@@ -82,7 +82,92 @@ class TurboFormMixin:
         return context
 
 
+class LegacyMethodsMixin:
+    """
+    A previous approach in carte form / views consisted on getting values from
+    request directly.
+
+    This is not the best way to get these using django, usually a form is
+    instantiated from the request to bring powerful form validation.
+
+    In order to gradually migrate the view from the previous to the new approach, every
+    data manually pulled from the request is isolated in its own method.
+
+    These method can then easily be overriden in the class that inherits from
+    SearchActeursView.
+
+    The current mixin has been created in order to easily read the legacy methods
+    so that they can be removed later.
+    """
+
+    def get_sous_categorie_objet(self) -> str:
+        return self.get_data_from_request_or_bounded_form("sous_categorie_objet")
+
+    def get_sc_id(self, initial) -> str | None:
+        return (
+            self.get_data_from_request_or_bounded_form("sc_id")
+            if initial["sous_categorie_objet"]
+            else None
+        )
+
+    def get_sous_categories_ids(self) -> list[int]:
+        return [self.get_data_from_request_or_bounded_form("sc_id", 0)]
+
+    def get_adresse(self) -> str:
+        return self.get_data_from_request_or_bounded_form("adresse")
+
+    def get_longitude(self) -> str:
+        return self.get_data_from_request_or_bounded_form("longitude")
+
+    def get_latitude(self) -> str:
+        return self.get_data_from_request_or_bounded_form("latitude")
+
+    def get_digital(self) -> str:
+        return self.get_data_from_request_or_bounded_form("digital", "0")
+
+    def get_data_from_request_or_bounded_form(self, key: str, default=None):
+        """Temporary dummy method
+
+        There is a flaw in the way the form is instantiated, because the
+        form is never bounded to its data.
+        The request is directly used to perform various tasks, like
+        populating some multiple choice field choices, hence missing all
+        the validation provided by django forms.
+
+        To prepare a future refactor of this form, the method here calls
+        the cleaned_data when the form is bounded and the request.GET
+        QueryDict when it is not bounded.
+        Note : we call getlist and not get because in some cases, the request
+        parameters needs to be treated as a list.
+
+        The form is currently used for various use cases:
+            - The map form
+            - The "iframe form" form (for https://epargnonsnosressources.gouv.fr)
+            - The turbo-frames
+        The form should be bounded at least when used in turbo-frames.
+
+        The name is explicitely very verbose because it is not meant to stay
+        a long time as is.
+
+        TODO: refacto forms : get rid of this method and use cleaned_data when
+        form is valid and request.GET for non-field request parameters
+
+        Edit 25 july 2025 : the refactoring has started and can be found in
+        LegacyMethodMixin above.
+        """
+        try:
+            return self.cleaned_data.get(key, default)
+        except AttributeError:
+            pass
+
+        try:
+            return self.request.GET.get(key, default)
+        except AttributeError:
+            return self.request.GET.getlist(key, default)
+
+
 class SearchActeursView(
+    LegacyMethodsMixin,
     DigitalMixin,
     TurboFormMixin,
     FormView,
@@ -95,15 +180,15 @@ class SearchActeursView(
     def get_initial(self):
         initial = super().get_initial()
         # TODO: refacto forms : delete this line
-        initial["sous_categorie_objet"] = self.request.GET.get("sous_categorie_objet")
+        initial["sous_categorie_objet"] = self.get_sous_categorie_objet()
         # TODO: refacto forms : delete this line
-        initial["adresse"] = self.request.GET.get("adresse")
-        initial["digital"] = self.request.GET.get("digital", "0")
+        initial["adresse"] = self.get_adresse()
+        initial["digital"] = self.get_digital()
         initial["direction"] = get_direction(self.request, self.is_carte)
         # TODO: refacto forms : delete this line
-        initial["latitude"] = self.request.GET.get("latitude")
+        initial["latitude"] = self.get_latitude()
         # TODO: refacto forms : delete this line
-        initial["longitude"] = self.request.GET.get("longitude")
+        initial["longitude"] = self.get_longitude()
         # TODO: refacto forms : delete this line
         initial["label_reparacteur"] = self.request.GET.get("label_reparacteur")
         initial["epci_codes"] = self.request.GET.getlist("epci_codes")
@@ -116,10 +201,7 @@ class SearchActeursView(
         initial["ess"] = self.request.GET.get("ess")
         # TODO: refacto forms : delete this line
         initial["bounding_box"] = self.request.GET.get("bounding_box")
-        initial["sc_id"] = (
-            self.request.GET.get("sc_id") if initial["sous_categorie_objet"] else None
-        )
-
+        initial["sc_id"] = self.get_sc_id(initial)
         # Action to display and check
         action_displayed = self._set_action_displayed()
         initial["action_displayed"] = "|".join([a.code for a in action_displayed])
@@ -159,42 +241,6 @@ class SearchActeursView(
         )
 
         return form
-
-    def get_data_from_request_or_bounded_form(self, key: str, default=None):
-        """Temporary dummy method
-
-        There is a flaw in the way the form is instantiated, because the
-        form is never bounded to its data.
-        The request is directly used to perform various tasks, like
-        populating some multiple choice field choices, hence missing all
-        the validation provided by django forms.
-
-        To prepare a future refactor of this form, the method here calls
-        the cleaned_data when the form is bounded and the request.GET
-        QueryDict when it is not bounded.
-        Note : we call getlist and not get because in some cases, the request
-        parameters needs to be treated as a list.
-
-        The form is currently used for various use cases:
-            - The map form
-            - The "iframe form" form (for https://epargnonsnosressources.gouv.fr)
-            - The turbo-frames
-        The form should be bounded at least when used in turbo-frames.
-
-        The name is explicitely very verbose because it is not meant to stay
-        a long time as is.
-
-        TODO: refacto forms : get rid of this method and use cleaned_data when
-        form is valid and request.GET for non-field request parameters"""
-        try:
-            return self.cleaned_data.get(key, default)
-        except AttributeError:
-            pass
-
-        try:
-            return self.request.GET.get(key, default)
-        except AttributeError:
-            return self.request.GET.getlist(key, default)
 
     def get_context_data(self, **kwargs):
         form = self.get_form_class()(self.request.GET)
@@ -444,7 +490,7 @@ class SearchActeursView(
         if self.get_data_from_request_or_bounded_form("bonus"):
             filters &= Q(labels__bonus=True)
 
-        if sous_categorie_ids := self.get_sous_categories():
+        if sous_categorie_ids := self.get_sous_categories_ids():
             filters &= Q(
                 proposition_services__sous_categories__id__in=sous_categorie_ids,
             )
@@ -471,9 +517,6 @@ class SearchActeursView(
         filters &= actions_filters
 
         return filters, excludes
-
-    def get_sous_categories(self):
-        return [self.get_data_from_request_or_bounded_form("sc_id", 0)]
 
     def get_cached_groupe_action_with_displayed_actions(self, action_displayed):
         # Cast needed because of the cache
