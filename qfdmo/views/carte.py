@@ -20,7 +20,6 @@ class CarteSearchActeursView(SearchActeursView):
         super().__init__(*args, **kwargs)
 
     def get_initial(self, *args, **kwargs):
-
         initial = super().get_initial(*args, **kwargs)
         action_displayed = self._set_action_displayed()
         grouped_action_choices = self._get_grouped_action_choices(action_displayed)
@@ -37,8 +36,6 @@ class CarteSearchActeursView(SearchActeursView):
         return initial
 
     def get_context_data(self, **kwargs):
-        logger.info("get_context_data 🪏")
-        logger.info(f"{self.request.GET=}")
         self.displayed_acteur_form = DisplayedActeursForm(self.request.GET)
         if not self.displayed_acteur_form.is_valid():
             logger.error(f"Form is valid {self.displayed_acteur_form=}")
@@ -56,11 +53,9 @@ class CarteSearchActeursView(SearchActeursView):
         return [a.id for a in self._get_selected_action()]
 
     def get_sous_categories(self):
-        logger.info("get_sous_categories 💣")
         if sous_categories := self.displayed_acteur_form.cleaned_data.get(
             "sous_categories"
         ):
-            logger.info(f"{sous_categories=}")
             return sous_categories.values_list("pk", flat=True)
 
         return []
