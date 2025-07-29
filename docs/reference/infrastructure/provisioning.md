@@ -61,7 +61,7 @@ Pour chaque environnement :
 - [Preprod](../../../infrastructure/environments/preprod)
 - [Prod](../../../infrastructure/environments/prod)
 
-Se placer dans le répertoire `infrastructure` et exécuter les commandes suivantes
+Se placer dans le répertoire `infrastructure/environments/<ENV>` et exécuter les commandes suivantes
 
 ```sh
 terragrunt init -reconfigure
