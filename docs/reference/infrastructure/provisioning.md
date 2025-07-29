@@ -2,10 +2,11 @@
 
 Cette configuration OpenTofu gère l'infrastructure de QueFaireDeMesObjets sur Scaleway.
 
-## OpenTofu
+## OpenTofu & Terragrunt
 
-Nous utilisons OpenTofu, version open-source de `Terraform`, pour automatiser le provisionning de l'infractructure. \
-Suivre la documentation pour installer OpenTofu : https://opentofu.org/docs/intro/install/
+Nous utilisons OpenTofu, version open-source de `Terraform`, pour automatiser le provisionning de l'infractructure. [Suivre la documentation](https://opentofu.org/docs/intro/install/) pour installer OpenTofu.
+
+[Terragrunt](https://terragrunt.gruntwork.io/) est utilisé en complément d'OpenTofu pour avoir une configuration DRY. [Suivre la documentation](https://terragrunt.gruntwork.io/docs/getting-started/install/) pour installer Terragrunt.
 
 La configuration est définie dans le dossier `infrastructure`
 
@@ -23,9 +24,8 @@ Vérifer que vous avez les droits d'administration du projet concerné par cette
 infrastructure/
 ├── environments/
 │   ├── prod/
-│   │   ├── main.tf
-│   │   ├── variables.tf
-│   │   ├── terraform.tfvars.exemple
+│   │   ├── terragrunt.hcl
+│   │   ├── terraform.tfvars.example
 │   │   └── terraform.tfvars -> non partagé
 │   ├── preprod/
 │   └── preview/
@@ -52,8 +52,6 @@ infrastructure/
 
 ⚠️ le `state` est enregistré sur une répertoire s3 de Scaleway s3://
 
-Si ce répertoire n'existe pas, il est nécessaire d'executer la configuration `backend`, cf. [infrastructure/environments/backend](../../../infrastructure/environments/backend/)
-
 #### Par environnement
 
 L'environnement de `preview` est utilisé pour tester notre projet IaC, on détruit volontairement l'infrastructure créée sur cet environnement une fois que la configuration terraform est testée.
@@ -66,15 +64,15 @@ Pour chaque environnement :
 Se placer dans le répertoire `infrastructure` et exécuter les commandes suivantes
 
 ```sh
-tofu init -reconfigure
+terragrunt init -reconfigure
 ```
 
 ```sh
-tofu plan
+teragrunt plan
 ```
 
 ```sh
-tofu apply
+teragrunt apply
 ```
 
 Pour chaque commande, l'environnement doit-être précisé

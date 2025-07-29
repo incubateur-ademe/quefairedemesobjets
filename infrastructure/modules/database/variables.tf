@@ -1,13 +1,3 @@
-variable "project_id" {
-  description = "ID du projet Scaleway"
-  type        = string
-}
-
-variable "organization_id" {
-  description = "ID de l'organisation Scaleway"
-  type        = string
-}
-
 variable "environment" {
   description = "Environnement de déploiement"
   type        = string
@@ -16,11 +6,6 @@ variable "environment" {
 variable "prefix" {
   description = "Prefix for the resources"
   type        = string
-}
-
-variable "tags" {
-  description = "Tags for the resources"
-  type        = list(string)
 }
 
 variable "db_password" {
@@ -40,7 +25,7 @@ variable "db_name" {
   type        = string
 }
 
-variable "wh_db_name" {
+variable "warehouse_db_name" {
   description = "Nom de la base de données warehouse"
   type        = string
 }
