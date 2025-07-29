@@ -1434,14 +1434,14 @@ typing-extensions = ">=4.0,<5.0"
 
 [[package]]
 name = "dbt-common"
-version = "1.26.0"
+version = "1.27.1"
 description = "The shared common utilities that dbt-core and adapter implementations use"
 optional = false
 python-versions = ">=3.9"
 groups = ["airflow"]
 files = [
-    {file = "dbt_common-1.26.0-py3-none-any.whl", hash = "sha256:5f17fe9faa5e709ac494c314186d1566ca5c6684826e2f35c8d437437835f0ff"},
-    {file = "dbt_common-1.26.0.tar.gz", hash = "sha256:56ad25fae0539452e875255d577aaf3b76a6e44ddf63fa29f8d51b26ae563b74"},
+    {file = "dbt_common-1.27.1-py3-none-any.whl", hash = "sha256:9753e8f79d2d648c7716dd9e07dbbdd518ca3c3d101b6d2ee6e423ea9b6a20b5"},
+    {file = "dbt_common-1.27.1.tar.gz", hash = "sha256:1cc5b0579768a03800d90ecd9b5646c9648c970b8f278d85e1760c836007a4db"},
 ]
 
 [package.dependencies]
@@ -1466,14 +1466,14 @@ test = ["hypothesis (>=6.87,<7.0)", "pytest (>=7.3,<8.0)", "pytest-cov (>=4.1,<5
 
 [[package]]
 name = "dbt-core"
-version = "1.10.4"
+version = "1.10.5"
 description = "With dbt, data analysts and engineers can build analytics the way engineers build applications."
 optional = false
 python-versions = ">=3.9"
 groups = ["airflow"]
 files = [
-    {file = "dbt_core-1.10.4-py3-none-any.whl", hash = "sha256:461bbd98c77e4ce7ae3f54c8a84aba620516c558deb8ecdc1b2552c3232cca24"},
-    {file = "dbt_core-1.10.4.tar.gz", hash = "sha256:45497e813b6e19e0db97df5cc720cb606ce50489d4825e1d091fc04fa408a283"},
+    {file = "dbt_core-1.10.5-py3-none-any.whl", hash = "sha256:a40f9204ee0faa28221c25d8d29093853584c1dae46a3a601aa8d5cd92b45fc0"},
+    {file = "dbt_core-1.10.5.tar.gz", hash = "sha256:3ee399a2f1b410c6167bee602f8606cfc2831a9c4ebc368aa991af72c3d6d36f"},
 ]
 
 [package.dependencies]
@@ -1481,9 +1481,9 @@ agate = ">=1.7.0,<1.10"
 click = ">=8.0.2,<9.0"
 daff = ">=1.3.46"
 dbt-adapters = ">=1.15.2,<2.0"
-dbt-common = ">=1.25.1,<2.0"
+dbt-common = ">=1.27.0,<2.0"
 dbt-extractor = ">=0.5.0,<=0.6"
-dbt-protos = ">=1.0.335,<2.0"
+dbt-protos = ">=1.0.346,<2.0"
 dbt-semantic-interfaces = ">=0.9.0,<0.10"
 Jinja2 = ">=3.1.3,<4"
 jsonschema = ">=4.19.1,<5.0"
@@ -1547,14 +1547,14 @@ psycopg2-binary = ">=2.9,<3.0"
 
 [[package]]
 name = "dbt-protos"
-version = "1.0.339"
+version = "1.0.348"
 description = "Public proto bindings for dbt"
 optional = false
 python-versions = ">=3.6"
 groups = ["airflow"]
 files = [
-    {file = "dbt_protos-1.0.339-py3-none-any.whl", hash = "sha256:17e52cfba29bdb558d8ae16e5836b8ce265120fc2d707100bec2a15040cefa7f"},
-    {file = "dbt_protos-1.0.339.tar.gz", hash = "sha256:6955a84f515fb06c0bd68e381122aefc3d9ff11beb97f36f67ea54fcddf120de"},
+    {file = "dbt_protos-1.0.348-py3-none-any.whl", hash = "sha256:5d89171b64058170b39a80fc69abbd344170ac637c5dee90e7b3cbd7b1a43fe4"},
+    {file = "dbt_protos-1.0.348.tar.gz", hash = "sha256:d8834c685c323b1533c1c7fdb5db5636cffab2f1a58515caba54b3dc13a3578b"},
 ]
 
 [package.dependencies]
@@ -7478,4 +7478,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12,<3.13"
-content-hash = "0209d3c9343685ceafbf2276ed765ac26a5b96594823a37ed13664d85a8e8c7f"
+content-hash = "5982708c2e37139d4f192d16bfea19d7faa7c9d8445bc49edadf033dd394e8b3"
