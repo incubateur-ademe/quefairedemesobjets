@@ -14,14 +14,6 @@ jobs:
     name: 🤖 CI
     uses: ./.github/workflows/ci.yml
 
-  preprod:
-    name: 🟠 Preprod
-    uses: ./.github/workflows/_cd-by-environment.yml
-    secrets: inherit # pragma: allowlist secret`
-    needs: [ci]
-    with:
-      environment: preprod
-
 # Address actions/missing-workflow-permissions rule in
 # code scanning alerts
 permissions:
