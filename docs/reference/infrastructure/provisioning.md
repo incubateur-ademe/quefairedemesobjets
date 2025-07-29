@@ -50,7 +50,7 @@ infrastructure/
 
 #### tfstate
 
-⚠️ le `state` est enregistré sur une répertoire s3 de Scaleway s3://
+⚠️ le `state` est enregistré sur une répertoire s3 de Scaleway `s3://lvao-terraform-state`
 
 #### Par environnement
 

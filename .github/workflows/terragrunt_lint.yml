@@ -10,7 +10,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Terragrunt and OpenTofu
-        uses: gruntwork-io/terragrunt-action@v3
+        uses: gruntwork-io/terragrunt-action@95fc057922e3c3d4cc021a81a213f088f333ddef
         with:
           tg_version: '0.83.2'
           tofu_version: '1.10.3'
