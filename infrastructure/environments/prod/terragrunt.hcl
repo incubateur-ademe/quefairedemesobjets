@@ -12,5 +12,18 @@ inputs = {
   db_username       = "[db_username]"
   db_password       = "[db_password]"
   db_name           = "qfdmo"
-  warehouse_db_name = "warehouse"
+
+  # Web app
+  webapp_node_type   = "DB-PRO2-XXS"
+  webapp_db_name     = "webapp"
+  webapp_db_username = "[webapp_db_username]"
+  webapp_db_password = "[webapp_db_password]"
+  webapp_volume_size = 100
+
+  # Warehouse
+  warehouse_node_type   = "DB-PRO2-XXS"
+  warehouse_db_name     = "warehouse"
+  warehouse_db_username = "[warehouse_db_username]"
+  warehouse_db_password = "[warehouse_db_password]"
+  warehouse_volume_size = 200
 }
