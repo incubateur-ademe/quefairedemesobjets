@@ -289,10 +289,10 @@
           <section id="provisionner-l-infrastructure">
 <h1>Provisionner l’infrastructure<a class="headerlink" href="#provisionner-l-infrastructure" title="Lien vers cette rubrique">¶</a></h1>
 <p>Cette configuration OpenTofu gère l’infrastructure de QueFaireDeMesObjets sur Scaleway.</p>
-<section id="opentofu">
-<h2>OpenTofu<a class="headerlink" href="#opentofu" title="Lien vers cette rubrique">¶</a></h2>
-<p>Nous utilisons OpenTofu, version open-source de <code class="docutils literal notranslate"><span class="pre">Terraform</span></code>, pour automatiser le provisionning de l’infractructure. <br />
-Suivre la documentation pour installer OpenTofu : https://opentofu.org/docs/intro/install/</p>
+<section id="opentofu-terragrunt">
+<h2>OpenTofu &amp; Terragrunt<a class="headerlink" href="#opentofu-terragrunt" title="Lien vers cette rubrique">¶</a></h2>
+<p>Nous utilisons OpenTofu, version open-source de <code class="docutils literal notranslate"><span class="pre">Terraform</span></code>, pour automatiser le provisionning de l’infractructure. <a class="reference external" href="https://opentofu.org/docs/intro/install/">Suivre la documentation</a> pour installer OpenTofu.</p>
+<p><a class="reference external" href="https://terragrunt.gruntwork.io/">Terragrunt</a> est utilisé en complément d’OpenTofu pour avoir une configuration DRY. <a class="reference external" href="https://terragrunt.gruntwork.io/docs/getting-started/install/">Suivre la documentation</a> pour installer Terragrunt.</p>
 <p>La configuration est définie dans le dossier <code class="docutils literal notranslate"><span class="pre">infrastructure</span></code></p>
 <section id="prerequis">
 <h3>Prérequis<a class="headerlink" href="#prerequis" title="Lien vers cette rubrique">¶</a></h3>
@@ -306,9 +306,8 @@ Suivre la documentation pour installer OpenTofu : https://opentofu.org/docs/intr
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>infrastructure/
 ├── environments/
 │   ├── prod/
-│   │   ├── main.tf
-│   │   ├── variables.tf
-│   │   ├── terraform.tfvars.exemple
+│   │   ├── terragrunt.hcl
+│   │   ├── terraform.tfvars.example
 │   │   └── terraform.tfvars -&gt; non partagé
 │   ├── preprod/
 │   └── preview/
@@ -340,8 +339,7 @@ Suivre la documentation pour installer OpenTofu : https://opentofu.org/docs/intr
 <h3>Exécution<a class="headerlink" href="#execution" title="Lien vers cette rubrique">¶</a></h3>
 <section id="tfstate">
 <h4>tfstate<a class="headerlink" href="#tfstate" title="Lien vers cette rubrique">¶</a></h4>
-<p>⚠️ le <code class="docutils literal notranslate"><span class="pre">state</span></code> est enregistré sur une répertoire s3 de Scaleway s3://</p>
-<p>Si ce répertoire n’existe pas, il est nécessaire d’executer la configuration <code class="docutils literal notranslate"><span class="pre">backend</span></code>, cf. <a class="reference internal" href="#../../../infrastructure/environments/backend/"><span class="xref myst">infrastructure/environments/backend</span></a></p>
+<p>⚠️ le <code class="docutils literal notranslate"><span class="pre">state</span></code> est enregistré sur une répertoire s3 de Scaleway <code class="docutils literal notranslate"><span class="pre">s3://lvao-terraform-state</span></code></p>
 </section>
 <section id="par-environnement">
 <h4>Par environnement<a class="headerlink" href="#par-environnement" title="Lien vers cette rubrique">¶</a></h4>
@@ -351,14 +349,14 @@ Suivre la documentation pour installer OpenTofu : https://opentofu.org/docs/intr
 <li><p><a class="reference internal" href="#../../../infrastructure/environments/preprod"><span class="xref myst">Preprod</span></a></p></li>
 <li><p><a class="reference internal" href="#../../../infrastructure/environments/prod"><span class="xref myst">Prod</span></a></p></li>
 </ul>
-<p>Se placer dans le répertoire <code class="docutils literal notranslate"><span class="pre">infrastructure</span></code> et exécuter les commandes suivantes</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>tofu<span class="w"> </span>init<span class="w"> </span>-reconfigure
+<p>Se placer dans le répertoire <code class="docutils literal notranslate"><span class="pre">infrastructure/environments/&lt;ENV&gt;</span></code> et exécuter les commandes suivantes</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>terragrunt<span class="w"> </span>init<span class="w"> </span>-reconfigure
 </pre></div>
 </div>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>tofu<span class="w"> </span>plan
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>teragrunt<span class="w"> </span>plan
 </pre></div>
 </div>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>tofu<span class="w"> </span>apply
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>teragrunt<span class="w"> </span>apply
 </pre></div>
 </div>
 <p>Pour chaque commande, l’environnement doit-être précisé</p>
@@ -423,7 +421,7 @@ Suivre la documentation pour installer OpenTofu : https://opentofu.org/docs/intr
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Provisionner l’infrastructure</a><ul>
-<li><a class="reference internal" href="#opentofu">OpenTofu</a><ul>
+<li><a class="reference internal" href="#opentofu-terragrunt">OpenTofu &amp; Terragrunt</a><ul>
 <li><a class="reference internal" href="#prerequis">Prérequis</a></li>
 <li><a class="reference internal" href="#iac-infrastructure-as-code">IaC : Infrastructure as Code</a><ul>
 <li><a class="reference internal" href="#structure">Structure</a></li>
