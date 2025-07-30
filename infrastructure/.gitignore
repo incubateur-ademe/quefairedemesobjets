@@ -2,3 +2,4 @@
 *.tfstate.*
 terraform.tfvars
 .terraform
+.terragrunt-cache
