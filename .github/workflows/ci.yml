@@ -4,6 +4,58 @@ on:
   workflow_call:
 
 jobs:
+
+  backend_linter:
+    name: 🤖 Linter
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          cache: "pip"
+      - name: Install GIS Packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install gdal-bin
+      - name: Install poetry
+        uses: abatilo/actions-poetry@3765cf608f2d4a72178a9fc5b918668e542b89b1 # v4
+      - uses: actions/cache@v4
+        name: Define a cache for the virtual environment based on the dependencies lock file
+        with:
+          path: ./.venv
+          key: venv-dev-airflow-${{ hashFiles('poetry.lock') }}
+      - name: Install the project dependencies
+        run: poetry sync --with dev,airflow --no-root
+      - name: Check code formatting
+        run: make check-format
+      - uses: astral-sh/ruff-action@0c50076f12c38c3d0115b7b519b54a91cb9cf0ad # v3.5.0
+
+      - name: Install Terragrunt and OpenTofu
+        uses: gruntwork-io/terragrunt-action@95fc057922e3c3d4cc021a81a213f088f333ddef
+        with:
+          tg_version: '0.83.2'
+          tofu_version: '1.10.3'
+      - name: Run Tofu format check
+        run: |
+          cd infrastructure/
+          tofu fmt -recursive -check
+
+  frontend_linter:
+    name: tests frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".tool-versions"
+          cache: "npm"
+      - name: Build assets
+        run: |
+          npm ci
+          npm run build
+      - name: Check code formatting
+        run: npm run format:check
+
   backend_tests:
     name: tests backend
     runs-on: ubuntu-latest
@@ -46,11 +98,6 @@ jobs:
         run: make integration-test
       - name: Run data tests
         run: poetry run pytest dags/tests
-      # - name: Run data e2e tests
-      #   run: poetry run pytest dags/e2e_tests
-      - name: Check code formatting
-        run: make check-format
-      - uses: astral-sh/ruff-action@0c50076f12c38c3d0115b7b519b54a91cb9cf0ad # v3.5.0
       - name: Check for missing migrations
         run: poetry run python manage.py makemigrations --check --no-input --settings=core.test_settings
         env:
@@ -70,8 +117,6 @@ jobs:
         run: |
           npm ci
           npm run build
-      - name: Check code formatting
-        run: npm run format:check
       - name: Run tests
         run: npm run test
 
