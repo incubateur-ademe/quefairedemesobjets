@@ -14,5 +14,11 @@ class GroupeActionConfigInline(admin.StackedInline):
 @admin.register(CarteConfig)
 class CarteConfigAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ["nom"]}
-    autocomplete_fields = ["sous_categorie_objet", "source", "groupe_action", "label"]
+    autocomplete_fields = [
+        "sous_categorie_objet",
+        "source",
+        "groupe_action",
+        "acteur_type",
+        "label",
+    ]
     inlines = [GroupeActionConfigInline]

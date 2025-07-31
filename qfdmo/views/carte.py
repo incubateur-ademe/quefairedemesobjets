@@ -113,6 +113,9 @@ class CustomCarteView(DetailView, CarteSearchActeursView):
         if label_filter := self.get_object().label.all():
             filters &= Q(labels__in=label_filter)
 
+        if acteur_type_filter := self.get_object().acteur_type.all():
+            filters &= Q(acteur_type__in=acteur_type_filter)
+
         if sous_categorie_filter := self.get_object().sous_categorie_objet.all():
             filters &= Q(
                 proposition_services__sous_categories__in=sous_categorie_filter,
