@@ -102,6 +102,21 @@ class CarteConfig(models.Model):
         blank=True,
     )
 
+    label = models.ManyToManyField(
+        "qfdmo.LabelQualite",
+        verbose_name="Label(s) qualité",
+        help_text="Seuls les labels sélectionnés s'afficheront sur la carte"
+        "\nSi le champ n'est pas renseigné il sera ignoré",
+        blank=True,
+    )
+    acteur_type = models.ManyToManyField(
+        "qfdmo.ActeurType",
+        verbose_name="Type(s) d'acteurs",
+        help_text="Seuls les types d'acteurs sélectionnés s'afficheront sur la carte"
+        "\nSi le champ n'est pas renseigné il sera ignoré",
+        blank=True,
+    )
+
     preview_title = models.CharField(
         blank=True,
         verbose_name="Titre de l'écran de prévisualisation",
