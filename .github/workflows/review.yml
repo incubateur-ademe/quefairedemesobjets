@@ -14,6 +14,22 @@ jobs:
     name: 🤖 CI
     uses: ./.github/workflows/ci.yml
 
+  webapp:
+    name: 🟠 Webapp
+    uses: ./.github/workflows/_deploy-webapp.yml
+    secrets: inherit # pragma: allowlist secret`
+    needs: [ci]
+    with:
+      environment: preprod
+
+  airflow:
+    name: 🟠 Airflow
+    uses: ./.github/workflows/_deploy-airflow.yml
+    secrets: inherit # pragma: allowlist secret`
+    needs: [ci]
+    with:
+      environment: preprod
+
 # Address actions/missing-workflow-permissions rule in
 # code scanning alerts
 permissions:
