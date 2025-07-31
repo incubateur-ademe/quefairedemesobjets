@@ -102,6 +102,14 @@ class CarteConfig(models.Model):
         blank=True,
     )
 
+    label = models.ManyToManyField(
+        "qfdmo.LabelQualite",
+        verbose_name="Label(s) qualité",
+        help_text="Seules les labels sélectionnés s'afficheront sur la carte"
+        "\nSi le champ n'est pas renseigné il sera ignoré",
+        blank=True,
+    )
+
     preview_title = models.CharField(
         blank=True,
         verbose_name="Titre de l'écran de prévisualisation",
