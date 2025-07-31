@@ -2,7 +2,7 @@
 
 {% block main_heading %}
 {% if page.synonyme %}
-    {% include "components/produit/heading_family.html" with title=page.get_parent.titre_phrase infotri=page.get_parent.infotri synonyme=page.synonyme.titre_phrase %}
+    {% include "components/produit/heading_family.html" with title=page.get_parent.specific.titre_phrase infotri=page.get_parent.specific.infotri synonyme=page.synonyme.titre_phrase %}
 {% else %}
     {% include "components/produit/heading_family.html" with title=page.titre_phrase infotri=page.infotri %}
 {% endif %}
