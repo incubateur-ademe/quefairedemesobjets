@@ -109,6 +109,7 @@ rapidfuzz = "^3.13.0"
 sites-faciles-experiment = "^0.0.10"
 diff-match-patch = "^20241021"
 django-lookbook = "^1.0.2"
+queryish = "^0.2"
 
 [tool.poetry.group.dev.dependencies]
 black = "^25.1.0"
