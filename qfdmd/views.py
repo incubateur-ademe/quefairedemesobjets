@@ -176,7 +176,7 @@ pokemon_chooser_viewset = BlockChooserViewSet("pokemon_chooser")
 class ReusableContentViewSet(ModelViewSet):
     model = ReusableContent
     form_fields = ["title", "genre", "nombre"]
-    icon = "user"
+    icon = "resubmit"
     list_filter = ["genre", "nombre"]
     add_to_admin_menu = True
     copy_view_enabled = True
@@ -186,7 +186,7 @@ class ReusableContentViewSet(ModelViewSet):
 class BonusViewSet(ModelViewSet):
     model = Bonus
     form_fields = ["title", "montant_min", "montant_max"]
-    icon = "user"
+    icon = "tag"
     list_filter = ["montant_min", "montant_max"]
     add_to_admin_menu = True
     copy_view_enabled = False
