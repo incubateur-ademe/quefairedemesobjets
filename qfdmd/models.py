@@ -15,6 +15,7 @@ from modelcluster.contrib.taggit import ClusterTaggableManager
 from taggit.models import TaggedItemBase
 from wagtail.admin.panels import (
     FieldPanel,
+    FieldRowPanel,
     HelpPanel,
     MultiFieldPanel,
     ObjectList,
@@ -65,11 +66,19 @@ class Bonus(index.Indexed, models.Model):
 
 @register_snippet
 class ReusableContent(index.Indexed, GenreNombreModel):
-    title = models.CharField(unique=True)
-    content = RichTextField()
+    title = models.CharField(verbose_name="Titre", unique=True)
+    content = RichTextField(verbose_name="Contenu")
     search_fields = [
         index.SearchField("title"),
         index.AutocompleteField("title"),
+    ]
+
+    panels = [
+        FieldPanel("title"),
+        FieldPanel("content"),
+        FieldRowPanel(
+            [FieldPanel("genre"), FieldPanel("nombre")], heading="Genre et nombre"
+        ),
     ]
 
     def __str__(self):
@@ -134,23 +143,13 @@ class ProduitPageTag(TaggedItemBase):
     )
 
 
-class ProduitPageMatiereTag(TaggedItemBase):
-    content_object = ParentalKey(
-        "qfdmd.ProduitPage",
-        on_delete=models.CASCADE,
-        related_name="%(class)ss_matiere_items",
-    )
+class AncestorFieldsMixin:
+    @property
+    def family(self):
+        return FamilyPage.objects.ancestor_of(self).first()
 
 
-class ProduitPageMarqueTag(TaggedItemBase):
-    content_object = ParentalKey(
-        "qfdmd.ProduitPage",
-        on_delete=models.CASCADE,
-        related_name="%(class)ss_marques_items",
-    )
-
-
-class ProduitPage(Page, GenreNombreModel, CompiledFieldMixin):
+class ProduitPage(Page, GenreNombreModel, CompiledFieldMixin, AncestorFieldsMixin):
     base_form_class = ProduitPageForm
     subpage_types = [
         "qfdmd.synonymepage",
@@ -159,13 +158,6 @@ class ProduitPage(Page, GenreNombreModel, CompiledFieldMixin):
 
     # Taxonomie
     tags = ClusterTaggableManager(through=ProduitPageTag, blank=True, related_name="+")
-    # marques = ClusterTaggableManager(
-    #     through=ProduitPageMarqueTag, blank=True, related_name="+"
-    # )
-    # matieres = ClusterTaggableManager(
-    #     through=ProduitPageMatiereTag, blank=True, related_name="+"
-    # )
-
     # Config
     bonus = models.ForeignKey(
         "qfdmd.bonus",
@@ -248,10 +240,6 @@ class ProduitPage(Page, GenreNombreModel, CompiledFieldMixin):
                 self.body = [("tabs", tabs), *self.body]
 
         self.save_revision()
-
-    @property
-    def family(self):
-        return FamilyPage.objects.ancestor_of(self).first()
 
     content_panels = Page.content_panels + [
         FieldPanel("infotri"),
@@ -338,7 +326,7 @@ class FamilyPage(ProduitPage):
         verbose_name = "Famille"
 
 
-class SynonymePage(Page):
+class SynonymePage(Page, AncestorFieldsMixin):
     parent_page_types = ["qfdmd.produitpage", "qfdmd.familypage"]
 
     class Meta:
