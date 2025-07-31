@@ -86,7 +86,7 @@ class ReusableContent(index.Indexed, GenreNombreModel):
 
     class Meta:
         verbose_name = "Contenu réutilisable"
-        verbose_name_plural = "Contenus réutilisable"
+        verbose_name_plural = "Contenus réutilisables"
 
 
 class CompiledFieldMixin:
@@ -107,6 +107,17 @@ class CompiledFieldMixin:
         if not self.bonus and self.famille and not self.disable_bonus_inheritance:
             return self.famille.specific.bonus
         return self.bonus
+
+
+class TitleFields(models.Model):
+    titre_phrase = models.CharField(
+        "Titre utilisé dans les phrases",
+        help_text="Ce titre sera utilisé dans les contenus réutilisables, "
+        "pour l'affichage du synonyme de recherche",
+    )
+
+    class Meta:
+        abstract = True
 
 
 class ProduitIndexPage(Page, CompiledFieldMixin):
@@ -149,7 +160,9 @@ class AncestorFieldsMixin:
         return FamilyPage.objects.ancestor_of(self).first()
 
 
-class ProduitPage(Page, GenreNombreModel, CompiledFieldMixin, AncestorFieldsMixin):
+class ProduitPage(
+    Page, GenreNombreModel, CompiledFieldMixin, TitleFields, AncestorFieldsMixin
+):
     base_form_class = ProduitPageForm
     subpage_types = [
         "qfdmd.synonymepage",
@@ -188,11 +201,6 @@ class ProduitPage(Page, GenreNombreModel, CompiledFieldMixin, AncestorFieldsMixi
     usage_unique = models.BooleanField(
         "À usage unique",
         default=False,
-    )
-    titre_phrase = models.CharField(
-        "Titre utilisé dans les phrases",
-        help_text="Ce titre sera utilisé dans les contenus réutilisables, "
-        "pour l'affichage du synonyme de recherche",
     )
 
     infotri = StreamField([("image", ImageBlock())], blank=True)
@@ -326,8 +334,15 @@ class FamilyPage(ProduitPage):
         verbose_name = "Famille"
 
 
-class SynonymePage(Page, AncestorFieldsMixin):
+class SynonymePage(
+    Page,
+    AncestorFieldsMixin,
+    TitleFields,
+):
     parent_page_types = ["qfdmd.produitpage", "qfdmd.familypage"]
+
+    def get_template(self, request, *args, **kwargs):
+        return self.get_parent().get_template(request, *args, **kwargs)
 
     class Meta:
         verbose_name = "Synonyme de recherche"
@@ -338,6 +353,7 @@ class SynonymePage(Page, AncestorFieldsMixin):
             "Cette page est un synonyme de recherche, si vous souhaitez modifier des"
             " champs sur cette page il faut modifier la page parente.",
         ),
+        FieldPanel("titre_phrase"),
     ] + Page.content_panels
 
 

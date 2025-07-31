@@ -1,0 +1,16 @@
+{% extends "qfdmd/produit_page.html" %}
+
+{% block main_heading %}
+
+{% with title=page.get_parent.title %}
+{% with synonyme=page.titre_phrase %}
+{% with infotri=page.infotri %}
+
+{% if page.content}
+{% include "components/produit/heading_synonyme.html" with title=page.get_parent.title synonyme=page.titre_phrase infotri=page.infotri %}
+
+{% endwith %}
+{% endwith %}
+{% endwith %}
+
+{% endblock main_heading %}
