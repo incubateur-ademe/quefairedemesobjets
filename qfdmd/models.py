@@ -342,7 +342,10 @@ class SynonymePage(
     parent_page_types = ["qfdmd.produitpage", "qfdmd.familypage"]
 
     def get_template(self, request, *args, **kwargs):
-        return self.get_parent().get_template(request, *args, **kwargs)
+        if self.get_parent().page_type_display_name.lower() == "produit":
+            return "qfdmd/produit_page.html"
+        elif self.get_parent().page_type_display_name.lower() == "famille":
+            return "qfdmd/family_page.html"
 
     class Meta:
         verbose_name = "Synonyme de recherche"
