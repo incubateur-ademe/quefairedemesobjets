@@ -1897,11 +1897,6 @@ class Migration(migrations.Migration):
                 verbose_name="Corps de texte",
             ),
         ),
-        migrations.AlterField(
-            model_name="reusablecontent",
-            name="title",
-            field=models.CharField(unique=True),
-        ),
         migrations.AddField(
             model_name="produitpage",
             name="bonus",
