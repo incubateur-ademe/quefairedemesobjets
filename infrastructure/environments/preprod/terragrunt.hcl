@@ -25,5 +25,5 @@ inputs = {
   warehouse_db_name     = "warehouse"
   warehouse_db_username = "[warehouse_db_username]"
   warehouse_db_password = "[warehouse_db_password]"
-  warehouse_volume_size = 200
+  warehouse_volume_size = 100
 }
