@@ -66,9 +66,7 @@ class Bonus(index.Indexed, models.Model):
 @register_snippet
 class ReusableContent(index.Indexed, GenreNombreModel):
     title = models.CharField(unique=True)
-    # Ajout un par genre / nombre
     content = RichTextField()
-    # panels = ["title", "content"]
     search_fields = [
         index.SearchField("title"),
         index.AutocompleteField("title"),
