@@ -183,14 +183,14 @@ class ProduitPage(
         "Désactiver l'héritage du bonus",
         default=False,
     )
-    produit = models.ForeignKey(
+    legacy_produit = models.ForeignKey(
         "qfdmd.produit",
         on_delete=models.SET_NULL,
         related_name="produit_page",
         blank=True,
         null=True,
     )
-    synonyme = models.ForeignKey(
+    legacy_synonyme = models.ForeignKey(
         "qfdmd.synonyme",
         on_delete=models.SET_NULL,
         related_name="produit_page",
@@ -212,19 +212,19 @@ class ProduitPage(
     commentaire = RichTextField(blank=True)
 
     def build_streamfield_from_legacy_data(self):
-        if not self.produit and not self.synonyme and not self.infotri:
+        if not self.legacy_produit and not self.legacy_synonyme and not self.infotri:
             # TODO: test
             return
 
         legacy_produit_or_synonyme = None
         infotri = None
-        if self.produit:
-            legacy_produit_or_synonyme = self.produit
-            infotri = self.produit.infotri
+        if self.legacy_produit:
+            legacy_produit_or_synonyme = self.legacy_produit
+            infotri = self.legacy_produit.infotri
 
-        if self.synonyme:
-            legacy_produit_or_synonyme = self.synonyme
-            infotri = self.synonyme.produit.infotri
+        if self.legacy_synonyme:
+            legacy_produit_or_synonyme = self.legacy_synonyme
+            infotri = self.legacy_synonyme.produit.infotri
 
         if infotri is not None:
             self.infotri = [
@@ -266,8 +266,8 @@ class ProduitPage(
                 "<li>4. Publier la page courante</li></ol>",
             ),
         ),
-        FieldPanel("produit"),
-        FieldPanel("synonyme"),
+        FieldPanel("legacy_produit"),
+        FieldPanel("legacy_synonyme"),
         FieldPanel("commentaire"),
     ]
 
@@ -306,14 +306,15 @@ class ProduitPage(
 
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request, *args, **kwargs)
-        context.update(is_synonyme=not (self.produit or self.synonyme))
+        context.update(is_synonyme=not (self.legacy_produit or self.legacy_synonyme))
         return context
 
     class Meta:
         verbose_name = "Produit"
         constraints = [
             CheckConstraint(
-                condition=Q(produit__isnull=True) | Q(synonyme__isnull=True),
+                condition=Q(legacy_produit__isnull=True)
+                | Q(legacy_synonyme__isnull=True),
                 name="no_produit_and_synonyme_filled_in_parallel",
             ),
         ]
@@ -346,6 +347,18 @@ class SynonymePage(
             return "qfdmd/produit_page.html"
         elif self.get_parent().page_type_display_name.lower() == "famille":
             return "qfdmd/family_page.html"
+
+    @cached_property
+    def synonyme(self) -> ProduitPage | FamilyPage:
+        """This property is used in templates because this page can be rendered
+        as a produit or famille but we want to add some context.
+        This is not clear yet if this approach will use a real URL for synonymes
+        or if a redirect will be issued with an url parameter.
+
+        For now we add the synonyme to the context so that it can be picked up
+        in both famille and produit templates, but this might change in a near
+        future."""
+        return self
 
     class Meta:
         verbose_name = "Synonyme de recherche"
