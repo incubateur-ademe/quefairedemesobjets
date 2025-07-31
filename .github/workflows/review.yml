@@ -3,7 +3,7 @@ name: 💣 Review
 on:
   workflow_dispatch:
   pull_request:
-    types: [labeled, opened, synchronize]
+    types: [opened, synchronize]
 
 defaults:
   run:
