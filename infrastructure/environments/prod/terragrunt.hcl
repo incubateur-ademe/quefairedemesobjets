@@ -18,7 +18,7 @@ inputs = {
   webapp_db_name     = "webapp"
   webapp_db_username = "[webapp_db_username]"
   webapp_db_password = "[webapp_db_password]"
-  webapp_volume_size = 100
+  webapp_volume_size = 20
 
   # Warehouse
   warehouse_node_type   = "DB-PRO2-XXS"
