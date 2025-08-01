@@ -19,7 +19,6 @@ Partager ce site
             rel="noreferrer"
             title="{{ sharer.facebook.title }}"
             href="{{ sharer.facebook.url }}"
-            tabindex="-1"
             >
                 Partager sur Facebook
             </a>
@@ -31,7 +30,6 @@ Partager ce site
             rel="noreferrer"
             title="{{ sharer.twitter.title }}"
             href="{{ sharer.twitter.url }}"
-            tabindex="-1"
             >
                 Partager sur X (anciennement Twitter)
             </a>
@@ -43,7 +41,6 @@ Partager ce site
             onclick="window.open(this.href,'Partager sur LinkedIn','toolbar=no,location=yes,status=no,menubar=no,scrollbars=yes,resizable=yes,width=550,height=550'); event.preventDefault();"
             title="{{ sharer.linkedin.title }}"
             href="{{ sharer.linkedin.url }}"
-            tabindex="-1"
             >
                 Partager sur LinkedIn
             </a>
@@ -54,7 +51,6 @@ Partager ce site
             rel="noreferrer"
             title="{{ sharer.email.title }}"
             href="{{ sharer.email.url }}"
-            tabindex="-1"
             >
                 Partager par email
             </a>
@@ -63,7 +59,6 @@ Partager ce site
             <button class="fr-btn--copy fr-btn"
                     onclick="navigator.clipboard.writeText('{{ request.build_absolute_uri }}').then(function() {alert('Adresse copiée dans le presse papier.')});"
                     type="button"
-                    tabindex="-1"
             >
                 Copier dans le presse-papier
             </button>
