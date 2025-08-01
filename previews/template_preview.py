@@ -7,6 +7,7 @@ from django.template.loader import render_to_string
 from django_lookbook.preview import LookbookPreview
 from django_lookbook.utils import register_form_class
 
+from qfdmd.forms import SearchForm
 from qfdmd.models import Suggestion, Synonyme
 
 
@@ -34,8 +35,8 @@ class ComponentsPreview(LookbookPreview):
         }
         return render_to_string("components/code/code.html", context)
 
-    def logo_animated(self, **kwargs):
-        return render_to_string("components/logo/animated.html")
+    def logo(self, **kwargs):
+        return render_to_string("components/logo/header.html")
 
     def logo_homepage(self, **kwargs):
         return render_to_string("components/logo/homepage.html")
@@ -206,3 +207,68 @@ class IframePreview(LookbookPreview):
         )
 
         return template.render(Context({}))
+
+
+class AccessibilitePreview(LookbookPreview):
+    def P01_7_3(self, **kwargs):
+        """
+        "Les composants suivants ne sont pas contrôlables au clavier :
+        1. Dans la modale de partage, les liens et le bouton ne sont
+        pas accessibles au clavier : retirer leur attribut tabindex=""-1
+        """
+        return render_to_string("modals/share.html")
+
+    def P01_3_3(self, **kwargs):
+        """
+        ## Retour
+        "Le rapport de contraste entre les couleurs d’un composant d’interface et son arrière-plan est insuffisant, exemple :
+        - le formulaire de recherche
+        - les images des boutons d'intégration de l'outil, de partage et de contact
+
+        Le rapport de contraste entre les couleurs d'un composant d'interface et son arrière-plan doit être d'au moins 3:1."
+
+        ## À vérifier :
+        - [ ] Le contour de la recherche doit être en couleur #53918C
+        """
+        context = {"search_form": SearchForm()}
+        return render_to_string("components/search/view.html", context)
+
+    def P01_10_2(self, **kwargs):
+        """
+        Lorsque l'utilisateur désactive le CSS, le contenu porteur d'information n'est plus visible, exemple :
+        - le bouton de soumission du formulaire de recherche n'a pas d'intitulé, ajouter le texte "Rechercher"
+        et le masquer avec la méthode sr-only*, retirer son attribut aria-label="Rechercher"
+        """
+        context = {"search_form": SearchForm()}
+        return render_to_string("components/search/view.html", context)
+
+    def P01_10_7(self, **kwargs):
+        """
+        ## Retour
+        Des éléments interactifs prennent le focus mais ce dernier n'est pas visible, exemple :
+        - le champ de saisie du formulaire de recherche
+
+        Soit :
+        - Le style du focus natif du navigateur ne doit pas être supprimé ou dégradé
+        La prise de focus est suffisamment contrastée (ratio de contraste égal ou supérieur à 3:1).
+
+        ## À vérifier
+        - [ ] Le focus du champ de recherche affiche un contour bleu bien visible
+        """
+        context = {"search_form": SearchForm()}
+        return render_to_string("components/search/view.html", context)
+
+    def P01_13_8(self, **kwargs):
+        """
+        ## Retour
+        Du contenu en mouvement est déclenché automatiquement, exemple :
+
+        - le texte "Que faire de mes... ?"
+
+
+        ## À vérifier
+        - [ ] Le logo est statique
+        - [ ] Le logo affiche Que faire de mes objets et déchets
+
+        """
+        return render_to_string("components/logo/homepage.html")

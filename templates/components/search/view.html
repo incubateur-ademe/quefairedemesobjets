@@ -13,7 +13,7 @@
         qf-rounded-3xl qf-overflow-hidden
         group-data-[home]:qf-rounded-[2rem]
         max-md:qf-rounded-[2rem]
-        qf-border-solid qf-border-[3px] qf-border-green-menthe-850-hover qf-bg-white
+        qf-border-solid qf-border-[3px] qf-border-green-menthe-sun-373-moon-652-hover qf-bg-white
         qf-flex qf-flex-col"
     >
         <form
@@ -31,18 +31,19 @@
                 {{ field }}
             {% endfor %}
             <button
-                aria-label="Rechercher"
                 type="submit"
                 class="qf-absolute qf-top-0 qf-bottom-0 qf-left-0
                 qf-m-auto qf-pl-1v
                 fr-btn fr-icon-search-line fr-btn--tertiary-no-outline
-                focus:qf-bg-green-menthe-850-hover
+                focus:qf-bg-green-menthe-sun-373-moon-652-hover
+                focus:qf-ring focus:qf-ring-inset focus:qf-ring-blue-france-sun-113-625-hover
+                qf-rounded-l-full
                 focus:qf-text-white
                 focus:!qf-outline-none
                 qf-h-full
                 !qf-max-h-[none]
-                qf-text-green-menthe-main-548"
-            ></button>
+                qf-text-green-menthe-sun-373-moon-652-hover"
+            ><span class="qf-sr-only">Rechercher</span></button>
         </form>
 
         <turbo-frame

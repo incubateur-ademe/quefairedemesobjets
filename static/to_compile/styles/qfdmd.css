@@ -27,7 +27,7 @@
 
     .logo {
       grid-area: logo;
-      @apply max-md:qf-pt-1w max-md:qf-h-[5rem];
+      @apply max-md:qf-pt-1w max-md:qf-h-[6.5rem];
       @apply md:qf-pt-2w qf-flex qf-justify-center qf-items-center;
     }
 
@@ -210,13 +210,17 @@
     }
   }
   @media (max-width: 768px) {
+    /** The row height is driven by the logo actual height.
+      Making the logo higher will impact all other row. So changes
+      to the logo height need to be reflected in each rows.
+      */
     .patchwork {
       grid:
-        ". item-10 . item-11 . item-12 . item-13 ." 0.5fr
-        "item-14 . item-15 . item-16 . item-17 . item-18" 0.5fr
+        ". item-10 . item-11 . item-12 . item-13 ." 0.4fr
+        "item-14 . item-15 . item-16 . item-17 . item-18" 0.4fr
         "logo logo logo logo logo logo logo logo logo" 1fr
-        "item-19 . item-20 . item-21 . item-22 . item-23" 0.5fr
-        ". item-24 . item-25 . item-26 . item-27 ." 0.5fr
+        "item-19 . item-20 . item-21 . item-22 . item-23" 0.4fr
+        ". item-24 . item-25 . item-26 . item-27 ." 0.4fr
         / 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
     }
   }
