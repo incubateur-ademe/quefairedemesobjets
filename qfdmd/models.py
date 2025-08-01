@@ -1,6 +1,7 @@
 import logging
 
 import sites_faciles
+from django import forms
 from django.contrib.gis.db import models
 from django.db.models import CheckConstraint, Q
 from django.db.models.functions import Now
@@ -10,10 +11,19 @@ from django.urls.base import reverse
 from django.utils.functional import cached_property
 from django.utils.safestring import mark_safe
 from django_extensions.db.fields import AutoSlugField
-from wagtail.admin.panels import FieldPanel, HelpPanel, ObjectList, TabbedInterface
+from modelcluster.contrib.taggit import ClusterTaggableManager
+from taggit.models import TaggedItemBase
+from wagtail.admin.panels import (
+    FieldPanel,
+    HelpPanel,
+    MultiFieldPanel,
+    ObjectList,
+    TabbedInterface,
+)
+from wagtail.admin.panels.page_utils import WagtailAdminPageForm
 from wagtail.fields import RichTextField, StreamField
 from wagtail.images.blocks import ImageBlock
-from wagtail.models import Page
+from wagtail.models import Page, ParentalKey
 from wagtail.search import index
 from wagtail.snippets.models import register_snippet
 
@@ -26,11 +36,37 @@ sites_faciles.content_manager.blocks.CommonStreamBlock = ExtendedCommonStreamBlo
 logger = logging.getLogger(__name__)
 
 
+class GenreNombreModel(models.Model):
+    genre = models.CharField("Genre", choices=[("m", "Masculin"), ("f", "Féminin")])
+    nombre = models.IntegerField("Nombre", choices=[(1, "singulier"), (2, "pluriel")])
+
+    class Meta:
+        abstract = True
+
+
 @register_snippet
-class ReusableContent(index.Indexed, models.Model):
-    title = models.CharField()
+class Bonus(index.Indexed, models.Model):
+    title = models.CharField(unique=True)
+    montant_min = models.IntegerField()
+    montant_max = models.IntegerField(null=True)
+
+    search_fields = [
+        index.SearchField("title"),
+        index.AutocompleteField("title"),
+    ]
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name_plural = "Bonus"
+        verbose_name = "Bonus"
+
+
+@register_snippet
+class ReusableContent(index.Indexed, GenreNombreModel):
+    title = models.CharField(unique=True)
     content = RichTextField()
-    panels = ["title", "content"]
     search_fields = [
         index.SearchField("title"),
         index.AutocompleteField("title"),
@@ -53,9 +89,15 @@ class CompiledFieldMixin:
 
     @cached_property
     def compiled_body(self):
-        if not getattr(self, "body") and self.famille:
+        if not self.body and self.famille:
             return self.famille.specific.body
         return self.body
+
+    @cached_property
+    def compiled_bonus(self):
+        if not self.bonus and self.famille and not self.disable_bonus_inheritance:
+            return self.famille.specific.bonus
+        return self.bonus
 
 
 class ProduitIndexPage(Page, CompiledFieldMixin):
@@ -65,11 +107,77 @@ class ProduitIndexPage(Page, CompiledFieldMixin):
         verbose_name = "Index des familles & produits"
 
 
-class ProduitPage(Page, CompiledFieldMixin):
+class ProduitPageForm(WagtailAdminPageForm):
+    parent_page_id = forms.CharField(widget=forms.widgets.HiddenInput())
+
+    def __init__(self, data=None, files=None, parent_page=None, *args, **kwargs):
+        initial = kwargs.pop("initial", {})
+
+        if parent_page:
+            initial["parent_page_id"] = parent_page.pk
+
+        return super().__init__(
+            data,
+            files,
+            parent_page,
+            *args,
+            initial=initial,
+            **kwargs,
+        )
+
+
+class ProduitPageTag(TaggedItemBase):
+    content_object = ParentalKey(
+        "qfdmd.ProduitPage",
+        on_delete=models.CASCADE,
+        related_name="%(class)ss_tagged_items",
+    )
+
+
+class ProduitPageMatiereTag(TaggedItemBase):
+    content_object = ParentalKey(
+        "qfdmd.ProduitPage",
+        on_delete=models.CASCADE,
+        related_name="%(class)ss_matiere_items",
+    )
+
+
+class ProduitPageMarqueTag(TaggedItemBase):
+    content_object = ParentalKey(
+        "qfdmd.ProduitPage",
+        on_delete=models.CASCADE,
+        related_name="%(class)ss_marques_items",
+    )
+
+
+class ProduitPage(Page, GenreNombreModel, CompiledFieldMixin):
+    base_form_class = ProduitPageForm
     subpage_types = [
         "qfdmd.synonymepage",
     ]
     parent_page_types = ["qfdmd.produitindexpage", "qfdmd.familypage"]
+
+    # Taxonomie
+    tags = ClusterTaggableManager(through=ProduitPageTag, blank=True, related_name="+")
+    # marques = ClusterTaggableManager(
+    #     through=ProduitPageMarqueTag, blank=True, related_name="+"
+    # )
+    # matieres = ClusterTaggableManager(
+    #     through=ProduitPageMatiereTag, blank=True, related_name="+"
+    # )
+
+    # Config
+    bonus = models.ForeignKey(
+        "qfdmd.bonus",
+        on_delete=models.SET_NULL,
+        related_name="produit_page",
+        blank=True,
+        null=True,
+    )
+    disable_bonus_inheritance = models.BooleanField(
+        "Désactiver l'héritage du bonus",
+        default=False,
+    )
     produit = models.ForeignKey(
         "qfdmd.produit",
         on_delete=models.SET_NULL,
@@ -85,8 +193,6 @@ class ProduitPage(Page, CompiledFieldMixin):
         null=True,
     )
 
-    genre = models.CharField("Genre", choices=[("m", "Masculin"), ("f", "Féminin")])
-    nombre = models.IntegerField("Nombre", choices=[(1, "singulier"), (2, "pluriel")])
     usage_unique = models.BooleanField(
         "À usage unique",
         default=False,
@@ -99,7 +205,9 @@ class ProduitPage(Page, CompiledFieldMixin):
 
     infotri = StreamField([("image", ImageBlock())], blank=True)
     body = StreamField(
-        STREAMFIELD_COMMON_BLOCKS, verbose_name="Corps de texte", blank=True
+        STREAMFIELD_COMMON_BLOCKS,
+        verbose_name="Corps de texte",
+        blank=True,
     )
     commentaire = RichTextField(blank=True)
 
@@ -128,12 +236,12 @@ class ProduitPage(Page, CompiledFieldMixin):
             tabs = []
             if text := legacy_produit_or_synonyme.mauvais_etat:
                 tabs.append(
-                    ("tabs", {"title": "Mauvais état", "content": [("text", text)]})
+                    ("tabs", {"title": "Mauvais état", "content": [("text", text)]}),
                 )
 
             if text := legacy_produit_or_synonyme.bon_etat:
                 tabs.append(
-                    ("tabs", {"title": "Bon état", "content": [("text", text)]})
+                    ("tabs", {"title": "Bon état", "content": [("text", text)]}),
                 )
 
             if len(tabs) > 0:
@@ -159,8 +267,8 @@ class ProduitPage(Page, CompiledFieldMixin):
                 "<li>2. Choisir <b>Migrer les produits/synonymes</b> dans la liste en"
                 "cliquant sur le bouton vert en bas à gauche</li>"
                 "<li>3. Vérifier les champs après le rechargement de la page</li>"
-                "<li>4. Publier la page courante</li></ol>"
-            )
+                "<li>4. Publier la page courante</li></ol>",
+            ),
         ),
         FieldPanel("produit"),
         FieldPanel("synonyme"),
@@ -168,10 +276,26 @@ class ProduitPage(Page, CompiledFieldMixin):
     ]
 
     config_panels = [
-        FieldPanel("titre_phrase"),
-        FieldPanel("genre"),
-        FieldPanel("nombre"),
+        MultiFieldPanel(
+            [
+                FieldPanel("titre_phrase"),
+                FieldPanel("genre"),
+                FieldPanel("nombre"),
+            ],
+            heading="Dynamisation des contenus",
+        ),
+        MultiFieldPanel(
+            [
+                FieldPanel("bonus"),
+                FieldPanel("disable_bonus_inheritance"),
+            ],
+            heading="Bonus",
+        ),
         FieldPanel("usage_unique"),
+        MultiFieldPanel(
+            [FieldPanel("tags")],
+            heading="Taxonomie",
+        ),
     ]
 
     edit_handler = TabbedInterface(
@@ -181,7 +305,7 @@ class ProduitPage(Page, CompiledFieldMixin):
             ObjectList(migration_panels, heading="Migration"),
             ObjectList(Page.promote_panels, heading="Promotion (SEO)"),
             ObjectList(Page.settings_panels, heading="Paramètres"),
-        ]
+        ],
     )
 
     def get_context(self, request, *args, **kwargs):
@@ -197,6 +321,14 @@ class ProduitPage(Page, CompiledFieldMixin):
                 name="no_produit_and_synonyme_filled_in_parallel",
             ),
         ]
+
+
+class FamilyPageTag(TaggedItemBase):
+    content_object = ParentalKey(
+        "qfdmd.FamilyPage",
+        on_delete=models.CASCADE,
+        related_name="tagged_items",
+    )
 
 
 class FamilyPage(ProduitPage):
@@ -216,8 +348,8 @@ class SynonymePage(Page):
     content_panels = [
         HelpPanel(
             "Cette page est un synonyme de recherche, si vous souhaitez modifier des"
-            " champs sur cette page il faut modifier la page parente."
-        )
+            " champs sur cette page il faut modifier la page parente.",
+        ),
     ] + Page.content_panels
 
 
@@ -230,17 +362,21 @@ class AbstractBaseProduit(NomAsNaturalKeyModel):
     # TODO : renommer ces champs lorsque le métier + technique seront tombés
     # d'accord sur un nom pour ces champs
     qu_est_ce_que_j_en_fais_mauvais_etat = models.TextField(
-        blank=True, help_text="Qu'est-ce que j'en fais ? - Mauvais état"
+        blank=True,
+        help_text="Qu'est-ce que j'en fais ? - Mauvais état",
     )
     # TODO : idem ci-dessus
     qu_est_ce_que_j_en_fais_bon_etat = models.TextField(
-        blank=True, help_text="Qu'est-ce que j'en fais ? - Bon état"
+        blank=True,
+        help_text="Qu'est-ce que j'en fais ? - Bon état",
     )
     comment_les_eviter = models.TextField(
-        blank=True, help_text="Comment consommer responsable ?"
+        blank=True,
+        help_text="Comment consommer responsable ?",
     )
     que_va_t_il_devenir = models.TextField(
-        blank=True, help_text="Que va-t-il devenir ?"
+        blank=True,
+        help_text="Que va-t-il devenir ?",
     )
 
     class Meta:
@@ -286,7 +422,8 @@ class Produit(index.Indexed, AbstractBaseProduit):
     code = models.CharField(blank=True, help_text="Code")
     bdd = models.CharField(blank=True, help_text="Bdd")
     qu_est_ce_que_j_en_fais = models.TextField(
-        blank=True, help_text="Qu'est-ce que j'en fais ? - ANCIEN CHAMP."
+        blank=True,
+        help_text="Qu'est-ce que j'en fais ? - ANCIEN CHAMP.",
     )
     nom_eco_organisme = models.CharField(blank=True, help_text="Nom de l’éco-organisme")
     filieres_rep = models.CharField(blank=True, help_text="Filière(s) REP concernée(s)")
@@ -315,11 +452,11 @@ class Produit(index.Indexed, AbstractBaseProduit):
         # base de donnée au bon endroit, cette méthode deviendra caduque.
         text = self.qu_est_ce_que_j_en_fais
         if "En bon état" not in text and "En mauvais état" not in text:
-            return
+            return None
 
         _, _, mauvais_etat_and_rest = text.partition("<b>En bon état</b>")
         mauvais_etat, _, bon_etat = mauvais_etat_and_rest.partition(
-            "<b>En mauvais état</b>"
+            "<b>En mauvais état</b>",
         )
 
         return (bon_etat, mauvais_etat)
@@ -355,7 +492,7 @@ class Produit(index.Indexed, AbstractBaseProduit):
         )
 
         if not produit_liens:
-            return
+            return None
 
         return render_to_string(
             "components/produit/_en_savoir_plus.html",
@@ -429,7 +566,9 @@ class Synonyme(index.Indexed, AbstractBaseProduit):
     slug = AutoSlugField(populate_from=["nom"], max_length=255)
     nom = models.CharField(blank=True, unique=True, help_text="Nom du produit")
     produit = models.ForeignKey(
-        Produit, related_name="synonymes", on_delete=models.CASCADE
+        Produit,
+        related_name="synonymes",
+        on_delete=models.CASCADE,
     )
     picto = models.FileField(
         upload_to="pictos",
@@ -446,7 +585,8 @@ class Synonyme(index.Indexed, AbstractBaseProduit):
         "30 premiers synonymes avec la case cochée s'afficheront.",
     )
     meta_description = models.TextField(
-        "Description lue et affichée par les moteurs de recherche.", blank=True
+        "Description lue et affichée par les moteurs de recherche.",
+        blank=True,
     )
 
     @property

@@ -27,19 +27,12 @@ with DAG(
     params={
         "normalization_rules": [
             # 1. Renommage des colonnes
-            {
-                "origin": "nom_de_lorganisme",
-                "destination": "nom",
-            },
-            {
-                "origin": "longitudewgs84",
-                "destination": "longitude",
-            },
-            {
-                "origin": "latitudewgs84",
-                "destination": "latitude",
-            },
+            {"origin": "nom_de_lorganisme", "destination": "nom"},
+            {"origin": "enseigne_commerciale", "destination": "nom_commercial"},
+            {"origin": "longitudewgs84", "destination": "longitude"},
+            {"origin": "latitudewgs84", "destination": "latitude"},
             # 2. Transformation des colonnes
+            {"origin": "site_web", "transformation": "clean_url", "destination": "url"},
             {
                 "origin": "ecoorganisme",
                 "transformation": "strip_lower_string",
@@ -86,10 +79,7 @@ with DAG(
                 "destination": "sous_categorie_codes",
             },
             # 3. Ajout des colonnes avec une valeur par défaut
-            {
-                "column": "statut",
-                "value": constants.ACTEUR_ACTIF,
-            },
+            {"column": "statut", "value": constants.ACTEUR_ACTIF},
             # 4. Transformation du dataframe
             {
                 "origin": ["siret", "siren"],
@@ -165,8 +155,10 @@ with DAG(
             {"remove": "point_de_reparation"},
             {"remove": "perimetre_dintervention"},
             {"remove": "service_a_domicile"},
+            {"remove": "consignes_dacces"},
             # 6. Colonnes à garder (rien à faire, utilisé pour le controle)
             {"keep": "email"},
+            {"keep": "adresse_complement"},
         ],
         "endpoint": (
             "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"

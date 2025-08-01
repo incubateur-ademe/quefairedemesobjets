@@ -3,7 +3,24 @@ from wagtail import hooks
 from wagtail.admin.action_menu import ActionMenuItem
 
 from qfdmd.models import ProduitPage
-from qfdmd.views import legacy_migrate
+from qfdmd.views import (
+    legacy_migrate,
+    pokemon_chooser_viewset,
+    reusable_content_viewset,
+)
+
+
+@hooks.register("register_admin_viewset")
+def register_pokemon_chooser_viewset():
+    return pokemon_chooser_viewset
+
+
+@hooks.register("register_admin_viewset")
+def register_viewset():
+    return reusable_content_viewset
+
+
+WagtailBlockChooserWidget = pokemon_chooser_viewset.widget_class
 
 
 class MigratePageMenuItem(ActionMenuItem):

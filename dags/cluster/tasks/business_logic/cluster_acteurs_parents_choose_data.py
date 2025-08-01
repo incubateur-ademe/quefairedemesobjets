@@ -113,6 +113,9 @@ def cluster_acteurs_parents_choose_data(
         # Acteurs to consider: first revisions, then base, but not from excluded sources
         acteurs = list(acteurs_revision) + list(acteurs_base)
         acteurs.sort(key=source_priority)
+        # On parent creation, we don't want to keep empty data
+        if not parent:
+            keep_empty = False
         if parent and keep_parent_data_by_default:
             acteurs = [parent] + acteurs
 
