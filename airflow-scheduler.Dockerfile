@@ -28,10 +28,13 @@ USER root
 # unzip for Airflow DAG
 RUN echo "deb http://deb.debian.org/debian stable main" > /etc/apt/sources.list
 RUN apt-get update
-RUN apt-get install -y unzip
+RUN apt-get install -y unzip curl
 
 RUN apt-get install -y --no-install-recommends \
-    gdal-bin libgdal-dev
+    gdal-bin libgdal-dev jq
+
+# Installation du client Scaleway CLI
+RUN curl -s https://raw.githubusercontent.com/scaleway/scaleway-cli/master/scripts/get.sh | sh
 
 USER ${AIRFLOW_UID:-50000}:0
 WORKDIR /opt/airflow
@@ -47,6 +50,7 @@ COPY ./qfdmo/ /opt/airflow/qfdmo/
 COPY ./qfdmd/ /opt/airflow/qfdmd/
 COPY ./data/ /opt/airflow/data/
 COPY ./dbt/ /opt/airflow/dbt/
+COPY ./scripts/ /opt/airflow/scripts/
 COPY ./dsfr_hacks/ /opt/airflow/dsfr_hacks/
 
 # Classique Airflow
