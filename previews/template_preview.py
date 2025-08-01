@@ -272,3 +272,38 @@ class AccessibilitePreview(LookbookPreview):
 
         """
         return render_to_string("components/logo/homepage.html")
+
+    def P02_7_1__P02_7_3(self, **kwargs):
+        """
+        # P02 7.1
+        ## Retour
+        Les composants suivants ne sont pas compatibles avec les technologies d'assistance :
+
+        1. Le dernier élément du fil d'ariane n'a pas d'attribut href : cf. modèle de conception https://www.w3.org/WAI/ARIA/apg/patterns/breadcrumb/examples/breadcrumb/
+
+        ## À vérifier
+        - [ ] Le dernier élément du breadcrumb a un attribut href
+
+        # P02 7.3
+        ## Retour
+        Les composants suivants ne sont pas contrôlables au clavier :
+
+        1. Le dernier élément du fil d'ariane n'est pas atteignable (voir 7.1)
+
+        ## À vérifier
+        - [ ] Le dernier élément du breadcrumb est atteignable au clavier
+
+        """
+        context = {
+            "self": {
+                "get_ancestors": [
+                    {"title": "Une première page", "is_site_root": True},
+                    {"title": "Une deuxième page", "is_root": False},
+                ],
+                "title": "Une troisième page",
+            },
+        }
+        return render_to_string(
+            "sites_faciles_content_manager/blocks/breadcrumbs.html",
+            context,
+        )
