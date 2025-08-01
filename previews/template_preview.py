@@ -1,11 +1,26 @@
 # Ignore line length recommandations from flake8
 # flake8: noqa: E501
+from django import forms
 from django.conf import settings
 from django.template import Context, Template
 from django.template.loader import render_to_string
 from django_lookbook.preview import LookbookPreview
+from django_lookbook.utils import register_form_class
 
 from qfdmd.models import Suggestion, Synonyme
+
+
+class SynonymeForm(forms.Form):
+    """
+    This is to show how to add parameter editor to preview synonyme in heading
+    """
+
+    synonyme = forms.CharField(
+        label="Synonyme",
+        max_length=100,
+        help_text="Entrez le nom d'un synonyme",
+        initial="",
+    )
 
 
 class ComponentsPreview(LookbookPreview):
@@ -15,7 +30,7 @@ class ComponentsPreview(LookbookPreview):
 
     def code(self, **kwargs):
         context = {
-            "script": '<script src="https://quefairedemesdechets.ademe.local/iframe.js"></script>'
+            "script": '<script src="https://quefairedemesdechets.ademe.local/iframe.js"></script>',
         }
         return render_to_string("components/code/code.html", context)
 
@@ -29,12 +44,22 @@ class ComponentsPreview(LookbookPreview):
         context = {"title": "Coucou !"}
         return render_to_string("components/produit/legacy_heading.html", context)
 
-    def produit_heading(self, **kwargs):
+    @register_form_class(SynonymeForm)
+    def produit_heading(self, synonyme=None, **kwargs):
         context = {"title": "Coucou !"}
+
+        if synonyme:
+            context.update(synonyme=synonyme)
+
         return render_to_string("components/produit/heading.html", context)
 
-    def produit_heading_family(self, **kwargs):
+    @register_form_class(SynonymeForm)
+    def produit_heading_family(self, synonyme=None, **kwargs):
         context = {"label": "youpi", "title": "Coucou !"}
+
+        if synonyme:
+            context.update(synonyme=synonyme)
+
         return render_to_string("components/produit/heading_family.html", context)
 
 
@@ -134,7 +159,7 @@ class IframePreview(LookbookPreview):
             data-height="720px"
             data-bounding_box="{&quot;southWest&quot;: {&quot;lat&quot;: 47.570401, &quot;lng&quot;: 1.597977}, &quot;northEast&quot;: {&quot;lat&quot;: 48.313697, &quot;lng&quot;: 3.059159}}"
             ></script>
-            """
+            """,
         )
 
         return template.render(Context({}))
@@ -150,7 +175,7 @@ class IframePreview(LookbookPreview):
                 data-action_list="reparer|echanger|mettreenlocation|revendre"
                 data-iframe_attributes='{"loading":"lazy", "id" : "resize" }'>
                 </script>
-            """
+            """,
         )
 
         return template.render(Context({}))
@@ -159,7 +184,7 @@ class IframePreview(LookbookPreview):
         template = Template(
             f"""
         <script src="{settings.ASSISTANT["BASE_URL"]}/iframe.js" data-testid='assistant'></script>
-        """
+        """,
         )
 
         return template.render(Context({}))
@@ -168,7 +193,7 @@ class IframePreview(LookbookPreview):
         template = Template(
             f"""
         <script src="{settings.ASSISTANT["BASE_URL"]}/iframe.js" data-epci="200043123" data-objet="lave-linge"></script>
-        """
+        """,
         )
 
         return template.render(Context({}))
@@ -177,7 +202,7 @@ class IframePreview(LookbookPreview):
         template = Template(
             f"""
         <script src="{settings.ASSISTANT["BASE_URL"]}/iframe.js" data-debug-referrer data-testid='assistant'></script>
-        """
+        """,
         )
 
         return template.render(Context({}))
