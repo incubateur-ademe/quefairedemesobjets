@@ -1,7 +1,0 @@
-project_id      = "your-project-id"
-organization_id = "your-organization-id"
-db_password     = "your-secure-password"  # pragma: allowlist secret
-db_username     = "qfdmo"
-access_key      = "access-key"
-secret_key      = "secret-key"  # pragma: allowlist secret
-
