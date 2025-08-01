@@ -1,6 +1,14 @@
 {% extends "dsfr/footer.html" %}
 {% load menu_tags %}
 
+{% block footer_top %}
+<div class="fr-footer__top">
+    {% if request %}
+    {% flat_menu handle="surfooter_assistant" template="components/footer/footer-menu.html" %}
+    {% endif %}
+</div>
+{% endblock footer_top %}
+
 {% block footer_links %}
 {% if request %}
 {% flat_menu handle="footer_assistant" template="components/footer/footer-menu.html" %}
