@@ -1,5 +1,5 @@
 terraform {
-  source = "../../modules/database"
+  source = "../../../modules/database"
 }
 
 include {
@@ -8,7 +8,7 @@ include {
 
 inputs = {
   node_type         = "DB-PRO2-XXS"
-  volume_size       = 300
+  volume_size       = 200
   db_username       = "[db_username]"
   db_password       = "[db_password]"
   db_name           = "qfdmo"
