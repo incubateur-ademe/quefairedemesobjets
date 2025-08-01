@@ -212,14 +212,20 @@ class IframePreview(LookbookPreview):
 class AccessibilitePreview(LookbookPreview):
     def P01_7_3(self, **kwargs):
         """
+        # P01 7.3
+        ## Retour
         "Les composants suivants ne sont pas contrôlables au clavier :
         1. Dans la modale de partage, les liens et le bouton ne sont
         pas accessibles au clavier : retirer leur attribut tabindex=""-1
+
+        ## À vérifier
+        - [ ] En utilisant la touche tab, on peut naviguer dans les boutons de la modale de partage
         """
         return render_to_string("modals/share.html")
 
     def P01_3_3(self, **kwargs):
         """
+        # P01 3.3
         ## Retour
         "Le rapport de contraste entre les couleurs d’un composant d’interface et son arrière-plan est insuffisant, exemple :
         - le formulaire de recherche
@@ -235,9 +241,14 @@ class AccessibilitePreview(LookbookPreview):
 
     def P01_10_2(self, **kwargs):
         """
+        # P01 10.2
+        ## Retour
         Lorsque l'utilisateur désactive le CSS, le contenu porteur d'information n'est plus visible, exemple :
         - le bouton de soumission du formulaire de recherche n'a pas d'intitulé, ajouter le texte "Rechercher"
         et le masquer avec la méthode sr-only*, retirer son attribut aria-label="Rechercher"
+
+        ## À vérifier
+        - [ ] Avec le CSS désactivé, le label rechercher du bouton s'affiche
         """
         context = {"search_form": SearchForm()}
         return render_to_string("components/search/view.html", context)
