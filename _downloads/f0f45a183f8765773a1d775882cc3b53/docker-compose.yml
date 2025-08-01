@@ -11,6 +11,7 @@ x-airflow-common:
     - ./dbt:/opt/airflow/dbt
     - ./logs:/opt/airflow/logs
     - ./dags:/opt/airflow/dags
+    - ./scripts:/opt/airflow/scripts
     - ./config:/opt/airflow/config
     - ./plugins:/opt/airflow/plugins
   # Voir la doc et s'assurer que AIRFLOW_UID est
