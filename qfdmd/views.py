@@ -1,4 +1,5 @@
 import logging
+import re
 from typing import Any
 
 from django.conf import settings
@@ -10,12 +11,15 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control
 from django.views.decorators.vary import vary_on_headers
 from django.views.generic import DetailView, FormView, ListView
+from queryish.rest import APIModel
+from wagtail.admin.viewsets.chooser import ChooserViewSet
+from wagtail.admin.viewsets.model import ModelViewSet
 from wagtail.models import Page
 
 from core.notion import create_new_row_in_notion_table
 from core.views import static_file_content_from
 from qfdmd.forms import ContactForm, SearchForm
-from qfdmd.models import Suggestion, Synonyme
+from qfdmd.models import Bonus, ReusableContent, Suggestion, Synonyme
 
 logger = logging.getLogger(__name__)
 
@@ -124,3 +128,70 @@ class HomeView(AssistantBaseView, ListView):
 class SynonymeDetailView(AssistantBaseView, DetailView):
     template_name = "pages/produit.html"
     model = Synonyme
+
+
+# WAGTAIL
+# =======
+
+
+class WagtailBlock(APIModel):
+    class Meta:
+        base_url = "https://pokeapi.co/api/v2/pokemon/"
+        detail_url = "https://pokeapi.co/api/v2/pokemon/%s/"
+        fields = ["id", "name"]
+        pagination_style = "offset-limit"
+        verbose_name_plural = "pokemon"
+
+    @classmethod
+    def from_query_data(cls, data):
+        return cls(
+            id=int(
+                re.match(
+                    r"https://pokeapi.co/api/v2/pokemon/(\d+)/", data["url"]
+                ).group(1)
+            ),
+            name=data["name"],
+        )
+
+    @classmethod
+    def from_individual_data(cls, data):
+        return cls(
+            id=data["id"],
+            name=data["name"],
+        )
+
+    def __str__(self):
+        return self.name
+
+
+class BlockChooserViewSet(ChooserViewSet):
+    model = WagtailBlock
+    choose_one_text = "Choisir un bloc"
+    choose_another_text = "Choisir un autre bloc"
+
+
+pokemon_chooser_viewset = BlockChooserViewSet("pokemon_chooser")
+
+
+class ReusableContentViewSet(ModelViewSet):
+    model = ReusableContent
+    form_fields = ["title", "genre", "nombre"]
+    icon = "user"
+    list_filter = ["genre", "nombre"]
+    add_to_admin_menu = True
+    copy_view_enabled = True
+    inspect_view_enabled = True
+
+
+class BonusViewSet(ModelViewSet):
+    model = Bonus
+    form_fields = ["title", "montant_min", "montant_max"]
+    icon = "user"
+    list_filter = ["montant_min", "montant_max"]
+    add_to_admin_menu = True
+    copy_view_enabled = False
+    inspect_view_enabled = True
+
+
+reusable_content_viewset = ReusableContentViewSet("contenu-reutilisable")
+bonus_viewset = BonusViewSet("bonus")
