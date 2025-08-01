@@ -21,7 +21,7 @@
 
     {% block main_heading %}
     {% if page.synonyme %}
-        {% include "components/produit/heading.html" with title=page.get_parent.title infotri=page.get_parent.specific.infotri synonyme=page.synonyme.titre_phrase %}
+        {% include "components/produit/heading.html" with title=page.get_parent.specific.titre_phrase infotri=page.get_parent.specific.infotri synonyme=page.synonyme.titre_phrase %}
     {% else %}
         {% include "components/produit/heading.html" with title=page.titre_phrase infotri=page.infotri synonyme=page.synonyme %}
     {% endif %}
