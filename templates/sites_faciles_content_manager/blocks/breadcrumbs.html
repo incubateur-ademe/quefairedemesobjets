@@ -23,10 +23,20 @@
             </li>
           {% endfor %}
           <li>
+              {% comment %}
+              ⚠️ We need a href here to be RGAA compliant, to follow ARIA best practices
+              https://www.w3.org/WAI/ARIA/apg/patterns/breadcrumb/examples/breadcrumb/
+              The link can then be read by voice over technologies.
+
+              This is the only customisation of this template (with the same a few lines below)
+              {% endcomment %}
             <a class="fr-breadcrumb__link" href="#" aria-current="page">{{ extra_breadcrumbs.current|truncatewords:6 }}</a>
           </li>
         {% else %}
           <li>
+             {% comment %}
+              ⚠️ Same as above
+              {% endcomment %}
             <a class="fr-breadcrumb__link" href="#" aria-current="page">{{ self.title|truncatewords:6 }}</a>
           </li>
         {% endif %}
