@@ -50,13 +50,13 @@ class CarteSearchActeursView(SearchActeursView):
     def _get_selected_action_ids(self):
         return [a.id for a in self._get_selected_action()]
 
-    def get_sous_categories(self):
+    def get_sous_categories_ids(self):
         if sous_categories := self.displayed_acteur_form.cleaned_data.get(
             "sous_categories"
         ):
             return sous_categories.values_list("pk", flat=True)
 
-        return super().get_sous_categories()
+        return super().get_sous_categories_ids()
 
 
 class ProductCarteView(CarteSearchActeursView):
