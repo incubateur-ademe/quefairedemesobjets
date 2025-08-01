@@ -282,7 +282,18 @@ class AccessibilitePreview(LookbookPreview):
         - [ ] Le logo affiche Que faire de mes objets et déchets
 
         """
-        return render_to_string("components/logo/homepage.html")
+        template = Template(
+            """
+            {% load dsfr_tags %}
+
+            <p class="fr-h2">Logo en homepage</p>
+            {% include "components/logo/homepage.html" %}
+            <hr>
+            <p class="fr-h2">Logo du header</p>
+            {% include "components/logo/header.html" %}
+            """,
+        )
+        return template.render(Context({}))
 
     def P02_7_1__P02_7_3(self, **kwargs):
         """
