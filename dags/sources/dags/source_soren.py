@@ -155,10 +155,10 @@ with DAG(
             {"remove": "point_de_reparation"},
             {"remove": "perimetre_dintervention"},
             {"remove": "service_a_domicile"},
-            {"remove": "consignes_dacces"},
             # 6. Colonnes à garder (rien à faire, utilisé pour le controle)
             {"keep": "email"},
             {"keep": "adresse_complement"},
+            {"keep": "consignes_dacces"},
         ],
         "endpoint": (
             "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"

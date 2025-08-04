@@ -420,6 +420,12 @@ class BaseActeur(TimestampedModel):
         blank=True,
         null=True,
     )
+    consignes_dacces = models.TextField(
+        verbose_name="Consignes d'accès",
+        blank=True,
+        default="",
+        db_default="",
+    )
 
     @property
     def latitude(self):
