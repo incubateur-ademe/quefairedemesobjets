@@ -202,6 +202,7 @@ class BaseActeurAdmin(admin.GISModelAdmin):
         "reprise",
         "exclusivite_de_reprisereparation",
         "uniquement_sur_rdv",
+        "consignes_dacces",
         "statut",
         "commentaires",
         "cree_le",
