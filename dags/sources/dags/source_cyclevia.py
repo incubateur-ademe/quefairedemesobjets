@@ -47,10 +47,6 @@ with DAG(
                 "origin": "horaires_douverture",
                 "destination": "horaires_description",
             },
-            {
-                "origin": "consignes_dacces",
-                "destination": "description",
-            },
             # 2. Transformation des colonnes
             {
                 "origin": "ecoorganisme",
@@ -172,8 +168,12 @@ with DAG(
             {"remove": "point_dapport_de_service_reparation"},
             {"remove": "point_dapport_pour_reemploi"},
             {"remove": "point_de_reparation"},
+            {"remove": "date_debut_point_ephemere"},
+            {"remove": "date_fin_point_ephemere"},
             # 6. Colonnes à garder (rien à faire, utilisé pour le controle)
             {"keep": "adresse_complement"},
+            {"keep": "consignes_dacces"},
+            {"keep": "email"},
         ],
         "endpoint": (
             "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"
