@@ -32,10 +32,6 @@ with DAG(
                 "destination": "nom",
             },
             {
-                "origin": "consignes_dacces",
-                "destination": "description",
-            },
-            {
                 "origin": "longitudewgs84",
                 "destination": "longitude",
             },
@@ -152,6 +148,7 @@ with DAG(
             {"remove": "point_de_reparation"},
             {"remove": "point_dapport_de_service_reparation"},
             # 6. Colonnes à garder (rien à faire, utilisé pour le controle)
+            {"keep": "consignes_dacces"},
         ],
         "endpoint": (
             "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"
