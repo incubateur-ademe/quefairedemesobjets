@@ -45,8 +45,8 @@ generate "common_variables" {
 }
 
 inputs = {
-  prefix = "lvao"
-  environment = "${basename(get_terragrunt_dir())}"
-  project_id        = "[project_id]"
-  organization_id   = "[organization_id]"
+  prefix          = "lvao"
+  environment     = "${basename(dirname(get_terragrunt_dir()))}"
+  project_id      = "[project_id]"
+  organization_id = "[organization_id]"
 }

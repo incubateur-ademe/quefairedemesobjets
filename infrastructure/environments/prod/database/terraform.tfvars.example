@@ -6,5 +6,7 @@ webapp_db_username    = "webapp"
 webapp_db_password    = "your-secure-password"  # pragma: allowlist secret
 warehouse_db_username = "warehouse"
 warehouse_db_password = "your-secure-password"  # pragma: allowlist secret
+airflow_db_username = "airflow"
+airflow_db_password = "your-secure-password"  # pragma: allowlist secret
 access_key            = "access-key"
 secret_key            = "secret-key"  # pragma: allowlist secret

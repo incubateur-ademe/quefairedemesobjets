@@ -102,3 +102,34 @@ resource "scaleway_rdb_privilege" "warehouse" {
   database_name = scaleway_rdb_database.warehouse.name
   permission    = "all"
 }
+
+## Airflow
+
+resource "scaleway_rdb_instance" "airflow" {
+  name                      = "${var.prefix}-${var.environment}-airflow"
+  node_type                 = var.airflow_node_type
+  engine                    = "PostgreSQL-16"
+  is_ha_cluster             = true
+  disable_backup            = false
+  user_name                 = var.airflow_db_username
+  password                  = var.airflow_db_password
+  tags                      = ["${var.environment}", "postgresql", "airflow", "dbt"]
+  backup_schedule_frequency = 24
+  backup_schedule_retention = 7
+  backup_same_region        = false
+  volume_size_in_gb         = var.airflow_volume_size
+  volume_type               = "sbs_15k"
+  encryption_at_rest        = true
+}
+
+resource "scaleway_rdb_database" "airflow" {
+  instance_id = scaleway_rdb_instance.airflow.id
+  name        = var.airflow_db_name
+}
+
+resource "scaleway_rdb_privilege" "airflow" {
+  instance_id   = scaleway_rdb_instance.airflow.id
+  user_name     = var.airflow_db_username
+  database_name = scaleway_rdb_database.airflow.name
+  permission    = "all"
+}
