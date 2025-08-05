@@ -27,6 +27,7 @@ SELECT
     {{ coalesce_empty('ra.reprise', 'a.reprise') }} AS reprise,
     COALESCE(ra.exclusivite_de_reprisereparation, a.exclusivite_de_reprisereparation) AS exclusivite_de_reprisereparation,
     COALESCE(ra.uniquement_sur_rdv, a.uniquement_sur_rdv) AS uniquement_sur_rdv,
+    {{ coalesce_empty('ra.consignes_dacces', 'a.consignes_dacces') }} AS consignes_dacces,
     COALESCE(ra.action_principale_id, a.action_principale_id) AS action_principale_id,
     COALESCE(ra.modifie_le, a.modifie_le) AS modifie_le,
     ra.parent_id AS parent_id,
