@@ -299,15 +299,6 @@ default_settings = {
     # FIXME : est-ce que Django à besoin d'avoir les 2 bases de données ?
 }
 
-# The readonly access is configured with fake access when DB_READONLY env
-# variable is not set.
-DB_READONLY = decouple.config(
-    "DB_READONLY",
-    cast=str,
-    default="postgres://fakeusername:fakepassword@postgres:5432/database",
-)
-readonly_settings = dj_database_url.parse(DB_READONLY)
-
 DB_WAREHOUSE = decouple.config(
     "DB_WAREHOUSE",
     cast=str,
@@ -320,7 +311,6 @@ warehouse_settings = {
 
 DATABASES = {
     "default": default_settings,
-    "readonly": readonly_settings,
     "warehouse": warehouse_settings,
 }
 

@@ -65,7 +65,7 @@
     "eslint-config-love": "^117.0.0",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-n": "^17.21.0",
-    "eslint-plugin-prettier": "^5.5.1",
+    "eslint-plugin-prettier": "^5.5.3",
     "eslint-plugin-promise": "^7.2.1",
     "jest": "^30.0.5",
     "jest-environment-jsdom": "^30.0.5",
@@ -75,7 +75,7 @@
     "prettier": "^3.6.2",
     "svgo": "^3.3.2",
     "tailwindcss-animate": "^1.0.7",
-    "ts-jest": "^29.4.0",
+    "ts-jest": "^29.4.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0"

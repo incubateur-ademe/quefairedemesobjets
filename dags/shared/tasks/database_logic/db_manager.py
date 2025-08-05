@@ -5,8 +5,8 @@ from sqlalchemy.engine import Engine
 class PostgresConnectionManager:
     """
     Singleton class to manage the connection to the Postgres database.
-    use the connecter qfdmo_django_db by default
-    this connecter is set by using env variable AIRFLOW_CONN_QFDMO_DJANGO_DB
+    use the connecter webapp_db by default
+    this connecter is set by using env variable AIRFLOW_CONN_WEBAPP_DB
     """
 
     _instance = None
@@ -16,7 +16,7 @@ class PostgresConnectionManager:
             cls._instance = super(PostgresConnectionManager, cls).__new__(cls)
         return cls._instance
 
-    def __init__(self, postgres_conn_id="qfdmo_django_db"):
+    def __init__(self, postgres_conn_id="webapp_db"):
         if not hasattr(self, "initialized"):  # Pour éviter la réinitialisation
             self.postgres_conn_id = postgres_conn_id
             self.engine = self._create_engine()
