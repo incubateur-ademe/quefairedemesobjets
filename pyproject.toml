@@ -125,7 +125,7 @@ pytest = "^8.4.1"
 pytest-django = "^4.9.0"
 pytest-dotenv = "^0.5.2"
 pytest-mock = "^3.14.1"
-ruff = "^0.12.5"
+ruff = "^0.12.7"
 shapely = "^2.1.1" # notebook
 djade = "^1.4.0"
 
