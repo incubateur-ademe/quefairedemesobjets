@@ -27,7 +27,7 @@ class ChangeActeurDeleteAsParent(ChangeActeurAbstract):
          - we should first take care of its children (e.g. pointing to new parent)
          - consequently the parent should be automatically deleted (see PR1247)
          - Except if there is some children with non actif status, then we have to
-           set the statuts of the parent to "SUPPRIME"
+           unlink children and delete the parent
         """
         rev = RevisionActeur.objects.filter(identifiant_unique=self.id).first()
         if rev is not None:
@@ -36,8 +36,8 @@ class ChangeActeurDeleteAsParent(ChangeActeurAbstract):
                 [d.statut == ActeurStatus.ACTIF for d in duplicats]
             ):
                 raise ValueError(f"Parent '{self.id}' should already be deleted")
-            if any([d.statut == ActeurStatus.INACTIF for d in duplicats]):
-                rev.statut = ActeurStatus.INACTIF
             else:
-                rev.statut = ActeurStatus.SUPPRIME
-            rev.save()
+                for d in duplicats:
+                    d.parent = None
+                    d.save()
+                rev.delete()
