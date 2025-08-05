@@ -38,33 +38,25 @@ class TestChangeActeurDeleteAsParent:
         with pytest.raises(ValueError, match="Parent 'p1' should already be deleted"):
             change.apply()  # calling apply to ensure it calls validate
 
-    def test_inactif_if_present_with_inactif_children(self):
+    def test_deleted_if_present_with_children(self):
         # We expect acteur management to automatically delete parent for us
         p1 = RevisionActeurFactory(identifiant_unique="p1")
-        RevisionActeurFactory(
+        e2 = RevisionActeurFactory(
             identifiant_unique="e2", parent=p1, statut=ActeurStatus.INACTIF
         )
-        RevisionActeurFactory(
+        e3 = RevisionActeurFactory(
             identifiant_unique="e3", parent=p1, statut=ActeurStatus.SUPPRIME
         )
         change = ChangeActeurDeleteAsParent(id="p1")
         change.apply()
-        p1.refresh_from_db()
-        assert p1.statut == ActeurStatus.INACTIF
 
-    def test_supprime_if_present_with_supprime_children(self):
-        # We expect acteur management to automatically delete parent for us
-        p1 = RevisionActeurFactory(identifiant_unique="p1")
-        RevisionActeurFactory(
-            identifiant_unique="e2", parent=p1, statut=ActeurStatus.SUPPRIME
-        )
-        RevisionActeurFactory(
-            identifiant_unique="e3", parent=p1, statut=ActeurStatus.SUPPRIME
-        )
-        change = ChangeActeurDeleteAsParent(id="p1")
-        change.apply()
-        p1.refresh_from_db()
-        assert p1.statut == ActeurStatus.SUPPRIME
+        p1 = RevisionActeur.objects.filter(pk="p1").first()
+        e2.refresh_from_db()
+        e3.refresh_from_db()
+
+        assert p1 is None
+        assert e2.parent is None
+        assert e3.parent is None
 
     def test_ensure_deletion_is_automatic(self):
         # We replay the e2e scenario of having children pointing
