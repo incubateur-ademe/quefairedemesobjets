@@ -9,7 +9,7 @@ PYTHON := poetry run python
 DJANGO_ADMIN := $(PYTHON) manage.py
 PYTEST := poetry run pytest
 HONCHO := poetry run honcho
-DB_URL := postgres://qfdmo:qfdmo@localhost:6543/qfdmo# pragma: allowlist secret
+DB_URL := postgres://webapp:webapp@localhost:6543/webapp# pragma: allowlist secret
 ASSISTANT_URL := quefairedemesdechets.ademe.local
 LVAO_URL := lvao.ademe.local
 FIXTURES_OPTIONS := --indent 4 --natural-foreign --natural-primary
@@ -180,11 +180,11 @@ extract-dsfr:
 
 .PHONY: drop-schema-public
 drop-schema-public:
-	docker compose exec lvao-db psql -U qfdmo -d qfdmo -c "DROP SCHEMA IF EXISTS public CASCADE;"
+	docker compose exec lvao-webapp-db psql -U webapp -d webapp -c "DROP SCHEMA IF EXISTS public CASCADE;"
 
 .PHONY: create-schema-public
 create-schema-public:
-	docker compose exec lvao-db psql -U qfdmo -d qfdmo -c "CREATE SCHEMA IF NOT EXISTS public;"
+	docker compose exec lvao-webapp-db psql -U webapp -d webapp -c "CREATE SCHEMA IF NOT EXISTS public;"
 
 .PHONY: dump-production
 dump-production:

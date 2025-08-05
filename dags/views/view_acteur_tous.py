@@ -58,7 +58,7 @@ with DAG(
             - elles sont toutes les 2 petites et rapides
             - on veut éviter d'avoir à parcourir les logs de 2 petites tâches
         """
-        pg_hook = PostgresHook(postgres_conn_id="qfdmo_django_db")
+        pg_hook = PostgresHook(postgres_conn_id="webapp_db")
 
         with pg_hook.get_conn() as conn:
             with conn.cursor() as cursor:

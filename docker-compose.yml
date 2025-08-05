@@ -26,20 +26,34 @@ x-airflow-common:
       condition: service_healthy
 
 services:
-  lvao-db:
+  lvao-webapp-db:
     image: postgis/postgis:15-3.3-alpine
     environment:
-      - POSTGRES_USER=qfdmo
-      - POSTGRES_PASSWORD=qfdmo # pragma: allowlist secret
-      - POSTGRES_DB=qfdmo
+      - POSTGRES_USER=webapp
+      - POSTGRES_PASSWORD=webapp # pragma: allowlist secret
+      - POSTGRES_DB=webapp
       - POSTGRES_MULTIPLE_EXTENSIONS=postgis
     volumes:
-      - webapp_db_data:/var/lib/postgresql/data:delegated
+      - ./webapp_dbdata:/var/lib/postgresql/data:delegated
     expose:
       - 5432
     ports:
       - 6543:5432
     profiles: [lvao, airflow]
+  lvao-warehouse-db:
+    image: postgis/postgis:15-3.3-alpine
+    environment:
+      - POSTGRES_USER=warehouse
+      - POSTGRES_PASSWORD=warehouse # pragma: allowlist secret
+      - POSTGRES_DB=warehouse
+      - POSTGRES_MULTIPLE_EXTENSIONS=postgis
+    volumes:
+      - ./warehouse_dbdata:/var/lib/postgresql/data:delegated
+    expose:
+      - 5432
+    ports:
+      - 8765:5432
+    profiles: [airflow]
   lvao-proxy:
     image: nginx:latest
     ports:
@@ -55,10 +69,10 @@ services:
     image: postgres:15
     environment:
       POSTGRES_USER: airflow
-      POSTGRES_PASSWORD: airflow
+      POSTGRES_PASSWORD: airflow # pragma: allowlist secret
       POSTGRES_DB: airflow
     volumes:
-      - airflow_db_data:/var/lib/postgresql/data
+      - ./airflow_dbdata:/var/lib/postgresql/data
     ports:
       - 7654:5432
     healthcheck:
@@ -111,7 +125,3 @@ services:
       airflow-webserver:
         condition: service_healthy
     profiles: [airflow]
-
-volumes:
-  webapp_db_data:
-  airflow_db_data:

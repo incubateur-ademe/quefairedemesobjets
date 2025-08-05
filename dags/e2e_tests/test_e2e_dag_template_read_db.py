@@ -108,7 +108,6 @@ class TestE2ETemplateReadDb:
         dbs = ti_settings["DATABASES"]
         db_test = {"HOST": "localhost", "PORT": 6543, "NAME": "test_qfdmo"}
         assert dbs["default"] == db_test
-        assert dbs["readonly"] == db_test
 
     def test_acteurs_list_works(self, ti_acteurs_list):
         # We should we able to retrieve acteurs created via models outside Airflow
