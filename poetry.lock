@@ -616,25 +616,27 @@ apache-airflow = ">=2.10.0"
 
 [[package]]
 name = "apache-airflow-providers-postgres"
-version = "6.2.1"
+version = "6.2.2"
 description = "Provider package apache-airflow-providers-postgres for Apache Airflow"
 optional = false
-python-versions = "~=3.10"
+python-versions = ">=3.10"
 groups = ["airflow"]
 files = [
-    {file = "apache_airflow_providers_postgres-6.2.1-py3-none-any.whl", hash = "sha256:3964de6a7bc6476d425196bb94b1fea48a2bd0dfc523884f5e81fd9da9480f65"},
-    {file = "apache_airflow_providers_postgres-6.2.1.tar.gz", hash = "sha256:4bc078c0557e3e20ec129fa189540ede2a842c7a40daa88565714fc6ba478fb1"},
+    {file = "apache_airflow_providers_postgres-6.2.2-py3-none-any.whl", hash = "sha256:1a86dd83d2c463c5f82c0136a54a4bb4d4ce32798bd46c8ff9565b672079d4db"},
+    {file = "apache_airflow_providers_postgres-6.2.2.tar.gz", hash = "sha256:5487374cfa9c93466b1227daad5290b781bcae6a40ee860ca02076741aac31e8"},
 ]
 
 [package.dependencies]
 apache-airflow = ">=2.10.0"
 apache-airflow-providers-common-sql = ">=1.23.0"
 asyncpg = ">=0.30.0"
-psycopg2-binary = ">=2.9.9"
+psycopg2-binary = {version = ">=2.9.9", markers = "python_version < \"3.13\""}
 
 [package.extras]
 amazon = ["apache-airflow-providers-amazon (>=2.6.0)"]
 openlineage = ["apache-airflow-providers-openlineage"]
+pandas = ["pandas (>=2.1.2) ; python_version < \"3.13\"", "pandas (>=2.2.3) ; python_version >= \"3.13\""]
+polars = ["polars (>=1.26.0)"]
 
 [[package]]
 name = "apache-airflow-providers-smtp"
@@ -7582,4 +7584,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12,<3.13"
-content-hash = "c4f87bc61c18c6fd68b56e97f9388c2738884f300d831206327760d06b906e3b"
+content-hash = "d023c2c739fef590675c2d8f3f9b60abf16df7dbde5a4c30dc1a5e042b5e4b95"
