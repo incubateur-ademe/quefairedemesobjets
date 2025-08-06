@@ -9,4 +9,3 @@ default:
       password: "{{ env_var('POSTGRES_PASSWORD', 'qfdmo') }}"
       dbname: "{{ env_var('POSTGRES_DB', 'qfdmo') }}"
       schema: "{{ env_var('POSTGRES_SCHEMA', 'warehouse') }}"
-      threads: 5

@@ -314,6 +314,11 @@ DATABASES = {
     "warehouse": WAREHOUSE_DATABASE_SETTINGS,
 }
 
+REMOTE_WEBAPP_SERVERNAME = "webapp_server"
+REMOTE_WEBAPP_SCHEMANAME = "webapp_public"
+REMOTE_WAREHOUSE_SERVERNAME = "warehouse_server"
+REMOTE_WAREHOUSE_SCHEMANAME = "warehouse_public"
+
 CONN_HEALTH_CHECKS = True
 CONN_MAX_AGE = decouple.config("CONN_MAX_AGE", cast=int, default=0)
 

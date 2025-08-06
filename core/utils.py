@@ -6,6 +6,15 @@ from wagtail.fields import DjangoJSONEncoder
 
 from qfdmo.models.action import get_directions
 
+SQL_CREATE_EXTENSIONS = """
+                CREATE EXTENSION IF NOT EXISTS postgis;
+                CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
+                CREATE EXTENSION IF NOT EXISTS unaccent;
+                CREATE EXTENSION IF NOT EXISTS pg_trgm;
+                CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+                CREATE EXTENSION IF NOT EXISTS postgres_fdw;
+                """
+
 
 def get_direction(request, is_carte=False):
     default_direction = None if is_carte else settings.DEFAULT_ACTION_DIRECTION
@@ -26,16 +35,6 @@ class LazyEncoder(DjangoJSONEncoder):
         if isinstance(obj, Promise):
             return force_str(obj)
         return super(LazyEncoder, self).default(obj)
-
-
-SQL_CREATE_EXTENSIONS = """
-                CREATE EXTENSION IF NOT EXISTS postgis;
-                CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
-                CREATE EXTENSION IF NOT EXISTS unaccent;
-                CREATE EXTENSION IF NOT EXISTS pg_trgm;
-                CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-                CREATE EXTENSION IF NOT EXISTS postgres_fdw;
-                """
 
 
 def _create_schema_public_in_db(
@@ -94,8 +93,8 @@ def create_schema_webapp_public_in_warehouse_db():
 
     return _create_schema_public_in_db(
         current_db_connection_name="warehouse",
-        remote_server_name="webapp_server",
-        remote_schema_name="webapp_public",
+        remote_server_name=settings.REMOTE_WEBAPP_SERVERNAME,
+        remote_schema_name=settings.REMOTE_WEBAPP_SCHEMANAME,
         db_host=db_host,
         db_port=db_port,
         db_name=settings.DATABASES["default"]["NAME"],
@@ -118,8 +117,8 @@ def create_schema_warehouse_public_in_webapp_db():
 
     return _create_schema_public_in_db(
         current_db_connection_name="default",
-        remote_server_name="warehouse_server",
-        remote_schema_name="warehouse_public",
+        remote_server_name=settings.REMOTE_WAREHOUSE_SERVERNAME,
+        remote_schema_name=settings.REMOTE_WAREHOUSE_SCHEMANAME,
         db_host=db_host,
         db_port=db_port,
         db_name=settings.DATABASES["warehouse"]["NAME"],
