@@ -41,7 +41,7 @@
     "@hotwired/stimulus": "^3.2.2",
     "@hotwired/turbo": "^8.0.13",
     "@iframe-resizer/child": "^5.4.7",
-    "@iframe-resizer/parent": "^5.4.7",
+    "@iframe-resizer/parent": "^5.5.1",
     "bowser": "^2.11.0",
     "eslint-config-prettier": "^10.1.8",
     "leaflet": "^1.9.4",
@@ -56,7 +56,7 @@
     "@playwright/test": "^1.54.1",
     "@testing-library/jest-dom": "^6.6.4",
     "@types/jest": "^30.0.0",
-    "@types/leaflet": "^1.9.18",
+    "@types/leaflet": "^1.9.20",
     "@types/lodash": "^4.17.20",
     "@types/node": "^24.1.0",
     "@typescript-eslint/eslint-plugin": "^8.38.0",
@@ -77,7 +77,7 @@
     "tailwindcss-animate": "^1.0.7",
     "ts-jest": "^29.4.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.3",
+    "typescript": "^5.9.2",
     "typescript-eslint": "^8.38.0"
   },
   "optionalDependencies": {

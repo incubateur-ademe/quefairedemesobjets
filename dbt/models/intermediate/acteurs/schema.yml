@@ -66,6 +66,8 @@ models:
         description: "L'exclusivité de la réparation de l'acteur"
       - name: uniquement_sur_rdv
         description: "Le fait que l'acteur soit uniquement sur RDV"
+      - name: consignes_dacces
+        description: "Les consignes d'accès de l'acteur"
       - name: action_principale_id
         description: "L'action principale de l'acteur"
       - name: modifie_le

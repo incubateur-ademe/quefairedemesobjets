@@ -98,6 +98,9 @@ models:
       - name: uniquement_sur_rdv
         description: "Le fait que l'acteur soit uniquement sur RDV"
         data_type: boolean
+      - name: consignes_dacces
+        description: "Les consignes d'accès de l'acteur"
+        data_type: text
       - name: action_principale_id
         description: "L'action principale de l'acteur"
         data_type: integer

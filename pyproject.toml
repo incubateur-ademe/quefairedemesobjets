@@ -138,7 +138,7 @@ sphinxcontrib-mermaid = "^1.0.0"
 
 
 [tool.poetry.group.airflow.dependencies]
-apache-airflow-providers-postgres = "^6.2.1"
+apache-airflow-providers-postgres = "^6.2.2"
 fuzzywuzzy = "^0.18.0"
 pyproj = "^3.7.0"
 python-decouple = "^3.8"
@@ -148,7 +148,7 @@ unidecode = "^1.4.0"
 scikit-learn = "1.7.1"
 apache-airflow = "^2.10.4"
 pandas = "<2.2"
-dbt-core = "^1.10.4"
+dbt-core = "^1.10.6"
 dbt-postgres = "^1.9.0"
 
 [build-system]
