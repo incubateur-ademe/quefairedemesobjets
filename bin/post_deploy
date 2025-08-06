@@ -4,3 +4,4 @@ python manage.py createcachetable
 python manage.py migrate
 python manage.py clearsessions
 python manage.py clear_cache --all
+python manage.py setup_dbt_schemas
