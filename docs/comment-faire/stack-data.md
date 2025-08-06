@@ -11,7 +11,7 @@ En vrac (non exhaustif):
 
 La base de données nécessite certaines tables en base avant de pouvoir fonctionner avec `dbt` :
 
-- `poetry run python manage.py setup_dbt_schemas`
+- `poetry run python manage.py create_remote_db_server`
 
 ## Ingestion de sources
 
