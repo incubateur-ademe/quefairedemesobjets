@@ -177,6 +177,8 @@ jobs:
         run: |
           make createcachetable
           make migrate
+        env:
+          PYTEST_CURRENT_TEST: "ongoing"
 
       - name: Populate database
         run: |
