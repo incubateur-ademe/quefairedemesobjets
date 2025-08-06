@@ -9,19 +9,16 @@ resource "scaleway_container" "airflow_webserver" {
   min_scale      = var.airflow_webserver_min_scale
   max_scale      = var.airflow_webserver_max_scale
   timeout        = var.airflow_webserver_timeout
-  privacy        = "private"
+  privacy        = "public"
   protocol       = "http1"
 
   health_check {
     http {
       path = "/health"
     }
-    failure_threshold = 3
-    interval          = "5s"
+    failure_threshold = 5
+    interval          = "30s"
   }
-
-  command = ["webserver"]
-  args    = ["--port", "8080"]
 
   environment_variables = {
     _AIRFLOW_DB_MIGRATE                        = "true"

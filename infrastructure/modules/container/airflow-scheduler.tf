@@ -9,18 +9,16 @@ resource "scaleway_container" "airflow_scheduler" {
   min_scale      = var.airflow_scheduler_min_scale
   max_scale      = var.airflow_scheduler_max_scale
   timeout        = var.airflow_scheduler_timeout
-  privacy        = "private"
+  privacy        = "public"
   protocol       = "http1"
 
   health_check {
     http {
       path = "/health"
     }
-    failure_threshold = 3
-    interval          = "5s"
+    failure_threshold = 5
+    interval          = "30s"
   }
-
-  command = ["scheduler"]
 
   environment_variables = {
     AIRFLOW__API__AUTH_BACKENDS                  = "airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session"
