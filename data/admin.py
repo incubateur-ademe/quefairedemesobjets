@@ -3,11 +3,7 @@ import logging
 from django.contrib import admin, messages
 from django.utils.html import format_html
 
-from core.admin import (
-    NotEditableMixin,
-    NotSelfDeletableMixin,
-    QuerysetFilterAdmin,
-)
+from core.admin import NotEditableMixin, NotSelfDeletableMixin, QuerysetFilterAdmin
 from data.models.suggestion import Suggestion, SuggestionCohorte, SuggestionStatut
 
 NB_SUGGESTIONS_DISPLAYED_WHEN_DELETING = 100
@@ -35,6 +31,12 @@ class SuggestionCohorteAdmin(NotEditableMixin, admin.ModelAdmin):
         "__str__",
         "statut",
         "metadonnees",
+    ]
+
+    search_fields = ["metadata", "identifiant_action", "identifiant_execution"]
+    list_filter = [
+        ("statut", admin.ChoicesFieldListFilter),
+        ("type_action", admin.ChoicesFieldListFilter),
     ]
 
     def metadonnees(self, obj):
@@ -115,7 +117,7 @@ class SuggestionAdmin(NotSelfDeletableMixin, QuerysetFilterAdmin):
         def field_choices(self, field, request, model_admin):
             return field.get_choices(include_blank=False, ordering=("-cree_le",))
 
-    search_fields = ["contexte", "suggestion"]
+    search_fields = ["contexte", "suggestion", "metadata"]
     list_display = [
         "id",
         "cohorte",
