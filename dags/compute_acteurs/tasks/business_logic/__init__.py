@@ -1,9 +1,0 @@
-from .compute_acteur import *  # noqa
-from .compute_acteur_services import *  # noqa
-from .compute_labels import *  # noqa
-from .compute_ps import *  # noqa
-from .db_data_write import *  # noqa
-from .deduplicate_acteur_services import *  # noqa
-from .deduplicate_acteur_sources import *  # noqa
-from .deduplicate_labels import *  # noqa
-from .deduplicate_propositionservices import *  # noqa
