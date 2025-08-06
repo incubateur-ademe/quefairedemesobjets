@@ -57,9 +57,9 @@ jobs:
       postgres:
         image: postgis/postgis:15-3.3-alpine
         env:
-          POSTGRES_USER: qfdmo
-          POSTGRES_PASSWORD: qfdmo # pragma: allowlist secret
-          POSTGRES_DB: qfdmo
+          POSTGRES_USER: webapp
+          POSTGRES_PASSWORD: webapp # pragma: allowlist secret
+          POSTGRES_DB: webapp
         options: >-
           --health-cmd pg_isready
           --health-interval 1s
@@ -125,9 +125,9 @@ jobs:
       postgres:
         image: postgis/postgis:15-3.3-alpine
         env:
-          POSTGRES_USER: qfdmo
-          POSTGRES_PASSWORD: qfdmo # pragma: allowlist secret
-          POSTGRES_DB: qfdmo
+          POSTGRES_USER: webapp
+          POSTGRES_PASSWORD: webapp # pragma: allowlist secret
+          POSTGRES_DB: webapp
         options: >-
           --health-cmd pg_isready
           --health-interval 1s
@@ -141,6 +141,7 @@ jobs:
       - name: Prepare environment
         run: |
           cp .env.template .env
+          sed -i 's/[[:space:]]*#.*//g' .env
           echo LVAO_BASE_URL=http://localhost:8000 >> .env
           echo ASSISTANT_BASE_URL=http://127.0.0.1:8000 >> .env
           echo ASSISTANT_HOSTS=127.0.0.1:8000 >> .env

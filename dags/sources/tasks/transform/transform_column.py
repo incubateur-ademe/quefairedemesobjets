@@ -6,9 +6,8 @@ import pandas as pd
 from opening_hours import OpeningHours, ParserError
 from sources.config import shared_constants as constants
 from sources.tasks.airflow_logic.config_management import DAGConfig
+from sources.tasks.transform.formatter import format_libelle_to_code
 from sources.tasks.transform.opening_hours import interprete_opening_hours
-
-from utils.formatter import format_libelle_to_code
 
 logger = logging.getLogger(__name__)
 

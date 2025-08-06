@@ -15,6 +15,7 @@ from data.models.changes import (
     ChangeActeurUpdateParentId,
 )
 from qfdmo.models import RevisionActeur
+from qfdmo.models.acteur import ActeurStatus
 from unit_tests.qfdmo.acteur_factory import ActeurFactory, RevisionActeurFactory
 
 
@@ -23,12 +24,39 @@ class TestChangeActeurDeleteAsParent:
     def test_model_name(self):
         assert ChangeActeurDeleteAsParent.name() == "acteur_delete_as_parent"
 
-    def test_raise_if_present(self):
+    def test_raise_if_present_with_actif_children(self):
         # We expect acteur management to automatically delete parent for us
-        RevisionActeurFactory(identifiant_unique="p1")
+        p1 = RevisionActeurFactory(identifiant_unique="p1")
+        RevisionActeurFactory(identifiant_unique="e1", parent=p1)
+        RevisionActeurFactory(
+            identifiant_unique="e2", parent=p1, statut=ActeurStatus.INACTIF
+        )
+        RevisionActeurFactory(
+            identifiant_unique="e3", parent=p1, statut=ActeurStatus.SUPPRIME
+        )
         change = ChangeActeurDeleteAsParent(id="p1")
         with pytest.raises(ValueError, match="Parent 'p1' should already be deleted"):
             change.apply()  # calling apply to ensure it calls validate
+
+    def test_deleted_if_present_with_children(self):
+        # We expect acteur management to automatically delete parent for us
+        p1 = RevisionActeurFactory(identifiant_unique="p1")
+        e2 = RevisionActeurFactory(
+            identifiant_unique="e2", parent=p1, statut=ActeurStatus.INACTIF
+        )
+        e3 = RevisionActeurFactory(
+            identifiant_unique="e3", parent=p1, statut=ActeurStatus.SUPPRIME
+        )
+        change = ChangeActeurDeleteAsParent(id="p1")
+        change.apply()
+
+        p1 = RevisionActeur.objects.filter(pk="p1").first()
+        e2.refresh_from_db()
+        e3.refresh_from_db()
+
+        assert p1 is None
+        assert e2.parent is None
+        assert e3.parent is None
 
     def test_ensure_deletion_is_automatic(self):
         # We replay the e2e scenario of having children pointing

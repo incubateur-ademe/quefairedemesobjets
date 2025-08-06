@@ -2,7 +2,6 @@ from core.settings import *  # noqa: F403
 
 DATABASES = {
     "default": DATABASES["default"],  # noqa: F405
-    "readonly": DATABASES["readonly"],  # noqa: F405
 }
 
 CACHES = {

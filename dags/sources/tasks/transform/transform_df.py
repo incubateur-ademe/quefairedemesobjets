@@ -8,15 +8,14 @@ from fuzzywuzzy import fuzz
 from shapely import wkb
 from shapely.geometry import Point
 from sources.tasks.airflow_logic.config_management import DAGConfig
+from sources.tasks.transform.formatter import format_libelle_to_code
 from sources.tasks.transform.transform_column import (
     clean_code_postal,
     clean_number,
     clean_siren,
     clean_siret,
 )
-
 from utils import logging_utils as log
-from utils.formatter import format_libelle_to_code
 
 logger = logging.getLogger(__name__)
 
