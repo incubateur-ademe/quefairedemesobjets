@@ -56,7 +56,7 @@ resource "scaleway_rdb_database" "warehouse_database" {
 resource "scaleway_rdb_privilege" "warehouse" {
   instance_id   = scaleway_rdb_instance.warehouse.id
   user_name     = var.warehouse_db_username
-  database_name = scaleway_rdb_database.warehouse.name
+  database_name = scaleway_rdb_database.warehouse_database.name
   permission    = "all"
 }
 
