@@ -2,7 +2,7 @@ version: 2
 
 sources:
   - name: qfdmo
-    schema: foreign_qfdmo_public
+    schema: webapp_public
     tables:
       - name : qfdmo_acteur
       - name : qfdmo_acteur_acteur_services

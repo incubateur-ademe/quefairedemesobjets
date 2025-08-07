@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 from shared.tasks.business_logic import normalize
-
 from utils.django import (
     django_model_queryset_generate,
     django_model_queryset_to_df,
@@ -131,7 +130,9 @@ def cluster_acteurs_read_orphans(
             # On applique la normalisation de base à la volée
             # pour simplifier les regex
             .map(normalize.string_basic).str.contains(
-                include_only_if_regex_matches_nom, na=False, regex=True
+                normalize.string_basic(include_only_if_regex_matches_nom),
+                na=False,
+                regex=True,
             )
         ].copy()
 
