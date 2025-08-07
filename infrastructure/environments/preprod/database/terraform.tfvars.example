@@ -1,7 +1,5 @@
 project_id            = "your-project-id"
 organization_id       = "your-organization-id"
-db_username           = "qfdmo"
-db_password           = "your-secure-password"  # pragma: allowlist secret
 webapp_db_username    = "webapp"
 webapp_db_password    = "your-secure-password"  # pragma: allowlist secret
 warehouse_db_username = "warehouse"

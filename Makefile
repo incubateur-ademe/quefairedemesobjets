@@ -220,3 +220,8 @@ db-restore-for-tests:
 .PHONY: build-docs
 build-docs:
 	poetry run sphinx-build -b html -c docs docs _build
+
+.PHONY: fmt-infra
+fmt-infra:
+	tofu fmt -recursive infrastructure
+	terragrunt hcl fmt infrastructure
