@@ -4,7 +4,7 @@ with the etablissement table */
 WITH acteurs_with_siret_matched AS (
 	SELECT
 	COUNT(*) AS nombre_acteurs
-	FROM foreign_qfdmo_public.qfdmo_displayedacteur AS acteurs
+	FROM webapp_public.qfdmo_displayedacteur AS acteurs
 	JOIN {{table_name}} AS etab
 	ON etab.siret = acteurs.siret
 	WHERE acteurs.siret IS NOT NULL
