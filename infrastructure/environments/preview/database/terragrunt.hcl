@@ -7,12 +7,6 @@ include {
 }
 
 inputs = {
-  node_type   = "DB-DEV-S"
-  volume_size = 100
-  db_username = "[db_username]"
-  db_password = "[db_password]"
-  db_name     = "qfdmo"
-
   # Web app
   webapp_node_type   = "DB-DEV-S"
   webapp_db_name     = "webapp"

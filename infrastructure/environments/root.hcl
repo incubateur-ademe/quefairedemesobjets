@@ -26,7 +26,7 @@ terraform {
   backend "s3" {
     endpoint                    = "s3.fr-par.scw.cloud"
     bucket                      = "lvao-terraform-state"
-    key                         = "${basename(get_terragrunt_dir())}/terraform.tfstate"
+    key                         = "${basename(dirname(get_terragrunt_dir()))}/terraform.tfstate"
     region                      = "fr-par"
     skip_credentials_validation = true
     skip_region_validation      = true

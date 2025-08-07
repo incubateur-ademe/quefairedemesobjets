@@ -292,7 +292,7 @@ DATABASE_URL = decouple.config(
     default="postgis://qfdmo:qfdmo@localhost:6543/qfdmo",  # pragma: allowlist secret  # noqa: E501
 )
 
-default_settings = {
+DEFAULT_DATABASE_SETTINGS = {
     **dj_database_url.parse(DATABASE_URL),
     "ENGINE": "django.contrib.gis.db.backends.postgis",
     "OPTIONS": {"options": "-c search_path=public,warehouse"},
@@ -304,15 +304,20 @@ DB_WAREHOUSE = decouple.config(
     cast=str,
     default="postgis://qfdmo:qfdmo@localhost:6543/warehouse",  # pragma: allowlist secret  # noqa: E501
 )
-warehouse_settings = {
+WAREHOUSE_DATABASE_SETTINGS = {
     **dj_database_url.parse(DB_WAREHOUSE),
     "ENGINE": "django.contrib.gis.db.backends.postgis",
 }
 
 DATABASES = {
-    "default": default_settings,
-    "warehouse": warehouse_settings,
+    "default": DEFAULT_DATABASE_SETTINGS,
+    "warehouse": WAREHOUSE_DATABASE_SETTINGS,
 }
+
+REMOTE_WEBAPP_SERVERNAME = "webapp_server"
+REMOTE_WEBAPP_SCHEMANAME = "webapp_public"
+REMOTE_WAREHOUSE_SERVERNAME = "warehouse_server"
+REMOTE_WAREHOUSE_SCHEMANAME = "warehouse_public"
 
 CONN_HEALTH_CHECKS = True
 CONN_MAX_AGE = decouple.config("CONN_MAX_AGE", cast=int, default=0)
