@@ -22,7 +22,6 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from slugify import slugify
 from unidecode import unidecode
-
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)

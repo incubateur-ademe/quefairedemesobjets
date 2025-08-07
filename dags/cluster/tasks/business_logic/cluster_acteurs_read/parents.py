@@ -1,6 +1,5 @@
 import pandas as pd
 from shared.tasks.business_logic import normalize
-
 from utils.django import django_model_queryset_to_df, django_setup_full
 
 django_setup_full()
@@ -29,13 +28,22 @@ def cluster_acteurs_read_parents(
 
     # On récupère les parents des acteurs types donnés
     # qui sont censés être des acteurs sans source
-    parents = DisplayedActeur.objects.filter(
+    parents = DisplayedActeur.objects.prefetch_related("sources").filter(
         acteur_type__id__in=acteur_type_ids,
         statut=ActeurStatus.ACTIF,
-        source__id__isnull=True,
+        source_id__isnull=True,
     )
 
     df = django_model_queryset_to_df(parents, fields)
+
+    # On ajoute la liste des codes des sources pour chaque acteur
+    source_codes_by_parent_identifiant_unique = {
+        parent.identifiant_unique: tuple(parent.sources.values_list("code", flat=True))
+        for parent in parents
+    }
+    df["source_codes"] = df["identifiant_unique"].map(
+        pd.Series(source_codes_by_parent_identifiant_unique)
+    )
 
     # Si une regexp de nom est fournie, on l'applique
     # pour filtrer la df, sinon on garde toute la df
