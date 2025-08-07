@@ -59,3 +59,29 @@ variable "warehouse_volume_size" {
   description = "Taille du volume en GB de la base de données warehouse"
   type        = number
 }
+
+variable "airflow_node_type" {
+  description = "Type de nœud de la base de données airflow"
+  type        = string
+}
+
+variable "airflow_db_name" {
+  description = "Nom de la base de données airflow"
+  type        = string
+}
+
+variable "airflow_db_username" {
+  description = "Nom d'utilisateur de la base de données airflow"
+  type        = string
+}
+
+variable "airflow_db_password" {
+  description = "Mot de passe de la base de données airflow"
+  type        = string
+  sensitive   = true
+}
+
+variable "airflow_volume_size" {
+  description = "Taille du volume en GB de la base de données airflow"
+  type        = number
+}

@@ -32,6 +32,8 @@ jobs:
       - uses: astral-sh/ruff-action@0c50076f12c38c3d0115b7b519b54a91cb9cf0ad # v3.5.0
       - name: Run Tofu format check
         run: tofu fmt -recursive -check infrastructure
+      - name: Run Terragrunt format check
+        run: terragrunt hcl fmt -check infrastructure
 
   frontend_linter:
     name: 📝 Frontend Linter
