@@ -1,14 +1,11 @@
 # Inspiration:
 # - https://docs.github.com/en/actions/guides/publishing-docker-images#publishing-images-to-github-packages
-name: Create and publish a Docker image
+name: 🐳 Docker images for Airflow
 on:
   # See https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#webhook-payload-object-38
   release:
     types: [ released, prereleased ]
   push:
-    branches:
-      - main
-  pull_request:
     branches:
       - main
 env:
@@ -47,6 +44,8 @@ jobs:
         with:
           context: .
           push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           tags: ${{ steps.airflow_scheduler_meta.outputs.tags }}
           labels: ${{ steps.airflow_scheduler_meta.outputs.labels }}
           file: airflow-scheduler.Dockerfile
@@ -62,6 +61,8 @@ jobs:
         with:
           context: .
           push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           tags: ${{ steps.airflow_webserver_meta.outputs.tags }}
           labels: ${{ steps.airflow_webserver_meta.outputs.labels }}
           file: airflow-webserver.Dockerfile
@@ -87,6 +88,8 @@ jobs:
         with:
           context: .
           push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           tags: ${{ steps.airflow_scheduler_meta_scaleway.outputs.tags }}
           labels: ${{ steps.airflow_scheduler_meta_scaleway.outputs.labels }}
           file: airflow-scheduler.Dockerfile
@@ -102,6 +105,8 @@ jobs:
         with:
           context: .
           push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           tags: ${{ steps.airflow_webserver_meta_scaleway.outputs.tags }}
           labels: ${{ steps.airflow_webserver_meta_scaleway.outputs.labels }}
           file: airflow-webserver.Dockerfile
