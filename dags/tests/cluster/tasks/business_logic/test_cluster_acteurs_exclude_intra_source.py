@@ -2,6 +2,7 @@ import pandas as pd
 import pytest
 from cluster.tasks.business_logic.misc.cluster_exclude_intra_source import (
     cluster_exclude_intra_source,
+    split_cluster_intra_source,
 )
 
 ID = "identifiant_unique"
@@ -86,3 +87,45 @@ class TestClusterActeursExcludeIntraSource:
         )
         with pytest.raises(ValueError, match="Fonction à utiliser sur 1 seul cluster"):
             cluster_exclude_intra_source(df)
+
+
+class TestClusterSplitClusterintraSource:
+
+    @pytest.fixture
+    def cluster_potential(self):
+        rows = pd.DataFrame(
+            {
+                "id": ["a1", "a2", "a3", "a4", "a5", "a6", "a7"],
+                "source_codes": [
+                    ["s1"],
+                    ["s2"],
+                    ["s1", "s3"],
+                    ["s4"],
+                    ["s3"],
+                    ["s2"],
+                    ["s3"],
+                ],
+                "nom": ["décheterie du village" for _ in range(7)],
+            }
+        )
+        return ("ctype", ["keys1", "keys2"], rows)
+
+    def test_split_cluster_intra_source(self, cluster_potential):
+        cluster_potential = split_cluster_intra_source(cluster_potential)
+        assert len(cluster_potential) == 2
+
+        df_cluster_1 = cluster_potential[0][2]
+        df_cluster_2 = cluster_potential[1][2]
+
+        assert df_cluster_1["id"].tolist() == ["a3", "a2", "a4"]
+        assert df_cluster_2["id"].tolist() == ["a1", "a5", "a6"]
+
+        # ctype
+        assert cluster_potential[0][0] == "ctype"
+        assert cluster_potential[1][0] == "ctype"
+        # keys
+        assert cluster_potential[0][1] == ["keys1", "keys2"]
+        assert cluster_potential[1][1] == ["keys1", "keys2", "1"]
+        # rows
+        assert df_cluster_1["id"].tolist() == ["a3", "a2", "a4"]
+        assert df_cluster_2["id"].tolist() == ["a1", "a5", "a6"]

@@ -1,6 +1,5 @@
 import pandas as pd
 from cluster.config.constants import COL_PARENT_DATA_NEW
-
 from utils.django import django_setup_full
 
 django_setup_full()
@@ -32,9 +31,19 @@ def df_sort(
     ]
     sort_rows = [x for x in sort_rows if x in df.columns]
     sort_rows += [
-        x for x in df.columns if x not in cluster_fields_exact and x not in sort_rows
+        x
+        for x in df.columns
+        if x not in cluster_fields_exact and x not in sort_rows
+        # remove column of type list because they aren't sortable
+        and not df[x].apply(lambda y: isinstance(y, list)).any()
     ]
-    df = df.sort_values(by=sort_rows)[sort_rows]
+    # keep column of type list in the df after sorting
+    list_rows = [
+        x
+        for x in df.columns
+        if x not in sort_rows and df[x].apply(lambda y: isinstance(y, list)).any()
+    ]
+    df = df.sort_values(by=sort_rows)[sort_rows + list_rows]
 
     # SORTING COLUMNS: by what makes sense for debugging
     sort_cols = [

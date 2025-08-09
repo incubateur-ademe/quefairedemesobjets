@@ -62,9 +62,9 @@ def cluster_acteurs_read_for_clustering(
     logger.info(f"# orphelins récupérées: {len(df_orphans)}")
     if df_orphans.empty:
         return df_orphans
-    log.preview("# acteurs par source_id", df_orphans.groupby("source_id").size())
+    log.preview("# acteurs par source_code", df_orphans.groupby("source_code").size())
     log.preview(
-        "# acteurs par acteur_type_id", df_orphans.groupby("acteur_type_id").size()
+        "# acteurs par acteur_type_code", df_orphans.groupby("acteur_type_code").size()
     )
     log.preview_df_as_markdown("acteurs sélectionnés", df_orphans)
     df_orphans = df_sort(df_orphans)

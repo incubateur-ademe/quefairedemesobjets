@@ -97,6 +97,7 @@ class TestClusterActeursSelectionActeurTypeParents:
                 "statut",
                 "latitude",
                 "nom",
+                "source_codes",
             ]
         )
 

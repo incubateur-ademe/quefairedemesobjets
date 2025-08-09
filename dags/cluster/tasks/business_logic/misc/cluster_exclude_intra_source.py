@@ -1,4 +1,55 @@
 import pandas as pd
+from utils import logging_utils as log
+
+
+def split_clusters_infra_source(
+    clusters_potential: list[tuple[str, list[str], pd.DataFrame]],
+):
+    result = []
+    for ctype, keys, rows in clusters_potential:
+        result = result + split_cluster_intra_source((ctype, keys, rows))
+    return result
+
+
+def split_cluster_intra_source(
+    cluster_potential: tuple[str, list[str], pd.DataFrame],
+    index_to_add: int = 0,
+) -> list[tuple[str, list[str], pd.DataFrame]]:
+    (ctype, keys, rows) = cluster_potential
+    print("start")
+
+    # Ordonner rows pour commencer par ceux qui on le plus de source_codes
+    rows["nb_sources"] = rows["source_codes"].apply(len)
+    rows = rows.sort_values(by="nb_sources", ascending=False)
+
+    source_codes = set()
+    current_rows = pd.DataFrame()
+    new_rows = pd.DataFrame()
+
+    for row in rows.to_dict(orient="records"):
+        # intersection between source_codes and row["source_codes"]
+        if source_codes.intersection(set(row["source_codes"])):
+            new_rows = pd.concat([new_rows, pd.DataFrame([row])], ignore_index=True)
+        else:
+            source_codes = source_codes.union(set(row["source_codes"]))
+            current_rows = pd.concat(
+                [current_rows, pd.DataFrame([row])], ignore_index=True
+            )
+
+    if len(new_rows) < 2:
+        if len(new_rows) == 1:
+            log.preview_df_as_markdown("❌ Acteurs intra-source exclus", new_rows)
+            # FIXME : ajout de message, le news_rows de 1 est ignoré
+            pass
+        if index_to_add:
+            print("index_to_add", index_to_add)
+            keys.append(str(index_to_add))
+        return [(ctype, keys, current_rows)]
+    else:
+        copy_keys = keys.copy()
+        return [(ctype, keys, current_rows)] + split_cluster_intra_source(
+            (ctype, copy_keys, new_rows), index_to_add + 1
+        )
 
 
 def cluster_exclude_intra_source(
