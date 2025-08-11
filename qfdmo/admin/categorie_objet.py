@@ -3,6 +3,7 @@ from django.http.request import HttpRequest
 from import_export import admin as import_export_admin
 from import_export import fields, resources, widgets
 
+from core.admin import CodeLibelleModelMixin
 from qfdmo.models import CategorieObjet, Objet, SousCategorieObjet
 
 
@@ -20,16 +21,18 @@ class SousCategorieInline(admin.TabularInline):
         return False
 
 
-class CategorieAdmin(admin.ModelAdmin):
-    search_fields = ["libelle", "code"]
+class CategorieAdmin(CodeLibelleModelMixin, admin.ModelAdmin):
     inlines = [SousCategorieInline]
 
 
-class SousCategorieAdmin(admin.ModelAdmin):
-    list_display = ("libelle", "categorie", "code")
+class SousCategorieAdmin(CodeLibelleModelMixin, admin.ModelAdmin):
+    list_display = CodeLibelleModelMixin.list_display + ("categorie",)
     list_filter = ["afficher_carte"]
     autocomplete_fields = ("qfdmd_produits",)
-    search_fields = ["categorie__libelle", "categorie__code", "code", "libelle"]
+    search_fields = CodeLibelleModelMixin.search_fields + [
+        "categorie__libelle",
+        "categorie__code",
+    ]
 
 
 class ObjetResource(resources.ModelResource):
@@ -54,11 +57,9 @@ class ObjetResource(resources.ModelResource):
         )
 
 
-class ObjetAdmin(import_export_admin.ImportExportModelAdmin):
-    list_display = ("libelle", "sous_categorie")
-    search_fields = [
-        "code",
-        "libelle",
+class ObjetAdmin(CodeLibelleModelMixin, import_export_admin.ImportExportModelAdmin):
+    list_display = CodeLibelleModelMixin.list_display + ("sous_categorie",)
+    search_fields = CodeLibelleModelMixin.search_fields + [
         "sous_categorie__libelle",
         "sous_categorie__code",
         "sous_categorie__categorie__libelle",
