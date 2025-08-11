@@ -1,6 +1,6 @@
 # Builder python
 # --- --- --- ---
-FROM apache/airflow:2.10.4 AS python-builder
+FROM apache/airflow:2.11.0 AS python-builder
 
 # system dependencies
 USER root
@@ -21,7 +21,7 @@ RUN poetry sync --with airflow
 
 # Runtime
 # --- --- --- ---
-FROM apache/airflow:2.10.4 AS scheduler
+FROM apache/airflow:2.11.0 AS scheduler
 
 USER root
 
