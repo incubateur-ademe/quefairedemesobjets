@@ -24,6 +24,10 @@
         {% include "qfdmo/acteur/tabs/sections/description.html" %}
     {% endif %}
 
+    {% if object.consignes_dacces %}
+        {% include "qfdmo/acteur/tabs/sections/consignes_dacces.html" %}
+    {% endif %}
+
     {% if object.sorted_acteur_services_libelles %}
         {% include "qfdmo/acteur/tabs/sections/services_disponibles.html" %}
     {% endif %}
