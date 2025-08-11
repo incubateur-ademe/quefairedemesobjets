@@ -1,6 +1,5 @@
 from datetime import timedelta
 
-import pendulum
 from acteurs.tasks.airflow_logic.check_model_table_consistency_task import (
     check_model_table_consistency_task,
 )
@@ -10,12 +9,12 @@ from acteurs.tasks.airflow_logic.replace_acteur_table_task import (
 from airflow import DAG
 from airflow.operators.bash import BashOperator
 from shared.config.schedules import SCHEDULES
+from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
 
 default_args = {
     "owner": "airflow",
     "depends_on_past": False,
-    "start_date": pendulum.today("UTC").add(days=-1),
     "email_on_failure": False,
     "email_on_retry": False,
     "retries": 3,
@@ -29,6 +28,7 @@ dbt_test = "dbt test --resource-type model --select"
 with DAG(
     "compute_acteurs",
     default_args=default_args,
+    start_date=START_DATES.YESTERDAY,
     dag_display_name="Acteurs affichés - Rafraîchir les acteurs affichés",
     description=(
         "Ce DAG construit les tables des acteurs utilisables par l'admin"
