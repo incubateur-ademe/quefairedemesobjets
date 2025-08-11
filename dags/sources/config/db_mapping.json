@@ -1,20 +1,20 @@
 {
   "sous_categories": {
-    "articles de sport hors vélos": "materiel de sport (hors velo)",
-    "autres pmcb": "Autres PMCB",
-    "batteries & piles portables": "Batteries & piles portables",
+    "articles de sport hors vélos": "materiel_de_sport_hors_velo",
+    "autres pmcb": "autres_pmcb",
+    "batteries & piles portables": "batteries_et_piles_portables",
     "batteries de moyens de transport légers (mtl)": "batteries_de_mtl",
-    "béton": "Béton - PMCB (produits et matériaux de construction du bâtiment)",
+    "béton": "beton_pmcb_produits_et_materiaux_de_construction_du_batiment",
     "bouteilles plastique": "bouteilles_plastique",
     "cartouches": "cartouches",
     "chaussure": "chaussures",
-    "déchets dangereux de pmcb": "Déchets dangereux de PMCB (produits et matériaux de construction du bâtiment)",
-    "déchets de peintures, vernis, encres et colles": "Déchets de peintures, vernis, encres et colles - Produits chimiques",
-    "déchets de produits chimiques acides": "Déchets de produits chimiques acides",
-    "déchets de produits chimiques basiques": "Déchets de produits chimiques basiques",
-    "déchets de produits chimiques": "Déchets de produits chimiques",
-    "déchets phytosanitaires ménagers": "Déchets phytosanitaires ménagers - Produits chimiques",
-    "décoration textile": "Décoration textile - Éléments d'ameublement",
+    "déchets dangereux de pmcb": "dechets_dangereux_de_pmcb_produits_et_materiaux_de_construction_du_batiment",
+    "déchets de peintures, vernis, encres et colles": "dechets_de_peintures_vernis_encres_et_colles_produits_chimiques",
+    "déchets de produits chimiques acides": "dechets_de_produits_chimiques_acides",
+    "déchets de produits chimiques basiques": "dechets_de_produits_chimiques_basiques",
+    "déchets de produits chimiques": "dechets_de_produits_chimiques",
+    "déchets phytosanitaires ménagers": "dechets_phytosanitaires_menagers_produits_chimiques",
+    "décoration textile": "decorations_textiles_elements_d_ameublement",
     "ecrans": "ecran",
     "écrans": "ecran",
     "emballage multimatériaux": [
@@ -23,28 +23,28 @@
       "emballage_metal",
       "emballage_carton"
     ],
-    "gem froid": "gros electromenager (refrigerant)",
-    "gem hors froid": "gros electromenager (hors refrigerant)",
+    "gem froid": "gros_electromenager_refrigerant",
+    "gem hors froid": "gros_electromenager_hors_refrigerant",
     "grands cartons": "emballage_carton",
-    "huiles moteurs": "Huiles_lubrifiantes",
-    "huiles industrielles": "Huiles_lubrifiantes",
-    "huisseries": "Huisseries (produits et matériaux de construction du bâtiment)",
+    "huiles moteurs": "huiles_lubrifiantes",
+    "huiles industrielles": "huiles_lubrifiantes",
+    "huisseries": "huisseries_produits_et_materiaux_de_construction_du_batiment",
     "jeux et jouets": "jouet",
-    "laine de roche": "Laine de roche (produits et matériaux de construction du bâtiment)",
-    "laine de verre": "Laine de verre (produits et matériaux de construction du bâtiment)",
+    "laine de roche": "laine_de_roche_produits_et_materiaux_de_construction_du_batiment",
+    "laine de verre": "laine_de_verre_produits_et_materiaux_de_construction_du_batiment",
     "lampes": "luminaire",
-    "linge": "linge de maison",
-    "literie": "Literie - Éléments d'ameublement",
-    "machines et appareils motorisés thermiques": "Machines et appareils motorises thermiques",
-    "matériels de bricolage, dont l’outillage à main": "outil de bricolage et jardinage",
+    "linge": "linge_de_maison",
+    "literie": "literie_elements_d_ameublement",
+    "machines et appareils motorisés thermiques": "machines_et_appareils_motorises_thermiques",
+    "matériels de bricolage, dont l’outillage à main": "outil_de_bricolage_et_jardinage",
     "médicaments & dasri": "medicaments",
-    "mélange d’inertes": "Mélange d’inertes (produits et matériaux de construction du bâtiment)",
-    "membranes bitumineuses": "Membranes bitumineuses - PMCB (produits et matériaux de construction du bâtiment)",
+    "mélange d’inertes": "mélange_d_inertes_produits_et_materiaux_de_construction_du_batiment",
+    "membranes bitumineuses": "membranes_bitumineuses_pmcb_produits_et_materiaux_de_construction_du_batiment",
     "meubles": "meuble",
-    "outillage du peintre": "ABJ_Outillage du peintre usagé",
-    "pae (petits appareils extincteurs)": "Petits appareils extincteurs",
-    "pam (petits appareils ménagers)": "petit electromenager",
-    "panneaux photovoltaïques": "Panneaux photovoltaïques",
+    "outillage du peintre": "abj_outillage_du_peintre_usage",
+    "pae (petits appareils extincteurs)": "petits_appareils_extincteurs",
+    "pam (petits appareils ménagers)": "petit_electromenager",
+    "panneaux photovoltaïques": "panneaux_photovoltaiques",
     "papiers graphiques": "papiers_graphiques",
     "papiers graphiques et emballages papiers-carton": [
       "autres_emballages_menagers",
@@ -56,18 +56,18 @@
       "emballage_carton",
       "papiers_graphiques"
     ],
-    "petits appareils extincteurs": "Petits appareils extincteurs",
-    "plâtre": "Plâtre - PMCB (produits et matériaux de construction du bâtiment)",
-    "pmcb - bois": "Bois - PMCB (produits et matériaux de construction du bâtiment)",
-    "pmcb - métal": "Métal - PMCB (produits et matériaux de construction du bâtiment)",
-    "pmcb - plastiques": "Plastiques - PMCB (produits et matériaux de construction du bâtiment)",
-    "pneu": "Pneu",
-    "produits et matériels destinés à l’entretien et l’aménagement du jardin": "accessoire et meuble de jardin",
-    "produits pyrotechniques": "Produits pyrotechniques",
-    "rembourrés d'assise ou de couchage": "Rembourrés d'assise ou de couchage - Éléments d'ameublement",
-    "sièges": "Sièges - Éléments d'ameublement",
-    "solvants": "Produits chimiques - Solvants",
-    "téléphones portables": "smartphone, tablette et console",
+    "petits appareils extincteurs": "petits_appareils_extincteurs",
+    "plâtre": "platre_pmcb_produits_et_materiaux_de_construction_du_batiment",
+    "pmcb - bois": "bois_pmcb_produits_et_materiaux_de_construction_du_batiment",
+    "pmcb - métal": "metal_pmcb_produits_et_materiaux_de_construction_du_batiment",
+    "pmcb - plastiques": "plastiques_pmcb_produits_et_materiaux_de_construction_du_batiment",
+    "pneu": "pneu",
+    "produits et matériels destinés à l’entretien et l’aménagement du jardin": "accessoire_et_meuble_de_jardin",
+    "produits pyrotechniques": "produits_pyrotechniques",
+    "rembourrés d'assise ou de couchage": "rembourres_d_assise_ou_de_couchage_elements_d_ameublement",
+    "sièges": "sieges_elements_d_ameublement",
+    "solvants": "produits_chimiques_solvants",
+    "téléphones portables": "smartphone_tablette_et_console",
     "vélos non électriques, trottinettes non électriques, skate-board, rollers": "velo",
     "verre": "emballage_verre",
     "vêtement": "vetement"
@@ -76,163 +76,199 @@
     "articles d’ameublement (meubles, chaises, fauteuils, canapés, tapis, etc)": [
       "meuble"
     ],
-    "articles de sport, cycles": ["materiel de sport (hors velo)", "velo"],
-    "bijoux, montre, horlogerie": ["bijou et montre"],
-    "chaussures, maroquinerie": ["chaussures", "maroquinerie"],
+    "articles de sport, cycles": [
+      "materiel_de_sport_hors_velo",
+      "velo"
+    ],
+    "bijoux, montre, horlogerie": [
+      "bijou_et_montre"
+    ],
+    "chaussures, maroquinerie": [
+      "chaussures",
+      "maroquinerie"
+    ],
     "electroménager": [
-      "gros electromenager (hors refrigerant)",
-      "petit electromenager"
+      "gros_electromenager_hors_refrigerant",
+      "petit_electromenager"
     ],
     "equipements du jardin et de bricolage (tondeuses, taille haies, perceuses, etc)": [
-      "outil de bricolage et jardinage",
-      "Machines et appareils motorises thermiques"
+      "outil_de_bricolage_et_jardinage",
+      "machines_et_appareils_motorises_thermiques"
     ],
-    "instruments de musique": ["instrument de musique"],
-    "multimédia : image et son (télés, hifi, etc)": ["ecran", "materiel hifi et video"],
+    "instruments de musique": [
+      "instrument_de_musique"
+    ],
+    "multimédia : image et son (télés, hifi, etc)": [
+      "ecran",
+      "materiel_hifi_et_video"
+    ],
     "ordinateurs fixes, portables, tablettes, objets connectés": [
-      "materiel informatique"
+      "materiel_informatique"
     ],
-    "téléphones, smartphones": ["smartphone, tablette et console"],
-    "vêtements, textiles": ["vetement", "linge de maison"],
+    "téléphones, smartphones": [
+      "smartphone_tablette_et_console"
+    ],
+    "téléphones": [
+      "smartphone_tablette_et_console"
+    ],
+    "smartphones": [
+      "smartphone_tablette_et_console"
+    ],
+    "vêtements, textiles": [
+      "vetement",
+      "linge_de_maison"
+    ],
     "autres": []
   },
   "sous_categories_qualirepar": {
     "tv": "ecran",
     "ei & t (equipements informatiques et de télécommunications)": [
-      "smartphone, tablette et console",
-      "materiel informatique"
+      "smartphone_tablette_et_console",
+      "materiel_informatique"
     ],
-    "appareil photo avec optique séparée (hors fixed-lens)": "materiel photo et cinema",
+    "appareil photo avec optique séparée (hors fixed-lens)": "materiel_photo_et_cinema",
     "gem (gros electroménager) - appareils avec circuits de fluides frigorigènes": [
-      "gros electromenager (refrigerant)"
+      "gros_electromenager_refrigerant"
     ],
     "gem (gros electroménager) - hors appareils avec circuits de fluides frigorigènes": [
-      "gros electromenager (hors refrigerant)"
+      "gros_electromenager_hors_refrigerant"
     ],
-    "cycle": ["velo"],
+    "cycle": [
+      "velo"
+    ],
     "jels (jouets, équipements de loisirs et de sport) - mobilité": [
-      "JELS_Mobilite_electrique"
+      "jels_mobilite_electrique"
     ],
-    "pem (petit electroménager) - hors fluides frigorigènes": ["petit electromenager"],
-    "gros outillage électrique": ["ABJ_electrique"],
-    "petit outillage électrique": ["ABJ_electrique"],
+    "pem (petit electroménager) - hors fluides frigorigènes": [
+      "petit_electromenager"
+    ],
+    "gros outillage électrique": [
+      "abj_electrique"
+    ],
+    "petit outillage électrique": [
+      "abj_electrique"
+    ],
     "tout egp (equipements grand public) - hors tv et optique non intégrée et jels": [
-      "gros electromenager (refrigerant)",
-      "gros electromenager (hors refrigerant)",
-      "petit electromenager",
-      "smartphone, tablette et console",
-      "autre equipement electronique",
+      "gros_electromenager_refrigerant",
+      "gros_electromenager_hors_refrigerant",
+      "petit_electromenager",
+      "smartphone_tablette_et_console",
+      "autre_equipement_electronique",
       "luminaire",
       "velo",
-      "materiel hifi et video"
+      "materiel_hifi_et_video"
     ],
     "tout egp (equipements grand public) - hors tv et optique non intégrée et jels (jouets, équipements de loisirs et de sport) - hors mobilité": [
-      "gros electromenager (refrigerant)",
-      "gros electromenager (hors refrigerant)",
-      "petit electromenager",
-      "smartphone, tablette et console",
-      "autre equipement electronique",
+      "gros_electromenager_refrigerant",
+      "gros_electromenager_hors_refrigerant",
+      "petit_electromenager",
+      "smartphone_tablette_et_console",
+      "autre_equipement_electronique",
       "luminaire",
-      "materiel hifi et video"
+      "materiel_hifi_et_video"
     ]
   },
   "sous_categories_3eee": {
-    "appareil photo avec optique séparée (hors fixed-lens)": "materiel photo et cinema",
-    "articles de sport hors vélos": "materiel de sport (hors velo)",
-    "autres pmcb": "Autres PMCB",
-    "batteries & piles portables": "Batteries & piles portables",
-    "béton": "Béton - PMCB (produits et matériaux de construction du bâtiment)",
+    "appareil photo avec optique séparée (hors fixed-lens)": "materiel_photo_et_cinema",
+    "articles de sport hors vélos": "materiel_de_sport_hors_velo",
+    "autres pmcb": "autres_pmcb",
+    "batteries & piles portables": "batteries_et_piles_portables",
+    "béton": "beton_pmcb_produits_et_materiaux_de_construction_du_batiment",
     "cartouches": "cartouches",
     "chaussure": "chaussures",
-    "cycles (eee)": "JELS_Mobilite_electrique",
-    "déchets dangereux de pmcb": "Déchets dangereux de PMCB (produits et matériaux de construction du bâtiment)",
-    "déchets de peintures, vernis, encres et colles": "Déchets de peintures, vernis, encres et colles - Produits chimiques",
-    "déchets de produits chimiques": "Déchets de produits chimiques",
-    "déchets de produits chimiques acides": "Déchets de produits chimiques acides",
-    "déchets de produits chimiques basiques": "Déchets de produits chimiques basiques",
-    "déchets phytosanitaires ménagers": "Déchets phytosanitaires ménagers - Produits chimiques",
-    "décoration textile": "Décoration textile - Éléments d'ameublement",
+    "cycles (eee)": "jels_mobilite_electrique",
+    "déchets dangereux de pmcb": "dechets_dangereux_de_pmcb_produits_et_materiaux_de_construction_du_batiment",
+    "déchets de peintures, vernis, encres et colles": "dechets_de_peintures_vernis_encres_et_colles_produits_chimiques",
+    "déchets de produits chimiques": "dechets_de_produits_chimiques",
+    "déchets de produits chimiques acides": "dechets_de_produits_chimiques_acides",
+    "déchets de produits chimiques basiques": "dechets_de_produits_chimiques_basiques",
+    "déchets phytosanitaires ménagers": "dechets_phytosanitaires_menagers_produits_chimiques",
+    "décoration textile": "decorations_textiles_elements_d_ameublement",
     "ecrans": "ecran",
-    "ei & t": ["materiel informatique", "smartphone, tablette et console", "ecran"],
-    "equipements informatiques": "materiel informatique",
-    "gem - appareils avec circuits de fluides frigorigènes": "gros electromenager (refrigerant)",
-    "gem - hors appareils avec circuits de fluides frigorigènes": [
-      "gros electromenager (hors refrigerant)",
-      "ABJ_electrique",
-      "JELS_Mobilite_electrique",
-      "materiel informatique"
+    "ei & t": [
+      "materiel_informatique",
+      "smartphone_tablette_et_console",
+      "ecran"
     ],
-    "gem froid": "gros electromenager (refrigerant)",
+    "equipements informatiques": "materiel_informatique",
+    "gem - appareils avec circuits de fluides frigorigènes": "gros_electromenager_refrigerant",
+    "gem - hors appareils avec circuits de fluides frigorigènes": [
+      "gros_electromenager_hors_refrigerant",
+      "abj_electrique",
+      "jels_mobilite_electrique",
+      "materiel_informatique"
+    ],
+    "gem froid": "gros_electromenager_refrigerant",
     "gem hors froid": [
-      "gros electromenager (hors refrigerant)",
-      "ABJ_electrique",
-      "JELS_Mobilite_electrique",
-      "materiel informatique"
+      "gros_electromenager_hors_refrigerant",
+      "abj_electrique",
+      "jels_mobilite_electrique",
+      "materiel_informatique"
     ],
     "gep froid": [],
     "gep hors froid": [],
-    "gros outillage électrique": "ABJ_electrique",
-    "huisseries": "Huisseries (produits et matériaux de construction du bâtiment)",
+    "gros outillage électrique": "abj_electrique",
+    "huisseries": "huisseries_produits_et_materiaux_de_construction_du_batiment",
     "jeux et jouets": "jouet",
-    "jouets et équipements de loisirs et de sport (jels) – mobilité": "JELS_Mobilite_electrique",
-    "laine de roche": "Laine de roche (produits et matériaux de construction du bâtiment)",
-    "laine de verre": "Laine de verre (produits et matériaux de construction du bâtiment)",
+    "jouets et équipements de loisirs et de sport (jels) – mobilité": "jels_mobilite_electrique",
+    "laine de roche": "laine_de_roche_produits_et_materiaux_de_construction_du_batiment",
+    "laine de verre": "laine_de_verre_produits_et_materiaux_de_construction_du_batiment",
     "lampes": "ampoule",
-    "linge": "linge de maison",
-    "literie": "Literie - Éléments d'ameublement",
-    "machines et appareils motorisés thermiques": "Machines et appareils motorises thermiques",
-    "matériels de bricolage, dont l’outillage à main": "outil de bricolage et jardinage",
-    "membranes bitumineuses": "Membranes bitumineuses - PMCB (produits et matériaux de construction du bâtiment)",
+    "linge": "linge_de_maison",
+    "literie": "literie_elements_d_ameublement",
+    "machines et appareils motorisés thermiques": "machines_et_appareils_motorises_thermiques",
+    "matériels de bricolage, dont l’outillage à main": "outil_de_bricolage_et_jardinage",
+    "membranes bitumineuses": "membranes_bitumineuses_pmcb_produits_et_materiaux_de_construction_du_batiment",
     "meubles": "meuble",
-    "mélange d’inertes": "Mélange d’inertes (produits et matériaux de construction du bâtiment)",
-    "outillage du peintre": "ABJ_Outillage du peintre usagé",
-    "pae (petits appareils extincteurs)": "Petits appareils extincteurs",
+    "mélange d’inertes": "mélange_d_inertes_produits_et_materiaux_de_construction_du_batiment",
+    "outillage du peintre": "abj_outillage_du_peintre_usage",
+    "pae (petits appareils extincteurs)": "petits_appareils_extincteurs",
     "pam (petits appareils en mélange)": [
-      "petit electromenager",
-      "materiel hifi et video",
-      "materiel photo et cinema",
-      "autre equipement electronique",
+      "petit_electromenager",
+      "materiel_hifi_et_video",
+      "materiel_photo_et_cinema",
+      "autre_equipement_electronique",
       "luminaire"
     ],
     "pam (petits appareils ménagers)": [
-      "petit electromenager",
-      "materiel hifi et video",
-      "materiel photo et cinema",
-      "autre equipement electronique",
+      "petit_electromenager",
+      "materiel_hifi_et_video",
+      "materiel_photo_et_cinema",
+      "autre_equipement_electronique",
       "luminaire"
     ],
-    "panneaux photovoltaïques": "Panneaux photovoltaïques",
+    "panneaux photovoltaïques": "panneaux_photovoltaiques",
     "pem": [
-      "petit electromenager",
-      "materiel hifi et video",
-      "materiel photo et cinema",
-      "autre equipement electronique",
+      "petit_electromenager",
+      "materiel_hifi_et_video",
+      "materiel_photo_et_cinema",
+      "autre_equipement_electronique",
       "luminaire"
     ],
     "pep (petits équipements professionnels)": [],
-    "petit outillage électrique": "ABJ_electrique",
-    "plâtre": "Plâtre - PMCB (produits et matériaux de construction du bâtiment)",
-    "pmcb - bois": "Bois - PMCB (produits et matériaux de construction du bâtiment)",
-    "pmcb - métal": "Métal - PMCB (produits et matériaux de construction du bâtiment)",
-    "pmcb - plastiques": "Plastiques - PMCB (produits et matériaux de construction du bâtiment)",
-    "pneu": "Pneu",
-    "produits et matériels destinés à l’entretien et l’aménagement du jardin": "accessoire et meuble de jardin",
-    "produits pyrotechniques": "Produits pyrotechniques",
-    "rembourrés d'assise ou de couchage": "Rembourrés d'assise ou de couchage - Éléments d'ameublement",
-    "sièges": "Sièges - Éléments d'ameublement",
-    "solvants": "Produits chimiques - Solvants",
+    "petit outillage électrique": "abj_electrique",
+    "plâtre": "platre_pmcb_produits_et_materiaux_de_construction_du_batiment",
+    "pmcb - bois": "bois_pmcb_produits_et_materiaux_de_construction_du_batiment",
+    "pmcb - métal": "metal_pmcb_produits_et_materiaux_de_construction_du_batiment",
+    "pmcb - plastiques": "plastiques_pmcb_produits_et_materiaux_de_construction_du_batiment",
+    "pneu": "pneu",
+    "produits et matériels destinés à l’entretien et l’aménagement du jardin": "accessoire_et_meuble_de_jardin",
+    "produits pyrotechniques": "produits_pyrotechniques",
+    "rembourrés d'assise ou de couchage": "rembourres_d_assise_ou_de_couchage_elements_d_ameublement",
+    "sièges": "sieges_elements_d_ameublement",
+    "solvants": "produits_chimiques_solvants",
     "tout egp – hors tv et optique non intégrée et jels – hors mobilité": [
       "ecran",
-      "petit electromenager",
-      "materiel hifi et video",
-      "gros electromenager (hors refrigerant)",
-      "autre equipement electronique",
+      "petit_electromenager",
+      "materiel_hifi_et_video",
+      "gros_electromenager_hors_refrigerant",
+      "autre_equipement_electronique",
       "luminaire"
     ],
     "gros electromenager (refrigerant)": "instrument_musique_electrique",
-    "autre equipement electronique": "autre equipement electronique",
+    "autre equipement electronique": "autre_equipement_electronique",
     "tv": "ecran",
-    "téléphones portables": "smartphone, tablette et console",
+    "téléphones portables": "smartphone_tablette_et_console",
     "vélos non électriques, trottinettes non électriques, skate-board, rollers": "velo",
     "vêtement": "vetement",
     "écrans": "ecran"
@@ -257,41 +293,50 @@
     "[syderep] pots/barquettes pet clair (en extension)": "emballage_plastique",
     "[syderep] pots/barquettes ps (en extension)": "bouteilles_plastique",
     "[syderep] rigides multi-couches ou complexes (en extension)": "emballage_plastique",
-    "articles de bricolage et de jardin (abj)": "outil de bricolage et jardinage",
-    "articles de bricolage et de jardin (outils du peintre)": "ABJ_Outillage du peintre usagé",
-    "articles de sports et de loisirs (asl)": ["materiel de sport (hors velo)", "velo"],
-    "automobiles hors d'usage": "Vehicule",
+    "articles de bricolage et de jardin (abj)": "outil_de_bricolage_et_jardinage",
+    "articles de bricolage et de jardin (outils du peintre)": "abj_outillage_du_peintre_usage",
+    "articles de sports et de loisirs (asl)": [
+      "materiel_de_sport_hors_velo",
+      "velo"
+    ],
+    "automobiles hors d'usage": "vehicule",
     "autres batteries (y compris moyens de transport légers)": "batteries_de_mtl",
     "batteries automobiles": "batterie_de_voitures_pour_demarrage",
     "biodéchets": "biodechets",
-    "bouteilles de gaz/extincteurs": "Petits appareils extincteurs",
+    "bouteilles de gaz/extincteurs": "petits_appareils_extincteurs",
     "cartons": "emballage_carton",
-    "catalyseurs chimiques usés": "Déchets de produits chimiques",
+    "catalyseurs chimiques usés": "dechets_de_produits_chimiques",
     "compost": "biodechets",
-    "contenant d'huile de vidange": "Huiles_lubrifiantes",
-    "déchets acides": "Déchets de produits chimiques acides",
-    "déchets acides, alcalins ou salins": "Déchets de produits chimiques acides",
-    "déchets amiantés": "Déchets dangereux de PMCB (produits et matériaux de construction du bâtiment)",
-    "déchets chimiques en mélange": "Déchets de produits chimiques",
-    "déchets chimiques mélangés pour traitement": "Déchets de produits chimiques",
-    "déchets d'amiante friable": "Déchets dangereux de PMCB (produits et matériaux de construction du bâtiment)",
-    "déchets d’articles de bricolage et de jardin": "outil de bricolage et jardinage",
-    "déchets d'autres préparations chimiques": "Déchets de produits chimiques",
+    "contenant d'huile de vidange": "huiles_lubrifiantes",
+    "déchets acides": "dechets_de_produits_chimiques_acides",
+    "déchets acides, alcalins ou salins": "dechets_de_produits_chimiques_acides",
+    "déchets amiantés": "dechets_dangereux_de_pmcb_produits_et_materiaux_de_construction_du_batiment",
+    "déchets chimiques en mélange": "dechets_de_produits_chimiques",
+    "déchets chimiques mélangés pour traitement": "dechets_de_produits_chimiques",
+    "déchets d'amiante friable": "dechets_dangereux_de_pmcb_produits_et_materiaux_de_construction_du_batiment",
+    "déchets d’articles de bricolage et de jardin": "outil_de_bricolage_et_jardinage",
+    "déchets d'autres préparations chimiques": "dechets_de_produits_chimiques",
     "déchets d'élagage": "dechets_verts",
     "déchets d'emballages en bois": "autres_emballages_menagers",
-    "déchets de composés chimiques": "Déchets de produits chimiques",
+    "déchets de composés chimiques": "dechets_de_produits_chimiques",
     "déchets de la préparation des produits végétaux": "biodechets",
-    "déchets de laines de roche": "Laine de roche (produits et matériaux de construction du bâtiment)",
-    "déchets de laines de verre": "Laine de verre (produits et matériaux de construction du bâtiment)",
-    "déchets de peintures, vernis, encres et colles": "Déchets de peintures, vernis, encres et colles - Produits chimiques",
-    "déchets de piles et accumulateurs": "Batteries & piles portables",
-    "déchets de plâtre": "Plâtre - PMCB (produits et matériaux de construction du bâtiment)",
-    "déchets de préparation chimiques": "Déchets de produits chimiques",
+    "déchets de laines de roche": "laine_de_roche_produits_et_materiaux_de_construction_du_batiment",
+    "déchets de laines de verre": "laine_de_verre_produits_et_materiaux_de_construction_du_batiment",
+    "déchets de peintures, vernis, encres et colles": "dechets_de_peintures_vernis_encres_et_colles_produits_chimiques",
+    "déchets de piles et accumulateurs": "batteries_et_piles_portables",
+    "déchets de plâtre": "platre_pmcb_produits_et_materiaux_de_construction_du_batiment",
+    "déchets de préparation chimiques": "dechets_de_produits_chimiques",
     "déchets de produits alimentaires": "biodechets",
-    "déchets de vêtements en textiles": ["vetement", "linge de maison"],
+    "déchets de vêtements en textiles": [
+      "vetement",
+      "linge_de_maison"
+    ],
     "déchets en mélange": "encombrants_menagers_divers",
     "déchets ménagers et assimilés": "encombrants_menagers_divers",
-    "déchets textiles": ["vetement", "linge de maison"],
+    "déchets textiles": [
+      "vetement",
+      "linge_de_maison"
+    ],
     "déchets verts": "dechets_verts",
     "déchets verts d'entretien des parcs et jardins": "dechets_verts",
     "ecorces": "dechets_verts",
@@ -308,7 +353,10 @@
       "papiers_graphiques"
     ],
     "emballages métalliques en mélange": "emballage_metal",
-    "emballages papier carton complexés": ["papiers_graphiques", "emballage_carton"],
+    "emballages papier carton complexés": [
+      "papiers_graphiques",
+      "emballage_carton"
+    ],
     "emballages papier carton non complexés": [
       "papiers_graphiques",
       "emballage_carton"
@@ -326,35 +374,45 @@
       "emballage_metal",
       "autres_emballages_menagers"
     ],
-    "emballages souillés par une substance dangereuse": "Déchets de produits chimiques",
+    "emballages souillés par une substance dangereuse": "dechets_de_produits_chimiques",
     "encombrants ménagers divers": "encombrants_menagers_divers",
-    "equipements électriques et électroniques hors d'usage": "petit electromenager",
+    "equipements électriques et électroniques hors d'usage": "petit_electromenager",
     "films plastiques": "emballage_plastique",
     "films plastiques emballages ménagers": "emballage_plastique",
-    "filtres à huiles ou à gazole": "Déchets de produits chimiques",
-    "gros appareils de production de froid": "gros electromenager (refrigerant)",
-    "gros électroménager hors d'usage": "gros electromenager (hors refrigerant)",
-    "huiles de vidange": "Huiles_lubrifiantes",
-    "huiles usées": "Huiles_lubrifiantes",
-    "huisseries multi-matériaux": "Huisseries (produits et matériaux de construction du bâtiment)",
+    "filtres à huiles ou à gazole": "dechets_de_produits_chimiques",
+    "gros appareils de production de froid": "gros_electromenager_refrigerant",
+    "gros électroménager hors d'usage": "gros_electromenager_hors_refrigerant",
+    "huiles de vidange": "huiles_lubrifiantes",
+    "huiles usées": "huiles_lubrifiantes",
+    "huisseries multi-matériaux": "huisseries_produits_et_materiaux_de_construction_du_batiment",
     "jouets": "jouet",
-    "jouets et asl en mélange": ["jouet", "materiel de sport (hors velo)", "velo"],
+    "jouets et asl en mélange": [
+      "jouet",
+      "materiel_de_sport_hors_velo",
+      "velo"
+    ],
     "palettes usagées": "palette",
-    "papiers cartons en mélange à trier": ["papiers_graphiques", "emballage_carton"],
-    "papiers cartons mêlés triés": ["papiers_graphiques", "emballage_carton"],
+    "papiers cartons en mélange à trier": [
+      "papiers_graphiques",
+      "emballage_carton"
+    ],
+    "papiers cartons mêlés triés": [
+      "papiers_graphiques",
+      "emballage_carton"
+    ],
     "papiers graphiques": "papiers_graphiques",
-    "petit électroménager hors d'usage": "petit electromenager",
-    "petits déchets chimiques en mélange": "Déchets de produits chimiques",
-    "piles et batteries portables (inférieur à 5 kg)": "Batteries & piles portables",
-    "pneumatiques hors d'usage": "Pneu",
-    "produits chimiques hors spécifications": "Déchets de produits chimiques",
+    "petit électroménager hors d'usage": "petit_electromenager",
+    "petits déchets chimiques en mélange": "dechets_de_produits_chimiques",
+    "piles et batteries portables (inférieur à 5 kg)": "batteries_et_piles_portables",
+    "pneumatiques hors d'usage": "pneu",
+    "produits chimiques hors spécifications": "dechets_de_produits_chimiques",
     "sciures et copeaux de bois": "dechets_verts",
-    "solvants usés": "Produits chimiques - Solvants",
-    "solvants usés halogénés": "Produits chimiques - Solvants",
-    "solvants usés non halogénés": "Produits chimiques - Solvants",
+    "solvants usés": "produits_chimiques_solvants",
+    "solvants usés halogénés": "produits_chimiques_solvants",
+    "solvants usés non halogénés": "produits_chimiques_solvants",
     "toner d'impression": "cartouches",
     "tubes cathodiques": "ecran",
     "tubes fluorescents": "ampoule",
-    "véhicules hors d'usage": "Vehicule"
+    "véhicules hors d'usage": "vehicule"
   }
 }

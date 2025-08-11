@@ -10,40 +10,40 @@
       ],
       "sous_categories": [
         [
-          "autre equipement electronique"
+          "autre_equipement_electronique"
         ],
         [
           "chaussures"
         ],
         [
-          "gros electromenager (hors refrigerant)"
+          "gros_electromenager_hors_refrigerant"
         ],
         [
-          "gros electromenager (refrigerant)"
+          "gros_electromenager_refrigerant"
         ],
         [
-          "JELS_Mobilite_electrique"
+          "jels_mobilite_electrique"
         ],
         [
-          "linge de maison"
+          "linge_de_maison"
         ],
         [
           "luminaire"
         ],
         [
-          "materiel de sport (hors velo)"
+          "materiel_de_sport_hors_velo"
         ],
         [
-          "materiel hifi et video"
+          "materiel_hifi_et_video"
         ],
         [
-          "materiel informatique"
+          "materiel_informatique"
         ],
         [
-          "ABJ_electrique"
+          "abj_electrique"
         ],
         [
-          "petit electromenager"
+          "petit_electromenager"
         ],
         [
           "velo"
@@ -52,7 +52,7 @@
           "vetement"
         ],
         [
-          "materiel photo et cinema"
+          "materiel_photo_et_cinema"
         ],
         [
           "ecran"
@@ -71,13 +71,13 @@
       ],
       "sous_categories": [
         [
-          "accessoire et meuble de jardin"
+          "accessoire_et_meuble_de_jardin"
         ],
         [
-          "autre equipement electronique"
+          "autre_equipement_electronique"
         ],
         [
-          "CD, DVD et jeu video"
+          "cd_dvd_et_jeu_video"
         ],
         [
           "chaussures"
@@ -86,22 +86,22 @@
           "decoration"
         ],
         [
-          "Décoration textile - Éléments d'ameublement"
+          "decorations_textiles_elements_d_ameublement"
         ],
         [
-          "gros electromenager (hors refrigerant)"
+          "gros_electromenager_hors_refrigerant"
         ],
         [
-          "gros electromenager (refrigerant)"
+          "gros_electromenager_refrigerant"
         ],
         [
           "jouet"
         ],
         [
-          "linge de maison"
+          "linge_de_maison"
         ],
         [
-          "Literie - Éléments d'ameublement"
+          "literie_elements_d_ameublement"
         ],
         [
           "livre"
@@ -113,31 +113,31 @@
           "maroquinerie"
         ],
         [
-          "materiel hifi et video"
+          "materiel_hifi_et_video"
         ],
         [
-          "materiel informatique"
+          "materiel_informatique"
         ],
         [
           "meuble"
         ],
         [
-          "outil de bricolage et jardinage"
+          "outil_de_bricolage_et_jardinage"
         ],
         [
-          "ABJ_electrique"
+          "abj_electrique"
         ],
         [
-          "petit electromenager"
+          "petit_electromenager"
         ],
         [
           "puericulture"
         ],
         [
-          "Sièges - Éléments d'ameublement"
+          "sieges_elements_d_ameublement"
         ],
         [
-          "smartphone, tablette et console"
+          "smartphone_tablette_et_console"
         ],
         [
           "vaisselle"
@@ -149,7 +149,7 @@
           "vetement"
         ],
         [
-          "materiel photo et cinema"
+          "materiel_photo_et_cinema"
         ],
         [
           "ecran"
@@ -168,16 +168,16 @@
       ],
       "sous_categories": [
         [
-          "accessoire et meuble de jardin"
+          "accessoire_et_meuble_de_jardin"
         ],
         [
-          "autre equipement electronique"
+          "autre_equipement_electronique"
         ],
         [
-          "bijou et montre"
+          "bijou_et_montre"
         ],
         [
-          "CD, DVD et jeu video"
+          "cd_dvd_et_jeu_video"
         ],
         [
           "chaussures"
@@ -186,25 +186,25 @@
           "decoration"
         ],
         [
-          "Décoration textile - Éléments d'ameublement"
+          "decorations_textiles_elements_d_ameublement"
         ],
         [
-          "gros electromenager (hors refrigerant)"
+          "gros_electromenager_hors_refrigerant"
         ],
         [
-          "gros electromenager (refrigerant)"
+          "gros_electromenager_refrigerant"
         ],
         [
-          "JELS_Mobilite_electrique"
+          "jels_mobilite_electrique"
         ],
         [
           "jouet"
         ],
         [
-          "linge de maison"
+          "linge_de_maison"
         ],
         [
-          "Literie - Éléments d'ameublement"
+          "literie_elements_d_ameublement"
         ],
         [
           "livre"
@@ -213,46 +213,46 @@
           "luminaire"
         ],
         [
-          "Machines et appareils motorises thermiques"
+          "machines_et_appareils_motorises_thermiques"
         ],
         [
           "maroquinerie"
         ],
         [
-          "materiel de sport (hors velo)"
+          "materiel_de_sport_hors_velo"
         ],
         [
-          "materiel hifi et video"
+          "materiel_hifi_et_video"
         ],
         [
-          "materiel informatique"
+          "materiel_informatique"
         ],
         [
           "meuble"
         ],
         [
-          "outil de bricolage et jardinage"
+          "outil_de_bricolage_et_jardinage"
         ],
         [
-          "ABJ_electrique"
+          "abj_electrique"
         ],
         [
-          "Panneaux photovoltaïques"
+          "panneaux_photovoltaiques"
         ],
         [
-          "petit electromenager"
+          "petit_electromenager"
         ],
         [
           "puericulture"
         ],
         [
-          "Rembourrés d'assise ou de couchage - Éléments d'ameublement"
+          "rembourres_d_assise_ou_de_couchage_elements_d_ameublement"
         ],
         [
-          "Sièges - Éléments d'ameublement"
+          "sieges_elements_d_ameublement"
         ],
         [
-          "smartphone, tablette et console"
+          "smartphone_tablette_et_console"
         ],
         [
           "vaisselle"
@@ -264,7 +264,7 @@
           "vetement"
         ],
         [
-          "materiel photo et cinema"
+          "materiel_photo_et_cinema"
         ],
         [
           "ecran"
@@ -283,10 +283,10 @@
       ],
       "sous_categories": [
         [
-          "materiel informatique"
+          "materiel_informatique"
         ],
         [
-          "smartphone, tablette et console"
+          "smartphone_tablette_et_console"
         ]
       ]
     }
@@ -321,7 +321,7 @@
           "chaussures"
         ],
         [
-          "linge de maison"
+          "linge_de_maison"
         ],
         [
           "vetement"
@@ -343,7 +343,7 @@
           "chaussures"
         ],
         [
-          "linge de maison"
+          "linge_de_maison"
         ],
         [
           "vetement"
@@ -362,10 +362,10 @@
       ],
       "sous_categories": [
         [
-          "outil de bricolage et jardinage"
+          "outil_de_bricolage_et_jardinage"
         ],
         [
-          "ABJ_electrique"
+          "abj_electrique"
         ]
       ]
     }
@@ -387,7 +387,7 @@
           "jouet"
         ],
         [
-          "Literie - Éléments d'ameublement"
+          "literie_elements_d_ameublement"
         ],
         [
           "luminaire"
@@ -399,7 +399,7 @@
           "puericulture"
         ],
         [
-          "Sièges - Éléments d'ameublement"
+          "sieges_elements_d_ameublement"
         ]
       ]
     }
@@ -415,10 +415,10 @@
       ],
       "sous_categories": [
         [
-          "outil de bricolage et jardinage"
+          "outil_de_bricolage_et_jardinage"
         ],
         [
-          "ABJ_electrique"
+          "abj_electrique"
         ]
       ]
     }
@@ -434,16 +434,16 @@
       ],
       "sous_categories": [
         [
-          "Machines et appareils motorises thermiques"
+          "machines_et_appareils_motorises_thermiques"
         ],
         [
-          "outil de bricolage et jardinage"
+          "outil_de_bricolage_et_jardinage"
         ],
         [
-          "ABJ_electrique"
+          "abj_electrique"
         ],
         [
-          "petit electromenager"
+          "petit_electromenager"
         ]
       ]
     }
@@ -459,16 +459,16 @@
       ],
       "sous_categories": [
         [
-          "Machines et appareils motorises thermiques"
+          "machines_et_appareils_motorises_thermiques"
         ],
         [
-          "outil de bricolage et jardinage"
+          "outil_de_bricolage_et_jardinage"
         ],
         [
-          "ABJ_electrique"
+          "abj_electrique"
         ],
         [
-          "petit electromenager"
+          "petit_electromenager"
         ]
       ]
     }
