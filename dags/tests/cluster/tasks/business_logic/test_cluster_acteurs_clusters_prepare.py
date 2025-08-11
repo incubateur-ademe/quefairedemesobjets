@@ -22,6 +22,7 @@ class TestClusterActeursClustersDisplay:
         the clustering function must return early with empty df"""
         at1 = ActeurTypeFactory(code="at1")
         s1 = SourceFactory(code="s1")
+        s2 = SourceFactory(code="s2")
         DisplayedActeurFactory(identifiant_unique="p1", acteur_type=at1, ville="Paris")
         DisplayedActeurFactory(
             identifiant_unique="orphan1", acteur_type=at1, ville="Laval", source=s1
@@ -30,6 +31,8 @@ class TestClusterActeursClustersDisplay:
             {
                 "identifiant_unique": ["p1", "orphan1"],
                 "source_id": [None, s1.id],
+                "source_code": [None, s1.code],
+                "source_codes": [[s1.code, s2.code], [s1.code]],
                 "acteur_type_id": [at1.id, at1.id],
                 "ville": ["Paris", "Laval"],
                 "nombre_enfants": [1, 0],
@@ -67,6 +70,8 @@ class TestClusterActeursClustersDisplay:
             {
                 "identifiant_unique": ["p1", "orphan1", "orphan2"],
                 "source_id": [None, s1.id, s2.id],
+                "source_code": [None, s1.code, s2.code],
+                "source_codes": [[s1.code, s2.code], [s1.code], [s2.code]],
                 "acteur_type_id": [at1.id, at1.id, at1.id],
                 "ville": ["Paris", "Laval", "Laval"],
                 "nombre_enfants": [1, 0, 0],

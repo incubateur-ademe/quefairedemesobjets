@@ -16,13 +16,12 @@ import re
 import numpy as np
 import pandas as pd
 from cluster.tasks.business_logic.misc.cluster_exclude_intra_source import (
-    cluster_exclude_intra_source,
+    split_clusters_infra_source,
 )
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from slugify import slugify
 from unidecode import unidecode
-
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
@@ -202,7 +201,12 @@ def cluster_acteurs_clusters(
         if re.search(r"(^id|^identifiant|_code$|_id$)", col, re.I)
     ]
     cols_to_keep = list(
-        set(cols_ids_codes + cluster_fields_exact + cluster_fields_fuzzy + ["nom"])
+        set(
+            cols_ids_codes
+            + cluster_fields_exact
+            + cluster_fields_fuzzy
+            + ["nom", "source_codes"]
+        )
     )
     df = df[cols_to_keep]
 
@@ -242,22 +246,15 @@ def cluster_acteurs_clusters(
             # Only relying on exact clustering
             clusters_potential.append(("exact", keys, exact_rows))
 
+        if not cluster_intra_source_is_allowed:
+            clusters_potential = split_clusters_infra_source(clusters_potential)
+
         # For all potential clusters, we apply the intra-source logic
-        for ctype, keys, rows in clusters_potential:
+        for _, keys, rows in clusters_potential:
             cluster_id = cluster_id_from_strings(keys)
             rows["cluster_id"] = cluster_id
 
-            if cluster_intra_source_is_allowed:
-                clusters.append(rows.copy())
-            else:
-                kept, lost = cluster_exclude_intra_source(rows)
-                if isinstance(lost, pd.DataFrame):
-                    log.preview_df_as_markdown("❌ Acteurs intra-source exclus", lost)
-                if len(kept) < 2:
-                    log.preview_df_as_markdown("🔴 Cluster de taille <2", kept)
-                    continue
-                log.preview_df_as_markdown(f"🟢 Cluster {ctype} conservé", kept)
-                clusters.append(kept.copy())
+            clusters.append(rows.copy())
 
     if not clusters:
         return pd.DataFrame()
