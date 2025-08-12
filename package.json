@@ -42,7 +42,7 @@
     "@hotwired/turbo": "^8.0.13",
     "@iframe-resizer/child": "^5.4.7",
     "@iframe-resizer/parent": "^5.5.1",
-    "bowser": "^2.11.0",
+    "bowser": "^2.12.0",
     "eslint-config-prettier": "^10.1.8",
     "leaflet": "^1.9.4",
     "posthog-js": "^1.257.0",
