@@ -26,15 +26,14 @@ jobs:
 
   deploy_scaleway_preprod:
     if: ${{ inputs.environment == 'preprod' }}
+    secrets: inherit # pragma: allowlist secret`
     steps:
     - name: 🟣⏳ Scaleway Airflow scheduler
       uses: ./.github/workflows/_scaleway_container_deploy.yml
-      secrets: inherit # pragma: allowlist secret`
       with:
         container_id: 083f314c-c3e7-4050-b4fb-f150d0145334
     - name: 🟣🔄 Scaleway Airflow webserver
       uses: ./.github/workflows/_scaleway_container_deploy.yml
-      secrets: inherit # pragma: allowlist secret`
       with:
         container_id: ab4796f9-6803-42a1-b216-540d0e720dee
 

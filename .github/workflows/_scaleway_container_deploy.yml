@@ -7,6 +7,7 @@ on:
 
 jobs:
   deploy_container:
+    steps:
     - name: Deploy container
       run: |
         curl -X POST \
