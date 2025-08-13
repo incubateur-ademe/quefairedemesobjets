@@ -47,7 +47,7 @@ with DAG(
             description_md="📊 Le genre de table à créer",
         ),
         "data_endpoint": Param(
-            "https://files.data.gouv.fr/insee-sirene/StockEtablissement_utf8.zip",
+            "https://object.files.data.gouv.fr/data-pipeline-open/siren/stock/StockEtablissement_utf8.zip",
             type="string",
             description_md="📥 URL pour télécharger les données",
         ),
