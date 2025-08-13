@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy_container:
-    - name: Deploy container ${{ inputs.container_id }}
+    - name: Deploy container
       run: |
         curl -X POST \
         -H "X-Auth-Token: $SCALEWAY_DEPLOY_KEY" \
