@@ -9,7 +9,7 @@ from suggestions.tasks.airflow_logic.db_apply_suggestion_task import (
 from suggestions.tasks.airflow_logic.db_check_suggestion_to_process_task import (
     db_check_suggestion_to_process_task,
 )
-from suggestions.tasks.airflow_logic.launch_compute_task import (
+from suggestions.tasks.airflow_logic.trigger_compute_acteur_task import (
     should_trigger_compute_acteur_task,
     trigger_compute_acteur_task,
 )
