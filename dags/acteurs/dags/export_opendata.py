@@ -1,12 +1,12 @@
 from datetime import timedelta
 
-import pendulum
 from acteurs.tasks.airflow_logic.export_opendata_csv_to_s3_task import (
     export_opendata_csv_to_s3_task,
 )
 from airflow import DAG
 from decouple import config
 from shared.config.schedules import SCHEDULES
+from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
 
 ENVIRONMENT = config("ENVIRONMENT", default="development")
@@ -14,7 +14,6 @@ ENVIRONMENT = config("ENVIRONMENT", default="development")
 default_args = {
     "owner": "airflow",
     "depends_on_past": False,
-    "start_date": pendulum.today("UTC").add(days=-1),
     "email_on_failure": False,
     "email_on_retry": False,
     "retries": 3,
@@ -25,6 +24,7 @@ default_args = {
 with DAG(
     "export_opendata_dag",
     default_args=default_args,
+    start_date=START_DATES.YESTERDAY,
     dag_display_name="Acteurs Open-Data - Exporter les Acteurs en Open-Data",
     description=(
         "Ce DAG export les acteurs disponibles en opendata précédemment générés dans la"
