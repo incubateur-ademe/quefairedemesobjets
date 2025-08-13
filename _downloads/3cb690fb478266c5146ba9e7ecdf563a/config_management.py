@@ -63,6 +63,7 @@ class DAGConfig(BaseModel):
     dechet_mapping: dict = {}
     s3_connection_id: str | None = None
     endpoint: str  # HttpURL or s3URL
+    metadata_endpoint: str | None = None
     label_bonus_reparation: Optional[str] = None
     product_mapping: dict
     source_code: Optional[str] = None
@@ -87,6 +88,15 @@ class DAGConfig(BaseModel):
             raise ValueError("URL must start with 's3://' or 'http(s)://'")
 
         return endpoint
+
+    @field_validator("metadata_endpoint")
+    def validate_metadata_endpoint(cls, metadata_endpoint):
+        if metadata_endpoint is not None:
+            if not re.match(r"^https?://[^/\s]+[^\s]*$", metadata_endpoint):
+                raise ValueError(
+                    "if metadata_endpoint is set, it must be a valid HTTP URL"
+                )
+        return metadata_endpoint
 
     @classmethod
     def from_airflow_params(
