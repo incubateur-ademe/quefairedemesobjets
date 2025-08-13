@@ -7,6 +7,7 @@ on:
 
 jobs:
   deploy_container:
+    name: Scaleway deploy container
     runs-on: ubuntu-latest
     steps:
     - name: Deploy container
