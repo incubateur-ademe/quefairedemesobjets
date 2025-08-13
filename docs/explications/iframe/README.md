@@ -11,7 +11,8 @@ On affiche l'iframe grâce à un script JS.
 ## Script pour afficher «La Carte»
 
 ```html
-<script src="https://lvao.ademe.fr/static/iframe.js"
+<script
+  src="https://lvao.ademe.fr/static/iframe.js"
   data-max_width="800"
   data-direction="jai"
   data-first_dir="jai"
@@ -28,7 +29,7 @@ Voir l'exemple d'integration de l'iframe « Longue vie aux objets » dans une pa
 2 configurateurs sont disponibles pour customiser l'integration de la carte
 
 - Configurateur grand public : [https://longuevieauxobjets.ademe.fr/configurateur/](https://longuevieauxobjets.ademe.fr/configurateur/)
-- Configurateur avancé (disponible uniquement pour les utilisateurs autorisés) :  [https://quefairedemesobjets.ademe.fr/iframe/configurateur](https://quefairedemesobjets.ademe.fr/iframe/configurateur)
+- Configurateur avancé (disponible uniquement pour les utilisateurs autorisés) : [https://quefairedemesobjets.ademe.fr/iframe/configurateur](https://quefairedemesobjets.ademe.fr/iframe/configurateur)
 
 ## Alternative d'intégration de l'application
 

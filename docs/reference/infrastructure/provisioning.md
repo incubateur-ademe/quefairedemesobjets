@@ -58,8 +58,8 @@ L'environnement de `preview` est utilisé pour tester notre projet IaC, on détr
 
 Pour chaque environnement :
 
-- [Preprod](../../../infrastructure/environments/preprod)
-- [Prod](../../../infrastructure/environments/prod)
+- en **Preprod** dans le dossier infrastructure/environments/preprod à la racine du projet
+- en **Prod** dans le dossier infrastructure/environments/prod à la racine du projet
 
 Se placer dans le répertoire `infrastructure/environments/<ENV>` et exécuter les commandes suivantes
 

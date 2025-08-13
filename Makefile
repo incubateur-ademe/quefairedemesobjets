@@ -31,13 +31,13 @@ init-playwright:
 
 .PHONY: init-dev
 init-dev:
+	# python
+	pip install poetry
+	poetry install --with dev,airflow
+	make init-certs
 	# git
 	git config blame.ignoreRevsFile .git-blame-ignore-revs
 	pre-commit install
-	# python
-	curl -sSL https://install.python-poetry.org | python3 -
-	poetry install --with dev,airflow
-	make init-certs
 	# javascript
 	npm install
 	make init-playwright
@@ -45,8 +45,8 @@ init-dev:
 	cp .env.template .env
 	cp ./dags/.env.template ./dags/.env
 	# prepare django
-	psql -d "$(DB_URL)" -f scripts/sql/create_databases.sql
-	psql -d "$(DB_URL)" -f scripts/sql/create_extensions.sql
+	make run-all
+	$(PYTHON) manage.py create_remote_db_server
 	make migrate
 	make createcachetable
 	make createsuperuser

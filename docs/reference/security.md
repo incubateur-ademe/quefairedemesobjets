@@ -2,7 +2,7 @@
 
 ## Politique de sécurité
 
-La politique de sécurité est consultable ici : [SECURITY.md](../../SECURITY.md)
+La politique de sécurité est consultable ici : [SECURITY.md](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/SECURITY.md)
 
 ## Monitoring
 
