@@ -5,5 +5,5 @@
 
 data/README.md
 frontend/README.md
-iframe/iframe.md
+iframe/README.md
 ```
