@@ -23,6 +23,7 @@
       "emballage_metal",
       "emballage_carton"
     ],
+    "emballage verre réemployable": "emballage_reemployable",
     "gem froid": "gros_electromenager_refrigerant",
     "gem hors froid": "gros_electromenager_hors_refrigerant",
     "grands cartons": "emballage_carton",
