@@ -2240,14 +2240,14 @@ lxml = ["lxml (>=4.2.0,<6)"]
 
 [[package]]
 name = "dslr"
-version = "0.5.1"
+version = "0.6.0"
 description = "Take lightning fast snapshots of your local Postgres databases."
 optional = false
 python-versions = "<4.0,>=3.9"
 groups = ["dev"]
 files = [
-    {file = "dslr-0.5.1-py3-none-any.whl", hash = "sha256:2faf55410d8299270bda3d79661b5653493255093223ea0a7d7e780767dfb9c4"},
-    {file = "dslr-0.5.1.tar.gz", hash = "sha256:5ca89aa7265d423eea86f1d2c647995836c22d72e0386a2d07c640103084d134"},
+    {file = "dslr-0.6.0-py3-none-any.whl", hash = "sha256:3accbc79f53c3bfd0a0792147fc907b28c88b3444c8617ca6fb33db98b7120c3"},
+    {file = "dslr-0.6.0.tar.gz", hash = "sha256:e8c8ce2f51f979761def676c71c442711e1dd7c5e8638f32d1118860ed6550ad"},
 ]
 
 [package.dependencies]
@@ -7615,4 +7615,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12,<3.13"
-content-hash = "e8be1f3e946292bcf1cd6c5f689a0ddc5ddc346a86d725aae21b3a47f0e90060"
+content-hash = "38b1375fe9cfdbb2b350e4cf2a3dd6e179e2f4418b6b0b5d1e452cbbd77a296b"
