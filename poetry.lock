@@ -1467,14 +1467,14 @@ test = ["hypothesis (>=6.87,<7.0)", "pytest (>=7.3,<8.0)", "pytest-cov (>=4.1,<5
 
 [[package]]
 name = "dbt-core"
-version = "1.10.6"
+version = "1.10.8"
 description = "With dbt, data analysts and engineers can build analytics the way engineers build applications."
 optional = false
 python-versions = ">=3.9"
 groups = ["airflow"]
 files = [
-    {file = "dbt_core-1.10.6-py3-none-any.whl", hash = "sha256:cca54335b475ded01ccee34944d27b768e2d30b06eef84f2ef14d4e44c55eeb5"},
-    {file = "dbt_core-1.10.6.tar.gz", hash = "sha256:059649a275103e275c0eceeb2c6815b157032b94ef7c82c1f76ef819912e61d7"},
+    {file = "dbt_core-1.10.8-py3-none-any.whl", hash = "sha256:117029971a32b78abc598548f63375990a9a5fcec7471aca14182dc2da7e5002"},
+    {file = "dbt_core-1.10.8.tar.gz", hash = "sha256:eb00b7169ea078aa609548258ceebaa5801605a87de33ce14fd6cbc823c9734c"},
 ]
 
 [package.dependencies]
@@ -7615,4 +7615,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12,<3.13"
-content-hash = "38b1375fe9cfdbb2b350e4cf2a3dd6e179e2f4418b6b0b5d1e452cbbd77a296b"
+content-hash = "2df423170f6aa298e025650e9769fc2dcd3efce9eae258ca5960832b50d3fca6"

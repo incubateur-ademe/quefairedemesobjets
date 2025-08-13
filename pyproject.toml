@@ -149,7 +149,7 @@ unidecode = "^1.4.0"
 scikit-learn = "1.7.1"
 apache-airflow = "^2.11.0"
 pandas = "<2.2"
-dbt-core = "^1.10.6"
+dbt-core = "^1.10.8"
 dbt-postgres = "^1.9.0"
 
 [build-system]
