@@ -14,12 +14,15 @@ logger = logging.getLogger(__name__)
 CLOSED_THIS_DAY = "Fermé"
 
 
-def cast_eo_boolean_or_string_to_boolean(value: str | bool, _) -> bool:
+def cast_eo_boolean_or_string_to_boolean(value: str | bool, _) -> bool | None:
     if isinstance(value, bool):
         return value
     if isinstance(value, str):
-        return value.lower().strip() == "oui"
-    return False
+        if value.lower().strip() == "oui":
+            return True
+        if value.lower().strip() == "non":
+            return False
+    return None
 
 
 def convert_opening_hours(opening_hours: str | None, _) -> str:
@@ -158,6 +161,15 @@ def clean_url(url, _) -> str:
         url = "https://" + url
 
     return url
+
+
+def clean_email(email: str | None, _) -> str:
+    if pd.isna(email) or not email:
+        return ""
+    email = str(email).strip().lower()
+    if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+        return ""
+    return email
 
 
 def clean_code_postal(cp: str | None, _) -> str:
