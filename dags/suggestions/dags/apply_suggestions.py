@@ -10,7 +10,8 @@ from suggestions.tasks.airflow_logic.db_check_suggestion_to_process_task import 
     db_check_suggestion_to_process_task,
 )
 from suggestions.tasks.airflow_logic.launch_compute_task import (
-    launch_compute_acteur_task,
+    should_trigger_compute_acteur_task,
+    trigger_compute_acteur_task,
 )
 
 default_args = {
@@ -36,5 +37,6 @@ dag = DAG(
 (
     db_check_suggestion_to_process_task(dag)
     >> db_apply_suggestion_task(dag)
-    >> launch_compute_acteur_task(dag)
+    >> should_trigger_compute_acteur_task(dag)
+    >> trigger_compute_acteur_task(dag)
 )
