@@ -128,7 +128,7 @@ pytest-mock = "^3.14.1"
 ruff = "^0.12.8"
 shapely = "^2.1.1" # notebook
 djade = "^1.4.0"
-dslr = "^0.5.1"
+dslr = "^0.6.0"
 
 [tool.poetry.group.docs.dependencies]
 myst-parser = "^4.0.0"
