@@ -18,7 +18,7 @@ Elle est répartie en 4 sections suivant la convention [DIATAXIS](https://diatax
 
 ![](https://diataxis.fr/_images/diataxis.png)
 
-Pour en savoir plus sur la construction de cette documentation, suivez le guide : [Guide de la documentation technique](./reference/documentation-technique.md)
+Pour en savoir plus sur la construction de cette documentation, suivez le guide : [Guide de la documentation technique](./reference/documentation/documentation-technique.md)
 
 ### Référence
 
