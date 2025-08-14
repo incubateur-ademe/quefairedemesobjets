@@ -20,3 +20,8 @@ jobs:
       env:
         SCALEWAY_DEPLOY_KEY: ${{ secrets.SCALEWAY_DEPLOY_KEY }}
         CONTAINER_ID: ${{ inputs.container_id }}
+
+# Address actions/missing-workflow-permissions rule in
+# code scanning alerts
+permissions:
+  contents: read
