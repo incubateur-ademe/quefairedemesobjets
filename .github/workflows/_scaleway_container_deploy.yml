@@ -1,6 +1,9 @@
 on:
   workflow_call:
     inputs:
+      environment:
+        required: true
+        type: string
       container_id:
         type: string
         required: true
