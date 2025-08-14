@@ -12,6 +12,7 @@ jobs:
   deploy_container:
     name: Scaleway deploy container
     runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
     steps:
     - name: Deploy container
       run: |
