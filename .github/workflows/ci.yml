@@ -9,7 +9,7 @@ jobs:
     name: 📝 Backend Linter
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-python@v5
         with:
           cache: "pip"
@@ -39,7 +39,7 @@ jobs:
     name: 📝 Frontend Linter
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".tool-versions"
@@ -69,7 +69,7 @@ jobs:
           - 6543:5432
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-python@v5
         with:
           cache: "pip"
@@ -102,7 +102,7 @@ jobs:
     name: ✅ Frontend Tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".tool-versions"
@@ -136,7 +136,7 @@ jobs:
         ports:
           - 6543:5432
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Prepare environment
         run: |

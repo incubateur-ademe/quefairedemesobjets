@@ -10,133 +10,133 @@
     "model": "qfdmo.categorieobjet",
     "fields": {
         "libelle": "équipements de loisir",
-        "code": "equipements de loisir"
+        "code": "equipements_de_loisir"
     }
 },
 {
     "model": "qfdmo.categorieobjet",
     "fields": {
         "libelle": "bricolage et jardinage",
-        "code": "bricolage et jardinage"
+        "code": "bricolage_et_jardinage"
     }
 },
 {
     "model": "qfdmo.categorieobjet",
     "fields": {
         "libelle": "mobilier et décoration",
-        "code": "mobilier et decoration"
+        "code": "mobilier_et_decoration"
     }
 },
 {
     "model": "qfdmo.categorieobjet",
     "fields": {
         "libelle": "produits divers",
-        "code": "produits divers"
+        "code": "produits_divers"
     }
 },
 {
     "model": "qfdmo.categorieobjet",
     "fields": {
         "libelle": "image, son & Informatique",
-        "code": "image, son & Informatique"
+        "code": "image_son_et_informatique"
     }
 },
 {
     "model": "qfdmo.categorieobjet",
     "fields": {
         "libelle": "livres & multimedia",
-        "code": "livres & multimedia"
+        "code": "livres_et_multimedia"
     }
 },
 {
     "model": "qfdmo.categorieobjet",
     "fields": {
         "libelle": "vêtements & accessoires",
-        "code": "vetements & accessoires"
+        "code": "vetements_et_accessoires"
     }
 },
 {
     "model": "qfdmo.categorieobjet",
     "fields": {
         "libelle": "bijou, montre, horlogerie",
-        "code": "bijou, montre, horlogerie"
+        "code": "bijoux_montre_horlogerie"
     }
 },
 {
     "model": "qfdmo.categorieobjet",
     "fields": {
         "libelle": "matériau de construction / du bâtiment",
-        "code": "materiau de construction / du batiment"
+        "code": "materiau_de_construction_du_batiment"
     }
 },
 {
     "model": "qfdmo.categorieobjet",
     "fields": {
         "libelle": "Batteries & piles portables",
-        "code": "Batteries & piles portables"
+        "code": "batteries_et_piles_portables"
     }
 },
 {
     "model": "qfdmo.categorieobjet",
     "fields": {
         "libelle": "Petits appareils extincteurs",
-        "code": "Petits appareils extincteurs"
+        "code": "petits_appareils_extincteurs"
     }
 },
 {
     "model": "qfdmo.categorieobjet",
     "fields": {
         "libelle": "PCHIM - DDS",
-        "code": "PCHIM - DDS"
+        "code": "pchim_dds"
     }
 },
 {
     "model": "qfdmo.categorieobjet",
     "fields": {
         "libelle": "Panneaux photovoltaïques",
-        "code": "Panneaux photovoltaïques"
+        "code": "panneaux_photovoltaiques"
     }
 },
 {
     "model": "qfdmo.categorieobjet",
     "fields": {
         "libelle": "Bateau",
-        "code": "Bateau"
+        "code": "bateau"
     }
 },
 {
     "model": "qfdmo.categorieobjet",
     "fields": {
         "libelle": "Aides Techniques",
-        "code": "Aides Techniques"
+        "code": "aides_techniques"
     }
 },
 {
     "model": "qfdmo.categorieobjet",
     "fields": {
         "libelle": "Pneu",
-        "code": "Pneu"
+        "code": "pneu"
     }
 },
 {
     "model": "qfdmo.categorieobjet",
     "fields": {
         "libelle": "Médicaments & DASRI",
-        "code": "Médicaments & DASRI"
+        "code": "medicaments_et_dasri"
     }
 },
 {
     "model": "qfdmo.categorieobjet",
     "fields": {
         "libelle": "JELS (Jouets, équipements de loisirs et de sport) - Mobilité électrique",
-        "code": "JELS_Mobilite_electrique"
+        "code": "jels_mobilite_electrique"
     }
 },
 {
     "model": "qfdmo.categorieobjet",
     "fields": {
         "libelle": "Huiles Lubrifiantes",
-        "code": "Huiles_lubrifiantes"
+        "code": "huiles_lubrifiantes"
     }
 },
 {
@@ -150,7 +150,7 @@
     "model": "qfdmo.categorieobjet",
     "fields": {
         "libelle": "Véhicule",
-        "code": "Vehicule"
+        "code": "vehicule"
     }
 },
 {
@@ -174,7 +174,7 @@
         "categorie": [
             "electromenager"
         ],
-        "code": "gros electromenager (refrigerant)",
+        "code": "gros_electromenager_refrigerant",
         "afficher": true,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -191,7 +191,7 @@
         "categorie": [
             "electromenager"
         ],
-        "code": "gros electromenager (hors refrigerant)",
+        "code": "gros_electromenager_hors_refrigerant",
         "afficher": true,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -226,7 +226,7 @@
         "categorie": [
             "electromenager"
         ],
-        "code": "petit electromenager",
+        "code": "petit_electromenager",
         "afficher": true,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -280,7 +280,7 @@
     "fields": {
         "libelle": "Écran",
         "categorie": [
-            "image, son & Informatique"
+            "image_son_et_informatique"
         ],
         "code": "ecran",
         "afficher": true,
@@ -300,9 +300,9 @@
     "fields": {
         "libelle": "Matériel informatique",
         "categorie": [
-            "image, son & Informatique"
+            "image_son_et_informatique"
         ],
-        "code": "materiel informatique",
+        "code": "materiel_informatique",
         "afficher": true,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -326,9 +326,9 @@
     "fields": {
         "libelle": "Matériel hifi et vidéo",
         "categorie": [
-            "image, son & Informatique"
+            "image_son_et_informatique"
         ],
-        "code": "materiel hifi et video",
+        "code": "materiel_hifi_et_video",
         "afficher": true,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -346,9 +346,9 @@
     "fields": {
         "libelle": "Smartphone, tablette et console",
         "categorie": [
-            "image, son & Informatique"
+            "image_son_et_informatique"
         ],
-        "code": "smartphone, tablette et console",
+        "code": "smartphone_tablette_et_console",
         "afficher": true,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -366,9 +366,9 @@
     "fields": {
         "libelle": "matériel photo et cinéma",
         "categorie": [
-            "image, son & Informatique"
+            "image_son_et_informatique"
         ],
-        "code": "materiel photo et cinema",
+        "code": "materiel_photo_et_cinema",
         "afficher": true,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -386,9 +386,9 @@
     "fields": {
         "libelle": "Autre équipement électronique",
         "categorie": [
-            "image, son & Informatique"
+            "image_son_et_informatique"
         ],
-        "code": "autre equipement electronique",
+        "code": "autre_equipement_electronique",
         "afficher": true,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -403,9 +403,9 @@
     "fields": {
         "libelle": "CD, DVD et jeu vidéo",
         "categorie": [
-            "livres & multimedia"
+            "livres_et_multimedia"
         ],
-        "code": "CD, DVD et jeu video",
+        "code": "cd_dvd_et_jeu_video",
         "afficher": true,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -423,7 +423,7 @@
     "fields": {
         "libelle": "Livre",
         "categorie": [
-            "livres & multimedia"
+            "livres_et_multimedia"
         ],
         "code": "livre",
         "afficher": true,
@@ -440,9 +440,9 @@
     "fields": {
         "libelle": "Instrument de musique",
         "categorie": [
-            "equipements de loisir"
+            "equipements_de_loisir"
         ],
-        "code": "instrument de musique",
+        "code": "instrument_de_musique",
         "afficher": true,
         "afficher_carte": true,
         "qfdmd_produits": []
@@ -453,9 +453,9 @@
     "fields": {
         "libelle": "Outil de bricolage et jardinage",
         "categorie": [
-            "bricolage et jardinage"
+            "bricolage_et_jardinage"
         ],
-        "code": "outil de bricolage et jardinage",
+        "code": "outil_de_bricolage_et_jardinage",
         "afficher": true,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -494,9 +494,9 @@
     "fields": {
         "libelle": "Accessoire et meuble de jardin",
         "categorie": [
-            "equipements de loisir"
+            "equipements_de_loisir"
         ],
-        "code": "accessoire et meuble de jardin",
+        "code": "accessoire_et_meuble_de_jardin",
         "afficher": true,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -514,7 +514,7 @@
     "fields": {
         "libelle": "Meuble",
         "categorie": [
-            "mobilier et decoration"
+            "mobilier_et_decoration"
         ],
         "code": "meuble",
         "afficher": true,
@@ -555,7 +555,7 @@
     "fields": {
         "libelle": "Décoration",
         "categorie": [
-            "mobilier et decoration"
+            "mobilier_et_decoration"
         ],
         "code": "decoration",
         "afficher": true,
@@ -568,7 +568,7 @@
     "fields": {
         "libelle": "Luminaire",
         "categorie": [
-            "mobilier et decoration"
+            "mobilier_et_decoration"
         ],
         "code": "luminaire",
         "afficher": true,
@@ -588,7 +588,7 @@
     "fields": {
         "libelle": "Vaisselle",
         "categorie": [
-            "mobilier et decoration"
+            "mobilier_et_decoration"
         ],
         "code": "vaisselle",
         "afficher": true,
@@ -617,9 +617,9 @@
     "fields": {
         "libelle": "Linge de maison",
         "categorie": [
-            "vetements & accessoires"
+            "vetements_et_accessoires"
         ],
-        "code": "linge de maison",
+        "code": "linge_de_maison",
         "afficher": true,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -640,7 +640,7 @@
     "fields": {
         "libelle": "Puériculture",
         "categorie": [
-            "produits divers"
+            "produits_divers"
         ],
         "code": "puericulture",
         "afficher": true,
@@ -657,7 +657,7 @@
     "fields": {
         "libelle": "Jouet",
         "categorie": [
-            "equipements de loisir"
+            "equipements_de_loisir"
         ],
         "code": "jouet",
         "afficher": true,
@@ -677,7 +677,7 @@
     "fields": {
         "libelle": "Vêtement",
         "categorie": [
-            "vetements & accessoires"
+            "vetements_et_accessoires"
         ],
         "code": "vetement",
         "afficher": true,
@@ -709,7 +709,7 @@
     "fields": {
         "libelle": "Maroquinerie",
         "categorie": [
-            "vetements & accessoires"
+            "vetements_et_accessoires"
         ],
         "code": "maroquinerie",
         "afficher": true,
@@ -732,7 +732,7 @@
     "fields": {
         "libelle": "Chaussures",
         "categorie": [
-            "vetements & accessoires"
+            "vetements_et_accessoires"
         ],
         "code": "chaussures",
         "afficher": true,
@@ -755,9 +755,9 @@
     "fields": {
         "libelle": "Bijou et montre",
         "categorie": [
-            "bijou, montre, horlogerie"
+            "bijoux_montre_horlogerie"
         ],
-        "code": "bijou et montre",
+        "code": "bijou_et_montre",
         "afficher": true,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -775,7 +775,7 @@
     "fields": {
         "libelle": "Vélo",
         "categorie": [
-            "equipements de loisir"
+            "equipements_de_loisir"
         ],
         "code": "velo",
         "afficher": true,
@@ -795,9 +795,9 @@
     "fields": {
         "libelle": "Matériel de sport (hors vélo)",
         "categorie": [
-            "equipements de loisir"
+            "equipements_de_loisir"
         ],
-        "code": "materiel de sport (hors velo)",
+        "code": "materiel_de_sport_hors_velo",
         "afficher": true,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -842,9 +842,9 @@
     "fields": {
         "libelle": "Matériel médical",
         "categorie": [
-            "Aides Techniques"
+            "aides_techniques"
         ],
-        "code": "materiel medical",
+        "code": "materiel_medical",
         "afficher": true,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -859,9 +859,9 @@
     "fields": {
         "libelle": "Matériau du bâtiment réemployable",
         "categorie": [
-            "materiau de construction / du batiment"
+            "materiau_de_construction_du_batiment"
         ],
-        "code": "materiau du batiment reemployable",
+        "code": "materiau_du_batiment_reemployable",
         "afficher": true,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -879,9 +879,9 @@
     "fields": {
         "libelle": "Machines et appareils motorisés thermiques",
         "categorie": [
-            "bricolage et jardinage"
+            "bricolage_et_jardinage"
         ],
-        "code": "Machines et appareils motorises thermiques",
+        "code": "machines_et_appareils_motorises_thermiques",
         "afficher": true,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -913,9 +913,9 @@
     "fields": {
         "libelle": "Batteries & piles portables",
         "categorie": [
-            "Batteries & piles portables"
+            "batteries_et_piles_portables"
         ],
-        "code": "Batteries & piles portables",
+        "code": "batteries_et_piles_portables",
         "afficher": false,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -936,9 +936,9 @@
     "fields": {
         "libelle": "Petits appareils extincteurs",
         "categorie": [
-            "Petits appareils extincteurs"
+            "petits_appareils_extincteurs"
         ],
-        "code": "Petits appareils extincteurs",
+        "code": "petits_appareils_extincteurs",
         "afficher": true,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -953,9 +953,9 @@
     "fields": {
         "libelle": "Outillage du peintre usagé",
         "categorie": [
-            "PCHIM - DDS"
+            "pchim_dds"
         ],
-        "code": "ABJ_Outillage du peintre usagé",
+        "code": "abj_outillage_du_peintre_usage",
         "afficher": true,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -970,9 +970,9 @@
     "fields": {
         "libelle": "Produits chimiques - Solvants",
         "categorie": [
-            "PCHIM - DDS"
+            "pchim_dds"
         ],
-        "code": "Produits chimiques - Solvants",
+        "code": "produits_chimiques_solvants",
         "afficher": false,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -1002,9 +1002,9 @@
     "fields": {
         "libelle": "Déchets de produits chimiques",
         "categorie": [
-            "PCHIM - DDS"
+            "pchim_dds"
         ],
-        "code": "Déchets de produits chimiques",
+        "code": "dechets_de_produits_chimiques",
         "afficher": false,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -1055,9 +1055,9 @@
     "fields": {
         "libelle": "Déchets phytosanitaires ménagers - Produits chimiques",
         "categorie": [
-            "PCHIM - DDS"
+            "pchim_dds"
         ],
-        "code": "Déchets phytosanitaires ménagers - Produits chimiques",
+        "code": "dechets_phytosanitaires_menagers_produits_chimiques",
         "afficher": false,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -1102,9 +1102,9 @@
     "fields": {
         "libelle": "Déchets de peintures, vernis, encres et colles - Produits chimiques",
         "categorie": [
-            "PCHIM - DDS"
+            "pchim_dds"
         ],
-        "code": "Déchets de peintures, vernis, encres et colles - Produits chimiques",
+        "code": "dechets_de_peintures_vernis_encres_et_colles_produits_chimiques",
         "afficher": false,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -1149,9 +1149,9 @@
     "fields": {
         "libelle": "Produits pyrotechniques",
         "categorie": [
-            "PCHIM - DDS"
+            "pchim_dds"
         ],
-        "code": "Produits pyrotechniques",
+        "code": "produits_pyrotechniques",
         "afficher": true,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -1166,9 +1166,9 @@
     "fields": {
         "libelle": "Déchets de produits chimiques basiques",
         "categorie": [
-            "PCHIM - DDS"
+            "pchim_dds"
         ],
-        "code": "Déchets de produits chimiques basiques",
+        "code": "dechets_de_produits_chimiques_basiques",
         "afficher": false,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -1189,9 +1189,9 @@
     "fields": {
         "libelle": "Déchets de produits chimiques acides",
         "categorie": [
-            "PCHIM - DDS"
+            "pchim_dds"
         ],
-        "code": "Déchets de produits chimiques acides",
+        "code": "dechets_de_produits_chimiques_acides",
         "afficher": false,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -1206,9 +1206,9 @@
     "fields": {
         "libelle": "Panneaux photovoltaïques",
         "categorie": [
-            "Panneaux photovoltaïques"
+            "panneaux_photovoltaiques"
         ],
-        "code": "Panneaux photovoltaïques",
+        "code": "panneaux_photovoltaiques",
         "afficher": true,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -1223,9 +1223,9 @@
     "fields": {
         "libelle": "Décoration textile - Éléments d'ameublement",
         "categorie": [
-            "mobilier et decoration"
+            "mobilier_et_decoration"
         ],
-        "code": "Décoration textile - Éléments d'ameublement",
+        "code": "decorations_textiles_elements_d_ameublement",
         "afficher": true,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -1243,9 +1243,9 @@
     "fields": {
         "libelle": "Literie - Éléments d'ameublement",
         "categorie": [
-            "mobilier et decoration"
+            "mobilier_et_decoration"
         ],
-        "code": "Literie - Éléments d'ameublement",
+        "code": "literie_elements_d_ameublement",
         "afficher": true,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -1260,9 +1260,9 @@
     "fields": {
         "libelle": "Rembourrés d'assise ou de couchage - Éléments d'ameublement",
         "categorie": [
-            "mobilier et decoration"
+            "mobilier_et_decoration"
         ],
-        "code": "Rembourrés d'assise ou de couchage - Éléments d'ameublement",
+        "code": "rembourres_d_assise_ou_de_couchage_elements_d_ameublement",
         "afficher": true,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -1280,9 +1280,9 @@
     "fields": {
         "libelle": "Sièges - Éléments d'ameublement",
         "categorie": [
-            "mobilier et decoration"
+            "mobilier_et_decoration"
         ],
-        "code": "Sièges - Éléments d'ameublement",
+        "code": "sieges_elements_d_ameublement",
         "afficher": true,
         "afficher_carte": false,
         "qfdmd_produits": []
@@ -1293,9 +1293,9 @@
     "fields": {
         "libelle": "Bois (Matériaux du Bâtiment)",
         "categorie": [
-            "materiau de construction / du batiment"
+            "materiau_de_construction_du_batiment"
         ],
-        "code": "Bois - PMCB (produits et matériaux de construction du bâtiment)",
+        "code": "bois_pmcb_produits_et_materiaux_de_construction_du_batiment",
         "afficher": false,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -1322,9 +1322,9 @@
     "fields": {
         "libelle": "Déchets dangereux du bâtiment",
         "categorie": [
-            "materiau de construction / du batiment"
+            "materiau_de_construction_du_batiment"
         ],
-        "code": "Déchets dangereux de PMCB (produits et matériaux de construction du bâtiment)",
+        "code": "dechets_dangereux_de_pmcb_produits_et_materiaux_de_construction_du_batiment",
         "afficher": false,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -1339,9 +1339,9 @@
     "fields": {
         "libelle": "Huisseries (Bâtiment)",
         "categorie": [
-            "materiau de construction / du batiment"
+            "materiau_de_construction_du_batiment"
         ],
-        "code": "Huisseries (produits et matériaux de construction du bâtiment)",
+        "code": "huisseries_produits_et_materiaux_de_construction_du_batiment",
         "afficher": true,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -1359,9 +1359,9 @@
     "fields": {
         "libelle": "Laine de roche (Bâtiment)",
         "categorie": [
-            "materiau de construction / du batiment"
+            "materiau_de_construction_du_batiment"
         ],
-        "code": "Laine de roche (produits et matériaux de construction du bâtiment)",
+        "code": "laine_de_roche_produits_et_materiaux_de_construction_du_batiment",
         "afficher": false,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -1376,9 +1376,9 @@
     "fields": {
         "libelle": "Laine de verre (Bâtiment)",
         "categorie": [
-            "materiau de construction / du batiment"
+            "materiau_de_construction_du_batiment"
         ],
-        "code": "Laine de verre (produits et matériaux de construction du bâtiment)",
+        "code": "laine_de_verre_produits_et_materiaux_de_construction_du_batiment",
         "afficher": false,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -1393,9 +1393,9 @@
     "fields": {
         "libelle": "Mélange d’inertes (Bâtiment)",
         "categorie": [
-            "materiau de construction / du batiment"
+            "materiau_de_construction_du_batiment"
         ],
-        "code": "Mélange d’inertes (produits et matériaux de construction du bâtiment)",
+        "code": "mélange_d_inertes_produits_et_materiaux_de_construction_du_batiment",
         "afficher": false,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -1431,9 +1431,9 @@
     "fields": {
         "libelle": "Métal (Matériaux du Bâtiment)",
         "categorie": [
-            "materiau de construction / du batiment"
+            "materiau_de_construction_du_batiment"
         ],
-        "code": "Métal - PMCB (produits et matériaux de construction du bâtiment)",
+        "code": "metal_pmcb_produits_et_materiaux_de_construction_du_batiment",
         "afficher": false,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -1463,9 +1463,9 @@
     "fields": {
         "libelle": "Plastiques (Matériaux du bâtiment)",
         "categorie": [
-            "materiau de construction / du batiment"
+            "materiau_de_construction_du_batiment"
         ],
-        "code": "Plastiques - PMCB (produits et matériaux de construction du bâtiment)",
+        "code": "plastiques_pmcb_produits_et_materiaux_de_construction_du_batiment",
         "afficher": false,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -1492,9 +1492,9 @@
     "fields": {
         "libelle": "Plâtre (Bâtiment)",
         "categorie": [
-            "materiau de construction / du batiment"
+            "materiau_de_construction_du_batiment"
         ],
-        "code": "Plâtre - PMCB (produits et matériaux de construction du bâtiment)",
+        "code": "platre_pmcb_produits_et_materiaux_de_construction_du_batiment",
         "afficher": false,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -1509,9 +1509,9 @@
     "fields": {
         "libelle": "Béton (Bâtiment)",
         "categorie": [
-            "materiau de construction / du batiment"
+            "materiau_de_construction_du_batiment"
         ],
-        "code": "Béton - PMCB (produits et matériaux de construction du bâtiment)",
+        "code": "beton_pmcb_produits_et_materiaux_de_construction_du_batiment",
         "afficher": false,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -1526,9 +1526,9 @@
     "fields": {
         "libelle": "Membranes bitumineuses (Bâtiment)",
         "categorie": [
-            "materiau de construction / du batiment"
+            "materiau_de_construction_du_batiment"
         ],
-        "code": "Membranes bitumineuses - PMCB (produits et matériaux de construction du bâtiment)",
+        "code": "membranes_bitumineuses_pmcb_produits_et_materiaux_de_construction_du_batiment",
         "afficher": true,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -1543,9 +1543,9 @@
     "fields": {
         "libelle": "Bateau",
         "categorie": [
-            "Bateau"
+            "bateau"
         ],
-        "code": "Bateau",
+        "code": "bateau",
         "afficher": false,
         "afficher_carte": false,
         "qfdmd_produits": []
@@ -1556,7 +1556,7 @@
     "fields": {
         "libelle": "Lunettes de vue",
         "categorie": [
-            "Aides Techniques"
+            "aides_techniques"
         ],
         "code": "lunettes_de_vue_aides_techniques",
         "afficher": true,
@@ -1573,9 +1573,9 @@
     "fields": {
         "libelle": "Pneu",
         "categorie": [
-            "Pneu"
+            "pneu"
         ],
-        "code": "Pneu",
+        "code": "pneu",
         "afficher": true,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -1590,7 +1590,7 @@
     "fields": {
         "libelle": "Médicaments non utilisés",
         "categorie": [
-            "Médicaments & DASRI"
+            "medicaments_et_dasri"
         ],
         "code": "medicaments",
         "afficher": false,
@@ -1607,9 +1607,9 @@
     "fields": {
         "libelle": "Autres PMCB (Produits de construction d'origine végétale, animale, ou autres déchets de PMCB non-séparables)",
         "categorie": [
-            "materiau de construction / du batiment"
+            "materiau_de_construction_du_batiment"
         ],
-        "code": "Autres PMCB",
+        "code": "autres_pmcb",
         "afficher": true,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -1627,9 +1627,9 @@
     "fields": {
         "libelle": "Outil de bricolage et jardinage électrique",
         "categorie": [
-            "bricolage et jardinage"
+            "bricolage_et_jardinage"
         ],
-        "code": "ABJ_electrique",
+        "code": "abj_electrique",
         "afficher": true,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -1647,9 +1647,9 @@
     "fields": {
         "libelle": "JELS (Jouets, équipements de loisirs et de sport) - Mobilité",
         "categorie": [
-            "JELS_Mobilite_electrique"
+            "jels_mobilite_electrique"
         ],
-        "code": "JELS_Mobilite_electrique",
+        "code": "jels_mobilite_electrique",
         "afficher": true,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -1670,9 +1670,9 @@
     "fields": {
         "libelle": "Huiles lubrifiantes",
         "categorie": [
-            "Huiles_lubrifiantes"
+            "huiles_lubrifiantes"
         ],
-        "code": "Huiles_lubrifiantes",
+        "code": "huiles_lubrifiantes",
         "afficher": true,
         "afficher_carte": true,
         "qfdmd_produits": [
@@ -1785,9 +1785,9 @@
     "fields": {
         "libelle": "Véhicule",
         "categorie": [
-            "Vehicule"
+            "vehicule"
         ],
-        "code": "Vehicule",
+        "code": "vehicule",
         "afficher": false,
         "afficher_carte": false,
         "qfdmd_produits": []
@@ -2132,7 +2132,7 @@
     "fields": {
         "libelle": "Batteries de voitures pour démarrage, éclairage & allumage (SLI)",
         "categorie": [
-            "Batteries & piles portables"
+            "batteries_et_piles_portables"
         ],
         "code": "batterie_de_voitures_pour_demarrage",
         "afficher": false,
@@ -2145,7 +2145,7 @@
     "fields": {
         "libelle": "Batteries de moyens de transport Légers (MTL)",
         "categorie": [
-            "Batteries & piles portables"
+            "batteries_et_piles_portables"
         ],
         "code": "batteries_de_mtl",
         "afficher": false,
@@ -2158,7 +2158,7 @@
     "fields": {
         "libelle": "Dispositifs Médicaux Perforants / Déchets d'Activités de Soins à Risque Infectieux (DASRI)",
         "categorie": [
-            "Médicaments & DASRI"
+            "medicaments_et_dasri"
         ],
         "code": "dasri",
         "afficher": false,
@@ -2221,12 +2221,29 @@
         "categorie": [
             "emballages_et_papiers_graphiques"
         ],
-        "code": "bouchonsenliege",
+        "code": "bouchons_en_liege",
         "afficher": true,
         "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Bouchons en liège"
+            ]
+        ]
+    }
+},
+{
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+        "libelle": "Emballage réemployable",
+        "categorie": [
+            "emballages_et_papiers_graphiques"
+        ],
+        "code": "emballage_reemployable",
+        "afficher": true,
+        "afficher_carte": true,
+        "qfdmd_produits": [
+            [
+                "Emballage réemployable"
             ]
         ]
     }

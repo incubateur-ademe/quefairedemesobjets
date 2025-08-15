@@ -479,7 +479,17 @@ class TestClusterExcludeIntraSource:
     def df_acteurs(self):
         return pd.DataFrame(
             {
-                "identifiant_unique": ["a1", "a2", "a3", "a4", "a5", "a6", "a7"],
+                "identifiant_unique": [
+                    "a1",
+                    "a2",
+                    "a3",
+                    "a4",
+                    "a5",
+                    "a6",
+                    "a7",
+                    "a8",
+                    "a9",
+                ],
                 "source_codes": [
                     ["s1"],
                     ["s2"],
@@ -488,8 +498,10 @@ class TestClusterExcludeIntraSource:
                     ["s3"],
                     ["s2"],
                     ["s3"],
+                    ["s2"],
+                    ["s3"],
                 ],
-                "nom": ["décheterie du village" for _ in range(7)],
+                "nom": ["décheterie du village" for _ in range(9)],
             }
         )
 
@@ -513,4 +525,4 @@ class TestClusterExcludeIntraSource:
             cluster_fuzzy_threshold=0.5,
             cluster_intra_source_is_allowed=False,
         )
-        assert df_clusters["cluster_id"].nunique() == 2
+        assert df_clusters["cluster_id"].nunique() == 3
