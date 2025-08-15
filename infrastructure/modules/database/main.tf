@@ -75,7 +75,7 @@ resource "scaleway_rdb_instance" "airflow" {
   backup_schedule_retention = 7
   backup_same_region        = false
   volume_size_in_gb         = var.airflow_volume_size
-  volume_type               = "sbs_15k"
+  volume_type               = "sbs_5k"
   encryption_at_rest        = true
 }
 

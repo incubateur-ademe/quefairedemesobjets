@@ -22,9 +22,9 @@ inputs = {
   warehouse_volume_size = 100
 
   # Airflow
-  airflow_node_type   = "DB-PRO2-XXS"
+  airflow_node_type   = "DB-PLAY2-NANO"
   airflow_db_name     = "airflow"
   airflow_db_username = "[airflow_db_username]"
   airflow_db_password = "[airflow_db_password]"
-  airflow_volume_size = 50
+  airflow_volume_size = 20
 }
