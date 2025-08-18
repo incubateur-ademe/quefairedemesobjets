@@ -20,6 +20,7 @@
 >
 
     {% block main_heading %}
+    {# FIXME: explain logic below #}
     {% if page.synonyme %}
         {% include "components/produit/heading.html" with title=page.get_parent.specific.titre_phrase infotri=page.get_parent.specific.infotri synonyme=page.synonyme.titre_phrase %}
     {% else %}
