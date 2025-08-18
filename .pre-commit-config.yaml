@@ -26,7 +26,6 @@ repos:
       rev: v1.5.0
       hooks:
         - id: detect-secrets
-          # exclude: ^dbt/package-lock\.yml$
           exclude: ^dbt/package-lock\.yml$|^qfdmo/migrations/fixtures/objets\.json$
           name: Detect secrets
           language: python
