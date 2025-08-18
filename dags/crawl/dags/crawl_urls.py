@@ -1,4 +1,3 @@
-import pendulum
 from airflow import DAG
 from airflow.models.param import Param
 from crawl.tasks.airflow_logic.crawl_urls_check_crawl_task import (
@@ -25,6 +24,7 @@ from crawl.tasks.airflow_logic.crawl_urls_suggest_dns_fail_task import (
 from crawl.tasks.airflow_logic.crawl_urls_suggest_syntax_fail_task import (
     crawl_urls_suggest_syntax_fail_task,
 )
+from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
 
 UI_PARAMS_SEPARATOR_SELECTION = r"""
@@ -43,11 +43,11 @@ with DAG(
     default_args={
         "owner": "airflow",
         "depends_on_past": False,
-        "start_date": pendulum.today("UTC").add(days=-1),
         "email_on_failure": False,
         "email_on_retry": False,
         "retries": 0,
     },
+    start_date=START_DATES.YESTERDAY,
     catchup=False,
     schedule_interval=None,
     description=("Un DAG pour parcourir des URLs et suggérer des corrections"),

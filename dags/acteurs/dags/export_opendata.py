@@ -14,7 +14,6 @@ ENVIRONMENT = config("ENVIRONMENT", default="development")
 default_args = {
     "owner": "airflow",
     "depends_on_past": False,
-    "start_date": pendulum.today("UTC").add(days=-1),
     "email_on_failure": False,
     "email_on_retry": False,
     "retries": 3,
@@ -25,6 +24,7 @@ default_args = {
 with DAG(
     "export_opendata_dag",
     default_args=default_args,
+    start_date=pendulum.datetime(2025, 8, 1, tz="UTC"),
     dag_display_name="Acteurs Open-Data - Exporter les Acteurs en Open-Data",
     description=(
         "Ce DAG export les acteurs disponibles en opendata précédemment générés dans la"

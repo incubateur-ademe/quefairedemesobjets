@@ -15,9 +15,8 @@ Convertir la table de mapping en json avec les anciens identifiants externes com
 
 ```json
 {
-    "old1": "new1",
-    "old2": "new2",
-    …
+  "old1": "new1",
+  "old2": "new2"
 }
 ```
 
