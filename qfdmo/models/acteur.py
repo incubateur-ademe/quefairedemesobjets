@@ -19,6 +19,7 @@ from django.contrib.gis.geos import Point, Polygon
 from django.contrib.gis.geos.geometry import GEOSGeometry
 from django.core.cache import cache
 from django.core.files.images import get_image_dimensions
+from django.core.validators import RegexValidator
 from django.db.models import (
     Case,
     CheckConstraint,
@@ -67,6 +68,58 @@ def generate_short_uuid():
     return shortuuid.uuid()
 
 
+class ActeurStatus(models.TextChoices):
+    ACTIF = "ACTIF", "actif"
+    INACTIF = "INACTIF", "inactif"
+    SUPPRIME = "SUPPRIME", "supprimé"
+
+
+class DataLicense(models.TextChoices):
+    OPEN_LICENSE = "OPEN_LICENSE", "Licence Ouverte"
+    ODBL = "ODBL", "ODBL"
+    CC_BY_NC_SA = "CC_BY_NC_SA", "CC-BY-NC-SA"
+    NO_LICENSE = "NO_LICENSE", "Pas de licence"
+
+
+class ActeurPublicAccueilli(models.TextChoices):
+    PROFESSIONNELS_ET_PARTICULIERS = (
+        "Particuliers et professionnels",
+        "Particuliers et professionnels",
+    )
+    PROFESSIONNELS = "Professionnels", "Professionnels"
+    PARTICULIERS = "Particuliers", "Particuliers"
+    AUCUN = "Aucun", "Aucun"
+    UNKNOWN = "", ""
+
+
+class ActeurReprise(models.TextChoices):
+    UN_POUR_ZERO = REPRISE_1POUR0, "1 pour 0"
+    UN_POUR_UN = REPRISE_1POUR1, "1 pour 1"
+    UNKNOWN = "", ""
+
+
+class LieuPrestation(models.TextChoices):
+    A_DOMICILE = "A_DOMICILE", "À domicile"
+    SUR_PLACE = "SUR_PLACE", "Sur place"
+    SUR_PLACE_OU_A_DOMICILE = "SUR_PLACE_OU_A_DOMICILE", "Sur place ou à domicile"
+    UNKNOWN = "", ""
+
+
+class TypePerimetreADomicile(models.TextChoices):
+    DEPARTEMENTAL = "DEPARTEMENTAL", "Départemental"
+    KILOMETRIQUE = "KILOMETRIQUE", "Kilométrique"
+
+
+class DepartementOrNumValidator(RegexValidator):
+    # soit 2A, 2B, ou un entier
+    regex = r"^2A$|^2B$|^[0-9]+$"
+    message = (
+        "Le champ `value` doit être le numéro d'un département ou le nombre de"
+        " kilomètres d'un périmètre pour la réalisation d'un service à domicile."
+    )
+    code = "invalid_code"
+
+
 class ActeurService(CodeAsNaturalKeyModel):
     class Meta:
         ordering = ["libelle"]
@@ -96,36 +149,6 @@ class ActeurService(CodeAsNaturalKeyModel):
 
     def __str__(self):
         return f"{self.libelle} ({self.code})"
-
-
-class ActeurStatus(models.TextChoices):
-    ACTIF = "ACTIF", "actif"
-    INACTIF = "INACTIF", "inactif"
-    SUPPRIME = "SUPPRIME", "supprimé"
-
-
-class DataLicense(models.TextChoices):
-    OPEN_LICENSE = "OPEN_LICENSE", "Licence Ouverte"
-    ODBL = "ODBL", "ODBL"
-    CC_BY_NC_SA = "CC_BY_NC_SA", "CC-BY-NC-SA"
-    NO_LICENSE = "NO_LICENSE", "Pas de licence"
-
-
-class ActeurPublicAccueilli(models.TextChoices):
-    PROFESSIONNELS_ET_PARTICULIERS = (
-        "Particuliers et professionnels",
-        "Particuliers et professionnels",
-    )
-    PROFESSIONNELS = "Professionnels", "Professionnels"
-    PARTICULIERS = "Particuliers", "Particuliers"
-    AUCUN = "Aucun", "Aucun"
-    UNKNOWN = "", ""
-
-
-class ActeurReprise(models.TextChoices):
-    UN_POUR_ZERO = REPRISE_1POUR0, "1 pour 0"
-    UN_POUR_UN = REPRISE_1POUR1, "1 pour 1"
-    UNKNOWN = "", ""
 
 
 class ActeurType(CodeAsNaturalKeyModel):
@@ -430,6 +453,12 @@ class BaseActeur(TimestampedModel):
         blank=True,
         default="",
         db_default="",
+    )
+    lieu_prestation = models.CharField(
+        max_length=255,
+        choices=LieuPrestation.choices,
+        default=LieuPrestation.UNKNOWN,
+        blank=True,
     )
 
     @property
@@ -777,6 +806,31 @@ class Acteur(BaseActeur):
         self.generate_identifiant_unique_if_missing()
 
 
+class BasePerimetreADomicile(models.Model):
+    from django.core.validators import RegexValidator
+
+    class Meta:
+        abstract = True
+
+    acteur = models.ForeignKey(Acteur, on_delete=models.CASCADE)
+    type = models.CharField(
+        max_length=255,
+        choices=TypePerimetreADomicile.choices,
+        default=TypePerimetreADomicile.KILOMETRIQUE,
+    )
+    # Char is needed because Corsica codes are 2A and 2B
+    value = models.CharField(
+        max_length=255,
+        null=False,
+        blank=False,
+        validators=[DepartementOrNumValidator()],
+    )
+
+
+class PerimetreADomicile(BasePerimetreADomicile):
+    pass
+
+
 # TODO: améliorer ci-dessous avec un gestionnaire de cache
 # pour l'ensemble des propriétés calculées de type enfants/parents,
 # y inclure la refacto de is_parent
@@ -1030,6 +1084,10 @@ class RevisionActeurParent(RevisionActeur):
         verbose_name_plural = "Parents"
 
 
+class RevisionPerimetreADomicile(BasePerimetreADomicile):
+    acteur = models.ForeignKey(RevisionActeur, on_delete=models.CASCADE)
+
+
 """
 Model to display all acteurs in admin
 """
@@ -1057,6 +1115,13 @@ class VueActeur(BaseActeur):
     @property
     def is_parent(self):
         return self.pk and self.duplicats.exists()
+
+
+class VuePerimetreADomicile(BasePerimetreADomicile):
+    acteur = models.ForeignKey(VueActeur, on_delete=models.CASCADE)
+
+    class Meta:
+        managed = False
 
 
 class DisplayedActeur(BaseActeur):
@@ -1267,6 +1332,10 @@ class DisplayedActeur(BaseActeur):
         return not self.is_digital and bool(
             self.adresse or self.adresse_complement or self.code_postal or self.ville
         )
+
+
+class DisplayedPerimetreADomicile(BasePerimetreADomicile):
+    acteur = models.ForeignKey(DisplayedActeur, on_delete=models.CASCADE)
 
 
 class BasePropositionService(models.Model):
