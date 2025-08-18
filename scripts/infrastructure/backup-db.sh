@@ -1,4 +1,5 @@
 #!/bin/bash
+# TODO: lire l'environnement local directement pour le nom de la db
 
 # Récupérer l'ID de l'instance
 INSTANCE_ID=$(scw rdb instance list | grep "lvao-prod-webapp" | awk '{print $1}')
