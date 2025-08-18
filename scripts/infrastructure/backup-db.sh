@@ -17,6 +17,8 @@ if [ -n "$EXISTING_BACKUPS" ]; then
     read -p "Voulez-vous continuer et créer un nouveau backup ? (o/n): " CONTINUE
     if [[ "$CONTINUE" != "o" && "$CONTINUE" != "O" ]]; then
         echo "Création de backup annulée. Utilisation du dernier backup existant"
+        # TODO: display $BACKUP_ID here and download it instead of
+        # exiting.
         exit 0
     fi
 fi
@@ -49,6 +51,9 @@ echo "Téléchargement du backup..."
 
 mkdir -p tmpbackup
 cd tmpbackup
+
+rm -rf *.custom
+
 scw rdb backup download $BACKUP_ID
 cd ..
 
