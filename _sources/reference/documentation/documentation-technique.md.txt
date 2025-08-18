@@ -10,9 +10,9 @@ Elle suit la convention [DIATAXIS](https://diataxis.fr) et met en application, t
 
 On découpe la documentation en 3 parties (la section comment-faire contient les tutoriels) :
 
-- COMMENT-FAIRE : Guide l'utilisateur pour résoudre un problème, ex : copie de la base de données de prod vers preprod ([docs/comment-faire](../comment-faire/README.md))
-- EXPLICATIONS : Description de comment ça marche et des prises de décision, ex : architecture des données Acteurs et de leur revision ([docs/explications](../explications/README.md)))
-- REFERENCE : Description technique, ex : Architecture du dossier `data` ([docs/reference](../reference/README.md))
+- COMMENT-FAIRE : Guide l'utilisateur pour résoudre un problème, ex : copie de la base de données de prod vers preprod ([docs/comment-faire](../../comment-faire/README.md))
+- EXPLICATIONS : Description de comment ça marche et des prises de décision, ex : architecture des données Acteurs et de leur revision ([docs/explications](../../explications/README.md)))
+- REFERENCE : Description technique, ex : Architecture du dossier `data` ([docs/reference](../../reference/README.md))
 
 ## Spécificité de la documentation du projet
 
