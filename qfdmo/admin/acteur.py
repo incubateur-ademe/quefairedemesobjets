@@ -24,11 +24,15 @@ from qfdmo.models import (
     ActeurService,
     ActeurType,
     Action,
+    DisplayedPerimetreADomicile,
+    PerimetreADomicile,
     PropositionService,
     RevisionActeur,
+    RevisionPerimetreADomicile,
     RevisionPropositionService,
     Source,
     SousCategorieObjet,
+    VuePerimetreADomicile,
 )
 from qfdmo.models.acteur import (
     ActeurPublicAccueilli,
@@ -46,28 +50,55 @@ from qfdmo.widgets import CustomOSMWidget
 logger = logging.getLogger(__name__)
 
 
-class ActeurLabelQualiteInline(admin.StackedInline):
+## Inlines
+
+### LabelQualite
+
+
+class BaseLabelQualiteInline(admin.StackedInline):
+    extra = 0
+
+
+class LabelQualiteInline(NotMutableMixin, BaseLabelQualiteInline):
     model = Acteur.labels.through
-    extra = 0
-
-    def has_add_permission(self, request, obj=None):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        return False
 
 
-class RevisionActeurLabelQualiteInline(admin.StackedInline):
+class RevisionLabelQualiteInline(BaseLabelQualiteInline):
     model = RevisionActeur.labels.through
-    extra = 0
 
 
-class DisplayedActeurLabelQualiteInline(NotMutableMixin, admin.StackedInline):
+class DisplayedLabelQualiteInline(NotMutableMixin, BaseLabelQualiteInline):
     model = DisplayedActeur.labels.through
+
+
+class VueLabelQualiteInline(NotMutableMixin, BaseLabelQualiteInline):
+    model = VueActeur.labels.through
+
+
+### PerimetreADomicile
+
+
+class BasePerimetreADomicileInline(admin.StackedInline):
     extra = 0
+
+
+class PerimetreADomicileInline(NotMutableMixin, BasePerimetreADomicileInline):
+    model = PerimetreADomicile
+
+
+class RevisionPerimetreADomicileInline(BasePerimetreADomicileInline):
+    model = RevisionPerimetreADomicile
+
+
+class DisplayedPerimetreADomicileInline(NotMutableMixin, BasePerimetreADomicileInline):
+    model = DisplayedPerimetreADomicile
+
+
+class VuePerimetreADomicileInline(NotMutableMixin, BasePerimetreADomicileInline):
+    model = VuePerimetreADomicile
+
+
+### PropositionService
 
 
 class BasePropositionServiceForm(forms.ModelForm):
@@ -134,6 +165,13 @@ class RevisionPropositionServiceInline(BasePropositionServiceInline):
 
 class DisplayedPropositionServiceInline(NotMutableMixin, BasePropositionServiceInline):
     model = DisplayedPropositionService
+
+
+class VuePropositionServiceInline(NotMutableMixin, BasePropositionServiceInline):
+    model = VuePropositionService
+
+
+## BaseActeur
 
 
 class BaseActeurForm(forms.ModelForm):
@@ -209,6 +247,7 @@ class BaseActeurAdmin(admin.GISModelAdmin):
         "modifie_le",
         "acteur_services",
         "action_principale",
+        "lieu_prestation",
     )
 
     readonly_fields = [
@@ -223,6 +262,9 @@ class BaseActeurAdmin(admin.GISModelAdmin):
         if obj and "identifiant_unique" not in readonly_fields:
             readonly_fields += ["identifiant_unique"]
         return readonly_fields
+
+
+### Acteur
 
 
 class ActeurResource(resources.ModelResource):
@@ -285,13 +327,21 @@ class ActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
     modifiable = False
     ordering = ("nom",)
     resource_classes = [ActeurResource]
-    inlines = list(BaseActeurAdmin.inlines) + [ActeurLabelQualiteInline]
+    inlines = list(BaseActeurAdmin.inlines) + [
+        LabelQualiteInline,
+        PerimetreADomicileInline,
+    ]
 
     def get_readonly_fields(self, request, obj=None):
+        if settings.DEBUG:
+            return list(super().get_readonly_fields(request, obj))
         return [f.name for f in self.model._meta.fields if f.name != "location"]
 
     def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
         return False
+
+
+### RevisionActeur
 
 
 class RevisionActeurResource(ActeurResource):
@@ -321,22 +371,8 @@ class RevisionActeurChildInline(NotMutableMixin, admin.TabularInline):
         return None
 
 
-class VueActeurChildInline(RevisionActeurChildInline):
-    model = VueActeur
-    change_form_url = "admin:qfdmo_vueacteur_change"
-
-
-class RevisionActeurParentAdmin(admin.ModelAdmin):
+class RevisionActeurParentAdmin(NotMutableMixin, admin.ModelAdmin):
     search_fields = list(BaseActeurAdmin.search_fields)
-
-    def has_add_permission(self, request: HttpRequest) -> bool:
-        return False
-
-    def has_change_permission(self, request: HttpRequest) -> bool:
-        return False
-
-    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
 
     def change_view(
         self,
@@ -409,7 +445,8 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
         else:
             return [
                 RevisionPropositionServiceInline(self.model, self.admin_site),
-                RevisionActeurLabelQualiteInline(self.model, self.admin_site),
+                RevisionLabelQualiteInline(self.model, self.admin_site),
+                RevisionPerimetreADomicileInline(self.model, self.admin_site),
             ]
 
     # update readlonly fields following statut of object
@@ -421,6 +458,7 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
                 "acteur_services",
                 "source",
                 "labels",
+                "perimetre_adomicile",
             ]
         return super().get_readonly_fields(request, revision_acteur)
 
@@ -526,6 +564,9 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
         return revision_acteur_form
 
 
+### BasePropositionService
+
+
 class BasePropositionServiceAdmin(admin.GISModelAdmin):
     form = BasePropositionServiceForm
 
@@ -555,6 +596,9 @@ class BasePropositionServiceResource(resources.ModelResource):
         return self.fields["delete"].clean(row)
 
 
+### PropositionService
+
+
 class PropositionServiceResource(BasePropositionServiceResource):
     acteur = fields.Field(
         column_name="acteur",
@@ -577,6 +621,9 @@ class PropositionServiceAdmin(
     ]
     search_help_text = "Recherche sur le nom, le siret ou le siren de l'acteur"
     autocomplete_fields = ["acteur"]
+
+
+### RevisionPropositionService
 
 
 class RevisionPropositionServiceResource(BasePropositionServiceResource):
@@ -606,9 +653,76 @@ class RevisionPropositionServiceAdmin(
     autocomplete_fields = ["acteur"]
 
 
+### DisplayedActeur
+
+
 class DisplayedActeurResource(ActeurResource):
     class Meta:
         model = DisplayedActeur
+
+
+class DisplayedActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
+    list_display = list(BaseActeurAdmin.list_display) + ["uuid"]
+    search_fields = list(BaseActeurAdmin.search_fields) + ["uuid"]
+    change_form_template = "admin/acteur/change_form.html"
+    gis_widget = CustomOSMWidget
+    base_fields = list(BaseActeurAdmin.fields)
+    base_fields.remove("source")
+    base_fields.insert(1, "sources")
+    base_fields.insert(0, "uuid")
+    readonly_fields = list(BaseActeurAdmin.readonly_fields)
+    readonly_fields.insert(0, "uuid")
+    fields = base_fields
+
+    inlines = [
+        DisplayedPropositionServiceInline,
+        DisplayedLabelQualiteInline,
+        DisplayedPerimetreADomicileInline,
+    ]
+    modifiable = False
+    resource_classes = [DisplayedActeurResource]
+
+    def get_readonly_fields(self, request, obj=None):
+        if settings.DEBUG:
+            return list(super().get_readonly_fields(request, obj))
+        return [f.name for f in self.model._meta.fields if f.name != "location"]
+
+    def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
+
+### VueActeur
+
+
+class VueActeurChildInline(RevisionActeurChildInline):
+    model = VueActeur
+    change_form_url = "admin:qfdmo_vueacteur_change"
+
+
+class VueActeurAdmin(NotMutableMixin, BaseActeurAdmin):
+    list_display = list(BaseActeurAdmin.list_display) + ["uuid"]
+    search_fields = list(BaseActeurAdmin.search_fields) + ["uuid"]
+    change_form_template = "admin/acteur/change_form.html"
+
+    inlines = [
+        VuePropositionServiceInline,
+        VueLabelQualiteInline,
+        VuePerimetreADomicileInline,
+    ]
+    fields = list(BaseActeurAdmin.fields) + ["parent"]
+
+    def get_inline_instances(self, request, vue_acteur=None):
+        if vue_acteur and vue_acteur.is_parent:
+            return [VueActeurChildInline(self.model, self.admin_site)]
+        else:
+            return [
+                VuePropositionServiceInline(self.model, self.admin_site),
+                VueLabelQualiteInline(self.model, self.admin_site),
+                VuePerimetreADomicileInline(self.model, self.admin_site),
+            ]
+
+
+## Exporter
 
 
 class GenericExporterMixin:
@@ -810,65 +924,6 @@ class OpenSourceDisplayedActeurResource(resources.ModelResource, GenericExporter
             "acteur_services",
             "propositions_services",
         ]
-
-
-class DisplayedActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
-    list_display = list(BaseActeurAdmin.list_display) + ["uuid"]
-    search_fields = list(BaseActeurAdmin.search_fields) + ["uuid"]
-    change_form_template = "admin/acteur/change_form.html"
-    gis_widget = CustomOSMWidget
-    base_fields = list(BaseActeurAdmin.fields)
-    base_fields.remove("source")
-    base_fields.insert(1, "sources")
-    base_fields.insert(0, "uuid")
-    readonly_fields = list(BaseActeurAdmin.readonly_fields)
-    readonly_fields.insert(0, "uuid")
-    fields = base_fields
-
-    inlines = [
-        DisplayedPropositionServiceInline,
-        DisplayedActeurLabelQualiteInline,
-    ]
-    modifiable = False
-    resource_classes = [DisplayedActeurResource]
-
-    def get_readonly_fields(self, request, obj=None):
-        if settings.DEBUG:
-            return list(super().get_readonly_fields(request, obj))
-        return [f.name for f in self.model._meta.fields if f.name != "location"]
-
-    def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
-
-
-class VuePropositionServiceInline(NotMutableMixin, BasePropositionServiceInline):
-    model = VuePropositionService
-
-
-class VueActeurLabelQualiteInline(NotMutableMixin, admin.StackedInline):
-    model = VueActeur.labels.through
-    extra = 0
-
-
-class VueActeurAdmin(NotMutableMixin, BaseActeurAdmin):
-    list_display = list(BaseActeurAdmin.list_display) + ["uuid"]
-    search_fields = list(BaseActeurAdmin.search_fields) + ["uuid"]
-    change_form_template = "admin/acteur/change_form.html"
-
-    inlines = [
-        VuePropositionServiceInline,
-        VueActeurLabelQualiteInline,
-    ]
-    fields = list(BaseActeurAdmin.fields) + ["parent"]
-
-    def get_inline_instances(self, request, vue_acteur=None):
-        if vue_acteur and vue_acteur.is_parent:
-            return [VueActeurChildInline(self.model, self.admin_site)]
-        else:
-            return [
-                VuePropositionServiceInline(self.model, self.admin_site),
-                VueActeurLabelQualiteInline(self.model, self.admin_site),
-            ]
 
 
 admin.site.register(Acteur, ActeurAdmin)

@@ -662,6 +662,7 @@ class BaseActeur(TimestampedModel):
             "proposition_services",
             "acteur_services",
             "labels",
+            "perimetre_adomicile",
         }
 
     def commentaires_ajouter(self, added):
@@ -764,6 +765,11 @@ class Acteur(BaseActeur):
                 name="acteur_unique_by_source_and_external_id",
             )
         ]
+        permissions = [
+            ("forceadd_acteur", "Can add an acteur (for debug purposes)"),
+            ("forceupdate_acteur", "Can update an acteur (for debug purposes)"),
+            ("forcedelete_acteur", "Can delete an acteur (for debug purposes)"),
+        ]
 
         verbose_name = "ACTEUR de l'EC - IMPORTÉ"
         verbose_name_plural = "ACTEURS de l'EC - IMPORTÉ"
@@ -811,8 +817,12 @@ class BasePerimetreADomicile(models.Model):
 
     class Meta:
         abstract = True
+        verbose_name = "Périmètre à domicile"
+        verbose_name_plural = "Périmètres à domicile"
 
-    acteur = models.ForeignKey(Acteur, on_delete=models.CASCADE)
+    acteur = models.ForeignKey(
+        Acteur, on_delete=models.CASCADE, related_name="perimetre_adomicile"
+    )
     type = models.CharField(
         max_length=255,
         choices=TypePerimetreADomicile.choices,
@@ -919,6 +929,9 @@ class RevisionActeur(BaseActeur):
         acteur = self.set_default_fields_and_objects_before_save()
         self.full_clean()
         creating = self._state.adding  # Before calling save
+        if creating:
+            # We keep acteur's lieu_prestation because it goes with perimetre_adomicile
+            self.lieu_prestation = self.lieu_prestation or acteur.lieu_prestation
         super_result = super().save(*args, **kwargs)
         if creating and acteur:
             for proposition_service in acteur.proposition_services.all():  # type: ignore
@@ -935,6 +948,12 @@ class RevisionActeur(BaseActeur):
                 self.labels.add(label)
             for acteur_service in acteur.acteur_services.all():
                 self.acteur_services.add(acteur_service)
+            for perimetre_adomicile in acteur.perimetre_adomicile.all():
+                RevisionPerimetreADomicile.objects.create(
+                    acteur=self,
+                    type=perimetre_adomicile.type,
+                    value=perimetre_adomicile.value,
+                )
 
         if self.parent != self._original_parent and self._original_parent:
             if not self._original_parent.is_parent:
@@ -970,6 +989,7 @@ class RevisionActeur(BaseActeur):
                 "proposition_services",
                 "acteur_services",
                 "labels",
+                "perimetre_adomicile",
                 "parent",
                 "parent_reason",
                 "is_parent",
@@ -1085,7 +1105,9 @@ class RevisionActeurParent(RevisionActeur):
 
 
 class RevisionPerimetreADomicile(BasePerimetreADomicile):
-    acteur = models.ForeignKey(RevisionActeur, on_delete=models.CASCADE)
+    acteur = models.ForeignKey(
+        RevisionActeur, on_delete=models.CASCADE, related_name="perimetre_adomicile"
+    )
 
 
 """
@@ -1118,7 +1140,9 @@ class VueActeur(BaseActeur):
 
 
 class VuePerimetreADomicile(BasePerimetreADomicile):
-    acteur = models.ForeignKey(VueActeur, on_delete=models.CASCADE)
+    acteur = models.ForeignKey(
+        VueActeur, on_delete=models.CASCADE, related_name="perimetre_adomicile"
+    )
 
     class Meta:
         managed = False
@@ -1335,7 +1359,9 @@ class DisplayedActeur(BaseActeur):
 
 
 class DisplayedPerimetreADomicile(BasePerimetreADomicile):
-    acteur = models.ForeignKey(DisplayedActeur, on_delete=models.CASCADE)
+    acteur = models.ForeignKey(
+        DisplayedActeur, on_delete=models.CASCADE, related_name="perimetre_adomicile"
+    )
 
 
 class BasePropositionService(models.Model):
