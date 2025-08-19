@@ -38,8 +38,12 @@ logger = logging.getLogger(__name__)
 
 
 class GenreNombreModel(models.Model):
-    genre = models.CharField("Genre", choices=[("m", "Masculin"), ("f", "Féminin")])
-    nombre = models.IntegerField("Nombre", choices=[(1, "singulier"), (2, "pluriel")])
+    genre = models.CharField(
+        "Genre", blank=True, choices=[("m", "Masculin"), ("f", "Féminin")]
+    )
+    nombre = models.IntegerField(
+        "Nombre", null=True, blank=True, choices=[(1, "singulier"), (2, "pluriel")]
+    )
 
     class Meta:
         abstract = True
@@ -123,6 +127,7 @@ class TitleFields(models.Model):
         "Titre utilisé dans les phrases",
         help_text="Ce titre sera utilisé dans les contenus réutilisables, "
         "pour l'affichage du synonyme de recherche",
+        blank=True,
     )
 
     class Meta:
