@@ -16,6 +16,7 @@ jobs:
   airflow_docker:
     name: 🐳 Airflow Docker
     uses: ./.github/workflows/airflow_docker.yml
+    secrets: inherit # pragma: allowlist secret`
 
   webapp:
     name: 🟠 Webapp
