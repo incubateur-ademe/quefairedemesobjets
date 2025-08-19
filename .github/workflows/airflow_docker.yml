@@ -44,8 +44,8 @@ jobs:
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
         with:
           context: .
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=scheduler
+          cache-to: type=gha,scope=scheduler,mode=max
           push: true
           tags: ${{ steps.airflow_scheduler_meta_scaleway.outputs.tags }}
           labels: ${{ steps.airflow_scheduler_meta_scaleway.outputs.labels }}
@@ -61,8 +61,8 @@ jobs:
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
         with:
           context: .
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=webserver
+          cache-to: type=gha,scope=webserver,mode=max
           push: true
           tags: ${{ steps.airflow_webserver_meta_scaleway.outputs.tags }}
           labels: ${{ steps.airflow_webserver_meta_scaleway.outputs.labels }}
