@@ -34,7 +34,7 @@ jobs:
 
   deploy_scaleway_webserver:
     secrets: inherit # pragma: allowlist secret`
-    name: 🟣⏳ Scaleway Airflow scheduler
+    name: 🟣⏳ Scaleway Airflow webserver
     uses: ./.github/workflows/_scaleway_container_deploy.yml
     with:
       environment: ${{ inputs.environment }}
