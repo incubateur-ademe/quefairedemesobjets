@@ -3,6 +3,7 @@
 name: 🐳 Docker images for Airflow
 on:
   # See https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#webhook-payload-object-38
+  workflow_call:
   release:
     types: [ released, prereleased ]
   push:
@@ -44,7 +45,7 @@ jobs:
         with:
           context: .
           push: true
-          cache-from: type=registry
+          cache-from: type=registry,ref=${{ env.OWNER }}/airflow-scheduler:latest
           cache-to: type=inline
           tags: ${{ steps.airflow_scheduler_meta.outputs.tags }}
           labels: ${{ steps.airflow_scheduler_meta.outputs.labels }}
@@ -61,7 +62,7 @@ jobs:
         with:
           context: .
           push: true
-          cache-from: type=registry
+          cache-from: type=registry,ref=${{ env.OWNER }}/airflow-webserver:latest
           cache-to: type=inline
           tags: ${{ steps.airflow_webserver_meta.outputs.tags }}
           labels: ${{ steps.airflow_webserver_meta.outputs.labels }}
@@ -88,7 +89,7 @@ jobs:
         with:
           context: .
           push: true
-          cache-from: type=registry
+          cache-from: type=registry,ref=${{ env.SCALEWAY_NAMESPACE }}/airflow-scheduler:latest
           cache-to: type=inline
           tags: ${{ steps.airflow_scheduler_meta_scaleway.outputs.tags }}
           labels: ${{ steps.airflow_scheduler_meta_scaleway.outputs.labels }}
@@ -105,7 +106,7 @@ jobs:
         with:
           context: .
           push: true
-          cache-from: type=registry
+          cache-from: type=registry,ref=${{ env.SCALEWAY_NAMESPACE }}/airflow-webserver:latest
           cache-to: type=inline
           tags: ${{ steps.airflow_webserver_meta_scaleway.outputs.tags }}
           labels: ${{ steps.airflow_webserver_meta_scaleway.outputs.labels }}
