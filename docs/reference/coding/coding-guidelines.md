@@ -1,4 +1,4 @@
-# Règles de codage
+# Règles de codage python et typescript
 
 - Nommage (et [Swift API Guidelines](https://www.swift.org/documentation/api-design-guidelines/))
 - La base de code python suit les conventions décrites par [PEP8](https://peps.python.org/pep-0008/). Garanti en CI par `ruff`
