@@ -61,3 +61,5 @@ jobs:
           tags: ${{ steps.airflow_webserver_meta_scaleway.outputs.tags }}
           labels: ${{ steps.airflow_webserver_meta_scaleway.outputs.labels }}
           file: airflow-webserver.Dockerfile
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
