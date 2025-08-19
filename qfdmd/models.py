@@ -68,6 +68,11 @@ class Bonus(index.Indexed, models.Model):
 class ReusableContent(index.Indexed, GenreNombreModel):
     title = models.CharField(verbose_name="Titre", unique=True)
     content = RichTextField(verbose_name="Contenu")
+    feminin_singulier = RichTextField(verbose_name="Contenu - Féminin singulier")
+    feminin_pluriel = RichTextField(verbose_name="Contenu - Féminin pluriel")
+    masculin_singulier = RichTextField(verbose_name="Contenu - Masculin singulier")
+    masculin_pluriel = RichTextField(verbose_name="Contenu - Masculin pluriel")
+
     search_fields = [
         index.SearchField("title"),
         index.AutocompleteField("title"),
@@ -76,6 +81,10 @@ class ReusableContent(index.Indexed, GenreNombreModel):
     panels = [
         FieldPanel("title"),
         FieldPanel("content"),
+        FieldPanel("feminin_singulier"),
+        FieldPanel("feminin_pluriel"),
+        FieldPanel("masculin_singulier"),
+        FieldPanel("masculin_pluriel"),
         FieldRowPanel(
             [FieldPanel("genre"), FieldPanel("nombre")], heading="Genre et nombre"
         ),
