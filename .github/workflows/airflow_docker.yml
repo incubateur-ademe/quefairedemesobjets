@@ -44,8 +44,8 @@ jobs:
         with:
           context: .
           push: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=registry
+          cache-to: type=inline
           tags: ${{ steps.airflow_scheduler_meta.outputs.tags }}
           labels: ${{ steps.airflow_scheduler_meta.outputs.labels }}
           file: airflow-scheduler.Dockerfile
@@ -61,8 +61,8 @@ jobs:
         with:
           context: .
           push: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=registry
+          cache-to: type=inline
           tags: ${{ steps.airflow_webserver_meta.outputs.tags }}
           labels: ${{ steps.airflow_webserver_meta.outputs.labels }}
           file: airflow-webserver.Dockerfile
@@ -88,8 +88,8 @@ jobs:
         with:
           context: .
           push: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=registry
+          cache-to: type=inline
           tags: ${{ steps.airflow_scheduler_meta_scaleway.outputs.tags }}
           labels: ${{ steps.airflow_scheduler_meta_scaleway.outputs.labels }}
           file: airflow-scheduler.Dockerfile
@@ -105,8 +105,8 @@ jobs:
         with:
           context: .
           push: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=registry
+          cache-to: type=inline
           tags: ${{ steps.airflow_webserver_meta_scaleway.outputs.tags }}
           labels: ${{ steps.airflow_webserver_meta_scaleway.outputs.labels }}
           file: airflow-webserver.Dockerfile
