@@ -24,6 +24,22 @@ jobs:
       # Name of environment variable set in github environment
       app_name_key: AIRFLOW_WEBSERVER_CLEVERCLOUD_APP_NAME
 
+  deploy_scaleway_scheduler:
+    secrets: inherit # pragma: allowlist secret`
+    name: 🟣⏳ Scaleway Airflow scheduler
+    uses: ./.github/workflows/_scaleway_container_deploy.yml
+    with:
+      environment: ${{ inputs.environment }}
+      container_id: ${{ vars.SCALEWAY_AIRFLOW_SCHEDULER_CONTAINER_ID }}
+
+  deploy_scaleway_webserver:
+    secrets: inherit # pragma: allowlist secret`
+    name: 🟣⏳ Scaleway Airflow webserver
+    uses: ./.github/workflows/_scaleway_container_deploy.yml
+    with:
+      environment: ${{ inputs.environment }}
+      container_id: ${{ vars.SCALEWAY_AIRFLOW_WEBSERVER_CONTAINER_ID }}
+
 # Address actions/missing-workflow-permissions rule in
 # code scanning alerts
 permissions:
