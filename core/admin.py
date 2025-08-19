@@ -17,15 +17,12 @@ class NotMutableMixin:
     # permissions
     def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
         return settings.DEBUG
-        # return request.user.has_perm("qfdmo.forceadd_acteur")
 
     def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
         return settings.DEBUG
-        # return request.user.has_perm("qfdmo.forcedelete_acteur")
 
     def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
         return settings.DEBUG
-        # return request.user.has_perm("qfdmo.forceupdate_acteur")
 
 
 class NotEditableMixin:

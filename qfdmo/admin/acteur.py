@@ -441,7 +441,10 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
 
     def get_inline_instances(self, request, revision_acteur=None):
         if revision_acteur and revision_acteur.is_parent:
-            return [RevisionActeurChildInline(self.model, self.admin_site)]
+            return [
+                RevisionActeurChildInline(self.model, self.admin_site),
+                RevisionPerimetreADomicileInline(self.model, self.admin_site),
+            ]
         else:
             return [
                 RevisionPropositionServiceInline(self.model, self.admin_site),

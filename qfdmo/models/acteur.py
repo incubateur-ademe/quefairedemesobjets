@@ -765,11 +765,6 @@ class Acteur(BaseActeur):
                 name="acteur_unique_by_source_and_external_id",
             )
         ]
-        permissions = [
-            ("forceadd_acteur", "Can add an acteur (for debug purposes)"),
-            ("forceupdate_acteur", "Can update an acteur (for debug purposes)"),
-            ("forcedelete_acteur", "Can delete an acteur (for debug purposes)"),
-        ]
 
         verbose_name = "ACTEUR de l'EC - IMPORTÉ"
         verbose_name_plural = "ACTEURS de l'EC - IMPORTÉ"
@@ -931,6 +926,7 @@ class RevisionActeur(BaseActeur):
         creating = self._state.adding  # Before calling save
         if creating:
             # We keep acteur's lieu_prestation because it goes with perimetre_adomicile
+            # FIXME: should we keep this exception ?
             self.lieu_prestation = self.lieu_prestation or acteur.lieu_prestation
         super_result = super().save(*args, **kwargs)
         if creating and acteur:
@@ -1117,7 +1113,6 @@ Model to display all acteurs in admin
 
 class VueActeur(BaseActeur):
     class Meta:
-        managed = False
         verbose_name = "ACTEUR de l'EC - Vue sur l'acteur"
         verbose_name_plural = "ACTEURS de l'EC - Vues sur tous les acteurs"
 
@@ -1143,9 +1138,6 @@ class VuePerimetreADomicile(BasePerimetreADomicile):
     acteur = models.ForeignKey(
         VueActeur, on_delete=models.CASCADE, related_name="perimetre_adomicile"
     )
-
-    class Meta:
-        managed = False
 
 
 class DisplayedActeur(BaseActeur):
@@ -1438,7 +1430,6 @@ class VuePropositionService(BasePropositionService):
     class Meta:
         verbose_name = "Vue sur la proposition de service"
         verbose_name_plural = "Vue sur toutes les propositions de service"
-        managed = False
 
     id = models.CharField(primary_key=True)
 

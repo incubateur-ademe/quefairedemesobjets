@@ -118,6 +118,14 @@ with DAG(
             "exposure_carte_propositionservice",
         )
     )
+    check_model_table_displayedperimetreadomicile_task = (
+        check_model_table_consistency_task(
+            dag,
+            "qfdmo",
+            "DisplayedPerimetreADomicile",
+            "exposure_carte_perimetreadomicile",
+        )
+    )
     replace_displayedacteur_table_task = replace_acteur_table_task(
         dag, "qfdmo_displayed", "exposure_carte_"
     )
@@ -130,6 +138,9 @@ with DAG(
         "qfdmo",
         "VuePropositionService",
         "exposure_exhaustive_propositionservice",
+    )
+    check_model_table_vueperimetreadomicile_task = check_model_table_consistency_task(
+        dag, "qfdmo", "VuePerimetreADomicile", "exposure_exhaustive_perimetreadomicile"
     )
     replace_vueacteur_table_task = replace_acteur_table_task(
         dag, "qfdmo_vue", "exposure_exhaustive_"
@@ -160,6 +171,7 @@ with DAG(
         dbt_test_exposure_acteurs_carte
         >> check_model_table_displayedacteur_task
         >> check_model_table_displayedpropositionservice_task
+        >> check_model_table_displayedperimetreadomicile_task
         >> replace_displayedacteur_table_task
     )
 
@@ -167,5 +179,6 @@ with DAG(
         dbt_test_exposure_acteurs_exhaustive
         >> check_model_table_vueacteur_task
         >> check_model_table_vuepropositionservice_task
+        >> check_model_table_vueperimetreadomicile_task
         >> replace_vueacteur_table_task
     )

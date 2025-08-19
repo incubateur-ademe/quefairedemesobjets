@@ -29,6 +29,7 @@ SELECT
     COALESCE(ra.uniquement_sur_rdv, a.uniquement_sur_rdv) AS uniquement_sur_rdv,
     {{ coalesce_empty('ra.consignes_dacces', 'a.consignes_dacces') }} AS consignes_dacces,
     COALESCE(ra.action_principale_id, a.action_principale_id) AS action_principale_id,
+    COALESCE(ra.lieu_prestation, a.lieu_prestation) AS lieu_prestation,
     COALESCE(ra.modifie_le, a.modifie_le) AS modifie_le,
     ra.parent_id AS parent_id,
     COALESCE(a.cree_le, ra.cree_le) AS cree_le,

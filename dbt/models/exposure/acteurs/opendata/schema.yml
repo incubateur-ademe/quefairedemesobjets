@@ -117,6 +117,17 @@ models:
         description: "La date de dernière modification de l'acteur"
         tests:
           - dbt_expectations.expect_column_to_exist
+      - name: lieu_prestation
+        description: "Le lieu de prestation de l'acteur"
+        tests:
+          - dbt_expectations.expect_column_to_exist
+      - name: perimetreadomicile
+        description: "Les périmètres à domicile de l'acteur"
+        data_type: jsonb
+        tests:
+          - dbt_expectations.expect_column_to_exist
+          - dbt_expectations.expect_column_type_to_be:
+              type: jsonb
     tests:
       - dbt_expectations.expect_table_row_count_to_be_between:
           min_value: 250000
