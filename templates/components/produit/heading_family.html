@@ -1,15 +1,5 @@
 {% extends "./heading.html" %}
 
-{% block title_classes %}
-qf-text-[3.5rem] {# 60px is not available in DSFR sizes #}
-{% endblock title_classes %}
+{% block wrapper_classes %}qf-bg-green-menthe-975-75{% endblock %}
 
-{% block wrapper %}
-<div class="qf-py-8w qf-flex qf-text-green-menthe-main-548 qf-bg-green-menthe-975-75">
-{{ block.super }}
-</div>
-{% endblock wrapper %}
-
-{% block title_content %}
-    <span class="qf-text-black">Que faire de mon</span> <span class="qf-text-green-menthe-sun-373-moon-652">{% firstof page.label page.title %}</span>
-{% endblock title_content %}
+{% block title_classes %}qf-text-[3.5rem] {# 60px is not available in DSFR sizes #}{% endblock %}
