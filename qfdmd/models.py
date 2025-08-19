@@ -1,7 +1,6 @@
 import logging
 from urllib.parse import urlencode
 
-import sites_faciles
 from django import forms
 from django.contrib.gis.db import models
 from django.db.models import CheckConstraint, Q
@@ -21,18 +20,14 @@ from wagtail.admin.panels import (
     ObjectList,
     TabbedInterface,
 )
-from wagtail.admin.panels.page_utils import WagtailAdminPageForm
 from wagtail.fields import RichTextField, StreamField
 from wagtail.images.blocks import ImageBlock
 from wagtail.models import Page, ParentalKey
 from wagtail.search import index
 from wagtail.snippets.models import register_snippet
 
-from qfdmd.blocks import STREAMFIELD_COMMON_BLOCKS, ExtendedCommonStreamBlock
+from qfdmd.blocks import STREAMFIELD_COMMON_BLOCKS
 from qfdmo.models.utils import NomAsNaturalKeyModel
-
-sites_faciles.content_manager.blocks.CommonStreamBlock = ExtendedCommonStreamBlock
-
 
 logger = logging.getLogger(__name__)
 
@@ -141,25 +136,6 @@ class ProduitIndexPage(Page, CompiledFieldMixin):
         verbose_name = "Index des familles & produits"
 
 
-class ProduitPageForm(WagtailAdminPageForm):
-    parent_page_id = forms.CharField(widget=forms.widgets.HiddenInput())
-
-    def __init__(self, data=None, files=None, parent_page=None, *args, **kwargs):
-        initial = kwargs.pop("initial", {})
-
-        if parent_page:
-            initial["parent_page_id"] = parent_page.pk
-
-        return super().__init__(
-            data,
-            files,
-            parent_page,
-            *args,
-            initial=initial,
-            **kwargs,
-        )
-
-
 class ProduitPageTag(TaggedItemBase):
     content_object = ParentalKey(
         "qfdmd.ProduitPage",
@@ -177,7 +153,6 @@ class AncestorFieldsMixin:
 class ProduitPage(
     Page, GenreNombreModel, CompiledFieldMixin, TitleFields, AncestorFieldsMixin
 ):
-    base_form_class = ProduitPageForm
     subpage_types = [
         "qfdmd.synonymepage",
     ]
@@ -185,6 +160,12 @@ class ProduitPage(
 
     # Taxonomie
     tags = ClusterTaggableManager(through=ProduitPageTag, blank=True, related_name="+")
+    sous_categories = models.ManyToManyField(
+        "qfdmo.SousCategorieObjet",
+        related_name="produit_pages",
+        blank=True,
+    )
+
     # Config
     bonus = models.ForeignKey(
         "qfdmd.bonus",
@@ -303,7 +284,10 @@ class ProduitPage(
         ),
         FieldPanel("usage_unique"),
         MultiFieldPanel(
-            [FieldPanel("tags")],
+            [
+                FieldPanel("tags"),
+                FieldPanel("sous_categories", widget=forms.CheckboxSelectMultiple),
+            ],
             heading="Taxonomie",
         ),
     ]
