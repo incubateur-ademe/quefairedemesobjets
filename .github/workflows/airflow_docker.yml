@@ -30,6 +30,8 @@ jobs:
           username: nologin
           password: ${{ secrets.SCALEWAY_DOCKER_SECRET }}
 
+      - uses: docker/setup-buildx-action@4cc794f83e4b7488282e879f4469e86246e52ddd
+
       # https://github.com/docker/metadata-action
       - name: "[🟣 Scaleway] Extract metadata (tags, labels) for Docker"
         id: airflow_scheduler_meta_scaleway
@@ -42,6 +44,8 @@ jobs:
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
         with:
           context: .
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           push: true
           tags: ${{ steps.airflow_scheduler_meta_scaleway.outputs.tags }}
           labels: ${{ steps.airflow_scheduler_meta_scaleway.outputs.labels }}
@@ -57,6 +61,8 @@ jobs:
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
         with:
           context: .
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           push: true
           tags: ${{ steps.airflow_webserver_meta_scaleway.outputs.tags }}
           labels: ${{ steps.airflow_webserver_meta_scaleway.outputs.labels }}
