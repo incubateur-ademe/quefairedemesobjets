@@ -27,12 +27,22 @@ def get_choices(*args, **kwargs) -> list:
     return [("coucou", "coucou")]
 
 
+reusable_block = SnippetChooserBlock(
+    "qfdmd.reusablecontent",
+    label="Contenu réutilisable",
+    template="blocks/reusable.html",
+)
+
+carte_sur_mesure_block = SnippetChooserBlock(
+    "qfdmo.CarteConfig",
+    label="Carte sur mesure",
+    template="blocks/carte.html",
+)
+
+
 class ExtendedCommonStreamBlock(CommonStreamBlock):
-    reusable = SnippetChooserBlock(
-        "qfdmd.reusablecontent",
-        label="Contenu réutilisable",
-        template="blocks/reusable.html",
-    )
+    reusable = reusable_block
+    carte_sur_mesure = carte_sur_mesure_block
 
 
 class ColumnBlock(sites_faciles_blocks.ColumnBlock, ExtendedCommonStreamBlock):
@@ -80,11 +90,11 @@ STREAMFIELD_COMMON_BLOCKS = [
     ("bonus", Bonus()),
     (
         "reusable",
-        SnippetChooserBlock(
-            "qfdmd.reusablecontent",
-            label="Contenu réutilisable",
-            template="blocks/reusable.html",
-        ),
+        reusable_block,
+    ),
+    (
+        "carte_sur_mesure",
+        carte_sur_mesure_block,
     ),
     ("tabs", TabsBlock(label=_("Tabs"), group=_("DSFR components"))),
 ]

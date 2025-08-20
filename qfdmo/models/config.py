@@ -53,19 +53,47 @@ class GroupeActionConfig(models.Model):
 @register_snippet
 class CarteConfig(models.Model):
     nom = models.CharField(unique=True)
-    hide_legend = models.BooleanField(
+
+    # UI
+    class ModesAffichage(models.TextChoices):
+        CARTE = "carte", "Carte"
+        LISTE = "liste", "Liste"
+
+    mode_affichage = models.CharField(
+        default=ModesAffichage.CARTE,
+        choices=ModesAffichage,
+        verbose_name="Mode d'affichage par défaut",
+        help_text="Ce choix permet de définir le mode d'affichage par défaut de"
+        " la carte. Le mode liste affiche une liste d'acteurs tandis qu'une"
+        " carte affiche un fond de carte.",
+    )
+    cacher_legende = models.BooleanField(
         default=False,
         verbose_name="Cacher la légende",
         help_text="Cocher cette case cache la légende affichée en bas à gauche de la "
         "carte en desktop et au dessus de celle-ci en mobile",
     )
-    no_branding = models.BooleanField(
+    supprimer_branding = models.BooleanField(
         verbose_name="Supprimer le branding",
         default=False,
         help_text="Supprime le logo dans l'entête de la carte ainsi que"
         " le bouton Infos. Ce mode est utilisé essentiellement "
         "pour la carte affichée dans l'assistant",
     )
+    titre_previsualisation = models.CharField(
+        blank=True,
+        verbose_name="Titre de l'écran de prévisualisation",
+        help_text="Ce titre s'affiche avant que l'utilisateur n'ait fait une recherche "
+        "dans la carte",
+    )
+    contenu_previsualisation = models.TextField(
+        blank=True,
+        verbose_name="Contenu de l'écran de prévisualisation",
+        help_text="Ce texte s'affiche avant que l'utilisateur n'ait fait une recherche "
+        "dans la carte",
+    )
+
+    # Config
     slug = models.SlugField(
         unique=True,
         help_text=mark_safe(
@@ -117,24 +145,11 @@ class CarteConfig(models.Model):
         blank=True,
     )
 
-    preview_title = models.CharField(
-        blank=True,
-        verbose_name="Titre de l'écran de prévisualisation",
-        help_text="Ce titre s'affiche avant que l'utilisateur n'ait fait une recherche "
-        "dans la carte",
-    )
-    preview_content = models.TextField(
-        blank=True,
-        verbose_name="Contenu de l'écran de prévisualisation",
-        help_text="Ce texte s'affiche avant que l'utilisateur n'ait fait une recherche "
-        "dans la carte",
-    )
-
     def get_absolute_url(self):
         return reverse("qfdmo:carte_custom", kwargs={"slug": self.slug})
 
     def __str__(self):
-        return self.nom
+        return f"Carte - {self.nom}"
 
     class Meta:
         verbose_name = "Carte sur mesure"

@@ -97,7 +97,7 @@ class ReusableContent(index.Indexed, GenreNombreModel):
         verbose_name_plural = "Contenus réutilisables"
 
 
-class CompiledFieldMixin:
+class CompiledFieldMixin(Page):
     @cached_property
     def famille(self):
         if famille := self.get_ancestors().type(FamilyPage).first():
@@ -106,15 +106,29 @@ class CompiledFieldMixin:
 
     @cached_property
     def compiled_body(self):
-        if not self.body and self.famille:
-            return self.famille.specific.body
-        return self.body
+        return self._get_compiled_field("body")
 
     @cached_property
     def compiled_bonus(self):
-        if not self.bonus and self.famille and not self.disable_bonus_inheritance:
-            return self.famille.specific.bonus
-        return self.bonus
+        return self._get_compiled_field("bonus", "disable_bonus_inheritance")
+
+    @cached_property
+    def compiled_infotri(self):
+        return self._get_compiled_field("infotri")
+
+    @cached_property
+    def compiled_titre_phrase(self):
+        return self._get_compiled_field("titre_phrase")
+
+    def _get_compiled_field(self: Page, field_name: str, kill_switch_field_name=""):
+        if not hasattr(self, field_name) and getattr(
+            self, kill_switch_field_name, True
+        ):
+            return getattr(self.get_parent().specific, field_name)
+        return getattr(self, field_name)
+
+    class Meta:
+        abstract = True
 
 
 class TitleFields(models.Model):
@@ -129,7 +143,7 @@ class TitleFields(models.Model):
         abstract = True
 
 
-class ProduitIndexPage(Page, CompiledFieldMixin):
+class ProduitIndexPage(CompiledFieldMixin, Page):
     subpage_types = ["qfdmd.produitpage", "qfdmd.familypage"]
 
     class Meta:
@@ -151,7 +165,7 @@ class AncestorFieldsMixin:
 
 
 class ProduitPage(
-    Page, GenreNombreModel, CompiledFieldMixin, TitleFields, AncestorFieldsMixin
+    CompiledFieldMixin, Page, GenreNombreModel, TitleFields, AncestorFieldsMixin
 ):
     subpage_types = [
         "qfdmd.synonymepage",
@@ -270,8 +284,10 @@ class ProduitPage(
         MultiFieldPanel(
             [
                 FieldPanel("titre_phrase"),
-                FieldPanel("genre"),
-                FieldPanel("nombre"),
+                FieldRowPanel(
+                    [FieldPanel("genre"), FieldPanel("nombre")],
+                    heading="Genre et nombre",
+                ),
             ],
             heading="Dynamisation des contenus",
         ),
@@ -334,6 +350,7 @@ class FamilyPage(ProduitPage):
 
 
 class SynonymePage(
+    CompiledFieldMixin,
     Page,
     AncestorFieldsMixin,
     TitleFields,
@@ -346,17 +363,23 @@ class SynonymePage(
         elif self.get_parent().page_type_display_name.lower() == "famille":
             return "qfdmd/family_page.html"
 
-    @cached_property
-    def synonyme(self) -> ProduitPage | FamilyPage:
-        """This property is used in templates because this page can be rendered
-        as a produit or famille but we want to add some context.
-        This is not clear yet if this approach will use a real URL for synonymes
-        or if a redirect will be issued with an url parameter.
+    def get_context(self, request, *args, **kwargs):
+        """
+        Extend the default Wagtail page context for SynonymePage.
 
-        For now we add the synonyme to the context so that it can be picked up
-        in both famille and produit templates, but this might change in a near
-        future."""
-        return self
+        This method overrides the default `get_context` behavior in order to
+        adjust how templates see the `page` object. By default, `page` would
+        refer to the current `SynonymePage`, but synonymes are meant to act
+        as "aliases" for their parent page (either a `ProduitPage` or
+        `FamilyPage`).
+
+        This makes it possible to render templates as if the parent page were
+        being visited directly, while still preserving access to the synonyme
+        itself.
+        """
+        context = super().get_context(request, *args, **kwargs)
+        page = context.pop("page")
+        return {**context, "page": self.get_parent().specific, "synonyme": page}
 
     class Meta:
         verbose_name = "Synonyme de recherche"
