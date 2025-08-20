@@ -13,7 +13,7 @@ include {
 inputs = {
   # Scheduler
   airflow_scheduler_registry_image = "rg.fr-par.scw.cloud/ns-qfdmo/airflow-scheduler:main"
-  airflow_scheduler_cpu_limit      = 6000
+  airflow_scheduler_cpu_limit      = 2000
   airflow_scheduler_memory_limit   = 8000
   airflow_scheduler_min_scale      = 1
   airflow_scheduler_max_scale      = 1
@@ -21,7 +21,7 @@ inputs = {
 
   # Webserver
   airflow_webserver_registry_image = "rg.fr-par.scw.cloud/ns-qfdmo/airflow-webserver:main"
-  airflow_webserver_cpu_limit      = 6000
+  airflow_webserver_cpu_limit      = 2000
   airflow_webserver_memory_limit   = 8000
   airflow_webserver_min_scale      = 1
   airflow_webserver_max_scale      = 1
