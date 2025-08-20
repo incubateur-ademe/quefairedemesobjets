@@ -175,7 +175,7 @@ def clean_email(email: str | None, _) -> str:
 def clean_code_postal(cp: str | None, _) -> str:
     if pd.isna(cp) or not cp:
         return ""
-    cp = clean_number(cp)
+    # cast en str et ajout de 0 si le code postal est inférieur à 10000
     return f"0{cp}" if cp and len(str(cp)) == 4 else str(cp)
 
 

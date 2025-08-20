@@ -16,6 +16,7 @@ from sources.tasks.airflow_logic.config_management import (
 from sources.tasks.transform.transform_df import compute_location, merge_duplicates
 from sqlalchemy import text
 from tenacity import retry, stop_after_attempt, wait_fixed
+
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
