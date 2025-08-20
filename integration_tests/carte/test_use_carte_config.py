@@ -26,14 +26,14 @@ class TestCarteConfig:
     def test_carte_config_context_name(
         self, get_carte_config_response_and_soup, params
     ):
-        carte_config = CarteConfigFactory(hide_legend=True)
+        carte_config = CarteConfigFactory(cacher_legende=True)
         response, _ = get_carte_config_response_and_soup(carte_config.slug)
         assert "carte_config" in response.context
 
     def test_legend_is_visible_by_default(
         self, get_carte_config_response_and_soup, params
     ):
-        carte_config = CarteConfigFactory()  # hide_legend is False by default
+        carte_config = CarteConfigFactory()  # cacher_legende is False by default
         response, soup = get_carte_config_response_and_soup(
             carte_config.slug,
             params,
@@ -43,7 +43,7 @@ class TestCarteConfig:
         assert soup.find(attrs={"data-testid": "carte-legend-mobile"}) is not None
 
     def test_legend_can_be_hidden(self, get_carte_config_response_and_soup, params):
-        carte_config = CarteConfigFactory(hide_legend=True)
+        carte_config = CarteConfigFactory(cacher_legende=True)
         response, soup = get_carte_config_response_and_soup(
             carte_config.slug,
             params,
@@ -54,8 +54,8 @@ class TestCarteConfig:
 
     def test_preview_screen(self, get_carte_config_response_and_soup):
         carte_config = CarteConfigFactory(
-            preview_title="Youpi",
-            preview_content="Coucou",
+            titre_previsualisation="Youpi",
+            contenu_previsualisation="Coucou",
         )
         response, soup = get_carte_config_response_and_soup(
             carte_config.slug,

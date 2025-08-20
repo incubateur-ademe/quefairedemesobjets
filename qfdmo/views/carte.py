@@ -45,7 +45,7 @@ class ProductCarteView(CarteSearchActeursView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         carte_config, _ = CarteConfig.objects.get_or_create(
-            slug="product", no_branding=True
+            slug="product", supprimer_branding=True
         )
         context.update(
             carte_config=carte_config,

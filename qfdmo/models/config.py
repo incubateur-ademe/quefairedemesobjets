@@ -147,7 +147,10 @@ class CarteConfig(models.Model):
         blank=True,
     )
 
-    def get_absolute_url(self) -> str:
+    def get_absolute_url(self):
+        return reverse("qfdmo:carte_custom", kwargs={"slug": self.slug})
+
+    def zget_absolute_url(self) -> str:
         carte_settings = {
             "map_container_id": self.pk,
         }
