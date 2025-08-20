@@ -1,12 +1,15 @@
+import logging
+
 from django.core.management.base import BaseCommand
 
 from qfdmd.models import FamilyPage, ProduitPage, ReusableContent
+
+logger = logging.getLogger(__name__)
 
 
 def update_block_inplace(streamblock, base_content, batch):
     for block in streamblock.blocks_by_name("reusable"):
         if block.value in batch and block.value != base_content:
-            print(f"Update block {block=}")
             block.value = base_content
 
 
@@ -20,7 +23,7 @@ def merge_reusable_content():
         batch = ReusableContent.objects.filter(title__startswith=f"{base_title}-")
 
         if batch.count() != 4:
-            print(
+            logger.error(
                 f"The batch length is not expected - {batch.count()=} - {base_title=}"
             )
             continue
@@ -28,7 +31,6 @@ def merge_reusable_content():
         try:
             base_content = ReusableContent.objects.get(title=base_title)
         except ReusableContent.DoesNotExist:
-            print(f"Create new reusable content {base_title=}")
             base_content = batch.first()
 
             # Clone and create a new reusable content
@@ -44,12 +46,10 @@ def merge_reusable_content():
                 base_content.save()
 
         for page in [*FamilyPage.objects.all(), *ProduitPage.objects.all()]:
-            print(f"update {page=}")
             update_block_inplace(page.body, base_content, batch)
 
             for block in page.body.blocks_by_name("tabs"):
                 for subblock in block.value:
-                    print(f"{subblock=}")
                     update_block_inplace(subblock.value["content"], base_content, batch)
 
             page.save()
