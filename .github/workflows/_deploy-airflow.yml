@@ -30,7 +30,7 @@ jobs:
     uses: ./.github/workflows/_scaleway_container_deploy.yml
     with:
       environment: ${{ inputs.environment }}
-      container_id: SCALEWAY_AIRFLOW_SCHEDULER_CONTAINER_ID
+      container_key: SCALEWAY_AIRFLOW_SCHEDULER_CONTAINER_ID
 
   deploy_scaleway_webserver:
     secrets: inherit # pragma: allowlist secret`
@@ -38,7 +38,7 @@ jobs:
     uses: ./.github/workflows/_scaleway_container_deploy.yml
     with:
       environment: ${{ inputs.environment }}
-      container_id: SCALEWAY_AIRFLOW_WEBSERVER_CONTAINER_ID
+      container_key: SCALEWAY_AIRFLOW_WEBSERVER_CONTAINER_ID
 
 # Address actions/missing-workflow-permissions rule in
 # code scanning alerts
