@@ -11,9 +11,6 @@ on:
         type: string
   release:
     types: [ released, prereleased ]
-  push:
-    branches:
-      - main
 env:
   SCALEWAY_REGISTRY: rg.fr-par.scw.cloud
   SCALEWAY_NAMESPACE: ns-qfdmo
