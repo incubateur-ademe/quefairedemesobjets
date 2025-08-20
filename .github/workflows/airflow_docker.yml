@@ -5,6 +5,10 @@ on:
   # See https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#webhook-payload-object-38
   workflow_dispatch:
   workflow_call:
+    inputs:
+      image_tag:
+        required: false
+        type: string
   release:
     types: [ released, prereleased ]
   push:
@@ -47,7 +51,7 @@ jobs:
           cache-from: type=gha,scope=scheduler
           cache-to: type=gha,scope=scheduler,mode=max
           push: true
-          tags: ${{ steps.airflow_scheduler_meta_scaleway.outputs.tags }}
+          tags: ${{ inputs.image_tag && env.SCALEWAY_REGISTRY/env.SCALEWAY_NAMESPACE/airflow-scheduler:inputs.image_tag || steps.airflow_scheduler_meta_scaleway.outputs.tags }}
           labels: ${{ steps.airflow_scheduler_meta_scaleway.outputs.labels }}
           file: airflow-scheduler.Dockerfile
 
