@@ -18,6 +18,8 @@ jobs:
     name: 🐳 Airflow Docker
     uses: ./.github/workflows/airflow_docker.yml
     secrets: inherit # pragma: allowlist secret`
+    with:
+      image_tag: review
 
   webapp:
     name: 🟠 Webapp
@@ -34,7 +36,6 @@ jobs:
     needs: [ci, airflow_docker]
     with:
       environment: preprod
-      image_tag: review
 
 # Address actions/missing-workflow-permissions rule in
 # code scanning alerts
