@@ -1,8 +1,22 @@
-{{ value }}
-{{ value.get_absolute_url }}
-
-<turbo-frame
-    id="{{ value.pk }}"
-    class="qf-h-full qf-w-full"
-    src="{{ value.get_absolute_url }}">
-</turbo-frame>
+{% comment %}
+This template implements the Carte components in a standalone wagtail blocks.
+This is the successor of the current approach that lives in templates/components/produit/_detail.html
+{% endcomment %}
+<div class="
+    {% comment %}
+    For an odd reason, 90vh does not play well with leaflet here so we use percents instead.
+    This is less reliable as this does not guarantee that the maps takes 90% of the viewport height
+    but is enough in most cases.
+    {% endcomment %}
+    max-md:qf-h-[45rem]
+    max-sm:qf-h-[40rem]
+    qf-h-[50rem]
+    qf-w-full
+">
+    <turbo-frame
+        id="{{ value.pk }}"
+        allow="geolocation; clipboard-write"
+        class="qf-h-full qf-w-full"
+        src="{{ value.get_absolute_url }}">
+    </turbo-frame>
+</div>

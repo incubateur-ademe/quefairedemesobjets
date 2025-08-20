@@ -24,7 +24,7 @@
     {% endblock main_heading %}
 
     <div class="qf-flex qf-flex-col max-md:qf-order-2 md:qf-row-start-2 md:qf-col-span-2">
-
-  {% include "sites_faciles_content_manager/blocks/blocks_stream.html" with stream=page.compiled_body page=page %}
+        {% include "sites_faciles_content_manager/blocks/blocks_stream.html" with stream=page.body page=page %}
+    </div>
 </article>
 {% endblock main %}

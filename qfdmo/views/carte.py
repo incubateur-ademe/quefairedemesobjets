@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 from django.db.models import Q
 from django.utils.functional import cached_property
@@ -57,6 +58,12 @@ class ProductCarteView(CarteSearchActeursView):
 class CustomCarteView(DetailView, CarteSearchActeursView):
     model = CarteConfig
     context_object_name = "carte_config"
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        return {
+            **super().get_context_data(**kwargs),
+            "map_container_id": self.object.pk,
+        }
 
     @cached_property
     def groupe_actions(self):

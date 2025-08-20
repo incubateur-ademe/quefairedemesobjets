@@ -45,8 +45,9 @@ class ExtendedCommonStreamBlock(CommonStreamBlock):
     carte_sur_mesure = carte_sur_mesure_block
 
 
-class ColumnBlock(sites_faciles_blocks.ColumnBlock, ExtendedCommonStreamBlock):
-    pass
+class ColumnBlock(sites_faciles_blocks.ColumnBlock):
+    reusable = reusable_block
+    carte_sur_mesure = carte_sur_mesure_block
 
 
 class TabBlock(sites_faciles_blocks.TabBlock):
@@ -54,7 +55,7 @@ class TabBlock(sites_faciles_blocks.TabBlock):
 
 
 class TabsBlock(sites_faciles_blocks.TabsBlock):
-    tabs = TabBlock(label=_("Tab"), min_num=1, max_num=15)
+    tabs = TabBlock(label=_("Tab"), minnum=1, max_num=15)
 
 
 class Bonus(blocks.StaticBlock):
