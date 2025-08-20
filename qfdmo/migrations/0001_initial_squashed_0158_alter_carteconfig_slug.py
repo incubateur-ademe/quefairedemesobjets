@@ -437,7 +437,6 @@ class Migration(migrations.Migration):
             options={
                 "verbose_name": "ACTEUR de l'EC - Vue sur l'acteur",
                 "verbose_name_plural": "ACTEURS de l'EC - Vues sur tous les acteurs",
-                "managed": False,
             },
         ),
         migrations.CreateModel(
@@ -448,7 +447,6 @@ class Migration(migrations.Migration):
             options={
                 "verbose_name": "Vue sur la proposition de service",
                 "verbose_name_plural": "Vue sur toutes les propositions de service",
-                "managed": False,
             },
         ),
         migrations.CreateModel(
