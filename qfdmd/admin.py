@@ -175,6 +175,6 @@ class SynonymeAdmin(
     search_fields = ["nom__unaccent"]
     readonly_fields = ["slug"]
     list_display = ("nom", "produit", "slug", "modifie_le")
-    list_filter = ["pin_on_homepage"]
+    list_filter = [("picto", admin.EmptyFieldListFilter), "pin_on_homepage"]
     autocomplete_fields = ["produit"]
     fields_to_display_in_first_position = ["nom", "produit"]
