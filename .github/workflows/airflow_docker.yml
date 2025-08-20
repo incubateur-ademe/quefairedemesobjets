@@ -68,6 +68,6 @@ jobs:
           cache-from: type=gha,scope=webserver
           cache-to: type=gha,scope=webserver,mode=max
           push: true
-          tags: ${{ steps.airflow_webserver_meta_scaleway.outputs.tags }}
+          tags: ${{ inputs.image_tag && format('{0}/{1}/{2}:{3}', env.SCALEWAY_REGISTRY, env.SCALEWAY_NAMESPACE, 'airflow-webserver', inputs.image_tag) || steps.airflow_webserver_meta_scaleway.outputs.tags }}
           labels: ${{ steps.airflow_webserver_meta_scaleway.outputs.labels }}
           file: airflow-webserver.Dockerfile
