@@ -1,0 +1,8 @@
+{{ value }}
+{{ value.get_absolute_url }}
+
+<turbo-frame
+    id="{{ value.pk }}"
+    class="qf-h-full qf-w-full"
+    src="{{ value.get_absolute_url }}">
+</turbo-frame>

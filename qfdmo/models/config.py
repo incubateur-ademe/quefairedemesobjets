@@ -1,3 +1,5 @@
+from urllib.parse import urlencode
+
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.urls import reverse
@@ -145,8 +147,15 @@ class CarteConfig(models.Model):
         blank=True,
     )
 
-    def get_absolute_url(self):
-        return reverse("qfdmo:carte_custom", kwargs={"slug": self.slug})
+    def get_absolute_url(self) -> str:
+        carte_settings = {
+            "map_container_id": self.pk,
+        }
+
+        params = urlencode(carte_settings)
+        url = reverse("qfdmo:carte_custom", kwargs={"slug": self.slug})
+        return url
+        return f"{url}?{params}"
 
     def __str__(self):
         return f"Carte - {self.nom}"

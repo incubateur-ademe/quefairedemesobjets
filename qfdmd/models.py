@@ -120,7 +120,8 @@ class CompiledFieldMixin(Page):
     def compiled_titre_phrase(self):
         return self._get_compiled_field("titre_phrase")
 
-    def _get_compiled_field(self: Page, field_name: str, kill_switch_field_name=""):
+    def _get_compiled_field(self: Page, field_name: str, kill_switch_field_name=None):
+        logger.info(f"{self=} {field_name=}")
         if not hasattr(self, field_name) and getattr(
             self, kill_switch_field_name, True
         ):
@@ -318,11 +319,6 @@ class ProduitPage(
         ],
     )
 
-    def get_context(self, request, *args, **kwargs):
-        context = super().get_context(request, *args, **kwargs)
-        context.update(is_synonyme=not (self.legacy_produit or self.legacy_synonyme))
-        return context
-
     class Meta:
         verbose_name = "Produit"
         constraints = [
@@ -358,10 +354,7 @@ class SynonymePage(
     parent_page_types = ["qfdmd.produitpage", "qfdmd.familypage"]
 
     def get_template(self, request, *args, **kwargs):
-        if self.get_parent().page_type_display_name.lower() == "produit":
-            return "qfdmd/produit_page.html"
-        elif self.get_parent().page_type_display_name.lower() == "famille":
-            return "qfdmd/family_page.html"
+        return self.get_parent().specific.template
 
     def get_context(self, request, *args, **kwargs):
         """
@@ -379,7 +372,8 @@ class SynonymePage(
         """
         context = super().get_context(request, *args, **kwargs)
         page = context.pop("page")
-        return {**context, "page": self.get_parent().specific, "synonyme": page}
+        context.update(page=self.get_parent().specific, synonyme=page)
+        return context
 
     class Meta:
         verbose_name = "Synonyme de recherche"

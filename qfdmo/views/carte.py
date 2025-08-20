@@ -58,11 +58,6 @@ class CustomCarteView(DetailView, CarteSearchActeursView):
     model = CarteConfig
     context_object_name = "carte_config"
 
-    def get_context_data(self, *args, **kwargs):
-        ctx = super().get_context_data(*args, **kwargs)
-
-        return ctx
-
     @cached_property
     def groupe_actions(self):
         # TODO: cache
