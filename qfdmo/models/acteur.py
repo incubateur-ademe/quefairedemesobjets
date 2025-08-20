@@ -1116,7 +1116,9 @@ class VueActeur(BaseActeur):
         verbose_name = "ACTEUR de l'EC - Vue sur l'acteur"
         verbose_name_plural = "ACTEURS de l'EC - Vues sur tous les acteurs"
 
-    uuid = models.CharField(max_length=255, default=shortuuid.uuid, editable=False)
+    uuid = models.CharField(
+        max_length=255, default=generate_short_uuid, editable=False, db_index=True
+    )
 
     parent = models.ForeignKey(
         "self",

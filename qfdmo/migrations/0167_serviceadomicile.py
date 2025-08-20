@@ -13,20 +13,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterModelOptions(
-            name="vueacteur",
-            options={
-                "verbose_name": "ACTEUR de l'EC - Vue sur l'acteur",
-                "verbose_name_plural": "ACTEURS de l'EC - Vues sur tous les acteurs",
-            },
-        ),
-        migrations.AlterModelOptions(
-            name="vuepropositionservice",
-            options={
-                "verbose_name": "Vue sur la proposition de service",
-                "verbose_name_plural": "Vue sur toutes les propositions de service",
-            },
-        ),
         migrations.AddField(
             model_name="acteur",
             name="lieu_prestation",
@@ -70,6 +56,28 @@ class Migration(migrations.Migration):
                 ],
                 default="",
                 max_length=255,
+            ),
+        ),
+        migrations.AddField(
+            model_name="vueacteur",
+            name="lieu_prestation",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("A_DOMICILE", "À domicile"),
+                    ("SUR_PLACE", "Sur place"),
+                    ("SUR_PLACE_OU_A_DOMICILE", "Sur place ou à domicile"),
+                    ("", ""),
+                ],
+                default="",
+                max_length=255,
+            ),
+        ),
+        migrations.AddField(
+            model_name="vueacteur",
+            name="consignes_dacces",
+            field=models.TextField(
+                blank=True, db_default="", default="", verbose_name="Consignes d'accès"
             ),
         ),
         migrations.CreateModel(
