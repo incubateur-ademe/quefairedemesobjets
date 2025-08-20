@@ -11,6 +11,8 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RunSQL(
             sql="""
+            CREATE EXTENSION IF NOT EXISTS unaccent;
+
             CREATE TEXT SEARCH CONFIGURATION wagtail_french (COPY = french);
             ALTER TEXT SEARCH CONFIGURATION wagtail_french
               ALTER MAPPING FOR hword, hword_part, word
