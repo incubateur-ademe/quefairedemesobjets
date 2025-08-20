@@ -30,7 +30,7 @@ jobs:
         EXPECTED_VALUE="ready"
 
         while true; do
-            RESPONSE_VALUE=$(curl -X GET -H "X-Auth-Token: $SCALEWAY_DEPLOY_KEY" "https://api.scaleway.com/containers/v1beta1/regions/fr-par/containers/$CONTAINER_ID/" | jq -r '.status')
+            RESPONSE_VALUE=$(curl -s -X GET -H "X-Auth-Token: $SCALEWAY_DEPLOY_KEY" "https://api.scaleway.com/containers/v1beta1/regions/fr-par/containers/$CONTAINER_ID/" | jq -r '.status')
 
             echo "Current status: $RESPONSE_VALUE"
 
@@ -39,7 +39,7 @@ jobs:
                 break
             fi
 
-            sleep 1
+            sleep 5
         done
 
 # Address actions/missing-workflow-permissions rule in
