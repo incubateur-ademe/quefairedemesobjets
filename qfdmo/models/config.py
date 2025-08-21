@@ -1,13 +1,9 @@
-import logging
-
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.http import QueryDict
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from wagtail.snippets.models import register_snippet
-
-logger = logging.getLogger(__name__)
 
 
 class GroupeActionConfig(models.Model):
