@@ -108,7 +108,9 @@ class CarteConfigView(DetailView, CarteSearchActeursView):
 
     def get_sous_categorie_filter(self):
         # TODO: Revoir nommage + documenter
-        if sous_categorie_filter := self.request.GET.getlist("sous_categorie_objet"):
+        if sous_categorie_filter := self.request.GET.getlist(
+            CarteConfig.SOUS_CATEGORIE_QUERY_PARAM
+        ):
             return sous_categorie_filter
         return self.get_object().sous_categorie_objet.all().values_list("id", flat=True)
 
