@@ -17,6 +17,8 @@ jobs:
     name: 🐳 Airflow Docker
     uses: ./.github/workflows/airflow_docker.yml
     secrets: inherit # pragma: allowlist secret`
+    with:
+      image_tag: preprod
 
   webapp:
     name: 🟠 Webapp
