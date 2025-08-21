@@ -76,14 +76,14 @@ def render_file_content(file_field: FileField) -> str:
 @register.inclusion_tag("components/carte/carte.html", takes_context=True)
 def carte(context, carte_config: CarteConfig) -> dict:
     page = context.get("page")
-
-    if not carte_config:
-        return {}
-
-    if page and page.sous_categorie_objet.exists():
-        carte_config.sous_categorie_objet = page.sous_categorie_objet
-
-    return {"carte_config": carte_config}
+    return {
+        "id": carte_config.pk,
+        "url": carte_config.get_absolute_url(
+            extra_sous_categories=list(
+                page.sous_categorie_objet.all().values_list("id", flat=True)
+            )
+        ),
+    }
 
 
 @register.inclusion_tag("head/favicon.html")

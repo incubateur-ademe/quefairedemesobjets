@@ -1,7 +1,6 @@
 import logging
 from urllib.parse import urlencode
 
-from django import forms
 from django.contrib.gis.db import models
 from django.db.models import CheckConstraint, Q
 from django.db.models.functions import Now
@@ -303,7 +302,7 @@ class ProduitPage(
         MultiFieldPanel(
             [
                 FieldPanel("tags"),
-                FieldPanel("sous_categorie_objet", widget=forms.CheckboxSelectMultiple),
+                FieldPanel("sous_categorie_objet"),
             ],
             heading="Taxonomie",
         ),

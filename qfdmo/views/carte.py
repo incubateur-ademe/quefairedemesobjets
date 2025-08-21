@@ -55,7 +55,7 @@ class ProductCarteView(CarteSearchActeursView):
         return context
 
 
-class CustomCarteView(DetailView, CarteSearchActeursView):
+class CarteConfigView(DetailView, CarteSearchActeursView):
     model = CarteConfig
     context_object_name = "carte_config"
 
@@ -106,6 +106,12 @@ class CustomCarteView(DetailView, CarteSearchActeursView):
             ]
         return super()._grouped_action_from(*args, **kwargs)
 
+    def get_sous_categorie_filter(self):
+        # TODO: Revoir nommage + documenter
+        if sous_categorie_filter := self.request.GET.getlist("sous_categorie_objet"):
+            return sous_categorie_filter
+        return self.get_object().sous_categorie_objet.all().values_list("id", flat=True)
+
     def _compile_acteurs_queryset(self, *args, **kwargs):
         filters, excludes = super()._compile_acteurs_queryset(*args, **kwargs)
 
@@ -118,9 +124,10 @@ class CustomCarteView(DetailView, CarteSearchActeursView):
         if acteur_type_filter := self.get_object().acteur_type.all():
             filters &= Q(acteur_type__in=acteur_type_filter)
 
-        if sous_categorie_filter := self.get_object().sous_categorie_objet.all():
+        if sous_categorie_filter := self.get_sous_categorie_filter():
+            logger.info(f"COUCOUCUOCOUCOUCOUCOUC {sous_categorie_filter=}")
             filters &= Q(
-                proposition_services__sous_categories__in=sous_categorie_filter,
+                proposition_services__sous_categories__id__in=sous_categorie_filter,
             )
 
         if groupe_action_filter := self.get_object().groupe_action.all():

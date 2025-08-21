@@ -1,8 +1,13 @@
+import logging
+
 from django.core.validators import FileExtensionValidator
 from django.db import models
+from django.http import QueryDict
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from wagtail.snippets.models import register_snippet
+
+logger = logging.getLogger(__name__)
 
 
 class GroupeActionConfig(models.Model):
@@ -52,6 +57,8 @@ class GroupeActionConfig(models.Model):
 
 @register_snippet
 class CarteConfig(models.Model):
+    SOUS_CATEGORIE_QUERY_PARAM = "sous_categorie_objet"
+
     nom = models.CharField(unique=True)
 
     # UI
@@ -145,8 +152,13 @@ class CarteConfig(models.Model):
         blank=True,
     )
 
-    def get_absolute_url(self):
-        return reverse("qfdmo:carte_custom", kwargs={"slug": self.slug})
+    def get_absolute_url(self, extra_sous_categories=None):
+        query = QueryDict("", mutable=True)
+        if extra_sous_categories:
+            logger.info(f"YOUPIPIPIPIPPI {extra_sous_categories=}")
+            query.setlist(self.SOUS_CATEGORIE_QUERY_PARAM, extra_sous_categories)
+
+        return reverse("qfdmo:carte_custom", kwargs={"slug": self.slug}, query=query)
 
     def __str__(self):
         return f"Carte - {self.nom}"
