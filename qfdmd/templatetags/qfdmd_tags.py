@@ -8,6 +8,8 @@ from django.forms import FileField
 from django.utils.safestring import mark_safe
 from wagtail.templatetags.wagtailcore_tags import richtext
 
+from qfdmo.models.config import CarteConfig
+
 register = template.Library()
 
 logger = logging.getLogger(__name__)
@@ -69,6 +71,19 @@ def render_file_content(file_field: FileField) -> str:
     except FileNotFoundError as e:
         logger.error(f"file not found {file_field.name=}, original error : {e}")
         return ""
+
+
+@register.inclusion_tag("components/carte/carte.html", takes_context=True)
+def carte(context, carte_config: CarteConfig) -> dict:
+    page = context.get("page")
+
+    if not carte_config:
+        return {}
+
+    if page and page.sous_categorie_objet.exists():
+        carte_config.sous_categorie_objet = page.sous_categorie_objet
+
+    return {"carte_config": carte_config}
 
 
 @register.inclusion_tag("head/favicon.html")

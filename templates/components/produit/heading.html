@@ -1,10 +1,12 @@
 {% load dsfr_tags %}
 {% block wrapper %}
-<div class="qf-py-8w qf-flex qf-text-green-menthe-main-548 qf-pt-3w md:qf-pt-4w {% block wrapper_classes %}{% endblock %}">
-    <header class="
-    md:qf-row-start-1 md:qf-col-start-1
+<header class="qf-text-green-menthe-main-548 {% block wrapper_classes %}qf-py-8w qf-pt-3w md:qf-pt-4w{% endblock %}">
+    <div class="
+        qf-flex fr-container
+        ">
+    <div class="
     max-md:qf-order-1
-    qf-flex qf-flex-col qf-gap-3w {% block header_classes %}{% endblock %}">
+    qf-flex qf-flex-col qf-items-start qf-gap-3w {% block header_classes %}{% endblock %}">
         {% block content %}
         <a
             href="{% url 'qfdmd:home' %}"
@@ -35,9 +37,13 @@
                 </span>
             {% endblock title_content %}
         </h1>
-        {% include "components/produit/_infotri.html" with infotri=infotri %}
+        {% if infotri %}
+            <div class="{% block infotri_wrapper_classes %}{% endblock %} mr-auto">
+            {% include "components/produit/_infotri.html" with infotri=infotri %}
+            </div>
+        {% endif %}
         {% endblock content %}
-    </header>
+    </div>
     {% include "snippets/share_and_embed_produit.html" with extra_classes="qf-ml-auto qf-mr-0 max-md:qf-order-last md:qf-min-w-[17rem] md:qf-row-start-1 md:qf-col-start-2" %}
-</div>
+</header>
 {% endblock wrapper %}

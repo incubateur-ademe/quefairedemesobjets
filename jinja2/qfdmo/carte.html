@@ -31,6 +31,9 @@
         {% if request.resolver_match.namespace == "qfdmd" and request.resolver_match.url_name == "carte" %}
         action="carte/"
         {% endif %}
+        {% if carte_config %}
+        action="{{ carte_config.get_absolute_url() }}"
+        {% endif %}
         data-search-form-visible
         data-search-solution-form-map-container-id-value="{{ map_container_id }}"
     >

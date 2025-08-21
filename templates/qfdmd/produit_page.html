@@ -7,18 +7,17 @@
 {% endblock title %}
 
 {% comment %}
-{% block main_classes %}
-{% if not is_synonyme %}{{ block.super }}{% endif %}
-{% endblock main_classes %}
+Here we want to remove the fr-container class set on the <main> tag
+so that the green background heading can properly expand to the full
+page width.
 {% endcomment %}
+{% block main_classes %}{% endblock %}
 
 {% block main %}
-<article
-    class="qf-flex qf-flex-col md:qf-grid md:qf-grid-cols-[minmax(200px,1fr)] md:qf-grid-rows-[auto] md:qf-gap-4
-    qf-auto-rows-min qf-auto-cols-min
+<div
+    class="qf-flex qf-flex-col md:qf-gap-4
     qf-gap-6w max-lg:qf-pr-0 max-xl:qf-pr-6w"
 >
-
     {% block main_heading %}
         {% include "components/produit/heading.html" with title=page.compiled_titre_phrase infotri=page.compiled_infotri %}
     {% endblock main_heading %}
@@ -26,5 +25,5 @@
     <div class="qf-flex qf-flex-col max-md:qf-order-2 md:qf-row-start-2 md:qf-col-span-2">
         {% include "sites_faciles_content_manager/blocks/blocks_stream.html" with stream=page.body page=page %}
     </div>
-</article>
+</div>
 {% endblock main %}

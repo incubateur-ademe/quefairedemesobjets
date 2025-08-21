@@ -175,7 +175,7 @@ class ProduitPage(
 
     # Taxonomie
     tags = ClusterTaggableManager(through=ProduitPageTag, blank=True, related_name="+")
-    sous_categories = models.ManyToManyField(
+    sous_categorie_objet = models.ManyToManyField(
         "qfdmo.SousCategorieObjet",
         related_name="produit_pages",
         blank=True,
@@ -303,7 +303,7 @@ class ProduitPage(
         MultiFieldPanel(
             [
                 FieldPanel("tags"),
-                FieldPanel("sous_categories", widget=forms.CheckboxSelectMultiple),
+                FieldPanel("sous_categorie_objet", widget=forms.CheckboxSelectMultiple),
             ],
             heading="Taxonomie",
         ),

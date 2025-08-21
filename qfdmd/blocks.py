@@ -15,23 +15,12 @@ from wagtail.snippets.blocks import SnippetChooserBlock
 logger = logging.getLogger(__name__)
 
 
-class ProductBlock(blocks.StructBlock):
-    champ = blocks.ChoiceBlock(
-        choices=[("Bon état", "bon_etat"), ("Mauvais état", "mauvais_etat")],
-    )
-    produit = SnippetChooserBlock("qfdmd.produit", label="produit")
-
-
-def get_choices(*args, **kwargs) -> list:
-    logger.info(f"{args=} {kwargs=}")
-    return [("coucou", "coucou")]
-
-
 reusable_block = SnippetChooserBlock(
     "qfdmd.reusablecontent",
     label="Contenu réutilisable",
     template="blocks/reusable.html",
 )
+
 
 carte_sur_mesure_block = SnippetChooserBlock(
     "qfdmo.CarteConfig",

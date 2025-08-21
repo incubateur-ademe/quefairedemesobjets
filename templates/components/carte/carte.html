@@ -1,0 +1,18 @@
+<div class="
+    {% comment %}
+    For an odd reason, 90vh does not play well with leaflet here so we use percents instead.
+    This is less reliable as this does not guarantee that the maps takes 90% of the viewport height
+    but is enough in most cases.
+    {% endcomment %}
+    max-md:qf-h-[45rem]
+    max-sm:qf-h-[40rem]
+    qf-h-[50rem]
+    qf-w-full
+">
+    <turbo-frame
+        id="{{ carte_config.pk }}"
+        allow="geolocation; clipboard-write"
+        class="qf-h-full qf-w-full"
+        src="{{ carte_config.get_absolute_url }}">
+    </turbo-frame>
+</div>

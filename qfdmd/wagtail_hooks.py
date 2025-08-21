@@ -2,7 +2,6 @@ from django.urls import path, reverse
 from wagtail import hooks
 from wagtail.admin.action_menu import ActionMenuItem
 
-from qfdmd.models import ProduitPage
 from qfdmd.views import (
     bonus_viewset,
     legacy_migrate,
@@ -39,7 +38,7 @@ class MigratePageMenuItem(ActionMenuItem):
         return reverse("legacy_migrate", args=[page.id])
 
     def is_shown(self, context):
-        return isinstance(context.get("page"), ProduitPage)
+        return False
 
 
 @hooks.register("register_page_action_menu_item")
