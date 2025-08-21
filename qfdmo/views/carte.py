@@ -125,7 +125,6 @@ class CarteConfigView(DetailView, CarteSearchActeursView):
             filters &= Q(acteur_type__in=acteur_type_filter)
 
         if sous_categorie_filter := self.get_sous_categorie_filter():
-            logger.info(f"COUCOUCUOCOUCOUCOUCOUC {sous_categorie_filter=}")
             filters &= Q(
                 proposition_services__sous_categories__id__in=sous_categorie_filter,
             )

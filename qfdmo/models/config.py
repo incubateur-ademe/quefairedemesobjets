@@ -155,7 +155,6 @@ class CarteConfig(models.Model):
     def get_absolute_url(self, extra_sous_categories=None):
         query = QueryDict("", mutable=True)
         if extra_sous_categories:
-            logger.info(f"YOUPIPIPIPIPPI {extra_sous_categories=}")
             query.setlist(self.SOUS_CATEGORIE_QUERY_PARAM, extra_sous_categories)
 
         return reverse("qfdmo:carte_custom", kwargs={"slug": self.slug}, query=query)
