@@ -22,6 +22,12 @@ logger = logging.getLogger(__name__)
 ACTEUR_TYPE_DIGITAL = "acteur_digital"
 ACTEUR_TYPE_ESS = "ess"
 LABEL_ESS = "ess"
+
+# FIXME : Utiliser Django pour toutes ces constantes ?
+A_DOMICILE = "A_DOMICILE"
+SUR_PLACE = "SUR_PLACE"
+SUR_PLACE_OU_A_DOMICILE = "SUR_PLACE_OU_A_DOMICILE"
+
 LABEL_TO_IGNORE = ["non applicable", "na", "n/a", "null", "aucun", "non"]
 MANDATORY_COLUMNS_AFTER_NORMALISATION = [
     "identifiant_unique",
@@ -277,12 +283,10 @@ def _parse_float(value):
 
 def compute_location(row: pd.Series, _):
     # first column is latitude, second is longitude
-    lat_column = row.keys()[0]
-    lng_column = row.keys()[1]
-    row[lat_column] = _parse_float(row[lat_column])
-    row[lng_column] = _parse_float(row[lng_column])
-    row["location"] = get_point_from_location(row[lng_column], row[lat_column])
-    return row[["location"]]
+    row["latitude"] = _parse_float(row["latitude"])
+    row["longitude"] = _parse_float(row["longitude"])
+    row["location"] = get_point_from_location(row["longitude"], row["latitude"])
+    return row[["location", "latitude", "longitude"]]
 
 
 def get_point_from_location(longitude, latitude):
@@ -314,6 +318,61 @@ def clean_proposition_services(row, _):
 ### Fonctions de résolution de l'adresse au format BAN et avec vérification via l'API
 # adresse.data.gouv.fr en option
 # TODO : A déplacer ?
+
+
+def _clean_service_a_domicile(service_a_domicile):
+    service_a_domicile = service_a_domicile.lower().strip()
+
+    if re.match(r"oui\s*exclusivement", service_a_domicile):
+        return A_DOMICILE
+    elif re.match(r"^oui$", service_a_domicile):
+        return SUR_PLACE_OU_A_DOMICILE
+    elif re.match(r"^non$", service_a_domicile):
+        return SUR_PLACE
+    else:
+        return ""
+
+
+def _clean_departement_code(departement_code):
+    if len(departement_code) == 1:
+        departement_code = "0" + departement_code
+    return departement_code
+
+
+def _clean_perimetre_adomicile_codes(perimetre_dinterventions):
+    perimetre_prestation = []
+    perimetre_dinterventions = perimetre_dinterventions.split("|")
+    for perimetre in perimetre_dinterventions:
+        perimetre = perimetre.lower().strip()
+        if matches := re.match(r"(\d+)\s*km", perimetre):
+            perimetre_prestation.append(
+                {"type": "KILOMETRIQUE", "value": int(matches.group(1))}
+            )
+        elif matches := re.match(r"^(\d{1,3})$", perimetre):
+            departement = matches.group(1)
+            departement = _clean_departement_code(departement)
+            perimetre_prestation.append({"type": "DEPARTEMENT", "value": departement})
+        elif matches := re.match(r"^france métropolitaine$", perimetre):
+            perimetre_prestation.append({"type": "FRANCE_METROPOLITAINE", "value": ""})
+        else:
+            logger.warning(f"Perimetre {perimetre} non reconnu")
+
+    perimetre_prestation.sort(key=lambda x: (x["type"], x["value"]))
+
+    return perimetre_prestation
+
+
+def clean_service_a_domicile(row, _):
+
+    row["lieu_prestation"] = _clean_service_a_domicile(row["service_a_domicile"])
+
+    row["perimetre_adomicile_codes"] = []
+    if row["lieu_prestation"] in [A_DOMICILE, SUR_PLACE_OU_A_DOMICILE]:
+        row["perimetre_adomicile_codes"] = _clean_perimetre_adomicile_codes(
+            row["perimetre_dintervention"]
+        )
+
+    return row[["lieu_prestation", "perimetre_adomicile_codes"]]
 
 
 def _get_address(

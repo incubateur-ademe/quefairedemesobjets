@@ -108,6 +108,10 @@ class LieuPrestation(models.TextChoices):
 class TypePerimetreADomicile(models.TextChoices):
     DEPARTEMENTAL = "DEPARTEMENTAL", "Départemental"
     KILOMETRIQUE = "KILOMETRIQUE", "Kilométrique"
+    FRANCE_METROPOLITAINE = (
+        "FRANCE_METROPOLITAINE",
+        "France métropolitaine (Corse incluse)",
+    )
 
 
 class DepartementOrNumValidator(RegexValidator):
@@ -662,7 +666,7 @@ class BaseActeur(TimestampedModel):
             "proposition_services",
             "acteur_services",
             "labels",
-            "perimetre_adomicile",
+            "perimetre_adomiciles",
         }
 
     def commentaires_ajouter(self, added):
@@ -816,7 +820,7 @@ class BasePerimetreADomicile(models.Model):
         verbose_name_plural = "Périmètres à domicile"
 
     acteur = models.ForeignKey(
-        Acteur, on_delete=models.CASCADE, related_name="perimetre_adomicile"
+        Acteur, on_delete=models.CASCADE, related_name="perimetre_adomiciles"
     )
     type = models.CharField(
         max_length=255,
@@ -944,7 +948,7 @@ class RevisionActeur(BaseActeur):
                 self.labels.add(label)
             for acteur_service in acteur.acteur_services.all():
                 self.acteur_services.add(acteur_service)
-            for perimetre_adomicile in acteur.perimetre_adomicile.all():
+            for perimetre_adomicile in acteur.perimetre_adomiciles.all():
                 RevisionPerimetreADomicile.objects.create(
                     acteur=self,
                     type=perimetre_adomicile.type,

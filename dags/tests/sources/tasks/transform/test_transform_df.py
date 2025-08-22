@@ -9,6 +9,7 @@ from sources.tasks.transform.transform_df import (
     clean_identifiant_unique,
     clean_label_codes,
     clean_proposition_services,
+    clean_service_a_domicile,
     clean_siret_and_siren,
     clean_telephone,
     compute_location,
@@ -428,6 +429,108 @@ class TestCleanPropositionServiceCodes:
             None,
         )
         assert result["proposition_service_codes"] == expected_proposition_service_codes
+
+
+class TestCleanServiceADomicile:
+    @pytest.mark.parametrize(
+        (
+            "service_a_domicile, perimetre_dintervention,"
+            " expected_lieu_prestation, expected_perimetre_adomicile_codes"
+        ),
+        [
+            # Nominal cases : one perimeter
+            (
+                "oui",
+                "10 km",
+                "SUR_PLACE_OU_A_DOMICILE",
+                [{"type": "KILOMETRIQUE", "value": 10}],
+            ),
+            (
+                "oui",
+                "10",
+                "SUR_PLACE_OU_A_DOMICILE",
+                [{"type": "DEPARTEMENT", "value": "10"}],
+            ),
+            (
+                "oui",
+                "france métropolitaine",
+                "SUR_PLACE_OU_A_DOMICILE",
+                [{"type": "FRANCE_METROPOLITAINE", "value": ""}],
+            ),
+            (
+                "oui exclusivement",
+                "10 km",
+                "A_DOMICILE",
+                [{"type": "KILOMETRIQUE", "value": 10}],
+            ),
+            # Nominal cases : non
+            ("non", "", "SUR_PLACE", []),
+            # other cases : non
+            ("non", "10 km", "SUR_PLACE", []),
+            ("non", "10", "SUR_PLACE", []),
+            ("non", "france métropolitaine", "SUR_PLACE", []),
+            # Nominal cases : multiple perimeters
+            (
+                "oui",
+                " 10 km | 10 ",
+                "SUR_PLACE_OU_A_DOMICILE",
+                [
+                    {"type": "KILOMETRIQUE", "value": 10},
+                    {"type": "DEPARTEMENT", "value": "10"},
+                ],
+            ),
+            (
+                "oui",
+                " 1 | 11 | 978",
+                "SUR_PLACE_OU_A_DOMICILE",
+                [
+                    {"type": "DEPARTEMENT", "value": "01"},
+                    {"type": "DEPARTEMENT", "value": "11"},
+                    {"type": "DEPARTEMENT", "value": "978"},
+                ],
+            ),
+            (
+                "oui",
+                " France métropolitaine | 978",
+                "SUR_PLACE_OU_A_DOMICILE",
+                [
+                    {"type": "FRANCE_METROPOLITAINE", "value": ""},
+                    {"type": "DEPARTEMENT", "value": "978"},
+                ],
+            ),
+            # unknown cases
+            (
+                "oui",
+                "fake",
+                "SUR_PLACE_OU_A_DOMICILE",
+                [],
+            ),
+            (
+                "oui",
+                "10|fake",
+                "SUR_PLACE_OU_A_DOMICILE",
+                [{"type": "DEPARTEMENT", "value": "10"}],
+            ),
+        ],
+    )
+    def test_clean_service_a_domicile(
+        self,
+        service_a_domicile,
+        perimetre_dintervention,
+        expected_lieu_prestation,
+        expected_perimetre_adomicile_codes,
+    ):
+        result = clean_service_a_domicile(
+            pd.Series(
+                {
+                    "service_a_domicile": service_a_domicile,
+                    "perimetre_dintervention": perimetre_dintervention,
+                }
+            ),
+            None,
+        )
+        assert result["lieu_prestation"] == expected_lieu_prestation
+        assert result["perimetre_adomicile_codes"] == expected_perimetre_adomicile_codes
 
 
 class TestCleanTelephone:
