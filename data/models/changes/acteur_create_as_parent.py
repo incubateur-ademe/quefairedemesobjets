@@ -3,6 +3,7 @@
 from data.models.changes.acteur_abstract import ChangeActeurAbstract
 from data.models.changes.utils import data_reconstruct
 from qfdmo.models import ActeurStatus, RevisionActeur
+from qfdmo.models.acteur import RevisionPerimetreADomicile
 
 
 class ChangeActeurCreateAsParent(ChangeActeurAbstract):
@@ -25,5 +26,17 @@ class ChangeActeurCreateAsParent(ChangeActeurAbstract):
         data.update({"identifiant_unique": self.id})
         data = data_reconstruct(RevisionActeur, data)
         data["statut"] = ActeurStatus.ACTIF
+
+        # Get perimetre_adomiciles and remove it from data before create RevisonActeur
+        perimetre_adomiciles = data.get("perimetre_adomiciles")
+        del data["perimetre_adomiciles"]
+
+        # Create RevisionActeur as parent
         rev = RevisionActeur(**data)
         rev.save_as_parent()
+
+        # Create perimetre_adomicilesonce RevisionActeur is created
+        for perimetre in perimetre_adomiciles:
+            RevisionPerimetreADomicile.objects.create(
+                acteur=rev, type=perimetre["type"], value=perimetre["value"]
+            )

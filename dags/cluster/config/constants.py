@@ -24,6 +24,7 @@ FIELDS_PARENT_DATA_EXCLUDED = [
     "source",
     "source_id",
     "statut",
+    "perimetre_adomiciles",
     # TODO: we can't set cree_le consistently
     # (see test_data_serialize_reconstruct), thus
     # we exclude it for now (maybe solution is to compute)

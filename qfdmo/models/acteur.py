@@ -466,6 +466,21 @@ class BaseActeur(TimestampedModel):
     )
 
     @property
+    def service_a_domicile(self):
+        if not self.lieu_prestation:
+            return {}
+        return {
+            "lieu_prestation": self.lieu_prestation,
+            "perimetre_adomicile": [
+                {
+                    "type": perimetre.type,
+                    "value": perimetre.value,
+                }
+                for perimetre in self.perimetre_adomiciles.all()
+            ],
+        }
+
+    @property
     def latitude(self):
         return self.location.y if self.location else None
 
@@ -1106,7 +1121,7 @@ class RevisionActeurParent(RevisionActeur):
 
 class RevisionPerimetreADomicile(BasePerimetreADomicile):
     acteur = models.ForeignKey(
-        RevisionActeur, on_delete=models.CASCADE, related_name="perimetre_adomicile"
+        RevisionActeur, on_delete=models.CASCADE, related_name="perimetre_adomiciles"
     )
 
 
@@ -1142,7 +1157,7 @@ class VueActeur(BaseActeur):
 
 class VuePerimetreADomicile(BasePerimetreADomicile):
     acteur = models.ForeignKey(
-        VueActeur, on_delete=models.CASCADE, related_name="perimetre_adomicile"
+        VueActeur, on_delete=models.CASCADE, related_name="perimetre_adomiciles"
     )
 
 
@@ -1358,7 +1373,7 @@ class DisplayedActeur(BaseActeur):
 
 class DisplayedPerimetreADomicile(BasePerimetreADomicile):
     acteur = models.ForeignKey(
-        DisplayedActeur, on_delete=models.CASCADE, related_name="perimetre_adomicile"
+        DisplayedActeur, on_delete=models.CASCADE, related_name="perimetre_adomiciles"
     )
 
 
