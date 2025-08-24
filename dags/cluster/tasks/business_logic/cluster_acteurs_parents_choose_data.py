@@ -125,7 +125,6 @@ def cluster_acteurs_parents_choose_data(
         # lieu_prestation, we need it because the perimetre_adomicile choosen should be
         # the ones corresponding to the lieu_prestation
         fields = fields + ["service_a_domicile"]
-
         result = {}
         for field in fields:
             value_old = getattr(parent, field) if parent else None
@@ -146,10 +145,8 @@ def cluster_acteurs_parents_choose_data(
         if service_a_domicile := result.get("service_a_domicile"):
             result["perimetre_adomiciles"] = service_a_domicile["perimetre_adomicile"]
             result["lieu_prestation"] = service_a_domicile["lieu_prestation"]
-        else:
-            result["perimetre_adomiciles"] = []
-            result["lieu_prestation"] = ""
-        del result["service_a_domicile"]
+        if "service_a_domicile" in result:
+            del result["service_a_domicile"]
 
         return result
 

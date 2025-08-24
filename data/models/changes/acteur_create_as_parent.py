@@ -28,8 +28,9 @@ class ChangeActeurCreateAsParent(ChangeActeurAbstract):
         data["statut"] = ActeurStatus.ACTIF
 
         # Get perimetre_adomiciles and remove it from data before create RevisonActeur
-        perimetre_adomiciles = data.get("perimetre_adomiciles")
-        del data["perimetre_adomiciles"]
+        perimetre_adomiciles = data.get("perimetre_adomiciles", [])
+        if "perimetre_adomiciles" in data:
+            del data["perimetre_adomiciles"]
 
         # Create RevisionActeur as parent
         rev = RevisionActeur(**data)

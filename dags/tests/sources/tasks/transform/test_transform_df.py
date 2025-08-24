@@ -530,7 +530,13 @@ class TestCleanServiceADomicile:
             None,
         )
         assert result["lieu_prestation"] == expected_lieu_prestation
-        assert result["perimetre_adomicile_codes"] == expected_perimetre_adomicile_codes
+        assert sorted(
+            result["perimetre_adomicile_codes"],
+            key=lambda x: (x.get("type"), x.get("value")),
+        ) == sorted(
+            expected_perimetre_adomicile_codes,
+            key=lambda x: (x.get("type"), x.get("value")),
+        )
 
 
 class TestCleanTelephone:
