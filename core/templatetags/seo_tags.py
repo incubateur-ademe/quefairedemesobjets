@@ -14,10 +14,11 @@ def get_sharer_content(request, object, social_network=None):
     Once jinja will be removed from the project, this can be merged in
     share_url function below
     """
-    if not request or not request.META:
+    if not request:
         return {}
 
     # FIXME: check if current view is carte
+    print(f"{request=}")
     carte = request.resolver_match.view_name in ["qfdmo:carte", "qfdmo:carte_custom"]
     url = request.build_absolute_uri()
 
