@@ -827,8 +827,6 @@ class Acteur(BaseActeur):
 
 
 class BasePerimetreADomicile(models.Model):
-    from django.core.validators import RegexValidator
-
     class Meta:
         abstract = True
         verbose_name = "Périmètre à domicile"
