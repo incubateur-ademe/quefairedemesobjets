@@ -461,9 +461,9 @@ models:
         tests:
           - not_null
           - not_empty_string
-      - name: value
+      - name: valeur
         description: "La valeur du périmètre à domicile"
-        data_type: varchar(255)
+        data_type: varchar
         tests:
           - not_null
     config:

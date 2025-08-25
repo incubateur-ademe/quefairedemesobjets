@@ -356,7 +356,7 @@ def _clean_perimetre_adomicile_codes(perimetre_dinterventions):
             perimetre_prestation.append(
                 {
                     "type": PerimetreADomicile.Type.KILOMETRIQUE.value,
-                    "value": int(matches.group(1)),
+                    "valeur": int(matches.group(1)),
                 }
             )
         elif matches := re.match(r"^(\d{1,3}|2A|2B)$", perimetre):
@@ -365,14 +365,14 @@ def _clean_perimetre_adomicile_codes(perimetre_dinterventions):
             perimetre_prestation.append(
                 {
                     "type": PerimetreADomicile.Type.DEPARTEMENTAL.value,
-                    "value": departement,
+                    "valeur": departement,
                 }
             )
         elif matches := re.match(r"^FRANCE\s*METROPOLITAINE$", perimetre):
             perimetre_prestation.append(
                 {
                     "type": PerimetreADomicile.Type.FRANCE_METROPOLITAINE.value,
-                    "value": "",
+                    "valeur": "",
                 }
             )
             # TOUTE LA FRANCE Y COMPRIS DROM TOM
@@ -380,7 +380,7 @@ def _clean_perimetre_adomicile_codes(perimetre_dinterventions):
             perimetre_prestation.append(
                 {
                     "type": PerimetreADomicile.Type.DROM_TOM.value,
-                    "value": "",
+                    "valeur": "",
                 }
             )
         elif matches := re.match(
@@ -389,19 +389,19 @@ def _clean_perimetre_adomicile_codes(perimetre_dinterventions):
             perimetre_prestation.append(
                 {
                     "type": PerimetreADomicile.Type.FRANCE_METROPOLITAINE.value,
-                    "value": "",
+                    "valeur": "",
                 }
             )
             perimetre_prestation.append(
                 {
                     "type": PerimetreADomicile.Type.DROM_TOM.value,
-                    "value": "",
+                    "valeur": "",
                 }
             )
         else:
             logger.warning(f"Perimetre {perimetre} non reconnu")
 
-    perimetre_prestation.sort(key=lambda x: (x["type"], x["value"]))
+    perimetre_prestation.sort(key=lambda x: (x["type"], x["valeur"]))
 
     return perimetre_prestation
 

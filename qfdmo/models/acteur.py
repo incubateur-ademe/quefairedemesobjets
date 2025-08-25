@@ -464,7 +464,7 @@ class BaseActeur(TimestampedModel):
             "perimetre_adomicile": [
                 {
                     "type": perimetre.type,
-                    "value": perimetre.value,
+                    "valeur": perimetre.valeur,
                 }
                 for perimetre in self.perimetre_adomiciles.all()
             ],

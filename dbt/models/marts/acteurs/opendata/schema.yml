@@ -399,7 +399,7 @@ models:
         description: "Le type de périmètre à domicile"
         data_tests:
           - not_null
-      - name: value
+      - name: valeur
         description: "La valeur du périmètre à domicile"
         data_tests:
           - not_null
