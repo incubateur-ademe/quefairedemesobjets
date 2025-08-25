@@ -51,6 +51,14 @@ with DAG(
                 "origin": "ville",
                 "destination": "ville",
             },
+            {
+                "origin": "final_latitude",
+                "destination": "latitude",
+            },
+            {
+                "origin": "final_longitude",
+                "destination": "longitude",
+            },
             # 2. Transformation des colonnes
             {
                 "origin": "code_postal",
@@ -93,9 +101,9 @@ with DAG(
             },
             # 4. Transformation du dataframe
             {
-                "origin": ["final_latitude", "final_longitude"],
+                "origin": ["latitude", "longitude"],
                 "transformation": "compute_location",
-                "destination": ["location"],
+                "destination": ["location", "latitude", "longitude"],
             },
             {
                 "origin": ["siret"],
@@ -155,9 +163,7 @@ with DAG(
             {"remove": "techloadts"},
             {"remove": "techprocessid"},
             {"remove": "techsource"},
-            {"remove": "latitude"},
             {"remove": "libelle_naf"},
-            {"remove": "longitude"},
             # 6. Colonnes à garder (rien à faire, utilisé pour le controle)
             {"keep": "nom"},
             {"keep": "adresse"},

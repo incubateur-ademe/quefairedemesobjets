@@ -47,6 +47,20 @@ acteur_services AS (
     ON da.identifiant_unique = daas.acteur_id
   LEFT JOIN {{ source('qfdmo', 'qfdmo_acteurservice') }} AS as2 ON daas.acteurservice_id = as2.id
   GROUP BY da.uuid
+),
+perimetreadomicile AS (
+  SELECT
+    a.identifiant_unique AS acteur_id,
+    -- get perimetreadomicile like a json list
+    jsonb_agg(
+      jsonb_build_object(
+        'type', pad.type,
+        'value', pad.value
+      )
+    ) as json_value
+  FROM {{ ref('marts_opendata_acteur') }} AS a
+  INNER JOIN {{ ref('marts_opendata_perimetreadomicile') }} AS pad ON pad.acteur_id = a.identifiant_unique
+  GROUP BY a.identifiant_unique
 )
 SELECT
   da.uuid as "identifiant",
@@ -85,6 +99,8 @@ SELECT
   da.exclusivite_de_reprisereparation as "exclusivite_de_reprisereparation",
   da.uniquement_sur_rdv as "uniquement_sur_rdv",
   acs.services as "type_de_services",
+  da.lieu_prestation as "lieu_prestation",
+  pad.json_value as "perimetreadomicile",
   ps.services::text as "propositions_de_services",
   {{ sscat_from_action('ps.services', 'emprunter') }} as "emprunter",
   {{ sscat_from_action('ps.services', 'preter') }} as "preter",
@@ -104,4 +120,5 @@ INNER JOIN deduplicated_opened_sources AS ds ON da.uuid = ds.uuid
 LEFT JOIN proposition_services AS ps ON da.uuid = ps.uuid
 LEFT JOIN acteur_labels AS al ON da.uuid = al.uuid
 LEFT JOIN acteur_services AS acs ON da.uuid = acs.uuid
+LEFT JOIN perimetreadomicile AS pad ON da.identifiant_unique = pad.acteur_id
 ORDER BY da.uuid

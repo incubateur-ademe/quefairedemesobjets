@@ -122,6 +122,9 @@ models:
       - name: siret_is_closed
         description: "Information si on sait que le SIRET est fermé"
         data_type: boolean
+      - name: lieu_prestation
+        description: "Le lieu de prestation de l'acteur"
+        data_type: varchar(255)
     config:
       tags:
         - exposure
@@ -216,7 +219,7 @@ models:
         - type: foreign_key
           columns: [acteur_id]
           ref_columns: [identifiant_unique]
-          ref_table: exposure_carte_acteur
+          ref_table: exposure_exhaustive_acteur
           deferrable: true
           initially_deferred: true
         - type: foreign_key
@@ -270,7 +273,7 @@ models:
         - type: foreign_key
           columns: [vuepropositionservice_id]
           ref_columns: [id]
-          ref_table: exposure_carte_propositionservice
+          ref_table: exposure_exhaustive_propositionservice
           deferrable: true
           initially_deferred: true
         - type: foreign_key
@@ -324,7 +327,7 @@ models:
         - type: foreign_key
           columns: [vueacteur_id]
           ref_columns: [identifiant_unique]
-          ref_table: exposure_carte_acteur
+          ref_table: exposure_exhaustive_acteur
           deferrable: true
           initially_deferred: true
         - type: foreign_key
@@ -380,7 +383,7 @@ models:
         - type: foreign_key
           columns: [vueacteur_id]
           ref_columns: [identifiant_unique]
-          ref_table: exposure_carte_acteur
+          ref_table: exposure_exhaustive_acteur
           deferrable: true
           initially_deferred: true
         - type: foreign_key
@@ -434,7 +437,7 @@ models:
         - type: foreign_key
           columns: [vueacteur_id]
           ref_columns: [identifiant_unique]
-          ref_table: exposure_carte_acteur
+          ref_table: exposure_exhaustive_acteur
           deferrable: true
           initially_deferred: true
         - type: foreign_key
@@ -445,3 +448,45 @@ models:
     tests:
       - dbt_expectations.expect_table_row_count_to_be_between:
           min_value: 500000
+  - name: exposure_exhaustive_perimetreadomicile
+    description: "Vue exhaustive sur les périmètres à domicile"
+    columns:
+      - name: id
+        description: "L'identifiant du périmètre à domicile"
+        data_type: bigint
+        tests:
+          - not_null
+          - unique
+      - name: acteur_id
+        description: "L'identifiant de l'acteur"
+        data_type: varchar
+        tests:
+          - not_null
+      - name: type
+        description: "Le type de périmètre à domicile"
+        data_type: varchar(255)
+        tests:
+          - not_null
+          - not_empty_string
+      - name: value
+        description: "La valeur du périmètre à domicile"
+        data_type: varchar(255)
+        tests:
+          - not_null
+    config:
+      tags:
+        - exposure
+        - exhaustive
+        - acteurs
+        - perimetreadomicile
+      materialized: table
+      contract:
+        enforced: true
+      indexes:
+        - columns: ['id']
+          unique: true
+        - columns: ['acteur_id']
+          type: hash
+    tests:
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          min_value: 350000

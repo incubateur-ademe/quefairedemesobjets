@@ -1,6 +1,5 @@
 import pandas as pd
 import pytest
-
 from utils.django import (
     django_model_fields_get,
     django_model_queryset_generate,
@@ -122,12 +121,14 @@ def test_get_model_fields():
         "identifiant_unique",
         "label_codes",
         "latitude",
+        "lieu_prestation",
         "longitude",
         "modifie_le",
         "naf_principal",
         "nom_commercial",
         "nom_officiel",
         "nom",
+        "perimetre_adomicile_codes",
         "proposition_service_codes",
         "public_accueilli",
         "reprise",
@@ -157,6 +158,7 @@ def test_get_model_fields():
         "horaires_osm",
         "identifiant_externe",
         "identifiant_unique",
+        "lieu_prestation",
         "location",
         "modifie_le",
         "naf_principal",

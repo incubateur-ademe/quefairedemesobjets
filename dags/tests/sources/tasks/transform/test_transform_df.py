@@ -1,7 +1,6 @@
 import pandas as pd
 import pytest
 from sources.tasks.transform.transform_df import (
-    _parse_float,
     clean_acteur_service_codes,
     clean_action_codes,
     clean_adresse,
@@ -9,12 +8,14 @@ from sources.tasks.transform.transform_df import (
     clean_identifiant_unique,
     clean_label_codes,
     clean_proposition_services,
+    clean_service_a_domicile,
     clean_siret_and_siren,
     clean_telephone,
     compute_location,
     get_latlng_from_geopoint,
     merge_duplicates,
     merge_sous_categories_columns,
+    parse_any_to_float,
 )
 
 
@@ -430,6 +431,114 @@ class TestCleanPropositionServiceCodes:
         assert result["proposition_service_codes"] == expected_proposition_service_codes
 
 
+class TestCleanServiceADomicile:
+    @pytest.mark.parametrize(
+        (
+            "service_a_domicile, perimetre_dintervention,"
+            " expected_lieu_prestation, expected_perimetre_adomicile_codes"
+        ),
+        [
+            # Nominal cases : one perimeter
+            (
+                "oui",
+                "10 km",
+                "SUR_PLACE_OU_A_DOMICILE",
+                [{"type": "KILOMETRIQUE", "value": 10}],
+            ),
+            (
+                "oui",
+                "10",
+                "SUR_PLACE_OU_A_DOMICILE",
+                [{"type": "DEPARTEMENT", "value": "10"}],
+            ),
+            (
+                "oui",
+                "france métropolitaine",
+                "SUR_PLACE_OU_A_DOMICILE",
+                [{"type": "FRANCE_METROPOLITAINE", "value": ""}],
+            ),
+            (
+                "oui exclusivement",
+                "10 km",
+                "A_DOMICILE",
+                [{"type": "KILOMETRIQUE", "value": 10}],
+            ),
+            # Nominal cases : non
+            ("non", "", "SUR_PLACE", []),
+            # other cases : non
+            ("non", "10 km", "SUR_PLACE", []),
+            ("non", "10", "SUR_PLACE", []),
+            ("non", "france métropolitaine", "SUR_PLACE", []),
+            # Nominal cases : multiple perimeters
+            (
+                "oui",
+                " 10 km | 10 ",
+                "SUR_PLACE_OU_A_DOMICILE",
+                [
+                    {"type": "KILOMETRIQUE", "value": 10},
+                    {"type": "DEPARTEMENT", "value": "10"},
+                ],
+            ),
+            (
+                "oui",
+                " 1 | 11 | 978",
+                "SUR_PLACE_OU_A_DOMICILE",
+                [
+                    {"type": "DEPARTEMENT", "value": "01"},
+                    {"type": "DEPARTEMENT", "value": "11"},
+                    {"type": "DEPARTEMENT", "value": "978"},
+                ],
+            ),
+            (
+                "oui",
+                " France métropolitaine | 978",
+                "SUR_PLACE_OU_A_DOMICILE",
+                [
+                    {"type": "FRANCE_METROPOLITAINE", "value": ""},
+                    {"type": "DEPARTEMENT", "value": "978"},
+                ],
+            ),
+            # unknown cases
+            (
+                "oui",
+                "fake",
+                "SUR_PLACE_OU_A_DOMICILE",
+                [],
+            ),
+            (
+                "oui",
+                "10|fake",
+                "SUR_PLACE_OU_A_DOMICILE",
+                [{"type": "DEPARTEMENT", "value": "10"}],
+            ),
+        ],
+    )
+    def test_clean_service_a_domicile(
+        self,
+        service_a_domicile,
+        perimetre_dintervention,
+        expected_lieu_prestation,
+        expected_perimetre_adomicile_codes,
+    ):
+        result = clean_service_a_domicile(
+            pd.Series(
+                {
+                    "service_a_domicile": service_a_domicile,
+                    "perimetre_dintervention": perimetre_dintervention,
+                }
+            ),
+            None,
+        )
+        assert result["lieu_prestation"] == expected_lieu_prestation
+        assert sorted(
+            result["perimetre_adomicile_codes"],
+            key=lambda x: (x.get("type"), x.get("value")),
+        ) == sorted(
+            expected_perimetre_adomicile_codes,
+            key=lambda x: (x.get("type"), x.get("value")),
+        )
+
+
 class TestCleanTelephone:
     @pytest.mark.parametrize(
         "phone_number, code_postal, expected_phone_number",
@@ -814,27 +923,27 @@ class TestComputeLocation:
 
 
 class TestParseFloat:
-    def test_parse_float_with_french_decimal(self):
-        assert _parse_float("1234,56") == 1234.56
-        assert _parse_float("-1234,56") == -1234.56
-        assert _parse_float("0,0") == 0
-        assert _parse_float("1,234") == 1.234
+    def test_parse_any_to_float_with_french_decimal(self):
+        assert parse_any_to_float("1234,56") == 1234.56
+        assert parse_any_to_float("-1234,56") == -1234.56
+        assert parse_any_to_float("0,0") == 0
+        assert parse_any_to_float("1,234") == 1.234
 
-    def test_parse_float_with_trailing_comma(self):
-        assert _parse_float("1234,") == 1234.0
-        assert _parse_float("1234,56,") == 1234.56
+    def test_parse_any_to_float_with_trailing_comma(self):
+        assert parse_any_to_float("1234,") == 1234.0
+        assert parse_any_to_float("1234,56,") == 1234.56
 
-    def test_parse_float_with_valid_float(self):
-        assert _parse_float(1234.56) == 1234.56
-        assert _parse_float(-1234.56) == -1234.56
+    def test_parse_any_to_float_with_valid_float(self):
+        assert parse_any_to_float(1234.56) == 1234.56
+        assert parse_any_to_float(-1234.56) == -1234.56
 
-    def test_parse_float_with_nan(self):
-        assert _parse_float(float("nan")) is None
+    def test_parse_any_to_float_with_nan(self):
+        assert parse_any_to_float(float("nan")) is None
 
-    def test_parse_float_with_none(self):
-        assert _parse_float(None) is None
+    def test_parse_any_to_float_with_none(self):
+        assert parse_any_to_float(None) is None
 
-    def test_parse_float_with_invalid_string(self):
-        assert _parse_float("abc") is None
-        assert _parse_float("1234abc") is None
-        assert _parse_float("12,34,56") is None
+    def test_parse_any_to_float_with_invalid_string(self):
+        assert parse_any_to_float("abc") is None
+        assert parse_any_to_float("1234abc") is None
+        assert parse_any_to_float("12,34,56") is None

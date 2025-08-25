@@ -164,6 +164,12 @@ a11y:
 js-test:
 	npm run test
 
+.PHONY: backend-test
+backend-test:
+	@make unit-test
+	@make integration-test
+	@make dags-test
+
 .PHONY: test
 test:
 	@make unit-test

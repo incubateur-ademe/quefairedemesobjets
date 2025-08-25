@@ -213,245 +213,6 @@ class Migration(migrations.Migration):
         migrations.RunSQL('CREATE EXTENSION IF NOT EXISTS "uuid-ossp";'),
         migrations.RunSQL("CREATE EXTENSION IF NOT EXISTS postgres_fdw;"),
         migrations.CreateModel(
-            name="VueActeur",
-            fields=[
-                (
-                    "cree_le",
-                    models.DateTimeField(
-                        auto_now_add=True,
-                        db_default=django.db.models.functions.datetime.Now(),
-                    ),
-                ),
-                (
-                    "modifie_le",
-                    models.DateTimeField(
-                        auto_now=True,
-                        db_default=django.db.models.functions.datetime.Now(),
-                    ),
-                ),
-                ("nom", models.CharField(db_index=True, max_length=255)),
-                (
-                    "description",
-                    models.TextField(blank=True, db_default="", default=""),
-                ),
-                (
-                    "identifiant_unique",
-                    models.CharField(
-                        blank=True,
-                        db_index=True,
-                        max_length=255,
-                        primary_key=True,
-                        serialize=False,
-                        unique=True,
-                    ),
-                ),
-                (
-                    "adresse",
-                    models.CharField(
-                        blank=True, db_default="", default="", max_length=255
-                    ),
-                ),
-                (
-                    "adresse_complement",
-                    models.CharField(
-                        blank=True, db_default="", default="", max_length=255
-                    ),
-                ),
-                (
-                    "code_postal",
-                    models.CharField(
-                        blank=True,
-                        db_default="",
-                        db_index=True,
-                        default="",
-                        max_length=10,
-                    ),
-                ),
-                (
-                    "ville",
-                    models.CharField(
-                        blank=True,
-                        db_default="",
-                        db_index=True,
-                        default="",
-                        max_length=255,
-                    ),
-                ),
-                (
-                    "url",
-                    models.CharField(
-                        blank=True, db_default="", default="", max_length=2048
-                    ),
-                ),
-                (
-                    "email",
-                    models.EmailField(
-                        blank=True, db_default="", default="", max_length=254
-                    ),
-                ),
-                (
-                    "location",
-                    django.contrib.gis.db.models.fields.PointField(
-                        blank=True, null=True, srid=4326
-                    ),
-                ),
-                (
-                    "telephone",
-                    models.CharField(
-                        blank=True, db_default="", default="", max_length=255
-                    ),
-                ),
-                (
-                    "nom_commercial",
-                    models.CharField(
-                        blank=True, db_default="", default="", max_length=255
-                    ),
-                ),
-                (
-                    "nom_officiel",
-                    models.CharField(
-                        blank=True, db_default="", default="", max_length=255
-                    ),
-                ),
-                (
-                    "siren",
-                    models.CharField(
-                        blank=True,
-                        db_default="",
-                        db_index=True,
-                        default="",
-                        max_length=9,
-                    ),
-                ),
-                (
-                    "siret",
-                    models.CharField(
-                        blank=True,
-                        db_default="",
-                        db_index=True,
-                        default="",
-                        max_length=14,
-                    ),
-                ),
-                (
-                    "siret_is_closed",
-                    models.BooleanField(
-                        blank=True,
-                        default=None,
-                        help_text="Indique si le SIRET est fermé ou non dans l'Annuaire Entreprises",
-                        null=True,
-                        verbose_name="SIRET fermé",
-                    ),
-                ),
-                (
-                    "identifiant_externe",
-                    models.CharField(
-                        blank=True, db_default="", default="", max_length=255
-                    ),
-                ),
-                (
-                    "statut",
-                    models.CharField(
-                        choices=[
-                            ("ACTIF", "actif"),
-                            ("INACTIF", "inactif"),
-                            ("SUPPRIME", "supprimé"),
-                        ],
-                        db_default="ACTIF",
-                        default="ACTIF",
-                        max_length=255,
-                    ),
-                ),
-                (
-                    "naf_principal",
-                    models.CharField(
-                        blank=True, db_default="", default="", max_length=255
-                    ),
-                ),
-                (
-                    "commentaires",
-                    models.TextField(blank=True, db_default="", default=""),
-                ),
-                (
-                    "horaires_osm",
-                    models.CharField(
-                        blank=True,
-                        db_default="",
-                        default="",
-                        validators=[qfdmo.models.acteur.validate_opening_hours],
-                    ),
-                ),
-                (
-                    "horaires_description",
-                    models.TextField(blank=True, db_default="", default=""),
-                ),
-                (
-                    "public_accueilli",
-                    models.CharField(
-                        blank=True,
-                        choices=[
-                            (
-                                "Particuliers et professionnels",
-                                "Particuliers et professionnels",
-                            ),
-                            ("Professionnels", "Professionnels"),
-                            ("Particuliers", "Particuliers"),
-                            ("Aucun", "Aucun"),
-                            ("", ""),
-                        ],
-                        default="",
-                        max_length=255,
-                    ),
-                ),
-                (
-                    "reprise",
-                    models.CharField(
-                        blank=True,
-                        choices=[
-                            ("1 pour 0", "1 pour 0"),
-                            ("1 pour 1", "1 pour 1"),
-                            ("", ""),
-                        ],
-                        default="",
-                        max_length=255,
-                    ),
-                ),
-                (
-                    "exclusivite_de_reprisereparation",
-                    models.BooleanField(
-                        blank=True,
-                        null=True,
-                        verbose_name="Exclusivité de reprise/réparation",
-                    ),
-                ),
-                ("uniquement_sur_rdv", models.BooleanField(blank=True, null=True)),
-                (
-                    "uuid",
-                    models.CharField(
-                        default=shortuuid.main.ShortUUID.uuid,
-                        editable=False,
-                        max_length=255,
-                    ),
-                ),
-            ],
-            options={
-                "verbose_name": "ACTEUR de l'EC - Vue sur l'acteur",
-                "verbose_name_plural": "ACTEURS de l'EC - Vues sur tous les acteurs",
-                "managed": False,
-            },
-        ),
-        migrations.CreateModel(
-            name="VuePropositionService",
-            fields=[
-                ("id", models.CharField(primary_key=True, serialize=False)),
-            ],
-            options={
-                "verbose_name": "Vue sur la proposition de service",
-                "verbose_name_plural": "Vue sur toutes les propositions de service",
-                "managed": False,
-            },
-        ),
-        migrations.CreateModel(
             name="ActeurService",
             fields=[
                 ("id", models.AutoField(primary_key=True, serialize=False)),
@@ -3564,5 +3325,304 @@ class Migration(migrations.Migration):
             constraint=models.UniqueConstraint(
                 fields=("acteur", "action"), name="ps_unique_by_acteur"
             ),
+        ),
+        migrations.CreateModel(
+            name="VueActeur",
+            fields=[
+                (
+                    "cree_le",
+                    models.DateTimeField(
+                        auto_now_add=True,
+                        db_default=django.db.models.functions.datetime.Now(),
+                    ),
+                ),
+                (
+                    "modifie_le",
+                    models.DateTimeField(
+                        auto_now=True,
+                        db_default=django.db.models.functions.datetime.Now(),
+                    ),
+                ),
+                ("nom", models.CharField(db_index=True, max_length=255)),
+                (
+                    "description",
+                    models.TextField(blank=True, db_default="", default=""),
+                ),
+                (
+                    "identifiant_unique",
+                    models.CharField(
+                        blank=True,
+                        db_index=True,
+                        max_length=255,
+                        primary_key=True,
+                        serialize=False,
+                        unique=True,
+                    ),
+                ),
+                (
+                    "adresse",
+                    models.CharField(
+                        blank=True, db_default="", default="", max_length=255
+                    ),
+                ),
+                (
+                    "adresse_complement",
+                    models.CharField(
+                        blank=True, db_default="", default="", max_length=255
+                    ),
+                ),
+                (
+                    "code_postal",
+                    models.CharField(
+                        blank=True,
+                        db_default="",
+                        db_index=True,
+                        default="",
+                        max_length=10,
+                    ),
+                ),
+                (
+                    "ville",
+                    models.CharField(
+                        blank=True,
+                        db_default="",
+                        db_index=True,
+                        default="",
+                        max_length=255,
+                    ),
+                ),
+                (
+                    "url",
+                    models.CharField(
+                        blank=True, db_default="", default="", max_length=2048
+                    ),
+                ),
+                (
+                    "email",
+                    models.EmailField(
+                        blank=True, db_default="", default="", max_length=254
+                    ),
+                ),
+                (
+                    "location",
+                    django.contrib.gis.db.models.fields.PointField(
+                        blank=True, null=True, srid=4326
+                    ),
+                ),
+                (
+                    "telephone",
+                    models.CharField(
+                        blank=True, db_default="", default="", max_length=255
+                    ),
+                ),
+                (
+                    "nom_commercial",
+                    models.CharField(
+                        blank=True, db_default="", default="", max_length=255
+                    ),
+                ),
+                (
+                    "nom_officiel",
+                    models.CharField(
+                        blank=True, db_default="", default="", max_length=255
+                    ),
+                ),
+                (
+                    "siren",
+                    models.CharField(
+                        blank=True,
+                        db_default="",
+                        db_index=True,
+                        default="",
+                        max_length=9,
+                    ),
+                ),
+                (
+                    "siret",
+                    models.CharField(
+                        blank=True,
+                        db_default="",
+                        db_index=True,
+                        default="",
+                        max_length=14,
+                    ),
+                ),
+                (
+                    "siret_is_closed",
+                    models.BooleanField(
+                        blank=True,
+                        default=None,
+                        help_text="Indique si le SIRET est fermé ou non dans l'Annuaire Entreprises",
+                        null=True,
+                        verbose_name="SIRET fermé",
+                    ),
+                ),
+                (
+                    "identifiant_externe",
+                    models.CharField(
+                        blank=True, db_default="", default="", max_length=255
+                    ),
+                ),
+                (
+                    "statut",
+                    models.CharField(
+                        choices=[
+                            ("ACTIF", "actif"),
+                            ("INACTIF", "inactif"),
+                            ("SUPPRIME", "supprimé"),
+                        ],
+                        db_default="ACTIF",
+                        default="ACTIF",
+                        max_length=255,
+                    ),
+                ),
+                (
+                    "naf_principal",
+                    models.CharField(
+                        blank=True, db_default="", default="", max_length=255
+                    ),
+                ),
+                (
+                    "commentaires",
+                    models.TextField(blank=True, db_default="", default=""),
+                ),
+                (
+                    "horaires_osm",
+                    models.CharField(
+                        blank=True,
+                        db_default="",
+                        default="",
+                        validators=[qfdmo.models.acteur.validate_opening_hours],
+                    ),
+                ),
+                (
+                    "horaires_description",
+                    models.TextField(blank=True, db_default="", default=""),
+                ),
+                (
+                    "public_accueilli",
+                    models.CharField(
+                        blank=True,
+                        choices=[
+                            (
+                                "Particuliers et professionnels",
+                                "Particuliers et professionnels",
+                            ),
+                            ("Professionnels", "Professionnels"),
+                            ("Particuliers", "Particuliers"),
+                            ("Aucun", "Aucun"),
+                            ("", ""),
+                        ],
+                        default="",
+                        max_length=255,
+                    ),
+                ),
+                (
+                    "reprise",
+                    models.CharField(
+                        blank=True,
+                        choices=[
+                            ("1 pour 0", "1 pour 0"),
+                            ("1 pour 1", "1 pour 1"),
+                            ("", ""),
+                        ],
+                        default="",
+                        max_length=255,
+                    ),
+                ),
+                (
+                    "exclusivite_de_reprisereparation",
+                    models.BooleanField(
+                        blank=True,
+                        null=True,
+                        verbose_name="Exclusivité de reprise/réparation",
+                    ),
+                ),
+                ("uniquement_sur_rdv", models.BooleanField(blank=True, null=True)),
+                (
+                    "uuid",
+                    models.CharField(
+                        db_index=True,
+                        default=qfdmo.models.acteur.generate_short_uuid,
+                        editable=False,
+                        max_length=255,
+                    ),
+                ),
+                (
+                    "acteur_services",
+                    models.ManyToManyField(blank=True, to="qfdmo.acteurservice"),
+                ),
+                (
+                    "acteur_type",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="qfdmo.acteurtype",
+                    ),
+                ),
+                (
+                    "action_principale",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="qfdmo.action",
+                    ),
+                ),
+                ("labels", models.ManyToManyField(to="qfdmo.labelqualite")),
+                (
+                    "parent",
+                    models.ForeignKey(
+                        blank=True,
+                        help_text="Acteur «chapeau» utilisé pour dédupliquer cet acteur",
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="duplicats",
+                        to="qfdmo.vueacteur",
+                        validators=[qfdmo.models.acteur.clean_parent],
+                        verbose_name="Dédupliqué par",
+                    ),
+                ),
+                (
+                    "source",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="qfdmo.source",
+                    ),
+                ),
+            ],
+            options={
+                "verbose_name": "ACTEUR de l'EC - Vue sur l'acteur",
+                "verbose_name_plural": "ACTEURS de l'EC - Vues sur tous les acteurs",
+            },
+        ),
+        migrations.CreateModel(
+            name="VuePropositionService",
+            fields=[
+                ("id", models.CharField(primary_key=True, serialize=False)),
+                (
+                    "acteur",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="proposition_services",
+                        to="qfdmo.vueacteur",
+                    ),
+                ),
+                (
+                    "action",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="qfdmo.action"
+                    ),
+                ),
+                (
+                    "sous_categories",
+                    models.ManyToManyField(to="qfdmo.souscategorieobjet"),
+                ),
+            ],
+            options={
+                "verbose_name": "Vue sur la proposition de service",
+                "verbose_name_plural": "Vue sur toutes les propositions de service",
+            },
         ),
     ]

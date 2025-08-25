@@ -29,6 +29,7 @@ def db_read_acteur(df_normalized: pd.DataFrame, dag_config: DAGConfig):
         "source",
         "acteur_type",
         "acteur_services",
+        "perimetre_adomiciles",
     ).filter(source__code__in=unique_source_codes)
 
     if acteurs_count := acteurs.count():
@@ -61,6 +62,10 @@ def db_read_acteur(df_normalized: pd.DataFrame, dag_config: DAGConfig):
                 ],
             }
             for ps in acteur.proposition_services.all().order_by("action__code")
+        ]
+        acteur_dict["perimetre_adomicile_codes"] = [
+            {"type": perimetre.type, "value": perimetre.value}
+            for perimetre in acteur.perimetre_adomiciles.all().order_by("type", "value")
         ]
         acteurs_list.append(acteur_dict)
     if acteurs_list:

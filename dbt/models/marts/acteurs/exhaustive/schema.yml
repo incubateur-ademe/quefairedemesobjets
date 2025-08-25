@@ -182,3 +182,29 @@ models:
           combination_of_columns:
             - propositionservice_id
             - souscategorieobjet_id
+  - name: marts_exhaustive_perimetreadomicile
+    description: "Vue sur les périmètres à domicile affichés sur la carte"
+    columns:
+      - name: id
+        description: "L'identifiant du périmètre à domicile"
+        data_tests:
+          - not_null
+          - unique
+      - name: acteur_id
+        description: "L'identifiant de l'acteur"
+        data_tests:
+          - not_null
+      - name: type
+        description: "Le type de périmètre à domicile"
+        data_tests:
+          - not_null
+      - name: value
+        description: "La valeur du périmètre à domicile"
+        data_tests:
+          - not_null
+    config:
+      tags:
+        - marts
+        - exhaustive
+        - acteurs
+        - perimetreadomicile
