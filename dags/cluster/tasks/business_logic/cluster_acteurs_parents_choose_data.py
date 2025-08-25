@@ -122,7 +122,7 @@ def cluster_acteurs_parents_choose_data(
         fields = fields_to_include_clean(fields_to_include)  # TODO : check which
 
         # service_a_domicile is a special field which combine perimetre_adomicile and
-        # lieu_prestation, we need it because the perimetre_adomicile choosen should be
+        # lieu_prestation, we need it because the perimetre_adomicile chosen should be
         # the ones corresponding to the lieu_prestation
         fields = fields + ["service_a_domicile"]
         result = {}
@@ -140,7 +140,7 @@ def cluster_acteurs_parents_choose_data(
                 continue
             result[field] = value_new
 
-        # once the values are choosen, we need to reconstruct the perimetre_adomicile
+        # once the values are chosen, we need to reconstruct the perimetre_adomicile
         # and lieu_prestation
         if service_a_domicile := result.get("service_a_domicile"):
             result["perimetre_adomiciles"] = service_a_domicile["perimetre_adomicile"]
