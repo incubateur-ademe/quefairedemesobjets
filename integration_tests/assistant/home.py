@@ -2,11 +2,7 @@
 # - tester formulaire de recherche
 import pytest
 from bs4 import BeautifulSoup
-from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
-
-# from django.core.management import call_command
-from django.test import override_settings
 
 from qfdmd.models import Suggestion, Synonyme
 from unit_tests.qfdmd.qfdmod_factory import (
@@ -20,13 +16,9 @@ from unit_tests.qfdmd.qfdmod_factory import (
 # --------
 @pytest.fixture
 def get_response(client):
-    @override_settings(
-        ASSISTANT={**settings.ASSISTANT, "HOSTS": ["coucou.youpi"]},
-        ALLOWED_HOSTS=["coucou.youpi"],
-    )
     def _get_response(path=""):
         url = f"/{path}"
-        response = client.get(url, headers={"host": "coucou.youpi"})
+        response = client.get(url)
         assert response.status_code == 200, "No redirect occurs"
         return response, BeautifulSoup(response.content, "html.parser")
 

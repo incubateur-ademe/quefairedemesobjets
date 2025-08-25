@@ -12,7 +12,7 @@ On affiche l'iframe grâce à un script JS.
 
 ```html
 <script
-  src="https://lvao.ademe.fr/static/iframe.js"
+  src="https://quefairedemesdechets.fr/static/iframe.js"
   data-max_width="800"
   data-direction="jai"
   data-first_dir="jai"

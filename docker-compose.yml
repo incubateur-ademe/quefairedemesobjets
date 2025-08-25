@@ -1,6 +1,5 @@
 ---
-x-airflow-common:
-  &airflow-common
+x-airflow-common: &airflow-common
   env_file:
     - ./dags/.env
   volumes:
@@ -20,8 +19,7 @@ x-airflow-common:
   user: "${AIRFLOW_UID:-50000}:0"
   extra_hosts:
     - "host.docker.internal:host-gateway"
-  depends_on:
-    &airflow-common-depends-on
+  depends_on: &airflow-common-depends-on
     airflow-db:
       condition: service_healthy
 
@@ -86,11 +84,11 @@ services:
     <<: *airflow-common
 
     environment:
-      _AIRFLOW_DB_MIGRATE: 'true'
-      _AIRFLOW_WWW_USER_CREATE: 'true'
+      _AIRFLOW_DB_MIGRATE: "true"
+      _AIRFLOW_WWW_USER_CREATE: "true"
       _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
       _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
-      _PIP_ADDITIONAL_REQUIREMENTS: ''
+      _PIP_ADDITIONAL_REQUIREMENTS: ""
     user: "0:0"
     build:
       context: .
@@ -110,7 +108,7 @@ services:
   airflow-scheduler:
     <<: *airflow-common
     env_file:
-    - ./dags/.env
+      - ./dags/.env
     build:
       context: .
       dockerfile: airflow-scheduler.Dockerfile
