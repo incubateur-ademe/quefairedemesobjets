@@ -98,15 +98,6 @@ class ActeurReprise(models.TextChoices):
     UNKNOWN = "", ""
 
 
-class TypePerimetreADomicile(models.TextChoices):
-    DEPARTEMENTAL = "DEPARTEMENTAL", "Départemental"
-    KILOMETRIQUE = "KILOMETRIQUE", "Kilométrique"
-    FRANCE_METROPOLITAINE = (
-        "FRANCE_METROPOLITAINE",
-        "France métropolitaine (Corse incluse)",
-    )
-
-
 class DepartementOrNumValidator(RegexValidator):
     # soit 2A, 2B, ou un entier
     regex = r"^2A$|^2B$|^[0-9]+$"
@@ -473,7 +464,7 @@ class BaseActeur(TimestampedModel):
             "perimetre_adomicile": [
                 {
                     "type": perimetre.type,
-                    "value": perimetre.value,
+                    "valeur": perimetre.valeur,
                 }
                 for perimetre in self.perimetre_adomiciles.all()
             ],
@@ -831,17 +822,28 @@ class BasePerimetreADomicile(models.Model):
         verbose_name = "Périmètre à domicile"
         verbose_name_plural = "Périmètres à domicile"
 
+    class Type(models.TextChoices):
+        DEPARTEMENTAL = "DEPARTEMENTAL", "Départemental"
+        KILOMETRIQUE = "KILOMETRIQUE", "Kilométrique"
+        FRANCE_METROPOLITAINE = (
+            "FRANCE_METROPOLITAINE",
+            "France métropolitaine (Corse incluse)",
+        )
+        DROM_TOM = "DROM_TOM", "DROM TOM"
+
     acteur = models.ForeignKey(
         Acteur, on_delete=models.CASCADE, related_name="perimetre_adomiciles"
     )
     type = models.CharField(
-        choices=TypePerimetreADomicile.choices,
-        default=TypePerimetreADomicile.KILOMETRIQUE,
+        choices=Type.choices,
+        default=Type.KILOMETRIQUE,
     )
     # Char is needed because Corsica codes are 2A and 2B
-    value = models.CharField(
-        blank=False,
-        validators=[DepartementOrNumValidator()],
+    valeur = models.CharField(
+        blank=True,
+        validators=[
+            DepartementOrNumValidator(),
+        ],
     )
 
 

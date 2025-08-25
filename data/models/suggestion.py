@@ -295,7 +295,7 @@ class Suggestion(models.Model):
         for perimetre_adomicile_code in self.suggestion["perimetre_adomicile_codes"]:
             PerimetreADomicile.objects.create(
                 type=perimetre_adomicile_code["type"],
-                value=perimetre_adomicile_code["value"],
+                valeur=perimetre_adomicile_code["value"],
                 acteur=acteur,
             )
         for label_code in self.suggestion["label_codes"]:
