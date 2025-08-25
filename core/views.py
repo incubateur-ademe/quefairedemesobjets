@@ -21,8 +21,10 @@ def direct_access(request):
 
     get_params = request.GET.copy()
 
-    # FIXME: check if view is assistant
-    if request.resolver_match.view_name.startswith(("qfdmd", "wagtail")):
+    if (
+        request.resolver_match.namespace == "qfdmd"
+        or request.resolver_match.view_name.startswith("wagtail")
+    ):
         return Assistant.as_view()(request)
 
     # FIXME: check if view is carte
