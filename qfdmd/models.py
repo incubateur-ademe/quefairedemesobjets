@@ -1,8 +1,6 @@
 import logging
 from urllib.parse import urlencode
 
-import sites_faciles
-from django import forms
 from django.contrib.gis.db import models
 from django.db.models import CheckConstraint, Q
 from django.db.models.functions import Now
@@ -21,25 +19,25 @@ from wagtail.admin.panels import (
     ObjectList,
     TabbedInterface,
 )
-from wagtail.admin.panels.page_utils import WagtailAdminPageForm
 from wagtail.fields import RichTextField, StreamField
 from wagtail.images.blocks import ImageBlock
 from wagtail.models import Page, ParentalKey
 from wagtail.search import index
 from wagtail.snippets.models import register_snippet
 
-from qfdmd.blocks import STREAMFIELD_COMMON_BLOCKS, ExtendedCommonStreamBlock
+from qfdmd.blocks import STREAMFIELD_COMMON_BLOCKS
 from qfdmo.models.utils import NomAsNaturalKeyModel
-
-sites_faciles.content_manager.blocks.CommonStreamBlock = ExtendedCommonStreamBlock
-
 
 logger = logging.getLogger(__name__)
 
 
 class GenreNombreModel(models.Model):
-    genre = models.CharField("Genre", choices=[("m", "Masculin"), ("f", "Féminin")])
-    nombre = models.IntegerField("Nombre", choices=[(1, "singulier"), (2, "pluriel")])
+    genre = models.CharField(
+        "Genre", blank=True, choices=[("m", "Masculin"), ("f", "Féminin")]
+    )
+    nombre = models.IntegerField(
+        "Nombre", null=True, blank=True, choices=[(1, "singulier"), (2, "pluriel")]
+    )
 
     class Meta:
         abstract = True
@@ -68,6 +66,11 @@ class Bonus(index.Indexed, models.Model):
 class ReusableContent(index.Indexed, GenreNombreModel):
     title = models.CharField(verbose_name="Titre", unique=True)
     content = RichTextField(verbose_name="Contenu")
+    feminin_singulier = RichTextField(verbose_name="Contenu - Féminin singulier")
+    feminin_pluriel = RichTextField(verbose_name="Contenu - Féminin pluriel")
+    masculin_singulier = RichTextField(verbose_name="Contenu - Masculin singulier")
+    masculin_pluriel = RichTextField(verbose_name="Contenu - Masculin pluriel")
+
     search_fields = [
         index.SearchField("title"),
         index.AutocompleteField("title"),
@@ -76,6 +79,10 @@ class ReusableContent(index.Indexed, GenreNombreModel):
     panels = [
         FieldPanel("title"),
         FieldPanel("content"),
+        FieldPanel("feminin_singulier"),
+        FieldPanel("feminin_pluriel"),
+        FieldPanel("masculin_singulier"),
+        FieldPanel("masculin_pluriel"),
         FieldRowPanel(
             [FieldPanel("genre"), FieldPanel("nombre")], heading="Genre et nombre"
         ),
@@ -89,7 +96,7 @@ class ReusableContent(index.Indexed, GenreNombreModel):
         verbose_name_plural = "Contenus réutilisables"
 
 
-class CompiledFieldMixin:
+class CompiledFieldMixin(Page):
     @cached_property
     def famille(self):
         if famille := self.get_ancestors().type(FamilyPage).first():
@@ -98,15 +105,42 @@ class CompiledFieldMixin:
 
     @cached_property
     def compiled_body(self):
-        if not self.body and self.famille:
-            return self.famille.specific.body
-        return self.body
+        return self._get_compiled_field("body")
 
     @cached_property
     def compiled_bonus(self):
-        if not self.bonus and self.famille and not self.disable_bonus_inheritance:
-            return self.famille.specific.bonus
-        return self.bonus
+        return self._get_compiled_field("bonus", "disable_bonus_inheritance")
+
+    @cached_property
+    def compiled_infotri(self):
+        return self._get_compiled_field("infotri")
+
+    @cached_property
+    def compiled_titre_phrase(self):
+        return self._get_compiled_field("titre_phrase")
+
+    def _get_inherited_field(
+        self: Page, field_name: str, disable_inheritance_field=None
+    ):
+        # TODOWAGTAIL : add unit test
+        """
+        Retrieve the value of a field from the current page or fall back to its parent.
+
+        This helper is designed for cases where a Produit page
+        may not define a certain field and should instead inherit it
+        from its parent page.
+
+        An optional "kill switch" field can be used to disable fallback
+        and force inheritance even if the field exists on the current page.
+        """
+        if not hasattr(self, field_name) and getattr(
+            self, disable_inheritance_field, True
+        ):
+            return getattr(self.get_parent().specific, field_name)
+        return getattr(self, field_name)
+
+    class Meta:
+        abstract = True
 
 
 class TitleFields(models.Model):
@@ -114,36 +148,18 @@ class TitleFields(models.Model):
         "Titre utilisé dans les phrases",
         help_text="Ce titre sera utilisé dans les contenus réutilisables, "
         "pour l'affichage du synonyme de recherche",
+        blank=True,
     )
 
     class Meta:
         abstract = True
 
 
-class ProduitIndexPage(Page, CompiledFieldMixin):
+class ProduitIndexPage(CompiledFieldMixin, Page):
     subpage_types = ["qfdmd.produitpage", "qfdmd.familypage"]
 
     class Meta:
         verbose_name = "Index des familles & produits"
-
-
-class ProduitPageForm(WagtailAdminPageForm):
-    parent_page_id = forms.CharField(widget=forms.widgets.HiddenInput())
-
-    def __init__(self, data=None, files=None, parent_page=None, *args, **kwargs):
-        initial = kwargs.pop("initial", {})
-
-        if parent_page:
-            initial["parent_page_id"] = parent_page.pk
-
-        return super().__init__(
-            data,
-            files,
-            parent_page,
-            *args,
-            initial=initial,
-            **kwargs,
-        )
 
 
 class ProduitPageTag(TaggedItemBase):
@@ -161,9 +177,8 @@ class AncestorFieldsMixin:
 
 
 class ProduitPage(
-    Page, GenreNombreModel, CompiledFieldMixin, TitleFields, AncestorFieldsMixin
+    CompiledFieldMixin, Page, GenreNombreModel, TitleFields, AncestorFieldsMixin
 ):
-    base_form_class = ProduitPageForm
     subpage_types = [
         "qfdmd.synonymepage",
     ]
@@ -171,6 +186,12 @@ class ProduitPage(
 
     # Taxonomie
     tags = ClusterTaggableManager(through=ProduitPageTag, blank=True, related_name="+")
+    sous_categorie_objet = models.ManyToManyField(
+        "qfdmo.SousCategorieObjet",
+        related_name="produit_pages",
+        blank=True,
+    )
+
     # Config
     bonus = models.ForeignKey(
         "qfdmd.bonus",
@@ -275,8 +296,10 @@ class ProduitPage(
         MultiFieldPanel(
             [
                 FieldPanel("titre_phrase"),
-                FieldPanel("genre"),
-                FieldPanel("nombre"),
+                FieldRowPanel(
+                    [FieldPanel("genre"), FieldPanel("nombre")],
+                    heading="Genre et nombre",
+                ),
             ],
             heading="Dynamisation des contenus",
         ),
@@ -289,7 +312,10 @@ class ProduitPage(
         ),
         FieldPanel("usage_unique"),
         MultiFieldPanel(
-            [FieldPanel("tags")],
+            [
+                FieldPanel("tags"),
+                FieldPanel("sous_categorie_objet"),
+            ],
             heading="Taxonomie",
         ),
     ]
@@ -303,11 +329,6 @@ class ProduitPage(
             ObjectList(Page.settings_panels, heading="Paramètres"),
         ],
     )
-
-    def get_context(self, request, *args, **kwargs):
-        context = super().get_context(request, *args, **kwargs)
-        context.update(is_synonyme=not (self.legacy_produit or self.legacy_synonyme))
-        return context
 
     class Meta:
         verbose_name = "Produit"
@@ -336,6 +357,7 @@ class FamilyPage(ProduitPage):
 
 
 class SynonymePage(
+    CompiledFieldMixin,
     Page,
     AncestorFieldsMixin,
     TitleFields,
@@ -343,22 +365,26 @@ class SynonymePage(
     parent_page_types = ["qfdmd.produitpage", "qfdmd.familypage"]
 
     def get_template(self, request, *args, **kwargs):
-        if self.get_parent().page_type_display_name.lower() == "produit":
-            return "qfdmd/produit_page.html"
-        elif self.get_parent().page_type_display_name.lower() == "famille":
-            return "qfdmd/family_page.html"
+        return self.get_parent().specific.template
 
-    @cached_property
-    def synonyme(self) -> ProduitPage | FamilyPage:
-        """This property is used in templates because this page can be rendered
-        as a produit or famille but we want to add some context.
-        This is not clear yet if this approach will use a real URL for synonymes
-        or if a redirect will be issued with an url parameter.
+    def get_context(self, request, *args, **kwargs):
+        """
+        Extend the default Wagtail page context for SynonymePage.
 
-        For now we add the synonyme to the context so that it can be picked up
-        in both famille and produit templates, but this might change in a near
-        future."""
-        return self
+        This method overrides the default `get_context` behavior in order to
+        adjust how templates see the `page` object. By default, `page` would
+        refer to the current `SynonymePage`, but synonymes are meant to act
+        as "aliases" for their parent page (either a `ProduitPage` or
+        `FamilyPage`).
+
+        This makes it possible to render templates as if the parent page were
+        being visited directly, while still preserving access to the synonyme
+        itself.
+        """
+        context = super().get_context(request, *args, **kwargs)
+        page = context.pop("page")
+        context.update(page=self.get_parent().specific, synonyme=page)
+        return context
 
     class Meta:
         verbose_name = "Synonyme de recherche"

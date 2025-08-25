@@ -1,9 +1,5 @@
 {% extends "qfdmd/produit_page.html" %}
 
 {% block main_heading %}
-{% if page.synonyme %}
-    {% include "components/produit/heading_family.html" with title=page.get_parent.specific.titre_phrase infotri=page.get_parent.specific.infotri synonyme=page.synonyme.titre_phrase %}
-{% else %}
-    {% include "components/produit/heading_family.html" with title=page.titre_phrase infotri=page.infotri %}
-{% endif %}
+    {% include "components/produit/heading_family.html" with title=page.compiled_titre_phrase infotri=page.compiled_infotri %}
 {% endblock main_heading %}

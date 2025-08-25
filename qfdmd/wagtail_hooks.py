@@ -2,7 +2,6 @@ from django.urls import path, reverse
 from wagtail import hooks
 from wagtail.admin.action_menu import ActionMenuItem
 
-from qfdmd.models import ProduitPage
 from qfdmd.views import (
     bonus_viewset,
     legacy_migrate,
@@ -30,6 +29,7 @@ WagtailBlockChooserWidget = pokemon_chooser_viewset.widget_class
 
 
 class MigratePageMenuItem(ActionMenuItem):
+    # TODOWAGTAIL: remove if not needed in a few weeks (2025/8/25)
     name = "migrate-legacy"
     label = "Migrer depuis les produits/synonymes"
     icon_name = "download"
@@ -39,7 +39,13 @@ class MigratePageMenuItem(ActionMenuItem):
         return reverse("legacy_migrate", args=[page.id])
 
     def is_shown(self, context):
-        return isinstance(context.get("page"), ProduitPage)
+        """
+        We keep this class in case it needs to be enabled
+        in a near future, but this can be considered as deprecated
+        for now as a migration from produit / synonyme is no longer
+        planned so we do not show it in Wagtail Admin.
+        """
+        return False
 
 
 @hooks.register("register_page_action_menu_item")
