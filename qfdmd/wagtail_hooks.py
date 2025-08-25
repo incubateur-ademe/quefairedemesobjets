@@ -29,6 +29,7 @@ WagtailBlockChooserWidget = pokemon_chooser_viewset.widget_class
 
 
 class MigratePageMenuItem(ActionMenuItem):
+    # TODOWAGTAIL: remove if not needed in a few weeks (2025/8/25)
     name = "migrate-legacy"
     label = "Migrer depuis les produits/synonymes"
     icon_name = "download"
@@ -38,6 +39,12 @@ class MigratePageMenuItem(ActionMenuItem):
         return reverse("legacy_migrate", args=[page.id])
 
     def is_shown(self, context):
+        """
+        We keep this class in case it needs to be enabled
+        in a near future, but this can be considered as deprecated
+        for now as a migration from produit / synonyme is no longer
+        planned
+        """
         return False
 
 
