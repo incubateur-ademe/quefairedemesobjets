@@ -1,7 +1,10 @@
 # Allow everything for everyone
 User-agent: *
-Allow: /
+Disallow: /adresse_details/*
+Disallow: /donnez-votre-avis
+Disallow: /proposer-une-adresse
+Disallow: /proposer-une-modification
+Disallow: /nous-contacter
 
 # Sitemap
-# https://longuevieauxobjets.ademe.fr/sitemap.xml
 Sitemap: {{ request.scheme }}://{{ request.get_host }}/sitemap.xml
