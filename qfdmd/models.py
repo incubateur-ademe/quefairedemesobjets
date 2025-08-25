@@ -119,9 +119,22 @@ class CompiledFieldMixin(Page):
     def compiled_titre_phrase(self):
         return self._get_compiled_field("titre_phrase")
 
-    def _get_compiled_field(self: Page, field_name: str, kill_switch_field_name=None):
+    def _get_inherited_field(
+        self: Page, field_name: str, disable_inheritance_field=None
+    ):
+        # TODOWAGTAIL : add unit test
+        """
+        Retrieve the value of a field from the current page or fall back to its parent.
+
+        This helper is designed for cases where a Produit page
+        may not define a certain field and should instead inherit it
+        from its parent page.
+
+        An optional "kill switch" field can be used to disable fallback
+        and force inheritance even if the field exists on the current page.
+        """
         if not hasattr(self, field_name) and getattr(
-            self, kill_switch_field_name, True
+            self, disable_inheritance_field, True
         ):
             return getattr(self.get_parent().specific, field_name)
         return getattr(self, field_name)

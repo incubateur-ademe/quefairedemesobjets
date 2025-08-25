@@ -70,6 +70,7 @@ class CarteConfig(models.Model):
         " la carte. Le mode liste affiche une liste d'acteurs tandis qu'une"
         " carte affiche un fond de carte.",
     )
+    # TODOWAGTAIL : remove double negation and use afficher_legende instead
     cacher_legende = models.BooleanField(
         default=False,
         verbose_name="Cacher la légende",
@@ -148,10 +149,17 @@ class CarteConfig(models.Model):
         blank=True,
     )
 
-    def get_absolute_url(self, extra_sous_categories=None):
+    def get_absolute_url(self, override_sous_categories=None):
+        # TODOWAGTAIL: add unit test
+        """This view can be used with categories set from the parent page.
+        For example in the Assistant, with a Produit page, the sous_categorie_objet
+        is set on the page itself and need to replace the ones set on the carte config.
+        The carte config used on a Produit Page usually does not have
+        sous_categorie_objet field filled,
+        but in case this happens, we assume they need to be bypassed"""
         query = QueryDict("", mutable=True)
-        if extra_sous_categories:
-            query.setlist(self.SOUS_CATEGORIE_QUERY_PARAM, extra_sous_categories)
+        if override_sous_categories:
+            query.setlist(self.SOUS_CATEGORIE_QUERY_PARAM, override_sous_categories)
 
         return reverse("qfdmo:carte_custom", kwargs={"slug": self.slug}, query=query)
 
