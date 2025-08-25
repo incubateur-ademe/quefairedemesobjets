@@ -120,7 +120,6 @@ class CompiledFieldMixin(Page):
         return self._get_compiled_field("titre_phrase")
 
     def _get_compiled_field(self: Page, field_name: str, kill_switch_field_name=None):
-        logger.info(f"{self=} {field_name=}")
         if not hasattr(self, field_name) and getattr(
             self, kill_switch_field_name, True
         ):
