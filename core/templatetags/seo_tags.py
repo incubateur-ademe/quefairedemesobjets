@@ -1,7 +1,6 @@
 from urllib.parse import quote, quote_plus
 
 from django import template
-from django.conf import settings
 
 from core.constants import ASSISTANT, CARTE
 
@@ -19,7 +18,7 @@ def get_sharer_content(request, object, social_network=None):
         return {}
 
     # FIXME: check if current view is carte
-    carte = request.META.get("HTTP_HOST") not in settings.ASSISTANT["HOSTS"]
+    carte = request.resolver_match.view_name in ["qfdmo:carte", "qfdmo:carte_custom"]
     url = request.build_absolute_uri()
 
     share_body = ""

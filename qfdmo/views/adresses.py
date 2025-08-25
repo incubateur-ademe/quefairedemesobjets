@@ -655,7 +655,7 @@ def acteur_detail(request, uuid):
     # FIXME: This case shouldn't occure because we compute only active displayed
     # acteurs in dislayedacteur table
     if displayed_acteur is None or displayed_acteur.statut != ActeurStatus.ACTIF:
-        return redirect(settings.ASSISTANT["BASE_URL"], permanent=True)
+        return redirect(settings.BASE_URL, permanent=True)
 
     context = {
         "base_template": base_template,
