@@ -15,7 +15,6 @@
             content="width=device-width, initial-scale=1, shrink-to-fit=no"
         />
         {% block title %}<title>{{ seo.title }}</title>{% endblock %}
-        {% canonical_url %}
         <meta name="description" content="{% block meta_description %}{{ seo.description }}{% endblock %}">
         <meta property="og:image" content="{% static 'assistant/og-image.jpg' %}" />
         {% if block_robots %}<meta name="robots" content="noindex, nofollow" />{% endif %}

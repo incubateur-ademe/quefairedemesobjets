@@ -21,9 +21,13 @@ def direct_access(request):
 
     get_params = request.GET.copy()
 
-    if request.META.get("HTTP_HOST") in settings.ASSISTANT["HOSTS"]:
+    if (
+        request.resolver_match.namespace == "qfdmd"
+        or request.resolver_match.view_name.startswith("wagtail")
+    ):
         return Assistant.as_view()(request)
 
+    # FIXME: check if view is carte
     if "carte" in request.GET:
         # Order matters, this should be before iframe because iframe and carte
         # parameters can coexist
@@ -36,6 +40,7 @@ def direct_access(request):
         parts = [reverse("qfdmo:carte"), "?" if params else "", params]
         return redirect("".join(parts))
 
+    # FIXME: check if view is carte
     if "iframe" in request.GET:
         del get_params["iframe"]
         params = get_params.urlencode()
