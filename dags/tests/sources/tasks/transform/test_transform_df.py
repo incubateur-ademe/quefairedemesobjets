@@ -449,7 +449,7 @@ class TestCleanServiceADomicile:
                 "oui",
                 "10",
                 "SUR_PLACE_OU_A_DOMICILE",
-                [{"type": "DEPARTEMENT", "value": "10"}],
+                [{"type": "DEPARTEMENTAL", "value": "10"}],
             ),
             (
                 "oui",
@@ -476,7 +476,7 @@ class TestCleanServiceADomicile:
                 "SUR_PLACE_OU_A_DOMICILE",
                 [
                     {"type": "KILOMETRIQUE", "value": 10},
-                    {"type": "DEPARTEMENT", "value": "10"},
+                    {"type": "DEPARTEMENTAL", "value": "10"},
                 ],
             ),
             (
@@ -484,9 +484,9 @@ class TestCleanServiceADomicile:
                 " 1 | 11 | 978",
                 "SUR_PLACE_OU_A_DOMICILE",
                 [
-                    {"type": "DEPARTEMENT", "value": "01"},
-                    {"type": "DEPARTEMENT", "value": "11"},
-                    {"type": "DEPARTEMENT", "value": "978"},
+                    {"type": "DEPARTEMENTAL", "value": "01"},
+                    {"type": "DEPARTEMENTAL", "value": "11"},
+                    {"type": "DEPARTEMENTAL", "value": "978"},
                 ],
             ),
             (
@@ -495,7 +495,7 @@ class TestCleanServiceADomicile:
                 "SUR_PLACE_OU_A_DOMICILE",
                 [
                     {"type": "FRANCE_METROPOLITAINE", "value": ""},
-                    {"type": "DEPARTEMENT", "value": "978"},
+                    {"type": "DEPARTEMENTAL", "value": "978"},
                 ],
             ),
             # unknown cases
@@ -509,7 +509,7 @@ class TestCleanServiceADomicile:
                 "oui",
                 "10|fake",
                 "SUR_PLACE_OU_A_DOMICILE",
-                [{"type": "DEPARTEMENT", "value": "10"}],
+                [{"type": "DEPARTEMENTAL", "value": "10"}],
             ),
         ],
     )

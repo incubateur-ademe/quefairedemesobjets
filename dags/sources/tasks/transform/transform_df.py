@@ -15,6 +15,7 @@ from sources.tasks.transform.transform_column import (
     clean_siren,
     clean_siret,
 )
+from unidecode import unidecode
 from utils import logging_utils as log
 from utils.django import django_setup_full
 
@@ -345,20 +346,58 @@ def _clean_departement_code(departement_code):
 
 
 def _clean_perimetre_adomicile_codes(perimetre_dinterventions):
+    from qfdmo.models.acteur import PerimetreADomicile
+
     perimetre_prestation = []
     perimetre_dinterventions = perimetre_dinterventions.split("|")
     for perimetre in perimetre_dinterventions:
-        perimetre = perimetre.lower().strip()
-        if matches := re.match(r"(\d+)\s*km", perimetre):
+        perimetre = unidecode(perimetre).upper().strip()
+        if matches := re.match(r"(\d+)\s*KM", perimetre):
             perimetre_prestation.append(
-                {"type": "KILOMETRIQUE", "value": int(matches.group(1))}
+                {
+                    "type": PerimetreADomicile.Type.KILOMETRIQUE.value,
+                    "value": int(matches.group(1)),
+                }
             )
-        elif matches := re.match(r"^(\d{1,3})$", perimetre):
+        elif matches := re.match(r"^(\d{1,3}|2A|2B)$", perimetre):
             departement = matches.group(1)
             departement = _clean_departement_code(departement)
-            perimetre_prestation.append({"type": "DEPARTEMENT", "value": departement})
-        elif matches := re.match(r"^france métropolitaine$", perimetre):
-            perimetre_prestation.append({"type": "FRANCE_METROPOLITAINE", "value": ""})
+            perimetre_prestation.append(
+                {
+                    "type": PerimetreADomicile.Type.DEPARTEMENTAL.value,
+                    "value": departement,
+                }
+            )
+        elif matches := re.match(r"^FRANCE\s*METROPOLITAINE$", perimetre):
+            perimetre_prestation.append(
+                {
+                    "type": PerimetreADomicile.Type.FRANCE_METROPOLITAINE.value,
+                    "value": "",
+                }
+            )
+            # TOUTE LA FRANCE Y COMPRIS DROM TOM
+        elif matches := re.match(r"^DROM\s*TOM$", perimetre):
+            perimetre_prestation.append(
+                {
+                    "type": PerimetreADomicile.Type.DROM_TOM.value,
+                    "value": "",
+                }
+            )
+        elif matches := re.match(
+            r"^FRANCE\s*METROPOLITAINE\s*Y\s*COMPRIS\s*DROM\s*TOM$", perimetre
+        ):
+            perimetre_prestation.append(
+                {
+                    "type": PerimetreADomicile.Type.FRANCE_METROPOLITAINE.value,
+                    "value": "",
+                }
+            )
+            perimetre_prestation.append(
+                {
+                    "type": PerimetreADomicile.Type.DROM_TOM.value,
+                    "value": "",
+                }
+            )
         else:
             logger.warning(f"Perimetre {perimetre} non reconnu")
 
