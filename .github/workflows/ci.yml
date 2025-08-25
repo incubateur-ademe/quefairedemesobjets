@@ -141,6 +141,7 @@ jobs:
       - name: Prepare environment
         run: |
           cp .env.template .env
+          echo BASE_URL=http://localhost:8000 >> .env
 
       - uses: actions/setup-node@v4
         with:
