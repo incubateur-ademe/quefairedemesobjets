@@ -145,7 +145,7 @@ if DEBUG:
     # being wrongly set when using nginx. The current workaround impacts
     # only local development and can be considered harmless, but this
     # might be nice to remove this setting someday.
-    CSRF_TRUSTED_ORIGINS = [config["BASE_URL"] for config in [ASSISTANT, LVAO]]
+    CSRF_TRUSTED_ORIGINS = [BASE_URL]
     INSTALLED_APPS.extend(["debug_toolbar", "django_browser_reload"])
     MEDIA_ROOT = "media"
     MEDIA_URL = "/media/"
