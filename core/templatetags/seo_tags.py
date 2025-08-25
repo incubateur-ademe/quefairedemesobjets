@@ -18,8 +18,8 @@ def get_sharer_content(request, object, social_network=None):
     if not request or not request.META:
         return {}
 
+    # FIXME: check if current view is carte
     carte = request.META.get("HTTP_HOST") not in settings.ASSISTANT["HOSTS"]
-
     url = request.build_absolute_uri()
 
     share_body = ""
