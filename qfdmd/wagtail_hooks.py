@@ -43,7 +43,7 @@ class MigratePageMenuItem(ActionMenuItem):
         We keep this class in case it needs to be enabled
         in a near future, but this can be considered as deprecated
         for now as a migration from produit / synonyme is no longer
-        planned
+        planned so we do not show it in Wagtail Admin.
         """
         return False
 
