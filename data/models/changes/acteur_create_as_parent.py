@@ -39,5 +39,5 @@ class ChangeActeurCreateAsParent(ChangeActeurAbstract):
         # Create perimetre_adomicilesonce RevisionActeur is created
         for perimetre in perimetre_adomiciles:
             RevisionPerimetreADomicile.objects.create(
-                acteur=rev, type=perimetre["type"], value=perimetre["value"]
+                acteur=rev, type=perimetre["type"], valeur=perimetre["value"]
             )

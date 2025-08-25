@@ -36,9 +36,9 @@ class ActeurComparator:
         self, pad_from_source: list, pad_from_db: list
     ) -> bool:
         sorted_pad_from_source = sorted(
-            pad_from_source, key=lambda x: (x["type"], x["value"])
+            pad_from_source, key=lambda x: (x["type"], x["valeur"])
         )
-        sorted_pad_from_db = sorted(pad_from_db, key=lambda x: (x["type"], x["value"]))
+        sorted_pad_from_db = sorted(pad_from_db, key=lambda x: (x["type"], x["valeur"]))
         return sorted_pad_from_source != sorted_pad_from_db
 
     def _proposition_services_changed(
