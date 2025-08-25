@@ -46,7 +46,7 @@ init-dev:
 	cp ./dags/.env.template ./dags/.env
 	# prepare django
 	make run-all
-	$(PYTHON) manage.py create_remote_db_server
+	make create_remote_db_server
 	make migrate
 	make createcachetable
 	make createsuperuser
@@ -94,6 +94,14 @@ merge-migrations:
 .PHONY: createcachetable
 createcachetable:
 	$(DJANGO_ADMIN) createcachetable
+
+.PHONY: clearsessions
+clearsessions:
+	$(DJANGO_ADMIN) clearsessions
+
+.PHONY: create_remote_db_server
+create_remote_db_server:
+	$(DJANGO_ADMIN) create_remote_db_server
 
 .PHONY: createsuperuser
 createsuperuser:
@@ -214,6 +222,7 @@ db-restore:
 	make create-schema-public
 	make load-production-dump
 	make migrate
+	make create_remote_db_server
 
 .PHONY: db-restore-for-tests
 db-restore-for-tests:
