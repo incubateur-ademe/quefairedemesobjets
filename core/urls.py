@@ -41,7 +41,7 @@ info_dict = {
 
 
 class PaginatedSitemap(GenericSitemap):
-    limit = 50000
+    limit = 500
 
 
 sitemaps = {
