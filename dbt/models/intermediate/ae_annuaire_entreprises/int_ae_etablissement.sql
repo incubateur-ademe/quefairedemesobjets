@@ -6,15 +6,12 @@ Notes:
 */
 {{
   config(
-    materialized='table',
-    tags=['intermediate', 'ae', 'annuaire_entreprises', 'etablissement'],
-    indexes=[
-      {'columns': ['siret'], 'unique': True},
-      {'columns': ['est_actif']},
-      {'columns': ['code_postal']},
-    ],
     post_hook=[
-      "CREATE INDEX ON {{ this }}(adresse_numero) WHERE adresse_numero IS NOT NULL"
+      "CREATE INDEX ON {{ this }}(adresse_numero) WHERE adresse_numero IS NOT NULL",
+      "CREATE INDEX ON {{ this }}(siret)",
+      "CREATE INDEX ON {{ this }}(est_actif)",
+      "CREATE INDEX ON {{ this }}(code_postal)",
+      "CREATE INDEX ON {{ this }}(adresse_normalize_string_for_match)"
     ],
   )
 }}
@@ -56,7 +53,14 @@ SELECT
     etab.numero_voie AS adresse_numero,
     etab.complement_adresse AS adresse_complement,
     etab.code_postal,
-    etab.libelle_commune AS ville
+    etab.libelle_commune AS ville,
+    {{ target.schema }}.udf_normalize_string_for_match(
+      {{ target.schema }}.udf_columns_concat_unique_non_empty(
+        etab.numero_voie,
+        etab.type_voie,
+        etab.libelle_voie
+      )
+    ) AS adresse_normalize_string_for_match
 
 FROM {{ ref('base_ae_etablissement') }} AS etab
 /* Joining with unite_legale to bring some essential
