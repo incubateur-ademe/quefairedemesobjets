@@ -20,30 +20,34 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.sitemaps import GenericSitemap
 from django.contrib.sitemaps import views as sitemaps_views
+from django.contrib.sitemaps.views import sitemap
 from django.urls import include, path
 from django.views.generic import TemplateView
 from wagtail import urls as wagtail_urls
 from wagtail.admin import urls as wagtailadmin_urls
+from wagtail.contrib.sitemaps.sitemap_generator import Sitemap
+from wagtail.contrib.sitemaps.views import index
 from wagtail.documents import urls as wagtaildocs_urls
 
-from qfdmo.models.acteur import ActeurStatus, DisplayedActeur
+from qfdmd.models import Synonyme
 
 from .api import api
 from .views import direct_access, robots_txt
 
 info_dict = {
-    "queryset": DisplayedActeur.objects.filter(statut=ActeurStatus.ACTIF).order_by(
-        "identifiant_unique"
-    ),
+    "queryset": Synonyme.objects.filter().order_by("nom"),
     "date_field": "modifie_le",
 }
 
 
 class PaginatedSitemap(GenericSitemap):
-    limit = 500
+    limit = 50000
 
 
-sitemaps = {"items": PaginatedSitemap(info_dict, priority=1.0)}
+sitemaps = {
+    "produits": PaginatedSitemap(info_dict, priority=1.0),
+    "pages": Sitemap(),
+}
 
 
 urlpatterns = [
@@ -52,9 +56,15 @@ urlpatterns = [
     path("robots.txt", robots_txt),
     path(
         "sitemap.xml",
-        sitemaps_views.index,
+        index,
         {"sitemaps": sitemaps},
-        name="django.contrib.sitemaps.views.index",
+        name="wagtail.contrib.sitemaps.views",
+    ),
+    path(
+        "sitemap-<section>.xml",
+        sitemap,
+        {"sitemaps": sitemaps},
+        name="django.contrib.sitemaps.views.sitemap",
     ),
     path(
         "sitemap-<section>.xml",
