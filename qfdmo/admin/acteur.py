@@ -50,9 +50,10 @@ from qfdmo.widgets import CustomOSMWidget
 logger = logging.getLogger(__name__)
 
 
-## Inlines
+# region Inlines
 
-### LabelQualite
+
+# region Inlines > LabelQualite
 
 
 class BaseLabelQualiteInline(admin.StackedInline):
@@ -75,7 +76,9 @@ class VueLabelQualiteInline(NotMutableMixin, BaseLabelQualiteInline):
     model = VueActeur.labels.through
 
 
-### PerimetreADomicile
+# endregion Inlines > LabelQualite
+
+# region Inlines > PerimetreADomicile
 
 
 class BasePerimetreADomicileInline(admin.StackedInline):
@@ -98,7 +101,11 @@ class VuePerimetreADomicileInline(NotMutableMixin, BasePerimetreADomicileInline)
     model = VuePerimetreADomicile
 
 
-### PropositionService
+# endregion Inlines > PerimetreADomicile
+
+# endregion Inlines
+
+# region PropositionService
 
 
 class BasePropositionServiceForm(forms.ModelForm):
@@ -171,7 +178,9 @@ class VuePropositionServiceInline(NotMutableMixin, BasePropositionServiceInline)
     model = VuePropositionService
 
 
-## BaseActeur
+# endregion PropositionService
+
+# region BaseActeur
 
 
 class BaseActeurForm(forms.ModelForm):
@@ -264,7 +273,9 @@ class BaseActeurAdmin(admin.GISModelAdmin):
         return readonly_fields
 
 
-### Acteur
+# endregion BaseActeur
+
+# region Acteur
 
 
 class ActeurResource(resources.ModelResource):
@@ -333,7 +344,7 @@ class ActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
     ]
 
     def get_readonly_fields(self, request, obj=None):
-        if settings.DEBUG:
+        if settings.BYPASS_ACTEUR_READONLY_FIELDS:
             return list(super().get_readonly_fields(request, obj))
         return [f.name for f in self.model._meta.fields if f.name != "location"]
 
@@ -341,7 +352,9 @@ class ActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
         return False
 
 
-### RevisionActeur
+# endregion Acteur
+
+# region RevisionActeur
 
 
 class RevisionActeurResource(ActeurResource):
@@ -567,7 +580,9 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
         return revision_acteur_form
 
 
-### BasePropositionService
+# endregion RevisionActeur
+
+# region BasePropositionService
 
 
 class BasePropositionServiceAdmin(admin.GISModelAdmin):
@@ -599,7 +614,9 @@ class BasePropositionServiceResource(resources.ModelResource):
         return self.fields["delete"].clean(row)
 
 
-### PropositionService
+# endregion BasePropositionService
+
+# region PropositionService
 
 
 class PropositionServiceResource(BasePropositionServiceResource):
@@ -626,7 +643,9 @@ class PropositionServiceAdmin(
     autocomplete_fields = ["acteur"]
 
 
-### RevisionPropositionService
+# endregion PropositionService
+
+# region RevisionPropositionService
 
 
 class RevisionPropositionServiceResource(BasePropositionServiceResource):
@@ -656,7 +675,9 @@ class RevisionPropositionServiceAdmin(
     autocomplete_fields = ["acteur"]
 
 
-### DisplayedActeur
+# endregion RevisionPropositionService
+
+# region DisplayedActeur
 
 
 class DisplayedActeurResource(ActeurResource):
@@ -669,9 +690,12 @@ class DisplayedActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
     search_fields = list(BaseActeurAdmin.search_fields) + ["uuid"]
     change_form_template = "admin/acteur/change_form.html"
     gis_widget = CustomOSMWidget
+    # DisplayedActeur has one or many sources, then we need to displayed the sources
+    # field instead source field from BaseActeurAdmin
     base_fields = list(BaseActeurAdmin.fields)
     base_fields.remove("source")
     base_fields.insert(1, "sources")
+    # We also add the uuid which is a computed field only for DisplayedActeur
     base_fields.insert(0, "uuid")
     readonly_fields = list(BaseActeurAdmin.readonly_fields)
     readonly_fields.insert(0, "uuid")
@@ -686,7 +710,7 @@ class DisplayedActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
     resource_classes = [DisplayedActeurResource]
 
     def get_readonly_fields(self, request, obj=None):
-        if settings.DEBUG:
+        if settings.BYPASS_ACTEUR_READONLY_FIELDS:
             return list(super().get_readonly_fields(request, obj))
         return [f.name for f in self.model._meta.fields if f.name != "location"]
 
@@ -694,7 +718,9 @@ class DisplayedActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
         return False
 
 
-### VueActeur
+# endregion DisplayedActeur
+
+# region VueActeur
 
 
 class VueActeurChildInline(RevisionActeurChildInline):
@@ -725,7 +751,9 @@ class VueActeurAdmin(NotMutableMixin, BaseActeurAdmin):
             ]
 
 
-## Exporter
+# endregion VueActeur
+
+# region Exporter
 
 
 class GenericExporterMixin:
@@ -928,6 +956,8 @@ class OpenSourceDisplayedActeurResource(resources.ModelResource, GenericExporter
             "propositions_services",
         ]
 
+
+# endregion Exporter
 
 admin.site.register(Acteur, ActeurAdmin)
 admin.site.register(ActeurService, CodeLibelleModelAdmin)

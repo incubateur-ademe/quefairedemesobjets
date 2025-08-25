@@ -98,13 +98,6 @@ class ActeurReprise(models.TextChoices):
     UNKNOWN = "", ""
 
 
-class LieuPrestation(models.TextChoices):
-    A_DOMICILE = "A_DOMICILE", "À domicile"
-    SUR_PLACE = "SUR_PLACE", "Sur place"
-    SUR_PLACE_OU_A_DOMICILE = "SUR_PLACE_OU_A_DOMICILE", "Sur place ou à domicile"
-    UNKNOWN = "", ""
-
-
 class TypePerimetreADomicile(models.TextChoices):
     DEPARTEMENTAL = "DEPARTEMENTAL", "Départemental"
     KILOMETRIQUE = "KILOMETRIQUE", "Kilométrique"
@@ -363,6 +356,12 @@ class DisplayedActeurManager(models.Manager):
 
 
 class BaseActeur(TimestampedModel):
+    class LieuPrestation(models.TextChoices):
+        A_DOMICILE = "A_DOMICILE", "À domicile"
+        SUR_PLACE = "SUR_PLACE", "Sur place"
+        SUR_PLACE_OU_A_DOMICILE = "SUR_PLACE_OU_A_DOMICILE", "Sur place ou à domicile"
+        UNKNOWN = "", ""
+
     class Meta:
         abstract = True
 
@@ -836,14 +835,11 @@ class BasePerimetreADomicile(models.Model):
         Acteur, on_delete=models.CASCADE, related_name="perimetre_adomiciles"
     )
     type = models.CharField(
-        max_length=255,
         choices=TypePerimetreADomicile.choices,
         default=TypePerimetreADomicile.KILOMETRIQUE,
     )
     # Char is needed because Corsica codes are 2A and 2B
     value = models.CharField(
-        max_length=255,
-        null=False,
         blank=False,
         validators=[DepartementOrNumValidator()],
     )

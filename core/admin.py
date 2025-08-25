@@ -16,13 +16,13 @@ class NotMutableMixin:
     # we would like to use permissions but it is not possible as superadmin has all
     # permissions
     def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
-        return settings.DEBUG
+        return settings.BYPASS_ACTEUR_READONLY_FIELDS
 
     def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
-        return settings.DEBUG
+        return settings.BYPASS_ACTEUR_READONLY_FIELDS
 
     def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
-        return settings.DEBUG
+        return settings.BYPASS_ACTEUR_READONLY_FIELDS
 
 
 class NotEditableMixin:

@@ -467,6 +467,7 @@ models:
         data_type: varchar(255)
         tests:
           - not_null
+          - not_empty_string
       - name: value
         description: "La valeur du périmètre à domicile"
         data_type: varchar(255)

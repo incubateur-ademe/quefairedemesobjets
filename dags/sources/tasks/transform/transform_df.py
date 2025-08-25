@@ -16,6 +16,9 @@ from sources.tasks.transform.transform_column import (
     clean_siret,
 )
 from utils import logging_utils as log
+from utils.django import django_setup_full
+
+django_setup_full()
 
 logger = logging.getLogger(__name__)
 
@@ -268,7 +271,7 @@ def get_latlng_from_geopoint(row: pd.Series, _) -> pd.Series:
     return row[["latitude", "longitude"]]
 
 
-def _parse_float(value):
+def parse_any_to_float(value) -> float | None:
     if isinstance(value, float):
         return None if math.isnan(value) else value
     if not isinstance(value, str):
@@ -283,8 +286,8 @@ def _parse_float(value):
 
 def compute_location(row: pd.Series, _):
     # first column is latitude, second is longitude
-    row["latitude"] = _parse_float(row["latitude"])
-    row["longitude"] = _parse_float(row["longitude"])
+    row["latitude"] = parse_any_to_float(row["latitude"])
+    row["longitude"] = parse_any_to_float(row["longitude"])
     row["location"] = get_point_from_location(row["longitude"], row["latitude"])
     return row[["location", "latitude", "longitude"]]
 
@@ -320,17 +323,19 @@ def clean_proposition_services(row, _):
 # TODO : A déplacer ?
 
 
-def _clean_service_a_domicile(service_a_domicile):
+def _clean_lieu_prestation(service_a_domicile):
+    from qfdmo.models.acteur import Acteur
+
     service_a_domicile = service_a_domicile.lower().strip()
 
     if re.match(r"oui\s*exclusivement", service_a_domicile):
-        return A_DOMICILE
+        return Acteur.LieuPrestation.A_DOMICILE
     elif re.match(r"^oui$", service_a_domicile):
-        return SUR_PLACE_OU_A_DOMICILE
+        return Acteur.LieuPrestation.SUR_PLACE_OU_A_DOMICILE
     elif re.match(r"^non$", service_a_domicile):
-        return SUR_PLACE
+        return Acteur.LieuPrestation.SUR_PLACE
     else:
-        return ""
+        return Acteur.LieuPrestation.UNKNOWN
 
 
 def _clean_departement_code(departement_code):
@@ -364,7 +369,7 @@ def _clean_perimetre_adomicile_codes(perimetre_dinterventions):
 
 def clean_service_a_domicile(row, _):
 
-    row["lieu_prestation"] = _clean_service_a_domicile(row["service_a_domicile"])
+    row["lieu_prestation"] = _clean_lieu_prestation(row["service_a_domicile"])
 
     row["perimetre_adomicile_codes"] = []
     if row["lieu_prestation"] in [A_DOMICILE, SUR_PLACE_OU_A_DOMICILE]:
