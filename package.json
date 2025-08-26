@@ -54,7 +54,7 @@
     "@parcel/optimizer-svgo": "^2.15.4",
     "@parcel/transformer-inline-string": "^2.15.4",
     "@playwright/test": "^1.55.0",
-    "@testing-library/jest-dom": "^6.6.4",
+    "@testing-library/jest-dom": "^6.8.0",
     "@types/jest": "^30.0.0",
     "@types/leaflet": "^1.9.20",
     "@types/lodash": "^4.17.20",
