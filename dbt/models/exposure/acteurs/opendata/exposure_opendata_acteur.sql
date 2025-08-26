@@ -55,7 +55,7 @@ perimetreadomicile AS (
     jsonb_agg(
       jsonb_build_object(
         'type', pad.type,
-        'value', pad.value
+        'valeur', pad.valeur
       )
     ) as json_value
   FROM {{ ref('marts_opendata_acteur') }} AS a

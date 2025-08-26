@@ -73,13 +73,6 @@ class Migration(migrations.Migration):
                 max_length=255,
             ),
         ),
-        migrations.AddField(
-            model_name="vueacteur",
-            name="consignes_dacces",
-            field=models.TextField(
-                blank=True, db_default="", default="", verbose_name="Consignes d'accès"
-            ),
-        ),
         migrations.CreateModel(
             name="DisplayedPerimetreADomicile",
             fields=[

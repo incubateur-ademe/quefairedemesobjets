@@ -3591,6 +3591,15 @@ class Migration(migrations.Migration):
                         to="qfdmo.source",
                     ),
                 ),
+                (
+                    "consignes_dacces",
+                    models.TextField(
+                        blank=True,
+                        db_default="",
+                        default="",
+                        verbose_name="Consignes d'accès",
+                    ),
+                ),
             ],
             options={
                 "verbose_name": "ACTEUR de l'EC - Vue sur l'acteur",
