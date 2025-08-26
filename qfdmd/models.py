@@ -105,19 +105,19 @@ class CompiledFieldMixin(Page):
 
     @cached_property
     def compiled_body(self):
-        return self._get_compiled_field("body")
+        return self._get_inherited_field("body")
 
     @cached_property
     def compiled_bonus(self):
-        return self._get_compiled_field("bonus", "disable_bonus_inheritance")
+        return self._get_inherited_field("bonus", "disable_bonus_inheritance")
 
     @cached_property
     def compiled_infotri(self):
-        return self._get_compiled_field("infotri")
+        return self._get_inherited_field("infotri")
 
     @cached_property
     def compiled_titre_phrase(self):
-        return self._get_compiled_field("titre_phrase")
+        return self._get_inherited_field("titre_phrase")
 
     def _get_inherited_field(
         self: Page, field_name: str, disable_inheritance_field=None
