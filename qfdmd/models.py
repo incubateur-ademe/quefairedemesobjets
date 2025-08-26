@@ -10,6 +10,7 @@ from django.utils.functional import cached_property
 from django.utils.safestring import mark_safe
 from django_extensions.db.fields import AutoSlugField
 from modelcluster.contrib.taggit import ClusterTaggableManager
+from modelcluster.fields import ParentalManyToManyField
 from taggit.models import TaggedItemBase
 from wagtail.admin.panels import (
     FieldPanel,
@@ -186,7 +187,7 @@ class ProduitPage(
 
     # Taxonomie
     tags = ClusterTaggableManager(through=ProduitPageTag, blank=True, related_name="+")
-    sous_categorie_objet = models.ManyToManyField(
+    sous_categorie_objet = ParentalManyToManyField(
         "qfdmo.SousCategorieObjet",
         related_name="produit_pages",
         blank=True,
