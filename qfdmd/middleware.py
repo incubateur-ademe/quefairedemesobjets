@@ -1,9 +1,17 @@
+from urllib.parse import urlparse, urlunparse
+
+from django.conf import settings
+from django.shortcuts import redirect
+from wagtail.admin.views.generic.models import HttpResponseRedirect
+
+
 class AssistantMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
         # Prepare request
+        self._redirect_from_legacy_domains(request)
         self._prepare_request_if_iframe(request)
         response = self.get_response(request)
 
@@ -13,6 +21,24 @@ class AssistantMiddleware:
         self._cleanup_vary_header(response)
 
         return response
+
+    def _redirect_from_legacy_domains(self, request) -> HttpResponseRedirect | None:
+        base_host = urlparse(settings.BASE_URL).hostname
+        request_host = request.META.get("HTTP_HOST")
+
+        if not request_host:
+            return None
+
+        if request_host in settings.ALLOWED_HOSTS and request_host != base_host:
+            full_requested_url = urlparse(request.build_absolute_uri())
+            url_to_redirect = urlunparse(
+                full_requested_url._replace(netloc=base_host)._replace(scheme="https")
+            )
+            print(f"COUCOU {url_to_redirect=} {urlunparse(full_requested_url)=}")
+            return redirect(url_to_redirect)
+
+        return None
+        # redirect to main base_host with path
 
     def _set_logged_in_cookie(self, request, response):
         """Set or update the 'logged-in' header based on authentication.

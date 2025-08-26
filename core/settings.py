@@ -78,7 +78,11 @@ BLOCK_ROBOTS = decouple.config("BLOCK_ROBOTS", default=False, cast=bool)
 ENVIRONMENT = decouple.config("ENVIRONMENT", default="development", cast=str)
 VERSION = decouple.config("CONTAINER_VERSION", default="version", cast=str)
 APP = decouple.config("APP", default="local", cast=str)
-BASE_URL = decouple.config("BASE_URL", cast=str)
+BASE_URL = decouple.config(
+    "BASE_URL",
+    default="http://quefairedemesdechets.ademe.local",
+    cast=str,
+)
 ALLOWED_HOSTS = [
     urlparse(BASE_URL).hostname,
     *decouple.config("ALLOWED_HOSTS", default="", cast=str).split(","),
