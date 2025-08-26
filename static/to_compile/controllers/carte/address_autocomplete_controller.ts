@@ -1,5 +1,4 @@
 import AutocompleteController from "./autocomplete_controller"
-import SearchFormController from "./search_solution_form_controller"
 
 const SEPARATOR = "||"
 
@@ -48,12 +47,17 @@ class AdresseAutocompleteController extends AutocompleteController {
       target = target.parentNode as HTMLElement
     }
 
-    const [label, latitude, longitude] = target
-      .getElementsByTagName("input")[0]
-      .value.split(SEPARATOR)
+    const option = JSON.parse(target.getElementsByTagName("input")[0].value)
+    const labelValue = option.label
+    const longitudeValue = option.longitude
+    const latitudeValue = option.latitude
 
     // TODO: Explain where do these values come from
-    if (longitude == "9999" && latitude == "9999" && "geolocation" in navigator) {
+    if (
+      longitudeValue == "9999" &&
+      latitudeValue == "9999" &&
+      "geolocation" in navigator
+    ) {
       this.displaySpinner()
       navigator.geolocation.getCurrentPosition(
         this.getAndStorePosition.bind(this),
@@ -62,7 +66,7 @@ class AdresseAutocompleteController extends AutocompleteController {
     } else if (!("geolocation" in navigator)) {
       console.error("geolocation is not available")
     } else {
-      this.dispatchLocationToGlobalState(label, latitude, longitude)
+      this.dispatchLocationToGlobalState(labelValue, latitudeValue, longitudeValue)
     }
     this.hideAutocompleteList()
   }
@@ -98,26 +102,6 @@ class AdresseAutocompleteController extends AutocompleteController {
     this.dispatch("change", { detail: { adresse, latitude, longitude } })
   }
 
-  addOption(regexPattern: RegExp, option: any) {
-    //option : this.#allAvailableOptions[i]
-    /*create a DIV element for each matching element:*/
-    let b = document.createElement("DIV")
-
-    /*make the matching letters bold:*/
-    const [data, longitude, latitude] = option.split("||")
-    const newText = data.replace(regexPattern, "<strong>$&</strong>")
-    b.innerHTML = newText
-
-    // FIXME : better way to do this
-    const input = document.createElement("input")
-    input.setAttribute("type", "hidden")
-    input.setAttribute("value", option)
-    b.appendChild(input)
-    b.setAttribute("data-action", "click->" + this.controllerName + "#selectOption")
-    b.setAttribute("data-on-focus", "true")
-    this.autocompleteList.appendChild(b)
-  }
-
   keydownEnter(event: KeyboardEvent): boolean {
     let toSubmit = super.keydownEnter(event)
     if (toSubmit) {
@@ -148,10 +132,10 @@ class AdresseAutocompleteController extends AutocompleteController {
     this.displayErrorTarget.style.display = "none"
   }
 
-  async #getOptionCallback(value: string): Promise<string[]> {
+  async #getOptionCallback(value: string): Promise<object[]> {
     if (value.trim().length < 3) {
       this.latitudeTarget.value = this.longitudeTarget.value = ""
-      return [["Autour de moi", 9999, 9999].join(SEPARATOR)]
+      return [{ label: "Autour de moi", longitude: 9999, latitude: 9999 }]
     }
     return await fetch(`https://data.geopf.fr/geocodage/search/?q=${value}`)
       .then((response) => response.json())
@@ -159,13 +143,14 @@ class AdresseAutocompleteController extends AutocompleteController {
         let labels = data.features
           .slice(0, this.maxOptionDisplayedValue)
           .map((feature: any) => {
-            return [
-              feature.properties.label,
-              feature.geometry.coordinates[1],
-              feature.geometry.coordinates[0],
-            ].join(SEPARATOR)
+            return {
+              label: feature.properties.label,
+              sub_label: feature.properties.context,
+              longitude: feature.geometry.coordinates[0],
+              latitude: feature.geometry.coordinates[1],
+            }
           })
-          .concat([["Autour de moi", 9999, 9999].join(SEPARATOR)])
+          .concat([{ label: "Autour de moi", longitude: 9999, latitude: 9999 }])
         return labels
       })
       .catch((error) => {

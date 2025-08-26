@@ -1,6 +1,6 @@
+import posthog from "posthog-js"
 import AutocompleteController from "./autocomplete_controller"
 import { SSCatObject } from "./types"
-import posthog from "posthog-js"
 
 export default class extends AutocompleteController {
   controllerName: string = "ss-cat-object-autocomplete"
@@ -60,22 +60,12 @@ export default class extends AutocompleteController {
     while (target && target.nodeName !== "DIV") {
       target = target.parentNode as HTMLElement
     }
+    const option = JSON.parse(target.getElementsByTagName("input")[0].value)
+    const labelValue = option.label
+    const subLabelValue = option.sub_label
+    const identifierValue = option.identifier
 
-    const labelElement = target.querySelector(
-      '[data-type-name="label"]',
-    ) as HTMLInputElement
-    const labelValue = labelElement ? labelElement.value : ""
     this.inputTarget.value = labelValue
-
-    const subLabelElement = target.querySelector(
-      '[data-type-name="subLabel"]',
-    ) as HTMLInputElement
-    const subLabelValue = subLabelElement ? subLabelElement.value : ""
-
-    const identifierElement = target.querySelector(
-      '[data-type-name="identifier"]',
-    ) as HTMLInputElement
-    const identifierValue = identifierElement ? identifierElement.value : undefined
     this.ssCatTarget.value = identifierValue
 
     posthog.capture("object_select", {
@@ -88,48 +78,6 @@ export default class extends AutocompleteController {
     this.hideAutocompleteList()
     // Call outlet
     this.dispatch("optionSelected")
-  }
-
-  addOption(regexPattern: RegExp, option: SSCatObject) {
-    //option : this.#allAvailableOptions[i]
-    /*create a DIV element for each matching element:*/
-    let b = document.createElement("DIV")
-    b.classList.add("qf-flex", "qf-flex-col", "sm:qf-flex-row", "sm:qf-justify-between")
-    /*make the matching letters bold:*/
-    // const [data, longitude, latitude] = option.split("||")
-
-    let label = document.createElement("span")
-    const data = option.label
-    const newText = data.replace(regexPattern, "<strong>$&</strong>")
-    label.innerHTML = newText
-    b.appendChild(label)
-
-    if (option.sub_label != null) {
-      const sub_label = document.createElement("span")
-      sub_label.classList.add("fr-text--sm", "fr-m-0", "qf-italic")
-      sub_label.innerHTML = option.sub_label
-      b.appendChild(sub_label)
-    }
-
-    // Input hidden
-    const labelInput = document.createElement("input")
-    labelInput.setAttribute("type", "hidden")
-    labelInput.setAttribute("data-type-name", "label")
-    labelInput.setAttribute("value", option.label)
-    b.appendChild(labelInput)
-    const identifierInput = document.createElement("input")
-    identifierInput.setAttribute("type", "hidden")
-    identifierInput.setAttribute("data-type-name", "identifier")
-    identifierInput.setAttribute("value", option.identifier)
-    b.appendChild(identifierInput)
-    const input = document.createElement("input")
-    input.setAttribute("type", "hidden")
-    input.setAttribute("data-type-name", "subLabel")
-    input.setAttribute("value", option.sub_label ? option.sub_label : "")
-    b.appendChild(input)
-    b.setAttribute("data-action", "click->" + this.controllerName + "#selectOption")
-    b.setAttribute("data-on-focus", "true")
-    this.autocompleteList.appendChild(b)
   }
 
   keydownEnter(event: KeyboardEvent): boolean {

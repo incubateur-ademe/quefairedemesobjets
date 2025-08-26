@@ -174,7 +174,31 @@ export default abstract class extends Controller<HTMLElement> {
   }
 
   addOption(regexPattern: RegExp, option: any) {
-    // Implement this method in your controller
+    let b = document.createElement("DIV")
+    b.classList.add("qf-flex", "qf-flex-col", "sm:qf-flex-row", "sm:qf-justify-between")
+
+    let label = document.createElement("span")
+
+    /*make the matching letters bold:*/
+    const label_text = option.label
+    const newText = label_text.replace(regexPattern, "<strong>$&</strong>")
+    label.innerHTML = newText
+    b.appendChild(label)
+
+    if (option.sub_label != null) {
+      const sub_label = document.createElement("span")
+      sub_label.classList.add("fr-text--sm", "fr-m-0", "qf-italic")
+      sub_label.innerHTML = option.sub_label
+      b.appendChild(sub_label)
+    }
+
+    const input = document.createElement("input")
+    input.setAttribute("type", "hidden")
+    input.setAttribute("value", JSON.stringify(option))
+    b.appendChild(input)
+    b.setAttribute("data-action", "click->" + this.controllerName + "#selectOption")
+    b.setAttribute("data-on-focus", "true")
+    this.autocompleteList.appendChild(b)
   }
 
   createAutocompleteList() {
