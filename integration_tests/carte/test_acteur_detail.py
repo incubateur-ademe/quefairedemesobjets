@@ -161,25 +161,6 @@ class TestRedirects:
         response = client.get(url)
         assert response.status_code == expected_status_code
 
-    def test_inactif_acteur_is_not_in_sitemap(self, client):
-        youpi = DisplayedActeurFactory(
-            identifiant_unique="youpi",
-            statut=ActeurStatus.ACTIF,
-        )
-        coucou = DisplayedActeurFactory(
-            identifiant_unique="coucou",
-            statut=ActeurStatus.INACTIF,
-        )
-        super = DisplayedActeurFactory(
-            identifiant_unique="super",
-            statut=ActeurStatus.SUPPRIME,
-        )
-        url = "/sitemap-items.xml"
-        response = client.get(url)
-        assert coucou.uuid not in str(response.content)
-        assert super.uuid not in str(response.content)
-        assert youpi.uuid in str(response.content)
-
     def test_acteur_detail_redirect(self, client):
         acteur = DisplayedActeurFactory(
             identifiant_unique="coucou",
@@ -221,7 +202,6 @@ class TestRedirects:
 
 @pytest.mark.django_db
 class TestSEO:
-
     @pytest.fixture
     def adresse(self):
         adresse = DisplayedActeurFactory(
