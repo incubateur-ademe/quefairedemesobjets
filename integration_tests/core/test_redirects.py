@@ -10,24 +10,6 @@ host_aware_headers = {"Host": urlparse(settings.BASE_URL).hostname}
 @pytest.mark.django_db
 @override_settings(DEBUG=False)
 @pytest.mark.parametrize(
-    "params,redirect_url",
-    [
-        ("?carte", "/carte"),
-        ("?iframe", "/formulaire"),
-        ("?iframe&direction=jai", "/formulaire?direction=jai"),
-    ],
-)
-def test_redirect_with_carte_param(client, params, redirect_url):
-    url = f"/{params}"
-    redirect = client.get(url, headers=host_aware_headers)
-    assert redirect.url == redirect_url
-    response = client.get(redirect.url, headers=host_aware_headers)
-    assert response.status_code == 200
-
-
-@pytest.mark.django_db
-@override_settings(DEBUG=False)
-@pytest.mark.parametrize(
     "test_url",
     ["/configurateur", "/sitemap.xml", "/dsfr/colors"],
 )
@@ -105,11 +87,24 @@ def test_forms_redirects(client, test_url):
             200,
         ),  # carte script
         ("quefairedemesdechets.ademe.fr", "/iframe.js", None, 200),  # assistant script
+        ("lvao.ademe.fr", "?carte", "https://quefairedemesdechets.ademe.fr/carte", 301),
+        (
+            "lvao.ademe.fr",
+            "?formulaire",
+            "https://quefairedemesdechets.ademe.fr/formulaire",
+            301,
+        ),
+        (
+            "lvao.ademe.fr",
+            "?iframe&direction=jai",
+            "https://quefairedemesdechets.ademe.fr/formulaire?direction=jai",
+            301,
+        ),
         (
             "lvao.ademe.fr",
             "/?carte",
             "https://quefairedemesdechets.ademe.fr/carte",
-            200,
+            301,
         ),
     ],
 )
