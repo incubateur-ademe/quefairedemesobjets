@@ -5,4 +5,4 @@ sources:
     description: "Enrich"
     schema: webapp_public
     tables:
-      - name: qfdmo_vueacteur
+      - name: qfdmo_displayedacteur
