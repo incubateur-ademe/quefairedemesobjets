@@ -105,6 +105,12 @@ def test_forms_redirects(client, test_url):
             200,
         ),  # carte script
         ("quefairedemesdechets.ademe.fr", "/iframe.js", None, 200),  # assistant script
+        (
+            "lvao.ademe.fr",
+            "/?carte",
+            "https://quefairedemesdechets.ademe.fr/carte",
+            200,
+        ),
     ],
 )
 def test_redirects(
