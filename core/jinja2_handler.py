@@ -41,7 +41,10 @@ def display_exclusivite_reparation(acteur: DisplayedActeur) -> bool:
 
 
 def hide_object_filter(request) -> bool:
-    return bool(request.GET.get("sc_id"))
+    return (
+        bool(request.GET.get("sc_id"))
+        and request.GET.get("map_container_id") != "carte"
+    )
 
 
 def distance_to_acteur(request, acteur):
