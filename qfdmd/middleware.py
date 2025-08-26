@@ -9,11 +9,10 @@ logger = logging.getLogger(__name__)
 
 
 class AssistantMiddleware:
-    # Constants for better maintainability
-    CARTE_PARAM = "carte"
-    IFRAME_PARAM = "iframe"
     LOGGED_IN_COOKIE = "logged_in"
     CMS_CARTE_FALLBACK = "/lacarte"
+    CARTE_PARAM = "carte"
+    IFRAME_PARAM = "iframe"
 
     def __init__(self, get_response):
         self.get_response = get_response
@@ -49,6 +48,7 @@ class AssistantMiddleware:
             return redirect_url
 
         # Handle host-based redirects
+        # TODO: handle in nginx as well
         return self._handle_host_redirects(request)
 
     def _handle_special_query_params(self, request) -> str | None:
@@ -79,16 +79,8 @@ class AssistantMiddleware:
         return f"{base_url}?{query_string}" if query_string else base_url
 
     def _handle_host_redirects(self, request) -> str | None:
-        try:
-            base_host = urlparse(settings.BASE_URL).hostname
-            base_scheme = urlparse(settings.BASE_URL).scheme
-        except (AttributeError, ValueError) as e:
-            logger.warning(
-                f"Invalid BASE_URL in settings: {settings.BASE_URL}. Error: {e}"
-            )
-            # If BASE_URL is malformed, fall back to CMS
-            return f"{settings.CMS['BASE_URL']}{self.CMS_CARTE_FALLBACK}"
-
+        base_host = urlparse(settings.BASE_URL).hostname
+        base_scheme = urlparse(settings.BASE_URL).scheme
         request_host = request.META.get("HTTP_HOST")
 
         if not request_host or request_host == base_host:
@@ -96,20 +88,15 @@ class AssistantMiddleware:
 
         if request_host in settings.ALLOWED_HOSTS:
             # Redirect to main domain while preserving path and query params
-            try:
-                full_requested_url = urlparse(request.build_absolute_uri())
-                redirect_url = urlunparse(
-                    full_requested_url._replace(netloc=base_host, scheme=base_scheme)
-                )
-                logger.info(
-                    f"Redirecting {full_requested_url.path} "
-                    f"from {request_host} to {base_host}"
-                )
-                return redirect_url
-            except (AttributeError, ValueError) as e:
-                logger.warning(f"Failed to parse URL for redirect: {e}")
-                # If URL parsing fails, fall back to CMS
-                return f"{settings.CMS['BASE_URL']}{self.CMS_CARTE_FALLBACK}"
+            full_requested_url = urlparse(request.build_absolute_uri())
+            redirect_url = urlunparse(
+                full_requested_url._replace(netloc=base_host, scheme=base_scheme)
+            )
+            logger.info(
+                f"Redirecting {full_requested_url.path} "
+                f"from {request_host} to {base_host}"
+            )
+            return redirect_url
 
         # Unknown host - redirect to CMS
         logger.info(f"Unknown host {request_host} redirected to CMS carte page")
