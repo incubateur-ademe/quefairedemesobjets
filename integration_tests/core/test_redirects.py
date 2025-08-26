@@ -7,7 +7,7 @@ from django.test import override_settings
 def test_redirect_without_param(client):
     url = "/"
     response = client.get(url)
-    assert response.status_code == 302
+    assert response.status_code == 301
     assert response.url == "https://longuevieauxobjets.ademe.fr/lacarte"
 
 
@@ -65,6 +65,74 @@ def test_protected_routes_work(client, test_url):
         "/nous-contacter",
     ],
 )
-def test_redirects(client, test_url):
+def test_forms_redirects(client, test_url):
     response = client.get(test_url)
     assert response.status_code == 301
+
+
+@pytest.mark.django_db
+@override_settings(
+    ALLOWED_HOSTS=[
+        "quefairedemesdechets.ademe.fr",
+        "lvao.ademe.fr",
+        "quefairedemesobjets.ademe.fr",
+    ],
+    BASE_URL="https://quefairedemesdechets.ademe.fr",
+)
+@pytest.mark.parametrize(
+    "host,url,expected_url,expected_status_code",
+    [
+        # Redirects to CMS
+        ("lvao.ademe.fr", "", "https://longuevieauxobjets.ademe.fr/lacarte", 301),
+        ("lvao.ademe.fr", "/", "https://longuevieauxobjets.ademe.fr/lacarte", 301),
+        # Épargnons, Formulaire
+        (
+            "lvao.ademe.fr",
+            "/formulaire",
+            "https://quefairedemesdechets.ademe.fr/formulaire",
+            301,
+        ),
+        # Carte
+        ("lvao.ademe.fr", "/carte", "https://quefairedemesdechets.ademe.fr/carte", 301),
+        # Scripts
+        (
+            "lvao.ademe.fr",
+            "/static/iframe.js",
+            "https://quefairedemesdechets.ademe.fr/static/iframe.js",
+            301,
+        ),
+        (
+            "lvao.ademe.fr",
+            "/static/carte.js",
+            "https://quefairedemesdechets.ademe.fr/static/carte.js",
+            301,
+        ),
+        # Assistant
+        ("quefairedemesdechets.ademe.fr", "/", None, 200),
+        ("quefairedemesdechets.ademe.fr", "/carte", None, 200),
+        (
+            "quefairedemesdechets.ademe.fr",
+            "/static/iframe.js",
+            None,
+            200,
+        ),  # formulaire script
+        (
+            "quefairedemesdechets.ademe.fr",
+            "/static/carte.js",
+            None,
+            200,
+        ),  # carte script
+        ("quefairedemesdechets.ademe.fr", "/iframe.js", None, 200),  # assistant script
+    ],
+)
+def test_redirects(
+    client,
+    host,
+    url,
+    expected_url,
+    expected_status_code,
+):
+    response = client.get(url, headers={"Host": host})
+    assert response.status_code == expected_status_code
+    if expected_url:
+        assert response.url == expected_url

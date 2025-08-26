@@ -1,5 +1,12 @@
 from core.settings import *  # noqa: F403
 
+# Add test hosts to ALLOWED_HOSTS for integration tests
+ALLOWED_HOSTS = [
+    *ALLOWED_HOSTS,  # noqa: F405
+    "lvao.ademe.fr",
+    "quefairedemesdechets.ademe.fr",
+]
+
 DATABASES = {
     "default": DATABASES["default"],  # noqa: F405
 }

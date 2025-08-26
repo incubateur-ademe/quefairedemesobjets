@@ -1,4 +1,5 @@
 import mimetypes
+from urllib.parse import urlparse
 
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -17,17 +18,23 @@ def robots_txt(request):
 
 
 def direct_access(request):
+    """
+    Handle direct access routing for legacy paths based on host and query parameters.
+
+    Routes requests to:
+    - Assistant view for main domain
+    - Carte view when 'carte' parameter present
+    - Formulaire view when 'iframe' parameter present
+    - CMS carte page as fallback
+    """
     from qfdmd.views import HomeView as Assistant  # avoid circular dependency
 
     get_params = request.GET.copy()
 
-    if (
-        request.resolver_match.namespace == "qfdmd"
-        or request.resolver_match.view_name.startswith("wagtail")
-    ):
+    print(f"YOUPI {request.META=} {settings.BASE_URL=}")
+    if request.META.get("HTTP_HOST") == urlparse(settings.BASE_URL).hostname:
         return Assistant.as_view()(request)
 
-    # FIXME: check if view is carte
     if "carte" in request.GET:
         # Order matters, this should be before iframe because iframe and carte
         # parameters can coexist
@@ -38,16 +45,15 @@ def direct_access(request):
             pass
         params = get_params.urlencode()
         parts = [reverse("qfdmo:carte"), "?" if params else "", params]
-        return redirect("".join(parts))
+        return redirect("".join(parts), permanent=True)
 
-    # FIXME: check if view is carte
     if "iframe" in request.GET:
         del get_params["iframe"]
         params = get_params.urlencode()
         parts = [reverse("qfdmo:formulaire"), "?" if params else "", params]
-        return redirect("".join(parts))
+        return redirect("".join(parts), permanent=True)
 
-    return redirect(f"{settings.CMS['BASE_URL']}/lacarte", permanent=False)
+    return redirect(f"{settings.CMS['BASE_URL']}/lacarte", permanent=True)
 
 
 def static_file_content_from(path):
