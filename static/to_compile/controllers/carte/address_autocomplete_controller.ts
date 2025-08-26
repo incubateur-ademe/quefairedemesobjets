@@ -1,10 +1,8 @@
 import AutocompleteController from "./autocomplete_controller"
 
-const SEPARATOR = "||"
-
 class AdresseAutocompleteController extends AutocompleteController {
   controllerName: string = "address-autocomplete"
-  allAvailableOptions: Array<string> = []
+  allAvailableOptions: Array<object> = []
 
   static targets = AutocompleteController.targets.concat([
     "longitude",

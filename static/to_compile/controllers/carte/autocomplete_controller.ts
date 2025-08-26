@@ -3,7 +3,7 @@ import debounce from "lodash/debounce"
 
 export default abstract class extends Controller<HTMLElement> {
   controllerName: string = "autocomplete"
-  allAvailableOptions = []
+  allAvailableOptions: Array<object> = []
   autocompleteList: HTMLElement
   nbCharToSearchDefault: number = 3
 
