@@ -1,17 +1,28 @@
+import logging
 from urllib.parse import urlparse, urlunparse
 
 from django.conf import settings
 from django.shortcuts import redirect
-from wagtail.admin.views.generic.models import HttpResponseRedirect
+from wagtail.admin.viewsets.base import reverse
+
+logger = logging.getLogger(__name__)
 
 
 class AssistantMiddleware:
+    # Constants for better maintainability
+    CARTE_PARAM = "carte"
+    IFRAME_PARAM = "iframe"
+    LOGGED_IN_COOKIE = "logged_in"
+    CMS_CARTE_FALLBACK = "/lacarte"
+
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
         # Prepare request
-        self._redirect_from_legacy_domains(request)
+        if url_to_redirect := self._check_redirect_from_legacy_domains(request):
+            return redirect(url_to_redirect, permanent=True)
+
         self._prepare_request_if_iframe(request)
         response = self.get_response(request)
 
@@ -22,30 +33,94 @@ class AssistantMiddleware:
 
         return response
 
-    def _redirect_from_legacy_domains(self, request) -> HttpResponseRedirect | None:
-        base_host = urlparse(settings.BASE_URL).hostname
-        request_host = request.META.get("HTTP_HOST")
+    def _check_redirect_from_legacy_domains(self, request) -> str | None:
+        """
+        Handle direct access routing for legacy paths
+        based on host and query parameters.
 
-        if not request_host:
-            return None
+        Routes requests to:
+        - Carte view when 'carte' parameter present (highest priority)
+        - Formulaire view when 'iframe' parameter present
+        - Main domain redirect for allowed hosts
+        - CMS carte page as fallback for unknown hosts
+        """
+        # Check for special query parameters first (highest priority)
+        if redirect_url := self._handle_special_query_params(request):
+            return redirect_url
 
-        if request_host in settings.ALLOWED_HOSTS and request_host != base_host:
-            full_requested_url = urlparse(request.build_absolute_uri())
-            url_to_redirect = urlunparse(
-                full_requested_url._replace(netloc=base_host)._replace(scheme="https")
+        # Handle host-based redirects
+        return self._handle_host_redirects(request)
+
+    def _handle_special_query_params(self, request) -> str | None:
+        get_params = request.GET.copy()
+
+        # Order matters: 'carte' takes precedence over 'iframe'
+        if self.CARTE_PARAM in get_params:
+            return self._build_redirect_url(
+                "qfdmo:carte", get_params, [self.CARTE_PARAM, self.IFRAME_PARAM]
             )
-            print(f"COUCOU {url_to_redirect=} {urlunparse(full_requested_url)=}")
-            return redirect(url_to_redirect)
+
+        if self.IFRAME_PARAM in get_params:
+            return self._build_redirect_url(
+                "qfdmo:formulaire", get_params, [self.IFRAME_PARAM]
+            )
 
         return None
-        # redirect to main base_host with path
+
+    def _build_redirect_url(
+        self, view_name: str, get_params, params_to_remove: list
+    ) -> str:
+        for param in params_to_remove:
+            get_params.pop(param, None)  # Use pop() to avoid KeyError
+
+        query_string = get_params.urlencode()
+        base_url = reverse(view_name)
+
+        return f"{base_url}?{query_string}" if query_string else base_url
+
+    def _handle_host_redirects(self, request) -> str | None:
+        try:
+            base_host = urlparse(settings.BASE_URL).hostname
+            base_scheme = urlparse(settings.BASE_URL).scheme
+        except (AttributeError, ValueError) as e:
+            logger.warning(
+                f"Invalid BASE_URL in settings: {settings.BASE_URL}. Error: {e}"
+            )
+            # If BASE_URL is malformed, fall back to CMS
+            return f"{settings.CMS['BASE_URL']}{self.CMS_CARTE_FALLBACK}"
+
+        request_host = request.META.get("HTTP_HOST")
+
+        if not request_host or request_host == base_host:
+            return None
+
+        if request_host in settings.ALLOWED_HOSTS:
+            # Redirect to main domain while preserving path and query params
+            try:
+                full_requested_url = urlparse(request.build_absolute_uri())
+                redirect_url = urlunparse(
+                    full_requested_url._replace(netloc=base_host, scheme=base_scheme)
+                )
+                logger.info(
+                    f"Redirecting {full_requested_url.path} "
+                    f"from {request_host} to {base_host}"
+                )
+                return redirect_url
+            except (AttributeError, ValueError) as e:
+                logger.warning(f"Failed to parse URL for redirect: {e}")
+                # If URL parsing fails, fall back to CMS
+                return f"{settings.CMS['BASE_URL']}{self.CMS_CARTE_FALLBACK}"
+
+        # Unknown host - redirect to CMS
+        logger.info(f"Unknown host {request_host} redirected to CMS carte page")
+        return f"{settings.CMS['BASE_URL']}{self.CMS_CARTE_FALLBACK}"
 
     def _set_logged_in_cookie(self, request, response):
         """Set or update the 'logged-in' header based on authentication.
         It is use to bypass cache by nginx.
 
         If present, the logged_in cookie bypasses the cache."""
-        cookie_name = "logged_in"
+        cookie_name = self.LOGGED_IN_COOKIE
 
         # In some cases, gunicorn can be reached directly without going through
         # nginx, when reaching http://localhost:8000 directly for example, that
@@ -73,7 +148,7 @@ class AssistantMiddleware:
         if request.headers.get("Sec-Fetch-Dest") == "iframe":
             is_in_iframe_mode = True
 
-        if "iframe" in request.GET:
+        if self.IFRAME_PARAM in request.GET:
             is_in_iframe_mode = True
 
         request.iframe = is_in_iframe_mode

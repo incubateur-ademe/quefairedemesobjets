@@ -333,11 +333,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# Redirects settings
-# ------------------
-# Redirect to home URL after login
-LOGOUT_REDIRECT_URL = "qfdmo:login"
-LOGIN_URL = "qfdmo:login"
 
 # Internationalization
 # --------------------

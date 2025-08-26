@@ -29,7 +29,7 @@ def global_context(request) -> dict:
         "iframe": getattr(request, "iframe", False),
         "BASE_URL": settings.BASE_URL,
         "assistant": {
-            "is_home": request.path == reverse("home"),
+            "is_home": request.path == reverse("qfdmd:home"),
             "POSTHOG_KEY": settings.ASSISTANT["POSTHOG_KEY"],
             "MATOMO_ID": settings.ASSISTANT["MATOMO_ID"],
         },
