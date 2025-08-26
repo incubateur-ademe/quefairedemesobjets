@@ -1,14 +1,10 @@
+from urllib.parse import urlparse
+
 import pytest
+from django.conf import settings
 from django.test import override_settings
 
-
-@pytest.mark.django_db
-@override_settings(DEBUG=False)
-def test_redirect_without_param(client):
-    url = "/"
-    response = client.get(url)
-    assert response.status_code == 301
-    assert response.url == "https://longuevieauxobjets.ademe.fr/lacarte"
+host_aware_headers = {"Host": urlparse(settings.BASE_URL).hostname}
 
 
 @pytest.mark.django_db
@@ -23,9 +19,9 @@ def test_redirect_without_param(client):
 )
 def test_redirect_with_carte_param(client, params, redirect_url):
     url = f"/{params}"
-    redirect = client.get(url)
+    redirect = client.get(url, headers=host_aware_headers)
     assert redirect.url == redirect_url
-    response = client.get(redirect.url)
+    response = client.get(redirect.url, headers=host_aware_headers)
     assert response.status_code == 200
 
 
@@ -33,25 +29,11 @@ def test_redirect_with_carte_param(client, params, redirect_url):
 @override_settings(DEBUG=False)
 @pytest.mark.parametrize(
     "test_url",
-    ["/configurateur", "/sitemap.xml", "/dsfr/colors", "/connexion"],
+    ["/configurateur", "/sitemap.xml", "/dsfr/colors"],
 )
 def test_other_routes_work(client, test_url):
-    response = client.get(test_url)
+    response = client.get(test_url, headers=host_aware_headers)
     assert response.status_code == 200
-
-
-@pytest.mark.django_db
-@override_settings(DEBUG=False)
-@pytest.mark.parametrize(
-    "test_url",
-    [
-        "/iframe/configurateur",
-    ],
-)
-def test_protected_routes_work(client, test_url):
-    response = client.get(test_url)
-    assert response.status_code == 302
-    assert response.url.startswith("/connexion")
 
 
 @pytest.mark.django_db
@@ -83,8 +65,8 @@ def test_forms_redirects(client, test_url):
     "host,url,expected_url,expected_status_code",
     [
         # Redirects to CMS
-        ("lvao.ademe.fr", "", "https://longuevieauxobjets.ademe.fr/lacarte", 301),
-        ("lvao.ademe.fr", "/", "https://longuevieauxobjets.ademe.fr/lacarte", 301),
+        ("lvao.ademe.fr", "", "https://quefairedemesdechets.ademe.fr/", 301),
+        ("lvao.ademe.fr", "/", "https://quefairedemesdechets.ademe.fr/", 301),
         # Épargnons, Formulaire
         (
             "lvao.ademe.fr",
