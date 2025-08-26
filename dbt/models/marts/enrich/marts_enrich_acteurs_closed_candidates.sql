@@ -28,10 +28,9 @@ WITH acteurs_with_siret AS (
 		adresse AS acteur_adresse,
 		code_postal AS acteur_code_postal,
 		ville AS acteur_ville,
-		location AS acteur_location,
-		parent_id AS acteur_parent_id
+		location AS acteur_location
 
-	FROM {{ source('enrich', 'qfdmo_vueacteur') }} AS acteurs
+	FROM {{ source('enrich', 'qfdmo_displayedacteur') }} AS acteurs
 	WHERE siret IS NOT NULL AND siret != '' AND LENGTH(siret) = 14
 ),
 /* Filtering on etab closed (NOT etab.est_actif) BUT
@@ -53,7 +52,6 @@ SELECT
 	acteurs.acteur_adresse,
 	acteurs.acteur_code_postal,
 	acteurs.acteur_ville,
-	acteurs.acteur_parent_id,
 	CASE WHEN acteurs.acteur_location IS NULL THEN NULL ELSE ST_X(acteurs.acteur_location) END AS acteur_longitude,
 	CASE WHEN acteurs.acteur_location IS NULL THEN NULL ELSE ST_Y(acteurs.acteur_location) END AS acteur_latitude,
 

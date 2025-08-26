@@ -4,9 +4,9 @@ from datetime import datetime, timezone
 import pandas as pd
 from enrich.config.cohorts import COHORTS
 from enrich.config.columns import COLS
+from utils import logging_utils as log
 
 from data.models.changes.acteur_rgpd_anonymize import rgpd_data_get
-from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
 

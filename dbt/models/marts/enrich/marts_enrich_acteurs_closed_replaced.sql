@@ -52,7 +52,7 @@ WITH potential_replacements AS (
 	ON suggests.naf = candidates.etab_naf
 	AND suggests.code_postal = candidates.etab_code_postal
 	AND suggests.adresse_numero = candidates.etab_adresse_numero
-	AND {{ target.schema }}.udf_normalize_string_for_match(suggests.adresse) = {{ target.schema }}.udf_normalize_string_for_match(candidates.etab_adresse)
+	AND suggests.adresse_normalize_string_for_match = {{ target.schema }}.udf_normalize_string_for_match(candidates.etab_adresse)
 	WHERE suggests.est_actif
 	-- Fields which must be non-NULL for a replacement to be considered
 	AND suggests.code_postal IS NOT NULL
