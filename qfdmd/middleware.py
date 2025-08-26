@@ -13,6 +13,7 @@ class AssistantMiddleware:
     CMS_CARTE_FALLBACK = "/lacarte"
     CARTE_PARAM = "carte"
     IFRAME_PARAM = "iframe"
+    FORMULAIRE_PARAM = "formulaire"
 
     def __init__(self, get_response):
         self.get_response = get_response
@@ -52,31 +53,42 @@ class AssistantMiddleware:
         return self._handle_host_redirects(request)
 
     def _handle_special_query_params(self, request) -> str | None:
-        get_params = request.GET.copy()
-
         # Order matters: 'carte' takes precedence over 'iframe'
-        if self.CARTE_PARAM in get_params:
+        if self.CARTE_PARAM in request.GET:
             return self._build_redirect_url(
-                "qfdmo:carte", get_params, [self.CARTE_PARAM, self.IFRAME_PARAM]
+                "qfdmo:carte", request.GET, [self.CARTE_PARAM, self.IFRAME_PARAM]
             )
 
-        if self.IFRAME_PARAM in get_params:
+        if self.IFRAME_PARAM in request.GET:
             return self._build_redirect_url(
-                "qfdmo:formulaire", get_params, [self.IFRAME_PARAM]
+                "qfdmo:formulaire", request.GET, [self.IFRAME_PARAM]
             )
 
+        if self.FORMULAIRE_PARAM in request.GET:
+            return self._build_redirect_url(
+                "qfdmo:formulaire", request.GET, [self.FORMULAIRE_PARAM]
+            )
         return None
 
     def _build_redirect_url(
-        self, view_name: str, get_params, params_to_remove: list
+        self,
+        view_name: str,
+        get_params,
+        params_to_remove: list,
     ) -> str:
+        from urllib.parse import urljoin
+
+        get_params_copy = get_params.copy()
+
         for param in params_to_remove:
-            get_params.pop(param, None)  # Use pop() to avoid KeyError
+            get_params_copy.pop(param, None)  # Use pop() to avoid KeyError
 
-        query_string = get_params.urlencode()
-        base_url = reverse(view_name)
+        query_string = get_params_copy.urlencode()
+        relative_url = reverse(view_name)
 
-        return f"{base_url}?{query_string}" if query_string else base_url
+        base_url = settings.BASE_URL.rstrip("/")
+        absolute_url = urljoin(base_url, relative_url.lstrip("/"))
+        return f"{absolute_url}?{query_string}" if query_string else absolute_url
 
     def _handle_host_redirects(self, request) -> str | None:
         base_host = urlparse(settings.BASE_URL).hostname
