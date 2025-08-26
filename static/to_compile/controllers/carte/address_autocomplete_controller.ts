@@ -2,7 +2,6 @@ import AutocompleteController from "./autocomplete_controller"
 
 class AdresseAutocompleteController extends AutocompleteController {
   controllerName: string = "address-autocomplete"
-  allAvailableOptions: Array<object> = []
 
   static targets = AutocompleteController.targets.concat([
     "longitude",
@@ -27,10 +26,10 @@ class AdresseAutocompleteController extends AutocompleteController {
     this.hideAutocompleteList()
     this.autocompleteList = this.createAutocompleteList()
     this.allAvailableOptions = data
-    for (let i = 0; i < this.allAvailableOptions.length; i++) {
+    for (let i = 0; i < data.length; i++) {
       if (countResult >= this.maxOptionDisplayedValue + 1) break
       countResult++
-      this.addOption(regexPattern, this.allAvailableOptions[i])
+      this.addOption(regexPattern, data[i])
     }
     if (this.autocompleteList.childElementCount > 0) {
       this.currentFocusedOptionIndexValue = 0
