@@ -1,10 +1,9 @@
 import posthog from "posthog-js"
 import AutocompleteController from "./autocomplete_controller"
-import { SSCatObject } from "./types"
 
 export default class extends AutocompleteController {
   controllerName: string = "ss-cat-object-autocomplete"
-  allAvailableOptions: Array<SSCatObject> = []
+  allAvailableOptions: Array<object> = []
 
   static targets = AutocompleteController.targets.concat(["ssCat"])
   declare readonly ssCatTarget: HTMLInputElement
@@ -88,7 +87,7 @@ export default class extends AutocompleteController {
     return toSubmit
   }
 
-  async #getOptionCallback(value: string): Promise<SSCatObject[]> {
+  async #getOptionCallback(value: string): Promise<object[]> {
     if (value.trim().length < this.nbCharToSearchValue) {
       this.ssCatTarget.value = ""
       return []
