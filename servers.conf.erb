@@ -11,6 +11,11 @@ server {
     listen <%= ENV["PORT"] %>;
     server_name _;
 
+    # Redirect if host is different from the BASE_URL host
+    if ($host != "<%= URI.parse(ENV["BASE_URL"]).host %>") {
+        return 301 <%= URI.parse(ENV["BASE_URL"]).scheme %>://<%= URI.parse(ENV["BASE_URL"]).host %>$request_uri;
+    }
+
 
     location /static/ {
         expires max;
