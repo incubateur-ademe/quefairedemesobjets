@@ -33,11 +33,11 @@
             </script>
         {% elif request.GET.carte_slug %}
             <h3>LA CARTE - avec une config de carte (Cyclevia)</h3>
-            <script src="{{ assistant.BASE_URL }}/static/carte.js" data-slug="{{ request.GET.carte_slug }}"></script>
+            <script src="{{ BASE_URL }}/static/carte.js" data-slug="{{ request.GET.carte_slug }}"></script>
         {% else %}
         <div id="formulaire">
             <h3>LE FORMULAIRE</h3>
-            <script src="{{ lvao.BASE_URL }}/static/iframe.js"
+            <script src="{{ BASE_URL }}/static/iframe.js"
                     data-max_width="100%"
                     data-height="720px"
                     data-direction="jai"
