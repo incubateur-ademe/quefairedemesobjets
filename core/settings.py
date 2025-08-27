@@ -83,8 +83,9 @@ BASE_URL = decouple.config(
     default="http://quefairedemesdechets.ademe.local",
     cast=str,
 )
+BASE_HOST = urlparse(BASE_URL).hostname
 ALLOWED_HOSTS = [
-    urlparse(BASE_URL).hostname,
+    BASE_HOST,
     *decouple.config("ALLOWED_HOSTS", default="", cast=str).split(","),
 ]
 
