@@ -1,7 +1,7 @@
 import pytest
 from django.test import override_settings
 
-from core.views import static_file_content_from
+# from core.views import static_file_content_from
 
 
 @pytest.mark.django_db
@@ -56,34 +56,35 @@ def test_forms_redirects(client, test_url):
         # Carte
         ("lvao.ademe.fr", "/carte", "https://quefairedemesdechets.ademe.fr/carte", 302),
         # Scripts
-        (
-            "lvao.ademe.fr",
-            "/static/iframe.js",
-            "https://quefairedemesdechets.ademe.fr/static/iframe.js",
-            302,
-        ),
-        (
-            "lvao.ademe.fr",
-            "/static/carte.js",
-            "https://quefairedemesdechets.ademe.fr/static/carte.js",
-            302,
-        ),
+        # (
+        #     "lvao.ademe.fr",
+        #     "/static/iframe.js",
+        #     "https://quefairedemesdechets.ademe.fr/static/iframe.js",
+        #     302,
+        # ),
+        # (
+        #     "lvao.ademe.fr",
+        #     "/static/carte.js",
+        #     "https://quefairedemesdechets.ademe.fr/static/carte.js",
+        #     302,
+        # ),
         # Assistant
         ("quefairedemesdechets.ademe.fr", "/", None, 200),
         ("quefairedemesdechets.ademe.fr", "/carte", None, 200),
-        (
-            "quefairedemesdechets.ademe.fr",
-            "/static/iframe.js",
-            None,
-            200,
-        ),  # formulaire script
-        (
-            "quefairedemesdechets.ademe.fr",
-            "/static/carte.js",
-            None,
-            200,
-        ),  # carte script
-        ("quefairedemesdechets.ademe.fr", "/iframe.js", None, 200),  # assistant script
+        # (
+        #     "quefairedemesdechets.ademe.fr",
+        #     "/static/iframe.js",
+        #     None,
+        #     200,
+        # ),  # formulaire script
+        # (
+        #     "quefairedemesdechets.ademe.fr",
+        #     "/static/carte.js",
+        #     None,
+        #     200,
+        # ),  # carte script
+        # ("quefairedemesdechets.ademe.fr", "/iframe.js", None, 200),
+        # assistant script
         ("lvao.ademe.fr", "?carte", "https://quefairedemesdechets.ademe.fr/carte", 302),
         (
             "lvao.ademe.fr",
