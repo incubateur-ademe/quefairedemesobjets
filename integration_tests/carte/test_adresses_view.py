@@ -3,7 +3,7 @@ from django.contrib.gis.geos import Point
 from django.http import HttpRequest
 from django.test import override_settings
 
-from qfdmo.leaflet import compile_leaflet_bbox
+from qfdmo.map_utils import compile_map_bbox
 from qfdmo.models.acteur import ActeurStatus, DisplayedActeur, RevisionActeur
 from qfdmo.views.carte import CarteSearchActeursView
 from unit_tests.core.test_utils import query_dict_from
@@ -441,15 +441,15 @@ class TestBBOX:
     def test_bbox_is_returned_if_no_acteurs(self):
         request = HttpRequest()
         adresses_view = CarteSearchActeursView()
-        leaflet_bbox = compile_leaflet_bbox([1, 1, 1, 1])
+        map_bbox = compile_map_bbox([1, 1, 1, 1])
         request.GET = query_dict_from({})
-        request.GET.update(bounding_box=leaflet_bbox)
+        request.GET.update(bounding_box=map_bbox)
         adresses_view.setup(request)
 
         acteurs = DisplayedActeur.objects.all()
         assert acteurs.count() == 0
         bbox, acteurs = adresses_view._bbox_and_acteurs_from_location_or_epci(acteurs)
-        assert bbox == leaflet_bbox
+        assert bbox == map_bbox
 
     @override_settings(DISTANCE_MAX=100000000000)
     def test_no_bbox_and_acteurs_from_center_if_no_acteurs_found_in_bbox(
@@ -458,9 +458,9 @@ class TestBBOX:
         request = HttpRequest()
         adresses_view = CarteSearchActeursView()
         bbox = [0, 0, 0, 0]
-        leaflet_bbox = compile_leaflet_bbox(bbox)
+        map_bbox = compile_map_bbox(bbox)
         request.GET = query_dict_from({})
-        request.GET.update(bounding_box=leaflet_bbox, latitude="1", longitude="1")
+        request.GET.update(bounding_box=map_bbox, latitude="1", longitude="1")
         adresses_view.setup(request)
 
         DisplayedActeurFactory.create_batch(2)
@@ -476,9 +476,9 @@ class TestBBOX:
         request = HttpRequest()
         adresses_view = CarteSearchActeursView()
         bbox = [-2, -2, 4, 4]  # Acteurs in factory are created with a location of 3, 3
-        leaflet_bbox = compile_leaflet_bbox(bbox)
+        map_bbox = compile_map_bbox(bbox)
         request.GET = query_dict_from({})
-        request.GET.update(bounding_box=leaflet_bbox, latitude="1", longitude="1")
+        request.GET.update(bounding_box=map_bbox, latitude="1", longitude="1")
         adresses_view.setup(request)
 
         DisplayedActeurFactory.create_batch(2)

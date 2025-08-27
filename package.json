@@ -44,8 +44,8 @@
     "@iframe-resizer/parent": "^5.5.5",
     "bowser": "^2.12.1",
     "eslint-config-prettier": "^10.1.8",
-    "leaflet": "^1.9.4",
     "posthog-js": "^1.261.8",
+    "maplibre-gl": "^5.7.0",
     "stimulus-use": "^0.52.3",
     "tailwindcss": "^3.4.17"
   },
@@ -56,7 +56,6 @@
     "@playwright/test": "^1.55.0",
     "@testing-library/jest-dom": "^6.8.0",
     "@types/jest": "^30.0.0",
-    "@types/leaflet": "^1.9.20",
     "@types/lodash": "^4.17.20",
     "@types/node": "^24.3.1",
     "@typescript-eslint/eslint-plugin": "^8.43.0",

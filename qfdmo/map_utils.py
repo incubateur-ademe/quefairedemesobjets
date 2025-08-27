@@ -17,7 +17,7 @@ class LeafletBbox(TypedDict):
     northEast: PointDict
 
 
-def center_from_leaflet_bbox(custom_bbox_as_string: str) -> List[float]:
+def center_from_map_bbox(custom_bbox_as_string: str) -> List[float]:
     try:
         custom_bbox: LeafletBbox = json.loads(custom_bbox_as_string)
         # Handle center
@@ -27,7 +27,7 @@ def center_from_leaflet_bbox(custom_bbox_as_string: str) -> List[float]:
         return ["", ""]
 
 
-def sanitize_leaflet_bbox(custom_bbox_as_string: str) -> List[float] | None:
+def sanitize_map_bbox(custom_bbox_as_string: str) -> List[float] | None:
     try:
         custom_bbox: LeafletBbox = json.loads(custom_bbox_as_string)
         # Handle center
@@ -43,7 +43,7 @@ def sanitize_leaflet_bbox(custom_bbox_as_string: str) -> List[float] | None:
         return []
 
 
-def compile_leaflet_bbox(bbox) -> str:
+def compile_map_bbox(bbox) -> str:
     xmin, ymin, xmax, ymax = bbox
     return json.dumps(
         {

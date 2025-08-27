@@ -1,6 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
 import { clearActivePinpoints } from "../../js/helpers"
-import { debounce } from "lodash"
 
 class ActeurController extends Controller<HTMLElement> {
   static targets = ["handle", "actions", "content"]
@@ -109,7 +108,7 @@ class ActeurController extends Controller<HTMLElement> {
   }
 
   connect() {
-    // Prevents the leaflet map to move when the user moves panel
+    // Prevents the map to move when the user moves panel
     this.element.addEventListener("touchmove", (event) => event.stopPropagation())
     document.addEventListener(
       "turbo:frame-load",
