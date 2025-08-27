@@ -66,13 +66,20 @@ def get_sharer_content(request, object, social_network=None):
 
 
 @register.simple_tag(takes_context=True)
-def configure_sharer(context):
-    """This template tag enriches the context of a Dechet/Produit/Synonyme.
-    Once Jinja will be dropped, it could be merged with the function above."""
+def configure_acteur_sharer(context, object):
+    try:
+        object = context.get("object")
+    except AttributeError:
+        object = None
+    request = context.get("request")
+    context["sharer"] = get_sharer_content(request, object)
+
+
+@register.simple_tag(takes_context=True)
+def configure_produit_sharer(context):
     try:
         object = context.get("object").produit
     except AttributeError:
         object = None
     request = context.get("request")
     context["sharer"] = get_sharer_content(request, object)
-    return ""
