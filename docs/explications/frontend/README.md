@@ -7,7 +7,7 @@ routing-nginx-cache.md
 historique.md
 ```
 
-Le projet dispose de deux frontend principaux
+Le projet dispose de deux produits disponibles via des routes spécifiques
 
 - **La Carte** : https://quefairedemesdechets.ademe.fr/carte, celle-ci est intégrée sous forme d'iframe chez nos partenaires ré-utilisateurs.
 - L'**assistant** : https://quefairedemesobjets.ademe.fr.
