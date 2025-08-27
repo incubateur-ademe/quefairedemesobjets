@@ -15,7 +15,7 @@ Le projet dispose de deux produits disponibles via des routes spécifiques
 Ils ont été développés en silo, et ne partagent à date qu'un minimum de code.
 L'objectif à terme est d'en mutualiser une majeure partie au travers de refactorisations.
 
-Longue vie aux objet est quant à lui découpé en deux briques fonctionnelles :
+Le produit **La Carte** est quant à lui découpé en deux briques fonctionnelles :
 
 - Le **formulaire**, aussi appelé _version épargnons_
 - La **carte**, intégrée au sein de l'assistant et par de nombreuses collectivités sous forme d'iframe
