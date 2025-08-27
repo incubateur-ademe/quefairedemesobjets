@@ -4,19 +4,13 @@
         role="tablist"
         aria-label="Informations détaillées de la solution {{ adresse }}"
     >
-        {% with text="Présentation",target="aboutPanel" %}
-            {% include "qfdmo/acteur/tabs/_tab.html" %}
-        {% endwith %}
+        {% include "qfdmo/acteur/tabs/_tab.html" with text="Présentation" target="aboutPanel" %}
 
         {% if object.labels_without_enseigne_display %}
-            {% with text="Labels",target="labelsPanel" %}
-                {% include "qfdmo/acteur/tabs/_tab.html" %}
-            {% endwith %}
+            {% include "qfdmo/acteur/tabs/_tab.html" with text="Labels" target="labelsPanel" %}
         {% endif %}
 
-        {% with text="Sources",target="sourcesPanel" %}
-            {% include "qfdmo/acteur/tabs/_tab.html" %}
-        {% endwith %}
+        {% include "qfdmo/acteur/tabs/_tab.html" with text="Sources" target="sourcesPanel" %}
     </ul>
 
     {% include "qfdmo/acteur/tabs/about_panel.html" %}
