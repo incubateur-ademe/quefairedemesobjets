@@ -35,12 +35,8 @@
 
                 {# Gestes #}
                 <div class="fr-mt-3w fr-px-1v">
-                    {% with action_direction='jai' %}
-                        {% include "qfdmo/partials/action_list_by_direction.html" %}
-                    {% endwith %}
-                    {% with action_direction='jecherche' %}
-                        {% include "qfdmo/partials/action_list_by_direction.html" %}
-                    {% endwith %}
+                    {% include "qfdmo/partials/action_list_by_direction.html" with action_direction='jai' %}
+                    {% include "qfdmo/partials/action_list_by_direction.html" with action_direction='jecherche' %}
                 </div>
             </div>
 

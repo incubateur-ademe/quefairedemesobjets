@@ -3,19 +3,11 @@
         Choisir le(s) filtre(s)
     </legend>
 
-    {% with field=form.bonus %}
-        {% include "qfdmo/_addresses_partials/filters/_labels_filters_field.html" %}
-    {% endwith %}
+    {% include "qfdmo/_addresses_partials/filters/_labels_filters_field.html" with field=form.bonus %}
 
-    {% with field=form.ess %}
-        {% include "qfdmo/_addresses_partials/filters/_labels_filters_field.html" %}
-    {% endwith %}
+    {% include "qfdmo/_addresses_partials/filters/_labels_filters_field.html" with field=form.ess %}
 
-    {% with field=form.label_reparacteur %}
-        {% include "qfdmo/_addresses_partials/filters/_labels_filters_field.html" %}
-    {% endwith %}
+    {% include "qfdmo/_addresses_partials/filters/_labels_filters_field.html" with field=form.label_reparacteur %}
 
-    {% with field=form.pas_exclusivite_reparation %}
-        {% include "qfdmo/_addresses_partials/filters/_labels_filters_field.html" %}
-    {% endwith %}
+    {% include "qfdmo/_addresses_partials/filters/_labels_filters_field.html" with field=form.pas_exclusivite_reparation %}
 </fieldset>
