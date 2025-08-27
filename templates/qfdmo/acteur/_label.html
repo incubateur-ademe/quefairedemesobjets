@@ -5,7 +5,7 @@
         class="{% if border %}fr-p-2w{% endif %} fr-link fr-link--no-underline
         qf-w-full qf-flex fr-text--sm qf-gap-1w
         qf-no-external-link-icon"
-        href="{{ source_or_label.url if source_or_label.url else '#' }}"
+        href="{{ source_or_label.url|yesno:"#" }}"
         target="_blank"
         rel="noreferrer"
     >
