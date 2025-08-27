@@ -1,3 +1,4 @@
+{% load static %}
 {# Panel «Formulaire de recherche» #}
 <div
     class="
@@ -70,7 +71,7 @@
 
         <div class="fr-p-3w qf-my-auto qf-flex-grow qf-hidden sm:qf-block">
             <img
-                src="{{ static('france_map.svg') }}"
+                src="{% static 'france_map.svg' %}"
                 alt=""
                 class="qf-max-w-[100%]"
             >

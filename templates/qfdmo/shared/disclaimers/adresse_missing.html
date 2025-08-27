@@ -1,13 +1,14 @@
+{% load static %}
 <div
     class="qf-absolute qf-top-1w qf-bottom-1w qf-left-1w qf-right-1w qf-border qf-border-grey-900 qf-border-solid
     qf-flex qf-flex-row qf-justify-center group-aria-[busy]:qf-hidden"
     data-testid="adresse-missing"
 >
     <picture>
-        <source srcset="{{ static("map-background-mobile.png") }}" media="(orientation: portrait)">
+        <source srcset="{% static 'map-background-mobile.png' %}" media="(orientation: portrait)">
         <img
             class="qf-absolute qf-left-0 qf-right-0 qf-top-0 qf-bottom-0 qf-w-full qf-h-full qf-object-cover"
-            src="{{ static("map-background-desktop.png") }}"
+            src="{% static 'map-background-desktop.png' %}"
             alt=""
         >
     </picture>

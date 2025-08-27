@@ -1,3 +1,4 @@
+{% load static %}
 <button class="qf-hidden"
         id="display_modale_reparacteur"
         data-fr-opened="false"
@@ -19,7 +20,7 @@
                             <div class="fr-grid-row fr-grid-row--center">
                                 <div class="fr-col-12 fr-col-md-3 qf-text-center">
                                     <img
-                                        src="{{ static('reparacteurs.png') }}"
+                                        src="{% static 'reparacteurs.png' %}"
                                         alt="Repar'Acteur"
                                         class="qf-text-center qf-max-w-[100%]"
                                         data-fr-opened="false"

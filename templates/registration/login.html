@@ -6,7 +6,7 @@
             <h1>Connexion au configurateur Longue vie aux objets</h1>
 
 
-            <form method="post" action="{{ url('qfdmo:login') }}">
+            <form method="post" action="{% url 'qfdmo:login' %}">
                 {% if next %}
                     <div class="fr-alert fr-alert--warning fr-my-2w">
                         <p class="fr-alert__title">
@@ -26,7 +26,7 @@
                     </div>
                 {% endif %}
 
-                {{ csrf_input }}
+                {% csrf_token %}
                 <input type="hidden" name="next" value="{{ next }}">
                 <fieldset class="fr-fieldset">
                     <legend class="fr-fieldset__legend" id="login-1760-fieldset-legend">
@@ -39,7 +39,7 @@
                                     <label class="fr-label" for="{{ form.username.id_for_label }}">
                                         Identifiant
                                     </label>
-                                    <input class="fr-input" autocomplete="username" aria-required="true" name="username" id="{{ form.username.id_for_label }}" type="text" value="{{ form.username.value() or "" }}">
+                                    <input class="fr-input" autocomplete="username" aria-required="true" name="username" id="{{ form.username.id_for_label }}" type="text" value="{{ form.username.value|default:'' }}">
                                 </div>
                             </div>
                             <div class="fr-fieldset__element">
@@ -48,7 +48,7 @@
                                         Mot de passe
                                     </label>
                                     <div class="fr-input-wrap">
-                                        <input class="fr-password__input fr-input" aria-required="true" name="password" autocomplete="current-password" id="{{ form.password.id_for_label }}" type="password" value="{{ form.password.value() or "" }}">
+                                        <input class="fr-password__input fr-input" aria-required="true" name="password" autocomplete="current-password" id="{{ form.password.id_for_label }}" type="password" value="{{ form.password.value|default:'' }}">
                                     </div>
                                 </div>
                             </div>

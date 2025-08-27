@@ -1,13 +1,10 @@
-{% load qfdmo_tags static %}
-
-{% hide_object_filter as hidden %}
 <div data-search-solution-form-target="sousCategoryObjetGroup" class="fr-mt-3w fr-px-1v fr-input-group {% if hidden %}qf-hidden{% endif %}">
     <div data-controller='ss-cat-object-autocomplete'
          data-ss-cat-object-autocomplete-max-option-displayed-value=5
          data-ss-cat-object-autocomplete-nb-char-to-search-value=1
-         data-with-controls="{% if is_carte %}false{% else %}true{% endif %}"
-         data-without-zone="{% if is_carte %}false{% else %}true{% endif %}"
-         data-with-dynamic-form-panel="{% if is_carte %}false{% else %}true{% endif %}"
+         data-with-controls={{ "false" if is_carte else "true" }}
+         data-without-zone={{ "false" if is_carte else "true" }}
+         data-with-dynamic-form-panel={{ "false" if is_carte else "true" }}
     >
         <div class="form-group">
             {{ form.sous_categorie_objet.label_tag }}
