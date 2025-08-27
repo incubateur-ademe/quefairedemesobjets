@@ -6,10 +6,8 @@
 
 {% block content %}
 <div class="qf-pt-1w">
-{% with border=True %}
     {% for source_or_label in object.labels_without_enseigne_display %}
-        {% include "qfdmo/acteur/_label.html" %}
+        {% include "qfdmo/acteur/_label.html" with border=True %}
     {% endfor %}
-{% endwith %}
 </div>
 {% endblock content %}
