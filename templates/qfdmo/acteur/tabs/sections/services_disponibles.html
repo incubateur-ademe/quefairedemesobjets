@@ -8,17 +8,11 @@ Services disponibles
 <div class="qf-space-y-1w">
     {% for service in object.sorted_proposition_services %}
         <div class="qf-space-y-1v">
-            {% with text=service.action.libelle %}
-                {% if is_carte %}
-                    {% with action=service.action.groupe_action %}
-                        {% include "qfdmo/acteur/tabs/_service_tag.html" %}
-                    {% endwith %}
-                {% else %}
-                    {% with action=service.action,extra_classes="qf-bg-opacity-30" %}
-                        {% include "qfdmo/acteur/tabs/_service_tag.html" %}
-                    {% endwith %}
-                {% endif %}
-            {% endwith %}
+            {% if is_carte %}
+                {% include "qfdmo/acteur/tabs/_service_tag.html" with text=service.action.libelle action=service.action.groupe_action %}
+            {% else %}
+                {% include "qfdmo/acteur/tabs/_service_tag.html" with text=service.action.libelle action=service.action extra_classes="qf-bg-opacity-30" %}
+            {% endif %}
 
             <p class="qf-m-0 qf-text-sm">
             {{ service.sous_categories_display }}
@@ -32,7 +26,7 @@ Services disponibles
             Information importante
         </h3>
         <p class="fr-callout__text fr-text--sm">
-            Cet établissement ne reprend vos objets que dans le cadre d’un achat neuf.
+            Cet établissement ne reprend vos objets que dans le cadre d'un achat neuf.
         </p>
     </div>
     {% endif %}

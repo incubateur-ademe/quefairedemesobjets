@@ -6,10 +6,8 @@
 
 {% block content %}
 <div class="qf-pt-1w">
-{% with border=True %}
-    {% for source_or_label in object.sources.all() %}
-        {% include "qfdmo/acteur/_label.html" %}
+    {% for source_or_label in object.sources.all %}
+        {% include "qfdmo/acteur/_label.html" with border=True %}
     {% endfor %}
-{% endwith %}
-{% endblock content %}
 </div>
+{% endblock content %}
