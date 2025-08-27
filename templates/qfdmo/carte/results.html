@@ -49,7 +49,7 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
                     {# the important below is required to override fr-btn max-width style #}
                     !qf-max-w-sm md:!qf-ml-auto
                     max-md:qf-mx-auto"
-                    href="{{ url('qfdmo:address-suggestion-form') }}"
+                    href="{% url 'qfdmo:address-suggestion-form' %}"
                     target="_blank"
                     rel="noreferrer"
                     aria-label="Proposer une adresse - Nouvelle fenêtre"
