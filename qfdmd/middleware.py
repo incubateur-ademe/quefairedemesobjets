@@ -86,22 +86,22 @@ class AssistantMiddleware:
         return f"{absolute_url}?{query_string}" if query_string else absolute_url
 
     def _handle_host_redirects(self, request) -> str | None:
-        base_host = urlparse(settings.BASE_URL).hostname
+        base_netloc = urlparse(settings.BASE_URL).netloc
         base_scheme = urlparse(settings.BASE_URL).scheme
         request_host = request.META.get("HTTP_HOST")
 
-        if not request_host or request_host == base_host:
+        if not request_host or request_host == base_netloc:
             return None
 
         if request_host in settings.ALLOWED_HOSTS:
             # Redirect to main domain while preserving path and query params
             full_requested_url = urlparse(request.build_absolute_uri())
             redirect_url = urlunparse(
-                full_requested_url._replace(netloc=base_host, scheme=base_scheme)
+                full_requested_url._replace(netloc=base_netloc, scheme=base_scheme)
             )
             logger.info(
                 f"Redirecting {full_requested_url.path} "
-                f"from {request_host} to {base_host}"
+                f"from {request_host} to {base_netloc}"
             )
             return redirect_url
 
