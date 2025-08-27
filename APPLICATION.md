@@ -6,8 +6,8 @@ Ici sont référencées toutes les applications développées ou maintenues par 
 
 ### URLs
 
-- Production : https://quefairedemesdechets.fr/
-- Preprod : https://quefairedemesobjets-preprod.osc-fr1.scalingo.io/
+- Production : https://quefairedemesdechets.ademe.fr/
+- Preprod : https://quefairedemesdechets.incubateur.ademe.dev/
 
 ### Accès spécifiques
 

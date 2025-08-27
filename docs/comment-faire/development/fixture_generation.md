@@ -24,8 +24,8 @@ Pour ce faire, sont listées dans le `Makefile` une liste de `pk` d'acteurs (cha
 Ces identifiants ont été récupérés à la main, depuis le frontend de la carte :
 
 1. Faire une recherche pour la zone souhaitée
-2. Récupérer le lien de l'acteur dans la fiche détaillée (en cliquant sur le lien de partage par exemple) --> https://quefairedemesdechets.fr/adresse_details/3kQK86DEWA3ZrcirdzzBez l'id est 3kQK86DEWA3ZrcirdzzBez
-3. Chercher cet id dans l'admin Django : https://quefairedemesdechets.fr/admin/qfdmo/displayedacteur/?q=eYKxBYDMDoMXTr8iiw69Ek
+2. Récupérer le lien de l'acteur dans la fiche détaillée (en cliquant sur le lien de partage par exemple) --> https://quefairedemesdechets.ademe.fr/adresse_details/3kQK86DEWA3ZrcirdzzBez l'id est 3kQK86DEWA3ZrcirdzzBez
+3. Chercher cet id dans l'admin Django : https://quefairedemesdechets.ademe.fr/admin/qfdmo/displayedacteur/?q=eYKxBYDMDoMXTr8iiw69Ek
 4. Récupérer le champ `identifiant_unique` : il peut être un uuid ou un assemblage de chaînes de caractères mentionnant la source, par exemple `ocad3e_SGS-02069`
 5. Ajouter cet identifiant dans le `Makefile` à la suite des autres, derrière le flag `--pk` dans la commande `generate-fixtures-acteurs`
 

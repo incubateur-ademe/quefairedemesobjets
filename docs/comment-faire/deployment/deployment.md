@@ -110,6 +110,6 @@ _TODO: refaire un script de restauration de la base de données plus simple à u
 
 #### Vérifier que la restauration est effective
 
-Accéder à la carte et jouer avec : [La carte](https://quefairedemesdechets.fr/carte)
-Accéder au formulaire et joue avec : [Le formulaire](https://quefairedemesdechets.fr/formulaire)
-Accéder à l'administration Django et vérifier les données qui ont été restaurée : [Admin](https://quefairedemesdechets.fr/admin)
+Accéder à la carte et jouer avec : [La carte](https://quefairedemesdechets.ademe.fr/carte)
+Accéder au formulaire et joue avec : [Le formulaire](https://quefairedemesdechets.ademe.fr/formulaire)
+Accéder à l'administration Django et vérifier les données qui ont été restaurée : [Admin](https://quefairedemesdechets.ademe.fr/admin)
