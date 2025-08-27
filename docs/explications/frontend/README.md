@@ -9,8 +9,8 @@ historique.md
 
 Le projet dispose de deux frontend principaux
 
-- **La Carte** : https://quefairedemesdechets.ademe.fr/carte, celle-ci est intégré sous forme d'iframe chez nos partenaires ré-utilisateur
-- L'**assistant** : https://quefairedemesobjets.ademe.fr
+- **La Carte** : https://quefairedemesdechets.ademe.fr/carte, celle-ci est intégrée sous forme d'iframe chez nos partenaires ré-utilisateurs.
+- L'**assistant** : https://quefairedemesobjets.ademe.fr.
 
 Ils ont été développés en silo, et ne partagent à date qu'un minimum de code.
 L'objectif à terme est d'en mutualiser une majeure partie au travers de refactorisations.
