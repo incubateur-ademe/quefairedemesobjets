@@ -105,3 +105,9 @@ def acteur_json_display(acteur, direction, action_list, carte, carte_config, sc_
         carte_config=carte_config,
         sous_categorie_id=sc_id,
     )
+
+
+@register.simple_tag
+def get_non_enseigne_labels_count(acteur):
+    """Template tag to get count of labels with type_enseigne=False"""
+    return acteur.labels_display.filter(type_enseigne=False).count()

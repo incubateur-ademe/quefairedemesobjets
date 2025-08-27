@@ -1,3 +1,1 @@
-{% with content=label.libelle,icon_image=label.logo_file %}
-    {% include "qfdmo/shared/tag.html" %}
-{% endwith %}
+{% include "qfdmo/shared/tag.html" with content=label.libelle icon_image=label.logo_file %}

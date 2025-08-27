@@ -1,3 +1,4 @@
+{% load seo_tags %}
 <div class="
     qf-flex qf-flex-col qf-items-center
     qf-space-y-1v"
@@ -12,14 +13,15 @@
     </button>
 
     <div class="fr-tooltip fr-placement" id="{{ map_container_id }}:shareTooltip" role="tooltip" tabindex="1">
+        {% configure_sharer %}
         <div class="fr-share" role="toolbar">
             <ul class="fr-btns-group">
                 <li>
                     <a class="fr-btn--facebook fr-btn"
                        target="_blank"
                        rel="noreferrer"
-                       title="{{ sharer(request, object, 'facebook').title }}"
-                       href="{{ sharer(request, object, 'facebook').url }}"
+                       title="{{ sharer.facebook.title }}"
+                       href="{{ sharer.facebook.url }}"
                        tabindex="-1"
                     >
                         Partager sur Facebook
@@ -29,8 +31,8 @@
                     <a  class="fr-btn--twitter-x fr-btn"
                        target="_blank"
                        rel="noreferrer"
-                       title="{{ sharer(request, object, 'twitter').title }}"
-                       href="{{ sharer(request, object, 'twitter').url }}"
+                       title="{{ sharer.twitter.title }}"
+                       href="{{ sharer.twitter.url }}"
                        tabindex="-1"
                     >
                         Partager sur X (anciennement Twitter)
@@ -40,8 +42,8 @@
                     <a  class="fr-btn--linkedin fr-btn"
                        target="_blank"
                        rel="noreferrer"
-                       title="{{ sharer(request, object, 'linkedin').title }}"
-                       href="{{ sharer(request, object, 'linkedin').url }}"
+                       title="{{ sharer.linkedin.title }}"
+                       href="{{ sharer.linkedin.url }}"
                        onclick="window.open(this.href,'Partager sur LinkedIn','toolbar=no,location=yes,status=no,menubar=no,scrollbars=yes,resizable=yes,width=550,height=550'); event.preventDefault();"
                        tabindex="-1"
                     >
@@ -52,8 +54,8 @@
                     <a  class="fr-btn--mail fr-btn"
                        target="_blank"
                        rel="noreferrer"
-                       title="{{ sharer(request, object, 'email').title }}"
-                       href="{{ sharer(request, object, 'email').url }}"
+                       title="{{ sharer.email.title }}"
+                       href="{{ sharer.email.url }}"
                        tabindex="-1"
                     >
                         Partager par email
@@ -61,7 +63,7 @@
                 </li>
                 <li>
                     <button class="fr-btn--copy fr-btn"
-                            onclick="navigator.clipboard.writeText('{{ sharer(request, object, 'url') }}').then(function() {alert('Adresse copiée dans le presse papier.')});"
+                            onclick="navigator.clipboard.writeText('{{ request.build_absolute_uri }}').then(function() {alert('Adresse copiée dans le presse papier.')});"
                             type="button"
                             tabindex="-1"
                     >
