@@ -1,7 +1,6 @@
 from urllib.parse import quote, quote_plus
 
 from django import template
-from django.conf import settings
 
 from core.constants import ASSISTANT, CARTE
 
@@ -15,11 +14,11 @@ def get_sharer_content(request, object, social_network=None):
     Once jinja will be removed from the project, this can be merged in
     share_url function below
     """
-    if not request or not request.META:
+    if not request:
         return {}
 
-    carte = request.META.get("HTTP_HOST") not in settings.ASSISTANT["HOSTS"]
-
+    # FIXME: check if current view is carte
+    carte = request.resolver_match.view_name in ["qfdmo:carte", "qfdmo:carte_custom"]
     url = request.build_absolute_uri()
 
     share_body = ""
@@ -67,13 +66,20 @@ def get_sharer_content(request, object, social_network=None):
 
 
 @register.simple_tag(takes_context=True)
-def configure_sharer(context):
-    """This template tag enriches the context of a Dechet/Produit/Synonyme.
-    Once Jinja will be dropped, it could be merged with the function above."""
+def configure_acteur_sharer(context, object):
+    try:
+        object = context.get("object")
+    except AttributeError:
+        object = None
+    request = context.get("request")
+    context["sharer"] = get_sharer_content(request, object)
+
+
+@register.simple_tag(takes_context=True)
+def configure_produit_sharer(context):
     try:
         object = context.get("object").produit
     except AttributeError:
         object = None
     request = context.get("request")
     context["sharer"] = get_sharer_content(request, object)
-    return ""
