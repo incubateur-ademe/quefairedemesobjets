@@ -255,7 +255,6 @@ TEMPLATES = [
             "context_processors": [
                 *context_processors(),
                 # Sites faciles
-                # These are not fully compatible with jinja
                 "wagtail.contrib.settings.context_processors.settings",
                 "wagtailmenus.context_processors.wagtailmenus",
                 "sites_faciles.content_manager.context_processors.skiplinks",

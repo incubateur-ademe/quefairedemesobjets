@@ -12,9 +12,8 @@ export default new Transformer({
       const purgeCSSResults = await new PurgeCSS().purge({
         content: [
           "templates/**/*.html",
-          "jinja2/**/*.html",
           "static_to_compile/**/*.css",
-          "static/to_compile/**/*.ts"
+          "static/to_compile/**/*.ts",
         ],
         css: [{ raw: source }],
         // safelist: ["htm", "body", ...tailwindConfig.safelist],
