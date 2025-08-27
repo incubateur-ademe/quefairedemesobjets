@@ -39,7 +39,7 @@ def merge_reusable_content():
             if base_content is not None:
                 base_content.masculin_singulier = batch.get(genre="m", nombre=1).content
                 base_content.masculin_pluriel = batch.get(genre="m", nombre=2).content
-                base_content.feminin_singulier = batch.get(genre="m", nombre=1).content
+                base_content.feminin_singulier = batch.get(genre="f", nombre=1).content
                 base_content.feminin_pluriel = batch.get(genre="f", nombre=2).content
                 base_content.genre = ""
                 base_content.nombre = None

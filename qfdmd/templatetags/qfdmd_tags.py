@@ -79,7 +79,7 @@ def carte(context, carte_config: CarteConfig) -> dict:
     return {
         "id": carte_config.pk,
         "url": carte_config.get_absolute_url(
-            extra_sous_categories=list(
+            override_sous_categories=list(
                 page.sous_categorie_objet.all().values_list("id", flat=True)
             )
         ),
