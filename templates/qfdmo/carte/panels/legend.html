@@ -26,8 +26,8 @@
         {{ CARTE.filtres_bouton }}
     </button>
 
-    {# Check if the branding configuration is not set or if branding is allowed.
-    If either condition is true, display the "Infos" button. #}
+    {% comment %} Check if the branding configuration is not set or if branding is allowed.
+    If either condition is true, display the "Infos" button. {% endcomment %}
     {% if not carte_config or not carte_config.supprimer_branding %}
     <button
         class="fr-mb-1w fr-btn fr-btn--sm fr-btn--tertiary fr-btn--icon-left

@@ -93,3 +93,15 @@ def random_range(max_value):
     import random
 
     return random.randint(0, max_value - 1)
+
+
+@register.simple_tag
+def acteur_json_display(acteur, direction, action_list, carte, carte_config, sc_id):
+    """Template tag to replace Jinja2 acteur.json_acteur_for_display method call"""
+    return acteur.json_acteur_for_display(
+        direction=direction,
+        action_list=action_list,
+        carte=carte,
+        carte_config=carte_config,
+        sous_categorie_id=sc_id,
+    )
