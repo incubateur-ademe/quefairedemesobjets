@@ -1,10 +1,5 @@
-from urllib.parse import urlparse
-
 import pytest
-from django.conf import settings
 from django.test import override_settings
-
-host_aware_headers = {"Host": urlparse(settings.BASE_URL).hostname}
 
 
 @pytest.mark.django_db
@@ -14,7 +9,7 @@ host_aware_headers = {"Host": urlparse(settings.BASE_URL).hostname}
     ["/configurateur", "/sitemap.xml", "/dsfr/colors"],
 )
 def test_other_routes_work(client, test_url):
-    response = client.get(test_url, headers=host_aware_headers)
+    response = client.get(test_url)
     assert response.status_code == 200
 
 
