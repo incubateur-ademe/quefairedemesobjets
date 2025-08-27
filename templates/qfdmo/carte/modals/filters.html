@@ -1,4 +1,5 @@
 {% extends 'qfdmo/_addresses_partials/filters/panel_filters.html' %}
+{% load qfdmo_tags %}
 
 {% block modal_title %}
 Filtres
@@ -14,9 +15,8 @@ Filtres
     >
     {{ form.action_displayed }}
 
-    {% with hidden=hide_object_filter(request) %}
-        {% include 'qfdmo/_addresses_partials/filters/_object_filter.html' %}
-    {% endwith %}
+    {% hide_object_filter as hidden %}
+    {% include 'qfdmo/_addresses_partials/filters/_object_filter.html' with hidden=hidden %}
 
     {% include 'qfdmo/_addresses_partials/filters/_labels_filters.html' %}
 {% endblock modal_content %}

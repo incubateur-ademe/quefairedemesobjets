@@ -1,12 +1,13 @@
-{#
+{% comment %}
 We need to set a size on the map to help Leaflet size its content.
 We do not want the map to be bigger than the height of its container
 
 The values of 120px and 150px are determined empirically.
 They need to match the css variables used for .grid-map selector in qfdmo.css
-#}
+{% endcomment %}
 
-{% with address_ok=(form.initial.adresse or form.initial.bounding_box or form.initial.epci_codes) %}
+{% load qfdmo_tags %}
+{% with address_ok=form.initial.adresse|default:form.initial.bounding_box|default:form.initial.epci_codes %}
 <div
     class="
     qf-relative
@@ -35,7 +36,7 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
         >
             {% for acteur in acteurs %}
                 <script type="application/json" data-map-target="acteur">
-                    {{ acteur.json_acteur_for_display(direction=form.initial.direction, action_list=form.initial.action_list, carte=carte, carte_config=carte_config, sous_categorie_id=form.initial.sc_id) | safe }}
+                    {% acteur_json_display acteur form.initial.direction form.initial.action_list carte carte_config form.initial.sc_id as json_data %}{{ json_data|safe }}
                 </script>
             {% endfor %}
         </div>

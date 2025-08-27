@@ -1,10 +1,9 @@
-{#
-We need to set a size on the map to help Leaflet size its content.
+{% comment %}We need to set a size on the map to help Leaflet size its content.
 We do not want the map to be bigger than the height of its container
 
 The values of 120px and 150px are determined empirically.
 They need to match the css variables used for .grid-map selector in qfdmo.css
-#}
+{% encomment %}
 
 {% with address_ok=(form.initial.adresse or form.initial.bounding_box or form.initial.epci_codes) %}
 {% if request.user.is_authenticated and DEBUG %}
