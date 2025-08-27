@@ -59,15 +59,10 @@ class AssistantMiddleware:
                 "qfdmo:carte", request.GET, [self.CARTE_PARAM, self.IFRAME_PARAM]
             )
 
-        if self.IFRAME_PARAM in request.GET:
+        if self.FORMULAIRE_PARAM in request.GET:
             return self._build_redirect_url(
-                "qfdmo:formulaire", request.GET, [self.IFRAME_PARAM]
+                "qfdmo:formulaire", request.GET, [self.FORMULAIRE_PARAM]
             )
-
-        # if self.FORMULAIRE_PARAM in request.GET:
-        #     return self._build_redirect_url(
-        #         "qfdmo:formulaire", request.GET, [self.FORMULAIRE_PARAM]
-        #     )
         return None
 
     def _build_redirect_url(
