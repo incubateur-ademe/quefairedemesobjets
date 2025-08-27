@@ -1,4 +1,3 @@
-import type { Marker } from "leaflet"
 import type { EventName } from "posthog-js"
 
 export interface Location {
@@ -29,7 +28,3 @@ export class SSCatObject {
 
 export type InteractionType = "solution_details" | "map"
 export type PosthogEventType = "ui_interaction" | EventName
-
-export type LVAOMarker = Marker & {
-  _uuid?: string
-}
