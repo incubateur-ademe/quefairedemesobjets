@@ -7,19 +7,19 @@ import pytest
 from django.test import RequestFactory
 from django.urls import resolve
 
-from core.templatetags.seo_tags import get_sharer_content
+from core.templatetags.share_tags import get_sharer_content
 from unit_tests.qfdmd.qfdmod_factory import SynonymeFactory
 from unit_tests.qfdmo.acteur_factory import DisplayedActeurFactory
 
 
 @pytest.mark.django_db()
 class TestSharer:
-    def test_sharer_synonyme(self, client):
-        """Test the /acteurs/types endpoint"""
+    def test_sharer_synonyme(self):
         synonyme = SynonymeFactory(nom="Nom du synonyme", slug="coucou")
         request = RequestFactory().get(synonyme.url)
         request.resolver_match = resolve(synonyme.url)
         sharer = get_sharer_content(request, synonyme)
+
         assert sharer == {
             "url": "http://testserver/dechet/nom-du-synonyme/",
             "facebook": {
@@ -40,15 +40,12 @@ class TestSharer:
             },
         }
 
-    def test_sharer(self, client):
-        """Test the /acteurs/types endpoint"""
+    def test_sharer(self):
         displayed_acteur = DisplayedActeurFactory(nom="Coucou", uuid="un-coucou-unique")
         url = displayed_acteur.get_absolute_url()
         request = RequestFactory().get(url)
         request.resolver_match = resolve(url)
         sharer = get_sharer_content(request, displayed_acteur)
-
-        print(sharer)
 
         assert sharer == {
             "url": "http://testserver/adresse_details/un-coucou-unique",

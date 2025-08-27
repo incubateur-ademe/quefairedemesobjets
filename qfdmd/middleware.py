@@ -21,7 +21,7 @@ class AssistantMiddleware:
     def __call__(self, request):
         # Prepare request
         if url_to_redirect := self._check_redirect_from_legacy_domains(request):
-            return redirect(url_to_redirect, permanent=True)
+            return redirect(url_to_redirect, permanent=False)
 
         self._prepare_request_if_iframe(request)
         response = self.get_response(request)
@@ -64,10 +64,10 @@ class AssistantMiddleware:
                 "qfdmo:formulaire", request.GET, [self.IFRAME_PARAM]
             )
 
-        if self.FORMULAIRE_PARAM in request.GET:
-            return self._build_redirect_url(
-                "qfdmo:formulaire", request.GET, [self.FORMULAIRE_PARAM]
-            )
+        # if self.FORMULAIRE_PARAM in request.GET:
+        #     return self._build_redirect_url(
+        #         "qfdmo:formulaire", request.GET, [self.FORMULAIRE_PARAM]
+        #     )
         return None
 
     def _build_redirect_url(
