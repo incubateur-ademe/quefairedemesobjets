@@ -9,7 +9,7 @@ historique.md
 
 Le projet dispose de deux frontend principaux
 
-- **Longue Vie Aux Objets** : https://quefairedemesdechets.ademe.fr/carte
+- **La Carte** : https://quefairedemesdechets.ademe.fr/carte, celle-ci est intégré sous forme d'iframe chez nos partenaires ré-utilisateur
 - L'**assistant** : https://quefairedemesobjets.ademe.fr
 
 Ils ont été développés en silo, et ne partagent à date qu'un minimum de code.
