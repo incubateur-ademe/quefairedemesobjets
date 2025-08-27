@@ -163,20 +163,20 @@ def test_redirects(
 
 # Temporarily disable this test as scripts are not available in CI.
 # This should be fixed in the future (27 august 2025)
-def ztest_scripts(
-    client,
-):
-    assert (
-        client.get("/iframe.js").content
-        == static_file_content_from("embed/assistant.js").content
-    )
-    assert (
-        client.get("/static/iframe.js").content
-        == static_file_content_from(
-            "embed/formulaire.js",
-        ).content
-    )
-    assert (
-        client.get("/static/carte.js").content
-        == static_file_content_from("embed/carte.js").content
-    )
+# def ztest_scripts(
+#     client,
+# ):
+#     assert (
+#         client.get("/iframe.js").content
+#         == static_file_content_from("embed/assistant.js").content
+#     )
+#     assert (
+#         client.get("/static/iframe.js").content
+#         == static_file_content_from(
+#             "embed/formulaire.js",
+#         ).content
+#     )
+#     assert (
+#         client.get("/static/carte.js").content
+#         == static_file_content_from("embed/carte.js").content
+#     )
