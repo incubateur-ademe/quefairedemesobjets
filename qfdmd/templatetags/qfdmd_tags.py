@@ -36,6 +36,12 @@ def patchwork() -> dict:
     return {"produits": produits}
 
 
+@register.inclusion_tag("seo/_canonical_url.html", takes_context=True)
+def canonical_url(context: dict) -> dict:
+    if request := context.get("request"):
+        return {"url": request.build_absolute_uri(request.path)}
+
+
 @register.simple_tag
 def render_file_content(file_field: FileField) -> str:
     """Renders the content of a Filefield as a safe HTML string
