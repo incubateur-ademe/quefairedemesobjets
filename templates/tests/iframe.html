@@ -22,10 +22,10 @@
 
         {% if request.GET.carte %}
             <h3>LA CARTE sans option</h3>
-            <script src="{{ assistant.BASE_URL }}/static/carte.js"></script>
+            <script src="{{ BASE_URL }}/static/carte.js"></script>
         {% elif request.GET.carte_with_defaults %}
             <h3>LA CARTE avec des options par défaut</h3>
-            <script src="{{ assistant.BASE_URL }}/static/carte.js"
+            <script src="{{ BASE_URL }}/static/carte.js"
                     data-action_displayed="preter|emprunter|louer|mettreenlocation|reparer|donner|echanger|acheter|revendre"
                     data-max-width="800px"
                     data-height="720px"
@@ -58,10 +58,10 @@
 
         {% if "noreferrer" in request.GET %}
         <h3>Avec referrerpolicy="noreferrer"</h3>
-        <script src="{{ assistant.BASE_URL }}/iframe.js" data-debug-referrer data-testid='assistant'></script>
+        <script src="{{ BASE_URL }}/iframe.js" data-debug-referrer data-testid='assistant'></script>
         {% else %}
         <h3>Par défaut</h3>
-        <script src="{{ assistant.BASE_URL }}/iframe.js" data-testid='assistant'></script>
+        <script src="{{ BASE_URL }}/iframe.js" data-testid='assistant'></script>
         {% endif %}
 
         <div>
