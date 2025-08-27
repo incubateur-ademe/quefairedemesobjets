@@ -52,13 +52,18 @@ class ObjetResource(resources.ModelResource):
             "id",
             "libelle",
             "code",
+            "slug",
             "sous_categorie",
             "delete",
         )
 
 
 class ObjetAdmin(CodeLibelleModelMixin, import_export_admin.ImportExportModelAdmin):
-    list_display = CodeLibelleModelMixin.list_display + ("sous_categorie",)
+    prepopulated_fields = {"slug": ["libelle"]}
+    list_display = CodeLibelleModelMixin.list_display + (
+        "slug",
+        "sous_categorie",
+    )
     search_fields = CodeLibelleModelMixin.search_fields + [
         "sous_categorie__libelle",
         "sous_categorie__code",
@@ -66,6 +71,13 @@ class ObjetAdmin(CodeLibelleModelMixin, import_export_admin.ImportExportModelAdm
         "sous_categorie__categorie__code",
     ]
     resource_classes = [ObjetResource]
+
+    # le champ code ne doit pas être modifiable
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = super().get_readonly_fields(request, obj)
+        if obj:
+            readonly_fields = readonly_fields + ["slug"]
+        return readonly_fields
 
 
 admin.site.register(CategorieObjet, CategorieAdmin)
