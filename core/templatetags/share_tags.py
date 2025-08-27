@@ -66,7 +66,7 @@ def get_sharer_content(request, object, social_network=None):
 
 
 @register.simple_tag(takes_context=True)
-def configure_acteur_sharer(context, object):
+def configure_acteur_sharer(context):
     try:
         object = context.get("object")
     except AttributeError:
