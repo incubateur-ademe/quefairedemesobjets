@@ -54,7 +54,6 @@ def merge_duplicates(
     merge_as_list_columns: list,
     merge_as_proposition_service_columns: list,
 ) -> pd.DataFrame:
-
     for col in merge_as_list_columns + merge_as_proposition_service_columns:
         if col not in df.columns:
             raise ValueError(f"Column {col} not found in DataFrame")
@@ -300,7 +299,6 @@ def get_point_from_location(longitude, latitude):
 
 
 def clean_proposition_services(row, _):
-
     # formater les propositions de service selon les colonnes
     # action_codes and sous_categorie_codes
     #
@@ -407,7 +405,6 @@ def _clean_perimetre_adomicile_codes(perimetre_dinterventions):
 
 
 def clean_service_a_domicile(row, _):
-
     row["lieu_prestation"] = _clean_lieu_prestation(row["service_a_domicile"])
 
     row["perimetre_adomicile_codes"] = []
@@ -444,7 +441,7 @@ def _get_address(
 
 # TODO faire un retry avec tenacity
 def _get_address_from_ban(address) -> dict:
-    url = "https://api-adresse.data.gouv.fr/search/"
+    url = "https://data.geopf.fr/geocodage/search/"
     params = {"q": address, "limit": 1}
     if address is None:
         return {}

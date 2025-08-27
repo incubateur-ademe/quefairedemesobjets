@@ -45,7 +45,7 @@ from qfdmo.models.action import (
 
 logger = logging.getLogger(__name__)
 
-BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
+BAN_API_URL = "https://data.geopf.fr/geocodage/search/?q={}"
 
 
 def generate_google_maps_itineraire_url(
