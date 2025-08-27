@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.templatetags.static import static
 from django.urls import reverse
 
 from core.templatetags.seo_tags import get_sharer_content
@@ -36,6 +35,11 @@ def global_context(request) -> dict:
             "BASE_URL": settings.ASSISTANT["BASE_URL"],
         },
         "lvao": {"BASE_URL": settings.LVAO["BASE_URL"]},
+        # Legacy jinja2
+        "sharer": get_sharer_content,
+        "AIRFLOW_WEBSERVER_REFRESHACTEUR_URL": getattr(
+            settings, "AIRFLOW_WEBSERVER_REFRESHACTEUR_URL", ""
+        ),
     }
 
     if request.META.get("HTTP_HOST") not in settings.ASSISTANT["HOSTS"]:
@@ -49,15 +53,4 @@ def global_context(request) -> dict:
         "search_form": search_form,
         "home_search_form": home_search_form,
         **constants.ASSISTANT,
-    }
-
-
-def jinja2_globals(request):
-    """Context processor to replace jinja2 global variables"""
-    return {
-        "static": static,
-        "sharer": get_sharer_content,
-        "AIRFLOW_WEBSERVER_REFRESHACTEUR_URL": getattr(
-            settings, "AIRFLOW_WEBSERVER_REFRESHACTEUR_URL", ""
-        ),
     }
