@@ -13,7 +13,8 @@ RUN apt-get update && \
 ARG POETRY_VERSION=2.0
 ENV POETRY_NO_INTERACTION=1
 USER ${AIRFLOW_UID:-50000}:0
-RUN pip install "poetry==${POETRY_VERSION} distlib"
+RUN pip install "poetry==${POETRY_VERSION}"
+RUN pip install distlib
 WORKDIR /opt/airflow/
 COPY pyproject.toml poetry.lock ./
 RUN poetry sync --with airflow
