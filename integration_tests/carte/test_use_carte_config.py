@@ -64,3 +64,26 @@ class TestCarteConfig:
         assert (
             soup.find(attrs={"data-testid": "preview-content"}).text.strip() == "Coucou"
         )
+
+    def test_cyclevia_regresion(self, get_carte_config_response_and_soup):
+        """A regression introduced by adding the CarteConfig as a wagtail block
+        caused the Cyclevia CarteConfig to fail after a search, because it does
+        not use any sous_categorie_objet.
+        This test ensures that the regression is fixed."""
+        carte_config_without_sous_categories = CarteConfigFactory()
+        response, soup = get_carte_config_response_and_soup(
+            carte_config_without_sous_categories.slug,
+            {
+                "adresse": "Auray",
+                "longitude": "-2.990838",
+                "latitude": "47.668099",
+                "carte": "",
+                "r": "55",
+                "bounding_box": "",
+                "direction": "",
+                "action_displayed": "trier",
+                "sous_categorie_objet": "",
+                "sc_id": "",
+            },
+        )
+        assert response.status_code == 200
