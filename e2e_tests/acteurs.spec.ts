@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test"
-import { getMarkers, hideDjangoToolbar, searchDummyAdresse } from "./helpers"
+import { getMarkers, hideDjangoToolbar } from "./helpers"
 function getItemSelector(index) {
   return `#mauvais_etat #id_adresseautocomplete-list.autocomplete-items div:nth-of-type(${index})`
 }
@@ -80,7 +80,7 @@ test.skip("Les acteurs digitaux sont visibles sur le formulaire", async ({ page 
   // Submit form
   await iframe?.getByTestId("formulaire-rechercher-adresses-submit").click()
   // Wait for results to laod en being added to leaflet
-  const someLeafletMarker = iframe?.locator(".leaflet-marker-icon").first()
+  const someLeafletMarker = iframe?.locator(".maplibregl-marker").first()
   await expect(someLeafletMarker).toBeAttached()
 
   // Digital acteurs

@@ -17,6 +17,7 @@ export class SolutionMap {
   #controller: MapController
   bboxValue?: Array<Number>
   points: Array<Array<Number>>
+  mapPadding: number = 50
 
   constructor({
     selector,
@@ -184,8 +185,6 @@ export class SolutionMap {
         points.push([actor.location.coordinates[1], actor.location.coordinates[0]])
       }
     }, this)
-    console.log("points", points)
-    console.log("bboxValue", bboxValue)
     this.fitBounds(points, bboxValue)
   }
 
@@ -199,12 +198,12 @@ export class SolutionMap {
           [bboxValue.northEast.lng, bboxValue.northEast.lat],
         ],
         {
-          padding: 50,
+          padding: this.mapPadding,
           duration: 0,
         },
       )
     } else if (points.length > 0) {
-      // Calculer les limites min/max des coordonnées
+      // Compute bbox from points
       const lngs = points.map((point) => point[1])
       const lats = points.map((point) => point[0])
       const bounds: LngLatBoundsLike = [
@@ -212,7 +211,7 @@ export class SolutionMap {
         [Math.max(...lngs), Math.max(...lats)], // Nord-est
       ]
       this.map.fitBounds(bounds, {
-        padding: 50,
+        padding: this.mapPadding,
         duration: 0,
       })
     }

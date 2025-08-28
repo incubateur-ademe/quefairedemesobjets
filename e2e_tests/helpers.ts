@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test"
+import { expect } from "@playwright/test"
 
 const fillAndSelectAutocomplete = async (
   page,
@@ -32,14 +32,14 @@ export const hideDjangoToolbar = async (page) =>
   await page.locator("#djHideToolBarButton").click()
 
 export const getMarkers = async (page) => {
-  await expect(page.locator(".leaflet-marker-icon.home-icon").first()).toBeAttached()
+  await expect(page.locator(".maplibregl-marker.home-icon").first()).toBeAttached()
   await page.evaluate(() => {
     document
-      .querySelectorAll(".leaflet-marker-icon.home-icon")
+      .querySelectorAll(".maplibregl-marker.home-icon")
       ?.forEach((element) => element.remove())
   })
 
-  const markers = page?.locator(".leaflet-marker-icon svg")
+  const markers = page?.locator(".maplibregl-marker svg")
   // Ensure we have at least one marker, and let's click on a marker.
   // The approach is feels cumbersome, this is because Playwright has a
   // hard time clicking on leaflet markers.
