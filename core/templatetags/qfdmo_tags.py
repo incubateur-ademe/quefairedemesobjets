@@ -9,6 +9,11 @@ from qfdmo.models.action import get_actions_by_direction
 register = template.Library()
 
 
+@register.simple_tag
+def actions_for(dispayed_acteur: DisplayedActeur, direction):
+    return dispayed_acteur.acteur_actions(direction=direction)
+
+
 @register.simple_tag(takes_context=True)
 def action_by_direction(context, direction):
     """Template tag to replace jinja2_handler.action_by_direction"""
