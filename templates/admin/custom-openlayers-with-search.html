@@ -15,7 +15,7 @@
             var searchButton = document.getElementById("search-button");
             searchButton.addEventListener("click", function() {
                 var search = document.getElementById("search").value;
-                var url = "https://api-adresse.data.gouv.fr/search/?q=" + search + "&limit=1";
+                var url = "https://data.geopf.fr/geocodage/search/?q=" + search + "&limit=1";
                 fetch(url)
                     .then(response => response.json())
                     .then(data => {
