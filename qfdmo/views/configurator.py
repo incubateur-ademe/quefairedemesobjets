@@ -14,7 +14,7 @@ from django.views.generic.edit import FormView
 from qfdmo.forms import AdvancedConfiguratorForm, ConfiguratorForm
 from qfdmo.models.action import GroupeActionQueryset
 
-BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
+BAN_API_URL = "https://data.geopf.fr/geocodage/search/?q={}"
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +77,7 @@ class ConfiguratorView(FormView):
         that they can be destructured and passed to the view loaded in the iframe.
         """
 
-        iframe_script = f"<script src='{ self.iframe_url }'"
+        iframe_script = f"<script src='{self.iframe_url}'"
         for key, value in attributes.items():
             # In some cases, the value need to be rewritten
             # so that it can be easily parsed in the frontend
@@ -171,7 +171,7 @@ class AdvancedConfiguratorView(LoginRequiredMixin, FormView):
                 attributes["bounding_box"] = ""
 
         if iframe_url:
-            kwargs["iframe_script"] = f"<script src='{ iframe_url }'"
+            kwargs["iframe_script"] = f"<script src='{iframe_url}'"
             for key, value in attributes.items():
                 kwargs["iframe_script"] += f" data-{key}='{value}'"
             kwargs["iframe_script"] += "></script>"

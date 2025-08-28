@@ -1,11 +1,11 @@
 default:
-  target: qfdmo
+  target: warehouse
   outputs:
-    qfdmo:
+    warehouse:
       type: postgres
       host: "{{ env_var('POSTGRES_HOST', 'localhost') }}"
-      port: "{{ env_var('POSTGRES_PORT', 6543) | as_number }}"
-      user: "{{ env_var('POSTGRES_USER', 'qfdmo') }}"
-      password: "{{ env_var('POSTGRES_PASSWORD', 'qfdmo') }}"
-      dbname: "{{ env_var('POSTGRES_DB', 'qfdmo') }}"
-      schema: "{{ env_var('POSTGRES_SCHEMA', 'warehouse') }}"
+      port: "{{ env_var('POSTGRES_PORT', 8765) | as_number }}"
+      user: "{{ env_var('POSTGRES_USER', 'warehouse') }}"
+      password: "{{ env_var('POSTGRES_PASSWORD', 'warehouse') }}"
+      dbname: "{{ env_var('POSTGRES_DB', 'warehouse') }}"
+      schema: "{{ env_var('POSTGRES_SCHEMA', 'public') }}"

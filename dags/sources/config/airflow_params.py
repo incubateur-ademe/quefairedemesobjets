@@ -29,6 +29,7 @@ from sources.tasks.transform.transform_df import (
     clean_identifiant_unique,
     clean_label_codes,
     clean_proposition_services,
+    clean_service_a_domicile,
     clean_siret_and_siren,
     clean_telephone,
     compute_location,
@@ -72,6 +73,7 @@ TRANSFORM_DF_MAPPING = {
     "clean_identifiant_unique": clean_identifiant_unique,
     "clean_label_codes": clean_label_codes,
     "clean_proposition_services": clean_proposition_services,
+    "clean_service_a_domicile": clean_service_a_domicile,
     "clean_siret_and_siren": clean_siret_and_siren,
     "clean_telephone": clean_telephone,
     "compute_location": compute_location,
@@ -178,7 +180,7 @@ EO_NORMALIZATION_RULES = [
     {
         "origin": ["latitude", "longitude"],
         "transformation": "compute_location",
-        "destination": ["location"],
+        "destination": ["location", "latitude", "longitude"],
     },
     {
         "origin": ["labels_etou_bonus", "acteur_type_code"],
@@ -237,6 +239,11 @@ EO_NORMALIZATION_RULES = [
         "origin": ["action_codes", "sous_categorie_codes"],
         "transformation": "clean_proposition_services",
         "destination": ["proposition_service_codes"],
+    },
+    {
+        "origin": ["service_a_domicile", "perimetre_dintervention"],
+        "transformation": "clean_service_a_domicile",
+        "destination": ["lieu_prestation", "perimetre_adomicile_codes"],
     },
     # {
     #     "origin": ["latitudemercator", "longitudemercator"],

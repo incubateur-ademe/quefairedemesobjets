@@ -27,6 +27,7 @@ from qfdmo.models.acteur import (
     ActeurStatus,
     ActeurType,
     LabelQualite,
+    PerimetreADomicile,
     PropositionService,
     RevisionActeur,
     Source,
@@ -275,6 +276,7 @@ class Suggestion(models.Model):
     # be used to handle all specificities of self.suggestions
     def _remove_acteur_linked_objects(self, acteur):
         acteur.proposition_services.all().delete()
+        acteur.perimetre_adomiciles.all().delete()
         acteur.labels.clear()
         acteur.acteur_services.clear()
 
@@ -290,6 +292,12 @@ class Suggestion(models.Model):
                 proposition_service.sous_categories.add(
                     SousCategorieObjet.objects.get(code=sous_categorie_code)
                 )
+        for perimetre_adomicile_code in self.suggestion["perimetre_adomicile_codes"]:
+            PerimetreADomicile.objects.create(
+                type=perimetre_adomicile_code["type"],
+                valeur=perimetre_adomicile_code["value"],
+                acteur=acteur,
+            )
         for label_code in self.suggestion["label_codes"]:
             label = LabelQualite.objects.get(code=label_code)
             acteur.labels.add(label.id)

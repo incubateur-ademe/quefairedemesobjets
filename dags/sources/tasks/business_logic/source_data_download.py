@@ -25,6 +25,8 @@ def source_data_download(
     data = fetch_data_from_endpoint(endpoint, s3_connection_id)
     logger.info("Téléchargement données de l'API : ✅ succès.")
     df = pd.DataFrame(data).replace({pd.NA: None, np.nan: None})
+    # create dataframe with only string dtype columns
+    df = df.astype(str)
     if df.empty:
         raise ValueError("Aucune donnée reçue de l'API")
     log.preview("df retournée par la tâche", df)

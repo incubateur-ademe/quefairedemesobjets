@@ -70,7 +70,7 @@ class AdresseAutocompleteController extends AutocompleteController {
   async getAndStorePosition(position: GeolocationPosition) {
     try {
       const response = await fetch(
-        `https://api-adresse.data.gouv.fr/reverse/?lon=${position.coords.longitude}&lat=${position.coords.latitude}`,
+        `https://data.geopf.fr/geocodage/reverse/?lon=${position.coords.longitude}&lat=${position.coords.latitude}`,
       )
       const data = await response.json()
       if (data.features.length == 0) {
@@ -153,7 +153,7 @@ class AdresseAutocompleteController extends AutocompleteController {
       this.latitudeTarget.value = this.longitudeTarget.value = ""
       return [["Autour de moi", 9999, 9999].join(SEPARATOR)]
     }
-    return await fetch(`https://api-adresse.data.gouv.fr/search/?q=${value}`)
+    return await fetch(`https://data.geopf.fr/geocodage/search/?q=${value}`)
       .then((response) => response.json())
       .then((data) => {
         let labels = data.features

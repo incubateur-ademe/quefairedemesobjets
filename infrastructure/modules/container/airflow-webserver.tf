@@ -9,6 +9,7 @@ resource "scaleway_container" "airflow_webserver" {
   min_scale      = var.airflow_webserver_min_scale
   max_scale      = var.airflow_webserver_max_scale
   timeout        = var.airflow_webserver_timeout
+  deploy         = true
   privacy        = "public"
   protocol       = "http1"
 

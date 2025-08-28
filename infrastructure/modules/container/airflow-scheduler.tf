@@ -9,6 +9,7 @@ resource "scaleway_container" "airflow_scheduler" {
   min_scale      = var.airflow_scheduler_min_scale
   max_scale      = var.airflow_scheduler_max_scale
   timeout        = var.airflow_scheduler_timeout
+  deploy         = true
   privacy        = "public"
   protocol       = "http1"
 

@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 from sources.tasks.airflow_logic.config_management import DAGConfig
 from sources.tasks.transform.transform_df import compute_identifiant_unique
-
 from utils.django import django_setup_full, get_model_fields
 
 logger = logging.getLogger(__name__)
@@ -30,19 +29,30 @@ class ActeurComparator:
         self.columns_to_compare = columns_to_compare - {"identifiant_unique"}
         self.metadata: dict[str, ColumnDiff] = {}
 
-    def _compare_lists(self, source: list, db: list) -> bool:
-        return sorted(source) != sorted(db)
+    def _list_field_changed(self, list_from_source: list, list_from_db: list) -> bool:
+        return sorted(list_from_source) != sorted(list_from_db)
 
-    def _compare_proposition_services(self, source: list[dict], db: list[dict]) -> bool:
-        source_sorted = sorted(source, key=lambda x: x["action"])
-        db_sorted = sorted(db, key=lambda x: x["action"])
+    def _perimetre_adomiciles_changed(
+        self, pad_from_source: list, pad_from_db: list
+    ) -> bool:
+        sorted_pad_from_source = sorted(
+            pad_from_source, key=lambda x: (x["type"], x["valeur"])
+        )
+        sorted_pad_from_db = sorted(pad_from_db, key=lambda x: (x["type"], x["valeur"]))
+        return sorted_pad_from_source != sorted_pad_from_db
 
-        for item in source_sorted:
+    def _proposition_services_changed(
+        self, ps_from_source: list[dict], ps_from_db: list[dict]
+    ) -> bool:
+        sorted_ps_from_source = sorted(ps_from_source, key=lambda x: x["action"])
+        sorted_ps_from_db = sorted(ps_from_db, key=lambda x: x["action"])
+
+        for item in sorted_ps_from_source:
             item["sous_categories"] = sorted(item["sous_categories"])
-        for item in db_sorted:
+        for item in sorted_ps_from_db:
             item["sous_categories"] = sorted(item["sous_categories"])
 
-        return source_sorted != db_sorted
+        return sorted_ps_from_source != sorted_ps_from_db
 
     def _get_diff_type(self, source_val, db_val) -> list[int]:
         if not source_val:
@@ -51,7 +61,7 @@ class ActeurComparator:
             return [0, 0, 1]  # AJOUT
         return [1, 0, 0]  # MODIF
 
-    def compare_rows(self, row_source: dict, row_db: dict) -> dict[str, list[int]]:
+    def field_changed(self, row_source: dict, row_db: dict) -> dict[str, list[int]]:
         columns_updated = {}
         for column in self.columns_to_compare:
             source_val = row_source[column]
@@ -59,9 +69,11 @@ class ActeurComparator:
 
             is_updated = False
             if column == "proposition_service_codes":
-                is_updated = self._compare_proposition_services(source_val, db_val)
+                is_updated = self._proposition_services_changed(source_val, db_val)
+            elif column == "perimetre_adomicile_codes":
+                is_updated = self._perimetre_adomiciles_changed(source_val, db_val)
             elif isinstance(source_val, list) and isinstance(db_val, list):
-                is_updated = self._compare_lists(source_val, db_val)
+                is_updated = self._list_field_changed(source_val, db_val)
             elif isinstance(source_val, float) and isinstance(db_val, float):
                 if np.isnan(source_val) and np.isnan(db_val):
                     is_updated = False
@@ -171,7 +183,7 @@ def keep_acteur_changed(
 
     for identifiant, row_source in df_source.iterrows():
         row_db = df_db.loc[identifiant]
-        if not comparator.compare_rows(row_source.to_dict(), row_db.to_dict()):
+        if not comparator.field_changed(row_source.to_dict(), row_db.to_dict()):
             noupdate_ids.append(identifiant)
 
     # Filtrer les dataframes

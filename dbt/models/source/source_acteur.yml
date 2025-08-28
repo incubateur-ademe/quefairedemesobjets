@@ -11,11 +11,13 @@ sources:
       - name : qfdmo_acteurservice
       - name : qfdmo_action
       - name : qfdmo_labelqualite
+      - name : qfdmo_perimetreadomicile
       - name : qfdmo_propositionservice
       - name : qfdmo_propositionservice_sous_categories
       - name : qfdmo_revisionacteur
       - name : qfdmo_revisionacteur_acteur_services
       - name : qfdmo_revisionacteur_labels
+      - name : qfdmo_revisionperimetreadomicile
       - name : qfdmo_revisionpropositionservice
       - name : qfdmo_revisionpropositionservice_sous_categories
       - name : qfdmo_source

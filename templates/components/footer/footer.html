@@ -1,10 +1,8 @@
-<div class="qf-bg-grey-1000-50-hover qf-py-9w">
-    {% if request.iframe %}
-        {% include "./_embedded.html" %}
-    {% else %}
-        {% include "./_standalone.html" %}
-    {% endif %}
-</div>
+{% if request.iframe %}
+    <div class="qf-bg-grey-1000-50-hover qf-py-9w">
+    {% include "./_embedded.html" %}
+    </div>
+{% endif %}
 
 {% if not iframe %}
     {% include "./_dsfr_footer.html" %}

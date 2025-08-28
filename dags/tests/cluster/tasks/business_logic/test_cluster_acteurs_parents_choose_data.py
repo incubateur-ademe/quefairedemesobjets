@@ -1,6 +1,7 @@
 import pandas as pd
 import pytest
 from django.contrib.gis.geos import Point
+from utils.django import django_setup_full
 
 from dags.cluster.tasks.business_logic.cluster_acteurs_parents_choose_data import (
     cluster_acteurs_parents_choose_data,
@@ -19,7 +20,6 @@ from unit_tests.qfdmo.acteur_factory import (
     RevisionActeurFactory,
     SourceFactory,
 )
-from utils.django import django_setup_full
 
 django_setup_full()
 
@@ -257,7 +257,6 @@ class TestClusterActeursParentsChooseData:
             keep_empty=True,
         )
 
-        print(df)
         # Retrieve parent data
         assert (
             df.loc[df["identifiant_unique"] == "p1", "parent_data_new"].values[0] == {}

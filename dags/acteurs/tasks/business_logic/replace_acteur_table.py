@@ -17,6 +17,7 @@ def replace_acteur_table(
         "acteur_sources",
         "propositionservice",
         "propositionservice_sous_categories",
+        "perimetreadomicile",
     ],
 ):
     from django.db import DEFAULT_DB_ALIAS, connections

@@ -80,6 +80,9 @@ SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 DEBUG = decouple.config("DEBUG", default=False, cast=bool)
 STIMULUS_DEBUG = decouple.config("STIMULUS_DEBUG", default=False, cast=bool)
 POSTHOG_DEBUG = decouple.config("POSTHOG_DEBUG", default=False, cast=bool)
+BYPASS_ACTEUR_READONLY_FIELDS = decouple.config(
+    "BYPASS_ACTEUR_READONLY_FIELDS", default=False, cast=bool
+)
 BLOCK_ROBOTS = decouple.config("BLOCK_ROBOTS", default=False, cast=bool)
 ENVIRONMENT = decouple.config("ENVIRONMENT", default="development", cast=str)
 VERSION = decouple.config("CONTAINER_VERSION", default="version", cast=str)

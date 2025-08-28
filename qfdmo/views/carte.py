@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 from django.db.models import Q
 from django.utils.functional import cached_property
@@ -45,7 +46,7 @@ class ProductCarteView(CarteSearchActeursView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         carte_config, _ = CarteConfig.objects.get_or_create(
-            slug="product", no_branding=True
+            slug="product", supprimer_branding=True
         )
         context.update(
             carte_config=carte_config,
@@ -54,14 +55,15 @@ class ProductCarteView(CarteSearchActeursView):
         return context
 
 
-class CustomCarteView(DetailView, CarteSearchActeursView):
+class CarteConfigView(DetailView, CarteSearchActeursView):
     model = CarteConfig
     context_object_name = "carte_config"
 
-    def get_context_data(self, *args, **kwargs):
-        ctx = super().get_context_data(*args, **kwargs)
-
-        return ctx
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        return {
+            **super().get_context_data(**kwargs),
+            "map_container_id": self.object.pk,
+        }
 
     @cached_property
     def groupe_actions(self):
@@ -104,6 +106,17 @@ class CustomCarteView(DetailView, CarteSearchActeursView):
             ]
         return super()._grouped_action_from(*args, **kwargs)
 
+    def get_sous_categorie_filter(self):
+        sous_categories_from_request = list(
+            filter(
+                None, self.request.GET.getlist(CarteConfig.SOUS_CATEGORIE_QUERY_PARAM)
+            )
+        )
+        if sous_categories_from_request:
+            return sous_categories_from_request
+
+        return self.get_object().sous_categorie_objet.all().values_list("id", flat=True)
+
     def _compile_acteurs_queryset(self, *args, **kwargs):
         filters, excludes = super()._compile_acteurs_queryset(*args, **kwargs)
 
@@ -116,9 +129,9 @@ class CustomCarteView(DetailView, CarteSearchActeursView):
         if acteur_type_filter := self.get_object().acteur_type.all():
             filters &= Q(acteur_type__in=acteur_type_filter)
 
-        if sous_categorie_filter := self.get_object().sous_categorie_objet.all():
+        if sous_categorie_filter := self.get_sous_categorie_filter():
             filters &= Q(
-                proposition_services__sous_categories__in=sous_categorie_filter,
+                proposition_services__sous_categories__id__in=sous_categorie_filter,
             )
 
         if groupe_action_filter := self.get_object().groupe_action.all():

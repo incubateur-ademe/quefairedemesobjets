@@ -1,0 +1,48 @@
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+      container_key:
+        type: string
+        required: true
+
+jobs:
+  deploy_container:
+    name: Scaleway deploy container
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    env:
+      SCALEWAY_DEPLOY_KEY: ${{ secrets.SCALEWAY_DEPLOY_KEY }}
+      CONTAINER_ID: ${{ vars[inputs.container_key] }}
+    steps:
+    - name: Deploy container
+      run: |
+        curl -X POST \
+        -H "X-Auth-Token: $SCALEWAY_DEPLOY_KEY" \
+        -H "Content-Type: application/json" \
+        -d '{}' \
+        "https://api.scaleway.com/containers/v1beta1/regions/fr-par/containers/$CONTAINER_ID/deploy"
+
+    - name: Check deployment status
+      run: |
+        EXPECTED_VALUE="ready"
+
+        while true; do
+            RESPONSE_VALUE=$(curl -s -X GET -H "X-Auth-Token: $SCALEWAY_DEPLOY_KEY" "https://api.scaleway.com/containers/v1beta1/regions/fr-par/containers/$CONTAINER_ID/" | jq -r '.status')
+
+            echo "Current status: $RESPONSE_VALUE"
+
+            if [ "$RESPONSE_VALUE" == "$EXPECTED_VALUE" ]; then
+                echo "🎉 The expected value '$EXPECTED_VALUE' was returned. Exiting."
+                break
+            fi
+
+            sleep 5
+        done
+
+# Address actions/missing-workflow-permissions rule in
+# code scanning alerts
+permissions:
+  contents: read
