@@ -37,9 +37,6 @@ def global_context(request) -> dict:
         "lvao": {"BASE_URL": settings.LVAO["BASE_URL"]},
         # Legacy jinja2
         "sharer": get_sharer_content,
-        "AIRFLOW_WEBSERVER_REFRESHACTEUR_URL": getattr(
-            settings, "AIRFLOW_WEBSERVER_REFRESHACTEUR_URL", ""
-        ),
     }
 
     if request.META.get("HTTP_HOST") not in settings.ASSISTANT["HOSTS"]:
