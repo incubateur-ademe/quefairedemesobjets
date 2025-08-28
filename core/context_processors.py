@@ -33,6 +33,10 @@ def global_context(request) -> dict:
             "POSTHOG_KEY": settings.ASSISTANT["POSTHOG_KEY"],
             "MATOMO_ID": settings.ASSISTANT["MATOMO_ID"],
         },
+        "lvao": {
+            "BASE_URL": settings.LVAO["BASE_URL"],
+            "POSTHOG_KEY": settings.LVAO["POSTHOG_KEY"],
+        },
     }
 
     search_form = SearchForm(prefix="header", initial={"id": "header"})

@@ -40,6 +40,12 @@ ASSISTANT = {
 # --------------
 LVAO = {
     "GOOGLE_SEARCH_CONSOLE": "google9dfbbc61adbe3888.html",
+    "POSTHOG_KEY": decouple.config(
+        "LVAO_POSTHOG_KEY",
+        # Staging project by default
+        default="phc_L1dG5EsBjyMTTcQqFJTAQtEugtGz6C3Tdpf1g7O09si",  # pragma: allowlist secret  # noqa: E501
+        cast=str,
+    ),
 }
 DEFAULT_MAX_SOLUTION_DISPLAYED = decouple.config(
     "DEFAULT_MAX_SOLUTION_DISPLAYED", cast=int, default=10
