@@ -1,5 +1,5 @@
 @import "./dsfr-overrides.css";
-@import "./maplibre.css";
+@import "./maplibre-overrides.css";
 
 @tailwind base;
 @tailwind components;
