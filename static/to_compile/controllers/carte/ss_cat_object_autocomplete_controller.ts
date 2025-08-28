@@ -1,10 +1,8 @@
-import AutocompleteController from "./autocomplete_controller"
-import { SSCatObject } from "./types"
 import posthog from "posthog-js"
+import AutocompleteController from "./autocomplete_controller"
 
 export default class extends AutocompleteController {
   controllerName: string = "ss-cat-object-autocomplete"
-  allAvailableOptions: Array<SSCatObject> = []
 
   static targets = AutocompleteController.targets.concat(["ssCat"])
   declare readonly ssCatTarget: HTMLInputElement
@@ -21,14 +19,13 @@ export default class extends AutocompleteController {
     return this.#getOptionCallback(inputTargetValue)
       .then((data) => {
         this.hideAutocompleteList()
-        this.allAvailableOptions = data
-        if (this.allAvailableOptions.length == 0) return
+        if (data.length == 0) return
 
         this.autocompleteList = this.createAutocompleteList()
-        for (let i = 0; i < this.allAvailableOptions.length; i++) {
+        for (let i = 0; i < data.length; i++) {
           if (countResult >= this.maxOptionDisplayedValue) break
           countResult++
-          this.addOption(regexPattern, this.allAvailableOptions[i])
+          this.addOption(regexPattern, data[i])
         }
         if (this.autocompleteList.childElementCount > 0) {
           this.currentFocusedOptionIndexValue = 0
@@ -36,15 +33,9 @@ export default class extends AutocompleteController {
 
         posthog.capture("object_input", {
           object_requested: inputTargetValue,
-          object_list: this.allAvailableOptions
-            ? this.allAvailableOptions.slice(0, this.maxOptionDisplayedValue)
-            : undefined,
-          first_object: this.allAvailableOptions
-            ? this.allAvailableOptions[0]["label"]
-            : undefined,
-          first_subcategory: this.allAvailableOptions
-            ? this.allAvailableOptions[0]["sub_label"]
-            : undefined,
+          object_list: data ? data.slice(0, this.maxOptionDisplayedValue) : undefined,
+          first_object: data ? data[0]["label"] : undefined,
+          first_subcategory: data ? data[0]["sub_label"] : undefined,
         })
       })
       .then(() => {
@@ -60,22 +51,12 @@ export default class extends AutocompleteController {
     while (target && target.nodeName !== "DIV") {
       target = target.parentNode as HTMLElement
     }
+    const option = JSON.parse(target.getElementsByTagName("input")[0].value)
+    const labelValue = option.label
+    const subLabelValue = option.sub_label
+    const identifierValue = option.identifier
 
-    const labelElement = target.querySelector(
-      '[data-type-name="label"]',
-    ) as HTMLInputElement
-    const labelValue = labelElement ? labelElement.value : ""
     this.inputTarget.value = labelValue
-
-    const subLabelElement = target.querySelector(
-      '[data-type-name="subLabel"]',
-    ) as HTMLInputElement
-    const subLabelValue = subLabelElement ? subLabelElement.value : ""
-
-    const identifierElement = target.querySelector(
-      '[data-type-name="identifier"]',
-    ) as HTMLInputElement
-    const identifierValue = identifierElement ? identifierElement.value : undefined
     this.ssCatTarget.value = identifierValue
 
     posthog.capture("object_select", {
@@ -90,48 +71,6 @@ export default class extends AutocompleteController {
     this.dispatch("optionSelected")
   }
 
-  addOption(regexPattern: RegExp, option: SSCatObject) {
-    //option : this.#allAvailableOptions[i]
-    /*create a DIV element for each matching element:*/
-    let b = document.createElement("DIV")
-    b.classList.add("qf-flex", "qf-flex-col", "sm:qf-flex-row", "sm:qf-justify-between")
-    /*make the matching letters bold:*/
-    // const [data, longitude, latitude] = option.split("||")
-
-    let label = document.createElement("span")
-    const data = option.label
-    const newText = data.replace(regexPattern, "<strong>$&</strong>")
-    label.innerHTML = newText
-    b.appendChild(label)
-
-    if (option.sub_label != null) {
-      const sub_label = document.createElement("span")
-      sub_label.classList.add("fr-text--sm", "fr-m-0", "qf-italic")
-      sub_label.innerHTML = option.sub_label
-      b.appendChild(sub_label)
-    }
-
-    // Input hidden
-    const labelInput = document.createElement("input")
-    labelInput.setAttribute("type", "hidden")
-    labelInput.setAttribute("data-type-name", "label")
-    labelInput.setAttribute("value", option.label)
-    b.appendChild(labelInput)
-    const identifierInput = document.createElement("input")
-    identifierInput.setAttribute("type", "hidden")
-    identifierInput.setAttribute("data-type-name", "identifier")
-    identifierInput.setAttribute("value", option.identifier)
-    b.appendChild(identifierInput)
-    const input = document.createElement("input")
-    input.setAttribute("type", "hidden")
-    input.setAttribute("data-type-name", "subLabel")
-    input.setAttribute("value", option.sub_label ? option.sub_label : "")
-    b.appendChild(input)
-    b.setAttribute("data-action", "click->" + this.controllerName + "#selectOption")
-    b.setAttribute("data-on-focus", "true")
-    this.autocompleteList.appendChild(b)
-  }
-
   keydownEnter(event: KeyboardEvent): boolean {
     let toSubmit = super.keydownEnter(event)
     if (toSubmit) {
@@ -140,7 +79,7 @@ export default class extends AutocompleteController {
     return toSubmit
   }
 
-  async #getOptionCallback(value: string): Promise<SSCatObject[]> {
+  async #getOptionCallback(value: string): Promise<object[]> {
     if (value.trim().length < this.nbCharToSearchValue) {
       this.ssCatTarget.value = ""
       return []

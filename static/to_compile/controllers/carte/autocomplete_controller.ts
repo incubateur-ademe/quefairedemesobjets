@@ -3,12 +3,10 @@ import debounce from "lodash/debounce"
 
 export default abstract class extends Controller<HTMLElement> {
   controllerName: string = "autocomplete"
-  allAvailableOptions = []
   autocompleteList: HTMLElement
   nbCharToSearchDefault: number = 3
 
-  static targets = ["allAvailableOptions", "input", "option", "spinner"]
-  declare readonly allAvailableOptionsTarget: HTMLScriptElement
+  static targets = ["input", "option", "spinner"]
   declare readonly inputTarget: HTMLInputElement
   declare readonly optionTargets: Array<HTMLElement>
   declare readonly spinnerTarget: HTMLElement
@@ -23,9 +21,6 @@ export default abstract class extends Controller<HTMLElement> {
   declare currentFocusedOptionIndexValue: number
 
   connect() {
-    if (this.allAvailableOptionsTarget.textContent != null) {
-      this.allAvailableOptions = JSON.parse(this.allAvailableOptionsTarget.textContent)
-    }
     if (!this.nbCharToSearchValue) this.nbCharToSearchValue = this.nbCharToSearchDefault
   }
 
@@ -53,14 +48,13 @@ export default abstract class extends Controller<HTMLElement> {
     return this.#getOptionCallback(inputTargetValue)
       .then((data) => {
         this.hideAutocompleteList()
-        this.allAvailableOptions = data
-        if (this.allAvailableOptions.length == 0) return
+        if (data.length == 0) return
 
         this.autocompleteList = this.createAutocompleteList()
-        for (let i = 0; i < this.allAvailableOptions.length; i++) {
+        for (let i = 0; i < data.length; i++) {
           if (countResult >= this.maxOptionDisplayedValue) break
           countResult++
-          this.addOption(regexPattern, this.allAvailableOptions[i])
+          this.addOption(regexPattern, data[i])
         }
         if (this.autocompleteList.childElementCount > 0) {
           this.currentFocusedOptionIndexValue = 0
@@ -174,7 +168,31 @@ export default abstract class extends Controller<HTMLElement> {
   }
 
   addOption(regexPattern: RegExp, option: any) {
-    // Implement this method in your controller
+    let b = document.createElement("DIV")
+    b.classList.add("qf-flex", "qf-flex-col", "sm:qf-flex-row", "sm:qf-justify-between")
+
+    let label = document.createElement("span")
+
+    /*make the matching letters bold:*/
+    const label_text = option.label
+    const newText = label_text.replace(regexPattern, "<strong>$&</strong>")
+    label.innerHTML = newText
+    b.appendChild(label)
+
+    if (option.sub_label != null) {
+      const sub_label = document.createElement("span")
+      sub_label.classList.add("fr-text--sm", "fr-m-0", "qf-italic")
+      sub_label.innerHTML = option.sub_label
+      b.appendChild(sub_label)
+    }
+
+    const input = document.createElement("input")
+    input.setAttribute("type", "hidden")
+    input.setAttribute("value", JSON.stringify(option))
+    b.appendChild(input)
+    b.setAttribute("data-action", "click->" + this.controllerName + "#selectOption")
+    b.setAttribute("data-on-focus", "true")
+    this.autocompleteList.appendChild(b)
   }
 
   createAutocompleteList() {
