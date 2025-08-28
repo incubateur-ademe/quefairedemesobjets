@@ -123,6 +123,7 @@ test("iframe cannot read the referrer when referrerPolicy is set to no-referrer"
 
 test("iframe can read the referrer when referrerPolicy is not set", async ({
   page,
+  baseUrl,
 }) => {
   await page.goto(`/test_iframe?test_carte=1`, {
     waitUntil: "domcontentloaded",
@@ -137,7 +138,7 @@ test("iframe can read the referrer when referrerPolicy is not set", async ({
   const referrer = await iframe!.evaluate(() => document.referrer)
 
   // Assert that the referrer is set and not undefined
-  expect(referrer).toBe(`/test_iframe?test_carte=1`)
+  expect(referrer).toBe(`${baseUrl}/test_iframe?test_carte=1`)
 })
 
 test("iFrame mode persists across navigation", async ({ page, baseUrl }) => {
