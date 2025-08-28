@@ -49,6 +49,11 @@ ASSISTANT = {
 LVAO = {
     "BASE_URL": decouple.config("LVAO_BASE_URL", default="https://lvao.ademe.local"),
     "GOOGLE_SEARCH_CONSOLE": "google9dfbbc61adbe3888.html",
+    "POSTHOG_KEY": decouple.config(
+        "LVAO_POSTHOG_KEY",
+        default="phc_fSfhoWDOUxZdKWty16Z3XfRiAoWd1qdJK0N0z9kQHJr",  # pragma: allowlist secret  # noqa: E501
+        cast=str,
+    ),
 }
 DEFAULT_MAX_SOLUTION_DISPLAYED = decouple.config(
     "DEFAULT_MAX_SOLUTION_DISPLAYED", cast=int, default=10

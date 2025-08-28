@@ -33,7 +33,10 @@ def global_context(request) -> dict:
             "MATOMO_ID": settings.ASSISTANT["MATOMO_ID"],
             "BASE_URL": settings.ASSISTANT["BASE_URL"],
         },
-        "lvao": {"BASE_URL": settings.LVAO["BASE_URL"]},
+        "lvao": {
+            "BASE_URL": settings.LVAO["BASE_URL"],
+            "POSTHOG_KEY": settings.LVAO["POSTHOG_KEY"],
+        },
     }
 
     if request.META.get("HTTP_HOST") not in settings.ASSISTANT["HOSTS"]:

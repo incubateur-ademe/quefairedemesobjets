@@ -47,7 +47,7 @@
         data-state-search-solution-form-outlet="[data-controller='search-solution-form']"
         data-action="address-autocomplete:change->state#setLocation"
         {# Analytics #}
-        data-analytics-posthog-key-value="{{ assistant.POSTHOG_KEY }}"
+        data-analytics-posthog-key-value="{{ lvao.POSTHOG_KEY }}"
         data-analytics-posthog-debug-value="{{ POSTHOG_DEBUG|lower }}"
         {% if request.user.is_authenticated %}
             data-analytics-user-username-value="{{ request.user.username }}"
