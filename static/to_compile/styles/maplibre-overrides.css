@@ -1,5 +1,3 @@
-@import "maplibre-gl/dist/maplibre-gl.css";
-
 /* Styles pour la popup "Vous êtes ici" */
 .maplibregl-popup {
   @apply qf-p-2w !qf-z-[10000];
@@ -21,6 +19,6 @@
 /* Moins de marge pour les crédits */
 @media screen {
   .maplibregl-ctrl-attrib.maplibregl-compact {
-    @apply qf-m-1v;
+    @apply !qf-m-1v;
   }
 }
