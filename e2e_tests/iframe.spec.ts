@@ -85,12 +85,14 @@ test("form is visible in the iframe", async ({ page }) => {
 })
 
 test("iframe with 0px parent height displays correctly", async ({ page }) => {
-  await page.goto(`/test_iframe?carte_with_defaults=1`, {
+  await page.goto(`/test_iframe?test_carte_with_defaults=1`, {
     waitUntil: "domcontentloaded",
   })
   await expect(page).toHaveScreenshot("iframe.png")
 
-  await page.goto(`/test_iframe?noheight=1&carte=1`, { waitUntil: "domcontentloaded" })
+  await page.goto(`/test_iframe?test_noheight=1&test_carte=1`, {
+    waitUntil: "domcontentloaded",
+  })
   await page.evaluate(() => {
     document
       .querySelector("[data-testid=iframe-no-height-wrapper]")
@@ -103,7 +105,9 @@ test("iframe with 0px parent height displays correctly", async ({ page }) => {
 test("iframe cannot read the referrer when referrerPolicy is set to no-referrer", async ({
   page,
 }) => {
-  await page.goto(`/test_iframe?carte=1&noreferrer`, { waitUntil: "domcontentloaded" })
+  await page.goto(`/test_iframe?test_carte=1&test_noreferrer`, {
+    waitUntil: "domcontentloaded",
+  })
 
   // Get the content frame of the iframe
   const iframeElement = await page.$("iframe[referrerpolicy='no-referrer']")
@@ -120,7 +124,7 @@ test("iframe cannot read the referrer when referrerPolicy is set to no-referrer"
 test("iframe can read the referrer when referrerPolicy is not set", async ({
   page,
 }) => {
-  await page.goto(`/test_iframe?carte=1`, {
+  await page.goto(`/test_iframe?test_carte=1`, {
     waitUntil: "domcontentloaded",
   })
 
@@ -133,7 +137,7 @@ test("iframe can read the referrer when referrerPolicy is not set", async ({
   const referrer = await iframe!.evaluate(() => document.referrer)
 
   // Assert that the referrer is set and not undefined
-  expect(referrer).toBe(`/test_iframe?carte=1`)
+  expect(referrer).toBe(`/test_iframe?test_carte=1`)
 })
 
 test("iFrame mode persists across navigation", async ({ page, baseUrl }) => {

@@ -20,10 +20,10 @@
             <div data-testid="iframe-no-height-wrapper" style="display: none;">
         {% endif %}
 
-        {% if request.GET.carte %}
+        {% if request.GET.test_carte %}
             <h3>LA CARTE sans option</h3>
             <script src="{{ BASE_URL }}/static/carte.js"></script>
-        {% elif request.GET.carte_with_defaults %}
+        {% elif request.GET.test_carte_with_defaults %}
             <h3>LA CARTE avec des options par défaut</h3>
             <script src="{{ BASE_URL }}/static/carte.js"
                     data-action_displayed="preter|emprunter|louer|mettreenlocation|reparer|donner|echanger|acheter|revendre"
@@ -31,7 +31,7 @@
                     data-height="720px"
                     data-bounding_box="{&quot;southWest&quot;: {&quot;lat&quot;: 47.570401, &quot;lng&quot;: 1.597977}, &quot;northEast&quot;: {&quot;lat&quot;: 48.313697, &quot;lng&quot;: 3.059159}}">
             </script>
-        {% elif request.GET.carte_slug %}
+        {% elif request.GET.test_carte_slug %}
             <h3>LA CARTE - avec une config de carte (Cyclevia)</h3>
             <script src="{{ BASE_URL }}/static/carte.js" data-slug="{{ request.GET.carte_slug }}"></script>
         {% else %}
@@ -48,7 +48,7 @@
             </div>
         {% endif %}
 
-        {% if request.GET.noheight %}
+        {% if request.GET.test_noheight %}
             </div>
         {% endif %}
 
@@ -56,7 +56,7 @@
 
         <h2>ASSISTANT</h2>
 
-        {% if "noreferrer" in request.GET %}
+        {% if "test_noreferrer" in request.GET %}
         <h3>Avec referrerpolicy="noreferrer"</h3>
         <script src="{{ BASE_URL }}/iframe.js" data-debug-referrer data-testid='assistant'></script>
         {% else %}

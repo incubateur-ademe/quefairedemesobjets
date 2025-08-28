@@ -19,7 +19,7 @@ test.describe("WCAG Compliance Tests", () => {
   })
 
   test("Carte iFrame", async ({ page }) => {
-    await page.goto(`/test_iframe?carte`, { waitUntil: "domcontentloaded" })
+    await page.goto(`/test_iframe?test_carte`, { waitUntil: "domcontentloaded" })
 
     const accessibilityScanResults = await new AxeBuilder({ page })
       .include(IFRAME_SELECTOR) // Restrict scan to the iframe
