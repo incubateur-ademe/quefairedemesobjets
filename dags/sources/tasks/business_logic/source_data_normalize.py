@@ -176,7 +176,7 @@ def _remove_undesired_lines(
     dups = df[df["identifiant_unique"].duplicated(keep=False)]
     if not dups.empty:
         logger.warning(
-            f"==== DOUBLONS SUR LES IDENTIFIANTS UNIQUES {len(dups)/2} ====="
+            f"==== DOUBLONS SUR LES IDENTIFIANTS UNIQUES {len(dups) / 2} ====="
         )
         log.preview("Doublons sur identifiant_unique", dups)
         metadata["nb acteurs filtrés car doublons sur identifiant_unique"] = str(
@@ -303,7 +303,6 @@ def df_normalize_pharmacie(df: pd.DataFrame) -> pd.DataFrame:
 def df_normalize_sinoe(
     df: pd.DataFrame,
 ) -> pd.DataFrame:
-
     # DOUBLONS: extra sécurité: même si on ne devrait pas obtenir
     # de doublon grâce à l'API (q_mode=simple&ANNEE_eq=2025)
     # on vérifie qu'on a qu'une année
@@ -338,7 +337,7 @@ def enrich_from_ban_api(row: pd.Series) -> pd.Series:
         result = ban_cache_row["ban_returned"]
     else:
         ban_adresse = _compute_ban_adresse(row)
-        url = "https://api-adresse.data.gouv.fr/search/"
+        url = "https://data.geopf.fr/geocodage/search/"
         r = requests.get(url, params={"q": ban_adresse})
         if r.status_code != 200:
             raise Exception(f"Failed to get data from API: {r.status_code}")

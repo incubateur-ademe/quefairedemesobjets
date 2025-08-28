@@ -107,11 +107,14 @@ class CarteConfigView(DetailView, CarteSearchActeursView):
         return super()._grouped_action_from(*args, **kwargs)
 
     def get_sous_categorie_filter(self):
-        # TODO: Revoir nommage + documenter
-        if sous_categorie_filter := self.request.GET.getlist(
-            CarteConfig.SOUS_CATEGORIE_QUERY_PARAM
-        ):
-            return sous_categorie_filter
+        sous_categories_from_request = list(
+            filter(
+                None, self.request.GET.getlist(CarteConfig.SOUS_CATEGORIE_QUERY_PARAM)
+            )
+        )
+        if sous_categories_from_request:
+            return sous_categories_from_request
+
         return self.get_object().sous_categorie_objet.all().values_list("id", flat=True)
 
     def _compile_acteurs_queryset(self, *args, **kwargs):
