@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.urls import reverse
 
-from core.templatetags.seo_tags import get_sharer_content
 from qfdmd.forms import SearchForm
 
 from . import constants
