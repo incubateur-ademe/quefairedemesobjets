@@ -59,7 +59,7 @@
     "@types/leaflet": "^1.9.20",
     "@types/lodash": "^4.17.20",
     "@types/node": "^24.1.0",
-    "@typescript-eslint/eslint-plugin": "^8.38.0",
+    "@typescript-eslint/eslint-plugin": "^8.41.0",
     "buffer": "^6.0.3",
     "eslint": "^9.34.0",
     "eslint-config-love": "^121.0.0",
