@@ -53,6 +53,9 @@ class AssistantMiddleware:
         return self._handle_host_redirects(request)
 
     def _handle_special_query_params(self, request) -> str | None:
+        if request.resolver_match != "qfdmd:home":
+            return
+
         # Order matters: 'carte' takes precedence over 'iframe'
         if self.CARTE_PARAM in request.GET:
             return self._build_redirect_url(
