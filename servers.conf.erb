@@ -13,7 +13,6 @@ server {
 
     # Redirect if host is different from the BASE_URL host
     if ($host != "<%= ENV["BASE_DOMAIN"] %>") {
-        add_header X-redirect-from $host;
         return 302 https://<%= ENV["BASE_DOMAIN"] %>$request_uri;
     }
 
