@@ -28,7 +28,7 @@ export default defineConfig({
   reporter: "html",
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    baseURL: process.env.ASSISTANT_BASE_URL!,
+    baseURL: process.env.BASE_URL!,
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
   },
@@ -54,11 +54,4 @@ export default defineConfig({
       },
     },
   ],
-
-  /* Run your local dev server before starting the tests */
-  // webServer: {
-  //     command: "honcho start -f Procfile.dev",
-  //     url: "http://localhost:8000",
-  //     reuseExistingServer: !process.env.CI,
-  // },
 })

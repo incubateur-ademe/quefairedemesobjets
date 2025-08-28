@@ -4,7 +4,7 @@ import { hideDjangoToolbar } from "./helpers"
 
 test("iframe formulaire is loaded with correct parameters", async ({
   page,
-  carteUrl,
+  baseUrl,
 }) => {
   await page.goto(`/test_iframe`, { waitUntil: "domcontentloaded" })
 
@@ -26,7 +26,7 @@ test("iframe formulaire is loaded with correct parameters", async ({
 
   expect(allow).toBe("geolocation; clipboard-write")
   expect(src).toBe(
-    `${carteUrl}/formulaire?direction=jai&first_dir=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre`,
+    `${baseUrl}/formulaire?direction=jai&first_dir=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre`,
   )
   expect(frameborder).toBe("0")
   expect(scrolling).toBe("no")
@@ -85,12 +85,14 @@ test("form is visible in the iframe", async ({ page }) => {
 })
 
 test("iframe with 0px parent height displays correctly", async ({ page }) => {
-  await page.goto(`/test_iframe?carte_with_defaults=1`, {
+  await page.goto(`/test_iframe?test_carte_with_defaults=1`, {
     waitUntil: "domcontentloaded",
   })
   await expect(page).toHaveScreenshot("iframe.png")
 
-  await page.goto(`/test_iframe?noheight=1&carte=1`, { waitUntil: "domcontentloaded" })
+  await page.goto(`/test_iframe?test_noheight=1&test_carte=1`, {
+    waitUntil: "domcontentloaded",
+  })
   await page.evaluate(() => {
     document
       .querySelector("[data-testid=iframe-no-height-wrapper]")
@@ -103,7 +105,9 @@ test("iframe with 0px parent height displays correctly", async ({ page }) => {
 test("iframe cannot read the referrer when referrerPolicy is set to no-referrer", async ({
   page,
 }) => {
-  await page.goto(`/test_iframe?carte=1&noreferrer`, { waitUntil: "domcontentloaded" })
+  await page.goto(`/test_iframe?test_carte=1&test_noreferrer`, {
+    waitUntil: "domcontentloaded",
+  })
 
   // Get the content frame of the iframe
   const iframeElement = await page.$("iframe[referrerpolicy='no-referrer']")
@@ -119,9 +123,9 @@ test("iframe cannot read the referrer when referrerPolicy is set to no-referrer"
 
 test("iframe can read the referrer when referrerPolicy is not set", async ({
   page,
-  assistantUrl,
+  baseUrl,
 }) => {
-  await page.goto(`${assistantUrl}/test_iframe?carte=1`, {
+  await page.goto(`/test_iframe?test_carte=1`, {
     waitUntil: "domcontentloaded",
   })
 
@@ -134,13 +138,13 @@ test("iframe can read the referrer when referrerPolicy is not set", async ({
   const referrer = await iframe!.evaluate(() => document.referrer)
 
   // Assert that the referrer is set and not undefined
-  expect(referrer).toBe(`${assistantUrl}/test_iframe?carte=1`)
+  expect(referrer).toBe(`${baseUrl}/test_iframe?test_carte=1`)
 })
 
-test("iFrame mode persists across navigation", async ({ page, assistantUrl }) => {
+test("iFrame mode persists across navigation", async ({ page, baseUrl }) => {
   test.slow()
   // Starting URL - change this to your site's starting point
-  await page.goto(`${assistantUrl}/?iframe`, { waitUntil: "domcontentloaded" })
+  await page.goto(`/?iframe`, { waitUntil: "domcontentloaded" })
   expect(page).not.toBeNull()
 
   for (let i = 0; i < 50; i++) {
@@ -150,7 +154,7 @@ test("iFrame mode persists across navigation", async ({ page, assistantUrl }) =>
     )
 
     // Find all internal links on the page (href starting with the same origin)
-    const links = page.locator(`a[href^="${assistantUrl}"]`)
+    const links = page.locator(`a[href^="${baseUrl}"]`)
 
     // Pick a random internal link to click
     const count = await links.count()

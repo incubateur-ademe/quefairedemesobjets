@@ -43,7 +43,6 @@ class TestHomepage:
         produit = ProduitFactory()
         SynonymeFactory(picto=picto, pin_on_homepage=True, produit=produit)
         response, soup = get_response()
-        print(str(soup))
 
         assert (
             len(soup.css.select("[data-testid=patchwork-icon]"))

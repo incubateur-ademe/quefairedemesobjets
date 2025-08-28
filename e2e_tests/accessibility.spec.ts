@@ -19,7 +19,7 @@ test.describe("WCAG Compliance Tests", () => {
   })
 
   test("Carte iFrame", async ({ page }) => {
-    await page.goto(`/test_iframe?carte`, { waitUntil: "domcontentloaded" })
+    await page.goto(`/test_iframe?test_carte`, { waitUntil: "domcontentloaded" })
 
     const accessibilityScanResults = await new AxeBuilder({ page })
       .include(IFRAME_SELECTOR) // Restrict scan to the iframe
@@ -29,9 +29,9 @@ test.describe("WCAG Compliance Tests", () => {
     expect(accessibilityScanResults.violations).toEqual([])
   })
 
-  test("Assistant Homepage", async ({ page, assistantUrl }) => {
+  test("Assistant Homepage", async ({ page }) => {
     // TODO: Update the route for production
-    await page.goto(`${assistantUrl}/`, { waitUntil: "domcontentloaded" })
+    await page.goto(`/`, { waitUntil: "domcontentloaded" })
 
     const accessibilityScanResults = await new AxeBuilder({ page })
       .exclude("[data-disable-axe]")
@@ -41,8 +41,8 @@ test.describe("WCAG Compliance Tests", () => {
     expect(accessibilityScanResults.violations).toEqual([])
   })
 
-  test("Assistant Detail Page", async ({ page, assistantUrl }) => {
-    await page.goto(`${assistantUrl}/dechet/smartphone`, {
+  test("Assistant Detail Page", async ({ page }) => {
+    await page.goto(`/dechet/smartphone`, {
       waitUntil: "domcontentloaded",
     })
 

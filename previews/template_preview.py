@@ -138,7 +138,7 @@ class IframePreview(LookbookPreview):
     def carte(self, **kwargs):
         template = Template(
             f"""
-            <script src="{settings.ASSISTANT["BASE_URL"]}/static/carte.js"></script>
+            <script src="{settings.BASE_URL}/static/carte.js"></script>
             """,
         )
         return template.render(Context({}))
@@ -146,7 +146,7 @@ class IframePreview(LookbookPreview):
     def carte_sur_mesure(self, **kwargs):
         template = Template(
             f"""
-            <script src="{settings.ASSISTANT["BASE_URL"]}/static/carte.js" data-slug="cyclevia"></script>
+            <script src="{settings.BASE_URL}/static/carte.js" data-slug="cyclevia"></script>
             """,
         )
 
@@ -154,7 +154,7 @@ class IframePreview(LookbookPreview):
 
     def carte_preconfiguree(self, **kwargs):
         template = Template(
-            f"<script src='{settings.ASSISTANT['BASE_URL']}/static/carte.js'"
+            f"<script src='{settings.BASE_URL}/static/carte.js'"
             """data-action_displayed="preter|emprunter|louer|mettreenlocation|reparer|donner|echanger|acheter|revendre"
             data-max-width="800px"
             data-height="720px"
@@ -167,7 +167,7 @@ class IframePreview(LookbookPreview):
 
     def formulaire(self, **kwargs):
         template = Template(
-            f"<script src='{settings.LVAO['BASE_URL']}/static/iframe.js'"
+            f"<script src='{settings.BASE_URL}/static/iframe.js'"
             """
                 data-max_width="100%"
                 data-height="720px"
@@ -184,7 +184,7 @@ class IframePreview(LookbookPreview):
     def assistant(self, **kwargs):
         template = Template(
             f"""
-        <script src="{settings.ASSISTANT["BASE_URL"]}/iframe.js" data-testid='assistant'></script>
+        <script src="{settings.BASE_URL}/iframe.js" data-testid='assistant'></script>
         """,
         )
 
@@ -193,7 +193,7 @@ class IframePreview(LookbookPreview):
     def assistant_with_epci(self, **kwargs):
         template = Template(
             f"""
-        <script src="{settings.ASSISTANT["BASE_URL"]}/iframe.js" data-epci="200043123" data-objet="lave-linge"></script>
+        <script src="{settings.BASE_URL}/iframe.js" data-epci="200043123" data-objet="lave-linge"></script>
         """,
         )
 
@@ -202,7 +202,7 @@ class IframePreview(LookbookPreview):
     def assistant_without_referrer(self, **kwargs):
         template = Template(
             f"""
-        <script src="{settings.ASSISTANT["BASE_URL"]}/iframe.js" data-debug-referrer data-testid='assistant'></script>
+        <script src="{settings.BASE_URL}/iframe.js" data-debug-referrer data-testid='assistant'></script>
         """,
         )
 

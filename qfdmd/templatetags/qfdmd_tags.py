@@ -38,14 +38,8 @@ def patchwork() -> dict:
 
 @register.inclusion_tag("seo/_canonical_url.html", takes_context=True)
 def canonical_url(context: dict) -> dict:
-    canonical_url = None
-
     if request := context.get("request"):
-        request = context["request"]
-        path = request.build_absolute_uri(request.path)
-        canonical_url = path.replace(request.get_host(), settings.CANONICAL_HOST)
-
-    return {"canonical_url": canonical_url}
+        return {"url": request.build_absolute_uri(request.path)}
 
 
 @register.simple_tag
