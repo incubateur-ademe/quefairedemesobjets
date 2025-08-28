@@ -39,7 +39,14 @@ export const getMarkers = async (page) => {
       ?.forEach((element) => element.remove())
   })
 
-  const markers = page?.locator(".maplibregl-marker svg")
+  const markers = page?.locator(".maplibregl-marker:has(svg)")
+
+  // Wait for markers to be loaded
+  await page.waitForSelector(".maplibregl-marker:has(svg)", {
+    state: "attached",
+    timeout: 5000,
+  })
+
   // Ensure we have at least one marker, and let's click on a marker.
   // The approach is feels cumbersome, this is because Playwright has a
   // hard time clicking on leaflet markers.
