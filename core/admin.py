@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.postgres.lookups import Unaccent
 from django.core.exceptions import ValidationError
@@ -11,14 +12,17 @@ TextField.register_lookup(Unaccent)
 
 
 class NotMutableMixin:
+    # Editable only in debug mode
+    # we would like to use permissions but it is not possible as superadmin has all
+    # permissions
     def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
+        return settings.BYPASS_ACTEUR_READONLY_FIELDS
 
     def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
+        return settings.BYPASS_ACTEUR_READONLY_FIELDS
 
     def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
+        return settings.BYPASS_ACTEUR_READONLY_FIELDS
 
 
 class NotEditableMixin:
@@ -161,7 +165,7 @@ class QuerysetFilter(InputFilter):
         return queryset
 
 
-class BaseAdmin(admin.ModelAdmin):
+class QuerysetFilterAdmin(admin.ModelAdmin):
     """
     A base Django admin class that automatically adds a custom queryset filter
     to the list of filters in the admin interface.

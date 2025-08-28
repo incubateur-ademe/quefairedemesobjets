@@ -6,11 +6,11 @@ we configure start dates to be 1 interval in the past of schedule
 present/future date) thus if there is catchup, it's only 1 run max."""
 
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 
-NOW = datetime.now(timezone.utc)
+import pendulum
 
 
 @dataclass(frozen=True)
 class START_DATES:
-    YESTERDAY: datetime = NOW - timedelta(days=1)
+    YESTERDAY: datetime = pendulum.today("UTC").add(days=-1)

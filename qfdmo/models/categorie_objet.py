@@ -1,6 +1,7 @@
 from django.contrib.gis.db import models
 
 from qfdmo.models.utils import CodeAsNaturalKeyModel
+from qfdmo.validators import CodeValidator
 
 
 class CategorieObjet(CodeAsNaturalKeyModel):
@@ -9,7 +10,17 @@ class CategorieObjet(CodeAsNaturalKeyModel):
 
     id = models.AutoField(primary_key=True)
     libelle = models.CharField(max_length=255, blank=False, null=False)
-    code = models.CharField(max_length=255, unique=True, blank=False, null=False)
+    code = models.CharField(
+        max_length=255,
+        unique=True,
+        blank=False,
+        null=False,
+        help_text=(
+            "Ce champ est utilisé lors de l'import de données, il ne doit pas être"
+            " mis à jour sous peine de casser l'import de données"
+        ),
+        validators=[CodeValidator()],
+    )
 
 
 class SousCategorieObjet(CodeAsNaturalKeyModel):
@@ -20,7 +31,17 @@ class SousCategorieObjet(CodeAsNaturalKeyModel):
     id = models.AutoField(primary_key=True)
     libelle = models.CharField(max_length=255, blank=False, null=False)
     categorie = models.ForeignKey(CategorieObjet, on_delete=models.CASCADE)
-    code = models.CharField(max_length=255, unique=True, blank=False, null=False)
+    code = models.CharField(
+        max_length=255,
+        unique=True,
+        blank=False,
+        null=False,
+        help_text=(
+            "Ce champ est utilisé lors de l'import de données, il ne doit pas être"
+            " mis à jour sous peine de casser l'import de données"
+        ),
+        validators=[CodeValidator()],
+    )
     afficher = models.BooleanField(default=True)
     qfdmd_produits = models.ManyToManyField(
         "qfdmd.produit",
@@ -49,7 +70,17 @@ class Objet(CodeAsNaturalKeyModel):
 
     id = models.AutoField(primary_key=True)
     libelle = models.CharField(max_length=255, blank=False, null=False)
-    code = models.CharField(max_length=255, unique=True, blank=False, null=False)
+    code = models.CharField(
+        max_length=255,
+        unique=True,
+        blank=False,
+        null=False,
+        help_text=(
+            "Ce champ est utilisé lors de l'import de données, il ne doit pas être"
+            " mis à jour sous peine de casser l'import de données"
+        ),
+        validators=[CodeValidator()],
+    )
     sous_categorie = models.ForeignKey(
         SousCategorieObjet,
         on_delete=models.CASCADE,

@@ -1,11 +1,27 @@
 # Ignore line length recommandations from flake8
 # flake8: noqa: E501
+from django import forms
 from django.conf import settings
 from django.template import Context, Template
 from django.template.loader import render_to_string
 from django_lookbook.preview import LookbookPreview
+from django_lookbook.utils import register_form_class
 
+from qfdmd.forms import SearchForm
 from qfdmd.models import Suggestion, Synonyme
+
+
+class SynonymeForm(forms.Form):
+    """
+    This is to show how to add parameter editor to preview synonyme in heading
+    """
+
+    synonyme = forms.CharField(
+        label="Synonyme",
+        max_length=100,
+        help_text="Entrez le nom d'un synonyme",
+        initial="",
+    )
 
 
 class ComponentsPreview(LookbookPreview):
@@ -15,22 +31,36 @@ class ComponentsPreview(LookbookPreview):
 
     def code(self, **kwargs):
         context = {
-            "script": '<script src="https://quefairedemesdechets.ademe.local/iframe.js"></script>'
+            "script": '<script src="https://quefairedemesdechets.ademe.local/iframe.js"></script>',
         }
         return render_to_string("components/code/code.html", context)
 
-    def logo_animated(self, **kwargs):
-        return render_to_string("components/logo/animated.html")
+    def logo(self, **kwargs):
+        return render_to_string("components/logo/header.html")
 
     def logo_homepage(self, **kwargs):
         return render_to_string("components/logo/homepage.html")
 
-    def produit_heading(self, **kwargs):
+    def produit_legacy_heading(self, **kwargs):
         context = {"title": "Coucou !"}
+        return render_to_string("components/produit/legacy_heading.html", context)
+
+    @register_form_class(SynonymeForm)
+    def produit_heading(self, synonyme=None, **kwargs):
+        context = {"title": "Coucou !"}
+
+        if synonyme:
+            context.update(synonyme=synonyme)
+
         return render_to_string("components/produit/heading.html", context)
 
-    def produit_heading_family(self, **kwargs):
-        context = {"title": "Coucou !"}
+    @register_form_class(SynonymeForm)
+    def produit_heading_family(self, synonyme=None, **kwargs):
+        context = {"label": "youpi", "title": "Coucou !"}
+
+        if synonyme:
+            context.update(synonyme=synonyme)
+
         return render_to_string("components/produit/heading_family.html", context)
 
 
@@ -130,7 +160,7 @@ class IframePreview(LookbookPreview):
             data-height="720px"
             data-bounding_box="{&quot;southWest&quot;: {&quot;lat&quot;: 47.570401, &quot;lng&quot;: 1.597977}, &quot;northEast&quot;: {&quot;lat&quot;: 48.313697, &quot;lng&quot;: 3.059159}}"
             ></script>
-            """
+            """,
         )
 
         return template.render(Context({}))
@@ -146,7 +176,7 @@ class IframePreview(LookbookPreview):
                 data-action_list="reparer|echanger|mettreenlocation|revendre"
                 data-iframe_attributes='{"loading":"lazy", "id" : "resize" }'>
                 </script>
-            """
+            """,
         )
 
         return template.render(Context({}))
@@ -155,7 +185,7 @@ class IframePreview(LookbookPreview):
         template = Template(
             f"""
         <script src="{settings.ASSISTANT["BASE_URL"]}/iframe.js" data-testid='assistant'></script>
-        """
+        """,
         )
 
         return template.render(Context({}))
@@ -164,7 +194,7 @@ class IframePreview(LookbookPreview):
         template = Template(
             f"""
         <script src="{settings.ASSISTANT["BASE_URL"]}/iframe.js" data-epci="200043123" data-objet="lave-linge"></script>
-        """
+        """,
         )
 
         return template.render(Context({}))
@@ -173,7 +203,129 @@ class IframePreview(LookbookPreview):
         template = Template(
             f"""
         <script src="{settings.ASSISTANT["BASE_URL"]}/iframe.js" data-debug-referrer data-testid='assistant'></script>
-        """
+        """,
         )
 
         return template.render(Context({}))
+
+
+class AccessibilitePreview(LookbookPreview):
+    def P01_7_3(self, **kwargs):
+        """
+        # P01 7.3
+        ## Retour
+        "Les composants suivants ne sont pas contrôlables au clavier :
+        1. Dans la modale de partage, les liens et le bouton ne sont
+        pas accessibles au clavier : retirer leur attribut tabindex=""-1
+
+        ## À vérifier
+        - [ ] En utilisant la touche tab, on peut naviguer dans les boutons de la modale de partage
+        """
+        return render_to_string("modals/share.html")
+
+    def P01_3_3(self, **kwargs):
+        """
+        # P01 3.3
+        ## Retour
+        "Le rapport de contraste entre les couleurs d’un composant d’interface et son arrière-plan est insuffisant, exemple :
+        - le formulaire de recherche
+        - les images des boutons d'intégration de l'outil, de partage et de contact
+
+        Le rapport de contraste entre les couleurs d'un composant d'interface et son arrière-plan doit être d'au moins 3:1."
+
+        ## À vérifier :
+        - [ ] Le contour de la recherche doit être en couleur #53918C
+        """
+        context = {"search_form": SearchForm()}
+        return render_to_string("components/search/view.html", context)
+
+    def P01_10_2(self, **kwargs):
+        """
+        # P01 10.2
+        ## Retour
+        Lorsque l'utilisateur désactive le CSS, le contenu porteur d'information n'est plus visible, exemple :
+        - le bouton de soumission du formulaire de recherche n'a pas d'intitulé, ajouter le texte "Rechercher"
+        et le masquer avec la méthode sr-only*, retirer son attribut aria-label="Rechercher"
+
+        ## À vérifier
+        - [ ] Avec le CSS désactivé, le label rechercher du bouton s'affiche
+        """
+        context = {"search_form": SearchForm()}
+        return render_to_string("components/search/view.html", context)
+
+    def P01_10_7(self, **kwargs):
+        """
+        ## Retour
+        Des éléments interactifs prennent le focus mais ce dernier n'est pas visible, exemple :
+        - le champ de saisie du formulaire de recherche
+
+        Soit :
+        - Le style du focus natif du navigateur ne doit pas être supprimé ou dégradé
+        La prise de focus est suffisamment contrastée (ratio de contraste égal ou supérieur à 3:1).
+
+        ## À vérifier
+        - [ ] Le focus du champ de recherche affiche un contour bleu bien visible
+        """
+        context = {"search_form": SearchForm()}
+        return render_to_string("components/search/view.html", context)
+
+    def P01_13_8(self, **kwargs):
+        """
+        ## Retour
+        Du contenu en mouvement est déclenché automatiquement, exemple :
+
+        - le texte "Que faire de mes... ?"
+
+
+        ## À vérifier
+        - [ ] Le logo est statique
+        - [ ] Le logo affiche Que faire de mes objets et déchets
+
+        """
+        template = Template(
+            """
+            {% load dsfr_tags %}
+
+            <p class="fr-h2">Logo en homepage</p>
+            {% include "components/logo/homepage.html" %}
+            <hr>
+            <p class="fr-h2">Logo du header</p>
+            {% include "components/logo/header.html" %}
+            """,
+        )
+        return template.render(Context({}))
+
+    def P02_7_1__P02_7_3(self, **kwargs):
+        """
+        # P02 7.1
+        ## Retour
+        Les composants suivants ne sont pas compatibles avec les technologies d'assistance :
+
+        1. Le dernier élément du fil d'ariane n'a pas d'attribut href : cf. modèle de conception https://www.w3.org/WAI/ARIA/apg/patterns/breadcrumb/examples/breadcrumb/
+
+        ## À vérifier
+        - [ ] Le dernier élément du breadcrumb a un attribut href
+
+        # P02 7.3
+        ## Retour
+        Les composants suivants ne sont pas contrôlables au clavier :
+
+        1. Le dernier élément du fil d'ariane n'est pas atteignable (voir 7.1)
+
+        ## À vérifier
+        - [ ] Le dernier élément du breadcrumb est atteignable au clavier
+
+        """
+        context = {
+            "self": {
+                "get_ancestors": [
+                    {"title": "Une première page", "is_site_root": True},
+                    {"title": "Une deuxième page", "is_root": False},
+                ],
+                "title": "Une troisième page",
+            },
+        }
+        return render_to_string(
+            "sites_faciles_content_manager/blocks/breadcrumbs.html",
+            context,
+        )

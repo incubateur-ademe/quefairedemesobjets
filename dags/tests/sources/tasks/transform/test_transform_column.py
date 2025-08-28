@@ -6,6 +6,7 @@ from sources.tasks.transform.transform_column import (
     clean_acteur_type_code,
     clean_code_list,
     clean_code_postal,
+    clean_email,
     clean_horaires_osm,
     clean_number,
     clean_public_accueilli,
@@ -25,7 +26,7 @@ class TestCastEOBooleanOrStringToBoolean:
     @pytest.mark.parametrize(
         "value,expected_value",
         [
-            (None, False),
+            (None, None),
             (False, False),
             (True, True),
             ("oui", True),
@@ -34,9 +35,9 @@ class TestCastEOBooleanOrStringToBoolean:
             ("non", False),
             ("NON", False),
             (" NON ", False),
-            ("", False),
-            (" ", False),
-            ("fake", False),
+            ("", None),
+            (" ", None),
+            ("fake", None),
         ],
     )
     def test_cast_eo_boolean_or_string_to_boolean(
@@ -323,6 +324,26 @@ class TestCleanUrl:
     )
     def test_clean_url(self, url, expected_url):
         assert clean_url(url, None) == expected_url
+
+
+class TestCleanEmail:
+    @pytest.mark.parametrize(
+        "email, expected_email",
+        [
+            (None, ""),
+            ("", ""),
+            ("fake", ""),
+            ("@example.com ", ""),
+            ("fake@example.com", "fake@example.com"),
+            (" fake@example.com ", "fake@example.com"),
+            (
+                "prenom.de-mon_nom@ex-am_ple.com.fr",
+                "prenom.de-mon_nom@ex-am_ple.com.fr",
+            ),
+        ],
+    )
+    def test_clean_email(self, email, expected_email):
+        assert clean_email(email, None) == expected_email
 
 
 class TestCleanCodePostal:

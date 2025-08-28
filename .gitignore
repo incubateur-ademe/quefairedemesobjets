@@ -12,6 +12,9 @@ local_iframe.html
 
 # DB
 pgdata
+webapp_dbdata
+warehouse_dbdata
+airflow_dbdata
 
 # JS
 static/collected

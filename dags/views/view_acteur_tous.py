@@ -2,10 +2,10 @@ import time
 from logging import getLogger
 from pathlib import Path
 
-import pendulum
 from airflow import DAG
 from airflow.decorators import task
 from airflow.providers.postgres.hooks.postgres import PostgresHook
+from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
 
 logger = getLogger(__name__)
@@ -13,7 +13,6 @@ logger = getLogger(__name__)
 DEFAULT_ARGS = {
     "owner": "airflow",
     "depends_on_past": False,
-    "start_date": pendulum.today("UTC").add(days=-1),
     "email_on_failure": False,
     "email_on_retry": False,
     "retries": 0,
@@ -34,6 +33,7 @@ with DAG(
     dag_id="view_acteur_all",
     tags=[TAGS.VUE, TAGS.ACTEURS, TAGS.TOUT, TAGS.SQL],
     default_args=DEFAULT_ARGS,
+    start_date=START_DATES.YESTERDAY,
     catchup=False,
     schedule=SCHEDULE,
     dag_display_name="Vue - Acteur - Tous les acteurs",
@@ -58,7 +58,7 @@ with DAG(
             - elles sont toutes les 2 petites et rapides
             - on veut éviter d'avoir à parcourir les logs de 2 petites tâches
         """
-        pg_hook = PostgresHook(postgres_conn_id="qfdmo_django_db")
+        pg_hook = PostgresHook(postgres_conn_id="webapp_db")
 
         with pg_hook.get_conn() as conn:
             with conn.cursor() as cursor:

@@ -273,7 +273,8 @@ PARAMS = {
         type="boolean",
         description_md=r"""**∅ CONSERVER LE VIDE**: si OUI et qu'une valeur
         vide est rencontrée sur une source prioritaire, alors elle sera
-        conservée""",
+        conservée.
+        **Cette option n'est appliquée que lors de la mis à jour du parent**""",
     ),
     "dedup_enrich_keep_parent_data_by_default": Param(
         True,
@@ -281,7 +282,7 @@ PARAMS = {
         description_md=r"""
 ** CONSERVER LES DONNÉES DU PARENT**: si OUI, les données du parent seront conservées.
 
-Lorsque l'option `dedup_enrich_keep_empty` est:
+Dans le cas de la mise à jour du parent, lorsque l'option `dedup_enrich_keep_empty` est:
  - VRAI, toutes les données du parent même vides sont conservées
  - FAUX, seules les données non-vides du parent sont conservées
 """,

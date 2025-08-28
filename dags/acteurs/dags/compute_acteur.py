@@ -1,6 +1,5 @@
 from datetime import timedelta
 
-import pendulum
 from acteurs.tasks.airflow_logic.check_model_table_consistency_task import (
     check_model_table_consistency_task,
 )
@@ -10,22 +9,26 @@ from acteurs.tasks.airflow_logic.replace_acteur_table_task import (
 from airflow import DAG
 from airflow.operators.bash import BashOperator
 from shared.config.schedules import SCHEDULES
+from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
 
 default_args = {
     "owner": "airflow",
     "depends_on_past": False,
-    "start_date": pendulum.today("UTC").add(days=-1),
     "email_on_failure": False,
     "email_on_retry": False,
     "retries": 3,
     "retry_delay": timedelta(minutes=2),
 }
 
+dbt_run = "dbt run --models"
+dbt_test = "dbt test --resource-type model --select"
+
 
 with DAG(
     "compute_acteurs",
     default_args=default_args,
+    start_date=START_DATES.YESTERDAY,
     dag_display_name="Acteurs affichés - Rafraîchir les acteurs affichés",
     description=(
         "Ce DAG construit les tables des acteurs utilisables par l'admin"
@@ -38,11 +41,11 @@ with DAG(
 ) as dag:
     dbt_run_base_acteurs = BashOperator(
         task_id="dbt_run_base_acteurs",
-        bash_command=("dbt run --models base.acteurs"),
+        bash_command=(f"{dbt_run} base.acteurs"),
     )
     dbt_test_base_acteurs = BashOperator(
         task_id="dbt_test_base_acteurs",
-        bash_command=("dbt test --models base.acteurs"),
+        bash_command=(f"{dbt_test} base.acteurs"),
     )
     dbt_run_intermediate_acteurs = BashOperator(
         task_id="dbt_run_intermediate_acteurs",
@@ -50,58 +53,58 @@ with DAG(
     )
     dbt_test_intermediate_acteurs = BashOperator(
         task_id="dbt_test_intermediate_acteurs",
-        bash_command=("dbt test --models intermediate.acteurs"),
+        bash_command=(f"{dbt_test} intermediate.acteurs"),
     )
 
     dbt_run_marts_acteurs_exhaustive = BashOperator(
         task_id="dbt_run_marts_acteurs_exhaustive",
-        bash_command=("dbt run --models marts.acteurs.exhaustive"),
+        bash_command=(f"{dbt_run} marts.acteurs.exhaustive"),
     )
     dbt_test_marts_acteurs_exhaustive = BashOperator(
         task_id="dbt_test_marts_acteurs_exhaustive",
-        bash_command=("dbt test --models marts.acteurs.exhaustive"),
+        bash_command=(f"{dbt_test} marts.acteurs.exhaustive"),
     )
     dbt_run_exposure_acteurs_exhaustive = BashOperator(
         task_id="dbt_run_exposure_acteurs_exhaustive",
-        bash_command=("dbt run --models exposure.acteurs.exhaustive"),
+        bash_command=(f"{dbt_run} exposure.acteurs.exhaustive"),
     )
     dbt_test_exposure_acteurs_exhaustive = BashOperator(
         task_id="dbt_test_exposure_acteurs_exhaustive",
-        bash_command=("dbt test --models exposure.acteurs.exhaustive"),
+        bash_command=(f"{dbt_test} exposure.acteurs.exhaustive"),
     )
 
     dbt_run_marts_acteurs_carte = BashOperator(
         task_id="dbt_run_marts_acteurs_carte",
-        bash_command=("dbt run --models marts.acteurs.carte"),
+        bash_command=(f"{dbt_run} marts.acteurs.carte"),
     )
     dbt_test_marts_acteurs_carte = BashOperator(
         task_id="dbt_test_marts_acteurs_carte",
-        bash_command=("dbt test --models marts.acteurs.carte"),
+        bash_command=(f"{dbt_test} marts.acteurs.carte"),
     )
     dbt_run_exposure_acteurs_carte = BashOperator(
         task_id="dbt_run_exposure_acteurs_carte",
-        bash_command=("dbt run --models exposure.acteurs.carte"),
+        bash_command=(f"{dbt_run} exposure.acteurs.carte"),
     )
     dbt_test_exposure_acteurs_carte = BashOperator(
         task_id="dbt_test_exposure_acteurs_carte",
-        bash_command=("dbt test --models exposure.acteurs.carte"),
+        bash_command=(f"{dbt_test} exposure.acteurs.carte"),
     )
 
     dbt_run_marts_acteurs_opendata = BashOperator(
         task_id="dbt_run_marts_acteurs_opendata",
-        bash_command=("dbt run --models marts.acteurs.opendata"),
+        bash_command=(f"{dbt_run} marts.acteurs.opendata"),
     )
     dbt_test_marts_acteurs_opendata = BashOperator(
         task_id="dbt_test_marts_acteurs_opendata",
-        bash_command=("dbt test --models marts.acteurs.opendata"),
+        bash_command=(f"{dbt_test} marts.acteurs.opendata"),
     )
     dbt_run_exposure_acteurs_opendata = BashOperator(
         task_id="dbt_run_exposure_acteurs_opendata",
-        bash_command=("dbt run --models exposure.acteurs.opendata"),
+        bash_command=(f"{dbt_run} exposure.acteurs.opendata"),
     )
     dbt_test_exposure_acteurs_opendata = BashOperator(
         task_id="dbt_test_exposure_acteurs_opendata",
-        bash_command=("dbt test --models exposure.acteurs.opendata"),
+        bash_command=(f"{dbt_test} exposure.acteurs.opendata"),
     )
 
     check_model_table_displayedacteur_task = check_model_table_consistency_task(
@@ -113,6 +116,14 @@ with DAG(
             "qfdmo",
             "DisplayedPropositionService",
             "exposure_carte_propositionservice",
+        )
+    )
+    check_model_table_displayedperimetreadomicile_task = (
+        check_model_table_consistency_task(
+            dag,
+            "qfdmo",
+            "DisplayedPerimetreADomicile",
+            "exposure_carte_perimetreadomicile",
         )
     )
     replace_displayedacteur_table_task = replace_acteur_table_task(
@@ -127,6 +138,9 @@ with DAG(
         "qfdmo",
         "VuePropositionService",
         "exposure_exhaustive_propositionservice",
+    )
+    check_model_table_vueperimetreadomicile_task = check_model_table_consistency_task(
+        dag, "qfdmo", "VuePerimetreADomicile", "exposure_exhaustive_perimetreadomicile"
     )
     replace_vueacteur_table_task = replace_acteur_table_task(
         dag, "qfdmo_vue", "exposure_exhaustive_"
@@ -157,6 +171,7 @@ with DAG(
         dbt_test_exposure_acteurs_carte
         >> check_model_table_displayedacteur_task
         >> check_model_table_displayedpropositionservice_task
+        >> check_model_table_displayedperimetreadomicile_task
         >> replace_displayedacteur_table_task
     )
 
@@ -164,5 +179,6 @@ with DAG(
         dbt_test_exposure_acteurs_exhaustive
         >> check_model_table_vueacteur_task
         >> check_model_table_vuepropositionservice_task
+        >> check_model_table_vueperimetreadomicile_task
         >> replace_vueacteur_table_task
     )

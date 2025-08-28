@@ -1,10 +1,9 @@
 import logging
 
-import pendulum
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
-
 from utils.django import django_setup_full
 
 # Load Django environement to test Django and saving airflow logs to s3 storage are
@@ -16,7 +15,6 @@ logger = logging.getLogger(__name__)
 default_args = {
     "owner": "airflow",
     "depends_on_past": False,
-    "start_date": pendulum.today("UTC").add(days=-1),
     "email_on_failure": False,
     "email_on_retry": False,
 }
@@ -31,6 +29,7 @@ with DAG(
     dag_display_name="[TEST] Les logs Airflow sont enregistrés sur s3",
     tags=[TAGS.DEV_TOOLS],
     default_args=default_args,
+    start_date=START_DATES.YESTERDAY,
     description=(
         """
 Lancer le DAG et vérifier que les logs sont disponibles sur s3

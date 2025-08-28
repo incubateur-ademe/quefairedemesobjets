@@ -1,0 +1,4 @@
+project_id            = "your-project-id"
+organization_id       = "your-organization-id"
+access_key            = "access-key"
+secret_key            = "secret-key"  # pragma: allowlist secret

@@ -9,7 +9,7 @@ PYTHON := poetry run python
 DJANGO_ADMIN := $(PYTHON) manage.py
 PYTEST := poetry run pytest
 HONCHO := poetry run honcho
-DB_URL := postgres://qfdmo:qfdmo@localhost:6543/qfdmo# pragma: allowlist secret
+DB_URL := postgres://webapp:webapp@localhost:6543/webapp# pragma: allowlist secret
 ASSISTANT_URL := quefairedemesdechets.ademe.local
 LVAO_URL := lvao.ademe.local
 FIXTURES_OPTIONS := --indent 4 --natural-foreign --natural-primary
@@ -31,13 +31,13 @@ init-playwright:
 
 .PHONY: init-dev
 init-dev:
+	# python
+	pip install poetry
+	poetry install --with dev,airflow
+	make init-certs
 	# git
 	git config blame.ignoreRevsFile .git-blame-ignore-revs
 	pre-commit install
-	# python
-	curl -sSL https://install.python-poetry.org | python3 -
-	poetry install --with dev,airflow
-	make init-certs
 	# javascript
 	npm install
 	make init-playwright
@@ -45,8 +45,8 @@ init-dev:
 	cp .env.template .env
 	cp ./dags/.env.template ./dags/.env
 	# prepare django
-	psql -d "$(DB_URL)" -f scripts/sql/create_databases.sql
-	psql -d "$(DB_URL)" -f scripts/sql/create_extensions.sql
+	make run-all
+	$(PYTHON) manage.py create_remote_db_server
 	make migrate
 	make createcachetable
 	make createsuperuser
@@ -164,6 +164,12 @@ a11y:
 js-test:
 	npm run test
 
+.PHONY: backend-test
+backend-test:
+	@make unit-test
+	@make integration-test
+	@make dags-test
+
 .PHONY: test
 test:
 	@make unit-test
@@ -180,11 +186,15 @@ extract-dsfr:
 
 .PHONY: drop-schema-public
 drop-schema-public:
-	docker compose exec lvao-db psql -U qfdmo -d qfdmo -c "DROP SCHEMA IF EXISTS public CASCADE;"
+	docker compose exec lvao-webapp-db psql -U webapp -d webapp -c "DROP SCHEMA IF EXISTS public CASCADE;"
 
 .PHONY: create-schema-public
 create-schema-public:
-	docker compose exec lvao-db psql -U qfdmo -d qfdmo -c "CREATE SCHEMA IF NOT EXISTS public;"
+	docker compose exec lvao-webapp-db psql -U webapp -d webapp -c "CREATE SCHEMA IF NOT EXISTS public;"
+
+.PHONY: psql
+psql:
+	docker compose exec lvao-db psql -U qfdmo -d qfdmo
 
 .PHONY: dump-production
 dump-production:
@@ -216,3 +226,8 @@ db-restore-for-tests:
 .PHONY: build-docs
 build-docs:
 	poetry run sphinx-build -b html -c docs docs _build
+
+.PHONY: fmt-infra
+fmt-infra:
+	tofu fmt -recursive infrastructure
+	terragrunt hcl fmt infrastructure

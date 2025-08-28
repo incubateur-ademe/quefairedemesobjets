@@ -90,3 +90,4 @@ class TAGS:
     ACTEURS: str = "acteurs"
     TOUT: str = "tout"
     SQL: str = "sql"
+    SCALEWAY: str = "scaleway"

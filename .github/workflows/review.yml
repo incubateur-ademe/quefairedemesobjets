@@ -3,7 +3,7 @@ name: 💣 Review
 on:
   workflow_dispatch:
   pull_request:
-    types: [labeled, opened, synchronize]
+    types: [opened, synchronize]
 
 defaults:
   run:
@@ -14,11 +14,26 @@ jobs:
     name: 🤖 CI
     uses: ./.github/workflows/ci.yml
 
-  preprod:
-    name: 🟠 Preprod
-    uses: ./.github/workflows/_cd-by-environment.yml
+  airflow_docker:
+    name: 🐳 Airflow Docker
+    uses: ./.github/workflows/airflow_docker.yml
+    secrets: inherit # pragma: allowlist secret`
+    with:
+      image_tag: review
+
+  webapp:
+    name: 🟠 Webapp
+    uses: ./.github/workflows/_deploy-webapp.yml
     secrets: inherit # pragma: allowlist secret`
     needs: [ci]
+    with:
+      environment: preprod
+
+  airflow:
+    name: 🟠 Airflow
+    uses: ./.github/workflows/_deploy-airflow.yml
+    secrets: inherit # pragma: allowlist secret`
+    needs: [ci, airflow_docker]
     with:
       environment: preprod
 

@@ -8,21 +8,30 @@ from fuzzywuzzy import fuzz
 from shapely import wkb
 from shapely.geometry import Point
 from sources.tasks.airflow_logic.config_management import DAGConfig
+from sources.tasks.transform.formatter import format_libelle_to_code
 from sources.tasks.transform.transform_column import (
     clean_code_postal,
     clean_number,
     clean_siren,
     clean_siret,
 )
-
+from unidecode import unidecode
 from utils import logging_utils as log
-from utils.formatter import format_libelle_to_code
+from utils.django import django_setup_full
+
+django_setup_full()
 
 logger = logging.getLogger(__name__)
 
 ACTEUR_TYPE_DIGITAL = "acteur_digital"
 ACTEUR_TYPE_ESS = "ess"
 LABEL_ESS = "ess"
+
+# FIXME : Utiliser Django pour toutes ces constantes ?
+A_DOMICILE = "A_DOMICILE"
+SUR_PLACE = "SUR_PLACE"
+SUR_PLACE_OU_A_DOMICILE = "SUR_PLACE_OU_A_DOMICILE"
+
 LABEL_TO_IGNORE = ["non applicable", "na", "n/a", "null", "aucun", "non"]
 MANDATORY_COLUMNS_AFTER_NORMALISATION = [
     "identifiant_unique",
@@ -45,7 +54,6 @@ def merge_duplicates(
     merge_as_list_columns: list,
     merge_as_proposition_service_columns: list,
 ) -> pd.DataFrame:
-
     for col in merge_as_list_columns + merge_as_proposition_service_columns:
         if col not in df.columns:
             raise ValueError(f"Column {col} not found in DataFrame")
@@ -263,7 +271,7 @@ def get_latlng_from_geopoint(row: pd.Series, _) -> pd.Series:
     return row[["latitude", "longitude"]]
 
 
-def _parse_float(value):
+def parse_any_to_float(value) -> float | None:
     if isinstance(value, float):
         return None if math.isnan(value) else value
     if not isinstance(value, str):
@@ -278,12 +286,10 @@ def _parse_float(value):
 
 def compute_location(row: pd.Series, _):
     # first column is latitude, second is longitude
-    lat_column = row.keys()[0]
-    lng_column = row.keys()[1]
-    row[lat_column] = _parse_float(row[lat_column])
-    row[lng_column] = _parse_float(row[lng_column])
-    row["location"] = get_point_from_location(row[lng_column], row[lat_column])
-    return row[["location"]]
+    row["latitude"] = parse_any_to_float(row["latitude"])
+    row["longitude"] = parse_any_to_float(row["longitude"])
+    row["location"] = get_point_from_location(row["longitude"], row["latitude"])
+    return row[["location", "latitude", "longitude"]]
 
 
 def get_point_from_location(longitude, latitude):
@@ -293,7 +299,6 @@ def get_point_from_location(longitude, latitude):
 
 
 def clean_proposition_services(row, _):
-
     # formater les propositions de service selon les colonnes
     # action_codes and sous_categorie_codes
     #
@@ -315,6 +320,100 @@ def clean_proposition_services(row, _):
 ### Fonctions de résolution de l'adresse au format BAN et avec vérification via l'API
 # adresse.data.gouv.fr en option
 # TODO : A déplacer ?
+
+
+def _clean_lieu_prestation(service_a_domicile):
+    from qfdmo.models.acteur import Acteur
+
+    service_a_domicile = service_a_domicile.lower().strip()
+
+    if re.match(r"oui\s*exclusivement", service_a_domicile):
+        return Acteur.LieuPrestation.A_DOMICILE
+    elif re.match(r"^oui$", service_a_domicile):
+        return Acteur.LieuPrestation.SUR_PLACE_OU_A_DOMICILE
+    elif re.match(r"^non$", service_a_domicile):
+        return Acteur.LieuPrestation.SUR_PLACE
+    else:
+        return Acteur.LieuPrestation.UNKNOWN
+
+
+def _clean_departement_code(departement_code):
+    if len(departement_code) == 1:
+        departement_code = "0" + departement_code
+    return departement_code
+
+
+def _clean_perimetre_adomicile_codes(perimetre_dinterventions):
+    from qfdmo.models.acteur import PerimetreADomicile
+
+    perimetre_prestation = []
+    perimetre_dinterventions = perimetre_dinterventions.split("|")
+    for perimetre in perimetre_dinterventions:
+        perimetre = unidecode(perimetre).upper().strip()
+        if matches := re.match(r"(\d+)\s*KM", perimetre):
+            perimetre_prestation.append(
+                {
+                    "type": PerimetreADomicile.Type.KILOMETRIQUE.value,
+                    "valeur": int(matches.group(1)),
+                }
+            )
+        elif matches := re.match(r"^(\d{1,3}|2A|2B)$", perimetre):
+            departement = matches.group(1)
+            departement = _clean_departement_code(departement)
+            perimetre_prestation.append(
+                {
+                    "type": PerimetreADomicile.Type.DEPARTEMENTAL.value,
+                    "valeur": departement,
+                }
+            )
+        elif matches := re.match(r"^FRANCE\s*METROPOLITAINE$", perimetre):
+            perimetre_prestation.append(
+                {
+                    "type": PerimetreADomicile.Type.FRANCE_METROPOLITAINE.value,
+                    "valeur": "",
+                }
+            )
+            # TOUTE LA FRANCE Y COMPRIS DROM TOM
+        elif matches := re.match(r"^DROM\s*TOM$", perimetre):
+            perimetre_prestation.append(
+                {
+                    "type": PerimetreADomicile.Type.DROM_TOM.value,
+                    "valeur": "",
+                }
+            )
+        elif matches := re.match(
+            r"^FRANCE\s*METROPOLITAINE\s*Y\s*COMPRIS\s*DROM\s*TOM$", perimetre
+        ):
+            perimetre_prestation.append(
+                {
+                    "type": PerimetreADomicile.Type.FRANCE_METROPOLITAINE.value,
+                    "valeur": "",
+                }
+            )
+            perimetre_prestation.append(
+                {
+                    "type": PerimetreADomicile.Type.DROM_TOM.value,
+                    "valeur": "",
+                }
+            )
+        else:
+            logger.warning(f"Perimetre {perimetre} non reconnu")
+
+    perimetre_prestation.sort(key=lambda x: (x["type"], x["valeur"]))
+
+    return perimetre_prestation
+
+
+def clean_service_a_domicile(row, _):
+    row["lieu_prestation"] = _clean_lieu_prestation(row["service_a_domicile"])
+
+    row["perimetre_adomicile_codes"] = []
+    if row["lieu_prestation"] in [A_DOMICILE, SUR_PLACE_OU_A_DOMICILE]:
+        row["perimetre_adomicile_codes"] = _clean_perimetre_adomicile_codes(
+            row["perimetre_dintervention"]
+        )
+
+    return row[["lieu_prestation", "perimetre_adomicile_codes"]]
 
 
 def _get_address(
@@ -342,7 +441,7 @@ def _get_address(
 
 # TODO faire un retry avec tenacity
 def _get_address_from_ban(address) -> dict:
-    url = "https://api-adresse.data.gouv.fr/search/"
+    url = "https://data.geopf.fr/geocodage/search/"
     params = {"q": address, "limit": 1}
     if address is None:
         return {}

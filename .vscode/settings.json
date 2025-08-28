@@ -5,7 +5,13 @@
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
     "files.associations": {
-        "*.html": "django-html"
+        "*.html": "django-html",
+        "dbt/**/*.sql": "jinja-sql",
+        "dbt/**/**/*.sql": "jinja-sql",
+        "dbt/**/**/**/*.sql": "jinja-sql",
+        "dbt/**/*.yml": "jinja-yaml",
+        "dbt/**/**/*.yml": "jinja-yaml",
+        "dbt/**/**/**/*.yml": "jinja-yaml",
     },
     "python.analysis.extraPaths": [
         "./dags"

@@ -6,14 +6,15 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import requests
-
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
 
 
 def source_data_download(
-    endpoint: str, s3_connection_id: str | None = None
+    endpoint: str,
+    s3_connection_id: str | None = None,
+    metadata_endpoint: str | None = None,
 ) -> pd.DataFrame:
     """Téléchargement de la données source sans lui apporter de modification"""
     logger.info("Téléchargement données de l'API : début...")
@@ -24,9 +25,38 @@ def source_data_download(
     data = fetch_data_from_endpoint(endpoint, s3_connection_id)
     logger.info("Téléchargement données de l'API : ✅ succès.")
     df = pd.DataFrame(data).replace({pd.NA: None, np.nan: None})
+    # create dataframe with only string dtype columns
+    df = df.astype(str)
     if df.empty:
         raise ValueError("Aucune donnée reçue de l'API")
     log.preview("df retournée par la tâche", df)
+
+    if metadata_endpoint:
+        metadata = requests.get(metadata_endpoint, timeout=60)
+        metadata.raise_for_status()
+        schema = metadata.json()
+
+        # Récupérer toutes les colonnes attendues du schéma
+        expected_columns = [
+            field["key"] for field in schema if not field.get("x-calculated", False)
+        ]
+
+        # Vérifier les colonnes manquantes
+        missing_columns = set(expected_columns) - set(df.columns)
+        if missing_columns:
+            logger.warning(f"Colonnes manquantes dans le DataFrame : {missing_columns}")
+        for column in missing_columns:
+            df[column] = ""
+
+        # Vérifier les colonnes supplémentaires non attendues
+        extra_columns = set(df.columns) - set(expected_columns)
+        if extra_columns:
+            logger.warning(
+                f"Colonnes supplémentaires dans le DataFrame : {extra_columns}"
+            )
+
+        log.preview("metadata retournée par la tâche", schema)
+
     return df
 
 

@@ -6,21 +6,23 @@ import pandas as pd
 from opening_hours import OpeningHours, ParserError
 from sources.config import shared_constants as constants
 from sources.tasks.airflow_logic.config_management import DAGConfig
+from sources.tasks.transform.formatter import format_libelle_to_code
 from sources.tasks.transform.opening_hours import interprete_opening_hours
-
-from utils.formatter import format_libelle_to_code
 
 logger = logging.getLogger(__name__)
 
 CLOSED_THIS_DAY = "Fermé"
 
 
-def cast_eo_boolean_or_string_to_boolean(value: str | bool, _) -> bool:
+def cast_eo_boolean_or_string_to_boolean(value: str | bool, _) -> bool | None:
     if isinstance(value, bool):
         return value
     if isinstance(value, str):
-        return value.lower().strip() == "oui"
-    return False
+        if value.lower().strip() == "oui":
+            return True
+        if value.lower().strip() == "non":
+            return False
+    return None
 
 
 def convert_opening_hours(opening_hours: str | None, _) -> str:
@@ -161,10 +163,19 @@ def clean_url(url, _) -> str:
     return url
 
 
+def clean_email(email: str | None, _) -> str:
+    if pd.isna(email) or not email:
+        return ""
+    email = str(email).strip().lower()
+    if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+        return ""
+    return email
+
+
 def clean_code_postal(cp: str | None, _) -> str:
     if pd.isna(cp) or not cp:
         return ""
-    # cast en str et ajout de 0 si le code postal est inférieur à 10000
+    cp = clean_number(cp)
     return f"0{cp}" if cp and len(str(cp)) == 4 else str(cp)
 
 

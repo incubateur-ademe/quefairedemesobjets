@@ -1,6 +1,7 @@
 import pandas as pd
 import pytest
 from django.contrib.gis.geos import Point
+from utils.django import django_setup_full
 
 from dags.cluster.tasks.business_logic.cluster_acteurs_parents_choose_data import (
     cluster_acteurs_parents_choose_data,
@@ -19,7 +20,6 @@ from unit_tests.qfdmo.acteur_factory import (
     RevisionActeurFactory,
     SourceFactory,
 )
-from utils.django import django_setup_full
 
 django_setup_full()
 
@@ -240,6 +240,58 @@ class TestClusterActeursParentsChooseData:
         assert df.loc[df["identifiant_unique"] == "p1", "parent_data_new"].values[
             0
         ] == {"nom": "prio 1", "email": "email.acteur@source.3"}
+        assert (
+            df.loc[df["identifiant_unique"] != "p1", "parent_data_new"].isnull().all()
+        ), "tester que tous les autres sont None"
+
+    def test_cluster_acteurs_parents_choose_data_parent_keep_keep_empty(
+        self,
+        df_clusters_parent_keep,
+        sources,
+    ):
+        df = cluster_acteurs_parents_choose_data(
+            df_clusters=df_clusters_parent_keep,
+            fields_to_include=["nom", "siret", "email"],
+            exclude_source_ids=[],
+            prioritize_source_ids=[sources[0].id, sources[1].id],
+            keep_empty=True,
+        )
+
+        # Retrieve parent data
+        assert (
+            df.loc[df["identifiant_unique"] == "p1", "parent_data_new"].values[0] == {}
+        ), (
+            "keep_empty is True, first email is empty, as it is the same than parent"
+            " email value, the update in empty"
+        )
+        # tester que tous les autres sont None
+        assert (
+            df.loc[df["identifiant_unique"] != "p1", "parent_data_new"].isnull().all()
+        )
+
+    def test_cluster_acteurs_parents_choose_data_parent_create_keep_empty(
+        self,
+        df_clusters_parent_create,
+        sources,
+    ):
+        df = cluster_acteurs_parents_choose_data(
+            df_clusters=df_clusters_parent_create,
+            fields_to_include=["nom", "siret", "email"],
+            exclude_source_ids=[],
+            prioritize_source_ids=[sources[2].id],
+            keep_empty=True,
+        )
+
+        # Retrieve parent data
+        assert df.loc[df["identifiant_unique"] == "p1", "parent_data_new"].values[
+            0
+        ] == {
+            "nom": "prio 1",
+            "email": "email.acteur@source.3",
+        }, (
+            "keep_empty is forced to False and the empty email is ignored until"
+            " found `email.acteur@source.3`"
+        )
         assert (
             df.loc[df["identifiant_unique"] != "p1", "parent_data_new"].isnull().all()
         ), "tester que tous les autres sont None"

@@ -1,12 +1,87 @@
 import logging
-import subprocess
-import tempfile
 
 from utils.django import django_setup_full
 
 logger = logging.getLogger(__name__)
 
 django_setup_full()
+
+
+def replace_acteur_table(
+    prefix_django: str,
+    prefix_dbt: str,
+    tables=[
+        "acteur",
+        "acteur_acteur_services",
+        "acteur_labels",
+        "acteur_sources",
+        "propositionservice",
+        "propositionservice_sous_categories",
+        "perimetreadomicile",
+    ],
+):
+    from django.db import DEFAULT_DB_ALIAS, connections
+
+    with connections[DEFAULT_DB_ALIAS].cursor() as cursor:
+        copy_tables_between_servers(cursor, prefix_dbt, prefix_django, tables)
+        switch_tables(cursor, prefix_django, prefix_dbt, tables)
+
+
+def copy_tables_between_servers(cursor, prefix_dbt, prefix_django, tables):
+    from django.conf import settings
+
+    cursor.execute("BEGIN")
+    try:
+        for table in tables:
+            logger.warning(
+                f"copy table to {prefix_dbt}{table} from warehouse to webapp"
+            )
+
+            # Refresh table in webapp_public
+            cursor.execute(
+                f"DROP FOREIGN TABLE IF EXISTS"
+                f" {settings.REMOTE_WAREHOUSE_SCHEMANAME}.{prefix_dbt}{table}"
+            )
+            cursor.execute(
+                f"IMPORT FOREIGN SCHEMA public"
+                f" LIMIT TO ({prefix_dbt}{table})"
+                f" FROM SERVER {settings.REMOTE_WAREHOUSE_SERVERNAME}"
+                f" INTO {settings.REMOTE_WAREHOUSE_SCHEMANAME}"
+            )
+
+            # Create table with same structure including indexes
+            cursor.execute(f"DROP TABLE IF EXISTS {prefix_dbt}{table}")
+            cursor.execute(
+                f"CREATE TABLE {prefix_dbt}{table} (LIKE "
+                f"{prefix_django}{table} "
+                f"INCLUDING INDEXES)"
+            )
+
+            # Get column names in correct order
+            cursor.execute(
+                f"""
+                SELECT column_name
+                FROM information_schema.columns
+                WHERE table_name = '{prefix_django}{table}'
+                ORDER BY ordinal_position
+            """
+            )
+            columns = [col[0] for col in cursor.fetchall()]
+            columns_str = ", ".join(columns)
+
+            # Copy data
+            cursor.execute(
+                f"INSERT INTO {prefix_dbt}{table} ({columns_str}) "
+                f"SELECT {columns_str} FROM "
+                f"{settings.REMOTE_WAREHOUSE_SCHEMANAME}.{prefix_dbt}{table}"
+            )
+
+        logger.warning("Commit the transaction")
+        cursor.execute("COMMIT")
+    except Exception as e:
+        logger.warning("Rollback the transaction")
+        cursor.execute("ROLLBACK")
+        raise e
 
 
 def switch_tables(cursor, prefix_django, prefix_dbt, tables):
@@ -38,71 +113,3 @@ def switch_tables(cursor, prefix_django, prefix_dbt, tables):
         logger.warning("Rollback the transaction")
         cursor.execute("ROLLBACK")
         raise e
-
-
-def replace_acteur_table(
-    prefix_django: str,
-    prefix_dbt: str,
-    tables=[
-        "acteur",
-        "acteur_acteur_services",
-        "acteur_labels",
-        "acteur_sources",
-        "propositionservice",
-        "propositionservice_sous_categories",
-    ],
-):
-    from django.db import DEFAULT_DB_ALIAS, connections
-
-    for table in tables:
-        copy_table_with_pg_tools(f"{prefix_dbt}{table}")
-
-    with connections[DEFAULT_DB_ALIAS].cursor() as cursor:
-        switch_tables(cursor, prefix_django, prefix_dbt, tables)
-
-
-def copy_table_with_pg_tools(table):
-    from django.conf import settings
-
-    warehouse_connection = settings.DB_WAREHOUSE
-    qfdmo_connection = settings.DATABASE_URL
-
-    logger.info(f"Copying table {table} using pg_dump/pg_restore")
-    try:
-        with tempfile.NamedTemporaryFile() as tmpfile:
-            dump_file_path = tmpfile.name
-
-            pg_dump_cmd = [
-                "pg_dump",
-                "--format",
-                "custom",
-                "--large-objects",
-                "--table",
-                table,
-                "--dbname",
-                warehouse_connection,
-                "--file",
-                dump_file_path,
-            ]
-
-            subprocess.run(pg_dump_cmd)
-
-            pg_restore_cmd = [
-                "pg_restore",
-                "-d",
-                qfdmo_connection,
-                "--clean",
-                "--if-exists",
-                "--no-comments",
-                "--disable-triggers",
-                "--no-owner",
-                "--no-privileges",
-                dump_file_path,
-            ]
-
-            subprocess.run(pg_restore_cmd)
-            logger.warning(f"Successfully copied table {table}, using {dump_file_path}")
-
-    except Exception as e:
-        logger.error(f"Error copying table {table}: {str(e)}")
-        raise

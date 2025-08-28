@@ -33,18 +33,14 @@
 {% endblock burger_menu %}
 
 {% block brand %}
-<a href="/" title="Accueil — {{ SITE_CONFIG.site_title }}">
-{% include "components/logo/animated.html" %}
+<a href="/" title="Accueil — {{ SITE_CONFIG.site_title }}" class="qf-block qf-text-sm">
+{% include "components/logo/header.html" %}
 </a>
 {% endblock brand %}
 
 {% block operator_logo %}
-<a href="/" title="Accueil — {{ SITE_CONFIG.site_title }}">
-<img
-    src="{% static 'assistant/bloc-marque.svg' %}"
-    class="max-md:qf-max-w-[220px]"
-    alt="Bloc-marque Ademe & République française"
->
+<a class="md:qf-px-2w" href="/" title="Accueil — {{ SITE_CONFIG.site_title }}">
+{% include './bloc-marque.html' %}
 </a>
 {% endblock operator_logo %}
 

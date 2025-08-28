@@ -39,6 +39,15 @@ class TestClusterActeursClusters:
                 ],
                 "source_id": range(1, 8),
                 "source_code": ["s1", "s2", "s3", "s4", "s5", "s6", "s7"],
+                "source_codes": [
+                    ["s1"],
+                    ["s2"],
+                    ["s3"],
+                    ["s4"],
+                    ["s5"],
+                    ["s6"],
+                    ["s7"],
+                ],
                 "code_departement": ["75", "75", "75", "75", "75", "53", "53"],
                 "code_postal": [
                     "75000",
@@ -76,6 +85,8 @@ class TestClusterActeursClusters:
             df_basic,
             cluster_fields_exact=["ville"],
             cluster_fields_fuzzy=[],
+            cluster_fuzzy_threshold=0.5,
+            cluster_intra_source_is_allowed=True,
         )
         assert len(df_clusters) == len(df_basic)
         assert df_clusters["cluster_id"].nunique() == 3
@@ -115,6 +126,8 @@ class TestClusterActeursClusters:
                     "id4",
                 ],
                 "source_id": range(1, 5),
+                "source_code": ["s1", "s2", "s3", "s4"],
+                "source_codes": [["s1"], ["s2"], ["s3"], ["s4"]],
                 "code_departement": ["13", "75", "53", "13"],
                 "code_postal": ["13000", "75000", "53000", "13000"],
                 "ville": ["Marseille", "Paris", "Laval", "Marseille"],
@@ -129,6 +142,8 @@ class TestClusterActeursClusters:
             df_some_clusters_of_one,
             cluster_fields_exact=["ville"],
             cluster_fields_fuzzy=[],
+            cluster_fuzzy_threshold=0.5,
+            cluster_intra_source_is_allowed=True,
         )
         assert len(df_clusters) == 2
         clusters = df_clusters_to_dict(df_clusters)
@@ -144,6 +159,8 @@ class TestClusterActeursClusters:
         return pd.DataFrame(
             {
                 "source_id": range(1, 8),
+                "source_code": ["s1", "s1", "s1", "s1", "s1", "s1", "s1"],
+                "source_codes": [["s1"] for _ in range(7)],
                 "code_postal": ["10000" for _ in range(7)],
                 "identifiant_unique": ["id" + str(i) for i in range(0, 7)],
                 "nom": [
@@ -167,6 +184,7 @@ class TestClusterActeursClusters:
             cluster_fields_exact=["code_postal"],
             cluster_fields_fuzzy=["nom"],
             cluster_fuzzy_threshold=0.7,
+            cluster_intra_source_is_allowed=True,
         )
         assert df_clusters["cluster_id"].nunique() == 3
         assert len(df_clusters) == 6
@@ -202,6 +220,7 @@ class TestClusterActeursClusters:
                     "statut": "ACTIF",
                     "source_id": 2513,
                     "source_code": "s2",
+                    "source_codes": ["s2"],
                 },
                 {
                     "identifiant_unique": "id13",
@@ -214,6 +233,7 @@ class TestClusterActeursClusters:
                     "statut": "ACTIF",
                     "source_id": None,
                     "source_code": None,
+                    "source_codes": ["s1"],
                 },
                 {
                     "identifiant_unique": "id14",
@@ -226,6 +246,7 @@ class TestClusterActeursClusters:
                     "statut": "ACTIF",
                     "source_id": 2512,
                     "source_code": "s1",
+                    "source_codes": ["s1"],
                 },
             ]
         )
@@ -234,7 +255,9 @@ class TestClusterActeursClusters:
             cluster_fields_exact=["code_postal", "ville"],
             cluster_fields_fuzzy=["nom"],
             cluster_fuzzy_threshold=0.5,
+            cluster_intra_source_is_allowed=True,
         )
+
         assert df_clusters["cluster_id"].nunique() == 1
         assert sorted(df_clusters["identifiant_unique"].tolist()) == [
             "id13",
@@ -264,6 +287,8 @@ class TestClusterActeursClusters:
             {
                 "identifiant_unique": ["orphan1", "orphan2"],
                 "source_id": [s1.id, s1.id],
+                "source_code": ["s1", "s1"],
+                "source_codes": [["s1"], ["s1"]],
                 "acteur_type_id": [at1.id, at1.id],
                 "ville": ["Laval", "Laval"],
                 "nombre_enfants": [0, 0],
@@ -446,3 +471,58 @@ class TestScoreTuplesToClusters:
         threshold = 0.5
         expected = [[1, 2, 3, 4]]
         assert score_tuples_to_clusters(data, threshold) == expected
+
+
+class TestClusterExcludeIntraSource:
+
+    @pytest.fixture
+    def df_acteurs(self):
+        return pd.DataFrame(
+            {
+                "identifiant_unique": [
+                    "a1",
+                    "a2",
+                    "a3",
+                    "a4",
+                    "a5",
+                    "a6",
+                    "a7",
+                    "a8",
+                    "a9",
+                ],
+                "source_codes": [
+                    ["s1"],
+                    ["s2"],
+                    ["s1", "s3"],
+                    ["s4"],
+                    ["s3"],
+                    ["s2"],
+                    ["s3"],
+                    ["s2"],
+                    ["s3"],
+                ],
+                "nom": ["décheterie du village" for _ in range(9)],
+            }
+        )
+
+    def test_cluster_split_clusterintra_source_intrasource_allowed(self, df_acteurs):
+        df_clusters = cluster_acteurs_clusters(
+            df_acteurs,
+            cluster_fields_exact=["nom"],
+            cluster_fields_fuzzy=[],
+            cluster_fuzzy_threshold=0.5,
+            cluster_intra_source_is_allowed=True,
+        )
+        assert df_clusters["cluster_id"].nunique() == 1
+
+    def test_cluster_split_clusterintra_source_intrasource_not_allowed(
+        self, df_acteurs
+    ):
+        df_clusters = cluster_acteurs_clusters(
+            df_acteurs,
+            cluster_fields_exact=["nom"],
+            cluster_fields_fuzzy=[],
+            cluster_fuzzy_threshold=0.5,
+            cluster_intra_source_is_allowed=False,
+        )
+        assert df_clusters["cluster_id"].nunique() == 3

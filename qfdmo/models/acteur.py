@@ -19,6 +19,7 @@ from django.contrib.gis.geos import Point, Polygon
 from django.contrib.gis.geos.geometry import GEOSGeometry
 from django.core.cache import cache
 from django.core.files.images import get_image_dimensions
+from django.core.validators import RegexValidator
 from django.db.models import (
     Case,
     CheckConstraint,
@@ -62,35 +63,9 @@ logger = logging.getLogger(__name__)
 DEFAULT_SOURCE_CODE = "communautelvao"
 
 
-class ActeurService(CodeAsNaturalKeyModel):
-    class Meta:
-        ordering = ["libelle"]
-        verbose_name = "Service proposé"
-        verbose_name_plural = "Services proposés"
-        constraints = [
-            CheckConstraint(
-                check=Q(code__regex=CodeValidator.regex),
-                name="acteur_service_code_format",
-            ),
-        ]
-
-    id = models.AutoField(primary_key=True)
-    code = models.CharField(
-        max_length=255,
-        unique=True,
-        blank=False,
-        null=False,
-        help_text=(
-            "Ce champ est utilisé lors de l'import de données, il ne doit pas être"
-            " mis à jour sous peine de casser l'import de données"
-        ),
-        validators=[CodeValidator()],
-    )
-    libelle = models.CharField(max_length=255, blank=True, null=True)
-    actions = models.ManyToManyField(Action)
-
-    def __str__(self):
-        return f"{self.libelle} ({self.code})"
+def generate_short_uuid():
+    """Wrapper function for shortuuid.uuid to avoid migration issues"""
+    return shortuuid.uuid()
 
 
 class ActeurStatus(models.TextChoices):
@@ -121,6 +96,47 @@ class ActeurReprise(models.TextChoices):
     UN_POUR_ZERO = REPRISE_1POUR0, "1 pour 0"
     UN_POUR_UN = REPRISE_1POUR1, "1 pour 1"
     UNKNOWN = "", ""
+
+
+class DepartementOrNumValidator(RegexValidator):
+    # soit 2A, 2B, ou un entier
+    regex = r"^2A$|^2B$|^[0-9]+$"
+    message = (
+        "Le champ `value` doit être le numéro d'un département ou le nombre de"
+        " kilomètres d'un périmètre pour la réalisation d'un service à domicile."
+    )
+    code = "invalid_code"
+
+
+class ActeurService(CodeAsNaturalKeyModel):
+    class Meta:
+        ordering = ["libelle"]
+        verbose_name = "Service proposé"
+        verbose_name_plural = "Services proposés"
+        constraints = [
+            CheckConstraint(
+                check=Q(code__regex=CodeValidator.regex),
+                name="acteur_service_code_format",
+            ),
+        ]
+
+    id = models.AutoField(primary_key=True)
+    code = models.CharField(
+        max_length=255,
+        unique=True,
+        blank=False,
+        null=False,
+        help_text=(
+            "Ce champ est utilisé lors de l'import de données, il ne doit pas être"
+            " mis à jour sous peine de casser l'import de données"
+        ),
+        validators=[CodeValidator()],
+    )
+    libelle = models.CharField(max_length=255, blank=True, null=True)
+    actions = models.ManyToManyField(Action)
+
+    def __str__(self):
+        return f"{self.libelle} ({self.code})"
 
 
 class ActeurType(CodeAsNaturalKeyModel):
@@ -331,6 +347,12 @@ class DisplayedActeurManager(models.Manager):
 
 
 class BaseActeur(TimestampedModel):
+    class LieuPrestation(models.TextChoices):
+        A_DOMICILE = "A_DOMICILE", "À domicile"
+        SUR_PLACE = "SUR_PLACE", "Sur place"
+        SUR_PLACE_OU_A_DOMICILE = "SUR_PLACE_OU_A_DOMICILE", "Sur place ou à domicile"
+        UNKNOWN = "", ""
+
     class Meta:
         abstract = True
 
@@ -420,6 +442,33 @@ class BaseActeur(TimestampedModel):
         blank=True,
         null=True,
     )
+    consignes_dacces = models.TextField(
+        verbose_name="Consignes d'accès",
+        blank=True,
+        default="",
+        db_default="",
+    )
+    lieu_prestation = models.CharField(
+        max_length=255,
+        choices=LieuPrestation.choices,
+        default=LieuPrestation.UNKNOWN,
+        blank=True,
+    )
+
+    @property
+    def service_a_domicile(self):
+        if not self.lieu_prestation:
+            return {}
+        return {
+            "lieu_prestation": self.lieu_prestation,
+            "perimetre_adomicile": [
+                {
+                    "type": perimetre.type,
+                    "valeur": perimetre.valeur,
+                }
+                for perimetre in self.perimetre_adomiciles.all()
+            ],
+        }
 
     @property
     def latitude(self):
@@ -622,6 +671,7 @@ class BaseActeur(TimestampedModel):
             "proposition_services",
             "acteur_services",
             "labels",
+            "perimetre_adomiciles",
         }
 
     def commentaires_ajouter(self, added):
@@ -766,6 +816,41 @@ class Acteur(BaseActeur):
         self.generate_identifiant_unique_if_missing()
 
 
+class BasePerimetreADomicile(models.Model):
+    class Meta:
+        abstract = True
+        verbose_name = "Périmètre à domicile"
+        verbose_name_plural = "Périmètres à domicile"
+
+    class Type(models.TextChoices):
+        DEPARTEMENTAL = "DEPARTEMENTAL", "Départemental"
+        KILOMETRIQUE = "KILOMETRIQUE", "Kilométrique"
+        FRANCE_METROPOLITAINE = (
+            "FRANCE_METROPOLITAINE",
+            "France métropolitaine (Corse incluse)",
+        )
+        DROM_TOM = "DROM_TOM", "DROM TOM"
+
+    acteur = models.ForeignKey(
+        Acteur, on_delete=models.CASCADE, related_name="perimetre_adomiciles"
+    )
+    type = models.CharField(
+        choices=Type.choices,
+        default=Type.KILOMETRIQUE,
+    )
+    # Char is needed because Corsica codes are 2A and 2B
+    valeur = models.CharField(
+        blank=True,
+        validators=[
+            DepartementOrNumValidator(),
+        ],
+    )
+
+
+class PerimetreADomicile(BasePerimetreADomicile):
+    pass
+
+
 # TODO: améliorer ci-dessous avec un gestionnaire de cache
 # pour l'ensemble des propriétés calculées de type enfants/parents,
 # y inclure la refacto de is_parent
@@ -854,6 +939,10 @@ class RevisionActeur(BaseActeur):
         acteur = self.set_default_fields_and_objects_before_save()
         self.full_clean()
         creating = self._state.adding  # Before calling save
+        if creating:
+            # We keep acteur's lieu_prestation because it goes with perimetre_adomicile
+            # FIXME: should we keep this exception ?
+            self.lieu_prestation = self.lieu_prestation or acteur.lieu_prestation
         super_result = super().save(*args, **kwargs)
         if creating and acteur:
             for proposition_service in acteur.proposition_services.all():  # type: ignore
@@ -870,6 +959,12 @@ class RevisionActeur(BaseActeur):
                 self.labels.add(label)
             for acteur_service in acteur.acteur_services.all():
                 self.acteur_services.add(acteur_service)
+            for perimetre_adomicile in acteur.perimetre_adomiciles.all():
+                RevisionPerimetreADomicile.objects.create(
+                    acteur=self,
+                    type=perimetre_adomicile.type,
+                    value=perimetre_adomicile.value,
+                )
 
         if self.parent != self._original_parent and self._original_parent:
             if not self._original_parent.is_parent:
@@ -905,6 +1000,7 @@ class RevisionActeur(BaseActeur):
                 "proposition_services",
                 "acteur_services",
                 "labels",
+                "perimetre_adomicile",
                 "parent",
                 "parent_reason",
                 "is_parent",
@@ -1019,6 +1115,12 @@ class RevisionActeurParent(RevisionActeur):
         verbose_name_plural = "Parents"
 
 
+class RevisionPerimetreADomicile(BasePerimetreADomicile):
+    acteur = models.ForeignKey(
+        RevisionActeur, on_delete=models.CASCADE, related_name="perimetre_adomiciles"
+    )
+
+
 """
 Model to display all acteurs in admin
 """
@@ -1026,11 +1128,12 @@ Model to display all acteurs in admin
 
 class VueActeur(BaseActeur):
     class Meta:
-        managed = False
         verbose_name = "ACTEUR de l'EC - Vue sur l'acteur"
         verbose_name_plural = "ACTEURS de l'EC - Vues sur tous les acteurs"
 
-    uuid = models.CharField(max_length=255, default=shortuuid.uuid, editable=False)
+    uuid = models.CharField(
+        max_length=255, default=generate_short_uuid, editable=False, db_index=True
+    )
 
     parent = models.ForeignKey(
         "self",
@@ -1048,6 +1151,12 @@ class VueActeur(BaseActeur):
         return self.pk and self.duplicats.exists()
 
 
+class VuePerimetreADomicile(BasePerimetreADomicile):
+    acteur = models.ForeignKey(
+        VueActeur, on_delete=models.CASCADE, related_name="perimetre_adomiciles"
+    )
+
+
 class DisplayedActeur(BaseActeur):
     objects = DisplayedActeurManager()
 
@@ -1059,7 +1168,7 @@ class DisplayedActeur(BaseActeur):
         verbose_name_plural = "ACTEURS de l'EC - AFFICHÉ"
 
     uuid = models.CharField(
-        max_length=255, default=shortuuid.uuid, editable=False, db_index=True
+        max_length=255, default=generate_short_uuid, editable=False, db_index=True
     )
 
     # Table name qfdmo_displayedacteur_sources
@@ -1258,76 +1367,10 @@ class DisplayedActeur(BaseActeur):
         )
 
 
-class DisplayedActeurTemp(BaseActeur):
-    uuid = models.CharField(max_length=255, default=shortuuid.uuid, editable=False)
-
-    labels = models.ManyToManyField(
-        LabelQualite,
-        through="ActeurLabelQualite",
+class DisplayedPerimetreADomicile(BasePerimetreADomicile):
+    acteur = models.ForeignKey(
+        DisplayedActeur, on_delete=models.CASCADE, related_name="perimetre_adomiciles"
     )
-
-    acteur_services = models.ManyToManyField(
-        ActeurService,
-        blank=True,
-        through="ActeurActeurService",
-    )
-
-    # Table name qfdmo_displayedacteurtemp_sources
-    sources = models.ManyToManyField(
-        Source,
-        blank=True,
-        through="DisplayedActeurTempSource",
-        related_name="displayed_acteur_temps",
-    )
-
-    class ActeurLabelQualite(models.Model):
-        class Meta:
-            db_table = "qfdmo_displayedacteurtemp_labels"
-
-        id = models.BigAutoField(primary_key=True)
-        acteur = models.ForeignKey(
-            "DisplayedActeurTemp",
-            on_delete=models.CASCADE,
-            db_column="displayedacteur_id",
-        )
-        label = models.ForeignKey(
-            LabelQualite,
-            on_delete=models.CASCADE,
-            db_column="labelqualite_id",
-        )
-
-    class ActeurActeurService(models.Model):
-        class Meta:
-            db_table = "qfdmo_displayedacteurtemp_acteur_services"
-
-        id = models.BigAutoField(primary_key=True)
-        acteur = models.ForeignKey(
-            "DisplayedActeurTemp",
-            on_delete=models.CASCADE,
-            db_column="displayedacteur_id",
-        )
-        acteur_service = models.ForeignKey(
-            ActeurService,
-            on_delete=models.CASCADE,
-            db_column="acteurservice_id",
-        )
-
-    class DisplayedActeurTempSource(models.Model):
-        class Meta:
-            db_table = "qfdmo_displayedacteurtemp_sources"
-            unique_together = ("acteur_id", "source_id")
-
-        id = models.AutoField(primary_key=True)
-        acteur = models.ForeignKey(
-            "DisplayedActeurTemp",
-            on_delete=models.CASCADE,
-            db_column="displayedacteur_id",
-        )
-        source = models.ForeignKey(
-            Source,
-            on_delete=models.CASCADE,
-            related_name="source_id",
-        )
 
 
 class BasePropositionService(models.Model):
@@ -1404,7 +1447,6 @@ class VuePropositionService(BasePropositionService):
     class Meta:
         verbose_name = "Vue sur la proposition de service"
         verbose_name_plural = "Vue sur toutes les propositions de service"
-        managed = False
 
     id = models.CharField(primary_key=True)
 
@@ -1456,33 +1498,3 @@ class DisplayedPropositionService(BasePropositionService):
         return (self.acteur.natural_key(), self.action.natural_key())
 
     natural_key.dependencies = ["qfdmo.displayedacteur"]
-
-
-class DisplayedPropositionServiceTemp(BasePropositionService):
-    acteur = models.ForeignKey(
-        DisplayedActeurTemp,
-        on_delete=models.CASCADE,
-        null=False,
-        related_name="proposition_services",
-    )
-
-    sous_categories = models.ManyToManyField(
-        SousCategorieObjet,
-        through="DisplayedPropositionServiceTempSousCategorie",
-    )
-
-    class DisplayedPropositionServiceTempSousCategorie(models.Model):
-        class Meta:
-            db_table = "qfdmo_displayedpropositionservicetemp_sous_categories"
-
-        id = models.BigAutoField(primary_key=True)
-        proposition_service = models.ForeignKey(
-            "DisplayedPropositionServiceTemp",
-            on_delete=models.CASCADE,
-            db_column="displayedpropositionservice_id",
-        )
-        sous_categorie_objet = models.ForeignKey(
-            SousCategorieObjet,
-            on_delete=models.CASCADE,
-            db_column="souscategorieobjet_id",
-        )

@@ -1,0 +1,70 @@
+# Inspiration:
+# - https://docs.github.com/en/actions/guides/publishing-docker-images#publishing-images-to-github-packages
+name: 🐳 Docker images for Airflow
+on:
+  # See https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#webhook-payload-object-38
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      image_tag:
+        required: false
+        type: string
+  release:
+    types: [ released, prereleased ]
+env:
+  SCALEWAY_REGISTRY: rg.fr-par.scw.cloud
+  SCALEWAY_NAMESPACE: ns-qfdmo
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      # https://github.com/docker/login-action
+      - name: "[🟣 Scaleway] Log in to the Scaleway Container registry"
+        uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1
+        with:
+          registry: ${{ env.SCALEWAY_REGISTRY }}
+          username: nologin
+          password: ${{ secrets.SCALEWAY_DOCKER_SECRET }}
+
+      - uses: docker/setup-buildx-action@4cc794f83e4b7488282e879f4469e86246e52ddd
+
+      # https://github.com/docker/metadata-action
+      - name: "[🟣 Scaleway] Extract metadata (tags, labels) for Docker"
+        id: airflow_scheduler_meta_scaleway
+        uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f
+        with:
+          images: ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/airflow-scheduler
+
+      # https://github.com/docker/build-push-action
+      - name: "[🟣 Scaleway] Build and push Docker image (airflow-scheduler)"
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
+        with:
+          context: .
+          cache-from: type=gha,scope=scheduler
+          cache-to: type=gha,scope=scheduler,mode=max
+          push: true
+          tags: ${{ inputs.image_tag && format('{0}/{1}/{2}:{3}', env.SCALEWAY_REGISTRY, env.SCALEWAY_NAMESPACE, 'airflow-scheduler', inputs.image_tag) || steps.airflow_scheduler_meta_scaleway.outputs.tags }}
+          labels: ${{ steps.airflow_scheduler_meta_scaleway.outputs.labels }}
+          file: airflow-scheduler.Dockerfile
+
+      - name: "[🟣 Scaleway] Extract metadata (tags, labels) for Docker"
+        id: airflow_webserver_meta_scaleway
+        uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f
+        with:
+          images: ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/airflow-webserver
+
+      - name: "[🟣 Scaleway] Build and push Docker image (airflow-webserver)"
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
+        with:
+          context: .
+          cache-from: type=gha,scope=webserver
+          cache-to: type=gha,scope=webserver,mode=max
+          push: true
+          tags: ${{ inputs.image_tag && format('{0}/{1}/{2}:{3}', env.SCALEWAY_REGISTRY, env.SCALEWAY_NAMESPACE, 'airflow-webserver', inputs.image_tag) || steps.airflow_webserver_meta_scaleway.outputs.tags }}
+          labels: ${{ steps.airflow_webserver_meta_scaleway.outputs.labels }}
+          file: airflow-webserver.Dockerfile
