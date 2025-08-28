@@ -47,6 +47,7 @@
         data-state-search-solution-form-outlet="[data-controller='search-solution-form']"
         data-action="address-autocomplete:change->state#setLocation"
         {# Analytics #}
+        {# TODO: factorize with django-templating-language template as soon as jinja2 will be removed #}
         data-analytics-posthog-key-value="{{ lvao.POSTHOG_KEY }}"
         data-analytics-posthog-debug-value="{{ POSTHOG_DEBUG|lower }}"
         {% if request.user.is_authenticated %}
