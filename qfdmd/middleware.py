@@ -51,7 +51,8 @@ class AssistantMiddleware:
 
         # Handle host-based redirects
         # TODO: handle in nginx as well
-        return self._handle_host_redirects(request)
+        # return self._handle_host_redirects(request)
+        return None
 
     def _handle_special_query_params(self, request) -> str | None:
         if resolve(request.path).view_name != "qfdmd:home":
