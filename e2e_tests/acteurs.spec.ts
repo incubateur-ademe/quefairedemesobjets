@@ -37,16 +37,26 @@ test("Les acteurs sont visibles sur la carte du formulaire et fonctionnent", asy
 
   // Remove the home marker (red dot) that prevents Playwright from clicking other markers
   const [markers, count] = await getMarkers(iframe)
+
+  // Check that there are markers
+  expect(count).toBeGreaterThan(0)
+
+  let clicked = false
   for (let i = 0; i < count; i++) {
     const item = markers?.nth(i)
-
     try {
-      await item!.click()
+      // Wait item before click it
+      await item?.waitFor({ state: "attached", timeout: 2000 })
+      await item?.click({ timeout: 2000 })
+      clicked = true
       break
     } catch (e) {
-      console.log("cannot click", e)
+      console.log(`Cannot click marker ${i}:`, e)
     }
   }
+
+  // Check it is clicked
+  expect(clicked).toBe(true)
 
   await expect(iframe?.locator("#acteurDetailsPanel")).toBeVisible()
 })
