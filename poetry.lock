@@ -7169,6 +7169,28 @@ docs = ["Sphinx (>=7.3)", "myst_parser (==2.0.0)", "pyenchant (>=3.1.1,<4)", "sp
 testing = ["Jinja2 (>=3.0,<3.2)", "azure-mgmt-cdn (>=12.0,<13.0)", "azure-mgmt-frontdoor (>=1.0,<1.1)", "boto3 (>=1.28,<2)", "coverage (>=3.7.0)", "curlylint (==0.13.1)", "django-pattern-library (>=0.7)", "djhtml (==3.0.6)", "doc8 (==1.1.2)", "factory-boy (>=3.2)", "freezegun (>=0.3.8)", "polib (>=1.1,<2.0)", "python-dateutil (>=2.7)", "responses (>=0.25,<1)", "ruff (==0.9.6)", "semgrep (==1.40.0)", "tblib (>=2.0,<3.0)"]
 
 [[package]]
+name = "wagtail-honeypot"
+version = "1.2.0"
+description = "Add optional honeypot protection to your Wagtail forms."
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = []
+develop = false
+
+[package.dependencies]
+Wagtail = ">=5.1"
+
+[package.extras]
+development = ["black (==24.4.2)", "django-upgrade", "flake8 (==7.1.0)", "isort (==5.13.2)", "pyupgrade"]
+
+[package.source]
+type = "git"
+url = "https://github.com/Luzzzi/wagtail-honeypot.git"
+reference = "feature/i18n-required-honeypot"
+resolved_reference = "39908237c320cd8a3568a9ee6bff039bc89f3b66"
+
+[[package]]
 name = "wagtail-localize"
 version = "1.12.2"
 description = "Translation plugin for Wagtail CMS"
@@ -7632,4 +7654,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12,<3.13"
-content-hash = "f2ea622468b40be675fb47db3b51a4f13d05b8bce3d679dff2ee06d8f6dcda89"
+content-hash = "53e5c2270b444ac8af5a6947a7fcfec10fb45f164d19b5c025a090231731c062"

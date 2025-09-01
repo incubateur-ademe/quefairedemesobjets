@@ -109,6 +109,7 @@ sites-faciles-experiment = "^2.1.0rc1"
 diff-match-patch = "^20241021"
 django-lookbook = "^1.0.2"
 queryish = "^0.2"
+wagtail-honeypot = { git = "https://github.com/Luzzzi/wagtail-honeypot.git", branch = "feature/i18n-required-honeypot" }
 
 [tool.poetry.group.dev.dependencies]
 black = "^25.1.0"
