@@ -353,8 +353,8 @@ git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </sp
 Ces identifiants ont été récupérés à la main, depuis le frontend de la carte :</p>
 <ol class="arabic simple">
 <li><p>Faire une recherche pour la zone souhaitée</p></li>
-<li><p>Récupérer le lien de l’acteur dans la fiche détaillée (en cliquant sur le lien de partage par exemple) –&gt; https://lvao.ademe.fr/adresse_details/3kQK86DEWA3ZrcirdzzBez l’id est 3kQK86DEWA3ZrcirdzzBez</p></li>
-<li><p>Chercher cet id dans l’admin Django : https://lvao.ademe.fr/admin/qfdmo/displayedacteur/?q=eYKxBYDMDoMXTr8iiw69Ek</p></li>
+<li><p>Récupérer le lien de l’acteur dans la fiche détaillée (en cliquant sur le lien de partage par exemple) –&gt; https://quefairedemesdechets.ademe.fr/adresse_details/3kQK86DEWA3ZrcirdzzBez l’id est 3kQK86DEWA3ZrcirdzzBez</p></li>
+<li><p>Chercher cet id dans l’admin Django : https://quefairedemesdechets.ademe.fr/admin/qfdmo/displayedacteur/?q=eYKxBYDMDoMXTr8iiw69Ek</p></li>
 <li><p>Récupérer le champ <code class="docutils literal notranslate"><span class="pre">identifiant_unique</span></code> : il peut être un uuid ou un assemblage de chaînes de caractères mentionnant la source, par exemple <code class="docutils literal notranslate"><span class="pre">ocad3e_SGS-02069</span></code></p></li>
 <li><p>Ajouter cet identifiant dans le <code class="docutils literal notranslate"><span class="pre">Makefile</span></code> à la suite des autres, derrière le flag <code class="docutils literal notranslate"><span class="pre">--pk</span></code> dans la commande <code class="docutils literal notranslate"><span class="pre">generate-fixtures-acteurs</span></code></p></li>
 <li><p>Une fois cela fait, il faut récupérer les <em>primary key</em> des propositions de service associées.
