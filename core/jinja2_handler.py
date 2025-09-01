@@ -1,6 +1,5 @@
 from math import sqrt
 
-from django.conf import settings
 from django.http import HttpRequest
 from django.templatetags.static import static
 from django.urls import reverse
@@ -79,9 +78,6 @@ def environment(**options):
             "url": reverse,
             "static": static,
             "sharer": get_sharer_content,
-            "AIRFLOW_WEBSERVER_REFRESHACTEUR_URL": (
-                settings.AIRFLOW_WEBSERVER_REFRESHACTEUR_URL
-            ),
         }
     )
     env.filters.update({"linebreaks": linebreaks})

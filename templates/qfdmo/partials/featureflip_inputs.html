@@ -1,0 +1,24 @@
+{% load qfdmo_tags static %}
+
+{% if is_iframe %}
+    <input type="hidden" name="iframe">
+{% endif %}
+
+{% if is_carte %}
+    <input type="hidden" name="carte" data-search-solution-form-target='carte'>
+{% endif %}
+
+{% if request.GET.limit %}
+    <input type="hidden" name="limit" value="{{ request.GET.limit }}">
+{% endif %}
+
+{% if request.GET.address_placeholder %}
+    <input type="hidden" name="address_placeholder" value="{{ request.GET.address_placeholder }}">
+{% endif %}
+
+{% random_range 1000 as random_value %}
+<input type="hidden" name="r" value="{{ random_value }}">
+
+{% if request.GET.first_dir %}
+    <input type="hidden" name="first_dir" value="{{ request.GET.first_dir }}">
+{% endif %}

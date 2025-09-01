@@ -1,0 +1,31 @@
+{% load static %}
+<div
+    class="qf-absolute qf-top-1w qf-bottom-1w qf-left-1w qf-right-1w qf-border qf-border-grey-900 qf-border-solid
+    qf-flex qf-flex-row qf-justify-center group-aria-[busy]:qf-hidden"
+    data-testid="adresse-missing"
+>
+    <picture>
+        <source srcset="{% static 'map-background-mobile.png' %}" media="(orientation: portrait)">
+        <img
+            class="qf-absolute qf-left-0 qf-right-0 qf-top-0 qf-bottom-0 qf-w-full qf-h-full qf-object-cover"
+            src="{% static 'map-background-desktop.png' %}"
+            alt=""
+        >
+    </picture>
+    <div class="mx-auto qf-max-w-3xl qf-flex qf-flex-col qf-justify-center qf-text-center qf-items-center qf-relative qf-p-1w">
+        <h3 class="qf-text-2xl sm:qf-text-4xl qf-text-center text-black qf-mb-2w" data-testid="preview-title">
+            {% if carte_config and carte_config.titre_previsualisation %}
+                {{ carte_config.titre_previsualisation }}
+            {% else %}
+                Découvrez les lieux près de chez vous
+                pour donner une seconde vie à votre objet !
+            {% endif %}
+        </h3>
+        <p class="qf-max-w-xl qf-text-lg mx-auto qf-text-grey-50" data-testid="preview-content">
+            {% if carte_config and carte_config.contenu_previsualisation %}
+                {{ carte_config.contenu_previsualisation }}
+            {% else %}
+                Saisissez une adresse et recherchez des établissements à proximité qui vous aideront à remettre votre objet en circulation.</p>
+            {% endif %}
+    </div>
+</div>
