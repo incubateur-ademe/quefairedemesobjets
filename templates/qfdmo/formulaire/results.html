@@ -1,0 +1,59 @@
+{% comment %}We need to set a size on the map to help Leaflet size its content.
+We do not want the map to be bigger than the height of its container
+
+The values of 120px and 150px are determined empirically.
+They need to match the css variables used for .grid-map selector in qfdmo.css
+{% endcomment %}
+
+{% load qfdmo_tags %}
+{% with address_ok=form.initial.adresse|default:form.initial.bounding_box|default:form.initial.epci_codes %}
+{% if request.user.is_authenticated and DEBUG %}
+    <div class="qf-bg-blue-france-sun-113-625 qf-text-white qf-text-center qf-w-screen qf-py-1v qf-text-xs ">
+        <details><summary>Afficher l'url</summary> {{ request.build_absolute_uri }}</details>
+        <a href="{{ request.build_absolute_uri }}" target="_blank">Ouvrir la carte directement</a>
+    </div>
+{% endif %}
+<div
+    class="
+    qf-relative
+    qf-flex-grow
+    qf-shadow
+    {% if is_digital %}
+    max-md:qf-overflow-auto
+    {% endif %}
+    "
+    {% if not is_digital %}
+    data-controller="map"
+    data-map-location-value="{{ location }}"
+    {% endif %}
+>
+    {% if is_digital %}
+        {% include "qfdmo/carte/_digital_results.html" %}
+    {% else %}
+        {# Near by addresses #}
+        {% include "qfdmo/shared/_search_in_zone.html" %}
+        <div
+            id="map"
+            data-map-target="mapContainer"
+            class="qf-inset-0 qf-h-full qf-relative qf-z-0"
+            data-action="map:captureInteraction->analytics#captureInteractionWithMap"
+        >
+            {% for acteur in acteurs %}
+                <script type="application/json" data-map-target="acteur">
+                    {% acteur_json_display acteur form.initial.direction form.initial.action_list carte carte_config form.initial.sc_id as json_data %}{{ json_data|safe }}
+                </script>
+            {% endfor %}
+        </div>
+
+        {% if address_ok %}
+            {% if not acteurs %}
+                {% include "qfdmo/shared/disclaimers/no_local_solution.html" %}
+            {% endif %}
+        {% else %}
+            {% include "qfdmo/shared/disclaimers/adresse_missing.html" %}
+        {% endif %}
+    {% endif %}
+
+    {% include "qfdmo/shared/disclaimers/loading_solutions.html" %}
+</div>
+{% endwith %}
