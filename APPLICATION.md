@@ -6,8 +6,8 @@ Ici sont référencées toutes les applications développées ou maintenues par 
 
 ### URLs
 
-- Production : https://lvao.ademe.fr/
-- Preprod : https://quefairedemesobjets-preprod.osc-fr1.scalingo.io/
+- Production : https://quefairedemesdechets.ademe.fr/
+- Preprod : https://quefairedemesdechets.incubateur.ademe.dev/
 
 ### Accès spécifiques
 
@@ -61,4 +61,3 @@ Pas de preprod
 - Production : https://app-efd2802a-1773-48e0-987e-7a6dffb929d1.cleverapps.io/home
 - Preprod : https://app-d3c229bf-be85-4dbd-aca2-c8df1c6166de.cleverapps.io/home
 - Hébergement : https://console.clever-cloud.com/organisations/orga_0c814f24-ffc6-4933-abcf-3050940209eb
-- documentation spécifique : [README.airflow.md](./README.airflow.md)

@@ -32,7 +32,7 @@ from wagtail.documents import urls as wagtaildocs_urls
 from qfdmd.models import Synonyme
 
 from .api import api
-from .views import direct_access, robots_txt
+from .views import robots_txt
 
 info_dict = {
     "queryset": Synonyme.objects.filter().order_by("nom"),
@@ -72,8 +72,6 @@ urlpatterns = [
         {"sitemaps": sitemaps},
         name="django.contrib.sitemaps.views.sitemap",
     ),
-    path("dsfr/", include(("dsfr_hacks.urls", "dsfr_hacks"), namespace="dsfr_hacks")),
-    path("", direct_access, name="home"),
     path("", include(("qfdmo.urls", "qfdmo"), namespace="qfdmo")),
     path("", include(("qfdmd.urls", "qfdmd"), namespace="qfdmd")),
     path("docs/", TemplateView.as_view(template_name="techdocs.html"), name="techdocs"),
@@ -85,6 +83,10 @@ if settings.DEBUG:
 
     urlpatterns.extend(
         [
+            path(
+                "dsfr/",
+                include(("dsfr_hacks.urls", "dsfr_hacks"), namespace="dsfr_hacks"),
+            ),
             path("__debug__/", include("debug_toolbar.urls")),
             path("__reload__/", include("django_browser_reload.urls")),
             path("500", server_error, {"template_name": "500.html"}),
