@@ -80,15 +80,12 @@ export class SolutionMap {
   }
 
   #generateHomeHTMLMarker() {
-    const el = document.createElement("div")
-    el.innerHTML = `<div class="qf-flex qf-items-center qf-justify-center qf-rounded-full qf-bg-white qf-aspect-square qf-border-2 qf-border-solid qf-border-[#E1000F]">
-      <span class="fr-icon-map-pin-2-fill qf-text-[#E1000F]"></span>
-    </div>
-    `
-    el.className = "!qf-z-[10000] home-icon"
-    el.style.width = "35px"
-    el.style.height = "35px"
-    return el
+    const homePinPoint = document.getElementById("pinpoint-home")
+    if (!homePinPoint) {
+      return null
+    }
+    homePinPoint.classList.remove("qf-invisible")
+    return homePinPoint
   }
 
   #generateMarkerHTMLStringFrom(acteur?: DisplayedActeur): string {
