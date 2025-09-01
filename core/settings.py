@@ -465,6 +465,7 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = decouple.config(
 # Wagtail settings
 # ----------------
 SILENCED_SYSTEM_CHECKS = ["wagtailadmin.W002"]
+HOST_PROTO = decouple.config("HOST_PROTO", default="https")
 WAGTAIL_SITE_NAME = "Longue vie aux objets"
 WAGTAILADMIN_BASE_URL = BASE_URL
 WAGTAIL_SEARCH_BACKENDS = {
@@ -481,11 +482,12 @@ INSTALLED_APPS.extend(
         "sites_faciles.blog",
         "sites_faciles.content_manager",
         "sites_faciles.events",
-        "sass_processor",
         "wagtail.contrib.settings",
+        "sites_faciles.forms",
         "wagtail_modeladmin",
         "wagtailmenus",
         "wagtailmarkdown",
+        "wagtail_honeypot",
         # wagtail
         "wagtail.contrib.forms",
         "wagtail.contrib.redirects",
@@ -508,8 +510,6 @@ WAGTAILIMAGES_EXTENSIONS = ["gif", "jpg", "jpeg", "png", "webp", "svg"]
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
-    # Sites faciles
-    "sass_processor.finders.CssFinder",
 ]
 
 
