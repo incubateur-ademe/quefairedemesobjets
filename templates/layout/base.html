@@ -39,7 +39,7 @@
 
     <body
         class="qf-flex qf-flex-col qf-h-svh qf-h-screen qf-overflow-hidden {% block body_classes %}{% endblock %}"
-        data-controller="state"
+        data-controller="state analytics"
         data-state-adresse-value=""
         data-state-longitude-value=""
         data-state-latitude-value=""
@@ -47,6 +47,16 @@
         data-state-map-outlet="[data-controller='map']"
         data-state-search-solution-form-outlet="[data-controller='search-solution-form']"
         data-action="address-autocomplete:change->state#setLocation"
+        {# Analytics #}
+        {# TODO: factorize with django-templating-language template as soon as jinja2 will be removed #}
+        data-analytics-posthog-key-value="{{ lvao.POSTHOG_KEY }}"
+        data-analytics-posthog-debug-value="{{ POSTHOG_DEBUG|lower }}"
+        {% if request.user.is_authenticated %}
+            data-analytics-user-username-value="{{ request.user.username }}"
+            data-analytics-user-email-value="{{ request.user.email }}"
+            data-analytics-user-admin-value="{{ request.user.is_superuser|lower }}"
+        {% endif %}
+        data-analytics-initial-action-value="{% block analytics_action %}{% endblock %}"
     >
         <main id="solutions" class="qf-h-full qf-overflow-auto qf-overscroll-none qf-scroll-smooth">
             <noscript>
