@@ -6,7 +6,7 @@ from django.templatetags.static import static
 from django.urls import reverse
 from django.utils.html import linebreaks
 
-from core.templatetags.seo_tags import get_sharer_content
+from core.templatetags.share_tags import get_sharer_content
 from core.utils import get_direction
 from jinja2 import Environment
 from qfdmo.models import DisplayedActeur
@@ -41,7 +41,13 @@ def display_exclusivite_reparation(acteur: DisplayedActeur) -> bool:
 
 
 def hide_object_filter(request) -> bool:
-    return bool(request.GET.get("sc_id"))
+    # FIXME : we assume that solution is really dirty
+    # the good way would be to manage the display
+    # of this filter using CarteConfig
+    return (
+        bool(request.GET.get("sc_id"))
+        and request.GET.get("map_container_id") != "carte"
+    )
 
 
 def distance_to_acteur(request, acteur):
@@ -59,7 +65,7 @@ def distance_to_acteur(request, acteur):
     if distance_meters >= 1000:
         return f"({round(distance_meters / 1000, 1)} km)".replace(".", ",")
     else:
-        return f"({round(distance_meters/10) * 10 } m)"
+        return f"({round(distance_meters / 10) * 10} m)"
 
 
 def environment(**options):

@@ -27,17 +27,16 @@ def content(request):
 def global_context(request) -> dict:
     base = {
         "iframe": getattr(request, "iframe", False),
+        "BASE_URL": settings.BASE_URL,
         "assistant": {
-            "is_home": request.path == reverse("home"),
+            "is_home": request.path == reverse("qfdmd:home"),
             "POSTHOG_KEY": settings.ASSISTANT["POSTHOG_KEY"],
             "MATOMO_ID": settings.ASSISTANT["MATOMO_ID"],
-            "BASE_URL": settings.ASSISTANT["BASE_URL"],
         },
-        "lvao": {"BASE_URL": settings.LVAO["BASE_URL"]},
+        "lvao": {
+            "POSTHOG_KEY": settings.LVAO["POSTHOG_KEY"],
+        },
     }
-
-    if request.META.get("HTTP_HOST") not in settings.ASSISTANT["HOSTS"]:
-        return base
 
     search_form = SearchForm(prefix="header", initial={"id": "header"})
     home_search_form = SearchForm(prefix="home", initial={"id": "home"})

@@ -16,7 +16,6 @@ from qfdmo.views.adresses import (
     getorcreate_revisionacteur,
     solution_admin,
 )
-from qfdmo.views.auth import LVAOLoginView
 from qfdmo.views.carte import CarteConfigView, CarteSearchActeursView
 from qfdmo.views.configurator import AdvancedConfiguratorView, ConfiguratorView
 
@@ -29,7 +28,6 @@ urlpatterns = [
     path("carte/<slug:slug>/", CarteConfigView.as_view(), name="carte_custom"),
     path("carte.json", CarteSearchActeursView.as_view(), name="carte_json"),
     path("formulaire", FormulaireSearchActeursView.as_view(), name="formulaire"),
-    path("connexion", LVAOLoginView.as_view(), name="login"),
     path(settings.LVAO.get("GOOGLE_SEARCH_CONSOLE"), google_verification),
     path(
         "donnez-votre-avis",

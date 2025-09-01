@@ -29,14 +29,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ------------------
 ASSISTANT = {
     "MATOMO_ID": decouple.config("ASSISTANT_MATOMO_ID", default=82, cast=int),
-    "HOSTS": decouple.config(
-        "ASSISTANT_HOSTS",
-        default="assistant.dev",
-        cast=str,
-    ).split(","),
-    "BASE_URL": decouple.config(
-        "ASSISTANT_BASE_URL", default="https://quefairedemesobjets.ademe.local"
-    ),
     "POSTHOG_KEY": decouple.config(
         "ASSISTANT_POSTHOG_KEY",
         default="phc_fSfhoWDOUxZdKWty16Z3XfRiAoWd1qdJK0N0z9kQHJr",  # pragma: allowlist secret  # noqa: E501
@@ -47,8 +39,13 @@ ASSISTANT = {
 # Carte settings
 # --------------
 LVAO = {
-    "BASE_URL": decouple.config("LVAO_BASE_URL", default="https://lvao.ademe.local"),
     "GOOGLE_SEARCH_CONSOLE": "google9dfbbc61adbe3888.html",
+    "POSTHOG_KEY": decouple.config(
+        "LVAO_POSTHOG_KEY",
+        # Staging project by default
+        default="phc_L1dG5EsBjyMTTcQqFJTAQtEugtGz6C3Tdpf1g7O09si",  # pragma: allowlist secret  # noqa: E501
+        cast=str,
+    ),
 }
 DEFAULT_MAX_SOLUTION_DISPLAYED = decouple.config(
     "DEFAULT_MAX_SOLUTION_DISPLAYED", cast=int, default=10
@@ -87,16 +84,14 @@ BLOCK_ROBOTS = decouple.config("BLOCK_ROBOTS", default=False, cast=bool)
 ENVIRONMENT = decouple.config("ENVIRONMENT", default="development", cast=str)
 VERSION = decouple.config("CONTAINER_VERSION", default="version", cast=str)
 APP = decouple.config("APP", default="local", cast=str)
-BASE_URL = ASSISTANT.get("BASE_URL")
-
-BASE_ALLOWED_HOSTS = [
-    urlparse(config.get("BASE_URL")).hostname for config in [ASSISTANT, LVAO]
-]
-CANONICAL_HOST = urlparse(ASSISTANT.get("BASE_URL")).hostname
-
-
+BASE_URL = decouple.config(
+    "BASE_URL",
+    default="http://quefairedemesdechets.ademe.local",
+    cast=str,
+)
+BASE_HOST = urlparse(BASE_URL).hostname
 ALLOWED_HOSTS = [
-    *BASE_ALLOWED_HOSTS,
+    BASE_HOST,
     *decouple.config("ALLOWED_HOSTS", default="", cast=str).split(","),
 ]
 
@@ -161,7 +156,7 @@ if DEBUG:
     # being wrongly set when using nginx. The current workaround impacts
     # only local development and can be considered harmless, but this
     # might be nice to remove this setting someday.
-    CSRF_TRUSTED_ORIGINS = [config["BASE_URL"] for config in [ASSISTANT, LVAO]]
+    CSRF_TRUSTED_ORIGINS = [BASE_URL]
     INSTALLED_APPS.extend(["debug_toolbar", "django_browser_reload"])
     MEDIA_ROOT = "media"
     MEDIA_URL = "/media/"
@@ -345,11 +340,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# Redirects settings
-# ------------------
-# Redirect to home URL after login
-LOGOUT_REDIRECT_URL = "qfdmo:login"
-LOGIN_URL = "qfdmo:login"
+
+LOGIN_URL = "admin:login"
+
 
 # Internationalization
 # --------------------
