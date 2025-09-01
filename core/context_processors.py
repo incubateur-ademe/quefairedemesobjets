@@ -34,7 +34,6 @@ def global_context(request) -> dict:
             "MATOMO_ID": settings.ASSISTANT["MATOMO_ID"],
         },
         "lvao": {
-            "BASE_URL": settings.LVAO["BASE_URL"],
             "POSTHOG_KEY": settings.LVAO["POSTHOG_KEY"],
         },
     }
