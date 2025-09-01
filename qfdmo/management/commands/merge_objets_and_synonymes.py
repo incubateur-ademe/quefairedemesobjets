@@ -115,13 +115,16 @@ class Command(BaseCommand):
             )
 
         objet_slugs = list(objets.values_list("slug", flat=True))
-        synonymes_sans_objets = Synonyme.objects.prefetch_related("produit").exclude(
-            slug__in=objet_slugs
+        synonymes_sans_objets = (
+            Synonyme.objects.prefetch_related("produit")
+            .exclude(slug__in=objet_slugs)
+            .order_by("produit__nom")
         )
         synonymes_sans_objets_prepare = []
         for synonyme in synonymes_sans_objets:
             synonymes_sans_objets_prepare.append(
                 {
+                    "produit": synonyme.produit.nom,
                     "slug": synonyme.slug,
                     "nom": synonyme.nom,
                     "synonyme_sous_categorie_codes": " | ".join(
@@ -213,7 +216,7 @@ class Command(BaseCommand):
         with open(output_path, "w", newline="", encoding="utf-8") as f:
             writer = csv.DictWriter(
                 f,
-                fieldnames=["slug", "nom", "synonyme_sous_categorie_codes"],
+                fieldnames=["produit", "slug", "nom", "synonyme_sous_categorie_codes"],
             )
             writer.writeheader()
             writer.writerows(synonymes_sans_objets_prepare)
