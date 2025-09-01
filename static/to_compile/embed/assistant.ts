@@ -6,6 +6,19 @@ const slug = script?.dataset?.objet
 const epci = script?.dataset?.epci
 const origin = new URL(script?.getAttribute("src")).origin
 
+function generateBackLink(iframe: HTMLIFrameElement) {
+  const backlinkTag = document.createElement("div")
+  backlinkTag.setAttribute(
+    "style",
+    "font-size: 0.9rem; text-align: center; padding-top: 0.5rem;",
+  )
+  const assistantUrl = "https://google.fr"
+  backlinkTag.innerHTML = `
+    Avant de jeter votre objet, demandez-lui !
+    <a href="${assistantUrl}" target="_blank" rel="noreferrer" title="Ouvrir l'assistant au tri dans une nouvelle fenêtre">L'assistant au tri de l'ADEME</a> vous aide à choisir entre recyclage, réemploi ou mise à la poubelle en dernier recours.`
+  iframe.insertAdjacentElement("afterend", backlinkTag)
+}
+
 function initScript() {
   const parts = [origin]
   const iframeResizerOptions = { license: "GPLv3" }
@@ -45,6 +58,7 @@ function initScript() {
   }
 
   script.parentNode?.insertBefore(iframe, script)
+  generateBackLink(iframe)
   iframe.onload = () => {
     iframeResize(iframeResizerOptions, iframe)
   }
