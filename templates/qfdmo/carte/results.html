@@ -39,6 +39,7 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
                     {% acteur_json_display acteur form.initial.direction form.initial.action_list carte carte_config form.initial.sc_id as json_data %}{{ json_data|safe }}
                 </script>
             {% endfor %}
+            {% include "qfdmo/carte/pinpoints/home.html" %}
         </div>
 
         {% if address_ok %}
