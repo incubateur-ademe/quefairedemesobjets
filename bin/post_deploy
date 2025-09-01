@@ -1,7 +1,7 @@
 #!/bin/env bash
 
-python manage.py createcachetable
-python manage.py migrate
-python manage.py clearsessions
-python manage.py clear_cache --all
-python manage.py create_remote_db_server
+make createcachetable
+make migrate
+make clearsessions
+make clear-cache
+make create_remote_db_server
