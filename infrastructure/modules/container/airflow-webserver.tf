@@ -33,7 +33,7 @@ resource "scaleway_container" "airflow_webserver" {
     AIRFLOW__CORE__FERNET_KEY                  = ""
     AIRFLOW__CORE__LOAD_EXAMPLES               = "false"
     AIRFLOW__LOGGING__ENCRYPT_S3_LOGS          = "false"
-    AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER   = "s3://lvao-data-preprod-logs"
+    AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER   = "s3://${var.prefix}-${var.environment}-airflow"
     AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID       = "scalewaylogs"
     AIRFLOW__LOGGING__REMOTE_LOGGING           = "true"
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK    = "true"
