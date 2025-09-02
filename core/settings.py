@@ -410,12 +410,6 @@ STORAGES = {
     },
 }
 
-# Airflow settings
-# ----------------
-AIRFLOW_WEBSERVER_REFRESHACTEUR_URL = decouple.config(
-    "AIRFLOW_WEBSERVER_REFRESHACTEUR_URL", cast=str, default="https://lvao.ademe.local"
-)
-
 # Import / export settings
 # ------------------------
 IMPORT_EXPORT_TMP_STORAGE_CLASS = "import_export.tmp_storages.MediaStorage"
