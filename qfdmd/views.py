@@ -177,7 +177,6 @@ class ReusableContentViewSet(ModelViewSet):
     model = ReusableContent
     form_fields = ["title", "genre", "nombre"]
     icon = "resubmit"
-    list_filter = ["genre", "nombre"]
     add_to_admin_menu = True
     copy_view_enabled = True
     inspect_view_enabled = True

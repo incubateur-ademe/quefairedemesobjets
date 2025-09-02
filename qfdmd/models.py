@@ -16,6 +16,7 @@ from wagtail.admin.panels import (
     FieldPanel,
     FieldRowPanel,
     HelpPanel,
+    InlinePanel,
     MultiFieldPanel,
     ObjectList,
     TabbedInterface,
@@ -26,6 +27,7 @@ from wagtail.models import Page, ParentalKey
 from wagtail.search import index
 from wagtail.snippets.models import register_snippet
 
+from core.models.mixin import TimestampedModel
 from qfdmd.blocks import STREAMFIELD_COMMON_BLOCKS
 from qfdmo.models.utils import NomAsNaturalKeyModel
 
@@ -333,20 +335,21 @@ class ProduitPage(
             ],
             heading="Dynamisation des contenus",
         ),
+        InlinePanel("synonymes"),
+        MultiFieldPanel(
+            [
+                FieldPanel("usage_unique"),
+                FieldPanel("tags"),
+                FieldPanel("sous_categorie_objet"),
+            ],
+            heading="Taxonomie",
+        ),
         MultiFieldPanel(
             [
                 FieldPanel("bonus"),
                 FieldPanel("disable_bonus_inheritance"),
             ],
             heading="Bonus",
-        ),
-        FieldPanel("usage_unique"),
-        MultiFieldPanel(
-            [
-                FieldPanel("tags"),
-                FieldPanel("sous_categorie_objet"),
-            ],
-            heading="Taxonomie",
         ),
     ]
 
@@ -384,6 +387,30 @@ class FamilyPage(ProduitPage):
 
     class Meta:
         verbose_name = "Famille"
+
+
+@register_snippet
+class TemporarySynonymeModel(TimestampedModel, index.Indexed):
+    nom = models.CharField(max_length=255, unique=True)
+    page = ParentalKey(
+        "wagtailcore.page",
+        on_delete=models.CASCADE,
+        related_name="synonymes",
+    )
+
+    def __str__(self):
+        return self.nom
+
+    class Meta:
+        verbose_name = "Synnoyme de recherche"
+        verbose_name_plural = "Synonymes de recherche"
+
+    panels = [FieldPanel("nom")]
+    search_fields = [
+        index.AutocompleteField("nom"),
+        index.SearchField("nom"),
+        index.FilterField("page"),
+    ]
 
 
 class SynonymePage(
