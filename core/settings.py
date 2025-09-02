@@ -248,14 +248,6 @@ def context_processors():
 
 TEMPLATES = [
     {
-        "BACKEND": "django.template.backends.jinja2.Jinja2",
-        "DIRS": [BASE_DIR / "jinja2"],
-        "OPTIONS": {
-            "environment": "core.jinja2_handler.environment",
-            "context_processors": context_processors(),
-        },
-    },
-    {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
@@ -263,7 +255,6 @@ TEMPLATES = [
             "context_processors": [
                 *context_processors(),
                 # Sites faciles
-                # These are not fully compatible with jinja
                 "wagtail.contrib.settings.context_processors.settings",
                 "wagtailmenus.context_processors.wagtailmenus",
                 "sites_faciles.content_manager.context_processors.skiplinks",
@@ -418,12 +409,6 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
-
-# Airflow settings
-# ----------------
-AIRFLOW_WEBSERVER_REFRESHACTEUR_URL = decouple.config(
-    "AIRFLOW_WEBSERVER_REFRESHACTEUR_URL", cast=str, default="https://lvao.ademe.local"
-)
 
 # Import / export settings
 # ------------------------
