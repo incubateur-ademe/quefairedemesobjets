@@ -53,7 +53,7 @@ class Command(BaseCommand):
         synonymes_to_create = []
         sous_categories_unsync = []
         for objet in objets:
-            synonymes = Synonyme.objects.filter(slug=objet.slug)
+            synonymes = Synonyme.objects.filter(slug=objet.slug).order_by("nom")
             if synonymes.count() > 1:
                 raise Exception(
                     "Impossible ! Plusieurs synonymes trouvés pour le même slug "

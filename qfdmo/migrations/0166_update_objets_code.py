@@ -68,8 +68,8 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(remove_duplicates),
-        migrations.RunPython(update_categorieobjets_code),
-        migrations.RunPython(update_souscategorieobjets_code),
-        migrations.RunPython(update_objets_code),
+        # migrations.RunPython(remove_duplicates),
+        # migrations.RunPython(update_categorieobjets_code),
+        # migrations.RunPython(update_souscategorieobjets_code),
+        # migrations.RunPython(update_objets_code),
     ]
