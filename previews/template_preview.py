@@ -9,6 +9,9 @@ from django_lookbook.utils import register_form_class
 
 from qfdmd.forms import SearchForm
 from qfdmd.models import Suggestion, Synonyme
+from qfdmo.models.acteur import ActeurType, DisplayedActeur, DisplayedPropositionService
+from qfdmo.models.action import Action
+from qfdmo.models.config import CarteConfig
 
 
 class SynonymeForm(forms.Form):
@@ -24,7 +27,102 @@ class SynonymeForm(forms.Form):
     )
 
 
+class PinPointForm(forms.Form):
+    action = forms.ChoiceField(
+        label="Action",
+        help_text="Sélectionnez une action",
+        initial="reparer",
+    )
+    avec_bonus = forms.BooleanField(
+        label="Avec bonus",
+        help_text="Avec bonus",
+        initial=False,
+    )
+    carte = forms.BooleanField(
+        label="Carte",
+        help_text="Carte",
+        initial=True,
+    )
+    carte_config = forms.ChoiceField(
+        label="Carte config",
+        help_text="Carte config",
+        required=False,
+        choices=[("", "")] + list(CarteConfig.objects.all().values_list("id", "nom")),
+        initial="",
+    )
+    acteur_type = forms.ChoiceField(
+        label="Acteur type",
+        help_text="Action list",
+        required=False,
+        choices=[("", "")]
+        + list(ActeurType.objects.all().values_list("code", "libelle")),
+        initial="",
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Récupérer toutes les actions et les transformer en choix pour le selectbox
+        self.fields["action"].choices = [
+            (action.code, action.libelle)
+            for action in Action.objects.all().order_by("order")
+        ]
+
+
 class ComponentsPreview(LookbookPreview):
+
+    @register_form_class(PinPointForm)
+    def acteur_pinpoint(
+        self,
+        action="reparer",
+        avec_bonus="False",
+        carte="True",
+        carte_config=None,
+        acteur_type=None,
+        **kwargs,
+    ):
+        # FIXME : avec_bonus is returned as a string by the lookbook where I expected
+        # a boolean
+        avec_bonus = avec_bonus.lower() == "true"
+        carte = carte.lower() == "true"
+        if carte_config:
+            carte_config = CarteConfig.objects.get(id=carte_config)
+        action = Action.objects.get(code=action)
+        displayed_proposition_service = DisplayedPropositionService.objects.filter(
+            action=action
+        )
+        if acteur_type:
+            displayed_proposition_service = displayed_proposition_service.filter(
+                acteur__acteur_type__code=acteur_type
+            )
+        if avec_bonus:
+            displayed_proposition_service = displayed_proposition_service.filter(
+                acteur__labels__bonus=True
+            )
+        else:
+            displayed_proposition_service = displayed_proposition_service.exclude(
+                acteur__in=DisplayedActeur.objects.filter(labels__bonus=True)
+            )
+        displayed_proposition_service = displayed_proposition_service.first()
+        if not displayed_proposition_service:
+            raise ValueError(f"PropositionService with action `{action}` not found")
+
+        context = {
+            "acteur": displayed_proposition_service.acteur,
+            "direction": action.directions.first().code,
+            "action_list": action.code,
+            "carte": carte,
+            "carte_config": carte_config,
+            "sc_id": displayed_proposition_service.sous_categories.first().id,
+            "force_visible": True,  # Only to display ir it the lookbook
+        }
+        template = Template(
+            """
+            {% load qfdmo_tags %}
+            {% acteur_pinpoint_tag acteur=acteur direction=direction action_list=action_list carte=carte carte_config=carte_config sous_categorie_id=sc_id %}
+            """
+        )
+        return template.render(Context(context))
+
     def button(self, **kwargs):
         context = {"href": "google.fr", "text": "test"}
         return render_to_string("components/button.html", context)

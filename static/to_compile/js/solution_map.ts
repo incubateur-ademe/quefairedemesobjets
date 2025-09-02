@@ -1,11 +1,8 @@
-import bonusIconSvg from "bundle-text:../svg/bonus-reparation-fill.svg"
-import pinBackgroundFillSvg from "bundle-text:../svg/pin-background-fill.svg"
-import pinBackgroundSvg from "bundle-text:../svg/pin-background.svg"
 import maplibregl, { LngLat, LngLatBoundsLike, Map, Marker } from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
 import MapController from "../controllers/carte/map_controller"
 import { ACTIVE_PINPOINT_CLASSNAME, clearActivePinpoints } from "./helpers"
-import type { DisplayedActeur, Location } from "./types"
+import type { Location } from "./types"
 const DEFAULT_LOCATION: LngLat = new LngLat(2.213749, 46.227638)
 const DEFAULT_ZOOM: number = 5
 const DEFAULT_MAX_ZOOM: number = 18
@@ -88,98 +85,36 @@ export class SolutionMap {
     return homePinPoint
   }
 
-  #generateMarkerHTMLStringFrom(acteur?: DisplayedActeur): string {
-    /**
-    This method uses complex scale and translate css attributes in
-    order to compensate an issue that causes the marker to not be
-    at the location it is supposed to be when zooming in / out.
-
-    This could definitely be fixed by using appropriately sized
-    svg, but works fine as is.
-
-    If you need to add a new marker's design in the future, it
-    is advised to follow the approach to not this bug.
-    */
-    if (acteur?.iconFile) {
-      return [
-        `<div data-animated class="qf-scale-75">`,
-        `<img class="qf--translate-y-2/4" height="61" width="46" src="${acteur.iconFile}">`,
-        `</div>`,
-      ].join("")
-    }
-
-    const markerHtmlStyles = `color: ${acteur?.couleur};`
-    let background: string = acteur?.fillBackground
-      ? pinBackgroundFillSvg
-      : pinBackgroundSvg
-    if (background.includes("MASK_ID")) {
-      // When multiple maps are displayed in DSFR tabs, a bug occurs because pins mask share
-      // the same id : #a.
-      // This bug causes the mask to briefly appears then disappear, and the pin's border gets lost.
-      // The fix here is to hardcode a magical MASK_ID value for the id's value in the svg file, and
-      // replace it with the acteur's id. Therefore, we ensure the mask ids are always unique and
-      // this prevents the bug to occur.
-      background = background.replace(/MASK_ID/g, acteur?.uuid!)
-    }
-
-    const cornerIcon = acteur?.bonus ? bonusIconSvg : ""
-    const icon = acteur?.icon || "fr-icon-checkbox-circle-line"
-    const markerIconClasses = `qf-absolute qf-top-[10] qf-left-[10.5] qf-margin-auto
-      ${icon} ${acteur?.reparer ? "qf-text-white" : ""}
-    `
-    const htmlTree = [
-      `<div data-animated class="qf-scale-75">`,
-      `<div class="qf--translate-y-2/4" style="${markerHtmlStyles}">`,
-      background,
-    ]
-    if (cornerIcon) {
-      htmlTree.push(
-        `<span class="qf-absolute qf-right-[-16] qf-top-[-6] qf-z-10">`,
-        cornerIcon,
-        `</span>`,
-      )
-    }
-    htmlTree.push(`<span class="${markerIconClasses}"></span>`, `</div>`, `</div>`)
-    return htmlTree.join("")
-  }
-
-  #generateMarkerHTMLMarker(acteur?: DisplayedActeur): HTMLDivElement {
-    const actorMarker = document.createElement("div")
-    actorMarker.innerHTML = this.#generateMarkerHTMLStringFrom(acteur)
-    actorMarker.className = ""
-    actorMarker.style.width = "34px"
-    actorMarker.style.height = "45px"
-    actorMarker.dataset.uuid = acteur?.uuid || ""
-    actorMarker.addEventListener("click", () => {
-      this.#onClickMarker(actorMarker)
-    })
-    return actorMarker
-  }
-
-  addActorMarkersToMap(
-    actors: Array<DisplayedActeur>,
-    bboxValue?: Array<Number>,
-  ): void {
+  addActorMarkersToMap(actors: Array<HTMLElement>, bboxValue?: Array<Number>): void {
     const points: Array<Array<Number>> = []
     const addedActors: Array<string> = []
-    actors.forEach(function (actor: DisplayedActeur) {
-      if (addedActors.includes(actor.uuid)) {
+    actors.forEach(function (actor: HTMLElement) {
+      if (addedActors.includes(actor.dataset?.uuid || "")) {
         // Ensure actors are not added twice on the map.
         // This can happen and can causes visual glitches.
         // ID of markers being duplicated, these are wrongly rendered
         // without borders.
         return
       }
-      if (actor.location) {
-        const actorMarker = this.#generateMarkerHTMLMarker(actor)
+
+      const longitude = actor.dataset?.longitude
+      const latitude = actor.dataset?.latitude
+
+      if (longitude && latitude) {
+        let longitudeFloat = parseFloat(longitude.replace(",", "."))
+        let latitudeFloat = parseFloat(latitude.replace(",", "."))
+        actor.addEventListener("click", () => {
+          this.#onClickMarker(actor)
+        })
+        actor.classList.remove("qf-invisible")
 
         const marker: Marker = new maplibregl.Marker({
-          element: actorMarker,
-        }).setLngLat([actor.location.coordinates[0], actor.location.coordinates[1]])
+          element: actor,
+        }).setLngLat([longitudeFloat, latitudeFloat])
 
         marker.addTo(this.map)
-        addedActors.push(actor.uuid)
-        points.push([actor.location.coordinates[1], actor.location.coordinates[0]])
+        addedActors.push(actor.dataset?.uuid || "")
+        points.push([latitudeFloat, longitudeFloat])
       }
     }, this)
     this.fitBounds(points, bboxValue)
