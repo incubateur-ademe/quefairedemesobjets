@@ -34,7 +34,7 @@ class SearchForm(DsfrBaseForm):
                 boosted_score=Case(
                     When(
                         unaccented_nom__istartswith=search_query,
-                        then=F("similarity") + Value(0.1),
+                        then=F("similarity") + Value(0.2),
                     ),
                     When(
                         unaccented_nom__iendswith=search_query,
@@ -44,8 +44,10 @@ class SearchForm(DsfrBaseForm):
                 ),
             )
             .filter(word_similarity__gte=0.1)
-            .order_by("-boosted_score", "-word_similarity", "-similarity")
-            .values("slug", "nom")[:10]
+            .order_by("-word_similarity", "-boosted_score", "-similarity")
+            .values("slug", "nom", "boosted_score", "word_similarity", "similarity")[
+                :10
+            ]
         )
         return self.results
 
