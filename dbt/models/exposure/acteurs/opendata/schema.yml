@@ -117,6 +117,18 @@ models:
         description: "La date de dernière modification de l'acteur"
         tests:
           - dbt_expectations.expect_column_to_exist
+      - name: consignes_dacces
+        description: "Les consignes d'accès de l'acteur"
+        tests:
+          - dbt_expectations.expect_column_to_exist
+      - name: horaires_description
+        description: "Les horaires de l'acteur sous forme de texte"
+        tests:
+          - dbt_expectations.expect_column_to_exist
+      - name: horaires_osm
+        description: "Les horaires au format OSM de l'acteur"
+        tests:
+          - dbt_expectations.expect_column_to_exist
       - name: lieu_prestation
         description: "Le lieu de prestation de l'acteur"
         tests:
