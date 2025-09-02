@@ -33,11 +33,17 @@ logger = logging.getLogger(__name__)
 
 
 class GenreNombreModel(models.Model):
-    genre = models.CharField(
-        "Genre", blank=True, choices=[("m", "Masculin"), ("f", "Féminin")]
-    )
+    class Genre(models.TextChoices):
+        MASCULIN = "m", "Masculin"
+        FEMININ = "f", "Féminin"
+
+    class Nombre(models.IntegerChoices):
+        SINGULIER = 1, "singulier"
+        PLURIEL = 2, "pluriel"
+
+    genre = models.CharField("Genre", blank=True, choices=Genre.choices)
     nombre = models.IntegerField(
-        "Nombre", null=True, blank=True, choices=[(1, "singulier"), (2, "pluriel")]
+        "Nombre", null=True, blank=True, choices=Nombre.choices
     )
 
     class Meta:
@@ -83,6 +89,30 @@ class ReusableContent(index.Indexed, models.Model):
         FieldPanel("masculin_singulier"),
         FieldPanel("masculin_pluriel"),
     ]
+
+    def get_from_genre_nombre(self, genre: str, nombre: int):
+        if (
+            genre == GenreNombreModel.Genre.MASCULIN
+            and nombre == GenreNombreModel.Nombre.SINGULIER
+        ):
+            return self.masculin_singulier
+
+        if (
+            genre == GenreNombreModel.Genre.FEMININ
+            and nombre == GenreNombreModel.Nombre.SINGULIER
+        ):
+            return self.feminin_singulier
+        if (
+            genre == GenreNombreModel.Genre.MASCULIN
+            and nombre == GenreNombreModel.Nombre.PLURIEL
+        ):
+            return self.masculin_pluriel
+
+        if (
+            genre == GenreNombreModel.Genre.FEMININ
+            and nombre == GenreNombreModel.Nombre.PLURIEL
+        ):
+            return self.feminin_pluriel
 
     def __str__(self):
         return self.title

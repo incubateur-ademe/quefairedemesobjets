@@ -1,7 +1,5 @@
 {% load qfdmd_tags wagtailcore_tags %}
 
 {% if page %}
-{{ value.content|richtext_with_objet:page }}
-{% else %}
-{{ value.content|richtext }}
+{{ value|genre_nombre_from:page }}
 {% endif %}
