@@ -10,7 +10,8 @@ DJANGO_ADMIN := $(PYTHON) manage.py
 PYTEST := poetry run pytest
 HONCHO := poetry run honcho
 DB_URL := postgres://webapp:webapp@localhost:6543/webapp# pragma: allowlist secret
-BASE_URL := quefairedemesdechets.ademe.local
+ASSISTANT_URL := quefairedemesdechets.ademe.local
+LVAO_URL := lvao.ademe.local
 FIXTURES_OPTIONS := --indent 4 --natural-foreign --natural-primary
 
 # Makefile config
@@ -22,7 +23,7 @@ check:
 
 .PHONY: init-certs
 init-certs:
-	docker run -ti -v ./nginx-local-only/certs:/app/certs -w /app/certs --rm alpine/mkcert $(BASE_URL)
+	docker run -ti -v ./nginx-local-only/certs:/app/certs -w /app/certs --rm alpine/mkcert $(LVAO_URL) $(ASSISTANT_URL)
 
 .PHONY: init-playwright
 init-playwright:
