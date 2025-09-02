@@ -70,6 +70,7 @@ class Objet(CodeAsNaturalKeyModel):
 
     id = models.AutoField(primary_key=True)
     libelle = models.CharField(max_length=255, blank=False, null=False)
+    slug = models.SlugField(max_length=255, unique=True)
     code = models.CharField(
         max_length=255,
         unique=True,
