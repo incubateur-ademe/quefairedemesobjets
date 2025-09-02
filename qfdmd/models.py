@@ -90,7 +90,11 @@ class ReusableContent(index.Indexed, models.Model):
         FieldPanel("masculin_pluriel"),
     ]
 
-    def get_from_genre_nombre(self, genre: str, nombre: int):
+    def get_from_genre_nombre(
+        self,
+        genre: str,
+        nombre: int,
+    ):
         if (
             genre == GenreNombreModel.Genre.MASCULIN
             and nombre == GenreNombreModel.Nombre.SINGULIER
