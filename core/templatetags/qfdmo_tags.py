@@ -1,12 +1,17 @@
+import logging
 from math import sqrt
 
 from django import template
+from django.db.models import Q
 
 from core.utils import get_direction
 from qfdmo.models import DisplayedActeur
 from qfdmo.models.action import get_actions_by_direction
+from qfdmo.models.config import GroupeActionConfig
 
 register = template.Library()
+
+logger = logging.getLogger(__name__)
 
 
 @register.simple_tag
@@ -100,16 +105,96 @@ def random_range(max_value):
     return random.randint(0, max_value - 1)
 
 
-@register.simple_tag
-def acteur_json_display(acteur, direction, action_list, carte, carte_config, sc_id):
-    """Template tag to replace Jinja2 acteur.json_acteur_for_display method call"""
-    return acteur.json_acteur_for_display(
-        direction=direction,
-        action_list=action_list,
-        carte=carte,
-        carte_config=carte_config,
-        sous_categorie_id=sc_id,
+@register.inclusion_tag("qfdmo/carte/pinpoints/acteur.html", takes_context=True)
+def acteur_pinpoint_tag(
+    context, acteur, direction, action_list, carte, carte_config, sous_categorie_id
+):
+    """
+    Template tags to display the acteur's pinpoint after increasing context with
+      - marker_icon
+      - marker_couleur
+      - marker_icon_file
+      - marker_bonus
+      - marker_fill_background
+      - marker_icon_extra_classes
+    """
+    context.update(
+        {
+            "marker_icon": "",
+            "marker_couleur": "",
+            "marker_icon_file": "",
+            "marker_bonus": False,
+            "marker_fill_background": False,
+            "marker_icon_extra_classes": "",
+        }
     )
+    actions = acteur.acteur_actions(
+        direction=direction,
+        actions_codes=action_list,
+        sous_categorie_id=sous_categorie_id,
+    )
+
+    if not actions:
+        logger.warning("No actions found for acteur %s", acteur)
+        return context
+
+    def sort_actions_by_action_principale_and_order(a):
+        if a == acteur.action_principale:
+            return -1
+
+        base_order = a.order or 0
+        if carte and a.groupe_action:
+            base_order += (a.groupe_action.order or 0) * 100
+        return base_order
+
+    action_to_display = sorted(
+        actions, key=sort_actions_by_action_principale_and_order
+    )[0]
+
+    if carte and action_to_display.groupe_action:
+        action_to_display = action_to_display.groupe_action
+
+    context.update(
+        {
+            "marker_icon": action_to_display.icon,
+            "marker_couleur": action_to_display.couleur,
+        }
+    )
+
+    if carte_config:
+        queryset = Q()
+        if action_to_display:
+            queryset &= Q(
+                groupe_action__actions__code__in=[action_to_display.code]
+            ) | Q(groupe_action__actions__code=None)
+
+        if acteur.acteur_type:
+            queryset &= Q(acteur_type=acteur.acteur_type) | Q(acteur_type=None)
+
+        try:
+            groupe_action_config = carte_config.groupe_action_configs.get(queryset)
+            if groupe_action_config.icon:
+                # Property is camelcased as it is used in javascript
+                context.update(
+                    {
+                        "marker_icon_file": groupe_action_config.icon.url,
+                        "marker_icon": "",
+                    }
+                )
+
+        except GroupeActionConfig.DoesNotExist:
+            pass
+
+    if carte and action_to_display.code == "reparer":
+        context.update(
+            {
+                "marker_bonus": getattr(acteur, "is_bonus_reparation", False),
+                "marker_fill_background": True,
+                "marker_icon_extra_classes": "qf-text-white",
+            }
+        )
+
+    return context
 
 
 @register.simple_tag

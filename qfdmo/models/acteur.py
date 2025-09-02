@@ -9,7 +9,6 @@ from typing import Any, List, cast
 from urllib.parse import urlencode
 
 import opening_hours
-import orjson
 import shortuuid
 from django.conf import settings
 from django.contrib.admin.utils import quote
@@ -51,7 +50,6 @@ from qfdmo.models.categorie_objet import SousCategorieObjet
 # Explicit imports from models config, action, categories, utils
 # and not from qfdmo.models are required here to prevent circular
 # dependency import error.
-from qfdmo.models.config import CarteConfig, GroupeActionConfig
 from qfdmo.models.utils import (
     CodeAsNaturalKeyModel,
     string_remove_substring_via_normalization,
@@ -1268,83 +1266,83 @@ class DisplayedActeur(BaseActeur):
             sort_keys=True,
         )
 
-    def json_acteur_for_display(
-        self,
-        direction: str | None = None,
-        action_list: str | None = None,
-        carte: bool = False,
-        carte_config: CarteConfig = None,
-        sous_categorie_id: str | None = None,
-    ) -> str:
-        # TODO: refacto jinja: once the shared/results.html template
-        # will be migrated to django template, this method should
-        # live in a template_tags instead.
-        actions = self.acteur_actions(
-            direction=direction,
-            actions_codes=action_list,
-            sous_categorie_id=sous_categorie_id,
-        )
+    # def json_acteur_for_display(
+    #     self,
+    #     direction: str | None = None,
+    #     action_list: str | None = None,
+    #     carte: bool = False,
+    #     carte_config: CarteConfig = None,
+    #     sous_categorie_id: str | None = None,
+    # ) -> str:
+    #     # TODO: refacto jinja: once the shared/results.html template
+    #     # will be migrated to django template, this method should
+    #     # live in a template_tags instead.
+    #     actions = self.acteur_actions(
+    #         direction=direction,
+    #         actions_codes=action_list,
+    #         sous_categorie_id=sous_categorie_id,
+    #     )
 
-        def sort_actions_by_action_principale_and_order(a):
-            if a == self.action_principale:
-                return -1
+    #     def sort_actions_by_action_principale_and_order(a):
+    #         if a == self.action_principale:
+    #             return -1
 
-            base_order = a.order or 0
-            if carte and a.groupe_action:
-                base_order += (a.groupe_action.order or 0) * 100
-            return base_order
+    #         base_order = a.order or 0
+    #         if carte and a.groupe_action:
+    #             base_order += (a.groupe_action.order or 0) * 100
+    #         return base_order
 
-        acteur_dict = {
-            "uuid": self.uuid,
-            "location": orjson.loads(self.location.geojson),
-        }
+    #     acteur_dict = {
+    #         "uuid": self.uuid,
+    #         "location": orjson.loads(self.location.geojson),
+    #     }
 
-        if not actions:
-            # TODO: explain why we need to decode here
-            return orjson.dumps(acteur_dict).decode("utf-8")
+    #     if not actions:
+    #         # TODO: explain why we need to decode here
+    #         return orjson.dumps(acteur_dict).decode("utf-8")
 
-        action_to_display = sorted(
-            actions, key=sort_actions_by_action_principale_and_order
-        )[0]
+    #     action_to_display = sorted(
+    #         actions, key=sort_actions_by_action_principale_and_order
+    #     )[0]
 
-        if carte and action_to_display.groupe_action:
-            action_to_display = action_to_display.groupe_action
+    #     if carte and action_to_display.groupe_action:
+    #         action_to_display = action_to_display.groupe_action
 
-        acteur_dict.update(
-            icon=action_to_display.icon,
-            couleur=action_to_display.couleur,
-        )
+    #     acteur_dict.update(
+    #         icon=action_to_display.icon,
+    #         couleur=action_to_display.couleur,
+    #     )
 
-        if carte_config:
-            queryset = Q()
-            if action_to_display:
-                queryset &= Q(groupe_action__actions__code__in=[action_to_display]) | Q(
-                    groupe_action__actions__code=None
-                )
+    #     if carte_config:
+    #         queryset = Q()
+    #         if action_to_display:
+    #           queryset &= Q(groupe_action__actions__code__in=[action_to_display]) | Q(
+    #               groupe_action__actions__code=None
+    #           )
 
-            if self.acteur_type:
-                queryset &= Q(acteur_type=self.acteur_type) | Q(acteur_type=None)
+    #         if self.acteur_type:
+    #             queryset &= Q(acteur_type=self.acteur_type) | Q(acteur_type=None)
 
-            try:
-                groupe_action_config = carte_config.groupe_action_configs.get(queryset)
-                if groupe_action_config.icon:
-                    # Property is camelcased as it is used in javascript
-                    acteur_dict.update(iconFile=groupe_action_config.icon.url)
-                    # In this case, a svg file uploaded by a user is used
-                    # in place of the DSFR's icon code.
-                    del acteur_dict["icon"]
+    #         try:
+    #           groupe_action_config = carte_config.groupe_action_configs.get(queryset)
+    #           if groupe_action_config.icon:
+    #                 # Property is camelcased as it is used in javascript
+    #                 acteur_dict.update(iconFile=groupe_action_config.icon.url)
+    #                 # In this case, a svg file uploaded by a user is used
+    #                 # in place of the DSFR's icon code.
+    #                 del acteur_dict["icon"]
 
-            except GroupeActionConfig.DoesNotExist:
-                pass
+    #         except GroupeActionConfig.DoesNotExist:
+    #             pass
 
-        if carte and action_to_display.code == "reparer":
-            acteur_dict.update(
-                bonus=getattr(self, "bonus", False),
-                reparer=getattr(self, "reparer", False),
-                fillBackground=True,
-            )
+    #     if carte and action_to_display.code == "reparer":
+    #         acteur_dict.update(
+    #             bonus=getattr(self, "bonus", False),
+    #             reparer=getattr(self, "reparer", False),
+    #             fillBackground=True,
+    #         )
 
-        return orjson.dumps(acteur_dict).decode("utf-8")
+    #     return orjson.dumps(acteur_dict).decode("utf-8")
 
     def get_share_url(self, request: HttpRequest, direction: str | None = None) -> str:
         protocol = "https" if request.is_secure() else "http"
