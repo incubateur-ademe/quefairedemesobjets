@@ -64,9 +64,8 @@ class Bonus(index.Indexed, models.Model):
 
 
 @register_snippet
-class ReusableContent(index.Indexed, GenreNombreModel):
+class ReusableContent(index.Indexed, models.Model):
     title = models.CharField(verbose_name="Titre", unique=True)
-    content = RichTextField(verbose_name="Contenu")
     feminin_singulier = RichTextField(verbose_name="Contenu - Féminin singulier")
     feminin_pluriel = RichTextField(verbose_name="Contenu - Féminin pluriel")
     masculin_singulier = RichTextField(verbose_name="Contenu - Masculin singulier")
@@ -79,14 +78,10 @@ class ReusableContent(index.Indexed, GenreNombreModel):
 
     panels = [
         FieldPanel("title"),
-        FieldPanel("content"),
         FieldPanel("feminin_singulier"),
         FieldPanel("feminin_pluriel"),
         FieldPanel("masculin_singulier"),
         FieldPanel("masculin_pluriel"),
-        FieldRowPanel(
-            [FieldPanel("genre"), FieldPanel("nombre")], heading="Genre et nombre"
-        ),
     ]
 
     def __str__(self):
