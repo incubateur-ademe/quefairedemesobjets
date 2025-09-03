@@ -67,7 +67,7 @@
     "eslint-plugin-n": "^17.21.3",
     "eslint-plugin-prettier": "^5.5.4",
     "eslint-plugin-promise": "^7.2.1",
-    "jest": "^30.1.2",
+    "jest": "^30.1.3",
     "jest-environment-jsdom": "^30.1.2",
     "lodash": "^4.17.21",
     "parcel": "^2.15.4",
