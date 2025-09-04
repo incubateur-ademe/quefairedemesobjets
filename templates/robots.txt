@@ -5,6 +5,8 @@ Disallow: /donnez-votre-avis
 Disallow: /proposer-une-adresse
 Disallow: /proposer-une-modification
 Disallow: /nous-contacter
+Disallow: /carte
+Disallow: /formulaire
 
 # Sitemap
 Sitemap: {{ request.scheme }}://{{ request.get_host }}/sitemap.xml
