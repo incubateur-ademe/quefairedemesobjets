@@ -28,7 +28,7 @@ WITH acteurs_with_siren AS (
 		{{ target.schema }}.udf_normalize_string_for_match(CONCAT(nom || ' ' || nom_officiel || ' ' || nom_commercial)) AS noms_normalises,
 		commentaires,
 		statut
-	FROM {{ source('enrich', 'qfdmo_vueacteur') }} AS acteurs
+	FROM {{ source('enrich', 'qfdmo_displayedacteur') }} AS acteurs
 	/*
 	We have normalization issues with our SIREN field in our DB
 	and we obtain better matching by reconstructing SIREN via SIRET
