@@ -33,6 +33,11 @@ COMMON_CUSTOM_BLOCKS = {
 }
 
 
+class WagtailBlockChoiceBlock(blocks.StaticBlock):
+    # Deprecated, kept to prevent migrations failure
+    pass
+
+
 class CustomBlockMixin:
     """Mixin to add common custom blocks to any block class."""
 
