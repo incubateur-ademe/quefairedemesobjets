@@ -53,7 +53,11 @@
         >
             {% if search_form.results %}
                 {% for result in search_form.results %}
-                    {% include "./_search_result.html" %}
+                    {% if beta %}
+                        {% include "./_search_result_beta.html" %}
+                    {% else %}
+                        {% include "./_search_result.html" %}
+                    {% endif %}
                 {% endfor %}
             {% endif %}
         </turbo-frame>

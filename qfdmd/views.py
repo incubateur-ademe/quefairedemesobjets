@@ -48,7 +48,6 @@ def get_assistant_script(request):
 
 
 SEARCH_VIEW_TEMPLATE_NAME = "components/search/view.html"
-BETA_SEARCH_VIEW_TEMPLATE_NAME = "components/search/view_beta.html"
 
 
 def search_view(request) -> HttpResponse:
@@ -65,10 +64,8 @@ def search_view(request) -> HttpResponse:
         beta = request.user.has_perm("wagtailadmin.can_see_beta_search")
 
     form = SearchForm(request.GET, **form_kwargs)
-    context = {"prefix": form_kwargs, "prefix_key": prefix_key}
+    context = {"beta": beta, "prefix": form_kwargs, "prefix_key": prefix_key}
     template_name = SEARCH_VIEW_TEMPLATE_NAME
-    if beta:
-        template_name = BETA_SEARCH_VIEW_TEMPLATE_NAME
 
     if form.is_valid():
         form.search(beta)

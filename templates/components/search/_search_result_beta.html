@@ -1,3 +1,5 @@
 {% extends "./_search_result.html" %}
 
-{% block href %}{{ synonyme.page.url }}{% endblock %}
+{% block href %}{{ result.url }}{% endblock %}
+
+{% block nom %}{{ result.title }} <span class="qf-ml-auto">{{ result.famille }}</span>{% endblock %}

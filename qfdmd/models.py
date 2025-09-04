@@ -363,6 +363,11 @@ class ProduitPage(
         ],
     )
 
+    search_fields = [
+        index.AutocompleteField("title"),
+        index.RelatedFields("synonymes", [index.AutocompleteField("nom")]),
+    ]
+
     class Meta:
         verbose_name = "Produit"
         constraints = [
@@ -397,6 +402,10 @@ class TemporarySynonymeModel(TimestampedModel, index.Indexed):
         on_delete=models.CASCADE,
         related_name="synonymes",
     )
+
+    @cached_property
+    def famille(self):
+        return self.page.specific.famille
 
     def __str__(self):
         return self.nom
