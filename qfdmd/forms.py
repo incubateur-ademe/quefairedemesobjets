@@ -9,7 +9,7 @@ from django.contrib.postgres.search import (
 from django.db.models import Case, F, Value, When
 from dsfr.forms import DsfrBaseForm
 
-from .models import Synonyme
+from .models import Synonyme, TemporarySynonymeModel
 
 logger = logging.getLogger(__name__)
 
@@ -24,10 +24,13 @@ class SearchForm(DsfrBaseForm):
         help_text="Entrez un objet ou un déchet", required=False, widget=SearchInput
     )
 
-    def search(self) -> dict[str, str]:
+    def search(self, beta) -> dict[str, str]:
         search_query: str = self.cleaned_data.get("input")
+        searched_model = Synonyme
+        if beta:
+            searched_model = TemporarySynonymeModel
         self.results = (
-            Synonyme.objects.annotate(
+            searched_model.objects.annotate(
                 word_similarity=TrigramStrictWordSimilarity(search_query, "nom"),
                 similarity=TrigramSimilarity("nom", search_query),
                 unaccented_nom=Unaccent("nom"),

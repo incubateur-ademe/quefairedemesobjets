@@ -1,3 +1,4 @@
+from django.contrib.auth.models import Permission
 from django.urls import path, reverse
 from wagtail import hooks
 from wagtail.admin.action_menu import ActionMenuItem
@@ -8,6 +9,11 @@ from qfdmd.views import (
     pokemon_chooser_viewset,
     reusable_content_viewset,
 )
+
+
+@hooks.register("register_permissions")
+def register_permissions():
+    return Permission.objects.filter(codename__in=["can_see_beta_search"])
 
 
 @hooks.register("register_admin_viewset")
