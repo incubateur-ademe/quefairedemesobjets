@@ -4,7 +4,6 @@ import usedColors from "./dsfr_hacks/used_colors"
 
 module.exports = {
   content: [
-    "jinja2/**/*.html",
     "templates/**/*.html",
     "static/to_compile/**/*.{js,ts,svg,css}",
     "./**/forms.py",

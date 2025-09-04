@@ -4,7 +4,11 @@ import { URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE } from "../js/helpers"
 const script = document.currentScript as HTMLScriptElement
 const slug = script?.dataset?.objet
 const epci = script?.dataset?.epci
-const origin = new URL(script?.getAttribute("src")).origin
+let origin = new URL(script?.getAttribute("src")).origin
+
+if (process.env.BASE_URL) {
+  origin = process.env.BASE_URL
+}
 
 function initScript() {
   const parts = [origin]

@@ -14,7 +14,7 @@ def get_sharer_content(request, object, social_network=None):
     Once jinja will be removed from the project, this can be merged in
     share_url function below
     """
-    if not request:
+    if not request or not request.resolver_match:
         return {}
     carte = request.resolver_match.view_name in ["qfdmo:carte", "qfdmo:carte_custom"]
 

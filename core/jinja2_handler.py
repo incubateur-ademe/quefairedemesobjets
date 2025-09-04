@@ -1,13 +1,8 @@
 from math import sqrt
 
 from django.http import HttpRequest
-from django.templatetags.static import static
-from django.urls import reverse
-from django.utils.html import linebreaks
 
-from core.templatetags.share_tags import get_sharer_content
 from core.utils import get_direction
-from jinja2 import Environment
 from qfdmo.models import DisplayedActeur
 from qfdmo.models.action import get_actions_by_direction
 
@@ -65,20 +60,3 @@ def distance_to_acteur(request, acteur):
         return f"({round(distance_meters / 1000, 1)} km)".replace(".", ",")
     else:
         return f"({round(distance_meters / 10) * 10} m)"
-
-
-def environment(**options):
-    env = Environment(**options)
-    env.globals.update(
-        {
-            "action_by_direction": action_by_direction,
-            "hide_object_filter": hide_object_filter,
-            "distance_to_acteur": distance_to_acteur,
-            "display_exclusivite_reparation": display_exclusivite_reparation,
-            "url": reverse,
-            "static": static,
-            "sharer": get_sharer_content,
-        }
-    )
-    env.filters.update({"linebreaks": linebreaks})
-    return env
