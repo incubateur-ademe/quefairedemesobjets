@@ -209,6 +209,9 @@ dump-production:
 	sh scripts/infrastructure/backup-db.sh
 
 # We need to create extensions because they are not restored by pg_restore
+.PHONY: create-sql-extensions
+create_sql_extensions:
+
 .PHONY: load-production-dump
 load-production-dump:
 	@DUMP_FILE=$$(find tmpbackup -type f -name "*.custom" -print -quit); \

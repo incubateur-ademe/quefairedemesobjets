@@ -8,6 +8,7 @@ from django.forms import FileField
 from django.utils.safestring import mark_safe
 from wagtail.templatetags.wagtailcore_tags import richtext
 
+from qfdmd.models import ReusableContent
 from qfdmo.models.config import CarteConfig
 
 register = template.Library()
@@ -16,12 +17,18 @@ logger = logging.getLogger(__name__)
 
 
 @register.filter
-def richtext_with_objet(reusable_content, page):
+def genre_nombre_from(reusable_content: ReusableContent, page):
+    """Retrieves reusable content based on page genre and nombre.
+
+    Takes a ReusableContent object and a page (ProduitPage or FamilyPage) and returns
+    the appropriate content with placeholder replacement. The content is retrieved based
+    on the page's genre and nombre attributes, and any "<objet>" placeholder
+    in the content is replaced with the page's titre_phrase or title.
     """
-    TODO: docstring
-    """
+    content = reusable_content.get_from_genre_nombre(page.genre, page.nombre)
+
     replacement = page.titre_phrase if page.titre_phrase else page.title
-    return richtext(reusable_content.replace("&lt;objet&gt;", replacement))
+    return richtext(content.replace("&lt;objet&gt;", replacement))
 
 
 @register.inclusion_tag("components/patchwork/patchwork.html")

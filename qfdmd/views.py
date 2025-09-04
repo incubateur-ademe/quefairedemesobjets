@@ -59,12 +59,16 @@ def search_view(request) -> HttpResponse:
     if prefix := request.GET[prefix_key]:
         form_kwargs.update(prefix=prefix, initial={"id": prefix})
 
+    beta = False
+    if request.user.is_authenticated:
+        beta = request.user.has_perm("wagtailadmin.can_see_beta_search")
+
     form = SearchForm(request.GET, **form_kwargs)
-    context = {"prefix": form_kwargs, "prefix_key": prefix_key}
+    context = {"beta": beta, "prefix": form_kwargs, "prefix_key": prefix_key}
     template_name = SEARCH_VIEW_TEMPLATE_NAME
 
     if form.is_valid():
-        form.search()
+        form.search(beta)
         context.update(search_form=form)
 
     return render(request, template_name, context=context)
@@ -177,7 +181,6 @@ class ReusableContentViewSet(ModelViewSet):
     model = ReusableContent
     form_fields = ["title", "genre", "nombre"]
     icon = "resubmit"
-    list_filter = ["genre", "nombre"]
     add_to_admin_menu = True
     copy_view_enabled = True
     inspect_view_enabled = True
