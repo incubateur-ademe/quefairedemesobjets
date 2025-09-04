@@ -211,12 +211,11 @@ dump-production:
 # We need to create extensions because they are not restored by pg_restore
 .PHONY: create-sql-extensions
 create_sql_extensions:
-	psql -d "$(DB_URL)" -f scripts/sql/create_extensions.sql
 
 .PHONY: load-production-dump
 load-production-dump:
 	@DUMP_FILE=$$(find tmpbackup -type f -name "*.custom" -print -quit); \
-	create-sql-extensions \
+	psql -d "$(DB_URL)" -f scripts/sql/create_extensions.sql && \
 	pg_restore -d "$(DB_URL)" --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
 
 .PHONY: db-restore
