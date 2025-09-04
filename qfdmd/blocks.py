@@ -1,6 +1,5 @@
 import logging
 
-from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from sites_faciles.content_manager import blocks as sites_faciles_blocks
 from sites_faciles.content_manager.blocks import (
@@ -15,28 +14,40 @@ from wagtail.snippets.blocks import SnippetChooserBlock
 logger = logging.getLogger(__name__)
 
 
-reusable_block = SnippetChooserBlock(
-    "qfdmd.reusablecontent",
-    label="Contenu réutilisable",
-    template="blocks/reusable.html",
-)
+COMMON_CUSTOM_BLOCKS = {
+    "reusable": SnippetChooserBlock(
+        "qfdmd.reusablecontent",
+        label="Contenu réutilisable",
+        template="blocks/reusable.html",
+    ),
+    "carte_sur_mesure": SnippetChooserBlock(
+        "qfdmo.CarteConfig",
+        label="Carte sur mesure",
+        template="blocks/carte.html",
+    ),
+    "liens": blocks.ListBlock(
+        SnippetChooserBlock("qfdmd.Lien", label="Lien"),
+        label="Liste de liens",
+        template="blocks/liens.html",
+    ),
+}
 
 
-carte_sur_mesure_block = SnippetChooserBlock(
-    "qfdmo.CarteConfig",
-    label="Carte sur mesure",
-    template="blocks/carte.html",
-)
+class CustomBlockMixin:
+    """Mixin to add common custom blocks to any block class."""
+
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        for name, block in COMMON_CUSTOM_BLOCKS.items():
+            setattr(cls, name, block)
 
 
-class ExtendedCommonStreamBlock(CommonStreamBlock):
-    reusable = reusable_block
-    carte_sur_mesure = carte_sur_mesure_block
+class ExtendedCommonStreamBlock(CustomBlockMixin, CommonStreamBlock):
+    pass
 
 
-class ColumnBlock(sites_faciles_blocks.ColumnBlock):
-    reusable = reusable_block
-    carte_sur_mesure = carte_sur_mesure_block
+class ColumnBlock(CustomBlockMixin, sites_faciles_blocks.ColumnBlock):
+    pass
 
 
 class TabBlock(sites_faciles_blocks.TabBlock):
@@ -53,38 +64,11 @@ class Bonus(blocks.StaticBlock):
         label = "Bonus réparation"
 
 
-class WagtailBlockChoiceBlock(blocks.ChooserBlock):
-    @cached_property
-    def target_model(self):
-        from qfdmd.views import WagtailBlock
-
-        return WagtailBlock
-
-    @cached_property
-    def widget(self):
-        from qfdmd.wagtail_hooks import WagtailBlockChooserWidget
-
-        return WagtailBlockChooserWidget(
-            linked_fields={"parent_page_id": "#id_parent_page_id"}
-        )
-
-
-class Override(blocks.StructBlock):
-    block = WagtailBlockChoiceBlock()
-    content = ExtendedCommonStreamBlock()
-
-
 STREAMFIELD_COMMON_BLOCKS = [
     *SITES_FACILES_BLOCKS,
-    ("override", Override()),
     ("bonus", Bonus()),
-    (
-        "reusable",
-        reusable_block,
-    ),
-    (
-        "carte_sur_mesure",
-        carte_sur_mesure_block,
-    ),
+    ("reusable", COMMON_CUSTOM_BLOCKS["reusable"]),
+    ("carte_sur_mesure", COMMON_CUSTOM_BLOCKS["carte_sur_mesure"]),
+    ("liens", COMMON_CUSTOM_BLOCKS["liens"]),
     ("tabs", TabsBlock(label=_("Tabs"), group=_("DSFR components"))),
 ]
