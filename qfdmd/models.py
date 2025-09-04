@@ -133,7 +133,6 @@ class CompiledFieldMixin(Page):
     def famille(self):
         if famille := self.get_ancestors().type(FamilyPage).first():
             return famille
-        return famille
 
     @cached_property
     def compiled_body(self):
@@ -415,6 +414,7 @@ class TemporarySynonymeModel(TimestampedModel, index.Indexed):
         verbose_name_plural = "Synonymes de recherche"
 
     panels = [FieldPanel("nom")]
+
     search_fields = [
         index.AutocompleteField("nom"),
         index.SearchField("nom"),
@@ -547,7 +547,7 @@ class Produit(index.Indexed, AbstractBaseProduit):
     def __str__(self):
         return f"{self.pk} - {self.nom}"
 
-    search_fields = [
+    search_fields = Page.search_fields + [
         index.AutocompleteField("nom"),
         index.RelatedFields("synonymes", [index.SearchField("nom")]),
         index.SearchField("id"),
