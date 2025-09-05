@@ -1,35 +1,28 @@
 # DevOps, déploiement, opérations
 
-## Déploiement de la plateforme Airflow hors CD
+## Continuous Delivery
 
-La plateforme Data est déploié automatiquement par le processus de `Continuous Deployment`. Cependant, il est possibel d'avoir besoin de « forcer » un déploiement.
+Il est possible de déployer Airflow et le site web à l'aide de workflows GitHub Actions. Il existe 2 environnements : `preprod` et `prod`.
 
-### Procédure de déploiement
+### Review
 
-#### Prérequis
+Le workflow [review](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/review.yml) est exécuté **sur les pull-requests.**
 
-- configururer sa clé ssh dans l'interface de clevercloud (cf. doc clevercloud)
-- configurer un "remote repository" pour `airflow-webserver` pour ce repository et pour chaque environnemnt
-- configurer un "remote repository" pour `airflow-scheduler` pour ce repository et pour chaque environnemnt
-- pousser le code souhaité sur la branch master des 2 repository
+Il exécute les tests CI, build et push les images Airflow avec le tag `review` et peut déployer Airflow et l'application web lorsqu'une action manuelle est effectuée.
 
-#### en PREPROD
+La branche déployée est alors celle de la pull-request en environnement de `preprod`.
 
-```sh
-git remote add preprod-airflow-scheduler git+ssh://git@push-n3-par-clevercloud-customers.services.clever-cloud.com/app_3d1f7d89-d7f0-433a-ac01-c663d4729143.git
-git remote add preprod-airflow-webserver git+ssh://git@push-n3-par-clevercloud-customers.services.clever-cloud.com/app_d3c229bf-be85-4dbd-aca2-c8df1c6166de.git
-git push preprod-airflow-scheduler mabranch:master
-git push preprod-airflow-webserver mabranch:master
-```
+### CD
 
-#### en PROD
+Le workflow [cd](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/cd.yml) est exécuté **sur les commits de la branche `main`.**
 
-```sh
-git remote add prod-airflow-scheduler git+ssh://git@push-n3-par-clevercloud-customers.services.clever-cloud.com/app_fda5d606-44d9-485f-a1b4-1f7007bc3bec.git
-git remote add prod-airflow-webserver git+ssh://git@push-n3-par-clevercloud-customers.services.clever-cloud.com/app_efd2802a-1773-48e0-987e-7a6dffb929d1.git
-git push prod-airflow-scheduler mabranch:master
-git push prod-airflow-webserver mabranch:master
-```
+Il exécute les tests CI, build et push les images Airflow avec le tag `preprod` et peut déployer Airflow et l'application web lorsqu'une action manuelle est effectuée. Une release est alors créée automatiquement avec le statut de `draft`.
+
+### Deploy
+
+Le workflow [deploy](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/deploy.yml) est exécuté **lorsqu'une release passe du statut de `draft` à `published`.**
+
+Airflow et l'application web sont alors déployés en environnement de `prod`.
 
 ## Déploiement sur Scalingo
 
@@ -47,7 +40,7 @@ le code de l'interface est déployé sur le repo git de scalingo à conditions q
 
 <!-- TODO data plateforme -->
 
-## Deploiment sur Scaleway
+## Deploiement sur Scaleway
 
 <!-- TODO s3 et bientôt plus ? -->
 
