@@ -49,6 +49,6 @@ resource "scaleway_container" "airflow_webserver" {
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN = var.AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
     DATABASE_URL                        = var.DATABASE_URL
     DB_WAREHOUSE                        = var.DB_WAREHOUSE
-    AIRFLOW_CONN_QFDMO_DJANGO_DB        = var.AIRFLOW_CONN_QFDMO_DJANGO_DB
+    AIRFLOW_CONN_WEBAPP_DB              = var.AIRFLOW_CONN_WEBAPP_DB
   }
 }
