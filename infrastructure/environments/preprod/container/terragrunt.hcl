@@ -13,7 +13,7 @@ include {
 inputs = {
   # Scheduler
   airflow_scheduler_registry_image = "rg.fr-par.scw.cloud/ns-qfdmo/airflow-scheduler:preprod"
-  airflow_scheduler_cpu_limit      = 2000
+  airflow_scheduler_cpu_limit      = 4000
   airflow_scheduler_memory_limit   = 8000
   airflow_scheduler_min_scale      = 1
   airflow_scheduler_max_scale      = 1
@@ -21,14 +21,14 @@ inputs = {
 
   # Webserver
   airflow_webserver_registry_image = "rg.fr-par.scw.cloud/ns-qfdmo/airflow-webserver:preprod"
-  airflow_webserver_cpu_limit      = 2000
+  airflow_webserver_cpu_limit      = 4000
   airflow_webserver_memory_limit   = 4000
   airflow_webserver_min_scale      = 1
   airflow_webserver_max_scale      = 1
   airflow_webserver_timeout        = 300
 
   AIRFLOW__DATABASE__SQL_ALCHEMY_CONN = "[AIRFLOW__DATABASE__SQL_ALCHEMY_CONN]"
-  AIRFLOW_CONN_QFDMO_DJANGO_DB        = "[AIRFLOW_CONN_QFDMO_DJANGO_DB]"
+  AIRFLOW_CONN_WEBAPP_DB              = "[AIRFLOW_CONN_WEBAPP_DB]"
   DATABASE_URL                        = "[DATABASE_URL]"
   DB_WAREHOUSE                        = "[DB_WAREHOUSE]"
   ENVIRONMENT                         = "[ENVIRONMENT]"
