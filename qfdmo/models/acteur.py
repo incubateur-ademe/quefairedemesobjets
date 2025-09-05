@@ -1209,6 +1209,34 @@ class DisplayedActeur(BaseActeur):
         pointent vers l'identifiant_unique de cet acteur"""
         return parents_cache_get()["nombre_enfants"].get(self.identifiant_unique, 0)
 
+    def action_to_display(
+        self,
+        direction: str | None = None,
+        action_list: str | None = None,
+        sous_categorie_id: int | None = None,
+        carte: bool = True,
+    ) -> Action | None:
+
+        actions = self.acteur_actions(
+            direction=direction,
+            actions_codes=action_list,
+            sous_categorie_id=sous_categorie_id,
+        )
+
+        if not actions:
+            return None
+
+        def sort_actions_by_action_principale_and_order(a):
+            if a == self.action_principale:
+                return -1
+
+            base_order = a.order or 0
+            if carte and a.groupe_action:
+                base_order += (a.groupe_action.order or 0) * 100
+            return base_order
+
+        return sorted(actions, key=sort_actions_by_action_principale_and_order)[0]
+
     def get_absolute_url(self):
         return reverse("qfdmo:acteur-detail", args=[self.uuid])
 

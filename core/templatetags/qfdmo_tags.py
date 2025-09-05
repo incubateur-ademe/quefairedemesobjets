@@ -128,38 +128,15 @@ def acteur_pinpoint_tag(
             "marker_icon_extra_classes": "",
         }
     )
-    actions = acteur.acteur_actions(
+
+    action_to_display = acteur.action_to_display(
         direction=direction,
-        actions_codes=action_list,
+        action_list=action_list,
         sous_categorie_id=sous_categorie_id,
     )
-
-    if not actions:
+    if action_to_display is None:
         logger.warning("No actions found for acteur %s", acteur)
         return context
-
-    def sort_actions_by_action_principale_and_order(a):
-        if a == acteur.action_principale:
-            return -1
-
-        base_order = a.order or 0
-        if carte and a.groupe_action:
-            base_order += (a.groupe_action.order or 0) * 100
-        return base_order
-
-    action_to_display = sorted(
-        actions, key=sort_actions_by_action_principale_and_order
-    )[0]
-
-    if carte and action_to_display.groupe_action:
-        action_to_display = action_to_display.groupe_action
-
-    context.update(
-        {
-            "marker_icon": action_to_display.icon,
-            "marker_couleur": action_to_display.couleur,
-        }
-    )
 
     if carte_config:
         queryset = Q()
@@ -181,18 +158,29 @@ def acteur_pinpoint_tag(
                         "marker_icon": "",
                     }
                 )
+                return context
 
         except GroupeActionConfig.DoesNotExist:
             pass
 
-    if carte and action_to_display.code == "reparer":
-        context.update(
-            {
-                "marker_bonus": getattr(acteur, "is_bonus_reparation", False),
-                "marker_fill_background": True,
-                "marker_icon_extra_classes": "qf-text-white",
-            }
-        )
+    if carte:
+        if action_to_display.groupe_action:
+            action_to_display = action_to_display.groupe_action
+        if action_to_display.code == "reparer":
+            context.update(
+                {
+                    "marker_bonus": getattr(acteur, "is_bonus_reparation", False),
+                    "marker_fill_background": True,
+                    "marker_icon_extra_classes": "qf-text-white",
+                }
+            )
+
+    context.update(
+        {
+            "marker_icon": action_to_display.icon,
+            "marker_couleur": action_to_display.couleur,
+        }
+    )
 
     return context
 
