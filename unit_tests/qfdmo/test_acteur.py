@@ -1,4 +1,5 @@
 import json
+from unittest.mock import patch
 
 import pytest
 from django.contrib.gis.geos import Point
@@ -463,17 +464,12 @@ class TestRevisionActeurDuplicate:
         revision_acteur.labels.add(label1)
         revision_acteur.labels.add(label2)
 
-        print(revision_acteur.labels.all())
-
         revision_acteur_duplicate = revision_acteur.duplicate()
 
         assert revision_acteur_duplicate.labels.count() == 2
         assert set(
             [label.code for label in revision_acteur_duplicate.labels.all()]
-        ) == {
-            label1.code,
-            label2.code,
-        }
+        ) == {label1.code, label2.code}
 
     def test_duplicate_proposition_services(self):
         SourceFactory(code="communautelvao")
@@ -734,6 +730,48 @@ class TestDisplayedActeurDisplayPostalAddress:
         displayed_acteur = DisplayedActeurFactory.build(**fields)
 
         assert displayed_acteur.should_display_adresse is True
+
+
+@pytest.mark.django_db
+class TestDisplayedActeurActionToDisplay:
+    @pytest.mark.parametrize("actions", [None, []])
+    def test_action_to_display_no_actions(self, actions):
+        with patch(
+            "qfdmo.models.acteur.DisplayedActeur.acteur_actions"
+        ) as mock_acteur_actions:
+            mock_acteur_actions.return_value = actions
+            displayed_acteur = DisplayedActeurFactory()
+            assert displayed_acteur.action_to_display() is None
+
+    def test_action_to_display_actions(self):
+        action1 = ActionFactory(code="action1", order=2)
+        action2 = ActionFactory(code="action2", order=1)
+        actions = [action1, action2]
+        displayed_acteur = DisplayedActeurFactory()
+        with patch(
+            "qfdmo.models.acteur.DisplayedActeur.acteur_actions"
+        ) as mock_acteur_actions:
+            mock_acteur_actions.return_value = actions
+            assert displayed_acteur.action_to_display() == action2
+
+    def test_action_to_display_action_principale(self):
+        action1 = ActionFactory(code="action1")
+        action2 = ActionFactory(code="action2")
+        action3 = ActionFactory(code="action3")
+        actions = [action1, action2]
+        displayed_acteur = DisplayedActeurFactory(action_principale=action3)
+        with patch(
+            "qfdmo.models.acteur.DisplayedActeur.acteur_actions"
+        ) as mock_acteur_actions:
+            mock_acteur_actions.return_value = actions
+            assert displayed_acteur.action_to_display() == action1
+
+        actions = [action2, action1, action3]
+        with patch(
+            "qfdmo.models.acteur.DisplayedActeur.acteur_actions"
+        ) as mock_acteur_actions:
+            mock_acteur_actions.return_value = actions
+            assert displayed_acteur.action_to_display() == action3
 
 
 @pytest.mark.django_db
