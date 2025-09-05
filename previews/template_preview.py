@@ -33,7 +33,7 @@ class PinPointForm(forms.Form):
         label="Action",
         to_field_name="code",
         help_text="Sélectionnez une action",
-        initial="reparer",
+        initial=Action.objects.get(code="reparer"),
     )
     avec_bonus = forms.BooleanField(
         label="Avec bonus",
@@ -77,8 +77,16 @@ class ComponentsPreview(LookbookPreview):
             # a boolean
             # We suspect an issue upstream in django-lookbook, this might need to be investigated
             # and raised to the maintainer.
-            avec_bonus = avec_bonus.lower() == "true"
-            carte = carte.lower() == "true"
+            if isinstance(action, str) and action:
+                action = Action.objects.get(code=action)
+            if isinstance(carte_config, str) and carte_config:
+                carte_config = CarteConfig.objects.get(id=carte_config)
+            if isinstance(acteur_type, str) and acteur_type:
+                acteur_type = ActeurType.objects.get(code=acteur_type)
+            if isinstance(avec_bonus, str):
+                avec_bonus = avec_bonus.lower() == "true"
+            if isinstance(carte, str):
+                carte = carte.lower() == "true"
 
             displayed_proposition_service = DisplayedPropositionService.objects.filter(
                 action=action
