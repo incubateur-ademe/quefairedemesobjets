@@ -161,6 +161,9 @@ class ActeurType(CodeAsNaturalKeyModel):
     )
     libelle = models.CharField(max_length=255, blank=False, null=False, default="?")
 
+    def __str__(self):
+        return self.libelle
+
 
 def validate_logo(value: Any):
     if value:

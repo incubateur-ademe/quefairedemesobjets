@@ -28,8 +28,10 @@ class SynonymeForm(forms.Form):
 
 
 class PinPointForm(forms.Form):
-    action = forms.ChoiceField(
+    action = forms.ModelChoiceField(
+        queryset=Action.objects.all(),
         label="Action",
+        to_field_name="code",
         help_text="Sélectionnez une action",
         initial="reparer",
     )
@@ -43,68 +45,66 @@ class PinPointForm(forms.Form):
         help_text="Carte",
         initial=True,
     )
-    carte_config = forms.ChoiceField(
+    carte_config = forms.ModelChoiceField(
         label="Carte config",
         help_text="Carte config",
         required=False,
-        choices=[("", "")] + list(CarteConfig.objects.all().values_list("id", "nom")),
-        initial="",
+        queryset=CarteConfig.objects.all(),
     )
-    acteur_type = forms.ChoiceField(
+    acteur_type = forms.ModelChoiceField(
         label="Acteur type",
         help_text="Action list",
+        to_field_name="code",
         required=False,
-        choices=[("", "")]
-        + list(ActeurType.objects.all().values_list("code", "libelle")),
+        queryset=ActeurType.objects.all(),
         initial="",
     )
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Récupérer toutes les actions et les transformer en choix pour le selectbox
-        self.fields["action"].choices = [
-            (action.code, action.libelle)
-            for action in Action.objects.all().order_by("order")
-        ]
 
 
 class ComponentsPreview(LookbookPreview):
-
     @register_form_class(PinPointForm)
     def acteur_pinpoint(
         self,
-        action="reparer",
+        action=Action.objects.get(code="reparer"),
         avec_bonus="False",
         carte="True",
         carte_config=None,
         acteur_type=None,
         **kwargs,
     ):
-        # FIXME : avec_bonus is returned as a string by the lookbook where I expected
-        # a boolean
-        avec_bonus = avec_bonus.lower() == "true"
-        carte = carte.lower() == "true"
-        if carte_config:
-            carte_config = CarteConfig.objects.get(id=carte_config)
-        action = Action.objects.get(code=action)
-        displayed_proposition_service = DisplayedPropositionService.objects.filter(
-            action=action
-        )
-        if acteur_type:
-            displayed_proposition_service = displayed_proposition_service.filter(
-                acteur__acteur_type__code=acteur_type
+        try:
+            # FIXME : avec_bonus is returned as a string by the lookbook where I expected
+            # a boolean
+            # We suspect an issue upstream in django-lookbook, this might need to be investigated
+            # and raised to the maintainer.
+            avec_bonus = avec_bonus.lower() == "true"
+            carte = carte.lower() == "true"
+
+            displayed_proposition_service = DisplayedPropositionService.objects.filter(
+                action=action
             )
-        if avec_bonus:
-            displayed_proposition_service = displayed_proposition_service.filter(
-                acteur__labels__bonus=True
+            if acteur_type:
+                displayed_proposition_service = displayed_proposition_service.filter(
+                    acteur__acteur_type=acteur_type
+                )
+            if avec_bonus:
+                displayed_proposition_service = displayed_proposition_service.filter(
+                    acteur__labels__bonus=True
+                )
+            else:
+                displayed_proposition_service = displayed_proposition_service.exclude(
+                    acteur__in=DisplayedActeur.objects.filter(labels__bonus=True)
+                )
+            displayed_proposition_service = displayed_proposition_service.first()
+            if not displayed_proposition_service:
+                raise ValueError(f"PropositionService with action `{action}` not found")
+        except Exception as e:
+            template = Template(
+                "Une erreur s'est produite dans la génération de la preview,"
+                f" la combinaison de filtres ne permet pas d'afficher un pinpoint <br><pre>{e}</pre>",
             )
-        else:
-            displayed_proposition_service = displayed_proposition_service.exclude(
-                acteur__in=DisplayedActeur.objects.filter(labels__bonus=True)
-            )
-        displayed_proposition_service = displayed_proposition_service.first()
-        if not displayed_proposition_service:
-            raise ValueError(f"PropositionService with action `{action}` not found")
+
+            return template.render(Context({}))
 
         context = {
             "acteur": displayed_proposition_service.acteur,
