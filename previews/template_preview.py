@@ -68,7 +68,7 @@ class ComponentsPreview(LookbookPreview):
     @register_form_class(PinPointForm)
     def acteur_pinpoint(
         self,
-        action=Action.objects.get(code="reparer"),
+        action=None,
         avec_bonus="False",
         carte="True",
         carte_config=None,
