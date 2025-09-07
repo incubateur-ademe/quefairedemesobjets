@@ -28,12 +28,15 @@ class SynonymeForm(forms.Form):
 
 
 class PinPointForm(forms.Form):
+    def get_default_action(self):
+        return Action.objects.get(code="reparer")
+
     action = forms.ModelChoiceField(
         queryset=Action.objects.all(),
         label="Action",
         to_field_name="code",
         help_text="Sélectionnez une action",
-        initial=Action.objects.get(code="reparer"),
+        initial=get_default_action,
     )
     avec_bonus = forms.BooleanField(
         label="Avec bonus",
