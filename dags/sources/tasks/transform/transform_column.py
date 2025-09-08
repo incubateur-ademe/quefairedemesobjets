@@ -18,9 +18,9 @@ def cast_eo_boolean_or_string_to_boolean(value: str | bool, _) -> bool | None:
     if isinstance(value, bool):
         return value
     if isinstance(value, str):
-        if value.lower().strip() == "oui":
+        if value.lower().strip() in ["oui", "yes", "true"]:
             return True
-        if value.lower().strip() == "non":
+        if value.lower().strip() in ["non", "no", "false"]:
             return False
     return None
 
