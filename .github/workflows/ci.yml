@@ -127,7 +127,6 @@ jobs:
       - uses: ./.github/workflows/composite/setup-gdal
       - uses: ./.github/workflows/composite/build-frontend
       - uses: ./.github/workflows/composite/setup-python
-      - uses: ./.github/workflows/composite/setup-django
 
       - name: Migrate database
         run: |
