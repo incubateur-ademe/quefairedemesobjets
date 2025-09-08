@@ -75,6 +75,7 @@ jobs:
       - uses: awalsh128/cache-apt-pkgs-action@latest
         with:
           packages: gdal-bin
+          execute_install_scripts: true
           version: 1.0
       - name: Install poetry
         uses: abatilo/actions-poetry@3765cf608f2d4a72178a9fc5b918668e542b89b1 # v4
@@ -187,6 +188,7 @@ jobs:
       - uses: awalsh128/cache-apt-pkgs-action@latest
         with:
           packages: gdal-bin
+          execute_install_scripts: true
           version: 1.0
       - name: Install poetry
         uses: abatilo/actions-poetry@3765cf608f2d4a72178a9fc5b918668e542b89b1 # v4
