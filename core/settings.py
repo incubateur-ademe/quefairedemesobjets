@@ -150,6 +150,7 @@ CACHES = {
 
 X_FRAME_OPTIONS = "ALLOWALL"
 
+CSRF_TRUSTED_ORIGINS = []
 if DEBUG:
     # FIXME: A CSRF error can occur locally when using HTTPS.
     # It is not clear yet what causes it, it might be http host headers
