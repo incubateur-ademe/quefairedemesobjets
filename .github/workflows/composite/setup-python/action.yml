@@ -22,4 +22,5 @@ runs:
         path: ./.venv
         key: venv-dev-${{ hashFiles('poetry.lock') }}
     - name: Install the project dependencies
+      shell: bash
       run: poetry sync --with ${{ inputs.groups }} --no-root

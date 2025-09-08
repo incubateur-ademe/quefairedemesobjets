@@ -4,14 +4,13 @@ description: Build Parcel assets
 runs:
   using: composite
   steps:
-    - uses: actions/checkout@v5
-
     - uses: actions/setup-node@v5
       with:
         node-version-file: ".tool-versions"
         cache: "npm"
 
     - name: Install dependencies
+      shell: bash
       run: npm ci
 
     - uses: actions/cache@v4
@@ -28,5 +27,6 @@ runs:
           parcel-${{ runner.os }}-
 
     - name: Build assets if cache missed
+      shell: bash
       if: steps.parcel-cache.outputs.cache-hit != 'true'
       run: npm run build
