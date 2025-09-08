@@ -5,7 +5,6 @@ runs:
   using: composite
   steps:
     - uses: actions/setup-node@v4
-      shell: bash
       with:
         node-version-file: ".tool-versions"
         cache: "npm"
