@@ -130,7 +130,7 @@ jobs:
   e2e:
     name: tests de bout-en-bout
     runs-on: ubuntu-latest
-    needs: [frontend_tests]
+    needs: [frontend_tests,backend_tests]
     if: ${{ github.ref_name == 'main' || (github.event_name ==  'pull_request' && contains( github.event.pull_request.labels.*.name, 'frontend')) }}
     strategy:
       matrix:
