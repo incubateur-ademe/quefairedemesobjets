@@ -107,6 +107,7 @@ jobs:
   frontend_tests:
     name: ✅ Frontend Tests
     runs-on: ubuntu-latest
+    needs: [frontend_linter]
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -117,10 +118,25 @@ jobs:
         run: npm ci
       - name: Run tests
         run: npm run test
+      - uses: actions/cache@v4
+        name: Cache Parcel build
+        id: parcel-cache
+        with:
+          path: |
+            static/compiled
+            .parcel-cache
+          key: parcel-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('static/to_compile/**/*.css', 'static/to_compile/**/*.ts') }}
+          restore-keys: |
+            parcel-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+            parcel-${{ runner.os }}-
+      - name: Ensure build works assets
+        if: steps.parcel-cache.outputs.cache-hit != 'true'
+        run: npm run build
 
   e2e:
     name: tests de bout-en-bout
     runs-on: ubuntu-latest
+    needs: [frontend_tests]
     if: ${{ github.ref_name == 'main' || (github.event_name ==  'pull_request' && contains( github.event.pull_request.labels.*.name, 'frontend')) }}
     # strategy:
     #   matrix:
@@ -176,7 +192,6 @@ jobs:
             playwright-browsers-
 
       - name: Install dependencies
-        if: steps.parcel-cache.outputs.cache-hit != 'true'
         run: npm ci
 
       - name: Build assets
