@@ -10,23 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-<<<<<<< HEAD
-      - uses: actions/setup-python@v6
-        with:
-          cache: "pip"
-      - name: Install poetry
-        uses: abatilo/actions-poetry@3765cf608f2d4a72178a9fc5b918668e542b89b1 # v4
-      - uses: actions/cache@v4
-        name: Define a cache for the virtual environment based on the dependencies lock file
-        with:
-          path: ./.venv
-          key: venv-dev-airflow-${{ hashFiles('poetry.lock') }}
-      - name: Install the project dependencies
-        run: poetry sync --only dev --no-root
-=======
       - uses: ./_setup-python.yml
 
->>>>>>> 209cdde4 (Split workflows)
       - name: Install Terragrunt and OpenTofu
         uses: gruntwork-io/terragrunt-action@95fc057922e3c3d4cc021a81a213f088f333ddef
         with:
@@ -74,12 +59,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
-<<<<<<< HEAD
-      - uses: actions/setup-python@v6
-=======
       - uses: ./_setup-gdal.yml
       - uses: ./_setup-python.yml
->>>>>>> 209cdde4 (Split workflows)
         with:
           groups: dev,airflow
       - name: Run unit tests
@@ -153,57 +134,11 @@ jobs:
           cp .env.template .env
           echo BASE_URL=http://localhost:8000 >> .env
           echo DEBUG=false >> .env
-<<<<<<< HEAD
-
-      - uses: actions/setup-node@v5
-        with:
-          node-version-file: ".tool-versions"
-          cache: "npm"
-      - uses: actions/cache@v4
-        name: Cache Parcel build
-        id: parcel-cache
-        with:
-          path: |
-            static/compiled
-            .parcel-cache
-          key: parcel-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('static/to_compile/**/*.css', 'static/to_compile/**/*.ts') }}
-          restore-keys: |
-            parcel-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('static/to_compile/**/*.css', 'static/to_compile/**/*.ts') }}
-            parcel-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
-            parcel-${{ runner.os }}-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build assets
-        if: steps.parcel-cache.outputs.cache-hit != 'true'
-        run: npm run build
-
-      - uses: actions/setup-python@v6
-        with:
-          cache: "pip"
-
-      - uses: awalsh128/cache-apt-pkgs-action@latest
-        with:
-          packages: gdal-bin
-          version: 1.0
-      - name: Install packages
-        run: sudo apt-get update && sudo apt-get install -y gdal-bin
-      - name: Install poetry
-        uses: abatilo/actions-poetry@3765cf608f2d4a72178a9fc5b918668e542b89b1 # v4
-      - uses: actions/cache@v4
-        name: Define a cache for the virtual environment based on the dependencies lock file
-        with:
-          path: ./.venv
-          key: venv-dev-${{ hashFiles('poetry.lock') }}
-      - name: Install the project dependencies
-        run: poetry sync --with dev --no-root
-=======
 
       - uses: ./_setup-gdal.yml
       - uses: ./_build-frontend.yml
       - uses: ./_setup-python.yml
       - uses: ./_setup-django.yml
->>>>>>> 209cdde4 (Split workflows)
 
       - name: Migrate database
         run: |
