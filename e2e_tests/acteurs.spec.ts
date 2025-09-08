@@ -1,8 +1,5 @@
 import { expect, test } from "@playwright/test"
 import { getMarkers, hideDjangoToolbar } from "./helpers"
-function getItemSelector(index) {
-  return `#mauvais_etat #id_adresseautocomplete-list.autocomplete-items div:nth-of-type(${index})`
-}
 
 test("Les acteurs sont visibles sur la carte du formulaire et fonctionnent", async ({
   page,
