@@ -2,6 +2,7 @@ import logging
 import re
 from typing import Any
 
+import numpy as np
 import pandas as pd
 from opening_hours import OpeningHours, ParserError
 from sources.config import shared_constants as constants
@@ -15,8 +16,8 @@ CLOSED_THIS_DAY = "Fermé"
 
 
 def cast_eo_boolean_or_string_to_boolean(value: str | bool, _) -> bool | None:
-    if isinstance(value, bool):
-        return value
+    if isinstance(value, (bool, np.bool_)):
+        return bool(value)
     if isinstance(value, str):
         if value.lower().strip() in ["oui", "yes", "true"]:
             return True

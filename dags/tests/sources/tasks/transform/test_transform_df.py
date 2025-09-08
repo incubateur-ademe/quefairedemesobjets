@@ -803,6 +803,11 @@ class TestCleanActeurserviceCodes:
         [
             ({}, []),
             ({"point_dapport_de_service_reparation": True}, ["service_de_reparation"]),
+            (
+                {"point_dapport_de_service_reparation": "True"},
+                ["service_de_reparation"],
+            ),
+            ({"point_dapport_de_service_reparation": "oui"}, ["service_de_reparation"]),
             ({"point_de_reparation": True}, ["service_de_reparation"]),
             ({"point_dapport_pour_reemploi": True}, ["structure_de_collecte"]),
             (
@@ -833,6 +838,8 @@ class TestCleanActionCodes:
         [
             ({}, [], []),
             ({"point_dapport_de_service_reparation": True}, ["reparer"], ["reparer"]),
+            ({"point_dapport_de_service_reparation": "True"}, ["reparer"], ["reparer"]),
+            ({"point_dapport_de_service_reparation": "oui"}, ["reparer"], ["reparer"]),
             ({"point_de_reparation": True}, ["reparer"], ["reparer"]),
             ({"point_dapport_pour_reemploi": True}, ["donner"], ["rapporter"]),
             (
