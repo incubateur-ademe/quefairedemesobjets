@@ -6,7 +6,6 @@ ALLOWED_HOSTS = [
     "lvao.ademe.fr",
     "quefairedemesdechets.ademe.fr",
 ]
-CSRF_TRUSTED_ORIGINS = ["http://localhost"]
 
 DATABASES = {
     "default": DATABASES["default"],  # noqa: F405

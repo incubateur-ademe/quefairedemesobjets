@@ -1,6 +1,5 @@
 import { expect } from "@playwright/test"
 import { test } from "./config"
-import { hideDjangoToolbar } from "./helpers"
 
 test.describe(
   "django-admin",

@@ -137,7 +137,6 @@ jobs:
           - 6543:5432
     steps:
       - uses: actions/checkout@v5
-
       - name: Prepare environment
         run: |
           cp .env.template .env

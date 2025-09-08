@@ -17,7 +17,6 @@ async function searchOnProduitPage(page, searchedAddress: string) {
 test("La carte s'affiche sur une fiche déchet/objet", async ({ page }) => {
   // Navigate to the carte page
   await page.goto(`/dechet/lave-linge`, { waitUntil: "domcontentloaded" })
-  // await hideDjangoToolbar(page)
   await searchOnProduitPage(page, "Auray")
   const sessionStorage = await page.evaluate(() => window.sessionStorage)
   expect(sessionStorage.adresse).toBe("Auray")
@@ -46,7 +45,6 @@ test(
   async ({ page }) => {
     // Navigate to the carte page
     await page.goto(`/`, { waitUntil: "domcontentloaded" })
-    await hideDjangoToolbar(page)
 
     await page.locator("#id_home-input").click()
     await page.locator("#id_home-input").pressSequentially("lave")
@@ -86,7 +84,6 @@ test(
 test("Le tracking PostHog fonctionne comme prévu", async ({ page }) => {
   // Check that homepage scores 1
   await page.goto(`/`, { waitUntil: "domcontentloaded" })
-  // await hideDjangoToolbar(page)
   let sessionStorage = await page.evaluate(() => window.sessionStorage)
   expect(sessionStorage.homePageView).toBe("0")
 

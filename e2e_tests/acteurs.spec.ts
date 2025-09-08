@@ -9,7 +9,6 @@ test("Les acteurs sont visibles sur la carte du formulaire et fonctionnent", asy
   const sessionStorage = await page.evaluate(() => window.sessionStorage)
   const iframeElement = await page.$("#formulaire iframe")
   const iframe = await iframeElement?.contentFrame()
-  await hideDjangoToolbar(iframe)
 
   // Select a Produit
   let inputSelector = "#id_sous_categorie_objet"
@@ -51,7 +50,6 @@ test("Les acteurs sont visibles sur la carte du formulaire et fonctionnent", asy
 test.skip("Les acteurs digitaux sont visibles sur le formulaire", async ({ page }) => {
   // Navigate to the carte page
   await page.goto(`/test_iframe`, { waitUntil: "networkidle" })
-  // await hideDjangoToolbar(page)
   const sessionStorage = await page.evaluate(() => window.sessionStorage)
   const iframeElement = await page.$("#formulaire iframe")
   const iframe = await iframeElement?.contentFrame()
