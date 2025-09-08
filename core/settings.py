@@ -176,7 +176,10 @@ with suppress(ModuleNotFoundError):
 
     def show_toolbar_callback(request):
         path_is_not_excluded = not any(p in request.path for p in patterns_to_exclude)
-        # view_is_not_in_iframe_mode = "iframe" not in request.GET
+
+        if request.headers.get("x-django-disable-toolbar"):
+            return False
+
         return path_is_not_excluded
 
     patterns_to_exclude = [
