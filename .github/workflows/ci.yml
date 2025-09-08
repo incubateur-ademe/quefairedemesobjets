@@ -44,9 +44,22 @@ jobs:
         with:
           node-version-file: ".tool-versions"
           cache: "npm"
+      - uses: actions/cache@v4
+        name: Cache Parcel build
+        id: parcel-cache
+        with:
+          path: |
+            static/compiled
+            .parcel-cache
+          key: parcel-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('src/**', 'static/**/*.js', 'static/**/*.css', 'static/**/*.ts') }}
+          restore-keys: |
+            parcel-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+            parcel-${{ runner.os }}-
+      - name: Install dependencies
+        run: npm ci
       - name: Build assets
-        run: |
-          npm ci
+        if: steps.parcel-cache.outputs.cache-hit != 'true'
+        run: npm run build
       - name: Check code formatting
         run: npm run format:check
 
@@ -107,10 +120,22 @@ jobs:
         with:
           node-version-file: ".tool-versions"
           cache: "npm"
+      - uses: actions/cache@v4
+        name: Cache Parcel build
+        id: parcel-cache
+        with:
+          path: |
+            static/compiled
+            .parcel-cache
+          key: parcel-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('src/**', 'static/**/*.js', 'static/**/*.css', 'static/**/*.ts') }}
+          restore-keys: |
+            parcel-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+            parcel-${{ runner.os }}-
+      - name: Install dependencies
+        run: npm ci
       - name: Build assets
-        run: |
-          npm ci
-          npm run build
+        if: steps.parcel-cache.outputs.cache-hit != 'true'
+        run: npm run build
       - name: Run tests
         run: npm run test
 
@@ -147,11 +172,33 @@ jobs:
         with:
           node-version-file: ".tool-versions"
           cache: "npm"
+      - uses: actions/cache@v4
+        name: Cache Parcel build
+        id: parcel-cache
+        with:
+          path: |
+            static/compiled
+            .parcel-cache
+          key: parcel-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('src/**', 'static/**/*.js', 'static/**/*.css', 'static/**/*.ts') }}
+          restore-keys: |
+            parcel-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+            parcel-${{ runner.os }}-
+      - uses: actions/cache@v4
+        name: Cache Playwright browsers
+        id: playwright-cache
+        with:
+          path: |
+            ~/.cache/ms-playwright
+            ~/.cache/playwright
+          key: playwright-browsers-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            playwright-browsers-${{ runner.os }}-
 
+      - name: Install dependencies
+        run: npm ci
       - name: Build assets
-        run: |
-          npm ci
-          npm run build
+        if: steps.parcel-cache.outputs.cache-hit != 'true'
+        run: npm run build
 
       - uses: actions/setup-python@v6
         with:
@@ -193,6 +240,7 @@ jobs:
           poetry run python manage.py runserver &
 
       - name: Install Playwright Browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: make init-playwright
 
       - name: Run Playwright tests
