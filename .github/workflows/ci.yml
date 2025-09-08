@@ -44,22 +44,8 @@ jobs:
         with:
           node-version-file: ".tool-versions"
           cache: "npm"
-      - uses: actions/cache@v4
-        name: Cache Parcel build
-        id: parcel-cache
-        with:
-          path: |
-            static/compiled
-            .parcel-cache
-          key: parcel-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('src/**', 'static/**/*.js', 'static/**/*.css', 'static/**/*.ts') }}
-          restore-keys: |
-            parcel-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
-            parcel-${{ runner.os }}-
       - name: Install dependencies
         run: npm ci
-      - name: Build assets
-        if: steps.parcel-cache.outputs.cache-hit != 'true'
-        run: npm run build
       - name: Check code formatting
         run: npm run format:check
 
@@ -120,22 +106,8 @@ jobs:
         with:
           node-version-file: ".tool-versions"
           cache: "npm"
-      - uses: actions/cache@v4
-        name: Cache Parcel build
-        id: parcel-cache
-        with:
-          path: |
-            static/compiled
-            .parcel-cache
-          key: parcel-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('src/**', 'static/**/*.js', 'static/**/*.css', 'static/**/*.ts') }}
-          restore-keys: |
-            parcel-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
-            parcel-${{ runner.os }}-
       - name: Install dependencies
         run: npm ci
-      - name: Build assets
-        if: steps.parcel-cache.outputs.cache-hit != 'true'
-        run: npm run build
       - name: Run tests
         run: npm run test
 
@@ -143,9 +115,9 @@ jobs:
     name: tests de bout-en-bout
     runs-on: ubuntu-latest
     if: ${{ github.ref_name == 'main' || (github.event_name ==  'pull_request' && contains( github.event.pull_request.labels.*.name, 'frontend')) }}
-    strategy:
-      matrix:
-        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
+    # strategy:
+    #   matrix:
+    #     shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       postgres:
         image: postgis/postgis:15-3.3-alpine
@@ -179,7 +151,7 @@ jobs:
           path: |
             static/compiled
             .parcel-cache
-          key: parcel-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('src/**', 'static/**/*.js', 'static/**/*.css', 'static/**/*.ts') }}
+          key: parcel-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('static/to_compile/**/*.css', 'static/to_compile/**/*.ts') }}
           restore-keys: |
             parcel-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
             parcel-${{ runner.os }}-
@@ -195,7 +167,9 @@ jobs:
             playwright-browsers-${{ runner.os }}-
 
       - name: Install dependencies
+        if: steps.parcel-cache.outputs.cache-hit != 'true'
         run: npm ci
+
       - name: Build assets
         if: steps.parcel-cache.outputs.cache-hit != 'true'
         run: npm run build
@@ -221,7 +195,6 @@ jobs:
 
       - name: Migrate database
         run: |
-          cat .env
           make createcachetable
           make migrate
         env:
@@ -244,7 +217,8 @@ jobs:
         run: make init-playwright
 
       - name: Run Playwright tests
-        run: npx playwright test --reporter=list --update-snapshots --shard=${{ matrix.shard }}
+        # run: npx playwright test --reporter=list --update-snapshots --shard=${{ matrix.shard }}
+        run: npx playwright test --reporter=list --update-snapshots
 
 # Address actions/missing-workflow-permissions rule in
 # code scanning alerts
