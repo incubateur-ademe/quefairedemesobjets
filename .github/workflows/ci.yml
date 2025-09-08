@@ -87,7 +87,11 @@ jobs:
   e2e:
     name: tests de bout-en-bout
     runs-on: ubuntu-latest
+<<<<<<< HEAD
     needs: [frontend_tests, backend_tests]
+=======
+    needs: frontend_tests
+>>>>>>> cc2435d0 (Remove backend test dependency)
     if: ${{ github.ref_name == 'main' || (github.event_name ==  'pull_request' && contains( github.event.pull_request.labels.*.name, 'frontend')) }}
     services:
       postgres:
