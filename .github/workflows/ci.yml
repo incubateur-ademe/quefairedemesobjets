@@ -72,21 +72,9 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           cache: "pip"
-      - uses: actions/cache@v4
-        name: Cache GIS installation
-        id: gis-cache
+      - uses: tecolicom/actions-use-apt-tools@v1
         with:
-          path: /usr/bin/gdal*
-          key: gis-${{ runner.os }}-gdal-bin
-          restore-keys: |
-            gis-${{ runner.os }}-gdal-bin
-            gis-${{ runner.os }}-
-            gis-
-      - name: Install GIS Packages
-        if: steps.gis-cache.outputs.cache-hit != 'true'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gdal-bin
+          tools: gdal-bin
       - name: Install poetry
         uses: abatilo/actions-poetry@3765cf608f2d4a72178a9fc5b918668e542b89b1 # v4
       - uses: actions/cache@v4
@@ -184,19 +172,6 @@ jobs:
             parcel-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('static/to_compile/**/*.css', 'static/to_compile/**/*.ts') }}
             parcel-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
             parcel-${{ runner.os }}-
-      - uses: actions/cache@v4
-        name: Cache Playwright browsers
-        id: playwright-cache
-        with:
-          path: |
-            ~/.cache/ms-playwright
-            ~/.cache/playwright
-          key: playwright-browsers-${{ runner.os }}-${{ hashFiles('playwright.config.ts') }}
-          restore-keys: |
-            playwright-browsers-${{ runner.os }}-${{ hashFiles('playwright.config.ts') }}
-            playwright-browsers-${{ runner.os }}-
-            playwright-browsers-
-
       - name: Install dependencies
         run: npm ci
 
@@ -208,21 +183,9 @@ jobs:
         with:
           cache: "pip"
 
-      - uses: actions/cache@v4
-        name: Cache GIS installation
-        id: gis-cache
+      - uses: tecolicom/actions-use-apt-tools@v1
         with:
-          path: /usr/bin/gdal*
-          key: gis-${{ runner.os }}-gdal-bin
-          restore-keys: |
-            gis-${{ runner.os }}-gdal-bin
-            gis-${{ runner.os }}-
-            gis-
-      - name: Install GIS Packages
-        if: steps.gis-cache.outputs.cache-hit != 'true'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gdal-bin
+          tools: gdal-bin
       - name: Install poetry
         uses: abatilo/actions-poetry@3765cf608f2d4a72178a9fc5b918668e542b89b1 # v4
       - uses: actions/cache@v4
@@ -251,6 +214,19 @@ jobs:
       - name: Run server
         run: |
           poetry run python manage.py runserver &
+
+      - uses: actions/cache@v4
+        name: Cache Playwright browsers
+        id: playwright-cache
+        with:
+          path: |
+            ~/.cache/ms-playwright
+            ~/.cache/playwright
+          key: playwright-browsers-${{ runner.os }}-${{ hashFiles('playwright.config.ts') }}
+          restore-keys: |
+            playwright-browsers-${{ runner.os }}-${{ hashFiles('playwright.config.ts') }}
+            playwright-browsers-${{ runner.os }}-
+            playwright-browsers-
 
       - name: Install Playwright Browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
