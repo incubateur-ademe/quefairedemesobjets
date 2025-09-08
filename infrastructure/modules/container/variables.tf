@@ -51,7 +51,7 @@ variable "AIRFLOW__DATABASE__SQL_ALCHEMY_CONN" {
   type      = string
   sensitive = true
 }
-variable "AIRFLOW_CONN_QFDMO_DJANGO_DB" {
+variable "AIRFLOW_CONN_WEBAPP_DB" {
   type      = string
   sensitive = true
 }

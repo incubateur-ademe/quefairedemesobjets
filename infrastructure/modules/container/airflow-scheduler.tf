@@ -39,7 +39,7 @@ resource "scaleway_container" "airflow_scheduler" {
   }
   secret_environment_variables = {
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN = var.AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
-    AIRFLOW_CONN_QFDMO_DJANGO_DB        = var.AIRFLOW_CONN_QFDMO_DJANGO_DB
+    AIRFLOW_CONN_WEBAPP_DB              = var.AIRFLOW_CONN_WEBAPP_DB
     DATABASE_URL                        = var.DATABASE_URL
     DB_WAREHOUSE                        = var.DB_WAREHOUSE
     ENVIRONMENT                         = var.ENVIRONMENT
