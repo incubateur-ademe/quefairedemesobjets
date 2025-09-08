@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: ./_setup-python.yml
+      - uses: ./.github/workflows/_setup-python.yml
 
       - name: Install Terragrunt and OpenTofu
         uses: gruntwork-io/terragrunt-action@95fc057922e3c3d4cc021a81a213f088f333ddef
@@ -135,10 +135,10 @@ jobs:
           echo BASE_URL=http://localhost:8000 >> .env
           echo DEBUG=false >> .env
 
-      - uses: ./_setup-gdal.yml
-      - uses: ./_build-frontend.yml
-      - uses: ./_setup-python.yml
-      - uses: ./_setup-django.yml
+      - uses: ./.github/workflows/_setup-gdal.yml
+      - uses: ./.github/workflows/_build-frontend.yml
+      - uses: ./.github/workflows/_setup-python.yml
+      - uses: ./.github/workflows/_setup-django.yml
 
       - name: Migrate database
         run: |
