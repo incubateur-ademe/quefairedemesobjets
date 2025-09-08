@@ -1,0 +1,19 @@
+name: Install GDAL
+description: Install GDAL
+
+runs:
+  using: "composite"
+  steps:
+    - name: Cache apt packages
+      id: apt-cache
+      uses: awalsh128/cache-apt-pkgs-action@9f7a885e33ff6f8166b600e3e74a981ec11b92c3
+      with:
+        packages: gdal-bin
+
+    # Install the package(s)
+    - name: Install packages
+      run: |
+        if [ "${{ steps.apt-cache.outputs.cache-hit }}" != "true" ]; then
+          sudo apt-get update -qq
+        fi
+        sudo apt-get install -y gdal-bin
