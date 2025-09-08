@@ -32,7 +32,7 @@ export const hideDjangoToolbar = async (page) =>
   await page.locator("#djHideToolBarButton").click()
 
 export const getMarkers = async (page) => {
-  await expect(page.locator("#pinpoint-home")).toBeAttached()
+  await expect(page.locator("#pinpoint-home").first()).toBeAttached()
   await page.evaluate(() => {
     document
       .querySelectorAll(".maplibregl-marker.home-icon")
