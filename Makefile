@@ -22,7 +22,11 @@ check:
 
 .PHONY: init-certs
 init-certs:
-	docker run -ti -v ./nginx-local-only/certs:/app/certs -w /app/certs --rm alpine/mkcert $(BASE_URL)
+	@which mkcert > /dev/null || { echo "mkcert is not installed. Please install it first: brew install mkcert (macOS) or visit https://github.com/FiloSottile/mkcert"; exit 1; }
+	mkcert -install
+	mkcert $(BASE_URL)
+	mv *.pem ./nginx-local-only/certs/
+	docker compose restart lvao-proxy
 
 .PHONY: init-playwright
 init-playwright:
