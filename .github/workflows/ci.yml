@@ -81,29 +81,18 @@ jobs:
     needs: [frontend_linter]
     steps:
       - uses: actions/checkout@v5
+<<<<<<< HEAD
       - uses: actions/setup-node@v5
         with:
           node-version-file: ".tool-versions"
           cache: "npm"
       - name: Install dependencies
         run: npm ci
+=======
+      - uses: ./.github/workflows/composite/build-frontend
+>>>>>>> 3e1aed89 (Fix composite action for fronted)
       - name: Run tests
         run: npm run test
-      - uses: actions/cache@v4
-        name: Cache Parcel build
-        id: parcel-cache
-        with:
-          path: |
-            static/compiled
-            .parcel-cache
-          key: parcel-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('static/to_compile/**/*.css', 'static/to_compile/**/*.ts') }}
-          restore-keys: |
-            parcel-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('static/to_compile/**/*.css', 'static/to_compile/**/*.ts') }}
-            parcel-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
-            parcel-${{ runner.os }}-
-      - name: Ensure build works assets
-        if: steps.parcel-cache.outputs.cache-hit != 'true'
-        run: npm run build
 
   e2e:
     name: tests de bout-en-bout
