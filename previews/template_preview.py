@@ -27,9 +27,11 @@ class SynonymeForm(forms.Form):
     )
 
 
+def get_default_action():
+    return Action.objects.get(code="reparer")
+
+
 class PinPointForm(forms.Form):
-    def get_default_action(self):
-        return Action.objects.get(code="reparer")
 
     action = forms.ModelChoiceField(
         queryset=Action.objects.all(),
@@ -68,7 +70,7 @@ class ComponentsPreview(LookbookPreview):
     @register_form_class(PinPointForm)
     def acteur_pinpoint(
         self,
-        action=None,
+        action="reparer",
         avec_bonus="False",
         carte="True",
         carte_config=None,
