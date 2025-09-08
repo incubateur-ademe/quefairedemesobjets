@@ -169,9 +169,11 @@ jobs:
           path: |
             ~/.cache/ms-playwright
             ~/.cache/playwright
-          key: playwright-browsers-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          key: playwright-browsers-${{ runner.os }}-${{ hashFiles('playwright.config.ts') }}
           restore-keys: |
+            playwright-browsers-${{ runner.os }}-${{ hashFiles('playwright.config.ts') }}
             playwright-browsers-${{ runner.os }}-
+            playwright-browsers-
 
       - name: Install dependencies
         if: steps.parcel-cache.outputs.cache-hit != 'true'
