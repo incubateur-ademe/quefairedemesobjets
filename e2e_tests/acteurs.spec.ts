@@ -37,7 +37,7 @@ test("Les acteurs sont visibles sur la carte du formulaire et fonctionnent", asy
   for (let i = 0; i < count; i++) {
     const item = markers?.nth(i)
     try {
-      await item?.click({ force: true, timeout: 100 })
+      await item?.click({ force: true })
       break
     } catch (e) {
       console.log(`Cannot click marker ${i}:`, e)

@@ -99,7 +99,7 @@ test("Le tracking PostHog fonctionne comme prévu", async ({ page }) => {
     const item = markers?.nth(i)
 
     try {
-      await item!.click({ force: true, timeout: 100 })
+      await item!.click({ force: true })
       break
     } catch (e) {
       console.log("cannot click", e)
@@ -114,7 +114,7 @@ test("Le tracking PostHog fonctionne comme prévu", async ({ page }) => {
     const item = markers?.nth(i)
 
     try {
-      await item!.click({ force: true, timeout: 100 })
+      await item!.click({ force: true })
       break
     } catch (e) {
       console.log("cannot click", e)
