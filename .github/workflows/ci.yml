@@ -143,9 +143,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [frontend_tests]
     if: ${{ github.ref_name == 'main' || (github.event_name ==  'pull_request' && contains( github.event.pull_request.labels.*.name, 'frontend')) }}
-    # strategy:
-    #   matrix:
-    #     shard: [1/5, 2/5, 3/5, 4/5, 5/5]
+    strategy:
+      matrix:
+        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       postgres:
         image: postgis/postgis:15-3.3-alpine
@@ -257,8 +257,7 @@ jobs:
         run: make init-playwright
 
       - name: Run Playwright tests
-        # run: npx playwright test --reporter=list --update-snapshots --shard=${{ matrix.shard }}
-        run: npx playwright test --reporter=list --update-snapshots
+        run: npx playwright test --reporter=list --update-snapshots --shard=${{ matrix.shard }}
 
 # Address actions/missing-workflow-permissions rule in
 # code scanning alerts
