@@ -78,6 +78,10 @@ jobs:
         with:
           path: /usr/bin/gdal*
           key: gis-${{ runner.os }}-gdal-bin
+          restore-keys: |
+            gis-${{ runner.os }}-gdal-bin
+            gis-${{ runner.os }}-
+            gis-
       - name: Install GIS Packages
         if: steps.gis-cache.outputs.cache-hit != 'true'
         run: |
@@ -127,6 +131,7 @@ jobs:
             .parcel-cache
           key: parcel-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('static/to_compile/**/*.css', 'static/to_compile/**/*.ts') }}
           restore-keys: |
+            parcel-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('static/to_compile/**/*.css', 'static/to_compile/**/*.ts') }}
             parcel-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
             parcel-${{ runner.os }}-
       - name: Ensure build works assets
@@ -176,6 +181,7 @@ jobs:
             .parcel-cache
           key: parcel-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('static/to_compile/**/*.css', 'static/to_compile/**/*.ts') }}
           restore-keys: |
+            parcel-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('static/to_compile/**/*.css', 'static/to_compile/**/*.ts') }}
             parcel-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
             parcel-${{ runner.os }}-
       - uses: actions/cache@v4
@@ -208,6 +214,10 @@ jobs:
         with:
           path: /usr/bin/gdal*
           key: gis-${{ runner.os }}-gdal-bin
+          restore-keys: |
+            gis-${{ runner.os }}-gdal-bin
+            gis-${{ runner.os }}-
+            gis-
       - name: Install GIS Packages
         if: steps.gis-cache.outputs.cache-hit != 'true'
         run: |
