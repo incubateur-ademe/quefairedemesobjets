@@ -808,11 +808,32 @@ class TestCleanActeurserviceCodes:
                 ["service_de_reparation"],
             ),
             ({"point_dapport_de_service_reparation": "oui"}, ["service_de_reparation"]),
+            ({"point_dapport_de_service_reparation": False}, []),
+            ({"point_dapport_de_service_reparation": "False"}, []),
+            ({"point_dapport_de_service_reparation": "non"}, []),
             ({"point_de_reparation": True}, ["service_de_reparation"]),
             ({"point_dapport_pour_reemploi": True}, ["structure_de_collecte"]),
             (
                 {"point_de_collecte_ou_de_reprise_des_dechets": True},
                 ["structure_de_collecte"],
+            ),
+            (
+                {
+                    "point_dapport_de_service_reparation": False,
+                    "point_de_reparation": False,
+                    "point_dapport_pour_reemploi": True,
+                    "point_de_collecte_ou_de_reprise_des_dechets": True,
+                },
+                ["structure_de_collecte"],
+            ),
+            (
+                {
+                    "point_dapport_de_service_reparation": True,
+                    "point_de_reparation": True,
+                    "point_dapport_pour_reemploi": False,
+                    "point_de_collecte_ou_de_reprise_des_dechets": False,
+                },
+                ["service_de_reparation"],
             ),
             (
                 {
@@ -840,6 +861,9 @@ class TestCleanActionCodes:
             ({"point_dapport_de_service_reparation": True}, ["reparer"], ["reparer"]),
             ({"point_dapport_de_service_reparation": "True"}, ["reparer"], ["reparer"]),
             ({"point_dapport_de_service_reparation": "oui"}, ["reparer"], ["reparer"]),
+            ({"point_dapport_de_service_reparation": False}, [], []),
+            ({"point_dapport_de_service_reparation": "False"}, [], []),
+            ({"point_dapport_de_service_reparation": "non"}, [], []),
             ({"point_de_reparation": True}, ["reparer"], ["reparer"]),
             ({"point_dapport_pour_reemploi": True}, ["donner"], ["rapporter"]),
             (
