@@ -10,7 +10,7 @@ async function searchOnProduitPage(page, searchedAddress: string) {
 
   // Autour de moi
   await page.locator(inputSelector).click()
-  await page.locator(inputSelector).fill(searchedAddress)
+  await page.locator(inputSelector).pressSequentially(searchedAddress, { delay: 100 })
   expect(page.locator(getItemSelector(1)).innerText()).not.toBe("Autour de moi")
   await page.locator(getItemSelector(1)).click()
 }
