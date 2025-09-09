@@ -45,7 +45,7 @@
     "bowser": "^2.12.1",
     "eslint-config-prettier": "^10.1.8",
     "leaflet": "^1.9.4",
-    "posthog-js": "^1.261.0",
+    "posthog-js": "^1.261.8",
     "stimulus-use": "^0.52.3",
     "tailwindcss": "^3.4.17"
   },
