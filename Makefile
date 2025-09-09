@@ -10,7 +10,7 @@ DJANGO_ADMIN := $(PYTHON) manage.py
 PYTEST := poetry run pytest
 HONCHO := poetry run honcho
 DB_URL := postgres://webapp:webapp@localhost:6543/webapp# pragma: allowlist secret
-BASE_URL := quefairedemesdechets.ademe.local
+BASE_DOMAIN := quefairedemesdechets.ademe.local
 FIXTURES_OPTIONS := --indent 4 --natural-foreign --natural-primary
 
 # Makefile config
@@ -24,7 +24,7 @@ check:
 init-certs:
 	@which mkcert > /dev/null || { echo "mkcert is not installed. Please install it first: brew install mkcert (macOS) or visit https://github.com/FiloSottile/mkcert"; exit 1; }
 	mkcert -install
-	mkcert $(BASE_URL)
+	mkcert $(BASE_DOMAIN)
 	mv *.pem ./nginx-local-only/certs/
 	docker compose restart lvao-proxy
 

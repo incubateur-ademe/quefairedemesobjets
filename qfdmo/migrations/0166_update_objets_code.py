@@ -7,16 +7,19 @@ from django.db import migrations
 
 
 def remove_duplicates(apps, schema_editor):
+    # disable data migrations
+    return
+    # # Skip during tests
+    # if os.environ.get("PYTEST_CURRENT_TEST"):
+    #     return
 
-    # Skip during tests
-    if os.environ.get("PYTEST_CURRENT_TEST"):
-        return
-
-    Objet = apps.get_model("qfdmo", "Objet")
-    Objet.objects.filter(code="equipement de ski de randonnée (pelle, sonde)").delete()
+    # Objet = apps.get_model("qfdmo", "Objet")
+    # Objet.objects.filter(code="equipement de ski de randonnée (pelle, sonde)").delete()
 
 
 def update_categorieobjets_code(apps, schema_editor):
+    # disable data migrations
+    return
 
     # Skip during tests
     if os.environ.get("PYTEST_CURRENT_TEST"):
@@ -32,6 +35,8 @@ def update_categorieobjets_code(apps, schema_editor):
 
 
 def update_souscategorieobjets_code(apps, schema_editor):
+    # disable data migrations
+    return
 
     # Skip during tests
     if os.environ.get("PYTEST_CURRENT_TEST"):
@@ -47,6 +52,8 @@ def update_souscategorieobjets_code(apps, schema_editor):
 
 
 def update_objets_code(apps, schema_editor):
+    # disable data migrations
+    return
 
     # Skip during tests
     if os.environ.get("PYTEST_CURRENT_TEST"):
