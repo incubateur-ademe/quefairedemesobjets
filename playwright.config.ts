@@ -31,7 +31,6 @@ export default defineConfig({
     baseURL: process.env.BASE_URL!,
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
-    userAgent: "playwright",
   },
 
   /* Configure projects for major browsers */
@@ -41,6 +40,7 @@ export default defineConfig({
       grepInvert: /@mobile/,
       use: {
         ...devices["Desktop Chrome"],
+        userAgent: "playwright",
         launchOptions: {
           args: ["--ignore-certificate-errors"],
         },
@@ -52,6 +52,7 @@ export default defineConfig({
       grep: /@mobile|@responsive/,
       use: {
         ...devices["iPhone 12"],
+        userAgent: "playwright",
       },
     },
   ],
