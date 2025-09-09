@@ -173,7 +173,7 @@ jobs:
       - name: Install the project dependencies
         run: poetry sync --with dev --no-root
 
-      - name: Migrate database
+      - name: Prepare django, migrate, collect static files...
         run: |
           make createcachetable
           make migrate
