@@ -7,7 +7,8 @@ from django.db import migrations
 
 
 def remove_duplicates(apps, schema_editor):
-    # disable data migrations
+    # This data migration was meant to run once on production.
+    # This need to be disabled now that it ran to prevent issues during testing.
     return
     # # Skip during tests
     # if os.environ.get("PYTEST_CURRENT_TEST"):
@@ -18,7 +19,8 @@ def remove_duplicates(apps, schema_editor):
 
 
 def update_categorieobjets_code(apps, schema_editor):
-    # disable data migrations
+    # This data migration was meant to run once on production.
+    # This need to be disabled now that it ran to prevent issues during testing.
     return
 
     # Skip during tests
@@ -35,7 +37,8 @@ def update_categorieobjets_code(apps, schema_editor):
 
 
 def update_souscategorieobjets_code(apps, schema_editor):
-    # disable data migrations
+    # This data migration was meant to run once on production.
+    # This need to be disabled now that it ran to prevent issues during testing.
     return
 
     # Skip during tests
@@ -52,7 +55,8 @@ def update_souscategorieobjets_code(apps, schema_editor):
 
 
 def update_objets_code(apps, schema_editor):
-    # disable data migrations
+    # This data migration was meant to run once on production.
+    # This need to be disabled now that it ran to prevent issues during testing.
     return
 
     # Skip during tests
