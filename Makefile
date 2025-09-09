@@ -161,11 +161,11 @@ dags-test:
 
 .PHONY: e2e-test
 e2e-test:
-	npx playwright test --update-snapshots
+	npx playwright test --update-snapshots all
 
 .PHONY: e2e-test-ui
 e2e-test-ui:
-	npx playwright test --update-snapshots --ui
+	npx playwright test --update-snapshots all --ui
 
 .PHONY: a11y
 a11y:

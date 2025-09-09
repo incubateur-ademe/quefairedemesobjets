@@ -81,16 +81,7 @@ jobs:
     needs: [frontend_linter]
     steps:
       - uses: actions/checkout@v5
-<<<<<<< HEAD
-      - uses: actions/setup-node@v5
-        with:
-          node-version-file: ".tool-versions"
-          cache: "npm"
-      - name: Install dependencies
-        run: npm ci
-=======
       - uses: ./.github/workflows/composite/build-frontend
->>>>>>> 3e1aed89 (Fix composite action for fronted)
       - name: Run tests
         run: npm run test
 
@@ -165,7 +156,7 @@ jobs:
         run: make init-playwright
 
       - name: Run Playwright tests
-        run: npx playwright test --reporter=list --update-snapshots --shard=${{ matrix.shard }}
+        run: npx playwright test --reporter=list --update-snapshots all --shard=${{ matrix.shard }}
 
 # Address actions/missing-workflow-permissions rule in
 # code scanning alerts

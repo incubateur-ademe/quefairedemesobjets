@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test"
-import { getMarkers, hideDjangoToolbar } from "./helpers"
+import { getMarkers, hideDjangoToolbar, mockApiAdresse } from "./helpers"
 
 test("Les acteurs sont visibles sur la carte du formulaire et fonctionnent", async ({
   page,
@@ -23,6 +23,7 @@ test("Les acteurs sont visibles sur la carte du formulaire et fonctionnent", asy
   // Fill adresse
   inputSelector = "#id_adresse"
   await iframe.locator(inputSelector).click()
+  await mockApiAdresse(page)
   await iframe.locator(inputSelector).fill("auray")
   await iframe
     .locator("#id_adresseautocomplete-list.autocomplete-items div:nth-child(1)")
@@ -53,6 +54,7 @@ test.skip("Les acteurs digitaux sont visibles sur le formulaire", async ({ page 
   const sessionStorage = await page.evaluate(() => window.sessionStorage)
   const iframeElement = await page.$("#formulaire iframe")
   const iframe = await iframeElement?.contentFrame()
+  await mockApiAdresse(page)
 
   // Select a Produit
   let inputSelector = "#id_sous_categorie_objet"

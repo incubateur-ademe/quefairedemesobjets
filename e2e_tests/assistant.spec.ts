@@ -1,11 +1,12 @@
 import { expect, test } from "@playwright/test"
-import { getMarkers, hideDjangoToolbar } from "./helpers"
+import { getMarkers, hideDjangoToolbar, mockApiAdresse } from "./helpers"
 function getItemSelector(index) {
   return `#mauvais_etat #id_adresseautocomplete-list.autocomplete-items div:nth-of-type(${index})`
 }
 
 async function searchOnProduitPage(page, searchedAddress: string) {
   const inputSelector = "#mauvais_etat input#id_adresse"
+  await mockApiAdresse(page)
 
   // Autour de moi
   await page.locator(inputSelector).click()
