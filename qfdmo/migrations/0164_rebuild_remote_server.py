@@ -12,6 +12,8 @@ from core.utils import (
 
 
 def create_remote_schemas(apps, schema_editor):
+    # disable data migrations
+    return
 
     # Skip during tests
     if os.environ.get("PYTEST_CURRENT_TEST") is None:

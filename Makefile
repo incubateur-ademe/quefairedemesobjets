@@ -81,6 +81,10 @@ run-all:
 migrate:
 	$(DJANGO_ADMIN) migrate
 
+.PHONY: collectstatic
+collectstatic:
+	$(DJANGO_ADMIN) collectstatic --noinput
+
 .PHONY: shell
 shell:
 	$(DJANGO_ADMIN) shell
