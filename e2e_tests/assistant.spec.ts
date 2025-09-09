@@ -14,7 +14,7 @@ async function searchOnProduitPage(page, searchedAddress: string) {
   await page.locator(getItemSelector(1)).click()
 }
 
-test("La carte s'affiche sur une fiche déchet/objet", async ({ page }) => {
+test("Le sessionStorage se peuple bien lors d'un choix d'adresse", async ({ page }) => {
   // Navigate to the carte page
   await page.goto(`/dechet/lave-linge`, { waitUntil: "domcontentloaded" })
   await searchOnProduitPage(page, "Auray")
