@@ -16,6 +16,7 @@ from wagtail.admin.panels import (
     FieldPanel,
     FieldRowPanel,
     HelpPanel,
+    InlinePanel,
     MultiFieldPanel,
     ObjectList,
     TabbedInterface,
@@ -26,6 +27,7 @@ from wagtail.models import Page, ParentalKey
 from wagtail.search import index
 from wagtail.snippets.models import register_snippet
 
+from core.models.mixin import TimestampedModel
 from qfdmd.blocks import STREAMFIELD_COMMON_BLOCKS
 from qfdmo.models.utils import NomAsNaturalKeyModel
 
@@ -33,11 +35,17 @@ logger = logging.getLogger(__name__)
 
 
 class GenreNombreModel(models.Model):
-    genre = models.CharField(
-        "Genre", blank=True, choices=[("m", "Masculin"), ("f", "Féminin")]
-    )
+    class Genre(models.TextChoices):
+        MASCULIN = "m", "Masculin"
+        FEMININ = "f", "Féminin"
+
+    class Nombre(models.IntegerChoices):
+        SINGULIER = 1, "singulier"
+        PLURIEL = 2, "pluriel"
+
+    genre = models.CharField("Genre", blank=True, choices=Genre.choices)
     nombre = models.IntegerField(
-        "Nombre", null=True, blank=True, choices=[(1, "singulier"), (2, "pluriel")]
+        "Nombre", null=True, blank=True, choices=Nombre.choices
     )
 
     class Meta:
@@ -64,9 +72,8 @@ class Bonus(index.Indexed, models.Model):
 
 
 @register_snippet
-class ReusableContent(index.Indexed, GenreNombreModel):
+class ReusableContent(index.Indexed, models.Model):
     title = models.CharField(verbose_name="Titre", unique=True)
-    content = RichTextField(verbose_name="Contenu")
     feminin_singulier = RichTextField(verbose_name="Contenu - Féminin singulier")
     feminin_pluriel = RichTextField(verbose_name="Contenu - Féminin pluriel")
     masculin_singulier = RichTextField(verbose_name="Contenu - Masculin singulier")
@@ -79,15 +86,39 @@ class ReusableContent(index.Indexed, GenreNombreModel):
 
     panels = [
         FieldPanel("title"),
-        FieldPanel("content"),
         FieldPanel("feminin_singulier"),
         FieldPanel("feminin_pluriel"),
         FieldPanel("masculin_singulier"),
         FieldPanel("masculin_pluriel"),
-        FieldRowPanel(
-            [FieldPanel("genre"), FieldPanel("nombre")], heading="Genre et nombre"
-        ),
     ]
+
+    def get_from_genre_nombre(
+        self,
+        genre: str,
+        nombre: int,
+    ):
+        if (
+            genre == GenreNombreModel.Genre.MASCULIN
+            and nombre == GenreNombreModel.Nombre.SINGULIER
+        ):
+            return self.masculin_singulier
+
+        if (
+            genre == GenreNombreModel.Genre.FEMININ
+            and nombre == GenreNombreModel.Nombre.SINGULIER
+        ):
+            return self.feminin_singulier
+        if (
+            genre == GenreNombreModel.Genre.MASCULIN
+            and nombre == GenreNombreModel.Nombre.PLURIEL
+        ):
+            return self.masculin_pluriel
+
+        if (
+            genre == GenreNombreModel.Genre.FEMININ
+            and nombre == GenreNombreModel.Nombre.PLURIEL
+        ):
+            return self.feminin_pluriel
 
     def __str__(self):
         return self.title
@@ -102,7 +133,6 @@ class CompiledFieldMixin(Page):
     def famille(self):
         if famille := self.get_ancestors().type(FamilyPage).first():
             return famille
-        return famille
 
     @cached_property
     def compiled_body(self):
@@ -304,20 +334,21 @@ class ProduitPage(
             ],
             heading="Dynamisation des contenus",
         ),
+        InlinePanel("synonymes"),
+        MultiFieldPanel(
+            [
+                FieldPanel("usage_unique"),
+                FieldPanel("tags"),
+                FieldPanel("sous_categorie_objet"),
+            ],
+            heading="Taxonomie",
+        ),
         MultiFieldPanel(
             [
                 FieldPanel("bonus"),
                 FieldPanel("disable_bonus_inheritance"),
             ],
             heading="Bonus",
-        ),
-        FieldPanel("usage_unique"),
-        MultiFieldPanel(
-            [
-                FieldPanel("tags"),
-                FieldPanel("sous_categorie_objet"),
-            ],
-            heading="Taxonomie",
         ),
     ]
 
@@ -330,6 +361,11 @@ class ProduitPage(
             ObjectList(Page.settings_panels, heading="Paramètres"),
         ],
     )
+
+    search_fields = [
+        index.AutocompleteField("title"),
+        index.RelatedFields("synonymes", [index.AutocompleteField("nom")]),
+    ]
 
     class Meta:
         verbose_name = "Produit"
@@ -355,6 +391,35 @@ class FamilyPage(ProduitPage):
 
     class Meta:
         verbose_name = "Famille"
+
+
+@register_snippet
+class TemporarySynonymeModel(TimestampedModel, index.Indexed):
+    nom = models.CharField(max_length=255, unique=True)
+    page = ParentalKey(
+        "wagtailcore.page",
+        on_delete=models.CASCADE,
+        related_name="synonymes",
+    )
+
+    @cached_property
+    def famille(self):
+        return self.page.specific.famille
+
+    def __str__(self):
+        return self.nom
+
+    class Meta:
+        verbose_name = "Synnoyme de recherche"
+        verbose_name_plural = "Synonymes de recherche"
+
+    panels = [FieldPanel("nom")]
+
+    search_fields = [
+        index.AutocompleteField("nom"),
+        index.SearchField("nom"),
+        index.FilterField("page"),
+    ]
 
 
 class SynonymePage(
@@ -482,7 +547,7 @@ class Produit(index.Indexed, AbstractBaseProduit):
     def __str__(self):
         return f"{self.pk} - {self.nom}"
 
-    search_fields = [
+    search_fields = Page.search_fields + [
         index.AutocompleteField("nom"),
         index.RelatedFields("synonymes", [index.SearchField("nom")]),
         index.SearchField("id"),

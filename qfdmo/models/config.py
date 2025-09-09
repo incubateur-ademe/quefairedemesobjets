@@ -3,6 +3,7 @@ from django.db import models
 from django.http import QueryDict
 from django.urls import reverse
 from django.utils.safestring import mark_safe
+from wagtail.search import index
 from wagtail.snippets.models import register_snippet
 
 
@@ -52,7 +53,7 @@ class GroupeActionConfig(models.Model):
 
 
 @register_snippet
-class CarteConfig(models.Model):
+class CarteConfig(index.Indexed, models.Model):
     SOUS_CATEGORIE_QUERY_PARAM = "sous_categorie_objet"
 
     nom = models.CharField(unique=True)
@@ -169,3 +170,10 @@ class CarteConfig(models.Model):
     class Meta:
         verbose_name = "Carte sur mesure"
         verbose_name_plural = "Cartes sur mesure"
+        ordering = ("nom",)
+
+    # Wagtail-specific
+    search_fields = [
+        index.SearchField("nom"),
+        index.AutocompleteField("nom"),
+    ]
