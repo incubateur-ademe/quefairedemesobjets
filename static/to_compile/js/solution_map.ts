@@ -50,7 +50,7 @@ export class SolutionMap {
             type: "raster",
             source: "carto-light",
             minzoom: 0,
-            maxzoom: 19,
+            maxzoom: DEFAULT_MAX_ZOOM,
           },
         ],
       },
