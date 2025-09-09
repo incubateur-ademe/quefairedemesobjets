@@ -146,7 +146,7 @@ shortuuid = "^1.0.13"
 unidecode = "^1.4.0"
 scikit-learn = "1.7.1"
 apache-airflow = "^2.11.0"
-pandas = "<2.2"
+pandas = "<2.4"
 dbt-core = "^1.10.9"
 dbt-postgres = "^1.9.1"
 
