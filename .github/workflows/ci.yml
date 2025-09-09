@@ -142,6 +142,7 @@ jobs:
         run: |
           cp .env.template .env
           echo BASE_URL=http://localhost:8000 >> .env
+          echo DEBUG=false >> .env
 
       - uses: actions/setup-node@v5
         with:
