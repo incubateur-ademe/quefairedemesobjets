@@ -13,7 +13,7 @@ from data.models.changes.acteur_create_as_parent import ChangeActeurCreateAsPare
 from data.models.changes.acteur_keep_as_parent import ChangeActeurKeepAsParent
 from data.models.changes.acteur_update_parent_id import ChangeActeurUpdateParentId
 from data.models.changes.acteur_verify_in_revision import ChangeActeurVerifyRevision
-from qfdmo.models.acteur import RevisionActeur
+from qfdmo.models.acteur import Acteur, RevisionActeur
 from unit_tests.qfdmo.acteur_factory import (
     ActeurFactory,
     ActeurTypeFactory,
@@ -295,3 +295,84 @@ class TestClusterActeursParentsChooseData:
         assert (
             df.loc[df["identifiant_unique"] != "p1", "parent_data_new"].isnull().all()
         ), "tester que tous les autres sont None"
+
+    def test_cluster_acteurs_parents_choose_data_parent_create_source_priority(
+        self,
+        df_clusters_parent_create,
+    ):
+        revison_a3 = RevisionActeur.objects.get(identifiant_unique="a3")
+        source = revison_a3.source
+        nom = revison_a3.nom
+        revison_a3.source = None
+        revison_a3.save()
+
+        df = cluster_acteurs_parents_choose_data(
+            df_clusters=df_clusters_parent_create,
+            fields_to_include=["nom", "siret", "email"],
+            exclude_source_ids=[],
+            prioritize_source_ids=[source.id],
+            keep_empty=False,
+        )
+
+        # Retrieve parent data
+        assert (
+            df.loc[df["identifiant_unique"] == "p1", "parent_data_new"].values[0]["nom"]
+            == nom
+        ), (
+            "revision acteur a3 should be chosen even if it doesn't have "
+            "a source defined"
+        )
+
+    def test_cluster_acteurs_parents_choose_data_parent_create_resolve_source_priority(
+        self,
+        df_clusters_parent_create,
+    ):
+        revison_a3 = RevisionActeur.objects.get(identifiant_unique="a3")
+        source = revison_a3.source
+        revison_a3.nom = ""
+        revison_a3.save()
+        acteur_a3 = Acteur.objects.get(identifiant_unique="a3")
+        acteur_a3.nom = "acteur a3"
+        acteur_a3.save()
+
+        df = cluster_acteurs_parents_choose_data(
+            df_clusters=df_clusters_parent_create,
+            fields_to_include=["nom", "siret", "email"],
+            exclude_source_ids=[],
+            prioritize_source_ids=[source.id],
+            keep_empty=False,
+        )
+
+        # Retrieve parent data
+        assert df.loc[df["identifiant_unique"] == "p1", "parent_data_new"].values[0][
+            "nom"
+        ] not in ["", "acteur a3"], (
+            "revision acteur a3 should not be chosen even if it doesn't have `nom`"
+            " defined"
+        )
+
+    def test_cluster_acteurs_parents_choose_data_parent_create_resolve_empty_nom(
+        self,
+        df_clusters_parent_create,
+    ):
+        RevisionActeur.objects.all().update(nom="")
+        revison_a3 = RevisionActeur.objects.get(identifiant_unique="a3")
+        source = revison_a3.source
+
+        acteur_a3 = Acteur.objects.get(identifiant_unique="a3")
+        acteur_a3.nom = "acteur a3"
+        acteur_a3.save()
+
+        df = cluster_acteurs_parents_choose_data(
+            df_clusters=df_clusters_parent_create,
+            fields_to_include=["nom", "siret", "email"],
+            exclude_source_ids=[],
+            prioritize_source_ids=[source.id],
+            keep_empty=False,
+        )
+
+        # Retrieve parent data
+        assert (
+            df.loc[df["identifiant_unique"] == "p1", "parent_data_new"].values[0]["nom"]
+            == "acteur a3"
+        ), "acteur a3 nom should be chosen because no nom defined on revision"
