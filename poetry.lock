@@ -1520,14 +1520,14 @@ files = [
 
 [[package]]
 name = "dbt-postgres"
-version = "1.9.0"
+version = "1.9.1"
 description = "The set of adapter protocols and base functionality that supports integration with dbt-core"
 optional = false
 python-versions = ">=3.9.0"
 groups = ["airflow"]
 files = [
-    {file = "dbt_postgres-1.9.0-py3-none-any.whl", hash = "sha256:c85d1adb419251ac989e5f720fdbb964aa6c280da7739dc8c48d44e6f45d354a"},
-    {file = "dbt_postgres-1.9.0.tar.gz", hash = "sha256:b0574e9e1e66d8a5cd627b1d464ec0278eef7342f0b5babe4f987eee9d02a143"},
+    {file = "dbt_postgres-1.9.1-py3-none-any.whl", hash = "sha256:114890c53b8dff20284cf432d8130f2bbec86ce156b3a16ce6defa0b68c68d7f"},
+    {file = "dbt_postgres-1.9.1.tar.gz", hash = "sha256:cf78b06c190f6fea5e8c182f3376b1ba7cd8eb0368d7c75bdac9bf8cfcd71e31"},
 ]
 
 [package.dependencies]
@@ -7596,4 +7596,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12,<3.13"
-content-hash = "67bb4c1b85fec3b69ef77d8aa0be4ceb583fada529cabfe97b3d359dae82903a"
+content-hash = "43df9d999d86be78def5acc0842c48dc2042fb71aa0cadbf8276f2db41a30c0e"
