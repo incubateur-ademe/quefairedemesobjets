@@ -257,9 +257,7 @@ export const searchDummyAdresse = async (page) =>
 export const getMarkers = async (page) => {
   await expect(page.locator("#pinpoint-home").first()).toBeAttached()
   await page.evaluate(() => {
-    document
-      .querySelectorAll(".maplibregl-marker.home-icon")
-      ?.forEach((element) => element.remove())
+    document.querySelectorAll("#pinpoint-home")?.forEach((element) => element.remove())
   })
 
   const markers = page?.locator(".maplibregl-marker:has(svg)")
