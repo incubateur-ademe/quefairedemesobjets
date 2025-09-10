@@ -52,6 +52,9 @@ test(
         response.url().includes("/assistant/recherche") && response.status() === 200,
     )
     await page.locator("#id_home-input").click()
+    // FIXME: try to remove delay here
+    // It is required to prevent the locator check below to happen before the
+    // input debounce delay has ran, hence happening before the API call to succeed
     await page.locator("#id_home-input").pressSequentially("lave", { delay: 200 })
     await responsePromise
 
@@ -65,6 +68,9 @@ test(
     )
     await page.locator("#id_header-input").click()
     expect(page.locator("main [data-search-target=results] a")).toHaveCount(0)
+    // FIXME: try to remove delay here
+    // It is required to prevent the locator check below to happen before the
+    // input debounce delay has ran, hence happening before the API call to succeed
     await page.locator("#id_header-input").pressSequentially("lave", { delay: 200 })
     await responsePromise
 
