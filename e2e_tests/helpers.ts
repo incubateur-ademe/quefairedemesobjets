@@ -265,7 +265,7 @@ export const getMarkers = async (page) => {
   // Ensure we have at least one marker, and let's click on a marker.
   // The approach is feels cumbersome, this is because Playwright has a
   // hard time clicking on leaflet markers.
-  await expect(markers?.nth(0)).toBeAttached()
+  await expect(markers?.first()).toBeAttached()
   const count = await markers?.count()
   return [markers, count]
 }
