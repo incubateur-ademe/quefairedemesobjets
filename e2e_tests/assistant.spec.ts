@@ -111,6 +111,7 @@ test("Le tracking PostHog fonctionne comme prévu", async ({ page }) => {
 
   // Click on a pin on the map and check that it scores 1
   await searchOnProduitPage(page, "Auray")
+  await page.waitForTimeout(500)
   const [markers, count] = await getMarkers(page)
   for (let i = 0; i < count; i++) {
     const item = markers?.nth(i)
