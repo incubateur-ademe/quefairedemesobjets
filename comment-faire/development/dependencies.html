@@ -334,13 +334,13 @@
 <h1>Gestion de package<a class="headerlink" href="#gestion-de-package" title="Lien vers cette rubrique">¶</a></h1>
 <section id="dependances-python">
 <h2>Dépendances Python<a class="headerlink" href="#dependances-python" title="Lien vers cette rubrique">¶</a></h2>
-<p>On utilise poetry</p>
+<p>On utilise uv</p>
 <p>Pour installer les packages en local</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>poetry<span class="w"> </span>sync<span class="w"> </span>&lt;package&gt;
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>sync<span class="w"> </span>&lt;package&gt;
 </pre></div>
 </div>
 <p>Pour ajouter une dépendance</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>poetry<span class="w"> </span>add<span class="w"> </span>&lt;package&gt;
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>add<span class="w"> </span>&lt;package&gt;
 </pre></div>
 </div>
 <p>option <code class="docutils literal notranslate"><span class="pre">--group</span> <span class="pre">dev</span></code> pour les dépendances de développement et <code class="docutils literal notranslate"><span class="pre">--group</span> <span class="pre">airflow</span></code> pour les dépendances de airflow</p>

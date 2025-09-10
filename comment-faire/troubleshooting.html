@@ -339,9 +339,9 @@
 <h3>En cas de conflits sur <code class="docutils literal notranslate"><span class="pre">.secrets.baseline</span></code><a class="headerlink" href="#en-cas-de-conflits-sur-secrets-baseline" title="Lien vers cette rubrique">¶</a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># installer detect-secrets s&#39;il n&#39;est pas présent dans l&#39;environnement virtuel</span>
 <span class="c1"># ou en local</span>
-poetry<span class="w"> </span>add<span class="w"> </span>detect-secrets
+uv<span class="w"> </span>add<span class="w"> </span>detect-secrets
 <span class="c1"># re-générer .secrets.baseline</span>
-poetry<span class="w"> </span>run<span class="w"> </span>detect-secrets<span class="w"> </span>scan<span class="w"> </span>&gt;<span class="w"> </span>.secrets.baseline
+uv<span class="w"> </span>run<span class="w"> </span>detect-secrets<span class="w"> </span>scan<span class="w"> </span>&gt;<span class="w"> </span>.secrets.baseline
 <span class="c1"># ajout au rebase en cours</span>
 git<span class="w"> </span>add<span class="w"> </span>.secrets.baseline
 <span class="c1"># continuer le rebase si aucun autre conflit n&#39;est présent</span>
@@ -349,12 +349,12 @@ git<span class="w"> </span>rebase<span class="w"> </span>--continue
 </pre></div>
 </div>
 </section>
-<section id="en-cas-de-conflits-sur-poetry-lock">
-<h3>En cas de conflits sur <code class="docutils literal notranslate"><span class="pre">poetry.lock</span></code><a class="headerlink" href="#en-cas-de-conflits-sur-poetry-lock" title="Lien vers cette rubrique">¶</a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># ou avec poetry</span>
-rm<span class="w"> </span>poetry.lock
-poetry<span class="w"> </span>lock
-git<span class="w"> </span>add<span class="w"> </span>poetry.lock
+<section id="en-cas-de-conflits-sur-uv-lock">
+<h3>En cas de conflits sur <code class="docutils literal notranslate"><span class="pre">uv.lock</span></code><a class="headerlink" href="#en-cas-de-conflits-sur-uv-lock" title="Lien vers cette rubrique">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># ou avec uv</span>
+rm<span class="w"> </span>uv.lock
+uv<span class="w"> </span>lock
+git<span class="w"> </span>add<span class="w"> </span>uv.lock
 
 <span class="c1"># si c&#39;est pendant un rebase...</span>
 git<span class="w"> </span>rebase<span class="w"> </span>--continue
@@ -440,7 +440,7 @@ docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">ex
 <ol class="arabic simple">
 <li><p>Générer un mot de passe en utilisant <code class="docutils literal notranslate"><span class="pre">werkzeug</span></code> utilisé par Airflow</p></li>
 </ol>
-<div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="c1"># Depuis un shell python, par exemple poetry run python</span>
+<div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="c1"># Depuis un shell python, par exemple uv run python</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">werkzeug.security</span><span class="w"> </span><span class="kn">import</span> <span class="n">generate_password_hash</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">generate_password_hash</span><span class="p">(</span><span class="s1">&#39;your_password&#39;</span><span class="p">))</span>
@@ -549,7 +549,7 @@ docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">ex
 <li><a class="reference internal" href="#">☎️ 3615 jaidesproblemes</a><ul>
 <li><a class="reference internal" href="#git">git</a><ul>
 <li><a class="reference internal" href="#en-cas-de-conflits-sur-secrets-baseline">En cas de conflits sur <code class="docutils literal notranslate"><span class="pre">.secrets.baseline</span></code></a></li>
-<li><a class="reference internal" href="#en-cas-de-conflits-sur-poetry-lock">En cas de conflits sur <code class="docutils literal notranslate"><span class="pre">poetry.lock</span></code></a></li>
+<li><a class="reference internal" href="#en-cas-de-conflits-sur-uv-lock">En cas de conflits sur <code class="docutils literal notranslate"><span class="pre">uv.lock</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#mise-en-place-du-poste-developpeur">Mise en place du poste developpeur</a><ul>
