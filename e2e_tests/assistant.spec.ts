@@ -10,7 +10,8 @@ async function searchOnProduitPage(page, searchedAddress: string) {
 
   // Autour de moi
   await page.locator(inputSelector).click()
-  await page.locator(inputSelector).pressSequentially(searchedAddress, { delay: 200 })
+  await page.locator(inputSelector).fill(searchedAddress)
+  await page.waitForTimeout(500)
   await page.locator(getItemSelector(1)).click()
 }
 
@@ -55,8 +56,10 @@ test(
     // FIXME: try to remove delay here
     // It is required to prevent the locator check below to happen before the
     // input debounce delay has ran, hence happening before the API call to succeed
-    await page.locator("#id_home-input").pressSequentially("lave", { delay: 200 })
+    await page.locator("#id_home-input").fill("lave")
     await responsePromise
+
+    await page.waitForTimeout(500)
 
     // We expect at least on search result
     await expect(
@@ -75,6 +78,7 @@ test(
     // input debounce delay has ran, hence happening before the API call to succeed
     await page.locator("#id_header-input").pressSequentially("lave", { delay: 200 })
     await responsePromise
+    await page.waitForTimeout(500)
 
     expect(page.locator("main [data-search-target=results] a")).toHaveCount(0)
     await expect(
@@ -88,6 +92,7 @@ test(
     )
     await page.locator("#id_home-input").click()
     await responsePromise
+    await page.waitForTimeout(500)
     expect(page.locator("#home [data-search-target=results] a")).toHaveCount(0)
     expect(page.locator("#header [data-search-target=results] a")).toHaveCount(0)
   },
