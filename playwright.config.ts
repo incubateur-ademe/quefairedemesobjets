@@ -40,7 +40,6 @@ export default defineConfig({
       grepInvert: /@mobile/,
       use: {
         ...devices["Desktop Chrome"],
-        userAgent: "playwright",
         launchOptions: {
           args: ["--ignore-certificate-errors"],
         },
@@ -52,7 +51,6 @@ export default defineConfig({
       grep: /@mobile|@responsive/,
       use: {
         ...devices["iPhone 12"],
-        userAgent: "playwright",
       },
     },
   ],

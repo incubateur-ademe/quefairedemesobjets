@@ -179,10 +179,6 @@ with suppress(ModuleNotFoundError):
             # Hide in iframe
             return False
 
-        if request.headers.get("user_agent") == "playwright":
-            # Hide during playwright tests
-            return False
-
         return path_is_not_excluded
 
     patterns_to_exclude = [
