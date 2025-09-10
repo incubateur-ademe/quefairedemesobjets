@@ -51,7 +51,7 @@ def test_forms_redirects(client, test_url):
             "quefairedemesdechets.ademe.fr",
             "?formulaire",
             "https://quefairedemesdechets.ademe.fr/formulaire",
-            302,
+            301,
         ),
         (
             "quefairedemesdechets.ademe.fr",
@@ -63,7 +63,7 @@ def test_forms_redirects(client, test_url):
             "quefairedemesdechets.ademe.fr",
             "?carte",
             "https://quefairedemesdechets.ademe.fr/carte",
-            302,
+            301,
         ),
         # Integrations from Notion list
         (
