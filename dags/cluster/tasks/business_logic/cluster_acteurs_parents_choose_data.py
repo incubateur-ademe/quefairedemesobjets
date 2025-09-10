@@ -109,9 +109,34 @@ def cluster_acteurs_parents_choose_data(
                 else float("inf")
             )
 
-        # Acteurs to consider: first revisions, then base, but not from excluded sources
-        acteurs = list(acteurs_revision) + list(acteurs_base)
-        acteurs.sort(key=source_priority)
+        def set_revision_source(
+            acteurs_base: list[Acteur], acteurs_revision: list[RevisionActeur]
+        ) -> list[RevisionActeur]:
+            source_by_acteur_base = {
+                acteur.identifiant_unique: acteur.source for acteur in acteurs_base
+            }
+            # set source_id for acteur_revision from source_by_acteur_base
+            # if not already set
+            for acteur_revision in acteurs_revision:
+                if (
+                    acteur_revision.source is None
+                    and acteur_revision.identifiant_unique in source_by_acteur_base
+                ):
+                    acteur_revision.source = source_by_acteur_base[
+                        acteur_revision.identifiant_unique
+                    ]
+            return acteurs_revision
+
+        # Acteurs to consider: first revisions, then base
+        acteurs_revision_list = list(acteurs_revision)
+        acteurs_base_list = list(acteurs_base)
+        acteurs_revision_list = set_revision_source(
+            acteurs_base_list, acteurs_revision_list
+        )
+        acteurs_revision_list.sort(key=source_priority)
+        acteurs_base_list.sort(key=source_priority)
+        acteurs = acteurs_revision_list + acteurs_base_list
+
         # On parent creation, we don't want to keep empty data
         if not parent:
             keep_empty = False
