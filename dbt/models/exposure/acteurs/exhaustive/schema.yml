@@ -125,6 +125,33 @@ models:
       - name: lieu_prestation
         description: "Le lieu de prestation de l'acteur"
         data_type: varchar(255)
+      - name: est_parent
+        description: "Vrai si l'acteur est un parent"
+        data_type: boolean
+      - name: enfants_liste
+        description: "La liste des enfants de l'acteur"
+        data_type: jsonb
+      - name: enfants_nombre
+        description: "Le nombre d'enfants de l'acteur"
+        data_type: integer
+        data_tests:
+          - not_null
+      - name: est_dans_carte
+        description: "Vrai si l'acteur est dans la carte"
+        data_type: boolean
+        data_tests:
+          - not_null
+      - name: est_dans_opendata
+        description: "Vrai si l'acteur est dans l'opendata"
+        data_type: boolean
+        data_tests:
+          - not_null
+      - name: latitude
+        description: "La latitude de la localisation de l'acteur"
+        data_type: float
+      - name: longitude
+        description: "La longitude de la localisation de l'acteur"
+        data_type: float
     config:
       tags:
         - exposure

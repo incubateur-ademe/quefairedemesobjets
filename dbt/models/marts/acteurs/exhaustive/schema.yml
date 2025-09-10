@@ -78,12 +78,37 @@ models:
         description: "La date de création de l'acteur"
       - name: statut
         description: "Le statut de l'acteur"
+      - name: siret_is_closed
+        description: "Information si on sait que le SIRET est fermé"
       - name: revision_existe
         description: "Le fait que l'acteur est une révision"
         data_tests:
           - not_null
-      - name: siret_is_closed
-        description: "Information si on sait que le SIRET est fermé"
+      - name: est_parent
+        description: "Vrai si l'acteur est un parent"
+        data_type: boolean
+        data_tests:
+          - not_null
+      - name: enfants_liste
+        description: "La liste des enfants de l'acteur"
+        data_type: jsonb
+        data_tests:
+          - not_null
+      - name: enfants_nombre
+        description: "Le nombre d'enfants de l'acteur"
+        data_type: integer
+        data_tests:
+          - not_null
+      - name: est_dans_carte
+        description: "Vrai si l'acteur est dans la carte"
+        data_type: boolean
+        data_tests:
+          - not_null
+      - name: est_dans_opendata
+        description: "Vrai si l'acteur est dans l'opendata"
+        data_type: boolean
+        data_tests:
+          - not_null
     config:
       materialized: table
   - name: marts_exhaustive_acteur_acteur_services

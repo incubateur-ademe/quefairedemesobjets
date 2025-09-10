@@ -47,6 +47,7 @@ with DAG(
         task_id="dbt_test_base_acteurs",
         bash_command=(f"{dbt_test} base.acteurs"),
     )
+
     dbt_run_intermediate_acteurs = BashOperator(
         task_id="dbt_run_intermediate_acteurs",
         bash_command=("dbt run --models intermediate.acteurs"),
@@ -54,23 +55,6 @@ with DAG(
     dbt_test_intermediate_acteurs = BashOperator(
         task_id="dbt_test_intermediate_acteurs",
         bash_command=(f"{dbt_test} intermediate.acteurs"),
-    )
-
-    dbt_run_marts_acteurs_exhaustive = BashOperator(
-        task_id="dbt_run_marts_acteurs_exhaustive",
-        bash_command=(f"{dbt_run} marts.acteurs.exhaustive"),
-    )
-    dbt_test_marts_acteurs_exhaustive = BashOperator(
-        task_id="dbt_test_marts_acteurs_exhaustive",
-        bash_command=(f"{dbt_test} marts.acteurs.exhaustive"),
-    )
-    dbt_run_exposure_acteurs_exhaustive = BashOperator(
-        task_id="dbt_run_exposure_acteurs_exhaustive",
-        bash_command=(f"{dbt_run} exposure.acteurs.exhaustive"),
-    )
-    dbt_test_exposure_acteurs_exhaustive = BashOperator(
-        task_id="dbt_test_exposure_acteurs_exhaustive",
-        bash_command=(f"{dbt_test} exposure.acteurs.exhaustive"),
     )
 
     dbt_run_marts_acteurs_carte = BashOperator(
@@ -105,6 +89,23 @@ with DAG(
     dbt_test_exposure_acteurs_opendata = BashOperator(
         task_id="dbt_test_exposure_acteurs_opendata",
         bash_command=(f"{dbt_test} exposure.acteurs.opendata"),
+    )
+
+    dbt_run_marts_acteurs_exhaustive = BashOperator(
+        task_id="dbt_run_marts_acteurs_exhaustive",
+        bash_command=(f"{dbt_run} marts.acteurs.exhaustive"),
+    )
+    dbt_test_marts_acteurs_exhaustive = BashOperator(
+        task_id="dbt_test_marts_acteurs_exhaustive",
+        bash_command=(f"{dbt_test} marts.acteurs.exhaustive"),
+    )
+    dbt_run_exposure_acteurs_exhaustive = BashOperator(
+        task_id="dbt_run_exposure_acteurs_exhaustive",
+        bash_command=(f"{dbt_run} exposure.acteurs.exhaustive"),
+    )
+    dbt_test_exposure_acteurs_exhaustive = BashOperator(
+        task_id="dbt_test_exposure_acteurs_exhaustive",
+        bash_command=(f"{dbt_test} exposure.acteurs.exhaustive"),
     )
 
     check_model_table_displayedacteur_task = check_model_table_consistency_task(
@@ -152,10 +153,6 @@ with DAG(
         >> dbt_test_base_acteurs
         >> dbt_run_intermediate_acteurs
         >> dbt_test_intermediate_acteurs
-        >> dbt_run_marts_acteurs_exhaustive
-        >> dbt_test_marts_acteurs_exhaustive
-        >> dbt_run_exposure_acteurs_exhaustive
-        >> dbt_test_exposure_acteurs_exhaustive
         >> dbt_run_marts_acteurs_carte
         >> dbt_test_marts_acteurs_carte
         >> dbt_run_exposure_acteurs_carte
@@ -164,6 +161,10 @@ with DAG(
         >> dbt_test_marts_acteurs_opendata
         >> dbt_run_exposure_acteurs_opendata
         >> dbt_test_exposure_acteurs_opendata
+        >> dbt_run_marts_acteurs_exhaustive
+        >> dbt_test_marts_acteurs_exhaustive
+        >> dbt_run_exposure_acteurs_exhaustive
+        >> dbt_test_exposure_acteurs_exhaustive
     )
 
     # Définir la séquence de vérification en parallèle

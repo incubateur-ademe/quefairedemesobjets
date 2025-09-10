@@ -738,7 +738,23 @@ class VueActeurAdmin(NotMutableMixin, BaseActeurAdmin):
         VueLabelQualiteInline,
         VuePerimetreADomicileInline,
     ]
-    fields = list(BaseActeurAdmin.fields) + ["parent"]
+    fields = (
+        ["est_parent"]
+        + list(BaseActeurAdmin.fields)
+        + [
+            "parent",
+            "revision_existe",
+            "est_dans_carte",
+            "est_dans_opendata",
+        ]
+    )
+    readonly_fields = list(BaseActeurAdmin.readonly_fields) + [
+        "est_parent",
+        "revision_existe",
+        "est_dans_carte",
+        "est_dans_opendata",
+    ]
+    autocomplete_fields = ["parent"]
 
     def get_inline_instances(self, request, vue_acteur=None):
         if vue_acteur and vue_acteur.is_parent:

@@ -347,6 +347,21 @@ class DisplayedActeurManager(models.Manager):
         )
 
 
+class LatLngPropertiesMixin(models.Model):
+    location: models.PointField
+
+    @property
+    def latitude(self):
+        return self.location.y if self.location else None
+
+    @property
+    def longitude(self):
+        return self.location.x if self.location else None
+
+    class Meta:
+        abstract = True
+
+
 class BaseActeur(TimestampedModel):
     class LieuPrestation(models.TextChoices):
         A_DOMICILE = "A_DOMICILE", "À domicile"
@@ -470,14 +485,6 @@ class BaseActeur(TimestampedModel):
                 for perimetre in self.perimetre_adomiciles.all()
             ],
         }
-
-    @property
-    def latitude(self):
-        return self.location.y if self.location else None
-
-    @property
-    def longitude(self):
-        return self.location.x if self.location else None
 
     @property
     def libelle(self):
@@ -766,7 +773,7 @@ def clean_parent(parent):
         raise ValidationError("You can't define a Parent which is already a duplicate.")
 
 
-class Acteur(BaseActeur):
+class Acteur(BaseActeur, LatLngPropertiesMixin):
     class Meta:
         constraints = [
             models.UniqueConstraint(
@@ -876,7 +883,7 @@ def parents_cache_invalidate():
     PARENTS_CACHE = None
 
 
-class RevisionActeur(BaseActeur):
+class RevisionActeur(BaseActeur, LatLngPropertiesMixin):
     parent_model_name = "RevisionActeurParent"
 
     class Meta:
@@ -1147,6 +1154,40 @@ class VueActeur(BaseActeur):
         validators=[clean_parent],
     )
 
+    # Readonly fields
+    revision_existe = models.BooleanField(
+        default=False, editable=False, verbose_name="Une correction existe"
+    )
+    est_parent = models.BooleanField(
+        default=False, editable=False, verbose_name="L'acteur est un parent"
+    )
+    enfants_liste = models.JSONField(
+        default=None,
+        editable=False,
+        null=True,
+        verbose_name="La liste des enfants de l'acteur parent",
+    )
+    enfants_nombre = models.IntegerField(
+        default=None,
+        editable=False,
+        null=True,
+        verbose_name="Le nombre d'enfants de l'acteur parent",
+    )
+    est_dans_carte = models.BooleanField(
+        default=False, editable=False, verbose_name="L'acteur est affiché dans la carte"
+    )
+    est_dans_opendata = models.BooleanField(
+        default=False,
+        editable=False,
+        verbose_name="L'acteur est dans le partage opendata",
+    )
+    latitude = models.FloatField(
+        default=0.0, editable=False, null=True, verbose_name="La latitude de l'acteur"
+    )
+    longitude = models.FloatField(
+        default=0.0, editable=False, null=True, verbose_name="La longitude de l'acteur"
+    )
+
     @property
     def is_parent(self):
         return self.pk and self.duplicats.exists()
@@ -1158,7 +1199,7 @@ class VuePerimetreADomicile(BasePerimetreADomicile):
     )
 
 
-class DisplayedActeur(BaseActeur):
+class DisplayedActeur(BaseActeur, LatLngPropertiesMixin):
     objects = DisplayedActeurManager()
 
     def natural_key(self):
