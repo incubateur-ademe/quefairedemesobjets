@@ -46,29 +46,26 @@ test(
     // Navigate to the carte page
     await page.goto(`/`, { waitUntil: "domcontentloaded" })
 
-    await page.locator("#id_home-input").click()
+    // Type in main serach
     let responsePromise = page.waitForResponse(
       (response) =>
         response.url().includes("/assistant/recherche") && response.status() === 200,
     )
-    await page.locator("#id_home-input").pressSequentially("lave", { delay: 100 })
+    await page.locator("#id_home-input").click()
+    await page.locator("#id_home-input").pressSequentially("lave", { delay: 200 })
     await responsePromise
+
     // We expect at least on search result
     expect(page.locator("main [data-search-target=results] a").first()).toBeAttached()
 
+    // Type in header search
     responsePromise = page.waitForResponse(
       (response) =>
         response.url().includes("/assistant/recherche") && response.status() === 200,
     )
     await page.locator("#id_header-input").click()
-    await responsePromise
     expect(page.locator("main [data-search-target=results] a")).toHaveCount(0)
-
-    responsePromise = page.waitForResponse(
-      (response) =>
-        response.url().includes("/assistant/recherche") && response.status() === 200,
-    )
-    await page.locator("#id_header-input").pressSequentially("lave")
+    await page.locator("#id_header-input").pressSequentially("lave", { delay: 200 })
     await responsePromise
 
     expect(page.locator("main [data-search-target=results] a")).toHaveCount(0)
@@ -76,11 +73,13 @@ test(
       page.locator("#header [data-search-target=results] a").first(),
     ).toBeAttached()
 
-    await page.locator("#id_home-input").click()
-    await page.waitForResponse(
+    // Blur header input and expect it to be closed
+    responsePromise = page.waitForResponse(
       (response) =>
         response.url().includes("/assistant/recherche") && response.status() === 200,
     )
+    await page.locator("#id_home-input").click()
+    await responsePromise
     expect(page.locator("#home [data-search-target=results] a")).toHaveCount(0)
     expect(page.locator("#header [data-search-target=results] a")).toHaveCount(0)
   },
