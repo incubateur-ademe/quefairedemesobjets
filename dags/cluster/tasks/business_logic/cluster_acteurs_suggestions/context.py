@@ -58,7 +58,9 @@ def suggestion_context_generate(
     cols = ["identifiant_unique"] + cluster_fields_fuzzy
     context = {}
     context["cluster_id"] = cluster_id
-    context["exact_match"] = dict(zip(cluster_fields_exact, groups[0]))  # type: ignore
+    # Make sure groups[0] is always a tuple, even with a single field
+    group_val = groups[0] if isinstance(groups[0], tuple) else (groups[0],)
+    context["exact_match"] = dict(zip(cluster_fields_exact, group_val))  # type: ignore
     context["fuzzy_details"] = df_cluster[cols].to_dict(orient="records")
 
     return context
