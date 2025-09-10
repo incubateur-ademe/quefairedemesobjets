@@ -59,7 +59,9 @@ test(
     await responsePromise
 
     // We expect at least on search result
-    expect(page.locator("main [data-search-target=results] a").first()).toBeAttached()
+    await expect(
+      page.locator("main [data-search-target=results] a").first(),
+    ).toBeAttached()
 
     // Type in header search
     responsePromise = page.waitForResponse(
@@ -75,7 +77,7 @@ test(
     await responsePromise
 
     expect(page.locator("main [data-search-target=results] a")).toHaveCount(0)
-    expect(
+    await expect(
       page.locator("#header [data-search-target=results] a").first(),
     ).toBeAttached()
 
