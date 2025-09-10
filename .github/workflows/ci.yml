@@ -167,7 +167,7 @@ jobs:
           path: ./.venv
           key: venv-dev-${{ hashFiles('uv.lock') }}
       - name: Install the project dependencies
-        run: uv sync --with dev --no-root
+        run: uv sync --group dev
 
       - name: Prepare django, migrate, collect static files...
         run: |
