@@ -1,18 +1,11 @@
 import { expect, test } from "@playwright/test"
-import {
-  hideDjangoToolbar,
-  searchDummyAdresse,
-  searchDummySousCategorieObjet,
-} from "../helpers"
+import { searchDummyAdresse, searchDummySousCategorieObjet } from "../helpers"
 
 test("Recherche et modification d'une recherche", async ({ page }) => {
   // Helper function to handle autocomplete inputs
 
   // Navigate to the formulaire page
   await page.goto(`/formulaire`, { waitUntil: "domcontentloaded" })
-
-  // Hide the Django debug toolbar
-  await hideDjangoToolbar(page)
 
   // Expect the Proposer une adresse button to be hidden
   await expect(page.getByTestId("formulaire-proposer-une-adresse")).not.toBeVisible()

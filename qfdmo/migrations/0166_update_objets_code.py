@@ -7,16 +7,21 @@ from django.db import migrations
 
 
 def remove_duplicates(apps, schema_editor):
+    # This data migration was meant to run once on production.
+    # This need to be disabled now that it ran to prevent issues during testing.
+    return
+    # # Skip during tests
+    # if os.environ.get("PYTEST_CURRENT_TEST"):
+    #     return
 
-    # Skip during tests
-    if os.environ.get("PYTEST_CURRENT_TEST"):
-        return
-
-    Objet = apps.get_model("qfdmo", "Objet")
-    Objet.objects.filter(code="equipement de ski de randonnée (pelle, sonde)").delete()
+    # Objet = apps.get_model("qfdmo", "Objet")
+    # Objet.objects.filter(code="equipement de ski de randonnée (pelle, sonde)").delete()
 
 
 def update_categorieobjets_code(apps, schema_editor):
+    # This data migration was meant to run once on production.
+    # This need to be disabled now that it ran to prevent issues during testing.
+    return
 
     # Skip during tests
     if os.environ.get("PYTEST_CURRENT_TEST"):
@@ -32,6 +37,9 @@ def update_categorieobjets_code(apps, schema_editor):
 
 
 def update_souscategorieobjets_code(apps, schema_editor):
+    # This data migration was meant to run once on production.
+    # This need to be disabled now that it ran to prevent issues during testing.
+    return
 
     # Skip during tests
     if os.environ.get("PYTEST_CURRENT_TEST"):
@@ -47,6 +55,9 @@ def update_souscategorieobjets_code(apps, schema_editor):
 
 
 def update_objets_code(apps, schema_editor):
+    # This data migration was meant to run once on production.
+    # This need to be disabled now that it ran to prevent issues during testing.
+    return
 
     # Skip during tests
     if os.environ.get("PYTEST_CURRENT_TEST"):

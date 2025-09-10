@@ -1,0 +1,24 @@
+/* Styles pour la popup "Vous êtes ici" */
+.maplibregl-popup {
+  @apply qf-p-2w !qf-z-[10000];
+}
+
+.maplibregl-popup-content {
+  @apply qf-rounded-xl qf-shadow-lg qf-bg-white;
+  @apply qf-border;
+}
+
+.maplibregl-popup-content p {
+  @apply qf-m-0;
+}
+
+.maplibregl-popup-tip {
+  @apply qf-border-t-white;
+}
+
+/* Moins de marge pour les crédits */
+@media screen {
+  .maplibregl-ctrl-attrib.maplibregl-compact {
+    @apply !qf-m-1v;
+  }
+}

@@ -1,6 +1,7 @@
 import logging
 from typing import Any
 
+from django.conf import settings
 from django.db.models import Q
 from django.utils.functional import cached_property
 from django.views.generic import DetailView
@@ -41,8 +42,19 @@ class CarteSearchActeursView(SearchActeursView):
     def _get_selected_action_ids(self):
         return [a.id for a in self._get_selected_action()]
 
+    def _get_max_displayed_acteurs(self):
+        """Standalone Carte view displays more acteurs than the
+        embedded one."""
+        return settings.DEFAULT_MAX_SOLUTION_DISPLAYED
+
 
 class ProductCarteView(CarteSearchActeursView):
+    """This view is used for Produit / Synonyme, the legacy django models
+    that were defined prior to Wagtail usage for these pages.
+
+    It will be progressively deprecated until the end of 2025 but
+    needs to be maintained for now."""
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         carte_config, _ = CarteConfig.objects.get_or_create(

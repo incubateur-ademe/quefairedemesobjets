@@ -23,10 +23,10 @@ from core.jinja2_handler import distance_to_acteur
 from core.utils import get_direction
 from qfdmo.forms import FormulaireForm
 from qfdmo.geo_api import bbox_from_list_of_geojson, retrieve_epci_geojson
-from qfdmo.leaflet import (
-    center_from_leaflet_bbox,
-    compile_leaflet_bbox,
-    sanitize_leaflet_bbox,
+from qfdmo.map_utils import (
+    center_from_frontend_bbox,
+    compile_frontend_bbox,
+    sanitize_frontend_bbox,
 )
 from qfdmo.models import (
     Acteur,
@@ -249,12 +249,12 @@ class SearchActeursView(
         custom_bbox = cast(
             str, self.get_data_from_request_or_bounded_form("bounding_box")
         )
-        center = center_from_leaflet_bbox(custom_bbox)
+        center = center_from_frontend_bbox(custom_bbox)
         latitude = center[1] or self.get_data_from_request_or_bounded_form("latitude")
         longitude = center[0] or self.get_data_from_request_or_bounded_form("longitude")
 
         if custom_bbox:
-            bbox = sanitize_leaflet_bbox(custom_bbox)
+            bbox = sanitize_frontend_bbox(custom_bbox)
             acteurs_in_bbox = acteurs.in_bbox(bbox)
 
             if acteurs_in_bbox.count() > 0:
@@ -262,7 +262,7 @@ class SearchActeursView(
 
         # TODO
         # - Tester cas avec bounding box définie depuis le configurateur
-        # - Tester cas avec center retourné par leaflet
+        # - Tester cas avec center retourné par la carte
         if latitude and longitude:
             acteurs_from_center = acteurs.from_center(longitude, latitude)
 
@@ -278,7 +278,7 @@ class SearchActeursView(
                 acteurs = acteurs.in_geojson(
                     [json.dumps(geojson) for geojson in geojson_list]
                 )
-            return compile_leaflet_bbox(bbox), acteurs
+            return compile_frontend_bbox(bbox), acteurs
 
         return custom_bbox, acteurs.none()
 

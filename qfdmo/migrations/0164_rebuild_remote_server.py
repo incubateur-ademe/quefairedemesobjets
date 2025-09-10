@@ -12,6 +12,9 @@ from core.utils import (
 
 
 def create_remote_schemas(apps, schema_editor):
+    # This data migration was meant to run once on production.
+    # This need to be disabled now that it ran to prevent issues during testing.
+    return
 
     # Skip during tests
     if os.environ.get("PYTEST_CURRENT_TEST") is None:

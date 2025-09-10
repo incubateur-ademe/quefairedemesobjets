@@ -1426,21 +1426,21 @@ typing-extensions = ">=4.0,<5.0"
 
 [[package]]
 name = "dbt-common"
-version = "1.28.0"
+version = "1.29.0"
 description = "The shared common utilities that dbt-core and adapter implementations use"
 optional = false
 python-versions = ">=3.9"
 groups = ["airflow"]
 files = [
-    {file = "dbt_common-1.28.0-py3-none-any.whl", hash = "sha256:1c533bdc4327cc4890e033822102fd2319c98448a6de5f5a03c7bdd7d50f7ba0"},
-    {file = "dbt_common-1.28.0.tar.gz", hash = "sha256:31f42029cccfdfe072d36abe649a479bad20b86ef711fe32de72411b9acd45c9"},
+    {file = "dbt_common-1.29.0-py3-none-any.whl", hash = "sha256:8f4d98343aabfaf6f4315059cf8315c06be7217510fa72069538f44216c54934"},
+    {file = "dbt_common-1.29.0.tar.gz", hash = "sha256:46c59d24904c48253af7e5580a19cb74f607b1b1cb4078507c8bf1135bfafeb3"},
 ]
 
 [package.dependencies]
 agate = ">=1.7.0,<1.10"
 colorama = ">=0.3.9,<0.5"
 dbt-protos = ">=1.0.291,<2.0.0"
-deepdiff = ">=7.0,<8.0"
+deepdiff = ">=7.0,<9.0"
 isodate = ">=0.6,<0.7"
 jinja2 = ">=3.1.3,<4"
 jsonschema = ">=4.0,<5.0"
@@ -1520,14 +1520,14 @@ files = [
 
 [[package]]
 name = "dbt-postgres"
-version = "1.9.0"
+version = "1.9.1"
 description = "The set of adapter protocols and base functionality that supports integration with dbt-core"
 optional = false
 python-versions = ">=3.9.0"
 groups = ["airflow"]
 files = [
-    {file = "dbt_postgres-1.9.0-py3-none-any.whl", hash = "sha256:c85d1adb419251ac989e5f720fdbb964aa6c280da7739dc8c48d44e6f45d354a"},
-    {file = "dbt_postgres-1.9.0.tar.gz", hash = "sha256:b0574e9e1e66d8a5cd627b1d464ec0278eef7342f0b5babe4f987eee9d02a143"},
+    {file = "dbt_postgres-1.9.1-py3-none-any.whl", hash = "sha256:114890c53b8dff20284cf432d8130f2bbec86ce156b3a16ce6defa0b68c68d7f"},
+    {file = "dbt_postgres-1.9.1.tar.gz", hash = "sha256:cf78b06c190f6fea5e8c182f3376b1ba7cd8eb0368d7c75bdac9bf8cfcd71e31"},
 ]
 
 [package.dependencies]
@@ -1577,22 +1577,27 @@ typing-extensions = ">=4.4,<5"
 
 [[package]]
 name = "deepdiff"
-version = "7.0.1"
+version = "8.6.1"
 description = "Deep Difference and Search of any Python object/data. Recreate objects by adding adding deltas to each other."
 optional = false
-python-versions = ">=3.8"
-groups = ["airflow"]
+python-versions = ">=3.9"
+groups = ["airflow", "dev"]
 files = [
-    {file = "deepdiff-7.0.1-py3-none-any.whl", hash = "sha256:447760081918216aa4fd4ca78a4b6a848b81307b2ea94c810255334b759e1dc3"},
-    {file = "deepdiff-7.0.1.tar.gz", hash = "sha256:260c16f052d4badbf60351b4f77e8390bee03a0b516246f6839bc813fb429ddf"},
+    {file = "deepdiff-8.6.1-py3-none-any.whl", hash = "sha256:ee8708a7f7d37fb273a541fa24ad010ed484192cd0c4ffc0fa0ed5e2d4b9e78b"},
+    {file = "deepdiff-8.6.1.tar.gz", hash = "sha256:ec56d7a769ca80891b5200ec7bd41eec300ced91ebcc7797b41eb2b3f3ff643a"},
 ]
 
 [package.dependencies]
-ordered-set = ">=4.1.0,<4.2.0"
+orderly-set = ">=5.4.1,<6"
 
 [package.extras]
-cli = ["click (==8.1.7)", "pyyaml (==6.0.1)"]
+cli = ["click (>=8.1.0,<8.2.0)", "pyyaml (>=6.0.0,<6.1.0)"]
+coverage = ["coverage (>=7.6.0,<7.7.0)"]
+dev = ["bump2version (>=1.0.0,<1.1.0)", "ipdb (>=0.13.0,<0.14.0)", "jsonpickle (>=4.0.0,<4.1.0)", "nox (==2025.5.1)", "numpy (>=2.0,<3.0) ; python_version < \"3.10\"", "numpy (>=2.2.0,<2.3.0) ; python_version >= \"3.10\"", "orjson (>=3.10.0,<3.11.0)", "pandas (>=2.2.0,<2.3.0)", "polars (>=1.21.0,<1.22.0)", "python-dateutil (>=2.9.0,<2.10.0)", "tomli (>=2.2.0,<2.3.0)", "tomli-w (>=1.2.0,<1.3.0)", "uuid6 (==2025.0.1)"]
+docs = ["Sphinx (>=6.2.0,<6.3.0)", "sphinx-sitemap (>=2.6.0,<2.7.0)", "sphinxemoji (>=0.3.0,<0.4.0)"]
 optimize = ["orjson"]
+static = ["flake8 (>=7.1.0,<7.2.0)", "flake8-pyproject (>=1.2.3,<1.3.0)", "pydantic (>=2.10.0,<2.11.0)"]
+test = ["pytest (>=8.3.0,<8.4.0)", "pytest-benchmark (>=5.1.0,<5.2.0)", "pytest-cov (>=6.0.0,<6.1.0)", "python-dotenv (>=1.0.0,<1.1.0)"]
 
 [[package]]
 name = "defusedxml"
@@ -1718,24 +1723,24 @@ static3 = "*"
 
 [[package]]
 name = "djade"
-version = "1.5.0"
+version = "1.6.0"
 description = "A Django template formatter."
 optional = false
 python-versions = ">=3.9"
 groups = ["dev"]
 files = [
-    {file = "djade-1.5.0-py3-none-macosx_10_12_x86_64.whl", hash = "sha256:16a6cbc275b223ba7acada78b6f607232534f24ae3926c82e0e10b7c37e8d961"},
-    {file = "djade-1.5.0-py3-none-macosx_11_0_arm64.whl", hash = "sha256:eeccde54dfc4e465663c3bdd387a3f3a69213cc03d1a1c91b9f155bd35e62523"},
-    {file = "djade-1.5.0-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:17160411fd96be8dd7f44b9bd140bfd62cd045a12c5a52e0a44700f50a416895"},
-    {file = "djade-1.5.0-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:e6f50ed54c4867fe64525b17465ced86a5364cc69f4d976bc31f3b6a41971375"},
-    {file = "djade-1.5.0-py3-none-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:6e8aa4650ed2b67f2ac9eaaeb7fd6f8915e9a4a0ba48648255d19db0df35ba2e"},
-    {file = "djade-1.5.0-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:b586e3b60b23c173531e20ad7c7a964e2d10f39ee57fe2ddbba2a6342508d71e"},
-    {file = "djade-1.5.0-py3-none-musllinux_1_1_aarch64.whl", hash = "sha256:a1f4ecfc68aedbaeb8d9c5b6079abf6fbcafbf59e420d9f9d11da0ed3906c675"},
-    {file = "djade-1.5.0-py3-none-musllinux_1_1_x86_64.whl", hash = "sha256:4eeb82c65b7baad7fb27c139f00d68e9ac35114d5cc169e45964b571e54c4c66"},
-    {file = "djade-1.5.0-py3-none-win32.whl", hash = "sha256:8045469ebe36d5503622c7268d8f7859a1f0eb579725a363ec18b508fdf53363"},
-    {file = "djade-1.5.0-py3-none-win_amd64.whl", hash = "sha256:67892f9405d92decd8bb4a253b14534df6a1f613a2423a197317d530599b8dbe"},
-    {file = "djade-1.5.0-py3-none-win_arm64.whl", hash = "sha256:dfd431b77170e26458e59a1ed886d588adc6e25f8e3a4ae1d76af230cee4b8e7"},
-    {file = "djade-1.5.0.tar.gz", hash = "sha256:fee13ad8142338df9a658fc3789113bd08a518e56261cfe301a964faf62fc0cc"},
+    {file = "djade-1.6.0-py3-none-macosx_10_12_x86_64.whl", hash = "sha256:e43eb2227a02599df038ba64b7a0c8599d6cef9d0de978ac635592d58299d477"},
+    {file = "djade-1.6.0-py3-none-macosx_11_0_arm64.whl", hash = "sha256:fe820c5be3d08952ad42ea9ee5475e1c60d32326fae57ee98a4887e99d2d1765"},
+    {file = "djade-1.6.0-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:4dd8a7919f1fa953e332548aeb3b793dea0563fc5e9f89017da6fe7318b603a2"},
+    {file = "djade-1.6.0-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:113a8db4657bd488ecf383c3db0953530012afbccb596302a294c7b629573269"},
+    {file = "djade-1.6.0-py3-none-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:53511e1d3d55ff408fe11edc7bc982b0af53ab6225870d031804e209ec0515d8"},
+    {file = "djade-1.6.0-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:e9ed89688c9baa733cbf4ec08b8cc0102bdd1b539bd0775f5ad5be98e20ab934"},
+    {file = "djade-1.6.0-py3-none-musllinux_1_1_aarch64.whl", hash = "sha256:4c4c42d86f317742ad1d33f4ca85d4d507530b7cfbfc9b2dc015dda4d06199ad"},
+    {file = "djade-1.6.0-py3-none-musllinux_1_1_x86_64.whl", hash = "sha256:a99661ad8b155c3aa62ac2fdb3879df0e5a5bcb1c66f8a142f3964cd2a0bb1cb"},
+    {file = "djade-1.6.0-py3-none-win32.whl", hash = "sha256:4555387841d0ef6290ff8221ebea48321262ff1011874debd30010e5deba0ff3"},
+    {file = "djade-1.6.0-py3-none-win_amd64.whl", hash = "sha256:d6111763d133a7a85db0f6f0e59586fdbbd08e6c22238e84de730bb1a21cbab4"},
+    {file = "djade-1.6.0-py3-none-win_arm64.whl", hash = "sha256:c52efaa5d64572ddc4a986d74202195c8574f969877fcfbdbea3a41718334804"},
+    {file = "djade-1.6.0.tar.gz", hash = "sha256:a7f173d6949ce248ee538ab85676e3277b4b4ae956c3383f96348355ab8983b7"},
 ]
 
 [[package]]
@@ -4230,6 +4235,25 @@ files = [
 dev = ["black", "mypy", "pytest"]
 
 [[package]]
+name = "orderly-set"
+version = "5.5.0"
+description = "Orderly set"
+optional = false
+python-versions = ">=3.8"
+groups = ["airflow", "dev"]
+files = [
+    {file = "orderly_set-5.5.0-py3-none-any.whl", hash = "sha256:46f0b801948e98f427b412fcabb831677194c05c3b699b80de260374baa0b1e7"},
+    {file = "orderly_set-5.5.0.tar.gz", hash = "sha256:e87185c8e4d8afa64e7f8160ee2c542a475b738bc891dc3f58102e654125e6ce"},
+]
+
+[package.extras]
+coverage = ["coverage (>=7.6.0,<7.7.0)"]
+dev = ["bump2version (>=1.0.0,<1.1.0)", "ipdb (>=0.13.0,<0.14.0)"]
+optimize = ["orjson"]
+static = ["flake8 (>=7.1.0,<7.2.0)", "flake8-pyproject (>=1.2.3,<1.3.0)"]
+test = ["pytest (>=8.3.0,<8.4.0)", "pytest-benchmark (>=5.1.0,<5.2.0)", "pytest-cov (>=6.0.0,<6.1.0)", "python-dotenv (>=1.0.0,<1.1.0)"]
+
+[[package]]
 name = "orjson"
 version = "3.11.3"
 description = "Fast, correct Python JSON library supporting dataclasses, datetimes, and numpy"
@@ -5266,14 +5290,14 @@ tests = ["coverage[toml] (==5.0.4)", "pytest (>=6.0.0,<7.0.0)"]
 
 [[package]]
 name = "pytest"
-version = "8.4.1"
+version = "8.4.2"
 description = "pytest: simple powerful testing with Python"
 optional = false
 python-versions = ">=3.9"
 groups = ["dev"]
 files = [
-    {file = "pytest-8.4.1-py3-none-any.whl", hash = "sha256:539c70ba6fcead8e78eebbf1115e8b589e7565830d7d006a8723f19ac8a0afb7"},
-    {file = "pytest-8.4.1.tar.gz", hash = "sha256:7c67fd69174877359ed9371ec3af8a3d2b04741818c51e5e99cc1742251fa93c"},
+    {file = "pytest-8.4.2-py3-none-any.whl", hash = "sha256:872f880de3fc3a5bdc88a11b39c9710c3497a547cfa9320bc3c5e62fbf272e79"},
+    {file = "pytest-8.4.2.tar.gz", hash = "sha256:86c0d0b93306b961d58d62a4db4879f27fe25513d4b969df351abdddb3c30e01"},
 ]
 
 [package.dependencies]
@@ -6114,14 +6138,14 @@ test = ["Cython", "array-api-strict (>=2.3.1)", "asv", "gmpy2", "hypothesis (>=6
 
 [[package]]
 name = "sentry-sdk"
-version = "2.35.2"
+version = "2.37.0"
 description = "Python client for Sentry (https://sentry.io)"
 optional = false
 python-versions = ">=3.6"
 groups = ["main"]
 files = [
-    {file = "sentry_sdk-2.35.2-py2.py3-none-any.whl", hash = "sha256:38c98e3cbb620dd3dd80a8d6e39c753d453dd41f8a9df581b0584c19a52bc926"},
-    {file = "sentry_sdk-2.35.2.tar.gz", hash = "sha256:e9e8f3c795044beb59f2c8f4c6b9b0f9779e5e604099882df05eec525e782cc6"},
+    {file = "sentry_sdk-2.37.0-py2.py3-none-any.whl", hash = "sha256:89c1ed205d5c25926558b64a9bed8a5b4fb295b007cecc32c0ec4bf7694da2e1"},
+    {file = "sentry_sdk-2.37.0.tar.gz", hash = "sha256:2c661a482dd5accf3df58464f31733545745bb4d5cf8f5e46e0e1c4eed88479f"},
 ]
 
 [package.dependencies]
@@ -6149,6 +6173,7 @@ httpx = ["httpx (>=0.16.0)"]
 huey = ["huey (>=2)"]
 huggingface-hub = ["huggingface_hub (>=0.22)"]
 langchain = ["langchain (>=0.0.210)"]
+langgraph = ["langgraph (>=0.6.6)"]
 launchdarkly = ["launchdarkly-server-sdk (>=9.8.0)"]
 litestar = ["litestar (>=2.0.0)"]
 loguru = ["loguru (>=0.5)"]
@@ -7595,4 +7620,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12,<3.13"
-content-hash = "d0be7e65932d84a3b9030beff08b69538124d7efd1388968dca92e7dfc6e4f61"
+content-hash = "43df9d999d86be78def5acc0842c48dc2042fb71aa0cadbf8276f2db41a30c0e"

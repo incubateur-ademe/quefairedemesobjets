@@ -9,6 +9,9 @@ from django_lookbook.utils import register_form_class
 
 from qfdmd.forms import SearchForm
 from qfdmd.models import Suggestion, Synonyme
+from qfdmo.models.acteur import ActeurType, DisplayedActeur, DisplayedPropositionService
+from qfdmo.models.action import Action
+from qfdmo.models.config import CarteConfig
 
 
 class SynonymeForm(forms.Form):
@@ -24,7 +27,115 @@ class SynonymeForm(forms.Form):
     )
 
 
+def get_default_action():
+    return Action.objects.get(code="reparer")
+
+
+class PinPointForm(forms.Form):
+
+    action = forms.ModelChoiceField(
+        queryset=Action.objects.all(),
+        label="Action",
+        to_field_name="code",
+        help_text="Sélectionnez une action",
+        initial=get_default_action,
+    )
+    avec_bonus = forms.BooleanField(
+        label="Avec bonus",
+        help_text="Avec bonus",
+        initial=False,
+    )
+    carte = forms.BooleanField(
+        label="Carte",
+        help_text="Carte",
+        initial=True,
+    )
+    carte_config = forms.ModelChoiceField(
+        label="Carte config",
+        help_text="Carte config",
+        required=False,
+        queryset=CarteConfig.objects.all(),
+    )
+    acteur_type = forms.ModelChoiceField(
+        label="Acteur type",
+        help_text="Action list",
+        to_field_name="code",
+        required=False,
+        queryset=ActeurType.objects.all(),
+        initial="",
+    )
+
+
 class ComponentsPreview(LookbookPreview):
+    @register_form_class(PinPointForm)
+    def acteur_pinpoint(
+        self,
+        action="reparer",
+        avec_bonus="False",
+        carte="True",
+        carte_config=None,
+        acteur_type=None,
+        **kwargs,
+    ):
+        try:
+            # FIXME : avec_bonus is returned as a string by the lookbook where I expected
+            # a boolean
+            # We suspect an issue upstream in django-lookbook, this might need to be investigated
+            # and raised to the maintainer.
+            if isinstance(action, str) and action:
+                action = Action.objects.get(code=action)
+            if isinstance(carte_config, str) and carte_config:
+                carte_config = CarteConfig.objects.get(id=carte_config)
+            if isinstance(acteur_type, str) and acteur_type:
+                acteur_type = ActeurType.objects.get(code=acteur_type)
+            if isinstance(avec_bonus, str):
+                avec_bonus = avec_bonus.lower() == "true"
+            if isinstance(carte, str):
+                carte = carte.lower() == "true"
+
+            displayed_proposition_service = DisplayedPropositionService.objects.filter(
+                action=action
+            )
+            if acteur_type:
+                displayed_proposition_service = displayed_proposition_service.filter(
+                    acteur__acteur_type=acteur_type
+                )
+            if avec_bonus:
+                displayed_proposition_service = displayed_proposition_service.filter(
+                    acteur__labels__bonus=True
+                )
+            else:
+                displayed_proposition_service = displayed_proposition_service.exclude(
+                    acteur__in=DisplayedActeur.objects.filter(labels__bonus=True)
+                )
+            displayed_proposition_service = displayed_proposition_service.first()
+            if not displayed_proposition_service:
+                raise ValueError(f"PropositionService with action `{action}` not found")
+        except Exception as e:
+            template = Template(
+                "Une erreur s'est produite dans la génération de la preview,"
+                f" la combinaison de filtres ne permet pas d'afficher un pinpoint <br><pre>{e}</pre>",
+            )
+
+            return template.render(Context({}))
+
+        context = {
+            "acteur": displayed_proposition_service.acteur,
+            "direction": action.directions.first().code,
+            "action_list": action.code,
+            "carte": carte,
+            "carte_config": carte_config,
+            "sc_id": displayed_proposition_service.sous_categories.first().id,
+            "force_visible": True,  # Only to display ir it the lookbook
+        }
+        template = Template(
+            """
+            {% load qfdmo_tags %}
+            {% acteur_pinpoint_tag acteur=acteur direction=direction action_list=action_list carte=carte carte_config=carte_config sous_categorie_id=sc_id %}
+            """
+        )
+        return template.render(Context(context))
+
     def button(self, **kwargs):
         context = {"href": "google.fr", "text": "test"}
         return render_to_string("components/button.html", context)

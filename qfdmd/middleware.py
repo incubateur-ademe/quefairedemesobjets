@@ -22,7 +22,7 @@ class AssistantMiddleware:
     def __call__(self, request):
         # Prepare request
         if url_to_redirect := self._check_redirect_from_legacy_domains(request):
-            return redirect(url_to_redirect, permanent=False)
+            return redirect(url_to_redirect, permanent=True)
 
         self._prepare_request_if_iframe(request)
         response = self.get_response(request)
