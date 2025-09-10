@@ -260,7 +260,7 @@ export const getMarkers = async (page) => {
     document.querySelectorAll("#pinpoint-home")?.forEach((element) => element.remove())
   })
 
-  const markers = page?.locator(".maplibregl-marker:has(svg)")
+  const markers = await page?.locator(".maplibregl-marker:has(svg)")
 
   // Ensure we have at least one marker, and let's click on a marker.
   // The approach is feels cumbersome, this is because Playwright has a
