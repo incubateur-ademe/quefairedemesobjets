@@ -12,15 +12,15 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           cache: "pip"
-      - name: Install poetry
-        uses: abatilo/actions-poetry@3765cf608f2d4a72178a9fc5b918668e542b89b1 # v4
+      - name: Install uv
+        uses:  astral-sh/setup-uv@557e51de59eb14aaaba2ed9621916900a91d50c6
       - uses: actions/cache@v4
         name: Define a cache for the virtual environment based on the dependencies lock file
         with:
           path: ./.venv
-          key: venv-dev-airflow-${{ hashFiles('poetry.lock') }}
+          key: venv-dev-airflow-${{ hashFiles('uv.lock') }}
       - name: Install the project dependencies
-        run: poetry sync --only dev --no-root
+        run: uv sync --only-dev
       - name: Install Terragrunt and OpenTofu
         uses: gruntwork-io/terragrunt-action@95fc057922e3c3d4cc021a81a213f088f333ddef
         with:
@@ -76,23 +76,23 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install gdal-bin
-      - name: Install poetry
-        uses: abatilo/actions-poetry@3765cf608f2d4a72178a9fc5b918668e542b89b1 # v4
+      - name: Install uv
+        uses:  astral-sh/setup-uv@557e51de59eb14aaaba2ed9621916900a91d50c6
       - uses: actions/cache@v4
         name: Define a cache for the virtual environment based on the dependencies lock file
         with:
           path: ./.venv
-          key: venv-dev-airflow-${{ hashFiles('poetry.lock') }}
+          key: venv-dev-airflow-${{ hashFiles('uv.lock') }}
       - name: Install the project dependencies
-        run: poetry sync --with dev,airflow --no-root
+        run: uv sync --group dev --group airflow
       - name: Run unit tests
         run: make unit-test
       - name: Run integration tests
         run: make integration-test
       - name: Run data tests
-        run: poetry run pytest dags/tests
+        run: uv run pytest dags/tests
       - name: Check for missing migrations
-        run: poetry run python manage.py makemigrations --check --no-input --settings=core.test_settings
+        run: uv run python manage.py makemigrations --check --no-input --settings=core.test_settings
         env:
           SECRET_KEY: votre_blanquette_est_bonne # pragma: allowlist secret
           DATABASE_URL: "postgres://fakeusername:fakepassword@postgres:5432/database" # pragma: allowlist secret
@@ -159,15 +159,15 @@ jobs:
           sudo apt-get update
           sudo apt-get install gdal-bin
 
-      - name: Install poetry
-        uses: abatilo/actions-poetry@3765cf608f2d4a72178a9fc5b918668e542b89b1 # v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@557e51de59eb14aaaba2ed9621916900a91d50c6
       - uses: actions/cache@v4
         name: Define a cache for the virtual environment based on the dependencies lock file
         with:
           path: ./.venv
-          key: venv-dev-${{ hashFiles('poetry.lock') }}
+          key: venv-dev-${{ hashFiles('uv.lock') }}
       - name: Install the project dependencies
-        run: poetry sync --with dev --no-root
+        run: uv sync --with dev --no-root
 
       - name: Prepare django, migrate, collect static files...
         run: |
@@ -185,7 +185,7 @@ jobs:
 
       - name: Run server
         run: |
-          poetry run python manage.py runserver &
+          uv run python manage.py runserver &
 
       - name: Install Playwright Browsers
         run: make init-playwright

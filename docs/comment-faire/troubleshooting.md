@@ -9,22 +9,22 @@ Une liste de solutions à des situations fréquentes qui peuvent se produire en 
 ```bash
 # installer detect-secrets s'il n'est pas présent dans l'environnement virtuel
 # ou en local
-poetry add detect-secrets
+uv add detect-secrets
 # re-générer .secrets.baseline
-poetry run detect-secrets scan > .secrets.baseline
+uv run detect-secrets scan > .secrets.baseline
 # ajout au rebase en cours
 git add .secrets.baseline
 # continuer le rebase si aucun autre conflit n'est présent
 git rebase --continue
 ```
 
-### En cas de conflits sur `poetry.lock`
+### En cas de conflits sur `uv.lock`
 
 ```bash
-# ou avec poetry
-rm poetry.lock
-poetry lock
-git add poetry.lock
+# ou avec uv
+rm uv.lock
+uv lock
+git add uv.lock
 
 # si c'est pendant un rebase...
 git rebase --continue
@@ -117,7 +117,7 @@ Il est possible de créer un user directement depuis `psql`, pour ce faire
 1. Générer un mot de passe en utilisant `werkzeug` utilisé par Airflow
 
 ```py
-# Depuis un shell python, par exemple poetry run python
+# Depuis un shell python, par exemple uv run python
 from werkzeug.security import generate_password_hash
 
 print(generate_password_hash('your_password'))

@@ -135,8 +135,8 @@ docker compose  --profile lvao up -d
 Installation des dépendances python et javascript
 
 ```sh
-poetry env activate
-poetry install --with dev,airflow
+uv env activate
+uv install --with dev,airflow
 npm install
 ```
 
