@@ -35,7 +35,6 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
             data-action="map:captureInteraction->analytics#captureInteractionWithMap"
         >
             {% for acteur in acteurs %}
-
                 {% acteur_pinpoint_tag acteur=acteur direction=form.initial.direction action_list=form.initial.action_list carte=carte carte_config=carte_config sous_categorie_id=form.initial.sc_id %}
             {% endfor %}
             {% include "qfdmo/carte/pinpoints/home.html" %}

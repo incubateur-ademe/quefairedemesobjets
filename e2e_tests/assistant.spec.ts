@@ -20,6 +20,7 @@ test("Le sessionStorage se peuple bien lors d'un choix d'adresse", async ({ page
   await page.goto(`/dechet/lave-linge`, { waitUntil: "domcontentloaded" })
   await searchOnProduitPage(page, "Auray")
   const sessionStorage = await page.evaluate(() => window.sessionStorage)
+  await page.waitForTimeout(1000)
   expect(sessionStorage.adresse).toBe("Auray")
   expect(sessionStorage.latitude).toContain("47.6")
   expect(sessionStorage.longitude).toContain("-2.9")
