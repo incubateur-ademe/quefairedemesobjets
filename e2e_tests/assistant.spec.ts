@@ -113,7 +113,7 @@ test("Le tracking PostHog fonctionne comme prévu", async ({ page }) => {
   await searchOnProduitPage(page, "Auray")
   // Attempt to force waiting for pinpoints availability
   // TODO: understand why this is required......
-  await page.waitForTimeout(500)
+  await page.waitForTimeout(1000)
   const [markers, count] = await getMarkers(page)
   for (let i = 0; i < count; i++) {
     const item = markers?.nth(i)
