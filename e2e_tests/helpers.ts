@@ -231,7 +231,6 @@ export const mockApiAdresse = async (page) =>
       ],
       query: "auray",
     }
-    // wait route.fulfill({ json })
     await route.fulfill({
       status: 200,
       contentType: "application/json",
@@ -254,9 +253,6 @@ export const searchDummyAdresse = async (page) =>
     "10 rue de la paix",
     "#id_adresseautocomplete-list.autocomplete-items div:nth-of-type(2)",
   )
-
-export const hideDjangoToolbar = async (page) =>
-  await page.locator("#djHideToolBarButton").click()
 
 export const getMarkers = async (page) => {
   await expect(page.locator("#pinpoint-home").first()).toBeAttached()

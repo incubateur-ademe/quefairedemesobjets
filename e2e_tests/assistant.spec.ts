@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test"
-import { getMarkers, hideDjangoToolbar, mockApiAdresse } from "./helpers"
+import { getMarkers, mockApiAdresse } from "./helpers"
 function getItemSelector(index) {
   return `#mauvais_etat #id_adresseautocomplete-list.autocomplete-items div[data-action="click->address-autocomplete#selectOption"]:nth-of-type(${index})`
 }
@@ -47,7 +47,7 @@ test(
     await page.goto(`/`, { waitUntil: "domcontentloaded" })
 
     await page.locator("#id_home-input").click()
-    const responsePromise = page.waitForResponse(
+    let responsePromise = page.waitForResponse(
       (response) =>
         response.url().includes("/assistant/recherche") && response.status() === 200,
     )
@@ -56,17 +56,21 @@ test(
     // We expect at least on search result
     expect(page.locator("main [data-search-target=results] a").first()).toBeAttached()
 
+    responsePromise = page.waitForResponse(
+      (response) =>
+        response.url().includes("/assistant/recherche") && response.status() === 200,
+    )
     await page.locator("#id_header-input").click()
-    await page.waitForResponse(
-      (response) =>
-        response.url().includes("/assistant/recherche") && response.status() === 200,
-    )
+    await responsePromise
     expect(page.locator("main [data-search-target=results] a")).toHaveCount(0)
-    await page.locator("#id_header-input").pressSequentially("lave")
-    await page.waitForResponse(
+
+    responsePromise = page.waitForResponse(
       (response) =>
         response.url().includes("/assistant/recherche") && response.status() === 200,
     )
+    await page.locator("#id_header-input").pressSequentially("lave")
+    await responsePromise
+
     expect(page.locator("main [data-search-target=results] a")).toHaveCount(0)
     expect(
       page.locator("#header [data-search-target=results] a").first(),

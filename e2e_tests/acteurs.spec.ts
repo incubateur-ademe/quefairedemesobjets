@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test"
-import { getMarkers, hideDjangoToolbar, mockApiAdresse } from "./helpers"
+import { getMarkers, mockApiAdresse } from "./helpers"
 
 test("Les acteurs sont visibles sur la carte du formulaire et fonctionnent", async ({
   page,

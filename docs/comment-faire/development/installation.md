@@ -7,6 +7,7 @@
 - docker & docker-compose
 - python 3.12
 - node 20
+- mkcert (optionnel : utilisé pour la génération de certificats pour le développement frontend de la carte et assistant)
 - gdal (librairie nécessaire à l'utilisation de GeoDjango)
 - Installer et configurer le client Scaleway en suivant [les instructions de Scaleway](https://www.scaleway.com/en/docs/scaleway-cli/quickstart/)
 - Installer et configurer le client Scalingo en suivant [les instructions de Scalingo](https://doc.scalingo.com/platform/cli/start)
