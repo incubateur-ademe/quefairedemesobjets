@@ -84,7 +84,7 @@ jobs:
           path: ./.venv
           key: venv-dev-airflow-${{ hashFiles('uv.lock') }}
       - name: Install the project dependencies
-        run: uv sync --with dev,airflow --no-root
+        run: uv sync --group dev --group airflow
       - name: Run unit tests
         run: make unit-test
       - name: Run integration tests
