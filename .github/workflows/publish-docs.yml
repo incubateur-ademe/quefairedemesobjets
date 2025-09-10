@@ -28,7 +28,7 @@ jobs:
         path: ./.venv
         key: venv-dev-docs-${{ hashFiles('uv.lock') }}
     - name: Install the project dependencies
-      run: uv sync --only docs --no-root
+      run: uv sync --group docs
 
     - name: Build the documentation
       run: |
