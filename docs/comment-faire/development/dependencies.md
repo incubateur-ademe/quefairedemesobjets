@@ -2,18 +2,18 @@
 
 ## Dépendances Python
 
-On utilise poetry
+On utilise uv
 
 Pour installer les packages en local
 
 ```sh
-poetry sync <package>
+uv sync <package>
 ```
 
 Pour ajouter une dépendance
 
 ```sh
-poetry add <package>
+uv add <package>
 ```
 
 option `--group dev` pour les dépendances de développement et `--group airflow` pour les dépendances de airflow

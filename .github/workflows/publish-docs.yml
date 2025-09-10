@@ -20,19 +20,19 @@ jobs:
     - uses: actions/setup-python@v6
       with:
         cache: "pip"
-    - name: Install poetry
-      uses: abatilo/actions-poetry@3765cf608f2d4a72178a9fc5b918668e542b89b1 # v4
+    - name: Install uv
+      uses: abatilo/actions-uv@3765cf608f2d4a72178a9fc5b918668e542b89b1 # v4
     - uses: actions/cache@v4
       name: Define a cache for the virtual environment based on the dependencies lock file
       with:
         path: ./.venv
-        key: venv-dev-docs-${{ hashFiles('poetry.lock') }}
+        key: venv-dev-docs-${{ hashFiles('uv.lock') }}
     - name: Install the project dependencies
-      run: poetry sync --only docs --no-root
+      run: uv sync --only docs --no-root
 
     - name: Build the documentation
       run: |
-        poetry run make build-docs
+        uv run make build-docs
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e # v4

@@ -1,3 +1,47 @@
+[project]
+name = "quefairedemesobjets"
+version = "1.57.0"
+description = ""
+requires-python = ">=3.12,<3.13"
+readme = "README.md"
+license = "MIT"
+dependencies = [
+    "api-insee~=1.6",
+    "boto3<1.36",
+    "dj-database-url>=3.0.1,<4",
+    "django<=5.2.5",
+    "django-extensions~=4.1",
+    "django-import-export[xls, xlsx]>=4.3.8,<5",
+    "django-ninja>=1.4.3,<2",
+    "django-storages>=1.14.6,<2",
+    "gunicorn>=23.0.0,<24",
+    "opening-hours-py>=1.1.3,<2",
+    "orjson>=3.11.1,<4",
+    "pillow>=11.2.1,<12",
+    "psycopg2>=2.9.10,<3",
+    "python-decouple~=3.8",
+    "requests>=2.32.4,<3",
+    "sentry-sdk>=2.37.0,<3",
+    "shortuuid>=1.0.13,<2",
+    "tqdm>=4.67.1,<5",
+    "unidecode>=1.4.0,<2",
+    "whitenoise>=6.8.2,<7",
+    "django-widget-tweaks>=1.5.0,<2",
+    "django-cors-headers>=4.6.0,<5",
+    "django-colorfield>=0.14.0,<0.15",
+    "django-dsfr>=2.4.0,<3",
+    "rapidfuzz>=3.13.0,<4",
+    "sites-faciles-experiment>=0.0.10,<0.0.11",
+    "diff-match-patch>=20241021,<20241022",
+    "django-lookbook>=1.0.2,<2",
+    "queryish>=0.2,<0.3",
+    "detect-secrets>=1.5.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "core.test_settings"
 env_files = [".env.template"]
@@ -8,9 +52,58 @@ filterwarnings = [
   "ignore::django.utils.deprecation.RemovedInDjango60Warning",
 ]
 
+[dependency-groups]
+dev = [
+    "black>=25.1.0,<26",
+    "django-browser-reload>=1.17.0,<2",
+    "django-debug-toolbar>=6.0.0,<7",
+    "django-stubs>=5.2.0,<6",
+    "factory-boy>=3.3.1,<4",
+    "honcho>=2.0.0,<3",
+    "pre-commit>=4.3.0,<5",
+    "ptpython>=3.0.30,<4",
+    "beautifulsoup4>=4.13.5,<5",
+    "pytest>=8.4.2,<9",
+    "pytest-django>=4.9.0,<5",
+    "pytest-dotenv>=0.5.2,<0.6",
+    "pytest-mock>=3.14.1,<4",
+    "ruff>=0.12.10,<0.13",
+    "shapely>=2.1.1,<3",
+    "djade>=1.6.0,<2",
+    "dslr>=0.6.0,<0.7",
+]
+docs = [
+    "myst-parser>=4.0.0,<5",
+    "sphinx>=8.1.3,<9",
+    "furo>=2025.7.19,<2026",
+    "detect-secrets>=1.5.0,<2",
+    "sphinxcontrib-mermaid>=1.0.0,<2",
+]
+airflow = [
+    "apache-airflow-providers-postgres>=6.2.2,<7",
+    "fuzzywuzzy>=0.18.0,<0.19",
+    "python-decouple~=3.8",
+    "ratelimit>=2.2.1,<3",
+    "shortuuid>=1.0.13,<2",
+    "unidecode>=1.4.0,<2",
+    "scikit-learn==1.7.1",
+    "apache-airflow>=2.11.0,<3",
+    "pandas<2.2",
+    "dbt-core>=1.10.9,<2",
+    "dbt-postgres>=1.9.1,<2",
+]
+
 [tool.pyright]
 venvPath = "."
 venv = ".venv"
+
+[tool.uv]
+package = false
+default-groups = [
+    "dev",
+    "docs",
+    "airflow",
+]
 
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
@@ -66,90 +159,3 @@ dummy-variable-rgx = "ˆ(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 exclude = ["migrations/"]
 ignore_missing_imports = true
 warn_return_any = false
-
-[project]
-name = "quefairedemesobjets"
-version = "1.57.0"
-description = ""
-license = "MIT"
-readme = "README.md"
-requires-python = ">=3.12,<3.13"
-
-[tool.poetry]
-package-mode = false
-
-[tool.poetry.dependencies]
-python = "^3.12,<3.13"
-api-insee = "^1.6"
-boto3 = "<1.36"
-dj-database-url = "^3.0.1"
-django = "<=5.2.5" # cf. https://github.com/django/django/issues/16589
-django-extensions = "^4.1"
-django-import-export = {extras = ["xls", "xlsx"], version = "^4.3.8"}
-django-ninja = "^1.4.3"
-django-storages = "^1.14.6"
-gunicorn = "^23.0.0"
-opening-hours-py = "^1.1.3"
-orjson = "^3.11.1"
-pillow = "^11.2.1"
-psycopg2 = "^2.9.10"
-python-decouple = "^3.8"
-requests = "^2.32.4"
-sentry-sdk = "^2.37.0"
-shortuuid = "^1.0.13"
-tqdm = "^4.67.1"
-unidecode = "^1.4.0"
-whitenoise = "^6.8.2"
-django-widget-tweaks = "^1.5.0"
-django-cors-headers = "^4.6.0"
-django-colorfield = "^0.14.0"
-django-dsfr = "^2.4.0"
-rapidfuzz = "^3.13.0"
-sites-faciles-experiment = "^0.0.10"
-diff-match-patch = "^20241021"
-django-lookbook = "^1.0.2"
-queryish = "^0.2"
-
-[tool.poetry.group.dev.dependencies]
-black = "^25.1.0"
-django-browser-reload = "^1.17.0"
-django-debug-toolbar = "^6.0.0"
-django-stubs = "^5.2.0"
-factory-boy = "^3.3.1"
-honcho = "^2.0.0"
-pre-commit = "^4.3.0"
-ptpython = "^3.0.30"
-beautifulsoup4 = "^4.13.5"
-pytest = "^8.4.2"
-pytest-django = "^4.9.0"
-pytest-dotenv = "^0.5.2"
-pytest-mock = "^3.14.1"
-ruff = "^0.12.10"
-shapely = "^2.1.1" # notebook
-djade = "^1.6.0"
-dslr = "^0.6.0"
-
-[tool.poetry.group.docs.dependencies]
-myst-parser = "^4.0.0"
-sphinx = "^8.1.3" # docs
-furo = "^2025.7.19" # docs theme
-detect-secrets = "^1.5.0"
-sphinxcontrib-mermaid = "^1.0.0"
-
-
-[tool.poetry.group.airflow.dependencies]
-apache-airflow-providers-postgres = "^6.2.2"
-fuzzywuzzy = "^0.18.0"
-python-decouple = "^3.8"
-ratelimit = "^2.2.1"
-shortuuid = "^1.0.13"
-unidecode = "^1.4.0"
-scikit-learn = "1.7.1"
-apache-airflow = "^2.11.0"
-pandas = "<2.2"
-dbt-core = "^1.10.9"
-dbt-postgres = "^1.9.1"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"

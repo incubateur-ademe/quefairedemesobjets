@@ -5,14 +5,14 @@
 A la racine du projet
 
 ```sh
-poetry install --with dev,airflow
+uv install --with dev,airflow
 ```
 
 Puis dans le dossier dbt
 
 ```sh
 cd dbt
-poetry run dbt deps
+uv run dbt deps
 ```
 
 ## Utilisation
@@ -21,13 +21,13 @@ Lancer dbt dans le dossier dbt.
 L'option select permet de lancer un seul ensemble de models, cf [project.yml](./dbt_project.yml).
 
 ```sh
-poetry run dbt run --select qfdmo.exhaustive_acteurs
+uv run dbt run --select qfdmo.exhaustive_acteurs
 ```
 
 Lancer les tests
 
 ```sh
-poetry run dbt run --select qfdmo.exhaustive_acteurs
+uv run dbt run --select qfdmo.exhaustive_acteurs
 ```
 
 ## Sampling

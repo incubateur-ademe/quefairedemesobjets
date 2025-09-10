@@ -5,10 +5,10 @@ ifneq (,$(wildcard ./.env))
 endif
 
 # Aliases
-PYTHON := poetry run python
+PYTHON := uv run python
 DJANGO_ADMIN := $(PYTHON) manage.py
-PYTEST := poetry run pytest
-HONCHO := poetry run honcho
+PYTEST := uv run pytest
+HONCHO := uv run honcho
 DB_URL := postgres://webapp:webapp@localhost:6543/webapp# pragma: allowlist secret
 BASE_DOMAIN := quefairedemesdechets.ademe.local
 FIXTURES_OPTIONS := --indent 4 --natural-foreign --natural-primary
@@ -35,8 +35,8 @@ init-playwright:
 .PHONY: init-dev
 init-dev:
 	# python
-	pip install poetry
-	poetry install --with dev,airflow
+	pip install uv
+	uv install --with dev,airflow
 	make init-certs
 	# git
 	git config blame.ignoreRevsFile .git-blame-ignore-revs
@@ -57,12 +57,12 @@ init-dev:
 
 .PHONY: check-format
 check-format:
-	poetry run black --check --diff .
+	uv run black --check --diff .
 
 .PHONY: fix
 fix:
-	poetry run ruff check . --fix
-	poetry run black --exclude=.venv .
+	uv run ruff check . --fix
+	uv run black --exclude=.venv .
 
 # Run development servers
 .PHONY: run-airflow
@@ -244,7 +244,7 @@ db-restore-for-tests:
 # Docs
 .PHONY: build-docs
 build-docs:
-	poetry run sphinx-build -b html -c docs docs _build
+	uv run sphinx-build -b html -c docs docs _build
 
 .PHONY: fmt-infra
 fmt-infra:
