@@ -47,12 +47,13 @@ test(
     await page.goto(`/`, { waitUntil: "domcontentloaded" })
 
     await page.locator("#id_home-input").click()
-    await page.locator("#id_home-input").pressSequentially("lave", { delay: 100 })
-    // We expect at least on search result
-    await page.waitForResponse(
+    const responsePromise = page.waitForResponse(
       (response) =>
         response.url().includes("/assistant/recherche") && response.status() === 200,
     )
+    await page.locator("#id_home-input").pressSequentially("lave", { delay: 100 })
+    await responsePromise
+    // We expect at least on search result
     expect(page.locator("main [data-search-target=results] a").first()).toBeAttached()
 
     await page.locator("#id_header-input").click()
