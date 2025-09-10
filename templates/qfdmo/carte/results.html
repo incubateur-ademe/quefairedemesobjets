@@ -35,10 +35,10 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
             data-action="map:captureInteraction->analytics#captureInteractionWithMap"
         >
             {% for acteur in acteurs %}
-                <script type="application/json" data-map-target="acteur">
-                    {% acteur_json_display acteur form.initial.direction form.initial.action_list carte carte_config form.initial.sc_id as json_data %}{{ json_data|safe }}
-                </script>
+
+                {% acteur_pinpoint_tag acteur=acteur direction=form.initial.direction action_list=form.initial.action_list carte=carte carte_config=carte_config sous_categorie_id=form.initial.sc_id %}
             {% endfor %}
+            {% include "qfdmo/carte/pinpoints/home.html" %}
         </div>
 
         {% if address_ok %}
@@ -46,7 +46,7 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
                 {% include "qfdmo/carte/panels/legend.html" %}
                 <a class="qf-flex
                     fr-btn fr-btn--icon-left fr-icon-epingle-plus qf-whitespace-nowrap qf-w-auto qf-justify-center
-                    qf-absolute qf-left-2w qf-right-2w qf-bottom-3w qf-z-20
+                    qf-absolute qf-left-2w qf-right-2w qf-bottom-4w qf-z-20
                     {# the important below is required to override fr-btn max-width style #}
                     !qf-max-w-sm md:!qf-ml-auto
                     max-md:qf-mx-auto"

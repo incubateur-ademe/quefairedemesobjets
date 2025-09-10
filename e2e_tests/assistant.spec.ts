@@ -1,23 +1,22 @@
 import { expect, test } from "@playwright/test"
-import { getMarkers, hideDjangoToolbar, searchDummyAdresse } from "./helpers"
+import { getMarkers, mockApiAdresse } from "./helpers"
 function getItemSelector(index) {
-  return `#mauvais_etat #id_adresseautocomplete-list.autocomplete-items div:nth-of-type(${index})`
+  return `#mauvais_etat #id_adresseautocomplete-list.autocomplete-items div[data-action="click->address-autocomplete#selectOption"]:nth-of-type(${index})`
 }
 
 async function searchOnProduitPage(page, searchedAddress: string) {
   const inputSelector = "#mauvais_etat input#id_adresse"
+  await mockApiAdresse(page)
 
   // Autour de moi
   await page.locator(inputSelector).click()
-  await page.locator(inputSelector).fill(searchedAddress)
-  expect(page.locator(getItemSelector(1)).innerText()).not.toBe("Autour de moi")
+  await page.locator(inputSelector).pressSequentially(searchedAddress, { delay: 100 })
   await page.locator(getItemSelector(1)).click()
 }
 
-test("La carte s'affiche sur une fiche déchet/objet", async ({ page }) => {
+test("Le sessionStorage se peuple bien lors d'un choix d'adresse", async ({ page }) => {
   // Navigate to the carte page
   await page.goto(`/dechet/lave-linge`, { waitUntil: "domcontentloaded" })
-  // await hideDjangoToolbar(page)
   await searchOnProduitPage(page, "Auray")
   const sessionStorage = await page.evaluate(() => window.sessionStorage)
   expect(sessionStorage.adresse).toBe("Auray")
@@ -46,38 +45,47 @@ test(
   async ({ page }) => {
     // Navigate to the carte page
     await page.goto(`/`, { waitUntil: "domcontentloaded" })
-    await hideDjangoToolbar(page)
 
+    // Type in main serach
+    let responsePromise = page.waitForResponse(
+      (response) =>
+        response.url().includes("/assistant/recherche") && response.status() === 200,
+    )
     await page.locator("#id_home-input").click()
-    await page.locator("#id_home-input").pressSequentially("lave")
-    // We expect at least on search result
-    await page.waitForResponse(
-      (response) =>
-        response.url().includes("/assistant/recherche") && response.status() === 200,
-    )
-    expect(page.locator("#home [data-search-target=results] a").first()).toBeAttached()
+    // FIXME: try to remove delay here
+    // It is required to prevent the locator check below to happen before the
+    // input debounce delay has ran, hence happening before the API call to succeed
+    await page.locator("#id_home-input").pressSequentially("lave", { delay: 200 })
+    await responsePromise
 
+    // We expect at least on search result
+    expect(page.locator("main [data-search-target=results] a").first()).toBeAttached()
+
+    // Type in header search
+    responsePromise = page.waitForResponse(
+      (response) =>
+        response.url().includes("/assistant/recherche") && response.status() === 200,
+    )
     await page.locator("#id_header-input").click()
-    await page.waitForResponse(
-      (response) =>
-        response.url().includes("/assistant/recherche") && response.status() === 200,
-    )
-    expect(page.locator("#home [data-search-target=results] a")).toHaveCount(0)
-    await page.locator("#id_header-input").pressSequentially("lave")
-    await page.waitForResponse(
-      (response) =>
-        response.url().includes("/assistant/recherche") && response.status() === 200,
-    )
-    expect(page.locator("#home [data-search-target=results] a")).toHaveCount(0)
+    expect(page.locator("main [data-search-target=results] a")).toHaveCount(0)
+    // FIXME: try to remove delay here
+    // It is required to prevent the locator check below to happen before the
+    // input debounce delay has ran, hence happening before the API call to succeed
+    await page.locator("#id_header-input").pressSequentially("lave", { delay: 200 })
+    await responsePromise
+
+    expect(page.locator("main [data-search-target=results] a")).toHaveCount(0)
     expect(
       page.locator("#header [data-search-target=results] a").first(),
     ).toBeAttached()
 
-    await page.locator("#id_home-input").click()
-    await page.waitForResponse(
+    // Blur header input and expect it to be closed
+    responsePromise = page.waitForResponse(
       (response) =>
         response.url().includes("/assistant/recherche") && response.status() === 200,
     )
+    await page.locator("#id_home-input").click()
+    await responsePromise
     expect(page.locator("#home [data-search-target=results] a")).toHaveCount(0)
     expect(page.locator("#header [data-search-target=results] a")).toHaveCount(0)
   },
@@ -86,7 +94,6 @@ test(
 test("Le tracking PostHog fonctionne comme prévu", async ({ page }) => {
   // Check that homepage scores 1
   await page.goto(`/`, { waitUntil: "domcontentloaded" })
-  // await hideDjangoToolbar(page)
   let sessionStorage = await page.evaluate(() => window.sessionStorage)
   expect(sessionStorage.homePageView).toBe("0")
 
@@ -102,7 +109,7 @@ test("Le tracking PostHog fonctionne comme prévu", async ({ page }) => {
     const item = markers?.nth(i)
 
     try {
-      await item!.click({ force: true, timeout: 100 })
+      await item!.click({ force: true })
       break
     } catch (e) {
       console.log("cannot click", e)
@@ -117,7 +124,7 @@ test("Le tracking PostHog fonctionne comme prévu", async ({ page }) => {
     const item = markers?.nth(i)
 
     try {
-      await item!.click({ force: true, timeout: 100 })
+      await item!.click({ force: true })
       break
     } catch (e) {
       console.log("cannot click", e)

@@ -10,8 +10,7 @@ DJANGO_ADMIN := $(PYTHON) manage.py
 PYTEST := poetry run pytest
 HONCHO := poetry run honcho
 DB_URL := postgres://webapp:webapp@localhost:6543/webapp# pragma: allowlist secret
-ASSISTANT_URL := quefairedemesdechets.ademe.local
-LVAO_URL := lvao.ademe.local
+BASE_DOMAIN := quefairedemesdechets.ademe.local
 FIXTURES_OPTIONS := --indent 4 --natural-foreign --natural-primary
 
 # Makefile config
@@ -23,7 +22,11 @@ check:
 
 .PHONY: init-certs
 init-certs:
-	docker run -ti -v ./nginx-local-only/certs:/app/certs -w /app/certs --rm alpine/mkcert $(LVAO_URL) $(ASSISTANT_URL)
+	@which mkcert > /dev/null || { echo "mkcert is not installed. Please install it first: brew install mkcert (macOS) or visit https://github.com/FiloSottile/mkcert"; exit 1; }
+	mkcert -install
+	mkcert $(BASE_DOMAIN)
+	mv *.pem ./nginx-local-only/certs/
+	docker compose restart lvao-proxy
 
 .PHONY: init-playwright
 init-playwright:
@@ -46,7 +49,7 @@ init-dev:
 	cp ./dags/.env.template ./dags/.env
 	# prepare django
 	make run-all
-	make create_remote_db_server
+	make create-remote-db-server
 	make migrate
 	make createcachetable
 	make createsuperuser
@@ -78,6 +81,10 @@ run-all:
 migrate:
 	$(DJANGO_ADMIN) migrate
 
+.PHONY: collectstatic
+collectstatic:
+	$(DJANGO_ADMIN) collectstatic --noinput
+
 .PHONY: shell
 shell:
 	$(DJANGO_ADMIN) shell
@@ -99,8 +106,8 @@ createcachetable:
 clearsessions:
 	$(DJANGO_ADMIN) clearsessions
 
-.PHONY: create_remote_db_server
-create_remote_db_server:
+.PHONY: create-remote-db-server
+create-remote-db-server:
 	$(DJANGO_ADMIN) create_remote_db_server
 
 .PHONY: createsuperuser
@@ -158,11 +165,11 @@ dags-test:
 
 .PHONY: e2e-test
 e2e-test:
-	npx playwright test --update-snapshots
+	npx playwright test --update-snapshots all
 
 .PHONY: e2e-test-ui
 e2e-test-ui:
-	npx playwright test --update-snapshots --ui
+	npx playwright test --update-snapshots all --ui
 
 .PHONY: a11y
 a11y:
@@ -225,7 +232,7 @@ db-restore:
 	make create-schema-public
 	make load-production-dump
 	make migrate
-	make create_remote_db_server
+	make create-remote-db-server
 
 .PHONY: db-restore-for-tests
 db-restore-for-tests:

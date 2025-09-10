@@ -19,10 +19,10 @@ On utilise 2 bases de données par environnement. Chaque instance de bases de do
 - sur la DB `warehouse`, la base de données `webapp` est dispponible via le schema `webapp_public`
 - sur la DB `webapp`, la base de données `warehouse` est dispponible via le schema `warehouse_public`
 
-Pour créer ou mettre à jour ces schemas, utiliser la commmande `create_remote_db_server` :
+Pour créer ou mettre à jour ces schemas, utiliser la commmande `create-remote-db-server` :
 
 ```sh
-python manage.py create_remote_db_server
+make create-remote-db-server
 ```
 
 ## Copier la base de données de prod en local

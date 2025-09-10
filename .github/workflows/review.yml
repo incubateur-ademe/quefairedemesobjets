@@ -5,9 +5,14 @@ on:
   pull_request:
     types: [opened, synchronize]
 
+
 defaults:
   run:
     shell: bash
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   ci:
@@ -41,4 +46,3 @@ jobs:
 # code scanning alerts
 permissions:
   contents: read
-

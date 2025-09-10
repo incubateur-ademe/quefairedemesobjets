@@ -1,5 +1,4 @@
 import { expect, test } from "@playwright/test"
-import { hideDjangoToolbar } from "../helpers"
 
 async function searchInCarteMode(page) {
   await page.locator("input#id_adresse").click()
@@ -28,7 +27,6 @@ test("Filtres avancés s'ouvrent et se ferment en mode formulaire", async ({ pag
   await page.goto(`/formulaire`, {
     waitUntil: "domcontentloaded",
   })
-  await hideDjangoToolbar(page)
   await openAdvancedFilters(page)
 })
 
@@ -36,7 +34,6 @@ test("Filtres avancés s'ouvrent et se ferment en mode carte", async ({ page }) 
   await page.goto(`/carte`, {
     waitUntil: "domcontentloaded",
   })
-  await hideDjangoToolbar(page)
   await searchInCarteMode(page)
   await openAdvancedFilters(page, "advanced-filters-in-legend")
 })
@@ -48,7 +45,6 @@ test(
     await page.goto(`/carte`, {
       waitUntil: "domcontentloaded",
     })
-    await hideDjangoToolbar(page)
     await searchInCarteMode(page)
     await openAdvancedFilters(page)
   },

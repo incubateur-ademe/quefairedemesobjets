@@ -32,7 +32,7 @@ class MapController extends Controller<HTMLElement> {
   static values = {
     location: { type: Object, default: {} },
   }
-  declare readonly acteurTargets: Array<HTMLScriptElement>
+  declare readonly acteurTargets: Array<HTMLElement>
   declare readonly searchInZoneButtonTarget: HTMLButtonElement
   declare readonly hasSearchInZoneButtonTarget: boolean
   declare readonly bboxTarget: HTMLInputElement
@@ -47,19 +47,11 @@ class MapController extends Controller<HTMLElement> {
       controller: this,
     })
 
-    const actors: Array<Actor> = this.acteurTargets
-      .filter(({ textContent }) => textContent !== null)
-      .map(({ textContent }) => {
-        const actorFields: DisplayedActeur = JSON.parse(textContent!)
-        return new Actor(actorFields)
-      })
-      .filter((actor) => actor !== undefined)
-
     if (this.hasBboxTarget && this.bboxTarget.value !== "") {
       const bbox = JSON.parse(this.bboxTarget.value)
-      actorsMap.addActorMarkersToMap(actors, bbox)
+      actorsMap.addActorMarkersToMap(this.acteurTargets, bbox)
     } else {
-      actorsMap.addActorMarkersToMap(actors)
+      actorsMap.addActorMarkersToMap(this.acteurTargets)
     }
 
     actorsMap.initEventListener()
