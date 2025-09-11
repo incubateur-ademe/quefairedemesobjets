@@ -1,5 +1,6 @@
 import json
 import logging
+from abc import ABC, abstractmethod
 from typing import List, cast
 
 import unidecode
@@ -83,10 +84,15 @@ class TurboFormMixin:
 
 
 class SearchActeursView(
+    ABC,
     DigitalMixin,
     TurboFormMixin,
     FormView,
 ):
+    @abstractmethod
+    def _get_max_displayed_acteurs(self):
+        pass
+
     # TODO : supprimer
     is_iframe = False
     is_carte = False
@@ -281,13 +287,6 @@ class SearchActeursView(
             return compile_frontend_bbox(bbox), acteurs
 
         return custom_bbox, acteurs.none()
-
-    def _get_max_displayed_acteurs(self):
-        if self.request.GET.get("limit", "").isnumeric():
-            return int(self.request.GET.get("limit"))
-        if self.is_carte:
-            return settings.CARTE_MAX_SOLUTION_DISPLAYED
-        return settings.DEFAULT_MAX_SOLUTION_DISPLAYED
 
     def _set_action_displayed(self) -> List[Action]:
         cached_action_instances = cast(
@@ -561,6 +560,9 @@ class FormulaireSearchActeursView(SearchActeursView):
                 a for a in actions if direction in [d.code for d in a.directions.all()]
             ]
         return [model_to_dict(a, exclude=["directions"]) for a in actions]
+
+    def _get_max_displayed_acteurs(self):
+        return settings.DEFAULT_MAX_SOLUTION_DISPLAYED
 
 
 def getorcreate_revisionacteur(request, acteur_identifiant):
