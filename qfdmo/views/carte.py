@@ -42,6 +42,11 @@ class CarteSearchActeursView(SearchActeursView):
     def _get_selected_action_ids(self):
         return [a.id for a in self._get_selected_action()]
 
+    def _get_max_displayed_acteurs(self):
+        if self.request.GET.get("limit", "").isnumeric():
+            return int(self.request.GET.get("limit"))
+        return settings.CARTE_MAX_SOLUTION_DISPLAYED
+
 
 class ProductCarteView(CarteSearchActeursView):
     """This view is used for Produit / Synonyme, the legacy django models
