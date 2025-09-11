@@ -43,9 +43,9 @@ class CarteSearchActeursView(SearchActeursView):
         return [a.id for a in self._get_selected_action()]
 
     def _get_max_displayed_acteurs(self):
-        """Standalone Carte view displays more acteurs than the
-        embedded one."""
-        return settings.DEFAULT_MAX_SOLUTION_DISPLAYED
+        if self.request.GET.get("limit", "").isnumeric():
+            return int(self.request.GET.get("limit"))
+        return settings.CARTE_MAX_SOLUTION_DISPLAYED
 
 
 class ProductCarteView(CarteSearchActeursView):
@@ -70,6 +70,11 @@ class ProductCarteView(CarteSearchActeursView):
 class CarteConfigView(DetailView, CarteSearchActeursView):
     model = CarteConfig
     context_object_name = "carte_config"
+
+    def _get_max_displayed_acteurs(self):
+        """Standalone Carte view displays more acteurs than the
+        embedded one."""
+        return settings.CARTE_MAX_SOLUTION_DISPLAYED
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         return {
