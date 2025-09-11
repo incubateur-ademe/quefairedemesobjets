@@ -24,6 +24,11 @@ class XCOMS:
     DF_READ: str = "df_read"
     DF_MATCH: str = "df_match"
 
+    DB_READ_ACTEUR_CP: str = "db_read_acteur_cp"
+    DB_READ_REVISION_ACTEUR_CP: str = "db_read_revision_acteur_cp"
+    NORMALIZED_ACTEUR_CP: str = "normalized_acteur_cp"
+    NORMALIZED_REVISION_ACTEUR_CP: str = "normalized_revision_acteur_cp"
+
 
 def xcom_pull(ti: TaskInstance, key: str, skip_if_empty: bool = False) -> Any:
     """For pulls, we create a helper to constrain keys
