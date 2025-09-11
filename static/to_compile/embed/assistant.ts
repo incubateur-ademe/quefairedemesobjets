@@ -1,5 +1,6 @@
 import iframeResize from "@iframe-resizer/parent"
 import { URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE } from "../js/helpers"
+import { iframeResizer } from "@iframe-resizer/child"
 
 const script = document.currentScript as HTMLScriptElement
 const slug = script?.dataset?.objet
@@ -12,8 +13,10 @@ if (process.env.BASE_URL) {
 
 function initScript() {
   const parts = [origin]
-  const iframeResizerOptions = { license: "GPLv3" }
-
+  const iframeResizerOptions: iframeResizer.IFramePageOptions = {
+    license: "GPLv3",
+    id: "quefairedemesdechets-assistant",
+  }
   if (slug) {
     parts.push("dechet", slug)
   }
@@ -28,7 +31,6 @@ function initScript() {
   const src = `${parts.join("/")}?${searchParams.toString()}`
   const iframe = document.createElement("iframe")
   const iframeAttributes = {
-    id: "quefairedemesdechets-assistant",
     src,
     style: "border: none; width: 100%; display: block; margin: 0 auto;",
     allowfullscreen: true,
