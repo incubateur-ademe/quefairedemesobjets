@@ -73,10 +73,6 @@ class SuggestionAction(models.TextChoices):
         "ENRICH_REVISION_ACTEURS_CP_TYPO",
         "🏙️ Revision acteurs codes postaux non conformes",
     )
-    ENRICH_REVISION_ACTEURS_CP_NEW = (
-        "ENRICH_REVISION_ACTEURS_CP_NEW",
-        "🏙️ Revision acteurs codes postaux nouvelles",
-    )
     CLUSTERING = SUGGESTION_CLUSTERING, "regroupement/déduplication des acteurs"
     SOURCE_AJOUT = (
         SUGGESTION_SOURCE_AJOUT,
