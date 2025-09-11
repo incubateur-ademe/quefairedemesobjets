@@ -74,7 +74,7 @@ class CarteConfigView(DetailView, CarteSearchActeursView):
     def _get_max_displayed_acteurs(self):
         """Standalone Carte view displays more acteurs than the
         embedded one."""
-        return settings.DEFAULT_MAX_SOLUTION_DISPLAYED
+        return settings.CARTE_MAX_SOLUTION_DISPLAYED
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         return {

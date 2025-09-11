@@ -89,6 +89,10 @@ class SearchActeursView(
     TurboFormMixin,
     FormView,
 ):
+    @abstractmethod
+    def _get_max_displayed_acteurs(self):
+        pass
+
     # TODO : supprimer
     is_iframe = False
     is_carte = False
@@ -283,10 +287,6 @@ class SearchActeursView(
             return compile_frontend_bbox(bbox), acteurs
 
         return custom_bbox, acteurs.none()
-
-    @abstractmethod
-    def _get_max_displayed_acteurs(self):
-        pass
 
     def _set_action_displayed(self) -> List[Action]:
         cached_action_instances = cast(
