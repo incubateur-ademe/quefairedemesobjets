@@ -21,6 +21,10 @@ from wagtail.admin.panels import (
     ObjectList,
     TabbedInterface,
 )
+from wagtail.contrib.settings.models import (
+    BaseGenericSetting,
+    register_setting,
+)
 from wagtail.fields import RichTextField, StreamField
 from wagtail.images.blocks import ImageBlock
 from wagtail.models import Page, ParentalKey
@@ -770,3 +774,13 @@ class Suggestion(models.Model):
 
     def __str__(self) -> str:
         return str(self.produit)
+
+
+@register_setting
+class EmbedSettings(BaseGenericSetting):
+    backlink_assistant = RichTextField("Backlink de l'iframe de l'assistant")
+    backlink_carte = RichTextField("Backlink de l'iframe de la carte")
+    backlink_formulaire = RichTextField("Backlink de l'iframe du formulaire")
+
+    class Meta:
+        verbose_name = "Réglage des iframes"
