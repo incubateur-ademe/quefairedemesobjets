@@ -36,13 +36,15 @@ class TestCarteViews:
         view.request = request
         assert (
             view._get_max_displayed_acteurs() == settings.CARTE_MAX_SOLUTION_DISPLAYED
-        )
+        ), "On affiche 100 acteurs sur la carte standalone (ou en iframe)"
 
     def test_carte_search_acteurs_with_limit(self, rf):
         request = rf.get("/fake/?limit=42")
         view = CarteSearchActeursView()
         view.request = request
-        assert view._get_max_displayed_acteurs() == 42
+        assert (
+            view._get_max_displayed_acteurs() == 42
+        ), "On affiche le nombre d'acteurs passés en paramètre"
 
     def test_formulaire_search_acteurs(self, rf):
         request = rf.get("/fake/")
@@ -50,7 +52,7 @@ class TestCarteViews:
         view.request = request
         assert (
             view._get_max_displayed_acteurs() == settings.DEFAULT_MAX_SOLUTION_DISPLAYED
-        )
+        ), "On affiche 10 acteurs sur le formulaire (ou en iframe)"
 
     def test_carte_config_view(self, rf):
         request = rf.get("/fake/")
@@ -58,4 +60,4 @@ class TestCarteViews:
         view.request = request
         assert (
             view._get_max_displayed_acteurs() == settings.CARTE_MAX_SOLUTION_DISPLAYED
-        )
+        ), "On affiche 100 acteurs sur les cartes sur mesure par défaut"
