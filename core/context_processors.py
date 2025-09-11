@@ -35,6 +35,7 @@ def global_context(request) -> dict:
         },
         "lvao": {
             "POSTHOG_KEY": settings.LVAO["POSTHOG_KEY"],
+            "MATOMO_ID": settings.LVAO["MATOMO_ID"],
         },
     }
 
