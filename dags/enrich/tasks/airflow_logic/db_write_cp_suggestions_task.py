@@ -28,9 +28,11 @@ def task_info_get():
 def db_write_cp_suggestions_wrapper(ti, dag, params) -> None:
     logger.info(task_info_get())
 
-    normalized_acteur_cp = ti.xcom_pull(ti, XCOMS.NORMALIZED_ACTEUR_CP)
+    normalized_acteur_cp = ti.xcom_pull(
+        key=XCOMS.NORMALIZED_ACTEUR_CP, task_ids=TASKS.NORMALIZE_ACTEUR_CP
+    )
     normalized_revision_acteur_cp = ti.xcom_pull(
-        ti, XCOMS.NORMALIZED_REVISION_ACTEUR_CP
+        key=XCOMS.NORMALIZED_REVISION_ACTEUR_CP, task_ids=TASKS.NORMALIZE_ACTEUR_CP
     )
 
     db_write_cp_suggestions(

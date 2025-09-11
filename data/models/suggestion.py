@@ -65,6 +65,14 @@ class SuggestionAction(models.TextChoices):
         "ENRICH_ACTEURS_VILLES_NEW",
         "🏙️ Acteurs villes nouvelles",
     )
+    ENRICH_ACTEURS_CP_TYPO = (
+        "ENRICH_ACTEURS_CP_TYPO",
+        "🏙️ Acteurs codes postaux typographiques",
+    )
+    ENRICH_REVISION_ACTEURS_CP_NEW = (
+        "ENRICH_REVISION_ACTEURS_CP_NEW",
+        "🏙️ Revision acteurs codes postaux nouvelles",
+    )
     CLUSTERING = SUGGESTION_CLUSTERING, "regroupement/déduplication des acteurs"
     SOURCE_AJOUT = (
         SUGGESTION_SOURCE_AJOUT,
@@ -212,6 +220,7 @@ class Suggestion(models.Model):
             SuggestionAction.ENRICH_ACTEURS_VILLES_NEW,
             SuggestionAction.CRAWL_URLS,
             SuggestionAction.CLUSTERING,
+            SuggestionAction.ENRICH_ACTEURS_CP_TYPO,
         ]:
             template_name = "data/_partials/suggestion_details_changes.html"
             template_context = self.suggestion

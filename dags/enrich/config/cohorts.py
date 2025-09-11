@@ -13,5 +13,9 @@ class COHORTS:
     RGPD = "Anonymisation RGPD"
     VILLES_TYPO = "🌆 Changement de ville: 🟢 variation d'ortographe"
     VILLES_NEW = "🌆 Changement de ville: 🟡 ancienne -> nouvelle"
-    ACTEUR_CP_TYPO = "🌆 Changement de code postal: 🟢 respect du formlisme"
-    REVISION_ACTEUR_CP_TYPO = "🌆 Changement de code postal: 🟢 respect du formlisme"
+    ACTEUR_CP_TYPO = (
+        "🌆 Changement de code postal pour les acteurs: 🟢 respect du formalisme"
+    )
+    REVISION_ACTEUR_CP_TYPO = (
+        "🌆 Changement de code postal pour les revisions: 🟢 respect du formalisme"
+    )
