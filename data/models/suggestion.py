@@ -67,7 +67,11 @@ class SuggestionAction(models.TextChoices):
     )
     ENRICH_ACTEURS_CP_TYPO = (
         "ENRICH_ACTEURS_CP_TYPO",
-        "🏙️ Acteurs codes postaux typographiques",
+        "🏙️ Acteurs codes postaux non conformes",
+    )
+    ENRICH_REVISION_ACTEURS_CP_TYPO = (
+        "ENRICH_REVISION_ACTEURS_CP_TYPO",
+        "🏙️ Revision acteurs codes postaux non conformes",
     )
     ENRICH_REVISION_ACTEURS_CP_NEW = (
         "ENRICH_REVISION_ACTEURS_CP_NEW",
@@ -355,6 +359,8 @@ class Suggestion(models.Model):
             SuggestionAction.ENRICH_ACTEURS_RGPD,
             SuggestionAction.ENRICH_ACTEURS_VILLES_TYPO,
             SuggestionAction.ENRICH_ACTEURS_VILLES_NEW,
+            SuggestionAction.ENRICH_ACTEURS_CP_TYPO,
+            SuggestionAction.ENRICH_REVISION_ACTEURS_CP_TYPO,
         ]:
             changes = self.suggestion["changes"]
             changes.sort(key=lambda x: x["order"])
