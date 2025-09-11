@@ -42,11 +42,6 @@ class CarteSearchActeursView(SearchActeursView):
     def _get_selected_action_ids(self):
         return [a.id for a in self._get_selected_action()]
 
-    def _get_max_displayed_acteurs(self):
-        """Standalone Carte view displays more acteurs than the
-        embedded one."""
-        return settings.DEFAULT_MAX_SOLUTION_DISPLAYED
-
 
 class ProductCarteView(CarteSearchActeursView):
     """This view is used for Produit / Synonyme, the legacy django models
@@ -70,6 +65,11 @@ class ProductCarteView(CarteSearchActeursView):
 class CarteConfigView(DetailView, CarteSearchActeursView):
     model = CarteConfig
     context_object_name = "carte_config"
+
+    def _get_max_displayed_acteurs(self):
+        """Standalone Carte view displays more acteurs than the
+        embedded one."""
+        return settings.DEFAULT_MAX_SOLUTION_DISPLAYED
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         return {
