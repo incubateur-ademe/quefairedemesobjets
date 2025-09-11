@@ -28,6 +28,7 @@ function initScript() {
   const src = `${parts.join("/")}?${searchParams.toString()}`
   const iframe = document.createElement("iframe")
   const iframeAttributes = {
+    id: "quefairedemesdechets-assistant",
     src,
     style: "border: none; width: 100%; display: block; margin: 0 auto;",
     allowfullscreen: true,

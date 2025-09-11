@@ -52,7 +52,9 @@ export function getIframeAttributesAndExtra(
   const BASE_URL = new URL(scriptTag.getAttribute("src")!).origin
   const urlParams = new URLSearchParams()
 
-  let iframeExtraAttributes: { [Property in keyof HTMLScriptElement]?: unknown } = {}
+  let iframeExtraAttributes: { [Property in keyof HTMLScriptElement]?: unknown } = {
+    id: `quefairedemesdechets-${baseRoute}`,
+  }
 
   for (const param in scriptTag.dataset) {
     if (param == "epci_codes" && scriptTag.dataset[param]?.includes(",")) {
