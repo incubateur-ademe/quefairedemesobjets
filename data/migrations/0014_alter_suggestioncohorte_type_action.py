@@ -26,10 +26,6 @@ class Migration(migrations.Migration):
                         "ENRICH_REVISION_ACTEURS_CP_TYPO",
                         "🏙️ Revision acteurs codes postaux non conformes",
                     ),
-                    (
-                        "ENRICH_REVISION_ACTEURS_CP_NEW",
-                        "🏙️ Revision acteurs codes postaux nouvelles",
-                    ),
                     ("CLUSTERING", "regroupement/déduplication des acteurs"),
                     ("SOURCE_AJOUT", "ingestion de source de données - nouveau acteur"),
                     (
