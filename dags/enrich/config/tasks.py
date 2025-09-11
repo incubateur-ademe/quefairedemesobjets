@@ -32,3 +32,8 @@ class TASKS:
     # Villes
     ENRICH_VILLES_TYPO: str = "enrich_acteurs_villes_typo"
     ENRICH_VILLES_NEW: str = "enrich_acteurs_villes_new"
+
+    # Code postal
+    DB_READ_ACTEUR_CP: str = "db_read_acteur_cp"
+    NORMALIZE_ACTEUR_CP: str = "normalize_acteur_cp_task"
+    DB_WRITE_CP_SUGGESTIONS: str = "db_write_cp_suggestions"
