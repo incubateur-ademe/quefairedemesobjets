@@ -28,10 +28,6 @@ ACTEUR_TYPE_DIGITAL = "acteur_digital"
 ACTEUR_TYPE_ESS = "ess"
 LABEL_ESS = "ess"
 
-# FIXME : Utiliser Django pour toutes ces constantes ?
-A_DOMICILE = "A_DOMICILE"
-SUR_PLACE = "SUR_PLACE"
-SUR_PLACE_OU_A_DOMICILE = "SUR_PLACE_OU_A_DOMICILE"
 
 LABEL_TO_IGNORE = ["non applicable", "na", "n/a", "null", "aucun", "non"]
 MANDATORY_COLUMNS_AFTER_NORMALISATION = [
@@ -47,6 +43,14 @@ MANDATORY_COLUMNS_AFTER_NORMALISATION = [
 ]
 REGEX_BAN_SEPARATORS = r"\s,;-"
 STRIP_BAN = REGEX_BAN_SEPARATORS.replace("\\s", " ")
+REGEXPS_SERVICE_A_DOMICILE_UNIQUEMENT = [
+    r"SERVICE\s*A\s*DOMICILE\s*UNIQUEMENT",
+    r"OUI\s*EXCLUSIVEMENT",
+]
+REGEXPS_SERVICE_SUR_PLACE_OU_A_DOMICILE = [
+    r"OUI",
+    r"SERVICE\s*A\s*DOMICILE\s*ET\s*EN\s*BOUTIQUE",
+]
 
 
 def merge_duplicates(
@@ -323,10 +327,8 @@ def get_point_from_location(longitude, latitude):
 
 
 def clean_proposition_services(row, _):
-    # formater les propositions de service selon les colonnes
-    # action_codes and sous_categorie_codes
-    #
-    # [{'action': 'CODE_ACTION','sous_categories': ['CODE_SSCAT']}] ou []
+    # Format proposition de service following action_codes and sous_categorie_codes
+    # ex: [{'action': 'CODE_ACTION','sous_categories': ['CODE_SSCAT']}] ou []
     if row["sous_categorie_codes"]:
         row["proposition_service_codes"] = [
             {
@@ -341,24 +343,27 @@ def clean_proposition_services(row, _):
     return row[["proposition_service_codes"]]
 
 
-### Fonctions de résolution de l'adresse au format BAN et avec vérification via l'API
-# adresse.data.gouv.fr en option
-# TODO : A déplacer ?
+def _sanitize_string(str_to_sanitize):
+    return unidecode(str_to_sanitize).upper().strip()
 
 
 def _clean_lieu_prestation(service_a_domicile):
     from qfdmo.models.acteur import Acteur
 
-    service_a_domicile = service_a_domicile.lower().strip()
+    service_a_domicile = _sanitize_string(service_a_domicile)
 
-    if re.match(r"oui\s*exclusivement", service_a_domicile):
+    if any(
+        re.match(regexp, service_a_domicile)
+        for regexp in REGEXPS_SERVICE_A_DOMICILE_UNIQUEMENT
+    ):
         return Acteur.LieuPrestation.A_DOMICILE
-    elif re.match(r"^oui$", service_a_domicile):
+    elif any(
+        re.match(regexp, service_a_domicile)
+        for regexp in REGEXPS_SERVICE_SUR_PLACE_OU_A_DOMICILE
+    ):
         return Acteur.LieuPrestation.SUR_PLACE_OU_A_DOMICILE
-    elif re.match(r"^non$", service_a_domicile):
-        return Acteur.LieuPrestation.SUR_PLACE
     else:
-        return Acteur.LieuPrestation.UNKNOWN
+        return Acteur.LieuPrestation.SUR_PLACE
 
 
 def _clean_departement_code(departement_code):
@@ -373,7 +378,7 @@ def _clean_perimetre_adomicile_codes(perimetre_dinterventions):
     perimetre_prestation = []
     perimetre_dinterventions = perimetre_dinterventions.split("|")
     for perimetre in perimetre_dinterventions:
-        perimetre = unidecode(perimetre).upper().strip()
+        perimetre = _sanitize_string(perimetre)
         if matches := re.match(r"(\d+)\s*KM", perimetre):
             perimetre_prestation.append(
                 {
@@ -429,15 +434,23 @@ def _clean_perimetre_adomicile_codes(perimetre_dinterventions):
 
 
 def clean_service_a_domicile(row, _):
+    from qfdmo.models.acteur import Acteur
+
     row["lieu_prestation"] = _clean_lieu_prestation(row["service_a_domicile"])
 
     row["perimetre_adomicile_codes"] = []
-    if row["lieu_prestation"] in [A_DOMICILE, SUR_PLACE_OU_A_DOMICILE]:
+    if row["lieu_prestation"] in [
+        Acteur.LieuPrestation.A_DOMICILE,
+        Acteur.LieuPrestation.SUR_PLACE_OU_A_DOMICILE,
+    ]:
         row["perimetre_adomicile_codes"] = _clean_perimetre_adomicile_codes(
             row["perimetre_dintervention"]
         )
-
     return row[["lieu_prestation", "perimetre_adomicile_codes"]]
+
+
+### Fonctions de résolution de l'adresse au format BAN et avec vérification via l'API
+# adresse.data.gouv.fr en option
 
 
 def _get_address(
