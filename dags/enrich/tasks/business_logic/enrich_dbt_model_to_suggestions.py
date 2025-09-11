@@ -238,6 +238,9 @@ def enrich_dbt_model_to_suggestions(
         COHORTS.VILLES_TYPO: SuggestionAction.ENRICH_ACTEURS_VILLES_TYPO,
         COHORTS.VILLES_NEW: SuggestionAction.ENRICH_ACTEURS_VILLES_NEW,
         COHORTS.ACTEUR_CP_TYPO: SuggestionAction.ENRICH_ACTEURS_CP_TYPO,
+        COHORTS.REVISION_ACTEUR_CP_TYPO: (
+            SuggestionAction.ENRICH_REVISION_ACTEURS_CP_TYPO
+        ),
     }
 
     # Validation
