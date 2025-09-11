@@ -38,6 +38,7 @@ def global_context(request) -> dict:
             "DECLARATION_ACCESSIBILITE_PAGE_ID": settings.LVAO[
                 "DECLARATION_ACCESSIBILITE_PAGE_ID"
             ],
+            "MATOMO_ID": settings.LVAO["MATOMO_ID"],
         },
     }
 

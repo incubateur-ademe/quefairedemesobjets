@@ -1,4 +1,4 @@
-{% load dsfr_tags qfdmd_tags static wagtailuserbar %}
+{% load analytics_tags dsfr_tags qfdmd_tags static wagtailuserbar %}
 
 {% with contact_modal_id="contact" %}
 
@@ -31,7 +31,7 @@
         {% block social_media %}
         {% endblock social_media %}
 
-        {% matomo %}
+        {% matomo assistant.MATOMO_ID %}
 
         {% block extra_css %}
         {% endblock extra_css %}
@@ -57,15 +57,7 @@
         data-state-map-outlet="[data-controller='map']"
         data-state-address-autocomplete-outlet="[data-controller='address-autocomplete']"
         data-state-search-solution-form-outlet="[data-controller='search-solution-form']"
-        {# Analytics #}
-        data-analytics-posthog-key-value="{{ assistant.POSTHOG_KEY }}"
-        data-analytics-posthog-debug-value="{{ POSTHOG_DEBUG|lower }}"
-        {% if request.user.is_authenticated %}
-            data-analytics-user-username-value="{{ request.user.username }}"
-            data-analytics-user-email-value="{{ request.user.email }}"
-            data-analytics-user-admin-value="{{ request.user.is_superuser|lower }}"
-        {% endif %}
-        data-analytics-initial-action-value="{% block analytics_action %}{% endblock %}"
+        {% posthog_data_attributes lvao.POSTHOG_KEY %}
         {# Actions #}
         data-action="address-autocomplete:change->state#setLocation"
     >

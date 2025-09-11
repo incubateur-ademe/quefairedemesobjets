@@ -2,7 +2,6 @@ import logging
 from typing import cast
 
 from django import template
-from django.conf import settings
 from django.core.cache import cache
 from django.forms import FileField
 from django.utils.safestring import mark_safe
@@ -100,11 +99,3 @@ def carte(context, carte_config: CarteConfig) -> dict:
 @register.inclusion_tag("head/favicon.html")
 def favicon() -> dict:
     return {}
-
-
-@register.inclusion_tag("tracking/matomo.html")
-def matomo():
-    return {
-        "matomo_url": "stats.beta.gouv.fr",
-        "matomo_id": settings.ASSISTANT["MATOMO_ID"],
-    }
