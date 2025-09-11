@@ -8,7 +8,7 @@ from qfdmo.models import Acteur
 class ChangeActeurUpdate(ChangeActeurAbstract):
     @classmethod
     def name(cls) -> str:
-        return "acteur_update_revision"
+        return "acteur_update"
 
     def validate(self) -> Acteur:
         if not self.data:

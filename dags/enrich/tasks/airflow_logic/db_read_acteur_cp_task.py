@@ -10,6 +10,7 @@ from enrich.tasks.business_logic.db_read_acteur_cp import (
     db_read_acteur_cp,
     db_read_revision_acteur_cp,
 )
+from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +33,13 @@ def db_read_acteur_cp_wrapper(ti, dag, params) -> None:
 
     db_acteur_cp = db_read_acteur_cp()
     db_revision_acteur_cp = db_read_revision_acteur_cp()
+
+    log.preview_df_as_markdown(
+        "acteurs avec des codes postaux non conformes", db_acteur_cp
+    )
+    log.preview_df_as_markdown(
+        "revision acteurs avec des codes postaux non conformes", db_revision_acteur_cp
+    )
 
     ti.xcom_push(key=XCOMS.DB_READ_ACTEUR_CP, value=db_acteur_cp)
     ti.xcom_push(key=XCOMS.DB_READ_REVISION_ACTEUR_CP, value=db_revision_acteur_cp)

@@ -6,8 +6,6 @@ from enrich.config.cohorts import COHORTS
 from enrich.config.columns import COLS
 from utils import logging_utils as log
 
-from data.models.changes.acteur_rgpd_anonymize import rgpd_data_get
-
 logger = logging.getLogger(__name__)
 
 
@@ -63,6 +61,7 @@ def changes_prepare_rgpd(
 ) -> tuple[list[dict], dict]:
     """Prepare suggestions for RGPD cohorts"""
     from data.models.changes import ChangeActeurRgpdAnonymize
+    from data.models.changes.acteur_rgpd_anonymize import rgpd_data_get
 
     changes = []
     model_params = {
@@ -177,10 +176,14 @@ def _changes_prepare_cp(row: dict, model) -> tuple[list[dict], dict]:
             model=model,
             model_params=model_params,
             order=1,
-            reason="On fait confiance à la BAN",
+            reason="Code postal normalisé",
         )
     )
-    return changes, {}
+    context = {
+        "code_postal": row["code_postal"],
+    }
+
+    return changes, context
 
 
 def changes_prepare_acteur_cp(row: dict) -> tuple[list[dict], dict]:
@@ -234,6 +237,7 @@ def enrich_dbt_model_to_suggestions(
         COHORTS.RGPD: SuggestionAction.ENRICH_ACTEURS_RGPD,
         COHORTS.VILLES_TYPO: SuggestionAction.ENRICH_ACTEURS_VILLES_TYPO,
         COHORTS.VILLES_NEW: SuggestionAction.ENRICH_ACTEURS_VILLES_NEW,
+        COHORTS.ACTEUR_CP_TYPO: SuggestionAction.ENRICH_ACTEURS_CP_TYPO,
     }
 
     # Validation
