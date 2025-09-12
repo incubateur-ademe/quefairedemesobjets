@@ -57,7 +57,7 @@
         data-state-map-outlet="[data-controller='map']"
         data-state-address-autocomplete-outlet="[data-controller='address-autocomplete']"
         data-state-search-solution-form-outlet="[data-controller='search-solution-form']"
-        {% posthog_data_attributes lvao.POSTHOG_KEY %}
+        {% posthog_data_attributes assistant.POSTHOG_KEY %}
         {# Actions #}
         data-action="address-autocomplete:change->state#setLocation"
     >
