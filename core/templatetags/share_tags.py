@@ -75,9 +75,9 @@ def _configure_sharer(context):
 
 @register.simple_tag(takes_context=True)
 def configure_acteur_sharer(context):
-    return _configure_sharer(context)
+    _configure_sharer(context)
 
 
 @register.simple_tag(takes_context=True)
 def configure_produit_sharer(context):
-    return _configure_sharer
+    _configure_sharer(context)
