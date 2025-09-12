@@ -1,3 +1,5 @@
+import { BacklinkKey } from "../embed/helpers"
+
 function compileIframeAttributes(
   baseUrl: string,
   urlParams: URLSearchParams,
@@ -30,8 +32,10 @@ export function buildAndInsertIframeFrom(
   iframeAttributes: object,
   iframeExtraAttributes: object,
   scriptTag: HTMLScriptElement,
+  backlinkKey: BacklinkKey,
 ) {
   const iframe = document.createElement("iframe")
+  await generateBackLink(iframe, key)
   for (var key in iframeAttributes) {
     iframe.setAttribute(key, iframeAttributes[key])
   }
