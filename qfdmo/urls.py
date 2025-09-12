@@ -21,14 +21,14 @@ from qfdmo.views.configurator import AdvancedConfiguratorView, ConfiguratorView
 
 urlpatterns = [
     # This route needs to be touched with care is it is embedded
-    # on many website, enabling the load of LVAO as an iframe
+    # on many website, enabling the load of Carte / Formulaire as an iframe
     path("static/carte.js", get_carte_iframe_script, name="carte_script"),
     path("static/iframe.js", get_formulaire_iframe_script, name="formulaire_script"),
     path("carte", CarteSearchActeursView.as_view(), name="carte"),
     path("carte/<slug:slug>/", CarteConfigView.as_view(), name="carte_custom"),
     path("carte.json", CarteSearchActeursView.as_view(), name="carte_json"),
     path("formulaire", FormulaireSearchActeursView.as_view(), name="formulaire"),
-    path(settings.LVAO.get("GOOGLE_SEARCH_CONSOLE"), google_verification),
+    path(settings.CARTE.get("GOOGLE_SEARCH_CONSOLE"), google_verification),
     path(
         "donnez-votre-avis",
         RedirectView.as_view(

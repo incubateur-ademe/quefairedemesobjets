@@ -31,7 +31,7 @@
         {% block css_extras %}{% endblock %}
 
         {# Js #}
-        {% matomo lvao.MATOMO_ID %}
+        {% matomo carte.MATOMO_ID %}
 
         <script src="{% static 'qfdmo.js' %}"></script>
         {% block javascript_extras %}{% endblock %}
@@ -48,7 +48,7 @@
         data-state-address-autocomplete-outlet="[data-controller='address-autocomplete']"
         data-state-map-outlet="[data-controller='map']"
         data-state-search-solution-form-outlet="[data-controller='search-solution-form']"
-        {% posthog_data_attributes lvao.POSTHOG_KEY %}
+        {% posthog_data_attributes carte.POSTHOG_KEY %}
         data-action="address-autocomplete:change->state#setLocation"
     >
         <main id="solutions" class="qf-h-full qf-overflow-auto qf-overscroll-none qf-scroll-smooth">

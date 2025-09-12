@@ -33,12 +33,11 @@ def global_context(request) -> dict:
             "POSTHOG_KEY": settings.ASSISTANT["POSTHOG_KEY"],
             "MATOMO_ID": settings.ASSISTANT["MATOMO_ID"],
         },
-        "lvao": {
-            "POSTHOG_KEY": settings.LVAO["POSTHOG_KEY"],
-            "DECLARATION_ACCESSIBILITE_PAGE_ID": settings.LVAO[
+        "carte": {
+            "DECLARATION_ACCESSIBILITE_PAGE_ID": settings.CARTE[
                 "DECLARATION_ACCESSIBILITE_PAGE_ID"
-            ],
-            "MATOMO_ID": settings.LVAO["MATOMO_ID"],
+            "POSTHOG_KEY": settings.CARTE["POSTHOG_KEY"],
+            "MATOMO_ID": settings.CARTE["MATOMO_ID"],
         },
     }
 

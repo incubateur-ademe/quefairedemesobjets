@@ -38,7 +38,7 @@ ASSISTANT = {
 
 # Carte settings
 # --------------
-LVAO = {
+CARTE = {
     "MATOMO_ID": decouple.config("LVAO_MATOMO_ID", default=50, cast=int),
     "GOOGLE_SEARCH_CONSOLE": "google9dfbbc61adbe3888.html",
     "POSTHOG_KEY": decouple.config(
