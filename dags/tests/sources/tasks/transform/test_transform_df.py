@@ -440,6 +440,12 @@ class TestCleanServiceADomicile:
         [
             # Nominal cases : one perimeter
             (
+                "Service à domicile et en Boutique",
+                "10 km",
+                "SUR_PLACE_OU_A_DOMICILE",
+                [{"type": "KILOMETRIQUE", "valeur": 10}],
+            ),
+            (
                 "oui",
                 "10 km",
                 "SUR_PLACE_OU_A_DOMICILE",
@@ -456,6 +462,12 @@ class TestCleanServiceADomicile:
                 "france métropolitaine",
                 "SUR_PLACE_OU_A_DOMICILE",
                 [{"type": "FRANCE_METROPOLITAINE", "valeur": ""}],
+            ),
+            (
+                "Service à domicile uniquement",
+                "10 km",
+                "A_DOMICILE",
+                [{"type": "KILOMETRIQUE", "valeur": 10}],
             ),
             (
                 "oui exclusivement",
@@ -478,6 +490,9 @@ class TestCleanServiceADomicile:
                     {"type": "DROM_TOM", "valeur": ""},
                 ],
             ),
+            # Nominal cases empty
+            ("", "", "SUR_PLACE", []),
+            ("", "10 km", "SUR_PLACE", []),
             # Nominal cases : non
             ("non", "", "SUR_PLACE", []),
             # other cases : non
