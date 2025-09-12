@@ -1,7 +1,7 @@
-{% load wagtailcore_tags %}
+{% load qfdmd_tags %}
 <a
     {# Ensure the link is not followed using turbo frame but works as a real link #}
     target="_top"
-    href="{% slugurl 'accessibilite-de-la-carte-partiellement-conforme' %}"
+    href="{% pageurl_by_id CARTE.DECLARATION_ACCESSIBILITE_PAGE_ID %}"
     class="qf-text-xs fr-link"
 >Accessibilité : partiellement conforme</a>
