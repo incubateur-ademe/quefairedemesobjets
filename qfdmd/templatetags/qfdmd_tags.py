@@ -6,6 +6,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.forms import FileField
 from django.utils.safestring import mark_safe
+from wagtail.models import Page
 from wagtail.templatetags.wagtailcore_tags import richtext
 
 from qfdmd.models import ReusableContent
@@ -47,6 +48,15 @@ def patchwork() -> dict:
 def canonical_url(context: dict) -> dict:
     if request := context.get("request"):
         return {"url": request.build_absolute_uri(request.path)}
+
+
+@register.simple_tag(takes_context=True)
+def pageurl_by_id(context, page_id):
+    request = context["request"]
+    try:
+        return Page.objects.get(id=page_id).get_full_url(request)
+    except Page.DoesNotExist:
+        return ""
 
 
 @register.simple_tag

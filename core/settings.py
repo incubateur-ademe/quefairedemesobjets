@@ -46,6 +46,11 @@ LVAO = {
         default="phc_L1dG5EsBjyMTTcQqFJTAQtEugtGz6C3Tdpf1g7O09si",  # pragma: allowlist secret  # noqa: E501
         cast=str,
     ),
+    "DECLARATION_ACCESSIBILITE_PAGE_ID": decouple.config(
+        "CARTE_DECLARATION_ACCESSBILITE_PAGE_ID",
+        default=177,
+        cast=int,
+    ),
 }
 DEFAULT_MAX_SOLUTION_DISPLAYED = decouple.config(
     "DEFAULT_MAX_SOLUTION_DISPLAYED", cast=int, default=10
