@@ -53,6 +53,11 @@ class TestHomepage:
         )
         assert soup.css.select("[data-testid=patchwork-icon]")[0]
 
+    def test_none_in_modal(self, get_response):
+        response, soup = get_response()
+        modal = soup.find(id="fr-modal-partager-le-site")
+        assert "None" not in modal.get_text()
+
     def test_suggestions(self, get_response, tmp_path):
         produit = ProduitFactory(nom="Coucou le produit")
         synonyme = SynonymeFactory(produit=produit, nom="Youpi le synonyme")

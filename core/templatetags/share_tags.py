@@ -67,7 +67,7 @@ def get_sharer_content(request, object, social_network=None):
     return template[social_network]
 
 
-def _configure_sharer(context, object_class):
+def _configure_sharer(context):
     shared_object = context.get("object")
     request = context.get("request")
     context["sharer"] = get_sharer_content(request, shared_object)
