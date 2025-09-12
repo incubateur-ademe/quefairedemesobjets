@@ -10,7 +10,7 @@ from django.views.decorators.cache import cache_control
 from qfdmd.models import EmbedSettings
 
 
-@cache_control(max_age=31536000)
+@cache_control(max_age=3600)  # an hour
 def backlink(request):
     key = request.GET.get("key")
     text_content = ""
