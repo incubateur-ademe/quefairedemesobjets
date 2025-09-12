@@ -1,6 +1,10 @@
 import iframeResize from "@iframe-resizer/parent"
 import { URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE } from "../js/helpers"
+<<<<<<< HEAD
 import { iframeResizer } from "@iframe-resizer/child"
+=======
+import { generateBackLink } from "./helpers"
+>>>>>>> 4bbf3544 (Add to formulaire and carte)
 
 const script = document.currentScript as HTMLScriptElement
 const slug = script?.dataset?.objet
@@ -9,18 +13,6 @@ let origin = new URL(script?.getAttribute("src")).origin
 
 if (process.env.BASE_URL) {
   origin = process.env.BASE_URL
-}
-
-async function generateBackLink(iframe: HTMLIFrameElement) {
-  const backlinkTag = document.createElement("div")
-  backlinkTag.setAttribute(
-    "style",
-    "font-size: 0.9rem; text-align: center; padding-top: 0.5rem;",
-  )
-  // TODO: get backlink content
-  const backlinkContent = await fetch(`${origin}/embed/backlink?key=assistant`)
-  backlinkTag.innerHTML = await backlinkContent.text()
-  iframe.insertAdjacentElement("afterend", backlinkTag)
 }
 
 async function initScript() {
@@ -64,7 +56,7 @@ async function initScript() {
   }
 
   script.parentNode?.insertBefore(iframe, script)
-  await generateBackLink(iframe)
+  await generateBackLink(iframe, "assistant")
   iframe.onload = () => {
     iframeResize(iframeResizerOptions, iframe)
   }
