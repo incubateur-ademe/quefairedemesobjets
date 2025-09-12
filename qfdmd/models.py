@@ -782,5 +782,21 @@ class EmbedSettings(BaseGenericSetting):
     backlink_carte = RichTextField("Backlink de l'iframe de la carte")
     backlink_formulaire = RichTextField("Backlink de l'iframe du formulaire")
 
+    panels = [
+        MultiFieldPanel(
+            [
+                FieldPanel("backlink_assistant"),
+                FieldPanel("backlink_carte"),
+                FieldPanel("backlink_formulaire"),
+                HelpPanel(
+                    "Les backlink sont cachés pendant dix minutes.\n"
+                    "Cela veut dire qu'une mise à jour du contenu ci-dessus "
+                    "ne sera reflétée qu'après ce délai."
+                ),
+            ],
+            heading="Backlink",
+        )
+    ]
+
     class Meta:
         verbose_name = "Réglage des iframes"
