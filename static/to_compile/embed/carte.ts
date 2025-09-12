@@ -10,7 +10,7 @@ const setupIframe = () => {
     scriptTag,
     "carte",
   )
-  buildAndInsertIframeFrom(iframeAttributes, iframeExtraAttributes, scriptTag)
+  buildAndInsertIframeFrom(iframeAttributes, iframeExtraAttributes, scriptTag, "carte")
 }
 
 setupIframe()
