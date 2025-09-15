@@ -170,7 +170,6 @@ def cluster_acteurs_parents_choose_data(
         if service_a_domicile := result.get("service_a_domicile"):
             if perimetre_adomiciles := service_a_domicile["perimetre_adomicile"]:
                 result["perimetre_adomiciles"] = perimetre_adomiciles
-                ]
             result["lieu_prestation"] = service_a_domicile["lieu_prestation"]
         if "service_a_domicile" in result:
             del result["service_a_domicile"]

@@ -449,7 +449,7 @@ def clean_service_a_domicile(row, _):
     return row[["lieu_prestation", "perimetre_adomicile_codes"]]
 
 
-### Fonctions de résolution de l'adresse au format BAN et avec vérification via l'API
+### Functions to resolve BAN formatted address and check it with APIs
 # adresse.data.gouv.fr en option
 
 
