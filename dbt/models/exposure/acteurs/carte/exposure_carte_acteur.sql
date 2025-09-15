@@ -1,1 +1,1 @@
-select * from {{ ref('marts_carte_acteur') }}
+SELECT * FROM {{ ref('marts_carte_acteur') }} WHERE lieu_prestation != 'A_DOMICILE'
