@@ -168,9 +168,8 @@ def cluster_acteurs_parents_choose_data(
         # once the values are chosen, we need to reconstruct the perimetre_adomicile
         # and lieu_prestation
         if service_a_domicile := result.get("service_a_domicile"):
-            if service_a_domicile["perimetre_adomicile"]:
-                result["perimetre_adomiciles"] = service_a_domicile[
-                    "perimetre_adomicile"
+            if perimetre_adomiciles := service_a_domicile["perimetre_adomicile"]:
+                result["perimetre_adomiciles"] = perimetre_adomiciles
                 ]
             result["lieu_prestation"] = service_a_domicile["lieu_prestation"]
         if "service_a_domicile" in result:
