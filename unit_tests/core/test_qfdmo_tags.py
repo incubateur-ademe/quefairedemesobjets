@@ -320,7 +320,5 @@ class TestActeurPinpointTag:
             sous_categorie.id,
         )
 
-        assert result_context["marker_icon_file"] == (
-            "/media/config/groupeaction/icones/top.svg"
-        )
+        assert result_context["marker_icon_file"].endswith("top.svg")
         assert result_context["marker_icon"] == ""

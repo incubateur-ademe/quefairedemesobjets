@@ -64,21 +64,18 @@ def get_sharer_content(request, object, social_network=None):
     return template[social_network]
 
 
+def _configure_sharer(context):
+    shared_object = context.get("object", "")
+    request = context.get("request")
+    context["sharer"] = get_sharer_content(request, shared_object)
+    return ""
+
+
 @register.simple_tag(takes_context=True)
 def configure_acteur_sharer(context):
-    try:
-        object = context.get("object")
-    except AttributeError:
-        object = None
-    request = context.get("request")
-    context["sharer"] = get_sharer_content(request, object)
+    return _configure_sharer(context)
 
 
 @register.simple_tag(takes_context=True)
 def configure_produit_sharer(context):
-    try:
-        object = context.get("object").produit
-    except AttributeError:
-        object = None
-    request = context.get("request")
-    context["sharer"] = get_sharer_content(request, object)
+    return _configure_sharer(context)
