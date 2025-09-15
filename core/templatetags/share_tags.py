@@ -18,9 +18,6 @@ def get_sharer_content(request, object, social_network=None):
         return {}
     carte = request.resolver_match.view_name in ["qfdmo:carte", "qfdmo:carte_custom"]
 
-    if not object:
-        object = ""
-
     url = request.build_absolute_uri()
 
     share_body = ""
