@@ -68,7 +68,7 @@ def get_sharer_content(request, object, social_network=None):
 
 
 def _configure_sharer(context):
-    shared_object = context.get("object")
+    shared_object = context.get("object", "")
     request = context.get("request")
     context["sharer"] = get_sharer_content(request, shared_object)
     return ""
