@@ -7,6 +7,7 @@ on:
 
 jobs:
   deploy_airflow-webserver:
+    if: ${{ inputs.environment == 'prod' }}
     name: 🔄 Airflow webserver
     uses: ./.github/workflows/_deploy-on-clever-cloud.yml
     secrets: inherit # pragma: allowlist secret`
@@ -16,6 +17,7 @@ jobs:
       app_name_key: AIRFLOW_SCHEDULER_CLEVERCLOUD_APP_NAME
 
   deploy_airflow-scheduler:
+    if: ${{ inputs.environment == 'prod' }}
     name: ⏳ Airflow scheduler
     uses: ./.github/workflows/_deploy-on-clever-cloud.yml
     secrets: inherit # pragma: allowlist secret`
