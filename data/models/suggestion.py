@@ -283,28 +283,35 @@ class Suggestion(models.Model):
     # FIXME: this acteur management will be reviewed with PYDANTIC classes which will
     # be used to handle all specificities of self.suggestions
     def _create_acteur_linked_objects(self, acteur):
-        for proposition_service_code in self.suggestion["proposition_service_codes"]:
-            proposition_service = PropositionService.objects.create(
-                action=Action.objects.get(code=proposition_service_code["action"]),
-                acteur=acteur,
-            )
-            for sous_categorie_code in proposition_service_code["sous_categories"]:
-                proposition_service.sous_categories.add(
-                    SousCategorieObjet.objects.get(code=sous_categorie_code)
+        if "proposition_service_codes" in self.suggestion:
+            for proposition_service_code in self.suggestion[
+                "proposition_service_codes"
+            ]:
+                proposition_service = PropositionService.objects.create(
+                    action=Action.objects.get(code=proposition_service_code["action"]),
+                    acteur=acteur,
                 )
-        for perimetre_adomicile_code in self.suggestion["perimetre_adomicile_codes"]:
-            PerimetreADomicile.objects.create(
-                type=perimetre_adomicile_code["type"],
-                valeur=perimetre_adomicile_code["valeur"],
-                acteur=acteur,
-            )
-        for label_code in self.suggestion["label_codes"]:
-            label = LabelQualite.objects.get(code=label_code)
-            acteur.labels.add(label.id)
-
-        for acteurservice_code in self.suggestion["acteur_service_codes"]:
-            acteur_service = ActeurService.objects.get(code=acteurservice_code)
-            acteur.acteur_services.add(acteur_service.id)
+                for sous_categorie_code in proposition_service_code["sous_categories"]:
+                    proposition_service.sous_categories.add(
+                        SousCategorieObjet.objects.get(code=sous_categorie_code)
+                    )
+        if "perimetre_adomicile_codes" in self.suggestion:
+            for perimetre_adomicile_code in self.suggestion[
+                "perimetre_adomicile_codes"
+            ]:
+                PerimetreADomicile.objects.create(
+                    type=perimetre_adomicile_code["type"],
+                    valeur=perimetre_adomicile_code["valeur"],
+                    acteur=acteur,
+                )
+        if "label_codes" in self.suggestion:
+            for label_code in self.suggestion["label_codes"]:
+                label = LabelQualite.objects.get(code=label_code)
+                acteur.labels.add(label.id)
+        if "acteur_service_codes" in self.suggestion:
+            for acteurservice_code in self.suggestion["acteur_service_codes"]:
+                acteur_service = ActeurService.objects.get(code=acteurservice_code)
+                acteur.acteur_services.add(acteur_service.id)
 
     # FIXME: this acteur management will be reviewed with PYDANTIC classes which will
     # be used to handle all specificities of self.suggestions
