@@ -56,6 +56,11 @@ class SousCategorieObjet(CodeAsNaturalKeyModel):
         "“Que faire de mes objets et déchets” avec les identifiants "
         "indiqués au niveau de la sous-catégorie",
     )
+    reemploi_possible = models.BooleanField(
+        default=True,
+        verbose_name="Reemploi possible",
+        help_text="Indique si la sous-catégorie est compatible avec le reemploi",
+    )
 
     def __str__(self) -> str:
         return self.libelle
