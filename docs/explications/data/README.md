@@ -12,7 +12,7 @@ Ce projet contient l'environnement d'execution d'Airflow
 
 Les fichiers qui concerne la plateforme data :
 
-- `pyproject.toml` définition des dépendances dans la section [tool.poetry.group.airflow.dependencies]
+- `pyproject.toml` définition des dépendances dans la section [dependency-groups]
 - `./dags` répertoire dans lequels sont stockés tous les dags executés sur le cluster Airflow
 - `airflow-scheduler.Dockerfile` et `airflow-webserver.Dockerfile`, fichier de configuration docker executer dans tous les environnements
 - `docker-compose.yml` orchestre les dockers en envronnemnt de développement
