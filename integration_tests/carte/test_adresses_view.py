@@ -9,6 +9,7 @@ from qfdmo.views.carte import CarteSearchActeursView
 from unit_tests.core.test_utils import query_dict_from
 from unit_tests.qfdmo.acteur_factory import (
     ActeurFactory,
+    ActeurTypeFactory,
     DisplayedActeurFactory,
     DisplayedPropositionServiceFactory,
     LabelQualiteFactory,
@@ -16,6 +17,11 @@ from unit_tests.qfdmo.acteur_factory import (
 )
 from unit_tests.qfdmo.action_factory import ActionFactory
 from unit_tests.qfdmo.sscatobj_factory import SousCategorieObjetFactory
+
+
+@pytest.fixture
+def acteur_type_commerce():
+    return ActeurTypeFactory(code="commerce")
 
 
 @pytest.fixture
@@ -392,6 +398,7 @@ class TestFilters:
     def test_sous_categorie_filter_by_action_no_match(
         self,
         action_preter,
+        action_reparer,
         sous_categorie,
         displayed_acteur_donner_sscat_preter_sscat2,
     ):
@@ -415,6 +422,7 @@ class TestFilters:
     def test_sous_categorie_filter_by_action_1_match(
         self,
         action_preter,
+        action_reparer,
         sous_categorie2,
         displayed_acteur_donner_sscat_preter_sscat2,
     ):
@@ -492,7 +500,7 @@ class TestBBOX:
 
 @pytest.mark.django_db
 class TestLayers:
-    def test_adresse_missing_layer_is_displayed(self, client):
+    def test_adresse_missing_layer_is_displayed(self, client, action_reparer):
         url = "/carte"
         response = client.get(url)
         assert 'data-testid="adresse-missing"' in str(response.content)
@@ -502,7 +510,9 @@ class TestLayers:
         response = client.get(url)
         assert 'data-testid="adresse-missing"' not in str(response.content)
 
-    def test_adresse_missing_layer_is_not_displayed_for_epcis(self, client):
+    def test_adresse_missing_layer_is_not_displayed_for_epcis(
+        self, client, action_reparer
+    ):
         url = "/carte?action_list=reparer%7Cdonner%7Cechanger%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cacheter%7Crevendre&epci_codes=200055887&limit=50"  # noqa: E501
         response = client.get(url)
         assert 'data-testid="adresse-missing"' not in str(response.content)
@@ -510,7 +520,9 @@ class TestLayers:
 
 @pytest.mark.django_db
 class TestGetOrCreateRevisionActeur:
-    def test_get_or_create_revision_acteur_only_acteur(self, client):
+    def test_get_or_create_revision_acteur_only_acteur(
+        self, client, acteur_type_commerce
+    ):
         acteur = ActeurFactory()
         url = f"/qfdmo/getorcreate_revisionacteur/{acteur.identifiant_unique}"
 
