@@ -367,7 +367,6 @@ class BaseActeur(TimestampedModel):
         A_DOMICILE = "A_DOMICILE", "À domicile"
         SUR_PLACE = "SUR_PLACE", "Sur place"
         SUR_PLACE_OU_A_DOMICILE = "SUR_PLACE_OU_A_DOMICILE", "Sur place ou à domicile"
-        UNKNOWN = "", ""
 
     class Meta:
         abstract = True
@@ -467,8 +466,9 @@ class BaseActeur(TimestampedModel):
     lieu_prestation = models.CharField(
         max_length=255,
         choices=LieuPrestation.choices,
-        default=LieuPrestation.UNKNOWN,
+        default=LieuPrestation.SUR_PLACE,
         blank=True,
+        null=True,
     )
 
     @property

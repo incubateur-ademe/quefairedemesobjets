@@ -239,7 +239,11 @@ class TestClusterActeursParentsChooseData:
         # Retrieve parent data
         assert df.loc[df["identifiant_unique"] == "p1", "parent_data_new"].values[
             0
-        ] == {"nom": "prio 1", "email": "email.acteur@source.3"}
+        ] == {
+            "nom": "prio 1",
+            "email": "email.acteur@source.3",
+            "lieu_prestation": "SUR_PLACE",
+        }
         assert (
             df.loc[df["identifiant_unique"] != "p1", "parent_data_new"].isnull().all()
         ), "tester que tous les autres sont None"
@@ -288,6 +292,7 @@ class TestClusterActeursParentsChooseData:
         ] == {
             "nom": "prio 1",
             "email": "email.acteur@source.3",
+            "lieu_prestation": "SUR_PLACE",
         }, (
             "keep_empty is forced to False and the empty email is ignored until"
             " found `email.acteur@source.3`"
