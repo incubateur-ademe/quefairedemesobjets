@@ -1055,15 +1055,15 @@ wheels = [
 
 [[package]]
 name = "django-browser-reload"
-version = "1.18.0"
+version = "1.19.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "asgiref" },
     { name = "django" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/3b/41/84eaa4f2b7f764e56e01c4ee49aa12bdea30ae50fd0d3ef7c2690b0c4ec2/django_browser_reload-1.18.0.tar.gz", hash = "sha256:c5f0b134723cbf2a0dc9ae1ee1d38e42db28fe23c74cdee613ba3ef286d04735", size = 14319, upload-time = "2025-02-06T22:14:40.799Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/fa/cf/2a12149f8327ca0222a7cbfb371e7af9f7e649981390d81f38b58d3dc7f0/django_browser_reload-1.19.0.tar.gz", hash = "sha256:034939f770832fde374035e9e4d904c6f990d75598edb777626b5202587315d7", size = 14810, upload-time = "2025-09-08T15:55:39.485Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e4/9d/1322dc4bce4982d1eadd3a62802c996ae0303aad13d9ad88c1d35025f73d/django_browser_reload-1.18.0-py3-none-any.whl", hash = "sha256:ed4cc2fb83c3bf6c30b54107a1a6736c0b896e62e4eba666d81005b9f2ecf6f8", size = 12230, upload-time = "2025-02-06T22:14:36.87Z" },
+    { url = "https://files.pythonhosted.org/packages/6a/4c/291b6925d9afa2edafa9c1aab4b4674b769d30731dea6dc95a4edd3f2a9b/django_browser_reload-1.19.0-py3-none-any.whl", hash = "sha256:ac67c304654b77811abb4ebfa3802554a4e4b4ab030f8623b21e7b606efea160", size = 12272, upload-time = "2025-09-08T15:55:37.987Z" },
 ]
 
 [[package]]
