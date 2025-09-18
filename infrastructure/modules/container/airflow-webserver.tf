@@ -38,10 +38,10 @@ resource "scaleway_container" "airflow_webserver" {
     AIRFLOW__LOGGING__REMOTE_LOGGING           = "true"
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK    = "true"
     AIRFLOW__WEBSERVER__EXPOSE_CONFIG          = "true"
-    AIRFLOW__WEBSERVER__INSTANCE_NAME          = "✅✅✅✅ ENV de PREPROD ! ✅✅✅✅"
+    AIRFLOW__WEBSERVER__INSTANCE_NAME          = var.AIRFLOW__WEBSERVER__INSTANCE_NAME
     AIRFLOW__WEBSERVER__WORKERS                = "1"
     AIRFLOW_WEBSERVER_WARN_DEPLOYMENT_EXPOSURE = "false"
-    ENVIRONMENT                                = "preprod"
+    ENVIRONMENT                                = var.environment
   }
   secret_environment_variables = {
     _AIRFLOW_WWW_USER_USERNAME          = var._AIRFLOW_WWW_USER_USERNAME

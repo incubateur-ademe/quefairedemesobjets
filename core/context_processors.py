@@ -35,6 +35,9 @@ def global_context(request) -> dict:
         },
         "lvao": {
             "POSTHOG_KEY": settings.LVAO["POSTHOG_KEY"],
+            "DECLARATION_ACCESSIBILITE_PAGE_ID": settings.LVAO[
+                "DECLARATION_ACCESSIBILITE_PAGE_ID"
+            ],
         },
     }
 
