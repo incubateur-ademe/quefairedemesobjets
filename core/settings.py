@@ -125,6 +125,7 @@ INSTALLED_APPS = [
     "data",
     "corsheaders",
     "django_lookbook",
+    "djangoql",
 ]
 
 

@@ -14,6 +14,7 @@ from django.forms import CharField, ValidationError
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.utils.html import format_html
+from djangoql.admin import DjangoQLSearchMixin
 from import_export import admin as import_export_admin
 from import_export import fields, resources, widgets
 
@@ -190,7 +191,8 @@ class BaseActeurForm(forms.ModelForm):
             self.fields["source"].queryset = Source.objects.all().order_by("libelle")
 
 
-class BaseActeurAdmin(admin.GISModelAdmin):
+class BaseActeurAdmin(DjangoQLSearchMixin, admin.GISModelAdmin):
+    djangoql_completion_enabled_by_default = False
     form = BaseActeurForm
     gis_widget = CustomOSMWidget
     inlines = [
