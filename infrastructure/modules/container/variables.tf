@@ -119,3 +119,6 @@ variable "_AIRFLOW_WWW_USER_PASSWORD" {
   type      = string
   sensitive = true
 }
+variable "AIRFLOW__WEBSERVER__INSTANCE_NAME" {
+  type = string
+}

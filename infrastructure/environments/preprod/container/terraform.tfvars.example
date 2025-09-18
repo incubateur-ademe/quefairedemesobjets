@@ -4,7 +4,7 @@ access_key            = "access-key"
 secret_key            = "secret-key"  # pragma: allowlist secret
 
 AIRFLOW__DATABASE__SQL_ALCHEMY_CONN = ""
-AIRFLOW_CONN_QFDMO_DJANGO_DB = ""
+AIRFLOW_CONN_WEBAPP_DB = ""
 DATABASE_URL = ""
 DB_WAREHOUSE = ""
 ENVIRONMENT = ""

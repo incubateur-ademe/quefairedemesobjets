@@ -1,6 +1,6 @@
 import pytest
 
-from unit_tests.qfdmd.qfdmod_factory import SynonymeFactory
+from unit_tests.qfdmd.qfdmod_factory import ProduitFactory, SynonymeFactory
 
 
 class TestSynonyme:
@@ -12,8 +12,9 @@ class TestSynonyme:
 
     @pytest.mark.django_db
     def test_slug_max_length(self):
-        synonyme255 = SynonymeFactory(nom="X" * 255)
+        produit = ProduitFactory(nom="Produit")
+        synonyme255 = SynonymeFactory(nom="X" * 255, produit=produit)
         assert synonyme255.slug == "x" * 255
 
-        synonyme256 = SynonymeFactory(nom="Y" * 256)
+        synonyme256 = SynonymeFactory(nom="Y" * 256, produit=produit)
         assert synonyme256.slug == "y" * 255

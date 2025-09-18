@@ -37,6 +37,11 @@ def global_context(request) -> dict:
             "POSTHOG_KEY": settings.CARTE["POSTHOG_KEY"],
             "MATOMO_ID": settings.CARTE["MATOMO_ID"],
         },
+        "lvao": {
+            "DECLARATION_ACCESSIBILITE_PAGE_ID": settings.LVAO[
+                "DECLARATION_ACCESSIBILITE_PAGE_ID"
+            ],
+        },
     }
 
     search_form = SearchForm(prefix="header", initial={"id": "header"})

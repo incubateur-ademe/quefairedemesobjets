@@ -4,8 +4,6 @@ from datetime import datetime, timezone
 import pandas as pd
 from enrich.config.cohorts import COHORTS
 from enrich.config.columns import COLS
-
-from data.models.changes.acteur_rgpd_anonymize import rgpd_data_get
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
@@ -63,6 +61,7 @@ def changes_prepare_rgpd(
 ) -> tuple[list[dict], dict]:
     """Prepare suggestions for RGPD cohorts"""
     from data.models.changes import ChangeActeurRgpdAnonymize
+    from data.models.changes.acteur_rgpd_anonymize import rgpd_data_get
 
     changes = []
     model_params = {
@@ -162,6 +161,45 @@ def changes_prepare_closed_replaced(
     return changes, contexte
 
 
+def _changes_prepare_cp(row: dict, model) -> tuple[list[dict], dict]:
+    """Prepare suggestions for villes cohorts"""
+
+    changes = []
+    model_params = {
+        "id": row[COLS.ACTEUR_ID],
+        "data": {
+            "code_postal": row[COLS.SUGGEST_CODE_POSTAL],
+        },
+    }
+    changes.append(
+        changes_prepare(
+            model=model,
+            model_params=model_params,
+            order=1,
+            reason="Code postal normalisé",
+        )
+    )
+    context = {
+        "code_postal": row["code_postal"],
+    }
+
+    return changes, context
+
+
+def changes_prepare_acteur_cp(row: dict) -> tuple[list[dict], dict]:
+    """Prepare suggestions for villes cohorts"""
+    from data.models.changes import ChangeActeurUpdate
+
+    return _changes_prepare_cp(row, ChangeActeurUpdate)
+
+
+def changes_prepare_revision_acteur_cp(row: dict) -> tuple[list[dict], dict]:
+    """Prepare suggestions for villes cohorts"""
+    from data.models.changes import ChangeActeurUpdateRevision
+
+    return _changes_prepare_cp(row, ChangeActeurUpdateRevision)
+
+
 # Mapping cohorts with their respective changes preparation function
 COHORTS_TO_PREPARE_CHANGES = {
     COHORTS.CLOSED_NOT_REPLACED: changes_prepare_closed_not_replaced,
@@ -170,6 +208,8 @@ COHORTS_TO_PREPARE_CHANGES = {
     COHORTS.RGPD: changes_prepare_rgpd,
     COHORTS.VILLES_TYPO: changes_prepare_villes,
     COHORTS.VILLES_NEW: changes_prepare_villes,
+    COHORTS.ACTEUR_CP_TYPO: changes_prepare_acteur_cp,
+    COHORTS.REVISION_ACTEUR_CP_TYPO: changes_prepare_revision_acteur_cp,
 }
 
 
@@ -197,6 +237,10 @@ def enrich_dbt_model_to_suggestions(
         COHORTS.RGPD: SuggestionAction.ENRICH_ACTEURS_RGPD,
         COHORTS.VILLES_TYPO: SuggestionAction.ENRICH_ACTEURS_VILLES_TYPO,
         COHORTS.VILLES_NEW: SuggestionAction.ENRICH_ACTEURS_VILLES_NEW,
+        COHORTS.ACTEUR_CP_TYPO: SuggestionAction.ENRICH_ACTEURS_CP_TYPO,
+        COHORTS.REVISION_ACTEUR_CP_TYPO: (
+            SuggestionAction.ENRICH_REVISION_ACTEURS_CP_TYPO
+        ),
     }
 
     # Validation

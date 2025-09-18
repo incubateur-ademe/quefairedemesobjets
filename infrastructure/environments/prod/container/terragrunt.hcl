@@ -27,8 +27,9 @@ inputs = {
   airflow_webserver_max_scale      = 1
   airflow_webserver_timeout        = 300
 
+  AIRFLOW__WEBSERVER__INSTANCE_NAME   = "🔴🔴🔴 ENV de PROD ! 🔴🔴🔴"
   AIRFLOW__DATABASE__SQL_ALCHEMY_CONN = "[AIRFLOW__DATABASE__SQL_ALCHEMY_CONN]"
-  AIRFLOW_CONN_QFDMO_DJANGO_DB        = "[AIRFLOW_CONN_QFDMO_DJANGO_DB]"
+  AIRFLOW_CONN_WEBAPP_DB              = "[AIRFLOW_CONN_WEBAPP_DB]"
   DATABASE_URL                        = "[DATABASE_URL]"
   DB_WAREHOUSE                        = "[DB_WAREHOUSE]"
   ENVIRONMENT                         = "[ENVIRONMENT]"

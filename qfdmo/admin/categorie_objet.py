@@ -26,7 +26,10 @@ class CategorieAdmin(CodeLibelleModelMixin, admin.ModelAdmin):
 
 
 class SousCategorieAdmin(CodeLibelleModelMixin, admin.ModelAdmin):
-    list_display = CodeLibelleModelMixin.list_display + ("categorie",)
+    list_display = CodeLibelleModelMixin.list_display + (
+        "categorie",
+        "reemploi_possible",
+    )
     list_filter = ["afficher_carte"]
     autocomplete_fields = ("qfdmd_produits",)
     search_fields = CodeLibelleModelMixin.search_fields + [

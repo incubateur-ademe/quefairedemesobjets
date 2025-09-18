@@ -56,6 +56,9 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
                 >
                     {{ CARTE.ajouter_un_lieu }}
                 </a>
+                <div class="qf-absolute qf-left-0 qf-right-0 qf-bottom-0 qf-text-center qf-bg-white lg:qf-hidden">
+                    {% include "qfdmo/carte/_declaration_accessibilite.html" %}
+                </div>
             {% endif %}
 
             {% if not acteurs %}
