@@ -16,7 +16,11 @@ from qfdmo.models import (
     PropositionService,
     Source,
 )
-from qfdmo.models.acteur import RevisionActeur, RevisionPropositionService
+from qfdmo.models.acteur import (
+    PerimetreADomicile,
+    RevisionActeur,
+    RevisionPropositionService,
+)
 from unit_tests.qfdmo.action_factory import ActionFactory
 
 
@@ -116,3 +120,12 @@ class DisplayedPropositionServiceFactory(Factory):
     id = Faker("text", max_nb_chars=30)
     action = SubFactory(ActionFactory)
     acteur = SubFactory(DisplayedActeurFactory)
+
+
+class PerimetreADomicileFactory(Factory):
+    class Meta:
+        model = PerimetreADomicile
+
+    type = PerimetreADomicile.Type.KILOMETRIQUE
+    valeur = str(Faker("random_int", min=10, max=99))
+    acteur = SubFactory(ActeurFactory)
