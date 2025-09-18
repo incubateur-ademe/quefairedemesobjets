@@ -3,7 +3,6 @@ from math import sqrt
 from django.http import HttpRequest
 
 from core.utils import get_direction
-from qfdmo.models import DisplayedActeur
 from qfdmo.models.action import get_actions_by_direction
 
 
@@ -27,21 +26,6 @@ def action_by_direction(request: HttpRequest, direction: str):
             for a in actions_to_display
         ]
     return [{**a, "active": True} for a in actions_to_display]
-
-
-# TODO : should be deprecated and replaced by a value in context view
-def display_exclusivite_reparation(acteur: DisplayedActeur) -> bool:
-    return acteur.exclusivite_de_reprisereparation
-
-
-def hide_object_filter(request) -> bool:
-    # FIXME : we assume that solution is really dirty
-    # the good way would be to manage the display
-    # of this filter using CarteConfig
-    return (
-        bool(request.GET.get("sc_id"))
-        and request.GET.get("map_container_id") != "carte"
-    )
 
 
 def distance_to_acteur(request, acteur):
