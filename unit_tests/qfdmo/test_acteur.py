@@ -15,6 +15,7 @@ from unit_tests.qfdmo.acteur_factory import (
     DisplayedActeurFactory,
     DisplayedPropositionServiceFactory,
     LabelQualiteFactory,
+    PerimetreADomicileFactory,
     PropositionServiceFactory,
     RevisionActeurFactory,
     RevisionPropositionServiceFactory,
@@ -272,6 +273,17 @@ class TestCreateRevisionActeur:
 
         with pytest.raises(ValidationError):
             RevisionActeurFactory(parent=revision_acteur)
+
+    def test_create_revision_acteur_from_acteur_with_perimetre_adomiciles(self):
+        acteur = ActeurFactory(lieu_prestation=Acteur.LieuPrestation.A_DOMICILE)
+        acteur.perimetre_adomiciles.add(PerimetreADomicileFactory())
+        revision_acteur = acteur.get_or_create_revision()
+        assert (
+            revision_acteur.lieu_prestation == Acteur.LieuPrestation.A_DOMICILE
+        ), "le lieu de prestation est copié de Acteur"
+        assert (
+            revision_acteur.perimetre_adomiciles.count() == 1
+        ), "Les perimètres adomiciles doivent être copiés"
 
 
 @pytest.mark.django_db

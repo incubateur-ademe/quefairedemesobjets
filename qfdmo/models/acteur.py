@@ -949,8 +949,7 @@ class RevisionActeur(BaseActeur, LatLngPropertiesMixin):
         creating = self._state.adding  # Before calling save
         if creating:
             # We keep acteur's lieu_prestation because it goes with perimetre_adomicile
-            # FIXME: should we keep this exception ?
-            self.lieu_prestation = self.lieu_prestation or acteur.lieu_prestation
+            self.lieu_prestation = acteur.lieu_prestation
         super_result = super().save(*args, **kwargs)
         if creating and acteur:
             for proposition_service in acteur.proposition_services.all():  # type: ignore
@@ -971,7 +970,7 @@ class RevisionActeur(BaseActeur, LatLngPropertiesMixin):
                 RevisionPerimetreADomicile.objects.create(
                     acteur=self,
                     type=perimetre_adomicile.type,
-                    value=perimetre_adomicile.value,
+                    valeur=perimetre_adomicile.valeur,
                 )
 
         if self.parent != self._original_parent and self._original_parent:
