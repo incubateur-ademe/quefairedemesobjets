@@ -35,7 +35,7 @@ export function buildAndInsertIframeFrom(
   backlinkKey: BacklinkKey,
 ) {
   const iframe = document.createElement("iframe")
-  await generateBackLink(iframe, key)
+  await generateBackLink(iframe, backlinkKey)
   for (var key in iframeAttributes) {
     iframe.setAttribute(key, iframeAttributes[key])
   }
