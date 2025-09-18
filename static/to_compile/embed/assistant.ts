@@ -1,5 +1,6 @@
 import iframeResize from "@iframe-resizer/parent"
 import { URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE } from "../js/helpers"
+import { generateBackLink } from "./helpers"
 import { iframeResizer } from "@iframe-resizer/child"
 
 const script = document.currentScript as HTMLScriptElement
@@ -11,7 +12,7 @@ if (process.env.BASE_URL) {
   origin = process.env.BASE_URL
 }
 
-function initScript() {
+async function initScript() {
   const parts = [origin]
   const iframeResizerOptions: iframeResizer.IFramePageOptions = {
     license: "GPLv3",
@@ -52,6 +53,7 @@ function initScript() {
   }
 
   script.parentNode?.insertBefore(iframe, script)
+  await generateBackLink(iframe, "assistant")
   iframe.onload = () => {
     iframeResize(iframeResizerOptions, iframe)
   }
