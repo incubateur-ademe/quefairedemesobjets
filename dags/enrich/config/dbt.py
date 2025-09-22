@@ -16,8 +16,11 @@ class DBT:
     MARTS_ENRICH_AE_CLOSED_REPLACED_OTHER_SIREN: str = (
         "marts_enrich_acteurs_closed_suggest_replaced_other_siren"
     )
-    MARTS_ENRICH_AE_CLOSED_NOT_REPLACED: str = (
-        "marts_enrich_acteurs_closed_suggest_not_replaced"
+    MARTS_ENRICH_AE_CLOSED_NOT_REPLACED_UNITE: str = (
+        "marts_enrich_acteurs_closed_suggest_not_replaced_unite"
+    )
+    MARTS_ENRICH_AE_CLOSED_NOT_REPLACED_ETABLISSEMENT: str = (
+        "marts_enrich_acteurs_closed_suggest_not_replaced_etablissement"
     )
     MARTS_ENRICH_VILLES_TYPO: str = "marts_enrich_acteurs_villes_suggest_typo"
     MARTS_ENRICH_VILLES_NEW: str = "marts_enrich_acteurs_villes_suggest_new"

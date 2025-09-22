@@ -46,7 +46,7 @@ class TestEnrichActeursClosedSuggestions:
                 COLS.ACTEUR_VILLE: ["Rennes", "Rennes"],
                 COLS.ACTEUR_TYPE_ID: [atype.pk, atype.pk],
                 COLS.ACTEUR_SOURCE_ID: [source.pk, source.pk],
-                COLS.SUGGEST_COHORT: [COHORTS.CLOSED_NOT_REPLACED] * 2,
+                COLS.SUGGEST_COHORT: [COHORTS.CLOSED_NOT_REPLACED_UNITE] * 2,
             }
         )
 
@@ -149,7 +149,7 @@ class TestEnrichActeursClosedSuggestions:
         # Write suggestions to DB
         enrich_dbt_model_to_suggestions(
             df=df_not_replaced,
-            cohort=COHORTS.CLOSED_NOT_REPLACED,
+            cohort=COHORTS.CLOSED_NOT_REPLACED_UNITE,
             identifiant_action="test_not_replaced",
             dry_run=False,
         )

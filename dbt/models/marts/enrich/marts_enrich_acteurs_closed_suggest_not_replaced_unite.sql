@@ -10,7 +10,7 @@ AND for which we couldn't find replacements
 }}
 
 SELECT
-  '🚪 Acteurs Fermés: 🔴 non remplacés' AS suggest_cohort,
+  '🚪 Acteurs Fermés: 🔴 non remplacés - unité fermée' AS suggest_cohort,
   *
 FROM {{ ref('marts_enrich_acteurs_closed_candidates') }}
 WHERE

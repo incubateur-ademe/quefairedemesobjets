@@ -202,7 +202,8 @@ def changes_prepare_revision_acteur_cp(row: dict) -> tuple[list[dict], dict]:
 
 # Mapping cohorts with their respective changes preparation function
 COHORTS_TO_PREPARE_CHANGES = {
-    COHORTS.CLOSED_NOT_REPLACED: changes_prepare_closed_not_replaced,
+    COHORTS.CLOSED_NOT_REPLACED_UNITE: changes_prepare_closed_not_replaced,
+    COHORTS.CLOSED_NOT_REPLACED_ETABLISSEMENT: changes_prepare_closed_not_replaced,
     COHORTS.CLOSED_REP_OTHER_SIREN: changes_prepare_closed_replaced,
     COHORTS.CLOSED_REP_SAME_SIREN: changes_prepare_closed_replaced,
     COHORTS.RGPD: changes_prepare_rgpd,
@@ -231,7 +232,10 @@ def enrich_dbt_model_to_suggestions(
     # identifiant_execution = cohort AND pydantic models take care of
     # handling the specifics
     COHORTS_TO_SUGGESTION_ACTION = {
-        COHORTS.CLOSED_NOT_REPLACED: SuggestionAction.ENRICH_ACTEURS_CLOSED,
+        COHORTS.CLOSED_NOT_REPLACED_UNITE: SuggestionAction.ENRICH_ACTEURS_CLOSED,
+        COHORTS.CLOSED_NOT_REPLACED_ETABLISSEMENT: (
+            SuggestionAction.ENRICH_ACTEURS_CLOSED
+        ),
         COHORTS.CLOSED_REP_OTHER_SIREN: SuggestionAction.ENRICH_ACTEURS_CLOSED,
         COHORTS.CLOSED_REP_SAME_SIREN: SuggestionAction.ENRICH_ACTEURS_CLOSED,
         COHORTS.RGPD: SuggestionAction.ENRICH_ACTEURS_RGPD,
