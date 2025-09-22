@@ -502,6 +502,7 @@ INSTALLED_APPS.extend(
         "wagtail.images",
         "wagtail.search",
         "wagtail.admin",
+        "wagtail.contrib.typed_table_block",
         "wagtail",
         "modelcluster",
         "taggit",
