@@ -6,7 +6,7 @@ FROM apache/airflow:2.11.0 AS python-builder
 USER root
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    libpq-dev python3-dev g++
+    libpq-dev python3-dev g++ git
 
 # python dependencies
 USER ${AIRFLOW_UID:-50000}
