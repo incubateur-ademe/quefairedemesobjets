@@ -35,7 +35,7 @@ def global_context(request) -> dict:
         },
         "carte": {
             "DECLARATION_ACCESSIBILITE_PAGE_ID": settings.CARTE[
-                "DECLARATION_ACCESSIBILITE_PAGE_ID"
+                "DECLARATION_ACCESSIBILITE_PAGE_ID"],
             "POSTHOG_KEY": settings.CARTE["POSTHOG_KEY"],
             "MATOMO_ID": settings.CARTE["MATOMO_ID"],
         },
