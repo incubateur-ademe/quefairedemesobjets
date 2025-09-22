@@ -11,7 +11,7 @@ async function searchOnProduitPage(page, searchedAddress: string) {
   // Autour de moi
   await page.locator(inputSelector).click()
   await page.locator(inputSelector).fill(searchedAddress)
-  await page.waitForTimeout(500)
+  await page.waitForTimeout(1000)
   await page.locator(getItemSelector(1)).click()
 }
 
@@ -103,6 +103,8 @@ test("Le tracking PostHog fonctionne comme prévu", async ({ page }) => {
   // Check that homepage scores 1
   await page.goto(`/`, { waitUntil: "domcontentloaded" })
   let sessionStorage = await page.evaluate(() => window.sessionStorage)
+
+  await page.waitForTimeout(1000)
   expect(sessionStorage.homePageView).toBe("0")
 
   // Navigate to a produit page and check that it scores 1
