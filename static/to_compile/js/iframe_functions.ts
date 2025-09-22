@@ -1,3 +1,5 @@
+import { BacklinkKey, generateBackLink } from "../embed/helpers"
+
 function compileIframeAttributes(
   baseUrl: string,
   urlParams: URLSearchParams,
@@ -26,12 +28,14 @@ function parseJSONDataset(dataset: string): any {
   }
 }
 
-export function buildAndInsertIframeFrom(
+export async function buildAndInsertIframeFrom(
   iframeAttributes: object,
   iframeExtraAttributes: object,
   scriptTag: HTMLScriptElement,
+  backlinkKey: BacklinkKey,
 ) {
   const iframe = document.createElement("iframe")
+  await generateBackLink(iframe, backlinkKey)
   for (var key in iframeAttributes) {
     iframe.setAttribute(key, iframeAttributes[key])
   }

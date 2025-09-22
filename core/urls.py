@@ -32,7 +32,7 @@ from wagtail.documents import urls as wagtaildocs_urls
 from qfdmd.models import Synonyme
 
 from .api import api
-from .views import robots_txt
+from .views import backlink, robots_txt
 
 info_dict = {
     "queryset": Synonyme.objects.filter().order_by("nom"),
@@ -54,6 +54,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", api.urls),
     path("robots.txt", robots_txt),
+    path("embed/backlink", backlink),
     path(
         "sitemap.xml",
         index,
