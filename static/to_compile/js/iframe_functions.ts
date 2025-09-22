@@ -28,7 +28,7 @@ function parseJSONDataset(dataset: string): any {
   }
 }
 
-export function buildAndInsertIframeFrom(
+export async function buildAndInsertIframeFrom(
   iframeAttributes: object,
   iframeExtraAttributes: object,
   scriptTag: HTMLScriptElement,
