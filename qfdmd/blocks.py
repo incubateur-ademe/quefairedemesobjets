@@ -91,5 +91,3 @@ STREAMFIELD_COMMON_BLOCKS = [
     ),
     ("tabs", TabsBlock(label=_("Tabs"), group=_("DSFR components"))),
 ]
-
-print(f"{STREAMFIELD_COMMON_BLOCKS=}")
