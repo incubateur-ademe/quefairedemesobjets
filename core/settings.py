@@ -182,6 +182,8 @@ with suppress(ModuleNotFoundError):
     def show_toolbar_callback(request):
         path_is_not_excluded = not any(p in request.path for p in patterns_to_exclude)
 
+        if request.headers.get("User-Agent") == "playwright":
+            return False
         if request.headers.get("Sec-Fetch-Dest") == "iframe":
             # Hide in iframe
             return False

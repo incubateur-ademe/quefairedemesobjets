@@ -58,6 +58,7 @@
         data-state-address-autocomplete-outlet="[data-controller='address-autocomplete']"
         data-state-search-solution-form-outlet="[data-controller='search-solution-form']"
         {% posthog_data_attributes assistant.POSTHOG_KEY %}
+        data-analytics-initial-action-value="{% block analytics_action %}{% endblock %}"
         {# Actions #}
         data-action="address-autocomplete:change->state#setLocation"
     >
