@@ -3198,7 +3198,7 @@ requires-dist = [
     { name = "requests", specifier = ">=2.32.4,<3" },
     { name = "sentry-sdk", specifier = ">=2.37.0,<3" },
     { name = "shortuuid", specifier = ">=1.0.13,<2" },
-    { name = "sites-faciles-experiment", specifier = "~=2.1.0rc7" },
+    { name = "sites-faciles-experiment", specifier = "~=2.1.0rc8" },
     { name = "tqdm", specifier = ">=4.67.1,<5" },
     { name = "unidecode", specifier = ">=1.4.0,<2" },
     { name = "wagtail-honeypot", git = "https://github.com/Luzzzi/wagtail-honeypot?rev=feature%2Fi18n-required-honeypot" },
@@ -3600,7 +3600,7 @@ wheels = [
 
 [[package]]
 name = "sites-faciles-experiment"
-version = "2.1.0rc7"
+version = "2.1.0rc8"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "beautifulsoup4" },
@@ -3626,9 +3626,9 @@ dependencies = [
     { name = "wagtail-modeladmin" },
     { name = "wagtailmenus" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d1/d2/89d0aa3474831403fc22e750154ffe7a6d04bc3a858c419fea4f8ed44b3c/sites_faciles_experiment-2.1.0rc7.tar.gz", hash = "sha256:27c8a8e9d65e744ba339372b480e4c21568d528716ca6f78ce884c001c671c1f", size = 2576537, upload-time = "2025-09-22T11:35:52.424Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b9/fd/44f5d56d5cc227cd36a4e4202eb816d127bc2d4a714ff29e43398fc1ecd1/sites_faciles_experiment-2.1.0rc8.tar.gz", hash = "sha256:7b6306bd9fc00c987ce8d92d24b1f0500987c521e949382cb292a4b7695dfeed", size = 2576574, upload-time = "2025-09-22T11:48:22.747Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/58/2c/d4bed6927fcdf96a281e4b893a6de0fe653ce7eb11f42271b5a392619070/sites_faciles_experiment-2.1.0rc7-py3-none-any.whl", hash = "sha256:1e3276900b801f1f5dcf5e2a77783a25af99010d4eab4d9896a6f6af62276364", size = 2877999, upload-time = "2025-09-22T11:35:50.468Z" },
+    { url = "https://files.pythonhosted.org/packages/fe/dc/fdb0ef686e9da0b5240d9858cc065a1d92f311de8de45cf11c5d582a8349/sites_faciles_experiment-2.1.0rc8-py3-none-any.whl", hash = "sha256:618fc14f009a5e37544d03dd8417773d77b65a7a6957da84025db9909cddefe1", size = 2877996, upload-time = "2025-09-22T11:48:20.506Z" },
 ]
 
 [[package]]
