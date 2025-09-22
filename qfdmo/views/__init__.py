@@ -13,5 +13,5 @@ def get_formulaire_iframe_script(request):
 
 
 def google_verification(request):
-    content = f"google-site-verification: {settings.LVAO.get('GOOGLE_SEARCH_CONSOLE')}"
+    content = f"google-site-verification: {settings.CARTE.get('GOOGLE_SEARCH_CONSOLE')}"
     return HttpResponse(content, content_type="text/plain")
