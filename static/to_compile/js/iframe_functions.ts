@@ -1,4 +1,4 @@
-import { BacklinkKey } from "../embed/helpers"
+import { BacklinkKey, generateBackLink } from "../embed/helpers"
 
 function compileIframeAttributes(
   baseUrl: string,

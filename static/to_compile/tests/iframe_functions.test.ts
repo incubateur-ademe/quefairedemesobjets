@@ -1,4 +1,26 @@
+import { BacklinkKey, generateBackLink } from "../embed/helpers"
 import { getIframeAttributesAndExtra } from "../js/iframe_functions"
+
+describe("generateBackLink", () => {
+  let iframeMock
+
+  beforeEach(() => {
+    iframeMock = document.createElement("iframe")
+    document.body.appendChild(iframeMock)
+  })
+
+  afterEach(() => {
+    document.body.removeChild(iframeMock)
+    jest.restoreAllMocks()
+  })
+
+  it("should not exit when fetch fails and logs an error message", async () => {
+    global.fetch = jest.fn(() => Promise.reject(new Error("Network Error")))
+    const key: BacklinkKey = "carte"
+
+    await generateBackLink(iframeMock, key)
+  })
+})
 
 describe("getIframeAttributesAndExtra function tests", () => {
   let scriptTag: HTMLScriptElement
