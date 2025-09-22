@@ -3123,6 +3123,7 @@ dependencies = [
     { name = "sites-faciles-experiment" },
     { name = "tqdm" },
     { name = "unidecode" },
+    { name = "wagtail-honeypot" },
     { name = "whitenoise" },
 ]
 
@@ -3197,9 +3198,10 @@ requires-dist = [
     { name = "requests", specifier = ">=2.32.4,<3" },
     { name = "sentry-sdk", specifier = ">=2.37.0,<3" },
     { name = "shortuuid", specifier = ">=1.0.13,<2" },
-    { name = "sites-faciles-experiment", specifier = "~=2.1.0rc1" },
+    { name = "sites-faciles-experiment", directory = "../sites-faciles" },
     { name = "tqdm", specifier = ">=4.67.1,<5" },
     { name = "unidecode", specifier = ">=1.4.0,<2" },
+    { name = "wagtail-honeypot", git = "https://github.com/Luzzzi/wagtail-honeypot?rev=feature%2Fi18n-required-honeypot" },
     { name = "whitenoise", specifier = ">=6.8.2,<7" },
 ]
 
@@ -3598,8 +3600,8 @@ wheels = [
 
 [[package]]
 name = "sites-faciles-experiment"
-version = "2.1.0rc1"
-source = { registry = "https://pypi.org/simple" }
+version = "2.1.0rc5"
+source = { directory = "../sites-faciles" }
 dependencies = [
     { name = "beautifulsoup4" },
     { name = "boto3" },
@@ -3615,6 +3617,7 @@ dependencies = [
     { name = "mozilla-django-oidc" },
     { name = "psycopg2-binary" },
     { name = "python-dotenv" },
+    { name = "pyyaml" },
     { name = "rust-just" },
     { name = "unidecode" },
     { name = "wagtail" },
@@ -3623,9 +3626,44 @@ dependencies = [
     { name = "wagtail-modeladmin" },
     { name = "wagtailmenus" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/82/a8/4e3553057209c2b3860a454486c578291b86dca1fecdc1c5eff460aa053e/sites_faciles_experiment-2.1.0rc1.tar.gz", hash = "sha256:019eeb069829ddf75e40f8a3e88eea680990bd038498f1eadda9257024e48571", size = 2565676, upload-time = "2025-09-02T10:28:49.603Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/88/49/1b4b9c8824f3c8ff95ea1d2fc2cc12567576950234a2fd24a7b87ce78985/sites_faciles_experiment-2.1.0rc1-py3-none-any.whl", hash = "sha256:2915a731fad959c2401103bdce83de7af330d78d622951b57d6b1455a8cca92b", size = 2862796, upload-time = "2025-09-02T10:28:47.74Z" },
+
+[package.metadata]
+requires-dist = [
+    { name = "beautifulsoup4", specifier = ">=4.13.4" },
+    { name = "boto3", specifier = "==1.35.99" },
+    { name = "dj-database-url", specifier = ">=3.0.0" },
+    { name = "dj-static", specifier = ">=0.0.6" },
+    { name = "django", specifier = ">=5.2.3" },
+    { name = "django-dsfr", specifier = ">=2.4.0" },
+    { name = "django-storages", extras = ["s3"], specifier = ">=1.14.6" },
+    { name = "django-taggit", specifier = ">=6.1.0" },
+    { name = "faker", specifier = ">=37.4.0" },
+    { name = "gunicorn", specifier = ">=23.0.0" },
+    { name = "icalendar", specifier = ">=6.3.1" },
+    { name = "mozilla-django-oidc", specifier = ">=4.0.1" },
+    { name = "psycopg2-binary", specifier = ">=2.9.10" },
+    { name = "python-dotenv", specifier = ">=1.1.0" },
+    { name = "pyyaml", specifier = ">=6.0.2" },
+    { name = "rust-just", specifier = ">=1.40.0" },
+    { name = "unidecode", specifier = ">=1.4.0" },
+    { name = "wagtail", specifier = ">=7.0.1" },
+    { name = "wagtail-localize", specifier = ">=1.12.1" },
+    { name = "wagtail-markdown", specifier = ">=0.12.1" },
+    { name = "wagtail-modeladmin", specifier = ">=2.2.0" },
+    { name = "wagtailmenus", specifier = ">=4.0.3" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "black", specifier = ">=25.1.0" },
+    { name = "coverage", specifier = ">=7.9.1" },
+    { name = "django-compressor", specifier = ">=4.5.1" },
+    { name = "django-debug-toolbar", specifier = ">=5.2.0" },
+    { name = "djlint", specifier = ">=1.36.4" },
+    { name = "ipython", specifier = ">=9.3.0" },
+    { name = "pre-commit", specifier = ">=4.2.0" },
+    { name = "ruff", specifier = ">=0.12.0" },
+    { name = "tblib", specifier = ">=3.1.0" },
 ]
 
 [[package]]
@@ -4068,6 +4106,14 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/11/4d/beae1646414e01cdafae1adc48e3d6a52aad378c5838b68c9419134978cf/wagtail-7.1.1.tar.gz", hash = "sha256:7bdd1e5b0c345437985c01f0a7f60a617e75d788f37c7d839558f4e6a1251af9", size = 6822343, upload-time = "2025-08-28T18:22:51.76Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c0/c5/fa6919c98abf7d426e09d5f5edfea1cfcdcd935d5844212ad622825d76c0/wagtail-7.1.1-py3-none-any.whl", hash = "sha256:a112050c9476b794a0a0e453a86f339f2b6d7201abc93eebf2d8b13326870c3c", size = 9315126, upload-time = "2025-08-28T18:22:46.537Z" },
+]
+
+[[package]]
+name = "wagtail-honeypot"
+version = "1.2.0"
+source = { git = "https://github.com/Luzzzi/wagtail-honeypot?rev=feature%2Fi18n-required-honeypot#39908237c320cd8a3568a9ee6bff039bc89f3b66" }
+dependencies = [
+    { name = "wagtail" },
 ]
 
 [[package]]
