@@ -1,10 +1,7 @@
 import iframeResize from "@iframe-resizer/parent"
 import { URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE } from "../js/helpers"
-<<<<<<< HEAD
 import { iframeResizer } from "@iframe-resizer/child"
-=======
 import { generateBackLink } from "./helpers"
->>>>>>> 4bbf3544 (Add to formulaire and carte)
 
 const script = document.currentScript as HTMLScriptElement
 const slug = script?.dataset?.objet
