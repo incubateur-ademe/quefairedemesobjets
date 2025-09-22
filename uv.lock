@@ -3198,7 +3198,7 @@ requires-dist = [
     { name = "requests", specifier = ">=2.32.4,<3" },
     { name = "sentry-sdk", specifier = ">=2.37.0,<3" },
     { name = "shortuuid", specifier = ">=1.0.13,<2" },
-    { name = "sites-faciles-experiment", directory = "../sites-faciles" },
+    { name = "sites-faciles-experiment", specifier = "~=2.1.0rc5" },
     { name = "tqdm", specifier = ">=4.67.1,<5" },
     { name = "unidecode", specifier = ">=1.4.0,<2" },
     { name = "wagtail-honeypot", git = "https://github.com/Luzzzi/wagtail-honeypot?rev=feature%2Fi18n-required-honeypot" },
@@ -3601,7 +3601,7 @@ wheels = [
 [[package]]
 name = "sites-faciles-experiment"
 version = "2.1.0rc5"
-source = { directory = "../sites-faciles" }
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "beautifulsoup4" },
     { name = "boto3" },
@@ -3626,44 +3626,9 @@ dependencies = [
     { name = "wagtail-modeladmin" },
     { name = "wagtailmenus" },
 ]
-
-[package.metadata]
-requires-dist = [
-    { name = "beautifulsoup4", specifier = ">=4.13.4" },
-    { name = "boto3", specifier = "==1.35.99" },
-    { name = "dj-database-url", specifier = ">=3.0.0" },
-    { name = "dj-static", specifier = ">=0.0.6" },
-    { name = "django", specifier = ">=5.2.3" },
-    { name = "django-dsfr", specifier = ">=2.4.0" },
-    { name = "django-storages", extras = ["s3"], specifier = ">=1.14.6" },
-    { name = "django-taggit", specifier = ">=6.1.0" },
-    { name = "faker", specifier = ">=37.4.0" },
-    { name = "gunicorn", specifier = ">=23.0.0" },
-    { name = "icalendar", specifier = ">=6.3.1" },
-    { name = "mozilla-django-oidc", specifier = ">=4.0.1" },
-    { name = "psycopg2-binary", specifier = ">=2.9.10" },
-    { name = "python-dotenv", specifier = ">=1.1.0" },
-    { name = "pyyaml", specifier = ">=6.0.2" },
-    { name = "rust-just", specifier = ">=1.40.0" },
-    { name = "unidecode", specifier = ">=1.4.0" },
-    { name = "wagtail", specifier = ">=7.0.1" },
-    { name = "wagtail-localize", specifier = ">=1.12.1" },
-    { name = "wagtail-markdown", specifier = ">=0.12.1" },
-    { name = "wagtail-modeladmin", specifier = ">=2.2.0" },
-    { name = "wagtailmenus", specifier = ">=4.0.3" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "black", specifier = ">=25.1.0" },
-    { name = "coverage", specifier = ">=7.9.1" },
-    { name = "django-compressor", specifier = ">=4.5.1" },
-    { name = "django-debug-toolbar", specifier = ">=5.2.0" },
-    { name = "djlint", specifier = ">=1.36.4" },
-    { name = "ipython", specifier = ">=9.3.0" },
-    { name = "pre-commit", specifier = ">=4.2.0" },
-    { name = "ruff", specifier = ">=0.12.0" },
-    { name = "tblib", specifier = ">=3.1.0" },
+sdist = { url = "https://files.pythonhosted.org/packages/52/5b/2a19d6a7f690e0217804a6713b6b776c40ac0dd289603ee655141a9a6ac5/sites_faciles_experiment-2.1.0rc5.tar.gz", hash = "sha256:84326aa194a1b1547bf054d5b51d4799341b4429d248fd649d17a810652df144", size = 2576729, upload-time = "2025-09-18T15:14:42.577Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/fe/a5/666bf12f104db08ed8c643d3c90ac6f62890bbcede6c1563a342e24d9373/sites_faciles_experiment-2.1.0rc5-py3-none-any.whl", hash = "sha256:88eac33f4a61836e22e6e826b0c3381d8d65a9a23c73e070a4c7066041460184", size = 2878248, upload-time = "2025-09-18T15:14:40.661Z" },
 ]
 
 [[package]]
