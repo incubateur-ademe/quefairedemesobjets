@@ -57,7 +57,10 @@ def display_exclusivite_reparation(acteur):
 def hide_object_filter(context):
     """Template tag to replace jinja2_handler.hide_object_filter"""
     request = context["request"]
-    return bool(request.GET.get("sc_id"))
+    return (
+        bool(request.GET.get("sc_id"))
+        and request.GET.get("map_container_id") != "carte"
+    )
 
 
 @register.simple_tag(takes_context=True)
