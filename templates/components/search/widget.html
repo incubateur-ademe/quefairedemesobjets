@@ -4,30 +4,32 @@ https://github.com/django/django/blob/main/django/forms/templates/django/forms/w
 
 It is used mainly for styles, to add clasnames.
 {% endcomment %}
-<label for="{{ widget.attrs.id }}" class="qf-sr-only">Entrez un déchet :</label>
-<input
-    class="qf-pl-1w qf-pr-2w
-    qf-rounded-r-full
-    qf-ml-1w
-    focus:qf-outline-none
-    focus:qf-ring-inset focus:qf-ring-blue-france-sun-113-625-hover
-    focus:qf-ring
-    qf-w-full
-    qf-text-base
-    md:group-data-[home]:qf-text-2xl
-    qf-text-grey-425 qf-font-bold
-    placeholder:qf-text-grey-425
-    "
-    autocomplete="off"
-    autocorrect="off"
-    autocapitalize="off"
-    spellcheck="false"
-    placeholder="Entrez un objet ou un déchet"
-    type="{{ widget.type }}"
-    name="{{ widget.name }}"{% if widget.value != None %}
-    value="{{ widget.value|stringformat:'s' }}"{% endif %}
-    data-action="search#submitForm keydown.enter->search#submitFirstItem"
-    data-search-target="input"
-    role="search"
-    {% include "django/forms/widgets/attrs.html" %}
->
+
+<div class="fr-search-bar" role="search">
+    <label class="fr-label" for="{{ widget.attrs.id }}">
+        Rechercher, {{ widget.attrs.label }}
+    </label>
+    <input
+        class="fr-input"
+        aria-describedby="search-input-messages"
+        id="search-input"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+        placeholder="Entrez un objet ou un déchet"
+        type="{{ widget.type }}"
+        name="{{ widget.name }}"{% if widget.value != None %}
+        value="{{ widget.value|stringformat:'s' }}"{% endif %}
+        data-action="search#submitForm keydown.enter->search#submitFirstItem"
+        data-search-target="input"
+        type="search"
+        role="search"
+        {% include "django/forms/widgets/attrs.html" %}
+    >
+    <div class="fr-messages-group" id="search-input-messages" aria-live="polite">
+    </div>
+    <button title="Rechercher" type="button" class="fr-btn" data-action="click->search#submitFirstItem">
+        Rechercher
+    </button>
+</div>
