@@ -22,3 +22,4 @@ runs:
         key: venv-dev-airflow-${{ hashFiles('uv.lock') }}
     - name: Install the project dependencies
       run: uv sync --only-dev
+      shell: bash
