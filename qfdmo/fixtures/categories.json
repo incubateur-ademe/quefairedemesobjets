@@ -175,8 +175,6 @@
             "electromenager"
         ],
         "code": "gros_electromenager_refrigerant",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "EEE - Electroménager avec liquide frigorifique - BR"
@@ -192,8 +190,6 @@
             "electromenager"
         ],
         "code": "gros_electromenager_hors_refrigerant",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Antenne parabolique"
@@ -227,8 +223,6 @@
             "electromenager"
         ],
         "code": "petit_electromenager",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Sextoy électrique"
@@ -283,8 +277,6 @@
             "image_son_et_informatique"
         ],
         "code": "ecran",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Equipements électriques et électroniques - Ecrans - Bonus Réparation"
@@ -303,8 +295,6 @@
             "image_son_et_informatique"
         ],
         "code": "materiel_informatique",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Equipements électriques et électroniques - Matériel informatique - Bonus Réparation"
@@ -329,8 +319,6 @@
             "image_son_et_informatique"
         ],
         "code": "materiel_hifi_et_video",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Baladeur"
@@ -349,8 +337,6 @@
             "image_son_et_informatique"
         ],
         "code": "smartphone_tablette_et_console",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Téléphone mobile"
@@ -369,8 +355,6 @@
             "image_son_et_informatique"
         ],
         "code": "materiel_photo_et_cinema",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Appareil photo numérique"
@@ -389,8 +373,6 @@
             "image_son_et_informatique"
         ],
         "code": "autre_equipement_electronique",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "GPS"
@@ -406,8 +388,6 @@
             "livres_et_multimedia"
         ],
         "code": "cd_dvd_et_jeu_video",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "CD/DVD, cassette (avec ou sans boîtier), Disque vinyle"
@@ -426,8 +406,6 @@
             "livres_et_multimedia"
         ],
         "code": "livre",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Livre"
@@ -443,8 +421,6 @@
             "equipements_de_loisir"
         ],
         "code": "instrument_de_musique",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": []
     }
 },
@@ -456,8 +432,6 @@
             "bricolage_et_jardinage"
         ],
         "code": "outil_de_bricolage_et_jardinage",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Outil manuel (bricolage, jardinage)"
@@ -497,8 +471,6 @@
             "equipements_de_loisir"
         ],
         "code": "accessoire_et_meuble_de_jardin",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Barbecue à combustible"
@@ -517,8 +489,6 @@
             "mobilier_et_decoration"
         ],
         "code": "meuble",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Ameublement - Bonus réparation"
@@ -558,8 +528,6 @@
             "mobilier_et_decoration"
         ],
         "code": "decoration",
-        "afficher": true,
-        "afficher_carte": false,
         "qfdmd_produits": []
     }
 },
@@ -571,8 +539,6 @@
             "mobilier_et_decoration"
         ],
         "code": "luminaire",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Lampe (ou luminaire) sans ampoule"
@@ -591,8 +557,6 @@
             "mobilier_et_decoration"
         ],
         "code": "vaisselle",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Urne cinéraire vide"
@@ -620,8 +584,6 @@
             "vetements_et_accessoires"
         ],
         "code": "linge_de_maison",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Linge de maison"
@@ -643,8 +605,6 @@
             "produits_divers"
         ],
         "code": "puericulture",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Poussette"
@@ -660,8 +620,6 @@
             "equipements_de_loisir"
         ],
         "code": "jouet",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Jouets - Bonus réparation"
@@ -680,8 +638,6 @@
             "vetements_et_accessoires"
         ],
         "code": "vetement",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Vêtements - Sous-vêtements"
@@ -712,8 +668,6 @@
             "vetements_et_accessoires"
         ],
         "code": "maroquinerie",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Sac en coton (tissu)"
@@ -735,8 +689,6 @@
             "vetements_et_accessoires"
         ],
         "code": "chaussures",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Sabots"
@@ -758,8 +710,6 @@
             "bijoux_montre_horlogerie"
         ],
         "code": "bijou_et_montre",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Bijou fantaisie (accessoires de mode)"
@@ -778,8 +728,6 @@
             "equipements_de_loisir"
         ],
         "code": "velo",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Sport et Loisirs - VAE - Bonus réparation"
@@ -798,8 +746,6 @@
             "equipements_de_loisir"
         ],
         "code": "materiel_de_sport_hors_velo",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Article de sport"
@@ -845,8 +791,6 @@
             "aides_techniques"
         ],
         "code": "materiel_medical",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Fauteuil roulant"
@@ -862,8 +806,6 @@
             "materiau_de_construction_du_batiment"
         ],
         "code": "materiau_du_batiment_reemployable",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Remorque pour véhicule"
@@ -882,8 +824,6 @@
             "bricolage_et_jardinage"
         ],
         "code": "machines_et_appareils_motorises_thermiques",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Tondeuse à gazon thermique"
@@ -899,8 +839,6 @@
             "electromenager"
         ],
         "code": "cartouches",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Cartouche d'impression (à jet d'encre, laser)"
@@ -916,8 +854,6 @@
             "batteries_et_piles_portables"
         ],
         "code": "batteries_et_piles_portables",
-        "afficher": false,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Batterie (hors batterie de voiture)"
@@ -939,8 +875,6 @@
             "petits_appareils_extincteurs"
         ],
         "code": "petits_appareils_extincteurs",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Petit extincteur à poudre ou à mousse (moins de 2 kg ou 2 L)"
@@ -956,8 +890,6 @@
             "pchim_dds"
         ],
         "code": "abj_outillage_du_peintre_usage",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Outillage du peintre (bricolage)"
@@ -973,8 +905,6 @@
             "pchim_dds"
         ],
         "code": "produits_chimiques_solvants",
-        "afficher": false,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Essence de térébenthine"
@@ -1005,8 +935,6 @@
             "pchim_dds"
         ],
         "code": "dechets_de_produits_chimiques",
-        "afficher": false,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Nettoyant cheminée"
@@ -1058,8 +986,6 @@
             "pchim_dds"
         ],
         "code": "dechets_phytosanitaires_menagers_produits_chimiques",
-        "afficher": false,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Répulsif"
@@ -1105,8 +1031,6 @@
             "pchim_dds"
         ],
         "code": "dechets_de_peintures_vernis_encres_et_colles_produits_chimiques",
-        "afficher": false,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Eau souillée"
@@ -1152,8 +1076,6 @@
             "pchim_dds"
         ],
         "code": "produits_pyrotechniques",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Fumigène"
@@ -1169,8 +1091,6 @@
             "pchim_dds"
         ],
         "code": "dechets_de_produits_chimiques_basiques",
-        "afficher": false,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Allume-feu"
@@ -1192,8 +1112,6 @@
             "pchim_dds"
         ],
         "code": "dechets_de_produits_chimiques_acides",
-        "afficher": false,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Acide"
@@ -1209,8 +1127,6 @@
             "panneaux_photovoltaiques"
         ],
         "code": "panneaux_photovoltaiques",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Panneaux photovoltaïques"
@@ -1226,8 +1142,6 @@
             "mobilier_et_decoration"
         ],
         "code": "decorations_textiles_elements_d_ameublement",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Tapis"
@@ -1246,8 +1160,6 @@
             "mobilier_et_decoration"
         ],
         "code": "literie_elements_d_ameublement",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Literie"
@@ -1263,8 +1175,6 @@
             "mobilier_et_decoration"
         ],
         "code": "rembourres_d_assise_ou_de_couchage_elements_d_ameublement",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Matelas (en mousse, à ressorts...)"
@@ -1283,8 +1193,6 @@
             "mobilier_et_decoration"
         ],
         "code": "sieges_elements_d_ameublement",
-        "afficher": true,
-        "afficher_carte": false,
         "qfdmd_produits": []
     }
 },
@@ -1296,8 +1204,6 @@
             "materiau_de_construction_du_batiment"
         ],
         "code": "bois_pmcb_produits_et_materiaux_de_construction_du_batiment",
-        "afficher": false,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Matériaux du bâtiment en bois"
@@ -1325,8 +1231,6 @@
             "materiau_de_construction_du_batiment"
         ],
         "code": "dechets_dangereux_de_pmcb_produits_et_materiaux_de_construction_du_batiment",
-        "afficher": false,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Amiante"
@@ -1342,8 +1246,6 @@
             "materiau_de_construction_du_batiment"
         ],
         "code": "huisseries_produits_et_materiaux_de_construction_du_batiment",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Vitre"
@@ -1362,8 +1264,6 @@
             "materiau_de_construction_du_batiment"
         ],
         "code": "laine_de_roche_produits_et_materiaux_de_construction_du_batiment",
-        "afficher": false,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Laine de roche"
@@ -1379,8 +1279,6 @@
             "materiau_de_construction_du_batiment"
         ],
         "code": "laine_de_verre_produits_et_materiaux_de_construction_du_batiment",
-        "afficher": false,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Laine de verre"
@@ -1396,8 +1294,6 @@
             "materiau_de_construction_du_batiment"
         ],
         "code": "mélange_d_inertes_produits_et_materiaux_de_construction_du_batiment",
-        "afficher": false,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Matériaux de construction"
@@ -1434,8 +1330,6 @@
             "materiau_de_construction_du_batiment"
         ],
         "code": "metal_pmcb_produits_et_materiaux_de_construction_du_batiment",
-        "afficher": false,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Matériaux du bâtiment en métal"
@@ -1466,8 +1360,6 @@
             "materiau_de_construction_du_batiment"
         ],
         "code": "plastiques_pmcb_produits_et_materiaux_de_construction_du_batiment",
-        "afficher": false,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Matériaux du bâtiment en plastique"
@@ -1495,8 +1387,6 @@
             "materiau_de_construction_du_batiment"
         ],
         "code": "platre_pmcb_produits_et_materiaux_de_construction_du_batiment",
-        "afficher": false,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Plâtre"
@@ -1512,8 +1402,6 @@
             "materiau_de_construction_du_batiment"
         ],
         "code": "beton_pmcb_produits_et_materiaux_de_construction_du_batiment",
-        "afficher": false,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Béton"
@@ -1529,8 +1417,6 @@
             "materiau_de_construction_du_batiment"
         ],
         "code": "membranes_bitumineuses_pmcb_produits_et_materiaux_de_construction_du_batiment",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Membrane bitumineuse"
@@ -1546,8 +1432,6 @@
             "bateau"
         ],
         "code": "bateau",
-        "afficher": false,
-        "afficher_carte": false,
         "qfdmd_produits": []
     }
 },
@@ -1559,8 +1443,6 @@
             "aides_techniques"
         ],
         "code": "lunettes_de_vue_aides_techniques",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Lunettes"
@@ -1576,8 +1458,6 @@
             "pneu"
         ],
         "code": "pneu",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Pneu de voiture / moto / scooter"
@@ -1593,8 +1473,6 @@
             "medicaments_et_dasri"
         ],
         "code": "medicaments",
-        "afficher": false,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Médicaments"
@@ -1610,8 +1488,6 @@
             "materiau_de_construction_du_batiment"
         ],
         "code": "autres_pmcb",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Linoléum & Fibre de verre (non-recyclables)"
@@ -1630,8 +1506,6 @@
             "bricolage_et_jardinage"
         ],
         "code": "abj_electrique",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Tondeuse à gazon électrique"
@@ -1650,8 +1524,6 @@
             "jels_mobilite_electrique"
         ],
         "code": "jels_mobilite_electrique",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Voiture de course électrique (jouet)"
@@ -1673,8 +1545,6 @@
             "huiles_lubrifiantes"
         ],
         "code": "huiles_lubrifiantes",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Huile de vidange"
@@ -1693,8 +1563,6 @@
             "electromenager"
         ],
         "code": "ampoule",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Ampoule halogène"
@@ -1725,8 +1593,6 @@
             "biodechets"
         ],
         "code": "biodechets",
-        "afficher": false,
-        "afficher_carte": false,
         "qfdmd_produits": []
     }
 },
@@ -1738,8 +1604,6 @@
             "biodechets"
         ],
         "code": "dechets_verts",
-        "afficher": false,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Plante"
@@ -1788,8 +1652,6 @@
             "vehicule"
         ],
         "code": "vehicule",
-        "afficher": false,
-        "afficher_carte": false,
         "qfdmd_produits": []
     }
 },
@@ -1801,8 +1663,6 @@
             "ordures_menageres"
         ],
         "code": "encombrants_menagers_divers",
-        "afficher": false,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Cartouche ou bouteille de protoxyde d'azote"
@@ -1899,8 +1759,6 @@
             "ordures_menageres"
         ],
         "code": "palette",
-        "afficher": false,
-        "afficher_carte": false,
         "qfdmd_produits": []
     }
 },
@@ -1912,8 +1770,6 @@
             "emballages_et_papiers_graphiques"
         ],
         "code": "bouteilles_plastique",
-        "afficher": false,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Liquide vaisselle"
@@ -1947,8 +1803,6 @@
             "emballages_et_papiers_graphiques"
         ],
         "code": "emballage_carton",
-        "afficher": false,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Carton"
@@ -1979,8 +1833,6 @@
             "emballages_et_papiers_graphiques"
         ],
         "code": "emballage_plastique",
-        "afficher": false,
-        "afficher_carte": false,
         "qfdmd_produits": []
     }
 },
@@ -1992,8 +1844,6 @@
             "emballages_et_papiers_graphiques"
         ],
         "code": "emballage_metal",
-        "afficher": false,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Bouteille de CO2 pour aquariophylie"
@@ -2024,8 +1874,6 @@
             "emballages_et_papiers_graphiques"
         ],
         "code": "autres_emballages_menagers",
-        "afficher": false,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Cosmétique (produit et emballage)"
@@ -2080,8 +1928,6 @@
             "emballages_et_papiers_graphiques"
         ],
         "code": "papiers_graphiques",
-        "afficher": false,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Papier graphique"
@@ -2109,8 +1955,6 @@
             "emballages_et_papiers_graphiques"
         ],
         "code": "emballage_verre",
-        "afficher": false,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Maquillage (emballage et produit)"
@@ -2135,8 +1979,6 @@
             "batteries_et_piles_portables"
         ],
         "code": "batterie_de_voitures_pour_demarrage",
-        "afficher": false,
-        "afficher_carte": false,
         "qfdmd_produits": []
     }
 },
@@ -2148,8 +1990,6 @@
             "batteries_et_piles_portables"
         ],
         "code": "batteries_de_mtl",
-        "afficher": false,
-        "afficher_carte": false,
         "qfdmd_produits": []
     }
 },
@@ -2161,8 +2001,6 @@
             "medicaments_et_dasri"
         ],
         "code": "dasri",
-        "afficher": false,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Cathéter"
@@ -2205,8 +2043,6 @@
             "electromenager"
         ],
         "code": "instrument_musique_electrique",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Instrument de musique électrique"
@@ -2222,8 +2058,6 @@
             "emballages_et_papiers_graphiques"
         ],
         "code": "bouchons_en_liege",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Bouchons en liège"
@@ -2239,8 +2073,6 @@
             "emballages_et_papiers_graphiques"
         ],
         "code": "emballage_reemployable",
-        "afficher": true,
-        "afficher_carte": true,
         "qfdmd_produits": [
             [
                 "Emballage réemployable"
