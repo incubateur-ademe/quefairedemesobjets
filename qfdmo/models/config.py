@@ -134,6 +134,14 @@ class CarteConfig(index.Indexed, models.Model):
         "\nSi le champ n'est pas renseigné il sera ignoré",
         blank=True,
     )
+    direction = models.ManyToManyField(
+        "qfdmo.ActionDirection",
+        verbose_name="Direction des actions",
+        help_text="Seules les actions correspondantes à la direction choisie "
+        "s'afficheront sur la carte"
+        "\nSi le champ n'est pas renseigné il sera ignoré",
+        blank=True,
+    )
 
     label = models.ManyToManyField(
         "qfdmo.LabelQualite",
