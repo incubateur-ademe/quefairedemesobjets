@@ -3,7 +3,9 @@ import json
 import pytest
 from django.urls import reverse
 
-from unit_tests.qfdmo.sscatobj_factory import ObjetFactory, SousCategorieObjetFactory
+from qfdmd.models import Synonyme
+from unit_tests.qfdmd.qfdmod_factory import ProduitFactory, SynonymeFactory
+from unit_tests.qfdmo.sscatobj_factory import SousCategorieObjetFactory
 
 
 @pytest.fixture
@@ -12,13 +14,17 @@ def sous_categorie():
 
 
 @pytest.fixture
-def objet1(sous_categorie):
-    return ObjetFactory(libelle="Test Object 1", sous_categorie=sous_categorie)
+def produit(sous_categorie):
+    produit = ProduitFactory()
+    produit.sous_categories.add(sous_categorie)
+    return produit
 
 
 @pytest.fixture
-def objet2(sous_categorie):
-    return ObjetFactory(libelle="Test Object 2", sous_categorie=sous_categorie)
+def synonymes(produit) -> list[Synonyme]:
+    synonyme1 = SynonymeFactory(nom="Test Object 1", produit=produit)
+    synonyme2 = SynonymeFactory(nom="Test Object 2", produit=produit)
+    return [synonyme1, synonyme2]
 
 
 def test_get_object_list_noquery(client):
@@ -30,7 +36,7 @@ def test_get_object_list_noquery(client):
 
 
 @pytest.mark.django_db
-def test_get_object_list(client, objet1, objet2):
+def test_get_object_list(client, synonymes):
     url = reverse("qfdmo:get_object_list")
     response = client.get(url, {"q": "Test Object"})
 
@@ -42,7 +48,7 @@ def test_get_object_list(client, objet1, objet2):
 
 
 @pytest.mark.django_db
-def test_get_object_list_most_accurate_first(client, objet1, objet2):
+def test_get_object_list_most_accurate_first(client, synonymes):
     url = reverse("qfdmo:get_object_list")
     response = client.get(url, {"q": "Test Object 2"})
 
@@ -50,11 +56,12 @@ def test_get_object_list_most_accurate_first(client, objet1, objet2):
     data = json.loads(response.content)
     assert len(data) == 2
     assert data[0]["label"] == "Test Object 2"
+    assert data[1]["label"] == "Test Object 1"
 
 
 @pytest.mark.django_db
-def test_get_object_list_sscat_not_displayed(client, sous_categorie, objet1, objet2):
-    sous_categorie.afficher = False
+def test_get_object_list_sscat_not_displayed(client, sous_categorie, synonymes):
+    sous_categorie.reemploi_possible = False
     sous_categorie.save()
     url = reverse("qfdmo:get_object_list")
     response = client.get(url, {"q": "Test Object 2"})
@@ -64,9 +71,9 @@ def test_get_object_list_sscat_not_displayed(client, sous_categorie, objet1, obj
 
 
 @pytest.mark.django_db
-def test_get_object_list_limit_to_ten(client):
+def test_get_object_list_limit_to_ten(client, produit):
     for i in range(11):
-        ObjetFactory(libelle=f"Test Object {i}")
+        SynonymeFactory(nom=f"Test Object {i}", produit=produit)
     url = reverse("qfdmo:get_object_list")
     response = client.get(url, {"q": "Test Object"})
 
