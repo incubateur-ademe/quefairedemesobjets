@@ -2,12 +2,10 @@ import logging
 from urllib.parse import urlencode
 
 from django.contrib.gis.db import models
-from django.db.models import CheckConstraint, Q
 from django.db.models.functions import Now
 from django.template.loader import render_to_string
 from django.urls.base import reverse
 from django.utils.functional import cached_property
-from django.utils.safestring import mark_safe
 from django_extensions.db.fields import AutoSlugField
 from modelcluster.contrib.taggit import ClusterTaggableManager
 from modelcluster.fields import ParentalManyToManyField
@@ -246,13 +244,6 @@ class ProduitPage(
         "Désactiver l'héritage du bonus",
         default=False,
     )
-    legacy_produit = models.ForeignKey(
-        "qfdmd.produit",
-        on_delete=models.SET_NULL,
-        related_name="produit_page",
-        blank=True,
-        null=True,
-    )
     legacy_synonyme = models.ForeignKey(
         "qfdmd.synonyme",
         on_delete=models.SET_NULL,
@@ -274,63 +265,26 @@ class ProduitPage(
     )
     commentaire = RichTextField(blank=True)
 
-    def build_streamfield_from_legacy_data(self):
-        if not self.legacy_produit and not self.legacy_synonyme and not self.infotri:
-            # TODO: test
-            return
-
-        legacy_produit_or_synonyme = None
-        infotri = None
-        if self.legacy_produit:
-            legacy_produit_or_synonyme = self.legacy_produit
-            infotri = self.legacy_produit.infotri
-
-        if self.legacy_synonyme:
-            legacy_produit_or_synonyme = self.legacy_synonyme
-            infotri = self.legacy_synonyme.produit.infotri
-
-        if infotri is not None:
-            self.infotri = [
-                ("image", {"image": block.value, "decorative": True})
-                for block in infotri
-            ]
-
-        if legacy_produit_or_synonyme is not None:
-            tabs = []
-            if text := legacy_produit_or_synonyme.mauvais_etat:
-                tabs.append(
-                    ("tabs", {"title": "Mauvais état", "content": [("text", text)]}),
-                )
-
-            if text := legacy_produit_or_synonyme.bon_etat:
-                tabs.append(
-                    ("tabs", {"title": "Bon état", "content": [("text", text)]}),
-                )
-
-            if len(tabs) > 0:
-                self.body = [("tabs", tabs), *self.body]
-
-        self.save_revision()
-
     content_panels = Page.content_panels + [
         FieldPanel("infotri"),
         FieldPanel("body"),
     ]
 
     migration_panels = [
-        HelpPanel(
-            content=mark_safe(
-                "Ces champs serviront à la migration d'un produit ou synonyme"
-                "vers la nouvelle approche. <br/>"
-                "<ol><li>1. Sélectionner un produit OU synonyme ci-dessous</li>"
-                "<li>2. Choisir <b>Migrer les produits/synonymes</b> dans la liste en"
-                "cliquant sur le bouton vert en bas à gauche</li>"
-                "<li>3. Vérifier les champs après le rechargement de la page</li>"
-                "<li>4. Publier la page courante</li></ol>",
-            ),
+        MultiFieldPanel(
+            [
+                HelpPanel(
+                    "Le champ ci-dessous servira durant la transition des produits / synonymes Django vers leur version Page Wagtail. <br/>"
+                    "Sélectioner une fiche produit dans ce champ va provoquer le déclenchement d'une redirection 301"
+                    " lorsqu'un utilisateur visitera la page synonyme du produit correspondant"
+                ),
+                InlinePanel(
+                    "legacy_produit",
+                    heading="Fiche produit à rediriger",
+                ),
+            ],
+            heading="Dépréciation des Produits / Synonymes Django",
         ),
-        FieldPanel("legacy_produit"),
-        FieldPanel("legacy_synonyme"),
         FieldPanel("commentaire"),
     ]
 
@@ -380,13 +334,6 @@ class ProduitPage(
 
     class Meta:
         verbose_name = "Produit"
-        constraints = [
-            CheckConstraint(
-                condition=Q(legacy_produit__isnull=True)
-                | Q(legacy_synonyme__isnull=True),
-                name="no_produit_and_synonyme_filled_in_parallel",
-            ),
-        ]
 
 
 class FamilyPageTag(TaggedItemBase):
@@ -478,6 +425,26 @@ class SynonymePage(
 
 # LEGACY MODELS
 # ==============
+class LegacyIntermediateProduitPage(models.Model):
+    page = ParentalKey(
+        "wagtailcore.page",
+        on_delete=models.CASCADE,
+        related_name="legacy_produit",
+    )
+    produit = models.ForeignKey(
+        "qfdmd.produit",
+        unique=True,
+        on_delete=models.CASCADE,
+        related_name="next_wagtail_page",
+    )
+
+    panels = [FieldPanel("produit")]
+
+    class Meta:
+        verbose_name = "Fiche produit"
+        verbose_name_plural = "Fiches produit"
+
+
 class AbstractBaseProduit(NomAsNaturalKeyModel):
     modifie_le = models.DateTimeField(auto_now=True, db_default=Now())
     # Le nom des champs conserve ici délibérément l'ancienne nomenclature,
@@ -504,7 +471,7 @@ class AbstractBaseProduit(NomAsNaturalKeyModel):
 
     class Meta:
         abstract = True
-        ordering = ("-modifie_le",)
+        ordering = ("id",)
 
 
 @register_snippet
@@ -785,9 +752,13 @@ class Suggestion(models.Model):
 
 @register_setting
 class EmbedSettings(BaseGenericSetting):
-    backlink_assistant = RichTextField("Backlink de l'iframe de l'assistant")
-    backlink_carte = RichTextField("Backlink de l'iframe de la carte")
-    backlink_formulaire = RichTextField("Backlink de l'iframe du formulaire")
+    backlink_assistant = RichTextField(
+        "Backlink de l'iframe de l'assistant", blank=True
+    )
+    backlink_carte = RichTextField("Backlink de l'iframe de la carte", blank=True)
+    backlink_formulaire = RichTextField(
+        "Backlink de l'iframe du formulaire", blank=True
+    )
 
     panels = [
         MultiFieldPanel(

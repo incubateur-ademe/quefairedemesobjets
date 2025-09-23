@@ -40,7 +40,9 @@ class SearchForm(DsfrBaseForm):
         return self.results
 
     def _search_pages(self, search_query: str):
-        return ProduitPage.objects.autocomplete(search_query)
+        return list(
+            ProduitPage.objects.live().autocomplete(search_query)
+        ) + self._search_legacy_synonymes(search_query)
 
     def _search_legacy_synonymes(self, search_query: str):
         return list(

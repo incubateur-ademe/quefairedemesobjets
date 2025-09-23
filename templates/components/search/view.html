@@ -1,3 +1,4 @@
+{% load qfdmd_tags %}
 {% with id=search_form.id.value %}
 <turbo-frame id="{{ id }}">
     <div
@@ -53,7 +54,7 @@
         >
             {% if search_form.results %}
                 {% for result in search_form.results %}
-                    {% if beta %}
+                    {% if result.content_type|is_page %}
                         {% include "./_search_result_beta.html" %}
                     {% else %}
                         {% include "./_search_result.html" %}

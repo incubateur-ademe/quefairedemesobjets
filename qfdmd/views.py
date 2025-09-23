@@ -3,7 +3,7 @@ import re
 from typing import Any
 
 from django.contrib import messages
-from django.http import HttpResponse
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control
@@ -128,6 +128,17 @@ class HomeView(AssistantBaseView, ListView):
 class SynonymeDetailView(AssistantBaseView, DetailView):
     template_name = "pages/produit.html"
     model = Synonyme
+
+    def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        if (
+            is_beta(request.user)
+            and self.get_object().produit.next_wagtail_page.exists()
+        ):
+            return redirect(
+                self.get_object().produit.next_wagtail_page.first().page.url
+            )
+
+        return super().get(request, *args, **kwargs)
 
 
 # WAGTAIL
