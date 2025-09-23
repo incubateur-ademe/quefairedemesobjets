@@ -47,6 +47,9 @@ jobs:
           key: venv-dev-airflow-${{ hashFiles('uv.lock') }}
       - name: Install the project dependencies
         run: uv sync --only-dev
+      - name: Install Scalingo CLI
+        run: |
+          curl -O https://cli-dl.scalingo.com/install && bash install
       - name: Login Scalingo CLI
         run: scalingo login --api-token "${DUPLICATE_API_TOKEN}"
       - name: Use CLI
