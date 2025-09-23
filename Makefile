@@ -201,11 +201,11 @@ extract-dsfr:
 
 .PHONY: drop-schema-public
 drop-schema-public:
-	docker compose exec lvao-webapp-db psql -U webapp -d webapp -c "DROP SCHEMA IF EXISTS public CASCADE;"
+	psql -d "$(DB_URL)" -c "DROP SCHEMA IF EXISTS public CASCADE;"
 
 .PHONY: create-schema-public
 create-schema-public:
-	docker compose exec lvao-webapp-db psql -U webapp -d webapp -c "CREATE SCHEMA IF NOT EXISTS public;"
+	psql -d "$(DB_URL)" -c "CREATE SCHEMA IF NOT EXISTS public;"
 
 .PHONY: psql
 psql:
@@ -214,6 +214,10 @@ psql:
 .PHONY: dump-production
 dump-production:
 	sh scripts/infrastructure/backup-db.sh
+
+.PHONY: dump-production-quiet
+dump-production-quiet:
+	sh scripts/infrastructure/backup-db.sh --quiet
 
 # We need to create extensions because they are not restored by pg_restore
 .PHONY: create-sql-extensions
@@ -233,6 +237,13 @@ db-restore:
 	make load-production-dump
 	make migrate
 	make create-remote-db-server
+
+.PHONY: db-restore-preprod
+db-restore-preprod:
+	make dump-production-quiet
+	make drop-schema-public
+	make create-schema-public
+	make load-production-dump
 
 .PHONY: db-restore-for-tests
 db-restore-for-tests:
