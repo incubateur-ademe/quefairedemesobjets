@@ -4,12 +4,8 @@ description: Build Parcel assets
 runs:
   using: composite
   steps:
-<<<<<<< HEAD
     - uses: actions/setup-node@v5
       shell: bash
-=======
-    - uses: actions/setup-node@v4
->>>>>>> 7391bd1a (backport changes)
       with:
         node-version-file: ".tool-versions"
         cache: "npm"
