@@ -51,7 +51,7 @@ class GenreNombreModel(models.Model):
     )
 
     @cached_property
-    def pronom(self):
+    def pronom(self) -> str:
         if self.nombre == self.Nombre.PLURIEL:
             return "mes"
         if self.genre == self.Genre.FEMININ:
