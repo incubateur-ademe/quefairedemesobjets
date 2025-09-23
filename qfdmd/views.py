@@ -14,6 +14,8 @@ from wagtail.admin.viewsets.chooser import ChooserViewSet
 from wagtail.admin.viewsets.model import ModelViewSet
 from wagtail.models import Page
 
+from core.notion import create_new_row_in_notion_table
+from core.utils import has_explicit_perm
 from core.views import static_file_content_from
 from qfdmd.forms import SearchForm
 from qfdmd.models import Bonus, ReusableContent, Suggestion, Synonyme
@@ -58,7 +60,7 @@ def search_view(request) -> HttpResponse:
 
     beta = False
     if request.user.is_authenticated:
-        beta = request.user.has_perm("wagtailadmin.can_see_beta_search")
+        beta = has_explicit_perm(request.user, "wagtailadmin.can_see_beta_search")
 
     form = SearchForm(request.GET, **form_kwargs)
     context = {"beta": beta, "prefix": form_kwargs, "prefix_key": prefix_key}
