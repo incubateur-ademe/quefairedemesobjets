@@ -4,11 +4,18 @@ from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from pydantic import ValidationError
-from sites_faciles.forms.models import FormPage
+from wagtail.contrib.forms.models import FormSubmission
 
 from core.notion import ContactFormData, create_new_row_in_notion_table
 
-submission_class = FormPage().get_submission_class()
+# Warning : this could change if Sites Faciles creates their
+# own form submission class.
+# Using FormPage.get_submission_class would raise a warning
+# as it could access the db before django apps are ready.
+#
+# So be aware of this if Notion integration breaks at some point.
+# TODO: add a test that checks that FormPage().get_submission_class() == FormSubmission
+submission_class = FormSubmission
 
 logger = logging.getLogger(__name__)
 
