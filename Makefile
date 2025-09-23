@@ -199,13 +199,15 @@ extract-dsfr:
 	$(PYTHON) ./dsfr_hacks/extract_used_colors.py
 	$(PYTHON) ./dsfr_hacks/extract_used_icons.py
 
+.SILENT:
 .PHONY: drop-schema-public
 drop-schema-public:
-	psql -d "$(DB_URL)" -c "DROP SCHEMA IF EXISTS public CASCADE;"
+	psql -d '$(DB_URL)' -c "DROP SCHEMA IF EXISTS public CASCADE;"
 
+.SILENT:
 .PHONY: create-schema-public
 create-schema-public:
-	psql -d "$(DB_URL)" -c "CREATE SCHEMA IF NOT EXISTS public;"
+	psql -d '$(DB_URL)' -c "CREATE SCHEMA IF NOT EXISTS public;"
 
 .PHONY: psql
 psql:
@@ -223,11 +225,12 @@ dump-production-quiet:
 .PHONY: create-sql-extensions
 create_sql_extensions:
 
+.SILENT:
 .PHONY: load-production-dump
 load-production-dump:
 	@DUMP_FILE=$$(find tmpbackup -type f -name "*.custom" -print -quit); \
-	psql -d "$(DB_URL)" -f scripts/sql/create_extensions.sql && \
-	pg_restore -d "$(DB_URL)" --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
+	psql -d '$(DB_URL)' -f scripts/sql/create_extensions.sql && \
+	pg_restore -d '$(DB_URL)' --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
 
 .PHONY: db-restore
 db-restore:
