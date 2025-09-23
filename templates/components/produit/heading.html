@@ -32,7 +32,7 @@
         <h1 class="qf-m-0 {% block title_classes %}{% endblock %}">
             {% block title_content %}
                 {% firstof label title as title %}
-                <span class="qf-text-black">Que faire de mon</span> <span class="qf-text-green-menthe-sun-373-moon-652">
+                <span class="qf-text-black">Que faire de {{ pronom|default:"mon" }}</span> <span class="qf-text-green-menthe-sun-373-moon-652">
                     {{ title }}
                 </span>
             {% endblock title_content %}

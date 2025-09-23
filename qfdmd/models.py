@@ -50,6 +50,14 @@ class GenreNombreModel(models.Model):
         "Nombre", null=True, blank=True, choices=Nombre.choices
     )
 
+    @cached_property
+    def pronom(self):
+        if self.nombre == self.Nombre.PLURIEL:
+            return "mes"
+        if self.genre == self.Genre.FEMININ:
+            return "ma"
+        return "mon"
+
     class Meta:
         abstract = True
 
@@ -274,9 +282,12 @@ class ProduitPage(
         MultiFieldPanel(
             [
                 HelpPanel(
-                    "Le champ ci-dessous servira durant la transition des produits / synonymes Django vers leur version Page Wagtail. <br/>"
-                    "Sélectioner une fiche produit dans ce champ va provoquer le déclenchement d'une redirection 301"
-                    " lorsqu'un utilisateur visitera la page synonyme du produit correspondant"
+                    "Le champ ci-dessous servira durant la transition des "
+                    "produits / synonymes Django vers leur version Page Wagtail."
+                    "<br/> Sélectioner une fiche produit dans ce champ va "
+                    "provoquer le déclenchement d'une redirection 301"
+                    " lorsqu'un utilisateur visitera la page synonyme "
+                    "du produit correspondant"
                 ),
                 InlinePanel(
                     "legacy_produit",
