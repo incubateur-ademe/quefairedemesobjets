@@ -3172,7 +3172,7 @@ docs = [
 [package.metadata]
 requires-dist = [
     { name = "api-insee", specifier = "~=1.6" },
-    { name = "boto3", specifier = "<1.36" },
+    { name = "boto3", specifier = "<1.41" },
     { name = "detect-secrets", specifier = ">=1.5.0" },
     { name = "diff-match-patch", specifier = ">=20241021,<20241022" },
     { name = "dj-database-url", specifier = ">=3.0.1,<4" },
