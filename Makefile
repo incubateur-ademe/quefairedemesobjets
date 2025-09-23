@@ -200,6 +200,12 @@ extract-dsfr:
 	$(PYTHON) ./dsfr_hacks/extract_used_icons.py
 
 .SILENT:
+.PHONY: drop-all-tables
+drop-all-tables:
+	@echo "Removing all tables, views, functions, etc. from the public schema..."
+	psql -d '$(DB_URL)' -f scripts/sql/drop_all_tables.sql
+
+.SILENT:
 .PHONY: drop-schema-public
 drop-schema-public:
 	psql -d '$(DB_URL)' -c "DROP SCHEMA IF EXISTS public CASCADE;"
@@ -244,8 +250,7 @@ db-restore:
 .PHONY: db-restore-preprod
 db-restore-preprod:
 	make dump-production-quiet
-	make drop-schema-public
-	make create-schema-public
+	make drop-all-tables
 	make load-production-dump
 
 .PHONY: db-restore-for-tests
