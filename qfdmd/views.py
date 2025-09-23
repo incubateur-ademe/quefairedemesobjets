@@ -18,7 +18,7 @@ from core.notion import create_new_row_in_notion_table
 from core.utils import has_explicit_perm
 from core.views import static_file_content_from
 from qfdmd.forms import SearchForm
-from qfdmd.models import Bonus, ReusableContent, Suggestion, Synonyme
+from qfdmd.models import Bonus, ProduitIndexPage, ReusableContent, Suggestion, Synonyme
 
 logger = logging.getLogger(__name__)
 
@@ -49,6 +49,12 @@ def get_assistant_script(request):
 SEARCH_VIEW_TEMPLATE_NAME = "components/search/view.html"
 
 
+def is_beta(user):
+    if user.is_authenticated:
+        return has_explicit_perm(user, "wagtailadmin.can_see_beta_search")
+    return False
+
+
 def search_view(request) -> HttpResponse:
     prefix_key = next(
         (key for key in request.GET.dict().keys() if key.endswith("-id")), ""
@@ -58,10 +64,7 @@ def search_view(request) -> HttpResponse:
     if prefix := request.GET[prefix_key]:
         form_kwargs.update(prefix=prefix, initial={"id": prefix})
 
-    beta = False
-    if request.user.is_authenticated:
-        beta = has_explicit_perm(request.user, "wagtailadmin.can_see_beta_search")
-
+    beta = is_beta(request.user)
     form = SearchForm(request.GET, **form_kwargs)
     context = {"beta": beta, "prefix": form_kwargs, "prefix_key": prefix_key}
     template_name = SEARCH_VIEW_TEMPLATE_NAME
@@ -94,6 +97,7 @@ class HomeView(AssistantBaseView, ListView):
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
+
         context.update(
             accordion={
                 "id": "professionels",
@@ -108,6 +112,16 @@ class HomeView(AssistantBaseView, ListView):
                 "</a>.",
             }
         )
+
+        if is_beta(self.request.user):
+            # The ProduitIndexPage is unique and is the future homepage.
+            # It holds a body field that renders DSFR blocks.
+            # At the moment it is only available to beta testers
+            # but once it will be release to all users, the current homeview
+            # will be deprecated and the context will be directly pulled from
+            # the Wagtail page.
+            context.update(page=ProduitIndexPage.objects.first())
+
         return context
 
 
