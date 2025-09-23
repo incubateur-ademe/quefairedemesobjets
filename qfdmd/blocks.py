@@ -14,45 +14,38 @@ from wagtail.snippets.blocks import SnippetChooserBlock
 logger = logging.getLogger(__name__)
 
 
-COMMON_CUSTOM_BLOCKS = {
-    "reusable": SnippetChooserBlock(
-        "qfdmd.reusablecontent",
-        label="Contenu réutilisable",
-        template="blocks/reusable.html",
-    ),
-    "carte_sur_mesure": SnippetChooserBlock(
-        "qfdmo.CarteConfig",
-        label="Carte sur mesure",
-        template="blocks/carte.html",
-    ),
-    "liens": blocks.ListBlock(
-        SnippetChooserBlock("qfdmd.Lien", label="Lien"),
-        label="Liste de liens",
-        template="blocks/liens.html",
-    ),
-}
-
-
 class WagtailBlockChoiceBlock(blocks.StaticBlock):
     # Deprecated, kept to prevent migrations failure
     pass
 
 
-class CustomBlockMixin:
+class CustomBlockMixin(CommonStreamBlock):
     """Mixin to add common custom blocks to any block class."""
 
-    def __init_subclass__(cls, **kwargs):
-        super().__init_subclass__(**kwargs)
-        for name, block in COMMON_CUSTOM_BLOCKS.items():
-            setattr(cls, name, block)
+    reusable = SnippetChooserBlock(
+        "qfdmd.reusablecontent",
+        label="Contenu réutilisable",
+        template="blocks/reusable.html",
+    )
+    carte_sur_mesure = SnippetChooserBlock(
+        "qfdmo.CarteConfig",
+        label="Carte sur mesure",
+        template="blocks/carte.html",
+    )
+    liens = blocks.ListBlock(
+        SnippetChooserBlock("qfdmd.Lien", label="Lien"),
+        label="Liste de liens",
+        template="blocks/liens.html",
+    )
 
 
-class ExtendedCommonStreamBlock(CustomBlockMixin, CommonStreamBlock):
-    pass
-
-
-class ColumnBlock(CustomBlockMixin, sites_faciles_blocks.ColumnBlock):
-    pass
+class ColumnBlock(CustomBlockMixin):
+    card = sites_faciles_blocks.VerticalCardBlock(
+        label=_("Vertical card"), group=_("DSFR components")
+    )
+    contact_card = sites_faciles_blocks.VerticalContactCardBlock(
+        label=_("Contact card"), group=_("Extra components")
+    )
 
 
 class TabBlock(sites_faciles_blocks.TabBlock):
@@ -72,8 +65,29 @@ class Bonus(blocks.StaticBlock):
 STREAMFIELD_COMMON_BLOCKS = [
     *SITES_FACILES_BLOCKS,
     ("bonus", Bonus()),
-    ("reusable", COMMON_CUSTOM_BLOCKS["reusable"]),
-    ("carte_sur_mesure", COMMON_CUSTOM_BLOCKS["carte_sur_mesure"]),
-    ("liens", COMMON_CUSTOM_BLOCKS["liens"]),
+    (
+        "reusable",
+        SnippetChooserBlock(
+            "qfdmd.reusablecontent",
+            label="Contenu réutilisable",
+            template="blocks/reusable.html",
+        ),
+    ),
+    (
+        "carte_sur_mesure",
+        SnippetChooserBlock(
+            "qfdmo.CarteConfig",
+            label="Carte sur mesure",
+            template="blocks/carte.html",
+        ),
+    ),
+    (
+        "liens",
+        blocks.ListBlock(
+            SnippetChooserBlock("qfdmd.Lien", label="Lien"),
+            label="Liste de liens",
+            template="blocks/liens.html",
+        ),
+    ),
     ("tabs", TabsBlock(label=_("Tabs"), group=_("DSFR components"))),
 ]

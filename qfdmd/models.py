@@ -366,7 +366,7 @@ class ProduitPage(
         ],
     )
 
-    search_fields = [
+    search_fields = Page.search_fields + [
         index.AutocompleteField("title"),
         index.RelatedFields("synonymes", [index.AutocompleteField("nom")]),
     ]
