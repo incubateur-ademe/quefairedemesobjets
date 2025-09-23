@@ -192,6 +192,13 @@ class TitleFields(models.Model):
 
 class ProduitIndexPage(CompiledFieldMixin, Page):
     subpage_types = ["qfdmd.produitpage", "qfdmd.familypage"]
+    body = StreamField(
+        STREAMFIELD_COMMON_BLOCKS,
+        verbose_name="Corps de texte",
+        blank=True,
+    )
+
+    content_panels = Page.content_panels + [FieldPanel("body")]
 
     class Meta:
         verbose_name = "Index des familles & produits"

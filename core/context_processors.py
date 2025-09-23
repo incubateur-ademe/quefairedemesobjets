@@ -47,7 +47,7 @@ def global_context(request) -> dict:
 
     return {
         **base,
-        "search_form": search_form,
+        "header_search_form": search_form,
         "home_search_form": home_search_form,
         **constants.ASSISTANT,
     }

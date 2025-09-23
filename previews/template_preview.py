@@ -347,7 +347,7 @@ class AccessibilitePreview(LookbookPreview):
         ## À vérifier :
         - [ ] Le contour de la recherche doit être en couleur #53918C
         """
-        context = {"search_form": SearchForm()}
+        context = {"header_search_form": SearchForm()}
         return render_to_string("components/search/view.html", context)
 
     def P01_10_2(self, **kwargs):
@@ -361,7 +361,7 @@ class AccessibilitePreview(LookbookPreview):
         ## À vérifier
         - [ ] Avec le CSS désactivé, le label rechercher du bouton s'affiche
         """
-        context = {"search_form": SearchForm()}
+        context = {"header_search_form": SearchForm()}
         return render_to_string("components/search/view.html", context)
 
     def P01_10_7(self, **kwargs):
@@ -377,7 +377,7 @@ class AccessibilitePreview(LookbookPreview):
         ## À vérifier
         - [ ] Le focus du champ de recherche affiche un contour bleu bien visible
         """
-        context = {"search_form": SearchForm()}
+        context = {"header_search_form": SearchForm()}
         return render_to_string("components/search/view.html", context)
 
     def P01_13_8(self, **kwargs):
