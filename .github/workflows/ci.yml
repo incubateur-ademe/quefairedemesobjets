@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: ./.github/workflows/composite/setup-python
+      - uses: ./.github/actions/setup-python
 
       - name: Install Terragrunt and OpenTofu
         uses: gruntwork-io/terragrunt-action@95fc057922e3c3d4cc021a81a213f088f333ddef
@@ -58,8 +58,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
-      - uses: ./.github/workflows/composite/setup-gdal
-      - uses: ./.github/workflows/composite/setup-python
+      - uses: ./.github/actions/setup-gdal
+      - uses: ./.github/actions/setup-python
         with:
           groups: dev,airflow
       - name: Run unit tests
@@ -80,7 +80,7 @@ jobs:
     needs: [frontend_linter]
     steps:
       - uses: actions/checkout@v5
-      - uses: ./.github/workflows/composite/build-frontend
+      - uses: ./.github/actions/build-frontend
       - name: Run tests
         run: npm run test
 
@@ -111,9 +111,9 @@ jobs:
           echo BASE_URL=http://localhost:8000 >> .env
           echo DEBUG=false >> .env
 
-      - uses: ./.github/workflows/composite/setup-gdal
-      - uses: ./.github/workflows/composite/build-frontend
-      - uses: ./.github/workflows/composite/setup-python
+      - uses: ./.github/actions/setup-gdal
+      - uses: ./.github/actions/build-frontend
+      - uses: ./.github/actions/setup-python
 
       - name: Prepare django, migrate, collect static files...
         run: |
