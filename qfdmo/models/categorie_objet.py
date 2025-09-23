@@ -73,7 +73,8 @@ class SousCategorieObjet(CodeAsNaturalKeyModel):
 
 class Objet(CodeAsNaturalKeyModel):
     class Meta:
-        verbose_name = "Objet - Objet"
+        verbose_name = "Objet - Objet - DEPRECATED"
+        verbose_name_plural = "Objet - Objets - DEPRECATED"
 
     id = models.AutoField(primary_key=True)
     libelle = models.CharField(max_length=255, blank=False, null=False)
