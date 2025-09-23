@@ -1,4 +1,11 @@
 {% extends "qfdmd/base.html" %}
+{% comment %}
+This overrides the base.html used by Sites Faciles.
+At the moment, Sites Faciles does not namespace this template and
+our package does not handle this.
+
+This template should be touched cautiously.
+{% endcomment %}
 
 {% block main %}
 {% block content %}{% endblock %}
