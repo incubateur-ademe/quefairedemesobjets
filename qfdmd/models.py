@@ -555,7 +555,7 @@ class Produit(index.Indexed, AbstractBaseProduit):
 
     @cached_property
     def sous_categorie_with_carte_display(self):
-        return self.sous_categories.filter(afficher_carte=True).first()
+        return self.sous_categories.first()
 
     def get_etats_descriptions(self) -> tuple[str, str] | None:
         # TODO: rename this method
@@ -576,7 +576,7 @@ class Produit(index.Indexed, AbstractBaseProduit):
     @property
     def carte_settings(self):
         # TODO : gérer plusieurs catégories ici
-        sous_categorie = self.sous_categories.filter(afficher_carte=True).first()
+        sous_categorie = self.sous_categories.first()
         if not sous_categorie:
             return {}
 

@@ -143,7 +143,7 @@ def sous_categories(request):
     """
     Liste l'ensemble des <i>sous-catégories d'objet</i> possibles pour un acteur.
     """  # noqa
-    qs = SousCategorieObjet.objects.filter(afficher=True)
+    qs = SousCategorieObjet.objects.all()
     return qs
 
 

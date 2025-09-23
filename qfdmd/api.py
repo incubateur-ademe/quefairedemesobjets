@@ -21,6 +21,4 @@ def sous_categorie_from_product(request, id: str):
     # On retourne donc la même sous_catégorie pour tous les synonymes, celle-ci
     # correspondant à la partie avant l'underscore
     id = id.split("_")[0]
-    return get_object_or_404(
-        SousCategorieObjet, qfdmd_produits__id__in=[id], afficher_carte=True
-    )
+    return get_object_or_404(SousCategorieObjet, qfdmd_produits__id__in=[id])
