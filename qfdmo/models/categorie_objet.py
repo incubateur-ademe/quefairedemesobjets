@@ -42,6 +42,7 @@ class SousCategorieObjet(CodeAsNaturalKeyModel):
         ),
         validators=[CodeValidator()],
     )
+    # FIXME : afficher is deprecated
     afficher = models.BooleanField(default=True)
     qfdmd_produits = models.ManyToManyField(
         "qfdmd.produit",
@@ -49,6 +50,7 @@ class SousCategorieObjet(CodeAsNaturalKeyModel):
         verbose_name="Produits Que Faire De Mes Déchets & Objets",
         blank=True,
     )
+    # FIXME : afficher_carte is deprecated
     afficher_carte = models.BooleanField(
         default=False,
         verbose_name="Afficher la carte dans l’assistant",
