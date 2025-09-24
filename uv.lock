@@ -1128,7 +1128,7 @@ wheels = [
 
 [[package]]
 name = "django-dsfr"
-version = "2.4.0"
+version = "3.1.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
@@ -1136,9 +1136,9 @@ dependencies = [
     { name = "django-widget-tweaks" },
     { name = "requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b8/97/27da719c708d310f2e147de5b9a432d44f9192afed5f9a5988ff20e550d3/django_dsfr-2.4.0.tar.gz", hash = "sha256:7ed256f30da90a91c9fb6a72dab4994de3df3db37aa0f363f96c959a90acead6", size = 2578857, upload-time = "2025-05-05T09:44:19.731Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ea/b6/d6fc03d28549b9f4a82fa178280557464e293b69c9aaf86c9675448a9f88/django_dsfr-3.1.0.tar.gz", hash = "sha256:ce93342064fa7ef04511b15f5c5107c9a0883b14f073a625fa9ea755e08e096d", size = 2571716, upload-time = "2025-08-26T13:55:39.011Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c3/e0/ee4c133c1e75980e9e01fe41bc57a1ed6424e7faa88c2b7c2f863c6eae6b/django_dsfr-2.4.0-py3-none-any.whl", hash = "sha256:ba79b2a40fc23946fcccac66e2448cc7bda15a2dc35cec8fd51b85c96e21b80f", size = 3170148, upload-time = "2025-05-05T09:44:18.286Z" },
+    { url = "https://files.pythonhosted.org/packages/67/98/f2c05dac97bababc0e16eb55d71dfc0fd375ec5476dad09f8d4bc1e9a718/django_dsfr-3.1.0-py3-none-any.whl", hash = "sha256:bcf68768a7e4720d98c43870ad18e1705134a8ec754bdf2411d30b5f6e482001", size = 3118866, upload-time = "2025-08-26T13:55:37.444Z" },
 ]
 
 [[package]]
@@ -3190,7 +3190,7 @@ requires-dist = [
     { name = "django", specifier = "<=5.2.5" },
     { name = "django-colorfield", specifier = ">=0.14.0,<0.15" },
     { name = "django-cors-headers", specifier = ">=4.6.0,<5" },
-    { name = "django-dsfr", specifier = ">=2.4.0,<3" },
+    { name = "django-dsfr", specifier = ">=3,<4" },
     { name = "django-extensions", specifier = "~=4.1" },
     { name = "django-import-export", extras = ["xls", "xlsx"], specifier = ">=4.3.8,<5" },
     { name = "django-lookbook", specifier = ">=1.0.2,<2" },
