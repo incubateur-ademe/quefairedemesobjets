@@ -1,6 +1,30 @@
 #!/bin/bash
 # TODO: lire l'environnement local directement pour le nom de la db
 
+# Initialiser les variables
+QUIET=false
+
+# Traitement des arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --quiet|-q)
+            QUIET=true
+            shift
+            ;;
+        --help|-h)
+            echo "Usage: $0 [--quiet|-q] [--help|-h]"
+            echo "  --quiet, -q: Ne pas poser de question de confirmation"
+            echo "  --help, -h:  Afficher cette aide"
+            exit 0
+            ;;
+        *)
+            echo "Option inconnue: $1"
+            echo "Utilisez --help pour voir les options disponibles"
+            exit 1
+            ;;
+    esac
+done
+
 # Récupérer l'ID de l'instance
 INSTANCE_ID=$(scw rdb instance list | grep "lvao-prod-webapp" | awk '{print $1}')
 TODAY=$(date +%Y%m%d)
@@ -11,15 +35,17 @@ if [ -z "$INSTANCE_ID" ]; then
     exit 1
 fi
 
-if [ -n "$EXISTING_BACKUPS" ]; then
-    echo "Un backup a déjà été effectué aujourd'hui :"
-    echo "$EXISTING_BACKUPS"
-    read -p "Voulez-vous continuer et créer un nouveau backup ? (o/n): " CONTINUE
-    if [[ "$CONTINUE" != "o" && "$CONTINUE" != "O" ]]; then
-        echo "Création de backup annulée. Utilisation du dernier backup existant"
-        # TODO: display $BACKUP_ID here and download it instead of
-        # exiting.
-        exit 0
+if [ "$QUIET" = false ]; then
+    if [ -n "$EXISTING_BACKUPS" ]; then
+        echo "Un backup a déjà été effectué aujourd'hui :"
+        echo "$EXISTING_BACKUPS"
+        read -p "Voulez-vous continuer et créer un nouveau backup ? (o/n): " CONTINUE
+        if [[ "$CONTINUE" != "o" && "$CONTINUE" != "O" ]]; then
+            echo "Création de backup annulée. Utilisation du dernier backup existant"
+            # TODO: display $BACKUP_ID here and download it instead of
+            # exiting.
+            exit 0
+        fi
     fi
 fi
 

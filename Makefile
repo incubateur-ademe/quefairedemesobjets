@@ -199,13 +199,21 @@ extract-dsfr:
 	$(PYTHON) ./dsfr_hacks/extract_used_colors.py
 	$(PYTHON) ./dsfr_hacks/extract_used_icons.py
 
+.SILENT:
+.PHONY: drop-all-tables
+drop-all-tables:
+	@echo "Removing all tables, views, functions, etc. from the public schema..."
+	psql -d '$(DB_URL)' -f scripts/sql/drop_all_tables.sql
+
+.SILENT:
 .PHONY: drop-schema-public
 drop-schema-public:
-	docker compose exec lvao-webapp-db psql -U webapp -d webapp -c "DROP SCHEMA IF EXISTS public CASCADE;"
+	psql -d '$(DB_URL)' -c "DROP SCHEMA IF EXISTS public CASCADE;"
 
+.SILENT:
 .PHONY: create-schema-public
 create-schema-public:
-	docker compose exec lvao-webapp-db psql -U webapp -d webapp -c "CREATE SCHEMA IF NOT EXISTS public;"
+	psql -d '$(DB_URL)' -c "CREATE SCHEMA IF NOT EXISTS public;"
 
 .PHONY: psql
 psql:
@@ -215,15 +223,20 @@ psql:
 dump-production:
 	sh scripts/infrastructure/backup-db.sh
 
+.PHONY: dump-production-quiet
+dump-production-quiet:
+	sh scripts/infrastructure/backup-db.sh --quiet
+
 # We need to create extensions because they are not restored by pg_restore
 .PHONY: create-sql-extensions
 create_sql_extensions:
 
+.SILENT:
 .PHONY: load-production-dump
 load-production-dump:
 	@DUMP_FILE=$$(find tmpbackup -type f -name "*.custom" -print -quit); \
-	psql -d "$(DB_URL)" -f scripts/sql/create_extensions.sql && \
-	pg_restore -d "$(DB_URL)" --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
+	psql -d '$(DB_URL)' -f scripts/sql/create_extensions.sql && \
+	pg_restore -d '$(DB_URL)' --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
 
 .PHONY: db-restore
 db-restore:
@@ -233,6 +246,12 @@ db-restore:
 	make load-production-dump
 	make migrate
 	make create-remote-db-server
+
+.PHONY: db-restore-preprod
+db-restore-preprod:
+	make dump-production-quiet
+	make drop-all-tables
+	make load-production-dump
 
 .PHONY: db-restore-for-tests
 db-restore-for-tests:
