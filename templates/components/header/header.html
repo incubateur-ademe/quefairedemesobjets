@@ -34,12 +34,15 @@
 
 {% block brand %}
 <a href="/" title="Accueil — {{ SITE_CONFIG.site_title }}" class="qf-block qf-text-sm">
-{% include "components/logo/header.html" %}
+    <div class="qf-grid qf-auto-cols-max qf-grid-flow-col qf-gap-2w">
+        {% include "./_logo_rf.html" %}
+        {% include "./_logo_ademe.html" %}
+        {% include "components/logo/header.html" %}
+    </div>
 </a>
 {% endblock brand %}
 
 {% block operator_logo %}
-    {% include './bloc-marque.html' %}
 {% endblock operator_logo %}
 
 {% block header_tools_links %}
