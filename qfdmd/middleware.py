@@ -6,7 +6,26 @@ from django.shortcuts import redirect
 from django.urls import resolve
 from wagtail.admin.viewsets.base import reverse
 
+from core.utils import has_explicit_perm
+
 logger = logging.getLogger(__name__)
+
+
+class BetaMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def _check_beta(self, request):
+        if request.user.is_authenticated:
+            request.beta = has_explicit_perm(
+                request.user, "wagtailadmin.can_see_beta_search"
+            )
+        request.beta = False
+
+    def __call__(self, request):
+        self._check_beta(request)
+        response = self.get_response(request)
+        return response
 
 
 class AssistantMiddleware:

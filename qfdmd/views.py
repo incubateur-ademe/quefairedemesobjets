@@ -15,7 +15,6 @@ from wagtail.admin.viewsets.model import ModelViewSet
 from wagtail.models import Page
 
 from core.notion import create_new_row_in_notion_table
-from core.utils import has_explicit_perm
 from core.views import static_file_content_from
 from qfdmd.forms import SearchForm
 from qfdmd.models import Bonus, ProduitIndexPage, ReusableContent, Suggestion, Synonyme
@@ -49,12 +48,6 @@ def get_assistant_script(request):
 SEARCH_VIEW_TEMPLATE_NAME = "components/search/view.html"
 
 
-def is_beta(user):
-    if user.is_authenticated:
-        return has_explicit_perm(user, "wagtailadmin.can_see_beta_search")
-    return False
-
-
 def search_view(request) -> HttpResponse:
     prefix_key = next(
         (key for key in request.GET.dict().keys() if key.endswith("-id")), ""
@@ -64,13 +57,12 @@ def search_view(request) -> HttpResponse:
     if prefix := request.GET[prefix_key]:
         form_kwargs.update(prefix=prefix, initial={"id": prefix})
 
-    beta = is_beta(request.user)
     form = SearchForm(request.GET, **form_kwargs)
-    context = {"beta": beta, "prefix": form_kwargs, "prefix_key": prefix_key}
+    context = {"prefix": form_kwargs, "prefix_key": prefix_key}
     template_name = SEARCH_VIEW_TEMPLATE_NAME
 
     if form.is_valid():
-        form.search(beta)
+        form.search(request.beta)
         context.update(search_form=form)
 
     return render(request, template_name, context=context)
@@ -113,7 +105,7 @@ class HomeView(AssistantBaseView, ListView):
             }
         )
 
-        if is_beta(self.request.user):
+        if self.request.beta:
             # The ProduitIndexPage is unique and is the future homepage.
             # It holds a body field that renders DSFR blocks.
             # At the moment it is only available to beta testers
@@ -130,10 +122,7 @@ class SynonymeDetailView(AssistantBaseView, DetailView):
     model = Synonyme
 
     def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-        if (
-            is_beta(request.user)
-            and self.get_object().produit.next_wagtail_page.exists()
-        ):
+        if request.beta and self.get_object().produit.next_wagtail_page.exists():
             return redirect(
                 self.get_object().produit.next_wagtail_page.first().page.url
             )
