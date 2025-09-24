@@ -15,15 +15,15 @@ class BetaMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
-    def _check_beta(self, request):
+    def _set_beta_mode_from(self, request):
+        request.beta = False
         if request.user.is_authenticated:
             request.beta = has_explicit_perm(
                 request.user, "wagtailadmin.can_see_beta_search"
             )
-        request.beta = False
 
     def __call__(self, request):
-        self._check_beta(request)
+        self._set_beta_mode_from(request)
         response = self.get_response(request)
         return response
 
