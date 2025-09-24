@@ -7,7 +7,7 @@
     md:qf-hidden
     {% endif %}
     "
-    href="{% block href %}{{ url }}{% endblock %}"
+    href="{% block href %}{{ url }}{% if utm_source %}?utm_source={{ utm_source }}{% endif %}{% endblock %}"
     {% if title %}title="{{ title }}"{% endif %}
     target="_blank"
     rel="noreferrer"
