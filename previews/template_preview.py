@@ -14,9 +14,9 @@ from qfdmo.models.action import Action
 from qfdmo.models.config import CarteConfig
 
 
-class SynonymeForm(forms.Form):
+class ProduitHeadingForm(forms.Form):
     """
-    This is to show how to add parameter editor to preview synonyme in heading
+    Form for produit heading with synonyme and pronom choices
     """
 
     synonyme = forms.CharField(
@@ -24,6 +24,18 @@ class SynonymeForm(forms.Form):
         max_length=100,
         help_text="Entrez le nom d'un synonyme",
         initial="",
+        required=False,
+    )
+
+    pronom = forms.ChoiceField(
+        label="Pronom",
+        choices=[
+            ("mon", "mon"),
+            ("ma", "ma"),
+            ("mes", "mes"),
+        ],
+        help_text="Choisissez le pronom",
+        initial="mon",
     )
 
 
@@ -156,21 +168,25 @@ class ComponentsPreview(LookbookPreview):
         context = {"title": "Coucou !"}
         return render_to_string("components/produit/legacy_heading.html", context)
 
-    @register_form_class(SynonymeForm)
-    def produit_heading(self, synonyme=None, **kwargs):
+    @register_form_class(ProduitHeadingForm)
+    def produit_heading(self, synonyme=None, pronom="mon", **kwargs):
         context = {"title": "Coucou !"}
 
         if synonyme:
             context.update(synonyme=synonyme)
 
+        context.update(pronom=pronom)
+
         return render_to_string("components/produit/heading.html", context)
 
-    @register_form_class(SynonymeForm)
-    def produit_heading_family(self, synonyme=None, **kwargs):
+    @register_form_class(ProduitHeadingForm)
+    def produit_heading_family(self, synonyme=None, pronom="mon", **kwargs):
         context = {"label": "youpi", "title": "Coucou !"}
 
         if synonyme:
             context.update(synonyme=synonyme)
+
+        context.update(pronom=pronom)
 
         return render_to_string("components/produit/heading_family.html", context)
 
