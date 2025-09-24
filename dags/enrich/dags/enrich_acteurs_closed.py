@@ -61,11 +61,17 @@ with DAG(
     # Instantiation
     config = enrich_config_create_task(dag)
     dbt_refresh = enrich_dbt_models_refresh_task(dag)
-    suggest_not_replaced = enrich_dbt_model_suggest_task(
+    suggest_not_replaced_unite = enrich_dbt_model_suggest_task(
         dag,
-        task_id=TASKS.ENRICH_CLOSED_SUGGESTIONS_NOT_REPLACED,
-        cohort=COHORTS.CLOSED_NOT_REPLACED,
-        dbt_model_name=DBT.MARTS_ENRICH_AE_CLOSED_NOT_REPLACED,
+        task_id=TASKS.ENRICH_CLOSED_SUGGESTIONS_NOT_REPLACED_UNITE,
+        cohort=COHORTS.CLOSED_NOT_REPLACED_UNITE,
+        dbt_model_name=DBT.MARTS_ENRICH_AE_CLOSED_NOT_REPLACED_UNITE,
+    )
+    suggest_not_replaced_etablissement = enrich_dbt_model_suggest_task(
+        dag,
+        task_id=TASKS.ENRICH_CLOSED_SUGGESTIONS_NOT_REPLACED_ETABLISSEMENT,
+        cohort=COHORTS.CLOSED_NOT_REPLACED_ETABLISSEMENT,
+        dbt_model_name=DBT.MARTS_ENRICH_AE_CLOSED_NOT_REPLACED_ETABLISSEMENT,
     )
     suggest_other_siren = enrich_dbt_model_suggest_task(
         dag,
@@ -82,6 +88,7 @@ with DAG(
 
     # Graph
     config >> dbt_refresh  # type: ignore
-    dbt_refresh >> suggest_not_replaced  # type: ignore
+    dbt_refresh >> suggest_not_replaced_unite  # type: ignore
+    dbt_refresh >> suggest_not_replaced_etablissement  # type: ignore
     dbt_refresh >> suggest_other_siren  # type: ignore
     dbt_refresh >> suggest_same_siren  # type: ignore

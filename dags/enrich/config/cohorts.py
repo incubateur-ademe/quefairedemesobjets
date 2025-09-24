@@ -5,7 +5,10 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class COHORTS:
-    CLOSED_NOT_REPLACED = "🚪 Acteurs Fermés: 🔴 non remplacés"
+    CLOSED_NOT_REPLACED_UNITE = "🚪 Acteurs Fermés: 🔴 non remplacés - unité fermée"
+    CLOSED_NOT_REPLACED_ETABLISSEMENT = (
+        "🚪 Acteurs Fermés: 🔴 non remplacés - établissement fermé"
+    )
     CLOSED_REP_OTHER_SIREN = (
         "🚪 Acteurs Fermés: 🟡 remplacés par SIRET d'un autre SIREN"
     )
