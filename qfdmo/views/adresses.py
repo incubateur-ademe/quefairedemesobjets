@@ -574,8 +574,10 @@ def getorcreate_revisionacteur(request, acteur_identifiant):
 
 
 @require_GET
-def get_object_list(request):
+def get_synonyme_list(request):
     query = request.GET.get("q")
+    only_reemploi = bool(request.GET.get("only_reemploi"))
+
     if not query:
         return JsonResponse([], safe=False)
 
@@ -589,15 +591,17 @@ def get_object_list(request):
         Synonyme.objects.annotate(
             nom_unaccent=Unaccent(Lower("nom")),
         )
-        .distinct()
         .prefetch_related("produit__sous_categories")
         .annotate(
             distance=TrigramWordDistance(query, "nom_unaccent"),
             length=Length("nom"),
         )
-        .filter(produit__sous_categories__reemploi_possible=True)
-        .order_by("distance", "length")[:10]
+        .filter(produit__sous_categories__id__isnull=False)
+        .order_by("distance", "length")
     )
+    if only_reemploi:
+        synonymes = synonymes.filter(produit__sous_categories__reemploi_possible=True)
+    synonymes = synonymes.distinct()[:10]
 
     synonyme_list = []
     for synonyme in synonymes:

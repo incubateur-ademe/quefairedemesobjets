@@ -26,7 +26,7 @@
                 {{ form.action_list }}
 
                 {# Recherche Objet #}
-                {% include 'qfdmo/_addresses_partials/filters/_object_filter.html' %}
+                {% include 'qfdmo/_addresses_partials/filters/_object_filter.html' with only_reemploi=True %}
 
                 {# Recherche adresse #}
                 <div class="fr-mt-3w fr-px-1v fr-input-group">

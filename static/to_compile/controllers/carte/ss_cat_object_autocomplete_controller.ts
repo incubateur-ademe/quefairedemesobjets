@@ -4,6 +4,13 @@ import AutocompleteController from "./autocomplete_controller"
 export default class extends AutocompleteController {
   controllerName: string = "ss-cat-object-autocomplete"
 
+  static values = {
+    onlyReemploi: Boolean,
+    ...AutocompleteController.values,
+  }
+
+  declare readonly onlyReemploiValue: boolean
+
   static targets = AutocompleteController.targets.concat(["ssCat"])
   declare readonly ssCatTarget: HTMLInputElement
 
@@ -84,7 +91,11 @@ export default class extends AutocompleteController {
       this.ssCatTarget.value = ""
       return []
     }
-    return await fetch(`/qfdmo/get_object_list?q=${value}`)
+    let get_synonymes_url = `/qfdmo/get_synonyme_list?q=${value}`
+    if (this.onlyReemploiValue) {
+      get_synonymes_url += `&only_reemploi=true`
+    }
+    return await fetch(get_synonymes_url)
       .then((response) => response.json())
       .then((data) => {
         return data

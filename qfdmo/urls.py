@@ -12,7 +12,7 @@ from qfdmo.views.adresses import (
     FormulaireSearchActeursView,
     acteur_detail,
     acteur_detail_redirect,
-    get_object_list,
+    get_synonyme_list,
     getorcreate_revisionacteur,
     solution_admin,
 )
@@ -63,9 +63,9 @@ urlpatterns = [
         name="getorcreate_revisionacteur",
     ),
     path(
-        "qfdmo/get_object_list",
-        get_object_list,
-        name="get_object_list",
+        "qfdmo/get_synonyme_list",
+        get_synonyme_list,
+        name="get_synonyme_list",
     ),
     path(
         "adresse/<str:identifiant_unique>",
