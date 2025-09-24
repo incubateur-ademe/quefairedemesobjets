@@ -17,6 +17,7 @@ from wagtail.admin.panels import (
     InlinePanel,
     MultiFieldPanel,
     ObjectList,
+    PageChooserPanel,
     TabbedInterface,
 )
 from wagtail.contrib.settings.models import (
@@ -759,6 +760,26 @@ class Suggestion(models.Model):
 
     def __str__(self) -> str:
         return str(self.produit)
+
+
+@register_setting
+class FormPageValidationSettings(BaseGenericSetting):
+    form_page = models.ForeignKey(
+        "wagtailcore.Page",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="Sélectionnez la page de formulaire utilisée pour "
+        " le formulaire de contact. Celle-ci doit avoir exactement 4 champs",
+    )
+
+    panels = [
+        PageChooserPanel("form_page", "sites_faciles_forms.FormPage"),
+    ]
+
+    class Meta:
+        verbose_name = "Paramètres des pages de formulaire"
 
 
 @register_setting

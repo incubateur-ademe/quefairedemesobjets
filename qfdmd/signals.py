@@ -4,6 +4,7 @@ from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from pydantic import ValidationError
+from sites_faciles.forms.models import FormPage
 from wagtail.contrib.forms.models import FormSubmission
 
 from core.notion import ContactFormData, create_new_row_in_notion_table
@@ -40,3 +41,35 @@ def submit_sites_faciles_form(sender, instance, created, **kwargs):
             # log or return the errors to user
             logger.error(exception.json())
             return
+
+
+@receiver(post_save, sender=FormPage)
+def validate_form_page_fields(sender, form_page: FormPage, created, **kwargs):
+    """
+    Validate that the FormPage has exactly 4 fields when it matches
+    the configured page in FormPageValidationSettings.
+
+    These 4 fields are used in Notion bridge in core/notion.py and
+    in the signal above.
+    """
+    from qfdmd.models import FormPageValidationSettings
+
+    settings_instance = FormPageValidationSettings.objects.first()
+    if not settings_instance.form_page:
+        return
+
+    # Check if this is the configured form page
+    if form_page.pk != settings_instance.form_page.pk:
+        return
+
+    # Get the form fields count
+    form_fields = form_page.get_form_fields()
+    field_count = len(form_fields)
+
+    if field_count != 4:
+        error_message = (
+            f"The form page '{form_page.title}' must have exactly "
+            f"4 fields, but has {field_count}. This error is "
+            "silently logged but should be addressed quickly."
+        )
+        logger.error(error_message)
