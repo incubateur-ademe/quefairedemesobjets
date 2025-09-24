@@ -61,7 +61,7 @@ jobs:
       - uses: ./.github/actions/setup-gdal
       - uses: ./.github/actions/setup-python
         with:
-          groups: dev,airflow
+          flags: --group dev --group airflow
       - name: Run unit tests
         run: make unit-test
       - name: Run integration tests

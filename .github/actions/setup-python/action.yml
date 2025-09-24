@@ -2,10 +2,9 @@ name: Install Python dependencies
 description: Install Python dependencies
 
 inputs:
-  groups:
-    description: "Comma-separated groups to install with uv"
+  flags:
+    description: "Flag to pass to uv sync command"
     required: false
-    default: "dev"
 
 runs:
   using: "composite"
@@ -21,5 +20,7 @@ runs:
         path: ./.venv
         key: venv-dev-airflow-${{ hashFiles('uv.lock') }}
     - name: Install the project dependencies
-      run: uv sync --only-dev
+      run: uv sync $FLAGS
       shell: bash
+      env:
+        FLAGS: ${{ inputs.flags }}
