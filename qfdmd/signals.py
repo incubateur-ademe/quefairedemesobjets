@@ -44,7 +44,7 @@ def submit_sites_faciles_form(sender, instance, created, **kwargs):
 
 
 @receiver(post_save, sender=FormPage)
-def validate_form_page_fields(sender, form_page: FormPage, created, **kwargs):
+def validate_form_page_fields(sender, instance: FormPage, created, **kwargs):
     """
     Validate that the FormPage has exactly 4 fields when it matches
     the configured page in FormPageValidationSettings.
@@ -59,16 +59,16 @@ def validate_form_page_fields(sender, form_page: FormPage, created, **kwargs):
         return
 
     # Check if this is the configured form page
-    if form_page.pk != settings_instance.form_page.pk:
+    if instance.pk != settings_instance.form_page.pk:
         return
 
     # Get the form fields count
-    form_fields = form_page.get_form_fields()
+    form_fields = instance.get_form_fields()
     field_count = len(form_fields)
 
     if field_count != 4:
         error_message = (
-            f"The form page '{form_page.title}' must have exactly "
+            f"The form page '{instance.title}' must have exactly "
             f"4 fields, but has {field_count}. This error is "
             "silently logged but should be addressed quickly."
         )
