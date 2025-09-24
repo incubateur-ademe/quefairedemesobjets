@@ -14,7 +14,6 @@ from wagtail.admin.viewsets.chooser import ChooserViewSet
 from wagtail.admin.viewsets.model import ModelViewSet
 from wagtail.models import Page
 
-from core.notion import create_new_row_in_notion_table
 from core.views import static_file_content_from
 from qfdmd.forms import SearchForm
 from qfdmd.models import Bonus, ProduitIndexPage, ReusableContent, Suggestion, Synonyme
