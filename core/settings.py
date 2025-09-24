@@ -141,6 +141,7 @@ MIDDLEWARE = [
     "qfdmd.middleware.AssistantMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "qfdmd.middleware.BetaMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -190,10 +191,7 @@ with suppress(ModuleNotFoundError):
 
         return path_is_not_excluded
 
-    patterns_to_exclude = [
-        "/test_iframe",
-        "/lookbook",
-    ]
+    patterns_to_exclude = ["/test_iframe", "/lookbook", "/cms"]
     DEBUG_TOOLBAR_CONFIG = {
         "SHOW_TOOLBAR_CALLBACK": show_toolbar_callback,
         "HIDE_IN_STACKTRACES": CONFIG_DEFAULTS["HIDE_IN_STACKTRACES"] + ("sentry_sdk",),

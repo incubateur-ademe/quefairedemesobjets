@@ -3,7 +3,7 @@ import re
 from typing import Any
 
 from django.contrib import messages
-from django.http import HttpResponse
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control
@@ -16,7 +16,7 @@ from wagtail.models import Page
 
 from core.views import static_file_content_from
 from qfdmd.forms import SearchForm
-from qfdmd.models import Bonus, ReusableContent, Suggestion, Synonyme
+from qfdmd.models import Bonus, ProduitIndexPage, ReusableContent, Suggestion, Synonyme
 
 logger = logging.getLogger(__name__)
 
@@ -56,16 +56,12 @@ def search_view(request) -> HttpResponse:
     if prefix := request.GET[prefix_key]:
         form_kwargs.update(prefix=prefix, initial={"id": prefix})
 
-    beta = False
-    if request.user.is_authenticated:
-        beta = request.user.has_perm("wagtailadmin.can_see_beta_search")
-
     form = SearchForm(request.GET, **form_kwargs)
-    context = {"beta": beta, "prefix": form_kwargs, "prefix_key": prefix_key}
+    context = {"prefix": form_kwargs, "prefix_key": prefix_key}
     template_name = SEARCH_VIEW_TEMPLATE_NAME
 
     if form.is_valid():
-        form.search(beta)
+        form.search(request.beta)
         context.update(search_form=form)
 
     return render(request, template_name, context=context)
@@ -92,6 +88,7 @@ class HomeView(AssistantBaseView, ListView):
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
+
         context.update(
             accordion={
                 "id": "professionels",
@@ -106,12 +103,29 @@ class HomeView(AssistantBaseView, ListView):
                 "</a>.",
             }
         )
+
+        if self.request.beta:
+            # The ProduitIndexPage is unique and is the future homepage.
+            # It holds a body field that renders DSFR blocks.
+            # At the moment it is only available to beta testers
+            # but once it will be release to all users, the current homeview
+            # will be deprecated and the context will be directly pulled from
+            # the Wagtail page.
+            context.update(page=ProduitIndexPage.objects.first())
+
         return context
 
 
 class SynonymeDetailView(AssistantBaseView, DetailView):
     template_name = "pages/produit.html"
     model = Synonyme
+
+    def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        if request.beta:
+            if intermediate_page := self.get_object().produit.next_wagtail_page.first():
+                return redirect(intermediate_page.page.url)
+
+        return super().get(request, *args, **kwargs)
 
 
 # WAGTAIL

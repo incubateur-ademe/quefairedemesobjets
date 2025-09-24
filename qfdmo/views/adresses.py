@@ -104,6 +104,7 @@ class SearchActeursView(
         initial["latitude"] = self.request.GET.get("latitude")
         # TODO: refacto forms : delete this line
         initial["longitude"] = self.request.GET.get("longitude")
+
         # TODO: refacto forms : delete this line
         initial["label_reparacteur"] = self.request.GET.get("label_reparacteur")
         initial["epci_codes"] = self.request.GET.getlist("epci_codes")

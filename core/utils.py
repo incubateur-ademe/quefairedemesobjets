@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.auth.models import Permission
 from django.db import connections
 from django.utils.encoding import force_str
 from django.utils.functional import Promise
@@ -134,3 +135,26 @@ def create_schema_warehouse_public_in_webapp_db():
         db_user=settings.DATABASES["warehouse"]["USER"],
         db_password=settings.DATABASES["warehouse"]["PASSWORD"],
     )
+
+
+def has_explicit_perm(user, perm_str):
+    """
+    use in place of has_perm, avoid to return always true for superadmin
+    https://docs.djangoproject.com/en/5.2/ref/contrib/auth/#django.contrib.auth.models.User.has_perm
+    """
+    app_label, codename = perm_str.split(".")
+    try:
+        perm = Permission.objects.get(
+            codename=codename, content_type__app_label=app_label
+        )
+    except Permission.DoesNotExist:
+        return False
+
+    if perm in user.user_permissions.all():
+        return True
+
+    for group in user.groups.all():
+        if perm in group.permissions.all():
+            return True
+
+    return False

@@ -17,6 +17,11 @@ logger = logging.getLogger(__name__)
 
 
 @register.filter
+def is_page(potential_page):
+    return isinstance(potential_page, Page)
+
+
+@register.filter
 def genre_nombre_from(reusable_content: ReusableContent, page):
     """Retrieves reusable content based on page genre and nombre.
 
