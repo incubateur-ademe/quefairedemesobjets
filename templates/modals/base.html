@@ -22,11 +22,11 @@
                         <button class="fr-btn--close fr-btn" title="Fermer la fenêtre modale" aria-controls="fr-modal-{{ id }}">Fermer</button>
                     </div>
                     <div class="fr-modal__content">
-                        <h1 id="fr-modal-title-{{ id }}" class=" fr-modal__title">
+                        <h2 id="fr-modal-title-{{ id }}" class=" fr-modal__title">
                             {% block modal_title %}
                             titre de la modale
                             {% endblock modal_title %}
-                        </h1>
+                        </h2>
                         {% block modal_content %}
                         <p>lorem ipsum dolor sit amet, consectetur adipiscing elit. maecenas varius tortor nibh, sit amet tempor nibh finibus et. aenean eu enim justo. vestibulum aliquam hendrerit molestie. mauris malesuada nisi sit amet augue accumsan tincidunt. maecenas tincidunt, velit ac porttitor pulvinar, tortor eros facilisis libero, vitae commodo nunc quam et ligula. ut nec ipsum sapien. interdum et malesuada fames ac ante ipsum primis in faucibus. integer id nisi nec nulla luctus lacinia non eu turpis. etiam in ex imperdiet justo tincidunt egestas. ut porttitor urna ac augue cursus tincidunt sit amet sed orci.</p>
                         {% endblock modal_content %}
