@@ -1,7 +1,8 @@
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
+from django.contrib.auth.models import AnonymousUser, User
 from django.test import RequestFactory
-from django.contrib.auth.models import User, AnonymousUser
 
 from qfdmd.middleware import BetaMiddleware
 
@@ -37,7 +38,9 @@ def anonymous_user():
 
 class TestBetaMiddleware:
     @patch("qfdmd.middleware.has_explicit_perm")
-    def test_set_beta_mode_from_anonymous_user(self, mock_has_explicit_perm, beta_middleware, request_factory, anonymous_user):
+    def test_set_beta_mode_from_anonymous_user(
+        self, mock_has_explicit_perm, beta_middleware, request_factory, anonymous_user
+    ):
         request = request_factory.get("/")
         request.user = anonymous_user
 
@@ -48,7 +51,11 @@ class TestBetaMiddleware:
 
     @patch("qfdmd.middleware.has_explicit_perm")
     def test_set_beta_mode_from_authenticated_user_without_permission(
-        self, mock_has_explicit_perm, beta_middleware, request_factory, authenticated_user
+        self,
+        mock_has_explicit_perm,
+        beta_middleware,
+        request_factory,
+        authenticated_user,
     ):
         mock_has_explicit_perm.return_value = False
         request = request_factory.get("/")
@@ -63,7 +70,11 @@ class TestBetaMiddleware:
 
     @patch("qfdmd.middleware.has_explicit_perm")
     def test_set_beta_mode_from_authenticated_user_with_permission(
-        self, mock_has_explicit_perm, beta_middleware, request_factory, authenticated_user
+        self,
+        mock_has_explicit_perm,
+        beta_middleware,
+        request_factory,
+        authenticated_user,
     ):
         mock_has_explicit_perm.return_value = True
         request = request_factory.get("/")
@@ -93,7 +104,11 @@ class TestBetaMiddleware:
 
     @patch("qfdmd.middleware.has_explicit_perm")
     def test_call_with_authenticated_user_with_permission(
-        self, mock_has_explicit_perm, beta_middleware, request_factory, authenticated_user
+        self,
+        mock_has_explicit_perm,
+        beta_middleware,
+        request_factory,
+        authenticated_user,
     ):
         mock_has_explicit_perm.return_value = True
         request = request_factory.get("/")

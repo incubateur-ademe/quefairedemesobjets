@@ -15,7 +15,6 @@ from wagtail.admin.viewsets.model import ModelViewSet
 from wagtail.models import Page
 
 from core.notion import create_new_row_in_notion_table
-from core.utils import has_explicit_perm
 from core.views import static_file_content_from
 from qfdmd.forms import SearchForm
 from qfdmd.models import Bonus, ProduitIndexPage, ReusableContent, Suggestion, Synonyme
@@ -47,7 +46,6 @@ def get_assistant_script(request):
 
 
 SEARCH_VIEW_TEMPLATE_NAME = "components/search/view.html"
-
 
 
 def search_view(request) -> HttpResponse:
