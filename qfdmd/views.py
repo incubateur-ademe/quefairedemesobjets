@@ -2,23 +2,20 @@ import logging
 import re
 from typing import Any
 
-from django.conf import settings
 from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
-from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control
 from django.views.decorators.vary import vary_on_headers
-from django.views.generic import DetailView, FormView, ListView
+from django.views.generic import DetailView, ListView
 from queryish.rest import APIModel
 from wagtail.admin.viewsets.chooser import ChooserViewSet
 from wagtail.admin.viewsets.model import ModelViewSet
 from wagtail.models import Page
 
-from core.notion import create_new_row_in_notion_table
 from core.views import static_file_content_from
-from qfdmd.forms import ContactForm, SearchForm
+from qfdmd.forms import SearchForm
 from qfdmd.models import Bonus, ReusableContent, Suggestion, Synonyme
 
 logger = logging.getLogger(__name__)
@@ -72,23 +69,6 @@ def search_view(request) -> HttpResponse:
         context.update(search_form=form)
 
     return render(request, template_name, context=context)
-
-
-class ContactFormView(FormView):
-    template_name = "forms/contact.html"
-    form_class = ContactForm
-    success_url = reverse_lazy("qfdmd:nous-contacter-confirmation")
-
-    def form_valid(self, form):
-        cleaned_data = form.cleaned_data
-        submitted_subject = cleaned_data.get("subject")
-        cleaned_data["subject"] = dict(self.form_class().fields["subject"].choices)[
-            submitted_subject
-        ]
-        create_new_row_in_notion_table(
-            settings.NOTION.get("CONTACT_FORM_DATABASE_ID"), cleaned_data
-        )
-        return super().form_valid(form)
 
 
 class AssistantBaseView:
