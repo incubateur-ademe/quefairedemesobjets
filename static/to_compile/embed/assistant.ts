@@ -6,14 +6,14 @@ import { generateBackLink } from "./helpers"
 const script = document.currentScript as HTMLScriptElement
 const slug = script?.dataset?.objet
 const epci = script?.dataset?.epci
-let origin = new URL(script?.getAttribute("src")).origin
+let baseUrl = new URL(script?.getAttribute("src")).origin
 
 if (process.env.BASE_URL) {
-  origin = process.env.BASE_URL
+  baseUrl = process.env.BASE_URL
 }
 
 async function initScript() {
-  const parts = [origin]
+  const parts = [baseUrl]
   const iframeResizerOptions: iframeResizer.IFramePageOptions = {
     license: "GPLv3",
     id: "quefairedemesdechets-assistant",
@@ -53,7 +53,7 @@ async function initScript() {
   }
 
   script.parentNode?.insertBefore(iframe, script)
-  await generateBackLink(iframe, "assistant")
+  await generateBackLink(iframe, "assistant", baseUrl)
   iframe.onload = () => {
     iframeResize(iframeResizerOptions, iframe)
   }
