@@ -1,6 +1,6 @@
 # Builder python
 # --- --- --- ---
-FROM apache/airflow:3.1.3 AS python-builder
+FROM apache/airflow:3.0.6 AS python-builder
 
 # system dependencies
 USER root
@@ -19,7 +19,7 @@ RUN uv sync --group airflow
 
 # Runtime
 # --- --- --- ---
-FROM apache/airflow:slim-3.1.3-python3.13 AS scheduler
+FROM apache/airflow:3.0.6 AS dagprocessor
 
 USER root
 
@@ -44,25 +44,21 @@ COPY --from=python-builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
 # Nécessaire pour faire fonctionner Django dans Airflow
 COPY ./core/ /opt/airflow/core/
+COPY ./qfdmo/ /opt/airflow/qfdmo/
+COPY ./qfdmd/ /opt/airflow/qfdmd/
 COPY ./data/ /opt/airflow/data/
 COPY ./dbt/ /opt/airflow/dbt/
-COPY ./dsfr_hacks/ /opt/airflow/dsfr_hacks/
-COPY ./qfdmo/ /opt/airflow/qfdmo/
 COPY ./scripts/ /opt/airflow/scripts/
+COPY ./dsfr_hacks/ /opt/airflow/dsfr_hacks/
 
 # Classique Airflow
 COPY ./dags/ /opt/airflow/dags/
 COPY ./config/ /opt/airflow/config/
 COPY ./plugins/ /opt/airflow/plugins/
 
-WORKDIR /opt/airflow/dbt
+WORKDIR /opt/airflow
 USER 0
 RUN chown -R ${AIRFLOW_UID:-50000}:0 /opt/airflow/dbt
 USER ${AIRFLOW_UID:-50000}:0
 
-ENV DBT_PROFILES_DIR=/opt/airflow/dbt
-ENV DBT_PROJECT_DIR=/opt/airflow/dbt
-
-RUN dbt deps
-
-CMD ["scheduler"]
+CMD ["dag-processor"]
