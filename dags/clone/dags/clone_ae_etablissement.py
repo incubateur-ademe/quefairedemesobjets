@@ -52,7 +52,7 @@ with DAG(
             description_md="📥 URL pour télécharger les données",
         ),
         "clone_method": Param(
-            "download_to_disk_first",
+            "stream_directly",
             type="string",
             description_md=r"""📥 **Méthode de création** de la table:
             - `download_to_disk_first`: télécharge/unpack sur disque avant import DB
