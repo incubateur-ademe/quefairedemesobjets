@@ -2,8 +2,12 @@ export type BacklinkKey = "assistant" | "carte" | "formulaire"
 export async function generateBackLink(
   iframe: HTMLIFrameElement,
   key: BacklinkKey,
-  origin: string,
+  baseUrl?: null | string,
 ) {
+  if (!baseUrl) {
+    console.error("Origin is not defined or is empty")
+    return
+  }
   const backlinkTag = document.createElement("div")
   backlinkTag.setAttribute(
     "style",
@@ -11,7 +15,7 @@ export async function generateBackLink(
   )
   let backlinkContent = ""
   try {
-    const req = await fetch(`${origin}/embed/backlink?key=${key}`)
+    const req = await fetch(`${baseUrl}/embed/backlink?key=${key}`)
     backlinkContent = await req.text()
     backlinkTag.innerHTML = backlinkContent
     iframe.insertAdjacentElement("afterend", backlinkTag)
