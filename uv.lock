@@ -2880,6 +2880,11 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/6a/c0/ec2b1c8712ca690e5d61979dee872603e92b8a32f94cc1b72d53beab008a/pydantic-2.11.7-py3-none-any.whl", hash = "sha256:dde5df002701f6de26248661f6835bbe296a47bf73990135c7d07ce741b9623b", size = 444782, upload-time = "2025-06-14T08:33:14.905Z" },
 ]
 
+[package.optional-dependencies]
+email = [
+    { name = "email-validator" },
+]
+
 [[package]]
 name = "pydantic-core"
 version = "2.33.2"
@@ -3124,6 +3129,7 @@ dependencies = [
     { name = "orjson" },
     { name = "pillow" },
     { name = "psycopg2" },
+    { name = "pydantic", extra = ["email"] },
     { name = "python-decouple" },
     { name = "queryish" },
     { name = "rapidfuzz" },
@@ -3202,6 +3208,7 @@ requires-dist = [
     { name = "orjson", specifier = ">=3.11.1,<4" },
     { name = "pillow", specifier = ">=11.2.1,<12" },
     { name = "psycopg2", specifier = ">=2.9.10,<3" },
+    { name = "pydantic", extras = ["email"], specifier = ">=2.11.7" },
     { name = "python-decouple", specifier = "~=3.8" },
     { name = "queryish", specifier = ">=0.2,<0.3" },
     { name = "rapidfuzz", specifier = ">=3.13.0,<4" },
