@@ -1,5 +1,9 @@
 export type BacklinkKey = "assistant" | "carte" | "formulaire"
-export async function generateBackLink(iframe: HTMLIFrameElement, key: BacklinkKey) {
+export async function generateBackLink(
+  iframe: HTMLIFrameElement,
+  key: BacklinkKey,
+  origin: string,
+) {
   const backlinkTag = document.createElement("div")
   backlinkTag.setAttribute(
     "style",

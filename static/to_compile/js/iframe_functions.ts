@@ -35,7 +35,8 @@ export async function buildAndInsertIframeFrom(
   backlinkKey: BacklinkKey,
 ) {
   const iframe = document.createElement("iframe")
-  await generateBackLink(iframe, backlinkKey)
+  const baseUrl = new URL(scriptTag.getAttribute("src")!).origin
+  await generateBackLink(iframe, backlinkKey, baseUrl)
   for (var key in iframeAttributes) {
     iframe.setAttribute(key, iframeAttributes[key])
   }
@@ -53,7 +54,7 @@ export function getIframeAttributesAndExtra(
   let maxWidth = options?.maxWidth || "100%"
   let height = "700px"
   let route = baseRoute
-  const BASE_URL = new URL(scriptTag.getAttribute("src")!).origin
+  const baseUrl = new URL(scriptTag.getAttribute("src")!).origin
   const urlParams = new URLSearchParams()
 
   let iframeExtraAttributes: { [Property in keyof HTMLScriptElement]?: unknown } = {}
@@ -89,7 +90,7 @@ export function getIframeAttributesAndExtra(
   }
 
   const iframeAttributes = compileIframeAttributes(
-    BASE_URL,
+    baseUrl,
     urlParams,
     maxWidth,
     height,

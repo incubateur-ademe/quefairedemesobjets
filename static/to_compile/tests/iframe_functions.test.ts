@@ -18,7 +18,7 @@ describe("generateBackLink", () => {
     global.fetch = jest.fn(() => Promise.reject(new Error("Network Error")))
     const key: BacklinkKey = "carte"
 
-    await generateBackLink(iframeMock, key)
+    await generateBackLink(iframeMock, key, "")
   })
 })
 
