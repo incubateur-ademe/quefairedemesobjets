@@ -146,7 +146,7 @@ def clean_telephone(row: pd.Series, _):
     return row[["telephone"]]
 
 
-def clean_siret_and_siren(row, _):
+def clean_siret_and_siren(row: pd.Series, _) -> pd.Series:
     if "siret" in row:
         row["siret"] = clean_siret(row["siret"])
     else:
