@@ -1,8 +1,9 @@
 {% load qfdmd_tags %}
-{% page_bu_id carte.DECLARATION_ACCESSIBILITE_PAGE_ID as page %}
+{% with page=CARTE.DECLARATION_ACCESSIBILITE_PAGE_ID|as_page %}
 <a
     {# Ensure the link is not followed using turbo frame but works as a real link #}
     target="_top"
-    href="{{ page.get_full_url }}"
+    href="{{ page.full_url }}"
     class="qf-text-xs fr-link"
 >{{ page.title }}</a>
+{% endwith %}
