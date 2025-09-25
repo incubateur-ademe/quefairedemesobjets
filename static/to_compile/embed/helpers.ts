@@ -1,17 +1,13 @@
 export type BacklinkKey = "assistant" | "carte" | "formulaire"
-export async function generateBackLink(
-  iframe: HTMLIFrameElement,
-  key: BacklinkKey,
-  baseUrl: string,
-) {
+export async function generateBackLink(iframe: HTMLIFrameElement, key: BacklinkKey) {
   const backlinkTag = document.createElement("div")
   backlinkTag.setAttribute(
     "style",
-    "font-family: system-ui !important; font-size: 0.9rem; text-align: center; padding-top: 0.5rem;",
+    "font-family: system-ui; font-size: 0.9rem; text-align: center; padding-top: 0.5rem;",
   )
   let backlinkContent = ""
   try {
-    const req = await fetch(`${baseUrl}/embed/backlink?key=${key}`)
+    const req = await fetch(`${origin}/embed/backlink?key=${key}`)
     backlinkContent = await req.text()
     backlinkTag.innerHTML = backlinkContent
     iframe.insertAdjacentElement("afterend", backlinkTag)
