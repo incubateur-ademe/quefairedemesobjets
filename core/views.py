@@ -14,12 +14,15 @@ from qfdmd.models import EmbedSettings
 def backlink(request):
     key = request.GET.get("key")
     text_content = ""
-    if key == "assistant":
-        text_content = EmbedSettings.objects.first().backlink_assistant
-    if key == "carte":
-        text_content = EmbedSettings.objects.first().backlink_carte
-    if key == "formulaire":
-        text_content = EmbedSettings.objects.first().backlink_formulaire
+    try:
+        if key == "assistant":
+            text_content = EmbedSettings.objects.first().backlink_assistant
+        if key == "carte":
+            text_content = EmbedSettings.objects.first().backlink_carte
+        if key == "formulaire":
+            text_content = EmbedSettings.objects.first().backlink_formulaire
+    except (AttributeError, EmbedSettings.DoesNotExist):
+        pass
 
     return HttpResponse(mark_safe(text_content), content_type="text/plain")
 
