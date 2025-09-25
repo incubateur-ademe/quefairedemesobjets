@@ -9,7 +9,7 @@ export async function generateBackLink(
     return
   }
 
-  // Temporarily disable
+  // Temporarily disabled
   return
   const backlinkTag = document.createElement("div")
   backlinkTag.setAttribute(
