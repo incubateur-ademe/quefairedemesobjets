@@ -1,7 +1,8 @@
 {% load qfdmd_tags %}
+{% page_bu_id carte.DECLARATION_ACCESSIBILITE_PAGE_ID as page %}
 <a
     {# Ensure the link is not followed using turbo frame but works as a real link #}
     target="_top"
-    href="{% pageurl_by_id lvao.DECLARATION_ACCESSIBILITE_PAGE_ID %}"
+    href="{{ page.get_full_url }}"
     class="qf-text-xs fr-link"
->Accessibilité : partiellement conforme</a>
+>{{ page.title }}</a>
