@@ -332,38 +332,24 @@
         <article role="main" id="furo-main-content">
           <section id="devops-deploiement-operations">
 <h1>DevOps, déploiement, opérations<a class="headerlink" href="#devops-deploiement-operations" title="Lien vers cette rubrique">¶</a></h1>
-<section id="deploiement-de-la-plateforme-airflow-hors-cd">
-<h2>Déploiement de la plateforme Airflow hors CD<a class="headerlink" href="#deploiement-de-la-plateforme-airflow-hors-cd" title="Lien vers cette rubrique">¶</a></h2>
-<p>La plateforme Data est déploié automatiquement par le processus de <code class="docutils literal notranslate"><span class="pre">Continuous</span> <span class="pre">Deployment</span></code>. Cependant, il est possibel d’avoir besoin de « forcer » un déploiement.</p>
-<section id="procedure-de-deploiement">
-<h3>Procédure de déploiement<a class="headerlink" href="#procedure-de-deploiement" title="Lien vers cette rubrique">¶</a></h3>
-<section id="prerequis">
-<h4>Prérequis<a class="headerlink" href="#prerequis" title="Lien vers cette rubrique">¶</a></h4>
-<ul class="simple">
-<li><p>configururer sa clé ssh dans l’interface de clevercloud (cf. doc clevercloud)</p></li>
-<li><p>configurer un « remote repository » pour <code class="docutils literal notranslate"><span class="pre">airflow-webserver</span></code> pour ce repository et pour chaque environnemnt</p></li>
-<li><p>configurer un « remote repository » pour <code class="docutils literal notranslate"><span class="pre">airflow-scheduler</span></code> pour ce repository et pour chaque environnemnt</p></li>
-<li><p>pousser le code souhaité sur la branch master des 2 repository</p></li>
-</ul>
+<section id="continuous-delivery">
+<h2>Continuous Delivery<a class="headerlink" href="#continuous-delivery" title="Lien vers cette rubrique">¶</a></h2>
+<p>Il est possible de déployer Airflow et le site web à l’aide de workflows GitHub Actions. Il existe 2 environnements : <code class="docutils literal notranslate"><span class="pre">preprod</span></code> et <code class="docutils literal notranslate"><span class="pre">prod</span></code>.</p>
+<section id="review">
+<h3>Review<a class="headerlink" href="#review" title="Lien vers cette rubrique">¶</a></h3>
+<p>Le workflow <a class="reference external" href="https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/review.yml">review</a> est exécuté <strong>sur les pull-requests.</strong></p>
+<p>Il exécute les tests CI, build et push les images Airflow avec le tag <code class="docutils literal notranslate"><span class="pre">review</span></code> et peut déployer Airflow et l’application web lorsqu’une action manuelle est effectuée.</p>
+<p>La branche déployée est alors celle de la pull-request en environnement de <code class="docutils literal notranslate"><span class="pre">preprod</span></code>.</p>
 </section>
-<section id="en-preprod">
-<h4>en PREPROD<a class="headerlink" href="#en-preprod" title="Lien vers cette rubrique">¶</a></h4>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>remote<span class="w"> </span>add<span class="w"> </span>preprod-airflow-scheduler<span class="w"> </span>git+ssh://git@push-n3-par-clevercloud-customers.services.clever-cloud.com/app_3d1f7d89-d7f0-433a-ac01-c663d4729143.git
-git<span class="w"> </span>remote<span class="w"> </span>add<span class="w"> </span>preprod-airflow-webserver<span class="w"> </span>git+ssh://git@push-n3-par-clevercloud-customers.services.clever-cloud.com/app_d3c229bf-be85-4dbd-aca2-c8df1c6166de.git
-git<span class="w"> </span>push<span class="w"> </span>preprod-airflow-scheduler<span class="w"> </span>mabranch:master
-git<span class="w"> </span>push<span class="w"> </span>preprod-airflow-webserver<span class="w"> </span>mabranch:master
-</pre></div>
-</div>
+<section id="cd">
+<h3>CD<a class="headerlink" href="#cd" title="Lien vers cette rubrique">¶</a></h3>
+<p>Le workflow <a class="reference external" href="https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/cd.yml">cd</a> est exécuté <strong>sur les commits de la branche <code class="docutils literal notranslate"><span class="pre">main</span></code>.</strong></p>
+<p>Il exécute les tests CI, build et push les images Airflow avec le tag <code class="docutils literal notranslate"><span class="pre">preprod</span></code> et peut déployer Airflow et l’application web lorsqu’une action manuelle est effectuée. Une release est alors créée automatiquement avec le statut de <code class="docutils literal notranslate"><span class="pre">draft</span></code>.</p>
 </section>
-<section id="en-prod">
-<h4>en PROD<a class="headerlink" href="#en-prod" title="Lien vers cette rubrique">¶</a></h4>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>remote<span class="w"> </span>add<span class="w"> </span>prod-airflow-scheduler<span class="w"> </span>git+ssh://git@push-n3-par-clevercloud-customers.services.clever-cloud.com/app_fda5d606-44d9-485f-a1b4-1f7007bc3bec.git
-git<span class="w"> </span>remote<span class="w"> </span>add<span class="w"> </span>prod-airflow-webserver<span class="w"> </span>git+ssh://git@push-n3-par-clevercloud-customers.services.clever-cloud.com/app_efd2802a-1773-48e0-987e-7a6dffb929d1.git
-git<span class="w"> </span>push<span class="w"> </span>prod-airflow-scheduler<span class="w"> </span>mabranch:master
-git<span class="w"> </span>push<span class="w"> </span>prod-airflow-webserver<span class="w"> </span>mabranch:master
-</pre></div>
-</div>
-</section>
+<section id="deploy">
+<h3>Deploy<a class="headerlink" href="#deploy" title="Lien vers cette rubrique">¶</a></h3>
+<p>Le workflow <a class="reference external" href="https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/deploy.yml">deploy</a> est exécuté <strong>lorsqu’une release passe du statut de <code class="docutils literal notranslate"><span class="pre">draft</span></code> à <code class="docutils literal notranslate"><span class="pre">published</span></code>.</strong></p>
+<p>Airflow et l’application web sont alors déployés en environnement de <code class="docutils literal notranslate"><span class="pre">prod</span></code>.</p>
 </section>
 </section>
 <section id="deploiement-sur-scalingo">
@@ -380,8 +366,8 @@ git<span class="w"> </span>push<span class="w"> </span>prod-airflow-webserver<sp
 <h2>Déploiement sur CleverCloud<a class="headerlink" href="#deploiement-sur-clevercloud" title="Lien vers cette rubrique">¶</a></h2>
 <!-- TODO data plateforme -->
 </section>
-<section id="deploiment-sur-scaleway">
-<h2>Deploiment sur Scaleway<a class="headerlink" href="#deploiment-sur-scaleway" title="Lien vers cette rubrique">¶</a></h2>
+<section id="deploiement-sur-scaleway">
+<h2>Deploiement sur Scaleway<a class="headerlink" href="#deploiement-sur-scaleway" title="Lien vers cette rubrique">¶</a></h2>
 <!-- TODO s3 et bientôt plus ? -->
 </section>
 <section id="acceder-a-un-shell-en-production">
@@ -403,8 +389,8 @@ git<span class="w"> </span>push<span class="w"> </span>prod-airflow-webserver<sp
 Suivez les étapes ci-dessous pour revenir à la version précédente</p>
 <section id="rollback-des-interfaces">
 <h3>Rollback des interfaces<a class="headerlink" href="#rollback-des-interfaces" title="Lien vers cette rubrique">¶</a></h3>
-<section id="id1">
-<h4>Prérequis<a class="headerlink" href="#id1" title="Lien vers cette rubrique">¶</a></h4>
+<section id="prerequis">
+<h4>Prérequis<a class="headerlink" href="#prerequis" title="Lien vers cette rubrique">¶</a></h4>
 <ul class="simple">
 <li><p>Prévenir l’équipe du problème de prod et du rollback à venir sur Mattermost</p></li>
 <li><p>Voir avec l’administrateur des données (Christian) si des modifications récentes sont à sauvegarder avant la restauration de la base de données</p></li>
@@ -505,13 +491,10 @@ Accéder à l’administration Django et vérifier les données qui ont été re
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">DevOps, déploiement, opérations</a><ul>
-<li><a class="reference internal" href="#deploiement-de-la-plateforme-airflow-hors-cd">Déploiement de la plateforme Airflow hors CD</a><ul>
-<li><a class="reference internal" href="#procedure-de-deploiement">Procédure de déploiement</a><ul>
-<li><a class="reference internal" href="#prerequis">Prérequis</a></li>
-<li><a class="reference internal" href="#en-preprod">en PREPROD</a></li>
-<li><a class="reference internal" href="#en-prod">en PROD</a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#continuous-delivery">Continuous Delivery</a><ul>
+<li><a class="reference internal" href="#review">Review</a></li>
+<li><a class="reference internal" href="#cd">CD</a></li>
+<li><a class="reference internal" href="#deploy">Deploy</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#deploiement-sur-scalingo">Déploiement sur Scalingo</a><ul>
@@ -519,11 +502,11 @@ Accéder à l’administration Django et vérifier les données qui ont été re
 </ul>
 </li>
 <li><a class="reference internal" href="#deploiement-sur-clevercloud">Déploiement sur CleverCloud</a></li>
-<li><a class="reference internal" href="#deploiment-sur-scaleway">Deploiment sur Scaleway</a></li>
+<li><a class="reference internal" href="#deploiement-sur-scaleway">Deploiement sur Scaleway</a></li>
 <li><a class="reference internal" href="#acceder-a-un-shell-en-production">Accéder à un shell en production</a></li>
 <li><a class="reference internal" href="#rollback-revenir-a-une-version-precedente-de-l-application-deployee">Rollback: Revenir à une version précédente de l’application déployée</a><ul>
 <li><a class="reference internal" href="#rollback-des-interfaces">Rollback des interfaces</a><ul>
-<li><a class="reference internal" href="#id1">Prérequis</a></li>
+<li><a class="reference internal" href="#prerequis">Prérequis</a></li>
 <li><a class="reference internal" href="#rollback-du-code">Rollback du code</a></li>
 <li><a class="reference internal" href="#base-de-donnees">Base de données</a></li>
 <li><a class="reference internal" href="#verifier-que-la-restauration-est-effective">Vérifier que la restauration est effective</a></li>
