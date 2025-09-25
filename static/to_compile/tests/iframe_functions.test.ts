@@ -14,11 +14,20 @@ describe("generateBackLink", () => {
     jest.restoreAllMocks()
   })
 
-  it("should not exit when fetch fails and logs an error message", async () => {
-    global.fetch = jest.fn(() => Promise.reject(new Error("Network Error")))
-    const key: BacklinkKey = "carte"
+  it("should log an error and not proceed when origin is undefined or empty", async () => {
+    console.error = jest.fn() // Mock console.error to track errors
 
-    await generateBackLink(iframeMock, key)
+    // Test for undefined origin
+    await generateBackLink(iframeMock, "carte", undefined)
+    expect(console.error).toHaveBeenCalledWith("Origin is not defined or is empty")
+
+    // Test for empty string origin
+    await generateBackLink(iframeMock, "carte", "")
+    expect(console.error).toHaveBeenCalledWith("Origin is not defined or is empty")
+
+    // Test for null origin
+    await generateBackLink(iframeMock, "carte", null)
+    expect(console.error).toHaveBeenCalledWith("Origin is not defined or is empty")
   })
 })
 

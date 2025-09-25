@@ -47,12 +47,12 @@ class AddressesForm(forms.Form):
             attrs={
                 "class": "fr-input fr-icon-search-line sm:qf-w-[596px]",
                 "autocomplete": "off",
-                "aria-label": "Indiquer un objet - obligatoire",
+                "aria-label": "Indiquer un objet ou déchet - obligatoire",
             },
             data_controller="ss-cat-object-autocomplete",
         ),
         help_text="pantalon, perceuse, canapé...",
-        label="Indiquer un objet ",
+        label="Indiquer un objet ou déchet ",
         empty_label="",
         required=False,
     )
