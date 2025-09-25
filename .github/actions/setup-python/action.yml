@@ -1,0 +1,26 @@
+name: Install Python dependencies
+description: Install Python dependencies
+
+inputs:
+  flags:
+    description: "Flag to pass to uv sync command"
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-python@v6
+      with:
+        cache: "pip"
+    - name: Install uv
+      uses: astral-sh/setup-uv@b75a909f75acd358c2196fb9a5f1299a9a8868a4
+    - uses: actions/cache@v4
+      name: Define a cache for the virtual environment based on the dependencies lock file
+      with:
+        path: ./.venv
+        key: venv-dev-airflow-${{ hashFiles('uv.lock') }}
+    - name: Install the project dependencies
+      run: uv sync $FLAGS
+      shell: bash
+      env:
+        FLAGS: ${{ inputs.flags }}

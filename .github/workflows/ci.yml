@@ -9,23 +9,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
-        with:
-          cache: "pip"
-      - name: Install uv
-        uses:  astral-sh/setup-uv@b75a909f75acd358c2196fb9a5f1299a9a8868a4
-      - uses: actions/cache@v4
-        name: Define a cache for the virtual environment based on the dependencies lock file
-        with:
-          path: ./.venv
-          key: venv-dev-airflow-${{ hashFiles('uv.lock') }}
-      - name: Install the project dependencies
-        run: uv sync --only-dev
+      - uses: ./.github/actions/setup-python
+
       - name: Install Terragrunt and OpenTofu
         uses: gruntwork-io/terragrunt-action@95fc057922e3c3d4cc021a81a213f088f333ddef
         with:
-          tg_version: '0.83.2'
-          tofu_version: '1.10.3'
+          tg_version: "0.83.2"
+          tofu_version: "1.10.3"
       - name: Check code formatting
         run: make check-format
       - uses: astral-sh/ruff-action@57714a7c8a2e59f32539362ba31877a1957dded1 # v3.5.1
@@ -43,9 +33,8 @@ jobs:
         with:
           node-version-file: ".tool-versions"
           cache: "npm"
-      - name: Build assets
-        run: |
-          npm ci
+      - name: Install dependencies
+        run: npm ci
       - name: Check code formatting
         run: npm run format:check
 
@@ -69,22 +58,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
+      - uses: ./.github/actions/setup-gdal
+      - uses: ./.github/actions/setup-python
         with:
-          cache: "pip"
-      - name: Install GIS Packages
-        run: |
-          sudo apt-get update
-          sudo apt-get install gdal-bin
-      - name: Install uv
-        uses:  astral-sh/setup-uv@b75a909f75acd358c2196fb9a5f1299a9a8868a4
-      - uses: actions/cache@v4
-        name: Define a cache for the virtual environment based on the dependencies lock file
-        with:
-          path: ./.venv
-          key: venv-dev-airflow-${{ hashFiles('uv.lock') }}
-      - name: Install the project dependencies
-        run: uv sync --group dev --group airflow
+          flags: --group dev --group airflow
       - name: Run unit tests
         run: make unit-test
       - name: Run integration tests
@@ -100,22 +77,17 @@ jobs:
   frontend_tests:
     name: ✅ Frontend Tests
     runs-on: ubuntu-latest
+    needs: [frontend_linter]
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
-        with:
-          node-version-file: ".tool-versions"
-          cache: "npm"
-      - name: Build assets
-        run: |
-          npm ci
-          npm run build
+      - uses: ./.github/actions/build-frontend
       - name: Run tests
         run: npm run test
 
   e2e:
     name: tests de bout-en-bout
     runs-on: ubuntu-latest
+    needs: frontend_tests
     if: ${{ github.ref_name == 'main' || (github.event_name ==  'pull_request' && contains( github.event.pull_request.labels.*.name, 'frontend')) }}
     services:
       postgres:
@@ -133,41 +105,15 @@ jobs:
           - 6543:5432
     steps:
       - uses: actions/checkout@v5
-
       - name: Prepare environment
         run: |
           cp .env.template .env
           echo BASE_URL=http://localhost:8000 >> .env
           echo DEBUG=false >> .env
 
-      - uses: actions/setup-node@v5
-        with:
-          node-version-file: ".tool-versions"
-          cache: "npm"
-
-      - name: Build assets
-        run: |
-          npm ci
-          npm run build
-
-      - uses: actions/setup-python@v6
-        with:
-          cache: "pip"
-
-      - name: Install GIS Packages
-        run: |
-          sudo apt-get update
-          sudo apt-get install gdal-bin
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@b75a909f75acd358c2196fb9a5f1299a9a8868a4
-      - uses: actions/cache@v4
-        name: Define a cache for the virtual environment based on the dependencies lock file
-        with:
-          path: ./.venv
-          key: venv-dev-${{ hashFiles('uv.lock') }}
-      - name: Install the project dependencies
-        run: uv sync --group dev
+      - uses: ./.github/actions/setup-gdal
+      - uses: ./.github/actions/build-frontend
+      - uses: ./.github/actions/setup-python
 
       - name: Prepare django, migrate, collect static files...
         run: |
@@ -187,7 +133,21 @@ jobs:
         run: |
           uv run python manage.py runserver &
 
+      - uses: actions/cache@v4
+        name: Cache Playwright browsers
+        id: playwright-cache
+        with:
+          path: |
+            ~/.cache/ms-playwright
+            ~/.cache/playwright
+          key: playwright-browsers-${{ runner.os }}-${{ hashFiles('playwright.config.ts') }}
+          restore-keys: |
+            playwright-browsers-${{ runner.os }}-${{ hashFiles('playwright.config.ts') }}
+            playwright-browsers-${{ runner.os }}-
+            playwright-browsers-
+
       - name: Install Playwright Browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: make init-playwright
 
       - name: Run Playwright tests
