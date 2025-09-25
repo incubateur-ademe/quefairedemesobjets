@@ -33,7 +33,7 @@ def global_context(request) -> dict:
             "POSTHOG_KEY": settings.ASSISTANT["POSTHOG_KEY"],
             "MATOMO_ID": settings.ASSISTANT["MATOMO_ID"],
         },
-        "carte": {
+        "CARTE": {
             "DECLARATION_ACCESSIBILITE_PAGE_ID": settings.CARTE[
                 "DECLARATION_ACCESSIBILITE_PAGE_ID"
             ],
@@ -42,12 +42,12 @@ def global_context(request) -> dict:
         },
     }
 
-    search_form = SearchForm(prefix="header", initial={"id": "header"})
+    header_search_form = SearchForm(prefix="header", initial={"id": "header"})
     home_search_form = SearchForm(prefix="home", initial={"id": "home"})
 
     return {
         **base,
-        "search_form": search_form,
+        "header_search_form": header_search_form,
         "home_search_form": home_search_form,
         **constants.ASSISTANT,
     }

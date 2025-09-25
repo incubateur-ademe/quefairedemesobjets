@@ -19,7 +19,10 @@ class XCOMS:
 
     DF_CLOSED_REPLACED_SAME_SIREN: str = "df_acteurs_closed_replaced_same_siren"
     DF_CLOSED_REPLACED_OTHER_SIREN: str = "df_acteurs_closed_replaced_other_siren"
-    DF_CLOSED_NOT_REPLACED: str = "df_acteurs_closed_not_replaced"
+    DF_CLOSED_NOT_REPLACED_UNITE: str = "df_acteurs_closed_not_replaced_unite"
+    DF_CLOSED_NOT_REPLACED_ETABLISSEMENT: str = (
+        "df_acteurs_closed_not_replaced_etablissement"
+    )
 
     DF_READ: str = "df_read"
     DF_MATCH: str = "df_match"
@@ -44,8 +47,12 @@ def xcom_pull(ti: TaskInstance, key: str, skip_if_empty: bool = False) -> Any:
         value = ti.xcom_pull(key=key, task_ids=TASKS.ENRICH_CLOSED_REPLACED_SAME_SIREN)
     elif key == XCOMS.DF_CLOSED_REPLACED_OTHER_SIREN:
         value = ti.xcom_pull(key=key, task_ids=TASKS.ENRICH_CLOSED_REPLACED_OTHER_SIREN)
-    elif key == XCOMS.DF_CLOSED_NOT_REPLACED:
-        value = ti.xcom_pull(key=key, task_ids=TASKS.ENRICH_CLOSED_NOT_REPLACED)
+    elif key == XCOMS.DF_CLOSED_NOT_REPLACED_UNITE:
+        value = ti.xcom_pull(key=key, task_ids=TASKS.ENRICH_CLOSED_NOT_REPLACED_UNITE)
+    elif key == XCOMS.DF_CLOSED_NOT_REPLACED_ETABLISSEMENT:
+        value = ti.xcom_pull(
+            key=key, task_ids=TASKS.ENRICH_CLOSED_NOT_REPLACED_ETABLISSEMENT
+        )
     else:
         raise ValueError(f"{msg} key inconnue")
 

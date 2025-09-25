@@ -81,35 +81,6 @@
             {% block main %}
             {% endblock main %}
         </main>
-        <dialog
-            aria-labelledby="fr-modal-title-{{ contact_modal_id }}"
-            aria-modal="true"
-            role="dialog"
-            id="fr-modal-{{ contact_modal_id }}"
-            class="fr-modal z-50 qf-text-left"
-        >
-            <div class="fr-container fr-container--fluid fr-container-md">
-                <div class="fr-grid-row fr-grid-row--center">
-                    <div class="fr-col-12 fr-col-md-8 fr-col-lg-6">
-                        <div class="fr-modal__body">
-                            <div class="fr-modal__header">
-                                <button class="fr-btn--close fr-btn" title="fermer la fenêtre modale" aria-controls="fr-modal-{{ contact_modal_id }}">fermer</button>
-                            </div>
-                            <div class="fr-modal__content">
-                                <h1 id="fr-modal-title-{{ contact_modal_id }}" class=" fr-modal__title">
-                                  Nous contacter
-                                </h1>
-                                <turbo-frame id="contact-form"
-                                  src="{% url 'qfdmd:nous-contacter' %}"
-                                  loading="lazy"
-                                >
-                                </turbo-frame>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </dialog>
 
         {% block footer %}
         {% include "components/footer/footer.html" %}

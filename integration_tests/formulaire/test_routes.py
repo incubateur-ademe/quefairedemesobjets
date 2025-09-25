@@ -10,7 +10,7 @@ class TestFormulaire:
             # Formulaire home
             "/formulaire",
             # Objet search
-            "/qfdmo/get_object_list?q=auray",
+            "/qfdmo/get_synonyme_list?q=auray",
             # Formulaire map display
             "/formulaire?map_container_id=formulaire&digital=0&r=387&bounding_box=&direction=jai&action_displayed=preter|emprunter|louer|mettreenlocation|reparer|donner|echanger|acheter|revendre&action_list=preter|emprunter|louer|mettreenlocation|reparer|donner|echanger|acheter|revendre&sous_categorie_objet=Blu-ray&sc_id=95&adresse=Auray&longitude=-2.990838&latitude=47.668099&preter=on&mettreenlocation=on&reparer=on&donner=on&echanger=on&echanger=on&revendre=on&emprunter=on&louer=on&acheter=on&pas_exclusivite_reparation=on",
             # Formulaire digital acteurs

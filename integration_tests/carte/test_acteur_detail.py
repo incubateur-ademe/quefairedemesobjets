@@ -39,6 +39,21 @@ class TestDisplaySource:
 
 
 @pytest.mark.django_db
+class TestUTMSource:
+    def test_utm_source_exists(self, get_response):
+        adresse = DisplayedActeurFactory(nom="coucou", url="https://example.com")
+        response, _ = get_response(adresse.uuid)
+        assert "https://example.com?utm_source=quefairedemesobjets_ADEME" in str(
+            response.content
+        )
+
+    def test_utm_source_does_not_exist_if_no_url(self, get_response):
+        adresse = DisplayedActeurFactory(nom="coucou")
+        response, _ = get_response(adresse.uuid)
+        assert "utm_source=quefairedemesobjets_ADEME" not in str(response.content)
+
+
+@pytest.mark.django_db
 class TestDisplayNomCommercial:
     def test_nom_is_capitalized(self, get_response):
         adresse = DisplayedActeurFactory(nom="coucou", nom_commercial="")

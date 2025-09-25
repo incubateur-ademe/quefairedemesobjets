@@ -22,6 +22,7 @@ from django.views.generic.edit import FormView
 
 from core.jinja2_handler import distance_to_acteur
 from core.utils import get_direction
+from qfdmd.models import Synonyme
 from qfdmo.forms import FormulaireForm
 from qfdmo.geo_api import bbox_from_list_of_geojson, retrieve_epci_geojson
 from qfdmo.map_utils import (
@@ -29,14 +30,7 @@ from qfdmo.map_utils import (
     compile_frontend_bbox,
     sanitize_frontend_bbox,
 )
-from qfdmo.models import (
-    Acteur,
-    ActeurStatus,
-    Action,
-    DisplayedActeur,
-    Objet,
-    RevisionActeur,
-)
+from qfdmo.models import Acteur, ActeurStatus, Action, DisplayedActeur, RevisionActeur
 from qfdmo.models.action import (
     GroupeAction,
     get_action_instances,
@@ -110,6 +104,7 @@ class SearchActeursView(
         initial["latitude"] = self.request.GET.get("latitude")
         # TODO: refacto forms : delete this line
         initial["longitude"] = self.request.GET.get("longitude")
+
         # TODO: refacto forms : delete this line
         initial["label_reparacteur"] = self.request.GET.get("label_reparacteur")
         initial["epci_codes"] = self.request.GET.getlist("epci_codes")
@@ -580,35 +575,48 @@ def getorcreate_revisionacteur(request, acteur_identifiant):
 
 
 @require_GET
-def get_object_list(request):
+def get_synonyme_list(request):
     query = request.GET.get("q")
+    only_reemploi = bool(request.GET.get("only_reemploi"))
+
     if not query:
         return JsonResponse([], safe=False)
 
     query = unidecode.unidecode(query)
-    objets = (
-        Objet.objects.annotate(
-            libelle_unaccent=Unaccent(Lower("libelle")),
+    # FIXME : reemploi_possible = True should be only user for formulaire
+    # else we just need to be sure that a sous_categorie_objet is linked to the synonyme
+    # via produit
+    # FIXME : we get the first sous_categorie_objet of the synonyme but we should get
+    # all sous_categorie_objets of the synonyme and manage multi-sous_categorie_objets
+    synonymes = (
+        Synonyme.objects.annotate(
+            nom_unaccent=Unaccent(Lower("nom")),
         )
-        .prefetch_related("sous_categorie")
+        .prefetch_related("produit__sous_categories")
         .annotate(
-            distance=TrigramWordDistance(query, "libelle_unaccent"),
-            length=Length("libelle"),
+            distance=TrigramWordDistance(query, "nom_unaccent"),
+            length=Length("nom"),
         )
-        .filter(sous_categorie__afficher=True)
-        .order_by("distance", "length")[:10]
+        .filter(produit__sous_categories__id__isnull=False)
+        .order_by("distance", "length")
     )
-    object_list = [
-        {
-            "label": objet.libelle,
-            "sub_label": objet.sous_categorie.libelle,
-            "identifier": objet.sous_categorie_id,
-        }
-        for objet in objets
-    ]
+    if only_reemploi:
+        synonymes = synonymes.filter(produit__sous_categories__reemploi_possible=True)
+    synonymes = synonymes.distinct()[:10]
+
+    synonyme_list = []
+    for synonyme in synonymes:
+        if premiere_sous_categorie := synonyme.produit.sous_categories.first():
+            synonyme_list.append(
+                {
+                    "label": synonyme.nom,
+                    "sub_label": premiere_sous_categorie.libelle,
+                    "identifier": premiere_sous_categorie.id,
+                }
+            )
 
     return JsonResponse(
-        object_list,
+        synonyme_list,
         safe=False,
     )
 

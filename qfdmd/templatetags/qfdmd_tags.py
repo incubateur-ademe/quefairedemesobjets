@@ -17,6 +17,11 @@ logger = logging.getLogger(__name__)
 
 
 @register.filter
+def is_page(potential_page):
+    return isinstance(potential_page, Page)
+
+
+@register.filter
 def genre_nombre_from(reusable_content: ReusableContent, page):
     """Retrieves reusable content based on page genre and nombre.
 
@@ -49,15 +54,13 @@ def canonical_url(context: dict) -> dict:
         return {"url": request.build_absolute_uri(request.path)}
 
 
-@register.simple_tag(takes_context=True)
-def pageurl_by_id(context, page_id):
-    request = context["request"]
-
+@register.filter
+def as_page(page_id):
     if not page_id:
         return ""
 
     try:
-        return Page.objects.get(id=page_id).get_full_url(request)
+        return Page.objects.get(id=page_id)
     except Page.DoesNotExist:
         return ""
 

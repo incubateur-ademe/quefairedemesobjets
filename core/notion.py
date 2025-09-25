@@ -3,11 +3,19 @@ import logging
 import requests
 from django.conf import settings
 from django.utils import timezone
+from pydantic import BaseModel, EmailStr
 
 logger = logging.getLogger(__name__)
 
 
-def create_new_row_in_notion_table(database_id, data):
+class ContactFormData(BaseModel):
+    name: str
+    email: EmailStr
+    subject: str
+    message: str
+
+
+def create_new_row_in_notion_table(database_id: str, data: ContactFormData):
     notion_token = settings.NOTION.get("TOKEN")
     if not notion_token:
         logging.error("The notion token is not set in local environment")
@@ -22,10 +30,10 @@ def create_new_row_in_notion_table(database_id, data):
     payload = {
         "parent": {"database_id": database_id},
         "properties": {
-            "Nom": {"title": [{"text": {"content": data.get("name")}}]},
-            "Email": {"email": data.get("email")},
-            "Objet": {"rich_text": [{"text": {"content": data.get("subject")}}]},
-            "Message": {"rich_text": [{"text": {"content": data.get("message")}}]},
+            "Nom": {"title": [{"text": {"content": data.name}}]},
+            "Email": {"email": data.email},
+            "Objet": {"rich_text": [{"text": {"content": data.subject}}]},
+            "Message": {"rich_text": [{"text": {"content": data.message}}]},
             "Date": {"date": {"start": timezone.now().isoformat()}},
         },
     }

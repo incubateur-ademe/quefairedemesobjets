@@ -157,6 +157,7 @@ class ProduitAdmin(
     fields_to_display_in_first_position = ["id", "nom"]
     inlines = [SynonymeInline, LienInline]
     exclude = ("infotri",)
+    ordering = ["-modifie_le"]
 
 
 @admin.register(Lien)
@@ -178,3 +179,4 @@ class SynonymeAdmin(
     list_filter = [("picto", admin.EmptyFieldListFilter), "pin_on_homepage"]
     autocomplete_fields = ["produit"]
     fields_to_display_in_first_position = ["nom", "produit"]
+    ordering = ["-modifie_le"]
