@@ -9,8 +9,6 @@ export async function generateBackLink(
     return
   }
 
-  // Temporarily disable
-  return
   const backlinkTag = document.createElement("div")
   backlinkTag.setAttribute(
     "style",
