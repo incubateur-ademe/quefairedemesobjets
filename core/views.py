@@ -4,13 +4,12 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.staticfiles import finders
 from django.http import HttpResponse
 from django.template.loader import render_to_string
-from django.utils.safestring import mark_safe
 from django.views.decorators.cache import cache_control
+from wagtail.templatetags.wagtailcore_tags import richtext
 
 from qfdmd.models import EmbedSettings
 
 
-@cache_control(max_age=3600)  # an hour
 def backlink(request):
     key = request.GET.get("key")
     text_content = ""
@@ -24,7 +23,7 @@ def backlink(request):
     except (AttributeError, EmbedSettings.DoesNotExist):
         pass
 
-    return HttpResponse(mark_safe(text_content), content_type="text/plain")
+    return HttpResponse(richtext(text_content), content_type="text/plain")
 
 
 @cache_control(max_age=31536000)
