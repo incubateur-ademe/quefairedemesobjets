@@ -1,5 +1,5 @@
 resource "scaleway_container" "airflow_dag_processor" {
-  name           = "${var.prefix}-airflow-processor"
+  name           = "${var.prefix}-airflow-dag-processor"
   tags           = [var.environment, var.prefix, "airflow", "dag-processor"]
   namespace_id   = scaleway_container_namespace.main.id
   registry_image = var.airflow_dag_processor_registry_image
@@ -14,6 +14,7 @@ resource "scaleway_container" "airflow_dag_processor" {
   protocol       = "http1"
 
   environment_variables = {
+    _AIRFLOW_DB_MIGRATE                          = "true"
     AIRFLOW__API__AUTH_BACKENDS                  = "airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session"
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION   = "true"
     AIRFLOW__CORE__DAGS_FOLDER                   = "/opt/airflow/dags"
