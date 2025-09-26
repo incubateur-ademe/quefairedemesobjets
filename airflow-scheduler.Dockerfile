@@ -65,6 +65,4 @@ ENV DBT_PROJECT_DIR=/opt/airflow/dbt
 
 RUN dbt deps
 
-RUN airflow db migrate
-
 CMD ["scheduler"]
