@@ -94,14 +94,14 @@ NORMALIZATION_RULES = [
     },
     {
         "origin": "nom origin",
-        "transformation": "test_fct",
+        "transformation": "test_fct_transform_column",
         "destination": "nom destination",
     },
     {"column": "string_col", "value": "value of col"},
     {"column": "list_col", "value": ["col1", "col2"]},
     {
         "origin": ["nom"],
-        "transformation": "test_fct",
+        "transformation": "test_fct_transform_df",
         "destination": ["nom"],
     },
     {"keep": "identifiant_unique"},
@@ -117,8 +117,11 @@ class TestSourceDataNormalize:
             "product_mapping": {},
             "endpoint": "http://example.com/api",
         }
-        TRANSFORMATION_MAPPING["test_fct"] = lambda x, y: "success"
-        df, metadata = source_data_normalize(
+        TRANSFORMATION_MAPPING["test_fct_transform_column"] = lambda x, y: "success"
+        TRANSFORMATION_MAPPING["test_fct_transform_df"] = lambda x, y: pd.Series(
+            {"nom": "success"}
+        )
+        df, _, metadata = source_data_normalize(
             df_acteur_from_source=pd.DataFrame(
                 {
                     "identifiant_unique": ["id"],
@@ -164,8 +167,11 @@ class TestSourceDataNormalize:
             "product_mapping": {},
             "endpoint": "http://example.com/api",
         }
-        TRANSFORMATION_MAPPING["test_fct"] = lambda x, y: "success"
-        df, metadata = source_data_normalize(
+        TRANSFORMATION_MAPPING["test_fct_transform_column"] = lambda x, y: "success"
+        TRANSFORMATION_MAPPING["test_fct_transform_df"] = lambda x, y: pd.Series(
+            {"nom": "success"}
+        )
+        df, _, metadata = source_data_normalize(
             df_acteur_from_source=pd.DataFrame(
                 {
                     "identifiant_unique": ["id"],
@@ -241,7 +247,7 @@ class TestSourceDataNormalize:
                 "product_mapping": {"product1": "code1"},
             }
         )
-        df, _ = source_data_normalize(
+        df, _, _ = source_data_normalize(
             dag_config=dag_config,
             df_acteur_from_source=pd.DataFrame(
                 {
@@ -296,7 +302,7 @@ class TestDfApplyOCA:
     def test_apply_oca_config(self, dag_config_kwargs, df_acteur):
         dag_config_kwargs["oca"] = {"prefix": "ocatest", "deduplication_source": True}
 
-        df, _ = source_data_normalize(
+        df, _, _ = source_data_normalize(
             df_acteur_from_source=df_acteur,
             dag_config=DAGConfig.model_validate(dag_config_kwargs),
             dag_id="dag_id",
@@ -324,7 +330,7 @@ class TestDfApplyOCA:
     ):
         dag_config_kwargs["oca"] = {"prefix": "ocatest"}
 
-        df, _ = source_data_normalize(
+        df, _, _ = source_data_normalize(
             df_acteur_from_source=df_acteur,
             dag_config=DAGConfig.model_validate(dag_config_kwargs),
             dag_id="dag_id",
@@ -349,7 +355,7 @@ class TestDfApplyOCA:
     def test_apply_oca_config_no_prefix(self, dag_config_kwargs, df_acteur):
         dag_config_kwargs["oca"] = {"deduplication_source": True}
 
-        df, _ = source_data_normalize(
+        df, _, _ = source_data_normalize(
             df_acteur_from_source=df_acteur,
             dag_config=DAGConfig.model_validate(dag_config_kwargs),
             dag_id="dag_id",
