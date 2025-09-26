@@ -3299,6 +3299,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 airflow = [
     { name = "apache-airflow", specifier = ">=3.0.0,<4" },
+    { name = "apache-airflow-providers-amazon" },
     { name = "apache-airflow-providers-amazon", specifier = ">=9.4.0" },
     { name = "apache-airflow-providers-fab", specifier = ">=2.4.3" },
     { name = "apache-airflow-providers-postgres", specifier = ">=6.2.2,<7" },
