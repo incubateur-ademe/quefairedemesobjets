@@ -1,28 +1,19 @@
-resource "scaleway_container" "airflow_scheduler" {
-  name           = "${var.prefix}-airflow-scheduler"
-  tags           = [var.environment, var.prefix, "airflow", "scheduler"]
+resource "scaleway_container" "airflow_dag_processor" {
+  name           = "${var.prefix}-airflow-processor"
+  tags           = [var.environment, var.prefix, "airflow", "dag-processor"]
   namespace_id   = scaleway_container_namespace.main.id
-  registry_image = var.airflow_scheduler_registry_image
+  registry_image = var.airflow_dag_processor_registry_image
   port           = 8974
-  cpu_limit      = var.airflow_scheduler_cpu_limit
-  memory_limit   = var.airflow_scheduler_memory_limit
-  min_scale      = var.airflow_scheduler_min_scale
-  max_scale      = var.airflow_scheduler_max_scale
-  timeout        = var.airflow_scheduler_timeout
+  cpu_limit      = var.airflow_dag_processor_cpu_limit
+  memory_limit   = var.airflow_dag_processor_memory_limit
+  min_scale      = var.airflow_dag_processor_min_scale
+  max_scale      = var.airflow_dag_processor_max_scale
+  timeout        = var.airflow_dag_processor_timeout
   deploy         = true
   privacy        = "public"
   protocol       = "http1"
 
-  health_check {
-    http {
-      path = "/health"
-    }
-    failure_threshold = 5
-    interval          = "30s"
-  }
-
   environment_variables = {
-    _AIRFLOW_DB_MIGRATE                          = "true"
     AIRFLOW__API__AUTH_BACKENDS                  = "airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session"
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION   = "true"
     AIRFLOW__CORE__DAGS_FOLDER                   = "/opt/airflow/dags"
