@@ -23,7 +23,6 @@ resource "scaleway_container" "airflow_scheduler" {
   }
 
   environment_variables = {
-    _AIRFLOW_DB_MIGRATE                          = "true"
     AIRFLOW__API__AUTH_BACKENDS                  = "airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session"
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION   = "true"
     AIRFLOW__CORE__DAGS_FOLDER                   = "/opt/airflow/dags"
