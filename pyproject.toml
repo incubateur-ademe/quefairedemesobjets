@@ -85,6 +85,7 @@ airflow = [
     "apache-airflow-providers-postgres>=6.2.2,<7",
     "apache-airflow-providers-standard>=1.8.0",
     "apache-airflow-providers-fab>=2.4.3",
+    "apache-airflow-providers-amazon",
     "fuzzywuzzy>=0.18.0,<0.19",
     "python-decouple~=3.8",
     "ratelimit>=2.2.1,<3",
