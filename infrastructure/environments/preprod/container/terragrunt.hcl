@@ -12,7 +12,7 @@ include {
 
 inputs = {
   # Scheduler
-  airflow_scheduler_registry_image = "rg.fr-par.scw.cloud/ns-qfdmo/airflow-scheduler:preprod"
+  airflow_scheduler_registry_image = "rg.fr-par.scw.cloud/ns-qfdmo/airflow-scheduler:review"
   airflow_scheduler_cpu_limit      = 4000
   airflow_scheduler_memory_limit   = 12288
   airflow_scheduler_min_scale      = 1
@@ -28,7 +28,7 @@ inputs = {
   airflow_webserver_timeout        = 300
 
   # DAG processor
-  airflow_dag_processor_registry_image = "rg.fr-par.scw.cloud/ns-qfdmo/airflow-dag-processor:preprod"
+  airflow_dag_processor_registry_image = "rg.fr-par.scw.cloud/ns-qfdmo/airflow-dag-processor:review"
   airflow_dag_processor_cpu_limit      = 2000
   airflow_dag_processor_memory_limit   = 4000
   airflow_dag_processor_min_scale      = 1

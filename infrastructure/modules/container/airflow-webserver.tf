@@ -15,7 +15,7 @@ resource "scaleway_container" "airflow_webserver" {
 
   health_check {
     http {
-      path = "/health"
+      path = "/api/v2/version"
     }
     failure_threshold = 5
     interval          = "30s"
@@ -32,6 +32,7 @@ resource "scaleway_container" "airflow_webserver" {
     AIRFLOW__CORE__EXECUTOR                    = "LocalExecutor"
     AIRFLOW__CORE__FERNET_KEY                  = ""
     AIRFLOW__CORE__LOAD_EXAMPLES               = "false"
+    AIRFLOW__CORE__AUTH_MANAGER                = "airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager"
     AIRFLOW__LOGGING__ENCRYPT_S3_LOGS          = "false"
     AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER   = "s3://${var.prefix}-${var.environment}-airflow"
     AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID       = "scalewaylogs"
