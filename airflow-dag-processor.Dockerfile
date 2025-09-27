@@ -19,7 +19,7 @@ RUN uv sync --group airflow
 
 # Runtime
 # --- --- --- ---
-FROM apache/airflow:3.0.6 AS scheduler
+FROM apache/airflow:3.0.6 AS dagprocessor
 
 USER root
 
@@ -56,14 +56,9 @@ COPY ./dags/ /opt/airflow/dags/
 COPY ./config/ /opt/airflow/config/
 COPY ./plugins/ /opt/airflow/plugins/
 
-WORKDIR /opt/airflow/dbt
+WORKDIR /opt/airflow
 USER 0
 RUN chown -R ${AIRFLOW_UID:-50000}:0 /opt/airflow/dbt
 USER ${AIRFLOW_UID:-50000}:0
 
-ENV DBT_PROFILES_DIR=/opt/airflow/dbt
-ENV DBT_PROJECT_DIR=/opt/airflow/dbt
-
-RUN dbt deps
-
-CMD ["scheduler"]
+CMD ["dag-processor"]

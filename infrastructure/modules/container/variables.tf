@@ -47,6 +47,26 @@ variable "airflow_webserver_timeout" {
   type = number
 }
 
+variable "airflow_dag_processor_registry_image" {
+  type = string
+}
+
+variable "airflow_dag_processor_cpu_limit" {
+  type = number
+}
+variable "airflow_dag_processor_memory_limit" {
+  type = number
+}
+variable "airflow_dag_processor_min_scale" {
+  type = number
+}
+variable "airflow_dag_processor_max_scale" {
+  type = number
+}
+variable "airflow_dag_processor_timeout" {
+  type = number
+}
+
 variable "AIRFLOW__DATABASE__SQL_ALCHEMY_CONN" {
   type      = string
   sensitive = true
