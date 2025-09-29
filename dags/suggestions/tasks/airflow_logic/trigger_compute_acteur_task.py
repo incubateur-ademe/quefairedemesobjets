@@ -35,7 +35,6 @@ def should_trigger_compute_acteur_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
         task_id="check_dag_state",
         python_callable=check_and_trigger,
-        provide_context=True,
     )
 
 
