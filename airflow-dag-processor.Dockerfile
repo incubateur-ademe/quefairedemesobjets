@@ -1,6 +1,6 @@
 # Builder python
 # --- --- --- ---
-FROM apache/airflow:3.0.6 AS python-builder
+FROM apache/airflow:3.1.0 AS python-builder
 
 # system dependencies
 USER root
@@ -19,7 +19,7 @@ RUN uv sync --group airflow
 
 # Runtime
 # --- --- --- ---
-FROM apache/airflow:3.0.6 AS dagprocessor
+FROM apache/airflow:3.1.0 AS dagprocessor
 
 USER root
 
