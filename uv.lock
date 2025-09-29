@@ -3209,6 +3209,7 @@ requires-dist = [
     { name = "requests", specifier = ">=2.32.4,<3" },
     { name = "sentry-sdk", specifier = ">=2.37.0,<3" },
     { name = "shortuuid", specifier = ">=1.0.13,<2" },
+    { name = "sites-faciles-experiment", specifier = "~=2.1.0rc9" },
     { name = "tqdm", specifier = ">=4.67.1,<5" },
     { name = "unidecode", specifier = ">=1.4.0,<2" },
     { name = "wagtail-honeypot", git = "https://github.com/Luzzzi/wagtail-honeypot?rev=feature%2Fi18n-required-honeypot" },
@@ -3650,12 +3651,34 @@ wheels = [
 ]
 
 [[package]]
-name = "shortuuid"
-version = "1.0.13"
+name = "sites-faciles-experiment"
+version = "2.1.0rc9"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/8c/e2/bcf761f3bff95856203f9559baf3741c416071dd200c0fc19fad7f078f86/shortuuid-1.0.13.tar.gz", hash = "sha256:3bb9cf07f606260584b1df46399c0b87dd84773e7b25912b7e391e30797c5e72", size = 9662, upload-time = "2024-03-11T20:11:06.879Z" }
+dependencies = [
+    { name = "beautifulsoup4" },
+    { name = "dj-database-url" },
+    { name = "dj-static" },
+    { name = "django" },
+    { name = "django-dsfr" },
+    { name = "django-taggit" },
+    { name = "faker" },
+    { name = "gunicorn" },
+    { name = "icalendar" },
+    { name = "mozilla-django-oidc" },
+    { name = "psycopg2-binary" },
+    { name = "python-dotenv" },
+    { name = "pyyaml" },
+    { name = "rust-just" },
+    { name = "unidecode" },
+    { name = "wagtail" },
+    { name = "wagtail-localize" },
+    { name = "wagtail-markdown" },
+    { name = "wagtail-modeladmin" },
+    { name = "wagtailmenus" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/89/69/064d393f3109c97067180e62cca1358a318cadb608cd32f6fe7a08fa9cf9/sites_faciles_experiment-2.1.0rc9.tar.gz", hash = "sha256:103bb07afcc2575043ddfd2c646fdd3c93b996af5e177c03531c498861978c5b", size = 2576417, upload-time = "2025-09-29T12:17:32.042Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c0/44/21d6bf170bf40b41396480d8d49ad640bca3f2b02139cd52aa1e272830a5/shortuuid-1.0.13-py3-none-any.whl", hash = "sha256:a482a497300b49b4953e15108a7913244e1bb0d41f9d332f5e9925dba33a3c5a", size = 10529, upload-time = "2024-03-11T20:11:04.807Z" },
+    { url = "https://files.pythonhosted.org/packages/49/1f/48bf2e0786b50275bb76d0e3531dde305e43bf7681f1646adc5e68d5d88a/sites_faciles_experiment-2.1.0rc9-py3-none-any.whl", hash = "sha256:34fee07ec8543cb720829735d555c975be397ab949489626b974a11f1356ae14", size = 2877972, upload-time = "2025-09-29T12:17:30.004Z" },
 ]
 
 [[package]]
