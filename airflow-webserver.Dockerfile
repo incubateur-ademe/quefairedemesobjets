@@ -4,6 +4,7 @@ FROM apache/airflow:3.1.3 AS python-builder
 
 # system dependencies
 USER root
+
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     libpq-dev python3-dev g++ git
@@ -14,6 +15,7 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 WORKDIR /opt/airflow/
 COPY pyproject.toml uv.lock ./
 RUN uv sync --group airflow
+
 
 # Runtime
 # --- --- --- ---

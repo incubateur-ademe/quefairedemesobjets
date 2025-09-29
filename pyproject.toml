@@ -31,7 +31,7 @@ dependencies = [
     "django-colorfield>=0.14.0,<0.15",
     "django-dsfr>=3,<4",
     "rapidfuzz>=3.13.0,<4",
-    "sites-faciles-experiment~=2.1.0rc9",
+#    "sites-faciles-experiment~=2.1.0rc9",
     "wagtail-honeypot @ git+https://github.com/Luzzzi/wagtail-honeypot@feature/i18n-required-honeypot",
     "diff-match-patch>=20241021,<20241022",
     "django-lookbook>=1.0.2,<2",
@@ -82,6 +82,7 @@ docs = [
     "sphinxcontrib-mermaid>=1.0.0,<2",
 ]
 airflow = [
+    "boto3<1.41,>=1.37.2",
     "apache-airflow-providers-postgres>=6.2.2,<7",
     "apache-airflow-providers-standard>=1.8.0",
     "apache-airflow-providers-fab>=2.4.3",
@@ -96,7 +97,7 @@ airflow = [
     "pandas<2.2",
     "dbt-core>=1.10.9,<2",
     "dbt-postgres>=1.9.1,<2",
-    "apache-airflow-providers-amazon>=9.4.0",
+    "apache-airflow-providers-amazon>=9.14.0",
 ]
 
 [tool.pyright]
