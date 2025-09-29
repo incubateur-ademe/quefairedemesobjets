@@ -47,12 +47,12 @@ class AddressesForm(forms.Form):
             attrs={
                 "class": "fr-input fr-icon-search-line sm:qf-w-[596px]",
                 "autocomplete": "off",
-                "aria-label": "Indiquer un objet ou déchet - obligatoire",
+                "aria-label": "Indiquer un objet - obligatoire",
             },
             data_controller="ss-cat-object-autocomplete",
         ),
         help_text="pantalon, perceuse, canapé...",
-        label="Indiquer un objet ou déchet ",
+        label="Indiquer un objet ",
         empty_label="",
         required=False,
     )
@@ -265,6 +265,15 @@ def get_epcis_for_carte_form():
 
 
 class CarteForm(AddressesForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Override the label and aria-label for the sous_categorie_objet field
+        self.fields["sous_categorie_objet"].label = "Indiquer un objet ou déchet "
+        self.fields["sous_categorie_objet"].widget.attrs[
+            "aria-label"
+        ] = "Indiquer un objet ou déchet"
+
     def load_choices(
         self,
         request: HttpRequest,
