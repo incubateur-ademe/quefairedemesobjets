@@ -4,6 +4,7 @@ FROM apache/airflow:3.0.6 AS python-builder
 
 # system dependencies
 USER root
+
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     libpq-dev python3-dev g++ git
@@ -15,9 +16,11 @@ WORKDIR /opt/airflow/
 COPY pyproject.toml uv.lock ./
 RUN uv sync --group airflow
 
+
 # Runtime
 # --- --- --- ---
 FROM apache/airflow:3.0.6 AS webserver
+
 USER ${AIRFLOW_UID:-50000}
 ENV VIRTUAL_ENV=/home/airflow/.local \
     PATH="/opt/airflow/.venv/bin:$PATH" \
