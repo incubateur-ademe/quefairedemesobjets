@@ -45,7 +45,7 @@
     "bowser": "^2.12.1",
     "eslint-config-prettier": "^10.1.8",
     "posthog-js": "^1.268.0",
-    "maplibre-gl": "^5.7.0",
+    "maplibre-gl": "^5.7.3",
     "stimulus-use": "^0.52.3",
     "tailwindcss": "^3.4.17"
   },
@@ -58,16 +58,16 @@
     "@types/jest": "^30.0.0",
     "@types/lodash": "^4.17.20",
     "@types/node": "^24.6.0",
-    "@typescript-eslint/eslint-plugin": "^8.44.1",
+    "@typescript-eslint/eslint-plugin": "^8.45.0",
     "buffer": "^6.0.3",
     "eslint": "^9.36.0",
-    "eslint-config-love": "^125.0.0",
+    "eslint-config-love": "^130.0.0",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-n": "^17.23.1",
     "eslint-plugin-prettier": "^5.5.4",
     "eslint-plugin-promise": "^7.2.1",
-    "jest": "^30.1.3",
-    "jest-environment-jsdom": "^30.1.2",
+    "jest": "^30.2.0",
+    "jest-environment-jsdom": "^30.2.0",
     "lodash": "^4.17.21",
     "parcel": "^2.16.0",
     "postcss": "^8.5.6",
@@ -78,7 +78,7 @@
     "ts-jest": "^29.4.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2",
-    "typescript-eslint": "^8.44.1"
+    "typescript-eslint": "^8.45.0"
   },
   "optionalDependencies": {
     "@parcel/watcher-linux-x64-glibc": "^2.5.1"
