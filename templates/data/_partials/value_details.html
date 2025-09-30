@@ -1,4 +1,4 @@
-{% load custom_filters %}
+{% load qfdmo_tags %}
 
 {# Recursion on lists and dicts #}
 {% if value|valuetype == "list" and value %}
@@ -8,65 +8,25 @@
         {% endfor %}
     </ul>
 {% elif value|valuetype == "dict" %}
-        {% for key, item in value.items %}
-            <p><strong>{{ key }}</strong> : {% include "data/_partials/value_details.html" with key=key value=item %}</p>
-        {% endfor %}
+    {% for key, item in value.items %}
+        <p><strong>{{ key }}</strong> : {% include "data/_partials/value_details.html" with key=key value=item %}</p>
+    {% endfor %}
 
-        {% comment %}
-            If the value is a dict containing "adresse", "ville" and "code_postal",
-            we can display a link to Google Maps AFTER recusrively displaying the rest,
-            this works both in suggestion changes and contexte
-        {% endcomment %}
-        {% if "adresse" in value and "ville" in value and "code_postal" in value %}
-            <br>
-            {# As bonus we add "nom" to the query if present #}
-            <a href="https://www.google.com/maps/search/?api=1&query={{ value.nom|urlencode }}+{{ value.adresse|urlencode }}+{{ value.code_postal|urlencode }}+{{ value.ville|urlencode }}" target="_blank">
-                🗺️ Google Maps
-            </a>
-        {% endif %}
+    {% comment %}
+        If the value is a dict containing "adresse", "ville" and "code_postal",
+        we can display a link to Google Maps AFTER recusrively displaying the rest,
+        this works both in suggestion changes and contexte
+    {% endcomment %}
+    {% if "adresse" in value and "ville" in value and "code_postal" in value %}
+        <br>
+        {# As bonus we add "nom" to the query if present #}
+        <a href="https://www.google.com/maps/search/?api=1&query={{ value.nom|urlencode }}+{{ value.adresse|urlencode }}+{{ value.code_postal|urlencode }}+{{ value.ville|urlencode }}" target="_blank">
+            🗺️ Google Maps
+        </a>
+    {% endif %}
 
 {# Rendering values #}
 {% else %}
-    {# Generic case to highlight specific values #}
-    {% if value is None %}
-        <span style="color: orange"><i>NONE</i></span>
-    {% elif value == "" %}
-        <span style="color: orange"><i>EMPTY STRING</i></span>
-    {% elif value == "__empty__" %}
-        <span style="color: #cb84e0"><b>__empty__</b></span>
-    {# Source #}
-    {% elif key == "source" %}
-        <a href="{% url 'admin:qfdmo_source_change' value|quote %}" target="_blank" rel="noreferrer">{{ value }}</a>
+    {% display_diff_value key value suggestion.contexte %}
 
-    {# Acteur Type #}
-    {% elif key == "acteur_type" %}
-        <a href="{% url 'admin:qfdmo_acteurtype_change' value|quote %}" target="_blank" rel="noreferrer">{{ value }}</a>
-
-    {# Acteur #}
-    {# By default we assume "id" is that of acteur #}
-    {% elif key == "identifiant_unique" or key == "id" %}
-        {{ value }}
-        (<a href="{% url 'admin:qfdmo_acteur_change' value|quote %}" target="_blank" rel="noreferrer">base</a>,
-        <a href="{% url 'qfdmo:getorcreate_revisionacteur' value %}" target="_blank" rel="noreferrer">rev</a>,
-        <a href="{% url 'admin:qfdmo_displayedacteur_change' value|quote %}" target="_blank" rel="noreferrer">disp</a>)
-    {% elif key == "statut" %}
-        <span style="color: {% if value == "ACTIF" %}green{% elif value == "INACTIF" %}red{% else %}orange{% endif %}">{{ value }}</span>
-    {% elif key == "siret_is_closed" %}
-        <span style="color: {% if value %}red{% else %}green{% endif %}">{{ value }}</span>
-    {% elif key == "parent" %}
-        {{ value }} (futur parent)
-
-
-    {# Annuaire Entreprises links #}
-    {% elif key == "siren" %}
-        <a href="https://annuaire-entreprises.data.gouv.fr/entreprise/{{ value }}" target="_blank">{{ value }}</a>
-    {% elif key == "siret" %}
-        <a href="https://annuaire-entreprises.data.gouv.fr/etablissement/{{ value }}" target="_blank">{{ value }}</a>
-
-    {# Fallback #}
-    {% elif value|slice:":4" == "http" %}
-        <a href="{{ value }}" target="_blank">{{ value }}</a>
-    {% else %}
-        {{ value }}
-    {% endif %}
 {% endif %}
