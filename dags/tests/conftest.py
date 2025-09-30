@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
+from django.core.management import call_command
 from faker import Faker
 
 from dags.sources.tasks.airflow_logic.config_management import DAGConfig
@@ -11,6 +12,16 @@ from dags.sources.tasks.airflow_logic.config_management import DAGConfig
 
 def pytest_configure(config):
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "dags"))
+
+
+@pytest.fixture(scope="session")
+def django_db_setup(django_db_setup, django_db_blocker):
+    with django_db_blocker.unblock():
+        call_command(
+            "loaddata",
+            "acteur_types",
+            "actions",
+        )
 
 
 @pytest.fixture
