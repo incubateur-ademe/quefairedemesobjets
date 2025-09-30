@@ -2,10 +2,15 @@ from typing import List, cast
 
 from django import forms
 from django.core.cache import cache
+from django.db.models import TextChoices
 from django.http import HttpRequest
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
+from dsfr.enums import SegmentedControlChoices
 from dsfr.forms import DsfrBaseForm
+from dsfr.widgets import (
+    SegmentedControl,
+)
 
 from qfdmo.fields import GroupeActionChoiceField
 from qfdmo.geo_api import epcis_from, formatted_epcis_as_list_of_tuple
@@ -615,4 +620,25 @@ class AdvancedConfiguratorForm(forms.Form):
             '"lng":2.483596801757813}<br>}'
         ),
         required=False,
+    )
+
+
+class ViewModeForm(DsfrBaseForm):
+    class ViewModeSegmentedControlChoices(TextChoices, SegmentedControlChoices):
+        CARTE = {
+            "value": "carte",
+            "label": "Carte",
+            "icon": "globe-line",
+        }
+        LISTE = {
+            "value": "liste",
+            "label": "Liste",
+            "icon": "list-unordered",
+        }
+
+    view_mode = forms.ChoiceField(
+        label="Choix du mode de vue",
+        choices=ViewModeSegmentedControlChoices.choices,
+        required=False,
+        widget=SegmentedControl(extended_choices=ViewModeSegmentedControlChoices),
     )
