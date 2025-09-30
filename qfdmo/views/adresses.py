@@ -694,7 +694,7 @@ def acteur_detail(request, uuid):
             )
         )
 
-    return render(request, "qfdmo/acteur.html", context)
+    return render(request, "components/carte/acteur.html", context)
 
 
 def solution_admin(request, identifiant_unique):
