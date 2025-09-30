@@ -19,20 +19,30 @@ RUN uv sync --group airflow
 
 # Runtime
 # --- --- --- ---
-FROM apache/airflow:3.1.0 AS scheduler
+FROM apache/airflow:3.1.0 AS dagprocessor
 
 USER root
 
 # unzip for Airflow DAG
 RUN echo "deb http://deb.debian.org/debian stable main" > /etc/apt/sources.list
 RUN apt-get update
-RUN apt-get install -y unzip curl
+RUN apt-get install -y unzip curl nginx
 
 RUN apt-get install -y --no-install-recommends \
     gdal-bin libgdal-dev jq
 
 # Installation du client Scaleway CLI
 RUN curl -s https://raw.githubusercontent.com/scaleway/scaleway-cli/master/scripts/get.sh | sh
+
+# Nginx
+RUN echo 'worker_processes 1; \
+    events { worker_connections 1024; } \
+    http { \
+    server { \
+    listen 80 default_server; \
+    location / { return 200 "Hello"; } \
+    } \
+    }' > /etc/nginx/nginx.conf
 
 USER ${AIRFLOW_UID:-50000}:0
 WORKDIR /opt/airflow
@@ -56,14 +66,17 @@ COPY ./dags/ /opt/airflow/dags/
 COPY ./config/ /opt/airflow/config/
 COPY ./plugins/ /opt/airflow/plugins/
 
-WORKDIR /opt/airflow/dbt
+COPY airflow-dag-processor-start.sh /opt/airflow/airflow-dag-processor-start.sh
+
+WORKDIR /opt/airflow
 USER 0
 RUN chown -R ${AIRFLOW_UID:-50000}:0 /opt/airflow/dbt
+RUN touch /run/nginx.pid
+RUN chown -R ${AIRFLOW_UID:-50000}:0 /var/lib/nginx /var/log/nginx /run/nginx.pid
+RUN chmod +x /opt/airflow/airflow-dag-processor-start.sh
 USER ${AIRFLOW_UID:-50000}:0
 
-ENV DBT_PROFILES_DIR=/opt/airflow/dbt
-ENV DBT_PROJECT_DIR=/opt/airflow/dbt
+EXPOSE 80
 
-RUN dbt deps
-
-CMD ["scheduler"]
+ENTRYPOINT ["/opt/airflow/airflow-dag-processor-start.sh"]
+CMD [""]
