@@ -3,7 +3,7 @@ resource "scaleway_container" "airflow_dag_processor" {
   tags           = [var.environment, var.prefix, "airflow", "dag-processor"]
   namespace_id   = scaleway_container_namespace.main.id
   registry_image = var.airflow_dag_processor_registry_image
-  port           = 8974
+  port           = 80
   cpu_limit      = var.airflow_dag_processor_cpu_limit
   memory_limit   = var.airflow_dag_processor_memory_limit
   min_scale      = var.airflow_dag_processor_min_scale
@@ -12,6 +12,14 @@ resource "scaleway_container" "airflow_dag_processor" {
   deploy         = true
   privacy        = "public"
   protocol       = "http1"
+
+  health_check {
+    http {
+      path = "/"
+    }
+    failure_threshold = 5
+    interval          = "30s"
+  }
 
   environment_variables = {
     AIRFLOW__API__AUTH_BACKENDS                  = "airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session"
