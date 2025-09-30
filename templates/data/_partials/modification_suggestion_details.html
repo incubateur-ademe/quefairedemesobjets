@@ -1,4 +1,5 @@
 {% extends "data/_partials/suggestion_details.html" %}
+
 {% load qfdmo_tags %}
 
 {% block suggestion_title %}Champs modifiés:{% endblock %}</h3>
@@ -7,8 +8,7 @@
     <ul>
         {% for field, value in updated_fields.items %}
             <li>
-                <strong>{{ field }}</strong> :
-                {{ value.old|diff_display:value.new }}
+                <strong>{{ field }}</strong> :{% display_diff_value field value suggestion_contexte %}<br>
             </li>
         {% endfor %}
     </ul>

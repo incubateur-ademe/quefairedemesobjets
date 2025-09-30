@@ -241,19 +241,27 @@ class Suggestion(models.Model):
             and isinstance(self.contexte, dict)
         ):
             template_name = "data/_partials/modification_suggestion_details.html"
-            updated_fields = {}
-            unchanged_fields = {}
-            for key, value in self.suggestion.items():
-                # Ignore location because it is already displayed with lat / long fields
-                if key not in self.contexte or key == "location":
-                    continue
-                if self.contexte.get(key) != value:
-                    updated_fields[key] = {"new": value, "old": self.contexte.get(key)}
-                else:
-                    unchanged_fields[key] = value
+
+            valid_items = [
+                (key, value)
+                for key, value in self.suggestion.items()
+                if key in self.contexte and key != "location"
+            ]
+            updated_fields = {
+                key: value
+                for key, value in valid_items
+                if self.contexte.get(key) != value
+            }
+            unchanged_fields = {
+                key: value
+                for key, value in valid_items
+                if self.contexte.get(key) == value
+            }
+
             template_context = {
                 "updated_fields": updated_fields,
                 "unchanged_fields": unchanged_fields,
+                "suggestion_contexte": self.contexte,
             }
         elif (
             self.suggestion_cohorte.type_action == SuggestionAction.SOURCE_AJOUT

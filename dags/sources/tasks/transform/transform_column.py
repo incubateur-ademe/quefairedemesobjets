@@ -177,6 +177,8 @@ def clean_code_postal(cp: str | None, _) -> str:
     if pd.isna(cp) or not cp:
         return ""
     cp = clean_number(cp)
+    if len(cp) > 5 or len(cp) < 4:
+        return ""
     return f"0{cp}" if cp and len(str(cp)) == 4 else str(cp)
 
 
