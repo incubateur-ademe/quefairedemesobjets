@@ -39,11 +39,11 @@
         </h1>
         {% if infotri %}
             <div class="{% block infotri_wrapper_classes %}{% endblock %} mr-auto">
-            {% include "components/produit/_infotri.html" with infotri=infotri %}
+            {% include "ui/components/produit/_infotri.html" with infotri=infotri %}
             </div>
         {% endif %}
         {% endblock content %}
     </div>
-    {% include "snippets/share_and_embed_produit.html" with extra_classes="qf-ml-auto qf-mr-0 max-md:qf-order-last md:qf-min-w-[17rem] md:qf-row-start-1 md:qf-col-start-2" %}
+    {% include "ui/snippets/share_and_embed_produit.html" with extra_classes="qf-ml-auto qf-mr-0 max-md:qf-order-last md:qf-min-w-[17rem] md:qf-row-start-1 md:qf-col-start-2" %}
 </header>
 {% endblock wrapper %}

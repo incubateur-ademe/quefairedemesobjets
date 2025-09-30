@@ -26,17 +26,17 @@
                 {{ form.action_list }}
 
                 {# Recherche Objet #}
-                {% include "components/carte/_addresses_partials/filters/_object_filter.html" with only_reemploi=True %}
+                {% include "ui/components/carte/_addresses_partials/filters/_object_filter.html" with only_reemploi=True %}
 
                 {# Recherche adresse #}
                 <div class="fr-mt-3w fr-px-1v fr-input-group">
-                    {% include "components/carte/_addresses_partials/adresse_input_form.html" %}
+                    {% include "ui/components/carte/_addresses_partials/adresse_input_form.html" %}
                 </div>
 
                 {# Gestes #}
                 <div class="fr-mt-3w fr-px-1v">
-                    {% include "components/carte/partials/action_list_by_direction.html" with action_direction='jai' %}
-                    {% include "components/carte/partials/action_list_by_direction.html" with action_direction='jecherche' %}
+                    {% include "ui/components/carte/partials/action_list_by_direction.html" with action_direction='jai' %}
+                    {% include "ui/components/carte/partials/action_list_by_direction.html" with action_direction='jecherche' %}
                 </div>
             </div>
 

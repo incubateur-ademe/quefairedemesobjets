@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 class ConfiguratorView(FormView):
     form_class = ConfiguratorForm
-    template_name = "pages/configurateur/base.html"
+    template_name = "ui/pages/configurateur/base.html"
 
     def get_initial(self) -> dict[str, Any]:
         """Populate the view with values passed as a querystring in the URL"""
@@ -102,7 +102,7 @@ class ConfiguratorView(FormView):
 
 class AdvancedConfiguratorView(LoginRequiredMixin, FormView):
     form_class = AdvancedConfiguratorForm
-    template_name = "pages/configurateur/avance.html"
+    template_name = "ui/pages/configurateur/avance.html"
 
     def get_initial(self):
         initial = super().get_initial()

@@ -10,7 +10,7 @@
     >
         {% for text, href in suggestions %}
         <li class="qf-list-none qf-p-0">
-        {% include "components/button.html" with text=text|capfirst testid="suggestion" %}
+        {% include "ui/components/button.html" with text=text|capfirst testid="suggestion" %}
         </li>
         {% endfor %}
     </ul>
