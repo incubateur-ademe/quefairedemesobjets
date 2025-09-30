@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 class CarteSearchActeursView(SearchActeursView):
     is_carte = True
-    template_name = "qfdmo/carte.html"
+    template_name = "pages/carte.html"
     form_class = CarteForm
 
     def get_initial(self, *args, **kwargs):
