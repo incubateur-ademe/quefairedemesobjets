@@ -46,6 +46,7 @@
             <main
                 class="
                 qf-flex
+                qf-flex-col
                 {% if is_digital %}
                 {# Is useful for digital view so that the users can scroll in the results #}
                 qf-overflow-auto
@@ -54,7 +55,7 @@
                 "
                 tabindex="0"
             >
-            {% if forms.view_mode.view == "liste" %}
+            {% if forms.view_mode.cleaned_data.view == "liste" %}
                 {% include "ui/components/carte/mode_liste.html" %}
             {% else %}
                 {% include "ui/components/carte/mode_carte.html" %}

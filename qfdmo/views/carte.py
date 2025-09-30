@@ -3,6 +3,7 @@ from typing import Any
 
 from django.conf import settings
 from django.db.models import Q
+from django.forms import Form
 from django.utils.functional import cached_property
 from django.views.generic import DetailView
 
@@ -19,7 +20,7 @@ class CarteSearchActeursView(SearchActeursView):
     form_class = CarteForm
     forms = {"view_mode": ViewModeForm}
 
-    def get_forms(self):
+    def get_forms(self) -> dict[str, Form]:
         bounded_forms = {}
         for key, form in self.forms.items():
             if self.request.method == "POST":
