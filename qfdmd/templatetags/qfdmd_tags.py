@@ -36,7 +36,7 @@ def genre_nombre_from(reusable_content: ReusableContent, page):
     return richtext(content.replace("&lt;objet&gt;", replacement))
 
 
-@register.inclusion_tag("components/patchwork/patchwork.html")
+@register.inclusion_tag("ui/components/patchwork/patchwork.html")
 def patchwork() -> dict:
     from qfdmd.models import Synonyme
 
@@ -90,7 +90,7 @@ def render_file_content(file_field: FileField) -> str:
         return ""
 
 
-@register.inclusion_tag("components/carte/carte.html", takes_context=True)
+@register.inclusion_tag("ui/components/carte/carte.html", takes_context=True)
 def carte(context, carte_config: CarteConfig) -> dict:
     page = context.get("page")
     return {

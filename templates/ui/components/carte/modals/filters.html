@@ -1,4 +1,4 @@
-{% extends "components/carte/_addresses_partials/filters/panel_filters.html" %}
+{% extends "ui/components/carte/_addresses_partials/filters/panel_filters.html" %}
 {% load carte_tags %}
 
 {% block modal_title %}
@@ -16,7 +16,7 @@ Filtres
     {{ form.action_displayed }}
 
     {% hide_object_filter as hidden %}
-    {% include "components/carte/_addresses_partials/filters/_object_filter.html" with hidden=hidden %}
+    {% include "ui/components/carte/_addresses_partials/filters/_object_filter.html" with hidden=hidden %}
 
-    {% include "components/carte/_addresses_partials/filters/_labels_filters.html" %}
+    {% include "ui/components/carte/_addresses_partials/filters/_labels_filters.html" %}
 {% endblock modal_content %}

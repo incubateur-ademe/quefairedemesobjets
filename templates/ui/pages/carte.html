@@ -49,7 +49,7 @@
                 >
                 {% block form_header %}
     {# TODO: refacto turbo, should be moved outside of form #}
-                {% include 'components/carte/header.html' %}
+                {% include 'ui/components/carte/header.html' %}
                 {% endblock form_header %}
                 </div>
             </header>
@@ -78,15 +78,15 @@
                         data-visible="true"
                         tabindex="0"
                     >
-                        {% include 'components/carte/results.html' %}
+                        {% include 'ui/components/carte/results.html' %}
                     </div>
                     {# Panel «Legend» #}
                     {# TODO: refacto turbo, should be moved outside of form #}
-                    {% include 'components/carte/panels/legend_mobile.html' %}
+                    {% include 'ui/components/carte/panels/legend_mobile.html' %}
                 {% endblock form_result %}
 
                 {% block form_fields %}
-                    {% include "components/carte/partials/featureflip_inputs.html" %}
+                    {% include "ui/components/carte/partials/featureflip_inputs.html" %}
                     {{ form.bounding_box }}
                     {{ form.epci_codes }}
                 {% endblock form_fields %}
@@ -114,7 +114,7 @@
             data-controller="acteur-details"
             data-acteur-details-map-container-id-value="{{ map_container_id }}"
             >
-                {% include "components/carte/panels/acteur_detail.html" %}
+                {% include "ui/components/carte/panels/acteur_detail.html" %}
             </aside>
 
             {% block content_footer %}
@@ -123,11 +123,11 @@
 
         {% block form_modals %}
             {# Panel «Filtres» #}
-            {% include 'components/carte/modals/filters.html' %}
+            {% include 'ui/components/carte/modals/filters.html' %}
 
             {# Panel À propos #}
             {# TODO: refacto turbo, should be moved outside of form #}
-            {% include 'components/carte/modals/a_propos.html' %}
+            {% include 'ui/components/carte/modals/a_propos.html' %}
         {% endblock form_modals %}
 
     </form>
@@ -135,5 +135,5 @@
 {% endblock content %}
 
 {% block modals %}
-    {% include "components/carte/reparacteur_modale.html" %}
+    {% include "ui/components/carte/reparacteur_modale.html" %}
 {% endblock modals %}

@@ -38,7 +38,7 @@
                     qf-flex qf-flex-row sm:qf-items-center"
                 >
                 {% block form_header %}
-                {% include 'components/formulaire/header.html' %}
+                {% include 'ui/components/formulaire/header.html' %}
                 {% endblock form_header %}
                 </div>
             </header>
@@ -65,12 +65,12 @@
                         data-visible="false"
                         tabindex="0"
                     >
-                        {% include 'components/formulaire/results.html' %}
+                        {% include 'ui/components/formulaire/results.html' %}
                     </turbo-frame>
                 {% endblock form_result %}
 
                 {% block form_fields %}
-                    {% include "components/carte/partials/featureflip_inputs.html" %}
+                    {% include "ui/components/carte/partials/featureflip_inputs.html" %}
                     {{ form.bounding_box }}
                 {% endblock form_fields %}
             </main>
@@ -99,7 +99,7 @@
             data-acteur-details-map-container-id-value="{{ map_container_id }}"
             aria-hidden="true"
             >
-                {% include "components/carte/panels/acteur_detail.html" %}
+                {% include "ui/components/carte/panels/acteur_detail.html" %}
             </aside>
 
             <footer
@@ -122,22 +122,22 @@
                     </a>
                 </div>
                 {# Liens de pieds de page pour iframe #}
-                {% include "components/carte/_addresses_partials/iframe_footer_links.html" %}
+                {% include "ui/components/carte/_addresses_partials/iframe_footer_links.html" %}
             {% endblock content_footer %}
             </footer>
         </section>
 
         {% block form_modals %}
             {# Panel «Formulaire de recherche» #}
-            {% include 'components/formulaire/search_form.html' %}
+            {% include 'ui/components/formulaire/search_form.html' %}
 
             {# Panel «Filtres avancés» #}
-            {% include 'components/formulaire/modals/advanced_filters.html' %}
+            {% include 'ui/components/formulaire/modals/advanced_filters.html' %}
         {% endblock form_modals %}
     </form>
 </turbo-frame>
 {% endblock content %}
 
 {% block modals %}
-    {% include "components/carte/reparacteur_modale.html" %}
+    {% include "ui/components/carte/reparacteur_modale.html" %}
 {% endblock modals %}

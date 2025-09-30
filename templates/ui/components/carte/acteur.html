@@ -18,7 +18,7 @@
             <header class="qf-mb-2w">
                 <div>
                     {% if object.labels_display %}
-                        {% include "components/carte/acteur/_labels.html" %}
+                        {% include "ui/components/carte/acteur/_labels.html" %}
                     {% endif %}
 
                     {# TODO: use an alternative template instead of a conditionnal inside the html tag #}
@@ -28,10 +28,10 @@
                     </p>
                 </div>
 
-                {% include "components/carte/acteur/tabs/_separator.html" %}
-                {% include "components/carte/acteur/_actions.html" %}
+                {% include "ui/components/carte/acteur/tabs/_separator.html" %}
+                {% include "ui/components/carte/acteur/_actions.html" %}
             </header>
-            {% include "components/carte/acteur/_tabs.html" %}
+            {% include "ui/components/carte/acteur/_tabs.html" %}
         </article>
     </turbo-frame>
 </div>

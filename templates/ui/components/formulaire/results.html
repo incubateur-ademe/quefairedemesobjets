@@ -28,10 +28,10 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
     {% endif %}
 >
     {% if is_digital %}
-        {% include "components/carte/_digital_results.html" %}
+        {% include "ui/components/carte/_digital_results.html" %}
     {% else %}
         {# Near by addresses #}
-        {% include "components/carte/shared/_search_in_zone.html" %}
+        {% include "ui/components/carte/shared/_search_in_zone.html" %}
         <div
             id="map"
             data-map-target="mapContainer"
@@ -41,18 +41,18 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
             {% for acteur in acteurs %}
                 {% acteur_pinpoint_tag acteur=acteur direction=form.initial.direction action_list=form.initial.action_list carte=carte carte_config=carte_config sous_categorie_id=form.initial.sc_id %}
             {% endfor %}
-            {% include "components/carte/pinpoints/home.html" %}
+            {% include "ui/components/carte/pinpoints/home.html" %}
         </div>
 
         {% if address_ok %}
             {% if not acteurs %}
-                {% include "components/carte/shared/disclaimers/no_local_solution.html" %}
+                {% include "ui/components/carte/shared/disclaimers/no_local_solution.html" %}
             {% endif %}
         {% else %}
-            {% include "components/carte/shared/disclaimers/adresse_missing.html" %}
+            {% include "ui/components/carte/shared/disclaimers/adresse_missing.html" %}
         {% endif %}
     {% endif %}
 
-    {% include "components/carte/shared/disclaimers/loading_solutions.html" %}
+    {% include "ui/components/carte/shared/disclaimers/loading_solutions.html" %}
 </div>
 {% endwith %}
