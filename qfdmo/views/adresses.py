@@ -638,7 +638,7 @@ def acteur_detail_redirect(request, identifiant_unique):
 
 
 def acteur_detail(request, uuid):
-    base_template = "layout/base.html"
+    base_template = "layout/carte.html"
 
     if request.headers.get("Turbo-Frame"):
         base_template = "layout/turbo.html"
