@@ -39,20 +39,9 @@
     >
         <input type="hidden" name="map_container_id" value="{{ map_container_id }}">
         <section class="map-grid qf-relative">
-            <header
-                {# The z-index below can impact the shadow over #}
-                class="{% block header_classes %}qf-z-20{% endblock %} qf-bg-white qf-shadow-lg"
-            >
-                <div
-                    class="
-                    qf-flex qf-flex-row sm:qf-items-center"
-                >
-                {% block form_header %}
-    {# TODO: refacto turbo, should be moved outside of form #}
-                {% include 'ui/components/carte/header.html' %}
-                {% endblock form_header %}
-                </div>
-            </header>
+            {% block form_header %}
+                {% include 'components/carte/header.html' %}
+            {% endblock form_header %}
 
             <main
                 class="
