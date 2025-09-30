@@ -44,7 +44,6 @@ def get_default_action():
 
 
 class PinPointForm(forms.Form):
-
     action = forms.ModelChoiceField(
         queryset=Action.objects.all(),
         label="Action",
@@ -150,23 +149,23 @@ class ComponentsPreview(LookbookPreview):
 
     def button(self, **kwargs):
         context = {"href": "google.fr", "text": "test"}
-        return render_to_string("components/button.html", context)
+        return render_to_string("ui/components/button.html", context)
 
     def code(self, **kwargs):
         context = {
             "script": '<script src="https://quefairedemesdechets.ademe.local/iframe.js"></script>',
         }
-        return render_to_string("components/code/code.html", context)
+        return render_to_string("ui/components/code/code.html", context)
 
     def logo(self, **kwargs):
-        return render_to_string("components/logo/header.html")
+        return render_to_string("ui/components/logo/header.html")
 
     def logo_homepage(self, **kwargs):
-        return render_to_string("components/logo/homepage.html")
+        return render_to_string("ui/components/logo/homepage.html")
 
     def produit_legacy_heading(self, **kwargs):
         context = {"title": "Coucou !"}
-        return render_to_string("components/produit/legacy_heading.html", context)
+        return render_to_string("ui/components/produit/legacy_heading.html", context)
 
     @register_form_class(ProduitHeadingForm)
     def produit_heading(self, synonyme=None, pronom="mon", **kwargs):
@@ -177,7 +176,7 @@ class ComponentsPreview(LookbookPreview):
 
         context.update(pronom=pronom)
 
-        return render_to_string("components/produit/heading.html", context)
+        return render_to_string("ui/components/produit/heading.html", context)
 
     @register_form_class(ProduitHeadingForm)
     def produit_heading_family(self, synonyme=None, pronom="mon", **kwargs):
@@ -188,7 +187,7 @@ class ComponentsPreview(LookbookPreview):
 
         context.update(pronom=pronom)
 
-        return render_to_string("components/produit/heading_family.html", context)
+        return render_to_string("ui/components/produit/heading_family.html", context)
 
 
 class ModalsPreview(LookbookPreview):
@@ -229,11 +228,11 @@ class PagesPreview(LookbookPreview):
             },
             "ASSISTANT": {"faites_decouvrir_ce_site": "Faites découvrir ce site !"},
         }
-        return render_to_string("pages/home.html", context)
+        return render_to_string("ui/pages/home.html", context)
 
     def produit(self, **kwargs):
         context = {"object": Synonyme.objects.first()}
-        return render_to_string("pages/produit.html", context)
+        return render_to_string("ui/pages/produit.html", context)
 
 
 class SnippetsPreview(LookbookPreview):
@@ -244,21 +243,21 @@ class SnippetsPreview(LookbookPreview):
         **Markdown syntax is supported in docstring**
         """
         context = {"request": None}
-        return render_to_string("components/header/header.html", context)
+        return render_to_string("ui/components/header/header.html", context)
 
     def footer(self, **kwargs):
-        return render_to_string("components/footer/footer.html")
+        return render_to_string("ui/components/footer/footer.html")
 
     def suggestions(self, **kwargs):
         context = {
             "heading": "Coucou",
             "suggestions": [("coucou", "google.fr"), ("youpi", "google.fr")],
         }
-        return render_to_string("components/suggestions/suggestions.html", context)
+        return render_to_string("ui/components/suggestions/suggestions.html", context)
 
     def share_and_embed(self, **kwargs):
         context = {"heading": "Faites découvrir ce site"}
-        return render_to_string("snippets/share_and_embed.html", context)
+        return render_to_string("ui/snippets/share_and_embed.html", context)
 
 
 class IframePreview(LookbookPreview):
@@ -364,7 +363,7 @@ class AccessibilitePreview(LookbookPreview):
         - [ ] Le contour de la recherche doit être en couleur #53918C
         """
         context = {"search_form": SearchForm()}
-        return render_to_string("components/search/view.html", context)
+        return render_to_string("ui/components/search/view.html", context)
 
     def P01_10_2(self, **kwargs):
         """
@@ -378,7 +377,7 @@ class AccessibilitePreview(LookbookPreview):
         - [ ] Avec le CSS désactivé, le label rechercher du bouton s'affiche
         """
         context = {"search_form": SearchForm()}
-        return render_to_string("components/search/view.html", context)
+        return render_to_string("ui/components/search/view.html", context)
 
     def P01_10_7(self, **kwargs):
         """
@@ -394,7 +393,7 @@ class AccessibilitePreview(LookbookPreview):
         - [ ] Le focus du champ de recherche affiche un contour bleu bien visible
         """
         context = {"search_form": SearchForm()}
-        return render_to_string("components/search/view.html", context)
+        return render_to_string("ui/components/search/view.html", context)
 
     def P01_13_8(self, **kwargs):
         """
@@ -414,10 +413,10 @@ class AccessibilitePreview(LookbookPreview):
             {% load dsfr_tags %}
 
             <p class="fr-h2">Logo en homepage</p>
-            {% include "components/logo/homepage.html" %}
+            {% include "ui/components/logo/homepage.html" %}
             <hr>
             <p class="fr-h2">Logo du header</p>
-            {% include "components/logo/header.html" %}
+            {% include "ui/components/logo/header.html" %}
             """,
         )
         return template.render(Context({}))

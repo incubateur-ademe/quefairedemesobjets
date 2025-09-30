@@ -23,11 +23,11 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
     {% endif %}
 >
     {% if is_digital %}
-        {% include "components/carte/_digital_results.html" %}
+        {% include "ui/components/carte/_digital_results.html" %}
     {% else %}
         {# Near by addresses #}
         {% if address_ok %}
-            {% include "components/carte/shared/_search_in_zone.html" %}
+            {% include "ui/components/carte/shared/_search_in_zone.html" %}
         {% endif %}
         <div
             data-map-target="mapContainer"
@@ -37,12 +37,12 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
             {% for acteur in acteurs %}
                 {% acteur_pinpoint_tag acteur=acteur direction=form.initial.direction action_list=form.initial.action_list carte=carte carte_config=carte_config sous_categorie_id=form.initial.sc_id %}
             {% endfor %}
-            {% include "components/carte/pinpoints/home.html" %}
+            {% include "ui/components/carte/pinpoints/home.html" %}
         </div>
 
         {% if address_ok %}
             {% if is_carte %}
-                {% include "components/carte/panels/legend.html" %}
+                {% include "ui/components/carte/panels/legend.html" %}
                 <a class="qf-flex
                     fr-btn fr-btn--icon-left fr-icon-epingle-plus qf-whitespace-nowrap qf-w-auto qf-justify-center
                     qf-absolute qf-left-2w qf-right-2w qf-bottom-4w qf-z-20
@@ -57,19 +57,19 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
                     {{ CARTE.ajouter_un_lieu }}
                 </a>
                 <div class="qf-absolute qf-left-0 qf-right-0 qf-bottom-0 qf-text-center qf-bg-white lg:qf-hidden">
-                    {% include "components/carte/_declaration_accessibilite.html" %}
+                    {% include "ui/components/carte/_declaration_accessibilite.html" %}
                 </div>
             {% endif %}
 
             {% if not acteurs %}
-                {% include "components/carte/shared/disclaimers/no_local_solution.html" %}
+                {% include "ui/components/carte/shared/disclaimers/no_local_solution.html" %}
             {% endif %}
 
         {% else %}
-            {% include "components/carte/shared/disclaimers/adresse_missing.html" %}
+            {% include "ui/components/carte/shared/disclaimers/adresse_missing.html" %}
         {% endif %}
     {% endif %}
 
-    {% include "components/carte/shared/disclaimers/loading_solutions.html" %}
+    {% include "ui/components/carte/shared/disclaimers/loading_solutions.html" %}
 </div>
 {% endwith %}

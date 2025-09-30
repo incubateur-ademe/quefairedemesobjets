@@ -21,8 +21,8 @@ qf-flex qf-flex-col qf-gap-3w {% block header_classes %}{% endblock %}">
         {{ title|capfirst }}
         {% endblock title_content %}
     </h1>
-    {% include "components/produit/_infotri.html" with infotri=infotri %}
+    {% include "ui/components/produit/_infotri.html" with infotri=infotri %}
     {% endblock content %}
 </header>
-{% include "snippets/share_and_embed_produit.html" with extra_classes="max-md:qf-order-last md:qf-min-w-[17rem] md:qf-row-start-1 md:qf-col-start-2" %}
+{% include "ui/snippets/share_and_embed_produit.html" with extra_classes="max-md:qf-order-last md:qf-min-w-[17rem] md:qf-row-start-1 md:qf-col-start-2" %}
 {% endblock wrapper %}
