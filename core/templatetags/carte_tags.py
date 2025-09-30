@@ -74,7 +74,31 @@ def distance_to_acteur(context, acteur):
         return f"({round(distance_meters / 10) * 10} m)"
 
 
-@register.inclusion_tag("qfdmo/carte/pinpoints/acteur.html", takes_context=True)
+@register.filter
+def tojson(value):
+    """Django filter to replace Jinja2's |tojson filter"""
+    import json
+
+    return json.dumps(value)
+
+
+@register.filter
+def title_case(value):
+    """Django filter to properly handle title case like Jinja2"""
+    if value:
+        return value.title()
+    return value
+
+
+@register.simple_tag
+def random_range(max_value):
+    """Generate a random number for cache busting"""
+    import random
+
+    return random.randint(0, max_value - 1)
+
+
+@register.inclusion_tag("templatetags/acteur_pinpoint.html", takes_context=True)
 def acteur_pinpoint_tag(
     context, acteur, direction, action_list, carte, carte_config, sous_categorie_id
 ):

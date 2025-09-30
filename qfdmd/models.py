@@ -225,6 +225,7 @@ class AncestorFieldsMixin:
 class ProduitPage(
     CompiledFieldMixin, Page, GenreNombreModel, TitleFields, AncestorFieldsMixin
 ):
+    template = "pages/produit_page.html"
     subpage_types = [
         "qfdmd.synonymepage",
     ]
@@ -354,6 +355,7 @@ class FamilyPageTag(TaggedItemBase):
 
 
 class FamilyPage(ProduitPage):
+    template = "pages/family_page.html"
     subpage_types = ["qfdmd.produitpage", "qfdmd.synonymepage"]
 
     class Meta:
