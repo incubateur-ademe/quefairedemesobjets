@@ -26,13 +26,23 @@ USER root
 # unzip for Airflow DAG
 RUN echo "deb http://deb.debian.org/debian stable main" > /etc/apt/sources.list
 RUN apt-get update
-RUN apt-get install -y unzip curl
+RUN apt-get install -y unzip curl nginx
 
 RUN apt-get install -y --no-install-recommends \
     gdal-bin libgdal-dev jq
 
 # Installation du client Scaleway CLI
 RUN curl -s https://raw.githubusercontent.com/scaleway/scaleway-cli/master/scripts/get.sh | sh
+
+# Nginx
+RUN echo 'worker_processes 1; \
+    events { worker_connections 1024; } \
+    http { \
+    server { \
+    listen 80 default_server; \
+    location / { return 200 "Hello"; } \
+    } \
+    }' > /etc/nginx/nginx.conf
 
 USER ${AIRFLOW_UID:-50000}:0
 WORKDIR /opt/airflow
