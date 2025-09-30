@@ -20,10 +20,7 @@ from wagtail.admin.panels import (
     PageChooserPanel,
     TabbedInterface,
 )
-from wagtail.contrib.settings.models import (
-    BaseGenericSetting,
-    register_setting,
-)
+from wagtail.contrib.settings.models import BaseGenericSetting, register_setting
 from wagtail.fields import RichTextField, StreamField
 from wagtail.images.blocks import ImageBlock
 from wagtail.models import Page, ParentalKey
@@ -506,10 +503,10 @@ class Produit(index.Indexed, AbstractBaseProduit):
         except (KeyError, TypeError):
             return ""
 
-    id = models.IntegerField(
+    id = models.AutoField(
         primary_key=True,
-        help_text="Correspond à l'identifiant ID défini dans les données "
-        "<i>Que Faire</i>.",
+        help_text="A l'origine : Correspond à l'identifiant ID défini dans les données "
+        "<i>Que Faire</i>. Maintenant : Identifiant auto-généré.",
     )
 
     nom = models.CharField(
