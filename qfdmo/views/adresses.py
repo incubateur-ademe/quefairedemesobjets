@@ -533,7 +533,7 @@ class FormulaireSearchActeursView(SearchActeursView):
     modifiée."""
 
     is_iframe = True
-    template_name = "qfdmo/formulaire.html"
+    template_name = "pages/formulaire.html"
     form_class = FormulaireForm
 
     def get_context_data(self, **kwargs):
