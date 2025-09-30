@@ -9,13 +9,13 @@
         {% else %}
             <div class="qf--translate-y-2/4" style="color: {{ marker_couleur }};">
                 {% if marker_fill_background %}
-                    {% include "qfdmo/carte/pinpoints/svg/pin-background-fill.html" %}
+                    {% include "components/carte/pinpoints/svg/pin-background-fill.html" %}
                 {% else %}
-                    {% include "qfdmo/carte/pinpoints/svg/pin-background.html" %}
+                    {% include "components/carte/pinpoints/svg/pin-background.html" %}
                 {% endif %}
                 {% if marker_bonus %}
                     <span class="qf-absolute qf-right-[-16] qf-top-[-6] qf-z-10">
-                        {% include "qfdmo/carte/pinpoints/svg/bonus-icon.svg" %}
+                        {% include "components/carte/pinpoints/svg/bonus-icon.svg" %}
                     </span>
                 {% endif %}
                 <span class="qf-absolute qf-top-[10] qf-left-[10.5] qf-margin-auto {{ marker_icon }} {{ marker_icon_extra_classes }}"></span>
