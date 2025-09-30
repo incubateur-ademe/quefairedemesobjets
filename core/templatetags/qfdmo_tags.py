@@ -108,7 +108,7 @@ def random_range(max_value):
     return random.randint(0, max_value - 1)
 
 
-@register.inclusion_tag("qfdmo/carte/pinpoints/acteur.html", takes_context=True)
+@register.inclusion_tag("templatetags/acteur_pinpoint.html", takes_context=True)
 def acteur_pinpoint_tag(
     context, acteur, direction, action_list, carte, carte_config, sous_categorie_id
 ):
