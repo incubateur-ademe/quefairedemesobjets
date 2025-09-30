@@ -270,7 +270,6 @@ def get_epcis_for_carte_form():
 
 
 class CarteForm(AddressesForm):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Override the label and aria-label for the sous_categorie_objet field
@@ -516,9 +515,7 @@ class AdvancedConfiguratorForm(forms.Form):
     action_displayed = forms.MultipleChoiceField(
         widget=DSFRCheckboxSelectMultiple(
             attrs={
-                "class": (
-                    "fr-checkbox qf-inline-grid qf-grid-cols-4 qf-gap-4" " qf-m-1w"
-                ),
+                "class": ("fr-checkbox qf-inline-grid qf-grid-cols-4 qf-gap-4 qf-m-1w"),
             },
         ),
         choices=[],
@@ -544,9 +541,7 @@ class AdvancedConfiguratorForm(forms.Form):
     action_list = forms.MultipleChoiceField(
         widget=DSFRCheckboxSelectMultiple(
             attrs={
-                "class": (
-                    "fr-checkbox qf-inline-grid qf-grid-cols-4 qf-gap-4" " qf-m-1w"
-                ),
+                "class": ("fr-checkbox qf-inline-grid qf-grid-cols-4 qf-gap-4 qf-m-1w"),
             },
         ),
         choices=[],
@@ -636,9 +631,15 @@ class ViewModeForm(DsfrBaseForm):
             "icon": "list-unordered",
         }
 
-    view_mode = forms.ChoiceField(
-        label="Choix du mode de vue",
+    view = forms.ChoiceField(
+        label="",
         choices=ViewModeSegmentedControlChoices.choices,
         required=False,
-        widget=SegmentedControl(extended_choices=ViewModeSegmentedControlChoices),
+        initial=ViewModeSegmentedControlChoices.CARTE,
+        widget=SegmentedControl(
+            attrs={
+                "data-action": "search-solution-form#advancedSubmit",
+            },
+            extended_choices=ViewModeSegmentedControlChoices,
+        ),
     )
