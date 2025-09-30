@@ -177,6 +177,7 @@ if DEBUG:
 
     CORS_ALLOW_ALL_ORIGINS = DEBUG
 
+
 with suppress(ModuleNotFoundError):
     from debug_toolbar.settings import CONFIG_DEFAULTS
 
