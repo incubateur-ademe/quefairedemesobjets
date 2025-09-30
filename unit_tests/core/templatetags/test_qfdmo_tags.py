@@ -5,10 +5,10 @@ from django.contrib.gis.geos import Point
 from django.http import HttpRequest, QueryDict
 from factory.django import FileField
 
-from core.templatetags.qfdmo_tags import (
+from core.templatetags.admin_data_tags import display_diff_value
+from core.templatetags.carte_tags import (
     acteur_pinpoint_tag,
     action_by_direction,
-    display_diff_value,
     distance_to_acteur,
 )
 from unit_tests.qfdmo.acteur_factory import (
@@ -372,7 +372,7 @@ class TestDisplayDiffValue:
     @pytest.fixture
     def mock_diff_display(self):
         """Mock pour diff_display"""
-        with patch("core.templatetags.qfdmo_tags.diff_display") as mock:
+        with patch("core.templatetags.admin_data_tags.diff_display") as mock:
             mock.side_effect = lambda old, new: f"DIFF({old} -> {new})"
             yield mock
 

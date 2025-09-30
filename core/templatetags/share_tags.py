@@ -79,3 +79,19 @@ def configure_acteur_sharer(context):
 @register.simple_tag(takes_context=True)
 def configure_produit_sharer(context):
     return _configure_sharer(context)
+
+
+@register.filter
+def tojson(value):
+    """Django filter to replace Jinja2's |tojson filter"""
+    import json
+
+    return json.dumps(value)
+
+
+@register.simple_tag
+def random_range(max_value):
+    """Generate a random number for cache busting"""
+    import random
+
+    return random.randint(0, max_value - 1)
