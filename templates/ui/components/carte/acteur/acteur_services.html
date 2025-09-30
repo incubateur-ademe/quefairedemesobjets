@@ -1,5 +1,5 @@
 <div class="qf-flex qf-gap-1v">
-    {% for ps in acteur.sorted_proposition_services %}
+    {% for ps in object.sorted_proposition_services %}
         {% include "ui/components/carte/acteur/tabs/_service_tag.html" with text=ps.action.libelle action=ps.action.groupe_action %}
     {% endfor %}
 </div>
