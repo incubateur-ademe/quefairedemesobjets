@@ -66,11 +66,17 @@ COPY ./dags/ /opt/airflow/dags/
 COPY ./config/ /opt/airflow/config/
 COPY ./plugins/ /opt/airflow/plugins/
 
+COPY airflow-dag-processor-start.sh /opt/airflow/airflow-dag-processor-start.sh
+
 WORKDIR /opt/airflow
 USER 0
 RUN chown -R ${AIRFLOW_UID:-50000}:0 /opt/airflow/dbt
+RUN touch /run/nginx.pid
+RUN chown -R ${AIRFLOW_UID:-50000}:0 /var/lib/nginx /var/log/nginx /run/nginx.pid
+RUN chmod +x /opt/airflow/airflow-dag-processor-start.sh
 USER ${AIRFLOW_UID:-50000}:0
 
 EXPOSE 80
 
-CMD ["dag-processor"]
+ENTRYPOINT ["/opt/airflow/airflow-dag-processor-start.sh"]
+CMD [""]
