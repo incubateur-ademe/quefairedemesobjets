@@ -122,7 +122,7 @@
                     </a>
                 </div>
                 {# Liens de pieds de page pour iframe #}
-                {% include 'qfdmo/_addresses_partials/iframe_footer_links.html' %}
+                {% include "components/carte/_addresses_partials/iframe_footer_links.html" %}
             {% endblock content_footer %}
             </footer>
         </section>
@@ -139,5 +139,5 @@
 {% endblock content %}
 
 {% block modals %}
-    {% include 'qfdmo/reparacteur_modale.html' %}
+    {% include "components/carte/reparacteur_modale.html" %}
 {% endblock modals %}
