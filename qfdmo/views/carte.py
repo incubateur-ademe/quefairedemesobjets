@@ -17,15 +17,15 @@ class CarteSearchActeursView(SearchActeursView):
     is_carte = True
     template_name = "ui/pages/carte.html"
     form_class = CarteForm
-    forms = [ViewModeForm]
+    forms = {"view_mode": ViewModeForm}
 
     def get_forms(self):
         bounded_forms = []
-        for form in self.forms:
+        for key, form in self.forms.items():
             if self.request.method == "POST":
-                bounded_forms.append(form(self.request.POST))
+                bounded_forms.append({key: form(self.request.POST)})
             else:
-                bounded_forms.append(form(self.request.GET))
+                bounded_forms.append({key: form(self.request.GET)})
 
         return bounded_forms
 
