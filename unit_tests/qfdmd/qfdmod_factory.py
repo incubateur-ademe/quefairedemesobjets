@@ -18,7 +18,6 @@ class ProduitFactory(Factory):
         model = Produit
         django_get_or_create = ("nom",)
 
-    id = Faker("pyint", min_value=1)  # Ajout d'un ID unique
     nom = Faker("sentence", nb_words=3)
 
 
