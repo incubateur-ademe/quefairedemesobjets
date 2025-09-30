@@ -6,7 +6,7 @@ from dsfr_hacks.forms import ColorForm
 
 
 class ColorsView(FormView):
-    template_name = "dsfr_hacks/colors.html"
+    template_name = "ui/pages/dsfr_hacks/colors.html"
     form_class = ColorForm
 
     def form_valid(self, form):
