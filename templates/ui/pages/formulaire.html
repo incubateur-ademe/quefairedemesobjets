@@ -32,15 +32,9 @@
             <header
                 class="max-md:qf-sticky qf-top-0 qf-z-0"
             >
-                <div
-                    class="
-                    qf-bg-white
-                    qf-flex qf-flex-row sm:qf-items-center"
-                >
-                {% block form_header %}
-                {% include 'ui/components/formulaire/header.html' %}
-                {% endblock form_header %}
-                </div>
+            {% block form_header %}
+                {% include 'components/formulaire/header.html' with extra_classes="qf-bg-white" %}
+            {% endblock form_header %}
             </header>
 
             <main
@@ -99,8 +93,12 @@
             data-acteur-details-map-container-id-value="{{ map_container_id }}"
             aria-hidden="true"
             >
+<<<<<<< HEAD:templates/ui/pages/formulaire.html
                 {% include "ui/components/carte/panels/acteur_detail.html" %}
+=======
+>>>>>>> d181fe59 (WIP):templates/pages/formulaire.html
             </aside>
+            {% include "components/formulaire/panels/acteur_detail.html" %}
 
             <footer
                 class="max-md:qf-fixed
