@@ -3,6 +3,7 @@ from math import sqrt
 
 from django.db.models import Q
 from django.template.defaulttags import register
+from django.template.loader import render_to_string
 
 from core.utils import get_direction
 from qfdmo.models import DisplayedActeur
@@ -15,6 +16,40 @@ logger = logging.getLogger(__name__)
 @register.simple_tag
 def actions_for(dispayed_acteur: DisplayedActeur, direction):
     return dispayed_acteur.acteur_actions(direction=direction)
+
+
+def render_acteur(acteur):
+    return [
+        acteur.nom,
+        render_to_string(
+            "ui/components/carte/acteur/acteur_services.html", {"object": acteur}
+        ),
+        render_to_string(
+            "ui/components/carte/acteur/acteur_labels.html", {"object": acteur}
+        ),
+        "10km",
+    ]
+
+
+@register.filter
+def as_dsfr_table(acteurs):
+    return {
+        "caption": "Tableau basique",
+        "header": ["Nom", "Actions", "Caractéristiques", "Distance"],
+        "content": [render_acteur(acteur) for acteur in acteurs],
+        "extra_classes": "fr-table--multiline qf-w-full",
+    }
+
+
+@register.filter
+def as_paginator(acteurs):
+    # DSFR pagination expect a Paginator instance
+    # See https://docs.djangoproject.com/fr/5.2/ref/paginator/#django.core.paginator.Paginator
+    # and https://numerique-gouv.github.io/django-dsfr/components/pagination/
+    from django.core.paginator import Paginator
+
+    paginator = Paginator(acteurs, 12)
+    return paginator
 
 
 @register.simple_tag(takes_context=True)
