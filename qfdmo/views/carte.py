@@ -20,13 +20,15 @@ class CarteSearchActeursView(SearchActeursView):
     forms = {"view_mode": ViewModeForm}
 
     def get_forms(self):
-        bounded_forms = []
+        bounded_forms = {}
         for key, form in self.forms.items():
             if self.request.method == "POST":
-                bounded_forms.append({key: form(self.request.POST)})
+                form = form(self.request.POST)
             else:
-                bounded_forms.append({key: form(self.request.GET)})
+                form = form(self.request.GET)
 
+            if form and form.is_valid():
+                bounded_forms[key] = form
         return bounded_forms
 
     def get_initial(self, *args, **kwargs):
@@ -47,7 +49,11 @@ class CarteSearchActeursView(SearchActeursView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context.update(is_carte=True, map_container_id="carte", forms=self.get_forms())
+        context.update(
+            is_carte=True,
+            map_container_id="carte",
+            forms=self.get_forms(),
+        )
         return context
 
         return context

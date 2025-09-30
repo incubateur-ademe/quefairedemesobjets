@@ -17,6 +17,7 @@
         </div>
         {% endif %}
 
+
         {# Recherche adresse #}
         <div class="fr-my-1w qf-flex-grow qf-flex qf-flex-col
             {% if not carte_config or not carte_config.supprimer_branding %}qf-px-2w md:qf-px-3w md:qf-pr-6w{% else %}qf-p-2w{% endif %}"
@@ -59,5 +60,7 @@
             </div>
             {% endif %}
         </div>
+
+        {{ forms.view_mode }}
     </div>
 </header>
