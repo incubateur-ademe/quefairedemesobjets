@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class SearchInput(forms.TextInput):
-    template_name = "components/search/widget.html"
+    template_name = "ui/components/search/widget.html"
 
 
 class SearchForm(DsfrBaseForm):

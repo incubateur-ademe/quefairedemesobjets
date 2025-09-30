@@ -36,7 +36,7 @@ def genre_nombre_from(reusable_content: ReusableContent, page):
     return richtext(content.replace("&lt;objet&gt;", replacement))
 
 
-@register.inclusion_tag("components/patchwork/patchwork.html")
+@register.inclusion_tag("ui/components/patchwork/patchwork.html")
 def patchwork() -> dict:
     from qfdmd.models import Synonyme
 
@@ -48,7 +48,7 @@ def patchwork() -> dict:
     return {"produits": produits}
 
 
-@register.inclusion_tag("seo/_canonical_url.html", takes_context=True)
+@register.inclusion_tag("templatetags/canonical_url.html", takes_context=True)
 def canonical_url(context: dict) -> dict:
     if request := context.get("request"):
         return {"url": request.build_absolute_uri(request.path)}
@@ -90,7 +90,7 @@ def render_file_content(file_field: FileField) -> str:
         return ""
 
 
-@register.inclusion_tag("components/carte/carte.html", takes_context=True)
+@register.inclusion_tag("ui/components/carte/carte.html", takes_context=True)
 def carte(context, carte_config: CarteConfig) -> dict:
     page = context.get("page")
     return {
@@ -103,6 +103,6 @@ def carte(context, carte_config: CarteConfig) -> dict:
     }
 
 
-@register.inclusion_tag("head/favicon.html")
+@register.inclusion_tag("templatetags/favicon.html")
 def favicon() -> dict:
     return {}

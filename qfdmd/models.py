@@ -228,6 +228,7 @@ class AncestorFieldsMixin:
 class ProduitPage(
     CompiledFieldMixin, Page, GenreNombreModel, TitleFields, AncestorFieldsMixin
 ):
+    template = "ui/pages/produit_page.html"
     subpage_types = [
         "qfdmd.synonymepage",
     ]
@@ -357,6 +358,7 @@ class FamilyPageTag(TaggedItemBase):
 
 
 class FamilyPage(ProduitPage):
+    template = "ui/pages/family_page.html"
     subpage_types = ["qfdmd.produitpage", "qfdmd.synonymepage"]
 
     class Meta:
@@ -590,7 +592,7 @@ class Produit(index.Indexed, AbstractBaseProduit):
             return None
 
         return render_to_string(
-            "components/produit/_en_savoir_plus.html",
+            "ui/components/produit/_en_savoir_plus.html",
             {"liens": [produit_lien.lien for produit_lien in produit_liens]},
         )
 
