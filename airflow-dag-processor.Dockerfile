@@ -71,4 +71,6 @@ USER 0
 RUN chown -R ${AIRFLOW_UID:-50000}:0 /opt/airflow/dbt
 USER ${AIRFLOW_UID:-50000}:0
 
+EXPOSE 80
+
 CMD ["dag-processor"]
