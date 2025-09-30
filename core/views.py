@@ -23,7 +23,9 @@ def backlink(request):
     except (AttributeError, EmbedSettings.DoesNotExist):
         pass
 
-    return HttpResponse(richtext(text_content), content_type="text/plain")
+    response = HttpResponse(richtext(text_content), content_type="text/plain")
+    response["Access-Control-Allow-Origin"] = "*"
+    return response
 
 
 @cache_control(max_age=31536000)
