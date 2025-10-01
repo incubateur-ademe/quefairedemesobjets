@@ -23,7 +23,6 @@ class TestInitialValue:
         "sc_id": None,
         "adresse": None,
         "direction": settings.DEFAULT_ACTION_DIRECTION,
-        "digital": "0",
         "latitude": None,
         "longitude": None,
         "label_reparacteur": None,

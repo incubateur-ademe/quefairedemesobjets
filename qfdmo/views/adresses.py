@@ -55,14 +55,6 @@ def generate_google_maps_itineraire_url(
     )
 
 
-# class DigitalMixin:
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         context.update(is_digital=self.next_form)
-
-#         return context
-
-
 class TurboFormMixin:
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
@@ -80,7 +72,6 @@ class TurboFormMixin:
 
 class SearchActeursView(
     ABC,
-    # DigitalMixin,
     TurboFormMixin,
     FormView,
 ):
@@ -99,8 +90,6 @@ class SearchActeursView(
         initial["sous_categorie_objet"] = self.request.GET.get("sous_categorie_objet")
         # TODO: refacto forms : delete this line
         initial["adresse"] = self.request.GET.get("adresse")
-        #  🔨🔨🔨🔨🔨🔨🔨🔨🔨
-        # initial["digital"] = self.request.GET.get("digital", "0")
         initial["direction"] = get_direction(self.request, self.is_carte)
         # TODO: refacto forms : delete this line
         initial["latitude"] = self.request.GET.get("latitude")
@@ -218,9 +207,7 @@ class SearchActeursView(
 
         # Manage the selection of sous_categorie_objet and actions
         acteurs = self._acteurs_from_sous_categorie_objet_and_actions()
-        # 🔨🔨🔨🔨🔨🔨🔨🔨🔨
-        # RENAME
-        bbox, acteurs = self._handle_digital_acteurs(acteurs, kwargs)
+        bbox, acteurs = self._handle_scoped_acteurs(acteurs, kwargs)
         kwargs.update(acteurs=acteurs)
         context = super().get_context_data(**kwargs)
 
@@ -233,9 +220,15 @@ class SearchActeursView(
 
         return context
 
-    def _handle_digital_acteurs(
+    def _handle_scoped_acteurs(
         self, acteurs: QuerySet[DisplayedActeur], kwargs
-    ) -> QuerySet[DisplayedActeur]:
+    ) -> tuple[Any, QuerySet[DisplayedActeur]]:
+        """
+        Handle the scoped acteurs following the order of priority:
+        - bbox
+        - epci_codes
+        - user location
+        """
         bbox, acteurs = self._bbox_and_acteurs_from_location_or_epci(acteurs)
         acteurs = acteurs[: self._get_max_displayed_acteurs()]
 
@@ -545,15 +538,25 @@ class FormulaireSearchActeursView(SearchActeursView):
             logger.error(f"{self.next_form=} 💣💣💣💣💣")
         return super().get(request, *args, **kwargs)
 
-    def _handle_digital_acteurs(self, acteurs: QuerySet[DisplayedActeur], kwargs):
+    def _handle_scoped_acteurs(
+        self, acteurs: QuerySet[DisplayedActeur], kwargs
+    ) -> tuple[Any, QuerySet[DisplayedActeur]]:
+        """
+        Handle the scoped acteurs following the order of priority:
+        - digital
+        - bbox
+        - epci_codes
+        - user location
+        override from parent class to handle digital acteurs
+        """
+
         if (
             self.next_form
             and self.next_form.is_bound
             and self.next_form.cleaned_data["digital"] == "1"
         ):
-            logging.warning(f"IS DIGITAL == {self.next_form.cleaned_data=}")
             return None, acteurs.digital()
-        return super()._handle_digital_acteurs(acteurs, kwargs)
+        return super()._handle_scoped_acteurs(acteurs, kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
