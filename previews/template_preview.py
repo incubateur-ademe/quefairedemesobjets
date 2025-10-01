@@ -200,10 +200,10 @@ class ModalsPreview(LookbookPreview):
         ## TODO
         - [ ] Générer un contexte fake dans Django Lookbook
         """
-        return render_to_string("modals/embed.html")
+        return render_to_string("ui/modals/embed.html")
 
     def share(self, **kwargs):
-        return render_to_string("modals/share.html")
+        return render_to_string("ui/modals/share.html")
 
 
 class PagesPreview(LookbookPreview):
@@ -347,7 +347,7 @@ class AccessibilitePreview(LookbookPreview):
         ## À vérifier
         - [ ] En utilisant la touche tab, on peut naviguer dans les boutons de la modale de partage
         """
-        return render_to_string("modals/share.html")
+        return render_to_string("ui/modals/share.html")
 
     def P01_3_3(self, **kwargs):
         """
