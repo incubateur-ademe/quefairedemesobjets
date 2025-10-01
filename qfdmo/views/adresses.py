@@ -539,21 +539,28 @@ class FormulaireSearchActeursView(SearchActeursView):
     form_class = FormulaireForm
 
     def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-        next_form = NextFormulaireForm(self.request.GET)
-        if next_form.is_valid():
-            self.next_form = next_form
-        else:
-            logger.error(f"{next_form.errors=} 💣💣💣💣💣")
+        self.next_form = NextFormulaireForm(self.request.GET)
+        if not self.next_form.is_valid():
+            logger.error(f"{self.next_form=} 💣💣💣💣💣")
         return super().get(request, *args, **kwargs)
 
     def _handle_digital_acteurs(self, acteurs: QuerySet[DisplayedActeur], kwargs):
-        if self.next_form and self.next_form.cleaned_data["digital"]:
+        if (
+            self.next_form
+            and self.next_form.is_bound
+            and self.next_form.cleaned_data["digital"] == "1"
+        ):
+            logging.warning(f"IS DIGITAL == {self.next_form.cleaned_data=}")
             return None, acteurs.digital()
         return super()._handle_digital_acteurs(acteurs, kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if self.next_form and self.next_form.cleaned_data["digital"]:
+        if (
+            self.next_form
+            and self.next_form.is_bound
+            and self.next_form.cleaned_data["digital"] == "1"
+        ):
             context.update(is_digital=True)
         context.update(map_container_id="formulaire", next_form=self.next_form)
         return context
