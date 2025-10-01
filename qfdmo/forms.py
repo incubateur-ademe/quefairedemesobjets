@@ -2,10 +2,13 @@ from typing import List, cast
 
 from django import forms
 from django.core.cache import cache
+from django.db.models import IntegerChoices
 from django.http import HttpRequest
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
+from dsfr.enums import SegmentedControlChoices
 from dsfr.forms import DsfrBaseForm
+from dsfr.widgets import SegmentedControl
 
 from qfdmo.fields import GroupeActionChoiceField
 from qfdmo.geo_api import epcis_from, formatted_epcis_as_list_of_tuple
@@ -204,33 +207,6 @@ class AddressesForm(forms.Form):
         required=False,
     )
 
-    digital = forms.ChoiceField(
-        widget=SegmentedControlSelect(
-            attrs={
-                "class": "qf-w-full sm:qf-w-fit",
-                "data-action": "click -> search-solution-form#advancedSubmit",
-                "data-with-controls": "true",
-            },
-        ),
-        choices=[
-            (
-                "0",
-                mark_safe(
-                    '<span class="fr-icon-road-map-line sm:qf-mx-1w">'
-                    " à proximité</span>"
-                ),
-            ),
-            (
-                "1",
-                mark_safe(
-                    '<span class="fr-icon-global-line sm:qf-mx-1w"> en ligne</span>'
-                ),
-            ),
-        ],
-        label="Adresses à proximité ou solutions digitales",
-        required=False,
-    )
-
 
 class FormulaireForm(AddressesForm):
     def load_choices(self, request: HttpRequest, **kwargs) -> None:
@@ -257,6 +233,44 @@ class FormulaireForm(AddressesForm):
         help_text="20 av. du Grésillé 49000 Angers",
         label="Autour de l'adresse suivante ",
         required=False,
+    )
+
+
+class DigitalChoices(IntegerChoices, SegmentedControlChoices):
+    DIGITAL = {
+        "value": 1,
+        "label": "En ligne",
+        "icon": "global-line",
+    }
+    PHYSIQUE = {
+        "value": 0,
+        "label": "À proximité",
+        "icon": "road-map-line",
+    }
+
+
+class GetFormMixin(forms.Form):
+
+    def __init__(self, data: dict | None = None, *args, **kwargs):
+        if data and not (set(data.keys()) & set(self.base_fields.keys())):
+            data = None
+
+        super().__init__(*args, data=data, **kwargs)
+
+
+class NextFormulaireForm(GetFormMixin, DsfrBaseForm):
+
+    digital = forms.ChoiceField(
+        label="",
+        choices=DigitalChoices.choices,
+        initial=DigitalChoices.PHYSIQUE,
+        required=False,
+        widget=SegmentedControl(
+            extended_choices=DigitalChoices,
+            attrs={
+                "data-action": "search-solution-form#advancedSubmit",
+            },
+        ),
     )
 
 
@@ -511,9 +525,7 @@ class AdvancedConfiguratorForm(forms.Form):
     action_displayed = forms.MultipleChoiceField(
         widget=DSFRCheckboxSelectMultiple(
             attrs={
-                "class": (
-                    "fr-checkbox qf-inline-grid qf-grid-cols-4 qf-gap-4" " qf-m-1w"
-                ),
+                "class": ("fr-checkbox qf-inline-grid qf-grid-cols-4 qf-gap-4 qf-m-1w"),
             },
         ),
         choices=[],
@@ -539,9 +551,7 @@ class AdvancedConfiguratorForm(forms.Form):
     action_list = forms.MultipleChoiceField(
         widget=DSFRCheckboxSelectMultiple(
             attrs={
-                "class": (
-                    "fr-checkbox qf-inline-grid qf-grid-cols-4 qf-gap-4" " qf-m-1w"
-                ),
+                "class": ("fr-checkbox qf-inline-grid qf-grid-cols-4 qf-gap-4 qf-m-1w"),
             },
         ),
         choices=[],

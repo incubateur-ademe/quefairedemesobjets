@@ -29,7 +29,7 @@ dependencies = [
     "django-widget-tweaks>=1.5.0,<2",
     "django-cors-headers>=4.6.0,<5",
     "django-colorfield>=0.14.0,<0.15",
-    "django-dsfr>=2.4.0,<3",
+    "django-dsfr>=3,<4",
     "rapidfuzz>=3.13.0,<4",
     "sites-faciles-experiment~=2.1.0rc9",
     "wagtail-honeypot @ git+https://github.com/Luzzzi/wagtail-honeypot@feature/i18n-required-honeypot",
