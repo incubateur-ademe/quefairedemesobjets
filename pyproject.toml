@@ -109,6 +109,9 @@ default-groups = [
     "airflow",
 ]
 
+[tool.uv.sources]
+django-dsfr = { path = "../django-dsfr" }
+
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
 exclude = [
