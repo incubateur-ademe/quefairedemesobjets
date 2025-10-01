@@ -1,21 +1,20 @@
 {# Generic template for suggestions following suggestion.changes:list[SuggestionChange] #}
 {% extends "data/_partials/suggestion_details.html" %}
-{% load custom_filters %}
 
 {% block suggestion_title %}
-{{ title }}
+{{ suggestion.suggestion.title }}
 {% endblock suggestion_title %}</h3>
 
 {% block suggestion_details %}
 
 {# To dynamically display other info other than title/changes #}
-{% for key, value in suggestion.items %}
+{% for key, value in suggestion.suggestion.items %}
     {% if key != "changes" and key != "title" %}
         <p>{{ key }}: {% include "data/_partials/value_details.html" with key=key value=value %}</p>
     {% endif %}
 {% endfor %}
 
-<h3 style="margin-top: 1.5em">🔢 {{ changes|length }} acteur(s) impacté(s):</h3>
+<h3 style="margin-top: 1.5em">🔢 {{ suggestion.suggestion.changes|length }} acteur(s) impacté(s):</h3>
 <style>
     .suggestion-changes-table {
         width: 100%;
@@ -49,7 +48,7 @@
         </tr>
     </thead>
     <tbody>
-    {% for change in changes %}
+    {% for change in suggestion.suggestion.changes %}
     <tr>
         <td>{{ change.order }}</td>
         <td>{{ change.reason }}</td>
