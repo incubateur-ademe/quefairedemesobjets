@@ -1,12 +1,12 @@
 from typing import List, cast
-from dsfr.enums import SegmentedControlChoices
 
 from django import forms
 from django.core.cache import cache
-from django.db.models import Choices, IntegerChoices, TextChoices
+from django.db.models import IntegerChoices
 from django.http import HttpRequest
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
+from dsfr.enums import SegmentedControlChoices
 from dsfr.forms import DsfrBaseForm
 from dsfr.widgets import SegmentedControl
 
@@ -249,41 +249,29 @@ class DigitalChoices(IntegerChoices, SegmentedControlChoices):
     }
 
 
-class NextFormulaireForm(DsfrBaseForm):
+class GetFormMixin(forms.Form):
+
+    def __init__(self, data: dict | None = None, *args, **kwargs):
+        if data and not (set(data.keys()) & set(self.base_fields.keys())):
+            data = None
+
+        super().__init__(*args, data=data, **kwargs)
+
+
+class NextFormulaireForm(GetFormMixin, DsfrBaseForm):
+
     digital = forms.ChoiceField(
-        label="Adresses à proximité ou solutions digitales",
+        label="",
         choices=DigitalChoices.choices,
         initial=DigitalChoices.PHYSIQUE,
         required=False,
-        widget=SegmentedControl(extended_choices=DigitalChoices),
+        widget=SegmentedControl(
+            extended_choices=DigitalChoices,
+            attrs={
+                "data-action": "search-solution-form#advancedSubmit",
+            },
+        ),
     )
-    # digital = forms.BooleanField(
-    #     initial=False,
-    #     # widget=SegmentedControlSelect(
-    #     #     attrs={
-    #     #         "class": "qf-w-full sm:qf-w-fit",
-    #     #         "data-action": "click -> search-solution-form#advancedSubmit",
-    #     #         "data-with-controls": "true",
-    #     #     },
-    #     # ),
-    #     # choices=[
-    #     #     (
-    #     #         "0",
-    #     #         mark_safe(
-    #     #             '<span class="fr-icon-road-map-line sm:qf-mx-1w">'
-    #     #             " à proximité</span>"
-    #     #         ),
-    #     #     ),
-    #     #     (
-    #     #         "1",
-    #     #         mark_safe(
-    #     #             '<span class="fr-icon-global-line sm:qf-mx-1w"> en ligne</span>'
-    #     #         ),
-    #     #     ),
-    #     # ],
-    #     required=False,
-    #     label="Adresses à proximité ou solutions digitales",
-    # )
 
 
 def get_epcis_for_carte_form():
