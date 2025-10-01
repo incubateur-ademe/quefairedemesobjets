@@ -8,6 +8,12 @@ from fuzzywuzzy import fuzz
 from shapely import wkb
 from shapely.geometry import Point
 from sources.tasks.airflow_logic.config_management import DAGConfig
+from sources.tasks.transform.exceptions import (
+    ActeurServiceCodesWarning,
+    ActionCodesWarning,
+    AdresseWarning,
+    IdentifiantExterneError,
+)
 from sources.tasks.transform.formatter import format_libelle_to_code
 from sources.tasks.transform.transform_column import (
     cast_eo_boolean_or_string_to_boolean,
@@ -165,14 +171,20 @@ def clean_identifiant_externe(row, _):
     identifiant_externe_column = list(row.keys())[0]
     if not row[identifiant_externe_column] and "nom" in row:
         if not row["nom"]:
-            raise ValueError(
-                f"{identifiant_externe_column} or nom is required to generate"
-                " identifiant_externe"
+            raise IdentifiantExterneError(
+                f"L'identifiant externe est requis, il n'a pas pu être déduite des"
+                f" colonnes `{identifiant_externe_column}` et/ou `nom`"
             )
         row[identifiant_externe_column] = (
-            row["nom"].replace("-", "").replace(" ", "_").replace("__", "_")
+            row["nom"].strip().replace("-", "").replace(" ", "_").replace("__", "_")
         )
     row["identifiant_externe"] = str(row[identifiant_externe_column]).strip()
+
+    if not row["identifiant_externe"]:
+        raise IdentifiantExterneError(
+            f"L'identifiant externe est requis, il n'a pas pu être déduite des colonnes"
+            f" `{identifiant_externe_column}` et/ou `nom`"
+        )
 
     if "acteur_type_code" in row and row["acteur_type_code"] == ACTEUR_TYPE_DIGITAL:
         row["identifiant_externe"] += "_d"
@@ -209,6 +221,8 @@ def clean_adresse(row, dag_config):
         address, postal_code, city = _get_address(row["adresse_format_ban"])
     else:
         address, postal_code, city = _extract_details(row["adresse_format_ban"])
+    if not address and not postal_code and not city:
+        raise AdresseWarning(f"Adresse n'a pas pu être déduit : {row}")
     row["adresse"] = address
     row["code_postal"] = postal_code
     row["ville"] = city
@@ -233,6 +247,10 @@ def clean_acteur_service_codes(row, _):
         acteur_service_codes.append("service_de_reparation")
     if point_dapport_pour_reemploi or point_de_collecte_ou_de_reprise_des_dechets:
         acteur_service_codes.append("structure_de_collecte")
+    if not acteur_service_codes:
+        raise ActeurServiceCodesWarning(
+            f"Acteur service n'a pas pu être déduit : {row}"
+        )
     row["acteur_service_codes"] = acteur_service_codes
     return row[["acteur_service_codes"]]
 
@@ -261,6 +279,8 @@ def clean_action_codes(row, dag_config: DAGConfig):
             action_codes.append("donner")
     if point_de_collecte_ou_de_reprise_des_dechets:
         action_codes.append("trier")
+    if not action_codes:
+        raise ActionCodesWarning(f"Action codes n'a pas pu être déduit : {row}")
     row["action_codes"] = action_codes
     return row[["action_codes"]]
 

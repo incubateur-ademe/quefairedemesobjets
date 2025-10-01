@@ -1,6 +1,11 @@
 import numpy as np
 import pandas as pd
 import pytest
+from sources.tasks.transform.exceptions import (
+    ActeurTypeCodeError,
+    BooleanValueWarning,
+    CodePostalWarning,
+)
 from sources.tasks.transform.transform_column import (
     cast_eo_boolean_or_string_to_boolean,
     clean_acteur_type_code,
@@ -41,7 +46,6 @@ class TestCastEOBooleanOrStringToBoolean:
             ("True", True),
             ("", None),
             (" ", None),
-            ("fake", None),
         ],
     )
     def test_cast_eo_boolean_or_string_to_boolean(
@@ -49,8 +53,15 @@ class TestCastEOBooleanOrStringToBoolean:
         value,
         expected_value,
     ):
-
         assert cast_eo_boolean_or_string_to_boolean(value, None) == expected_value
+
+    @pytest.mark.parametrize(
+        "value",
+        [1.0, "fake"],
+    )
+    def test_cast_eo_boolean_or_string_to_boolean_warning(self, value):
+        with pytest.raises(BooleanValueWarning):
+            cast_eo_boolean_or_string_to_boolean(value, None)
 
 
 class TestConvertOpeningHours:
@@ -264,7 +275,7 @@ class TestCleanActeurTypeCode:
     )
     def test_clean_acteur_type_code_invalid(self, value):
         with pytest.raises(
-            ValueError, match=f"Acteur type `{value}` not found in mapping"
+            ActeurTypeCodeError, match=f"Acteur type `{value}` not found in mapping :"
         ):
             clean_acteur_type_code(value, None)
 
@@ -356,13 +367,17 @@ class TestCleanCodePostal:
         [
             (None, ""),
             ("", ""),
-            ("75", ""),
             ("75001", "75001"),
             ("7501", "07501"),
         ],
     )
     def test_clean_code_postal(self, cp, expected_cp):
         assert clean_code_postal(cp, None) == expected_cp
+
+    @pytest.mark.parametrize("cp", ["123456", "123", "Paris"])
+    def test_clean_code_postal_warning(self, cp):
+        with pytest.raises(CodePostalWarning):
+            clean_code_postal(cp, None)
 
 
 class TestCleanHorairesOsm:

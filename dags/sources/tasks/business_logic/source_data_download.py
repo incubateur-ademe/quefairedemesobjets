@@ -17,6 +17,30 @@ def source_data_download(
     metadata_endpoint: str | None = None,
 ) -> pd.DataFrame:
     """Téléchargement de la données source sans lui apporter de modification"""
+
+    def _align_columns_with_schema(df: pd.DataFrame, schema: dict) -> pd.DataFrame:
+        # Récupérer toutes les colonnes attendues du schéma
+        expected_columns = [
+            field["key"] for field in schema if not field.get("x-calculated", False)
+        ]
+
+        # Vérifier les colonnes manquantes
+        missing_columns = set(expected_columns) - set(df.columns)
+        if missing_columns:
+            logger.warning(f"Colonnes manquantes dans le DataFrame : {missing_columns}")
+        for column in missing_columns:
+            df[column] = ""
+
+        # Vérifier les colonnes supplémentaires non attendues
+        extra_columns = set(df.columns) - set(expected_columns)
+        if extra_columns:
+            logger.warning(
+                f"Colonnes supplémentaires dans le DataFrame : {extra_columns}"
+            )
+
+        log.preview("metadata retournée par la tâche", schema)
+        return df
+
     logger.info("Téléchargement données de l'API : début...")
     # TODO: changer de logique, plutôt que de tout charger en mémoire et se
     # trimballer des dataframes en XCOM, on devrait plutôt streamer les données
@@ -38,27 +62,7 @@ def source_data_download(
         metadata = requests.get(metadata_endpoint, timeout=60)
         metadata.raise_for_status()
         schema = metadata.json()
-
-        # Récupérer toutes les colonnes attendues du schéma
-        expected_columns = [
-            field["key"] for field in schema if not field.get("x-calculated", False)
-        ]
-
-        # Vérifier les colonnes manquantes
-        missing_columns = set(expected_columns) - set(df.columns)
-        if missing_columns:
-            logger.warning(f"Colonnes manquantes dans le DataFrame : {missing_columns}")
-        for column in missing_columns:
-            df[column] = ""
-
-        # Vérifier les colonnes supplémentaires non attendues
-        extra_columns = set(df.columns) - set(expected_columns)
-        if extra_columns:
-            logger.warning(
-                f"Colonnes supplémentaires dans le DataFrame : {extra_columns}"
-            )
-
-        log.preview("metadata retournée par la tâche", schema)
+        df = _align_columns_with_schema(df, schema)
 
     return df
 
