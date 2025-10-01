@@ -13,7 +13,10 @@ from sources.tasks.airflow_logic.config_management import (
     NormalizationColumnTransform,
     NormalizationDFTransform,
 )
-from sources.tasks.transform.exceptions import TransformationError
+from sources.tasks.transform.exceptions import (
+    ImportSourceException,
+    ImportSourceValueWarning,
+)
 from sources.tasks.transform.transform_df import compute_location, merge_duplicates
 from sqlalchemy import text
 from tenacity import retry, stop_after_attempt, wait_fixed
@@ -87,8 +90,8 @@ def _transform_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
                 df.at[index, column_to_transform.destination] = normalisation_function(
                     origin_value
                 )
-            except TransformationError as e:
-                df.at[index, "error_log"].append(
+            except ImportSourceValueWarning as e:
+                df.at[index, "log_warning"].append(
                     {
                         "destination_columns": [column_to_transform.destination],
                         "transformation": function_name,
@@ -139,8 +142,9 @@ def _transform_df(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
                         f" but it's {type(result)=}, {result=}"
                     )
 
-            except TransformationError as e:
-                df.at[index, "error_log"].append(
+            except ImportSourceException as e:
+                log_column = "log_error" if e.is_blocking else "log_warning"
+                df.at[index, log_column].append(
                     {
                         "destination_columns": column_to_transform_df.destination,
                         "transformation": function_name,
@@ -155,7 +159,7 @@ def _transform_df(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
                 )
                 # Définir des valeurs par défaut pour toutes les colonnes de destination
                 for dest_col in column_to_transform_df.destination:
-                    df.at[index, dest_col] = ""
+                    df.at[index, dest_col] = [] if dest_col.endswith("_codes") else ""
 
     return df
 
@@ -292,7 +296,7 @@ def source_data_normalize(
     df_acteur_from_source: pd.DataFrame,
     dag_config: DAGConfig,
     dag_id: str,
-) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, dict]:
     """
     Normalisation des données source. Passée cette étape:
     - toutes les sources doivent avoir une nomenclature et formatage alignés
@@ -311,7 +315,9 @@ def source_data_normalize(
             inplace=True,
         )
 
-    df["error_log"] = [[] for _ in range(len(df))]
+    # Init log_warning for each row
+    df["log_warning"] = [[] for _ in range(len(df))]
+    df["log_error"] = [[] for _ in range(len(df))]
 
     df = _replace_explicit_null_values(df)
 
@@ -321,10 +327,16 @@ def source_data_normalize(
     df = _transform_df(df, dag_config)
     df = _remove_columns(df, dag_config)
 
-    # create df_error_log with identifiant_unique and error_log
-    df_error_log = df[["identifiant_unique", "error_log"]]
-    # drop error_log from df
-    df = df.drop(columns=["error_log"])
+    # extract logs by identifiant_unique
+    df_log_error = df[["identifiant_unique", "log_error"]]
+    df_log_warning = df[["identifiant_unique", "log_warning"]]
+
+    # drop row with not empty log_error
+    df = df[df["log_error"].apply(len) == 0]
+
+    # drop logs from df
+    df = df.drop(columns=["log_error"])
+    df = df.drop(columns=["log_warning"])
 
     # Merge and delete undesired lines
     df, metadata = _remove_undesired_lines(df, dag_config)
@@ -356,7 +368,7 @@ def source_data_normalize(
     log.preview("df après normalisation", df)
     if df.empty:
         raise ValueError("Plus aucune donnée disponible après normalisation")
-    return df, df_error_log, metadata
+    return df, df_log_error, df_log_warning, metadata
 
 
 def df_normalize_pharmacie(df: pd.DataFrame) -> pd.DataFrame:

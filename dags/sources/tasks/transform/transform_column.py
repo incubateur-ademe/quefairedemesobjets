@@ -1,5 +1,6 @@
 import logging
 import re
+from types import NoneType
 from typing import Any
 
 import numpy as np
@@ -7,6 +8,11 @@ import pandas as pd
 from opening_hours import OpeningHours, ParserError
 from sources.config import shared_constants as constants
 from sources.tasks.airflow_logic.config_management import DAGConfig
+from sources.tasks.transform.exceptions import (
+    ActeurTypeCodeError,
+    BooleanValueWarning,
+    CodePostalWarning,
+)
 from sources.tasks.transform.formatter import format_libelle_to_code
 from sources.tasks.transform.opening_hours import interprete_opening_hours
 
@@ -15,7 +21,9 @@ logger = logging.getLogger(__name__)
 CLOSED_THIS_DAY = "Fermé"
 
 
-def cast_eo_boolean_or_string_to_boolean(value: str | bool, _) -> bool | None:
+def cast_eo_boolean_or_string_to_boolean(
+    value: str | bool | NoneType, _
+) -> bool | None:
     if isinstance(value, (bool, np.bool_)):
         return bool(value)
     if isinstance(value, str):
@@ -23,7 +31,13 @@ def cast_eo_boolean_or_string_to_boolean(value: str | bool, _) -> bool | None:
             return True
         if value.lower().strip() in ["non", "no", "false"]:
             return False
-    return None
+    if value is None or (isinstance(value, str) and value.strip() == ""):
+        return None
+    raise BooleanValueWarning(
+        f"la valeur `{value}` n'a pas pu être interprété comme un booléen"
+        ", Valeurs possibles: oui, yes, true, non, no, false"
+        f", Valeur reçue: {value}"
+    )
 
 
 def convert_opening_hours(opening_hours: str | None, _) -> str:
@@ -118,7 +132,9 @@ def clean_acteur_type_code(value, _):
     }
     code = mapping_dict.get(format_libelle_to_code(value), None)
     if code is None:
-        raise ValueError(f"Acteur type `{value}` not found in mapping")
+        raise ActeurTypeCodeError(
+            f"Acteur type `{value}` not found in mapping : {mapping_dict}"
+        )
     return code
 
 
@@ -174,12 +190,16 @@ def clean_email(email: str | None, _) -> str:
 
 
 def clean_code_postal(cp: str | None, _) -> str:
+    cp_origin = cp
     if pd.isna(cp) or not cp:
         return ""
     cp = clean_number(cp)
-    if len(cp) > 5 or len(cp) < 4:
-        return ""
-    return f"0{cp}" if cp and len(str(cp)) == 4 else str(cp)
+    cp = f"0{cp}" if cp and len(str(cp)) == 4 else str(cp)
+    if len(cp) != 5:
+        raise CodePostalWarning(
+            f"Le code postal n'a pas pu être interprété : `{cp_origin}`"
+        )
+    return cp
 
 
 def clean_horaires_osm(horaires_osm: str | None, _) -> str:
