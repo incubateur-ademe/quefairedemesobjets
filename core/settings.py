@@ -522,6 +522,10 @@ MIDDLEWARE.extend(
     ]
 )
 
+# Django DSFR
+# -----------
+DSFR_ALLOWED_EXTRA_ATTRS = ["data-action"]
+
 # UI
 # ---
 LOOKBOOK = {
