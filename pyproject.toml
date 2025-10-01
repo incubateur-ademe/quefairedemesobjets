@@ -110,7 +110,7 @@ default-groups = [
 ]
 
 [tool.uv.sources]
-django-dsfr = { path = "../django-dsfr" }
+django-dsfr = { git = "https://github.com/fabienheureux/django-dsfr", branch = "support-custom-attrs-in-components" }
 
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
