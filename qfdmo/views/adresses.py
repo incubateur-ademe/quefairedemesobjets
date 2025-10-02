@@ -213,13 +213,12 @@ class SearchActeursView(
 
         # Manage the selection of sous_categorie_objet and actions
         acteurs = self._acteurs_from_sous_categorie_objet_and_actions()
-        acteurs = acteurs[:10]
 
         if self.get_data_from_request_or_bounded_form("digital") == "1":
             acteurs = acteurs.digital()
         elif False:
             bbox, acteurs = self._bbox_and_acteurs_from_location_or_epci(acteurs)
-            # acteurs = acteurs[: self._get_max_displayed_acteurs()]
+            acteurs = acteurs[: self._get_max_displayed_acteurs()]
 
             # Set Home location (address set as input)
             # FIXME : can be manage in template using the form value ?
