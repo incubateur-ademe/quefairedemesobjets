@@ -1,10 +1,11 @@
+{% load dsfr_tags %}
 <header
     {# The z-index below can impact the shadow over #}
     class="{% block header_classes %}qf-z-20{% endblock %} qf-bg-white qf-shadow-lg"
 >
     <div
         class="
-        qf-flex qf-flex-row sm:qf-items-center"
+        qf-flex qf-flex-col md:qf-flex-row sm:qf-items-center"
     >
 
         {% if not carte_config or not carte_config.supprimer_branding %}
@@ -61,8 +62,11 @@
             {% endif %}
         </div>
 
-        <div class="-qf-mt-3w qf-pr-2w">
+        <div class="md:-qf-mt-3w md:qf-pr-2w max-md:qf-px-2w max-md:qf-pb-2w max-md:qf-flex qf-justify-between qf-items-center">
             {{ forms.view_mode }}
+            <div>
+            {% dsfr_button label="Filtres" extra_classes="fr-btn--sm fr-btn--secondary fr-ml-1w fr-btn--icon-left fr-icon-equalizer-line" data_action="search-solution-form#toggleAdvancedFilters" data_testid="advanced-filters" %}
+            </div>
         </div>
     </div>
 </header>

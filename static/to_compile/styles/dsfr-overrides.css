@@ -195,3 +195,20 @@ DSFR customization for tabs
 .fr-header__service {
   @apply qf-hidden;
 }
+
+.fr-table--mode-liste {
+  thead {
+    @apply max-md:qf-hidden;
+  }
+  tbody {
+    @apply max-md:qf-flex qf-flex-col qf-gap-1w;
+  }
+
+  tr {
+    @apply max-md:qf-flex qf-flex-col;
+  }
+
+  .fr-table__content table tbody td {
+    background: transparent !important;
+  }
+}

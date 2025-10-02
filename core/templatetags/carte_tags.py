@@ -204,9 +204,9 @@ def render_acteur(acteur, context):
 def acteurs_table(context, acteurs):
     return {
         "table": {
-            "caption": "Tableau basique",
+            # "caption": "Tableau basique",
             "header": ["Nom", "Actions", "Caractéristiques", "Distance"],
             "content": [render_acteur(acteur, context) for acteur in acteurs],
-            "extra_classes": "fr-table--multiline qf-w-full",
+            "extra_classes": "fr-table--multiline fr-table--mode-liste qf-w-full",
         }
     }
