@@ -1,5 +1,4 @@
 import json
-from django.core.paginator import Paginator
 import logging
 from abc import ABC, abstractmethod
 from typing import List, cast
@@ -10,6 +9,7 @@ from django.contrib.postgres.lookups import Unaccent
 from django.contrib.postgres.search import TrigramWordDistance
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.paginator import Paginator
 from django.db.models import Q
 from django.db.models.functions import Length, Lower
 from django.db.models.query import QuerySet
@@ -201,10 +201,7 @@ class SearchActeursView(
         form = self.get_form_class()(self.request.GET)
 
         kwargs.update(
-            # TODO: refacto forms : define a BooleanField carte on CarteAddressesForm
             carte=self.is_carte,
-            # TODO: refacto forms, return bounded form in template
-            # form=form,
             location="{}",
         )
 
@@ -216,12 +213,13 @@ class SearchActeursView(
 
         # Manage the selection of sous_categorie_objet and actions
         acteurs = self._acteurs_from_sous_categorie_objet_and_actions()
+        acteurs = acteurs[:10]
 
         if self.get_data_from_request_or_bounded_form("digital") == "1":
             acteurs = acteurs.digital()
-        else:
+        elif False:
             bbox, acteurs = self._bbox_and_acteurs_from_location_or_epci(acteurs)
-            acteurs = acteurs[: self._get_max_displayed_acteurs()]
+            # acteurs = acteurs[: self._get_max_displayed_acteurs()]
 
             # Set Home location (address set as input)
             # FIXME : can be manage in template using the form value ?
@@ -231,10 +229,18 @@ class SearchActeursView(
                 longitude := self.get_data_from_request_or_bounded_form("longitude")
             ):
                 kwargs.update(
-                    location=json.dumps({"latitude": latitude, "longitude": longitude})
+                    location=json.dumps({"latitude": latitude, "longitude": longitude}),
                 )
 
-        kwargs.update(acteurs=acteurs)
+        if acteurs:
+            # paginated_acteurs = Paginator(acteurs, self._get_max_displayed_acteurs())
+            # paginated_acteurs_object_list = paginated_acteurs.page(1)
+            kwargs.update(
+                acteurs=acteurs[:10],
+                # acteurs=acteurs[:self._get_max_displayed_acteurs()],
+                # paginated_acteurs=paginated_acteurs,
+                # paginated_acteurs_object_list=paginated_acteurs_object_list,
+            )
         context = super().get_context_data(**kwargs)
 
         # TODO : refacto forms, gérer ça autrement
@@ -415,7 +421,7 @@ class SearchActeursView(
             "proposition_services__sous_categories__categorie",
             "proposition_services__action",
             "action_principale",
-        ).distinct()
+        )
 
         return acteurs
 

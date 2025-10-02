@@ -6,9 +6,9 @@
         {% dsfr_button label="Infos" extra_classes="fr-btn--icon-left fr-icon-info-line fr-btn--secondary" %}
     </header>
     <main>
-        {% acteurs_table acteurs %}
+        {% acteurs_table paginated_acteurs_object_list %}
     </main>
     <footer>
-        {% dsfr_pagination acteurs|as_paginator %}
+        {% dsfr_pagination paginated_acteurs %}
     </footer>
 </div>
