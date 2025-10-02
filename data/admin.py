@@ -2,9 +2,17 @@ import logging
 
 from django.contrib import admin, messages
 from django.utils.html import format_html
+from djangoql.admin import DjangoQLSearchMixin
 
 from core.admin import NotEditableMixin, NotSelfDeletableMixin, QuerysetFilterAdmin
-from data.models.suggestion import Suggestion, SuggestionCohorte, SuggestionStatut
+from data.models.suggestion import (
+    Suggestion,
+    SuggestionCohorte,
+    SuggestionGroupe,
+    SuggestionLog,
+    SuggestionStatut,
+    SuggestionUnitaire,
+)
 
 NB_SUGGESTIONS_DISPLAYED_WHEN_DELETING = 100
 
@@ -25,9 +33,26 @@ def dict_to_html_table(data: dict):
     return table
 
 
-class SuggestionCohorteAdmin(NotEditableMixin, admin.ModelAdmin):
+class SuggestionLogInline(admin.TabularInline):
+    model = SuggestionLog
+    fields = (
+        "niveau_de_log",
+        "fonction_de_transformation",
+        "origine_colonnes",
+        "origine_valeurs",
+        "destination_colonnes",
+        "message",
+    )
+    extra = 0
+    can_delete = False
+    can_add = False
+    can_change = False
+    can_view = True
+
+
+class SuggestionCohorteAdmin(DjangoQLSearchMixin, NotEditableMixin, admin.ModelAdmin):
+    djangoql_completion_enabled_by_default = False
     list_display = [
-        "id",
         "__str__",
         "statut",
         "metadonnees",
@@ -38,6 +63,7 @@ class SuggestionCohorteAdmin(NotEditableMixin, admin.ModelAdmin):
         ("statut", admin.ChoicesFieldListFilter),
         ("type_action", admin.ChoicesFieldListFilter),
     ]
+    inlines = [SuggestionLogInline]
 
     def metadonnees(self, obj):
         return format_html(dict_to_html_table(obj.metadata or {}))
@@ -165,6 +191,87 @@ class SuggestionAdmin(NotSelfDeletableMixin, QuerysetFilterAdmin):
                 obj.metadata["error"],
             )
         return obj.get_statut_display()
+
+
+class SuggestionUnitaireInline(admin.TabularInline):
+    model = SuggestionUnitaire
+    # fields = ("statut", "acteur", "revision_acteur", "contexte", "metadata")
+    extra = 0
+    can_delete = False
+    can_add = False
+    can_change = False
+    can_view = True
+
+
+@admin.register(SuggestionGroupe)
+class SuggestionGroupeAdmin(
+    DjangoQLSearchMixin, NotEditableMixin, NotSelfDeletableMixin, QuerysetFilterAdmin
+):
+    djangoql_completion_enabled_by_default = False
+
+    class SuggestionCohorteFilter(admin.RelatedFieldListFilter):
+        def field_choices(self, field, request, model_admin):
+            return field.get_choices(include_blank=False, ordering=("-cree_le",))
+
+    search_fields = ["contexte", "metadata"]
+    list_display = [
+        "id",
+        "suggestion_cohorte",
+        "statut",
+        "acteur",
+        "revision_acteur",
+        "contexte",
+        "metadata",
+    ]
+    readonly_fields = ["cree_le", "modifie_le"]
+    inlines = [SuggestionUnitaireInline]
+    list_filter = [
+        ("suggestion_cohorte", SuggestionCohorteFilter),
+        ("statut", admin.ChoicesFieldListFilter),
+    ]
+    # actions = [mark_as_rejected, mark_as_toproceed]
+
+
+@admin.register(SuggestionUnitaire)
+class SuggestionUnitaireAdmin(
+    DjangoQLSearchMixin,
+    NotEditableMixin,
+    NotSelfDeletableMixin,
+    QuerysetFilterAdmin,
+):
+    djangoql_completion_enabled_by_default = False
+
+    class SuggestionCohorteFilter(admin.RelatedFieldListFilter):
+        def field_choices(self, field, request, model_admin):
+            return field.get_choices(include_blank=False, ordering=("-cree_le",))
+
+    list_display = [
+        "suggestion_groupe",
+        "suggestion_groupe__suggestion_cohorte",
+        "statut",
+        "acteur",
+        "revision_acteur",
+        "ordre",
+        "raison",
+        "parametres",
+        "suggestion_modele",
+        "champs",
+        "valeurs",
+    ]
+
+    search_fields = [
+        "raison",
+        "parametres",
+        "suggestion_modele",
+        "champs",
+        "valeurs",
+        "metadata",
+    ]
+    readonly_fields = ["cree_le", "modifie_le"]
+    list_filter = [
+        ("suggestion_groupe__suggestion_cohorte", SuggestionCohorteFilter),
+        ("statut", admin.ChoicesFieldListFilter),
+    ]
 
 
 admin.site.register(SuggestionCohorte, SuggestionCohorteAdmin)
