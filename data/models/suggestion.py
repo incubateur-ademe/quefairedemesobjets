@@ -146,7 +146,7 @@ class SuggestionCohorte(TimestampedModel):
         return f"""{self.id} - {self.identifiant_action} -- {self.execution_datetime}"""
 
 
-class Suggestion(models.Model):
+class Suggestion(TimestampedModel):
 
     class Meta:
         verbose_name = "1️⃣ Suggestion"
@@ -166,8 +166,6 @@ class Suggestion(models.Model):
         verbose_name="Données initiales",
     )
     suggestion = models.JSONField(blank=True, verbose_name="Suggestion de modification")
-    cree_le = models.DateTimeField(auto_now_add=True, db_default=Now())
-    modifie_le = models.DateTimeField(auto_now=True, db_default=Now())
     metadata = models.JSONField(
         null=True,
         blank=True,

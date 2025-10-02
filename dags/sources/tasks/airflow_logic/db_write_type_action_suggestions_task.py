@@ -81,4 +81,6 @@ def db_write_type_action_suggestions_wrapper(**kwargs) -> None:
             **metadata_columns_updated,
         },
         metadata_to_delete={**metadata, **metadata_to_delete},
+        df_log_error=df_log_error,
+        df_log_warning=df_log_warning,
     )
