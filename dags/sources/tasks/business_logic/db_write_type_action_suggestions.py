@@ -18,6 +18,8 @@ def db_write_type_action_suggestions(
     metadata_to_create: dict,
     metadata_to_update: dict,
     metadata_to_delete: dict,
+    df_log_error: pd.DataFrame,
+    df_log_warning: pd.DataFrame,
 ):
 
     run_name = run_id.replace("__", " - ")
