@@ -210,14 +210,3 @@ def acteurs_table(context, acteurs):
             "extra_classes": "fr-table--multiline qf-w-full",
         }
     }
-
-
-@register.filter
-def as_paginator(acteurs):
-    # DSFR pagination expect a Paginator instance
-    # See https://docs.djangoproject.com/fr/5.2/ref/paginator/#django.core.paginator.Paginator
-    # and https://numerique-gouv.github.io/django-dsfr/components/pagination/
-    from django.core.paginator import Paginator
-
-    paginator = Paginator(acteurs, 12)
-    return paginator

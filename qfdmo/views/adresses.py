@@ -216,9 +216,9 @@ class SearchActeursView(
 
         if self.get_data_from_request_or_bounded_form("digital") == "1":
             acteurs = acteurs.digital()
-        elif False:
+        else:
             bbox, acteurs = self._bbox_and_acteurs_from_location_or_epci(acteurs)
-            acteurs = acteurs[: self._get_max_displayed_acteurs()]
+            acteurs = acteurs
 
             # Set Home location (address set as input)
             # FIXME : can be manage in template using the form value ?
@@ -232,13 +232,13 @@ class SearchActeursView(
                 )
 
         if acteurs:
-            # paginated_acteurs = Paginator(acteurs, self._get_max_displayed_acteurs())
-            # paginated_acteurs_object_list = paginated_acteurs.page(1)
+            paginated_acteurs = Paginator(acteurs, self._get_max_displayed_acteurs())
+            paginated_acteurs_obj = paginated_acteurs.page(
+                self.request.GET.get("page", 1)
+            )
             kwargs.update(
-                acteurs=acteurs[:10],
-                # acteurs=acteurs[:self._get_max_displayed_acteurs()],
-                # paginated_acteurs=paginated_acteurs,
-                # paginated_acteurs_object_list=paginated_acteurs_object_list,
+                acteurs=acteurs,
+                paginated_acteurs_obj=paginated_acteurs_obj,
             )
         context = super().get_context_data(**kwargs)
 
@@ -420,7 +420,7 @@ class SearchActeursView(
             "proposition_services__sous_categories__categorie",
             "proposition_services__action",
             "action_principale",
-        )
+        ).distinct()
 
         return acteurs
 
