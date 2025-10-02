@@ -25,6 +25,7 @@
         >
             {% include "ui/components/carte/_addresses_partials/adresse_input_form.html" %}
 
+            {% comment %}
             {% if not carte_config or not carte_config.cacher_legende %}
             <div class="lg:qf-hidden fr-mt-1w qf-flex qf-justify-between">
                 {% if not carte_config or not carte_config.supprimer_branding %}
@@ -60,12 +61,13 @@
                 </div>
             </div>
             {% endif %}
+            {% endcomment %}
         </div>
 
-        <div class="md:-qf-mt-3w md:qf-pr-2w max-md:qf-px-2w max-md:qf-pb-2w max-md:qf-flex qf-justify-between qf-items-center">
+        <div class="md:qf-pr-2w max-md:qf-px-2w max-md:qf-flex qf-justify-between qf-items-center">
             {{ forms.view_mode }}
-            <div>
-            {% dsfr_button label="Filtres" extra_classes="fr-btn--sm fr-btn--secondary fr-ml-1w fr-btn--icon-left fr-icon-equalizer-line" data_action="search-solution-form#toggleAdvancedFilters" data_testid="advanced-filters" %}
+            <div class="md:qf-hidden">
+            {% dsfr_button label="Filtres" extra_classes="fr-btn--sm fr-btn--secondary fr-ml-1w fr-btn--icon-left fr-icon-equalizer-line" data_action="search-solution-form#toggleAdvancedFilters:prevent" data_testid="advanced-filters" %}
             </div>
         </div>
     </div>
