@@ -110,7 +110,7 @@ default-groups = [
 ]
 
 [tool.uv.sources]
-django-dsfr = { git = "https://github.com/fabienheureux/django-dsfr", branch = "support-custom-attrs-in-components" }
+django-dsfr = { git = "https://github.com/fabienheureux/django-dsfr", rev = "6c3f91f282bd24f7e1a0135095138d0ed05ceed3" } # pragma: allowlist secret
 
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
