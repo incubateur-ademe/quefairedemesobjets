@@ -1,4 +1,4 @@
-{% load dsfr_tags qfdmo_tags %}
+{% load carte_tags dsfr_tags %}
 <div class="qf-flex qf-flex-col qf-gap-1w qf-px-2w">
     <header class="qf-flex qf-justify-end qf-gap-1w qf-py-2w">
         {% dsfr_button label="Filtres" extra_classes="fr-btn--icon-left fr-icon-equalizer-fill fr-btn--secondary" data_action="search-solution-form#toggleAPropos:prevent" %}
@@ -6,9 +6,9 @@
         {% dsfr_button label="Infos" extra_classes="fr-btn--icon-left fr-icon-info-line fr-btn--secondary" %}
     </header>
     <main>
-        {% acteurs_table paginated_acteurs_object_list %}
+        {% acteurs_table paginated_acteurs_obj %}
     </main>
     <footer>
-        {% dsfr_pagination paginated_acteurs %}
+        {% dsfr_pagination paginated_acteurs_obj %}
     </footer>
 </div>
