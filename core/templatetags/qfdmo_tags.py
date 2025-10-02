@@ -3,6 +3,7 @@ from math import sqrt
 
 from django import template
 from django.db.models import Q
+from django.template.loader import render_to_string
 
 from core.utils import get_direction
 from qfdmo.models import DisplayedActeur
@@ -79,9 +80,9 @@ def distance_to_acteur(context, acteur):
         * 111320
     )
     if distance_meters >= 1000:
-        return f"({round(distance_meters / 1000, 1)} km)".replace(".", ",")
+        return f"{round(distance_meters / 1000, 1)} km".replace(".", ",")
     else:
-        return f"({round(distance_meters / 10) * 10} m)"
+        return f"{round(distance_meters / 10) * 10} m"
 
 
 @register.filter
@@ -192,3 +193,41 @@ def acteur_pinpoint_tag(
 def get_non_enseigne_labels_count(acteur):
     """Template tag to get count of labels with type_enseigne=False"""
     return acteur.labels_display.filter(type_enseigne=False).count()
+
+
+def render_acteur(acteur, context):
+    return [
+        acteur.nom,
+        render_to_string(
+            "ui/components/carte/acteur/acteur_services.html", {"object": acteur}
+        ),
+        render_to_string(
+            "ui/components/carte/acteur/acteur_labels.html", {"object": acteur}
+        ),
+        distance_to_acteur(context, acteur),
+    ]
+
+
+@register.inclusion_tag(
+    "ui/components/carte/acteur/acteur_table.html", takes_context=True
+)
+def acteurs_table(context, acteurs):
+    return {
+        "table": {
+            "caption": "Tableau basique",
+            "header": ["Nom", "Actions", "Caractéristiques", "Distance"],
+            "content": [render_acteur(acteur, context) for acteur in acteurs],
+            "extra_classes": "fr-table--multiline qf-w-full",
+        }
+    }
+
+
+@register.filter
+def as_paginator(acteurs):
+    # DSFR pagination expect a Paginator instance
+    # See https://docs.djangoproject.com/fr/5.2/ref/paginator/#django.core.paginator.Paginator
+    # and https://numerique-gouv.github.io/django-dsfr/components/pagination/
+    from django.core.paginator import Paginator
+
+    paginator = Paginator(acteurs, 12)
+    return paginator
