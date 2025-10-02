@@ -623,7 +623,7 @@ class ViewModeForm(DsfrBaseForm):
         CARTE = {
             "value": "carte",
             "label": "Carte",
-            "icon": "globe-line",
+            "icon": "map-pin-2-fill",
         }
         LISTE = {
             "value": "liste",

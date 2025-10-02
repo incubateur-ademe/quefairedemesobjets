@@ -1,4 +1,5 @@
 import json
+from django.core.paginator import Paginator
 import logging
 from abc import ABC, abstractmethod
 from typing import List, cast
@@ -83,7 +84,7 @@ class SearchActeursView(
     FormView,
 ):
     @abstractmethod
-    def _get_max_displayed_acteurs(self):
+    def _get_max_displayed_acteurs(self) -> int:
         pass
 
     # TODO : supprimer
