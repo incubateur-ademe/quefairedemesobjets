@@ -3,6 +3,7 @@ import re
 from datetime import datetime
 
 from django.contrib.gis.db import models
+from django.contrib.postgres.fields import ArrayField
 from django.db.models.functions import Now
 from django.template.loader import render_to_string
 
@@ -87,7 +88,8 @@ class SuggestionAction(models.TextChoices):
 
 class SuggestionCohorte(TimestampedModel):
     class Meta:
-        verbose_name = "📦 Cohorte"
+        verbose_name = "1️⃣ Suggestion Cohorte"
+        verbose_name_plural = "1️⃣ Suggestions Cohortes"
 
     id = models.AutoField(primary_key=True)
     # On utilise identifiant car le champ n'est pas utilisé pour résoudre une relation
@@ -149,11 +151,12 @@ class SuggestionCohorte(TimestampedModel):
 class Suggestion(TimestampedModel):
 
     class Meta:
-        verbose_name = "1️⃣ Suggestion"
+        verbose_name = "2️⃣ Suggestion - Bientôt déprécié"
+        verbose_name_plural = "2️⃣ Suggestions - Bientôt déprécié"
 
     id = models.AutoField(primary_key=True)
     suggestion_cohorte = models.ForeignKey(
-        SuggestionCohorte, on_delete=models.CASCADE, related_name="suggestion_unitaires"
+        SuggestionCohorte, on_delete=models.CASCADE, related_name="suggestions"
     )
     statut = models.CharField(
         max_length=50,
@@ -398,50 +401,128 @@ class Suggestion(TimestampedModel):
                 f"{self.suggestion_cohorte.type_action}"
             )
 
-    # FIXME: DEPRECATED, to be removed
-    def display_proposition_service(self):
-        return self.suggestion.get("proposition_services", [])
 
-    # FIXME: DEPRECATED, to be removed
-    def display_acteur_details(self) -> dict:
-        displayed_details = {}
-        for field, field_value in {
-            "nom": "Nom",
-            "nom_commercial": "Nom commercial",
-            "siret": "SIRET",
-            "siren": "SIREN",
-            "url": "Site web",
-            "email": "Email",
-            "telephone": "Téléphone",
-            "adresse": "Adresse",
-            "adresse_complement": "Complement d'adresse",
-            "code_postal": "Code postal",
-            "ville": "Ville",
-            "commentaires": "Commentaires",
-            "horaires_description": "Horaires",
-            "latitude": "latitude",
-            "longitude": "longitude",
-            "identifiant_unique": "identifiant_unique",
-            "identifiant_externe": "identifiant_externe",
-        }.items():
-            if value := self.suggestion.get(field):
-                displayed_details[field_value] = value
-        if value := self.suggestion.get("acteur_type_id"):
-            displayed_details["Type d'acteur"] = ActeurType.objects.get(
-                pk=value
-            ).libelle
-        if value := self.suggestion.get("source_id"):
-            displayed_details["Source"] = Source.objects.get(pk=value).libelle
-        if value := self.suggestion.get("labels"):
-            displayed_details["Labels"] = ", ".join(
-                [str(v["labelqualite_id"]) for v in value]
-            )
-        if value := self.suggestion.get("acteur_services"):
-            displayed_details["Acteur Services"] = ", ".join(
-                [str(v["acteurservice_id"]) for v in value]
-            )
+class SuggestionGroupe(TimestampedModel):
 
-        return displayed_details
+    class Meta:
+        verbose_name = "2️⃣ ⏳ ⚠️ Suggestion Groupe - Livraison prochainement"
+        verbose_name_plural = "2️⃣ ⏳ ⚠️ Suggestions Groupes - Livraison prochainement"
+
+    id = models.AutoField(primary_key=True)
+    suggestion_cohorte = models.ForeignKey(
+        SuggestionCohorte, on_delete=models.CASCADE, related_name="suggestion_groupes"
+    )
+    statut = models.CharField(
+        max_length=50,
+        choices=SuggestionStatut.choices,
+        default=SuggestionStatut.AVALIDER,
+    )
+    acteur = models.ForeignKey(
+        Acteur,
+        on_delete=models.CASCADE,
+        related_name="suggestion_groupes",
+        null=True,
+    )
+    revision_acteur = models.ForeignKey(
+        RevisionActeur,
+        on_delete=models.CASCADE,
+        related_name="suggestion_groupes",
+        null=True,
+    )
+    contexte = models.JSONField(
+        null=True,
+        blank=True,
+        verbose_name="Données initiales",
+    )
+    metadata = models.JSONField(
+        null=True,
+        blank=True,
+        verbose_name="Metadata de la cohorte, données statistiques",
+    )
+
+
+class SuggestionUnitaire(TimestampedModel):
+
+    class Meta:
+        verbose_name = "3️⃣ ⏳ ⚠️ Suggestion Unitaire - Livraison prochainement"
+        verbose_name_plural = "3️⃣ ⏳ ⚠️ Suggestions Unitaires - Livraison prochainement"
+
+    id = models.AutoField(primary_key=True)
+    suggestion_groupe = models.ForeignKey(
+        SuggestionGroupe, on_delete=models.CASCADE, related_name="suggestion_unitaires"
+    )
+    statut = models.CharField(
+        max_length=50,
+        choices=SuggestionStatut.choices,
+        default=SuggestionStatut.AVALIDER,
+    )
+    acteur = models.ForeignKey(
+        Acteur,
+        on_delete=models.CASCADE,
+        related_name="suggestion_unitaires",
+        null=True,
+    )
+    revision_acteur = models.ForeignKey(
+        RevisionActeur,
+        on_delete=models.CASCADE,
+        related_name="suggestion_unitaires",
+        null=True,
+    )
+    ordre = models.IntegerField(default=1, blank=True)
+    raison = models.TextField(blank=True, db_default="", default="")
+    parametres = models.JSONField(blank=True, db_default="", default="")
+    suggestion_modele = models.CharField(
+        max_length=255, blank=True, db_default="", default="", choices=[]
+    )
+    champs = ArrayField(
+        models.TextField(),
+        blank=True,
+        default=list,
+    )
+    valeurs = ArrayField(
+        models.TextField(),
+        blank=True,
+        default=list,
+    )
+
+
+class SuggestionLog(TimestampedModel):
+    class Meta:
+        verbose_name = "📝 Suggestion Log"
+
+    class SuggestionLogLevel(models.TextChoices):
+        WARNING = "WARNING", "Warning"
+        ERROR = "ERROR", "Error"
+
+    id = models.AutoField(primary_key=True)
+    suggestion_cohorte = models.ForeignKey(
+        SuggestionCohorte,
+        on_delete=models.CASCADE,
+        related_name="suggestion_logs",
+        null=True,
+    )
+    suggestion_groupe = models.ForeignKey(
+        SuggestionGroupe,
+        on_delete=models.CASCADE,
+        related_name="suggestion_logs",
+        null=True,
+    )
+    suggestion_unitaire = models.ForeignKey(
+        SuggestionUnitaire,
+        on_delete=models.CASCADE,
+        related_name="suggestion_logs",
+        null=True,
+    )
+    niveau_de_log = models.CharField(
+        max_length=50,
+        choices=SuggestionLogLevel.choices,
+        default=SuggestionLogLevel.WARNING,
+    )
+    fonction_de_transformation = models.CharField(max_length=255)
+    origine_colonnes = ArrayField(models.CharField(max_length=255), null=True)
+    origine_valeurs = ArrayField(models.TextField(), null=True)
+    destination_colonnes = ArrayField(models.CharField(max_length=255), null=True)
+    message = models.TextField(blank=True, db_default="", default="")
 
 
 class BANCache(models.Model):
