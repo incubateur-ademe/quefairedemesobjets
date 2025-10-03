@@ -5,7 +5,6 @@ from airflow.operators.python import PythonOperator
 from sources.tasks.business_logic.db_write_type_action_suggestions import (
     db_write_type_action_suggestions,
 )
-
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
@@ -43,6 +42,12 @@ def db_write_type_action_suggestions_wrapper(**kwargs) -> None:
     )
 
     metadata = kwargs["ti"].xcom_pull(task_ids="source_data_normalize", key="metadata")
+    df_log_error = kwargs["ti"].xcom_pull(
+        task_ids="source_data_normalize", key="df_log_error"
+    )
+    df_log_warning = kwargs["ti"].xcom_pull(
+        task_ids="source_data_normalize", key="df_log_warning"
+    )
     metadata_columns_updated = kwargs["ti"].xcom_pull(
         task_ids="keep_acteur_changed", key="metadata_columns_updated"
     )
@@ -52,6 +57,8 @@ def db_write_type_action_suggestions_wrapper(**kwargs) -> None:
     log.preview("df_acteur_to_delete", df_acteur_to_delete)
     log.preview("df_acteur_to_create", df_acteur_to_create)
     log.preview("df_acteur_to_update", df_acteur_to_update)
+    log.preview("df_log_error", df_log_error)
+    log.preview("df_log_warning", df_log_warning)
 
     if (
         df_acteur_to_create.empty
@@ -76,4 +83,6 @@ def db_write_type_action_suggestions_wrapper(**kwargs) -> None:
             **metadata_columns_updated,
         },
         metadata_to_delete={**metadata, **metadata_to_delete},
+        df_log_error=df_log_error,
+        df_log_warning=df_log_warning,
     )
