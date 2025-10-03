@@ -36,6 +36,7 @@ def dict_to_html_table(data: dict):
 class SuggestionLogInline(admin.TabularInline):
     model = SuggestionLog
     fields = (
+        "identifiant_unique",
         "niveau_de_log",
         "fonction_de_transformation",
         "origine_colonnes",

@@ -48,3 +48,7 @@ class AdresseWarning(ImportSourceException, ImportSourceValueWarning):
 
 class IdentifiantExterneError(ImportSourceException, ImportSourceValueError):
     pass
+
+
+class OpeningHoursWarning(ImportSourceException, ImportSourceValueWarning):
+    pass

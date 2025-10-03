@@ -12,6 +12,7 @@ from sources.tasks.transform.exceptions import (
     ActeurTypeCodeError,
     BooleanValueWarning,
     CodePostalWarning,
+    OpeningHoursWarning,
 )
 from sources.tasks.transform.formatter import format_libelle_to_code
 from sources.tasks.transform.opening_hours import interprete_opening_hours
@@ -211,8 +212,9 @@ def clean_horaires_osm(horaires_osm: str | None, _) -> str:
     try:
         OpeningHours(horaires_osm)
     except ParserError as e:
-        logger.warning(f"Error parsing opening hours: {e}")
-        return ""
+        raise OpeningHoursWarning(
+            f"Les horaires au format OSM n'ont pas pu être interprétés : {e}"
+        )
     return horaires_osm
 
 

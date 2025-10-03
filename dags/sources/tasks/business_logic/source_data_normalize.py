@@ -3,6 +3,7 @@ import logging
 
 import pandas as pd
 import requests
+from pydantic import BaseModel
 from shared.tasks.database_logic.db_manager import PostgresConnectionManager
 from sources.config.airflow_params import TRANSFORMATION_MAPPING
 from sources.tasks.airflow_logic.config_management import (
@@ -28,6 +29,14 @@ REPLACE_NULL_MAPPING = {
     key: ""
     for key in ["null", "none", "nan", "na", "n/a", "non applicable", "aucun", "-"]
 }
+
+
+class LogBase(BaseModel):
+    fonction_de_transformation: str
+    origine_colonnes: list[str]
+    origine_valeurs: list[str]
+    destination_colonnes: list[str]
+    message: str
 
 
 def _replace_null_insensitive(value):
@@ -92,13 +101,13 @@ def _transform_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
                 )
             except ImportSourceValueWarning as e:
                 df.at[index, "log_warning"].append(
-                    {
-                        "destination_columns": [column_to_transform.destination],
-                        "transformation": function_name,
-                        "origin_columns": [column_to_transform.origin],
-                        "origin_value": origin_value,
-                        "error": str(e),
-                    }
+                    LogBase(
+                        destination_colonnes=[column_to_transform.destination],
+                        fonction_de_transformation=function_name,
+                        origine_colonnes=[column_to_transform.origin],
+                        origine_valeurs=[str(origin_value)],
+                        message=str(e),
+                    )
                 )
                 df.at[index, column_to_transform.destination] = ""
 
@@ -143,19 +152,21 @@ def _transform_df(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
                     )
 
             except ImportSourceException as e:
+                logger.warning(f"Error in {function_name}")
+                logger.warning(f"{column_to_transform_df.origin=}")
+                logger.warning(f"{row[column_to_transform_df.origin]=}")
+                logger.warning(f"{type(origin_values)=}")
+                logger.warning(f"{origin_values=}")
+                logger.warning(f"{origin_values.tolist()=}")
                 log_column = "log_error" if e.is_blocking else "log_warning"
                 df.at[index, log_column].append(
-                    {
-                        "destination_columns": column_to_transform_df.destination,
-                        "transformation": function_name,
-                        "origin_columns": column_to_transform_df.origin,
-                        "origin_value": (
-                            origin_values.tolist()
-                            if hasattr(origin_values, "tolist")
-                            else origin_values
-                        ),
-                        "error": str(e),
-                    }
+                    LogBase(
+                        destination_colonnes=column_to_transform_df.destination,
+                        fonction_de_transformation=function_name,
+                        origine_colonnes=column_to_transform_df.origin,
+                        origine_valeurs=[str(v) for v in origin_values.tolist()],
+                        message=str(e),
+                    )
                 )
                 # Définir des valeurs par défaut pour toutes les colonnes de destination
                 for dest_col in column_to_transform_df.destination:
@@ -330,6 +341,39 @@ def source_data_normalize(
     # extract logs by identifiant_unique
     df_log_error = df[["identifiant_unique", "log_error"]]
     df_log_warning = df[["identifiant_unique", "log_warning"]]
+
+    df_log_error = df_log_error[df_log_error["log_error"].apply(len) > 0]
+    df_log_warning = df_log_warning[df_log_warning["log_warning"].apply(len) > 0]
+
+    # flatten df_log_error and df_log_warning
+    df_log_error = df_log_error.explode("log_error")
+    df_log_warning = df_log_warning.explode("log_warning")
+    log.preview("df_log_error", df_log_error)
+    # Transform LogBase objects into separate columns
+    if not df_log_error.empty:
+        df_log_error_expanded = pd.json_normalize(
+            df_log_error["log_error"].apply(lambda x: x.dict() if x else {})
+        )
+        df_log_error = pd.concat(
+            [
+                df_log_error[["identifiant_unique"]].reset_index(drop=True),
+                df_log_error_expanded.reset_index(drop=True),
+            ],
+            axis=1,
+        )
+    log.preview("df_log_error", df_log_error)
+
+    if not df_log_warning.empty:
+        df_log_warning_expanded = pd.json_normalize(
+            df_log_warning["log_warning"].apply(lambda x: x.dict() if x else {})
+        )
+        df_log_warning = pd.concat(
+            [
+                df_log_warning[["identifiant_unique"]].reset_index(drop=True),
+                df_log_warning_expanded.reset_index(drop=True),
+            ],
+            axis=1,
+        )
 
     # drop row with not empty log_error
     df = df[df["log_error"].apply(len) == 0]

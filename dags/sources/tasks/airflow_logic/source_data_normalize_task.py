@@ -36,8 +36,14 @@ def source_data_normalize_wrapper(**kwargs) -> pd.DataFrame:
         dag_config=dag_config,
         dag_id=dag_id,
     )
+
+    log.preview("df après normalisation", df)
+    log.preview("df_log_error", df_log_error)
+    log.preview("df_log_warning", df_log_warning)
+    log.preview("metadata", metadata)
+
     kwargs["ti"].xcom_push(key="metadata", value=metadata)
-    kwargs["ti"].xcom_push(key="df_error_log", value=df_log_error)
-    kwargs["ti"].xcom_push(key="df_warning_log", value=df_log_warning)
+    kwargs["ti"].xcom_push(key="df_log_error", value=df_log_error)
+    kwargs["ti"].xcom_push(key="df_log_warning", value=df_log_warning)
 
     return df

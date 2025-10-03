@@ -513,6 +513,7 @@ class SuggestionLog(TimestampedModel):
         related_name="suggestion_logs",
         null=True,
     )
+    identifiant_unique = models.CharField(max_length=255, blank=True, default="")
     niveau_de_log = models.CharField(
         max_length=50,
         choices=SuggestionLogLevel.choices,
