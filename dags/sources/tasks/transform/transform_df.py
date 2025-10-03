@@ -215,7 +215,6 @@ def merge_sous_categories_columns(row, _):
 
 
 def clean_adresse(row, dag_config):
-    row["adresse"] = row["adresse_format_ban"]
     address = postal_code = city = ""
     if dag_config.validate_address_with_ban:
         address, postal_code, city = _get_address(row["adresse_format_ban"])

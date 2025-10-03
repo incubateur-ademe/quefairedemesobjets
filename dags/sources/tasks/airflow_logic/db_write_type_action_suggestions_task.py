@@ -57,6 +57,8 @@ def db_write_type_action_suggestions_wrapper(**kwargs) -> None:
     log.preview("df_acteur_to_delete", df_acteur_to_delete)
     log.preview("df_acteur_to_create", df_acteur_to_create)
     log.preview("df_acteur_to_update", df_acteur_to_update)
+    log.preview("df_log_error", df_log_error)
+    log.preview("df_log_warning", df_log_warning)
 
     if (
         df_acteur_to_create.empty
