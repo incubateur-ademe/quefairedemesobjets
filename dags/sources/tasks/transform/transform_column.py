@@ -12,7 +12,14 @@ from sources.tasks.transform.exceptions import (
     ActeurTypeCodeError,
     BooleanValueWarning,
     CodePostalWarning,
+    EmailWarning,
     OpeningHoursWarning,
+    PublicAccueilliWarning,
+    RepriseWarning,
+    SirenWarning,
+    SiretWarning,
+    SousCategorieCodesError,
+    UrlWarning,
 )
 from sources.tasks.transform.formatter import format_libelle_to_code
 from sources.tasks.transform.opening_hours import interprete_opening_hours
@@ -75,13 +82,19 @@ def convert_opening_hours(opening_hours: str | None, _) -> str:
 def clean_siren(siren: int | str | None) -> str:
     siren = clean_number(siren)
 
+    if not siren:
+        return ""
+
     if len(siren) == 9:
         return siren
-    return ""
+    raise SirenWarning(f"Le numéro de SIREN n'a pas pu être interprété : `{siren}`")
 
 
 def clean_siret(siret: int | str | None) -> str:
     siret = clean_number(siret)
+
+    if not siret:
+        return ""
 
     if len(siret) == 9:
         return siret
@@ -92,7 +105,7 @@ def clean_siret(siret: int | str | None) -> str:
     if len(siret) == 14:
         return siret
 
-    return ""
+    raise SiretWarning(f"Le numéro de SIRET n'a pas pu être interprété : `{siret}`")
 
 
 def clean_number(number: Any) -> str:
@@ -134,7 +147,7 @@ def clean_acteur_type_code(value, _):
     code = mapping_dict.get(format_libelle_to_code(value), None)
     if code is None:
         raise ActeurTypeCodeError(
-            f"Acteur type `{value}` not found in mapping : {mapping_dict}"
+            f"Acteur type `{value}` not found in mapping : {mapping_dict.keys()}"
         )
     return code
 
@@ -153,6 +166,10 @@ def clean_public_accueilli(value, _):
         "pro": constants.PUBLIC_PRO,
         "np": constants.PUBLIC_NP,
     }
+    if value.lower().strip() not in values_mapping:
+        raise PublicAccueilliWarning(
+            f"Public accueilli `{value}` not found in mapping : {values_mapping.keys()}"
+        )
 
     return values_mapping.get(value.lower().strip(), constants.PUBLIC_NP)
 
@@ -167,6 +184,11 @@ def clean_reprise(value, _):
         "non": constants.REPRISE_1POUR0,
         "oui": constants.REPRISE_1POUR1,
     }
+    if value.lower().strip() not in values_mapping:
+        raise RepriseWarning(
+            f"Reprise `{value}` not found in mapping : {values_mapping.keys()}"
+        )
+
     return values_mapping.get(value.lower().strip(), constants.REPRISE_NP)
 
 
@@ -178,6 +200,10 @@ def clean_url(url, _) -> str:
     if not (url.startswith("http://") or url.startswith("https://")):
         url = "https://" + url
 
+    # regexp to check if url is valid
+    if not re.match(r"^https?://[^/\s]+[^\s]*$", url):
+        raise UrlWarning(f"L'URL n'est pas valide : `{url}`")
+
     return url
 
 
@@ -186,7 +212,7 @@ def clean_email(email: str | None, _) -> str:
         return ""
     email = str(email).strip().lower()
     if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
-        return ""
+        raise EmailWarning(f"L'email n'est pas valide : `{email}`")
     return email
 
 
@@ -211,9 +237,9 @@ def clean_horaires_osm(horaires_osm: str | None, _) -> str:
     horaires_osm = re.sub(r"(\d{2})h(\d{2})", r"\1:\2", horaires_osm)
     try:
         OpeningHours(horaires_osm)
-    except ParserError as e:
+    except ParserError:
         raise OpeningHoursWarning(
-            f"Les horaires au format OSM n'ont pas pu être interprétés : {e}"
+            "Les horaires au format OSM n'ont pas pu être interprétés"
         )
     return horaires_osm
 
@@ -235,8 +261,8 @@ def clean_sous_categorie_codes(
     if isinstance(sscat_list, str):
         sscat_list = sscat_list.split("|")
     if not isinstance(sscat_list, list):
-        raise ValueError(
-            f"Type {type(sscat_list)} not supported while cleaning sous_categorie_codes"
+        raise SousCategorieCodesError(
+            f"Impossible d'interpréter les sous-catégories: {sscat_list}"
         )
 
     product_mapping = dag_config.product_mapping
@@ -250,7 +276,9 @@ def clean_sous_categorie_codes(
         elif isinstance(sscat, list):
             sous_categorie_codes.extend(sscat)
         else:
-            raise ValueError(f"Type {type(sscat)} not supported in product_mapping")
+            raise SousCategorieCodesError(
+                f"Impossible d'interpréter la sous-catégorie: {sscat}"
+            )
 
     return list(set(sous_categorie_codes))
 

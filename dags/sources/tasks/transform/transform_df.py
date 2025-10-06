@@ -12,7 +12,10 @@ from sources.tasks.transform.exceptions import (
     ActeurServiceCodesWarning,
     ActionCodesWarning,
     AdresseWarning,
+    GeopointWarning,
     IdentifiantExterneError,
+    IdentifiantUniqueError,
+    TelephoneWarning,
 )
 from sources.tasks.transform.formatter import format_libelle_to_code
 from sources.tasks.transform.transform_column import (
@@ -132,10 +135,11 @@ def _merge_proposition_service_columns(group):
 
 
 def clean_telephone(row: pd.Series, _):
+    # FIXME : check if we can interprete the column like a telephone number ?
     telephone_column = list(row.keys())[0]
     number = clean_number(row[telephone_column])
 
-    if number is None:
+    if not number:
         row[["telephone"]] = ""
         return row[["telephone"]]
 
@@ -146,7 +150,9 @@ def clean_telephone(row: pd.Series, _):
         number = "0" + number[2:]
 
     if len(number) < 6:
-        number = ""
+        raise TelephoneWarning(
+            f"Le numéro de téléphone n'a pas pu être déduit : {row[telephone_column]}"
+        )
 
     row["telephone"] = number
     return row[["telephone"]]
@@ -194,6 +200,12 @@ def clean_identifiant_externe(row, _):
 
 def compute_identifiant_unique(identifiant_externe, source_code):
     unique_str = str(identifiant_externe).replace("/", "-").strip()
+    if not unique_str:
+        raise IdentifiantUniqueError(
+            "L'identifiant unique est requis, il n'a pas pu être déduit des colonnes"
+            f" `identifiant_externe` : `{identifiant_externe}`"
+            f" et/ou `source_code`  : `{source_code}`"
+        )
     return source_code.lower() + "_" + unique_str
 
 
@@ -306,12 +318,16 @@ def clean_label_codes(row, dag_config):
             continue
         label_codes.append(label_ou_bonus)
 
+    # FIXME : check if label_codes belong to qfdmo.LabelQualite ?
+
     row["label_codes"] = label_codes
     return row[["label_codes"]]
 
 
 def get_latlng_from_geopoint(row: pd.Series, _) -> pd.Series:
     # GEO
+    if not row["_geopoint"]:
+        raise GeopointWarning("La colonne _geopoint est requise")
     geopoint = row["_geopoint"].split(",")
     row["latitude"] = float(geopoint[0].strip())
     row["longitude"] = float(geopoint[1].strip())

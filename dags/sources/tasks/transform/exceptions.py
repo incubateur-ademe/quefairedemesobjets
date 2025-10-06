@@ -50,5 +50,45 @@ class IdentifiantExterneError(ImportSourceException, ImportSourceValueError):
     pass
 
 
+class IdentifiantUniqueError(ImportSourceException, ImportSourceValueError):
+    pass
+
+
 class OpeningHoursWarning(ImportSourceException, ImportSourceValueWarning):
+    pass
+
+
+class PublicAccueilliWarning(ImportSourceException, ImportSourceValueWarning):
+    pass
+
+
+class RepriseWarning(ImportSourceException, ImportSourceValueWarning):
+    pass
+
+
+class SirenWarning(ImportSourceException, ImportSourceValueWarning):
+    pass
+
+
+class SiretWarning(ImportSourceException, ImportSourceValueWarning):
+    pass
+
+
+class SousCategorieCodesError(ImportSourceException, ImportSourceValueError):
+    pass
+
+
+class UrlWarning(ImportSourceException, ImportSourceValueWarning):
+    pass
+
+
+class EmailWarning(ImportSourceException, ImportSourceValueWarning):
+    pass
+
+
+class TelephoneWarning(ImportSourceException, ImportSourceValueWarning):
+    pass
+
+
+class GeopointWarning(ImportSourceException, ImportSourceValueWarning):
     pass

@@ -152,12 +152,6 @@ def _transform_df(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
                     )
 
             except ImportSourceException as e:
-                logger.warning(f"Error in {function_name}")
-                logger.warning(f"{column_to_transform_df.origin=}")
-                logger.warning(f"{row[column_to_transform_df.origin]=}")
-                logger.warning(f"{type(origin_values)=}")
-                logger.warning(f"{origin_values=}")
-                logger.warning(f"{origin_values.tolist()=}")
                 log_column = "log_error" if e.is_blocking else "log_warning"
                 df.at[index, log_column].append(
                     LogBase(

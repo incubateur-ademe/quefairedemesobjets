@@ -76,11 +76,31 @@ def db_write_type_action_suggestions(
         )
     ]
 
-    df_log_error_to_create = pd.concat([df_log_error_to_create, df_log_error_left_over])
-    df_log_warning_to_create = pd.concat(
-        [df_log_warning_to_create, df_log_warning_left_over]
-    )
-    df_log_error_to_update = pd.concat([df_log_error_to_update, df_log_error_left_over])
+    if nb_lines_ignorees := len(df_log_error_left_over):
+        metadata_to_create["nombre de lignes non-traitees à cause d'erreurs"] = (
+            nb_lines_ignorees
+        )
+        df_log_error_to_create = pd.concat(
+            [df_log_error_to_create, df_log_error_left_over]
+        )
+    if not df_log_error_to_create.empty:
+        metadata_to_create["nombre de lignes non-traitees à cause d'erreurs"] = len(
+            df_log_error_to_create
+        )
+    if not df_log_warning_to_create.empty:
+        metadata_to_create["nombre de valeurs de champs ignorées"] = len(
+            df_log_warning_to_create
+        )
+
+    if nb_lines_data_ignorees := len(df_log_warning_to_update):
+        metadata_to_update[
+            "nombre de modifications de champs ignorées parmis les acteurs à mettre à"
+            " jour"
+        ] = nb_lines_data_ignorees
+    if nb_lines_log_warning_left_over := len(df_log_warning_left_over):
+        metadata_to_update[
+            "nombre de modifications de champs ignorées parmis les acteurs non modifiés"
+        ] = nb_lines_log_warning_left_over
     df_log_warning_to_update = pd.concat(
         [df_log_warning_to_update, df_log_warning_left_over]
     )
@@ -92,7 +112,7 @@ def db_write_type_action_suggestions(
         run_name=run_name,
         type_action=constants.SUGGESTION_SOURCE_AJOUT,
         df_log_error=df_log_error_to_create,
-        df_log_warning=df_log_error_to_create,
+        df_log_warning=df_log_warning_to_create,
     )
     insert_suggestion(
         df=df_acteur_to_delete,
@@ -127,11 +147,6 @@ def insert_suggestion(
         return
     engine = PostgresConnectionManager().engine
     current_date = datetime.now()
-
-    if not df_log_error.empty:
-        metadata["nombre d'erreurs"] = len(df_log_error)
-    if not df_log_warning.empty:
-        metadata["nombre d'avertissements"] = len(df_log_warning)
 
     with engine.connect() as conn:
         # Insert a new suggestion

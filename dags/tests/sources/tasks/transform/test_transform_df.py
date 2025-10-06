@@ -585,6 +585,7 @@ class TestCleanTelephone:
             ("33 1 23 45 67 89", "75001", "0123456789"),
             ("0612345678", "75001", "0612345678"),
             ("+33612345678", "75001", "+33612345678"),
+            ("fake", "75001", ""),
         ],
     )
     def test_clean_telephone(self, phone_number, code_postal, expected_phone_number):
