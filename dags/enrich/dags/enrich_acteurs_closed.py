@@ -50,7 +50,7 @@ with DAG(
     start_date=START_DATES.YESTERDAY,
     params=config_to_airflow_params(
         EnrichActeursClosedConfig(
-            dbt_models_refresh=False,
+            dbt_models_refresh=True,
             dbt_models_refresh_command=(
                 "dbt build --select tag:marts,tag:enrich,tag:closed"
             ),
