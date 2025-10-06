@@ -4,17 +4,6 @@ Notes:
  - 🧱 Only layer materialized as table (subsequent layers, because
   they JOIN with continuously changing QFDMO data are kept as views)
 */
-{{
-  config(
-    post_hook=[
-      "CREATE INDEX ON {{ this }}(adresse_numero) WHERE adresse_numero IS NOT NULL",
-      "CREATE INDEX ON {{ this }}(siret)",
-      "CREATE INDEX ON {{ this }}(est_actif)",
-      "CREATE INDEX ON {{ this }}(code_postal)",
-      "CREATE INDEX ON {{ this }}(adresse_normalize_string_for_match)"
-    ],
-  )
-}}
 
 SELECT
     -- Codes

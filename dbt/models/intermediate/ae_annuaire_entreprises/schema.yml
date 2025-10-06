@@ -82,16 +82,16 @@ models:
         - ae
         - annuaire_entreprises
         - etablissement
-      # indexes:
-      #   - columns: ['siret']
-      #     unique: true
-      #   - columns: ['est_actif']
-      #     type: hash
-      #   - columns: ['code_postal']
-      #     type: hash
-      #   - columns: ['naf']
-      #     type: hash
-      #   - columns: ['adresse_numero']
-      #     type: hash
-      #   - columns: ['adresse_normalize_string_for_match']
-      #     type: hash
+      indexes:
+        - columns: ['siret']
+          unique: true
+        - columns: ['est_actif']
+          type: hash
+        - columns: ['code_postal']
+          type: hash
+        - columns: ['naf']
+          type: hash
+        - columns: ['adresse_numero']
+          type: hash
+        - columns: ['adresse_normalize_string_for_match']
+          type: hash
