@@ -26,5 +26,5 @@ inputs = {
   airflow_db_name     = "airflow"
   airflow_db_username = "[airflow_db_username]"
   airflow_db_password = "[airflow_db_password]"
-  airflow_volume_size = 100
+  airflow_volume_size = 10
 }

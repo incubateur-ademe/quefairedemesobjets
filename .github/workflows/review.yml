@@ -24,7 +24,7 @@ jobs:
     uses: ./.github/workflows/airflow_docker.yml
     secrets: inherit # pragma: allowlist secret`
     with:
-      image_tag: review
+      image_tag: airflow-v3.0
 
   webapp:
     name: 🟠 Webapp
