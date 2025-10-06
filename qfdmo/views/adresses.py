@@ -20,7 +20,6 @@ from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_GET
 from django.views.generic.edit import FormView
 
-from core.jinja2_handler import distance_to_acteur
 from core.utils import get_direction
 from qfdmd.models import Synonyme
 from qfdmo.forms import FormulaireForm
@@ -676,7 +675,6 @@ def acteur_detail(request, uuid):
         "is_embedded": "carte" in request.GET or "iframe" in request.GET,
         "longitude": longitude,
         "direction": direction,
-        "distance": distance_to_acteur(request, displayed_acteur),
         "display_labels_panel": bool(
             displayed_acteur.labels.filter(afficher=True, type_enseigne=False).count()
         ),

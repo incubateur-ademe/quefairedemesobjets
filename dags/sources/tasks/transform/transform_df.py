@@ -383,7 +383,7 @@ def _clean_perimetre_adomicile_codes(perimetre_dinterventions):
             perimetre_prestation.append(
                 {
                     "type": PerimetreADomicile.Type.KILOMETRIQUE.value,
-                    "valeur": int(matches.group(1)),
+                    "valeur": str(int(matches.group(1))),
                 }
             )
         elif matches := re.match(r"^(\d{1,3}|2A|2B)$", perimetre):

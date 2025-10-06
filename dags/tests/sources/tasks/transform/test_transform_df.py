@@ -443,13 +443,13 @@ class TestCleanServiceADomicile:
                 "Service à domicile et en Boutique",
                 "10 km",
                 "SUR_PLACE_OU_A_DOMICILE",
-                [{"type": "KILOMETRIQUE", "valeur": 10}],
+                [{"type": "KILOMETRIQUE", "valeur": "10"}],
             ),
             (
                 "oui",
                 "10 km",
                 "SUR_PLACE_OU_A_DOMICILE",
-                [{"type": "KILOMETRIQUE", "valeur": 10}],
+                [{"type": "KILOMETRIQUE", "valeur": "10"}],
             ),
             (
                 "oui",
@@ -467,13 +467,13 @@ class TestCleanServiceADomicile:
                 "Service à domicile uniquement",
                 "10 km",
                 "A_DOMICILE",
-                [{"type": "KILOMETRIQUE", "valeur": 10}],
+                [{"type": "KILOMETRIQUE", "valeur": "10"}],
             ),
             (
                 "oui exclusivement",
                 "10 km",
                 "A_DOMICILE",
-                [{"type": "KILOMETRIQUE", "valeur": 10}],
+                [{"type": "KILOMETRIQUE", "valeur": "10"}],
             ),
             (
                 "oui exclusivement",
@@ -505,7 +505,7 @@ class TestCleanServiceADomicile:
                 " 10 km | 10 ",
                 "SUR_PLACE_OU_A_DOMICILE",
                 [
-                    {"type": "KILOMETRIQUE", "valeur": 10},
+                    {"type": "KILOMETRIQUE", "valeur": "10"},
                     {"type": "DEPARTEMENTAL", "valeur": "10"},
                 ],
             ),

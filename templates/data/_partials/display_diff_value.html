@@ -1,0 +1,22 @@
+{% if strike_value %}
+    <span style="color: red; text-decoration: line-through;">
+        {{ strike_value }}
+    </span>
+{% endif %}
+{% if colored_color and colored_value %}
+    <span style="color: {{ colored_color }}">
+        {{ colored_value }}
+    </span>
+{% endif %}
+{% if diff_value %}
+    {{ diff_value }}
+{% endif %}
+{% if extra_links and diff_value %}
+    <br>
+{% endif %}
+{% for extra_link in extra_links %}
+    <a href="{{ extra_link.0 }}" target="_blank" rel="noreferrer">{{ extra_link.1 }}</a>
+    {% if not forloop.last %}
+        ,
+    {% endif %}
+{% endfor %}

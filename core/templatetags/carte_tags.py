@@ -1,15 +1,13 @@
 import logging
 from math import sqrt
 
-from django import template
 from django.db.models import Q
+from django.template.defaulttags import register
 
 from core.utils import get_direction
 from qfdmo.models import DisplayedActeur
 from qfdmo.models.action import get_actions_by_direction
 from qfdmo.models.config import GroupeActionConfig
-
-register = template.Library()
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +19,7 @@ def actions_for(dispayed_acteur: DisplayedActeur, direction):
 
 @register.simple_tag(takes_context=True)
 def action_by_direction(context, direction):
-    """Template tag to replace jinja2_handler.action_by_direction"""
+    """Get action for the given direction following context"""
     request = context["request"]
     requested_direction = get_direction(request)
     action_displayed = request.GET.get("action_displayed", "")
@@ -45,17 +43,9 @@ def action_by_direction(context, direction):
     return [{**a, "active": True} for a in actions_to_display]
 
 
-@register.simple_tag
-def display_exclusivite_reparation(acteur):
-    """Template tag to replace jinja2_handler.display_exclusivite_reparation"""
-    if isinstance(acteur, DisplayedActeur):
-        return acteur.exclusivite_de_reprisereparation
-    return False
-
-
 @register.simple_tag(takes_context=True)
 def hide_object_filter(context):
-    """Template tag to replace jinja2_handler.hide_object_filter"""
+    """should hide the object filter?"""
     request = context["request"]
     return (
         bool(request.GET.get("sc_id"))
@@ -65,7 +55,7 @@ def hide_object_filter(context):
 
 @register.simple_tag(takes_context=True)
 def distance_to_acteur(context, acteur):
-    """Template tag to replace jinja2_handler.distance_to_acteur"""
+    """distance from user location to displayed acteur"""
     request = context["request"]
     longitude = request.GET.get("longitude")
     latitude = request.GET.get("latitude")
@@ -82,30 +72,6 @@ def distance_to_acteur(context, acteur):
         return f"({round(distance_meters / 1000, 1)} km)".replace(".", ",")
     else:
         return f"({round(distance_meters / 10) * 10} m)"
-
-
-@register.filter
-def tojson(value):
-    """Django filter to replace Jinja2's |tojson filter"""
-    import json
-
-    return json.dumps(value)
-
-
-@register.filter
-def title_case(value):
-    """Django filter to properly handle title case like Jinja2"""
-    if value:
-        return value.title()
-    return value
-
-
-@register.simple_tag
-def random_range(max_value):
-    """Generate a random number for cache busting"""
-    import random
-
-    return random.randint(0, max_value - 1)
 
 
 @register.inclusion_tag("qfdmo/carte/pinpoints/acteur.html", takes_context=True)

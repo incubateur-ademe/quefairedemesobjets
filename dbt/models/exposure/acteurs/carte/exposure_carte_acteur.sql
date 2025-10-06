@@ -1,1 +1,1 @@
-SELECT * FROM {{ ref('marts_carte_acteur') }} WHERE lieu_prestation != 'A_DOMICILE'
+SELECT * FROM {{ ref('marts_carte_acteur') }} WHERE lieu_prestation != 'A_DOMICILE' OR lieu_prestation IS NULL

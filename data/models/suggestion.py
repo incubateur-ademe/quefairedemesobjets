@@ -210,7 +210,7 @@ class Suggestion(models.Model):
     @property
     def display_suggestion_details(self):
         template_name = "data/_partials/suggestion_details.html"
-        template_context = {"suggestion": self.suggestion}
+        template_context = {"contexte": self.contexte, "suggestion": self.suggestion}
 
         # Suggestions leveraging the PYDANTIC SuggestionChange model
         if self.suggestion_cohorte.type_action in [
@@ -221,9 +221,10 @@ class Suggestion(models.Model):
             SuggestionAction.CRAWL_URLS,
             SuggestionAction.CLUSTERING,
             SuggestionAction.ENRICH_ACTEURS_CP_TYPO,
+            SuggestionAction.ENRICH_REVISION_ACTEURS_CP_TYPO,
         ]:
             template_name = "data/_partials/suggestion_details_changes.html"
-            template_context = self.suggestion
+            template_context = {"suggestion": self}
 
         # TODO: suggestions to migrate to PYDANTIC classes
         elif (
@@ -240,19 +241,27 @@ class Suggestion(models.Model):
             and isinstance(self.contexte, dict)
         ):
             template_name = "data/_partials/modification_suggestion_details.html"
-            updated_fields = {}
-            unchanged_fields = {}
-            for key, value in self.suggestion.items():
-                # Ignore location because it is already displayed with lat / long fields
-                if key not in self.contexte or key == "location":
-                    continue
-                if self.contexte.get(key) != value:
-                    updated_fields[key] = {"new": value, "old": self.contexte.get(key)}
-                else:
-                    unchanged_fields[key] = value
+
+            valid_items = [
+                (key, value)
+                for key, value in self.suggestion.items()
+                if key in self.contexte and key != "location"
+            ]
+            updated_fields = {
+                key: value
+                for key, value in valid_items
+                if self.contexte.get(key) != value
+            }
+            unchanged_fields = {
+                key: value
+                for key, value in valid_items
+                if self.contexte.get(key) == value
+            }
+
             template_context = {
                 "updated_fields": updated_fields,
                 "unchanged_fields": unchanged_fields,
+                "suggestion_contexte": self.contexte,
             }
         elif (
             self.suggestion_cohorte.type_action == SuggestionAction.SOURCE_AJOUT
