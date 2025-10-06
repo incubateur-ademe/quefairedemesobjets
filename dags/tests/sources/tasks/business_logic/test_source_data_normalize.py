@@ -121,7 +121,7 @@ class TestSourceDataNormalize:
         TRANSFORMATION_MAPPING["test_fct_transform_df"] = lambda x, y: pd.Series(
             {"nom": "success"}
         )
-        df, _, metadata = source_data_normalize(
+        df, _, _, _ = source_data_normalize(
             df_acteur_from_source=pd.DataFrame(
                 {
                     "identifiant_unique": ["id"],
@@ -171,7 +171,7 @@ class TestSourceDataNormalize:
         TRANSFORMATION_MAPPING["test_fct_transform_df"] = lambda x, y: pd.Series(
             {"nom": "success"}
         )
-        df, _, metadata = source_data_normalize(
+        df, _, _, _ = source_data_normalize(
             df_acteur_from_source=pd.DataFrame(
                 {
                     "identifiant_unique": ["id"],
@@ -247,7 +247,7 @@ class TestSourceDataNormalize:
                 "product_mapping": {"product1": "code1"},
             }
         )
-        df, _, _ = source_data_normalize(
+        df, _, _, _ = source_data_normalize(
             dag_config=dag_config,
             df_acteur_from_source=pd.DataFrame(
                 {
@@ -302,7 +302,7 @@ class TestDfApplyOCA:
     def test_apply_oca_config(self, dag_config_kwargs, df_acteur):
         dag_config_kwargs["oca"] = {"prefix": "ocatest", "deduplication_source": True}
 
-        df, _, _ = source_data_normalize(
+        df, _, _, _ = source_data_normalize(
             df_acteur_from_source=df_acteur,
             dag_config=DAGConfig.model_validate(dag_config_kwargs),
             dag_id="dag_id",
@@ -330,7 +330,7 @@ class TestDfApplyOCA:
     ):
         dag_config_kwargs["oca"] = {"prefix": "ocatest"}
 
-        df, _, _ = source_data_normalize(
+        df, _, _, _ = source_data_normalize(
             df_acteur_from_source=df_acteur,
             dag_config=DAGConfig.model_validate(dag_config_kwargs),
             dag_id="dag_id",
@@ -355,7 +355,7 @@ class TestDfApplyOCA:
     def test_apply_oca_config_no_prefix(self, dag_config_kwargs, df_acteur):
         dag_config_kwargs["oca"] = {"deduplication_source": True}
 
-        df, _, _ = source_data_normalize(
+        df, _, _, _ = source_data_normalize(
             df_acteur_from_source=df_acteur,
             dag_config=DAGConfig.model_validate(dag_config_kwargs),
             dag_id="dag_id",
@@ -485,13 +485,13 @@ class TestRemoveUndesiredLines:
     def test_remove_undesired_lines_suppressions(self, df, expected_df, dag_config):
         # Mock the DAGConfig
 
-        result_df, metadata = _remove_undesired_lines(df, dag_config)
+        result_df, _ = _remove_undesired_lines(df, dag_config)
         pd.testing.assert_frame_equal(
             result_df.reset_index(drop=True), expected_df.reset_index(drop=True)
         )
 
     def test_merge_duplicated(self, dag_config):
-        result, metadata = _remove_undesired_lines(
+        result, _ = _remove_undesired_lines(
             pd.DataFrame(
                 {
                     "identifiant_unique": ["id1", "id1", "id2"],

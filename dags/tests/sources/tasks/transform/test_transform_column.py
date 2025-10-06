@@ -5,6 +5,7 @@ from sources.tasks.transform.exceptions import (
     ActeurTypeCodeError,
     BooleanValueWarning,
     CodePostalWarning,
+    OpeningHoursWarning,
 )
 from sources.tasks.transform.transform_column import (
     cast_eo_boolean_or_string_to_boolean,
@@ -391,11 +392,14 @@ class TestCleanHorairesOsm:
                 "Mo-Fr 12h30-15h30,16h30-18h30 ; We 12h30-15h30",
                 "Mo-Fr 12:30-15:30,16:30-18:30 ; We 12:30-15:30",
             ),
-            ("fake", ""),
         ],
     )
     def test_clean_horaires_osm(self, horaires_osm, expected_horaires_osm):
         assert clean_horaires_osm(horaires_osm, None) == expected_horaires_osm
+
+    def test_clean_horaires_osm_warning(self):
+        with pytest.raises(OpeningHoursWarning):
+            clean_horaires_osm("fake", None)
 
 
 class TestCleanSousCategorieCodes:
