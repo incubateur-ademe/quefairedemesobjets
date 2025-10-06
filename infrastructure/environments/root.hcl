@@ -12,8 +12,9 @@ terraform {
 }
 
 provider "scaleway" {
-  zone   = "fr-par-1" # Zone de Paris
-  region = "fr-par"   # Région de Paris
+  zone       = "fr-par-1" # Zone de Paris
+  region     = "fr-par"   # Région de Paris
+  project_id = var.project_id
 }
 EOF
 }
