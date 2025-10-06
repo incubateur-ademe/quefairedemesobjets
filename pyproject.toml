@@ -95,6 +95,7 @@ airflow = [
     "scikit-learn==1.7.2",
     "apache-airflow>=3.0.0,<4",
     "pandas<2.2",
+    "numpy==1.26.4",
     "dbt-core>=1.10.9,<2",
     "dbt-postgres>=1.9.1,<2",
 ]
