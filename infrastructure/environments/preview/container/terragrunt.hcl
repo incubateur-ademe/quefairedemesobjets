@@ -12,30 +12,30 @@ include {
 
 inputs = {
   # Scheduler
-  airflow_scheduler_registry_image = "rg.fr-par.scw.cloud/ns-qfdmo/airflow-scheduler:preprod"
+  airflow_scheduler_registry_image = "rg.fr-par.scw.cloud/ns-qfdmo/airflow-scheduler:airflow-v3.0"
   airflow_scheduler_cpu_limit      = 4000
-  airflow_scheduler_memory_limit   = 12288
+  airflow_scheduler_memory_limit   = 8000
   airflow_scheduler_min_scale      = 1
   airflow_scheduler_max_scale      = 1
   airflow_scheduler_timeout        = 300
 
   # Webserver
-  airflow_webserver_registry_image = "rg.fr-par.scw.cloud/ns-qfdmo/airflow-webserver:preprod"
-  airflow_webserver_cpu_limit      = 1000
-  airflow_webserver_memory_limit   = 2048
+  airflow_webserver_registry_image = "rg.fr-par.scw.cloud/ns-qfdmo/airflow-webserver:airflow-v3.0"
+  airflow_webserver_cpu_limit      = 2000
+  airflow_webserver_memory_limit   = 4000
   airflow_webserver_min_scale      = 1
   airflow_webserver_max_scale      = 1
   airflow_webserver_timeout        = 300
 
   # DAG processor
-  airflow_dag_processor_registry_image = "rg.fr-par.scw.cloud/ns-qfdmo/airflow-dag-processor:preprod"
+  airflow_dag_processor_registry_image = "rg.fr-par.scw.cloud/ns-qfdmo/airflow-dag-processor:airflow-v3.0"
   airflow_dag_processor_cpu_limit      = 2000
   airflow_dag_processor_memory_limit   = 4000
   airflow_dag_processor_min_scale      = 1
   airflow_dag_processor_max_scale      = 1
   airflow_dag_processor_timeout        = 300
 
-  AIRFLOW__WEBSERVER__INSTANCE_NAME   = "✅✅✅✅ ENV de PREPROD ! ✅✅✅✅"
+  AIRFLOW__WEBSERVER__INSTANCE_NAME   = "✅✅✅✅ ENV de PREVIEW ! ✅✅✅✅"
   AIRFLOW__DATABASE__SQL_ALCHEMY_CONN = "[AIRFLOW__DATABASE__SQL_ALCHEMY_CONN]"
   AIRFLOW_CONN_WEBAPP_DB              = "[AIRFLOW_CONN_WEBAPP_DB]"
   DATABASE_URL                        = "[DATABASE_URL]"
