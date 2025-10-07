@@ -218,7 +218,6 @@ class SearchActeursView(
             acteurs = acteurs.digital()
         else:
             bbox, acteurs = self._bbox_and_acteurs_from_location_or_epci(acteurs)
-            acteurs = acteurs
 
             # Set Home location (address set as input)
             # FIXME : can be manage in template using the form value ?
@@ -231,15 +230,12 @@ class SearchActeursView(
                     location=json.dumps({"latitude": latitude, "longitude": longitude}),
                 )
 
-        if acteurs:
-            paginated_acteurs = Paginator(acteurs, self._get_max_displayed_acteurs())
-            paginated_acteurs_obj = paginated_acteurs.page(
-                self.request.GET.get("page", 1)
-            )
-            kwargs.update(
-                acteurs=acteurs,
-                paginated_acteurs_obj=paginated_acteurs_obj,
-            )
+        paginated_acteurs = Paginator(acteurs, self._get_max_displayed_acteurs())
+        paginated_acteurs_obj = paginated_acteurs.page(self.request.GET.get("page", 1))
+        kwargs.update(
+            acteurs=acteurs,
+            paginated_acteurs_obj=paginated_acteurs_obj,
+        )
         context = super().get_context_data(**kwargs)
 
         # TODO : refacto forms, gérer ça autrement
