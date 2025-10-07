@@ -49,7 +49,7 @@ with DAG(
     },
     start_date=START_DATES.YESTERDAY,
     catchup=False,
-    schedule_interval=None,
+    schedule=None,
     description=("Un DAG pour parcourir des URLs et suggérer des corrections"),
     tags=[TAGS.ENRICH, TAGS.CRAWL, TAGS.ACTEURS, TAGS.URL, TAGS.SUGGESTIONS],
     params={
