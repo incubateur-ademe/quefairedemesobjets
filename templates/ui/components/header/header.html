@@ -53,5 +53,7 @@
 {% endblock service_tagline %}
 
 {% block main_menu %}
+{% if request %}
 {% main_menu max_levels=1 template="ui/components/header/header_menu.html" %}
+{% endif %}
 {% endblock main_menu %}
