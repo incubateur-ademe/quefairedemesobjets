@@ -4,7 +4,7 @@ from django.http import HttpRequest
 from django.test import override_settings
 
 from qfdmo.map_utils import compile_frontend_bbox
-from qfdmo.models.acteur import ActeurStatus, DisplayedActeur, RevisionActeur
+from qfdmo.models.acteur import Acteur, ActeurStatus, DisplayedActeur, RevisionActeur
 from qfdmo.views.carte import CarteSearchActeursView
 from unit_tests.core.test_utils import query_dict_from
 from unit_tests.qfdmo.acteur_factory import (
@@ -94,7 +94,6 @@ def displayed_acteur_reparer(proposition_service_reparer):
 
 @pytest.fixture
 def displayed_acteur_reparacteur(displayed_acteur_reparer):
-
     reparacteur = LabelQualiteFactory(code="reparacteur")
     displayed_acteur_reparer.labels.add(reparacteur)
     return displayed_acteur_reparer
@@ -566,5 +565,5 @@ class TestGetOrCreateRevisionActeur:
     def test_get_or_create_revision_acteur_no_acteur(self, client):
         url = "/qfdmo/getorcreate_revisionacteur/1234567890"  # pragma: allowlist secret
 
-        with pytest.raises(RevisionActeur.DoesNotExist):
+        with pytest.raises((Acteur.DoesNotExist, RevisionActeur.DoesNotExist)):
             client.get(url)

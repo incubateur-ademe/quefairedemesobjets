@@ -44,7 +44,7 @@ def get_assistant_script(request):
     return static_file_content_from("embed/assistant.js")
 
 
-SEARCH_VIEW_TEMPLATE_NAME = "components/search/view.html"
+SEARCH_VIEW_TEMPLATE_NAME = "ui/components/search/view.html"
 
 
 def search_view(request) -> HttpResponse:
@@ -83,7 +83,7 @@ class AssistantBaseView:
 @method_decorator(cache_control(max_age=60 * 15), name="dispatch")
 @method_decorator(vary_on_headers("logged-in", "iframe"), name="dispatch")
 class HomeView(AssistantBaseView, ListView):
-    template_name = "pages/home.html"
+    template_name = "ui/pages/home.html"
     model = Suggestion
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
@@ -117,7 +117,7 @@ class HomeView(AssistantBaseView, ListView):
 
 
 class SynonymeDetailView(AssistantBaseView, DetailView):
-    template_name = "pages/produit.html"
+    template_name = "ui/pages/produit.html"
     model = Synonyme
 
     def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:

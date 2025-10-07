@@ -1,0 +1,59 @@
+{% extends request.iframe|yesno:"ui/components/header/base.iframe.html,ui/components/header/base.html" %}
+
+{% load menu_tags static %}
+
+{% block header_search %}
+    <div
+        class="qf-w-[320px]
+        qf-ml-auto
+        qf-relative
+        -qf-top-3w
+        max-lg:qf-hidden qf-text-left"
+    >
+        <div class="qf-absolute qf-left-0 qf-right-0 my-auto">
+        {% include "ui/components/search/view.html" with search_form=header_search_form %}
+        </div>
+    </div>
+{% endblock header_search %}
+
+{% block burger_menu %}
+  <div class="fr-header__navbar">
+    <a class="fr-btn--search fr-btn" href="/">
+        Recherche
+    </a>
+
+    <button class="fr-btn--menu fr-btn"
+            data-fr-opened="false"
+            aria-controls="fr-menu-mobile"
+            id="fr-btn-menu-mobile"
+            title="Menu">
+            Menu
+    </button>
+  </div>
+{% endblock burger_menu %}
+
+{% block operator_logo %}
+<div class="fr-header__operator max-md:qf-pl-0 max-sm:qf-pr-0">
+    <div class="qf-grid qf-auto-cols-max qf-grid-flow-col qf-max-h-8w md:qf-max-h-9w qf-gap-1w md:qf-gap-2w">
+        <div class="qf-w-8w qf-px-1v">
+            {% include "./_logo_ademe.html" %}
+        </div>
+        {% include "ui/components/logo/header.html" %}
+    </div>
+</div>
+{% endblock operator_logo %}
+
+{% block header_tools_links %}
+{% endblock header_tools_links %}
+
+{% block service_title %}
+{% endblock service_title %}
+
+{% block service_tagline %}
+{% endblock service_tagline %}
+
+{% block main_menu %}
+{% if request %}
+{% main_menu max_levels=1 template="ui/components/header/header_menu.html" %}
+{% endif %}
+{% endblock main_menu %}

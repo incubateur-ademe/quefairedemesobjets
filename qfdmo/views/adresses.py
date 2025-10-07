@@ -69,9 +69,9 @@ class TurboFormMixin:
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.turbo:
-            context.update(turbo=True, base_template="layout/turbo.html")
+            context.update(turbo=True, base_template="ui/layout/turbo.html")
         else:
-            context.update(base_template="layout/base.html")
+            context.update(base_template="ui/layout/base.html")
 
         return context
 
@@ -532,7 +532,7 @@ class FormulaireSearchActeursView(SearchActeursView):
     modifiée."""
 
     is_iframe = True
-    template_name = "qfdmo/formulaire.html"
+    template_name = "ui/pages/formulaire.html"
     form_class = FormulaireForm
 
     def get_context_data(self, **kwargs):
@@ -638,10 +638,10 @@ def acteur_detail_redirect(request, identifiant_unique):
 
 
 def acteur_detail(request, uuid):
-    base_template = "layout/base.html"
+    base_template = "ui/layout/base.html"
 
     if request.headers.get("Turbo-Frame"):
-        base_template = "layout/turbo.html"
+        base_template = "ui/layout/turbo.html"
 
     latitude = request.GET.get("latitude")
     longitude = request.GET.get("longitude")
@@ -692,7 +692,7 @@ def acteur_detail(request, uuid):
             )
         )
 
-    return render(request, "qfdmo/acteur.html", context)
+    return render(request, "ui/components/carte/acteur.html", context)
 
 
 def solution_admin(request, identifiant_unique):
