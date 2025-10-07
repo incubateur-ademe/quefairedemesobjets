@@ -3378,7 +3378,7 @@ airflow = [
     { name = "dbt-core", specifier = ">=1.10.9,<2" },
     { name = "dbt-postgres", specifier = ">=1.9.1,<2" },
     { name = "fuzzywuzzy", specifier = ">=0.18.0,<0.19" },
-    { name = "numpy", specifier = "==1.26.4" },
+    { name = "numpy", specifier = "<2.0" },
     { name = "pandas", specifier = "<2.2" },
     { name = "python-decouple", specifier = "~=3.8" },
     { name = "ratelimit", specifier = ">=2.2.1,<3" },
