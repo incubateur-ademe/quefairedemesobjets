@@ -2694,7 +2694,7 @@ wheels = [
 
 [[package]]
 name = "pandas"
-version = "2.1.1"
+version = "2.1.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "numpy" },
@@ -2702,14 +2702,14 @@ dependencies = [
     { name = "pytz" },
     { name = "tzdata" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/3d/0e/2c225d7a5de6ca0ec7d729aff6ef560544596f3a9bfed77f6dbc1713dbb5/pandas-2.1.1.tar.gz", hash = "sha256:fecb198dc389429be557cde50a2d46da8434a17fe37d7d41ff102e3987fd947b", size = 4266250, upload-time = "2023-09-20T21:05:19.391Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/6f/41/eb562668eaf93790762f600536b28c97b45803cba9253cd8e436cda96aef/pandas-2.1.4.tar.gz", hash = "sha256:fcb68203c833cc735321512e13861358079a96c174a61f5116a1de89c58c0ef7", size = 4274800, upload-time = "2023-12-08T15:38:29.713Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a5/d2/9e130353d2358b463095a42aaa4432d6a91c42ff22e55c39dae4597e3ae5/pandas-2.1.1-cp312-cp312-macosx_10_9_x86_64.whl", hash = "sha256:c747793c4e9dcece7bb20156179529898abf505fe32cb40c4052107a3c620b49", size = 11346591, upload-time = "2023-09-20T21:04:38.363Z" },
-    { url = "https://files.pythonhosted.org/packages/38/1b/e425daceff79695e67d115230bdeb57bbdd6cfff8c46d532e4e64d3dc966/pandas-2.1.1-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:3bcad1e6fb34b727b016775bea407311f7721db87e5b409e6542f4546a4951ea", size = 10603951, upload-time = "2023-09-20T21:04:41.872Z" },
-    { url = "https://files.pythonhosted.org/packages/8e/2d/d6723a2639310abcadb91233ea13428768865ff9f61fb8cf2ee42ed568f8/pandas-2.1.1-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:f5ec7740f9ccb90aec64edd71434711f58ee0ea7f5ed4ac48be11cfa9abf7317", size = 14239105, upload-time = "2023-09-20T21:04:45.627Z" },
-    { url = "https://files.pythonhosted.org/packages/41/db/fc107df31c06976764e753074cc71cbe1c7062481f668746f8d498cafcb6/pandas-2.1.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:29deb61de5a8a93bdd033df328441a79fcf8dd3c12d5ed0b41a395eef9cd76f0", size = 11652903, upload-time = "2023-09-20T21:04:48.846Z" },
-    { url = "https://files.pythonhosted.org/packages/7c/ac/050be15bca8dc1cbce67d3425507a3eee18190e44ff3583d926701d8ca46/pandas-2.1.1-cp312-cp312-musllinux_1_1_x86_64.whl", hash = "sha256:4f99bebf19b7e03cf80a4e770a3e65eee9dd4e2679039f542d7c1ace7b7b1daa", size = 12364214, upload-time = "2023-09-20T21:04:52.332Z" },
-    { url = "https://files.pythonhosted.org/packages/89/c8/466196b756d74326820fe227743105fda0198a133f18916610e068540f0f/pandas-2.1.1-cp312-cp312-win_amd64.whl", hash = "sha256:84e7e910096416adec68075dc87b986ff202920fb8704e6d9c8c9897fe7332d6", size = 10525986, upload-time = "2023-09-20T21:04:55.448Z" },
+    { url = "https://files.pythonhosted.org/packages/f5/16/64109832ed426d5c3e9f6b791e64a2b78d785823657640afb8f416ed1dc9/pandas-2.1.4-cp312-cp312-macosx_10_9_x86_64.whl", hash = "sha256:482d5076e1791777e1571f2e2d789e940dedd927325cc3cb6d0800c6304082f6", size = 11357488, upload-time = "2023-12-08T15:37:48.717Z" },
+    { url = "https://files.pythonhosted.org/packages/0b/e0/8d97c7ecd73624f4cd5755578990b3cfbc6bbe350b8e017ede3580173a6f/pandas-2.1.4-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:8a706cfe7955c4ca59af8c7a0517370eafbd98593155b48f10f9811da440248b", size = 10613199, upload-time = "2023-12-08T15:37:51.808Z" },
+    { url = "https://files.pythonhosted.org/packages/54/be/98b894bef9acfc310de70fc03524473a9695981e1e87c7afa56ada08f016/pandas-2.1.4-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:b0513a132a15977b4a5b89aabd304647919bc2169eac4c8536afb29c07c23540", size = 14288250, upload-time = "2023-12-08T15:37:55.263Z" },
+    { url = "https://files.pythonhosted.org/packages/5b/5f/076b1ce74f80df0a9db244d30e30c4d4dee45342cbfa5f3e01f64cadf663/pandas-2.1.4-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:e9f17f2b6fc076b2a0078862547595d66244db0f41bf79fc5f64a5c4d635bead", size = 11673138, upload-time = "2023-12-08T15:37:59.209Z" },
+    { url = "https://files.pythonhosted.org/packages/cc/a8/13dced3276ea4514909a80c8dd08b43ab23007b4949701e3d7ae2a8ccd2d/pandas-2.1.4-cp312-cp312-musllinux_1_1_x86_64.whl", hash = "sha256:45d63d2a9b1b37fa6c84a68ba2422dc9ed018bdaa668c7f47566a01188ceeec1", size = 12389903, upload-time = "2023-12-08T15:38:02.655Z" },
+    { url = "https://files.pythonhosted.org/packages/ae/d9/3741b344f57484b423cd22194025a8489992ad9962196a62721ef9980045/pandas-2.1.4-cp312-cp312-win_amd64.whl", hash = "sha256:f69b0c9bb174a2342818d3e2778584e18c740d56857fc5cdb944ec8bbe4082cf", size = 10498689, upload-time = "2023-12-08T15:38:05.834Z" },
 ]
 
 [[package]]
@@ -3278,7 +3278,6 @@ dependencies = [
     { name = "requests" },
     { name = "sentry-sdk" },
     { name = "shortuuid" },
-    { name = "sites-faciles-experiment" },
     { name = "tqdm" },
     { name = "unidecode" },
     { name = "wagtail-honeypot" },
@@ -3360,7 +3359,6 @@ requires-dist = [
     { name = "requests", specifier = ">=2.32.4,<3" },
     { name = "sentry-sdk", specifier = ">=2.37.0,<3" },
     { name = "shortuuid", specifier = ">=1.0.13,<2" },
-    { name = "sites-faciles-experiment", specifier = "~=2.1.0rc9" },
     { name = "tqdm", specifier = ">=4.67.1,<5" },
     { name = "unidecode", specifier = ">=1.4.0,<2" },
     { name = "wagtail-honeypot", git = "https://github.com/Luzzzi/wagtail-honeypot?rev=feature%2Fi18n-required-honeypot" },
@@ -3379,7 +3377,7 @@ airflow = [
     { name = "dbt-postgres", specifier = ">=1.9.1,<2" },
     { name = "fuzzywuzzy", specifier = ">=0.18.0,<0.19" },
     { name = "numpy", specifier = "<2.0" },
-    { name = "pandas", specifier = "<2.2" },
+    { name = "pandas", specifier = "==2.1.4" },
     { name = "python-decouple", specifier = "~=3.8" },
     { name = "ratelimit", specifier = ">=2.2.1,<3" },
     { name = "scikit-learn", specifier = "==1.7.2" },
