@@ -1,6 +1,18 @@
 import numpy as np
 import pandas as pd
 import pytest
+from sources.tasks.transform.exceptions import (
+    ActeurTypeCodeError,
+    BooleanValueWarning,
+    CodePostalWarning,
+    EmailWarning,
+    OpeningHoursWarning,
+    PublicAccueilliWarning,
+    RepriseWarning,
+    SirenWarning,
+    SiretWarning,
+    SousCategorieCodesError,
+)
 from sources.tasks.transform.transform_column import (
     cast_eo_boolean_or_string_to_boolean,
     clean_acteur_type_code,
@@ -41,7 +53,6 @@ class TestCastEOBooleanOrStringToBoolean:
             ("True", True),
             ("", None),
             (" ", None),
-            ("fake", None),
         ],
     )
     def test_cast_eo_boolean_or_string_to_boolean(
@@ -49,8 +60,15 @@ class TestCastEOBooleanOrStringToBoolean:
         value,
         expected_value,
     ):
-
         assert cast_eo_boolean_or_string_to_boolean(value, None) == expected_value
+
+    @pytest.mark.parametrize(
+        "value",
+        [1.0, "fake"],
+    )
+    def test_cast_eo_boolean_or_string_to_boolean_warning(self, value):
+        with pytest.raises(BooleanValueWarning):
+            cast_eo_boolean_or_string_to_boolean(value, None)
 
 
 class TestConvertOpeningHours:
@@ -137,14 +155,23 @@ class TestCleanSiren:
             (pd.NA, ""),
             (None, ""),
             ("", ""),
-            ("1234567890", ""),
             ("123456789", "123456789"),
             (" 123456789 ", "123456789"),
-            ("12345678", ""),
         ],
     )
     def test_clean_siren(self, siren, expected_siren):
         assert clean_siren(siren) == expected_siren
+
+    @pytest.mark.parametrize(
+        "siren",
+        [
+            "fake" "1234567890",
+            "12345678",
+        ],
+    )
+    def test_clean_siren_warning(self, siren):
+        with pytest.raises(SirenWarning):
+            clean_siren(siren)
 
 
 class TestCleanSiret:
@@ -155,15 +182,24 @@ class TestCleanSiret:
             (pd.NA, ""),
             (None, ""),
             ("", ""),
-            ("123456789012345", ""),
             ("98765432109876", "98765432109876"),
             (" 98765432109876 ", "98765432109876"),
             ("8765432109876", "08765432109876"),
-            ("AB123", ""),
         ],
     )
     def test_clean_siret(self, siret, expected_siret):
         assert clean_siret(siret) == expected_siret
+
+    @pytest.mark.parametrize(
+        "siret",
+        [
+            "fake" "123456789012345",
+            "AB123",
+        ],
+    )
+    def test_clean_siret_warning(self, siret):
+        with pytest.raises(SiretWarning):
+            clean_siret(siret)
 
 
 class TestCleanNumber:
@@ -264,7 +300,7 @@ class TestCleanActeurTypeCode:
     )
     def test_clean_acteur_type_code_invalid(self, value):
         with pytest.raises(
-            ValueError, match=f"Acteur type `{value}` not found in mapping"
+            ActeurTypeCodeError, match=f"Acteur type `{value}` not found in mapping :"
         ):
             clean_acteur_type_code(value, None)
 
@@ -274,7 +310,6 @@ class TestCleanPublicAccueilli:
         "value, expected_value",
         [
             (None, ""),
-            ("fake", ""),
             ("PARTICULIERS", "Particuliers"),
             ("Particuliers", "Particuliers"),
             ("DMA", "Particuliers"),
@@ -292,6 +327,14 @@ class TestCleanPublicAccueilli:
 
         assert clean_public_accueilli(value, None) == expected_value
 
+    @pytest.mark.parametrize(
+        "value",
+        ["fake"],
+    )
+    def test_clean_public_accueilli_warning(self, value):
+        with pytest.raises(PublicAccueilliWarning):
+            clean_public_accueilli(value, None)
+
 
 class TestCleanReprise:
 
@@ -303,7 +346,6 @@ class TestCleanReprise:
             ("1 pour 1", "1 pour 1"),
             ("non", "1 pour 0"),
             ("oui", "1 pour 1"),
-            ("fake", ""),
         ],
     )
     def test_clean_reprise(
@@ -312,6 +354,14 @@ class TestCleanReprise:
         expected_value,
     ):
         assert clean_reprise(value, None) == expected_value
+
+    @pytest.mark.parametrize(
+        "value",
+        ["fake"],
+    )
+    def test_clean_reprise_warning(self, value):
+        with pytest.raises(RepriseWarning):
+            clean_reprise(value, None)
 
 
 class TestCleanUrl:
@@ -336,8 +386,6 @@ class TestCleanEmail:
         [
             (None, ""),
             ("", ""),
-            ("fake", ""),
-            ("@example.com ", ""),
             ("fake@example.com", "fake@example.com"),
             (" fake@example.com ", "fake@example.com"),
             (
@@ -349,6 +397,11 @@ class TestCleanEmail:
     def test_clean_email(self, email, expected_email):
         assert clean_email(email, None) == expected_email
 
+    @pytest.mark.parametrize("email", ["fake", "@example.com"])
+    def test_clean_email_warning(self, email):
+        with pytest.raises(EmailWarning):
+            clean_email(email, None)
+
 
 class TestCleanCodePostal:
     @pytest.mark.parametrize(
@@ -356,13 +409,17 @@ class TestCleanCodePostal:
         [
             (None, ""),
             ("", ""),
-            ("75", ""),
             ("75001", "75001"),
             ("7501", "07501"),
         ],
     )
     def test_clean_code_postal(self, cp, expected_cp):
         assert clean_code_postal(cp, None) == expected_cp
+
+    @pytest.mark.parametrize("cp", ["123456", "123", "Paris"])
+    def test_clean_code_postal_warning(self, cp):
+        with pytest.raises(CodePostalWarning):
+            clean_code_postal(cp, None)
 
 
 class TestCleanHorairesOsm:
@@ -376,11 +433,14 @@ class TestCleanHorairesOsm:
                 "Mo-Fr 12h30-15h30,16h30-18h30 ; We 12h30-15h30",
                 "Mo-Fr 12:30-15:30,16:30-18:30 ; We 12:30-15:30",
             ),
-            ("fake", ""),
         ],
     )
     def test_clean_horaires_osm(self, horaires_osm, expected_horaires_osm):
         assert clean_horaires_osm(horaires_osm, None) == expected_horaires_osm
+
+    def test_clean_horaires_osm_warning(self):
+        with pytest.raises(OpeningHoursWarning):
+            clean_horaires_osm("fake", None)
 
 
 class TestCleanSousCategorieCodes:
@@ -426,7 +486,7 @@ class TestCleanSousCategorieCodes:
 
     def test_clean_sous_categorie_codes_raise(self, dag_config):
         dag_config.product_mapping = {"sscat1": 1.0}
-        with pytest.raises(ValueError):
+        with pytest.raises(SousCategorieCodesError):
             clean_sous_categorie_codes("sscat1", dag_config)
 
 

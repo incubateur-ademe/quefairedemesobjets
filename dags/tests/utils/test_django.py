@@ -137,6 +137,8 @@ def test_get_model_fields():
         "siret",
         "source_code",
         "statut",
+        "suggestion_groupe_codes",
+        "suggestion_unitaire_codes",
         "telephone",
         "uniquement_sur_rdv",
         "url",
