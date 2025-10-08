@@ -18,11 +18,14 @@ class CloneConfig(BaseModel):
     dry_run: bool
     table_kind: str
     data_endpoint: AnyUrl
-    clone_method: Literal["download_to_disk_first", "stream_directly"]
-    file_downloaded: str
-    file_unpacked: str
-    delimiter: str
+    clone_method: Literal["download_to_disk_first", "stream_directly"] = (
+        "stream_directly"
+    )
+    file_downloaded: str | None = None
+    file_unpacked: str | None = None
+    delimiter: str = ","
     run_timestamp: str
+    convert_downloaded_file_to_utf8: bool = False
 
     @computed_field
     @property

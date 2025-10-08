@@ -4,7 +4,6 @@ import logging
 from pathlib import Path
 
 from pydantic import AnyUrl
-
 from utils import logging_utils as log
 from utils.cmd import cmd_run
 from utils.django import django_schema_create_and_check, django_setup_full
@@ -38,11 +37,18 @@ def commands_stream_directly(
     cmd_cleanup = {"cmd": "echo 'Pas de nettoyage requis en streaming'"}
 
     cmd_psql = command_psql_copy(table_name=table_name, delimiter=delimiter)
-    cmds_create.append(
-        {
-            "cmd": (f"curl -s {data_endpoint} | " "zcat | " f"{cmd_psql}"),
-        }
-    )
+    if str(data_endpoint).endswith(".gz") or str(data_endpoint).endswith(".zip"):
+        cmds_create.append(
+            {
+                "cmd": (f"curl -s '{data_endpoint}' | zcat | " f"{cmd_psql}"),
+            }
+        )
+    else:
+        cmds_create.append(
+            {
+                "cmd": (f"curl -s '{data_endpoint}' | {cmd_psql}"),
+            }
+        )
 
     return cmds_create, cmd_cleanup
 
@@ -53,6 +59,7 @@ def commands_download_to_disk_first(
     file_unpacked: str,
     delimiter: str,
     table_name: str,
+    convert_downloaded_file_to_utf8: bool,
 ) -> tuple[list[dict], dict]:
     """Commands to create table while first dowloading to disk"""
 
@@ -69,16 +76,19 @@ def commands_download_to_disk_first(
     cmds_create.append(f"curl -sSL {data_endpoint} -o {folder}/{file_downloaded}")
 
     # Unpack the file
-    if str(data_endpoint).endswith(".zip"):
+    if str(file_downloaded).endswith(".zip"):
         cmds_create.append(f"unzip {folder}/{file_downloaded} -d {folder}/")
-    elif str(data_endpoint).endswith(".gz"):
+    elif str(file_downloaded).endswith(".gz"):
         cmds_create.append(
             f"gunzip -c {folder}/{file_downloaded} > {folder}/{file_unpacked}"
         )
-    elif str(data_endpoint).endswith(".csv"):
+    elif str(file_downloaded).endswith(".csv"):
+        file_unpacked = file_unpacked or file_downloaded
         pass
     else:
-        raise NotImplementedError(f"URL non supportée: {data_endpoint}")
+        raise NotImplementedError(
+            f"URL non supportée: {data_endpoint} -> {file_downloaded}"
+        )
 
     # Check the unpacked file
     cmds_create.append(f"wc -l {folder}/{file_unpacked}")
@@ -88,9 +98,18 @@ def commands_download_to_disk_first(
 
     # Load into DB
     cmd_psql = command_psql_copy(table_name=table_name, delimiter=delimiter)
+    if convert_downloaded_file_to_utf8:
+        cmds_create.append(
+            {
+                "cmd": (
+                    "iconv -f ISO-8859-1 -t UTF-8"
+                    f" {folder}/{file_unpacked} > {folder}/{file_unpacked}"
+                )
+            }
+        )
     cmds_create.append(
         {
-            "cmd": (f"cat {folder}/{file_unpacked} | " f"{cmd_psql}"),
+            "cmd": f"cat {folder}/{file_unpacked} | {cmd_psql}",
         }
     )
 
@@ -126,13 +145,16 @@ def commands_run(
 def clone_table_create(
     data_endpoint: AnyUrl,
     clone_method: str,
-    file_downloaded: str,
-    file_unpacked: str,
+    file_downloaded: str | None,
+    file_unpacked: str | None,
     delimiter: str,
     table_name: str,
     table_schema_file_path: Path,
+    convert_downloaded_file_to_utf8: bool,
     dry_run: bool,
 ) -> None:
+    from django.db import connections
+
     """Create a table in the DB from a CSV file downloaded via URL"""
 
     logger.info(log.banner_string(f"Création du schema de la table {table_name}"))
@@ -154,6 +176,7 @@ def clone_table_create(
                 file_unpacked=file_unpacked,
                 delimiter=delimiter,
                 table_name=table_name,
+                convert_downloaded_file_to_utf8=convert_downloaded_file_to_utf8,
             )
         elif clone_method == "stream_directly":
             cmds_create, cmd_cleanup = commands_stream_directly(
@@ -180,9 +203,9 @@ def clone_table_create(
 
     # If anything went wrong = delete schema if it exists
     except Exception as e:
-        from django.db import connection
-
         logger.error(log.banner_string(f"❌ Erreur rencontrée: {e}"))
         logger.error(f"On supprime la table {table_name} si créée")
+        connection = connections["warehouse"]
         with connection.cursor() as cursor:
             cursor.execute(f"DROP TABLE IF EXISTS {table_name};")
+        raise e
