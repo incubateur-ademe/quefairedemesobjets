@@ -343,6 +343,10 @@ models:
         description: "L'identifiant de la source"
         data_tests:
           - not_null
+      - name: identifiant_externe
+        description: "L'identifiant externe de l'acteur pour cette source"
+        data_tests:
+          - not_null
     config:
       tags:
         - marts
@@ -351,7 +355,7 @@ models:
         - acteur_sources
       materialized: table
       indexes:
-        - columns: ['acteur_id', 'source_id']
+        - columns: ['acteur_id', 'source_id', 'identifiant_externe']
           unique: true
         - columns: ['acteur_id']
           type: hash

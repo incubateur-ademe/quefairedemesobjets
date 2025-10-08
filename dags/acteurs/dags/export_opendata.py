@@ -6,6 +6,7 @@ from acteurs.tasks.airflow_logic.export_opendata_csv_to_s3_task import (
 )
 from airflow import DAG
 from decouple import config
+from shared.config.catchups import CATCHUPS
 from shared.config.schedules import SCHEDULES
 from shared.config.tags import TAGS
 
@@ -24,6 +25,7 @@ default_args = {
 with DAG(
     "export_opendata_dag",
     default_args=default_args,
+    catchup=CATCHUPS.AWLAYS_FALSE,
     start_date=pendulum.datetime(2025, 8, 1, tz="UTC"),
     dag_display_name="Acteurs Open-Data - Exporter les Acteurs en Open-Data",
     description=(

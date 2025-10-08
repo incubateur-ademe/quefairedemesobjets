@@ -3,18 +3,20 @@
 WITH nochild_acteur_labels AS (
     SELECT
         a.identifiant_unique AS acteur_id,
-        a.source_id AS source_id
+        a.source_id AS source_id,
+        a.identifiant_externe AS identifiant_externe
     FROM {{ ref(ephemeral_filtered_acteur) }} AS a
     WHERE a.parent_id is null AND a.source_id is not null
-    GROUP BY a.identifiant_unique, a.source_id
+    GROUP BY a.identifiant_unique, a.source_id, a.identifiant_externe
 ),
 parentacteur_labels AS (
     SELECT
         a.parent_id AS acteur_id,
-        a.source_id AS source_id
+        a.source_id AS source_id,
+        a.identifiant_externe AS identifiant_externe
     FROM {{ ref(ephemeral_filtered_acteur) }} AS a
     WHERE a.parent_id is not null
-    GROUP BY a.parent_id, a.source_id
+    GROUP BY a.parent_id, a.source_id, a.identifiant_externe
 ),
 acteur_sources AS (
     SELECT * FROM nochild_acteur_labels

@@ -1,5 +1,6 @@
-select
-    id,
+SELECT
+    ROW_NUMBER() OVER (ORDER BY acteur_id, source_id) AS id,
     acteur_id AS vueacteur_id,
     source_id
-from {{ ref('marts_exhaustive_acteur_sources') }}
+FROM {{ ref('marts_exhaustive_acteur_sources') }}
+GROUP BY acteur_id, source_id
