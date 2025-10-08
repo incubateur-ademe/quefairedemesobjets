@@ -39,6 +39,17 @@ models:
       - name: nom_usage
         description: Nom d'usage du dirigeant
         data_type: string
+    config:
+      materialized: table
+      tags:
+        - base
+        - ae
+        - annuaire_entreprises
+        - unite_legale
+      indexes:
+        - columns: ['siren']
+          type: btree
+          unique: true
   - name: base_ae_etablissement
     description: Établissements de l'Annuaire Entreprises (AE)
     columns:
@@ -72,3 +83,15 @@ models:
       - name: libelle_commune
         description: Nom de la ville
         data_type: string
+    config:
+      materialized: table
+      tags:
+        - base
+        - ae
+        - annuaire_entreprises
+        - etablissement
+      indexes:
+        - columns: ['siret']
+          unique: true
+        - columns: ['siren']
+          type: btree

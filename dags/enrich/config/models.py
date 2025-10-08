@@ -43,7 +43,7 @@ def filters_get(model: BaseModel, prefix: str, operator: str) -> list[dict[str, 
 
 class EnrichBaseConfig(BaseModel):
     dry_run: bool = Field(
-        default=True,
+        default=False,
         description="🚱 Si coché, aucune tâche d'écriture ne sera effectuée",
     )
     dbt_models_refresh: bool = Field(

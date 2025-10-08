@@ -2,19 +2,15 @@
 Notes:
  - 🌍 Filtering out non-FR establishments
  - 🛑 Excluding columns we don't use
- - 👁️‍🗨️ AE tables large (10Ms' rows) so only int layer as table
+ - 👁️‍🗨️ We need to materialize the table to have indexes on siren
+      because we already use vues in the request
 */
-{{
-  config(
-    materialized = 'view',
-    tags=['base', 'ae', 'annuaire_entreprises', 'etablissement'],
-  )
-}}
 
 SELECT
 
 -- Codes
 {{ target.schema }}.udf_ae_string_cleanup(siret) AS siret,
+{{ target.schema }}.udf_ae_string_cleanup(siren) AS siren,
 {{ target.schema }}.udf_ae_string_cleanup(activite_principale) AS activite_principale,
 
 -- Names
@@ -35,6 +31,9 @@ FROM {{ source('ae', 'clone_ae_etablissement_in_use') }}
 -- Filtering out foreign establishments as our focus is France
 -- On 2025-03-17 this allows excluding ~316K rows
 WHERE code_pays_etranger IS NULL
+-- Ignore closed establishments before 2006 (20 years ago)
+AND NOT (date_debut < '2006-01-01' AND etat_administratif = 'F')
+
 {% if env_var('DBT_SAMPLING', 'false') == 'true' %}
 /* We can't do random sampling else we risk having
 no matching etablissement vs. unite legale. Can't
