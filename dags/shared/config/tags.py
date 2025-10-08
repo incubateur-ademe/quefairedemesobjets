@@ -91,3 +91,8 @@ class TAGS:
     TOUT: str = "tout"
     SQL: str = "sql"
     SCALEWAY: str = "scaleway"
+    KOUMOUL: str = "koumoul"
+    EPCI: str = "epci"
+    INSEE: str = "insee"
+    COMMUNE: str = "commune"
+    LAPOSTE: str = "laposte"
