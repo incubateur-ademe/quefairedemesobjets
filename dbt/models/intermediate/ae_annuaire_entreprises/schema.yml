@@ -41,6 +41,18 @@ models:
         description: "Nom du dirigeant"
       - name: dirigeant_nom_usage
         description: "Nom d'usage du dirigeant"
+    config:
+      materialized: table
+      tags:
+        - intermediate
+        - ae
+        - annuaire_entreprises
+        - unite_legale
+      indexes:
+        - columns: ['siren']
+          unique: true
+        - columns: ['est_actif']
+        - columns: ['a_dirigeant_noms_ou_prenoms_non_null']
   - name: int_ae_etablissement
     description: "Établissements de l'Annuaire Entreprises (AE)"
     columns:
@@ -77,6 +89,7 @@ models:
         description: "Adresse nomalisée pour la recherche"
     config:
       materialized: table
+      create_table_as: false
       tags:
         - intermediate
         - ae
@@ -85,13 +98,7 @@ models:
       indexes:
         - columns: ['siret']
           unique: true
-        - columns: ['est_actif']
-          type: hash
         - columns: ['code_postal']
-          type: hash
-        - columns: ['naf']
-          type: hash
-        - columns: ['adresse_numero']
           type: hash
         - columns: ['adresse_normalize_string_for_match']
           type: hash

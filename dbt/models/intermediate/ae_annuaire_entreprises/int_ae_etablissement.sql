@@ -1,8 +1,8 @@
 /*
 Notes:
  - 🖊️ Renaming columns to follow our naming convention
- - 🧱 Only layer materialized as table (subsequent layers, because
-  they JOIN with continuously changing QFDMO data are kept as views)
+ - 🧱 We force tu use indexes `Merge Join` instead of `Hash Join`
+      to improve performance because siren has a high cardinality
 */
 
 SELECT
@@ -56,7 +56,7 @@ FROM {{ ref('base_ae_etablissement') }} AS etab
 data from parent unite into each etablissement (saves
 us from making expensive JOINS in downstream models) */
 JOIN {{ ref('base_ae_unite_legale') }} AS unite
-ON unite.siren = LEFT(etab.siret,9)
+ON unite.siren = etab.siren
 /* Here we keep unavailable names as int_ models aren't
 responsible for business logic. Keeping allows investigating
 AND nom != {{ value_unavailable() }}
