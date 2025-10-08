@@ -1,7 +1,9 @@
 WITH deduplicated_opened_sources AS (
   SELECT
     da.uuid,
-    string_agg(DISTINCT source.libelle, '|' ORDER BY source.libelle) as sources_list
+    string_agg(DISTINCT source.libelle, '|' ORDER BY source.libelle) as sources_list,
+    -- from marts_opendata_acteur_sources, get json with source_code:identifiant_externe
+    jsonb_agg(jsonb_build_object(source.libelle, das.identifiant_externe)) as identifiants_par_source
   FROM {{ ref('marts_opendata_acteur') }}  AS da
   LEFT JOIN {{ ref('marts_opendata_acteur_sources') }} AS das
     ON da.identifiant_unique = das.acteur_id
@@ -69,6 +71,7 @@ SELECT
     THEN 'Longue Vie Aux Objets|ADEME|' || ds.sources_list
     ELSE 'Longue Vie Aux Objets|ADEME'
   END as "paternite",
+  ds.identifiants_par_source as "identifiants_des_contributeurs",
   da.nom as "nom",
   da.nom_commercial as "nom_commercial",
   da.siren as "siren",
