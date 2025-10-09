@@ -28,6 +28,7 @@ jobs:
     - name: Check deployment status
       run: |
         EXPECTED_VALUE="ready"
+        ERROR_VALUE="error"
 
         while true; do
             RESPONSE_VALUE=$(curl -s -X GET -H "X-Auth-Token: $SCALEWAY_DEPLOY_KEY" "https://api.scaleway.com/containers/v1beta1/regions/fr-par/containers/$CONTAINER_ID/" | jq -r '.status')
@@ -37,6 +38,10 @@ jobs:
             if [ "$RESPONSE_VALUE" == "$EXPECTED_VALUE" ]; then
                 echo "🎉 The expected value '$EXPECTED_VALUE' was returned. Exiting."
                 break
+            fi
+            if [ "$RESPONSE_VALUE" == "$ERROR_VALUE" ]; then
+                echo "🚨 Ended with error : ERROR_VALUE."
+                exit 1
             fi
 
             sleep 5
