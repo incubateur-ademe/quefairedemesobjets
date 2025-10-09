@@ -32,15 +32,9 @@
             <header
                 class="max-md:qf-sticky qf-top-0 qf-z-0"
             >
-                <div
-                    class="
-                    qf-bg-white
-                    qf-flex qf-flex-row sm:qf-items-center"
-                >
-                {% block form_header %}
-                {% include 'ui/components/formulaire/header.html' %}
-                {% endblock form_header %}
-                </div>
+            {% block form_header %}
+                {% include 'ui/components/formulaire/header.html' with extra_classes="qf-bg-white" %}
+            {% endblock form_header %}
             </header>
 
             <main

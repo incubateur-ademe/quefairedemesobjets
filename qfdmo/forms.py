@@ -2,10 +2,15 @@ from typing import List, cast
 
 from django import forms
 from django.core.cache import cache
+from django.db.models import TextChoices
 from django.http import HttpRequest
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
+from dsfr.enums import SegmentedControlChoices
 from dsfr.forms import DsfrBaseForm
+from dsfr.widgets import (
+    SegmentedControl,
+)
 
 from qfdmo.fields import GroupeActionChoiceField
 from qfdmo.geo_api import epcis_from, formatted_epcis_as_list_of_tuple
@@ -265,7 +270,6 @@ def get_epcis_for_carte_form():
 
 
 class CarteForm(AddressesForm):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Override the label and aria-label for the sous_categorie_objet field
@@ -511,9 +515,7 @@ class AdvancedConfiguratorForm(forms.Form):
     action_displayed = forms.MultipleChoiceField(
         widget=DSFRCheckboxSelectMultiple(
             attrs={
-                "class": (
-                    "fr-checkbox qf-inline-grid qf-grid-cols-4 qf-gap-4" " qf-m-1w"
-                ),
+                "class": ("fr-checkbox qf-inline-grid qf-grid-cols-4 qf-gap-4 qf-m-1w"),
             },
         ),
         choices=[],
@@ -539,9 +541,7 @@ class AdvancedConfiguratorForm(forms.Form):
     action_list = forms.MultipleChoiceField(
         widget=DSFRCheckboxSelectMultiple(
             attrs={
-                "class": (
-                    "fr-checkbox qf-inline-grid qf-grid-cols-4 qf-gap-4" " qf-m-1w"
-                ),
+                "class": ("fr-checkbox qf-inline-grid qf-grid-cols-4 qf-gap-4 qf-m-1w"),
             },
         ),
         choices=[],
@@ -615,4 +615,31 @@ class AdvancedConfiguratorForm(forms.Form):
             '"lng":2.483596801757813}<br>}'
         ),
         required=False,
+    )
+
+
+class ViewModeForm(DsfrBaseForm):
+    class ViewModeSegmentedControlChoices(TextChoices, SegmentedControlChoices):
+        CARTE = {
+            "value": "carte",
+            "label": "Carte",
+            "icon": "map-pin-2-fill",
+        }
+        LISTE = {
+            "value": "liste",
+            "label": "Liste",
+            "icon": "list-unordered",
+        }
+
+    view = forms.ChoiceField(
+        label="",
+        choices=ViewModeSegmentedControlChoices.choices,
+        required=False,
+        initial=ViewModeSegmentedControlChoices.CARTE,
+        widget=SegmentedControl(
+            attrs={
+                "data-action": "search-solution-form#advancedSubmit",
+            },
+            extended_choices=ViewModeSegmentedControlChoices,
+        ),
     )
