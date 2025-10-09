@@ -25,17 +25,17 @@ class CustomBlockMixin(CommonStreamBlock):
     reusable = SnippetChooserBlock(
         "qfdmd.reusablecontent",
         label="Contenu réutilisable",
-        template="blocks/reusable.html",
+        template="ui/blocks/reusable.html",
     )
     carte_sur_mesure = SnippetChooserBlock(
         "qfdmo.CarteConfig",
         label="Carte sur mesure",
-        template="blocks/carte.html",
+        template="ui/blocks/carte.html",
     )
     liens = blocks.ListBlock(
         SnippetChooserBlock("qfdmd.Lien", label="Lien"),
         label="Liste de liens",
-        template="blocks/liens.html",
+        template="ui/blocks/liens.html",
     )
 
 
@@ -58,7 +58,7 @@ class TabsBlock(sites_faciles_blocks.TabsBlock):
 
 class Bonus(blocks.StaticBlock):
     class Meta:
-        template = "blocks/bonus.html"
+        template = "ui/blocks/bonus.html"
         label = "Bonus réparation"
 
 
@@ -70,7 +70,7 @@ STREAMFIELD_COMMON_BLOCKS = [
         SnippetChooserBlock(
             "qfdmd.reusablecontent",
             label="Contenu réutilisable",
-            template="blocks/reusable.html",
+            template="ui/blocks/reusable.html",
         ),
     ),
     (
@@ -78,7 +78,7 @@ STREAMFIELD_COMMON_BLOCKS = [
         SnippetChooserBlock(
             "qfdmo.CarteConfig",
             label="Carte sur mesure",
-            template="blocks/carte.html",
+            template="ui/blocks/carte.html",
         ),
     ),
     (
@@ -86,7 +86,7 @@ STREAMFIELD_COMMON_BLOCKS = [
         blocks.ListBlock(
             SnippetChooserBlock("qfdmd.Lien", label="Lien"),
             label="Liste de liens",
-            template="blocks/liens.html",
+            template="ui/blocks/liens.html",
         ),
     ),
     ("tabs", TabsBlock(label=_("Tabs"), group=_("DSFR components"))),
