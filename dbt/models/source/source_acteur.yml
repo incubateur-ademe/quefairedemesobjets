@@ -22,3 +22,8 @@ sources:
       - name : qfdmo_revisionpropositionservice_sous_categories
       - name : qfdmo_source
       - name : qfdmo_souscategorieobjet
+  - name: clone
+    schema: public
+    tables:
+      - name : clone_laposte_code_postal_in_use
+      - name : clone_koumoul_epci_in_use
