@@ -5,17 +5,6 @@ Notes:
  - 🧱 Only layer materialized as table (subsequent layers, because
   they JOIN with continuously changing QFDMO data are kept as views)
 */
-{{
-  config(
-    materialized = 'table',
-    tags=['intermediate', 'ae', 'annuaire_entreprises', 'unite_legale'],
-    indexes=[
-      {'columns': ['siren'], 'unique': True},
-      {'columns': ['est_actif']},
-      {'columns': ['a_dirigeant_noms_ou_prenoms_non_null']},
-    ],
-  )
-}}
 
 SELECT
     -- Codes

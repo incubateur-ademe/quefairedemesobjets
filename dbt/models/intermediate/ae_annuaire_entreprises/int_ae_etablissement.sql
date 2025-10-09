@@ -1,23 +1,9 @@
 /*
 Notes:
  - 🖊️ Renaming columns to follow our naming convention
- - 🧱 Only layer materialized as table (subsequent layers, because
-  they JOIN with continuously changing QFDMO data are kept as views)
+ - 🧱 We force tu use indexes `Merge Join` instead of `Hash Join`
+      to improve performance because siren has a high cardinality
 */
-{{
-  config(
-    materialized='table',
-    tags=['intermediate', 'ae', 'annuaire_entreprises', 'etablissement'],
-    indexes=[
-      {'columns': ['siret'], 'unique': True},
-      {'columns': ['est_actif']},
-      {'columns': ['code_postal']},
-    ],
-    post_hook=[
-      "CREATE INDEX ON {{ this }}(adresse_numero) WHERE adresse_numero IS NOT NULL"
-    ],
-  )
-}}
 
 SELECT
     -- Codes
@@ -56,14 +42,21 @@ SELECT
     etab.numero_voie AS adresse_numero,
     etab.complement_adresse AS adresse_complement,
     etab.code_postal,
-    etab.libelle_commune AS ville
+    etab.libelle_commune AS ville,
+    {{ target.schema }}.udf_normalize_string_for_match(
+      {{ target.schema }}.udf_columns_concat_unique_non_empty(
+        etab.numero_voie,
+        etab.type_voie,
+        etab.libelle_voie
+      )
+    ) AS adresse_normalize_string_for_match
 
 FROM {{ ref('base_ae_etablissement') }} AS etab
 /* Joining with unite_legale to bring some essential
 data from parent unite into each etablissement (saves
 us from making expensive JOINS in downstream models) */
 JOIN {{ ref('base_ae_unite_legale') }} AS unite
-ON unite.siren = LEFT(etab.siret,9)
+ON unite.siren = etab.siren
 /* Here we keep unavailable names as int_ models aren't
 responsible for business logic. Keeping allows investigating
 AND nom != {{ value_unavailable() }}

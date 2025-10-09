@@ -3,14 +3,9 @@ Notes:
  - 🛑 Excluding columns we don't use
  - 🧹 Converting '[ND]' (non-diffusile) to NULL to make
       our data lighter and easier to work with
- - 👁️‍🗨️ AE tables large (10Ms' rows) so only int layer as table
+ - 👁️‍🗨️ We need to materialize the table to have indexes on siren
+      because we already use vues in the request
 */
-{{
-  config(
-    materialized = 'view',
-    tags=['base', 'ae', 'annuaire_entreprises', 'unite_legale'],
-  )
-}}
 
 SELECT
 

@@ -1,5 +1,11 @@
 import pandas as pd
 import pytest
+from sources.tasks.transform.exceptions import (
+    ActeurServiceCodesWarning,
+    ActionCodesWarning,
+    AdresseWarning,
+    IdentifiantExterneError,
+)
 from sources.tasks.transform.transform_df import (
     clean_acteur_service_codes,
     clean_action_codes,
@@ -579,6 +585,7 @@ class TestCleanTelephone:
             ("33 1 23 45 67 89", "75001", "0123456789"),
             ("0612345678", "75001", "0612345678"),
             ("+33612345678", "75001", "+33612345678"),
+            ("fake", "75001", ""),
         ],
     )
     def test_clean_telephone(self, phone_number, code_postal, expected_phone_number):
@@ -638,11 +645,19 @@ class TestCleanIdentifiantExterne:
         result = clean_identifiant_externe(row, None)
         assert result["identifiant_externe"] == expected_identifiant_externe
 
-    def test_clean_identifiant_externe_raise(self):
-        row = pd.Series({"id": None, "nom": None})
-        with pytest.raises(ValueError) as erreur:
+    @pytest.mark.parametrize(
+        "identifiant_externe, nom",
+        [
+            (None, None),
+            (" ", None),
+            (None, " "),
+        ],
+    )
+    def test_clean_identifiant_externe_raise(self, identifiant_externe, nom):
+        row = pd.Series({"id": identifiant_externe, "nom": nom})
+        with pytest.raises(IdentifiantExterneError) as erreur:
             clean_identifiant_externe(row, None)
-        assert "id or nom" in str(erreur.value)
+        assert "`id` et/ou `nom`" in str(erreur.value)
 
 
 class TestCleanIdentifiantUnique:
@@ -794,6 +809,10 @@ class TestCleanAdresse:
         row = pd.Series({"adresse_format_ban": adresse_format_ban})
         assert dict(clean_adresse(row, dag_config)) == expected_adresse
 
+    def test_clean_adresse_warning(self, dag_config):
+        with pytest.raises(AdresseWarning):
+            clean_adresse(pd.Series({"adresse_format_ban": ""}), dag_config)
+
     def test_clean_adresse_with_ban(self, dag_config, mocker):
         def _get_address(_):
             # Mock implementation of _get_address
@@ -816,16 +835,16 @@ class TestCleanActeurserviceCodes:
     @pytest.mark.parametrize(
         "row_columns, expected_acteur_service_codes",
         [
-            ({}, []),
+            # ({}, []),
             ({"point_dapport_de_service_reparation": True}, ["service_de_reparation"]),
             (
                 {"point_dapport_de_service_reparation": "True"},
                 ["service_de_reparation"],
             ),
             ({"point_dapport_de_service_reparation": "oui"}, ["service_de_reparation"]),
-            ({"point_dapport_de_service_reparation": False}, []),
-            ({"point_dapport_de_service_reparation": "False"}, []),
-            ({"point_dapport_de_service_reparation": "non"}, []),
+            # ({"point_dapport_de_service_reparation": False}, []),
+            # ({"point_dapport_de_service_reparation": "False"}, []),
+            # ({"point_dapport_de_service_reparation": "non"}, []),
             ({"point_de_reparation": True}, ["service_de_reparation"]),
             ({"point_dapport_pour_reemploi": True}, ["structure_de_collecte"]),
             (
@@ -867,18 +886,31 @@ class TestCleanActeurserviceCodes:
         result = clean_acteur_service_codes(pd.Series(row_columns), None)
         assert result["acteur_service_codes"] == expected_acteur_service_codes
 
+    @pytest.mark.parametrize(
+        "row_columns",
+        [
+            {},
+            {"point_dapport_de_service_reparation": False},
+            {"point_dapport_de_service_reparation": "False"},
+            {"point_dapport_de_service_reparation": "non"},
+        ],
+    )
+    def test_clean_acteur_service_codes_warning(self, row_columns):
+        with pytest.raises(ActeurServiceCodesWarning):
+            clean_acteur_service_codes(pd.Series(row_columns), None)
+
 
 class TestCleanActionCodes:
     @pytest.mark.parametrize(
         "row_columns, expected_action_codes, expected_action_codes_returnable_objects",
         [
-            ({}, [], []),
+            # ({}, [], []),
             ({"point_dapport_de_service_reparation": True}, ["reparer"], ["reparer"]),
             ({"point_dapport_de_service_reparation": "True"}, ["reparer"], ["reparer"]),
             ({"point_dapport_de_service_reparation": "oui"}, ["reparer"], ["reparer"]),
-            ({"point_dapport_de_service_reparation": False}, [], []),
-            ({"point_dapport_de_service_reparation": "False"}, [], []),
-            ({"point_dapport_de_service_reparation": "non"}, [], []),
+            # ({"point_dapport_de_service_reparation": False}, [], []),
+            # ({"point_dapport_de_service_reparation": "False"}, [], []),
+            # ({"point_dapport_de_service_reparation": "non"}, [], []),
             ({"point_de_reparation": True}, ["reparer"], ["reparer"]),
             ({"point_dapport_pour_reemploi": True}, ["donner"], ["rapporter"]),
             (
@@ -911,6 +943,19 @@ class TestCleanActionCodes:
         dag_config.returnable_objects = True
         result = clean_action_codes(pd.Series(row_columns), dag_config)
         assert result["action_codes"] == expected_action_codes_returnable_objects
+
+    @pytest.mark.parametrize(
+        "row_columns",
+        [
+            {},
+            {"point_dapport_de_service_reparation": False},
+            {"point_dapport_de_service_reparation": "False"},
+            {"point_dapport_de_service_reparation": "non"},
+        ],
+    )
+    def test_clean_action_codes_warning(self, row_columns):
+        with pytest.raises(ActionCodesWarning):
+            clean_action_codes(pd.Series(row_columns), None)
 
 
 class TestCleanLabelCodes:

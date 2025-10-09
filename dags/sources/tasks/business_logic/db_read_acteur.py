@@ -5,7 +5,6 @@ from sources.tasks.airflow_logic.config_management import DAGConfig
 from utils import logging_utils as log
 from utils.django import django_setup_full, get_model_fields
 
-# Setup Django avant import des modèles
 django_setup_full()
 
 

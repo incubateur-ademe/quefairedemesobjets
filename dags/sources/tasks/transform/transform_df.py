@@ -8,6 +8,15 @@ from fuzzywuzzy import fuzz
 from shapely import wkb
 from shapely.geometry import Point
 from sources.tasks.airflow_logic.config_management import DAGConfig
+from sources.tasks.transform.exceptions import (
+    ActeurServiceCodesWarning,
+    ActionCodesWarning,
+    AdresseWarning,
+    GeopointWarning,
+    IdentifiantExterneError,
+    IdentifiantUniqueError,
+    TelephoneWarning,
+)
 from sources.tasks.transform.formatter import format_libelle_to_code
 from sources.tasks.transform.transform_column import (
     cast_eo_boolean_or_string_to_boolean,
@@ -126,10 +135,11 @@ def _merge_proposition_service_columns(group):
 
 
 def clean_telephone(row: pd.Series, _):
+    # FIXME : check if we can interprete the column like a telephone number ?
     telephone_column = list(row.keys())[0]
     number = clean_number(row[telephone_column])
 
-    if number is None:
+    if not number:
         row[["telephone"]] = ""
         return row[["telephone"]]
 
@@ -140,13 +150,15 @@ def clean_telephone(row: pd.Series, _):
         number = "0" + number[2:]
 
     if len(number) < 6:
-        number = ""
+        raise TelephoneWarning(
+            f"Le numéro de téléphone n'a pas pu être déduit : {row[telephone_column]}"
+        )
 
     row["telephone"] = number
     return row[["telephone"]]
 
 
-def clean_siret_and_siren(row, _):
+def clean_siret_and_siren(row: pd.Series, _) -> pd.Series:
     if "siret" in row:
         row["siret"] = clean_siret(row["siret"])
     else:
@@ -165,14 +177,20 @@ def clean_identifiant_externe(row, _):
     identifiant_externe_column = list(row.keys())[0]
     if not row[identifiant_externe_column] and "nom" in row:
         if not row["nom"]:
-            raise ValueError(
-                f"{identifiant_externe_column} or nom is required to generate"
-                " identifiant_externe"
+            raise IdentifiantExterneError(
+                f"L'identifiant externe est requis, il n'a pas pu être déduite des"
+                f" colonnes `{identifiant_externe_column}` et/ou `nom`"
             )
         row[identifiant_externe_column] = (
-            row["nom"].replace("-", "").replace(" ", "_").replace("__", "_")
+            row["nom"].strip().replace("-", "").replace(" ", "_").replace("__", "_")
         )
     row["identifiant_externe"] = str(row[identifiant_externe_column]).strip()
+
+    if not row["identifiant_externe"]:
+        raise IdentifiantExterneError(
+            f"L'identifiant externe est requis, il n'a pas pu être déduite des colonnes"
+            f" `{identifiant_externe_column}` et/ou `nom`"
+        )
 
     if "acteur_type_code" in row and row["acteur_type_code"] == ACTEUR_TYPE_DIGITAL:
         row["identifiant_externe"] += "_d"
@@ -182,6 +200,12 @@ def clean_identifiant_externe(row, _):
 
 def compute_identifiant_unique(identifiant_externe, source_code):
     unique_str = str(identifiant_externe).replace("/", "-").strip()
+    if not unique_str:
+        raise IdentifiantUniqueError(
+            "L'identifiant unique est requis, il n'a pas pu être déduit des colonnes"
+            f" `identifiant_externe` : `{identifiant_externe}`"
+            f" et/ou `source_code`  : `{source_code}`"
+        )
     return source_code.lower() + "_" + unique_str
 
 
@@ -203,12 +227,13 @@ def merge_sous_categories_columns(row, _):
 
 
 def clean_adresse(row, dag_config):
-    row["adresse"] = row["adresse_format_ban"]
     address = postal_code = city = ""
     if dag_config.validate_address_with_ban:
         address, postal_code, city = _get_address(row["adresse_format_ban"])
     else:
         address, postal_code, city = _extract_details(row["adresse_format_ban"])
+    if not address and not postal_code and not city:
+        raise AdresseWarning(f"Adresse n'a pas pu être déduit : {row}")
     row["adresse"] = address
     row["code_postal"] = postal_code
     row["ville"] = city
@@ -233,6 +258,10 @@ def clean_acteur_service_codes(row, _):
         acteur_service_codes.append("service_de_reparation")
     if point_dapport_pour_reemploi or point_de_collecte_ou_de_reprise_des_dechets:
         acteur_service_codes.append("structure_de_collecte")
+    if not acteur_service_codes:
+        raise ActeurServiceCodesWarning(
+            f"Acteur service n'a pas pu être déduit : {row}"
+        )
     row["acteur_service_codes"] = acteur_service_codes
     return row[["acteur_service_codes"]]
 
@@ -261,6 +290,8 @@ def clean_action_codes(row, dag_config: DAGConfig):
             action_codes.append("donner")
     if point_de_collecte_ou_de_reprise_des_dechets:
         action_codes.append("trier")
+    if not action_codes:
+        raise ActionCodesWarning(f"Action codes n'a pas pu être déduit : {row}")
     row["action_codes"] = action_codes
     return row[["action_codes"]]
 
@@ -287,12 +318,16 @@ def clean_label_codes(row, dag_config):
             continue
         label_codes.append(label_ou_bonus)
 
+    # FIXME : check if label_codes belong to qfdmo.LabelQualite ?
+
     row["label_codes"] = label_codes
     return row[["label_codes"]]
 
 
 def get_latlng_from_geopoint(row: pd.Series, _) -> pd.Series:
     # GEO
+    if not row["_geopoint"]:
+        raise GeopointWarning("La colonne _geopoint est requise")
     geopoint = row["_geopoint"].split(",")
     row["latitude"] = float(geopoint[0].strip())
     row["longitude"] = float(geopoint[1].strip())

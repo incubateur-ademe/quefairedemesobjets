@@ -680,6 +680,8 @@ class BaseActeur(TimestampedModel):
             "acteur_services",
             "labels",
             "perimetre_adomiciles",
+            "suggestion_groupes",
+            "suggestion_unitaires",
         }
 
     def commentaires_ajouter(self, added):
