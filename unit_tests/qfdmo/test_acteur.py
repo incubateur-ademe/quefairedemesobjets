@@ -124,27 +124,17 @@ class TestActeurDefaultOnSave:
 
 @pytest.mark.django_db
 class TestActeurOpeningHours:
-    def test_horaires_ok(self):
-        acteur_type = ActeurTypeFactory(code="fake")
-        acteur = Acteur(
-            nom="Test Object 1",
-            acteur_type_id=acteur_type.id,
-            location=Point(1, 1),
-        )
-        assert acteur.full_clean() is None
-        acteur.horaires = ""
-        assert acteur.full_clean() is None
-        acteur.horaires = "24/7"
-        assert acteur.full_clean() is None
-        acteur.horaires = "Mo-Fr 09:00-12:00,13:00-18:00; Sa 09:00-12:00"
+
+    @pytest.mark.parametrize(
+        "horaires_osm",
+        ["", "24/7", "Mo-Fr 09:00-12:00,13:00-18:00; Sa 09:00-12:00", "__empty__"],
+    )
+    def test_horaires_ok(self, horaires_osm):
+        acteur = ActeurFactory(horaires_osm=horaires_osm)
         assert acteur.full_clean() is None
 
     def test_horaires_ko(self):
-        acteur = Acteur(
-            nom="Test Object 1",
-            location=Point(1, 1),
-        )
-        acteur.horaires_osm = "24/24"
+        acteur = ActeurFactory(horaires_osm="24/24")
         with pytest.raises(ValidationError):
             acteur.full_clean()
 

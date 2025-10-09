@@ -220,6 +220,8 @@ class Source(CodeAsNaturalKeyModel):
 
 
 def validate_opening_hours(value):
+    if value and value == EMPTY_ACTEUR_FIELD:
+        return
     if value and not opening_hours.validate(value):
         raise ValidationError(
             ("%(value)s is not an valid opening hours"),
