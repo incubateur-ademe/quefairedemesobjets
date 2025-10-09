@@ -91,7 +91,7 @@ SELECT
   da.adresse_complement as "complement_dadresse",
   da.code_postal as "code_postal",
   da.ville as "ville",
-  epci.code_commune as "code_commune",
+  epci.code_commune_insee as "code_commune",
   epci.code_epci as "code_epci",
   ST_Y(da.location::geometry) as "latitude",
   ST_X(da.location::geometry) as "longitude",

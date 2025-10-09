@@ -12,7 +12,7 @@ WITH acteur_with_best_match AS (
     ROW_NUMBER() OVER (
       PARTITION BY acteur.identifiant_unique
       ORDER BY SIMILARITY(UPPER(UNACCENT(acteur.ville)), REPLACE(UPPER(UNACCENT(epci.nom_commune)), ' ARRONDISSEMENT', '')) DESC
-    ) as rn
+    ) as rank
   FROM {{ ref('marts_opendata_acteur') }} AS acteur
   LEFT JOIN {{ source('clone','clone_laposte_code_postal_in_use') }} AS laposte
     ON acteur.code_postal = laposte.code_postal
