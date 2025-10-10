@@ -6,4 +6,5 @@ Cette section contient des tutoriels pour gérer l'administration de la platefor
 :maxdepth: 2
 
 update-ext-id.md
+admin_command.md
 ```
