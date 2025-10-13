@@ -4,12 +4,11 @@ DAG to clone LAPOSTE's codes_postaux table in our DB.
 cf. https://www.data.gouv.fr/datasets/base-officielle-des-codes-postaux/
 """
 
-import pendulum
 from airflow import DAG
 from airflow.models.param import Param
 from clone.tasks.airflow_logic.chain_tasks import chain_tasks
-from shared.config.catchups import CATCHUPS
 from shared.config.schedules import SCHEDULES
+from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
 
 with DAG(
@@ -22,9 +21,8 @@ with DAG(
         "email_on_retry": False,
         "retries": 0,
     },
-    schedule=SCHEDULES.MONTHLY,
-    catchup=CATCHUPS.AWLAYS_FALSE,
-    start_date=pendulum.datetime(2025, 10, 1, tz="UTC"),
+    schedule=SCHEDULES.EVERY_SUNDAY_AT_02_00,
+    start_date=START_DATES.DEFAULT,
     description=("Clone le jeu de données 'code postal' de LAPOSTE dans notre DB"),
     tags=[
         TAGS.ENRICH,

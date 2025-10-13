@@ -28,7 +28,7 @@ dbt_test = "dbt test --resource-type model --select"
 with DAG(
     "compute_acteurs",
     default_args=default_args,
-    start_date=START_DATES.YESTERDAY,
+    start_date=START_DATES.DEFAULT,
     dag_display_name="Acteurs affichés - Rafraîchir les acteurs affichés",
     description=(
         "Ce DAG construit les tables des acteurs utilisables par l'admin"
@@ -36,7 +36,7 @@ with DAG(
         " par l'export des acteurs en open-data."
     ),
     tags=[TAGS.COMPUTE, TAGS.ACTEURS, TAGS.CARTE, TAGS.OPENDATA, TAGS.DBT],
-    schedule=SCHEDULES.DAILY,
+    schedule=SCHEDULES.EVERY_DAY_AT_00_00,
     max_active_runs=1,
 ) as dag:
     dbt_run_base_acteurs = BashOperator(

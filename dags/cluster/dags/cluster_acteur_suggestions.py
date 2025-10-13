@@ -6,11 +6,8 @@ from cluster.config.constants import FIELDS_PARENT_DATA_EXCLUDED
 from cluster.config.model import ClusterConfig
 from cluster.tasks.airflow_logic.chain_tasks import chain_tasks
 from cluster.ui import params_separators as UI_PARAMS_SEPARATORS
-from shared.config.catchups import CATCHUPS
-from shared.config.schedules import SCHEDULES
 from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
-
 from utils.airflow_params import airflow_params_dropdown_from_mapping
 from utils.django import django_model_fields_get, django_setup_full
 
@@ -304,9 +301,7 @@ with DAG(
         "email_on_retry": False,
         "retries": 0,
     },
-    start_date=START_DATES.YESTERDAY,
-    catchup=CATCHUPS.AWLAYS_FALSE,
-    schedule=SCHEDULES.NONE,
+    start_date=START_DATES.DEFAULT,
     description=("Un DAG pour générer des suggestions de clustering pour les acteurs"),
     tags=[TAGS.CLUSTER, TAGS.ACTEURS, TAGS.SUGGESTIONS, TAGS.CLUSTERING],
     params=PARAMS,

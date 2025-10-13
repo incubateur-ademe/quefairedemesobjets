@@ -29,7 +29,7 @@ with DAG(
     dag_display_name="[TEST] Les logs Airflow sont enregistrés sur s3",
     tags=[TAGS.DEV_TOOLS],
     default_args=default_args,
-    start_date=START_DATES.YESTERDAY,
+    start_date=START_DATES.DEFAULT,
     description=(
         """
 Lancer le DAG et vérifier que les logs sont disponibles sur s3

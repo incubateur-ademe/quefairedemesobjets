@@ -7,7 +7,6 @@ cf. https://opendata.koumoul.com/datasets/communes-de-france/full
 from airflow import DAG
 from airflow.models.param import Param
 from clone.tasks.airflow_logic.chain_tasks import chain_tasks
-from shared.config.catchups import CATCHUPS
 from shared.config.schedules import SCHEDULES
 from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
@@ -22,9 +21,8 @@ with DAG(
         "email_on_retry": False,
         "retries": 0,
     },
-    schedule=SCHEDULES.NONE,
-    catchup=CATCHUPS.AWLAYS_FALSE,
-    start_date=START_DATES.YESTERDAY,
+    schedule=SCHEDULES.EVERY_SUNDAY_AT_01_00,
+    start_date=START_DATES.DEFAULT,
     description=("Clone le jeu de données 'epci' de Koumoul dans notre DB"),
     tags=[
         TAGS.ENRICH,

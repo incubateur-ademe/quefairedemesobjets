@@ -14,9 +14,7 @@ from enrich.tasks.airflow_logic.enrich_dbt_model_suggest_task import (
 from enrich.tasks.airflow_logic.enrich_dbt_models_refresh_task import (
     enrich_dbt_models_refresh_task,
 )
-from shared.config.catchups import CATCHUPS
 from shared.config.models import config_to_airflow_params
-from shared.config.schedules import SCHEDULES
 from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
 
@@ -32,9 +30,7 @@ with DAG(
     },
     description=("Un DAG pour suggérer des corrections de villes"),
     tags=[TAGS.ENRICH, TAGS.ANNAIRE_ENTREPRISE, TAGS.ACTEURS, TAGS.CP, TAGS.VILLES],
-    schedule=SCHEDULES.NONE,
-    catchup=CATCHUPS.AWLAYS_FALSE,
-    start_date=START_DATES.YESTERDAY,
+    start_date=START_DATES.DEFAULT,
     params=config_to_airflow_params(
         EnrichActeursVillesConfig(
             dbt_models_refresh=True,

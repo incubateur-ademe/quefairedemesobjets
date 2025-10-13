@@ -8,12 +8,11 @@ cf. https://www.data.gouv.fr/datasets/code-officiel-geographique-cog/
 cf. https://explore.data.gouv.fr/fr/datasets/58c984b088ee386cdb1261f3/#/resources/91a95bee-c7c8-45f9-a8aa-f14cc4697545
 """
 
-import pendulum
 from airflow import DAG
 from airflow.models.param import Param
 from clone.tasks.airflow_logic.chain_tasks import chain_tasks
-from shared.config.catchups import CATCHUPS
 from shared.config.schedules import SCHEDULES
+from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
 
 with DAG(
@@ -26,9 +25,8 @@ with DAG(
         "email_on_retry": False,
         "retries": 0,
     },
-    schedule=SCHEDULES.MONTHLY,
-    catchup=CATCHUPS.AWLAYS_FALSE,
-    start_date=pendulum.datetime(2025, 10, 1, tz="UTC"),
+    schedule=SCHEDULES.EVERY_SUNDAY_AT_00_00,
+    start_date=START_DATES.DEFAULT,
     description=("Clone le jeu de données 'commune' de INSEE dans notre DB"),
     tags=[
         TAGS.ENRICH,

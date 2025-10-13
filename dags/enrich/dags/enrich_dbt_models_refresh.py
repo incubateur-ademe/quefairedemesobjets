@@ -8,7 +8,6 @@ from airflow.models.baseoperator import chain
 from airflow.operators.bash import BashOperator
 from airflow.utils.trigger_rule import TriggerRule
 from enrich.config.models import EnrichDbtModelsRefreshConfig
-from shared.config.catchups import CATCHUPS
 from shared.config.models import config_to_airflow_params
 from shared.config.schedules import SCHEDULES
 from shared.config.start_dates import START_DATES
@@ -31,9 +30,8 @@ with DAG(
         "à l'enrichissement des acteurs"
     ),
     tags=[TAGS.ENRICH, TAGS.ANNAIRE_ENTREPRISE, TAGS.BAN, TAGS.PREPARE, TAGS.DBT],
-    schedule=SCHEDULES.DAILY,
-    catchup=CATCHUPS.AWLAYS_FALSE,
-    start_date=START_DATES.YESTERDAY,
+    schedule=SCHEDULES.EVERY_DAY_AT_00_00,
+    start_date=START_DATES.DEFAULT,
     params=config_to_airflow_params(
         EnrichDbtModelsRefreshConfig(
             dbt_models_refresh_commands=[
