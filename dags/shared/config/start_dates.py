@@ -13,4 +13,4 @@ import pendulum
 
 @dataclass(frozen=True)
 class START_DATES:
-    YESTERDAY: datetime = pendulum.today("UTC").add(days=-1)
+    DEFAULT: datetime = pendulum.datetime(2025, 8, 1, tz="UTC")

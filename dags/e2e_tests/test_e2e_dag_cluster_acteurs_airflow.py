@@ -56,7 +56,7 @@ class TestClusterDedupSkipped:
         """DAG run should stop at config because data acteurs data available"""
         from dags.cluster.dags.cluster_acteur_suggestions import dag
 
-        dag.test(execution_date=START_DATES.YESTERDAY, run_conf=conf)
+        dag.test(execution_date=START_DATES.DEFAULT, run_conf=conf)
         tis = dag.get_task_instances()
 
         # Conf was sucesssfully created and some of the calculated
@@ -129,7 +129,7 @@ class TestClusterDedupSkipped:
             source=s1,
         ).save()
 
-        dag.test(execution_date=START_DATES.YESTERDAY, run_conf=conf)
+        dag.test(execution_date=START_DATES.DEFAULT, run_conf=conf)
         tis = dag.get_task_instances()
 
         # Tasks which should have completed successfully

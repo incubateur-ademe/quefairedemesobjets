@@ -13,7 +13,6 @@ from airflow.operators.bash import BashOperator
 from airflow.utils.db import reflect_tables
 from airflow.utils.db_cleanup import _effective_table_names
 from airflow.utils.session import NEW_SESSION, provide_session
-from shared.config.catchups import CATCHUPS
 from shared.config.schedules import SCHEDULES
 from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
@@ -28,9 +27,8 @@ DAYS_TO_KEEP = 7
 @dag(
     dag_id="airflow_cleanup_db",
     dag_display_name="Maintenance - Airflow - Nettoyer la DB (XCOM, logs, etc.)",
-    schedule=SCHEDULES.DAILY,
-    start_date=START_DATES.YESTERDAY,
-    catchup=CATCHUPS.AWLAYS_FALSE,
+    schedule=SCHEDULES.EVERY_DAY_AT_00_00,
+    start_date=START_DATES.DEFAULT,
     is_paused_upon_creation=False,
     render_template_as_native_obj=True,
     max_active_tasks=1,

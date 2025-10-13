@@ -4,8 +4,6 @@ from enrich.tasks.airflow_logic.db_write_cp_suggestions_task import (
     db_write_cp_suggestions_task,
 )
 from enrich.tasks.airflow_logic.normalize_acteur_cp_task import normalize_acteur_cp_task
-from shared.config.catchups import CATCHUPS
-from shared.config.schedules import SCHEDULES
 from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
 
@@ -24,9 +22,7 @@ with DAG(
         " à la norme et proposer une correction le cas échéant"
     ),
     tags=[TAGS.ENRICH, TAGS.ACTEURS, TAGS.CP],
-    schedule=SCHEDULES.NONE,
-    catchup=CATCHUPS.AWLAYS_FALSE,
-    start_date=START_DATES.YESTERDAY,
+    start_date=START_DATES.DEFAULT,
 ) as dag:
     db_read_acteur_cp = db_read_acteur_cp_task(dag)
     acteur_cp_normalize = normalize_acteur_cp_task(dag)
