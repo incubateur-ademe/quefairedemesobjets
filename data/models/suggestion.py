@@ -358,12 +358,10 @@ class Suggestion(TimestampedModel):
             code=self.suggestion.get("acteur_type_code")
         )
         acteur.save()
-
         self._remove_acteur_linked_objects(acteur)
         self._create_acteur_linked_objects(acteur)
 
     def apply(self):
-
         # Suggestions leveraging the PYDANTIC SuggestionChange model
         if self.suggestion_cohorte.type_action in [
             SuggestionAction.CLUSTERING,
