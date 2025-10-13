@@ -33,7 +33,7 @@ default_args = {
 default_params = {
     "schedule": None,
     "max_active_runs": 1,
-    "start_date": START_DATES.YESTERDAY,
+    "start_date": START_DATES.DEFAULT,
 }
 
 

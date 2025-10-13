@@ -1,7 +1,9 @@
 WITH deduplicated_opened_sources AS (
   SELECT
     da.uuid,
-    string_agg(DISTINCT source.libelle, '|' ORDER BY source.libelle) as sources_list
+    string_agg(DISTINCT source.libelle, '|' ORDER BY source.libelle) as sources_list,
+    -- from marts_opendata_acteur_sources, get json with source_code:identifiant_externe
+    jsonb_agg(jsonb_build_object(source.libelle, das.identifiant_externe)) as identifiants_par_source
   FROM {{ ref('marts_opendata_acteur') }}  AS da
   LEFT JOIN {{ ref('marts_opendata_acteur_sources') }} AS das
     ON da.identifiant_unique = das.acteur_id
@@ -69,6 +71,7 @@ SELECT
     THEN 'Longue Vie Aux Objets|ADEME|' || ds.sources_list
     ELSE 'Longue Vie Aux Objets|ADEME'
   END as "paternite",
+  ds.identifiants_par_source as "identifiants_des_contributeurs",
   da.nom as "nom",
   da.nom_commercial as "nom_commercial",
   da.siren as "siren",
@@ -91,6 +94,8 @@ SELECT
   da.adresse_complement as "complement_dadresse",
   da.code_postal as "code_postal",
   da.ville as "ville",
+  epci.code_commune_insee as "code_commune",
+  epci.code_epci as "code_epci",
   ST_Y(da.location::geometry) as "latitude",
   ST_X(da.location::geometry) as "longitude",
   al.labels as "qualites_et_labels",
@@ -124,4 +129,5 @@ LEFT JOIN proposition_services AS ps ON da.uuid = ps.uuid
 LEFT JOIN acteur_labels AS al ON da.uuid = al.uuid
 LEFT JOIN acteur_services AS acs ON da.uuid = acs.uuid
 LEFT JOIN perimetreadomicile AS pad ON da.identifiant_unique = pad.acteur_id
+LEFT JOIN {{ ref('marts_opendata_acteur_epci') }} AS epci ON da.identifiant_unique = epci.identifiant_unique
 ORDER BY da.uuid

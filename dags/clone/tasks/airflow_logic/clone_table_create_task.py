@@ -6,7 +6,6 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from clone.config import TASKS, XCOMS, CloneConfig, xcom_pull
 from clone.tasks.business_logic.clone_table_create import clone_table_create
-
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
@@ -43,6 +42,7 @@ def clone_table_create_wrapper(ti) -> None:
         delimiter=config.delimiter,
         table_name=config.table_name,
         table_schema_file_path=config.table_schema_file_path,
+        convert_downloaded_file_to_utf8=config.convert_downloaded_file_to_utf8,
         dry_run=config.dry_run,
     )
 

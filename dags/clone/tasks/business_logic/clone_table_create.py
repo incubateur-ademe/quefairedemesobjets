@@ -1,10 +1,10 @@
 """Creates the actual tables replicating AE in our DB"""
 
 import logging
+import tempfile
 from pathlib import Path
 
 from pydantic import AnyUrl
-
 from utils import logging_utils as log
 from utils.cmd import cmd_run
 from utils.django import django_schema_create_and_check, django_setup_full
@@ -31,108 +31,80 @@ def commands_stream_directly(
     data_endpoint: AnyUrl,
     delimiter: str,
     table_name: str,
-) -> tuple[list[dict], dict]:
+    dry_run: bool,
+):
     """Commands to create table while streaming directly to DB (no disk)"""
 
-    cmds_create = []
-    cmd_cleanup = {"cmd": "echo 'Pas de nettoyage requis en streaming'"}
+    logger.info("Pas de nettoyage requis en streaming")
 
     cmd_psql = command_psql_copy(table_name=table_name, delimiter=delimiter)
-    cmds_create.append(
-        {
-            "cmd": (f"curl -s {data_endpoint} | " "zcat | " f"{cmd_psql}"),
-        }
-    )
-
-    return cmds_create, cmd_cleanup
+    if str(data_endpoint).endswith(".gz") or str(data_endpoint).endswith(".zip"):
+        cmd_run(f"curl -s '{data_endpoint}' | zcat | " f"{cmd_psql}", dry_run=dry_run)
+    else:
+        cmd_run(f"curl -s '{data_endpoint}' | {cmd_psql}", dry_run=dry_run)
 
 
 def commands_download_to_disk_first(
     data_endpoint: AnyUrl,
     file_downloaded: str,
-    file_unpacked: str,
+    file_unpacked: str | None,
     delimiter: str,
     table_name: str,
-) -> tuple[list[dict], dict]:
+    convert_downloaded_file_to_utf8: bool,
+    dry_run: bool,
+):
     """Commands to create table while first dowloading to disk"""
+
+    file_unpacked = file_unpacked or file_downloaded
 
     # File download and unpacking: all done within a temporary folder
     # so cleanup is easier AND to avoid collisions (table name contains timestamp)
-    # FIXME : use tempfile directory or file
-    folder = f"/tmp/{table_name}"
-    cmds_create = []
-
-    # Create folder to hold temporary files
-    cmds_create.append(f"mkdir {folder}")
-
-    # Download to folder
-    cmds_create.append(f"curl -sSL {data_endpoint} -o {folder}/{file_downloaded}")
-
-    # Unpack the file
-    if str(data_endpoint).endswith(".zip"):
-        cmds_create.append(f"unzip {folder}/{file_downloaded} -d {folder}/")
-    elif str(data_endpoint).endswith(".gz"):
-        cmds_create.append(
-            f"gunzip -c {folder}/{file_downloaded} > {folder}/{file_unpacked}"
+    with tempfile.TemporaryDirectory() as folder:
+        # Download to folder
+        cmd_run(
+            f"curl -sSL {data_endpoint} -o {folder}/{file_downloaded}", dry_run=dry_run
         )
-    elif str(data_endpoint).endswith(".csv"):
-        pass
-    else:
-        raise NotImplementedError(f"URL non supportée: {data_endpoint}")
 
-    # Check the unpacked file
-    cmds_create.append(f"wc -l {folder}/{file_unpacked}")
+        # Unpack the file
+        if str(file_downloaded).endswith(".zip"):
+            cmd_run(f"unzip {folder}/{file_downloaded} -d {folder}/", dry_run=dry_run)
+        if str(file_downloaded).endswith(".gz"):
+            cmd_run(
+                f"gunzip -c {folder}/{file_downloaded} > {folder}/{file_unpacked}",
+                dry_run=dry_run,
+            )
 
-    # Convert commands so far into results format
-    cmds_create = [{"cmd": cmd, "env": {}} for cmd in cmds_create]
+        # Check the unpacked file
+        cmd_run(f"wc -l {folder}/{file_unpacked}", dry_run=dry_run)
 
-    # Load into DB
-    cmd_psql = command_psql_copy(table_name=table_name, delimiter=delimiter)
-    cmds_create.append(
-        {
-            "cmd": (f"cat {folder}/{file_unpacked} | " f"{cmd_psql}"),
-        }
-    )
+        # Load into DB
+        cmd_psql = command_psql_copy(table_name=table_name, delimiter=delimiter)
+        if convert_downloaded_file_to_utf8:
+            file_converted = file_unpacked.replace(".csv", "_utf8.csv")
+            cmd_run(
+                "iconv -f ISO-8859-1 -t UTF-8"
+                f" {folder}/{file_unpacked} > {folder}/{file_converted}",
+                dry_run=dry_run,
+            )
+            file_unpacked = file_converted
 
-    # Cleanup
-    cmd_cleanup = {"cmd": f"rm -rf {folder}", "env": {}}
-
-    return cmds_create, cmd_cleanup
-
-
-def commands_run(
-    cmds_create: list[dict],
-    cmd_cleanup: dict,
-    dry_run: bool,
-):
-
-    # Trying creation commands
-    error = None
-    for command in cmds_create:
-        try:
-            cmd_run(command["cmd"], dry_run=dry_run)
-        except Exception as e:
-            logger.error(e)
-            error = str(e)
-            break
-
-    # Cleanup: always performing to avoid leaving a mess on server
-    cmd_run(cmd_cleanup["cmd"], dry_run=dry_run)
-
-    if error:
-        raise SystemError(f"Erreur rencontrée: {error}")
+        # Load into DB
+        cmd_run(f"cat {folder}/{file_unpacked} | {cmd_psql}", dry_run=dry_run)
 
 
 def clone_table_create(
     data_endpoint: AnyUrl,
     clone_method: str,
-    file_downloaded: str,
-    file_unpacked: str,
+    file_downloaded: str | None,
+    file_unpacked: str | None,
     delimiter: str,
     table_name: str,
     table_schema_file_path: Path,
+    convert_downloaded_file_to_utf8: bool,
     dry_run: bool,
 ) -> None:
+    from django.db import connections
+
     """Create a table in the DB from a CSV file downloaded via URL"""
 
     logger.info(log.banner_string(f"Création du schema de la table {table_name}"))
@@ -148,28 +120,29 @@ def clone_table_create(
 
         # Get commands based on the create method
         if clone_method == "download_to_disk_first":
-            cmds_create, cmd_cleanup = commands_download_to_disk_first(
+            if file_downloaded is None:
+                raise ValueError(
+                    "file_downloaded is required for download_to_disk_first"
+                )
+
+            commands_download_to_disk_first(
                 data_endpoint=data_endpoint,
                 file_downloaded=file_downloaded,
                 file_unpacked=file_unpacked,
                 delimiter=delimiter,
                 table_name=table_name,
+                convert_downloaded_file_to_utf8=convert_downloaded_file_to_utf8,
+                dry_run=dry_run,
             )
         elif clone_method == "stream_directly":
-            cmds_create, cmd_cleanup = commands_stream_directly(
+            commands_stream_directly(
                 data_endpoint=data_endpoint,
                 delimiter=delimiter,
                 table_name=table_name,
+                dry_run=dry_run,
             )
         else:
             raise ValueError(f"Méthode {clone_method=} invalide")
-
-        # Run the commands
-        commands_run(
-            cmds_create=cmds_create,
-            cmd_cleanup=cmd_cleanup,
-            dry_run=dry_run,
-        )
 
         # Final log
         logger.info(log.banner_string("🏁 Résultat final de la tâche"))
@@ -180,9 +153,9 @@ def clone_table_create(
 
     # If anything went wrong = delete schema if it exists
     except Exception as e:
-        from django.db import connection
-
         logger.error(log.banner_string(f"❌ Erreur rencontrée: {e}"))
         logger.error(f"On supprime la table {table_name} si créée")
+        connection = connections["warehouse"]
         with connection.cursor() as cursor:
             cursor.execute(f"DROP TABLE IF EXISTS {table_name};")
+        raise e

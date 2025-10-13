@@ -16,7 +16,6 @@ with DAG(
     dag_id="template_read_db",
     dag_display_name="Template - Read DB",
     schedule=None,
-    catchup=False,
     tags=["template"],
 ) as dag:
 
@@ -77,7 +76,7 @@ class TestE2ETemplateReadDb:
         # on Oct 2024 for Airflow 3:
         # https://github.com/apache/airflow/pull/42761
         dag.test(
-            execution_date=START_DATES.YESTERDAY,
+            execution_date=START_DATES.DEFAULT,
             # Values put here will be available under "params"
             # argument of Airflow task functions
             run_conf={

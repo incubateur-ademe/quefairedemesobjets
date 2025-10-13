@@ -1,12 +1,15 @@
 from datetime import timedelta
 
-import pendulum
 from acteurs.tasks.airflow_logic.export_opendata_csv_to_s3_task import (
     export_opendata_csv_to_s3_task,
+)
+from acteurs.tasks.airflow_logic.remove_old_s3_opendata_csv_task import (
+    remove_old_s3_opendata_csv_task,
 )
 from airflow import DAG
 from decouple import config
 from shared.config.schedules import SCHEDULES
+from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
 
 ENVIRONMENT = config("ENVIRONMENT", default="development")
@@ -24,7 +27,7 @@ default_args = {
 with DAG(
     "export_opendata_dag",
     default_args=default_args,
-    start_date=pendulum.datetime(2025, 8, 1, tz="UTC"),
+    start_date=START_DATES.DEFAULT,
     dag_display_name="Acteurs Open-Data - Exporter les Acteurs en Open-Data",
     description=(
         "Ce DAG export les acteurs disponibles en opendata précédemment générés dans la"
@@ -37,8 +40,8 @@ with DAG(
         "s3_connection_id": "s3data",
         "opendata_table": "exposure_opendata_acteur",
     },
-    schedule=SCHEDULES.WEEKLY_AT_1AM,
+    schedule=SCHEDULES.EVERY_MONDAY_AT_01_00,
     max_active_runs=1,
 ) as dag:
 
-    export_opendata_csv_to_s3_task(dag=dag)
+    export_opendata_csv_to_s3_task(dag=dag) >> remove_old_s3_opendata_csv_task(dag=dag)
