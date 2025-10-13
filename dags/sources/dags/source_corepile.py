@@ -27,11 +27,11 @@ with DAG(
         "normalization_rules": EO_NORMALIZATION_RULES,
         "endpoint": (
             "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"
-            "donnees-eo-corepile/lines?size=10000"
+            "donnees-eo-corepile-ecosystem/lines?size=10000"
         ),
         "metadata_endpoint": (
             "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"
-            "donnees-eo-corepile/schema"
+            "donnees-eo-corepile-ecosystem/schema"
         ),
         "validate_address_with_ban": False,
         "product_mapping": get_mapping_config(),
