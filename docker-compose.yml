@@ -51,7 +51,7 @@ services:
       - 5432
     ports:
       - 8765:5432
-    profiles: [airflow]
+    profiles: [airflow, prefect]
   lvao-proxy:
     image: nginx:latest
     ports:
@@ -123,3 +123,68 @@ services:
       airflow-webserver:
         condition: service_healthy
     profiles: [airflow]
+
+  prefect-db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: prefect
+      POSTGRES_PASSWORD: prefect # pragma: allowlist secret
+      POSTGRES_DB: prefect
+    volumes:
+      - ./prefect_dbdata:/var/lib/postgresql/data
+    ports:
+      - 9876:5432
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "prefect"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+    profiles: [prefect]
+
+  # docker run -p 4200:4200 -d --rm prefecthq/prefect:3-python3.12 prefect server start --host 0.0.0.0
+  # Serveur Prefect (UI + API)
+  prefect-server:
+    image: prefecthq/prefect:3-python3.12
+    ports:
+      - "4200:4200"
+    expose:
+      - 4200
+    env_file:
+      - ./data_platform/.env
+    command: prefect server start --host 0.0.0.0
+    depends_on:
+      prefect-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4200/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    profiles: [prefect]
+
+  # Worker Prefect pour exécuter les flows
+  prefect-worker:
+    build:
+      context: .
+      dockerfile: prefect-worker.Dockerfile
+    environment:
+      PREFECT_API_URL: http://prefect-server:4200/api
+    env_file:
+      - ./data_platform/.env
+    volumes:
+      - ./data_platform:/opt/prefect/data_platform
+      - ./core:/opt/prefect/core
+      - ./qfdmo:/opt/prefect/qfdmo
+      - ./qfdmd:/opt/prefect/qfdmd
+      - ./data:/opt/prefect/data
+      - ./logs:/opt/prefect/logs
+    # command: prefect worker start --pool default
+    # command: python /opt/prefect/data_platform/deploy.py
+    command: python /opt/prefect/data_platform/deploy.py
+    depends_on:
+      prefect-server:
+        condition: service_started
+      lvao-warehouse-db:
+        condition: service_started
+    profiles: [prefect]

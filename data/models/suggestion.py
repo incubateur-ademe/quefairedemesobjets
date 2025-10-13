@@ -8,19 +8,6 @@ from django.db.models.functions import Now
 from django.template.loader import render_to_string
 
 from core.models.mixin import TimestampedModel
-from dags.sources.config.shared_constants import (
-    SUGGESTION_ATRAITER,
-    SUGGESTION_AVALIDER,
-    SUGGESTION_CLUSTERING,
-    SUGGESTION_CRAWL_URLS,
-    SUGGESTION_ENCOURS,
-    SUGGESTION_ERREUR,
-    SUGGESTION_REJETEE,
-    SUGGESTION_SOURCE_AJOUT,
-    SUGGESTION_SOURCE_MODIFICATION,
-    SUGGESTION_SOURCE_SUPRESSION,
-    SUGGESTION_SUCCES,
-)
 from data.models.change import SuggestionChange
 from qfdmo.models.acteur import (
     Acteur,
@@ -37,6 +24,21 @@ from qfdmo.models.action import Action
 from qfdmo.models.categorie_objet import SousCategorieObjet
 
 logger = logging.getLogger(__name__)
+
+# Suggestion statut
+SUGGESTION_AVALIDER = "AVALIDER"
+SUGGESTION_REJETEE = "REJETEE"
+SUGGESTION_ATRAITER = "ATRAITER"
+SUGGESTION_ENCOURS = "ENCOURS"
+SUGGESTION_ERREUR = "ERREUR"
+SUGGESTION_SUCCES = "SUCCES"
+
+# SuggestionCohorte type_action
+SUGGESTION_CRAWL_URLS = "CRAWL_URLS"
+SUGGESTION_CLUSTERING = "CLUSTERING"
+SUGGESTION_SOURCE_AJOUT = "SOURCE_AJOUT"
+SUGGESTION_SOURCE_MODIFICATION = "SOURCE_MODIFICATION"
+SUGGESTION_SOURCE_SUPRESSION = "SOURCE_SUPRESSION"
 
 
 class SuggestionStatut(models.TextChoices):
