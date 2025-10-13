@@ -2,13 +2,13 @@
 
 ## Correction de la valeur d'un champs sur toute la base d'acteur
 
-Cas d'utilisation : quand un group d'acteur conséquent a une valeur fausse et qu'on souhaite la corriger en masse.
+Cas d'utilisation : quand un groupe d'acteur conséquent a une valeur fausse et qu'on souhaite la corriger en masse.
 
-Etape du script :
+Étape du script :
 
 - Recherche la valeur à corriger parmis tous les acteurs compilés (VueActeur)
-- Créer une révision si elle n'existe pas pour l'acteur
-- modifie la valeur du champ de la révision
+- Créer une révision si elle n'existe pas pour chaque acteur à corriger
+- modifie la valeur du champ de la révision pour chaque acteur à corriger
 
 Note: il existe une option `--dry-run` permettant de visualiser la correction avant de l'appliquer
 
