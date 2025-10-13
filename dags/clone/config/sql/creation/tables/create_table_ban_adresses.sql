@@ -19,8 +19,8 @@ CREATE TABLE {{table_name}} (
   "lon" FLOAT4,
   "lat" FLOAT4,
   "type_position" VARCHAR(25), -- 18 -> 25
-  "alias" VARCHAR(10), -- None
-  "nom_ld" VARCHAR(100), -- 91 -> 100
+  "alias" VARCHAR(10),
+  "nom_ld" VARCHAR, -- 91 ->
   "libelle_acheminement" VARCHAR(40), -- 31 -> 40
   "nom_afnor" VARCHAR(50), -- 41 -> 50
   "source_position" VARCHAR(15), -- 8 -> 15
