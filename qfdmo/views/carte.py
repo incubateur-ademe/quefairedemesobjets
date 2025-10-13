@@ -3,10 +3,11 @@ from typing import Any
 
 from django.conf import settings
 from django.db.models import Q
+from django.forms import Form
 from django.utils.functional import cached_property
 from django.views.generic import DetailView
 
-from qfdmo.forms import CarteForm
+from qfdmo.forms import CarteForm, ViewModeForm
 from qfdmo.models import CarteConfig
 from qfdmo.views.adresses import SearchActeursView
 
@@ -17,6 +18,19 @@ class CarteSearchActeursView(SearchActeursView):
     is_carte = True
     template_name = "ui/pages/carte.html"
     form_class = CarteForm
+    forms = {"view_mode": ViewModeForm}
+
+    def get_forms(self) -> dict[str, Form]:
+        bounded_forms = {}
+        for key, form in self.forms.items():
+            if self.request.method == "POST":
+                form = form(self.request.POST)
+            else:
+                form = form(self.request.GET)
+
+            if form and form.is_valid():
+                bounded_forms[key] = form
+        return bounded_forms
 
     def get_initial(self, *args, **kwargs):
         initial = super().get_initial(*args, **kwargs)
@@ -36,7 +50,13 @@ class CarteSearchActeursView(SearchActeursView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context.update(is_carte=True, map_container_id="carte")
+        context.update(
+            is_carte=True,
+            map_container_id="carte",
+            forms=self.get_forms(),
+        )
+        return context
+
         return context
 
     def _get_selected_action_ids(self):
