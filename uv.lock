@@ -223,7 +223,7 @@ wheels = [
 
 [[package]]
 name = "apache-airflow-providers-amazon"
-version = "9.4.0"
+version = "9.15.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apache-airflow" },
@@ -236,14 +236,15 @@ dependencies = [
     { name = "inflection" },
     { name = "jmespath" },
     { name = "jsonpath-ng" },
+    { name = "marshmallow" },
     { name = "pyathena" },
-    { name = "python3-saml" },
     { name = "redshift-connector" },
+    { name = "sagemaker-studio" },
     { name = "watchtower" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/9b/29/27998957b92fe693d7f1557f3ee8ebb7867c2681e85c2fe3dd107b06d818/apache_airflow_providers_amazon-9.4.0.tar.gz", hash = "sha256:53a9fd570387290c4e97a99ce1cb4ca6565e36277a22e575ad015f66c79c656c", size = 356434, upload-time = "2025-02-26T11:49:58.436Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/43/64/5304f48b1fa2318c78f339e95042a0a6fd2efb46abd296e2cd234ab3c0a6/apache_airflow_providers_amazon-9.15.0.tar.gz", hash = "sha256:71dc1ed3323f332015c464e03d5a257b7ad4e52ca9b6f6073b9217beec14a300", size = 2032133, upload-time = "2025-10-04T09:11:01.981Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/6e/cf/629db6f345f7f1fb530c66fe8480a80f60c897eadb5ae50e55879f34b59a/apache_airflow_providers_amazon-9.4.0-py3-none-any.whl", hash = "sha256:3940f065cb327e9d6340f0a265cbb955597b3def84f76cda560eaa09c76d4e54", size = 613534, upload-time = "2025-02-26T11:48:21.06Z" },
+    { url = "https://files.pythonhosted.org/packages/53/92/a5961c634b8dc26b2aed3a1e0bf883ee3c8cd995c813a143467a50269bac/apache_airflow_providers_amazon-9.15.0-py3-none-any.whl", hash = "sha256:91bd8547651082dcf5bfbc81892126b99c8460d891483d0e946f2ff0b06e0ab2", size = 674023, upload-time = "2025-10-04T09:10:56.981Z" },
 ]
 
 [[package]]
@@ -3041,20 +3042,6 @@ wheels = [
 ]
 
 [[package]]
-name = "python3-saml"
-version = "1.16.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "isodate" },
-    { name = "lxml" },
-    { name = "xmlsec" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/5d/98/6e0268c3a9893af3d4c5cf670183e0314cd6b5cb034a612d6a7cc5060df8/python3-saml-1.16.0.tar.gz", hash = "sha256:97c9669aecabc283c6e5fb4eb264f446b6e006f5267d01c9734f9d8bffdac133", size = 83468, upload-time = "2023-10-09T10:37:43.128Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/07/14/49d9828443b58bd5cc80a454c91b0f867fbf36a24975d501945e6cb9e32f/python3_saml-1.16.0-py3-none-any.whl", hash = "sha256:20b97d11b04f01ee22e98f4a38242e2fea2e28fbc7fbc9bdd57cab5ac7fc2d0d", size = 76155, upload-time = "2023-10-09T10:40:34.001Z" },
-]
-
-[[package]]
 name = "pytimeparse"
 version = "1.1.8"
 source = { registry = "https://pypi.org/simple" }
@@ -3487,6 +3474,25 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/62/74/8d69dcb7a9efe8baa2046891735e5dfe433ad558ae23d9e3c14c633d1d58/s3transfer-0.14.0.tar.gz", hash = "sha256:eff12264e7c8b4985074ccce27a3b38a485bb7f7422cc8046fee9be4983e4125", size = 151547, upload-time = "2025-09-09T19:23:31.089Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/48/f0/ae7ca09223a81a1d890b2557186ea015f6e0502e9b8cb8e1813f1d8cfa4e/s3transfer-0.14.0-py3-none-any.whl", hash = "sha256:ea3b790c7077558ed1f02a3072fb3cb992bbbd253392f4b6e9e8976941c7d456", size = 85712, upload-time = "2025-09-09T19:23:30.041Z" },
+]
+
+[[package]]
+name = "sagemaker-studio"
+version = "1.0.22"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "boto3" },
+    { name = "botocore" },
+    { name = "packaging" },
+    { name = "psutil" },
+    { name = "python-dateutil" },
+    { name = "requests" },
+    { name = "setuptools" },
+    { name = "urllib3" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/59/b8/966b07accde241c70ef92ef7ad7c0350cfc49fdeff0704671f09c17742da/sagemaker_studio-1.0.22.tar.gz", hash = "sha256:a544f5d7e166cfb9444a4171793a6ab90dba4186a4b4f464f82b1e946df649c1", size = 493993, upload-time = "2025-10-07T16:49:47.256Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b3/30/ffcaa340fe244f2963235b068747dc8e7746dd4134d971167459f3444c26/sagemaker_studio-1.0.22-py3-none-any.whl", hash = "sha256:ced8a96d653a0ff2330b8fe839d3d5379fae2047faaa6d8535c6541ff7b0f3bf", size = 287147, upload-time = "2025-10-07T16:49:46.018Z" },
 ]
 
 [[package]]
@@ -4273,26 +4279,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/06/97/56a6f56ce44578a69343449aa5a0d98eefe04085d69da539f3034e2cd5c1/xlwt-1.3.0.tar.gz", hash = "sha256:c59912717a9b28f1a3c2a98fd60741014b06b043936dcecbc113eaaada156c88", size = 153929, upload-time = "2017-08-22T06:47:16.498Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/44/48/def306413b25c3d01753603b1a222a011b8621aed27cd7f89cbc27e6b0f4/xlwt-1.3.0-py2.py3-none-any.whl", hash = "sha256:a082260524678ba48a297d922cc385f58278b8aa68741596a87de01a9c628b2e", size = 99981, upload-time = "2017-08-22T06:47:15.281Z" },
-]
-
-[[package]]
-name = "xmlsec"
-version = "1.3.16"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "lxml" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/ed/52/b025fe78a178d9eaffa1c77a4a73b20072e27d4679200cee76475034b399/xmlsec-1.3.16.tar.gz", hash = "sha256:2b6c70544c6d1d4ca006aaa314958e0ef3514dc81fffde1b23f2ec41a5791f9d", size = 114202, upload-time = "2025-07-10T12:45:37.847Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/dc/88/3b2e468d4d666225a63be6e9da55fb6ff867173f1f18f21027dbb8fbc764/xmlsec-1.3.16-cp312-cp312-macosx_10_13_x86_64.whl", hash = "sha256:b4878829e95561e66b2d43b987f1d3c75f470eff979acf6121f297f9cce0fc77", size = 3424714, upload-time = "2025-07-10T12:18:26.51Z" },
-    { url = "https://files.pythonhosted.org/packages/78/2a/aad64bff99da020bcd4a9aba73e6b1d9169d66dc213340c83971aeaa557a/xmlsec-1.3.16-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:1f79a3324db82fa9da639723982971f7d8ca970e4677159a49f6242452cf8a33", size = 3830223, upload-time = "2025-07-10T12:18:27.772Z" },
-    { url = "https://files.pythonhosted.org/packages/b5/70/766ba23e2fba7e6d866c88f8c6cd020e72288c6515fc6a1ee9c0a07c2365/xmlsec-1.3.16-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:d0b3028f89760e5a87956af92d4aab102da56d5e07f34086f29793f644e7c8cb", size = 4367846, upload-time = "2025-07-10T12:18:29.071Z" },
-    { url = "https://files.pythonhosted.org/packages/69/95/dc2821e26824d4373a34c17fb30edad04f380ef5e973f63bda3e434e71fb/xmlsec-1.3.16-cp312-cp312-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:27392ea8bc3b7e6ff310d261f0232ad14972188c44a45be5a1ebe33bf9d4f4c5", size = 3791859, upload-time = "2025-07-10T12:18:31.022Z" },
-    { url = "https://files.pythonhosted.org/packages/81/1c/f012b3ea3041064396ed90f70b0a0487c542925ca0c0fcb0ce1376f30eae/xmlsec-1.3.16-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:bfbe712a1117145916c0fc183f3a3e924b3ca7495d6d06f4236d6f93324427d6", size = 4099033, upload-time = "2025-07-10T12:18:32.39Z" },
-    { url = "https://files.pythonhosted.org/packages/9e/da/a9f6d73be731ab591c2ae37b9111353b642d1e0c1aba0e4e916ceee174a5/xmlsec-1.3.16-cp312-cp312-musllinux_1_2_aarch64.whl", hash = "sha256:37144c51339a1217bcba2f5a2412fe9ec29410d08f25957f3635694512f0a375", size = 4400930, upload-time = "2025-07-10T12:18:33.745Z" },
-    { url = "https://files.pythonhosted.org/packages/94/80/f7440cffbe33c5f5778f3ed52b042725579d16137c8d843813495c8739d5/xmlsec-1.3.16-cp312-cp312-musllinux_1_2_x86_64.whl", hash = "sha256:6f430206704190738fb33a43b695a0813671675e811b570547789750e4de1390", size = 4153482, upload-time = "2025-07-10T12:18:35.433Z" },
-    { url = "https://files.pythonhosted.org/packages/50/06/581f9f7b1cf85256fde2617bc7b7c967e0e98b4097cde6127391ebf1474f/xmlsec-1.3.16-cp312-cp312-win32.whl", hash = "sha256:fc76572c58bf50d5d5c524ac649112a9cd62e5f525618af52efc162d22201a39", size = 2155810, upload-time = "2025-07-10T12:18:38.057Z" },
-    { url = "https://files.pythonhosted.org/packages/1b/7e/f26abea8603e5788749633bd43dff18b02810a2c34846aaf9d37d9d2273d/xmlsec-1.3.16-cp312-cp312-win_amd64.whl", hash = "sha256:ae91291233db6fcbe154b58e06d647b4c01a28693b735cdfcda5f5ad0c86b3b3", size = 2446010, upload-time = "2025-07-10T12:18:36.655Z" },
 ]
 
 [[package]]
