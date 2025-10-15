@@ -96,6 +96,7 @@ SELECT
   da.ville as "ville",
   epci.code_commune_insee as "code_commune",
   epci.code_epci as "code_epci",
+  epci.nom_epci as "nom_epci",
   ST_Y(da.location::geometry) as "latitude",
   ST_X(da.location::geometry) as "longitude",
   al.labels as "qualites_et_labels",

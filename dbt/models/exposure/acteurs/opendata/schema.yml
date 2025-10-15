@@ -6,6 +6,7 @@ models:
     columns:
       - name: identifiant
         description: "L'identifiant unique de l'acteur"
+        data_type: text
         tests:
           - unique
           - not_null
@@ -13,75 +14,112 @@ models:
           - not_empty_string
       - name: paternite
         description: "La paternité de l'acteur"
+        data_type: text
         tests:
           - not_null
           - dbt_expectations.expect_column_to_exist
           - not_empty_string
+      - name: identifiants_des_contributeurs
+        description: "Les identifiants des contributeurs de l'acteur"
+        data_type: jsonb
+        tests:
+          - dbt_expectations.expect_column_to_exist
       - name: nom
         description: "Le nom de l'acteur"
+        data_type: text
         tests:
           - not_null
           - dbt_expectations.expect_column_to_exist
           - not_empty_string
       - name: nom_commercial
         description: "Le nom commercial de l'acteur"
+        data_type: text
         tests:
           - dbt_expectations.expect_column_to_exist
       - name: siren
         description: "Le SIREN de l'acteur"
+        data_type: text
         tests:
           - dbt_expectations.expect_column_to_exist
       - name: siret
         description: "Le SIRET de l'acteur"
+        data_type: text
         tests:
           - dbt_expectations.expect_column_to_exist
       - name: description
         description: "La description de l'acteur"
+        data_type: text
         tests:
           - dbt_expectations.expect_column_to_exist
       - name: type_dacteur
         description: "Le type d'acteur"
+        data_type: text
         tests:
           - not_null
           - dbt_expectations.expect_column_to_exist
       - name: site_web
         description: "Le site web de l'acteur"
+        data_type: text
         tests:
           - dbt_expectations.expect_column_to_exist
       - name: telephone
         description: "Le téléphone de l'acteur"
+        data_type: text
         tests:
           - dbt_expectations.expect_column_to_exist
       - name: adresse
         description: "L'adresse de l'acteur"
+        data_type: text
         tests:
           - dbt_expectations.expect_column_to_exist
       - name: complement_dadresse
         description: "Le complément d'adresse de l'acteur"
+        data_type: text
         tests:
           - dbt_expectations.expect_column_to_exist
       - name: code_postal
         description: "Le code postal de l'acteur"
+        data_type: text
         tests:
           - dbt_expectations.expect_column_to_exist
       - name: ville
         description: "La ville de l'acteur"
+        data_type: text
+        tests:
+          - dbt_expectations.expect_column_to_exist
+      - name: code_commune
+        description: "Le code commune de l'acteur"
+        data_type: text
+        tests:
+          - dbt_expectations.expect_column_to_exist
+      - name: code_epci
+        description: "Le code EPCI de l'acteur"
+        data_type: text
+        tests:
+          - dbt_expectations.expect_column_to_exist
+      - name: nom_epci
+        description: "Le nom EPCI de l'acteur"
+        data_type: text
         tests:
           - dbt_expectations.expect_column_to_exist
       - name: latitude
         description: "La latitude de l'acteur"
+        data_type: float
         tests:
           - dbt_expectations.expect_column_to_exist
       - name: longitude
         description: "La longitude de l'acteur"
+        data_type: float
         tests:
           - dbt_expectations.expect_column_to_exist
       - name: qualites_et_labels
         description: "Les qualités et labels de l'acteur"
+        data_type: text
         tests:
           - dbt_expectations.expect_column_to_exist
       - name: public_accueilli
         description: "Le public accueilli par l'acteur"
+        data_type: text
         tests:
           - dbt_expectations.expect_column_to_exist
       - name: reprise
@@ -107,30 +145,27 @@ models:
               values: [true, false]
       - name: type_de_services
         description: "Le type de services de l'acteur"
-        tests:
-          - dbt_expectations.expect_column_to_exist
-      - name: propositions_de_services
-        description: "Les propositions de services de l'acteur"
-        tests:
-          - dbt_expectations.expect_column_to_exist
-      - name: date_de_derniere_modification
-        description: "La date de dernière modification de l'acteur"
+        data_type: text
         tests:
           - dbt_expectations.expect_column_to_exist
       - name: consignes_dacces
         description: "Les consignes d'accès de l'acteur"
+        data_type: text
         tests:
           - dbt_expectations.expect_column_to_exist
       - name: horaires_description
         description: "Les horaires de l'acteur sous forme de texte"
+        data_type: text
         tests:
           - dbt_expectations.expect_column_to_exist
       - name: horaires_osm
         description: "Les horaires au format OSM de l'acteur"
+        data_type: text
         tests:
           - dbt_expectations.expect_column_to_exist
       - name: lieu_prestation
         description: "Le lieu de prestation de l'acteur"
+        data_type: text
         tests:
           - dbt_expectations.expect_column_to_exist
       - name: perimetreadomicile
@@ -140,12 +175,74 @@ models:
           - dbt_expectations.expect_column_to_exist
           - dbt_expectations.expect_column_type_to_be:
               type: jsonb
+      - name: propositions_de_services
+        description: "Les propositions de services de l'acteur"
+        data_type: text
+        tests:
+          - dbt_expectations.expect_column_to_exist
+      - name: emprunter
+        description: "Les sous-categories associées à l'action emprunter de l'acteur"
+        data_type: text
+        tests:
+          - dbt_expectations.expect_column_to_exist
+      - name: preter
+        description: "Les sous-categories associées à l'action preter de l'acteur"
+        data_type: text
+        tests:
+          - dbt_expectations.expect_column_to_exist
+      - name: louer
+        description: "Les sous-categories associées à l'action louer de l'acteur"
+        data_type: text
+        tests:
+          - dbt_expectations.expect_column_to_exist
+      - name: mettreenlocation
+        description: "Les sous-categories associées à l'action mettreenlocation de l'acteur"
+        data_type: text
+        tests:
+          - dbt_expectations.expect_column_to_exist
+      - name: reparer
+        description: "Les sous-categories associées à l'action reparer de l'acteur"
+        data_type: text
+        tests:
+          - dbt_expectations.expect_column_to_exist
+      - name: donner
+        description: "Les sous-categories associées à l'action donner de l'acteur"
+        data_type: text
+        tests:
+          - dbt_expectations.expect_column_to_exist
+      - name: trier
+        description: "Les sous-categories associées à l'action trier de l'acteur"
+        data_type: text
+        tests:
+          - dbt_expectations.expect_column_to_exist
+      - name: echanger
+        description: "Les sous-categories associées à l'action echanger de l'acteur"
+        data_type: text
+        tests:
+          - dbt_expectations.expect_column_to_exist
+      - name: revendre
+        description: "Les sous-categories associées à l'action revendre de l'acteur"
+        data_type: text
+        tests:
+          - dbt_expectations.expect_column_to_exist
+      - name: acheter
+        description: "Les sous-categories associées à l'action acheter de l'acteur"
+        data_type: text
+        tests:
+          - dbt_expectations.expect_column_to_exist
+      - name: date_de_derniere_modification
+        description: "La date de dernière modification de l'acteur"
+        data_type: text
+        tests:
+          - dbt_expectations.expect_column_to_exist
     tests:
       - dbt_expectations.expect_table_row_count_to_be_between:
           min_value: 250000
       - dbt_expectations.expect_table_column_count_to_equal:
           value: 34
     config:
+      contract:
+        enforced: true
       tags:
         - exposure
         - opendata

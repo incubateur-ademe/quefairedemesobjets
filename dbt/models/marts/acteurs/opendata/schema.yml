@@ -413,3 +413,30 @@ models:
         - opendata
         - acteurs
         - perimetreadomicile
+  - name: marts_opendata_acteur_epci
+    description: "Lien entre acteur les données  EPCI"
+    columns:
+      - name: identifiant_unique
+        description: "L'identifiant unique de l'acteur"
+        data_tests:
+          - not_null
+      - name: code_postal
+        description: "Le code postal de l'acteur"
+      - name: upper_acteur_ville
+        description: "La ville de l'acteur en majuscule"
+      - name: upper_epci_nom_commune
+        description: "Le nom de la commune de l'EPCI en majuscule"
+      - name: code_commune_insee
+        description: "Le code commune insee de l'acteur selon son code postal"
+      - name: code_epci
+        description: "Le code EPCI de l'acteur selon son code postal"
+      - name: nom_epci
+        description: "Le nom de l'EPCI de l'acteur selon son code postal"
+      - name: similarity_score
+        description: "Le score de similarité entre la ville de l'acteur et la commune de la DB EPCI"
+    config:
+      tags:
+        - marts
+        - opendata
+        - acteurs
+        - epci
