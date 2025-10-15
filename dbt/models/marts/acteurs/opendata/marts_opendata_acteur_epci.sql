@@ -8,6 +8,7 @@ WITH acteur_with_best_match AS (
     REPLACE(UPPER(UNACCENT(epci.nom_commune)), ' ARRONDISSEMENT', '') AS upper_epci_nom_commune, -- pour débugger
     laposte.code_commune_insee,
     epci.code_epci,
+    epci.nom_epci,
     SIMILARITY(UPPER(UNACCENT(acteur.ville)), REPLACE(UPPER(UNACCENT(epci.nom_commune)), ' ARRONDISSEMENT', '')) as similarity_score,
     ROW_NUMBER() OVER (
       PARTITION BY acteur.identifiant_unique
@@ -22,6 +23,13 @@ WITH acteur_with_best_match AS (
 )
 
 SELECT
-  *
+  identifiant_unique,
+  code_postal,
+  upper_acteur_ville,
+  upper_epci_nom_commune,
+  code_commune_insee,
+  code_epci,
+  nom_epci,
+  similarity_score
 FROM acteur_with_best_match
 WHERE rank = 1 AND code_postal IS NOT NULL
