@@ -12,7 +12,6 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
-
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
