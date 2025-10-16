@@ -342,6 +342,18 @@
 </pre></div>
 </div>
 </section>
+<section id="population-des-propositions-de-service-avec-une-sous-categorie">
+<h2>Population des propositions de service avec une sous-catégorie<a class="headerlink" href="#population-des-propositions-de-service-avec-une-sous-categorie" title="Lien vers cette rubrique">¶</a></h2>
+<p>Ajout d’une sous-catégorie aux propositions de service qui en contient une autre</p>
+<p>Cette commande est utile quand on ajoute une nouvelle sous-catégorie car on a besoin de plus de détails, on veut alors pouvoir ajouter cette nouvelle sous-catégorie en masse aux propositions de service qui en contient une sous-catégorie spécifique.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="o">(</span>uv<span class="w"> </span>run<span class="o">)</span><span class="w"> </span>python<span class="w"> </span>manage.py<span class="w"> </span>populate_propositionservice<span class="w"> </span>--new_sous_categorie_code<span class="w"> </span>sous_categorie_a_populer<span class="w"> </span>--origin_sous_categorie_code<span class="w"> </span>sous_categorie_pour_identifier_les_propositions_de_service_a_populer<span class="w"> </span><span class="o">(</span>--dry-run<span class="o">)</span>
+</pre></div>
+</div>
+<p>Par exemple : on souhaite ajouter la sous-catégorie « Poêle et Casserole » aux propositions de service qui en contiennent la sous-catégorie « Vaisselle »</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>manage.py<span class="w"> </span>populate_propositionservice<span class="w"> </span>--new_sous_categorie_code<span class="w"> </span>poele_casserole<span class="w"> </span>--origin_sous_categorie_code<span class="w"> </span>vaisselle<span class="w"> </span>--dry-run
+</pre></div>
+</div>
+</section>
 </section>
 
         </article>
@@ -401,6 +413,7 @@
             <ul>
 <li><a class="reference internal" href="#">Commandes Django d’administration</a><ul>
 <li><a class="reference internal" href="#correction-de-la-valeur-d-un-champs-sur-toute-la-base-d-acteur">Correction de la valeur d’un champs sur toute la base d’acteur</a></li>
+<li><a class="reference internal" href="#population-des-propositions-de-service-avec-une-sous-categorie">Population des propositions de service avec une sous-catégorie</a></li>
 </ul>
 </li>
 </ul>
