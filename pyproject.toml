@@ -31,7 +31,7 @@ dependencies = [
     "django-colorfield>=0.14.0,<0.15",
     "django-dsfr>=3,<4",
     "rapidfuzz>=3.13.0,<4",
-#    "sites-faciles-experiment~=2.1.0rc9",
+    "sites-faciles-experiment~=2.1.0rc9",
     "wagtail-honeypot @ git+https://github.com/Luzzzi/wagtail-honeypot@feature/i18n-required-honeypot",
     "diff-match-patch>=20241021,<20241022",
     "django-lookbook>=1.0.2,<2",
