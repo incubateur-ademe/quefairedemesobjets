@@ -45,11 +45,13 @@ resource "scaleway_container" "airflow_webserver" {
     ENVIRONMENT                                = var.environment
   }
   secret_environment_variables = {
-    _AIRFLOW_WWW_USER_USERNAME          = var._AIRFLOW_WWW_USER_USERNAME
-    _AIRFLOW_WWW_USER_PASSWORD          = var._AIRFLOW_WWW_USER_PASSWORD
-    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN = var.AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
-    DATABASE_URL                        = var.DATABASE_URL
-    DB_WAREHOUSE                        = var.DB_WAREHOUSE
-    AIRFLOW_CONN_WEBAPP_DB              = var.AIRFLOW_CONN_WEBAPP_DB
+    _AIRFLOW_WWW_USER_USERNAME              = var._AIRFLOW_WWW_USER_USERNAME
+    _AIRFLOW_WWW_USER_PASSWORD              = var._AIRFLOW_WWW_USER_PASSWORD
+    AIRFLOW__CORE__EXECUTION_API_SERVER_URL = var.AIRFLOW__CORE__EXECUTION_API_SERVER_URL
+    AIRFLOW__API_AUTH__JWT_SECRET           = var.AIRFLOW__API_AUTH__JWT_SECRET
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN     = var.AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+    DATABASE_URL                            = var.DATABASE_URL
+    DB_WAREHOUSE                            = var.DB_WAREHOUSE
+    AIRFLOW_CONN_WEBAPP_DB                  = var.AIRFLOW_CONN_WEBAPP_DB
   }
 }
