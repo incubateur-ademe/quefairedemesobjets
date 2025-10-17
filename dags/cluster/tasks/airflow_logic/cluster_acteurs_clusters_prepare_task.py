@@ -69,6 +69,5 @@ def cluster_acteurs_clusters_prepare_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
         task_id=TASKS.CLUSTERS_PREPARE,
         python_callable=cluster_acteurs_clusters_prepare_wrapper,
-        provide_context=True,
         dag=dag,
     )
