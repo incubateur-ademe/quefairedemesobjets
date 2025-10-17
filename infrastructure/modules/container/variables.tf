@@ -142,3 +142,11 @@ variable "_AIRFLOW_WWW_USER_PASSWORD" {
 variable "AIRFLOW__WEBSERVER__INSTANCE_NAME" {
   type = string
 }
+variable "AIRFLOW__CORE__EXECUTION_API_SERVER_URL" {
+  type      = string
+  sensitive = true
+}
+variable "AIRFLOW__API_AUTH__JWT_SECRET" {
+  type      = string
+  sensitive = true
+}

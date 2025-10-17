@@ -38,21 +38,23 @@ resource "scaleway_container" "airflow_dag_processor" {
     AIRFLOW__WEBSERVER__WARN_DEPLOYMENT_EXPOSURE = "false"
   }
   secret_environment_variables = {
-    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN = var.AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
-    AIRFLOW_CONN_WEBAPP_DB              = var.AIRFLOW_CONN_WEBAPP_DB
-    DATABASE_URL                        = var.DATABASE_URL
-    DB_WAREHOUSE                        = var.DB_WAREHOUSE
-    ENVIRONMENT                         = var.ENVIRONMENT
-    POSTGRES_DB                         = var.POSTGRES_DB
-    POSTGRES_HOST                       = var.POSTGRES_HOST
-    POSTGRES_PASSWORD                   = var.POSTGRES_PASSWORD
-    POSTGRES_PORT                       = var.POSTGRES_PORT
-    POSTGRES_SCHEMA                     = var.POSTGRES_SCHEMA
-    POSTGRES_USER                       = var.POSTGRES_USER
-    SCW_ACCESS_KEY                      = var.SCW_ACCESS_KEY
-    SCW_DEFAULT_ORGANIZATION_ID         = var.SCW_DEFAULT_ORGANIZATION_ID
-    SCW_DEFAULT_PROJECT_ID              = var.SCW_DEFAULT_PROJECT_ID
-    SCW_SECRET_KEY                      = var.SCW_SECRET_KEY
-    SECRET_KEY                          = var.SECRET_KEY
+    AIRFLOW__CORE__EXECUTION_API_SERVER_URL = var.AIRFLOW__CORE__EXECUTION_API_SERVER_URL
+    AIRFLOW__API_AUTH__JWT_SECRET           = var.AIRFLOW__API_AUTH__JWT_SECRET
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN     = var.AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+    AIRFLOW_CONN_WEBAPP_DB                  = var.AIRFLOW_CONN_WEBAPP_DB
+    DATABASE_URL                            = var.DATABASE_URL
+    DB_WAREHOUSE                            = var.DB_WAREHOUSE
+    ENVIRONMENT                             = var.ENVIRONMENT
+    POSTGRES_DB                             = var.POSTGRES_DB
+    POSTGRES_HOST                           = var.POSTGRES_HOST
+    POSTGRES_PASSWORD                       = var.POSTGRES_PASSWORD
+    POSTGRES_PORT                           = var.POSTGRES_PORT
+    POSTGRES_SCHEMA                         = var.POSTGRES_SCHEMA
+    POSTGRES_USER                           = var.POSTGRES_USER
+    SCW_ACCESS_KEY                          = var.SCW_ACCESS_KEY
+    SCW_DEFAULT_ORGANIZATION_ID             = var.SCW_DEFAULT_ORGANIZATION_ID
+    SCW_DEFAULT_PROJECT_ID                  = var.SCW_DEFAULT_PROJECT_ID
+    SCW_SECRET_KEY                          = var.SCW_SECRET_KEY
+    SECRET_KEY                              = var.SECRET_KEY
   }
 }
