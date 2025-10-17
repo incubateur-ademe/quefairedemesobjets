@@ -376,7 +376,7 @@
       "autres_emballages_menagers"
     ],
     "emballages souillés par une substance dangereuse": "dechets_de_produits_chimiques",
-    "encombrants ménagers divers": "encombrants_menagers_divers",
+    "encombrants ménagers divers": ["encombrants_menagers_divers", "vaisselle", "poele_casserole"],
     "equipements électriques et électroniques hors d'usage": "petit_electromenager",
     "films plastiques": "emballage_plastique",
     "films plastiques emballages ménagers": "emballage_plastique",
