@@ -15,6 +15,7 @@ pgdata
 webapp_dbdata
 warehouse_dbdata
 airflow_dbdata
+prefect_dbdata
 
 # JS
 static/collected

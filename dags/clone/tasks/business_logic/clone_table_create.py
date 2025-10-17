@@ -4,6 +4,7 @@ import logging
 import tempfile
 from pathlib import Path
 
+from prefect import get_run_logger
 from pydantic import AnyUrl
 from utils import logging_utils as log
 from utils.cmd import cmd_run
@@ -106,7 +107,7 @@ def clone_table_create(
     from django.db import connections
 
     """Create a table in the DB from a CSV file downloaded via URL"""
-
+    logger = get_run_logger()
     logger.info(log.banner_string(f"Création du schema de la table {table_name}"))
 
     try:
