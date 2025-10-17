@@ -76,7 +76,7 @@ deploy_clone_ban_adresses = clone_external_table.to_deployment(
         "clone_method": "stream_directly",
         "file_downloaded": "adresses-france.csv.gz",
         "file_unpacked": "adresses-france.csv",
-        "delimiter": ",",
+        "delimiter": ";",
     },
 )
 
@@ -102,6 +102,6 @@ deploy_clone_ban_lieux_dits = clone_external_table.to_deployment(
         "clone_method": "stream_directly",
         "file_downloaded": "lieux-dits-beta-france.csv.gz",
         "file_unpacked": "lieux-dits-beta-france.csv",
-        "delimiter": ",",
+        "delimiter": ";",
     },
 )
