@@ -162,7 +162,9 @@ class SearchFormController extends Controller<HTMLElement> {
   }
 
   resetBboxInput() {
-    this.bboxTarget.value = ""
+    if (this.hasBboxTarget) {
+      this.bboxTarget.value = ""
+    }
   }
 
   updateBboxInput(event) {
@@ -385,9 +387,7 @@ class SearchFormController extends Controller<HTMLElement> {
     const withoutZone =
       (event?.target as HTMLElement).dataset.withoutZone?.toLowerCase() === "true"
     if (withoutZone) {
-      if (this.hasBboxTarget) {
-        this.bboxTarget.value = ""
-      }
+      this.resetBboxInput()
     }
 
     // Applies only in Formulaire alternative.

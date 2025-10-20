@@ -55,7 +55,7 @@
                 "
                 tabindex="0"
             >
-            {% if forms.view_mode.cleaned_data.view == "liste" %}
+            {% if forms.view_mode.view.value == "liste" %}
                 {% include "ui/components/carte/mode_liste.html" %}
             {% else %}
                 {% include "ui/components/carte/mode_carte.html" %}
