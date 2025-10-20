@@ -20,7 +20,15 @@ def ps_by_action(propositionservices: QuerySet):
 
 
 class Command(BaseCommand):
-    help = "Suppression des parents qui n'ont pas d'enfants"
+    help = """
+    Correction des propositions de service révisiées d'une source
+    Pour l'ensemble des révision de proposition de service,
+    ajouter les propositions de service présenste dans l'acteur source si celle-ci
+    n'existe pas dans la révision de proposition de service.
+    Cette commande est utile quand une source à ajouté des propositions de service
+    dans l'acteur source et que ces proposition n'ont pas été ajoutées dans
+    la révision de proposition de service.
+    """
 
     def add_arguments(self, parser):
         parser.add_argument(

@@ -34,6 +34,7 @@ resource "scaleway_container" "airflow_scheduler" {
     AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID         = "scalewaylogs"
     AIRFLOW__LOGGING__REMOTE_LOGGING             = "true"
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK      = "true"
+    AIRFLOW__SCHEDULER__CATCHUP_BY_DEFAULT       = "false"
     AIRFLOW__WEBSERVER__EXPOSE_CONFIG            = "true"
     AIRFLOW__WEBSERVER__WARN_DEPLOYMENT_EXPOSURE = "false"
   }
