@@ -38,12 +38,7 @@ from unidecode import unidecode
 
 from core.constants import DIGITAL_ACTEUR_CODE
 from core.models.mixin import TimestampedModel
-from core.validators import EmptyEmailValidator
-from dags.sources.config.shared_constants import (
-    EMPTY_ACTEUR_FIELD,
-    REPRISE_1POUR0,
-    REPRISE_1POUR1,
-)
+from core.validators import EMPTY_ACTEUR_FIELD, EmptyEmailValidator
 from qfdmo.models.action import Action, get_action_instances
 from qfdmo.models.categorie_objet import SousCategorieObjet
 
@@ -91,8 +86,8 @@ class ActeurPublicAccueilli(models.TextChoices):
 
 
 class ActeurReprise(models.TextChoices):
-    UN_POUR_ZERO = REPRISE_1POUR0, "1 pour 0"
-    UN_POUR_UN = REPRISE_1POUR1, "1 pour 1"
+    UN_POUR_ZERO = "1 pour 0", "1 pour 0"
+    UN_POUR_UN = "1 pour 1", "1 pour 1"
     UNKNOWN = "", ""
 
 

@@ -1,6 +1,6 @@
 from django.core.validators import EmailValidator
 
-from dags.sources.config.shared_constants import EMPTY_ACTEUR_FIELD
+EMPTY_ACTEUR_FIELD = "__empty__"
 
 
 class EmptyValidator:
