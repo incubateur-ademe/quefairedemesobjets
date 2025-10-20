@@ -47,6 +47,7 @@
                 class="
                 qf-flex
                 qf-flex-col
+                qf-relative
                 {% if is_digital %}
                 {# Is useful for digital view so that the users can scroll in the results #}
                 qf-overflow-auto
@@ -60,6 +61,7 @@
             {% else %}
                 {% include "ui/components/carte/mode_carte.html" %}
             {% endif %}
+            {% include "ui/components/carte/shared/disclaimers/loading_solutions.html" %}
             </main>
 
             {# Part of this tag' style is defined in qfdmo.css because it would have been a bit unreadable as tailwind classes #}

@@ -1,9 +1,7 @@
 <div
-    data-search-solution-form-target="loadingSolutions"
-    class="qf-absolute qf-inset-0 qf-bg-white qf-opacity-90 qf-font-black qf-hidden group-aria-[busy]:qf-flex qf-z-50"
+    class="qf-bg-white/25 qf-backdrop-blur-sm
+        qf-flex-col qf-items-center qf-justify-center
+     qf-absolute qf-top-0 qf-bottom-0 qf-right-0 qf-left-0 qf-hidden group-aria-[busy]:qf-flex qf-z-50"
 >
-    <div class="qf-flex qf-h-full qf-w-full qf-items-center qf-justify-center qf-text-2xl sm:qf-text-4xl ">
-        <span class="fr-icon-refresh-line qf-animate-spin"></span>
-        <span class="fr-ml-1w">Affichage des lieux...</span>
-    </div>
+    {% include "ui/components/spinner.html" %}
 </div>
