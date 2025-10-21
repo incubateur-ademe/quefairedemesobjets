@@ -18,6 +18,7 @@ from urllib.parse import urlparse
 import decouple
 import dj_database_url
 import sentry_sdk
+from botocore.config import Config as BotoConfig
 from import_export.formats.base_formats import CSV, XLS, XLSX
 from sentry_sdk.integrations.django import DjangoIntegration
 
@@ -409,6 +410,7 @@ AWS_STORAGE_BUCKET_NAME = decouple.config("AWS_STORAGE_BUCKET_NAME", default="")
 AWS_S3_REGION_NAME = decouple.config("AWS_S3_REGION_NAME", default="")
 AWS_S3_ENDPOINT_URL = decouple.config("AWS_S3_ENDPOINT_URL", default="")
 
+
 STORAGES = {
     "default": {
         "BACKEND": (
@@ -419,8 +421,19 @@ STORAGES = {
     },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "OPTIONS": {},
     },
 }
+
+if AWS_ACCESS_KEY_ID and decouple.config(
+    "DISABLE_S3_CHECKSUM_CALCULATION", default=False
+):
+    STORAGES["staticfiles"]["OPTIONS"] = {
+        "client_config": BotoConfig(
+            request_checksum_calculation="when_required",
+            response_checksum_validation="when_required",
+        )
+    }
 
 # Import / export settings
 # ------------------------
