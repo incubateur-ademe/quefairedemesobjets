@@ -1,8 +1,11 @@
 from django.contrib.auth.models import Permission
-from django.templatetags.static import static
 from django.urls import path, reverse
+from draftjs_exporter.dom import DOM
 from wagtail import hooks
 from wagtail.admin.action_menu import ActionMenuItem
+from wagtail.admin.rich_text.converters.html_to_contentstate import (
+    InlineEntityElementHandler,
+)
 from wagtail.admin.rich_text.editors.draftail import features as draftail_features
 
 from qfdmd.views import (
@@ -72,29 +75,63 @@ def register_legacy_migrate_url():
     ]
 
 
-@hooks.register("insert_editor_js")
-def editor_js():
-    return f'<script src="{static("wagtail/emoji.js")}"></script>'
+def icon_entity_decorator(props):
+    """
+    Draft.js ContentState to database HTML.
+    Converts the ICON entities into a span tag.
+    """
+    print(f"👭 {props=}")
+
+    return DOM.create_element(
+        "img",
+        {
+            "width": "auto",
+            "height": "16px",
+            "src": props["icon"],
+        },
+        props["children"],
+    )
 
 
-@hooks.register("insert_editor_css")
-def editor_css():
-    return f'<link rel="stylesheet" href="{static("wagtail/emoji.css")}">'
+class IconEntityElementHandler(InlineEntityElementHandler):
+    """
+    Database HTML to Draft.js ContentState.
+    Converts the span tag into a ICON entity, with the right data.
+    """
+
+    mutability = "IMMUTABLE"
+
+    def get_attribute_data(self, attrs):
+        """
+        Take the `icon` value from the `data-icon` HTML attribute.
+        """
+        return attrs
 
 
 @hooks.register("register_rich_text_features")
-def register_emoji_feature(features):
-    feature_name = "emoji"
-    type_ = "EMOJI"
-
+def register_icon_feature(features):
+    feature_name = "icon"
+    type_ = "ICON"
     control = {
         "type": type_,
-        "label": "😊",
-        "description": "Insérer un emoji",
+        "label": "♺",
+        "description": "Insérer une icone",
     }
 
-    features.register_editor_plugin(
-        "draftail", feature_name, draftail_features.EntityFeature(control)
-    )
-
     features.default_features.append(feature_name)
+    features.register_editor_plugin(
+        "draftail",
+        feature_name,
+        draftail_features.EntityFeature(
+            control, js=["wagtail/emoji.js"], css={"all": ["wagtail/emoji.css"]}
+        ),
+    )
+    features.register_converter_rule(
+        "contentstate",
+        feature_name,
+        {
+            # Note here that the conversion is more complicated than for blocks and inline styles.
+            "from_database_format": {"img": IconEntityElementHandler(type_)},
+            "to_database_format": {"entity_decorators": {type_: icon_entity_decorator}},
+        },
+    )
