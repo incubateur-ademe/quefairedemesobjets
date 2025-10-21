@@ -1,7 +1,9 @@
 from django.contrib.auth.models import Permission
+from django.templatetags.static import static
 from django.urls import path, reverse
 from wagtail import hooks
 from wagtail.admin.action_menu import ActionMenuItem
+from wagtail.admin.rich_text.editors.draftail import features as draftail_features
 
 from qfdmd.views import (
     bonus_viewset,
@@ -68,3 +70,31 @@ def register_legacy_migrate_url():
             name="legacy_migrate",
         ),
     ]
+
+
+@hooks.register("insert_editor_js")
+def editor_js():
+    return f'<script src="{static("wagtail/emoji.js")}"></script>'
+
+
+@hooks.register("insert_editor_css")
+def editor_css():
+    return f'<link rel="stylesheet" href="{static("wagtail/emoji.css")}">'
+
+
+@hooks.register("register_rich_text_features")
+def register_emoji_feature(features):
+    feature_name = "emoji"
+    type_ = "EMOJI"
+
+    control = {
+        "type": type_,
+        "label": "😊",
+        "description": "Insérer un emoji",
+    }
+
+    features.register_editor_plugin(
+        "draftail", feature_name, draftail_features.EntityFeature(control)
+    )
+
+    features.default_features.append(feature_name)

@@ -16,7 +16,8 @@
     "static/to_compile/embed/carte.ts",
     "static/to_compile/admin.css",
     "static/to_compile/admin-categorie-widget.ts",
-    "static/to_compile/admin-map-widget.ts"
+    "static/to_compile/admin-map-widget.ts",
+    "static/to_compile/wagtail/emoji.ts"
   ],
   "targets": {
     "default": {
