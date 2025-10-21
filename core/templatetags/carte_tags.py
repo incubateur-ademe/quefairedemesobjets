@@ -195,6 +195,9 @@ def render_acteur(acteur, context):
             "ui/components/carte/acteur/acteur_labels.html", {"object": acteur}
         ),
         distance_to_acteur(context, acteur),
+        render_to_string(
+            "ui/components/carte/acteur/acteur_lien.html", {"object": acteur}
+        ),
     ]
 
 
@@ -205,8 +208,8 @@ def acteurs_table(context, acteurs):
     return {
         "table": {
             # "caption": "Tableau basique",
-            "header": ["Nom", "Actions", "Caractéristiques", "Distance"],
+            "header": ["Nom", "Actions", "Caractéristiques", "Distance", ""],
             "content": [render_acteur(acteur, context) for acteur in acteurs],
-            "extra_classes": "fr-table--multiline fr-table--mode-liste qf-w-full",
+            "extra_classes": "fr-table--mode-liste",
         }
     }

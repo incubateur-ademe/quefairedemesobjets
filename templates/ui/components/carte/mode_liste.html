@@ -25,7 +25,8 @@
     </div>
 
     {% if paginated_acteurs_obj %}
-    <div>
+    {# The negative margin-top aims to compensate the one defined in django-dsfr #}
+    <div class="qf-flex qf-items-center qf-justify-center -qf-mt-3w">
         {% dsfr_pagination paginated_acteurs_obj %}
     </div>
     {% endif %}
