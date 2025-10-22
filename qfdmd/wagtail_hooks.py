@@ -105,7 +105,7 @@ class IconEntityElementHandler(InlineEntityElementHandler):
         """
         Take the `icon` value from the `data-icon` HTML attribute.
         """
-        return attrs
+        return { "icon": attrs["src"]}
 
 
 @hooks.register("register_rich_text_features")

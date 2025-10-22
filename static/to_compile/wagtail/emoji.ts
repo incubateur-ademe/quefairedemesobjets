@@ -24,9 +24,9 @@ class IconSource extends window.React.Component {
     })
     const entityKey = contentWithEntity.getLastCreatedEntityKey()
 
-    console.log(content)
+    // console.log(content)
 
-    // We also add some text for the entity to be activated on.
+    // // We also add some text for the entity to be activated on.
     const text = `coucou`
 
     const newContent = window.DraftJS.Modifier.replaceText(
