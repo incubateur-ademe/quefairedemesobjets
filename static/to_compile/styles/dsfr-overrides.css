@@ -223,3 +223,13 @@ DSFR customization for tabs
     @apply max-md:!qf-bg-none;
   }
 }
+
+#view-mode-nav {
+  > .fr-input-group {
+    @apply qf-mb-0;
+  }
+}
+
+.fr-segmented__legend:not(:has(*)) {
+  @apply qf-hidden;
+}

@@ -39,8 +39,13 @@
     >
         <input type="hidden" name="map_container_id" value="{{ map_container_id }}">
         <section class="map-grid qf-relative">
+
             {% block form_header %}
-                {% include 'ui/components/carte/header.html' %}
+                {% if forms.view_mode.view.value == "liste" %}
+                    {% include 'ui/components/carte/header.html' with no_shadow=True %}
+                {% else %}
+                    {% include 'ui/components/carte/header.html' %}
+                {% endif %}
             {% endblock form_header %}
 
             {% if forms.view_mode.view.value == "liste" %}
@@ -48,6 +53,7 @@
             {% else %}
                 {% include "ui/components/carte/mode_carte.html" %}
             {% endif %}
+
             {% include "ui/components/carte/shared/disclaimers/loading_solutions.html" %}
 
             {# Part of this tag' style is defined in qfdmo.css because it would have been a bit unreadable as tailwind classes #}

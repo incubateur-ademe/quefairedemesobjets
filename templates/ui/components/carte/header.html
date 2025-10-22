@@ -1,7 +1,7 @@
 {% load dsfr_tags %}
 <header
     {# The z-index below can impact the shadow over #}
-    class="{% block header_classes %}qf-z-20{% endblock %} qf-bg-white qf-shadow-lg"
+    class="{% block header_classes %}qf-z-20{% endblock %} qf-bg-white {% if not no_shadow %}qf-shadow-lg{% endif %}"
 >
     <div
         class="
@@ -51,7 +51,7 @@
                     </button>
                     {% endif %}
                     <button
-                        class="fr-btn fr-btn--sm fr-btn--secondary fr-ml-1w fr-btn--icon-left fr-icon-equalizer-line"
+                        class="fr-btn max-md:fr-btn--sm fr-btn--secondary fr-ml-1w fr-btn--icon-left fr-icon-equalizer-line"
                         type="button"
                         data-action="search-solution-form#toggleAdvancedFilters"
                         data-testid="advanced-filters"
@@ -64,10 +64,11 @@
             {% endcomment %}
         </div>
 
-        <div class="md:qf-pr-2w md:qf-mt-2w max-md:qf-px-2w max-md:qf-flex qf-justify-between qf-items-center">
+        {# Navigation entre carte / liste #}
+        <div class="md:qf-pr-2w md:qf-mt-2w max-md:qf-px-2w max-md:qf-flex qf-justify-between qf-items-end qf-pb-1w" id="view-mode-nav">
             {{ forms.view_mode }}
             <div class="md:qf-hidden">
-            {% dsfr_button label="Filtres" extra_classes="fr-btn--sm fr-btn--secondary fr-ml-1w fr-btn--icon-left fr-icon-equalizer-line" data_action="search-solution-form#toggleAdvancedFilters:prevent" data_testid="advanced-filters" %}
+            {% dsfr_button label="Filtres" extra_classes="fr-btn fr-btn--secondary fr-ml-1w fr-btn--icon-left fr-icon-equalizer-line" data_action="search-solution-form#toggleAdvancedFilters:prevent" data_testid="advanced-filters" %}
             </div>
         </div>
     </div>
