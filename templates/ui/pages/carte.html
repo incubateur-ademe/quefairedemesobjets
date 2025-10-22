@@ -43,26 +43,12 @@
                 {% include 'ui/components/carte/header.html' %}
             {% endblock form_header %}
 
-            <main
-                class="
-                qf-flex
-                qf-flex-col
-                qf-relative
-                {% if is_digital %}
-                {# Is useful for digital view so that the users can scroll in the results #}
-                qf-overflow-auto
-                {% endif %}
-                qf-h-full
-                "
-                tabindex="0"
-            >
             {% if forms.view_mode.view.value == "liste" %}
                 {% include "ui/components/carte/mode_liste.html" %}
             {% else %}
                 {% include "ui/components/carte/mode_carte.html" %}
             {% endif %}
             {% include "ui/components/carte/shared/disclaimers/loading_solutions.html" %}
-            </main>
 
             {# Part of this tag' style is defined in qfdmo.css because it would have been a bit unreadable as tailwind classes #}
             <aside class="

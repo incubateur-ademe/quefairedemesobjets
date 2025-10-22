@@ -187,12 +187,11 @@ def get_non_enseigne_labels_count(acteur):
 
 def render_acteur(acteur, context):
     return [
-        acteur.nom,
-        render_to_string(
-            "ui/components/carte/acteur/acteur_services.html", {"object": acteur}
-        ),
         render_to_string(
             "ui/components/carte/acteur/acteur_labels.html", {"object": acteur}
+        ),
+        render_to_string(
+            "ui/components/carte/acteur/acteur_services.html", {"object": acteur}
         ),
         distance_to_acteur(context, acteur),
         render_to_string(
@@ -207,9 +206,8 @@ def render_acteur(acteur, context):
 def acteurs_table(context, acteurs):
     return {
         "table": {
-            # "caption": "Tableau basique",
-            "header": ["Nom", "Actions", "Caractéristiques", "Distance", ""],
+            "header": ["Nom du lieu", "Actions", "Distance", ""],
             "content": [render_acteur(acteur, context) for acteur in acteurs],
-            "extra_classes": "fr-table--mode-liste",
+            "extra_classes": "fr-table--mode-liste fr-table--multiline" " qf-w-full",
         }
     }

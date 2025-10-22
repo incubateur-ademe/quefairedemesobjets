@@ -208,7 +208,7 @@ DSFR customization for tabs
     @apply max-md:qf-flex qf-flex-col;
   }
 
-  .fr-table__content table tbody td {
-    background: transparent !important;
-  }
+  /* .fr-table__content table tbody td { */
+  /* background: transparent !important; */
+  /* } */
 }

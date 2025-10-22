@@ -1,4 +1,14 @@
 {% load carte_tags dsfr_tags %}
+<main
+    class="
+    qf-flex
+    qf-flex-col
+    qf-relative
+    qf-h-full
+    qf-overflow-auto
+    "
+    tabindex="0"
+>
 <div class="qf-flex qf-flex-col qf-gap-1w qf-px-2w">
     <nav class="qf-flex qf-justify-end qf-gap-1w qf-py-2w">
         {% dsfr_button label="Filtres" extra_classes="max-md:qf-hidden fr-btn--icon-left fr-icon-equalizer-fill fr-btn--secondary" data_action="search-solution-form#toggleAdvancedFilters:prevent" data_testid="advanced-filters:prevent" %}
@@ -31,3 +41,4 @@
     </div>
     {% endif %}
 </div>
+</main>
