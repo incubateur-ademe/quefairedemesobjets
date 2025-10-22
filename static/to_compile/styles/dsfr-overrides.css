@@ -197,6 +197,8 @@ DSFR customization for tabs
 }
 
 .fr-table--mode-liste {
+  @apply max-md:qf-mt-0;
+
   thead {
     @apply max-md:qf-hidden;
   }
@@ -206,9 +208,18 @@ DSFR customization for tabs
 
   tr {
     @apply max-md:qf-flex qf-flex-col;
+    @apply max-md:qf-border max-md:qf-border-solid max-md:qf-py-2w max-md:qf-mb-0 max-md:qf-border-grey-900 max-md:qf-mb-2w;
   }
 
-  /* .fr-table__content table tbody td { */
-  /* background: transparent !important; */
-  /* } */
+  td {
+    @apply max-md:!qf-px-2w;
+  }
+
+  .fr-table__content table tbody td {
+    @apply max-md:!qf-bg-none;
+  }
+
+  .fr-table__wrapper::after {
+    @apply max-md:!qf-bg-none;
+  }
 }

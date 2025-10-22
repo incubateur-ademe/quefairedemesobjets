@@ -235,6 +235,7 @@ class SearchActeursView(
         kwargs.update(
             acteurs=acteurs,
             paginated_acteurs_obj=paginated_acteurs_obj,
+            count=paginated_acteurs.count,
         )
         context = super().get_context_data(**kwargs)
 

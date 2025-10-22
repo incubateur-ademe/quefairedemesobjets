@@ -10,13 +10,14 @@
     tabindex="0"
 >
 <div class="qf-flex qf-flex-col qf-gap-1w qf-px-2w">
-    <nav class="qf-flex qf-justify-end qf-gap-1w qf-py-2w">
+    <nav class="qf-flex qf-justify-end qf-gap-1w max-md:qf-pt-2w md:qf-py-2w">
         {% dsfr_button label="Filtres" extra_classes="max-md:qf-hidden fr-btn--icon-left fr-icon-equalizer-fill fr-btn--secondary" data_action="search-solution-form#toggleAdvancedFilters:prevent" data_testid="advanced-filters:prevent" %}
         {% dsfr_button label="Proposer un nouveau lieu" extra_classes="max-md:qf-w-full fr-btn--icon-left fr-icon-add-line" %}
         {% dsfr_button label="Infos" extra_classes="max-md:qf-hidden fr-btn--icon-left fr-icon-info-line fr-btn--secondary" data_action="search-solution-form#toggleAPropos:prevent" %}
     </nav>
     <div class="qf-flex qf-flex-col qf-justify-center qf-items-center">
         {% if paginated_acteurs_obj %}
+            <span class="max-md:qf-pb-1w qf-mr-auto qf-text-grey-425 qf-text-sm">{{ count }} lieux du + proche au + loin</span>
             {% acteurs_table paginated_acteurs_obj %}
         {% else %}
         <svg width="482" height="256" viewBox="0 0 482 256" fill="none" xmlns="http://www.w3.org/2000/svg">
