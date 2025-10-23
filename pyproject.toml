@@ -109,7 +109,7 @@ default-groups = [
 ]
 
 [tool.uv.sources]
-django-dsfr = { git = "https://github.com/fabienheureux/django-dsfr", rev = "6c3f91f282bd24f7e1a0135095138d0ed05ceed3" } # pragma: allowlist secret
+django-dsfr = { git = "https://github.com/fabienheureux/django-dsfr", rev = "6aaf78fff6281a2a8908a94c6cc99b81f9cc954c" } # pragma: allowlist secret
 
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.

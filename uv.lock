@@ -1129,8 +1129,8 @@ wheels = [
 
 [[package]]
 name = "django-dsfr"
-version = "3.1.0"
-source = { git = "https://github.com/fabienheureux/django-dsfr?rev=6c3f91f282bd24f7e1a0135095138d0ed05ceed3#6c3f91f282bd24f7e1a0135095138d0ed05ceed3" }
+version = "3.2.0"
+source = { git = "https://github.com/fabienheureux/django-dsfr?rev=6aaf78fff6281a2a8908a94c6cc99b81f9cc954c#6aaf78fff6281a2a8908a94c6cc99b81f9cc954c" }
 dependencies = [
     { name = "django" },
     { name = "django-crispy-forms" },
@@ -3156,7 +3156,7 @@ requires-dist = [
     { name = "django", specifier = "<=5.2.7" },
     { name = "django-colorfield", specifier = ">=0.14.0,<0.15" },
     { name = "django-cors-headers", specifier = ">=4.6.0,<5" },
-    { name = "django-dsfr", git = "https://github.com/fabienheureux/django-dsfr?rev=6c3f91f282bd24f7e1a0135095138d0ed05ceed3" },
+    { name = "django-dsfr", git = "https://github.com/fabienheureux/django-dsfr?rev=6aaf78fff6281a2a8908a94c6cc99b81f9cc954c" },
     { name = "django-extensions", specifier = "~=4.1" },
     { name = "django-import-export", extras = ["xls", "xlsx"], specifier = ">=4.3.8,<5" },
     { name = "django-lookbook", specifier = ">=1.0.2,<2" },

@@ -1,22 +1,26 @@
-<div
-    class="qf-bg-white qf-flex qf-flex-row sm:qf-items-center"
+<header
+    class="max-md:qf-sticky qf-top-0 qf-z-0"
 >
-    <div class="qf-px-2w">
-        {# Panel «Modifier ma recherche» #}
-        {% include 'ui/components/formulaire/update_search.html' %}
+    <div
+        class="qf-bg-white qf-flex qf-flex-row sm:qf-items-center"
+    >
+        <div class="qf-px-2w">
+            {# Panel «Modifier ma recherche» #}
+            {% include 'ui/components/formulaire/update_search.html' %}
 
-        <div data-search-solution-form-target="headerAddressPanel">
-            {# Digital #}
-            <fieldset class="fr-segmented fr-segmented--sm qf-w-full ">
-                <legend class="fr-segmented__legend qf-hidden">
-                    {{ form.digital.label_tag }}
-                </legend>
-                {{ form.digital }}
-            </fieldset>
+            <div data-search-solution-form-target="headerAddressPanel">
+                {# Digital #}
+                <fieldset class="fr-segmented fr-segmented--sm qf-w-full ">
+                    <legend class="fr-segmented__legend qf-hidden">
+                        {{ form.digital.label_tag }}
+                    </legend>
+                    {{ form.digital }}
+                </fieldset>
 
-            <h4 class="fr-my-1w fr-h6">
-                Vos {% if form.digital.value == "1" %}résultats{% else %}adresses{% endif %} {% if form.sous_categorie_objet.value %}pour «{{ form.sous_categorie_objet.value }}»{% endif %}&nbsp;:
-            </h4>
+                <h4 class="fr-my-1w fr-h6">
+                    Vos {% if form.digital.value == "1" %}résultats{% else %}adresses{% endif %} {% if form.sous_categorie_objet.value %}pour «{{ form.sous_categorie_objet.value }}»{% endif %}&nbsp;:
+                </h4>
+            </div>
         </div>
     </div>
-</div>
+</header>

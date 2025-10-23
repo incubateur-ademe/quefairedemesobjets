@@ -1284,6 +1284,10 @@ class DisplayedActeur(BaseActeur, LatLngPropertiesMixin):
     def get_absolute_url(self):
         return reverse("qfdmo:acteur-detail", args=[self.uuid])
 
+    @property
+    def url(self):
+        return self.get_absolute_url()
+
     def acteur_actions(
         self, direction=None, actions_codes=None, sous_categorie_id=None
     ):

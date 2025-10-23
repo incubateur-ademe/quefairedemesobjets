@@ -1,40 +1,31 @@
 <main
     class="
     qf-flex
-    qf-flex-col
-    qf-relative
-    {% if is_digital %}
-    {# Is useful for digital view so that the users can scroll in the results #}
+    max-md:qf-h-main-svh
+    {# Is useful for digital view so that the users can scrol in the results #}
     qf-overflow-auto
-    {% endif %}
-    qf-h-full
     "
     tabindex="0"
 >
-    {% include "ui/components/carte/shared/disclaimers/loading_solutions.html" %}
     {% block form_result %}
-        <div id="addressesPanel"
+        <turbo-frame id="addressesPanel"
             data-search-solution-form-target="addressesPanel"
             class="qf-relative qf-z-10
                 qf-flex qf-flex-col
-                qf-h-full
-                qf-w-full
+                max-md:qf-fixed
+                max-md:qf-top-header max-md:qf-bottom-footer
                 max-md:qf-left-0 max-md:qf-right-0
                 data-[visible=true]:qf-flex-grow
                 data-[visible=false]:qf-invisible data-[visible=false]:qf-h-0"
-            data-visible="true"
+            data-visible="false"
             tabindex="0"
         >
-            {% include 'ui/components/carte/results.html' %}
-        </div>
-        {# Panel «Legend» #}
-        {# TODO: refacto turbo, should be moved outside of form #}
-        {% include 'ui/components/carte/panels/legend_mobile.html' %}
+            {% include 'ui/components/formulaire/results.html' %}
+        </turbo-frame>
     {% endblock form_result %}
 
     {% block form_fields %}
         {% include "ui/components/carte/partials/featureflip_inputs.html" %}
         {{ form.bounding_box }}
-        {{ form.epci_codes }}
     {% endblock form_fields %}
 </main>

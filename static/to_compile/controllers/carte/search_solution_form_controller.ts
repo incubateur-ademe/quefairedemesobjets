@@ -177,6 +177,12 @@ class SearchFormController extends Controller<HTMLElement> {
     this.displayActeur(uuid)
   }
 
+  displayActeurNext(event) {
+    const uuid = event.currentTarget.dataset.uuid
+    event.currentTarget.setAttribute("aria-expanded", "true")
+    this.displayActeur(uuid)
+  }
+
   displayActeur(uuid: string) {
     this.dispatch("captureInteraction")
     const latitude = this.latitudeInputTarget.value

@@ -1,0 +1,58 @@
+<aside class="
+  {% block classes %}
+  {% endblock classes %}
+    md:qf-relative qf-z-20
+    aria-[hidden=false]:qf-block qf-hidden
+    md:qf-overflow-auto
+    max-md:qf-overflow-visible
+    qf-bg-white
+    max-md:qf-absolute
+    max-md:qf-top-full max-md:qf-bottom-0 max-md:qf-left-0 max-md:qf-right-0
+    max-md:qf-drop-shadow-[0_0_100px_rgba(0,0,0,0.3)]
+    max-md:qf-rounded-t-xl
+    max-md:qf-h-full
+    max-md:transition-transform max-md:duration-500
+    aria-[hidden=true]:max-md:qf-animate-out
+    aria-[hidden=true]:max-md:qf-fade-out
+    aria-[hidden=true]:data-[exit-animation-ended=true]:qf-hidden"
+tabindex="0"
+id="acteurDetailsPanel"
+aria-hidden="true"
+data-controller="acteur-details"
+data-search-solution-form-target="acteurDetailsPanel"
+data-acteur-details-map-container-id-value="{{ map_container_id }}"
+>
+  {# Acteur details #}
+  {# Handle visible only on mobile. It is used to drag the panel #}
+  <div
+      data-acteur-details-target="handle"
+      class="qf-py-2w cursor-grab md:qf-hidden"
+  >
+      <span
+          class="qf-block qf-rounded-full qf-w-12w qf-h-1v qf-bg-[#DFDFDF] qf-mx-auto"
+      ></span>
+  </div>
+  {# Content #}
+  <div
+      class="qf-flex-grow qf-relative qf-overflow-auto qf-px-2w"
+      data-acteur-details-target="content"
+  >
+      {# Close button #}
+      <span
+          class="
+          qf-cursor-pointer
+          qf-inline-flex
+          fr-icon fr-icon-close-line
+          qf-flex qf-justify-end
+          qf-absolute qf-left-auto qf-right-[.5rem] qf-top-0
+          qf-z-10
+          qf-bg-white qf-p-1v qf-rounded-full
+          qf-text-blue-france-sun-113-625"
+          data-action="click->acteur-details#hide"
+      >
+      </span>
+      <turbo-frame
+          id="{{ map_container_id }}:acteur-detail"
+      ></turbo-frame>
+  </div>
+</aside>
