@@ -189,6 +189,10 @@ class ComponentsPreview(LookbookPreview):
 
         return render_to_string("ui/components/produit/heading_family.html", context)
 
+    def acteur_detail(self, **kwargs):
+        context = {"preview": True}
+        return render_to_string("ui/components/carte/acteur_detail.html", context)
+
 
 class ModalsPreview(LookbookPreview):
     def embed(self, **kwargs):

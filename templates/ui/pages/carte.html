@@ -47,7 +47,7 @@
                 {% include "ui/components/carte/mode_carte.html" %}
             {% endif %}
 
-            {% include "ui/components/carte/acteur_detail.html" %}
+            {% include "ui/components/carte/acteur_detail.html" with no_draggable=mode_liste %}
         </section>
 
         {# Panel «Filtres» #}

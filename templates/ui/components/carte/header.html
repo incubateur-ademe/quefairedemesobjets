@@ -1,11 +1,14 @@
 {% load dsfr_tags %}
 <header
+    class="
     {# The z-index below can impact the shadow over #}
-    class="{% block header_classes %}qf-z-20{% endblock %} qf-bg-white {% if not mode_liste %}qf-shadow-lg{% endif %}"
+    {% block header_classes %}qf-z-20{% endblock %}
+    qf-bg-white qf-border-b qf-border-solid qf-border-t-0 qf-border-x-0 qf-border-grey-900
+    max-md:qf-p-1w
+    {% if not mode_liste %}qf-shadow-lg{% endif %}"
 >
     <div
-        class="
-        qf-flex qf-flex-col md:qf-flex-row sm:qf-items-center"
+        class="qf-flex qf-flex-col md:qf-flex-row sm:qf-items-center"
     >
 
         {% if not carte_config or not carte_config.supprimer_branding %}
@@ -21,7 +24,7 @@
 
         {# Recherche adresse #}
         <div class="fr-my-1w qf-flex-grow qf-flex qf-flex-col
-            {% if not carte_config or not carte_config.supprimer_branding %}qf-px-2w md:qf-px-3w {% else %}qf-p-2w{% endif %}"
+            {% if carte_config and carte_config.supprimer_branding %}qf-p-2w{% endif %}"
         >
             {% include "ui/components/carte/_addresses_partials/adresse_input_form.html" %}
 
@@ -65,7 +68,7 @@
         </div>
 
         {# Navigation entre carte / liste #}
-        <div class="md:qf-pr-2w max-md:qf-px-2w max-md:qf-flex qf-justify-between qf-items-end max-md:qf-pb-1w" id="view-mode-nav">
+        <div class="md:qf-px-2w max-md:qf-flex qf-justify-between qf-items-end" id="view-mode-nav">
             {{ forms.view_mode }}
             <div class="md:qf-hidden">
             {% dsfr_button label="Filtres" extra_classes="fr-btn--sm fr-btn--secondary fr-ml-1w fr-btn--icon-left fr-icon-equalizer-line" data_action="search-solution-form#toggleAdvancedFilters:prevent" data_testid="advanced-filters" %}
