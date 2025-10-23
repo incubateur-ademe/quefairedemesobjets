@@ -637,6 +637,7 @@ class ViewModeForm(DsfrBaseForm):
         required=False,
         initial=ViewModeSegmentedControlChoices.CARTE,
         widget=SegmentedControl(
+            extra_classes="max-md:fr-segmented--sm",
             attrs={
                 "data-action": "search-solution-form#advancedSubmit",
             },

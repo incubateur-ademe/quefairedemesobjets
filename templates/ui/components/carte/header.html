@@ -21,7 +21,7 @@
 
         {# Recherche adresse #}
         <div class="fr-my-1w qf-flex-grow qf-flex qf-flex-col
-            {% if not carte_config or not carte_config.supprimer_branding %}qf-px-2w md:qf-px-3w md:qf-pr-6w{% else %}qf-p-2w{% endif %}"
+            {% if not carte_config or not carte_config.supprimer_branding %}qf-px-2w md:qf-px-3w {% else %}qf-p-2w{% endif %}"
         >
             {% include "ui/components/carte/_addresses_partials/adresse_input_form.html" %}
 
@@ -65,10 +65,10 @@
         </div>
 
         {# Navigation entre carte / liste #}
-        <div class="md:qf-pr-2w md:qf-mt-2w max-md:qf-px-2w max-md:qf-flex qf-justify-between qf-items-end qf-pb-1w" id="view-mode-nav">
+        <div class="md:qf-pr-2w max-md:qf-px-2w max-md:qf-flex qf-justify-between qf-items-end max-md:qf-pb-1w" id="view-mode-nav">
             {{ forms.view_mode }}
             <div class="md:qf-hidden">
-            {% dsfr_button label="Filtres" extra_classes="fr-btn fr-btn--secondary fr-ml-1w fr-btn--icon-left fr-icon-equalizer-line" data_action="search-solution-form#toggleAdvancedFilters:prevent" data_testid="advanced-filters" %}
+            {% dsfr_button label="Filtres" extra_classes="fr-btn--sm fr-btn--secondary fr-ml-1w fr-btn--icon-left fr-icon-equalizer-line" data_action="search-solution-form#toggleAdvancedFilters:prevent" data_testid="advanced-filters" %}
             </div>
         </div>
     </div>
