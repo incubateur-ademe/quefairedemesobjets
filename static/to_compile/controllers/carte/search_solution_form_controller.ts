@@ -162,7 +162,9 @@ class SearchFormController extends Controller<HTMLElement> {
   }
 
   resetBboxInput() {
-    this.bboxTarget.value = ""
+    if (this.hasBboxTarget) {
+      this.bboxTarget.value = ""
+    }
   }
 
   updateBboxInput(event) {
@@ -170,6 +172,12 @@ class SearchFormController extends Controller<HTMLElement> {
   }
 
   displayDigitalActeur(event) {
+    const uuid = event.currentTarget.dataset.uuid
+    event.currentTarget.setAttribute("aria-expanded", "true")
+    this.displayActeur(uuid)
+  }
+
+  displayActeurNext(event) {
     const uuid = event.currentTarget.dataset.uuid
     event.currentTarget.setAttribute("aria-expanded", "true")
     this.displayActeur(uuid)
@@ -385,9 +393,7 @@ class SearchFormController extends Controller<HTMLElement> {
     const withoutZone =
       (event?.target as HTMLElement).dataset.withoutZone?.toLowerCase() === "true"
     if (withoutZone) {
-      if (this.hasBboxTarget) {
-        this.bboxTarget.value = ""
-      }
+      this.resetBboxInput()
     }
 
     // Applies only in Formulaire alternative.

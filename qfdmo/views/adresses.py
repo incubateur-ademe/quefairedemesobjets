@@ -9,6 +9,7 @@ from django.contrib.postgres.lookups import Unaccent
 from django.contrib.postgres.search import TrigramWordDistance
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.paginator import Paginator
 from django.db.models import Q
 from django.db.models.functions import Length, Lower
 from django.db.models.query import QuerySet
@@ -83,7 +84,7 @@ class SearchActeursView(
     FormView,
 ):
     @abstractmethod
-    def _get_max_displayed_acteurs(self):
+    def _get_max_displayed_acteurs(self) -> int:
         pass
 
     # TODO : supprimer
@@ -200,10 +201,7 @@ class SearchActeursView(
         form = self.get_form_class()(self.request.GET)
 
         kwargs.update(
-            # TODO: refacto forms : define a BooleanField carte on CarteAddressesForm
             carte=self.is_carte,
-            # TODO: refacto forms, return bounded form in template
-            # form=form,
             location="{}",
         )
 
@@ -220,7 +218,6 @@ class SearchActeursView(
             acteurs = acteurs.digital()
         else:
             bbox, acteurs = self._bbox_and_acteurs_from_location_or_epci(acteurs)
-            acteurs = acteurs[: self._get_max_displayed_acteurs()]
 
             # Set Home location (address set as input)
             # FIXME : can be manage in template using the form value ?
@@ -230,10 +227,16 @@ class SearchActeursView(
                 longitude := self.get_data_from_request_or_bounded_form("longitude")
             ):
                 kwargs.update(
-                    location=json.dumps({"latitude": latitude, "longitude": longitude})
+                    location=json.dumps({"latitude": latitude, "longitude": longitude}),
                 )
 
-        kwargs.update(acteurs=acteurs)
+        paginated_acteurs = Paginator(acteurs, self._get_max_displayed_acteurs())
+        paginated_acteurs_obj = paginated_acteurs.page(self.request.GET.get("page", 1))
+        kwargs.update(
+            acteurs=acteurs,
+            paginated_acteurs_obj=paginated_acteurs_obj,
+            count=paginated_acteurs.count,
+        )
         context = super().get_context_data(**kwargs)
 
         # TODO : refacto forms, gérer ça autrement

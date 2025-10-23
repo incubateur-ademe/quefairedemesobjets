@@ -3,7 +3,7 @@ import { clearActivePinpoints } from "../../js/helpers"
 
 class ActeurController extends Controller<HTMLElement> {
   static targets = ["handle", "actions", "content"]
-  static values = { mapContainerId: String }
+  static values = { mapContainerId: String, draggable: Boolean }
   isDragging = false
   panelHeight: number
   startY: number
@@ -20,6 +20,7 @@ class ActeurController extends Controller<HTMLElement> {
   snapPoints = [0.3, 0.5, 0.8, 1]
 
   declare readonly mapContainerIdValue: string
+  declare readonly draggableValue: boolean
   declare readonly handleTarget: HTMLElement
   declare readonly contentTarget: HTMLElement
   declare readonly actionsTarget: HTMLElement
@@ -27,14 +28,16 @@ class ActeurController extends Controller<HTMLElement> {
 
   initialize() {
     this.element.style.transition = this.initialTransition
-    this.element.addEventListener("mousedown", this.#dragStart.bind(this))
-    this.handleTarget.addEventListener("touchstart", this.#dragStart.bind(this))
+    if (this.draggableValue) {
+      this.element.addEventListener("mousedown", this.#dragStart.bind(this))
+      this.handleTarget.addEventListener("touchstart", this.#dragStart.bind(this))
 
-    this.element.addEventListener("mousemove", this.#dragMove.bind(this))
-    this.element.addEventListener("touchmove", this.#dragMove.bind(this))
+      this.element.addEventListener("mousemove", this.#dragMove.bind(this))
+      this.element.addEventListener("touchmove", this.#dragMove.bind(this))
 
-    window.addEventListener("mouseup", this.#dragEnd.bind(this))
-    window.addEventListener("touchend", this.#dragEnd.bind(this))
+      window.addEventListener("mouseup", this.#dragEnd.bind(this))
+      window.addEventListener("touchend", this.#dragEnd.bind(this))
+    }
 
     if (this.hasActionsTarget) {
       this.initialTranslateY = 20 + this.actionsTarget.getBoundingClientRect().bottom
@@ -125,6 +128,10 @@ class ActeurController extends Controller<HTMLElement> {
   }
 
   #setTranslateY(value: number) {
+    if (!this.draggableValue) {
+      return
+    }
+
     if (window.matchMedia("screen and (max-width:768px)").matches) {
       let nextValue = value
       if (Math.abs(value) < this.initialTranslateY) {
