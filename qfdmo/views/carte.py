@@ -50,10 +50,13 @@ class CarteSearchActeursView(SearchActeursView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        forms = self.get_forms()
         context.update(
             is_carte=True,
+            forms=forms,
             map_container_id="carte",
-            forms=self.get_forms(),
+            mode_liste=forms["view_mode"]["view"].value()
+            == ViewModeForm.ViewModeSegmentedControlChoices.LISTE,
         )
         return context
 

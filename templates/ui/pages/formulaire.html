@@ -29,17 +29,21 @@
     >
         <input type="hidden" name="map_container_id" value="{{ map_container_id }}">
         <section class="map-grid">
+
+            {# Part of this tag' style is defined in qfdmo.css because it would have been a bit unreadable as tailwind classes #}
             {% include 'ui/components/formulaire/header.html' with extra_classes="qf-bg-white" %}
             {% include "ui/components/formulaire/main.html" %}
             {% include "ui/components/formulaire/acteur_detail.html" %}
             {% include "ui/components/formulaire/footer.html" %}
         </section>
 
-        {# Panel «Formulaire de recherche» #}
-        {% include 'ui/components/formulaire/search_form.html' %}
+        {% block form_modals %}
+            {# Panel «Formulaire de recherche» #}
+            {% include 'ui/components/formulaire/search_form.html' %}
 
-        {# Panel «Filtres avancés» #}
-        {% include 'ui/components/formulaire/modals/advanced_filters.html' %}
+            {# Panel «Filtres avancés» #}
+            {% include 'ui/components/formulaire/modals/advanced_filters.html' %}
+        {% endblock form_modals %}
     </form>
 </turbo-frame>
 {% endblock content %}

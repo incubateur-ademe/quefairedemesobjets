@@ -39,18 +39,14 @@
     >
         <input type="hidden" name="map_container_id" value="{{ map_container_id }}">
         <section class="map-grid qf-relative">
+            {% include 'ui/components/carte/header.html' %}
 
-            {% if forms.view_mode.view.value == "liste" %}
-                {% include 'ui/components/carte/header.html' with no_shadow=True %}
-            {% else %}
-                {% include 'ui/components/carte/header.html' %}
-            {% endif %}
-
-            {% if forms.view_mode.view.value == "liste" %}
+            {% if mode_liste %}
                 {% include "ui/components/carte/mode_liste.html" %}
             {% else %}
                 {% include "ui/components/carte/mode_carte.html" %}
             {% endif %}
+
             {% include "ui/components/carte/acteur_detail.html" %}
         </section>
 

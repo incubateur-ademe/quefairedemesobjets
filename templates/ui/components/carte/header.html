@@ -1,8 +1,7 @@
 {% load dsfr_tags %}
 <header
     {# The z-index below can impact the shadow over #}
-    class="{% block header_classes %}qf-z-20{% endblock %} qf-bg-white {% if not no_shadow %}qf-shadow-lg{% endif %}
-    qf-border-t-0 qf-border-x-0 qf-border-solid qf-border-b qf-border-grey-900"
+    class="{% block header_classes %}qf-z-20{% endblock %} qf-bg-white {% if not mode_liste %}qf-shadow-lg{% endif %}"
 >
     <div
         class="
