@@ -1,9 +1,10 @@
 # Builder python
 # --- --- --- ---
-FROM apache/airflow:2.11.0 AS python-builder
+FROM apache/airflow:3.1.0 AS python-builder
 
 # system dependencies
 USER root
+
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     libpq-dev python3-dev g++ git
@@ -15,9 +16,11 @@ WORKDIR /opt/airflow/
 COPY pyproject.toml uv.lock ./
 RUN uv sync --group airflow
 
+
 # Runtime
 # --- --- --- ---
-FROM apache/airflow:2.11.0 AS webserver
+FROM apache/airflow:3.1.0 AS webserver
+
 USER ${AIRFLOW_UID:-50000}
 ENV VIRTUAL_ENV=/home/airflow/.local \
     PATH="/opt/airflow/.venv/bin:$PATH" \
@@ -30,4 +33,4 @@ COPY ./dags /opt/airflow/dags
 
 EXPOSE 8080
 
-CMD ["webserver", "--port", "8080"]
+CMD ["api-server"]

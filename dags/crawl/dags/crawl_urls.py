@@ -48,7 +48,6 @@ with DAG(
         "retries": 0,
     },
     start_date=START_DATES.DEFAULT,
-    schedule_interval=None,
     description=("Un DAG pour parcourir des URLs et suggérer des corrections"),
     tags=[TAGS.ENRICH, TAGS.CRAWL, TAGS.ACTEURS, TAGS.URL, TAGS.SUGGESTIONS],
     params={
