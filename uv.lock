@@ -175,21 +175,20 @@ wheels = [
 
 [[package]]
 name = "apache-airflow"
-version = "3.1.0"
+version = "3.1.1rc2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apache-airflow-core" },
     { name = "apache-airflow-task-sdk" },
-    { name = "natsort" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/66/12/65573254244d154a564dd4c67e0de1b85f242cd826fdf0675c150d5b84d1/apache_airflow-3.1.0.tar.gz", hash = "sha256:830eadf196f772f108e67fe2141576e93b06f82e9107b179287d1a5185a8e727", size = 28298, upload-time = "2025-09-25T20:31:42.843Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/18/20/f0e3a0b30e70539c4a08d8e8f1e3b242fe4f679dd1eadd919533884a6f94/apache_airflow-3.1.1rc2.tar.gz", hash = "sha256:c54e3e476cc80ec4d6d51ce6714dd72ca95b2f3ca1725abe0497a6e62b5e0194", size = 28273, upload-time = "2025-10-23T17:16:41.736Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/78/56/f2bea2df212d6ec8076fc559b1c4e7a2b783b725046ad87316ee655356b4/apache_airflow-3.1.0-py3-none-any.whl", hash = "sha256:4f51a6ad5617467ddb2a8d3a2bfb199f3d2788b45d71fac53a2f1de792274bce", size = 12322, upload-time = "2025-09-25T20:31:38.67Z" },
+    { url = "https://files.pythonhosted.org/packages/b0/52/4202b9a2d40c6b2ca5f02db260d67c0822558892f35a0808cfaf9f067c8b/apache_airflow-3.1.1rc2-py3-none-any.whl", hash = "sha256:3f25217bf0f4130c1c8f8cb5f7af7197729a1dbd9488c97ec64c4268d7c9392e", size = 12348, upload-time = "2025-10-23T17:16:36.966Z" },
 ]
 
 [[package]]
 name = "apache-airflow-core"
-version = "3.1.0"
+version = "3.1.1rc2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "a2wsgi" },
@@ -223,6 +222,7 @@ dependencies = [
     { name = "lockfile" },
     { name = "methodtools" },
     { name = "msgspec" },
+    { name = "natsort" },
     { name = "opentelemetry-api" },
     { name = "opentelemetry-exporter-otlp" },
     { name = "opentelemetry-proto" },
@@ -255,9 +255,9 @@ dependencies = [
     { name = "universal-pathlib" },
     { name = "uuid6" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/4d/3b/f3274490c1ddf861e2046379c701626e99a9255fb9902fff98971de6b150/apache_airflow_core-3.1.0.tar.gz", hash = "sha256:d98f0c1c9226041e23098cd27c7f0b215e3b59984070d9c339aa7f34504107fd", size = 4045917, upload-time = "2025-09-25T20:31:40.4Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/81/4e/5983bdfc5a67f72706050d47794b608594416a97caf713c5c84763b30626/apache_airflow_core-3.1.1rc2.tar.gz", hash = "sha256:57fe03e82ae2def0a305d40f8a46d9da2d3d0975de216d29a2693e751d1a6c90", size = 4130638, upload-time = "2025-10-23T17:16:39.056Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a9/0f/f02dd6719b0b98fc7100e62958568a61cffa5eb60473c8bc631f35db8536/apache_airflow_core-3.1.0-py3-none-any.whl", hash = "sha256:84d3d62d6a649fe85736a352d1a8ba133d9ca4a153a8e4575af2e11c1c86b8a0", size = 5252575, upload-time = "2025-09-25T20:31:34.97Z" },
+    { url = "https://files.pythonhosted.org/packages/91/96/1539d573c12face3785832e7e217616dd874706a64b95acd29670c6f1714/apache_airflow_core-3.1.1rc2-py3-none-any.whl", hash = "sha256:1fcc208bfc626be31db4966ddb5a24cd076cad8862f51e48fc873e9c996daad2", size = 5358267, upload-time = "2025-10-23T17:16:33.537Z" },
 ]
 
 [[package]]
@@ -323,6 +323,20 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/26/1b/5ec5e768bfde559ae4cbba3727f2332556f0ad29e7a35e15782cd141f1dc/apache_airflow_providers_common_sql-1.28.1.tar.gz", hash = "sha256:c2ef46561014d70ed2ec9b7d3641a2c3713b008a8c0c984bcde7c3fbda8a5339", size = 105036, upload-time = "2025-09-22T09:22:56.346Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/65/04/60517d44c78ddb7c791639e3f3233b591978daa3263d17ca88fdbce37bf3/apache_airflow_providers_common_sql-1.28.1-py3-none-any.whl", hash = "sha256:9dc5ba569d1144079d406342ebf3111b1c19d81d524dcc2fc8c7dc4438379ee9", size = 66890, upload-time = "2025-09-22T09:22:12.506Z" },
+]
+
+[[package]]
+name = "apache-airflow-providers-elasticsearch"
+version = "6.3.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "apache-airflow" },
+    { name = "apache-airflow-providers-common-sql" },
+    { name = "elasticsearch" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/42/77/669c4e7db9cfe8445c2ee585a2b477a7922b14785a8d4a89d145d170941e/apache_airflow_providers_elasticsearch-6.3.3.tar.gz", hash = "sha256:5ca3ea52daccacc23a5d7567d7c7badd71761f9e6cf1f5f870ec3d6e416eb974", size = 73535, upload-time = "2025-09-22T09:23:05.229Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/58/96/59cb77d039e1fb0fb833ff7140656601e150ddcf90551732abc6afa909ab/apache_airflow_providers_elasticsearch-6.3.3-py3-none-any.whl", hash = "sha256:23df9ca9170a03b8f4f4d890de434322ae3a53472c9b6678921c4cf4b351233c", size = 28630, upload-time = "2025-09-22T09:22:18.47Z" },
 ]
 
 [[package]]
@@ -408,12 +422,13 @@ wheels = [
 
 [[package]]
 name = "apache-airflow-task-sdk"
-version = "1.1.0"
+version = "1.1.1rc2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apache-airflow-core" },
     { name = "asgiref" },
     { name = "attrs" },
+    { name = "babel" },
     { name = "colorlog" },
     { name = "fsspec" },
     { name = "greenback" },
@@ -432,9 +447,9 @@ dependencies = [
     { name = "tenacity" },
     { name = "types-requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/2e/a7/aae0a64578a73cf16df13d8af72119778df8093d15973453ce6f53c71c15/apache_airflow_task_sdk-1.1.0.tar.gz", hash = "sha256:81abc85d80dffb3331f99b1e064dab270b3a26d4bf9aad6b0ce4855742138af0", size = 1271374, upload-time = "2025-09-25T20:31:41.89Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/bb/f0/68eaae30996b8871a94249d85a2de4425b6e16affca49e7bee713fc27b37/apache_airflow_task_sdk-1.1.1rc2.tar.gz", hash = "sha256:6743e0d2226071f571999b11f0267a24e0ae1958d020f81c7da1fd379a51039d", size = 1279090, upload-time = "2025-10-23T17:16:40.365Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/51/6b/1fc93e247b0286c3f7456b3847d76e5baecc6ce772cf5e2197f8093ac69e/apache_airflow_task_sdk-1.1.0-py3-none-any.whl", hash = "sha256:7d92021ceb7ccd4ab186b38b51c6269868f21fb5bdb00e40253463d76e31aefd", size = 297134, upload-time = "2025-09-25T20:31:36.771Z" },
+    { url = "https://files.pythonhosted.org/packages/de/59/522a4e72932a183a83c026cb73bb144e70c15007396d26d67f62571c7ec5/apache_airflow_task_sdk-1.1.1rc2-py3-none-any.whl", hash = "sha256:3f147ff96b9c4911b80790d84ff8af81781bb8e74e5ae8fefbbc85567ba68ca3", size = 301014, upload-time = "2025-10-23T17:16:35.805Z" },
 ]
 
 [[package]]
@@ -1452,6 +1467,33 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/12/1b/07c6710d1829d31e211124093db8f6f9964b224a3097e717af7e3b7e4cc2/dslr-0.6.0.tar.gz", hash = "sha256:e8c8ce2f51f979761def676c71c442711e1dd7c5e8638f32d1118860ed6550ad", size = 11517, upload-time = "2025-07-09T01:27:01.522Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/6e/f3/8091526d8106c21bac9e0b23753f4351ede871bb82f97229e55228dbf89f/dslr-0.6.0-py3-none-any.whl", hash = "sha256:3accbc79f53c3bfd0a0792147fc907b28c88b3444c8617ca6fb33db98b7120c3", size = 11194, upload-time = "2025-07-09T01:27:00.433Z" },
+]
+
+[[package]]
+name = "elastic-transport"
+version = "8.17.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "certifi" },
+    { name = "urllib3" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/6a/54/d498a766ac8fa475f931da85a154666cc81a70f8eb4a780bc8e4e934e9ac/elastic_transport-8.17.1.tar.gz", hash = "sha256:5edef32ac864dca8e2f0a613ef63491ee8d6b8cfb52881fa7313ba9290cac6d2", size = 73425, upload-time = "2025-03-13T07:28:30.776Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/cf/cd/b71d5bc74cde7fc6fd9b2ff9389890f45d9762cbbbf81dc5e51fd7588c4a/elastic_transport-8.17.1-py3-none-any.whl", hash = "sha256:192718f498f1d10c5e9aa8b9cf32aed405e469a7f0e9d6a8923431dbb2c59fb8", size = 64969, upload-time = "2025-03-13T07:28:29.031Z" },
+]
+
+[[package]]
+name = "elasticsearch"
+version = "8.19.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "elastic-transport" },
+    { name = "python-dateutil" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/98/0d/3ee3cd1122c33499ab55814e298f5d3104b0827e613e4243ae557552269a/elasticsearch-8.19.1.tar.gz", hash = "sha256:7192cd6eff2d6ab48f2858265dea717d15ab42f04cfdc4f571a811bcfcbc7a3a", size = 790617, upload-time = "2025-09-12T12:00:32.846Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e3/87/f3f34b99c1590492f0050c51b5eedc15be8a9c4cb7ca4f21a71f8533a4fd/elasticsearch-8.19.1-py3-none-any.whl", hash = "sha256:b511dd4cc26aef1fc02c1b5c1eefe9f16d76127d8f133b0f6900fd052c48d2a4", size = 940480, upload-time = "2025-09-12T12:00:29.377Z" },
 ]
 
 [[package]]
@@ -3274,6 +3316,7 @@ dependencies = [
 airflow = [
     { name = "apache-airflow" },
     { name = "apache-airflow-providers-amazon" },
+    { name = "apache-airflow-providers-elasticsearch" },
     { name = "apache-airflow-providers-fab" },
     { name = "apache-airflow-providers-postgres" },
     { name = "apache-airflow-providers-standard" },
@@ -3354,8 +3397,9 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 airflow = [
-    { name = "apache-airflow", specifier = ">=3.0,<4.0" },
+    { name = "apache-airflow", specifier = ">=3.1.1rc2,<4.0" },
     { name = "apache-airflow-providers-amazon", specifier = ">=9.14.0" },
+    { name = "apache-airflow-providers-elasticsearch", specifier = ">=6.3.3" },
     { name = "apache-airflow-providers-fab", specifier = ">=2.4.3" },
     { name = "apache-airflow-providers-postgres", specifier = ">=6.2.2,<7" },
     { name = "apache-airflow-providers-standard", specifier = ">=1.8.0" },
