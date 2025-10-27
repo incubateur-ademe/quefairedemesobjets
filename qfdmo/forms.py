@@ -619,6 +619,8 @@ class AdvancedConfiguratorForm(forms.Form):
 
 
 class GetFormMixin(forms.Form):
+    # TODO: expliquer pourquoi on utilise ce mixin qui sert à éviter de bounder
+    # un formulaire si la requête ne comporte pas ce qu'il faut
     def __init__(self, data: dict | None = None, *args, **kwargs):
         if data and not (set(data.keys()) & set(self.base_fields.keys())):
             data = None
