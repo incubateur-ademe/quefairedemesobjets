@@ -31,6 +31,7 @@ class MapController extends Controller<HTMLElement> {
   static targets = ["acteur", "searchInZoneButton", "bbox", "mapContainer"]
   static values = {
     location: { type: Object, default: {} },
+    initialZoom: Number,
   }
   declare readonly acteurTargets: Array<HTMLElement>
   declare readonly searchInZoneButtonTarget: HTMLButtonElement
@@ -39,11 +40,13 @@ class MapController extends Controller<HTMLElement> {
   declare readonly mapContainerTarget: HTMLDivElement
   declare readonly hasBboxTarget: boolean
   declare readonly locationValue: object
+  declare readonly initialZoomValue: number
 
   connect() {
     const actorsMap = new SolutionMap({
       selector: this.mapContainerTarget,
       location: this.locationValue,
+      initialZoom: this.initialZoomValue,
       controller: this,
     })
 

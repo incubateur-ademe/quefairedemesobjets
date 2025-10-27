@@ -2,6 +2,7 @@
 # flake8: noqa: E501
 from django import forms
 from django.conf import settings
+from django.contrib.gis.geos import Point
 from django.template import Context, Template
 from django.template.loader import render_to_string
 from django_lookbook.preview import LookbookPreview
@@ -189,9 +190,11 @@ class ComponentsPreview(LookbookPreview):
 
         return render_to_string("ui/components/produit/heading_family.html", context)
 
-    def acteur_detail(self, **kwargs):
-        context = {"preview": True}
-        return render_to_string("ui/components/carte/acteur_detail.html", context)
+    def mini_carte(self, **kwargs):
+        context = {"preview": True, "acteur": None, "home": None}
+        context.update(acteur=DisplayedActeur.objects.first(), location=Point(-2, 48))
+
+        return render_to_string("ui/components/mini_carte/mini_carte.html", context)
 
 
 class ModalsPreview(LookbookPreview):

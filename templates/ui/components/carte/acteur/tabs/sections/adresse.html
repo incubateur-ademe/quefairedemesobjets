@@ -5,6 +5,7 @@ Adresse
 {% endblock title %}
 
 {% block content %}
+{% include "ui/components/mini_carte/mini_carte.html" with location=object.location acteur=object %}
 <address class="qf-not-italic">
     {% if object.adresse %}
         {{ object.adresse|title }}<br>

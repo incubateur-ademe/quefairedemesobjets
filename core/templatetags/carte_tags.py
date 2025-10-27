@@ -1,3 +1,4 @@
+import json
 import logging
 from math import sqrt
 
@@ -78,8 +79,6 @@ def distance_to_acteur(context, acteur):
 @register.filter
 def tojson(value):
     """Django filter to replace Jinja2's |tojson filter"""
-    import json
-
     return json.dumps(value)
 
 
@@ -99,9 +98,20 @@ def random_range(max_value):
     return random.randint(0, max_value - 1)
 
 
+@register.filter
+def to_latlng_json(point):
+    return json.dumps({"latitude": point.y, "longitude": point.x})
+
+
 @register.inclusion_tag("templatetags/acteur_pinpoint.html", takes_context=True)
 def acteur_pinpoint_tag(
-    context, acteur, direction, action_list, carte, carte_config, sous_categorie_id
+    context,
+    acteur,
+    direction=None,
+    action_list=None,
+    carte=None,
+    carte_config=None,
+    sous_categorie_id=None,
 ):
     """
     Template tags to display the acteur's pinpoint after increasing context with
@@ -128,6 +138,7 @@ def acteur_pinpoint_tag(
         action_list=action_list,
         sous_categorie_id=sous_categorie_id,
     )
+
     if action_to_display is None:
         logger.warning("No actions found for acteur %s", acteur)
         return context
@@ -208,6 +219,6 @@ def acteurs_table(context, acteurs):
         "table": {
             "header": ["Nom du lieu", "Actions", "Distance", ""],
             "content": [render_acteur(acteur, context) for acteur in acteurs],
-            "extra_classes": "fr-table--mode-liste fr-table--multiline" " qf-w-full",
+            "extra_classes": "fr-table--mode-liste fr-table--multiline qf-w-full",
         }
     }
