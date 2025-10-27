@@ -28,8 +28,10 @@ class CarteSearchActeursView(SearchActeursView):
             else:
                 form = form(self.request.GET)
 
-            if form and form.is_valid():
-                bounded_forms[key] = form
+            # Call is_valid to bound form
+            form.is_valid()
+            bounded_forms[key] = form
+
         return bounded_forms
 
     def get_initial(self, *args, **kwargs):

@@ -618,7 +618,15 @@ class AdvancedConfiguratorForm(forms.Form):
     )
 
 
-class ViewModeForm(DsfrBaseForm):
+class GetFormMixin(forms.Form):
+    def __init__(self, data: dict | None = None, *args, **kwargs):
+        if data and not (set(data.keys()) & set(self.base_fields.keys())):
+            data = None
+
+        super().__init__(*args, data=data, **kwargs)
+
+
+class ViewModeForm(GetFormMixin, DsfrBaseForm):
     class ViewModeSegmentedControlChoices(TextChoices, SegmentedControlChoices):
         CARTE = {
             "value": "carte",
@@ -635,7 +643,7 @@ class ViewModeForm(DsfrBaseForm):
         label="",
         choices=ViewModeSegmentedControlChoices.choices,
         required=False,
-        initial=ViewModeSegmentedControlChoices.CARTE,
+        initial=ViewModeSegmentedControlChoices.CARTE.value,
         widget=SegmentedControl(
             extra_classes="max-md:fr-segmented--sm",
             attrs={
