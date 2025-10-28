@@ -1,7 +1,3 @@
-.fr-enlarge-link a::before {
-  position: relative !important;
-}
-
 .fr-icon-action-acheter::before,
 .fr-icon-action-acheter::after {
   -webkit-mask-image: url("../svg/acheter.svg");
