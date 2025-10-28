@@ -1,9 +1,14 @@
 import { Controller } from "@hotwired/stimulus"
 import debounce from "lodash/debounce"
-import { removeHash } from "../../js/helpers"
+import {
+  ACTIVE_PINPOINT_CLASSNAME,
+  clearActivePinpoints,
+  removeHash,
+} from "../../js/helpers"
 import { SolutionMap } from "../../js/solution_map"
 import { ActorLocation, DisplayedActeur } from "../../js/types"
 import SearchFormController from "./search_solution_form_controller"
+import { Map } from "maplibre-gl"
 
 export class Actor implements DisplayedActeur {
   uuid: string
@@ -28,6 +33,7 @@ export class Actor implements DisplayedActeur {
 }
 
 class MapController extends Controller<HTMLElement> {
+  actorsMap: SolutionMap
   static targets = ["acteur", "searchInZoneButton", "bbox", "mapContainer"]
   static values = {
     location: { type: Object, default: {} },
@@ -43,7 +49,7 @@ class MapController extends Controller<HTMLElement> {
   declare readonly initialZoomValue: number
 
   connect() {
-    const actorsMap = new SolutionMap({
+    this.actorsMap = new SolutionMap({
       selector: this.mapContainerTarget,
       location: this.locationValue,
       initialZoom: this.initialZoomValue,
@@ -52,13 +58,18 @@ class MapController extends Controller<HTMLElement> {
 
     if (this.hasBboxTarget && this.bboxTarget.value !== "") {
       const bbox = JSON.parse(this.bboxTarget.value)
-      actorsMap.addActorMarkersToMap(this.acteurTargets, bbox)
+      this.actorsMap.addActorMarkersToMap(this.acteurTargets, bbox)
     } else {
-      actorsMap.addActorMarkersToMap(this.acteurTargets)
+      this.actorsMap.addActorMarkersToMap(this.acteurTargets)
     }
 
-    actorsMap.initEventListener()
+    this.actorsMap.initEventListener()
     removeHash()
+  }
+
+  handleClick(event) {
+    clearActivePinpoints()
+    event.currentTarget.classList.add(ACTIVE_PINPOINT_CLASSNAME)
   }
 
   initialize() {
@@ -67,16 +78,16 @@ class MapController extends Controller<HTMLElement> {
 
   mapChanged(event: CustomEvent) {
     this.dispatch("updateBbox", { detail: event.detail })
-    this.displaySearchInZoneButton()
+    this.#displaySearchInZoneButton()
   }
 
-  displaySearchInZoneButton() {
+  #displaySearchInZoneButton() {
     if (this.hasSearchInZoneButtonTarget) {
       this.searchInZoneButtonTarget.classList.remove("qf-hidden")
     }
   }
 
-  hideSearchInZoneButton() {
+  #hideSearchInZoneButton() {
     if (this.hasSearchInZoneButtonTarget) {
       this.searchInZoneButtonTarget.classList.add("qf-hidden")
     }

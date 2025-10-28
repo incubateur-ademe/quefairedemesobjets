@@ -114,9 +114,6 @@ export class SolutionMap {
       if (longitude && latitude) {
         let longitudeFloat = parseFloat(longitude.replace(",", "."))
         let latitudeFloat = parseFloat(latitude.replace(",", "."))
-        actor.addEventListener("click", () => {
-          this.#onClickMarker(actor)
-        })
         actor.classList.remove("qf-invisible")
 
         const marker: Marker = new maplibregl.Marker({
@@ -157,12 +154,6 @@ export class SolutionMap {
       ]
       this.map.fitBounds(bounds, fitBoundsOptions)
     }
-  }
-
-  #onClickMarker(actorMarker: HTMLDivElement) {
-    clearActivePinpoints()
-    actorMarker.classList.add(ACTIVE_PINPOINT_CLASSNAME)
-    this.#controller.setActiveActeur(actorMarker.dataset.uuid || "")
   }
 
   #addZoomControl() {

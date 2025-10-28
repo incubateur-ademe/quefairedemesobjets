@@ -1,2 +1,4 @@
 {% load dsfr_tags %}
-{% dsfr_link label="Voir la fiche" url=object.url data_action="search-solution-form#displayActeurNext:prevent" data_uuid=object.uuid %}
+{% with frame=map_container_id|add:":acteur-detail" %}
+{% dsfr_link label="Voir la fiche" url=object.url data_turbo_frame=frame data_uuid=object.uuid %}
+{% endwith %}

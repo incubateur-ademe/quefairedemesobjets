@@ -206,7 +206,8 @@ def render_acteur(acteur, context):
         ),
         distance_to_acteur(context, acteur),
         render_to_string(
-            "ui/components/carte/acteur/acteur_lien.html", {"object": acteur}
+            "ui/components/carte/acteur/acteur_lien.html",
+            {"object": acteur, "map_container_id": context["map_container_id"]},
         ),
     ]
 
