@@ -5,6 +5,7 @@ secret_key            = "secret-key"  # pragma: allowlist secret
 
 AIRFLOW__DATABASE__SQL_ALCHEMY_CONN = ""
 AIRFLOW_CONN_WEBAPP_DB = ""
+AIRFLOW_CONN_SCALEWAYLOGS = ""
 DATABASE_URL = ""
 DB_WAREHOUSE = ""
 ENVIRONMENT = ""
