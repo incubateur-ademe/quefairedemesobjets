@@ -150,3 +150,7 @@ variable "AIRFLOW__API_AUTH__JWT_SECRET" {
   type      = string
   sensitive = true
 }
+variable "AIRFLOW_CONN_SCALEWAYLOGS" {
+  type      = string
+  sensitive = true
+}
