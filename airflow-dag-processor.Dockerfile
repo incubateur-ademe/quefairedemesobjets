@@ -14,6 +14,10 @@ USER ${AIRFLOW_UID:-50000}:0
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 WORKDIR /opt/airflow/
 COPY pyproject.toml uv.lock ./
+
+COPY ./airflow-fork/ /opt/airflow/airflow-fork/
+
+ENV UV_PROJECT_ENVIRONMENT=/home/airflow/.local
 RUN uv sync --group airflow
 
 
@@ -26,12 +30,12 @@ USER root
 # unzip for Airflow DAG
 RUN echo "deb http://deb.debian.org/debian stable main" > /etc/apt/sources.list
 RUN apt-get update
-RUN apt-get install -y unzip curl nginx
+RUN apt-get install -y unzip curl nginx vim
 
 RUN apt-get install -y --no-install-recommends \
     gdal-bin libgdal-dev jq
 
-# Installation du client Scaleway CLI
+# Scaleway CLI installation
 RUN curl -s https://raw.githubusercontent.com/scaleway/scaleway-cli/master/scripts/get.sh | sh
 
 # Nginx
@@ -46,13 +50,13 @@ RUN echo 'worker_processes 1; \
 
 USER ${AIRFLOW_UID:-50000}:0
 WORKDIR /opt/airflow
-ENV VIRTUAL_ENV=/opt/airflow/.venv \
-    LD_LIBRARY_PATH=/usr/lib \
-    PATH="/opt/airflow/.venv/bin:$PATH"
+ENV VIRTUAL_ENV=/home/airflow/.local \
+    PATH="/home/airflow/.local/bin:$PATH" \
+    LD_LIBRARY_PATH=/usr/lib
 
-COPY --from=python-builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
+COPY --from=python-builder /home/airflow/.local /home/airflow/.local
 
-# Nécessaire pour faire fonctionner Django dans Airflow
+# Necessary to make Django work in Airflow
 COPY ./core/ /opt/airflow/core/
 COPY ./qfdmo/ /opt/airflow/qfdmo/
 COPY ./qfdmd/ /opt/airflow/qfdmd/
@@ -61,7 +65,7 @@ COPY ./dbt/ /opt/airflow/dbt/
 COPY ./scripts/ /opt/airflow/scripts/
 COPY ./dsfr_hacks/ /opt/airflow/dsfr_hacks/
 
-# Classique Airflow
+# Airflow classics
 COPY ./dags/ /opt/airflow/dags/
 COPY ./config/ /opt/airflow/config/
 COPY ./plugins/ /opt/airflow/plugins/

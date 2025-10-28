@@ -13,6 +13,7 @@ x-airflow-common: &airflow-common
     - ./scripts:/opt/airflow/scripts
     - ./config:/opt/airflow/config
     - ./plugins:/opt/airflow/plugins
+    - ./airflow-fork/providers/amazon/src/airflow/providers/amazon:/home/airflow/.local/lib/python3.12/site-packages/airflow/providers/amazon
   # Voir la doc et s'assurer que AIRFLOW_UID est
   # définit dans le .env pour correspondre à votre UID
   # sed -i '/^AIRFLOW_UID=/d' .env && echo "AIRFLOW_UID=$(id -u)" >> .env
@@ -22,6 +23,8 @@ x-airflow-common: &airflow-common
   depends_on: &airflow-common-depends-on
     airflow-db:
       condition: service_healthy
+  stdin_open: true
+  tty: true
 
 services:
   lvao-webapp-db:
@@ -88,7 +91,7 @@ services:
       _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
       _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
       _PIP_ADDITIONAL_REQUIREMENTS: ""
-    user: "0:0"
+    # user: "0:0"
     build:
       context: .
       dockerfile: airflow-webserver.Dockerfile

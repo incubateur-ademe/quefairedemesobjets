@@ -55,6 +55,9 @@ filterwarnings = [
   "ignore::django.utils.deprecation.RemovedInDjango60Warning",
 ]
 
+[tool.uv.sources]
+apache-airflow-providers-amazon = { path = "airflow-fork/providers/amazon" }
+
 [dependency-groups]
 dev = [
     "black>=25.1.0,<26",
