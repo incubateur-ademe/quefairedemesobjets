@@ -6,6 +6,10 @@ from django.template.defaulttags import register
 @register.simple_tag(takes_context=True)
 def acteur_url(context, acteur, with_map=True):
     query_params = {}
+    request = context.get("request")
+
+    if request:
+        query_params.update(request.GET.dict())
 
     if with_map:
         query_params.update(with_map=True)

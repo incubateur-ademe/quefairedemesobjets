@@ -201,6 +201,7 @@ def render_acteur(acteur, context):
         "map_container_id": context["map_container_id"],
         "forms": context["forms"],
         "object": acteur,
+        "request": context["request"],
     }
     return [
         render_to_string("ui/components/carte/acteur/acteur_labels.html", _context),
