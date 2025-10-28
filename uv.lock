@@ -98,15 +98,6 @@ wheels = [
 ]
 
 [[package]]
-name = "aiosmtplib"
-version = "4.0.2"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/0f/e1/cc58e0be242f0b410707e001ed22c689435964fcaab42108887426e44fff/aiosmtplib-4.0.2.tar.gz", hash = "sha256:f0b4933e7270a8be2b588761e5b12b7334c11890ee91987c2fb057e72f566da6", size = 61052, upload-time = "2025-08-25T02:39:07.249Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/f1/2f/db9414bbeacee48ab0c7421a0319b361b7c15b5c3feebcd38684f5d5f849/aiosmtplib-4.0.2-py3-none-any.whl", hash = "sha256:72491f96e6de035c28d29870186782eccb2f651db9c5f8a32c9db689327f5742", size = 27048, upload-time = "2025-08-25T02:39:06.089Z" },
-]
-
-[[package]]
 name = "aiosqlite"
 version = "0.21.0"
 source = { registry = "https://pypi.org/simple" }
@@ -175,22 +166,262 @@ wheels = [
 
 [[package]]
 name = "apache-airflow"
-version = "3.1.0"
-source = { registry = "https://pypi.org/simple" }
+version = "3.1.1"
+source = { editable = "airflow-fork" }
 dependencies = [
     { name = "apache-airflow-core" },
     { name = "apache-airflow-task-sdk" },
-    { name = "natsort" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/66/12/65573254244d154a564dd4c67e0de1b85f242cd826fdf0675c150d5b84d1/apache_airflow-3.1.0.tar.gz", hash = "sha256:830eadf196f772f108e67fe2141576e93b06f82e9107b179287d1a5185a8e727", size = 28298, upload-time = "2025-09-25T20:31:42.843Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/78/56/f2bea2df212d6ec8076fc559b1c4e7a2b783b725046ad87316ee655356b4/apache_airflow-3.1.0-py3-none-any.whl", hash = "sha256:4f51a6ad5617467ddb2a8d3a2bfb199f3d2788b45d71fac53a2f1de792274bce", size = 12322, upload-time = "2025-09-25T20:31:38.67Z" },
+
+[package.metadata]
+requires-dist = [
+    { name = "amqp", marker = "extra == 'rabbitmq'", specifier = ">=5.2.0" },
+    { name = "apache-airflow", extras = ["aiobotocore", "amazon-aws-auth", "apache-atlas", "apache-webhdfs", "async", "cloudpickle", "github-enterprise", "google-auth", "graphviz", "kerberos", "ldap", "otel", "pandas", "polars", "rabbitmq", "s3fs", "sentry", "statsd", "uv"], marker = "extra == 'all'", editable = "airflow-fork" },
+    { name = "apache-airflow-core", editable = "airflow-fork/airflow-core" },
+    { name = "apache-airflow-core", extras = ["all"], marker = "extra == 'all'", editable = "airflow-fork/airflow-core" },
+    { name = "apache-airflow-core", extras = ["all"], marker = "extra == 'all-core'", editable = "airflow-fork/airflow-core" },
+    { name = "apache-airflow-core", extras = ["async"], marker = "extra == 'async'", editable = "airflow-fork/airflow-core" },
+    { name = "apache-airflow-core", extras = ["graphviz"], marker = "extra == 'graphviz'", editable = "airflow-fork/airflow-core" },
+    { name = "apache-airflow-core", extras = ["kerberos"], marker = "extra == 'kerberos'", editable = "airflow-fork/airflow-core" },
+    { name = "apache-airflow-core", extras = ["otel"], marker = "extra == 'otel'", editable = "airflow-fork/airflow-core" },
+    { name = "apache-airflow-core", extras = ["sentry"], marker = "extra == 'sentry'", editable = "airflow-fork/airflow-core" },
+    { name = "apache-airflow-core", extras = ["statsd"], marker = "extra == 'statsd'", editable = "airflow-fork/airflow-core" },
+    { name = "apache-airflow-providers-airbyte", marker = "extra == 'airbyte'", editable = "airflow-fork/providers/airbyte" },
+    { name = "apache-airflow-providers-airbyte", marker = "extra == 'all'", editable = "airflow-fork/providers/airbyte" },
+    { name = "apache-airflow-providers-alibaba", marker = "extra == 'alibaba'", editable = "airflow-fork/providers/alibaba" },
+    { name = "apache-airflow-providers-alibaba", marker = "extra == 'all'", editable = "airflow-fork/providers/alibaba" },
+    { name = "apache-airflow-providers-amazon", marker = "extra == 'all'", editable = "airflow-fork/providers/amazon" },
+    { name = "apache-airflow-providers-amazon", marker = "extra == 'amazon'", editable = "airflow-fork/providers/amazon" },
+    { name = "apache-airflow-providers-amazon", extras = ["aiobotocore"], marker = "extra == 'aiobotocore'", editable = "airflow-fork/providers/amazon" },
+    { name = "apache-airflow-providers-amazon", extras = ["python3-saml"], marker = "extra == 'amazon-aws-auth'", editable = "airflow-fork/providers/amazon" },
+    { name = "apache-airflow-providers-amazon", extras = ["s3fs"], marker = "extra == 's3fs'", editable = "airflow-fork/providers/amazon" },
+    { name = "apache-airflow-providers-apache-beam", marker = "python_full_version != '3.13.*' and extra == 'all'", editable = "airflow-fork/providers/apache/beam" },
+    { name = "apache-airflow-providers-apache-beam", marker = "python_full_version != '3.13.*' and extra == 'apache-beam'", editable = "airflow-fork/providers/apache/beam" },
+    { name = "apache-airflow-providers-apache-cassandra", marker = "extra == 'all'", editable = "airflow-fork/providers/apache/cassandra" },
+    { name = "apache-airflow-providers-apache-cassandra", marker = "extra == 'apache-cassandra'", editable = "airflow-fork/providers/apache/cassandra" },
+    { name = "apache-airflow-providers-apache-drill", marker = "extra == 'all'", editable = "airflow-fork/providers/apache/drill" },
+    { name = "apache-airflow-providers-apache-drill", marker = "extra == 'apache-drill'", editable = "airflow-fork/providers/apache/drill" },
+    { name = "apache-airflow-providers-apache-druid", marker = "extra == 'all'", editable = "airflow-fork/providers/apache/druid" },
+    { name = "apache-airflow-providers-apache-druid", marker = "extra == 'apache-druid'", editable = "airflow-fork/providers/apache/druid" },
+    { name = "apache-airflow-providers-apache-flink", marker = "extra == 'all'", editable = "airflow-fork/providers/apache/flink" },
+    { name = "apache-airflow-providers-apache-flink", marker = "extra == 'apache-flink'", editable = "airflow-fork/providers/apache/flink" },
+    { name = "apache-airflow-providers-apache-hdfs", marker = "extra == 'all'", editable = "airflow-fork/providers/apache/hdfs" },
+    { name = "apache-airflow-providers-apache-hdfs", marker = "extra == 'apache-hdfs'", editable = "airflow-fork/providers/apache/hdfs" },
+    { name = "apache-airflow-providers-apache-hdfs", marker = "extra == 'apache-webhdfs'", editable = "airflow-fork/providers/apache/hdfs" },
+    { name = "apache-airflow-providers-apache-hive", marker = "extra == 'all'", editable = "airflow-fork/providers/apache/hive" },
+    { name = "apache-airflow-providers-apache-hive", marker = "extra == 'apache-hive'", editable = "airflow-fork/providers/apache/hive" },
+    { name = "apache-airflow-providers-apache-iceberg", marker = "extra == 'all'", editable = "airflow-fork/providers/apache/iceberg" },
+    { name = "apache-airflow-providers-apache-iceberg", marker = "extra == 'apache-iceberg'", editable = "airflow-fork/providers/apache/iceberg" },
+    { name = "apache-airflow-providers-apache-impala", marker = "extra == 'all'", editable = "airflow-fork/providers/apache/impala" },
+    { name = "apache-airflow-providers-apache-impala", marker = "extra == 'apache-impala'", editable = "airflow-fork/providers/apache/impala" },
+    { name = "apache-airflow-providers-apache-kafka", marker = "python_full_version != '3.13.*' and extra == 'all'", editable = "airflow-fork/providers/apache/kafka" },
+    { name = "apache-airflow-providers-apache-kafka", marker = "python_full_version != '3.13.*' and extra == 'apache-kafka'", editable = "airflow-fork/providers/apache/kafka" },
+    { name = "apache-airflow-providers-apache-kylin", marker = "extra == 'all'", editable = "airflow-fork/providers/apache/kylin" },
+    { name = "apache-airflow-providers-apache-kylin", marker = "extra == 'apache-kylin'", editable = "airflow-fork/providers/apache/kylin" },
+    { name = "apache-airflow-providers-apache-livy", marker = "extra == 'all'", editable = "airflow-fork/providers/apache/livy" },
+    { name = "apache-airflow-providers-apache-livy", marker = "extra == 'apache-livy'", editable = "airflow-fork/providers/apache/livy" },
+    { name = "apache-airflow-providers-apache-pig", marker = "extra == 'all'", editable = "airflow-fork/providers/apache/pig" },
+    { name = "apache-airflow-providers-apache-pig", marker = "extra == 'apache-pig'", editable = "airflow-fork/providers/apache/pig" },
+    { name = "apache-airflow-providers-apache-pinot", marker = "extra == 'all'", editable = "airflow-fork/providers/apache/pinot" },
+    { name = "apache-airflow-providers-apache-pinot", marker = "extra == 'apache-pinot'", editable = "airflow-fork/providers/apache/pinot" },
+    { name = "apache-airflow-providers-apache-spark", marker = "extra == 'all'", editable = "airflow-fork/providers/apache/spark" },
+    { name = "apache-airflow-providers-apache-spark", marker = "extra == 'apache-spark'", editable = "airflow-fork/providers/apache/spark" },
+    { name = "apache-airflow-providers-apache-tinkerpop", marker = "extra == 'all'", editable = "airflow-fork/providers/apache/tinkerpop" },
+    { name = "apache-airflow-providers-apache-tinkerpop", marker = "extra == 'apache-tinkerpop'", editable = "airflow-fork/providers/apache/tinkerpop" },
+    { name = "apache-airflow-providers-apprise", marker = "extra == 'all'", editable = "airflow-fork/providers/apprise" },
+    { name = "apache-airflow-providers-apprise", marker = "extra == 'apprise'", editable = "airflow-fork/providers/apprise" },
+    { name = "apache-airflow-providers-arangodb", marker = "extra == 'all'", editable = "airflow-fork/providers/arangodb" },
+    { name = "apache-airflow-providers-arangodb", marker = "extra == 'arangodb'", editable = "airflow-fork/providers/arangodb" },
+    { name = "apache-airflow-providers-asana", marker = "extra == 'all'", editable = "airflow-fork/providers/asana" },
+    { name = "apache-airflow-providers-asana", marker = "extra == 'asana'", editable = "airflow-fork/providers/asana" },
+    { name = "apache-airflow-providers-atlassian-jira", marker = "extra == 'all'", editable = "airflow-fork/providers/atlassian/jira" },
+    { name = "apache-airflow-providers-atlassian-jira", marker = "extra == 'atlassian-jira'", editable = "airflow-fork/providers/atlassian/jira" },
+    { name = "apache-airflow-providers-celery", marker = "extra == 'all'", editable = "airflow-fork/providers/celery" },
+    { name = "apache-airflow-providers-celery", marker = "extra == 'celery'", editable = "airflow-fork/providers/celery" },
+    { name = "apache-airflow-providers-cloudant", marker = "extra == 'all'", editable = "airflow-fork/providers/cloudant" },
+    { name = "apache-airflow-providers-cloudant", marker = "extra == 'cloudant'", editable = "airflow-fork/providers/cloudant" },
+    { name = "apache-airflow-providers-cncf-kubernetes", marker = "extra == 'all'", editable = "airflow-fork/providers/cncf/kubernetes" },
+    { name = "apache-airflow-providers-cncf-kubernetes", marker = "extra == 'cncf-kubernetes'", editable = "airflow-fork/providers/cncf/kubernetes" },
+    { name = "apache-airflow-providers-cohere", marker = "extra == 'all'", editable = "airflow-fork/providers/cohere" },
+    { name = "apache-airflow-providers-cohere", marker = "extra == 'cohere'", editable = "airflow-fork/providers/cohere" },
+    { name = "apache-airflow-providers-common-compat", marker = "extra == 'all'", editable = "airflow-fork/providers/common/compat" },
+    { name = "apache-airflow-providers-common-compat", marker = "extra == 'common-compat'", editable = "airflow-fork/providers/common/compat" },
+    { name = "apache-airflow-providers-common-io", marker = "extra == 'all'", editable = "airflow-fork/providers/common/io" },
+    { name = "apache-airflow-providers-common-io", marker = "extra == 'common-io'", editable = "airflow-fork/providers/common/io" },
+    { name = "apache-airflow-providers-common-messaging", marker = "extra == 'all'", editable = "airflow-fork/providers/common/messaging" },
+    { name = "apache-airflow-providers-common-messaging", marker = "extra == 'common-messaging'", editable = "airflow-fork/providers/common/messaging" },
+    { name = "apache-airflow-providers-common-sql", marker = "extra == 'all'", editable = "airflow-fork/providers/common/sql" },
+    { name = "apache-airflow-providers-common-sql", marker = "extra == 'common-sql'", editable = "airflow-fork/providers/common/sql" },
+    { name = "apache-airflow-providers-common-sql", extras = ["pandas"], marker = "extra == 'pandas'", editable = "airflow-fork/providers/common/sql" },
+    { name = "apache-airflow-providers-common-sql", extras = ["polars"], marker = "extra == 'polars'", editable = "airflow-fork/providers/common/sql" },
+    { name = "apache-airflow-providers-databricks", marker = "extra == 'all'", editable = "airflow-fork/providers/databricks" },
+    { name = "apache-airflow-providers-databricks", marker = "extra == 'databricks'", editable = "airflow-fork/providers/databricks" },
+    { name = "apache-airflow-providers-datadog", marker = "extra == 'all'", editable = "airflow-fork/providers/datadog" },
+    { name = "apache-airflow-providers-datadog", marker = "extra == 'datadog'", editable = "airflow-fork/providers/datadog" },
+    { name = "apache-airflow-providers-dbt-cloud", marker = "extra == 'all'", editable = "airflow-fork/providers/dbt/cloud" },
+    { name = "apache-airflow-providers-dbt-cloud", marker = "extra == 'dbt-cloud'", editable = "airflow-fork/providers/dbt/cloud" },
+    { name = "apache-airflow-providers-dingding", marker = "extra == 'all'", editable = "airflow-fork/providers/dingding" },
+    { name = "apache-airflow-providers-dingding", marker = "extra == 'dingding'", editable = "airflow-fork/providers/dingding" },
+    { name = "apache-airflow-providers-discord", marker = "extra == 'all'", editable = "airflow-fork/providers/discord" },
+    { name = "apache-airflow-providers-discord", marker = "extra == 'discord'", editable = "airflow-fork/providers/discord" },
+    { name = "apache-airflow-providers-docker", marker = "extra == 'all'", editable = "airflow-fork/providers/docker" },
+    { name = "apache-airflow-providers-docker", marker = "extra == 'docker'", editable = "airflow-fork/providers/docker" },
+    { name = "apache-airflow-providers-edge3", marker = "extra == 'all'", editable = "airflow-fork/providers/edge3" },
+    { name = "apache-airflow-providers-edge3", marker = "extra == 'edge3'", editable = "airflow-fork/providers/edge3" },
+    { name = "apache-airflow-providers-elasticsearch", marker = "extra == 'all'", editable = "airflow-fork/providers/elasticsearch" },
+    { name = "apache-airflow-providers-elasticsearch", marker = "extra == 'elasticsearch'", editable = "airflow-fork/providers/elasticsearch" },
+    { name = "apache-airflow-providers-exasol", marker = "extra == 'all'", editable = "airflow-fork/providers/exasol" },
+    { name = "apache-airflow-providers-exasol", marker = "extra == 'exasol'", editable = "airflow-fork/providers/exasol" },
+    { name = "apache-airflow-providers-fab", marker = "python_full_version != '3.13.*' and extra == 'all'", editable = "airflow-fork/providers/fab" },
+    { name = "apache-airflow-providers-fab", marker = "python_full_version != '3.13.*' and extra == 'fab'", editable = "airflow-fork/providers/fab" },
+    { name = "apache-airflow-providers-fab", marker = "python_full_version != '3.13.*' and extra == 'github-enterprise'", editable = "airflow-fork/providers/fab" },
+    { name = "apache-airflow-providers-fab", marker = "python_full_version != '3.13.*' and extra == 'google-auth'", editable = "airflow-fork/providers/fab" },
+    { name = "apache-airflow-providers-facebook", marker = "extra == 'all'", editable = "airflow-fork/providers/facebook" },
+    { name = "apache-airflow-providers-facebook", marker = "extra == 'facebook'", editable = "airflow-fork/providers/facebook" },
+    { name = "apache-airflow-providers-ftp", marker = "extra == 'all'", editable = "airflow-fork/providers/ftp" },
+    { name = "apache-airflow-providers-ftp", marker = "extra == 'ftp'", editable = "airflow-fork/providers/ftp" },
+    { name = "apache-airflow-providers-git", marker = "extra == 'all'", editable = "airflow-fork/providers/git" },
+    { name = "apache-airflow-providers-git", marker = "extra == 'git'", editable = "airflow-fork/providers/git" },
+    { name = "apache-airflow-providers-github", marker = "extra == 'all'", editable = "airflow-fork/providers/github" },
+    { name = "apache-airflow-providers-github", marker = "extra == 'github'", editable = "airflow-fork/providers/github" },
+    { name = "apache-airflow-providers-google", marker = "extra == 'all'", editable = "airflow-fork/providers/google" },
+    { name = "apache-airflow-providers-google", marker = "extra == 'google'", editable = "airflow-fork/providers/google" },
+    { name = "apache-airflow-providers-grpc", marker = "extra == 'all'", editable = "airflow-fork/providers/grpc" },
+    { name = "apache-airflow-providers-grpc", marker = "extra == 'grpc'", editable = "airflow-fork/providers/grpc" },
+    { name = "apache-airflow-providers-hashicorp", marker = "extra == 'all'", editable = "airflow-fork/providers/hashicorp" },
+    { name = "apache-airflow-providers-hashicorp", marker = "extra == 'hashicorp'", editable = "airflow-fork/providers/hashicorp" },
+    { name = "apache-airflow-providers-http", marker = "extra == 'all'", editable = "airflow-fork/providers/http" },
+    { name = "apache-airflow-providers-http", marker = "extra == 'http'", editable = "airflow-fork/providers/http" },
+    { name = "apache-airflow-providers-imap", marker = "extra == 'all'", editable = "airflow-fork/providers/imap" },
+    { name = "apache-airflow-providers-imap", marker = "extra == 'imap'", editable = "airflow-fork/providers/imap" },
+    { name = "apache-airflow-providers-influxdb", marker = "extra == 'all'", editable = "airflow-fork/providers/influxdb" },
+    { name = "apache-airflow-providers-influxdb", marker = "extra == 'influxdb'", editable = "airflow-fork/providers/influxdb" },
+    { name = "apache-airflow-providers-jdbc", marker = "extra == 'all'", editable = "airflow-fork/providers/jdbc" },
+    { name = "apache-airflow-providers-jdbc", marker = "extra == 'jdbc'", editable = "airflow-fork/providers/jdbc" },
+    { name = "apache-airflow-providers-jenkins", marker = "extra == 'all'", editable = "airflow-fork/providers/jenkins" },
+    { name = "apache-airflow-providers-jenkins", marker = "extra == 'jenkins'", editable = "airflow-fork/providers/jenkins" },
+    { name = "apache-airflow-providers-keycloak", marker = "extra == 'all'", editable = "airflow-fork/providers/keycloak" },
+    { name = "apache-airflow-providers-keycloak", marker = "extra == 'keycloak'", editable = "airflow-fork/providers/keycloak" },
+    { name = "apache-airflow-providers-microsoft-azure", marker = "extra == 'all'", editable = "airflow-fork/providers/microsoft/azure" },
+    { name = "apache-airflow-providers-microsoft-azure", marker = "extra == 'microsoft-azure'", editable = "airflow-fork/providers/microsoft/azure" },
+    { name = "apache-airflow-providers-microsoft-mssql", marker = "extra == 'all'", editable = "airflow-fork/providers/microsoft/mssql" },
+    { name = "apache-airflow-providers-microsoft-mssql", marker = "extra == 'microsoft-mssql'", editable = "airflow-fork/providers/microsoft/mssql" },
+    { name = "apache-airflow-providers-microsoft-psrp", marker = "extra == 'all'", editable = "airflow-fork/providers/microsoft/psrp" },
+    { name = "apache-airflow-providers-microsoft-psrp", marker = "extra == 'microsoft-psrp'", editable = "airflow-fork/providers/microsoft/psrp" },
+    { name = "apache-airflow-providers-microsoft-winrm", marker = "extra == 'all'", editable = "airflow-fork/providers/microsoft/winrm" },
+    { name = "apache-airflow-providers-microsoft-winrm", marker = "extra == 'microsoft-winrm'", editable = "airflow-fork/providers/microsoft/winrm" },
+    { name = "apache-airflow-providers-mongo", marker = "extra == 'all'", editable = "airflow-fork/providers/mongo" },
+    { name = "apache-airflow-providers-mongo", marker = "extra == 'mongo'", editable = "airflow-fork/providers/mongo" },
+    { name = "apache-airflow-providers-mysql", marker = "extra == 'all'", editable = "airflow-fork/providers/mysql" },
+    { name = "apache-airflow-providers-mysql", marker = "extra == 'mysql'", editable = "airflow-fork/providers/mysql" },
+    { name = "apache-airflow-providers-neo4j", marker = "extra == 'all'", editable = "airflow-fork/providers/neo4j" },
+    { name = "apache-airflow-providers-neo4j", marker = "extra == 'neo4j'", editable = "airflow-fork/providers/neo4j" },
+    { name = "apache-airflow-providers-odbc", marker = "extra == 'all'", editable = "airflow-fork/providers/odbc" },
+    { name = "apache-airflow-providers-odbc", marker = "extra == 'odbc'", editable = "airflow-fork/providers/odbc" },
+    { name = "apache-airflow-providers-openai", marker = "extra == 'all'", editable = "airflow-fork/providers/openai" },
+    { name = "apache-airflow-providers-openai", marker = "extra == 'openai'", editable = "airflow-fork/providers/openai" },
+    { name = "apache-airflow-providers-openfaas", marker = "extra == 'all'", editable = "airflow-fork/providers/openfaas" },
+    { name = "apache-airflow-providers-openfaas", marker = "extra == 'openfaas'", editable = "airflow-fork/providers/openfaas" },
+    { name = "apache-airflow-providers-openlineage", marker = "extra == 'all'", editable = "airflow-fork/providers/openlineage" },
+    { name = "apache-airflow-providers-openlineage", marker = "extra == 'openlineage'", editable = "airflow-fork/providers/openlineage" },
+    { name = "apache-airflow-providers-opensearch", marker = "extra == 'all'", editable = "airflow-fork/providers/opensearch" },
+    { name = "apache-airflow-providers-opensearch", marker = "extra == 'opensearch'", editable = "airflow-fork/providers/opensearch" },
+    { name = "apache-airflow-providers-opsgenie", marker = "extra == 'all'", editable = "airflow-fork/providers/opsgenie" },
+    { name = "apache-airflow-providers-opsgenie", marker = "extra == 'opsgenie'", editable = "airflow-fork/providers/opsgenie" },
+    { name = "apache-airflow-providers-oracle", marker = "extra == 'all'", editable = "airflow-fork/providers/oracle" },
+    { name = "apache-airflow-providers-oracle", marker = "extra == 'oracle'", editable = "airflow-fork/providers/oracle" },
+    { name = "apache-airflow-providers-pagerduty", marker = "extra == 'all'", editable = "airflow-fork/providers/pagerduty" },
+    { name = "apache-airflow-providers-pagerduty", marker = "extra == 'pagerduty'", editable = "airflow-fork/providers/pagerduty" },
+    { name = "apache-airflow-providers-papermill", marker = "extra == 'all'", editable = "airflow-fork/providers/papermill" },
+    { name = "apache-airflow-providers-papermill", marker = "extra == 'papermill'", editable = "airflow-fork/providers/papermill" },
+    { name = "apache-airflow-providers-pgvector", marker = "extra == 'all'", editable = "airflow-fork/providers/pgvector" },
+    { name = "apache-airflow-providers-pgvector", marker = "extra == 'pgvector'", editable = "airflow-fork/providers/pgvector" },
+    { name = "apache-airflow-providers-pinecone", marker = "extra == 'all'", editable = "airflow-fork/providers/pinecone" },
+    { name = "apache-airflow-providers-pinecone", marker = "extra == 'pinecone'", editable = "airflow-fork/providers/pinecone" },
+    { name = "apache-airflow-providers-postgres", marker = "extra == 'all'", editable = "airflow-fork/providers/postgres" },
+    { name = "apache-airflow-providers-postgres", marker = "extra == 'postgres'", editable = "airflow-fork/providers/postgres" },
+    { name = "apache-airflow-providers-presto", marker = "extra == 'all'", editable = "airflow-fork/providers/presto" },
+    { name = "apache-airflow-providers-presto", marker = "extra == 'presto'", editable = "airflow-fork/providers/presto" },
+    { name = "apache-airflow-providers-qdrant", marker = "extra == 'all'", editable = "airflow-fork/providers/qdrant" },
+    { name = "apache-airflow-providers-qdrant", marker = "extra == 'qdrant'", editable = "airflow-fork/providers/qdrant" },
+    { name = "apache-airflow-providers-redis", marker = "extra == 'all'", editable = "airflow-fork/providers/redis" },
+    { name = "apache-airflow-providers-redis", marker = "extra == 'redis'", editable = "airflow-fork/providers/redis" },
+    { name = "apache-airflow-providers-salesforce", marker = "extra == 'all'", editable = "airflow-fork/providers/salesforce" },
+    { name = "apache-airflow-providers-salesforce", marker = "extra == 'salesforce'", editable = "airflow-fork/providers/salesforce" },
+    { name = "apache-airflow-providers-samba", marker = "extra == 'all'", editable = "airflow-fork/providers/samba" },
+    { name = "apache-airflow-providers-samba", marker = "extra == 'samba'", editable = "airflow-fork/providers/samba" },
+    { name = "apache-airflow-providers-segment", marker = "extra == 'all'", editable = "airflow-fork/providers/segment" },
+    { name = "apache-airflow-providers-segment", marker = "extra == 'segment'", editable = "airflow-fork/providers/segment" },
+    { name = "apache-airflow-providers-sendgrid", marker = "extra == 'all'", editable = "airflow-fork/providers/sendgrid" },
+    { name = "apache-airflow-providers-sendgrid", marker = "extra == 'sendgrid'", editable = "airflow-fork/providers/sendgrid" },
+    { name = "apache-airflow-providers-sftp", marker = "extra == 'all'", editable = "airflow-fork/providers/sftp" },
+    { name = "apache-airflow-providers-sftp", marker = "extra == 'sftp'", editable = "airflow-fork/providers/sftp" },
+    { name = "apache-airflow-providers-singularity", marker = "extra == 'all'", editable = "airflow-fork/providers/singularity" },
+    { name = "apache-airflow-providers-singularity", marker = "extra == 'singularity'", editable = "airflow-fork/providers/singularity" },
+    { name = "apache-airflow-providers-slack", marker = "extra == 'all'", editable = "airflow-fork/providers/slack" },
+    { name = "apache-airflow-providers-slack", marker = "extra == 'slack'", editable = "airflow-fork/providers/slack" },
+    { name = "apache-airflow-providers-smtp", marker = "extra == 'all'", editable = "airflow-fork/providers/smtp" },
+    { name = "apache-airflow-providers-smtp", marker = "extra == 'smtp'", editable = "airflow-fork/providers/smtp" },
+    { name = "apache-airflow-providers-snowflake", marker = "extra == 'all'", editable = "airflow-fork/providers/snowflake" },
+    { name = "apache-airflow-providers-snowflake", marker = "extra == 'snowflake'", editable = "airflow-fork/providers/snowflake" },
+    { name = "apache-airflow-providers-sqlite", marker = "extra == 'all'", editable = "airflow-fork/providers/sqlite" },
+    { name = "apache-airflow-providers-sqlite", marker = "extra == 'sqlite'", editable = "airflow-fork/providers/sqlite" },
+    { name = "apache-airflow-providers-ssh", marker = "extra == 'all'", editable = "airflow-fork/providers/ssh" },
+    { name = "apache-airflow-providers-ssh", marker = "extra == 'ssh'", editable = "airflow-fork/providers/ssh" },
+    { name = "apache-airflow-providers-standard", marker = "extra == 'all'", editable = "airflow-fork/providers/standard" },
+    { name = "apache-airflow-providers-standard", marker = "extra == 'standard'", editable = "airflow-fork/providers/standard" },
+    { name = "apache-airflow-providers-tableau", marker = "extra == 'all'", editable = "airflow-fork/providers/tableau" },
+    { name = "apache-airflow-providers-tableau", marker = "extra == 'tableau'", editable = "airflow-fork/providers/tableau" },
+    { name = "apache-airflow-providers-telegram", marker = "extra == 'all'", editable = "airflow-fork/providers/telegram" },
+    { name = "apache-airflow-providers-telegram", marker = "extra == 'telegram'", editable = "airflow-fork/providers/telegram" },
+    { name = "apache-airflow-providers-teradata", marker = "extra == 'all'", editable = "airflow-fork/providers/teradata" },
+    { name = "apache-airflow-providers-teradata", marker = "extra == 'teradata'", editable = "airflow-fork/providers/teradata" },
+    { name = "apache-airflow-providers-trino", marker = "extra == 'all'", editable = "airflow-fork/providers/trino" },
+    { name = "apache-airflow-providers-trino", marker = "extra == 'trino'", editable = "airflow-fork/providers/trino" },
+    { name = "apache-airflow-providers-vertica", marker = "extra == 'all'", editable = "airflow-fork/providers/vertica" },
+    { name = "apache-airflow-providers-vertica", marker = "extra == 'vertica'", editable = "airflow-fork/providers/vertica" },
+    { name = "apache-airflow-providers-weaviate", marker = "extra == 'all'", editable = "airflow-fork/providers/weaviate" },
+    { name = "apache-airflow-providers-weaviate", marker = "extra == 'weaviate'", editable = "airflow-fork/providers/weaviate" },
+    { name = "apache-airflow-providers-yandex", marker = "python_full_version != '3.13.*' and extra == 'all'", editable = "airflow-fork/providers/yandex" },
+    { name = "apache-airflow-providers-yandex", marker = "python_full_version != '3.13.*' and extra == 'yandex'", editable = "airflow-fork/providers/yandex" },
+    { name = "apache-airflow-providers-ydb", marker = "python_full_version != '3.13.*' and extra == 'all'", editable = "airflow-fork/providers/ydb" },
+    { name = "apache-airflow-providers-ydb", marker = "python_full_version != '3.13.*' and extra == 'ydb'", editable = "airflow-fork/providers/ydb" },
+    { name = "apache-airflow-providers-zendesk", marker = "extra == 'all'", editable = "airflow-fork/providers/zendesk" },
+    { name = "apache-airflow-providers-zendesk", marker = "extra == 'zendesk'", editable = "airflow-fork/providers/zendesk" },
+    { name = "apache-airflow-task-sdk", editable = "airflow-fork/task-sdk" },
+    { name = "atlasclient", marker = "extra == 'apache-atlas'", specifier = ">=0.1.2" },
+    { name = "authlib", marker = "extra == 'github-enterprise'", specifier = ">=1.0.0" },
+    { name = "authlib", marker = "extra == 'google-auth'", specifier = ">=1.0.0" },
+    { name = "cloudpickle", marker = "extra == 'cloudpickle'", specifier = ">=2.2.1" },
+    { name = "python-ldap", marker = "extra == 'ldap'", specifier = ">=3.4.4" },
+    { name = "uv", marker = "extra == 'uv'", specifier = ">=0.9.4" },
 ]
+provides-extras = ["all-core", "async", "graphviz", "kerberos", "otel", "sentry", "statsd", "airbyte", "alibaba", "amazon", "apache-beam", "apache-cassandra", "apache-drill", "apache-druid", "apache-flink", "apache-hdfs", "apache-hive", "apache-iceberg", "apache-impala", "apache-kafka", "apache-kylin", "apache-livy", "apache-pig", "apache-pinot", "apache-spark", "apache-tinkerpop", "apprise", "arangodb", "asana", "atlassian-jira", "celery", "cloudant", "cncf-kubernetes", "cohere", "common-compat", "common-io", "common-messaging", "common-sql", "databricks", "datadog", "dbt-cloud", "dingding", "discord", "docker", "edge3", "elasticsearch", "exasol", "fab", "facebook", "ftp", "git", "github", "google", "grpc", "hashicorp", "http", "imap", "influxdb", "jdbc", "jenkins", "keycloak", "microsoft-azure", "microsoft-mssql", "microsoft-psrp", "microsoft-winrm", "mongo", "mysql", "neo4j", "odbc", "openai", "openfaas", "openlineage", "opensearch", "opsgenie", "oracle", "pagerduty", "papermill", "pgvector", "pinecone", "postgres", "presto", "qdrant", "redis", "salesforce", "samba", "segment", "sendgrid", "sftp", "singularity", "slack", "smtp", "snowflake", "sqlite", "ssh", "standard", "tableau", "telegram", "teradata", "trino", "vertica", "weaviate", "yandex", "ydb", "zendesk", "all", "aiobotocore", "apache-atlas", "apache-webhdfs", "amazon-aws-auth", "cloudpickle", "github-enterprise", "google-auth", "ldap", "pandas", "polars", "rabbitmq", "s3fs", "uv"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "apache-airflow", extras = ["all"], editable = "airflow-fork" },
+    { name = "apache-airflow-breeze", editable = "airflow-fork/dev/breeze" },
+    { name = "apache-airflow-ctl", editable = "airflow-fork/airflow-ctl" },
+    { name = "apache-airflow-dev", editable = "airflow-fork/dev" },
+    { name = "apache-airflow-devel-common", extras = ["no-doc"], editable = "airflow-fork/devel-common" },
+    { name = "apache-airflow-docker-tests", editable = "airflow-fork/docker-tests" },
+    { name = "apache-airflow-helm-tests", editable = "airflow-fork/helm-tests" },
+    { name = "apache-airflow-kubernetes-tests", editable = "airflow-fork/kubernetes-tests" },
+    { name = "apache-airflow-shared-logging", editable = "airflow-fork/shared/logging" },
+    { name = "apache-airflow-shared-secrets-masker", editable = "airflow-fork/shared/secrets_masker" },
+    { name = "apache-airflow-shared-timezones", editable = "airflow-fork/shared/timezones" },
+    { name = "apache-airflow-task-sdk", editable = "airflow-fork/task-sdk" },
+    { name = "apache-airflow-task-sdk-tests", editable = "airflow-fork/task-sdk-tests" },
+]
+docs = [{ name = "apache-airflow-devel-common", extras = ["docs"], editable = "airflow-fork/devel-common" }]
+docs-gen = [{ name = "apache-airflow-devel-common", extras = ["docs-gen"], editable = "airflow-fork/devel-common" }]
+leveldb = [{ name = "plyvel", specifier = ">=1.5.1" }]
 
 [[package]]
 name = "apache-airflow-core"
-version = "3.1.0"
-source = { registry = "https://pypi.org/simple" }
+version = "3.1.1"
+source = { editable = "airflow-fork/airflow-core" }
 dependencies = [
     { name = "a2wsgi" },
     { name = "aiosqlite" },
@@ -223,6 +454,7 @@ dependencies = [
     { name = "lockfile" },
     { name = "methodtools" },
     { name = "msgspec" },
+    { name = "natsort" },
     { name = "opentelemetry-api" },
     { name = "opentelemetry-exporter-otlp" },
     { name = "opentelemetry-proto" },
@@ -255,15 +487,109 @@ dependencies = [
     { name = "universal-pathlib" },
     { name = "uuid6" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/4d/3b/f3274490c1ddf861e2046379c701626e99a9255fb9902fff98971de6b150/apache_airflow_core-3.1.0.tar.gz", hash = "sha256:d98f0c1c9226041e23098cd27c7f0b215e3b59984070d9c339aa7f34504107fd", size = 4045917, upload-time = "2025-09-25T20:31:40.4Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/a9/0f/f02dd6719b0b98fc7100e62958568a61cffa5eb60473c8bc631f35db8536/apache_airflow_core-3.1.0-py3-none-any.whl", hash = "sha256:84d3d62d6a649fe85736a352d1a8ba133d9ca4a153a8e4575af2e11c1c86b8a0", size = 5252575, upload-time = "2025-09-25T20:31:34.97Z" },
+
+[package.metadata]
+requires-dist = [
+    { name = "a2wsgi", specifier = ">=1.10.8" },
+    { name = "aiosqlite", specifier = ">=0.20.0" },
+    { name = "alembic", specifier = ">=1.13.1,<2.0" },
+    { name = "apache-airflow-core", extras = ["graphviz", "kerberos", "otel", "sentry", "statsd"], marker = "extra == 'all'", editable = "airflow-fork/airflow-core" },
+    { name = "apache-airflow-providers-common-compat", editable = "airflow-fork/providers/common/compat" },
+    { name = "apache-airflow-providers-common-io", editable = "airflow-fork/providers/common/io" },
+    { name = "apache-airflow-providers-common-sql", editable = "airflow-fork/providers/common/sql" },
+    { name = "apache-airflow-providers-smtp", editable = "airflow-fork/providers/smtp" },
+    { name = "apache-airflow-providers-standard", editable = "airflow-fork/providers/standard" },
+    { name = "apache-airflow-task-sdk", editable = "airflow-fork/task-sdk" },
+    { name = "argcomplete", specifier = ">=1.10" },
+    { name = "asgiref", specifier = ">=2.3.0" },
+    { name = "attrs", specifier = ">=22.1.0,!=25.2.0" },
+    { name = "blinker", marker = "extra == 'sentry'", specifier = ">=1.1" },
+    { name = "cadwyn", specifier = ">=5.2.1" },
+    { name = "colorlog", specifier = ">=6.8.2" },
+    { name = "cron-descriptor", specifier = ">=1.2.24" },
+    { name = "croniter", specifier = ">=2.0.2" },
+    { name = "cryptography", specifier = ">=41.0.0" },
+    { name = "deprecated", specifier = ">=1.2.13" },
+    { name = "dill", specifier = ">=0.2.2" },
+    { name = "eventlet", marker = "extra == 'async'", specifier = ">=0.37.0" },
+    { name = "fastapi", extras = ["standard-no-fastapi-cloud-cli"], specifier = ">=0.116.0,<0.118.0" },
+    { name = "gevent", marker = "extra == 'async'", specifier = ">=25.4.1" },
+    { name = "graphviz", marker = "sys_platform != 'darwin' and extra == 'graphviz'", specifier = ">=0.20" },
+    { name = "greenback", marker = "extra == 'async'", specifier = ">=1.2.1" },
+    { name = "greenlet", marker = "extra == 'async'", specifier = ">=3.1.0" },
+    { name = "httpx", specifier = ">=0.25.0" },
+    { name = "importlib-metadata", marker = "python_full_version < '3.12'", specifier = ">=6.5" },
+    { name = "importlib-metadata", marker = "python_full_version >= '3.12'", specifier = ">=7.0" },
+    { name = "itsdangerous", specifier = ">=2.0" },
+    { name = "jinja2", specifier = ">=3.1.5" },
+    { name = "jsonschema", specifier = ">=4.19.1" },
+    { name = "lazy-object-proxy", specifier = ">=1.2.0" },
+    { name = "libcst", specifier = ">=1.8.2" },
+    { name = "linkify-it-py", specifier = ">=2.0.0" },
+    { name = "lockfile", specifier = ">=0.12.2" },
+    { name = "methodtools", specifier = ">=0.4.7" },
+    { name = "msgspec", specifier = ">=0.19.0" },
+    { name = "natsort", specifier = ">=8.4.0" },
+    { name = "opentelemetry-api", specifier = ">=1.27.0" },
+    { name = "opentelemetry-exporter-otlp", specifier = ">=1.27.0" },
+    { name = "opentelemetry-exporter-prometheus", marker = "extra == 'otel'", specifier = ">=0.47b0" },
+    { name = "opentelemetry-proto", specifier = ">=1.27.0,<9999" },
+    { name = "packaging", specifier = ">=25.0" },
+    { name = "pathspec", specifier = ">=0.9.0" },
+    { name = "pendulum", specifier = ">=3.1.0" },
+    { name = "pluggy", specifier = ">=1.5.0" },
+    { name = "psutil", specifier = ">=5.8.0" },
+    { name = "pydantic", specifier = ">=2.11.0" },
+    { name = "pygments", specifier = ">=2.0.1,!=2.19.0" },
+    { name = "pygtrie", specifier = ">=2.5.0" },
+    { name = "pyjwt", specifier = ">=2.10.0" },
+    { name = "pykerberos", marker = "extra == 'kerberos'", specifier = ">=1.1.13" },
+    { name = "python-daemon", specifier = ">=3.0.0" },
+    { name = "python-dateutil", specifier = ">=2.7.0" },
+    { name = "python-slugify", specifier = ">=5.0" },
+    { name = "requests", specifier = ">=2.32.0,<3" },
+    { name = "requests-kerberos", marker = "extra == 'kerberos'", specifier = ">=0.14.0" },
+    { name = "rich", specifier = ">=13.6.0" },
+    { name = "rich-argparse", specifier = ">=1.0.0" },
+    { name = "sentry-sdk", extras = ["flask"], marker = "extra == 'sentry'", specifier = ">=2.30.0" },
+    { name = "setproctitle", specifier = ">=1.3.3" },
+    { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=1.4.49" },
+    { name = "sqlalchemy-jsonfield", specifier = ">=1.0" },
+    { name = "sqlalchemy-utils", specifier = ">=0.41.2" },
+    { name = "starlette", specifier = ">=0.45.0" },
+    { name = "statsd", marker = "extra == 'statsd'", specifier = ">=3.3.0" },
+    { name = "structlog", specifier = ">=25.4.0" },
+    { name = "svcs", specifier = ">=25.1.0" },
+    { name = "tabulate", specifier = ">=0.9.0" },
+    { name = "tenacity", specifier = ">=8.3.0" },
+    { name = "termcolor", specifier = ">=3.0.0" },
+    { name = "thrift-sasl", marker = "extra == 'kerberos'", specifier = ">=0.4.2" },
+    { name = "typing-extensions", specifier = ">=4.14.1" },
+    { name = "universal-pathlib", specifier = ">=0.2.6,<0.3.0" },
+    { name = "uuid6", specifier = ">=2024.7.10" },
 ]
+provides-extras = ["async", "graphviz", "kerberos", "otel", "sentry", "statsd", "all"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "apache-airflow", extras = ["pandas", "polars"], editable = "airflow-fork" },
+    { name = "apache-airflow-core", extras = ["all"], editable = "airflow-fork/airflow-core" },
+    { name = "apache-airflow-ctl", editable = "airflow-fork/airflow-ctl" },
+    { name = "apache-airflow-devel-common", editable = "airflow-fork/devel-common" },
+    { name = "apache-airflow-providers-amazon", editable = "airflow-fork/providers/amazon" },
+    { name = "apache-airflow-providers-celery", editable = "airflow-fork/providers/celery" },
+    { name = "apache-airflow-providers-cncf-kubernetes", editable = "airflow-fork/providers/cncf/kubernetes" },
+    { name = "apache-airflow-providers-fab", marker = "python_full_version < '3.13'", editable = "airflow-fork/providers/fab" },
+    { name = "apache-airflow-providers-ftp", editable = "airflow-fork/providers/ftp" },
+    { name = "apache-airflow-providers-git", editable = "airflow-fork/providers/git" },
+    { name = "apache-airflow-task-sdk", editable = "airflow-fork/task-sdk" },
+]
+docs = [{ name = "apache-airflow-devel-common", extras = ["docs"], editable = "airflow-fork/devel-common" }]
 
 [[package]]
 name = "apache-airflow-providers-amazon"
-version = "9.15.0"
-source = { registry = "https://pypi.org/simple" }
+version = "9.13.0"
+source = { directory = "airflow-fork/providers/amazon" }
 dependencies = [
     { name = "apache-airflow" },
     { name = "apache-airflow-providers-common-compat" },
@@ -281,49 +607,172 @@ dependencies = [
     { name = "sagemaker-studio" },
     { name = "watchtower" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/43/64/5304f48b1fa2318c78f339e95042a0a6fd2efb46abd296e2cd234ab3c0a6/apache_airflow_providers_amazon-9.15.0.tar.gz", hash = "sha256:71dc1ed3323f332015c464e03d5a257b7ad4e52ca9b6f6073b9217beec14a300", size = 2032133, upload-time = "2025-10-04T09:11:01.981Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/53/92/a5961c634b8dc26b2aed3a1e0bf883ee3c8cd995c813a143467a50269bac/apache_airflow_providers_amazon-9.15.0-py3-none-any.whl", hash = "sha256:91bd8547651082dcf5bfbc81892126b99c8460d891483d0e946f2ff0b06e0ab2", size = 674023, upload-time = "2025-10-04T09:10:56.981Z" },
+
+[package.metadata]
+requires-dist = [
+    { name = "aiobotocore", extras = ["boto3"], marker = "extra == 'aiobotocore'", specifier = ">=2.21.1" },
+    { name = "apache-airflow", editable = "airflow-fork" },
+    { name = "apache-airflow-providers-apache-hive", marker = "extra == 'apache-hive'", editable = "airflow-fork/providers/apache/hive" },
+    { name = "apache-airflow-providers-cncf-kubernetes", marker = "extra == 'cncf-kubernetes'", editable = "airflow-fork/providers/cncf/kubernetes" },
+    { name = "apache-airflow-providers-common-compat", editable = "airflow-fork/providers/common/compat" },
+    { name = "apache-airflow-providers-common-messaging", marker = "extra == 'common-messaging'", editable = "airflow-fork/providers/common/messaging" },
+    { name = "apache-airflow-providers-common-sql", editable = "airflow-fork/providers/common/sql" },
+    { name = "apache-airflow-providers-exasol", marker = "extra == 'exasol'", editable = "airflow-fork/providers/exasol" },
+    { name = "apache-airflow-providers-fab", marker = "python_full_version < '3.13' and extra == 'fab'", editable = "airflow-fork/providers/fab" },
+    { name = "apache-airflow-providers-ftp", marker = "extra == 'ftp'", editable = "airflow-fork/providers/ftp" },
+    { name = "apache-airflow-providers-google", marker = "extra == 'google'", editable = "airflow-fork/providers/google" },
+    { name = "apache-airflow-providers-http", editable = "airflow-fork/providers/http" },
+    { name = "apache-airflow-providers-imap", marker = "extra == 'imap'", editable = "airflow-fork/providers/imap" },
+    { name = "apache-airflow-providers-microsoft-azure", marker = "extra == 'microsoft-azure'", editable = "airflow-fork/providers/microsoft/azure" },
+    { name = "apache-airflow-providers-mongo", marker = "extra == 'mongo'", editable = "airflow-fork/providers/mongo" },
+    { name = "apache-airflow-providers-openlineage", marker = "extra == 'openlineage'", editable = "airflow-fork/providers/openlineage" },
+    { name = "apache-airflow-providers-salesforce", marker = "extra == 'salesforce'", editable = "airflow-fork/providers/salesforce" },
+    { name = "apache-airflow-providers-ssh", marker = "extra == 'ssh'", editable = "airflow-fork/providers/ssh" },
+    { name = "apache-airflow-providers-standard", marker = "extra == 'standard'", editable = "airflow-fork/providers/standard" },
+    { name = "asgiref", specifier = ">=2.3.0" },
+    { name = "boto3", specifier = ">=1.37.2" },
+    { name = "botocore", specifier = ">=1.37.2" },
+    { name = "inflection", specifier = ">=0.5.1" },
+    { name = "jmespath", specifier = ">=0.7.0" },
+    { name = "jsonpath-ng", specifier = ">=1.5.3" },
+    { name = "lxml", marker = "python_full_version < '3.13' and extra == 'python3-saml'", specifier = ">=6.0.0" },
+    { name = "marshmallow", specifier = ">=3" },
+    { name = "pyathena", specifier = ">=3.10.0" },
+    { name = "python3-saml", marker = "python_full_version < '3.13' and extra == 'python3-saml'", specifier = ">=1.16.0" },
+    { name = "redshift-connector", specifier = ">=2.1.3" },
+    { name = "s3fs", marker = "extra == 's3fs'", specifier = ">=2023.10.0" },
+    { name = "sagemaker-studio", specifier = ">=1.0.9" },
+    { name = "watchtower", specifier = ">=3.3.1,<4" },
+    { name = "xmlsec", marker = "python_full_version < '3.13' and extra == 'python3-saml'", specifier = ">=1.3.14" },
 ]
+provides-extras = ["aiobotocore", "cncf-kubernetes", "s3fs", "python3-saml", "apache-hive", "exasol", "fab", "ftp", "google", "imap", "microsoft-azure", "mongo", "openlineage", "salesforce", "ssh", "standard", "common-messaging"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "aiobotocore", extras = ["boto3"], specifier = ">=2.21.1" },
+    { name = "apache-airflow", editable = "airflow-fork" },
+    { name = "apache-airflow-devel-common", editable = "airflow-fork/devel-common" },
+    { name = "apache-airflow-providers-apache-hive", editable = "airflow-fork/providers/apache/hive" },
+    { name = "apache-airflow-providers-cncf-kubernetes", editable = "airflow-fork/providers/cncf/kubernetes" },
+    { name = "apache-airflow-providers-common-compat", editable = "airflow-fork/providers/common/compat" },
+    { name = "apache-airflow-providers-common-messaging", editable = "airflow-fork/providers/common/messaging" },
+    { name = "apache-airflow-providers-common-sql", editable = "airflow-fork/providers/common/sql" },
+    { name = "apache-airflow-providers-common-sql", extras = ["pandas", "polars"], editable = "airflow-fork/providers/common/sql" },
+    { name = "apache-airflow-providers-exasol", editable = "airflow-fork/providers/exasol" },
+    { name = "apache-airflow-providers-ftp", editable = "airflow-fork/providers/ftp" },
+    { name = "apache-airflow-providers-google", editable = "airflow-fork/providers/google" },
+    { name = "apache-airflow-providers-http", editable = "airflow-fork/providers/http" },
+    { name = "apache-airflow-providers-imap", editable = "airflow-fork/providers/imap" },
+    { name = "apache-airflow-providers-microsoft-azure", editable = "airflow-fork/providers/microsoft/azure" },
+    { name = "apache-airflow-providers-mongo", editable = "airflow-fork/providers/mongo" },
+    { name = "apache-airflow-providers-openlineage", editable = "airflow-fork/providers/openlineage" },
+    { name = "apache-airflow-providers-postgres", editable = "airflow-fork/providers/postgres" },
+    { name = "apache-airflow-providers-salesforce", editable = "airflow-fork/providers/salesforce" },
+    { name = "apache-airflow-providers-ssh", editable = "airflow-fork/providers/ssh" },
+    { name = "apache-airflow-task-sdk", editable = "airflow-fork/task-sdk" },
+    { name = "aws-xray-sdk", specifier = ">=2.12.0" },
+    { name = "moto", extras = ["cloudformation", "glue"], specifier = ">=5.1.2" },
+    { name = "mypy-boto3-appflow", specifier = ">=1.37.0" },
+    { name = "mypy-boto3-rds", specifier = ">=1.34.90" },
+    { name = "mypy-boto3-redshift-data", specifier = ">=1.34.0" },
+    { name = "mypy-boto3-s3", specifier = ">=1.34.90" },
+    { name = "openapi-schema-validator", specifier = ">=0.6.2" },
+    { name = "openapi-spec-validator", specifier = ">=0.7.1" },
+    { name = "opensearch-py", specifier = ">=2.2.0" },
+    { name = "responses", specifier = ">=0.25.0" },
+    { name = "s3fs", specifier = ">=2023.10.0" },
+]
+docs = [{ name = "apache-airflow-devel-common", extras = ["docs"], editable = "airflow-fork/devel-common" }]
 
 [[package]]
 name = "apache-airflow-providers-common-compat"
 version = "1.7.4"
-source = { registry = "https://pypi.org/simple" }
+source = { editable = "airflow-fork/providers/common/compat" }
 dependencies = [
     { name = "apache-airflow" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e3/49/9bef427ff80c458d5564b095c24a85411d6f5433a444eb7b9d534b0d1111/apache_airflow_providers_common_compat-1.7.4.tar.gz", hash = "sha256:557b395995823a96ef62e8bff307f1d584abf85fae929b8d687983a3df7f5f83", size = 21163, upload-time = "2025-09-22T09:22:53.565Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/10/b5/ab7730ffb859e2cccc3572968f3795b91482248c31f5f77d8052ac64163b/apache_airflow_providers_common_compat-1.7.4-py3-none-any.whl", hash = "sha256:54b7be46724c5f0fdc6f96f9f177c1a7c80336394ba33ef9e2c946e7d708574c", size = 30129, upload-time = "2025-09-22T09:22:09.802Z" },
+
+[package.metadata]
+requires-dist = [
+    { name = "apache-airflow", editable = "airflow-fork" },
+    { name = "apache-airflow-providers-openlineage", marker = "extra == 'openlineage'", editable = "airflow-fork/providers/openlineage" },
+    { name = "apache-airflow-providers-standard", marker = "extra == 'standard'", editable = "airflow-fork/providers/standard" },
 ]
+provides-extras = ["openlineage", "standard"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "apache-airflow", editable = "airflow-fork" },
+    { name = "apache-airflow-devel-common", editable = "airflow-fork/devel-common" },
+    { name = "apache-airflow-providers-openlineage", editable = "airflow-fork/providers/openlineage" },
+    { name = "apache-airflow-providers-standard", editable = "airflow-fork/providers/standard" },
+    { name = "apache-airflow-task-sdk", editable = "airflow-fork/task-sdk" },
+]
+docs = [{ name = "apache-airflow-devel-common", extras = ["docs"], editable = "airflow-fork/devel-common" }]
 
 [[package]]
 name = "apache-airflow-providers-common-io"
 version = "1.6.3"
-source = { registry = "https://pypi.org/simple" }
+source = { editable = "airflow-fork/providers/common/io" }
 dependencies = [
     { name = "apache-airflow" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a2/c1/3b57c0341384c49d6716b92b945728d488002a76ca4302e57d39c170bf65/apache_airflow_providers_common_io-1.6.3.tar.gz", hash = "sha256:a758c6b56d6faa478f9a40d40f207c340e9fa6049ada967231c4f449ed14740b", size = 23940, upload-time = "2025-09-22T09:22:54.536Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/ab/88/db3f4cb6a3bf73b37a541b8e2292a5f7005e269710350c328cf1524518fc/apache_airflow_providers_common_io-1.6.3-py3-none-any.whl", hash = "sha256:cce8db81f59c96d708cfd0f8a367cc967c8ea08f64f8ca1c551f9f0c2e0af1f1", size = 19335, upload-time = "2025-09-22T09:22:10.855Z" },
+
+[package.metadata]
+requires-dist = [
+    { name = "apache-airflow", editable = "airflow-fork" },
+    { name = "apache-airflow-providers-common-compat", marker = "extra == 'common-compat'", editable = "airflow-fork/providers/common/compat" },
+    { name = "apache-airflow-providers-openlineage", marker = "extra == 'openlineage'", editable = "airflow-fork/providers/openlineage" },
 ]
+provides-extras = ["common-compat", "openlineage"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "apache-airflow", editable = "airflow-fork" },
+    { name = "apache-airflow-devel-common", editable = "airflow-fork/devel-common" },
+    { name = "apache-airflow-providers-common-compat", editable = "airflow-fork/providers/common/compat" },
+    { name = "apache-airflow-providers-openlineage", editable = "airflow-fork/providers/openlineage" },
+    { name = "apache-airflow-task-sdk", editable = "airflow-fork/task-sdk" },
+]
+docs = [{ name = "apache-airflow-devel-common", extras = ["docs"], editable = "airflow-fork/devel-common" }]
 
 [[package]]
 name = "apache-airflow-providers-common-sql"
 version = "1.28.1"
-source = { registry = "https://pypi.org/simple" }
+source = { editable = "airflow-fork/providers/common/sql" }
 dependencies = [
     { name = "apache-airflow" },
     { name = "methodtools" },
     { name = "more-itertools" },
     { name = "sqlparse" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/26/1b/5ec5e768bfde559ae4cbba3727f2332556f0ad29e7a35e15782cd141f1dc/apache_airflow_providers_common_sql-1.28.1.tar.gz", hash = "sha256:c2ef46561014d70ed2ec9b7d3641a2c3713b008a8c0c984bcde7c3fbda8a5339", size = 105036, upload-time = "2025-09-22T09:22:56.346Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/65/04/60517d44c78ddb7c791639e3f3233b591978daa3263d17ca88fdbce37bf3/apache_airflow_providers_common_sql-1.28.1-py3-none-any.whl", hash = "sha256:9dc5ba569d1144079d406342ebf3111b1c19d81d524dcc2fc8c7dc4438379ee9", size = 66890, upload-time = "2025-09-22T09:22:12.506Z" },
+
+[package.metadata]
+requires-dist = [
+    { name = "apache-airflow", editable = "airflow-fork" },
+    { name = "apache-airflow-providers-openlineage", marker = "extra == 'openlineage'", editable = "airflow-fork/providers/openlineage" },
+    { name = "methodtools", specifier = ">=0.4.7" },
+    { name = "more-itertools", specifier = ">=9.0.0" },
+    { name = "pandas", marker = "python_full_version >= '3.13' and extra == 'pandas'", specifier = ">=2.2.3" },
+    { name = "pandas", extras = ["sql-other"], marker = "python_full_version < '3.13' and extra == 'pandas'", specifier = ">=2.1.2" },
+    { name = "polars", marker = "extra == 'polars'", specifier = ">=1.26.0" },
+    { name = "sqlparse", specifier = ">=0.5.1" },
 ]
+provides-extras = ["pandas", "openlineage", "polars"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "apache-airflow", editable = "airflow-fork" },
+    { name = "apache-airflow-devel-common", editable = "airflow-fork/devel-common" },
+    { name = "apache-airflow-providers-common-sql", extras = ["pandas"], editable = "airflow-fork/providers/common/sql" },
+    { name = "apache-airflow-providers-common-sql", extras = ["polars"], editable = "airflow-fork/providers/common/sql" },
+    { name = "apache-airflow-providers-mysql", editable = "airflow-fork/providers/mysql" },
+    { name = "apache-airflow-providers-odbc", editable = "airflow-fork/providers/odbc" },
+    { name = "apache-airflow-providers-openlineage", editable = "airflow-fork/providers/openlineage" },
+    { name = "apache-airflow-providers-postgres", editable = "airflow-fork/providers/postgres" },
+    { name = "apache-airflow-task-sdk", editable = "airflow-fork/task-sdk" },
+]
+docs = [{ name = "apache-airflow-devel-common", extras = ["docs"], editable = "airflow-fork/devel-common" }]
 
 [[package]]
 name = "apache-airflow-providers-fab"
@@ -352,7 +801,7 @@ wheels = [
 [[package]]
 name = "apache-airflow-providers-http"
 version = "5.3.4"
-source = { registry = "https://pypi.org/simple" }
+source = { editable = "airflow-fork/providers/http" }
 dependencies = [
     { name = "aiohttp" },
     { name = "apache-airflow" },
@@ -360,10 +809,23 @@ dependencies = [
     { name = "requests" },
     { name = "requests-toolbelt" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/0b/5e/8af570868468eec1b10d351be01f08cc9658ad480e9a06d602e285898591/apache_airflow_providers_http-5.3.4.tar.gz", hash = "sha256:45738ef5d528ca642f3a41fc68ac60ce5f5a0e4dc4f597be084b94bcdbe1c61c", size = 64634, upload-time = "2025-09-09T03:50:00.499Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/d3/9d/f1934138d3222c0ab442ddede0b11e2985a33b2e249a9ee4301ac310a85d/apache_airflow_providers_http-5.3.4-py3-none-any.whl", hash = "sha256:ba9afe78e6e9e01eb29d0df68b1c3a3165c2a4ce1be9c732a904e485b5d939f1", size = 29907, upload-time = "2025-09-09T03:49:17.439Z" },
+
+[package.metadata]
+requires-dist = [
+    { name = "aiohttp", specifier = ">=3.12.14" },
+    { name = "apache-airflow", editable = "airflow-fork" },
+    { name = "asgiref", specifier = ">=2.3.0" },
+    { name = "requests", specifier = ">=2.32.0,<3" },
+    { name = "requests-toolbelt", specifier = ">=1.0.0" },
 ]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "apache-airflow", editable = "airflow-fork" },
+    { name = "apache-airflow-devel-common", editable = "airflow-fork/devel-common" },
+    { name = "apache-airflow-task-sdk", editable = "airflow-fork/task-sdk" },
+]
+docs = [{ name = "apache-airflow-devel-common", extras = ["docs"], editable = "airflow-fork/devel-common" }]
 
 [[package]]
 name = "apache-airflow-providers-postgres"
@@ -383,37 +845,55 @@ wheels = [
 [[package]]
 name = "apache-airflow-providers-smtp"
 version = "2.3.1"
-source = { registry = "https://pypi.org/simple" }
+source = { editable = "airflow-fork/providers/smtp" }
 dependencies = [
-    { name = "aiosmtplib" },
     { name = "apache-airflow" },
     { name = "apache-airflow-providers-common-compat" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ce/c8/9118485a3ccf18f2a47311d3f2b6890b4d8564865375fd225e2ca7e3d2c8/apache_airflow_providers_smtp-2.3.1.tar.gz", hash = "sha256:45c9b0d4fd8f086568b0b8d263d48335c9ca2bd1cf72b566f1e68deee70007f9", size = 44685, upload-time = "2025-09-28T09:58:34.833Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/83/f9/07e60402759a00c337cf20d6a57dd50775b5979bff96d8ba48d5923ce4bb/apache_airflow_providers_smtp-2.3.1-py3-none-any.whl", hash = "sha256:d1302e83f4444be73e70fe4deacb3ccbac3f0da17bef53baa04f095f56e7d3a3", size = 24992, upload-time = "2025-09-28T09:58:21.94Z" },
+
+[package.metadata]
+requires-dist = [
+    { name = "apache-airflow", editable = "airflow-fork" },
+    { name = "apache-airflow-providers-common-compat", editable = "airflow-fork/providers/common/compat" },
 ]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "apache-airflow", editable = "airflow-fork" },
+    { name = "apache-airflow-devel-common", editable = "airflow-fork/devel-common" },
+    { name = "apache-airflow-providers-common-compat", editable = "airflow-fork/providers/common/compat" },
+    { name = "apache-airflow-task-sdk", editable = "airflow-fork/task-sdk" },
+]
+docs = [{ name = "apache-airflow-devel-common", extras = ["docs"], editable = "airflow-fork/devel-common" }]
 
 [[package]]
 name = "apache-airflow-providers-standard"
 version = "1.9.0"
-source = { registry = "https://pypi.org/simple" }
+source = { editable = "airflow-fork/providers/standard" }
 dependencies = [
     { name = "apache-airflow" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/fb/ca/482c82161c23624f0e8bb2b3b9c104981fc48c70d371caafa264594ad4cd/apache_airflow_providers_standard-1.9.0.tar.gz", hash = "sha256:46c4a0399f54e88f84e67a1881886a30ef6aa4b5abb52df2f3e5e83d2e8908b7", size = 180443, upload-time = "2025-09-29T12:08:02.313Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/21/08/3e182b9e183b970d897951319955551bff30650dc47be8278496ad5eef7d/apache_airflow_providers_standard-1.9.0-py3-none-any.whl", hash = "sha256:2abb8c9a148b853d7a732e8a688846418ff9d9b31686efe059f2644ca2560ca3", size = 144899, upload-time = "2025-09-29T12:08:01.064Z" },
+
+[package.metadata]
+requires-dist = [{ name = "apache-airflow", editable = "airflow-fork" }]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "apache-airflow", editable = "airflow-fork" },
+    { name = "apache-airflow-devel-common", editable = "airflow-fork/devel-common" },
+    { name = "apache-airflow-providers-mysql", editable = "airflow-fork/providers/mysql" },
+    { name = "apache-airflow-task-sdk", editable = "airflow-fork/task-sdk" },
 ]
+docs = [{ name = "apache-airflow-devel-common", extras = ["docs"], editable = "airflow-fork/devel-common" }]
 
 [[package]]
 name = "apache-airflow-task-sdk"
-version = "1.1.0"
-source = { registry = "https://pypi.org/simple" }
+source = { editable = "airflow-fork/task-sdk" }
 dependencies = [
     { name = "apache-airflow-core" },
     { name = "asgiref" },
     { name = "attrs" },
+    { name = "babel" },
     { name = "colorlog" },
     { name = "fsspec" },
     { name = "greenback" },
@@ -432,10 +912,47 @@ dependencies = [
     { name = "tenacity" },
     { name = "types-requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/2e/a7/aae0a64578a73cf16df13d8af72119778df8093d15973453ce6f53c71c15/apache_airflow_task_sdk-1.1.0.tar.gz", hash = "sha256:81abc85d80dffb3331f99b1e064dab270b3a26d4bf9aad6b0ce4855742138af0", size = 1271374, upload-time = "2025-09-25T20:31:41.89Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/51/6b/1fc93e247b0286c3f7456b3847d76e5baecc6ce772cf5e2197f8093ac69e/apache_airflow_task_sdk-1.1.0-py3-none-any.whl", hash = "sha256:7d92021ceb7ccd4ab186b38b51c6269868f21fb5bdb00e40253463d76e31aefd", size = 297134, upload-time = "2025-09-25T20:31:36.771Z" },
+
+[package.metadata]
+requires-dist = [
+    { name = "apache-airflow-core", editable = "airflow-fork/airflow-core" },
+    { name = "asgiref", specifier = ">=2.3.0" },
+    { name = "attrs", specifier = ">=24.2.0,!=25.2.0" },
+    { name = "babel", specifier = ">=2.17.0" },
+    { name = "colorlog", specifier = ">=6.8.2" },
+    { name = "fsspec", specifier = ">=2023.10.0" },
+    { name = "greenback", specifier = ">=1.2.1" },
+    { name = "httpx", specifier = ">=0.27.0" },
+    { name = "jinja2", specifier = ">=3.1.5" },
+    { name = "methodtools", specifier = ">=0.4.7" },
+    { name = "msgspec", specifier = ">=0.19.0" },
+    { name = "pendulum", specifier = ">=3.1.0" },
+    { name = "psutil", specifier = ">=6.1.0" },
+    { name = "pydantic", specifier = ">2.11.0" },
+    { name = "pygtrie", specifier = ">=2.5.0" },
+    { name = "python-dateutil", specifier = ">=2.7.0" },
+    { name = "requests", specifier = ">=2.31.0,<3" },
+    { name = "retryhttp", specifier = ">=1.2.0,!=1.3.0" },
+    { name = "structlog", specifier = ">=25.4.0" },
+    { name = "tenacity", specifier = ">=8.3.0" },
+    { name = "types-requests", specifier = ">=2.31.0" },
 ]
+
+[package.metadata.requires-dev]
+codegen = [
+    { name = "datamodel-code-generator", extras = ["http"], specifier = "==0.33.0" },
+    { name = "openapi-spec-validator", specifier = ">=0.7.1" },
+    { name = "rich", specifier = ">=13.6.0" },
+    { name = "svcs", specifier = ">=25.1.0" },
+]
+dev = [
+    { name = "apache-airflow-devel-common", editable = "airflow-fork/devel-common" },
+    { name = "apache-airflow-providers-common-sql", editable = "airflow-fork/providers/common/sql" },
+    { name = "apache-airflow-providers-standard", editable = "airflow-fork/providers/standard" },
+    { name = "pandas", marker = "python_full_version < '3.13'", specifier = ">=2.1.2" },
+    { name = "pandas", marker = "python_full_version >= '3.13'", specifier = ">=2.2.3" },
+]
+docs = [{ name = "apache-airflow-devel-common", extras = ["docs"], editable = "airflow-fork/devel-common" }]
 
 [[package]]
 name = "api-insee"
@@ -3355,7 +3872,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 airflow = [
     { name = "apache-airflow", specifier = ">=3.0,<4.0" },
-    { name = "apache-airflow-providers-amazon", specifier = ">=9.14.0" },
+    { name = "apache-airflow-providers-amazon", directory = "airflow-fork/providers/amazon" },
     { name = "apache-airflow-providers-fab", specifier = ">=2.4.3" },
     { name = "apache-airflow-providers-postgres", specifier = ">=6.2.2,<7" },
     { name = "apache-airflow-providers-standard", specifier = ">=1.8.0" },
@@ -3500,18 +4017,15 @@ wheels = [
 
 [[package]]
 name = "retryhttp"
-version = "1.3.3"
+version = "1.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "httpx" },
     { name = "pydantic" },
-    { name = "requests" },
     { name = "tenacity" },
-    { name = "types-requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/cb/b1/798afea3de35d0a7e9f682ac580d19c4f1d3701ab41b33afb72baf46556b/retryhttp-1.3.3.tar.gz", hash = "sha256:071a0296ac69640f9685cc96f9e259c155d327943cc2d15b827eea7577976178", size = 25191, upload-time = "2025-04-30T15:20:45.221Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/00/80/ac82d3d6c4b65fd752d9f5483d1ea3bbb0220ba9e51f26199c45f0e5039e/retryhttp-1.4.0.tar.gz", hash = "sha256:9bba1ef1b46b67f251ac80b0ee6a846d93dcbbe8c49b7959cd1142fc6c393c99", size = 25405, upload-time = "2025-10-23T20:43:36.782Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b8/09/d5ff873d2579da0082c9afbaad8efde9765aa9bc15875c477fe577f59c09/retryhttp-1.3.3-py3-none-any.whl", hash = "sha256:6b9bd2ba6c9f7eedc73aeb80af97f1f6ebb4cdc71a1b5ec2df6b2f8aa7a2916f", size = 17404, upload-time = "2025-04-30T15:20:43.731Z" },
+    { url = "https://files.pythonhosted.org/packages/02/33/10910709a90b5e19875ad5cc5fde88221c389dc75a379540670990388f68/retryhttp-1.4.0-py3-none-any.whl", hash = "sha256:cdf77b92d2dfee599fb78b8c19d633eea53b9f529da9a4b9325213cc8f3841a4", size = 17604, upload-time = "2025-10-23T20:43:35.889Z" },
 ]
 
 [[package]]
