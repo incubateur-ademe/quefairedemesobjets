@@ -45,7 +45,7 @@
     "bowser": "^2.12.1",
     "eslint-config-prettier": "^10.1.8",
     "posthog-js": "^1.281.0",
-    "maplibre-gl": "^5.9.0",
+    "maplibre-gl": "^5.10.0",
     "stimulus-use": "^0.52.3",
     "tailwindcss": "^3.4.18"
   },
