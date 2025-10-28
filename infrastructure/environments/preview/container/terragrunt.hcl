@@ -40,6 +40,7 @@ inputs = {
   AIRFLOW__API_AUTH__JWT_SECRET           = "[AIRFLOW__API_AUTH__JWT_SECRET]"
   AIRFLOW__DATABASE__SQL_ALCHEMY_CONN     = "[AIRFLOW__DATABASE__SQL_ALCHEMY_CONN]"
   AIRFLOW_CONN_WEBAPP_DB                  = "[AIRFLOW_CONN_WEBAPP_DB]"
+  AIRFLOW_CONN_SCALEWAYLOGS               = "[AIRFLOW_CONN_SCALEWAYLOGS]"
   DATABASE_URL                            = "[DATABASE_URL]"
   DB_WAREHOUSE                            = "[DB_WAREHOUSE]"
   ENVIRONMENT                             = "[ENVIRONMENT]"
