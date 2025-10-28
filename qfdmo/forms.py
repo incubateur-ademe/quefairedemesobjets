@@ -22,6 +22,7 @@ from qfdmo.models.action import (
     get_directions,
     get_ordered_directions,
 )
+from qfdmo.models.config import CarteConfig
 from qfdmo.widgets import (
     AutoCompleteInput,
     DSFRCheckboxSelectMultiple,
@@ -621,13 +622,13 @@ class AdvancedConfiguratorForm(forms.Form):
 class ViewModeForm(DsfrBaseForm):
     class ViewModeSegmentedControlChoices(TextChoices, SegmentedControlChoices):
         CARTE = {
-            "value": "carte",
-            "label": "Carte",
+            "value": CarteConfig.ModesAffichage.CARTE.value,
+            "label": CarteConfig.ModesAffichage.CARTE.label,
             "icon": "map-pin-2-fill",
         }
         LISTE = {
-            "value": "liste",
-            "label": "Liste",
+            "value": CarteConfig.ModesAffichage.LISTE.value,
+            "label": CarteConfig.ModesAffichage.LISTE.label,
             "icon": "list-unordered",
         }
 
@@ -635,7 +636,7 @@ class ViewModeForm(DsfrBaseForm):
         label="",
         choices=ViewModeSegmentedControlChoices.choices,
         required=False,
-        initial=ViewModeSegmentedControlChoices.CARTE.value,
+        initial=CarteConfig.ModesAffichage.CARTE,
         widget=SegmentedControl(
             extra_classes="max-md:fr-segmented--sm",
             attrs={

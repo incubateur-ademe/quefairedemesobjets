@@ -98,16 +98,7 @@ export class SolutionMap {
 
   addActorMarkersToMap(actors: Array<HTMLElement>, bboxValue?: Array<Number>): void {
     const points: Array<Array<Number>> = []
-    const addedActors: Array<string> = []
     actors.forEach(function (actor: HTMLElement) {
-      if (addedActors.includes(actor.dataset?.uuid || "")) {
-        // Ensure actors are not added twice on the map.
-        // This can happen and can causes visual glitches.
-        // ID of markers being duplicated, these are wrongly rendered
-        // without borders.
-        return
-      }
-
       const longitude = actor.dataset?.longitude
       const latitude = actor.dataset?.latitude
 
@@ -121,7 +112,6 @@ export class SolutionMap {
         }).setLngLat([longitudeFloat, latitudeFloat])
 
         marker.addTo(this.map)
-        addedActors.push(actor.dataset?.uuid || "")
         points.push([latitudeFloat, longitudeFloat])
       }
     }, this)

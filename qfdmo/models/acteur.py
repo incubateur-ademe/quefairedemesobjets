@@ -1286,7 +1286,7 @@ class DisplayedActeur(BaseActeur, LatLngPropertiesMixin):
 
     @property
     def url(self):
-        return self.get_absolute_url()
+        return f"{settings.BASE_URL}{self.get_absolute_url()}"
 
     def acteur_actions(
         self, direction=None, actions_codes=None, sous_categorie_id=None

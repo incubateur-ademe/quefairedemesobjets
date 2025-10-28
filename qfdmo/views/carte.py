@@ -25,7 +25,11 @@ class CarteSearchActeursView(SearchActeursView):
         for key, FormCls in self.forms.items():
             if self.request.method == "POST":
                 form = FormCls(self.request.POST)
-            elif self.request.method == "GET" and self.request.GET.keys():
+            elif self.request.method == "GET" and set(self.request.GET.keys()) & set(
+                FormCls.base_fields.keys()
+            ):
+                # We instantiate the form only if the request contains fields that are
+                # defined on the form.
                 form = FormCls(self.request.GET)
             else:
                 form = FormCls()
