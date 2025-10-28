@@ -1,7 +1,8 @@
-import { Controller } from "@hotwired/stimulus"
+import { WindowResizeController } from "stimulus-use"
+
 import { clearActivePinpoints } from "../../js/helpers"
 
-class ActeurController extends Controller<HTMLElement> {
+class ActeurController extends WindowResizeController {
   static targets = ["handle", "actions", "content"]
   static values = { mapContainerId: String, draggable: Boolean }
   isDragging = false
@@ -27,7 +28,6 @@ class ActeurController extends Controller<HTMLElement> {
   declare readonly hasActionsTarget: Function
 
   initialize() {
-    this.element.style.transition = this.initialTransition
     if (this.draggableValue) {
       this.element.addEventListener("mousedown", this.#dragStart.bind(this))
       this.handleTarget.addEventListener("touchstart", this.#dragStart.bind(this))
@@ -44,6 +44,13 @@ class ActeurController extends Controller<HTMLElement> {
     }
   }
 
+  windowResize({ width, height, event }) {
+    this.element.style.transition = ""
+    this.element.style.transform = ``
+    this.contentTarget.style.maxHeight = ``
+    this.#setTranslateY()
+  }
+
   #computePanelTranslateY(): number {
     const matrix = window.getComputedStyle(this.element).transform
 
@@ -55,7 +62,8 @@ class ActeurController extends Controller<HTMLElement> {
   }
 
   #show() {
-    this.element.style.transition = this.initialTransition
+    this.#resetTransition()
+
     // Reset scroll when jumping from a acteur detail to another.
     this.element.scrollTo(0, 0)
     if (this.element.ariaHidden !== "false") {
@@ -124,7 +132,7 @@ class ActeurController extends Controller<HTMLElement> {
     const eventY = event?.y || event?.touches[0].clientY
     this.startY = Math.abs(eventY)
     this.startTranslateY = this.#computePanelTranslateY()
-    this.element.style.transition = "none"
+    this.element.style.transition = ""
   }
 
   #setTranslateY(value: number) {
@@ -158,10 +166,16 @@ class ActeurController extends Controller<HTMLElement> {
     this.#setTranslateY(-1 * this.currentTranslateY)
   }
 
+  #resetTransition() {
+    if (window.matchMedia("screen and (max-width:768px)").matches) {
+      this.element.style.transition = this.initialTransition
+    }
+  }
+
   #dragEnd(event: MouseEvent | TouchEvent) {
     if (!this.isDragging) return
     this.isDragging = false
-    this.element.style.transition = this.initialTransition
+    this.#resetTransition()
     this.element.classList.remove("qf-select-none")
 
     const currentDragRatio = this.currentTranslateY / this.panelHeight

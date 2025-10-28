@@ -54,25 +54,19 @@ Style the autocomplete container:
   @apply qf-grid-flow-row-dense;
   @apply qf-transition-[grid-template-columns] qf-ease-in qf-duration-200;
   @media (min-width: 768px) {
-    grid-template-columns: auto var(--sidebar-width);
     grid-template-rows: var(--header-height) 1.5fr var(--footer-height);
     grid-template-areas:
-      "header header"
-      "map detail"
-      "footer footer";
-  }
-
-  &:has(> aside[aria-hidden="false"]) {
-    @apply qf-ease-out;
-    --sidebar-width: 400px;
-  }
-
-  > aside {
-    grid-area: detail;
+      "header"
+      "map"
+      "footer";
   }
 
   > footer {
     grid-area: footer;
+  }
+
+  > aside {
+    grid-area: map;
   }
 
   > header {

@@ -2,27 +2,27 @@
     {% block classes %}
       {# The classes below are specific to carte and can be overriden in Formulaire #}
       qf-z-20
-      max-md:transition-transform max-md:duration-500
       qf-pt-2w
       max-md:qf-h-full
     {% endblock classes %}
 
-    {% if mode_liste %}
-      qf-absolute max-md:qf-left-0
-      qf-top-0 qf-right-0 qf-bottom-0
+     {% if mode_liste %}
+      max-md:qf-left-0
       qf-overflow-auto
     {% else %}
-      max-md:qf-absolute
       max-md:qf-top-full
-      md:qf-relative
       max-md:qf-rounded-t-xl
       md:qf-overflow-auto
     max-md:qf-overflow-visible
     {% endif %}
 
+    md:qf-transition-transform
+    md:qf-duration-250
+     md:qf-w-[400px] md:qf-translate-x-full
+    aria-[hidden=false]:md:qf-translate-x-0
+     qf-absolute qf-top-0 qf-right-0 qf-bottom-0
     qf-px-2w
     qf-border-l qf-border-grey-900 qf-border-solid qf-border-t-0 qf-border-r-0 qf-border-b-0
-    aria-[hidden=false]:qf-block qf-hidden
     qf-bg-white
     max-md:qf-bottom-0 max-md:qf-left-0 max-md:qf-right-0
     max-md:qf-drop-shadow-[0_0_100px_rgba(0,0,0,0.3)]
@@ -53,7 +53,7 @@ data-acteur-details-map-container-id-value="{{ map_container_id }}"
 {% endif %}
   {# Content #}
   <div
-      class="qf-flex-grow qf-relative qf-overflow-auto"
+      class="qf-flex-grow qf-relative"
       data-acteur-details-target="content"
   >
       {# Close button #}
