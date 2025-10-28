@@ -117,14 +117,6 @@ class AddressesForm(forms.Form):
                 "data-search-solution-form-target": "reparerFilter",
             }
         ),
-        label=(
-            "Masquer les lieux qui réparent uniquement les produits de leurs marques"
-        ),
-        help_text=(
-            "Les lieux ne réparant que les produits de leur propre marque"
-            " n'apparaîtront pas si cette case est cochée."
-            " (uniquement valable lorsque l'action « réparer » est sélectionnée)"
-        ),
         label_suffix="",
         required=False,
     )
@@ -136,42 +128,14 @@ class AddressesForm(forms.Form):
                 "data-search-solution-form-target": "reparerFilter",
             }
         ),
-        label="Lieux labellisés Répar’Acteurs",
-        help_text=mark_safe(
-            """Afficher uniquement les artisans labellisés
-            (uniquement valable lorsque l'action « réparer » est sélectionnée).
-            Les <span
-                class="qf-underline qf-cursor-pointer
-                qf-underline-offset-[3px] hover:qf-decoration-[1.5px]"
-                title="Ouvre la modale Répar'Acteurs"
-                onclick="document
-                .getElementById('display_modale_reparacteur')
-                .setAttribute('data-fr-opened', 'true');"
-            >Répar'Acteurs</span>
-             sont une initiative de la
-            <a
-                href='https://www.artisanat.fr/nous-connaitre/vous-accompagner/reparacteurs'
-                target="_blank"
-                rel="noreferrer"
-                title="sur le site de la CMA - Nouvelle fenêtre"
-            >
-                Chambre des Métiers et de l’Artisanat
-            </a>"""
-        ),
+        label=render_to_string("ui/components/filtres/reparacteurs/label.html"),
         label_suffix="",
         required=False,
     )
 
     ess = forms.BooleanField(
         widget=forms.CheckboxInput(attrs={"class": "fr-checkbox fr-m-1v"}),
-        label="Lieux de l'économie sociale et solidaire",
-        help_text=mark_safe(
-            "Afficher uniquement les lieux recensés comme relevant de l'économie"
-            " sociale et solidaire. En savoir plus sur le site <a href="
-            '"https://www.economie.gouv.fr/cedef/economie-sociale-et-solidaire"'
-            ' target="_blank" rel="noreferrer" title="economie.gouv.fr - Nouvelle'
-            ' fenêtre">economie.gouv.fr</a>'
-        ),
+        label=render_to_string("ui/components/filtres/ess/label.html"),
         label_suffix="",
         required=False,
     )
@@ -183,17 +147,7 @@ class AddressesForm(forms.Form):
                 "data-search-solution-form-target": "reparerFilter",
             },
         ),
-        label=mark_safe(
-            "<div><span class='fr-icon--sm fr-icon-percent-line'></span>"
-            "&nbsp;Lieux proposant le Bonus Réparation</div>"
-        ),
-        help_text=mark_safe(
-            "Afficher uniquement les lieux éligibles (uniquement valable lorsque l'"
-            "action « réparer » est sélectionnée). En savoir plus sur le site <a href="
-            '"https://quefairedemesdechets.ademe.fr/bonus-reparation" target="_blank"'
-            ' rel="noreferrer" title="Bonus réparation - Nouvelle fenêtre">Bonus'
-            " réparation</a>"
-        ),
+        label=render_to_string("ui/components/filtres/bonus/label.html"),
         label_suffix="",
         required=False,
     )
