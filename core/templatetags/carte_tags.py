@@ -197,18 +197,16 @@ def get_non_enseigne_labels_count(acteur):
 
 
 def render_acteur(acteur, context):
+    _context = {
+        "map_container_id": context["map_container_id"],
+        "forms": context["forms"],
+        "object": acteur,
+    }
     return [
-        render_to_string(
-            "ui/components/carte/acteur/acteur_labels.html", {"object": acteur}
-        ),
-        render_to_string(
-            "ui/components/carte/acteur/acteur_services.html", {"object": acteur}
-        ),
+        render_to_string("ui/components/carte/acteur/acteur_labels.html", _context),
+        render_to_string("ui/components/carte/acteur/acteur_services.html", _context),
         distance_to_acteur(context, acteur),
-        render_to_string(
-            "ui/components/carte/acteur/acteur_lien.html",
-            {"object": acteur, "map_container_id": context["map_container_id"]},
-        ),
+        render_to_string("ui/components/carte/acteur/acteur_lien.html", _context),
     ]
 
 

@@ -172,28 +172,7 @@ class SearchFormController extends Controller<HTMLElement> {
   }
 
   displayDigitalActeur(event) {
-    const uuid = event.currentTarget.dataset.uuid
     event.currentTarget.setAttribute("aria-expanded", "true")
-    this.displayActeur(uuid)
-  }
-
-  displayActeur(uuid: string) {
-    this.dispatch("captureInteraction")
-    const latitude = this.latitudeInputTarget.value
-    const longitude = this.longitudeInputTarget.value
-    const params = new URLSearchParams()
-    params.set("direction", this.#selectedOption)
-    params.set("latitude", latitude)
-    params.set("longitude", longitude)
-    params.set("map_container_id", this.mapContainerIdValue)
-    let frame = `${this.mapContainerIdValue}:acteur-detail`
-
-    if (this.hasCarteTarget) {
-      params.set("carte", "1")
-    }
-
-    const acteurDetailPath = `/adresse_details/${uuid}?${params.toString()}`
-    Turbo.visit(acteurDetailPath, { frame })
   }
 
   displayActionList() {

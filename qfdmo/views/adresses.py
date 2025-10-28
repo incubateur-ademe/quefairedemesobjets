@@ -695,7 +695,7 @@ def acteur_detail(request, uuid):
             )
         )
 
-    return render(request, "ui/components/carte/acteur.html", context)
+    return render(request, "ui/pages/acteur.html", context)
 
 
 def solution_admin(request, identifiant_unique):

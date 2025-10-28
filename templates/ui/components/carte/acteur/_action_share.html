@@ -61,13 +61,16 @@
                         Partager par email
                     </a>
                 </li>
-                <li>
+                <li
+                    data-controller="copy"
+                >
                     <button class="fr-btn--copy fr-btn"
-                            onclick="navigator.clipboard.writeText('{{ request.build_absolute_uri }}').then(function() {alert('Adresse copiée dans le presse papier.')});"
-                            type="button"
-                            tabindex="-1"
+                        data-action="copy#toClipboard"
+                        type="button"
+                        tabindex="-1"
                     >
                         Copier dans le presse-papier
+                        <span data-copy-target="toCopy">{{ request.build_absolute_uri }}</span>
                     </button>
                 </li>
             </ul>

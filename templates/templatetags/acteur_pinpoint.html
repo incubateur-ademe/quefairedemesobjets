@@ -1,11 +1,11 @@
-<a class="qf-w-[34px] qf-h-[45px] qf-no-underline {% if not force_visible %}qf-invisible{% endif %}"
-    data-uuid="{{ acteur.uuid }}"
+{% load acteur_tags %}
+<a class="qf-w-[34px] qf-h-[45px] !qf-bg-none {% if not force_visible %}qf-invisible{% endif %}"
     data-latitude="{{ acteur.latitude }}"
     data-longitude="{{ acteur.longitude }}"
-    data-action="map#handleClick"
+    data-action="map#setActivePinpoint"
     data-map-target="acteur"
-    href="{{ acteur.url }}"
-    data-turbo-frame="{{ map_container_id }}:acteur-detail"
+    href="{% acteur_url acteur with_map=False %}"
+    data-turbo-frame="{% acteur_frame_id %}"
 >
     <div data-animated="" class="qf-scale-75">
         {% if marker_icon_file %}
