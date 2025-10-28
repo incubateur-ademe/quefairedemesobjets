@@ -22,11 +22,13 @@ class CarteSearchActeursView(SearchActeursView):
 
     def get_forms(self) -> dict[str, Form]:
         bounded_forms = {}
-        for key, form in self.forms.items():
+        for key, FormCls in self.forms.items():
             if self.request.method == "POST":
-                form = form(self.request.POST)
+                form = FormCls(self.request.POST)
+            elif self.request.method == "GET" and self.request.GET.keys():
+                form = FormCls(self.request.GET)
             else:
-                form = form(self.request.GET)
+                form = FormCls()
 
             # Call is_valid to bound form
             form.is_valid()
