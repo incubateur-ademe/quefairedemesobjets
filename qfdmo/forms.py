@@ -243,7 +243,6 @@ class DigitalActeurForm(GetFormMixin, DsfrBaseForm):
 
 
 class ActionDirectionForm(GetFormMixin, DsfrBaseForm):
-    # TODO: Gérer la rétrocompatibilité avec les paramètres d'URL
     class DirectionChoices(TextChoices, SegmentedControlChoices):
         J_AI = {
             "value": "jai",
