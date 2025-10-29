@@ -11,11 +11,17 @@ class GroupeActionChoiceField(forms.ModelMultipleChoiceField):
     def label_from_instance(self, obj):
         return mark_safe(
             render_to_string(
-                "forms/widgets/groupe_action_label.html",
+                "ui/forms/widgets/groupe_action_label.html",
                 {"groupe_action": obj},
             )
         )
 
 
-class LabelChoiceField(forms.ModelMultipleChoiceField):
-    pass
+class LabelQualiteChoiceField(forms.ModelMultipleChoiceField):
+    def label_from_instance(self, obj):
+        return mark_safe(
+            render_to_string(
+                "ui/forms/widgets/label_qualite_label.html",
+                {"label_qualite": obj},
+            )
+        )

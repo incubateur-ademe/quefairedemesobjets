@@ -419,7 +419,7 @@ class ConfiguratorForm(DsfrBaseForm):
                 "endpoint": "/api/qfdmo/autocomplete/configurateur?query=",
                 "additionnal_info": mark_safe(
                     render_to_string(
-                        "forms/widgets/epci_codes_additionnal_info.html",
+                        "ui/forms/widgets/epci_codes_additionnal_info.html",
                     )
                 ),
             },
