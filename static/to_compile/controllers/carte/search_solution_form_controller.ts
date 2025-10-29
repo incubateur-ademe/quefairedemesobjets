@@ -46,7 +46,7 @@ class SearchFormController extends Controller<HTMLElement> {
 
   declare readonly jaiTarget: HTMLElement
   declare readonly jechercheTarget: HTMLElement
-  declare readonly directionTargets: HTMLElement[]
+  declare readonly directionTargets: HTMLInputElement[]
   declare readonly latitudeInputTarget: HTMLInputElement
   declare readonly longitudeInputTarget: HTMLInputElement
   declare readonly actionListTarget: HTMLInputElement
@@ -214,10 +214,9 @@ class SearchFormController extends Controller<HTMLElement> {
   }
 
   apply() {
-    const direction = this.directionTarget
-    const options = direction.getElementsByTagName("input")
-    for (let i = 0; i < options.length; i++) {
-      options[i].checked = options[i].value == this.#selectedOption
+    for (let i = 0; i < this.directionTargets.length; i++) {
+      this.directionTargets[i].checked =
+        this.directionTargets[i].value == this.#selectedOption
     }
 
     let actionList: string[] = []
