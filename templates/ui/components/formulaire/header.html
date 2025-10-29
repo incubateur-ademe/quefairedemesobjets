@@ -6,7 +6,7 @@
         {{ digital_acteur_form }}
 
         <h4 class="fr-my-1w fr-h6">
-            Vos {% if next_form.digital %}résultats{% else %}adresses{% endif %} {% if form.sous_categorie_objet.value %}pour «{{ form.sous_categorie_objet.value }}»{% endif %}&nbsp;:
+            Vos {% if digital_form.digital.value %}résultats{% else %}adresses{% endif %} {% if form.sous_categorie_objet.value %}pour «{{ form.sous_categorie_objet.value }}»{% endif %}&nbsp;:
         </h4>
     </div>
 </div>
