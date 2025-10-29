@@ -1,0 +1,22 @@
+{% extends "ui/components/modals/base.html" %}
+{% load script_tags %}
+
+{% block button_text %}
+{{ button_text|default:"Filtres" }}
+{% endblock button_text %}
+
+{% block button_extra_classes %}fr-btn--secondary fr-btn--icon-left fr-icon-equalizer-line{% endblock %}
+
+{% block modal_title %}
+Filtres
+{% endblock modal_title %}
+
+{% block modal_content %}
+{{ form }}
+{% endblock modal_content %}
+
+{% block modal_wrapper_for_id %}
+    {% with id="filtres" %}
+    {{ block.super }}
+    {% endwith %}
+{% endblock modal_wrapper_for_id %}

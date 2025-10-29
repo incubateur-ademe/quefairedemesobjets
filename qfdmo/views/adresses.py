@@ -507,7 +507,7 @@ class SearchActeursView(
             libelle = ""
             if groupe.icon:
                 libelle = render_to_string(
-                    "forms/widgets/groupe_action_label.html",
+                    "ui/forms/widgets/groupe_action_label.html",
                     {
                         "groupe_action": groupe,
                         "libelle": groupe.get_libelle_from(groupe_displayed_actions),

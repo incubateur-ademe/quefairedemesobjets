@@ -10,9 +10,10 @@ from dsfr.enums import SegmentedControlChoices
 from dsfr.forms import DsfrBaseForm
 from dsfr.widgets import SegmentedControl
 
-from qfdmo.fields import GroupeActionChoiceField
+from qfdmo.fields import GroupeActionChoiceField, LabelChoiceField
 from qfdmo.geo_api import epcis_from, formatted_epcis_as_list_of_tuple
 from qfdmo.models import SousCategorieObjet
+from qfdmo.models.acteur import LabelQualite
 from qfdmo.models.action import (
     Action,
     GroupeAction,
@@ -167,6 +168,72 @@ class GetFormMixin(forms.Form):
             data = None
 
         super().__init__(*args, data=data, **kwargs)
+
+
+class FiltresForm(GetFormMixin, DsfrBaseForm):
+    groupe_action = GroupeActionChoiceField(
+        queryset=GroupeAction.objects.all().order_by("order"),
+        to_field_name="code",
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        label="",
+        # initial=GroupeAction.objects.all(),
+    )
+
+    sous_categorie_objet = forms.ModelChoiceField(
+        queryset=SousCategorieObjet.objects.all(),
+        widget=AutoCompleteInput(
+            attrs={
+                "class": "fr-input fr-icon-search-line sm:qf-w-[596px]",
+                "autocomplete": "off",
+                "aria-label": "Indiquer un objet - obligatoire",
+            },
+            data_controller="ss-cat-object-autocomplete",
+        ),
+        help_text="pantalon, perceuse, canapé...",
+        label="Indiquer un objet ",
+        empty_label="",
+        required=False,
+    )
+    label = LabelChoiceField(
+        queryset=LabelQualite.objects.all(),
+        to_field_name="code",
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        label="",
+        # initial=GroupeAction.objects.all(),
+    )
+
+    label_reparacteur = forms.BooleanField(
+        widget=forms.CheckboxInput(
+            attrs={
+                "class": "fr-checkbox fr-m-1v",
+                "data-search-solution-form-target": "reparerFilter",
+            }
+        ),
+        label=render_to_string("ui/components/filtres/reparacteurs/label.html"),
+        label_suffix="",
+        required=False,
+    )
+
+    ess = forms.BooleanField(
+        widget=forms.CheckboxInput(attrs={"class": "fr-checkbox fr-m-1v"}),
+        label=render_to_string("ui/components/filtres/ess/label.html"),
+        label_suffix="",
+        required=False,
+    )
+
+    bonus = forms.BooleanField(
+        widget=forms.CheckboxInput(
+            attrs={
+                "class": "fr-checkbox fr-m-1v",
+                "data-search-solution-form-target": "reparerFilter",
+            },
+        ),
+        label=render_to_string("ui/components/filtres/bonus/label.html"),
+        label_suffix="",
+        required=False,
+    )
 
 
 class DigitalActeurForm(GetFormMixin, DsfrBaseForm):
@@ -561,7 +628,11 @@ class AdvancedConfiguratorForm(forms.Form):
     )
 
 
-class ViewModeForm(DsfrBaseForm):
+class GroupeActionForm(GetFormMixin, DsfrBaseForm):
+    pass
+
+
+class ViewModeForm(GetFormMixin, DsfrBaseForm):
     class ViewModeSegmentedControlChoices(TextChoices, SegmentedControlChoices):
         CARTE = {
             "value": CarteConfig.ModesAffichage.CARTE.value,

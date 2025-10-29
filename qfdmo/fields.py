@@ -15,3 +15,7 @@ class GroupeActionChoiceField(forms.ModelMultipleChoiceField):
                 {"groupe_action": obj},
             )
         )
+
+
+class LabelChoiceField(forms.ModelMultipleChoiceField):
+    pass

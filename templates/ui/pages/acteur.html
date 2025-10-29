@@ -18,7 +18,7 @@
     <turbo-frame
         id="{{ map_container_id }}:acteur-detail"
     >
-        <article>
+        <article {% if turbo %}class='qf-animate-in qf-fade-in qf-duration-400'{% endif %}>
             <header class="qf-mb-2w">
                 <div>
                     {% if object.labels_display %}

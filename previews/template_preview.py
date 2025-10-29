@@ -198,7 +198,7 @@ class ComponentsPreview(LookbookPreview):
 
 
 class ModalsPreview(LookbookPreview):
-    def embed(self, **kwargs):
+    def intégration(self, **kwargs):
         """
         # Modal de partage
         La modal ci-dessous ne contient pas de code car celle-ci est
@@ -207,10 +207,17 @@ class ModalsPreview(LookbookPreview):
         ## TODO
         - [ ] Générer un contexte fake dans Django Lookbook
         """
-        return render_to_string("ui/modals/embed.html")
+        return render_to_string("ui/components/modals/embed.html")
 
-    def share(self, **kwargs):
-        return render_to_string("ui/modals/share.html")
+    def partage(self, **kwargs):
+        return render_to_string("ui/components/modals/share.html")
+
+    def filtres(self, **kwargs):
+        from qfdmo.forms import FiltresForm
+
+        form = FiltresForm()
+        context = {"form": form}
+        return render_to_string("ui/components/modals/filtres.html", context)
 
 
 class PagesPreview(LookbookPreview):

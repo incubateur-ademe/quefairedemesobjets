@@ -5,12 +5,12 @@ from django.forms import widgets
 
 
 class RangeInput(widgets.NumberInput):
-    template_name = "forms/widgets/range_input.html"
+    template_name = "ui/forms/widgets/range_input.html"
     input_type = "range"
 
 
 class GenericAutoCompleteInput(widgets.SelectMultiple):
-    template_name = "forms/widgets/generic_autocomplete.html"
+    template_name = "ui/forms/widgets/generic_autocomplete.html"
 
     def __init__(self, attrs=None, extra_attrs=None):
         super().__init__(attrs)
@@ -24,7 +24,7 @@ class GenericAutoCompleteInput(widgets.SelectMultiple):
 
 
 class AutoCompleteInput(forms.TextInput):
-    template_name = "forms/widgets/autocomplete.html"
+    template_name = "ui/forms/widgets/autocomplete.html"
 
     def __init__(self, attrs=None, data_controller="autocomplete", **kwargs):
         self.data_controller = data_controller
@@ -37,8 +37,8 @@ class AutoCompleteInput(forms.TextInput):
 
 
 class SegmentedControlSelect(forms.RadioSelect):
-    template_name = "forms/widgets/segmented_control.html"
-    option_template_name = "forms/widgets/segmented_control_option.html"
+    template_name = "ui/forms/widgets/segmented_control.html"
+    option_template_name = "ui/forms/widgets/segmented_control_option.html"
 
     def __init__(self, attrs=None, fieldset_attrs=None, **kwargs):
         super().__init__(attrs, **kwargs)
@@ -52,8 +52,8 @@ class SegmentedControlSelect(forms.RadioSelect):
 
 
 class DSFRCheckboxSelectMultiple(forms.CheckboxSelectMultiple):
-    template_name = "forms/widgets/dsfr_checkbox_select.html"
-    option_template_name = "forms/widgets/dsfr_checkbox_option.html"
+    template_name = "ui/forms/widgets/dsfr_checkbox_select.html"
+    option_template_name = "ui/forms/widgets/dsfr_checkbox_option.html"
 
     # TODO: refacto forms
     # The method below has been written to bypass a limitation of the
