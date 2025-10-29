@@ -2,7 +2,7 @@ from typing import List, cast
 
 from django import forms
 from django.core.cache import cache
-from django.db.models import IntegerChoices, TextChoices
+from django.db.models import TextChoices
 from django.http import HttpRequest
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
@@ -215,14 +215,14 @@ class GetFormMixin(forms.Form):
 
 
 class DigitalActeurForm(GetFormMixin, DsfrBaseForm):
-    class DigitalChoices(IntegerChoices, SegmentedControlChoices):
+    class DigitalChoices(TextChoices, SegmentedControlChoices):
         DIGITAL = {
-            "value": 1,
+            "value": "en_ligne",
             "label": "En ligne",
             "icon": "global-line",
         }
         PHYSIQUE = {
-            "value": 0,
+            "value": "digital",
             "label": "À proximité",
             "icon": "road-map-line",
         }
@@ -231,7 +231,7 @@ class DigitalActeurForm(GetFormMixin, DsfrBaseForm):
         # TODO : gérer pour l'accessibilité
         label="",
         choices=DigitalChoices.choices,
-        initial=DigitalChoices.PHYSIQUE,
+        initial=DigitalChoices.PHYSIQUE.value,
         required=False,
         widget=SegmentedControl(
             extended_choices=DigitalChoices,
