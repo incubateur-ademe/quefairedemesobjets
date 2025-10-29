@@ -534,7 +534,9 @@ class FormulaireSearchActeursView(SearchActeursView):
     form_class = FormulaireForm
 
     def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-        self.digital_acteur_form = DigitalActeurForm(self.request.GET)
+        self.digital_acteur_form: DigitalActeurForm = DigitalActeurForm(
+            self.request.GET
+        )
         self.action_direction_form = ActionDirectionForm(
             self.request.GET,
             initial={"direction": ActionDirectionForm.DirectionChoices.J_AI.value},
@@ -543,6 +545,12 @@ class FormulaireSearchActeursView(SearchActeursView):
 
     def _get_direction(self):
         return self.action_direction_form["direction"].value()
+
+    def _check_if_is_digital(self):
+        return (
+            self.digital_acteur_form["digital"].value()
+            == self.digital_acteur_form.DigitalChoices.DIGITAL.value
+        )
 
     def _handle_scoped_acteurs(
         self, acteurs: QuerySet[DisplayedActeur], kwargs
@@ -556,21 +564,13 @@ class FormulaireSearchActeursView(SearchActeursView):
         override from parent class to handle digital acteurs
         """
 
-        if (
-            self.digital_acteur_form
-            and self.digital_acteur_form.is_bound
-            and self.digital_acteur_form.cleaned_data["digital"] == "1"
-        ):
+        if self._check_if_is_digital():
             return None, acteurs.digital()
         return super()._handle_scoped_acteurs(acteurs, kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if (
-            self.digital_acteur_form
-            and self.digital_acteur_form.is_bound
-            and self.digital_acteur_form.cleaned_data["digital"] == "1"
-        ):
+        if self._check_if_is_digital():
             context.update(is_digital=True)
         context.update(
             map_container_id="formulaire",
