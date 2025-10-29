@@ -2,7 +2,7 @@ from typing import List, cast
 
 from django import forms
 from django.core.cache import cache
-from django.db.models import IntegerChoices
+from django.db.models import IntegerChoices, TextChoices
 from django.http import HttpRequest
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
@@ -18,7 +18,6 @@ from qfdmo.models.action import (
     GroupeAction,
     get_action_instances,
     get_directions,
-    get_ordered_directions,
 )
 from qfdmo.widgets import (
     AutoCompleteInput,
@@ -87,23 +86,6 @@ class AddressesForm(forms.Form):
                 "data-search-solution-form-target": "longitudeInput",
             }
         ),
-        required=False,
-    )
-
-    direction = forms.ChoiceField(
-        widget=SegmentedControlSelect(
-            attrs={
-                "data-action": "click -> search-solution-form#changeDirection",
-                "class": "qf-w-full sm:qf-w-fit",
-            },
-            fieldset_attrs={
-                "data-search-solution-form-target": "direction",
-            },
-        ),
-        choices=[],
-        # TODO: refacto forms : set initial value
-        # initial="jai",
-        label="Direction des actions",
         required=False,
     )
 
@@ -209,18 +191,6 @@ class AddressesForm(forms.Form):
 
 
 class FormulaireForm(AddressesForm):
-    def load_choices(self, request: HttpRequest, **kwargs) -> None:
-        # The kwargs in function signature prevents type error.
-        # TODO : refacto forms : if AddressesForm and CarteAddressesForm
-        # are used on differents views, the method signature would not need
-        # to be the same.
-        first_direction = request.GET.get("first_dir")
-        self.fields["direction"].choices = [
-            [direction["code"], direction["libelle"]]
-            for direction in get_ordered_directions(first_direction=first_direction)
-        ]
-        super().load_choices(request)
-
     adresse = forms.CharField(
         widget=AutoCompleteInput(
             attrs={
@@ -236,31 +206,29 @@ class FormulaireForm(AddressesForm):
     )
 
 
-class DigitalChoices(IntegerChoices, SegmentedControlChoices):
-    DIGITAL = {
-        "value": 1,
-        "label": "En ligne",
-        "icon": "global-line",
-    }
-    PHYSIQUE = {
-        "value": 0,
-        "label": "À proximité",
-        "icon": "road-map-line",
-    }
-
-
 class GetFormMixin(forms.Form):
-
     def __init__(self, data: dict | None = None, *args, **kwargs):
-        if data and not (set(data.keys()) & set(self.base_fields.keys())):
+        if data is not None and not (set(data.keys()) & set(self.base_fields.keys())):
             data = None
 
         super().__init__(*args, data=data, **kwargs)
 
 
-class NextFormulaireForm(GetFormMixin, DsfrBaseForm):
+class DigitalActeurForm(GetFormMixin, DsfrBaseForm):
+    class DigitalChoices(IntegerChoices, SegmentedControlChoices):
+        DIGITAL = {
+            "value": 1,
+            "label": "En ligne",
+            "icon": "global-line",
+        }
+        PHYSIQUE = {
+            "value": 0,
+            "label": "À proximité",
+            "icon": "road-map-line",
+        }
 
     digital = forms.ChoiceField(
+        # TODO : gérer pour l'accessibilité
         label="",
         choices=DigitalChoices.choices,
         initial=DigitalChoices.PHYSIQUE,
@@ -271,6 +239,35 @@ class NextFormulaireForm(GetFormMixin, DsfrBaseForm):
                 "data-action": "search-solution-form#advancedSubmit",
             },
         ),
+    )
+
+
+class ActionDirectionForm(GetFormMixin, DsfrBaseForm):
+    # TODO: Gérer la rétrocompatibilité avec les paramètres d'URL
+    class DirectionChoices(TextChoices, SegmentedControlChoices):
+        J_AI = {
+            "value": "jai",
+            "label": "J'ai un objet",
+        }
+        JE_CHERCHE = {
+            "value": "jecherche",
+            "label": "Je recherche un objet",
+        }
+
+    direction = forms.ChoiceField(
+        widget=SegmentedControl(
+            attrs={
+                "data-action": "click -> search-solution-form#changeDirection",
+                "data-search-solution-form-target": "direction",
+                "class": "qf-w-full sm:qf-w-fit",
+            },
+            extended_choices=DirectionChoices,
+        ),
+        choices=DirectionChoices.choices,
+        # TODO: handle label in UI without displaying it
+        label="",
+        # label="Direction des actions",
+        required=False,
     )
 
 

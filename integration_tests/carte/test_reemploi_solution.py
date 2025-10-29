@@ -1,5 +1,4 @@
 import pytest
-from django.conf import settings
 from django.core.management import call_command
 
 
@@ -22,7 +21,7 @@ class TestInitialValue:
         "sous_categorie_objet": None,
         "sc_id": None,
         "adresse": None,
-        "direction": settings.DEFAULT_ACTION_DIRECTION,
+        "direction": "jai",
         "latitude": None,
         "longitude": None,
         "label_reparacteur": None,

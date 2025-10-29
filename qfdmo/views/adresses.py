@@ -21,9 +21,8 @@ from django.views.decorators.http import require_GET
 from django.views.generic.edit import FormView
 from wagtail.query import Any
 
-from core.utils import get_direction
 from qfdmd.models import Synonyme
-from qfdmo.forms import FormulaireForm, NextFormulaireForm
+from qfdmo.forms import ActionDirectionForm, DigitalActeurForm, FormulaireForm
 from qfdmo.geo_api import bbox_from_list_of_geojson, retrieve_epci_geojson
 from qfdmo.map_utils import (
     center_from_frontend_bbox,
@@ -75,6 +74,10 @@ class SearchActeursView(
     FormView,
 ):
     @abstractmethod
+    def _get_direction(self):
+        pass
+
+    @abstractmethod
     def _get_max_displayed_acteurs(self):
         pass
 
@@ -89,7 +92,6 @@ class SearchActeursView(
         initial["sous_categorie_objet"] = self.request.GET.get("sous_categorie_objet")
         # TODO: refacto forms : delete this line
         initial["adresse"] = self.request.GET.get("adresse")
-        initial["direction"] = get_direction(self.request, self.is_carte)
         # TODO: refacto forms : delete this line
         initial["latitude"] = self.request.GET.get("latitude")
         # TODO: refacto forms : delete this line
@@ -285,7 +287,7 @@ class SearchActeursView(
         """
         Limit to actions of the direction only in Carte mode
         """
-        if direction := self.request.GET.get("direction"):
+        if direction := self._get_direction():
             if self.is_carte:
                 cached_action_instances = [
                     action
@@ -383,7 +385,7 @@ class SearchActeursView(
             if codes
             else cached_action_instances
         )
-        if direction := self.request.GET.get("direction"):
+        if direction := self._get_direction():
             actions = [
                 a for a in actions if direction in [d.code for d in a.directions.all()]
             ]
@@ -532,10 +534,15 @@ class FormulaireSearchActeursView(SearchActeursView):
     form_class = FormulaireForm
 
     def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-        self.next_form = NextFormulaireForm(self.request.GET)
-        if not self.next_form.is_valid():
-            logger.error(f"{self.next_form=} 💣💣💣💣💣")
+        self.digital_acteur_form = DigitalActeurForm(self.request.GET)
+        self.action_direction_form = ActionDirectionForm(
+            self.request.GET,
+            initial={"direction": ActionDirectionForm.DirectionChoices.J_AI.value},
+        )
         return super().get(request, *args, **kwargs)
+
+    def _get_direction(self):
+        return self.action_direction_form["direction"].value()
 
     def _handle_scoped_acteurs(
         self, acteurs: QuerySet[DisplayedActeur], kwargs
@@ -550,9 +557,9 @@ class FormulaireSearchActeursView(SearchActeursView):
         """
 
         if (
-            self.next_form
-            and self.next_form.is_bound
-            and self.next_form.cleaned_data["digital"] == "1"
+            self.digital_acteur_form
+            and self.digital_acteur_form.is_bound
+            and self.digital_acteur_form.cleaned_data["digital"] == "1"
         ):
             return None, acteurs.digital()
         return super()._handle_scoped_acteurs(acteurs, kwargs)
@@ -560,12 +567,16 @@ class FormulaireSearchActeursView(SearchActeursView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if (
-            self.next_form
-            and self.next_form.is_bound
-            and self.next_form.cleaned_data["digital"] == "1"
+            self.digital_acteur_form
+            and self.digital_acteur_form.is_bound
+            and self.digital_acteur_form.cleaned_data["digital"] == "1"
         ):
             context.update(is_digital=True)
-        context.update(map_container_id="formulaire", next_form=self.next_form)
+        context.update(
+            map_container_id="formulaire",
+            action_direction_form=self.action_direction_form,
+            digital_acteur_form=self.digital_acteur_form,
+        )
         return context
 
     def _get_selected_action_ids(self):
@@ -574,7 +585,7 @@ class FormulaireSearchActeursView(SearchActeursView):
         return [a["id"] for a in self.get_action_list()]
 
     def get_action_list(self) -> List[dict]:
-        direction = get_direction(self.request, False)
+        direction = self._get_direction()
         action_displayed = self._set_action_displayed()
         actions = self._set_action_list(action_displayed)
         if direction:

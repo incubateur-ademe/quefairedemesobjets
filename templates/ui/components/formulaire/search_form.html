@@ -14,12 +14,7 @@
             {# TODO: REFACTO OVERFLOW : supprimer les overflow et le padding left #}
             <div class="qf-flex-grow md:qf-pl-3v max-md:qf-px-1w">
                 {# Direction #}
-                <fieldset class="fr-segmented fr-segmented--sm qf-w-full fr-mt-3w">
-                    <legend class="fr-segmented__legend qf-hidden">
-                        {{ form.direction.label }}
-                    </legend>
-                    {{ form.direction }}
-                </fieldset>
+                {{ action_direction_form }}
 
                 {{ form.action_displayed }}
 
