@@ -217,12 +217,12 @@ class GetFormMixin(forms.Form):
 class DigitalActeurForm(GetFormMixin, DsfrBaseForm):
     class DigitalChoices(TextChoices, SegmentedControlChoices):
         DIGITAL = {
-            "value": "en_ligne",
+            "value": "digital",
             "label": "En ligne",
             "icon": "global-line",
         }
         PHYSIQUE = {
-            "value": "digital",
+            "value": "physique",
             "label": "À proximité",
             "icon": "road-map-line",
         }

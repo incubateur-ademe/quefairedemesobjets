@@ -11,6 +11,7 @@ from core.templatetags.carte_tags import (
     action_by_direction,
     distance_to_acteur,
 )
+from qfdmo.forms import ActionDirectionForm
 from unit_tests.qfdmo.acteur_factory import (
     ActeurTypeFactory,
     DisplayedActeurFactory,
@@ -569,7 +570,10 @@ class TestActionByDirection:
     def test_action_by_direction_default(self):
         request = HttpRequest()
         request.GET = QueryDict("")
-        context = {"request": request}
+        context = {
+            "request": request,
+            "action_direction_form": ActionDirectionForm(),
+        }
 
         assert [
             action["libelle"] for action in action_by_direction(context, "jai")
@@ -616,8 +620,11 @@ class TestActionByDirection:
     @pytest.mark.django_db
     def test_action_by_direction_jai(self):
         request = HttpRequest()
-        request.GET = QueryDict("direction=jecherche&action_list=emprunter|louer")
-        context = {"request": request}
+        request.GET = QueryDict("action_list=emprunter|louer")
+        context = {
+            "request": request,
+            "action_direction_form": ActionDirectionForm({"direction": "jecherche"}),
+        }
 
         assert [
             action["libelle"] for action in action_by_direction(context, "jai")
