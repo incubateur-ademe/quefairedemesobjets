@@ -20,6 +20,7 @@ module.exports = {
     "sm:qf-w-[400px]",
     "qf-top-3/4",
     "qf-scale-115",
+
     {
       pattern: new RegExp(`qf-(text|border|bg)-(${usedColors.join("|")})`),
     },

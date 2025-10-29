@@ -15,7 +15,6 @@ On affiche l'iframe grâce à un script JS.
   src="https://quefairedemesdechets.ademe.fr/static/iframe.js"
   data-max_width="800"
   data-direction="jai"
-  data-first_dir="jai"
   data-action_list="preter|donner|reparer|echanger|mettreenlocation|revendre"
 ></script>
 ```

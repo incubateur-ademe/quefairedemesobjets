@@ -13,6 +13,8 @@ from qfdmo.models.utils import CodeAsNaturalKeyManager, CodeAsNaturalKeyModel
 from qfdmo.validators import CodeValidator
 
 
+# TODO: the direction form used in Formulaire now uses an enum
+# This model could be migrated to an enum at some point.
 class ActionDirection(CodeAsNaturalKeyModel):
     class Meta:
         verbose_name = "Action - Direction"

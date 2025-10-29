@@ -46,7 +46,7 @@ class SearchFormController extends Controller<HTMLElement> {
 
   declare readonly jaiTarget: HTMLElement
   declare readonly jechercheTarget: HTMLElement
-  declare readonly directionTarget: HTMLElement
+  declare readonly directionTargets: HTMLElement[]
   declare readonly latitudeInputTarget: HTMLInputElement
   declare readonly longitudeInputTarget: HTMLInputElement
   declare readonly actionListTarget: HTMLInputElement
@@ -176,24 +176,16 @@ class SearchFormController extends Controller<HTMLElement> {
   }
 
   displayActionList() {
-    if (!this.hasDirectionTarget) {
-      return
-    }
-    const direction = this.directionTarget
-    // In "La Carte" mode, the direction is a hidden input
-    if (direction instanceof HTMLInputElement) {
-      this.#selectedOption = direction.value
-      return
-    }
-    // In form mode, the direction is a fieldset
-    const options = direction.getElementsByTagName("input")
-    for (let i = 0; i < options.length; i++) {
-      if (options[i].checked && options[i].value == "jai") {
+    for (let i = 0; i < this.directionTargets.length; i++) {
+      if (this.directionTargets[i].checked && this.directionTargets[i].value == "jai") {
         this.#selectedOption = "jai"
         this.jechercheTarget.hidden = true
         this.jaiTarget.hidden = false
       }
-      if (options[i].checked && options[i].value == "jecherche") {
+      if (
+        this.directionTargets[i].checked &&
+        this.directionTargets[i].value == "jecherche"
+      ) {
         this.#selectedOption = "jecherche"
         this.jechercheTarget.hidden = false
         this.jaiTarget.hidden = true

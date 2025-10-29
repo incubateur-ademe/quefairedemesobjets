@@ -5,8 +5,6 @@ from django.utils.encoding import force_str
 from django.utils.functional import Promise
 from wagtail.fields import DjangoJSONEncoder
 
-from qfdmo.models.action import get_directions
-
 SQL_CREATE_EXTENSIONS = """
                 CREATE EXTENSION IF NOT EXISTS postgis;
                 CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
@@ -15,14 +13,6 @@ SQL_CREATE_EXTENSIONS = """
                 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
                 CREATE EXTENSION IF NOT EXISTS postgres_fdw;
                 """
-
-
-def get_direction(request, is_carte=False):
-    default_direction = None if is_carte else settings.DEFAULT_ACTION_DIRECTION
-    direction = request.GET.get("direction", default_direction)
-    if direction not in [d["code"] for d in get_directions()]:
-        direction = default_direction
-    return direction
 
 
 class LazyEncoder(DjangoJSONEncoder):
