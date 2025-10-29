@@ -276,7 +276,6 @@ def get_epcis_for_carte_form():
 
 
 class CarteForm(AddressesForm):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Override the label and aria-label for the sous_categorie_objet field
@@ -427,10 +426,6 @@ class AdvancedConfiguratorForm(forms.Form):
         self.fields["direction"].choices = [
             (direction["code"], direction["libelle"]) for direction in cached_directions
         ] + [("no_dir", "Par défaut")]
-        self.fields["first_dir"].choices = [
-            ("first_" + direction["code"], direction["libelle"])
-            for direction in cached_directions
-        ] + [("first_no_dir", "Par défaut")]
 
         # Cast needed because of the cache
         cached_action_instances = cast(
@@ -502,20 +497,6 @@ class AdvancedConfiguratorForm(forms.Form):
         # TODO: refacto forms : set initial value
         # initial="jecherche",
         label="Direction des actions",
-        required=False,
-    )
-
-    # - `data-first_dir`, option `jai` ou `jecherche`, par défaut l'option de direction
-    # « Je cherche » est affiché en premier dans la liste des options de direction
-    first_dir = forms.ChoiceField(
-        widget=SegmentedControlSelect(
-            attrs={
-                "class": "qf-w-full sm:qf-w-fit",
-            },
-            fieldset_attrs={},
-        ),
-        label="Direction affichée en premier dans la liste des options de direction",
-        help_text="Cette option n'est disponible que dans la version formulaire",
         required=False,
     )
 

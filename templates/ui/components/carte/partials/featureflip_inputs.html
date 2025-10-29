@@ -18,7 +18,3 @@
 
 {% random_range 1000 as random_value %}
 <input type="hidden" name="r" value="{{ random_value }}">
-
-{% if request.GET.first_dir %}
-    <input type="hidden" name="first_dir" value="{{ request.GET.first_dir }}">
-{% endif %}

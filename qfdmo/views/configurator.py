@@ -110,7 +110,6 @@ class AdvancedConfiguratorView(LoginRequiredMixin, FormView):
         initial["address_placeholder"] = self.request.GET.get("address_placeholder")
         initial["iframe_mode"] = self.request.GET.get("iframe_mode")
         initial["direction"] = self.request.GET.get("direction")
-        initial["first_dir"] = self.request.GET.get("first_dir")
         initial["action_displayed"] = self.request.GET.getlist("action_displayed")
         initial["action_list"] = self.request.GET.getlist("action_list")
         initial["max_width"] = self.request.GET.get("max_width")
@@ -140,9 +139,6 @@ class AdvancedConfiguratorView(LoginRequiredMixin, FormView):
         if direction := self.request.GET.get("direction"):
             if direction != "no_dir":
                 attributes["direction"] = escape(direction)
-        if first_dir := self.request.GET.get("first_dir"):
-            if first_dir != "first_no_dir":
-                attributes["first_dir"] = escape(first_dir.replace("first_", ""))
         if action_list := self.request.GET.getlist("action_list"):
             attributes["action_list"] = escape("|".join(action_list))
         if action_displayed := self.request.GET.getlist("action_displayed"):
