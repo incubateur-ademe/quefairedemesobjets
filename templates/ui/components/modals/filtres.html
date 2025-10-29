@@ -7,16 +7,24 @@
 
 {% block button_extra_classes %}fr-btn--secondary fr-btn--icon-left fr-icon-equalizer-line{% endblock %}
 
+{% block size_classes %}fr-col-12 fr-col-md-10 fr-col-lg-10{% endblock %}
+
 {% block modal_title %}
 Filtres
 {% endblock modal_title %}
 
 {% block modal_content %}
-{{ form }}
+<form>
+  {{ form }}
+  <button type="submit" class="fr-btn" title="Valider">
+    Filtrer
+  </button>
+</form>
+
 {% endblock modal_content %}
 
 {% block modal_wrapper_for_id %}
-    {% with id="filtres" %}
-    {{ block.super }}
-    {% endwith %}
+{% with id=id|default:"filtres" %}
+{{ block.super }}
+{% endwith %}
 {% endblock modal_wrapper_for_id %}

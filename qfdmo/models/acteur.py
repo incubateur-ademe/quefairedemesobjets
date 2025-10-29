@@ -266,6 +266,11 @@ class LabelQualite(CodeAsNaturalKeyModel):
         help_text="Configure le texte d'aide affiché dans le champ de formulaire"
         " dans le panel de filtres sur la carte ou le mode liste",
     )
+    logo = models.FileField(
+        upload_to="labels",
+        blank=True,
+        null=True,
+    )
     logo_file = models.ImageField(
         upload_to="logos", blank=True, null=True, validators=[validate_logo]
     )

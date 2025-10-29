@@ -278,6 +278,9 @@ class SearchFormController extends Controller<HTMLElement> {
   }
 
   closeAdvancedFilters() {
+    if (!this.hasAdvancedFiltersMainPanelTarget) {
+      return
+    }
     this.advancedFiltersSaveAndSubmitButtonTarget.classList.remove("qf-hidden")
     this.advancedFiltersSaveButtonTarget.classList.add("qf-hidden")
     this.#hideAdvancedFilters()
@@ -285,6 +288,9 @@ class SearchFormController extends Controller<HTMLElement> {
   }
 
   toggleAdvancedFilters() {
+    if (!this.hasAdvancedFiltersMainPanelTarget) {
+      return
+    }
     this.advancedFiltersSaveAndSubmitButtonTarget.classList.remove("qf-hidden")
     this.advancedFiltersSaveButtonTarget.classList.add("qf-hidden")
     if (this.advancedFiltersMainPanelTarget.dataset.visible === "false") {
@@ -296,10 +302,16 @@ class SearchFormController extends Controller<HTMLElement> {
   }
 
   #showAdvancedFilters() {
+    if (!this.hasAdvancedFiltersMainPanelTarget) {
+      return
+    }
     this.advancedFiltersMainPanelTarget.dataset.visible = "true"
   }
 
   #hideAdvancedFilters() {
+    if (!this.hasAdvancedFiltersMainPanelTarget) {
+      return
+    }
     if (this.advancedFiltersMainPanelTarget.dataset.visible == "false") {
       return
     }

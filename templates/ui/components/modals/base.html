@@ -3,7 +3,10 @@
     class="fr-btn {% block button_extra_classes %}{% endblock %} {{ button_extra_classes }} qf-whitespace-nowrap"
     data-fr-opened="false"
     aria-controls="fr-modal-{{ id }}"
-    aria-labelledby="sidebar-action-{{ id }}"
+    aria-labelledby="fr-modal-title-{{ id }}"
+    {# Ensure turbo frame is disabled as DSFR modals should not interact with turbo frame #}
+    data-turbo="false"
+    type="button"
 >
       {% block button_text %}{% endblock %}
 </button>
@@ -12,11 +15,11 @@
     aria-labelledby="fr-modal-title-{{ id }}"
     role="dialog"
     id="fr-modal-{{ id }}"
-    class="fr-modal z-50 qf-text-left"
+    class="fr-modal z-[100000] qf-text-left"
 >
     <div class="fr-container fr-container--fluid fr-container-md">
         <div class="fr-grid-row fr-grid-row--center">
-            <div class="fr-col-12 fr-col-md-8 fr-col-lg-6">
+            <div class="{% block size_classes %}fr-col-12 fr-col-md-8 fr-col-lg-6{% endblock %}">
                 <div class="fr-modal__body">
                     <div class="fr-modal__header">
                         <button class="fr-btn--close fr-btn" title="Fermer la fenêtre modale" aria-controls="fr-modal-{{ id }}">Fermer</button>

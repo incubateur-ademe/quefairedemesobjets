@@ -7,7 +7,7 @@ from django.forms import Form
 from django.utils.functional import cached_property
 from django.views.generic import DetailView
 
-from qfdmo.forms import ActionDirectionForm, CarteForm, ViewModeForm
+from qfdmo.forms import ActionDirectionForm, CarteForm, FiltresForm, ViewModeForm
 from qfdmo.models import CarteConfig
 from qfdmo.views.adresses import SearchActeursView
 
@@ -18,21 +18,22 @@ class CarteSearchActeursView(SearchActeursView):
     is_carte = True
     template_name = "ui/pages/carte.html"
     form_class = CarteForm
-    forms = {"view_mode": ViewModeForm}
+    forms = {
+        "view_mode": ViewModeForm,
+        "filtres_form": FiltresForm,
+    }
 
     def get_forms(self) -> dict[str, Form]:
-        bounded_forms = {}
+        form_instances = {}
         for key, FormCls in self.forms.items():
             if self.request.method == "POST":
                 form = FormCls(self.request.POST)
             else:
-                # We instantiate the form only if the request contains fields that are
-                # defined on the form.
                 form = FormCls(self.request.GET)
 
-            bounded_forms[key] = form
+            form_instances[key] = form
 
-        return bounded_forms
+        return form_instances
 
     def _get_direction(self):
         action_direction_form = ActionDirectionForm(self.request.GET)

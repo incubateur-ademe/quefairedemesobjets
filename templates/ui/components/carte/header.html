@@ -53,14 +53,6 @@
                         Légende
                     </button>
                     {% endif %}
-                    <button
-                        class="fr-btn max-md:fr-btn--sm fr-btn--secondary fr-ml-1w fr-btn--icon-left fr-icon-equalizer-line"
-                        type="button"
-                        data-action="search-solution-form#toggleAdvancedFilters"
-                        data-testid="advanced-filters"
-                    >
-                        Filtres
-                    </button>
                 </div>
             </div>
             {% endif %}
@@ -71,7 +63,7 @@
         <div class="md:qf-px-2w max-md:qf-flex qf-justify-between qf-items-end" id="view-mode-nav">
             {{ forms.view_mode }}
             <div class="md:qf-hidden">
-            {% dsfr_button label="Filtres" extra_classes="fr-btn--sm fr-btn--secondary fr-ml-1w fr-btn--icon-left fr-icon-equalizer-line" data_action="search-solution-form#toggleAdvancedFilters:prevent" data_testid="advanced-filters" %}
+            {% include "ui/components/modals/filtres.html" with form=forms.filtres_form button_extra_classes="fr-btn--sm" id="filtres-mobile" %}
             </div>
         </div>
     </div>

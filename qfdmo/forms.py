@@ -10,7 +10,7 @@ from dsfr.enums import SegmentedControlChoices
 from dsfr.forms import DsfrBaseForm
 from dsfr.widgets import SegmentedControl
 
-from qfdmo.fields import GroupeActionChoiceField, LabelChoiceField
+from qfdmo.fields import GroupeActionChoiceField, LabelQualiteChoiceField
 from qfdmo.geo_api import epcis_from, formatted_epcis_as_list_of_tuple
 from qfdmo.models import SousCategorieObjet
 from qfdmo.models.acteur import LabelQualite
@@ -177,7 +177,7 @@ class FiltresForm(GetFormMixin, DsfrBaseForm):
         widget=forms.CheckboxSelectMultiple,
         required=False,
         label="",
-        # initial=GroupeAction.objects.all(),
+        initial=GroupeAction.objects.all(),
     )
 
     sous_categorie_objet = forms.ModelChoiceField(
@@ -195,44 +195,12 @@ class FiltresForm(GetFormMixin, DsfrBaseForm):
         empty_label="",
         required=False,
     )
-    label = LabelChoiceField(
-        queryset=LabelQualite.objects.all(),
+    label = LabelQualiteChoiceField(
+        queryset=LabelQualite.objects.filter(afficher=True, filtre=True),
         to_field_name="code",
         widget=forms.CheckboxSelectMultiple,
         required=False,
         label="",
-        # initial=GroupeAction.objects.all(),
-    )
-
-    label_reparacteur = forms.BooleanField(
-        widget=forms.CheckboxInput(
-            attrs={
-                "class": "fr-checkbox fr-m-1v",
-                "data-search-solution-form-target": "reparerFilter",
-            }
-        ),
-        label=render_to_string("ui/components/filtres/reparacteurs/label.html"),
-        label_suffix="",
-        required=False,
-    )
-
-    ess = forms.BooleanField(
-        widget=forms.CheckboxInput(attrs={"class": "fr-checkbox fr-m-1v"}),
-        label=render_to_string("ui/components/filtres/ess/label.html"),
-        label_suffix="",
-        required=False,
-    )
-
-    bonus = forms.BooleanField(
-        widget=forms.CheckboxInput(
-            attrs={
-                "class": "fr-checkbox fr-m-1v",
-                "data-search-solution-form-target": "reparerFilter",
-            },
-        ),
-        label=render_to_string("ui/components/filtres/bonus/label.html"),
-        label_suffix="",
-        required=False,
     )
 
 
