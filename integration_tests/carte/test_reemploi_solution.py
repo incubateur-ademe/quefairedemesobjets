@@ -21,7 +21,6 @@ class TestInitialValue:
         "sous_categorie_objet": None,
         "sc_id": None,
         "adresse": None,
-        "direction": "jai",
         "latitude": None,
         "longitude": None,
         "label_reparacteur": None,
@@ -60,7 +59,6 @@ class TestInitialValue:
         assert response.context_data["acteurs"].count() == 0
         assert response.context_data["form"].initial == {
             **self.default_context,
-            "direction": None,
             "action_displayed": (
                 "preter|emprunter|louer|mettreenlocation|reparer|donner|echanger"
                 "|acheter|revendre|rapporter|trier"
