@@ -207,12 +207,12 @@ class FiltresForm(GetFormMixin, DsfrBaseForm):
 class DigitalActeurForm(GetFormMixin, DsfrBaseForm):
     class DigitalChoices(TextChoices, SegmentedControlChoices):
         DIGITAL = {
-            "value": "en_ligne",
+            "value": "digital",
             "label": "En ligne",
             "icon": "global-line",
         }
         PHYSIQUE = {
-            "value": "digital",
+            "value": "physique",
             "label": "À proximité",
             "icon": "road-map-line",
         }
@@ -233,7 +233,6 @@ class DigitalActeurForm(GetFormMixin, DsfrBaseForm):
 
 
 class ActionDirectionForm(GetFormMixin, DsfrBaseForm):
-    # TODO: Gérer la rétrocompatibilité avec les paramètres d'URL
     class DirectionChoices(TextChoices, SegmentedControlChoices):
         J_AI = {
             "value": "jai",

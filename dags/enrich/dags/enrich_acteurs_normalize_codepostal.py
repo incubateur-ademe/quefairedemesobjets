@@ -22,6 +22,7 @@ with DAG(
         " à la norme et proposer une correction le cas échéant"
     ),
     tags=[TAGS.ENRICH, TAGS.ACTEURS, TAGS.CP],
+    schedule=None,
     start_date=START_DATES.DEFAULT,
 ) as dag:
     db_read_acteur_cp = db_read_acteur_cp_task(dag)

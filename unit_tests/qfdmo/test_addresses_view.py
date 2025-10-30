@@ -11,7 +11,7 @@ class TestAdresseViewMixins:
         request = HttpRequest()
         request.GET = query_dict_from(
             {
-                "digital": "1",
+                "digital": ["digital"],
             }
         )
         adresses_view = FormulaireSearchActeursView()
@@ -36,7 +36,11 @@ class TestFormulaireViewGetActionList:
                 ],
             ),
             (
-                {"direction": "fake"},
+                {"direction": ["fake"]},
+                [],
+            ),
+            (
+                {"direction": ["jai"]},
                 [
                     "prêter",
                     "mettre en location",
@@ -47,31 +51,21 @@ class TestFormulaireViewGetActionList:
                 ],
             ),
             (
-                {"direction": "jai"},
-                [
-                    "prêter",
-                    "mettre en location",
-                    "réparer",
-                    "donner",
-                    "échanger",
-                    "vendre",
-                ],
-            ),
-            (
-                {"direction": "jecherche"},
+                {"direction": ["jecherche"]},
                 ["emprunter", "louer", "échanger", "acheter de seconde main"],
             ),
-            ({"action_list": "fake"}, []),
-            ({"action_list": "preter"}, ["prêter"]),
-            ({"action_list": "preter|reparer"}, ["prêter", "réparer"]),
+            ({"action_list": ["fake"]}, []),
+            ({"action_list": ["preter"]}, ["prêter"]),
+            ({"action_list": ["preter|reparer"]}, ["prêter", "réparer"]),
         ],
     )
     @pytest.mark.django_db
     def test_get_action_list(self, params, action_list):
         request = HttpRequest()
-        request.GET = params
+        request.GET = query_dict_from(params)
         adresses_view = FormulaireSearchActeursView()
         adresses_view.setup(request)
+        adresses_view.get(request)
 
         assert [
             action["libelle"] for action in adresses_view.get_action_list()

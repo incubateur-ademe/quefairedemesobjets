@@ -327,10 +327,15 @@ def source_data_normalize(
     df = _replace_explicit_null_values(df)
 
     df = _rename_columns(df, dag_config)
+    log.preview("df after renaming columns", df)
     df = _transform_columns(df, dag_config)
+    log.preview("df after transforming columns", df)
     df = _default_value_columns(df, dag_config)
+    log.preview("df after adding default value columns", df)
     df = _transform_df(df, dag_config)
+    log.preview("df after transforming df", df)
     df = _remove_columns(df, dag_config)
+    log.preview("df after removing columns", df)
 
     # extract logs by identifiant_unique
     df_log_error = df[["identifiant_unique", "log_error"]]
@@ -378,6 +383,7 @@ def source_data_normalize(
 
     # Merge and delete undesired lines
     df, metadata = _remove_undesired_lines(df, dag_config)
+    log.preview("df after removing undesired lines", df)
 
     # deduplication_on_source_code
     if dag_config.is_oca:

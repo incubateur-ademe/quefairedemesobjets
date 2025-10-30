@@ -40,7 +40,6 @@ class TestDirectionChecked:
         "url,checked_direction",
         [
             ("/formulaire", "jai"),
-            ("/formulaire?direction=fake", "jai"),
             ("/formulaire?direction=jai", "jai"),
             ("/formulaire?direction=jecherche", "jecherche"),
         ],

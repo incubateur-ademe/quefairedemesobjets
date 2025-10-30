@@ -27,6 +27,7 @@ default_args = {
 with DAG(
     "export_opendata_dag",
     default_args=default_args,
+    schedule=SCHEDULES.EVERY_MONDAY_AT_01_00,
     start_date=START_DATES.DEFAULT,
     dag_display_name="Acteurs Open-Data - Exporter les Acteurs en Open-Data",
     description=(
@@ -40,7 +41,6 @@ with DAG(
         "s3_connection_id": "s3data",
         "opendata_table": "exposure_opendata_acteur",
     },
-    schedule=SCHEDULES.EVERY_MONDAY_AT_01_00,
     max_active_runs=1,
 ) as dag:
 

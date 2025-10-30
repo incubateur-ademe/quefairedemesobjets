@@ -7,9 +7,9 @@ describe("SearchSolutionFormController", () => {
   beforeEach(() => {
     document.body.innerHTML = `
             <div data-controller="search-solution-form">
-                <fieldset data-search-solution-form-target="direction">
-                    <input type="radio" name="direction" value="jai" data-action="click->search-solution-form#changeDirection" id="id_direction_0" checked="">
-                    <input type="radio" name="direction" value="jecherche" data-action="click->search-solution-form#changeDirection" id="id_direction_1">
+                <fieldset >
+                    <input type="radio" name="direction" value="jai" data-action="click->search-solution-form#changeDirection" id="id_direction_0" data-search-solution-form-target="direction" checked="">
+                    <input type="radio" name="direction" value="jecherche" data-action="click->search-solution-form#changeDirection" id="id_direction_1" data-search-solution-form-target="direction">
                 </fieldset>
                 <button type="button" data-action="search-solution-form#toggleadvancedFiltersDiv" data-search-solution-form-target="advancedFiltersButton">
                     <span class="qf-hidden" data-search-solution-form-target="advancedFiltersCounter"></span>

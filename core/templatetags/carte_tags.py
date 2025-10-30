@@ -24,7 +24,6 @@ def action_by_direction(context, direction):
     """Get action for the given direction following context"""
     request = context["request"]
     action_direction_form: ActionDirectionForm = context["action_direction_form"]
-    action_direction_form.is_valid()
     requested_direction = action_direction_form["direction"].value()
 
     action_displayed = request.GET.get("action_displayed", "")
