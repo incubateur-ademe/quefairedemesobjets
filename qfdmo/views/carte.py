@@ -23,12 +23,14 @@ class CarteForms(TypedDict):
     view_mode: Type[ViewModeForm]
     filtres_form: Type[FiltresForm]
     legende_form: Type[LegendeForm]
+    legende_form_mobile: Type[LegendeForm]
 
 
 class CarteFormsInstance(TypedDict):
     view_mode: Optional[ViewModeForm]
     filtres_form: Optional[FiltresForm]
     legende_form: Optional[LegendeForm]
+    legende_form_mobile: Optional[LegendeForm]
 
 
 class CarteSearchActeursView(SearchActeursView):
@@ -39,6 +41,7 @@ class CarteSearchActeursView(SearchActeursView):
         "view_mode": ViewModeForm,
         "filtres_form": FiltresForm,
         "legende_form": LegendeForm,
+        "legende_form_mobile": LegendeForm,
     }
 
     def get_forms(self) -> CarteFormsInstance:
