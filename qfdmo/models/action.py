@@ -261,15 +261,5 @@ def get_directions() -> List[dict]:
     return sorted(directions_list, key=lambda x: x["order"])
 
 
-def get_ordered_directions(first_direction=None) -> List[dict]:
-    ordered_directions = cast(
-        List[dict], cache.get_or_set("directions", get_directions)
-    )
-    if first_direction is not None and first_direction in [
-        d["code"] for d in ordered_directions
-    ]:
-        return sorted(
-            ordered_directions,
-            key=lambda x: (x["code"] != first_direction, x["code"]),
-        )
-    return ordered_directions
+def get_ordered_directions() -> List[dict]:
+    return cast(List[dict], cache.get_or_set("directions", get_directions))
