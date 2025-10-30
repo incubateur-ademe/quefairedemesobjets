@@ -218,6 +218,9 @@ class ModalsPreview(LookbookPreview):
         context = {"legende_form": LegendeForm(), "filtres_form": FiltresForm}
         return render_to_string("ui/components/modals/filtres.html", context)
 
+    def infos(self, **kwargs):
+        return render_to_string("ui/components/modals/infos.html")
+
 
 class PagesPreview(LookbookPreview):
     def home(self, **kwargs):

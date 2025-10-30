@@ -1,21 +1,17 @@
-{% extends "ui/components/carte/_addresses_partials/filters/_modal.html" %}
+{% extends "ui/components/modals/base.html" %}
+{% load script_tags turbo_tags %}
 
-{# Panel «À propos» #}
-{% block wrapper_attrs %}
-     data-search-solution-form-target="aProposMainPanel"
-{% endblock wrapper_attrs %}
+{% block size_classes %}fr-col-12 fr-col-md-10 fr-col-lg-10{% endblock %}
 
-{% block modal_header %}
-<button
-    class="fr-btn fr-btn--close fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-close-line"
-    type="button"
-    data-action="click -> search-solution-form#toggleAPropos"
->
-    Fermer
-</button>
-{% endblock modal_header %}
+{% block button_extra_classes %}fr-btn--secondary fr-btn--icon-left fr-icon-info-line{% endblock %}
 
-{% block modal_title %}À propos de La Carte{% endblock %}
+{% block button_text %}
+{{ button_text|default:"Infos" }}
+{% endblock button_text %}
+
+{% block modal_title %}
+À propos de la carte
+{% endblock modal_title %}
 
 {% block modal_content %}
 <div class="fr-card fr-enlarge-link fr-card--horizontal">
@@ -58,3 +54,9 @@
     {% include 'ui/layout/_partials/header_logos.html' %}
 </div>
 {% endblock modal_content %}
+
+{% block modal_wrapper_for_id %}
+{% with id=id|default:"infos" %}
+{{ block.super }}
+{% endwith %}
+{% endblock modal_wrapper_for_id %}

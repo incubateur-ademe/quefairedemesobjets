@@ -12,7 +12,7 @@
         <nav class="qf-flex qf-justify-end qf-gap-2w max-md:qf-pt-2w md:qf-py-2w">
             {% include "ui/components/modals/filtres.html" with legende_form=forms.legende_form filtres_form=forms.filtres_form %}
             {% dsfr_button label="Proposer un nouveau lieu" extra_classes="max-md:qf-w-full fr-btn--icon-left fr-icon-add-line" %}
-            {% dsfr_button label="Infos" extra_classes="max-md:qf-hidden fr-btn--icon-left fr-icon-info-line fr-btn--secondary" data_action="search-solution-form#toggleAPropos:prevent" %}
+            {% include "ui/components/modals/infos.html" %}
         </nav>
         <div class="qf-flex qf-flex-col qf-justify-center qf-items-center">
             {% if paginated_acteurs_obj %}
