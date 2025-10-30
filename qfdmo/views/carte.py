@@ -3,6 +3,7 @@ from typing import Any, Optional, Type, TypedDict
 
 from django.conf import settings
 from django.db.models import Q
+from django.forms import Form
 from django.views.generic import DetailView
 
 from qfdmo.forms import (
@@ -35,7 +36,6 @@ class CarteFormsInstance(TypedDict):
     filtres: Optional[FiltresForm]
     legende: Optional[LegendeForm]
     legende_filtres: Optional[LegendeForm]
-    legende_filtres_mobile: Optional[LegendeForm]
 
 
 class CarteSearchActeursView(SearchActeursView):
@@ -47,10 +47,9 @@ class CarteSearchActeursView(SearchActeursView):
         "filtres": FiltresForm,
         "legende": AutoSubmitLegendeForm,
         "legende_filtres": LegendeForm,
-        "legende_filtres_mobile": LegendeForm,
     }
 
-    def get_forms(self) -> CarteFormsInstance:
+    def _get_forms(self) -> CarteFormsInstance:
         form_instances: CarteFormsInstance = {}
         for key, FormCls in self.forms.items():
             if self.request.method == "POST":
@@ -62,13 +61,34 @@ class CarteSearchActeursView(SearchActeursView):
 
         return form_instances
 
+    def _get_form(self, form_name) -> Form | None:
+        try:
+            return self._get_forms()[form_name]
+        except KeyError:
+            return None
+
     def _get_direction(self):
         action_direction_form = ActionDirectionForm(self.request.GET)
         return action_direction_form["direction"].value()
 
+    def _get_ess(self):
+        return self._check_if_label_qualite_is_set("ess")
+
+    def _get_label_reparacteur(self):
+        return self._check_if_label_qualite_is_set("reparacteur")
+
+    def _get_bonus(self):
+        return self._check_if_label_qualite_is_set("bonusrepar")
+
+    def _check_if_label_qualite_is_set(self, label):
+        try:
+            return label in self._get_form("filtres")["label"].value()
+        except (TypeError, KeyError):
+            return False
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        forms = self.get_forms()
+        forms = self._get_forms()
         context.update(
             is_carte=True,
             forms=forms,
@@ -79,9 +99,19 @@ class CarteSearchActeursView(SearchActeursView):
         return context
 
     def _get_action_ids(self) -> list[str]:
-        groupe_action_ids = self.get_forms()["legende"]["groupe_action"].value()
+        groupe_action_ids = self._get_form("legende")["groupe_action"].value()
+        for form in [
+            self._get_form("legende"),
+            self._get_form("legende_filtre"),
+        ]:
+            if form and form.is_valid():
+                groupe_action_ids = form["groupe_action"].value()
 
-        return Action.objects.filter(groupe_action__id__in=groupe_action_ids).only("id")
+        return (
+            Action.objects.filter(groupe_action__id__in=groupe_action_ids)
+            .only("id")
+            .values_list("id", flat=True)
+        )
 
     def _get_max_displayed_acteurs(self):
         if self.request.GET.get("limit", "").isnumeric():

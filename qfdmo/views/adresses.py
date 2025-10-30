@@ -79,6 +79,18 @@ class SearchActeursView(
     def _get_action_ids(self) -> list[str]:
         pass
 
+    @abstractmethod
+    def _get_ess(self) -> bool:
+        pass
+
+    @abstractmethod
+    def _get_label_reparacteur(self) -> bool:
+        pass
+
+    @abstractmethod
+    def _get_bonus(self) -> bool:
+        pass
+
     # TODO : supprimer
     is_iframe = False
     is_carte = False
@@ -94,17 +106,11 @@ class SearchActeursView(
         initial["latitude"] = self.request.GET.get("latitude")
         # TODO: refacto forms : delete this line
         initial["longitude"] = self.request.GET.get("longitude")
-
-        # TODO: refacto forms : delete this line
-        initial["label_reparacteur"] = self.request.GET.get("label_reparacteur")
         initial["epci_codes"] = self.request.GET.getlist("epci_codes")
         initial["pas_exclusivite_reparation"] = self.request.GET.get(
             "pas_exclusivite_reparation", True
         )
-        # TODO: refacto forms : delete this line
-        initial["bonus"] = self.request.GET.get("bonus")
-        # TODO: refacto forms : delete this line
-        initial["ess"] = self.request.GET.get("ess")
+
         # TODO: refacto forms : delete this line
         initial["bounding_box"] = self.request.GET.get("bounding_box")
         initial["sc_id"] = (
@@ -265,7 +271,6 @@ class SearchActeursView(
         selected_actions_ids = self._get_action_ids()
         reparer_action_id = cache.get_or_set("reparer_action_id", get_reparer_action_id)
         reparer_is_checked = reparer_action_id in selected_actions_ids
-
         filters, excludes = self._compile_acteurs_queryset(
             reparer_is_checked, selected_actions_ids, reparer_action_id
         )
@@ -297,10 +302,10 @@ class SearchActeursView(
         ):
             excludes |= Q(exclusivite_de_reprisereparation=True)
 
-        if self.get_data_from_request_or_bounded_form("ess"):
+        if self._get_ess():
             filters &= Q(labels__code="ess")
 
-        if self.get_data_from_request_or_bounded_form("bonus"):
+        if self._get_bonus():
             filters &= Q(labels__bonus=True)
 
         if sous_categorie_id := self.get_data_from_request_or_bounded_form("sc_id", 0):
@@ -310,13 +315,11 @@ class SearchActeursView(
 
         actions_filters = Q()
 
-        if (
-            self.get_data_from_request_or_bounded_form("label_reparacteur")
-            and reparer_is_checked
-        ):
+        if self._get_label_reparacteur() and reparer_is_checked:
             selected_actions_ids = [
                 a for a in selected_actions_ids if a != reparer_action_id
             ]
+
             actions_filters |= Q(
                 proposition_services__action_id=reparer_action_id,
                 labels__code="reparacteur",
@@ -327,7 +330,8 @@ class SearchActeursView(
                 proposition_services__action_id__in=selected_actions_ids,
             )
 
-        filters &= actions_filters
+        if actions_filters:
+            filters &= actions_filters
 
         return filters, excludes
 

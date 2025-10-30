@@ -35,6 +35,13 @@ class FormulaireSearchActeursView(SearchActeursView):
 
     def get_initial(self):
         initial = super().get_initial()
+
+        # TODO: refacto forms : delete this line
+        initial["label_reparacteur"] = self.request.GET.get("label_reparacteur")
+        # TODO: refacto forms : delete this line
+        initial["bonus"] = self.request.GET.get("bonus")
+        # TODO: refacto forms : delete this line
+        initial["ess"] = self.request.GET.get("ess")
         # Action to display and check
         action_displayed = self._set_action_displayed()
         initial["action_displayed"] = "|".join([a.code for a in action_displayed])
@@ -211,6 +218,15 @@ class FormulaireSearchActeursView(SearchActeursView):
 
     def _get_direction(self):
         return self.action_direction_form["direction"].value()
+
+    def _get_ess(self):
+        return self.get_data_from_request_or_bounded_form("ess")
+
+    def _get_label_reparacteur(self):
+        return self.get_data_from_request_or_bounded_form("label_reparacteur")
+
+    def _get_bonus(self):
+        return self.get_data_from_request_or_bounded_form("bonus")
 
     def _check_if_is_digital(self):
         return (
