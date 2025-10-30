@@ -42,6 +42,35 @@ jobs:
     with:
       environment: preprod
 
+  # FIXME: tmp pour tester
+  update_release_draft_for_review:
+    # Uncomment when anchor are supported in GitHub Actions
+    # See : https://github.com/actions/runner/issues/1182
+    # <<: *release_drafter
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    name: 🔢 Release
+    steps:
+      - uses: release-drafter/release-drafter@b1476f6e6eb133afa41ed8589daba6dc69b4d3f5 # v6.1.0
+        id: release-drafter
+        with:
+          config-name: release-config.yml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    needs: [webapp]
+    if: ${{ !contains( github.ref_name, 'hotfix') }}
+    outputs:
+      tag_name: ${{ steps.release-drafter.outputs.tag_name }}
+
+  airflow_docker_for_prod:
+    name: 🐳 Airflow Docker
+    uses: ./.github/workflows/airflow_docker.yml
+    secrets: inherit # pragma: allowlist secret`
+    needs: [update_release_draft_for_review]
+    with:
+      image_tag: ${{ needs.update_release_draft_for_review.steps.release-drafter.outputs.tag_name }}
+
 # Address actions/missing-workflow-permissions rule in
 # code scanning alerts
 permissions:
