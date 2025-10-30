@@ -49,14 +49,23 @@ class CarteSearchActeursView(SearchActeursView):
         "legende_filtres": LegendeForm,
     }
 
+    def _generate_prefix(self, prefix: str) -> str:
+        try:
+            id = self.request.GET["map_container_id"]
+            return f"{id}-{prefix}"
+        except (KeyError, AttributeError):
+            return prefix
+
     def _get_forms(self) -> CarteFormsInstance:
         form_instances: CarteFormsInstance = {}
         for key, FormCls in self.forms.items():
             if self.request.method == "POST":
-                form = FormCls(self.request.POST)
+                data = self.request.POST
             else:
-                form = FormCls(self.request.GET)
+                data = self.request.GET
 
+            prefix = self._generate_prefix(key)
+            form = FormCls(data, prefix=prefix)
             form_instances[key] = form
 
         return form_instances
@@ -102,7 +111,7 @@ class CarteSearchActeursView(SearchActeursView):
         groupe_action_ids = self._get_form("legende")["groupe_action"].value()
         for form in [
             self._get_form("legende"),
-            self._get_form("legende_filtre"),
+            self._get_form("legende_filtres"),
         ]:
             if form and form.is_valid():
                 groupe_action_ids = form["groupe_action"].value()
