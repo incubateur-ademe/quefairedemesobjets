@@ -446,8 +446,12 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
     save_as = False
     exclude = ["id"]
     resource_classes = [RevisionActeurResource]
-    fields = list(BaseActeurAdmin.fields) + ["parent"]
     autocomplete_fields = ["parent"]
+
+    def get_fields(self, request, obj=None):
+        if obj and obj.is_parent:
+            return [f for f in BaseActeurAdmin.fields if f != "lieu_prestation"]
+        return list(BaseActeurAdmin.fields) + ["parent"]
 
     def change_view(self, request, object_id, form_url="", extra_context=None):
         extra_context = extra_context or {}
@@ -458,7 +462,6 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
         if revision_acteur and revision_acteur.is_parent:
             return [
                 RevisionActeurChildInline(self.model, self.admin_site),
-                RevisionPerimetreADomicileInline(self.model, self.admin_site),
             ]
         else:
             return [
