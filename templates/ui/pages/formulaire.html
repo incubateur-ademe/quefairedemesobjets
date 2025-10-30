@@ -1,5 +1,7 @@
 {% extends base_template %}
 
+{% load turbo_tags %}
+
 {% block body_classes %}
 qf-h-svh qf-h-screen qf-overflow-hidden qf-bg-white
 {% endblock body_classes %}
@@ -27,10 +29,10 @@ qf-h-svh qf-h-screen qf-overflow-hidden qf-bg-white
         qf-flex qf-flex-col qf-flex-auto
         qf-relative"
         data-search-form-visible
-        data-search-solution-form-map-container-id-value="{{ map_container_id }}"
+        data-search-solution-form-map-container-id-value="{% main_frame_id %}"
     >
 
-        <input type="hidden" name="map_container_id" value="{{ map_container_id }}">
+        <input type="hidden" name="{{ MAP_CONTAINER_ID }}" value="{% main_frame_id %}">
         <section class="qf-relative map-grid">
             {# Part of this tag' style is defined in qfdmo.css because it would have been a bit unreadable as tailwind classes #}
             {% include 'ui/components/formulaire/header.html' with extra_classes="qf-bg-white" %}

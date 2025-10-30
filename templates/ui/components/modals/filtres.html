@@ -1,5 +1,6 @@
 {% extends "ui/components/modals/base.html" %}
-{% load script_tags %}
+{% load script_tags turbo_tags %}
+
 
 {% block button_text %}
 {{ button_text|default:"Filtres" }}
@@ -14,20 +15,17 @@ Filtres
 {% endblock modal_title %}
 
 {% block modal_content %}
-<form id="filtres-form-{{ id }}">
-  {% if legende_form %}
-  <div>
-    {{ legende_form }}
-    <hr>
-  </div>
-  {% endif %}
-  {{ filtres_form }}
-</form>
+{% if legende_form %}
+{{ legende_form }}
+<hr>
+{% endif %}
+
+{{ filtres_form }}
 {% endblock modal_content %}
 
 {% block modal_footer_buttons %}
 <li>
-  <button type="submit" class="fr-btn" title="Valider" form="filtres-form-{{ id }}">
+  <button type="submit" class="fr-btn" title="Valider">
     Appliquer
   </button>
 </li>

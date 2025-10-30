@@ -37,7 +37,7 @@ data-controller="acteur-details"
 data-search-solution-form-target="acteurDetailsPanel"
 data-acteur-details-draggable-value="{{ mode_liste|yesno:"false,true" }}"
 data-acteur-details-draggable-value="true"
-data-acteur-details-map-container-id-value="{{ map_container_id }}"
+data-acteur-details-map-container-id-value="{% main_frame_id %}"
 >
   {# Acteur details #}
   {# Handle visible only on mobile. It is used to drag the panel #}

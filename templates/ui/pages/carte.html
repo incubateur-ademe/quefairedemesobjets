@@ -1,9 +1,9 @@
 {% extends base_template %}
-{% load static %}
+{% load static turbo_tags %}
 
 {% block content %}
 <turbo-frame
-    id="{{ map_container_id }}"
+    id="{% main_frame_id %}"
     {% if request.user.is_authenticated and DEBUG %}
     data-turbo-action="advance"
     {% endif %}
@@ -11,7 +11,7 @@
 >
     {# Controleur général de gestion de la navigation et du formulaire #}
     <form
-        id='{{ map_container_id }}:search_form'
+        id='{% main_frame_id %}:search_form'
         data-controller="search-solution-form"
         data-search-solution-form-target="searchForm"
         data-search-solution-form-is-iframe-value="{{ is_embedded }}"
@@ -36,9 +36,9 @@
         action="{{ carte_config.get_absolute_url }}"
         {% endif %}
         data-search-form-visible
-        data-search-solution-form-map-container-id-value="{{ map_container_id }}"
+        data-search-solution-form-map-container-id-value="{% main_frame_id %}"
     >
-        <input type="hidden" name="map_container_id" value="{{ map_container_id }}">
+        <input type="hidden" name="{{ MAP_CONTAINER_ID }}" value="{% main_frame_id %}">
         <section class="map-grid qf-relative">
             {% include 'ui/components/carte/header.html' %}
 

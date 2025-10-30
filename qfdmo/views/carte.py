@@ -1,10 +1,8 @@
 import logging
-from typing import Any
+from typing import Any, Optional, Type, TypedDict
 
 from django.conf import settings
 from django.db.models import Q
-from django.forms import Form
-from django.utils.functional import cached_property
 from django.views.generic import DetailView
 
 from qfdmo.forms import (
@@ -15,23 +13,36 @@ from qfdmo.forms import (
     ViewModeForm,
 )
 from qfdmo.models import CarteConfig
+from qfdmo.models.action import Action
 from qfdmo.views.adresses import SearchActeursView
 
 logger = logging.getLogger(__name__)
+
+
+class CarteForms(TypedDict):
+    view_mode: Type[ViewModeForm]
+    filtres_form: Type[FiltresForm]
+    legende_form: Type[LegendeForm]
+
+
+class CarteFormsInstance(TypedDict):
+    view_mode: Optional[ViewModeForm]
+    filtres_form: Optional[FiltresForm]
+    legende_form: Optional[LegendeForm]
 
 
 class CarteSearchActeursView(SearchActeursView):
     is_carte = True
     template_name = "ui/pages/carte.html"
     form_class = CarteForm
-    forms = {
+    forms: CarteForms = {
         "view_mode": ViewModeForm,
         "filtres_form": FiltresForm,
         "legende_form": LegendeForm,
     }
 
-    def get_forms(self) -> dict[str, Form]:
-        form_instances = {}
+    def get_forms(self) -> CarteFormsInstance:
+        form_instances: CarteFormsInstance = {}
         for key, FormCls in self.forms.items():
             if self.request.method == "POST":
                 form = FormCls(self.request.POST)
@@ -58,10 +69,10 @@ class CarteSearchActeursView(SearchActeursView):
         )
         return context
 
-        return context
-
     def _get_action_ids(self) -> list[str]:
-        return []
+        groupe_action_ids = self.get_forms()["legende_form"]["groupe_action"].value()
+
+        return Action.objects.filter(groupe_action__id__in=groupe_action_ids).only("id")
 
     def _get_max_displayed_acteurs(self):
         if self.request.GET.get("limit", "").isnumeric():
@@ -102,47 +113,6 @@ class CarteConfigView(DetailView, CarteSearchActeursView):
             **super().get_context_data(**kwargs),
             "map_container_id": self.object.pk,
         }
-
-    @cached_property
-    def groupe_actions(self):
-        # TODO: cache
-        return self.get_object().groupe_action.all().order_by("order")
-
-    def _set_action_list(self, *args, **kwargs):
-        if self.groupe_actions:
-            return self.groupe_actions
-        return super()._set_action_list(*args, **kwargs)
-
-    def _set_action_displayed(self, *args, **kwargs):
-        if self.groupe_actions:
-            return self.groupe_actions
-
-        return super()._set_action_displayed(*args, **kwargs)
-
-    def _get_selected_action_code(self, *args, **kwargs):
-        if self.groupe_actions:
-            return self.groupe_actions
-
-        return super()._get_selected_action_code(*args, **kwargs)
-
-    def get_cached_groupe_action_with_displayed_actions(self, *args, **kwargs):
-        if self.groupe_actions:
-            return [
-                [groupe_action, groupe_action.actions.all()]
-                for groupe_action in self.groupe_actions
-            ]
-        else:
-            return super().get_cached_groupe_action_with_displayed_actions(
-                *args, **kwargs
-            )
-
-    def _grouped_action_from(self, *args, **kwargs):
-        if self.groupe_actions:
-            return [
-                "|".join(groupe_action.actions.all().values_list("code", flat=True))
-                for groupe_action in self.groupe_actions
-            ]
-        return super()._grouped_action_from(*args, **kwargs)
 
     def get_sous_categorie_filter(self):
         sous_categories_from_request = list(

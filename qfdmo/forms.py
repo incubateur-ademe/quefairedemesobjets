@@ -173,28 +173,30 @@ class GetFormMixin(forms.Form):
 class LegendeForm(GetFormMixin, DsfrBaseForm):
     groupe_action = GroupeActionChoiceField(
         queryset=GroupeAction.objects.all().order_by("order"),
-        to_field_name="code",
+        to_field_name="id",
         widget=forms.CheckboxSelectMultiple,
         required=False,
         label="",
         initial=GroupeAction.objects.all(),
     )
 
-    sous_categorie_objet = forms.ModelChoiceField(
-        queryset=SousCategorieObjet.objects.all(),
-        widget=AutoCompleteInput(
-            attrs={
-                "class": "fr-input fr-icon-search-line sm:qf-w-[596px]",
-                "autocomplete": "off",
-                "aria-label": "Indiquer un objet - obligatoire",
-            },
-            data_controller="ss-cat-object-autocomplete",
-        ),
-        help_text="pantalon, perceuse, canapé...",
-        label="Indiquer un objet ",
-        empty_label="",
-        required=False,
-    )
+
+class FiltresForm(GetFormMixin, DsfrBaseForm):
+    # sous_categorie_objet = forms.ModelChoiceField(
+    #     queryset=SousCategorieObjet.objects.all(),
+    #     widget=AutoCompleteInput(
+    #         attrs={
+    #             "class": "fr-input fr-icon-search-line sm:qf-w-[596px]",
+    #             "autocomplete": "off",
+    #             "aria-label": "Indiquer un objet - obligatoire",
+    #         },
+    #         data_controller="ss-cat-object-autocomplete",
+    #     ),
+    #     help_text="pantalon, perceuse, canapé...",
+    #     label="Indiquer un objet ",
+    #     empty_label="",
+    #     required=False,
+    # )
     label = LabelQualiteChoiceField(
         queryset=LabelQualite.objects.filter(afficher=True, filtre=True),
         to_field_name="code",

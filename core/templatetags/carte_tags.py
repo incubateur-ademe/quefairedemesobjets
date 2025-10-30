@@ -6,7 +6,6 @@ from django.db.models import Q
 from django.template.defaulttags import register
 from django.template.loader import render_to_string
 
-from qfdmo.forms import ActionDirectionForm
 from qfdmo.models import DisplayedActeur
 from qfdmo.models.action import get_actions_by_direction
 from qfdmo.models.config import GroupeActionConfig
@@ -21,6 +20,8 @@ def actions_for(dispayed_acteur: DisplayedActeur, direction):
 
 @register.simple_tag(takes_context=True)
 def action_by_direction(context, direction):
+    from qfdmo.forms import ActionDirectionForm
+
     """Get action for the given direction following context"""
     request = context["request"]
     action_direction_form: ActionDirectionForm = context["action_direction_form"]
