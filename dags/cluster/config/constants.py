@@ -24,6 +24,7 @@ FIELDS_PARENT_DATA_EXCLUDED = [
     "source",
     "source_id",
     "statut",
+    "lieu_prestation",
     "perimetre_adomiciles",
     "suggestion_groupes",
     "suggestion_unitaires",

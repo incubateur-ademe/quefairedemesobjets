@@ -146,10 +146,6 @@ def cluster_acteurs_parents_choose_data(
         # Fields: make sure we don't include unwanted fields
         fields = fields_to_include_clean(fields_to_include)  # TODO : check which
 
-        # service_a_domicile is a special field which combine perimetre_adomicile and
-        # lieu_prestation, we need it because the perimetre_adomicile chosen should be
-        # the ones corresponding to the lieu_prestation
-        fields = fields + ["service_a_domicile"]
         result = {}
         for field in fields:
             value_old = getattr(parent, field) if parent else None
@@ -164,15 +160,6 @@ def cluster_acteurs_parents_choose_data(
             if value_new is None and not keep_empty:
                 continue
             result[field] = value_new
-
-        # once the values are chosen, we need to reconstruct the perimetre_adomicile
-        # and lieu_prestation
-        if service_a_domicile := result.get("service_a_domicile"):
-            if perimetre_adomiciles := service_a_domicile["perimetre_adomicile"]:
-                result["perimetre_adomiciles"] = perimetre_adomiciles
-            result["lieu_prestation"] = service_a_domicile["lieu_prestation"]
-        if "service_a_domicile" in result:
-            del result["service_a_domicile"]
 
         return result
 
