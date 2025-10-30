@@ -1,7 +1,7 @@
 import pytest
 from django.http import HttpRequest
 
-from qfdmo.views.adresses import FormulaireSearchActeursView
+from qfdmo.views.formulaire import FormulaireSearchActeursView
 from unit_tests.core.test_utils import query_dict_from
 
 

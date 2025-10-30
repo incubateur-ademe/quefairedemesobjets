@@ -4,7 +4,6 @@ from colorfield.fields import ColorField
 from django.contrib.gis.db import models
 from django.core.cache import cache
 from django.db.models import CheckConstraint, Q
-from django.db.models.query import QuerySet
 from django.forms import model_to_dict
 from django.utils.functional import cached_property
 
@@ -235,10 +234,6 @@ def get_reparer_action_id() -> int:
         ][0].id
     except IndexError:
         raise Exception("Action 'Réparer' not found")
-
-
-def get_groupe_action_instances() -> QuerySet[GroupeAction]:
-    return GroupeAction.objects.prefetch_related("actions").order_by("order")
 
 
 def get_actions_by_direction() -> dict:

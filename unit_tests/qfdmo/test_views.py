@@ -2,8 +2,8 @@ import pytest
 from django.conf import settings
 from django.test import RequestFactory
 
-from qfdmo.views.adresses import FormulaireSearchActeursView
 from qfdmo.views.carte import CarteConfigView, CarteSearchActeursView
+from qfdmo.views.formulaire import FormulaireSearchActeursView
 
 
 class TestConfigurateur:

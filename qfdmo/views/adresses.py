@@ -1,7 +1,7 @@
 import json
 import logging
 from abc import ABC, abstractmethod
-from typing import List, cast
+from typing import cast
 
 import unidecode
 from django.conf import settings
@@ -13,28 +13,21 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.db.models.functions import Length, Lower
 from django.db.models.query import QuerySet
-from django.forms import model_to_dict
-from django.http import Http404, HttpRequest, HttpResponse, JsonResponse
+from django.http import Http404, JsonResponse
 from django.shortcuts import redirect, render
-from django.template.loader import render_to_string
-from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_GET
 from django.views.generic.edit import FormView
 from wagtail.query import Any
 
 from qfdmd.models import Synonyme
-from qfdmo.forms import ActionDirectionForm, DigitalActeurForm, FormulaireForm
 from qfdmo.geo_api import bbox_from_list_of_geojson, retrieve_epci_geojson
 from qfdmo.map_utils import (
     center_from_frontend_bbox,
     compile_frontend_bbox,
     sanitize_frontend_bbox,
 )
-from qfdmo.models import Acteur, ActeurStatus, Action, DisplayedActeur, RevisionActeur
+from qfdmo.models import Acteur, ActeurStatus, DisplayedActeur, RevisionActeur
 from qfdmo.models.action import (
-    GroupeAction,
-    get_action_instances,
-    get_groupe_action_instances,
     get_reparer_action_id,
 )
 
@@ -82,6 +75,10 @@ class SearchActeursView(
     def _get_max_displayed_acteurs(self) -> int:
         pass
 
+    @abstractmethod
+    def _get_action_ids(self) -> list[str]:
+        pass
+
     # TODO : supprimer
     is_iframe = False
     is_carte = False
@@ -114,13 +111,6 @@ class SearchActeursView(
             self.request.GET.get("sc_id") if initial["sous_categorie_objet"] else None
         )
 
-        # Action to display and check
-        action_displayed = self._set_action_displayed()
-        initial["action_displayed"] = "|".join([a.code for a in action_displayed])
-
-        action_list = self._set_action_list(action_displayed)
-        initial["action_list"] = "|".join([a.code for a in action_list])
-
         return initial
 
     def get_form(self, form_class=None):
@@ -136,21 +126,6 @@ class SearchActeursView(
             form = super().get_form(form_class)
         else:
             form = super().get_form(form_class)
-
-        action_displayed = self._set_action_displayed() if self.is_carte else None
-        grouped_action_choices = (
-            self._get_grouped_action_choices(action_displayed)
-            if action_displayed
-            else None
-        )
-
-        form.load_choices(
-            self.request,
-            grouped_action_choices=grouped_action_choices,
-            disable_reparer_option=(
-                "reparer" not in form.initial.get("grouped_action", [])
-            ),
-        )
 
         return form
 
@@ -284,121 +259,10 @@ class SearchActeursView(
 
         return custom_bbox, acteurs.none()
 
-    def _set_action_displayed(self) -> List[Action]:
-        cached_action_instances = cast(
-            List[Action], cache.get_or_set("action_instances", get_action_instances)
-        )
-        """
-        Limit to actions of the direction only in Carte mode
-        """
-        if direction := self._get_direction():
-            if self.is_carte:
-                cached_action_instances = [
-                    action
-                    for action in cached_action_instances
-                    if direction in [d.code for d in action.directions.all()]
-                ]
-        if action_displayed := self.get_data_from_request_or_bounded_form(
-            "action_displayed", ""
-        ):
-            cached_action_instances = [
-                action
-                for action in cached_action_instances
-                if action.code in action_displayed.split("|")
-            ]
-        # In form mode, only display actions with afficher=True
-        # TODO : discuss with epargnonsnosressources if we can remove this condition
-        # or set it in get_action_instances
-        if not self.is_carte:
-            cached_action_instances = [
-                action for action in cached_action_instances if action.afficher
-            ]
-        return cached_action_instances
-
-    def _set_action_list(self, action_displayed: List[Action]) -> List[Action]:
-        if action_list := self.get_data_from_request_or_bounded_form("action_list", ""):
-            return [
-                action
-                for action in action_displayed
-                if action.code in action_list.split("|")
-            ]
-        return action_displayed
-
-    def _get_selected_action_code(self):
-        """
-        Get the action to include in the request
-        """
-        # FIXME : est-ce possible d'optimiser en accédant au valeur initial du form ?
-
-        # selection from interface
-        if self.get_data_from_request_or_bounded_form("grouped_action"):
-            return [
-                code
-                for new_groupe_action in self.get_data_from_request_or_bounded_form(
-                    "grouped_action"
-                )
-                for code in new_groupe_action.split("|")
-            ]
-        # Selection is not set in interface, get all available from
-        # (checked_)action_list
-        if self.get_data_from_request_or_bounded_form("action_list"):
-            return self.get_data_from_request_or_bounded_form("action_list", "").split(
-                "|"
-            )
-        # Selection is not set in interface, defeult checked action list is not set
-        # get all available from action_displayed
-        if self.get_data_from_request_or_bounded_form("action_displayed"):
-            return self.get_data_from_request_or_bounded_form(
-                "action_displayed", ""
-            ).split("|")
-        # return empty array, will search in all actions
-        return []
-
-    def _get_selected_action(self) -> List[Action]:
-        """
-        Get the action to include in the request
-        """
-
-        codes = []
-        # selection from interface
-        if self.request.GET.get("grouped_action"):
-            codes = [
-                code
-                for new_groupe_action in self.request.GET.getlist("grouped_action")
-                for code in new_groupe_action.split("|")
-            ]
-        # Selection is not set in interface, get all available from
-        # (checked_)action_list
-        elif action_list := self.cleaned_data.get("action_list"):
-            # TODO : effet de bord si la list des action n'est pas cohérente avec
-            # les actions affichées
-            # il faut collecté les actions coché selon les groupes d'action
-            codes = action_list.split("|")
-        # Selection is not set in interface, defeult checked action list is not set
-        # get all available from action_displayed
-        elif action_displayed := self.cleaned_data.get("action_displayed"):
-            codes = action_displayed.split("|")
-        # return empty array, will search in all actions
-
-        # Cast needed because of the cache
-        cached_action_instances = cast(
-            List[Action], cache.get_or_set("action_instances", get_action_instances)
-        )
-        actions = (
-            [a for a in cached_action_instances if a.code in codes]
-            if codes
-            else cached_action_instances
-        )
-        if direction := self._get_direction():
-            actions = [
-                a for a in actions if direction in [d.code for d in a.directions.all()]
-            ]
-        return actions
-
     def _acteurs_from_sous_categorie_objet_and_actions(
         self,
     ) -> QuerySet[DisplayedActeur]:
-        selected_actions_ids = self._get_selected_action_ids()
+        selected_actions_ids = self._get_action_ids()
         reparer_action_id = cache.get_or_set("reparer_action_id", get_reparer_action_id)
         reparer_is_checked = reparer_action_id in selected_actions_ids
 
@@ -466,140 +330,6 @@ class SearchActeursView(
         filters &= actions_filters
 
         return filters, excludes
-
-    def get_cached_groupe_action_with_displayed_actions(self, action_displayed):
-        # Cast needed because of the cache
-        cached_groupe_action_instances = cast(
-            QuerySet[GroupeAction],
-            cache.get_or_set("groupe_action_instances", get_groupe_action_instances),
-        )
-
-        # Fetch actions from cache only if they are displayed
-        # for the end user
-        cached_groupe_action_with_displayed_actions = []
-        for cached_groupe in cached_groupe_action_instances:
-            if displayed_actions_from_groupe_actions := [
-                action
-                # TODO : à optimiser avec le cache
-                for action in cached_groupe.actions.all().order_by(  # type: ignore
-                    "order"
-                )
-                if action in action_displayed
-            ]:
-                cached_groupe_action_with_displayed_actions.append(
-                    [cached_groupe, displayed_actions_from_groupe_actions]
-                )
-        return cached_groupe_action_with_displayed_actions
-
-    def _get_grouped_action_choices(
-        self, action_displayed: list[Action]
-    ) -> list[list[str]]:
-        """Generate a list of choices for form field
-        used in legend"""
-        # Generate a tuple of (code, libelle) used in the frontend.
-        # The libelle is automatically picked up by django templating
-        # when generating the form.
-        grouped_action_choices = []
-        for [
-            groupe,
-            groupe_displayed_actions,
-        ] in self.get_cached_groupe_action_with_displayed_actions(action_displayed):
-            libelle = ""
-            if groupe.icon:
-                libelle = render_to_string(
-                    "ui/forms/widgets/groupe_action_label.html",
-                    {
-                        "groupe_action": groupe,
-                        "libelle": groupe.get_libelle_from(groupe_displayed_actions),
-                    },
-                )
-
-            code = "|".join([a.code for a in groupe_displayed_actions])
-            grouped_action_choices.append([code, mark_safe(libelle)])
-        return grouped_action_choices
-
-    def _grouped_action_from(
-        self, grouped_action_choices: list[list[str]], action_list: list[Action]
-    ) -> list[str]:
-        return [
-            groupe_option[0]
-            for groupe_option in grouped_action_choices
-            if set(groupe_option[0].split("|")) & set([a.code for a in action_list])
-        ]
-
-
-class FormulaireSearchActeursView(SearchActeursView):
-    """Affiche le formulaire utilisé sur epargnonsnosressources.gouv.fr
-    Cette vue est à considérer en mode maintenance uniquement et ne doit pas être
-    modifiée."""
-
-    is_iframe = True
-    template_name = "ui/pages/formulaire.html"
-    form_class = FormulaireForm
-
-    def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-        self.digital_acteur_form: DigitalActeurForm = DigitalActeurForm(
-            self.request.GET
-        )
-        self.action_direction_form = ActionDirectionForm(
-            self.request.GET,
-            initial={"direction": ActionDirectionForm.DirectionChoices.J_AI.value},
-        )
-        return super().get(request, *args, **kwargs)
-
-    def _get_direction(self):
-        return self.action_direction_form["direction"].value()
-
-    def _check_if_is_digital(self):
-        return (
-            self.digital_acteur_form["digital"].value()
-            == self.digital_acteur_form.DigitalChoices.DIGITAL.value
-        )
-
-    def _handle_scoped_acteurs(
-        self, acteurs: QuerySet[DisplayedActeur], kwargs
-    ) -> tuple[Any, QuerySet[DisplayedActeur]]:
-        """
-        Handle the scoped acteurs following the order of priority:
-        - digital
-        - bbox
-        - epci_codes
-        - user location
-        override from parent class to handle digital acteurs
-        """
-
-        if self._check_if_is_digital():
-            return None, acteurs.digital()
-        return super()._handle_scoped_acteurs(acteurs, kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        if self._check_if_is_digital():
-            context.update(is_digital=True)
-        context.update(
-            map_container_id="formulaire",
-            action_direction_form=self.action_direction_form,
-            digital_acteur_form=self.digital_acteur_form,
-        )
-        return context
-
-    def _get_selected_action_ids(self):
-        # TODO: merge this method with the one from CarteSearchActeursView
-        # and do not return a list of dict but a queryset instead
-        return [a["id"] for a in self.get_action_list()]
-
-    def get_action_list(self) -> List[dict]:
-        direction = self._get_direction()
-        action_displayed = self._set_action_displayed()
-        actions = self._set_action_list(action_displayed)
-        if direction:
-            actions = [
-                a for a in actions if direction in [d.code for d in a.directions.all()]
-            ]
-        return [model_to_dict(a, exclude=["directions"]) for a in actions]
-
-    def _get_max_displayed_acteurs(self):
-        return settings.DEFAULT_MAX_SOLUTION_DISPLAYED
 
 
 def getorcreate_revisionacteur(request, acteur_identifiant):
