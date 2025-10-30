@@ -25,7 +25,7 @@ test("iframe formulaire is loaded with correct parameters", async ({
 
   expect(allow).toBe("geolocation; clipboard-write")
   expect(src).toBe(
-    `${baseUrl}/formulaire?direction=jai&first_dir=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre`,
+    `${baseUrl}/formulaire?direction=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre`,
   )
   expect(frameborder).toBe("0")
   expect(scrolling).toBe("no")
@@ -38,11 +38,11 @@ test("iframe formulaire is loaded with correct parameters", async ({
 
 test("legacy iframe urls still work", async ({ page }) => {
   await page.goto(
-    `/formulaire?direction=jai&first_dir=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre`,
+    `/formulaire?direction=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre`,
     { waitUntil: "domcontentloaded" },
   )
   await expect(page).toHaveURL(
-    `/formulaire?direction=jai&first_dir=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre`,
+    `/formulaire?direction=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre`,
   )
   await page.goto(
     `/carte?action_list=reparer%7Cdonner%7Cechanger%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cacheter%7Crevendre&epci_codes=200055887&limit=50`,

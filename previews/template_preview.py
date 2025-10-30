@@ -298,7 +298,6 @@ class IframePreview(LookbookPreview):
                 data-max_width="100%"
                 data-height="720px"
                 data-direction="jai"
-                data-first_dir="jai"
                 data-action_list="reparer|echanger|mettreenlocation|revendre"
                 data-iframe_attributes='{"loading":"lazy", "id" : "resize" }'>
                 </script>

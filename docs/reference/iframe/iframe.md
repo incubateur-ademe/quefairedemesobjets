@@ -9,7 +9,6 @@ les paramètres de l'iframe «CARTE» sont passés dans le dataset : en tant qu'
 Les paramètres disponibles pour customiser l'affichage de l'iframe sont:
 
 - `data-direction`, option `jai` ou `jecherche`, par défaut l'option de direction « Je cherche » est active
-- `data-first_dir`, option `jai` ou `jecherche`, par défaut l'option de direction « Je cherche » est affiché en premier dans la liste des options de direction
 - `data-action_list`, liste des actions cochées selon la direction séparées par le caractère `|` :
   - pour la direction `jecherche` les actions possibles sont : `emprunter`, `echanger`, `louer`, `acheter`
   - pour la direction `jai` les actions possibles sont : `reparer`, `preter`, `donner`, `echanger`, `mettreenlocation`, `revendre`

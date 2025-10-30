@@ -4,7 +4,7 @@ from math import sqrt
 from django.db.models import Q
 from django.template.defaulttags import register
 
-from core.utils import get_direction
+from qfdmo.forms import ActionDirectionForm
 from qfdmo.models import DisplayedActeur
 from qfdmo.models.action import get_actions_by_direction
 from qfdmo.models.config import GroupeActionConfig
@@ -21,7 +21,9 @@ def actions_for(dispayed_acteur: DisplayedActeur, direction):
 def action_by_direction(context, direction):
     """Get action for the given direction following context"""
     request = context["request"]
-    requested_direction = get_direction(request)
+    action_direction_form: ActionDirectionForm = context["action_direction_form"]
+    requested_direction = action_direction_form["direction"].value()
+
     action_displayed = request.GET.get("action_displayed", "")
     actions_to_display = get_actions_by_direction()[direction]
 

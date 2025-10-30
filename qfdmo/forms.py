@@ -2,10 +2,13 @@ from typing import List, cast
 
 from django import forms
 from django.core.cache import cache
+from django.db.models import TextChoices
 from django.http import HttpRequest
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
+from dsfr.enums import SegmentedControlChoices
 from dsfr.forms import DsfrBaseForm
+from dsfr.widgets import SegmentedControl
 
 from qfdmo.fields import GroupeActionChoiceField
 from qfdmo.geo_api import epcis_from, formatted_epcis_as_list_of_tuple
@@ -15,7 +18,6 @@ from qfdmo.models.action import (
     GroupeAction,
     get_action_instances,
     get_directions,
-    get_ordered_directions,
 )
 from qfdmo.widgets import (
     AutoCompleteInput,
@@ -84,23 +86,6 @@ class AddressesForm(forms.Form):
                 "data-search-solution-form-target": "longitudeInput",
             }
         ),
-        required=False,
-    )
-
-    direction = forms.ChoiceField(
-        widget=SegmentedControlSelect(
-            attrs={
-                "data-action": "click -> search-solution-form#changeDirection",
-                "class": "qf-w-full sm:qf-w-fit",
-            },
-            fieldset_attrs={
-                "data-search-solution-form-target": "direction",
-            },
-        ),
-        choices=[],
-        # TODO: refacto forms : set initial value
-        # initial="jai",
-        label="Direction des actions",
         required=False,
     )
 
@@ -204,47 +189,8 @@ class AddressesForm(forms.Form):
         required=False,
     )
 
-    digital = forms.ChoiceField(
-        widget=SegmentedControlSelect(
-            attrs={
-                "class": "qf-w-full sm:qf-w-fit",
-                "data-action": "click -> search-solution-form#advancedSubmit",
-                "data-with-controls": "true",
-            },
-        ),
-        choices=[
-            (
-                "0",
-                mark_safe(
-                    '<span class="fr-icon-road-map-line sm:qf-mx-1w">'
-                    " à proximité</span>"
-                ),
-            ),
-            (
-                "1",
-                mark_safe(
-                    '<span class="fr-icon-global-line sm:qf-mx-1w"> en ligne</span>'
-                ),
-            ),
-        ],
-        label="Adresses à proximité ou solutions digitales",
-        required=False,
-    )
-
 
 class FormulaireForm(AddressesForm):
-    def load_choices(self, request: HttpRequest, **kwargs) -> None:
-        # The kwargs in function signature prevents type error.
-        # TODO : refacto forms : if AddressesForm and CarteAddressesForm
-        # are used on differents views, the method signature would not need
-        # to be the same.
-        first_direction = request.GET.get("first_dir")
-        self.fields["direction"].choices = [
-            [direction["code"], direction["libelle"]]
-            for direction in get_ordered_directions(first_direction=first_direction)
-        ]
-        super().load_choices(request)
-
     adresse = forms.CharField(
         widget=AutoCompleteInput(
             attrs={
@@ -260,12 +206,75 @@ class FormulaireForm(AddressesForm):
     )
 
 
+class GetFormMixin(forms.Form):
+    def __init__(self, data: dict | None = None, *args, **kwargs):
+        if data is not None and not (set(data.keys()) & set(self.base_fields.keys())):
+            data = None
+
+        super().__init__(*args, data=data, **kwargs)
+
+
+class DigitalActeurForm(GetFormMixin, DsfrBaseForm):
+    class DigitalChoices(TextChoices, SegmentedControlChoices):
+        DIGITAL = {
+            "value": "digital",
+            "label": "En ligne",
+            "icon": "global-line",
+        }
+        PHYSIQUE = {
+            "value": "physique",
+            "label": "À proximité",
+            "icon": "road-map-line",
+        }
+
+    digital = forms.ChoiceField(
+        # TODO : gérer pour l'accessibilité
+        label="",
+        choices=DigitalChoices.choices,
+        initial=DigitalChoices.PHYSIQUE.value,
+        required=False,
+        widget=SegmentedControl(
+            extended_choices=DigitalChoices,
+            attrs={
+                "data-action": "search-solution-form#advancedSubmit",
+            },
+        ),
+    )
+
+
+class ActionDirectionForm(GetFormMixin, DsfrBaseForm):
+    class DirectionChoices(TextChoices, SegmentedControlChoices):
+        J_AI = {
+            "value": "jai",
+            "label": "J'ai un objet",
+        }
+        JE_CHERCHE = {
+            "value": "jecherche",
+            "label": "Je recherche un objet",
+        }
+
+    direction = forms.ChoiceField(
+        widget=SegmentedControl(
+            attrs={
+                "data-action": "click -> search-solution-form#changeDirection",
+                "data-search-solution-form-target": "direction",
+                "class": "qf-w-full sm:qf-w-fit",
+            },
+            extended_choices=DirectionChoices,
+        ),
+        choices=DirectionChoices.choices,
+        # TODO: handle label in UI without displaying it
+        label="",
+        # label="Direction des actions",
+        required=False,
+    )
+
+
 def get_epcis_for_carte_form():
     return [(code, code) for code in cast(List[str], epcis_from(["code"]))]
 
 
 class CarteForm(AddressesForm):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Override the label and aria-label for the sous_categorie_objet field
@@ -416,10 +425,6 @@ class AdvancedConfiguratorForm(forms.Form):
         self.fields["direction"].choices = [
             (direction["code"], direction["libelle"]) for direction in cached_directions
         ] + [("no_dir", "Par défaut")]
-        self.fields["first_dir"].choices = [
-            ("first_" + direction["code"], direction["libelle"])
-            for direction in cached_directions
-        ] + [("first_no_dir", "Par défaut")]
 
         # Cast needed because of the cache
         cached_action_instances = cast(
@@ -494,26 +499,10 @@ class AdvancedConfiguratorForm(forms.Form):
         required=False,
     )
 
-    # - `data-first_dir`, option `jai` ou `jecherche`, par défaut l'option de direction
-    # « Je cherche » est affiché en premier dans la liste des options de direction
-    first_dir = forms.ChoiceField(
-        widget=SegmentedControlSelect(
-            attrs={
-                "class": "qf-w-full sm:qf-w-fit",
-            },
-            fieldset_attrs={},
-        ),
-        label="Direction affichée en premier dans la liste des options de direction",
-        help_text="Cette option n'est disponible que dans la version formulaire",
-        required=False,
-    )
-
     action_displayed = forms.MultipleChoiceField(
         widget=DSFRCheckboxSelectMultiple(
             attrs={
-                "class": (
-                    "fr-checkbox qf-inline-grid qf-grid-cols-4 qf-gap-4" " qf-m-1w"
-                ),
+                "class": ("fr-checkbox qf-inline-grid qf-grid-cols-4 qf-gap-4 qf-m-1w"),
             },
         ),
         choices=[],
@@ -539,9 +528,7 @@ class AdvancedConfiguratorForm(forms.Form):
     action_list = forms.MultipleChoiceField(
         widget=DSFRCheckboxSelectMultiple(
             attrs={
-                "class": (
-                    "fr-checkbox qf-inline-grid qf-grid-cols-4 qf-gap-4" " qf-m-1w"
-                ),
+                "class": ("fr-checkbox qf-inline-grid qf-grid-cols-4 qf-gap-4 qf-m-1w"),
             },
         ),
         choices=[],

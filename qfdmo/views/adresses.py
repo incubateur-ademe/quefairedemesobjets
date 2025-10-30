@@ -13,16 +13,16 @@ from django.db.models import Q
 from django.db.models.functions import Length, Lower
 from django.db.models.query import QuerySet
 from django.forms import model_to_dict
-from django.http import Http404, JsonResponse
+from django.http import Http404, HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_GET
 from django.views.generic.edit import FormView
+from wagtail.query import Any
 
-from core.utils import get_direction
 from qfdmd.models import Synonyme
-from qfdmo.forms import FormulaireForm
+from qfdmo.forms import ActionDirectionForm, DigitalActeurForm, FormulaireForm
 from qfdmo.geo_api import bbox_from_list_of_geojson, retrieve_epci_geojson
 from qfdmo.map_utils import (
     center_from_frontend_bbox,
@@ -53,14 +53,6 @@ def generate_google_maps_itineraire_url(
     )
 
 
-class DigitalMixin:
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update(is_digital=self.request.GET.get("digital") == "1")
-
-        return context
-
-
 class TurboFormMixin:
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
@@ -78,10 +70,13 @@ class TurboFormMixin:
 
 class SearchActeursView(
     ABC,
-    DigitalMixin,
     TurboFormMixin,
     FormView,
 ):
+    @abstractmethod
+    def _get_direction(self):
+        pass
+
     @abstractmethod
     def _get_max_displayed_acteurs(self):
         pass
@@ -97,8 +92,6 @@ class SearchActeursView(
         initial["sous_categorie_objet"] = self.request.GET.get("sous_categorie_objet")
         # TODO: refacto forms : delete this line
         initial["adresse"] = self.request.GET.get("adresse")
-        initial["digital"] = self.request.GET.get("digital", "0")
-        initial["direction"] = get_direction(self.request, self.is_carte)
         # TODO: refacto forms : delete this line
         initial["latitude"] = self.request.GET.get("latitude")
         # TODO: refacto forms : delete this line
@@ -215,24 +208,7 @@ class SearchActeursView(
 
         # Manage the selection of sous_categorie_objet and actions
         acteurs = self._acteurs_from_sous_categorie_objet_and_actions()
-
-        if self.get_data_from_request_or_bounded_form("digital") == "1":
-            acteurs = acteurs.digital()
-        else:
-            bbox, acteurs = self._bbox_and_acteurs_from_location_or_epci(acteurs)
-            acteurs = acteurs[: self._get_max_displayed_acteurs()]
-
-            # Set Home location (address set as input)
-            # FIXME : can be manage in template using the form value ?
-            if (
-                latitude := self.get_data_from_request_or_bounded_form("latitude")
-            ) and (
-                longitude := self.get_data_from_request_or_bounded_form("longitude")
-            ):
-                kwargs.update(
-                    location=json.dumps({"latitude": latitude, "longitude": longitude})
-                )
-
+        bbox, acteurs = self._handle_scoped_acteurs(acteurs, kwargs)
         kwargs.update(acteurs=acteurs)
         context = super().get_context_data(**kwargs)
 
@@ -244,6 +220,28 @@ class SearchActeursView(
             pass
 
         return context
+
+    def _handle_scoped_acteurs(
+        self, acteurs: QuerySet[DisplayedActeur], kwargs
+    ) -> tuple[Any, QuerySet[DisplayedActeur]]:
+        """
+        Handle the scoped acteurs following the order of priority:
+        - bbox
+        - epci_codes
+        - user location
+        """
+        bbox, acteurs = self._bbox_and_acteurs_from_location_or_epci(acteurs)
+        acteurs = acteurs[: self._get_max_displayed_acteurs()]
+
+        # Set Home location (address set as input)
+        # FIXME : can be manage in template using the form value ?
+        if (latitude := self.get_data_from_request_or_bounded_form("latitude")) and (
+            longitude := self.get_data_from_request_or_bounded_form("longitude")
+        ):
+            kwargs.update(
+                location=json.dumps({"latitude": latitude, "longitude": longitude})
+            )
+        return bbox, acteurs
 
     def _bbox_and_acteurs_from_location_or_epci(self, acteurs):
         custom_bbox = cast(
@@ -289,7 +287,7 @@ class SearchActeursView(
         """
         Limit to actions of the direction only in Carte mode
         """
-        if direction := self.request.GET.get("direction"):
+        if direction := self._get_direction():
             if self.is_carte:
                 cached_action_instances = [
                     action
@@ -387,7 +385,7 @@ class SearchActeursView(
             if codes
             else cached_action_instances
         )
-        if direction := self.request.GET.get("direction"):
+        if direction := self._get_direction():
             actions = [
                 a for a in actions if direction in [d.code for d in a.directions.all()]
             ]
@@ -535,9 +533,50 @@ class FormulaireSearchActeursView(SearchActeursView):
     template_name = "ui/pages/formulaire.html"
     form_class = FormulaireForm
 
+    def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        self.digital_acteur_form: DigitalActeurForm = DigitalActeurForm(
+            self.request.GET
+        )
+        self.action_direction_form = ActionDirectionForm(
+            self.request.GET,
+            initial={"direction": ActionDirectionForm.DirectionChoices.J_AI.value},
+        )
+        return super().get(request, *args, **kwargs)
+
+    def _get_direction(self):
+        return self.action_direction_form["direction"].value()
+
+    def _check_if_is_digital(self):
+        return (
+            self.digital_acteur_form["digital"].value()
+            == self.digital_acteur_form.DigitalChoices.DIGITAL.value
+        )
+
+    def _handle_scoped_acteurs(
+        self, acteurs: QuerySet[DisplayedActeur], kwargs
+    ) -> tuple[Any, QuerySet[DisplayedActeur]]:
+        """
+        Handle the scoped acteurs following the order of priority:
+        - digital
+        - bbox
+        - epci_codes
+        - user location
+        override from parent class to handle digital acteurs
+        """
+
+        if self._check_if_is_digital():
+            return None, acteurs.digital()
+        return super()._handle_scoped_acteurs(acteurs, kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context.update(map_container_id="formulaire")
+        if self._check_if_is_digital():
+            context.update(is_digital=True)
+        context.update(
+            map_container_id="formulaire",
+            action_direction_form=self.action_direction_form,
+            digital_acteur_form=self.digital_acteur_form,
+        )
         return context
 
     def _get_selected_action_ids(self):
@@ -546,7 +585,7 @@ class FormulaireSearchActeursView(SearchActeursView):
         return [a["id"] for a in self.get_action_list()]
 
     def get_action_list(self) -> List[dict]:
-        direction = get_direction(self.request, False)
+        direction = self._get_direction()
         action_displayed = self._set_action_displayed()
         actions = self._set_action_list(action_displayed)
         if direction:

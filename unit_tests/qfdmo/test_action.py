@@ -1,11 +1,7 @@
 import pytest
 
 from qfdmo.models import Action, CodeAsNaturalKeyModel
-from qfdmo.models.action import (
-    ActionDirection,
-    get_actions_by_direction,
-    get_ordered_directions,
-)
+from qfdmo.models.action import ActionDirection, get_actions_by_direction
 from unit_tests.qfdmo.action_factory import ActionDirectionFactory, ActionFactory
 
 
@@ -37,27 +33,6 @@ def actions():
     ActionFactory(code="second_2").directions.add(second)
     ActionFactory(code="second_3").directions.add(second)
     ActionFactory(code="first_second").directions.add(first, second)
-
-
-class TestCachedGetDirections:
-
-    @pytest.mark.django_db
-    @pytest.mark.parametrize(
-        "first_direction,expected",
-        [
-            ("first", [{"code": "first", "order": 1}, {"code": "second", "order": 2}]),
-            (
-                "second",
-                [{"code": "second", "order": 2}, {"code": "first", "order": 1}],
-            ),
-            (None, [{"code": "first", "order": 1}, {"code": "second", "order": 2}]),
-        ],
-    )
-    def test_get_directions(self, first_direction, expected, action_directions):
-        assert [
-            {k: v for k, v in direction.items() if k in ["order", "code"]}
-            for direction in get_ordered_directions(first_direction=first_direction)
-        ] == expected
 
 
 class TestCachedGetActionsByDirection:

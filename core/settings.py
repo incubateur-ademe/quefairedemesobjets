@@ -391,8 +391,6 @@ sentry_sdk.init(
 )
 
 
-DEFAULT_ACTION_DIRECTION = "jai"
-
 # Insee
 # -----
 INSEE_KEY = decouple.config("INSEE_KEY", cast=str, default="")

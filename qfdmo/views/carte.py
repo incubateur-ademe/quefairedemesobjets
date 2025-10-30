@@ -6,7 +6,7 @@ from django.db.models import Q
 from django.utils.functional import cached_property
 from django.views.generic import DetailView
 
-from qfdmo.forms import CarteForm
+from qfdmo.forms import ActionDirectionForm, CarteForm
 from qfdmo.models import CarteConfig
 from qfdmo.views.adresses import SearchActeursView
 
@@ -17,6 +17,10 @@ class CarteSearchActeursView(SearchActeursView):
     is_carte = True
     template_name = "ui/pages/carte.html"
     form_class = CarteForm
+
+    def _get_direction(self):
+        action_direction_form = ActionDirectionForm(self.request.GET)
+        return action_direction_form["direction"].value()
 
     def get_initial(self, *args, **kwargs):
         initial = super().get_initial(*args, **kwargs)

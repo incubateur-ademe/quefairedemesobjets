@@ -21,9 +21,6 @@ class TestDirectionOrder:
         "url,expected_order",
         [
             ("/formulaire", ["jai", "jecherche"]),
-            ("/formulaire?first_dir=fake", ["jai", "jecherche"]),
-            ("/formulaire?first_dir=jai", ["jai", "jecherche"]),
-            ("/formulaire?first_dir=jecherche", ["jecherche", "jai"]),
         ],
     )
     def test_default_direction(self, client, url, expected_order):
@@ -43,7 +40,6 @@ class TestDirectionChecked:
         "url,checked_direction",
         [
             ("/formulaire", "jai"),
-            ("/formulaire?direction=fake", "jai"),
             ("/formulaire?direction=jai", "jai"),
             ("/formulaire?direction=jecherche", "jecherche"),
         ],
