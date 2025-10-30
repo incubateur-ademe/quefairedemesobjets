@@ -1,5 +1,5 @@
 {% extends base_template %}
-{% load carte_tags %}
+{% load carte_tags turbo_tags %}
 
 {% block meta %}
 <meta name="robots" content="noindex" />
@@ -16,7 +16,7 @@
 {% block content %}
 <div class="fr-container qf-py-2w">
     <turbo-frame
-        id="{{ map_container_id }}:acteur-detail"
+        id="{% acteur frame_id %}"
     >
         <article {% if turbo %}class='qf-animate-in qf-fade-in qf-duration-400'{% endif %}>
             <header class="qf-mb-2w">

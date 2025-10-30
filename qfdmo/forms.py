@@ -170,7 +170,7 @@ class GetFormMixin(forms.Form):
         super().__init__(*args, data=data, **kwargs)
 
 
-class FiltresForm(GetFormMixin, DsfrBaseForm):
+class LegendeForm(GetFormMixin, DsfrBaseForm):
     groupe_action = GroupeActionChoiceField(
         queryset=GroupeAction.objects.all().order_by("order"),
         to_field_name="code",

@@ -49,3 +49,5 @@ ASSISTANT = {
     "nouvelle_recherche": "Nouvelle recherche",
     "faites_decouvrir_ce_site": "Faites découvrir ce site !",
 }
+
+MAP_CONTAINER_ID = "map_container_id"

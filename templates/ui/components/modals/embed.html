@@ -1,5 +1,7 @@
-{% extends "./base.html" %}
+{% extends "ui/components/modals/base.html" %}
 {% load script_tags %}
+
+{% block modal_footer %}{% endblock %}
 
 {% block button_text %}
 {{ button_text|default:"Intégrer sur votre site" }}

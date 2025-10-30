@@ -111,6 +111,7 @@ class ActeurController extends WindowResizeController {
   }
 
   #showPanelWhenTurboFrameLoad(event) {
+    // TODO : fetch this variable from template, using turbo_tags.acteur_frame_id
     let acteurDetailTurboFrameId = `${this.mapContainerIdValue}:acteur-detail`
 
     if (event.target.id === acteurDetailTurboFrameId) {

@@ -213,10 +213,9 @@ class ModalsPreview(LookbookPreview):
         return render_to_string("ui/components/modals/share.html")
 
     def filtres(self, **kwargs):
-        from qfdmo.forms import FiltresForm
+        from qfdmo.forms import FiltresForm, LegendeForm
 
-        form = FiltresForm()
-        context = {"form": form}
+        context = {"legende_form": LegendeForm(), "filtres_form": FiltresForm}
         return render_to_string("ui/components/modals/filtres.html", context)
 
 

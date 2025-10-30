@@ -1,3 +1,4 @@
+{% load turbo_tags %}
 <aside class="
     {% block classes %}
       {# The classes below are specific to carte and can be overriden in Formulaire #}
@@ -70,7 +71,7 @@ data-acteur-details-map-container-id-value="{{ map_container_id }}"
       >
       </span>
       <turbo-frame
-          id="{{ map_container_id }}:acteur-detail"
+          id="{% acteur_frame_id %}"
       ></turbo-frame>
   </div>
 </aside>

@@ -7,7 +7,13 @@ from django.forms import Form
 from django.utils.functional import cached_property
 from django.views.generic import DetailView
 
-from qfdmo.forms import ActionDirectionForm, CarteForm, FiltresForm, ViewModeForm
+from qfdmo.forms import (
+    ActionDirectionForm,
+    CarteForm,
+    FiltresForm,
+    LegendeForm,
+    ViewModeForm,
+)
 from qfdmo.models import CarteConfig
 from qfdmo.views.adresses import SearchActeursView
 
@@ -21,6 +27,7 @@ class CarteSearchActeursView(SearchActeursView):
     forms = {
         "view_mode": ViewModeForm,
         "filtres_form": FiltresForm,
+        "legende_form": LegendeForm,
     }
 
     def get_forms(self) -> dict[str, Form]:

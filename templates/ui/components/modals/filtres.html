@@ -14,14 +14,24 @@ Filtres
 {% endblock modal_title %}
 
 {% block modal_content %}
-<form>
-  {{ form }}
-  <button type="submit" class="fr-btn" title="Valider">
-    Filtrer
-  </button>
+<form id="filtres-form-{{ id }}">
+  {% if legende_form %}
+  <div>
+    {{ legende_form }}
+    <hr>
+  </div>
+  {% endif %}
+  {{ filtres_form }}
 </form>
-
 {% endblock modal_content %}
+
+{% block modal_footer_buttons %}
+<li>
+  <button type="submit" class="fr-btn" title="Valider" form="filtres-form-{{ id }}">
+    Appliquer
+  </button>
+</li>
+{% endblock modal_footer_buttons %}
 
 {% block modal_wrapper_for_id %}
 {% with id=id|default:"filtres" %}

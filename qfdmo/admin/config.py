@@ -19,6 +19,6 @@ class CarteConfigAdmin(admin.ModelAdmin):
         "source",
         "groupe_action",
         "acteur_type",
-        "label",
+        "label_qualite",
     ]
     inlines = [GroupeActionConfigInline]
