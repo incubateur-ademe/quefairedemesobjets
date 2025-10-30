@@ -1,4 +1,21 @@
 {% block modal_wrapper_for_id %}
+{% comment %}
+Reusable DSFR modal component with optional trigger button.
+Blocks:
+- button_text / button_extra_classes: customize trigger button
+- modal_title: modal header
+- modal_content: modal body
+- modal_footer / modal_footer_buttons: modal footer
+- size_classes: modal width
+
+Flags:
+- modal_only: render only the modal
+- button_only: render only the button
+
+Requires a unique 'id' per modal for accessibility.
+{% endcomment %}
+
+{% if not modal_only %}
 <button
     class="fr-btn {% block button_extra_classes %}{% endblock %} {{ button_extra_classes }} qf-whitespace-nowrap"
     data-fr-opened="false"
@@ -10,7 +27,9 @@
 >
       {% block button_text %}{% endblock %}
 </button>
+{% endif %}
 
+{% if not button_only %}
 <dialog
     aria-labelledby="fr-modal-title-{{ id }}"
     role="dialog"
@@ -46,4 +65,5 @@
         </div>
     </div>
 </dialog>
+{% endif %}
 {% endblock modal_wrapper_for_id %}
