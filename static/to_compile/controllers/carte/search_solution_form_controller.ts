@@ -357,6 +357,10 @@ class SearchFormController extends Controller<HTMLElement> {
     this.searchFormPanelTarget.classList.add("qf-h-0", "qf-invisible")
   }
 
+  submitForm() {
+    this.element.requestSubmit()
+  }
+
   advancedSubmit(event?: Event) {
     // Applies only in Formulaire alternative or in digital version.
     const withControls =

@@ -16,7 +16,13 @@ Filtres
 
 {% block modal_content %}
 {% if legende_form %}
-{{ legende_form }}
+{% if not mode_liste %}
+<div class="md:qf-hidden">
+{% endif %}
+  {{ legende_form }}
+{% if not mode_liste %}
+</div>
+{% endif %}
 <hr>
 {% endif %}
 

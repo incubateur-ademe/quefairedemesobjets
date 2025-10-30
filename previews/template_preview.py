@@ -10,6 +10,7 @@ from django_lookbook.utils import register_form_class
 
 from qfdmd.forms import SearchForm
 from qfdmd.models import Suggestion, Synonyme
+from qfdmo.forms import LegendeForm
 from qfdmo.models.acteur import ActeurType, DisplayedActeur, DisplayedPropositionService
 from qfdmo.models.action import Action
 from qfdmo.models.config import CarteConfig
@@ -220,6 +221,23 @@ class ModalsPreview(LookbookPreview):
 
     def infos(self, **kwargs):
         return render_to_string("ui/components/modals/infos.html")
+
+    def plusieurs_formulaires(self, **kwargs):
+        """
+        # Simulation de plusieurs formulaires
+        """
+
+        form1 = LegendeForm(prefix="1")
+        form2 = LegendeForm(prefix="2")
+
+        template = Template(
+            """
+            {% include "ui/components/modals/filtres.html" with legende_form=form1 id="filtres-legende" %}
+            {% include "ui/components/modals/filtres.html" with legende_form=form2 id="filtres-legende-mobile" %}
+            """
+        )
+        context = {"form1": form1, "form2": form2}
+        return template.render(Context(context))
 
 
 class PagesPreview(LookbookPreview):

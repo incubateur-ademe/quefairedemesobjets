@@ -170,6 +170,20 @@ class GetFormMixin(forms.Form):
         super().__init__(*args, data=data, **kwargs)
 
 
+class AutoSubmitMixin:
+    """A mixin that automatically adds data attributes to specified fields."""
+
+    autosubmit_fields: list[str] = []
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for field_name in getattr(self, "autosubmit_fields", []):
+            field = self.fields.get(field_name)
+            if field:
+                field.widget.attrs["data-action"] = "search-solution-form#submitForm"
+
+
 class LegendeForm(GetFormMixin, DsfrBaseForm):
     groupe_action = GroupeActionChoiceField(
         queryset=GroupeAction.objects.all().order_by("order"),
@@ -179,6 +193,10 @@ class LegendeForm(GetFormMixin, DsfrBaseForm):
         label="",
         initial=GroupeAction.objects.all(),
     )
+
+
+class AutoSubmitLegendeForm(AutoSubmitMixin, LegendeForm):
+    autosubmit_fields = ["groupe_action"]
 
 
 class FiltresForm(GetFormMixin, DsfrBaseForm):

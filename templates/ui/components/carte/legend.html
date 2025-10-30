@@ -11,12 +11,11 @@
     <h2 class="fr-h4 fr-mb-2w">
         Actions possibles
     </h2>
-    {{ forms.legende_form }}
+    {{ forms.legende }}
     <hr class="qf-pb-2w qf-pt-0">
 
     <div class="qf-flex qf-gap-2w qf-flex-col">
-        {# 👇 This needs to be kept in sync with modals at the end of the file #}
-        {% include "ui/components/modals/filtres.html" with filtres_form=forms.filtres_form id="filtres-legende-mobile" button_extra_classes="fr-btn--sm qf-w-full qf-justify-center" button_only=True %}
+        {% include "ui/components/modals/filtres.html" with filtres_form=forms.filtres_form id="filtres" button_extra_classes="fr-btn--sm qf-w-full qf-justify-center" button_only=True %}
 
         {% comment %}
         Check if the branding configuration is not set or if branding is allowed.
@@ -24,7 +23,6 @@
         {% endcomment %}
 
         {% if not carte_config or not carte_config.supprimer_branding %}
-            {# 👇 This needs to be kept in sync with modals at the end of the file #}
             {% include "ui/components/modals/infos.html" with button_extra_classes="max-md:qf-hidden fr-btn--sm qf-w-full qf-justify-center" button_only=True %}
         {% endif %}
 
@@ -33,9 +31,4 @@
         </div>
     </div>
 </aside>
-{# 👉 Here #}
-{% include "ui/components/modals/filtres.html" with filtres_form=forms.filtres_form id="filtres-legende-mobile" modal_only=True %}
-
-{# 👉 And here #}
-{% include "ui/components/modals/infos.html" with modal_only=True %}
 {% endif %}

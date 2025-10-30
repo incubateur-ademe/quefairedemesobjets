@@ -7,6 +7,7 @@ from django.views.generic import DetailView
 
 from qfdmo.forms import (
     ActionDirectionForm,
+    AutoSubmitLegendeForm,
     CarteForm,
     FiltresForm,
     LegendeForm,
@@ -21,16 +22,20 @@ logger = logging.getLogger(__name__)
 
 class CarteForms(TypedDict):
     view_mode: Type[ViewModeForm]
-    filtres_form: Type[FiltresForm]
-    legende_form: Type[LegendeForm]
-    legende_form_mobile: Type[LegendeForm]
+    # ess etc desktop / mobile : tout le temps
+    filtres: Type[FiltresForm]
+    # gestes desktop : carte
+    legende: Type[LegendeForm]
+    # desktop : mode liste
+    legende_filtres: Type[LegendeForm]
 
 
 class CarteFormsInstance(TypedDict):
     view_mode: Optional[ViewModeForm]
-    filtres_form: Optional[FiltresForm]
-    legende_form: Optional[LegendeForm]
-    legende_form_mobile: Optional[LegendeForm]
+    filtres: Optional[FiltresForm]
+    legende: Optional[LegendeForm]
+    legende_filtres: Optional[LegendeForm]
+    legende_filtres_mobile: Optional[LegendeForm]
 
 
 class CarteSearchActeursView(SearchActeursView):
@@ -39,9 +44,10 @@ class CarteSearchActeursView(SearchActeursView):
     form_class = CarteForm
     forms: CarteForms = {
         "view_mode": ViewModeForm,
-        "filtres_form": FiltresForm,
-        "legende_form": LegendeForm,
-        "legende_form_mobile": LegendeForm,
+        "filtres": FiltresForm,
+        "legende": AutoSubmitLegendeForm,
+        "legende_filtres": LegendeForm,
+        "legende_filtres_mobile": LegendeForm,
     }
 
     def get_forms(self) -> CarteFormsInstance:
@@ -73,7 +79,7 @@ class CarteSearchActeursView(SearchActeursView):
         return context
 
     def _get_action_ids(self) -> list[str]:
-        groupe_action_ids = self.get_forms()["legende_form"]["groupe_action"].value()
+        groupe_action_ids = self.get_forms()["legende"]["groupe_action"].value()
 
         return Action.objects.filter(groupe_action__id__in=groupe_action_ids).only("id")
 
