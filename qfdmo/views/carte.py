@@ -52,7 +52,7 @@ class CarteSearchActeursView(SearchActeursView):
     def _generate_prefix(self, prefix: str) -> str:
         try:
             id = self.request.GET["map_container_id"]
-            return f"{id}-{prefix}"
+            return f"{id}_{prefix}"
         except (KeyError, AttributeError):
             return prefix
 
@@ -98,12 +98,16 @@ class CarteSearchActeursView(SearchActeursView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         forms = self._get_forms()
+        mode_liste = (
+            forms["view_mode"]["view"].value()
+            == ViewModeForm.ViewModeSegmentedControlChoices.LISTE
+        )
+
         context.update(
             is_carte=True,
             forms=forms,
             map_container_id="carte",
-            mode_liste=forms["view_mode"]["view"].value()
-            == ViewModeForm.ViewModeSegmentedControlChoices.LISTE,
+            mode_liste=mode_liste,
         )
         return context
 

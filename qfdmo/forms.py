@@ -163,8 +163,16 @@ class FormulaireForm(AddressesForm):
 
 
 class GetFormMixin(forms.Form):
-    def __init__(self, data: dict | None = None, *args, **kwargs):
-        if data is not None and not (set(data.keys()) & set(self.base_fields.keys())):
+    def __init__(self, data: dict | None = None, prefix=None, *args, **kwargs):
+        if prefix:
+            self.prefix = prefix
+
+        unique_field_names_with_prefix = set(
+            [self.add_prefix(field) for field in self.base_fields.keys()]
+        )
+        unique_keys = set(data.keys())
+        request_contains_field_names = unique_keys & unique_field_names_with_prefix
+        if data is not None and not request_contains_field_names:
             data = None
 
         super().__init__(*args, data=data, **kwargs)
