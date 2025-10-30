@@ -30,6 +30,7 @@ with DAG(
     },
     description=("Un DAG pour suggérer des corrections de villes"),
     tags=[TAGS.ENRICH, TAGS.ANNAIRE_ENTREPRISE, TAGS.ACTEURS, TAGS.CP, TAGS.VILLES],
+    schedule=None,
     start_date=START_DATES.DEFAULT,
     params=config_to_airflow_params(
         EnrichActeursVillesConfig(

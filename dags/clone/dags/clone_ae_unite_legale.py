@@ -20,6 +20,7 @@ with DAG(
         "email_on_retry": False,
         "retries": 0,
     },
+    schedule=None,
     start_date=START_DATES.DEFAULT,
     description=(
         "Clone la table 'unite_legale' de l'Annuaire Entreprises (AE) dans notre DB"
