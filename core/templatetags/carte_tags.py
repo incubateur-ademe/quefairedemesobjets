@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.template.defaulttags import register
 from django.template.loader import render_to_string
 
+from core.constants import MAP_CONTAINER_ID
 from qfdmo.models import DisplayedActeur
 from qfdmo.models.action import get_actions_by_direction
 from qfdmo.models.config import GroupeActionConfig
@@ -115,6 +116,7 @@ def acteur_pinpoint_tag(
     carte=None,
     carte_config=None,
     sous_categorie_id=None,
+    counter=None,
 ):
     """
     Template tags to display the acteur's pinpoint after increasing context with
@@ -125,16 +127,15 @@ def acteur_pinpoint_tag(
       - marker_fill_background
       - marker_icon_extra_classes
     """
-    context.update(
-        {
-            "marker_icon": "",
-            "marker_couleur": "",
-            "marker_icon_file": "",
-            "marker_bonus": False,
-            "marker_fill_background": False,
-            "marker_icon_extra_classes": "",
-        }
-    )
+    context = {
+        "acteur": context["acteur"],
+        "marker_icon": "",
+        "marker_couleur": "",
+        "marker_icon_file": "",
+        "marker_bonus": False,
+        "marker_fill_background": False,
+        "marker_icon_extra_classes": "",
+    }
 
     action_to_display = acteur.action_to_display(
         direction=direction,
@@ -161,10 +162,8 @@ def acteur_pinpoint_tag(
             if groupe_action_config.icon:
                 # Property is camelcased as it is used in javascript
                 context.update(
-                    {
-                        "marker_icon_file": groupe_action_config.icon.url,
-                        "marker_icon": "",
-                    }
+                    marker_icon_file=groupe_action_config.icon.url,
+                    marker_icon="",
                 )
                 return context
 
@@ -176,18 +175,21 @@ def acteur_pinpoint_tag(
             action_to_display = action_to_display.groupe_action
         if action_to_display.code == "reparer":
             context.update(
-                {
-                    "marker_bonus": getattr(acteur, "is_bonus_reparation", False),
-                    "marker_fill_background": True,
-                    "marker_icon_extra_classes": "qf-text-white",
-                }
+                marker_bonus=getattr(acteur, "is_bonus_reparation", False),
+                marker_fill_background=True,
+                marker_icon_extra_classes="qf-text-white",
             )
 
+    mask_id = acteur.uuid
+    if MAP_CONTAINER_ID in context:
+        mask_id += f"-{context[MAP_CONTAINER_ID]}"
+    if counter:
+        mask_id += f"-{counter}"
+
     context.update(
-        {
-            "marker_icon": action_to_display.icon,
-            "marker_couleur": action_to_display.couleur,
-        }
+        mask_id=mask_id,
+        marker_icon=action_to_display.icon,
+        marker_couleur=action_to_display.couleur,
     )
 
     return context
