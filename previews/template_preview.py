@@ -248,7 +248,7 @@ class ModalsPreview(LookbookPreview):
                 widget=NextAutocompleteInput(
                     label_field_name="nom",
                     meta_field_name="coucou",
-                    search_view="youpi",
+                    search_view="autocomplete_sous_categorie_objet",
                 ),
                 help_text="pantalon, perceuse, canapé...",
                 label="Indiquer un objet ",

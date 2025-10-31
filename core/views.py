@@ -7,7 +7,7 @@ from django.http import HttpResponse
 from django.template import Template
 from django.template.loader import render_to_string
 from django.views.decorators.cache import cache_control
-from django.views.generic import TemplateView
+from django.views.generic import ListView, TemplateView
 from wagtail.templatetags.wagtailcore_tags import richtext
 
 from qfdmd.models import EmbedSettings
@@ -60,9 +60,5 @@ class IsStaffMixin(LoginRequiredMixin):
         return super().dispatch(request, *args, **kwargs)
 
 
-class Autocomplete(TemplateView):
-    pass
-
-
-class AutocompleteActeur:
+class AutocompleteSousCategorieObjet(ListView):
     pass

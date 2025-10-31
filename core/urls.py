@@ -32,7 +32,7 @@ from wagtail.documents import urls as wagtaildocs_urls
 from qfdmd.models import Synonyme
 
 from .api import api
-from .views import backlink, robots_txt
+from .views import AutocompleteSousCategorieObjet, backlink, robots_txt
 
 info_dict = {
     "queryset": Synonyme.objects.filter().order_by("nom"),
@@ -55,6 +55,11 @@ urlpatterns = [
     path("api/", api.urls),
     path("robots.txt", robots_txt),
     path("embed/backlink", backlink),
+    path(
+        "autocomplete/sous_categorie_objet",
+        AutocompleteSousCategorieObjet.as_view(),
+        name="autocomplete_sous_categorie_objet",
+    ),
     path(
         "sitemap.xml",
         index,
