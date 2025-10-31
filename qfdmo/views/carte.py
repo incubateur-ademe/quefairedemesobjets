@@ -21,14 +21,26 @@ from qfdmo.views.adresses import SearchActeursView
 logger = logging.getLogger(__name__)
 
 
+class ViewModeFormEntry(TypedDict):
+    form: Type["ViewModeForm"]
+    prefix: str
+
+
+class FiltresFormEntry(TypedDict):
+    form: Type["FiltresForm"]
+    prefix: str
+
+
+class LegendeFormEntry(TypedDict):
+    form: Type["LegendeForm"]
+    prefix: str
+
+
 class CarteForms(TypedDict):
-    view_mode: Type[ViewModeForm]
-    # ess etc desktop / mobile : tout le temps
-    filtres: Type[FiltresForm]
-    # gestes desktop : carte
-    legende: Type[LegendeForm]
-    # desktop : mode liste
-    legende_filtres: Type[LegendeForm]
+    view_mode: ViewModeFormEntry
+    filtres: FiltresFormEntry
+    legende: LegendeFormEntry
+    legende_filtres: LegendeFormEntry
 
 
 class CarteFormsInstance(TypedDict):
@@ -43,10 +55,24 @@ class CarteSearchActeursView(SearchActeursView):
     template_name = "ui/pages/carte.html"
     form_class = CarteForm
     forms: CarteForms = {
-        "view_mode": ViewModeForm,
-        "filtres": FiltresForm,
-        "legende": AutoSubmitLegendeForm,
-        "legende_filtres": LegendeForm,
+        "view_mode": {
+            "form": ViewModeForm,
+            "prefix": "view_mode",
+        },
+        "filtres": {
+            "form": FiltresForm,
+            "prefix": "filtres",
+        },
+        "legende": {
+            "form": AutoSubmitLegendeForm,
+            "prefix": "legende",
+            "other_prefixes_to_check": ["legende_filtres"],
+        },
+        "legende_filtres": {
+            "form": LegendeForm,
+            "prefix": "legende_filtres",
+            "other_prefixes_to_check": ["legende"],
+        },
     }
 
     def _generate_prefix(self, prefix: str) -> str:
@@ -58,14 +84,22 @@ class CarteSearchActeursView(SearchActeursView):
 
     def _get_forms(self) -> CarteFormsInstance:
         form_instances: CarteFormsInstance = {}
-        for key, FormCls in self.forms.items():
+        for key, form_config in self.forms.items():
             if self.request.method == "POST":
                 data = self.request.POST
             else:
                 data = self.request.GET
 
-            prefix = self._generate_prefix(key)
-            form = FormCls(data, prefix=prefix)
+            prefix = self._generate_prefix(form_config["prefix"])
+            form = form_config["form"](data, prefix=prefix)
+            if not form.is_valid():
+                for other_prefix in form_config.get("other_prefixes_to_check", []):
+                    other_prefix = self._generate_prefix(other_prefix)
+                    other_form = form_config["form"](data, prefix=other_prefix)
+                    if other_form.is_valid():
+                        form = other_form
+                        break
+
             form_instances[key] = form
 
         return form_instances
