@@ -648,7 +648,7 @@ class ViewModeForm(GetFormMixin, DsfrBaseForm):
         widget=SegmentedControl(
             extra_classes="max-md:fr-segmented--sm",
             attrs={
-                "data-action": "search-solution-form#advancedSubmit",
+                "data-action": "search-solution-form#submitForm",
             },
             extended_choices=ViewModeSegmentedControlChoices,
         ),

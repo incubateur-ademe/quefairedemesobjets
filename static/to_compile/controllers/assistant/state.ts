@@ -17,18 +17,19 @@ export default class extends Controller<HTMLElement> {
     longitude: string | null
   }
   declare iframeValue: boolean
+  hasAddressAutocompleteOutletConnected = false
+  hasSearchSolutionFormOutletConnected = false
 
   connect() {
-    document.addEventListener("turbo:load", this.#initRecurringEvents.bind(this))
+    this.fetchLocationFromSessionStorageOnFirstLoad()
+    this.configureIframeSpecificUI()
   }
 
-  #initRecurringEvents(event) {
-    /**
-    These methods must be called every time we add elements to the dom through a turbo-frame
-    so that all new DOM nodes get updated.
-    */
-    this.fetchLocationFromSessionStorageOnFirstLoad(event)
-    this.configureIframeSpecificUI()
+  addressAutocompleteOutletConnected(outlet, element) {
+    if (outlet.inputTarget.value) {
+      return
+    }
+    this.updateUIFromGlobalState(outlet)
   }
 
   #redirectIfIframeMisconfigured() {
@@ -64,12 +65,8 @@ export default class extends Controller<HTMLElement> {
     }
   }
 
-  fetchLocationFromSessionStorageOnFirstLoad(event) {
+  fetchLocationFromSessionStorageOnFirstLoad() {
     if (!isEmpty(this.locationValue)) {
-      document.removeEventListener(
-        "turbo:frame-load",
-        this.fetchLocationFromSessionStorageOnFirstLoad.bind(this),
-      )
       return
     }
 
@@ -79,9 +76,7 @@ export default class extends Controller<HTMLElement> {
       longitude: sessionStorage.getItem("longitude"),
     }
 
-    if (Object.values(nextLocationValue).find((value) => !!value)) {
-      this.locationValue = nextLocationValue
-    }
+    this.#setLocationValue(nextLocationValue)
   }
 
   resetBboxInputs() {
@@ -93,28 +88,33 @@ export default class extends Controller<HTMLElement> {
   setLocation(event) {
     this.resetBboxInputs()
     const nextLocationValue = event.detail
+    this.#setLocationValue(nextLocationValue)
+  }
+
+  #setLocationValue(nextLocationValue) {
     const updatedLocationIsNotEmpty = !isEmpty(nextLocationValue)
     if (updatedLocationIsNotEmpty) {
       this.locationValue = nextLocationValue
+
+      for (const outlet of this.addressAutocompleteOutlets) {
+        this.updateUIFromGlobalState(outlet)
+      }
     }
   }
 
   locationValueChanged(value, previousValue) {
-    if (value && previousValue) {
-      this.persistInSessionStorageIfChanged(value.adresse, "adresse")
-      this.persistInSessionStorageIfChanged(value.latitude, "latitude")
-      this.persistInSessionStorageIfChanged(value.longitude, "longitude")
-    }
-
-    for (const outlet of this.addressAutocompleteOutlets) {
-      this.updateUIFromGlobalState(outlet)
-    }
+    // Persist UI changes in session storage
+    this.persistInSessionStorageIfChanged(value?.adresse, "adresse")
+    this.persistInSessionStorageIfChanged(value?.latitude, "latitude")
+    this.persistInSessionStorageIfChanged(value?.longitude, "longitude")
   }
 
   updateUIFromGlobalState(outlet) {
+    // Update a single Carte instance UI reading the state
+    // stored globally in the page
     const value = this.locationValue
     let touched = false
-    if (value.adresse && value.adresse !== outlet.inputTarget.value) {
+    if (value.adresse) {
       outlet.inputTarget.value = value.adresse
       touched = true
     }
@@ -135,18 +135,24 @@ export default class extends Controller<HTMLElement> {
   }
 
   submit() {
+    // Submit all instances of Carte on the same page
     for (const outlet of this.searchSolutionFormOutlets) {
-      outlet.advancedSubmit()
+      outlet.submitForm()
     }
   }
 
   updateBbox(event) {
+    // Update all bbox instances of Carte on the same page
     for (const outlet of this.searchSolutionFormOutlets) {
       outlet.updateBboxInput(event)
     }
   }
 
   persistInSessionStorageIfChanged(value, key) {
+    if (!value) {
+      return
+    }
+
     if (value !== sessionStorage.getItem(key)) {
       sessionStorage.setItem(key, value)
     }
