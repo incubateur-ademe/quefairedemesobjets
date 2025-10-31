@@ -2,7 +2,6 @@
 <a class="qf-w-[34px] qf-h-[45px] !qf-bg-none {% if not force_visible %}qf-invisible{% endif %}"
     data-latitude="{{ acteur.latitude }}"
     data-longitude="{{ acteur.longitude }}"
-    data-action="map#setActivePinpoint"
     data-map-target="acteur"
     href="{% acteur_url acteur with_map=False %}"
     data-turbo-frame="{% acteur_frame_id %}"

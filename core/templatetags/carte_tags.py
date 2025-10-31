@@ -129,6 +129,8 @@ def acteur_pinpoint_tag(
     """
     context = {
         "acteur": context["acteur"],
+        MAP_CONTAINER_ID: context[MAP_CONTAINER_ID],
+        "request": context["request"],
         "marker_icon": "",
         "marker_couleur": "",
         "marker_icon_file": "",
