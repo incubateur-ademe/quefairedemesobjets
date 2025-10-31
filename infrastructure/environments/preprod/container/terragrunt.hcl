@@ -21,11 +21,19 @@ inputs = {
 
   # Webserver
   airflow_webserver_registry_image = "rg.fr-par.scw.cloud/ns-qfdmo/airflow-webserver:preprod"
-  airflow_webserver_cpu_limit      = 4000
+  airflow_webserver_cpu_limit      = 2000
   airflow_webserver_memory_limit   = 4000
   airflow_webserver_min_scale      = 1
   airflow_webserver_max_scale      = 1
   airflow_webserver_timeout        = 300
+
+  # DAG processor
+  airflow_dag_processor_registry_image = "rg.fr-par.scw.cloud/ns-qfdmo/airflow-dag-processor:preprod"
+  airflow_dag_processor_cpu_limit      = 2000
+  airflow_dag_processor_memory_limit   = 4000
+  airflow_dag_processor_min_scale      = 1
+  airflow_dag_processor_max_scale      = 1
+  airflow_dag_processor_timeout        = 300
 
   AIRFLOW__WEBSERVER__INSTANCE_NAME   = "✅✅✅✅ ENV de PREPROD ! ✅✅✅✅"
   AIRFLOW__DATABASE__SQL_ALCHEMY_CONN = "[AIRFLOW__DATABASE__SQL_ALCHEMY_CONN]"

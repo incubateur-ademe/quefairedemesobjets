@@ -1,21 +1,21 @@
-resource "scaleway_container" "airflow_scheduler" {
-  name           = "${var.prefix}-airflow-scheduler"
-  tags           = [var.environment, var.prefix, "airflow", "scheduler"]
+resource "scaleway_container" "airflow_dag_processor" {
+  name           = "${var.prefix}-airflow-dag-processor"
+  tags           = [var.environment, var.prefix, "airflow", "dag-processor"]
   namespace_id   = scaleway_container_namespace.main.id
-  registry_image = var.airflow_scheduler_registry_image
-  port           = 8974
-  cpu_limit      = var.airflow_scheduler_cpu_limit
-  memory_limit   = var.airflow_scheduler_memory_limit
-  min_scale      = var.airflow_scheduler_min_scale
-  max_scale      = var.airflow_scheduler_max_scale
-  timeout        = var.airflow_scheduler_timeout
+  registry_image = var.airflow_dag_processor_registry_image
+  port           = 80
+  cpu_limit      = var.airflow_dag_processor_cpu_limit
+  memory_limit   = var.airflow_dag_processor_memory_limit
+  min_scale      = var.airflow_dag_processor_min_scale
+  max_scale      = var.airflow_dag_processor_max_scale
+  timeout        = var.airflow_dag_processor_timeout
   deploy         = true
   privacy        = "public"
   protocol       = "http1"
 
   health_check {
     http {
-      path = "/health"
+      path = "/"
     }
     failure_threshold = 5
     interval          = "30s"
@@ -34,7 +34,6 @@ resource "scaleway_container" "airflow_scheduler" {
     AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID         = "scalewaylogs"
     AIRFLOW__LOGGING__REMOTE_LOGGING             = "true"
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK      = "true"
-    AIRFLOW__SCHEDULER__CATCHUP_BY_DEFAULT       = "false"
     AIRFLOW__WEBSERVER__EXPOSE_CONFIG            = "true"
     AIRFLOW__WEBSERVER__WARN_DEPLOYMENT_EXPOSURE = "false"
   }
