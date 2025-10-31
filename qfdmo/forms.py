@@ -179,10 +179,12 @@ class GetFormMixin(forms.Form):
         unique_field_names_with_prefix = set(
             [self.add_prefix(field) for field in self.base_fields.keys()]
         )
-        unique_keys = set(data.keys())
-        request_contains_field_names = unique_keys & unique_field_names_with_prefix
-        if data is not None and not request_contains_field_names:
-            data = None
+        if data is not None:
+            unique_keys = set(data.keys())
+            request_contains_field_names = unique_keys & unique_field_names_with_prefix
+
+            if not request_contains_field_names:
+                data = None
 
         super().__init__(*args, data=data, **kwargs)
 
@@ -216,34 +218,40 @@ class AutoSubmitLegendeForm(AutoSubmitMixin, LegendeForm):
     autosubmit_fields = ["groupe_action"]
 
 
+class ModelAutocompleteInput(forms.TextInput):
+    template_name = "ui/forms/widgets/model_autocomplete.html"
+
+    def __init__(
+        self,
+        label_field_name,
+        meta_field_name,
+        search_view,
+        option_displayed=5,
+        *args,
+        **kwargs,
+    ):
+        self.label_field_name = label_field_name
+        self.search_view = search_view
+        self.meta_field_name = meta_field_name
+        super().__init__(*args, **kwargs)
+
+    def get_context(self, name, value, attrs):
+        context = super().get_context(name, value, attrs)
+        return {**context, "search_view": "/"}
+
+
 class FiltresForm(GetFormMixin, DsfrBaseForm):
     sous_categorie_objet = forms.ModelChoiceField(
         queryset=SousCategorieObjet.objects.all(),
-        widget=AutoCompleteInput(
-            attrs={
-                "class": "fr-input fr-icon-search-line sm:qf-w-[596px]",
-                "autocomplete": "off",
-                "aria-label": "Indiquer un objet - obligatoire",
-            },
-            data_controller="ss-cat-object-autocomplete",
-            template_name="ui/forms/widgets/autocomplete-objet.html",
+        widget=ModelAutocompleteInput(
+            label_field_name="nom", meta_field_name="coucou", search_view="youpi"
         ),
         help_text="pantalon, perceuse, canapé...",
         label="Indiquer un objet ",
         empty_label="",
         required=False,
     )
-    sous_categorie_objet_id = forms.IntegerField(
-        widget=forms.NumberInput(
-            attrs={
-                "class": "qf-hidden",
-                "data-ss-cat-object-autocomplete-target": "ssCat",
-                "data-search-solution-form-target": "sousCategoryObjetID",
-            }
-        ),
-        label="",
-        required=False,
-    )
+
     label = LabelQualiteChoiceField(
         queryset=LabelQualite.objects.filter(afficher=True, filtre=True),
         to_field_name="code",

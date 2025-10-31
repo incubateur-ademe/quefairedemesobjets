@@ -1,7 +1,6 @@
 {% extends "ui/components/modals/base.html" %}
 {% load script_tags turbo_tags %}
 
-
 {% block button_text %}
 {{ button_text|default:"Filtres" }}
 {% endblock button_text %}
@@ -26,24 +25,12 @@ Filtres
 <hr>
 {% endif %}
 
-{% comment %}
-TODO: once the autocomplete will use a more django-friendly approach, these
-data attributes should be removed.
-{% endcomment %}
-<div
-  data-search-solution-form-target="sousCategoryObjetGroup"
-  data-controller='ss-cat-object-autocomplete'
-  data-ss-cat-object-autocomplete-max-option-displayed-value=5
-  data-ss-cat-object-autocomplete-nb-char-to-search-value=1
-
->
-  {{ filtres_form }}
-</div>
+{{ filtres_form }}
 {% endblock modal_content %}
 
 {% block modal_footer_buttons %}
 <li>
-  <button type="submit" class="fr-btn" title="Valider">
+  <button type="submit" class="fr-btn" title="Valider" form="{% main_frame_id %}:search_form">
     Appliquer
   </button>
 </li>
