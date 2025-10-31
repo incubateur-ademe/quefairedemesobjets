@@ -11,7 +11,7 @@
     <div class="qf-flex qf-flex-col qf-gap-1w qf-px-1w md:qf-px-3w">
         <nav class="qf-flex qf-justify-end qf-gap-2w max-md:qf-pt-2w md:qf-py-2w">
             {% include "ui/components/modals/filtres.html" with button_extra_classes="max-md:qf-hidden" button_only=True %}
-            {% dsfr_button label="Proposer un nouveau lieu" extra_classes="max-md:qf-w-full fr-btn--icon-left fr-icon-add-line" %}
+            {% include "ui/components/carte/buttons/ajouter_un_lieu_mode_liste.html" %}
             {% include "ui/components/modals/infos.html" with button_extra_classes="max-md:qf-hidden" button_only=True %}
         </nav>
         <div class="qf-flex qf-flex-col qf-justify-center qf-items-center">
