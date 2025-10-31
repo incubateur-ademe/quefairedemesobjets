@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Optional, Type, TypedDict
+from typing import Any, TypedDict
 
 from django.conf import settings
 from django.db.models import Q
@@ -22,32 +22,39 @@ logger = logging.getLogger(__name__)
 
 
 class ViewModeFormEntry(TypedDict):
-    form: Type["ViewModeForm"]
+    form: type[ViewModeForm]
     prefix: str
 
 
 class FiltresFormEntry(TypedDict):
-    form: Type["FiltresForm"]
+    form: type[FiltresForm]
     prefix: str
 
 
 class LegendeFormEntry(TypedDict):
-    form: Type["LegendeForm"]
+    form: type[LegendeForm]
     prefix: str
+    other_prefixes_to_check: list[str]
+
+
+class AutoSubmitLegendeFormEntry(TypedDict):
+    form: type[AutoSubmitLegendeForm]
+    prefix: str
+    other_prefixes_to_check: list[str]
 
 
 class CarteForms(TypedDict):
     view_mode: ViewModeFormEntry
     filtres: FiltresFormEntry
-    legende: LegendeFormEntry
+    legende: AutoSubmitLegendeFormEntry
     legende_filtres: LegendeFormEntry
 
 
 class CarteFormsInstance(TypedDict):
-    view_mode: Optional[ViewModeForm]
-    filtres: Optional[FiltresForm]
-    legende: Optional[LegendeForm]
-    legende_filtres: Optional[LegendeForm]
+    view_mode: None | ViewModeForm
+    filtres: None | FiltresForm
+    legende: None | AutoSubmitLegendeForm
+    legende_filtres: None | LegendeForm
 
 
 class CarteSearchActeursView(SearchActeursView):
