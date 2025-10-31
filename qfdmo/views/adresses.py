@@ -91,6 +91,10 @@ class SearchActeursView(
     def _get_bonus(self) -> bool:
         pass
 
+    @abstractmethod
+    def _get_sous_categorie_id(self) -> int:
+        pass
+
     # TODO : supprimer
     is_iframe = False
     is_carte = False
@@ -113,10 +117,6 @@ class SearchActeursView(
 
         # TODO: refacto forms : delete this line
         initial["bounding_box"] = self.request.GET.get("bounding_box")
-        initial["sc_id"] = (
-            self.request.GET.get("sc_id") if initial["sous_categorie_objet"] else None
-        )
-
         return initial
 
     def get_form(self, form_class=None):
@@ -308,7 +308,7 @@ class SearchActeursView(
         if self._get_bonus():
             filters &= Q(labels__bonus=True)
 
-        if sous_categorie_id := self.get_data_from_request_or_bounded_form("sc_id", 0):
+        if sous_categorie_id := self._get_sous_categorie_id():
             filters &= Q(
                 proposition_services__sous_categories__id=sous_categorie_id,
             )

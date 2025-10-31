@@ -76,6 +76,12 @@ class CarteSearchActeursView(SearchActeursView):
         except KeyError:
             return None
 
+    def _get_field_value_for(self, form_name: str, field_name: str) -> Any:
+        try:
+            return self._get_form(form_name)[field_name].value()
+        except (AttributeError, KeyError):
+            return None
+
     def _get_direction(self):
         action_direction_form = ActionDirectionForm(self.request.GET)
         return action_direction_form["direction"].value()
@@ -125,6 +131,11 @@ class CarteSearchActeursView(SearchActeursView):
             .only("id")
             .values_list("id", flat=True)
         )
+
+    def _get_sous_categorie_id(self) -> int:
+        id = self._get_field_value_for("filtres", "sous_categorie_objet_id")
+        print(f"{id=}")
+        return id
 
     def _get_max_displayed_acteurs(self):
         if self.request.GET.get("limit", "").isnumeric():

@@ -26,9 +26,14 @@ class GenericAutoCompleteInput(widgets.SelectMultiple):
 class AutoCompleteInput(forms.TextInput):
     template_name = "ui/forms/widgets/autocomplete.html"
 
-    def __init__(self, attrs=None, data_controller="autocomplete", **kwargs):
+    def __init__(
+        self, attrs=None, data_controller="autocomplete", template_name=None, **kwargs
+    ):
         self.data_controller = data_controller
+
         super().__init__(attrs=attrs, **kwargs)
+        if template_name is not None:
+            self.template_name = template_name
 
     def get_context(self, name, value, attrs):
         context = super().get_context(name, value, attrs)

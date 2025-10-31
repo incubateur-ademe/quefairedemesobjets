@@ -45,32 +45,6 @@ class AddressesForm(forms.Form):
         required=False,
     )
 
-    sous_categorie_objet = forms.ModelChoiceField(
-        queryset=SousCategorieObjet.objects.all(),
-        widget=AutoCompleteInput(
-            attrs={
-                "class": "fr-input fr-icon-search-line sm:qf-w-[596px]",
-                "autocomplete": "off",
-                "aria-label": "Indiquer un objet - obligatoire",
-            },
-            data_controller="ss-cat-object-autocomplete",
-        ),
-        help_text="pantalon, perceuse, canapé...",
-        label="Indiquer un objet ",
-        empty_label="",
-        required=False,
-    )
-
-    sc_id = forms.IntegerField(
-        widget=forms.HiddenInput(
-            attrs={
-                "data-ss-cat-object-autocomplete-target": "ssCat",
-                "data-search-solution-form-target": "sousCategoryObjetID",
-            }
-        ),
-        required=False,
-    )
-
     latitude = forms.FloatField(
         widget=forms.HiddenInput(
             attrs={
@@ -91,6 +65,38 @@ class AddressesForm(forms.Form):
         required=False,
     )
 
+
+class FormulaireForm(AddressesForm):
+    # TODO: supprimer
+    sous_categorie_objet = forms.ModelChoiceField(
+        queryset=SousCategorieObjet.objects.all(),
+        to_field_name="nom",
+        widget=AutoCompleteInput(
+            attrs={
+                "class": "fr-input fr-icon-search-line sm:qf-w-[596px]",
+                "autocomplete": "off",
+                "aria-label": "Indiquer un objet - obligatoire",
+            },
+            data_controller="ss-cat-object-autocomplete",
+        ),
+        help_text="pantalon, perceuse, canapé...",
+        label="Indiquer un objet ",
+        empty_label="",
+        required=False,
+    )
+
+    # TODO: supprimer
+    sc_id = forms.IntegerField(
+        widget=forms.HiddenInput(
+            attrs={
+                "data-ss-cat-object-autocomplete-target": "ssCat",
+                "data-search-solution-form-target": "sousCategoryObjetID",
+            }
+        ),
+        required=False,
+    )
+
+    # TODO: supprimer
     pas_exclusivite_reparation = forms.BooleanField(
         widget=forms.CheckboxInput(
             attrs={
@@ -102,6 +108,7 @@ class AddressesForm(forms.Form):
         required=False,
     )
 
+    # TODO: supprimer
     label_reparacteur = forms.BooleanField(
         widget=forms.CheckboxInput(
             attrs={
@@ -114,6 +121,7 @@ class AddressesForm(forms.Form):
         required=False,
     )
 
+    # TODO: supprimer
     ess = forms.BooleanField(
         widget=forms.CheckboxInput(attrs={"class": "fr-checkbox fr-m-1v"}),
         label=render_to_string("ui/components/filtres/ess/label.html"),
@@ -121,6 +129,7 @@ class AddressesForm(forms.Form):
         required=False,
     )
 
+    # TODO: supprimer
     bonus = forms.BooleanField(
         widget=forms.CheckboxInput(
             attrs={
@@ -133,6 +142,7 @@ class AddressesForm(forms.Form):
         required=False,
     )
 
+    # TODO: supprimer
     action_list = forms.CharField(
         widget=forms.HiddenInput(
             attrs={"data-search-solution-form-target": "actionList"},
@@ -140,13 +150,12 @@ class AddressesForm(forms.Form):
         required=False,
     )
 
+    # TODO: supprimer
     action_displayed = forms.CharField(
         widget=forms.HiddenInput(),
         required=False,
     )
 
-
-class FormulaireForm(AddressesForm):
     adresse = forms.CharField(
         widget=AutoCompleteInput(
             attrs={
@@ -208,21 +217,33 @@ class AutoSubmitLegendeForm(AutoSubmitMixin, LegendeForm):
 
 
 class FiltresForm(GetFormMixin, DsfrBaseForm):
-    # sous_categorie_objet = forms.ModelChoiceField(
-    #     queryset=SousCategorieObjet.objects.all(),
-    #     widget=AutoCompleteInput(
-    #         attrs={
-    #             "class": "fr-input fr-icon-search-line sm:qf-w-[596px]",
-    #             "autocomplete": "off",
-    #             "aria-label": "Indiquer un objet - obligatoire",
-    #         },
-    #         data_controller="ss-cat-object-autocomplete",
-    #     ),
-    #     help_text="pantalon, perceuse, canapé...",
-    #     label="Indiquer un objet ",
-    #     empty_label="",
-    #     required=False,
-    # )
+    sous_categorie_objet = forms.ModelChoiceField(
+        queryset=SousCategorieObjet.objects.all(),
+        widget=AutoCompleteInput(
+            attrs={
+                "class": "fr-input fr-icon-search-line sm:qf-w-[596px]",
+                "autocomplete": "off",
+                "aria-label": "Indiquer un objet - obligatoire",
+            },
+            data_controller="ss-cat-object-autocomplete",
+            template_name="ui/forms/widgets/autocomplete-objet.html",
+        ),
+        help_text="pantalon, perceuse, canapé...",
+        label="Indiquer un objet ",
+        empty_label="",
+        required=False,
+    )
+    sous_categorie_objet_id = forms.IntegerField(
+        widget=forms.NumberInput(
+            attrs={
+                "class": "qf-hidden",
+                "data-ss-cat-object-autocomplete-target": "ssCat",
+                "data-search-solution-form-target": "sousCategoryObjetID",
+            }
+        ),
+        label="",
+        required=False,
+    )
     label = LabelQualiteChoiceField(
         queryset=LabelQualite.objects.filter(afficher=True, filtre=True),
         to_field_name="code",
@@ -293,39 +314,6 @@ def get_epcis_for_carte_form():
 
 
 class CarteForm(AddressesForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Override the label and aria-label for the sous_categorie_objet field
-        self.fields["sous_categorie_objet"].label = "Indiquer un objet ou déchet "
-        self.fields["sous_categorie_objet"].widget.attrs[
-            "aria-label"
-        ] = "Indiquer un objet ou déchet"
-
-    def load_choices(
-        self,
-        request: HttpRequest,
-        grouped_action_choices: list[list[str]] = [],
-        disable_reparer_option: bool = False,
-    ) -> None:
-        self.fields["grouped_action"].choices = [
-            (
-                self.fields["grouped_action"].label,
-                grouped_action_choices,
-            )
-        ]
-        self.fields["legend_grouped_action"].choices = [
-            (
-                self.fields["legend_grouped_action"].label,
-                grouped_action_choices,
-            )
-        ]
-
-        if disable_reparer_option:
-            for field in ["bonus", "label_reparacteur", "pas_exclusivite_reparation"]:
-                self.fields[field].widget.attrs["disabled"] = "true"
-
-        super().load_choices(request)
-
     adresse = forms.CharField(
         widget=AutoCompleteInput(
             attrs={

@@ -22,8 +22,8 @@ Requires a unique 'id' per modal for accessibility.
 <button
     class="fr-btn {% block button_extra_classes %}{% endblock %} {{ button_extra_classes }} qf-whitespace-nowrap"
     data-fr-opened="false"
-    aria-controls="fr-modal-{{ coucou }}"
-    aria-labelledby="fr-modal-title-{{ coucou }}"
+    aria-controls="fr-modal-{{ namespaced_id }}"
+    aria-labelledby="fr-modal-title-{{ namespaced_id }}"
     {# Ensure turbo frame is disabled as DSFR modals should not interact with turbo frame #}
     data-turbo="false"
     type="button"
@@ -34,20 +34,20 @@ Requires a unique 'id' per modal for accessibility.
 
 {% if not button_only %}
 <dialog
-    aria-labelledby="fr-modal-title-{{ coucou }}"
-    role="dialog"
-    id="fr-modal-{{ coucou }}"
-    class="fr-modal z-[100000] qf-text-left"
+    aria-labelledby="fr-modal-title-{{ namespaced_id }}"
+    aria-modal="true"
+    id="fr-modal-{{ namespaced_id }}"
+    class="fr-modal qf-text-left"
 >
     <div class="fr-container fr-container--fluid fr-container-md">
         <div class="fr-grid-row fr-grid-row--center">
             <div class="{% block size_classes %}fr-col-12 fr-col-md-8 fr-col-lg-6{% endblock %}">
                 <div class="fr-modal__body">
                     <div class="fr-modal__header">
-                        <button type="button" class="fr-btn--close fr-btn" title="Fermer la fenêtre modale" aria-controls="fr-modal-{{ coucou }}">Fermer</button>
+                        <button type="button" class="fr-btn--close fr-btn" title="Fermer la fenêtre modale" aria-controls="fr-modal-{{ namespaced_id }}">Fermer</button>
                     </div>
                     <div class="fr-modal__content">
-                        <h2 id="fr-modal-title-{{ coucou }}" class=" fr-modal__title">
+                        <h2 id="fr-modal-title-{{ namespaced_id }}" class=" fr-modal__title">
                             {% block modal_title %}
                             titre de la modale
                             {% endblock modal_title %}

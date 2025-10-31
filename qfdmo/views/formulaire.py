@@ -45,6 +45,9 @@ class FormulaireSearchActeursView(SearchActeursView):
         # Action to display and check
         action_displayed = self._set_action_displayed()
         initial["action_displayed"] = "|".join([a.code for a in action_displayed])
+        initial["sc_id"] = (
+            self.request.GET.get("sc_id") if initial["sous_categorie_objet"] else None
+        )
 
         action_list = self._set_action_list(action_displayed)
         initial["action_list"] = "|".join([a.code for a in action_list])
@@ -315,3 +318,6 @@ class FormulaireSearchActeursView(SearchActeursView):
             ][0].id
         except IndexError:
             raise Exception("Action 'Réparer' not found")
+
+    def _get_sous_categorie_id(self) -> int:
+        return self.get_data_from_request_or_bounded_form("sc_id", 0)

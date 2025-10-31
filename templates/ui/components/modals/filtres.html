@@ -26,7 +26,19 @@ Filtres
 <hr>
 {% endif %}
 
-{{ filtres_form }}
+{% comment %}
+TODO: once the autocomplete will use a more django-friendly approach, these
+data attributes should be removed.
+{% endcomment %}
+<div
+  data-search-solution-form-target="sousCategoryObjetGroup"
+  data-controller='ss-cat-object-autocomplete'
+  data-ss-cat-object-autocomplete-max-option-displayed-value=5
+  data-ss-cat-object-autocomplete-nb-char-to-search-value=1
+
+>
+  {{ filtres_form }}
+</div>
 {% endblock modal_content %}
 
 {% block modal_footer_buttons %}
