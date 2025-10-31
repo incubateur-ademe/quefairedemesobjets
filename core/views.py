@@ -1,10 +1,13 @@
 import mimetypes
 
+from _pytest.tmpdir import TempPathFactory
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.staticfiles import finders
 from django.http import HttpResponse
+from django.template import Template
 from django.template.loader import render_to_string
 from django.views.decorators.cache import cache_control
+from django.views.generic import TemplateView
 from wagtail.templatetags.wagtailcore_tags import richtext
 
 from qfdmd.models import EmbedSettings
@@ -55,3 +58,11 @@ class IsStaffMixin(LoginRequiredMixin):
         if not request.user.is_staff:
             return self.handle_no_permission()
         return super().dispatch(request, *args, **kwargs)
+
+
+class Autocomplete(TemplateView):
+    pass
+
+
+class AutocompleteActeur:
+    pass
