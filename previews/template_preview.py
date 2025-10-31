@@ -7,12 +7,14 @@ from django.template import Context, Template
 from django.template.loader import render_to_string
 from django_lookbook.preview import LookbookPreview
 from django_lookbook.utils import register_form_class
+from dsfr.forms import DsfrBaseForm
 
 from qfdmd.forms import SearchForm
 from qfdmd.models import Suggestion, Synonyme
-from qfdmo.forms import LegendeForm
+from qfdmo.forms import LegendeForm, NextAutocompleteInput
 from qfdmo.models.acteur import ActeurType, DisplayedActeur, DisplayedPropositionService
 from qfdmo.models.action import Action
+from qfdmo.models.categorie_objet import SousCategorieObjet
 from qfdmo.models.config import CarteConfig
 
 
@@ -237,6 +239,26 @@ class ModalsPreview(LookbookPreview):
             """
         )
         context = {"form1": form1, "form2": form2}
+        return template.render(Context(context))
+
+    def autocomplete(self, **kwargs):
+        class AutocompleteForm(DsfrBaseForm):
+            sous_categorie_objet = forms.ModelChoiceField(
+                queryset=SousCategorieObjet.objects.all(),
+                widget=NextAutocompleteInput(
+                    label_field_name="nom",
+                    meta_field_name="coucou",
+                    search_view="youpi",
+                ),
+                help_text="pantalon, perceuse, canapé...",
+                label="Indiquer un objet ",
+                empty_label="",
+                required=False,
+            )
+
+        form = AutocompleteForm()
+        template = Template("{{ form }}")
+        context = {"form": form}
         return template.render(Context(context))
 
 

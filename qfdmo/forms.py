@@ -218,8 +218,8 @@ class AutoSubmitLegendeForm(AutoSubmitMixin, LegendeForm):
     autosubmit_fields = ["groupe_action"]
 
 
-class ModelAutocompleteInput(forms.TextInput):
-    template_name = "ui/forms/widgets/model_autocomplete.html"
+class NextAutocompleteInput(forms.TextInput):
+    template_name = "ui/forms/widgets/next_autocomplete.html"
 
     def __init__(
         self,
@@ -237,13 +237,15 @@ class ModelAutocompleteInput(forms.TextInput):
 
     def get_context(self, name, value, attrs):
         context = super().get_context(name, value, attrs)
-        return {**context, "search_view": "/"}
+        endpoint_url = "/"
+        # endpoint_url = reverse view self.search_view
+        return {**context, "endpoint_url": endpoint_url}
 
 
 class FiltresForm(GetFormMixin, DsfrBaseForm):
     sous_categorie_objet = forms.ModelChoiceField(
         queryset=SousCategorieObjet.objects.all(),
-        widget=ModelAutocompleteInput(
+        widget=NextAutocompleteInput(
             label_field_name="nom", meta_field_name="coucou", search_view="youpi"
         ),
         help_text="pantalon, perceuse, canapé...",

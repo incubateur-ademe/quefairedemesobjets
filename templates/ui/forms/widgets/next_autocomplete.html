@@ -1,0 +1,13 @@
+<div
+    data-controller="next-autocomplete"
+    data-next-autocomplete-endpoint-url-value="{{ endpoint_url }}"
+>
+    {# Copy pasted from django/forms/widgets/input.html #}
+    <input
+        type="{{ widget.type }}"
+        name="{{ widget.name }}"{% if widget.value != None %} value="{{ widget.value }}"{% endif %}{% include "django/forms/widgets/attrs.html" %}
+        data-action="next-autocomplete#search"
+    >
+    {# Results #}
+    <turbo-frame data-next-autocomplete-target="results" id="next-autocomplete-results"></turbo-frame>
+</div>

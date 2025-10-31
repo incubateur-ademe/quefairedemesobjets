@@ -10,7 +10,7 @@ import MapController from "../controllers/carte/map_controller"
 import SearchSolutionFormController from "../controllers/carte/search_solution_form_controller"
 import SsCatObjectAutocompleteController from "../controllers/carte/ss_cat_object_autocomplete_controller"
 import ActeurDetailsController from "../controllers/carte/acteur_details"
-import ModelAutocompleteController from "../controllers/shared/model_autocomplete_controller"
+import NextAutocompleteController from "../controllers/shared/next_autocomplete_controller"
 
 // QFDMD
 import SearchController from "../controllers/assistant/search"
@@ -28,7 +28,7 @@ stimulus.register("autocomplete", GenericAutocompleteController)
 stimulus.register("copy", CopyController)
 stimulus.register("scroll", ScrollController)
 stimulus.register("acteur-details", ActeurDetailsController)
-stimulus.register("model-autocomplete", ModelAutocompleteController)
+stimulus.register("next-autocomplete", NextAutocompleteController)
 
 stimulus.register("search", SearchController)
 stimulus.register("blink", BlinkController)
