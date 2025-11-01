@@ -1,24 +1,28 @@
+import uuid
 from typing import List, cast
 
 from django import forms
 from django.core.cache import cache
 from django.db.models import TextChoices
 from django.http import HttpRequest
+from django.shortcuts import reverse
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from dsfr.enums import SegmentedControlChoices
 from dsfr.forms import DsfrBaseForm
 from dsfr.widgets import SegmentedControl
 
-from qfdmo.fields import GroupeActionChoiceField
+from qfdmo.fields import GroupeActionChoiceField, LabelQualiteChoiceField
 from qfdmo.geo_api import epcis_from, formatted_epcis_as_list_of_tuple
 from qfdmo.models import SousCategorieObjet
+from qfdmo.models.acteur import LabelQualite
 from qfdmo.models.action import (
     Action,
     GroupeAction,
     get_action_instances,
     get_directions,
 )
+from qfdmo.models.config import CarteConfig
 from qfdmo.widgets import (
     AutoCompleteInput,
     DSFRCheckboxSelectMultiple,
@@ -38,32 +42,6 @@ class AddressesForm(forms.Form):
             attrs={
                 "data-search-solution-form-target": "bbox",
                 "data-map-target": "bbox",
-            }
-        ),
-        required=False,
-    )
-
-    sous_categorie_objet = forms.ModelChoiceField(
-        queryset=SousCategorieObjet.objects.all(),
-        widget=AutoCompleteInput(
-            attrs={
-                "class": "fr-input fr-icon-search-line sm:qf-w-[596px]",
-                "autocomplete": "off",
-                "aria-label": "Indiquer un objet - obligatoire",
-            },
-            data_controller="ss-cat-object-autocomplete",
-        ),
-        help_text="pantalon, perceuse, canapé...",
-        label="Indiquer un objet ",
-        empty_label="",
-        required=False,
-    )
-
-    sc_id = forms.IntegerField(
-        widget=forms.HiddenInput(
-            attrs={
-                "data-ss-cat-object-autocomplete-target": "ssCat",
-                "data-search-solution-form-target": "sousCategoryObjetID",
             }
         ),
         required=False,
@@ -89,6 +67,38 @@ class AddressesForm(forms.Form):
         required=False,
     )
 
+
+class FormulaireForm(AddressesForm):
+    # TODO: supprimer
+    sous_categorie_objet = forms.ModelChoiceField(
+        queryset=SousCategorieObjet.objects.all(),
+        to_field_name="nom",
+        widget=AutoCompleteInput(
+            attrs={
+                "class": "fr-input fr-icon-search-line sm:qf-w-[596px]",
+                "autocomplete": "off",
+                "aria-label": "Indiquer un objet - obligatoire",
+            },
+            data_controller="ss-cat-object-autocomplete",
+        ),
+        help_text="pantalon, perceuse, canapé...",
+        label="Indiquer un objet ",
+        empty_label="",
+        required=False,
+    )
+
+    # TODO: supprimer
+    sc_id = forms.IntegerField(
+        widget=forms.HiddenInput(
+            attrs={
+                "data-ss-cat-object-autocomplete-target": "ssCat",
+                "data-search-solution-form-target": "sousCategoryObjetID",
+            }
+        ),
+        required=False,
+    )
+
+    # TODO: supprimer
     pas_exclusivite_reparation = forms.BooleanField(
         widget=forms.CheckboxInput(
             attrs={
@@ -96,18 +106,11 @@ class AddressesForm(forms.Form):
                 "data-search-solution-form-target": "reparerFilter",
             }
         ),
-        label=(
-            "Masquer les lieux qui réparent uniquement les produits de leurs marques"
-        ),
-        help_text=(
-            "Les lieux ne réparant que les produits de leur propre marque"
-            " n'apparaîtront pas si cette case est cochée."
-            " (uniquement valable lorsque l'action « réparer » est sélectionnée)"
-        ),
         label_suffix="",
         required=False,
     )
 
+    # TODO: supprimer
     label_reparacteur = forms.BooleanField(
         widget=forms.CheckboxInput(
             attrs={
@@ -115,46 +118,20 @@ class AddressesForm(forms.Form):
                 "data-search-solution-form-target": "reparerFilter",
             }
         ),
-        label="Lieux labellisés Répar’Acteurs",
-        help_text=mark_safe(
-            """Afficher uniquement les artisans labellisés
-            (uniquement valable lorsque l'action « réparer » est sélectionnée).
-            Les <span
-                class="qf-underline qf-cursor-pointer
-                qf-underline-offset-[3px] hover:qf-decoration-[1.5px]"
-                title="Ouvre la modale Répar'Acteurs"
-                onclick="document
-                .getElementById('display_modale_reparacteur')
-                .setAttribute('data-fr-opened', 'true');"
-            >Répar'Acteurs</span>
-             sont une initiative de la
-            <a
-                href='https://www.artisanat.fr/nous-connaitre/vous-accompagner/reparacteurs'
-                target="_blank"
-                rel="noreferrer"
-                title="sur le site de la CMA - Nouvelle fenêtre"
-            >
-                Chambre des Métiers et de l’Artisanat
-            </a>"""
-        ),
+        label=render_to_string("ui/components/filtres/reparacteurs/label.html"),
         label_suffix="",
         required=False,
     )
 
+    # TODO: supprimer
     ess = forms.BooleanField(
         widget=forms.CheckboxInput(attrs={"class": "fr-checkbox fr-m-1v"}),
-        label="Lieux de l'économie sociale et solidaire",
-        help_text=mark_safe(
-            "Afficher uniquement les lieux recensés comme relevant de l'économie"
-            " sociale et solidaire. En savoir plus sur le site <a href="
-            '"https://www.economie.gouv.fr/cedef/economie-sociale-et-solidaire"'
-            ' target="_blank" rel="noreferrer" title="economie.gouv.fr - Nouvelle'
-            ' fenêtre">economie.gouv.fr</a>'
-        ),
+        label=render_to_string("ui/components/filtres/ess/label.html"),
         label_suffix="",
         required=False,
     )
 
+    # TODO: supprimer
     bonus = forms.BooleanField(
         widget=forms.CheckboxInput(
             attrs={
@@ -162,21 +139,12 @@ class AddressesForm(forms.Form):
                 "data-search-solution-form-target": "reparerFilter",
             },
         ),
-        label=mark_safe(
-            "<div><span class='fr-icon--sm fr-icon-percent-line'></span>"
-            "&nbsp;Lieux proposant le Bonus Réparation</div>"
-        ),
-        help_text=mark_safe(
-            "Afficher uniquement les lieux éligibles (uniquement valable lorsque l'"
-            "action « réparer » est sélectionnée). En savoir plus sur le site <a href="
-            '"https://quefairedemesdechets.ademe.fr/bonus-reparation" target="_blank"'
-            ' rel="noreferrer" title="Bonus réparation - Nouvelle fenêtre">Bonus'
-            " réparation</a>"
-        ),
+        label=render_to_string("ui/components/filtres/bonus/label.html"),
         label_suffix="",
         required=False,
     )
 
+    # TODO: supprimer
     action_list = forms.CharField(
         widget=forms.HiddenInput(
             attrs={"data-search-solution-form-target": "actionList"},
@@ -184,13 +152,12 @@ class AddressesForm(forms.Form):
         required=False,
     )
 
+    # TODO: supprimer
     action_displayed = forms.CharField(
         widget=forms.HiddenInput(),
         required=False,
     )
 
-
-class FormulaireForm(AddressesForm):
     adresse = forms.CharField(
         widget=AutoCompleteInput(
             attrs={
@@ -207,11 +174,97 @@ class FormulaireForm(AddressesForm):
 
 
 class GetFormMixin(forms.Form):
-    def __init__(self, data: dict | None = None, *args, **kwargs):
-        if data is not None and not (set(data.keys()) & set(self.base_fields.keys())):
-            data = None
+    def __init__(self, data: dict | None = None, prefix=None, *args, **kwargs):
+        if prefix:
+            self.prefix = prefix
+
+        unique_field_names_with_prefix = set(
+            [self.add_prefix(field) for field in self.base_fields.keys()]
+        )
+        if data is not None:
+            unique_keys = set(data.keys())
+            request_contains_field_names = unique_keys & unique_field_names_with_prefix
+
+            if not request_contains_field_names:
+                data = None
 
         super().__init__(*args, data=data, **kwargs)
+
+
+class AutoSubmitMixin:
+    """A mixin that automatically adds data attributes to specified fields."""
+
+    autosubmit_fields: list[str] = []
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for field_name in getattr(self, "autosubmit_fields", []):
+            field = self.fields.get(field_name)
+            if field:
+                field.widget.attrs["data-action"] = "search-solution-form#submitForm"
+
+
+class LegendeForm(GetFormMixin, DsfrBaseForm):
+    groupe_action = GroupeActionChoiceField(
+        queryset=GroupeAction.objects.all().order_by("order"),
+        to_field_name="id",
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        label="",
+        initial=GroupeAction.objects.all(),
+    )
+
+
+class AutoSubmitLegendeForm(AutoSubmitMixin, LegendeForm):
+    autosubmit_fields = ["groupe_action"]
+
+
+class NextAutocompleteInput(forms.TextInput):
+    template_name = "ui/forms/widgets/next_autocomplete.html"
+
+    def __init__(
+        self,
+        label_field_name,
+        meta_field_name,
+        search_view,
+        option_displayed=5,
+        *args,
+        **kwargs,
+    ):
+        self.label_field_name = label_field_name
+        self.search_view = search_view
+        self.meta_field_name = meta_field_name
+        self.id = str(uuid.uuid4())
+        super().__init__(*args, **kwargs)
+
+    def get_context(self, name, value, attrs):
+        context = super().get_context(name, value, attrs)
+        endpoint_url = reverse(self.search_view)
+        return {**context, "endpoint_url": endpoint_url, "id": self.id}
+
+
+class FiltresForm(GetFormMixin, DsfrBaseForm):
+    sous_categorie_objet = forms.ModelChoiceField(
+        queryset=SousCategorieObjet.objects.all(),
+        widget=NextAutocompleteInput(
+            label_field_name="nom",
+            meta_field_name="coucou",
+            search_view="autocomplete_sous_categorie_objet",
+        ),
+        help_text="pantalon, perceuse, canapé...",
+        label="Indiquer un objet ",
+        empty_label="",
+        required=False,
+    )
+
+    label = LabelQualiteChoiceField(
+        queryset=LabelQualite.objects.filter(afficher=True, filtre=True),
+        to_field_name="code",
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        label="",
+    )
 
 
 class DigitalActeurForm(GetFormMixin, DsfrBaseForm):
@@ -275,39 +328,6 @@ def get_epcis_for_carte_form():
 
 
 class CarteForm(AddressesForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Override the label and aria-label for the sous_categorie_objet field
-        self.fields["sous_categorie_objet"].label = "Indiquer un objet ou déchet "
-        self.fields["sous_categorie_objet"].widget.attrs[
-            "aria-label"
-        ] = "Indiquer un objet ou déchet"
-
-    def load_choices(
-        self,
-        request: HttpRequest,
-        grouped_action_choices: list[list[str]] = [],
-        disable_reparer_option: bool = False,
-    ) -> None:
-        self.fields["grouped_action"].choices = [
-            (
-                self.fields["grouped_action"].label,
-                grouped_action_choices,
-            )
-        ]
-        self.fields["legend_grouped_action"].choices = [
-            (
-                self.fields["legend_grouped_action"].label,
-                grouped_action_choices,
-            )
-        ]
-
-        if disable_reparer_option:
-            for field in ["bonus", "label_reparacteur", "pas_exclusivite_reparation"]:
-                self.fields[field].widget.attrs["disabled"] = "true"
-
-        super().load_choices(request)
-
     adresse = forms.CharField(
         widget=AutoCompleteInput(
             attrs={
@@ -396,7 +416,7 @@ class ConfiguratorForm(DsfrBaseForm):
                 "endpoint": "/api/qfdmo/autocomplete/configurateur?query=",
                 "additionnal_info": mark_safe(
                     render_to_string(
-                        "forms/widgets/epci_codes_additionnal_info.html",
+                        "ui/forms/widgets/epci_codes_additionnal_info.html",
                     )
                 ),
             },
@@ -602,4 +622,36 @@ class AdvancedConfiguratorForm(forms.Form):
             '"lng":2.483596801757813}<br>}'
         ),
         required=False,
+    )
+
+
+class GroupeActionForm(GetFormMixin, DsfrBaseForm):
+    pass
+
+
+class ViewModeForm(GetFormMixin, DsfrBaseForm):
+    class ViewModeSegmentedControlChoices(TextChoices, SegmentedControlChoices):
+        CARTE = {
+            "value": CarteConfig.ModesAffichage.CARTE.value,
+            "label": CarteConfig.ModesAffichage.CARTE.label,
+            "icon": "map-pin-2-fill",
+        }
+        LISTE = {
+            "value": CarteConfig.ModesAffichage.LISTE.value,
+            "label": CarteConfig.ModesAffichage.LISTE.label,
+            "icon": "list-unordered",
+        }
+
+    view = forms.ChoiceField(
+        label="",
+        choices=ViewModeSegmentedControlChoices.choices,
+        required=False,
+        initial=CarteConfig.ModesAffichage.CARTE,
+        widget=SegmentedControl(
+            extra_classes="max-md:fr-segmented--sm",
+            attrs={
+                "data-action": "search-solution-form#submitForm",
+            },
+            extended_choices=ViewModeSegmentedControlChoices,
+        ),
     )

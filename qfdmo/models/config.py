@@ -143,7 +143,7 @@ class CarteConfig(index.Indexed, models.Model):
         blank=True,
     )
 
-    label = models.ManyToManyField(
+    label_qualite = models.ManyToManyField(
         "qfdmo.LabelQualite",
         verbose_name="Label(s) qualité",
         help_text="Seuls les labels sélectionnés s'afficheront sur la carte"

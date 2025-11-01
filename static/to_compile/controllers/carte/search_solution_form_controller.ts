@@ -162,7 +162,9 @@ class SearchFormController extends Controller<HTMLElement> {
   }
 
   resetBboxInput() {
-    this.bboxTarget.value = ""
+    if (this.hasBboxTarget) {
+      this.bboxTarget.value = ""
+    }
   }
 
   updateBboxInput(event) {
@@ -170,28 +172,7 @@ class SearchFormController extends Controller<HTMLElement> {
   }
 
   displayDigitalActeur(event) {
-    const uuid = event.currentTarget.dataset.uuid
     event.currentTarget.setAttribute("aria-expanded", "true")
-    this.displayActeur(uuid)
-  }
-
-  displayActeur(uuid: string) {
-    this.dispatch("captureInteraction")
-    const latitude = this.latitudeInputTarget.value
-    const longitude = this.longitudeInputTarget.value
-    const params = new URLSearchParams()
-    params.set("direction", this.#selectedOption)
-    params.set("latitude", latitude)
-    params.set("longitude", longitude)
-    params.set("map_container_id", this.mapContainerIdValue)
-    let frame = `${this.mapContainerIdValue}:acteur-detail`
-
-    if (this.hasCarteTarget) {
-      params.set("carte", "1")
-    }
-
-    const acteurDetailPath = `/adresse_details/${uuid}?${params.toString()}`
-    Turbo.visit(acteurDetailPath, { frame })
   }
 
   displayActionList() {
@@ -296,6 +277,9 @@ class SearchFormController extends Controller<HTMLElement> {
   }
 
   closeAdvancedFilters() {
+    if (!this.hasAdvancedFiltersMainPanelTarget) {
+      return
+    }
     this.advancedFiltersSaveAndSubmitButtonTarget.classList.remove("qf-hidden")
     this.advancedFiltersSaveButtonTarget.classList.add("qf-hidden")
     this.#hideAdvancedFilters()
@@ -303,6 +287,9 @@ class SearchFormController extends Controller<HTMLElement> {
   }
 
   toggleAdvancedFilters() {
+    if (!this.hasAdvancedFiltersMainPanelTarget) {
+      return
+    }
     this.advancedFiltersSaveAndSubmitButtonTarget.classList.remove("qf-hidden")
     this.advancedFiltersSaveButtonTarget.classList.add("qf-hidden")
     if (this.advancedFiltersMainPanelTarget.dataset.visible === "false") {
@@ -314,10 +301,16 @@ class SearchFormController extends Controller<HTMLElement> {
   }
 
   #showAdvancedFilters() {
+    if (!this.hasAdvancedFiltersMainPanelTarget) {
+      return
+    }
     this.advancedFiltersMainPanelTarget.dataset.visible = "true"
   }
 
   #hideAdvancedFilters() {
+    if (!this.hasAdvancedFiltersMainPanelTarget) {
+      return
+    }
     if (this.advancedFiltersMainPanelTarget.dataset.visible == "false") {
       return
     }
@@ -364,6 +357,10 @@ class SearchFormController extends Controller<HTMLElement> {
     this.searchFormPanelTarget.classList.add("qf-h-0", "qf-invisible")
   }
 
+  submitForm() {
+    this.element.requestSubmit()
+  }
+
   advancedSubmit(event?: Event) {
     // Applies only in Formulaire alternative or in digital version.
     const withControls =
@@ -376,9 +373,7 @@ class SearchFormController extends Controller<HTMLElement> {
     const withoutZone =
       (event?.target as HTMLElement).dataset.withoutZone?.toLowerCase() === "true"
     if (withoutZone) {
-      if (this.hasBboxTarget) {
-        this.bboxTarget.value = ""
-      }
+      this.resetBboxInput()
     }
 
     // Applies only in Formulaire alternative.

@@ -247,7 +247,33 @@ class LabelQualite(CodeAsNaturalKeyModel):
         ),
         validators=[CodeValidator()],
     )
-    afficher = models.BooleanField(default=True)
+    afficher = models.BooleanField(
+        default=True,
+        help_text="Affiche le label côté frontend, notamment dans les fiches acteur",
+    )
+    filtre = models.BooleanField(
+        default=False,
+        help_text="Affiche le label dans la modale de filtres affichée sur"
+        " la carte ou le mode liste",
+    )
+    filtre_label = models.CharField(
+        blank=True,
+        help_text="Configure le label affiché dans le champ de formulaire"
+        " dans le panel de filtres sur la carte ou le mode liste",
+    )
+    filtre_texte_d_aide = models.CharField(
+        blank=True,
+        help_text="Configure le texte d'aide affiché dans le champ de formulaire"
+        " dans le panel de filtres sur la carte ou le mode liste",
+    )
+    logo = models.FileField(
+        upload_to="labels",
+        blank=True,
+        null=True,
+    )
+    logo_file = models.ImageField(
+        upload_to="logos", blank=True, null=True, validators=[validate_logo]
+    )
     bonus = models.BooleanField(
         default=False, help_text="Ouvre les droits à un bonus financier"
     )
@@ -256,9 +282,6 @@ class LabelQualite(CodeAsNaturalKeyModel):
         help_text="Ce label est affiché comme un type d'enseigne, ex : ESS",
     )
     url = models.CharField(max_length=2048, blank=True, null=True)
-    logo_file = models.ImageField(
-        upload_to="logos", blank=True, null=True, validators=[validate_logo]
-    )
 
     def __str__(self):
         return self.libelle
@@ -1260,7 +1283,6 @@ class DisplayedActeur(BaseActeur, LatLngPropertiesMixin):
         sous_categorie_id: int | None = None,
         carte: bool = True,
     ) -> Action | None:
-
         actions = self.acteur_actions(
             direction=direction,
             actions_codes=action_list,
@@ -1283,6 +1305,10 @@ class DisplayedActeur(BaseActeur, LatLngPropertiesMixin):
 
     def get_absolute_url(self):
         return reverse("qfdmo:acteur-detail", args=[self.uuid])
+
+    @property
+    def url(self):
+        return f"{settings.BASE_URL}{self.get_absolute_url()}"
 
     def acteur_actions(
         self, direction=None, actions_codes=None, sous_categorie_id=None

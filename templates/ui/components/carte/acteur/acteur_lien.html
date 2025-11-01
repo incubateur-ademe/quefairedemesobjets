@@ -1,0 +1,6 @@
+{% load acteur_tags dsfr_tags turbo_tags %}
+
+{% acteur_frame_id as frame_id %}
+{% acteur_url object as url %}
+
+{% dsfr_link label="Voir la fiche" url=url data_turbo_frame=frame_id data_uuid=object.uuid %}

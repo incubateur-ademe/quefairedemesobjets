@@ -2,13 +2,16 @@
 # flake8: noqa: E501
 from django import forms
 from django.conf import settings
+from django.contrib.gis.geos import Point
 from django.template import Context, Template
 from django.template.loader import render_to_string
 from django_lookbook.preview import LookbookPreview
 from django_lookbook.utils import register_form_class
+from dsfr.forms import DsfrBaseForm
 
 from qfdmd.forms import SearchForm
 from qfdmd.models import Suggestion, Synonyme
+from qfdmo.forms import LegendeForm, NextAutocompleteInput
 from qfdmo.models.acteur import ActeurType, DisplayedActeur, DisplayedPropositionService
 from qfdmo.models.action import Action
 from qfdmo.models.config import CarteConfig
@@ -189,9 +192,15 @@ class ComponentsPreview(LookbookPreview):
 
         return render_to_string("ui/components/produit/heading_family.html", context)
 
+    def mini_carte(self, **kwargs):
+        context = {"preview": True, "acteur": None, "home": None}
+        context.update(acteur=DisplayedActeur.objects.first(), location=Point(-2, 48))
+
+        return render_to_string("ui/components/mini_carte/mini_carte.html", context)
+
 
 class ModalsPreview(LookbookPreview):
-    def embed(self, **kwargs):
+    def intégration(self, **kwargs):
         """
         # Modal de partage
         La modal ci-dessous ne contient pas de code car celle-ci est
@@ -200,10 +209,56 @@ class ModalsPreview(LookbookPreview):
         ## TODO
         - [ ] Générer un contexte fake dans Django Lookbook
         """
-        return render_to_string("ui/modals/embed.html")
+        return render_to_string("ui/components/modals/embed.html")
 
-    def share(self, **kwargs):
-        return render_to_string("ui/modals/share.html")
+    def partage(self, **kwargs):
+        return render_to_string("ui/components/modals/share.html")
+
+    def filtres(self, **kwargs):
+        from qfdmo.forms import FiltresForm, LegendeForm
+
+        context = {"legende_form": LegendeForm(), "filtres_form": FiltresForm}
+        return render_to_string("ui/components/modals/filtres.html", context)
+
+    def infos(self, **kwargs):
+        return render_to_string("ui/components/modals/infos.html")
+
+    def plusieurs_formulaires(self, **kwargs):
+        """
+        # Simulation de plusieurs formulaires
+        """
+
+        form1 = LegendeForm(prefix="1")
+        form2 = LegendeForm(prefix="2")
+
+        template = Template(
+            """
+            {% include "ui/components/modals/filtres.html" with legende_form=form1 id="filtres-legende" %}
+            {% include "ui/components/modals/filtres.html" with legende_form=form2 id="filtres-legende-mobile" %}
+            """
+        )
+        context = {"form1": form1, "form2": form2}
+        return template.render(Context(context))
+
+    def autocomplete(self, **kwargs):
+        class AutocompleteForm(DsfrBaseForm):
+            sous_categorie_objet = forms.ModelChoiceField(
+                queryset=Synonyme.objects.all(),
+                widget=NextAutocompleteInput(
+                    label_field_name="nom",
+                    meta_field_name="coucou",
+                    search_view="autocomplete_synonyme",
+                ),
+                help_text="pantalon, perceuse, canapé...",
+                label="Indiquer un objet ",
+                empty_label="",
+                required=False,
+            )
+
+        form = AutocompleteForm()
+        template = Template("{{ form }}")
+        context = {"form": form}
+        return template.render(Context(context))
 
 
 class PagesPreview(LookbookPreview):

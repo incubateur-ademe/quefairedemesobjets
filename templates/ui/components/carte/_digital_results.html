@@ -2,7 +2,9 @@
 <div class="qf-relative qf-shadow" data-testid="digital-acteurs-results">
     <div class="qf-px-2w qf-pt-1v">
         {% for adresse in acteurs %}
-            <div data-action="click->search-solution-form#displayDigitalActeur
+            <a
+            href="{{ map_container_id }}:{{ adresse.url }}"
+            data-action="click->search-solution-form#displayDigitalActeur
                               keydown.enter->search-solution-form#displayDigitalActeur
                               keydown.space->search-solution-form#displayDigitalActeur"
                  data-uuid="{{ adresse.uuid }}"

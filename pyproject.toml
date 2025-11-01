@@ -108,6 +108,9 @@ default-groups = [
     "airflow",
 ]
 
+[tool.uv.sources]
+django-dsfr = { git = "https://github.com/fabienheureux/django-dsfr", rev = "d26ab6f77014b04c43c4c54f694111179d1de0ef" } # pragma: allowlist secret
+
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
 exclude = [
