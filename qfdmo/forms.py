@@ -1,9 +1,11 @@
+import uuid
 from typing import List, cast
 
 from django import forms
 from django.core.cache import cache
 from django.db.models import TextChoices
 from django.http import HttpRequest
+from django.shortcuts import reverse
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from dsfr.enums import SegmentedControlChoices
@@ -233,20 +235,22 @@ class NextAutocompleteInput(forms.TextInput):
         self.label_field_name = label_field_name
         self.search_view = search_view
         self.meta_field_name = meta_field_name
+        self.id = str(uuid.uuid4())
         super().__init__(*args, **kwargs)
 
     def get_context(self, name, value, attrs):
         context = super().get_context(name, value, attrs)
-        endpoint_url = "/"
-        # endpoint_url = reverse view self.search_view
-        return {**context, "endpoint_url": endpoint_url}
+        endpoint_url = reverse(self.search_view)
+        return {**context, "endpoint_url": endpoint_url, "id": self.id}
 
 
 class FiltresForm(GetFormMixin, DsfrBaseForm):
     sous_categorie_objet = forms.ModelChoiceField(
         queryset=SousCategorieObjet.objects.all(),
         widget=NextAutocompleteInput(
-            label_field_name="nom", meta_field_name="coucou", search_view="youpi"
+            label_field_name="nom",
+            meta_field_name="coucou",
+            search_view="autocomplete_sous_categorie_objet",
         ),
         help_text="pantalon, perceuse, canapé...",
         label="Indiquer un objet ",

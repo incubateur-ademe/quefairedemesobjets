@@ -1,0 +1,7 @@
+<turbo-frame id="{{ id }}">
+    {% for synonyme in object_list %}
+        <div role="option" tabindex="{{ forloop.counter }}">
+            {{ synonyme }}
+        </div>
+    {% endfor %}
+</turbo-frame>

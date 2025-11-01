@@ -14,7 +14,6 @@ from qfdmd.models import Suggestion, Synonyme
 from qfdmo.forms import LegendeForm, NextAutocompleteInput
 from qfdmo.models.acteur import ActeurType, DisplayedActeur, DisplayedPropositionService
 from qfdmo.models.action import Action
-from qfdmo.models.categorie_objet import SousCategorieObjet
 from qfdmo.models.config import CarteConfig
 
 
@@ -244,11 +243,11 @@ class ModalsPreview(LookbookPreview):
     def autocomplete(self, **kwargs):
         class AutocompleteForm(DsfrBaseForm):
             sous_categorie_objet = forms.ModelChoiceField(
-                queryset=SousCategorieObjet.objects.all(),
+                queryset=Synonyme.objects.all(),
                 widget=NextAutocompleteInput(
                     label_field_name="nom",
                     meta_field_name="coucou",
-                    search_view="autocomplete_sous_categorie_objet",
+                    search_view="autocomplete_synonyme",
                 ),
                 help_text="pantalon, perceuse, canapé...",
                 label="Indiquer un objet ",

@@ -4,18 +4,21 @@ export default abstract class extends Controller<HTMLElement> {
   static targets = ["results"]
   static values = {
     endpointUrl: String,
+    turboFrameId: String,
   }
   declare readonly resultsTarget: HTMLElement
+  declare readonly turboFrameIdValue: string
   declare readonly endpointUrlValue: string
 
-  connect() {
-    console.log("coucou")
+  focusOnResults() {
+    // this.resultsTarget?.firstElementChild?.focus()
   }
 
   search(event) {
     const query = event.target.value
     const nextUrl = new URL(this.endpointUrlValue, window.location.origin)
     nextUrl.searchParams.set("q", query)
+    nextUrl.searchParams.set("id", this.turboFrameIdValue)
     this.resultsTarget.setAttribute("src", nextUrl.toString())
   }
 }

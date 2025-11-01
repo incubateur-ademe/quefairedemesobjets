@@ -32,7 +32,7 @@ from wagtail.documents import urls as wagtaildocs_urls
 from qfdmd.models import Synonyme
 
 from .api import api
-from .views import AutocompleteSousCategorieObjet, backlink, robots_txt
+from .views import AutocompleteSynonyme, backlink, robots_txt
 
 info_dict = {
     "queryset": Synonyme.objects.filter().order_by("nom"),
@@ -49,17 +49,14 @@ sitemaps = {
     "pages": Sitemap(),
 }
 
-
-urlpatterns = [
-    path("admin/", admin.site.urls),
-    path("api/", api.urls),
-    path("robots.txt", robots_txt),
-    path("embed/backlink", backlink),
+autocomplete_urlpatterns = [
     path(
-        "autocomplete/sous_categorie_objet",
-        AutocompleteSousCategorieObjet.as_view(),
-        name="autocomplete_sous_categorie_objet",
+        "autocomplete/synonyme",
+        AutocompleteSynonyme.as_view(),
+        name="autocomplete_synonyme",
     ),
+]
+sitemap_urlpatterns = [
     path(
         "sitemap.xml",
         index,
@@ -78,10 +75,25 @@ urlpatterns = [
         {"sitemaps": sitemaps},
         name="django.contrib.sitemaps.views.sitemap",
     ),
-    path("", include(("qfdmo.urls", "qfdmo"), namespace="qfdmo")),
-    path("", include(("qfdmd.urls", "qfdmd"), namespace="qfdmd")),
-    path("docs/", TemplateView.as_view(template_name="techdocs.html"), name="techdocs"),
 ]
+
+urlpatterns = (
+    autocomplete_urlpatterns
+    + sitemap_urlpatterns
+    + [
+        path("admin/", admin.site.urls),
+        path("api/", api.urls),
+        path("robots.txt", robots_txt),
+        path("embed/backlink", backlink),
+        path("", include(("qfdmo.urls", "qfdmo"), namespace="qfdmo")),
+        path("", include(("qfdmd.urls", "qfdmd"), namespace="qfdmd")),
+        path(
+            "docs/",
+            TemplateView.as_view(template_name="techdocs.html"),
+            name="techdocs",
+        ),
+    ]
+)
 
 if settings.DEBUG:
     from django.conf.urls.static import static

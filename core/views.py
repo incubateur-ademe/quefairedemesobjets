@@ -1,16 +1,15 @@
 import mimetypes
+from typing import override
 
-from _pytest.tmpdir import TempPathFactory
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.staticfiles import finders
 from django.http import HttpResponse
-from django.template import Template
 from django.template.loader import render_to_string
 from django.views.decorators.cache import cache_control
-from django.views.generic import ListView, TemplateView
+from django.views.generic import ListView
 from wagtail.templatetags.wagtailcore_tags import richtext
 
-from qfdmd.models import EmbedSettings
+from qfdmd.models import EmbedSettings, Synonyme
 
 
 def backlink(request):
@@ -60,5 +59,20 @@ class IsStaffMixin(LoginRequiredMixin):
         return super().dispatch(request, *args, **kwargs)
 
 
-class AutocompleteSousCategorieObjet(ListView):
-    pass
+class AutocompleteSynonyme(ListView):
+    template_name = "ui/forms/widgets/autocomplete/synonyme.html"
+    model = Synonyme
+
+    @override
+    def get_queryset(self):
+        query = self.request.GET.get("q", "")
+        qs = super().get_queryset().filter(nom__icontains=query)
+
+        print(f"{qs=}")
+        return qs
+
+    @override
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["id"] = self.request.GET.get("id")
+        return context
