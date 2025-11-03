@@ -127,9 +127,9 @@ def acteur_pinpoint_tag(
       - marker_fill_background
       - marker_icon_extra_classes
     """
-    parent_context = context
     context = {
-        "acteur": parent_context["acteur"],
+        "acteur": acteur,
+        "request": context.get("request"),
         "marker_icon": "",
         "marker_couleur": "",
         "marker_icon_file": "",
@@ -137,9 +137,6 @@ def acteur_pinpoint_tag(
         "marker_fill_background": False,
         "marker_icon_extra_classes": "",
     }
-    if "request" in context:
-        # Not always set, for example in django lookbook
-        context["request"] = parent_context["request"]
 
     action_to_display = acteur.action_to_display(
         direction=direction,
