@@ -127,10 +127,9 @@ def acteur_pinpoint_tag(
       - marker_fill_background
       - marker_icon_extra_classes
     """
+    parent_context = context
     context = {
-        "acteur": context["acteur"],
-        MAP_CONTAINER_ID: context[MAP_CONTAINER_ID],
-        "request": context["request"],
+        "acteur": parent_context["acteur"],
         "marker_icon": "",
         "marker_couleur": "",
         "marker_icon_file": "",
@@ -138,6 +137,9 @@ def acteur_pinpoint_tag(
         "marker_fill_background": False,
         "marker_icon_extra_classes": "",
     }
+    if "request" in context:
+        # Not always set, for example in django lookbook
+        context["request"] = parent_context["request"]
 
     action_to_display = acteur.action_to_display(
         direction=direction,
@@ -185,6 +187,7 @@ def acteur_pinpoint_tag(
     mask_id = acteur.uuid
     if MAP_CONTAINER_ID in context:
         mask_id += f"-{context[MAP_CONTAINER_ID]}"
+        context[MAP_CONTAINER_ID] = context[MAP_CONTAINER_ID]
     if counter:
         mask_id += f"-{counter}"
 

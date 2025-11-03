@@ -1,5 +1,5 @@
 import uuid
-from typing import List, cast
+from typing import cast
 
 from django import forms
 from django.core.cache import cache
@@ -231,6 +231,7 @@ class NextAutocompleteInput(forms.TextInput):
         *args,
         **kwargs,
     ):
+        # TODO: add optional template args
         self.search_view = search_view
         self.limit = limit
         self.turbo_frame_id = str(uuid.uuid4())
@@ -259,6 +260,7 @@ class FiltresForm(GetFormMixin, DsfrBaseForm):
         required=False,
     )
 
+    # TODO: rename to follow carte config definition
     label = LabelQualiteChoiceField(
         queryset=LabelQualite.objects.filter(afficher=True, filtre=True),
         to_field_name="code",
@@ -325,7 +327,7 @@ class ActionDirectionForm(GetFormMixin, DsfrBaseForm):
 
 
 def get_epcis_for_carte_form():
-    return [(code, code) for code in cast(List[str], epcis_from(["code"]))]
+    return [(code, code) for code in cast(list[str], epcis_from(["code"]))]
 
 
 class CarteForm(AddressesForm):
@@ -441,7 +443,7 @@ class AdvancedConfiguratorForm(forms.Form):
 
     def load_choices(self):
         cached_directions = cast(
-            List[dict], cache.get_or_set("directions", get_directions)
+            list[dict], cache.get_or_set("directions", get_directions)
         )
         self.fields["direction"].choices = [
             (direction["code"], direction["libelle"]) for direction in cached_directions
@@ -449,7 +451,7 @@ class AdvancedConfiguratorForm(forms.Form):
 
         # Cast needed because of the cache
         cached_action_instances = cast(
-            List[Action], cache.get_or_set("action_instances", get_action_instances)
+            list[Action], cache.get_or_set("action_instances", get_action_instances)
         )
         self.fields["action_list"].choices = [
             (

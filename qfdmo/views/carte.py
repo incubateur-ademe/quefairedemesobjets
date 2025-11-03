@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.forms import Form
 from django.views.generic import DetailView
 
+from core.constants import MAP_CONTAINER_ID
 from qfdmd.models import Produit
 from qfdmo.forms import (
     ActionDirectionForm,
@@ -83,9 +84,13 @@ class CarteSearchActeursView(SearchActeursView):
         },
     }
 
+    def __init__(self, **kwargs):
+        # TODO: check that linked forms have exactly the same fields
+        super().__init__(**kwargs)
+
     def _generate_prefix(self, prefix: str) -> str:
         try:
-            id = self.request.GET["map_container_id"]
+            id = self.request.GET[MAP_CONTAINER_ID]
             return f"{id}_{prefix}"
         except (KeyError, AttributeError):
             return prefix
@@ -99,6 +104,7 @@ class CarteSearchActeursView(SearchActeursView):
                 data = self.request.GET
 
             prefix = self._generate_prefix(form_config["prefix"])
+            # carte_legende-nom_du_champ
             form = form_config["form"](data, prefix=prefix)
             if not form.is_valid():
                 for other_prefix in form_config.get("other_prefixes_to_check", []):
@@ -161,6 +167,7 @@ class CarteSearchActeursView(SearchActeursView):
 
     def _get_action_ids(self) -> list[str]:
         groupe_action_ids = self._get_form("legende")["groupe_action"].value()
+        # TODO: check if useful as these two forms are now synced
         for form in [
             self._get_form("legende"),
             self._get_form("legende_filtres"),

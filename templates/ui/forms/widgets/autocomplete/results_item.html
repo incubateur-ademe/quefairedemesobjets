@@ -7,5 +7,8 @@
   data-value="{{ object.id }}"
   data-action="keydown->next-autocomplete#navigate:prevent click->next-autocomplete#commitSelection"
 >
+    {% block rendering %}
     {{ object }}
+    {{ object.produit.sous_categorie_with_carte_display }}
+    {% endblock rendering %}
 </li>
