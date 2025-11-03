@@ -130,6 +130,7 @@ def acteur_pinpoint_tag(
     context = {
         "acteur": acteur,
         "request": context.get("request"),
+        MAP_CONTAINER_ID: context.get(MAP_CONTAINER_ID),
         "marker_icon": "",
         "marker_couleur": "",
         "marker_icon_file": "",
@@ -184,7 +185,7 @@ def acteur_pinpoint_tag(
     mask_id = acteur.uuid
     if MAP_CONTAINER_ID in context:
         mask_id += f"-{context[MAP_CONTAINER_ID]}"
-        context[MAP_CONTAINER_ID] = context[MAP_CONTAINER_ID]
+
     if counter:
         mask_id += f"-{counter}"
 

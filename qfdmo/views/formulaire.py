@@ -265,6 +265,7 @@ class FormulaireSearchActeursView(SearchActeursView):
         context = super().get_context_data(**kwargs)
         if self._check_if_is_digital():
             context.update(is_digital=True)
+
         context.update(
             map_container_id="formulaire",
             action_direction_form=self.action_direction_form,
