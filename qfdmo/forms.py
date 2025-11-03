@@ -351,36 +351,6 @@ class CarteForm(AddressesForm):
         required=False,
     )
 
-    grouped_action = forms.MultipleChoiceField(
-        widget=DSFRCheckboxSelectMultiple(
-            attrs={
-                "class": "fr-fieldset",
-                "data-search-solution-form-target": "groupedActionInput",
-                "data-action": (
-                    "change -> search-solution-form#activeReparerFiltersCarte"
-                ),
-            },
-        ),
-        choices=[],
-        label="Groupes d'actions",
-        required=False,
-    )
-
-    # TODO : refacto forms, merge with grouped_action field
-    legend_grouped_action = forms.MultipleChoiceField(
-        widget=DSFRCheckboxSelectMultiple(
-            attrs={
-                "class": "fr-fieldset qf-mb-0",
-                "data-action": (
-                    "click -> search-solution-form#applyLegendGroupedAction"
-                ),
-            },
-        ),
-        choices=[],
-        label="Groupes d'actions",
-        required=False,
-    )
-
 
 class ConfiguratorForm(DsfrBaseForm):
     # TODO: rename this field in all codebase -> actions_displayed

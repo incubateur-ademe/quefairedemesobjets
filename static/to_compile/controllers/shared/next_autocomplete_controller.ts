@@ -1,6 +1,6 @@
-import { Controller } from "@hotwired/stimulus"
+import { ClickOutsideController } from "stimulus-use"
 
-export default class AutocompleteController extends Controller<HTMLElement> {
+export default class AutocompleteController extends ClickOutsideController<HTMLElement> {
   static targets = ["option", "input", "hiddenInput", "results"]
   static values = {
     endpointUrl: String,
@@ -18,6 +18,11 @@ export default class AutocompleteController extends Controller<HTMLElement> {
   currentIndex = -1
 
   connect() {
+    this.hideListbox()
+  }
+  clickOutside(event) {
+    // example to close a modal
+    event.preventDefault()
     this.hideListbox()
   }
 

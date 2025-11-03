@@ -103,17 +103,12 @@ class SearchActeursView(
     def get_initial(self):
         initial = super().get_initial()
         # TODO: refacto forms : delete this line
-        initial["sous_categorie_objet"] = self.request.GET.get("sous_categorie_objet")
-        # TODO: refacto forms : delete this line
         initial["adresse"] = self.request.GET.get("adresse")
         # TODO: refacto forms : delete this line
         initial["latitude"] = self.request.GET.get("latitude")
         # TODO: refacto forms : delete this line
         initial["longitude"] = self.request.GET.get("longitude")
         initial["epci_codes"] = self.request.GET.getlist("epci_codes")
-        initial["pas_exclusivite_reparation"] = self.request.GET.get(
-            "pas_exclusivite_reparation", True
-        )
 
         # TODO: refacto forms : delete this line
         initial["bounding_box"] = self.request.GET.get("bounding_box")
@@ -330,8 +325,7 @@ class SearchActeursView(
                 proposition_services__action_id__in=selected_actions_ids,
             )
 
-        if actions_filters:
-            filters &= actions_filters
+        filters &= actions_filters
 
         return filters, excludes
 

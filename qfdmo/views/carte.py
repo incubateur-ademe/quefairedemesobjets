@@ -247,7 +247,7 @@ class CarteConfigView(DetailView, CarteSearchActeursView):
         if source_filter := self.get_object().source.all():
             filters &= Q(source__in=source_filter)
 
-        if label_filter := self.get_object().label.all():
+        if label_filter := self.get_object().label_qualite.all():
             filters &= Q(labels__in=label_filter)
 
         if acteur_type_filter := self.get_object().acteur_type.all():

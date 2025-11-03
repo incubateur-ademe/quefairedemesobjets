@@ -37,6 +37,11 @@ class FormulaireSearchActeursView(SearchActeursView):
         initial = super().get_initial()
 
         # TODO: refacto forms : delete this line
+        initial["sous_categorie_objet"] = self.request.GET.get("sous_categorie_objet")
+        initial["pas_exclusivite_reparation"] = self.request.GET.get(
+            "pas_exclusivite_reparation", True
+        )
+        # TODO: refacto forms : delete this line
         initial["label_reparacteur"] = self.request.GET.get("label_reparacteur")
         # TODO: refacto forms : delete this line
         initial["bonus"] = self.request.GET.get("bonus")
