@@ -223,7 +223,7 @@ wheels = [
 
 [[package]]
 name = "apache-airflow-providers-amazon"
-version = "9.15.0"
+version = "9.16.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apache-airflow" },
@@ -242,9 +242,9 @@ dependencies = [
     { name = "sagemaker-studio" },
     { name = "watchtower" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/43/64/5304f48b1fa2318c78f339e95042a0a6fd2efb46abd296e2cd234ab3c0a6/apache_airflow_providers_amazon-9.15.0.tar.gz", hash = "sha256:71dc1ed3323f332015c464e03d5a257b7ad4e52ca9b6f6073b9217beec14a300", size = 2032133, upload-time = "2025-10-04T09:11:01.981Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/db/0a/5750f7e5aeb77c45397290def1c2ea41503e6b0a28934d876e6943beb746/apache_airflow_providers_amazon-9.16.0.tar.gz", hash = "sha256:a442e685df44f19aad3aef152b4c2920a8bb92a01b9ac7813af0e8fcc1cda070", size = 2032999, upload-time = "2025-10-26T07:04:41.579Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/53/92/a5961c634b8dc26b2aed3a1e0bf883ee3c8cd995c813a143467a50269bac/apache_airflow_providers_amazon-9.15.0-py3-none-any.whl", hash = "sha256:91bd8547651082dcf5bfbc81892126b99c8460d891483d0e946f2ff0b06e0ab2", size = 674023, upload-time = "2025-10-04T09:10:56.981Z" },
+    { url = "https://files.pythonhosted.org/packages/a3/72/fe295a85350b1109d89999ecb9188ecccc4cbfa2195ed283eadb768cc0ae/apache_airflow_providers_amazon-9.16.0-py3-none-any.whl", hash = "sha256:914653e565f2dc7855179b4154368b19238481d611f92907119e774bf57565e7", size = 675377, upload-time = "2025-10-26T07:03:18.802Z" },
 ]
 
 [[package]]
