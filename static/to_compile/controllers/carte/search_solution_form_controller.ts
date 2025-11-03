@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 import * as Turbo from "@hotwired/turbo"
 
-class SearchFormController extends Controller<HTMLElement> {
+class SearchFormController extends Controller<HTMLFormElement> {
   #selectedOption: string = ""
   static targets = [
     "jai",
@@ -67,6 +67,7 @@ class SearchFormController extends Controller<HTMLElement> {
 
   declare readonly hasProposeAddressPanelTarget: boolean
   declare readonly hasHeaderAddressPanelTarget: boolean
+  declare readonly hasAdvancedFiltersMainPanelTarget: boolean
 
   declare readonly sousCategoryObjetGroupTarget: HTMLElement
   declare readonly sousCategoryObjetIDTarget: HTMLInputElement
