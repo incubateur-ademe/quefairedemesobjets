@@ -223,6 +223,8 @@ class ModalsPreview(LookbookPreview):
     def infos(self, **kwargs):
         return render_to_string("ui/components/modals/infos.html")
 
+
+class FormulairesPreview(LookbookPreview):
     def plusieurs_formulaires(self, **kwargs):
         """
         # Simulation de plusieurs formulaires
@@ -240,7 +242,7 @@ class ModalsPreview(LookbookPreview):
         context = {"form1": form1, "form2": form2}
         return template.render(Context(context))
 
-    def autocomplete(self, **kwargs):
+    def autocomplétion(self, **kwargs):
         class AutocompleteForm(DsfrBaseForm):
             synonyme = forms.ModelChoiceField(
                 queryset=Synonyme.objects.all(),
