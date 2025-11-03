@@ -43,7 +43,6 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
     switch (key) {
       case "ArrowDown":
         event.preventDefault()
-        console.log("arrow down")
         if (event.altKey) {
           this.showListbox()
           return

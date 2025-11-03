@@ -208,7 +208,7 @@ class AutoSubmitMixin:
 
 class LegendeForm(GetFormMixin, DsfrBaseForm):
     groupe_action = GroupeActionChoiceField(
-        queryset=GroupeAction.objects.all().order_by("order"),
+        queryset=GroupeAction.objects.filter(afficher=True).order_by("order"),
         to_field_name="id",
         widget=forms.CheckboxSelectMultiple,
         required=False,
