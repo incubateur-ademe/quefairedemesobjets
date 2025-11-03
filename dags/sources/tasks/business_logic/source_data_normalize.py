@@ -64,12 +64,16 @@ def _rename_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
         for t in dag_config.normalization_rules
         if isinstance(t, NormalizationColumnRename)
     ]
-    return df.rename(
-        columns={
-            column_to_rename.origin: column_to_rename.destination
-            for column_to_rename in columns_to_rename
-        },
-    )
+    for column_to_rename in columns_to_rename:
+        logger.warning(
+            f"Renaming columns from {column_to_rename.origin}"
+            f" to {column_to_rename.destination}"
+        )
+        df.drop(columns=[column_to_rename.destination], inplace=True, errors="ignore")
+        df = df.rename(
+            columns={column_to_rename.origin: column_to_rename.destination},
+        )
+    return df
 
 
 def _transform_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
@@ -83,22 +87,13 @@ def _transform_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
         function_name = column_to_transform.transformation
         normalisation_function = get_transformation_function(function_name, dag_config)
         logger.warning(f"Transformation {function_name}")
-        # df[column_to_transform.destination] = df[column_to_transform.origin].apply(
-        #     normalisation_function
-        # )
-        # Initialize the new column if it doesn't exist
-        if column_to_transform.destination not in df.columns:
-            df[column_to_transform.destination] = None
 
+        transformed_column = pd.Series(index=df.index, dtype="object")
         # Iterate over each row to apply the transformation
         for index, row in df.iterrows():
             origin_value = row[column_to_transform.origin]
             try:
-                # FIXME : Every normalization function is responsible to raise an
-                # exception if the transformation is not possible
-                df.at[index, column_to_transform.destination] = normalisation_function(
-                    origin_value
-                )
+                transformed_column[index] = normalisation_function(origin_value)
             except ImportSourceValueWarning as e:
                 df.at[index, "log_warning"].append(
                     LogBase(
@@ -110,6 +105,7 @@ def _transform_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
                     )
                 )
                 df.at[index, column_to_transform.destination] = ""
+        df[column_to_transform.destination] = transformed_column
 
         if column_to_transform.origin not in dag_config.get_expected_columns():
             df.drop(columns=[column_to_transform.origin], inplace=True)
