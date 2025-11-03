@@ -66,13 +66,11 @@ class AutocompleteSynonyme(ListView):
     @override
     def get_queryset(self):
         query = self.request.GET.get("q", "")
-        qs = super().get_queryset().filter(nom__icontains=query)
-
-        print(f"{qs=}")
-        return qs
+        limit = self.request.GET.get("limit", 10)
+        return super().get_queryset().filter(nom__icontains=query)[: int(limit)]
 
     @override
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["id"] = self.request.GET.get("id")
+        context["turbo_frame_id"] = self.request.GET.get("turbo_frame_id")
         return context

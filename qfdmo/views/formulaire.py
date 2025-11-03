@@ -319,5 +319,5 @@ class FormulaireSearchActeursView(SearchActeursView):
         except IndexError:
             raise Exception("Action 'Réparer' not found")
 
-    def _get_sous_categorie_id(self) -> int:
-        return self.get_data_from_request_or_bounded_form("sc_id", 0)
+    def _get_sous_categorie_ids(self) -> list[int]:
+        return [self.get_data_from_request_or_bounded_form("sc_id", 0)]

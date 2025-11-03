@@ -12,6 +12,7 @@ from dsfr.enums import SegmentedControlChoices
 from dsfr.forms import DsfrBaseForm
 from dsfr.widgets import SegmentedControl
 
+from qfdmd.models import Synonyme
 from qfdmo.fields import GroupeActionChoiceField, LabelQualiteChoiceField
 from qfdmo.geo_api import epcis_from, formatted_epcis_as_list_of_tuple
 from qfdmo.models import SousCategorieObjet
@@ -221,40 +222,40 @@ class AutoSubmitLegendeForm(AutoSubmitMixin, LegendeForm):
 
 
 class NextAutocompleteInput(forms.TextInput):
-    template_name = "ui/forms/widgets/next_autocomplete.html"
+    template_name = "ui/forms/widgets/autocomplete/input.html"
 
     def __init__(
         self,
-        label_field_name,
-        meta_field_name,
         search_view,
-        option_displayed=5,
+        limit=5,
         *args,
         **kwargs,
     ):
-        self.label_field_name = label_field_name
         self.search_view = search_view
-        self.meta_field_name = meta_field_name
-        self.id = str(uuid.uuid4())
+        self.limit = limit
+        self.turbo_frame_id = str(uuid.uuid4())
+
         super().__init__(*args, **kwargs)
 
     def get_context(self, name, value, attrs):
         context = super().get_context(name, value, attrs)
         endpoint_url = reverse(self.search_view)
-        return {**context, "endpoint_url": endpoint_url, "id": self.id}
+        return {
+            **context,
+            "endpoint_url": endpoint_url,
+            "limit": self.limit,
+            "turbo_frame_id": self.turbo_frame_id,
+        }
 
 
 class FiltresForm(GetFormMixin, DsfrBaseForm):
-    sous_categorie_objet = forms.ModelChoiceField(
-        queryset=SousCategorieObjet.objects.all(),
+    synonyme = forms.ModelChoiceField(
+        queryset=Synonyme.objects.all(),
         widget=NextAutocompleteInput(
-            label_field_name="nom",
-            meta_field_name="coucou",
-            search_view="autocomplete_sous_categorie_objet",
+            search_view="autocomplete_synonyme",
         ),
         help_text="pantalon, perceuse, canapé...",
         label="Indiquer un objet ",
-        empty_label="",
         required=False,
     )
 

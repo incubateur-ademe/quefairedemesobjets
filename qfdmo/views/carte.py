@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.forms import Form
 from django.views.generic import DetailView
 
+from qfdmd.models import Produit
 from qfdmo.forms import (
     ActionDirectionForm,
     AutoSubmitLegendeForm,
@@ -173,10 +174,14 @@ class CarteSearchActeursView(SearchActeursView):
             .values_list("id", flat=True)
         )
 
-    def _get_sous_categorie_id(self) -> int:
-        id = self._get_field_value_for("filtres", "sous_categorie_objet_id")
-        print(f"{id=}")
-        return id
+    def _get_sous_categorie_ids(self) -> list[int]:
+        synonyme_id = self._get_field_value_for("filtres", "synonyme")
+        if not synonyme_id:
+            return []
+
+        return Produit.objects.filter(synonymes__id__in=[synonyme_id]).values_list(
+            "sous_categories__id", flat=True
+        )
 
     def _get_max_displayed_acteurs(self):
         if self.request.GET.get("limit", "").isnumeric():

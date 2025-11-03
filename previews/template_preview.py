@@ -242,12 +242,11 @@ class ModalsPreview(LookbookPreview):
 
     def autocomplete(self, **kwargs):
         class AutocompleteForm(DsfrBaseForm):
-            sous_categorie_objet = forms.ModelChoiceField(
+            synonyme = forms.ModelChoiceField(
                 queryset=Synonyme.objects.all(),
                 widget=NextAutocompleteInput(
-                    label_field_name="nom",
-                    meta_field_name="coucou",
                     search_view="autocomplete_synonyme",
+                    limit=10,
                 ),
                 help_text="pantalon, perceuse, canapé...",
                 label="Indiquer un objet ",

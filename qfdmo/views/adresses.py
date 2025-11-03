@@ -92,7 +92,7 @@ class SearchActeursView(
         pass
 
     @abstractmethod
-    def _get_sous_categorie_id(self) -> int:
+    def _get_sous_categorie_ids(self) -> list[int]:
         pass
 
     # TODO : supprimer
@@ -308,9 +308,9 @@ class SearchActeursView(
         if self._get_bonus():
             filters &= Q(labels__bonus=True)
 
-        if sous_categorie_id := self._get_sous_categorie_id():
+        if sous_categorie_ids := self._get_sous_categorie_ids():
             filters &= Q(
-                proposition_services__sous_categories__id=sous_categorie_id,
+                proposition_services__sous_categories__id__in=[sous_categorie_ids],
             )
 
         actions_filters = Q()

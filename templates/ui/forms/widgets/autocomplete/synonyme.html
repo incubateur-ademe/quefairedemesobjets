@@ -1,7 +1,8 @@
-<turbo-frame id="{{ id }}">
-    {% for synonyme in object_list %}
-        <div role="option" tabindex="{{ forloop.counter }}">
-            {{ synonyme }}
-        </div>
+{% extends "ui/forms/widgets/autocomplete/results.html" %}
+
+{% block results %}
+    {% for object in object_list %}
+        {% include "ui/forms/widgets/autocomplete/results_item.html" %}
     {% endfor %}
+{% endblock results %}
 </turbo-frame>
