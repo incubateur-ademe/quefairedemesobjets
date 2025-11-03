@@ -231,6 +231,14 @@ class FormulaireSearchActeursView(SearchActeursView):
     def _get_bonus(self):
         return self.get_data_from_request_or_bounded_form("bonus")
 
+    def _get_sous_categorie_ids(self) -> list[int]:
+        if id := self.get_data_from_request_or_bounded_form("sc_id"):
+            return [id]
+        return []
+
+    def _get_action_ids(self) -> list[str]:
+        return self._get_selected_action_ids()
+
     def _check_if_is_digital(self):
         return (
             self.digital_acteur_form["digital"].value()
@@ -318,6 +326,3 @@ class FormulaireSearchActeursView(SearchActeursView):
             ][0].id
         except IndexError:
             raise Exception("Action 'Réparer' not found")
-
-    def _get_sous_categorie_ids(self) -> list[int]:
-        return [self.get_data_from_request_or_bounded_form("sc_id", 0)]

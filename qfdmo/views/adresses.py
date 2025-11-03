@@ -310,7 +310,7 @@ class SearchActeursView(
 
         if sous_categorie_ids := self._get_sous_categorie_ids():
             filters &= Q(
-                proposition_services__sous_categories__id__in=[sous_categorie_ids],
+                proposition_services__sous_categories__id__in=sous_categorie_ids,
             )
 
         actions_filters = Q()

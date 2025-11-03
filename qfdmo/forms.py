@@ -73,7 +73,7 @@ class FormulaireForm(AddressesForm):
     # TODO: supprimer
     sous_categorie_objet = forms.ModelChoiceField(
         queryset=SousCategorieObjet.objects.all(),
-        to_field_name="nom",
+        to_field_name="libelle",
         widget=AutoCompleteInput(
             attrs={
                 "class": "fr-input fr-icon-search-line sm:qf-w-[596px]",
