@@ -70,7 +70,6 @@ class AddressesForm(forms.Form):
 
 
 class FormulaireForm(AddressesForm):
-    # TODO: supprimer
     sous_categorie_objet = forms.ModelChoiceField(
         queryset=SousCategorieObjet.objects.all(),
         to_field_name="libelle",
@@ -88,7 +87,6 @@ class FormulaireForm(AddressesForm):
         required=False,
     )
 
-    # TODO: supprimer
     sc_id = forms.IntegerField(
         widget=forms.HiddenInput(
             attrs={
@@ -99,7 +97,6 @@ class FormulaireForm(AddressesForm):
         required=False,
     )
 
-    # TODO: supprimer
     pas_exclusivite_reparation = forms.BooleanField(
         widget=forms.CheckboxInput(
             attrs={
@@ -111,7 +108,6 @@ class FormulaireForm(AddressesForm):
         required=False,
     )
 
-    # TODO: supprimer
     label_reparacteur = forms.BooleanField(
         widget=forms.CheckboxInput(
             attrs={
@@ -124,7 +120,6 @@ class FormulaireForm(AddressesForm):
         required=False,
     )
 
-    # TODO: supprimer
     ess = forms.BooleanField(
         widget=forms.CheckboxInput(attrs={"class": "fr-checkbox fr-m-1v"}),
         label=render_to_string("ui/components/filtres/ess/label.html"),
@@ -132,7 +127,6 @@ class FormulaireForm(AddressesForm):
         required=False,
     )
 
-    # TODO: supprimer
     bonus = forms.BooleanField(
         widget=forms.CheckboxInput(
             attrs={
@@ -145,7 +139,6 @@ class FormulaireForm(AddressesForm):
         required=False,
     )
 
-    # TODO: supprimer
     action_list = forms.CharField(
         widget=forms.HiddenInput(
             attrs={"data-search-solution-form-target": "actionList"},
@@ -153,7 +146,6 @@ class FormulaireForm(AddressesForm):
         required=False,
     )
 
-    # TODO: supprimer
     action_displayed = forms.CharField(
         widget=forms.HiddenInput(),
         required=False,
@@ -213,7 +205,7 @@ class LegendeForm(GetFormMixin, DsfrBaseForm):
         widget=forms.CheckboxSelectMultiple,
         required=False,
         label="",
-        initial=GroupeAction.objects.all(),
+        initial=GroupeAction.objects.filter(afficher=True),
     )
 
 
