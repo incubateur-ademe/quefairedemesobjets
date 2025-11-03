@@ -1,5 +1,27 @@
 {%- macro acteur(ephemeral_filtered_acteur, propositionservice ) -%}
 
+with parentacteur_lieuprestation AS (
+    SELECT
+    acteur.parent_id AS acteur_id,
+    -- AGGREGATION, on prend le lieu de prestation dans l'ordre : SUR_PLACE_OU_A_DOMICILE, A_DOMICILE, SUR_PLACE
+    CASE
+      WHEN BOOL_OR(enfant.lieu_prestation = 'SUR_PLACE_OU_A_DOMICILE') THEN 'SUR_PLACE_OU_A_DOMICILE'
+      WHEN BOOL_OR(enfant.lieu_prestation = 'A_DOMICILE') THEN 'A_DOMICILE'
+      WHEN BOOL_OR(enfant.lieu_prestation = 'SUR_PLACE') THEN 'SUR_PLACE'
+      ELSE NULL
+    END AS lieu_prestation
+
+    FROM {{ ref(ephemeral_filtered_acteur) }} AS acteur
+    -- get only the acteur with propositionservice
+    INNER JOIN {{ ref(propositionservice) }} AS ps
+        ON acteur.identifiant_unique = ps.acteur_id
+    -- get the children of the acteur
+    INNER JOIN {{ ref(ephemeral_filtered_acteur) }} AS enfant
+        ON enfant.parent_id = acteur.identifiant_unique
+    WHERE enfant.lieu_prestation IS NOT NULL
+    GROUP BY acteur.parent_id
+)
+
 SELECT DISTINCT efa.uuid,
     efa.identifiant_unique,
     efa.nom,
@@ -29,7 +51,8 @@ SELECT DISTINCT efa.uuid,
     efa.uniquement_sur_rdv,
     {{ field_empty('efa.consignes_dacces') }} AS consignes_dacces,
     efa.action_principale_id,
-    efa.lieu_prestation,
+    -- Résolution du lieu de prestation : si l' acteur est un parent et qu'il a des enfants, on prend le lieu de prestation compilé, sinon on prend le lieu de prestation de l'acteur
+    CASE WHEN plp.acteur_id IS NOT NULL THEN plp.lieu_prestation ELSE efa.lieu_prestation END AS lieu_prestation,
     efa.modifie_le,
     efa.cree_le,
     efa.statut,
@@ -37,6 +60,8 @@ SELECT DISTINCT efa.uuid,
 FROM {{ ref(ephemeral_filtered_acteur) }} AS efa
 INNER JOIN {{ ref(propositionservice) }} AS cps
     ON efa.identifiant_unique = cps.acteur_id
+LEFT OUTER JOIN parentacteur_lieuprestation AS plp
+    ON efa.identifiant_unique = plp.acteur_id
 -- filter to apply on resolved parent + children acteur
 WHERE (efa.public_accueilli IS NULL OR UPPER(efa.public_accueilli) NOT IN {{ get_public_accueilli_exclus() }})
 {%- endmacro -%}

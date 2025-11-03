@@ -1,4 +1,3 @@
--- depends_on: {{ ref('marts_carte_acteur') }}
--- depends_on: {{ ref('int_perimetreadomicile') }}
+-- depends_on: {{ ref('marts_exhaustive_acteur') }}
 
-SELECT * FROM {{ ref('int_perimetreadomicile') }}
+{{ perimetreadomicile('marts_exhaustive_acteur') }}
