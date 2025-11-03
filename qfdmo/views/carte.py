@@ -1,7 +1,8 @@
 import logging
-from typing import Any, TypedDict
+from typing import Any, TypedDict, override
 
 from django.conf import settings
+from django.contrib.gis.forms import ModelChoiceField
 from django.db.models import Q
 from django.forms import Form
 from django.views.generic import DetailView
@@ -106,6 +107,8 @@ class CarteSearchActeursView(SearchActeursView):
             prefix = self._generate_prefix(form_config["prefix"])
             # carte_legende-nom_du_champ
             form = form_config["form"](data, prefix=prefix)
+            if overriden_form := self._check_for_choices_override(form):
+                form = overriden_form
             if not form.is_valid():
                 for other_prefix in form_config.get("other_prefixes_to_check", []):
                     other_prefix = self._generate_prefix(other_prefix)
@@ -145,9 +148,15 @@ class CarteSearchActeursView(SearchActeursView):
 
     def _check_if_label_qualite_is_set(self, label):
         try:
-            return label in self._get_form("filtres")["label"].value()
+            return label in self._get_form("filtres")["label_qualite"].value()
         except (TypeError, KeyError):
             return False
+
+    def _get_map_container_id(self):
+        return "carte"
+
+    def _get_carte_config(self):
+        return None
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -160,10 +169,37 @@ class CarteSearchActeursView(SearchActeursView):
         context.update(
             is_carte=True,
             forms=forms,
-            map_container_id="carte",
+            map_container_id=self._get_map_container_id(),
             mode_liste=mode_liste,
+            carte_config=self._get_carte_config(),
         )
+
         return context
+
+    def _check_for_choices_override(self, form):
+        print(f"Check {form=}")
+        carte_config = self._get_carte_config()
+        many_to_many_fields_names = [
+            field.name for field in carte_config.__class__._meta.many_to_many
+        ]
+        model_choice_fields_names = [
+            name
+            for name, field in form.fields.items()
+            if isinstance(field, ModelChoiceField)
+        ]
+        shared_fields = set(many_to_many_fields_names) & set(model_choice_fields_names)
+
+        if not carte_config or not shared_fields:
+            return
+
+        for field_name in shared_fields:
+            carte_config_value = getattr(carte_config, field_name).all()
+            if carte_config_value.exists():
+                form.fields[field_name].queryset = carte_config_value
+
+            # TODO: terminer...
+            print(f"{field_name=}\n{form.fields[field_name].queryset=} \n\n")
+        return form
 
     def _get_action_ids(self) -> list[str]:
         groupe_action_ids = self._get_form("legende")["groupe_action"].value()
@@ -203,15 +239,18 @@ class ProductCarteView(CarteSearchActeursView):
     It will be progressively deprecated until the end of 2025 but
     needs to be maintained for now."""
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    def _get_map_container_id(self):
+        # TODO: check if required
+        return self.request.GET.get("map_container_id", "carte")
+
+    def _get_carte_config(self):
         carte_config, _ = CarteConfig.objects.get_or_create(
             slug="product", supprimer_branding=True
         )
-        context.update(
-            carte_config=carte_config,
-            map_container_id=self.request.GET.get("map_container_id", "carte"),
-        )
+        return carte_config
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         return context
 
 
@@ -219,16 +258,18 @@ class CarteConfigView(DetailView, CarteSearchActeursView):
     model = CarteConfig
     context_object_name = "carte_config"
 
+    @override
+    def _get_carte_config(self):
+        return self.object
+
+    @override
+    def _get_map_container_id(self):
+        return self.object.pk
+
     def _get_max_displayed_acteurs(self):
         """Standalone Carte view displays more acteurs than the
         embedded one."""
         return settings.CARTE_MAX_SOLUTION_DISPLAYED
-
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        return {
-            **super().get_context_data(**kwargs),
-            "map_container_id": self.object.pk,
-        }
 
     def get_sous_categorie_filter(self):
         sous_categories_from_request = list(

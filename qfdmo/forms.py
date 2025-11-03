@@ -253,7 +253,7 @@ class FiltresForm(GetFormMixin, DsfrBaseForm):
     )
 
     # TODO: rename to follow carte config definition
-    label = LabelQualiteChoiceField(
+    label_qualite = LabelQualiteChoiceField(
         queryset=LabelQualite.objects.filter(afficher=True, filtre=True),
         to_field_name="code",
         widget=forms.CheckboxSelectMultiple,
