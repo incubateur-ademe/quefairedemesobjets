@@ -34,8 +34,10 @@ class TestInitialValue:
         assert response.context_data["acteurs"].count() == 0
         assert response.context_data["form"].initial == {
             **self.default_context,
-            "action_displayed": "preter|emprunter|louer|mettreenlocation|reparer|donner|echanger|acheter|revendre",
-            "action_list": "preter|emprunter|louer|mettreenlocation|reparer|donner|echanger|acheter|revendre",
+            "action_displayed": "preter|emprunter|louer|mettreenlocation"
+            "|reparer|donner|echanger|acheter|revendre",
+            "action_list": "preter|emprunter|louer|mettreenlocation|"
+            "reparer|donner|echanger|acheter|revendre",
             "adresse": None,
             "bonus": None,
             "bounding_box": None,
