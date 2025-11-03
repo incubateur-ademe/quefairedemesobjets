@@ -19,9 +19,9 @@ def acteur_url(context, acteur, with_map=True):
 
     if query_params:
         querystring = urlencode(query_params)
-        return f"{acteur.url}?{querystring}"
+        return f"{acteur.full_url}?{querystring}"
 
-    return acteur.url
+    return acteur.full_url
 
 
 @register.simple_tag(takes_context=True)

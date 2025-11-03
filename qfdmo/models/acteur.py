@@ -1307,7 +1307,7 @@ class DisplayedActeur(BaseActeur, LatLngPropertiesMixin):
         return reverse("qfdmo:acteur-detail", args=[self.uuid])
 
     @property
-    def url(self):
+    def full_url(self):
         return f"{settings.BASE_URL}{self.get_absolute_url()}"
 
     def acteur_actions(

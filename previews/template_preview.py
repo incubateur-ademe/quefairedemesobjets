@@ -235,8 +235,8 @@ class FormulairesPreview(LookbookPreview):
 
         template = Template(
             """
-            {% include "ui/components/modals/filtres.html" with legende_form=form1 id="filtres-legende" %}
-            {% include "ui/components/modals/filtres.html" with legende_form=form2 id="filtres-legende-mobile" %}
+            {% include "ui/components/modals/filtres.html" with filtres_form=form1 id="filtres-legende" %}
+            {% include "ui/components/modals/filtres.html" with filtres_form=form2 id="filtres-legende-mobile" %}
             """
         )
         context = {"form1": form1, "form2": form2}
