@@ -1,9 +1,12 @@
+{% load acteur_tags turbo_tags %}
+
 {# Online addresses #}
 <div class="qf-relative qf-shadow" data-testid="digital-acteurs-results">
     <div class="qf-px-2w qf-pt-1v">
         {% for adresse in acteurs %}
             <a
-            href="{{ map_container_id }}:{{ adresse.url }}"
+            href="{% acteur_url adresse with_map=True %}"
+            data-turbo-frame="{% acteur_frame_id %}"
             data-action="click->search-solution-form#displayDigitalActeur
                               keydown.enter->search-solution-form#displayDigitalActeur
                               keydown.space->search-solution-form#displayDigitalActeur"
@@ -23,7 +26,7 @@
                         {{ acteur_service }}{% if not loop.last %}<br>{% endif %}
                     {% endfor %}
                 </p>
-            </div>
+            </a>
         {% endfor %}
         {% if acteurs|length == 0 %}
             <p class="qf-italic">
