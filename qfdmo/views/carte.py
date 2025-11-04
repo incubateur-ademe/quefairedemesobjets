@@ -154,6 +154,8 @@ class CarteSearchActeursView(SearchActeursView):
             return False
 
     def _get_map_container_id(self):
+        if self.carte_config:
+            return self.carte_config.slug
         return "carte"
 
     def _get_carte_config(self):
@@ -243,10 +245,6 @@ class CarteConfigView(DetailView, CarteSearchActeursView):
     @override
     def _get_carte_config(self):
         return self.object
-
-    @override
-    def _get_map_container_id(self):
-        return f"{self.object.slug}-{self.object.pk}"
 
     def get_sous_categorie_filter(self):
         sous_categories_from_request = list(
