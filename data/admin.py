@@ -1,8 +1,10 @@
 import logging
 
 from django.contrib import admin, messages
+from django.template.loader import render_to_string
 from django.utils.html import format_html
 from djangoql.admin import DjangoQLSearchMixin
+from djangoql.schema import DjangoQLSchema, StrField
 
 from core.admin import NotEditableMixin, NotSelfDeletableMixin, QuerysetFilterAdmin
 from data.models.suggestion import (
@@ -204,11 +206,25 @@ class SuggestionUnitaireInline(admin.TabularInline):
     can_view = True
 
 
+class SuggestionGroupeQLSchema(DjangoQLSchema):
+
+    def get_fields(self, model):
+        """Surcharge pour exposer les relations et champs personnalisés."""
+        fields = super().get_fields(model)
+
+        # Force string field for champs and valeurs in SuggestionUnitaire
+        if model == SuggestionUnitaire:
+            fields = [field for field in fields if field not in ["champs", "valeurs"]]
+            return fields + [StrField(name="champs"), StrField(name="valeurs")]
+        return fields
+
+
 @admin.register(SuggestionGroupe)
 class SuggestionGroupeAdmin(
     DjangoQLSearchMixin, NotEditableMixin, NotSelfDeletableMixin, QuerysetFilterAdmin
 ):
-    djangoql_completion_enabled_by_default = False
+    djangoql_completion_enabled_by_default = True
+    djangoql_schema = SuggestionGroupeQLSchema
 
     class SuggestionCohorteFilter(admin.RelatedFieldListFilter):
         def field_choices(self, field, request, model_admin):
@@ -217,12 +233,7 @@ class SuggestionGroupeAdmin(
     search_fields = ["contexte", "metadata"]
     list_display = [
         "id",
-        "suggestion_cohorte",
-        "statut",
-        "acteur",
-        "revision_acteur",
-        "contexte",
-        "metadata",
+        "groupe_de_suggestions",
     ]
     readonly_fields = ["cree_le", "modifie_le"]
     inlines = [SuggestionUnitaireInline]
@@ -230,7 +241,23 @@ class SuggestionGroupeAdmin(
         ("suggestion_cohorte", SuggestionCohorteFilter),
         ("statut", admin.ChoicesFieldListFilter),
     ]
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        return queryset.prefetch_related(
+            "suggestion_unitaires",
+            "acteur",
+            "revision_acteur",
+            "revision_acteur__parent",
+        )
+
     # actions = [mark_as_rejected, mark_as_toproceed]
+    def groupe_de_suggestions(self, obj):
+        template_name = "data/_partials/suggestion_groupe_details.html"
+        template_context = {
+            "suggestion_groupe": obj,
+        }
+        return render_to_string(template_name, template_context)
 
 
 @admin.register(SuggestionUnitaire)
