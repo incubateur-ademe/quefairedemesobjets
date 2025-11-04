@@ -8,11 +8,13 @@
     qf-bg-white qf-drop-shadow-lg"
 >
 
+    {% if forms.legende.visible %}
     <h2 class="fr-h4 fr-mb-2w">
         Actions possibles
     </h2>
     {{ forms.legende }}
     <hr class="qf-pb-2w qf-pt-0">
+    {% endif %}
 
     <div class="qf-flex qf-gap-2w qf-flex-col">
         {% include "ui/components/modals/filtres.html" with filtres_form=forms.filtres_form id="filtres" button_extra_classes="fr-btn--sm qf-w-full qf-justify-center" button_only=True %}

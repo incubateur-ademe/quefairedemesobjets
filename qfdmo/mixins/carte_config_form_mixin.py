@@ -1,5 +1,3 @@
-from typing import Self
-
 from django.forms import ModelChoiceField, ModelMultipleChoiceField
 
 from core.exceptions import (
@@ -35,23 +33,20 @@ class CarteConfigFormMixin:
             CarteConfigInitialMappingError: If carte_config_initial_mapping references
                 a non-existent CarteConfig field.
         """
+        self.carte_config = carte_config
+
+        # Prepare initial values before calling super().__init__()
+        if self.carte_config:
+            self._validate_carte_config_mappings()
+            initial = kwargs.get("initial", {})
+            self._override_initial_from_carte_config(self.carte_config, initial)
+            kwargs["initial"] = initial
+
         super().__init__(*args, **kwargs)
-        self._validate_carte_config_mappings()
-        if carte_config:
-            self.apply_carte_config_overrides(carte_config)
 
-    def apply_carte_config_overrides(self, carte_config: CarteConfig | None) -> Self:
-        """Apply overrides from CarteConfig to the form fields.
-
-        Returns self for method chaining.
-        """
-        if not carte_config:
-            return self
-
-        self._override_choices_from_carte_config(carte_config)
-        self._override_initial_from_carte_config(carte_config)
-
-        return self
+        # Override choices after form is initialized (self.fields is available)
+        if self.carte_config:
+            self._override_choices_from_carte_config(self.carte_config)
 
     def _override_choices_from_carte_config(self, carte_config: CarteConfig) -> None:
         """Override queryset choices for ModelChoiceField/ModelMultipleChoiceField
@@ -95,8 +90,15 @@ class CarteConfigFormMixin:
                     id__in=config_field_value.all().values_list("id", flat=True)
                 )
 
-    def _override_initial_from_carte_config(self, carte_config: CarteConfig) -> None:
-        """Override initial values for fields based on CarteConfig fields."""
+    def _override_initial_from_carte_config(
+        self, carte_config: CarteConfig, initial: dict
+    ) -> None:
+        """Override initial values for fields based on CarteConfig fields.
+
+        Args:
+            carte_config: CarteConfig instance to get values from.
+            initial: Initial values dict to mutate (modified in-place).
+        """
         if not self.carte_config_initial_mapping:
             return
 
@@ -105,7 +107,7 @@ class CarteConfigFormMixin:
             config_field_name,
         ) in self.carte_config_initial_mapping.items():
             # Check if the form field exists
-            if form_field_name not in self.fields:
+            if form_field_name not in self.base_fields:
                 continue
 
             # Check if the config field exists
@@ -117,17 +119,17 @@ class CarteConfigFormMixin:
 
             # Only override if there's a meaningful value
             if config_value is not None and config_value != "":
-                field = self.fields[form_field_name]
+                field = self.base_fields[form_field_name]
 
                 # Handle ModelChoiceField and ModelMultipleChoiceField
                 if isinstance(field, (ModelChoiceField, ModelMultipleChoiceField)):
-                    # For many-to-many relationships, filter the queryset
-                    field.initial = field.queryset.filter(
+                    # For many-to-many relationships, get the queryset
+                    initial[form_field_name] = field.queryset.filter(
                         id__in=config_value.all().values_list("id", flat=True)
                     )
                 else:
                     # For simple fields, set the initial value directly
-                    field.initial = config_value
+                    initial[form_field_name] = config_value
 
     def _validate_carte_config_mappings(self) -> None:
         """Validate that all mappings reference existing CarteConfig fields.

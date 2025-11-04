@@ -4,6 +4,7 @@ from typing import cast
 from django import forms
 from django.core.cache import cache
 from django.db.models import TextChoices
+from django.db.utils import cached_property
 from django.http import HttpRequest
 from django.shortcuts import reverse
 from django.template.loader import render_to_string
@@ -180,6 +181,10 @@ class LegendeForm(CarteConfigFormMixin, GetFormMixin, DsfrBaseForm):
         label="",
         initial=GroupeAction.objects.filter(afficher=True),
     )
+
+    @cached_property
+    def visible(self):
+        return self.fields["groupe_action"].queryset.count() > 1
 
 
 class AutoSubmitLegendeForm(AutoSubmitMixin, LegendeForm):
