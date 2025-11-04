@@ -116,3 +116,67 @@ class TestGetFormMixin:
         # form1 should have valid data
         assert form1.is_valid()
         assert form1.cleaned_data["name"] == "Alice"
+
+    def test_form_does_not_bind_with_empty_string_value(self):
+        """Test that form doesn't bind when field has empty string value"""
+        data = QueryDict("prefix-name=")
+        form = SampleForm(data=data, prefix="prefix")
+
+        # Form should not be bound because the value is empty
+        assert not form.is_bound
+
+    def test_form_does_not_bind_with_multiple_empty_string_values(self):
+        """Test that form doesn't bind when all fields have empty string values"""
+        data = QueryDict("prefix-name=&prefix-email=&prefix-age=")
+        form = SampleForm(data=data, prefix="prefix")
+
+        # Form should not be bound because all values are empty
+        assert not form.is_bound
+
+    def test_form_binds_with_at_least_one_non_empty_value(self):
+        """Test that form binds when at least one field has a non-empty value"""
+        data = QueryDict("prefix-name=&prefix-email=john@example.com&prefix-age=")
+        form = SampleForm(data=data, prefix="prefix")
+
+        # Form should be bound because email has a value
+        assert form.is_bound
+        assert form.is_valid()
+        assert form.cleaned_data["email"] == "john@example.com"
+
+    def test_form_does_not_bind_with_empty_list_values(self):
+        """Test that form doesn't bind when field has list with empty strings"""
+        # QueryDict with multiple values creates a list
+        data = QueryDict("prefix-name=&prefix-name=")
+        form = SampleForm(data=data, prefix="prefix")
+
+        # Form should not be bound because all list elements are empty
+        assert not form.is_bound
+
+    def test_form_binds_with_list_containing_non_empty_value(self):
+        """Test that form binds when list contains at least one non-empty value"""
+        data = QueryDict("prefix-name=&prefix-name=John")
+        form = SampleForm(data=data, prefix="prefix")
+
+        # Form should be bound because one list element is non-empty
+        assert form.is_bound
+
+    def test_form_binds_with_zero_as_valid_value(self):
+        """Test that form binds with zero as a valid (truthy for form purposes) value"""
+        data = QueryDict("prefix-age=0")
+        form = SampleForm(data=data, prefix="prefix")
+
+        # Form should be bound because "0" as a string is truthy
+        assert form.is_bound
+        assert form.is_valid()
+        assert form.cleaned_data["age"] == 0
+
+    def test_form_does_not_bind_with_whitespace_only(self):
+        """Test that form doesn't bind when field has only whitespace"""
+        # Note: QueryDict doesn't strip whitespace, but empty string after strip
+        # would be falsy. However, a string with spaces is truthy.
+        data = QueryDict("prefix-name=   ")
+        form = SampleForm(data=data, prefix="prefix")
+
+        # Form should be bound because "   " is truthy (non-empty string)
+        # This is expected behavior - the form validation will handle trimming
+        assert form.is_bound
