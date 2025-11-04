@@ -80,6 +80,89 @@ class PinPointForm(forms.Form):
     )
 
 
+class CartePreview(LookbookPreview):
+    """
+    Previews for carte components
+    """
+
+    def mode_liste(self, **kwargs):
+        """
+        # Mode liste
+        Displays the list view of actors with pagination
+        """
+        from django.core.paginator import Paginator
+        from django.test import RequestFactory
+
+        acteurs = DisplayedActeur.objects.all()[:10]
+        paginator = Paginator(acteurs, 5)
+        page = paginator.get_page(1)
+
+        # Create a fake request for the context
+        factory = RequestFactory()
+        request = factory.get("/")
+
+        context = {
+            "paginated_acteurs_obj": page,
+            "count": acteurs.count(),
+            "CARTE": {"ajouter_un_lieu_mode_liste": "Proposer une adresse"},
+            "map_container_id": "carte",
+            "forms": {
+                "legende": LegendeForm(),
+                "filtres_form": None,
+            },
+            "request": request,
+        }
+        return render_to_string("ui/components/carte/mode_liste.html", context)
+
+    def legend(self, **kwargs):
+        """
+        # Légende de la carte
+        Displays the map legend with actions and filters
+        """
+        context = {
+            "forms": {
+                "legende": LegendeForm(),
+                "filtres_form": None,
+            },
+            "carte_config": None,
+        }
+        return render_to_string("ui/components/carte/legend.html", context)
+
+    def acteur_labels(self, **kwargs):
+        """
+        # Labels d'acteur
+        Displays the labels for an actor (bonus, ESS, répar'acteurs)
+        """
+        acteur = DisplayedActeur.objects.filter(labels__isnull=False).first()
+        if not acteur:
+            acteur = DisplayedActeur.objects.first()
+
+        context = {"object": acteur}
+        return render_to_string(
+            "ui/components/carte/acteur/acteur_labels.html", context
+        )
+
+    def ajouter_un_lieu(self, **kwargs):
+        """
+        # Bouton "Ajouter un lieu"
+        Button to add a new location (map view)
+        """
+        context = {"CARTE": {"ajouter_un_lieu": "Proposer une adresse"}}
+        return render_to_string(
+            "ui/components/carte/buttons/ajouter_un_lieu.html", context
+        )
+
+    def ajouter_un_lieu_mode_liste(self, **kwargs):
+        """
+        # Bouton "Ajouter un lieu" (mode liste)
+        Button to add a new location (list view)
+        """
+        context = {"CARTE": {"ajouter_un_lieu_mode_liste": "Proposer une adresse"}}
+        return render_to_string(
+            "ui/components/carte/buttons/ajouter_un_lieu_mode_liste.html", context
+        )
+
+
 class ComponentsPreview(LookbookPreview):
     @register_form_class(PinPointForm)
     def acteur_pinpoint(
@@ -197,6 +280,76 @@ class ComponentsPreview(LookbookPreview):
         context.update(acteur=DisplayedActeur.objects.first(), location=Point(-2, 48))
 
         return render_to_string("ui/components/mini_carte/mini_carte.html", context)
+
+    def spinner(self, **kwargs):
+        """
+        # Spinner
+        Loading spinner component
+        """
+        context = {"small": False}
+        return render_to_string("ui/components/spinner.html", context)
+
+    def spinner_small(self, **kwargs):
+        """
+        # Spinner (small)
+        Small loading spinner component
+        """
+        context = {"small": True}
+        return render_to_string("ui/components/spinner.html", context)
+
+
+class IconsPreview(LookbookPreview):
+    """
+    Previews for icon components
+    """
+
+    def bonus(self, **kwargs):
+        """
+        # Icône Bonus Réparation
+        Icon for the Bonus Réparation label
+        """
+        return render_to_string("ui/components/icons/bonus.html")
+
+    def ess(self, **kwargs):
+        """
+        # Icône ESS (Économie Sociale et Solidaire)
+        Icon for the ESS label
+        """
+        return render_to_string("ui/components/icons/ess.html")
+
+    def reparacteurs(self, **kwargs):
+        """
+        # Icône Répar'Acteurs
+        Icon for the Répar'Acteurs label
+        """
+        return render_to_string("ui/components/icons/reparacteurs.html")
+
+
+class FiltresPreview(LookbookPreview):
+    """
+    Previews for filter label components
+    """
+
+    def label_bonus(self, **kwargs):
+        """
+        # Label filtre Bonus Réparation
+        Filter label for Bonus Réparation locations
+        """
+        return render_to_string("ui/components/filtres/bonus/label.html")
+
+    def label_ess(self, **kwargs):
+        """
+        # Label filtre ESS
+        Filter label for ESS (Économie Sociale et Solidaire) locations
+        """
+        return render_to_string("ui/components/filtres/ess/label.html")
+
+    def label_reparacteurs(self, **kwargs):
+        """
+        # Label filtre Répar'Acteurs
+        Filter label for Répar'Acteurs certified locations
+        """
+        return render_to_string("ui/components/filtres/reparacteurs/label.html")
 
 
 class ModalsPreview(LookbookPreview):

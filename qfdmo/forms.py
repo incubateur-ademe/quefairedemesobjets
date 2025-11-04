@@ -15,6 +15,7 @@ from dsfr.widgets import SegmentedControl
 from qfdmd.models import Synonyme
 from qfdmo.fields import GroupeActionChoiceField, LabelQualiteChoiceField
 from qfdmo.geo_api import epcis_from, formatted_epcis_as_list_of_tuple
+from qfdmo.mixins import AutoSubmitMixin, CarteConfigFormMixin, GetFormMixin
 from qfdmo.models import SousCategorieObjet
 from qfdmo.models.acteur import LabelQualite
 from qfdmo.models.action import (
@@ -166,39 +167,11 @@ class FormulaireForm(AddressesForm):
     )
 
 
-class GetFormMixin(forms.Form):
-    def __init__(self, data: dict | None = None, prefix=None, *args, **kwargs):
-        if prefix:
-            self.prefix = prefix
+class LegendeForm(CarteConfigFormMixin, GetFormMixin, DsfrBaseForm):
+    carte_config_choices_mapping = {
+        "groupe_action": "groupe_action",
+    }
 
-        unique_field_names_with_prefix = set(
-            [self.add_prefix(field) for field in self.base_fields.keys()]
-        )
-        if data is not None:
-            unique_keys = set(data.keys())
-            request_contains_field_names = unique_keys & unique_field_names_with_prefix
-
-            if not request_contains_field_names:
-                data = None
-
-        super().__init__(*args, data=data, **kwargs)
-
-
-class AutoSubmitMixin:
-    """A mixin that automatically adds data attributes to specified fields."""
-
-    autosubmit_fields: list[str] = []
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        for field_name in getattr(self, "autosubmit_fields", []):
-            field = self.fields.get(field_name)
-            if field:
-                field.widget.attrs["data-action"] = "search-solution-form#submitForm"
-
-
-class LegendeForm(GetFormMixin, DsfrBaseForm):
     groupe_action = GroupeActionChoiceField(
         queryset=GroupeAction.objects.filter(afficher=True).order_by("order"),
         to_field_name="id",
@@ -241,7 +214,10 @@ class NextAutocompleteInput(forms.TextInput):
         }
 
 
-class FiltresForm(GetFormMixin, DsfrBaseForm):
+class FiltresForm(CarteConfigFormMixin, GetFormMixin, DsfrBaseForm):
+    carte_config_initial_mapping = {
+        "label_qualite": "label_qualite",
+    }
     synonyme = forms.ModelChoiceField(
         queryset=Synonyme.objects.all(),
         widget=NextAutocompleteInput(
@@ -594,7 +570,11 @@ class GroupeActionForm(GetFormMixin, DsfrBaseForm):
     pass
 
 
-class ViewModeForm(GetFormMixin, DsfrBaseForm):
+class ViewModeForm(CarteConfigFormMixin, GetFormMixin, DsfrBaseForm):
+    carte_config_initial_mapping = {
+        "view": "mode_affichage",
+    }
+
     class ViewModeSegmentedControlChoices(TextChoices, SegmentedControlChoices):
         CARTE = {
             "value": CarteConfig.ModesAffichage.CARTE.value,

@@ -3,7 +3,7 @@ from typing import Any, TypedDict, override
 
 from django.conf import settings
 from django.db.models import Q
-from django.forms import Form, ModelChoiceField, ModelMultipleChoiceField
+from django.forms import Form
 from django.views.generic import DetailView
 
 from core.constants import MAP_CONTAINER_ID
@@ -105,12 +105,15 @@ class CarteSearchActeursView(SearchActeursView):
 
             prefix = self._generate_prefix(form_config["prefix"])
             # carte_legende-nom_du_champ
-            form = form_config["form"](data, prefix=prefix)
-            form = self._override_form_choices_from_carte_config(form)
+            form = form_config["form"](
+                data, prefix=prefix, carte_config=self._get_carte_config()
+            )
             if not form.is_valid():
                 for other_prefix in form_config.get("other_prefixes_to_check", []):
                     other_prefix = self._generate_prefix(other_prefix)
-                    other_form = form_config["form"](data, prefix=other_prefix)
+                    other_form = form_config["form"](
+                        data, prefix=other_prefix, carte_config=self._get_carte_config()
+                    )
                     if other_form.is_valid():
                         form = other_form
                         break
@@ -173,32 +176,6 @@ class CarteSearchActeursView(SearchActeursView):
         )
 
         return context
-
-    def _override_form_choices_from_carte_config(self, form):
-        carte_config = self._get_carte_config()
-        many_to_many_fields_names = [
-            field.name for field in carte_config.__class__._meta.many_to_many
-        ]
-        model_choice_fields_names = [
-            name
-            for name, field in form.fields.items()
-            if isinstance(field, (ModelChoiceField, ModelMultipleChoiceField))
-        ]
-
-        shared_fields_between_model_and_form = set(many_to_many_fields_names) & set(
-            model_choice_fields_names
-        )
-
-        if not carte_config or not shared_fields_between_model_and_form:
-            return form
-
-        for field_name in shared_fields_between_model_and_form:
-            if getattr(carte_config, field_name).exists():
-                form.fields[field_name].queryset = getattr(
-                    carte_config, field_name
-                ).all()
-
-        return form
 
     def _get_action_ids(self) -> list[str]:
         groupe_action_ids = self._get_form("legende")["groupe_action"].value()
