@@ -1,0 +1,80 @@
+{% load admin_data_tags %}
+
+<h3>{% block suggestion_title %}{{ suggestion_groupe }}{% endblock %}</h3>
+
+{% block suggestion_details %}
+    {% if suggestion_groupe.suggestion_unitaires.count > 0 %}
+    <div class="fr-table fr-table--bordered">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 20%;">Champs</th>
+                    <th style="width: 20%;">Suggestion</th>
+                    {% with identifiant_unique=suggestion_groupe.acteur.identifiant_unique|quote %}
+                        {% if suggestion_groupe.acteur %}
+                            <th style="width: 20%;">
+                                <a href="{% url 'admin:qfdmo_acteur_change' identifiant_unique %}" target="_blank" rel="noreferrer">Acteur : {{ suggestion_groupe.acteur.identifiant_unique }}</a>
+                            </th>
+                        {% endif %}
+                        {% if suggestion_groupe.revision_acteur %}
+                            <th style="width: 20%;">
+                                <a href="{% url 'admin:qfdmo_revisionacteur_change' suggestion_groupe.revision_acteur.identifiant_unique|quote %}" target="_blank" rel="noreferrer">Révision : {{ suggestion_groupe.revision_acteur.identifiant_unique }}</a>
+                            </th>
+                        {% endif %}
+                        {% if suggestion_groupe.revision_acteur and suggestion_groupe.revision_acteur.parent %}
+                            <th style="width: 20%;">
+                                <a href="{% url 'admin:qfdmo_revisionacteur_change' suggestion_groupe.revision_acteur.parent.identifiant_unique|quote %}" target="_blank" rel="noreferrer">Parent : {{ suggestion_groupe.revision_acteur.parent.identifiant_unique }}</a>
+                            </th>
+                        {% endif %}
+                    {% endwith %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for suggestion_unitaire in suggestion_groupe.suggestion_unitaires.all %}
+                <tr>
+                    <td>{{ suggestion_unitaire.champs|join:", " }}</td>
+                    <td>{{ suggestion_unitaire.valeurs|join:", " }}</td>
+                    <td>
+                        {% if suggestion_groupe.acteur %}
+                            {% for champ in suggestion_unitaire.champs %}
+                                {% with value=suggestion_groupe.acteur|getattr:champ %}
+                                    {{ value|default:"-" }}{% if not forloop.last %}, {% endif %}
+                                {% endwith %}
+                            {% endfor %}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    {% if suggestion_groupe.revision_acteur %}
+                        <td>
+                            {% if suggestion_groupe.revision_acteur %}
+                                {% for champ in suggestion_unitaire.champs %}
+                                    {% with value=suggestion_groupe.revision_acteur|getattr:champ %}
+                                        {{ value|default:"-" }}{% if not forloop.last %}, {% endif %}
+                                    {% endwith %}
+                                {% endfor %}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    {% endif %}
+                    {% if suggestion_groupe.revision_acteur and suggestion_groupe.revision_acteur.parent %}
+                        <td>
+                            {% if suggestion_groupe.revision_acteur and suggestion_groupe.revision_acteur.parent %}
+                                {% for champ in suggestion_unitaire.champs %}
+                                    {% with value=suggestion_groupe.revision_acteur.parent|getattr:champ %}
+                                        {{ value|default:"-" }}{% if not forloop.last %}, {% endif %}
+                                    {% endwith %}
+                                {% endfor %}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+{% endblock suggestion_details %}
