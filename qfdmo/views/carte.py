@@ -159,6 +159,17 @@ class CarteSearchActeursView(SearchActeursView):
     def _get_carte_config(self):
         return None
 
+    @property
+    def carte_config(self) -> CarteConfig | None:
+        return self._get_carte_config()
+
+    def _get_max_displayed_acteurs(self):
+        if self.carte_config and self.carte_config.nombre_d_acteurs_affiches:
+            return self.carte_config.nombre_d_acteurs_affiches
+        if self.request.GET.get("limit", "").isnumeric():
+            return int(self.request.GET.get("limit"))
+        return settings.CARTE_MAX_SOLUTION_DISPLAYED
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         forms = self._get_forms()
@@ -202,11 +213,6 @@ class CarteSearchActeursView(SearchActeursView):
             "sous_categories__id", flat=True
         )
 
-    def _get_max_displayed_acteurs(self):
-        if self.request.GET.get("limit", "").isnumeric():
-            return int(self.request.GET.get("limit"))
-        return settings.CARTE_MAX_SOLUTION_DISPLAYED
-
 
 class ProductCarteView(CarteSearchActeursView):
     """This view is used for Produit / Synonyme, the legacy django models
@@ -240,12 +246,7 @@ class CarteConfigView(DetailView, CarteSearchActeursView):
 
     @override
     def _get_map_container_id(self):
-        return self.object.pk
-
-    def _get_max_displayed_acteurs(self):
-        """Standalone Carte view displays more acteurs than the
-        embedded one."""
-        return settings.CARTE_MAX_SOLUTION_DISPLAYED
+        return f"{self.object.slug}-{self.object.pk}"
 
     def get_sous_categorie_filter(self):
         sous_categories_from_request = list(

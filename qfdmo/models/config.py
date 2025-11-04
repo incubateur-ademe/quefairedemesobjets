@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.http import QueryDict
@@ -70,6 +71,9 @@ class CarteConfig(index.Indexed, models.Model):
         help_text="Ce choix permet de définir le mode d'affichage par défaut de"
         " la carte. Le mode liste affiche une liste d'acteurs tandis qu'une"
         " carte affiche un fond de carte.",
+    )
+    nombre_d_acteurs_affiches = models.IntegerField(
+        default=settings.CARTE_MAX_SOLUTION_DISPLAYED
     )
     # TODOWAGTAIL : remove double negation and use afficher_legende instead
     cacher_legende = models.BooleanField(

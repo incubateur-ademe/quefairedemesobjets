@@ -24,6 +24,8 @@ class GenericAutoCompleteInput(widgets.SelectMultiple):
 
 
 class AutoCompleteInput(forms.TextInput):
+    # TODO: support an initial queryset that controls
+    # the search view.
     template_name = "ui/forms/widgets/autocomplete.html"
 
     def __init__(
