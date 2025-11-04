@@ -4,7 +4,6 @@ from datetime import datetime
 
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields import ArrayField
-from django.db.models.functions import Now
 from django.template.loader import render_to_string
 
 from core.models.mixin import TimestampedModel
@@ -464,11 +463,9 @@ class SuggestionUnitaire(TimestampedModel):
         null=True,
     )
     ordre = models.IntegerField(default=1, blank=True)
-    raison = models.TextField(blank=True, db_default="", default="")
-    parametres = models.JSONField(blank=True, db_default="", default=dict)
-    suggestion_modele = models.CharField(
-        max_length=255, blank=True, db_default="", default="", choices=[]
-    )
+    raison = models.TextField(blank=True, default="")
+    parametres = models.JSONField(blank=True, default=dict)
+    suggestion_modele = models.CharField(max_length=255, blank=True, default="")
     champs = ArrayField(
         models.TextField(),
         blank=True,
@@ -518,7 +515,7 @@ class SuggestionLog(TimestampedModel):
     origine_colonnes = ArrayField(models.CharField(max_length=255), null=True)
     origine_valeurs = ArrayField(models.TextField(), null=True)
     destination_colonnes = ArrayField(models.CharField(max_length=255), null=True)
-    message = models.TextField(blank=True, db_default="", default="")
+    message = models.TextField(blank=True, default="")
 
 
 class BANCache(models.Model):
@@ -531,4 +528,4 @@ class BANCache(models.Model):
     ville = models.CharField(blank=True, null=True)
     location = models.PointField(blank=True, null=True)
     ban_returned = models.JSONField(blank=True, null=True)
-    modifie_le = models.DateTimeField(auto_now=True, db_default=Now())
+    modifie_le = models.DateTimeField(auto_now=True)
