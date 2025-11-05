@@ -233,7 +233,6 @@ class FiltresForm(CarteConfigFormMixin, GetFormMixin, DsfrBaseForm):
         required=False,
     )
 
-    # TODO: rename to follow carte config definition
     label_qualite = LabelQualiteChoiceField(
         queryset=LabelQualite.objects.filter(afficher=True, filtre=True),
         to_field_name="code",

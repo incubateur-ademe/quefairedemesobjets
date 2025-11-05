@@ -20,9 +20,8 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
   connect() {
     this.hideListbox()
   }
+
   clickOutside(event) {
-    // example to close a modal
-    event.preventDefault()
     this.hideListbox()
   }
 
