@@ -41,6 +41,17 @@ def diff_display(old_value, new_value):
 def display_diff_value(key, value, suggestion_contexte):
     """Display diff value with context links"""
 
+    old_value_exists = (
+        isinstance(suggestion_contexte, dict) and key in suggestion_contexte
+    )
+    old_value = suggestion_contexte.get(key, None) if old_value_exists else None
+
+    return display_diff_value_details(key, value, old_value, old_value_exists)
+
+
+@register.inclusion_tag("data/_partials/display_diff_value.html")
+def display_diff_value_details(key, value, old_value, old_value_exists=True):
+
     def _get_diff_value(old_value_exists, old_value, value):
         """Compute the diff value to display"""
         if old_value_exists:
@@ -129,11 +140,6 @@ def display_diff_value(key, value, suggestion_contexte):
             "extra_links": [(value, value)],
         }
 
-    old_value_exists = (
-        isinstance(suggestion_contexte, dict) and key in suggestion_contexte
-    )
-    old_value = suggestion_contexte.get(key, None) if old_value_exists else None
-
     # Initialize default values
     result = {
         "strike_value": None,
@@ -191,4 +197,31 @@ def getattr_filter(obj, attr):
     try:
         return getattr(obj, attr, None)
     except (AttributeError, TypeError):
+        return None
+
+
+@register.filter(name="get_first_with_model")
+def get_first_with_model(suggestion_unitaires, model_name):
+    """Get the first object with the given model name from the queryset"""
+    for obj in suggestion_unitaires:
+        if obj.suggestion_modele == model_name:
+            return obj
+    return None
+
+
+# FIXME : peut-être plus simple si on stocke les modifications comme un dict
+@register.filter(name="get_at_index")
+def get_at_index(list_value, index):
+    """
+    Template filter pour accéder à un élément d'une liste par son index.
+    Usage: {{ my_list|get_at_index:forloop.counter0 }}
+    """
+    try:
+        if not isinstance(list_value, (list, tuple)):
+            return None
+        index = int(index)
+        if 0 <= index < len(list_value):
+            return list_value[index]
+        return None
+    except (ValueError, TypeError, IndexError):
         return None

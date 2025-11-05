@@ -4,75 +4,72 @@
 
 {% block suggestion_details %}
     {% if suggestion_groupe.suggestion_unitaires.count > 0 %}
-    <div class="fr-table fr-table--bordered">
-        <table>
-            <thead>
-                <tr>
-                    <th style="width: 20%;">Champs</th>
-                    <th style="width: 20%;">Suggestion</th>
-                    {% with identifiant_unique=suggestion_groupe.acteur.identifiant_unique %}
-                        {% if suggestion_groupe.acteur %}
-                            <th style="width: 20%;">
-                                <a href="{% url 'admin:qfdmo_acteur_change' identifiant_unique|quote %}" target="_blank" rel="noreferrer">Acteur : {{ identifiant_unique }}</a>
-                            </th>
-                            <th style="width: 20%;">
-                                {% if suggestion_groupe.revision_acteur %}
-                                    <a href="{% url 'admin:qfdmo_revisionacteur_change' identifiant_unique|quote %}" target="_blank" rel="noreferrer">Révision : {{ identifiant_unique }}</a>
-                                {% else %}
-                                    Révision : -
-                                {% endif %}
-                            </th>
-                        {% endif %}
-                            <th style="width: 20%;">
-                                {% if suggestion_groupe.revision_acteur and suggestion_groupe.revision_acteur.parent %}
-                                    <a href="{% url 'admin:qfdmo_revisionacteur_change' suggestion_groupe.revision_acteur.parent.identifiant_unique|quote %}" target="_blank" rel="noreferrer">Parent : {{ suggestion_groupe.revision_acteur.parent.identifiant_unique }}</a>
-                                {% else %}
-                                    Parent : -
-                                {% endif %}
-                            </th>
-                    {% endwith %}
-                </tr>
-            </thead>
-            <tbody>
-                {% for suggestion_unitaire in suggestion_groupe.suggestion_unitaires.all %}
-                <tr>
-                    <td>{{ suggestion_unitaire.champs|join:", " }}</td>
-                    <td>{{ suggestion_unitaire.valeurs|join:", " }}</td>
-                    {% if suggestion_groupe.acteur %}
+
+
+
+
+        <div class="fr-table fr-table--bordered">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="qf-w-1/4">
+                            <div class="qf-truncate">Champs</div>
+                        </th>
+                        <th class="qf-w-1/4">
+                            <div class="qf-truncate">Acteur</div>
+                        </th>
+                        {% with identifiant_unique=suggestion_groupe.acteur.identifiant_unique %}
+                            {% if suggestion_groupe.acteur %}
+                                <th class="qf-w-1/4">
+                                    <div class="qf-truncate">
+                                        {% if suggestion_groupe.revision_acteur %}
+                                            <a href="{% url 'admin:qfdmo_revisionacteur_change' identifiant_unique|quote %}" target="_blank" rel="noreferrer" class="qf-truncate qf-block">Révision : {{ identifiant_unique }}</a>
+                                        {% else %}
+                                            Révision : -
+                                        {% endif %}
+                                    </div>
+                                </th>
+                            {% endif %}
+                                <th class="qf-w-1/4">
+                                    <div class="qf-truncate">
+                                        {% if suggestion_groupe.revision_acteur and suggestion_groupe.revision_acteur.parent %}
+                                            <a href="{% url 'admin:qfdmo_revisionacteur_change' suggestion_groupe.revision_acteur.parent.identifiant_unique|quote %}" target="_blank" rel="noreferrer" class="qf-truncate qf-block">Parent : {{ suggestion_groupe.revision_acteur.parent.identifiant_unique }}</a>
+                                        {% else %}
+                                            Parent : -
+                                        {% endif %}
+                                    </div>
+                                </th>
+                        {% endwith %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for champs, suggestion_unitaires in suggestion_unitaires_by_champs.items %}
+                    <tr>
+                        {# get the first suggestion_unitaire with model Acteur #}
+                        <td>{{ champs|join:", " }}</td>
                         <td>
-                            {% for champ in suggestion_unitaire.champs %}
-                                {% with value=suggestion_groupe.acteur|getattr:champ %}
-                                    {{ value|default:"-" }}{% if not forloop.last %}, {% endif %}
-                                {% endwith %}
-                            {% endfor %}
+                            {% include 'data/_partials/suggestion_groupe_row_type_source_diff_value.html' with model_name="Acteur" champs=champs suggestion_unitaires=suggestion_unitaires %}
                         </td>
+
                         <td>
-                            {% if suggestion_groupe.revision_acteur %}
+                            {% include 'data/_partials/suggestion_groupe_row_type_source_diff_value.html' with model_name="RevisionActeur" champs=champs suggestion_unitaires=suggestion_unitaires editable=True %}
+                        </td>
+
+                        <td>
+                            {% if suggestion_groupe.revision_acteur and suggestion_groupe.revision_acteur.parent %}
                                 {% for champ in suggestion_unitaire.champs %}
-                                    {% with value=suggestion_groupe.revision_acteur|getattr:champ %}
+                                    {% with value=suggestion_groupe.revision_acteur.parent|getattr:champ %}
                                         {{ value|default:"-" }}{% if not forloop.last %}, {% endif %}
                                     {% endwith %}
                                 {% endfor %}
                             {% else %}
-                                -
+                                🚫
                             {% endif %}
                         </td>
-                    {% endif %}
-                    <td>
-                        {% if suggestion_groupe.revision_acteur and suggestion_groupe.revision_acteur.parent %}
-                            {% for champ in suggestion_unitaire.champs %}
-                                {% with value=suggestion_groupe.revision_acteur.parent|getattr:champ %}
-                                    {{ value|default:"-" }}{% if not forloop.last %}, {% endif %}
-                                {% endwith %}
-                            {% endfor %}
-                        {% else %}
-                            🚫
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     {% endif %}
 {% endblock suggestion_details %}
