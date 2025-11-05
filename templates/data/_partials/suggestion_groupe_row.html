@@ -1,16 +1,20 @@
 {% load admin_data_tags %}
 
-<h3>
-    {% block suggestion_title %}
-        <a href="{% url 'admin:data_suggestiongroupe_change' suggestion_groupe.id %}" rel="noreferrer">{{ suggestion_groupe }}</a> : {{ suggestion_groupe.get_statut_display }}
-    {% endblock suggestion_title %}
-</h3>
-<span class="qf-ml-3w qf-text-xs qf-italic">
-    {% block suggestion_subtitle %}
-        Cohorte : {{ suggestion_groupe.suggestion_cohorte }}
-    {% endblock suggestion_subtitle %}
-</span>
-<div class="qf-my-3w">
-    {% block suggestion_details %}
-    {% endblock suggestion_details %}
-</div>
+<turbo-frame id="suggestion_groupe_row_{{ suggestion_groupe.id }}">
+    <h3>
+        {% block suggestion_title %}
+            <a href="{% url 'admin:data_suggestiongroupe_change' suggestion_groupe.id %}" rel="noreferrer">{{ suggestion_groupe }}</a> : {{ suggestion_groupe.get_statut_display }}
+        {% endblock suggestion_title %}
+    </h3>
+    <span class="qf-ml-3w qf-text-xs qf-italic">
+        {% block suggestion_subtitle %}
+            Cohorte : {{ suggestion_groupe.suggestion_cohorte }}
+        {% endblock suggestion_subtitle %}
+    </span>
+    <div class="qf-my-3w">
+        {% block suggestion_details %}
+        {% endblock suggestion_details %}
+    </div>
+
+    <a href="{% url 'data:refresh_suggestion_groupe' suggestion_groupe.id %}">Rafraîchir</a>
+</turbo-frame>
