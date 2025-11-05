@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.http import QueryDict
@@ -73,7 +72,7 @@ class CarteConfig(index.Indexed, models.Model):
         " carte affiche un fond de carte.",
     )
     nombre_d_acteurs_affiches = models.IntegerField(
-        default=settings.CARTE_MAX_SOLUTION_DISPLAYED
+        default=10,
     )
     # TODOWAGTAIL : remove double negation and use afficher_legende instead
     cacher_legende = models.BooleanField(
