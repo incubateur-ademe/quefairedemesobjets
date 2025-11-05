@@ -39,12 +39,12 @@ logger = logging.getLogger(__name__)
 
 
 class SuggestionStatut(models.TextChoices):
-    AVALIDER = SUGGESTION_AVALIDER, "À valider"
-    REJETEE = SUGGESTION_REJETEE, "Rejetée"
-    ATRAITER = SUGGESTION_ATRAITER, "À traiter"
-    ENCOURS = SUGGESTION_ENCOURS, "En cours de traitement"
-    ERREUR = SUGGESTION_ERREUR, "Fini en erreur"
-    SUCCES = SUGGESTION_SUCCES, "Fini avec succès"
+    AVALIDER = SUGGESTION_AVALIDER, "🟠 À valider"
+    REJETEE = SUGGESTION_REJETEE, "🔴 Rejetée"
+    ATRAITER = SUGGESTION_ATRAITER, "⏳ À traiter"
+    ENCOURS = SUGGESTION_ENCOURS, "⏳ En cours de traitement"
+    ERREUR = SUGGESTION_ERREUR, "❌ Fini en erreur"
+    SUCCES = SUGGESTION_SUCCES, "✅ Fini avec succès"
 
 
 class SuggestionCohorteStatut(models.TextChoices):

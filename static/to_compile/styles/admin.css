@@ -1,0 +1,4 @@
+/* Import de Tailwind CSS pour Django Admin */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
