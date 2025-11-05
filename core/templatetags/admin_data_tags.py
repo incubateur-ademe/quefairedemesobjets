@@ -179,3 +179,17 @@ def valuetype(value):
 @register.filter(name="quote")
 def quote_filter(value):
     return quote(value)
+
+
+@register.filter(name="getattr")
+def getattr_filter(obj, attr):
+    """
+    Template filter pour accéder dynamiquement à un attribut d'un objet.
+    Usage: {{ object|getattr:attribute_name }}
+    """
+    import builtins
+
+    try:
+        return builtins.getattr(obj, attr, None)
+    except (AttributeError, TypeError):
+        return None
