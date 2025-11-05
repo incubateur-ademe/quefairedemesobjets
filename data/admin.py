@@ -206,23 +206,22 @@ class SuggestionUnitaireInline(admin.TabularInline):
     can_view = True
 
 
-class SuggestionGroupeQLSchema(DjangoQLSchema):
-
-    def get_fields(self, model):
-        """Surcharge pour exposer les relations et champs personnalisés."""
-        fields = super().get_fields(model)
-
-        # Force string field for champs and valeurs in SuggestionUnitaire
-        if model == SuggestionUnitaire:
-            fields = [field for field in fields if field not in ["champs", "valeurs"]]
-            return fields + [StrField(name="champs"), StrField(name="valeurs")]
-        return fields
-
-
 @admin.register(SuggestionGroupe)
 class SuggestionGroupeAdmin(
     DjangoQLSearchMixin, NotEditableMixin, NotSelfDeletableMixin, QuerysetFilterAdmin
 ):
+    class SuggestionGroupeQLSchema(DjangoQLSchema):
+        def get_fields(self, model):
+            """Surcharge pour exposer les relations et champs personnalisés."""
+            fields = super().get_fields(model)
+
+            # Force string field for champs and valeurs in SuggestionUnitaire
+            if model == SuggestionUnitaire:
+                return [
+                    field for field in fields if field not in ["champs", "valeurs"]
+                ] + [StrField(name="champs"), StrField(name="valeurs")]
+            return fields
+
     djangoql_completion_enabled_by_default = True
     djangoql_schema = SuggestionGroupeQLSchema
 
@@ -232,9 +231,9 @@ class SuggestionGroupeAdmin(
 
     search_fields = ["contexte", "metadata"]
     list_display = [
-        "id",
         "groupe_de_suggestions",
     ]
+    list_display_links = None
     readonly_fields = ["cree_le", "modifie_le"]
     inlines = [SuggestionUnitaireInline]
     list_filter = [
