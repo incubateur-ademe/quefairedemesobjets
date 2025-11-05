@@ -437,6 +437,12 @@ class SuggestionGroupe(TimestampedModel):
         verbose_name="Metadata de la cohorte, données statistiques",
     )
 
+    def __str__(self) -> str:
+        libelle = self.suggestion_cohorte.identifiant_action
+        if self.acteur:
+            libelle += f" - {self.acteur.identifiant_unique}"
+        return libelle
+
 
 class SuggestionUnitaire(TimestampedModel):
 

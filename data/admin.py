@@ -1,10 +1,11 @@
 import logging
 
 from django.contrib import admin, messages
+from django.db.models import Count
 from django.template.loader import render_to_string
 from django.utils.html import format_html
 from djangoql.admin import DjangoQLSearchMixin
-from djangoql.schema import DjangoQLSchema, StrField
+from djangoql.schema import DjangoQLSchema, IntField, StrField
 
 from core.admin import NotEditableMixin, NotSelfDeletableMixin, QuerysetFilterAdmin
 from data.models.suggestion import (
@@ -215,6 +216,13 @@ class SuggestionGroupeAdmin(
             """Surcharge pour exposer les relations et champs personnalisés."""
             fields = super().get_fields(model)
 
+            if model == SuggestionGroupe:
+                return [
+                    field
+                    for field in fields
+                    if field not in ["suggestion_unitaires_count"]
+                ] + [IntField(name="suggestion_unitaires_count")]
+
             # Force string field for champs and valeurs in SuggestionUnitaire
             if model == SuggestionUnitaire:
                 return [
@@ -248,11 +256,11 @@ class SuggestionGroupeAdmin(
             "acteur",
             "revision_acteur",
             "revision_acteur__parent",
-        )
+        ).annotate(suggestion_unitaires_count=Count("suggestion_unitaires"))
 
     # actions = [mark_as_rejected, mark_as_toproceed]
     def groupe_de_suggestions(self, obj):
-        template_name = "data/_partials/suggestion_groupe_details.html"
+        template_name = "data/_partials/suggestion_groupe_row_type_source.html"
         template_context = {
             "suggestion_groupe": obj,
         }
