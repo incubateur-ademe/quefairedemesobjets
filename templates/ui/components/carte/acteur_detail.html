@@ -39,6 +39,7 @@ data-search-solution-form-target="acteurDetailsPanel"
 data-acteur-details-draggable-value="{{ mode_liste|yesno:"false,true" }}"
 data-acteur-details-draggable-value="true"
 data-acteur-details-map-container-id-value="{% main_frame_id %}"
+data-action="keydown.esc@window->acteur-details#hide:stop"
 >
   {# Acteur details #}
   {# Handle visible only on mobile. It is used to drag the panel #}

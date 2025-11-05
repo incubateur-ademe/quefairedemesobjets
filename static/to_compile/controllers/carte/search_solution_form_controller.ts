@@ -169,7 +169,9 @@ class SearchFormController extends Controller<HTMLFormElement> {
   }
 
   updateBboxInput(event) {
-    this.bboxTarget.value = JSON.stringify(event.detail)
+    if (this.hasBboxTarget) {
+      this.bboxTarget.value = JSON.stringify(event.detail)
+    }
   }
 
   displayDigitalActeur(event) {
