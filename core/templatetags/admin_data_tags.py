@@ -187,9 +187,8 @@ def getattr_filter(obj, attr):
     Template filter pour accéder dynamiquement à un attribut d'un objet.
     Usage: {{ object|getattr:attribute_name }}
     """
-    import builtins
 
     try:
-        return builtins.getattr(obj, attr, None)
+        return getattr(obj, attr, None)
     except (AttributeError, TypeError):
         return None
