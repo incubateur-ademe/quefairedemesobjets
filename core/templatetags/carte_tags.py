@@ -117,6 +117,7 @@ def acteur_pinpoint_tag(
     carte_config=None,
     sous_categorie_id=None,
     counter=None,
+    force_visible=False,
 ):
     """
     Template tags to display the acteur's pinpoint after increasing context with
