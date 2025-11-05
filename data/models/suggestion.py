@@ -441,6 +441,20 @@ class SuggestionGroupe(TimestampedModel):
             libelle += f" - {self.acteur.identifiant_unique}"
         return libelle
 
+    def get_suggestion_unitaires_by_champs(self) -> dict[tuple, list]:
+        champs_modifies = {
+            tuple(suggestion_unitaire.champs)
+            for suggestion_unitaire in self.suggestion_unitaires.all()
+        }
+        return {
+            champs: [
+                suggestion_unitaire
+                for suggestion_unitaire in self.suggestion_unitaires.all()
+                if set(tuple(suggestion_unitaire.champs)) == set(champs)
+            ]
+            for champs in champs_modifies
+        }
+
 
 class SuggestionUnitaire(TimestampedModel):
     class Meta:
