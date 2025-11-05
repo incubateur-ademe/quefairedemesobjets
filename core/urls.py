@@ -53,6 +53,7 @@ sitemaps = {
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", api.urls),
+    path("data/", include(("data.urls", "data"), namespace="data")),
     path("robots.txt", robots_txt),
     path("embed/backlink", backlink),
     path(
