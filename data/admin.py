@@ -258,13 +258,17 @@ class SuggestionGroupeAdmin(
             "revision_acteur__parent",
         ).annotate(suggestion_unitaires_count=Count("suggestion_unitaires"))
 
-    # actions = [mark_as_rejected, mark_as_toproceed]
     def groupe_de_suggestions(self, obj):
         template_name = "data/_partials/suggestion_groupe_row_type_source.html"
-        template_context = {
-            "suggestion_groupe": obj,
-        }
-        return render_to_string(template_name, template_context)
+        return render_to_string(
+            template_name,
+            {
+                "suggestion_groupe": obj,
+                "suggestion_unitaires_by_champs": (
+                    obj.get_suggestion_unitaires_by_champs()
+                ),
+            },
+        )
 
 
 @admin.register(SuggestionUnitaire)
