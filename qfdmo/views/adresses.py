@@ -183,7 +183,8 @@ class SearchActeursView(
         # Manage the selection of sous_categorie_objet and actions
         acteurs = self._acteurs_from_sous_categorie_objet_and_actions()
         bbox, acteurs = self._handle_scoped_acteurs(acteurs, kwargs)
-        paginated_acteurs = Paginator(acteurs, self._get_max_displayed_acteurs())
+        page_size = 10
+        paginated_acteurs = Paginator(acteurs, page_size)
         paginated_acteurs_obj = paginated_acteurs.page(self.request.GET.get("page", 1))
         kwargs.update(
             acteurs=acteurs,
