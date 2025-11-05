@@ -60,6 +60,11 @@ class CarteConfigFormMixin:
         if not self.carte_config_initial_mapping:
             return
 
+        # Get all ManyToMany field names from CarteConfig
+        many_to_many_fields_names = [
+            field.name for field in carte_config.__class__._meta.many_to_many
+        ]
+
         for (
             form_field_name,
             config_field_name,
@@ -75,8 +80,14 @@ class CarteConfigFormMixin:
             # Get the value from the config
             config_value = getattr(carte_config, config_field_name)
 
+            # Handle ManyToMany fields specially
+            if config_field_name in many_to_many_fields_names:
+                # For ManyToMany fields, check if there are any related objects
+                if config_value.exists():
+                    # Set the initial value to the queryset or list of objects
+                    self.fields[form_field_name].initial = config_value.all()
             # Only override if there's a meaningful value
-            if config_value is not None and config_value != "":
+            elif config_value is not None and config_value != "":
                 # Set the initial value on the field instance
                 self.fields[form_field_name].initial = config_value
 

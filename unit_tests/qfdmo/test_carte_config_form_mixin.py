@@ -364,3 +364,36 @@ class TestCarteConfigFormMixin:
 
         form = EmptyMappingsForm()
         assert form is not None
+
+    def test_manytomany_initial_mapping_can_be_rendered(
+        self, carte_config, label_qualites
+    ):
+        """Test that ManyToMany fields in initial_mapping can be rendered without
+        TypeError"""
+
+        class ManyToManyInitialForm(CarteConfigFormMixin, forms.Form):
+            carte_config_initial_mapping = {
+                "label_qualite": "label_qualite",
+            }
+
+            label_qualite = forms.ModelMultipleChoiceField(
+                queryset=LabelQualite.objects.all(),
+                required=False,
+            )
+
+        # Create form with carte_config that has ManyToMany relations
+        form = ManyToManyInitialForm(carte_config=carte_config)
+
+        # The initial value should be set to the queryset
+        assert form.fields["label_qualite"].initial is not None
+
+        # Verify we can render the form without errors (this was failing before)
+        # This simulates what happens in templates when accessing field.subwidgets
+        for field in form:
+            # This triggers the error path that was failing:
+            # BoundField.subwidgets -> build_widget_attrs -> initial property
+            # -> get_initial_for_field -> value() on ManyRelatedManager
+            str(field)  # Trigger rendering
+
+        # If we got here, rendering succeeded
+        assert True
