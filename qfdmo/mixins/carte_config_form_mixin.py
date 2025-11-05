@@ -33,20 +33,52 @@ class CarteConfigFormMixin:
             CarteConfigInitialMappingError: If carte_config_initial_mapping references
                 a non-existent CarteConfig field.
         """
-        self.carte_config = carte_config
+        # Validate mappings on form class instantiation
+        self._validate_carte_config_mappings()
 
-        # Prepare initial values before calling super().__init__()
-        if self.carte_config:
-            self._validate_carte_config_mappings()
-            initial = kwargs.get("initial", {})
-            self._override_initial_from_carte_config(self.carte_config, initial)
-            kwargs["initial"] = initial
+        self.carte_config = carte_config
 
         super().__init__(*args, **kwargs)
 
-        # Override choices after form is initialized (self.fields is available)
+        # Override choices and field initial values after form is initialized
+        # (self.fields is available)
         if self.carte_config:
             self._override_choices_from_carte_config(self.carte_config)
+            self._override_field_initial_from_carte_config(self.carte_config)
+
+    def _override_field_initial_from_carte_config(
+        self, carte_config: CarteConfig
+    ) -> None:
+        """Override field.initial values after form initialization.
+
+        This is needed because Django doesn't override field-level initial values
+        with form-level initial values when the field has initial= defined.
+
+        Args:
+            carte_config: CarteConfig instance to get values from.
+        """
+        if not self.carte_config_initial_mapping:
+            return
+
+        for (
+            form_field_name,
+            config_field_name,
+        ) in self.carte_config_initial_mapping.items():
+            # Check if the form field exists
+            if form_field_name not in self.fields:
+                continue
+
+            # Check if the config field exists
+            if not hasattr(carte_config, config_field_name):
+                continue
+
+            # Get the value from the config
+            config_value = getattr(carte_config, config_field_name)
+
+            # Only override if there's a meaningful value
+            if config_value is not None and config_value != "":
+                # Set the initial value on the field instance
+                self.fields[form_field_name].initial = config_value
 
     def _override_choices_from_carte_config(self, carte_config: CarteConfig) -> None:
         """Override queryset choices for ModelChoiceField/ModelMultipleChoiceField
@@ -89,47 +121,6 @@ class CarteConfigFormMixin:
                 ].queryset.filter(
                     id__in=config_field_value.all().values_list("id", flat=True)
                 )
-
-    def _override_initial_from_carte_config(
-        self, carte_config: CarteConfig, initial: dict
-    ) -> None:
-        """Override initial values for fields based on CarteConfig fields.
-
-        Args:
-            carte_config: CarteConfig instance to get values from.
-            initial: Initial values dict to mutate (modified in-place).
-        """
-        if not self.carte_config_initial_mapping:
-            return
-
-        for (
-            form_field_name,
-            config_field_name,
-        ) in self.carte_config_initial_mapping.items():
-            # Check if the form field exists
-            if form_field_name not in self.base_fields:
-                continue
-
-            # Check if the config field exists
-            if not hasattr(carte_config, config_field_name):
-                continue
-
-            # Get the value from the config
-            config_value = getattr(carte_config, config_field_name)
-
-            # Only override if there's a meaningful value
-            if config_value is not None and config_value != "":
-                field = self.base_fields[form_field_name]
-
-                # Handle ModelChoiceField and ModelMultipleChoiceField
-                if isinstance(field, (ModelChoiceField, ModelMultipleChoiceField)):
-                    # For many-to-many relationships, get the queryset
-                    initial[form_field_name] = field.queryset.filter(
-                        id__in=config_value.all().values_list("id", flat=True)
-                    )
-                else:
-                    # For simple fields, set the initial value directly
-                    initial[form_field_name] = config_value
 
     def _validate_carte_config_mappings(self) -> None:
         """Validate that all mappings reference existing CarteConfig fields.

@@ -575,10 +575,12 @@ class GroupeActionForm(GetFormMixin, DsfrBaseForm):
     pass
 
 
-class ViewModeForm(CarteConfigFormMixin, GetFormMixin, DsfrBaseForm):
+class ViewModeForm(AutoSubmitMixin, GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
     carte_config_initial_mapping = {
         "view": "mode_affichage",
     }
+
+    autosubmit_fields = ["view"]
 
     class ViewModeSegmentedControlChoices(TextChoices, SegmentedControlChoices):
         CARTE = {
@@ -599,9 +601,6 @@ class ViewModeForm(CarteConfigFormMixin, GetFormMixin, DsfrBaseForm):
         initial=CarteConfig.ModesAffichage.CARTE,
         widget=SegmentedControl(
             extra_classes="max-md:fr-segmented--sm",
-            attrs={
-                "data-action": "search-solution-form#submitForm",
-            },
             extended_choices=ViewModeSegmentedControlChoices,
         ),
     )

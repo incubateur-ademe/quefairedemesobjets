@@ -11,7 +11,7 @@ from dsfr.forms import DsfrBaseForm
 
 from qfdmd.forms import SearchForm
 from qfdmd.models import Suggestion, Synonyme
-from qfdmo.forms import LegendeForm, NextAutocompleteInput
+from qfdmo.forms import LegendeForm, NextAutocompleteInput, ViewModeForm
 from qfdmo.models.acteur import ActeurType, DisplayedActeur, DisplayedPropositionService
 from qfdmo.models.action import Action
 from qfdmo.models.config import CarteConfig
@@ -353,7 +353,7 @@ class FiltresPreview(LookbookPreview):
 
 
 class ModalsPreview(LookbookPreview):
-    def intégration(self, **kwargs):
+    def integration(self, **kwargs):
         """
         # Modal de partage
         La modal ci-dessous ne contient pas de code car celle-ci est
@@ -395,7 +395,7 @@ class FormulairesPreview(LookbookPreview):
         context = {"form1": form1, "form2": form2}
         return template.render(Context(context))
 
-    def autocomplétion(self, **kwargs):
+    def autocompletion(self, **kwargs):
         class AutocompleteForm(DsfrBaseForm):
             synonyme = forms.ModelChoiceField(
                 queryset=Synonyme.objects.all(),
@@ -410,6 +410,16 @@ class FormulairesPreview(LookbookPreview):
             )
 
         form = AutocompleteForm()
+        template = Template("{{ form }}")
+        context = {"form": form}
+        return template.render(Context(context))
+
+    def mode_carte_liste(self, **kwargs):
+        """
+        # Formulaire de sélection du mode d'affichage
+        Segmented control permettant de basculer entre la vue carte et la vue liste
+        """
+        form = ViewModeForm()
         template = Template("{{ form }}")
         context = {"form": form}
         return template.render(Context(context))

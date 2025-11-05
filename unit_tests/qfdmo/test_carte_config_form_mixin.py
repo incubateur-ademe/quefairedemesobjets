@@ -97,38 +97,25 @@ class TestCarteConfigFormMixin:
         assert initial_count1 == initial_count2
         assert form2.fields["mode"].initial == "carte"
 
-    def test_apply_carte_config_overrides_with_none(self, groupe_actions):
-        """Test that applying None carte_config doesn't change the form"""
-        form = SampleTestForm()
-
-        # Get initial queryset count
-        initial_count = form.fields["groupe_action"].queryset.count()
-
-        # Apply with None
-        result = form.apply_carte_config_overrides(None)
-
-        # Should return self
-        assert result is form
-
-        # Queryset should be unchanged
-        assert form.fields["groupe_action"].queryset.count() == initial_count
-
     def test_override_choices_filters_queryset(
         self, carte_config, groupe_actions, label_qualites
     ):
         """Test that choices override correctly filters the queryset"""
-        form = SampleTestForm()
-
-        # Before override - should have at least the test items
-        initial_groupe_action_count = form.fields["groupe_action"].queryset.count()
-        initial_label_qualite_count = form.fields["label_qualite"].queryset.count()
+        # Form without carte_config
+        form_without_config = SampleTestForm()
+        initial_groupe_action_count = form_without_config.fields[
+            "groupe_action"
+        ].queryset.count()
+        initial_label_qualite_count = form_without_config.fields[
+            "label_qualite"
+        ].queryset.count()
 
         # Verify test items exist in queryset
         assert initial_groupe_action_count >= len(groupe_actions)
         assert initial_label_qualite_count >= len(label_qualites)
 
-        # Apply overrides
-        form.apply_carte_config_overrides(carte_config)
+        # Form with carte_config - should have filtered querysets
+        form = SampleTestForm(carte_config=carte_config)
 
         # After override - should only have items from carte_config
         assert form.fields["groupe_action"].queryset.count() == 3
@@ -143,15 +130,12 @@ class TestCarteConfigFormMixin:
 
     def test_override_initial_value(self, carte_config):
         """Test that initial value override works correctly"""
-        form = SampleTestForm()
+        # Form without carte_config
+        form_without = SampleTestForm()
+        assert form_without.fields["mode"].initial == "carte"
 
-        # Before override
-        assert form.fields["mode"].initial == "carte"
-
-        # Apply overrides
-        form.apply_carte_config_overrides(carte_config)
-
-        # After override - should have value from carte_config
+        # Form with carte_config - should have value from carte_config
+        form = SampleTestForm(carte_config=carte_config)
         assert form.fields["mode"].initial == "liste"
 
     def test_override_with_empty_carte_config_relations(self):
@@ -166,11 +150,11 @@ class TestCarteConfigFormMixin:
         GroupeActionFactory(code="action_1", afficher=True)
         GroupeActionFactory(code="action_2", afficher=True)
 
-        form = SampleTestForm()
-        initial_count = form.fields["groupe_action"].queryset.count()
+        form_without_config = SampleTestForm()
+        initial_count = form_without_config.fields["groupe_action"].queryset.count()
 
-        # Apply overrides
-        form.apply_carte_config_overrides(config)
+        # Form with empty carte_config
+        form = SampleTestForm(carte_config=config)
 
         # Queryset should be unchanged because carte_config has no relations
         assert form.fields["groupe_action"].queryset.count() == initial_count
@@ -194,11 +178,13 @@ class TestCarteConfigFormMixin:
                 required=False,
             )
 
-        form = PartialForm()
-        initial_label_count = form.fields["label_qualite"].queryset.count()
+        form_without_config = PartialForm()
+        initial_label_count = form_without_config.fields[
+            "label_qualite"
+        ].queryset.count()
 
-        # Apply overrides
-        form.apply_carte_config_overrides(carte_config)
+        # Form with carte_config
+        form = PartialForm(carte_config=carte_config)
 
         # groupe_action should be filtered
         assert form.fields["groupe_action"].queryset.count() == 3
@@ -223,10 +209,8 @@ class TestCarteConfigFormMixin:
             nom="Test", slug="test", mode_affichage="carte"
         )
 
-        form = MixedForm()
-
         # Should not raise an error
-        form.apply_carte_config_overrides(config)
+        form = MixedForm(carte_config=config)
 
         # Field should be unchanged
         assert len(form.fields["regular_choice"].choices) == 2
@@ -239,27 +223,17 @@ class TestCarteConfigFormMixin:
             mode_affichage="carte",  # Use valid value since field is NOT NULL
         )
 
-        form = SampleTestForm()
-        original_initial = form.fields["mode"].initial
+        form_without_config = SampleTestForm()
+        original_initial = form_without_config.fields["mode"].initial
 
         # Temporarily set the value to empty string to test empty value handling
         config.mode_affichage = ""
 
-        # Apply overrides
-        form.apply_carte_config_overrides(config)
+        # Form with config that has empty value
+        form = SampleTestForm(carte_config=config)
 
         # Initial should be unchanged because config value is empty string
         assert form.fields["mode"].initial == original_initial
-
-    def test_method_chaining(self, carte_config):
-        """Test that apply_carte_config_overrides returns self for chaining"""
-        form = SampleTestForm()
-
-        result = form.apply_carte_config_overrides(carte_config)
-
-        assert result is form
-        # And verify it actually applied the overrides
-        assert form.fields["mode"].initial == "liste"
 
     def test_override_with_nonexistent_config_field(self):
         """Test that mapping to nonexistent CarteConfig field raises error

@@ -244,7 +244,7 @@ class CarteConfigView(DetailView, CarteSearchActeursView):
 
     @override
     def _get_carte_config(self):
-        return self.object
+        return self.get_object()
 
     def get_sous_categorie_filter(self):
         sous_categories_from_request = list(
