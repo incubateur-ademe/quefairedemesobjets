@@ -199,12 +199,6 @@ class LegendeForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
         To new format:
             GroupeAction queryset containing the related groupe_action
             for each action code.
-
-        Args:
-            request_data: Dictionary-like object containing request parameters
-
-        Returns:
-            GroupeAction queryset or None if action_displayed is not present
         """
         # Check if legacy parameter exists
         action_displayed = request_data.get("action_displayed", "")

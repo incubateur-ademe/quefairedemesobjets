@@ -53,8 +53,39 @@ class CarteConfigFormMixin:
         if self.carte_config:
             self._override_choices_from_carte_config(self.carte_config)
             self._override_field_initial_from_carte_config(self.carte_config)
+
         # Apply legacy parameter mappings if any
         self._apply_legacy_choices_mapping()
+
+    def _restrict_field_choices_to_queryset(
+        self,
+        form_field_name: str,
+        source_queryset,
+    ) -> None:
+        """Restrict a form field's choices to only include IDs from a source queryset.
+
+        This is a reusable helper that restricts a ModelChoiceField or
+        ModelMultipleChoiceField's queryset based on IDs present in another queryset.
+        """
+        # Only proceed if source queryset has values
+        if not source_queryset.exists():
+            return
+
+        # Check if the form field exists
+        if form_field_name not in self.fields:
+            return
+
+        # Check if it's a model choice field
+        if not isinstance(
+            self.fields[form_field_name],
+            (ModelChoiceField, ModelMultipleChoiceField),
+        ):
+            return
+
+        # Filter the form field's queryset to only include IDs from source
+        self.fields[form_field_name].queryset = self.fields[
+            form_field_name
+        ].queryset.filter(id__in=source_queryset.values_list("id", flat=True))
 
     def _override_field_initial_from_carte_config(
         self, carte_config: CarteConfig
@@ -134,14 +165,10 @@ class CarteConfigFormMixin:
             # Get the related manager for the config field
             config_field_value = getattr(carte_config, config_field_name)
 
-            # Only override if there are values in the config field
-            if config_field_value.exists():
-                # Filter the form field's queryset
-                self.fields[form_field_name].queryset = self.fields[
-                    form_field_name
-                ].queryset.filter(
-                    id__in=config_field_value.all().values_list("id", flat=True)
-                )
+            # Use the helper to restrict the field's choices
+            self._restrict_field_choices_to_queryset(
+                form_field_name, config_field_value.all()
+            )
 
     def _apply_legacy_choices_mapping(self) -> None:
         """Apply legacy parameter mappings to convert old request parameters
@@ -156,40 +183,24 @@ class CarteConfigFormMixin:
         request_data = getattr(self, "_data", {})
 
         for form_field_name, callable_func in self.legacy_choices_mapping.items():
-            # Check if the form field exists
-            if form_field_name not in self.fields:
-                continue
-
-            # Check if the field is a ModelChoiceField or ModelMultipleChoiceField
-            if not isinstance(
-                self.fields[form_field_name],
-                (ModelChoiceField, ModelMultipleChoiceField),
-            ):
-                continue
-
             # Call the callable with request data
             try:
                 result = callable_func(request_data)
 
-                # If we got a result, apply it
+                # If we got a result, use the helper to restrict the choices
                 if result is not None:
-                    self.fields[form_field_name].queryset = self.fields[
-                        form_field_name
-                    ].queryset.filter(id__in=result.values_list("id", flat=True))
-            except Exception:
+                    self._restrict_field_choices_to_queryset(
+                        form_field_name, result[:1]
+                    )
+
+            except Exception as exception:
+                print(exception)
                 # If the callable fails, silently continue
                 # (backward compatibility should be forgiving)
                 continue
 
     def _validate_carte_config_mappings(self) -> None:
-        """Validate that all mappings reference existing CarteConfig fields.
-
-        Raises:
-            CarteConfigChoicesMappingError: If carte_config_choices_mapping contains
-                invalid CarteConfig field names.
-            CarteConfigInitialMappingError: If carte_config_initial_mapping contains
-                invalid CarteConfig field names.
-        """
+        """Validate that all mappings reference existing CarteConfig fields."""
         from qfdmo.models import CarteConfig
 
         # Get all field names from CarteConfig
