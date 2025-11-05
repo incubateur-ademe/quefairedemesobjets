@@ -5,5 +5,5 @@ Label de filtre pour les lieux certifiés Répar'Acteurs.
 ## Comment l'utiliser
 
 ```django
-{% include "ui/components/filtres/reparacteurs/label.html" %}
+{% include "ui/components/formulaire/filtres/reparacteurs/label.html" %}
 ```

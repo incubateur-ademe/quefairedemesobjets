@@ -117,14 +117,16 @@ class FormulaireForm(AddressesForm):
                 "data-search-solution-form-target": "reparerFilter",
             }
         ),
-        label=render_to_string("ui/components/filtres/reparacteurs/label.html"),
+        label=render_to_string(
+            "ui/components/formulaire/filtres/reparacteurs/label.html"
+        ),
         label_suffix="",
         required=False,
     )
 
     ess = forms.BooleanField(
         widget=forms.CheckboxInput(attrs={"class": "fr-checkbox fr-m-1v"}),
-        label=render_to_string("ui/components/filtres/ess/label.html"),
+        label=render_to_string("ui/components/formulaire/filtres/ess/label.html"),
         label_suffix="",
         required=False,
     )
@@ -136,7 +138,7 @@ class FormulaireForm(AddressesForm):
                 "data-search-solution-form-target": "reparerFilter",
             },
         ),
-        label=render_to_string("ui/components/filtres/bonus/label.html"),
+        label=render_to_string("ui/components/formulaire/filtres/bonus/label.html"),
         label_suffix="",
         required=False,
     )
