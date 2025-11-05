@@ -14,6 +14,8 @@ class GetFormMixin(forms.Form):
         *args: Any,
         **kwargs: Any,
     ) -> None:
+        self._data = data
+
         if prefix:
             self.prefix = prefix
 

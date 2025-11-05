@@ -1,3 +1,5 @@
+from typing import Callable
+
 from django.forms import ModelChoiceField, ModelMultipleChoiceField
 
 from core.exceptions import (
@@ -19,6 +21,12 @@ class CarteConfigFormMixin:
     # Mapping between form field names and CarteConfig field names
     # for initial values override.
     carte_config_initial_mapping: dict[str, str] = {}
+
+    # Mapping between form field names and callables that process
+    # legacy request parameters to convert them to the new format.
+    # Each callable receives (request_data: dict) and returns a queryset
+    # or list of model instances to set as the field's queryset/choices.
+    legacy_choices_mapping: dict[str, Callable] = {}
 
     def __init__(self, *args, carte_config: CarteConfig | None = None, **kwargs):
         """Initialize the form and apply carte_config overrides if provided.
@@ -45,6 +53,8 @@ class CarteConfigFormMixin:
         if self.carte_config:
             self._override_choices_from_carte_config(self.carte_config)
             self._override_field_initial_from_carte_config(self.carte_config)
+        # Apply legacy parameter mappings if any
+        self._apply_legacy_choices_mapping()
 
     def _override_field_initial_from_carte_config(
         self, carte_config: CarteConfig
@@ -132,6 +142,44 @@ class CarteConfigFormMixin:
                 ].queryset.filter(
                     id__in=config_field_value.all().values_list("id", flat=True)
                 )
+
+    def _apply_legacy_choices_mapping(self) -> None:
+        """Apply legacy parameter mappings to convert old request parameters
+        to new field formats.
+
+        For each mapping in legacy_choices_mapping, calls the provided callable
+        with the request data to get the appropriate queryset/choices for the field.
+        """
+        if not self.legacy_choices_mapping:
+            return
+
+        request_data = getattr(self, "_data", {})
+
+        for form_field_name, callable_func in self.legacy_choices_mapping.items():
+            # Check if the form field exists
+            if form_field_name not in self.fields:
+                continue
+
+            # Check if the field is a ModelChoiceField or ModelMultipleChoiceField
+            if not isinstance(
+                self.fields[form_field_name],
+                (ModelChoiceField, ModelMultipleChoiceField),
+            ):
+                continue
+
+            # Call the callable with request data
+            try:
+                result = callable_func(request_data)
+
+                # If we got a result, apply it
+                if result is not None:
+                    self.fields[form_field_name].queryset = self.fields[
+                        form_field_name
+                    ].queryset.filter(id__in=result.values_list("id", flat=True))
+            except Exception:
+                # If the callable fails, silently continue
+                # (backward compatibility should be forgiving)
+                continue
 
     def _validate_carte_config_mappings(self) -> None:
         """Validate that all mappings reference existing CarteConfig fields.

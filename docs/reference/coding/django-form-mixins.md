@@ -39,12 +39,12 @@ form.apply_carte_config_overrides(carte_config)
 
 ```python
 # LegendeForm - filters available action groups
-class LegendeForm(CarteConfigFormMixin, GetFormMixin, DsfrBaseForm):
+class LegendeForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
     carte_config_choices_mapping = {"groupe_action": "groupe_action"}
     groupe_action = GroupeActionChoiceField(...)
 
 # ViewModeForm - sets initial display mode
-class ViewModeForm(CarteConfigFormMixin, GetFormMixin, DsfrBaseForm):
+class ViewModeForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
     carte_config_initial_mapping = {"view": "mode_affichage"}
     view = forms.ChoiceField(initial=CarteConfig.ModesAffichage.CARTE)
 ```

@@ -28,6 +28,8 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
         {# Near by addresses #}
         {% if address_ok %}
             {% include "ui/components/carte/shared/_search_in_zone.html" %}
+            {% include "ui/components/carte/legend.html" %}
+            {% include "ui/components/carte/buttons/ajouter_un_lieu.html" %}
         {% endif %}
         <div
             data-map-target="mapContainer"
@@ -41,13 +43,9 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
         </div>
 
         {% if address_ok %}
-            {% if is_carte %}
-                {% include "ui/components/carte/legend.html" %}
-                {% include "ui/components/carte/buttons/ajouter_un_lieu.html" %}
-                <div class="qf-absolute qf-left-0 qf-right-0 qf-bottom-0 qf-text-center qf-bg-white lg:qf-hidden">
-                    {% include "ui/components/carte/_declaration_accessibilite.html" %}
-                </div>
-            {% endif %}
+            <div class="qf-absolute qf-left-0 qf-right-0 qf-bottom-0 qf-text-center qf-bg-white lg:qf-hidden">
+                {% include "ui/components/carte/_declaration_accessibilite.html" %}
+            </div>
 
             {% if not acteurs %}
                 {% include "ui/components/carte/shared/disclaimers/no_local_solution.html" %}

@@ -397,3 +397,145 @@ class TestCarteConfigFormMixin:
 
         # If we got here, rendering succeeded
         assert True
+
+    def test_legacy_choices_mapping_with_queryset_result(self, groupe_actions):
+        """Test that legacy_choices_mapping correctly applies when callable returns
+        a queryset"""
+
+        def legacy_mapper(request_data):
+            """Map legacy parameter to first 2 groupe_actions"""
+            if "legacy_param" in request_data:
+                return GroupeAction.objects.filter(
+                    id__in=[ga.id for ga in groupe_actions[:2]]
+                )
+            return None
+
+        class LegacyForm(CarteConfigFormMixin, forms.Form):
+            legacy_choices_mapping = {
+                "groupe_action": legacy_mapper,
+            }
+
+            groupe_action = forms.ModelMultipleChoiceField(
+                queryset=GroupeAction.objects.all(),
+                required=False,
+            )
+
+        # Form without legacy parameter
+        form_without = LegacyForm()
+        assert form_without.fields["groupe_action"].queryset.count() == len(
+            groupe_actions
+        )
+
+        # Form with legacy parameter
+        form_with = LegacyForm(data={"legacy_param": "some_value"})
+        assert form_with.fields["groupe_action"].queryset.count() == 2
+
+    def test_legacy_choices_mapping_with_list_result(self, groupe_actions):
+        """Test that legacy_choices_mapping correctly applies when callable returns
+        a list"""
+
+        def legacy_mapper(request_data):
+            """Map legacy parameter to list of objects"""
+            if "legacy_param" in request_data:
+                return groupe_actions[:2]
+            return None
+
+        class LegacyForm(CarteConfigFormMixin, forms.Form):
+            legacy_choices_mapping = {
+                "groupe_action": legacy_mapper,
+            }
+
+            groupe_action = forms.ModelMultipleChoiceField(
+                queryset=GroupeAction.objects.all(),
+                required=False,
+            )
+
+        # Form without legacy parameter
+        form_without = LegacyForm()
+        assert form_without.fields["groupe_action"].queryset.count() == len(
+            groupe_actions
+        )
+
+        # Form with legacy parameter
+        form_with = LegacyForm(data={"legacy_param": "some_value"})
+        assert form_with.fields["groupe_action"].queryset.count() == 2
+
+    def test_legacy_choices_mapping_with_none_result(self, groupe_actions):
+        """Test that legacy_choices_mapping doesn't modify field when callable
+        returns None"""
+
+        def legacy_mapper(request_data):
+            """Return None when legacy parameter not present"""
+            return None
+
+        class LegacyForm(CarteConfigFormMixin, forms.Form):
+            legacy_choices_mapping = {
+                "groupe_action": legacy_mapper,
+            }
+
+            groupe_action = forms.ModelMultipleChoiceField(
+                queryset=GroupeAction.objects.all(),
+                required=False,
+            )
+
+        # Form should have unmodified queryset
+        form = LegacyForm(data={"some_param": "value"})
+        assert form.fields["groupe_action"].queryset.count() == len(groupe_actions)
+
+    def test_legacy_choices_mapping_with_exception(self, groupe_actions):
+        """Test that legacy_choices_mapping silently continues when callable raises
+        exception"""
+
+        def legacy_mapper(request_data):
+            """Raise an exception"""
+            raise ValueError("Something went wrong")
+
+        class LegacyForm(CarteConfigFormMixin, forms.Form):
+            legacy_choices_mapping = {
+                "groupe_action": legacy_mapper,
+            }
+
+            groupe_action = forms.ModelMultipleChoiceField(
+                queryset=GroupeAction.objects.all(),
+                required=False,
+            )
+
+        # Form should still be created without raising exception
+        form = LegacyForm(data={"legacy_param": "value"})
+        # Queryset should remain unchanged
+        assert form.fields["groupe_action"].queryset.count() == len(groupe_actions)
+
+    def test_legacy_choices_mapping_with_non_model_field(self):
+        """Test that legacy_choices_mapping ignores non-ModelChoiceField fields"""
+
+        def legacy_mapper(request_data):
+            """Return something for a regular field"""
+            return ["value1", "value2"]
+
+        class LegacyForm(CarteConfigFormMixin, forms.Form):
+            legacy_choices_mapping = {
+                "regular_field": legacy_mapper,
+            }
+
+            regular_field = forms.ChoiceField(
+                choices=[("a", "A"), ("b", "B")],
+                required=False,
+            )
+
+        # Should not raise error and field should be unchanged
+        form = LegacyForm(data={"legacy_param": "value"})
+        assert len(form.fields["regular_field"].choices) == 2
+
+    def test_legacy_choices_mapping_empty(self, groupe_actions):
+        """Test that empty legacy_choices_mapping doesn't cause issues"""
+
+        class LegacyForm(CarteConfigFormMixin, forms.Form):
+            legacy_choices_mapping = {}
+
+            groupe_action = forms.ModelMultipleChoiceField(
+                queryset=GroupeAction.objects.all(),
+                required=False,
+            )
+
+        form = LegacyForm(data={"param": "value"})
+        assert form.fields["groupe_action"].queryset.count() == len(groupe_actions)

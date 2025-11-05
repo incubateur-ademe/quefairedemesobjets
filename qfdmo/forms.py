@@ -170,9 +170,15 @@ class FormulaireForm(AddressesForm):
     )
 
 
-class LegendeForm(CarteConfigFormMixin, GetFormMixin, DsfrBaseForm):
+class LegendeForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
     carte_config_choices_mapping = {
         "groupe_action": "groupe_action",
+    }
+
+    legacy_choices_mapping = {
+        "groupe_action": lambda request_data: LegendeForm._map_action_displayed_to_groupe_action(  # noqa: E501
+            request_data
+        ),
     }
 
     groupe_action = GroupeActionChoiceField(
@@ -183,6 +189,53 @@ class LegendeForm(CarteConfigFormMixin, GetFormMixin, DsfrBaseForm):
         label="",
         initial=GroupeAction.objects.filter(afficher=True),
     )
+
+    @staticmethod
+    def _map_action_displayed_to_groupe_action(request_data):
+        """Map legacy action_displayed parameter to GroupeAction queryset.
+
+        Converts old format:
+            action_displayed=preter|louer|mettreenlocation|donner|echanger|revendre
+        To new format:
+            GroupeAction queryset containing the related groupe_action
+            for each action code.
+
+        Args:
+            request_data: Dictionary-like object containing request parameters
+
+        Returns:
+            GroupeAction queryset or None if action_displayed is not present
+        """
+        # Check if legacy parameter exists
+        action_displayed = request_data.get("action_displayed", "")
+
+        if not action_displayed:
+            return None
+
+        # Split the pipe-separated action codes
+        action_codes = [
+            code.strip() for code in action_displayed.split("|") if code.strip()
+        ]
+
+        if not action_codes:
+            return None
+
+        # Get actions matching these codes
+        actions = Action.objects.filter(code__in=action_codes)
+
+        # Extract unique groupe_action IDs from these actions
+        groupe_action_ids = set()
+        for action in actions:
+            if action.groupe_action_id:
+                groupe_action_ids.add(action.groupe_action_id)
+
+        if not groupe_action_ids:
+            return None
+
+        # Return queryset of GroupeAction objects
+        return GroupeAction.objects.filter(
+            id__in=groupe_action_ids, afficher=True
+        ).order_by("order")
 
     @cached_property
     def visible(self):
@@ -221,7 +274,7 @@ class NextAutocompleteInput(forms.TextInput):
         }
 
 
-class FiltresForm(CarteConfigFormMixin, GetFormMixin, DsfrBaseForm):
+class FiltresForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
     carte_config_initial_mapping = {
         "label_qualite": "label_qualite",
     }

@@ -98,11 +98,7 @@ class CarteSearchActeursView(SearchActeursView):
     def _get_forms(self) -> CarteFormsInstance:
         form_instances: CarteFormsInstance = {}
         for key, form_config in self.forms.items():
-            if self.request.method == "POST":
-                data = self.request.POST
-            else:
-                data = self.request.GET
-
+            data = self.request.GET
             prefix = self._generate_prefix(form_config["prefix"])
             # carte_legende-nom_du_champ
             form = form_config["form"](
@@ -232,10 +228,6 @@ class ProductCarteView(CarteSearchActeursView):
             slug="product", supprimer_branding=True
         )
         return carte_config
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
 
 
 class CarteConfigView(DetailView, CarteSearchActeursView):
