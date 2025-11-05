@@ -1,6 +1,6 @@
 {% load admin_data_tags %}
 
-<h3>{% block suggestion_title %}{{ suggestion_groupe }}{% endblock %}</h3>
+<h3>{% block suggestion_title %}<a href="{% url 'admin:data_suggestiongroupe_change' suggestion_groupe.id %}" rel="noreferrer">{{ suggestion_groupe }}</a> : {{ suggestion_groupe.get_statut_display }}{% endblock %}</h3>
 
 {% block suggestion_details %}
     {% if suggestion_groupe.suggestion_unitaires.count > 0 %}
