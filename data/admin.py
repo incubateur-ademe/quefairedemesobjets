@@ -8,6 +8,7 @@ from djangoql.admin import DjangoQLSearchMixin
 from djangoql.schema import DjangoQLSchema, IntField, StrField
 
 from core.admin import NotEditableMixin, NotSelfDeletableMixin, QuerysetFilterAdmin
+from data.forms import SuggestionGroupeForm
 from data.models.suggestion import (
     Suggestion,
     SuggestionCohorte,
@@ -258,11 +259,17 @@ class SuggestionGroupeAdmin(
             "revision_acteur__parent",
         ).annotate(suggestion_unitaires_count=Count("suggestion_unitaires"))
 
+    def changelist_view(self, request, extra_context=None):
+        self.csrf_token = request.META.get("CSRF_COOKIE")
+        return super().changelist_view(request, extra_context)
+
     def groupe_de_suggestions(self, obj):
         template_name = "data/_partials/suggestion_groupe_row_type_source.html"
         return render_to_string(
             template_name,
             {
+                "csrf_token": self.csrf_token,
+                "form": SuggestionGroupeForm(),
                 "suggestion_groupe": obj,
                 "suggestion_unitaires_by_champs": (
                     obj.get_suggestion_unitaires_by_champs()

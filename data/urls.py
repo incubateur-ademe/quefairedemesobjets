@@ -1,13 +1,13 @@
 from django.urls import path
 
-from . import views
+from data.views import SuggestionGroupeView
 
 app_name = "data"
 
 urlpatterns = [
     path(
-        "suggestion-groupe/<int:suggestion_groupe_id>/refresh/",
-        views.refresh_suggestion_groupe,
-        name="refresh_suggestion_groupe",
+        "suggestion-groupe/<int:suggestion_groupe_id>/",
+        SuggestionGroupeView.as_view(),
+        name="suggestion_groupe",
     ),
 ]

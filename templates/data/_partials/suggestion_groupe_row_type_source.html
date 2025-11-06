@@ -4,10 +4,6 @@
 
 {% block suggestion_details %}
     {% if suggestion_groupe.suggestion_unitaires.count > 0 %}
-
-
-
-
         <div class="fr-table fr-table--bordered">
             <table>
                 <thead>
@@ -46,20 +42,20 @@
                     {% for champs, suggestion_unitaires in suggestion_unitaires_by_champs.items %}
                     <tr>
                         {# get the first suggestion_unitaire with model Acteur #}
-                        <td>{{ champs|join:", " }}</td>
+                        <td>{{ champs|join:" | " }}</td>
                         <td>
                             {% include 'data/_partials/suggestion_groupe_row_type_source_diff_value.html' with model_name="Acteur" champs=champs suggestion_unitaires=suggestion_unitaires %}
                         </td>
 
                         <td>
-                            {% include 'data/_partials/suggestion_groupe_row_type_source_diff_value.html' with model_name="RevisionActeur" champs=champs suggestion_unitaires=suggestion_unitaires editable=True %}
+                            {% include 'data/_partials/suggestion_groupe_row_type_source_diff_value.html' with model_name="RevisionActeur" champs=champs suggestion_unitaires=suggestion_unitaires editable=True identitfiant_unique=identifiant_unique %}
                         </td>
 
                         <td>
                             {% if suggestion_groupe.revision_acteur and suggestion_groupe.revision_acteur.parent %}
                                 {% for champ in suggestion_unitaire.champs %}
                                     {% with value=suggestion_groupe.revision_acteur.parent|getattr:champ %}
-                                        {{ value|default:"-" }}{% if not forloop.last %}, {% endif %}
+                                        {{ value|default:"-" }}{% if not forloop.last %} | {% endif %}
                                     {% endwith %}
                                 {% endfor %}
                             {% else %}
