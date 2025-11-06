@@ -1,0 +1,36 @@
+{% extends "admin/change_list.html" %}
+{% load admin_list admin_urls i18n static %}
+
+{% block content %}
+  <div id="content-main">
+    {% block object-tools %}{{ block.super }}{% endblock %}
+    {% if cl.formset and cl.formset.errors %}
+        <p class="errornote">
+        {% blocktranslate count counter=cl.formset.total_error_count %}Please correct the error below.{% plural %}Please correct the errors below.{% endblocktranslate %}
+        </p>
+        {{ cl.formset.non_form_errors }}
+    {% endif %}
+    <div class="module{% if cl.has_filters %} filtered{% endif %}" id="changelist">
+      <div class="changelist-form-container">
+        {% block search %}{{ block.super }}{% endblock %}
+        {% block date_hierarchy %}{{ block.super }}{% endblock %}
+
+        <!-- Comment form and remove csrf_token even in the comment
+        <form id="changelist-form" method="post"{% if cl.formset and cl.formset.is_multipart %} enctype="multipart/form-data"{% endif %} novalidate>
+        Comment form -->
+        {% if cl.formset %}
+          <div>{{ cl.formset.management_form }}</div>
+        {% endif %}
+
+        {% block result_list %}
+          {{ block.super }}
+        {% endblock result_list %}
+        {% block pagination %}{{ block.super }}{% endblock %}
+        <!-- Comment form
+        </form>
+        Comment form -->
+      </div>
+      {% block filters %}{{ block.super }}{% endblock %}
+    </div>
+  </div>
+{% endblock content %}
