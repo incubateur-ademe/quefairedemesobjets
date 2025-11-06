@@ -3,17 +3,23 @@
 {% if editable %}
 ✏
 {% endif %}
-<div contentEditable="{{ editable|yesno:"true,false" }}" class='qf-inline-block'>
-{% with suggestion_unitaire=suggestion_unitaires|get_first_with_model:model_name %}
-    {% if suggestion_unitaire %}
-        {% for champ in champs %}
-            {% with value=suggestion_groupe.acteur|getattr:champ %}
-                {% display_diff_value_details champ suggestion_unitaire.valeurs|get_at_index:forloop.counter0 value %}
-                {% if not forloop.last %}, {% endif %}
-            {% endwith %}
-        {% endfor %}
-    {% else %}
-        -
-    {% endif %}
-{% endwith %}
+<div
+    contentEditable="{{ editable|yesno:"true,false" }}"
+    class='qf-inline-block'
+    data-suggestion-groupe-id="{{ suggestion_groupe.id }}"
+    data-model-name="{{ model_name }}"
+    data-champs="{{ champs|join:" | " }}"
+    data-action="blur->suggestion-groupe-row#editSuggestionGroupeRow">
+    {% with suggestion_unitaire=suggestion_unitaires|get_first_with_model:model_name %}
+        {% if suggestion_unitaire %}
+            {% for champ in champs %}
+                {% with value=suggestion_groupe.acteur|getattr:champ %}
+                    {% display_diff_value_details champ suggestion_unitaire.valeurs|get_at_index:forloop.counter0 value %}
+                    {% if not forloop.last %}|{% endif %}
+                {% endwith %}
+            {% endfor %}
+        {% else %}
+            -
+        {% endif %}
+    {% endwith %}
 </div>
