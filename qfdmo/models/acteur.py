@@ -322,9 +322,9 @@ class DisplayedActeurQuerySet(models.QuerySet):
             .order_by("?")
         )
 
-    def from_center(self, longitude, latitude):
+    def from_center(self, longitude, latitude, distance_max):
         reference_point = Point(float(longitude), float(latitude), srid=4326)
-        distance_in_degrees = settings.DISTANCE_MAX / 111320
+        distance_in_degrees = distance_max / 111320
 
         return (
             self.physical()
@@ -1260,7 +1260,6 @@ class DisplayedActeur(BaseActeur, LatLngPropertiesMixin):
         sous_categorie_id: int | None = None,
         carte: bool = True,
     ) -> Action | None:
-
         actions = self.acteur_actions(
             direction=direction,
             actions_codes=action_list,

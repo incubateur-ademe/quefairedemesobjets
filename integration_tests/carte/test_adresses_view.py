@@ -473,7 +473,7 @@ class TestBBOX:
         DisplayedActeurFactory.create_batch(2)
         acteurs = DisplayedActeur.objects.all()
         assert acteurs.in_bbox(bbox).count() == 0
-        assert acteurs.from_center(1, 1).count() == 2
+        assert acteurs.from_center(1, 1, 30000).count() == 2
 
         bbox, acteurs = adresses_view._bbox_and_acteurs_from_location_or_epci(acteurs)
         assert bbox is None
