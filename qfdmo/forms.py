@@ -291,6 +291,11 @@ class FiltresForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
     )
 
 
+class FiltresFormWithoutSynonyme(FiltresForm):
+    # Explicitly remove the synonyme field by setting it to None
+    synonyme = None
+
+
 class DigitalActeurForm(GetFormMixin, DsfrBaseForm):
     class DigitalChoices(TextChoices, SegmentedControlChoices):
         DIGITAL = {

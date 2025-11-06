@@ -13,6 +13,7 @@ from qfdmo.forms import (
     AutoSubmitLegendeForm,
     CarteForm,
     FiltresForm,
+    FiltresFormWithoutSynonyme,
     LegendeForm,
     ViewModeForm,
 )
@@ -63,26 +64,30 @@ class CarteSearchActeursView(SearchActeursView):
     is_carte = True
     template_name = "ui/pages/carte.html"
     form_class = CarteForm
-    forms: CarteForms = {
-        "view_mode": {
-            "form": ViewModeForm,
-            "prefix": "view_mode",
-        },
-        "filtres": {
-            "form": FiltresForm,
-            "prefix": "filtres",
-        },
-        "legende": {
-            "form": AutoSubmitLegendeForm,
-            "prefix": "legende",
-            "other_prefixes_to_check": ["legende_filtres"],
-        },
-        "legende_filtres": {
-            "form": LegendeForm,
-            "prefix": "legende_filtres",
-            "other_prefixes_to_check": ["legende"],
-        },
-    }
+    filtres_form_class = FiltresForm
+
+    @property
+    def forms(self) -> CarteForms:
+        return {
+            "view_mode": {
+                "form": ViewModeForm,
+                "prefix": "view_mode",
+            },
+            "filtres": {
+                "form": self.filtres_form_class,
+                "prefix": "filtres",
+            },
+            "legende": {
+                "form": AutoSubmitLegendeForm,
+                "prefix": "legende",
+                "other_prefixes_to_check": ["legende_filtres"],
+            },
+            "legende_filtres": {
+                "form": LegendeForm,
+                "prefix": "legende_filtres",
+                "other_prefixes_to_check": ["legende"],
+            },
+        }
 
     def __init__(self, **kwargs):
         # TODO: check that linked forms have exactly the same fields
@@ -219,6 +224,8 @@ class ProductCarteView(CarteSearchActeursView):
     It will be progressively deprecated until the end of 2025 but
     needs to be maintained for now."""
 
+    filtres_form_class = FiltresFormWithoutSynonyme
+
     def _get_map_container_id(self):
         # TODO: check if required
         return self.request.GET.get("map_container_id", "carte")
@@ -238,6 +245,7 @@ class ProductCarteView(CarteSearchActeursView):
 class CarteConfigView(DetailView, CarteSearchActeursView):
     model = CarteConfig
     context_object_name = "carte_config"
+    filtres_form_class = FiltresFormWithoutSynonyme
 
     def _get_max_displayed_acteurs(self):
         # Hardcoded value taken from dict previously used
