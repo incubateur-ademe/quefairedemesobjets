@@ -1,6 +1,5 @@
 import pytest
-from django.conf import settings
-from django.test import RequestFactory
+from django.test import RequestFactory, override_settings
 
 from qfdmo.views.adresses import FormulaireSearchActeursView
 from qfdmo.views.carte import CarteConfigView, CarteSearchActeursView
@@ -30,14 +29,16 @@ def rf():
 
 @pytest.mark.django_db
 class TestCarteViews:
+    @override_settings(CARTE_MAX_SOLUTION_DISPLAYED=123)
     def test_carte_search_acteurs_default(self, rf):
         request = rf.get("/fake/")
         view = CarteSearchActeursView()
         view.request = request
         assert (
-            view._get_max_displayed_acteurs() == settings.CARTE_MAX_SOLUTION_DISPLAYED
+            view._get_max_displayed_acteurs() == 123
         ), "On affiche 100 acteurs sur la carte standalone (ou en iframe)"
 
+    @override_settings(CARTE_MAX_SOLUTION_DISPLAYED=123)
     def test_carte_search_acteurs_with_limit(self, rf):
         request = rf.get("/fake/?limit=42")
         view = CarteSearchActeursView()
@@ -46,12 +47,13 @@ class TestCarteViews:
             view._get_max_displayed_acteurs() == 42
         ), "On affiche le nombre d'acteurs passés en paramètre"
 
+    @override_settings(DEFAULT_MAX_SOLUTION_DISPLAYED=456)
     def test_formulaire_search_acteurs(self, rf):
         request = rf.get("/fake/")
         view = FormulaireSearchActeursView()
         view.request = request
         assert (
-            view._get_max_displayed_acteurs() == settings.DEFAULT_MAX_SOLUTION_DISPLAYED
+            view._get_max_displayed_acteurs() == 456
         ), "On affiche 10 acteurs sur le formulaire (ou en iframe)"
 
     def test_carte_config_view(self, rf):
@@ -59,5 +61,5 @@ class TestCarteViews:
         view = CarteConfigView()
         view.request = request
         assert (
-            view._get_max_displayed_acteurs() == settings.CARTE_MAX_SOLUTION_DISPLAYED
-        ), "On affiche 100 acteurs sur les cartes sur mesure par défaut"
+            view._get_max_displayed_acteurs() == 25
+        ), "On affiche 25 acteurs sur les cartes sur mesure par défaut"
