@@ -1,6 +1,7 @@
 import pytest
 from django.contrib.gis.geos import Point
 from django.http import HttpRequest
+from django.test import override_settings
 
 from qfdmo.map_utils import compile_frontend_bbox
 from qfdmo.models.acteur import Acteur, ActeurStatus, DisplayedActeur, RevisionActeur
@@ -457,6 +458,7 @@ class TestBBOX:
         bbox, acteurs = adresses_view._bbox_and_acteurs_from_location_or_epci(acteurs)
         assert bbox == map_bbox
 
+    @override_settings(DISTANCE_MAX=100000000000)
     def test_no_bbox_and_acteurs_from_center_if_no_acteurs_found_in_bbox(
         self,
     ):
