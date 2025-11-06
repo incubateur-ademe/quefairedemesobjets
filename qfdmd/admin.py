@@ -162,7 +162,6 @@ class ProduitAdmin(
     def get_readonly_fields(self, request, obj=None):
         try:
             if obj and obj.next_wagtail_page:
-                # Return all field names to make them read-only
                 return [field.name for field in obj._meta.fields]
         except Produit.next_wagtail_page.RelatedObjectDoesNotExist:
             pass
@@ -191,7 +190,9 @@ class SynonymeAdmin(
     ordering = ["-modifie_le"]
 
     def get_readonly_fields(self, request, obj=None):
-        if obj and obj.produit.next_wagtail_page:
-            # Return all field names to make them read-only
-            return [field.name for field in obj._meta.fields]
+        try:
+            if obj and obj.produit.next_wagtail_page:
+                return [field.name for field in obj._meta.fields]
+        except Produit.next_wagtail_page.RelatedObjectDoesNotExist:
+            pass
         return self.readonly_fields
