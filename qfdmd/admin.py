@@ -1,5 +1,6 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.core.exceptions import ImproperlyConfigured
+from django.shortcuts import redirect, reverse
 from import_export import fields, resources
 from import_export.admin import ImportExportModelAdmin
 
@@ -159,13 +160,23 @@ class ProduitAdmin(
     exclude = ("infotri",)
     ordering = ["-modifie_le"]
 
-    def get_readonly_fields(self, request, obj=None):
+    def change_view(self, request, object_id, form_url="", extra_context=None):
+        obj = self.get_object(request, object_id)
         try:
             if obj and obj.next_wagtail_page:
-                return [field.name for field in obj._meta.fields]
+                messages.info(
+                    request,
+                    "Vous avez été redirigé vers la page suivante car elle n'est plus"
+                    " éditable dans Django Admin",
+                )
+                return redirect(
+                    reverse(
+                        "wagtailadmin_pages:edit", args=[obj.next_wagtail_page.page.id]
+                    )
+                )
         except Produit.next_wagtail_page.RelatedObjectDoesNotExist:
             pass
-        return self.readonly_fields
+        return self.changeform_view(request, object_id, form_url, extra_context)
 
 
 @admin.register(Lien)
@@ -189,10 +200,20 @@ class SynonymeAdmin(
     fields_to_display_in_first_position = ["nom", "produit"]
     ordering = ["-modifie_le"]
 
-    def get_readonly_fields(self, request, obj=None):
+    def change_view(self, request, object_id, form_url="", extra_context=None):
+        obj = self.get_object(request, object_id)
         try:
             if obj and obj.produit.next_wagtail_page:
-                return [field.name for field in obj._meta.fields]
+                messages.info(
+                    request,
+                    "Vous avez été redirigé vers la page suivante car elle n'est plus"
+                    " éditable dans Django Admin",
+                )
+                return redirect(
+                    reverse(
+                        "wagtailadmin_pages:edit", args=[obj.next_wagtail_page.page.id]
+                    )
+                )
         except Produit.next_wagtail_page.RelatedObjectDoesNotExist:
             pass
-        return self.readonly_fields
+        return self.changeform_view(request, object_id, form_url, extra_context)
