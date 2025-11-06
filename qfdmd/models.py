@@ -281,35 +281,40 @@ class ProduitPage(
         MultiFieldPanel(
             [
                 HelpPanel(
-                    "Le champ ci-dessous servira durant la transition des "
-                    "produits / synonymes Django vers leur version Page Wagtail."
-                    "<br/> Sélectioner une fiche produit dans ce champ va "
-                    "provoquer le déclenchement d'une redirection 301"
-                    " lorsqu'un utilisateur visitera la page synonyme "
-                    "du produit correspondant"
+                    "<strong>Migration Django → Wagtail</strong><br/>"
+                    "Cette page Wagtail remplace une ou plusieurs fiches "
+                    "produit Django (ancien système).<br/><br/>"
+                    "<strong>Redirection automatique :</strong> Sélectionnez "
+                    "les fiches produit Django qui doivent rediriger vers "
+                    "cette page Wagtail. Les utilisateurs qui visitent "
+                    "l'ancienne URL seront automatiquement redirigés (HTTP 301) "
+                    "vers cette nouvelle page."
                 ),
                 InlinePanel(
                     "legacy_produit",
-                    heading="Fiche produit à rediriger",
+                    heading="Fiches produit Django à rediriger ici",
                 ),
             ],
-            heading="Dépréciation des Produits Django",
+            heading="Redirection des produits Django",
         ),
         MultiFieldPanel(
             [
                 HelpPanel(
-                    "Le champ ci-dessous servira durant la transition des "
-                    "produits / synonymes Django vers leur version Page Wagtail."
-                    "<br/> Sélectioner une fiche synonyme dans ce champ va "
-                    "exclure ce synonyme des redirection 301 configurés "
-                    "ci-dessus"
+                    "<strong>Exceptions aux redirections</strong><br/>"
+                    "Par défaut, tous les synonymes d'un produit Django "
+                    "sont redirigés avec le produit.<br/><br/>"
+                    "<strong>Pour exclure certains synonymes :</strong> "
+                    "Si un synonyme doit pointer vers une autre page Wagtail "
+                    "(ou ne pas être redirigé), ajoutez-le ici. "
+                    "Ces synonymes ne seront pas affectés par la redirection "
+                    "configurée ci-dessus."
                 ),
                 InlinePanel(
                     "legacy_synonyme_to_exclude",
-                    heading="Fiche synonyme à ne pas rediriger",
+                    heading="Synonymes à ne PAS rediriger",
                 ),
             ],
-            heading="Dépréciation des Synonymes Django",
+            heading="Exceptions aux redirections",
         ),
         FieldPanel("commentaire"),
     ]
