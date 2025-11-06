@@ -1,6 +1,15 @@
 {% load admin_data_tags %}
 
-<turbo-frame id="suggestion_groupe_row_{{ suggestion_groupe.id }}">
+<turbo-frame id="suggestion_groupe_row_{{ suggestion_groupe.id }}" data-controller="suggestion-groupe-row">
+    <form
+        id="form-{{ suggestion_groupe.id }}"
+        method="post"
+        action="{% url 'data:suggestion_groupe' suggestion_groupe.id %}"
+    >
+        {% csrf_token %}
+        {{ form }}
+    </form>
+
     <h3>
         {% block suggestion_title %}
             <a href="{% url 'admin:data_suggestiongroupe_change' suggestion_groupe.id %}" rel="noreferrer">{{ suggestion_groupe }}</a> : {{ suggestion_groupe.get_statut_display }}
@@ -16,5 +25,5 @@
         {% endblock suggestion_details %}
     </div>
 
-    <a href="{% url 'data:refresh_suggestion_groupe' suggestion_groupe.id %}">Rafraîchir</a>
+    <a href="{% url 'data:suggestion_groupe' suggestion_groupe.id %}">Rafraîchir</a>
 </turbo-frame>
