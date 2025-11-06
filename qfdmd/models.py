@@ -293,7 +293,23 @@ class ProduitPage(
                     heading="Fiche produit à rediriger",
                 ),
             ],
-            heading="Dépréciation des Produits / Synonymes Django",
+            heading="Dépréciation des Produits Django",
+        ),
+        MultiFieldPanel(
+            [
+                HelpPanel(
+                    "Le champ ci-dessous servira durant la transition des "
+                    "produits / synonymes Django vers leur version Page Wagtail."
+                    "<br/> Sélectioner une fiche synonyme dans ce champ va "
+                    "exclure ce synonyme des redirection 301 configurés "
+                    "ci-dessus"
+                ),
+                InlinePanel(
+                    "legacy_synonyme_to_exclude",
+                    heading="Fiche synonyme à ne pas rediriger",
+                ),
+            ],
+            heading="Dépréciation des Synonymes Django",
         ),
         FieldPanel("commentaire"),
     ]
@@ -442,9 +458,8 @@ class LegacyIntermediateProduitPage(models.Model):
         on_delete=models.CASCADE,
         related_name="legacy_produit",
     )
-    produit = models.ForeignKey(
+    produit = models.OneToOneField(
         "qfdmd.produit",
-        unique=True,
         on_delete=models.CASCADE,
         related_name="next_wagtail_page",
     )
@@ -454,6 +469,25 @@ class LegacyIntermediateProduitPage(models.Model):
     class Meta:
         verbose_name = "Fiche produit"
         verbose_name_plural = "Fiches produit"
+
+
+class LegacyIntermediateProduitPageSynonymeExclusion(models.Model):
+    page = ParentalKey(
+        "wagtailcore.page",
+        on_delete=models.CASCADE,
+        related_name="legacy_synonyme_to_exclude",
+    )
+    synonyme = models.OneToOneField(
+        "qfdmd.synonyme",
+        on_delete=models.CASCADE,
+        related_name="should_not_redirect_to",
+    )
+
+    panels = [FieldPanel("synonyme")]
+
+    class Meta:
+        verbose_name = "Fiche synonyme"
+        verbose_name_plural = "Fiches synonyme"
 
 
 class AbstractBaseProduit(NomAsNaturalKeyModel):
@@ -536,7 +570,7 @@ class Produit(index.Indexed, AbstractBaseProduit):
     def __str__(self):
         return f"{self.pk} - {self.nom}"
 
-    search_fields = Page.search_fields + [
+    search_fields = [
         index.AutocompleteField("nom"),
         index.RelatedFields("synonymes", [index.SearchField("nom")]),
         index.SearchField("id"),
@@ -750,6 +784,9 @@ class Synonyme(index.Indexed, AbstractBaseProduit):
     search_fields = [
         index.AutocompleteField("nom"),
         index.SearchField("id"),
+        index.RelatedFields(
+            "produit", [index.SearchField("id"), index.SearchField("nom")]
+        ),
     ]
 
 

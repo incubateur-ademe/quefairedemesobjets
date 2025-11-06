@@ -159,6 +159,15 @@ class ProduitAdmin(
     exclude = ("infotri",)
     ordering = ["-modifie_le"]
 
+    def get_readonly_fields(self, request, obj=None):
+        try:
+            if obj and obj.next_wagtail_page:
+                # Return all field names to make them read-only
+                return [field.name for field in obj._meta.fields]
+        except Produit.next_wagtail_page.RelatedObjectDoesNotExist:
+            pass
+        return self.readonly_fields
+
 
 @admin.register(Lien)
 class LienAdmin(ImportExportModelAdmin, admin.ModelAdmin):
@@ -180,3 +189,9 @@ class SynonymeAdmin(
     autocomplete_fields = ["produit"]
     fields_to_display_in_first_position = ["nom", "produit"]
     ordering = ["-modifie_le"]
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj and obj.produit.next_wagtail_page:
+            # Return all field names to make them read-only
+            return [field.name for field in obj._meta.fields]
+        return self.readonly_fields
