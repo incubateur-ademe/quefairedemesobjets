@@ -6,12 +6,12 @@ import { Application } from "@hotwired/stimulus"
 import * as Turbo from "@hotwired/turbo"
 
 // TODO : import here  the stimulus controllers
-// import AdminCategorieWidgetController from "./controllers/admin/categorie_widget_controller"
+import SuggestionGroupeRowController from "./controllers/admin/suggestion_groupe_row_controller"
 
 window.stimulus = Application.start()
 
 // TODO : register here the stimulus controllers
-// stimulus.register("admin-categorie-widget", AdminCategorieWidgetController)
+stimulus.register("suggestion-groupe-row", SuggestionGroupeRowController)
 
 Turbo.session.drive = false
 
