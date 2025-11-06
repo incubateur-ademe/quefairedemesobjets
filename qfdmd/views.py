@@ -2,6 +2,7 @@ import logging
 import re
 from typing import Any
 
+from django.conf import settings
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
@@ -16,7 +17,14 @@ from wagtail.models import Page
 
 from core.views import static_file_content_from
 from qfdmd.forms import SearchForm
-from qfdmd.models import Bonus, ProduitIndexPage, ReusableContent, Suggestion, Synonyme
+from qfdmd.models import (
+    Bonus,
+    Produit,
+    ProduitIndexPage,
+    ReusableContent,
+    Suggestion,
+    Synonyme,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -121,9 +129,18 @@ class SynonymeDetailView(AssistantBaseView, DetailView):
     model = Synonyme
 
     def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-        if request.beta:
-            if intermediate_page := self.get_object().produit.next_wagtail_page.first():
-                return redirect(intermediate_page.page.url)
+        if request.beta or settings.REDIRECT_LEGACY_PRODUIT_TO_WAGTAIL_PAGES:
+            synonyme = self.get_object()
+            try:
+                intermediate_page = synonyme.produit.next_wagtail_page
+                synonyme_can_be_redirected = (
+                    not hasattr(synonyme, "should_not_redirect_to")
+                    or synonyme.should_not_redirect_to.page != intermediate_page.page
+                )
+                if synonyme_can_be_redirected:
+                    return redirect(intermediate_page.page.url)
+            except Produit.next_wagtail_page.RelatedObjectDoesNotExist:
+                pass
 
         return super().get(request, *args, **kwargs)
 

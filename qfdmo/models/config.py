@@ -57,6 +57,9 @@ class CarteConfig(index.Indexed, models.Model):
     SOUS_CATEGORIE_QUERY_PARAM = "sous_categorie_objet"
 
     nom = models.CharField(unique=True)
+    SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url = models.CharField(
+        "paramètres d'URL pour la direction / groupes d'action", blank=True
+    )
 
     # UI
     class ModesAffichage(models.TextChoices):
@@ -161,15 +164,16 @@ class CarteConfig(index.Indexed, models.Model):
         blank=True,
     )
 
-    def get_absolute_url(self, override_sous_categories=None):
+    def get_absolute_url(self, override_sous_categories=None, initial_query_string=""):
         # TODOWAGTAIL: add unit test
         """This view can be used with categories set from the parent page.
         For example in the Assistant, with a Produit page, the sous_categorie_objet
         is set on the page itself and need to replace the ones set on the carte config.
         The carte config used on a Produit Page usually does not have
         sous_categorie_objet field filled,
-        but in case this happens, we assume they need to be bypassed"""
-        query = QueryDict("", mutable=True)
+        but in case this happens, we assume they need to be bypassed
+        """
+        query = QueryDict(initial_query_string, mutable=True)
         if override_sous_categories:
             query.setlist(self.SOUS_CATEGORIE_QUERY_PARAM, override_sous_categories)
 

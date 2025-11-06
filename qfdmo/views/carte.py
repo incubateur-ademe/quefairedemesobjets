@@ -229,10 +229,19 @@ class ProductCarteView(CarteSearchActeursView):
         )
         return carte_config
 
+    @override
+    def _get_max_displayed_acteurs(self):
+        # Hardcoded value taken from dict previously used
+        return 25
+
 
 class CarteConfigView(DetailView, CarteSearchActeursView):
     model = CarteConfig
     context_object_name = "carte_config"
+
+    def _get_max_displayed_acteurs(self):
+        # Hardcoded value taken from dict previously used
+        return 25
 
     @override
     def _get_carte_config(self):

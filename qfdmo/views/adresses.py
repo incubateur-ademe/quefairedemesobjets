@@ -95,6 +95,10 @@ class SearchActeursView(
     def _get_sous_categorie_ids(self) -> list[int]:
         pass
 
+    def _get_distance_max(self):
+        """The distance after which we stop displaying acteurs on the first request"""
+        return settings.DISTANCE_MAX
+
     # TODO : supprimer
     is_iframe = False
     is_carte = False
@@ -182,7 +186,7 @@ class SearchActeursView(
 
         # Manage the selection of sous_categorie_objet and actions
         acteurs = self._acteurs_from_sous_categorie_objet_and_actions()
-        bbox, acteurs = self._handle_scoped_acteurs(acteurs, kwargs)
+        bbox, acteurs = self._handle_scoped_acteurs(acteurs, **kwargs)
         page_size = 10
         paginated_acteurs = Paginator(acteurs, page_size)
         paginated_acteurs_obj = paginated_acteurs.page(self.request.GET.get("page", 1))
@@ -203,7 +207,7 @@ class SearchActeursView(
         return context
 
     def _handle_scoped_acteurs(
-        self, acteurs: QuerySet[DisplayedActeur], kwargs
+        self, acteurs: QuerySet[DisplayedActeur], **kwargs
     ) -> tuple[Any, QuerySet[DisplayedActeur]]:
         """
         Handle the scoped acteurs following the order of priority:
@@ -243,8 +247,9 @@ class SearchActeursView(
         # - Tester cas avec bounding box définie depuis le configurateur
         # - Tester cas avec center retourné par la carte
         if latitude and longitude:
-            acteurs_from_center = acteurs.from_center(longitude, latitude)
-
+            acteurs_from_center = acteurs.from_center(
+                longitude, latitude, self._get_distance_max()
+            )
             if acteurs_from_center.count():
                 custom_bbox = None
 
