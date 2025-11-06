@@ -43,7 +43,6 @@ class CarteSearchActeursView(SearchActeursView):
         context.update(
             is_carte=True,
             map_container_id="carte",
-            max_displayed_acteurs=self._get_max_displayed_acteurs(),
         )
         return context
 

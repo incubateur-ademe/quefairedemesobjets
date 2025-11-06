@@ -213,7 +213,7 @@ class SearchActeursView(
         # Manage the selection of sous_categorie_objet and actions
         acteurs = self._acteurs_from_sous_categorie_objet_and_actions()
         bbox, acteurs = self._handle_scoped_acteurs(acteurs, **kwargs)
-        kwargs.update(acteurs=acteurs, bbox=bbox)
+        kwargs.update(acteurs=acteurs)
         context = super().get_context_data(**kwargs)
 
         # TODO : refacto forms, gérer ça autrement
