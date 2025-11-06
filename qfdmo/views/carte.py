@@ -1,5 +1,5 @@
 import logging
-from typing import Any
+from typing import Any, override
 
 from django.conf import settings
 from django.db.models import Q
@@ -40,7 +40,10 @@ class CarteSearchActeursView(SearchActeursView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context.update(is_carte=True, map_container_id="carte")
+        context.update(
+            is_carte=True,
+            map_container_id="carte",
+        )
         return context
 
     def _get_selected_action_ids(self):
@@ -70,15 +73,20 @@ class ProductCarteView(CarteSearchActeursView):
         )
         return context
 
+    @override
+    def _get_max_displayed_acteurs(self):
+        # Hardcoded value taken from dict previously used
+        return 25
+
 
 class CarteConfigView(DetailView, CarteSearchActeursView):
     model = CarteConfig
     context_object_name = "carte_config"
 
+    @override
     def _get_max_displayed_acteurs(self):
-        """Standalone Carte view displays more acteurs than the
-        embedded one."""
-        return settings.CARTE_MAX_SOLUTION_DISPLAYED
+        # Hardcoded value taken from dict previously used
+        return 25
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         return {

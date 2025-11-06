@@ -98,7 +98,8 @@ def carte(context, carte_config: CarteConfig) -> dict:
         "url": carte_config.get_absolute_url(
             override_sous_categories=list(
                 page.sous_categorie_objet.all().values_list("id", flat=True)
-            )
+            ),
+            initial_query_string=carte_config.SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url,
         ),
     }
 

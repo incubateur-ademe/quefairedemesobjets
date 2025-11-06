@@ -81,6 +81,10 @@ class SearchActeursView(
     def _get_max_displayed_acteurs(self):
         pass
 
+    def _get_distance_max(self):
+        """The distance after which we stop displaying acteurs on the first request"""
+        return settings.DISTANCE_MAX
+
     # TODO : supprimer
     is_iframe = False
     is_carte = False
@@ -208,7 +212,7 @@ class SearchActeursView(
 
         # Manage the selection of sous_categorie_objet and actions
         acteurs = self._acteurs_from_sous_categorie_objet_and_actions()
-        bbox, acteurs = self._handle_scoped_acteurs(acteurs, kwargs)
+        bbox, acteurs = self._handle_scoped_acteurs(acteurs, **kwargs)
         kwargs.update(acteurs=acteurs)
         context = super().get_context_data(**kwargs)
 
@@ -222,7 +226,7 @@ class SearchActeursView(
         return context
 
     def _handle_scoped_acteurs(
-        self, acteurs: QuerySet[DisplayedActeur], kwargs
+        self, acteurs: QuerySet[DisplayedActeur], **kwargs
     ) -> tuple[Any, QuerySet[DisplayedActeur]]:
         """
         Handle the scoped acteurs following the order of priority:
@@ -262,8 +266,9 @@ class SearchActeursView(
         # - Tester cas avec bounding box définie depuis le configurateur
         # - Tester cas avec center retourné par la carte
         if latitude and longitude:
-            acteurs_from_center = acteurs.from_center(longitude, latitude)
-
+            acteurs_from_center = acteurs.from_center(
+                longitude, latitude, self._get_distance_max()
+            )
             if acteurs_from_center.count():
                 custom_bbox = None
 
@@ -553,7 +558,7 @@ class FormulaireSearchActeursView(SearchActeursView):
         )
 
     def _handle_scoped_acteurs(
-        self, acteurs: QuerySet[DisplayedActeur], kwargs
+        self, acteurs: QuerySet[DisplayedActeur], **kwargs
     ) -> tuple[Any, QuerySet[DisplayedActeur]]:
         """
         Handle the scoped acteurs following the order of priority:
@@ -566,7 +571,7 @@ class FormulaireSearchActeursView(SearchActeursView):
 
         if self._check_if_is_digital():
             return None, acteurs.digital()
-        return super()._handle_scoped_acteurs(acteurs, kwargs)
+        return super()._handle_scoped_acteurs(acteurs, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
