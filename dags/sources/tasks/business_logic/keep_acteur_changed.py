@@ -7,9 +7,13 @@ from sources.tasks.airflow_logic.config_management import DAGConfig
 from sources.tasks.transform.transform_df import compute_identifiant_unique
 from utils.django import django_setup_full, get_model_fields
 
+from data.models.changes.acteur_rgpd_anonymize import VALUE_ANONYMIZED
+
 logger = logging.getLogger(__name__)
 
 django_setup_full()
+
+METADATA_NUMBER_OF_UPDATES_BY_FIELD = "Nombre de mise à jour par champ"
 
 
 @dataclass
@@ -167,6 +171,24 @@ def keep_acteur_changed(
         available_model_fields_to_compare & dag_config.get_expected_columns()
     )
 
+    # Ignore acteurs anonymized because of RGPD
+    anonymized_ids = set(
+        df_acteur_from_db[df_acteur_from_db["nom"] == VALUE_ANONYMIZED][
+            "identifiant_unique"
+        ]
+    ) & set(df_normalized["identifiant_unique"])
+
+    df_acteur_from_db = df_acteur_from_db[
+        ~df_acteur_from_db["identifiant_unique"].isin(anonymized_ids)
+    ]
+    df_normalized = df_normalized[
+        ~df_normalized["identifiant_unique"].isin(anonymized_ids)
+    ]
+    if anonymized_ids:
+        metadata["Nombre d'acteur mis à jour ignoré car anonymisés pour RGPD"] = len(
+            anonymized_ids
+        )
+
     # Préparer les dataframes pour la comparaison
     source_ids = set(df_normalized["identifiant_unique"])
     db_ids = set(df_acteur_from_db["identifiant_unique"])
@@ -196,9 +218,9 @@ def keep_acteur_changed(
 
     # Préparer les métadonnées
     if comparator.metadata:
-        metadata = {"Nombre de mise à jour par champ": {" ": ["MODIF", "SUP", "AJOUT"]}}
+        metadata[METADATA_NUMBER_OF_UPDATES_BY_FIELD] = {" ": ["MODIF", "SUP", "AJOUT"]}
         for column, diff in comparator.metadata.items():
-            metadata["Nombre de mise à jour par champ"][column] = [
+            metadata[METADATA_NUMBER_OF_UPDATES_BY_FIELD][column] = [
                 diff.modif,
                 diff.sup,
                 diff.ajout,
