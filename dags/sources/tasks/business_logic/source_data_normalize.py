@@ -3,6 +3,11 @@ import logging
 
 import pandas as pd
 import requests
+from cluster.config.metadata import (
+    METADATA_DUPLICATES_FILTERED,
+    METADATA_NO_SOUS_CATEGORIE_FILTERED,
+    METADATA_SERVICE_DOMICILE_FILTERED,
+)
 from pydantic import BaseModel
 from shared.tasks.database_logic.db_manager import PostgresConnectionManager
 from sources.config.airflow_params import TRANSFORMATION_MAPPING
@@ -197,7 +202,7 @@ def _remove_undesired_lines(
 
     # Compute metadata
     if "service_a_domicile" in df.columns:
-        metadata["nb acteurs filtrés car service à domicile uniquement"] = str(
+        metadata[METADATA_SERVICE_DOMICILE_FILTERED] = str(
             (
                 df["service_a_domicile"]
                 .str.lower()
@@ -216,9 +221,7 @@ def _remove_undesired_lines(
         if nb_empty_sous_categorie := len(
             df[df["sous_categorie_codes"].apply(len) == 0]
         ) + len(df[df["sous_categorie_codes"].isnull()]):
-            metadata["nb acteurs filtrés car sans sous_categorie"] = str(
-                nb_empty_sous_categorie
-            )
+            metadata[METADATA_NO_SOUS_CATEGORIE_FILTERED] = str(nb_empty_sous_categorie)
 
     if all(
         column in df.columns
@@ -251,9 +254,7 @@ def _remove_undesired_lines(
             f"==== DOUBLONS SUR LES IDENTIFIANTS UNIQUES {len(dups) / 2} ====="
         )
         log.preview("Doublons sur identifiant_unique", dups)
-        metadata["nb acteurs filtrés car doublons sur identifiant_unique"] = str(
-            len(dups) / 2
-        )
+        metadata[METADATA_DUPLICATES_FILTERED] = str(len(dups) / 2)
 
     return df, metadata
 
