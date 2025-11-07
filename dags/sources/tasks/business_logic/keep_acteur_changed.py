@@ -3,6 +3,10 @@ from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
+from cluster.config.metadata import (
+    METADATA_ANONYMIZED_ACTEURS_IGNORED,
+    METADATA_NUMBER_OF_UPDATES_BY_FIELD,
+)
 from sources.tasks.airflow_logic.config_management import DAGConfig
 from sources.tasks.transform.transform_df import compute_identifiant_unique
 from utils.django import django_setup_full, get_model_fields
@@ -12,8 +16,6 @@ from data.models.changes.acteur_rgpd_anonymize import VALUE_ANONYMIZED
 logger = logging.getLogger(__name__)
 
 django_setup_full()
-
-METADATA_NUMBER_OF_UPDATES_BY_FIELD = "Nombre de mise à jour par champ"
 
 
 @dataclass
@@ -185,9 +187,7 @@ def keep_acteur_changed(
         ~df_normalized["identifiant_unique"].isin(anonymized_ids)
     ]
     if anonymized_ids:
-        metadata["Nombre d'acteur mis à jour ignoré car anonymisés pour RGPD"] = len(
-            anonymized_ids
-        )
+        metadata[METADATA_ANONYMIZED_ACTEURS_IGNORED] = len(anonymized_ids)
 
     # Préparer les dataframes pour la comparaison
     source_ids = set(df_normalized["identifiant_unique"])
