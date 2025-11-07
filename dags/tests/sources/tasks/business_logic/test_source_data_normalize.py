@@ -428,35 +428,8 @@ class TestDfNormalizePharmacie:
 
 class TestRemoveUndesiredLines:
     @pytest.mark.parametrize(
-        "df, expected_df",
+        "df, expected_df, expected_metadata",
         [
-            # Cas suppression service à domicile
-            (
-                pd.DataFrame(
-                    {
-                        "identifiant_unique": ["id1", "id2", "id3"],
-                        "service_a_domicile": [
-                            "non",
-                            "oui exclusivement",
-                            "service à domicile uniquement",
-                        ],
-                        "public_accueilli": [
-                            "Particuliers",
-                            "Particuliers",
-                            "Particuliers",
-                        ],
-                        "sous_categorie_codes": [["code1"], ["code2"], ["code3"]],
-                    }
-                ),
-                pd.DataFrame(
-                    {
-                        "identifiant_unique": ["id1"],
-                        "service_a_domicile": ["non"],
-                        "public_accueilli": ["Particuliers"],
-                        "sous_categorie_codes": [["code1"]],
-                    }
-                ),
-            ),
             # Cas avec suppression des lignes sans produits acceptés
             (
                 pd.DataFrame(
@@ -479,16 +452,132 @@ class TestRemoveUndesiredLines:
                         "sous_categorie_codes": [["code1"], ["code3"]],
                     }
                 ),
+                {"nb acteurs filtrés car sans sous_categorie": "1"},
+            ),
+            # Cas où les doublons sont fusionnés quand toutes les colonnes nécessaires
+            # sont présentes
+            (
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": ["id1", "id1", "id2"],
+                        "service_a_domicile": ["non", "non", "non"],
+                        "public_accueilli": [
+                            "Particuliers",
+                            "Particuliers",
+                            "Particuliers",
+                        ],
+                        "sous_categorie_codes": [
+                            ["code1"],
+                            ["code2"],
+                            ["code3"],
+                        ],
+                        "label_codes": [["label1"], ["label2"], ["label3"]],
+                        "acteur_service_codes": [
+                            ["acteurservice1"],
+                            ["acteurservice2"],
+                            ["acteurservice3"],
+                        ],
+                        "proposition_service_codes": [
+                            [
+                                {
+                                    "action": "action1",
+                                    "sous_categories": ["sscat1", "sscat3"],
+                                },
+                                {
+                                    "action": "action2",
+                                    "sous_categories": ["sscat1"],
+                                },
+                            ],
+                            [
+                                {
+                                    "action": "action2",
+                                    "sous_categories": ["sscat2"],
+                                },
+                                {
+                                    "action": "action3",
+                                    "sous_categories": ["sscat3"],
+                                },
+                            ],
+                            [
+                                {
+                                    "action": "action3",
+                                    "sous_categories": ["sscat3"],
+                                }
+                            ],
+                        ],
+                    }
+                ),
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": ["id1", "id2"],
+                        "service_a_domicile": ["non", "non"],
+                        "public_accueilli": [
+                            "Particuliers",
+                            "Particuliers",
+                        ],
+                        "sous_categorie_codes": [["code1"], ["code3"]],
+                        "label_codes": [["label1", "label2"], ["label3"]],
+                        "acteur_service_codes": [
+                            ["acteurservice1", "acteurservice2"],
+                            ["acteurservice3"],
+                        ],
+                        "proposition_service_codes": [
+                            [
+                                {
+                                    "action": "action1",
+                                    "sous_categories": ["sscat1", "sscat3"],
+                                },
+                                {
+                                    "action": "action2",
+                                    "sous_categories": ["sscat1", "sscat2"],
+                                },
+                                {
+                                    "action": "action3",
+                                    "sous_categories": ["sscat3"],
+                                },
+                            ],
+                            [
+                                {
+                                    "action": "action3",
+                                    "sous_categories": ["sscat3"],
+                                }
+                            ],
+                        ],
+                    }
+                ),
+                {},
+            ),
+            # Cas avec duplications conservées pour déclencher la métadonnée associée
+            (
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": ["id1", "id1"],
+                        "service_a_domicile": ["oui", "oui"],
+                        "public_accueilli": ["Particuliers", "Particuliers"],
+                        "sous_categorie_codes": [["code1"], ["code2"]],
+                    }
+                ),
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": ["id1", "id1"],
+                        "service_a_domicile": ["oui", "oui"],
+                        "public_accueilli": ["Particuliers", "Particuliers"],
+                        "sous_categorie_codes": [["code1"], ["code2"]],
+                    }
+                ),
+                {"nb acteurs filtrés car doublons sur identifiant_unique": "1.0"},
             ),
         ],
     )
-    def test_remove_undesired_lines_suppressions(self, df, expected_df, dag_config):
-        # Mock the DAGConfig
-
-        result_df, _ = _remove_undesired_lines(df, dag_config)
+    def test_remove_undesired_lines_suppressions(
+        self, df, expected_df, expected_metadata, dag_config
+    ):
+        result_df, metadata = _remove_undesired_lines(df, dag_config)
         pd.testing.assert_frame_equal(
-            result_df.reset_index(drop=True), expected_df.reset_index(drop=True)
+            result_df.sort_values("identifiant_unique").reset_index(drop=True),
+            expected_df.sort_values("identifiant_unique").reset_index(drop=True),
         )
+        assert metadata == expected_metadata
 
     def test_merge_duplicated(self, dag_config):
         result, _ = _remove_undesired_lines(

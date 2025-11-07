@@ -6,7 +6,6 @@ import requests
 from cluster.config.metadata import (
     METADATA_DUPLICATES_FILTERED,
     METADATA_NO_SOUS_CATEGORIE_FILTERED,
-    METADATA_SERVICE_DOMICILE_FILTERED,
 )
 from pydantic import BaseModel
 from shared.tasks.database_logic.db_manager import PostgresConnectionManager
@@ -200,23 +199,6 @@ def _remove_undesired_lines(
 ) -> tuple[pd.DataFrame, dict]:
     metadata = {}
 
-    # Compute metadata
-    if "service_a_domicile" in df.columns:
-        metadata[METADATA_SERVICE_DOMICILE_FILTERED] = str(
-            (
-                df["service_a_domicile"]
-                .str.lower()
-                .str.contains("service à domicile uniquement")
-                .sum()
-            )
-            + (
-                df["service_a_domicile"]
-                .str.lower()
-                .str.contains("oui exclusivement")
-                .sum()
-            )
-        )
-
     if "sous_categorie_codes" in df.columns:
         if nb_empty_sous_categorie := len(
             df[df["sous_categorie_codes"].apply(len) == 0]
@@ -237,10 +219,6 @@ def _remove_undesired_lines(
             merge_as_list_columns=["label_codes", "acteur_service_codes"],
             merge_as_proposition_service_columns=["proposition_service_codes"],
         )
-    # Remove acteurs which propose only service à domicile
-    if "service_a_domicile" in df.columns:
-        df = df[df["service_a_domicile"].str.lower() != "oui exclusivement"]
-        df = df[df["service_a_domicile"].str.lower() != "service à domicile uniquement"]
 
     # Remove acteurs which have no sous_categorie_codes
     if "sous_categorie_codes" in df.columns:
