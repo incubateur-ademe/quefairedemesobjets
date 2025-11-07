@@ -4,7 +4,6 @@ import logging
 import numpy as np
 import pandas as pd
 from sources.config import shared_constants as constants
-
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
