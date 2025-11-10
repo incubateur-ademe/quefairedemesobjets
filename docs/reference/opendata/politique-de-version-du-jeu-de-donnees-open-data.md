@@ -14,7 +14,7 @@ Nous distinguons deux familles de modifications :
 
 - **Changements compatibles** : ils n’interrompent pas vos traitements existants.
   - Exemples : ajout d’une colonne facultative, augmentation de la longueur d’un champ texte, ajout d’une nouvelle valeur autorisée.
-  - Nous n’incrémenteons pas la version. Une notification peut être envoyée pour vous informer du changement.
+  - Nous n’incrémentons pas la version. Une notification peut être envoyée pour vous informer du changement.
 - **Changements majeurs** : ils exigent une adaptation de vos scripts ou interfaces.
   - Exemples : suppression ou renommage d’une colonne, changement de type (texte → entier), modification d’une contrainte obligatoire.
   - Une nouvelle version du jeu de données est publiée.
