@@ -1,6 +1,9 @@
+from abc import abstractmethod
+
 from django.contrib import admin, messages
 from django.core.exceptions import ImproperlyConfigured
 from django.shortcuts import redirect, reverse
+from django.utils.html import format_html
 from import_export import fields, resources
 from import_export.admin import ImportExportModelAdmin
 
@@ -146,9 +149,57 @@ class MoveFieldsToFirstPositionMixin:
         return fields
 
 
+class WagtailRedirectMixin:
+    """Mixin to redirect to Wagtail admin if the object has a next_wagtail_page.
+
+    Note: This mixin does not inherit from ABC to avoid metaclass conflicts when
+    used with Django's admin.ModelAdmin (which has its own metaclass). The
+    @abstractmethod decorator still indicates that get_wagtail_page must be
+    implemented by subclasses.
+    """
+
+    @abstractmethod
+    def get_wagtail_page(self, obj):
+        pass
+
+    def change_view(self, request, object_id, form_url="", extra_context=None):
+        obj = self.get_object(request, object_id)
+        force_display_change = "force" in request.GET
+
+        if obj and not force_display_change:
+            try:
+                wagtail_page = self.get_wagtail_page(obj)
+                if wagtail_page:
+                    django_admin_url = (
+                        f"{request.path}?force=true"
+                        if not request.GET
+                        else f"{request.path}?{request.GET.urlencode()}&force=true"
+                    )
+
+                    messages.info(
+                        request,
+                        format_html(
+                            "Vous avez été redirigé vers la page suivante car elle"
+                            " n'est plus éditable dans Django Admin. "
+                            f"<a style='color:white;' href='{django_admin_url}'>"
+                            "<u>Cliquez ici pour revenir à Django Admin</u></a>."
+                        ),
+                    )
+                    return redirect(
+                        reverse("wagtailadmin_pages:edit", args=[wagtail_page.page.id])
+                    )
+            except Produit.next_wagtail_page.RelatedObjectDoesNotExist:
+                pass
+
+        return self.changeform_view(request, object_id, form_url, extra_context)
+
+
 @admin.register(Produit)
 class ProduitAdmin(
-    MoveFieldsToFirstPositionMixin, ImportExportModelAdmin, admin.ModelAdmin
+    WagtailRedirectMixin,
+    MoveFieldsToFirstPositionMixin,
+    ImportExportModelAdmin,
+    admin.ModelAdmin,
 ):
     resource_classes = [ProduitResource, KoumoulProduitResource]
     list_display = ("nom", "id", "modifie_le")
@@ -160,23 +211,8 @@ class ProduitAdmin(
     exclude = ("infotri",)
     ordering = ["-modifie_le"]
 
-    def change_view(self, request, object_id, form_url="", extra_context=None):
-        obj = self.get_object(request, object_id)
-        try:
-            if obj and obj.next_wagtail_page:
-                messages.info(
-                    request,
-                    "Vous avez été redirigé vers la page suivante car elle n'est plus"
-                    " éditable dans Django Admin",
-                )
-                return redirect(
-                    reverse(
-                        "wagtailadmin_pages:edit", args=[obj.next_wagtail_page.page.id]
-                    )
-                )
-        except Produit.next_wagtail_page.RelatedObjectDoesNotExist:
-            pass
-        return self.changeform_view(request, object_id, form_url, extra_context)
+    def get_wagtail_page(self, obj):
+        return obj.next_wagtail_page
 
 
 @admin.register(Lien)
@@ -189,7 +225,10 @@ class LienAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(Synonyme)
 class SynonymeAdmin(
-    MoveFieldsToFirstPositionMixin, ImportExportModelAdmin, admin.ModelAdmin
+    WagtailRedirectMixin,
+    MoveFieldsToFirstPositionMixin,
+    ImportExportModelAdmin,
+    admin.ModelAdmin,
 ):
     resource_classes = [SynonymeResource]
     search_fields = ["nom__unaccent"]
@@ -200,20 +239,5 @@ class SynonymeAdmin(
     fields_to_display_in_first_position = ["nom", "produit"]
     ordering = ["-modifie_le"]
 
-    def change_view(self, request, object_id, form_url="", extra_context=None):
-        obj = self.get_object(request, object_id)
-        try:
-            if obj and obj.produit.next_wagtail_page:
-                messages.info(
-                    request,
-                    "Vous avez été redirigé vers la page suivante car elle n'est plus"
-                    " éditable dans Django Admin",
-                )
-                return redirect(
-                    reverse(
-                        "wagtailadmin_pages:edit", args=[obj.next_wagtail_page.page.id]
-                    )
-                )
-        except Produit.next_wagtail_page.RelatedObjectDoesNotExist:
-            pass
-        return self.changeform_view(request, object_id, form_url, extra_context)
+    def get_wagtail_page(self, obj):
+        return obj.produit.next_wagtail_page
