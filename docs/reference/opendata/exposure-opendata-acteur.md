@@ -2,10 +2,10 @@
 
 ## Presentation
 
-- **Finalite** : partager en open data la liste des acteurs d l'économie circulaire collecté par l'équipe Longue Vie Aux Objets (ADEME) avec leurs metadonnees principales.
-- **Couverture** : acteurs actifs apres deduplication et consolidation multi-sources (au moins 250 000 acteurs). Seule les données partagées en licences ouvertes sont mis à disposition.
+- **Finalité** : partager en open data la liste des acteurs de l'économie circulaire collectés par l'équipe Longue Vie Aux Objets (ADEME) avec leurs métadonnées principales.
+- **Couverture** : acteurs actifs apres déduplication et consolidation multi-sources (au moins 250 000 acteurs). Seules les données partagées en licences ouvertes sont mises à disposition.
 - **Diffusion** : publication hebdomadaire (chaque lundi matin).
-- **Licence et paternite** : diffusion sous licence ouverte ADEME ; la colonne `paternite` liste les contributeurs à la données compilées de chaque acteur. # Obligation de mentionner la parternit lors de la ré-uyilisation de celle-ci.
+- **Licence et paternité** : diffusion sous licence ouverte ADEME ; la colonne `paternite` liste les contributeurs à la donnée compilée de chaque acteur. # Obligation de mentionner la parternité lors de la ré-utilisation de celle-ci.
 
 ## Schema des colonnes
 
@@ -14,10 +14,10 @@
 | Colonne                          | Type  | Description                                             | Format ou valeurs                                                                |
 | -------------------------------- | ----- | ------------------------------------------------------- | -------------------------------------------------------------------------------- |
 | `identifiant`                    | texte | Identifiant stable (base57) de l'acteur.                | Exemple : `aDcrby2bghAZFM3yYCRTue`.                                              |
-| `paternite`                      | texte | Paternite juridique du jeu de donnees.                  | `Longue Vie Aux Objets\|ADEME\|<libelle_source_1>\|...`.                         |
+| `paternite`                      | texte | Paternité juridique du jeu de donnees.                  | `Longue Vie Aux Objets\|ADEME\|<libelle_source_1>\|...`.                         |
 | `identifiants_des_contributeurs` | jsonb | Identifiants des sources ayant contribuées à la donnée. | Ex. `[{"ECOMAISON": "1234567890"}, {"REFASHION": "TLC-REFASHION-PAV-1234567"}]`. |
 | `nom`                            | texte | Nom de l'acteur.                                        | Texte libre, non vide.                                                           |
-| `nom_commercial`                 | texte | Enseigne commerciale (si differente).                   | Texte libre ; peut etre vide.                                                    |
+| `nom_commercial`                 | texte | Enseigne commerciale (si différente).                   | Texte libre ; peut etre vide.                                                    |
 | `siren`                          | texte | Identifiant SIREN (9 chiffres).                         | Vide si non connu.                                                               |
 | `siret`                          | texte | Identifiant SIRET (14 caracteres).                      | Vide si non connu.                                                               |
 | `description`                    | texte | Description libre de l'acteur.                          | Peut etre vide.                                                                  |
