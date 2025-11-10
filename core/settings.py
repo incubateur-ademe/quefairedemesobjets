@@ -475,6 +475,8 @@ WAGTAIL_SEARCH_BACKENDS = {
     }
 }
 
+MODELSEARCH_BACKENDS = WAGTAIL_SEARCH_BACKENDS
+
 INSTALLED_APPS.extend(
     [
         # Sites faciles
