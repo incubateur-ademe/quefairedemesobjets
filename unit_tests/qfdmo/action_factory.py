@@ -1,17 +1,7 @@
-from factory import Sequence
+from factory import LazyFunction, Sequence
 from factory.django import DjangoModelFactory as Factory
 
-from qfdmo.models.action import Action, ActionDirection, GroupeAction
-
-
-class ActionDirectionFactory(Factory):
-    class Meta:
-        model = ActionDirection
-        django_get_or_create = ("code",)
-
-    code = Sequence(lambda n: "jai" if n % 2 == 0 else "jecherche")
-    libelle = Sequence(lambda n: "J'ai" if n % 2 == 0 else "Je cherche")
-    order = Sequence(lambda n: n + 1)
+from qfdmo.models.action import Action, Direction, GroupeAction
 
 
 class ActionFactory(Factory):
@@ -22,6 +12,7 @@ class ActionFactory(Factory):
     code = "action"
     libelle = "Action"
     order = Sequence(lambda n: n + 1)
+    direction_codes = LazyFunction(lambda: [Direction.J_AI.value])
 
 
 class GroupeActionFactory(Factory):

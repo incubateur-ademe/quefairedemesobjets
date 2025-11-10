@@ -135,7 +135,7 @@ class ComponentsPreview(LookbookPreview):
 
         context = {
             "acteur": displayed_proposition_service.acteur,
-            "direction": action.directions.first().code,
+            "direction": action.direction_codes[0],
             "action_list": action.code,
             "carte": carte,
             "carte_config": carte_config,

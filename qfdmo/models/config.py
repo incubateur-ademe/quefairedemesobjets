@@ -1,3 +1,4 @@
+from django.contrib.postgres.fields import ArrayField
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.http import QueryDict
@@ -5,6 +6,8 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from wagtail.search import index
 from wagtail.snippets.models import register_snippet
+
+from qfdmo.models.action import Direction
 
 
 class GroupeActionConfig(models.Model):
@@ -136,11 +139,23 @@ class CarteConfig(index.Indexed, models.Model):
     )
     direction = models.ManyToManyField(
         "qfdmo.ActionDirection",
-        verbose_name="Direction des actions",
+        verbose_name="[DEPRECIE] Direction des actions",
         help_text="Seules les actions correspondantes à la direction choisie "
         "s'afficheront sur la carte"
         "\nSi le champ n'est pas renseigné il sera ignoré",
         blank=True,
+    )
+
+    direction_codes = ArrayField(
+        models.CharField(
+            max_length=32,
+            choices=Direction.choices,
+        ),
+        blank=True,
+        default=list,
+        verbose_name="Direction des actions",
+        help_text="Seules les actions correspondantes à la direction choisie "
+        "s'afficheront sur la carte\nSi le champ n'est pas renseigné il sera ignoré",
     )
 
     label_qualite = models.ManyToManyField(
