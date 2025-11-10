@@ -2217,6 +2217,19 @@ wheels = [
 ]
 
 [[package]]
+name = "modelsearch"
+version = "1.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+    { name = "django-tasks" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e4/99/ff1e3d962626555d4c59860b2d7bd1b2dcdb223af963054105f05f1db23d/modelsearch-1.1.tar.gz", hash = "sha256:bdccbe9c80b7ac37aecc998ca13f7b05915acca1a2405d73755245df03a37a36", size = 87284, upload-time = "2025-11-04T18:53:14.832Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/91/a0/7617ac718b5c5a660d663ee3edfa0d91676a1f35f73c9ef2909e0d588b75/modelsearch-1.1-py3-none-any.whl", hash = "sha256:a915a331a2ef7e1c94e769e2cd403cd7df4afe5078fd3796682f090541b7992e", size = 107132, upload-time = "2025-11-04T18:53:13.109Z" },
+]
+
+[[package]]
 name = "more-itertools"
 version = "10.7.0"
 source = { registry = "https://pypi.org/simple" }
@@ -3098,6 +3111,7 @@ dependencies = [
     { name = "django-widget-tweaks" },
     { name = "djangoql" },
     { name = "gunicorn" },
+    { name = "modelsearch" },
     { name = "opening-hours-py" },
     { name = "orjson" },
     { name = "pillow" },
@@ -3176,6 +3190,7 @@ requires-dist = [
     { name = "django-widget-tweaks", specifier = ">=1.5.0,<2" },
     { name = "djangoql", specifier = ">=0.18.1" },
     { name = "gunicorn", specifier = ">=23.0.0,<24" },
+    { name = "modelsearch", specifier = ">=1.1" },
     { name = "opening-hours-py", specifier = ">=1.1.3,<2" },
     { name = "orjson", specifier = ">=3.11.1,<4" },
     { name = "pillow", specifier = ">=11.2.1,<12" },
