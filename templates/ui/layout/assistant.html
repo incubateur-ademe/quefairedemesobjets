@@ -43,6 +43,7 @@ https://github.com/numerique-gouv/sites-faciles/blob/main/templates/base.html
         <link rel="stylesheet" href="{% static 'qfdmd.css' %}">
 
         {% block social_media %}
+        <meta property="og:image" content="{% static 'assistant/og-image.jpg' %}" />
         {% endblock social_media %}
 
         {% matomo assistant.MATOMO_ID %}
