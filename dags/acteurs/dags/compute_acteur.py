@@ -21,7 +21,7 @@ default_args = {
     "retry_delay": timedelta(minutes=2),
 }
 
-dbt_run = "dbt run --models"
+dbt_run = "dbt run --select"
 dbt_test = "dbt test --resource-type model --select"
 
 
