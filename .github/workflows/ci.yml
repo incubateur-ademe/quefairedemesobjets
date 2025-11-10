@@ -113,7 +113,7 @@ jobs:
 
   e2e:
     name: tests de bout-en-bout
-    runs-on: ubuntu
+    runs-on: ubuntu-latest
     if: ${{ github.ref_name == 'main' || (github.event_name ==  'pull_request' && contains( github.event.pull_request.labels.*.name, 'frontend')) }}
     services:
       postgres:
