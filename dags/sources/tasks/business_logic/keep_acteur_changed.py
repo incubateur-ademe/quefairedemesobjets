@@ -3,9 +3,15 @@ from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
+from cluster.config.metadata import (
+    METADATA_ANONYMIZED_ACTEURS_IGNORED,
+    METADATA_NUMBER_OF_UPDATES_BY_FIELD,
+)
 from sources.tasks.airflow_logic.config_management import DAGConfig
 from sources.tasks.transform.transform_df import compute_identifiant_unique
 from utils.django import django_setup_full, get_model_fields
+
+from data.models.changes.acteur_rgpd_anonymize import VALUE_ANONYMIZED
 
 logger = logging.getLogger(__name__)
 
@@ -151,6 +157,25 @@ def keep_acteur_changed(
 
     from qfdmo.models import Acteur
 
+    def remove_anonymized_acteur(
+        df_acteur_from_db: pd.DataFrame, df_normalized: pd.DataFrame, metadata: dict
+    ) -> (pd.DataFrame, pd.DataFrame, dict):
+        anonymized_ids = set(
+            df_acteur_from_db[df_acteur_from_db["nom"] == VALUE_ANONYMIZED][
+                "identifiant_unique"
+            ]
+        ) & set(df_normalized["identifiant_unique"])
+
+        if anonymized_ids:
+            df_acteur_from_db = df_acteur_from_db[
+                ~df_acteur_from_db["identifiant_unique"].isin(anonymized_ids)
+            ]
+            df_normalized = df_normalized[
+                ~df_normalized["identifiant_unique"].isin(anonymized_ids)
+            ]
+            metadata[METADATA_ANONYMIZED_ACTEURS_IGNORED] = len(anonymized_ids)
+        return df_acteur_from_db, df_normalized, metadata
+
     metadata = {}
     if df_acteur_from_db.empty:
         return df_normalized, df_acteur_from_db, metadata
@@ -165,6 +190,11 @@ def keep_acteur_changed(
 
     columns_to_compare = (
         available_model_fields_to_compare & dag_config.get_expected_columns()
+    )
+
+    # Ignore acteurs anonymized because of RGPD
+    df_acteur_from_db, df_normalized, metadata = remove_anonymized_acteur(
+        df_acteur_from_db, df_normalized, metadata
     )
 
     # Préparer les dataframes pour la comparaison
@@ -196,9 +226,9 @@ def keep_acteur_changed(
 
     # Préparer les métadonnées
     if comparator.metadata:
-        metadata = {"Nombre de mise à jour par champ": {" ": ["MODIF", "SUP", "AJOUT"]}}
+        metadata[METADATA_NUMBER_OF_UPDATES_BY_FIELD] = {" ": ["MODIF", "SUP", "AJOUT"]}
         for column, diff in comparator.metadata.items():
-            metadata["Nombre de mise à jour par champ"][column] = [
+            metadata[METADATA_NUMBER_OF_UPDATES_BY_FIELD][column] = [
                 diff.modif,
                 diff.sup,
                 diff.ajout,
