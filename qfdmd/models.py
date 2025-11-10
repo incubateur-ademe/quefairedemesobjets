@@ -368,12 +368,21 @@ class ProduitPage(
         verbose_name = "Produit"
 
 
-class FamilyPageTag(TaggedItemBase):
+@register_snippet
+class FamilyPageTag(index.Indexed, TaggedItemBase):
     content_object = ParentalKey(
         "qfdmd.FamilyPage",
         on_delete=models.CASCADE,
         related_name="tagged_items",
     )
+
+    hidden = models.BooleanField(default=False)
+    search_fields = [
+        index.SearchField("content_object__title"),
+        index.SearchField("tag__name"),
+    ]
+
+    panels = [FieldPanel("hidden")]
 
 
 class FamilyPage(ProduitPage):
