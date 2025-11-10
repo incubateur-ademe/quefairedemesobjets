@@ -30,6 +30,9 @@ def genre_nombre_from(reusable_content: ReusableContent, page):
     on the page's genre and nombre attributes, and any "<objet>" placeholder
     in the content is replaced with the page's titre_phrase or title.
     """
+    if not reusable_content:
+        return ""
+
     content = reusable_content.get_from_genre_nombre(page.genre, page.nombre)
 
     replacement = page.titre_phrase if page.titre_phrase else page.title
