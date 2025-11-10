@@ -157,6 +157,25 @@ def keep_acteur_changed(
 
     from qfdmo.models import Acteur
 
+    def remove_anonymized_acteur(
+        df_acteur_from_db: pd.DataFrame, df_normalized: pd.DataFrame, metadata: dict
+    ) -> (pd.DataFrame, pd.DataFrame, dict):
+        anonymized_ids = set(
+            df_acteur_from_db[df_acteur_from_db["nom"] == VALUE_ANONYMIZED][
+                "identifiant_unique"
+            ]
+        ) & set(df_normalized["identifiant_unique"])
+
+        if anonymized_ids:
+            df_acteur_from_db = df_acteur_from_db[
+                ~df_acteur_from_db["identifiant_unique"].isin(anonymized_ids)
+            ]
+            df_normalized = df_normalized[
+                ~df_normalized["identifiant_unique"].isin(anonymized_ids)
+            ]
+            metadata[METADATA_ANONYMIZED_ACTEURS_IGNORED] = len(anonymized_ids)
+        return df_acteur_from_db, df_normalized, metadata
+
     metadata = {}
     if df_acteur_from_db.empty:
         return df_normalized, df_acteur_from_db, metadata
@@ -174,20 +193,9 @@ def keep_acteur_changed(
     )
 
     # Ignore acteurs anonymized because of RGPD
-    anonymized_ids = set(
-        df_acteur_from_db[df_acteur_from_db["nom"] == VALUE_ANONYMIZED][
-            "identifiant_unique"
-        ]
-    ) & set(df_normalized["identifiant_unique"])
-
-    df_acteur_from_db = df_acteur_from_db[
-        ~df_acteur_from_db["identifiant_unique"].isin(anonymized_ids)
-    ]
-    df_normalized = df_normalized[
-        ~df_normalized["identifiant_unique"].isin(anonymized_ids)
-    ]
-    if anonymized_ids:
-        metadata[METADATA_ANONYMIZED_ACTEURS_IGNORED] = len(anonymized_ids)
+    df_acteur_from_db, df_normalized, metadata = remove_anonymized_acteur(
+        df_acteur_from_db, df_normalized, metadata
+    )
 
     # Préparer les dataframes pour la comparaison
     source_ids = set(df_normalized["identifiant_unique"])
