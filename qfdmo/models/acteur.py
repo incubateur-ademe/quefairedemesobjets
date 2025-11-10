@@ -50,6 +50,7 @@ from qfdmo.models.categorie_objet import SousCategorieObjet
 # Explicit imports from models config, action, categories, utils
 # and not from qfdmo.models are required here to prevent circular
 # dependency import error.
+from qfdmo.models.geo import EPCI
 from qfdmo.models.utils import (
     CodeAsNaturalKeyModel,
     string_remove_substring_via_normalization,
@@ -1214,6 +1215,12 @@ class VueActeur(BaseActeur):
         default=0.0, editable=False, null=True, verbose_name="La longitude de l'acteur"
     )
 
+    code_commune_insee = models.CharField(
+        max_length=10, blank=True, default="", db_index=True
+    )
+
+    epci = models.ForeignKey(EPCI, on_delete=models.CASCADE, blank=True, null=True)
+
     @property
     def is_parent(self):
         return self.pk and self.duplicats.exists()
@@ -1250,9 +1257,7 @@ class DisplayedActeur(BaseActeur, LatLngPropertiesMixin):
         max_length=10, blank=True, default="", db_index=True
     )
 
-    code_epci = models.CharField(max_length=10, blank=True, default="", db_index=True)
-
-    nom_epci = models.CharField(max_length=255, blank=True, default="", db_index=True)
+    epci = models.ForeignKey(EPCI, on_delete=models.CASCADE, blank=True, null=True)
 
     @property
     def change_url(self):

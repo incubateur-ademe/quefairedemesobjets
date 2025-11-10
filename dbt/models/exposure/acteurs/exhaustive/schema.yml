@@ -155,12 +155,9 @@ models:
       - name: code_commune_insee
         description: "Le code commune de l'acteur"
         data_type: varchar(10)
-      - name: code_epci
-        description: "Le code EPCI de l'acteur"
-        data_type: varchar(10)
-      - name: nom_epci
-        description: "Le nom EPCI de l'acteur"
-        data_type: varchar(255)
+      - name: epci_id
+        description: "L'identifiant de l'EPCI de l'acteur"
+        data_type: integer
     config:
       tags:
         - exposure
