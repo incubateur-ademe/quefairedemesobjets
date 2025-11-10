@@ -11,7 +11,7 @@ on:
 jobs:
   deploy_container:
     name: Scaleway deploy container
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     environment: ${{ inputs.environment }}
     env:
       SCALEWAY_DEPLOY_KEY: ${{ secrets.SCALEWAY_DEPLOY_KEY }}
