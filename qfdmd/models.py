@@ -1,8 +1,10 @@
 import logging
+from typing import override
 from urllib.parse import urlencode
 
 from django.contrib.gis.db import models
 from django.db.models.functions import Now
+from django.shortcuts import redirect
 from django.template.loader import render_to_string
 from django.urls.base import reverse
 from django.utils.functional import cached_property
@@ -195,6 +197,7 @@ class TitleFields(models.Model):
 
 
 class ProduitIndexPage(CompiledFieldMixin, Page):
+    template = "ui/pages/produit_index_page.html"
     subpage_types = ["qfdmd.produitpage", "qfdmd.familypage"]
     body = StreamField(
         STREAMFIELD_COMMON_BLOCKS,
@@ -203,6 +206,10 @@ class ProduitIndexPage(CompiledFieldMixin, Page):
     )
 
     content_panels = Page.content_panels + [FieldPanel("body")]
+
+    @override
+    def serve(self, request, *args, **kwargs):
+        return redirect(reverse("qfdmd:home"), permanent=False)
 
     class Meta:
         verbose_name = "Index des familles & produits"
