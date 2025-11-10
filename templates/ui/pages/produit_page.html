@@ -29,8 +29,7 @@
   <meta name="twitter:title"
         content="{% if page.seo_title %}{{ page.seo_title }}{% else %}{{ page.title }}{% endif %}" />
   <meta name="twitter:description" content="{{ page.search_description }}" />
-
-  {% include "blocks/socialmedia_preview_image.html" %}
+  <meta property="og:image" content="{% static 'assistant/og-image.jpg' %}" />
 {% endblock social_media %}
 
 {% comment %}
