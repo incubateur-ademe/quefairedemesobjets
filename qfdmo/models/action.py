@@ -2,8 +2,9 @@ from typing import List, cast
 
 from colorfield.fields import ColorField
 from django.contrib.gis.db import models
+from django.contrib.postgres.fields import ArrayField
 from django.core.cache import cache
-from django.db.models import CheckConstraint, Q
+from django.db.models import CheckConstraint, Q, TextChoices
 from django.forms import model_to_dict
 from django.utils.functional import cached_property
 
@@ -12,11 +13,14 @@ from qfdmo.models.utils import CodeAsNaturalKeyManager, CodeAsNaturalKeyModel
 from qfdmo.validators import CodeValidator
 
 
-# TODO: the direction form used in Formulaire now uses an enum
-# This model could be migrated to an enum at some point.
+class Direction(TextChoices):
+    J_AI = ("jai", "J'ai un objet")
+    JE_CHERCHE = ("jecherche", "Je recherche un objet")
+
+
 class ActionDirection(CodeAsNaturalKeyModel):
     class Meta:
-        verbose_name = "Action - Direction"
+        verbose_name = "[DEPRECIE] Action - Direction"
         constraints = [
             CheckConstraint(
                 condition=Q(code__regex=CodeValidator.regex),
@@ -180,7 +184,22 @@ class Action(CodeAsNaturalKeyModel):
     afficher = models.BooleanField(default=True)
     description = models.CharField(max_length=255, null=True, blank=True)
     order = models.IntegerField(blank=False, null=False, default=0)
-    directions = models.ManyToManyField(ActionDirection, related_name="actions")
+    direction_codes = ArrayField(
+        models.CharField(
+            max_length=32,
+            choices=Direction.choices,
+        ),
+        default=list,
+        blank=True,
+        null=False,
+    )
+    directions = models.ManyToManyField(
+        ActionDirection,
+        related_name="actions",
+        blank=True,
+        help_text="[DEPRECIE] Relation historique entre `Action` et `ActionDirection`. "
+        "Merci d'utiliser l'énumération `Direction` et le champ `direction_codes`.",
+    )
     couleur = ColorField(
         null=True,
         blank=True,
@@ -222,9 +241,12 @@ class Action(CodeAsNaturalKeyModel):
     def __str__(self):
         return self.libelle
 
+    def has_direction(self, code: str) -> bool:
+        return code in self.direction_codes
+
 
 def get_action_instances() -> List[Action]:
-    return Action.objects.prefetch_related("directions", "groupe_action")
+    return list(Action.objects.prefetch_related("groupe_action").all())
 
 
 def get_reparer_action_id() -> int:
@@ -236,24 +258,41 @@ def get_reparer_action_id() -> int:
         raise Exception("Action 'Réparer' not found")
 
 
-def get_actions_by_direction() -> dict:
-    # TODO: refactor to not use a dict anymore
-    return {
-        d.code: sorted(
-            [
-                {**model_to_dict(a, exclude=["directions"]), "primary": a.primary}
-                for a in d.actions.filter(afficher=True)
-            ],
-            key=lambda x: x["order"],
+def get_actions_by_direction() -> dict[str, list[dict]]:
+    cached_actions = [action for action in get_action_instances() if action.afficher]
+    actions_by_direction: dict[str, list[dict]] = {}
+
+    for direction in Direction:
+        actions = [
+            {**model_to_dict(a, exclude=["direction_codes"]), "primary": a.primary}
+            for a in cached_actions
+            if direction.value in a.direction_codes
+        ]
+        actions_by_direction[direction.value] = sorted(
+            actions, key=lambda x: x["order"]
         )
-        for d in ActionDirection.objects.all()
-    }
+
+    return actions_by_direction
 
 
+# TODO: check if it is useful & if we can remove the order notions
 def get_directions() -> List[dict]:
-    direction_instances = ActionDirection.objects.all()
-    directions_list = [model_to_dict(d) for d in direction_instances]
-    return sorted(directions_list, key=lambda x: x["order"])
+    """
+    Retourne la liste des directions connues avec priorité à l'enum `Direction`.
+    Les enregistrements supplémentaires dans la table historique sont conservés.
+    """
+
+    ordered: list[dict] = []
+    for index, direction in enumerate(Direction, start=1):
+        ordered.append(
+            {
+                "code": direction.value,
+                "libelle": direction.label,
+                "order": index,
+            }
+        )
+
+    return sorted(ordered, key=lambda x: x["order"])
 
 
 def get_ordered_directions() -> List[dict]:
