@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Install uv
-        uses:  astral-sh/setup-uv@85856786d1ce8acfbcc2f13a5f3fbd6b938f9f41
+        uses: astral-sh/setup-uv@85856786d1ce8acfbcc2f13a5f3fbd6b938f9f41
         with:
           enable-cache: true
       - uses: actions/cache@v4
@@ -23,8 +23,8 @@ jobs:
       - name: Install Terragrunt and OpenTofu
         uses: gruntwork-io/terragrunt-action@95fc057922e3c3d4cc021a81a213f088f333ddef
         with:
-          tg_version: '0.83.2'
-          tofu_version: '1.10.3'
+          tg_version: "0.83.2"
+          tofu_version: "1.10.3"
       - name: Check code formatting
         run: make check-format
       - uses: astral-sh/ruff-action@57714a7c8a2e59f32539362ba31877a1957dded1 # v3.5.1
@@ -73,7 +73,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install gdal-bin
       - name: Install uv
-        uses:  astral-sh/setup-uv@85856786d1ce8acfbcc2f13a5f3fbd6b938f9f41
+        uses: astral-sh/setup-uv@85856786d1ce8acfbcc2f13a5f3fbd6b938f9f41
         with:
           enable-cache: true
       - uses: actions/cache@v4
