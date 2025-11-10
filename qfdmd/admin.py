@@ -1,6 +1,7 @@
 from django.contrib import admin, messages
 from django.core.exceptions import ImproperlyConfigured
 from django.shortcuts import redirect, reverse
+from django.utils.html import format_html
 from import_export import fields, resources
 from import_export.admin import ImportExportModelAdmin
 
@@ -161,10 +162,20 @@ class WagtailRedirectMixin:
             try:
                 wagtail_page = self.get_wagtail_page(obj)
                 if wagtail_page:
+                    django_admin_url = (
+                        f"{request.path}?force=true"
+                        if not request.GET
+                        else f"{request.path}?{request.GET.urlencode()}&force=true"
+                    )
+
                     messages.info(
                         request,
-                        "Vous avez été redirigé vers la page suivante car elle n'est"
-                        " plus éditable dans Django Admin",
+                        format_html(
+                            "Vous avez été redirigé vers la page suivante car elle"
+                            " n'est plus éditable dans Django Admin. "
+                            f"<a style='color:white;' href='{django_admin_url}'>"
+                            "<u>Cliquez ici pour revenir à Django Admin</u></a>."
+                        ),
                     )
                     return redirect(
                         reverse("wagtailadmin_pages:edit", args=[wagtail_page.page.id])
