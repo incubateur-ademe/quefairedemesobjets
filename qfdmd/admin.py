@@ -1,3 +1,5 @@
+from abc import abstractmethod
+
 from django.contrib import admin, messages
 from django.core.exceptions import ImproperlyConfigured
 from django.shortcuts import redirect, reverse
@@ -148,11 +150,17 @@ class MoveFieldsToFirstPositionMixin:
 
 
 class WagtailRedirectMixin:
-    """Mixin to redirect to Wagtail admin if the object has a next_wagtail_page."""
+    """Mixin to redirect to Wagtail admin if the object has a next_wagtail_page.
 
+    Note: This mixin does not inherit from ABC to avoid metaclass conflicts when
+    used with Django's admin.ModelAdmin (which has its own metaclass). The
+    @abstractmethod decorator still indicates that get_wagtail_page must be
+    implemented by subclasses.
+    """
+
+    @abstractmethod
     def get_wagtail_page(self, obj):
-        """Override this method to return the wagtail page for the object."""
-        raise NotImplementedError("Subclasses must implement get_wagtail_page() method")
+        pass
 
     def change_view(self, request, object_id, form_url="", extra_context=None):
         obj = self.get_object(request, object_id)
