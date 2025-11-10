@@ -1,8 +1,10 @@
 import logging
+from typing import override
 from urllib.parse import urlencode
 
 from django.contrib.gis.db import models
 from django.db.models.functions import Now
+from django.shortcuts import redirect
 from django.template.loader import render_to_string
 from django.urls.base import reverse
 from django.utils.functional import cached_property
@@ -27,7 +29,6 @@ from wagtail.models import Page, ParentalKey
 from wagtail.search import index
 from wagtail.snippets.models import register_snippet
 
-from core.models.mixin import TimestampedModel
 from qfdmd.blocks import STREAMFIELD_COMMON_BLOCKS
 from qfdmo.models.utils import NomAsNaturalKeyModel
 
@@ -195,6 +196,7 @@ class TitleFields(models.Model):
 
 
 class ProduitIndexPage(CompiledFieldMixin, Page):
+    template = "ui/pages/produit_index_page.html"
     subpage_types = ["qfdmd.produitpage", "qfdmd.familypage"]
     body = StreamField(
         STREAMFIELD_COMMON_BLOCKS,
@@ -203,6 +205,10 @@ class ProduitIndexPage(CompiledFieldMixin, Page):
     )
 
     content_panels = Page.content_panels + [FieldPanel("body")]
+
+    @override
+    def serve(self, request, *args, **kwargs):
+        return redirect(reverse("qfdmd:home"), permanent=False)
 
     class Meta:
         verbose_name = "Index des familles & produits"
@@ -226,9 +232,7 @@ class ProduitPage(
     CompiledFieldMixin, Page, GenreNombreModel, TitleFields, AncestorFieldsMixin
 ):
     template = "ui/pages/produit_page.html"
-    subpage_types = [
-        "qfdmd.synonymepage",
-    ]
+    subpage_types = []
     parent_page_types = ["qfdmd.produitindexpage", "qfdmd.familypage"]
 
     # Taxonomie
@@ -330,7 +334,6 @@ class ProduitPage(
             ],
             heading="Dynamisation des contenus",
         ),
-        InlinePanel("synonymes"),
         MultiFieldPanel(
             [
                 FieldPanel("usage_unique"),
@@ -360,7 +363,6 @@ class ProduitPage(
 
     search_fields = Page.search_fields + [
         index.AutocompleteField("title"),
-        index.RelatedFields("synonymes", [index.AutocompleteField("nom")]),
     ]
 
     class Meta:
@@ -377,82 +379,10 @@ class FamilyPageTag(TaggedItemBase):
 
 class FamilyPage(ProduitPage):
     template = "ui/pages/family_page.html"
-    subpage_types = ["qfdmd.produitpage", "qfdmd.synonymepage"]
+    subpage_types = ["qfdmd.produitpage"]
 
     class Meta:
         verbose_name = "Famille"
-
-
-@register_snippet
-class TemporarySynonymeModel(TimestampedModel, index.Indexed):
-    nom = models.CharField(max_length=255, unique=True)
-    page = ParentalKey(
-        "wagtailcore.page",
-        on_delete=models.CASCADE,
-        related_name="synonymes",
-    )
-
-    @cached_property
-    def famille(self):
-        return self.page.specific.famille
-
-    def __str__(self):
-        return self.nom
-
-    class Meta:
-        verbose_name = "Synnoyme de recherche"
-        verbose_name_plural = "Synonymes de recherche"
-
-    panels = [FieldPanel("nom")]
-
-    search_fields = [
-        index.AutocompleteField("nom"),
-        index.SearchField("nom"),
-        index.FilterField("page"),
-    ]
-
-
-class SynonymePage(
-    CompiledFieldMixin,
-    Page,
-    AncestorFieldsMixin,
-    TitleFields,
-):
-    parent_page_types = ["qfdmd.produitpage", "qfdmd.familypage"]
-
-    def get_template(self, request, *args, **kwargs):
-        return self.get_parent().specific.template
-
-    def get_context(self, request, *args, **kwargs):
-        """
-        Extend the default Wagtail page context for SynonymePage.
-
-        This method overrides the default `get_context` behavior in order to
-        adjust how templates see the `page` object. By default, `page` would
-        refer to the current `SynonymePage`, but synonymes are meant to act
-        as "aliases" for their parent page (either a `ProduitPage` or
-        `FamilyPage`).
-
-        This makes it possible to render templates as if the parent page were
-        being visited directly, while still preserving access to the synonyme
-        itself.
-        """
-        context = super().get_context(request, *args, **kwargs)
-        page = context.pop("page")
-        context.update(page=self.get_parent().specific, synonyme=page)
-        return context
-
-    class Meta:
-        verbose_name = "Synonyme de recherche"
-        verbose_name_plural = "Synonymes de recherche"
-
-    content_panels = [
-        HelpPanel(
-            "Cette page est un synonyme de recherche, si vous souhaitez modifier des"
-            " champs sur cette page il faut modifier la page parente.",
-        ),
-        FieldPanel("titre_phrase"),
-    ] + Page.content_panels
 
 
 # LEGACY MODELS
