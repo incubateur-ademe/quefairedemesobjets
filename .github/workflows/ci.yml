@@ -6,14 +6,13 @@ on:
 jobs:
   backend_linter:
     name: 📝 Backend Linter
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
-        with:
-          cache: "pip"
       - name: Install uv
         uses:  astral-sh/setup-uv@85856786d1ce8acfbcc2f13a5f3fbd6b938f9f41
+        with:
+          enable-cache: true
       - uses: actions/cache@v4
         name: Define a cache for the virtual environment based on the dependencies lock file
         with:
@@ -36,7 +35,7 @@ jobs:
 
   frontend_linter:
     name: 📝 Frontend Linter
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v6
@@ -69,15 +68,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
-        with:
-          cache: "pip"
       - name: Install GIS Packages
         run: |
           sudo apt-get update
           sudo apt-get install gdal-bin
       - name: Install uv
         uses:  astral-sh/setup-uv@85856786d1ce8acfbcc2f13a5f3fbd6b938f9f41
+        with:
+          enable-cache: true
       - uses: actions/cache@v4
         name: Define a cache for the virtual environment based on the dependencies lock file
         with:
@@ -99,7 +97,7 @@ jobs:
 
   frontend_tests:
     name: ✅ Frontend Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v6
@@ -115,7 +113,7 @@ jobs:
 
   e2e:
     name: tests de bout-en-bout
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     if: ${{ github.ref_name == 'main' || (github.event_name ==  'pull_request' && contains( github.event.pull_request.labels.*.name, 'frontend')) }}
     services:
       postgres:
@@ -133,34 +131,27 @@ jobs:
           - 6543:5432
     steps:
       - uses: actions/checkout@v5
-
       - name: Prepare environment
         run: |
           cp .env.template .env
           echo BASE_URL=http://localhost:8000 >> .env
           echo DEBUG=false >> .env
-
       - uses: actions/setup-node@v6
         with:
           node-version-file: ".tool-versions"
           cache: "npm"
-
       - name: Build assets
         run: |
           npm ci
           npm run build
-
-      - uses: actions/setup-python@v6
-        with:
-          cache: "pip"
-
       - name: Install GIS Packages
         run: |
           sudo apt-get update
           sudo apt-get install gdal-bin
-
       - name: Install uv
         uses: astral-sh/setup-uv@85856786d1ce8acfbcc2f13a5f3fbd6b938f9f41
+        with:
+          enable-cache: true
       - uses: actions/cache@v4
         name: Define a cache for the virtual environment based on the dependencies lock file
         with:

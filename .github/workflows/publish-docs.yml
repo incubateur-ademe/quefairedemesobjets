@@ -11,17 +11,14 @@ permissions:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
-
+    runs-on: ubuntu-slim
     steps:
     - name: Check out the code
       uses: actions/checkout@v5
-
-    - uses: actions/setup-python@v6
-      with:
-        cache: "pip"
     - name: Install uv
       uses: astral-sh/setup-uv@85856786d1ce8acfbcc2f13a5f3fbd6b938f9f41
+      with:
+        enable-cache: true
     - uses: actions/cache@v4
       name: Define a cache for the virtual environment based on the dependencies lock file
       with:
@@ -29,11 +26,9 @@ jobs:
         key: venv-dev-docs-${{ hashFiles('uv.lock') }}
     - name: Install the project dependencies
       run: uv sync --group docs
-
     - name: Build the documentation
       run: |
         uv run make build-docs
-
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e # v4
       with:
