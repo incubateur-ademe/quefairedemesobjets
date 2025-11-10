@@ -79,12 +79,12 @@ def db_data_prepare(
         "df_acteur_to_update": df_acteur_to_update,
         "df_acteur_to_delete": df_acteur_to_delete,
         "metadata_to_update": {
-            "nb acteur à mettre à jour": len(df_acteur_to_update),
+            "Nombre d'acteurs à mettre à jour": len(df_acteur_to_update),
         },
         "metadata_to_create": {
-            "nb acteur à créer": len(df_acteur_to_create),
+            "Nombre d'acteurs à créer": len(df_acteur_to_create),
         },
         "metadata_to_delete": {
-            "nb acteur à supprimer": len(df_acteur_to_delete),
+            "Nombre d'acteurs à supprimer": len(df_acteur_to_delete),
         },
     }

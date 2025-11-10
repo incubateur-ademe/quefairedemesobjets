@@ -354,7 +354,7 @@ class TestKeepActeurChanged:
                     }
                 ),
                 {
-                    "Nombre de mise à jour par champ": {
+                    "Nombre de mises à jour par champ": {
                         " ": ["MODIF", "SUP", "AJOUT"],
                         "nom": [1, 0, 0],
                     }
@@ -451,7 +451,7 @@ class TestKeepActeurChanged:
                     }
                 ),
                 {
-                    "Nombre de mise à jour par champ": {
+                    "Nombre de mises à jour par champ": {
                         " ": ["MODIF", "SUP", "AJOUT"],
                         "acteur_service_codes": [1, 0, 0],
                     }
@@ -548,7 +548,7 @@ class TestKeepActeurChanged:
                     }
                 ),
                 {
-                    "Nombre de mise à jour par champ": {
+                    "Nombre de mises à jour par champ": {
                         " ": ["MODIF", "SUP", "AJOUT"],
                         "acteur_service_codes": [1, 0, 0],
                     }
@@ -653,7 +653,7 @@ class TestKeepActeurChanged:
                     }
                 ),
                 {
-                    "Nombre de mise à jour par champ": {
+                    "Nombre de mises à jour par champ": {
                         " ": ["MODIF", "SUP", "AJOUT"],
                         "proposition_service_codes": [1, 0, 0],
                     }
@@ -884,7 +884,7 @@ class TestKeepActeurChanged:
                     }
                 ),
                 {
-                    "Nombre de mise à jour par champ": {
+                    "Nombre de mises à jour par champ": {
                         " ": ["MODIF", "SUP", "AJOUT"],
                         "label_codes": [0, 0, 1],
                         "nom": [0, 0, 1],
@@ -969,7 +969,7 @@ class TestKeepActeurChanged:
                     }
                 ),
                 {
-                    "Nombre de mise à jour par champ": {
+                    "Nombre de mises à jour par champ": {
                         " ": ["MODIF", "SUP", "AJOUT"],
                         "label_codes": [0, 1, 0],
                         "nom": [0, 1, 0],
@@ -1227,12 +1227,12 @@ def test_keep_acteur_changed_ignores_anonymized_acteurs(dag_config):
     )
 
     # Verify metadata about ignored anonymized actors
-    assert "Nombre d'acteur mis à jour ignoré car anonymisés pour RGPD" in metadata
-    assert metadata["Nombre d'acteur mis à jour ignoré car anonymisés pour RGPD"] == 1
+    assert "Nombre d'acteurs mis à jour ignorés car anonymisés pour RGPD" in metadata
+    assert metadata["Nombre d'acteurs mis à jour ignorés car anonymisés pour RGPD"] == 1
 
     # Verify metadata about modifications
-    assert "Nombre de mise à jour par champ" in metadata
-    assert metadata["Nombre de mise à jour par champ"]["nom"] == [
+    assert "Nombre de mises à jour par champ" in metadata
+    assert metadata["Nombre de mises à jour par champ"]["nom"] == [
         1,
         0,
         0,

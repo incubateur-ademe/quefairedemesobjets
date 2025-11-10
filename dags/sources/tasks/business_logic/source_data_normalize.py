@@ -269,7 +269,7 @@ def _display_warning_about_missing_location(df: pd.DataFrame) -> None:
         if not df_acteur_sans_loc.empty:
             nb_acteurs = len(df)
             logger.warning(
-                f"Nombre d'acteur sans localisation: {len(df_acteur_sans_loc)} / "
+                f"Nombre d'acteurs sans localisation: {len(df_acteur_sans_loc)} / "
                 f"{nb_acteurs}"
             )
             log.preview("Acteurs sans localisation", df_acteur_sans_loc)
