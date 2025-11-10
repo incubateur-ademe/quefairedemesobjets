@@ -1,4 +1,4 @@
-{%- macro acteur(ephemeral_filtered_acteur, propositionservice ) -%}
+{%- macro acteur(ephemeral_filtered_acteur, propositionservice, acteur_epci ) -%}
 
 with parentacteur_lieuprestation AS (
     SELECT
@@ -56,12 +56,17 @@ SELECT DISTINCT efa.uuid,
     efa.modifie_le,
     efa.cree_le,
     efa.statut,
-    efa.siret_is_closed
+    efa.siret_is_closed,
+    COALESCE(aepci.code_commune_insee, '') as code_commune_insee,
+    COALESCE(aepci.code_epci, '') as code_epci,
+    COALESCE(aepci.nom_epci, '') as nom_epci
 FROM {{ ref(ephemeral_filtered_acteur) }} AS efa
 INNER JOIN {{ ref(propositionservice) }} AS cps
     ON efa.identifiant_unique = cps.acteur_id
 LEFT OUTER JOIN parentacteur_lieuprestation AS plp
     ON efa.identifiant_unique = plp.acteur_id
+LEFT OUTER JOIN {{ ref(acteur_epci) }} AS aepci
+    ON efa.identifiant_unique = aepci.identifiant_unique
 -- filter to apply on resolved parent + children acteur
 WHERE (efa.public_accueilli IS NULL OR UPPER(efa.public_accueilli) NOT IN {{ get_public_accueilli_exclus() }})
 {%- endmacro -%}

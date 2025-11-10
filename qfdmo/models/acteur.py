@@ -1223,6 +1223,14 @@ class DisplayedActeur(BaseActeur, LatLngPropertiesMixin):
         related_name="displayed_acteurs",
     )
 
+    code_commune_insee = models.CharField(
+        max_length=10, blank=True, default="", db_index=True
+    )
+
+    code_epci = models.CharField(max_length=10, blank=True, default="", db_index=True)
+
+    nom_epci = models.CharField(max_length=255, blank=True, default="", db_index=True)
+
     @property
     def change_url(self):
         return reverse(
