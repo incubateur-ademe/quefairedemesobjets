@@ -13,7 +13,7 @@ jobs:
     # Displayed in workflow graph in GitHub UI
     # and in left sidebar
     name: Clever Cloud
-    runs-on: "ubuntu-slim"
+    runs-on: "ubuntu-latest"
     environment: ${{ inputs.environment }}
     steps:
       - uses: actions/checkout@v5
