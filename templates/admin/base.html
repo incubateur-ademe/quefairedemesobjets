@@ -8,6 +8,7 @@
 
 {% block extrahead %}
     {{ block.super }}
+    <script src="{% static 'admin.js' %}" defer></script>
     <style>
         #site-name::after {
             content: " ({{ ENVIRONMENT }})";
