@@ -93,11 +93,12 @@ def render_file_content(file_field: FileField) -> str:
         return ""
 
 
-@register.inclusion_tag("ui/components/carte/carte.html", takes_context=True)
+@register.inclusion_tag("templatetags/carte.html", takes_context=True)
 def carte(context, carte_config: CarteConfig) -> dict:
     page = context.get("page")
     return {
-        "id": carte_config.pk,
+        # TODO: Mutualiser avec le _get_map_container_id de views/carte.py
+        "id": carte_config.slug,
         "url": carte_config.get_absolute_url(
             override_sous_categories=list(
                 page.sous_categorie_objet.all().values_list("id", flat=True)
