@@ -4,6 +4,17 @@ from django.template.defaulttags import register
 
 from core.constants import MAP_CONTAINER_ID
 from core.exceptions import TurboFrameConfigurationError
+from qfdmo.models import DisplayedActeur
+
+
+@register.inclusion_tag("templatetags/acteur.html", takes_context=True)
+def acteur(context, object: DisplayedActeur | None = None) -> dict:
+    data = {"request": context["request"]}
+    if not object:
+        object = context.get("object")
+    data.update(object=object)
+
+    return data
 
 
 @register.simple_tag(takes_context=True)

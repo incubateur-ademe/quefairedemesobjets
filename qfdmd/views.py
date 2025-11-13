@@ -8,6 +8,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.vary import vary_on_headers
 from django.views.generic import DetailView, ListView
 from queryish.rest import APIModel
@@ -25,6 +26,7 @@ from qfdmd.models import (
     Suggestion,
     Synonyme,
 )
+from qfdmo.forms import DisplayedActeurContribForm
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +55,23 @@ def get_assistant_script(request):
 
 
 SEARCH_VIEW_TEMPLATE_NAME = "ui/components/search/view.html"
+
+
+@csrf_exempt
+def contrib_displayed_acteur(request) -> HttpResponse:
+    template_name = "ui/components/modals/modifier.html"
+    if request.method == "POST":
+        change_form = DisplayedActeurContribForm(request.POST)
+        if change_form.is_valid():
+            # TODO: Create suggestion and send it to airflow
+            # change_form.save()
+            context = {"object": change_form.instance}
+        else:
+            context = {
+                "form": change_form,
+                "object": change_form.instance,
+            }
+        return render(request, template_name, context=context)
 
 
 def search_view(request) -> HttpResponse:

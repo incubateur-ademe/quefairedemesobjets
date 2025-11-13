@@ -7,6 +7,7 @@ from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.template import Context, Template
 from django.template.loader import render_to_string
+from django.test import RequestFactory
 from django_lookbook.preview import LookbookPreview
 from django_lookbook.utils import register_form_class
 from dsfr.forms import DsfrBaseForm
@@ -146,7 +147,6 @@ class CartePreview(LookbookPreview):
     @component_docs("ui/components/carte/mode_liste.md")
     def mode_liste(self, **kwargs):
         from django.core.paginator import Paginator
-        from django.test import RequestFactory
 
         acteurs = DisplayedActeur.objects.all()[:10]
         paginator = Paginator(acteurs, 5)
@@ -483,6 +483,25 @@ class FormulairesPreview(LookbookPreview):
 
 
 class PagesPreview(LookbookPreview):
+    def fiche_acteur(self, **kwargs):
+        acteur = DisplayedActeur.objects.first()
+        factory = RequestFactory()
+        request = factory.get(acteur.url)
+        request.can_edit_acteur = True
+        form = DisplayedActeurContribForm(instance=acteur)
+
+        context = {"request": request, "object": acteur, "form": form}
+        template = Template(
+            """
+            {% load dsfr_tags acteur_tags %}
+
+            {% acteur object %}
+
+            {% include "ui/components/modals/modifier.html" with modal_only=True %}
+            """,
+        )
+        return template.render(Context(context))
+
     def home(self, **kwargs):
         context = {
             "request": None,

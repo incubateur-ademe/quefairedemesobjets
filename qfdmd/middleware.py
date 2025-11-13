@@ -22,8 +22,17 @@ class BetaMiddleware:
                 request.user, "wagtailadmin.can_see_beta_search"
             )
 
+    def _set_epci_flag(self, request):
+        # TODO: check that it permission set matches the one from proconnect
+        # or do this elsewhere ?
+        #
+        # TODO: move this in another middleware ?
+        if request.user.is_authenticated:
+            request.can_edit_acteurs = True
+
     def __call__(self, request):
         self._set_beta_mode_from(request)
+        self._set_epci_flag(request)
         response = self.get_response(request)
         return response
 

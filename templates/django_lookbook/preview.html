@@ -18,6 +18,8 @@
   <div>
     {{ preview_html }}
   </div>
+  {% include "ui/components/modals/modifier.html" with modal_only=True %}
+
 
   {% dsfr_js %}
   <script type="module" src="{% static 'qfdmd.js' %}"></script>
