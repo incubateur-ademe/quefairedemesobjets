@@ -2,6 +2,7 @@
 
 {% load dsfr_tags %}
 {% block main %}
+<turbo-frame id="contrib-acteur-{{ object.pk }}">
     {% if form %}
         <form method="post" class="qf-flex qf-flex-col qf-gap-2w qf-group">
             {% csrf_token %}
