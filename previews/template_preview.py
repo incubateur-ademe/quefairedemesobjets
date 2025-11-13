@@ -13,7 +13,12 @@ from dsfr.forms import DsfrBaseForm
 
 from qfdmd.forms import SearchForm
 from qfdmd.models import Suggestion, Synonyme
-from qfdmo.forms import LegendeForm, NextAutocompleteInput, ViewModeForm
+from qfdmo.forms import (
+    DisplayedActeurContribForm,
+    LegendeForm,
+    NextAutocompleteInput,
+    ViewModeForm,
+)
 from qfdmo.models.acteur import ActeurType, DisplayedActeur, DisplayedPropositionService
 from qfdmo.models.action import Action
 from qfdmo.models.config import CarteConfig
@@ -394,6 +399,13 @@ class ModalsPreview(LookbookPreview):
 
     def partage(self, **kwargs):
         return render_to_string("ui/components/modals/share.html")
+
+    def modifier(self, **kwargs):
+        acteur = DisplayedActeur.objects.last()
+        form = DisplayedActeurContribForm(instance=acteur)
+        return render_to_string(
+            "ui/components/modals/modifier.html", {"object": acteur, "form": form}
+        )
 
     def filtres(self, **kwargs):
         from qfdmo.forms import FiltresForm, LegendeForm
