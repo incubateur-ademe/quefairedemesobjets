@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("qfdmo", "0178_displayedacteur_code_commune_insee_and_more"),
+        ("qfdmo", "0178_epci_displayedacteur_code_commune_insee_and_more"),
         ("qfdmo", "0178_remove_carteconfig_label_carteconfig_label_qualite_and_more"),
     ]
 
