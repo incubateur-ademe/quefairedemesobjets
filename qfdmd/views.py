@@ -28,6 +28,7 @@ from data.models.suggestion import (
 from qfdmd.forms import SearchForm
 from qfdmd.models import Bonus, Produit, ProduitIndexPage, ReusableContent, Synonyme
 from qfdmo.models.acteur import DisplayedActeur
+from qfdmo.views.adresses import TurboFormMixin
 
 logger = logging.getLogger(__name__)
 
@@ -64,10 +65,11 @@ class ActeurContribForm(DsfrBaseForm, ModelForm):
         fields = ["nom", "adresse", "description", "horaires_description"]
 
 
-class DisplayedActeurUpdateView(UpdateView):
+class DisplayedActeurUpdateView(TurboFormMixin, UpdateView):
     model = DisplayedActeur
     form_class = ActeurContribForm
     template_name = "ui/forms/acteur_contrib_form.html"
+    success_url = "qfdmd:contrib"
 
     @transaction.atomic
     def _create_suggestion(self, request: HttpRequest, change_form: ActeurContribForm):
@@ -103,8 +105,8 @@ class DisplayedActeurUpdateView(UpdateView):
     def form_valid(self, form: ActeurContribForm) -> HttpResponse:
         # Create suggestion
         self._create_suggestion(self.request, form)
-        messages.info(self.request, "Soumis avec succès")
-        return render(self.request, self.template_name, {"form": form})
+        context = self.get_context_data(form=form, object=self.object)
+        return self.render_to_response(context)
 
 
 def search_view(request) -> HttpResponse:

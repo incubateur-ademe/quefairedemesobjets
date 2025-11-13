@@ -1,19 +1,19 @@
-{% extends base_template|default:"ui/layout/assistant.html" %}
+{% extends base_template %}
 
 {% load dsfr_tags %}
-{% block main %}
-<turbo-frame id="contrib-acteur-{{ object.pk }}">
-    {% if form %}
-        <form method="post" class="qf-flex qf-flex-col qf-gap-2w qf-group">
+{% block content %}
+<turbo-frame id="contrib-acteur-{{ form.instance.pk }}">
+    {% if form.is_valid %}
+        {% dsfr_alert title="Merci pour votre contribution !" %}
+    {% else %}
+        <form method="post" class="qf-flex qf-flex-col qf-gap-2w qf-group" action="{% url "qfdmd:contrib" form.instance.pk %}">
             {% csrf_token %}
             {{ form.errors }}
             {{ form }}
             {% dsfr_button label="Valider" %}
             {% include "ui/components/carte/shared/disclaimers/loading_solutions.html" %}
         </form>
-    {% else %}
-    Merci pour vos modifications, elles seront prises en compte sous 30 minutes environ.
     {% endif %}
 </turbo-frame>
 
-{% endblock main %}
+{% endblock content %}
