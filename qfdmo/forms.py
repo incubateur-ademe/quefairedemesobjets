@@ -1,3 +1,4 @@
+import base64
 import uuid
 from typing import cast
 
@@ -214,26 +215,47 @@ class LegendeForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
         if not action_codes:
             return None
 
-        # Get actions matching these codes
-        actions = Action.objects.filter(code__in=action_codes)
-
-        # Extract unique groupe_action IDs from these actions
-        groupe_action_ids = set()
-        for action in actions:
-            if action.groupe_action_id:
-                groupe_action_ids.add(action.groupe_action_id)
-
-        if not groupe_action_ids:
-            return None
-
         # Return queryset of GroupeAction objects
         return GroupeAction.objects.filter(
-            id__in=groupe_action_ids, afficher=True
+            actions__code__in=action_codes, afficher=True
         ).order_by("order")
 
     @cached_property
     def visible(self):
         return self.fields["groupe_action"].queryset.count() > 1
+
+
+class LegacySupportForm(forms.Form):
+    querystring = forms.CharField(
+        widget=forms.HiddenInput(),
+        required=False,
+    )
+
+    query_params_to_keep = ["action_list", "action_displayed"]
+
+    def __init__(self, *args, **kwargs):
+        # Extract request from kwargs to get the initial querystring
+        request = kwargs.pop("request", None)
+        super().__init__(*args, **kwargs)
+
+        # On first load (GET request with no form data), capture the querystring
+        if request and request.method == "GET":
+            # Filter query params to only keep those in query_params_to_keep
+            filtered_query_dict = request.GET.copy()
+
+            # Remove params that are not in query_params_to_keep
+            for key in list(filtered_query_dict.keys()):
+                if key not in self.query_params_to_keep:
+                    del filtered_query_dict[key]
+
+            # Build the filtered querystring and encode as base64
+            if filtered_query_dict:
+                filtered_querystring = filtered_query_dict.urlencode()
+                encoded_querystring = base64.b64encode(
+                    filtered_querystring.encode("utf-8")
+                ).decode("utf-8")
+                self.fields["querystring"].initial = encoded_querystring
+                print(f"{encoded_querystring=}")
 
 
 class AutoSubmitLegendeForm(AutoSubmitMixin, LegendeForm):

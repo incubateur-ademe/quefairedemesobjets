@@ -14,6 +14,7 @@ from qfdmo.forms import (
     CarteForm,
     FiltresForm,
     FiltresFormWithoutSynonyme,
+    LegacySupportForm,
     LegendeForm,
     ViewModeForm,
 )
@@ -58,6 +59,7 @@ class CarteFormsInstance(TypedDict):
     filtres: None | FiltresForm
     legende: None | AutoSubmitLegendeForm
     legende_filtres: None | LegendeForm
+    legacy: None | LegacySupportForm
 
 
 class CarteSearchActeursView(SearchActeursView):
@@ -101,9 +103,14 @@ class CarteSearchActeursView(SearchActeursView):
             return prefix
 
     def _get_forms(self) -> CarteFormsInstance:
-        form_instances: CarteFormsInstance = {}
+        data = self.request.GET
+
+        # Initialize legacy form with request and bind it if there's data
+        legacy_form = LegacySupportForm(data if data else None, request=self.request)
+
+        form_instances: CarteFormsInstance = {"legacy": legacy_form}
+
         for key, form_config in self.forms.items():
-            data = self.request.GET
             prefix = self._generate_prefix(form_config["prefix"])
             # carte_legende-nom_du_champ
             form = form_config["form"](
