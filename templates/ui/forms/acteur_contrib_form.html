@@ -1,6 +1,10 @@
-<turbo-frame id="modal-modifier">
+{% extends "ui/layout/assistant.html" %}
+
+{% load dsfr_tags %}
+{% block main %}
     {% if form %}
-        <form method="post" class="qf-flex qf-flex-col qf-gap-2w qf-group" action="{% url "qfdmd:contrib" %}">
+        <form method="post" class="qf-flex qf-flex-col qf-gap-2w qf-group">
+            {% csrf_token %}
             {{ form.errors }}
             {{ form }}
             {% dsfr_button label="Valider" %}
@@ -10,3 +14,5 @@
     Merci pour vos modifications, elles seront prises en compte sous 30 minutes environ.
     {% endif %}
 </turbo-frame>
+
+{% endblock main %}

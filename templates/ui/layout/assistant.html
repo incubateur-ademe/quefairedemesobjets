@@ -79,6 +79,7 @@ https://github.com/numerique-gouv/sites-faciles/blob/main/templates/base.html
     >
         {% wagtailuserbar %}
 
+
         {% if request.user.is_authenticated %}
         <div class="qf-mt-2w qf-bg-red-marianne-main-472 qf-text-white qf-text-center qf-w-full qf-py-1v qf-text-xs">
         Vous êtes bien authentifié, vos statistiques PostHog seront ignorées pour cette session | <a href="{% url 'admin:index' %}">accéder à l'administration</a>
@@ -93,6 +94,9 @@ https://github.com/numerique-gouv/sites-faciles/blob/main/templates/base.html
         {% endblock pre_main %}
 
         <main class="{% block main_classes %}fr-container{% endblock %} qf-pb-7w">
+            {% for message in messages %}
+                {% dsfr_alert title=message %}
+            {% endfor %}
             {% block main %}
             {% endblock main %}
         </main>

@@ -4,12 +4,14 @@ from typing import Any
 
 from django.conf import settings
 from django.contrib import messages
+from django.forms.models import ModelForm
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control
 from django.views.decorators.vary import vary_on_headers
 from django.views.generic import DetailView, ListView, UpdateView
+from dsfr.forms import DsfrBaseForm
 from queryish.rest import APIModel
 from wagtail.admin.viewsets.chooser import ChooserViewSet
 from wagtail.admin.viewsets.model import ModelViewSet
@@ -56,10 +58,21 @@ def get_assistant_script(request):
 SEARCH_VIEW_TEMPLATE_NAME = "ui/components/search/view.html"
 
 
+class ActeurContribForm(DsfrBaseForm, ModelForm):
+    class Meta:
+        model = DisplayedActeur
+        fields = ["nom", "adresse", "description", "horaires_description"]
+
+
 class DisplayedActeurUpdateView(UpdateView):
     model = DisplayedActeur
-    template_name = "ui/forms/displayed_acteur_update_form.html"
-    fields = ["nom", "adresse", "description", "horaires_description"]
+    form_class = ActeurContribForm
+    template_name = "ui/forms/acteur_contrib_form.html"
+
+    def form_valid(self, form):
+        # Create suggestion
+        messages.info(self.request, "Soumis avec succès")
+        return render(self.request, self.template_name, {"form": form})
 
 
 # @csrf_exempt

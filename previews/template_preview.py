@@ -15,7 +15,6 @@ from dsfr.forms import DsfrBaseForm
 from qfdmd.forms import SearchForm
 from qfdmd.models import Suggestion, Synonyme
 from qfdmo.forms import (
-    DisplayedActeurContribForm,
     LegendeForm,
     NextAutocompleteInput,
     ViewModeForm,
@@ -400,12 +399,12 @@ class ModalsPreview(LookbookPreview):
     def partage(self, **kwargs):
         return render_to_string("ui/components/modals/share.html")
 
-    def modifier(self, **kwargs):
-        acteur = DisplayedActeur.objects.last()
-        form = DisplayedActeurContribForm(instance=acteur)
-        return render_to_string(
-            "ui/components/modals/modifier.html", {"object": acteur, "form": form}
-        )
+    # def modifier(self, **kwargs):
+    #     acteur = DisplayedActeur.objects.last()
+    #     # form = DisplayedActeurContribForm(instance=acteur)
+    #     return render_to_string(
+    #         "ui/components/modals/modifier.html", {"object": acteur, "form": form}
+    # )
 
     def filtres(self, **kwargs):
         from qfdmo.forms import FiltresForm, LegendeForm
@@ -438,24 +437,6 @@ class ModalsPreview(LookbookPreview):
 
 
 class FormulairesPreview(LookbookPreview):
-    def contrib_form(self, **kwargs):
-        acteur = DisplayedActeur.objects.last()
-        form = DisplayedActeurContribForm(instance=acteur)
-        context = {"form": form}
-        template = Template(
-            """
-            {% load dsfr_tags acteur_tags %}
-
-            <form method="post"
-            action="{% url "qfdmd:contrib" %}">
-            {{ form.errors }}
-            {{ form }}
-            {% dsfr_button label="Valider"%}
-            </form>
-            """,
-        )
-        return template.render(Context(context))
-
     @component_docs("ui/components/formulaires/plusieurs_formulaires.md")
     def plusieurs_formulaires(self, **kwargs):
         form1 = LegendeForm(prefix="1")
@@ -501,24 +482,24 @@ class FormulairesPreview(LookbookPreview):
 
 
 class PagesPreview(LookbookPreview):
-    def fiche_acteur(self, **kwargs):
-        acteur = DisplayedActeur.objects.last()
-        factory = RequestFactory()
-        request = factory.get(acteur.url)
-        request.can_edit_acteur = True
-        form = DisplayedActeurContribForm(instance=acteur)
+    # def fiche_acteur(self, **kwargs):
+    #     acteur = DisplayedActeur.objects.last()
+    #     factory = RequestFactory()
+    #     request = factory.get(acteur.url)
+    #     request.can_edit_acteur = True
+    #     form = DisplayedActeurContribForm(instance=acteur)
 
-        context = {"request": request, "object": acteur, "form": form}
-        template = Template(
-            """
-            {% load dsfr_tags acteur_tags %}
+    #     context = {"request": request, "object": acteur, "form": form}
+    #     template = Template(
+    #         """
+    #         {% load dsfr_tags acteur_tags %}
 
-            {% acteur object %}
+    #         {% acteur object %}
 
-            {% include "ui/components/modals/modifier.html" with modal_only=True %}
-            """,
-        )
-        return template.render(Context(context))
+    #         {% include "ui/components/modals/modifier.html" with modal_only=True %}
+    #         """,
+    #     )
+    #     return template.render(Context(context))
 
     def home(self, **kwargs):
         context = {
