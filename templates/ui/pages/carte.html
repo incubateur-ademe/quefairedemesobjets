@@ -40,6 +40,7 @@
         data-search-solution-form-map-container-id-value="{% main_frame_id %}"
     >
         <input type="hidden" name="{{ MAP_CONTAINER_ID }}" value="{% main_frame_id %}">
+        {{ forms.legacy }}
         <section class="map-grid qf-relative">
             {% include 'ui/components/carte/header.html' %}
 
