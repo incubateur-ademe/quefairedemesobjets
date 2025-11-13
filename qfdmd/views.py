@@ -8,9 +8,8 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.vary import vary_on_headers
-from django.views.generic import DetailView, ListView
+from django.views.generic import DetailView, ListView, UpdateView
 from queryish.rest import APIModel
 from wagtail.admin.viewsets.chooser import ChooserViewSet
 from wagtail.admin.viewsets.model import ModelViewSet
@@ -26,7 +25,7 @@ from qfdmd.models import (
     Suggestion,
     Synonyme,
 )
-from qfdmo.forms import DisplayedActeurContribForm
+from qfdmo.models.acteur import DisplayedActeur
 
 logger = logging.getLogger(__name__)
 
@@ -57,24 +56,30 @@ def get_assistant_script(request):
 SEARCH_VIEW_TEMPLATE_NAME = "ui/components/search/view.html"
 
 
-@csrf_exempt
-def contrib_displayed_acteur(request) -> HttpResponse:
-    template_name = "ui/components/modals/modifier.html"
-    if request.method == "POST":
-        change_form = DisplayedActeurContribForm(request.POST)
-        if change_form.is_valid():
-            # TODO: Create suggestion and send it to airflow
-            print(change_form.cleaned_data)
-            print(change_form.instance)
+class DisplayedActeurUpdateView(UpdateView):
+    model = DisplayedActeur
+    template_name = "ui/forms/displayed_acteur_update_form.html"
+    fields = ["nom", "adresse", "description", "horaires_description"]
 
-            # change_form.save()
-            context = {"object": change_form.instance}
-        else:
-            context = {
-                "form": change_form,
-                "object": change_form.instance,
-            }
-        return render(request, template_name, context=context)
+
+# @csrf_exempt
+# def contrib_displayed_acteur(request) -> HttpResponse:
+#     template_name = "ui/components/modals/modifier.html"
+#     # if request.method == "POST":
+#     #     change_form = DisplayedActeurContribForm(request.POST)
+#     #     if change_form.is_valid():
+#     #         # TODO: Create suggestion and send it to airflow
+#     #         print(change_form.cleaned_data)
+#     #         print(change_form.instance)
+
+#     #         # change_form.save()
+#     #         context = {"object": change_form.instance}
+#     #     else:
+#     #         context = {
+#     #             "form": change_form,
+#     #             "object": change_form.instance,
+#     #         }
+#     #     return render(request, template_name, context=context)
 
 
 def search_view(request) -> HttpResponse:

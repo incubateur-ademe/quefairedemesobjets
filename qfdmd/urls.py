@@ -3,9 +3,9 @@ from django.urls import path
 from django.views.generic import RedirectView
 
 from qfdmd.views import (
+    DisplayedActeurUpdateView,
     HomeView,
     SynonymeDetailView,
-    contrib_displayed_acteur,
     get_assistant_script,
     search_view,
 )
@@ -26,7 +26,7 @@ urlpatterns = [
     # legacy behaviour.
     path("dechet/<slug:slug>/", SynonymeDetailView.as_view(), name="synonyme-detail"),
     path("dechet/<slug:slug>/carte/", ProductCarteView.as_view(), name="carte"),
-    path("update-acteur", contrib_displayed_acteur, name="contrib"),
+    path("update-acteur", DisplayedActeurUpdateView.as_view(), name="contrib"),
     path("iframe.js", get_assistant_script, name="script"),
     path("", HomeView.as_view(), name="home"),
 ]

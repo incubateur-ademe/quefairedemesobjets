@@ -6,7 +6,6 @@ from django import forms
 from django.core.cache import cache
 from django.db.models import TextChoices
 from django.db.utils import cached_property
-from django.forms.models import ModelForm
 from django.http import HttpRequest
 from django.shortcuts import reverse
 from django.template.loader import render_to_string
@@ -20,7 +19,7 @@ from qfdmo.fields import GroupeActionChoiceField, LabelQualiteChoiceField
 from qfdmo.geo_api import epcis_from, formatted_epcis_as_list_of_tuple
 from qfdmo.mixins import AutoSubmitMixin, CarteConfigFormMixin, GetFormMixin
 from qfdmo.models import SousCategorieObjet
-from qfdmo.models.acteur import DisplayedActeur, LabelQualite
+from qfdmo.models.acteur import LabelQualite
 from qfdmo.models.action import (
     Action,
     GroupeAction,
@@ -680,9 +679,3 @@ class ViewModeForm(AutoSubmitMixin, GetFormMixin, CarteConfigFormMixin, DsfrBase
             extended_choices=ViewModeSegmentedControlChoices,
         ),
     )
-
-
-class DisplayedActeurContribForm(ModelForm, DsfrBaseForm):
-    class Meta:
-        model = DisplayedActeur
-        fields = ["nom", "adresse", "description", "horaires_description"]
