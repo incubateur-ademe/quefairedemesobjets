@@ -1,0 +1,31 @@
+version: 2
+
+models:
+  - name: exposure_epci
+    description: "Vue sur les EPCI"
+    columns:
+      - name: id
+        description: "L'identifiant de l'EPCI"
+        data_type: integer
+        tests:
+          - not_null
+      - name: code
+        description: "Le code EPCI"
+        data_type: varchar(10)
+        tests:
+          - not_null
+      - name: nom
+        description: "Le nom de l'EPCI"
+        data_type: varchar(255)
+        tests:
+          - not_null
+          - not_empty_string
+    config:
+      tags:
+        - exposure
+        - acteurs
+        - common
+        - epci
+      contract:
+        enforced: true
+      materialized: table

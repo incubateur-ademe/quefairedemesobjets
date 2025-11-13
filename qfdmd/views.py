@@ -4,27 +4,31 @@ from typing import Any
 
 from django.conf import settings
 from django.contrib import messages
+from django.db import transaction
+from django.forms.models import ModelForm
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control
 from django.views.decorators.vary import vary_on_headers
-from django.views.generic import DetailView, ListView
+from django.views.generic import DetailView, ListView, UpdateView
+from dsfr.forms import DsfrBaseForm
 from queryish.rest import APIModel
 from wagtail.admin.viewsets.chooser import ChooserViewSet
 from wagtail.admin.viewsets.model import ModelViewSet
 from wagtail.models import Page
 
 from core.views import static_file_content_from
-from qfdmd.forms import SearchForm
-from qfdmd.models import (
-    Bonus,
-    Produit,
-    ProduitIndexPage,
-    ReusableContent,
+from data.models.suggestion import (
     Suggestion,
-    Synonyme,
+    SuggestionAction,
+    SuggestionCohorte,
+    SuggestionStatut,
 )
+from qfdmd.forms import SearchForm
+from qfdmd.models import Bonus, Produit, ProduitIndexPage, ReusableContent, Synonyme
+from qfdmo.models.acteur import DisplayedActeur
+from qfdmo.views.adresses import TurboFormMixin
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +57,56 @@ def get_assistant_script(request):
 
 
 SEARCH_VIEW_TEMPLATE_NAME = "ui/components/search/view.html"
+
+
+class ActeurContribForm(DsfrBaseForm, ModelForm):
+    class Meta:
+        model = DisplayedActeur
+        fields = ["nom", "adresse", "description", "horaires_description"]
+
+
+class DisplayedActeurUpdateView(TurboFormMixin, UpdateView):
+    model = DisplayedActeur
+    form_class = ActeurContribForm
+    template_name = "ui/forms/acteur_contrib_form.html"
+    success_url = "qfdmd:contrib"
+
+    @transaction.atomic
+    def _create_suggestion(self, request: HttpRequest, change_form: ActeurContribForm):
+        suggestion_cohorte, created = SuggestionCohorte.objects.get_or_create(
+            identifiant_action="CONTRIBUTION",
+            identifiant_execution=request.session.session_key,
+            type_action=SuggestionAction.CONTRIBUTION,
+            statut=SuggestionStatut.AVALIDER,
+        )
+        fields = change_form.fields
+        acteur = change_form.instance
+
+        # TODO: replace
+        # acteur_from_db = DisplayedActeur.objects.get(
+        #     identifiant_unique=acteur.identifiant_unique
+        # )
+        acteur_from_db = DisplayedActeur.objects.last()
+
+        contexte = {}
+        suggestion = {}
+        for field in fields:
+            if getattr(acteur_from_db, field) != getattr(acteur, field):
+                contexte[field] = getattr(acteur_from_db, field)
+                suggestion[field] = getattr(acteur, field)
+
+        Suggestion.objects.create(
+            suggestion_cohorte=suggestion_cohorte,
+            statut=SuggestionStatut.ATRAITER,
+            contexte=contexte,
+            suggestion=suggestion,
+        )
+
+    def form_valid(self, form: ActeurContribForm) -> HttpResponse:
+        # Create suggestion
+        self._create_suggestion(self.request, form)
+        context = self.get_context_data(form=form, object=self.object)
+        return self.render_to_response(context)
 
 
 def search_view(request) -> HttpResponse:

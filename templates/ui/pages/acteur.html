@@ -13,28 +13,7 @@
 
 {% block content %}
 <div class="fr-container qf-py-2w">
-    <turbo-frame
-        id="{% acteur_frame_id %}"
-    >
-        <article {% if turbo %}class='qf-animate-in qf-fade-in qf-duration-400'{% endif %}>
-            <header class="qf-mb-2w">
-                <div>
-                    {% if object.labels_display %}
-                        {% include "ui/components/carte/acteur/_labels.html" %}
-                    {% endif %}
-
-                    {# TODO: use an alternative template instead of a conditionnal inside the html tag #}
-                    <{% if turbo %}h3{% else %}h1{% endif %} class="qf-text-lg qf-m-0 qf-max-w-[90%]" data-testid="acteur-title">{{ object.libelle|title }}</{% if turbo %}h3{% else %}h1{% endif %}>
-                    <p class="qf-text-sm qf-m-0">
-                        {{ object.acteur_services_display }} ({% distance_to_acteur object %})
-                    </p>
-                </div>
-
-                {% include "ui/components/carte/acteur/tabs/_separator.html" %}
-                {% include "ui/components/carte/acteur/_actions.html" %}
-            </header>
-            {% include "ui/components/carte/acteur/_tabs.html" %}
-        </article>
-    </turbo-frame>
+    {# TODO: use the template tag directly here #}
+    {% include "templatetags/acteur.html" %}
 </div>
 {% endblock content %}

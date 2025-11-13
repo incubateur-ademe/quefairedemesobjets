@@ -9,7 +9,7 @@ from django.template.loader import render_to_string
 from core.constants import MAP_CONTAINER_ID
 from qfdmo.models import DisplayedActeur
 from qfdmo.models.action import get_actions_by_direction
-from qfdmo.models.config import GroupeActionConfig
+from qfdmo.models.config import CarteConfig, GroupeActionConfig
 
 logger = logging.getLogger(__name__)
 
@@ -63,6 +63,9 @@ def hide_object_filter(context):
 def distance_to_acteur(context, acteur):
     """distance from user location to displayed acteur"""
     request = context["request"]
+    if not request:
+        return ""
+
     longitude = request.GET.get("longitude")
     latitude = request.GET.get("latitude")
     location = acteur.location
@@ -230,4 +233,19 @@ def acteurs_table(context, acteurs):
             "content": [render_acteur(acteur, context) for acteur in acteurs],
             "extra_classes": "fr-table--mode-liste fr-table--multiline qf-w-full",
         }
+    }
+
+
+@register.inclusion_tag("templatetags/carte.html", takes_context=True)
+def carte(context, carte_config: CarteConfig) -> dict:
+    page = context.get("page")
+    return {
+        # TODO: Mutualiser avec le _get_map_container_id de views/carte.py
+        "id": carte_config.slug,
+        "url": carte_config.get_absolute_url(
+            override_sous_categories=list(
+                page.sous_categorie_objet.all().values_list("id", flat=True)
+            ),
+            initial_query_string=carte_config.SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url,
+        ),
     }

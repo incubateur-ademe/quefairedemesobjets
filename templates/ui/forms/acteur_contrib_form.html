@@ -1,0 +1,19 @@
+{% extends base_template %}
+
+{% load dsfr_tags %}
+{% block content %}
+<turbo-frame id="contrib-acteur-{{ form.instance.pk }}">
+    {% if form.is_valid %}
+        {% dsfr_notice description="Merci pour votre contribution !" %}
+    {% else %}
+        <form method="post" class="qf-flex qf-flex-col qf-gap-2w qf-group" action="{% url "qfdmd:contrib" form.instance.pk %}">
+            {% csrf_token %}
+            {{ form.errors }}
+            {{ form }}
+            {% dsfr_button label="Valider" %}
+            {% include "ui/components/carte/shared/disclaimers/loading_solutions.html" %}
+        </form>
+    {% endif %}
+</turbo-frame>
+
+{% endblock content %}

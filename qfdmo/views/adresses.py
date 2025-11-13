@@ -460,6 +460,7 @@ def acteur_detail(request, uuid):
         ),
         "is_carte": "carte" in request.GET,
         "map_container_id": request.GET.get("map_container_id", "carte"),
+        "request": request,
     }
 
     if latitude and longitude and not displayed_acteur.is_digital:

@@ -21,7 +21,7 @@ default_args = {
     "retry_delay": timedelta(minutes=2),
 }
 
-dbt_run = "dbt run --models"
+dbt_run = "dbt run --select"
 dbt_test = "dbt test --resource-type model --select"
 
 
@@ -55,6 +55,15 @@ with DAG(
     dbt_test_intermediate_acteurs = BashOperator(
         task_id="dbt_test_intermediate_acteurs",
         bash_command=(f"{dbt_test} intermediate.acteurs"),
+    )
+
+    dbt_run_exposure_acteurs_common = BashOperator(
+        task_id="dbt_run_exposure_acteurs_common",
+        bash_command=(f"{dbt_run} exposure.acteurs.common"),
+    )
+    dbt_test_exposure_acteurs_common = BashOperator(
+        task_id="dbt_test_exposure_acteurs_common",
+        bash_command=(f"{dbt_test} exposure.acteurs.common"),
     )
 
     dbt_run_marts_acteurs_carte = BashOperator(
@@ -108,6 +117,13 @@ with DAG(
         bash_command=(f"{dbt_test} exposure.acteurs.exhaustive"),
     )
 
+    check_model_table_epci_task = check_model_table_consistency_task(
+        dag, "qfdmo", "EPCI", "exposure_epci"
+    )
+    replace_epci_table_task = replace_acteur_table_task(
+        dag, "qfdmo_", "exposure_", tables=["epci"]
+    )
+
     check_model_table_displayedacteur_task = check_model_table_consistency_task(
         dag, "qfdmo", "DisplayedActeur", "exposure_carte_acteur"
     )
@@ -153,6 +169,8 @@ with DAG(
         >> dbt_test_base_acteurs
         >> dbt_run_intermediate_acteurs
         >> dbt_test_intermediate_acteurs
+        >> dbt_run_exposure_acteurs_common
+        >> dbt_test_exposure_acteurs_common
         >> dbt_run_marts_acteurs_carte
         >> dbt_test_marts_acteurs_carte
         >> dbt_run_exposure_acteurs_carte
@@ -166,18 +184,16 @@ with DAG(
         >> dbt_run_exposure_acteurs_exhaustive
         >> dbt_test_exposure_acteurs_exhaustive
     )
-
+    (dbt_test_exposure_acteurs_carte >> check_model_table_epci_task)
+    (dbt_test_exposure_acteurs_exhaustive >> check_model_table_epci_task)
     # Définir la séquence de vérification en parallèle
+    (check_model_table_epci_task >> replace_epci_table_task)
     (
-        dbt_test_exposure_acteurs_carte
+        replace_epci_table_task
         >> check_model_table_displayedacteur_task
         >> check_model_table_displayedpropositionservice_task
         >> check_model_table_displayedperimetreadomicile_task
         >> replace_displayedacteur_table_task
-    )
-
-    (
-        dbt_test_exposure_acteurs_exhaustive
         >> check_model_table_vueacteur_task
         >> check_model_table_vuepropositionservice_task
         >> check_model_table_vueperimetreadomicile_task

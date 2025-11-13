@@ -55,6 +55,7 @@ class SuggestionCohorteStatut(models.TextChoices):
 
 
 class SuggestionAction(models.TextChoices):
+    CONTRIBUTION = "CONTRIBUTION", "Contribution"
     CRAWL_URLS = SUGGESTION_CRAWL_URLS, "🔗 URLs scannées"
     ENRICH_ACTEURS_CLOSED = "ENRICH_ACTEURS_CLOSED", "🚪 Acteurs fermés"
     ENRICH_ACTEURS_RGPD = "ENRICH_ACTEURS_RGPD", "🕵 Anonymisation RGPD"

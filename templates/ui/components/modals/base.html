@@ -19,6 +19,7 @@ Requires a unique 'id' per modal for accessibility.
 {% namespaced id as namespaced_id %}
 
 {% if not modal_only %}
+{% block button %}
 <button
     class="fr-btn {% block button_extra_classes %}{% endblock %} {{ button_extra_classes }} qf-whitespace-nowrap"
     data-fr-opened="false"
@@ -30,6 +31,7 @@ Requires a unique 'id' per modal for accessibility.
 >
       {% block button_text %}{% endblock %}
 </button>
+{% endblock button %}
 {% endif %}
 
 {% if not button_only %}
