@@ -64,6 +64,9 @@ def contrib_displayed_acteur(request) -> HttpResponse:
         change_form = DisplayedActeurContribForm(request.POST)
         if change_form.is_valid():
             # TODO: Create suggestion and send it to airflow
+            print(change_form.cleaned_data)
+            print(change_form.instance)
+
             # change_form.save()
             context = {"object": change_form.instance}
         else:

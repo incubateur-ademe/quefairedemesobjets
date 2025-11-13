@@ -438,6 +438,24 @@ class ModalsPreview(LookbookPreview):
 
 
 class FormulairesPreview(LookbookPreview):
+    def contrib_form(self, **kwargs):
+        acteur = DisplayedActeur.objects.last()
+        form = DisplayedActeurContribForm(instance=acteur)
+        context = {"form": form}
+        template = Template(
+            """
+            {% load dsfr_tags acteur_tags %}
+
+            <form method="post"
+            action="{% url "qfdmd:contrib" %}">
+            {{ form.errors }}
+            {{ form }}
+            {% dsfr_button label="Valider"%}
+            </form>
+            """,
+        )
+        return template.render(Context(context))
+
     @component_docs("ui/components/formulaires/plusieurs_formulaires.md")
     def plusieurs_formulaires(self, **kwargs):
         form1 = LegendeForm(prefix="1")
@@ -484,7 +502,7 @@ class FormulairesPreview(LookbookPreview):
 
 class PagesPreview(LookbookPreview):
     def fiche_acteur(self, **kwargs):
-        acteur = DisplayedActeur.objects.first()
+        acteur = DisplayedActeur.objects.last()
         factory = RequestFactory()
         request = factory.get(acteur.url)
         request.can_edit_acteur = True
