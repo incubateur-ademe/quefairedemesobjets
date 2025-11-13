@@ -87,7 +87,7 @@ Codes renvoyés sous forme de chaîne séparée par `|`. Correspondances princip
 - `BonusRepar_ASL` : bonus réparation Sport & Loisirs (Ecologic).
 - `ess` : enseigne de l'économie sociale et solidaire.
 
-> D'autres codes peuvent être ajoutés au fil des conventions partenaires ; se référer à la table `qfdmo_labelqualite` pour la liste exhaustive.
+> D'autres codes peuvent être ajoutés au fil des conventions partenaires
 
 ### Services (`type_de_services`)
 
