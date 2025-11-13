@@ -14,8 +14,7 @@ Modification d'un acteur
 {% endblock modal_title %}
 
 {% block modal_content %}
-
-{% include "ui/forms/acteur_contrib_form.html" %}
+<turbo-frame id="contrib-acteur-{{ object.pk }}" src="{% url "qfdmd:contrib" object.pk %}"></turbo-frame>
 {% endblock modal_content %}
 
 {% block modal_footer %}{% endblock %}
