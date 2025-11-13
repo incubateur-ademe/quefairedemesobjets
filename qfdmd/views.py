@@ -4,6 +4,7 @@ from typing import Any
 
 from django.conf import settings
 from django.contrib import messages
+from django.db import transaction
 from django.forms.models import ModelForm
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
@@ -18,15 +19,14 @@ from wagtail.admin.viewsets.model import ModelViewSet
 from wagtail.models import Page
 
 from core.views import static_file_content_from
-from qfdmd.forms import SearchForm
-from qfdmd.models import (
-    Bonus,
-    Produit,
-    ProduitIndexPage,
-    ReusableContent,
+from data.models.suggestion import (
     Suggestion,
-    Synonyme,
+    SuggestionAction,
+    SuggestionCohorte,
+    SuggestionStatut,
 )
+from qfdmd.forms import SearchForm
+from qfdmd.models import Bonus, Produit, ProduitIndexPage, ReusableContent, Synonyme
 from qfdmo.models.acteur import DisplayedActeur
 
 logger = logging.getLogger(__name__)
@@ -69,30 +69,42 @@ class DisplayedActeurUpdateView(UpdateView):
     form_class = ActeurContribForm
     template_name = "ui/forms/acteur_contrib_form.html"
 
-    def form_valid(self, form):
+    @transaction.atomic
+    def _create_suggestion(self, request: HttpRequest, change_form: ActeurContribForm):
+        suggestion_cohorte, created = SuggestionCohorte.objects.get_or_create(
+            identifiant_action="CONTRIBUTION",
+            identifiant_execution=request.session.session_key,
+            type_action=SuggestionAction.CONTRIBUTION,
+            statut=SuggestionStatut.AVALIDER,
+        )
+        fields = change_form.fields
+        acteur = change_form.instance
+
+        # TODO: replace
+        # acteur_from_db = DisplayedActeur.objects.get(
+        #     identifiant_unique=acteur.identifiant_unique
+        # )
+        acteur_from_db = DisplayedActeur.objects.last()
+
+        contexte = {}
+        suggestion = {}
+        for field in fields:
+            if getattr(acteur_from_db, field) != getattr(acteur, field):
+                contexte[field] = getattr(acteur_from_db, field)
+                suggestion[field] = getattr(acteur, field)
+
+        Suggestion.objects.create(
+            suggestion_cohorte=suggestion_cohorte,
+            statut=SuggestionStatut.ATRAITER,
+            contexte=contexte,
+            suggestion=suggestion,
+        )
+
+    def form_valid(self, form: ActeurContribForm) -> HttpResponse:
         # Create suggestion
+        self._create_suggestion(self.request, form)
         messages.info(self.request, "Soumis avec succès")
         return render(self.request, self.template_name, {"form": form})
-
-
-# @csrf_exempt
-# def contrib_displayed_acteur(request) -> HttpResponse:
-#     template_name = "ui/components/modals/modifier.html"
-#     # if request.method == "POST":
-#     #     change_form = DisplayedActeurContribForm(request.POST)
-#     #     if change_form.is_valid():
-#     #         # TODO: Create suggestion and send it to airflow
-#     #         print(change_form.cleaned_data)
-#     #         print(change_form.instance)
-
-#     #         # change_form.save()
-#     #         context = {"object": change_form.instance}
-#     #     else:
-#     #         context = {
-#     #             "form": change_form,
-#     #             "object": change_form.instance,
-#     #         }
-#     #     return render(request, template_name, context=context)
 
 
 def search_view(request) -> HttpResponse:
