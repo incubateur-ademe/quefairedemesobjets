@@ -21,11 +21,11 @@
                 {{ form.action_list }}
 
                 {# Recherche Objet #}
-                {% include "ui/components/carte/_addresses_partials/filters/_object_filter.html" with only_reemploi=True %}
+                {% include "ui/components/formulaire/filtres/_object_filter.html" with only_reemploi=True %}
 
                 {# Recherche adresse #}
                 <div class="fr-mt-3w fr-px-1v fr-input-group">
-                    {% include "ui/components/carte/_addresses_partials/adresse_input_form.html" %}
+                    {% include "ui/components/carte/adresse_input_form.html" %}
                 </div>
 
                 {# Gestes #}

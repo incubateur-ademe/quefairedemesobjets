@@ -1,58 +1,227 @@
 import logging
-from typing import Any, override
+from typing import Any, TypedDict, override
 
 from django.conf import settings
 from django.db.models import Q
-from django.utils.functional import cached_property
+from django.forms import Form
 from django.views.generic import DetailView
 
-from qfdmo.forms import ActionDirectionForm, CarteForm
+from core.constants import MAP_CONTAINER_ID
+from qfdmd.models import Produit
+from qfdmo.forms import (
+    ActionDirectionForm,
+    AutoSubmitLegendeForm,
+    CarteForm,
+    FiltresForm,
+    FiltresFormWithoutSynonyme,
+    LegacySupportForm,
+    LegendeForm,
+    ViewModeForm,
+)
 from qfdmo.models import CarteConfig
+from qfdmo.models.action import Action
 from qfdmo.views.adresses import SearchActeursView
 
 logger = logging.getLogger(__name__)
+
+
+class ViewModeFormEntry(TypedDict):
+    form: type[ViewModeForm]
+    prefix: str
+
+
+class FiltresFormEntry(TypedDict):
+    form: type[FiltresForm]
+    prefix: str
+
+
+class LegendeFormEntry(TypedDict):
+    form: type[LegendeForm]
+    prefix: str
+    other_prefixes_to_check: list[str]
+
+
+class AutoSubmitLegendeFormEntry(TypedDict):
+    form: type[AutoSubmitLegendeForm]
+    prefix: str
+    other_prefixes_to_check: list[str]
+
+
+class CarteForms(TypedDict):
+    view_mode: ViewModeFormEntry
+    filtres: FiltresFormEntry
+    legende: AutoSubmitLegendeFormEntry
+    legende_filtres: LegendeFormEntry
+
+
+class CarteFormsInstance(TypedDict):
+    view_mode: None | ViewModeForm
+    filtres: None | FiltresForm
+    legende: None | AutoSubmitLegendeForm
+    legende_filtres: None | LegendeForm
+    legacy: None | LegacySupportForm
 
 
 class CarteSearchActeursView(SearchActeursView):
     is_carte = True
     template_name = "ui/pages/carte.html"
     form_class = CarteForm
+    filtres_form_class = FiltresForm
+
+    @property
+    def forms(self) -> CarteForms:
+        return {
+            "view_mode": {
+                "form": ViewModeForm,
+                "prefix": "view_mode",
+            },
+            "filtres": {
+                "form": self.filtres_form_class,
+                "prefix": "filtres",
+            },
+            "legende": {
+                "form": AutoSubmitLegendeForm,
+                "prefix": "legende",
+                "other_prefixes_to_check": ["legende_filtres"],
+            },
+            "legende_filtres": {
+                "form": LegendeForm,
+                "prefix": "legende_filtres",
+                "other_prefixes_to_check": ["legende"],
+            },
+        }
+
+    def __init__(self, **kwargs):
+        # TODO: check that linked forms have exactly the same fields
+        super().__init__(**kwargs)
+
+    def _generate_prefix(self, prefix: str) -> str:
+        try:
+            id = self.request.GET[MAP_CONTAINER_ID]
+            return f"{id}_{prefix}"
+        except (KeyError, AttributeError):
+            return prefix
+
+    def _get_forms(self) -> CarteFormsInstance:
+        data = self.request.GET
+
+        # Initialize legacy form with request and bind it if there's data
+        legacy_form = LegacySupportForm(data if data else None, request=self.request)
+
+        form_instances: CarteFormsInstance = {"legacy": legacy_form}
+
+        for key, form_config in self.forms.items():
+            prefix = self._generate_prefix(form_config["prefix"])
+            # carte_legende-nom_du_champ
+            form = form_config["form"](
+                data, prefix=prefix, carte_config=self._get_carte_config()
+            )
+            if not form.is_valid():
+                for other_prefix in form_config.get("other_prefixes_to_check", []):
+                    other_prefix = self._generate_prefix(other_prefix)
+                    other_form = form_config["form"](
+                        data, prefix=other_prefix, carte_config=self._get_carte_config()
+                    )
+                    if other_form.is_valid():
+                        form = other_form
+                        break
+
+            form_instances[key] = form
+
+        return form_instances
+
+    def _get_form(self, form_name) -> Form | None:
+        try:
+            return self._get_forms()[form_name]
+        except KeyError:
+            return None
+
+    def _get_field_value_for(self, form_name: str, field_name: str) -> Any:
+        try:
+            return self._get_form(form_name)[field_name].value()
+        except (AttributeError, KeyError):
+            return None
 
     def _get_direction(self):
         action_direction_form = ActionDirectionForm(self.request.GET)
         return action_direction_form["direction"].value()
 
-    def get_initial(self, *args, **kwargs):
-        initial = super().get_initial(*args, **kwargs)
-        action_displayed = self._set_action_displayed()
-        grouped_action_choices = self._get_grouped_action_choices(action_displayed)
-        actions_to_select = self._get_selected_action()
-        initial["grouped_action"] = self._grouped_action_from(
-            grouped_action_choices, actions_to_select
-        )
-        # TODO : refacto forms, merge with grouped_action field
-        initial["legend_grouped_action"] = initial["grouped_action"]
+    def _get_ess(self):
+        return self._check_if_label_qualite_is_set("ess")
 
-        initial["action_list"] = "|".join(
-            [a for ga in initial["grouped_action"] for a in ga.split("|")]
-        )
-        return initial
+    def _get_label_reparacteur(self):
+        return self._check_if_label_qualite_is_set("reparacteur")
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update(
-            is_carte=True,
-            map_container_id="carte",
-        )
-        return context
+    def _get_bonus(self):
+        return self._check_if_label_qualite_is_set("bonusrepar")
 
-    def _get_selected_action_ids(self):
-        return [a.id for a in self._get_selected_action()]
+    def _check_if_label_qualite_is_set(self, label):
+        try:
+            return label in self._get_form("filtres")["label_qualite"].value()
+        except (TypeError, KeyError):
+            return False
+
+    def _get_map_container_id(self):
+        if self.carte_config:
+            return self.carte_config.slug
+        return "carte"
+
+    def _get_carte_config(self):
+        return None
+
+    @property
+    def carte_config(self) -> CarteConfig | None:
+        return self._get_carte_config()
 
     def _get_max_displayed_acteurs(self):
+        if self.carte_config and self.carte_config.nombre_d_acteurs_affiches:
+            return self.carte_config.nombre_d_acteurs_affiches
         if self.request.GET.get("limit", "").isnumeric():
             return int(self.request.GET.get("limit"))
         return settings.CARTE_MAX_SOLUTION_DISPLAYED
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        forms = self._get_forms()
+        mode_liste = (
+            forms["view_mode"]["view"].value()
+            == ViewModeForm.ViewModeSegmentedControlChoices.LISTE
+        )
+
+        context.update(
+            is_carte=True,
+            forms=forms,
+            map_container_id=self._get_map_container_id(),
+            mode_liste=mode_liste,
+            carte_config=self._get_carte_config(),
+        )
+
+        return context
+
+    def _get_action_ids(self) -> list[str]:
+        groupe_action_ids = self._get_form("legende")["groupe_action"].value()
+        # TODO: check if useful as these two forms are now synced
+        for form in [
+            self._get_form("legende"),
+            self._get_form("legende_filtres"),
+        ]:
+            if form and form.is_valid():
+                groupe_action_ids = form["groupe_action"].value()
+
+        return (
+            Action.objects.filter(groupe_action__id__in=groupe_action_ids)
+            .only("id")
+            .values_list("id", flat=True)
+        )
+
+    def _get_sous_categorie_ids(self) -> list[int]:
+        synonyme_id = self._get_field_value_for("filtres", "synonyme")
+        if not synonyme_id:
+            return []
+
+        return Produit.objects.filter(synonymes__id__in=[synonyme_id]).values_list(
+            "sous_categories__id", flat=True
+        )
 
 
 class ProductCarteView(CarteSearchActeursView):
@@ -62,16 +231,17 @@ class ProductCarteView(CarteSearchActeursView):
     It will be progressively deprecated until the end of 2025 but
     needs to be maintained for now."""
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    filtres_form_class = FiltresFormWithoutSynonyme
+
+    def _get_map_container_id(self):
+        # TODO: check if required
+        return self.request.GET.get("map_container_id", "carte")
+
+    def _get_carte_config(self):
         carte_config, _ = CarteConfig.objects.get_or_create(
             slug="product", supprimer_branding=True
         )
-        context.update(
-            carte_config=carte_config,
-            map_container_id=self.request.GET.get("map_container_id", "carte"),
-        )
-        return context
+        return carte_config
 
     @override
     def _get_max_displayed_acteurs(self):
@@ -82,58 +252,15 @@ class ProductCarteView(CarteSearchActeursView):
 class CarteConfigView(DetailView, CarteSearchActeursView):
     model = CarteConfig
     context_object_name = "carte_config"
+    filtres_form_class = FiltresFormWithoutSynonyme
 
-    @override
     def _get_max_displayed_acteurs(self):
         # Hardcoded value taken from dict previously used
         return 25
 
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        return {
-            **super().get_context_data(**kwargs),
-            "map_container_id": self.object.pk,
-        }
-
-    @cached_property
-    def groupe_actions(self):
-        # TODO: cache
-        return self.get_object().groupe_action.all().order_by("order")
-
-    def _set_action_list(self, *args, **kwargs):
-        if self.groupe_actions:
-            return self.groupe_actions
-        return super()._set_action_list(*args, **kwargs)
-
-    def _set_action_displayed(self, *args, **kwargs):
-        if self.groupe_actions:
-            return self.groupe_actions
-
-        return super()._set_action_displayed(*args, **kwargs)
-
-    def _get_selected_action_code(self, *args, **kwargs):
-        if self.groupe_actions:
-            return self.groupe_actions
-
-        return super()._get_selected_action_code(*args, **kwargs)
-
-    def get_cached_groupe_action_with_displayed_actions(self, *args, **kwargs):
-        if self.groupe_actions:
-            return [
-                [groupe_action, groupe_action.actions.all()]
-                for groupe_action in self.groupe_actions
-            ]
-        else:
-            return super().get_cached_groupe_action_with_displayed_actions(
-                *args, **kwargs
-            )
-
-    def _grouped_action_from(self, *args, **kwargs):
-        if self.groupe_actions:
-            return [
-                "|".join(groupe_action.actions.all().values_list("code", flat=True))
-                for groupe_action in self.groupe_actions
-            ]
-        return super()._grouped_action_from(*args, **kwargs)
+    @override
+    def _get_carte_config(self):
+        return self.get_object()
 
     def get_sous_categorie_filter(self):
         sous_categories_from_request = list(
@@ -152,7 +279,7 @@ class CarteConfigView(DetailView, CarteSearchActeursView):
         if source_filter := self.get_object().source.all():
             filters &= Q(source__in=source_filter)
 
-        if label_filter := self.get_object().label.all():
+        if label_filter := self.get_object().label_qualite.all():
             filters &= Q(labels__in=label_filter)
 
         if acteur_type_filter := self.get_object().acteur_type.all():

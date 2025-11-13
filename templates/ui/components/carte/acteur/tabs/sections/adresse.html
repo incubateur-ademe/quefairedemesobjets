@@ -5,6 +5,13 @@ Adresse
 {% endblock title %}
 
 {% block content %}
+
+{% if request.GET.with_map %}
+<div class="max-md:qf-hidden">
+    {% include "ui/components/mini_carte/mini_carte.html" with location=object.location acteur=object %}
+</div>
+{% endif %}
+
 <address class="qf-not-italic">
     {% if object.adresse %}
         {{ object.adresse|title }}<br>

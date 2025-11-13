@@ -152,6 +152,15 @@ models:
       - name: longitude
         description: "La longitude de la localisation de l'acteur"
         data_type: float
+      - name: code_commune_insee
+        description: "Le code commune de l'acteur"
+        data_type: varchar(10)
+      - name: code_epci
+        description: "Le code EPCI de l'acteur"
+        data_type: varchar(10)
+      - name: nom_epci
+        description: "Le nom EPCI de l'acteur"
+        data_type: varchar(255)
     config:
       tags:
         - exposure

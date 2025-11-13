@@ -1,6 +1,10 @@
 {% extends base_template %}
 
-{% block body_classes %}qf-bg-white{% endblock %}
+{% load turbo_tags %}
+
+{% block body_classes %}
+qf-h-svh qf-h-screen qf-overflow-hidden qf-bg-white
+{% endblock body_classes %}
 
 {% block content %}
 <turbo-frame id="mapContainer" class="qf-bg-white">
@@ -25,107 +29,16 @@
         qf-flex qf-flex-col qf-flex-auto
         qf-relative"
         data-search-form-visible
-        data-search-solution-form-map-container-id-value="{{ map_container_id }}"
+        data-search-solution-form-map-container-id-value="{% main_frame_id %}"
     >
 
-        <input type="hidden" name="map_container_id" value="{{ map_container_id }}">
-        <section class="map-grid">
-            <header
-                class="max-md:qf-sticky qf-top-0 qf-z-0"
-            >
-                <div
-                    class="
-                    qf-bg-white
-                    qf-flex qf-flex-row sm:qf-items-center"
-                >
-                {% block form_header %}
-                {% include 'ui/components/formulaire/header.html' %}
-                {% endblock form_header %}
-                </div>
-            </header>
-
-            <main
-                class="
-                qf-flex
-                max-md:qf-h-main-svh
-                {# Is useful for digital view so that the users can scrol in the results #}
-                qf-overflow-auto
-                "
-                tabindex="0"
-            >
-                {% block form_result %}
-                    <turbo-frame id="addressesPanel"
-                        data-search-solution-form-target="addressesPanel"
-                        class="qf-relative qf-z-10
-                            qf-flex qf-flex-col
-                            max-md:qf-fixed
-                            max-md:qf-top-header max-md:qf-bottom-footer
-                            max-md:qf-left-0 max-md:qf-right-0
-                            data-[visible=true]:qf-flex-grow
-                            data-[visible=false]:qf-invisible data-[visible=false]:qf-h-0"
-                        data-visible="false"
-                        tabindex="0"
-                    >
-                        {% include 'ui/components/formulaire/results.html' %}
-                    </turbo-frame>
-                {% endblock form_result %}
-
-                {% block form_fields %}
-                    {% include "ui/components/carte/partials/featureflip_inputs.html" %}
-                    {{ form.bounding_box }}
-                {% endblock form_fields %}
-            </main>
-
+        <input type="hidden" name="{{ MAP_CONTAINER_ID }}" value="{% main_frame_id %}">
+        <section class="qf-relative map-grid">
             {# Part of this tag' style is defined in qfdmo.css because it would have been a bit unreadable as tailwind classes #}
-            <aside class="
-                qf-relative qf-z-30
-                aria-[hidden=false]:qf-block qf-hidden
-                md:qf-overflow-auto
-                max-md:qf-overflow-visible
-                md:qf-h-[calc(100vh_-_250px)]
-                max-md:qf-absolute
-                max-md:qf-top-full max-md:qf-bottom-0 max-md:qf-left-0 max-md:qf-right-0
-                qf-bg-white
-                qf-px-2w
-                max-md:qf-drop-shadow-[0_0_100px_rgba(0,0,0,0.3)]
-                max-md:qf-rounded-t-xl
-                aria-[hidden=true]:max-md:qf-animate-out
-                aria-[hidden=true]:max-md:qf-fade-out
-                aria-[hidden=true]:data-[exit-animation-ended=true]:qf-hidden
-                aria-[hidden=false]:max-md:qf-min-h-[calc(100vh_-_200px)]"
-            tabindex="0"
-            id="acteurDetailsPanel"
-            data-controller="acteur-details"
-            data-search-solution-form-target="acteurDetailsPanel"
-            data-acteur-details-map-container-id-value="{{ map_container_id }}"
-            aria-hidden="true"
-            >
-                {% include "ui/components/carte/panels/acteur_detail.html" %}
-            </aside>
-
-            <footer
-                class="max-md:qf-fixed
-                qf-bottom-0 qf-left-0 qf-right-0"
-            >
-            {% block content_footer %}
-                <div
-                    class="qf-px-2w sm:qf-px-0 qf-duration-300 sm:qf-h-fit sm:qf-mr-1w qf-flex qf-flex-row-reverse
-                    group-data-[search-form-visible]:qf-hidden"
-                >
-                    <a class="fr-my-1w fr-btn fr-btn--tertiary qf-whitespace-nowrap qf-w-full sm:qf-w-max qf-flex qf-justify-center"
-                        href="{% url 'qfdmo:address-suggestion-form' %}"
-                        target="_blank"
-                        rel="noreferrer"
-                        aria-label="Proposer une adresse - Nouvelle fenêtre"
-                        data-testid="formulaire-proposer-une-adresse"
-                    >
-                        Proposer une adresse
-                    </a>
-                </div>
-                {# Liens de pieds de page pour iframe #}
-                {% include "ui/components/carte/_addresses_partials/iframe_footer_links.html" %}
-            {% endblock content_footer %}
-            </footer>
+            {% include 'ui/components/formulaire/header.html' with extra_classes="qf-bg-white" %}
+            {% include "ui/components/formulaire/main.html" %}
+            {% include "ui/components/formulaire/acteur_detail.html" %}
+            {% include "ui/components/formulaire/footer.html" %}
         </section>
 
         {% block form_modals %}
@@ -138,7 +51,3 @@
     </form>
 </turbo-frame>
 {% endblock content %}
-
-{% block modals %}
-    {% include "ui/components/carte/reparacteur_modale.html" %}
-{% endblock modals %}

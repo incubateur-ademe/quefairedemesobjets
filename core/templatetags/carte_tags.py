@@ -1,10 +1,12 @@
+import json
 import logging
 from math import sqrt
 
 from django.db.models import Q
 from django.template.defaulttags import register
+from django.template.loader import render_to_string
 
-from qfdmo.forms import ActionDirectionForm
+from core.constants import MAP_CONTAINER_ID
 from qfdmo.models import DisplayedActeur
 from qfdmo.models.action import get_actions_by_direction
 from qfdmo.models.config import GroupeActionConfig
@@ -19,6 +21,8 @@ def actions_for(dispayed_acteur: DisplayedActeur, direction):
 
 @register.simple_tag(takes_context=True)
 def action_by_direction(context, direction):
+    from qfdmo.forms import ActionDirectionForm
+
     """Get action for the given direction following context"""
     request = context["request"]
     action_direction_form: ActionDirectionForm = context["action_direction_form"]
@@ -71,16 +75,14 @@ def distance_to_acteur(context, acteur):
         * 111320
     )
     if distance_meters >= 1000:
-        return f"({round(distance_meters / 1000, 1)} km)".replace(".", ",")
+        return f"{round(distance_meters / 1000, 1)} km".replace(".", ",")
     else:
-        return f"({round(distance_meters / 10) * 10} m)"
+        return f"{round(distance_meters / 10) * 10} m"
 
 
 @register.filter
 def tojson(value):
     """Django filter to replace Jinja2's |tojson filter"""
-    import json
-
     return json.dumps(value)
 
 
@@ -100,9 +102,22 @@ def random_range(max_value):
     return random.randint(0, max_value - 1)
 
 
+@register.filter
+def to_latlng_json(point):
+    return json.dumps({"latitude": point.y, "longitude": point.x})
+
+
 @register.inclusion_tag("templatetags/acteur_pinpoint.html", takes_context=True)
 def acteur_pinpoint_tag(
-    context, acteur, direction, action_list, carte, carte_config, sous_categorie_id
+    context,
+    acteur,
+    direction=None,
+    action_list=None,
+    carte=None,
+    carte_config=None,
+    sous_categorie_id=None,
+    counter=None,
+    force_visible=False,
 ):
     """
     Template tags to display the acteur's pinpoint after increasing context with
@@ -113,22 +128,24 @@ def acteur_pinpoint_tag(
       - marker_fill_background
       - marker_icon_extra_classes
     """
-    context.update(
-        {
-            "marker_icon": "",
-            "marker_couleur": "",
-            "marker_icon_file": "",
-            "marker_bonus": False,
-            "marker_fill_background": False,
-            "marker_icon_extra_classes": "",
-        }
-    )
+    context = {
+        "acteur": acteur,
+        "request": context.get("request"),
+        MAP_CONTAINER_ID: context.get(MAP_CONTAINER_ID),
+        "marker_icon": "",
+        "marker_couleur": "",
+        "marker_icon_file": "",
+        "marker_bonus": False,
+        "marker_fill_background": False,
+        "marker_icon_extra_classes": "",
+    }
 
     action_to_display = acteur.action_to_display(
         direction=direction,
         action_list=action_list,
         sous_categorie_id=sous_categorie_id,
     )
+
     if action_to_display is None:
         logger.warning("No actions found for acteur %s", acteur)
         return context
@@ -148,10 +165,8 @@ def acteur_pinpoint_tag(
             if groupe_action_config.icon:
                 # Property is camelcased as it is used in javascript
                 context.update(
-                    {
-                        "marker_icon_file": groupe_action_config.icon.url,
-                        "marker_icon": "",
-                    }
+                    marker_icon_file=groupe_action_config.icon.url,
+                    marker_icon="",
                 )
                 return context
 
@@ -163,18 +178,22 @@ def acteur_pinpoint_tag(
             action_to_display = action_to_display.groupe_action
         if action_to_display.code == "reparer":
             context.update(
-                {
-                    "marker_bonus": getattr(acteur, "is_bonus_reparation", False),
-                    "marker_fill_background": True,
-                    "marker_icon_extra_classes": "qf-text-white",
-                }
+                marker_bonus=getattr(acteur, "is_bonus_reparation", False),
+                marker_fill_background=True,
+                marker_icon_extra_classes="qf-text-white",
             )
 
+    mask_id = acteur.uuid
+    if MAP_CONTAINER_ID in context:
+        mask_id += f"-{context[MAP_CONTAINER_ID]}"
+
+    if counter:
+        mask_id += f"-{counter}"
+
     context.update(
-        {
-            "marker_icon": action_to_display.icon,
-            "marker_couleur": action_to_display.couleur,
-        }
+        mask_id=mask_id,
+        marker_icon=action_to_display.icon,
+        marker_couleur=action_to_display.couleur,
     )
 
     return context
@@ -184,3 +203,31 @@ def acteur_pinpoint_tag(
 def get_non_enseigne_labels_count(acteur):
     """Template tag to get count of labels with type_enseigne=False"""
     return acteur.labels_display.filter(type_enseigne=False).count()
+
+
+def render_acteur(acteur, context):
+    _context = {
+        "map_container_id": context["map_container_id"],
+        "forms": context["forms"],
+        "object": acteur,
+        "request": context["request"],
+    }
+    return [
+        render_to_string("ui/components/carte/acteur/acteur_labels.html", _context),
+        render_to_string("ui/components/carte/acteur/acteur_services.html", _context),
+        distance_to_acteur(context, acteur),
+        render_to_string("ui/components/carte/acteur/acteur_lien.html", _context),
+    ]
+
+
+@register.inclusion_tag(
+    "ui/components/carte/acteur/acteur_table.html", takes_context=True
+)
+def acteurs_table(context, acteurs):
+    return {
+        "table": {
+            "header": ["Nom du lieu", "Actions", "Distance", ""],
+            "content": [render_acteur(acteur, context) for acteur in acteurs],
+            "extra_classes": "fr-table--mode-liste fr-table--multiline qf-w-full",
+        }
+    }

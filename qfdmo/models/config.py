@@ -74,6 +74,7 @@ class CarteConfig(index.Indexed, models.Model):
         " la carte. Le mode liste affiche une liste d'acteurs tandis qu'une"
         " carte affiche un fond de carte.",
     )
+    nombre_d_acteurs_affiches = models.IntegerField(null=True)
     # TODOWAGTAIL : remove double negation and use afficher_legende instead
     cacher_legende = models.BooleanField(
         default=False,
@@ -146,10 +147,12 @@ class CarteConfig(index.Indexed, models.Model):
         blank=True,
     )
 
-    label = models.ManyToManyField(
+    label_qualite = models.ManyToManyField(
         "qfdmo.LabelQualite",
         verbose_name="Label(s) qualité",
-        help_text="Seuls les labels sélectionnés s'afficheront sur la carte"
+        help_text="Ce champ agit comme un filtre des résultats affichés.<br/>"
+        " Si les labels sélectionnés correspondent aux labels affichés dans "
+        "la modale de filtres de la carte, alors ceux-ci seront cochés par défaut.<br/>"
         "\nSi le champ n'est pas renseigné il sera ignoré",
         blank=True,
     )

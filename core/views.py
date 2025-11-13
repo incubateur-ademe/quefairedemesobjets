@@ -1,13 +1,15 @@
 import mimetypes
+from typing import override
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.staticfiles import finders
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.views.decorators.cache import cache_control
+from django.views.generic import ListView
 from wagtail.templatetags.wagtailcore_tags import richtext
 
-from qfdmd.models import EmbedSettings
+from qfdmd.models import EmbedSettings, Synonyme
 
 
 def backlink(request):
@@ -55,3 +57,20 @@ class IsStaffMixin(LoginRequiredMixin):
         if not request.user.is_staff:
             return self.handle_no_permission()
         return super().dispatch(request, *args, **kwargs)
+
+
+class AutocompleteSynonyme(ListView):
+    template_name = "ui/forms/widgets/autocomplete/synonyme.html"
+    model = Synonyme
+
+    @override
+    def get_queryset(self):
+        query = self.request.GET.get("q", "")
+        limit = self.request.GET.get("limit", 10)
+        return super().get_queryset().filter(nom__icontains=query)[: int(limit)]
+
+    @override
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["turbo_frame_id"] = self.request.GET.get("turbo_frame_id")
+        return context

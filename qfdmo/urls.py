@@ -9,7 +9,6 @@ from qfdmo.views import (
     google_verification,
 )
 from qfdmo.views.adresses import (
-    FormulaireSearchActeursView,
     acteur_detail,
     acteur_detail_redirect,
     get_synonyme_list,
@@ -18,6 +17,7 @@ from qfdmo.views.adresses import (
 )
 from qfdmo.views.carte import CarteConfigView, CarteSearchActeursView
 from qfdmo.views.configurator import AdvancedConfiguratorView, ConfiguratorView
+from qfdmo.views.formulaire import FormulaireSearchActeursView
 
 urlpatterns = [
     # This route needs to be touched with care is it is embedded

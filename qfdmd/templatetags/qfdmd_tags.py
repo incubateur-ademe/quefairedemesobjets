@@ -93,7 +93,7 @@ def render_file_content(file_field: FileField) -> str:
         return ""
 
 
-@register.inclusion_tag("ui/components/carte/carte.html", takes_context=True)
+@register.inclusion_tag("ui/blocks/carte.html", takes_context=True)
 def carte(context, carte_config: CarteConfig) -> dict:
     page = context.get("page")
     return {

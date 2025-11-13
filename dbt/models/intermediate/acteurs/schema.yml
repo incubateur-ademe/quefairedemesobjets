@@ -202,3 +202,28 @@ models:
           combination_of_columns:
             - propositionservice_id
             - souscategorieobjet_id
+  - name: int_perimetreadomicile
+    description: "Perimètre à domicile model"
+    columns:
+      - name: id
+        description: "The primary key for this table"
+        data_tests:
+          - not_null
+      - name: acteur_id
+        description: "Link to the acteur"
+        data_tests:
+          - not_null
+      - name: type
+        description: "The type of the perimeter"
+        data_tests:
+          - not_null
+      - name: valeur
+        description: "The value of the perimeter (departement or km)"
+        data_tests:
+          - not_null
+    config:
+      tags:
+        - intermediate
+        - acteurs
+        - perimetreadomicile
+      materialized: table
