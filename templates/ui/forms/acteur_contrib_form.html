@@ -1,0 +1,12 @@
+<turbo-frame id="modal-modifier">
+    {% if form %}
+        <form method="post" class="qf-flex qf-flex-col qf-gap-2w qf-group" action="{% url "qfdmd:contrib" %}">
+            {{ form.errors }}
+            {{ form }}
+            {% dsfr_button label="Valider" %}
+            {% include "ui/components/carte/shared/disclaimers/loading_solutions.html" %}
+        </form>
+    {% else %}
+    Merci pour vos modifications, elles seront prises en compte sous 30 minutes environ.
+    {% endif %}
+</turbo-frame>
