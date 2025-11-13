@@ -19,7 +19,7 @@
   </div>
 
 {% if request.user.is_authenticated %}
-    {% include "ui/components/modals/modifier.html" %}
+    {% include "ui/components/modals/modifier.html" with button_only=True %}
 {% else %}
   <div class="fr-callout fr-callout--blue-cumulus">
         <a

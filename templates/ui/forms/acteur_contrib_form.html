@@ -4,7 +4,7 @@
 {% block content %}
 <turbo-frame id="contrib-acteur-{{ form.instance.pk }}">
     {% if form.is_valid %}
-        {% dsfr_alert title="Merci pour votre contribution !" %}
+        {% dsfr_notice description="Merci pour votre contribution !" %}
     {% else %}
         <form method="post" class="qf-flex qf-flex-col qf-gap-2w qf-group" action="{% url "qfdmd:contrib" form.instance.pk %}">
             {% csrf_token %}
