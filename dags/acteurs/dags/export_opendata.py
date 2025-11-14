@@ -1,5 +1,3 @@
-from datetime import timedelta
-
 from acteurs.tasks.airflow_logic.export_opendata_csv_to_s3_task import (
     export_opendata_csv_to_s3_task,
 )
@@ -8,25 +6,17 @@ from acteurs.tasks.airflow_logic.remove_old_s3_opendata_csv_task import (
 )
 from airflow import DAG
 from decouple import config
+from shared.config.airflow import DEFAULT_ARGS
 from shared.config.schedules import SCHEDULES
 from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
 
 ENVIRONMENT = config("ENVIRONMENT", default="development")
 
-default_args = {
-    "owner": "airflow",
-    "depends_on_past": False,
-    "email_on_failure": False,
-    "email_on_retry": False,
-    "retries": 3,
-    "retry_delay": timedelta(minutes=2),
-}
-
 
 with DAG(
     "export_opendata_dag",
-    default_args=default_args,
+    default_args=DEFAULT_ARGS,
     schedule=SCHEDULES.EVERY_MONDAY_AT_01_00,
     start_date=START_DATES.DEFAULT,
     dag_display_name="Acteurs Open-Data - Exporter les Acteurs en Open-Data",

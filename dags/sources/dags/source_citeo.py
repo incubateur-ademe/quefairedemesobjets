@@ -1,17 +1,14 @@
 from airflow import DAG
 from airflow.models.param import Param
+from shared.config.airflow import DEFAULT_ARGS
 from shared.config.tags import TAGS
 from sources.config.airflow_params import EO_NORMALIZATION_RULES, get_mapping_config
-from sources.tasks.airflow_logic.operators import (
-    default_args,
-    default_params,
-    eo_task_chain,
-)
+from sources.tasks.airflow_logic.operators import default_params, eo_task_chain
 
 with DAG(
     dag_id="eo-citeo",
     dag_display_name="Source - CITEO",
-    default_args=default_args,
+    default_args=DEFAULT_ARGS,
     description=(
         "Injestion des données de l'éco-organisme CITEO à partir des données disponible"
         " sur de Koumoul"

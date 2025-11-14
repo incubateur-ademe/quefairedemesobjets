@@ -5,10 +5,8 @@ import logging
 from acteurs.tasks.business_logic.check_model_table_consistency import (
     check_model_table_consistency,
 )
-from airflow import DAG
 from airflow.exceptions import AirflowFailException
 from airflow.operators.python import PythonOperator
-
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
@@ -50,7 +48,6 @@ def check_model_table_consistency_wrapper(
 
 
 def check_model_table_consistency_task(
-    dag: DAG,
     django_app: str,
     model_name: str,
     table_name: str,
@@ -59,7 +56,6 @@ def check_model_table_consistency_task(
     return PythonOperator(
         task_id=task_name,
         python_callable=check_model_table_consistency_wrapper,
-        dag=dag,
         op_kwargs={
             "django_app": django_app,
             "model_name": model_name,

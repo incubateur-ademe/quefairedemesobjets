@@ -1,0 +1,24 @@
+version: 2
+
+models:
+  - name: int_epci
+    description: "EPCI model"
+    columns:
+      - name: id
+        description: "The primary key for this table"
+        data_tests:
+          - not_null
+      - name: code_epci
+        description: "The code of the EPCI"
+        data_tests:
+          - not_null
+      - name: nom_epci
+        description: "The name of the EPCI"
+        data_tests:
+          - not_null
+    config:
+      tags:
+        - intermediate
+        - geo
+        - epci
+      materialized: table

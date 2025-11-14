@@ -10,16 +10,8 @@ django_setup_full()
 def replace_acteur_table(
     prefix_django: str,
     prefix_dbt: str,
-    tables=[
-        "acteur",
-        "acteur_acteur_services",
-        "acteur_labels",
-        "acteur_sources",
-        "propositionservice",
-        "propositionservice_sous_categories",
-        "perimetreadomicile",
-    ],
-):
+    tables: list[str],
+) -> None:
     from django.db import DEFAULT_DB_ALIAS, connections
 
     with connections[DEFAULT_DB_ALIAS].cursor() as cursor:

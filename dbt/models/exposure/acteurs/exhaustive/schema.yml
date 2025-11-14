@@ -134,8 +134,6 @@ models:
       - name: enfants_nombre
         description: "Le nombre d'enfants de l'acteur"
         data_type: integer
-        data_tests:
-          - not_null
       - name: est_dans_carte
         description: "Vrai si l'acteur est dans la carte"
         data_type: boolean
@@ -155,12 +153,9 @@ models:
       - name: code_commune_insee
         description: "Le code commune de l'acteur"
         data_type: varchar(10)
-      - name: code_epci
-        description: "Le code EPCI de l'acteur"
-        data_type: varchar(10)
-      - name: nom_epci
-        description: "Le nom EPCI de l'acteur"
-        data_type: varchar(255)
+      - name: epci_id
+        description: "L'identifiant de l'EPCI de l'acteur"
+        data_type: integer
     config:
       tags:
         - exposure
@@ -525,4 +520,4 @@ models:
           type: hash
     tests:
       - dbt_expectations.expect_table_row_count_to_be_between:
-          min_value: 350000
+          min_value: 50

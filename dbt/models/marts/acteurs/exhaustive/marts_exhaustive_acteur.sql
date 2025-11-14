@@ -8,8 +8,7 @@ WITH enfants AS (
 
 select a.*,
     COALESCE(cae.code_commune_insee, '') as code_commune_insee,
-    COALESCE(cae.code_epci, '') as code_epci,
-    COALESCE(cae.nom_epci, '') as nom_epci,
+    epci.id as epci_id,
     -- TODO : add lat and long, issue intrpreting double precision by dbt
     CAST(ST_X(a.location::geometry) AS DOUBLE PRECISION) AS latitude,
     CAST(ST_Y(a.location::geometry) AS DOUBLE PRECISION) AS longitude,
@@ -27,3 +26,5 @@ LEFT JOIN {{ ref('marts_opendata_acteur') }} AS oa
   ON a.identifiant_unique = oa.identifiant_unique
 LEFT JOIN {{ ref('marts_exhaustive_acteur_epci') }} AS cae
   ON a.identifiant_unique = cae.identifiant_unique
+LEFT JOIN {{ source('qfdmo','qfdmo_epci') }} AS epci
+  ON cae.code_epci = epci.code

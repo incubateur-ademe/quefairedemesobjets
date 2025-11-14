@@ -22,6 +22,7 @@ sources:
       - name : qfdmo_revisionpropositionservice_sous_categories
       - name : qfdmo_source
       - name : qfdmo_souscategorieobjet
+      - name : qfdmo_epci
   - name: clone
     schema: public
     tables:

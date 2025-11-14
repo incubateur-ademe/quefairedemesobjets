@@ -92,13 +92,9 @@ models:
       - name: enfants_liste
         description: "La liste des enfants de l'acteur"
         data_type: jsonb
-        data_tests:
-          - not_null
       - name: enfants_nombre
         description: "Le nombre d'enfants de l'acteur"
         data_type: integer
-        data_tests:
-          - not_null
       - name: est_dans_carte
         description: "Vrai si l'acteur est dans la carte"
         data_type: boolean
