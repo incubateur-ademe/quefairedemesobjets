@@ -43,6 +43,7 @@ with DAG(
         TAGS.ACTEURS,
         TAGS.CLOSED,
     ],
+    schedule=None,
     start_date=START_DATES.DEFAULT,
     params=config_to_airflow_params(
         EnrichActeursClosedConfig(

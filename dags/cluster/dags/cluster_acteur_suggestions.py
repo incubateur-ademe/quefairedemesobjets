@@ -301,6 +301,7 @@ with DAG(
         "email_on_retry": False,
         "retries": 0,
     },
+    schedule=None,
     start_date=START_DATES.DEFAULT,
     description=("Un DAG pour générer des suggestions de clustering pour les acteurs"),
     tags=[TAGS.CLUSTER, TAGS.ACTEURS, TAGS.SUGGESTIONS, TAGS.CLUSTERING],

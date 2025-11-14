@@ -1,15 +1,11 @@
-from core.settings import *  # noqa: F403
+# flake8: noqa: F405, F403
+from core.settings import *
 
 # Add test hosts to ALLOWED_HOSTS for integration tests
-ALLOWED_HOSTS = [
-    *ALLOWED_HOSTS,  # noqa: F405
+ALLOWED_HOSTS = ALLOWED_HOSTS + [
     "lvao.ademe.fr",
     "quefairedemesdechets.ademe.fr",
 ]
-
-DATABASES = {
-    "default": DATABASES["default"],  # noqa: F405
-}
 
 CACHES = {
     "default": {
@@ -20,18 +16,14 @@ CACHES = {
     },
 }
 
-# Storages is defined in settings.py the undefined
-# error can safely be ignored here
-STORAGES["default"][  # noqa: F405
-    "BACKEND"
-] = "django.core.files.storage.InMemoryStorage"
-STORAGES["staticfiles"] = {  # noqa: F405
+STORAGES["default"]["BACKEND"] = "django.core.files.storage.InMemoryStorage"
+STORAGES["staticfiles"] = {
     "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
 }
 
 MIDDLEWARE = [
     middleware
-    for middleware in MIDDLEWARE  # noqa: F405
+    for middleware in MIDDLEWARE
     if middleware
     not in [
         "whitenoise.middleware.WhiteNoiseMiddleware",

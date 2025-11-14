@@ -30,6 +30,9 @@ def genre_nombre_from(reusable_content: ReusableContent, page):
     on the page's genre and nombre attributes, and any "<objet>" placeholder
     in the content is replaced with the page's titre_phrase or title.
     """
+    if not reusable_content:
+        return ""
+
     content = reusable_content.get_from_genre_nombre(page.genre, page.nombre)
 
     replacement = page.titre_phrase if page.titre_phrase else page.title
@@ -98,7 +101,8 @@ def carte(context, carte_config: CarteConfig) -> dict:
         "url": carte_config.get_absolute_url(
             override_sous_categories=list(
                 page.sous_categorie_objet.all().values_list("id", flat=True)
-            )
+            ),
+            initial_query_string=carte_config.SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url,
         ),
     }
 

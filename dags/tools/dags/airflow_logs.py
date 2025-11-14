@@ -29,6 +29,7 @@ with DAG(
     dag_display_name="[TEST] Les logs Airflow sont enregistrés sur s3",
     tags=[TAGS.DEV_TOOLS],
     default_args=default_args,
+    schedule=None,
     start_date=START_DATES.DEFAULT,
     description=(
         """
@@ -36,7 +37,6 @@ Lancer le DAG et vérifier que les logs sont disponibles sur s3
 La mention `Found logs in s3` doit apparaitre dans les logs de la tâche
 """
     ),
-    schedule=None,
 ) as dag:
     PythonOperator(
         task_id="test_django_and_logs",

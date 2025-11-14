@@ -1,7 +1,6 @@
 import logging
 
 from django.db import connections
-
 from utils.django import DJANGO_WH_CONNECTION_NAME
 
 logger = logging.getLogger(__name__)
@@ -42,7 +41,11 @@ def compare_model_vs_table(cls, table_name: str) -> bool:
             info.name: {
                 "type": connection.introspection.get_field_type(info.type_code, info),
                 "null_ok": info.null_ok,
-                "display_size": info.display_size if info.display_size > 0 else None,
+                "display_size": (
+                    info.display_size
+                    if info.display_size and info.display_size > 0
+                    else None
+                ),
             }
             for info in table_description
         }

@@ -48,10 +48,6 @@ with DAG(
                 "destination": "adresse_complement",
             },
             {
-                "origin": "ville",
-                "destination": "ville",
-            },
-            {
                 "origin": "final_latitude",
                 "destination": "latitude",
             },

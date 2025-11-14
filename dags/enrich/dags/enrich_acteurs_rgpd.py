@@ -30,6 +30,7 @@ with DAG(
     },
     description=("Un DAG pour anonymiser les acteurs vs. RGPD"),
     tags=[TAGS.ENRICH, TAGS.ANNAIRE_ENTREPRISE, TAGS.RGPD, TAGS.ACTEURS],
+    schedule=None,
     start_date=START_DATES.DEFAULT,
     params=config_to_airflow_params(
         EnrichActeursRGPDConfig(

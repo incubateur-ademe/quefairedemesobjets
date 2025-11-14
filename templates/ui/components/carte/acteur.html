@@ -1,9 +1,7 @@
 {% extends base_template %}
 {% load carte_tags %}
 
-{% block meta %}
-<meta name="robots" content="noindex" />
-{% endblock meta %}
+{% block robots %}noindex{% endblock %}
 
 {% block page_title %}
 {{ object.libelle|title }} | {{ block.super }}
