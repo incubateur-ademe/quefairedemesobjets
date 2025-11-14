@@ -3,7 +3,6 @@
 import logging
 
 from acteurs.tasks.business_logic.replace_acteur_table import replace_acteur_table
-from airflow import DAG
 from airflow.operators.python import PythonOperator
 from utils import logging_utils as log
 
@@ -47,7 +46,6 @@ def replace_acteur_table_wrapper(
 
 
 def replace_acteur_table_task(
-    dag: DAG,
     prefix_django: str,
     prefix_dbt: str,
     tables: list[str] = [
@@ -64,7 +62,6 @@ def replace_acteur_table_task(
     return PythonOperator(
         task_id=task_name,
         python_callable=replace_acteur_table_wrapper,
-        dag=dag,
         op_kwargs={
             "prefix_django": prefix_django,
             "prefix_dbt": prefix_dbt,

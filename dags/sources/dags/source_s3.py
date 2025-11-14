@@ -1,17 +1,14 @@
 from airflow import DAG
 from airflow.models.param import Param
+from shared.config.airflow import DEFAULT_ARGS
 from shared.config.tags import TAGS
 from sources.config.airflow_params import get_souscategorie_mapping_from_db
-from sources.tasks.airflow_logic.operators import (
-    default_args,
-    default_params,
-    eo_task_chain,
-)
+from sources.tasks.airflow_logic.operators import default_params, eo_task_chain
 
 with DAG(
     dag_id="source-s3",
     dag_display_name="Source - DEPUIS S3",
-    default_args=default_args,
+    default_args=DEFAULT_ARGS,
     description=(
         "Un pipeline pour récupérer des données depuis un bucket S3 et les transformer"
     ),
