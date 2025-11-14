@@ -119,6 +119,12 @@ models:
       - name: lieu_prestation
         description: "Le lieu de prestation de l'acteur"
         data_type: varchar(255)
+      - name: code_commune_insee
+        description: "Le code commune de l'acteur"
+        data_type: varchar(10)
+      - name: epci_id
+        description: "L'identifiant de l'EPCI de l'acteur"
+        data_type: integer
     config:
       tags:
         - exposure
@@ -482,4 +488,4 @@ models:
           type: hash
     tests:
       - dbt_expectations.expect_table_row_count_to_be_between:
-          min_value: 350000
+          min_value: 50

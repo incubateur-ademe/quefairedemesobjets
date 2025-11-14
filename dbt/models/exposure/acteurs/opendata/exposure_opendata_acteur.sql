@@ -94,9 +94,9 @@ SELECT
   da.adresse_complement as "complement_dadresse",
   da.code_postal as "code_postal",
   da.ville as "ville",
-  epci.code_commune_insee as "code_commune",
-  epci.code_epci as "code_epci",
-  epci.nom_epci as "nom_epci",
+  da.code_commune_insee as "code_commune",
+  aepci.code_epci as "code_epci",
+  aepci.nom_epci as "nom_epci",
   ST_Y(da.location::geometry) as "latitude",
   ST_X(da.location::geometry) as "longitude",
   al.labels as "qualites_et_labels",
@@ -130,5 +130,5 @@ LEFT JOIN proposition_services AS ps ON da.uuid = ps.uuid
 LEFT JOIN acteur_labels AS al ON da.uuid = al.uuid
 LEFT JOIN acteur_services AS acs ON da.uuid = acs.uuid
 LEFT JOIN perimetreadomicile AS pad ON da.identifiant_unique = pad.acteur_id
-LEFT JOIN {{ ref('marts_opendata_acteur_epci') }} AS epci ON da.identifiant_unique = epci.identifiant_unique
+LEFT JOIN {{ ref('marts_opendata_acteur_epci') }} AS aepci ON da.identifiant_unique = aepci.identifiant_unique
 ORDER BY da.uuid

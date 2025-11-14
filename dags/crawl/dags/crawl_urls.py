@@ -24,6 +24,7 @@ from crawl.tasks.airflow_logic.crawl_urls_suggest_dns_fail_task import (
 from crawl.tasks.airflow_logic.crawl_urls_suggest_syntax_fail_task import (
     crawl_urls_suggest_syntax_fail_task,
 )
+from shared.config.airflow import DEFAULT_ARGS_NO_RETRIES
 from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
 
@@ -40,13 +41,7 @@ UI_PARAMS_SEPARATOR_VERIFICATION = r"""
 with DAG(
     dag_id="crawl_urls_suggestions",
     dag_display_name="🔗 Crawl - URLs - Suggestions",
-    default_args={
-        "owner": "airflow",
-        "depends_on_past": False,
-        "email_on_failure": False,
-        "email_on_retry": False,
-        "retries": 0,
-    },
+    default_args=DEFAULT_ARGS_NO_RETRIES,
     schedule=None,
     start_date=START_DATES.DEFAULT,
     description=("Un DAG pour parcourir des URLs et suggérer des corrections"),
