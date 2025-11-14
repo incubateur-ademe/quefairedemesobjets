@@ -7,7 +7,9 @@ on:
       container_key:
         type: string
         required: true
-
+      registry_image:
+        type: string
+        required: true
 jobs:
   deploy_container:
     name: Scaleway deploy container
@@ -16,7 +18,18 @@ jobs:
     env:
       SCALEWAY_DEPLOY_KEY: ${{ secrets.SCALEWAY_DEPLOY_KEY }}
       CONTAINER_ID: ${{ vars[inputs.container_key] }}
+      REGISTRY_IMAGE: ${{ inputs.registry_image }}
     steps:
+    # See https://www.scaleway.com/en/developers/api/serverless-containers/#path-containers-update-an-existing-container
+    - name: Update image
+      run: |
+        curl -X PATCH \
+        -H "X-Auth-Token: $SCALEWAY_DEPLOY_KEY" \
+        -H "Content-Type: application/json" \
+        -d "{\"registry_image\": \"$REGISTRY_IMAGE\"}" \
+        "https://api.scaleway.com/containers/v1beta1/regions/fr-par/containers/$CONTAINER_ID"
+
+    # See https://www.scaleway.com/en/developers/api/serverless-containers/#path-containers-deploy-a-container
     - name: Deploy container
       run: |
         curl -X POST \

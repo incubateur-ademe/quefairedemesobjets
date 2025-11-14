@@ -9,6 +9,20 @@ on:
       image_tag:
         required: false
         type: string
+    outputs:
+      scheduler_imageid:
+        description: "Image ID of the scheduler"
+        value: ${{ jobs.build-and-push-image.steps.build-and-push-scheduler.outputs.imageid }}
+      scheduler_digest:
+        description: "Digest of the scheduler image"
+        value: ${{ jobs.build-and-push-image.steps.build-and-push-scheduler.outputs.digest }}
+      webserver_imageid:
+        description: "Image ID of the webserver"
+        value: ${{ jobs.build-and-push-image.steps.build-and-push-webserver.outputs.imageid }}
+      webserver_digest:
+        description: "Digest of the webserver image"
+        value: ${{ jobs.build-and-push-image.steps.build-and-push-webserver.outputs.digest }}
+
   release:
     types: [ released, prereleased ]
 env:
@@ -42,6 +56,7 @@ jobs:
 
       # https://github.com/docker/build-push-action
       - name: "[🟣 Scaleway] Build and push Docker image (airflow-scheduler)"
+        id: build-and-push-scheduler
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
         with:
           context: .
@@ -59,6 +74,7 @@ jobs:
           images: ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/airflow-webserver
 
       - name: "[🟣 Scaleway] Build and push Docker image (airflow-webserver)"
+        id: build-and-push-webserver
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
         with:
           context: .
