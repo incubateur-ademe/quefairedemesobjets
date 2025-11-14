@@ -26,7 +26,7 @@ jobs:
         curl -X PATCH \
         -H "X-Auth-Token: $SCALEWAY_DEPLOY_KEY" \
         -H "Content-Type: application/json" \
-        -d "{\"registry_image\": $REGISTRY_IMAGE}" \
+        -d "{\"registry_image\": \"$REGISTRY_IMAGE\"}" \
         "https://api.scaleway.com/containers/v1beta1/regions/fr-par/containers/$CONTAINER_ID"
 
     # See https://www.scaleway.com/en/developers/api/serverless-containers/#path-containers-deploy-a-container
