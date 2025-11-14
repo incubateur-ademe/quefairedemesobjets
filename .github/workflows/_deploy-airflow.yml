@@ -4,6 +4,9 @@ on:
       environment:
         type: string
         required: true
+      tag_name:
+        type: string
+        required: true
 
 jobs:
   deploy_airflow-webserver:
@@ -33,6 +36,7 @@ jobs:
     with:
       environment: ${{ inputs.environment }}
       container_key: SCALEWAY_AIRFLOW_SCHEDULER_CONTAINER_ID
+      registry_image: format({0}:{1}, 'rg.fr-par.scw.cloud/ns-qfdmo/airflow-scheduler', inputs.tag_name)
 
   deploy_scaleway_webserver:
     secrets: inherit # pragma: allowlist secret`
@@ -41,6 +45,7 @@ jobs:
     with:
       environment: ${{ inputs.environment }}
       container_key: SCALEWAY_AIRFLOW_WEBSERVER_CONTAINER_ID
+      registry_image: format({0}:{1}, 'rg.fr-par.scw.cloud/ns-qfdmo/airflow-webserver', inputs.tag_name)
 
 # Address actions/missing-workflow-permissions rule in
 # code scanning alerts

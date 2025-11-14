@@ -41,6 +41,7 @@ jobs:
     needs: [ci, airflow_docker]
     with:
       environment: preprod
+      tag_name: preprod
 
   # FIXME: tmp pour tester
   update_release_draft_for_review:
