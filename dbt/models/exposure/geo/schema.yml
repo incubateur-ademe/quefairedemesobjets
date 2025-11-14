@@ -23,8 +23,7 @@ models:
     config:
       tags:
         - exposure
-        - acteurs
-        - common
+        - geo
         - epci
       contract:
         enforced: true

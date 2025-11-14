@@ -26,5 +26,5 @@ LEFT JOIN {{ ref('marts_opendata_acteur') }} AS oa
   ON a.identifiant_unique = oa.identifiant_unique
 LEFT JOIN {{ ref('marts_exhaustive_acteur_epci') }} AS cae
   ON a.identifiant_unique = cae.identifiant_unique
-LEFT JOIN {{ ref('int_epci') }} AS epci
-  ON cae.code_epci = epci.code_epci
+LEFT JOIN {{ source('qfdmo','qfdmo_epci') }} AS epci
+  ON cae.code_epci = epci.code

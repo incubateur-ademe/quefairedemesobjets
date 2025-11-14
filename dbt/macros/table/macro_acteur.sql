@@ -1,4 +1,4 @@
-{%- macro acteur(ephemeral_filtered_acteur, propositionservice, acteur_epci, epci ) -%}
+{%- macro acteur(ephemeral_filtered_acteur, propositionservice, acteur_epci ) -%}
 
 with parentacteur_lieuprestation AS (
     SELECT
@@ -66,8 +66,8 @@ LEFT OUTER JOIN parentacteur_lieuprestation AS plp
     ON efa.identifiant_unique = plp.acteur_id
 LEFT OUTER JOIN {{ ref(acteur_epci) }} AS aepci
     ON efa.identifiant_unique = aepci.identifiant_unique
-LEFT OUTER JOIN {{ ref(epci) }} AS epci
-    ON aepci.code_epci = epci.code_epci
+LEFT OUTER JOIN {{ source('qfdmo','qfdmo_epci') }} AS epci
+    ON aepci.code_epci = epci.code
 -- filter to apply on resolved parent + children acteur
 WHERE (efa.public_accueilli IS NULL OR UPPER(efa.public_accueilli) NOT IN {{ get_public_accueilli_exclus() }})
 {%- endmacro -%}

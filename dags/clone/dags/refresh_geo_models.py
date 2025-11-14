@@ -35,11 +35,11 @@ logger = logging.getLogger(__name__)
 def refresh_geo_models():
     dbt_run_exposure_acteurs_common = BashOperator(
         task_id="dbt_run_exposure_acteurs_common",
-        bash_command=f"{DBT_RUN} exposure.acteurs.common",
+        bash_command=f"{DBT_RUN} tag:geo",
     )
     dbt_test_exposure_acteurs_common = BashOperator(
         task_id="dbt_test_exposure_acteurs_common",
-        bash_command=f"{DBT_TEST} exposure.acteurs.common",
+        bash_command=f"{DBT_TEST} tag:geo",
     )
     check_model_table_epci_task = check_model_table_consistency_task(
         "qfdmo", "EPCI", "exposure_epci"

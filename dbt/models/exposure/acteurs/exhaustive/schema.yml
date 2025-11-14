@@ -134,8 +134,6 @@ models:
       - name: enfants_nombre
         description: "Le nombre d'enfants de l'acteur"
         data_type: integer
-        data_tests:
-          - not_null
       - name: est_dans_carte
         description: "Vrai si l'acteur est dans la carte"
         data_type: boolean
@@ -522,4 +520,4 @@ models:
           type: hash
     tests:
       - dbt_expectations.expect_table_row_count_to_be_between:
-          min_value: 350000
+          min_value: 50

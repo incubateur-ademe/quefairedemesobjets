@@ -44,15 +44,6 @@ with DAG(
         bash_command=(f"{DBT_TEST} intermediate.acteurs"),
     )
 
-    dbt_run_exposure_acteurs_common = BashOperator(
-        task_id="dbt_run_exposure_acteurs_common",
-        bash_command=(f"{DBT_RUN} exposure.acteurs.common"),
-    )
-    dbt_test_exposure_acteurs_common = BashOperator(
-        task_id="dbt_test_exposure_acteurs_common",
-        bash_command=(f"{DBT_TEST} exposure.acteurs.common"),
-    )
-
     dbt_run_marts_acteurs_carte = BashOperator(
         task_id="dbt_run_marts_acteurs_carte",
         bash_command=(f"{DBT_RUN} marts.acteurs.carte"),
@@ -104,13 +95,6 @@ with DAG(
         bash_command=(f"{DBT_TEST} exposure.acteurs.exhaustive"),
     )
 
-    check_model_table_epci_task = check_model_table_consistency_task(
-        "qfdmo", "EPCI", "exposure_epci"
-    )
-    replace_epci_table_task = replace_acteur_table_task(
-        "qfdmo_", "exposure_", tables=["epci"]
-    )
-
     check_model_table_displayedacteur_task = check_model_table_consistency_task(
         "qfdmo", "DisplayedActeur", "exposure_carte_acteur"
     )
@@ -153,8 +137,6 @@ with DAG(
         >> dbt_test_base_acteurs
         >> dbt_run_intermediate_acteurs
         >> dbt_test_intermediate_acteurs
-        >> dbt_run_exposure_acteurs_common
-        >> dbt_test_exposure_acteurs_common
         >> dbt_run_marts_acteurs_carte
         >> dbt_test_marts_acteurs_carte
         >> dbt_run_exposure_acteurs_carte
@@ -168,16 +150,16 @@ with DAG(
         >> dbt_run_exposure_acteurs_exhaustive
         >> dbt_test_exposure_acteurs_exhaustive
     )
-    (dbt_test_exposure_acteurs_carte >> check_model_table_epci_task)
-    (dbt_test_exposure_acteurs_exhaustive >> check_model_table_epci_task)
     # Définir la séquence de vérification en parallèle
-    (check_model_table_epci_task >> replace_epci_table_task)
     (
-        replace_epci_table_task
+        dbt_test_exposure_acteurs_carte
         >> check_model_table_displayedacteur_task
         >> check_model_table_displayedpropositionservice_task
         >> check_model_table_displayedperimetreadomicile_task
         >> replace_displayedacteur_table_task
+    )
+    (
+        dbt_test_exposure_acteurs_exhaustive
         >> check_model_table_vueacteur_task
         >> check_model_table_vuepropositionservice_task
         >> check_model_table_vueperimetreadomicile_task
