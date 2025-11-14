@@ -25,6 +25,7 @@ jobs:
     secrets: inherit # pragma: allowlist secret`
     with:
       environment: prod
+      tag_name: ${{ github.event.release.tag_name }}
 
 # Address actions/missing-workflow-permissions rule in
 # code scanning alerts
