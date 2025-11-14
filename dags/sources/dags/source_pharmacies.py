@@ -1,17 +1,14 @@
 from airflow import DAG
+from shared.config.airflow import DEFAULT_ARGS
 from shared.config.tags import TAGS
 from sources.config import shared_constants as constants
 from sources.config.airflow_params import get_mapping_config
-from sources.tasks.airflow_logic.operators import (
-    default_args,
-    default_params,
-    eo_task_chain,
-)
+from sources.tasks.airflow_logic.operators import default_params, eo_task_chain
 
 with DAG(
     dag_id="pharmacies",
     dag_display_name="Source - PHARMACIES",
-    default_args=default_args,
+    default_args=DEFAULT_ARGS,
     description=("Téléchargement des pharmacies (Ordre National Des Pharmaciens)"),
     tags=[
         TAGS.SOURCE,

@@ -3,7 +3,6 @@ import logging
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from sources.tasks.business_logic.db_data_prepare import db_data_prepare
-
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)

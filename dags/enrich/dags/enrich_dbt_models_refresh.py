@@ -8,6 +8,7 @@ from airflow.models.baseoperator import chain
 from airflow.operators.bash import BashOperator
 from airflow.utils.trigger_rule import TriggerRule
 from enrich.config.models import EnrichDbtModelsRefreshConfig
+from shared.config.airflow import DEFAULT_ARGS_NO_RETRIES
 from shared.config.models import config_to_airflow_params
 from shared.config.schedules import SCHEDULES
 from shared.config.start_dates import START_DATES
@@ -18,13 +19,7 @@ logger = logging.getLogger(__name__)
 with DAG(
     dag_id="enrich_dbt_models_refresh",
     dag_display_name="🔄 Enrichir - Rafraîchir les modèles DBT",
-    default_args={
-        "owner": "airflow",
-        "depends_on_past": False,
-        "email_on_failure": False,
-        "email_on_retry": False,
-        "retries": 0,
-    },
+    default_args=DEFAULT_ARGS_NO_RETRIES,
     description=(
         "Un DAG pour rafraîchir les modèles DBT nécessaires"
         "à l'enrichissement des acteurs"

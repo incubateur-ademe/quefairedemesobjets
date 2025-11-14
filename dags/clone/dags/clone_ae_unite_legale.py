@@ -7,19 +7,14 @@ running into DB table name length limits.
 from airflow import DAG
 from airflow.models.param import Param
 from clone.tasks.airflow_logic.chain_tasks import chain_tasks
+from shared.config.airflow import DEFAULT_ARGS_NO_RETRIES
 from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
 
 with DAG(
     dag_id="clone_ae_unite_legale",
     dag_display_name="Cloner - AE - Unite Legale",
-    default_args={
-        "owner": "airflow",
-        "depends_on_past": False,
-        "email_on_failure": False,
-        "email_on_retry": False,
-        "retries": 0,
-    },
+    default_args=DEFAULT_ARGS_NO_RETRIES,
     schedule=None,
     start_date=START_DATES.DEFAULT,
     description=(
