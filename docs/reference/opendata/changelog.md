@@ -7,7 +7,9 @@ Il ne trace pas l’exhaustivité des évolutions apportées au jeu de données,
 
 
 ## 2025-11-03
-* Changements techniques :
+
+**Changements techniques :**
+
 - Publication de la première version officielle des données :
   - Suppression de la mention BETA
 - Publication de la documentation du jeu de données
