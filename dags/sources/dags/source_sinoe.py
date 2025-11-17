@@ -1,21 +1,17 @@
 from airflow import DAG
+from shared.config.airflow import DEFAULT_ARGS_NO_RETRIES
 from shared.config.tags import TAGS
 from sources.config import shared_constants as constants
 from sources.config.airflow_params import (
     get_mapping_config,
     source_sinoe_dechet_mapping_get,
 )
-from sources.tasks.airflow_logic.operators import (
-    default_args,
-    default_params,
-    eo_task_chain,
-)
+from sources.tasks.airflow_logic.operators import default_params, eo_task_chain
 
-default_args["retries"] = 0
 with DAG(
     dag_id="source_sinoe",
     dag_display_name="Source - SINOE",
-    default_args=default_args,
+    default_args=DEFAULT_ARGS_NO_RETRIES,
     description=(
         "DAG pour télécharger, standardiser, et charger dans notre base la source SINOE"
     ),

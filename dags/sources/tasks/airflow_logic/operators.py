@@ -22,14 +22,6 @@ from sources.tasks.airflow_logic.source_data_validate_task import (
     source_data_validate_task,
 )
 
-default_args = {
-    "owner": "airflow",
-    "depends_on_past": False,
-    "email_on_failure": False,
-    "email_on_retry": False,
-    "retries": 1,
-}
-
 default_params = {
     "schedule": None,
     "max_active_runs": 1,

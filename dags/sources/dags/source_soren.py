@@ -1,16 +1,13 @@
 from airflow import DAG
+from shared.config.airflow import DEFAULT_ARGS
 from shared.config.tags import TAGS
 from sources.config.airflow_params import EO_NORMALIZATION_RULES, get_mapping_config
-from sources.tasks.airflow_logic.operators import (
-    default_args,
-    default_params,
-    eo_task_chain,
-)
+from sources.tasks.airflow_logic.operators import default_params, eo_task_chain
 
 with DAG(
     dag_id="eo-soren",
     dag_display_name="Source - SOREN",
-    default_args=default_args,
+    default_args=DEFAULT_ARGS,
     description=(
         "A pipeline to fetch, process, and load to validate data into postgresql"
         " for Soren dataset"

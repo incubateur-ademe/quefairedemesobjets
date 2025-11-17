@@ -11,6 +11,7 @@ cf. https://explore.data.gouv.fr/fr/datasets/58c984b088ee386cdb1261f3/#/resource
 from airflow import DAG
 from airflow.models.param import Param
 from clone.tasks.airflow_logic.chain_tasks import chain_tasks
+from shared.config.airflow import DEFAULT_ARGS_NO_RETRIES
 from shared.config.schedules import SCHEDULES
 from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
@@ -18,13 +19,7 @@ from shared.config.tags import TAGS
 with DAG(
     dag_id="clone_insee_commune",
     dag_display_name="Cloner - INSEE - Commune",
-    default_args={
-        "owner": "airflow",
-        "depends_on_past": False,
-        "email_on_failure": False,
-        "email_on_retry": False,
-        "retries": 0,
-    },
+    default_args=DEFAULT_ARGS_NO_RETRIES,
     schedule=SCHEDULES.EVERY_SUNDAY_AT_00_00,
     start_date=START_DATES.DEFAULT,
     description=("Clone le jeu de données 'commune' de INSEE dans notre DB"),

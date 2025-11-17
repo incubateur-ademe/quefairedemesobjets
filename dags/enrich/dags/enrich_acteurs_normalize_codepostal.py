@@ -4,19 +4,14 @@ from enrich.tasks.airflow_logic.db_write_cp_suggestions_task import (
     db_write_cp_suggestions_task,
 )
 from enrich.tasks.airflow_logic.normalize_acteur_cp_task import normalize_acteur_cp_task
+from shared.config.airflow import DEFAULT_ARGS_NO_RETRIES
 from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
 
 with DAG(
     dag_id="enrich_acteurs_normalize_codepostal",
     dag_display_name="🌆 Normalize - Code postal",
-    default_args={
-        "owner": "airflow",
-        "depends_on_past": False,
-        "email_on_failure": False,
-        "email_on_retry": False,
-        "retries": 0,
-    },
+    default_args=DEFAULT_ARGS_NO_RETRIES,
     description=(
         "Un DAG pour corriger les codes postaux : vérifier qu'ils sont conformes"
         " à la norme et proposer une correction le cas échéant"
