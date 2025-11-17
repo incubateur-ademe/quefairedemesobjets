@@ -1,14 +1,17 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy
 from django.views.generic.edit import FormView
 
-from data.forms import SuggestionGroupeForm
-from data.models.suggestion import SuggestionGroupe, SuggestionUnitaire
+from data.forms import SuggestionGroupeForm, SuggestionGroupeStatusForm
+from data.models.suggestion import (
+    SuggestionGroupe,
+    SuggestionStatut,
+    SuggestionUnitaire,
+)
 
 
-class SuggestionGroupeView(LoginRequiredMixin, FormView):
-    form_class = SuggestionGroupeForm
+class SuggestionGroupeMixin(FormView):
     template_name = "data/_partials/suggestion_groupe_row_type_source.html"
 
     def get_object(self):
@@ -23,14 +26,16 @@ class SuggestionGroupeView(LoginRequiredMixin, FormView):
         )
 
     def get_success_url(self):
-        print("success url")
         return reverse_lazy(
             "data:suggestion_groupe",
             kwargs={"suggestion_groupe_id": self.kwargs["suggestion_groupe_id"]},
         )
 
+
+class SuggestionGroupeView(LoginRequiredMixin, SuggestionGroupeMixin, FormView):
+    form_class = SuggestionGroupeForm
+
     def get_context_data(self, **kwargs):
-        print("context data")
         context = super().get_context_data(**kwargs)
         suggestion_groupe = self.get_object()
         context["suggestion_groupe"] = suggestion_groupe
@@ -71,3 +76,31 @@ class SuggestionGroupeView(LoginRequiredMixin, FormView):
             valeurs=valeurs,
         )
         return super().form_valid(form)
+
+
+class SuggestionGroupeStatusView(LoginRequiredMixin, SuggestionGroupeMixin, FormView):
+    form_class = SuggestionGroupeStatusForm
+
+    def form_valid(self, form):
+        suggestion_groupe = self.get_object()
+        action = form.cleaned_data["action"]
+        if action == "validate":
+            suggestion_groupe.statut = SuggestionStatut.ATRAITER
+        elif action == "reject":
+            suggestion_groupe.statut = SuggestionStatut.REJETEE
+        suggestion_groupe.save()
+        return super().form_valid(form)
+
+
+def get_suggestion_groupe_usefull_links(request, suggestion_groupe_id, usefull_link):
+    suggestion_groupe = get_object_or_404(SuggestionGroupe, id=suggestion_groupe_id)
+    return render(
+        request,
+        "data/_partials/suggestion_groupe_usefull_links.html",
+        {
+            "suggestion_groupe": suggestion_groupe,
+            "localisation": usefull_link == "localisation",
+            "displayedacteur": usefull_link == "displayedacteur",
+            "annuaire_entreprise": usefull_link == "annuaire_entreprise",
+        },
+    )

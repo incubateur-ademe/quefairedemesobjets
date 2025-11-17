@@ -53,11 +53,7 @@
 
                         <td>
                             {% if suggestion_groupe.revision_acteur and suggestion_groupe.revision_acteur.parent %}
-                                {% for champ in suggestion_unitaire.champs %}
-                                    {% with value=suggestion_groupe.revision_acteur.parent|getattr:champ %}
-                                        {{ value|default:"-" }}{% if not forloop.last %} | {% endif %}
-                                    {% endwith %}
-                                {% endfor %}
+                                {% include 'data/_partials/suggestion_groupe_row_type_source_diff_value.html' with model_name="RevisionActeurParent" champs=champs suggestion_unitaires=suggestion_unitaires editable=True identifiant_unique=suggestion_groupe.revision_acteur.parent.identifiant_unique %}
                             {% else %}
                                 🚫
                             {% endif %}
@@ -68,4 +64,5 @@
             </table>
         </div>
     {% endif %}
+
 {% endblock suggestion_details %}
