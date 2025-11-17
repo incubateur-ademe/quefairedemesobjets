@@ -50,6 +50,7 @@ from qfdmo.models.categorie_objet import SousCategorieObjet
 # Explicit imports from models config, action, categories, utils
 # and not from qfdmo.models are required here to prevent circular
 # dependency import error.
+from qfdmo.models.geo import EPCI
 from qfdmo.models.utils import (
     CodeAsNaturalKeyModel,
     string_remove_substring_via_normalization,
@@ -1160,14 +1161,24 @@ Model to display all acteurs in admin
 """
 
 
-class VueActeur(BaseActeur):
+class FinalActeur(BaseActeur):
     class Meta:
-        verbose_name = "ACTEUR de l'EC - Vue sur l'acteur"
-        verbose_name_plural = "ACTEURS de l'EC - Vues sur tous les acteurs"
+        abstract = True
 
     uuid = models.CharField(
         max_length=255, default=generate_short_uuid, editable=False, db_index=True
     )
+    code_commune_insee = models.CharField(
+        max_length=10, blank=True, default="", db_index=True
+    )
+
+    epci = models.ForeignKey(EPCI, on_delete=models.CASCADE, blank=True, null=True)
+
+
+class VueActeur(FinalActeur):
+    class Meta:
+        verbose_name = "ACTEUR de l'EC - Vue sur l'acteur"
+        verbose_name_plural = "ACTEURS de l'EC - Vues sur tous les acteurs"
 
     parent = models.ForeignKey(
         "self",
@@ -1225,7 +1236,7 @@ class VuePerimetreADomicile(BasePerimetreADomicile):
     )
 
 
-class DisplayedActeur(BaseActeur, LatLngPropertiesMixin):
+class DisplayedActeur(FinalActeur, LatLngPropertiesMixin):
     objects = DisplayedActeurManager()
 
     def natural_key(self):
@@ -1234,10 +1245,6 @@ class DisplayedActeur(BaseActeur, LatLngPropertiesMixin):
     class Meta:
         verbose_name = "ACTEUR de l'EC - AFFICHÉ"
         verbose_name_plural = "ACTEURS de l'EC - AFFICHÉ"
-
-    uuid = models.CharField(
-        max_length=255, default=generate_short_uuid, editable=False, db_index=True
-    )
 
     # Table name qfdmo_displayedacteur_sources
     sources = models.ManyToManyField(

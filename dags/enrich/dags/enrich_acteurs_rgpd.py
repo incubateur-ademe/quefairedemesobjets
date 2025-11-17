@@ -14,6 +14,7 @@ from enrich.tasks.airflow_logic.enrich_dbt_model_suggest_task import (
 from enrich.tasks.airflow_logic.enrich_dbt_models_refresh_task import (
     enrich_dbt_models_refresh_task,
 )
+from shared.config.airflow import DEFAULT_ARGS_NO_RETRIES
 from shared.config.models import config_to_airflow_params
 from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
@@ -21,13 +22,7 @@ from shared.config.tags import TAGS
 with DAG(
     dag_id="enrich_acteurs_rgpd",
     dag_display_name="🕵️ Enrichir - Acteurs RGPD",
-    default_args={
-        "owner": "airflow",
-        "depends_on_past": False,
-        "email_on_failure": False,
-        "email_on_retry": False,
-        "retries": 0,
-    },
+    default_args=DEFAULT_ARGS_NO_RETRIES,
     description=("Un DAG pour anonymiser les acteurs vs. RGPD"),
     tags=[TAGS.ENRICH, TAGS.ANNAIRE_ENTREPRISE, TAGS.RGPD, TAGS.ACTEURS],
     schedule=None,

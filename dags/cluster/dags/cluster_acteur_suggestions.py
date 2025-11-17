@@ -6,6 +6,7 @@ from cluster.config.constants import FIELDS_PARENT_DATA_EXCLUDED
 from cluster.config.model import ClusterConfig
 from cluster.tasks.airflow_logic.chain_tasks import chain_tasks
 from cluster.ui import params_separators as UI_PARAMS_SEPARATORS
+from shared.config.airflow import DEFAULT_ARGS_NO_RETRIES
 from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
 from utils.airflow_params import airflow_params_dropdown_from_mapping
@@ -294,13 +295,7 @@ if keys_missing_in_conf:
 with DAG(
     dag_id=DAG_ID,
     dag_display_name="Cluster - Suggestions",
-    default_args={
-        "owner": "airflow",
-        "depends_on_past": False,
-        "email_on_failure": False,
-        "email_on_retry": False,
-        "retries": 0,
-    },
+    default_args=DEFAULT_ARGS_NO_RETRIES,
     schedule=None,
     start_date=START_DATES.DEFAULT,
     description=("Un DAG pour générer des suggestions de clustering pour les acteurs"),

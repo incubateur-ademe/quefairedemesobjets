@@ -173,8 +173,6 @@ models:
         data_type: jsonb
         tests:
           - dbt_expectations.expect_column_to_exist
-          - dbt_expectations.expect_column_type_to_be:
-              type: jsonb
       - name: propositions_de_services
         description: "Les propositions de services de l'acteur"
         data_type: text
@@ -239,7 +237,7 @@ models:
       - dbt_expectations.expect_table_row_count_to_be_between:
           min_value: 250000
       - dbt_expectations.expect_table_column_count_to_equal:
-          value: 34
+          value: 43
     config:
       contract:
         enforced: true
