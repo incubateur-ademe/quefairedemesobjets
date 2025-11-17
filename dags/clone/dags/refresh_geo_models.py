@@ -12,7 +12,8 @@ from airflow.decorators import dag
 from airflow.models.baseoperator import chain
 from airflow.operators.bash import BashOperator
 from shared.config.airflow import DEFAULT_ARGS
-from shared.config.dbt_cmd import DBT_RUN, DBT_TEST
+from shared.config.dag_names import REFRESH_GEO_MODELS_DAG_ID
+from shared.config.dbt_commands import DBT_RUN, DBT_TEST
 from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
 
@@ -20,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 @dag(
-    dag_id="refresh_geo_models",
+    dag_id=REFRESH_GEO_MODELS_DAG_ID,
     dag_display_name="🔄 Rafraichir - Modèles Géographiques (EPCI)",
     default_args=DEFAULT_ARGS,
     description=(

@@ -11,6 +11,7 @@ from clone.tasks.airflow_logic.clone_table_validate_task import (
 from clone.tasks.airflow_logic.clone_view_in_use_switch_task import (
     clone_view_in_use_switch_task,
 )
+from shared.config.dag_names import REFRESH_GEO_MODELS_DAG_ID
 from shared.tasks.airflow_logic.trigger_dag_task import trigger_dag_task
 
 
@@ -23,6 +24,6 @@ def chain_tasks(dag: DAG) -> None:
         clone_old_tables_remove_task(dag),
         trigger_dag_task(
             task_id="launch_refresh_geo_models",
-            target_dag="refresh_geo_models",
+            target_dag=REFRESH_GEO_MODELS_DAG_ID,
         ),
     )

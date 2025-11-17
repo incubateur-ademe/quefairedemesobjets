@@ -5,9 +5,6 @@ from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 from airflow.utils.session import provide_session
 from airflow.utils.state import State
 
-TARGET_DAG = "refresh_geo_models"
-TRIGGERED_TASK_ID = "launch_refresh_geo_models"
-
 
 @provide_session
 def should_trigger(session=None, *, target_dag: str) -> bool:
