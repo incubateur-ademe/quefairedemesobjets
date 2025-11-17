@@ -19,13 +19,6 @@ jobs:
     name: 🤖 CI
     uses: ./.github/workflows/ci.yml
 
-  airflow_docker:
-    name: 🐳 Airflow Docker
-    uses: ./.github/workflows/airflow_docker.yml
-    secrets: inherit # pragma: allowlist secret`
-    with:
-      image_tag: review
-
   webapp:
     name: 🟠 Webapp
     uses: ./.github/workflows/_deploy-webapp.yml
@@ -38,7 +31,7 @@ jobs:
     name: 🟠 Airflow
     uses: ./.github/workflows/_deploy-airflow.yml
     secrets: inherit # pragma: allowlist secret`
-    needs: [ci, airflow_docker]
+    needs: [ci]
     with:
       environment: preprod
       tag_name: preprod
@@ -64,13 +57,13 @@ jobs:
     outputs:
       tag_name: ${{ steps.release-drafter.outputs.tag_name }}
 
-  airflow_docker_for_prod:
-    name: 🐳 Airflow Docker
-    uses: ./.github/workflows/airflow_docker.yml
-    secrets: inherit # pragma: allowlist secret`
-    needs: [update_release_draft_for_review]
-    with:
-      image_tag: ${{ needs.update_release_draft_for_review.steps.release-drafter.outputs.tag_name }}
+  # airflow_docker_for_prod:
+  #   name: 🐳 Airflow Docker
+  #   uses: ./.github/workflows/airflow_docker.yml
+  #   secrets: inherit # pragma: allowlist secret`
+  #   needs: [update_release_draft_for_review]
+  #   with:
+  #     image_tag: ${{ needs.update_release_draft_for_review.steps.release-drafter.outputs.tag_name }}
 
 # Address actions/missing-workflow-permissions rule in
 # code scanning alerts
