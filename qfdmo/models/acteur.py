@@ -1138,14 +1138,24 @@ Model to display all acteurs in admin
 """
 
 
-class VueActeur(BaseActeur):
+class FinalActeur(BaseActeur):
     class Meta:
-        verbose_name = "ACTEUR de l'EC - Vue sur l'acteur"
-        verbose_name_plural = "ACTEURS de l'EC - Vues sur tous les acteurs"
+        abstract = True
 
     uuid = models.CharField(
         max_length=255, default=generate_short_uuid, editable=False, db_index=True
     )
+    code_commune_insee = models.CharField(
+        max_length=10, blank=True, default="", db_index=True
+    )
+
+    epci = models.ForeignKey(EPCI, on_delete=models.CASCADE, blank=True, null=True)
+
+
+class VueActeur(FinalActeur):
+    class Meta:
+        verbose_name = "ACTEUR de l'EC - Vue sur l'acteur"
+        verbose_name_plural = "ACTEURS de l'EC - Vues sur tous les acteurs"
 
     parent = models.ForeignKey(
         "self",
@@ -1192,12 +1202,6 @@ class VueActeur(BaseActeur):
         default=0.0, editable=False, null=True, verbose_name="La longitude de l'acteur"
     )
 
-    code_commune_insee = models.CharField(
-        max_length=10, blank=True, default="", db_index=True
-    )
-
-    epci = models.ForeignKey(EPCI, on_delete=models.CASCADE, blank=True, null=True)
-
     @property
     def is_parent(self):
         return self.pk and self.duplicats.exists()
@@ -1209,7 +1213,7 @@ class VuePerimetreADomicile(BasePerimetreADomicile):
     )
 
 
-class DisplayedActeur(BaseActeur, LatLngPropertiesMixin):
+class DisplayedActeur(FinalActeur, LatLngPropertiesMixin):
     objects = DisplayedActeurManager()
 
     def natural_key(self):
@@ -1219,22 +1223,12 @@ class DisplayedActeur(BaseActeur, LatLngPropertiesMixin):
         verbose_name = "ACTEUR de l'EC - AFFICHÉ"
         verbose_name_plural = "ACTEURS de l'EC - AFFICHÉ"
 
-    uuid = models.CharField(
-        max_length=255, default=generate_short_uuid, editable=False, db_index=True
-    )
-
     # Table name qfdmo_displayedacteur_sources
     sources = models.ManyToManyField(
         Source,
         blank=True,
         related_name="displayed_acteurs",
     )
-
-    code_commune_insee = models.CharField(
-        max_length=10, blank=True, default="", db_index=True
-    )
-
-    epci = models.ForeignKey(EPCI, on_delete=models.CASCADE, blank=True, null=True)
 
     @property
     def change_url(self):
