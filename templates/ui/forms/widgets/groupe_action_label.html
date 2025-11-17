@@ -9,9 +9,7 @@
         {% if libelle %}
         {{ libelle }}
         {% else %}
-        {{ widget.action_field.all }}
-            {% for action in widget.action_field %}
-            {{ action }}
-            {% endfor %}
+        {{ groupe_action.libelle }}
         {% endif %}
+        {{ carte_config }}
 </p>

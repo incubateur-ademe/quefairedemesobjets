@@ -140,6 +140,21 @@ class GroupeAction(CodeAsNaturalKeyModel):
     def get_libelle_from(self, actions):
         return ", ".join({a.libelle_groupe for a in actions}).capitalize()
 
+    def get_libelle_from_config(self, carte_config):
+        actions = self.actions.all()
+
+        # Apply filters using walrus operator to avoid redundant queries
+        if config_actions := carte_config.action.all():
+            actions = actions.filter(id__in=config_actions)
+
+        if config_directions := carte_config.direction.all():
+            actions = actions.filter(directions__in=config_directions)
+
+        if config_groupes := carte_config.groupe_action.all():
+            actions = actions.filter(groupe_action__in=config_groupes)
+
+        return self.get_libelle_from(actions)
+
     @property
     def libelle(self):
         return self.get_libelle_from(self.actions.all())

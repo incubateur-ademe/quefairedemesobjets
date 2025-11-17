@@ -9,13 +9,13 @@ logger = logging.getLogger(__name__)
 
 class GroupeActionChoiceField(forms.ModelMultipleChoiceField):
     def label_from_instance(self, obj):
-        import pdb
-
-        pdb.set_trace()
         return mark_safe(
             render_to_string(
                 "ui/forms/widgets/groupe_action_label.html",
-                {"groupe_action": obj, "action_field": self.widget.action_field},
+                {
+                    "groupe_action": obj,
+                    "libelle": obj.get_libelle_from_config(self.widget.carte_config),
+                },
             )
         )
 

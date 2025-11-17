@@ -55,13 +55,17 @@ class CarteConfigFormMixin:
         super().__init__(*args, **kwargs)
 
         # Override choices and field initial values after form is initialized
-        # (self.fields is available)
         if self.carte_config:
-            self._override_choices_from_carte_config(self.carte_config)
-            self._override_field_initial_from_carte_config(self.carte_config)
+            self._override_choices_from_carte_config()
+            self._override_field_initial_from_carte_config()
+            self._add_carte_config_on_all_fields_widget()
 
         # Apply legacy parameter mappings if any
         self._apply_legacy_choices_mapping(legacy_form)
+
+    def _add_carte_config_on_all_fields_widget(self):
+        for field in self.fields.values():
+            field.widget.carte_config = self.carte_config
 
     def _restrict_field_choices_to_queryset(
         self,
@@ -93,9 +97,7 @@ class CarteConfigFormMixin:
             form_field_name
         ].queryset.filter(id__in=source_queryset.values_list("id", flat=True))
 
-    def _override_field_initial_from_carte_config(
-        self, carte_config: CarteConfig
-    ) -> None:
+    def _override_field_initial_from_carte_config(self) -> None:
         """Override field.initial values after form initialization.
 
         This is needed because Django doesn't override field-level initial values
@@ -109,7 +111,7 @@ class CarteConfigFormMixin:
 
         # Get all ManyToMany field names from CarteConfig
         many_to_many_fields_names = [
-            field.name for field in carte_config.__class__._meta.many_to_many
+            field.name for field in self.carte_config.__class__._meta.many_to_many
         ]
 
         for (
@@ -121,11 +123,11 @@ class CarteConfigFormMixin:
                 continue
 
             # Check if the config field exists
-            if not hasattr(carte_config, config_field_name):
+            if not hasattr(self.carte_config, config_field_name):
                 continue
 
             # Get the value from the config
-            config_value = getattr(carte_config, config_field_name)
+            config_value = getattr(self.carte_config, config_field_name)
 
             # Handle ManyToMany fields specially
             if config_field_name in many_to_many_fields_names:
@@ -138,7 +140,7 @@ class CarteConfigFormMixin:
                 # Set the initial value on the field instance
                 self.fields[form_field_name].initial = config_value
 
-    def _override_choices_from_carte_config(self, carte_config: CarteConfig) -> None:
+    def _override_choices_from_carte_config(self) -> None:
         """Override queryset choices for ModelChoiceField/ModelMultipleChoiceField
         based on ManyToMany fields in CarteConfig."""
         if not self.carte_config_choices_mapping:
@@ -146,7 +148,7 @@ class CarteConfigFormMixin:
 
         # Get all ManyToMany field names from CarteConfig
         many_to_many_fields_names = [
-            field.name for field in carte_config.__class__._meta.many_to_many
+            field.name for field in self.carte_config.__class__._meta.many_to_many
         ]
 
         # Get all ModelChoiceField field names from form
@@ -169,7 +171,7 @@ class CarteConfigFormMixin:
                 continue
 
             # Get the related manager for the config field
-            config_field_value = getattr(carte_config, config_field_name)
+            config_field_value = getattr(self.carte_config, config_field_name)
 
             # Use the helper to restrict the field's choices
             self._restrict_field_choices_to_queryset(

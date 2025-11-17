@@ -211,12 +211,6 @@ class LegendeForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
         initial=Action.objects.filter(afficher=True),
     )
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Pass the action field value to the groupe_action widget
-        # by adding a custom attribute that can be accessed in the template
-        self.fields["groupe_action"].widget.action_field = self.fields["action"]
-
     @staticmethod
     def _map_action_displayed_to_groupe_action(request_data):
         """Map legacy action_displayed parameter to GroupeAction queryset.
