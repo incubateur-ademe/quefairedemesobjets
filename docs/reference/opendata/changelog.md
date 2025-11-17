@@ -15,16 +15,6 @@ Il ne trace pas l’exhaustivité des évolutions apportées au jeu de données,
 - Publication de la documentation du jeu de données
 - Publication de la politique de version du jeu de données
   
-## 2025-10-13
-* Changements techniques :
-- Ajout des colonnes : 
-  - Identifiants_des_contributeurs
-  - code_commune
-  - code_epci
-  - nom_epci
-  
-* Changements des données :
-- Harmonisation de l’orthographe du mot “Déchèterie”
 
 
 
