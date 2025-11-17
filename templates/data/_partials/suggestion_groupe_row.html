@@ -25,5 +25,14 @@
         {% endblock suggestion_details %}
     </div>
 
-    <a href="{% url 'data:suggestion_groupe' suggestion_groupe.id %}">Rafraîchir</a>
+    {% include 'data/_partials/suggestion_groupe_usefull_links.html' %}
+
+    <form method="post"
+        id="form-status-{{ suggestion_groupe.id }}"
+        data-suggestion-groupe-id="{{ suggestion_groupe.id }}"
+        action="{% url 'data:suggestion_groupe_status' suggestion_groupe.id %}">
+        {% csrf_token %}
+        <button type="submit" name="action" value="validate">→ À Traiter</button>
+        <button type="submit" name="action" value="reject">→ Rejeter</button>
+    </form>
 </turbo-frame>
