@@ -103,6 +103,7 @@ class SearchActeursView(
     is_iframe = False
     is_carte = False
     is_embedded = True
+    mode_liste: bool
 
     def get_initial(self):
         initial = super().get_initial()
@@ -187,14 +188,23 @@ class SearchActeursView(
         # Manage the selection of sous_categorie_objet and actions
         acteurs = self._acteurs_from_sous_categorie_objet_and_actions()
         bbox, acteurs = self._handle_scoped_acteurs(acteurs, **kwargs)
-        page_size = 10
-        paginated_acteurs = Paginator(acteurs, page_size)
-        paginated_acteurs_obj = paginated_acteurs.page(self.request.GET.get("page", 1))
-        kwargs.update(
-            acteurs=acteurs,
-            paginated_acteurs_obj=paginated_acteurs_obj,
-            count=paginated_acteurs.count,
-        )
+        if self.mode_liste:
+            page_size = 10
+            paginated_acteurs = Paginator(
+                acteurs, page_size, allow_empty_first_page=True
+            )
+            paginated_acteurs_obj = paginated_acteurs.page(
+                self.request.GET.get("page", 1)
+            )
+            kwargs.update(
+                paginated_acteurs_obj=paginated_acteurs_obj,
+                count=paginated_acteurs.count,
+            )
+        else:
+            kwargs.update(
+                acteurs=acteurs[: self._get_max_displayed_acteurs()],
+            )
+
         context = super().get_context_data(**kwargs)
 
         # TODO : refacto forms, gérer ça autrement
