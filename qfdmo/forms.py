@@ -7,7 +7,7 @@ from django.core.cache import cache
 from django.db.models import TextChoices
 from django.db.utils import cached_property
 from django.forms.models import ModelForm
-from django.http import HttpRequest
+from django.http import HttpRequest, QueryDict
 from django.shortcuts import reverse
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
@@ -226,7 +226,7 @@ class LegendeForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
         return self.fields["groupe_action"].queryset.count() > 1
 
 
-class LegacySupportForm(forms.Form):
+class LegacySupportForm(GetFormMixin, forms.Form):
     querystring = forms.CharField(
         widget=forms.HiddenInput(),
         required=False,
@@ -256,7 +256,19 @@ class LegacySupportForm(forms.Form):
                     filtered_querystring.encode("utf-8")
                 ).decode("utf-8")
                 self.fields["querystring"].initial = encoded_querystring
-                print(f"{encoded_querystring=}")
+
+    def decode_querystring(self) -> QueryDict:
+        """Decode a base64-encoded querystring and parse it into a QueryDict"""
+        encoded_querystring = self["querystring"].value()
+        if not encoded_querystring:
+            return QueryDict()
+
+        try:
+            decoded_bytes = base64.b64decode(encoded_querystring)
+            decoded_querystring = decoded_bytes.decode("utf-8")
+            return QueryDict(decoded_querystring)
+        except (ValueError, UnicodeDecodeError) as e:
+            raise ValueError(f"Failed to decode querystring: {e}") from e
 
 
 class AutoSubmitLegendeForm(AutoSubmitMixin, LegendeForm):

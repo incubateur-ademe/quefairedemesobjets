@@ -59,7 +59,6 @@ class CarteFormsInstance(TypedDict):
     filtres: None | FiltresForm
     legende: None | AutoSubmitLegendeForm
     legende_filtres: None | LegendeForm
-    legacy: None | LegacySupportForm
 
 
 class CarteSearchActeursView(SearchActeursView):
@@ -107,20 +106,25 @@ class CarteSearchActeursView(SearchActeursView):
 
         # Initialize legacy form with request and bind it if there's data
         legacy_form = LegacySupportForm(data if data else None, request=self.request)
-
         form_instances: CarteFormsInstance = {"legacy": legacy_form}
 
         for key, form_config in self.forms.items():
             prefix = self._generate_prefix(form_config["prefix"])
             # carte_legende-nom_du_champ
             form = form_config["form"](
-                data, prefix=prefix, carte_config=self._get_carte_config()
+                data,
+                prefix=prefix,
+                carte_config=self._get_carte_config(),
+                legacy_form=legacy_form,
             )
             if not form.is_valid():
                 for other_prefix in form_config.get("other_prefixes_to_check", []):
                     other_prefix = self._generate_prefix(other_prefix)
                     other_form = form_config["form"](
-                        data, prefix=other_prefix, carte_config=self._get_carte_config()
+                        data,
+                        prefix=other_prefix,
+                        carte_config=self._get_carte_config(),
+                        legacy_form=legacy_form,
                     )
                     if other_form.is_valid():
                         form = other_form

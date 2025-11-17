@@ -28,7 +28,13 @@ class CarteConfigFormMixin:
     # or list of model instances to set as the field's queryset/choices.
     legacy_choices_mapping: dict[str, Callable] = {}
 
-    def __init__(self, *args, carte_config: CarteConfig | None = None, **kwargs):
+    def __init__(
+        self,
+        *args,
+        carte_config: CarteConfig | None = None,
+        legacy_form=None,
+        **kwargs,
+    ):
         """Initialize the form and apply carte_config overrides if provided.
 
         Args:
@@ -55,7 +61,7 @@ class CarteConfigFormMixin:
             self._override_field_initial_from_carte_config(self.carte_config)
 
         # Apply legacy parameter mappings if any
-        self._apply_legacy_choices_mapping()
+        self._apply_legacy_choices_mapping(legacy_form)
 
     def _restrict_field_choices_to_queryset(
         self,
@@ -170,17 +176,21 @@ class CarteConfigFormMixin:
                 form_field_name, config_field_value.all()
             )
 
-    def _apply_legacy_choices_mapping(self) -> None:
+    def _apply_legacy_choices_mapping(self, legacy_form) -> None:
         """Apply legacy parameter mappings to convert old request parameters
         to new field formats.
 
         For each mapping in legacy_choices_mapping, calls the provided callable
         with the request data to get the appropriate queryset/choices for the field.
+
+        Reads the base64-encoded querystring from self.request.GET, decodes it
+        using LegacySupportForm.decode_querystring(), and parses it to extract
+        parameter values.
         """
-        if not self.legacy_choices_mapping:
+        if not legacy_form or not self.legacy_choices_mapping:
             return
 
-        request_data = getattr(self, "_data", {})
+        request_data = legacy_form.decode_querystring()
 
         for form_field_name, callable_func in self.legacy_choices_mapping.items():
             # Call the callable with request data

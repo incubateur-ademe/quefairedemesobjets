@@ -14,11 +14,10 @@ class GetFormMixin(forms.Form):
         *args: Any,
         **kwargs: Any,
     ) -> None:
-        self._data = data
-
         if prefix:
             self.prefix = prefix
 
+        # TODO: dynamiser liste ici
         unique_field_names_with_prefix = set(
             [self.add_prefix(field) for field in self.base_fields.keys()]
         )
