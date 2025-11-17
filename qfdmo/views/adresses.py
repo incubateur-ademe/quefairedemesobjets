@@ -103,7 +103,7 @@ class SearchActeursView(
     is_iframe = False
     is_carte = False
     is_embedded = True
-    mode_liste: bool
+    paginate: bool
 
     def get_initial(self):
         initial = super().get_initial()
@@ -188,7 +188,7 @@ class SearchActeursView(
         # Manage the selection of sous_categorie_objet and actions
         acteurs = self._acteurs_from_sous_categorie_objet_and_actions()
         bbox, acteurs = self._handle_scoped_acteurs(acteurs, **kwargs)
-        if self.mode_liste:
+        if self.paginate:
             page_size = 10
             paginated_acteurs = Paginator(
                 acteurs, page_size, allow_empty_first_page=True

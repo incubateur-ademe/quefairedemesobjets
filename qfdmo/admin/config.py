@@ -18,6 +18,9 @@ class CarteConfigAdmin(admin.ModelAdmin):
         "sous_categorie_objet",
         "source",
         "groupe_action",
+        "action",
+        "direction",
+        "epci",
         "acteur_type",
         "label_qualite",
     ]

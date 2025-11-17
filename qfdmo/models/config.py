@@ -75,6 +75,7 @@ class CarteConfig(index.Indexed, models.Model):
         " carte affiche un fond de carte.",
     )
     nombre_d_acteurs_affiches = models.IntegerField(null=True)
+
     # TODOWAGTAIL : remove double negation and use afficher_legende instead
     cacher_legende = models.BooleanField(
         default=False,
@@ -131,6 +132,13 @@ class CarteConfig(index.Indexed, models.Model):
         "\nSi le champ n'est pas renseigné il sera ignoré",
         blank=True,
     )
+    action = models.ManyToManyField(
+        "qfdmo.Action",
+        verbose_name="Actions",
+        help_text="Seules les actions sélectionnées s'afficheront sur la carte"
+        "\nSi le champ n'est pas renseigné il sera ignoré",
+        blank=True,
+    )
     source = models.ManyToManyField(
         "qfdmo.Source",
         verbose_name="Source(s)",
@@ -163,6 +171,8 @@ class CarteConfig(index.Indexed, models.Model):
         "\nSi le champ n'est pas renseigné il sera ignoré",
         blank=True,
     )
+
+    epci = models.ManyToManyField("qfdmo.EPCI", verbose_name="EPCI")
 
     def get_absolute_url(self, override_sous_categories=None, initial_query_string=""):
         # TODOWAGTAIL: add unit test

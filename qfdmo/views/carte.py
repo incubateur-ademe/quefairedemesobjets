@@ -186,7 +186,7 @@ class CarteSearchActeursView(SearchActeursView):
 
     def get_context_data(self, **kwargs):
         forms = self._get_forms()
-        self.mode_liste = (
+        self.paginate = (
             forms["view_mode"]["view"].value()
             == ViewModeForm.ViewModeSegmentedControlChoices.LISTE
         )
@@ -196,7 +196,7 @@ class CarteSearchActeursView(SearchActeursView):
             is_carte=True,
             forms=forms,
             map_container_id=self._get_map_container_id(),
-            mode_liste=self.mode_liste,
+            mode_liste=self.paginate,
             carte_config=self._get_carte_config(),
         )
 
