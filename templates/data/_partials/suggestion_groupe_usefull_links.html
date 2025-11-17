@@ -1,0 +1,16 @@
+<turbo-frame id="suggestion_groupe_usefull_links_{{ suggestion_groupe.id }}">
+    <a href="{% url 'data:suggestion_groupe_usefull_links' suggestion_groupe.id 'localisation' %}">Localisation</a>
+    <a href="{% url 'data:suggestion_groupe_usefull_links' suggestion_groupe.id 'displayedacteur' %}">Acteur affiché</a>
+    <a href="{% url 'data:suggestion_groupe_usefull_links' suggestion_groupe.id 'annuaire_entreprise' %}">Annuaire entreprise</a>
+    <div>
+        {% if localisation %}
+            Affichage d'une iframe avec Gmap
+        {% endif %}
+        {% if displayedacteur %}
+            Affichage de l'acteur comme affiché sur la carte
+        {% endif %}
+        {% if annuaire_entreprise %}
+            Affichage de l'annuaire entreprise de l'acteur
+        {% endif %}
+    </div>
+</turbo-frame>
