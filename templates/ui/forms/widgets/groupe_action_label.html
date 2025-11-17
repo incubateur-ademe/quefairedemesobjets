@@ -9,6 +9,9 @@
         {% if libelle %}
         {{ libelle }}
         {% else %}
-        {{ groupe_action.libelle }}
+        {{ widget.action_field.all }}
+            {% for action in widget.action_field %}
+            {{ action }}
+            {% endfor %}
         {% endif %}
 </p>

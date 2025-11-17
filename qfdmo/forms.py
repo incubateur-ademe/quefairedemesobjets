@@ -23,6 +23,7 @@ from qfdmo.models import SousCategorieObjet
 from qfdmo.models.acteur import DisplayedActeur, LabelQualite
 from qfdmo.models.action import (
     Action,
+    ActionDirection,
     GroupeAction,
     get_action_instances,
     get_directions,
@@ -175,6 +176,8 @@ class FormulaireForm(AddressesForm):
 class LegendeForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
     carte_config_choices_mapping = {
         "groupe_action": "groupe_action",
+        "direction": "direction",
+        "action": "action",
     }
 
     legacy_choices_mapping = {
@@ -191,6 +194,28 @@ class LegendeForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
         label="",
         initial=GroupeAction.objects.filter(afficher=True),
     )
+
+    action = forms.ModelMultipleChoiceField(
+        queryset=Action.objects.all().order_by("order"),
+        widget=forms.MultipleHiddenInput,
+        required=False,
+        label="",
+        initial=Action.objects.filter(afficher=True),
+    )
+
+    direction = forms.ModelMultipleChoiceField(
+        queryset=ActionDirection.objects.all(),
+        widget=forms.MultipleHiddenInput,
+        required=False,
+        label="",
+        initial=Action.objects.filter(afficher=True),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Pass the action field value to the groupe_action widget
+        # by adding a custom attribute that can be accessed in the template
+        self.fields["groupe_action"].widget.action_field = self.fields["action"]
 
     @staticmethod
     def _map_action_displayed_to_groupe_action(request_data):
