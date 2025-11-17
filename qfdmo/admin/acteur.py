@@ -697,12 +697,15 @@ class DisplayedActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
     gis_widget = CustomOSMWidget
     # DisplayedActeur has one or many sources, then we need to displayed the sources
     # field instead source field from BaseActeurAdmin
-    base_fields = list(BaseActeurAdmin.fields)
+    base_fields = list(BaseActeurAdmin.fields) + ["epci", "code_commune_insee"]
     base_fields.remove("source")
     base_fields.insert(1, "sources")
     # We also add the uuid which is a computed field only for DisplayedActeur
     base_fields.insert(0, "uuid")
-    readonly_fields = list(BaseActeurAdmin.readonly_fields)
+    readonly_fields = list(BaseActeurAdmin.readonly_fields) + [
+        "epci",
+        "code_commune_insee",
+    ]
     readonly_fields.insert(0, "uuid")
     fields = base_fields
 
@@ -751,6 +754,8 @@ class VueActeurAdmin(NotMutableMixin, BaseActeurAdmin):
             "revision_existe",
             "est_dans_carte",
             "est_dans_opendata",
+            "epci",
+            "code_commune_insee",
         ]
     )
     readonly_fields = list(BaseActeurAdmin.readonly_fields) + [
@@ -758,6 +763,8 @@ class VueActeurAdmin(NotMutableMixin, BaseActeurAdmin):
         "revision_existe",
         "est_dans_carte",
         "est_dans_opendata",
+        "epci",
+        "code_commune_insee",
     ]
     autocomplete_fields = ["parent"]
 
