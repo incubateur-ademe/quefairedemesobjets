@@ -1,6 +1,7 @@
 import json
 import logging
 from math import sqrt
+from urllib.parse import urlparse
 
 from django.db.models import Q
 from django.template.defaulttags import register
@@ -9,7 +10,7 @@ from django.template.loader import render_to_string
 from core.constants import MAP_CONTAINER_ID
 from qfdmo.models import DisplayedActeur
 from qfdmo.models.action import get_actions_by_direction
-from qfdmo.models.config import GroupeActionConfig
+from qfdmo.models.config import CarteConfig, GroupeActionConfig
 
 logger = logging.getLogger(__name__)
 
@@ -230,4 +231,40 @@ def acteurs_table(context, acteurs):
             "content": [render_acteur(acteur, context) for acteur in acteurs],
             "extra_classes": "fr-table--mode-liste fr-table--multiline qf-w-full",
         }
+    }
+
+
+@register.inclusion_tag("templatetags/carte.html", takes_context=True)
+def carte(context, carte_config: CarteConfig) -> dict:
+    # TODO: add cache
+    page = context.get("page")
+    return {
+        # TODO: Mutualiser avec le _get_map_container_id de views/carte.py
+        "id": carte_config.slug,
+        "url": carte_config.get_absolute_url(
+            override_sous_categories=list(
+                page.sous_categorie_objet.all().values_list("id", flat=True)
+            ),
+            initial_query_string=carte_config.SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url,
+        ),
+    }
+
+
+@register.inclusion_tag("templatetags/carte.html", takes_context=True)
+def legacy_produit_carte(context):
+    # TODO: add cache
+    produit = context.get("produit")
+    legacy_url = context.get("url")
+    # Get query string
+    legacy_querystring = urlparse(legacy_url).query
+    sous_categories_ids = produit.sous_categories.all().values_list("id", flat=True)
+    carte_config = CarteConfig.objects.get(slug="product")
+
+    return {
+        # TODO: Mutualiser avec le _get_map_container_id de views/carte.py
+        "id": carte_config.slug,
+        "url": carte_config.get_absolute_url(
+            override_sous_categories=list(sous_categories_ids),
+            initial_query_string=legacy_querystring,
+        ),
     }

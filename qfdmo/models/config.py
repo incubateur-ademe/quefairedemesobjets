@@ -74,7 +74,7 @@ class CarteConfig(index.Indexed, models.Model):
         " la carte. Le mode liste affiche une liste d'acteurs tandis qu'une"
         " carte affiche un fond de carte.",
     )
-    nombre_d_acteurs_affiches = models.IntegerField(null=True)
+    nombre_d_acteurs_affiches = models.IntegerField(null=True, blank=True)
 
     # TODOWAGTAIL : remove double negation and use afficher_legende instead
     cacher_legende = models.BooleanField(
@@ -172,7 +172,7 @@ class CarteConfig(index.Indexed, models.Model):
         blank=True,
     )
 
-    epci = models.ManyToManyField("qfdmo.EPCI", verbose_name="EPCI")
+    epci = models.ManyToManyField("qfdmo.EPCI", verbose_name="EPCI", blank=True)
 
     def get_absolute_url(self, override_sous_categories=None, initial_query_string=""):
         # TODOWAGTAIL: add unit test

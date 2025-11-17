@@ -204,6 +204,7 @@ class CarteSearchActeursView(SearchActeursView):
 
     def _get_action_ids(self) -> list[str]:
         groupe_action_ids = self._get_form("legende")["groupe_action"].value()
+
         # TODO: check if useful as these two forms are now synced
         for form in [
             self._get_form("legende"),
@@ -228,7 +229,65 @@ class CarteSearchActeursView(SearchActeursView):
         )
 
 
-class ProductCarteView(CarteSearchActeursView):
+class CarteConfigView(DetailView, CarteSearchActeursView):
+    model = CarteConfig
+    context_object_name = "carte_config"
+    filtres_form_class = FiltresFormWithoutSynonyme
+
+    def _get_max_displayed_acteurs(self):
+        # Hardcoded value taken from dict previously used
+        return 25
+
+    @override
+    def _get_carte_config(self):
+        return self.get_object()
+
+    def _compile_acteurs_queryset(self, *args, **kwargs):
+        filters, excludes = super()._compile_acteurs_queryset(*args, **kwargs)
+
+        # TODO: remove this
+        if source_filter := self.get_object().source.all():
+            filters &= Q(source__in=source_filter)
+
+        # TODO: remove this
+        if label_filter := self.get_object().label_qualite.all():
+            filters &= Q(labels__in=label_filter)
+
+        # TODO: remove this
+        if acteur_type_filter := self.get_object().acteur_type.all():
+            filters &= Q(acteur_type__in=acteur_type_filter)
+
+        return filters, excludes
+
+    def _get_sous_categorie_ids(self) -> list[int]:
+        sous_categorie_ids = super()._get_sous_categorie_ids()
+        if sous_categorie_filter := self.get_object().sous_categorie_objet.all():
+            sous_categorie_ids = sous_categorie_filter.values_list("id", flat=True)
+        return sous_categorie_ids
+
+    def _get_action_ids(self) -> list[str]:
+        action_ids = super()._get_action_ids()
+        if groupe_action_filter := self.get_object().groupe_action.all():
+            action_ids = list(
+                set(groupe_action_filter.values_list("actions__id", flat=True))
+                & set(action_ids)
+            )
+
+        if action_filter := self.get_object().action.all():
+            action_ids = list(
+                set(action_filter.values_list("id", flat=True)) & set(action_ids)
+            )
+
+        if direction_filter := self.get_object().direction.all():
+            action_ids = list(
+                set(direction_filter.values_list("actions__id", flat=True))
+                & set(action_ids)
+            )
+
+        return action_ids
+
+
+class ProductCarteView(CarteConfigView):
     """This view is used for Produit / Synonyme, the legacy django models
     that were defined prior to Wagtail usage for these pages.
 
@@ -251,54 +310,3 @@ class ProductCarteView(CarteSearchActeursView):
     def _get_max_displayed_acteurs(self):
         # Hardcoded value taken from dict previously used
         return 25
-
-
-class CarteConfigView(DetailView, CarteSearchActeursView):
-    model = CarteConfig
-    context_object_name = "carte_config"
-    filtres_form_class = FiltresFormWithoutSynonyme
-
-    def _get_max_displayed_acteurs(self):
-        # Hardcoded value taken from dict previously used
-        return 25
-
-    @override
-    def _get_carte_config(self):
-        return self.get_object()
-
-    def get_sous_categorie_filter(self):
-        sous_categories_from_request = list(
-            filter(
-                None, self.request.GET.getlist(CarteConfig.SOUS_CATEGORIE_QUERY_PARAM)
-            )
-        )
-        if sous_categories_from_request:
-            return sous_categories_from_request
-
-        return self.get_object().sous_categorie_objet.all().values_list("id", flat=True)
-
-    def _compile_acteurs_queryset(self, *args, **kwargs):
-        filters, excludes = super()._compile_acteurs_queryset(*args, **kwargs)
-
-        if source_filter := self.get_object().source.all():
-            filters &= Q(source__in=source_filter)
-
-        if label_filter := self.get_object().label_qualite.all():
-            filters &= Q(labels__in=label_filter)
-
-        if acteur_type_filter := self.get_object().acteur_type.all():
-            filters &= Q(acteur_type__in=acteur_type_filter)
-
-        if sous_categorie_filter := self.get_sous_categorie_filter():
-            filters &= Q(
-                proposition_services__sous_categories__id__in=sous_categorie_filter,
-            )
-
-        if groupe_action_filter := self.get_object().groupe_action.all():
-            action_ids = list(
-                groupe_action_filter.values_list("actions__id", flat=True)
-            )
-            filters &= Q(
-                proposition_services__action_id__in=action_ids,
-            )
-        return filters, excludes
