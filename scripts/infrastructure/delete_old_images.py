@@ -18,6 +18,7 @@ headers = {"X-Auth-Token": TOKEN}
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger("delete_old_images")
 
+
 # See https://www.scaleway.com/en/developers/api/container-registry/
 def main():
     # Fetch images
@@ -51,5 +52,6 @@ def main():
         with urllib.request.urlopen(req) as response:
             res = response.read()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
