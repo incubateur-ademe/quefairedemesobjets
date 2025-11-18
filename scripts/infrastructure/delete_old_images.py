@@ -10,6 +10,7 @@ import logging
 
 REGION = "fr-par"
 TOKEN = os.environ["TOKEN"]
+NAMESPACE_ID = os.environ["NAMESPACE_ID"]
 TAGS_TO_KEEP = int(os.environ["TAGS_TO_KEEP"])
 
 headers = {"X-Auth-Token": TOKEN}
@@ -21,7 +22,7 @@ logger = logging.getLogger("delete_old_images")
 # See https://www.scaleway.com/en/developers/api/container-registry/
 def main():
     # Fetch images
-    url = f"https://api.scaleway.com/registry/v1/regions/{REGION}/images?page_size=100&order_by=created_at_asc"
+    url = f"https://api.scaleway.com/registry/v1/regions/{REGION}/images?page_size=100&order_by=created_at_asc&namespace_id={NAMESPACE_ID}"
     req = urllib.request.Request(url, headers=headers)
     with urllib.request.urlopen(req) as response:
         res = response.read()

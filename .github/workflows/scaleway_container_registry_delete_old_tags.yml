@@ -7,6 +7,8 @@ on:
 env:
   TAGS_TO_KEEP: 30
   TOKEN: ${{ secrets.SCALEWAY_DEPLOY_KEY }}
+  #https://console.scaleway.com/registry/namespaces/fr-par/08bcc090-f2e5-458a-8b13-f40016276b9d
+  NAMESPACE_ID: "08bcc090-f2e5-458a-8b13-f40016276b9d"
 
 permissions:
   contents: read
