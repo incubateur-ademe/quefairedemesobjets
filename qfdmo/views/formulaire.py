@@ -251,7 +251,7 @@ class FormulaireSearchActeursView(SearchActeursView):
         )
 
     def _handle_scoped_acteurs(
-        self, acteurs: QuerySet[DisplayedActeur], kwargs
+        self, acteurs: QuerySet[DisplayedActeur], **kwargs
     ) -> tuple[Any, QuerySet[DisplayedActeur]]:
         """
         Handle the scoped acteurs following the order of priority:
@@ -264,7 +264,7 @@ class FormulaireSearchActeursView(SearchActeursView):
 
         if self._check_if_is_digital():
             return None, acteurs.digital()
-        return super()._handle_scoped_acteurs(acteurs, kwargs)
+        return super()._handle_scoped_acteurs(acteurs, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
