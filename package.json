@@ -44,8 +44,8 @@
     "@iframe-resizer/parent": "^5.5.7",
     "bowser": "^2.12.1",
     "eslint-config-prettier": "^10.1.8",
-    "posthog-js": "^1.290.0",
-    "maplibre-gl": "^5.12.0",
+    "posthog-js": "^1.295.0",
+    "maplibre-gl": "^5.13.0",
     "stimulus-use": "^0.52.3",
     "tailwindcss": "^3.4.18"
   },
@@ -57,8 +57,8 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@types/jest": "^30.0.0",
     "@types/lodash": "^4.17.20",
-    "@types/node": "^24.10.0",
-    "@typescript-eslint/eslint-plugin": "^8.46.4",
+    "@types/node": "^24.10.1",
+    "@typescript-eslint/eslint-plugin": "^8.47.0",
     "buffer": "^6.0.3",
     "eslint": "^9.39.1",
     "eslint-config-love": "^133.0.0",
@@ -78,7 +78,7 @@
     "ts-jest": "^29.4.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.46.4"
+    "typescript-eslint": "^8.47.0"
   },
   "optionalDependencies": {
     "@parcel/watcher-linux-x64-glibc": "^2.5.1"
