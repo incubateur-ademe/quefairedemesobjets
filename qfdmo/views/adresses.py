@@ -103,7 +103,7 @@ class SearchActeursView(
     is_iframe = False
     is_carte = False
     is_embedded = True
-    paginate: bool
+    paginate = False
 
     def get_initial(self):
         initial = super().get_initial()
