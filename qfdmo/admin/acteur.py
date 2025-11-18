@@ -682,6 +682,19 @@ class RevisionPropositionServiceAdmin(
 
 # endregion RevisionPropositionService
 
+
+class FinalActeurAdminMixin(admin.ModelAdmin):
+    # We need this class to display the map for the location field
+    # even if it is readonly
+    def get_readonly_fields(self, request, obj=None):
+        if settings.BYPASS_ACTEUR_READONLY_FIELDS:
+            return list(super().get_readonly_fields(request, obj))
+        return [f.name for f in self.model._meta.fields if f.name != "location"]
+
+    def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
+
 # region DisplayedActeur
 
 
@@ -690,24 +703,28 @@ class DisplayedActeurResource(ActeurResource):
         model = DisplayedActeur
 
 
-class DisplayedActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
+class DisplayedActeurAdmin(
+    import_export_admin.ExportMixin, FinalActeurAdminMixin, BaseActeurAdmin
+):
     list_display = list(BaseActeurAdmin.list_display) + ["uuid"]
     search_fields = list(BaseActeurAdmin.search_fields) + ["uuid"]
     change_form_template = "admin/acteur/change_form.html"
     gis_widget = CustomOSMWidget
     # DisplayedActeur has one or many sources, then we need to displayed the sources
     # field instead source field from BaseActeurAdmin
-    base_fields = list(BaseActeurAdmin.fields) + ["epci", "code_commune_insee"]
-    base_fields.remove("source")
-    base_fields.insert(1, "sources")
-    # We also add the uuid which is a computed field only for DisplayedActeur
-    base_fields.insert(0, "uuid")
-    readonly_fields = list(BaseActeurAdmin.readonly_fields) + [
+    base_fields = [
+        field
+        for field in BaseActeurAdmin.fields
+        if field not in ["identifiant_unique", "source"]
+    ]
+    fields = [
+        "uuid",
+        "identifiant_unique",
+        "sources",
+        *base_fields,
         "epci",
         "code_commune_insee",
     ]
-    readonly_fields.insert(0, "uuid")
-    fields = base_fields
 
     inlines = [
         DisplayedPropositionServiceInline,
@@ -716,14 +733,6 @@ class DisplayedActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
     ]
     modifiable = False
     resource_classes = [DisplayedActeurResource]
-
-    def get_readonly_fields(self, request, obj=None):
-        if settings.BYPASS_ACTEUR_READONLY_FIELDS:
-            return list(super().get_readonly_fields(request, obj))
-        return [f.name for f in self.model._meta.fields if f.name != "location"]
-
-    def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
 
 
 # endregion DisplayedActeur
@@ -736,7 +745,7 @@ class VueActeurChildInline(RevisionActeurChildInline):
     change_form_url = "admin:qfdmo_vueacteur_change"
 
 
-class VueActeurAdmin(NotMutableMixin, BaseActeurAdmin):
+class VueActeurAdmin(FinalActeurAdminMixin, BaseActeurAdmin):
     list_display = list(BaseActeurAdmin.list_display) + ["uuid"]
     search_fields = list(BaseActeurAdmin.search_fields) + ["uuid"]
     change_form_template = "admin/acteur/change_form.html"
@@ -746,27 +755,17 @@ class VueActeurAdmin(NotMutableMixin, BaseActeurAdmin):
         VueLabelQualiteInline,
         VuePerimetreADomicileInline,
     ]
-    fields = (
-        ["est_parent"]
-        + list(BaseActeurAdmin.fields)
-        + [
-            "parent",
-            "revision_existe",
-            "est_dans_carte",
-            "est_dans_opendata",
-            "epci",
-            "code_commune_insee",
-        ]
-    )
-    readonly_fields = list(BaseActeurAdmin.readonly_fields) + [
+    fields = [
         "est_parent",
+        "uuid",
+        *BaseActeurAdmin.fields,
+        "parent",
         "revision_existe",
         "est_dans_carte",
         "est_dans_opendata",
         "epci",
         "code_commune_insee",
     ]
-    autocomplete_fields = ["parent"]
 
     def get_inline_instances(self, request, vue_acteur=None):
         if vue_acteur and vue_acteur.is_parent:
