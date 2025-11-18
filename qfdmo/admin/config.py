@@ -13,6 +13,7 @@ class GroupeActionConfigInline(admin.StackedInline):
 
 @admin.register(CarteConfig)
 class CarteConfigAdmin(admin.ModelAdmin):
+    # TODO: regrouper action, groupe action, direction
     prepopulated_fields = {"slug": ["nom"]}
     autocomplete_fields = [
         "sous_categorie_objet",
