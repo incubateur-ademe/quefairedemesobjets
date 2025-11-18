@@ -1,5 +1,5 @@
-# For each image in the Paris region of the Scaleway Container Registry, keep up `TAGS_TO_KEEP` tags per image.
-# The oldest ones will be deleted first.
+# For each image in the Paris region of the Scaleway Container Registry,
+# keep up `TAGS_TO_KEEP` tags per image. The oldest ones will be deleted first.
 #
 # Usage:
 # TOKEN="XXXXX" TAGS_TO_KEEP=20 python delete_old_images.py
@@ -7,7 +7,6 @@ import urllib.request
 import os
 import json
 import logging
-from datetime import datetime, timedelta
 
 REGION = "fr-par"
 TOKEN = os.environ["TOKEN"]
