@@ -143,13 +143,11 @@ class CarteConfigFormMixin:
     def _override_choices_from_carte_config(self) -> None:
         """Override queryset choices for ModelChoiceField/ModelMultipleChoiceField
         based on ManyToMany fields in CarteConfig."""
+        # TODO: check in __init__ that mapping uses only many to many fields
+        # from carteconfig
+        # if not : raise an improperlyconfigurederror
         if not self.carte_config_choices_mapping:
             return
-
-        # Get all ManyToMany field names from CarteConfig
-        many_to_many_fields_names = [
-            field.name for field in self.carte_config.__class__._meta.many_to_many
-        ]
 
         # Get all ModelChoiceField field names from form
         model_choice_fields_names = [
@@ -165,10 +163,6 @@ class CarteConfigFormMixin:
 
         for form_field_name in eligible_form_fields:
             config_field_name = self.carte_config_choices_mapping[form_field_name]
-
-            # Check if the config field is a ManyToMany field
-            if config_field_name not in many_to_many_fields_names:
-                continue
 
             # Get the related manager for the config field
             config_field_value = getattr(self.carte_config, config_field_name)
