@@ -4,11 +4,22 @@ on:
       environment:
         type: string
         required: true
+      tag_name:
+        type: string
+        required: true
 
 jobs:
+  airflow_docker:
+    name: 🐳 Airflow Docker
+    uses: ./.github/workflows/_airflow-build-and-push-docker.yml
+    secrets: inherit # pragma: allowlist secret`
+    with:
+      image_tag: ${{ inputs.tag_name }}
+
+  # WILL BE DEPRECATED SOON
   deploy_airflow-webserver:
     if: ${{ inputs.environment == 'prod' }}
-    name: 🔄 Airflow webserver
+    name: 🔄 CleverCloud Webserver
     uses: ./.github/workflows/_deploy-on-clever-cloud.yml
     secrets: inherit # pragma: allowlist secret`
     with:
@@ -16,9 +27,10 @@ jobs:
       # Name of environment variable set in github environment
       app_name_key: AIRFLOW_SCHEDULER_CLEVERCLOUD_APP_NAME
 
+  # WILL BE DEPRECATED SOON
   deploy_airflow-scheduler:
     if: ${{ inputs.environment == 'prod' }}
-    name: ⏳ Airflow scheduler
+    name: ⏳ CleverCloud Scheduler
     uses: ./.github/workflows/_deploy-on-clever-cloud.yml
     secrets: inherit # pragma: allowlist secret`
     with:
@@ -27,20 +39,24 @@ jobs:
       app_name_key: AIRFLOW_WEBSERVER_CLEVERCLOUD_APP_NAME
 
   deploy_scaleway_scheduler:
-    secrets: inherit # pragma: allowlist secret`
     name: 🟣⏳ Scaleway Airflow scheduler
-    uses: ./.github/workflows/_scaleway_container_deploy.yml
+    secrets: inherit # pragma: allowlist secret`
+    uses: ./.github/workflows/_scaleway-container-deploy.yml
+    needs: [airflow_docker]
     with:
       environment: ${{ inputs.environment }}
       container_key: SCALEWAY_AIRFLOW_SCHEDULER_CONTAINER_ID
+      registry_image: ${{ format('{0}:{1}', 'rg.fr-par.scw.cloud/ns-qfdmo/airflow-scheduler', inputs.tag_name) }}
 
   deploy_scaleway_webserver:
     secrets: inherit # pragma: allowlist secret`
     name: 🟣⏳ Scaleway Airflow webserver
-    uses: ./.github/workflows/_scaleway_container_deploy.yml
+    needs: [airflow_docker]
+    uses: ./.github/workflows/_scaleway-container-deploy.yml
     with:
       environment: ${{ inputs.environment }}
       container_key: SCALEWAY_AIRFLOW_WEBSERVER_CONTAINER_ID
+      registry_image: ${{ format('{0}:{1}', 'rg.fr-par.scw.cloud/ns-qfdmo/airflow-webserver', inputs.tag_name) }}
 
 # Address actions/missing-workflow-permissions rule in
 # code scanning alerts
