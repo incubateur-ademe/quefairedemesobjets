@@ -32,6 +32,7 @@ logger = logging.getLogger(__name__)
     schedule=None,
     start_date=START_DATES.DEFAULT,
     params={},
+    max_active_runs=1,
 )
 def refresh_geo_models():
     dbt_run_exposure_acteurs_common = BashOperator(
