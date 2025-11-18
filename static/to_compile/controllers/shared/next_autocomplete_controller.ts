@@ -99,7 +99,7 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
     if (!selected) return
 
     this.hiddenInputTarget.value = selected.dataset.value?.trim() || ""
-    this.inputTarget.value = selected.textContent?.trim() || ""
+    this.inputTarget.value = selected.dataset.selectedValue?.trim() || ""
     this.hideListbox()
   }
 

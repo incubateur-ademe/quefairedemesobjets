@@ -232,7 +232,11 @@ class LegacySupportForm(GetFormMixin, forms.Form):
         required=False,
     )
 
-    query_params_to_keep = ["action_list", "action_displayed"]
+    query_params_to_keep = [
+        "action_list",
+        "action_displayed",
+        CarteConfig.SOUS_CATEGORIE_QUERY_PARAM,
+    ]
 
     def __init__(self, *args, **kwargs):
         # Extract request from kwargs to get the initial querystring
@@ -313,7 +317,7 @@ class FiltresForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
             search_view="autocomplete_synonyme",
         ),
         help_text="pantalon, perceuse, canapé...",
-        label="Indiquer un objet ",
+        label="Indiquer un objet",
         required=False,
     )
 

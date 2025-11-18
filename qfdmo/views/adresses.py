@@ -191,7 +191,8 @@ class SearchActeursView(
         if self.paginate:
             page_size = 10
             paginated_acteurs = Paginator(
-                acteurs, page_size, allow_empty_first_page=True
+                acteurs,
+                page_size,
             )
             paginated_acteurs_obj = paginated_acteurs.page(
                 self.request.GET.get("page", 1)
@@ -201,9 +202,7 @@ class SearchActeursView(
                 count=paginated_acteurs.count,
             )
         else:
-            kwargs.update(
-                acteurs=acteurs[: self._get_max_displayed_acteurs()],
-            )
+            kwargs.update(acteurs=acteurs)
 
         context = super().get_context_data(**kwargs)
 
@@ -226,7 +225,15 @@ class SearchActeursView(
         - user location
         """
         bbox, acteurs = self._bbox_and_acteurs_from_location_or_epci(acteurs)
+        acteurs = acteurs.distinct()
         acteurs = acteurs[: self._get_max_displayed_acteurs()]
+        acteurs = acteurs.prefetch_related(
+            "proposition_services__sous_categories",
+            "proposition_services__sous_categories__categorie",
+            "proposition_services__action",
+            "labels",
+            "action_principale",
+        )
 
         # Set Home location (address set as input)
         # FIXME : can be manage in template using the form value ?
@@ -250,7 +257,8 @@ class SearchActeursView(
             bbox = sanitize_frontend_bbox(custom_bbox)
             acteurs_in_bbox = acteurs.in_bbox(bbox)
 
-            if acteurs_in_bbox.count() > 0:
+            # Use exists() instead of count() for existence check - much faster
+            if acteurs_in_bbox.exists():
                 return custom_bbox, acteurs_in_bbox
 
         # TODO
@@ -260,7 +268,8 @@ class SearchActeursView(
             acteurs_from_center = acteurs.from_center(
                 longitude, latitude, self._get_distance_max()
             )
-            if acteurs_from_center.count():
+            # Use exists() instead of count() for existence check - much faster
+            if acteurs_from_center.exists():
                 custom_bbox = None
 
             return custom_bbox, acteurs_from_center
@@ -290,13 +299,6 @@ class SearchActeursView(
 
         if reparer_is_checked:
             acteurs = acteurs.with_reparer().with_bonus()
-
-        acteurs = acteurs.prefetch_related(
-            "proposition_services__sous_categories",
-            "proposition_services__sous_categories__categorie",
-            "proposition_services__action",
-            "action_principale",
-        ).distinct()
 
         return acteurs
 
@@ -453,6 +455,15 @@ def acteur_detail(request, uuid):
     if displayed_acteur is None or displayed_acteur.statut != ActeurStatus.ACTIF:
         return redirect(settings.BASE_URL, permanent=True)
 
+    # Use prefetched data to avoid additional queries
+    display_labels_panel = any(
+        label.afficher and not label.type_enseigne
+        for label in displayed_acteur.labels.all()
+    )
+    display_sources_panel = any(
+        source.afficher for source in displayed_acteur.sources.all()
+    )
+
     context = {
         "base_template": base_template,
         "object": displayed_acteur,  # We can use object here so that switching
@@ -462,12 +473,8 @@ def acteur_detail(request, uuid):
         "is_embedded": "carte" in request.GET or "iframe" in request.GET,
         "longitude": longitude,
         "direction": direction,
-        "display_labels_panel": bool(
-            displayed_acteur.labels.filter(afficher=True, type_enseigne=False).count()
-        ),
-        "display_sources_panel": bool(
-            displayed_acteur.sources.filter(afficher=True).count()
-        ),
+        "display_labels_panel": display_labels_panel,
+        "display_sources_panel": display_sources_panel,
         "is_carte": "carte" in request.GET,
         "map_container_id": request.GET.get("map_container_id", "carte"),
     }

@@ -99,14 +99,17 @@ if settings.DEBUG:
     from django.conf.urls.static import static
     from django.views.defaults import page_not_found, server_error
 
+    if "debug_toolbar" in settings.INSTALLED_APPS:
+        urlpatterns.extend([path("__debug__/", include("debug_toolbar.urls"))])
+    if "django_browser_reload" in settings.INSTALLED_APPS:
+        urlpatterns.extend([path("__reload__/", include("django_browser_reload.urls"))])
+
     urlpatterns.extend(
         [
             path(
                 "dsfr/",
                 include(("dsfr_hacks.urls", "dsfr_hacks"), namespace="dsfr_hacks"),
             ),
-            path("__debug__/", include("debug_toolbar.urls")),
-            path("__reload__/", include("django_browser_reload.urls")),
             path("500", server_error, {"template_name": "ui/pages/500.html"}),
             path("404", page_not_found, {"template_name": "ui/pages/404.html"}),
         ]

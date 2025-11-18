@@ -175,7 +175,6 @@ class CarteConfig(index.Indexed, models.Model):
     epci = models.ManyToManyField("qfdmo.EPCI", verbose_name="EPCI", blank=True)
 
     def get_absolute_url(self, override_sous_categories=None, initial_query_string=""):
-        # TODOWAGTAIL: add unit test
         """This view can be used with categories set from the parent page.
         For example in the Assistant, with a Produit page, the sous_categorie_objet
         is set on the page itself and need to replace the ones set on the carte config.

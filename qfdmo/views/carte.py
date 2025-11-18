@@ -4,6 +4,7 @@ from typing import Any, TypedDict, override
 from django.conf import settings
 from django.db.models import Q
 from django.forms import Form
+from django.utils.functional import cached_property
 from django.views.generic import DetailView
 
 from core.constants import MAP_CONTAINER_ID
@@ -114,7 +115,7 @@ class CarteSearchActeursView(SearchActeursView):
             form = form_config["form"](
                 data,
                 prefix=prefix,
-                carte_config=self._get_carte_config(),
+                carte_config=self.carte_config,
                 legacy_form=legacy_form,
             )
             if not form.is_valid():
@@ -123,7 +124,7 @@ class CarteSearchActeursView(SearchActeursView):
                     other_form = form_config["form"](
                         data,
                         prefix=other_prefix,
-                        carte_config=self._get_carte_config(),
+                        carte_config=self.carte_config,
                         legacy_form=legacy_form,
                     )
                     if other_form.is_valid():
@@ -173,7 +174,7 @@ class CarteSearchActeursView(SearchActeursView):
     def _get_carte_config(self):
         return None
 
-    @property
+    @cached_property
     def carte_config(self) -> CarteConfig | None:
         return self._get_carte_config()
 
@@ -234,51 +235,87 @@ class CarteConfigView(DetailView, CarteSearchActeursView):
     context_object_name = "carte_config"
     filtres_form_class = FiltresFormWithoutSynonyme
 
+    def get_queryset(self):
+        """Optimize queries by prefetching all ManyToMany relations"""
+        return (
+            super()
+            .get_queryset()
+            .prefetch_related(
+                "source",
+                "label_qualite",
+                "acteur_type",
+                "sous_categorie_objet",
+                "groupe_action",
+                "groupe_action__actions",  # For _get_action_ids
+                "action",
+                "direction",
+                "direction__actions",  # For _get_action_ids
+            )
+        )
+
     def _get_max_displayed_acteurs(self):
         # Hardcoded value taken from dict previously used
         return 25
 
     @override
     def _get_carte_config(self):
+        """Cache the object to avoid repeated queries"""
         return self.get_object()
 
     def _compile_acteurs_queryset(self, *args, **kwargs):
         filters, excludes = super()._compile_acteurs_queryset(*args, **kwargs)
 
         # TODO: remove this
-        if source_filter := self.get_object().source.all():
+        if source_filter := self.carte_config.source.all():
             filters &= Q(source__in=source_filter)
 
         # TODO: remove this
-        if label_filter := self.get_object().label_qualite.all():
+        if label_filter := self.carte_config.label_qualite.all():
             filters &= Q(labels__in=label_filter)
 
         # TODO: remove this
-        if acteur_type_filter := self.get_object().acteur_type.all():
+        if acteur_type_filter := self.carte_config.acteur_type.all():
             filters &= Q(acteur_type__in=acteur_type_filter)
 
         return filters, excludes
 
     def _get_sous_categorie_ids(self) -> list[int]:
-        sous_categorie_ids = super()._get_sous_categorie_ids()
-        if sous_categorie_filter := self.get_object().sous_categorie_objet.all():
-            sous_categorie_ids = sous_categorie_filter.values_list("id", flat=True)
-        return sous_categorie_ids
+        # Start with parent's IDs (converted to set for efficient intersection)
+        result_ids = set(super()._get_sous_categorie_ids())
+        data = self.request.GET
+        legacy_form = LegacySupportForm(data if data else None, request=self.request)
+
+        # Filter by IDs from request (convert strings to ints)
+        if ids_from_request := legacy_form.decode_querystring().getlist(
+            CarteConfig.SOUS_CATEGORIE_QUERY_PARAM
+        ):
+            request_ids = {int(id_) for id_ in ids_from_request}
+            result_ids = result_ids & request_ids if result_ids else request_ids
+
+        # Filter by CarteConfig's sous_categorie_objet
+        if sous_categorie_filter := self.carte_config.sous_categorie_objet.values_list(
+            "id", flat=True
+        ):
+            filter_ids = set(sous_categorie_filter)
+            result_ids = result_ids & filter_ids if result_ids else filter_ids
+
+        return list(result_ids)
 
     def _get_action_ids(self) -> list[str]:
         action_ids = super()._get_action_ids()
-        if groupe_action_filter := self.get_object().groupe_action.all():
+
+        if groupe_action_filter := self.carte_config.groupe_action.all():
             action_ids = list(
                 set(groupe_action_filter.values_list("actions__id", flat=True))
                 & set(action_ids)
             )
 
-        if action_filter := self.get_object().action.all():
+        if action_filter := self.carte_config.action.all():
             action_ids = list(
                 set(action_filter.values_list("id", flat=True)) & set(action_ids)
             )
 
-        if direction_filter := self.get_object().direction.all():
+        if direction_filter := self.carte_config.direction.all():
             action_ids = list(
                 set(direction_filter.values_list("actions__id", flat=True))
                 & set(action_ids)
@@ -300,6 +337,7 @@ class ProductCarteView(CarteConfigView):
         # TODO: check if required
         return self.request.GET.get("map_container_id", "carte")
 
+    @override
     def _get_carte_config(self):
         carte_config, _ = CarteConfig.objects.get_or_create(
             slug="product", supprimer_branding=True
