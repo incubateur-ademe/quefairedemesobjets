@@ -1,0 +1,22 @@
+name: "🟣 Scaleway Container Registry: delete old tags"
+on:
+  workflow_dispatch:
+  schedule:
+  - cron: "0 0 * * SUN"
+
+env:
+  TAGS_TO_KEEP: 30
+  TOKEN: ${{ secrets.SCALEWAY_DEPLOY_KEY }}
+
+permissions:
+  contents: read
+
+jobs:
+  delete_old_tags:
+    name: Delete old tags
+    runs-on: ubuntu-slim
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+      - name: Run script
+        run: python scripts/infrastructure/delete_old_images.py
