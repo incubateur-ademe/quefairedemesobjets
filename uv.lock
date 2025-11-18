@@ -346,7 +346,7 @@ wheels = [
 
 [[package]]
 name = "apache-airflow-providers-postgres"
-version = "6.4.0"
+version = "6.4.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apache-airflow" },
@@ -355,9 +355,9 @@ dependencies = [
     { name = "asyncpg" },
     { name = "psycopg2-binary" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/da/6b/ec7a72a1960b2fb0ccd195daf4aef0d0dd24d0a448ca408a70d26370519b/apache_airflow_providers_postgres-6.4.0.tar.gz", hash = "sha256:7ec6790a950b949e977fb0f2331d2b3ea9cc096bd50267a632229b0dd8796c28", size = 60943, upload-time = "2025-10-26T07:05:25.695Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ce/0f/025e7085e5335647bfd1c20e9287411c3065d6040e6dd016306cf408227f/apache_airflow_providers_postgres-6.4.1.tar.gz", hash = "sha256:4de7ff56685f91d71a5e9c7b290847fb7052c035acbf4dad9836b1adc2747aea", size = 60934, upload-time = "2025-11-17T19:11:30.362Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/3a/67/0f44eae68e3eed1ac26e8a2dc1806a1a98fcba17979569108d92217168ba/apache_airflow_providers_postgres-6.4.0-py3-none-any.whl", hash = "sha256:262107be09de310da6c94a8ea29c77d4a9229997f59dd1cf61a1ae87957f7c99", size = 23082, upload-time = "2025-10-26T07:04:21.194Z" },
+    { url = "https://files.pythonhosted.org/packages/d9/11/711f1d6faf98234a3c159e94cc8b6343f5ea8c3e1d0c5e7bf0370316f6ef/apache_airflow_providers_postgres-6.4.1-py3-none-any.whl", hash = "sha256:d69e109035afb84a7a7a35e35ca1cfd805e8972dadbc48362f207704a4a991a4", size = 23539, upload-time = "2025-11-17T19:09:39.352Z" },
 ]
 
 [[package]]
