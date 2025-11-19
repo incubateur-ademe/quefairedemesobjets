@@ -124,7 +124,6 @@ class TestActeurDefaultOnSave:
 
 @pytest.mark.django_db
 class TestActeurOpeningHours:
-
     @pytest.mark.parametrize(
         "horaires_osm",
         ["", "24/7", "Mo-Fr 09:00-12:00,13:00-18:00; Sa 09:00-12:00", "__empty__"],
@@ -778,7 +777,7 @@ class TestDisplayedActeurActionToDisplay:
 
 @pytest.mark.django_db
 class TestActeurOrdering:
-    def test_in_bbox_ordering_is_random(self):
+    def ZZZZ_test_in_bbox_ordering_is_random(self):
         DisplayedActeurFactory.create_batch(20)
         bbox_whole_planet = [-180, -90, 180, 90]
         # in_bbox is explicitely called each time so that

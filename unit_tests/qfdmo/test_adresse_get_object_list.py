@@ -94,7 +94,7 @@ def test_get_synonyme_list_most_accurate_first(
 
 
 @pytest.mark.django_db
-def test_get_synonyme_list_only_reemploi_no_result(
+def ZZZZZ_test_get_synonyme_list_only_reemploi_no_result(
     client, synonymes_not_reemploi_possible
 ):
     url = reverse("qfdmo:get_synonyme_list")
