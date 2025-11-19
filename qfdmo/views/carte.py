@@ -107,6 +107,8 @@ class CarteSearchActeursView(SearchActeursView):
 
         # Initialize legacy form with request and bind it if there's data
         legacy_form = LegacySupportForm(data if data else None, request=self.request)
+        if not (legacy_form.is_valid() and legacy_form.cleaned_data["querystring"]):
+            legacy_form = None
         form_instances: CarteFormsInstance = {"legacy": legacy_form}
 
         for key, form_config in self.forms.items():

@@ -21,7 +21,7 @@ Filtres
 {% if legende_form and legende_form.visible %}
 
 {% if not mode_liste %}
-<div class="md:qf-hidden">
+<div data-controller="responsive" data-responsive-media-query-value="(max-width: 768px)">
 {% endif %}
   {{ legende_form }}
 {% if not mode_liste %}
@@ -35,7 +35,7 @@ Filtres
 
 {% block modal_footer_buttons %}
 <li>
-  <button type="submit" class="fr-btn" title="Valider">
+    <button type="submit" class="fr-btn" title="Valider" form="{{ form_id }}">
     Appliquer
   </button>
 </li>

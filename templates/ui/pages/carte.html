@@ -2,6 +2,7 @@
 {% load static turbo_tags %}
 
 {% block content %}
+{% namespaced "search_form" as form_id %}
 <turbo-frame
     id="{% main_frame_id %}"
     {% if request.user.is_authenticated and DEBUG %}
@@ -12,7 +13,7 @@
 >
     {# Controleur général de gestion de la navigation et du formulaire #}
     <form
-        id='{% main_frame_id %}:search_form'
+        id='{{ form_id }}'
         data-controller="search-solution-form"
         data-search-solution-form-target="searchForm"
         data-search-solution-form-is-iframe-value="{{ is_embedded }}"
@@ -40,7 +41,9 @@
         data-search-solution-form-map-container-id-value="{% main_frame_id %}"
     >
         <input type="hidden" name="{{ MAP_CONTAINER_ID }}" value="{% main_frame_id %}">
+        {% if forms.legacy.querystring.value %}
         {{ forms.legacy }}
+        {% endif %}
         <section class="map-grid qf-relative">
             {% include 'ui/components/carte/header.html' %}
 
@@ -52,8 +55,6 @@
 
             {% include "ui/components/carte/acteur_detail.html" with no_draggable=mode_liste %}
         </section>
-
-        {{ forms.legacy }}
         {% include "ui/components/modals/filtres.html" with filtres_form=forms.filtres legende_form=forms.legende_filtres modal_only=True %}
         {% include "ui/components/modals/infos.html" with modal_only=True %}
     </form>

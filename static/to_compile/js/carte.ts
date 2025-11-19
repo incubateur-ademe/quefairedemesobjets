@@ -11,6 +11,7 @@ import SearchSolutionFormController from "../controllers/carte/search_solution_f
 import SsCatObjectAutocompleteController from "../controllers/carte/ss_cat_object_autocomplete_controller"
 import ActeurDetailsController from "../controllers/carte/acteur_details"
 import NextAutocompleteController from "../controllers/shared/next_autocomplete_controller"
+import ResponsiveController from "../controllers/carte/responsive_controller"
 
 // QFDMD
 import SearchController from "../controllers/assistant/search"
@@ -34,6 +35,7 @@ stimulus.register("search", SearchController)
 stimulus.register("blink", BlinkController)
 stimulus.register("analytics", AnalyticsController)
 stimulus.register("state", StateController)
+stimulus.register("responsive", ResponsiveController)
 
 Turbo.session.drive = false
 
