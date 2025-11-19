@@ -1,7 +1,6 @@
 import json
 import logging
 from math import sqrt
-from urllib.parse import urlparse
 
 from django.db.models import Q
 from django.template.defaulttags import register
@@ -251,20 +250,17 @@ def carte(context, carte_config: CarteConfig) -> dict:
 
 
 @register.inclusion_tag("templatetags/carte.html", takes_context=True)
-def legacy_produit_carte(context):
+def legacy_produit_carte(context, slug="product"):
     # TODO: add cache
     produit = context.get("produit")
-    legacy_url = context.get("url")
     # Get query string
-    legacy_querystring = urlparse(legacy_url).query
     sous_categories_ids = produit.sous_categories.all().values_list("id", flat=True)
-    carte_config = CarteConfig.objects.get(slug="product")
+    carte_config = CarteConfig.objects.get(slug=slug)
 
     return {
         # TODO: Mutualiser avec le _get_map_container_id de views/carte.py
         "id": carte_config.slug,
         "url": carte_config.get_absolute_url(
             override_sous_categories=list(sous_categories_ids),
-            initial_query_string=legacy_querystring,
         ),
     }
