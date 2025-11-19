@@ -94,11 +94,44 @@ class SuggestionGroupeStatusView(LoginRequiredMixin, SuggestionGroupeMixin, Form
 
 def get_suggestion_groupe_usefull_links(request, suggestion_groupe_id, usefull_link):
     suggestion_groupe = get_object_or_404(SuggestionGroupe, id=suggestion_groupe_id)
+    acteur = suggestion_groupe.acteur
+    revision_acteur = suggestion_groupe.revision_acteur
+    if revision_acteur:
+        parent_acteur = revision_acteur.parent
+    else:
+        parent_acteur = None
+
+    latitude = (
+        parent_acteur.latitude
+        if parent_acteur
+        else (
+            revision_acteur.latitude
+            if revision_acteur and revision_acteur.latitude
+            else acteur.latitude
+        )
+    )
+    longitude = (
+        parent_acteur.longitude
+        if parent_acteur
+        else (
+            revision_acteur.longitude
+            if revision_acteur and revision_acteur.longitude
+            else acteur.longitude
+        )
+    )
+    google_maps_url = f"https://maps.google.com/maps?q={latitude},{longitude}&z=14&output=embed&output=embed"
+
     return render(
         request,
         "data/_partials/suggestion_groupe_usefull_links.html",
         {
             "suggestion_groupe": suggestion_groupe,
+            "acteur": acteur,
+            "revision_acteur": revision_acteur,
+            "parent_acteur": parent_acteur,
+            "google_maps_url": google_maps_url,
+            "latitude": latitude,
+            "longitude": longitude,
             "localisation": usefull_link == "localisation",
             "displayedacteur": usefull_link == "displayedacteur",
             "annuaire_entreprise": usefull_link == "annuaire_entreprise",
