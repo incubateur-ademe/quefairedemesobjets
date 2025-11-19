@@ -1,17 +1,14 @@
 from airflow import DAG
+from shared.config.airflow import DEFAULT_ARGS
 from shared.config.tags import TAGS
 from sources.config import shared_constants as constants
 from sources.config.airflow_params import get_mapping_config
-from sources.tasks.airflow_logic.operators import (
-    default_args,
-    default_params,
-    eo_task_chain_v2,
-)
+from sources.tasks.airflow_logic.operators import default_params, eo_task_chain_v2
 
 with DAG(
     dag_id="cma_v2",
     dag_display_name="Source - CMA V2 - Test Nouvelles Suggestions",
-    default_args=default_args,
+    default_args=DEFAULT_ARGS,
     description=(
         "A pipeline to fetch, process, and load to validate data into postgresql"
         " for CMA reparacteur dataset"
@@ -40,10 +37,6 @@ with DAG(
                 "destination": "naf_principal",
             },
             {
-                "origin": "website",
-                "destination": "url",
-            },
-            {
                 "origin": "adresse_2",
                 "destination": "adresse_complement",
             },
@@ -65,6 +58,11 @@ with DAG(
                 "origin": "categories",
                 "transformation": "clean_sous_categorie_codes",
                 "destination": "sous_categorie_codes",
+            },
+            {
+                "origin": "website",
+                "transformation": "clean_url",
+                "destination": "url",
             },
             # 3. Ajout des colonnes avec une valeur par défaut
             {
