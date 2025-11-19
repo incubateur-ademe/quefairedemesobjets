@@ -3,15 +3,15 @@ x-airflow-common: &airflow-common
   env_file:
     - ./dags/.env
   volumes:
+    - ./config:/opt/airflow/config
     - ./core:/opt/airflow/core
-    - ./qfdmo:/opt/airflow/qfdmo
+    - ./dags:/opt/airflow/dags
     - ./data:/opt/airflow/data
     - ./dbt:/opt/airflow/dbt
     - ./logs:/opt/airflow/logs
-    - ./dags:/opt/airflow/dags
-    - ./scripts:/opt/airflow/scripts
-    - ./config:/opt/airflow/config
     - ./plugins:/opt/airflow/plugins
+    - ./qfdmo:/opt/airflow/qfdmo
+    - ./scripts:/opt/airflow/scripts
   # Voir la doc et s'assurer que AIRFLOW_UID est
   # définit dans le .env pour correspondre à votre UID
   # sed -i '/^AIRFLOW_UID=/d' .env && echo "AIRFLOW_UID=$(id -u)" >> .env
