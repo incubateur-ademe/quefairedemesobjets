@@ -4,7 +4,7 @@ from unittest.mock import Mock, patch
 import pytest
 from django.test import override_settings
 from ninja.errors import HttpError
-
+from urllib.parse import urlparse
 from stats.api import fetch_north_star_stats
 
 # Fixtures
@@ -100,7 +100,10 @@ class TestFetchNorthStarStats:
         # API call verification
         mock_post.assert_called_once()
         call_args = mock_post.call_args
-        assert "eu.posthog.com" in call_args[0][0]
+        # Parse URL and confirm hostname matches expected
+        url = call_args[0][0]
+        hostname = urlparse(url).hostname
+        assert hostname == "eu.posthog.com"
         assert call_args[1]["headers"]["Authorization"] == "Bearer test-api-key"
         assert call_args[1]["json"]["query"]["interval"] == "day"
 
