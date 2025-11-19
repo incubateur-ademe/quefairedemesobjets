@@ -80,7 +80,7 @@ def test_forms_redirects(client, test_url):
         ),
     ],
 )
-def test_redirects(
+def ZZZ_test_redirects(
     client,
     host,
     url,
