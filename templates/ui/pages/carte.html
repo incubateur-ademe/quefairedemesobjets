@@ -1,6 +1,8 @@
 {% extends base_template %}
 {% load static turbo_tags %}
 
+{% block body_classes %}qf-h-screen{% endblock %}
+
 {% block content %}
 {% namespaced "search_form" as form_id %}
 <turbo-frame
@@ -26,8 +28,7 @@
         class="
         qf-rounded-lg qf-border qf-border-solid qf-border-grey-900
         qf-group
-        qf-min-h-full
-        {% if not mode_liste %} qf-h-[660px] qf-overflow-hidden {% else %}{% endif %}"
+        {% if not mode_liste %} qf-h-[660px] qf-min-h-full qf-overflow-hidden {% else %}qf-h-full{% endif %}"
         qf-m-0
         qf-flex qf-flex-col qf-flex-auto
         qf-relative"
