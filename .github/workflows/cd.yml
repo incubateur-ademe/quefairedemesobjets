@@ -13,13 +13,6 @@ jobs:
     name: 🤖 CI
     uses: ./.github/workflows/ci.yml
 
-  airflow_docker:
-    name: 🐳 Airflow Docker
-    uses: ./.github/workflows/airflow_docker.yml
-    secrets: inherit # pragma: allowlist secret`
-    with:
-      image_tag: preprod
-
   webapp:
     name: 🟠 Webapp
     uses: ./.github/workflows/_deploy-webapp.yml
@@ -32,43 +25,30 @@ jobs:
     name: 🟠 Airflow
     uses: ./.github/workflows/_deploy-airflow.yml
     secrets: inherit # pragma: allowlist secret`
-    needs: [ci, airflow_docker]
+    needs: [ci]
     with:
       environment: preprod
+      tag_name: preprod
 
-  # Common release-drafter configuration
-  # From https://github.com/marketplace/actions/release-drafter
-  # Uncomment when anchor are supported in GitHub Actions
-  # See : https://github.com/actions/runner/issues/1182
-  # _release_drafter: &release_drafter
-  #   permissions:
-  #     contents: write
-  #   runs-on: ubuntu-slim
-  #   name: 🔢 Release
-  #   steps:
-  #     - uses: release-drafter/release-drafter@b1476f6e6eb133afa41ed8589daba6dc69b4d3f5 # v6.1.0
-  #       with:
-  #         config-name: release-config.yml
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  # Standard release draft update
   update_release_draft:
     # Uncomment when anchor are supported in GitHub Actions
     # See : https://github.com/actions/runner/issues/1182
     # <<: *release_drafter
+    needs: [webapp]
     permissions:
       contents: write
     runs-on: ubuntu-slim
     name: 🔢 Release
     steps:
       - uses: release-drafter/release-drafter@b1476f6e6eb133afa41ed8589daba6dc69b4d3f5 # v6.1.0
+        id: release-drafter
         with:
           config-name: release-config.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    needs: [webapp]
     if: ${{ !contains( github.ref_name, 'hotfix') }}
+    outputs:
+      tag_name: ${{ steps.release-drafter.outputs.tag_name }}
 
   # Hotfix-only release draft update
   update_release_draft_for_hotfix:
@@ -78,7 +58,7 @@ jobs:
     permissions:
       contents: write
     runs-on: ubuntu-slim
-    name: 🔢 Release
+    name: 🔢 Release Hotfix
     steps:
       - uses: release-drafter/release-drafter@b1476f6e6eb133afa41ed8589daba6dc69b4d3f5 # v6.1.0
         with:
