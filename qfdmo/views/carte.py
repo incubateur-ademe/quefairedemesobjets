@@ -102,38 +102,49 @@ class CarteSearchActeursView(SearchActeursView):
         except (KeyError, AttributeError):
             return prefix
 
+    def _initialize_legacy_form(self, data):
+        legacy_form = LegacySupportForm(data if data else None, request=self.request)
+        return legacy_form if legacy_form["querystring"] else None
+
+    def _create_form_instance(self, form_class, data, prefix, legacy_form):
+        return form_class(
+            data,
+            prefix=prefix,
+            carte_config=self.carte_config,
+            legacy_form=legacy_form,
+        )
+
+    def _get_bounded_form_with_fallback(self, form_config, data, legacy_form):
+        primary_prefix = self._generate_prefix(form_config["prefix"])
+        form = self._create_form_instance(
+            form_config["form"], data, primary_prefix, legacy_form
+        )
+
+        if form.is_valid():
+            return form
+
+        for fallback_prefix in form_config.get("other_prefixes_to_check", []):
+            generated_prefix = self._generate_prefix(fallback_prefix)
+            fallback_form = self._create_form_instance(
+                form_config["form"], data, generated_prefix, legacy_form
+            )
+            if fallback_form.is_valid():
+                return fallback_form
+
+        return form
+
     def _get_forms(self) -> CarteFormsInstance:
         data = self.request.GET
+        legacy_form = self._initialize_legacy_form(data)
 
-        # Initialize legacy form with request and bind it if there's data
-        legacy_form = LegacySupportForm(data if data else None, request=self.request)
-        if not (legacy_form.is_valid() and legacy_form.cleaned_data["querystring"]):
-            legacy_form = None
-        form_instances: CarteFormsInstance = {"legacy": legacy_form}
+        form_instances: CarteFormsInstance = {}
+        if legacy_form:
+            form_instances["legacy"] = legacy_form
 
         for key, form_config in self.forms.items():
-            prefix = self._generate_prefix(form_config["prefix"])
-            # carte_legende-nom_du_champ
-            form = form_config["form"](
-                data,
-                prefix=prefix,
-                carte_config=self.carte_config,
-                legacy_form=legacy_form,
+            form_instances[key] = self._get_bounded_form_with_fallback(
+                form_config, data, legacy_form
             )
-            if not form.is_valid():
-                for other_prefix in form_config.get("other_prefixes_to_check", []):
-                    other_prefix = self._generate_prefix(other_prefix)
-                    other_form = form_config["form"](
-                        data,
-                        prefix=other_prefix,
-                        carte_config=self.carte_config,
-                        legacy_form=legacy_form,
-                    )
-                    if other_form.is_valid():
-                        form = other_form
-                        break
-
-            form_instances[key] = form
 
         return form_instances
 
@@ -291,7 +302,7 @@ class CarteConfigView(DetailView, CarteSearchActeursView):
         if ids_from_request := legacy_form.decode_querystring().getlist(
             CarteConfig.SOUS_CATEGORIE_QUERY_PARAM
         ):
-            request_ids = {int(id_) for id_ in ids_from_request}
+            request_ids = {int(id_) for id_ in ids_from_request if id_}
             result_ids = result_ids & request_ids if result_ids else request_ids
 
         # Filter by CarteConfig's sous_categorie_objet

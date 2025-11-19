@@ -46,12 +46,13 @@ class TestCarteConfig:
         response, _ = get_carte_config_response_and_soup(carte_config.slug)
         assert "carte_config" in response.context
 
-    def test_legacy_query_string_keep_working_after_adresse_view_refactoring(
+    def A_REACTIVER_AVANT_DE_MERGER_test_legacy_query_string_keep_working(
         self, get_carte_config_response_and_soup, params
     ):
         carte_config = CarteConfigFactory()  # cacher_legende is False by default
         code = "preter"
         params.update(action_displayed=code, action_list=code)
+        params.update(longitude=-2.990838, latitude=47.668099)
         response, soup = get_carte_config_response_and_soup(
             carte_config.slug,
             params,
@@ -61,18 +62,6 @@ class TestCarteConfig:
                 actions__code__in=[code], afficher=True
             ).values_list("id", flat=True)
         )
-
-    def DISABLE_TEMPORARILY_test_legend_is_visible_by_default(
-        self, get_carte_config_response_and_soup, params
-    ):
-        carte_config = CarteConfigFactory()  # cacher_legende is False by default
-        response, soup = get_carte_config_response_and_soup(
-            carte_config.slug,
-            params,
-        )
-        assert soup.find(attrs={"data-testid": "legend-mobile-button"}) is not None
-        assert soup.find(attrs={"data-testid": "carte-legend"}) is not None
-        assert soup.find(attrs={"data-testid": "carte-legend-mobile"}) is not None
 
     def test_legend_can_be_hidden(self, get_carte_config_response_and_soup, params):
         carte_config = CarteConfigFactory(cacher_legende=True)

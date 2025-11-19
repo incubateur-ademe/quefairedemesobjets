@@ -229,7 +229,7 @@ class LegendeForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
 class LegacySupportForm(GetFormMixin, forms.Form):
     querystring = forms.CharField(
         widget=forms.HiddenInput(),
-        required=False,
+        required=True,
     )
 
     query_params_to_keep = [
