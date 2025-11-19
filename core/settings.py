@@ -74,6 +74,24 @@ CMS = {
     )
 }
 
+STATS = {
+    "POSTHOG_BASE_URL": decouple.config(
+        "POSTHOG_API_URL",
+        default="https://eu.posthog.com",
+        cast=str,
+    ),
+    "POSTHOG_PROJECT_ID": decouple.config(
+        "POSTHOG_STATS_PROJECT_ID",
+        default=23277,
+        cast=int,
+    ),
+    "POSTHOG_PERSONAL_API_KEY": decouple.config(
+        "POSTHOG_PERSONAL_API_KEY",
+        default="dummy_posthog_key",
+        cast=str,
+    ),
+}
+
 # Common settings
 # --------------
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -121,6 +139,7 @@ INSTALLED_APPS = [
     "django.forms",
     "colorfield",
     "core",
+    "stats",
     "qfdmd",
     "qfdmo",
     "data",
