@@ -4,7 +4,6 @@ from datetime import datetime
 
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields import ArrayField
-from django.db.models.functions import Now
 from django.template.loader import render_to_string
 
 from core.models.mixin import TimestampedModel
@@ -40,12 +39,12 @@ logger = logging.getLogger(__name__)
 
 
 class SuggestionStatut(models.TextChoices):
-    AVALIDER = SUGGESTION_AVALIDER, "À valider"
-    REJETEE = SUGGESTION_REJETEE, "Rejetée"
-    ATRAITER = SUGGESTION_ATRAITER, "À traiter"
-    ENCOURS = SUGGESTION_ENCOURS, "En cours de traitement"
-    ERREUR = SUGGESTION_ERREUR, "Fini en erreur"
-    SUCCES = SUGGESTION_SUCCES, "Fini avec succès"
+    AVALIDER = SUGGESTION_AVALIDER, "🟠 À valider"
+    REJETEE = SUGGESTION_REJETEE, "🔴 Rejetée"
+    ATRAITER = SUGGESTION_ATRAITER, "⏳ À traiter"
+    ENCOURS = SUGGESTION_ENCOURS, "⏳ En cours de traitement"
+    ERREUR = SUGGESTION_ERREUR, "❌ Fini en erreur"
+    SUCCES = SUGGESTION_SUCCES, "✅ Fini avec succès"
 
 
 class SuggestionCohorteStatut(models.TextChoices):
@@ -438,6 +437,26 @@ class SuggestionGroupe(TimestampedModel):
         verbose_name="Metadata de la cohorte, données statistiques",
     )
 
+    def __str__(self) -> str:
+        libelle = self.suggestion_cohorte.identifiant_action
+        if self.acteur:
+            libelle += f" - {self.acteur.identifiant_unique}"
+        return libelle
+
+    def get_suggestion_unitaires_by_champs(self) -> dict[tuple, list]:
+        champs_modifies = {
+            tuple(suggestion_unitaire.champs)
+            for suggestion_unitaire in self.suggestion_unitaires.all()
+        }
+        return {
+            champs: [
+                suggestion_unitaire
+                for suggestion_unitaire in self.suggestion_unitaires.all()
+                if set(tuple(suggestion_unitaire.champs)) == set(champs)
+            ]
+            for champs in champs_modifies
+        }
+
 
 class SuggestionUnitaire(TimestampedModel):
 
@@ -467,11 +486,9 @@ class SuggestionUnitaire(TimestampedModel):
         null=True,
     )
     ordre = models.IntegerField(default=1, blank=True)
-    raison = models.TextField(blank=True, db_default="", default="")
-    parametres = models.JSONField(blank=True, db_default="", default="")
-    suggestion_modele = models.CharField(
-        max_length=255, blank=True, db_default="", default="", choices=[]
-    )
+    raison = models.TextField(blank=True, default="")
+    parametres = models.JSONField(blank=True, default=dict)
+    suggestion_modele = models.CharField(max_length=255, blank=True, default="")
     champs = ArrayField(
         models.TextField(),
         blank=True,
@@ -521,7 +538,7 @@ class SuggestionLog(TimestampedModel):
     origine_colonnes = ArrayField(models.CharField(max_length=255), null=True)
     origine_valeurs = ArrayField(models.TextField(), null=True)
     destination_colonnes = ArrayField(models.CharField(max_length=255), null=True)
-    message = models.TextField(blank=True, db_default="", default="")
+    message = models.TextField(blank=True, default="")
 
 
 class BANCache(models.Model):
@@ -534,4 +551,4 @@ class BANCache(models.Model):
     ville = models.CharField(blank=True, null=True)
     location = models.PointField(blank=True, null=True)
     ban_returned = models.JSONField(blank=True, null=True)
-    modifie_le = models.DateTimeField(auto_now=True, db_default=Now())
+    modifie_le = models.DateTimeField(auto_now=True)
