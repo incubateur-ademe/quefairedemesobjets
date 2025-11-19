@@ -16,6 +16,7 @@ from django.contrib.gis.db import models
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point, Polygon
 from django.contrib.gis.geos.geometry import GEOSGeometry
+from django.contrib.gis.measure import D
 from django.core.cache import cache
 from django.core.files.images import get_image_dimensions
 from django.core.validators import RegexValidator
@@ -335,30 +336,33 @@ class DisplayedActeurQuerySet(models.QuerySet):
 
         return self.physical().filter(query).order_by("?")
 
-    def in_bbox(self, bbox):
+    def in_bbox(self, bbox, longitude, latitude):
         if not bbox:
             # TODO : test
             return self.physical()
 
+        reference_point = Point(float(longitude), float(latitude), srid=4326)
+        self._has_distance_field = True
         return (
             self.physical()
             .filter(location__within=Polygon.from_bbox(bbox))
-            .order_by("?")
+            .annotate(distance=Distance("location", reference_point))
+            .order_by("distance")
         )
 
     def from_center(self, longitude, latitude, distance_max):
         reference_point = Point(float(longitude), float(latitude), srid=4326)
-        distance_in_degrees = distance_max / 111320
+        self._has_distance_field = True
 
         return (
             self.physical()
-            .annotate(distance=Distance("location", reference_point))
             .filter(
                 location__dwithin=(
                     reference_point,
-                    distance_in_degrees,
+                    D(m=distance_max),
                 )
             )
+            .annotate(distance=Distance("location", reference_point))
             .order_by("distance")
         )
 
@@ -415,7 +419,7 @@ class BaseActeur(TimestampedModel):
     )
     url = models.CharField(max_length=2048, blank=True, default="", db_default="")
     email = models.EmailField(blank=True, default="", db_default="")
-    location = models.PointField(blank=True, null=True)
+    location = models.PointField(blank=True, null=True, geography=True)
     telephone = models.CharField(max_length=255, blank=True, default="", db_default="")
     nom_commercial = models.CharField(
         max_length=255, blank=True, default="", db_default=""
@@ -1245,6 +1249,15 @@ class DisplayedActeur(FinalActeur, LatLngPropertiesMixin):
     class Meta:
         verbose_name = "ACTEUR de l'EC - AFFICHÉ"
         verbose_name_plural = "ACTEURS de l'EC - AFFICHÉ"
+        indexes = [
+            # Composite index for common spatial + status queries
+            models.Index(
+                fields=["statut", "acteur_type_id"],
+                name="da_statut_type_idx",
+            ),
+            # Spatial index is already created by GeoDjango for location field
+            # Adding a functional index would require a migration with raw SQL
+        ]
 
     # Table name qfdmo_displayedacteur_sources
     sources = models.ManyToManyField(
@@ -1500,6 +1513,9 @@ class DisplayedPropositionService(BasePropositionService):
     class Meta:
         verbose_name = "Proposition de service - AFFICHÉ"
         verbose_name_plural = "Proposition de service - AFFICHÉ"
+        indexes = [
+            models.Index(fields=["acteur", "action"], name="dps_acteur_action_idx"),
+        ]
 
     id = models.CharField(primary_key=True)
     acteur = models.ForeignKey(

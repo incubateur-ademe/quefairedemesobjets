@@ -224,9 +224,6 @@ class SearchActeursView(
         - epci_codes
         - user location
         """
-        bbox, acteurs = self._bbox_and_acteurs_from_location_or_epci(acteurs)
-        acteurs = acteurs.distinct()
-        acteurs = acteurs[: self._get_max_displayed_acteurs()]
         acteurs = acteurs.prefetch_related(
             "proposition_services__sous_categories",
             "proposition_services__sous_categories__categorie",
@@ -234,6 +231,21 @@ class SearchActeursView(
             "labels",
             "action_principale",
         )
+        bbox, acteurs = self._bbox_and_acteurs_from_location_or_epci(acteurs)
+        acteurs = acteurs.only(
+            "location",
+            "identifiant_unique",
+            "action_principale_id",
+            "uuid",
+            "proposition_services",
+        )
+        if getattr(acteurs, "_has_distance_field", False):
+            acteurs = acteurs.distinct("distance")
+        else:
+            acteurs = acteurs.distinct()
+        acteurs = acteurs[: self._get_max_displayed_acteurs()]
+        if getattr(acteurs, "_needs_reparer_bonus", False):
+            acteurs = acteurs.with_bonus().with_reparer()
 
         # Set Home location (address set as input)
         # FIXME : can be manage in template using the form value ?
@@ -255,7 +267,7 @@ class SearchActeursView(
 
         if custom_bbox:
             bbox = sanitize_frontend_bbox(custom_bbox)
-            acteurs_in_bbox = acteurs.in_bbox(bbox)
+            acteurs_in_bbox = acteurs.in_bbox(bbox, longitude, latitude)
 
             # Use exists() instead of count() for existence check - much faster
             if acteurs_in_bbox.exists():
@@ -268,7 +280,6 @@ class SearchActeursView(
             acteurs_from_center = acteurs.from_center(
                 longitude, latitude, self._get_distance_max()
             )
-            # Use exists() instead of count() for existence check - much faster
             if acteurs_from_center.exists():
                 custom_bbox = None
 
@@ -297,8 +308,9 @@ class SearchActeursView(
 
         acteurs = DisplayedActeur.objects.filter(filters).exclude(excludes)
 
-        if reparer_is_checked:
-            acteurs = acteurs.with_reparer().with_bonus()
+        # Store whether we need reparer/bonus annotations for later
+        # We'll apply them AFTER limiting to avoid expensive subqueries on all rows
+        acteurs._needs_reparer_bonus = reparer_is_checked
 
         return acteurs
 
