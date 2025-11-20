@@ -261,10 +261,10 @@ class CarteConfigView(DetailView, CarteSearchActeursView):
                 "acteur_type",
                 "sous_categorie_objet",
                 "groupe_action",
-                "groupe_action__actions",  # For _get_action_ids
+                "groupe_action__actions",
                 "action",
                 "direction",
-                "direction__actions",  # For _get_action_ids
+                "direction__actions",
             )
         )
 
