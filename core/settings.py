@@ -124,6 +124,7 @@ INSTALLED_APPS = [
     "qfdmd",
     "qfdmo",
     "data",
+    "adminsortable2",
     "corsheaders",
     "django_lookbook",
     "djangoql",

@@ -2,6 +2,7 @@ import logging
 from typing import Any, List
 
 import orjson
+from adminsortable2.admin import SortableAdminMixin
 from django import forms
 from django.conf import settings
 from django.contrib.gis import admin
@@ -985,7 +986,14 @@ class OpenSourceDisplayedActeurResource(resources.ModelResource, GenericExporter
 
 
 @admin.register(LabelQualite)
-class LabelQualiteAdmin(CodeLibelleModelAdmin):
+class LabelQualiteAdmin(SortableAdminMixin, CodeLibelleModelAdmin):
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        form.base_fields["filtre_texte_d_aide"].widget = forms.Textarea(
+            attrs={"rows": 5, "cols": 80}
+        )
+        return form
+
     fieldsets = (
         (
             "Informations générales",

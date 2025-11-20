@@ -235,6 +235,13 @@ class LabelQualite(CodeAsNaturalKeyModel):
     class Meta:
         verbose_name = "Label qualité"
         verbose_name_plural = "Labels qualité"
+        ordering = ["order"]
+
+    order = models.PositiveIntegerField(
+        default=0,
+        blank=False,
+        null=False,
+    )
 
     id = models.AutoField(primary_key=True)
     libelle = models.CharField(max_length=255, unique=True)
