@@ -8,7 +8,7 @@ from cluster.tasks.business_logic.cluster_acteurs_read.parents import (
     cluster_acteurs_read_parents,
 )
 
-from qfdmo.models import DisplayedActeur
+from qfdmo.models import VueActeur
 from unit_tests.qfdmo.acteur_factory import ActeurTypeFactory, SourceFactory
 
 
@@ -33,45 +33,45 @@ class TestClusterActeursSelectionActeurTypeParents:
 
         # at1
         # Parent MAIS d'un acteur type non sélectionné (at1)
-        DisplayedActeur.objects.create(
+        VueActeur.objects.create(
             acteur_type=data["at1"],
             identifiant_unique=data["id_at1_parent"],
         )
         # at2
         # On test le cas où il y a plusieurs parents
         # Pas parent car avec une source
-        DisplayedActeur.objects.create(
+        VueActeur.objects.create(
             acteur_type=data["at2"],
             identifiant_unique=data["id_at2_pas_parent"],
             source=data["s1"],
         )
         # Parents car sans source
-        DisplayedActeur.objects.create(
+        VueActeur.objects.create(
             nom="Mon parent at2 a",
             acteur_type=data["at2"],
             identifiant_unique=data["id_at2_parent_a"],
         )
-        DisplayedActeur.objects.create(
+        VueActeur.objects.create(
             nom="Mon PÂRËNT at2 b",
             acteur_type=data["at2"],
             identifiant_unique=data["id_at2_parent_b"],
         )
         # at3
         # Pour at3 on test le cas où il n'y a pas de parent
-        DisplayedActeur.objects.create(
+        VueActeur.objects.create(
             acteur_type=data["at3"],
             identifiant_unique=data["id_at3_pas_parent"],
             source=data["s1"],
         )
         # at4
         # On test le cas où il y a 1 parent
-        DisplayedActeur.objects.create(
+        VueActeur.objects.create(
             nom="Mon parent at4",
             acteur_type=data["at4"],
             identifiant_unique=data["id_at4_parent"],
         )
         # On test le cas où il y a 1 parent mais inactif
-        DisplayedActeur.objects.create(
+        VueActeur.objects.create(
             acteur_type=data["at4"],
             identifiant_unique=data["id_at4_parent_inactif"],
             statut="INACTIF",

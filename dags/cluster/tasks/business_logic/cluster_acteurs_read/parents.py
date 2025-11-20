@@ -10,7 +10,7 @@ def cluster_acteurs_read_parents(
     fields: list[str],
     include_only_if_regex_matches_nom: str | None = None,
 ) -> pd.DataFrame:
-    from qfdmo.models import ActeurType, DisplayedActeur
+    from qfdmo.models import ActeurType, VueActeur
     from qfdmo.models.acteur import ActeurStatus
 
     """Reading parents from DB (acteurs with children pointing to them)."""
@@ -28,7 +28,7 @@ def cluster_acteurs_read_parents(
 
     # On récupère les parents des acteurs types donnés
     # qui sont censés être des acteurs sans source
-    parents = DisplayedActeur.objects.prefetch_related("sources").filter(
+    parents = VueActeur.objects.prefetch_related("sources").filter(
         acteur_type__id__in=acteur_type_ids,
         statut=ActeurStatus.ACTIF,
         source_id__isnull=True,
