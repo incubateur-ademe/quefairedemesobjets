@@ -8,9 +8,9 @@ Chaque acteur du ré-emploi et recyclage expose des propositions de service asso
 
 Certains objets de la base de données sont des objets d'administration qui n'ont pas vocation aest mis à jour régulièrement. Ci-dessous les populations de ces objets en date du 18 septembre 2023.
 
-**Direction de l'action** (qfdmo_actiondirection):
+**Direction de l'action** (enum dans le code):
 
-Détenir ou chercher un objet (spécifique à l'utilisation de «Épargnons nos ressources»
+Détenir ou chercher un objet (spécifique à l'utilisation de «Épargnons nos ressources»)
 
 **Action** (qfdmo_action):
 
@@ -145,11 +145,10 @@ Les acteurs sont configurés selon 3 couches:
 
 - Une couche d'import (Acteurs Importés) qui représente les acteurs tels qu'ils ont été partagés par nos partenaires moyennant une normalisation (cf. table qfdmo_acteur et qfdmo_propositionservice)
 - Une couche de révision (Acteurs Revisions) qui nous permet de corriger les données des acteurs importés et de les regrouper un même acteur a été partagé par plusieurs partenaires. La logique de correction est un coalesce:
-    - champ par champ, si la correction est non null et non vide, alors on la valeur à afficher est celle de la correction
-    - pour les objets liés (proposition de service, services), c'est la valeur de la correction qui sera affiché
-    - pour les regroupement d'acteur, la valeur des champs de l'acteur parent est affichés pour chaque champs, les objets liés sont collectés sur tous les enfants (acteurs regroupés sous la même entité)
+  - champ par champ, si la correction est non null et non vide, alors on la valeur à afficher est celle de la correction
+  - pour les objets liés (proposition de service, services), c'est la valeur de la correction qui sera affiché
+  - pour les regroupement d'acteur, la valeur des champs de l'acteur parent est affichés pour chaque champs, les objets liés sont collectés sur tous les enfants (acteurs regroupés sous la même entité)
 - Une couche d'affichage (Acteurs Affichés) qui calcule les acteurs à afficher selon les acteurs importés et leur révision
-
 
 ```mermaid
 ---
@@ -175,4 +174,3 @@ flowchart TB
     PropositionService --> CorrectionEquipePropositionService --> DisplayedPropositionService
     PropositionService --> DisplayedPropositionService
 ```
-

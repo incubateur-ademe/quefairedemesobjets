@@ -8,6 +8,7 @@ from factory.faker import Faker
 
 from qfdmo.models import Acteur, RevisionActeur, RevisionPropositionService
 from qfdmo.models.acteur import ActeurReprise, DisplayedActeur, LabelQualite, Source
+from qfdmo.models.action import Direction
 from unit_tests.qfdmo.acteur_factory import (
     ActeurFactory,
     ActeurServiceFactory,
@@ -21,7 +22,7 @@ from unit_tests.qfdmo.acteur_factory import (
     RevisionPropositionServiceFactory,
     SourceFactory,
 )
-from unit_tests.qfdmo.action_factory import ActionDirectionFactory, ActionFactory
+from unit_tests.qfdmo.action_factory import ActionFactory
 from unit_tests.qfdmo.sscatobj_factory import SousCategorieObjetFactory
 
 
@@ -580,9 +581,7 @@ class TestActeurActions:
         return DisplayedActeurFactory()
 
     def test_acteur_actions_filtered(self, displayed_acteur):
-        direction_jai = ActionDirectionFactory(code="jai")
-        action = ActionFactory(code="reparer")
-        action.directions.add(direction_jai)
+        action = ActionFactory(code="reparer", direction_codes=[Direction.J_AI.value])
         DisplayedPropositionServiceFactory(acteur=displayed_acteur, action=action)
 
         assert len(displayed_acteur.acteur_actions()) == 1, (
@@ -615,9 +614,7 @@ class TestActeurPropositionServicesByDirection:
     @pytest.mark.django_db
     def test_proposition_services_by_direction(self):
         acteur = ActeurFactory()
-        direction_jai = ActionDirectionFactory(code="jai")
-        action = ActionFactory()
-        action.directions.add(direction_jai)
+        action = ActionFactory(direction_codes=[Direction.J_AI.value])
         proposition_service = PropositionServiceFactory(acteur=acteur, action=action)
         acteur.proposition_services.add(proposition_service)
         assert list(acteur.proposition_services_by_direction("jai")) == [
@@ -639,9 +636,7 @@ class TestActeurLabel:
 class TestDisplayActeurActeurActions:
     def test_basic(self):
         displayed_acteur = DisplayedActeurFactory()
-        direction = ActionDirectionFactory(code="jai")
-        action = ActionFactory()
-        action.directions.add(direction)
+        action = ActionFactory(direction_codes=[Direction.J_AI.value])
         DisplayedPropositionServiceFactory(action=action, acteur=displayed_acteur)
         assert [
             model_to_dict(a, exclude=["directions"])
@@ -658,14 +653,13 @@ class TestDisplayActeurActeurActions:
                 "couleur": "#C3992A",
                 "icon": None,
                 "groupe_action": None,
+                "direction_codes": [Direction.J_AI.value],
             }
         ]
 
     def test_with_direction(self):
         displayed_acteur = DisplayedActeurFactory()
-        direction = ActionDirectionFactory(code="jai")
-        action = ActionFactory()
-        action.directions.add(direction)
+        action = ActionFactory(direction_codes=[Direction.J_AI.value])
         DisplayedPropositionServiceFactory(action=action, acteur=displayed_acteur)
         assert len(displayed_acteur.acteur_actions(direction="fake")) == 0
         assert [
@@ -683,15 +677,18 @@ class TestDisplayActeurActeurActions:
                 "couleur": "#C3992A",
                 "icon": None,
                 "groupe_action": None,
+                "direction_codes": [Direction.J_AI.value],
             }
         ]
 
     def test_ordered_action(self):
         displayed_acteur = DisplayedActeurFactory()
-        direction = ActionDirectionFactory(code="jai")
         for i in [2, 1, 3]:
-            action = ActionFactory(order=i, code=f"{i}")
-            action.directions.add(direction)
+            action = ActionFactory(
+                order=i,
+                code=f"{i}",
+                direction_codes=[Direction.J_AI.value],
+            )
             DisplayedPropositionServiceFactory(action=action, acteur=displayed_acteur)
 
         assert [

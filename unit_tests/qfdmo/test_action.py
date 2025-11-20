@@ -1,8 +1,9 @@
 import pytest
+from django.core.cache import cache
 
 from qfdmo.models import Action, CodeAsNaturalKeyModel
-from qfdmo.models.action import ActionDirection, get_actions_by_direction
-from unit_tests.qfdmo.action_factory import ActionDirectionFactory, ActionFactory
+from qfdmo.models.action import Direction, get_actions_by_direction
+from unit_tests.qfdmo.action_factory import ActionFactory
 
 
 class TestActionNomAsNaturalKeyHeritage:
@@ -15,61 +16,80 @@ class TestActionNomAsNaturalKeyHeritage:
 
 
 @pytest.fixture
-def action_directions():
-    ActionDirection.objects.all().delete()
-    ActionDirectionFactory(code="first", libelle="First", order=1)
-    ActionDirectionFactory(code="second", libelle="Second", order=2)
-
-
-@pytest.fixture
 def actions():
-    first = ActionDirection.objects.get(code="first")
-    second = ActionDirection.objects.get(code="second")
+    Action.objects.all().delete()
+    cache.clear()
 
-    ActionFactory(code="first_1").directions.add(first)
-    ActionFactory(code="first_2").directions.add(first)
-    ActionFactory(code="first_3").directions.add(first)
-    ActionFactory(code="second_1").directions.add(second)
-    ActionFactory(code="second_2").directions.add(second)
-    ActionFactory(code="second_3").directions.add(second)
-    ActionFactory(code="first_second").directions.add(first, second)
+    ActionFactory(code="jai_1", order=1, direction_codes=[Direction.J_AI.value])
+    ActionFactory(code="jai_2", order=2, direction_codes=[Direction.J_AI.value])
+    ActionFactory(code="jai_3", order=3, direction_codes=[Direction.J_AI.value])
+    ActionFactory(
+        code="jecherche_1",
+        order=1,
+        direction_codes=[Direction.JE_CHERCHE.value],
+    )
+    ActionFactory(
+        code="jecherche_2",
+        order=2,
+        direction_codes=[Direction.JE_CHERCHE.value],
+    )
+    ActionFactory(
+        code="jecherche_3",
+        order=3,
+        direction_codes=[Direction.JE_CHERCHE.value],
+    )
+    ActionFactory(
+        code="both",
+        order=4,
+        direction_codes=[
+            Direction.J_AI.value,
+            Direction.JE_CHERCHE.value,
+        ],
+    )
 
 
 class TestCachedGetActionsByDirection:
 
     @pytest.mark.django_db
-    def test_get_actions_by_direction_basic(self, action_directions, actions):
-
-        assert [a["code"] for a in get_actions_by_direction()["first"]] == [
-            "first_1",
-            "first_2",
-            "first_3",
-            "first_second",
+    def test_get_actions_by_direction_basic(self, actions):
+        assert [
+            a["code"] for a in get_actions_by_direction()[Direction.J_AI.value]
+        ] == [
+            "jai_1",
+            "jai_2",
+            "jai_3",
+            "both",
         ]
-        assert [a["code"] for a in get_actions_by_direction()["second"]] == [
-            "second_1",
-            "second_2",
-            "second_3",
-            "first_second",
-        ]
-
-    @pytest.mark.django_db
-    def test_get_actions_by_direction_order(self, action_directions, actions):
-        Action.objects.filter(code="first_1").update(order=999)
-
-        assert [a["code"] for a in get_actions_by_direction()["first"]] == [
-            "first_2",
-            "first_3",
-            "first_second",
-            "first_1",
+        assert [
+            a["code"] for a in get_actions_by_direction()[Direction.JE_CHERCHE.value]
+        ] == [
+            "jecherche_1",
+            "jecherche_2",
+            "jecherche_3",
+            "both",
         ]
 
     @pytest.mark.django_db
-    def test_get_actions_by_direction_hidden(self, action_directions, actions):
-        Action.objects.filter(code="first_1").update(afficher=False)
+    def test_get_actions_by_direction_order(self, actions):
+        Action.objects.filter(code="jai_1").update(order=999)
 
-        assert [a["code"] for a in get_actions_by_direction()["first"]] == [
-            "first_2",
-            "first_3",
-            "first_second",
+        assert [
+            a["code"] for a in get_actions_by_direction()[Direction.J_AI.value]
+        ] == [
+            "jai_2",
+            "jai_3",
+            "both",
+            "jai_1",
+        ]
+
+    @pytest.mark.django_db
+    def test_get_actions_by_direction_hidden(self, actions):
+        Action.objects.filter(code="jai_1").update(afficher=False)
+
+        assert [
+            a["code"] for a in get_actions_by_direction()[Direction.J_AI.value]
+        ] == [
+            "jai_2",
+            "jai_3",
+            "both",
         ]
