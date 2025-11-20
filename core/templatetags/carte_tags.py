@@ -205,7 +205,8 @@ def get_non_enseigne_labels_count(acteur):
     return acteur.labels_display.filter(type_enseigne=False).count()
 
 
-def render_acteur(acteur, context):
+def render_acteur_table_row(acteur, context):
+    """This is used to render a DSFR-compliant table row."""
     _context = {
         "map_container_id": context["map_container_id"],
         "forms": context["forms"],
@@ -224,10 +225,12 @@ def render_acteur(acteur, context):
     "ui/components/carte/acteur/acteur_table.html", takes_context=True
 )
 def acteurs_table(context, acteurs):
+    """We use a wrapper template tag to use the django-dsfr component.
+    At it must be rendered with a dict, we cannot easily render complex rows."""
     return {
         "table": {
             "header": ["Nom du lieu", "Actions", "Distance", ""],
-            "content": [render_acteur(acteur, context) for acteur in acteurs],
+            "content": [render_acteur_table_row(acteur, context) for acteur in acteurs],
             "extra_classes": "fr-table--mode-liste fr-table--multiline qf-w-full",
         }
     }
