@@ -295,19 +295,16 @@ class CarteConfigView(DetailView, CarteSearchActeursView):
         return filters, excludes
 
     def _get_sous_categorie_ids(self) -> list[int]:
-        # Start with parent's IDs (converted to set for efficient intersection)
         result_ids = set(super()._get_sous_categorie_ids())
         data = self.request.GET
         legacy_form = LegacySupportForm(data if data else None, request=self.request)
 
-        # Filter by IDs from request (convert strings to ints)
         if ids_from_request := legacy_form.decode_querystring().getlist(
             CarteConfig.SOUS_CATEGORIE_QUERY_PARAM
         ):
             request_ids = {int(id_) for id_ in ids_from_request if id_}
             result_ids = result_ids & request_ids if result_ids else request_ids
 
-        # Filter by CarteConfig's sous_categorie_objet
         if sous_categorie_filter := self.carte_config.sous_categorie_objet.values_list(
             "id", flat=True
         ):
