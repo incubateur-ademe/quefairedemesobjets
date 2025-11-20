@@ -20,6 +20,7 @@ class GetFormMixin(forms.Form):
         # TODO: dynamiser liste ici
         unique_field_names_with_prefix = set(
             [self.add_prefix(field) for field in self.base_fields.keys()]
+            + ["action_list", "label_reparacteur"]
         )
         if data is not None:
             unique_keys = set(data.keys())

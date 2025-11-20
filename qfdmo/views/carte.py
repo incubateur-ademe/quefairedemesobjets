@@ -270,6 +270,7 @@ class CarteSearchActeursView(SearchActeursView):
 
         # Convert to list to avoid generating a subquery in the final SQL
         # This optimizes the query by using a direct IN clause instead of a subquery
+
         return list(
             Action.objects.filter(groupe_action__id__in=groupe_action_ids)
             .only("id")
