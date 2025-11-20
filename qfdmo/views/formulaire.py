@@ -264,7 +264,7 @@ class FormulaireSearchActeursView(SearchActeursView):
 
         if self._check_if_is_digital():
             return None, acteurs.digital()
-        return super()._handle_scoped_acteurs(acteurs, **kwargs)
+        return super()._build_acteurs_queryset_from_location(acteurs, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

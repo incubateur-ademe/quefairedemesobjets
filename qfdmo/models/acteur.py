@@ -342,12 +342,11 @@ class DisplayedActeurQuerySet(models.QuerySet):
             return self.physical()
 
         reference_point = Point(float(longitude), float(latitude), srid=4326)
-        self._has_distance_field = True
         return (
             self.physical()
             .filter(location__within=Polygon.from_bbox(bbox))
             .annotate(distance=Distance("location", reference_point))
-            .order_by("distance")
+            .order_by("?")
         )
 
     def from_center(self, longitude, latitude, distance_max):

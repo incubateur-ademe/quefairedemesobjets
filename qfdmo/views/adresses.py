@@ -186,8 +186,9 @@ class SearchActeursView(
             self.cleaned_data = form.cleaned_data
 
         # Manage the selection of sous_categorie_objet and actions
-        acteurs = self._acteurs_from_sous_categorie_objet_and_actions()
-        bbox, acteurs = self._handle_scoped_acteurs(acteurs, **kwargs)
+        acteurs = self._build_acteurs_queryset_from_sous_categorie_objet_and_actions()
+        bbox, acteurs = self._build_acteurs_queryset_from_location(acteurs, **kwargs)
+
         if self.paginate:
             page_size = 10
             paginated_acteurs = Paginator(
@@ -215,7 +216,7 @@ class SearchActeursView(
 
         return context
 
-    def _handle_scoped_acteurs(
+    def _build_acteurs_queryset_from_location(
         self, acteurs: QuerySet[DisplayedActeur], **kwargs
     ) -> tuple[Any, QuerySet[DisplayedActeur]]:
         """
@@ -265,17 +266,17 @@ class SearchActeursView(
         latitude = center[1] or self.get_data_from_request_or_bounded_form("latitude")
         longitude = center[0] or self.get_data_from_request_or_bounded_form("longitude")
 
+        # A BBOX was set in the Configurateur OR the user interacted with
+        # the map, that set a bounding box in its browser.
         if custom_bbox:
             bbox = sanitize_frontend_bbox(custom_bbox)
             acteurs_in_bbox = acteurs.in_bbox(bbox, longitude, latitude)
 
-            # Use exists() instead of count() for existence check - much faster
             if acteurs_in_bbox.exists():
                 return custom_bbox, acteurs_in_bbox
 
-        # TODO
-        # - Tester cas avec bounding box définie depuis le configurateur
-        # - Tester cas avec center retourné par la carte
+        # At the beginning, there is no bounding box.
+        # Hence, we query the Acteurs from a center point.
         if latitude and longitude:
             acteurs_from_center = acteurs.from_center(
                 longitude, latitude, self._get_distance_max()
@@ -296,7 +297,7 @@ class SearchActeursView(
 
         return custom_bbox, acteurs.none()
 
-    def _acteurs_from_sous_categorie_objet_and_actions(
+    def _build_acteurs_queryset_from_sous_categorie_objet_and_actions(
         self,
     ) -> QuerySet[DisplayedActeur]:
         selected_actions_ids = self._get_action_ids()
