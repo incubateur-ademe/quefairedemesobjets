@@ -268,13 +268,24 @@ class LabelQualite(CodeAsNaturalKeyModel):
         help_text="Configure le texte d'aide affiché dans le champ de formulaire"
         " dans le panel de filtres sur la carte ou le mode liste",
     )
-    logo = models.FileField(
+    logo_filtre = models.FileField(
         upload_to="labels",
         blank=True,
         null=True,
+        verbose_name="Logo pour les filtres (SVG recommandé)",
+        help_text="Logo affiché dans le panneau de filtres de la carte. "
+        "Format SVG recommandé pour une qualité optimale. "
+        "Utilisé dans : modale de filtres côté utilisateur.",
     )
     logo_file = models.ImageField(
-        upload_to="logos", blank=True, null=True, validators=[validate_logo]
+        upload_to="logos",
+        blank=True,
+        null=True,
+        validators=[validate_logo],
+        verbose_name="Logo pour carte et open data (PNG 32x32px)",
+        help_text="Version miniature du logo : PNG 32x32 pixels maximum, 50 Ko max. "
+        "Utilisé dans : fiches acteurs sur la carte, export open data API. "
+        "Contraintes strictes : exactement 32x32 pixels.",
     )
     bonus = models.BooleanField(
         default=False, help_text="Ouvre les droits à un bonus financier"

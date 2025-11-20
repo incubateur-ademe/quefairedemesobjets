@@ -360,7 +360,6 @@ class ActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
 
 
 class RevisionActeurResource(ActeurResource):
-
     class Meta:
         model = RevisionActeur
 
@@ -499,7 +498,6 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
     def get_form(
         self, request: Any, obj: Any | None = None, change: bool = False, **kwargs: Any
     ) -> Any:
-
         def _get_siret_siren_help_text(obj, acteur=None):
             siret = obj.siret or (acteur and acteur.siret) or None
             if siret:
@@ -918,7 +916,6 @@ class OpenSourceDisplayedActeurResource(resources.ModelResource, GenericExporter
     )
 
     def get_queryset(self):
-
         queryset = super().get_queryset()
 
         queryset = queryset.prefetch_related(
@@ -986,6 +983,80 @@ class OpenSourceDisplayedActeurResource(resources.ModelResource, GenericExporter
 
 # endregion Exporter
 
+
+@admin.register(LabelQualite)
+class LabelQualiteAdmin(CodeLibelleModelAdmin):
+    fieldsets = (
+        (
+            "Informations générales",
+            {
+                "fields": (
+                    "libelle",
+                    "code",
+                    "url",
+                )
+            },
+        ),
+        (
+            "Logos",
+            {
+                "fields": (
+                    "logo_filtre",
+                    "logo_file",
+                ),
+                "description": (
+                    "<strong>⚠️ Attention : deux logos différents avec des "
+                    "usages distincts</strong><br/><br/>"
+                    "<strong>1. Logo pour les filtres</strong> "
+                    "(logo_filtre - SVG recommandé) :<br/>"
+                    "→ Affiché dans le panneau de filtres de la carte<br/>"
+                    "→ Visible par l'utilisateur lors de la sélection "
+                    "des critères<br/>"
+                    "→ Format SVG préféré pour une qualité optimale<br/><br/>"
+                    "<strong>2. Logo l'open data</strong> "
+                    "(logo_file - PNG 32x32px obligatoire) :<br/>"
+                    "→ Utilisé dans l'export open data / API<br/>"
+                    "→ Contraintes strictes : PNG, exactement 32x32 pixels, "
+                    "max 50 Ko"
+                ),
+            },
+        ),
+        (
+            "Affichage sur le site",
+            {
+                "fields": (
+                    "afficher",
+                    "type_enseigne",
+                )
+            },
+        ),
+        (
+            "Configuration des filtres",
+            {
+                "fields": (
+                    "filtre",
+                    "filtre_label",
+                    "filtre_texte_d_aide",
+                ),
+                "description": (
+                    "Configuration du label lorsqu'il apparaît comme option "
+                    "de filtre dans le panneau de filtres de la carte "
+                    "(avec le logo défini dans le champ 'logo_filtre' "
+                    "ci-dessus)"
+                ),
+                "classes": ("collapse",),
+            },
+        ),
+        (
+            "Options avancées",
+            {
+                "fields": ("bonus",),
+                "classes": ("collapse",),
+            },
+        ),
+    )
+
+
 admin.site.register(Acteur, ActeurAdmin)
 admin.site.register(ActeurService, CodeLibelleModelAdmin)
 admin.site.register(ActeurType, CodeLibelleModelAdmin)
@@ -995,5 +1066,4 @@ admin.site.register(RevisionActeur, RevisionActeurAdmin)
 admin.site.register(RevisionActeurParent, RevisionActeurParentAdmin)
 admin.site.register(RevisionPropositionService, RevisionPropositionServiceAdmin)
 admin.site.register(Source, CodeLibelleModelAdmin)
-admin.site.register(LabelQualite, CodeLibelleModelAdmin)
 admin.site.register(VueActeur, VueActeurAdmin)

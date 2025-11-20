@@ -146,7 +146,6 @@ class GroupeAction(CodeAsNaturalKeyModel):
         if not carte_config:
             return self.get_libelle_from(actions)
 
-        # Apply filters using walrus operator to avoid redundant queries
         if config_actions := carte_config.action.all():
             actions = actions.filter(id__in=config_actions)
 
