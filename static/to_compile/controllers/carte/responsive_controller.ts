@@ -20,6 +20,9 @@ export default class extends Controller {
 
   #mediaQueryList: MediaQueryList | null = null
   #boundHandleMediaChange: (() => void) | null = null
+
+  // Note: crypto.randomUUID() requires a secure context (HTTPS or localhost)
+  // This will throw an error in non-secure contexts (HTTP)
   #wrapperId: string = `responsive-wrapper-${crypto.randomUUID()}`
 
   connect() {
