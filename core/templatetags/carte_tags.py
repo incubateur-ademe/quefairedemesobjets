@@ -237,7 +237,12 @@ def acteurs_table(context, acteurs):
 
 
 @register.inclusion_tag("templatetags/carte.html", takes_context=True)
-def carte(context, carte_config: CarteConfig) -> dict:
+def carte(context: dict, carte_config: CarteConfig) -> dict:
+    """
+    Render an embedded carte (map) iframe for a Wagtail page.
+    Used in Wagtail StreamField blocks to display interactive maps of actors
+    filtered by the page's sous-categories (subcategories).
+    """
     # TODO: add cache
     page = context.get("page")
     return {
@@ -253,7 +258,12 @@ def carte(context, carte_config: CarteConfig) -> dict:
 
 
 @register.inclusion_tag("templatetags/carte.html", takes_context=True)
-def legacy_produit_carte(context, slug="product"):
+def legacy_produit_carte(context: dict, slug: str = "product") -> dict:
+    """
+    Render an embedded carte (map) iframe for a legacy product detail page.
+    Used in assistant product pages to display interactive maps of actors
+    filtered by the product's sous-categories (subcategories).
+    """
     # TODO: add cache
     produit = context.get("produit")
     # Get query string
