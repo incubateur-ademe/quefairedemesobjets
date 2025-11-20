@@ -24,6 +24,7 @@ def cluster_acteurs_clusters_prepare(
     cluster_intra_source_is_allowed: bool,
     fields_protected: list[str],
     fields_transformed: list[str],
+    include_source_ids: list[int],
 ) -> pd.DataFrame:
     """Overall clustering preparation:
     - Clustering of actors
@@ -33,6 +34,31 @@ def cluster_acteurs_clusters_prepare(
     - Sorting the final dataframe"""
 
     from qfdmo.models import RevisionActeur
+
+    def filter_clusters_without_any_included_sources(
+        df_clusters: pd.DataFrame, include_source_ids: list[int]
+    ) -> pd.DataFrame:
+        """
+        remove cluster if none of the acteur belongs one of the sources to include
+        """
+        nb_clusters_before = len(df_clusters["cluster_id"].unique())
+        rows_with_included_sources = df_clusters["source_id"].isin(include_source_ids)
+        clusters_with_included_sources = (
+            df_clusters.loc[rows_with_included_sources, "cluster_id"]
+            .dropna()
+            .unique()
+            .tolist()
+        )
+        df_clusters = df_clusters[
+            df_clusters["cluster_id"].isin(clusters_with_included_sources)
+        ]
+        nb_clusters_after = len(df_clusters["cluster_id"].unique())
+        if nb_clusters_filtered := nb_clusters_before - nb_clusters_after:
+            logger.warning(
+                "Clusters supprimés car aucune source concernée: "
+                f"{nb_clusters_filtered} / {nb_clusters_before}"
+            )
+        return df_clusters
 
     df_clusters = cluster_acteurs_clusters(
         df,
@@ -80,7 +106,9 @@ def cluster_acteurs_clusters_prepare(
         log.preview("parent_ids", parent_ids)
         df_children = cluster_acteurs_read_children(
             parent_ids=parent_ids,
-            fields_to_include=fields_protected + fields_transformed + ["parent_id"],
+            fields_to_include=fields_protected
+            + fields_transformed
+            + ["source_id", "parent_id"],
         )
 
         # Validation
@@ -93,6 +121,10 @@ def cluster_acteurs_clusters_prepare(
         df_combined = pd.concat([df_clusters, df_children], ignore_index=True).replace(
             {np.nan: None}
         )
+
+    df_combined = filter_clusters_without_any_included_sources(
+        df_combined, include_source_ids
+    )
 
     df_combined = df_sort(
         df_combined,

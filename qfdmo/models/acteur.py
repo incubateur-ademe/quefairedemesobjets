@@ -1213,6 +1213,13 @@ class VueActeur(FinalActeur):
         validators=[clean_parent],
     )
 
+    # Table name qfdmo_vueacteur_sources
+    sources = models.ManyToManyField(
+        Source,
+        blank=True,
+        related_name="vue_acteurs",
+    )
+
     # Readonly fields
     revision_existe = models.BooleanField(
         default=False, editable=False, verbose_name="Une correction existe"
@@ -1220,13 +1227,13 @@ class VueActeur(FinalActeur):
     est_parent = models.BooleanField(
         default=False, editable=False, verbose_name="L'acteur est un parent"
     )
-    enfants_liste = models.JSONField(
+    liste_enfants = models.JSONField(
         default=None,
         editable=False,
         null=True,
         verbose_name="La liste des enfants de l'acteur parent",
     )
-    enfants_nombre = models.IntegerField(
+    nombre_enfants = models.IntegerField(
         default=None,
         editable=False,
         null=True,

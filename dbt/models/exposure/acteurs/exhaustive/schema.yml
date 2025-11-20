@@ -128,10 +128,10 @@ models:
       - name: est_parent
         description: "Vrai si l'acteur est un parent"
         data_type: boolean
-      - name: enfants_liste
+      - name: liste_enfants
         description: "La liste des enfants de l'acteur"
         data_type: jsonb
-      - name: enfants_nombre
+      - name: nombre_enfants
         description: "Le nombre d'enfants de l'acteur"
         data_type: integer
       - name: est_dans_carte

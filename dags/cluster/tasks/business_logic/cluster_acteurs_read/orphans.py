@@ -53,7 +53,7 @@ def cluster_acteurs_read_orphans(
 
     Args:
         model_class (type[Model]): Le modèle Django à lire, le mettre en paramètre
-            nous permet de choisir Acteur, RevisionActeur ou DisplayedActeur
+            nous permet de choisir Acteur, RevisionActeur, VueActeur ou DisplayedActeur
 
         ➕ include_source_ids (list[int]): Les sources à inclure
 
@@ -87,6 +87,7 @@ def cluster_acteurs_read_orphans(
     )
     query = query.filter(source_id__in=include_source_ids)
     query = query.filter(acteur_type_id__in=include_acteur_type_ids)
+    query = query.filter(parent_id__isnull=True)
 
     # Un filtre en dur pour ne prendre que les acteurs actifs
     query = query.filter(statut=ActeurStatus.ACTIF)
