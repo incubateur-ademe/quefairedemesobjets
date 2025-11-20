@@ -4,7 +4,7 @@ from qfdmo.models import LabelQualite
 
 
 class Command(BaseCommand):
-    help = "Closes the specified poll for voting"
+    help = "initialize `filtre` fields"
 
     def handle(self, *args, **options):
         LabelQualite.objects.filter(

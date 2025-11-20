@@ -46,7 +46,7 @@ class TestCarteConfig:
         response, _ = get_carte_config_response_and_soup(carte_config.slug)
         assert "carte_config" in response.context
 
-    def A_REACTIVER_AVANT_DE_MERGER_test_legacy_query_string_keep_working(
+    def test_legacy_query_string_keep_working(
         self, get_carte_config_response_and_soup, params
     ):
         carte_config = CarteConfigFactory()  # cacher_legende is False by default

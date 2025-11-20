@@ -168,7 +168,7 @@ def displayed_acteur_donner_reparer(
 
 
 @pytest.mark.django_db
-class TEMPORARILY_DISABLED_TestReparacteur:
+class TestReparacteur:
     def test_filtre_reparacteur_return_0_acteur(
         self, adresses_view, displayed_acteur_reparer, action_reparer
     ):
@@ -192,15 +192,15 @@ class TEMPORARILY_DISABLED_TestReparacteur:
         request = HttpRequest()
         request.GET = query_dict_from(
             {
-                "groupe_action": [action_reparer.id],
+                "action_list": [action_reparer.code],
                 "latitude": [1],
                 "longitude": [1],
-                "label": ["reparacteur"],
+                "label_reparacteur": ["true"],
             }
         )
         adresses_view.setup(request)
         context = adresses_view.get_context_data()
-        assert context["forms"]["filtres"]["label"].value() == ["reparacteur"]
+
         assert context["acteurs"].count() == 1
 
     def test_filtre_reparacteur_return_1_noreparacteur(
@@ -226,7 +226,7 @@ class TEMPORARILY_DISABLED_TestReparacteur:
 
 
 @pytest.mark.django_db
-class TEMPORARILY_DISABLED_TestReparerAlternateIcon:
+class TestReparerAlternateIcon:
     def test_no_action_reparer_selected_does_not_add_reparer_attribute(
         self, adresses_view, displayed_acteur_donner_reparer, action_donner
     ):
@@ -265,7 +265,7 @@ class TEMPORARILY_DISABLED_TestReparerAlternateIcon:
 
 
 @pytest.mark.django_db
-class TEMPORARILY_DISABLED_TestExclusiviteReparation:
+class TestExclusiviteReparation:
     def test_no_action_reparer_excludes_acteurs_avec_exclusivite(
         self, adresses_view, displayed_acteur_reparer, action_preter
     ):
@@ -338,7 +338,7 @@ class TEMPORARILY_DISABLED_TestExclusiviteReparation:
 
 
 @pytest.mark.django_db
-class TEMPORARILY_DISABLED_TestFilters:
+class TestFilters:
     @pytest.mark.parametrize("carte", [[True], [None]])
     def test_action_filters(
         self,
@@ -445,7 +445,7 @@ class TEMPORARILY_DISABLED_TestFilters:
 
 @pytest.mark.django_db
 class TestBBOX:
-    def ZZZ_test_bbox_is_returned_if_no_acteurs(self):
+    def test_bbox_is_returned_if_no_acteurs(self):
         request = HttpRequest()
         adresses_view = CarteSearchActeursView()
         map_bbox = compile_frontend_bbox([1, 1, 1, 1])
