@@ -1,5 +1,3 @@
-from typing import Callable
-
 from django.forms import ModelChoiceField, ModelMultipleChoiceField
 
 from core.exceptions import (
@@ -21,12 +19,6 @@ class CarteConfigFormMixin:
     # Mapping between form field names and CarteConfig field names
     # for initial values override.
     carte_config_initial_mapping: dict[str, str] = {}
-
-    # Mapping between form field names and callables that process
-    # legacy request parameters to convert them to the new format.
-    # Each callable receives (request_data: dict) and returns a queryset
-    # or list of model instances to set as the field's queryset/choices.
-    legacy_choices_mapping: dict[str, Callable] = {}
 
     def __init__(
         self,
@@ -60,8 +52,10 @@ class CarteConfigFormMixin:
             self._override_field_initial_from_carte_config()
             self._add_carte_config_on_all_fields_widget()
 
-        # Apply legacy parameter mappings if any
-        self._apply_legacy_choices_mapping(legacy_form)
+        # Apply legacy querystring overrides if the form implements the method
+        # Querystring parameters should override carte_config
+        if hasattr(self, "_apply_legacy_querystring_overrides"):
+            self._apply_legacy_querystring_overrides(legacy_form)
 
     def _add_carte_config_on_all_fields_widget(self):
         for field in self.fields.values():
@@ -171,39 +165,6 @@ class CarteConfigFormMixin:
             self._restrict_field_choices_to_queryset(
                 form_field_name, config_field_value.all()
             )
-
-    def _apply_legacy_choices_mapping(self, legacy_form) -> None:
-        """Apply legacy parameter mappings to convert old request parameters
-        to new field formats.
-
-        For each mapping in legacy_choices_mapping, calls the provided callable
-        with the request data to get the appropriate queryset/choices for the field.
-
-        Reads the base64-encoded querystring from self.request.GET, decodes it
-        using LegacySupportForm.decode_querystring(), and parses it to extract
-        parameter values.
-        """
-        if not legacy_form or not self.legacy_choices_mapping:
-            return
-
-        request_data = legacy_form.decode_querystring()
-
-        for form_field_name, callable_func in self.legacy_choices_mapping.items():
-            # Call the callable with request data
-            try:
-                result = callable_func(request_data)
-
-                # If we got a result, use the helper to restrict the choices
-                if result is not None:
-                    self._restrict_field_choices_to_queryset(
-                        form_field_name, result[:1]
-                    )
-
-            except Exception as exception:
-                print(exception)
-                # If the callable fails, silently continue
-                # (backward compatibility should be forgiving)
-                continue
 
     def _validate_carte_config_mappings(self) -> None:
         """Validate that all mappings reference existing CarteConfig fields."""

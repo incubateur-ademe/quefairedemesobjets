@@ -91,10 +91,6 @@ class CarteSearchActeursView(SearchActeursView):
             },
         }
 
-    def __init__(self, **kwargs):
-        # TODO: check that linked forms have exactly the same fields
-        super().__init__(**kwargs)
-
     def _generate_prefix(self, prefix: str) -> str:
         try:
             id = self.request.GET[MAP_CONTAINER_ID]
@@ -103,8 +99,45 @@ class CarteSearchActeursView(SearchActeursView):
             return prefix
 
     def _initialize_legacy_form(self, data):
+        """Initialize legacy support form from request data.
+
+        Returns the form if it contains a valid querystring, None otherwise.
+        """
         legacy_form = LegacySupportForm(data if data else None, request=self.request)
         return legacy_form if legacy_form["querystring"] else None
+
+    def _get_legacy_form(self):
+        """Cache and return the legacy form if it exists.
+
+        This makes the legacy form accessible throughout the view hierarchy
+        without re-initializing it multiple times.
+        """
+        if not hasattr(self, "_cached_legacy_form"):
+            data = self.request.GET
+            self._cached_legacy_form = self._initialize_legacy_form(data)
+        return self._cached_legacy_form
+
+    def _get_sous_categorie_ids_from_legacy_querystring(self) -> set[int]:
+        """Extract sous_categorie IDs from legacy querystring if present.
+
+        This method checks for the SOUS_CATEGORIE_QUERY_PARAM in the legacy
+        querystring and returns a set of IDs. Returns empty set if no legacy
+        querystring or no sous_categorie IDs found.
+
+        Querystring parameters override carte_config.
+        """
+        legacy_form = self._get_legacy_form()
+        if not legacy_form:
+            return set()
+
+        ids_from_request = legacy_form.decode_querystring().getlist(
+            CarteConfig.SOUS_CATEGORIE_QUERY_PARAM
+        )
+
+        if ids_from_request:
+            return {int(id_) for id_ in ids_from_request if id_}
+
+        return set()
 
     def _create_form_instance(self, form_class, data, prefix, legacy_form):
         return form_class(
@@ -135,7 +168,7 @@ class CarteSearchActeursView(SearchActeursView):
 
     def _get_forms(self) -> CarteFormsInstance:
         data = self.request.GET
-        legacy_form = self._initialize_legacy_form(data)
+        legacy_form = self._get_legacy_form()
 
         form_instances: CarteFormsInstance = {}
         if legacy_form:
@@ -236,12 +269,24 @@ class CarteSearchActeursView(SearchActeursView):
         )
 
     def _get_sous_categorie_ids(self) -> list[int]:
+        """Get sous_categorie IDs from synonyme field and legacy querystring.
+
+        Legacy querystring parameters override other sources if present.
+        """
+        # Check for legacy querystring first (it overrides everything)
+        legacy_ids = self._get_sous_categorie_ids_from_legacy_querystring()
+        if legacy_ids:
+            return list(legacy_ids)
+
+        # Fall back to synonyme field
         synonyme_id = self._get_field_value_for("filtres", "synonyme")
         if not synonyme_id:
             return []
 
-        return Produit.objects.filter(synonymes__id__in=[synonyme_id]).values_list(
-            "sous_categories__id", flat=True
+        return list(
+            Produit.objects.filter(synonymes__id__in=[synonyme_id]).values_list(
+                "sous_categories__id", flat=True
+            )
         )
 
 
@@ -295,16 +340,16 @@ class CarteConfigView(DetailView, CarteSearchActeursView):
         return filters, excludes
 
     def _get_sous_categorie_ids(self) -> list[int]:
+        """Get sous_categorie IDs with the following priority:
+        1. Legacy querystring (overrides everything) - handled in parent
+        2. Parent implementation (synonyme field + legacy querystring)
+        3. CarteConfig sous_categorie_objet filter
+
+        Results are intersected when multiple sources provide IDs.
+        """
         result_ids = set(super()._get_sous_categorie_ids())
-        data = self.request.GET
-        legacy_form = LegacySupportForm(data if data else None, request=self.request)
 
-        if ids_from_request := legacy_form.decode_querystring().getlist(
-            CarteConfig.SOUS_CATEGORIE_QUERY_PARAM
-        ):
-            request_ids = {int(id_) for id_ in ids_from_request if id_}
-            result_ids = result_ids & request_ids if result_ids else request_ids
-
+        # Apply carte_config filter if present
         if sous_categorie_filter := self.carte_config.sous_categorie_objet.values_list(
             "id", flat=True
         ):

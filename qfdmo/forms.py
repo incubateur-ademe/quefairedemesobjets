@@ -176,12 +176,6 @@ class LegendeForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
         "groupe_action": "groupe_action",
     }
 
-    legacy_choices_mapping = {
-        "groupe_action": lambda request_data: LegendeForm._map_action_displayed_to_groupe_action(  # noqa: E501
-            request_data
-        ),
-    }
-
     groupe_action = GroupeActionChoiceField(
         queryset=GroupeAction.objects.filter(afficher=True).order_by("order"),
         to_field_name="id",
@@ -191,34 +185,58 @@ class LegendeForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
         initial=GroupeAction.objects.filter(afficher=True),
     )
 
-    @staticmethod
-    def _map_action_displayed_to_groupe_action(request_data):
-        """Map legacy action_displayed parameter to GroupeAction queryset.
+    def _apply_legacy_querystring_overrides(self, legacy_form):
+        """Apply legacy querystring parameters to override form behavior.
 
-        Converts old format:
-            action_displayed=preter|louer|mettreenlocation|donner|echanger|revendre
-        To new format:
-            GroupeAction queryset containing the related groupe_action
-            for each action code.
+        - action_displayed: filters the queryset for groupe_action field
+        - action_list: sets the initial value for groupe_action field
+
+        Querystring parameters override carte_config if present.
         """
-        # Check if legacy parameter exists
-        action_displayed = request_data.get("action_displayed", "")
+        if not legacy_form:
+            return
 
-        if not action_displayed:
-            return None
+        request_data = legacy_form.decode_querystring()
 
-        # Split the pipe-separated action codes
-        action_codes = [
-            code.strip() for code in action_displayed.split("|") if code.strip()
-        ]
+        # Handle action_displayed: filter the queryset
+        if action_displayed := request_data.get("action_displayed"):
+            # Split pipe-separated action codes
+            action_codes = [
+                code.strip() for code in action_displayed.split("|") if code.strip()
+            ]
 
-        if not action_codes:
-            return None
+            if action_codes:
+                # Filter groupe_action based on actions with these codes
+                groupe_action_qs = (
+                    GroupeAction.objects.filter(
+                        actions__code__in=action_codes, afficher=True
+                    )
+                    .distinct()
+                    .order_by("order")
+                )
 
-        # Return queryset of GroupeAction objects
-        return GroupeAction.objects.filter(
-            actions__code__in=action_codes, afficher=True
-        ).order_by("order")
+                # Override the queryset
+                self.fields["groupe_action"].queryset = groupe_action_qs
+
+        # Handle action_list: set initial value
+        if action_list := request_data.get("action_list"):
+            # Split pipe-separated action codes
+            action_codes = [
+                code.strip() for code in action_list.split("|") if code.strip()
+            ]
+
+            if action_codes:
+                # Get GroupeAction instances that contain these actions
+                initial_groupe_actions = (
+                    GroupeAction.objects.filter(
+                        actions__code__in=action_codes, afficher=True
+                    )
+                    .distinct()
+                    .order_by("order")
+                )
+
+                # Set as initial value
+                self.fields["groupe_action"].initial = initial_groupe_actions
 
     @cached_property
     def visible(self):

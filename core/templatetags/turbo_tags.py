@@ -1,7 +1,6 @@
 from django.template.defaulttags import register
 
 from core.constants import MAP_CONTAINER_ID
-from core.exceptions import TurboFrameConfigurationError
 
 
 @register.simple_tag(takes_context=True)
@@ -22,7 +21,5 @@ def namespaced(context: dict, id: str) -> str:
     instances exist on the same page, preventing ID collisions.
     """
     if MAP_CONTAINER_ID not in context:
-        raise TurboFrameConfigurationError(
-            f"The view should have a {MAP_CONTAINER_ID} context variable."
-        )
+        return id
     return f"{context.get(MAP_CONTAINER_ID)}:{id}"
