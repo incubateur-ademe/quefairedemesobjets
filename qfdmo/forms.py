@@ -252,6 +252,7 @@ class LegacySupportForm(GetFormMixin, forms.Form):
     query_params_to_keep = [
         "action_list",
         "action_displayed",
+        "label_reparacteur",
         CarteConfig.SOUS_CATEGORIE_QUERY_PARAM,
     ]
 
@@ -345,6 +346,33 @@ class FiltresForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
         required=False,
         label="",
     )
+
+    pas_exclusivite_reparation = forms.BooleanField(
+        required=False,
+        initial=True,
+        label="Masquer les lieux qui réparent uniquement les produits de leurs marques",
+        help_text="Les adresses ne réparant que les produits de leur propre marque "
+        "n'apparaîtront pas si cette case est cochée. (uniquement valable lorsque"
+        " l'action « réparer » est sélectionnée)",
+    )
+
+    def _apply_legacy_querystring_overrides(self, legacy_form):
+        """Apply legacy querystring parameters to override form behavior.
+
+        - label_reparacteur: set initial value to reparacteur checked
+        """
+        if not legacy_form:
+            return
+
+        request_data = legacy_form.decode_querystring()
+
+        # Handle action_displayed: filter the queryset
+        if label_reparacteur := request_data.get("label_reparacteur"):
+            if label_reparacteur == "true":
+                # Set as initial value
+                self.fields["label_qualite"].initial = LabelQualite.objects.filter(
+                    code="reparacteur"
+                )
 
 
 class FiltresFormWithoutSynonyme(FiltresForm):

@@ -200,6 +200,14 @@ class CarteSearchActeursView(SearchActeursView):
     def _get_ess(self):
         return self._check_if_label_qualite_is_set("ess")
 
+    def _get_legacy_label_reparacteur(self):
+        legacy_form = self._get_legacy_form()
+        if not legacy_form:
+            return False
+
+        # TODO : handle initial values
+        return legacy_form.decode_querystring().get("label_reparacteur")
+
     def _get_label_reparacteur(self):
         return self._check_if_label_qualite_is_set("reparacteur")
 
