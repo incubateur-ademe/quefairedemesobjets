@@ -126,7 +126,7 @@ print(generate_password_hash('your_password'))
 
 2. Insérer le nouvel utilisateur dans la table `ab_user`
 
-Récupérer la commande de connexion depuis le dashboard Clever Cloud (dans notre cas):
+Récupérer la commande de connexion depuis le dashboard Scaleway (dans notre cas):
 
 ```sh
 psql -h databae_host_name -p 5432 -U user -d airflow_database`
@@ -174,4 +174,4 @@ airflow users create \
     --password your_password
 ```
 
-Malheureusement on a pas d'accès shell actuellement sur nos instances déployées dans Clever cloud...
+Malheureusement on a pas d'accès shell actuellement sur nos instances déployées dans Scaleway...

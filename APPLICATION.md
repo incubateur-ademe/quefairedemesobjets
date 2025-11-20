@@ -58,6 +58,8 @@ Pas de preprod
 
 ## Airflow
 
-- Production : https://app-efd2802a-1773-48e0-987e-7a6dffb929d1.cleverapps.io/home
-- Preprod : https://app-d3c229bf-be85-4dbd-aca2-c8df1c6166de.cleverapps.io/home
-- Hébergement : https://console.clever-cloud.com/organisations/orga_0c814f24-ffc6-4933-abcf-3050940209eb
+- Production : https://lvaoprodnlgtohal-lvao-airflow-webserver.functions.fnc.fr-par.scw.cloud
+- Preprod : https://lvaopreprodbeamztby-lvao-airflow-webserver.functions.fnc.fr-par.scw.cloud
+- Hébergement : https://console.scaleway.com/containers/namespaces/fr-par
+  - Organisation : Incubateur ADEME (Pathtech)
+  - Projet : longuevieauxobjets
