@@ -270,7 +270,7 @@ class SearchActeursView(
         # the map, that set a bounding box in its browser.
         if custom_bbox:
             bbox = sanitize_frontend_bbox(custom_bbox)
-            acteurs_in_bbox = acteurs.in_bbox(bbox, longitude, latitude)
+            acteurs_in_bbox = acteurs.in_bbox(bbox)
 
             if acteurs_in_bbox.exists():
                 return custom_bbox, acteurs_in_bbox

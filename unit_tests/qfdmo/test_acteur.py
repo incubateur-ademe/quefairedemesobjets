@@ -777,7 +777,7 @@ class TestDisplayedActeurActionToDisplay:
 
 @pytest.mark.django_db
 class TestActeurOrdering:
-    def ZZZZ_test_in_bbox_ordering_is_random(self):
+    def test_in_bbox_ordering_is_random(self):
         DisplayedActeurFactory.create_batch(20)
         bbox_whole_planet = [-180, -90, 180, 90]
         # in_bbox is explicitely called each time so that

@@ -336,16 +336,14 @@ class DisplayedActeurQuerySet(models.QuerySet):
 
         return self.physical().filter(query).order_by("?")
 
-    def in_bbox(self, bbox, longitude, latitude):
+    def in_bbox(self, bbox):
         if not bbox:
             # TODO : test
             return self.physical()
 
-        reference_point = Point(float(longitude), float(latitude), srid=4326)
         return (
             self.physical()
             .filter(location__within=Polygon.from_bbox(bbox))
-            .annotate(distance=Distance("location", reference_point))
             .order_by("?")
         )
 

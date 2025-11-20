@@ -48,6 +48,7 @@ def synonymes_reemploi_possible(produit_reemploi_possible) -> list[Synonyme]:
 @pytest.fixture
 def synonymes_not_reemploi_possible(produit_not_reemploi_possible) -> list[Synonyme]:
     synonymes = []
+    Synonyme.objects.all().delete()
     for i in range(20):
         synonymes.append(
             SynonymeFactory(
@@ -94,7 +95,7 @@ def test_get_synonyme_list_most_accurate_first(
 
 
 @pytest.mark.django_db
-def ZZZZZ_test_get_synonyme_list_only_reemploi_no_result(
+def test_get_synonyme_list_only_reemploi_no_result(
     client, synonymes_not_reemploi_possible
 ):
     url = reverse("qfdmo:get_synonyme_list")
