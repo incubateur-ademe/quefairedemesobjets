@@ -2,8 +2,24 @@ from urllib.parse import urlencode
 
 import pytest
 from bs4 import BeautifulSoup
+from django.core.management import call_command
 
+from qfdmo.models.action import GroupeAction
 from unit_tests.qfdmo.carte_config_factory import CarteConfigFactory
+
+
+@pytest.fixture(scope="session")
+def django_db_setup(django_db_setup, django_db_blocker):
+    with django_db_blocker.unblock():
+        call_command(
+            "loaddata",
+            "categories",
+            "actions",
+            "acteur_services",
+            "acteur_types",
+            "produits",
+            "synonymes",
+        )
 
 
 @pytest.fixture
@@ -30,17 +46,22 @@ class TestCarteConfig:
         response, _ = get_carte_config_response_and_soup(carte_config.slug)
         assert "carte_config" in response.context
 
-    def test_legend_is_visible_by_default(
+    def test_legacy_query_string_keep_working(
         self, get_carte_config_response_and_soup, params
     ):
         carte_config = CarteConfigFactory()  # cacher_legende is False by default
+        code = "preter"
+        params.update(action_displayed=code, action_list=code)
+        params.update(longitude=-2.990838, latitude=47.668099)
         response, soup = get_carte_config_response_and_soup(
             carte_config.slug,
             params,
         )
-        assert soup.find(attrs={"data-testid": "legend-mobile-button"}) is not None
-        assert soup.find(attrs={"data-testid": "carte-legend"}) is not None
-        assert soup.find(attrs={"data-testid": "carte-legend-mobile"}) is not None
+        assert response.context["forms"]["legende"]["groupe_action"].value() == list(
+            GroupeAction.objects.filter(
+                actions__code__in=[code], afficher=True
+            ).values_list("id", flat=True)
+        )
 
     def test_legend_can_be_hidden(self, get_carte_config_response_and_soup, params):
         carte_config = CarteConfigFactory(cacher_legende=True)

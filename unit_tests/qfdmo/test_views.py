@@ -1,8 +1,9 @@
 import pytest
 from django.test import RequestFactory, override_settings
 
-from qfdmo.views.adresses import FormulaireSearchActeursView
 from qfdmo.views.carte import CarteConfigView, CarteSearchActeursView
+from qfdmo.views.formulaire import FormulaireSearchActeursView
+from unit_tests.qfdmo.carte_config_factory import CarteConfigFactory
 
 
 class TestConfigurateur:
@@ -57,9 +58,11 @@ class TestCarteViews:
         ), "On affiche 10 acteurs sur le formulaire (ou en iframe)"
 
     def test_carte_config_view(self, rf):
+        carte_config = CarteConfigFactory()
         request = rf.get("/fake/")
         view = CarteConfigView()
         view.request = request
+        view.kwargs = {"slug": carte_config.slug}
         assert (
             view._get_max_displayed_acteurs() == 25
         ), "On affiche 25 acteurs sur les cartes sur mesure par défaut"

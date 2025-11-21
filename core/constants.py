@@ -17,6 +17,7 @@ CARTE = {
         "corps": "J’ai trouvé une bonne adresse {NOM} grâce à l’ADEME : {URL}",
     },
     "ajouter_un_lieu": "Ajouter un lieu sur la carte",
+    "ajouter_un_lieu_mode_liste": "Proposer un nouveau lieu",
     "nouvelle_recherche_dans_cette_zone": "Nouvelle recherche dans cette zone",
     "filtres_bouton": "Filtres",
 }
@@ -49,3 +50,5 @@ ASSISTANT = {
     "nouvelle_recherche": "Nouvelle recherche",
     "faites_decouvrir_ce_site": "Faites découvrir ce site !",
 }
+
+MAP_CONTAINER_ID = "map_container_id"

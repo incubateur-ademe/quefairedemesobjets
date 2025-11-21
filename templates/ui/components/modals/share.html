@@ -1,0 +1,77 @@
+{% extends "ui/components/modals/base.html" %}
+{% load share_tags %}
+
+{% block modal_footer %}{% endblock %}
+
+{% block button_text %}
+{{ button_text|default:"Partager à vos proches" }}
+{% endblock button_text %}
+
+{% block modal_title %}
+Partager ce site
+{% endblock modal_title %}
+
+{% block modal_content %}
+{% configure_produit_sharer %}
+<div class="fr-share" role="toolbar">
+    <ul class="fr-btns-group">
+        <li>
+            <a class="fr-btn--facebook fr-btn"
+            target="_blank"
+            rel="noreferrer"
+            title="{{ sharer.facebook.title }}"
+            href="{{ sharer.facebook.url }}"
+            >
+                Partager sur Facebook
+            </a>
+        </li>
+        <li>
+            {# Les paramètres de la reqûete doivent être URI-encodés (ex: encodeURIComponent() en js) #}
+            <a  class="fr-btn--twitter-x fr-btn"
+            target="_blank"
+            rel="noreferrer"
+            title="{{ sharer.twitter.title }}"
+            href="{{ sharer.twitter.url }}"
+            >
+                Partager sur X (anciennement Twitter)
+            </a>
+        </li>
+        <li>
+            <a  class="fr-btn--linkedin fr-btn"
+            target="_blank"
+            rel="noreferrer"
+            onclick="window.open(this.href,'Partager sur LinkedIn','toolbar=no,location=yes,status=no,menubar=no,scrollbars=yes,resizable=yes,width=550,height=550'); event.preventDefault();"
+            title="{{ sharer.linkedin.title }}"
+            href="{{ sharer.linkedin.url }}"
+            >
+                Partager sur LinkedIn
+            </a>
+        </li>
+        <li>
+            <a  class="fr-btn--mail fr-btn"
+            target="_blank"
+            rel="noreferrer"
+            title="{{ sharer.email.title }}"
+            href="{{ sharer.email.url }}"
+            >
+                Partager par email
+            </a>
+        </li>
+        <li>
+            <button class="fr-btn--copy fr-btn"
+                    onclick="navigator.clipboard.writeText('{{ request.build_absolute_uri }}').then(function() {alert('Adresse copiée dans le presse papier.')});"
+                    type="button"
+            >
+                Copier dans le presse-papier
+            </button>
+        </li>
+    </ul>
+</div>
+{% endblock modal_content %}
+
+{# TODO: documenter #}
+{% block modal_wrapper_for_id %}
+    {% with id="partager-le-site" %}
+    {{ block.super }}
+    {% endwith %}
+{% endblock modal_wrapper_for_id %}

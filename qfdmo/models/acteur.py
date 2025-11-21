@@ -16,6 +16,7 @@ from django.contrib.gis.db import models
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point, Polygon
 from django.contrib.gis.geos.geometry import GEOSGeometry
+from django.contrib.gis.measure import D
 from django.core.cache import cache
 from django.core.files.images import get_image_dimensions
 from django.core.validators import RegexValidator
@@ -234,6 +235,13 @@ class LabelQualite(CodeAsNaturalKeyModel):
     class Meta:
         verbose_name = "Label qualité"
         verbose_name_plural = "Labels qualité"
+        ordering = ["order"]
+
+    order = models.PositiveIntegerField(
+        default=0,
+        blank=False,
+        null=False,
+    )
 
     id = models.AutoField(primary_key=True)
     libelle = models.CharField(max_length=255, unique=True)
@@ -248,7 +256,44 @@ class LabelQualite(CodeAsNaturalKeyModel):
         ),
         validators=[CodeValidator()],
     )
-    afficher = models.BooleanField(default=True)
+    afficher = models.BooleanField(
+        default=True,
+        help_text="Affiche le label côté frontend, notamment dans les fiches acteur",
+    )
+    filtre = models.BooleanField(
+        default=False,
+        help_text="Affiche le label dans la modale de filtres affichée sur"
+        " la carte ou le mode liste",
+    )
+    filtre_label = models.CharField(
+        blank=True,
+        help_text="Configure le label affiché dans le champ de formulaire"
+        " dans le panel de filtres sur la carte ou le mode liste",
+    )
+    filtre_texte_d_aide = models.CharField(
+        blank=True,
+        help_text="Configure le texte d'aide affiché dans le champ de formulaire"
+        " dans le panel de filtres sur la carte ou le mode liste",
+    )
+    logo_filtre = models.FileField(
+        upload_to="labels",
+        blank=True,
+        null=True,
+        verbose_name="Logo pour les filtres (SVG recommandé)",
+        help_text="Logo affiché dans le panneau de filtres de la carte. "
+        "Format SVG recommandé pour une qualité optimale. "
+        "Utilisé dans : modale de filtres côté utilisateur.",
+    )
+    logo_file = models.ImageField(
+        upload_to="logos",
+        blank=True,
+        null=True,
+        validators=[validate_logo],
+        verbose_name="Logo pour carte et open data (PNG 32x32px)",
+        help_text="Version miniature du logo : PNG 32x32 pixels maximum, 50 Ko max. "
+        "Utilisé dans : fiches acteurs sur la carte, export open data API. "
+        "Contraintes strictes : exactement 32x32 pixels.",
+    )
     bonus = models.BooleanField(
         default=False, help_text="Ouvre les droits à un bonus financier"
     )
@@ -257,9 +302,6 @@ class LabelQualite(CodeAsNaturalKeyModel):
         help_text="Ce label est affiché comme un type d'enseigne, ex : ESS",
     )
     url = models.CharField(max_length=2048, blank=True, null=True)
-    logo_file = models.ImageField(
-        upload_to="logos", blank=True, null=True, validators=[validate_logo]
-    )
 
     def __str__(self):
         return self.libelle
@@ -325,17 +367,17 @@ class DisplayedActeurQuerySet(models.QuerySet):
 
     def from_center(self, longitude, latitude, distance_max):
         reference_point = Point(float(longitude), float(latitude), srid=4326)
-        distance_in_degrees = distance_max / 111320
+        self._has_distance_field = True
 
         return (
             self.physical()
-            .annotate(distance=Distance("location", reference_point))
             .filter(
                 location__dwithin=(
                     reference_point,
-                    distance_in_degrees,
+                    D(m=distance_max),
                 )
             )
+            .annotate(distance=Distance("location", reference_point))
             .order_by("distance")
         )
 
@@ -392,7 +434,7 @@ class BaseActeur(TimestampedModel):
     )
     url = models.CharField(max_length=2048, blank=True, default="", db_default="")
     email = models.EmailField(blank=True, default="", db_default="")
-    location = models.PointField(blank=True, null=True)
+    location = models.PointField(blank=True, null=True, geography=True)
     telephone = models.CharField(max_length=255, blank=True, default="", db_default="")
     nom_commercial = models.CharField(
         max_length=255, blank=True, default="", db_default=""
@@ -1222,6 +1264,15 @@ class DisplayedActeur(FinalActeur, LatLngPropertiesMixin):
     class Meta:
         verbose_name = "ACTEUR de l'EC - AFFICHÉ"
         verbose_name_plural = "ACTEURS de l'EC - AFFICHÉ"
+        indexes = [
+            # Composite index for common spatial + status queries
+            models.Index(
+                fields=["statut", "acteur_type_id"],
+                name="da_statut_type_idx",
+            ),
+            # Spatial index is already created by GeoDjango for location field
+            # Adding a functional index would require a migration with raw SQL
+        ]
 
     # Table name qfdmo_displayedacteur_sources
     sources = models.ManyToManyField(
@@ -1289,6 +1340,10 @@ class DisplayedActeur(FinalActeur, LatLngPropertiesMixin):
 
     def get_absolute_url(self):
         return reverse("qfdmo:acteur-detail", args=[self.uuid])
+
+    @property
+    def full_url(self):
+        return f"{settings.BASE_URL}{self.get_absolute_url()}"
 
     def acteur_actions(
         self, direction=None, actions_codes=None, sous_categorie_id=None
@@ -1473,6 +1528,9 @@ class DisplayedPropositionService(BasePropositionService):
     class Meta:
         verbose_name = "Proposition de service - AFFICHÉ"
         verbose_name_plural = "Proposition de service - AFFICHÉ"
+        indexes = [
+            models.Index(fields=["acteur", "action"], name="dps_acteur_action_idx"),
+        ]
 
     id = models.CharField(primary_key=True)
     acteur = models.ForeignKey(
