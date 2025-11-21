@@ -1,0 +1,12 @@
+{% extends "ui/layout/base.html" %}
+{% load static %}
+
+{% block page_title %}Info-tri{% endblock %}
+
+{% block body_classes %}qf-bg-white{% endblock %}
+
+{% block content %}
+<div class="qf-flex qf-items-center qf-justify-center qf-min-h-screen">
+    {% include "infotri/components/preview.html" %}
+</div>
+{% endblock content %}

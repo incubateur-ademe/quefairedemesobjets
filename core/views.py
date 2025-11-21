@@ -20,6 +20,8 @@ def backlink(request):
             text_content = EmbedSettings.objects.first().backlink_carte
         if key == "formulaire":
             text_content = EmbedSettings.objects.first().backlink_formulaire
+        if key == "infotri":
+            text_content = EmbedSettings.objects.first().backlink_infotri
     except (AttributeError, EmbedSettings.DoesNotExist):
         pass
 
