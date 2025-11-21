@@ -40,7 +40,7 @@ def cluster_acteurs_read_for_clustering(
     Hence the abstracted name "read_for_clustering"
     """
 
-    from qfdmo.models import DisplayedActeur
+    from qfdmo.models import VueActeur
 
     # --------------------------------
     # 1) Sélection des orphelins
@@ -50,7 +50,7 @@ def cluster_acteurs_read_for_clustering(
     # fournis au niveau du DAG
     logging.info(log.banner_string("Sélection des orphelins"))
     df_orphans, query = cluster_acteurs_read_orphans(
-        model_class=DisplayedActeur,
+        model_class=VueActeur,
         include_source_ids=include_source_ids,
         include_acteur_type_ids=include_acteur_type_ids,
         include_only_if_regex_matches_nom=include_only_if_regex_matches_nom,
