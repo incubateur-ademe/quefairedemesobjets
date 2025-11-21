@@ -1,0 +1,146 @@
+{% extends "ui/layout/base.html" %}
+{% load static %}
+
+{% block page_title %}Concevez facilement votre Info-tri [Beta] - Longue vie aux objets{% endblock %}
+
+{% block page_description %}Générateur d'Info-tri pour produits textiles, vêtements et chaussures{% endblock %}
+
+{% block body_classes %}qf-bg-white qf-overflow-auto{% endblock %}
+
+{% block content %}
+<div class="qf-grid qf-h-screen qf-w-screen qf-grid-cols-1 md:qf-grid-cols-2 qf-gap-2w md:qf-divide-x">
+    <main
+        class="qf-flex qf-flex-col qf-items-start qf-gap-2w qf-p-2w qf-overflow-auto"
+        data-controller="infotri"
+        data-infotri-base-url-value="{{ base_url }}"
+    >
+        <h1 class="qf-mb-1w qf-text-2xl qf-leading-none qf-font-extrabold qf-tracking-tight qf-text-gray-900 md:qf-text-3xl lg:qf-text-4xl">
+            Concevez facilement votre Info-tri [Beta]
+        </h1>
+
+        <p class="qf-max-w-prose">
+            Ce générateur ne permet, pour le moment, que la création d'Info-tri destiné à des produits
+            tels que des textiles d'habillement, du linge de maison et/ou des chaussures.
+        </p>
+
+        <form class="qf-mr-auto qf-flex qf-h-full qf-max-w-full qf-flex-col qf-gap-2w qf-w-full">
+            {% csrf_token %}
+
+            {# Catégorie Section #}
+            <div>
+                <h2 class="qf-text-xl qf-font-bold qf-mb-3v">Choisissez une catégorie de produit</h2>
+
+                {% for value, label in form.fields.categorie.choices %}
+                    {% if value %}
+                    <div class="qf-mb-1w qf-flex qf-items-center">
+                        <input
+                            type="radio"
+                            name="categorie"
+                            value="{{ value }}"
+                            id="categorie-{{ value }}"
+                            data-infotri-target="categorieInput"
+                            data-action="change->infotri#updateCategorie"
+                            class="qf-h-2w qf-w-2w qf-border-gray-300 qf-bg-gray-100 qf-text-blue-600 focus:qf-ring-2 focus:qf-ring-blue-500"
+                            {% if initial_categorie == value %}checked{% endif %}
+                        />
+                        <label for="categorie-{{ value }}" class="qf-ms-1w qf-text-sm qf-text-gray-900 qf-capitalize">{{ label }}</label>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            {# Consigne Section #}
+            <div data-infotri-target="consigneSection" class="{% if not initial_categorie %}qf-hidden{% endif %}">
+                <h2 class="qf-text-xl qf-font-bold qf-mb-3v">Choisissez la consigne</h2>
+
+                {% for value, label in form.fields.consigne.choices %}
+                    {% if value %}
+                    <div class="qf-mb-2 qf-flex qf-items-center">
+                        <input
+                            type="radio"
+                            name="consigne"
+                            value="{{ value }}"
+                            id="consigne-{{ value }}"
+                            data-infotri-target="consigneInput"
+                            data-action="change->infotri#updateConsigne"
+                            class="qf-h-4 qf-w-4 qf-border-gray-300 qf-bg-gray-100 qf-text-blue-600 focus:qf-ring-2 focus:qf-ring-blue-500"
+                            {% if initial_consigne == value %}checked{% endif %}
+                        />
+                        <label for="consigne-{{ value }}" class="qf-ms-1w qf-text-sm qf-text-gray-900">{{ label }}</label>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            {# Phrase Toggle Section #}
+            <div data-infotri-target="phraseSection" class="{% if not initial_consigne %}qf-hidden{% endif %}">
+                <div class="fr-toggle">
+                    <input
+                        type="checkbox"
+                        name="avec_phrase"
+                        id="toggle-phrase"
+                        class="fr-toggle__input"
+                        data-infotri-target="avecPhraseInput"
+                        data-action="change->infotri#updateAvecPhrase"
+                        {% if initial_avec_phrase %}checked{% endif %}
+                    />
+                    <label class="fr-toggle__label" for="toggle-phrase" data-fr-checked-label="Activé" data-fr-unchecked-label="Désactivé">
+                        Afficher la phrase
+                    </label>
+                </div>
+            </div>
+
+            {# Generate Button #}
+            <div data-infotri-target="generateButton" class="{% if not initial_consigne %}qf-hidden{% endif %}">
+                <button
+                    type="button"
+                    class="fr-btn"
+                    data-action="click->infotri#generate"
+                >
+                    Générer le code
+                </button>
+            </div>
+
+            {# Code Section #}
+            <div data-infotri-target="codeSection" class="qf-hidden">
+                <h2 class="qf-text-xl qf-font-bold qf-mb-3v">Code à implémenter</h2>
+
+                <div class="qf-mb-2w qf-space-y-1w">
+                    <p class="qf-text-sm">
+                        Cette balise HTML vous permet d'afficher l'Info-tri générée sur une page de votre site
+                        internet. Celle-ci sera automatiquement mise à jour avec les dernières nouveautés.
+                    </p>
+                    <p class="qf-text-sm">
+                        Pour l'utiliser, il vous suffit de copier/coller le code ci-dessous dans votre site
+                        Internet. En cas de difficultés ou de besoin d'assistance, vous pouvez contacter notre
+                        équipe.
+                    </p>
+                </div>
+
+                <div class="fr-callout">
+                    <pre
+                        class="qf-whitespace-normal qf-break-all qf-mb-2w qf-p-2w qf-bg-gray-100 qf-rounded qf-text-xs qf-font-mono"
+                        data-infotri-target="iframe"
+                    ></pre>
+                    <button
+                        type="button"
+                        class="fr-btn"
+                        data-infotri-target="copyButton"
+                        data-action="click->infotri#copyToClipboard"
+                    >
+                        Copier
+                    </button>
+                </div>
+            </div>
+        </form>
+    </main>
+
+    <aside class="qf-flex qf-flex-col qf-items-center qf-justify-center qf-p-2w qf-bg-gray-50 qf-overflow-auto qf-border-l qf-border-gray-200">
+        <turbo-frame id="infotri-preview" src="/infotri/preview?categorie={{ initial_categorie }}&consigne={{ initial_consigne }}&avec_phrase={{ initial_avec_phrase|yesno:'true,false' }}">
+            <div class="qf-flex qf-items-center qf-justify-center qf-min-h-[400px]">
+                <p class="qf-text-gray-500">Chargement de l'aperçu...</p>
+            </div>
+        </turbo-frame>
+    </aside>
+</div>
+{% endblock content %}

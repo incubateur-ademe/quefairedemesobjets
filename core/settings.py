@@ -142,6 +142,7 @@ INSTALLED_APPS = [
     "stats",
     "qfdmd",
     "qfdmo",
+    "infotri",
     "data",
     "corsheaders",
     "django_lookbook",

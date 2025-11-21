@@ -1,0 +1,65 @@
+<turbo-frame id="infotri-preview">
+    {% if not categorie %}
+        <div class="qf-flex qf-items-center qf-justify-center qf-min-h-[400px]">
+            <p class="qf-text-gray-500 qf-text-center">
+                Sélectionnez une catégorie de produit pour voir l'aperçu de votre Info-tri
+            </p>
+        </div>
+    {% else %}
+        {# Info-tri Preview Display #}
+        <div class="qf-flex qf-flex-col qf-items-center">
+            {% if avec_phrase %}
+                <div class="qf-flex qf-justify-center">
+                    {% if consigne == "1" %}
+                        {% include "infotri/components/svg/phrase-1.html" %}
+                    {% elif consigne == "2" %}
+                        {% include "infotri/components/svg/phrase-2.html" %}
+                    {% elif consigne == "3" %}
+                        {% include "infotri/components/svg/phrase-3.html" %}
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            <div class="qf-pt-2w qf-flex qf-gap-1w">
+                {# Triman symbol - Always shown #}
+                <div>
+                    {% include "infotri/components/svg/triman.html" %}
+                </div>
+
+                {# Category box with French flag and icons #}
+                {% if categorie %}
+                    <div class="qf-relative qf-flex qf-items-center qf-gap-1v qf-rounded-lg qf-px-1w qf-pt-1v qf-ring-2 qf-ring-black">
+                        {# French flag cartouche #}
+                        {% include "infotri/components/svg/cartouche-fr.html" %}
+
+                        {# Category symbol #}
+                        {% if categorie == "chaussures" %}
+                            {% include "infotri/components/svg/chaussures.html" %}
+                        {% elif categorie == "vetement" %}
+                            {% include "infotri/components/svg/vetement.html" %}
+                        {% elif categorie == "tissu" %}
+                            {% include "infotri/components/svg/tissu.html" %}
+                        {% elif categorie == "tous" %}
+                            {% include "infotri/components/svg/tous.html" %}
+                        {% endif %}
+
+                        {# Consigne symbol #}
+                        {% if consigne == "1" %}
+                            {% include "infotri/components/svg/consigne-1.html" %}
+                        {% elif consigne == "2" %}
+                            {% include "infotri/components/svg/consigne-2.html" %}
+                        {% elif consigne == "3" %}
+                            {% include "infotri/components/svg/consigne-3.html" %}
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if not request.GET.iframe %}
+            <div class="qf-flex qf-items-center qf-justify-center qf-pt-1w">
+                {% include "infotri/components/svg/website.html" %}
+            </div>
+            {% endif %}
+        </div>
+    {% endif %}
+</turbo-frame>

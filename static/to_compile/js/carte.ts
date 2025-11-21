@@ -3,6 +3,7 @@ import * as Turbo from "@hotwired/turbo"
 
 import CopyController from "../controllers/shared/copy_controller"
 import GenericAutocompleteController from "../controllers/shared/generic_autocomplete_controller"
+import InfotriController from "../controllers/shared/infotri_controller"
 import ScrollController from "../controllers/shared/scroll_controller"
 
 import AddressAutocompleteController from "../controllers/carte/address_autocomplete_controller"
@@ -25,6 +26,7 @@ stimulus.register("address-autocomplete", AddressAutocompleteController)
 stimulus.register("search-solution-form", SearchSolutionFormController)
 stimulus.register("autocomplete", GenericAutocompleteController)
 stimulus.register("copy", CopyController)
+stimulus.register("infotri", InfotriController)
 stimulus.register("scroll", ScrollController)
 stimulus.register("acteur-details", ActeurDetailsController)
 

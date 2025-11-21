@@ -1,4 +1,4 @@
-export type BacklinkKey = "assistant" | "carte" | "formulaire"
+export type BacklinkKey = "assistant" | "carte" | "formulaire" | "infotri"
 export async function generateBackLink(
   iframe: HTMLIFrameElement,
   key: BacklinkKey,
