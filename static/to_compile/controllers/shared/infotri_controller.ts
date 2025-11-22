@@ -1,8 +1,30 @@
 import { Controller } from "@hotwired/stimulus"
 
 /**
+ * Configuration state for the Info-tri generator
+ */
+interface InfotriConfig {
+  categorie: string
+  consigne: string
+  avec_phrase: boolean
+}
+
+/**
  * Stimulus controller for Info-tri generator
- * Manages the state of the Info-tri configuration form
+ *
+ * This controller manages the interactive Info-tri configuration form, which allows
+ * users to generate custom Info-tri labels for textile recycling.
+ *
+ * Features:
+ * - Progressive form disclosure (each section reveals the next)
+ * - Live preview updates via Turbo Frames
+ * - Embed code generation for third-party sites
+ * - Clipboard copy functionality
+ *
+ * @example
+ * <div data-controller="infotri" data-infotri-base-url-value="https://example.com">
+ *   <!-- Form elements -->
+ * </div>
  */
 export default class extends Controller<HTMLElement> {
   static targets = [
@@ -16,6 +38,7 @@ export default class extends Controller<HTMLElement> {
     "codeSection",
     "iframe",
     "copyButton",
+    "previewContainer",
   ]
 
   static values = {
@@ -32,41 +55,77 @@ export default class extends Controller<HTMLElement> {
   declare readonly codeSectionTarget: HTMLElement
   declare readonly iframeTarget: HTMLElement
   declare readonly copyButtonTarget: HTMLButtonElement
+  declare readonly previewContainerTarget: HTMLElement
+  declare readonly hasPreviewContainerTarget: boolean
 
   declare baseUrlValue: string
 
-  private categorie: string = ""
-  private consigne: string = ""
-  private avecPhrase: boolean = false
+  /** Current configuration state */
+  private config: InfotriConfig = {
+    categorie: "",
+    consigne: "",
+    avec_phrase: false,
+  }
+
+  /** Tracks whether the embed code has been copied */
   private copied: boolean = false
 
+  /**
+   * Lifecycle: Called when the controller is connected to the DOM
+   * Initializes the UI state based on form values
+   */
   connect() {
     this.updateUI()
   }
 
+  /**
+   * Event handler: Updates the selected category
+   * Triggers UI update to show/hide subsequent sections
+   *
+   * @param event - Change event from category radio input
+   */
   updateCategorie(event: Event) {
     const target = event.target as HTMLInputElement
-    this.categorie = target.value
+    this.config.categorie = target.value
     this.updateUI()
   }
 
+  /**
+   * Event handler: Updates the selected consigne (disposal instruction)
+   * Triggers UI update to show/hide phrase section
+   *
+   * @param event - Change event from consigne radio input
+   */
   updateConsigne(event: Event) {
     const target = event.target as HTMLInputElement
-    this.consigne = target.value
+    this.config.consigne = target.value
     this.updateUI()
   }
 
+  /**
+   * Event handler: Toggles the phrase visibility option
+   *
+   * @param event - Change event from phrase checkbox input
+   */
   updateAvecPhrase(event: Event) {
     const target = event.target as HTMLInputElement
-    this.avecPhrase = target.checked
+    this.config.avec_phrase = target.checked
     this.updateUI()
   }
 
+  /**
+   * Action: Generates and displays the embed code
+   * Shows the code section with the configured iframe snippet
+   */
   generate() {
     this.updateIframeCode()
     this.codeSectionTarget.classList.remove("qf-hidden")
   }
 
+  /**
+   * Action: Copies the embed code to clipboard
+   * Provides visual feedback by temporarily changing button text
+   */
   async copyToClipboard() {
     try {
       const iframeCode = this.getIframeCode()
@@ -74,66 +133,129 @@ export default class extends Controller<HTMLElement> {
       this.copied = true
       this.copyButtonTarget.textContent = "Copié"
 
-      // Reset after 2 seconds
+      // Reset button text after 2 seconds
       setTimeout(() => {
         this.copied = false
         this.copyButtonTarget.textContent = "Copier"
       }, 2000)
     } catch (err) {
-      console.error("Failed to copy:", err)
+      console.error("Failed to copy embed code to clipboard:", err)
+      // Could display an error message to the user here
     }
   }
 
+  /**
+   * Updates UI visibility based on current configuration state
+   * Implements progressive disclosure pattern:
+   * - Consigne section appears when category is selected
+   * - Phrase section appears when consigne is selected
+   * - Generate button appears when consigne is selected
+   * - Preview updates with each change
+   */
   private updateUI() {
-    // Show/hide consigne section
-    if (this.categorie && this.hasConsigneSectionTarget) {
+    // Show/hide consigne section based on category selection
+    if (this.config.categorie && this.hasConsigneSectionTarget) {
       this.consigneSectionTarget.classList.remove("qf-hidden")
     } else if (this.hasConsigneSectionTarget) {
       this.consigneSectionTarget.classList.add("qf-hidden")
     }
 
-    // Show/hide phrase section
-    if (this.consigne && this.hasPhraseSectionTarget) {
+    // Show/hide phrase section based on consigne selection
+    if (this.config.consigne && this.hasPhraseSectionTarget) {
       this.phraseSectionTarget.classList.remove("qf-hidden")
     } else if (this.hasPhraseSectionTarget) {
       this.phraseSectionTarget.classList.add("qf-hidden")
     }
 
-    // Show/hide generate button
-    if (this.consigne && this.hasGenerateButtonTarget) {
+    // Show/hide generate button when configuration is complete
+    if (this.config.consigne && this.hasGenerateButtonTarget) {
       this.generateButtonTarget.classList.remove("qf-hidden")
     } else if (this.hasGenerateButtonTarget) {
       this.generateButtonTarget.classList.add("qf-hidden")
     }
 
-    // Update preview
+    // Update the live preview
     this.updatePreview()
   }
 
+  /**
+   * Updates the Turbo Frame preview with current configuration
+   * Uses Turbo's built-in frame navigation to load the preview
+   * Shows loading state during preview update
+   */
   private updatePreview() {
-    // Update the Turbo Frame with new preview
-    const params = new URLSearchParams({
-      categorie: this.categorie,
-      consigne: this.consigne,
-      avec_phrase: this.avecPhrase.toString(),
-    })
+    const params = this.buildQueryParams()
+    const previewFrame = document.getElementById("infotri-preview") as HTMLElement & {
+      src?: string
+    }
 
-    const previewFrame = document.getElementById("infotri-preview") as any
     if (previewFrame) {
+      // Show loading state
+      this.showPreviewLoading()
+
+      // Update preview URL
       previewFrame.src = `/infotri/preview?${params.toString()}`
+
+      // Hide loading state after a short delay
+      // Turbo Frame will handle the actual content loading
+      setTimeout(() => {
+        this.hidePreviewLoading()
+      }, 300)
     }
   }
 
-  private getIframeCode(): string {
-    const params = new URLSearchParams({
-      consigne: this.consigne,
-      categorie: this.categorie,
-      avec_phrase: this.avecPhrase.toString(),
-    })
+  /**
+   * Shows loading indicator on preview container
+   */
+  private showPreviewLoading() {
+    if (this.hasPreviewContainerTarget) {
+      this.previewContainerTarget.classList.add(
+        "qf-opacity-50",
+        "qf-pointer-events-none",
+      )
+      this.previewContainerTarget.setAttribute("aria-busy", "true")
+    }
+  }
 
+  /**
+   * Hides loading indicator on preview container
+   */
+  private hidePreviewLoading() {
+    if (this.hasPreviewContainerTarget) {
+      this.previewContainerTarget.classList.remove(
+        "qf-opacity-50",
+        "qf-pointer-events-none",
+      )
+      this.previewContainerTarget.setAttribute("aria-busy", "false")
+    }
+  }
+
+  /**
+   * Builds query parameters from current configuration
+   *
+   * @returns URLSearchParams object with current config
+   */
+  private buildQueryParams(): URLSearchParams {
+    return new URLSearchParams({
+      categorie: this.config.categorie,
+      consigne: this.config.consigne,
+      avec_phrase: this.config.avec_phrase.toString(),
+    })
+  }
+
+  /**
+   * Generates the embed code snippet for third-party sites
+   *
+   * @returns HTML script tag with data attributes
+   */
+  private getIframeCode(): string {
+    const params = this.buildQueryParams()
     return `<script src="${this.baseUrlValue}/infotri/static/infotri.js" data-config="${params.toString()}"></script>`
   }
 
+  /**
+   * Updates the displayed embed code in the UI
+   */
   private updateIframeCode() {
     if (this.hasIframeTarget) {
       this.iframeTarget.textContent = this.getIframeCode()
