@@ -123,6 +123,7 @@ INSTALLED_APPS = [
     "core",
     "qfdmd",
     "qfdmo",
+    "infotri",
     "data",
     "corsheaders",
     "django_lookbook",
