@@ -5,14 +5,14 @@
 
 {% block page_description %}Générateur d'Info-tri pour produits textiles, vêtements et chaussures{% endblock %}
 
-{% block body_classes %}qf-bg-white qf-overflow-auto{% endblock %}
+{% block body_classes %}qf-overflow-auto qf-bg-gradient-infotri{% endblock %}
 
 {% block content %}
-<div class="qf-grid qf-h-screen qf-w-screen qf-grid-cols-1 md:qf-grid-cols-2 qf-gap-2w md:qf-divide-x">
+<div class="qf-grid qf-h-screen qf-w-screen qf-grid-cols-1 md:qf-grid-cols-3"
+     data-controller="infotri"
+     data-infotri-base-url-value="{{ base_url }}">
     <main
-        class="qf-flex qf-flex-col qf-items-start qf-gap-2w qf-p-2w qf-overflow-auto"
-        data-controller="infotri"
-        data-infotri-base-url-value="{{ base_url }}"
+        class="qf-flex qf-flex-col qf-items-start qf-gap-2w qf-p-2w qf-overflow-auto md:qf-col-span-2"
     >
         <h1 class="qf-mb-1w qf-text-2xl qf-leading-none qf-font-extrabold qf-tracking-tight qf-text-gray-900 md:qf-text-3xl lg:qf-text-4xl">
             Concevez facilement votre Info-tri [Beta]
@@ -55,7 +55,7 @@
 
                 {% for value, label in form.fields.consigne.choices %}
                     {% if value %}
-                    <div class="qf-mb-2 qf-flex qf-items-center">
+                    <div class="qf-mb-1w qf-flex qf-items-center">
                         <input
                             type="radio"
                             name="consigne"
@@ -63,7 +63,7 @@
                             id="consigne-{{ value }}"
                             data-infotri-target="consigneInput"
                             data-action="change->infotri#updateConsigne"
-                            class="qf-h-4 qf-w-4 qf-border-gray-300 qf-bg-gray-100 qf-text-blue-600 focus:qf-ring-2 focus:qf-ring-blue-500"
+                            class="qf-h-2w qf-w-2w qf-border-gray-300 qf-bg-gray-100 qf-text-blue-600 focus:qf-ring-2 focus:qf-ring-blue-500"
                             {% if initial_consigne == value %}checked{% endif %}
                         />
                         <label for="consigne-{{ value }}" class="qf-ms-1w qf-text-sm qf-text-gray-900">{{ label }}</label>
@@ -82,7 +82,6 @@
                         class="fr-toggle__input"
                         data-infotri-target="avecPhraseInput"
                         data-action="change->infotri#updateAvecPhrase"
-                        {% if initial_avec_phrase %}checked{% endif %}
                     />
                     <label class="fr-toggle__label" for="toggle-phrase" data-fr-checked-label="Activé" data-fr-unchecked-label="Désactivé">
                         Afficher la phrase
@@ -101,16 +100,16 @@
                 </button>
             </div>
 
-            {# Code Section #}
+            {# Code Section - Back in main #}
             <div data-infotri-target="codeSection" class="qf-hidden">
-                <h2 class="qf-text-xl qf-font-bold qf-mb-3v">Code à implémenter</h2>
+                <h2 class="qf-text-xl qf-font-bold qf-mb-1w">Code à implémenter</h2>
 
-                <div class="qf-mb-2w qf-space-y-1w">
-                    <p class="qf-text-sm">
+                <div class="qf-mb-1w">
+                    <p class="qf-text-base">
                         Cette balise HTML vous permet d'afficher l'Info-tri générée sur une page de votre site
                         internet. Celle-ci sera automatiquement mise à jour avec les dernières nouveautés.
                     </p>
-                    <p class="qf-text-sm">
+                    <p class="qf-text-base">
                         Pour l'utiliser, il vous suffit de copier/coller le code ci-dessous dans votre site
                         Internet. En cas de difficultés ou de besoin d'assistance, vous pouvez contacter notre
                         équipe.
@@ -119,7 +118,7 @@
 
                 <div class="fr-callout">
                     <pre
-                        class="qf-whitespace-normal qf-break-all qf-mb-2w qf-p-2w qf-bg-gray-100 qf-rounded qf-text-xs qf-font-mono"
+                        class="qf-whitespace-normal qf-break-all qf-mb-1w qf-p-1w qf-bg-gray-100 qf-rounded qf-text-sm qf-font-mono"
                         data-infotri-target="iframe"
                     ></pre>
                     <button
@@ -135,12 +134,16 @@
         </form>
     </main>
 
-    <aside class="qf-flex qf-flex-col qf-items-center qf-justify-center qf-p-2w qf-bg-gray-50 qf-overflow-auto qf-border-l qf-border-gray-200">
-        <turbo-frame id="infotri-preview" src="/infotri/preview?categorie={{ initial_categorie }}&consigne={{ initial_consigne }}&avec_phrase={{ initial_avec_phrase|yesno:'true,false' }}">
-            <div class="qf-flex qf-items-center qf-justify-center qf-min-h-[400px]">
-                <p class="qf-text-gray-500">Chargement de l'aperçu...</p>
+    <aside class="qf-flex qf-flex-col qf-overflow-auto">
+        <div class="qf-flex qf-items-center qf-justify-center qf-h-full qf-p-4w">
+            <div class="qf-bg-white qf-shadow-lg qf-p-3w">
+                <turbo-frame id="infotri-preview" src="/infotri/preview?categorie={{ initial_categorie }}&consigne={{ initial_consigne }}&avec_phrase={{ initial_avec_phrase|yesno:'true,false' }}">
+                    <div class="qf-flex qf-items-center qf-justify-center qf-min-h-[400px]">
+                        <p class="qf-text-gray-500">Chargement de l'aperçu...</p>
+                    </div>
+                </turbo-frame>
             </div>
-        </turbo-frame>
+        </div>
     </aside>
 </div>
 {% endblock content %}

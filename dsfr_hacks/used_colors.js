@@ -19,6 +19,7 @@ const usedColors = [
   "pink-tuile-main-556",
   "blue-cumulus-main-526",
   "green-menthe-main-548",
+  "blue-france-sun-113-625",
 ]
 
 export default usedColors
