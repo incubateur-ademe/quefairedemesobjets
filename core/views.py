@@ -13,17 +13,19 @@ from qfdmd.models import EmbedSettings
 def backlink(request):
     key = request.GET.get("key")
     text_content = ""
-    try:
-        if key == "assistant":
-            text_content = EmbedSettings.objects.first().backlink_assistant
-        if key == "carte":
-            text_content = EmbedSettings.objects.first().backlink_carte
-        if key == "formulaire":
-            text_content = EmbedSettings.objects.first().backlink_formulaire
-        if key == "infotri":
-            text_content = EmbedSettings.objects.first().backlink_infotri
-    except (AttributeError, EmbedSettings.DoesNotExist):
-        pass
+
+    if key == "infotri":
+        text_content = "quefairedemesdechets.fr"
+    else:
+        try:
+            if key == "assistant":
+                text_content = EmbedSettings.objects.first().backlink_assistant
+            if key == "carte":
+                text_content = EmbedSettings.objects.first().backlink_carte
+            if key == "formulaire":
+                text_content = EmbedSettings.objects.first().backlink_formulaire
+        except (AttributeError, EmbedSettings.DoesNotExist):
+            pass
 
     response = HttpResponse(richtext(text_content), content_type="text/plain")
     response["Access-Control-Allow-Origin"] = "*"

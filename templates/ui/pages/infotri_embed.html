@@ -6,7 +6,14 @@
 {% block body_classes %}qf-bg-white{% endblock %}
 
 {% block content %}
-<div class="qf-flex qf-items-center qf-justify-center qf-min-h-screen">
+<div class="qf-h-full qf-flex qf-items-center qf-flex-col qf-justify-end qf-pb-1w">
     {% include "infotri/components/preview.html" %}
 </div>
 {% endblock content %}
+
+{% block js %}
+    {# Override base.html js block to load iframe-resizer v5 instead of v4 #}
+    <script src="{% static 'compiled/infotri-child.js' %}" defer></script>
+
+    {{ block.super }}
+{% endblock js %}
