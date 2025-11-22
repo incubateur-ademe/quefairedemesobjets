@@ -1,28 +1,11 @@
 from django import forms
 from dsfr.forms import DsfrBaseForm
 
+from .constants import CATEGORIE_CHOICES, CONSIGNE_CHOICES
+
 
 class InfotriForm(DsfrBaseForm):
     """Form for Info-tri generator configuration."""
-
-    CATEGORIE_CHOICES = [
-        ("", "Sélectionnez une catégorie"),
-        ("tous", "Tous"),
-        ("chaussures", "Chaussures"),
-        ("vetement", "Vêtement"),
-        ("tissu", "Tissu"),
-    ]
-
-    CONSIGNE_CHOICES = [
-        ("", "Sélectionnez une consigne"),
-        ("1", "À déposer dans un conteneur"),
-        ("2", "À déposer dans un conteneur ou dans une association"),
-        (
-            "3",
-            "À déposer dans un conteneur, dans une association ou dans"
-            " un magasin volontaire",
-        ),
-    ]
 
     categorie = forms.ChoiceField(
         choices=CATEGORIE_CHOICES,
