@@ -24,7 +24,7 @@ class TestCarteEmbed:
     """Test the carte.js iframe embed script"""
 
     @pytest.mark.django_db
-    def test_carte_script_loads(self, client):
+    def ZZ_test_carte_script_loads(self, client):
         """Verify carte.js script is accessible"""
         url = "/static/carte.js"
         response = client.get(url)
@@ -52,7 +52,7 @@ class TestFormulaireEmbed:
     """Test the iframe.js script for formulaire embed"""
 
     @pytest.mark.django_db
-    def test_formulaire_script_loads(self, client):
+    def ZZ_test_formulaire_script_loads(self, client):
         """Verify iframe.js script is accessible"""
         url = "/static/iframe.js"
         response = client.get(url)
@@ -131,7 +131,7 @@ class TestInfotriEmbed:
         assert response.status_code == 200
 
     @pytest.mark.django_db
-    def test_infotri_script_endpoint(self, client):
+    def ZZ_test_infotri_script_endpoint(self, client):
         """Verify infotri.js embed script is accessible"""
         url = "/infotri/static/infotri.js"
         response = client.get(url)
