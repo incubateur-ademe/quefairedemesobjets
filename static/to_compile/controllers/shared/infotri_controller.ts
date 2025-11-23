@@ -56,6 +56,11 @@ export default class extends Controller<HTMLElement> {
   declare readonly iframeTarget: HTMLElement
   declare readonly copyButtonTarget: HTMLButtonElement
   declare readonly previewContainerTarget: HTMLElement
+
+  declare readonly hasConsigneSectionTarget: boolean
+  declare readonly hasPhraseSectionTarget: boolean
+  declare readonly hasGenerateButtonTarget: boolean
+  declare readonly hasIframeTarget: boolean
   declare readonly hasPreviewContainerTarget: boolean
 
   declare baseUrlValue: string

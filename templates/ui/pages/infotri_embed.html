@@ -3,10 +3,10 @@
 
 {% block page_title %}Info-tri{% endblock %}
 
-{% block body_classes %}qf-bg-white{% endblock %}
+{% block body_classes %}qf-bg-white !qf-h-auto{% endblock %}
 
 {% block content %}
-<div class="qf-h-full qf-flex qf-items-center qf-flex-col qf-justify-end qf-pb-1w">
+<div class="qf-flex qf-items-center qf-flex-col qf-justify-end qf-pb-1w qf-min-h-fit">
     {% include "infotri/components/preview.html" %}
 </div>
 {% endblock content %}
