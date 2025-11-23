@@ -22,6 +22,7 @@ from qfdmo.models import SousCategorieObjet
 from qfdmo.models.acteur import LabelQualite
 from qfdmo.models.action import (
     Action,
+    Direction,
     GroupeAction,
     get_action_instances,
     get_directions,
@@ -411,12 +412,12 @@ class DigitalActeurForm(GetFormMixin, DsfrBaseForm):
 class ActionDirectionForm(GetFormMixin, DsfrBaseForm):
     class DirectionChoices(TextChoices, SegmentedControlChoices):
         J_AI = {
-            "value": "jai",
-            "label": "J'ai un objet",
+            "value": Direction.J_AI.value,
+            "label": Direction.J_AI.label,
         }
         JE_CHERCHE = {
-            "value": "jecherche",
-            "label": "Je recherche un objet",
+            "value": Direction.JE_CHERCHE.value,
+            "label": Direction.JE_CHERCHE.label,
         }
 
     direction = forms.ChoiceField(

@@ -710,7 +710,9 @@ class BaseActeur(TimestampedModel):
 
     def proposition_services_by_direction(self, direction: str | None = None):
         if direction:
-            return self.proposition_services.filter(action__directions__code=direction)
+            return self.proposition_services.filter(
+                action__direction_codes__contains=[direction]
+            )
         return self.proposition_services.all()
 
     def has_label_reparacteur(self):
@@ -1357,7 +1359,7 @@ class DisplayedActeur(FinalActeur, LatLngPropertiesMixin):
         if sous_categorie_id:
             pss = pss.filter(sous_categories__id__in=[sous_categorie_id])
         if direction:
-            pss = pss.filter(action__directions__code__in=[direction])
+            pss = pss.filter(action__direction_codes__contains=[direction])
         if actions_codes:
             pss = pss.filter(action__code__in=actions_codes.split("|"))
 

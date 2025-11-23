@@ -89,7 +89,7 @@ class FormulaireSearchActeursView(SearchActeursView):
                 cached_action_instances = [
                     action
                     for action in cached_action_instances
-                    if direction in [d.code for d in action.directions.all()]
+                    if action.has_direction(direction)
                 ]
         if action_displayed := self.get_data_from_request_or_bounded_form(
             "action_displayed", ""
@@ -183,9 +183,7 @@ class FormulaireSearchActeursView(SearchActeursView):
             else cached_action_instances
         )
         if direction := self._get_direction():
-            actions = [
-                a for a in actions if direction in [d.code for d in a.directions.all()]
-            ]
+            actions = [a for a in actions if a.has_direction(direction)]
         return actions
 
     def _get_grouped_action_choices(
@@ -288,10 +286,8 @@ class FormulaireSearchActeursView(SearchActeursView):
         action_displayed = self._set_action_displayed()
         actions = self._set_action_list(action_displayed)
         if direction:
-            actions = [
-                a for a in actions if direction in [d.code for d in a.directions.all()]
-            ]
-        return [model_to_dict(a, exclude=["directions"]) for a in actions]
+            actions = [a for a in actions if a.has_direction(direction)]
+        return [model_to_dict(a, exclude=["direction_codes"]) for a in actions]
 
     def _get_max_displayed_acteurs(self):
         return settings.DEFAULT_MAX_SOLUTION_DISPLAYED
