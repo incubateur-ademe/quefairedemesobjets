@@ -6,23 +6,20 @@ import {
 const setupIframe = () => {
   // Add iFrame just after the script tag
   const scriptTag = document.currentScript as HTMLScriptElement
-
-  // Use "dechet" as base route, but if data-objet is present it will be appended
   const [iframeAttributes, iframeExtraAttributes] = getIframeAttributesAndExtra(
     scriptTag,
-    "dechet",
-    { useAutoHeight: true, addScriptModeParam: true },
+    "infotri",
+    { useAutoHeight: true },
   )
-
   buildAndInsertIframeFrom(
     iframeAttributes,
     iframeExtraAttributes,
     scriptTag,
-    "assistant",
+    "infotri-configurator",
     {
       useIframeResizer: true,
       resizerOptions: {
-        id: "quefairedemesdechets-assistant",
+        id: "infotri-configurator",
       },
     },
   )

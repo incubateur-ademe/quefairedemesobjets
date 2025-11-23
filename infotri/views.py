@@ -12,6 +12,10 @@ def get_infotri_iframe_script(request):
     return static_file_content_from("embed/infotri.js")
 
 
+def get_infotri_configurator_iframe_script(request):
+    return static_file_content_from("embed/infotri-configurator.js")
+
+
 class InfotriConfiguratorView(FormView):
     """
     Main view for the Info-tri configurator.

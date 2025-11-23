@@ -5,14 +5,16 @@
 
 {% block page_description %}Générateur d'Info-tri pour produits textiles, vêtements et chaussures{% endblock %}
 
-{% block body_classes %}qf-overflow-auto qf-bg-gradient-infotri{% endblock %}
+{% block body_classes %}{% if not iframe %}qf-bg-gradient-infotri{% endif %}{% endblock %}
 
 {% block content %}
-<div class="qf-grid qf-h-screen qf-w-screen qf-grid-cols-1 md:qf-grid-cols-3"
+<div class="qf-grid qf-min-h-screen {% if not iframe %}qf-w-screen{% endif %} qf-grid-cols-1 md:qf-grid-cols-3
+{% if iframe %}qf-rounded-lg !qf-border-2 !qf-border-solid !qf-border-grey-900 {% endif %}
+    "
      data-controller="infotri"
      data-infotri-base-url-value="{{ base_url }}">
     <main
-        class="qf-flex qf-flex-col qf-items-start qf-gap-2w qf-p-2w qf-overflow-auto md:qf-col-span-2"
+        class="qf-flex qf-flex-col qf-items-start qf-gap-2w qf-p-2w md:qf-col-span-2"
     >
         <h1 class="qf-mb-1w qf-text-2xl qf-leading-none qf-font-extrabold qf-tracking-tight qf-text-gray-900 md:qf-text-3xl lg:qf-text-4xl">
             Concevez facilement votre Info-tri [Beta]
@@ -86,7 +88,7 @@
         </form>
     </main>
 
-    <aside class="qf-flex qf-flex-col qf-overflow-auto">
+    <aside class="qf-flex qf-flex-col md:qf-sticky md:qf-top-0">
         <div class="qf-flex qf-items-center qf-justify-center qf-h-full qf-p-4w">
             <div class="qf-bg-white qf-shadow-lg qf-p-3w">
                 <turbo-frame id="infotri-preview" src="/infotri/preview?categorie={{ initial_categorie }}&consigne={{ initial_consigne }}&avec_phrase={{ initial_avec_phrase|yesno:'true,false' }}">
@@ -99,3 +101,10 @@
     </aside>
 </div>
 {% endblock content %}
+
+{% block js %}
+    {{ block.super }}
+    {% if iframe %}
+        <script src="{% static 'infotri-child.js' %}" defer></script>
+    {% endif %}
+{% endblock js %}

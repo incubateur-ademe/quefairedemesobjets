@@ -22,6 +22,14 @@ def backlink(request):
             'onMouseOut="this.style.textDecoration=`none`"'
             'target="_blank">quefairedemesdechets.fr</a>'
         )
+    if key == "infotri-configurator":
+        text_content = (
+            '<a style="color: black; text-decoration: none;" '
+            'href="https://quefairedemesdechets.fr" rel="noopener noreferrer" '
+            'onMouseOver="this.style.textDecoration=`underline`"'
+            'onMouseOut="this.style.textDecoration=`none`"'
+            'target="_blank">configurateur proposé par quefairedemesdechets.fr</a>'
+        )
     else:
         try:
             if key == "assistant":

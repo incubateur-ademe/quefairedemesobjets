@@ -120,6 +120,12 @@ export default class extends Controller<HTMLElement> {
   generate() {
     this.updateIframeCode()
     this.codeSectionTarget.classList.remove("qf-hidden")
+
+    // Scroll the code section into view with smooth behavior
+    this.codeSectionTarget.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    })
   }
 
   /**

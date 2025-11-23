@@ -1,4 +1,3 @@
-import { iframeResizer } from "@iframe-resizer/child"
-
-// Initialize iframe resizer on the child (embedded) page
-iframeResizer()
+// Import @iframe-resizer/child to enable auto-resizing
+// The script will quietly listen for messages from the parent page
+import "@iframe-resizer/child"

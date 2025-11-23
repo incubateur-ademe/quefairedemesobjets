@@ -2,7 +2,6 @@
 
 # Categorie choices
 CATEGORIE_CHOICES = [
-    ("", "Sélectionnez une catégorie"),
     ("tous", "Tous"),
     ("chaussures", "Chaussures"),
     ("vetement", "Vêtement"),
@@ -11,7 +10,6 @@ CATEGORIE_CHOICES = [
 
 # Consigne choices
 CONSIGNE_CHOICES = [
-    ("", "Sélectionnez une consigne"),
     ("1", "À déposer dans un conteneur"),
     ("2", "À déposer dans un conteneur ou dans une association"),
     (
