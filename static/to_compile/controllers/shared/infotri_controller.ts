@@ -244,7 +244,6 @@ export default class extends Controller<HTMLElement> {
   /**
    * Builds query parameters from current configuration
    *
-   * @returns URLSearchParams object with current config
    */
   private buildQueryParams(): URLSearchParams {
     return new URLSearchParams({
@@ -257,7 +256,6 @@ export default class extends Controller<HTMLElement> {
   /**
    * Generates the embed code snippet for third-party sites
    *
-   * @returns HTML script tag with data attributes
    */
   private getIframeCode(): string {
     const params = this.buildQueryParams()

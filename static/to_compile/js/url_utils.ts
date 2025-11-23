@@ -27,7 +27,6 @@ function getBaseUrlFromEnv(): string {
  * Handles protocol-relative URLs and validates against allowed hosts.
  *
  * @param scriptTag - The script element to extract the URL from
- * @returns The validated base URL with protocol
  *
  * Algorithm:
  * 1. Get the src attribute from the script tag
