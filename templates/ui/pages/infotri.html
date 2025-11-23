@@ -1,5 +1,5 @@
 {% extends "ui/layout/base.html" %}
-{% load static %}
+{% load dsfr_tags static %}
 
 {% block page_title %}Concevez facilement votre Info-tri [Beta] - Longue vie aux objets{% endblock %}
 
@@ -27,64 +27,18 @@
             {# Catégorie Section #}
             <div>
                 <h2 class="qf-text-xl qf-font-bold qf-mb-3v">Choisissez une catégorie de produit</h2>
-
-                {% for value, label in form.fields.categorie.choices %}
-                    {% if value %}
-                    <div class="qf-mb-1w qf-flex qf-items-center">
-                        <input
-                            type="radio"
-                            name="categorie"
-                            value="{{ value }}"
-                            id="categorie-{{ value }}"
-                            data-infotri-target="categorieInput"
-                            data-action="change->infotri#updateCategorie"
-                            class="qf-h-2w qf-w-2w qf-border-gray-300 qf-bg-gray-100 qf-text-blue-600 focus:qf-ring-2 focus:qf-ring-blue-500"
-                            {% if initial_categorie == value %}checked{% endif %}
-                        />
-                        <label for="categorie-{{ value }}" class="qf-ms-1w qf-text-sm qf-text-gray-900 qf-capitalize">{{ label }}</label>
-                    </div>
-                    {% endif %}
-                {% endfor %}
+                {% dsfr_form_field form.categorie %}
             </div>
 
             {# Consigne Section #}
             <div data-infotri-target="consigneSection" class="{% if not initial_categorie %}qf-hidden{% endif %}">
                 <h2 class="qf-text-xl qf-font-bold qf-mb-3v">Choisissez la consigne</h2>
-
-                {% for value, label in form.fields.consigne.choices %}
-                    {% if value %}
-                    <div class="qf-mb-1w qf-flex qf-items-center">
-                        <input
-                            type="radio"
-                            name="consigne"
-                            value="{{ value }}"
-                            id="consigne-{{ value }}"
-                            data-infotri-target="consigneInput"
-                            data-action="change->infotri#updateConsigne"
-                            class="qf-h-2w qf-w-2w qf-border-gray-300 qf-bg-gray-100 qf-text-blue-600 focus:qf-ring-2 focus:qf-ring-blue-500"
-                            {% if initial_consigne == value %}checked{% endif %}
-                        />
-                        <label for="consigne-{{ value }}" class="qf-ms-1w qf-text-sm qf-text-gray-900">{{ label }}</label>
-                    </div>
-                    {% endif %}
-                {% endfor %}
+                {% dsfr_form_field form.consigne %}
             </div>
 
             {# Phrase Toggle Section #}
             <div data-infotri-target="phraseSection" class="{% if not initial_consigne %}qf-hidden{% endif %}">
-                <div class="fr-toggle">
-                    <input
-                        type="checkbox"
-                        name="avec_phrase"
-                        id="toggle-phrase"
-                        class="fr-toggle__input"
-                        data-infotri-target="avecPhraseInput"
-                        data-action="change->infotri#updateAvecPhrase"
-                    />
-                    <label class="fr-toggle__label" for="toggle-phrase">
-                        Afficher la phrase
-                    </label>
-                </div>
+                {% dsfr_form_field form.avec_phrase %}
             </div>
 
             {# Generate Button #}
