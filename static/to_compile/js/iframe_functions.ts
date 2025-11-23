@@ -26,6 +26,7 @@ const SPECIAL_ATTRIBUTES = {
  */
 interface IframeSetupOptions {
   maxWidth?: string
+  height?: string
   useAutoHeight?: boolean
   addScriptModeParam?: boolean
 }
@@ -37,7 +38,7 @@ interface IframeResizerOptions {
   id?: string
   license?: string
   checkOrigin?: boolean
-  log?: boolean | string
+  log?: boolean | "expanded" | "collapsed" | number
 }
 
 /**
@@ -70,18 +71,16 @@ function createIframeAttributes(
   height: string,
   route: string,
   useAutoHeight: boolean,
-): Record<string, string> {
+): Record<string, any> {
   return {
     src: `${baseUrl}/${route}?${urlParams.toString()}`,
     id: IFRAME_ID,
     frameBorder: "0",
     scrolling: "no",
     allow: "geolocation; clipboard-write",
-    allowFullscreen: "true",
+    allowFullscreen: true,
     title: IFRAME_TITLE,
-    style: `width: 100%; max-width: ${maxWidth}; height: ${
-      useAutoHeight ? height : height
-    }; border: none;`,
+    style: `overflow: hidden; max-width: ${maxWidth}; width: 100%; height: ${height};`,
   }
 }
 
@@ -102,7 +101,7 @@ function processDatasetAttributes(
 } {
   let route = baseRoute
   let maxWidth = options.maxWidth || DEFAULT_MAX_WIDTH
-  let height = DEFAULT_HEIGHT
+  let height = options.height || DEFAULT_HEIGHT
   const urlParams = new URLSearchParams()
   const iframeExtraAttributes: Record<string, string> = {}
 
