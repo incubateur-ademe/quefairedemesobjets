@@ -1,5 +1,5 @@
 {% extends base_template %}
-{% load carte_tags turbo_tags %}
+{% load acteur_tags carte_tags turbo_tags %}
 
 {% block robots %}noindex{% endblock %}
 
@@ -19,7 +19,7 @@
         <article {% if turbo %}class='qf-animate-in qf-fade-in qf-duration-400'{% endif %}>
             <header class="qf-mb-2w">
                 <div>
-                    {% include "ui/components/carte/acteur/_labels.html" %}
+                    {% acteur_label %}
 
 
                     {# TODO: use an alternative template instead of a conditionnal inside the html tag #}

@@ -50,6 +50,8 @@ def acteur_label(context, acteur=None):
 
     labels_qualite_ordered = acteur.labels_display
     first_label_qualite = labels_qualite_ordered.first()
+    if not first_label_qualite:
+        return {}
 
     label = render_to_string(
         "ui/components/label_qualite/dsfr_label.html", {"label": first_label_qualite}
@@ -58,7 +60,7 @@ def acteur_label(context, acteur=None):
     if first_label_qualite.code == "bonusrepar":
         return {"label": label}
     else:
-        non_enseigne_count = acteur.labels_without_enseigne_display
+        non_enseigne_count = acteur.labels_without_enseigne_display.count()
         if non_enseigne_count > 1:
             return {
                 "label": ACTEUR["plusieurs_labels"],
