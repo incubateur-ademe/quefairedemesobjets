@@ -19,7 +19,7 @@ RUN uv sync --group airflow
 
 # Runtime
 # --- --- --- ---
-FROM apache/airflow:2.11.0 AS scheduler
+FROM apache/airflow:slim-2.11.0-python3.12 AS scheduler
 
 USER root
 
@@ -45,7 +45,6 @@ COPY --from=python-builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 # Nécessaire pour faire fonctionner Django dans Airflow
 COPY ./core/ /opt/airflow/core/
 COPY ./qfdmo/ /opt/airflow/qfdmo/
-COPY ./qfdmd/ /opt/airflow/qfdmd/
 COPY ./data/ /opt/airflow/data/
 COPY ./dbt/ /opt/airflow/dbt/
 COPY ./scripts/ /opt/airflow/scripts/

@@ -17,7 +17,7 @@ RUN uv sync --group airflow
 
 # Runtime
 # --- --- --- ---
-FROM apache/airflow:2.11.0 AS webserver
+FROM apache/airflow:slim-2.11.0-python3.12 AS webserver
 USER ${AIRFLOW_UID:-50000}
 ENV VIRTUAL_ENV=/home/airflow/.local \
     PATH="/opt/airflow/.venv/bin:$PATH" \
