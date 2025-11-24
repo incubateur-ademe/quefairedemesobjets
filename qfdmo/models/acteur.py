@@ -1311,6 +1311,10 @@ class DisplayedActeur(FinalActeur, LatLngPropertiesMixin):
         pointent vers l'identifiant_unique de cet acteur"""
         return parents_cache_get()["nombre_enfants"].get(self.identifiant_unique, 0)
 
+    def groupe_action_to_display(self, sous_categories_ids, actions_ids):
+        # TODO: implement
+        pass
+
     def action_to_display(
         self,
         direction: str | None = None,

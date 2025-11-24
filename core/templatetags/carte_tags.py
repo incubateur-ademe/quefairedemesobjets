@@ -108,17 +108,7 @@ def to_latlng_json(point):
 
 
 @register.inclusion_tag("templatetags/acteur_pinpoint.html", takes_context=True)
-def acteur_pinpoint_tag(
-    context,
-    acteur,
-    direction=None,
-    action_list=None,
-    carte=None,
-    carte_config=None,
-    sous_categorie_id=None,
-    counter=None,
-    force_visible=False,
-):
+def acteur_pinpoint_tag(context, counter=0):
     """
     Template tags to display the acteur's pinpoint after increasing context with
       - marker_icon
@@ -128,6 +118,12 @@ def acteur_pinpoint_tag(
       - marker_fill_background
       - marker_icon_extra_classes
     """
+    acteur = context.get("acteur")
+    carte = context.get("carte", None)
+    carte_config = context.get("carte_config", None)
+    sous_categories_ids = context.get("selected_sous_categories_ids")
+    actions_ids = context.get("selected_actions_ids")
+
     context = {
         "acteur": acteur,
         "request": context.get("request"),
@@ -140,22 +136,25 @@ def acteur_pinpoint_tag(
         "marker_icon_extra_classes": "",
     }
 
-    action_to_display = acteur.action_to_display(
-        direction=direction,
-        action_list=action_list,
-        sous_categorie_id=sous_categorie_id,
+    # TODO:
+    # - annotate with proposition services at the database level
+    # - for each PSS, find a way (annotation ?) to get the value for each groupe action
+    # - maybe : keep only pss that match the sous categories searched
+    # - This way, we can get acteur.propositions_services
+    groupe_action_to_display = acteur.groupe_action_to_display(
+        sous_categories_ids, actions_ids
     )
 
-    if action_to_display is None:
+    if groupe_action_to_display is None:
         logger.warning("No actions found for acteur %s", acteur)
         return context
 
     if carte_config:
         queryset = Q()
-        if action_to_display:
-            queryset &= Q(
-                groupe_action__actions__code__in=[action_to_display.code]
-            ) | Q(groupe_action__actions__code=None)
+        if groupe_action_to_display:
+            queryset &= Q(groupe_action__code__in=[groupe_action_to_display.code]) | Q(
+                groupe_action__code=None
+            )
 
         if acteur.acteur_type:
             queryset &= Q(acteur_type=acteur.acteur_type) | Q(acteur_type=None)
@@ -174,15 +173,14 @@ def acteur_pinpoint_tag(
             pass
 
     if carte:
-        if action_to_display.groupe_action:
-            action_to_display = action_to_display.groupe_action
-        if action_to_display.code == "reparer":
+        if "reparer" in groupe_action_to_display.code:
             context.update(
                 marker_bonus=getattr(acteur, "is_bonus_reparation", False),
                 marker_fill_background=True,
                 marker_icon_extra_classes="qf-text-white",
             )
 
+    # Generate uuid for svg mask to prevent marker's border to vanish
     mask_id = acteur.uuid
     if MAP_CONTAINER_ID in context:
         mask_id += f"-{context[MAP_CONTAINER_ID]}"
@@ -192,8 +190,8 @@ def acteur_pinpoint_tag(
 
     context.update(
         mask_id=mask_id,
-        marker_icon=action_to_display.icon,
-        marker_couleur=action_to_display.couleur,
+        marker_icon=groupe_action_to_display.icon,
+        marker_couleur=groupe_action_to_display.couleur,
     )
 
     return context
