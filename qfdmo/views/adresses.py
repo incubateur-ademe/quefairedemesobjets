@@ -176,7 +176,6 @@ class SearchActeursView(
 
         kwargs.update(
             carte=self.is_carte,
-            location="{}",
         )
 
         if form.is_valid():
@@ -206,6 +205,9 @@ class SearchActeursView(
             kwargs.update(acteurs=acteurs)
 
         context = super().get_context_data(**kwargs)
+
+        if hasattr(self, "location"):
+            context.update(location=self.location)
 
         # TODO : refacto forms, gérer ça autrement
         try:
@@ -250,12 +252,6 @@ class SearchActeursView(
 
         # Set Home location (address set as input)
         # FIXME : can be manage in template using the form value ?
-        if (latitude := self.get_data_from_request_or_bounded_form("latitude")) and (
-            longitude := self.get_data_from_request_or_bounded_form("longitude")
-        ):
-            kwargs.update(
-                location=json.dumps({"latitude": latitude, "longitude": longitude})
-            )
         return bbox, acteurs
 
     def _bbox_and_acteurs_from_location_or_epci(self, acteurs):
@@ -265,6 +261,9 @@ class SearchActeursView(
         center = center_from_frontend_bbox(custom_bbox)
         latitude = center[1] or self.get_data_from_request_or_bounded_form("latitude")
         longitude = center[0] or self.get_data_from_request_or_bounded_form("longitude")
+
+        # Store for later assignation in get_context_data
+        self.location = json.dumps({"latitude": latitude, "longitude": longitude})
 
         # A BBOX was set in the Configurateur OR the user interacted with
         # the map, that set a bounding box in its browser.

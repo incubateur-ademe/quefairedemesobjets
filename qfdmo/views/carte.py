@@ -255,7 +255,6 @@ class CarteSearchActeursView(SearchActeursView):
         context = super().get_context_data(**kwargs)
 
         context.update(
-            is_carte=True,
             forms=self.ui_forms,
             map_container_id=self._get_map_container_id(),
             mode_liste=self.paginate,
