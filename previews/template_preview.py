@@ -18,7 +18,12 @@ from qfdmo.forms import (
     NextAutocompleteInput,
     ViewModeForm,
 )
-from qfdmo.models.acteur import ActeurType, DisplayedActeur, DisplayedPropositionService
+from qfdmo.models.acteur import (
+    ActeurType,
+    DisplayedActeur,
+    DisplayedPropositionService,
+    LabelQualite,
+)
 from qfdmo.models.action import Action
 from qfdmo.models.config import CarteConfig
 
@@ -179,17 +184,6 @@ class CartePreview(LookbookPreview):
         }
         return render_to_string("ui/components/carte/legend.html", context)
 
-    @component_docs("ui/components/carte/acteur/acteur_labels.md")
-    def acteur_labels(self, **kwargs):
-        acteur = DisplayedActeur.objects.filter(labels__isnull=False).first()
-        if not acteur:
-            acteur = DisplayedActeur.objects.first()
-
-        context = {"object": acteur}
-        return render_to_string(
-            "ui/components/carte/acteur/acteur_labels.html", context
-        )
-
     @component_docs("ui/components/carte/buttons/ajouter_un_lieu.md")
     def ajouter_un_lieu(self, **kwargs):
         context = {"CARTE": {"ajouter_un_lieu": "Proposer une adresse"}}
@@ -341,23 +335,23 @@ class ComponentsPreview(LookbookPreview):
         context = {"small": True}
         return render_to_string("ui/components/spinner.html", context)
 
+    def label_qualite_dsfr_tag(self, **kwargs):
+        context = {"label": LabelQualite.objects.get(code="bonusrepar")}
+        return render_to_string("ui/components/label_qualite/dsfr_label.html", context)
 
-class IconsPreview(LookbookPreview):
-    """
-    Previews for icon components
-    """
-
-    @component_docs("ui/components/icons/bonus.md")
-    def bonus(self, **kwargs):
-        return render_to_string("ui/components/icons/bonus.html")
-
-    @component_docs("ui/components/icons/ess.md")
-    def ess(self, **kwargs):
-        return render_to_string("ui/components/icons/ess.html")
-
-    @component_docs("ui/components/icons/reparacteurs.md")
-    def reparacteurs(self, **kwargs):
-        return render_to_string("ui/components/icons/reparacteurs.html")
+    def label_qualite(self, **kwargs):
+        template = Template(
+            """
+            {% load acteur_tags %}
+            {% acteur_label %}
+            """
+        )
+        context = {
+            "object": DisplayedActeur.objects.filter(
+                labels__code__in=["bonusrepar"],
+            ).first()
+        }
+        return template.render(Context(context))
 
 
 class FiltresPreview(LookbookPreview):

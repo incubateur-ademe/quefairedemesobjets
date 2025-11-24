@@ -206,8 +206,7 @@ class SearchActeursView(
 
         context = super().get_context_data(**kwargs)
 
-        if hasattr(self, "location"):
-            context.update(location=self.location)
+        context.update(location=getattr(self, "location", ""))
 
         # TODO : refacto forms, gérer ça autrement
         try:
@@ -263,7 +262,8 @@ class SearchActeursView(
         longitude = center[0] or self.get_data_from_request_or_bounded_form("longitude")
 
         # Store for later assignation in get_context_data
-        self.location = json.dumps({"latitude": latitude, "longitude": longitude})
+        if latitude and longitude:
+            self.location = json.dumps({"latitude": latitude, "longitude": longitude})
 
         # A BBOX was set in the Configurateur OR the user interacted with
         # the map, that set a bounding box in its browser.

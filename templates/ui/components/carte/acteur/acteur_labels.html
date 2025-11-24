@@ -1,7 +1,4 @@
 <div class="qf-flex qf-gap-1v qf-max-w-[300px] qf-flex-col">
     <strong class="max-md:qf-text-lg max-md:qf-text-blue-france-sun-113-625">{{ object.nom }}</strong>
-    {% if object.labels_display %}
-        <br>
-        {% include "ui/components/carte/acteur/_labels.html" %}
-    {% endif %}
+    {% include "ui/components/carte/acteur/_labels.html" %}
 </div>

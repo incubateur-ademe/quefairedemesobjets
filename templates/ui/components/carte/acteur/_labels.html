@@ -1,5 +1,6 @@
 {% load carte_tags %}
 <div class="qf-space-y-1w qf-pb-1w" data-testid="acteur-detail-labels">
+    {% acteur_label %}
     {% with label=object.labels_display|first %}
         {% if label.bonus %}
             {% include "ui/components/carte/acteur/_labels/bonus.html" %}

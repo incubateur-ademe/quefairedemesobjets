@@ -199,12 +199,6 @@ def acteur_pinpoint_tag(
     return context
 
 
-@register.simple_tag
-def get_non_enseigne_labels_count(acteur):
-    """Template tag to get count of labels with type_enseigne=False"""
-    return acteur.labels_display.filter(type_enseigne=False).count()
-
-
 def render_acteur_table_row(acteur, context):
     """This is used to render a DSFR-compliant table row."""
     _context = {
@@ -214,7 +208,7 @@ def render_acteur_table_row(acteur, context):
         "request": context["request"],
     }
     return [
-        render_to_string("ui/components/carte/acteur/acteur_labels.html", _context),
+        render_to_string("ui/components/label_qualite/label_qualite.html", _context),
         render_to_string("ui/components/carte/acteur/acteur_services.html", _context),
         distance_to_acteur(context, acteur),
         render_to_string("ui/components/carte/acteur/acteur_lien.html", _context),

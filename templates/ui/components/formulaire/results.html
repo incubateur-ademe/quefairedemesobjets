@@ -24,7 +24,9 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
     "
     {% if not is_digital %}
     data-controller="map"
+    {% if location %}
     data-map-location-value="{{ location }}"
+    {% endif %}
     {% endif %}
 >
     {% if is_digital %}

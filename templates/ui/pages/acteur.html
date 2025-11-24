@@ -19,9 +19,8 @@
         <article {% if turbo %}class='qf-animate-in qf-fade-in qf-duration-400'{% endif %}>
             <header class="qf-mb-2w">
                 <div>
-                    {% if object.labels_display %}
-                        {% include "ui/components/carte/acteur/_labels.html" %}
-                    {% endif %}
+                    {% include "ui/components/carte/acteur/_labels.html" %}
+
 
                     {# TODO: use an alternative template instead of a conditionnal inside the html tag #}
                     <{% if turbo %}h3{% else %}h1{% endif %} class="qf-text-lg qf-m-0 qf-max-w-[90%]" data-testid="acteur-title">{{ object.libelle|title }}</{% if turbo %}h3{% else %}h1{% endif %}>

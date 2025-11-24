@@ -22,6 +22,10 @@ CARTE = {
     "filtres_bouton": "Filtres",
 }
 
+ACTEUR = {
+    "plusieurs_labels": "Cet établissement dispose de plusieurs labels",
+}
+
 ASSISTANT = {
     "partage": {
         # Introduction utilisé lors du partage d'un acteur ou d'un produit / déchet
