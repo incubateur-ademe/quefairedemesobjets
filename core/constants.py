@@ -22,6 +22,8 @@ CARTE = {
     "filtres_bouton": "Filtres",
 }
 
+MODE_LISTE = {"pagination_suffixe": "lieux du plus proche au plus loin"}
+
 ACTEUR = {
     "plusieurs_labels": "Cet établissement dispose de plusieurs labels",
 }

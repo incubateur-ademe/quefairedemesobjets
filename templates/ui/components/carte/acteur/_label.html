@@ -1,3 +1,4 @@
+{% load qfdmd_tags %}
 <div
     class="{% if border %}qf-border qf-border-grey-900 qf-border-solid{% endif %}"
 >
@@ -9,7 +10,11 @@
         target="_blank"
         rel="noreferrer"
     >
-        {% if source_or_label.logo_file %}
+        {% if source_or_label.logo_filtre %}
+            <span class="qf-h-3v [&>svg]:qf-h-full [&>svg]:qf-w-auto qf-flex">
+                {% render_file_content source_or_label.logo_filtre %}
+            </span>
+        {% elif source_or_label.logo_file %}
             <img
                 src="{{ source_or_label.logo_file.url }}"
                 alt="Ademe - Agence de la transition écologique"

@@ -15,7 +15,7 @@
 
 {% block modal_content %}
 <div class="qf-flex qf-flex-col qf-gap-2w">
-    <div class="qf-flex max-md:qf-flex-col md:qf-flex-row qf-gap-2w">
+    <div class="qf-flex max-md:qf-flex-col md:qf-flex-row qf-gap-2w" data-turbo="false">
         {% dsfr_card link="https://longuevieauxobjets.ademe.fr/reutiliser-nos-outils/?mtm_campaign=widget" title="Réutiliser La Carte" description="Et si vous ajoutiez cette carte à votre site ? Pour utiliser notre widget, c'est par ici !" %}
         {% url 'qfdmo:feedback-form' as link %}
         {% dsfr_card link=link title="Donner votre avis" description="Cette carte doit être la vôtre ! Si vous avez des idées pour l'améliorer, on vous écoute." %}
