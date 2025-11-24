@@ -28,28 +28,6 @@ from qfdmo.models.action import Action
 from qfdmo.models.config import CarteConfig
 
 
-def load_component_docs(template_path):
-    """
-    Load markdown documentation for a component template.
-
-    Looks for a .md file alongside the .html template file.
-    Returns the markdown content if found, otherwise returns None.
-
-    Example:
-        template_path = "ui/components/button.html"
-        -> looks for templates/ui/components/button.md
-    """
-    base_dir = Path(settings.BASE_DIR)
-    templates_dir = base_dir / "templates"
-
-    # Convert template path to markdown path
-    md_path = templates_dir / template_path.replace(".html", ".md")
-
-    if md_path.exists():
-        return md_path.read_text()
-    return None
-
-
 def component_docs(md_file_path):
     """
     Decorator that automatically loads and injects markdown documentation
