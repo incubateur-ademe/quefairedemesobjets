@@ -1,6 +1,5 @@
 import logging
 from typing import override
-from urllib.parse import urlencode
 
 from django.contrib.gis.db import models
 from django.db.models.functions import Now
@@ -653,37 +652,6 @@ class Synonyme(index.Indexed, AbstractBaseProduit):
     @property
     def url(self) -> str:
         return self.get_absolute_url()
-
-    def get_url_carte(self, actions=None, map_container_id=None):
-        carte_settings = self.produit.carte_settings
-        if actions:
-            carte_settings.update(
-                action_list=actions,
-                action_displayed=actions,
-            )
-
-        if map_container_id:
-            carte_settings.update(
-                map_container_id=map_container_id,
-            )
-
-        params = urlencode(carte_settings)
-        url = reverse("qfdmd:carte", args=[self.slug])
-        return f"{url}?{params}"
-
-    @cached_property
-    def url_carte(self):
-        return self.get_url_carte(None, "carte")
-
-    @cached_property
-    def url_carte_mauvais_etat(self):
-        actions = "reparer|trier"
-        return self.get_url_carte(actions, "mauvais_etat")
-
-    @cached_property
-    def url_carte_bon_etat(self):
-        actions = "preter|louer|mettreenlocation|donner|echanger|revendre"
-        return self.get_url_carte(actions, "bon_etat")
 
     @cached_property
     def bon_etat(self) -> str:
