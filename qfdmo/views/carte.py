@@ -2,7 +2,6 @@ import logging
 from typing import Any, TypedDict, override
 
 from django.conf import settings
-from django.db.models import Q
 from django.forms import Form
 from django.utils.functional import cached_property
 from django.views.generic import DetailView
@@ -98,6 +97,8 @@ class CarteSearchActeursView(SearchActeursView):
         except (KeyError, AttributeError):
             return prefix
 
+    # Legacy querystring support
+    # ==========================
     def _initialize_legacy_form(self, data):
         """Initialize legacy support form from request data.
 
@@ -139,6 +140,8 @@ class CarteSearchActeursView(SearchActeursView):
 
         return set()
 
+    # Forms and field utilities
+    # =========================
     def _create_form_instance(self, form_class, data, prefix, legacy_form):
         return form_class(
             data,
@@ -193,6 +196,8 @@ class CarteSearchActeursView(SearchActeursView):
         except (AttributeError, KeyError):
             return None
 
+    # Form field accessors
+    # ====================
     def _get_direction(self):
         action_direction_form = ActionDirectionForm(self.request.GET)
         return action_direction_form["direction"].value()
@@ -331,22 +336,22 @@ class CarteConfigView(DetailView, CarteSearchActeursView):
         """Cache the object to avoid repeated queries"""
         return self.get_object()
 
-    def _compile_acteurs_queryset(self, *args, **kwargs):
-        filters, excludes = super()._compile_acteurs_queryset(*args, **kwargs)
+    # def _compile_acteurs_queryset(self, *args, **kwargs):
+    #     filters, excludes = super()._compile_acteurs_queryset(*args, **kwargs)
 
-        # TODO: remove this
-        if source_filter := self.carte_config.source.all():
-            filters &= Q(source__in=source_filter)
+    #     # TODO: remove this
+    #     if source_filter := self.carte_config.source.all():
+    #         filters &= Q(source__in=source_filter)
 
-        # TODO: remove this
-        if label_filter := self.carte_config.label_qualite.all():
-            filters &= Q(labels__in=label_filter)
+    #     # TODO: remove this
+    #     if label_filter := self.carte_config.label_qualite.all():
+    #         filters &= Q(labels__in=label_filter)
 
-        # TODO: remove this
-        if acteur_type_filter := self.carte_config.acteur_type.all():
-            filters &= Q(acteur_type__in=acteur_type_filter)
+    #     # TODO: remove this
+    #     if acteur_type_filter := self.carte_config.acteur_type.all():
+    #         filters &= Q(acteur_type__in=acteur_type_filter)
 
-        return filters, excludes
+    #     return filters, excludes
 
     def _get_sous_categorie_ids(self) -> list[int]:
         """Get sous_categorie IDs with the following priority:
@@ -388,29 +393,3 @@ class CarteConfigView(DetailView, CarteSearchActeursView):
             )
 
         return action_ids
-
-
-class ProductCarteView(CarteConfigView):
-    """This view is used for Produit / Synonyme, the legacy django models
-    that were defined prior to Wagtail usage for these pages.
-
-    It will be progressively deprecated until the end of 2025 but
-    needs to be maintained for now."""
-
-    filtres_form_class = FiltresFormWithoutSynonyme
-
-    def _get_map_container_id(self):
-        # TODO: check if required
-        return self.request.GET.get("map_container_id", "carte")
-
-    @override
-    def _get_carte_config(self):
-        carte_config, _ = CarteConfig.objects.get_or_create(
-            slug="product", supprimer_branding=True
-        )
-        return carte_config
-
-    @override
-    def _get_max_displayed_acteurs(self):
-        # Hardcoded value taken from dict previously used
-        return 25
