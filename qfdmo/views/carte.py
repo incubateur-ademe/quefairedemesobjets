@@ -6,7 +6,7 @@ from django.forms import Form
 from django.utils.functional import cached_property
 from django.views.generic import DetailView
 
-from core.constants import MAP_CONTAINER_ID
+from core.constants import DEFAULT_MAP_CONTAINER_ID, MAP_CONTAINER_ID
 from qfdmd.models import Produit
 from qfdmo.forms import (
     ActionDirectionForm,
@@ -228,7 +228,7 @@ class CarteSearchActeursView(SearchActeursView):
     def _get_map_container_id(self):
         if self.carte_config:
             return self.carte_config.slug
-        return "carte"
+        return DEFAULT_MAP_CONTAINER_ID
 
     def _get_carte_config(self):
         return None

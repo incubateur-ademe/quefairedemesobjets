@@ -1,6 +1,6 @@
 from django.template.defaulttags import register
 
-from core.constants import MAP_CONTAINER_ID
+from core.constants import DEFAULT_MAP_CONTAINER_ID, MAP_CONTAINER_ID
 
 
 @register.simple_tag(takes_context=True)
@@ -10,7 +10,7 @@ def main_frame_id(context: dict) -> str:
     Used to identify the primary turbo-frame container, enabling multiple independent
     carte instances on the same page (e.g., embedded iframes). Defaults to "carte".
     """
-    return context.get(MAP_CONTAINER_ID, "carte")
+    return context.get(MAP_CONTAINER_ID, DEFAULT_MAP_CONTAINER_ID)
 
 
 @register.simple_tag(takes_context=True)

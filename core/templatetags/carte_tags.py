@@ -6,7 +6,7 @@ from django.db.models import Q
 from django.template.defaulttags import register
 from django.template.loader import render_to_string
 
-from core.constants import MAP_CONTAINER_ID
+from core.constants import DEFAULT_MAP_CONTAINER_ID, MAP_CONTAINER_ID
 from qfdmo.models import DisplayedActeur
 from qfdmo.models.action import get_actions_by_direction
 from qfdmo.models.config import CarteConfig, GroupeActionConfig
@@ -55,7 +55,7 @@ def hide_object_filter(context):
     request = context["request"]
     return (
         bool(request.GET.get("sc_id"))
-        and request.GET.get("map_container_id") != "carte"
+        and request.GET.get("map_container_id") != DEFAULT_MAP_CONTAINER_ID
     )
 
 
@@ -220,7 +220,7 @@ def render_acteur_table_row(acteur, context):
 )
 def acteurs_table(context, acteurs):
     """We use a wrapper template tag to use the django-dsfr component.
-    At it must be rendered with a dict, we cannot easily render complex rows."""
+    As it must be rendered with a dict, we cannot easily render complex rows."""
     return {
         "table": {
             "header": ["Nom du lieu", "Actions", "Distance", ""],

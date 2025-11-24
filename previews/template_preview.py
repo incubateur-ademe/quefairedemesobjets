@@ -11,6 +11,7 @@ from django_lookbook.preview import LookbookPreview
 from django_lookbook.utils import register_form_class
 from dsfr.forms import DsfrBaseForm
 
+from core.constants import DEFAULT_MAP_CONTAINER_ID
 from qfdmd.forms import SearchForm
 from qfdmd.models import Suggestion, Synonyme
 from qfdmo.forms import (
@@ -142,7 +143,7 @@ class CartePreview(LookbookPreview):
             "paginated_acteurs_obj": page,
             "count": acteurs.count(),
             "CARTE": {"ajouter_un_lieu_mode_liste": "Proposer une adresse"},
-            "map_container_id": "carte",
+            "map_container_id": DEFAULT_MAP_CONTAINER_ID,
             "forms": {
                 "legende": LegendeForm(),
                 "filtres_form": None,

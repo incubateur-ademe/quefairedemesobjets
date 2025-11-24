@@ -8,6 +8,7 @@ Tout ce qui n'est pas sous ASSISTANT est commun à la carte et à l'assistant.
 
 bonus_reparation = "Propose le Bonus Réparation"
 DIGITAL_ACTEUR_CODE = "acteur_digital"
+DEFAULT_MAP_CONTAINER_ID = "carte"
 
 SHARE_BODY = ()
 
