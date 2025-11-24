@@ -253,6 +253,7 @@ class LegacySupportForm(GetFormMixin, forms.Form):
         "action_list",
         "action_displayed",
         "label_reparacteur",
+        "pas_exclusivite_reparation",
         CarteConfig.SOUS_CATEGORIE_QUERY_PARAM,
     ]
 
@@ -364,15 +365,21 @@ class FiltresForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
         if not legacy_form:
             return
 
-        request_data = legacy_form.decode_querystring()
+        initial_legacy_request_data = legacy_form.decode_querystring()
 
-        # Handle action_displayed: filter the queryset
-        if label_reparacteur := request_data.get("label_reparacteur"):
+        if label_reparacteur := initial_legacy_request_data.get("label_reparacteur"):
             if label_reparacteur == "true":
                 # Set as initial value
                 self.fields["label_qualite"].initial = LabelQualite.objects.filter(
                     code="reparacteur"
                 )
+
+        if pas_exclusivite_reparation := initial_legacy_request_data.get(
+            "pas_exclusivite_reparation"
+        ):
+            self.fields["pas_exclusivite_reparation"].initial = (
+                pas_exclusivite_reparation == "false"
+            )
 
 
 class FiltresFormWithoutSynonyme(FiltresForm):

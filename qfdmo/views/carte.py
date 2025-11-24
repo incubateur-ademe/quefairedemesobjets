@@ -184,15 +184,15 @@ class CarteSearchActeursView(SearchActeursView):
 
         return form_instances
 
-    def _get_form(self, form_name) -> Form | None:
+    def _get_ui_form(self, form_name) -> Form | None:
         try:
-            return self._get_forms()[form_name]
+            return self.ui_forms[form_name]
         except KeyError:
             return None
 
     def _get_field_value_for(self, form_name: str, field_name: str) -> Any:
         try:
-            return self._get_form(form_name)[field_name].value()
+            return self._get_ui_form(form_name)[field_name].value()
         except (AttributeError, KeyError):
             return None
 
@@ -221,7 +221,7 @@ class CarteSearchActeursView(SearchActeursView):
 
     def _check_if_label_qualite_is_set(self, label):
         try:
-            return label in self._get_form("filtres")["label_qualite"].value()
+            return label in self._get_ui_form("filtres")["label_qualite"].value()
         except (TypeError, KeyError):
             return False
 
@@ -245,16 +245,18 @@ class CarteSearchActeursView(SearchActeursView):
         return settings.CARTE_MAX_SOLUTION_DISPLAYED
 
     def get_context_data(self, **kwargs):
-        forms = self._get_forms()
+        self.ui_forms = self._get_forms()
         self.paginate = (
-            forms["view_mode"]["view"].value()
+            self.ui_forms["view_mode"]["view"].value()
             == ViewModeForm.ViewModeSegmentedControlChoices.LISTE
         )
+        # QuerySet is built in SearchActeursView.get_context_data method,
+        # it needs to be kept after the forms are initialised above.
         context = super().get_context_data(**kwargs)
 
         context.update(
             is_carte=True,
-            forms=forms,
+            forms=self.ui_forms,
             map_container_id=self._get_map_container_id(),
             mode_liste=self.paginate,
             carte_config=self._get_carte_config(),
@@ -263,12 +265,12 @@ class CarteSearchActeursView(SearchActeursView):
         return context
 
     def _get_action_ids(self) -> list[str]:
-        groupe_action_ids = self._get_form("legende")["groupe_action"].value()
+        groupe_action_ids = self._get_ui_form("legende")["groupe_action"].value()
 
         # TODO: check if useful as these two forms are now synced
         for form in [
-            self._get_form("legende"),
-            self._get_form("legende_filtres"),
+            self._get_ui_form("legende"),
+            self._get_ui_form("legende_filtres"),
         ]:
             if form and form.is_valid():
                 groupe_action_ids = form["groupe_action"].value()
