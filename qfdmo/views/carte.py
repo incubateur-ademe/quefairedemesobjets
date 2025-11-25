@@ -254,15 +254,62 @@ class CarteSearchActeursView(SearchActeursView):
         # it needs to be kept after the forms are initialised above.
         context = super().get_context_data(**kwargs)
 
+        carte_config = self._get_carte_config()
+        icon_lookup = self._build_icon_lookup(carte_config) if carte_config else {}
+
         context.update(
             forms=self.ui_forms,
             map_container_id=self._get_map_container_id(),
             mode_liste=self.paginate,
-            carte_config=self._get_carte_config(),
+            carte_config=carte_config,
             selected_action_codes=self._get_action_codes(),
+            icon_lookup=icon_lookup,
         )
 
         return context
+
+    def _build_icon_lookup(self, carte_config):
+        """Build a lookup dictionary for icon configurations.
+
+        This precomputes the icon URLs for all action/acteur_type combinations
+        to avoid N+1 queries in the template tag.
+
+        Returns a dict with keys like: ('action_code', 'acteur_type_code') -> icon_url
+        and also: ('action_code', None) -> icon_url for configs without acteur_type
+        """
+        if not carte_config:
+            return {}
+
+        icon_lookup = {}
+
+        # Prefetch all groupe_action_configs with their relations
+        configs = carte_config.groupe_action_configs.select_related(
+            "groupe_action", "acteur_type"
+        ).prefetch_related("groupe_action__actions")
+
+        for config in configs:
+            if not config.icon:
+                continue
+
+            # Get action codes for this groupe_action
+            if config.groupe_action:
+                action_codes = list(
+                    config.groupe_action.actions.values_list("code", flat=True)
+                )
+            else:
+                # Config applies to all actions
+                action_codes = [None]
+
+            acteur_type_code = config.acteur_type.code if config.acteur_type else None
+
+            # Store the icon URL for each action/acteur_type combination
+            for action_code in action_codes:
+                key = (action_code, acteur_type_code)
+                # Only store if not already set (first match wins)
+                if key not in icon_lookup:
+                    icon_lookup[key] = config.icon.url
+
+        return icon_lookup
 
     def _get_action_ids(self) -> list[str]:
         groupe_action_ids = self._get_ui_form("legende")["groupe_action"].value()

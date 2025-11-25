@@ -128,7 +128,7 @@ def acteur_pinpoint_tag(
       - marker_fill_background
       - marker_icon_extra_classes
     """
-    context = {
+    tag_context = {
         "acteur": acteur,
         "request": context.get("request"),
         MAP_CONTAINER_ID: context.get(MAP_CONTAINER_ID),
@@ -149,9 +149,30 @@ def acteur_pinpoint_tag(
 
     if action_to_display is None:
         logger.warning("No actions found for acteur %s", acteur)
-        return context
+        return tag_context
 
-    if carte_config:
+    # Use precomputed icon_lookup from context if available (optimized path)
+    icon_lookup = context.get("icon_lookup", {})
+    if icon_lookup and action_to_display:
+        acteur_type_code = acteur.acteur_type.code if acteur.acteur_type else None
+
+        # Try to find icon in lookup: first with specific acteur_type, then without
+        icon_url = (
+            icon_lookup.get((action_to_display.code, acteur_type_code))
+            or icon_lookup.get((action_to_display.code, None))
+            or icon_lookup.get((None, acteur_type_code))
+            or icon_lookup.get((None, None))
+        )
+
+        if icon_url:
+            tag_context.update(
+                marker_icon_file=icon_url,
+                marker_icon="",
+            )
+            return tag_context
+
+    # Fallback to old query-based approach if icon_lookup not available
+    elif carte_config:
         queryset = Q()
         if action_to_display:
             queryset &= Q(
@@ -165,11 +186,11 @@ def acteur_pinpoint_tag(
             groupe_action_config = carte_config.groupe_action_configs.get(queryset)
             if groupe_action_config.icon:
                 # Property is camelcased as it is used in javascript
-                context.update(
+                tag_context.update(
                     marker_icon_file=groupe_action_config.icon.url,
                     marker_icon="",
                 )
-                return context
+                return tag_context
 
         except GroupeActionConfig.DoesNotExist:
             pass
@@ -178,7 +199,7 @@ def acteur_pinpoint_tag(
         if action_to_display.groupe_action:
             action_to_display = action_to_display.groupe_action
         if action_to_display.code == "reparer":
-            context.update(
+            tag_context.update(
                 marker_bonus=getattr(acteur, "is_bonus_reparation", False),
                 marker_fill_background=True,
                 marker_icon_extra_classes="qf-text-white",
@@ -191,13 +212,13 @@ def acteur_pinpoint_tag(
     if counter:
         mask_id += f"-{counter}"
 
-    context.update(
+    tag_context.update(
         mask_id=mask_id,
         marker_icon=action_to_display.icon,
         marker_couleur=action_to_display.couleur,
     )
 
-    return context
+    return tag_context
 
 
 def render_acteur_table_row(acteur, context):
