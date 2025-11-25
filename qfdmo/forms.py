@@ -347,7 +347,7 @@ class FiltresForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
     bonus = forms.BooleanField(
         required=False,
         initial=False,
-        label="Lieux proposant le Bonus Réparation",
+        label=render_to_string("ui/components/label_qualite/filtre_bonus.html"),
         help_text="Uniquement les acteurs proposant le Bonus Réparation (Disponible"
         ' pour l\'action "Je répare")',
     )

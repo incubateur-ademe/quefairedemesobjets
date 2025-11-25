@@ -261,8 +261,9 @@ class CarteSearchActeursView(SearchActeursView):
         # In mode liste, we want to sort by distance but do not annotate before
         # filtering and limiting so that we do not annotate the whole database.
         # Instead, we annotate here after the queryset has been limited.
-        if not getattr(acteurs, "_has_distance_field", False) and self.location:
-            location_data = json.loads(self.location)
+        location = getattr(self, "location", None)
+        if not getattr(acteurs, "_has_distance_field", False) and location:
+            location_data = json.loads(location)
             reference_point = Point(
                 location_data["longitude"], location_data["latitude"], srid=4326
             )

@@ -10,19 +10,23 @@
      {% if mode_liste %}
       max-md:qf-left-0
       qf-overflow-auto
+      max-md:qf-fixed
+      md:qf-absolute
+      max-md:bottom-0
     {% else %}
+     qf-absolute
       max-md:qf-top-full
       max-md:qf-rounded-t-xl
       md:qf-overflow-auto
     max-md:qf-overflow-visible
     {% endif %}
 
+     qf-top-0 qf-right-0 qf-bottom-0
     aria-[hidden=true]:qf-invisible
     md:qf-transition-transform
     md:qf-duration-250
      md:qf-w-[400px] md:qf-translate-x-full
     aria-[hidden=false]:md:qf-translate-x-0
-     qf-absolute qf-top-0 qf-right-0 qf-bottom-0
     qf-px-2w
     qf-border-l qf-border-grey-900 qf-border-solid qf-border-t-0 qf-border-r-0 qf-border-b-0
     qf-bg-white
