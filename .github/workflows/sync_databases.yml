@@ -31,7 +31,7 @@ permissions:
 jobs:
   sync_prod_to_preprod:
     name: Sync production database to preprod
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-latest # latest needed for psql client
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
