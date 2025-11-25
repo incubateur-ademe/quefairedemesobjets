@@ -37,10 +37,6 @@ with DAG(
                 "destination": "naf_principal",
             },
             {
-                "origin": "website",
-                "destination": "url",
-            },
-            {
                 "origin": "adresse_2",
                 "destination": "adresse_complement",
             },
@@ -62,6 +58,11 @@ with DAG(
                 "origin": "categories",
                 "transformation": "clean_sous_categorie_codes",
                 "destination": "sous_categorie_codes",
+            },
+            {
+                "origin": "website",
+                "transformation": "clean_url",
+                "destination": "url",
             },
             # 3. Ajout des colonnes avec une valeur par défaut
             {
