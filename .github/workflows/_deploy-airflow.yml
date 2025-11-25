@@ -15,6 +15,7 @@ jobs:
     secrets: inherit # pragma: allowlist secret`
     with:
       image_tag: ${{ inputs.tag_name }}
+      environment: ${{ inputs.environment }}
 
   # WILL BE DEPRECATED SOON
   deploy_airflow-webserver:
