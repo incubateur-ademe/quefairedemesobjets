@@ -1,4 +1,4 @@
-# Infrastructure
+# IFrame
 
 L'application est utilisable sous forme d'iFrame configurable pour La Carte et pour l'Assistant
 
