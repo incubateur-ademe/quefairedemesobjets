@@ -293,9 +293,10 @@ class CarteSearchActeursView(SearchActeursView):
 
             # Get action codes for this groupe_action
             if config.groupe_action:
-                action_codes = list(
-                    config.groupe_action.actions.values_list("code", flat=True)
-                )
+                # Work with prefetched data to avoid N+1 queries
+                action_codes = [
+                    action.code for action in config.groupe_action.actions.all()
+                ]
             else:
                 # Config applies to all actions
                 action_codes = [None]

@@ -706,7 +706,8 @@ class BaseActeur(TimestampedModel):
 
     @cached_property
     def is_bonus_reparation(self):
-        return self.labels.filter(afficher=True, bonus=True).exists()
+        # Work with prefetched data to avoid N+1 queries
+        return any(label.afficher and label.bonus for label in self.labels.all())
 
     def proposition_services_by_direction(self, direction: str | None = None):
         if direction:
