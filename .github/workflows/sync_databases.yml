@@ -28,8 +28,6 @@ permissions:
 
 jobs:
   sync_prod_to_preprod:
-    # pour tester la synchro s3, condition à supprimer
-    if: ${{ github.ref_name == 'main' }}
     name: Sync production database to preprod
     runs-on: ubuntu-latest
     steps:
@@ -84,7 +82,7 @@ jobs:
         run: |
           pip install awscli
       - name: Push to S3 bucket preprod
-        run: aws --endpoint-url ${{ env.S3_HOST }} s3 sync --delete ${{ env.S3_PRODUCTION_BUCKET }} ${{ env.S3_PREPROD_BUCKET }}
+        run: aws --endpoint-url ${{ env.S3_HOST }} s3 sync --delete --quiet ${{ env.S3_PRODUCTION_BUCKET }} ${{ env.S3_PREPROD_BUCKET }}
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.SCW_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.SCW_SECRET_KEY }}
