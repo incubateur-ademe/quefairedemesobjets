@@ -259,6 +259,7 @@ class CarteSearchActeursView(SearchActeursView):
             map_container_id=self._get_map_container_id(),
             mode_liste=self.paginate,
             carte_config=self._get_carte_config(),
+            selected_action_codes=self._get_action_codes(),
         )
 
         return context
@@ -282,6 +283,31 @@ class CarteSearchActeursView(SearchActeursView):
             .only("id")
             .values_list("id", flat=True)
         )
+
+    def _get_action_codes(self) -> str:
+        """Get selected action codes as a pipe-separated string for use in templates.
+
+        This converts the selected groupe_action IDs to action codes that can be
+        passed to acteur_pinpoint_tag.
+        """
+        groupe_action_ids = self._get_ui_form("legende")["groupe_action"].value()
+
+        # TODO: check if useful as these two forms are now synced
+        for form in [
+            self._get_ui_form("legende"),
+            self._get_ui_form("legende_filtres"),
+        ]:
+            if form and form.is_valid():
+                groupe_action_ids = form["groupe_action"].value()
+
+        # Get action codes for the selected groupe_actions
+        action_codes = list(
+            Action.objects.filter(groupe_action__id__in=groupe_action_ids)
+            .only("code")
+            .values_list("code", flat=True)
+        )
+
+        return "|".join(action_codes)
 
     def _get_sous_categorie_ids(self) -> list[int]:
         """Get sous_categorie IDs from synonyme field and legacy querystring.

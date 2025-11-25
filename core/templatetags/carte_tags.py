@@ -144,6 +144,7 @@ def acteur_pinpoint_tag(
         direction=direction,
         action_list=action_list,
         sous_categorie_id=sous_categorie_id,
+        carte=bool(carte),
     )
 
     if action_to_display is None:
