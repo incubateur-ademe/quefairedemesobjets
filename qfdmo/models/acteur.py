@@ -1348,20 +1348,37 @@ class DisplayedActeur(FinalActeur, LatLngPropertiesMixin):
     def acteur_actions(
         self, direction=None, actions_codes=None, sous_categorie_id=None
     ):
-        pss = self.proposition_services.all()
         # Cast needed because of the cache
         cached_action_instances = cast(
             List[Action], cache.get_or_set("_action_instances", get_action_instances)
         )
 
-        if sous_categorie_id:
-            pss = pss.filter(sous_categories__id__in=[sous_categorie_id])
-        if direction:
-            pss = pss.filter(action__directions__code__in=[direction])
-        if actions_codes:
-            pss = pss.filter(action__code__in=actions_codes.split("|"))
+        # Work with prefetched data in memory to avoid N+1 queries
+        # Access all() to use prefetched data
+        pss = list(self.proposition_services.all())
 
-        action_ids_to_display = pss.values_list("action__id", flat=True)
+        # Filter in Python instead of database to leverage prefetch
+        if sous_categorie_id:
+            pss = [
+                ps
+                for ps in pss
+                if any(sc.id == sous_categorie_id for sc in ps.sous_categories.all())
+            ]
+
+        if direction:
+            pss = [
+                ps
+                for ps in pss
+                if any(d.code == direction for d in ps.action.directions.all())
+            ]
+
+        if actions_codes:
+            action_codes_list = actions_codes.split("|")
+            pss = [ps for ps in pss if ps.action.code in action_codes_list]
+
+        # Extract action IDs from filtered proposition services
+        action_ids_to_display = {ps.action_id for ps in pss}
+
         return [
             action
             for action in cached_action_instances

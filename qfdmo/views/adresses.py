@@ -226,26 +226,30 @@ class SearchActeursView(
         - epci_codes
         - user location
         """
-        acteurs = acteurs.prefetch_related(
-            "proposition_services__sous_categories",
-            "proposition_services__sous_categories__categorie",
-            "proposition_services__action",
-            "labels",
-            "action_principale",
-        )
         bbox, acteurs = self._bbox_and_acteurs_from_location_or_epci(acteurs)
         acteurs = acteurs.only(
             "location",
             "identifiant_unique",
             "action_principale_id",
             "uuid",
-            "proposition_services",
+            "acteur_type_id",
         )
         if getattr(acteurs, "_has_distance_field", False):
-            acteurs = acteurs.distinct("distance")
+            acteurs = acteurs.distinct("distance", "identifiant_unique")
         else:
             acteurs = acteurs.distinct()
         acteurs = acteurs[: self._get_max_displayed_acteurs()]
+
+        # Prefetch AFTER limiting to only load related data for displayed acteurs
+        acteurs = acteurs.prefetch_related(
+            "proposition_services__sous_categories",
+            "proposition_services__sous_categories__categorie",
+            "proposition_services__action",
+            "proposition_services__action__directions",
+            "proposition_services__action__groupe_action",
+            "labels",
+            "action_principale",
+        )
         if getattr(acteurs, "_needs_reparer_bonus", False):
             acteurs = acteurs.with_bonus().with_reparer()
 
