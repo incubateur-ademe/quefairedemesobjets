@@ -250,6 +250,7 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../reference/infrastructure/README.html">Infrastructure</a><input aria-label="Toggle navigation of Infrastructure" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../reference/infrastructure/ci-cd.html">Documentation CI/CD</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../reference/infrastructure/scaleway.html">Infrastructure Scaleway</a><input aria-label="Toggle navigation of Infrastructure Scaleway" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../reference/infrastructure/provisioning.html">Provisionner l’infrastructure</a></li>
 </ul>
@@ -278,7 +279,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../reference/frontend/tailwind.html">Tailwind</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../reference/iframe/README.html">Infrastructure</a><input aria-label="Toggle navigation of Infrastructure" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../reference/iframe/README.html">IFrame</a><input aria-label="Toggle navigation of IFrame" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../reference/iframe/iframe.html">Iframe</a></li>
 </ul>
 </li>
@@ -335,39 +336,9 @@
         <article role="main" id="furo-main-content">
           <section id="devops-deploiement-operations">
 <h1>DevOps, déploiement, opérations<a class="headerlink" href="#devops-deploiement-operations" title="Lien vers cette rubrique">¶</a></h1>
-<section id="continuous-delivery">
-<h2>Continuous Delivery<a class="headerlink" href="#continuous-delivery" title="Lien vers cette rubrique">¶</a></h2>
-<p>Il est possible de déployer Airflow et le site web à l’aide de workflows GitHub Actions. Il existe 2 environnements : <code class="docutils literal notranslate"><span class="pre">preprod</span></code> et <code class="docutils literal notranslate"><span class="pre">prod</span></code>.</p>
-<section id="review">
-<h3>Review<a class="headerlink" href="#review" title="Lien vers cette rubrique">¶</a></h3>
-<p>Le workflow <a class="reference external" href="https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/review.yml">review</a> est exécuté <strong>sur les pull-requests.</strong></p>
-<p>Il exécute les tests CI, build et push les images Airflow avec le tag <code class="docutils literal notranslate"><span class="pre">review</span></code> et peut déployer Airflow et l’application web lorsqu’une action manuelle est effectuée.</p>
-<p>La branche déployée est alors celle de la pull-request en environnement de <code class="docutils literal notranslate"><span class="pre">preprod</span></code>.</p>
-</section>
-<section id="cd">
-<h3>CD<a class="headerlink" href="#cd" title="Lien vers cette rubrique">¶</a></h3>
-<p>Le workflow <a class="reference external" href="https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/cd.yml">cd</a> est exécuté <strong>sur les commits de la branche <code class="docutils literal notranslate"><span class="pre">main</span></code>.</strong></p>
-<p>Il exécute les tests CI, build et push les images Airflow avec le tag <code class="docutils literal notranslate"><span class="pre">preprod</span></code> et peut déployer Airflow et l’application web lorsqu’une action manuelle est effectuée. Une release est alors créée automatiquement avec le statut de <code class="docutils literal notranslate"><span class="pre">draft</span></code>.</p>
-</section>
-<section id="deploy">
-<h3>Deploy<a class="headerlink" href="#deploy" title="Lien vers cette rubrique">¶</a></h3>
-<p>Le workflow <a class="reference external" href="https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/deploy.yml">deploy</a> est exécuté <strong>lorsqu’une release passe du statut de <code class="docutils literal notranslate"><span class="pre">draft</span></code> à <code class="docutils literal notranslate"><span class="pre">published</span></code>.</strong></p>
-<p>Airflow et l’application web sont alors déployés en environnement de <code class="docutils literal notranslate"><span class="pre">prod</span></code>.</p>
-</section>
-</section>
-<section id="deploiement-sur-scalingo">
-<h2>Déploiement sur Scalingo<a class="headerlink" href="#deploiement-sur-scalingo" title="Lien vers cette rubrique">¶</a></h2>
-<p>Nous avons besoin d’installer GDAL comme c’est expliqué dans la doc suivante : <a class="reference external" href="https://techilearned.com/configure-geodjango-in-scalingo/">https://techilearned.com/configure-geodjango-in-scalingo/</a> cf. <a class="reference external" href="https://doc.scalingo.com/platform/app/app-with-gdal">https://doc.scalingo.com/platform/app/app-with-gdal</a></p>
-<p>le code est déployé en preprod lors de la mise à jour de la branche main</p>
-<p>et en production quand il est tagué avec en respectant le format de version semantique vX.Y.Z</p>
-<section id="deploiement-du-code-de-l-interface">
-<h3>Déploiement du code de l’interface<a class="headerlink" href="#deploiement-du-code-de-l-interface" title="Lien vers cette rubrique">¶</a></h3>
-<p>le code de l’interface est déployé sur le repo git de scalingo à conditions que les tests soit passés avec succès via Github</p>
-</section>
-</section>
-<section id="deploiement-sur-scaleway">
-<h2>Deploiement sur Scaleway<a class="headerlink" href="#deploiement-sur-scaleway" title="Lien vers cette rubrique">¶</a></h2>
-<!-- TODO s3 et bientôt plus ? -->
+<section id="continuous-integration-continuous-delivery">
+<h2>Continuous Integration / Continuous Delivery<a class="headerlink" href="#continuous-integration-continuous-delivery" title="Lien vers cette rubrique">¶</a></h2>
+<p>La documentation du process de CI/CD est disponible dans la section <a class="reference internal" href="../../reference/infrastructure/ci-cd.html"><span class="std std-doc">Référence/Infrastructure/CI-CD</span></a></p>
 </section>
 <section id="acceder-a-un-shell-en-production">
 <h2>Accéder à un shell en production<a class="headerlink" href="#acceder-a-un-shell-en-production" title="Lien vers cette rubrique">¶</a></h2>
@@ -490,17 +461,7 @@ Accéder à l’administration Django et vérifier les données qui ont été re
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">DevOps, déploiement, opérations</a><ul>
-<li><a class="reference internal" href="#continuous-delivery">Continuous Delivery</a><ul>
-<li><a class="reference internal" href="#review">Review</a></li>
-<li><a class="reference internal" href="#cd">CD</a></li>
-<li><a class="reference internal" href="#deploy">Deploy</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#deploiement-sur-scalingo">Déploiement sur Scalingo</a><ul>
-<li><a class="reference internal" href="#deploiement-du-code-de-l-interface">Déploiement du code de l’interface</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#deploiement-sur-scaleway">Deploiement sur Scaleway</a></li>
+<li><a class="reference internal" href="#continuous-integration-continuous-delivery">Continuous Integration / Continuous Delivery</a></li>
 <li><a class="reference internal" href="#acceder-a-un-shell-en-production">Accéder à un shell en production</a></li>
 <li><a class="reference internal" href="#rollback-revenir-a-une-version-precedente-de-l-application-deployee">Rollback: Revenir à une version précédente de l’application déployée</a><ul>
 <li><a class="reference internal" href="#rollback-des-interfaces">Rollback des interfaces</a><ul>
