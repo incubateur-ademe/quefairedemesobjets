@@ -145,6 +145,12 @@ class CarteSearchActeursView(SearchActeursView):
 
         return set()
 
+    def _get_epci_codes(self) -> list[str]:
+        legacy_form = self._get_legacy_form()
+        if not legacy_form:
+            return []
+        return legacy_form.decode_querystring().getlist("epci_codes")
+
     # Forms and field utilities
     # =========================
     def _create_form_instance(self, form_class, data, prefix, legacy_form):
@@ -160,7 +166,6 @@ class CarteSearchActeursView(SearchActeursView):
         form = self._create_form_instance(
             form_config["form"], data, primary_prefix, legacy_form
         )
-
         if form.is_valid():
             return form
 
@@ -554,6 +559,13 @@ class CarteConfigView(DetailView, CarteSearchActeursView):
             result_ids = result_ids & filter_ids if result_ids else filter_ids
 
         return list(result_ids)
+
+    def _get_epci_codes(self) -> list[str]:
+        epci_codes = super()._get_epci_codes()
+        if not epci_codes:
+            epci_codes = self.carte_config.epci.all().values_list("code", flat=True)
+
+        return epci_codes
 
     def _get_action_ids(self) -> list[str]:
         action_ids = super()._get_action_ids()
