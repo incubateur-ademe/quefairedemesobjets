@@ -1,17 +1,17 @@
 resource "scaleway_container" "airflow_scheduler" {
-  name           = "${var.prefix}-airflow-scheduler"
-  tags           = [var.environment, var.prefix, "airflow", "scheduler"]
-  namespace_id   = scaleway_container_namespace.main.id
-  registry_image = var.airflow_scheduler_registry_image
-  port           = 8974
-  cpu_limit      = var.airflow_scheduler_cpu_limit
-  memory_limit   = var.airflow_scheduler_memory_limit
-  min_scale      = var.airflow_scheduler_min_scale
-  max_scale      = var.airflow_scheduler_max_scale
-  timeout        = var.airflow_scheduler_timeout
-  deploy         = true
-  privacy        = "public"
-  protocol       = "http1"
+  name                = "${var.prefix}-airflow-scheduler"
+  tags                = [var.environment, var.prefix, "airflow", "scheduler"]
+  namespace_id        = scaleway_container_namespace.main.id
+  registry_image      = var.airflow_scheduler_registry_image
+  port                = 8974
+  cpu_limit           = var.airflow_scheduler_cpu_limit
+  memory_limit        = var.airflow_scheduler_memory_limit
+  min_scale           = var.airflow_scheduler_min_scale
+  max_scale           = var.airflow_scheduler_max_scale
+  timeout             = var.airflow_scheduler_timeout
+  deploy              = true
+  privacy             = "public"
+  protocol            = "http1"
   local_storage_limit = 10240 # 10 GB
 
   health_check {
