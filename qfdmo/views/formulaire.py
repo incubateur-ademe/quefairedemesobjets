@@ -275,8 +275,20 @@ class FormulaireSearchActeursView(SearchActeursView):
             map_container_id="formulaire",
             action_direction_form=self.action_direction_form,
             digital_acteur_form=self.digital_acteur_form,
+            selected_action_codes=self._get_action_codes(),
         )
         return context
+
+    def _get_action_codes(self) -> str:
+        """Get selected action codes as a pipe-separated string for use in templates.
+
+        Returns action codes that can be passed to acteur_pinpoint_tag.
+        """
+        action_list = self.get_action_list()
+        if not action_list:
+            return ""
+        action_codes = [action["code"] for action in action_list]
+        return "|".join(action_codes)
 
     def _get_selected_action_ids(self):
         # TODO: merge this method with the one from CarteSearchActeursView

@@ -128,10 +128,18 @@ def acteur_pinpoint_tag(
       - marker_fill_background
       - marker_icon_extra_classes
     """
+    # Generate mask_id early to ensure it's included in all return paths
+    mask_id = acteur.uuid
+    if MAP_CONTAINER_ID in context:
+        mask_id += f"-{context[MAP_CONTAINER_ID]}"
+    if counter:
+        mask_id += f"-{counter}"
+
     tag_context = {
         "acteur": acteur,
         "request": context.get("request"),
         MAP_CONTAINER_ID: context.get(MAP_CONTAINER_ID),
+        "mask_id": mask_id,
         "marker_icon": "",
         "marker_couleur": "",
         "marker_icon_file": "",
@@ -205,15 +213,7 @@ def acteur_pinpoint_tag(
                 marker_icon_extra_classes="qf-text-white",
             )
 
-    mask_id = acteur.uuid
-    if MAP_CONTAINER_ID in context:
-        mask_id += f"-{context[MAP_CONTAINER_ID]}"
-
-    if counter:
-        mask_id += f"-{counter}"
-
     tag_context.update(
-        mask_id=mask_id,
         marker_icon=action_to_display.icon,
         marker_couleur=action_to_display.couleur,
     )
