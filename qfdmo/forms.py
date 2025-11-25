@@ -177,12 +177,14 @@ class LegendeForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
     }
 
     groupe_action = GroupeActionChoiceField(
-        queryset=GroupeAction.objects.filter(afficher=True).order_by("order"),
+        queryset=GroupeAction.objects.filter(afficher=True)
+        .prefetch_related("actions")
+        .order_by("order"),
         to_field_name="id",
         widget=forms.CheckboxSelectMultiple,
         required=False,
         label="",
-        initial=GroupeAction.objects.filter(afficher=True),
+        initial=GroupeAction.objects.filter(afficher=True).prefetch_related("actions"),
     )
 
     def _apply_legacy_querystring_overrides(self, legacy_form):
@@ -211,6 +213,7 @@ class LegendeForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
                     GroupeAction.objects.filter(
                         actions__code__in=action_codes, afficher=True
                     )
+                    .prefetch_related("actions")
                     .distinct()
                     .order_by("order")
                 )
@@ -231,6 +234,7 @@ class LegendeForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
                     GroupeAction.objects.filter(
                         actions__code__in=action_codes, afficher=True
                     )
+                    .prefetch_related("actions")
                     .distinct()
                     .order_by("order")
                 )
@@ -472,11 +476,13 @@ class CarteForm(AddressesForm):
 class ConfiguratorForm(DsfrBaseForm):
     # TODO: rename this field in all codebase -> actions_displayed
     action_list = GroupeActionChoiceField(
-        queryset=GroupeAction.objects.all().order_by("order"),
+        queryset=GroupeAction.objects.all()
+        .prefetch_related("actions")
+        .order_by("order"),
         to_field_name="code",
         widget=forms.CheckboxSelectMultiple,
         required=False,
-        initial=GroupeAction.objects.exclude(code="trier"),
+        initial=GroupeAction.objects.exclude(code="trier").prefetch_related("actions"),
         label=mark_safe(
             "<h3>Informations disponibles sur la carte</h3>"
             "Choisissez les actions disponibles pour vos usagers."
