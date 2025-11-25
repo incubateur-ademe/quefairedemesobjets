@@ -333,42 +333,44 @@ class ComponentsPreview(LookbookPreview):
         return template.render(Context(context))
 
     def service_tag(self, **kwargs):
-        """Preview for service tags in both carte and non-carte modes"""
+        """Preview for service tags in both default and formulaire modes"""
         action = Action.objects.first()
         if not action:
             return "No actions available in database"
 
-        context_carte = {
+        context_default = {
             "action": action,
-            "is_carte": True,
+            # is_formulaire not set, defaults to False
         }
-        context_non_carte = {
+        context_formulaire = {
             "action": action,
-            "is_carte": False,
+            "is_formulaire": True,
         }
 
         # Render both versions to show the difference
-        carte_html = Template(
+        default_html = Template(
             """
             {% load acteur_tags %}
             <div style="padding: 1rem;">
-                <h3>Service tag in carte mode (is_carte=True)</h3>
+                <h3>Service tag - default (carte/list/acteur detail)</h3>
+                <p>Uses action.groupe_action - is_formulaire is not set (defaults to False)</p>
                 {% service_tag text=action.libelle action=action %}
             </div>
             """
-        ).render(Context(context_carte))
+        ).render(Context(context_default))
 
-        non_carte_html = Template(
+        formulaire_html = Template(
             """
             {% load acteur_tags %}
             <div style="padding: 1rem;">
-                <h3>Service tag in non-carte mode (is_carte=False)</h3>
+                <h3>Service tag - formulaire mode</h3>
+                <p>Uses action directly with reduced opacity - is_formulaire=True</p>
                 {% service_tag text=action.libelle action=action %}
             </div>
             """
-        ).render(Context(context_non_carte))
+        ).render(Context(context_formulaire))
 
-        return carte_html + non_carte_html
+        return default_html + formulaire_html
 
 
 class FiltresPreview(LookbookPreview):

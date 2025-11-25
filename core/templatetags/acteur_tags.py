@@ -73,15 +73,16 @@ def acteur_label(context, acteur=None):
 def service_tag(context, text, action):
     """
     Renders a service tag with proper styling based on the action group.
-    In carte mode, displays action.groupe_action, otherwise displays action directly.
+    In formulaire mode, displays action directly with reduced opacity.
+    In carte/list mode (default), displays action.groupe_action.
     """
-    is_carte = context.get("is_carte", False)
+    is_formulaire = context.get("is_formulaire", False)
 
-    # In carte mode, use groupe_action; otherwise use action directly
-    display_action = action.groupe_action if is_carte else action
+    # In formulaire mode, use action directly; otherwise use groupe_action
+    display_action = action if is_formulaire else action.groupe_action
 
     return {
         "text": text,
         "action": display_action,
-        "extra_classes": "" if is_carte else "qf-bg-opacity-30",
+        "extra_classes": "qf-bg-opacity-30" if is_formulaire else "",
     }

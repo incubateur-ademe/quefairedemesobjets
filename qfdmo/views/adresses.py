@@ -179,6 +179,10 @@ class SearchActeursView(
             is_carte=self.is_carte,
         )
 
+        # Only add is_formulaire flag for non-carte views (formulaire mode)
+        if not self.is_carte:
+            kwargs.update(is_formulaire=True)
+
         if form.is_valid():
             self.cleaned_data = form.cleaned_data
         else:
@@ -492,7 +496,7 @@ def acteur_detail(request, uuid):
         "direction": direction,
         "display_labels_panel": display_labels_panel,
         "display_sources_panel": display_sources_panel,
-        "is_carte": "carte" in request.GET,
+        "is_carte": "carte" in request.GET or "with_map" in request.GET,
         "map_container_id": request.GET.get("map_container_id", "carte"),
     }
 
