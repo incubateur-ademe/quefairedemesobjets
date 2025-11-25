@@ -36,10 +36,6 @@ et en production quand il est tagué avec en respectant le format de version sem
 
 le code de l'interface est déployé sur le repo git de scalingo à conditions que les tests soit passés avec succès via Github
 
-## Déploiement sur CleverCloud
-
-<!-- TODO data plateforme -->
-
 ## Deploiement sur Scaleway
 
 <!-- TODO s3 et bientôt plus ? -->

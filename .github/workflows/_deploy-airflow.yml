@@ -17,27 +17,6 @@ jobs:
       image_tag: ${{ inputs.tag_name }}
       environment: ${{ inputs.environment }}
 
-  # WILL BE DEPRECATED SOON
-  deploy_airflow-webserver:
-    if: ${{ inputs.environment == 'prod' }}
-    name: 🔄 CleverCloud Webserver
-    uses: ./.github/workflows/_deploy-on-clever-cloud.yml
-    secrets: inherit # pragma: allowlist secret`
-    with:
-      environment: ${{ inputs.environment }}
-      # Name of environment variable set in github environment
-      app_name_key: AIRFLOW_SCHEDULER_CLEVERCLOUD_APP_NAME
-
-  # WILL BE DEPRECATED SOON
-  deploy_airflow-scheduler:
-    if: ${{ inputs.environment == 'prod' }}
-    name: ⏳ CleverCloud Scheduler
-    uses: ./.github/workflows/_deploy-on-clever-cloud.yml
-    secrets: inherit # pragma: allowlist secret`
-    with:
-      environment: ${{ inputs.environment }}
-      # Name of environment variable set in github environment
-      app_name_key: AIRFLOW_WEBSERVER_CLEVERCLOUD_APP_NAME
 
   deploy_scaleway_scheduler:
     name: 🟣⏳ Scaleway Airflow scheduler
