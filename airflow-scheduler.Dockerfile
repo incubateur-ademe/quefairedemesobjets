@@ -44,11 +44,11 @@ COPY --from=python-builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
 # Nécessaire pour faire fonctionner Django dans Airflow
 COPY ./core/ /opt/airflow/core/
-COPY ./qfdmo/ /opt/airflow/qfdmo/
 COPY ./data/ /opt/airflow/data/
 COPY ./dbt/ /opt/airflow/dbt/
-COPY ./scripts/ /opt/airflow/scripts/
 COPY ./dsfr_hacks/ /opt/airflow/dsfr_hacks/
+COPY ./qfdmo/ /opt/airflow/qfdmo/
+COPY ./scripts/ /opt/airflow/scripts/
 
 # Classique Airflow
 COPY ./dags/ /opt/airflow/dags/
