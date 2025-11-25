@@ -1,7 +1,9 @@
+import json
 import logging
 from typing import Any, TypedDict, override
 
 from django.conf import settings
+from django.contrib.gis.geos import Point
 from django.forms import Form
 from django.utils.functional import cached_property
 from django.views.generic import DetailView
@@ -246,6 +248,38 @@ class CarteSearchActeursView(SearchActeursView):
         if self.request.GET.get("limit", "").isnumeric():
             return int(self.request.GET.get("limit"))
         return settings.CARTE_MAX_SOLUTION_DISPLAYED
+
+    def _build_acteurs_queryset_from_location(self, acteurs, **kwargs):
+        """Override parent to reorder by distance after limiting.
+
+        In carte mode, after limiting the queryset to max_displayed_acteurs,
+        we reorder by distance from the center point to ensure the closest
+        acteurs are shown first on the map.
+        """
+        bbox, acteurs = super()._build_acteurs_queryset_from_location(acteurs, **kwargs)
+
+        # In mode liste, we want to sort by distance but do not annotate before
+        # filtering and limiting so that we do not annotate the whole database.
+        # Instead, we annotate here after the queryset has been limited.
+        if not getattr(acteurs, "_has_distance_field", False) and self.location:
+            location_data = json.loads(self.location)
+            reference_point = Point(
+                location_data["longitude"], location_data["latitude"], srid=4326
+            )
+            # Convert to list and sort in Python since queryset is already sliced
+            acteurs_list = list(acteurs)
+            for acteur in acteurs_list:
+                acteur.distance = acteur.location.distance(reference_point)
+            acteurs = sorted(acteurs_list, key=lambda a: a.distance)
+        elif getattr(acteurs, "_has_distance_field", False):
+            # Only reorder via SQL if queryset hasn't been sliced yet
+            try:
+                acteurs = acteurs.order_by("distance")
+            except TypeError:
+                # Queryset was already sliced, convert to list and sort
+                acteurs = sorted(list(acteurs), key=lambda a: a.distance)
+
+        return bbox, acteurs
 
     def get_context_data(self, **kwargs):
         self.ui_forms = self._get_forms()
