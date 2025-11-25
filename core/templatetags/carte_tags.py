@@ -121,8 +121,7 @@ def acteur_pinpoint_tag(context, counter=0):
     acteur = context.get("acteur")
     carte = context.get("carte", None)
     carte_config = context.get("carte_config", None)
-    sous_categories_ids = context.get("selected_sous_categories_ids")
-    actions_ids = context.get("selected_actions_ids")
+    all_groupe_actions = context.get("all_groupe_actions", {})
 
     context = {
         "acteur": acteur,
@@ -136,14 +135,8 @@ def acteur_pinpoint_tag(context, counter=0):
         "marker_icon_extra_classes": "",
     }
 
-    # TODO:
-    # - annotate with proposition services at the database level
-    # - for each PSS, find a way (annotation ?) to get the value for each groupe action
-    # - maybe : keep only pss that match the sous categories searched
-    # - This way, we can get acteur.propositions_services
-    groupe_action_to_display = acteur.groupe_action_to_display(
-        sous_categories_ids, actions_ids
-    )
+    # Use the optimized annotated data if available
+    groupe_action_to_display = acteur.get_computed_groupe_action(all_groupe_actions)
 
     if groupe_action_to_display is None:
         logger.warning("No actions found for acteur %s", acteur)

@@ -45,7 +45,7 @@ from dags.sources.config.shared_constants import (
     REPRISE_1POUR0,
     REPRISE_1POUR1,
 )
-from qfdmo.models.action import Action, get_action_instances
+from qfdmo.models.action import Action, GroupeAction, get_action_instances
 from qfdmo.models.categorie_objet import SousCategorieObjet
 
 # Explicit imports from models config, action, categories, utils
@@ -703,10 +703,6 @@ class BaseActeur(TimestampedModel):
             - Si l'acteur dispose du bonus réparation : on l'affiche
         """
         return self.labels.filter(afficher=True).order_by("-bonus", "type_enseigne")
-
-    @cached_property
-    def is_bonus_reparation(self):
-        return self.labels.filter(afficher=True, bonus=True).exists()
 
     def proposition_services_by_direction(self, direction: str | None = None):
         if direction:
@@ -1425,6 +1421,35 @@ class DisplayedActeur(FinalActeur, LatLngPropertiesMixin):
         return not self.is_digital and bool(
             self.adresse or self.adresse_complement or self.code_postal or self.ville
         )
+
+    def get_computed_groupe_action(self, all_groupe_actions_dict=None):
+        """
+        Get the groupe_action based on the annotated computed_groupe_action_id.
+        Falls back to calling groupe_action_to_display if annotation doesn't exist.
+        """
+        if hasattr(self, "computed_groupe_action_id"):
+            groupe_action_id = self.computed_groupe_action_id
+
+            # Try to get from provided dict first (most efficient)
+            if all_groupe_actions_dict and groupe_action_id in all_groupe_actions_dict:
+                return all_groupe_actions_dict[groupe_action_id]
+
+            # Try to get from action_principale (already prefetched)
+            if (
+                self.action_principale
+                and self.action_principale.groupe_action
+                and self.action_principale.groupe_action.id == groupe_action_id
+            ):
+                return self.action_principale.groupe_action
+
+            # Fallback: query (should rarely happen with proper setup)
+            try:
+                return GroupeAction.objects.get(id=groupe_action_id)
+            except GroupeAction.DoesNotExist:
+                return None
+
+        # Annotation doesn't exist, use old method (backward compatibility)
+        return None
 
 
 class DisplayedPerimetreADomicile(BasePerimetreADomicile):

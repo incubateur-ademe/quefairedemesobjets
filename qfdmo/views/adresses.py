@@ -10,8 +10,16 @@ from django.contrib.postgres.search import TrigramWordDistance
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
-from django.db.models import Q
-from django.db.models.functions import Length, Lower
+from django.db.models import (
+    Exists,
+    IntegerField,
+    OuterRef,
+    Prefetch,
+    Q,
+    Subquery,
+    Value,
+)
+from django.db.models.functions import Coalesce, Length, Lower
 from django.db.models.query import QuerySet
 from django.http import Http404, JsonResponse
 from django.shortcuts import redirect, render
@@ -27,7 +35,9 @@ from qfdmo.map_utils import (
     sanitize_frontend_bbox,
 )
 from qfdmo.models import Acteur, ActeurStatus, DisplayedActeur, RevisionActeur
+from qfdmo.models.acteur import DisplayedPropositionService, LabelQualite
 from qfdmo.models.action import (
+    GroupeAction,
     get_reparer_action_id,
 )
 
@@ -188,6 +198,12 @@ class SearchActeursView(
         acteurs = self._build_acteurs_queryset_from_sous_categorie_objet_and_actions()
         bbox, acteurs = self._build_acteurs_queryset_from_location(acteurs, **kwargs)
 
+        # After enriching acteurs
+        acteurs = self._enrich_acteurs_queryset_with_icons(acteurs)
+
+        # Prefetch ALL GroupeActions (typically small dataset)
+        # This allows us to access any GroupeAction by ID without additional queries
+        all_groupe_actions = {ga.id: ga for ga in GroupeAction.objects.all()}
         if self.paginate:
             page_size = 10
             paginated_acteurs = Paginator(
@@ -206,7 +222,12 @@ class SearchActeursView(
 
         context = super().get_context_data(**kwargs)
 
-        context.update(location=getattr(self, "location", ""))
+        context.update(
+            location=getattr(self, "location", ""),
+            all_groupe_actions=all_groupe_actions,
+            sous_categories_ids=self.sous_categorie_ids,
+            selected_actions_ids=self.selected_action_ids,
+        )
 
         # TODO : refacto forms, gérer ça autrement
         try:
@@ -226,31 +247,65 @@ class SearchActeursView(
         - epci_codes
         - user location
         """
-        acteurs = acteurs.prefetch_related(
-            "proposition_services__sous_categories",
-            "proposition_services__sous_categories__categorie",
-            "proposition_services__action",
-            "labels",
-            "action_principale",
+        # Get filter criteria from form
+        self.selected_action_ids = self._get_action_ids()
+        self.sous_categorie_ids = self._get_sous_categorie_ids()
+
+        acteurs = (
+            acteurs.select_related(
+                "action_principale",
+                "action_principale__groupe_action",
+            )
+            .prefetch_related(
+                Prefetch(
+                    "proposition_services",
+                    queryset=DisplayedPropositionService.objects.filter(
+                        action_id__in=self.selected_action_ids,
+                        sous_categories__id__in=self.sous_categorie_ids,
+                    )
+                    .select_related(
+                        "action",
+                        "action__groupe_action",
+                    )
+                    .prefetch_related(
+                        "sous_categories",
+                        "sous_categories__categorie",
+                    )
+                    .distinct(),
+                ),
+                Prefetch(
+                    "labels",
+                    queryset=LabelQualite.objects.all(),
+                ),
+            )
+            .annotate(
+                is_bonus_reparation=Exists(
+                    LabelQualite.objects.filter(  # Replace with your actual Label model
+                        acteur=OuterRef("pk"), afficher=True, bonus=True
+                    )
+                )
+            )
         )
+
         bbox, acteurs = self._bbox_and_acteurs_from_location_or_epci(acteurs)
+
         acteurs = acteurs.only(
             "location",
             "identifiant_unique",
             "action_principale_id",
             "uuid",
-            "proposition_services",
         )
+
         if getattr(acteurs, "_has_distance_field", False):
             acteurs = acteurs.distinct("distance")
         else:
             acteurs = acteurs.distinct()
+
         acteurs = acteurs[: self._get_max_displayed_acteurs()]
+
         if getattr(acteurs, "_needs_reparer_bonus", False):
             acteurs = acteurs.with_bonus().with_reparer()
 
-        # Set Home location (address set as input)
-        # FIXME : can be manage in template using the form value ?
         return bbox, acteurs
 
     def _bbox_and_acteurs_from_location_or_epci(self, acteurs):
@@ -311,6 +366,49 @@ class SearchActeursView(
         # Store whether we need reparer/bonus annotations for later
         # We'll apply them AFTER limiting to avoid expensive subqueries on all rows
         acteurs._needs_reparer_bonus = reparer_is_checked
+
+        return acteurs
+
+    def _enrich_acteurs_queryset_with_icons(
+        self, acteurs: QuerySet[DisplayedActeur]
+    ) -> QuerySet[DisplayedActeur]:
+        default_groupe_action_id = cache.get_or_set(
+            "default_groupe_action_id",
+            lambda: GroupeAction.objects.order_by("order")
+            .values_list("id", flat=True)
+            .first(),
+            timeout=3600,
+        )
+
+        matching_proposition_services = DisplayedPropositionService.objects.filter(
+            acteur_id=OuterRef("pk"),
+        )
+        if self.selected_action_ids:
+            matching_proposition_services = matching_proposition_services.filter(
+                action_id__in=self.selected_action_ids,
+            )
+        if self.sous_categorie_ids:
+            matching_proposition_services = matching_proposition_services.filter(
+                sous_categories__id__in=self.sous_categorie_ids,
+            )
+
+        principal_ga_subquery = matching_proposition_services.filter(
+            action_id=OuterRef("action_principale_id"),
+        ).values("action__groupe_action_id")[:1]
+        fallback_ga_subquery = matching_proposition_services.order_by(
+            "action__groupe_action__order",
+            "action__order",
+            "pk",
+        ).values("action__groupe_action_id")[:1]
+
+        acteurs = acteurs.annotate(
+            computed_groupe_action_id=Coalesce(
+                Subquery(principal_ga_subquery),
+                Subquery(fallback_ga_subquery),
+                Value(default_groupe_action_id),
+                output_field=IntegerField(),
+            ),
+        )
 
         return acteurs
 

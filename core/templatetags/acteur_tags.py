@@ -1,10 +1,12 @@
 from urllib.parse import urlencode
 
+from django.core.cache import cache
 from django.template.defaulttags import register
 from django.template.loader import render_to_string
 
 from core.constants import ACTEUR
 from core.templatetags.turbo_tags import namespaced
+from qfdmo.models.action import GroupeAction
 
 
 @register.simple_tag(takes_context=True)
@@ -67,3 +69,18 @@ def acteur_label(context, acteur=None):
             }
         else:
             return {"label": dsfr_label}
+
+
+@register.simple_tag(takes_context=True)
+def groupe_action_icon(context, acteur):
+    """Return the icon for the acteur's computed groupe action."""
+    groupe_action = acteur.get_computed_groupe_action(context.get("all_groupe_actions"))
+    if groupe_action:
+        return groupe_action.icon
+
+    default_ga = cache.get("default_groupe_action")
+    if default_ga is None:
+        default_ga = GroupeAction.objects.order_by("order").first()
+        cache.set("default_groupe_action", default_ga, 3600)
+
+    return default_ga.icon if default_ga else None
