@@ -1,5 +1,4 @@
 from datetime import datetime, timezone
-from typing import Optional
 
 import requests
 from django.conf import settings
@@ -21,7 +20,7 @@ DESCRIPTION = (
 def fetch_north_star_stats(
     periodicity: StatPeriodicity,
     *,
-    since: Optional[int],
+    since: int | None = None,
 ) -> StatOutput:
 
     def _get_stat_setting(name: str) -> str:
@@ -31,7 +30,7 @@ def fetch_north_star_stats(
         return value
 
     def _build_query_payload(
-        periodicity: StatPeriodicity, since: Optional[int]
+        periodicity: StatPeriodicity, since: int | None = None
     ) -> dict:
         query_payload = QUERY_DATA.copy()
         query_payload["query"]["interval"] = periodicity

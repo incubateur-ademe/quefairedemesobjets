@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Literal, Optional
+from typing import Literal
 
 from ninja import Field, Schema
 
@@ -8,7 +8,7 @@ StatPeriodicity = Literal["day", "week", "month", "year"]
 
 
 class StatInput(Schema):
-    since: Optional[int] = Field(
+    since: int | None = Field(
         None,
         ge=1,
         description="Nombre d'itérations de la période souhaitée (ex: 30 jours).",
@@ -26,5 +26,5 @@ class Stat(Schema):
 
 
 class StatOutput(Schema):
-    description: Optional[str] = None
+    description: str | None = None
     stats: list[Stat]
