@@ -50,15 +50,21 @@ def acteur_label(context, acteur=None):
 
     labels_qualite_ordered = acteur.labels_display
     first_label_qualite = labels_qualite_ordered.first()
-    dsfr_label = render_to_string(
-        "ui/components/label_qualite/dsfr_label.html", {"label": first_label_qualite}
-    )
     if not first_label_qualite:
         return {}
 
-    if first_label_qualite.code == "bonusrepar":
+    if first_label_qualite.bonus:
+        first_label_qualite.libelle = "Labellisé bonus réparation"
+        dsfr_label = render_to_string(
+            "ui/components/label_qualite/dsfr_label.html",
+            {"label": first_label_qualite},
+        )
         return {"label": dsfr_label}
     else:
+        dsfr_label = render_to_string(
+            "ui/components/label_qualite/dsfr_label.html",
+            {"label": first_label_qualite},
+        )
         non_enseigne_count = acteur.labels_without_enseigne_display.count()
         if non_enseigne_count > 1:
             return {

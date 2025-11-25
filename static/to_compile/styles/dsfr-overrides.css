@@ -226,7 +226,8 @@ DSFR customization for tabs
   }
 }
 
-.fr-segmented__legend:not(:has(*)) {
+.fr-segmented__legend:not(:has(*)),
+.fr-fieldset__legend:not(:has(*)) {
   @apply qf-hidden;
 }
 

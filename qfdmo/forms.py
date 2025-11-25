@@ -344,6 +344,14 @@ class FiltresForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
         required=False,
     )
 
+    bonus = forms.BooleanField(
+        required=False,
+        initial=False,
+        label="Lieux proposant le Bonus Réparation",
+        help_text="Uniquement les acteurs proposant le Bonus Réparation (Disponible"
+        ' pour l\'action "Je répare")',
+    )
+
     label_qualite = LabelQualiteChoiceField(
         queryset=LabelQualite.objects.filter(afficher=True, filtre=True),
         to_field_name="code",

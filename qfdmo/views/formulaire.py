@@ -236,6 +236,9 @@ class FormulaireSearchActeursView(SearchActeursView):
     def _get_bonus(self):
         return self.get_data_from_request_or_bounded_form("bonus")
 
+    def _get_pas_exclusivite_reparation(self) -> bool:
+        return self.get_data_from_request_or_bounded_form("pas_exclusivite_reparation")
+
     def _get_sous_categorie_ids(self) -> list[int]:
         if id := self.get_data_from_request_or_bounded_form("sc_id"):
             return [id]

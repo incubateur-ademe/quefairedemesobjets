@@ -217,7 +217,10 @@ class CarteSearchActeursView(SearchActeursView):
         return self._check_if_label_qualite_is_set("reparacteur")
 
     def _get_bonus(self):
-        return self._check_if_label_qualite_is_set("bonusrepar")
+        return self._get_field_value_for("filtres", "bonus")
+
+    def _get_pas_exclusivite_reparation(self) -> bool:
+        return self._get_field_value_for("filtres", "pas_exclusivite_reparation")
 
     def _check_if_label_qualite_is_set(self, label):
         try:

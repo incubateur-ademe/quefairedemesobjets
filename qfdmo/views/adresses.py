@@ -92,6 +92,10 @@ class SearchActeursView(
         pass
 
     @abstractmethod
+    def _get_pas_exclusivite_reparation(self) -> bool:
+        pass
+
+    @abstractmethod
     def _get_sous_categorie_ids(self) -> list[int]:
         pass
 
@@ -330,8 +334,7 @@ class SearchActeursView(
         excludes = Q()
 
         if (
-            self.get_data_from_request_or_bounded_form("pas_exclusivite_reparation")
-            is not False
+            self._get_pas_exclusivite_reparation() is not False
             or not reparer_is_checked
         ):
             excludes |= Q(exclusivite_de_reprisereparation=True)
@@ -499,6 +502,10 @@ def acteur_detail(request, uuid):
         "is_carte": "carte" in request.GET or "with_map" in request.GET,
         "map_container_id": request.GET.get("map_container_id", "carte"),
     }
+
+    # Set is_formulaire flag when not coming from carte/list modes
+    if not ("carte" in request.GET or "with_map" in request.GET):
+        context["is_formulaire"] = True
 
     if latitude and longitude and not displayed_acteur.is_digital:
         context.update(
