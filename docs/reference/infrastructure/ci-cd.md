@@ -4,7 +4,9 @@ Cette documentation décrit les différents workflows de CI/CD du projet et ce q
 
 ## Création ou mise à jour d'une Pull Request
 
-Lorsqu'une Pull Request est créée ou mise à jour (événements `opened` ou `synchronize`), le workflow **Review** (`review.yml`) est déclenché.
+Lorsqu'une Pull Request est créée ou mise à jour (événements `opened` ou `synchronize`), le workflow **Review** ([review.yml](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/review.yml)) est déclenché.
+
+Les tests et les linters sont exécutés et il est possible de déployer la branche de la PR en environnement de `preprod`.
 
 ### Flux du workflow Review
 
@@ -35,9 +37,9 @@ graph TD
 
 ## Merge d'une PR sur main
 
-Lorsqu'une Pull Request est mergée sur la branche `main`, le workflow **CD** (`cd.yml`) est déclenché.
+Lorsqu'une Pull Request est mergée sur la branche `main`, le workflow **CD** ([cd.yml](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/cd.yml)) est déclenché.
 
-le Workkflow est très semblable au workflow de review
+le Workkflow est très semblable au workflow de review : Les tests et les linters sont exécutés et il est possible de déployer la branche `main` en environnement de `preprod`.
 
 ### Flux du workflow CD
 
@@ -67,7 +69,9 @@ graph TD
 
 ## Publication d'une release
 
-Lorsqu'une release est publiée sur GitHub (événement `published`), le workflow **Deploy** (`deploy.yml`) est déclenché pour déployer en production.
+Lorsqu'une release est publiée sur GitHub (événement `published`), le workflow **Deploy** ([deploy.yml](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/deploy.yml)) est déclenché pour déployer en production.
+
+La version de code tag est déployé en environnement de `prod`
 
 ### Flux du workflow Deploy
 
