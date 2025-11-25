@@ -16,7 +16,7 @@ jobs:
     runs-on: "ubuntu-latest"
     environment: ${{ inputs.environment }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - uses: 47ng/actions-clever-cloud@f496297399b2351f4459d10f556e1c4eff2566b7 # v2.1.0

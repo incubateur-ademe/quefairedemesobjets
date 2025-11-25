@@ -8,7 +8,7 @@ jobs:
     name: 📝 Backend Linter
     runs-on: ubuntu-slim
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Install uv
         uses: astral-sh/setup-uv@5a7eac68fb9809dea845d802897dc5c723910fa3
         with:
@@ -37,7 +37,7 @@ jobs:
     name: 📝 Frontend Linter
     runs-on: ubuntu-slim
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
           node-version-file: ".tool-versions"
@@ -67,7 +67,7 @@ jobs:
           - 6543:5432
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Install GIS Packages
         run: |
           sudo apt-get update
@@ -99,7 +99,7 @@ jobs:
     name: ✅ Frontend Tests
     runs-on: ubuntu-slim
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
           node-version-file: ".tool-versions"
@@ -130,7 +130,7 @@ jobs:
         ports:
           - 6543:5432
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Prepare environment
         run: |
           cp .env.template .env

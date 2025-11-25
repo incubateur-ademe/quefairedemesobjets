@@ -27,7 +27,7 @@ jobs:
               "username": "Bipboop le robot de seconde main",
               "icon": "https://cdn3.iconfinder.com/data/icons/system-basic-vol-4-1/20/icon-note-attention-alt3-512.png"
             }
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - uses: kolok/deploy-to-scalingo@3c03e17a8815000194aa06289db6e80ef1a687bc # v1
         id: deploy
