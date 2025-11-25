@@ -347,19 +347,31 @@
 <p>On distingue 3 environements:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">development</span></code> : airflow tourne localement en utilisant l’orchestrateur <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">compose</span></code> (cf. <a class="reference download internal" download="" href="../../_downloads/f0f45a183f8765773a1d775882cc3b53/docker-compose.yml"><span class="xref download myst">docker-compose.yml</span></a>)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">preprod</span></code> et <code class="docutils literal notranslate"><span class="pre">prod</span></code> : airflow tourne sur CleverCloud</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">preprod</span></code> et <code class="docutils literal notranslate"><span class="pre">prod</span></code> : Airflow tourne sur Scaleway</p></li>
 </ul>
 </section>
-<section id="mise-a-jour-du-scheduler-et-du-webserver-sur-clevercloud">
-<h2>Mise à jour du scheduler et du webserver sur CleverCloud<a class="headerlink" href="#mise-a-jour-du-scheduler-et-du-webserver-sur-clevercloud" title="Lien vers cette rubrique">¶</a></h2>
-<p>Airflow tourne sur CleverCloud sur un ensemble de serveur par environnement et utilise les services suivant:</p>
+<section id="mise-a-jour-du-scheduler-et-du-webserver-sur-scaleway">
+<h2>Mise à jour du scheduler et du webserver sur Scaleway<a class="headerlink" href="#mise-a-jour-du-scheduler-et-du-webserver-sur-scaleway" title="Lien vers cette rubrique">¶</a></h2>
+<p>Airflow utilise l’offre CaaS (Container as a Service) de Scaleway, chaque environnement est déployé dans un <code class="docutils literal notranslate"><span class="pre">namespace</span></code>:</p>
 <ul class="simple">
-<li><p><ENVIRONMENT>-airflow-webserver (instance docker): interface d’airflow</p></li>
-<li><p><ENVIRONMENT>-airflow-scheduler (instance docker): scheduler d’airflow, fait tourner les dags car on est configuré en LocalExecutor</p></li>
-<li><p><ENVIRONMENT>-airflow-s3 : S3 pour stocker les logs et les dags</p></li>
-<li><p><ENVIRONMENT>-airflow-postgres : base de données nécessaire au fonctionnelment d’airflow</p></li>
+<li><p>lvao-preprod</p></li>
+<li><p>lvao-prod</p></li>
 </ul>
-<p>Les répertoires s3 sont en cours de migration vers la plateforme Scaleway</p>
+<p>Dans chaque environnement, 2 conteneurs sont déployés:</p>
+<ul class="simple">
+<li><p>lvao-airflow-scheduler : scheduler d’airflow, orchestre et execute les dags car l’option <code class="docutils literal notranslate"><span class="pre">LocalExecutor</span></code> est active</p></li>
+<li><p>lvao-airflow-webserver : interface d’airflow</p></li>
+</ul>
+<p>Chaque environnement utilise sa propre base de données :</p>
+<ul class="simple">
+<li><p>lvao-preprod-airflow</p></li>
+<li><p>lvao-prod-airflow</p></li>
+</ul>
+<p>et chaque environnement utilise son espace de stockage s3 :</p>
+<ul class="simple">
+<li><p>lvao-preprod-airflow</p></li>
+<li><p>lvao-prod-airflow</p></li>
+</ul>
 </section>
 <section id="deploiement-et-configuration">
 <h2>Déploiement et configuration<a class="headerlink" href="#deploiement-et-configuration" title="Lien vers cette rubrique">¶</a></h2>
@@ -373,12 +385,12 @@
 <h3>Configuration du cluster Airflow<a class="headerlink" href="#configuration-du-cluster-airflow" title="Lien vers cette rubrique">¶</a></h3>
 <section id="variable-d-environnement-du-cluster-airflow">
 <h4>Variable d’environnement du cluster Airflow<a class="headerlink" href="#variable-d-environnement-du-cluster-airflow" title="Lien vers cette rubrique">¶</a></h4>
-<p>En plus des variables d’environnement nécessaire pour configurer Airflow, les variables d’environnemnt suivantes doivent-être configurées sur le docker <code class="docutils literal notranslate"><span class="pre">scheduler</span></code> de chaque environnement dans CleverCloud.</p>
+<p>Les variables d’environnement sont déployés lors de l’exécution des recettes terraform.</p>
 <p>Un exemple à adapter selon l’environnement est disponible sur le fichier <a class="reference download internal" download="" href="../../_downloads/53cb3d4b862676d49a89882c7f33b7d6/.env.template"><span class="xref download myst">.env.templates</span></a></p>
 </section>
 <section id="gestion-des-logs">
 <h4>Gestion des logs<a class="headerlink" href="#gestion-des-logs" title="Lien vers cette rubrique">¶</a></h4>
-<p>Pour que les logs du scheduler soient stockés sur S3, les instances CleverCloud sont lancés avec les variables d’environnement:</p>
+<p>Pour que les logs du scheduler soient stockés sur S3, les instances Scaleway sont lancés avec les variables d’environnement:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">AIRFLOW__LOGGING__REMOTE_LOGGING</span><span class="o">=</span><span class="n">true</span>
 <span class="n">AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER</span><span class="o">=</span><span class="n">s3</span><span class="p">:</span><span class="o">//</span><span class="n">qfdmo</span><span class="o">-</span><span class="n">airflow</span><span class="o">-</span><span class="n">logs</span>
 <span class="n">AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID</span><span class="o">=</span><span class="n">s3logs</span>
@@ -386,8 +398,7 @@
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">s3logs</span></code> est une connection configuré dans l’interface d’Airflow</p>
-<p><img alt="Configuration d'une connexion à Cellar (stockage s3 de clevercloud) dans Airflow" src="../../_images/airflow-s3-connection-configuration.png" /></p>
-<p>Attention à ajouter le paramètre endpoint_url pour le stockage Cellar de CleverCloud</p>
+<p>Attention à ajouter le paramètre endpoint_url pour le stockage S3 de Scaleway</p>
 </section>
 </section>
 </section>
@@ -450,7 +461,7 @@
             <ul>
 <li><a class="reference internal" href="#">📊 Plateforme de données</a><ul>
 <li><a class="reference internal" href="#environnements">Environnements</a></li>
-<li><a class="reference internal" href="#mise-a-jour-du-scheduler-et-du-webserver-sur-clevercloud">Mise à jour du scheduler et du webserver sur CleverCloud</a></li>
+<li><a class="reference internal" href="#mise-a-jour-du-scheduler-et-du-webserver-sur-scaleway">Mise à jour du scheduler et du webserver sur Scaleway</a></li>
 <li><a class="reference internal" href="#deploiement-et-configuration">Déploiement et configuration</a><ul>
 <li><a class="reference internal" href="#ci-cd">CI/CD</a></li>
 <li><a class="reference internal" href="#configuration-du-cluster-airflow">Configuration du cluster Airflow</a><ul>
