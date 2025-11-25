@@ -2,14 +2,13 @@ import json
 import logging
 from math import sqrt
 
-from django.db.models import Q
 from django.template.defaulttags import register
 from django.template.loader import render_to_string
 
 from core.constants import DEFAULT_MAP_CONTAINER_ID, MAP_CONTAINER_ID
 from qfdmo.models import DisplayedActeur
 from qfdmo.models.action import get_actions_by_direction
-from qfdmo.models.config import CarteConfig, GroupeActionConfig
+from qfdmo.models.config import CarteConfig
 
 logger = logging.getLogger(__name__)
 
@@ -120,7 +119,7 @@ def acteur_pinpoint_tag(context, counter=0):
     """
     acteur = context.get("acteur")
     carte = context.get("carte", None)
-    carte_config = context.get("carte_config", None)
+    carte_config_icon_urls = context.get("carte_config_icon_urls") or {}
     all_groupe_actions = context.get("all_groupe_actions", {})
 
     context = {
@@ -142,28 +141,15 @@ def acteur_pinpoint_tag(context, counter=0):
         logger.warning("No actions found for acteur %s", acteur)
         return context
 
-    if carte_config:
-        queryset = Q()
-        if groupe_action_to_display:
-            queryset &= Q(groupe_action__code__in=[groupe_action_to_display.code]) | Q(
-                groupe_action__code=None
+    carte_config_icon_id = getattr(acteur, "computed_carte_config_icon_id", None)
+    if carte_config_icon_id:
+        carte_config_icon_url = carte_config_icon_urls.get(carte_config_icon_id)
+        if carte_config_icon_url:
+            context.update(
+                marker_icon_file=carte_config_icon_url,
+                marker_icon="",
             )
-
-        if acteur.acteur_type:
-            queryset &= Q(acteur_type=acteur.acteur_type) | Q(acteur_type=None)
-
-        try:
-            groupe_action_config = carte_config.groupe_action_configs.get(queryset)
-            if groupe_action_config.icon:
-                # Property is camelcased as it is used in javascript
-                context.update(
-                    marker_icon_file=groupe_action_config.icon.url,
-                    marker_icon="",
-                )
-                return context
-
-        except GroupeActionConfig.DoesNotExist:
-            pass
+            return context
 
     if carte:
         if "reparer" in groupe_action_to_display.code:

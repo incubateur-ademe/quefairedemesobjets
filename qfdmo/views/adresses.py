@@ -11,6 +11,7 @@ from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.db.models import (
+    Case,
     Exists,
     IntegerField,
     OuterRef,
@@ -18,6 +19,7 @@ from django.db.models import (
     Q,
     Subquery,
     Value,
+    When,
 )
 from django.db.models.functions import Coalesce, Length, Lower
 from django.db.models.query import QuerySet
@@ -40,6 +42,7 @@ from qfdmo.models.action import (
     GroupeAction,
     get_reparer_action_id,
 )
+from qfdmo.models.config import GroupeActionConfig
 
 logger = logging.getLogger(__name__)
 
@@ -222,11 +225,16 @@ class SearchActeursView(
 
         context = super().get_context_data(**kwargs)
 
+        carte_config_icon_urls = {}
+        if getattr(self, "carte_config", None):
+            carte_config_icon_urls = self._get_carte_config_icon_urls()
+
         context.update(
             location=getattr(self, "location", ""),
             all_groupe_actions=all_groupe_actions,
             sous_categories_ids=self.sous_categorie_ids,
             selected_actions_ids=self.selected_action_ids,
+            carte_config_icon_urls=carte_config_icon_urls,
         )
 
         # TODO : refacto forms, gérer ça autrement
@@ -294,6 +302,7 @@ class SearchActeursView(
             "identifiant_unique",
             "action_principale_id",
             "uuid",
+            "acteur_type_id",
         )
 
         if getattr(acteurs, "_has_distance_field", False):
@@ -410,7 +419,65 @@ class SearchActeursView(
             ),
         )
 
+        carte_config = getattr(self, "carte_config", None)
+        if carte_config:
+            carte_config_icon_subquery = (
+                GroupeActionConfig.objects.filter(carte_config=carte_config)
+                .filter(
+                    Q(groupe_action_id=OuterRef("computed_groupe_action_id"))
+                    | Q(groupe_action__isnull=True)
+                )
+                .filter(
+                    Q(acteur_type_id=OuterRef("acteur_type_id"))
+                    | Q(acteur_type__isnull=True)
+                )
+                .annotate(
+                    match_priority=Case(
+                        When(
+                            groupe_action_id=OuterRef("computed_groupe_action_id"),
+                            acteur_type_id=OuterRef("acteur_type_id"),
+                            then=Value(0),
+                        ),
+                        When(
+                            groupe_action_id=OuterRef("computed_groupe_action_id"),
+                            acteur_type_id__isnull=True,
+                            then=Value(1),
+                        ),
+                        When(
+                            groupe_action_id__isnull=True,
+                            acteur_type_id=OuterRef("acteur_type_id"),
+                            then=Value(2),
+                        ),
+                        default=Value(3),
+                        output_field=IntegerField(),
+                    )
+                )
+                .order_by("match_priority", "id")
+            )
+
+            acteurs = acteurs.annotate(
+                computed_carte_config_icon_id=Subquery(
+                    carte_config_icon_subquery.values("id")[:1]
+                )
+            )
+
         return acteurs
+
+    def _get_carte_config_icon_urls(self) -> dict[int, str]:
+        carte_config = getattr(self, "carte_config", None)
+        if not carte_config:
+            return {}
+
+        if hasattr(self, "_carte_config_icon_urls_cache"):
+            return self._carte_config_icon_urls_cache
+
+        icon_urls = {}
+        for config in carte_config.groupe_action_configs.all():
+            if config.icon:
+                icon_urls[config.id] = config.icon.url
+
+        self._carte_config_icon_urls_cache = icon_urls
+        return icon_urls
 
     def _compile_acteurs_queryset(
         self, reparer_is_checked, selected_actions_ids, reparer_action_id
