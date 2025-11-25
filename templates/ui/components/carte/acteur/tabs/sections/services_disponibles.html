@@ -1,4 +1,5 @@
 {% extends "ui/components/carte/acteur/tabs/_section.html" %}
+{% load acteur_tags %}
 
 {% block title %}
 Services disponibles
@@ -8,11 +9,7 @@ Services disponibles
 <div class="qf-space-y-1w">
     {% for service in object.sorted_proposition_services %}
         <div class="qf-space-y-1v">
-            {% if is_carte %}
-                {% include "ui/components/carte/acteur/tabs/_service_tag.html" with text=service.action.libelle action=service.action.groupe_action %}
-            {% else %}
-                {% include "ui/components/carte/acteur/tabs/_service_tag.html" with text=service.action.libelle action=service.action extra_classes="qf-bg-opacity-30" %}
-            {% endif %}
+            {% service_tag text=service.action.libelle action=service.action %}
 
             <p class="qf-m-0 qf-text-sm">
             {{ service.sous_categories_display }}

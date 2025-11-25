@@ -176,6 +176,7 @@ class SearchActeursView(
 
         kwargs.update(
             carte=self.is_carte,
+            is_carte=self.is_carte,
         )
 
         if form.is_valid():

@@ -332,6 +332,44 @@ class ComponentsPreview(LookbookPreview):
         }
         return template.render(Context(context))
 
+    def service_tag(self, **kwargs):
+        """Preview for service tags in both carte and non-carte modes"""
+        action = Action.objects.first()
+        if not action:
+            return "No actions available in database"
+
+        context_carte = {
+            "action": action,
+            "is_carte": True,
+        }
+        context_non_carte = {
+            "action": action,
+            "is_carte": False,
+        }
+
+        # Render both versions to show the difference
+        carte_html = Template(
+            """
+            {% load acteur_tags %}
+            <div style="padding: 1rem;">
+                <h3>Service tag in carte mode (is_carte=True)</h3>
+                {% service_tag text=action.libelle action=action %}
+            </div>
+            """
+        ).render(Context(context_carte))
+
+        non_carte_html = Template(
+            """
+            {% load acteur_tags %}
+            <div style="padding: 1rem;">
+                <h3>Service tag in non-carte mode (is_carte=False)</h3>
+                {% service_tag text=action.libelle action=action %}
+            </div>
+            """
+        ).render(Context(context_non_carte))
+
+        return carte_html + non_carte_html
+
 
 class FiltresPreview(LookbookPreview):
     """

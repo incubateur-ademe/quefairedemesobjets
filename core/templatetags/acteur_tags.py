@@ -67,3 +67,21 @@ def acteur_label(context, acteur=None):
             }
         else:
             return {"label": dsfr_label}
+
+
+@register.inclusion_tag("ui/components/service/service_tag.html", takes_context=True)
+def service_tag(context, text, action):
+    """
+    Renders a service tag with proper styling based on the action group.
+    In carte mode, displays action.groupe_action, otherwise displays action directly.
+    """
+    is_carte = context.get("is_carte", False)
+
+    # In carte mode, use groupe_action; otherwise use action directly
+    display_action = action.groupe_action if is_carte else action
+
+    return {
+        "text": text,
+        "action": display_action,
+        "extra_classes": "" if is_carte else "qf-bg-opacity-30",
+    }
