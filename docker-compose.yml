@@ -5,7 +5,6 @@ x-airflow-common: &airflow-common
   volumes:
     - ./core:/opt/airflow/core
     - ./qfdmo:/opt/airflow/qfdmo
-    - ./qfdmd:/opt/airflow/qfdmd
     - ./data:/opt/airflow/data
     - ./dbt:/opt/airflow/dbt
     - ./logs:/opt/airflow/logs
