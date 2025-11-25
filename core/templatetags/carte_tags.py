@@ -134,7 +134,6 @@ def acteur_pinpoint_tag(context, counter=0):
         "marker_icon_extra_classes": "",
     }
 
-    # Use the optimized annotated data if available
     groupe_action_to_display = acteur.get_computed_groupe_action(all_groupe_actions)
 
     if groupe_action_to_display is None:
@@ -151,13 +150,12 @@ def acteur_pinpoint_tag(context, counter=0):
             )
             return context
 
-    if carte:
-        if "reparer" in groupe_action_to_display.code:
-            context.update(
-                marker_bonus=getattr(acteur, "is_bonus_reparation", False),
-                marker_fill_background=True,
-                marker_icon_extra_classes="qf-text-white",
-            )
+    if carte and "reparer" in groupe_action_to_display.code:
+        context.update(
+            marker_bonus=getattr(acteur, "is_bonus_reparation", False),
+            marker_fill_background=True,
+            marker_icon_extra_classes="qf-text-white",
+        )
 
     # Generate uuid for svg mask to prevent marker's border to vanish
     mask_id = acteur.uuid
