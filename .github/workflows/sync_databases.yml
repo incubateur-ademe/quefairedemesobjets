@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-slim
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Install uv
         uses:  astral-sh/setup-uv@5a7eac68fb9809dea845d802897dc5c723910fa3
         with:
@@ -79,7 +79,7 @@ jobs:
     runs-on: ubuntu-slim
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Install AWS CLI dependencies
         run: |
           pip install awscli
