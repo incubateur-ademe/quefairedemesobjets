@@ -11,6 +11,8 @@ env:
   S3_HOST: https://s3.fr-par.scw.cloud
   S3_PREPROD_BUCKET: ${{ secrets.LVAO_S3_PREPROD_BUCKET }}
   S3_PRODUCTION_BUCKET: ${{ secrets.LVAO_S3_PRODUCTION_BUCKET }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.SCW_ACCESS_KEY }}
   SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
   SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
   SCW_DEFAULT_PROJECT_ID: ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
@@ -29,7 +31,7 @@ permissions:
 jobs:
   sync_prod_to_preprod:
     name: Sync production database to preprod
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
