@@ -240,4 +240,14 @@ class SynonymeAdmin(
     ordering = ["-modifie_le"]
 
     def get_wagtail_page(self, obj):
-        return obj.produit.next_wagtail_page
+        # First check if the synonyme has a direct redirection
+        try:
+            return obj.next_wagtail_page
+        except Synonyme.next_wagtail_page.RelatedObjectDoesNotExist:
+            pass
+
+        # Otherwise, try to redirect via the produit
+        try:
+            return obj.produit.next_wagtail_page
+        except Produit.next_wagtail_page.RelatedObjectDoesNotExist:
+            return None
