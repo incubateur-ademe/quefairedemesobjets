@@ -1,0 +1,41 @@
+{% comment %}
+    Copy from suggestion_groupe_row.html
+{% endcomment %}
+{% load admin_data_tags %}
+
+<turbo-frame
+    id="suggestion_groupe_{{ id }}"
+    data-controller="suggestion-groupe-row"
+    data-refresh-url="{% url 'data:suggestion_groupe_refresh' id %}">
+
+    <h3>
+        {% block suggestion_title %}
+            <a href="{% url 'admin:data_suggestiongroupe_change' id %}" rel="noreferrer" data-turbo="false">{{ id }}</a> :
+            {% if acteur %}{{ acteur }} - {% endif %}{{ identifiant_unique }}
+            {% if acteur %}
+                (
+                <a href="{% url 'admin:qfdmo_acteur_change' acteur.identifiant_unique|quote %}" target="_blank" rel="noreferrer" data-turbo="false">importé</a>
+                {% if acteur_overridden_by %}
+                    , <a href="{% url 'admin:qfdmo_revisionacteur_change' acteur_overridden_by.identifiant_unique|quote %}" target="_blank" rel="noreferrer" data-turbo="false"> corrigé</a>
+                {% endif %}
+                , <a href="{% url 'admin:qfdmo_vueacteur_change' identifiant_unique|quote %}" target="_blank" rel="noreferrer" data-turbo="false">affiché</a>
+                )
+            {% endif %}
+        {% endblock suggestion_title %}
+    </h3>
+    <div class="qf-flex qf-flex-col qf-items-left qf-gap-2">
+        <span class="qf-ml-3w qf-text-xs qf-italic">
+            {% block suggestion_subtitle %}
+                Cohorte : {{ suggestion_cohorte.get_type_action_display }}
+            {% endblock suggestion_subtitle %}
+        </span>
+        <span class="qf-ml-3w qf-text-s qf-italic">
+            {{ statut }}
+        </span>
+    </div>
+    <div class="qf-my-3w">
+        {% block suggestion_details %}
+        {% endblock suggestion_details %}
+    </div>
+
+</turbo-frame>
