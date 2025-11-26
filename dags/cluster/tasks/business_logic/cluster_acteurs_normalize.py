@@ -29,6 +29,7 @@ def cluster_acteurs_normalize(
 
     # TODO: remnant of old code, might be able to delete now
     if "nombre_enfants" in df.columns:
+        df[["nombre_enfants"]] = df[["nombre_enfants"]].fillna(0)
         df["nombre_enfants"] = df["nombre_enfants"].astype(int)
 
     return df

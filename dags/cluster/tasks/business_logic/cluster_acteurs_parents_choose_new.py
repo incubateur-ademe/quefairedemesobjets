@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from cluster.config.constants import COL_PARENT_ID_BEFORE
 from cluster.tasks.business_logic.misc.df_sort import df_sort
+from utils.django import django_setup_full
 
 from data.models.change import (
     COL_CHANGE_MODEL_NAME,
@@ -19,7 +20,6 @@ from data.models.changes import (
     ChangeActeurUpdateParentId,
     ChangeActeurVerifyRevision,
 )
-from utils.django import django_setup_full
 
 django_setup_full()
 
@@ -76,7 +76,9 @@ def cluster_acteurs_one_cluster_parent_changes_mark(
     df.loc[parent_index, COL_CHANGE_ORDER] = 1
 
     # Ensuite tous les enfants (non-parents) doivent pointer vers le nouveau parent
-    filter_point = (df["nombre_enfants"] == 0) & (df["identifiant_unique"] != parent_id)
+    filter_point = ((df["nombre_enfants"] == 0) | df["nombre_enfants"].isna()) & (
+        df["identifiant_unique"] != parent_id
+    )
     df[COL_PARENT_ID_BEFORE] = df["parent_id"]  # Pour debug
     df.loc[filter_point, "parent_id"] = parent_id
     df.loc[filter_point, COL_CHANGE_MODEL_NAME] = ChangeActeurUpdateParentId.name()
