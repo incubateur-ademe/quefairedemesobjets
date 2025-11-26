@@ -2,20 +2,24 @@
 # - https://docs.github.com/en/actions/guides/publishing-docker-images#publishing-images-to-github-packages
 name: 🐳 Docker images for Airflow
 
+# See https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#webhook-payload-object-38
 on:
-  # See https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#webhook-payload-object-38
   workflow_dispatch:
     inputs:
       image_tag:
         required: false
+        type: string
+      environment:
+        required: true
         type: string
   workflow_call:
     inputs:
       image_tag:
         required: false
         type: string
-  # release:
-  #   types: [ released, prereleased ]
+      environment:
+        required: true
+        type: string
 
 env:
   SCALEWAY_REGISTRY: rg.fr-par.scw.cloud
@@ -25,11 +29,12 @@ jobs:
   build-and-push-image:
     name: 🐳 Build and push Docker images
     runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
     permissions:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       # https://github.com/docker/login-action
       - name: "[🟣 Scaleway] Log in to the Scaleway Container registry"

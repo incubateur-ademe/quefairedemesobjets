@@ -1,18 +1,19 @@
 resource "scaleway_container" "airflow_scheduler" {
-  name           = "${var.prefix}-airflow-scheduler"
-  tags           = [var.environment, var.prefix, "airflow", "scheduler"]
-  namespace_id   = scaleway_container_namespace.main.id
-  registry_image = var.airflow_scheduler_registry_image
-  port           = 8974
-  cpu_limit      = var.airflow_scheduler_cpu_limit
-  memory_limit   = var.airflow_scheduler_memory_limit
-  min_scale      = var.airflow_scheduler_min_scale
-  max_scale      = var.airflow_scheduler_max_scale
-  timeout        = var.airflow_scheduler_timeout
-  deploy         = true
-  privacy        = "public"
-  protocol       = "http1"
-
+  name                = "${var.prefix}-airflow-scheduler"
+  tags                = [var.environment, var.prefix, "airflow", "scheduler"]
+  namespace_id        = scaleway_container_namespace.main.id
+  registry_image      = var.airflow_scheduler_registry_image
+  port                = 8974
+  cpu_limit           = var.airflow_scheduler_cpu_limit
+  memory_limit        = var.airflow_scheduler_memory_limit
+  min_scale           = var.airflow_scheduler_min_scale
+  max_scale           = var.airflow_scheduler_max_scale
+  timeout             = var.airflow_scheduler_timeout
+  deploy              = true
+  privacy             = "public"
+  protocol            = "http1"
+  local_storage_limit = 10240 # 10 GB
+  sandbox             = "v1"
   health_check {
     http {
       path = "/health"
@@ -37,13 +38,13 @@ resource "scaleway_container" "airflow_scheduler" {
     AIRFLOW__SCHEDULER__CATCHUP_BY_DEFAULT       = "false"
     AIRFLOW__WEBSERVER__EXPOSE_CONFIG            = "true"
     AIRFLOW__WEBSERVER__WARN_DEPLOYMENT_EXPOSURE = "false"
+    ENVIRONMENT                                  = var.environment
   }
   secret_environment_variables = {
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN = var.AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
     AIRFLOW_CONN_WEBAPP_DB              = var.AIRFLOW_CONN_WEBAPP_DB
     DATABASE_URL                        = var.DATABASE_URL
     DB_WAREHOUSE                        = var.DB_WAREHOUSE
-    ENVIRONMENT                         = var.ENVIRONMENT
     POSTGRES_DB                         = var.POSTGRES_DB
     POSTGRES_HOST                       = var.POSTGRES_HOST
     POSTGRES_PASSWORD                   = var.POSTGRES_PASSWORD

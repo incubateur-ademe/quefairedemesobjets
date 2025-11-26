@@ -1,9 +1,6 @@
 on:
   workflow_call:
     inputs:
-      environment:
-        required: true
-        type: string
       container_key:
         type: string
         required: true
@@ -14,7 +11,6 @@ jobs:
   deploy_container:
     name: Scaleway deploy container
     runs-on: ubuntu-slim
-    environment: ${{ inputs.environment }}
     env:
       SCALEWAY_DEPLOY_KEY: ${{ secrets.SCALEWAY_DEPLOY_KEY }}
       CONTAINER_ID: ${{ vars[inputs.container_key] }}

@@ -73,7 +73,8 @@ def render_file_content(file_field: FileField) -> str:
     and caches the result."""
 
     def get_file_content() -> str:
-        # file_field.storage.exists(file_field.name) doesn't work with CleverCloud s3
+        # TODO : test this assertion with Scaleway object storage
+        # file_field.storage.exists(file_field.name) doesn't work with Scaleway s3
         # So we use a try except to catch FileNotFoundError error
         with file_field.storage.open(file_field.name) as f:
             return mark_safe(f.read().decode("utf-8"))  # noqa: S308

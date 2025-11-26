@@ -1,48 +1,8 @@
 # DevOps, déploiement, opérations
 
-## Continuous Delivery
+## Continuous Integration / Continuous Delivery
 
-Il est possible de déployer Airflow et le site web à l'aide de workflows GitHub Actions. Il existe 2 environnements : `preprod` et `prod`.
-
-### Review
-
-Le workflow [review](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/review.yml) est exécuté **sur les pull-requests.**
-
-Il exécute les tests CI, build et push les images Airflow avec le tag `review` et peut déployer Airflow et l'application web lorsqu'une action manuelle est effectuée.
-
-La branche déployée est alors celle de la pull-request en environnement de `preprod`.
-
-### CD
-
-Le workflow [cd](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/cd.yml) est exécuté **sur les commits de la branche `main`.**
-
-Il exécute les tests CI, build et push les images Airflow avec le tag `preprod` et peut déployer Airflow et l'application web lorsqu'une action manuelle est effectuée. Une release est alors créée automatiquement avec le statut de `draft`.
-
-### Deploy
-
-Le workflow [deploy](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/deploy.yml) est exécuté **lorsqu'une release passe du statut de `draft` à `published`.**
-
-Airflow et l'application web sont alors déployés en environnement de `prod`.
-
-## Déploiement sur Scalingo
-
-Nous avons besoin d'installer GDAL comme c'est expliqué dans la doc suivante : [https://techilearned.com/configure-geodjango-in-scalingo/](https://techilearned.com/configure-geodjango-in-scalingo/) cf. [https://doc.scalingo.com/platform/app/app-with-gdal](https://doc.scalingo.com/platform/app/app-with-gdal)
-
-le code est déployé en preprod lors de la mise à jour de la branche main
-
-et en production quand il est tagué avec en respectant le format de version semantique vX.Y.Z
-
-### Déploiement du code de l'interface
-
-le code de l'interface est déployé sur le repo git de scalingo à conditions que les tests soit passés avec succès via Github
-
-## Déploiement sur CleverCloud
-
-<!-- TODO data plateforme -->
-
-## Deploiement sur Scaleway
-
-<!-- TODO s3 et bientôt plus ? -->
+La documentation du process de CI/CD est disponible dans la section [Référence/Infrastructure/CI-CD](../../reference/infrastructure/ci-cd.md)
 
 ## Accéder à un shell en production
 
