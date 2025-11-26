@@ -1,0 +1,51 @@
+{% extends "data/_partials/suggestion_groupe.html" %}
+
+{% block suggestion_details %}
+
+    <input type="hidden" name="fields_list" value="{{ fields_list|json_fields }}"
+    data-suggestion-groupe-row-target="fieldsList">
+    {{ requested_fields_list }}
+    <div class="fr-table fr-table--bordered">
+        <table>
+            <thead>
+                <tr>
+                    <th class="qf-w-1/4">
+                        <div class="qf-truncate"></div>
+                    </th>
+                    <th class="qf-w-1/4">
+                        <div class="qf-truncate">Importé</div>
+                    </th>
+                    <th class="qf-text-center qf-text-2xl">
+                        <div data-action="click->suggestion-groupe-row#refresh" class="qf-cursor-pointer">
+                            ➡️
+                        </div>
+                    </th>
+                    <th class="qf-w-1/4">
+                        <div class="qf-truncate">Affiché</div>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for fields, values in fields_list.items %}
+                    <tr>
+                        <td>{{ fields|join:", " }}</td>
+                        <td>
+                            {% include 'data/_partials/suggestion_groupe_fields_diff.html' with values=values %}
+                        </td>
+                        <td class="qf-text-center qf-cursor-pointer" data-action="click->suggestion-groupe-row#refresh">
+                            ➡️
+                        </td>
+                        <td>
+                            {% for value, by_state in values.items %}
+                                {{ by_state.displayed_value }}
+                                {% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+
+{% endblock suggestion_details %}

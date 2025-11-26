@@ -212,6 +212,8 @@ class SuggestionUnitaireInline(admin.TabularInline):
 class SuggestionGroupeAdmin(
     DjangoQLSearchMixin, NotEditableMixin, NotSelfDeletableMixin, QuerysetFilterAdmin
 ):
+    actions = [mark_as_rejected, mark_as_toproceed]
+
     class SuggestionGroupeQLSchema(DjangoQLSchema):
         def get_fields(self, model):
             """Surcharge pour exposer les relations et champs personnalisés."""
@@ -240,7 +242,8 @@ class SuggestionGroupeAdmin(
 
     search_fields = ["contexte", "metadata"]
     list_display = [
-        "groupe_de_suggestions",
+        # "groupe_de_suggestions",
+        "groupe_de_suggestions2",
     ]
     list_display_links = None
     readonly_fields = ["cree_le", "modifie_le"]
@@ -276,6 +279,10 @@ class SuggestionGroupeAdmin(
                 ),
             },
         )
+
+    def groupe_de_suggestions2(self, obj):
+        template_name = "data/_partials/suggestion_groupe_details.html"
+        return render_to_string(template_name, obj.serialize().to_dict())
 
 
 @admin.register(SuggestionUnitaire)
