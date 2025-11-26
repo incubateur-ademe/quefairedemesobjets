@@ -1,3 +1,4 @@
+import json
 import logging
 
 from diff_match_patch import diff_match_patch
@@ -7,6 +8,16 @@ from django.urls.base import reverse
 from django.utils.safestring import mark_safe
 
 logger = logging.getLogger(__name__)
+
+
+@register.filter
+def json_fields(fields_list):
+    result = {}
+    for value in fields_list.values():
+        if not isinstance(value, dict):
+            raise ValueError(f"Value {value} is not a dict")
+        result.update(value)
+    return json.dumps(result)
 
 
 @register.filter
