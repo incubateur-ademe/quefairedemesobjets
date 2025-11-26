@@ -108,6 +108,7 @@ class TestDisplayLabel:
 
         response, soup = get_response(adresse.uuid)
         assert response.context["display_labels_panel"] == should_display
+        # Labels are displayed in the header with data-testid="acteur-detail-labels"
         label_tag = soup.find(attrs={"data-testid": "acteur-detail-labels"})
         if expected_text:
             assert label_tag and expected_text in label_tag.text

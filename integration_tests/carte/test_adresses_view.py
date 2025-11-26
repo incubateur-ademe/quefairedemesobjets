@@ -215,7 +215,7 @@ class TestReparacteur(RunViewMixin):
         ).exists()
         assert DisplayedActeur.objects.count() == 1
         assert response.status_code == 200
-        assert context["acteurs"].count() == 0
+        assert len(context["acteurs"]) == 0
 
     def test_filtre_reparacteur_return_1_reparacteur(
         self, rf, adresses_view_class, displayed_acteur_reparacteur, action_reparer
@@ -230,7 +230,7 @@ class TestReparacteur(RunViewMixin):
         response, context = self._run_view(rf, adresses_view_class, params)
 
         assert response.status_code == 200
-        assert context["acteurs"].count() == 1
+        assert len(context["acteurs"]) == 1
 
     def test_filtre_reparacteur_return_1_noreparacteur(
         self,
@@ -249,7 +249,7 @@ class TestReparacteur(RunViewMixin):
 
         _, context = self._run_view(rf, adresses_view_class, params)
 
-        assert context["acteurs"].count() == 1
+        assert len(context["acteurs"]) == 1
 
 
 @pytest.mark.django_db
@@ -302,7 +302,7 @@ class TestExclusiviteReparation(RunViewMixin):
             # "pas_exclusivite_reparation": ["true"],
         }
         _, context = self._run_view(rf, adresses_view_class, params)
-        assert context["acteurs"].count() == 0
+        assert len(context["acteurs"]) == 0
 
     def test_action_reparer_excludes_acteurs_avec_exclusivite_by_default(
         self, adresses_view, displayed_acteur_reparer, action_reparer, action_preter
@@ -320,7 +320,7 @@ class TestExclusiviteReparation(RunViewMixin):
         adresses_view.setup(request)
         context = adresses_view.get_context_data()
 
-        assert context["acteurs"].count() == 0
+        assert len(context["acteurs"]) == 0
 
     def test_action_reparer_and_exclusivite_includes_acteurs_with_exclusivite(
         self, rf, adresses_view_class, displayed_acteur_reparer, action_reparer
@@ -334,7 +334,7 @@ class TestExclusiviteReparation(RunViewMixin):
         }
         _, context = self._run_view(rf, adresses_view_class, params)
 
-        assert context["acteurs"].count() == 1
+        assert len(context["acteurs"]) == 1
 
     def test_sous_categorie_filter_works_with_exclu_reparation(
         self,
@@ -354,7 +354,7 @@ class TestExclusiviteReparation(RunViewMixin):
         }
         _, context = self._run_view(rf, adresses_view_class, params)
 
-        assert context["acteurs"].count() == 1
+        assert len(context["acteurs"]) == 1
 
 
 @pytest.mark.django_db
@@ -386,7 +386,7 @@ class TestFilters(RunViewMixin):
         }
         _, context = self._run_view(rf, adresses_view_class, params)
 
-        assert context["acteurs"].count() == 2
+        assert len(context["acteurs"]) == 2
 
     def test_sous_categorie_filter(
         self,
@@ -406,7 +406,7 @@ class TestFilters(RunViewMixin):
         _, context = self._run_view(rf, adresses_view_class, params)
 
         assert DisplayedActeur.objects.count() > 1
-        assert context["acteurs"].count() == 3
+        assert len(context["acteurs"]) == 3
 
     def test_sous_categorie_filter_by_action_no_match(
         self,
@@ -431,7 +431,7 @@ class TestFilters(RunViewMixin):
         context = adresses_view.get_context_data()
 
         assert DisplayedActeur.objects.count() > 1
-        assert context["acteurs"].count() == 0
+        assert len(context["acteurs"]) == 0
 
     def test_sous_categorie_filter_by_action_1_match(
         self,
@@ -455,7 +455,7 @@ class TestFilters(RunViewMixin):
         context = adresses_view.get_context_data()
 
         assert DisplayedActeur.objects.count() > 1
-        assert context["acteurs"].count() == 1
+        assert len(context["acteurs"]) == 1
 
 
 @pytest.mark.django_db

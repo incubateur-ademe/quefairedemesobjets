@@ -30,8 +30,8 @@ class TestInitialValue:
         response = client.get(url)
 
         assert response.status_code == 200
-        assert response.context_data["location"] == "{}"
-        assert response.context_data["acteurs"].count() == 0
+        assert response.context_data["location"] == ""
+        assert len(response.context_data["acteurs"]) == 0
         assert response.context_data["form"].initial == {
             **self.default_context,
             "action_displayed": "preter|emprunter|louer|mettreenlocation"
@@ -57,6 +57,6 @@ class TestInitialValue:
         response = client.get(url)
 
         assert response.status_code == 200
-        assert response.context_data["location"] == "{}"
-        assert response.context_data["acteurs"].count() == 0
+        assert response.context_data["location"] == ""
+        assert len(response.context_data["acteurs"]) == 0
         assert response.context_data["form"].initial == self.default_context
