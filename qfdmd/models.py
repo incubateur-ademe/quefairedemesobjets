@@ -497,7 +497,9 @@ class LegacyIntermediateSynonymePage(models.Model):
 
             # Check if this synonyme is marked as excluded somewhere else
             try:
-                exclusion = self.synonyme.should_not_redirect_to
+                exclusion = LegacyIntermediateProduitPageSynonymeExclusion.objects.get(
+                    synonyme=self.synonyme
+                )
                 if exclusion.page != self.page:
                     raise ValidationError(
                         f"Conflit : ce synonyme est marqué comme exclu de "
@@ -507,7 +509,7 @@ class LegacyIntermediateSynonymePage(models.Model):
                         f"tant que cette exclusion existe. "
                         f"Veuillez d'abord supprimer l'exclusion."
                     )
-            except self.synonyme.should_not_redirect_to.RelatedObjectDoesNotExist:
+            except LegacyIntermediateProduitPageSynonymeExclusion.DoesNotExist:
                 # No exclusion exists, that's fine
                 pass
 
