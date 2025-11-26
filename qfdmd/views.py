@@ -131,6 +131,15 @@ class SynonymeDetailView(AssistantBaseView, DetailView):
     def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         if request.beta or settings.REDIRECT_LEGACY_PRODUIT_TO_WAGTAIL_PAGES:
             synonyme = self.get_object()
+
+            # First, check if the synonyme has a direct redirection
+            try:
+                synonyme_intermediate_page = synonyme.next_wagtail_page
+                return redirect(synonyme_intermediate_page.page.url)
+            except Synonyme.next_wagtail_page.RelatedObjectDoesNotExist:
+                pass
+
+            # If no direct redirection, check if produit has redirection
             try:
                 intermediate_page = synonyme.produit.next_wagtail_page
                 synonyme_can_be_redirected = (
