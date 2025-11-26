@@ -23,7 +23,23 @@ export async function generateBackLink(
     const req = await fetch(`${baseUrl}/embed/backlink?key=${key}`)
     backlinkContent = await req.text()
     backlinkTag.innerHTML = backlinkContent
-    iframe.insertAdjacentElement("afterend", backlinkTag)
+
+    // Wrap iframe with backlink container
+    const wrapper = document.createElement("div")
+    const backlinkLink = backlinkTag.querySelector("a")
+
+    if (backlinkLink) {
+      // Remove text decoration from link style
+      backlinkLink.setAttribute("style", "display: block; text-decoration: none;")
+
+      // Insert iframe inside the link
+      iframe.parentNode?.insertBefore(wrapper, iframe)
+      backlinkLink.appendChild(iframe)
+      wrapper.appendChild(backlinkTag)
+    } else {
+      // Fallback: insert after iframe if no link found
+      iframe.insertAdjacentElement("afterend", backlinkTag)
+    }
   } catch (exception) {
     console.log("Backlink impossible to load")
   }

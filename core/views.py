@@ -15,13 +15,7 @@ def backlink(request):
     text_content = ""
 
     if key == "infotri":
-        text_content = (
-            '<a style="color: black; text-decoration: none;" '
-            'href="https://quefairedemesdechets.fr" rel="noopener noreferrer" '
-            'onMouseOver="this.style.textDecoration=`underline`"'
-            'onMouseOut="this.style.textDecoration=`none`"'
-            'target="_blank">quefairedemesdechets.fr</a>'
-        )
+        text_content = ""
     if key == "infotri-configurator":
         text_content = (
             '<a style="color: black; text-decoration: none;" '
