@@ -1,9 +1,11 @@
+import hashlib
 import json
 import logging
 from typing import Any, TypedDict, override
 
 from django.conf import settings
 from django.contrib.gis.geos import Point
+from django.core.cache import cache
 from django.forms import Form
 from django.utils.functional import cached_property
 from django.views.generic import DetailView
@@ -249,13 +251,59 @@ class CarteSearchActeursView(SearchActeursView):
             return int(self.request.GET.get("limit"))
         return settings.CARTE_MAX_SOLUTION_DISPLAYED
 
+    def _get_cache_key_for_acteurs(self):
+        """Generate a cache key based on query parameters, excluding view mode.
+
+        This allows caching the acteurs queryset when users switch between
+        carte and liste modes without hitting the database again.
+        """
+        # Get all query parameters except view mode
+        params_dict = self.request.GET.copy()
+
+        # Remove parameters that don't affect the acteurs queryset
+        params_to_exclude = [
+            # View mode parameters
+            f"{self._generate_prefix('view_mode')}-view",
+            "view_mode-view",
+            # Pagination
+            "page",
+            # Cache-busting random parameter
+            "r",
+            # UI state parameters that don't affect query results
+            "carte",
+            "querystring",
+        ]
+
+        for param in params_to_exclude:
+            params_dict.pop(param, None)
+
+        # Sort parameters for consistent cache keys
+        sorted_params = sorted(params_dict.items())
+        params_string = json.dumps(sorted_params, sort_keys=True)
+
+        # Create a hash of the parameters
+        params_hash = hashlib.md5(params_string.encode()).hexdigest()
+
+        return f"acteurs_queryset:{params_hash}"
+
     def _build_acteurs_queryset_from_location(self, acteurs, **kwargs):
         """Override parent to reorder by distance after limiting.
 
         In carte mode, after limiting the queryset to max_displayed_acteurs,
         we reorder by distance from the center point to ensure the closest
         acteurs are shown first on the map.
+
+        Also implements caching: when users switch between carte and liste modes,
+        the acteurs list is cached for 60 seconds to avoid hitting the database again.
         """
+        # Try to get cached acteurs if available
+        cache_key = self._get_cache_key_for_acteurs()
+        cached_result = cache.get(cache_key)
+
+        if cached_result is not None:
+            # Return cached bbox and acteurs
+            return cached_result
+
         bbox, acteurs = super()._build_acteurs_queryset_from_location(acteurs, **kwargs)
 
         # In mode liste, we want to sort by distance but do not annotate before
@@ -279,6 +327,10 @@ class CarteSearchActeursView(SearchActeursView):
             except TypeError:
                 # Queryset was already sliced, convert to list and sort
                 acteurs = sorted(list(acteurs), key=lambda a: a.distance)
+
+        # Cache the result for 60 seconds
+        result = (bbox, acteurs)
+        cache.set(cache_key, result, 60)
 
         return bbox, acteurs
 
