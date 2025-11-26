@@ -1,6 +1,11 @@
+import json
+
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy
+from django.views.decorators.http import require_POST
 from django.views.generic.edit import FormView
 
 from data.forms import SuggestionGroupeForm, SuggestionGroupeStatusForm
@@ -136,4 +141,30 @@ def get_suggestion_groupe_usefull_links(request, suggestion_groupe_id, usefull_l
             "displayedacteur": usefull_link == "displayedacteur",
             "annuaire_entreprise": usefull_link == "annuaire_entreprise",
         },
+    )
+
+
+@login_required
+@require_POST
+def refresh_suggestion_groupe_details(request, suggestion_groupe_id):
+    suggestion_groupe = get_object_or_404(SuggestionGroupe, id=suggestion_groupe_id)
+
+    fields_payload = request.POST.get("fields_list", "{}")
+    try:
+        requested_fields = json.loads(fields_payload) if fields_payload else {}
+    except json.JSONDecodeError:
+        return HttpResponseBadRequest("Payload fields_list invalide")
+
+    # TODO : here we interpret the fields_listand create the needed suggestions
+
+    context = suggestion_groupe.serialize().to_dict()
+
+    # TODO : should be removed, only for tests
+    context["requested_fields_list"] = requested_fields
+
+    return render(
+        request,
+        "data/_partials/suggestion_groupe_refresh_stream.html",
+        context,
+        content_type="text/vnd.turbo-stream.html",
     )
