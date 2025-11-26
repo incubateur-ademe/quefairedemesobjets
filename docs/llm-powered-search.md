@@ -88,6 +88,7 @@ For a query like "show me failed enrichment suggestions":
 ```
 
 This gets converted to:
+
 ```python
 SuggestionCohorte.objects.filter(
     statut__exact="ERREUR",
@@ -117,6 +118,7 @@ The LLM is explicitly instructed to generate only READ operations. The system en
 ### What Cannot Happen
 
 The LLM cannot:
+
 - Create, update, or delete records
 - Execute arbitrary Python code
 - Access fields not in the model
@@ -138,6 +140,7 @@ logger.warning(f"Ignoring invalid field: {field_name}")
 ### User Feedback
 
 When an LLM search is applied, a success message is shown:
+
 ```
 Recherche LLM appliquée pour: 'your search query'
 ```
@@ -161,6 +164,7 @@ Recherche LLM appliquée pour: 'your search query'
 ### API Rate Limits
 
 If you hit API rate limits:
+
 - Reduce search frequency
 - Use standard Django search operators (=, ~, etc.) which bypass LLM
 - Upgrade your Anthropic API plan
@@ -187,6 +191,7 @@ show me suggestions created after 2024-01-01 with status pending or in progress
 ```
 
 Generates:
+
 ```python
 Q(cree_le__gte="2024-01-01") & (Q(statut="AVALIDER") | Q(statut="ENCOURS"))
 ```
@@ -198,6 +203,7 @@ suggestions with error in metadata
 ```
 
 Generates:
+
 ```python
 metadata__icontains="error"
 ```
@@ -205,11 +211,13 @@ metadata__icontains="error"
 ## Cost Considerations
 
 Each LLM search query costs approximately:
+
 - Input: ~500 tokens (model schema + prompt)
 - Output: ~100 tokens (JSON response)
 - Cost: ~$0.003 per search at current Anthropic pricing
 
 For high-traffic admin sites, consider:
+
 - Caching common queries
 - Setting usage limits
 - Using standard search for simple queries
@@ -217,6 +225,7 @@ For high-traffic admin sites, consider:
 ## Future Enhancements
 
 Potential improvements:
+
 - Query result caching
 - Query suggestion/autocomplete
 - Multi-language support

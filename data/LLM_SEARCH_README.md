@@ -7,27 +7,34 @@ This implementation adds AI-powered natural language search to the Django admin 
 ## Files Modified
 
 ### 1. `data/admin.py`
+
 - Added `LLMQueryBuilder` class for safe, sandboxed query generation
 - Enhanced `SuggestionCohorteAdmin` with `get_search_results()` override
 - Integrated natural language query detection and processing
 
 ### 2. `pyproject.toml`
+
 - Added `anthropic>=0.40.0,<1` dependency
 
 ### 3. `.env.template`
+
 - Added `ANTHROPIC_API_KEY` configuration
 
 ## New Files
 
 ### 1. `docs/llm-powered-search.md`
+
 Complete documentation including:
+
 - Setup instructions
 - Usage examples
 - Security details
 - Troubleshooting guide
 
 ### 2. `data/tests/test_llm_search.py`
+
 Comprehensive test suite covering:
+
 - LLM query builder functionality
 - Admin integration
 - Security and sandboxing
@@ -36,23 +43,30 @@ Comprehensive test suite covering:
 ## Key Features
 
 ### 🔍 Natural Language Search
+
 Search using plain language:
+
 ```
 "show me failed enrichment suggestions"
 ```
+
 Instead of complex queries:
+
 ```
 statut = 'ERREUR' AND type_action ~ 'ENRICH'
 ```
 
 ### 🔒 Security & Sandboxing
+
 - **Read-only operations**: LLM can only generate SELECT queries
 - **Field validation**: All fields are validated against model schema
 - **Safe execution**: All queries go through Django ORM
 - **Error handling**: Graceful fallback to standard search
 
 ### 🎯 Smart Detection
+
 Automatically detects:
+
 - Natural language queries (uses LLM)
 - DjangoQL queries (bypasses LLM)
 - Empty queries (returns all)
@@ -77,23 +91,26 @@ python manage.py migrate
 ### In Django Admin Search Box
 
 **Simple queries:**
+
 - `suggestions with errors`
 - `successful clustering actions`
 - `pending validation suggestions`
 
 **Complex queries:**
+
 - `show enrichment suggestions that failed last week`
 - `clustering suggestions still pending validation`
 - `suggestions with metadata containing error messages`
 
 **Date-based:**
+
 - `suggestions created yesterday`
 - `recent failed suggestions`
 
 ## How It Works
 
 ```
-User Query → Natural Language Detection → LLM Processing → 
+User Query → Natural Language Detection → LLM Processing →
 JSON Filter Generation → Field Validation → Django ORM Filter → Results
                                 ↓
                          (if error or unavailable)
@@ -104,12 +121,14 @@ JSON Filter Generation → Field Validation → Django ORM Filter → Results
 ## Security Architecture
 
 ### Layer 1: Prompt Engineering
+
 ```python
-"IMPORTANT: Only generate READ operations. 
+"IMPORTANT: Only generate READ operations.
 Never suggest create, update, or delete operations."
 ```
 
 ### Layer 2: Field Validation
+
 ```python
 valid_fields = {field.name for field in model._meta.get_fields()}
 if base_field not in valid_fields:
@@ -117,11 +136,13 @@ if base_field not in valid_fields:
 ```
 
 ### Layer 3: Django ORM
+
 - Only uses `.filter()` method
 - No raw SQL execution
 - No `eval()` or `exec()` calls
 
 ### Layer 4: Error Handling
+
 ```python
 try:
     queryset = apply_llm_filters(queryset)
@@ -132,11 +153,13 @@ except Exception:
 ## Cost Analysis
 
 **Per Search:**
+
 - ~500 tokens input (prompt + schema)
 - ~100 tokens output (JSON filter)
 - ~$0.003 USD per search
 
 **Monthly estimates:**
+
 - 100 searches: ~$0.30
 - 1,000 searches: ~$3.00
 - 10,000 searches: ~$30.00
@@ -144,11 +167,13 @@ except Exception:
 ## Testing
 
 Run the test suite:
+
 ```bash
 pytest data/tests/test_llm_search.py -v
 ```
 
 Test coverage:
+
 - ✅ LLM query builder initialization
 - ✅ Model schema generation
 - ✅ API call handling
@@ -194,6 +219,7 @@ logger.error(f"LLM query generation failed: {error}")
 ### Admin Messages
 
 Users see feedback:
+
 ```
 ✓ Recherche LLM appliquée pour: 'show failed suggestions'
 ```
@@ -201,12 +227,14 @@ Users see feedback:
 ## Limitations
 
 ### Current Limitations
+
 - Only works with `SuggestionCohorte` model (can be extended)
 - Requires internet connection to Anthropic API
 - Rate limited by Anthropic API tier
 - French/English language primarily
 
 ### Not Supported
+
 - Aggregations (COUNT, SUM, etc.)
 - Joins across models
 - Updates/Deletes via search
@@ -215,6 +243,7 @@ Users see feedback:
 ## Future Enhancements
 
 ### Possible Improvements
+
 1. **Query Caching**: Cache common queries to reduce API calls
 2. **Multi-model Support**: Extend to other admin models
 3. **Query History**: Save and reuse successful queries
@@ -223,6 +252,7 @@ Users see feedback:
 6. **Local LLM**: Option to use local models for privacy
 
 ### Performance Optimizations
+
 - Implement query result caching
 - Add rate limiting
 - Use smaller/faster models for simple queries
@@ -233,6 +263,7 @@ Users see feedback:
 ### Common Issues
 
 **1. LLM search not working**
+
 ```bash
 # Check API key
 echo $ANTHROPIC_API_KEY
@@ -242,16 +273,19 @@ tail -f logs/django.log | grep LLM
 ```
 
 **2. No results found**
+
 - Try simpler query
 - Check logs for generated filters
 - Verify fields exist in model
 
 **3. Rate limit errors**
+
 - Reduce search frequency
 - Use DjangoQL syntax to bypass LLM
 - Upgrade Anthropic plan
 
 **4. Import errors**
+
 ```bash
 # Ensure anthropic is installed
 uv sync
@@ -271,6 +305,7 @@ When extending this feature:
 ## Support
 
 For issues:
+
 1. Check logs for error messages
 2. Review documentation in `docs/llm-powered-search.md`
 3. Run test suite to verify installation

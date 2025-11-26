@@ -5,6 +5,7 @@ from typing import Any
 
 from decouple import config
 from django.contrib import admin, messages
+from django.core.cache import cache
 from django.db.models import Q, QuerySet
 from django.http import HttpRequest
 from django.utils.html import format_html
@@ -38,6 +39,59 @@ class LLMQueryBuilder:
             "ANTHROPIC_API_KEY", default=config("ANTHROPIC_KEY", default="")
         )
 
+    def _get_metadata_examples(self) -> dict:
+        """
+        Get sample metadata structures for different type_action values.
+        Returns a dict mapping type_action to sample metadata keys.
+        Uses Django cache with 30-minute timeout to improve performance.
+        """
+        cache_key = f"llm_metadata_examples_{self.model_class.__name__}"
+
+        # Try to get from cache first
+        metadata_examples = cache.get(cache_key)
+        if metadata_examples is not None:
+            logger.debug(
+                f"Using cached metadata examples for {self.model_class.__name__}"
+            )
+            return metadata_examples
+
+        metadata_examples = {}
+
+        try:
+            logger.info(
+                f"Fetching fresh metadata examples for {self.model_class.__name__}"
+            )
+
+            # Get unique type_action values
+            type_actions = (
+                self.model_class.objects.exclude(metadata__isnull=True)
+                .values_list("type_action", flat=True)
+                .distinct()
+            )
+
+            # For each type_action, get a sample record's metadata
+            for type_action in type_actions:
+                if not type_action:
+                    continue
+
+                sample = self.model_class.objects.filter(
+                    type_action=type_action, metadata__isnull=False
+                ).first()
+
+                if sample and sample.metadata:
+                    metadata_examples[type_action] = list(sample.metadata.keys())
+
+            # Cache for 30 minutes (1800 seconds)
+            cache.set(cache_key, metadata_examples, 1800)
+            logger.info(
+                f"Cached metadata examples with {len(metadata_examples)} type_actions"
+            )
+
+        except Exception as e:
+            logger.warning(f"Could not fetch metadata examples: {e}")
+
+        return metadata_examples
+
     def _get_model_schema(self) -> str:
         """Generate a schema description for the model."""
         fields = []
@@ -48,18 +102,26 @@ class LLMQueryBuilder:
 
                 # Add choices if available
                 if hasattr(field, "choices") and field.choices:
-                    field_info += f" (choices: {field.choices})"
+                    choices_list = [f"{code}: {label}" for code, label in field.choices]
+                    field_info += f"\n  Choices: {', '.join(choices_list)}"
 
-                # Add special note for JSONField
+                # Add special note for JSONField with actual examples
                 if field_type == "JSONField" and field.name == "metadata":
                     field_info += (
                         "\n  * For metadata field, use Django JSON lookups like:\n"
-                        "    - metadata__1) 📦 Nombre Clusters Proposés__gte for cluster count\n"
+                        "    - metadata__<key_name>__gte for numeric comparisons\n"
+                        "    - metadata__<key_name>__icontains for text searches\n"
                         "    - metadata__has_key to check if key exists\n"
-                        "  * Common metadata keys for CLUSTERING type:\n"
-                        '    - "1) 📦 Nombre Clusters Proposés" (cluster count)\n'
-                        '    - "4) 🎭 Nombre Acteurs Total" (total actors)\n'
                     )
+
+                    # Add actual metadata examples from the database
+                    metadata_examples = self._get_metadata_examples()
+                    if metadata_examples:
+                        field_info += "\n  * Actual metadata keys by type_action:\n"
+                        for type_action, keys in metadata_examples.items():
+                            field_info += f"\n    {type_action}:\n"
+                            for key in keys[:5]:  # Limit to 5 keys per type
+                                field_info += f'      - "{key}"\n'
 
                 fields.append(field_info)
         return "\n".join(fields)
@@ -144,8 +206,12 @@ IMPORTANT:
 - When the user mentions "clusters", "clusters proposés", or "nombre de clusters", use the key "1) 📦 Nombre Clusters Proposés"
 - Return ONLY the JSON object, no explanation or markdown formatting."""
 
+            # Use Claude 3 Opus (most capable model available with this API key)
+            # You can override this with ANTHROPIC_MODEL environment variable
+            model_name = config("ANTHROPIC_MODEL", default="claude-3-opus-20240229")
+
             message = client.messages.create(
-                model="claude-sonnet-4-5",
+                model=model_name,
                 max_tokens=1024,
                 messages=[{"role": "user", "content": prompt}],
             )
