@@ -716,7 +716,12 @@ class ProduitLien(models.Model):
 
     class Meta:
         ordering = ("poids",)
-        unique_together = ("produit", "lien")  # Prevent duplicate relations
+        constraints = [
+            models.UniqueConstraint(
+                fields=["produit", "lien"],
+                name="unique_produit_lien",
+            )
+        ]
 
 
 @register_snippet
