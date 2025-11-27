@@ -253,6 +253,9 @@ class FormulaireSearchActeursView(SearchActeursView):
             == self.digital_acteur_form.DigitalChoices.DIGITAL.value
         )
 
+    def _get_epci_codes(self) -> list[str]:
+        return []
+
     def _handle_scoped_acteurs(
         self, acteurs: QuerySet[DisplayedActeur], **kwargs
     ) -> tuple[Any, QuerySet[DisplayedActeur]]:
