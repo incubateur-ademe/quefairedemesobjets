@@ -267,8 +267,6 @@ class CarteSearchActeursView(SearchActeursView):
             "view_mode-view",
             # Pagination
             "page",
-            # Cache-busting random parameter
-            "r",
             # UI state parameters that don't affect query results
             "carte",
             "querystring",
