@@ -1,10 +1,14 @@
 import logging
 
 from django.contrib import admin, messages
+from django.db.models import Count
+from django.template.loader import render_to_string
 from django.utils.html import format_html
 from djangoql.admin import DjangoQLSearchMixin
+from djangoql.schema import DjangoQLSchema, IntField, StrField
 
 from core.admin import NotEditableMixin, NotSelfDeletableMixin, QuerysetFilterAdmin
+from data.forms import SuggestionGroupeForm
 from data.models.suggestion import (
     Suggestion,
     SuggestionCohorte,
@@ -208,7 +212,29 @@ class SuggestionUnitaireInline(admin.TabularInline):
 class SuggestionGroupeAdmin(
     DjangoQLSearchMixin, NotEditableMixin, NotSelfDeletableMixin, QuerysetFilterAdmin
 ):
-    djangoql_completion_enabled_by_default = False
+    actions = [mark_as_rejected, mark_as_toproceed]
+
+    class SuggestionGroupeQLSchema(DjangoQLSchema):
+        def get_fields(self, model):
+            """Surcharge pour exposer les relations et champs personnalisés."""
+            fields = super().get_fields(model)
+
+            if model == SuggestionGroupe:
+                return [
+                    field
+                    for field in fields
+                    if field not in ["suggestion_unitaires_count"]
+                ] + [IntField(name="suggestion_unitaires_count")]
+
+            # Force string field for champs and valeurs in SuggestionUnitaire
+            if model == SuggestionUnitaire:
+                return [
+                    field for field in fields if field not in ["champs", "valeurs"]
+                ] + [StrField(name="champs"), StrField(name="valeurs")]
+            return fields
+
+    djangoql_completion_enabled_by_default = True
+    djangoql_schema = SuggestionGroupeQLSchema
 
     class SuggestionCohorteFilter(admin.RelatedFieldListFilter):
         def field_choices(self, field, request, model_admin):
@@ -216,21 +242,47 @@ class SuggestionGroupeAdmin(
 
     search_fields = ["contexte", "metadata"]
     list_display = [
-        "id",
-        "suggestion_cohorte",
-        "statut",
-        "acteur",
-        "revision_acteur",
-        "contexte",
-        "metadata",
+        # "groupe_de_suggestions",
+        "groupe_de_suggestions2",
     ]
+    list_display_links = None
     readonly_fields = ["cree_le", "modifie_le"]
     inlines = [SuggestionUnitaireInline]
     list_filter = [
         ("suggestion_cohorte", SuggestionCohorteFilter),
         ("statut", admin.ChoicesFieldListFilter),
     ]
-    # actions = [mark_as_rejected, mark_as_toproceed]
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        return queryset.prefetch_related(
+            "suggestion_unitaires",
+            "acteur",
+            "revision_acteur",
+            "revision_acteur__parent",
+        ).annotate(suggestion_unitaires_count=Count("suggestion_unitaires"))
+
+    def changelist_view(self, request, extra_context=None):
+        self.csrf_token = request.META.get("CSRF_COOKIE")
+        return super().changelist_view(request, extra_context)
+
+    def groupe_de_suggestions(self, obj):
+        template_name = "data/_partials/suggestion_groupe_row_type_source.html"
+        return render_to_string(
+            template_name,
+            {
+                "csrf_token": self.csrf_token,
+                "form": SuggestionGroupeForm(),
+                "suggestion_groupe": obj,
+                "suggestion_unitaires_by_champs": (
+                    obj.get_suggestion_unitaires_by_champs()
+                ),
+            },
+        )
+
+    def groupe_de_suggestions2(self, obj):
+        template_name = "data/_partials/suggestion_groupe_details.html"
+        return render_to_string(template_name, obj.serialize().to_dict())
 
 
 @admin.register(SuggestionUnitaire)
