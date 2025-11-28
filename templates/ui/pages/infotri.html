@@ -8,14 +8,12 @@
 {% block body_classes %}{% if not iframe %}qf-bg-gradient-infotri{% endif %}{% endblock %}
 
 {% block content %}
-<div class="qf-grid qf-min-h-screen {% if not iframe %}qf-w-screen{% endif %} qf-grid-cols-1 md:qf-grid-cols-3
-{% if iframe %}qf-rounded-lg !qf-border-2 !qf-border-solid !qf-border-grey-900 {% endif %}
-    "
-     data-controller="infotri"
-     data-infotri-base-url-value="{{ base_url }}">
-    <main
-        class="qf-flex qf-flex-col qf-items-start qf-gap-2w qf-p-2w md:qf-col-span-2"
-    >
+<turbo-frame
+    id="infotri-form"
+    class="qf-grid qf-min-h-screen {% if not iframe %}qf-w-screen{% endif %} qf-grid-cols-1 md:qf-grid-cols-3
+    {% if iframe %}qf-rounded-lg !qf-border-2 !qf-border-solid !qf-border-grey-900 {% endif %}"
+>
+    <main class="qf-flex qf-flex-col qf-items-start qf-gap-2w qf-p-2w md:qf-col-span-2">
         <h1 class="qf-mb-1w qf-text-2xl qf-leading-none qf-font-extrabold qf-tracking-tight qf-text-gray-900 md:qf-text-3xl lg:qf-text-4xl">
             Concevez facilement votre Info-tri [Beta]
         </h1>
@@ -25,37 +23,48 @@
             tels que des textiles d'habillement, du linge de maison et/ou des chaussures.
         </p>
 
-        <form class="qf-mr-auto qf-flex qf-h-full qf-max-w-full qf-flex-col qf-gap-2w qf-w-full">
-            {# Catégorie Section #}
+        <div class="qf-mr-auto qf-flex qf-h-full qf-max-w-full qf-flex-col qf-gap-2w qf-w-full">
+            <form
+                method="get"
+                action="{% url 'infotri:configurator' %}"
+                class="qf-flex qf-flex-col qf-gap-2w"
+                onchange="this.requestSubmit()"
+            >
+                {# Catégorie Section #}
+                <div>
+                    <h2 class="qf-text-xl qf-font-bold qf-mb-3v">Choisissez une catégorie de produit</h2>
+                    {% dsfr_form_field form.categorie %}
+                </div>
+
+
+                {# Consigne Section #}
+                {% if form.categorie.value %}
+                <div>
+                    <h2 class="qf-text-xl qf-font-bold qf-mb-3v">Choisissez la consigne</h2>
+                    {% dsfr_form_field form.consigne %}
+                </div>
+                {% endif %}
+
+                {# Phrase Toggle Section #}
+                {% if form.consigne.value %}
+                <div>
+                    {% dsfr_form_field form.avec_phrase %}
+                </div>
+                {% endif %}
+
+                {# Generate Button #}
+                {% if form.consigne.value and not show_code %}
+                <div>
+                    <button type="submit" name="show_code" value="true" class="fr-btn">
+                        Générer le code
+                    </button>
+                </div>
+                {% endif %}
+            </form>
+
+            {# Code Section #}
+            {% if form.is_valid and form.consigne.value and show_code %}
             <div>
-                <h2 class="qf-text-xl qf-font-bold qf-mb-3v">Choisissez une catégorie de produit</h2>
-                {% dsfr_form_field form.categorie %}
-            </div>
-
-            {# Consigne Section #}
-            <div data-infotri-target="consigneSection" class="{% if not initial_categorie %}qf-hidden{% endif %}">
-                <h2 class="qf-text-xl qf-font-bold qf-mb-3v">Choisissez la consigne</h2>
-                {% dsfr_form_field form.consigne %}
-            </div>
-
-            {# Phrase Toggle Section #}
-            <div data-infotri-target="phraseSection" class="{% if not initial_consigne %}qf-hidden{% endif %}">
-                {% dsfr_form_field form.avec_phrase %}
-            </div>
-
-            {# Generate Button #}
-            <div data-infotri-target="generateButton" class="{% if not initial_consigne %}qf-hidden{% endif %}">
-                <button
-                    type="button"
-                    class="fr-btn"
-                    data-action="click->infotri#generate"
-                >
-                    Générer le code
-                </button>
-            </div>
-
-            {# Code Section - Back in main #}
-            <div data-infotri-target="codeSection" class="qf-hidden">
                 <h2 class="qf-text-xl qf-font-bold qf-mb-1w">Code à implémenter</h2>
 
                 <div class="qf-mb-1w">
@@ -70,36 +79,29 @@
                     </p>
                 </div>
 
-                <div class="fr-callout">
-                    <pre
-                        class="qf-whitespace-normal qf-break-all qf-mb-1w qf-p-1w qf-bg-gray-100 qf-rounded qf-text-sm qf-font-mono"
-                        data-infotri-target="iframe"
-                    ></pre>
+                <div class="fr-callout" data-controller="copy">
+                    <pre class="qf-whitespace-normal qf-break-all qf-mb-1w qf-p-1w qf-bg-gray-100 qf-rounded qf-text-sm qf-font-mono" data-copy-target="toCopy">&lt;script src="{{ base_url }}/infotri/static/infotri.js" data-config="categorie={{ form.categorie.value }}&consigne={{ form.consigne.value }}&avec_phrase={{ form.avec_phrase.value|yesno:'true,false' }}"&gt;&lt;/script&gt;</pre>
                     <button
                         type="button"
                         class="fr-btn"
-                        data-infotri-target="copyButton"
-                        data-action="click->infotri#copyToClipboard"
+                        data-copy-target="button"
+                        data-action="click->copy#toClipboard"
                     >
                         Copier
                     </button>
                 </div>
             </div>
-        </form>
+            {% endif %}
     </main>
 
     <aside class="qf-flex qf-flex-col md:qf-sticky md:qf-top-0">
         <div class="qf-flex qf-items-center qf-justify-center qf-h-full qf-p-4w">
             <div class="qf-bg-white qf-shadow-lg qf-p-3w">
-                <turbo-frame id="infotri-preview" src="/infotri/preview?categorie={{ initial_categorie }}&consigne={{ initial_consigne }}&avec_phrase={{ initial_avec_phrase|yesno:'true,false' }}">
-                    <div class="qf-flex qf-items-center qf-justify-center qf-min-h-[400px]">
-                        <p class="qf-text-gray-500">Chargement de l'aperçu...</p>
-                    </div>
-                </turbo-frame>
+                {% include "ui/components/infotri/infotri.html" %}
             </div>
         </div>
     </aside>
-</div>
+</turbo-frame>
 {% endblock content %}
 
 {% block js %}

@@ -7,15 +7,13 @@
 
 {% block content %}
 <div class="qf-flex qf-items-center qf-flex-col qf-justify-end qf-pb-1w qf-min-h-fit">
-    <a href="https://quefairedemesdechets.ademe.fr" target="_blank" rel="noopener noreferrer" class="qf-no-external-link-icon !qf-bg-none">
-    {% include "infotri/components/preview.html" %}
+    <a href="https://quefairedemesdechets.ademe.fr?utm_source=infotri" target="_blank" rel="noreferrer" class="qf-no-external-link-icon !qf-bg-none">
+        {% include "ui/components/infotri/infotri.html" %}
     </a>
 </div>
 {% endblock content %}
 
 {% block js %}
-    {# Override base.html js block to load iframe-resizer v5 instead of v4 #}
     <script src="{% static 'infotri-child.js' %}" defer></script>
-
     {{ block.super }}
 {% endblock js %}

@@ -11,33 +11,18 @@ class InfotriForm(DsfrBaseForm):
         choices=CATEGORIE_CHOICES,
         label="",
         required=False,
-        widget=forms.RadioSelect(
-            attrs={
-                "data-infotri-target": "categorieInput",
-                "data-action": "change->infotri#updateCategorie",
-            }
-        ),
+        widget=forms.RadioSelect(),
     )
 
     consigne = forms.ChoiceField(
         choices=CONSIGNE_CHOICES,
         label="",
         required=False,
-        widget=forms.RadioSelect(
-            attrs={
-                "data-infotri-target": "consigneInput",
-                "data-action": "change->infotri#updateConsigne",
-            }
-        ),
+        widget=forms.RadioSelect(),
     )
 
     avec_phrase = forms.BooleanField(
         label="Afficher la phrase",
         required=False,
-        widget=forms.CheckboxInput(
-            attrs={
-                "data-infotri-target": "avecPhraseInput",
-                "data-action": "change->infotri#updateAvecPhrase",
-            }
-        ),
+        widget=forms.CheckboxInput(),
     )

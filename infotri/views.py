@@ -1,10 +1,9 @@
 from typing import Any
 
 from django.conf import settings
-from django.views.generic import FormView, TemplateView
+from django.views.generic import FormView
 
 from core.views import static_file_content_from
-from infotri.constants import VALID_CATEGORIES, VALID_CONSIGNES
 from infotri.forms import InfotriForm
 
 
@@ -20,6 +19,7 @@ class InfotriConfiguratorView(FormView):
     """
     Main view for the Info-tri configurator.
     Users configure their Info-tri labels here and get the embed code.
+    Handles GET requests with form data passed via query parameters.
     """
 
     form_class = InfotriForm
@@ -35,73 +35,17 @@ class InfotriConfiguratorView(FormView):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["base_url"] = settings.BASE_URL
-
-        # Get initial values from the form
-        form = context.get("form")
-        if form and form.is_bound:
-            if form.is_valid():
-                context["initial_categorie"] = form.cleaned_data.get("categorie", "")
-                context["initial_consigne"] = form.cleaned_data.get("consigne", "")
-                context["initial_avec_phrase"] = form.cleaned_data.get(
-                    "avec_phrase", False
-                )
-            else:
-                # If form is invalid, set empty defaults
-                context["initial_categorie"] = ""
-                context["initial_consigne"] = ""
-                context["initial_avec_phrase"] = False
-        else:
-            # If form is not bound, set empty defaults
-            context["initial_categorie"] = ""
-            context["initial_consigne"] = ""
-            context["initial_avec_phrase"] = False
-
+        context["show_code"] = self.request.GET.get("show_code") == "true"
         return context
 
-
-class InfotriPreviewView(TemplateView):
-    """
-    Preview view that renders the Info-tri visual.
-    Called via Turbo Frame to update preview dynamically.
-    """
-
-    template_name = "infotri/components/preview.html"
-
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-
-        # Validate and get parameters from query string
-        categorie = self.request.GET.get("categorie", "")
-        context["categorie"] = categorie if categorie in VALID_CATEGORIES else ""
-
-        consigne = self.request.GET.get("consigne", "")
-        context["consigne"] = consigne if consigne in VALID_CONSIGNES else ""
-
-        avec_phrase = self.request.GET.get("avec_phrase", "false").lower()
-        context["avec_phrase"] = avec_phrase in ["true", "1", "yes"]
-
-        return context
+    def form_valid(self, form):
+        return self.render_to_response(self.get_context_data(form=form))
 
 
-class InfotriEmbedView(TemplateView):
+class InfotriEmbedView(InfotriConfiguratorView):
     """
     Embed view that displays the actual Info-tri visual.
     This is loaded in an iframe on third-party sites.
     """
 
     template_name = "ui/pages/infotri_embed.html"
-
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-
-        # Validate and get parameters from query string
-        categorie = self.request.GET.get("categorie", "")
-        context["categorie"] = categorie if categorie in VALID_CATEGORIES else ""
-
-        consigne = self.request.GET.get("consigne", "")
-        context["consigne"] = consigne if consigne in VALID_CONSIGNES else ""
-
-        avec_phrase = self.request.GET.get("avec_phrase", "false").lower()
-        context["avec_phrase"] = avec_phrase in ["true", "1", "yes"]
-
-        return context
