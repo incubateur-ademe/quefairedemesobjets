@@ -12,7 +12,7 @@ const icons = [
   "fr-icon-recycle-line",
   "fr-icon-money-euro-circle-line",
   "fr-icon-arrow-go-back-line",
-  "fr-icon-hand-heart-line",
+  "fr-icon-hand-heart",
   "fr-icon-tools-fill",
 ]
 

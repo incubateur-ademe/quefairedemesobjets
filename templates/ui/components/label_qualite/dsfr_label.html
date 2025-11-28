@@ -1,0 +1,25 @@
+{% load qfdmd_tags %}
+
+<span class="qf-flex qf-items-center qf-flex-row qf-gap-1v">
+    {% block icon %}
+    {% if label.logo_filtre %}
+    <span class="qf-h-3v [&>svg]:qf-h-full [&>svg]:qf-w-auto qf-flex">
+        {% render_file_content label.logo_filtre %}
+    </span>
+    {% elif label.logo_file %}
+        <img
+            class="fr-mr-1w"
+            src="{{ label.logo_file.url }}"
+            alt=""
+            class="qf-cursor-pointer"
+            width=16
+            height=16
+        >
+    {% endif %}
+    {% endblock icon %}
+    <span>
+        {% block libelle %}
+        {{ label.libelle }}
+        {% endblock libelle %}
+    </span>
+</span>
