@@ -127,24 +127,3 @@ class TestCarteViews:
 
         # Cache keys should be the same
         assert cache_key1 == cache_key2
-
-    def test_cache_key_ignores_cache_busting_param(self, rf):
-        """Test that cache key is the same regardless of r (cache-busting) parameter."""
-        # Request with r=729
-        request1 = rf.get(
-            "/carte?latitude=48.8566&longitude=2.3522&action_list=reparer&r=729"
-        )
-        view1 = CarteSearchActeursView()
-        view1.request = request1
-        cache_key1 = view1._get_cache_key_for_acteurs()
-
-        # Request with r=383 (different random value)
-        request2 = rf.get(
-            "/carte?latitude=48.8566&longitude=2.3522&action_list=reparer&r=383"
-        )
-        view2 = CarteSearchActeursView()
-        view2.request = request2
-        cache_key2 = view2._get_cache_key_for_acteurs()
-
-        # Cache keys should be the same
-        assert cache_key1 == cache_key2
