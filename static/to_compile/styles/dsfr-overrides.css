@@ -82,10 +82,10 @@
   mask-image: url("../svg/tools-fill.svg");
 }
 
-.fr-icon-hand-heart-line::before,
-.fr-icon-hand-heart-line::after {
-  -webkit-mask-image: url("../svg/hand-heart-line.svg");
-  mask-image: url("../svg/hand-heart-line.svg");
+.fr-icon-hand-heart::before,
+.fr-icon-hand-heart::after {
+  -webkit-mask-image: url("../svg/hand-heart.svg");
+  mask-image: url("../svg/hand-heart.svg");
 }
 
 .fr-icon-money-euro-circle-line::before,
