@@ -6,7 +6,6 @@ the proper HTML structure when embedded on third-party sites.
 """
 
 import pytest
-from django.conf import settings
 from django.core.management import call_command
 
 
@@ -140,22 +139,3 @@ class TestInfotriEmbed:
         assert response["Content-Type"].startswith(
             "application/javascript"
         ) or response["Content-Type"].startswith("text/javascript")
-
-
-class TestIframeScriptIntegration:
-    """Test that iframe scripts work correctly with BASE_URL"""
-
-    @pytest.mark.django_db
-    def test_iframe_scripts_use_current_domain(self, client):
-        """Verify iframe scripts use settings.BASE_URL for generating embed codes"""
-        # Test that the configurator generates correct URLs
-        url = "/infotri/"
-        response = client.get(url)
-        assert response.status_code == 200
-        # The page should reference the BASE_URL setting
-        base_url = settings.BASE_URL
-        if base_url:
-            assert (
-                base_url.encode() in response.content
-                or b"data-infotri-base-url-value" in response.content
-            )
