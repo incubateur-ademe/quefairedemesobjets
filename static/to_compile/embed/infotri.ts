@@ -24,18 +24,12 @@ const setupIframe = () => {
     { useAutoHeight: true },
   )
 
-  buildAndInsertIframeFrom(
-    iframeAttributes,
-    iframeExtraAttributes,
-    scriptTag,
-    "infotri",
-    {
-      useIframeResizer: true,
-      resizerOptions: {
-        id: "quefairedemesdechets-infotri",
-      },
+  buildAndInsertIframeFrom(iframeAttributes, iframeExtraAttributes, scriptTag, "", {
+    useIframeResizer: true,
+    resizerOptions: {
+      id: "quefairedemesdechets-infotri",
     },
-  )
+  })
 }
 
 setupIframe()

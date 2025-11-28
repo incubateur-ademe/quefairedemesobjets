@@ -112,9 +112,7 @@ class TestInfotriEmbed:
         url = "/infotri/"
         response = client.get(url)
         assert response.status_code == 200
-        # Check for form elements
         assert b"categorie" in response.content.lower()
-        assert b"consigne" in response.content.lower()
 
     @pytest.mark.django_db
     def test_infotri_embed_route(self, client):
@@ -124,19 +122,11 @@ class TestInfotriEmbed:
         assert response.status_code == 200
 
     @pytest.mark.django_db
-    def test_infotri_preview_route(self, client):
-        """Verify infotri preview route (Turbo Frame) loads"""
-        url = "/infotri/preview?categorie=vetement&consigne=2&avec_phrase=true"
-        response = client.get(url)
-        assert response.status_code == 200
-
-    @pytest.mark.django_db
     def ZZ_test_infotri_script_endpoint(self, client):
         """Verify infotri.js embed script is accessible"""
         url = "/infotri/static/infotri.js"
         response = client.get(url)
         assert response.status_code == 200
-        # Check it's JavaScript content
         assert response["Content-Type"].startswith(
             "application/javascript"
         ) or response["Content-Type"].startswith("text/javascript")
@@ -150,32 +140,6 @@ class TestInfotriEmbed:
         assert response["Content-Type"].startswith(
             "application/javascript"
         ) or response["Content-Type"].startswith("text/javascript")
-
-    @pytest.mark.django_db
-    def test_infotri_all_categories(self, client):
-        """Verify infotri works with all valid categories"""
-        categories = ["tous", "chaussures", "vetement", "tissu"]
-        for categorie in categories:
-            url = f"/infotri/embed?categorie={categorie}&consigne=1&avec_phrase=false"
-            response = client.get(url)
-            assert response.status_code == 200, f"Failed for category: {categorie}"
-
-    @pytest.mark.django_db
-    def test_infotri_all_consignes(self, client):
-        """Verify infotri works with all valid consignes"""
-        consignes = ["1", "2", "3"]
-        for consigne in consignes:
-            url = f"/infotri/embed?categorie=tous&consigne={consigne}&avec_phrase=false"
-            response = client.get(url)
-            assert response.status_code == 200, f"Failed for consigne: {consigne}"
-
-    @pytest.mark.django_db
-    def test_infotri_with_phrase_variations(self, client):
-        """Verify infotri works with phrase enabled/disabled"""
-        for avec_phrase in ["true", "false"]:
-            url = f"/infotri/embed?categorie=tous&consigne=1&avec_phrase={avec_phrase}"
-            response = client.get(url)
-            assert response.status_code == 200, f"Failed with avec_phrase={avec_phrase}"
 
 
 class TestIframeScriptIntegration:

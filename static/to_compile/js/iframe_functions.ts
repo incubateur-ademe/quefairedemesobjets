@@ -223,7 +223,7 @@ export async function buildAndInsertIframeFrom(
   iframeAttributes: Record<string, string>,
   iframeExtraAttributes: Record<string, string>,
   scriptTag: HTMLScriptElement,
-  backlinkKey: BacklinkKey,
+  backlinkKey?: BacklinkKey,
   options?: BuildIframeOptions,
 ): Promise<void> {
   const iframe = document.createElement("iframe")

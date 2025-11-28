@@ -18,7 +18,3 @@ CONSIGNE_CHOICES = [
         " un magasin volontaire",
     ),
 ]
-
-# Valid values (excluding empty choice)
-VALID_CATEGORIES = [choice[0] for choice in CATEGORIE_CHOICES if choice[0]]
-VALID_CONSIGNES = [choice[0] for choice in CONSIGNE_CHOICES if choice[0]]
