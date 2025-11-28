@@ -55,6 +55,7 @@ export function areWeInAnIframe() {
 
   return [weAreInAnIframe, referrer]
 }
+
 function removeUnwantedElements() {
   if (!document.referrer) {
     return
