@@ -14,8 +14,6 @@ def backlink(request):
     key = request.GET.get("key")
     text_content = ""
 
-    if key == "infotri":
-        text_content = ""
     if key == "infotri-configurator":
         text_content = (
             '<a style="color: black; text-decoration: none;" '
