@@ -43,7 +43,8 @@
     </head>
 
     <body
-        class="qf-flex qf-flex-col qf-h-svh qf-h-screen qf-overflow-hidden {% block body_classes %}{% endblock %}"
+        class="
+        qf-flex qf-flex-col qf-h-svh qf-h-screen qf-overflow-hidden {% block body_classes %}{% endblock %}"
         data-controller="state analytics"
         data-state-adresse-value=""
         data-state-longitude-value=""
@@ -54,7 +55,7 @@
         {% posthog_data_attributes CARTE.POSTHOG_KEY %}
         data-action="address-autocomplete:change->state#setLocation"
     >
-        <main id="solutions" class="qf-h-full qf-overflow-auto qf-overscroll-none qf-scroll-smooth">
+        <main id="solutions" class="{% block main_classes %}qf-h-full qf-overflow-auto qf-overscroll-none qf-scroll-smooth{% endblock %}">
             <noscript>
                 <div class="fr-container fr-my-3w">
                     <div class="fr-alert fr-alert--error">
