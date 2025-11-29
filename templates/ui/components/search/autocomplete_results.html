@@ -1,0 +1,47 @@
+{% extends "ui/forms/widgets/autocomplete/results.html" %}
+{% load qfdmd_tags %}
+
+{% block results %}
+    {% for result in results %}
+        <li
+            id="option-{{ forloop.counter }}"
+            role="option"
+            tabindex="-1"
+            class="qf-list-none qf-px-3w qf-py-2w hover:qf-bg-grey-1000-50-hover focus-within:qf-bg-grey-1000-50-hover"
+            data-next-autocomplete-target="option"
+            {% if result|is_page %}
+            data-value="{{ result.url }}"
+            data-selected-value="{{ result.title }}"
+            {% else %}
+            data-value="{% url 'qfdmd:synonyme-detail' slug=result.slug %}"
+            data-selected-value="{{ result.nom|capfirst }}"
+            {% endif %}
+            data-action="keydown->next-autocomplete#navigate:prevent click->next-autocomplete#commitSelection"
+        >
+            {% if result|is_page %}
+                {# ProduitPage result #}
+                <a
+                    href="{{ result.url }}"
+                    data-turbo="false"
+                    class="fr-link qf-flex qf-justify-between"
+                >
+                    <span>{{ result.title }}</span>
+                    <span class="qf-ml-auto qf-text-green-menthe-sun-373-moon-652">{{ result.famille|default_if_none:"" }}</span>
+                </a>
+            {% else %}
+                {# Synonyme result #}
+                <a
+                    href="{% url 'qfdmd:synonyme-detail' slug=result.slug %}"
+                    data-turbo="false"
+                    class="fr-link qf-block"
+                >
+                    {{ result.nom|capfirst }}
+                </a>
+            {% endif %}
+        </li>
+    {% empty %}
+        <li class="qf-list-none qf-px-3w qf-py-2w qf-text-gray-500">
+            Aucun résultat trouvé
+        </li>
+    {% endfor %}
+{% endblock results %}

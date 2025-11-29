@@ -519,6 +519,23 @@ class FormulairesPreview(LookbookPreview):
         context = {"form": form}
         return template.render(Context(context))
 
+    def autocomplete_search_homepage(self, **kwargs):
+        """Preview of the autocomplete search form used on the homepage."""
+        from qfdmd.forms import AutocompleteSearchForm
+
+        form = AutocompleteSearchForm()
+        template = Template(
+            """
+            <div class="qf-max-w-3xl qf-mx-auto qf-p-4w">
+                <h2>Autocomplete Search (Homepage)</h2>
+                <p class="qf-mb-2w">This autocomplete search navigates to results on selection.</p>
+                {% include "ui/components/search/autocomplete_view.html" with autocomplete_search_form=form %}
+            </div>
+            """
+        )
+        context = {"form": form}
+        return template.render(Context(context))
+
     @component_docs("ui/components/formulaires/mode_carte_liste.md")
     def mode_carte_liste(self, **kwargs):
         form = ViewModeForm()

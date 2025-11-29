@@ -20,6 +20,7 @@ from qfdmo.forms import (
     FiltresFormWithoutSynonyme,
     LegacySupportForm,
     LegendeForm,
+    MapForm,
     ViewModeForm,
 )
 from qfdmo.models import CarteConfig
@@ -51,11 +52,17 @@ class AutoSubmitLegendeFormEntry(TypedDict):
     other_prefixes_to_check: list[str]
 
 
+class MapFormEntry(TypedDict):
+    form: type[MapForm]
+    prefix: str
+
+
 class CarteForms(TypedDict):
     view_mode: ViewModeFormEntry
     filtres: FiltresFormEntry
     legende: AutoSubmitLegendeFormEntry
     legende_filtres: LegendeFormEntry
+    map: MapFormEntry
 
 
 class CarteFormsInstance(TypedDict):
@@ -63,6 +70,7 @@ class CarteFormsInstance(TypedDict):
     filtres: None | FiltresForm
     legende: None | AutoSubmitLegendeForm
     legende_filtres: None | LegendeForm
+    map: None | MapForm
 
 
 class CarteSearchActeursView(SearchActeursView):
@@ -91,6 +99,10 @@ class CarteSearchActeursView(SearchActeursView):
                 "form": LegendeForm,
                 "prefix": "legende_filtres",
                 "other_prefixes_to_check": ["legende"],
+            },
+            "map": {
+                "form": MapForm,
+                "prefix": "map",
             },
         }
 
@@ -236,6 +248,18 @@ class CarteSearchActeursView(SearchActeursView):
         if self.carte_config:
             return self.carte_config.slug
         return DEFAULT_MAP_CONTAINER_ID
+
+    def _get_latitude(self):
+        """Get latitude from MapForm or fall back to request parameters."""
+        return self._get_field_value_for("map", "latitude")
+
+    def _get_longitude(self):
+        """Get longitude from MapForm or fall back to request parameters."""
+        return self._get_field_value_for("map", "longitude")
+
+    def _get_bounding_box(self):
+        """Get bounding_box from MapForm or fall back to request parameters."""
+        return self._get_field_value_for("map", "bounding_box") or ""
 
     def _get_carte_config(self):
         return None

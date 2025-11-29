@@ -312,13 +312,17 @@ class NextAutocompleteInput(forms.TextInput):
         self,
         search_view,
         limit=5,
+        navigate=False,
+        wrapper_attrs=None,
         *args,
         **kwargs,
     ):
         # TODO: add optional template args
         self.search_view = search_view
         self.limit = limit
+        self.navigate = navigate
         self.turbo_frame_id = str(uuid.uuid4())
+        self.wrapper_attrs = wrapper_attrs or {}
 
         super().__init__(*args, **kwargs)
 
@@ -329,7 +333,9 @@ class NextAutocompleteInput(forms.TextInput):
             **context,
             "endpoint_url": endpoint_url,
             "limit": self.limit,
+            "navigate": self.navigate,
             "turbo_frame_id": self.turbo_frame_id,
+            "wrapper_attrs": self.wrapper_attrs,
         }
 
 
@@ -480,6 +486,54 @@ class CarteForm(AddressesForm):
     epci_codes = forms.MultipleChoiceField(
         choices=get_epcis_for_carte_form,
         widget=forms.MultipleHiddenInput(),
+        required=False,
+    )
+
+
+class MapForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
+    """Form for map-based address search with autocomplete.
+
+    Uses NextAutocompleteInput to provide address suggestions from the
+    French government geocoding service (data.geopf.fr).
+    """
+
+    adresse = forms.CharField(
+        label="",
+        required=False,
+        widget=NextAutocompleteInput(
+            search_view="autocomplete_address",
+            limit=10,
+            navigate=False,
+            attrs={
+                "class": "fr-input",
+                "placeholder": "Rechercher autour d'une adresse",
+                "autocomplete": "off",
+                "aria-label": "Saisir une adresse",
+                "data-map-address-autocomplete-target": "input",
+            },
+        ),
+    )
+
+    latitude = forms.FloatField(
+        widget=forms.HiddenInput(
+            attrs={
+                "data-map-address-autocomplete-target": "latitudeInput",
+            }
+        ),
+        required=False,
+    )
+
+    longitude = forms.FloatField(
+        widget=forms.HiddenInput(
+            attrs={
+                "data-map-address-autocomplete-target": "longitudeInput",
+            }
+        ),
+        required=False,
+    )
+
+    bounding_box = forms.CharField(
+        widget=forms.HiddenInput(),
         required=False,
     )
 

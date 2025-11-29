@@ -99,6 +99,21 @@ class SearchActeursView(
     def _get_sous_categorie_ids(self) -> list[int]:
         pass
 
+    @abstractmethod
+    def _get_latitude(self):
+        """Get latitude from form or request."""
+        pass
+
+    @abstractmethod
+    def _get_longitude(self):
+        """Get longitude from form or request."""
+        pass
+
+    @abstractmethod
+    def _get_bounding_box(self):
+        """Get bounding box from form or request."""
+        pass
+
     def _get_distance_max(self):
         """The distance after which we stop displaying acteurs on the first request"""
         return settings.DISTANCE_MAX
@@ -267,12 +282,10 @@ class SearchActeursView(
         return bbox, acteurs
 
     def _bbox_and_acteurs_from_location_or_epci(self, acteurs):
-        custom_bbox = cast(
-            str, self.get_data_from_request_or_bounded_form("bounding_box")
-        )
+        custom_bbox = cast(str, self._get_bounding_box())
         center = center_from_frontend_bbox(custom_bbox)
-        latitude = center[1] or self.get_data_from_request_or_bounded_form("latitude")
-        longitude = center[0] or self.get_data_from_request_or_bounded_form("longitude")
+        latitude = center[1] or self._get_latitude()
+        longitude = center[0] or self._get_longitude()
 
         # Store for later assignation in get_context_data
         if latitude and longitude:

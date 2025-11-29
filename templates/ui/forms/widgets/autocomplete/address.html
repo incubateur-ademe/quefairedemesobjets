@@ -1,0 +1,26 @@
+{% extends "ui/forms/widgets/autocomplete/results.html" %}
+
+{% block results %}
+    {% for feature in features %}
+        <li
+            id="option-{{ forloop.counter }}"
+            role="option"
+            tabindex="-1"
+            class="qf-list-none qf-px-3w qf-py-2w hover:qf-bg-grey-1000-50-hover focus-within:qf-bg-grey-1000-50-hover"
+            data-next-autocomplete-target="option"
+            data-value="{{ feature.properties.label }}"
+            data-selected-value="{{ feature.properties.label }}"
+            data-latitude="{{ feature.geometry.coordinates.1 }}"
+            data-longitude="{{ feature.geometry.coordinates.0 }}"
+            data-action="keydown->next-autocomplete#navigate:prevent click->next-autocomplete#commitSelection"
+        >
+            <span class="fr-link qf-block">
+                {{ feature.properties.label }}
+            </span>
+        </li>
+    {% empty %}
+        <li class="qf-list-none qf-px-3w qf-py-2w qf-text-gray-500">
+            Aucune adresse trouvée
+        </li>
+    {% endfor %}
+{% endblock results %}

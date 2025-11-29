@@ -1,15 +1,20 @@
 import mimetypes
 from typing import override
+from urllib.parse import urlencode
 
+import requests
 import unidecode
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.lookups import Unaccent
 from django.contrib.postgres.search import TrigramWordDistance
 from django.contrib.staticfiles import finders
+from django.core.cache import cache
 from django.db.models.functions import Length, Lower
 from django.http import HttpResponse
+from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.views.decorators.cache import cache_control
+from django.views.decorators.http import require_GET
 from django.views.generic import ListView
 from wagtail.templatetags.wagtailcore_tags import richtext
 
@@ -110,3 +115,55 @@ class AutocompleteSynonyme(ListView):
         context = super().get_context_data(**kwargs)
         context["turbo_frame_id"] = self.request.GET.get("turbo_frame_id")
         return context
+
+
+@require_GET
+@cache_control(max_age=3600)  # Cache for 1 hour
+def autocomplete_address(request):
+    """Proxy for data.geopf.fr geocoding API with caching.
+
+    This endpoint searches for French addresses using the official French
+    government geocoding service and caches results to reduce API calls.
+    Returns HTML for use with the autocomplete widget.
+
+    Matches the behavior of address_autocomplete_controller.ts by calling
+    the API without autocomplete or limit parameters.
+    """
+    query = request.GET.get("q", "").strip()
+    turbo_frame_id = request.GET.get("turbo_frame_id")
+
+    if not query:
+        features = []
+    else:
+        # Create cache key from query only (no limit parameter)
+        cache_key = f"address_autocomplete:{query}"
+
+        # Try to get cached result
+        cached_result = cache.get(cache_key)
+        if cached_result is not None:
+            features = cached_result.get("features", [])
+        else:
+            # Call the geocoding API (matches address_autocomplete_controller.ts)
+            try:
+                params = urlencode({"q": query})
+                url = f"https://data.geopf.fr/geocodage/search/?{params}"
+
+                response = requests.get(url, timeout=5)
+                response.raise_for_status()
+
+                data = response.json()
+                features = data.get("features", [])
+
+                # Cache the result for 1 hour
+                cache.set(cache_key, data, 3600)
+
+            except requests.RequestException:
+                features = []
+
+    # Render the template with results
+    context = {
+        "features": features,
+        "turbo_frame_id": turbo_frame_id,
+    }
+
+    return render(request, "ui/forms/widgets/autocomplete/address.html", context)
