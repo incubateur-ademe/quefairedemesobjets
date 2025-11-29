@@ -347,3 +347,15 @@ class FormulaireSearchActeursView(SearchActeursView):
             ][0].id
         except IndexError:
             raise Exception("Action 'Réparer' not found")
+
+    def _get_latitude(self):
+        """Get latitude from form or request."""
+        return self.get_data_from_request_or_bounded_form("latitude")
+
+    def _get_longitude(self):
+        """Get longitude from form or request."""
+        return self.get_data_from_request_or_bounded_form("longitude")
+
+    def _get_bounding_box(self):
+        """Get bounding_box from form or request."""
+        return self.get_data_from_request_or_bounded_form("bounding_box") or ""

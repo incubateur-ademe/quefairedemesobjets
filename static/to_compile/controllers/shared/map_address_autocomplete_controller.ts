@@ -43,6 +43,9 @@ export default class MapAddressAutocompleteController extends Controller {
 
       // Dispatch to global state (matches address_autocomplete_controller behavior)
       this.dispatchLocationToGlobalState(value, latitude, longitude)
+
+      // Submit the form (matches address_autocomplete_controller behavior)
+      this.dispatch("formSubmit")
     }
   }
 

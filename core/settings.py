@@ -554,3 +554,5 @@ LOOKBOOK = {
     "preview_base": ["previews"],
     "show_previews": decouple.config("SHOE_PREVIEWS", default=True, cast=bool),
 }
+
+DECIMAL_SEPARATOR = ","

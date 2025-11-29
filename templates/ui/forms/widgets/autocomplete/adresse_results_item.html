@@ -1,0 +1,20 @@
+{% extends "ui/forms/widgets/autocomplete/_results_item.html" %}
+
+{% block data %}
+data-value="{{ feature.properties.label }}"
+data-selected-value="{{ feature.properties.label }}"
+data-latitude="{{ feature.geometry.coordinates.1 }}"
+data-longitude="{{ feature.geometry.coordinates.0 }}"
+{% endblock %}
+
+{% block rendering %}
+    {{ feature.properties.label }}
+{% endblock rendering %}
+<li
+  id="option-{{ forloop.counter }}"
+  role="option"
+  tabindex="-1"
+  class="qf-flex qf-flex-row qf-justify-between qf-list-none qf-p-1w focus:qf-bg-blue-france-sun-113-625 focus:qf-text-white hover:qf-bg-grey-1000-50-hover qf-cursor-pointer"
+  data-next-autocomplete-target="option"
+>
+</li>

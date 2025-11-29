@@ -6,6 +6,7 @@
     {% if navigate %}data-next-autocomplete-navigate-value="true"{% endif %}
     {# TODO: add optional data-action block #}
     {% for key, value in wrapper_attrs.items %}{% if key != "data-controller" %}{{ key }}="{{ value }}" {% endif %}{% endfor %}
+    class="qf-relative"
 >
     {# Input, copy pasted from django/forms/widgets/input.html #}
     <input
@@ -29,7 +30,7 @@
     {% include "ui/forms/widgets/autocomplete/results.html" %}
     {# spinner displays only when parent turbo frame is loading #}
 
-    <div class="peer-aria-[busy]:qf-visible qf-invisible qf-absolute qf-right-1w qf-top-auto qf-bottom-[3px]">
+    <div class="peer-aria-[busy]:qf-visible qf-invisible qf-absolute qf-z-50 qf-right-1w qf-top-auto qf-bottom-[3px]">
     {% include "ui/components/spinner.html" with small=True %}
     </div>
 </div>

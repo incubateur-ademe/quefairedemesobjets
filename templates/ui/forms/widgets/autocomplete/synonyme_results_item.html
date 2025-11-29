@@ -1,0 +1,13 @@
+{% extends "ui/forms/widgets/autocomplete/_results_item.html" %}
+
+{% block data %}
+  data-value="{{ object.id }}"
+  data-selected-value="{{ object }}"
+  data-action="keydown->next-autocomplete#navigate:prevent click->next-autocomplete#commitSelection"
+{% endblock data %}
+{% block rendering %}
+    {{ object }}
+    <small class="qf-mt-auto qf-italic">
+    {{ object.produit.sous_categorie_with_carte_display }}
+    </small>
+{% endblock rendering %}

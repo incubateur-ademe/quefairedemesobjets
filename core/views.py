@@ -135,30 +135,17 @@ def autocomplete_address(request):
     if not query:
         features = []
     else:
-        # Create cache key from query only (no limit parameter)
-        cache_key = f"address_autocomplete:{query}"
+        try:
+            params = urlencode({"q": query})
+            url = f"https://data.geopf.fr/geocodage/search/?{params}"
 
-        # Try to get cached result
-        cached_result = cache.get(cache_key)
-        if cached_result is not None:
-            features = cached_result.get("features", [])
-        else:
-            # Call the geocoding API (matches address_autocomplete_controller.ts)
-            try:
-                params = urlencode({"q": query})
-                url = f"https://data.geopf.fr/geocodage/search/?{params}"
+            response = requests.get(url, timeout=5)
+            response.raise_for_status()
 
-                response = requests.get(url, timeout=5)
-                response.raise_for_status()
-
-                data = response.json()
-                features = data.get("features", [])
-
-                # Cache the result for 1 hour
-                cache.set(cache_key, data, 3600)
-
-            except requests.RequestException:
-                features = []
+            data = response.json()
+            features = data.get("features", [])
+        except requests.RequestException:
+            features = []
 
     # Render the template with results
     context = {
@@ -166,4 +153,4 @@ def autocomplete_address(request):
         "turbo_frame_id": turbo_frame_id,
     }
 
-    return render(request, "ui/forms/widgets/autocomplete/address.html", context)
+    return render(request, "ui/forms/widgets/autocomplete/adresse.html", context)

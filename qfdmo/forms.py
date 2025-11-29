@@ -41,36 +41,6 @@ class AddressesForm(forms.Form):
         if address_placeholder := request.GET.get("address_placeholder"):
             self.fields["adresse"].widget.attrs["placeholder"] = address_placeholder
 
-    bounding_box = forms.CharField(
-        widget=forms.HiddenInput(
-            attrs={
-                "data-search-solution-form-target": "bbox",
-                "data-map-target": "bbox",
-            }
-        ),
-        required=False,
-    )
-
-    latitude = forms.FloatField(
-        widget=forms.HiddenInput(
-            attrs={
-                "data-address-autocomplete-target": "latitude",
-                "data-search-solution-form-target": "latitudeInput",
-            }
-        ),
-        required=False,
-    )
-
-    longitude = forms.FloatField(
-        widget=forms.HiddenInput(
-            attrs={
-                "data-address-autocomplete-target": "longitude",
-                "data-search-solution-form-target": "longitudeInput",
-            }
-        ),
-        required=False,
-    )
-
 
 class FormulaireForm(AddressesForm):
     sous_categorie_objet = forms.ModelChoiceField(
@@ -167,6 +137,35 @@ class FormulaireForm(AddressesForm):
         ),
         help_text="20 av. du Grésillé 49000 Angers",
         label="Autour de l'adresse suivante ",
+        required=False,
+    )
+    bounding_box = forms.CharField(
+        widget=forms.HiddenInput(
+            attrs={
+                "data-search-solution-form-target": "bbox",
+                "data-map-target": "bbox",
+            }
+        ),
+        required=False,
+    )
+
+    latitude = forms.FloatField(
+        widget=forms.HiddenInput(
+            attrs={
+                "data-address-autocomplete-target": "latitude",
+                "data-search-solution-form-target": "latitudeInput",
+            }
+        ),
+        required=False,
+    )
+
+    longitude = forms.FloatField(
+        widget=forms.HiddenInput(
+            attrs={
+                "data-address-autocomplete-target": "longitude",
+                "data-search-solution-form-target": "longitudeInput",
+            }
+        ),
         required=False,
     )
 
@@ -514,22 +513,24 @@ class MapForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
         ),
     )
 
-    latitude = forms.FloatField(
+    latitude = forms.DecimalField(
         widget=forms.HiddenInput(
             attrs={
                 "data-map-address-autocomplete-target": "latitudeInput",
             }
         ),
         required=False,
+        localize=True,
     )
 
-    longitude = forms.FloatField(
+    longitude = forms.DecimalField(
         widget=forms.HiddenInput(
             attrs={
                 "data-map-address-autocomplete-target": "longitudeInput",
             }
         ),
         required=False,
+        localize=True,
     )
 
     bounding_box = forms.CharField(
