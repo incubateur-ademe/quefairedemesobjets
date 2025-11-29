@@ -4,14 +4,10 @@
   tabindex="-1"
   class="qf-flex qf-flex-row qf-justify-between qf-list-none qf-p-1w focus:qf-bg-blue-france-sun-113-625 focus:qf-text-white hover:qf-bg-grey-1000-50-hover qf-cursor-pointer"
   data-next-autocomplete-target="option"
-  data-value="{{ object.id }}"
-  data-selected-value="{{ object }}"
+  {% block data %}{% endblock %}
   data-action="keydown->next-autocomplete#navigate:prevent click->next-autocomplete#commitSelection"
 >
     {% block rendering %}
-    {{ object }}
-    <small class="qf-mt-auto qf-italic">
-    {{ object.produit.sous_categorie_with_carte_display }}
-    </small>
+    Résultat à remplacer ici
     {% endblock rendering %}
 </li>

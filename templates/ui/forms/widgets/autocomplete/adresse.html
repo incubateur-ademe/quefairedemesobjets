@@ -1,0 +1,11 @@
+{% extends "ui/forms/widgets/autocomplete/results.html" %}
+
+{% block results %}
+    {% for feature in features %}
+        {% include "ui/forms/widgets/autocomplete/adresse_results_item.html" %}
+    {% empty %}
+        <li class="qf-list-none qf-px-3w qf-py-2w qf-text-gray-500">
+            Aucune adresse trouvée
+        </li>
+    {% endfor %}
+{% endblock results %}

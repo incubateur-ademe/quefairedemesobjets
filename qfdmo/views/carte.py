@@ -251,11 +251,17 @@ class CarteSearchActeursView(SearchActeursView):
 
     def _get_latitude(self):
         """Get latitude from MapForm or fall back to request parameters."""
-        return self._get_field_value_for("map", "latitude")
+        try:
+            return self._get_field_value_for("map", "latitude").replace(",", ".")
+        except:
+            pass
 
     def _get_longitude(self):
         """Get longitude from MapForm or fall back to request parameters."""
-        return self._get_field_value_for("map", "longitude")
+        try:
+            return self._get_field_value_for("map", "longitude").replace(",", ".")
+        except:
+            pass
 
     def _get_bounding_box(self):
         """Get bounding_box from MapForm or fall back to request parameters."""
