@@ -9,7 +9,7 @@ const setupIframe = () => {
   const [iframeAttributes, iframeExtraAttributes] = getIframeAttributesAndExtra(
     scriptTag,
     "infotri",
-    { useAutoHeight: true },
+    { useAutoHeight: true, iframeId: "infotri-configurator" },
   )
   buildAndInsertIframeFrom(
     iframeAttributes,

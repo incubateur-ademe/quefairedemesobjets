@@ -30,6 +30,7 @@ interface IframeSetupOptions {
   height?: string
   useAutoHeight?: boolean
   addScriptModeParam?: boolean
+  iframeId?: string
 }
 
 /**
@@ -72,10 +73,11 @@ function createIframeAttributes(
   height: string,
   route: string,
   useAutoHeight: boolean,
+  iframeId?: string,
 ): Record<string, any> {
   return {
     src: `${baseUrl}/${route}?${urlParams.toString()}`,
-    id: IFRAME_ID,
+    id: iframeId || IFRAME_ID,
     frameBorder: "0",
     scrolling: "no",
     allow: "geolocation; clipboard-write",
@@ -267,6 +269,7 @@ export function getIframeAttributesAndExtra(
     height,
     route,
     options.useAutoHeight || false,
+    options.iframeId,
   )
 
   return [iframeAttributes, iframeExtraAttributes]

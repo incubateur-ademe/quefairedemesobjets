@@ -21,7 +21,7 @@ const setupIframe = () => {
   const [iframeAttributes, iframeExtraAttributes] = getIframeAttributesAndExtra(
     scriptTag,
     "infotri/embed",
-    { useAutoHeight: true },
+    { useAutoHeight: true, iframeId: "infotri" },
   )
 
   buildAndInsertIframeFrom(iframeAttributes, iframeExtraAttributes, scriptTag, "", {

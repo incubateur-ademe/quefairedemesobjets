@@ -9,7 +9,7 @@ const setupIframe = () => {
   const [iframeAttributes, iframeExtraAttributes] = getIframeAttributesAndExtra(
     scriptTag,
     "carte",
-    { maxWidth: "100%", height: "700px" },
+    { maxWidth: "100%", height: "700px", iframeId: "carte" },
   )
   buildAndInsertIframeFrom(iframeAttributes, iframeExtraAttributes, scriptTag, "carte")
 }
