@@ -329,11 +329,16 @@ class NextAutocompleteInput(forms.TextInput):
 
     def get_context(self, name, value, attrs):
         context = super().get_context(name, value, attrs)
-        # Compute endpoint_url here since it requires reverse()
-        # Computing it in the init would cause a very annoying circular dependency
-        # error accross many views.
-        self.endpoint_url = reverse(self.search_view)
-        return context
+        endpoint_url = reverse(self.search_view)
+        return {
+            **context,
+            "endpoint_url": endpoint_url,
+            "limit": self.limit,
+            "navigate": self.navigate,
+            "display_value": self.display_value,
+            "turbo_frame_id": self.turbo_frame_id,
+            "wrapper_attrs": self.wrapper_attrs,
+        }
 
 
 class FiltresForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):

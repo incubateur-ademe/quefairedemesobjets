@@ -10,6 +10,11 @@ data-longitude="{{ feature.geometry.coordinates.0 }}"
 {% endlocalize %}
 {% endblock data %}
 
+{% block li_classes %}
+qf-w-full qf-flex qf-flex-col sm:qf-flex-row sm:qf-justify-between
+qf-items-center
+{% endblock li_classes %}
+
 {% block rendering %}
-    {{ feature.properties.label }}
+    <span>{{ feature.properties.highlighted_label|default:feature.properties.label|safe }} </span><i class="qf-align-right qf-ml-auto qf-text-sm">{{ feature.properties.context }}</i>
 {% endblock rendering %}

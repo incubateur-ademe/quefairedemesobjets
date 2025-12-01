@@ -1,18 +1,18 @@
 <div
-    data-controller="next-autocomplete{% for key, value in widget.wrapper_attrs.items %}{% if key == "data-controller" %} {{ value }}{% endif %}{% endfor %}"
-    data-next-autocomplete-endpoint-url-value="{{ widget.endpoint_url }}"
-    data-next-autocomplete-turbo-frame-id-value="{{ widget.turbo_frame_id }}"
-    data-next-autocomplete-limit-value="{{ widget.limit }}"
-    {% if widget.navigate %}data-next-autocomplete-navigate-value="true"{% endif %}
+    data-controller="next-autocomplete{% for key, value in wrapper_attrs.items %}{% if key == "data-controller" %} {{ value }}{% endif %}{% endfor %}"
+    data-next-autocomplete-endpoint-url-value="{{ endpoint_url }}"
+    data-next-autocomplete-turbo-frame-id-value="{{ turbo_frame_id }}"
+    data-next-autocomplete-limit-value="{{ limit }}"
+    {% if navigate %}data-next-autocomplete-navigate-value="true"{% endif %}
     {# TODO: add optional data-action block #}
-    {% for key, value in widget.wrapper_attrs.items %}{% if key != "data-controller" %}{{ key }}="{{ value }}" {% endif %}{% endfor %}
+    {% for key, value in wrapper_attrs.items %}{% if key != "data-controller" %}{{ key }}="{{ value }}" {% endif %}{% endfor %}
     class="qf-relative"
 >
     {# Input, copy pasted from django/forms/widgets/input.html #}
     <input
         type="search"
         {% include "django/forms/widgets/attrs.html" %}
-        {% if widget.display_value %}
+        {% if display_value %}
         name="{{ widget.name }}"
         {% if widget.value != None %} value="{{ widget.value }}"{% endif %}
         {% endif %}

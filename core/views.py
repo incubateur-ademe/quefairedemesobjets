@@ -8,7 +8,6 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.lookups import Unaccent
 from django.contrib.postgres.search import TrigramWordDistance
 from django.contrib.staticfiles import finders
-from django.core.cache import cache
 from django.db.models.functions import Length, Lower
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -129,6 +128,8 @@ def autocomplete_address(request):
     Matches the behavior of address_autocomplete_controller.ts by calling
     the API without autocomplete or limit parameters.
     """
+    import re
+
     query = request.GET.get("q", "").strip()
     turbo_frame_id = request.GET.get("turbo_frame_id")
 
@@ -144,6 +145,20 @@ def autocomplete_address(request):
 
             data = response.json()
             features = data.get("features", [])
+
+            # Highlight query terms in the labels
+            if features and query:
+                # Escape special regex characters and split query into words
+                query_words = [re.escape(word) for word in query.split()]
+                # Create pattern that matches any of the query words (case-insensitive)
+                pattern = re.compile(f"({'|'.join(query_words)})", re.IGNORECASE)
+
+                for feature in features:
+                    label = feature.get("properties", {}).get("label", "")
+                    # Wrap matched words in <b> tags
+                    highlighted_label = pattern.sub(r"<b>\1</b>", label)
+                    feature["properties"]["highlighted_label"] = highlighted_label
+
         except requests.RequestException:
             features = []
 
