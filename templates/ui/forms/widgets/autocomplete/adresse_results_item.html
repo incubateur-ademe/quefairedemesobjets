@@ -5,7 +5,7 @@ data-value="{{ feature.properties.label }}"
 data-selected-value="{{ feature.properties.label }}"
 data-latitude="{{ feature.geometry.coordinates.1 }}"
 data-longitude="{{ feature.geometry.coordinates.0 }}"
-{% endblock %}
+{% endblock data %}
 
 {% block rendering %}
     {{ feature.properties.label }}
