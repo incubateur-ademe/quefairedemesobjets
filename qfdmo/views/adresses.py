@@ -20,16 +20,11 @@ from django.views.generic.edit import FormView
 from wagtail.query import Any
 
 from qfdmd.models import Synonyme
-from qfdmo.geo_api import bbox_from_list_of_geojson, retrieve_epci_geojson
-from qfdmo.map_utils import (
-    center_from_frontend_bbox,
-    compile_frontend_bbox,
-    sanitize_frontend_bbox,
-)
+from qfdmo.geo_api import retrieve_epci_geojson
+from qfdmo.map_utils import center_from_frontend_bbox, sanitize_frontend_bbox
 from qfdmo.models import Acteur, ActeurStatus, DisplayedActeur, RevisionActeur
-from qfdmo.models.action import (
-    get_reparer_action_id,
-)
+from qfdmo.models.action import get_reparer_action_id
+from qfdmo.models.geo import EPCI
 
 logger = logging.getLogger(__name__)
 
@@ -99,6 +94,10 @@ class SearchActeursView(
     def _get_sous_categorie_ids(self) -> list[int]:
         pass
 
+    @abstractmethod
+    def _get_epci_codes(self) -> list[str]:
+        pass
+
     def _get_distance_max(self):
         """The distance after which we stop displaying acteurs on the first request"""
         return settings.DISTANCE_MAX
@@ -117,7 +116,6 @@ class SearchActeursView(
         initial["latitude"] = self.request.GET.get("latitude")
         # TODO: refacto forms : delete this line
         initial["longitude"] = self.request.GET.get("longitude")
-        initial["epci_codes"] = self.request.GET.getlist("epci_codes")
 
         # TODO: refacto forms : delete this line
         initial["bounding_box"] = self.request.GET.get("bounding_box")
@@ -298,16 +296,25 @@ class SearchActeursView(
 
             return custom_bbox, acteurs_from_center
 
-        if epci_codes := self.get_data_from_request_or_bounded_form("epci_codes"):
+        if epci_bbox := self._get_bbox_from_epci_codes():
+            acteurs = self._get_acteurs_from_epci_codes(acteurs)
+            return epci_bbox, acteurs
+
+        return custom_bbox, acteurs.none()
+
+    def _get_bbox_from_epci_codes(self) -> str | None:
+        if epci_codes := self._get_epci_codes():
+            return EPCI.objects.get_bbox_from_epci_codes(epci_codes)
+        return None
+
+    def _get_acteurs_from_epci_codes(self, acteurs):
+        if epci_codes := self._get_epci_codes():
             geojson_list = [retrieve_epci_geojson(code) for code in epci_codes]
-            bbox = bbox_from_list_of_geojson(geojson_list, buffer=0)
             if geojson_list:
                 acteurs = acteurs.in_geojson(
                     [json.dumps(geojson) for geojson in geojson_list]
                 )
-            return compile_frontend_bbox(bbox), acteurs
-
-        return custom_bbox, acteurs.none()
+        return acteurs
 
     def _build_acteurs_queryset_from_sous_categorie_objet_and_actions(
         self,
