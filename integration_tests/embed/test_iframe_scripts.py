@@ -23,14 +23,6 @@ class TestCarteEmbed:
     """Test the carte.js iframe embed script"""
 
     @pytest.mark.django_db
-    def ZZ_test_carte_script_loads(self, client):
-        """Verify carte.js script is accessible"""
-        url = "/static/carte.js"
-        response = client.get(url)
-        assert response.status_code == 200
-        assert b"carte" in response.content
-
-    @pytest.mark.django_db
     def test_carte_iframe_renders(self, client):
         """Verify carte route renders correctly for iframe embedding"""
         url = "/carte"
@@ -49,14 +41,6 @@ class TestCarteEmbed:
 
 class TestFormulaireEmbed:
     """Test the iframe.js script for formulaire embed"""
-
-    @pytest.mark.django_db
-    def ZZ_test_formulaire_script_loads(self, client):
-        """Verify iframe.js script is accessible"""
-        url = "/static/iframe.js"
-        response = client.get(url)
-        assert response.status_code == 200
-        assert b"formulaire" in response.content or b"iframe" in response.content
 
     @pytest.mark.django_db
     def test_formulaire_iframe_renders(self, client):
@@ -119,23 +103,3 @@ class TestInfotriEmbed:
         url = "/infotri/embed?categorie=tous&consigne=1&avec_phrase=false"
         response = client.get(url)
         assert response.status_code == 200
-
-    @pytest.mark.django_db
-    def ZZ_test_infotri_script_endpoint(self, client):
-        """Verify infotri.js embed script is accessible"""
-        url = "/infotri/static/infotri.js"
-        response = client.get(url)
-        assert response.status_code == 200
-        assert response["Content-Type"].startswith(
-            "application/javascript"
-        ) or response["Content-Type"].startswith("text/javascript")
-
-    @pytest.mark.django_db
-    def ZZ_test_infotri_configurator_script_endpoint(self, client):
-        """Verify infotri-configurator.js embed script is accessible"""
-        url = "/infotri/static/infotri-configurator.js"
-        response = client.get(url)
-        assert response.status_code == 200
-        assert response["Content-Type"].startswith(
-            "application/javascript"
-        ) or response["Content-Type"].startswith("text/javascript")
