@@ -18,9 +18,10 @@
         {% endif %}
         {# Custom attributes to match w3c combobox pattern #}
         role="combobox"
-        aria-controls="results-frame"
+        aria-controls="{{ turbo_frame_id }}-listbox"
         aria-expanded="false"
         aria-activedescendant=""
+        aria-autocomplete="list"
         data-action="next-autocomplete#search keydown->next-autocomplete#navigate focus->next-autocomplete#showListbox"
         data-next-autocomplete-target="input"
     >
