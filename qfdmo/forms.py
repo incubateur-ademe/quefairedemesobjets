@@ -312,6 +312,7 @@ class NextAutocompleteInput(forms.TextInput):
         search_view,
         limit=5,
         navigate=False,
+        display_value=False,
         wrapper_attrs=None,
         *args,
         **kwargs,
@@ -320,6 +321,7 @@ class NextAutocompleteInput(forms.TextInput):
         self.search_view = search_view
         self.limit = limit
         self.navigate = navigate
+        self.display_value = display_value
         self.turbo_frame_id = str(uuid.uuid4())
         self.wrapper_attrs = wrapper_attrs or {}
 
@@ -327,15 +329,11 @@ class NextAutocompleteInput(forms.TextInput):
 
     def get_context(self, name, value, attrs):
         context = super().get_context(name, value, attrs)
-        endpoint_url = reverse(self.search_view)
-        return {
-            **context,
-            "endpoint_url": endpoint_url,
-            "limit": self.limit,
-            "navigate": self.navigate,
-            "turbo_frame_id": self.turbo_frame_id,
-            "wrapper_attrs": self.wrapper_attrs,
-        }
+        # Compute endpoint_url here since it requires reverse()
+        # Computing it in the init would cause a very annoying circular dependency
+        # error accross many views.
+        self.endpoint_url = reverse(self.search_view)
+        return context
 
 
 class FiltresForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
@@ -503,6 +501,7 @@ class MapForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
             search_view="autocomplete_address",
             limit=10,
             navigate=False,
+            display_value=True,
             attrs={
                 "class": "fr-input",
                 "placeholder": "Rechercher autour d'une adresse",

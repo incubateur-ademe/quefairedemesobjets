@@ -251,17 +251,11 @@ class CarteSearchActeursView(SearchActeursView):
 
     def _get_latitude(self):
         """Get latitude from MapForm or fall back to request parameters."""
-        try:
-            return self._get_field_value_for("map", "latitude").replace(",", ".")
-        except:
-            pass
+        return self._get_field_value_for("map", "latitude")
 
     def _get_longitude(self):
         """Get longitude from MapForm or fall back to request parameters."""
-        try:
-            return self._get_field_value_for("map", "longitude").replace(",", ".")
-        except:
-            pass
+        return self._get_field_value_for("map", "longitude")
 
     def _get_bounding_box(self):
         """Get bounding_box from MapForm or fall back to request parameters."""
@@ -328,7 +322,7 @@ class CarteSearchActeursView(SearchActeursView):
         cache_key = self._get_cache_key_for_acteurs()
         cached_result = cache.get(cache_key)
 
-        if cached_result is not None:
+        if not settings.DEBUG and cached_result is not None:
             # Return cached bbox and acteurs
             return cached_result
 
@@ -340,9 +334,10 @@ class CarteSearchActeursView(SearchActeursView):
         location = getattr(self, "location", None)
         if not getattr(acteurs, "_has_distance_field", False) and location:
             location_data = json.loads(location)
-            reference_point = Point(
-                location_data["longitude"], location_data["latitude"], srid=4326
-            )
+            # Handle comma-formatted coordinates (locale issue)
+            longitude = str(location_data["longitude"]).replace(",", ".")
+            latitude = str(location_data["latitude"]).replace(",", ".")
+            reference_point = Point(float(longitude), float(latitude), srid=4326)
             # Convert to list and sort in Python since queryset is already sliced
             acteurs_list = list(acteurs)
             for acteur in acteurs_list:
@@ -375,6 +370,21 @@ class CarteSearchActeursView(SearchActeursView):
         carte_config = self._get_carte_config()
         icon_lookup = self._build_icon_lookup(carte_config) if carte_config else {}
 
+        # Compute has_location_data to determine if we should display results
+        # Check if we have an address, bounding_box, epci_codes, or latitude
+        map_form = self.ui_forms.get("map")
+        has_location_data = bool(
+            (
+                map_form
+                and (
+                    map_form["adresse"].value()
+                    or map_form["bounding_box"].value()
+                    or map_form["latitude"].value()
+                )
+            )
+            or self.request.GET.get("epci_codes")
+        )
+
         context.update(
             forms=self.ui_forms,
             map_container_id=self._get_map_container_id(),
@@ -382,6 +392,7 @@ class CarteSearchActeursView(SearchActeursView):
             carte_config=carte_config,
             selected_action_codes=self._get_action_codes(),
             icon_lookup=icon_lookup,
+            has_location_data=has_location_data,
         )
 
         return context
