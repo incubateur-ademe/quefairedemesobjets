@@ -1,6 +1,5 @@
 # Ignore line length recommandations from flake8
 # flake8: noqa: E501
-from urllib.parse import urlparse
 
 from django import forms
 from django.conf import settings
@@ -9,6 +8,7 @@ from django.template.loader import render_to_string
 from django_lookbook.preview import LookbookPreview
 from django_lookbook.utils import register_form_class
 
+from core.utils import remove_protocol_from_url
 from infotri.forms import InfotriForm
 from qfdmd.forms import SearchForm
 from qfdmd.models import Suggestion, Synonyme
@@ -16,22 +16,7 @@ from qfdmo.models.acteur import ActeurType, DisplayedActeur, DisplayedPropositio
 from qfdmo.models.action import Action
 from qfdmo.models.config import CarteConfig
 
-
-def get_protocol_relative_url(url):
-    """
-    Convert an absolute URL to a protocol-relative URL.
-    This prevents mixed content issues in Django Lookbook previews
-    where the iframe may use http:// but BASE_URL is https://.
-
-    Example:
-        https://example.com/path -> //example.com/path
-        http://example.com/path -> //example.com/path
-    """
-    parsed = urlparse(url)
-    return f"//{parsed.netloc}{parsed.path}"
-
-
-base_url = get_protocol_relative_url(settings.BASE_URL)
+base_url = remove_protocol_from_url(settings.BASE_URL)
 
 
 class ProduitHeadingForm(forms.Form):
@@ -291,7 +276,6 @@ class IframePreview(LookbookPreview):
         <script src="{base_url}/static/carte.js"></script>
         ```
         """
-        # Render docstring with actual base_url
 
         template = Template(
             f"""
