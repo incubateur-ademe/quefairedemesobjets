@@ -1,5 +1,7 @@
 ---
 x-airflow-common: &airflow-common
+  tmpfs:
+    - /tmp
   env_file:
     - ./dags/.env
   volumes:
