@@ -100,11 +100,15 @@ jobs:
       - name: Run tests
         run: npm run test
 
-  e2e_prepare:
-    name: préparation des tests de bout-en-bout
+  e2e:
+    name: Tests de bout en bout
     runs-on: ubuntu-latest
     # needs: [backend_tests, frontend_tests]
     if: ${{ github.ref_name == 'main' || (github.event_name ==  'pull_request' && contains( github.event.pull_request.labels.*.name, 'frontend')) }}
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
     env:
       BASE_URL: http://localhost:8000
     services:
@@ -151,52 +155,6 @@ jobs:
             staticfiles
             database-dump.pgdump
           retention-days: 1
-
-  e2e:
-    name: tests de bout-en-bout
-    runs-on: ubuntu-latest
-    needs: e2e_prepare
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1]
-    services:
-      postgres:
-        image: postgis/postgis:15-3.3-alpine
-        env:
-          POSTGRES_USER: webapp
-          POSTGRES_PASSWORD: webapp # pragma: allowlist secret
-          POSTGRES_DB: webapp
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 1s
-          --health-timeout 1s
-          --health-retries 50
-        ports:
-          - 5432:5432
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Install GIS packages
-        uses: ./.github/actions/install-gis
-
-      - name: Setup backend environment
-        uses: ./.github/actions/setup-backend
-        with:
-          uv-groups: "--group dev"
-
-      - name: Setup Playwright
-        uses: ./.github/actions/setup-playwright
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v5
-        with:
-          name: e2e-build-artifacts
-
-      - name: Restore Django database
-        uses: ./.github/actions/restore-django-db
-        with:
-          database-url: ${{ env.DATABASE_URL }}
 
       - name: Run server
         run: |
