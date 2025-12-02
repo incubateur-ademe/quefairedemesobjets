@@ -178,16 +178,12 @@ jobs:
         if: steps.cache-db.outputs.cache-hit != 'true'
         run: pg_dump -f database-dump.sql
 
-      - name: Rename .env for artifact upload
-        run: mv .env env-file
-
       - name: Upload build artifacts for e2e tests
         uses: actions/upload-artifact@v5
         with:
           name: e2e-build-artifacts
           path: |
             staticfiles
-            env-file
             database-dump.sql
           retention-days: 1
 
@@ -248,9 +244,6 @@ jobs:
         uses: actions/download-artifact@v5
         with:
           name: e2e-build-artifacts
-
-      - name: Restore .env from artifact
-        run: mv env-file .env
 
       - name: Restore PostgreSQL database
         run: psql -f database-dump.sql
