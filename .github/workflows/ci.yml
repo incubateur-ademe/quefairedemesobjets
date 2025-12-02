@@ -11,7 +11,7 @@ env:
   PGDATABASE: webapp
   UV_PROJECT_ENVIRONMENT: .venv
   BASE_URL: http://localhost:8000
-  DATABASE_URL: "postgres://fakeusername:fakepassword@postgres:5432/database" # pragma: allowlist secret
+  DATABASE_URL: "postgres://webapp:webapp@postgres:5432/webapp" # pragma: allowlist secret
 
 jobs:
   backend_linter:
