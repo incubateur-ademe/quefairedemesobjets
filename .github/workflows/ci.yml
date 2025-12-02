@@ -132,6 +132,7 @@ jobs:
           cp .env.template .env
           echo BASE_URL=$BASE_URL >> .env
           echo DEBUG=false >> .env
+          echo DATABASE_URL=$DATABASE_URL >> .env
 
       - name: Setup E2E environment
         uses: ./.github/actions/setup-e2e
