@@ -18,9 +18,6 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Install GIS packages
-        uses: ./.github/actions/install-gis
-
       - name: Setup backend environment
         uses: ./.github/actions/setup-backend
         with:
@@ -53,6 +50,8 @@ jobs:
   backend_tests:
     name: ✅ Backend Tests
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/osgeo/gdal:ubuntu-full-latest
     services:
       postgres:
         image: postgis/postgis:15-3.3-alpine
@@ -70,9 +69,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-
-      - name: Install GIS packages
-        uses: ./.github/actions/install-gis
 
       - name: Setup backend environment
         uses: ./.github/actions/setup-backend
@@ -105,6 +101,8 @@ jobs:
   e2e_prepare:
     name: préparation des tests de bout-en-bout
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/osgeo/gdal:ubuntu-full-latest
     # needs: [backend_tests, frontend_tests]
     if: ${{ github.ref_name == 'main' || (github.event_name ==  'pull_request' && contains( github.event.pull_request.labels.*.name, 'frontend')) }}
     env:
@@ -133,9 +131,6 @@ jobs:
 
       - name: Setup E2E environment
         uses: ./.github/actions/setup-e2e
-
-      - name: Install GIS packages
-        uses: ./.github/actions/install-gis
 
       # Cache Playwright browsers to avoid re-downloading on every run.
       # GitHub Actions automatically evicts caches after 7 days of inactivity,
@@ -197,6 +192,8 @@ jobs:
   e2e:
     name: tests de bout-en-bout
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/osgeo/gdal:ubuntu-full-latest
     needs: e2e_prepare
     env:
       BASE_URL: http://localhost:8000
