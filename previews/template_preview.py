@@ -1,5 +1,6 @@
 # Ignore line length recommandations from flake8
 # flake8: noqa: E501
+
 from django import forms
 from django.conf import settings
 from django.template import Context, Template
@@ -7,11 +8,15 @@ from django.template.loader import render_to_string
 from django_lookbook.preview import LookbookPreview
 from django_lookbook.utils import register_form_class
 
+from core.utils import remove_protocol_from_url
+from infotri.forms import InfotriForm
 from qfdmd.forms import SearchForm
 from qfdmd.models import Suggestion, Synonyme
 from qfdmo.models.acteur import ActeurType, DisplayedActeur, DisplayedPropositionService
 from qfdmo.models.action import Action
 from qfdmo.models.config import CarteConfig
+
+base_url = remove_protocol_from_url(settings.BASE_URL)
 
 
 class ProduitHeadingForm(forms.Form):
@@ -262,25 +267,60 @@ class SnippetsPreview(LookbookPreview):
 
 class IframePreview(LookbookPreview):
     def carte(self, **kwargs):
+        """
+        # Carte
+
+        Copiez ce script pour intégrer la carte sur votre site :
+
+        ```html
+        <script src="{base_url}/static/carte.js"></script>
+        ```
+        """
+
         template = Template(
             f"""
-            <script src="{settings.BASE_URL}/static/carte.js"></script>
+            <script src="{base_url}/static/carte.js"></script>
             """,
         )
         return template.render(Context({}))
 
     def carte_sur_mesure(self, **kwargs):
+        """
+        # Carte sur mesure
+
+        Copiez ce script pour intégrer une carte personnalisée :
+
+        ```html
+        <script src="{base_url}/static/carte.js" data-slug="cyclevia"></script>
+        ```
+        """
+
         template = Template(
             f"""
-            <script src="{settings.BASE_URL}/static/carte.js" data-slug="cyclevia"></script>
+            <script src="{base_url}/static/carte.js" data-slug="cyclevia"></script>
             """,
         )
 
         return template.render(Context({}))
 
     def carte_preconfiguree(self, **kwargs):
+        """
+        # Carte préconfigurée
+
+        Copiez ce script pour intégrer une carte avec filtres prédéfinis :
+
+        ```html
+        <script src="{base_url}/static/carte.js"
+            data-action_displayed="preter|emprunter|louer|mettreenlocation|reparer|donner|echanger|acheter|revendre"
+            data-max-width="800px"
+            data-height="720px"
+            data-bounding_box="{{'southWest': {{'lat': 47.570401, 'lng': 1.597977}}, 'northEast': {{'lat': 48.313697, 'lng': 3.059159}}}}">
+        </script>
+        ```
+        """
+
         template = Template(
-            f"<script src='{settings.BASE_URL}/static/carte.js'"
+            f"<script src='{base_url}/static/carte.js'"
             """data-action_displayed="preter|emprunter|louer|mettreenlocation|reparer|donner|echanger|acheter|revendre"
             data-max-width="800px"
             data-height="720px"
@@ -292,14 +332,30 @@ class IframePreview(LookbookPreview):
         return template.render(Context({}))
 
     def formulaire(self, **kwargs):
+        """
+        # Formulaire
+
+        Copiez ce script pour intégrer le formulaire de recherche :
+
+        ```html
+        <script src="{base_url}/static/iframe.js"
+            data-max_width="100%"
+            data-height="720px"
+            data-direction="jai"
+            data-action_list="reparer|echanger|mettreenlocation|revendre"
+            data-iframe_attributes='{{"loading":"lazy", "id" : "resize" }}'>
+        </script>
+        ```
+        """
+
         template = Template(
-            f"<script src='{settings.BASE_URL}/static/iframe.js'"
+            f"<script src='{base_url}/static/iframe.js'"
             """
                 data-max_width="100%"
                 data-height="720px"
                 data-direction="jai"
                 data-action_list="reparer|echanger|mettreenlocation|revendre"
-                data-iframe_attributes='{"loading":"lazy", "id" : "resize" }'>
+                data-iframe_attributes='{"loading":"lazy"}'>
                 </script>
             """,
         )
@@ -307,27 +363,117 @@ class IframePreview(LookbookPreview):
         return template.render(Context({}))
 
     def assistant(self, **kwargs):
+        """
+        # Assistant
+
+        Copiez ce script pour intégrer l'assistant produit/déchet :
+
+        ```html
+        <script src="{base_url}/iframe.js"></script>
+        ```
+        """
+
         template = Template(
             f"""
-        <script src="{settings.BASE_URL}/iframe.js" data-testid='assistant'></script>
+        <script src="{base_url}/iframe.js" data-testid='assistant'></script>
         """,
         )
 
         return template.render(Context({}))
 
     def assistant_with_epci(self, **kwargs):
+        """
+        # Assistant avec EPCI
+
+        Copiez ce script pour intégrer l'assistant avec un code EPCI et objet prédéfinis :
+
+        ```html
+        <script src="{base_url}/iframe.js" data-epci="200043123" data-objet="lave-linge"></script>
+        ```
+        """
+
         template = Template(
             f"""
-        <script src="{settings.BASE_URL}/iframe.js" data-epci="200043123" data-objet="lave-linge"></script>
+        <script src="{base_url}/iframe.js" data-epci="200043123" data-objet="lave-linge"></script>
         """,
         )
 
         return template.render(Context({}))
 
     def assistant_without_referrer(self, **kwargs):
+        """
+        # Assistant sans referrer
+
+        Copiez ce script pour intégrer l'assistant en mode debug (sans referrer) :
+
+        ```html
+        <script src="{base_url}/iframe.js" data-debug-referrer></script>
+        ```
+        """
+
         template = Template(
             f"""
-        <script src="{settings.BASE_URL}/iframe.js" data-debug-referrer data-testid='assistant'></script>
+        <script src="{base_url}/iframe.js" data-debug-referrer data-testid='assistant'></script>
+        """,
+        )
+
+        return template.render(Context({}))
+
+    @register_form_class(InfotriForm)
+    def infotri(self, categorie="", consigne="", avec_phrase="false", **kwargs):
+        """
+        # Info-tri
+
+        Affiche un Info-tri avec les options configurables via le formulaire.
+
+        Copiez ce script pour intégrer l'Info-tri sur votre site :
+
+        ```html
+        <script src="{base_url}/infotri/static/infotri.js"
+                data-config="{config}"></script>
+        ```
+        """
+
+        # Build config string from parameters
+        params = []
+        if categorie:
+            params.append(f"categorie={categorie}")
+        if consigne:
+            params.append(f"consigne={consigne}")
+
+        # Handle avec_phrase as boolean string
+        if isinstance(avec_phrase, str):
+            avec_phrase_value = avec_phrase.lower() in ["true", "1", "yes", "on"]
+        else:
+            avec_phrase_value = bool(avec_phrase)
+        params.append(f"avec_phrase={'true' if avec_phrase_value else 'false'}")
+
+        config = "&".join(params)
+
+        template = Template(
+            f"""
+        <script src="{base_url}/infotri/static/infotri.js"
+                data-config="{config}"></script>
+        """,
+        )
+
+        return template.render(Context({}))
+
+    def infotri_configurator(self, **kwargs):
+        """
+        # Configurateur Info-tri
+
+        Affiche le configurateur Info-tri complet en iframe.
+
+        Copiez ce script pour intégrer le configurateur :
+
+        ```html
+        <script src="{base_url}/infotri/static/infotri-configurator.js"></script>
+        ```
+        """
+        template = Template(
+            f"""
+        <script src="{base_url}/infotri/static/infotri-configurator.js"></script>
         """,
         )
 

@@ -8,14 +8,20 @@ const setupIframe = () => {
   const scriptTag = document.currentScript as HTMLScriptElement
   const [iframeAttributes, iframeExtraAttributes] = getIframeAttributesAndExtra(
     scriptTag,
-    "formulaire",
-    { maxWidth: "800px", iframeId: "formulaire" },
+    "infotri",
+    { useAutoHeight: true, iframeId: "infotri-configurator" },
   )
   buildAndInsertIframeFrom(
     iframeAttributes,
     iframeExtraAttributes,
     scriptTag,
-    "formulaire",
+    "infotri-configurator",
+    {
+      useIframeResizer: true,
+      resizerOptions: {
+        id: "infotri-configurator",
+      },
+    },
   )
 }
 
