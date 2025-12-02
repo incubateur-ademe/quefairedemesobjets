@@ -1,0 +1,22 @@
+name: 'Setup E2E Environment'
+description: 'Sets up Node.js, Python, and Playwright for E2E tests'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version-file: ".tool-versions"
+        cache: "npm"
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@1e862dfacbd1d6d858c55d9b792c756523627244
+      with:
+        enable-cache: true
+
+    - name: Cache Playwright browsers
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
