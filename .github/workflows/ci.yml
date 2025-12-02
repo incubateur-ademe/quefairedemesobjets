@@ -178,6 +178,8 @@ jobs:
           POSTGRES_PASSWORD: webapp # pragma: allowlist secret
           POSTGRES_DB: webapp
     steps:
+      - uses: actions/checkout@v6
+
       # PREPARE e2e
       - name: Setup frontend environment
         uses: ./.github/actions/setup-frontend
