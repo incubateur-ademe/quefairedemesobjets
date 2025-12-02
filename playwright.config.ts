@@ -53,10 +53,11 @@ export default defineConfig({
   /* Run local dev server before starting the tests */
   webServer: {
     // skip-checks and noreload ensures django runserver starts faster
-    command: `uv run python manage.py runserver ${process.env.DEBUG && "--noreload --skip-checks"} ${PLAYWRIGHT_HOST}:${PLAYWRIGHT_PORT}`,
+    command: `uv run python manage.py runserver ${process.env.DEBUG?.toLowerCase() === "true" ? "--noreload --skip-checks" : ""} ${PLAYWRIGHT_HOST}:${PLAYWRIGHT_PORT}`,
     url: process.env.BASE_URL,
     reuseExistingServer: !process.env.CI,
     timeout: 10000,
+    env: process.env,
   },
 
   /* Configure projects for major browsers */
