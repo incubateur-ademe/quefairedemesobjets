@@ -56,7 +56,7 @@
         data-action="address-autocomplete:change->state#setLocation"
         {% if STIMULUS_DEBUG %}data-stimulus-debug="true"{% endif %}
     >
-        <main id="solutions" class="qf-h-full qf-overflow-y-auto qf-overflow-x-hidden">
+        <main id="solutions"{% block main_classes %}class="qf-h-full qf-overflow-y-auto qf-overflow-x-hidden{% endblock %}">
             <noscript>
                 <div class="fr-container fr-my-3w">
                     <div class="fr-alert fr-alert--error">

@@ -1,0 +1,19 @@
+{% extends "ui/layout/base.html" %}
+{% load static %}
+
+{% block page_title %}Info-tri{% endblock %}
+
+{% block body_classes %}qf-bg-white !qf-h-auto{% endblock %}
+
+{% block content %}
+<div class="qf-flex qf-items-center qf-flex-col qf-justify-end qf-pb-1w qf-min-h-fit">
+    <a href="https://quefairedemesdechets.ademe.fr?utm_source=infotri" target="_blank" rel="noreferrer" class="qf-no-external-link-icon !qf-bg-none">
+        {% include "ui/components/infotri/infotri.html" %}
+    </a>
+</div>
+{% endblock content %}
+
+{% block js %}
+    <script src="{% static 'infotri-child.js' %}" defer></script>
+    {{ block.super }}
+{% endblock js %}
