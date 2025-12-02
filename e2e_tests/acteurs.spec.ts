@@ -37,8 +37,11 @@ test.describe("🗺️ Acteurs Display and Interaction", () => {
 
     // Remove the home marker (red dot) that prevents Playwright from clicking other markers
     const markers = iframe.locator(".maplibregl-marker")
-    const count = await markers.count()
+    // const count = await markers.count()
 
+    await page.waitForLoadState("networkidle")
+
+    const count = await markers.count()
     for (let i = 0; i < count; i++) {
       const item = markers.nth(i)
       try {

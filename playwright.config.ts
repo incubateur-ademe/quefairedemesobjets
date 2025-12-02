@@ -16,8 +16,7 @@ dotenv.config({ path: path.resolve(__dirname, ".env") })
 
 const PLAYWRIGHT_HOST = process.env.PLAYWRIGHT_HOST || "localhost"
 const PLAYWRIGHT_PORT = process.env.PLAYWRIGHT_PORT || "8000"
-const PLAYWRIGHT_BASE_URL =
-  process.env.PLAYWRIGHT_BASE_URL || `http://${PLAYWRIGHT_HOST}:${PLAYWRIGHT_PORT}`
+const PLAYWRIGHT_BASE_URL = process.env.PLAYWRIGHT_BASE_URL || process.env.BASE_URL
 
 export default defineConfig({
   testDir: "./e2e_tests",
@@ -40,12 +39,11 @@ export default defineConfig({
 
   /* Run local dev server before starting the tests */
   webServer: {
-    command: `uv run python manage.py runserver ${PLAYWRIGHT_HOST}:${PLAYWRIGHT_PORT}`,
+    // skip-checks and noreload ensures django runserver starts faster
+    command: `uv run python manage.py runserver ${process.env.DEBUG && "--noreload --skip-checks"} ${PLAYWRIGHT_HOST}:${PLAYWRIGHT_PORT}`,
     url: PLAYWRIGHT_BASE_URL,
     reuseExistingServer: !process.env.CI,
-    timeout: 120000,
-    stdout: "pipe",
-    stderr: "pipe",
+    timeout: 10000,
   },
 
   /* Configure projects for major browsers */

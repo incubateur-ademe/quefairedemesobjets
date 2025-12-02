@@ -9,18 +9,22 @@ test.describe("🗺️ Carte Advanced Filters", () => {
       .click()
   }
 
-  async function openAdvancedFilters(page, dataTestId = "advanced-filters") {
-    // Explicitely wait for addresses to load
-    await page.waitForTimeout(5000)
-    await page.locator(`button[data-testid=${dataTestId}]`).click()
+  async function openAdvancedFilters(
+    page,
+    parentTestId = "form-content",
+    buttonDataTestId = "advanced-filters",
+    modalDataTestId = "advanced-filters-modal",
+  ) {
+    await page.getByTestId(parentTestId).getByTestId(buttonDataTestId).click()
+
     await expect(
-      page.locator("[data-testid=advanced-filters-modal] .fr-modal__content h2"),
+      page.locator(`[data-testid="${modalDataTestId}"] .fr-modal__content h2`),
     ).toBeInViewport()
     await page
-      .locator("[data-testid=advanced-filters-modal] .fr-modal__header button")
+      .locator(`[data-testid="${modalDataTestId}"] .fr-modal__header button`)
       .click()
     await expect(
-      page.locator("[data-testid=advanced-filters-modal] .fr-modal__content h2"),
+      page.locator(`[data-testid="${modalDataTestId}"] .fr-modal__content h2`),
     ).toBeHidden()
   }
 
@@ -38,7 +42,12 @@ test.describe("🗺️ Carte Advanced Filters", () => {
       waitUntil: "domcontentloaded",
     })
     await searchInCarteMode(page)
-    await openAdvancedFilters(page, "advanced-filters-in-legend")
+    await openAdvancedFilters(
+      page,
+      "carte-legend",
+      "modal-button-carte:filtres",
+      "modal-carte:filtres",
+    )
   })
 
   test(

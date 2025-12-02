@@ -26,6 +26,7 @@ Requires a unique 'id' per modal for accessibility.
     aria-labelledby="fr-modal-title-{{ namespaced_id }}"
     {# Ensure turbo frame is disabled as DSFR modals should not interact with turbo frame #}
     data-turbo="false"
+    data-testid="modal-button-{{ namespaced_id }}"
     type="button"
 >
       {% block button_text %}{% endblock %}
@@ -38,6 +39,7 @@ Requires a unique 'id' per modal for accessibility.
     aria-modal="true"
     id="fr-modal-{{ namespaced_id }}"
     class="fr-modal qf-text-left"
+    data-testid="modal-{{ namespaced_id }}"
 >
     <div class="fr-container fr-container--fluid fr-container-md">
         <div class="fr-grid-row fr-grid-row--center">
@@ -46,7 +48,7 @@ Requires a unique 'id' per modal for accessibility.
                     <div class="fr-modal__header">
                         {% block modal_header %}
                         {% endblock modal_header %}
-                        <button type="button" class="fr-btn--close fr-btn" title="Fermer la fenêtre modale" aria-controls="fr-modal-{{ namespaced_id }}">Fermer</button>
+                        <button type="button" class="fr-btn--close fr-btn" title="Fermer la fenêtre modale" aria-controls="fr-modal-{{ namespaced_id }}" data-testid="modal-close-{{ namespaced_id }}">Fermer</button>
                     </div>
                     <div class="fr-modal__content">
                         <h2 id="fr-modal-title-{{ namespaced_id }}" class=" fr-modal__title">
