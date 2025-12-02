@@ -36,7 +36,7 @@ jobs:
         run: terragrunt hcl fmt -check infrastructure
 
   frontend_prepare:
-    name: 📦 Frontend Build
+    name: 📦 Prepare frontend
     runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v6
@@ -50,11 +50,8 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version-file: ".tool-versions"
-          cache: "npm"
+      - name: Setup frontend environment
+        uses: ./.github/actions/setup-frontend
 
       - name: Check code formatting
         run: npm run format:check
