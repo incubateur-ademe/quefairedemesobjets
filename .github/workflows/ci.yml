@@ -152,24 +152,35 @@ jobs:
       - name: Setup backend environment
         uses: ./.github/actions/setup-backend
 
+      - name: Install Playwright Browsers
+        run: make init-playwright
+
+      - name: Check database cache
+        id: cache-db
+        uses: actions/cache@v4
+        with:
+          path: database-dump.sql
+          key: db-dump-${{ hashFiles('**/migrations/**/*.py', '**/fixtures/**/*') }}
+
       - name: Prepare django, migrate, collect static files...
+        if: steps.cache-db.outputs.cache-hit != 'true'
         run: |
           make createcachetable
           make migrate
           make collectstatic
 
       - name: Populate database
+        if: steps.cache-db.outputs.cache-hit != 'true'
         run: |
           make seed-database
 
       - name: Init django admin superuser
+        if: steps.cache-db.outputs.cache-hit != 'true'
         run: |
           make createsuperuser-example
 
-      - name: Install Playwright Browsers
-        run: make init-playwright
-
       - name: Dump PostgreSQL database
+        if: steps.cache-db.outputs.cache-hit != 'true'
         run: pg_dump -f database-dump.sql
 
       - name: Upload build artifacts for e2e tests
