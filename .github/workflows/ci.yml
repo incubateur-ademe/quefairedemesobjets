@@ -9,6 +9,7 @@ env:
   PGUSER: webapp
   PGPASSWORD: webapp # pragma: allowlist secret
   PGDATABASE: webapp
+  UV_PROJECT_ENVIRONMENT: .venv
 
 jobs:
   backend_linter:
