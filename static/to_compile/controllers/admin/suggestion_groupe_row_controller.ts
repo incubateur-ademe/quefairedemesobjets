@@ -2,9 +2,10 @@ import { Controller } from "@hotwired/stimulus"
 import * as Turbo from "@hotwired/turbo"
 
 export default class extends Controller<HTMLElement> {
-  static targets = ["fieldsList"]
+  static targets = ["fieldsValues", "fieldsGroups"]
 
-  declare readonly fieldsListTarget: HTMLInputElement
+  declare readonly fieldsValuesTarget: HTMLInputElement
+  declare readonly fieldsGroupsTarget: HTMLInputElement
 
   editSuggestionGroupeRow(event: Event) {
     const target = event.target as HTMLElement
@@ -42,30 +43,33 @@ export default class extends Controller<HTMLElement> {
     }
   }
 
-  refresh(event: Event) {
-    console.log("refresh")
-    event.preventDefault()
-    event.stopPropagation()
+  updateAllDisplayed(event: Event) {
+    let valueJson = this.fieldsValuesTarget.value
+    let groupsJson = this.fieldsGroupsTarget.value
+    let value = JSON.parse(valueJson)
+    for (let key in value) {
+      if (
+        (value[key]["updated_displayed_value"] === undefined &&
+          value[key]["new_value"] !== undefined) ||
+        value[key]["updated_displayed_value"] !== value[key]["new_value"]
+      ) {
+        value[key]["updated_displayed_value"] = value[key]["new_value"]
+      }
+    }
+    this.postFieldsList(JSON.stringify(value), groupsJson)
+  }
 
-    console.log("refresh 2")
+  private postFieldsList(valuesJson: string, groupsJson: string) {
     const refreshUrl = this.element.dataset.refreshUrl
     if (!refreshUrl) {
       console.error("URL de rafraîchissement manquante")
       return
     }
 
-    console.log("refresh 3")
-    const fieldsInput = this.fieldsListTarget
-    if (!fieldsInput) {
-      console.error("Champ fields_list introuvable")
-      return
-    }
-
-    console.log("refresh 4")
     const formData = new FormData()
-    formData.append("fields_list", fieldsInput.value)
+    formData.append("fields_values", valuesJson)
+    formData.append("fields_groups", groupsJson)
 
-    console.log("refresh 5", refreshUrl)
     fetch(refreshUrl, {
       method: "POST",
       headers: {
@@ -77,7 +81,6 @@ export default class extends Controller<HTMLElement> {
       credentials: "same-origin",
     })
       .then((response) => {
-        console.log("refresh 6", response)
         if (!response.ok) {
           throw new Error(`Échec du rafraîchissement (${response.status})`)
         }
@@ -87,7 +90,49 @@ export default class extends Controller<HTMLElement> {
         Turbo.renderStreamMessage(html)
       })
       .catch((error) => {
-        console.log("refresh error", error)
+        console.error("Erreur lors du rafraîchissement du groupe :", error)
+      })
+  }
+
+  refresh(event: Event) {
+    event.preventDefault()
+    event.stopPropagation()
+
+    const refreshUrl = this.element.dataset.refreshUrl
+    if (!refreshUrl) {
+      console.error("URL de rafraîchissement manquante")
+      return
+    }
+
+    const fieldsInput = this.fieldsListTarget
+    if (!fieldsInput) {
+      console.error("Champ fields_list introuvable")
+      return
+    }
+
+    const formData = new FormData()
+    formData.append("fields_list", fieldsInput.value)
+
+    fetch(refreshUrl, {
+      method: "POST",
+      headers: {
+        "X-Requested-With": "XMLHttpRequest",
+        "X-CSRFToken": this.getCsrfToken() ?? "",
+        Accept: "text/vnd.turbo-stream.html",
+      },
+      body: formData,
+      credentials: "same-origin",
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Échec du rafraîchissement (${response.status})`)
+        }
+        return response.text()
+      })
+      .then((html) => {
+        Turbo.renderStreamMessage(html)
+      })
+      .catch((error) => {
         console.error("Erreur lors du rafraîchissement du groupe :", error)
       })
   }

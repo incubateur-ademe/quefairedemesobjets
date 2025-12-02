@@ -4,7 +4,7 @@ from data.views import (
     SuggestionGroupeStatusView,
     SuggestionGroupeView,
     get_suggestion_groupe_usefull_links,
-    refresh_suggestion_groupe_details,
+    update_suggestion_groupe_details,
 )
 
 app_name = "data"
@@ -21,9 +21,9 @@ urlpatterns = [
         name="suggestion_groupe_status",
     ),
     path(
-        "suggestion-groupe/<int:suggestion_groupe_id>/refresh/",
-        refresh_suggestion_groupe_details,
-        name="suggestion_groupe_refresh",
+        "suggestion-groupe/<int:suggestion_groupe_id>/update/",
+        update_suggestion_groupe_details,
+        name="suggestion_groupe_update",
     ),
     path(
         "suggestion-groupe/<int:suggestion_groupe_id>/<str:usefull_link>/",

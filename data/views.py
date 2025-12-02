@@ -146,21 +146,29 @@ def get_suggestion_groupe_usefull_links(request, suggestion_groupe_id, usefull_l
 
 @login_required
 @require_POST
-def refresh_suggestion_groupe_details(request, suggestion_groupe_id):
+def update_suggestion_groupe_details(request, suggestion_groupe_id):
     suggestion_groupe = get_object_or_404(SuggestionGroupe, id=suggestion_groupe_id)
 
-    fields_payload = request.POST.get("fields_list", "{}")
+    fields_values_payload = request.POST.get("fields_values", "{}")
+    fields_groups_payload = request.POST.get("fields_groups", "{}")
     try:
-        requested_fields = json.loads(fields_payload) if fields_payload else {}
+        fields_values = (
+            json.loads(fields_values_payload) if fields_values_payload else {}
+        )
+        fields_groups = (
+            json.loads(fields_groups_payload) if fields_groups_payload else {}
+        )
     except json.JSONDecodeError:
         return HttpResponseBadRequest("Payload fields_list invalide")
 
     # TODO : here we interpret the fields_listand create the needed suggestions
 
+    suggestion_groupe.update_from_serialized_data(fields_values, fields_groups)
+
     context = suggestion_groupe.serialize().to_dict()
 
     # TODO : should be removed, only for tests
-    context["requested_fields_list"] = requested_fields
+    context["requested_fields_list"] = suggestion_groupe.serialize().fields_values
 
     return render(
         request,

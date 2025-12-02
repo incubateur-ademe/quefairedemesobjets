@@ -82,6 +82,11 @@ def configure_produit_sharer(context):
 
 
 @register.filter
+def get_item(dictionary, key):
+    return dictionary.get(key)
+
+
+@register.filter
 def tojson(value):
     """Django filter to replace Jinja2's |tojson filter"""
     import json
