@@ -14,6 +14,11 @@ import path from "path"
 
 dotenv.config({ path: path.resolve(__dirname, ".env") })
 
+const PLAYWRIGHT_HOST = process.env.PLAYWRIGHT_HOST || "localhost"
+const PLAYWRIGHT_PORT = process.env.PLAYWRIGHT_PORT || "8000"
+const PLAYWRIGHT_BASE_URL =
+  process.env.PLAYWRIGHT_BASE_URL || `http://${PLAYWRIGHT_HOST}:${PLAYWRIGHT_PORT}`
+
 export default defineConfig({
   testDir: "./e2e_tests",
   /* Run tests in files in parallel */
@@ -28,17 +33,19 @@ export default defineConfig({
   reporter: "html",
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    baseURL: process.env.BASE_URL!,
+    baseURL: PLAYWRIGHT_BASE_URL,
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
   },
 
   /* Run local dev server before starting the tests */
   webServer: {
-    command: "uv run python manage.py runserver",
-    url: process.env.BASE_URL!,
+    command: `uv run python manage.py runserver ${PLAYWRIGHT_HOST}:${PLAYWRIGHT_PORT}`,
+    url: PLAYWRIGHT_BASE_URL,
     reuseExistingServer: !process.env.CI,
     timeout: 120000,
+    stdout: "pipe",
+    stderr: "pipe",
   },
 
   /* Configure projects for major browsers */
