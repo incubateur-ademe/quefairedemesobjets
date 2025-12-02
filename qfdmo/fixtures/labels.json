@@ -1,93 +1,138 @@
 [
 {
     "model": "qfdmo.labelqualite",
-    "pk": 1,
     "fields": {
+        "order": 0,
         "libelle": "Labellisé Répar'Acteur",
         "code": "reparacteur",
         "afficher": true,
+        "filtre": false,
+        "filtre_label": "",
+        "filtre_texte_d_aide": "",
+        "logo_filtre": "",
+        "logo_file": "logos/logo_repar_acteurs.png",
         "bonus": false,
         "type_enseigne": false,
-        "url": "https://www.artisanat.fr/annuaire-repar-acteurs",
-        "logo_file": "logos/logo_repar_acteurs.png"
+        "url": "https://www.artisanat.fr/annuaire-repar-acteurs"
     }
 },
 {
     "model": "qfdmo.labelqualite",
-    "pk": 2,
     "fields": {
+        "order": 0,
         "libelle": "Labellisé Bonus Réparation QualiRépar",
         "code": "qualirepar",
         "afficher": true,
+        "filtre": false,
+        "filtre_label": "",
+        "filtre_texte_d_aide": "",
+        "logo_filtre": "",
+        "logo_file": "logos/logo-qualirepar.png",
         "bonus": true,
         "type_enseigne": false,
-        "url": "https://www.label-qualirepar.fr/",
-        "logo_file": "logos/logo-qualirepar.png"
+        "url": "https://www.label-qualirepar.fr/"
     }
 },
 {
     "model": "qfdmo.labelqualite",
-    "pk": 3,
     "fields": {
+        "order": 0,
         "libelle": "Labellisé Bonus Réparation Re_fashion",
         "code": "refashion",
         "afficher": true,
+        "filtre": false,
+        "filtre_label": "",
+        "filtre_texte_d_aide": "",
+        "logo_filtre": "",
+        "logo_file": "logos/Refashion_32.png",
         "bonus": true,
         "type_enseigne": false,
-        "url": "https://refashion.fr/citoyen/fr/bonus-reparation",
-        "logo_file": "logos/Refashion_32.png"
+        "url": "https://refashion.fr/citoyen/fr/bonus-reparation"
     }
 },
 {
     "model": "qfdmo.labelqualite",
-    "pk": 4,
     "fields": {
+        "order": 0,
         "libelle": "Labellisé Bonus Réparation Ecomaison",
         "code": "ecomaison",
         "afficher": true,
+        "filtre": false,
+        "filtre_label": "",
+        "filtre_texte_d_aide": "",
+        "logo_filtre": "",
+        "logo_file": "logos/ecomaison32.png",
         "bonus": true,
         "type_enseigne": false,
-        "url": "https://ecomaison.com/developper-reparation/",
-        "logo_file": "logos/ecomaison32.png"
+        "url": "https://ecomaison.com/developper-reparation/"
     }
 },
 {
     "model": "qfdmo.labelqualite",
-    "pk": 5,
     "fields": {
+        "order": 0,
         "libelle": "Labellisé Bonus Réparation Bonus Répar (Bricolage & Jardinage thermique)",
         "code": "bonusrepar_ABJ_TH",
         "afficher": true,
+        "filtre": false,
+        "filtre_label": "",
+        "filtre_texte_d_aide": "",
+        "logo_filtre": "",
+        "logo_file": "logos/BonusRepar32.png",
         "bonus": true,
         "type_enseigne": false,
-        "url": "https://www.ecologic-france.com/ecologic/filiere-abj/fonds-reparation-abjth.html",
-        "logo_file": "logos/BonusRepar32.png"
+        "url": "https://www.ecologic-france.com/ecologic/filiere-abj/fonds-reparation-abjth.html"
     }
 },
 {
     "model": "qfdmo.labelqualite",
-    "pk": 6,
     "fields": {
+        "order": 0,
         "libelle": "Labellisé Bonus Réparation Bonus Répar (Sport & Cycle)",
         "code": "BonusRepar_ASL",
         "afficher": true,
+        "filtre": false,
+        "filtre_label": "",
+        "filtre_texte_d_aide": "",
+        "logo_filtre": "",
+        "logo_file": "logos/BonusRepar_ASL.jpg",
         "bonus": true,
         "type_enseigne": false,
-        "url": "https://www.ecologic-france.com/ecologic/filiere-asl/fonds-reparation-asl.html",
-        "logo_file": "logos/BonusRepar_ASL.jpg"
+        "url": "https://www.ecologic-france.com/ecologic/filiere-asl/fonds-reparation-asl.html"
     }
 },
 {
     "model": "qfdmo.labelqualite",
-    "pk": 7,
     "fields": {
+        "order": 0,
         "libelle": "Enseigne de l'économie sociale et solidaire",
         "code": "ess",
         "afficher": true,
+        "filtre": false,
+        "filtre_label": "",
+        "filtre_texte_d_aide": "",
+        "logo_filtre": "",
+        "logo_file": "logos/ess.png",
         "bonus": false,
         "type_enseigne": true,
-        "url": "https://www.economie.gouv.fr/cedef/economie-sociale-et-solidaire",
-        "logo_file": "logos/ess.png"
+        "url": "https://www.economie.gouv.fr/cedef/economie-sociale-et-solidaire"
+    }
+},
+{
+    "model": "qfdmo.labelqualite",
+    "fields": {
+        "order": 0,
+        "libelle": "Labellisé Bonus Réparation Bonus Répar",
+        "code": "bonusrepar",
+        "afficher": true,
+        "filtre": false,
+        "filtre_label": "",
+        "filtre_texte_d_aide": "",
+        "logo_filtre": "",
+        "logo_file": "logos/bonusrepar.png",
+        "bonus": true,
+        "type_enseigne": false,
+        "url": "https://www.ecologic-france.com/citoyens.html"
     }
 }
 ]

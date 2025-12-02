@@ -172,7 +172,7 @@
         "afficher": true,
         "url": "https://ressourcerie.fr/",
         "logo_file": "logos/Reseau_ressourceries_et_recycleries.jpeg",
-        "licence": "NO_LICENSE"
+        "licence": "OPEN_LICENSE"
     }
 },
 {
@@ -183,7 +183,7 @@
         "afficher": true,
         "url": "https://www.envie.org/",
         "logo_file": "logos/Sans_titre_2.jpg",
-        "licence": "NO_LICENSE"
+        "licence": "OPEN_LICENSE"
     }
 },
 {
@@ -244,11 +244,11 @@
 {
     "model": "qfdmo.source",
     "fields": {
-        "libelle": "COREPILE - ECOSYSTEM",
+        "libelle": "ECOSYSTEM",
         "code": "corepile",
         "afficher": true,
-        "url": "https://www.corepile.fr/",
-        "logo_file": "logos/corepile.jpg",
+        "url": "https://www.ecosystem.eco/",
+        "logo_file": "logos/ecosystem.jpg",
         "licence": "OPEN_LICENSE"
     }
 },
@@ -458,7 +458,7 @@
         "afficher": true,
         "url": "https://carteco-ess.org/",
         "logo_file": "logos/essfrance-logo-carteco.png",
-        "licence": "NO_LICENSE"
+        "licence": "OPEN_LICENSE"
     }
 },
 {
@@ -486,12 +486,12 @@
 {
     "model": "qfdmo.source",
     "fields": {
-        "libelle": "RecylOptics",
+        "libelle": "RecyclOptics",
         "code": "recycloptics",
         "afficher": true,
         "url": "https://recycloptics.org/",
         "logo_file": "logos/Logo_recycloptics_new-FT-1.png",
-        "licence": "NO_LICENSE"
+        "licence": "OPEN_LICENSE"
     }
 },
 {
@@ -568,7 +568,7 @@
         "afficher": true,
         "url": "https://www.ordre.pharmacien.fr/",
         "logo_file": "logos/ordre_pharmaciens.jpg",
-        "licence": "NO_LICENSE"
+        "licence": "OPEN_LICENSE"
     }
 },
 {
@@ -579,7 +579,7 @@
         "afficher": true,
         "url": "https://leroymerlin.fr",
         "logo_file": "logos/leroy_merlin.jpg",
-        "licence": "NO_LICENSE"
+        "licence": "OPEN_LICENSE"
     }
 },
 {
@@ -612,7 +612,7 @@
         "afficher": true,
         "url": "https://laposte.fr/",
         "logo_file": "logos/laposte.jpg",
-        "licence": "NO_LICENSE"
+        "licence": "OPEN_LICENSE"
     }
 },
 {
@@ -640,9 +640,9 @@
 {
     "model": "qfdmo.source",
     "fields": {
-        "libelle": "",
+        "libelle": "DEPRECATED",
         "code": "deprecated_lvao",
-        "afficher": true,
+        "afficher": false,
         "url": null,
         "logo_file": "",
         "licence": "NO_LICENSE"
@@ -733,7 +733,7 @@
         "afficher": true,
         "url": "https://www.artisanat.fr/",
         "logo_file": "logos/cma.png",
-        "licence": "CC_BY_NC_SA"
+        "licence": "OPEN_LICENSE"
     }
 },
 {
@@ -744,6 +744,94 @@
         "afficher": true,
         "url": "https://mres-asso.org/",
         "logo_file": "logos/siteon0.png",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "Métropole Grand Lyon",
+        "code": "grandlyon",
+        "afficher": true,
+        "url": "https://www.grandlyon.com/",
+        "logo_file": "logos/grand_lyon.png",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "Réseau Compost Citoyen",
+        "code": "reseau_compost_citoyen",
+        "afficher": true,
+        "url": "https://reseaucompost.org/",
+        "logo_file": "logos/reseaucompostcitoyen.png",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "Réseau Vrac et Réemploi",
+        "code": "reseau_vrac_reemploi",
+        "afficher": true,
+        "url": "https://vracetreemploi.com/",
+        "logo_file": "logos/logo-vr-transparent-pink.png",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "Lokki",
+        "code": "lokki",
+        "afficher": true,
+        "url": "https://www.lokki.rent/",
+        "logo_file": "logos/custom_avatar-1738580342.png",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "Cultura",
+        "code": "cultura",
+        "afficher": true,
+        "url": "https://www.cultura.com/cultura-s-engage/recyclage.html",
+        "logo_file": "logos/téléchargement.png",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "Communauté d'Agglomération de La Rochelle",
+        "code": "larochelle",
+        "afficher": true,
+        "url": "https://www.agglo-larochelle.fr/",
+        "logo_file": "logos/logo-larochelle.png",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "REFASHION",
+        "code": "refashion_non_obligatoire",
+        "afficher": true,
+        "url": "https://refashion.fr/",
+        "logo_file": "logos/refashion.png",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "Tefal - Groupe SEB",
+        "code": "tefal_seb",
+        "afficher": true,
+        "url": "https://www.tefal.fr/nousvousdevonslemeilleur/cycle-de-vie-recyclage-poeles-casseroles",
+        "logo_file": "logos/tefal.png",
         "licence": "OPEN_LICENSE"
     }
 }

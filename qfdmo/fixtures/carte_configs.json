@@ -1,0 +1,1081 @@
+[
+{
+    "model": "qfdmo.carteconfig",
+    "pk": 1,
+    "fields": {
+        "nom": "Cyclevia",
+        "SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url": "",
+        "mode_affichage": "carte",
+        "nombre_d_acteurs_affiches": null,
+        "cacher_legende": true,
+        "supprimer_branding": false,
+        "titre_previsualisation": "Découvrez les lieux près de chez vous pour donner une seconde vie à votre huile de vidange.",
+        "contenu_previsualisation": "Saisissez une adresse et recherchez des établissements à proximité.",
+        "slug": "cyclevia",
+        "sous_categorie_objet": [],
+        "groupe_action": [
+            [
+                "trier"
+            ]
+        ],
+        "action": [],
+        "source": [
+            [
+                "cyclevia"
+            ]
+        ],
+        "direction": [],
+        "label_qualite": [],
+        "acteur_type": [],
+        "epci": []
+    }
+},
+{
+    "model": "qfdmo.carteconfig",
+    "pk": 2,
+    "fields": {
+        "nom": "Boite-a-lire",
+        "SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url": "",
+        "mode_affichage": "carte",
+        "nombre_d_acteurs_affiches": null,
+        "cacher_legende": false,
+        "supprimer_branding": false,
+        "titre_previsualisation": "",
+        "contenu_previsualisation": "",
+        "slug": "boite-a-lire",
+        "sous_categorie_objet": [],
+        "groupe_action": [],
+        "action": [],
+        "source": [
+            [
+                "recyclivrebal"
+            ]
+        ],
+        "direction": [],
+        "label_qualite": [],
+        "acteur_type": [],
+        "epci": []
+    }
+},
+{
+    "model": "qfdmo.carteconfig",
+    "pk": 3,
+    "fields": {
+        "nom": "TLC",
+        "SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url": "",
+        "mode_affichage": "carte",
+        "nombre_d_acteurs_affiches": null,
+        "cacher_legende": false,
+        "supprimer_branding": false,
+        "titre_previsualisation": "",
+        "contenu_previsualisation": "",
+        "slug": "tlc",
+        "sous_categorie_objet": [
+            [
+                "chaussures"
+            ],
+            [
+                "linge_de_maison"
+            ],
+            [
+                "vetement"
+            ]
+        ],
+        "groupe_action": [
+            [
+                "reparer"
+            ],
+            [
+                "donner_echanger_rapporter"
+            ],
+            [
+                "trier"
+            ]
+        ],
+        "action": [],
+        "source": [
+            [
+                "refashion"
+            ]
+        ],
+        "direction": [],
+        "label_qualite": [],
+        "acteur_type": [],
+        "epci": []
+    }
+},
+{
+    "model": "qfdmo.carteconfig",
+    "pk": 4,
+    "fields": {
+        "nom": "Redeem Medical",
+        "SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url": "",
+        "mode_affichage": "carte",
+        "nombre_d_acteurs_affiches": null,
+        "cacher_legende": true,
+        "supprimer_branding": false,
+        "titre_previsualisation": "",
+        "contenu_previsualisation": "",
+        "slug": "redeem-medical",
+        "sous_categorie_objet": [
+            [
+                "materiel_medical"
+            ]
+        ],
+        "groupe_action": [
+            [
+                "trier"
+            ]
+        ],
+        "action": [],
+        "source": [
+            [
+                "redeem_medical"
+            ]
+        ],
+        "direction": [],
+        "label_qualite": [],
+        "acteur_type": [],
+        "epci": []
+    }
+},
+{
+    "model": "qfdmo.carteconfig",
+    "pk": 37,
+    "fields": {
+        "nom": "Assistant - Sans onglet",
+        "SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url": "",
+        "mode_affichage": "carte",
+        "nombre_d_acteurs_affiches": null,
+        "cacher_legende": false,
+        "supprimer_branding": true,
+        "titre_previsualisation": "",
+        "contenu_previsualisation": "",
+        "slug": "product",
+        "sous_categorie_objet": [],
+        "groupe_action": [],
+        "action": [],
+        "source": [],
+        "direction": [
+            [
+                "jai"
+            ]
+        ],
+        "label_qualite": [],
+        "acteur_type": [],
+        "epci": []
+    }
+},
+{
+    "model": "qfdmo.carteconfig",
+    "pk": 39,
+    "fields": {
+        "nom": "REP : filière ABJ",
+        "SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url": "",
+        "mode_affichage": "carte",
+        "nombre_d_acteurs_affiches": null,
+        "cacher_legende": false,
+        "supprimer_branding": false,
+        "titre_previsualisation": "Carte des lieux de la filière ABJ",
+        "contenu_previsualisation": "Découvrez le maillage des points de réparation, de réemploi et de collecte pour la filière ABJ",
+        "slug": "rep-filiere-abj",
+        "sous_categorie_objet": [
+            [
+                "accessoire_et_meuble_de_jardin"
+            ],
+            [
+                "machines_et_appareils_motorises_thermiques"
+            ],
+            [
+                "outil_de_bricolage_et_jardinage"
+            ],
+            [
+                "abj_outillage_du_peintre_usage"
+            ]
+        ],
+        "groupe_action": [],
+        "action": [],
+        "source": [],
+        "direction": [],
+        "label_qualite": [],
+        "acteur_type": [],
+        "epci": []
+    }
+},
+{
+    "model": "qfdmo.carteconfig",
+    "pk": 40,
+    "fields": {
+        "nom": "REP : filière ASL",
+        "SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url": "",
+        "mode_affichage": "carte",
+        "nombre_d_acteurs_affiches": null,
+        "cacher_legende": false,
+        "supprimer_branding": false,
+        "titre_previsualisation": "Carte des lieux de la filière ASL",
+        "contenu_previsualisation": "Découvrez le maillage des points de réparation, de réemploi et de collecte pour la filière ASL",
+        "slug": "rep-filiere-asl",
+        "sous_categorie_objet": [
+            [
+                "materiel_de_sport_hors_velo"
+            ],
+            [
+                "velo"
+            ]
+        ],
+        "groupe_action": [],
+        "action": [],
+        "source": [],
+        "direction": [],
+        "label_qualite": [],
+        "acteur_type": [],
+        "epci": []
+    }
+},
+{
+    "model": "qfdmo.carteconfig",
+    "pk": 41,
+    "fields": {
+        "nom": "REP : filière PMCB",
+        "SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url": "",
+        "mode_affichage": "carte",
+        "nombre_d_acteurs_affiches": null,
+        "cacher_legende": false,
+        "supprimer_branding": false,
+        "titre_previsualisation": "Carte des lieux de la filière PMCB",
+        "contenu_previsualisation": "Découvrez le maillage des points de réemploi et de collecte pour la filière PMCB",
+        "slug": "rep-filiere-pmcb",
+        "sous_categorie_objet": [
+            [
+                "autres_pmcb"
+            ],
+            [
+                "bois_pmcb_produits_et_materiaux_de_construction_du_batiment"
+            ],
+            [
+                "beton_pmcb_produits_et_materiaux_de_construction_du_batiment"
+            ],
+            [
+                "dechets_dangereux_de_pmcb_produits_et_materiaux_de_construction_du_batiment"
+            ],
+            [
+                "huisseries_produits_et_materiaux_de_construction_du_batiment"
+            ],
+            [
+                "laine_de_roche_produits_et_materiaux_de_construction_du_batiment"
+            ],
+            [
+                "laine_de_verre_produits_et_materiaux_de_construction_du_batiment"
+            ],
+            [
+                "materiau_du_batiment_reemployable"
+            ],
+            [
+                "membranes_bitumineuses_pmcb_produits_et_materiaux_de_construction_du_batiment"
+            ],
+            [
+                "mélange_d_inertes_produits_et_materiaux_de_construction_du_batiment"
+            ],
+            [
+                "metal_pmcb_produits_et_materiaux_de_construction_du_batiment"
+            ],
+            [
+                "plastiques_pmcb_produits_et_materiaux_de_construction_du_batiment"
+            ],
+            [
+                "platre_pmcb_produits_et_materiaux_de_construction_du_batiment"
+            ]
+        ],
+        "groupe_action": [],
+        "action": [],
+        "source": [],
+        "direction": [],
+        "label_qualite": [],
+        "acteur_type": [],
+        "epci": []
+    }
+},
+{
+    "model": "qfdmo.carteconfig",
+    "pk": 42,
+    "fields": {
+        "nom": "REP : filière EA",
+        "SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url": "",
+        "mode_affichage": "carte",
+        "nombre_d_acteurs_affiches": null,
+        "cacher_legende": false,
+        "supprimer_branding": false,
+        "titre_previsualisation": "Carte des lieux de la filière EA",
+        "contenu_previsualisation": "Découvrez le maillage des points de réparation, de réemploi et de collecte pour la filière EA",
+        "slug": "rep-filiere-ea",
+        "sous_categorie_objet": [
+            [
+                "accessoire_et_meuble_de_jardin"
+            ],
+            [
+                "decoration"
+            ],
+            [
+                "decorations_textiles_elements_d_ameublement"
+            ],
+            [
+                "literie_elements_d_ameublement"
+            ],
+            [
+                "meuble"
+            ],
+            [
+                "rembourres_d_assise_ou_de_couchage_elements_d_ameublement"
+            ],
+            [
+                "sieges_elements_d_ameublement"
+            ]
+        ],
+        "groupe_action": [],
+        "action": [],
+        "source": [],
+        "direction": [],
+        "label_qualite": [],
+        "acteur_type": [],
+        "epci": []
+    }
+},
+{
+    "model": "qfdmo.carteconfig",
+    "pk": 43,
+    "fields": {
+        "nom": "REP : filière EMPAP",
+        "SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url": "",
+        "mode_affichage": "carte",
+        "nombre_d_acteurs_affiches": null,
+        "cacher_legende": false,
+        "supprimer_branding": false,
+        "titre_previsualisation": "Carte des lieux de la filière EMPAP",
+        "contenu_previsualisation": "Découvrez le maillage des points de réemploi et de collecte pour la filière EMPAP",
+        "slug": "rep-filiere-empap",
+        "sous_categorie_objet": [
+            [
+                "bouchons_en_liege"
+            ],
+            [
+                "bouteilles_plastique"
+            ],
+            [
+                "emballage_carton"
+            ],
+            [
+                "emballage_metal"
+            ],
+            [
+                "emballage_plastique"
+            ],
+            [
+                "emballage_verre"
+            ],
+            [
+                "emballage_reemployable"
+            ],
+            [
+                "autres_emballages_menagers"
+            ],
+            [
+                "papiers_graphiques"
+            ]
+        ],
+        "groupe_action": [],
+        "action": [],
+        "source": [],
+        "direction": [],
+        "label_qualite": [],
+        "acteur_type": [],
+        "epci": []
+    }
+},
+{
+    "model": "qfdmo.carteconfig",
+    "pk": 44,
+    "fields": {
+        "nom": "REP : filière EEE",
+        "SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url": "",
+        "mode_affichage": "carte",
+        "nombre_d_acteurs_affiches": null,
+        "cacher_legende": false,
+        "supprimer_branding": false,
+        "titre_previsualisation": "Carte des lieux de la filière EEE",
+        "contenu_previsualisation": "Découvrez le maillage des points de réparation, de réemploi et de collecte pour la filière EEE",
+        "slug": "rep-filiere-eee",
+        "sous_categorie_objet": [
+            [
+                "ampoule"
+            ],
+            [
+                "cartouches"
+            ],
+            [
+                "gros_electromenager_hors_refrigerant"
+            ],
+            [
+                "gros_electromenager_refrigerant"
+            ],
+            [
+                "instrument_musique_electrique"
+            ],
+            [
+                "jels_mobilite_electrique"
+            ],
+            [
+                "luminaire"
+            ],
+            [
+                "materiel_hifi_et_video"
+            ],
+            [
+                "materiel_informatique"
+            ],
+            [
+                "abj_electrique"
+            ],
+            [
+                "petit_electromenager"
+            ],
+            [
+                "smartphone_tablette_et_console"
+            ],
+            [
+                "materiel_photo_et_cinema"
+            ],
+            [
+                "ecran"
+            ]
+        ],
+        "groupe_action": [],
+        "action": [],
+        "source": [],
+        "direction": [],
+        "label_qualite": [],
+        "acteur_type": [],
+        "epci": []
+    }
+},
+{
+    "model": "qfdmo.carteconfig",
+    "pk": 45,
+    "fields": {
+        "nom": "REP : filière LUB",
+        "SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url": "",
+        "mode_affichage": "carte",
+        "nombre_d_acteurs_affiches": null,
+        "cacher_legende": false,
+        "supprimer_branding": false,
+        "titre_previsualisation": "Carte des lieux de la filière LUB",
+        "contenu_previsualisation": "Découvrez le maillage des points de collecte pour la filière LUB",
+        "slug": "rep-filiere-lub",
+        "sous_categorie_objet": [
+            [
+                "huiles_lubrifiantes"
+            ]
+        ],
+        "groupe_action": [],
+        "action": [],
+        "source": [],
+        "direction": [],
+        "label_qualite": [],
+        "acteur_type": [],
+        "epci": []
+    }
+},
+{
+    "model": "qfdmo.carteconfig",
+    "pk": 46,
+    "fields": {
+        "nom": "REP : filière JOUET",
+        "SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url": "",
+        "mode_affichage": "carte",
+        "nombre_d_acteurs_affiches": null,
+        "cacher_legende": false,
+        "supprimer_branding": false,
+        "titre_previsualisation": "Carte des lieux de la filière JOUET",
+        "contenu_previsualisation": "Découvrez le maillage des points de réparation, de réemploi et de collecte pour la filière JOUET",
+        "slug": "rep-filiere-jouet",
+        "sous_categorie_objet": [
+            [
+                "jouet"
+            ]
+        ],
+        "groupe_action": [],
+        "action": [],
+        "source": [],
+        "direction": [],
+        "label_qualite": [],
+        "acteur_type": [],
+        "epci": []
+    }
+},
+{
+    "model": "qfdmo.carteconfig",
+    "pk": 47,
+    "fields": {
+        "nom": "REP : filière PA",
+        "SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url": "",
+        "mode_affichage": "carte",
+        "nombre_d_acteurs_affiches": null,
+        "cacher_legende": false,
+        "supprimer_branding": false,
+        "titre_previsualisation": "Carte des lieux de la filière PA",
+        "contenu_previsualisation": "Découvrez le maillage des points de réparation, de réemploi et de collecte pour la filière PA",
+        "slug": "rep-filiere-pa",
+        "sous_categorie_objet": [
+            [
+                "batteries_et_piles_portables"
+            ],
+            [
+                "batteries_de_mtl"
+            ],
+            [
+                "batterie_de_voitures_pour_demarrage"
+            ]
+        ],
+        "groupe_action": [],
+        "action": [],
+        "source": [],
+        "direction": [],
+        "label_qualite": [],
+        "acteur_type": [],
+        "epci": []
+    }
+},
+{
+    "model": "qfdmo.carteconfig",
+    "pk": 48,
+    "fields": {
+        "nom": "REP : filière PNEU",
+        "SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url": "",
+        "mode_affichage": "carte",
+        "nombre_d_acteurs_affiches": null,
+        "cacher_legende": false,
+        "supprimer_branding": false,
+        "titre_previsualisation": "Carte des lieux de la filière PNEU",
+        "contenu_previsualisation": "Découvrez le maillage des points de collecte pour la filière PNEU",
+        "slug": "rep-filiere-pneu",
+        "sous_categorie_objet": [
+            [
+                "pneu"
+            ]
+        ],
+        "groupe_action": [],
+        "action": [],
+        "source": [],
+        "direction": [],
+        "label_qualite": [],
+        "acteur_type": [],
+        "epci": []
+    }
+},
+{
+    "model": "qfdmo.carteconfig",
+    "pk": 49,
+    "fields": {
+        "nom": "REP : filière PCHIM",
+        "SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url": "",
+        "mode_affichage": "carte",
+        "nombre_d_acteurs_affiches": null,
+        "cacher_legende": false,
+        "supprimer_branding": false,
+        "titre_previsualisation": "Carte des lieux de la filière PCHIM",
+        "contenu_previsualisation": "Découvrez le maillage des points de collecte pour la filière PCHIM",
+        "slug": "rep-filiere-pchim",
+        "sous_categorie_objet": [
+            [
+                "dechets_de_peintures_vernis_encres_et_colles_produits_chimiques"
+            ],
+            [
+                "dechets_de_produits_chimiques"
+            ],
+            [
+                "dechets_de_produits_chimiques_acides"
+            ],
+            [
+                "dechets_de_produits_chimiques_basiques"
+            ],
+            [
+                "dechets_phytosanitaires_menagers_produits_chimiques"
+            ],
+            [
+                "petits_appareils_extincteurs"
+            ],
+            [
+                "produits_chimiques_solvants"
+            ],
+            [
+                "produits_pyrotechniques"
+            ]
+        ],
+        "groupe_action": [],
+        "action": [],
+        "source": [],
+        "direction": [],
+        "label_qualite": [],
+        "acteur_type": [],
+        "epci": []
+    }
+},
+{
+    "model": "qfdmo.carteconfig",
+    "pk": 50,
+    "fields": {
+        "nom": "REP : filière TLC",
+        "SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url": "",
+        "mode_affichage": "carte",
+        "nombre_d_acteurs_affiches": null,
+        "cacher_legende": false,
+        "supprimer_branding": false,
+        "titre_previsualisation": "Carte des lieux de la filière TLC",
+        "contenu_previsualisation": "Découvrez le maillage des points de réparation, de réemploi et de collecte pour la filière TLC",
+        "slug": "rep-filiere-tlc",
+        "sous_categorie_objet": [
+            [
+                "chaussures"
+            ],
+            [
+                "linge_de_maison"
+            ],
+            [
+                "vetement"
+            ]
+        ],
+        "groupe_action": [],
+        "action": [],
+        "source": [],
+        "direction": [],
+        "label_qualite": [],
+        "acteur_type": [],
+        "epci": []
+    }
+},
+{
+    "model": "qfdmo.carteconfig",
+    "pk": 51,
+    "fields": {
+        "nom": "Carte réemploi ESS",
+        "SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url": "",
+        "mode_affichage": "carte",
+        "nombre_d_acteurs_affiches": null,
+        "cacher_legende": false,
+        "supprimer_branding": false,
+        "titre_previsualisation": "Carte du réemploi solidaire",
+        "contenu_previsualisation": "Découvrez les acteurs du réemploi solidaire près de chez vous",
+        "slug": "carte-reemploi-ess",
+        "sous_categorie_objet": [],
+        "groupe_action": [
+            [
+                "donner_echanger_rapporter"
+            ],
+            [
+                "emprunter_preter_louer"
+            ],
+            [
+                "vendre_acheter"
+            ]
+        ],
+        "action": [],
+        "source": [],
+        "direction": [],
+        "label_qualite": [],
+        "acteur_type": [],
+        "epci": []
+    }
+},
+{
+    "model": "qfdmo.carteconfig",
+    "pk": 52,
+    "fields": {
+        "nom": "Composteurs",
+        "SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url": "",
+        "mode_affichage": "carte",
+        "nombre_d_acteurs_affiches": null,
+        "cacher_legende": false,
+        "supprimer_branding": false,
+        "titre_previsualisation": "",
+        "contenu_previsualisation": "",
+        "slug": "composteurs",
+        "sous_categorie_objet": [
+            [
+                "biodechets"
+            ]
+        ],
+        "groupe_action": [
+            [
+                "trier"
+            ]
+        ],
+        "action": [],
+        "source": [],
+        "direction": [],
+        "label_qualite": [],
+        "acteur_type": [],
+        "epci": []
+    }
+},
+{
+    "model": "qfdmo.carteconfig",
+    "pk": 53,
+    "fields": {
+        "nom": "Assistant - Bon état",
+        "SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url": "",
+        "mode_affichage": "carte",
+        "nombre_d_acteurs_affiches": null,
+        "cacher_legende": false,
+        "supprimer_branding": true,
+        "titre_previsualisation": "",
+        "contenu_previsualisation": "",
+        "slug": "bon-etat",
+        "sous_categorie_objet": [],
+        "groupe_action": [
+            [
+                "donner_echanger_rapporter"
+            ],
+            [
+                "emprunter_preter_louer"
+            ],
+            [
+                "vendre_acheter"
+            ]
+        ],
+        "action": [],
+        "source": [],
+        "direction": [
+            [
+                "jai"
+            ]
+        ],
+        "label_qualite": [],
+        "acteur_type": [],
+        "epci": []
+    }
+},
+{
+    "model": "qfdmo.carteconfig",
+    "pk": 54,
+    "fields": {
+        "nom": "Assistant - Mauvais état",
+        "SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url": "",
+        "mode_affichage": "carte",
+        "nombre_d_acteurs_affiches": null,
+        "cacher_legende": false,
+        "supprimer_branding": true,
+        "titre_previsualisation": "",
+        "contenu_previsualisation": "",
+        "slug": "mauvais-etat",
+        "sous_categorie_objet": [],
+        "groupe_action": [
+            [
+                "reparer"
+            ],
+            [
+                "trier"
+            ]
+        ],
+        "action": [],
+        "source": [],
+        "direction": [
+            [
+                "jai"
+            ]
+        ],
+        "label_qualite": [],
+        "acteur_type": [],
+        "epci": []
+    }
+},
+{
+    "model": "qfdmo.carteconfig",
+    "pk": 55,
+    "fields": {
+        "nom": "Assistant - Déposer uniquement (déchèteries)",
+        "SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url": "",
+        "mode_affichage": "carte",
+        "nombre_d_acteurs_affiches": null,
+        "cacher_legende": false,
+        "supprimer_branding": true,
+        "titre_previsualisation": "",
+        "contenu_previsualisation": "Saisissez une adresse et recherchez des lieux à côté de chez vous.",
+        "slug": "ass-deposer-uniquement",
+        "sous_categorie_objet": [],
+        "groupe_action": [
+            [
+                "trier"
+            ]
+        ],
+        "action": [],
+        "source": [],
+        "direction": [
+            [
+                "jai"
+            ]
+        ],
+        "label_qualite": [],
+        "acteur_type": [],
+        "epci": []
+    }
+},
+{
+    "model": "qfdmo.carteconfig",
+    "pk": 56,
+    "fields": {
+        "nom": "Assistant - Tous les gestes",
+        "SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url": "action_displayed=preter|mettreenlocation|reparer|trier|donner|echanger|revendre&action_list=preter|mettreenlocation|reparer|trier|donner|echanger|revendre",
+        "mode_affichage": "carte",
+        "nombre_d_acteurs_affiches": null,
+        "cacher_legende": false,
+        "supprimer_branding": true,
+        "titre_previsualisation": "",
+        "contenu_previsualisation": "Saisissez une adresse et recherchez des lieux à côté de chez vous.",
+        "slug": "tous-les-gestes",
+        "sous_categorie_objet": [],
+        "groupe_action": [],
+        "action": [],
+        "source": [],
+        "direction": [
+            [
+                "jai"
+            ]
+        ],
+        "label_qualite": [],
+        "acteur_type": [],
+        "epci": []
+    }
+},
+{
+    "model": "qfdmo.carteconfig",
+    "pk": 57,
+    "fields": {
+        "nom": "Carte ESS",
+        "SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url": "",
+        "mode_affichage": "carte",
+        "nombre_d_acteurs_affiches": null,
+        "cacher_legende": false,
+        "supprimer_branding": false,
+        "titre_previsualisation": "Carte du réemploi et de la réparation solidaire",
+        "contenu_previsualisation": "Découvrez les acteurs du réemploi et de la réparation solidaire près de chez vous",
+        "slug": "carte-ess",
+        "sous_categorie_objet": [],
+        "groupe_action": [],
+        "action": [],
+        "source": [],
+        "direction": [],
+        "label_qualite": [],
+        "acteur_type": [],
+        "epci": []
+    }
+},
+{
+    "model": "qfdmo.carteconfig",
+    "pk": 58,
+    "fields": {
+        "nom": "Carte - Assistant - Sauf prêt et location",
+        "SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url": "action_displayed=reparer|trier|donner|echanger|revendre&action_list=reparer|trier|donner|echanger|revendre",
+        "mode_affichage": "carte",
+        "nombre_d_acteurs_affiches": null,
+        "cacher_legende": false,
+        "supprimer_branding": true,
+        "titre_previsualisation": "",
+        "contenu_previsualisation": "Saisissez une adresse et recherchez des lieux à côté de chez vous.",
+        "slug": "carte-assistant-sauf-pret-et-location",
+        "sous_categorie_objet": [],
+        "groupe_action": [],
+        "action": [],
+        "source": [],
+        "direction": [
+            [
+                "jai"
+            ]
+        ],
+        "label_qualite": [],
+        "acteur_type": [],
+        "epci": []
+    }
+},
+{
+    "model": "qfdmo.carteconfig",
+    "pk": 59,
+    "fields": {
+        "nom": "Carte - Assistant - Sauf prêt, location et dépôt",
+        "SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url": "action_displayed=reparer|donner|echanger|revendre&action_list=reparer|donner|echanger|revendre",
+        "mode_affichage": "carte",
+        "nombre_d_acteurs_affiches": null,
+        "cacher_legende": false,
+        "supprimer_branding": true,
+        "titre_previsualisation": "",
+        "contenu_previsualisation": "Saisissez une adresse et recherchez des lieux à côté de chez vous.",
+        "slug": "carte-assistant-sauf-pret-location-et-depot",
+        "sous_categorie_objet": [],
+        "groupe_action": [],
+        "action": [],
+        "source": [],
+        "direction": [
+            [
+                "jai"
+            ]
+        ],
+        "label_qualite": [],
+        "acteur_type": [],
+        "epci": []
+    }
+},
+{
+    "model": "qfdmo.carteconfig",
+    "pk": 61,
+    "fields": {
+        "nom": "Déchèteries",
+        "SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url": "",
+        "mode_affichage": "carte",
+        "nombre_d_acteurs_affiches": null,
+        "cacher_legende": false,
+        "supprimer_branding": false,
+        "titre_previsualisation": "Découvrez les déchèteries près de chez vous",
+        "contenu_previsualisation": "Saisissez une adresse et recherchez une déchèterie près de chez vous",
+        "slug": "decheteries",
+        "sous_categorie_objet": [],
+        "groupe_action": [
+            [
+                "trier"
+            ]
+        ],
+        "action": [],
+        "source": [],
+        "direction": [
+            [
+                "jai"
+            ]
+        ],
+        "label_qualite": [],
+        "acteur_type": [
+            [
+                "decheterie"
+            ]
+        ],
+        "epci": []
+    }
+},
+{
+    "model": "qfdmo.carteconfig",
+    "pk": 62,
+    "fields": {
+        "nom": "CMA",
+        "SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url": "",
+        "mode_affichage": "carte",
+        "nombre_d_acteurs_affiches": null,
+        "cacher_legende": false,
+        "supprimer_branding": false,
+        "titre_previsualisation": "Répar'acteurs",
+        "contenu_previsualisation": "",
+        "slug": "cma",
+        "sous_categorie_objet": [],
+        "groupe_action": [],
+        "action": [],
+        "source": [
+            [
+                "cma_reparacteur"
+            ]
+        ],
+        "direction": [],
+        "label_qualite": [],
+        "acteur_type": [],
+        "epci": []
+    }
+},
+{
+    "model": "qfdmo.groupeactionconfig",
+    "pk": 1,
+    "fields": {
+        "carte_config": 1,
+        "groupe_action": [
+            "trier"
+        ],
+        "acteur_type": [
+            "decheterie"
+        ],
+        "icon": "config/groupeaction/icones/Carte_PAV_ico_PAV_1.svg"
+    }
+},
+{
+    "model": "qfdmo.groupeactionconfig",
+    "pk": 2,
+    "fields": {
+        "carte_config": 1,
+        "groupe_action": [
+            "trier"
+        ],
+        "acteur_type": [
+            "pav_public"
+        ],
+        "icon": "config/groupeaction/icones/PAV_garage_1.svg"
+    }
+},
+{
+    "model": "qfdmo.groupeactionconfig",
+    "pk": 3,
+    "fields": {
+        "carte_config": 1,
+        "groupe_action": [
+            "trier"
+        ],
+        "acteur_type": [
+            "commerce"
+        ],
+        "icon": "config/groupeaction/icones/PAV_garage_1.svg"
+    }
+},
+{
+    "model": "qfdmo.groupeactionconfig",
+    "pk": 4,
+    "fields": {
+        "carte_config": 2,
+        "groupe_action": [
+            "donner_echanger_rapporter"
+        ],
+        "acteur_type": [
+            "collectivite"
+        ],
+        "icon": "config/groupeaction/icones/logo-boite.svg"
+    }
+},
+{
+    "model": "qfdmo.groupeactionconfig",
+    "pk": 5,
+    "fields": {
+        "carte_config": 2,
+        "groupe_action": [
+            "emprunter_preter_louer"
+        ],
+        "acteur_type": [
+            "collectivite"
+        ],
+        "icon": "config/groupeaction/icones/logo-boite.svg"
+    }
+},
+{
+    "model": "qfdmo.groupeactionconfig",
+    "pk": 37,
+    "fields": {
+        "carte_config": 51,
+        "groupe_action": null,
+        "acteur_type": null,
+        "icon": ""
+    }
+},
+{
+    "model": "qfdmo.groupeactionconfig",
+    "pk": 38,
+    "fields": {
+        "carte_config": 1,
+        "groupe_action": [
+            "trier"
+        ],
+        "acteur_type": [
+            "pav_prive"
+        ],
+        "icon": "config/groupeaction/icones/PAV_garage_1.svg"
+    }
+}
+]
