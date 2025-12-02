@@ -16,17 +16,11 @@ jobs:
     runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v6
-      - name: Install uv
-        uses: astral-sh/setup-uv@1e862dfacbd1d6d858c55d9b792c756523627244
+
+      - name: Setup backend environment
+        uses: ./.github/actions/setup-backend
         with:
-          enable-cache: true
-      - uses: actions/cache@v4
-        name: Define a cache for the virtual environment based on the dependencies lock file
-        with:
-          path: ./.venv
-          key: venv-dev-airflow-${{ hashFiles('uv.lock') }}
-      - name: Install the project dependencies
-        run: uv sync --only-dev
+          uv-groups: "--only-dev"
       - name: Install Terragrunt and OpenTofu
         uses: gruntwork-io/terragrunt-action@95fc057922e3c3d4cc021a81a213f088f333ddef
         with:
@@ -40,18 +34,38 @@ jobs:
       - name: Run Terragrunt format check
         run: terragrunt hcl fmt -check infrastructure
 
-  frontend_linter:
-    name: 📝 Frontend Linter
+  frontend_prepare:
+    name: 📦 Frontend Build
     runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+
+      - name: Setup frontend environment
+        uses: ./.github/actions/setup-frontend
         with:
-          node-version-file: ".tool-versions"
-          cache: "npm"
-      - name: Build assets
-        run: |
-          npm ci
+          build: "true"
+
+      - name: Upload frontend artifacts
+        uses: actions/upload-artifact@v5
+        with:
+          name: frontend-build-artifacts
+          path: |
+            node_modules
+            static/dist
+          retention-days: 1
+
+  frontend_linter:
+    name: 📝 Frontend Linter
+    runs-on: ubuntu-slim
+    needs: frontend_prepare
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Download frontend artifacts
+        uses: actions/download-artifact@v5
+        with:
+          name: frontend-build-artifacts
+
       - name: Check code formatting
         run: npm run format:check
 
@@ -75,21 +89,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-      - name: Install GIS Packages
-        run: |
-          sudo apt-get update
-          sudo apt-get install gdal-bin
-      - name: Install uv
-        uses: astral-sh/setup-uv@1e862dfacbd1d6d858c55d9b792c756523627244
+
+      - name: Install GIS packages
+        uses: ./.github/actions/install-gis
+
+      - name: Setup backend environment
+        uses: ./.github/actions/setup-backend
         with:
-          enable-cache: true
-      - uses: actions/cache@v4
-        name: Define a cache for the virtual environment based on the dependencies lock file
-        with:
-          path: ./.venv
-          key: venv-dev-airflow-${{ hashFiles('uv.lock') }}
-      - name: Install the project dependencies
-        run: uv sync --group dev --group airflow
+          uv-groups: "--group dev --group airflow"
       - name: Run unit tests
         run: make unit-test
       - name: Run integration tests
@@ -105,22 +112,22 @@ jobs:
   frontend_tests:
     name: ✅ Frontend Tests
     runs-on: ubuntu-slim
+    needs: frontend_prepare
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+
+      - name: Download frontend artifacts
+        uses: actions/download-artifact@v5
         with:
-          node-version-file: ".tool-versions"
-          cache: "npm"
-      - name: Build assets
-        run: |
-          npm ci
-          npm run build
+          name: frontend-build-artifacts
+
       - name: Run tests
         run: npm run test
 
   e2e_prepare:
     name: préparation des tests de bout-en-bout
     runs-on: ubuntu-latest
+    needs: frontend_prepare
     if: ${{ github.ref_name == 'main' || (github.event_name ==  'pull_request' && contains( github.event.pull_request.labels.*.name, 'frontend')) }}
     services:
       postgres:
@@ -146,22 +153,20 @@ jobs:
           echo PLAYWRIGHT_HOST=localhost >> .env
           echo PLAYWRIGHT_PORT=8000 >> .env
           echo PLAYWRIGHT_BASE_URL=http://localhost:8000 >> .env
+
       - name: Setup E2E environment
         uses: ./.github/actions/setup-e2e
 
-      - name: Install npm dependencies
-        run: npm ci
+      - name: Download frontend artifacts
+        uses: actions/download-artifact@v5
+        with:
+          name: frontend-build-artifacts
 
-      - name: Build assets
-        run: npm run build
+      - name: Install GIS packages
+        uses: ./.github/actions/install-gis
 
-      - name: Install GIS Packages
-        run: |
-          sudo apt-get update
-          sudo apt-get install gdal-bin
-
-      - name: Install the project dependencies
-        run: uv sync --group dev
+      - name: Setup backend environment
+        uses: ./.github/actions/setup-backend
 
       - name: Prepare django, migrate, collect static files...
         run: |
@@ -176,12 +181,6 @@ jobs:
       - name: Init django admin superuser
         run: |
           make createsuperuser-example
-
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
       - name: Install Playwright Browsers
         run: make init-playwright
