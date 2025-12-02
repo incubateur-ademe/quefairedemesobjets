@@ -133,18 +133,22 @@ jobs:
       # Cache Playwright browsers to avoid re-downloading on every run.
       # GitHub Actions automatically evicts caches after 7 days of inactivity,
       # so we don't need to include week number for rotation.
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(npm list @playwright/test --depth=0 --json | jq -r '.dependencies["@playwright/test"].version')" >> $GITHUB_OUTPUT
+
       - name: Cache Playwright browsers
         id: cache-playwright
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ hashFiles('playwright.config.ts') }}
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
           restore-keys: |
-            playwright-
+            playwright-${{ runner.os }}-
 
       - name: Install Playwright Browsers
         if: steps.cache-playwright.outputs.cache-hit != 'true'
-        run: make init-playwright
+        run: npx playwright install --with-deps chromium webkit
 
       - name: Check database cache
         id: cache-db
@@ -191,8 +195,6 @@ jobs:
     name: tests de bout-en-bout
     runs-on: ubuntu-latest
     needs: e2e_prepare
-    env:
-      BASE_URL: http://localhost:8000
     strategy:
       fail-fast: false
       matrix:
@@ -225,18 +227,22 @@ jobs:
       # Cache Playwright browsers to avoid re-downloading on every run.
       # GitHub Actions automatically evicts caches after 7 days of inactivity,
       # so we don't need to include week number for rotation.
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(npm list @playwright/test --depth=0 --json | jq -r '.dependencies["@playwright/test"].version')" >> $GITHUB_OUTPUT
+
       - name: Cache Playwright browsers
         id: cache-playwright
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ hashFiles('playwright.config.ts') }}
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
           restore-keys: |
-            playwright-
+            playwright-${{ runner.os }}-
 
       - name: Install Playwright Browsers
         if: steps.cache-playwright.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps
+        run: npx playwright install --with-deps chromium webkit
 
       - name: Download build artifacts
         uses: actions/download-artifact@v5
