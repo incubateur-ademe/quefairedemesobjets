@@ -1,7 +1,6 @@
 import { expect, test } from "@playwright/test"
 import { getMarkers, mockApiAdresse } from "./helpers"
-
-test.describe("🗺️ Acteurs Display and Interaction", () => {
+test.describe("🗺️ Affichage et Interaction Acteurs", () => {
   test("Les acteurs sont visibles sur la carte du formulaire et fonctionnent", async ({
     page,
   }) => {

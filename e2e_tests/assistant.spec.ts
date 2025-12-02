@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test"
 import { getMarkers, mockApiAdresse } from "./helpers"
 
-test.describe("🤖 Assistant Search and Interaction", () => {
+test.describe("🤖 Recherche et Interaction Assistant", () => {
   function getItemSelector(index) {
     return `#mauvais-etat-panel #id_adresseautocomplete-list.autocomplete-items div[data-action="click->address-autocomplete#selectOption"]:nth-of-type(${index})`
   }

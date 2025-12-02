@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test"
 import { searchDummyAdresse } from "./helpers"
 
-test.describe("🗺️ Carte Advanced Filters", () => {
+test.describe("🗺️ Filtres Avancés Carte", () => {
   async function searchInCarteMode(page) {
     await page.locator("input#id_adresse").click()
     await page.locator("input#id_adresse").fill("Paris")
@@ -63,7 +63,7 @@ test.describe("🗺️ Carte Advanced Filters", () => {
     },
   )
 })
-test.describe("🗺️ Carte Legend Display", () => {
+test.describe("🗺️ Affichage Légende Carte", () => {
   test("La carte affiche la légende après une recherche", async ({ page }) => {
     // Navigate to the carte page
     await page.goto(`/carte`, { waitUntil: "domcontentloaded" })

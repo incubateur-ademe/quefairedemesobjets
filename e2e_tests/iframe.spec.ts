@@ -1,8 +1,8 @@
 import { expect } from "@playwright/test"
 import { test } from "./config"
 
-test.describe("📦 Iframe Embed System", () => {
-  test.describe("iframe ID validation", () => {
+test.describe("📦 Système d'Intégration Iframe", () => {
+  test.describe("Validation des ID d'iframe", () => {
     test("carte lookbook generates iframe with ID 'carte'", async ({ page }) => {
       await page.goto("/lookbook/preview/iframe/carte", {
         waitUntil: "domcontentloaded",
@@ -55,7 +55,7 @@ test.describe("📦 Iframe Embed System", () => {
     })
   })
 
-  test.describe("iframe formulaire", () => {
+  test.describe("Iframe formulaire", () => {
     test("is loaded with correct parameters", async ({ page, baseUrl }) => {
       await page.goto(`/lookbook/preview/iframe/formulaire/`, {
         waitUntil: "domcontentloaded",
@@ -105,7 +105,7 @@ test.describe("📦 Iframe Embed System", () => {
     })
   })
 
-  test.describe("iframe carte", () => {
+  test.describe("Iframe carte", () => {
     test("displays correctly", async ({ page }) => {
       await page.goto(`/lookbook/preview/iframe/carte/`, {
         waitUntil: "domcontentloaded",
@@ -117,7 +117,7 @@ test.describe("📦 Iframe Embed System", () => {
     })
   })
 
-  test.describe("iframe assistant", () => {
+  test.describe("Iframe assistant", () => {
     test("displays correctly", async ({ page }) => {
       test.slow()
       await page.goto(`/lookbook/preview/iframe/assistant/`, {
@@ -130,7 +130,7 @@ test.describe("📦 Iframe Embed System", () => {
     })
   })
 
-  test.describe("legacy iframe urls", () => {
+  test.describe("URLs iframe legacy", () => {
     test("still work", async ({ page }) => {
       await page.goto(
         `/formulaire?direction=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre`,
@@ -149,7 +149,7 @@ test.describe("📦 Iframe Embed System", () => {
     })
   })
 
-  test.describe("iframe mode persistence", () => {
+  test.describe("Persistance mode iframe", () => {
     test("persists across navigation", async ({ page, baseUrl }) => {
       test.slow()
       await page.goto(`/?iframe`, { waitUntil: "domcontentloaded" })

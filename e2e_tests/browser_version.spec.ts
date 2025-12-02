@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test"
 
-test.describe("🌐 Browser Compatibility", () => {
+test.describe("🌐 Compatibilité Navigateur", () => {
   test("Browser version alert is not displayed", async ({ page }) => {
     await page.goto(`/formulaire`, { waitUntil: "domcontentloaded" })
 

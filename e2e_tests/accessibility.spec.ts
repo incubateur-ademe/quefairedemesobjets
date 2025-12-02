@@ -2,12 +2,12 @@ import { AxeBuilder } from "@axe-core/playwright"
 import { expect } from "@playwright/test"
 import { test } from "./config"
 
-test.describe("♿ WCAG Accessibility Compliance", () => {
+test.describe("♿ Conformité Accessibilité WCAG", () => {
   // Shared variables
   const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]
   const IFRAME_SELECTOR = "iframe"
 
-  test.describe("WCAG Compliance Tests", () => {
+  test.describe("Tests de conformité WCAG", () => {
     test("Formulaire iFrame", async ({ page }) => {
       await page.goto(`/lookbook/preview/iframe/formulaire/`, {
         waitUntil: "domcontentloaded",

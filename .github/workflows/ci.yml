@@ -3,6 +3,13 @@ name: 🤖 CI
 on:
   workflow_call:
 
+env:
+  PGHOST: localhost
+  PGPORT: 6543
+  PGUSER: webapp
+  PGPASSWORD: webapp # pragma: allowlist secret
+  PGDATABASE: webapp
+
 jobs:
   backend_linter:
     name: 📝 Backend Linter
@@ -111,14 +118,10 @@ jobs:
       - name: Run tests
         run: npm run test
 
-  e2e:
-    name: tests de bout-en-bout
+  e2e_prepare:
+    name: préparation des tests de bout-en-bout
     runs-on: ubuntu-latest
     if: ${{ github.ref_name == 'main' || (github.event_name ==  'pull_request' && contains( github.event.pull_request.labels.*.name, 'frontend')) }}
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2, 3, 4]
     services:
       postgres:
         image: postgis/postgis:15-3.3-alpine
@@ -184,8 +187,74 @@ jobs:
       - name: Install Playwright Browsers
         run: make init-playwright
 
+      - name: Dump PostgreSQL database
+        run: pg_dump -f database-dump.sql
+
+      - name: Create artifacts archive
+        run: |
+          tar -czf build-artifacts.tar.gz \
+            .venv \
+            staticfiles \
+            node_modules \
+            .env \
+            database-dump.sql \
+            ~/.cache/ms-playwright
+
+      - uses: actions/upload-artifact@v5
+        with:
+          name: e2e-build-artifacts
+          path: build-artifacts.tar.gz
+          retention-days: 1
+
+  e2e:
+    name: tests de bout-en-bout
+    runs-on: ubuntu-latest
+    needs: e2e_prepare
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    services:
+      postgres:
+        image: postgis/postgis:15-3.3-alpine
+        env:
+          POSTGRES_USER: webapp
+          POSTGRES_PASSWORD: webapp # pragma: allowlist secret
+          POSTGRES_DB: webapp
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 1s
+          --health-timeout 1s
+          --health-retries 50
+        ports:
+          - 6543:5432
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/download-artifact@v5
+        with:
+          name: e2e-build-artifacts
+
+      - name: Extract artifacts
+        run: |
+          tar -xzf build-artifacts.tar.gz
+          rm build-artifacts.tar.gz
+
+      - name: Restore PostgreSQL database
+        run: psql -f database-dump.sql
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: ".tool-versions"
+          cache: "npm"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@1e862dfacbd1d6d858c55d9b792c756523627244
+        with:
+          enable-cache: true
+
       - name: Run Playwright tests
-        run: npx playwright test --shard=${{ matrix.shard }}/4
+        run: npx playwright test --shard=${{ matrix.shard }}/4 --update-snapshots
 
       - uses: actions/upload-artifact@v5
         if: ${{ !cancelled() }}
