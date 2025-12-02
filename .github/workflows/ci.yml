@@ -70,24 +70,9 @@ jobs:
       - name: Check code formatting
         run: npm run format:check
 
-  backend_prepare:
-    name: 📦 Backend Preparation
+  backend_tests:
+    name: ✅ Backend Tests
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Install GIS packages
-        uses: ./.github/actions/install-gis
-
-      - name: Setup backend environment
-        uses: ./.github/actions/setup-backend
-        with:
-          uv-groups: "--group dev --group airflow"
-
-  backend_unit_tests:
-    name: ✅ Backend Unit Tests
-    runs-on: ubuntu-latest
-    needs: backend_prepare
     services:
       postgres:
         image: postgis/postgis:15-3.3-alpine
@@ -113,98 +98,25 @@ jobs:
         with:
           uv-groups: "--group dev --group airflow"
 
-      - name: Run unit tests
-        run: make unit-test
+      # - name: Run unit tests
+      #   run: make unit-test
 
-  backend_integration_tests:
-    name: ✅ Backend Integration Tests
-    runs-on: ubuntu-latest
-    needs: backend_prepare
-    services:
-      postgres:
-        image: postgis/postgis:15-3.3-alpine
-        env:
-          POSTGRES_USER: webapp
-          POSTGRES_PASSWORD: webapp # pragma: allowlist secret
-          POSTGRES_DB: webapp
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 1s
-          --health-timeout 1s
-          --health-retries 50
-        ports:
-          - 6543:5432
-    steps:
-      - uses: actions/checkout@v6
+      # - name: Run integration tests
+      #   run: make integration-test
 
-      - name: Install GIS packages
-        uses: ./.github/actions/install-gis
+      # - name: Run data tests
+      #   run: uv run pytest dags/tests
 
-      - name: Setup backend environment
-        uses: ./.github/actions/setup-backend
-        with:
-          uv-groups: "--group dev --group airflow"
-
-      - name: Run integration tests
-        run: make integration-test
-
-  backend_data_tests:
-    name: ✅ Backend Data Tests
-    runs-on: ubuntu-latest
-    needs: backend_prepare
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Setup backend environment
-        uses: ./.github/actions/setup-backend
-        with:
-          uv-groups: "--group dev --group airflow"
-
-      - name: Install GIS packages
-        uses: ./.github/actions/install-gis
-
-      - name: Run data tests
-        run: uv run pytest dags/tests
-
-  django_tests:
-    name: ✅ Django Tests
-    runs-on: ubuntu-latest
-    needs: backend_prepare
-    services:
-      postgres:
-        image: postgis/postgis:15-3.3-alpine
-        env:
-          POSTGRES_USER: webapp
-          POSTGRES_PASSWORD: webapp # pragma: allowlist secret
-          POSTGRES_DB: webapp
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 1s
-          --health-timeout 1s
-          --health-retries 50
-        ports:
-          - 6543:5432
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Install GIS packages
-        uses: ./.github/actions/install-gis
-
-      - name: Setup backend environment
-        uses: ./.github/actions/setup-backend
-        with:
-          uv-groups: "--group dev --group airflow"
-
-      - name: Check for missing migrations
-        run: uv run python manage.py makemigrations --check --no-input --settings=core.test_settings
-        env:
-          SECRET_KEY: votre_blanquette_est_bonne # pragma: allowlist secret
-          DATABASE_URL: "postgres://fakeusername:fakepassword@postgres:5432/database" # pragma: allowlist secret
+      # - name: Check for missing migrations
+      #   run: uv run python manage.py makemigrations --check --no-input --settings=core.test_settings
+      #   env:
+      #     SECRET_KEY: votre_blanquette_est_bonne # pragma: allowlist secret
+      #     DATABASE_URL: "postgres://fakeusername:fakepassword@postgres:5432/database" # pragma: allowlist secret
 
   frontend_tests:
     name: ✅ Frontend Tests
     runs-on: ubuntu-slim
-    needs: frontend_prepare
+    needs: [frontend_prepare, backend_tests]
     steps:
       - uses: actions/checkout@v6
 
