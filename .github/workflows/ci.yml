@@ -3,25 +3,23 @@ name: 🤖 CI
 on:
   workflow_call:
 
-env:
-  PGHOST: localhost
-  PGPORT: 6543
-  PGUSER: webapp
-  PGPASSWORD: webapp # pragma: allowlist secret
-  PGDATABASE: webapp
-  UV_PROJECT_ENVIRONMENT: .venv
-
 jobs:
   backend_linter:
     name: 📝 Backend Linter
     runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v6
-
-      - name: Setup backend environment
-        uses: ./.github/actions/setup-backend
+      - name: Install uv
+        uses: astral-sh/setup-uv@1e862dfacbd1d6d858c55d9b792c756523627244
         with:
-          uv-groups: "--only-dev"
+          enable-cache: true
+      - uses: actions/cache@v4
+        name: Define a cache for the virtual environment based on the dependencies lock file
+        with:
+          path: ./.venv
+          key: venv-dev-airflow-${{ hashFiles('uv.lock') }}
+      - name: Install the project dependencies
+        run: uv sync --only-dev
       - name: Install Terragrunt and OpenTofu
         uses: gruntwork-io/terragrunt-action@95fc057922e3c3d4cc021a81a213f088f333ddef
         with:
@@ -35,24 +33,18 @@ jobs:
       - name: Run Terragrunt format check
         run: terragrunt hcl fmt -check infrastructure
 
-  frontend_prepare:
-    name: 📦 Prepare frontend
-    runs-on: ubuntu-slim
-    steps:
-      - uses: actions/checkout@v6
-      - name: Setup frontend environment
-        uses: ./.github/actions/setup-frontend
-
   frontend_linter:
     name: 📝 Frontend Linter
-    needs: frontend_prepare
     runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v6
-
-      - name: Setup frontend environment
-        uses: ./.github/actions/setup-frontend
-
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: ".tool-versions"
+          cache: "npm"
+      - name: Build assets
+        run: |
+          npm ci
       - name: Check code formatting
         run: npm run format:check
 
@@ -73,49 +65,55 @@ jobs:
           --health-retries 50
         ports:
           - 6543:5432
+
     steps:
       - uses: actions/checkout@v6
-
-      - name: Install GIS packages
-        uses: ./.github/actions/install-gis
-
-      - name: Setup backend environment
-        uses: ./.github/actions/setup-backend
+      - name: Install GIS Packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install gdal-bin
+      - name: Install uv
+        uses: astral-sh/setup-uv@1e862dfacbd1d6d858c55d9b792c756523627244
         with:
-          uv-groups: "--group dev --group airflow"
-
-      # - name: Run unit tests
-      #   run: make unit-test
-
-      # - name: Run integration tests
-      #   run: make integration-test
-
-      # - name: Run data tests
-      #   run: uv run pytest dags/tests
-
-      # - name: Check for missing migrations
-      #   run: uv run python manage.py makemigrations --check --no-input --settings=core.test_settings
-      #   env:
-      #     SECRET_KEY: votre_blanquette_est_bonne # pragma: allowlist secret
-      #     DATABASE_URL: "postgres://fakeusername:fakepassword@postgres:5432/database" # pragma: allowlist secret
+          enable-cache: true
+      - uses: actions/cache@v4
+        name: Define a cache for the virtual environment based on the dependencies lock file
+        with:
+          path: ./.venv
+          key: venv-dev-airflow-${{ hashFiles('uv.lock') }}
+      - name: Install the project dependencies
+        run: uv sync --group dev --group airflow
+      - name: Run unit tests
+        run: make unit-test
+      - name: Run integration tests
+        run: make integration-test
+      - name: Run data tests
+        run: uv run pytest dags/tests
+      - name: Check for missing migrations
+        run: uv run python manage.py makemigrations --check --no-input --settings=core.test_settings
+        env:
+          SECRET_KEY: votre_blanquette_est_bonne # pragma: allowlist secret
+          DATABASE_URL: "postgres://fakeusername:fakepassword@postgres:5432/database" # pragma: allowlist secret
 
   frontend_tests:
     name: ✅ Frontend Tests
     runs-on: ubuntu-slim
-    needs: frontend_prepare
     steps:
       - uses: actions/checkout@v6
-
-      - name: Setup frontend environment
-        uses: ./.github/actions/setup-frontend
-
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: ".tool-versions"
+          cache: "npm"
+      - name: Build assets
+        run: |
+          npm ci
+          npm run build
       - name: Run tests
         run: npm run test
 
-  e2e_prepare:
-    name: préparation des tests de bout-en-bout
+  e2e:
+    name: tests de bout-en-bout
     runs-on: ubuntu-latest
-    needs: [frontend_prepare, backend_tests]
     if: ${{ github.ref_name == 'main' || (github.event_name ==  'pull_request' && contains( github.event.pull_request.labels.*.name, 'frontend')) }}
     services:
       postgres:
@@ -134,121 +132,62 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Prepare environment
-        run: | # pragma: allowlist secret
+        run: |
           cp .env.template .env
           echo BASE_URL=http://localhost:8000 >> .env
           echo DEBUG=false >> .env
-          echo SECRET_KEY=coucou
-
-      - name: Setup E2E environment
-        uses: ./.github/actions/setup-e2e
-
-      - name: Install GIS packages
-        uses: ./.github/actions/install-gis
-
-      - name: Setup backend environment
-        uses: ./.github/actions/setup-backend
-
-      - name: Install Playwright Browsers
-        run: make init-playwright
-
-      - name: Check database cache
-        id: cache-db
-        uses: actions/cache@v4
+      - uses: actions/setup-node@v6
         with:
-          path: database-dump.sql
-          key: db-dump-${{ hashFiles('**/migrations/**/*.py', '**/fixtures/**/*') }}
+          node-version-file: ".tool-versions"
+          cache: "npm"
+      - name: Build assets
+        run: |
+          npm ci
+          npm run build
+      - name: Install GIS Packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install gdal-bin
+      - name: Install uv
+        uses: astral-sh/setup-uv@1e862dfacbd1d6d858c55d9b792c756523627244
+        with:
+          enable-cache: true
+      - uses: actions/cache@v4
+        name: Define a cache for the virtual environment based on the dependencies lock file
+        with:
+          path: ./.venv
+          key: venv-dev-${{ hashFiles('uv.lock') }}
+      - name: Install the project dependencies
+        run: uv sync --group dev
 
       - name: Prepare django, migrate, collect static files...
-        if: steps.cache-db.outputs.cache-hit != 'true'
         run: |
           make createcachetable
           make migrate
           make collectstatic
 
       - name: Populate database
-        if: steps.cache-db.outputs.cache-hit != 'true'
         run: |
           make seed-database
 
       - name: Init django admin superuser
-        if: steps.cache-db.outputs.cache-hit != 'true'
         run: |
           make createsuperuser-example
-
-      - name: Dump PostgreSQL database
-        if: steps.cache-db.outputs.cache-hit != 'true'
-        run: pg_dump -f database-dump.sql
-
-      - name: Upload build artifacts for e2e tests
-        uses: actions/upload-artifact@v5
-        with:
-          name: e2e-build-artifacts
-          path: |
-            staticfiles
-            .env
-            database-dump.sql
-          retention-days: 1
-
-  e2e:
-    name: tests de bout-en-bout
-    runs-on: ubuntu-latest
-    needs: e2e_prepare
-    env:
-      BASE_URL: http://localhost:8000
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2, 3, 4]
-    services:
-      postgres:
-        image: postgis/postgis:15-3.3-alpine
-        env:
-          POSTGRES_USER: webapp
-          POSTGRES_PASSWORD: webapp # pragma: allowlist secret
-          POSTGRES_DB: webapp
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 1s
-          --health-timeout 1s
-          --health-retries 50
-        ports:
-          - 6543:5432
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Setup E2E environment
-        uses: ./.github/actions/setup-e2e
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v5
-        with:
-          name: e2e-build-artifacts
-
-      - name: Restore PostgreSQL database
-        run: psql -f database-dump.sql
-      - name: Prepare environment
-        run: | # pragma: allowlist secret
-          cp .env.template .env
-          echo BASE_URL=$BASE_URL >> .env
-          echo DEBUG=false >> .env
-          echo SECRET_KEY=coucou
 
       - name: Run server
         run: |
           uv run python manage.py runserver &
 
-      - name: Wait for server to be ready
-        run: |
-          timeout 60 sh -c 'until curl -s $BASE_URL > /dev/null; do sleep 1; done' || exit 1
+      - name: Install Playwright Browsers
+        run: make init-playwright
 
       - name: Run Playwright tests
-        run: npx playwright test --shard=${{ matrix.shard }}/4 --update-snapshots
+        run: npx playwright test --update-snapshots
 
       - uses: actions/upload-artifact@v5
         if: ${{ !cancelled() }}
         with:
-          name: playwright-report-${{ matrix.shard }}
+          name: playwright-report
           path: playwright-report/
           retention-days: 30
 
