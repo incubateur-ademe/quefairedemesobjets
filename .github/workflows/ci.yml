@@ -114,7 +114,7 @@ jobs:
 
   e2e_prepare:
     name: préparation des tests de bout-en-bout
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [frontend_prepare, backend_tests]
     if: ${{ github.ref_name == 'main' || (github.event_name ==  'pull_request' && contains( github.event.pull_request.labels.*.name, 'frontend')) }}
     services:
