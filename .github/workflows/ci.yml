@@ -160,6 +160,9 @@ jobs:
         with:
           uv-groups: "--group dev --group airflow"
 
+      - name: Install GIS packages
+        uses: ./.github/actions/install-gis
+
       - name: Run data tests
         run: uv run pytest dags/tests
 
