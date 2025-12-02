@@ -1,12 +1,6 @@
 name: "Setup Frontend Environment"
 description: "Installs Node.js and npm dependencies with caching"
 
-inputs:
-  build:
-    description: "Whether to run npm run build after installing dependencies"
-    required: false
-    default: "false"
-
 runs:
   using: "composite"
   steps:
@@ -18,9 +12,4 @@ runs:
 
     - name: Install npm dependencies
       run: npm ci
-      shell: bash
-
-    - name: Build assets
-      if: inputs.build == 'true'
-      run: npm run build
       shell: bash

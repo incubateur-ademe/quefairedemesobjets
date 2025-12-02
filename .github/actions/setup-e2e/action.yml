@@ -1,8 +1,8 @@
-name: 'Setup E2E Environment'
-description: 'Sets up Node.js, Python, and Playwright for E2E tests'
+name: "Setup E2E Environment"
+description: "Sets up Node.js, Python, and Playwright for E2E tests"
 
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
     - name: Setup Node.js
       uses: actions/setup-node@v6
@@ -20,3 +20,18 @@ runs:
       with:
         path: ~/.cache/ms-playwright
         key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+    - name: Setup frontend environment
+      uses: ./.github/actions/setup-frontend
+
+    - name: Frontend Assets Cache
+      uses: actions/cache@v4
+      id: frontend-assets-cache
+      with:
+        key: frontend-build-${{ hashFiles('static/**', 'package.json', 'package-lock.json', '.parcelrc', 'tailwind.config.js') }}
+        path: static/compiled/*
+
+    - name: Build assets
+      shell: bash
+      if: steps.frontend-assets-cache.outputs.cache-hit != 'true'
+      run: npm run build

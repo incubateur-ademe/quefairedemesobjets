@@ -40,22 +40,13 @@ jobs:
     runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v6
-
       - name: Setup frontend environment
         uses: ./.github/actions/setup-frontend
-        with:
-          build: "true"
-
-      - name: Cache built assets
-        uses: actions/cache/save@v4
-        with:
-          path: static/dist
-          key: frontend-dist-${{ hashFiles('static/**', 'package.json', 'package-lock.json', '.parcelrc') }}
 
   frontend_linter:
     name: 📝 Frontend Linter
-    runs-on: ubuntu-slim
     needs: frontend_prepare
+    runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v6
 
@@ -118,18 +109,8 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version-file: ".tool-versions"
-          cache: "npm"
-
-      - name: Restore built assets
-        uses: actions/cache/restore@v4
-        with:
-          path: static/dist
-          key: frontend-dist-${{ hashFiles('static/**', 'package.json', 'package-lock.json', '.parcelrc') }}
-          fail-on-cache-miss: true
+      - name: Setup frontend environment
+        uses: ./.github/actions/setup-frontend
 
       - name: Run tests
         run: npm run test
@@ -166,13 +147,6 @@ jobs:
 
       - name: Setup E2E environment
         uses: ./.github/actions/setup-e2e
-
-      - name: Restore built assets
-        uses: actions/cache/restore@v4
-        with:
-          path: static/dist
-          key: frontend-dist-${{ hashFiles('static/**', 'package.json', 'package-lock.json', '.parcelrc') }}
-          fail-on-cache-miss: true
 
       - name: Install GIS packages
         uses: ./.github/actions/install-gis
