@@ -128,29 +128,11 @@ jobs:
           echo BASE_URL=$BASE_URL >> .env
           echo DEBUG=false >> .env
 
-      - uses: actions/setup-node@v6
-        with:
-          node-version-file: ".tool-versions"
-          cache: "npm"
-      - name: Build assets
-        run: |
-          npm ci
-          npm run build
-      - name: Install GIS Packages
-        run: |
-          sudo apt-get update
-          sudo apt-get install gdal-bin libgdal-dev -y
-      - name: Install uv
-        uses: astral-sh/setup-uv@1e862dfacbd1d6d858c55d9b792c756523627244
-        with:
-          enable-cache: true
-      - uses: actions/cache@v4
-        name: Define a cache for the virtual environment based on the dependencies lock file
-        with:
-          path: ./.venv
-          key: venv-dev-${{ hashFiles('uv.lock') }}
-      - name: Install the project dependencies
-        run: uv sync --group dev
+      - name: Setup E2E environment
+        uses: ./.github/actions/setup-e2e
+
+      - name: Install GIS packages
+        uses: ./.github/actions/install-gis
 
       - name: Install Playwright Browsers
         run: make init-playwright
