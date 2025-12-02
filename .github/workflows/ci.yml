@@ -116,7 +116,7 @@ jobs:
   frontend_tests:
     name: ✅ Frontend Tests
     runs-on: ubuntu-slim
-    needs: [frontend_prepare, backend_tests]
+    needs: frontend_prepare
     steps:
       - uses: actions/checkout@v6
 
@@ -131,7 +131,7 @@ jobs:
   e2e_prepare:
     name: préparation des tests de bout-en-bout
     runs-on: ubuntu-latest
-    needs: frontend_prepare
+    needs: [frontend_prepare, backend_tests]
     if: ${{ github.ref_name == 'main' || (github.event_name ==  'pull_request' && contains( github.event.pull_request.labels.*.name, 'frontend')) }}
     services:
       postgres:
