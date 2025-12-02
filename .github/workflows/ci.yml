@@ -222,10 +222,12 @@ jobs:
         ports:
           - 6543:5432
     steps:
-      - uses: actions/checkout@v6
+      - name: Install essential packages
+        run: |
+          apt-get update
+          apt-get install -y git curl ca-certificates
 
-      - name: Install GIS packages
-        uses: ./.github/actions/install-gis
+      - uses: actions/checkout@v6
 
       - name: Setup backend environment
         uses: ./.github/actions/setup-backend
