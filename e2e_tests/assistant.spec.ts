@@ -13,7 +13,6 @@ test.describe("🤖 Assistant Search and Interaction", () => {
     // Autour de moi
     await page.locator(inputSelector).click()
     await page.locator(inputSelector).fill(searchedAddress)
-    await page.waitForTimeout(1000)
     await page.locator(getItemSelector(1)).click()
   }
 
@@ -24,7 +23,6 @@ test.describe("🤖 Assistant Search and Interaction", () => {
     await page.goto(`/dechet/lave-linge`, { waitUntil: "domcontentloaded" })
     await searchOnProduitPage(page, "Auray")
     const sessionStorage = await page.evaluate(() => window.sessionStorage)
-    await page.waitForTimeout(1000)
     expect(sessionStorage.adresse).toBe("Auray")
     expect(sessionStorage.latitude).toContain("47.6")
     expect(sessionStorage.longitude).toContain("-2.9")
@@ -64,8 +62,6 @@ test.describe("🤖 Assistant Search and Interaction", () => {
       await page.locator("#id_home-input").fill("lave")
       await responsePromise
 
-      await page.waitForTimeout(500)
-
       // We expect at least one search result
       await expect(
         page.locator("main [data-search-target=results] a").first(),
@@ -83,7 +79,6 @@ test.describe("🤖 Assistant Search and Interaction", () => {
       // input debounce delay has ran, hence happening before the API call to succeed
       await page.locator("#id_header-input").pressSequentially("lave", { delay: 200 })
       await responsePromise
-      await page.waitForTimeout(500)
 
       expect(page.locator("main [data-search-target=results] a")).toHaveCount(0)
       await expect(
@@ -97,7 +92,6 @@ test.describe("🤖 Assistant Search and Interaction", () => {
       )
       await page.locator("#id_home-input").click()
       await responsePromise
-      await page.waitForTimeout(500)
       expect(page.locator("#home [data-search-target=results] a")).toHaveCount(0)
       expect(page.locator("#header [data-search-target=results] a")).toHaveCount(0)
     },
@@ -108,7 +102,6 @@ test.describe("🤖 Assistant Search and Interaction", () => {
     await page.goto(`/`, { waitUntil: "domcontentloaded" })
     let sessionStorage = await page.evaluate(() => window.sessionStorage)
 
-    await page.waitForTimeout(1000)
     expect(sessionStorage.homePageView).toBe("0")
 
     // Navigate to a produit page and check that it scores 1
@@ -118,9 +111,6 @@ test.describe("🤖 Assistant Search and Interaction", () => {
 
     // Click on a pin on the map and check that it scores 1
     await searchOnProduitPage(page, "Auray")
-    // Attempt to force waiting for pinpoints availability
-    // TODO: understand why this is required......
-    await page.waitForTimeout(1000)
     const [markers, count] = await getMarkers(page)
     for (let i = 0; i < count; i++) {
       const item = markers?.nth(i)
@@ -133,6 +123,10 @@ test.describe("🤖 Assistant Search and Interaction", () => {
       }
     }
 
+    // Wait for sessionStorage to be updated after click
+    await page.waitForFunction(
+      () => window.sessionStorage.userInteractionWithMap !== undefined,
+    )
     sessionStorage = await page.evaluate(() => window.sessionStorage)
     expect(sessionStorage.userInteractionWithMap).toBe("1")
 
@@ -148,13 +142,15 @@ test.describe("🤖 Assistant Search and Interaction", () => {
       }
     }
 
+    // Wait for sessionStorage to be updated after second click
+    await page.waitForFunction(
+      () => window.sessionStorage.userInteractionWithMap === "2",
+    )
     sessionStorage = await page.evaluate(() => window.sessionStorage)
     expect(sessionStorage.userInteractionWithMap).toBe("2")
 
     // Click on share button in solution details
-    await page
-      .locator("#mauvais-etat-tab [aria-describedby='mauvais_etat:shareTooltip']")
-      .click()
+    await page.locator("[aria-describedby='mauvais-etat:shareTooltip']").click()
     sessionStorage = await page.evaluate(() => window.sessionStorage)
     expect(sessionStorage.userInteractionWithSolutionDetails).toBe("1")
 

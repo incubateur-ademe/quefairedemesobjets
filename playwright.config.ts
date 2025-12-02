@@ -14,9 +14,22 @@ import path from "path"
 
 dotenv.config({ path: path.resolve(__dirname, ".env") })
 
-const PLAYWRIGHT_HOST = process.env.PLAYWRIGHT_HOST || "localhost"
-const PLAYWRIGHT_PORT = process.env.PLAYWRIGHT_PORT || "8000"
-const PLAYWRIGHT_BASE_URL = process.env.PLAYWRIGHT_BASE_URL || process.env.BASE_URL
+const BASE_URL = process.env.BASE_URL
+
+// Extract host and port from BASE_URL for the webServer command
+let PLAYWRIGHT_HOST = process.env.PLAYWRIGHT_HOST || "localhost"
+let PLAYWRIGHT_PORT = process.env.PLAYWRIGHT_PORT || "8000"
+
+if (BASE_URL) {
+  try {
+    const url = new URL(BASE_URL)
+    PLAYWRIGHT_HOST = url.hostname
+    PLAYWRIGHT_PORT = url.port || (url.protocol === "https:" ? "443" : "80")
+  } catch (e) {
+    // If BASE_URL is invalid, fall back to environment variables or defaults
+    console.warn(`Invalid BASE_URL: ${BASE_URL}, using default host and port`)
+  }
+}
 
 export default defineConfig({
   testDir: "./e2e_tests",
@@ -32,7 +45,7 @@ export default defineConfig({
   reporter: "html",
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    baseURL: PLAYWRIGHT_BASE_URL,
+    baseURL: BASE_URL,
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
   },
@@ -41,7 +54,7 @@ export default defineConfig({
   webServer: {
     // skip-checks and noreload ensures django runserver starts faster
     command: `uv run python manage.py runserver ${process.env.DEBUG && "--noreload --skip-checks"} ${PLAYWRIGHT_HOST}:${PLAYWRIGHT_PORT}`,
-    url: PLAYWRIGHT_BASE_URL,
+    url: process.env.BASE_URL,
     reuseExistingServer: !process.env.CI,
     timeout: 10000,
   },
