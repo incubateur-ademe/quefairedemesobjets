@@ -138,9 +138,6 @@ jobs:
           cp .env.template .env
           echo BASE_URL=http://localhost:8000 >> .env
           echo DEBUG=false >> .env
-          echo PLAYWRIGHT_HOST=localhost >> .env
-          echo PLAYWRIGHT_PORT=8000 >> .env
-          echo PLAYWRIGHT_BASE_URL=http://localhost:8000 >> .env
           echo SECRET_KEY=coucou
 
       - name: Setup E2E environment
@@ -239,7 +236,7 @@ jobs:
 
       - name: Run server
         run: |
-          uv run python manage.py runserver --noreload --skip-checks &
+          uv run python manage.py runserver &
 
       - name: Wait for server to be ready
         run: |
