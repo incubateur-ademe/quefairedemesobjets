@@ -6,12 +6,14 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
     endpointUrl: String,
     turboFrameId: String,
     limit: String,
+    navigate: { type: Boolean, default: false },
   }
   declare readonly optionTargets: HTMLElement[]
   declare readonly resultsTarget: HTMLElement
   declare readonly turboFrameIdValue: string
   declare readonly endpointUrlValue: string
   declare readonly limitValue: string
+  declare readonly navigateValue: boolean
   declare readonly inputTarget: HTMLInputElement
   declare readonly hiddenInputTarget: HTMLInputElement
 
@@ -86,7 +88,15 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
     const currentOption = this.optionTargets[this.currentIndex]
 
     this.#blurOptions()
-    currentOption.focus()
+
+    // Focus on the link inside the option if it exists, otherwise the option itself
+    const link = currentOption.querySelector("a")
+    if (link) {
+      link.focus()
+    } else {
+      currentOption.focus()
+    }
+
     this.inputTarget.setAttribute("aria-activedescendant", currentOption.id || "")
     this.showListbox()
   }
@@ -94,13 +104,35 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
   commitSelection(event?) {
     let selected = this.optionTargets[this.currentIndex]
     if (event?.target) {
-      selected = event.target
+      selected = event.target.closest('[data-next-autocomplete-target="option"]')
     }
     if (!selected) return
 
-    this.hiddenInputTarget.value = selected.dataset.value?.trim() || ""
-    this.inputTarget.value = selected.dataset.selectedValue?.trim() || ""
+    const value = selected.dataset.value?.trim() || ""
+    const selectedValue = selected.dataset.selectedValue?.trim() || ""
+
+    this.hiddenInputTarget.value = value
+    this.inputTarget.value = selectedValue
     this.hideListbox()
+
+    // Emit custom event for other controllers to listen to
+    const commitEvent = new CustomEvent("next-autocomplete:commit", {
+      bubbles: true,
+      detail: { option: selected, value, selectedValue },
+    })
+    this.element.dispatchEvent(commitEvent)
+
+    // Navigate if configured to do so
+    if (this.navigateValue) {
+      // If the option contains a link, click it (for accessibility)
+      const link = selected.querySelector("a")
+      if (link) {
+        link.click()
+      } else if (value && (value.startsWith("/") || value.startsWith("http"))) {
+        // Fallback to JS navigation if no link present
+        window.location.href = value
+      }
+    }
   }
 
   escapeAction() {
@@ -117,7 +149,14 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
   }
 
   #blurOptions() {
-    this.optionTargets.forEach((opt) => opt.blur())
+    this.optionTargets.forEach((opt) => {
+      // Blur links inside options if they exist
+      const link = opt.querySelector("a")
+      if (link) {
+        link.blur()
+      }
+      opt.blur()
+    })
   }
 
   hideListbox() {

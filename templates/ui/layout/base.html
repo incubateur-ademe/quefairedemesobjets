@@ -53,7 +53,7 @@
         data-state-map-outlet="[data-controller='map']"
         data-state-search-solution-form-outlet="[data-controller='search-solution-form']"
         {% posthog_data_attributes CARTE.POSTHOG_KEY %}
-        data-action="address-autocomplete:change->state#setLocation"
+        data-action="address-autocomplete:change->state#setLocation map-address-autocomplete:change->state#setLocation"
         {% if STIMULUS_DEBUG %}data-stimulus-debug="true"{% endif %}
     >
         <main id="solutions"{% block main_classes %}class="qf-h-full qf-overflow-y-auto qf-overflow-x-hidden{% endblock %}">
