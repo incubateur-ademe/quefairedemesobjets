@@ -190,21 +190,17 @@ jobs:
       - name: Dump PostgreSQL database
         run: pg_dump -f database-dump.sql
 
-      - name: Create artifacts archive
-        run: |
-          tar -czf build-artifacts.tar.gz \
-            .venv \
-            staticfiles \
-            node_modules \
-            .env \
-            database-dump.sql \
-            ~/.cache/ms-playwright
-
-      - uses: actions/upload-artifact@v5
+      - name: Cache build artifacts
+        uses: actions/cache/save@v4
         with:
-          name: e2e-build-artifacts
-          path: build-artifacts.tar.gz
-          retention-days: 1
+          path: |
+            .venv
+            staticfiles
+            node_modules
+            .env
+            database-dump.sql
+            ~/.cache/ms-playwright
+          key: e2e-build-${{ github.sha }}-${{ github.run_id }}
 
   e2e:
     name: tests de bout-en-bout
@@ -231,14 +227,18 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: actions/download-artifact@v5
+      - name: Restore build artifacts
+        uses: actions/cache/restore@v4
         with:
-          name: e2e-build-artifacts
-
-      - name: Extract artifacts
-        run: |
-          tar -xzf build-artifacts.tar.gz
-          rm build-artifacts.tar.gz
+          path: |
+            .venv
+            staticfiles
+            node_modules
+            .env
+            database-dump.sql
+            ~/.cache/ms-playwright
+          key: e2e-build-${{ github.sha }}-${{ github.run_id }}
+          fail-on-cache-miss: true
 
       - name: Restore PostgreSQL database
         run: psql -f database-dump.sql
