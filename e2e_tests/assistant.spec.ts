@@ -1,11 +1,11 @@
 import { expect, test } from "@playwright/test"
 import { getMarkers, mockApiAdresse } from "./helpers"
 function getItemSelector(index) {
-  return `#mauvais_etat #id_adresseautocomplete-list.autocomplete-items div[data-action="click->address-autocomplete#selectOption"]:nth-of-type(${index})`
+  return `#mauvais-etat-tab #id_adresseautocomplete-list.autocomplete-items div[data-action="click->address-autocomplete#selectOption"]:nth-of-type(${index})`
 }
 
 async function searchOnProduitPage(page, searchedAddress: string) {
-  const inputSelector = "#mauvais_etat input#id_adresse"
+  const inputSelector = "#mauvais-etat-tab input#id_adresse"
   await mockApiAdresse(page)
 
   // Autour de moi
@@ -149,7 +149,7 @@ test("Le tracking PostHog fonctionne comme prévu", async ({ page }) => {
 
   // Click on share button in solution details
   await page
-    .locator("#mauvais_etat [aria-describedby='mauvais_etat:shareTooltip']")
+    .locator("#mauvais-etat-tab [aria-describedby='mauvais_etat:shareTooltip']")
     .click()
   sessionStorage = await page.evaluate(() => window.sessionStorage)
   expect(sessionStorage.userInteractionWithSolutionDetails).toBe("1")

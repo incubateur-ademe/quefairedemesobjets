@@ -1,4 +1,4 @@
-import { BacklinkKey, generateBackLink } from "../embed/helpers"
+import { generateBackLink } from "../embed/helpers"
 import { getIframeAttributesAndExtra } from "../js/iframe_functions"
 
 describe("generateBackLink", () => {
