@@ -154,7 +154,7 @@ jobs:
         id: cache-db
         uses: actions/cache@v4
         with:
-          path: database-dump.sql
+          path: database-dump.pgdump
           key: db-dump-${{ hashFiles('**/migrations/**/*.py', '**/fixtures/**/*') }}
 
       - name: Prepare django, migrate, collect static files...
@@ -176,7 +176,7 @@ jobs:
 
       - name: Dump PostgreSQL database
         if: steps.cache-db.outputs.cache-hit != 'true'
-        run: pg_dump -f database-dump.sql
+        run: pg_dump -Fc -f database-dump.pgdump
 
       - name: Upload build artifacts for e2e tests
         uses: actions/upload-artifact@v5
@@ -184,7 +184,7 @@ jobs:
           name: e2e-build-artifacts
           path: |
             staticfiles
-            database-dump.sql
+            database-dump.pgdump
           retention-days: 1
 
   e2e:
@@ -246,7 +246,7 @@ jobs:
           name: e2e-build-artifacts
 
       - name: Restore PostgreSQL database
-        run: psql -f database-dump.sql
+        run: pg_restore -d $DATABASE_URL --clean --if-exists database-dump.pgdump || true
 
       - name: Run server
         run: |
