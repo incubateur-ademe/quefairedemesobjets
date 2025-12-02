@@ -4,8 +4,9 @@ import {
   PosthogEventType,
 } from "../../js/types"
 import posthog, { PostHogConfig } from "posthog-js"
-import { areWeInAnIframe } from "../../js/iframe"
 import { URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE } from "../../js/helpers"
+
+const IFRAME_REFERRER_SESSION_KEY = "qf_ifr"
 
 type PersonProperties = {
   iframe: boolean
@@ -139,13 +140,63 @@ export default class extends Controller<HTMLElement> {
   // In all these cases, we still want to determine
   // whether the user browse inside an iframe or not.
   #checkIfWeAreInAnIframe() {
-    const [weAreInAnIframe, referrer] = areWeInAnIframe()
+    const [weAreInAnIframe, referrer] = this.#areWeInAnIframe()
     this.personProperties.iframe = weAreInAnIframe
     this.personProperties.iframeReferrer = referrer
     const url = new URL(window.location.href)
     this.personProperties.iframeFromScript = url.searchParams.has(
       URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE,
     )
+  }
+
+  #areWeInAnIframe(): [boolean, string | undefined] {
+    let weAreInAnIframe = false
+    let referrer
+
+    // First, try to get the stored referrer from sessionStorage
+    // This ensures we don't lose it on subsequent navigations
+    const storedReferrer = sessionStorage.getItem(IFRAME_REFERRER_SESSION_KEY)
+    if (storedReferrer) {
+      referrer = storedReferrer
+    }
+
+    try {
+      if (window.self !== window.top) {
+        weAreInAnIframe = true
+        // For same-origin iframes, we can access the parent URL directly
+        referrer = window.top?.location.href
+      }
+    } catch (e) {
+      // Unable to access window.top
+      // this might be due to cross-origin restrictions.
+      // Assuming it's inside an iframe.
+      weAreInAnIframe = true
+    }
+
+    // For cross-origin iframes, document.referrer contains the parent URL
+    // But only on the first load - so we need to persist it
+    if (document.referrer && !document.referrer.includes(document.location.origin)) {
+      weAreInAnIframe = true
+
+      // Only set referrer if we don't already have one
+      // This prevents overwriting the original referrer on subsequent navigations
+      if (!referrer) {
+        referrer = document.referrer
+      }
+    }
+
+    // Persist the referrer in sessionStorage so it survives navigations
+    // Only store if we have a referrer and are in an iframe
+    if (weAreInAnIframe && referrer && !storedReferrer) {
+      try {
+        sessionStorage.setItem(IFRAME_REFERRER_SESSION_KEY, referrer)
+      } catch (e) {
+        // SessionStorage might not be available (privacy mode, etc.)
+        console.warn("Unable to persist iframe referrer:", e)
+      }
+    }
+
+    return [weAreInAnIframe, referrer]
   }
 
   #computeConversionScoreFromSessionStorage() {
