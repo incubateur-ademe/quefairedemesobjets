@@ -53,8 +53,6 @@ jobs:
   backend_tests:
     name: ✅ Backend Tests
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/osgeo/gdal:ubuntu-full-latest
     services:
       postgres:
         image: postgis/postgis:15-3.3-alpine
@@ -67,12 +65,13 @@ jobs:
           --health-interval 1s
           --health-timeout 1s
           --health-retries 50
+        ports:
+          - 5432:5432
     steps:
       - uses: actions/checkout@v6
-      - name: Install essential packages
-        run: |
-          apt-get update
-          apt-get install -y git build-essential curl ca-certificates
+
+      - name: Install GIS packages
+        uses: ./.github/actions/install-gis
 
       - name: Setup backend environment
         uses: ./.github/actions/setup-backend
