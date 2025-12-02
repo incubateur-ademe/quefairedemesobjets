@@ -99,6 +99,9 @@ module.exports = {
         blink: "blink 1s infinite",
         "modal-appear": "modal-appear 0.2s",
       },
+      backgroundImage: {
+        "gradient-infotri": "linear-gradient(49deg, transparent 57%, #ececfe 78%)",
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

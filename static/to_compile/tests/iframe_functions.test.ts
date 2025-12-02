@@ -1,4 +1,4 @@
-import { BacklinkKey, generateBackLink } from "../embed/helpers"
+import { generateBackLink } from "../embed/helpers"
 import { getIframeAttributesAndExtra } from "../js/iframe_functions"
 
 describe("generateBackLink", () => {
@@ -71,6 +71,7 @@ describe("getIframeAttributesAndExtra function tests", () => {
         direction: "jai",
       },
       route: "carte",
+      options: { height: "700px" },
       expectedSrc:
         "https://example.com/carte?address_placeholder=toto%2Ctata&bounding_box=%7B%22southWest%22%3A%7B%22lat%22%3A48.916%2C%22lng%22%3A2.298202514648438%7D%2C%22northEast%22%3A%7B%22lat%22%3A48.98742568330284%2C%22lng%22%3A2.483596801757813%7D%7D&direction=jai",
     },
@@ -83,6 +84,7 @@ describe("getIframeAttributesAndExtra function tests", () => {
         limit: "71",
       },
       route: "carte",
+      options: { height: "700px" },
       expectedSrc:
         "https://example.com/carte?action_list=acheter%7Crevendre%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cdonner%7Cechanger%7Creparer&epci_codes=200073146&limit=71",
     },
@@ -95,22 +97,66 @@ describe("getIframeAttributesAndExtra function tests", () => {
         limit: "71",
       },
       route: "carte",
+      options: { height: "700px" },
       expectedSrc:
         "https://example.com/carte?action_list=acheter%7Crevendre%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cdonner%7Cechanger%7Creparer&epci_codes=200073146&epci_codes=200040442&epci_codes=245804497&limit=71",
     },
   ])(
     "should generate correct iframe attributes $description",
-    ({ dataset, route, expectedSrc }) => {
+    ({ dataset, route, options, expectedSrc }) => {
       // These are tests...any seems acceptable but we might want to type this at some point.
       setScriptDataset(dataset as any)
 
       const [iframeAttributes, iframeExtraAttributes] = getIframeAttributesAndExtra(
         scriptTag,
         route,
+        options as any,
       )
 
       assertIframeAttributes(iframeAttributes, expectedSrc)
       expect(iframeExtraAttributes).toBeDefined()
     },
   )
+
+  test("should use default height (100vh) for assistant iframe", () => {
+    setScriptDataset({ objet: "test-objet" })
+
+    const [iframeAttributes] = getIframeAttributesAndExtra(scriptTag, "dechet", {
+      useAutoHeight: true,
+      addScriptModeParam: true,
+    })
+
+    expect(iframeAttributes.style).toBe(
+      "overflow: hidden; max-width: 100%; width: 100%; height: 100vh;",
+    )
+    expect(iframeAttributes.src).toBe(
+      "https://example.com/dechet/test-objet?iframe=&s=1",
+    )
+  })
+
+  test("should use default height (100vh) for formulaire iframe", () => {
+    const [iframeAttributes] = getIframeAttributesAndExtra(scriptTag, "formulaire", {
+      maxWidth: "800px",
+    })
+
+    expect(iframeAttributes.style).toBe(
+      "overflow: hidden; max-width: 800px; width: 100%; height: 100vh;",
+    )
+    expect(iframeAttributes.src).toBe("https://example.com/formulaire?")
+  })
+
+  test("should use default height (100vh) for infotri iframe", () => {
+    setScriptDataset({ categorie: "tous", consigne: "1" })
+
+    const [iframeAttributes] = getIframeAttributesAndExtra(scriptTag, "infotri", {
+      useAutoHeight: true,
+    })
+
+    expect(iframeAttributes.style).toBe(
+      "overflow: hidden; max-width: 100%; width: 100%; height: 100vh;",
+    )
+    expect(iframeAttributes.src).toBe(
+      "https://example.com/infotri?iframe=&categorie=tous&consigne=1",
+    )
+  })
 })

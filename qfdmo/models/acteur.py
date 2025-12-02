@@ -686,14 +686,16 @@ class BaseActeur(TimestampedModel):
 
     @cached_property
     def labels_enseigne_display(self):
-        return self.labels_display.filter(type_enseigne=True)
+        return self.ordered_labels_by_bonus_and_type_enseigne.filter(type_enseigne=True)
 
     @cached_property
     def labels_without_enseigne_display(self):
-        return self.labels_display.exclude(type_enseigne=True)
+        return self.ordered_labels_by_bonus_and_type_enseigne.exclude(
+            type_enseigne=True
+        )
 
     @cached_property
-    def labels_display(self):
+    def ordered_labels_by_bonus_and_type_enseigne(self):
         """
         On retourne une liste de labels qualité.
         Dans la plupart des cas on ne retournera qu'un label, une future évolution

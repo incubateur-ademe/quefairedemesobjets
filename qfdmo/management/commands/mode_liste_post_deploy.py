@@ -1,12 +1,13 @@
 from django.core.management.base import BaseCommand
 
-from qfdmo.models import LabelQualite
+from qfdmo.models import GroupeAction, LabelQualite
 
 
 class Command(BaseCommand):
-    help = "initialize `filtre` fields"
+    help = "Post-deployment command for mode_liste feature"
 
     def handle(self, *args, **options):
+        # Update LabelQualite filtre fields
         LabelQualite.objects.filter(code__in=["ess", "reparacteur"]).update(filtre=True)
 
         LabelQualite.objects.filter(code="ess").update(
@@ -29,3 +30,10 @@ class Command(BaseCommand):
         )
 
         self.stdout.write(self.style.SUCCESS("Labels mis à jour"))
+
+        # Update GroupeAction icons
+        GroupeAction.objects.filter(icon="fr-icon-hand-heart-line").update(
+            icon="fr-icon-hand-heart"
+        )
+
+        self.stdout.write(self.style.SUCCESS("Icônes GroupeAction mis à jour"))
