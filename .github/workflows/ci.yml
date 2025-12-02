@@ -124,8 +124,13 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Setup E2E environment
-        uses: ./.github/actions/setup-e2e
+      - name: Setup frontend environment
+        uses: ./.github/actions/setup-frontend
+
+      - name: Setup backend environment
+        uses: ./.github/actions/setup-backend
+        with:
+          uv-groups: "--group dev"
 
       - name: Install GIS packages
         uses: ./.github/actions/install-gis
