@@ -166,6 +166,10 @@ jobs:
         run: |
           make createsuperuser-example
 
+      - name: Run server
+        run: |
+          uv run python manage.py runserver --noreload --skip-checks &
+
       - name: Install Playwright Browsers
         run: make init-playwright
 
