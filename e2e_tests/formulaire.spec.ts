@@ -3,8 +3,8 @@ import {
   mockApiAdresse,
   searchDummyAdresse,
   searchDummySousCategorieObjet,
+  openAdvancedFilters,
 } from "./helpers"
-import { openAdvancedFilters } from "./carte.spec"
 
 test.describe("🔍 Recherche et Modification Formulaire", () => {
   test("Recherche et modification d'une recherche", async ({ page }) => {

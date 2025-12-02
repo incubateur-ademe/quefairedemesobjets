@@ -1,24 +1,5 @@
 import { expect, test } from "@playwright/test"
-import { searchDummyAdresse } from "./helpers"
-
-export async function openAdvancedFilters(
-  page,
-  parentTestId = "form-content",
-  buttonDataTestId = "advanced-filters",
-  modalDataTestId = "advanced-filters-modal",
-) {
-  await page.getByTestId(parentTestId).getByTestId(buttonDataTestId).click()
-
-  await expect(
-    page.locator(`[data-testid="${modalDataTestId}"] .fr-modal__content h2`),
-  ).toBeInViewport()
-  await page
-    .locator(`[data-testid="${modalDataTestId}"] .fr-modal__header button`)
-    .click()
-  await expect(
-    page.locator(`[data-testid="${modalDataTestId}"] .fr-modal__content h2`),
-  ).toBeHidden()
-}
+import { openAdvancedFilters, searchDummyAdresse } from "./helpers"
 
 test.describe("🗺️ Filtres Avancés Carte", () => {
   async function searchInCarteMode(page) {
