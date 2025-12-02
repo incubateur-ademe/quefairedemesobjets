@@ -7,5 +7,7 @@ runs:
     - name: Cache and install GIS packages
       uses: awalsh128/cache-apt-pkgs-action@acb598e5ddbc6f68a970c5da0688d2f3a9f04d05
       with:
-        packages: gdal-bin libgdal-dev
+        packages: libgdal-dev
         version: 1.0
+    - run: sudo apt-get install gdal-bin -y
+      shell: bash
