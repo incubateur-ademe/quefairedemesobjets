@@ -13,9 +13,6 @@ env:
   BASE_URL: http://localhost:8000
   DATABASE_URL: "postgres://webapp:webapp@localhost:5432/webapp" # pragma: allowlist secret
   SECRET_KEY: coucou # pragma: allowlist secret
-  POSTGRES_USER: webapp
-  POSTGRES_PASSWORD: webapp # pragma: allowlist secret
-  POSTGRES_DB: webapp
   CI: true
 
 jobs:
@@ -67,6 +64,10 @@ jobs:
           --health-retries 50
         ports:
           - 5432:5432
+        env:
+          POSTGRES_USER: webapp
+          POSTGRES_PASSWORD: webapp # pragma: allowlist secret
+          POSTGRES_DB: webapp
     steps:
       - uses: actions/checkout@v6
 
@@ -109,6 +110,20 @@ jobs:
     # On s'assure que npm ci et uv sync aient tourné au moins une fois.
     needs: [frontend_linter, backend_linter]
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:15-3.3-alpine
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 1s
+          --health-timeout 1s
+          --health-retries 50
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: webapp
+          POSTGRES_PASSWORD: webapp # pragma: allowlist secret
+          POSTGRES_DB: webapp
     steps:
       - uses: actions/checkout@v6
 
@@ -158,6 +173,10 @@ jobs:
           --health-retries 50
         ports:
           - 5432:5432
+        env:
+          POSTGRES_USER: webapp
+          POSTGRES_PASSWORD: webapp # pragma: allowlist secret
+          POSTGRES_DB: webapp
     steps:
       # PREPARE e2e
       - name: Setup frontend environment
