@@ -71,7 +71,7 @@ jobs:
         run: npm run format:check
 
   backend_prepare:
-    name: 📦 Backend Build
+    name: 📦 Backend Preparation
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -83,13 +83,6 @@ jobs:
         uses: ./.github/actions/setup-backend
         with:
           uv-groups: "--group dev --group airflow"
-
-      - name: Upload backend artifacts
-        uses: actions/upload-artifact@v5
-        with:
-          name: backend-build-artifacts
-          path: .venv
-          retention-days: 1
 
   backend_unit_tests:
     name: ✅ Backend Unit Tests
@@ -112,10 +105,13 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Download backend artifacts
-        uses: actions/download-artifact@v5
+      - name: Install GIS packages
+        uses: ./.github/actions/install-gis
+
+      - name: Setup backend environment
+        uses: ./.github/actions/setup-backend
         with:
-          name: backend-build-artifacts
+          uv-groups: "--group dev --group airflow"
 
       - name: Run unit tests
         run: make unit-test
@@ -141,10 +137,13 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Download backend artifacts
-        uses: actions/download-artifact@v5
+      - name: Install GIS packages
+        uses: ./.github/actions/install-gis
+
+      - name: Setup backend environment
+        uses: ./.github/actions/setup-backend
         with:
-          name: backend-build-artifacts
+          uv-groups: "--group dev --group airflow"
 
       - name: Run integration tests
         run: make integration-test
@@ -156,10 +155,10 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Download backend artifacts
-        uses: actions/download-artifact@v5
+      - name: Setup backend environment
+        uses: ./.github/actions/setup-backend
         with:
-          name: backend-build-artifacts
+          uv-groups: "--group dev --group airflow"
 
       - name: Run data tests
         run: uv run pytest dags/tests
@@ -185,10 +184,13 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Download backend artifacts
-        uses: actions/download-artifact@v5
+      - name: Install GIS packages
+        uses: ./.github/actions/install-gis
+
+      - name: Setup backend environment
+        uses: ./.github/actions/setup-backend
         with:
-          name: backend-build-artifacts
+          uv-groups: "--group dev --group airflow"
 
       - name: Check for missing migrations
         run: uv run python manage.py makemigrations --check --no-input --settings=core.test_settings

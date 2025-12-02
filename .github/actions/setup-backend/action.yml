@@ -18,8 +18,8 @@ runs:
     - name: Cache Python virtual environment
       uses: actions/cache@v4
       with:
-        path: ./.venv
-        key: venv-dev-airflow-${{ hashFiles('uv.lock') }}
+        path: .venv
+        key: venv-${{ hashFiles('uv.lock') }}
 
     - name: Install Python dependencies
       run: uv sync ${{ inputs.uv-groups }}
