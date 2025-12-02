@@ -1,6 +1,25 @@
 import { expect, test } from "@playwright/test"
 import { searchDummyAdresse } from "./helpers"
 
+export async function openAdvancedFilters(
+  page,
+  parentTestId = "form-content",
+  buttonDataTestId = "advanced-filters",
+  modalDataTestId = "advanced-filters-modal",
+) {
+  await page.getByTestId(parentTestId).getByTestId(buttonDataTestId).click()
+
+  await expect(
+    page.locator(`[data-testid="${modalDataTestId}"] .fr-modal__content h2`),
+  ).toBeInViewport()
+  await page
+    .locator(`[data-testid="${modalDataTestId}"] .fr-modal__header button`)
+    .click()
+  await expect(
+    page.locator(`[data-testid="${modalDataTestId}"] .fr-modal__content h2`),
+  ).toBeHidden()
+}
+
 test.describe("🗺️ Filtres Avancés Carte", () => {
   async function searchInCarteMode(page) {
     await page.locator("input#id_adresse").click()
@@ -9,34 +28,6 @@ test.describe("🗺️ Filtres Avancés Carte", () => {
       .locator("#id_adresseautocomplete-list.autocomplete-items div:nth-of-type(2)")
       .click()
   }
-
-  async function openAdvancedFilters(
-    page,
-    parentTestId = "form-content",
-    buttonDataTestId = "advanced-filters",
-    modalDataTestId = "advanced-filters-modal",
-  ) {
-    await page.getByTestId(parentTestId).getByTestId(buttonDataTestId).click()
-
-    await expect(
-      page.locator(`[data-testid="${modalDataTestId}"] .fr-modal__content h2`),
-    ).toBeInViewport()
-    await page
-      .locator(`[data-testid="${modalDataTestId}"] .fr-modal__header button`)
-      .click()
-    await expect(
-      page.locator(`[data-testid="${modalDataTestId}"] .fr-modal__content h2`),
-    ).toBeHidden()
-  }
-
-  test("Filtres avancés s'ouvrent et se ferment en mode formulaire", async ({
-    page,
-  }) => {
-    await page.goto(`/formulaire`, {
-      waitUntil: "domcontentloaded",
-    })
-    await openAdvancedFilters(page)
-  })
 
   test("Filtres avancés s'ouvrent et se ferment en mode carte", async ({ page }) => {
     await page.goto(`/carte`, {

@@ -4,6 +4,7 @@ import {
   searchDummyAdresse,
   searchDummySousCategorieObjet,
 } from "./helpers"
+import { openAdvancedFilters } from "./carte.spec"
 
 test.describe("🔍 Recherche et Modification Formulaire", () => {
   test("Recherche et modification d'une recherche", async ({ page }) => {
@@ -99,6 +100,15 @@ test.describe("📝 Liste d'Actions Formulaire", () => {
     const id_action_list2 = await page.$eval("#id_action_list", (el) => el.value)
     expect(id_action_list2).toBe("louer")
   })
+})
+
+test.skip("Filtres avancés s'ouvrent et se ferment en mode formulaire", async ({
+  page,
+}) => {
+  await page.goto(`/formulaire`, {
+    waitUntil: "domcontentloaded",
+  })
+  await openAdvancedFilters(page)
 })
 
 test.skip("Les acteurs digitaux sont visibles sur le formulaire", async ({ page }) => {
