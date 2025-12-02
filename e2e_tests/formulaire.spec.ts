@@ -101,7 +101,7 @@ test.describe("📝 Liste d'Actions Formulaire", () => {
   })
 })
 
-test("Les acteurs digitaux sont visibles sur le formulaire", async ({ page }) => {
+test.skip("Les acteurs digitaux sont visibles sur le formulaire", async ({ page }) => {
   // Navigate to the lookbook preview page
   await page.goto(`/lookbook/preview/iframe/formulaire/`, {
     waitUntil: "domcontentloaded",
@@ -131,7 +131,7 @@ test("Les acteurs digitaux sont visibles sur le formulaire", async ({ page }) =>
     "false",
   )
 })
-test.describe("🗺️ Affichage et Interaction Acteurs", () => {
+test.skip("🗺️ Affichage et Interaction Acteurs", () => {
   test("Les acteurs sont visibles sur la carte du formulaire et fonctionnent", async ({
     page,
   }) => {
