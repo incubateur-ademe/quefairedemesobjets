@@ -146,28 +146,43 @@ jobs:
           echo PLAYWRIGHT_HOST=localhost >> .env
           echo PLAYWRIGHT_PORT=8000 >> .env
           echo PLAYWRIGHT_BASE_URL=http://localhost:8000 >> .env
+      - name: Cache node_modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: node-modules-${{ hashFiles('package-lock.json') }}
+
       - uses: actions/setup-node@v6
         with:
           node-version-file: ".tool-versions"
-          cache: "npm"
+
+      - name: Install npm dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: npm ci
+
       - name: Build assets
-        run: |
-          npm ci
-          npm run build
+        run: npm run build
+
       - name: Install GIS Packages
         run: |
           sudo apt-get update
           sudo apt-get install gdal-bin
+
+      - name: Cache Python virtual environment
+        id: cache-venv
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-dev-${{ hashFiles('uv.lock') }}
+
       - name: Install uv
         uses: astral-sh/setup-uv@1e862dfacbd1d6d858c55d9b792c756523627244
         with:
           enable-cache: true
-      - uses: actions/cache@v4
-        name: Define a cache for the virtual environment based on the dependencies lock file
-        with:
-          path: ./.venv
-          key: venv-dev-${{ hashFiles('uv.lock') }}
+
       - name: Install the project dependencies
+        if: steps.cache-venv.outputs.cache-hit != 'true'
         run: uv sync --group dev
 
       - name: Prepare django, migrate, collect static files...
@@ -184,22 +199,27 @@ jobs:
         run: |
           make createsuperuser-example
 
+      - name: Cache Playwright browsers
+        id: cache-playwright
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ hashFiles('package-lock.json') }}
+
       - name: Install Playwright Browsers
+        if: steps.cache-playwright.outputs.cache-hit != 'true'
         run: make init-playwright
 
       - name: Dump PostgreSQL database
         run: pg_dump -f database-dump.sql
 
-      - name: Cache build artifacts
+      - name: Save build artifacts for e2e tests
         uses: actions/cache/save@v4
         with:
           path: |
-            .venv
             staticfiles
-            node_modules
             .env
             database-dump.sql
-            ~/.cache/ms-playwright
           key: e2e-build-${{ github.sha }}-${{ github.run_id }}
 
   e2e:
@@ -227,16 +247,34 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Restore node_modules
+        uses: actions/cache/restore@v4
+        with:
+          path: node_modules
+          key: node-modules-${{ hashFiles('package-lock.json') }}
+          fail-on-cache-miss: true
+
+      - name: Restore Python virtual environment
+        uses: actions/cache/restore@v4
+        with:
+          path: .venv
+          key: venv-dev-${{ hashFiles('uv.lock') }}
+          fail-on-cache-miss: true
+
+      - name: Restore Playwright browsers
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ hashFiles('package-lock.json') }}
+          fail-on-cache-miss: true
+
       - name: Restore build artifacts
         uses: actions/cache/restore@v4
         with:
           path: |
-            .venv
             staticfiles
-            node_modules
             .env
             database-dump.sql
-            ~/.cache/ms-playwright
           key: e2e-build-${{ github.sha }}-${{ github.run_id }}
           fail-on-cache-miss: true
 
@@ -246,7 +284,6 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version-file: ".tool-versions"
-          cache: "npm"
 
       - name: Install uv
         uses: astral-sh/setup-uv@1e862dfacbd1d6d858c55d9b792c756523627244
