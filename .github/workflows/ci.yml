@@ -134,7 +134,20 @@ jobs:
       - name: Install GIS packages
         uses: ./.github/actions/install-gis
 
+      # Cache Playwright browsers to avoid re-downloading on every run.
+      # GitHub Actions automatically evicts caches after 7 days of inactivity,
+      # so we don't need to include week number for rotation.
+      - name: Cache Playwright browsers
+        id: cache-playwright
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ hashFiles('playwright.config.ts') }}
+          restore-keys: |
+            playwright-
+
       - name: Install Playwright Browsers
+        if: steps.cache-playwright.outputs.cache-hit != 'true'
         run: make init-playwright
 
       - name: Check database cache
@@ -209,6 +222,22 @@ jobs:
         uses: ./.github/actions/setup-backend
         with:
           uv-groups: "--group dev"
+
+      # Cache Playwright browsers to avoid re-downloading on every run.
+      # GitHub Actions automatically evicts caches after 7 days of inactivity,
+      # so we don't need to include week number for rotation.
+      - name: Cache Playwright browsers
+        id: cache-playwright
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ hashFiles('playwright.config.ts') }}
+          restore-keys: |
+            playwright-
+
+      - name: Install Playwright Browsers
+        if: steps.cache-playwright.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps
 
       - name: Download build artifacts
         uses: actions/download-artifact@v5
