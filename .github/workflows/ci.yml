@@ -46,14 +46,11 @@ jobs:
         with:
           build: "true"
 
-      - name: Upload frontend artifacts
-        uses: actions/upload-artifact@v5
+      - name: Cache built assets
+        uses: actions/cache/save@v4
         with:
-          name: frontend-build-artifacts
-          path: |
-            node_modules
-            static/dist
-          retention-days: 1
+          path: static/dist
+          key: frontend-dist-${{ hashFiles('static/**', 'package.json', 'package-lock.json', '.parcelrc') }}
 
   frontend_linter:
     name: 📝 Frontend Linter
@@ -62,10 +59,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Download frontend artifacts
-        uses: actions/download-artifact@v5
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
         with:
-          name: frontend-build-artifacts
+          node-version-file: ".tool-versions"
+          cache: "npm"
 
       - name: Check code formatting
         run: npm run format:check
@@ -120,10 +118,18 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Download frontend artifacts
-        uses: actions/download-artifact@v5
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
         with:
-          name: frontend-build-artifacts
+          node-version-file: ".tool-versions"
+          cache: "npm"
+
+      - name: Restore built assets
+        uses: actions/cache/restore@v4
+        with:
+          path: static/dist
+          key: frontend-dist-${{ hashFiles('static/**', 'package.json', 'package-lock.json', '.parcelrc') }}
+          fail-on-cache-miss: true
 
       - name: Run tests
         run: npm run test
@@ -161,10 +167,12 @@ jobs:
       - name: Setup E2E environment
         uses: ./.github/actions/setup-e2e
 
-      - name: Download frontend artifacts
-        uses: actions/download-artifact@v5
+      - name: Restore built assets
+        uses: actions/cache/restore@v4
         with:
-          name: frontend-build-artifacts
+          path: static/dist
+          key: frontend-dist-${{ hashFiles('static/**', 'package.json', 'package-lock.json', '.parcelrc') }}
+          fail-on-cache-miss: true
 
       - name: Install GIS packages
         uses: ./.github/actions/install-gis
