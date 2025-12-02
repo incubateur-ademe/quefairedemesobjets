@@ -156,11 +156,9 @@ class SuggestionCohorteSerializer(BaseModel):
     suggestion_cohorte: SuggestionCohorte
     statut: str
     action: str
-    old_values: dict
-    new_values: dict
-    displayed_values: dict
     identifiant_unique: str
-    fields_list: dict = {}
+    fields_groups: list[tuple] = []
+    fields_values: dict = {}  # dict[str, dict[str, str]]
     acteur: Acteur | None = None
     acteur_overridden_by: RevisionActeur | None = None  # Revision or Parent
 
@@ -184,9 +182,6 @@ class SuggestionCohorteSerializer(BaseModel):
             else None
         )
         data["suggestion_cohorte"] = self.suggestion_cohorte.id
-
-        for key in ["old_values", "new_values", "displayed_values"]:
-            data[key] = self._stringify_keys(data[key])
 
         return json.dumps(data)
 
@@ -499,6 +494,29 @@ class SuggestionGroupe(TimestampedModel):
             for champs in champs_modifies
         }
 
+    def acteur_overridden_by(self) -> RevisionActeur | None:
+        return (
+            self.revision_acteur.parent
+            if self.revision_acteur and self.revision_acteur.parent
+            else self.revision_acteur
+        )
+
+    def get_identifiant_unique_from_suggestion_unitaires(self) -> str:
+        """
+        Get the identifiant_unique from the suggestion_unitaires for the Acteur model
+        Useful for SOURCE_AJOUT
+        """
+        return first(
+            (
+                values[champs.index("identifiant_unique")]
+                for champs, values in self.suggestion_unitaires.filter(
+                    suggestion_modele="Acteur"
+                ).items()
+                if "identifiant_unique" in champs
+            ),
+            "",
+        )
+
     def serialize(self) -> SuggestionCohorteSerializer:
 
         def _flatten_suggestion_unitaires(
@@ -512,122 +530,138 @@ class SuggestionGroupe(TimestampedModel):
                 )
             }
 
+        # Get all suggestion_unitaires
         suggestion_unitaires = list(self.suggestion_unitaires.all())
 
+        # Get all suggestion_unitaires for Acteur
         acteur_suggestion_unitaires = {
             tuple(unit.champs): unit.valeurs
             for unit in suggestion_unitaires
             if unit.suggestion_modele == "Acteur"
         }
 
-        identifiant_unique = [
-            values[champs.index("identifiant_unique")]
-            for champs, values in acteur_suggestion_unitaires.items()
-            if "identifiant_unique" in champs
-        ]
-        identifiant_unique = first(identifiant_unique, "")
-
-        fields_list = {
-            keys: {
-                key: {"displayed_value": value, "new_value": value}
-                for key, value in zip(keys, values)
-            }
-            for keys, values in acteur_suggestion_unitaires.items()
-        }
-        logging.warning(f"fields_list: {fields_list}")
-
         if self.suggestion_cohorte.type_action == SuggestionAction.SOURCE_AJOUT:
+
+            identifiant_unique = self.get_identifiant_unique_from_suggestion_unitaires()
+            fields_groups = list(acteur_suggestion_unitaires.keys())
+            fields_values = {
+                key: {
+                    "displayed_value": value,
+                    "new_value": value,
+                }
+                for fields, values in acteur_suggestion_unitaires.items()
+                for key, value in zip(fields, values)
+            }
             return SuggestionCohorteSerializer(
                 id=self.id,
                 suggestion_cohorte=self.suggestion_cohorte,
                 statut=self.get_statut_display(),
                 action=self.suggestion_cohorte.type_action,
                 identifiant_unique=identifiant_unique,
-                fields_list=fields_list,
-                old_values={},
-                new_values=acteur_suggestion_unitaires,
-                displayed_values=acteur_suggestion_unitaires,
+                fields_groups=fields_groups,
+                fields_values=fields_values,
             )
 
         acteur = self.acteur
+        acteur_overridden_by = self.acteur_overridden_by()
 
-        acteur_overridden_by = (
-            self.revision_acteur.parent
-            if self.revision_acteur and self.revision_acteur.parent
-            else self.revision_acteur
-        )
         acteur_overridden_by_suggestion_unitaires = {
             tuple(unit.champs): unit.valeurs
             for unit in self.suggestion_unitaires.all()
             if unit.suggestion_modele == "RevisionActeur"
         }
 
-        flatten_acteur_suggestion_unitaires = _flatten_suggestion_unitaires(
+        fields_groups = list(
+            set(acteur_suggestion_unitaires.keys())
+            | set(acteur_overridden_by_suggestion_unitaires.keys())
+        )
+        fields = [key for keys in fields_groups for key in keys]
+
+        acteur_suggestion_unitaires_by_field = _flatten_suggestion_unitaires(
             acteur_suggestion_unitaires
         )
-        flatten_acteur_overriden_by_suggestion_unitaires = (
+        acteur_overridden_by_suggestion_unitaires_by_field = (
             _flatten_suggestion_unitaires(acteur_overridden_by_suggestion_unitaires)
         )
-        flatten_fields = set(flatten_acteur_suggestion_unitaires.keys()) | set(
-            flatten_acteur_overriden_by_suggestion_unitaires.keys()
-        )
-
-        flatten_displayed_values = {}
-        for field in flatten_fields:
-            value = flatten_acteur_overriden_by_suggestion_unitaires.get(field)
-            if value is None:
-                print(f"{acteur_overridden_by=}")
-                value = (
-                    getattr(acteur_overridden_by, field)
-                    if acteur_overridden_by
-                    else None
-                )
-                if value is None:
-                    value = flatten_acteur_suggestion_unitaires.get(field)
-                    if value is None:
-                        value = getattr(acteur, field)
-            flatten_displayed_values[field] = str(value)
-
-        old_values = {}
-        # todo combine with revision_acteur_suggestion_unitaires
-        for champs in acteur_suggestion_unitaires.keys():
-            old_values[champs] = [str(getattr(acteur, champ)) for champ in champs]
-
-        flatten_old_values = _flatten_suggestion_unitaires(old_values)
-
         displayed_values = {}
-        for champs in acteur_suggestion_unitaires.keys():
-            displayed_values[champs] = [
-                flatten_displayed_values.get(champ) for champ in champs
-            ]
-        fields_list = {}
-        for fields in set(acteur_suggestion_unitaires.keys()) | set(
-            acteur_overridden_by_suggestion_unitaires.keys()
-        ):
-            fields_list[fields] = {
-                field: {
-                    "displayed_value": flatten_displayed_values.get(field),
-                    "new_value": flatten_acteur_suggestion_unitaires.get(field),
-                    "old_value": flatten_old_values.get(field),
-                }
-                for field in fields
-            }
+        for field in fields:
+            value = (
+                getattr(acteur_overridden_by, field) if acteur_overridden_by else None
+            )
+            if value is None:
+                value = acteur_suggestion_unitaires_by_field.get(field)
+                if value is None:
+                    value = getattr(acteur, field)
+            displayed_values[field] = str(value)
 
+        fields_values = {}
+        for field in fields:
+            fields_values[field] = {
+                "displayed_value": str(displayed_values.get(field, "")),
+                "updated_displayed_value": (
+                    str(
+                        acteur_overridden_by_suggestion_unitaires_by_field.get(
+                            field, ""
+                        )
+                    )
+                ),
+                "new_value": str(acteur_suggestion_unitaires_by_field.get(field, "")),
+                "old_value": str(getattr(acteur, field, "")),
+            }
         return SuggestionCohorteSerializer(
             id=self.id,
             suggestion_cohorte=self.suggestion_cohorte,
             statut=self.get_statut_display(),
             action=self.suggestion_cohorte.type_action,
-            old_values=old_values,
-            new_values=acteur_suggestion_unitaires,
-            displayed_values=displayed_values,
-            fields_list=fields_list,
+            fields_groups=fields_groups,
+            fields_values=fields_values,
             acteur=acteur,
-            identifiant_unique=(
-                acteur.identifiant_unique if acteur else identifiant_unique or ""
-            ),
+            identifiant_unique=acteur.identifiant_unique,
             acteur_overridden_by=acteur_overridden_by,
         )
+
+    def update_from_serialized_data(
+        self, fields_values: dict, fields_groups: list[tuple]
+    ):
+        values_to_update = {}
+
+        revision_suggestion_unitaires = self.suggestion_unitaires.filter(
+            suggestion_modele="RevisionActeur"
+        ).all()
+        revision_suggestion_unitaire_by_field = {
+            field: value
+            for unit in revision_suggestion_unitaires
+            for field, value in zip(unit.champs, unit.valeurs)
+        }
+        for field, by_state_values in fields_values.items():
+            if by_state_values["updated_displayed_value"] != by_state_values[
+                "displayed_value"
+            ] or (
+                field in revision_suggestion_unitaire_by_field.keys()
+                and revision_suggestion_unitaire_by_field[field]
+                != by_state_values["updated_displayed_value"]
+            ):
+                values_to_update[field] = by_state_values["updated_displayed_value"]
+        for fields in fields_groups:
+            if any(field in values_to_update.keys() for field in fields):
+                suggestion_unitaire, _ = SuggestionUnitaire.objects.get_or_create(
+                    suggestion_groupe=self,
+                    champs=fields,
+                    suggestion_modele="RevisionActeur",
+                    defaults={
+                        "acteur": self.acteur,
+                        "revision_acteur": self.revision_acteur,
+                    },
+                )
+                suggestion_unitaire.valeurs = []
+                for field in fields:
+                    value = (
+                        values_to_update[field]
+                        if field in values_to_update.keys()
+                        else ""
+                    )
+                    suggestion_unitaire.valeurs.append(value)
+                suggestion_unitaire.save()
 
 
 class SuggestionUnitaire(TimestampedModel):
