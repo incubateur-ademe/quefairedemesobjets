@@ -184,7 +184,7 @@ jobs:
 
   e2e:
     name: tests de bout-en-bout
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: e2e_prepare
     strategy:
       fail-fast: false
