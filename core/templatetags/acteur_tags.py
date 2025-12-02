@@ -48,31 +48,42 @@ def acteur_label(context, acteur=None):
     if not acteur:
         acteur = context["object"]
 
-    labels_qualite_ordered = acteur.ord
-    first_label_qualite = labels_qualite_ordered.first()
-    if not first_label_qualite:
+    # Work with prefetched labels to avoid extra queries
+    # Filter and sort in Python since labels are already loaded
+    displayable_labels = [label for label in acteur.labels.all() if label.afficher]
+
+    if not displayable_labels:
         return {}
 
-    if first_label_qualite.bonus:
-        first_label_qualite.libelle = "Propose le Bonus Réparation"
+    # Sort: bonus first, then by type_enseigne
+    displayable_labels.sort(key=lambda label: (-label.bonus, label.type_enseigne))
+    first_label = displayable_labels[0]
+
+    # If bonus, always show it
+    if first_label.bonus:
+        first_label.libelle = "Propose le Bonus Réparation"
         dsfr_label = render_to_string(
             "ui/components/label_qualite/dsfr_label.html",
-            {"label": first_label_qualite},
+            {"label": first_label},
         )
         return {"label": dsfr_label}
+
+    # For non-bonus labels, check if multiple non-enseigne labels exist
+    non_enseigne_labels = [
+        label for label in displayable_labels if not label.type_enseigne
+    ]
+
+    if len(non_enseigne_labels) > 1:
+        return {
+            "label": ACTEUR["plusieurs_labels"],
+            "extra_classes": "fr-tag--icon-left fr-icon-shield-check-line",
+        }
     else:
         dsfr_label = render_to_string(
             "ui/components/label_qualite/dsfr_label.html",
-            {"label": first_label_qualite},
+            {"label": first_label},
         )
-        non_enseigne_count = acteur.labels_without_enseigne_display.count()
-        if non_enseigne_count > 1:
-            return {
-                "label": ACTEUR["plusieurs_labels"],
-                "extra_classes": "fr-tag--icon-left fr-icon-shield-check-line",
-            }
-        else:
-            return {"label": dsfr_label}
+        return {"label": dsfr_label}
 
 
 @register.inclusion_tag("ui/components/service/service_tag.html", takes_context=True)
