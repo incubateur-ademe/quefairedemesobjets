@@ -202,16 +202,10 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@1e862dfacbd1d6d858c55d9b792c756523627244
+      - name: Setup backend environment
+        uses: ./.github/actions/setup-backend
         with:
-          enable-cache: true
-
-      - uses: actions/cache@v4
-        name: Define a cache for the virtual environment based on the dependencies lock file
-        with:
-          path: ./.venv
-          key: venv-dev-${{ hashFiles('uv.lock') }}
+          uv-groups: "--group dev"
 
       - name: Download build artifacts
         uses: actions/download-artifact@v5
@@ -220,12 +214,6 @@ jobs:
 
       - name: Restore PostgreSQL database
         run: psql -f database-dump.sql
-
-      - name: Prepare environment
-        run: |
-          cp .env.template .env
-          echo BASE_URL=http://localhost:8000 >> .env
-          echo DEBUG=false >> .env
 
       - name: Run server
         run: |

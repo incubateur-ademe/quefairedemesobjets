@@ -8,4 +8,4 @@ runs:
       shell: bash
       run: |
         sudo apt-get update
-        sudo apt-get install gdal-bin
+        sudo apt-get install gdal-bin libgdal-dev -y
