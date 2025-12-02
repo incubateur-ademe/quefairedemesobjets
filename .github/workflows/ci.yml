@@ -218,6 +218,9 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Install GIS packages
+        uses: ./.github/actions/install-gis
+
       - name: Setup backend environment
         uses: ./.github/actions/setup-backend
         with:
