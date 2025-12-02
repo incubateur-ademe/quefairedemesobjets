@@ -69,9 +69,31 @@ jobs:
       - name: Check code formatting
         run: npm run format:check
 
-  backend_tests:
-    name: ✅ Backend Tests
+  backend_prepare:
+    name: 📦 Backend Build
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install GIS packages
+        uses: ./.github/actions/install-gis
+
+      - name: Setup backend environment
+        uses: ./.github/actions/setup-backend
+        with:
+          uv-groups: "--group dev --group airflow"
+
+      - name: Upload backend artifacts
+        uses: actions/upload-artifact@v5
+        with:
+          name: backend-build-artifacts
+          path: .venv
+          retention-days: 1
+
+  backend_unit_tests:
+    name: ✅ Backend Unit Tests
+    runs-on: ubuntu-latest
+    needs: backend_prepare
     services:
       postgres:
         image: postgis/postgis:15-3.3-alpine
@@ -86,23 +108,87 @@ jobs:
           --health-retries 50
         ports:
           - 6543:5432
-
     steps:
       - uses: actions/checkout@v6
 
-      - name: Install GIS packages
-        uses: ./.github/actions/install-gis
-
-      - name: Setup backend environment
-        uses: ./.github/actions/setup-backend
+      - name: Download backend artifacts
+        uses: actions/download-artifact@v5
         with:
-          uv-groups: "--group dev --group airflow"
+          name: backend-build-artifacts
+
       - name: Run unit tests
         run: make unit-test
+
+  backend_integration_tests:
+    name: ✅ Backend Integration Tests
+    runs-on: ubuntu-latest
+    needs: backend_prepare
+    services:
+      postgres:
+        image: postgis/postgis:15-3.3-alpine
+        env:
+          POSTGRES_USER: webapp
+          POSTGRES_PASSWORD: webapp # pragma: allowlist secret
+          POSTGRES_DB: webapp
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 1s
+          --health-timeout 1s
+          --health-retries 50
+        ports:
+          - 6543:5432
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Download backend artifacts
+        uses: actions/download-artifact@v5
+        with:
+          name: backend-build-artifacts
+
       - name: Run integration tests
         run: make integration-test
+
+  backend_data_tests:
+    name: ✅ Backend Data Tests
+    runs-on: ubuntu-latest
+    needs: backend_prepare
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Download backend artifacts
+        uses: actions/download-artifact@v5
+        with:
+          name: backend-build-artifacts
+
       - name: Run data tests
         run: uv run pytest dags/tests
+
+  django_tests:
+    name: ✅ Django Tests
+    runs-on: ubuntu-latest
+    needs: backend_prepare
+    services:
+      postgres:
+        image: postgis/postgis:15-3.3-alpine
+        env:
+          POSTGRES_USER: webapp
+          POSTGRES_PASSWORD: webapp # pragma: allowlist secret
+          POSTGRES_DB: webapp
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 1s
+          --health-timeout 1s
+          --health-retries 50
+        ports:
+          - 6543:5432
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Download backend artifacts
+        uses: actions/download-artifact@v5
+        with:
+          name: backend-build-artifacts
+
       - name: Check for missing migrations
         run: uv run python manage.py makemigrations --check --no-input --settings=core.test_settings
         env:

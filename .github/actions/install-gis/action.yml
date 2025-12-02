@@ -1,0 +1,11 @@
+name: 'Install GIS Packages'
+description: 'Installs system-level GIS dependencies (gdal-bin)'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install GIS Packages
+      run: |
+        sudo apt-get update
+        sudo apt-get install gdal-bin
+      shell: bash
