@@ -108,7 +108,7 @@ jobs:
       - name: Install GIS packages
         uses: ./.github/actions/install-gis
 
-      - run: sudo apt-get install gdal-bin libgdal-dev -y
+      - run: sudo apt-get install gdal-bin -y
         shell: bash
 
       - name: Setup backend environment
