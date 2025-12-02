@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.urls import path
-from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
 
 from qfdmo.views import (
@@ -80,11 +79,6 @@ urlpatterns = [
         "solution_admin/<str:identifiant_unique>",
         solution_admin,
         name="solution_admin",
-    ),
-    path(
-        "test_iframe",
-        TemplateView.as_view(template_name="tests/iframe.html"),
-        name="test_iframe",
     ),
     path(
         "configurateur",

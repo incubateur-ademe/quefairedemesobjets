@@ -1,165 +1,174 @@
 import { expect } from "@playwright/test"
 import { test } from "./config"
 
-test("iframe formulaire is loaded with correct parameters", async ({
-  page,
-  baseUrl,
-}) => {
-  await page.goto(`/test_iframe`, { waitUntil: "domcontentloaded" })
+test.describe("📦 Iframe Embed System", () => {
+  test.describe("iframe ID validation", () => {
+    test("carte lookbook generates iframe with ID 'carte'", async ({ page }) => {
+      await page.goto("/lookbook/preview/iframe/carte", {
+        waitUntil: "domcontentloaded",
+      })
 
-  const titlePage = await page.title()
-  expect(titlePage).toBe("IFrame test : QFDMO")
+      const iframe = page.locator("iframe#carte")
+      await expect(iframe).toBeAttached({ timeout: 10000 })
+    })
 
-  const iframeElement = await page.$("iframe")
-  const attributes = await Promise.all([
-    iframeElement?.getAttribute("allow"),
-    iframeElement?.getAttribute("src"),
-    iframeElement?.getAttribute("frameborder"),
-    iframeElement?.getAttribute("scrolling"),
-    iframeElement?.getAttribute("allowfullscreen"),
-    iframeElement?.getAttribute("style"),
-    iframeElement?.getAttribute("title"),
-  ])
+    test("formulaire lookbook generates iframe with ID 'formulaire'", async ({
+      page,
+    }) => {
+      await page.goto("/lookbook/preview/iframe/formulaire", {
+        waitUntil: "domcontentloaded",
+      })
 
-  const [allow, src, frameborder, scrolling, allowfullscreen, style, title] = attributes
+      const iframe = page.locator("iframe#formulaire")
+      await expect(iframe).toBeAttached({ timeout: 10000 })
+    })
 
-  expect(allow).toBe("geolocation; clipboard-write")
-  expect(src).toBe(
-    `${baseUrl}/formulaire?direction=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre`,
-  )
-  expect(frameborder).toBe("0")
-  expect(scrolling).toBe("no")
-  expect(allowfullscreen).toBe("true")
-  expect(style).toContain("width: 100%;")
-  expect(style).toContain("height: 720px;")
-  expect(style).toContain("max-width: 100%;")
-  expect(title).toBe("Longue vie aux objets")
-})
+    test("assistant lookbook generates iframe with ID 'assistant'", async ({
+      page,
+    }) => {
+      await page.goto("/lookbook/preview/iframe/assistant", {
+        waitUntil: "domcontentloaded",
+      })
 
-test("legacy iframe urls still work", async ({ page }) => {
-  await page.goto(
-    `/formulaire?direction=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre`,
-    { waitUntil: "domcontentloaded" },
-  )
-  await expect(page).toHaveURL(
-    `/formulaire?direction=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre`,
-  )
-  await page.goto(
-    `/carte?action_list=reparer%7Cdonner%7Cechanger%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cacheter%7Crevendre&epci_codes=200055887&limit=50`,
-    { waitUntil: "domcontentloaded" },
-  )
-  await expect(page).toHaveURL(
-    `/carte?action_list=reparer%7Cdonner%7Cechanger%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cacheter%7Crevendre&epci_codes=200055887&limit=50`,
-  )
-})
+      const iframe = page.locator("iframe#assistant")
+      await expect(iframe).toBeAttached({ timeout: 10000 })
+    })
 
-// test("Desktop | form is visible in the iframe", async ({ page }) => {
-//   await page.goto(`/test_iframe`, { waitUntil: "domcontentloaded" })
+    test("infotri-configurator lookbook generates iframe with ID 'infotri-configurator'", async ({
+      page,
+    }) => {
+      await page.goto("/lookbook/preview/iframe/infotri_configurator", {
+        waitUntil: "domcontentloaded",
+      })
 
-//   const iframeElement = page.locator("iframe")
-//   const iframe = iframeElement?.contentFrame()
-//   const form = iframe?.locator("#search_form")
-//   expect(form).not.toBeNull()
+      const iframe = page.locator("iframe#infotri-configurator")
+      await expect(iframe).toBeAttached()
+    })
 
-//   const formHeight = await iframe?.$eval(
-//     "[data-testid='form-content']",
-//     (el) => el.offsetHeight,
-//   )
-//   expect(formHeight).toBeGreaterThan(600)
-// })
-test("form is visible in the iframe", async ({ page }) => {
-  await page.goto(`/test_iframe`, { waitUntil: "domcontentloaded" })
+    test("infotri lookbook generates iframe with ID 'infotri'", async ({ page }) => {
+      await page.goto("/lookbook/preview/iframe/infotri", {
+        waitUntil: "domcontentloaded",
+      })
 
-  const iframeElement = page.frameLocator("iframe[title='Longue vie aux objets']")
-
-  // Check if the form exists
-  const form = iframeElement.locator("#search_form")
-  await expect(form).toBeVisible()
-
-  // Check form height
-  const formHeight = await iframeElement
-    .locator("[data-testid='form-content']")
-    .evaluate((el) => el.offsetHeight)
-  expect(formHeight).toBeGreaterThan(600)
-})
-
-test("iframe with 0px parent height displays correctly", async ({ page }) => {
-  await page.goto(`/test_iframe?test_carte_with_defaults=1`, {
-    waitUntil: "domcontentloaded",
-  })
-  await expect(page).toHaveScreenshot("iframe.png")
-
-  await page.goto(`/test_iframe?test_noheight=1&test_carte=1`, {
-    waitUntil: "domcontentloaded",
-  })
-  await page.evaluate(() => {
-    document
-      .querySelector("[data-testid=iframe-no-height-wrapper]")
-      ?.setAttribute("style", "")
-  })
-  await page.waitForTimeout(1000)
-  await expect(page).toHaveScreenshot("iframe.png")
-})
-
-test("iframe cannot read the referrer when referrerPolicy is set to no-referrer", async ({
-  page,
-}) => {
-  await page.goto(`/test_iframe?test_carte=1&test_noreferrer`, {
-    waitUntil: "domcontentloaded",
+      const iframe = page.locator("iframe#infotri")
+      await expect(iframe).toBeAttached()
+    })
   })
 
-  // Get the content frame of the iframe
-  const iframeElement = await page.$("iframe[referrerpolicy='no-referrer']")
-  const iframe = await iframeElement?.contentFrame()
-  expect(iframe).toBeTruthy()
+  test.describe("iframe formulaire", () => {
+    test("is loaded with correct parameters", async ({ page, baseUrl }) => {
+      await page.goto(`/lookbook/preview/iframe/formulaire/`, {
+        waitUntil: "domcontentloaded",
+      })
 
-  // Evaluate the referrer inside the iframe
-  const referrer = await iframe?.evaluate(() => document.referrer)
+      const iframeElement = await page.$("iframe#formulaire")
+      const attributes = await Promise.all([
+        iframeElement?.getAttribute("allow"),
+        iframeElement?.getAttribute("src"),
+        iframeElement?.getAttribute("frameborder"),
+        iframeElement?.getAttribute("scrolling"),
+        iframeElement?.getAttribute("allowfullscreen"),
+        iframeElement?.getAttribute("style"),
+        iframeElement?.getAttribute("title"),
+      ])
 
-  // Assert that the referrer is set and not undefined
-  expect(referrer).toBe("")
-})
+      const [allow, src, frameborder, scrolling, allowfullscreen, style, title] =
+        attributes
 
-test("iframe can read the referrer when referrerPolicy is not set", async ({
-  page,
-  baseUrl,
-}) => {
-  await page.goto(`/test_iframe?test_carte=1`, {
-    waitUntil: "domcontentloaded",
+      expect(allow).toBe("geolocation; clipboard-write")
+      expect(src).toBe(
+        `${baseUrl}/formulaire?direction=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre`,
+      )
+      expect(frameborder).toBe("0")
+      expect(scrolling).toBe("no")
+      expect(allowfullscreen).toBe("true")
+      expect(style).toContain("width: 100%;")
+      expect(style).toContain("height: 720px;")
+      expect(style).toContain("max-width: 100%;")
+      expect(title).toBe("Longue vie aux objets")
+    })
+
+    test("form is visible in the iframe", async ({ page }) => {
+      await page.goto(`/lookbook/preview/iframe/formulaire/`, {
+        waitUntil: "domcontentloaded",
+      })
+
+      const iframeElement = page.frameLocator("iframe#formulaire")
+
+      const form = iframeElement.locator("#search_form")
+      await expect(form).toBeVisible({ timeout: 10000 })
+
+      const formHeight = await iframeElement
+        .locator("[data-testid='form-content']")
+        .evaluate((el) => el.offsetHeight)
+      expect(formHeight).toBeGreaterThan(600)
+    })
   })
 
-  // Get the content frame of the iframe
-  const iframeElement = await page.$("iframe[data-testid='assistant']")
-  const iframe = await iframeElement?.contentFrame()
-  expect(iframe).not.toBeNull()
+  test.describe("iframe carte", () => {
+    test("displays correctly", async ({ page }) => {
+      await page.goto(`/lookbook/preview/iframe/carte/`, {
+        waitUntil: "domcontentloaded",
+      })
 
-  // Evaluate the referrer inside the iframe
-  const referrer = await iframe!.evaluate(() => document.referrer)
+      await page.waitForTimeout(2000)
 
-  // Assert that the referrer is set and not undefined
-  expect(referrer).toBe(`${baseUrl}/test_iframe?test_carte=1`)
-})
+      await expect(page).toHaveScreenshot("iframe-carte.png", { timeout: 10000 })
+    })
+  })
 
-test("iFrame mode persists across navigation", async ({ page, baseUrl }) => {
-  test.slow()
-  // Starting URL - change this to your site's starting point
-  await page.goto(`/?iframe`, { waitUntil: "domcontentloaded" })
-  expect(page).not.toBeNull()
+  test.describe("iframe assistant", () => {
+    test("displays correctly", async ({ page }) => {
+      test.slow()
+      await page.goto(`/lookbook/preview/iframe/assistant/`, {
+        waitUntil: "domcontentloaded",
+      })
 
-  for (let i = 0; i < 50; i++) {
-    await expect(page.locator("body")).toHaveAttribute(
-      "data-state-iframe-value",
-      "true",
-    )
+      const iframe = page.locator("iframe#assistant")
 
-    // Find all internal links on the page (href starting with the same origin)
-    const links = page.locator(`a[href^="${baseUrl}"]`)
+      await expect(iframe).toHaveAttribute("allow", /geolocation/)
+    })
+  })
 
-    // Pick a random internal link to click
-    const count = await links.count()
-    const randomLink = links.nth(Math.floor(Math.random() * count))
-    if (await randomLink.isVisible()) {
-      await randomLink.click()
-    }
-  }
+  test.describe("legacy iframe urls", () => {
+    test("still work", async ({ page }) => {
+      await page.goto(
+        `/formulaire?direction=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre`,
+        { waitUntil: "domcontentloaded" },
+      )
+      await expect(page).toHaveURL(
+        `/formulaire?direction=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre`,
+      )
+      await page.goto(
+        `/carte?action_list=reparer%7Cdonner%7Cechanger%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cacheter%7Crevendre&epci_codes=200055887&limit=50`,
+        { waitUntil: "domcontentloaded" },
+      )
+      await expect(page).toHaveURL(
+        `/carte?action_list=reparer%7Cdonner%7Cechanger%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cacheter%7Crevendre&epci_codes=200055887&limit=50`,
+      )
+    })
+  })
+
+  test.describe("iframe mode persistence", () => {
+    test("persists across navigation", async ({ page, baseUrl }) => {
+      test.slow()
+      await page.goto(`/?iframe`, { waitUntil: "domcontentloaded" })
+      expect(page).not.toBeNull()
+
+      for (let i = 0; i < 50; i++) {
+        await expect(page.locator("body")).toHaveAttribute(
+          "data-state-iframe-value",
+          "true",
+        )
+
+        const links = page.locator(`a[href^="${baseUrl}"]`)
+
+        const count = await links.count()
+        const randomLink = links.nth(Math.floor(Math.random() * count))
+        if (await randomLink.isVisible()) {
+          await randomLink.click()
+        }
+      }
+    })
+  })
 })

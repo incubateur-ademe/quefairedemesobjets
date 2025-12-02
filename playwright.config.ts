@@ -33,6 +33,14 @@ export default defineConfig({
     trace: "on-first-retry",
   },
 
+  /* Run local dev server before starting the tests */
+  webServer: {
+    command: "uv run python manage.py runserver",
+    url: process.env.BASE_URL!,
+    reuseExistingServer: !process.env.CI,
+    timeout: 120000,
+  },
+
   /* Configure projects for major browsers */
   projects: [
     {

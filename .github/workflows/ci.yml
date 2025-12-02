@@ -115,6 +115,10 @@ jobs:
     name: tests de bout-en-bout
     runs-on: ubuntu-latest
     if: ${{ github.ref_name == 'main' || (github.event_name ==  'pull_request' && contains( github.event.pull_request.labels.*.name, 'frontend')) }}
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
     services:
       postgres:
         image: postgis/postgis:15-3.3-alpine
@@ -174,20 +178,16 @@ jobs:
         run: |
           make createsuperuser-example
 
-      - name: Run server
-        run: |
-          uv run python manage.py runserver &
-
       - name: Install Playwright Browsers
         run: make init-playwright
 
       - name: Run Playwright tests
-        run: npx playwright test --update-snapshots
+        run: npx playwright test --shard=${{ matrix.shard }}/4
 
       - uses: actions/upload-artifact@v5
         if: ${{ !cancelled() }}
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.shard }}
           path: playwright-report/
           retention-days: 30
 

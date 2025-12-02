@@ -45,18 +45,29 @@ def acteur_frame_id(context: dict) -> str:
     "ui/components/label_qualite/label_qualite.html", takes_context=True
 )
 def acteur_label(context, acteur=None):
+    """
+    Display a single quality label for an acteur in the frontend.
+
+    The frontend displays only one label per acteur, so we need to prioritize which
+    label to show. This template tag uses a pre-ordered list of labels where:
+    - Bonus labels (bonus=True) appear first
+    - Then sorted by type_enseigne
+    - Only displayable labels (afficher=True) are included
+
+    The ordering and filtering is done at the database level via Prefetch in the view,
+    making this template tag a simple accessor with zero additional queries.
+    """
     if not acteur:
         acteur = context["object"]
 
-    # Work with prefetched labels to avoid extra queries
-    # Filter and sort in Python since labels are already loaded
-    displayable_labels = [label for label in acteur.labels.all() if label.afficher]
+    # Use prefetched and pre-ordered labels from the view
+    # The queryset is already filtered (afficher=True)
+    # and ordered (-bonus, type_enseigne)
+    displayable_labels = getattr(acteur, "displayable_labels_ordered", [])
 
     if not displayable_labels:
         return {}
 
-    # Sort: bonus first, then by type_enseigne
-    displayable_labels.sort(key=lambda label: (-label.bonus, label.type_enseigne))
     first_label = displayable_labels[0]
 
     # If bonus, always show it

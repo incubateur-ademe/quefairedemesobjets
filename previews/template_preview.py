@@ -12,7 +12,6 @@ from django_lookbook.utils import register_form_class
 from dsfr.forms import DsfrBaseForm
 
 from core.constants import DEFAULT_MAP_CONTAINER_ID
-from core.utils import remove_protocol_from_url
 from infotri.forms import InfotriForm
 from qfdmd.forms import SearchForm
 from qfdmd.models import Suggestion, Synonyme
@@ -30,7 +29,7 @@ from qfdmo.models.acteur import (
 from qfdmo.models.action import Action
 from qfdmo.models.config import CarteConfig
 
-base_url = remove_protocol_from_url(settings.BASE_URL)
+base_url = settings.BASE_URL
 
 
 def component_docs(md_file_path):
