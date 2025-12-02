@@ -130,53 +130,13 @@ jobs:
       - name: Install GIS packages
         uses: ./.github/actions/install-gis
 
-      # Cache Playwright browsers to avoid re-downloading on every run.
-      # GitHub Actions automatically evicts caches after 7 days of inactivity,
-      # so we don't need to include week number for rotation.
-      - name: Get Playwright version
-        id: playwright-version
-        run: echo "version=$(npm list @playwright/test --depth=0 --json | jq -r '.dependencies["@playwright/test"].version')" >> $GITHUB_OUTPUT
+      - name: Setup Playwright
+        uses: ./.github/actions/setup-playwright
 
-      - name: Cache Playwright browsers
-        id: cache-playwright
-        uses: actions/cache@v4
+      - name: Prepare Django database
+        uses: ./.github/actions/prepare-django-db
         with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
-          restore-keys: |
-            playwright-${{ runner.os }}-
-
-      - name: Install Playwright Browsers
-        if: steps.cache-playwright.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps chromium webkit
-
-      - name: Check database cache
-        id: cache-db
-        uses: actions/cache@v4
-        with:
-          path: database-dump.pgdump
-          key: db-dump-${{ hashFiles('**/migrations/**/*.py', '**/fixtures/**/*') }}
-
-      - name: Prepare django, migrate, collect static files...
-        if: steps.cache-db.outputs.cache-hit != 'true'
-        run: |
-          make createcachetable
-          make migrate
-          make collectstatic
-
-      - name: Populate database
-        if: steps.cache-db.outputs.cache-hit != 'true'
-        run: |
-          make seed-database
-
-      - name: Init django admin superuser
-        if: steps.cache-db.outputs.cache-hit != 'true'
-        run: |
-          make createsuperuser-example
-
-      - name: Dump PostgreSQL database
-        if: steps.cache-db.outputs.cache-hit != 'true'
-        run: pg_dump -Fc -f database-dump.pgdump
+          cache-key: db-dump-${{ hashFiles('**/migrations/**/*.py', '**/fixtures/**/*') }}
 
       - name: Upload build artifacts for e2e tests
         uses: actions/upload-artifact@v5
@@ -220,33 +180,18 @@ jobs:
         with:
           uv-groups: "--group dev"
 
-      # Cache Playwright browsers to avoid re-downloading on every run.
-      # GitHub Actions automatically evicts caches after 7 days of inactivity,
-      # so we don't need to include week number for rotation.
-      - name: Get Playwright version
-        id: playwright-version
-        run: echo "version=$(npm list @playwright/test --depth=0 --json | jq -r '.dependencies["@playwright/test"].version')" >> $GITHUB_OUTPUT
-
-      - name: Cache Playwright browsers
-        id: cache-playwright
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
-          restore-keys: |
-            playwright-${{ runner.os }}-
-
-      - name: Install Playwright Browsers
-        if: steps.cache-playwright.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps chromium webkit
+      - name: Setup Playwright
+        uses: ./.github/actions/setup-playwright
 
       - name: Download build artifacts
         uses: actions/download-artifact@v5
         with:
           name: e2e-build-artifacts
 
-      - name: Restore PostgreSQL database
-        run: pg_restore -d $DATABASE_URL --clean --if-exists database-dump.pgdump || true
+      - name: Restore Django database
+        uses: ./.github/actions/restore-django-db
+        with:
+          database-url: ${{ env.DATABASE_URL }}
 
       - name: Run server
         run: |

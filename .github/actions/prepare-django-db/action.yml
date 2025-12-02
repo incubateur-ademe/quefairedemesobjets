@@ -1,0 +1,49 @@
+name: Prepare Django Database
+description: Initialize Django database with migrations, static files, and seed data
+
+inputs:
+  cache-key:
+    description: 'Cache key for database dump'
+    required: true
+  database-dump-path:
+    description: 'Path to store database dump'
+    required: false
+    default: 'database-dump.pgdump'
+
+outputs:
+  cache-hit:
+    description: Whether the database cache was hit
+    value: ${{ steps.cache-db.outputs.cache-hit }}
+
+runs:
+  using: composite
+  steps:
+    - name: Check database cache
+      id: cache-db
+      uses: actions/cache@v4
+      with:
+        path: ${{ inputs.database-dump-path }}
+        key: ${{ inputs.cache-key }}
+
+    - name: Prepare django, migrate, collect static files
+      if: steps.cache-db.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        make createcachetable
+        make migrate
+        make collectstatic
+
+    - name: Populate database
+      if: steps.cache-db.outputs.cache-hit != 'true'
+      shell: bash
+      run: make seed-database
+
+    - name: Init django admin superuser
+      if: steps.cache-db.outputs.cache-hit != 'true'
+      shell: bash
+      run: make createsuperuser-example
+
+    - name: Dump PostgreSQL database
+      if: steps.cache-db.outputs.cache-hit != 'true'
+      shell: bash
+      run: pg_dump -Fc -f ${{ inputs.database-dump-path }}
