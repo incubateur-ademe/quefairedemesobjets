@@ -228,6 +228,15 @@ jobs:
 
       - name: Restore PostgreSQL database
         run: psql -f database-dump.sql
+      - name: Prepare environment
+        run: | # pragma: allowlist secret
+          cp .env.template .env
+          echo BASE_URL=http://localhost:8000 >> .env
+          echo DEBUG=false >> .env
+          echo PLAYWRIGHT_HOST=localhost >> .env
+          echo PLAYWRIGHT_PORT=8000 >> .env
+          echo PLAYWRIGHT_BASE_URL=http://localhost:8000 >> .env
+          echo SECRET_KEY=coucou
 
       - name: Run server
         run: |
