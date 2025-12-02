@@ -72,7 +72,7 @@ jobs:
       - name: Install essential packages
         run: |
           apt-get update
-          apt-get install -y git curl ca-certificates
+          apt-get install -y git build-essential curl ca-certificates
 
       - name: Setup backend environment
         uses: ./.github/actions/setup-backend
@@ -129,7 +129,7 @@ jobs:
       - name: Install essential packages
         run: |
           apt-get update
-          apt-get install -y git curl ca-certificates
+          apt-get install -y git build-essential curl ca-certificates
 
       - uses: actions/checkout@v6
 
@@ -229,7 +229,7 @@ jobs:
       - name: Install essential packages
         run: |
           apt-get update
-          apt-get install -y git curl ca-certificates
+          apt-get install -y git build-essential curl ca-certificates
 
       - uses: actions/checkout@v6
 
