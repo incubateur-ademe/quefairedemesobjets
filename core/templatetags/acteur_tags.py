@@ -48,7 +48,7 @@ def acteur_label(context, acteur=None):
     if not acteur:
         acteur = context["object"]
 
-    labels_qualite_ordered = acteur.labels_display
+    labels_qualite_ordered = acteur.ord
     first_label_qualite = labels_qualite_ordered.first()
     if not first_label_qualite:
         return {}
