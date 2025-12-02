@@ -47,7 +47,7 @@
     "@iframe-resizer/parent": "^5.5.7",
     "bowser": "^2.13.0",
     "eslint-config-prettier": "^10.1.8",
-    "posthog-js": "^1.298.0",
+    "posthog-js": "^1.299.0",
     "maplibre-gl": "^5.13.0",
     "stimulus-use": "^0.52.3",
     "tailwindcss": "^3.4.18"
