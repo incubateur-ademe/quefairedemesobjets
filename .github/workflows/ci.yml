@@ -122,7 +122,13 @@ jobs:
         ports:
           - 6543:5432
     steps:
+      - name: Install essential packages
+        run: |
+          apt-get update
+          apt-get install -y git curl ca-certificates
+
       - uses: actions/checkout@v6
+
       - name: Prepare environment
         run: |
           cp .env.template .env
