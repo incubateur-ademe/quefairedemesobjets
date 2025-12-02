@@ -1,0 +1,34 @@
+name: Setup E2E Environment
+description: Install Node.js, Python, and Playwright for e2e tests
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version-file: ".tool-versions"
+        cache: "npm"
+
+    - name: Install npm dependencies
+      shell: bash
+      run: npm ci
+
+    - name: Build assets
+      shell: bash
+      run: npm run build
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@1e862dfacbd1d6d858c55d9b792c756523627244
+      with:
+        enable-cache: true
+
+    - name: Cache virtual environment
+      uses: actions/cache@v4
+      with:
+        path: ./.venv
+        key: venv-dev-${{ hashFiles('uv.lock') }}
+
+    - name: Install Python dependencies
+      shell: bash
+      run: uv sync --group dev

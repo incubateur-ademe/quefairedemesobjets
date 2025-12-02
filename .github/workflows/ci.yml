@@ -17,17 +17,11 @@ jobs:
     runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v6
-      - name: Install uv
-        uses: astral-sh/setup-uv@1e862dfacbd1d6d858c55d9b792c756523627244
+
+      - name: Setup backend environment
+        uses: ./.github/actions/setup-backend
         with:
-          enable-cache: true
-      - uses: actions/cache@v4
-        name: Define a cache for the virtual environment based on the dependencies lock file
-        with:
-          path: ./.venv
-          key: venv-dev-airflow-${{ hashFiles('uv.lock') }}
-      - name: Install the project dependencies
-        run: uv sync --only-dev
+          uv-groups: "--only-dev"
       - name: Install Terragrunt and OpenTofu
         uses: gruntwork-io/terragrunt-action@95fc057922e3c3d4cc021a81a213f088f333ddef
         with:
@@ -46,13 +40,10 @@ jobs:
     runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version-file: ".tool-versions"
-          cache: "npm"
-      - name: Build assets
-        run: |
-          npm ci
+
+      - name: Setup frontend environment
+        uses: ./.github/actions/setup-frontend
+
       - name: Check code formatting
         run: npm run format:check
 
@@ -76,21 +67,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-      - name: Install GIS Packages
-        run: |
-          sudo apt-get update
-          sudo apt-get install gdal-bin libgdal-dev -y
-      - name: Install uv
-        uses: astral-sh/setup-uv@1e862dfacbd1d6d858c55d9b792c756523627244
+
+      - name: Install GIS packages
+        uses: ./.github/actions/install-gis
+
+      - name: Setup backend environment
+        uses: ./.github/actions/setup-backend
         with:
-          enable-cache: true
-      - uses: actions/cache@v4
-        name: Define a cache for the virtual environment based on the dependencies lock file
-        with:
-          path: ./.venv
-          key: venv-dev-airflow-${{ hashFiles('uv.lock') }}
-      - name: Install the project dependencies
-        run: uv sync --group dev --group airflow
+          uv-groups: "--group dev --group airflow"
       - name: Run unit tests
         run: make unit-test
       - name: Run integration tests
@@ -108,14 +92,10 @@ jobs:
     runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version-file: ".tool-versions"
-          cache: "npm"
-      - name: Build assets
-        run: |
-          npm ci
-          npm run build
+
+      - name: Setup frontend environment
+        uses: ./.github/actions/setup-frontend
+
       - name: Run tests
         run: npm run test
 
@@ -222,7 +202,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3, 4]
+        shard: [1]
     services:
       postgres:
         image: postgis/postgis:15-3.3-alpine

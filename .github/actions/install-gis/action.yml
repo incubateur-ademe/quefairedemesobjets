@@ -1,0 +1,11 @@
+name: Install GIS Packages
+description: Install GDAL and other GIS packages required for PostGIS
+
+runs:
+  using: composite
+  steps:
+    - name: Install GIS packages
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install gdal-bin
