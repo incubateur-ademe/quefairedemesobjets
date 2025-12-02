@@ -1,11 +1,11 @@
-name: 'Install GIS Packages'
-description: 'Installs system-level GIS dependencies (gdal-bin)'
+name: "Install GIS Packages"
+description: "Installs system-level GIS dependencies (gdal-bin)"
 
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
-    - name: Install GIS Packages
-      run: |
-        sudo apt-get update
-        sudo apt-get install gdal-bin
-      shell: bash
+    - name: Cache and install GIS packages
+      uses: awalsh128/cache-apt-pkgs-action@acb598e5ddbc6f68a970c5da0688d2f3a9f04d05
+      with:
+        packages: gdal-bin
+        version: 1.0
