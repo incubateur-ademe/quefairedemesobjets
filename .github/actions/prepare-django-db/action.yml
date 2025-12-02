@@ -3,12 +3,12 @@ description: Initialize Django database with migrations, static files, and seed 
 
 inputs:
   cache-key:
-    description: 'Cache key for database dump'
+    description: "Cache key for database dump"
     required: true
   database-dump-path:
-    description: 'Path to store database dump'
+    description: "Path to store database dump"
     required: false
-    default: 'database-dump.pgdump'
+    default: "database-dump.pgdump"
 
 outputs:
   cache-hit:
@@ -31,7 +31,6 @@ runs:
       run: |
         make createcachetable
         make migrate
-        make collectstatic
 
     - name: Populate database
       if: steps.cache-db.outputs.cache-hit != 'true'

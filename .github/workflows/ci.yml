@@ -146,6 +146,10 @@ jobs:
         with:
           cache-key: db-dump-${{ hashFiles('**/migrations/**/*.py', '**/fixtures/**/*') }}
 
+      - name: collectstatic
+        shell: bash
+        run: make collectstatic
+
       - name: Upload build artifacts for e2e tests
         uses: actions/upload-artifact@v5
         with:
