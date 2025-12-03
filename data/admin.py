@@ -8,7 +8,6 @@ from djangoql.admin import DjangoQLSearchMixin
 from djangoql.schema import DjangoQLSchema, IntField, StrField
 
 from core.admin import NotEditableMixin, NotSelfDeletableMixin, QuerysetFilterAdmin
-from data.forms import SuggestionGroupeForm
 from data.models.suggestion import (
     Suggestion,
     SuggestionCohorte,
@@ -242,8 +241,7 @@ class SuggestionGroupeAdmin(
 
     search_fields = ["contexte", "metadata"]
     list_display = [
-        # "groupe_de_suggestions",
-        "groupe_de_suggestions2",
+        "groupe_de_suggestions",
     ]
     list_display_links = None
     readonly_fields = ["cree_le", "modifie_le"]
@@ -267,20 +265,6 @@ class SuggestionGroupeAdmin(
         return super().changelist_view(request, extra_context)
 
     def groupe_de_suggestions(self, obj):
-        template_name = "data/_partials/suggestion_groupe_row_type_source.html"
-        return render_to_string(
-            template_name,
-            {
-                "csrf_token": self.csrf_token,
-                "form": SuggestionGroupeForm(),
-                "suggestion_groupe": obj,
-                "suggestion_unitaires_by_champs": (
-                    obj.get_suggestion_unitaires_by_champs()
-                ),
-            },
-        )
-
-    def groupe_de_suggestions2(self, obj):
         template_name = "data/_partials/suggestion_groupe_details.html"
         return render_to_string(template_name, obj.serialize().to_dict())
 

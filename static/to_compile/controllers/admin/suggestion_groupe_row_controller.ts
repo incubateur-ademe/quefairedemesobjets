@@ -7,52 +7,6 @@ export default class extends Controller<HTMLElement> {
   declare readonly fieldsValuesTarget: HTMLInputElement
   declare readonly fieldsGroupsTarget: HTMLInputElement
 
-  editSuggestionGroupeRow(event: Event) {
-    const target = event.target as HTMLElement
-
-    const suggestionGroupeId = target.dataset.suggestionGroupeId
-    if (!suggestionGroupeId) {
-      console.error("Suggestion groupe ID manquant")
-      return
-    }
-
-    const formID = `form-${target.dataset.suggestionGroupeId}`
-
-    // Trouver le formulaire de rafraîchissement et le soumettre
-    const form = document.getElementById(formID) as HTMLFormElement
-
-    if (form) {
-      // get input named valeurs and set valeurs with innerText
-      const valeurs = form.querySelectorAll("input[name='valeurs']")
-      const champs = form.querySelectorAll("input[name='champs']")
-      const modelName = form.querySelectorAll("input[name='suggestion_modele']")
-      valeurs.forEach((valeur: HTMLInputElement) => {
-        valeur.value = target.innerText
-      })
-      const champsValue = target.dataset.champs ?? ""
-      const modelNameValue = target.dataset.modelName ?? ""
-      champs.forEach((champ: HTMLInputElement) => {
-        champ.value = champsValue
-      })
-      modelName.forEach((modelName: HTMLInputElement) => {
-        modelName.value = modelNameValue
-      })
-      form.requestSubmit()
-    } else {
-      console.error(`Formulaire ${formID} introuvable`)
-    }
-  }
-
-  blur(event: Event) {
-    console.log("blur")
-  }
-
-  #getFieldsValues() {
-    const valueJson = this.fieldsValuesTarget.value
-    const value = JSON.parse(valueJson)
-    return value
-  }
-
   fieldDisplayedFocus(event: Event) {
     const value = this.#getFieldsValues()
     const field = (event.target as HTMLElement).dataset.field
@@ -60,7 +14,6 @@ export default class extends Controller<HTMLElement> {
       console.error("Champs manquants")
       return
     }
-    console.log(value[field])
     const target = event.target as HTMLElement
     target.textContent =
       value[field]["updated_displayed_value"] || value[field]["displayed_value"]
@@ -68,128 +21,39 @@ export default class extends Controller<HTMLElement> {
 
   fieldDisplayedBlur(event: Event) {
     const fieldsValues = this.#getFieldsValues()
-    const field = (event.target as HTMLElement).dataset.field
-    if (!field || !(field in fieldsValues)) {
-      console.error("Champs manquants")
-      return
+    const field = this.#getField(event, fieldsValues)
+    if (field != null) {
+      fieldsValues[field]["updated_displayed_value"] = (
+        event.target as HTMLElement
+      ).textContent
+      this.#postFieldsValues(fieldsValues)
     }
-    fieldsValues[field]["updated_displayed_value"] = (
-      event.target as HTMLElement
-    ).textContent
-    this.postFieldsValues(JSON.stringify(fieldsValues))
-  }
-
-  updateAllDisplayed(event: Event) {
-    let valueJson = this.fieldsValuesTarget.value
-    let value = JSON.parse(valueJson)
-    for (let key in value) {
-      if (
-        (value[key]["updated_displayed_value"] === undefined &&
-          value[key]["new_value"] !== undefined) ||
-        value[key]["updated_displayed_value"] !== value[key]["new_value"]
-      ) {
-        value[key]["updated_displayed_value"] = value[key]["new_value"]
-      }
-    }
-    this.postFieldsValues(JSON.stringify(value))
   }
 
   updateFieldsDisplayed(event: Event) {
-    let valueJson = this.fieldsValuesTarget.value
-    let value = JSON.parse(valueJson)
-    const fields = (event.target as HTMLElement).dataset.fields
-    if (!fields) {
-      console.error("Champs manquants")
-      return
-    }
-    fields.split("|").forEach((field: string) => {
-      value[field]["updated_displayed_value"] = value[field]["new_value"]
+    const fieldsValues = this.#getFieldsValues()
+    const fields = this.#getFields(event, fieldsValues)
+    fields.forEach((field: string) => {
+      fieldsValues[field]["updated_displayed_value"] = fieldsValues[field]["new_value"]
     })
-    this.postFieldsValues(JSON.stringify(value))
+    this.#postFieldsValues(fieldsValues)
   }
 
-  private postFieldsValues(valuesJson: string) {
-    const refreshUrl = this.element.dataset.refreshUrl
-    if (!refreshUrl) {
-      console.error("URL de rafraîchissement manquante")
-      return
+  updateAllDisplayed(event: Event) {
+    const fieldsValues = this.#getFieldsValues()
+    for (let key in fieldsValues) {
+      if (
+        (fieldsValues[key]["updated_displayed_value"] === undefined &&
+          fieldsValues[key]["new_value"] !== undefined) ||
+        fieldsValues[key]["updated_displayed_value"] !== fieldsValues[key]["new_value"]
+      ) {
+        fieldsValues[key]["updated_displayed_value"] = fieldsValues[key]["new_value"]
+      }
     }
-    const formData = new FormData()
-    const groupsJson = this.fieldsGroupsTarget.value
-    formData.append("fields_values", valuesJson)
-    formData.append("fields_groups", groupsJson)
-
-    fetch(refreshUrl, {
-      method: "POST",
-      headers: {
-        "X-Requested-With": "XMLHttpRequest",
-        "X-CSRFToken": this.getCsrfToken() ?? "",
-        Accept: "text/vnd.turbo-stream.html",
-      },
-      body: formData,
-      credentials: "same-origin",
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Échec du rafraîchissement (${response.status})`)
-        }
-        return response.text()
-      })
-      .then((html) => {
-        Turbo.renderStreamMessage(html)
-      })
-      .catch((error) => {
-        console.error("Erreur lors du rafraîchissement du groupe :", error)
-      })
-  }
-
-  refresh(event: Event) {
-    event.preventDefault()
-    event.stopPropagation()
-
-    const refreshUrl = this.element.dataset.refreshUrl
-    if (!refreshUrl) {
-      console.error("URL de rafraîchissement manquante")
-      return
-    }
-
-    const fieldsInput = this.fieldsListTarget
-    if (!fieldsInput) {
-      console.error("Champ fields_list introuvable")
-      return
-    }
-
-    const formData = new FormData()
-    formData.append("fields_list", fieldsInput.value)
-
-    fetch(refreshUrl, {
-      method: "POST",
-      headers: {
-        "X-Requested-With": "XMLHttpRequest",
-        "X-CSRFToken": this.getCsrfToken() ?? "",
-        Accept: "text/vnd.turbo-stream.html",
-      },
-      body: formData,
-      credentials: "same-origin",
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Échec du rafraîchissement (${response.status})`)
-        }
-        return response.text()
-      })
-      .then((html) => {
-        Turbo.renderStreamMessage(html)
-      })
-      .catch((error) => {
-        console.error("Erreur lors du rafraîchissement du groupe :", error)
-      })
+    this.#postFieldsValues(fieldsValues)
   }
 
   updateStatus(event: Event) {
-    // event.preventDefault()
-    // event.stopPropagation()
-
     const target = event.target as HTMLButtonElement
     const action = target.dataset.actionValue
     const statusUrl = target.dataset.statusUrl
@@ -202,11 +66,72 @@ export default class extends Controller<HTMLElement> {
     const formData = new FormData()
     formData.append("action", action)
 
-    fetch(statusUrl, {
+    this.#postSuggestion(statusUrl, formData)
+  }
+
+  #getCsrfToken(): string | null {
+    const match = document.cookie.match(/csrftoken=([^;]+)/)
+    return match ? decodeURIComponent(match[1]) : null
+  }
+
+  #getFieldsValues() {
+    const valueJson = this.fieldsValuesTarget.value
+    const value = JSON.parse(valueJson)
+    return value
+  }
+
+  #getField(event: Event, fieldsValues: Record<string, any>) {
+    const field = (event.target as HTMLElement).dataset.field
+    if (!field) {
+      console.error(
+        "Champ manquant dans les attributs de l'élement, besoin de data-field",
+      )
+      return null
+    }
+    if (!(field in fieldsValues)) {
+      console.error(`Champ ${field} manquant dans les valeurs`)
+      return null
+    }
+    return field
+  }
+
+  #getFields(event: Event, fieldsValues: Record<string, any>) {
+    const fields = (event.target as HTMLElement).dataset.fields
+    if (!fields) {
+      console.error(
+        "Champ manquant dans les attributs de l'élement, besoin de data-fields",
+      )
+      return []
+    }
+    fields.split("|").forEach((field: string) => {
+      if (!(field in fieldsValues)) {
+        console.error(`Champ ${field} manquant dans les valeurs`)
+        return []
+      }
+    })
+    return fields.split("|")
+  }
+
+  #postFieldsValues(valuesJson: Record<string, any>) {
+    const updateSuggestionUrl = this.element.dataset.updateSuggestionUrl
+    if (!updateSuggestionUrl) {
+      console.error("URL de mise à jour de la suggestion manquante")
+      return
+    }
+    const formData = new FormData()
+    const groupsJson = this.fieldsGroupsTarget.value
+    formData.append("fields_values", JSON.stringify(valuesJson))
+    formData.append("fields_groups", groupsJson)
+
+    this.#postSuggestion(updateSuggestionUrl, formData)
+  }
+
+  #postSuggestion(postUrl: string, formData: FormData) {
+    fetch(postUrl, {
       method: "POST",
       headers: {
         "X-Requested-With": "XMLHttpRequest",
-        "X-CSRFToken": this.getCsrfToken() ?? "",
+        "X-CSRFToken": this.#getCsrfToken() ?? "",
         Accept: "text/vnd.turbo-stream.html",
       },
       body: formData,
@@ -214,7 +139,9 @@ export default class extends Controller<HTMLElement> {
     })
       .then((response) => {
         if (!response.ok) {
-          throw new Error(`Échec de la mise à jour du statut (${response.status})`)
+          throw new Error(
+            `Échec de l'appel à la route ${postUrl} : (${response.status})`,
+          )
         }
         return response.text()
       })
@@ -222,12 +149,7 @@ export default class extends Controller<HTMLElement> {
         Turbo.renderStreamMessage(html)
       })
       .catch((error) => {
-        console.error("Erreur lors de la mise à jour du statut :", error)
+        console.error(`Erreur lors de l'appel à la route ${postUrl} : ${error}`)
       })
-  }
-
-  private getCsrfToken(): string | null {
-    const match = document.cookie.match(/csrftoken=([^;]+)/)
-    return match ? decodeURIComponent(match[1]) : null
   }
 }
