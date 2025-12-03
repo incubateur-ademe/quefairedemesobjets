@@ -167,7 +167,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3, 4]
+        shard: [1]
     services:
       postgres:
         image: postgis/postgis:15-3.3-alpine
@@ -220,7 +220,7 @@ jobs:
           timeout 20 sh -c 'until curl -s $BASE_URL > /dev/null; do sleep 1; done' || exit 1
 
       - name: Run Playwright tests
-        run: npx playwright test --shard=${{ matrix.shard }}/4 --update-snapshots
+        run: npx playwright test --shard=${{ matrix.shard }}/1 --update-snapshots
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v5
