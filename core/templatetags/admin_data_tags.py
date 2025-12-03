@@ -211,28 +211,6 @@ def getattr_filter(obj, attr):
         return None
 
 
-@register.filter(name="get_first_with_model")
-def get_first_with_model(suggestion_unitaires, model_name):
-    """Get the first object with the given model name from the queryset"""
-    for obj in suggestion_unitaires:
-        if obj.suggestion_modele == model_name:
-            return obj
-    return None
-
-
-# FIXME : peut-être plus simple si on stocke les modifications comme un dict
-@register.filter(name="get_at_index")
-def get_at_index(list_value, index):
-    """
-    Template filter pour accéder à un élément d'une liste par son index.
-    Usage: {{ my_list|get_at_index:forloop.counter0 }}
-    """
-    try:
-        if not isinstance(list_value, (list, tuple)):
-            return None
-        index = int(index)
-        if 0 <= index < len(list_value):
-            return list_value[index]
-        return None
-    except (ValueError, TypeError, IndexError):
-        return None
+@register.filter
+def get_item(dictionary, key):
+    return dictionary.get(key)

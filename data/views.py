@@ -12,28 +12,7 @@ from data.forms import SuggestionGroupeStatusForm
 from data.models.suggestion import SuggestionGroupe, SuggestionStatut
 
 
-class SuggestionGroupeMixin(FormView):
-    template_name = "data/_partials/suggestion_groupe_row_type_source.html"
-
-    def get_object(self):
-        return get_object_or_404(
-            SuggestionGroupe.objects.prefetch_related(
-                "suggestion_unitaires",
-                "acteur",
-                "revision_acteur",
-                "revision_acteur__parent",
-            ),
-            id=self.kwargs["suggestion_groupe_id"],
-        )
-
-    def get_success_url(self):
-        return reverse_lazy(
-            "data:suggestion_groupe",
-            kwargs={"suggestion_groupe_id": self.kwargs["suggestion_groupe_id"]},
-        )
-
-
-class SuggestionGroupeStatusView(LoginRequiredMixin, SuggestionGroupeMixin, FormView):
+class SuggestionGroupeStatusView(LoginRequiredMixin, FormView):
     form_class = SuggestionGroupeStatusForm
 
     def get_success_url(self):
@@ -43,7 +22,10 @@ class SuggestionGroupeStatusView(LoginRequiredMixin, SuggestionGroupeMixin, Form
         )
 
     def form_valid(self, form):
-        suggestion_groupe = self.get_object()
+        suggestion_groupe = get_object_or_404(
+            SuggestionGroupe.objects,
+            id=self.kwargs["suggestion_groupe_id"],
+        )
         action = form.cleaned_data["action"]
         if action == "validate":
             suggestion_groupe.statut = SuggestionStatut.ATRAITER

@@ -6,7 +6,7 @@
 <turbo-frame
     id="suggestion_groupe_{{ id }}"
     data-controller="suggestion-groupe-row"
-    data-refresh-url="{% url 'data:suggestion_groupe_update' id %}">
+    data-update-suggestion-url="{% url 'data:suggestion_groupe_update' id %}">
 
     <h3>
         {% block suggestion_title %}
