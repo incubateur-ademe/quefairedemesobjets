@@ -1,6 +1,6 @@
 # Builder python
 # --- --- --- ---
-FROM apache/airflow:3.1.3 AS python-builder
+FROM apache/airflow:slim-3.1.3-python3.12 AS python-builder
 
 # system dependencies
 USER root
@@ -19,7 +19,7 @@ RUN uv sync --group airflow
 
 # Runtime
 # --- --- --- ---
-FROM apache/airflow:slim-3.1.3-python3.13 AS scheduler
+FROM apache/airflow:slim-3.1.3-python3.12 AS scheduler
 
 USER root
 
