@@ -205,11 +205,6 @@ jobs:
         with:
           name: e2e-build-artifacts
 
-      - name: debug
-        run: |
-          ls -l ./staticfiles
-          ls -l ./staticfiles/compiled/embed
-
       - name: Restore Django database
         uses: ./.github/actions/restore-django-db
         with:
