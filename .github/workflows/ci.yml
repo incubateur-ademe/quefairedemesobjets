@@ -227,7 +227,7 @@ jobs:
         with:
           name: playwright-report-${{ matrix.shard }}
           path: playwright-report/
-          retention-days: 30
+          retention-days: 2
 
 # Address actions/missing-workflow-permissions rule in
 # code scanning alerts
