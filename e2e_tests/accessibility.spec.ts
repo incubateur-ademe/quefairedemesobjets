@@ -1,6 +1,5 @@
 import { AxeBuilder } from "@axe-core/playwright"
-import { expect } from "@playwright/test"
-import { test } from "./config"
+import { test, expect } from "@playwright/test"
 
 test.describe("♿ Conformité Accessibilité WCAG", () => {
   // Shared variables

@@ -1,2 +1,1 @@
-import { expect } from "@playwright/test"
-import { test } from "./config"
+import { test, expect } from "@playwright/test"

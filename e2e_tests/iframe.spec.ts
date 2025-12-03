@@ -1,5 +1,4 @@
-import { expect } from "@playwright/test"
-import { test } from "./config"
+import { test, expect } from "@playwright/test"
 
 test.describe("📦 Système d'Intégration Iframe", () => {
   test.describe("Validation des ID d'iframe", () => {
