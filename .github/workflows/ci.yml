@@ -222,11 +222,20 @@ jobs:
       - name: Run Playwright tests
         run: npx playwright test --shard=${{ matrix.shard }}/4 --update-snapshots
 
-      - uses: actions/upload-artifact@v5
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v5
         if: ${{ !cancelled() }}
         with:
           name: playwright-report-${{ matrix.shard }}
           path: playwright-report/
+          retention-days: 2
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v5
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-results-${{ matrix.shard }}
+          path: test-results/
           retention-days: 2
 
 # Address actions/missing-workflow-permissions rule in
