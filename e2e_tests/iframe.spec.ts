@@ -177,37 +177,37 @@ test.describe("📜 Vérification des scripts", () => {
    * Tests for embed script routes
    *
    * These tests verify that all embed script files are accessible
-   * and return the correct content type.
+   * and return the correct content type using HTTP fetch.
    */
 
-  test("carte.js script is accessible", async ({ page, baseUrl }) => {
-    const response = await page.goto(`${baseUrl}/static/carte.js`)
-    expect(response?.status()).toBe(200)
-    expect(response?.headers()["content-type"]).toMatch(
+  test("carte.js script is accessible", async ({ request, baseUrl }) => {
+    const response = await request.get(`${baseUrl}/static/carte.js`)
+    expect(response.status()).toBe(200)
+    expect(response.headers()["content-type"]).toMatch(
       /application\/javascript|text\/javascript/,
     )
   })
 
-  test("iframe.js script is accessible", async ({ page, baseUrl }) => {
-    const response = await page.goto(`${baseUrl}/static/iframe.js`)
-    expect(response?.status()).toBe(200)
-    expect(response?.headers()["content-type"]).toMatch(
+  test("iframe.js script is accessible", async ({ request, baseUrl }) => {
+    const response = await request.get(`${baseUrl}/static/iframe.js`)
+    expect(response.status()).toBe(200)
+    expect(response.headers()["content-type"]).toMatch(
       /application\/javascript|text\/javascript/,
     )
   })
 
-  test("infotri.js script is accessible", async ({ page, baseUrl }) => {
-    const response = await page.goto(`${baseUrl}/iframe.js`)
-    expect(response?.status()).toBe(200)
-    expect(response?.headers()["content-type"]).toMatch(
+  test("infotri.js script is accessible", async ({ request, baseUrl }) => {
+    const response = await request.get(`${baseUrl}/iframe.js`)
+    expect(response.status()).toBe(200)
+    expect(response.headers()["content-type"]).toMatch(
       /application\/javascript|text\/javascript/,
     )
   })
 
-  test("configurateur.js script is accessible", async ({ page, baseUrl }) => {
-    const response = await page.goto(`${baseUrl}/infotri/configurateur.js`)
-    expect(response?.status()).toBe(200)
-    expect(response?.headers()["content-type"]).toMatch(
+  test("configurateur.js script is accessible", async ({ request, baseUrl }) => {
+    const response = await request.get(`${baseUrl}/infotri/configurateur.js`)
+    expect(response.status()).toBe(200)
+    expect(response.headers()["content-type"]).toMatch(
       /application\/javascript|text\/javascript/,
     )
   })
