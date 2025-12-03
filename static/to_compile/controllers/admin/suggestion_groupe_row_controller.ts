@@ -43,9 +43,44 @@ export default class extends Controller<HTMLElement> {
     }
   }
 
+  blur(event: Event) {
+    console.log("blur")
+  }
+
+  #getFieldsValues() {
+    const valueJson = this.fieldsValuesTarget.value
+    const value = JSON.parse(valueJson)
+    return value
+  }
+
+  fieldDisplayedFocus(event: Event) {
+    const value = this.#getFieldsValues()
+    const field = (event.target as HTMLElement).dataset.field
+    if (!field || !(field in value)) {
+      console.error("Champs manquants")
+      return
+    }
+    console.log(value[field])
+    const target = event.target as HTMLElement
+    target.textContent =
+      value[field]["updated_displayed_value"] || value[field]["displayed_value"]
+  }
+
+  fieldDisplayedBlur(event: Event) {
+    const fieldsValues = this.#getFieldsValues()
+    const field = (event.target as HTMLElement).dataset.field
+    if (!field || !(field in fieldsValues)) {
+      console.error("Champs manquants")
+      return
+    }
+    fieldsValues[field]["updated_displayed_value"] = (
+      event.target as HTMLElement
+    ).textContent
+    this.postFieldsValues(JSON.stringify(fieldsValues))
+  }
+
   updateAllDisplayed(event: Event) {
     let valueJson = this.fieldsValuesTarget.value
-    let groupsJson = this.fieldsGroupsTarget.value
     let value = JSON.parse(valueJson)
     for (let key in value) {
       if (
@@ -56,12 +91,11 @@ export default class extends Controller<HTMLElement> {
         value[key]["updated_displayed_value"] = value[key]["new_value"]
       }
     }
-    this.postFieldsList(JSON.stringify(value), groupsJson)
+    this.postFieldsValues(JSON.stringify(value))
   }
 
   updateFieldsDisplayed(event: Event) {
     let valueJson = this.fieldsValuesTarget.value
-    let groupsJson = this.fieldsGroupsTarget.value
     let value = JSON.parse(valueJson)
     const fields = (event.target as HTMLElement).dataset.fields
     if (!fields) {
@@ -71,17 +105,17 @@ export default class extends Controller<HTMLElement> {
     fields.split("|").forEach((field: string) => {
       value[field]["updated_displayed_value"] = value[field]["new_value"]
     })
-    this.postFieldsList(JSON.stringify(value), groupsJson)
+    this.postFieldsValues(JSON.stringify(value))
   }
 
-  private postFieldsList(valuesJson: string, groupsJson: string) {
+  private postFieldsValues(valuesJson: string) {
     const refreshUrl = this.element.dataset.refreshUrl
     if (!refreshUrl) {
       console.error("URL de rafraîchissement manquante")
       return
     }
-
     const formData = new FormData()
+    const groupsJson = this.fieldsGroupsTarget.value
     formData.append("fields_values", valuesJson)
     formData.append("fields_groups", groupsJson)
 
