@@ -23,16 +23,42 @@
             {% endif %}
         {% endblock suggestion_title %}
     </h3>
-    <div class="qf-flex qf-flex-col qf-items-left qf-gap-2">
+    <div class="qf-flex qf-flex-col qf-items-left qf-gap-1v">
         <span class="qf-ml-3w qf-text-xs qf-italic">
             {% block suggestion_subtitle %}
                 Cohorte : {{ suggestion_cohorte.get_type_action_display }}
             {% endblock suggestion_subtitle %}
         </span>
-        <span class="qf-ml-3w qf-text-s qf-italic">
-            {{ statut }}
-        </span>
+        <div class="qf-flex qf-flex-row qf-gap-1w">
+            <span class="qf-ml-3w qf-text-lg qf-italic">
+                {{ statut }}
+            </span>
+            <button
+                type="button"
+                data-action="click->suggestion-groupe-row#updateStatus"
+                data-action-value="validate"
+                data-status-url="{% url 'data:suggestion_groupe_status' id %}">
+                ✅ VALIDER a suggestion
+            </button>
+            <button
+                type="button"
+                data-action="click->suggestion-groupe-row#updateStatus"
+                data-action-value="reject"
+                data-status-url="{% url 'data:suggestion_groupe_status' id %}">
+                ❌ REJETER la suggestion
+            </button>
+            <button
+                type="button"
+                data-action="click->suggestion-groupe-row#updateStatus"
+                data-action-value="to_process"
+                data-status-url="{% url 'data:suggestion_groupe_status' id %}">
+                ⏳ Renvoyer à valider
+            </button>
+        </div>
     </div>
+
+
+
     <div class="qf-my-3w">
         {% block suggestion_details %}
         {% endblock suggestion_details %}
