@@ -704,7 +704,7 @@ class IframePreview(LookbookPreview):
         Copiez ce script pour intégrer l'Info-tri sur votre site :
 
         ```html
-        <script src="{base_url}/infotri/static/infotri.js"
+        <script src="{base_url}/infotri/iframe.js"
                 data-config="{config}"></script>
         ```
         """
@@ -727,7 +727,7 @@ class IframePreview(LookbookPreview):
 
         template = Template(
             f"""
-        <script src="{base_url}/infotri/static/infotri.js"
+        <script src="{base_url}/infotri/iframe.js"
                 data-config="{config}"></script>
         """,
         )
@@ -743,12 +743,12 @@ class IframePreview(LookbookPreview):
         Copiez ce script pour intégrer le configurateur :
 
         ```html
-        <script src="{base_url}/infotri/static/infotri-configurator.js"></script>
+        <script src="{base_url}/infotri/configurateur.js"></script>
         ```
         """
         template = Template(
             f"""
-        <script src="{base_url}/infotri/static/infotri-configurator.js"></script>
+        <script src="{base_url}/infotri/configurateur.js"></script>
         """,
         )
 

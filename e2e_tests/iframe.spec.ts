@@ -172,7 +172,7 @@ test.describe("📦 Système d'Intégration Iframe", () => {
     })
   })
 })
-test.describe("📜 Embed Scripts Availability", () => {
+test.describe("📜 Vérification des scripts", () => {
   /**
    * Tests for embed script routes
    *
@@ -180,39 +180,35 @@ test.describe("📜 Embed Scripts Availability", () => {
    * and return the correct content type.
    */
 
-  test.describe("Embed script routes", () => {
-    test("carte.js script is accessible", async ({ page, baseUrl }) => {
-      const response = await page.goto(`${baseUrl}/static/carte.js`)
-      expect(response?.status()).toBe(200)
-      expect(response?.headers()["content-type"]).toMatch(
-        /application\/javascript|text\/javascript/,
-      )
-    })
+  test("carte.js script is accessible", async ({ page, baseUrl }) => {
+    const response = await page.goto(`${baseUrl}/static/carte.js`)
+    expect(response?.status()).toBe(200)
+    expect(response?.headers()["content-type"]).toMatch(
+      /application\/javascript|text\/javascript/,
+    )
+  })
 
-    test("iframe.js script is accessible", async ({ page, baseUrl }) => {
-      const response = await page.goto(`${baseUrl}/static/iframe.js`)
-      expect(response?.status()).toBe(200)
-      expect(response?.headers()["content-type"]).toMatch(
-        /application\/javascript|text\/javascript/,
-      )
-    })
+  test("iframe.js script is accessible", async ({ page, baseUrl }) => {
+    const response = await page.goto(`${baseUrl}/static/iframe.js`)
+    expect(response?.status()).toBe(200)
+    expect(response?.headers()["content-type"]).toMatch(
+      /application\/javascript|text\/javascript/,
+    )
+  })
 
-    test("infotri.js script is accessible", async ({ page, baseUrl }) => {
-      const response = await page.goto(`${baseUrl}/infotri/static/infotri.js`)
-      expect(response?.status()).toBe(200)
-      expect(response?.headers()["content-type"]).toMatch(
-        /application\/javascript|text\/javascript/,
-      )
-    })
+  test("infotri.js script is accessible", async ({ page, baseUrl }) => {
+    const response = await page.goto(`${baseUrl}/iframe.js`)
+    expect(response?.status()).toBe(200)
+    expect(response?.headers()["content-type"]).toMatch(
+      /application\/javascript|text\/javascript/,
+    )
+  })
 
-    test("infotri-configurator.js script is accessible", async ({ page, baseUrl }) => {
-      const response = await page.goto(
-        `${baseUrl}/infotri/static/infotri-configurator.js`,
-      )
-      expect(response?.status()).toBe(200)
-      expect(response?.headers()["content-type"]).toMatch(
-        /application\/javascript|text\/javascript/,
-      )
-    })
+  test("configurateur.js script is accessible", async ({ page, baseUrl }) => {
+    const response = await page.goto(`${baseUrl}/infotri/configurateur.js`)
+    expect(response?.status()).toBe(200)
+    expect(response?.headers()["content-type"]).toMatch(
+      /application\/javascript|text\/javascript/,
+    )
   })
 })
