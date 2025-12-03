@@ -41,7 +41,7 @@ jobs:
     uses: ./.github/workflows/_airflow-build-and-push-docker.yml
     secrets: inherit # pragma: allowlist secret`
     with:
-      environment: preprod
+      environment: preview
       image_tag: airflow-v3.0
 
   # FIXME: tmp pour tester
