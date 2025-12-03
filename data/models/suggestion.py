@@ -28,6 +28,7 @@ from qfdmo.models.acteur import (
     ActeurService,
     ActeurStatus,
     ActeurType,
+    DisplayedActeur,
     LabelQualite,
     PerimetreADomicile,
     PropositionService,
@@ -500,6 +501,15 @@ class SuggestionGroupe(TimestampedModel):
             if self.revision_acteur and self.revision_acteur.parent
             else self.revision_acteur
         )
+
+    def displayed_acteur_uuid(self) -> str | None:
+        acteur = self.acteur_overridden_by() or self.acteur
+        if acteur:
+            displayed_acteur = DisplayedActeur.objects.filter(
+                identifiant_unique=acteur.identifiant_unique
+            ).first()
+            return displayed_acteur.uuid if displayed_acteur else None
+        return None
 
     def get_identifiant_unique_from_suggestion_unitaires(self) -> str:
         """

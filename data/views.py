@@ -5,15 +5,11 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_GET, require_POST
 from django.views.generic.edit import FormView
 
-from data.forms import SuggestionGroupeForm, SuggestionGroupeStatusForm
-from data.models.suggestion import (
-    SuggestionGroupe,
-    SuggestionStatut,
-    SuggestionUnitaire,
-)
+from data.forms import SuggestionGroupeStatusForm
+from data.models.suggestion import SuggestionGroupe, SuggestionStatut
 
 
 class SuggestionGroupeMixin(FormView):
@@ -37,54 +33,14 @@ class SuggestionGroupeMixin(FormView):
         )
 
 
-class SuggestionGroupeView(LoginRequiredMixin, SuggestionGroupeMixin, FormView):
-    form_class = SuggestionGroupeForm
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        suggestion_groupe = self.get_object()
-        context["suggestion_groupe"] = suggestion_groupe
-        context["suggestion_unitaires_by_champs"] = (
-            suggestion_groupe.get_suggestion_unitaires_by_champs()
-        )
-        return context
-
-    def form_valid(self, form):
-        suggestion_groupe = self.get_object()
-        champs = [champ.strip() for champ in form.cleaned_data["champs"].split("|")]
-        valeurs = [value.strip() for value in form.cleaned_data["valeurs"].split("|")]
-
-        suggestion_unitaire_to_remove = all(valeur in ["", "-"] for valeur in valeurs)
-
-        suggestion_unitaires = suggestion_groupe.suggestion_unitaires.filter(
-            champs=champs,
-            suggestion_modele=form.cleaned_data["suggestion_modele"],
-        )
-        if suggestion_unitaires.count() > 1:
-            raise Exception(
-                "Plusieurs suggestions unitaires trouvées pour le même groupe de champs"
-            )
-        suggestion_unitaire = suggestion_unitaires.first()
-        if suggestion_unitaire_to_remove:
-            if suggestion_unitaire is not None:
-                suggestion_unitaire.delete()
-            return super().form_valid(form)
-        if suggestion_unitaire is not None:
-            suggestion_unitaire.valeurs = valeurs
-            suggestion_unitaire.save()
-            return super().form_valid(form)
-
-        SuggestionUnitaire.objects.create(
-            suggestion_groupe=suggestion_groupe,
-            champs=champs,
-            suggestion_modele=form.cleaned_data["suggestion_modele"],
-            valeurs=valeurs,
-        )
-        return super().form_valid(form)
-
-
 class SuggestionGroupeStatusView(LoginRequiredMixin, SuggestionGroupeMixin, FormView):
     form_class = SuggestionGroupeStatusForm
+
+    def get_success_url(self):
+        return reverse_lazy(
+            "data:suggestion_groupe_details",
+            kwargs={"suggestion_groupe_id": self.kwargs["suggestion_groupe_id"]},
+        )
 
     def form_valid(self, form):
         suggestion_groupe = self.get_object()
@@ -93,54 +49,26 @@ class SuggestionGroupeStatusView(LoginRequiredMixin, SuggestionGroupeMixin, Form
             suggestion_groupe.statut = SuggestionStatut.ATRAITER
         elif action == "reject":
             suggestion_groupe.statut = SuggestionStatut.REJETEE
+        elif action == "to_process":
+            suggestion_groupe.statut = SuggestionStatut.AVALIDER
         suggestion_groupe.save()
+
         return super().form_valid(form)
 
 
-def get_suggestion_groupe_usefull_links(request, suggestion_groupe_id, usefull_link):
+@login_required
+@require_GET
+def suggestion_groupe_details(request, suggestion_groupe_id):
     suggestion_groupe = get_object_or_404(SuggestionGroupe, id=suggestion_groupe_id)
-    acteur = suggestion_groupe.acteur
-    revision_acteur = suggestion_groupe.revision_acteur
-    if revision_acteur:
-        parent_acteur = revision_acteur.parent
-    else:
-        parent_acteur = None
-
-    latitude = (
-        parent_acteur.latitude
-        if parent_acteur
-        else (
-            revision_acteur.latitude
-            if revision_acteur and revision_acteur.latitude
-            else acteur.latitude
-        )
-    )
-    longitude = (
-        parent_acteur.longitude
-        if parent_acteur
-        else (
-            revision_acteur.longitude
-            if revision_acteur and revision_acteur.longitude
-            else acteur.longitude
-        )
-    )
-    google_maps_url = f"https://maps.google.com/maps?q={latitude},{longitude}&z=14&output=embed&output=embed"
-
+    context = suggestion_groupe.serialize().to_dict()
+    context["tab"] = request.GET.get("tab", "")
+    if context["tab"] == "acteur":
+        context["uuid"] = suggestion_groupe.displayed_acteur_uuid()
     return render(
         request,
-        "data/_partials/suggestion_groupe_usefull_links.html",
-        {
-            "suggestion_groupe": suggestion_groupe,
-            "acteur": acteur,
-            "revision_acteur": revision_acteur,
-            "parent_acteur": parent_acteur,
-            "google_maps_url": google_maps_url,
-            "latitude": latitude,
-            "longitude": longitude,
-            "localisation": usefull_link == "localisation",
-            "displayedacteur": usefull_link == "displayedacteur",
-            "annuaire_entreprise": usefull_link == "annuaire_entreprise",
-        },
+        "data/_partials/suggestion_groupe_refresh_stream.html",
+        context,
+        content_type="text/vnd.turbo-stream.html",
     )
 
 
@@ -156,7 +84,7 @@ def update_suggestion_groupe_details(request, suggestion_groupe_id):
             json.loads(fields_values_payload) if fields_values_payload else {}
         )
         fields_groups = (
-            json.loads(fields_groups_payload) if fields_groups_payload else {}
+            json.loads(fields_groups_payload) if fields_groups_payload else []
         )
     except json.JSONDecodeError:
         return HttpResponseBadRequest("Payload fields_list invalide")
