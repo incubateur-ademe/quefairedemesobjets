@@ -362,6 +362,8 @@ class CarteSearchActeursView(SearchActeursView):
         This precomputes the icon URLs for all action/acteur_type combinations
         to avoid N+1 queries in the template tag.
 
+        Only includes icons for groupe_actions that are currently selected by the user.
+
         Returns a dict with keys like: ('action_code', 'acteur_type_code') -> icon_url
         and also: ('action_code', None) -> icon_url for configs without acteur_type
         """
@@ -370,6 +372,14 @@ class CarteSearchActeursView(SearchActeursView):
 
         icon_lookup = {}
 
+        # Get the selected groupe_action IDs to filter configs
+        selected_groupe_action_ids = set(
+            self._get_ui_form("legende")["groupe_action"].value() or []
+        )
+
+        if not selected_groupe_action_ids:
+            return {}
+
         # Prefetch all groupe_action_configs with their relations
         configs = carte_config.groupe_action_configs.select_related(
             "groupe_action", "acteur_type"
@@ -377,6 +387,13 @@ class CarteSearchActeursView(SearchActeursView):
 
         for config in configs:
             if not config.icon:
+                continue
+
+            # Only include icons for selected groupe_actions
+            if (
+                config.groupe_action
+                and config.groupe_action.id not in selected_groupe_action_ids
+            ):
                 continue
 
             # Get action codes for this groupe_action

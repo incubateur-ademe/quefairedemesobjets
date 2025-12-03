@@ -175,6 +175,9 @@ class LegendeForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
     carte_config_choices_mapping = {
         "groupe_action": "groupe_action",
     }
+    carte_config_initial_mapping = {
+        "groupe_action": "groupe_action",
+    }
 
     groupe_action = GroupeActionChoiceField(
         queryset=GroupeAction.objects.filter(afficher=True)
