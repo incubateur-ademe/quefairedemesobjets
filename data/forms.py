@@ -9,5 +9,9 @@ class SuggestionGroupeForm(forms.Form):
 
 class SuggestionGroupeStatusForm(forms.Form):
     action = forms.ChoiceField(
-        choices=[("validate", "À Traiter"), ("reject", "Rejeter")]
+        choices=[
+            ("validate", "À Traiter"),
+            ("reject", "Rejeter"),
+            ("to_process", "Renvoyer à traiter"),
+        ]
     )

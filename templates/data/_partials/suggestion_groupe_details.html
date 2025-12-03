@@ -73,4 +73,56 @@
     </div>
 
 
+
+    <ul class="tabs">
+        <li {% if tab == "acteur" %}class="active"{% endif %}><a href="{% url 'data:suggestion_groupe_details' id %}?tab=acteur">Acteur affiché</a></li>
+        <li {% if tab == "localisation" %}class="active"{% endif %}><a href="{% url 'data:suggestion_groupe_details' id %}?tab=localisation">Localisation</a></li>
+        <li {% if tab == "annuaire_entreprise" %}class="active"{% endif %}><a href="{% url 'data:suggestion_groupe_details' id %}?tab=annuaire_entreprise">Annuaire entreprise</a></li>
+        <li ><a href="{% url 'data:suggestion_groupe_details' id %}">❌ Cacher les détails</a></li>
+    </ul>
+
+    <div>
+        {% if tab == "acteur" %}
+            <div>
+                {% if uuid %}
+                    <iframe
+                        id="acteur-detail-iframe-{{ uuid }}"
+                        src="{% url 'qfdmo:acteur-detail' uuid %}?iframe=1"
+                        width="100%"
+                        height="600px"
+                        style="border: none; overflow: hidden;">
+                    </iframe>
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/4.3.6/iframeResizer.min.js" integrity="sha512-f0wd6UIvZbsjPNebGx+uMzHmg6KXr1jWvumJDYSEDmwYJYOptZ0dTka/wBJu7Tj80tnCYMKoKicqvZiIc9GJgw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> {# pragma: allowlist secret #}
+                    <script>
+                        (function() {
+                            const iframeId = 'acteur-detail-iframe-{{ uuid }}';
+                            const iframe = document.getElementById(iframeId);
+                            if (iframe && typeof iFrameResize !== 'undefined') {
+                                iframe.onload = function() {
+                                    iFrameResize({
+                                        log: false,
+                                        checkOrigin: false,
+                                        heightCalculationMethod: 'lowestElement'
+                                    }, '#' + iframeId);
+                                };
+                            }
+                        })();
+                    </script>
+                {% else %}
+                    <p>Aucun acteur affiché</p>
+                {% endif %}
+            </div>
+        {% elif tab == "localisation" %}
+            <div>
+                <p>Localisation</p>
+                <p>{{ latitude }}, {{ longitude }}</p>
+            </div>
+        {% elif tab == "annuaire_entreprise" %}
+            <div>
+                <p>Annuaire entreprise</p>
+                <p>{{ annuaire_entreprise }}</p>
+            </div>
+        {% endif %}
+    </div>
+
 {% endblock suggestion_details %}

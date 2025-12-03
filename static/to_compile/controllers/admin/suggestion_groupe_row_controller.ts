@@ -186,6 +186,46 @@ export default class extends Controller<HTMLElement> {
       })
   }
 
+  updateStatus(event: Event) {
+    // event.preventDefault()
+    // event.stopPropagation()
+
+    const target = event.target as HTMLButtonElement
+    const action = target.dataset.actionValue
+    const statusUrl = target.dataset.statusUrl
+
+    if (!action || !statusUrl) {
+      console.error("Action ou URL manquante")
+      return
+    }
+
+    const formData = new FormData()
+    formData.append("action", action)
+
+    fetch(statusUrl, {
+      method: "POST",
+      headers: {
+        "X-Requested-With": "XMLHttpRequest",
+        "X-CSRFToken": this.getCsrfToken() ?? "",
+        Accept: "text/vnd.turbo-stream.html",
+      },
+      body: formData,
+      credentials: "same-origin",
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Échec de la mise à jour du statut (${response.status})`)
+        }
+        return response.text()
+      })
+      .then((html) => {
+        Turbo.renderStreamMessage(html)
+      })
+      .catch((error) => {
+        console.error("Erreur lors de la mise à jour du statut :", error)
+      })
+  }
+
   private getCsrfToken(): string | null {
     const match = document.cookie.match(/csrftoken=([^;]+)/)
     return match ? decodeURIComponent(match[1]) : null
