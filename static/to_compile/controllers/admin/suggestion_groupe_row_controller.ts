@@ -59,6 +59,21 @@ export default class extends Controller<HTMLElement> {
     this.postFieldsList(JSON.stringify(value), groupsJson)
   }
 
+  updateFieldsDisplayed(event: Event) {
+    let valueJson = this.fieldsValuesTarget.value
+    let groupsJson = this.fieldsGroupsTarget.value
+    let value = JSON.parse(valueJson)
+    const fields = (event.target as HTMLElement).dataset.fields
+    if (!fields) {
+      console.error("Champs manquants")
+      return
+    }
+    fields.split("|").forEach((field: string) => {
+      value[field]["updated_displayed_value"] = value[field]["new_value"]
+    })
+    this.postFieldsList(JSON.stringify(value), groupsJson)
+  }
+
   private postFieldsList(valuesJson: string, groupsJson: string) {
     const refreshUrl = this.element.dataset.refreshUrl
     if (!refreshUrl) {
