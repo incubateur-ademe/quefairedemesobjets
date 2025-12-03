@@ -56,7 +56,7 @@ test.describe("📦 Système d'Intégration Iframe", () => {
   })
 
   test.describe("Iframe formulaire", () => {
-    test("is loaded with correct parameters", async ({ page, baseUrl }) => {
+    test("is loaded with correct parameters", async ({ page, baseURL }) => {
       await page.goto(`/lookbook/preview/iframe/formulaire/`, {
         waitUntil: "domcontentloaded",
       })
@@ -77,7 +77,7 @@ test.describe("📦 Système d'Intégration Iframe", () => {
 
       expect(allow).toBe("geolocation; clipboard-write")
       expect(src).toBe(
-        `${baseUrl}/formulaire?direction=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre`,
+        `${baseURL}/formulaire?direction=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre`,
       )
       expect(frameborder).toBe("0")
       expect(scrolling).toBe("no")
@@ -150,7 +150,7 @@ test.describe("📦 Système d'Intégration Iframe", () => {
   })
 
   test.describe("Persistance mode iframe", () => {
-    test("persists across navigation", async ({ page, baseUrl }) => {
+    test("persists across navigation", async ({ page, baseURL }) => {
       test.slow()
       await page.goto(`/?iframe`, { waitUntil: "domcontentloaded" })
       expect(page).not.toBeNull()
@@ -161,7 +161,7 @@ test.describe("📦 Système d'Intégration Iframe", () => {
           "true",
         )
 
-        const links = page.locator(`a[href^="${baseUrl}"]`)
+        const links = page.locator(`a[href^="${baseURL}"]`)
 
         const count = await links.count()
         const randomLink = links.nth(Math.floor(Math.random() * count))
@@ -180,32 +180,32 @@ test.describe("📜 Vérification des scripts", () => {
    * and return the correct content type using HTTP fetch.
    */
 
-  test("carte.js script is accessible", async ({ request, baseUrl }) => {
-    const response = await request.get(`${baseUrl}/static/carte.js`)
+  test("carte.js script is accessible", async ({ request, baseURL }) => {
+    const response = await request.get(`${baseURL}/static/carte.js`)
     expect(response.status()).toBe(200)
     expect(response.headers()["content-type"]).toMatch(
       /application\/javascript|text\/javascript/,
     )
   })
 
-  test("iframe.js script is accessible", async ({ request, baseUrl }) => {
-    const response = await request.get(`${baseUrl}/static/iframe.js`)
+  test("iframe.js script is accessible", async ({ request, baseURL }) => {
+    const response = await request.get(`${baseURL}/static/iframe.js`)
     expect(response.status()).toBe(200)
     expect(response.headers()["content-type"]).toMatch(
       /application\/javascript|text\/javascript/,
     )
   })
 
-  test("infotri.js script is accessible", async ({ request, baseUrl }) => {
-    const response = await request.get(`${baseUrl}/iframe.js`)
+  test("infotri.js script is accessible", async ({ request, baseURL }) => {
+    const response = await request.get(`${baseURL}/iframe.js`)
     expect(response.status()).toBe(200)
     expect(response.headers()["content-type"]).toMatch(
       /application\/javascript|text\/javascript/,
     )
   })
 
-  test("configurateur.js script is accessible", async ({ request, baseUrl }) => {
-    const response = await request.get(`${baseUrl}/infotri/configurateur.js`)
+  test("configurateur.js script is accessible", async ({ request, baseURL }) => {
+    const response = await request.get(`${baseURL}/infotri/configurateur.js`)
     expect(response.status()).toBe(200)
     expect(response.headers()["content-type"]).toMatch(
       /application\/javascript|text\/javascript/,
