@@ -47,8 +47,10 @@
                                 {% if not forloop.last %}, {% endif %}
                             {% endfor %}
                         </td>
-                        <td class="qf-text-center qf-cursor-pointer qf-text-2xl" data-action="click->suggestion-groupe-row#refresh">
+                        <td class="qf-text-center qf-cursor-pointer qf-text-2xl">
+                            <div class="qf-cursor-pointer" data-action="click->suggestion-groupe-row#updateFieldsDisplayed" data-fields='{{ fields|join:"|" }}'>
                             ➡️
+                            </div>
                         </td>
                         <td>
                             {% for field in fields %}
