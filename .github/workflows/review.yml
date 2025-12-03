@@ -36,6 +36,13 @@ jobs:
       environment: preprod
       tag_name: preprod
 
+  airflow_docker:
+    name: 🐳 Airflow Docker
+    uses: ./.github/workflows/_airflow-build-and-push-docker.yml
+    secrets: inherit # pragma: allowlist secret`
+    with:
+      image_tag: airflow-v3.0
+
   # FIXME: tmp pour tester
   update_release_draft_for_review:
     # Uncomment when anchor are supported in GitHub Actions
@@ -56,14 +63,6 @@ jobs:
     if: ${{ !contains( github.ref_name, 'hotfix') }}
     outputs:
       tag_name: ${{ steps.release-drafter.outputs.tag_name }}
-
-  # airflow_docker_for_prod:
-  #   name: 🐳 Airflow Docker
-  #   uses: ./.github/workflows/airflow_docker.yml
-  #   secrets: inherit # pragma: allowlist secret`
-  #   needs: [update_release_draft_for_review]
-  #   with:
-  #     image_tag: ${{ needs.update_release_draft_for_review.steps.release-drafter.outputs.tag_name }}
 
 # Address actions/missing-workflow-permissions rule in
 # code scanning alerts
