@@ -31,7 +31,12 @@ test.describe("🗺️ Filtres Avancés Carte", () => {
         waitUntil: "domcontentloaded",
       })
       await searchInCarteMode(page)
-      await openAdvancedFilters(page)
+      await openAdvancedFilters(
+        page,
+        "view-mode-nav",
+        "modal-button-carte:filtres",
+        "modal-carte:filtres",
+      )
     },
   )
 })
