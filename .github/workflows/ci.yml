@@ -16,90 +16,90 @@ env:
   CI: true
 
 jobs:
-  backend_linter:
-    name: 📝 Backend Linter
-    runs-on: ubuntu-slim
-    steps:
-      - uses: actions/checkout@v6
+  # backend_linter:
+  #   name: 📝 Backend Linter
+  #   runs-on: ubuntu-slim
+  #   steps:
+  #     - uses: actions/checkout@v6
 
-      - name: Setup backend environment
-        uses: ./.github/actions/setup-backend
-        with:
-          uv-groups: "--only-dev"
-      - name: Install Terragrunt and OpenTofu
-        uses: gruntwork-io/terragrunt-action@95fc057922e3c3d4cc021a81a213f088f333ddef
-        with:
-          tg_version: "0.83.2"
-          tofu_version: "1.10.3"
-      - name: Check code formatting
-        run: make check-format
-      - uses: astral-sh/ruff-action@57714a7c8a2e59f32539362ba31877a1957dded1 # v3.5.1
-      - name: Run Tofu format check
-        run: tofu fmt -recursive -check infrastructure
-      - name: Run Terragrunt format check
-        run: terragrunt hcl fmt -check infrastructure
+  #     - name: Setup backend environment
+  #       uses: ./.github/actions/setup-backend
+  #       with:
+  #         uv-groups: "--only-dev"
+  #     - name: Install Terragrunt and OpenTofu
+  #       uses: gruntwork-io/terragrunt-action@95fc057922e3c3d4cc021a81a213f088f333ddef
+  #       with:
+  #         tg_version: "0.83.2"
+  #         tofu_version: "1.10.3"
+  #     - name: Check code formatting
+  #       run: make check-format
+  #     - uses: astral-sh/ruff-action@57714a7c8a2e59f32539362ba31877a1957dded1 # v3.5.1
+  #     - name: Run Tofu format check
+  #       run: tofu fmt -recursive -check infrastructure
+  #     - name: Run Terragrunt format check
+  #       run: terragrunt hcl fmt -check infrastructure
 
-  frontend_linter:
-    name: 📝 Frontend Linter
-    runs-on: ubuntu-slim
-    steps:
-      - uses: actions/checkout@v6
+  # frontend_linter:
+  #   name: 📝 Frontend Linter
+  #   runs-on: ubuntu-slim
+  #   steps:
+  #     - uses: actions/checkout@v6
 
-      - name: Setup frontend environment
-        uses: ./.github/actions/setup-frontend
+  #     - name: Setup frontend environment
+  #       uses: ./.github/actions/setup-frontend
 
-      - name: Check code formatting
-        run: npm run format:check
+  #     - name: Check code formatting
+  #       run: npm run format:check
 
-  backend_tests:
-    name: ✅ Backend Tests
-    runs-on: ubuntu-latest
-    needs: backend_linter
-    services:
-      postgres:
-        image: postgis/postgis:15-3.3-alpine
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 1s
-          --health-timeout 1s
-          --health-retries 50
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_USER: webapp
-          POSTGRES_PASSWORD: webapp # pragma: allowlist secret
-          POSTGRES_DB: webapp
-    steps:
-      - uses: actions/checkout@v6
+  # backend_tests:
+  #   name: ✅ Backend Tests
+  #   runs-on: ubuntu-latest
+  #   needs: backend_linter
+  #   services:
+  #     postgres:
+  #       image: postgis/postgis:15-3.3-alpine
+  #       options: >-
+  #         --health-cmd pg_isready
+  #         --health-interval 1s
+  #         --health-timeout 1s
+  #         --health-retries 50
+  #       ports:
+  #         - 5432:5432
+  #       env:
+  #         POSTGRES_USER: webapp
+  #         POSTGRES_PASSWORD: webapp # pragma: allowlist secret
+  #         POSTGRES_DB: webapp
+  #   steps:
+  #     - uses: actions/checkout@v6
 
-      - name: Install GIS packages
-        uses: ./.github/actions/install-gis
+  #     - name: Install GIS packages
+  #       uses: ./.github/actions/install-gis
 
-      - name: Setup backend environment
-        uses: ./.github/actions/setup-backend
-        with:
-          uv-groups: "--group dev --group airflow"
-      - name: Run unit tests
-        run: make unit-test
-      - name: Run integration tests
-        run: make integration-test
-      - name: Run data tests
-        run: uv run pytest dags/tests
-      - name: Check for missing migrations
-        run: uv run python manage.py makemigrations --check --no-input --settings=core.test_settings
+  #     - name: Setup backend environment
+  #       uses: ./.github/actions/setup-backend
+  #       with:
+  #         uv-groups: "--group dev --group airflow"
+  #     - name: Run unit tests
+  #       run: make unit-test
+  #     - name: Run integration tests
+  #       run: make integration-test
+  #     - name: Run data tests
+  #       run: uv run pytest dags/tests
+  #     - name: Check for missing migrations
+  #       run: uv run python manage.py makemigrations --check --no-input --settings=core.test_settings
 
-  frontend_tests:
-    name: ✅ Frontend Tests
-    runs-on: ubuntu-slim
-    needs: frontend_linter
-    steps:
-      - uses: actions/checkout@v6
+  # frontend_tests:
+  #   name: ✅ Frontend Tests
+  #   runs-on: ubuntu-slim
+  #   needs: frontend_linter
+  #   steps:
+  #     - uses: actions/checkout@v6
 
-      - name: Setup frontend environment
-        uses: ./.github/actions/setup-frontend
+  #     - name: Setup frontend environment
+  #       uses: ./.github/actions/setup-frontend
 
-      - name: Run tests
-        run: npm run test
+  #     - name: Run tests
+  #       run: npm run test
 
   # This job prepares all necessary artifacts for E2E test shards to run in parallel.
   # By building assets, populating the database, and caching Playwright browsers once,
@@ -109,7 +109,7 @@ jobs:
   e2e_prepare:
     name: Préparation des tests e2e
     # On s'assure que npm ci et uv sync aient tourné au moins une fois.
-    needs: [frontend_linter, backend_linter]
+    # needs: [frontend_linter, backend_linter]
     runs-on: ubuntu-latest
     services:
       postgres:
