@@ -213,7 +213,7 @@ jobs:
       # RUN e2e
       - name: Run server
         run: |
-          uv run python manage.py runserver --noreload --skip-checks &
+          uv run python manage.py runserver --noreload &
 
       - name: Wait for server to be ready
         run: |
