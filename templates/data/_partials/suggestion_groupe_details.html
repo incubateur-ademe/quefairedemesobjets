@@ -6,12 +6,6 @@
 
     <input type="hidden" name="fields_values" value='{{ fields_values|tojson }}' data-suggestion-groupe-row-target="fieldsValues">
     <input type="hidden" name="fields_groups" value='{{ fields_groups|tojson }}' data-suggestion-groupe-row-target="fieldsGroups">
-    <h3>requested_fields_list</h3>
-    {{ requested_fields_list }}
-    <h3>fields_values</h3>
-    {{ fields_values }}
-    <h3>fields_groups</h3>
-    {{ fields_groups }}
     <div class="fr-table fr-table--bordered">
         <table>
             <thead>
@@ -53,16 +47,24 @@
                             </div>
                         </td>
                         <td>
-                            {% for field in fields %}
-                                {% with values=fields_values|get_item:field %}
-                                    {% if values.updated_displayed_value and values.updated_displayed_value != values.displayed_value %}
-                                        {% display_diff_value_details None values.updated_displayed_value values.displayed_value %}
-                                    {% else %}
-                                        {{ values.displayed_value }}
-                                    {% endif %}
-                                {% endwith %}
-                                {% if not forloop.last %}, {% endif %}
-                            {% endfor %}
+                            <div class="qf-flex qf-flex-row qf-items-center qf-gap-1">
+                                {% for field in fields %}
+                                    <div
+                                        contentEditable="true"
+                                        data-field="{{ field }}"
+                                        data-action="blur->suggestion-groupe-row#fieldDisplayedBlur
+                                        focus->suggestion-groupe-row#fieldDisplayedFocus">
+                                        {% with values=fields_values|get_item:field %}
+                                            {% if values.updated_displayed_value and values.updated_displayed_value != values.displayed_value %}
+                                                {% display_diff_value_details None values.updated_displayed_value values.displayed_value %}
+                                            {% else %}
+                                                {{ values.displayed_value }}
+                                            {% endif %}
+                                        {% endwith %}
+                                    </div>
+                                    {% if not forloop.last %}<span>&nbsp;,&nbsp;</span> {% endif %}
+                                {% endfor %}
+                            </div>
                         </td>
                     </tr>
                 {% endfor %}
