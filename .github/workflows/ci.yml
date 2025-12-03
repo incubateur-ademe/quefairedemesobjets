@@ -156,6 +156,7 @@ jobs:
           name: e2e-build-artifacts
           path: |
             staticfiles
+            static/compiled
             database-dump.pgdump
           retention-days: 1
   e2e:
@@ -167,7 +168,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [1]
+        shard: [1, 2, 3, 4, 5]
     services:
       postgres:
         image: postgis/postgis:15-3.3-alpine
@@ -218,9 +219,11 @@ jobs:
       - name: Wait for server to be ready
         run: |
           timeout 20 sh -c 'until curl -s $BASE_URL > /dev/null; do sleep 1; done' || exit 1
+          # Additional wait to ensure static files are served
+          sleep 2
 
       - name: Run Playwright tests
-        run: npx playwright test --shard=${{ matrix.shard }}/1 --update-snapshots
+        run: npx playwright test --shard=${{ matrix.shard }}/5 --update-snapshots
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v5
