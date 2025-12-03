@@ -508,11 +508,13 @@ class SuggestionGroupe(TimestampedModel):
         """
         return first(
             (
-                values[champs.index("identifiant_unique")]
-                for champs, values in self.suggestion_unitaires.filter(
+                suggestion_unitaire.valeurs[
+                    suggestion_unitaire.champs.index("identifiant_unique")
+                ]
+                for suggestion_unitaire in self.suggestion_unitaires.filter(
                     suggestion_modele="Acteur"
-                ).items()
-                if "identifiant_unique" in champs
+                )
+                if "identifiant_unique" in suggestion_unitaire.champs
             ),
             "",
         )
