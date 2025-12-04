@@ -5,7 +5,7 @@ CATEGORIE_CHOICES = [
     ("tous", "Tous"),
     ("chaussures", "Chaussures"),
     ("vetement", "Vêtement"),
-    ("tissu", "Tissu"),
+    ("textile", "Textile"),
 ]
 
 # Consigne choices
