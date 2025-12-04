@@ -7,7 +7,7 @@ readme = "README.md"
 license = "MIT"
 dependencies = [
     "api-insee~=1.6",
-    "boto3<1.42",
+    "boto3<1.43",
     "dj-database-url>=3.0.1,<4",
     "django==5.2.9",
     "django-extensions~=4.1",
