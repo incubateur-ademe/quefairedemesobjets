@@ -441,10 +441,12 @@ class Suggestion(TimestampedModel):
 
 class SuggestionGroupe(TimestampedModel):
     NOT_EDITABLE_FIELDS = [
-        "proposition_service_codes",
-        "identifiant_unique",
-        "source_code",
+        "acteur_service_codes",
         "identifiant_externe",
+        "identifiant_unique",
+        "label_codes",
+        "proposition_service_codes",
+        "source_code",
     ]
 
     ORDERED_FIELDS = [
@@ -625,15 +627,28 @@ class SuggestionGroupe(TimestampedModel):
             for unit in suggestion_unitaires
             if unit.suggestion_modele == "Acteur"
         }
+        acteur_overridden_by_suggestion_unitaires = {
+            tuple(unit.champs): unit.valeurs
+            for unit in suggestion_unitaires
+            if unit.suggestion_modele == "RevisionActeur"
+        }
+        fields_groups = _get_ordered_fields_groups(
+            acteur_suggestion_unitaires, acteur_overridden_by_suggestion_unitaires
+        )
+        acteur_overridden_by_suggestion_unitaires_by_field = (
+            _flatten_suggestion_unitaires(acteur_overridden_by_suggestion_unitaires)
+        )
 
         if self.suggestion_cohorte.type_action == SuggestionAction.SOURCE_AJOUT:
 
             identifiant_unique = self.get_identifiant_unique_from_suggestion_unitaires()
-            fields_groups = _get_ordered_fields_groups(acteur_suggestion_unitaires)
             fields_values = {
                 key: {
                     "displayed_value": value,
                     "new_value": value,
+                    "updated_displayed_value": (
+                        acteur_overridden_by_suggestion_unitaires_by_field.get(key, "")
+                    ),
                 }
                 for fields, values in acteur_suggestion_unitaires.items()
                 for key, value in zip(fields, values)
@@ -651,21 +666,12 @@ class SuggestionGroupe(TimestampedModel):
         acteur = self.acteur
         acteur_overridden_by = self.acteur_overridden_by()
 
-        acteur_overridden_by_suggestion_unitaires = {
-            tuple(unit.champs): unit.valeurs
-            for unit in self.suggestion_unitaires.all()
-            if unit.suggestion_modele == "RevisionActeur"
-        }
-
         fields_groups = _get_ordered_fields_groups(acteur_suggestion_unitaires)
 
         fields = [key for keys in fields_groups for key in keys]
 
         acteur_suggestion_unitaires_by_field = _flatten_suggestion_unitaires(
             acteur_suggestion_unitaires
-        )
-        acteur_overridden_by_suggestion_unitaires_by_field = (
-            _flatten_suggestion_unitaires(acteur_overridden_by_suggestion_unitaires)
         )
         displayed_values = {}
         for field in fields:
@@ -736,7 +742,7 @@ class SuggestionGroupe(TimestampedModel):
                         )
                     )
                 except ValueError as e:
-                    logging.warning(f"ValueError: {e}")
+                    logger.warning(f"ValueError: {e}")
                     return {"longitude": f"longitude must be a float: {e}"}
                 try:
                     values_to_update["latitude"] = float(
@@ -745,25 +751,18 @@ class SuggestionGroupe(TimestampedModel):
                         )
                     )
                 except ValueError as e:
-                    logging.warning(f"ValueError: {e}")
+                    logger.warning(f"ValueError: {e}")
                     return {"latitude": f"latitude must be a float: {e}"}
-            identifiant_unique = (
-                fields_values["identifiant_unique"]["displayed_value"]
-                if "identifiant_unique" in fields_values.keys()
-                else self.acteur.identifiant_unique
-            )
             try:
-                logging.warning(f"values_to_update: {values_to_update}")
                 revision_acteur = RevisionActeur(
-                    identifiant_unique=identifiant_unique,
                     **values_to_update,
                 )
                 revision_acteur.full_clean()
             except ValidationError as e:
-                logging.warning(f"RevisionActeur is not valid: {e}")
+                logger.warning(f"RevisionActeur is not valid: {e}")
                 return e.error_dict
             except TypeError as e:
-                logging.warning(f"RevisionActeur is not valid: {e}")
+                logger.warning(f"RevisionActeur is not valid: {e}")
                 return {"error": f"{e}"}
             return {}
 
@@ -778,6 +777,8 @@ class SuggestionGroupe(TimestampedModel):
             for field, value in zip(unit.champs, unit.valeurs)
         }
         for field, by_state_values in fields_values.items():
+            if "updated_displayed_value" not in by_state_values.keys():
+                continue
             if by_state_values["updated_displayed_value"] != by_state_values[
                 "displayed_value"
             ] or (
