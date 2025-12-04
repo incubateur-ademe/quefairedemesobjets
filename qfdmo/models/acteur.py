@@ -948,10 +948,6 @@ class RevisionActeur(BaseActeur, LatLngPropertiesMixin):
         help_text="Raison du rattachement au parent",
     )
 
-    @property
-    def is_parent(self):
-        return self.pk and self.duplicats.exists()
-
     nom = models.CharField(max_length=255, blank=True, default="", db_default="")
     acteur_type = models.ForeignKey(
         ActeurType, on_delete=models.CASCADE, blank=True, null=True
@@ -963,6 +959,10 @@ class RevisionActeur(BaseActeur, LatLngPropertiesMixin):
         db_default="",
         validators=[EmptyEmailValidator()],
     )
+
+    @property
+    def is_parent(self):
+        return self.pk and self.duplicats.exists()
 
     @property
     def change_url(self):
@@ -977,6 +977,10 @@ class RevisionActeur(BaseActeur, LatLngPropertiesMixin):
         return parents_cache_get()["nombre_enfants"].get(self.identifiant_unique, 0)
 
     def __init__(self, *args, **kwargs):
+        if kwargs.get("latitude") and kwargs.get("longitude"):
+            kwargs["location"] = Point(kwargs["longitude"], kwargs["latitude"])
+            del kwargs["latitude"]
+            del kwargs["longitude"]
         super().__init__(*args, **kwargs)
         self._original_parent = self.parent
 
