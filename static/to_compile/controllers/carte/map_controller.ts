@@ -64,11 +64,6 @@ class MapController extends Controller<HTMLElement> {
     removeHash()
   }
 
-  setActivePinpoint(event) {
-    PinpointController.clearActivePinpoints()
-    event.currentTarget.classList.add(PinpointController.ACTIVE_PINPOINT_CLASSNAME)
-  }
-
   initialize() {
     this.mapChanged = debounce(this.mapChanged, 300).bind(this)
   }
