@@ -46,7 +46,6 @@ with DAG(
         return PythonOperator(
             task_id="read_db",
             python_callable=read_db,
-            provide_context=True,
             dag=dag,
         )
 
