@@ -24,7 +24,9 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
     "
     {% if not is_digital %}
     data-controller="map"
+    {% if location %}
     data-map-location-value="{{ location }}"
+    {% endif %}
     {% endif %}
 >
     {% if is_digital %}
@@ -39,7 +41,7 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
             data-action="map:captureInteraction->analytics#captureInteractionWithMap"
         >
             {% for acteur in acteurs %}
-                {% acteur_pinpoint_tag acteur=acteur direction=form.initial.direction action_list=form.initial.action_list carte=carte carte_config=carte_config sous_categorie_id=form.initial.sc_id %}
+                {% acteur_pinpoint_tag acteur=acteur direction=form.initial.direction action_list=selected_action_codes carte=carte carte_config=carte_config counter=forloop.counter %}
             {% endfor %}
             {% include "ui/components/carte/pinpoints/home.html" %}
         </div>

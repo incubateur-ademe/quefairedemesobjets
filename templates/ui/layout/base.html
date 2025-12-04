@@ -43,19 +43,20 @@
     </head>
 
     <body
-        class="
-        qf-flex qf-flex-col qf-h-svh qf-h-screen qf-overflow-hidden {% block body_classes %}{% endblock %}"
+        class="qf-flex qf-flex-col {% block body_classes %}{% endblock %}"
         data-controller="state analytics"
-        data-state-adresse-value=""
-        data-state-longitude-value=""
-        data-state-latitude-value=""
+        {% if location %}
+        data-map-location-value="{{ location }}"
+        {% endif %}
+        data-state-iframe-value="{{ iframe|yesno:"true,false" }}"
         data-state-address-autocomplete-outlet="[data-controller='address-autocomplete']"
         data-state-map-outlet="[data-controller='map']"
         data-state-search-solution-form-outlet="[data-controller='search-solution-form']"
         {% posthog_data_attributes CARTE.POSTHOG_KEY %}
         data-action="address-autocomplete:change->state#setLocation"
+        {% if STIMULUS_DEBUG %}data-stimulus-debug="true"{% endif %}
     >
-        <main id="solutions" class="{% block main_classes %}qf-h-full qf-overflow-auto qf-overscroll-none qf-scroll-smooth{% endblock %}">
+        <main id="solutions"{% block main_classes %}class="qf-h-full qf-overflow-y-auto qf-overflow-x-hidden{% endblock %}">
             <noscript>
                 <div class="fr-container fr-my-3w">
                     <div class="fr-alert fr-alert--error">

@@ -1,0 +1,36 @@
+{% extends "ui/components/modals/base.html" %}
+{% load dsfr_tags script_tags turbo_tags %}
+
+{% block size_classes %}fr-col-12 fr-col-md-10 fr-col-lg-10{% endblock %}
+
+{% block button_extra_classes %}fr-btn--secondary fr-btn--icon-left fr-icon-info-line{% endblock %}
+
+{% block button_text %}
+{{ button_text|default:"Infos" }}
+{% endblock button_text %}
+
+{% block modal_title %}
+À propos de la carte
+{% endblock modal_title %}
+
+{% block modal_content %}
+<div class="qf-flex qf-flex-col qf-gap-2w">
+    <div class="qf-flex max-md:qf-flex-col md:qf-flex-row qf-gap-2w" data-turbo="false">
+        {% dsfr_card link="https://longuevieauxobjets.ademe.fr/reutiliser-nos-outils/?mtm_campaign=widget" title="Réutiliser La Carte" description="Et si vous ajoutiez cette carte à votre site ? Pour utiliser notre widget, c'est par ici !" %}
+        {% url 'qfdmo:feedback-form' as link %}
+        {% dsfr_card link=link title="Donner votre avis" description="Cette carte doit être la vôtre ! Si vous avez des idées pour l'améliorer, on vous écoute." %}
+    </div>
+
+    <div class="qf-flex">
+        {% include 'ui/layout/_partials/header_logos.html' %}
+    </div>
+</div>
+{% endblock modal_content %}
+
+{% block modal_footer %}{% endblock %}
+
+{% block modal_wrapper_for_id %}
+{% with id=id|default:"infos" %}
+{{ block.super }}
+{% endwith %}
+{% endblock modal_wrapper_for_id %}
