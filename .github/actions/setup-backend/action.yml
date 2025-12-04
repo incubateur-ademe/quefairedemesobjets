@@ -1,0 +1,26 @@
+name: Setup Backend Environment
+description: Install uv and Python dependencies
+
+inputs:
+  uv-groups:
+    description: 'UV sync groups (e.g., "--group dev --group airflow")'
+    required: false
+    default: '--group dev'
+
+runs:
+  using: composite
+  steps:
+    - name: Install uv
+      uses: astral-sh/setup-uv@1e862dfacbd1d6d858c55d9b792c756523627244
+      with:
+        enable-cache: true
+
+    - name: Cache virtual environment
+      uses: actions/cache@v4
+      with:
+        path: ./.venv
+        key: venv-${{ inputs.uv-groups }}-${{ hashFiles('uv.lock') }}
+
+    - name: Install Python dependencies
+      shell: bash
+      run: uv sync ${{ inputs.uv-groups }}

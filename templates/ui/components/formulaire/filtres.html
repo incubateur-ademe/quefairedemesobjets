@@ -1,0 +1,56 @@
+{% extends "ui/components/formulaire/filtres/_modal.html" %}
+
+{# Panel «Filtres avancés» #}
+
+{% block wrapper_attrs %}
+    data-search-solution-form-target="advancedFiltersMainPanel"
+     data-action="keydown.esc@document->search-solution-form#closeAdvancedFilters"
+     data-testid="advanced-filters-modal"
+     tabindex="0"
+{% endblock wrapper_attrs %}
+
+{% block modal_header %}
+<button
+   class="fr-btn fr-btn--close fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-close-line"
+    type="button"
+    data-action="click -> search-solution-form#toggleAdvancedFilters"
+>
+    Fermer
+</button>
+{% endblock modal_header %}
+
+{% block modal_title %}Filtres avancés{% endblock %}
+
+{% block modal_content %}
+{% include "ui/components/formulaire/filtres/_labels_filters.html" %}
+{% endblock modal_content %}
+
+{% block modal_footer %}
+<div
+    class="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg fr-btns-group--icon-left"
+    data-search-solution-form-target="advancedFiltersSaveButton"
+>
+    <button
+        class="fr-btn"
+        type="button"
+        data-action="search-solution-form#toggleAdvancedFilters"
+    >
+        Enregistrer les filtres
+    </button>
+</div>
+<div
+    class="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg fr-btns-group--icon-left"
+    data-search-solution-form-target="advancedFiltersSaveAndSubmitButton"
+>
+    <button
+        class="fr-btn"
+        type="button"
+        data-action="click -> search-solution-form#advancedSubmit"
+        data-without-zone="false"
+        data-with-controls="{{ is_carte|yesno:'false,true' }}"
+        data-toggle-advanced-filters="true"
+    >
+        Appliquer
+    </button>
+</div>
+{% endblock modal_footer %}
