@@ -74,6 +74,8 @@ def register_legacy_migrate_url():
 @hooks.register("after_edit_page")
 def check_synonyme_redirection_conflicts(request, page):
     """Check for conflicts in legacy_synonyme redirections."""
+    from qfdmd.models import Produit
+
     if not hasattr(page, "legacy_synonyme"):
         return
 
@@ -83,8 +85,6 @@ def check_synonyme_redirection_conflicts(request, page):
 
         # Check if the synonyme's produit is already redirected
         try:
-            from qfdmd.models import Produit
-
             produit_page = synonyme_relation.synonyme.produit.next_wagtail_page
             if produit_page.page.id != page.id:
                 messages.warning(
