@@ -28,7 +28,7 @@
         </div>
 
         {# Navigation entre carte / liste #}
-        <div class="md:qf-px-2w max-md:qf-flex qf-justify-between qf-items-end" id="view-mode-nav">
+        <div class="md:qf-px-2w max-md:qf-flex qf-justify-between qf-items-end" id="view-mode-nav" data-testid="view-mode-nav">
             {{ forms.view_mode }}
             <div class="md:qf-hidden">
             {% include "ui/components/modals/filtres.html" with button_extra_classes="fr-btn--sm" id="filtres" button_only=True %}

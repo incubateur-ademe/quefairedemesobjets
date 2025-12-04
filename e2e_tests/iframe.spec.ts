@@ -179,34 +179,34 @@ test.describe("📜 Vérification des scripts", () => {
    * and return the correct content type using HTTP fetch.
    */
 
-  test("carte.js script is accessible", async ({ request, baseURL }) => {
-    const response = await request.get(`${baseURL}/static/carte.js`)
-    expect(response.status()).toBe(200)
-    expect(response.headers()["content-type"]).toMatch(
+  test("carte.js script is accessible", async ({ page }) => {
+    const response = await page.goto("/static/carte.js")
+    expect(response?.status()).toBe(200)
+    expect(response?.headers()["content-type"]).toMatch(
       /application\/javascript|text\/javascript/,
     )
   })
 
-  test("iframe.js script is accessible", async ({ request, baseURL }) => {
-    const response = await request.get(`${baseURL}/static/iframe.js`)
-    expect(response.status()).toBe(200)
-    expect(response.headers()["content-type"]).toMatch(
+  test("iframe.js script is accessible", async ({ page }) => {
+    const response = await page.goto("/static/iframe.js")
+    expect(response?.status()).toBe(200)
+    expect(response?.headers()["content-type"]).toMatch(
       /application\/javascript|text\/javascript/,
     )
   })
 
-  test("infotri.js script is accessible", async ({ request, baseURL }) => {
-    const response = await request.get(`${baseURL}/iframe.js`)
-    expect(response.status()).toBe(200)
-    expect(response.headers()["content-type"]).toMatch(
+  test("infotri.js script is accessible", async ({ page }) => {
+    const response = await page.goto("/iframe.js")
+    expect(response?.status()).toBe(200)
+    expect(response?.headers()["content-type"]).toMatch(
       /application\/javascript|text\/javascript/,
     )
   })
 
-  test("configurateur.js script is accessible", async ({ request, baseURL }) => {
-    const response = await request.get(`${baseURL}/infotri/configurateur.js`)
-    expect(response.status()).toBe(200)
-    expect(response.headers()["content-type"]).toMatch(
+  test("configurateur.js script is accessible", async ({ page }) => {
+    const response = await page.goto("/infotri/configurateur.js")
+    expect(response?.status()).toBe(200)
+    expect(response?.headers()["content-type"]).toMatch(
       /application\/javascript|text\/javascript/,
     )
   })
