@@ -1,8 +1,11 @@
 import mimetypes
 from typing import override
 
+import unidecode
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.postgres.search import TrigramWordDistance
 from django.contrib.staticfiles import finders
+from django.db.models.functions import Length, Lower, Unaccent
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.views.decorators.cache import cache_control
@@ -77,7 +80,29 @@ class AutocompleteSynonyme(ListView):
     def get_queryset(self):
         query = self.request.GET.get("q", "")
         limit = self.request.GET.get("limit", 10)
-        return super().get_queryset().filter(nom__icontains=query)[: int(limit)]
+
+        if not query:
+            return super().get_queryset().none()
+
+        query = unidecode.unidecode(query)
+
+        synonymes = (
+            super()
+            .get_queryset()
+            .annotate(
+                nom_unaccent=Unaccent(Lower("nom")),
+            )
+            .prefetch_related("produit__sous_categories")
+            .annotate(
+                distance=TrigramWordDistance(query, "nom_unaccent"),
+                length=Length("nom"),
+            )
+            .filter(produit__sous_categories__id__isnull=False)
+            .order_by("distance", "length")
+            .distinct()[: int(limit)]
+        )
+
+        return synonymes
 
     @override
     def get_context_data(self, **kwargs):
