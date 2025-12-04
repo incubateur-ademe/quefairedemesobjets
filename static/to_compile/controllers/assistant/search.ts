@@ -1,4 +1,3 @@
-import { Controller } from "@hotwired/stimulus"
 import { ClickOutsideController } from "stimulus-use"
 
 export default class extends ClickOutsideController {

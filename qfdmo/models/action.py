@@ -4,7 +4,6 @@ from colorfield.fields import ColorField
 from django.contrib.gis.db import models
 from django.core.cache import cache
 from django.db.models import CheckConstraint, Q
-from django.db.models.query import QuerySet
 from django.forms import model_to_dict
 from django.utils.functional import cached_property
 
@@ -141,6 +140,23 @@ class GroupeAction(CodeAsNaturalKeyModel):
     def get_libelle_from(self, actions):
         return ", ".join({a.libelle_groupe for a in actions}).capitalize()
 
+    def get_libelle_from_config(self, carte_config):
+        actions = self.actions.all()
+
+        if not carte_config:
+            return self.get_libelle_from(actions)
+
+        if config_actions := carte_config.action.all():
+            actions = actions.filter(id__in=config_actions)
+
+        if config_directions := carte_config.direction.all():
+            actions = actions.filter(directions__in=config_directions)
+
+        if config_groupes := carte_config.groupe_action.all():
+            actions = actions.filter(groupe_action__in=config_groupes)
+
+        return self.get_libelle_from(actions)
+
     @property
     def libelle(self):
         return self.get_libelle_from(self.actions.all())
@@ -235,10 +251,6 @@ def get_reparer_action_id() -> int:
         ][0].id
     except IndexError:
         raise Exception("Action 'Réparer' not found")
-
-
-def get_groupe_action_instances() -> QuerySet[GroupeAction]:
-    return GroupeAction.objects.prefetch_related("actions").order_by("order")
 
 
 def get_actions_by_direction() -> dict:

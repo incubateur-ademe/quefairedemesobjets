@@ -1,8 +1,13 @@
-<div class="qf-w-[34px] qf-h-[45px] {% if not force_visible %}qf-invisible{% endif %}"
-     data-uuid="{{ acteur.uuid }}"
-     data-latitude="{{ acteur.latitude }}"
-     data-longitude="{{ acteur.longitude }}"
-     data-map-target="acteur">
+{% load acteur_tags turbo_tags %}
+<a class="qf-w-[34px] qf-h-[45px] !qf-bg-none"
+    data-latitude="{{ acteur.latitude }}"
+    data-longitude="{{ acteur.longitude }}"
+    data-map-target="acteur"
+    href="{% acteur_url acteur with_map=False %}"
+    data-turbo-frame="{% acteur_frame_id %}"
+    data-controller="pinpoint"
+    data-action="analytics#captureInteractionWithMap pinpoint#setActive"
+>
     <div data-animated="" class="qf-scale-75">
         {% if marker_icon_file %}
             <img class="qf--translate-y-2/4" height="61" width="46" src="{{ marker_icon_file }}">
@@ -24,4 +29,4 @@
         {% endif %}
 
     </div>
-</div>
+</a>
