@@ -49,19 +49,23 @@
                         <td>
                             <div class="qf-flex qf-flex-row qf-items-center qf-gap-1">
                                 {% for field in fields %}
-                                    <div
-                                        contentEditable="true"
-                                        data-field="{{ field }}"
-                                        data-action="blur->suggestion-groupe-row#fieldDisplayedBlur
-                                        focus->suggestion-groupe-row#fieldDisplayedFocus">
-                                        {% with values=fields_values|get_item:field %}
-                                            {% if values.updated_displayed_value and values.updated_displayed_value != values.displayed_value %}
-                                                {% display_diff_value_details None values.updated_displayed_value values.displayed_value %}
-                                            {% else %}
-                                                {{ values.displayed_value }}
-                                            {% endif %}
-                                        {% endwith %}
-                                    </div>
+                                    {% if field|is_not_editable %}
+                                        <div>🚫</div>
+                                    {% else %}
+                                        <div
+                                            contentEditable="true"
+                                            data-field="{{ field }}"
+                                            data-action="blur->suggestion-groupe-row#fieldDisplayedBlur
+                                            focus->suggestion-groupe-row#fieldDisplayedFocus">
+                                            {% with values=fields_values|get_item:field %}
+                                                {% if values.updated_displayed_value and values.updated_displayed_value != values.displayed_value %}
+                                                    {% display_diff_value_details None values.updated_displayed_value values.displayed_value %}
+                                                {% else %}
+                                                    {{ values.displayed_value }}
+                                                {% endif %}
+                                            {% endwith %}
+                                        </div>
+                                    {% endif %}
                                     {% if not forloop.last %}<span>&nbsp;,&nbsp;</span> {% endif %}
                                 {% endfor %}
                             </div>
@@ -75,10 +79,10 @@
 
 
     <ul class="tabs">
-        <li {% if tab == "acteur" %}class="active"{% endif %}><a href="{% url 'data:suggestion_groupe_details' id %}?tab=acteur">Acteur affiché</a></li>
-        <li {% if tab == "localisation" %}class="active"{% endif %}><a href="{% url 'data:suggestion_groupe_details' id %}?tab=localisation">Localisation</a></li>
-        <li {% if tab == "annuaire_entreprise" %}class="active"{% endif %}><a href="{% url 'data:suggestion_groupe_details' id %}?tab=annuaire_entreprise">Annuaire entreprise</a></li>
-        <li ><a href="{% url 'data:suggestion_groupe_details' id %}">❌ Cacher les détails</a></li>
+        <li {% if tab == "acteur" %}class="active"{% endif %}><a href="{% url 'data:suggestion_groupe' id %}?tab=acteur">Acteur affiché</a></li>
+        <li {% if tab == "localisation" %}class="active"{% endif %}><a href="{% url 'data:suggestion_groupe' id %}?tab=localisation">Localisation</a></li>
+        <li {% if tab == "annuaire_entreprise" %}class="active"{% endif %}><a href="{% url 'data:suggestion_groupe' id %}?tab=annuaire_entreprise">Annuaire entreprise</a></li>
+        <li ><a href="{% url 'data:suggestion_groupe' id %}">❌ Cacher les détails</a></li>
     </ul>
 
     <div>
