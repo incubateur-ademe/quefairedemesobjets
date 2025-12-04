@@ -178,7 +178,6 @@ class TestSynonymeDetailViewRedirection:
     ):
         """Test that direct synonyme redirection takes priority over
         produit redirection."""
-        settings.REDIRECT_LEGACY_PRODUIT_TO_WAGTAIL_PAGES = True
 
         produit = ProduitFactory(nom="Produit Test")
         synonyme = SynonymeFactory(nom="Synonyme Test", produit=produit)
@@ -214,7 +213,6 @@ class TestSynonymeDetailViewRedirection:
     ):
         """Test that produit redirection works when synonyme has no
         direct redirection."""
-        settings.REDIRECT_LEGACY_PRODUIT_TO_WAGTAIL_PAGES = True
 
         produit = ProduitFactory(nom="Produit Test")
         synonyme = SynonymeFactory(nom="Synonyme Test", produit=produit)
@@ -241,7 +239,6 @@ class TestSynonymeDetailViewRedirection:
 
     def test_exclusion_blocks_produit_redirection(self, produit_page_a, db, settings):
         """Test that exclusion prevents produit redirection."""
-        settings.REDIRECT_LEGACY_PRODUIT_TO_WAGTAIL_PAGES = True
 
         produit = ProduitFactory(nom="Produit Test")
         synonyme = SynonymeFactory(nom="Synonyme Test", produit=produit)
@@ -271,11 +268,6 @@ class TestSynonymeDetailViewRedirection:
         # Should NOT redirect (exclusion blocks it)
         assert response.status_code == 200
 
-    def test_no_redirection_when_flag_disabled(self, produit_page_a, db, settings):
-        """Test that no redirection happens when beta flag is disabled."""
-        settings.REDIRECT_LEGACY_PRODUIT_TO_WAGTAIL_PAGES = False
-
-        produit = ProduitFactory(nom="Produit Test")
         synonyme = SynonymeFactory(nom="Synonyme Test", produit=produit)
 
         # Create direct synonyme redirection

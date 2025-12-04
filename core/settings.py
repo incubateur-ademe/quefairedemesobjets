@@ -547,9 +547,6 @@ MIDDLEWARE.extend(
     ]
 )
 
-REDIRECT_LEGACY_PRODUIT_TO_WAGTAIL_PAGES = decouple.config(
-    "REDIRECT_LEGACY_PRODUIT_TO_WAGTAIL_PAGES", default=False, cast=bool
-)
 
 # UI
 # ---

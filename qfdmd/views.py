@@ -2,7 +2,6 @@ import logging
 import re
 from typing import Any
 
-from django.conf import settings
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
@@ -129,27 +128,26 @@ class SynonymeDetailView(AssistantBaseView, DetailView):
     model = Synonyme
 
     def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-        if request.beta or settings.REDIRECT_LEGACY_PRODUIT_TO_WAGTAIL_PAGES:
-            synonyme = self.get_object()
+        synonyme = self.get_object()
 
-            # First, check if the synonyme has a direct redirection
-            try:
-                synonyme_intermediate_page = synonyme.next_wagtail_page
-                return redirect(synonyme_intermediate_page.page.url)
-            except Synonyme.next_wagtail_page.RelatedObjectDoesNotExist:
-                pass
+        # First, check if the synonyme has a direct redirection
+        try:
+            synonyme_intermediate_page = synonyme.next_wagtail_page
+            return redirect(synonyme_intermediate_page.page.url)
+        except Synonyme.next_wagtail_page.RelatedObjectDoesNotExist:
+            pass
 
-            # If no direct redirection, check if produit has redirection
-            try:
-                intermediate_page = synonyme.produit.next_wagtail_page
-                synonyme_can_be_redirected = (
-                    not hasattr(synonyme, "should_not_redirect_to")
-                    or synonyme.should_not_redirect_to.page != intermediate_page.page
-                )
-                if synonyme_can_be_redirected:
-                    return redirect(intermediate_page.page.url)
-            except Produit.next_wagtail_page.RelatedObjectDoesNotExist:
-                pass
+        # If no direct redirection, check if produit has redirection
+        try:
+            intermediate_page = synonyme.produit.next_wagtail_page
+            synonyme_can_be_redirected = (
+                not hasattr(synonyme, "should_not_redirect_to")
+                or synonyme.should_not_redirect_to.page != intermediate_page.page
+            )
+            if synonyme_can_be_redirected:
+                return redirect(intermediate_page.page.url)
+        except Produit.next_wagtail_page.RelatedObjectDoesNotExist:
+            pass
 
         return super().get(request, *args, **kwargs)
 
