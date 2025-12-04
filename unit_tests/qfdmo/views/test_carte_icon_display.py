@@ -33,36 +33,35 @@ class TestCarteIconDisplay:
 
     @pytest.fixture
     def groupe_reparer(self):
-        """Create 'reparer' groupe_action"""
-        groupe = GroupeActionFactory(code="reparer")
-        return groupe
+        """Get 'reparer' groupe_action from fixtures"""
+        from qfdmo.models import GroupeAction
+
+        # Use the existing groupe_action from fixtures
+        return GroupeAction.objects.get(code="reparer")
 
     @pytest.fixture
     def groupe_donner(self):
-        """Create 'donner' groupe_action - should not appear in results"""
+        """Create 'donner_test' groupe_action - should not appear in results"""
         groupe = GroupeActionFactory(code="donner_test")
         return groupe
 
     @pytest.fixture
     def groupe_trier(self):
-        """Create 'trier' groupe_action"""
-        groupe = GroupeActionFactory(code="trier")
-        return groupe
+        """Get 'trier' groupe_action from fixtures"""
+        from qfdmo.models import GroupeAction
+
+        # Use the existing groupe_action from fixtures
+        return GroupeAction.objects.get(code="trier")
 
     @pytest.fixture
     def action_reparer(self, groupe_reparer):
-        """Create 'reparer' action"""
-        action = ActionFactory(
-            code="reparer",
-            icon="fr-icon-tools-fill",
-            couleur="#009081",
-        )
-        groupe_reparer.actions.add(action)
-        return action
+        """Get 'reparer' action from fixtures"""
+        # The action is already linked to groupe_reparer from fixtures
+        return groupe_reparer.actions.first()
 
     @pytest.fixture
     def action_donner(self, groupe_donner):
-        """Create 'donner' action"""
+        """Create 'donner_test' action"""
         action = ActionFactory(
             code="donner_test",
             icon="fr-icon-gift-fill",
@@ -73,14 +72,9 @@ class TestCarteIconDisplay:
 
     @pytest.fixture
     def action_trier(self, groupe_trier):
-        """Create 'trier' action"""
-        action = ActionFactory(
-            code="trier",
-            icon="fr-icon-delete-bin-fill",
-            couleur="#6a6af4",
-        )
-        groupe_trier.actions.add(action)
-        return action
+        """Get 'trier' action from fixtures"""
+        # The action is already linked to groupe_trier from fixtures
+        return groupe_trier.actions.first()
 
     @pytest.fixture
     def carte_config_mauvais_etat(self, groupe_reparer, groupe_trier, groupe_donner):
@@ -94,15 +88,18 @@ class TestCarteIconDisplay:
         carte.groupe_action.add(groupe_trier)
 
         # Add groupe_action_configs with custom icons
+        # Set acteur_type=None so the icons apply to all acteur types
         GroupeActionConfigFactory(
             carte_config=carte,
             groupe_action=groupe_reparer,
             icon=FileField(filename="icon-reparer.svg"),
+            acteur_type=None,
         )
         GroupeActionConfigFactory(
             carte_config=carte,
             groupe_action=groupe_trier,
             icon=FileField(filename="icon-trier.svg"),
+            acteur_type=None,
         )
         # Note: No config for groupe_donner
 
@@ -113,8 +110,13 @@ class TestCarteIconDisplay:
         self, sous_categorie_109, action_reparer, action_donner, action_trier
     ):
         """Create an acteur that has reparer, donner AND trier actions"""
+        from django.contrib.gis.geos import Point
+
+        # Create acteur near Auray coordinates for the search
         acteur = DisplayedActeurFactory(
             nom="Test Acteur with Multiple Actions",
+            location=Point(-2.990838, 47.668099, srid=4326),
+            statut="ACTIF",
         )
 
         # Add proposition services for all three actions
@@ -220,7 +222,8 @@ class TestCarteIconDisplay:
             "latitude": "47.668099",
             "view_mode-view": "carte",
             # Explicitly select only reparer in the legend
-            "mauvais-etat_legende-groupe_action": str(groupe_reparer.id),
+            # Note: groupe_action is a MultipleChoiceField, so we need to pass a list
+            "mauvais-etat_legende-groupe_action": [str(groupe_reparer.id)],
         }
 
         response = client.get(url, params)
@@ -274,9 +277,9 @@ class TestCarteIconDisplay:
         acteurs = response.context.get("acteurs", [])
 
         # Verify our test acteur is included
-        acteur_ids = [acteur.id for acteur in acteurs]
+        acteur_pks = [acteur.pk for acteur in acteurs]
         assert (
-            acteur_with_multiple_actions.id in acteur_ids
+            acteur_with_multiple_actions.pk in acteur_pks
         ), "Test acteur should be in results"
 
         # Verify the icon_lookup doesn't contain donner_test

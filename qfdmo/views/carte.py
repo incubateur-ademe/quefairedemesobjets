@@ -374,7 +374,8 @@ class CarteSearchActeursView(SearchActeursView):
 
         # Get the selected groupe_action IDs to filter configs
         selected_groupe_action_ids = set(
-            self._get_ui_form("legende")["groupe_action"].value() or []
+            int(id)
+            for id in self._get_ui_form("legende")["groupe_action"].value() or []
         )
 
         if not selected_groupe_action_ids:
