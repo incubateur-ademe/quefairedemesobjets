@@ -4,6 +4,7 @@ from datetime import datetime
 
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields import ArrayField
+from django.core.exceptions import ValidationError
 from django.template.loader import render_to_string
 from more_itertools import first, flatten
 from pydantic import BaseModel, ConfigDict
@@ -706,7 +707,66 @@ class SuggestionGroupe(TimestampedModel):
 
     def update_from_serialized_data(
         self, fields_values: dict, fields_groups: list[tuple]
-    ):
+    ) -> tuple[bool, dict | None]:
+        """
+        Try to create the RevisionActeur Suggestions
+        Returns a tuple with:
+        - bool: True if the update is successful, False otherwise
+        - dict: None if the update is successful, a dictionary of errors otherwise
+          general errors are under the key "error"
+          field errors are under the key "field_name"
+        """
+
+        def _get_errors_from_proposed_updates(
+            self, values_to_update: dict, fields_values: dict
+        ) -> dict:
+            """
+            Check if the proposed updates are valid
+            Returns a dictionary of errors
+            """
+
+            if (
+                "longitude" in values_to_update.keys()
+                or "latitude" in values_to_update.keys()
+            ):
+                try:
+                    values_to_update["longitude"] = float(
+                        values_to_update.get(
+                            "longitude", fields_values["longitude"]["displayed_value"]
+                        )
+                    )
+                except ValueError as e:
+                    logging.warning(f"ValueError: {e}")
+                    return {"longitude": f"longitude must be a float: {e}"}
+                try:
+                    values_to_update["latitude"] = float(
+                        values_to_update.get(
+                            "latitude", fields_values["latitude"]["displayed_value"]
+                        )
+                    )
+                except ValueError as e:
+                    logging.warning(f"ValueError: {e}")
+                    return {"latitude": f"latitude must be a float: {e}"}
+            identifiant_unique = (
+                fields_values["identifiant_unique"]["displayed_value"]
+                if "identifiant_unique" in fields_values.keys()
+                else self.acteur.identifiant_unique
+            )
+            try:
+                logging.warning(f"values_to_update: {values_to_update}")
+                revision_acteur = RevisionActeur(
+                    identifiant_unique=identifiant_unique,
+                    **values_to_update,
+                )
+                revision_acteur.full_clean()
+            except ValidationError as e:
+                logging.warning(f"RevisionActeur is not valid: {e}")
+                return e.error_dict
+            except TypeError as e:
+                logging.warning(f"RevisionActeur is not valid: {e}")
+                return {"error": f"{e}"}
+            return {}
+
         values_to_update = {}
 
         revision_suggestion_unitaires = self.suggestion_unitaires.filter(
@@ -726,6 +786,13 @@ class SuggestionGroupe(TimestampedModel):
                 != by_state_values["updated_displayed_value"]
             ):
                 values_to_update[field] = by_state_values["updated_displayed_value"]
+
+        errors = _get_errors_from_proposed_updates(
+            self, values_to_update, fields_values
+        )
+        if errors:
+            return False, errors
+
         for fields in fields_groups:
             if any(field in values_to_update.keys() for field in fields):
                 suggestion_unitaire, _ = SuggestionUnitaire.objects.get_or_create(
@@ -746,6 +813,8 @@ class SuggestionGroupe(TimestampedModel):
                     )
                     suggestion_unitaire.valeurs.append(value)
                 suggestion_unitaire.save()
+
+        return True, None
 
 
 class SuggestionUnitaire(TimestampedModel):
