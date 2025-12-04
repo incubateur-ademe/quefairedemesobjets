@@ -52,3 +52,36 @@ test.describe("🗺️ Affichage Légende Carte", () => {
     await expect(page.getByTestId("carte-legend")).toBeVisible()
   })
 })
+
+test.describe("🗺️ Pinpoint Active State", () => {
+  test("Clicking a pinpoint adds active class and removes it from other pinpoints", async ({
+    page,
+  }) => {
+    // Navigate to the preview page with multiple pinpoints
+    await page.goto(`/lookbook/preview/components/acteur_pinpoint_multiple`, {
+      waitUntil: "domcontentloaded",
+    })
+
+    const pinpoint1 = page.getByTestId("pinpoint-1").locator("a")
+    const pinpoint2 = page.getByTestId("pinpoint-2").locator("a")
+
+    // Initially, no pinpoint should have the active class
+    await expect(pinpoint1).not.toHaveClass(/active-pinpoint/)
+    await expect(pinpoint2).not.toHaveClass(/active-pinpoint/)
+
+    // Click on first pinpoint
+    await pinpoint1.click()
+    await expect(pinpoint1).toHaveClass(/active-pinpoint/)
+    await expect(pinpoint2).not.toHaveClass(/active-pinpoint/)
+
+    // Click on second pinpoint
+    await pinpoint2.click()
+    await expect(pinpoint1).not.toHaveClass(/active-pinpoint/)
+    await expect(pinpoint2).toHaveClass(/active-pinpoint/)
+
+    // Click on first pinpoint again
+    await pinpoint1.click()
+    await expect(pinpoint1).toHaveClass(/active-pinpoint/)
+    await expect(pinpoint2).not.toHaveClass(/active-pinpoint/)
+  })
+})

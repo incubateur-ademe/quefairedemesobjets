@@ -251,6 +251,43 @@ class ComponentsPreview(LookbookPreview):
         )
         return template.render(Context(context))
 
+    def acteur_pinpoint_multiple(self, **kwargs):
+        """
+        Preview showing two pinpoints side by side to test active state toggling.
+        Uses dummy acteur objects to avoid generating real links.
+        """
+
+        class DummyActeur:
+            def __init__(self, latitude, longitude, uuid, *args, **kwargs):
+                self.latitude = latitude
+                self.longitude = longitude
+                self.uuid = uuid
+                self.location = Point(longitude, latitude)
+                self.action_to_display = lambda *args, **kwargs: None
+                self.full_url = "#"
+
+        acteur_1 = DummyActeur(48.8566, 2.3522, "dummy-1")
+        acteur_2 = DummyActeur(48.8606, 2.3376, "dummy-2")
+
+        context = {
+            "acteur_1": acteur_1,
+            "acteur_2": acteur_2,
+        }
+        template = Template(
+            """
+            {% load carte_tags %}
+            <div class="qf-flex qf-gap-4 qf-p-4" data-controller="map">
+                <div data-testid="pinpoint-1">
+                    {% acteur_pinpoint_tag acteur=acteur_1 %}
+                </div>
+                <div data-testid="pinpoint-2">
+                    {% acteur_pinpoint_tag acteur=acteur_2 %}
+                </div>
+            </div>
+            """
+        )
+        return template.render(Context(context))
+
     @component_docs("ui/components/button.md")
     def button(self, **kwargs):
         context = {"href": "google.fr", "text": "test"}

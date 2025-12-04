@@ -12,6 +12,7 @@ import SsCatObjectAutocompleteController from "../controllers/carte/ss_cat_objec
 import ActeurDetailsController from "../controllers/carte/acteur_details"
 import NextAutocompleteController from "../controllers/shared/next_autocomplete_controller"
 import ResponsiveController from "../controllers/carte/responsive_controller"
+import PinpointController from "../controllers/carte/pinpoint_controller"
 
 // QFDMD
 import SearchController from "../controllers/assistant/search"
@@ -30,6 +31,7 @@ stimulus.register("copy", CopyController)
 stimulus.register("scroll", ScrollController)
 stimulus.register("acteur-details", ActeurDetailsController)
 stimulus.register("next-autocomplete", NextAutocompleteController)
+stimulus.register("pinpoint", PinpointController)
 
 stimulus.register("search", SearchController)
 stimulus.register("blink", BlinkController)

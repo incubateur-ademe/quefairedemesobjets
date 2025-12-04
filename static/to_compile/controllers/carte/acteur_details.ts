@@ -1,6 +1,6 @@
 import { WindowResizeController } from "stimulus-use"
 
-import { clearActivePinpoints } from "../../js/helpers"
+import PinpointController from "./pinpoint_controller"
 
 class ActeurController extends WindowResizeController {
   static targets = ["handle", "actions", "content"]
@@ -105,7 +105,7 @@ class ActeurController extends WindowResizeController {
       },
       { once: true },
     )
-    clearActivePinpoints()
+    PinpointController.clearActivePinpoints()
     this.#setTranslateY(-1 * this.initialTranslateY)
     this.hidden = true
   }
