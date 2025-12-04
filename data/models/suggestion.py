@@ -439,6 +439,50 @@ class Suggestion(TimestampedModel):
 
 
 class SuggestionGroupe(TimestampedModel):
+    NOT_EDITABLE_FIELDS = [
+        "proposition_service_codes",
+        "identifiant_unique",
+        "source_code",
+        "identifiant_externe",
+    ]
+
+    ORDERED_FIELDS = [
+        ("identifiant_unique",),
+        ("source_code",),
+        ("identifiant_externe",),
+        ("nom",),
+        ("nom_commercial",),
+        ("nom_officiel",),
+        ("siret",),
+        ("siren",),
+        ("naf_principal",),
+        ("description",),
+        ("acteur_type_code",),
+        ("url",),
+        ("email",),
+        ("telephone",),
+        ("adresse",),
+        ("adresse_complement",),
+        ("code_postal",),
+        ("ville",),
+        (
+            "latitude",
+            "longitude",
+        ),
+        ("horaires_osm",),
+        ("horaires_description",),
+        ("public_accueilli",),
+        ("reprise",),
+        ("exclusivite_de_reprisereparation",),
+        ("uniquement_sur_rdv",),
+        ("consignes_dacces",),
+        ("statut",),
+        ("commentaires",),
+        ("label_codes",),
+        ("acteur_service_codes",),
+        ("proposition_service_codes",),
+    ]
+
     class Meta:
         verbose_name = "2️⃣ ⏳ ⚠️ Suggestion Groupe - Livraison prochainement"
         verbose_name_plural = "2️⃣ ⏳ ⚠️ Suggestions Groupes - Livraison prochainement"
@@ -542,6 +586,35 @@ class SuggestionGroupe(TimestampedModel):
                 )
             }
 
+        def _get_ordered_fields_groups(
+            acteur_suggestion_unitaires: dict,
+            acteur_overridden_by_suggestion_unitaires: dict | None = None,
+        ) -> list[tuple]:
+
+            fields_groups = list(
+                set(acteur_suggestion_unitaires.keys())
+                | set(
+                    acteur_overridden_by_suggestion_unitaires.keys()
+                    if acteur_overridden_by_suggestion_unitaires
+                    else set()
+                )
+            )
+
+            if any(
+                fields not in SuggestionGroupe.ORDERED_FIELDS
+                for fields in fields_groups
+            ):
+                raise ValueError(
+                    f"""fields in fields_groups are not in ORDERED_FIELDS:
+                                {fields_groups=}
+                                {SuggestionGroupe.ORDERED_FIELDS=}"""
+                )
+            return [
+                fields
+                for fields in SuggestionGroupe.ORDERED_FIELDS
+                if fields in fields_groups
+            ]
+
         # Get all suggestion_unitaires
         suggestion_unitaires = list(self.suggestion_unitaires.all())
 
@@ -555,7 +628,7 @@ class SuggestionGroupe(TimestampedModel):
         if self.suggestion_cohorte.type_action == SuggestionAction.SOURCE_AJOUT:
 
             identifiant_unique = self.get_identifiant_unique_from_suggestion_unitaires()
-            fields_groups = list(acteur_suggestion_unitaires.keys())
+            fields_groups = _get_ordered_fields_groups(acteur_suggestion_unitaires)
             fields_values = {
                 key: {
                     "displayed_value": value,
@@ -583,10 +656,8 @@ class SuggestionGroupe(TimestampedModel):
             if unit.suggestion_modele == "RevisionActeur"
         }
 
-        fields_groups = list(
-            set(acteur_suggestion_unitaires.keys())
-            | set(acteur_overridden_by_suggestion_unitaires.keys())
-        )
+        fields_groups = _get_ordered_fields_groups(acteur_suggestion_unitaires)
+
         fields = [key for keys in fields_groups for key in keys]
 
         acteur_suggestion_unitaires_by_field = _flatten_suggestion_unitaires(
@@ -620,6 +691,7 @@ class SuggestionGroupe(TimestampedModel):
                 "new_value": str(acteur_suggestion_unitaires_by_field.get(field, "")),
                 "old_value": str(getattr(acteur, field, "")),
             }
+
         return SuggestionCohorteSerializer(
             id=self.id,
             suggestion_cohorte=self.suggestion_cohorte,
