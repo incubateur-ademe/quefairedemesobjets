@@ -3192,7 +3192,7 @@ requires-dist = [
     { name = "psycopg" },
     { name = "pydantic", extras = ["email"], specifier = ">=2.11.7" },
     { name = "python-decouple", specifier = "~=3.8" },
-    { name = "queryish", specifier = ">=0.2,<0.3" },
+    { name = "queryish", specifier = ">=0.2,<0.4" },
     { name = "rapidfuzz", specifier = ">=3.13.0,<4" },
     { name = "requests", specifier = ">=2.32.4,<3" },
     { name = "sentry-sdk", specifier = ">=2.37.0,<3" },
@@ -3247,14 +3247,14 @@ docs = [
 
 [[package]]
 name = "queryish"
-version = "0.2"
+version = "0.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a6/d2/e8df727b39fca88e0a386b3341a91042ce808c43c24c6d24aa4be861af00/queryish-0.2.tar.gz", hash = "sha256:60150be41673af3d0597f78fb5e77be0e30dc49658a83d274b2a0959c4f97c1b", size = 16081, upload-time = "2023-09-05T17:38:28.052Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d5/ad/c8abbee4d48b274f55c145b7463a1d4d3393f677b7ab0e95cea7d5ab9da6/queryish-0.3.tar.gz", hash = "sha256:7f5e32cb466b4c87d8e8e1b8272da68ba43c413155a868453558e4ad6a4dc8d5", size = 17853, upload-time = "2025-10-13T11:53:20.379Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b1/6d/309fb3afedfbb7eb688df628a61da3547f053a70d69397999d28add8bc79/queryish-0.2-py3-none-any.whl", hash = "sha256:2e460537f6b7cd5af187b78a3635e80ceec421221adb62883282d419dc170ea8", size = 9902, upload-time = "2023-09-05T17:38:26.062Z" },
+    { url = "https://files.pythonhosted.org/packages/8d/03/de94848b5bc5781db51beafc204d657c5563c851cd49928383d30892b2dc/queryish-0.3-py3-none-any.whl", hash = "sha256:1e8c01b9372c2f715f6015c72424bb76514779fead71a7980343368c028965e1", size = 10638, upload-time = "2025-10-13T11:53:19.55Z" },
 ]
 
 [[package]]
