@@ -35,7 +35,7 @@ dependencies = [
     "wagtail-honeypot @ git+https://github.com/Luzzzi/wagtail-honeypot@feature/i18n-required-honeypot",
     "diff-match-patch>=20241021,<20241022",
     "django-lookbook>=1.0.2,<2",
-    "queryish>=0.2,<0.3",
+    "queryish>=0.2,<0.4",
     "detect-secrets>=1.5.0",
     "djangoql>=0.18.1",
     "pydantic[email]>=2.11.7",
