@@ -80,9 +80,6 @@ def check_synonyme_redirection_conflicts(request, page):
         return
 
     for synonyme_relation in page.legacy_synonyme.all():
-        if not synonyme_relation.synonyme:
-            continue
-
         # Check if the synonyme's produit is already redirected
         try:
             produit_page = synonyme_relation.synonyme.produit.next_wagtail_page
