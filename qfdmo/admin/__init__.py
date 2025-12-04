@@ -6,3 +6,4 @@ from .acteur import *  # noqa: F403
 from .action import *  # noqa: F403
 from .categorie_objet import *  # noqa: F403
 from .config import *  # noqa: F403
+from .geo import *  # noqa: F403

@@ -156,10 +156,7 @@ describe("getBaseUrlFromScript", () => {
     it("should handle Django Lookbook preview with protocol-relative URL", () => {
       process.env.BASE_URL = "https://quefairedemesdechets.ademe.local"
       const script = document.createElement("script")
-      script.setAttribute(
-        "src",
-        "//quefairedemesdechets.ademe.local/infotri/static/infotri.js",
-      )
+      script.setAttribute("src", "//quefairedemesdechets.ademe.local/infotri/iframe.js")
 
       const result = getBaseUrlFromScript(script)
 

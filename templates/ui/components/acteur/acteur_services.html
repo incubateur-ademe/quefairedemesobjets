@@ -1,0 +1,6 @@
+{% load acteur_tags %}
+<div class="qf-flex qf-gap-1v qf-max-w-[350px] qf-flex-wrap">
+    {% for ps in object.sorted_proposition_services %}
+        {% service_tag text=ps.action.libelle action=ps.action %}
+    {% endfor %}
+</div>

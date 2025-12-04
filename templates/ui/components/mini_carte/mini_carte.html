@@ -1,0 +1,18 @@
+{% load carte_tags %}
+<div
+    class="
+    qf-w-full
+    qf-aspect-video
+    qf-relative"
+    data-controller="map"
+    data-map-initial-zoom-value="3"
+    data-map-location-value="{{ location|to_latlng_json }}"
+>
+      <div
+          data-map-target="mapContainer"
+          class="qf-inset-0 qf-h-full qf-relative qf-z-0"
+      >
+          {% acteur_pinpoint_tag acteur=acteur carte=True %}
+          {% include "ui/components/carte/pinpoints/home.html" %}
+      </div>
+</div>

@@ -1,0 +1,13 @@
+{% extends "ui/components/acteur/tabs/_panel.html" %}
+
+{% block id %}labelsPanel{% endblock %}
+
+{% block aria_labelledby %}labelsPanel{% endblock %}
+
+{% block content %}
+<div class="qf-pt-1w">
+    {% for source_or_label in object.labels_without_enseigne_display %}
+        {% include "ui/components/acteur/_label.html" with border=True %}
+    {% endfor %}
+</div>
+{% endblock content %}

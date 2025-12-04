@@ -1,0 +1,21 @@
+{% extends "ui/components/acteur/tabs/_section.html" %}
+
+{% block title %}
+Horaires
+{% endblock title %}
+
+{% block content %}
+<div>
+    {% if object.uniquement_sur_rdv %}
+    <p class="qf-font-bold">
+        📆 Les services de cet établissement ne sont disponibles que sur rendez-vous.
+    </p>
+    {% endif %}
+
+    {% if object.uniquement_sur_rdv and object.horaires_description %}
+        {% include "ui/components/acteur/tabs/_separator.html" %}
+    {% endif %}
+
+    {{ object.horaires_description|linebreaks|safe }}
+</div>
+{% endblock content %}

@@ -275,16 +275,16 @@
 {
     "model": "qfdmo.action",
     "fields": {
-        "code": "rapporter",
-        "libelle": "rapporter",
-        "libelle_groupe": "Je rapporte",
+        "code": "trier",
+        "libelle": "déposer",
+        "libelle_groupe": "Je dépose en point de collecte",
         "afficher": false,
-        "description": "Rapporter ses contenants réutilisables",
-        "order": 10,
+        "description": "déposer pour recycler",
+        "order": 11,
         "couleur": "#cab300",
-        "icon": "fr-icon-arrow-up-down-line",
+        "icon": "fr-icon-recycle-line",
         "groupe_action": [
-            "donner_echanger_rapporter"
+            "trier"
         ],
         "directions": [
             [
@@ -296,16 +296,16 @@
 {
     "model": "qfdmo.action",
     "fields": {
-        "code": "trier",
-        "libelle": "déposer",
-        "libelle_groupe": "Je dépose en point de collecte",
+        "code": "rapporter",
+        "libelle": "rapporter",
+        "libelle_groupe": "Je rapporte",
         "afficher": false,
-        "description": "déposer pour recycler",
-        "order": 11,
+        "description": "Rapporter ses contenants réutilisables",
+        "order": 10,
         "couleur": "#cab300",
-        "icon": "fr-icon-recycle-line",
+        "icon": "fr-icon-arrow-up-down-line",
         "groupe_action": [
-            "trier"
+            "donner_echanger_rapporter"
         ],
         "directions": [
             [

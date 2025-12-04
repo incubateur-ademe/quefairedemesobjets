@@ -481,15 +481,15 @@ wheels = [
 
 [[package]]
 name = "beautifulsoup4"
-version = "4.14.2"
+version = "4.14.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "soupsieve" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/77/e9/df2358efd7659577435e2177bfa69cba6c33216681af51a707193dec162a/beautifulsoup4-4.14.2.tar.gz", hash = "sha256:2a98ab9f944a11acee9cc848508ec28d9228abfd522ef0fad6a02a72e0ded69e", size = 625822, upload-time = "2025-09-29T10:05:42.613Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c3/b0/1c6a16426d389813b48d95e26898aff79abbde42ad353958ad95cc8c9b21/beautifulsoup4-4.14.3.tar.gz", hash = "sha256:6292b1c5186d356bba669ef9f7f051757099565ad9ada5dd630bd9de5fa7fb86", size = 627737, upload-time = "2025-11-30T15:08:26.084Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/94/fe/3aed5d0be4d404d12d36ab97e2f1791424d9ca39c2f754a6285d59a3b01d/beautifulsoup4-4.14.2-py3-none-any.whl", hash = "sha256:5ef6fa3a8cbece8488d66985560f97ed091e22bbc4e9c2338508a9d5de6d4515", size = 106392, upload-time = "2025-09-29T10:05:43.771Z" },
+    { url = "https://files.pythonhosted.org/packages/1a/39/47f9197bdd44df24d67ac8893641e16f386c984a0619ef2ee4c51fbbc019/beautifulsoup4-4.14.3-py3-none-any.whl", hash = "sha256:0918bfe44902e6ad8d57732ba310582e98da931428d231a5ecb9e7c703a735bb", size = 107721, upload-time = "2025-11-30T15:08:24.087Z" },
 ]
 
 [[package]]
@@ -1044,16 +1044,28 @@ wheels = [
 
 [[package]]
 name = "django"
-version = "5.2.8"
+version = "5.2.9"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "asgiref" },
     { name = "sqlparse" },
     { name = "tzdata", marker = "sys_platform == 'win32'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/05/a2/933dbbb3dd9990494960f6e64aca2af4c0745b63b7113f59a822df92329e/django-5.2.8.tar.gz", hash = "sha256:23254866a5bb9a2cfa6004e8b809ec6246eba4b58a7589bc2772f1bcc8456c7f", size = 10849032, upload-time = "2025-11-05T14:07:32.778Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/eb/1c/188ce85ee380f714b704283013434976df8d3a2df8e735221a02605b6794/django-5.2.9.tar.gz", hash = "sha256:16b5ccfc5e8c27e6c0561af551d2ea32852d7352c67d452ae3e76b4f6b2ca495", size = 10848762, upload-time = "2025-12-02T14:01:08.418Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/5e/3d/a035a4ee9b1d4d4beee2ae6e8e12fe6dee5514b21f62504e22efcbd9fb46/django-5.2.8-py3-none-any.whl", hash = "sha256:37e687f7bd73ddf043e2b6b97cfe02fcbb11f2dbb3adccc6a2b18c6daa054d7f", size = 8289692, upload-time = "2025-11-05T14:07:28.761Z" },
+    { url = "https://files.pythonhosted.org/packages/17/b0/7f42bfc38b8f19b78546d47147e083ed06e12fc29c42da95655e0962c6c2/django-5.2.9-py3-none-any.whl", hash = "sha256:3a4ea88a70370557ab1930b332fd2887a9f48654261cdffda663fef5976bb00a", size = 8290652, upload-time = "2025-12-02T14:01:03.485Z" },
+]
+
+[[package]]
+name = "django-admin-sortable2"
+version = "2.2.8"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/d4/76/8af26a825442fb33688c820cf79e4b769d8c4b976a2ddaa7434b96706e05/django_admin_sortable2-2.2.8.tar.gz", hash = "sha256:59dfd7ced63e66adfb471b2a4d89ba3faae49c0148827047c8cf65759fc54c9e", size = 64599, upload-time = "2025-05-15T06:44:31.684Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/8a/97/7d0b28f52027f36751cec372f0eaf3a5bc1be169a141818acece40628e04/django_admin_sortable2-2.2.8-py3-none-any.whl", hash = "sha256:b4cf66d75450b0f89c883d94b10e6133a4e7832c5bfed1568e3e71e400dc2b48", size = 90597, upload-time = "2025-05-15T06:44:30.649Z" },
 ]
 
 [[package]]
@@ -1131,16 +1143,12 @@ wheels = [
 [[package]]
 name = "django-dsfr"
 version = "3.2.0"
-source = { registry = "https://pypi.org/simple" }
+source = { git = "https://github.com/fabienheureux/django-dsfr?rev=d26ab6f77014b04c43c4c54f694111179d1de0ef#d26ab6f77014b04c43c4c54f694111179d1de0ef" }
 dependencies = [
     { name = "django" },
     { name = "django-crispy-forms" },
     { name = "django-widget-tweaks" },
     { name = "requests" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/67/16/3086b3da77495cd52bc0470aaed7a662a40180a9cb2f7a7d4c367e9f93b5/django_dsfr-3.2.0.tar.gz", hash = "sha256:8433e0e0cf36a9ae71f307b3c82e9a33c432e55a1b331954fbd0761055bc6c29", size = 2739848, upload-time = "2025-10-02T09:57:15.546Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/a6/3c/0f86984616e454ac4cc8c9109fa5dec3c745fb0f15ce7e28e4f0ebf56702/django_dsfr-3.2.0-py3-none-any.whl", hash = "sha256:553b08eaaf1e8b9d96d9d314cfd7b36a6d0389269a8b8b67c9a690746c63dc21", size = 3486935, upload-time = "2025-10-02T09:57:14.079Z" },
 ]
 
 [[package]]
@@ -3087,6 +3095,7 @@ dependencies = [
     { name = "diff-match-patch" },
     { name = "dj-database-url" },
     { name = "django" },
+    { name = "django-admin-sortable2" },
     { name = "django-colorfield" },
     { name = "django-cors-headers" },
     { name = "django-dsfr" },
@@ -3164,10 +3173,11 @@ requires-dist = [
     { name = "detect-secrets", specifier = ">=1.5.0" },
     { name = "diff-match-patch", specifier = ">=20241021,<20241022" },
     { name = "dj-database-url", specifier = ">=3.0.1,<4" },
-    { name = "django", specifier = "<=5.2.8" },
+    { name = "django", specifier = "==5.2.9" },
+    { name = "django-admin-sortable2", specifier = ">=2.2.8" },
     { name = "django-colorfield", specifier = ">=0.14.0,<0.15" },
     { name = "django-cors-headers", specifier = ">=4.6.0,<5" },
-    { name = "django-dsfr", specifier = ">=3,<4" },
+    { name = "django-dsfr", git = "https://github.com/fabienheureux/django-dsfr?rev=d26ab6f77014b04c43c4c54f694111179d1de0ef" },
     { name = "django-extensions", specifier = "~=4.1" },
     { name = "django-import-export", extras = ["xls", "xlsx"], specifier = ">=4.3.8,<5" },
     { name = "django-lookbook", specifier = ">=1.0.2,<2" },
