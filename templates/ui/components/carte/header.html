@@ -2,16 +2,16 @@
 <header
     class="
     qf-bg-white qf-border-b qf-border-solid qf-border-t-0 qf-border-x-0 qf-border-grey-900
-    max-md:qf-p-1w
+    max-nolegend:qf-p-1w
     {% if not mode_liste %}qf-shadow-lg{% endif %}"
 >
     <div
-        class="qf-flex qf-flex-col md:qf-flex-row sm:qf-items-center"
+        class="qf-flex qf-flex-col nolegend:qf-flex-row nolegend:qf-items-center"
     >
 
         {% if not carte_config or not carte_config.supprimer_branding %}
         <div
-            class="qf-items-center qf-hidden md:qf-flex qf-flex-row"
+            class="qf-items-center qf-hidden nolegend:qf-flex qf-flex-row"
             id="logo"
             data-remove-if-internal
         >
@@ -28,9 +28,9 @@
         </div>
 
         {# Navigation entre carte / liste #}
-        <div class="md:qf-px-2w max-md:qf-flex qf-justify-between qf-items-end" id="view-mode-nav" data-testid="view-mode-nav">
+        <div class="nolegend:qf-px-2w max-nolegend:qf-flex qf-justify-between qf-items-end" id="view-mode-nav" data-testid="view-mode-nav">
             {{ forms.view_mode }}
-            <div class="md:qf-hidden">
+            <div class="nolegend:qf-hidden">
             {% include "ui/components/modals/filtres.html" with button_extra_classes="fr-btn--sm" id="filtres" button_only=True %}
             </div>
         </div>

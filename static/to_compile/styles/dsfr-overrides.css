@@ -236,7 +236,7 @@ segmented elements in the view mode switch
 https://github.com/GouvernementFR/dsfr/blob/6a2bbfe02e396d8d77c50efee9638ab78c7b277b/src/dsfr/component/segmented/style/module/_sm.scss#L9
 */
 @media (width < 48rem) {
-  .max-md\:fr-segmented--sm {
+  .max-nolegend\:fr-segmented--sm {
     input + label {
       max-width: 100%;
       min-height: 2rem;

@@ -230,16 +230,14 @@ def render_acteur_table_row(acteur, context):
         "request": context["request"],
     }
     return [
-        render_to_string("ui/components/carte/acteur/acteur_labels.html", _context),
-        render_to_string("ui/components/carte/acteur/acteur_services.html", _context),
+        render_to_string("ui/components/acteur/acteur_labels.html", _context),
+        render_to_string("ui/components/acteur/acteur_services.html", _context),
         distance_to_acteur(context, acteur),
-        render_to_string("ui/components/carte/acteur/acteur_lien.html", _context),
+        render_to_string("ui/components/acteur/acteur_lien.html", _context),
     ]
 
 
-@register.inclusion_tag(
-    "ui/components/carte/acteur/acteur_table.html", takes_context=True
-)
+@register.inclusion_tag("ui/components/acteur/acteur_table.html", takes_context=True)
 def acteurs_table(context, acteurs):
     """We use a wrapper template tag to use the django-dsfr component.
     As it must be rendered with a dict, we cannot easily render complex rows."""

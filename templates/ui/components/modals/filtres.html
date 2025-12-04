@@ -18,6 +18,8 @@ Filtres
 {% endblock modal_header %}
 
 {% block modal_content %}
+
+
 {% if legende_form and legende_form.visible %}
 
 {% if not mode_liste %}
@@ -34,6 +36,7 @@ Filtres
 {% endblock modal_content %}
 
 {% block modal_footer_buttons %}
+
 <li>
     <button type="submit" class="fr-btn" title="Valider" form="{{ form_id }}">
     Appliquer

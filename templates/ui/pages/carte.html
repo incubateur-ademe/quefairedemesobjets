@@ -52,7 +52,7 @@
                 {% include "ui/components/carte/mode_carte.html" %}
             {% endif %}
 
-            {% include "ui/components/carte/acteur_detail.html" with no_draggable=mode_liste %}
+            {% include "ui/components/acteur/acteur_detail.html" with no_draggable=mode_liste %}
         </section>
         {% include "ui/components/modals/filtres.html" with filtres_form=forms.filtres legende_form=forms.legende_filtres modal_only=True %}
         {% include "ui/components/modals/infos.html" with modal_only=True %}

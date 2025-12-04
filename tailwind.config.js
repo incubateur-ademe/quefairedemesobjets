@@ -69,6 +69,7 @@ module.exports = {
       screens: {
         xs: "320px",
         xsm: "360px",
+        nolegend: "1024px",
       },
       minWidth: ({ theme }) => ({ ...theme("spacing") }),
       keyframes: {

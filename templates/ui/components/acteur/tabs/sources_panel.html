@@ -1,4 +1,4 @@
-{% extends "ui/components/carte/acteur/tabs/_panel.html" %}
+{% extends "ui/components/acteur/tabs/_panel.html" %}
 
 {% block id %}sourcesPanel{% endblock %}
 
@@ -7,7 +7,7 @@
 {% block content %}
 <div class="qf-pt-1w">
     {% for source_or_label in object.sources.all %}
-        {% include "ui/components/carte/acteur/_label.html" with border=True %}
+        {% include "ui/components/acteur/_label.html" with border=True %}
     {% endfor %}
 </div>
 {% endblock content %}

@@ -1,4 +1,4 @@
-{% extends "ui/components/carte/acteur/tabs/_section.html" %}
+{% extends "ui/components/acteur/tabs/_section.html" %}
 
 {% block title %}
 Horaires
@@ -13,7 +13,7 @@ Horaires
     {% endif %}
 
     {% if object.uniquement_sur_rdv and object.horaires_description %}
-        {% include "ui/components/carte/acteur/tabs/_separator.html" %}
+        {% include "ui/components/acteur/tabs/_separator.html" %}
     {% endif %}
 
     {{ object.horaires_description|linebreaks|safe }}

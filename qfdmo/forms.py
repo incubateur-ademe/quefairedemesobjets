@@ -761,7 +761,7 @@ class ViewModeForm(AutoSubmitMixin, GetFormMixin, CarteConfigFormMixin, DsfrBase
         required=False,
         initial=CarteConfig.ModesAffichage.CARTE,
         widget=SegmentedControl(
-            extra_classes="max-md:fr-segmented--sm",
+            extra_classes="max-nolegend:fr-segmented--sm",
             extended_choices=ViewModeSegmentedControlChoices,
         ),
     )
