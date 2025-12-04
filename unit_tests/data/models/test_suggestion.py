@@ -144,49 +144,65 @@ class TestSuggestionGroupeSerialiser:
     @pytest.mark.django_db
     def test_serialize_source_ajout(self, suggestion_groupe_ajout):
 
-        result = suggestion_groupe_ajout.serialize()
+        result = suggestion_groupe_ajout.serialize().to_dict()
 
-        assert result.id == suggestion_groupe_ajout.id
-        assert result.suggestion_cohorte == suggestion_groupe_ajout.suggestion_cohorte
-        assert result.action == SuggestionAction.SOURCE_AJOUT
-        assert result.old_values == {}
-        assert result.new_values == {
-            ("nom",): ["Nouveau nom"],
-            ("latitude", "longitude"): ["48.56789", "2.56789"],
+        expected_result = {
+            "id": suggestion_groupe_ajout.id,
+            "suggestion_cohorte": suggestion_groupe_ajout.suggestion_cohorte,
+            "statut": "🟠 À valider",
+            "action": "SOURCE_AJOUT",
+            "identifiant_unique": "",
+            "fields_groups": [("nom",), ("latitude", "longitude")],
+            "fields_values": {
+                "nom": {"displayed_value": "Nouveau nom", "new_value": "Nouveau nom"},
+                "latitude": {"displayed_value": "48.56789", "new_value": "48.56789"},
+                "longitude": {"displayed_value": "2.56789", "new_value": "2.56789"},
+            },
+            "acteur": None,
+            "acteur_overridden_by": None,
         }
-        assert result.displayed_values == {
-            ("nom",): ["Nouveau nom"],
-            ("latitude", "longitude"): ["48.56789", "2.56789"],
-        }
-        assert result.acteur is None
-        assert result.acteur_overridden_by is None
+        assert result == expected_result
 
     def test_serialize_source_modification_with_acteur(
         self,
         suggestion_groupe_modification,
     ):
-        result = suggestion_groupe_modification.serialize()
+        result = suggestion_groupe_modification.serialize().to_dict()
 
-        assert result.id == suggestion_groupe_modification.id
-        assert (
-            result.suggestion_cohorte
-            == suggestion_groupe_modification.suggestion_cohorte
-        )
-        assert result.action == SuggestionAction.SOURCE_MODIFICATION
-        assert result.old_values == {
-            ("nom",): ["Ancien nom"],
-            ("latitude", "longitude"): ["48.1234", "2.1234"],
+        expected_result = {
+            "id": suggestion_groupe_modification.id,
+            "suggestion_cohorte": suggestion_groupe_modification.suggestion_cohorte,
+            "statut": "🟠 À valider",
+            "action": "SOURCE_MODIFICATION",
+            "identifiant_unique": (
+                suggestion_groupe_modification.acteur.identifiant_unique
+            ),
+            "fields_groups": [("nom",), ("latitude", "longitude")],
+            "fields_values": {
+                "nom": {
+                    "displayed_value": "Nouveau nom",
+                    "updated_displayed_value": "",
+                    "new_value": "Nouveau nom",
+                    "old_value": "Ancien nom",
+                },
+                "latitude": {
+                    "displayed_value": "48.56789",
+                    "updated_displayed_value": "",
+                    "new_value": "48.56789",
+                    "old_value": "48.1234",
+                },
+                "longitude": {
+                    "displayed_value": "2.56789",
+                    "updated_displayed_value": "",
+                    "new_value": "2.56789",
+                    "old_value": "2.1234",
+                },
+            },
+            "acteur": suggestion_groupe_modification.acteur,
+            "acteur_overridden_by": None,
         }
-        assert result.new_values == {
-            ("nom",): ["Nouveau nom"],
-            ("latitude", "longitude"): ["48.56789", "2.56789"],
-        }
-        assert result.displayed_values == {
-            ("nom",): ["Nouveau nom"],
-            ("latitude", "longitude"): ["48.56789", "2.56789"],
-        }
-        assert result.acteur == suggestion_groupe_modification.acteur
-        assert result.acteur_overridden_by is None
+
+        assert result == expected_result
 
     def test_serialize_source_modification_with_revisionacteur(
         self,
@@ -199,28 +215,42 @@ class TestSuggestionGroupeSerialiser:
         )
         suggestion_groupe_modification.revision_acteur = revision_acteur
         suggestion_groupe_modification.save()
-        result = suggestion_groupe_modification.serialize()
+        result = suggestion_groupe_modification.serialize().to_dict()
 
-        assert result.id == suggestion_groupe_modification.id
-        assert (
-            result.suggestion_cohorte
-            == suggestion_groupe_modification.suggestion_cohorte
-        )
-        assert result.action == SuggestionAction.SOURCE_MODIFICATION
-        assert result.old_values == {
-            ("nom",): ["Ancien nom"],
-            ("latitude", "longitude"): ["48.1234", "2.1234"],
+        expected_result = {
+            "id": suggestion_groupe_modification.id,
+            "suggestion_cohorte": suggestion_groupe_modification.suggestion_cohorte,
+            "statut": "🟠 À valider",
+            "action": "SOURCE_MODIFICATION",
+            "identifiant_unique": (
+                suggestion_groupe_modification.acteur.identifiant_unique
+            ),
+            "fields_groups": [("nom",), ("latitude", "longitude")],
+            "fields_values": {
+                "nom": {
+                    "displayed_value": "Revision nom",
+                    "updated_displayed_value": "",
+                    "new_value": "Nouveau nom",
+                    "old_value": "Ancien nom",
+                },
+                "latitude": {
+                    "displayed_value": "48.01",
+                    "updated_displayed_value": "",
+                    "new_value": "48.56789",
+                    "old_value": "48.1234",
+                },
+                "longitude": {
+                    "displayed_value": "2.01",
+                    "updated_displayed_value": "",
+                    "new_value": "2.56789",
+                    "old_value": "2.1234",
+                },
+            },
+            "acteur": suggestion_groupe_modification.acteur,
+            "acteur_overridden_by": revision_acteur,
         }
-        assert result.new_values == {
-            ("nom",): ["Nouveau nom"],
-            ("latitude", "longitude"): ["48.56789", "2.56789"],
-        }
-        assert result.displayed_values == {
-            ("nom",): ["Revision nom"],
-            ("latitude", "longitude"): ["48.01", "2.01"],
-        }
-        assert result.acteur == suggestion_groupe_modification.acteur
-        assert result.acteur_overridden_by == revision_acteur
+
+        assert result == expected_result
 
     def test_serialize_source_modification_with_revisionacteurparent(
         self,
@@ -238,28 +268,41 @@ class TestSuggestionGroupeSerialiser:
         )
         suggestion_groupe_modification.revision_acteur = revision_acteur
         suggestion_groupe_modification.save()
-        result = suggestion_groupe_modification.serialize()
+        result = suggestion_groupe_modification.serialize().to_dict()
 
-        assert result.id == suggestion_groupe_modification.id
-        assert (
-            result.suggestion_cohorte
-            == suggestion_groupe_modification.suggestion_cohorte
-        )
-        assert result.action == SuggestionAction.SOURCE_MODIFICATION
-        assert result.old_values == {
-            ("nom",): ["Ancien nom"],
-            ("latitude", "longitude"): ["48.1234", "2.1234"],
+        expected_result = {
+            "id": suggestion_groupe_modification.id,
+            "suggestion_cohorte": suggestion_groupe_modification.suggestion_cohorte,
+            "statut": "🟠 À valider",
+            "action": "SOURCE_MODIFICATION",
+            "identifiant_unique": (
+                suggestion_groupe_modification.acteur.identifiant_unique
+            ),
+            "fields_groups": [("nom",), ("latitude", "longitude")],
+            "fields_values": {
+                "nom": {
+                    "displayed_value": "Parent nom",
+                    "updated_displayed_value": "",
+                    "new_value": "Nouveau nom",
+                    "old_value": "Ancien nom",
+                },
+                "latitude": {
+                    "displayed_value": "48.1111",
+                    "updated_displayed_value": "",
+                    "new_value": "48.56789",
+                    "old_value": "48.1234",
+                },
+                "longitude": {
+                    "displayed_value": "2.1111",
+                    "updated_displayed_value": "",
+                    "new_value": "2.56789",
+                    "old_value": "2.1234",
+                },
+            },
+            "acteur": suggestion_groupe_modification.acteur,
+            "acteur_overridden_by": revision_acteur_parent,
         }
-        assert result.new_values == {
-            ("nom",): ["Nouveau nom"],
-            ("latitude", "longitude"): ["48.56789", "2.56789"],
-        }
-        assert result.displayed_values == {
-            ("nom",): ["Parent nom"],
-            ("latitude", "longitude"): ["48.1111", "2.1111"],
-        }
-        assert result.acteur == suggestion_groupe_modification.acteur
-        assert result.acteur_overridden_by == revision_acteur_parent
+        assert result == expected_result
 
     def test_serialize_source_modification_with_revisionacteurparent_parentsuggestion(
         self,
@@ -289,25 +332,38 @@ class TestSuggestionGroupeSerialiser:
             champs=["latitude", "longitude"],
             valeurs=["48.2222", "2.2222"],
         )
-        result = suggestion_groupe_modification.serialize()
+        result = suggestion_groupe_modification.serialize().to_dict()
 
-        assert result.id == suggestion_groupe_modification.id
-        assert (
-            result.suggestion_cohorte
-            == suggestion_groupe_modification.suggestion_cohorte
-        )
-        assert result.action == SuggestionAction.SOURCE_MODIFICATION
-        assert result.old_values == {
-            ("nom",): ["Ancien nom"],
-            ("latitude", "longitude"): ["48.1234", "2.1234"],
+        expected_result = {
+            "id": suggestion_groupe_modification.id,
+            "suggestion_cohorte": suggestion_groupe_modification.suggestion_cohorte,
+            "statut": "🟠 À valider",
+            "action": "SOURCE_MODIFICATION",
+            "identifiant_unique": (
+                suggestion_groupe_modification.acteur.identifiant_unique
+            ),
+            "fields_groups": [("nom",), ("latitude", "longitude")],
+            "fields_values": {
+                "nom": {
+                    "displayed_value": "Parent nom",
+                    "updated_displayed_value": "Suggestion nom",
+                    "new_value": "Nouveau nom",
+                    "old_value": "Ancien nom",
+                },
+                "latitude": {
+                    "displayed_value": "48.1111",
+                    "updated_displayed_value": "48.2222",
+                    "new_value": "48.56789",
+                    "old_value": "48.1234",
+                },
+                "longitude": {
+                    "displayed_value": "2.1111",
+                    "updated_displayed_value": "2.2222",
+                    "new_value": "2.56789",
+                    "old_value": "2.1234",
+                },
+            },
+            "acteur": suggestion_groupe_modification.acteur,
+            "acteur_overridden_by": revision_acteur_parent,
         }
-        assert result.new_values == {
-            ("nom",): ["Nouveau nom"],
-            ("latitude", "longitude"): ["48.56789", "2.56789"],
-        }
-        assert result.displayed_values == {
-            ("nom",): ["Suggestion nom"],
-            ("latitude", "longitude"): ["48.2222", "2.2222"],
-        }
-        assert result.acteur == suggestion_groupe_modification.acteur
-        assert result.acteur_overridden_by == revision_acteur_parent
+        assert result == expected_result
