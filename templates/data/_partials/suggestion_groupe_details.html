@@ -6,6 +6,11 @@
 
     <input type="hidden" name="fields_values" value='{{ fields_values|tojson }}' data-suggestion-groupe-row-target="fieldsValues">
     <input type="hidden" name="fields_groups" value='{{ fields_groups|tojson }}' data-suggestion-groupe-row-target="fieldsGroups">
+    {% if errors and errors.error %}
+        <div class="qf-text-red-500">
+            {{ errors.error }}
+        </div>
+    {% endif %}
     <div class="fr-table fr-table--bordered">
         <table>
             <thead>
@@ -69,6 +74,15 @@
                                     {% if not forloop.last %}<span>&nbsp;,&nbsp;</span> {% endif %}
                                 {% endfor %}
                             </div>
+                            <div>
+                                {% for field in fields %}
+                                    {% if errors and errors|get_item:field %}
+                                        <div class="qf-text-red-500">
+                                            {{ errors|get_item:field }}
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
                         </td>
                     </tr>
                 {% endfor %}
@@ -118,13 +132,16 @@
             </div>
         {% elif tab == "localisation" %}
             <div>
-                <p>Localisation</p>
-                <p>{{ latitude }}, {{ longitude }}</p>
+                <p>Localisation : Comming Soon…</p>
+                <p>Afficher un carte interactive, affichage du point comme il sera affiché, possiblilité de le déplacer, le déplacement mets à jour la latitude et la longitude affichées</p>
+                <p>Option IA : demander à une IA de vérifier sur l'interface de Google si elle trouve cet acteur à cette adresse et proposer des corrections si nécessaire</p>
             </div>
         {% elif tab == "annuaire_entreprise" %}
             <div>
-                <p>Annuaire entreprise</p>
-                <p>{{ annuaire_entreprise }}</p>
+                <p>Annuaire entreprise : Comming Soon…</p>
+                <p>Vérification si l'etablissement et l'entreprise existe dans l'annuaire entreprise, intéraction avec l'api d'annuaire entreprise ou une IA si tel n'est pas le cas</p>
+                <p>Affichage d'une alerte dans la case au dessus des tab si l'etablissement ou l'entreprise n'existe pas dans l'annuaire entreprise</p>
+                <p>Option IA : Recherche si l'acteur à déménagé ou si l'entreprise a été vendue mais qu'il y a toujours un établissement qui fait lamême chose à la même adresse et proposer des corrections si nécessaire</p>
             </div>
         {% endif %}
     </div>
