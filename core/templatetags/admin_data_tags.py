@@ -7,6 +7,8 @@ from django.template.defaulttags import register
 from django.urls.base import reverse
 from django.utils.safestring import mark_safe
 
+from data.models.suggestion import SuggestionGroupe
+
 logger = logging.getLogger(__name__)
 
 
@@ -214,3 +216,8 @@ def getattr_filter(obj, attr):
 @register.filter
 def get_item(dictionary, key):
     return dictionary.get(key)
+
+
+@register.filter
+def is_not_editable(key):
+    return key in SuggestionGroupe.NOT_EDITABLE_FIELDS

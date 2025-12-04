@@ -1,12 +1,10 @@
 import json
 
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy
-from django.views.decorators.http import require_GET, require_POST
-from django.views.generic.edit import FormView
+from django.views.generic import FormView, View
 
 from data.forms import SuggestionGroupeStatusForm
 from data.models.suggestion import SuggestionGroupe, SuggestionStatut
@@ -17,7 +15,7 @@ class SuggestionGroupeStatusView(LoginRequiredMixin, FormView):
 
     def get_success_url(self):
         return reverse_lazy(
-            "data:suggestion_groupe_details",
+            "data:suggestion_groupe",
             kwargs={"suggestion_groupe_id": self.kwargs["suggestion_groupe_id"]},
         )
 
@@ -38,51 +36,44 @@ class SuggestionGroupeStatusView(LoginRequiredMixin, FormView):
         return super().form_valid(form)
 
 
-@login_required
-@require_GET
-def suggestion_groupe_details(request, suggestion_groupe_id):
-    suggestion_groupe = get_object_or_404(SuggestionGroupe, id=suggestion_groupe_id)
-    context = suggestion_groupe.serialize().to_dict()
-    context["tab"] = request.GET.get("tab", "")
-    if context["tab"] == "acteur":
-        context["uuid"] = suggestion_groupe.displayed_acteur_uuid()
-    return render(
-        request,
-        "data/_partials/suggestion_groupe_refresh_stream.html",
-        context,
-        content_type="text/vnd.turbo-stream.html",
-    )
+class SuggestionGroupeView(LoginRequiredMixin, View):
+    template_name = "data/_partials/suggestion_groupe_refresh_stream.html"
 
+    def get(self, request, suggestion_groupe_id):
+        suggestion_groupe = get_object_or_404(SuggestionGroupe, id=suggestion_groupe_id)
 
-@login_required
-@require_POST
-def update_suggestion_groupe_details(request, suggestion_groupe_id):
-    suggestion_groupe = get_object_or_404(SuggestionGroupe, id=suggestion_groupe_id)
+        context = suggestion_groupe.serialize().to_dict()
+        context["tab"] = request.GET.get("tab", "")
+        if context["tab"] == "acteur":
+            context["uuid"] = suggestion_groupe.displayed_acteur_uuid()
 
-    fields_values_payload = request.POST.get("fields_values", "{}")
-    fields_groups_payload = request.POST.get("fields_groups", "{}")
-    try:
-        fields_values = (
-            json.loads(fields_values_payload) if fields_values_payload else {}
+        return render(
+            request,
+            self.template_name,
+            context,
+            content_type="text/vnd.turbo-stream.html",
         )
-        fields_groups = (
-            json.loads(fields_groups_payload) if fields_groups_payload else []
+
+    def post(self, request, suggestion_groupe_id):
+        suggestion_groupe = get_object_or_404(SuggestionGroupe, id=suggestion_groupe_id)
+
+        fields_values_payload = request.POST.get("fields_values", "{}")
+        fields_groups_payload = request.POST.get("fields_groups", "{}")
+        try:
+            fields_values = (
+                json.loads(fields_values_payload) if fields_values_payload else {}
+            )
+            fields_groups = (
+                json.loads(fields_groups_payload) if fields_groups_payload else []
+            )
+        except json.JSONDecodeError:
+            return HttpResponseBadRequest("Payload fields_list invalide")
+        suggestion_groupe.update_from_serialized_data(fields_values, fields_groups)
+        context = suggestion_groupe.serialize().to_dict()
+
+        return render(
+            request,
+            self.template_name,
+            context,
+            content_type="text/vnd.turbo-stream.html",
         )
-    except json.JSONDecodeError:
-        return HttpResponseBadRequest("Payload fields_list invalide")
-
-    # TODO : here we interpret the fields_listand create the needed suggestions
-
-    suggestion_groupe.update_from_serialized_data(fields_values, fields_groups)
-
-    context = suggestion_groupe.serialize().to_dict()
-
-    # TODO : should be removed, only for tests
-    context["requested_fields_list"] = suggestion_groupe.serialize().fields_values
-
-    return render(
-        request,
-        "data/_partials/suggestion_groupe_refresh_stream.html",
-        context,
-        content_type="text/vnd.turbo-stream.html",
-    )
