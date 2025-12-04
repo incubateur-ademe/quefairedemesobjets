@@ -3,9 +3,10 @@ from typing import override
 
 import unidecode
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.postgres.lookups import Unaccent
 from django.contrib.postgres.search import TrigramWordDistance
 from django.contrib.staticfiles import finders
-from django.db.models.functions import Length, Lower, Unaccent
+from django.db.models.functions import Length, Lower
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.views.decorators.cache import cache_control
