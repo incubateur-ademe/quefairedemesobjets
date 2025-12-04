@@ -41,7 +41,7 @@
                         <td>
                             {% for field in fields %}
                                 {% with values=fields_values|get_item:field %}
-                                    {% display_diff_value_details None values.new_value values.old_value %}
+                                    {{ values.old_value|display_diff_values:values.new_value }}
                                 {% endwith %}
                                 {% if not forloop.last %}, {% endif %}
                             {% endfor %}
@@ -63,15 +63,18 @@
                                             data-action="blur->suggestion-groupe-row#fieldDisplayedBlur
                                             focus->suggestion-groupe-row#fieldDisplayedFocus">
                                             {% with values=fields_values|get_item:field %}
-                                                {% if values.updated_displayed_value and values.updated_displayed_value != values.displayed_value %}
-                                                    {% display_diff_value_details None values.updated_displayed_value values.displayed_value %}
-                                                {% else %}
-                                                    {{ values.displayed_value }}
-                                                {% endif %}
+                                                {{ values.displayed_value|display_diff_values:values.updated_displayed_value }}
                                             {% endwith %}
                                         </div>
                                     {% endif %}
                                     {% if not forloop.last %}<span>&nbsp;,&nbsp;</span> {% endif %}
+                                {% endfor %}
+                            </div>
+                            <div>
+                                {% for field in fields %}
+                                    {% with values=fields_values|get_item:field %}
+                                        {% helper_updated_values field values.updated_displayed_value|default:values.displayed_value %}
+                                    {% endwith %}
                                 {% endfor %}
                             </div>
                             <div>
