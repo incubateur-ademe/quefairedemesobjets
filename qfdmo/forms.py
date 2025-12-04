@@ -1,24 +1,32 @@
-from typing import List, cast
+import base64
+import uuid
+from typing import cast
 
 from django import forms
 from django.core.cache import cache
 from django.db.models import TextChoices
-from django.http import HttpRequest
+from django.db.utils import cached_property
+from django.http import HttpRequest, QueryDict
+from django.shortcuts import reverse
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from dsfr.enums import SegmentedControlChoices
 from dsfr.forms import DsfrBaseForm
 from dsfr.widgets import SegmentedControl
 
-from qfdmo.fields import GroupeActionChoiceField
+from qfdmd.models import Synonyme
+from qfdmo.fields import GroupeActionChoiceField, LabelQualiteChoiceField
 from qfdmo.geo_api import epcis_from, formatted_epcis_as_list_of_tuple
+from qfdmo.mixins import AutoSubmitMixin, CarteConfigFormMixin, GetFormMixin
 from qfdmo.models import SousCategorieObjet
+from qfdmo.models.acteur import LabelQualite
 from qfdmo.models.action import (
     Action,
     GroupeAction,
     get_action_instances,
     get_directions,
 )
+from qfdmo.models.config import CarteConfig
 from qfdmo.widgets import (
     AutoCompleteInput,
     DSFRCheckboxSelectMultiple,
@@ -38,32 +46,6 @@ class AddressesForm(forms.Form):
             attrs={
                 "data-search-solution-form-target": "bbox",
                 "data-map-target": "bbox",
-            }
-        ),
-        required=False,
-    )
-
-    sous_categorie_objet = forms.ModelChoiceField(
-        queryset=SousCategorieObjet.objects.all(),
-        widget=AutoCompleteInput(
-            attrs={
-                "class": "fr-input fr-icon-search-line sm:qf-w-[596px]",
-                "autocomplete": "off",
-                "aria-label": "Indiquer un objet - obligatoire",
-            },
-            data_controller="ss-cat-object-autocomplete",
-        ),
-        help_text="pantalon, perceuse, canapé...",
-        label="Indiquer un objet ",
-        empty_label="",
-        required=False,
-    )
-
-    sc_id = forms.IntegerField(
-        widget=forms.HiddenInput(
-            attrs={
-                "data-ss-cat-object-autocomplete-target": "ssCat",
-                "data-search-solution-form-target": "sousCategoryObjetID",
             }
         ),
         required=False,
@@ -89,20 +71,41 @@ class AddressesForm(forms.Form):
         required=False,
     )
 
+
+class FormulaireForm(AddressesForm):
+    sous_categorie_objet = forms.ModelChoiceField(
+        queryset=SousCategorieObjet.objects.all(),
+        to_field_name="libelle",
+        widget=AutoCompleteInput(
+            attrs={
+                "class": "fr-input fr-icon-search-line sm:qf-w-[596px]",
+                "autocomplete": "off",
+                "aria-label": "Indiquer un objet - obligatoire",
+            },
+            data_controller="ss-cat-object-autocomplete",
+        ),
+        help_text="pantalon, perceuse, canapé...",
+        label="Indiquer un objet ",
+        empty_label="",
+        required=False,
+    )
+
+    sc_id = forms.IntegerField(
+        widget=forms.HiddenInput(
+            attrs={
+                "data-ss-cat-object-autocomplete-target": "ssCat",
+                "data-search-solution-form-target": "sousCategoryObjetID",
+            }
+        ),
+        required=False,
+    )
+
     pas_exclusivite_reparation = forms.BooleanField(
         widget=forms.CheckboxInput(
             attrs={
                 "class": "fr-checkbox fr-m-1v",
                 "data-search-solution-form-target": "reparerFilter",
             }
-        ),
-        label=(
-            "Masquer les lieux qui réparent uniquement les produits de leurs marques"
-        ),
-        help_text=(
-            "Les lieux ne réparant que les produits de leur propre marque"
-            " n'apparaîtront pas si cette case est cochée."
-            " (uniquement valable lorsque l'action « réparer » est sélectionnée)"
         ),
         label_suffix="",
         required=False,
@@ -115,27 +118,8 @@ class AddressesForm(forms.Form):
                 "data-search-solution-form-target": "reparerFilter",
             }
         ),
-        label="Lieux labellisés Répar’Acteurs",
-        help_text=mark_safe(
-            """Afficher uniquement les artisans labellisés
-            (uniquement valable lorsque l'action « réparer » est sélectionnée).
-            Les <span
-                class="qf-underline qf-cursor-pointer
-                qf-underline-offset-[3px] hover:qf-decoration-[1.5px]"
-                title="Ouvre la modale Répar'Acteurs"
-                onclick="document
-                .getElementById('display_modale_reparacteur')
-                .setAttribute('data-fr-opened', 'true');"
-            >Répar'Acteurs</span>
-             sont une initiative de la
-            <a
-                href='https://www.artisanat.fr/nous-connaitre/vous-accompagner/reparacteurs'
-                target="_blank"
-                rel="noreferrer"
-                title="sur le site de la CMA - Nouvelle fenêtre"
-            >
-                Chambre des Métiers et de l’Artisanat
-            </a>"""
+        label=render_to_string(
+            "ui/components/formulaire/filtres/reparacteurs/label.html"
         ),
         label_suffix="",
         required=False,
@@ -143,14 +127,7 @@ class AddressesForm(forms.Form):
 
     ess = forms.BooleanField(
         widget=forms.CheckboxInput(attrs={"class": "fr-checkbox fr-m-1v"}),
-        label="Lieux de l'économie sociale et solidaire",
-        help_text=mark_safe(
-            "Afficher uniquement les lieux recensés comme relevant de l'économie"
-            " sociale et solidaire. En savoir plus sur le site <a href="
-            '"https://www.economie.gouv.fr/cedef/economie-sociale-et-solidaire"'
-            ' target="_blank" rel="noreferrer" title="economie.gouv.fr - Nouvelle'
-            ' fenêtre">economie.gouv.fr</a>'
-        ),
+        label=render_to_string("ui/components/formulaire/filtres/ess/label.html"),
         label_suffix="",
         required=False,
     )
@@ -162,17 +139,7 @@ class AddressesForm(forms.Form):
                 "data-search-solution-form-target": "reparerFilter",
             },
         ),
-        label=mark_safe(
-            "<div><span class='fr-icon--sm fr-icon-percent-line'></span>"
-            "&nbsp;Lieux proposant le Bonus Réparation</div>"
-        ),
-        help_text=mark_safe(
-            "Afficher uniquement les lieux éligibles (uniquement valable lorsque l'"
-            "action « réparer » est sélectionnée). En savoir plus sur le site <a href="
-            '"https://quefairedemesdechets.ademe.fr/bonus-reparation" target="_blank"'
-            ' rel="noreferrer" title="Bonus réparation - Nouvelle fenêtre">Bonus'
-            " réparation</a>"
-        ),
+        label=render_to_string("ui/components/formulaire/filtres/bonus/label.html"),
         label_suffix="",
         required=False,
     )
@@ -189,8 +156,6 @@ class AddressesForm(forms.Form):
         required=False,
     )
 
-
-class FormulaireForm(AddressesForm):
     adresse = forms.CharField(
         widget=AutoCompleteInput(
             attrs={
@@ -206,12 +171,235 @@ class FormulaireForm(AddressesForm):
     )
 
 
-class GetFormMixin(forms.Form):
-    def __init__(self, data: dict | None = None, *args, **kwargs):
-        if data is not None and not (set(data.keys()) & set(self.base_fields.keys())):
-            data = None
+class LegendeForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
+    carte_config_choices_mapping = {
+        "groupe_action": "groupe_action",
+    }
+    carte_config_initial_mapping = {
+        "groupe_action": "groupe_action",
+    }
 
-        super().__init__(*args, data=data, **kwargs)
+    groupe_action = GroupeActionChoiceField(
+        queryset=GroupeAction.objects.filter(afficher=True)
+        .prefetch_related("actions")
+        .order_by("order"),
+        to_field_name="id",
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        label="",
+        initial=GroupeAction.objects.filter(afficher=True).prefetch_related("actions"),
+    )
+
+    def _apply_legacy_querystring_overrides(self, legacy_form):
+        """Apply legacy querystring parameters to override form behavior.
+
+        - action_displayed: filters the queryset for groupe_action field
+        - action_list: sets the initial value for groupe_action field
+
+        Querystring parameters override carte_config if present.
+        """
+        if not legacy_form:
+            return
+
+        request_data = legacy_form.decode_querystring()
+
+        # Handle action_displayed: filter the queryset
+        if action_displayed := request_data.get("action_displayed"):
+            # Split pipe-separated action codes
+            action_codes = [
+                code.strip() for code in action_displayed.split("|") if code.strip()
+            ]
+
+            if action_codes:
+                # Filter groupe_action based on actions with these codes
+                groupe_action_qs = (
+                    GroupeAction.objects.filter(
+                        actions__code__in=action_codes, afficher=True
+                    )
+                    .prefetch_related("actions")
+                    .distinct()
+                    .order_by("order")
+                )
+
+                # Override the queryset
+                self.fields["groupe_action"].queryset = groupe_action_qs
+
+        # Handle action_list: set initial value
+        if action_list := request_data.get("action_list"):
+            # Split pipe-separated action codes
+            action_codes = [
+                code.strip() for code in action_list.split("|") if code.strip()
+            ]
+
+            if action_codes:
+                # Get GroupeAction instances that contain these actions
+                initial_groupe_actions = (
+                    GroupeAction.objects.filter(
+                        actions__code__in=action_codes, afficher=True
+                    )
+                    .prefetch_related("actions")
+                    .distinct()
+                    .order_by("order")
+                )
+
+                # Set as initial value
+                self.fields["groupe_action"].initial = initial_groupe_actions
+
+    @cached_property
+    def visible(self):
+        return self.fields["groupe_action"].queryset.count() > 1
+
+
+class LegacySupportForm(GetFormMixin, forms.Form):
+    querystring = forms.CharField(
+        widget=forms.HiddenInput(),
+        required=True,
+    )
+
+    query_params_to_keep = [
+        "action_list",
+        "action_displayed",
+        "label_reparacteur",
+        "pas_exclusivite_reparation",
+        CarteConfig.SOUS_CATEGORIE_QUERY_PARAM,
+    ]
+
+    def __init__(self, *args, **kwargs):
+        # Extract request from kwargs to get the initial querystring
+        request = kwargs.pop("request", None)
+        super().__init__(*args, **kwargs)
+
+        # On first load (GET request with no form data), capture the querystring
+        if request and request.method == "GET":
+            # Filter query params to only keep those in query_params_to_keep
+            filtered_query_dict = request.GET.copy()
+
+            # Remove params that are not in query_params_to_keep
+            for key in list(filtered_query_dict.keys()):
+                if key not in self.query_params_to_keep:
+                    del filtered_query_dict[key]
+
+            # Build the filtered querystring and encode as base64
+            if filtered_query_dict:
+                filtered_querystring = filtered_query_dict.urlencode()
+                encoded_querystring = base64.b64encode(
+                    filtered_querystring.encode("utf-8")
+                ).decode("utf-8")
+                self.fields["querystring"].initial = encoded_querystring
+
+    def decode_querystring(self) -> QueryDict:
+        """Decode a base64-encoded querystring and parse it into a QueryDict"""
+        encoded_querystring = self["querystring"].value()
+        if not encoded_querystring:
+            return QueryDict()
+
+        try:
+            decoded_bytes = base64.b64decode(encoded_querystring)
+            decoded_querystring = decoded_bytes.decode("utf-8")
+            return QueryDict(decoded_querystring)
+        except (ValueError, UnicodeDecodeError) as e:
+            raise ValueError(f"Failed to decode querystring: {e}") from e
+
+
+class AutoSubmitLegendeForm(AutoSubmitMixin, LegendeForm):
+    autosubmit_fields = ["groupe_action"]
+
+
+class NextAutocompleteInput(forms.TextInput):
+    template_name = "ui/forms/widgets/autocomplete/input.html"
+
+    def __init__(
+        self,
+        search_view,
+        limit=5,
+        *args,
+        **kwargs,
+    ):
+        # TODO: add optional template args
+        self.search_view = search_view
+        self.limit = limit
+        self.turbo_frame_id = str(uuid.uuid4())
+
+        super().__init__(*args, **kwargs)
+
+    def get_context(self, name, value, attrs):
+        context = super().get_context(name, value, attrs)
+        endpoint_url = reverse(self.search_view)
+        return {
+            **context,
+            "endpoint_url": endpoint_url,
+            "limit": self.limit,
+            "turbo_frame_id": self.turbo_frame_id,
+        }
+
+
+class FiltresForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
+    carte_config_initial_mapping = {
+        "label_qualite": "label_qualite",
+    }
+    synonyme = forms.ModelChoiceField(
+        queryset=Synonyme.objects.all(),
+        widget=NextAutocompleteInput(
+            search_view="autocomplete_synonyme",
+        ),
+        help_text="pantalon, perceuse, canapé...",
+        label="Indiquer un objet",
+        required=False,
+    )
+
+    bonus = forms.BooleanField(
+        required=False,
+        initial=False,
+        label=render_to_string("ui/components/label_qualite/filtre_bonus.html"),
+        help_text="Uniquement les acteurs proposant le Bonus Réparation (Disponible"
+        ' pour l\'action "Je répare")',
+    )
+
+    label_qualite = LabelQualiteChoiceField(
+        queryset=LabelQualite.objects.filter(afficher=True, filtre=True),
+        to_field_name="code",
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        label="",
+    )
+
+    pas_exclusivite_reparation = forms.BooleanField(
+        required=False,
+        initial=True,
+        label="Masquer les lieux qui réparent uniquement les produits de leurs marques",
+        help_text="Les adresses ne réparant que les produits de leur propre marque "
+        "n'apparaîtront pas si cette case est cochée. (uniquement valable lorsque"
+        " l'action « réparer » est sélectionnée)",
+    )
+
+    def _apply_legacy_querystring_overrides(self, legacy_form):
+        """Apply legacy querystring parameters to override form behavior.
+
+        - label_reparacteur: set initial value to reparacteur checked
+        """
+        if not legacy_form:
+            return
+
+        initial_legacy_request_data = legacy_form.decode_querystring()
+
+        if label_reparacteur := initial_legacy_request_data.get("label_reparacteur"):
+            if label_reparacteur == "true":
+                # Set as initial value
+                self.fields["label_qualite"].initial = LabelQualite.objects.filter(
+                    code="reparacteur"
+                )
+
+        if pas_exclusivite_reparation := initial_legacy_request_data.get(
+            "pas_exclusivite_reparation"
+        ):
+            self.fields["pas_exclusivite_reparation"].initial = (
+                pas_exclusivite_reparation == "false"
+            )
+
+
+class FiltresFormWithoutSynonyme(FiltresForm):
+    # Explicitly remove the synonyme field by setting it to None
+    synonyme = None
 
 
 class DigitalActeurForm(GetFormMixin, DsfrBaseForm):
@@ -271,43 +459,10 @@ class ActionDirectionForm(GetFormMixin, DsfrBaseForm):
 
 
 def get_epcis_for_carte_form():
-    return [(code, code) for code in cast(List[str], epcis_from(["code"]))]
+    return [(code, code) for code in cast(list[str], epcis_from(["code"]))]
 
 
 class CarteForm(AddressesForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Override the label and aria-label for the sous_categorie_objet field
-        self.fields["sous_categorie_objet"].label = "Indiquer un objet ou déchet "
-        self.fields["sous_categorie_objet"].widget.attrs[
-            "aria-label"
-        ] = "Indiquer un objet ou déchet"
-
-    def load_choices(
-        self,
-        request: HttpRequest,
-        grouped_action_choices: list[list[str]] = [],
-        disable_reparer_option: bool = False,
-    ) -> None:
-        self.fields["grouped_action"].choices = [
-            (
-                self.fields["grouped_action"].label,
-                grouped_action_choices,
-            )
-        ]
-        self.fields["legend_grouped_action"].choices = [
-            (
-                self.fields["legend_grouped_action"].label,
-                grouped_action_choices,
-            )
-        ]
-
-        if disable_reparer_option:
-            for field in ["bonus", "label_reparacteur", "pas_exclusivite_reparation"]:
-                self.fields[field].widget.attrs["disabled"] = "true"
-
-        super().load_choices(request)
-
     adresse = forms.CharField(
         widget=AutoCompleteInput(
             attrs={
@@ -328,45 +483,17 @@ class CarteForm(AddressesForm):
         required=False,
     )
 
-    grouped_action = forms.MultipleChoiceField(
-        widget=DSFRCheckboxSelectMultiple(
-            attrs={
-                "class": "fr-fieldset",
-                "data-search-solution-form-target": "groupedActionInput",
-                "data-action": (
-                    "change -> search-solution-form#activeReparerFiltersCarte"
-                ),
-            },
-        ),
-        choices=[],
-        label="Groupes d'actions",
-        required=False,
-    )
-
-    # TODO : refacto forms, merge with grouped_action field
-    legend_grouped_action = forms.MultipleChoiceField(
-        widget=DSFRCheckboxSelectMultiple(
-            attrs={
-                "class": "fr-fieldset qf-mb-0",
-                "data-action": (
-                    "click -> search-solution-form#applyLegendGroupedAction"
-                ),
-            },
-        ),
-        choices=[],
-        label="Groupes d'actions",
-        required=False,
-    )
-
 
 class ConfiguratorForm(DsfrBaseForm):
     # TODO: rename this field in all codebase -> actions_displayed
     action_list = GroupeActionChoiceField(
-        queryset=GroupeAction.objects.all().order_by("order"),
+        queryset=GroupeAction.objects.all()
+        .prefetch_related("actions")
+        .order_by("order"),
         to_field_name="code",
         widget=forms.CheckboxSelectMultiple,
         required=False,
-        initial=GroupeAction.objects.exclude(code="trier"),
+        initial=GroupeAction.objects.exclude(code="trier").prefetch_related("actions"),
         label=mark_safe(
             "<h3>Informations disponibles sur la carte</h3>"
             "Choisissez les actions disponibles pour vos usagers."
@@ -396,7 +523,7 @@ class ConfiguratorForm(DsfrBaseForm):
                 "endpoint": "/api/qfdmo/autocomplete/configurateur?query=",
                 "additionnal_info": mark_safe(
                     render_to_string(
-                        "forms/widgets/epci_codes_additionnal_info.html",
+                        "ui/forms/widgets/epci_codes_additionnal_info.html",
                     )
                 ),
             },
@@ -420,7 +547,7 @@ class AdvancedConfiguratorForm(forms.Form):
 
     def load_choices(self):
         cached_directions = cast(
-            List[dict], cache.get_or_set("directions", get_directions)
+            list[dict], cache.get_or_set("directions", get_directions)
         )
         self.fields["direction"].choices = [
             (direction["code"], direction["libelle"]) for direction in cached_directions
@@ -428,7 +555,7 @@ class AdvancedConfiguratorForm(forms.Form):
 
         # Cast needed because of the cache
         cached_action_instances = cast(
-            List[Action], cache.get_or_set("action_instances", get_action_instances)
+            list[Action], cache.get_or_set("action_instances", get_action_instances)
         )
         self.fields["action_list"].choices = [
             (
@@ -602,4 +729,39 @@ class AdvancedConfiguratorForm(forms.Form):
             '"lng":2.483596801757813}<br>}'
         ),
         required=False,
+    )
+
+
+class GroupeActionForm(GetFormMixin, DsfrBaseForm):
+    pass
+
+
+class ViewModeForm(AutoSubmitMixin, GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
+    carte_config_initial_mapping = {
+        "view": "mode_affichage",
+    }
+
+    autosubmit_fields = ["view"]
+
+    class ViewModeSegmentedControlChoices(TextChoices, SegmentedControlChoices):
+        CARTE = {
+            "value": CarteConfig.ModesAffichage.CARTE.value,
+            "label": CarteConfig.ModesAffichage.CARTE.label,
+            "icon": "map-pin-2-fill",
+        }
+        LISTE = {
+            "value": CarteConfig.ModesAffichage.LISTE.value,
+            "label": CarteConfig.ModesAffichage.LISTE.label,
+            "icon": "list-unordered",
+        }
+
+    view = forms.ChoiceField(
+        label="",
+        choices=ViewModeSegmentedControlChoices.choices,
+        required=False,
+        initial=CarteConfig.ModesAffichage.CARTE,
+        widget=SegmentedControl(
+            extra_classes="max-nolegend:fr-segmented--sm",
+            extended_choices=ViewModeSegmentedControlChoices,
+        ),
     )

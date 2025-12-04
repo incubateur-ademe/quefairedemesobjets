@@ -7,7 +7,7 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
 {% endcomment %}
 
 {% load carte_tags %}
-{% with address_ok=form.initial.adresse|default:form.initial.bounding_box|default:form.initial.epci_codes %}
+{% with address_ok=form.initial.adresse|default:form.initial.bounding_box|default:form.initial.epci_codes|default:form.initial.latitude %}
 <div
     class="
     qf-relative
@@ -19,57 +19,37 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
     "
     {% if not is_digital %}
     data-controller="map"
+    {% if location %}
     data-map-location-value="{{ location }}"
     {% endif %}
+    {% endif %}
 >
-    {% if is_digital %}
-        {% include "ui/components/carte/_digital_results.html" %}
-    {% else %}
-        {# Near by addresses #}
-        {% if address_ok %}
-            {% include "ui/components/carte/shared/_search_in_zone.html" %}
-        {% endif %}
-        <div
-            data-map-target="mapContainer"
-            class="qf-inset-0 qf-h-full qf-relative qf-z-0"
-            data-action="map:captureInteraction->analytics#captureInteractionWithMap"
-        >
-            {% for acteur in acteurs %}
-                {% acteur_pinpoint_tag acteur=acteur direction=form.initial.direction action_list=form.initial.action_list carte=carte carte_config=carte_config sous_categorie_id=form.initial.sc_id %}
-            {% endfor %}
-            {% include "ui/components/carte/pinpoints/home.html" %}
+    {% if address_ok %}
+        {% include "ui/components/carte/legend.html" %}
+        {% include "ui/components/carte/shared/_search_in_zone.html" %}
+        {% include "ui/components/carte/buttons/ajouter_un_lieu.html" %}
+    {% endif %}
+    <div
+        data-map-target="mapContainer"
+        class="qf-inset-0 qf-h-full qf-relative qf-z-0"
+    >
+        {% for acteur in acteurs %}
+            {% acteur_pinpoint_tag acteur=acteur direction=form.initial.direction action_list=selected_action_codes carte=carte carte_config=carte_config sous_categorie_id=forms.filtres.sous_categorie_objet_id.value counter=forloop.counter %}
+        {% endfor %}
+        {% include "ui/components/carte/pinpoints/home.html" %}
+    </div>
+
+    {% if address_ok %}
+        <div class="qf-absolute qf-left-0 qf-right-0 qf-bottom-0 qf-text-center qf-bg-white lg:qf-hidden">
+            {% include "ui/components/carte/_declaration_accessibilite.html" %}
         </div>
 
-        {% if address_ok %}
-            {% if is_carte %}
-                {% include "ui/components/carte/panels/legend.html" %}
-                <a class="qf-flex
-                    fr-btn fr-btn--icon-left fr-icon-epingle-plus qf-whitespace-nowrap qf-w-auto qf-justify-center
-                    qf-absolute qf-left-2w qf-right-2w qf-bottom-4w qf-z-20
-                    {# the important below is required to override fr-btn max-width style #}
-                    !qf-max-w-sm md:!qf-ml-auto
-                    max-md:qf-mx-auto"
-                    href="{% url 'qfdmo:address-suggestion-form' %}"
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label="Proposer une adresse - Nouvelle fenêtre"
-                >
-                    {{ CARTE.ajouter_un_lieu }}
-                </a>
-                <div class="qf-absolute qf-left-0 qf-right-0 qf-bottom-0 qf-text-center qf-bg-white lg:qf-hidden">
-                    {% include "ui/components/carte/_declaration_accessibilite.html" %}
-                </div>
-            {% endif %}
-
-            {% if not acteurs %}
-                {% include "ui/components/carte/shared/disclaimers/no_local_solution.html" %}
-            {% endif %}
-
-        {% else %}
-            {% include "ui/components/carte/shared/disclaimers/adresse_missing.html" %}
+        {% if not acteurs %}
+            {% include "ui/components/carte/shared/disclaimers/no_local_solution.html" %}
         {% endif %}
-    {% endif %}
 
-    {% include "ui/components/carte/shared/disclaimers/loading_solutions.html" %}
+    {% else %}
+        {% include "ui/components/carte/shared/disclaimers/adresse_missing.html" %}
+    {% endif %}
 </div>
 {% endwith %}

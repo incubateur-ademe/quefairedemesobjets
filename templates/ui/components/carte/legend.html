@@ -1,0 +1,35 @@
+{% if not carte_config or not carte_config.cacher_legende %}
+<aside
+    data-controller="responsive" data-responsive-media-query-value="(min-width: 768px)"
+    data-testid="carte-legend"
+    class="
+    qf-pl-3w qf-py-2w qf-pr-2w qf-max-w-[17rem]
+    qf-hidden lg:qf-block
+    qf-absolute qf-bottom-0 qf-left-0 qf-z-10
+    qf-bg-white qf-drop-shadow-lg"
+>
+
+    <h2 class="fr-h4 fr-mb-2w">
+        Actions possibles
+    </h2>
+    {{ forms.legende }}
+    <hr class="qf-pb-2w qf-pt-0">
+
+    <div class="qf-flex qf-gap-2w qf-flex-col">
+        {% include "ui/components/modals/filtres.html" with button_extra_classes="fr-btn--sm qf-w-full qf-justify-center" button_only=True %}
+
+        {% comment %}
+        Check if the branding configuration is not set or if branding is allowed.
+        If either condition is true, display the "Infos" button.
+        {% endcomment %}
+
+        {% if not carte_config or not carte_config.supprimer_branding %}
+            {% include "ui/components/modals/infos.html" with button_extra_classes="max-md:qf-hidden fr-btn--sm qf-w-full qf-justify-center" button_only=True %}
+        {% endif %}
+
+        <div>
+        {% include "ui/components/carte/_declaration_accessibilite.html" with mobile=False %}
+        </div>
+    </div>
+</aside>
+{% endif %}

@@ -82,10 +82,10 @@
   mask-image: url("../svg/tools-fill.svg");
 }
 
-.fr-icon-hand-heart-line::before,
-.fr-icon-hand-heart-line::after {
-  -webkit-mask-image: url("../svg/hand-heart-line.svg");
-  mask-image: url("../svg/hand-heart-line.svg");
+.fr-icon-hand-heart::before,
+.fr-icon-hand-heart::after {
+  -webkit-mask-image: url("../svg/hand-heart.svg");
+  mask-image: url("../svg/hand-heart.svg");
 }
 
 .fr-icon-money-euro-circle-line::before,
@@ -190,4 +190,66 @@ DSFR customization for tabs
 
 .fr-header__service {
   @apply qf-hidden;
+}
+
+.fr-table--mode-liste {
+  @apply max-md:qf-mt-0;
+
+  thead {
+    @apply max-md:qf-hidden;
+  }
+  tbody {
+    @apply max-md:qf-flex qf-flex-col qf-gap-1w;
+  }
+
+  tr {
+    @apply max-md:qf-flex qf-flex-col;
+    @apply max-md:qf-border max-md:qf-border-solid max-md:qf-py-2w max-md:qf-mb-0 max-md:qf-border-grey-900 max-md:qf-mb-2w;
+  }
+
+  td {
+    @apply max-md:!qf-px-2w;
+  }
+
+  .fr-table__content table tbody td {
+    @apply max-md:!qf-bg-none;
+  }
+
+  .fr-table__wrapper::after {
+    @apply max-md:!qf-bg-none;
+  }
+}
+
+#view-mode-nav {
+  > .fr-input-group {
+    @apply qf-mb-0;
+  }
+}
+
+.fr-segmented__legend:not(:has(*)),
+.fr-fieldset__legend:not(:has(*)) {
+  @apply qf-hidden;
+}
+
+/* Duplicated styles from DSFR source to provide responsive approach for
+segmented elements in the view mode switch
+https://github.com/GouvernementFR/dsfr/blob/6a2bbfe02e396d8d77c50efee9638ab78c7b277b/src/dsfr/component/segmented/style/module/_sm.scss#L9
+*/
+@media (width < 48rem) {
+  .max-nolegend\:fr-segmented--sm {
+    input + label {
+      max-width: 100%;
+      min-height: 2rem;
+      max-height: none;
+      overflow: initial;
+      padding: 0.25rem 0.75rem;
+      font-size: 0.875rem;
+      line-height: 1.5rem;
+      &::before {
+        --icon-size: 1rem;
+        margin-left: -0.125rem;
+        margin-right: 0.5rem;
+      }
+    }
+  }
 }

@@ -1,0 +1,12 @@
+<div class="qf-flex qf-flex-row qf-gap-1v">
+  {% if label_qualite.logo_filtre %}
+  <img src="{{ label_qualite.logo_filtre.url }}" class="qf-mb-auto"/>
+  {% endif %}
+  <div class="qf-flex qf-flex-col">
+    {{ label_qualite.filtre_label }}
+
+    <small class="empty:qf-hidden fr-hint-text">
+      {{ label_qualite.filtre_texte_d_aide|safe }}
+    </small>
+  </div>
+</div>
