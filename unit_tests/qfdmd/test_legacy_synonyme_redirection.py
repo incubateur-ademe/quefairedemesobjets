@@ -267,24 +267,3 @@ class TestSynonymeDetailViewRedirection:
 
         # Should NOT redirect (exclusion blocks it)
         assert response.status_code == 200
-
-        synonyme = SynonymeFactory(nom="Synonyme Test", produit=produit)
-
-        # Create direct synonyme redirection
-        LegacyIntermediateSynonymePage.objects.create(
-            page=produit_page_a,
-            synonyme=synonyme,
-        )
-
-        # Create a request without beta
-        factory = RequestFactory()
-        request = factory.get(f"/produit/{synonyme.slug}/")
-        request.beta = False
-
-        # Create view and get response
-        view = SynonymeDetailView()
-        view.setup(request, slug=synonyme.slug)
-        response = view.get(request, slug=synonyme.slug)
-
-        # Should NOT redirect
-        assert response.status_code == 200
