@@ -1,3 +1,4 @@
+import json
 import logging
 
 from diff_match_patch import diff_match_patch
@@ -6,7 +7,19 @@ from django.template.defaulttags import register
 from django.urls.base import reverse
 from django.utils.safestring import mark_safe
 
+from data.models.suggestion import SuggestionGroupe
+
 logger = logging.getLogger(__name__)
+
+
+@register.filter
+def json_fields(fields_list):
+    result = {}
+    for value in fields_list.values():
+        if not isinstance(value, dict):
+            raise ValueError(f"Value {value} is not a dict")
+        result.update(value)
+    return json.dumps(result)
 
 
 @register.filter
@@ -40,6 +53,17 @@ def diff_display(old_value, new_value):
 @register.inclusion_tag("data/_partials/display_diff_value.html")
 def display_diff_value(key, value, suggestion_contexte):
     """Display diff value with context links"""
+
+    old_value_exists = (
+        isinstance(suggestion_contexte, dict) and key in suggestion_contexte
+    )
+    old_value = suggestion_contexte.get(key, None) if old_value_exists else None
+
+    return display_diff_value_details(key, value, old_value, old_value_exists)
+
+
+@register.inclusion_tag("data/_partials/display_diff_value.html")
+def display_diff_value_details(key, value, old_value, old_value_exists=True):
 
     def _get_diff_value(old_value_exists, old_value, value):
         """Compute the diff value to display"""
@@ -129,11 +153,6 @@ def display_diff_value(key, value, suggestion_contexte):
             "extra_links": [(value, value)],
         }
 
-    old_value_exists = (
-        isinstance(suggestion_contexte, dict) and key in suggestion_contexte
-    )
-    old_value = suggestion_contexte.get(key, None) if old_value_exists else None
-
     # Initialize default values
     result = {
         "strike_value": None,
@@ -179,3 +198,50 @@ def valuetype(value):
 @register.filter(name="quote")
 def quote_filter(value):
     return quote(value)
+
+
+@register.filter(name="getattr")
+def getattr_filter(obj, attr):
+    """
+    Template filter pour accéder dynamiquement à un attribut d'un objet.
+    Usage: {{ object|getattr:attribute_name }}
+    """
+
+    try:
+        return getattr(obj, attr, None)
+    except (AttributeError, TypeError):
+        return None
+
+
+@register.filter
+def get_item(dictionary, key):
+    return dictionary.get(key)
+
+
+@register.filter
+def is_not_editable(key):
+    return key in SuggestionGroupe.NOT_EDITABLE_FIELDS
+
+
+@register.filter
+def display_diff_values(old_value, new_value):
+    if not new_value:
+        return old_value
+    if not old_value:
+        return new_value
+    return diff_display(old_value, new_value)
+
+
+@register.inclusion_tag("data/_partials/helper_updated_values.html")
+def helper_updated_values(field, value):
+    if field in ["siren", "siret"]:
+        url_map = {
+            "siren": f"https://annuaire-entreprises.data.gouv.fr/entreprise/{value}",
+            "siret": f"https://annuaire-entreprises.data.gouv.fr/etablissement/{value}",
+        }
+        return {
+            "extra_links": [(url_map[field], value)],
+        }
+    elif isinstance(value, str) and value.startswith("http"):
+        return {"extra_links": [(value, value)]}
+    return {}

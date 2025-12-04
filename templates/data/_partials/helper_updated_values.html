@@ -1,0 +1,6 @@
+{% for extra_link in extra_links %}
+    <a href="{{ extra_link.0 }}" target="_blank" rel="noreferrer">{{ extra_link.1 }}</a>
+    {% if not forloop.last %}
+        ,
+    {% endif %}
+{% endfor %}
