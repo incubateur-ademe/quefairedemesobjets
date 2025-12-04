@@ -68,9 +68,11 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
             )
         except json.JSONDecodeError:
             return HttpResponseBadRequest("Payload fields_list invalide")
-        suggestion_groupe.update_from_serialized_data(fields_values, fields_groups)
+        _, errors = suggestion_groupe.update_from_serialized_data(
+            fields_values, fields_groups
+        )
         context = suggestion_groupe.serialize().to_dict()
-
+        context["errors"] = errors
         return render(
             request,
             self.template_name,
