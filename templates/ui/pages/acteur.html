@@ -1,0 +1,38 @@
+{% extends base_template %}
+{% load acteur_tags carte_tags turbo_tags %}
+
+{% block robots %}noindex{% endblock %}
+
+{% block page_title %}
+{{ object.libelle|title }} | {{ block.super }}
+{% endblock page_title %}
+
+{% block json_ld %}
+<script type="application/ld+json">{{ object.json_ld|safe }}</script>
+{% endblock json_ld %}
+
+{% block content %}
+<div class="fr-container qf-py-2w">
+    <turbo-frame
+        id="{% acteur_frame_id %}"
+    >
+        <article {% if turbo %}class='qf-animate-in qf-fade-in qf-duration-400'{% endif %}>
+            <header class="qf-mb-2w">
+                <div class="qf-flex qf-flex-col qf-gap-1w">
+                    {% acteur_label %}
+
+                    {# TODO: use an alternative template instead of a conditionnal inside the html tag #}
+                    <{% if turbo %}h3{% else %}h1{% endif %} class="qf-text-lg qf-m-0 qf-max-w-[90%]" data-testid="acteur-title">{{ object.libelle|title }}</{% if turbo %}h3{% else %}h1{% endif %}>
+                    <p class="qf-text-sm qf-m-0">
+                        {{ object.acteur_services_display }} ({% distance_to_acteur object %})
+                    </p>
+                </div>
+
+                {% include "ui/components/acteur/tabs/_separator.html" %}
+                {% include "ui/components/acteur/_actions.html" %}
+            </header>
+            {% include "ui/components/acteur/_tabs.html" %}
+        </article>
+    </turbo-frame>
+</div>
+{% endblock content %}

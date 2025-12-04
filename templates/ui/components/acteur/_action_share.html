@@ -1,0 +1,80 @@
+{% load share_tags %}
+<div class="
+    qf-flex qf-flex-col qf-items-center
+    qf-space-y-1v"
+>
+    <button
+        class="fr-btn fr-btn--sm fr-btn--secondary-light fr-icon-share-line qf-rounded-full"
+        aria-describedby="{{ map_container_id }}:shareTooltip"
+        type="button"
+        data-action="click -> analytics#captureInteractionWithSolutionDetails"
+    >
+        <span class="qf-sr-only">partager</span>
+    </button>
+
+    <div class="fr-tooltip fr-placement" id="{{ map_container_id }}:shareTooltip" role="tooltip" tabindex="1">
+        {% configure_acteur_sharer %}
+        <div class="fr-share" role="toolbar">
+            <ul class="fr-btns-group">
+                <li>
+                    <a class="fr-btn--facebook fr-btn"
+                       target="_blank"
+                       rel="noreferrer"
+                       title="{{ sharer.facebook.title }}"
+                       href="{{ sharer.facebook.url }}"
+                       tabindex="-1"
+                    >
+                        Partager sur Facebook
+                    </a>
+                </li>
+                <li>
+                    <a  class="fr-btn--twitter-x fr-btn"
+                       target="_blank"
+                       rel="noreferrer"
+                       title="{{ sharer.twitter.title }}"
+                       href="{{ sharer.twitter.url }}"
+                       tabindex="-1"
+                    >
+                        Partager sur X (anciennement Twitter)
+                    </a>
+                </li>
+                <li>
+                    <a  class="fr-btn--linkedin fr-btn"
+                       target="_blank"
+                       rel="noreferrer"
+                       title="{{ sharer.linkedin.title }}"
+                       href="{{ sharer.linkedin.url }}"
+                       onclick="window.open(this.href,'Partager sur LinkedIn','toolbar=no,location=yes,status=no,menubar=no,scrollbars=yes,resizable=yes,width=550,height=550'); event.preventDefault();"
+                       tabindex="-1"
+                    >
+                        Partager sur LinkedIn
+                    </a>
+                </li>
+                <li>
+                    <a  class="fr-btn--mail fr-btn"
+                       target="_blank"
+                       rel="noreferrer"
+                       title="{{ sharer.email.title }}"
+                       href="{{ sharer.email.url }}"
+                       tabindex="-1"
+                    >
+                        Partager par email
+                    </a>
+                </li>
+                <li
+                    data-controller="copy"
+                >
+                    <button class="fr-btn--copy fr-btn"
+                        data-action="copy#toClipboard"
+                        type="button"
+                        tabindex="-1"
+                    >
+                        Copier dans le presse-papier
+                        <span data-copy-target="toCopy">{{ object.url }}</span>
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <span class="fr-text--xs fr-mb-0">Partager</span>
+</div>

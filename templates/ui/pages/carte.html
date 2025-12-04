@@ -1,30 +1,34 @@
 {% extends base_template %}
-{% load static %}
+{% load static turbo_tags %}
+
+{% block body_classes %}qf-h-screen{% endblock %}
 
 {% block content %}
+{% namespaced "search_form" as form_id %}
 <turbo-frame
-    id="{{ map_container_id }}"
+    id="{% main_frame_id %}"
     {% if request.user.is_authenticated and DEBUG %}
     data-turbo-action="advance"
     {% endif %}
     data-name="{{ request.resolver_match.url_name }}"
+    class="qf-group"
 >
     {# Controleur général de gestion de la navigation et du formulaire #}
     <form
-        id='{{ map_container_id }}:search_form'
+        id='{{ form_id }}'
         data-controller="search-solution-form"
         data-search-solution-form-target="searchForm"
         data-search-solution-form-is-iframe-value="{{ is_embedded }}"
         data-action="
         map:updateBbox->search-solution-form#updateBboxInput
         search-solution-form:captureInteraction->analytics#captureInteractionWithMap
-        address-autocomplete:formSubmit->search-solution-form#advancedSubmit
-        ss-cat-object-autocomplete:formSubmit->search-solution-form#advancedSubmit
+        address-autocomplete:formSubmit->search-solution-form#submitForm
+        ss-cat-object-autocomplete:formSubmit->search-solution-form#submitForm
         ss-cat-object-autocomplete:optionSelected->search-solution-form#checkSsCatObjetErrorForm"
         class="
         qf-rounded-lg qf-border qf-border-solid qf-border-grey-900
         qf-group
-        qf-h-full qf-overflow-hidden
+        {% if not mode_liste %} qf-h-[660px] qf-min-h-full qf-overflow-hidden {% else %}qf-h-full{% endif %}"
         qf-m-0
         qf-flex qf-flex-col qf-flex-auto
         qf-relative"
@@ -35,105 +39,23 @@
         action="{{ carte_config.get_absolute_url }}"
         {% endif %}
         data-search-form-visible
-        data-search-solution-form-map-container-id-value="{{ map_container_id }}"
+        data-search-solution-form-map-container-id-value="{% main_frame_id %}"
     >
-        <input type="hidden" name="map_container_id" value="{{ map_container_id }}">
+        <input type="hidden" name="{{ MAP_CONTAINER_ID }}" value="{% main_frame_id %}">
+        {{ forms.legacy }}
         <section class="map-grid qf-relative">
-            <header
-                {# The z-index below can impact the shadow over #}
-                class="{% block header_classes %}qf-z-20{% endblock %} qf-bg-white qf-shadow-lg"
-            >
-                <div
-                    class="
-                    qf-flex qf-flex-row sm:qf-items-center"
-                >
-                {% block form_header %}
-    {# TODO: refacto turbo, should be moved outside of form #}
-                {% include 'ui/components/carte/header.html' %}
-                {% endblock form_header %}
-                </div>
-            </header>
+            {% include 'ui/components/carte/header.html' %}
 
-            <main
-                class="
-                qf-flex
-                {% if is_digital %}
-                {# Is useful for digital view so that the users can scroll in the results #}
-                qf-overflow-auto
-                {% endif %}
-                qf-h-full
-                "
-                tabindex="0"
-            >
-                {% block form_result %}
-                    <div id="addressesPanel"
-                        data-search-solution-form-target="addressesPanel"
-                        class="qf-relative qf-z-10
-                            qf-flex qf-flex-col
-                            qf-h-full
-                            qf-w-full
-                            max-md:qf-left-0 max-md:qf-right-0
-                            data-[visible=true]:qf-flex-grow
-                            data-[visible=false]:qf-invisible data-[visible=false]:qf-h-0"
-                        data-visible="true"
-                        tabindex="0"
-                    >
-                        {% include 'ui/components/carte/results.html' %}
-                    </div>
-                    {# Panel «Legend» #}
-                    {# TODO: refacto turbo, should be moved outside of form #}
-                    {% include 'ui/components/carte/panels/legend_mobile.html' %}
-                {% endblock form_result %}
+            {% if mode_liste %}
+                {% include "ui/components/carte/mode_liste.html" %}
+            {% else %}
+                {% include "ui/components/carte/mode_carte.html" %}
+            {% endif %}
 
-                {% block form_fields %}
-                    {% include "ui/components/carte/partials/featureflip_inputs.html" %}
-                    {{ form.bounding_box }}
-                    {{ form.epci_codes }}
-                {% endblock form_fields %}
-            </main>
-
-            {# Part of this tag' style is defined in qfdmo.css because it would have been a bit unreadable as tailwind classes #}
-            <aside class="
-                md:qf-relative qf-z-20
-                aria-[hidden=false]:qf-block qf-hidden
-                md:qf-overflow-auto
-                max-md:qf-overflow-visible
-                qf-bg-white
-                max-md:qf-absolute
-                max-md:qf-top-full max-md:qf-bottom-0 max-md:qf-left-0 max-md:qf-right-0
-                max-md:qf-drop-shadow-[0_0_100px_rgba(0,0,0,0.3)]
-                max-md:qf-rounded-t-xl
-                max-md:qf-h-full
-                max-md:transition-transform max-md:duration-500
-                aria-[hidden=true]:max-md:qf-animate-out
-                aria-[hidden=true]:max-md:qf-fade-out
-                aria-[hidden=true]:data-[exit-animation-ended=true]:qf-hidden"
-            tabindex="0"
-            id="acteurDetailsPanel"
-            aria-hidden="true"
-            data-controller="acteur-details"
-            data-acteur-details-map-container-id-value="{{ map_container_id }}"
-            >
-                {% include "ui/components/carte/panels/acteur_detail.html" %}
-            </aside>
-
-            {% block content_footer %}
-            {% endblock content_footer %}
+            {% include "ui/components/acteur/acteur_detail.html" with no_draggable=mode_liste %}
         </section>
-
-        {% block form_modals %}
-            {# Panel «Filtres» #}
-            {% include 'ui/components/carte/modals/filters.html' %}
-
-            {# Panel À propos #}
-            {# TODO: refacto turbo, should be moved outside of form #}
-            {% include 'ui/components/carte/modals/a_propos.html' %}
-        {% endblock form_modals %}
-
+        {% include "ui/components/modals/filtres.html" with filtres_form=forms.filtres legende_form=forms.legende_filtres modal_only=True %}
+        {% include "ui/components/modals/infos.html" with modal_only=True %}
     </form>
 </turbo-frame>
 {% endblock content %}
-
-{% block modals %}
-    {% include "ui/components/carte/reparacteur_modale.html" %}
-{% endblock modals %}

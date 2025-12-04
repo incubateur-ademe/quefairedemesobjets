@@ -1,0 +1,76 @@
+{% load turbo_tags %}
+{% block modal_wrapper_for_id %}
+{% comment %}
+Reusable DSFR modal component with optional trigger button.
+Blocks:
+- button_text / button_extra_classes: customize trigger button
+- modal_title: modal header
+- modal_content: modal body
+- modal_footer / modal_footer_buttons: modal footer
+- size_classes: modal width
+
+Flags:
+- modal_only: render only the modal
+- button_only: render only the button
+
+Requires a unique 'id' per modal for accessibility.
+{% endcomment %}
+
+{% namespaced id as namespaced_id %}
+
+{% if not modal_only %}
+<button
+    class="fr-btn {% block button_extra_classes %}{% endblock %} {{ button_extra_classes }} qf-whitespace-nowrap"
+    data-fr-opened="false"
+    aria-controls="fr-modal-{{ namespaced_id }}"
+    aria-labelledby="fr-modal-title-{{ namespaced_id }}"
+    {# Ensure turbo frame is disabled as DSFR modals should not interact with turbo frame #}
+    data-turbo="false"
+    data-testid="modal-button-{{ namespaced_id }}"
+    type="button"
+>
+      {% block button_text %}{% endblock %}
+</button>
+{% endif %}
+
+{% if not button_only %}
+<dialog
+    aria-labelledby="fr-modal-title-{{ namespaced_id }}"
+    aria-modal="true"
+    id="fr-modal-{{ namespaced_id }}"
+    class="fr-modal qf-text-left"
+    data-testid="modal-{{ namespaced_id }}"
+>
+    <div class="fr-container fr-container--fluid fr-container-md">
+        <div class="fr-grid-row fr-grid-row--center">
+            <div class="{% block size_classes %}fr-col-12 fr-col-md-8 fr-col-lg-6{% endblock %}">
+                <div class="fr-modal__body">
+                    <div class="fr-modal__header">
+                        {% block modal_header %}
+                        {% endblock modal_header %}
+                        <button type="button" class="fr-btn--close fr-btn" title="Fermer la fenêtre modale" aria-controls="fr-modal-{{ namespaced_id }}" data-testid="modal-close-{{ namespaced_id }}">Fermer</button>
+                    </div>
+                    <div class="fr-modal__content">
+                        <h2 id="fr-modal-title-{{ namespaced_id }}" class=" fr-modal__title">
+                            {% block modal_title %}
+                            titre de la modale
+                            {% endblock modal_title %}
+                        </h2>
+                        {% block modal_content %}
+                        <p>lorem ipsum dolor sit amet, consectetur adipiscing elit. maecenas varius tortor nibh, sit amet tempor nibh finibus et. aenean eu enim justo. vestibulum aliquam hendrerit molestie. mauris malesuada nisi sit amet augue accumsan tincidunt. maecenas tincidunt, velit ac porttitor pulvinar, tortor eros facilisis libero, vitae commodo nunc quam et ligula. ut nec ipsum sapien. interdum et malesuada fames ac ante ipsum primis in faucibus. integer id nisi nec nulla luctus lacinia non eu turpis. etiam in ex imperdiet justo tincidunt egestas. ut porttitor urna ac augue cursus tincidunt sit amet sed orci.</p>
+                        {% endblock modal_content %}
+                    </div>
+                    {% block modal_footer %}
+                    <div class="fr-modal__footer">
+                        <ul class="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg fr-btns-group--icon-left">
+                        {% block modal_footer_buttons %}{% endblock %}
+                        </ul>
+                    </div>
+                    {% endblock modal_footer %}
+                </div>
+            </div>
+        </div>
+    </div>
+</dialog>
+{% endif %}
+{% endblock modal_wrapper_for_id %}

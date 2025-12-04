@@ -1,0 +1,34 @@
+name: Setup Playwright
+description: Cache and install Playwright browsers
+
+outputs:
+  cache-hit:
+    description: Whether the Playwright cache was hit
+    value: ${{ steps.cache-playwright.outputs.cache-hit }}
+
+runs:
+  using: composite
+  steps:
+    - name: Get Playwright version
+      id: playwright-version
+      shell: bash
+      run: echo "version=$(npm list @playwright/test --depth=0 --json | jq -r '.dependencies["@playwright/test"].version')" >> $GITHUB_OUTPUT
+
+    - name: Cache Playwright browsers
+      id: cache-playwright
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+        restore-keys: |
+          playwright-${{ runner.os }}-
+
+    - name: Install Playwright Browsers
+      if: steps.cache-playwright.outputs.cache-hit != 'true'
+      shell: bash
+      run: npx playwright install --with-deps
+
+    - name: Install system dependencies for Playwright
+      if: steps.cache-playwright.outputs.cache-hit == 'true'
+      shell: bash
+      run: npx playwright install-deps

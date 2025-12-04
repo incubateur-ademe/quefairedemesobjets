@@ -1,0 +1,19 @@
+<div
+    class="qf-flex qf-justify-start qf-space-x-5w qf-overflow-auto"
+    data-acteur-details-target="actions"
+>
+    {% if itineraire_url %}
+        {% include "ui/components/acteur/_action.html" with text="Itinéraire" url=itineraire_url icon="fr-icon-send-plane-line" %}
+    {% endif %}
+
+    {% if object.url %}
+        {% include "ui/components/acteur/_action.html" with text="Site web" url=object.url utm_source="quefairedemesobjets_ADEME" icon="fr-icon-global-line" extra_classes="fr-btn--secondary-light" %}
+    {% endif %}
+
+    {% if object.telephone %}
+        {% include "ui/components/acteur/_action_tel.html" with text="Téléphone" tel=object.telephone icon="fr-icon-phone-line" extra_classes="fr-btn--secondary-light md:qf-hidden" mobile_only=True %}
+    {% endif %}
+
+    {% include "ui/components/acteur/_action_share.html" %}
+    {% include "ui/components/acteur/_action.html" with text="Modifier" icon="fr-icon-ball-pen-fill" url=object.suggestion_form_url extra_classes="fr-btn--secondary-light" %}
+</div>

@@ -1,0 +1,19 @@
+<div class="fr-tabs fr-tabs--noborder qf-h-full">
+    <ul
+        class="fr-tabs__list qfdmo"
+        role="tablist"
+        aria-label="Informations détaillées de la solution {{ adresse }}"
+    >
+        {% include "ui/components/acteur/tabs/_tab.html" with text="Présentation" target="aboutPanel" %}
+
+        {% if object.labels_without_enseigne_display %}
+            {% include "ui/components/acteur/tabs/_tab.html" with text="Labels" target="labelsPanel" %}
+        {% endif %}
+
+        {% include "ui/components/acteur/tabs/_tab.html" with text="Sources" target="sourcesPanel" %}
+    </ul>
+
+    {% include "ui/components/acteur/tabs/about_panel.html" %}
+    {% include "ui/components/acteur/tabs/labels_panel.html" %}
+    {% include "ui/components/acteur/tabs/sources_panel.html" %}
+</div>

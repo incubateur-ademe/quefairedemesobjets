@@ -1,7 +1,7 @@
 import json
 import logging
 from abc import ABC, abstractmethod
-from typing import List, cast
+from typing import cast
 
 import unidecode
 from django.conf import settings
@@ -9,31 +9,25 @@ from django.contrib.postgres.lookups import Unaccent
 from django.contrib.postgres.search import TrigramWordDistance
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Q
+from django.core.paginator import Paginator
+from django.db.models import Prefetch, Q
 from django.db.models.functions import Length, Lower
 from django.db.models.query import QuerySet
-from django.forms import model_to_dict
-from django.http import Http404, HttpRequest, HttpResponse, JsonResponse
+from django.http import Http404, JsonResponse
 from django.shortcuts import redirect, render
-from django.template.loader import render_to_string
-from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_GET
 from django.views.generic.edit import FormView
 from wagtail.query import Any
 
 from qfdmd.models import Synonyme
-from qfdmo.forms import ActionDirectionForm, DigitalActeurForm, FormulaireForm
 from qfdmo.geo_api import bbox_from_list_of_geojson, retrieve_epci_geojson
 from qfdmo.map_utils import (
     center_from_frontend_bbox,
     compile_frontend_bbox,
     sanitize_frontend_bbox,
 )
-from qfdmo.models import Acteur, ActeurStatus, Action, DisplayedActeur, RevisionActeur
+from qfdmo.models import Acteur, ActeurStatus, DisplayedActeur, RevisionActeur
 from qfdmo.models.action import (
-    GroupeAction,
-    get_action_instances,
-    get_groupe_action_instances,
     get_reparer_action_id,
 )
 
@@ -78,7 +72,31 @@ class SearchActeursView(
         pass
 
     @abstractmethod
-    def _get_max_displayed_acteurs(self):
+    def _get_max_displayed_acteurs(self) -> int:
+        pass
+
+    @abstractmethod
+    def _get_action_ids(self) -> list[str]:
+        pass
+
+    @abstractmethod
+    def _get_ess(self) -> bool:
+        pass
+
+    @abstractmethod
+    def _get_label_reparacteur(self) -> bool:
+        pass
+
+    @abstractmethod
+    def _get_bonus(self) -> bool:
+        pass
+
+    @abstractmethod
+    def _get_pas_exclusivite_reparation(self) -> bool:
+        pass
+
+    @abstractmethod
+    def _get_sous_categorie_ids(self) -> list[int]:
         pass
 
     def _get_distance_max(self):
@@ -89,41 +107,20 @@ class SearchActeursView(
     is_iframe = False
     is_carte = False
     is_embedded = True
+    paginate = False
 
     def get_initial(self):
         initial = super().get_initial()
-        # TODO: refacto forms : delete this line
-        initial["sous_categorie_objet"] = self.request.GET.get("sous_categorie_objet")
         # TODO: refacto forms : delete this line
         initial["adresse"] = self.request.GET.get("adresse")
         # TODO: refacto forms : delete this line
         initial["latitude"] = self.request.GET.get("latitude")
         # TODO: refacto forms : delete this line
         initial["longitude"] = self.request.GET.get("longitude")
-
-        # TODO: refacto forms : delete this line
-        initial["label_reparacteur"] = self.request.GET.get("label_reparacteur")
         initial["epci_codes"] = self.request.GET.getlist("epci_codes")
-        initial["pas_exclusivite_reparation"] = self.request.GET.get(
-            "pas_exclusivite_reparation", True
-        )
-        # TODO: refacto forms : delete this line
-        initial["bonus"] = self.request.GET.get("bonus")
-        # TODO: refacto forms : delete this line
-        initial["ess"] = self.request.GET.get("ess")
+
         # TODO: refacto forms : delete this line
         initial["bounding_box"] = self.request.GET.get("bounding_box")
-        initial["sc_id"] = (
-            self.request.GET.get("sc_id") if initial["sous_categorie_objet"] else None
-        )
-
-        # Action to display and check
-        action_displayed = self._set_action_displayed()
-        initial["action_displayed"] = "|".join([a.code for a in action_displayed])
-
-        action_list = self._set_action_list(action_displayed)
-        initial["action_list"] = "|".join([a.code for a in action_list])
-
         return initial
 
     def get_form(self, form_class=None):
@@ -139,21 +136,6 @@ class SearchActeursView(
             form = super().get_form(form_class)
         else:
             form = super().get_form(form_class)
-
-        action_displayed = self._set_action_displayed() if self.is_carte else None
-        grouped_action_choices = (
-            self._get_grouped_action_choices(action_displayed)
-            if action_displayed
-            else None
-        )
-
-        form.load_choices(
-            self.request,
-            grouped_action_choices=grouped_action_choices,
-            disable_reparer_option=(
-                "reparer" not in form.initial.get("grouped_action", [])
-            ),
-        )
 
         return form
 
@@ -197,12 +179,13 @@ class SearchActeursView(
         form = self.get_form_class()(self.request.GET)
 
         kwargs.update(
-            # TODO: refacto forms : define a BooleanField carte on CarteAddressesForm
             carte=self.is_carte,
-            # TODO: refacto forms, return bounded form in template
-            # form=form,
-            location="{}",
+            is_carte=self.is_carte,
         )
+
+        # Only add is_formulaire flag for non-carte views (formulaire mode)
+        if not self.is_carte:
+            kwargs.update(is_formulaire=True)
 
         if form.is_valid():
             self.cleaned_data = form.cleaned_data
@@ -211,10 +194,28 @@ class SearchActeursView(
             self.cleaned_data = form.cleaned_data
 
         # Manage the selection of sous_categorie_objet and actions
-        acteurs = self._acteurs_from_sous_categorie_objet_and_actions()
-        bbox, acteurs = self._handle_scoped_acteurs(acteurs, **kwargs)
-        kwargs.update(acteurs=acteurs)
+        acteurs = self._build_acteurs_queryset_from_sous_categorie_objet_and_actions()
+        bbox, acteurs = self._build_acteurs_queryset_from_location(acteurs, **kwargs)
+
+        if self.paginate:
+            page_size = 10
+            paginated_acteurs = Paginator(
+                acteurs,
+                page_size,
+            )
+            paginated_acteurs_obj = paginated_acteurs.page(
+                self.request.GET.get("page", 1)
+            )
+            kwargs.update(
+                paginated_acteurs_obj=paginated_acteurs_obj,
+                count=paginated_acteurs.count,
+            )
+        else:
+            kwargs.update(acteurs=acteurs)
+
         context = super().get_context_data(**kwargs)
+
+        context.update(location=getattr(self, "location", ""))
 
         # TODO : refacto forms, gérer ça autrement
         try:
@@ -225,7 +226,7 @@ class SearchActeursView(
 
         return context
 
-    def _handle_scoped_acteurs(
+    def _build_acteurs_queryset_from_location(
         self, acteurs: QuerySet[DisplayedActeur], **kwargs
     ) -> tuple[Any, QuerySet[DisplayedActeur]]:
         """
@@ -235,16 +236,34 @@ class SearchActeursView(
         - user location
         """
         bbox, acteurs = self._bbox_and_acteurs_from_location_or_epci(acteurs)
+        acteurs = acteurs.only(
+            "location",
+            "identifiant_unique",
+            "action_principale_id",
+            "uuid",
+            "acteur_type_id",
+        )
+        if getattr(acteurs, "_has_distance_field", False):
+            acteurs = acteurs.distinct("distance", "identifiant_unique")
+        else:
+            acteurs = acteurs.distinct()
         acteurs = acteurs[: self._get_max_displayed_acteurs()]
+
+        # Prefetch AFTER limiting to only load related data for displayed acteurs
+        acteurs = acteurs.prefetch_related(
+            "proposition_services__sous_categories",
+            "proposition_services__sous_categories__categorie",
+            "proposition_services__action",
+            "proposition_services__action__directions",
+            "proposition_services__action__groupe_action",
+            "labels",
+            "action_principale",
+        )
+        if getattr(acteurs, "_needs_reparer_bonus", False):
+            acteurs = acteurs.with_bonus().with_reparer()
 
         # Set Home location (address set as input)
         # FIXME : can be manage in template using the form value ?
-        if (latitude := self.get_data_from_request_or_bounded_form("latitude")) and (
-            longitude := self.get_data_from_request_or_bounded_form("longitude")
-        ):
-            kwargs.update(
-                location=json.dumps({"latitude": latitude, "longitude": longitude})
-            )
         return bbox, acteurs
 
     def _bbox_and_acteurs_from_location_or_epci(self, acteurs):
@@ -255,21 +274,26 @@ class SearchActeursView(
         latitude = center[1] or self.get_data_from_request_or_bounded_form("latitude")
         longitude = center[0] or self.get_data_from_request_or_bounded_form("longitude")
 
+        # Store for later assignation in get_context_data
+        if latitude and longitude:
+            self.location = json.dumps({"latitude": latitude, "longitude": longitude})
+
+        # A BBOX was set in the Configurateur OR the user interacted with
+        # the map, that set a bounding box in its browser.
         if custom_bbox:
             bbox = sanitize_frontend_bbox(custom_bbox)
             acteurs_in_bbox = acteurs.in_bbox(bbox)
 
-            if acteurs_in_bbox.count() > 0:
+            if acteurs_in_bbox.exists():
                 return custom_bbox, acteurs_in_bbox
 
-        # TODO
-        # - Tester cas avec bounding box définie depuis le configurateur
-        # - Tester cas avec center retourné par la carte
+        # At the beginning, there is no bounding box.
+        # Hence, we query the Acteurs from a center point.
         if latitude and longitude:
             acteurs_from_center = acteurs.from_center(
                 longitude, latitude, self._get_distance_max()
             )
-            if acteurs_from_center.count():
+            if acteurs_from_center.exists():
                 custom_bbox = None
 
             return custom_bbox, acteurs_from_center
@@ -285,139 +309,21 @@ class SearchActeursView(
 
         return custom_bbox, acteurs.none()
 
-    def _set_action_displayed(self) -> List[Action]:
-        cached_action_instances = cast(
-            List[Action], cache.get_or_set("action_instances", get_action_instances)
-        )
-        """
-        Limit to actions of the direction only in Carte mode
-        """
-        if direction := self._get_direction():
-            if self.is_carte:
-                cached_action_instances = [
-                    action
-                    for action in cached_action_instances
-                    if direction in [d.code for d in action.directions.all()]
-                ]
-        if action_displayed := self.get_data_from_request_or_bounded_form(
-            "action_displayed", ""
-        ):
-            cached_action_instances = [
-                action
-                for action in cached_action_instances
-                if action.code in action_displayed.split("|")
-            ]
-        # In form mode, only display actions with afficher=True
-        # TODO : discuss with epargnonsnosressources if we can remove this condition
-        # or set it in get_action_instances
-        if not self.is_carte:
-            cached_action_instances = [
-                action for action in cached_action_instances if action.afficher
-            ]
-        return cached_action_instances
-
-    def _set_action_list(self, action_displayed: List[Action]) -> List[Action]:
-        if action_list := self.get_data_from_request_or_bounded_form("action_list", ""):
-            return [
-                action
-                for action in action_displayed
-                if action.code in action_list.split("|")
-            ]
-        return action_displayed
-
-    def _get_selected_action_code(self):
-        """
-        Get the action to include in the request
-        """
-        # FIXME : est-ce possible d'optimiser en accédant au valeur initial du form ?
-
-        # selection from interface
-        if self.get_data_from_request_or_bounded_form("grouped_action"):
-            return [
-                code
-                for new_groupe_action in self.get_data_from_request_or_bounded_form(
-                    "grouped_action"
-                )
-                for code in new_groupe_action.split("|")
-            ]
-        # Selection is not set in interface, get all available from
-        # (checked_)action_list
-        if self.get_data_from_request_or_bounded_form("action_list"):
-            return self.get_data_from_request_or_bounded_form("action_list", "").split(
-                "|"
-            )
-        # Selection is not set in interface, defeult checked action list is not set
-        # get all available from action_displayed
-        if self.get_data_from_request_or_bounded_form("action_displayed"):
-            return self.get_data_from_request_or_bounded_form(
-                "action_displayed", ""
-            ).split("|")
-        # return empty array, will search in all actions
-        return []
-
-    def _get_selected_action(self) -> List[Action]:
-        """
-        Get the action to include in the request
-        """
-
-        codes = []
-        # selection from interface
-        if self.request.GET.get("grouped_action"):
-            codes = [
-                code
-                for new_groupe_action in self.request.GET.getlist("grouped_action")
-                for code in new_groupe_action.split("|")
-            ]
-        # Selection is not set in interface, get all available from
-        # (checked_)action_list
-        elif action_list := self.cleaned_data.get("action_list"):
-            # TODO : effet de bord si la list des action n'est pas cohérente avec
-            # les actions affichées
-            # il faut collecté les actions coché selon les groupes d'action
-            codes = action_list.split("|")
-        # Selection is not set in interface, defeult checked action list is not set
-        # get all available from action_displayed
-        elif action_displayed := self.cleaned_data.get("action_displayed"):
-            codes = action_displayed.split("|")
-        # return empty array, will search in all actions
-
-        # Cast needed because of the cache
-        cached_action_instances = cast(
-            List[Action], cache.get_or_set("action_instances", get_action_instances)
-        )
-        actions = (
-            [a for a in cached_action_instances if a.code in codes]
-            if codes
-            else cached_action_instances
-        )
-        if direction := self._get_direction():
-            actions = [
-                a for a in actions if direction in [d.code for d in a.directions.all()]
-            ]
-        return actions
-
-    def _acteurs_from_sous_categorie_objet_and_actions(
+    def _build_acteurs_queryset_from_sous_categorie_objet_and_actions(
         self,
     ) -> QuerySet[DisplayedActeur]:
-        selected_actions_ids = self._get_selected_action_ids()
+        selected_actions_ids = self._get_action_ids()
         reparer_action_id = cache.get_or_set("reparer_action_id", get_reparer_action_id)
         reparer_is_checked = reparer_action_id in selected_actions_ids
-
         filters, excludes = self._compile_acteurs_queryset(
             reparer_is_checked, selected_actions_ids, reparer_action_id
         )
 
         acteurs = DisplayedActeur.objects.filter(filters).exclude(excludes)
 
-        if reparer_is_checked:
-            acteurs = acteurs.with_reparer().with_bonus()
-
-        acteurs = acteurs.prefetch_related(
-            "proposition_services__sous_categories",
-            "proposition_services__sous_categories__categorie",
-            "proposition_services__action",
-            "action_principale",
-        ).distinct()
+        # Store whether we need reparer/bonus annotations for later
+        # We'll apply them AFTER limiting to avoid expensive subqueries on all rows
+        acteurs._needs_reparer_bonus = reparer_is_checked
 
         return acteurs
 
@@ -428,32 +334,29 @@ class SearchActeursView(
         excludes = Q()
 
         if (
-            self.get_data_from_request_or_bounded_form("pas_exclusivite_reparation")
-            is not False
+            self._get_pas_exclusivite_reparation() is not False
             or not reparer_is_checked
         ):
             excludes |= Q(exclusivite_de_reprisereparation=True)
 
-        if self.get_data_from_request_or_bounded_form("ess"):
+        if self._get_ess():
             filters &= Q(labels__code="ess")
 
-        if self.get_data_from_request_or_bounded_form("bonus"):
+        if self._get_bonus():
             filters &= Q(labels__bonus=True)
 
-        if sous_categorie_id := self.get_data_from_request_or_bounded_form("sc_id", 0):
+        if sous_categorie_ids := self._get_sous_categorie_ids():
             filters &= Q(
-                proposition_services__sous_categories__id=sous_categorie_id,
+                proposition_services__sous_categories__id__in=sous_categorie_ids,
             )
 
         actions_filters = Q()
 
-        if (
-            self.get_data_from_request_or_bounded_form("label_reparacteur")
-            and reparer_is_checked
-        ):
+        if self._get_label_reparacteur() and reparer_is_checked:
             selected_actions_ids = [
                 a for a in selected_actions_ids if a != reparer_action_id
             ]
+
             actions_filters |= Q(
                 proposition_services__action_id=reparer_action_id,
                 labels__code="reparacteur",
@@ -467,140 +370,6 @@ class SearchActeursView(
         filters &= actions_filters
 
         return filters, excludes
-
-    def get_cached_groupe_action_with_displayed_actions(self, action_displayed):
-        # Cast needed because of the cache
-        cached_groupe_action_instances = cast(
-            QuerySet[GroupeAction],
-            cache.get_or_set("groupe_action_instances", get_groupe_action_instances),
-        )
-
-        # Fetch actions from cache only if they are displayed
-        # for the end user
-        cached_groupe_action_with_displayed_actions = []
-        for cached_groupe in cached_groupe_action_instances:
-            if displayed_actions_from_groupe_actions := [
-                action
-                # TODO : à optimiser avec le cache
-                for action in cached_groupe.actions.all().order_by(  # type: ignore
-                    "order"
-                )
-                if action in action_displayed
-            ]:
-                cached_groupe_action_with_displayed_actions.append(
-                    [cached_groupe, displayed_actions_from_groupe_actions]
-                )
-        return cached_groupe_action_with_displayed_actions
-
-    def _get_grouped_action_choices(
-        self, action_displayed: list[Action]
-    ) -> list[list[str]]:
-        """Generate a list of choices for form field
-        used in legend"""
-        # Generate a tuple of (code, libelle) used in the frontend.
-        # The libelle is automatically picked up by django templating
-        # when generating the form.
-        grouped_action_choices = []
-        for [
-            groupe,
-            groupe_displayed_actions,
-        ] in self.get_cached_groupe_action_with_displayed_actions(action_displayed):
-            libelle = ""
-            if groupe.icon:
-                libelle = render_to_string(
-                    "forms/widgets/groupe_action_label.html",
-                    {
-                        "groupe_action": groupe,
-                        "libelle": groupe.get_libelle_from(groupe_displayed_actions),
-                    },
-                )
-
-            code = "|".join([a.code for a in groupe_displayed_actions])
-            grouped_action_choices.append([code, mark_safe(libelle)])
-        return grouped_action_choices
-
-    def _grouped_action_from(
-        self, grouped_action_choices: list[list[str]], action_list: list[Action]
-    ) -> list[str]:
-        return [
-            groupe_option[0]
-            for groupe_option in grouped_action_choices
-            if set(groupe_option[0].split("|")) & set([a.code for a in action_list])
-        ]
-
-
-class FormulaireSearchActeursView(SearchActeursView):
-    """Affiche le formulaire utilisé sur epargnonsnosressources.gouv.fr
-    Cette vue est à considérer en mode maintenance uniquement et ne doit pas être
-    modifiée."""
-
-    is_iframe = True
-    template_name = "ui/pages/formulaire.html"
-    form_class = FormulaireForm
-
-    def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-        self.digital_acteur_form: DigitalActeurForm = DigitalActeurForm(
-            self.request.GET
-        )
-        self.action_direction_form = ActionDirectionForm(
-            self.request.GET,
-            initial={"direction": ActionDirectionForm.DirectionChoices.J_AI.value},
-        )
-        return super().get(request, *args, **kwargs)
-
-    def _get_direction(self):
-        return self.action_direction_form["direction"].value()
-
-    def _check_if_is_digital(self):
-        return (
-            self.digital_acteur_form["digital"].value()
-            == self.digital_acteur_form.DigitalChoices.DIGITAL.value
-        )
-
-    def _handle_scoped_acteurs(
-        self, acteurs: QuerySet[DisplayedActeur], **kwargs
-    ) -> tuple[Any, QuerySet[DisplayedActeur]]:
-        """
-        Handle the scoped acteurs following the order of priority:
-        - digital
-        - bbox
-        - epci_codes
-        - user location
-        override from parent class to handle digital acteurs
-        """
-
-        if self._check_if_is_digital():
-            return None, acteurs.digital()
-        return super()._handle_scoped_acteurs(acteurs, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        if self._check_if_is_digital():
-            context.update(is_digital=True)
-        context.update(
-            map_container_id="formulaire",
-            action_direction_form=self.action_direction_form,
-            digital_acteur_form=self.digital_acteur_form,
-        )
-        return context
-
-    def _get_selected_action_ids(self):
-        # TODO: merge this method with the one from CarteSearchActeursView
-        # and do not return a list of dict but a queryset instead
-        return [a["id"] for a in self.get_action_list()]
-
-    def get_action_list(self) -> List[dict]:
-        direction = self._get_direction()
-        action_displayed = self._set_action_displayed()
-        actions = self._set_action_list(action_displayed)
-        if direction:
-            actions = [
-                a for a in actions if direction in [d.code for d in a.directions.all()]
-            ]
-        return [model_to_dict(a, exclude=["directions"]) for a in actions]
-
-    def _get_max_displayed_acteurs(self):
-        return settings.DEFAULT_MAX_SOLUTION_DISPLAYED
 
 
 def getorcreate_revisionacteur(request, acteur_identifiant):
@@ -692,11 +461,25 @@ def acteur_detail(request, uuid):
     direction = request.GET.get("direction")
 
     try:
+        # Import here to avoid circular imports
+        from qfdmo.models.acteur import LabelQualite
+
+        # Prefetch labels ordered by bonus (desc) and type_enseigne
+        # This allows the template tag to simply take the first label
+        ordered_labels = Prefetch(
+            "labels",
+            queryset=LabelQualite.objects.filter(afficher=True).order_by(
+                "-bonus", "type_enseigne"
+            ),
+            to_attr="displayable_labels_ordered",
+        )
+
         displayed_acteur = DisplayedActeur.objects.prefetch_related(
             "proposition_services__sous_categories",
             "proposition_services__sous_categories__categorie",
             "proposition_services__action__groupe_action",
-            "labels",
+            ordered_labels,
+            "labels",  # Keep original for other uses
             "sources",
         ).get(uuid=uuid)
     except DisplayedActeur.DoesNotExist:
@@ -710,6 +493,15 @@ def acteur_detail(request, uuid):
     if displayed_acteur is None or displayed_acteur.statut != ActeurStatus.ACTIF:
         return redirect(settings.BASE_URL, permanent=True)
 
+    # Use prefetched data to avoid additional queries
+    display_labels_panel = any(
+        label.afficher and not label.type_enseigne
+        for label in displayed_acteur.labels.all()
+    )
+    display_sources_panel = any(
+        source.afficher for source in displayed_acteur.sources.all()
+    )
+
     context = {
         "base_template": base_template,
         "object": displayed_acteur,  # We can use object here so that switching
@@ -719,15 +511,15 @@ def acteur_detail(request, uuid):
         "is_embedded": "carte" in request.GET or "iframe" in request.GET,
         "longitude": longitude,
         "direction": direction,
-        "display_labels_panel": bool(
-            displayed_acteur.labels.filter(afficher=True, type_enseigne=False).count()
-        ),
-        "display_sources_panel": bool(
-            displayed_acteur.sources.filter(afficher=True).count()
-        ),
-        "is_carte": "carte" in request.GET,
+        "display_labels_panel": display_labels_panel,
+        "display_sources_panel": display_sources_panel,
+        "is_carte": "carte" in request.GET or "with_map" in request.GET,
         "map_container_id": request.GET.get("map_container_id", "carte"),
     }
+
+    # Set is_formulaire flag when not coming from carte/list modes
+    if not ("carte" in request.GET or "with_map" in request.GET):
+        context["is_formulaire"] = True
 
     if latitude and longitude and not displayed_acteur.is_digital:
         context.update(
@@ -736,7 +528,7 @@ def acteur_detail(request, uuid):
             )
         )
 
-    return render(request, "ui/components/carte/acteur.html", context)
+    return render(request, "ui/pages/acteur.html", context)
 
 
 def solution_admin(request, identifiant_unique):

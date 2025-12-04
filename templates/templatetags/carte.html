@@ -1,0 +1,11 @@
+<div class="
+    qf-w-full
+    qf-overflow-x-hidden
+">
+    <turbo-frame
+        id="{{ id }}"
+        allow="geolocation; clipboard-write"
+        class="qf-h-full qf-w-full"
+        src="{{ url }}{% if request.GET.epci %}&epci_codes={{ request.GET.epci }}{% endif %}">
+    </turbo-frame>
+</div>

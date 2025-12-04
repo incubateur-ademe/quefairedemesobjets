@@ -10,9 +10,9 @@ from infotri.views import (
 urlpatterns = [
     # This route needs to be touched with care as it is embedded
     # on many websites, enabling the load of Info-tri as an iframe
-    path("static/infotri.js", get_infotri_iframe_script, name="infotri_script"),
+    path("iframe.js", get_infotri_iframe_script, name="infotri_script"),
     path(
-        "static/infotri-configurator.js",
+        "configurateur.js",
         get_infotri_configurator_iframe_script,
         name="infotri_configurator_script",
     ),

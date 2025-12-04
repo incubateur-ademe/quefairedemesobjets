@@ -207,7 +207,7 @@
     "model": "qfdmo.acteurservice",
     "fields": {
         "code": "recyclerie",
-        "libelle": "Recyclerie",
+        "libelle": "Recyclerie ou autre structure de la seconde main",
         "actions": [
             [
                 "acheter"

@@ -26,22 +26,3 @@ export function areWeInAnIframe() {
 
   return [weAreInAnIframe, referrer]
 }
-function removeUnwantedElements() {
-  if (!document.referrer) {
-    return
-  }
-  const domain = new URL(document.referrer).hostname
-  const domainIsInternal =
-    domain === "localhost" ||
-    domain.endsWith(".ademe.fr") ||
-    domain.endsWith(".ademe.dev")
-  if (domainIsInternal) {
-    for (const elementToRemove of document.querySelectorAll(
-      "[data-remove-if-internal]",
-    )) {
-      elementToRemove.remove()
-    }
-  }
-}
-window.addEventListener("DOMContentLoaded", removeUnwantedElements)
-document.addEventListener("turbo:frame-load", removeUnwantedElements)

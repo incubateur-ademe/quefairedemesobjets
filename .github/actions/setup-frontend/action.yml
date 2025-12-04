@@ -1,0 +1,26 @@
+name: Setup Frontend Environment
+description: Install Node.js and npm dependencies
+
+inputs:
+  build:
+    description: "Build frontend assets"
+    required: false
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version-file: ".tool-versions"
+        cache: "npm"
+
+    - name: Install npm dependencies
+      shell: bash
+      run: npm ci
+
+    - name: Build assets
+      if: inputs.build == 'true'
+      shell: bash
+      run: npm run build

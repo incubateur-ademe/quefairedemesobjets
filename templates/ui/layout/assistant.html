@@ -65,10 +65,10 @@ https://github.com/numerique-gouv/sites-faciles/blob/main/templates/base.html
         {% block body_attrs %}{% endblock %}
         data-controller="state analytics"
         {# State #}
-        data-state-adresse-value=""
-        data-state-longitude-value=""
-        data-state-latitude-value=""
-        data-state-iframe-value="{{ request.iframe|yesno:'true,false' }}"
+        {% if location %}
+        data-map-location-value="{{ location }}"
+        {% endif %}
+        data-state-iframe-value="{{ iframe|yesno:"true,false" }}"
         data-state-map-outlet="[data-controller='map']"
         data-state-address-autocomplete-outlet="[data-controller='address-autocomplete']"
         data-state-search-solution-form-outlet="[data-controller='search-solution-form']"

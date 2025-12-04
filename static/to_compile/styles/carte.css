@@ -49,30 +49,24 @@ Style the autocomplete container:
 }
 
 .map-grid {
-  @apply max-md:qf-flex qf-flex-col;
-  @apply qf-overflow-hidden qf-h-full md:qf-grid qf-gap-0;
+  @apply max-nolegend:qf-flex qf-flex-col;
+  @apply qf-h-full nolegend:qf-grid qf-gap-0;
   @apply qf-grid-flow-row-dense;
   @apply qf-transition-[grid-template-columns] qf-ease-in qf-duration-200;
   @media (min-width: 768px) {
-    grid-template-columns: auto var(--sidebar-width);
     grid-template-rows: var(--header-height) 1.5fr var(--footer-height);
     grid-template-areas:
-      "header header"
-      "map detail"
-      "footer footer";
-  }
-
-  &:has(> aside[aria-hidden="false"]) {
-    @apply qf-ease-out;
-    --sidebar-width: 400px;
-  }
-
-  > aside {
-    grid-area: detail;
+      "header"
+      "map"
+      "footer";
   }
 
   > footer {
     grid-area: footer;
+  }
+
+  > aside {
+    grid-area: map;
   }
 
   > header {
@@ -93,14 +87,14 @@ Style the autocomplete container:
   --legend-buttons-height: 40px;
 
   /* keep max width value in sync with tailwind breakpoints config */
-  @media (min-width: 768px) {
+  @media (min-width: 1024px) {
     --header-height: var(--base-header-height);
   }
 }
 
 :root[data-legend-hidden] {
   /* keep max width value in sync with tailwind breakpoints config */
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     --header-height: var(--base-header-height);
   }
 }

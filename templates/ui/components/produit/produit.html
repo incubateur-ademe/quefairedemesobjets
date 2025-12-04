@@ -31,10 +31,10 @@
                 </li>
             </ul>
             <div id="mauvais-etat-panel" class="fr-tabs__panel" role="tabpanel" aria-labelledby="mauvais-etat-tab" tabindex="0">
-                {% include "./_detail.html" with content=mauvais_etat url_carte=object.url_carte_mauvais_etat id="mauvais_etat" %}
+                {% include "./_detail.html" with content=mauvais_etat id="mauvais_etat" carte_config_slug="mauvais-etat" %}
             </div>
             <div id="bon-etat-panel" class="fr-tabs__panel" role="tabpanel" aria-labelledby="bon-etat-tab" tabindex="0">
-                {% include "./_detail.html" with content=bon_etat url_carte=object.url_carte_bon_etat id="bon_etat" %}
+                {% include "./_detail.html" with content=bon_etat id="bon_etat" carte_config_slug="bon-etat" %}
             </div>
         </div>
     {% else %}

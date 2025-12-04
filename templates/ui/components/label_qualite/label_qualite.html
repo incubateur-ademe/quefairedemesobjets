@@ -1,0 +1,7 @@
+{% load dsfr_tags %}
+
+{% if label %}
+<div data-testid="acteur-detail-labels">
+{% dsfr_tag label=label extra_classes=extra_classes %}
+</div>
+{% endif %}

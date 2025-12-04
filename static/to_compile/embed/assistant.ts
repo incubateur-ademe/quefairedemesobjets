@@ -22,7 +22,7 @@ const setupIframe = () => {
     {
       useIframeResizer: true,
       resizerOptions: {
-        id: "quefairedemesdechets-assistant",
+        id: "assistant",
       },
     },
   )

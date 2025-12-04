@@ -1,0 +1,51 @@
+{% extends "ui/components/modals/base.html" %}
+{% load script_tags turbo_tags %}
+
+{% block button_text %}
+{{ button_text|default:"Filtres" }}
+{% endblock button_text %}
+
+{% block button_extra_classes %}fr-btn--secondary fr-btn--icon-left fr-icon-equalizer-line{% endblock %}
+
+{% block size_classes %}fr-col-12 fr-col-md-10 fr-col-lg-10{% endblock %}
+
+{% block modal_title %}
+Filtres
+{% endblock modal_title %}
+
+{% block modal_header %}
+{% include "ui/components/modals/infos.html" with button_extra_classes="fr-btn--sm" button_only=True %}
+{% endblock modal_header %}
+
+{% block modal_content %}
+
+
+{% if legende_form and legende_form.visible %}
+
+{% if not mode_liste %}
+<div data-controller="responsive" data-responsive-media-query-value="(max-width: 1024px)">
+{% endif %}
+  {{ legende_form }}
+{% if not mode_liste %}
+</div>
+{% endif %}
+<hr>
+{% endif %}
+
+{{ filtres_form }}
+{% endblock modal_content %}
+
+{% block modal_footer_buttons %}
+
+<li>
+    <button type="submit" class="fr-btn" title="Valider" form="{{ form_id }}">
+    Appliquer
+  </button>
+</li>
+{% endblock modal_footer_buttons %}
+
+{% block modal_wrapper_for_id %}
+{% with id=id|default:"filtres" %}
+{{ block.super }}
+{% endwith %}
+{% endblock modal_wrapper_for_id %}

@@ -1,0 +1,37 @@
+<main
+    class="
+    qf-flex
+    qf-flex-col
+    qf-relative
+    {% if is_digital %}
+    {# Is useful for digital view so that the users can scroll in the results #}
+    qf-overflow-y-auto
+    {% endif %}
+    qf-h-full
+    "
+    tabindex="0"
+>
+    {% include "ui/components/carte/shared/disclaimers/loading_solutions.html" %}
+    {% block form_result %}
+        <div id="addressesPanel"
+            data-search-solution-form-target="addressesPanel"
+            class="qf-relative qf-z-10
+                qf-flex qf-flex-col
+                qf-h-full
+                qf-w-full
+                max-md:qf-left-0 max-md:qf-right-0
+                data-[visible=true]:qf-flex-grow
+                data-[visible=false]:qf-invisible data-[visible=false]:qf-h-0"
+            data-visible="true"
+            tabindex="0"
+        >
+            {% include 'ui/components/carte/results.html' %}
+        </div>
+    {% endblock form_result %}
+
+    {% block form_fields %}
+        {% include "ui/components/carte/partials/featureflip_inputs.html" %}
+        {{ form.bounding_box }}
+        {{ form.epci_codes }}
+    {% endblock form_fields %}
+</main>
