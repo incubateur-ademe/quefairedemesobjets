@@ -5,6 +5,7 @@ import tempfile
 from pathlib import Path
 
 from pydantic import AnyUrl
+from shared.config.airflow import TMP_FOLDER
 from utils import logging_utils as log
 from utils.cmd import cmd_run
 from utils.django import django_schema_create_and_check, django_setup_full
@@ -59,7 +60,7 @@ def commands_download_to_disk_first(
 
     # File download and unpacking: all done within a temporary folder
     # so cleanup is easier AND to avoid collisions (table name contains timestamp)
-    with tempfile.TemporaryDirectory() as folder:
+    with tempfile.TemporaryDirectory(dir=TMP_FOLDER) as folder:
         # Download to folder
         cmd_run(
             f"curl -sSL {data_endpoint} -o {folder}/{file_downloaded}", dry_run=dry_run

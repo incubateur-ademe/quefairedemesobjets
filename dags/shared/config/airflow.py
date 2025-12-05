@@ -16,3 +16,5 @@ DEFAULT_ARGS_NO_RETRIES: dict[str, Any] = {
     "email_on_failure": False,
     "email_on_retry": False,
 }
+
+TMP_FOLDER: str = "/opt/airflow/tmp"

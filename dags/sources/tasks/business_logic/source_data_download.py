@@ -6,6 +6,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import requests
+from shared.config.airflow import TMP_FOLDER
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
@@ -132,7 +133,7 @@ def fetch_dataset_from_artisanat(base_url):
 
 
 def fetch_dataset_from_pharmacies(endpoint):
-    with tempfile.TemporaryDirectory() as temp_dir:
+    with tempfile.TemporaryDirectory(dir=TMP_FOLDER) as temp_dir:
         zip_file = _download_file(endpoint, temp_dir)
         unzip_files = _extract_zip(zip_file, temp_dir)
         etablissements_file = [f for f in unzip_files if "etablissements" in f][0]

@@ -7,6 +7,7 @@ from pathlib import Path
 import pendulum
 from acteurs.tasks.airflow_logic.config_management import ExportOpendataConfig
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
+from shared.config.airflow import TMP_FOLDER
 from utils.django import django_setup_full
 
 logger = logging.getLogger(__name__)
@@ -20,7 +21,7 @@ def export_opendata_csv_to_s3(export_opendata_config: ExportOpendataConfig):
 
     from django.conf import settings
 
-    with tempfile.TemporaryDirectory() as temp_dir:
+    with tempfile.TemporaryDirectory(dir=TMP_FOLDER) as temp_dir:
         timestamp = pendulum.now("UTC").strftime("%Y%m%d%H%M%S")
         filename = f"{timestamp}.csv"
         permatent_filename = MAIN_OPENDATA_FILENAME

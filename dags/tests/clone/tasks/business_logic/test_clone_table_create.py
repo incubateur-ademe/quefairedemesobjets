@@ -43,9 +43,12 @@ class TestCommands:
             )
 
     def test_download_zip(self):
-        with patch(
-            "clone.tasks.business_logic.clone_table_create.cmd_run"
-        ) as mock_cmd_run:
+        with (
+            patch(
+                "clone.tasks.business_logic.clone_table_create.cmd_run"
+            ) as mock_cmd_run,
+            patch("clone.tasks.business_logic.clone_table_create.TMP_FOLDER", "/tmp"),
+        ):
             commands_download_to_disk_first(
                 # Testing a case similar to Annuaire Entreprises where
                 # the URL filename doesn't match the extracted filename
@@ -68,9 +71,12 @@ class TestCommands:
 
     def test_download_gz(self):
         # mock cmd_run
-        with patch(
-            "clone.tasks.business_logic.clone_table_create.cmd_run"
-        ) as mock_cmd_run:
+        with (
+            patch(
+                "clone.tasks.business_logic.clone_table_create.cmd_run"
+            ) as mock_cmd_run,
+            patch("clone.tasks.business_logic.clone_table_create.TMP_FOLDER", "/tmp"),
+        ):
             commands_download_to_disk_first(
                 data_endpoint=AnyUrl(url="https://example.com/adresses-france.csv.gz"),
                 file_downloaded="adresses-france.csv.gz",
