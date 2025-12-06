@@ -455,8 +455,8 @@ la plateforme data est accessible à l’adresse <a class="reference external" h
 </div>
 <p>Installation des dépendances python et javascript</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>env<span class="w"> </span>activate
-uv<span class="w"> </span>install<span class="w"> </span>--with<span class="w"> </span>dev,airflow
-npm<span class="w"> </span>install
+uv<span class="w"> </span>sync<span class="w"> </span>--group<span class="w"> </span>dev<span class="w"> </span>--group<span class="w"> </span>airflow
+npm<span class="w"> </span>ci
 </pre></div>
 </div>
 <p>Migration</p>
