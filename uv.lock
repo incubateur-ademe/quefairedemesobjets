@@ -1058,14 +1058,14 @@ wheels = [
 
 [[package]]
 name = "django-admin-sortable2"
-version = "2.2.8"
+version = "2.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d4/76/8af26a825442fb33688c820cf79e4b769d8c4b976a2ddaa7434b96706e05/django_admin_sortable2-2.2.8.tar.gz", hash = "sha256:59dfd7ced63e66adfb471b2a4d89ba3faae49c0148827047c8cf65759fc54c9e", size = 64599, upload-time = "2025-05-15T06:44:31.684Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/35/e4/5d0970e77b12e4dfb86765ac4c4c7be7cae2b8047b92b5492bbc17ed1883/django_admin_sortable2-2.3.tar.gz", hash = "sha256:2f2466bca052d320635c4c376171f574b1ef7b78fa2d204eebef48a05dfd5fef", size = 67377, upload-time = "2025-11-25T13:27:55.72Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8a/97/7d0b28f52027f36751cec372f0eaf3a5bc1be169a141818acece40628e04/django_admin_sortable2-2.2.8-py3-none-any.whl", hash = "sha256:b4cf66d75450b0f89c883d94b10e6133a4e7832c5bfed1568e3e71e400dc2b48", size = 90597, upload-time = "2025-05-15T06:44:30.649Z" },
+    { url = "https://files.pythonhosted.org/packages/09/b2/75ff4a64ef4eec4f892eb95732225c29395bd043a00a4cb16c5d561fea56/django_admin_sortable2-2.3-py3-none-any.whl", hash = "sha256:67c86310510da6d6d9bcaaaac5c8decf5164bb98374a8c7079238d6a1b0b98c4", size = 106970, upload-time = "2025-11-25T13:27:54.742Z" },
 ]
 
 [[package]]
