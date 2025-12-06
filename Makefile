@@ -42,7 +42,7 @@ init-dev:
 	git config blame.ignoreRevsFile .git-blame-ignore-revs
 	pre-commit install
 	# javascript
-	npm install
+	npm ci
 	make init-playwright
 	# environment
 	cp .env.template .env
