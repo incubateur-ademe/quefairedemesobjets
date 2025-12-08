@@ -659,6 +659,28 @@ class IframePreview(LookbookPreview):
 
         return template.render(Context({}))
 
+    def integrations(self, **kwargs):
+        """
+        # Integrations
+
+        Copiez ce script pour intégrer une carte avec des paramètres spécifiques :
+
+        ```html
+        <script src="{base_url}/static/carte.js"
+            data-action_list="preter|emprunter|louer|mettreenlocation|reparer|donner|echanger|acheter|revendre"
+            data-bounding_box="{{'southWest': {{'lat': 47.457526, 'lng': -0.609453}}, 'northEast': {{'lat': 47.489048, 'lng': -0.51571}}}}">
+        </script>
+        ```
+        """
+
+        template = Template(
+            f"<script src='{base_url}/static/carte.js'"
+            """ data-action_list="preter|emprunter|louer|mettreenlocation|reparer|donner|echanger|acheter|revendre" data-bounding_box="{&quot;southWest&quot;: {&quot;lat&quot;: 47.457526, &quot;lng&quot;: -0.609453}, &quot;northEast&quot;: {&quot;lat&quot;: 47.489048, &quot;lng&quot;: -0.51571}}"></script>
+            """,
+        )
+
+        return template.render(Context({}))
+
     def formulaire(self, **kwargs):
         """
         # Formulaire

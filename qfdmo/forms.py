@@ -36,6 +36,28 @@ from qfdmo.widgets import (
 )
 
 
+class MapForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
+    bounding_box = forms.CharField(
+        widget=forms.HiddenInput(
+            attrs={
+                "data-search-solution-form-target": "bbox",
+                "data-map-target": "bbox",
+            }
+        ),
+        required=False,
+    )
+
+    def _apply_legacy_querystring_overrides(self, legacy_form):
+        if not legacy_form:
+            return
+
+        request_data = legacy_form.decode_querystring()
+
+        # Handle action_displayed: filter the queryset
+        if bounding_box := request_data.get("bounding_box"):
+            self.fields["bounding_box"].initial = bounding_box
+
+
 class AddressesForm(forms.Form):
     def load_choices(self, request: HttpRequest, **kwargs) -> None:
         if address_placeholder := request.GET.get("address_placeholder"):
@@ -50,7 +72,6 @@ class AddressesForm(forms.Form):
         ),
         required=False,
     )
-
     latitude = forms.FloatField(
         widget=forms.HiddenInput(
             attrs={
@@ -262,6 +283,7 @@ class LegacySupportForm(GetFormMixin, forms.Form):
         "label_reparacteur",
         "pas_exclusivite_reparation",
         "epci_codes",
+        "bounding_box",
         CarteConfig.SOUS_CATEGORIE_QUERY_PARAM,
     ]
 
