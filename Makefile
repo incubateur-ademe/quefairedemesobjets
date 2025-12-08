@@ -23,8 +23,8 @@ check:
 .PHONY: init-certs
 init-certs:
 	@which mkcert > /dev/null || { echo "mkcert is not installed. Please install it first: brew install mkcert (macOS) or visit https://github.com/FiloSottile/mkcert"; exit 1; }
-	mkcert -install
-	mkcert $(BASE_DOMAIN)
+	@JAVA_HOME="" mkcert -install
+	@JAVA_HOME="" mkcert $(BASE_DOMAIN)
 	mv *.pem ./nginx-local-only/certs/
 	docker compose restart lvao-proxy
 
