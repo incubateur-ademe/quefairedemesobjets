@@ -1,7 +1,6 @@
 import json
 import logging
 from abc import ABC, abstractmethod
-from typing import cast
 
 import unidecode
 from django.conf import settings
@@ -101,6 +100,10 @@ class SearchActeursView(
     def _get_distance_max(self):
         """The distance after which we stop displaying acteurs on the first request"""
         return settings.DISTANCE_MAX
+
+    @abstractmethod
+    def _get_bounding_box(self) -> str:
+        pass
 
     # TODO : supprimer
     is_iframe = False
@@ -265,9 +268,7 @@ class SearchActeursView(
         return bbox, acteurs
 
     def _bbox_and_acteurs_from_location_or_epci(self, acteurs):
-        custom_bbox = cast(
-            str, self.get_data_from_request_or_bounded_form("bounding_box")
-        )
+        custom_bbox = self._get_bounding_box()
         center = center_from_frontend_bbox(custom_bbox)
         latitude = center[1] or self.get_data_from_request_or_bounded_form("latitude")
         longitude = center[0] or self.get_data_from_request_or_bounded_form("longitude")

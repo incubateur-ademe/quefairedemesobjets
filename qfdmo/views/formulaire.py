@@ -247,6 +247,12 @@ class FormulaireSearchActeursView(SearchActeursView):
     def _get_action_ids(self) -> list[str]:
         return self._get_selected_action_ids()
 
+    def _get_bounding_box(self) -> str | None:
+        """Get bounding_box from request or form"""
+        return cast(
+            str | None, self.get_data_from_request_or_bounded_form("bounding_box")
+        )
+
     def _check_if_is_digital(self):
         return (
             self.digital_acteur_form["digital"].value()

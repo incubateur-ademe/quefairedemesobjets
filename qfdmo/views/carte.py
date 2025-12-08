@@ -21,6 +21,7 @@ from qfdmo.forms import (
     FiltresFormWithoutSynonyme,
     LegacySupportForm,
     LegendeForm,
+    MapForm,
     ViewModeForm,
 )
 from qfdmo.models import CarteConfig
@@ -32,6 +33,11 @@ logger = logging.getLogger(__name__)
 
 class ViewModeFormEntry(TypedDict):
     form: type[ViewModeForm]
+    prefix: str
+
+
+class MapFormEntry(TypedDict):
+    form: type[MapForm]
     prefix: str
 
 
@@ -53,6 +59,7 @@ class AutoSubmitLegendeFormEntry(TypedDict):
 
 
 class CarteForms(TypedDict):
+    map: MapFormEntry
     view_mode: ViewModeFormEntry
     filtres: FiltresFormEntry
     legende: AutoSubmitLegendeFormEntry
@@ -75,6 +82,10 @@ class CarteSearchActeursView(SearchActeursView):
     @property
     def forms(self) -> CarteForms:
         return {
+            "map": {
+                "form": MapForm,
+                "prefix": "map",
+            },
             "view_mode": {
                 "form": ViewModeForm,
                 "prefix": "view_mode",
@@ -242,6 +253,19 @@ class CarteSearchActeursView(SearchActeursView):
         if self.carte_config:
             return self.carte_config.slug
         return DEFAULT_MAP_CONTAINER_ID
+
+    def _get_bounding_box(self) -> str | None:
+        """Get bounding_box from the bounded map form.
+
+        Override parent to use the bounded map form when available,
+        falling back to parent behavior if form is not available or invalid.
+        """
+        try:
+            map_form = self._get_ui_form("map")
+            return map_form["bounding_box"].value()
+        except (AttributeError, KeyError):
+            pass
+        return ""
 
     def _get_carte_config(self):
         return None
