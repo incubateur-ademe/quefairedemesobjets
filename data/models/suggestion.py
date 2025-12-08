@@ -23,6 +23,8 @@ from dags.sources.config.shared_constants import (
     SUGGESTION_SOURCE_SUPRESSION,
     SUGGESTION_SUCCES,
 )
+from data.models.apply_models.abstract_apply_model import AbstractApplyModel
+from data.models.apply_models.source_apply_model import SourceApplyModel
 from data.models.change import SuggestionChange
 from qfdmo.models.acteur import (
     Acteur,
@@ -816,6 +818,71 @@ class SuggestionGroupe(TimestampedModel):
                 suggestion_unitaire.save()
 
         return True, None
+
+    def _get_apply_models(self) -> list[AbstractApplyModel]:
+        if self.suggestion_cohorte.type_action in [
+            SuggestionAction.SOURCE_AJOUT,
+            SuggestionAction.SOURCE_MODIFICATION,
+            SuggestionAction.SOURCE_SUPPRESSION,
+        ]:
+            apply_models = []
+            # get the suggestion_unitaires on Acteur model
+            acteur_suggestion_unitaires = self.suggestion_unitaires.filter(
+                suggestion_modele="Acteur"
+            ).all()
+            if not acteur_suggestion_unitaires.exists():
+                raise ValueError("No acteur suggestion unitaires found")
+            identifiant_unique = (
+                acteur_suggestion_unitaires.first().acteur_id
+                or self.get_identifiant_unique_from_suggestion_unitaires()
+            )
+            apply_models.append(
+                SourceApplyModel(
+                    identifiant_unique=identifiant_unique,
+                    order=0,
+                    acteur_model=Acteur,
+                    data={
+                        champ: valeur
+                        for suggestion_unitaire in acteur_suggestion_unitaires
+                        for champ, valeur in zip(
+                            suggestion_unitaire.champs, suggestion_unitaire.valeurs
+                        )
+                    },
+                )
+            )
+
+            # transform in Pydantic model
+            # apply it
+
+            # get the suggestion_unitaires on RevisionActeur model
+            revision_acteur_suggestion_unitaires = self.suggestion_unitaires.filter(
+                suggestion_modele="RevisionActeur"
+            ).all()
+            if first := revision_acteur_suggestion_unitaires.first():
+                identifiant_unique = first.revision_acteur_id or identifiant_unique
+            apply_models.append(
+                SourceApplyModel(
+                    identifiant_unique=identifiant_unique,
+                    order=1,
+                    acteur_model=RevisionActeur,
+                    data={
+                        champ: valeur
+                        for suggestion_unitaire in (
+                            revision_acteur_suggestion_unitaires
+                        )
+                        for champ, valeur in zip(
+                            suggestion_unitaire.champs, suggestion_unitaire.valeurs
+                        )
+                    },
+                )
+            )
+            return apply_models
+        return []
+
+    def apply(self):
+        apply_models = self._get_apply_models()
+        for apply_model in sorted(apply_models, key=lambda x: x.order):
+            apply_model.apply()
 
 
 class SuggestionUnitaire(TimestampedModel):
