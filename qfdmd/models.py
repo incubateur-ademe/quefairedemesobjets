@@ -1,8 +1,8 @@
 import logging
 from typing import override
-from urllib.parse import urlencode
 
 from django.contrib.gis.db import models
+from django.core.exceptions import ValidationError
 from django.db.models.functions import Now
 from django.shortcuts import redirect
 from django.template.loader import render_to_string
@@ -255,13 +255,6 @@ class ProduitPage(
         "Désactiver l'héritage du bonus",
         default=False,
     )
-    legacy_synonyme = models.ForeignKey(
-        "qfdmd.synonyme",
-        on_delete=models.SET_NULL,
-        related_name="produit_page",
-        blank=True,
-        null=True,
-    )
 
     usage_unique = models.BooleanField(
         "À usage unique",
@@ -300,6 +293,32 @@ class ProduitPage(
                 ),
             ],
             heading="Redirection des produits Django",
+        ),
+        MultiFieldPanel(
+            [
+                HelpPanel(
+                    "<strong>Redirection directe de synonymes</strong><br/>"
+                    "Ajoutez ici des synonymes Django qui doivent rediriger "
+                    "directement vers cette page Wagtail.<br/><br/>"
+                    "<strong>Différence avec les produits :</strong> "
+                    "Contrairement aux produits qui redirigent tous leurs "
+                    "synonymes, ici vous pouvez sélectionner des synonymes "
+                    "individuellement pour les rediriger vers cette page."
+                    "<br/><br/>"
+                    "<strong>⚠️ Priorité des redirections :</strong> "
+                    "Les redirections de synonymes ont la priorité la plus "
+                    "élevée. Si un synonyme est listé ici ET que son produit "
+                    "est redirigé ailleurs, c'est la redirection du synonyme "
+                    "qui sera utilisée. Si vous souhaitez qu'un synonyme ne "
+                    "soit pas redirigé du tout, utilisez la section "
+                    "'Exceptions aux redirections' ci-dessous."
+                ),
+                InlinePanel(
+                    "legacy_synonyme",
+                    heading="Synonymes Django à rediriger ici",
+                ),
+            ],
+            heading="Redirection des synonymes Django",
         ),
         MultiFieldPanel(
             [
@@ -419,6 +438,80 @@ class LegacyIntermediateProduitPageSynonymeExclusion(models.Model):
     )
 
     panels = [FieldPanel("synonyme")]
+
+    def clean(self):
+        super().clean()
+
+        if self.synonyme:
+            # Check if this synonyme has a direct redirection elsewhere
+            try:
+                direct_redirection = self.synonyme.next_wagtail_page
+                raise ValidationError(
+                    f"Conflit : ce synonyme a déjà une redirection directe "
+                    f"vers la page '{direct_redirection.page.title}'. "
+                    f"Vous ne pouvez pas l'exclure ici. "
+                    f"Veuillez d'abord supprimer la redirection directe "
+                    f"du synonyme."
+                )
+            except Synonyme.next_wagtail_page.RelatedObjectDoesNotExist:
+                # No direct redirection exists, that's fine
+                pass
+
+    class Meta:
+        verbose_name = "Fiche synonyme"
+        verbose_name_plural = "Fiches synonyme"
+
+
+class LegacyIntermediateSynonymePage(models.Model):
+    page = ParentalKey(
+        "wagtailcore.page",
+        on_delete=models.CASCADE,
+        related_name="legacy_synonyme",
+    )
+    synonyme = models.OneToOneField(
+        "qfdmd.synonyme",
+        on_delete=models.CASCADE,
+        related_name="next_wagtail_page",
+    )
+
+    panels = [FieldPanel("synonyme")]
+
+    def clean(self):
+        super().clean()
+
+        if self.synonyme:
+            # Check if the synonyme's produit is already redirected
+            try:
+                produit_page = self.synonyme.produit.next_wagtail_page
+                if produit_page.page != self.page:
+                    logger.warning(
+                        f"Synonyme '{self.synonyme.nom}' has a direct "
+                        f"redirection to page '{self.page.title}' but its "
+                        f"produit '{self.synonyme.produit.nom}' is "
+                        f"redirected to '{produit_page.page.title}'. "
+                        f"The synonyme redirection will take priority."
+                    )
+            except Exception:
+                # If produit has no redirection or any other error, that's fine
+                pass
+
+            # Check if this synonyme is marked as excluded somewhere else
+            try:
+                exclusion = LegacyIntermediateProduitPageSynonymeExclusion.objects.get(
+                    synonyme=self.synonyme
+                )
+                if exclusion.page != self.page:
+                    raise ValidationError(
+                        f"Conflit : ce synonyme est marqué comme exclu de "
+                        f"la redirection vers la page "
+                        f"'{exclusion.page.title}'. "
+                        f"Vous ne pouvez pas créer une redirection directe "
+                        f"tant que cette exclusion existe. "
+                        f"Veuillez d'abord supprimer l'exclusion."
+                    )
+            except LegacyIntermediateProduitPageSynonymeExclusion.DoesNotExist:
+                # No exclusion exists, that's fine
+                pass
 
     class Meta:
         verbose_name = "Fiche synonyme"
@@ -653,37 +746,6 @@ class Synonyme(index.Indexed, AbstractBaseProduit):
     @property
     def url(self) -> str:
         return self.get_absolute_url()
-
-    def get_url_carte(self, actions=None, map_container_id=None):
-        carte_settings = self.produit.carte_settings
-        if actions:
-            carte_settings.update(
-                action_list=actions,
-                action_displayed=actions,
-            )
-
-        if map_container_id:
-            carte_settings.update(
-                map_container_id=map_container_id,
-            )
-
-        params = urlencode(carte_settings)
-        url = reverse("qfdmd:carte", args=[self.slug])
-        return f"{url}?{params}"
-
-    @cached_property
-    def url_carte(self):
-        return self.get_url_carte(None, "carte")
-
-    @cached_property
-    def url_carte_mauvais_etat(self):
-        actions = "reparer|trier"
-        return self.get_url_carte(actions, "mauvais_etat")
-
-    @cached_property
-    def url_carte_bon_etat(self):
-        actions = "preter|louer|mettreenlocation|donner|echanger|revendre"
-        return self.get_url_carte(actions, "bon_etat")
 
     @cached_property
     def bon_etat(self) -> str:

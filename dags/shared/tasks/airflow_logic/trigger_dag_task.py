@@ -34,7 +34,6 @@ def should_trigger_dag_task(
     return PythonOperator(
         task_id=task_id,
         python_callable=check_and_trigger,
-        provide_context=True,
         op_kwargs={"target_dag": target_dag},
     )
 

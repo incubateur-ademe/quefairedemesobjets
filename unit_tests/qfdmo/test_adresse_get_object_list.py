@@ -48,6 +48,7 @@ def synonymes_reemploi_possible(produit_reemploi_possible) -> list[Synonyme]:
 @pytest.fixture
 def synonymes_not_reemploi_possible(produit_not_reemploi_possible) -> list[Synonyme]:
     synonymes = []
+    Synonyme.objects.all().delete()
     for i in range(20):
         synonymes.append(
             SynonymeFactory(

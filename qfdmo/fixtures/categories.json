@@ -2,70 +2,70 @@
 {
     "model": "qfdmo.categorieobjet",
     "fields": {
-        "libelle": "électroménager",
+        "libelle": "Electroménager",
         "code": "electromenager"
     }
 },
 {
     "model": "qfdmo.categorieobjet",
     "fields": {
-        "libelle": "équipements de loisir",
+        "libelle": "Equipements de loisir",
         "code": "equipements_de_loisir"
     }
 },
 {
     "model": "qfdmo.categorieobjet",
     "fields": {
-        "libelle": "bricolage et jardinage",
+        "libelle": "Bricolage et jardinage",
         "code": "bricolage_et_jardinage"
     }
 },
 {
     "model": "qfdmo.categorieobjet",
     "fields": {
-        "libelle": "mobilier et décoration",
+        "libelle": "Mobilier et décoration",
         "code": "mobilier_et_decoration"
     }
 },
 {
     "model": "qfdmo.categorieobjet",
     "fields": {
-        "libelle": "produits divers",
+        "libelle": "Produits divers",
         "code": "produits_divers"
     }
 },
 {
     "model": "qfdmo.categorieobjet",
     "fields": {
-        "libelle": "image, son & Informatique",
+        "libelle": "Image, son & Informatique",
         "code": "image_son_et_informatique"
     }
 },
 {
     "model": "qfdmo.categorieobjet",
     "fields": {
-        "libelle": "livres & multimedia",
+        "libelle": "Livres & multimedia",
         "code": "livres_et_multimedia"
     }
 },
 {
     "model": "qfdmo.categorieobjet",
     "fields": {
-        "libelle": "vêtements & accessoires",
+        "libelle": "Vêtements & accessoires",
         "code": "vetements_et_accessoires"
     }
 },
 {
     "model": "qfdmo.categorieobjet",
     "fields": {
-        "libelle": "bijou, montre, horlogerie",
+        "libelle": "Bijou, montre, horlogerie",
         "code": "bijoux_montre_horlogerie"
     }
 },
 {
     "model": "qfdmo.categorieobjet",
     "fields": {
-        "libelle": "matériau de construction / du bâtiment",
+        "libelle": "Matériau de construction / du bâtiment",
         "code": "materiau_de_construction_du_batiment"
     }
 },
@@ -177,6 +177,7 @@
         "code": "gros_electromenager_refrigerant",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
                 "EEE - Electroménager avec liquide frigorifique - BR"
@@ -194,15 +195,16 @@
         "code": "gros_electromenager_hors_refrigerant",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
-                "Antenne parabolique"
+                "Chauffe-eau"
+            ],
+            [
+                "Gazinière"
             ],
             [
                 "Gros électroménager"
-            ],
-            [
-                "Chauffe-eau"
             ],
             [
                 "Radiateur électrique"
@@ -211,10 +213,10 @@
                 "Transformateur électrique"
             ],
             [
-                "Gazinière"
+                "Vieil appareil électrique ou électronique"
             ],
             [
-                "Vieil appareil électrique ou électronique"
+                "Antenne parabolique"
             ]
         ]
     }
@@ -229,27 +231,25 @@
         "code": "petit_electromenager",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
-                "Sextoy électrique"
+                "Carte RFID"
             ],
             [
-                "Matériel électrique passif (prise, adaptateur, câbles, cordons)"
-            ],
-            [
-                "Equipements électriques et électroniques - Petit électro ménager - Bonus Réparation"
-            ],
-            [
-                "Air Fryer"
+                "Chargeur"
             ],
             [
                 "Cigarette électronique"
             ],
             [
-                "Thermomètre digital"
+                "Équipement Électrique et Électronique (EEE)"
             ],
             [
-                "Accessoire automobile (et deux-roues) électronique"
+                "Matériel électrique passif (prise, adaptateur, câbles, cordons)"
+            ],
+            [
+                "Air Fryer"
             ],
             [
                 "Petit électroménager"
@@ -261,16 +261,10 @@
                 "Détecteur de fumées"
             ],
             [
-                "Équipement Électrique et Électronique (EEE)"
+                "Sextoy électrique"
             ],
             [
-                "Chargeur"
-            ],
-            [
-                "Autoradio"
-            ],
-            [
-                "Carte RFID"
+                "Equipements électriques et électroniques - Petit électro ménager - Bonus Réparation"
             ]
         ]
     }
@@ -285,12 +279,13 @@
         "code": "ecran",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
-                "Equipements électriques et électroniques - Ecrans - Bonus Réparation"
+                "Ecran à tube cathodique"
             ],
             [
-                "Ecran à tube cathodique"
+                "Equipements électriques et électroniques - Ecrans - Bonus Réparation"
             ]
         ]
     }
@@ -305,18 +300,16 @@
         "code": "materiel_informatique",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
-            [
-                "Equipements électriques et électroniques - Matériel informatique - Bonus Réparation"
-            ],
             [
                 "Matériel informatique"
             ],
             [
-                "Calculatrice"
+                "Ordinateur portable"
             ],
             [
-                "Ordinateur portable"
+                "Equipements électriques et électroniques - Matériel informatique - Bonus Réparation"
             ]
         ]
     }
@@ -331,12 +324,16 @@
         "code": "materiel_hifi_et_video",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
+            [
+                "Autoradio"
+            ],
             [
                 "Baladeur"
             ],
             [
-                "Haut-parleurs"
+                "Matériel hifi et vidéo"
             ]
         ]
     }
@@ -351,12 +348,13 @@
         "code": "smartphone_tablette_et_console",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
-                "Téléphone mobile"
+                "Montre connectée"
             ],
             [
-                "Montre connectée"
+                "Téléphone mobile"
             ]
         ]
     }
@@ -371,12 +369,13 @@
         "code": "materiel_photo_et_cinema",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
-                "Appareil photo numérique"
+                "Appareil photo jetable"
             ],
             [
-                "Appareil photo jetable"
+                "Appareil photo numérique"
             ]
         ]
     }
@@ -391,9 +390,19 @@
         "code": "autre_equipement_electronique",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
+                "Accessoire automobile (et deux-roues) électronique"
+            ],
+            [
                 "GPS"
+            ],
+            [
+                "Thermomètre digital"
+            ],
+            [
+                "Calculatrice"
             ]
         ]
     }
@@ -408,6 +417,7 @@
         "code": "cd_dvd_et_jeu_video",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
                 "CD/DVD, cassette (avec ou sans boîtier), Disque vinyle"
@@ -428,6 +438,7 @@
         "code": "livre",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
                 "Livre"
@@ -445,7 +456,12 @@
         "code": "instrument_de_musique",
         "afficher": true,
         "afficher_carte": true,
-        "qfdmd_produits": []
+        "reemploi_possible": true,
+        "qfdmd_produits": [
+            [
+                "Instrument de musique"
+            ]
+        ]
     }
 },
 {
@@ -458,33 +474,31 @@
         "code": "outil_de_bricolage_et_jardinage",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
-                "Outil manuel (bricolage, jardinage)"
-            ],
-            [
-                "ABJ - Accessoires et meubles de jardin - non réparable"
-            ],
-            [
-                "ABJ - Accessoires et meubles de jardin"
-            ],
-            [
-                "ABJ - Abris et constructions non maçonnées"
-            ],
-            [
-                "Bricolage et jardin - Outil Affutage - Bonus réparation"
-            ],
-            [
                 "Barbecue à combustible"
+            ],
+            [
+                "Outil manuel (bricolage, jardinage)"
             ],
             [
                 "Tondeuse à gazon mécanique"
             ],
             [
-                "Niche"
+                "Bricolage et jardin - Outil Affutage - Bonus réparation"
+            ],
+            [
+                "ABJ - Abris et constructions non maçonnées"
             ],
             [
                 "ABJ - Déchets non réutilisables"
+            ],
+            [
+                "ABJ - Accessoires et meubles de jardin"
+            ],
+            [
+                "ABJ - Accessoires et meubles de jardin - non réparable"
             ]
         ]
     }
@@ -499,12 +513,16 @@
         "code": "accessoire_et_meuble_de_jardin",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
                 "Barbecue à combustible"
             ],
             [
                 "Niche"
+            ],
+            [
+                "ABJ - Accessoires et meubles de jardin"
             ]
         ]
     }
@@ -519,15 +537,10 @@
         "code": "meuble",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
-                "Ameublement - Bonus réparation"
-            ],
-            [
-                "Ameublement - Quincaillerie/Non Réparable"
-            ],
-            [
-                "Ameublement - pas de Bonus réparation"
+                "Meuble"
             ],
             [
                 "Miroir (glace)"
@@ -536,16 +549,25 @@
                 "Planche à repasser"
             ],
             [
-                "Cintre en plastique ou en métal"
+                "Tableau en ardoise"
             ],
             [
-                "Meuble"
+                "Cintre en plastique ou en métal"
             ],
             [
                 "Cintre en bois"
             ],
             [
                 "Ameublement - Déchet Usage unique"
+            ],
+            [
+                "Ameublement - pas de Bonus réparation"
+            ],
+            [
+                "Ameublement - Quincaillerie/Non Réparable"
+            ],
+            [
+                "Ameublement - Bonus réparation"
             ]
         ]
     }
@@ -560,6 +582,7 @@
         "code": "decoration",
         "afficher": true,
         "afficher_carte": false,
+        "reemploi_possible": true,
         "qfdmd_produits": []
     }
 },
@@ -573,12 +596,13 @@
         "code": "luminaire",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
-                "Lampe (ou luminaire) sans ampoule"
+                "Guirlande électrique"
             ],
             [
-                "Guirlande électrique"
+                "Lampe (ou luminaire) sans ampoule"
             ]
         ]
     }
@@ -593,9 +617,19 @@
         "code": "vaisselle",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
-                "Urne cinéraire vide"
+                "Biberon en plastique"
+            ],
+            [
+                "Couverts en métal"
+            ],
+            [
+                "Gourde"
+            ],
+            [
+                "Ustensile de cuisine"
             ],
             [
                 "Vaisselle"
@@ -604,10 +638,7 @@
                 "Vaisselle en métal"
             ],
             [
-                "Couverts en métal"
-            ],
-            [
-                "Ustensile de cuisine"
+                "Urne cinéraire vide"
             ]
         ]
     }
@@ -622,6 +653,7 @@
         "code": "linge_de_maison",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
                 "Linge de maison"
@@ -645,6 +677,7 @@
         "code": "puericulture",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
                 "Poussette"
@@ -662,12 +695,13 @@
         "code": "jouet",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
-                "Jouets - Bonus réparation"
+                "Jouet (non électronique)"
             ],
             [
-                "Jouet (non électronique)"
+                "Jouets - Bonus réparation"
             ]
         ]
     }
@@ -682,24 +716,22 @@
         "code": "vetement",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
-                "Vêtements - Sous-vêtements"
+                "Fourrure synthétique"
             ],
             [
                 "Jean"
             ],
             [
-                "Fourrure synthétique"
-            ],
-            [
                 "Vêtements"
             ],
             [
-                "Rideau"
+                "Couvre-chef"
             ],
             [
-                "Couvre-chef"
+                "Vêtements - Sous-vêtements"
             ]
         ]
     }
@@ -714,15 +746,19 @@
         "code": "maroquinerie",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
-            [
-                "Sac en coton (tissu)"
-            ],
             [
                 "Articles en cuir (hors chaussures)"
             ],
             [
+                "Sac en coton (tissu)"
+            ],
+            [
                 "Parapluie"
+            ],
+            [
+                "Valise de voyage"
             ]
         ]
     }
@@ -737,15 +773,16 @@
         "code": "chaussures",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
-                "Sabots"
+                "Bottes en caoutchouc"
             ],
             [
                 "Chaussures"
             ],
             [
-                "Bottes en caoutchouc"
+                "Sabots"
             ]
         ]
     }
@@ -760,6 +797,7 @@
         "code": "bijou_et_montre",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
                 "Bijou fantaisie (accessoires de mode)"
@@ -780,6 +818,7 @@
         "code": "velo",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
                 "Sport et Loisirs - VAE - Bonus réparation"
@@ -800,7 +839,23 @@
         "code": "materiel_de_sport_hors_velo",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
+            [
+                "Antivol"
+            ],
+            [
+                "Bodyboard"
+            ],
+            [
+                "Bouteille de plongée"
+            ],
+            [
+                "Corde usée"
+            ],
+            [
+                "Rollers"
+            ],
             [
                 "Article de sport"
             ],
@@ -808,31 +863,19 @@
                 "Balle de sport (gymnastique, yoga, pilates, musculation, capoeira, cheerleading, cirque)"
             ],
             [
-                "Sport et Loisirs - Bonus réparation"
-            ],
-            [
-                "Antivol"
-            ],
-            [
-                "Matériel de protection individuelle (sport)"
-            ],
-            [
-                "Rollers"
+                "Balle de tennis"
             ],
             [
                 "Chaussons d'escalade"
             ],
             [
-                "Bodyboard"
+                "Matériel de protection individuelle (sport)"
             ],
             [
-                "Corde usée"
+                "Arme d'entraînement"
             ],
             [
-                "Balle de tennis"
-            ],
-            [
-                "Bouteille de plongée"
+                "Sport et Loisirs - Bonus réparation"
             ]
         ]
     }
@@ -847,6 +890,7 @@
         "code": "materiel_medical",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
                 "Fauteuil roulant"
@@ -864,12 +908,13 @@
         "code": "materiau_du_batiment_reemployable",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
-                "Remorque pour véhicule"
+                "Croisillons pour pose de carrelage"
             ],
             [
-                "Croisillons pour pose de carrelage"
+                "Remorque pour véhicule"
             ]
         ]
     }
@@ -884,6 +929,7 @@
         "code": "machines_et_appareils_motorises_thermiques",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
                 "Tondeuse à gazon thermique"
@@ -901,6 +947,7 @@
         "code": "cartouches",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": false,
         "qfdmd_produits": [
             [
                 "Cartouche d'impression (à jet d'encre, laser)"
@@ -918,15 +965,13 @@
         "code": "batteries_et_piles_portables",
         "afficher": false,
         "afficher_carte": true,
+        "reemploi_possible": false,
         "qfdmd_produits": [
             [
-                "Batterie (hors batterie de voiture)"
+                "Pile jetable"
             ],
             [
                 "Pile rechargeable"
-            ],
-            [
-                "Pile jetable"
             ]
         ]
     }
@@ -941,6 +986,7 @@
         "code": "petits_appareils_extincteurs",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": false,
         "qfdmd_produits": [
             [
                 "Petit extincteur à poudre ou à mousse (moins de 2 kg ou 2 L)"
@@ -958,6 +1004,7 @@
         "code": "abj_outillage_du_peintre_usage",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
                 "Outillage du peintre (bricolage)"
@@ -975,10 +1022,8 @@
         "code": "produits_chimiques_solvants",
         "afficher": false,
         "afficher_carte": true,
+        "reemploi_possible": false,
         "qfdmd_produits": [
-            [
-                "Essence de térébenthine"
-            ],
             [
                 "Acétone"
             ],
@@ -986,13 +1031,16 @@
                 "Décapant"
             ],
             [
+                "Essence de térébenthine"
+            ],
+            [
                 "Essence et autres carburants et combustibles"
             ],
             [
-                "White-spirit"
+                "Solvant"
             ],
             [
-                "Solvant"
+                "White-spirit"
             ]
         ]
     }
@@ -1007,15 +1055,10 @@
         "code": "dechets_de_produits_chimiques",
         "afficher": false,
         "afficher_carte": true,
+        "reemploi_possible": false,
         "qfdmd_produits": [
             [
-                "Nettoyant cheminée"
-            ],
-            [
-                "Chiffon (ou absorbant) souillé par des produits dangereux"
-            ],
-            [
-                "Eau oxygénée"
+                "Alcool à brûler"
             ],
             [
                 "Ammoniaque"
@@ -1024,16 +1067,25 @@
                 "Anti-rouille"
             ],
             [
-                "Imperméabilisant"
-            ],
-            [
-                "Vêtement souillé"
+                "Chiffon (ou absorbant) souillé par des produits dangereux"
             ],
             [
                 "Déboucheur de canalisations"
             ],
             [
-                "Alcool à brûler"
+                "Eau oxygénée"
+            ],
+            [
+                "Emballage souillé par un produit dangereux"
+            ],
+            [
+                "Imperméabilisant"
+            ],
+            [
+                "Mercure"
+            ],
+            [
+                "Nettoyant cheminée"
             ],
             [
                 "Produits de traitement des matériaux (dont bois)"
@@ -1042,10 +1094,7 @@
                 "Soude"
             ],
             [
-                "Mercure"
-            ],
-            [
-                "Emballage souillé par un produit dangereux"
+                "Vêtement souillé"
             ]
         ]
     }
@@ -1060,30 +1109,19 @@
         "code": "dechets_phytosanitaires_menagers_produits_chimiques",
         "afficher": false,
         "afficher_carte": true,
+        "reemploi_possible": false,
         "qfdmd_produits": [
             [
-                "Répulsif"
-            ],
-            [
-                "Fongicides"
-            ],
-            [
-                "Emballage vide de produit phytosanitaire"
-            ],
-            [
-                "Insecticide"
-            ],
-            [
-                "Produits phytopharmaceutiques non utilisés"
-            ],
-            [
-                "Chlore"
+                "Amendements"
             ],
             [
                 "Anti-mousse"
             ],
             [
-                "Mort aux rats"
+                "Chlore"
+            ],
+            [
+                "Emballage vide de produit phytosanitaire"
             ],
             [
                 "Engrais minéral"
@@ -1092,7 +1130,19 @@
                 "Engrais organiques"
             ],
             [
-                "Amendements"
+                "Fongicides"
+            ],
+            [
+                "Insecticide"
+            ],
+            [
+                "Mort aux rats"
+            ],
+            [
+                "Produits phytopharmaceutiques non utilisés"
+            ],
+            [
+                "Répulsif"
             ]
         ]
     }
@@ -1107,39 +1157,40 @@
         "code": "dechets_de_peintures_vernis_encres_et_colles_produits_chimiques",
         "afficher": false,
         "afficher_carte": true,
+        "reemploi_possible": false,
         "qfdmd_produits": [
             [
+                "Colle (à bois, super-glu, époxy, néoprène)"
+            ],
+            [
                 "Eau souillée"
-            ],
-            [
-                "Résines"
-            ],
-            [
-                "Peinture naturelle"
             ],
             [
                 "Enduit"
             ],
             [
-                "Peinture synthétique (acrylique, glycéro...)"
-            ],
-            [
-                "Colle (à bois, super-glu, époxy, néoprène)"
-            ],
-            [
-                "Lasure"
-            ],
-            [
-                "Vernis, laque"
-            ],
-            [
                 "Mastic"
+            ],
+            [
+                "Peinture à l'huile (glycéro...)"
+            ],
+            [
+                "Peinture naturelle"
+            ],
+            [
+                "Peinture synthétique (acrylique, glycéro...)"
             ],
             [
                 "Pigment"
             ],
             [
-                "Peinture à l'huile (glycéro...)"
+                "Résines"
+            ],
+            [
+                "Vernis, laque"
+            ],
+            [
+                "Lasure"
             ]
         ]
     }
@@ -1154,6 +1205,7 @@
         "code": "produits_pyrotechniques",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": false,
         "qfdmd_produits": [
             [
                 "Fumigène"
@@ -1171,6 +1223,7 @@
         "code": "dechets_de_produits_chimiques_basiques",
         "afficher": false,
         "afficher_carte": true,
+        "reemploi_possible": false,
         "qfdmd_produits": [
             [
                 "Allume-feu"
@@ -1194,6 +1247,7 @@
         "code": "dechets_de_produits_chimiques_acides",
         "afficher": false,
         "afficher_carte": true,
+        "reemploi_possible": false,
         "qfdmd_produits": [
             [
                 "Acide"
@@ -1211,6 +1265,7 @@
         "code": "panneaux_photovoltaiques",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
                 "Panneaux photovoltaïques"
@@ -1228,12 +1283,16 @@
         "code": "decorations_textiles_elements_d_ameublement",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
+            [
+                "Accessoires de rideaux"
+            ],
             [
                 "Tapis"
             ],
             [
-                "Accessoires de rideaux"
+                "Rideau"
             ]
         ]
     }
@@ -1248,6 +1307,7 @@
         "code": "literie_elements_d_ameublement",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
                 "Literie"
@@ -1265,6 +1325,7 @@
         "code": "rembourres_d_assise_ou_de_couchage_elements_d_ameublement",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
                 "Matelas (en mousse, à ressorts...)"
@@ -1285,6 +1346,7 @@
         "code": "sieges_elements_d_ameublement",
         "afficher": true,
         "afficher_carte": false,
+        "reemploi_possible": true,
         "qfdmd_produits": []
     }
 },
@@ -1298,15 +1360,16 @@
         "code": "bois_pmcb_produits_et_materiaux_de_construction_du_batiment",
         "afficher": false,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
+            [
+                "Bois contaminé (termites)"
+            ],
             [
                 "Matériaux du bâtiment en bois"
             ],
             [
                 "Bois imprégné, souillé ou dangereux"
-            ],
-            [
-                "Bois contaminé (termites)"
             ],
             [
                 "Morceaux de bois"
@@ -1327,6 +1390,7 @@
         "code": "dechets_dangereux_de_pmcb_produits_et_materiaux_de_construction_du_batiment",
         "afficher": false,
         "afficher_carte": true,
+        "reemploi_possible": false,
         "qfdmd_produits": [
             [
                 "Amiante"
@@ -1344,6 +1408,7 @@
         "code": "huisseries_produits_et_materiaux_de_construction_du_batiment",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
                 "Vitre"
@@ -1364,6 +1429,7 @@
         "code": "laine_de_roche_produits_et_materiaux_de_construction_du_batiment",
         "afficher": false,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
                 "Laine de roche"
@@ -1381,6 +1447,7 @@
         "code": "laine_de_verre_produits_et_materiaux_de_construction_du_batiment",
         "afficher": false,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
                 "Laine de verre"
@@ -1398,21 +1465,10 @@
         "code": "mélange_d_inertes_produits_et_materiaux_de_construction_du_batiment",
         "afficher": false,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
-                "Matériaux de construction"
-            ],
-            [
-                "Carrelage"
-            ],
-            [
-                "Enrobés bitumineux"
-            ],
-            [
                 "Matériaux du bâtiment en pierre"
-            ],
-            [
-                "Matériaux du bâtiment en terre cuite"
             ],
             [
                 "Equipements sanitaires en céramique"
@@ -1421,7 +1477,19 @@
                 "Gravats"
             ],
             [
+                "Matériaux de construction"
+            ],
+            [
                 "Sable"
+            ],
+            [
+                "Matériaux du bâtiment en terre cuite"
+            ],
+            [
+                "Enrobés bitumineux"
+            ],
+            [
+                "Carrelage"
             ]
         ]
     }
@@ -1436,24 +1504,25 @@
         "code": "metal_pmcb_produits_et_materiaux_de_construction_du_batiment",
         "afficher": false,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
-                "Matériaux du bâtiment en métal"
+                "Baignoire (en fonte)"
             ],
             [
                 "Equipements sanitaires en métal"
             ],
             [
-                "Radiateur en fonte"
+                "Fil de fer barbelé"
+            ],
+            [
+                "Matériaux du bâtiment en métal"
             ],
             [
                 "Plomb"
             ],
             [
-                "Baignoire (en fonte)"
-            ],
-            [
-                "Fil de fer barbelé"
+                "Radiateur en fonte"
             ]
         ]
     }
@@ -1468,21 +1537,22 @@
         "code": "plastiques_pmcb_produits_et_materiaux_de_construction_du_batiment",
         "afficher": false,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
-                "Matériaux du bâtiment en plastique"
-            ],
-            [
                 "Equipements sanitaires en résine (plastique)"
-            ],
-            [
-                "Matériaux du bâtiment en PVC (Polychlorure de vinyle)"
             ],
             [
                 "Matériaux d'isolation Plastique"
             ],
             [
                 "Mousse isolante"
+            ],
+            [
+                "Matériaux du bâtiment en PVC (Polychlorure de vinyle)"
+            ],
+            [
+                "Matériaux du bâtiment en plastique"
             ]
         ]
     }
@@ -1497,6 +1567,7 @@
         "code": "platre_pmcb_produits_et_materiaux_de_construction_du_batiment",
         "afficher": false,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
                 "Plâtre"
@@ -1514,6 +1585,7 @@
         "code": "beton_pmcb_produits_et_materiaux_de_construction_du_batiment",
         "afficher": false,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
                 "Béton"
@@ -1531,6 +1603,7 @@
         "code": "membranes_bitumineuses_pmcb_produits_et_materiaux_de_construction_du_batiment",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": false,
         "qfdmd_produits": [
             [
                 "Membrane bitumineuse"
@@ -1548,6 +1621,7 @@
         "code": "bateau",
         "afficher": false,
         "afficher_carte": false,
+        "reemploi_possible": true,
         "qfdmd_produits": []
     }
 },
@@ -1561,6 +1635,7 @@
         "code": "lunettes_de_vue_aides_techniques",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
                 "Lunettes"
@@ -1578,6 +1653,7 @@
         "code": "pneu",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": false,
         "qfdmd_produits": [
             [
                 "Pneu de voiture / moto / scooter"
@@ -1595,6 +1671,7 @@
         "code": "medicaments",
         "afficher": false,
         "afficher_carte": true,
+        "reemploi_possible": false,
         "qfdmd_produits": [
             [
                 "Médicaments"
@@ -1612,12 +1689,13 @@
         "code": "autres_pmcb",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": false,
         "qfdmd_produits": [
             [
-                "Linoléum & Fibre de verre (non-recyclables)"
+                "Matériaux du bâtiment d'origine végétale ou animale"
             ],
             [
-                "Matériaux du bâtiment d'origine végétale ou animale"
+                "Linoléum & Fibre de verre (non-recyclables)"
             ]
         ]
     }
@@ -1632,12 +1710,13 @@
         "code": "abj_electrique",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
-                "Tondeuse à gazon électrique"
+                "Outil électrique (bricolage, jardinage)"
             ],
             [
-                "Outil électrique (bricolage, jardinage)"
+                "Tondeuse à gazon électrique"
             ]
         ]
     }
@@ -1652,12 +1731,13 @@
         "code": "jels_mobilite_electrique",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
-                "Voiture de course électrique (jouet)"
+                "Train électrique (jouet)"
             ],
             [
-                "Train électrique (jouet)"
+                "Voiture de course électrique (jouet)"
             ],
             [
                 "Trottinette électrique"
@@ -1675,12 +1755,13 @@
         "code": "huiles_lubrifiantes",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": false,
         "qfdmd_produits": [
             [
-                "Huile de vidange"
+                "Bidon d'huile de moteur (ou de lubrifiant) vide"
             ],
             [
-                "Bidon d'huile de moteur (ou de lubrifiant) vide"
+                "Huile de vidange"
             ]
         ]
     }
@@ -1695,24 +1776,25 @@
         "code": "ampoule",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": false,
         "qfdmd_produits": [
+            [
+                "Ampoule classique (à incandescence)"
+            ],
+            [
+                "Clé USB"
+            ],
             [
                 "Ampoule halogène"
             ],
             [
-                "Clé USB"
+                "LED"
             ],
             [
                 "Tube fluorescent"
             ],
             [
                 "Ampoule"
-            ],
-            [
-                "LED"
-            ],
-            [
-                "Ampoule classique (à incandescence)"
             ]
         ]
     }
@@ -1726,8 +1808,13 @@
         ],
         "code": "biodechets",
         "afficher": false,
-        "afficher_carte": false,
-        "qfdmd_produits": []
+        "afficher_carte": true,
+        "reemploi_possible": false,
+        "qfdmd_produits": [
+            [
+                "Déchets de préparation et restes de repas"
+            ]
+        ]
     }
 },
 {
@@ -1740,33 +1827,10 @@
         "code": "dechets_verts",
         "afficher": false,
         "afficher_carte": true,
+        "reemploi_possible": false,
         "qfdmd_produits": [
             [
-                "Plante"
-            ],
-            [
-                "Terreau"
-            ],
-            [
-                "Mauvaises herbes"
-            ],
-            [
-                "Fleurs fanées"
-            ],
-            [
-                "Sciure de bois"
-            ],
-            [
-                "Herbe (ou gazon)"
-            ],
-            [
-                "Terre"
-            ],
-            [
-                "Sapin de Noël naturel"
-            ],
-            [
-                "Feuilles mortes"
+                "Bois de chauffage"
             ],
             [
                 "Branchages"
@@ -1775,7 +1839,31 @@
                 "Déchets verts"
             ],
             [
-                "Bois de chauffage"
+                "Feuilles mortes"
+            ],
+            [
+                "Fleurs fanées"
+            ],
+            [
+                "Herbe (ou gazon)"
+            ],
+            [
+                "Mauvaises herbes"
+            ],
+            [
+                "Plante"
+            ],
+            [
+                "Sapin de Noël naturel"
+            ],
+            [
+                "Sciure de bois"
+            ],
+            [
+                "Terre"
+            ],
+            [
+                "Terreau"
             ]
         ]
     }
@@ -1790,6 +1878,7 @@
         "code": "vehicule",
         "afficher": false,
         "afficher_carte": false,
+        "reemploi_possible": true,
         "qfdmd_produits": []
     }
 },
@@ -1803,90 +1892,97 @@
         "code": "encombrants_menagers_divers",
         "afficher": false,
         "afficher_carte": true,
+        "reemploi_possible": false,
         "qfdmd_produits": [
             [
+                "Accessoires automobiles (et deux-roues) non électroniques"
+            ],
+            [
+                "Bain photographique (révélateur, fixateur...)"
+            ],
+            [
+                "Balai"
+            ],
+            [
+                "Balai d'essuie-glace"
+            ],
+            [
+                "Bougie en cire"
+            ],
+            [
+                "Bougies de moteur"
+            ],
+            [
+                "Caoutchouc (hors pneus)"
+            ],
+            [
+                "Casque"
+            ],
+            [
+                "Diapositives"
+            ],
+            [
+                "Enjoliveurs"
+            ],
+            [
+                "Fourrure naturelle"
+            ],
+            [
+                "Galeries de voiture"
+            ],
+            [
+                "Moquette"
+            ],
+            [
+                "Morceaux de métal"
+            ],
+            [
+                "Morceaux de verre"
+            ],
+            [
+                "Palette en bois"
+            ],
+            [
+                "Pellicule (photographique ou de film)"
+            ],
+            [
+                "Pot catalytique"
+            ],
+            [
+                "Produits pyrotechniques"
+            ],
+            [
+                "Radiographie"
+            ],
+            [
+                "Siège auto"
+            ],
+            [
+                "Top-case"
+            ],
+            [
+                "Verre (ayant contenu une bougie)"
+            ],
+            [
+                "Verre à boire"
+            ],
+            [
+                "Cage pour animaux"
+            ],
+            [
                 "Cartouche ou bouteille de protoxyde d'azote"
+            ],
+            [
+                "Fève (galette des rois)"
+            ],
+            [
+                "Remorque pour véhicule"
             ],
             [
                 "Ruban de signalisation (Rubalise)"
             ],
             [
                 "Aimant"
-            ],
-            [
-                "Remorque pour véhicule"
-            ],
-            [
-                "Accessoires automobiles (et deux-roues) non électroniques"
-            ],
-            [
-                "Moquette"
-            ],
-            [
-                "Pellicule (photographique ou de film)"
-            ],
-            [
-                "Bain photographique (révélateur, fixateur...)"
-            ],
-            [
-                "Fourrure naturelle"
-            ],
-            [
-                "Siège auto"
-            ],
-            [
-                "Diapositives"
-            ],
-            [
-                "Top-case"
-            ],
-            [
-                "Galeries de voiture"
-            ],
-            [
-                "Bougies de moteur"
-            ],
-            [
-                "Balai d'essuie-glace"
-            ],
-            [
-                "Cage pour animaux"
-            ],
-            [
-                "Produits pyrotechniques"
-            ],
-            [
-                "Morceaux de verre"
-            ],
-            [
-                "Verre à boire"
-            ],
-            [
-                "Caoutchouc (hors pneus)"
-            ],
-            [
-                "Enjoliveurs"
-            ],
-            [
-                "Balai"
-            ],
-            [
-                "Pot catalytique"
-            ],
-            [
-                "Radiographie"
-            ],
-            [
-                "Fève (galette des rois)"
-            ],
-            [
-                "Palette en bois"
-            ],
-            [
-                "Morceaux de métal"
-            ],
-            [
-                "Casque"
             ]
         ]
     }
@@ -1901,6 +1997,7 @@
         "code": "palette",
         "afficher": false,
         "afficher_carte": false,
+        "reemploi_possible": true,
         "qfdmd_produits": []
     }
 },
@@ -1914,12 +2011,10 @@
         "code": "bouteilles_plastique",
         "afficher": false,
         "afficher_carte": true,
+        "reemploi_possible": false,
         "qfdmd_produits": [
             [
-                "Liquide vaisselle"
-            ],
-            [
-                "Shampoing (flacon en plastique)"
+                "Baril de lessive (en plastique)"
             ],
             [
                 "Bouchons en plastique"
@@ -1928,13 +2023,16 @@
                 "Bouteille en plastique (et bouchon)"
             ],
             [
-                "Baril de lessive (en plastique)"
-            ],
-            [
                 "Eau de Javel (bouteille)"
             ],
             [
-                "Produit d'entretien ménager non-dangereux"
+                "Liquide vaisselle"
+            ],
+            [
+                "Produit d'entretien ménager non dangereux"
+            ],
+            [
+                "Shampoing (flacon en plastique)"
             ]
         ]
     }
@@ -1949,9 +2047,13 @@
         "code": "emballage_carton",
         "afficher": false,
         "afficher_carte": true,
+        "reemploi_possible": false,
         "qfdmd_produits": [
             [
-                "Carton"
+                "Baril de lessive (en carton)"
+            ],
+            [
+                "Boîte à oeufs en carton"
             ],
             [
                 "Boîte à pizza"
@@ -1960,13 +2062,13 @@
                 "Carton de petite taille"
             ],
             [
-                "Baril de lessive (en carton)"
-            ],
-            [
-                "Boîte à oeufs en carton"
-            ],
-            [
                 "Carton d'emballage de grande taille (électroménager, meuble...)"
+            ],
+            [
+                "Papier (ou carton) souillé"
+            ],
+            [
+                "Carton"
             ]
         ]
     }
@@ -1981,6 +2083,7 @@
         "code": "emballage_plastique",
         "afficher": false,
         "afficher_carte": false,
+        "reemploi_possible": false,
         "qfdmd_produits": []
     }
 },
@@ -1994,24 +2097,25 @@
         "code": "emballage_metal",
         "afficher": false,
         "afficher_carte": true,
+        "reemploi_possible": false,
         "qfdmd_produits": [
-            [
-                "Bouteille de CO2 pour aquariophylie"
-            ],
-            [
-                "Bombe aérosol (vide)"
-            ],
-            [
-                "Canette"
-            ],
-            [
-                "Bouteille en métal (sirop)"
-            ],
             [
                 "Barquette en aluminium"
             ],
             [
                 "Boîte de conserve (vide)"
+            ],
+            [
+                "Bombe aérosol (vide)"
+            ],
+            [
+                "Bouteille en métal (sirop)"
+            ],
+            [
+                "Canette"
+            ],
+            [
+                "Bouteille de CO2 pour aquariophylie"
             ]
         ]
     }
@@ -2026,48 +2130,55 @@
         "code": "autres_emballages_menagers",
         "afficher": false,
         "afficher_carte": true,
+        "reemploi_possible": false,
         "qfdmd_produits": [
             [
-                "Cosmétique (produit et emballage)"
-            ],
-            [
-                "Cageot, caissette en bois"
-            ],
-            [
-                "Film plastique"
-            ],
-            [
-                "Pot en plastique (yaourt, crème fraîche)"
-            ],
-            [
-                "Pot de yaourt en grès"
-            ],
-            [
-                "Boîte à fromage en bois"
-            ],
-            [
                 "Barquette en plastique (dont polystyrène)"
-            ],
-            [
-                "Emballage de cirage"
-            ],
-            [
-                "Sac plastique jetable biodégradable"
             ],
             [
                 "Boîte en plastique (alimentaire, emballage...)"
             ],
             [
+                "Brique alimentaire (jus, lait...)"
+            ],
+            [
+                "Cageot, caissette en bois"
+            ],
+            [
+                "Cosmétique (produit et emballage)"
+            ],
+            [
+                "Film plastique"
+            ],
+            [
                 "Gobelet en carton"
             ],
             [
-                "Brique alimentaire (jus, lait...)"
+                "Polystyrène expansé (calage)"
+            ],
+            [
+                "Pot en plastique (yaourt, crème fraîche)"
+            ],
+            [
+                "Sac plastique jetable (biodégradable)"
+            ],
+            [
+                "Boîte à fromage en bois"
+            ],
+            [
+                "Pot de yaourt en grès"
+            ],
+            [
+                "Emballage de cirage"
+            ],
+            [
+                "Emballage multimatière (ex : carton et plastique)"
             ],
             [
                 "Blister de médicament (vide)"
             ],
             [
-                "Emballage multimatière (ex : carton et plastique)"
+                "Flacon ou recharge d'e-liquide pour cigarette électronique"
             ]
         ]
     }
@@ -2082,21 +2193,28 @@
         "code": "papiers_graphiques",
         "afficher": false,
         "afficher_carte": true,
+        "reemploi_possible": false,
         "qfdmd_produits": [
             [
-                "Papier graphique"
-            ],
-            [
-                "Papier de bureau"
+                "Livre"
             ],
             [
                 "Papier cadeau"
             ],
             [
-                "Papier kraft"
+                "Papier calque"
+            ],
+            [
+                "Papier de bureau"
+            ],
+            [
+                "Papier graphique"
             ],
             [
                 "Papier gras non plastifié"
+            ],
+            [
+                "Papier kraft"
             ]
         ]
     }
@@ -2111,18 +2229,25 @@
         "code": "emballage_verre",
         "afficher": false,
         "afficher_carte": true,
+        "reemploi_possible": false,
         "qfdmd_produits": [
             [
-                "Maquillage (emballage et produit)"
+                "Bocal ou pot en verre (alimentaire)"
             ],
             [
                 "Bouteille en verre (bière, cidre, eau, lait, jus, vin...)"
             ],
             [
-                "Bocal ou pot en verre (alimentaire)"
+                "Flacon de parfum (en verre)"
+            ],
+            [
+                "Maquillage (emballage et produit)"
             ],
             [
                 "Bouteille d'huile"
+            ],
+            [
+                "Flacon ou recharge d'e-liquide pour cigarette électronique"
             ]
         ]
     }
@@ -2137,6 +2262,7 @@
         "code": "batterie_de_voitures_pour_demarrage",
         "afficher": false,
         "afficher_carte": false,
+        "reemploi_possible": false,
         "qfdmd_produits": []
     }
 },
@@ -2149,8 +2275,13 @@
         ],
         "code": "batteries_de_mtl",
         "afficher": false,
-        "afficher_carte": false,
-        "qfdmd_produits": []
+        "afficher_carte": true,
+        "reemploi_possible": false,
+        "qfdmd_produits": [
+            [
+                "Batterie (hors batterie de voiture)"
+            ]
+        ]
     }
 },
 {
@@ -2163,7 +2294,11 @@
         "code": "dasri",
         "afficher": false,
         "afficher_carte": true,
+        "reemploi_possible": false,
         "qfdmd_produits": [
+            [
+                "Aiguille usagée (médicale)"
+            ],
             [
                 "Cathéter"
             ],
@@ -2171,28 +2306,25 @@
                 "Dispositifs médicaux sans électronique - Déchets d'Activités de Soins à Risques Infectieux (DASRI) perforants"
             ],
             [
-                "Lancette"
-            ],
-            [
-                "Aiguille usagée (médicale)"
-            ],
-            [
-                "Stylo avec aiguille (médical)"
-            ],
-            [
                 "Kit de perfusion"
+            ],
+            [
+                "Lancette"
             ],
             [
                 "Seringue avec aiguille"
             ],
             [
-                "Dispositifs médicaux avec électronique - Déchets d'Activités de Soins à Risques Infectieux (DASRI) perforants (avec électronique)"
+                "Seringue sans aiguille (contaminée)"
             ],
             [
                 "Set de transfert"
             ],
             [
-                "Seringue sans aiguille (contaminée)"
+                "Stylo avec aiguille (médical)"
+            ],
+            [
+                "Dispositifs médicaux avec électronique - Déchets d'Activités de Soins à Risques Infectieux (DASRI) perforants (avec électronique)"
             ]
         ]
     }
@@ -2207,6 +2339,7 @@
         "code": "instrument_musique_electrique",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
                 "Instrument de musique électrique"
@@ -2224,6 +2357,7 @@
         "code": "bouchons_en_liege",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": false,
         "qfdmd_produits": [
             [
                 "Bouchons en liège"
@@ -2241,9 +2375,61 @@
         "code": "emballage_reemployable",
         "afficher": true,
         "afficher_carte": true,
+        "reemploi_possible": true,
         "qfdmd_produits": [
             [
                 "Emballage réemployable"
+            ]
+        ]
+    }
+},
+{
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+        "libelle": "Papèterie",
+        "categorie": [
+            "produits_divers"
+        ],
+        "code": "papeterie",
+        "afficher": false,
+        "afficher_carte": false,
+        "reemploi_possible": true,
+        "qfdmd_produits": [
+            [
+                "Cahier"
+            ],
+            [
+                "Crayon en bois (à papier, de couleur)"
+            ],
+            [
+                "Fourniture scolaire ou de bureau"
+            ],
+            [
+                "Stylo à bille"
+            ],
+            [
+                "Stylo-plume"
+            ],
+            [
+                "Taille-crayon"
+            ]
+        ]
+    }
+},
+{
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+        "libelle": "Poêle et casserole",
+        "categorie": [
+            "mobilier_et_decoration"
+        ],
+        "code": "poele_casserole",
+        "afficher": true,
+        "afficher_carte": true,
+        "reemploi_possible": true,
+        "qfdmd_produits": [
+            [
+                "Poêle ou Casserole"
             ]
         ]
     }

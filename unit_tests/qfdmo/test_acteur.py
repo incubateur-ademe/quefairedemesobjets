@@ -124,7 +124,6 @@ class TestActeurDefaultOnSave:
 
 @pytest.mark.django_db
 class TestActeurOpeningHours:
-
     @pytest.mark.parametrize(
         "horaires_osm",
         ["", "24/7", "Mo-Fr 09:00-12:00,13:00-18:00; Sa 09:00-12:00", "__empty__"],

@@ -8,12 +8,16 @@ updates:
       interval: "weekly"
       day: "tuesday"
       time: "06:00" # UTC
+    cooldown:
+      default-days: 7
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "weekly"
       day: "tuesday"
       time: "06:00" # UTC
+    cooldown:
+      default-days: 7
     groups:
       parcel:
         patterns:
@@ -31,9 +35,13 @@ updates:
       interval: "weekly"
       day: "tuesday"
       time: "06:00" # UTC
+    cooldown:
+      default-days: 7
   - package-ecosystem: "terraform"
     directory: "/infrastructure"
     schedule:
       interval: "weekly"
       day: "tuesday"
       time: "06:00" # UTC
+    cooldown:
+      default-days: 7

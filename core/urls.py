@@ -32,7 +32,7 @@ from wagtail.documents import urls as wagtaildocs_urls
 from qfdmd.models import Synonyme
 
 from .api import api
-from .views import backlink, robots_txt
+from .views import AutocompleteSynonyme, backlink, robots_txt
 
 info_dict = {
     "queryset": Synonyme.objects.filter().order_by("nom"),
@@ -49,12 +49,14 @@ sitemaps = {
     "pages": Sitemap(),
 }
 
-
-urlpatterns = [
-    path("admin/", admin.site.urls),
-    path("api/", api.urls),
-    path("robots.txt", robots_txt),
-    path("embed/backlink", backlink),
+autocomplete_urlpatterns = [
+    path(
+        "autocomplete/synonyme",
+        AutocompleteSynonyme.as_view(),
+        name="autocomplete_synonyme",
+    ),
+]
+sitemap_urlpatterns = [
     path(
         "sitemap.xml",
         index,
@@ -73,15 +75,35 @@ urlpatterns = [
         {"sitemaps": sitemaps},
         name="django.contrib.sitemaps.views.sitemap",
     ),
-    path("", include(("qfdmo.urls", "qfdmo"), namespace="qfdmo")),
-    path("", include(("qfdmd.urls", "qfdmd"), namespace="qfdmd")),
-    path("infotri/", include(("infotri.urls", "infotri"), namespace="infotri")),
-    path("docs/", TemplateView.as_view(template_name="techdocs.html"), name="techdocs"),
 ]
+
+urlpatterns = (
+    autocomplete_urlpatterns
+    + sitemap_urlpatterns
+    + [
+        path("admin/", admin.site.urls),
+        path("api/", api.urls),
+        path("robots.txt", robots_txt),
+        path("embed/backlink", backlink),
+        path("", include(("qfdmo.urls", "qfdmo"), namespace="qfdmo")),
+        path("", include(("qfdmd.urls", "qfdmd"), namespace="qfdmd")),
+        path("infotri/", include(("infotri.urls", "infotri"), namespace="infotri")),
+        path(
+            "docs/",
+            TemplateView.as_view(template_name="techdocs.html"),
+            name="techdocs",
+        ),
+    ]
+)
 
 if settings.DEBUG:
     from django.conf.urls.static import static
     from django.views.defaults import page_not_found, server_error
+
+    if "debug_toolbar" in settings.INSTALLED_APPS:
+        urlpatterns.extend([path("__debug__/", include("debug_toolbar.urls"))])
+    if "django_browser_reload" in settings.INSTALLED_APPS:
+        urlpatterns.extend([path("__reload__/", include("django_browser_reload.urls"))])
 
     urlpatterns.extend(
         [
@@ -89,8 +111,6 @@ if settings.DEBUG:
                 "dsfr/",
                 include(("dsfr_hacks.urls", "dsfr_hacks"), namespace="dsfr_hacks"),
             ),
-            path("__debug__/", include("debug_toolbar.urls")),
-            path("__reload__/", include("django_browser_reload.urls")),
             path("500", server_error, {"template_name": "ui/pages/500.html"}),
             path("404", page_not_found, {"template_name": "ui/pages/404.html"}),
         ]
