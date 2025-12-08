@@ -9,7 +9,7 @@ from django.contrib.postgres.search import TrigramWordDistance
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
-from django.db.models import Prefetch, Q
+from django.db.models import Q
 from django.db.models.functions import Length, Lower
 from django.db.models.query import QuerySet
 from django.http import Http404, JsonResponse
@@ -259,7 +259,7 @@ class SearchActeursView(
             "proposition_services__action__groupe_action",
             "labels",
             "action_principale",
-        )
+        ).with_displayable_labels()
         if getattr(acteurs, "_needs_reparer_bonus", False):
             acteurs = acteurs.with_bonus().with_reparer()
 
@@ -471,27 +471,17 @@ def acteur_detail(request, uuid):
     direction = request.GET.get("direction")
 
     try:
-        # Import here to avoid circular imports
-        from qfdmo.models.acteur import LabelQualite
-
-        # Prefetch labels ordered by bonus (desc) and type_enseigne
-        # This allows the template tag to simply take the first label
-        ordered_labels = Prefetch(
-            "labels",
-            queryset=LabelQualite.objects.filter(afficher=True).order_by(
-                "-bonus", "type_enseigne"
-            ),
-            to_attr="displayable_labels_ordered",
+        displayed_acteur = (
+            DisplayedActeur.objects.prefetch_related(
+                "proposition_services__sous_categories",
+                "proposition_services__sous_categories__categorie",
+                "proposition_services__action__groupe_action",
+                "labels",
+                "sources",
+            )
+            .with_displayable_labels()
+            .get(uuid=uuid)
         )
-
-        displayed_acteur = DisplayedActeur.objects.prefetch_related(
-            "proposition_services__sous_categories",
-            "proposition_services__sous_categories__categorie",
-            "proposition_services__action__groupe_action",
-            ordered_labels,
-            "labels",  # Keep original for other uses
-            "sources",
-        ).get(uuid=uuid)
     except DisplayedActeur.DoesNotExist:
         # FIXME: it is impossible to get check if the revisionacteur has a parent
         # because the revision_acteur doesn't have any UUID
