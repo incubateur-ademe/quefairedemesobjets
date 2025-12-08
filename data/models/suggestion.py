@@ -149,7 +149,6 @@ class SuggestionCohorte(TimestampedModel):
 
 
 class Suggestion(TimestampedModel):
-
     class Meta:
         verbose_name = "2️⃣ Suggestion - Bientôt déprécié"
         verbose_name_plural = "2️⃣ Suggestions - Bientôt déprécié"
@@ -401,7 +400,6 @@ class Suggestion(TimestampedModel):
 
 
 class SuggestionGroupe(TimestampedModel):
-
     class Meta:
         verbose_name = "2️⃣ ⏳ ⚠️ Suggestion Groupe - Livraison prochainement"
         verbose_name_plural = "2️⃣ ⏳ ⚠️ Suggestions Groupes - Livraison prochainement"
@@ -440,7 +438,6 @@ class SuggestionGroupe(TimestampedModel):
 
 
 class SuggestionUnitaire(TimestampedModel):
-
     class Meta:
         verbose_name = "3️⃣ ⏳ ⚠️ Suggestion Unitaire - Livraison prochainement"
         verbose_name_plural = "3️⃣ ⏳ ⚠️ Suggestions Unitaires - Livraison prochainement"
@@ -468,7 +465,7 @@ class SuggestionUnitaire(TimestampedModel):
     )
     ordre = models.IntegerField(default=1, blank=True)
     raison = models.TextField(blank=True, db_default="", default="")
-    parametres = models.JSONField(blank=True, db_default="", default="")
+    parametres = models.JSONField(blank=True, db_default="", default=dict)
     suggestion_modele = models.CharField(
         max_length=255, blank=True, db_default="", default="", choices=[]
     )
