@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("data", "0015_alter_suggestion_management"),
+        ("data", "0016_alter_suggestionunitaire_parametres"),
     ]
 
     operations = [
