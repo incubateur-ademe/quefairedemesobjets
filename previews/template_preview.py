@@ -12,12 +12,16 @@ from django_lookbook.utils import register_form_class
 from dsfr.forms import DsfrBaseForm
 
 from core.constants import DEFAULT_MAP_CONTAINER_ID
+from core.widgets import (
+    AddressAutocompleteInput,
+    HomeSearchAutocompleteInput,
+    SynonymeAutocompleteInput,
+)
 from infotri.forms import InfotriForm
 from qfdmd.forms import SearchForm
 from qfdmd.models import Suggestion, Synonyme
 from qfdmo.forms import (
     LegendeForm,
-    NextAutocompleteInput,
     ViewModeForm,
 )
 from qfdmo.models.acteur import (
@@ -504,10 +508,7 @@ class FormulairesPreview(LookbookPreview):
         class AutocompleteForm(DsfrBaseForm):
             synonyme = forms.ModelChoiceField(
                 queryset=Synonyme.objects.all(),
-                widget=NextAutocompleteInput(
-                    search_view="autocomplete_synonyme",
-                    limit=10,
-                ),
+                widget=SynonymeAutocompleteInput(),
                 help_text="pantalon, perceuse, canapé...",
                 label="Indiquer un objet ",
                 empty_label="",
@@ -541,6 +542,59 @@ class FormulairesPreview(LookbookPreview):
         form = ViewModeForm()
         template = Template("{{ form }}")
         context = {"form": form}
+        return template.render(Context(context))
+
+    def autocomplete_widgets(self, **kwargs):
+        """Prévisualisation de tous les types de widgets d'autocomplétion sur une seule page."""
+
+        class AutocompleteFormExample(DsfrBaseForm):
+            synonyme = forms.ModelChoiceField(
+                queryset=Synonyme.objects.all(),
+                widget=SynonymeAutocompleteInput(),
+                help_text="pantalon, perceuse, canapé...",
+                label="Autocomplétion Synonyme",
+                empty_label="",
+                required=False,
+            )
+
+            adresse = forms.CharField(
+                label="Autocomplétion Adresse",
+                required=False,
+                widget=AddressAutocompleteInput(
+                    attrs={
+                        "class": "fr-input",
+                        "placeholder": "Rechercher une adresse",
+                        "autocomplete": "off",
+                    },
+                ),
+            )
+            search = forms.CharField(
+                label="Autocomplétion Recherche d'accueil",
+                required=False,
+                widget=HomeSearchAutocompleteInput(
+                    attrs={
+                        "class": "fr-input",
+                        "placeholder": "pantalon, perceuse, canapé...",
+                        "autocomplete": "off",
+                    },
+                ),
+            )
+
+        form = AutocompleteFormExample()
+
+        template = Template(
+            """
+            <div class="qf-max-w-3xl qf-space-y-4w">
+                <h2 class="qf-text-2xl qf-font-bold qf-mb-4w">Widgets d'autocomplétion</h2>
+                <hr>
+
+                {{ form }}
+            </div>
+            """
+        )
+        context = {
+            "form": form,
+        }
         return template.render(Context(context))
 
 

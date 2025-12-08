@@ -10,7 +10,7 @@ from django.contrib.postgres.search import (
 from django.db.models import Case, F, Value, When
 from dsfr.forms import DsfrBaseForm
 
-from qfdmo.forms import NextAutocompleteInput
+from core.widgets import HomeSearchAutocompleteInput
 
 from .models import ProduitPage, Synonyme
 
@@ -80,10 +80,7 @@ class AutocompleteSearchForm(DsfrBaseForm):
     search = forms.CharField(
         label="Saisir un objet ou un déchet",
         required=False,
-        widget=NextAutocompleteInput(
-            search_view="qfdmd:autocomplete_home_search",
-            limit=10,
-            navigate=True,
+        widget=HomeSearchAutocompleteInput(
             attrs={
                 "class": "fr-input",
                 "placeholder": "pantalon, perceuse, canapé...",

@@ -2,10 +2,10 @@
   id="option-{{ forloop.counter }}"
   role="option"
   tabindex="-1"
-  class="qf-flex qf-flex-row qf-justify-between qf-list-none qf-p-1w focus:qf-bg-blue-france-sun-113-625 focus:qf-text-white hover:qf-bg-grey-1000-50-hover qf-cursor-pointer {% block li_classes %}{% endblock %}"
+  class="qf-flex qf-flex-row qf-justify-between qf-list-none qf-p-1w qf-bg-white focus:qf-bg-blue-france-sun-113-625 focus:qf-text-white focus-within:qf-bg-blue-france-sun-113-625 focus-within:qf-text-white aria-[selected=true]:qf-bg-blue-france-sun-113-625 aria-[selected=true]:qf-text-white hover:qf-bg-grey-1000-50-hover qf-cursor-pointer {% block li_classes %}{% endblock %}"
   data-next-autocomplete-target="option"
   {% block data %}{% endblock %}
-  data-action="keydown->next-autocomplete#navigate:prevent click->next-autocomplete#commitSelection"
+  data-action="keydown->next-autocomplete#navigate click->next-autocomplete#commitSelection"
   data-value="{% block value %}{% endblock %}"
 >
     {% block rendering %}

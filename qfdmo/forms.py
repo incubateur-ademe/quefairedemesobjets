@@ -1,5 +1,4 @@
 import base64
-import uuid
 from typing import cast
 
 from django import forms
@@ -7,13 +6,13 @@ from django.core.cache import cache
 from django.db.models import TextChoices
 from django.db.utils import cached_property
 from django.http import HttpRequest, QueryDict
-from django.shortcuts import reverse
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from dsfr.enums import SegmentedControlChoices
 from dsfr.forms import DsfrBaseForm
 from dsfr.widgets import SegmentedControl
 
+from core.widgets import AddressAutocompleteInput, SynonymeAutocompleteInput
 from qfdmd.models import Synonyme
 from qfdmo.fields import GroupeActionChoiceField, LabelQualiteChoiceField
 from qfdmo.geo_api import epcis_from, formatted_epcis_as_list_of_tuple
@@ -304,52 +303,13 @@ class AutoSubmitLegendeForm(AutoSubmitMixin, LegendeForm):
     autosubmit_fields = ["groupe_action"]
 
 
-class NextAutocompleteInput(forms.TextInput):
-    template_name = "ui/forms/widgets/autocomplete/input.html"
-
-    def __init__(
-        self,
-        search_view,
-        limit=5,
-        navigate=False,
-        display_value=False,
-        wrapper_attrs=None,
-        *args,
-        **kwargs,
-    ):
-        # TODO: add optional template args
-        self.search_view = search_view
-        self.limit = limit
-        self.navigate = navigate
-        self.display_value = display_value
-        self.turbo_frame_id = str(uuid.uuid4())
-        self.wrapper_attrs = wrapper_attrs or {}
-
-        super().__init__(*args, **kwargs)
-
-    def get_context(self, name, value, attrs):
-        context = super().get_context(name, value, attrs)
-        endpoint_url = reverse(self.search_view)
-        return {
-            **context,
-            "endpoint_url": endpoint_url,
-            "limit": self.limit,
-            "navigate": self.navigate,
-            "display_value": self.display_value,
-            "turbo_frame_id": self.turbo_frame_id,
-            "wrapper_attrs": self.wrapper_attrs,
-        }
-
-
 class FiltresForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
     carte_config_initial_mapping = {
         "label_qualite": "label_qualite",
     }
     synonyme = forms.ModelChoiceField(
         queryset=Synonyme.objects.all(),
-        widget=NextAutocompleteInput(
-            search_view="autocomplete_synonyme",
-        ),
+        widget=SynonymeAutocompleteInput(),
         help_text="pantalon, perceuse, canapé...",
         label="Indiquer un objet",
         required=False,
@@ -502,11 +462,7 @@ class MapForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
     adresse = forms.CharField(
         label="",
         required=False,
-        widget=NextAutocompleteInput(
-            search_view="autocomplete_address",
-            limit=10,
-            navigate=False,
-            display_value=True,
+        widget=AddressAutocompleteInput(
             attrs={
                 "class": "fr-input",
                 "placeholder": "Rechercher autour d'une adresse",

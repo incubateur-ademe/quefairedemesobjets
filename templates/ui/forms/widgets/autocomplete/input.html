@@ -4,6 +4,7 @@
     data-next-autocomplete-turbo-frame-id-value="{{ turbo_frame_id }}"
     data-next-autocomplete-limit-value="{{ limit }}"
     {% if navigate %}data-next-autocomplete-navigate-value="true"{% endif %}
+    {% if show_on_focus %}data-next-autocomplete-show-on-focus-value="true"{% endif %}
     {# TODO: add optional data-action block #}
     {% for key, value in wrapper_attrs.items %}{% if key != "data-controller" %}{{ key }}="{{ value }}" {% endif %}{% endfor %}
     class="qf-relative"
@@ -21,8 +22,8 @@
         aria-controls="{{ turbo_frame_id }}-listbox"
         aria-expanded="false"
         aria-activedescendant=""
-        aria-autocomplete="list"
-        data-action="next-autocomplete#search keydown->next-autocomplete#navigate focus->next-autocomplete#showListbox"
+        aria-autocomplete="both"
+        data-action="next-autocomplete#search keydown->next-autocomplete#navigate focus->next-autocomplete#focus"
         data-next-autocomplete-target="input"
     >
     <input

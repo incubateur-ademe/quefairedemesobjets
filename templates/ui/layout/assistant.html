@@ -75,7 +75,7 @@ https://github.com/numerique-gouv/sites-faciles/blob/main/templates/base.html
         {% posthog_data_attributes assistant.POSTHOG_KEY %}
         data-analytics-initial-action-value="{% block analytics_action %}{% endblock %}"
         {# Actions #}
-        data-action="address-autocomplete:change->state#setLocation"
+        data-action="geolocation:change->state#setLocation"
     >
         {% wagtailuserbar %}
 
