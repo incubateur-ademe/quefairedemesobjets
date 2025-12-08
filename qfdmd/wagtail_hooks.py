@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth.models import Permission
 from django.urls import path, reverse
 from wagtail import hooks
@@ -68,3 +69,30 @@ def register_legacy_migrate_url():
             name="legacy_migrate",
         ),
     ]
+
+
+@hooks.register("after_edit_page")
+def check_synonyme_redirection_conflicts(request, page):
+    """Check for conflicts in legacy_synonyme redirections."""
+    from qfdmd.models import Produit
+
+    if not hasattr(page, "legacy_synonyme"):
+        return
+
+    for synonyme_relation in page.legacy_synonyme.all():
+        # Check if the synonyme's produit is already redirected
+        try:
+            produit_page = synonyme_relation.synonyme.produit.next_wagtail_page
+            if produit_page.page.id != page.id:
+                messages.warning(
+                    request,
+                    f"Attention : le synonyme "
+                    f"'{synonyme_relation.synonyme.nom}' sera redirigé "
+                    f"vers cette page, mais son produit "
+                    f"'{synonyme_relation.synonyme.produit.nom}' est "
+                    f"déjà redirigé vers '{produit_page.page.title}'. "
+                    f"La redirection du synonyme aura la priorité.",
+                )
+        except Produit.next_wagtail_page.RelatedObjectDoesNotExist:
+            # If produit has no redirection, no conflict
+            pass

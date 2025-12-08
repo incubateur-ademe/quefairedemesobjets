@@ -9,7 +9,7 @@ const setupIframe = () => {
   const [iframeAttributes, iframeExtraAttributes] = getIframeAttributesAndExtra(
     scriptTag,
     "formulaire",
-    { maxWidth: "800px" },
+    { maxWidth: "800px", iframeId: "formulaire" },
   )
   buildAndInsertIframeFrom(
     iframeAttributes,

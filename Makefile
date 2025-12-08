@@ -42,7 +42,7 @@ init-dev:
 	git config blame.ignoreRevsFile .git-blame-ignore-revs
 	pre-commit install
 	# javascript
-	npm install
+	npm ci
 	make init-playwright
 	# environment
 	cp .env.template .env
@@ -116,7 +116,7 @@ createsuperuser:
 
 .PHONY: seed-database
 seed-database:
-	$(DJANGO_ADMIN) loaddata_with_computed_fields categories labels sources actions produits acteur_services acteur_types objets synonymes suggestions
+	$(DJANGO_ADMIN) loaddata_with_computed_fields categories labels sources actions produits acteur_services acteur_types objets synonymes suggestions carte_configs
 	$(DJANGO_ADMIN) loaddata_with_computed_fields acteurs propositions_services
 
 .PHONY: createsuperuser-example
@@ -137,6 +137,7 @@ generate-fixtures:
 	$(DJANGO_ADMIN) dumpdata qfdmo.acteurservice $(FIXTURES_OPTIONS) -o qfdmo/fixtures/acteur_services.json
 	$(DJANGO_ADMIN) dumpdata qfdmo.labelqualite $(FIXTURES_OPTIONS) -o qfdmo/fixtures/labels.json
 	$(DJANGO_ADMIN) dumpdata qfdmo.source $(FIXTURES_OPTIONS) -o qfdmo/fixtures/sources.json
+	$(DJANGO_ADMIN) dumpdata qfdmo.carteconfig qfdmo.groupeactionconfig $(FIXTURES_OPTIONS) -o qfdmo/fixtures/carte_configs.json
 	$(DJANGO_ADMIN) dumpdata qfdmd.synonyme $(FIXTURES_OPTIONS) -o qfdmd/fixtures/synonymes.json
 	$(DJANGO_ADMIN) dumpdata qfdmd.produit $(FIXTURES_OPTIONS) -o qfdmd/fixtures/produits.json
 	$(DJANGO_ADMIN) dumpdata qfdmd.suggestion $(FIXTURES_OPTIONS) -o qfdmd/fixtures/suggestions.json

@@ -24,6 +24,7 @@ Les trucs à faire avant de demander une review :
 - [ ] La CI passe bien
 - [ ] En cas d'ajout de variable d'environnement, j'ai bien mis à jour le `.env.template`
 - [ ] J'ai ajouté des tests qui couvrent le nouveau code
+- [ ] En cas d'ajout de dépendance, j'ai bien respecté un cooldown de 7 jours pour éviter les [Supply Chain Attacks](https://cheatsheetseries.owasp.org/cheatsheets/Software_Supply_Chain_Security_Cheat_Sheet.html)
 
 ## ✅ Reste à faire (PR en cours)
 

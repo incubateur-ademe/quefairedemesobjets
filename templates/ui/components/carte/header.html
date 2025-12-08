@@ -1,50 +1,38 @@
-{% if not carte_config or not carte_config.supprimer_branding %}
-<div
-    class="qf-items-center qf-hidden md:qf-flex qf-flex-row"
-    id="logo"
+{% load dsfr_tags %}
+<header
+    class="
+    qf-bg-white qf-border-b qf-border-solid qf-border-t-0 qf-border-x-0 qf-border-grey-900
+    max-nolegend:qf-p-1w
+    {% if not mode_liste %}qf-shadow-lg{% endif %}"
 >
-    {% include 'ui/layout/_partials/header_logos.html' %}
-</div>
-{% endif %}
+    <div
+        class="qf-flex qf-flex-col nolegend:qf-flex-row nolegend:qf-items-center"
+    >
 
-{# Recherche adresse #}
-<div class="fr-my-1w qf-flex-grow qf-flex qf-flex-col
-    {% if not carte_config or not carte_config.supprimer_branding %}qf-px-2w md:qf-px-3w md:qf-pr-6w{% else %}qf-p-2w{% endif %}"
->
-    {% include "ui/components/carte/_addresses_partials/adresse_input_form.html" %}
-
-    {% if not carte_config or not carte_config.cacher_legende %}
-    <div class="lg:qf-hidden fr-mt-1w qf-flex qf-justify-between">
         {% if not carte_config or not carte_config.supprimer_branding %}
-        <button
-            class="fr-btn fr-btn--sm fr-btn--tertiary"
-            type="button"
-            title="À propos"
-            data-action="click -> search-solution-form#toggleAPropos"
+        <div
+            class="qf-items-center qf-hidden nolegend:qf-flex qf-flex-row"
+            id="logo"
+            data-remove-if-internal
         >
-            Infos
-        </button>
+            {% include 'ui/layout/_partials/header_logos.html' %}
+        </div>
         {% endif %}
-        <div class="qf-flex qf-flex-row-reverse">
-            {% if form.legend_grouped_action|length > 1 %}
-            <button
-                class="fr-btn fr-btn--sm fr-btn--secondary fr-ml-1w fr-btn--icon-left fr-icon-eye-line"
-                type="button"
-                data-testid="legend-mobile-button"
-                data-action="click -> search-solution-form#showLegend"
-            >
-                Légende
-            </button>
-            {% endif %}
-            <button
-                class="fr-btn fr-btn--sm fr-btn--secondary fr-ml-1w fr-btn--icon-left fr-icon-equalizer-line"
-                type="button"
-                data-action="search-solution-form#toggleAdvancedFilters"
-                data-testid="advanced-filters"
-            >
-                Filtres
-            </button>
+
+
+        {# Recherche adresse #}
+        <div class="fr-my-1w qf-flex-grow qf-flex qf-flex-col
+            {% if carte_config and carte_config.supprimer_branding %}qf-p-2w{% endif %}"
+        >
+            {% include "ui/components/carte/adresse_input_form.html" %}
+        </div>
+
+        {# Navigation entre carte / liste #}
+        <div class="nolegend:qf-px-2w max-nolegend:qf-flex qf-justify-between qf-items-end" id="view-mode-nav" data-testid="view-mode-nav">
+            {{ forms.view_mode }}
+            <div class="nolegend:qf-hidden">
+            {% include "ui/components/modals/filtres.html" with button_extra_classes="fr-btn--sm" id="filtres" button_only=True %}
+            </div>
         </div>
     </div>
-    {% endif %}
-</div>
+</header>

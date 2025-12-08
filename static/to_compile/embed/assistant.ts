@@ -1,67 +1,31 @@
-import iframeResize from "@iframe-resizer/parent"
-import { URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE } from "../js/helpers"
-import { iframeResizer } from "@iframe-resizer/child"
-import { generateBackLink } from "./helpers"
+import {
+  buildAndInsertIframeFrom,
+  getIframeAttributesAndExtra,
+} from "../js/iframe_functions"
 
-const script = document.currentScript as HTMLScriptElement
-const slug = script?.dataset?.objet
-const epci = script?.dataset?.epci
-let baseUrl = new URL(script?.getAttribute("src")).origin
+const setupIframe = () => {
+  // Add iFrame just after the script tag
+  const scriptTag = document.currentScript as HTMLScriptElement
 
-if (process.env.BASE_URL) {
-  baseUrl = process.env.BASE_URL
+  // Use "dechet" as base route, but if data-objet is present it will be appended
+  const [iframeAttributes, iframeExtraAttributes] = getIframeAttributesAndExtra(
+    scriptTag,
+    "dechet",
+    { useAutoHeight: true, addScriptModeParam: true, iframeId: "assistant" },
+  )
+
+  buildAndInsertIframeFrom(
+    iframeAttributes,
+    iframeExtraAttributes,
+    scriptTag,
+    "assistant",
+    {
+      useIframeResizer: true,
+      resizerOptions: {
+        id: "assistant",
+      },
+    },
+  )
 }
 
-async function initScript() {
-  const parts = [baseUrl]
-  const iframeResizerOptions: iframeResizer.IFramePageOptions = {
-    license: "GPLv3",
-    id: "quefairedemesdechets-assistant",
-  }
-  if (slug) {
-    parts.push("dechet", slug)
-  }
-
-  const searchParams = new URLSearchParams()
-  if (epci) {
-    searchParams.set("epci", epci)
-  }
-
-  searchParams.set("iframe", "")
-  searchParams.set(URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE, "1")
-  const src = `${parts.join("/")}?${searchParams.toString()}`
-  const iframe = document.createElement("iframe")
-  const iframeAttributes = {
-    src,
-    style: "border: none; width: 100%; display: block; margin: 0 auto;",
-    allowfullscreen: true,
-    allow: "geolocation; clipboard-write",
-    title: "Que faire de mes objets et déchets",
-  }
-
-  if (script?.dataset?.testid) {
-    iframeAttributes["data-testid"] = script.dataset.testid
-  }
-
-  const debugReferrer = typeof script?.dataset?.debugReferrer !== "undefined"
-  if (debugReferrer) {
-    iframeAttributes.referrerPolicy = "no-referrer"
-  }
-
-  for (var key in iframeAttributes) {
-    iframe.setAttribute(key, iframeAttributes[key])
-  }
-
-  script.parentNode?.insertBefore(iframe, script)
-  await generateBackLink(iframe, "assistant", baseUrl)
-  iframe.onload = () => {
-    iframeResize(iframeResizerOptions, iframe)
-  }
-}
-if (document.readyState === "loading") {
-  // Loading hasn't finished yet
-  document.addEventListener("DOMContentLoaded", initScript)
-} else {
-  // `DOMContentLoaded` has already fired
-  initScript()
-}
+setupIframe()

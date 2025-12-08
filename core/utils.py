@@ -1,3 +1,5 @@
+from urllib.parse import urlparse
+
 from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.db import connections
@@ -148,3 +150,17 @@ def has_explicit_perm(user, perm_str):
             return True
 
     return False
+
+
+def remove_protocol_from_url(url):
+    """
+    Convert an absolute URL to a protocol-relative URL.
+    This prevents mixed content issues in Django Lookbook previews
+    where the iframe may use http:// but BASE_URL is https://.
+
+    Example:
+        https://example.com/path -> //example.com/path
+        http://example.com/path -> //example.com/path
+    """
+    parsed = urlparse(url)
+    return f"//{parsed.netloc}{parsed.path}"

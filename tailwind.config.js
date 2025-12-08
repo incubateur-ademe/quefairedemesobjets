@@ -26,15 +26,6 @@ module.exports = {
     },
   ],
   theme: {
-    colors: {
-      // https://www.systeme-de-design.gouv.fr/elements-d-interface/fondamentaux-de-l-identite-de-l-etat/couleurs-palette
-      info: {
-        "975-active": "#c2cfff",
-      },
-      black: "black",
-      white: "white",
-      ...DSFRColors,
-    },
     spacing: {
       // https://www.systeme-de-design.gouv.fr/elements-d-interface/fondamentaux-techniques/espacements
       0: 0,
@@ -53,6 +44,15 @@ module.exports = {
       "15w": "7.5rem",
     },
     extend: {
+      colors: {
+        // https://www.systeme-de-design.gouv.fr/elements-d-interface/fondamentaux-de-l-identite-de-l-etat/couleurs-palette
+        info: {
+          "975-active": "#c2cfff",
+        },
+        black: "black",
+        white: "white",
+        ...DSFRColors,
+      },
       height: {
         header: "var(--header-height)",
         "main-svh": "calc(100svh - var(--header-height))",
@@ -69,6 +69,7 @@ module.exports = {
       screens: {
         xs: "320px",
         xsm: "360px",
+        nolegend: "1024px",
       },
       minWidth: ({ theme }) => ({ ...theme("spacing") }),
       keyframes: {
@@ -98,6 +99,9 @@ module.exports = {
         wave: "wave 1.5s linear",
         blink: "blink 1s infinite",
         "modal-appear": "modal-appear 0.2s",
+      },
+      backgroundImage: {
+        "gradient-infotri": "linear-gradient(49deg, transparent 57%, #ececfe 78%)",
       },
     },
   },

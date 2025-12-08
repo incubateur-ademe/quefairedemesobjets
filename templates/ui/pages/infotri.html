@@ -1,0 +1,112 @@
+{% extends "ui/layout/base.html" %}
+{% load dsfr_tags static %}
+
+{% block page_title %}Concevez facilement votre Info-tri [Beta] - Longue vie aux objets{% endblock %}
+
+{% block page_description %}Générateur d'Info-tri pour produits textiles, vêtements et chaussures{% endblock %}
+
+{% block body_classes %}{% if not iframe %}qf-bg-gradient-infotri{% endif %}{% endblock %}
+
+{% block content %}
+<turbo-frame
+    id="infotri-form"
+    class="qf-grid qf-min-h-screen {% if not iframe %}qf-w-screen{% endif %} qf-grid-cols-1 md:qf-grid-cols-3
+    {% if iframe %}qf-rounded-lg !qf-border-2 !qf-border-solid !qf-border-grey-900 {% endif %}"
+>
+    <main class="qf-flex qf-flex-col qf-items-start qf-gap-2w qf-p-2w md:qf-col-span-2">
+        <h1 class="qf-mb-1w qf-text-2xl qf-leading-none qf-font-extrabold qf-tracking-tight qf-text-gray-900 md:qf-text-3xl lg:qf-text-4xl">
+            Concevez facilement votre Info-tri [Beta]
+        </h1>
+
+        <p class="qf-max-w-prose">
+            Ce générateur ne permet, pour le moment, que la création d'Info-tri destiné à des produits
+            tels que des textiles d'habillement, du linge de maison et/ou des chaussures.
+        </p>
+
+        <div class="qf-mr-auto qf-flex qf-h-full qf-max-w-full qf-flex-col qf-gap-2w qf-w-full">
+            <form
+                method="get"
+                action="{% url 'infotri:configurator' %}"
+                class="qf-flex qf-flex-col qf-gap-2w"
+                onchange="this.requestSubmit()"
+            >
+                {# Catégorie Section #}
+                <div>
+                    <h2 class="qf-text-xl qf-font-bold qf-mb-3v">Choisissez une catégorie de produit</h2>
+                    {% dsfr_form_field form.categorie %}
+                </div>
+
+
+                {# Consigne Section #}
+                {% if form.categorie.value %}
+                <div>
+                    <h2 class="qf-text-xl qf-font-bold qf-mb-3v">Choisissez la consigne</h2>
+                    {% dsfr_form_field form.consigne %}
+                </div>
+                {% endif %}
+
+                {# Phrase Toggle Section #}
+                {% if form.consigne.value %}
+                <div>
+                    {% dsfr_form_field form.avec_phrase %}
+                </div>
+                {% endif %}
+
+                {# Generate Button #}
+                {% if form.consigne.value and not show_code %}
+                <div>
+                    <button type="submit" name="show_code" value="true" class="fr-btn">
+                        Générer le code
+                    </button>
+                </div>
+                {% endif %}
+            </form>
+
+            {# Code Section #}
+            {% if form.is_valid and form.consigne.value and show_code %}
+            <div data-controller="scroll">
+                <h2 class="qf-text-xl qf-font-bold qf-mb-1w">Code à implémenter</h2>
+
+                <div class="qf-mb-1w">
+                    <p class="qf-text-base">
+                        Cette balise HTML vous permet d'afficher l'Info-tri générée sur une page de votre site
+                        internet. Celle-ci sera automatiquement mise à jour avec les dernières nouveautés.
+                    </p>
+                    <p class="qf-text-base">
+                        Pour l'utiliser, il vous suffit de copier/coller le code ci-dessous dans votre site
+                        Internet. En cas de difficultés ou de besoin d'assistance, vous pouvez contacter notre
+                        équipe.
+                    </p>
+                </div>
+
+                <div class="fr-callout" data-controller="copy">
+                    <pre class="qf-whitespace-normal qf-break-all qf-mb-1w qf-p-1w qf-bg-gray-100 qf-rounded qf-text-sm qf-font-mono" data-copy-target="toCopy">&lt;script src="{{ base_url }}/infotri/static/infotri.js" data-config="categorie={{ form.categorie.value }}&consigne={{ form.consigne.value }}&avec_phrase={{ form.avec_phrase.value|yesno:'true,false' }}"&gt;&lt;/script&gt;</pre>
+                    <button
+                        type="button"
+                        class="fr-btn"
+                        data-copy-target="button"
+                        data-action="click->copy#toClipboard"
+                    >
+                        Copier
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+    </main>
+
+    <aside class="qf-flex qf-flex-col md:qf-sticky md:qf-top-0">
+        <div class="qf-flex qf-items-center qf-justify-center qf-h-full qf-p-4w">
+            <div class="qf-bg-white qf-shadow-lg qf-p-3w">
+                {% include "ui/components/infotri/infotri.html" %}
+            </div>
+        </div>
+    </aside>
+</turbo-frame>
+{% endblock content %}
+
+{% block js %}
+    {{ block.super }}
+    {% if iframe %}
+        <script src="{% static 'infotri-child.js' %}" defer></script>
+    {% endif %}
+{% endblock js %}
