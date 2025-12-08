@@ -154,9 +154,21 @@ class TestSuggestionGroupeSerialiser:
             "identifiant_unique": "",
             "fields_groups": [("nom",), ("latitude", "longitude")],
             "fields_values": {
-                "nom": {"displayed_value": "Nouveau nom", "new_value": "Nouveau nom"},
-                "latitude": {"displayed_value": "48.56789", "new_value": "48.56789"},
-                "longitude": {"displayed_value": "2.56789", "new_value": "2.56789"},
+                "nom": {
+                    "displayed_value": "Nouveau nom",
+                    "new_value": "Nouveau nom",
+                    "updated_displayed_value": "",
+                },
+                "latitude": {
+                    "displayed_value": "48.56789",
+                    "new_value": "48.56789",
+                    "updated_displayed_value": "",
+                },
+                "longitude": {
+                    "displayed_value": "2.56789",
+                    "new_value": "2.56789",
+                    "updated_displayed_value": "",
+                },
             },
             "acteur": None,
             "acteur_overridden_by": None,
