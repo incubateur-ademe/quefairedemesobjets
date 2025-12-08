@@ -23,7 +23,8 @@ option `--group dev` pour les dépendances de développement et `--group airflow
 Utiliser npm
 
 ```sh
-npm install <package>
+npm install <package> --before="$(date -v -7d +%Y-%m-%d)" # testé sur MacOS et Debian
 ```
 
 option `--dev` pour les dépendances de développement
+Note : on recommande un cooldown de 7 jours pour les nouvelles dépendances afin de se prémunir des supply chain attacks.

@@ -16,26 +16,11 @@ def django_db_setup(django_db_setup, django_db_blocker):
 
 @pytest.mark.django_db
 class TestInitialValue:
-
     default_context = {
-        "sous_categorie_objet": None,
-        "sc_id": None,
         "adresse": None,
         "latitude": None,
         "longitude": None,
-        "label_reparacteur": None,
-        "ess": None,
-        "bonus": None,
         "bounding_box": None,
-        "pas_exclusivite_reparation": True,
-        "action_displayed": (
-            "preter|emprunter|louer|mettreenlocation|reparer|donner|echanger"
-            "|acheter|revendre"
-        ),
-        "action_list": (
-            "preter|emprunter|louer|mettreenlocation|reparer|donner|echanger"
-            "|acheter|revendre"
-        ),
         "epci_codes": [],
     }
 
@@ -45,9 +30,26 @@ class TestInitialValue:
         response = client.get(url)
 
         assert response.status_code == 200
-        assert response.context_data["location"] == "{}"
-        assert response.context_data["acteurs"].count() == 0
-        assert response.context_data["form"].initial == self.default_context
+        assert response.context_data["location"] == ""
+        assert len(response.context_data["acteurs"]) == 0
+        assert response.context_data["form"].initial == {
+            **self.default_context,
+            "action_displayed": "preter|emprunter|louer|mettreenlocation"
+            "|reparer|donner|echanger|acheter|revendre",
+            "action_list": "preter|emprunter|louer|mettreenlocation|"
+            "reparer|donner|echanger|acheter|revendre",
+            "adresse": None,
+            "bonus": None,
+            "bounding_box": None,
+            "epci_codes": [],
+            "ess": None,
+            "label_reparacteur": None,
+            "latitude": None,
+            "longitude": None,
+            "pas_exclusivite_reparation": True,
+            "sc_id": None,
+            "sous_categorie_objet": None,
+        }
 
     def test_carte_without_parameters(self, client):
         url = "/carte"
@@ -55,30 +57,6 @@ class TestInitialValue:
         response = client.get(url)
 
         assert response.status_code == 200
-        assert response.context_data["location"] == "{}"
-        assert response.context_data["acteurs"].count() == 0
-        assert response.context_data["form"].initial == {
-            **self.default_context,
-            "action_displayed": (
-                "preter|emprunter|louer|mettreenlocation|reparer|donner|echanger"
-                "|acheter|revendre|rapporter|trier"
-            ),
-            "action_list": (
-                "reparer|donner|echanger|rapporter|preter|emprunter|louer|mettreenlocation|"
-                "acheter|revendre|trier"
-            ),
-            "grouped_action": [
-                "reparer",
-                "donner|echanger|rapporter",
-                "preter|emprunter|louer|mettreenlocation",
-                "acheter|revendre",
-                "trier",
-            ],
-            "legend_grouped_action": [
-                "reparer",
-                "donner|echanger|rapporter",
-                "preter|emprunter|louer|mettreenlocation",
-                "acheter|revendre",
-                "trier",
-            ],
-        }
+        assert response.context_data["location"] == ""
+        assert len(response.context_data["acteurs"]) == 0
+        assert response.context_data["form"].initial == self.default_context

@@ -9,7 +9,6 @@ from wagtail.models import Page
 from wagtail.templatetags.wagtailcore_tags import richtext
 
 from qfdmd.models import ReusableContent
-from qfdmo.models.config import CarteConfig
 
 register = template.Library()
 
@@ -92,20 +91,6 @@ def render_file_content(file_field: FileField) -> str:
     except FileNotFoundError as e:
         logger.error(f"file not found {file_field.name=}, original error : {e}")
         return ""
-
-
-@register.inclusion_tag("ui/components/carte/carte.html", takes_context=True)
-def carte(context, carte_config: CarteConfig) -> dict:
-    page = context.get("page")
-    return {
-        "id": carte_config.pk,
-        "url": carte_config.get_absolute_url(
-            override_sous_categories=list(
-                page.sous_categorie_objet.all().values_list("id", flat=True)
-            ),
-            initial_query_string=carte_config.SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url,
-        ),
-    }
 
 
 @register.inclusion_tag("templatetags/favicon.html")

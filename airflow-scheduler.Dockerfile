@@ -55,6 +55,9 @@ COPY ./dags/ /opt/airflow/dags/
 COPY ./config/ /opt/airflow/config/
 COPY ./plugins/ /opt/airflow/plugins/
 
+RUN mkdir -p /opt/airflow/tmp
+RUN chown -R ${AIRFLOW_UID:-50000}:0 /opt/airflow/tmp
+
 WORKDIR /opt/airflow/dbt
 USER 0
 RUN chown -R ${AIRFLOW_UID:-50000}:0 /opt/airflow/dbt

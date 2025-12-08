@@ -7,9 +7,9 @@ readme = "README.md"
 license = "MIT"
 dependencies = [
     "api-insee~=1.6",
-    "boto3<1.42",
+    "boto3<1.43",
     "dj-database-url>=3.0.1,<4",
-    "django<=5.2.8",
+    "django==5.2.9",
     "django-extensions~=4.1",
     "django-import-export[xls, xlsx]>=4.3.8,<5",
     "django-ninja>=1.4.3,<2",
@@ -35,10 +35,11 @@ dependencies = [
     "wagtail-honeypot @ git+https://github.com/Luzzzi/wagtail-honeypot@feature/i18n-required-honeypot",
     "diff-match-patch>=20241021,<20241022",
     "django-lookbook>=1.0.2,<2",
-    "queryish>=0.2,<0.3",
+    "queryish>=0.2,<0.4",
     "detect-secrets>=1.5.0",
     "djangoql>=0.18.1",
-    "pydantic[email]>=2.11.7"
+    "pydantic[email]>=2.11.7",
+    "django-admin-sortable2>=2.2.8",
 ]
 
 [build-system]
@@ -69,7 +70,7 @@ dev = [
     "pytest-django>=4.9.0,<5",
     "pytest-dotenv>=0.5.2,<0.6",
     "pytest-mock>=3.14.1,<4",
-    "ruff>=0.12.10,<0.13",
+    "ruff>=0.12.10,<0.15",
     "shapely>=2.1.1,<3",
     "djade>=1.6.0,<2",
     "dslr>=0.6.0,<0.7",
@@ -104,6 +105,16 @@ airflow = [
 [tool.pyright]
 venvPath = "."
 venv = ".venv"
+typeCheckingMode = "basic"
+# Disable strict type checking rules that are incompatible with Django's patterns.
+# Django uses metaclasses and descriptors (e.g., models.CharField) which appear as
+# one type at the class level but resolve to different types at the instance level.
+# These settings prevent false positives while maintaining useful type checking.
+reportUnannotatedClassAttribute = "none"  # Django model fields don't need type annotations
+reportMissingTypeStubs = "none"           # Ignore missing stubs for third-party libraries
+reportUnknownMemberType = "none"          # Allow unknown types for Django descriptors
+reportUnknownVariableType = "none"        # Allow variables with inferred types
+reportUnknownArgumentType = "none"        # Allow function arguments with inferred types
 
 [tool.uv]
 package = false
@@ -112,6 +123,9 @@ default-groups = [
     "docs",
     "airflow",
 ]
+
+[tool.uv.sources]
+django-dsfr = { git = "https://github.com/fabienheureux/django-dsfr", rev = "d26ab6f77014b04c43c4c54f694111179d1de0ef" } # pragma: allowlist secret
 
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.

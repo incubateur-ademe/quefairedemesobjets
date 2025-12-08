@@ -16,6 +16,7 @@ from django.contrib.gis.db import models
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point, Polygon
 from django.contrib.gis.geos.geometry import GEOSGeometry
+from django.contrib.gis.measure import D
 from django.core.cache import cache
 from django.core.files.images import get_image_dimensions
 from django.core.validators import RegexValidator
@@ -234,6 +235,13 @@ class LabelQualite(CodeAsNaturalKeyModel):
     class Meta:
         verbose_name = "Label qualité"
         verbose_name_plural = "Labels qualité"
+        ordering = ["order"]
+
+    order = models.PositiveIntegerField(
+        default=0,
+        blank=False,
+        null=False,
+    )
 
     id = models.AutoField(primary_key=True)
     libelle = models.CharField(max_length=255, unique=True)
@@ -248,7 +256,44 @@ class LabelQualite(CodeAsNaturalKeyModel):
         ),
         validators=[CodeValidator()],
     )
-    afficher = models.BooleanField(default=True)
+    afficher = models.BooleanField(
+        default=True,
+        help_text="Affiche le label côté frontend, notamment dans les fiches acteur",
+    )
+    filtre = models.BooleanField(
+        default=False,
+        help_text="Affiche le label dans la modale de filtres affichée sur"
+        " la carte ou le mode liste",
+    )
+    filtre_label = models.CharField(
+        blank=True,
+        help_text="Configure le label affiché dans le champ de formulaire"
+        " dans le panel de filtres sur la carte ou le mode liste",
+    )
+    filtre_texte_d_aide = models.CharField(
+        blank=True,
+        help_text="Configure le texte d'aide affiché dans le champ de formulaire"
+        " dans le panel de filtres sur la carte ou le mode liste",
+    )
+    logo_filtre = models.FileField(
+        upload_to="labels",
+        blank=True,
+        null=True,
+        verbose_name="Logo pour les filtres (SVG recommandé)",
+        help_text="Logo affiché dans le panneau de filtres de la carte. "
+        "Format SVG recommandé pour une qualité optimale. "
+        "Utilisé dans : modale de filtres côté utilisateur.",
+    )
+    logo_file = models.ImageField(
+        upload_to="logos",
+        blank=True,
+        null=True,
+        validators=[validate_logo],
+        verbose_name="Logo pour carte et open data (PNG 32x32px)",
+        help_text="Version miniature du logo : PNG 32x32 pixels maximum, 50 Ko max. "
+        "Utilisé dans : fiches acteurs sur la carte, export open data API. "
+        "Contraintes strictes : exactement 32x32 pixels.",
+    )
     bonus = models.BooleanField(
         default=False, help_text="Ouvre les droits à un bonus financier"
     )
@@ -257,9 +302,6 @@ class LabelQualite(CodeAsNaturalKeyModel):
         help_text="Ce label est affiché comme un type d'enseigne, ex : ESS",
     )
     url = models.CharField(max_length=2048, blank=True, null=True)
-    logo_file = models.ImageField(
-        upload_to="logos", blank=True, null=True, validators=[validate_logo]
-    )
 
     def __str__(self):
         return self.libelle
@@ -325,17 +367,17 @@ class DisplayedActeurQuerySet(models.QuerySet):
 
     def from_center(self, longitude, latitude, distance_max):
         reference_point = Point(float(longitude), float(latitude), srid=4326)
-        distance_in_degrees = distance_max / 111320
+        self._has_distance_field = True
 
         return (
             self.physical()
-            .annotate(distance=Distance("location", reference_point))
             .filter(
                 location__dwithin=(
                     reference_point,
-                    distance_in_degrees,
+                    D(m=distance_max),
                 )
             )
+            .annotate(distance=Distance("location", reference_point))
             .order_by("distance")
         )
 
@@ -392,7 +434,7 @@ class BaseActeur(TimestampedModel):
     )
     url = models.CharField(max_length=2048, blank=True, default="", db_default="")
     email = models.EmailField(blank=True, default="", db_default="")
-    location = models.PointField(blank=True, null=True)
+    location = models.PointField(blank=True, null=True, geography=True)
     telephone = models.CharField(max_length=255, blank=True, default="", db_default="")
     nom_commercial = models.CharField(
         max_length=255, blank=True, default="", db_default=""
@@ -644,14 +686,16 @@ class BaseActeur(TimestampedModel):
 
     @cached_property
     def labels_enseigne_display(self):
-        return self.labels_display.filter(type_enseigne=True)
+        return self.ordered_labels_by_bonus_and_type_enseigne.filter(type_enseigne=True)
 
     @cached_property
     def labels_without_enseigne_display(self):
-        return self.labels_display.exclude(type_enseigne=True)
+        return self.ordered_labels_by_bonus_and_type_enseigne.exclude(
+            type_enseigne=True
+        )
 
     @cached_property
-    def labels_display(self):
+    def ordered_labels_by_bonus_and_type_enseigne(self):
         """
         On retourne une liste de labels qualité.
         Dans la plupart des cas on ne retournera qu'un label, une future évolution
@@ -664,7 +708,8 @@ class BaseActeur(TimestampedModel):
 
     @cached_property
     def is_bonus_reparation(self):
-        return self.labels.filter(afficher=True, bonus=True).exists()
+        # Work with prefetched data to avoid N+1 queries
+        return any(label.afficher and label.bonus for label in self.labels.all())
 
     def proposition_services_by_direction(self, direction: str | None = None):
         if direction:
@@ -1222,6 +1267,15 @@ class DisplayedActeur(FinalActeur, LatLngPropertiesMixin):
     class Meta:
         verbose_name = "ACTEUR de l'EC - AFFICHÉ"
         verbose_name_plural = "ACTEURS de l'EC - AFFICHÉ"
+        indexes = [
+            # Composite index for common spatial + status queries
+            models.Index(
+                fields=["statut", "acteur_type_id"],
+                name="da_statut_type_idx",
+            ),
+            # Spatial index is already created by GeoDjango for location field
+            # Adding a functional index would require a migration with raw SQL
+        ]
 
     # Table name qfdmo_displayedacteur_sources
     sources = models.ManyToManyField(
@@ -1290,23 +1344,44 @@ class DisplayedActeur(FinalActeur, LatLngPropertiesMixin):
     def get_absolute_url(self):
         return reverse("qfdmo:acteur-detail", args=[self.uuid])
 
+    @property
+    def full_url(self):
+        return f"{settings.BASE_URL}{self.get_absolute_url()}"
+
     def acteur_actions(
         self, direction=None, actions_codes=None, sous_categorie_id=None
     ):
-        pss = self.proposition_services.all()
         # Cast needed because of the cache
         cached_action_instances = cast(
             List[Action], cache.get_or_set("_action_instances", get_action_instances)
         )
 
-        if sous_categorie_id:
-            pss = pss.filter(sous_categories__id__in=[sous_categorie_id])
-        if direction:
-            pss = pss.filter(action__directions__code__in=[direction])
-        if actions_codes:
-            pss = pss.filter(action__code__in=actions_codes.split("|"))
+        # Work with prefetched data in memory to avoid N+1 queries
+        # Access all() to use prefetched data
+        pss = list(self.proposition_services.all())
 
-        action_ids_to_display = pss.values_list("action__id", flat=True)
+        # Filter in Python instead of database to leverage prefetch
+        if sous_categorie_id:
+            pss = [
+                ps
+                for ps in pss
+                if any(sc.id == sous_categorie_id for sc in ps.sous_categories.all())
+            ]
+
+        if direction:
+            pss = [
+                ps
+                for ps in pss
+                if any(d.code == direction for d in ps.action.directions.all())
+            ]
+
+        if actions_codes:
+            action_codes_list = actions_codes.split("|")
+            pss = [ps for ps in pss if ps.action.code in action_codes_list]
+
+        # Extract action IDs from filtered proposition services
+        action_ids_to_display = {ps.action_id for ps in pss}
+
         return [
             action
             for action in cached_action_instances
@@ -1473,6 +1548,9 @@ class DisplayedPropositionService(BasePropositionService):
     class Meta:
         verbose_name = "Proposition de service - AFFICHÉ"
         verbose_name_plural = "Proposition de service - AFFICHÉ"
+        indexes = [
+            models.Index(fields=["acteur", "action"], name="dps_acteur_action_idx"),
+        ]
 
     id = models.CharField(primary_key=True)
     acteur = models.ForeignKey(

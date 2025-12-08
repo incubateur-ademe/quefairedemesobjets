@@ -66,13 +66,6 @@ export default class extends AutocompleteController {
     this.inputTarget.value = labelValue
     this.ssCatTarget.value = identifierValue
 
-    posthog.capture("object_select", {
-      object_requested: inputTargetValue,
-      object_selected: labelValue,
-      subcategory_selected: subLabelValue,
-      identifier_selected: Number(identifierValue),
-    })
-
     this.hideAutocompleteList()
     // Call outlet
     this.dispatch("optionSelected")

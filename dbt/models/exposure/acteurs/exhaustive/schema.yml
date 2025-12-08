@@ -52,7 +52,7 @@ models:
         data_type: varchar(254)
       - name: location
         description: "La localisation de l'acteur"
-        data_type: geometry(Point,4326)
+        data_type: geography
       - name: telephone
         description: "Le numéro de téléphone de l'acteur"
         data_type: varchar(255)

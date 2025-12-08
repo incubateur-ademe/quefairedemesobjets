@@ -5758,7 +5758,7 @@
         "libelle": "Vieil appareil électrique ou électronique",
         "code": "vieil_appareil_electrique_ou_electronique",
         "sous_categorie": [
-            "autre_equipement_electronique"
+            "gros_electromenager_hors_refrigerant"
         ],
         "identifiant_qfdmod": 365
     }
@@ -5890,9 +5890,9 @@
         "libelle": "BMX",
         "code": "bmx",
         "sous_categorie": [
-            "materiel_de_sport_hors_velo"
+            "velo"
         ],
-        "identifiant_qfdmod": null
+        "identifiant_qfdmod": 473
     }
 },
 {
@@ -7210,9 +7210,9 @@
         "libelle": "Pièce détachée de vélo (moyeu, jeu de direction, plateau, dérailleur, poignée, chaîne, cadre, guidon, fourche...)",
         "code": "piece_detachee_de_velo",
         "sous_categorie": [
-            "materiel_de_sport_hors_velo"
+            "velo"
         ],
-        "identifiant_qfdmod": null
+        "identifiant_qfdmod": 473
     }
 },
 {
@@ -7859,9 +7859,9 @@
         "libelle": "Volière",
         "code": "voliere",
         "sous_categorie": [
-            "decoration"
+            "encombrants_menagers_divers"
         ],
-        "identifiant_qfdmod": null
+        "identifiant_qfdmod": 400
     }
 },
 {
@@ -7870,7 +7870,7 @@
         "libelle": "Niche",
         "code": "niche",
         "sous_categorie": [
-            "decoration"
+            "accessoire_et_meuble_de_jardin"
         ],
         "identifiant_qfdmod": 442
     }
@@ -8134,9 +8134,9 @@
         "libelle": "Rideau",
         "code": "rideau",
         "sous_categorie": [
-            "decoration"
+            "decorations_textiles_elements_d_ameublement"
         ],
-        "identifiant_qfdmod": null
+        "identifiant_qfdmod": 453
     }
 },
 {

@@ -8,7 +8,6 @@ from qfdmd.views import (
     get_assistant_script,
     search_view,
 )
-from qfdmo.views.carte import ProductCarteView
 
 urlpatterns = [
     path("assistant/recherche", search_view, name="search"),
@@ -24,7 +23,6 @@ urlpatterns = [
     # Gatsby website. If changed, a redirect need to be created to keep the
     # legacy behaviour.
     path("dechet/<slug:slug>/", SynonymeDetailView.as_view(), name="synonyme-detail"),
-    path("dechet/<slug:slug>/carte/", ProductCarteView.as_view(), name="carte"),
     path("iframe.js", get_assistant_script, name="script"),
     path("", HomeView.as_view(), name="home"),
 ]

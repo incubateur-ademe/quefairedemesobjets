@@ -119,6 +119,12 @@ ALLOWED_HOSTS = [
     *decouple.config("ALLOWED_HOSTS", default="", cast=str).split(","),
 ]
 
+# Configure Django to trust proxy headers based on BASE_URL scheme
+if urlparse(BASE_URL).scheme == "https":
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    USE_X_FORWARDED_HOST = True
+    USE_X_FORWARDED_PORT = True
+
 
 # Application definition
 # ----------------------
@@ -144,6 +150,7 @@ INSTALLED_APPS = [
     "qfdmo",
     "infotri",
     "data",
+    "adminsortable2",
     "corsheaders",
     "django_lookbook",
     "djangoql",
@@ -212,7 +219,7 @@ with suppress(ModuleNotFoundError):
 
         return path_is_not_excluded
 
-    patterns_to_exclude = ["/test_iframe", "/lookbook", "/cms"]
+    patterns_to_exclude = ["/lookbook", "/cms"]
     DEBUG_TOOLBAR_CONFIG = {
         "SHOW_TOOLBAR_CALLBACK": show_toolbar_callback,
         "HIDE_IN_STACKTRACES": CONFIG_DEFAULTS["HIDE_IN_STACKTRACES"] + ("sentry_sdk",),
@@ -540,9 +547,6 @@ MIDDLEWARE.extend(
     ]
 )
 
-REDIRECT_LEGACY_PRODUIT_TO_WAGTAIL_PAGES = decouple.config(
-    "REDIRECT_LEGACY_PRODUIT_TO_WAGTAIL_PAGES", default=False, cast=bool
-)
 
 # UI
 # ---
