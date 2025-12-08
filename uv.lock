@@ -262,7 +262,7 @@ wheels = [
 
 [[package]]
 name = "apache-airflow-providers-amazon"
-version = "9.16.0"
+version = "9.18.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apache-airflow" },
@@ -281,21 +281,22 @@ dependencies = [
     { name = "sagemaker-studio" },
     { name = "watchtower" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/db/0a/5750f7e5aeb77c45397290def1c2ea41503e6b0a28934d876e6943beb746/apache_airflow_providers_amazon-9.16.0.tar.gz", hash = "sha256:a442e685df44f19aad3aef152b4c2920a8bb92a01b9ac7813af0e8fcc1cda070", size = 2032999, upload-time = "2025-10-26T07:04:41.579Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/88/b5/b774fc99459343bfa8f7208099fd4f2c3a74a72c521aba6800e8ac6ed0ea/apache_airflow_providers_amazon-9.18.0.tar.gz", hash = "sha256:c851eeeb6f7350a0a9ea506bce53348dc798a73c6b6449a5793a950451b87b68", size = 2081998, upload-time = "2025-12-02T21:21:27.816Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a3/72/fe295a85350b1109d89999ecb9188ecccc4cbfa2195ed283eadb768cc0ae/apache_airflow_providers_amazon-9.16.0-py3-none-any.whl", hash = "sha256:914653e565f2dc7855179b4154368b19238481d611f92907119e774bf57565e7", size = 675377, upload-time = "2025-10-26T07:03:18.802Z" },
+    { url = "https://files.pythonhosted.org/packages/e0/02/7506cd08c6cb94843f2788d46da312b8ffe37d09e0ed99a13b557b73306a/apache_airflow_providers_amazon-9.18.0-py3-none-any.whl", hash = "sha256:9485f40e26cf2a7ff71848cde32ab47977973b51c1966499e77cf300294c8aac", size = 679152, upload-time = "2025-12-02T21:21:09.508Z" },
 ]
 
 [[package]]
 name = "apache-airflow-providers-common-compat"
-version = "1.8.0"
+version = "1.10.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apache-airflow" },
+    { name = "asgiref" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ba/87/e840d4dea60d77b03f4e593936f4a2af13bde9047b59ce59a49b6dc1f1d8/apache_airflow_providers_common_compat-1.8.0.tar.gz", hash = "sha256:81218bfcd3f3c50f86df4bb265e0a38913829a7ce92c7de4a47c33b89c574d09", size = 28141, upload-time = "2025-10-26T07:05:00.73Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/62/bc/ca67cc0f34bda63c436ec984382d832a3caa646b36ec81b1f4467be92957/apache_airflow_providers_common_compat-1.10.0.tar.gz", hash = "sha256:941fbcf163557780c596a30b216e731463440b56d3ec66d6d6beb17ecfa77ebb", size = 37036, upload-time = "2025-11-30T22:18:10.129Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7f/dc/df140b6356981b3cfabe299604a013c7e1286b1bed79ba5225b6b80b8b03/apache_airflow_providers_common_compat-1.8.0-py3-none-any.whl", hash = "sha256:eaeea70747b346dcd6aaf895ef81e58c71778fec69109071822c629bcdb45fc8", size = 35957, upload-time = "2025-10-26T07:03:45.465Z" },
+    { url = "https://files.pythonhosted.org/packages/b6/7e/2eeabbad7b5ada886ba560a45aa2fc42a1d1f373b61b0f7219686ff8b053/apache_airflow_providers_common_compat-1.10.0-py3-none-any.whl", hash = "sha256:7161e6d779b9dcc68b213e0eceac8c069f435233efb7a0e9d9bfaee3d933d080", size = 39617, upload-time = "2025-11-30T22:16:34.255Z" },
 ]
 
 [[package]]
@@ -3372,7 +3373,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 airflow = [
     { name = "apache-airflow", specifier = ">=3.1.1" },
-    { name = "apache-airflow-providers-amazon", specifier = ">=9.14.0" },
+    { name = "apache-airflow-providers-amazon", specifier = ">=9.18.0" },
     { name = "apache-airflow-providers-fab", specifier = ">=2.4.3" },
     { name = "apache-airflow-providers-postgres", specifier = ">=6.2.2,<7" },
     { name = "apache-airflow-providers-standard", specifier = ">=1.8.0" },
