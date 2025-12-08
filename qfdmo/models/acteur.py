@@ -320,6 +320,24 @@ class DisplayedActeurQuerySet(models.QuerySet):
         )
         return self.annotate(bonus=Exists(bonus_label_qualite))
 
+    def with_displayable_labels(self):
+        """
+        Prefetch labels ordered by bonus (desc) and type_enseigne.
+        This allows the acteur_label template tag to simply take the first label.
+
+        Returns a queryset with displayable_labels_ordered attribute on each acteur.
+        """
+        from django.db.models import Prefetch
+
+        ordered_labels = Prefetch(
+            "labels",
+            queryset=LabelQualite.objects.filter(afficher=True).order_by(
+                "-bonus", "type_enseigne"
+            ),
+            to_attr="displayable_labels_ordered",
+        )
+        return self.prefetch_related(ordered_labels)
+
     def digital(self):
         # 1. Get ordered primary keys
         # List here ensures queryset is not re-evaluated, causing
