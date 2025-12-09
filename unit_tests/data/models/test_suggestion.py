@@ -1005,3 +1005,128 @@ class TestSuggestionGroupeUpdateFromSerialisedData:
         assert suggestion_unitaire is not None
         # longitude is added to values_to_update during validation with displayed_value
         assert suggestion_unitaire.valeurs == ["48.9999", "2.1234"]
+
+
+@pytest.mark.django_db
+class TestSuggestionGroupeApply:
+    @pytest.fixture
+    def suggestion_groupe_source_ajout(self):
+        """Fixture for a SuggestionGroupe with type_action SOURCE_AJOUT"""
+        from unit_tests.qfdmo.acteur_factory import ActeurTypeFactory, SourceFactory
+
+        # Use a digital acteur_type to avoid the need for location
+        ActeurTypeFactory(code="acteur_digital")
+        SourceFactory()
+        suggestion_groupe = SuggestionGroupeFactory(
+            suggestion_cohorte=SuggestionCohorteFactory(
+                type_action=SuggestionAction.SOURCE_AJOUT,
+            ),
+        )
+        SuggestionUnitaireFactory(
+            suggestion_groupe=suggestion_groupe,
+            suggestion_modele="Acteur",
+            champs=["nom", "identifiant_unique"],
+            valeurs=["Nouveau Acteur", "test_acteur_001"],
+        )
+        return suggestion_groupe
+
+    @pytest.fixture
+    def suggestion_groupe_source_modification(self):
+        """Fixture pour un SuggestionGroupe avec type_action SOURCE_MODIFICATION"""
+        acteur = ActeurFactory(nom="Ancien nom", code_postal="75001")
+        suggestion_groupe = SuggestionGroupeFactory(
+            suggestion_cohorte=SuggestionCohorteFactory(
+                type_action=SuggestionAction.SOURCE_MODIFICATION,
+            ),
+            acteur=acteur,
+        )
+        SuggestionUnitaireFactory(
+            suggestion_groupe=suggestion_groupe,
+            suggestion_modele="Acteur",
+            champs=["nom", "code_postal"],
+            valeurs=["Nouveau nom", "75002"],
+            acteur=acteur,
+        )
+        return suggestion_groupe
+
+    @pytest.fixture
+    def suggestion_groupe_source_modification_with_revision(self):
+        """Fixture pour un SuggestionGroupe avec Acteur et RevisionActeur"""
+        acteur = ActeurFactory(nom="Ancien nom", code_postal="75001")
+        revision_acteur = RevisionActeurFactory(
+            identifiant_unique=acteur.identifiant_unique, nom="Revision nom"
+        )
+        suggestion_groupe = SuggestionGroupeFactory(
+            suggestion_cohorte=SuggestionCohorteFactory(
+                type_action=SuggestionAction.SOURCE_MODIFICATION,
+            ),
+            acteur=acteur,
+            revision_acteur=revision_acteur,
+        )
+        SuggestionUnitaireFactory(
+            suggestion_groupe=suggestion_groupe,
+            suggestion_modele="Acteur",
+            champs=["nom"],
+            valeurs=["Nouveau nom Acteur"],
+            acteur=acteur,
+        )
+        SuggestionUnitaireFactory(
+            suggestion_groupe=suggestion_groupe,
+            suggestion_modele="RevisionActeur",
+            champs=["nom"],
+            valeurs=["Nouveau nom Revision"],
+            revision_acteur=revision_acteur,
+        )
+        return suggestion_groupe
+
+    def test_apply_raises_error_when_no_acteur_suggestion_unitaires(self):
+        """
+        Test that apply() raises an error if there are no Acteur suggestion unitaires
+        """
+        suggestion_groupe = SuggestionGroupeFactory(
+            suggestion_cohorte=SuggestionCohorteFactory(
+                type_action=SuggestionAction.SOURCE_AJOUT,
+            ),
+        )
+        # No SuggestionUnitary with suggestion_modele="Acteur"
+
+        with pytest.raises(ValueError, match="No acteur suggestion unitaires found"):
+            suggestion_groupe.apply()
+
+    def test_apply_source_modification_with_revision_creates_revision(
+        self, suggestion_groupe_source_modification_with_revision
+    ):
+        """Test that apply() creates/updates a RevisionActeur for SOURCE_MODIFICATION"""
+        acteur = suggestion_groupe_source_modification_with_revision.acteur
+        revision_acteur = (
+            suggestion_groupe_source_modification_with_revision.revision_acteur
+        )
+
+        assert acteur.nom == "Ancien nom"
+        assert revision_acteur.nom == "Revision nom"
+
+        suggestion_groupe_source_modification_with_revision.apply()
+
+        # Verify that the Acteur has been updated
+        acteur.refresh_from_db()
+        assert acteur.nom == "Nouveau nom Acteur"
+
+        # Verify that the RevisionActeur has been updated
+        revision_acteur.refresh_from_db()
+        assert revision_acteur.nom == "Nouveau nom Revision"
+
+    def test_apply_returns_empty_list_for_non_source_actions(self):
+        """Test that apply() does nothing for actions that are not SOURCE_*"""
+        suggestion_groupe = SuggestionGroupeFactory(
+            suggestion_cohorte=SuggestionCohorteFactory(
+                type_action=SuggestionAction.CLUSTERING,
+            ),
+        )
+
+        # apply() should not raise an error but do nothing
+        # because _get_apply_models() returns an empty list
+        apply_models = suggestion_groupe._get_apply_models()
+        assert apply_models == []
+
+        # apply() should not raise an error but do nothing
+        suggestion_groupe.apply()
