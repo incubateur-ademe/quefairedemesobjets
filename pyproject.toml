@@ -90,7 +90,7 @@ airflow = [
     "shortuuid>=1.0.13,<2",
     "unidecode>=1.4.0,<2",
     "scikit-learn==1.7.2",
-    "apache-airflow>=2.11.0,<3",
+    "apache-airflow>=2.11.0,<4",
     "pandas<2.2",
     "dbt-core>=1.10.9,<2",
     "dbt-postgres>=1.9.1,<2",
