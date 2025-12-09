@@ -134,11 +134,19 @@
                 {% endif %}
             </div>
         {% elif tab == "localisation" %}
-            <div>
-                <p>Localisation : Comming Soon…</p>
-                <p>Afficher un carte interactive, affichage du point comme il sera affiché, possiblilité de le déplacer, le déplacement mets à jour la latitude et la longitude affichées</p>
-                <p>Option IA : demander à une IA de vérifier sur l'interface de Google si elle trouve cet acteur à cette adresse et proposer des corrections si nécessaire</p>
-            </div>
+            {% if localisation %}
+                <div data-controller="admin--location-map">
+                    <script data-admin--location-map-target="latslongs" data-localisation-value='{{ localisation|tojson }}'></script>
+                        <div
+                            data-admin--location-map-target="mapContainer"
+                            class="qf-w-full qf-h-[400px] qf-border qf-rounded"
+                        ></div>
+                    </div>
+                </div>
+
+            {% else %}
+                <p>Aucune localisation disponible pour cet acteur.</p>
+            {% endif %}
         {% elif tab == "annuaire_entreprise" %}
             <div>
                 <p>Annuaire entreprise : Comming Soon…</p>
