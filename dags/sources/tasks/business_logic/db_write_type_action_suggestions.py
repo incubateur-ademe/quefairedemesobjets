@@ -390,11 +390,16 @@ def insert_suggestion_v2(
             revision_acteur = RevisionActeur.objects.filter(
                 identifiant_unique=identifiant_unique
             ).first()
+        parent = (
+            revision_acteur.parent
+            if revision_acteur and revision_acteur.parent
+            else None
+        )
         suggestion_groupe = SuggestionGroupe(
             suggestion_cohorte=suggestion_cohorte,
             statut=constants.SUGGESTION_AVALIDER,
             acteur=acteur,
-            revision_acteur=revision_acteur,
+            revision_acteur=parent or revision_acteur,
             contexte=row["contexte"],
         )
         suggestion_groupe.save()
@@ -432,10 +437,25 @@ def insert_suggestion_v2(
                 suggestion_groupe=suggestion_groupe,
                 statut=constants.SUGGESTION_AVALIDER,
                 acteur=acteur,
-                revision_acteur=revision_acteur,
                 # Acteur will be updated when a source is updated
                 suggestion_modele="Acteur",
-                # groupe de champs, ex : latitude et longitude doivent-être groupés
+                # fields should be grouped, ex : latitude and longitude
                 champs=keys,
                 valeurs=values,
             ).save()
+            # Special case for SUPPRESSION which should be applied to its revision
+            # if it exists
+            if (
+                suggestion_cohorte.type_action == constants.SUGGESTION_SOURCE_SUPRESSION
+                and keys == ["statut"]
+                and revision_acteur
+            ):
+                SuggestionUnitaire(
+                    suggestion_groupe=suggestion_groupe,
+                    statut=constants.SUGGESTION_AVALIDER,
+                    acteur=acteur,
+                    revision_acteur=revision_acteur,
+                    suggestion_modele="RevisionActeur",
+                    champs=keys,
+                    valeurs=values,
+                ).save()

@@ -69,6 +69,33 @@ export default class extends Controller<HTMLElement> {
     this.#postSuggestion(statusUrl, formData)
   }
 
+  handleMarkerDragged(event: CustomEvent) {
+    const { latitude, longitude } = event.detail
+    if (!latitude || !longitude) {
+      console.error("Coordonnées manquantes dans l'événement")
+      return
+    }
+
+    const fieldsValues = this.#getFieldsValues()
+
+    // Create the structure if it doesn't exist for latitude
+    if (!("latitude" in fieldsValues)) {
+      fieldsValues["latitude"] = { updated_displayed_value: "" }
+    }
+    fieldsValues["latitude"]["updated_displayed_value"] = latitude
+
+    // Create the structure if it doesn't exist for longitude
+    if (!("longitude" in fieldsValues)) {
+      fieldsValues["longitude"] = { updated_displayed_value: "" }
+    }
+    fieldsValues["longitude"]["updated_displayed_value"] = longitude
+
+    // Update hidden field to synchronize DOM
+    this.fieldsValuesTarget.value = JSON.stringify(fieldsValues)
+
+    this.#postFieldsValues(fieldsValues, "localisation")
+  }
+
   #getCsrfToken(): string | null {
     const match = document.cookie.match(/csrftoken=([^;]+)/)
     return match ? decodeURIComponent(match[1]) : null
@@ -112,7 +139,7 @@ export default class extends Controller<HTMLElement> {
     return fields.split("|")
   }
 
-  #postFieldsValues(valuesJson: Record<string, any>) {
+  #postFieldsValues(valuesJson: Record<string, any>, opened_tab: string = "") {
     const updateSuggestionUrl = this.element.dataset.updateSuggestionUrl
     if (!updateSuggestionUrl) {
       console.error("URL de mise à jour de la suggestion manquante")
@@ -122,6 +149,9 @@ export default class extends Controller<HTMLElement> {
     const groupsJson = this.fieldsGroupsTarget.value
     formData.append("fields_values", JSON.stringify(valuesJson))
     formData.append("fields_groups", groupsJson)
+    if (opened_tab) {
+      formData.append("tab", opened_tab)
+    }
 
     this.#postSuggestion(updateSuggestionUrl, formData)
   }

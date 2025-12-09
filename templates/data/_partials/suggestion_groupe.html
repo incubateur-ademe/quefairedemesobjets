@@ -3,7 +3,8 @@
 <turbo-frame
     id="suggestion_groupe_{{ id }}"
     data-controller="suggestion-groupe-row"
-    data-update-suggestion-url="{% url 'data:suggestion_groupe' id %}">
+    data-update-suggestion-url="{% url 'data:suggestion_groupe' id %}"
+    data-action="admin--location-map:markerDragged->suggestion-groupe-row#handleMarkerDragged">
 
     <h3>
         {% block suggestion_title %}
@@ -35,7 +36,7 @@
                 data-action="click->suggestion-groupe-row#updateStatus"
                 data-action-value="validate"
                 data-status-url="{% url 'data:suggestion_groupe_status' id %}">
-                ✅ VALIDER a suggestion
+                ✅ VALIDER la suggestion
             </button>
             <button
                 type="button"
