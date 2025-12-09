@@ -578,6 +578,15 @@ class SuggestionGroupe(TimestampedModel):
             "",
         )
 
+    def _build_serializer_common_fields(self) -> dict:
+        """Build common fields for SuggestionCohorteSerializer"""
+        return {
+            "id": self.id,
+            "suggestion_cohorte": self.suggestion_cohorte,
+            "statut": self.get_statut_display(),
+            "action": self.suggestion_cohorte.type_action,
+        }
+
     def serialize(self) -> SuggestionCohorteSerializer:
 
         def _flatten_suggestion_unitaires(
@@ -656,10 +665,7 @@ class SuggestionGroupe(TimestampedModel):
                 for key, value in zip(fields, values)
             }
             return SuggestionCohorteSerializer(
-                id=self.id,
-                suggestion_cohorte=self.suggestion_cohorte,
-                statut=self.get_statut_display(),
-                action=self.suggestion_cohorte.type_action,
+                **self._build_serializer_common_fields(),
                 identifiant_unique=identifiant_unique,
                 fields_groups=fields_groups,
                 fields_values=fields_values,
@@ -702,16 +708,46 @@ class SuggestionGroupe(TimestampedModel):
             }
 
         return SuggestionCohorteSerializer(
-            id=self.id,
-            suggestion_cohorte=self.suggestion_cohorte,
-            statut=self.get_statut_display(),
-            action=self.suggestion_cohorte.type_action,
+            **self._build_serializer_common_fields(),
             fields_groups=fields_groups,
             fields_values=fields_values,
             acteur=acteur,
             identifiant_unique=acteur.identifiant_unique,
             acteur_overridden_by=acteur_overridden_by,
         )
+
+    def _validate_proposed_updates(
+        self, values_to_update: dict, fields_values: dict
+    ) -> dict:
+        """
+        Check if the proposed updates are valid
+        Returns a dictionary of errors (empty if valid)
+        """
+        # Validate and convert coordinates if either is present
+        if "longitude" in values_to_update or "latitude" in values_to_update:
+            for coord_field in ["longitude", "latitude"]:
+                try:
+                    value = values_to_update.get(
+                        coord_field,
+                        fields_values.get(coord_field, {}).get("displayed_value", ""),
+                    )
+                    values_to_update[coord_field] = float(value)
+                except (ValueError, KeyError) as e:
+                    logger.warning(f"ValueError for {coord_field}: {e}")
+                    return {coord_field: f"{coord_field} must be a float: {e}"}
+
+        # Validate the RevisionActeur with the proposed values
+        try:
+            revision_acteur = RevisionActeur(**values_to_update)
+            revision_acteur.full_clean()
+        except ValidationError as e:
+            logger.warning(f"RevisionActeur is not valid: {e}")
+            return e.error_dict
+        except TypeError as e:
+            logger.warning(f"RevisionActeur is not valid: {e}")
+            return {"error": str(e)}
+
+        return {}
 
     def update_from_serialized_data(
         self, fields_values: dict, fields_groups: list[tuple]
@@ -724,80 +760,38 @@ class SuggestionGroupe(TimestampedModel):
           general errors are under the key "error"
           field errors are under the key "field_name"
         """
-
-        def _get_errors_from_proposed_updates(
-            self, values_to_update: dict, fields_values: dict
-        ) -> dict:
-            """
-            Check if the proposed updates are valid
-            Returns a dictionary of errors
-            """
-
-            if (
-                "longitude" in values_to_update.keys()
-                or "latitude" in values_to_update.keys()
-            ):
-                try:
-                    values_to_update["longitude"] = float(
-                        values_to_update.get(
-                            "longitude", fields_values["longitude"]["displayed_value"]
-                        )
-                    )
-                except ValueError as e:
-                    logger.warning(f"ValueError: {e}")
-                    return {"longitude": f"longitude must be a float: {e}"}
-                try:
-                    values_to_update["latitude"] = float(
-                        values_to_update.get(
-                            "latitude", fields_values["latitude"]["displayed_value"]
-                        )
-                    )
-                except ValueError as e:
-                    logger.warning(f"ValueError: {e}")
-                    return {"latitude": f"latitude must be a float: {e}"}
-            try:
-                revision_acteur = RevisionActeur(
-                    **values_to_update,
-                )
-                revision_acteur.full_clean()
-            except ValidationError as e:
-                logger.warning(f"RevisionActeur is not valid: {e}")
-                return e.error_dict
-            except TypeError as e:
-                logger.warning(f"RevisionActeur is not valid: {e}")
-                return {"error": f"{e}"}
-            return {}
-
-        values_to_update = {}
-
-        revision_suggestion_unitaires = self.suggestion_unitaires.filter(
-            suggestion_modele="RevisionActeur"
-        ).all()
+        # Build mapping of existing revision suggestions by field
         revision_suggestion_unitaire_by_field = {
             field: value
-            for unit in revision_suggestion_unitaires
+            for unit in self.suggestion_unitaires.filter(
+                suggestion_modele="RevisionActeur"
+            )
             for field, value in zip(unit.champs, unit.valeurs)
         }
-        for field, by_state_values in fields_values.items():
-            if "updated_displayed_value" not in by_state_values.keys():
-                continue
-            if by_state_values["updated_displayed_value"] != by_state_values[
-                "displayed_value"
-            ] or (
-                field in revision_suggestion_unitaire_by_field.keys()
-                and revision_suggestion_unitaire_by_field[field]
-                != by_state_values["updated_displayed_value"]
-            ):
-                values_to_update[field] = by_state_values["updated_displayed_value"]
 
-        errors = _get_errors_from_proposed_updates(
-            self, values_to_update, fields_values
-        )
-        if errors:
+        # Determine which fields need to be updated
+        values_to_update = {
+            field: by_state_values["updated_displayed_value"]
+            for field, by_state_values in fields_values.items()
+            if "updated_displayed_value" in by_state_values
+            and (
+                by_state_values["updated_displayed_value"]
+                != by_state_values["displayed_value"]
+                or (
+                    field in revision_suggestion_unitaire_by_field
+                    and revision_suggestion_unitaire_by_field[field]
+                    != by_state_values["updated_displayed_value"]
+                )
+            )
+        }
+
+        # Validate proposed updates
+        if errors := self._validate_proposed_updates(values_to_update, fields_values):
             return False, errors
 
+        # Create or update SuggestionUnitaire objects
         for fields in fields_groups:
-            if any(field in values_to_update.keys() for field in fields):
+            if any(field in values_to_update for field in fields):
                 suggestion_unitaire, _ = SuggestionUnitaire.objects.get_or_create(
                     suggestion_groupe=self,
                     champs=fields,
@@ -807,14 +801,9 @@ class SuggestionGroupe(TimestampedModel):
                         "revision_acteur": self.revision_acteur,
                     },
                 )
-                suggestion_unitaire.valeurs = []
-                for field in fields:
-                    value = (
-                        values_to_update[field]
-                        if field in values_to_update.keys()
-                        else ""
-                    )
-                    suggestion_unitaire.valeurs.append(value)
+                suggestion_unitaire.valeurs = [
+                    values_to_update.get(field, "") for field in fields
+                ]
                 suggestion_unitaire.save()
 
         return True, None
