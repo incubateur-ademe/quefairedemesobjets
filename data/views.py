@@ -39,13 +39,26 @@ class SuggestionGroupeStatusView(LoginRequiredMixin, FormView):
 class SuggestionGroupeView(LoginRequiredMixin, View):
     template_name = "data/_partials/suggestion_groupe_refresh_stream.html"
 
+    def _manage_tab_in_context(self, context, request, suggestion_groupe):
+        context["tab"] = request.GET.get("tab", request.POST.get("tab", None))
+        if context["tab"] == "acteur":
+            context["uuid"] = suggestion_groupe.displayed_acteur_uuid()
+        if context["tab"] == "localisation":
+            if (
+                "latitude" in context["fields_values"]
+                and "longitude" in context["fields_values"]
+            ):
+                context["localisation"] = {
+                    "latitude": context["fields_values"]["latitude"],
+                    "longitude": context["fields_values"]["longitude"],
+                }
+        return context
+
     def get(self, request, suggestion_groupe_id):
         suggestion_groupe = get_object_or_404(SuggestionGroupe, id=suggestion_groupe_id)
 
         context = suggestion_groupe.serialize().to_dict()
-        context["tab"] = request.GET.get("tab", "")
-        if context["tab"] == "acteur":
-            context["uuid"] = suggestion_groupe.displayed_acteur_uuid()
+        context = self._manage_tab_in_context(context, request, suggestion_groupe)
 
         return render(
             request,
@@ -73,6 +86,8 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
         )
         context = suggestion_groupe.serialize().to_dict()
         context["errors"] = errors
+        context = self._manage_tab_in_context(context, request, suggestion_groupe)
+
         return render(
             request,
             self.template_name,

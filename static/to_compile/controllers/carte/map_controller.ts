@@ -3,9 +3,6 @@ import debounce from "lodash/debounce"
 import { removeHash } from "../../js/helpers"
 import { SolutionMap } from "../../js/solution_map"
 import { ActorLocation, DisplayedActeur } from "../../js/types"
-import SearchFormController from "./search_solution_form_controller"
-import { Map } from "maplibre-gl"
-import PinpointController from "./pinpoint_controller"
 
 export class Actor implements DisplayedActeur {
   uuid: string
