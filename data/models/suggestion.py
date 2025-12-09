@@ -851,9 +851,6 @@ class SuggestionGroupe(TimestampedModel):
                 )
             )
 
-            # transform in Pydantic model
-            # apply it
-
             # get the suggestion_unitaires on RevisionActeur model
             revision_acteur_suggestion_unitaires = self.suggestion_unitaires.filter(
                 suggestion_modele="RevisionActeur"
