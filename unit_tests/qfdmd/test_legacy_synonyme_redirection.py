@@ -94,7 +94,7 @@ class TestProduitPageValidation:
         intermediate = LegacyIntermediateSynonymePage(
             synonyme=synonyme,
         )
-        produit_page_a.legacy_synonyme.add(intermediate)
+        produit_page_a.legacy_synonymes.add(intermediate)
 
         # ProduitPage.clean() should detect the conflict
         with pytest.raises(ValidationError) as exc_info:
@@ -114,7 +114,7 @@ class TestProduitPageValidation:
         intermediate = LegacyIntermediateSynonymePage(
             synonyme=synonyme,
         )
-        produit_page_a.legacy_synonyme.add(intermediate)
+        produit_page_a.legacy_synonymes.add(intermediate)
 
         # Should not raise
         produit_page_a.clean()
@@ -137,7 +137,7 @@ class TestProduitPageValidation:
         # Add both synonymes to page A
         intermediate1 = LegacyIntermediateSynonymePage(synonyme=synonyme1)
         intermediate2 = LegacyIntermediateSynonymePage(synonyme=synonyme2)
-        produit_page_a.legacy_synonyme.add(intermediate1, intermediate2)
+        produit_page_a.legacy_synonymes.add(intermediate1, intermediate2)
 
         # Should raise for synonyme2 conflict
         with pytest.raises(ValidationError) as exc_info:

@@ -314,7 +314,7 @@ class ProduitPage(
                     "'Exceptions aux redirections' ci-dessous."
                 ),
                 InlinePanel(
-                    "legacy_synonyme",
+                    "legacy_synonymes",
                     heading="Synonymes Django à rediriger ici",
                 ),
             ],
@@ -333,7 +333,7 @@ class ProduitPage(
                     "configurée ci-dessus."
                 ),
                 InlinePanel(
-                    "legacy_synonyme_to_exclude",
+                    "legacy_synonymes_to_exclude",
                     heading="Synonymes à ne PAS rediriger",
                 ),
             ],
@@ -388,7 +388,7 @@ class ProduitPage(
         super().clean()
 
         # Validate legacy_synonyme inline items
-        for synonyme_item in self.legacy_synonyme.all():
+        for synonyme_item in self.legacy_synonymes.all():
             if synonyme_item.synonyme:
                 # Check if the synonyme's produit is already redirected
                 try:
@@ -470,7 +470,7 @@ class LegacyIntermediateProduitPageSynonymeExclusion(models.Model):
     page = ParentalKey(
         "wagtailcore.page",
         on_delete=models.CASCADE,
-        related_name="legacy_synonyme_to_exclude",
+        related_name="legacy_synonymes_to_exclude",
     )
     synonyme = models.OneToOneField(
         "qfdmd.synonyme",
@@ -507,7 +507,7 @@ class LegacyIntermediateSynonymePage(models.Model):
     page = ParentalKey(
         "wagtailcore.page",
         on_delete=models.CASCADE,
-        related_name="legacy_synonyme",
+        related_name="legacy_synonymes",
     )
     synonyme = models.OneToOneField(
         "qfdmd.synonyme",

@@ -79,7 +79,7 @@ def check_synonyme_redirection_conflicts(request, page):
     if not hasattr(page, "legacy_synonyme"):
         return
 
-    for synonyme_relation in page.legacy_synonyme.all():
+    for synonyme_relation in page.legacy_synonymes.all():
         # Check if the synonyme's produit is already redirected
         try:
             produit_page = synonyme_relation.synonyme.produit.next_wagtail_page
