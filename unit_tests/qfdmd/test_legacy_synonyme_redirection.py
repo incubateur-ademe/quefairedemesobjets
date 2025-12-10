@@ -72,52 +72,79 @@ def produit_page_b(produit_index_page):
 
 
 @pytest.mark.django_db
-class TestLegacyIntermediateSynonymePage:
-    """Test LegacyIntermediateSynonymePage model validation."""
+class TestProduitPageValidation:
+    """Test ProduitPage.clean() validation for legacy synonyme redirections."""
 
-    def test_create_direct_synonyme_redirection(self, produit_page_a, db):
-        """Test creating a direct synonyme redirection."""
-        produit = ProduitFactory(nom="Produit Test")
-        synonyme = SynonymeFactory(nom="Synonyme Test", produit=produit)
-
-        # Create the intermediate relation
-        intermediate = LegacyIntermediateSynonymePage(
-            page=produit_page_a,
-            synonyme=synonyme,
-        )
-        intermediate.clean()  # Should not raise
-        intermediate.save()
-
-        # Verify the relation exists
-        assert synonyme.next_wagtail_page.page == produit_page_a
-
-    def test_conflict_with_exclusion_raises_error(
+    def test_produit_page_validates_synonyme_conflict_with_exclusion(
         self, produit_page_a, produit_page_b, db
     ):
-        """Test that creating a direct redirection for an excluded
-        synonyme raises ValidationError."""
+        """Test that ProduitPage.clean() detects conflicts between
+        direct synonyme redirections and exclusions."""
         produit = ProduitFactory(nom="Produit Test")
         synonyme = SynonymeFactory(nom="Synonyme Test", produit=produit)
 
-        # Create an exclusion first
+        # Create an exclusion on page B
         exclusion = LegacyIntermediateProduitPageSynonymeExclusion(
             page=produit_page_b,
             synonyme=synonyme,
         )
         exclusion.save()
 
-        # Try to create a direct redirection
+        # Add a direct synonyme redirection to page A
         intermediate = LegacyIntermediateSynonymePage(
-            page=produit_page_a,
             synonyme=synonyme,
         )
+        produit_page_a.legacy_synonyme.add(intermediate)
 
-        # Should raise ValidationError
+        # ProduitPage.clean() should detect the conflict
         with pytest.raises(ValidationError) as exc_info:
-            intermediate.clean()
+            produit_page_a.clean()
 
         assert "Conflit" in str(exc_info.value)
+        assert synonyme.nom in str(exc_info.value)
         assert produit_page_b.title in str(exc_info.value)
+
+    def test_produit_page_allows_synonyme_without_conflict(self, produit_page_a, db):
+        """Test that ProduitPage.clean() allows synonyme redirections
+        without conflicts."""
+        produit = ProduitFactory(nom="Produit Test")
+        synonyme = SynonymeFactory(nom="Synonyme Test", produit=produit)
+
+        # Add a direct synonyme redirection
+        intermediate = LegacyIntermediateSynonymePage(
+            synonyme=synonyme,
+        )
+        produit_page_a.legacy_synonyme.add(intermediate)
+
+        # Should not raise
+        produit_page_a.clean()
+
+    def test_produit_page_validates_multiple_synonymes(
+        self, produit_page_a, produit_page_b, db
+    ):
+        """Test that ProduitPage.clean() validates all synonymes."""
+        produit = ProduitFactory(nom="Produit Test")
+        synonyme1 = SynonymeFactory(nom="Synonyme 1", produit=produit)
+        synonyme2 = SynonymeFactory(nom="Synonyme 2", produit=produit)
+
+        # Create exclusion for synonyme2 on page B
+        exclusion = LegacyIntermediateProduitPageSynonymeExclusion(
+            page=produit_page_b,
+            synonyme=synonyme2,
+        )
+        exclusion.save()
+
+        # Add both synonymes to page A
+        intermediate1 = LegacyIntermediateSynonymePage(synonyme=synonyme1)
+        intermediate2 = LegacyIntermediateSynonymePage(synonyme=synonyme2)
+        produit_page_a.legacy_synonyme.add(intermediate1, intermediate2)
+
+        # Should raise for synonyme2 conflict
+        with pytest.raises(ValidationError) as exc_info:
+            produit_page_a.clean()
+
+        assert "Conflit" in str(exc_info.value)
+        assert synonyme2.nom in str(exc_info.value)
 
 
 @pytest.mark.django_db
