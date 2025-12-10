@@ -24,17 +24,16 @@ class AbstractApplyModel(BaseModel, ABC):
     @classmethod
     def name(cls) -> str:
         # Return a name in snake_case format
-        raise NotImplementedError("Method must be implemented")
+        pass
 
     @abstractmethod
     def validate(self):
         # Method called to validate the data
         # - either as standalone when we prepare suggestions
         # - or automatically as part of apply
-        raise NotImplementedError("Method must be implemented")
+        pass
 
     @abstractmethod
     def apply(self):
         # Method called to make the change effective
-        self.validate()
-        raise NotImplementedError("Method must be implemented")
+        pass

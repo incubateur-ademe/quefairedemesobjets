@@ -987,10 +987,6 @@ class RevisionActeur(BaseActeur, LatLngPropertiesMixin):
         return parents_cache_get()["nombre_enfants"].get(self.identifiant_unique, 0)
 
     def __init__(self, *args, **kwargs):
-        if kwargs.get("latitude") and kwargs.get("longitude"):
-            kwargs["location"] = Point(kwargs["longitude"], kwargs["latitude"])
-            del kwargs["latitude"]
-            del kwargs["longitude"]
         super().__init__(*args, **kwargs)
         self._original_parent = self.parent
 

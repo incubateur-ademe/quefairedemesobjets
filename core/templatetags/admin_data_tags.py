@@ -1,4 +1,3 @@
-import json
 import logging
 
 from diff_match_patch import diff_match_patch
@@ -10,16 +9,6 @@ from django.utils.safestring import mark_safe
 from data.models.suggestion import SuggestionGroupe
 
 logger = logging.getLogger(__name__)
-
-
-@register.filter
-def json_fields(fields_list):
-    result = {}
-    for value in fields_list.values():
-        if not isinstance(value, dict):
-            raise ValueError(f"Value {value} is not a dict")
-        result.update(value)
-    return json.dumps(result)
 
 
 @register.filter
@@ -53,17 +42,6 @@ def diff_display(old_value, new_value):
 @register.inclusion_tag("data/_partials/display_diff_value.html")
 def display_diff_value(key, value, suggestion_contexte):
     """Display diff value with context links"""
-
-    old_value_exists = (
-        isinstance(suggestion_contexte, dict) and key in suggestion_contexte
-    )
-    old_value = suggestion_contexte.get(key, None) if old_value_exists else None
-
-    return display_diff_value_details(key, value, old_value, old_value_exists)
-
-
-@register.inclusion_tag("data/_partials/display_diff_value.html")
-def display_diff_value_details(key, value, old_value, old_value_exists=True):
 
     def _get_diff_value(old_value_exists, old_value, value):
         """Compute the diff value to display"""
@@ -153,6 +131,11 @@ def display_diff_value_details(key, value, old_value, old_value_exists=True):
             "extra_links": [(value, value)],
         }
 
+    old_value_exists = (
+        isinstance(suggestion_contexte, dict) and key in suggestion_contexte
+    )
+    old_value = suggestion_contexte.get(key, None) if old_value_exists else None
+
     # Initialize default values
     result = {
         "strike_value": None,
@@ -198,19 +181,6 @@ def valuetype(value):
 @register.filter(name="quote")
 def quote_filter(value):
     return quote(value)
-
-
-@register.filter(name="getattr")
-def getattr_filter(obj, attr):
-    """
-    Template filter pour accéder dynamiquement à un attribut d'un objet.
-    Usage: {{ object|getattr:attribute_name }}
-    """
-
-    try:
-        return getattr(obj, attr, None)
-    except (AttributeError, TypeError):
-        return None
 
 
 @register.filter
