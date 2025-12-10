@@ -384,6 +384,47 @@ class ProduitPage(
         index.AutocompleteField("title"),
     ]
 
+    def clean(self):
+        super().clean()
+
+        # Validate legacy_synonyme inline items
+        for synonyme_item in self.legacy_synonyme.all():
+            if synonyme_item.synonyme:
+                # Check if the synonyme's produit is already redirected
+                try:
+                    produit_page = synonyme_item.synonyme.produit.next_wagtail_page
+                    if produit_page.page != self:
+                        logger.warning(
+                            f"Synonyme '{synonyme_item.synonyme.nom}' has a direct "
+                            f"redirection to page '{self.title}' but its "
+                            f"produit '{synonyme_item.synonyme.produit.nom}' is "
+                            f"redirected to '{produit_page.page.title}'. "
+                            "The synonyme redirection will take priority."
+                        )
+                except Exception:
+                    # If produit has no redirection or any other error, that's fine
+                    pass
+
+                # Check if this synonyme is marked as excluded somewhere else
+                try:
+                    exclusion = (
+                        LegacyIntermediateProduitPageSynonymeExclusion.objects.get(
+                            synonyme=synonyme_item.synonyme
+                        )
+                    )
+                    if exclusion.page != self:
+                        raise ValidationError(
+                            f"Conflit : le synonyme '{synonyme_item.synonyme.nom}' "
+                            "est marqué comme exclu de la redirection vers la page "
+                            f"'{exclusion.page.title}'. "
+                            "Vous ne pouvez pas créer une redirection directe "
+                            "tant que cette exclusion existe. "
+                            "Veuillez d'abord supprimer l'exclusion."
+                        )
+                except LegacyIntermediateProduitPageSynonymeExclusion.DoesNotExist:
+                    # No exclusion exists, that's fine
+                    pass
+
     class Meta:
         verbose_name = "Produit"
 
@@ -475,43 +516,6 @@ class LegacyIntermediateSynonymePage(models.Model):
     )
 
     panels = [FieldPanel("synonyme")]
-
-    def clean(self):
-        super().clean()
-
-        if self.synonyme:
-            # Check if the synonyme's produit is already redirected
-            try:
-                produit_page = self.synonyme.produit.next_wagtail_page
-                if produit_page.page != self.page:
-                    logger.warning(
-                        f"Synonyme '{self.synonyme.nom}' has a direct "
-                        f"redirection to page '{self.page.title}' but its "
-                        f"produit '{self.synonyme.produit.nom}' is "
-                        f"redirected to '{produit_page.page.title}'. "
-                        f"The synonyme redirection will take priority."
-                    )
-            except Exception:
-                # If produit has no redirection or any other error, that's fine
-                pass
-
-            # Check if this synonyme is marked as excluded somewhere else
-            try:
-                exclusion = LegacyIntermediateProduitPageSynonymeExclusion.objects.get(
-                    synonyme=self.synonyme
-                )
-                if exclusion.page != self.page:
-                    raise ValidationError(
-                        f"Conflit : ce synonyme est marqué comme exclu de "
-                        f"la redirection vers la page "
-                        f"'{exclusion.page.title}'. "
-                        f"Vous ne pouvez pas créer une redirection directe "
-                        f"tant que cette exclusion existe. "
-                        f"Veuillez d'abord supprimer l'exclusion."
-                    )
-            except LegacyIntermediateProduitPageSynonymeExclusion.DoesNotExist:
-                # No exclusion exists, that's fine
-                pass
 
     class Meta:
         verbose_name = "Fiche synonyme"
