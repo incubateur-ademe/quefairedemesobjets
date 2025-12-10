@@ -518,6 +518,7 @@ class CarteConfigView(DetailView, CarteSearchActeursView):
         """Cache the object to avoid repeated queries"""
         return self.get_object()
 
+    @override
     def _compile_acteurs_queryset(self, *args, **kwargs):
         filters, excludes = super()._compile_acteurs_queryset(*args, **kwargs)
 
