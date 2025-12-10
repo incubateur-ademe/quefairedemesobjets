@@ -711,6 +711,18 @@ class SuggestionGroupe(TimestampedModel):
         Returns a dictionary of errors (empty if valid)
         """
         # Validate the RevisionActeur with the proposed values
+
+        if "longitude" in values_to_update or "latitude" in values_to_update:
+            for coord_field in ["longitude", "latitude"]:
+                try:
+                    values_to_update[coord_field] = values_to_update.get(
+                        coord_field,
+                        fields_values.get(coord_field, {}).get("displayed_value", ""),
+                    )
+                except (ValueError, KeyError) as e:
+                    logger.warning(f"ValueError for {coord_field}: {e}")
+                    return {coord_field: f"{coord_field} must be a float: {e}"}
+
         try:
             values_to_update = data_latlong_to_location(values_to_update)
         except (ValueError, KeyError) as e:
