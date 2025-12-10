@@ -1,0 +1,19 @@
+{% extends "ui/layout/assistant.html" %}
+
+{# Analytics controller is enabled on assistant layout #}
+
+
+{% block main %}
+<div>
+Le referrer stocké est :
+<h1 id="referrer" class="fr-text--xl" data-testid="referrer"></h1>
+</div>
+
+<a href="?coucou">Naviguer vers une autre page fictive</a>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelector("#referrer").textContent = window.sessionStorage.getItem("qf_ifr")
+})
+</script>
+{% endblock main %}

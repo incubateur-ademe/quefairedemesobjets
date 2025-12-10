@@ -842,3 +842,10 @@ class AccessibilitePreview(LookbookPreview):
             "sites_faciles_content_manager/blocks/breadcrumbs.html",
             context,
         )
+
+
+class TestsPreview(LookbookPreview):
+    def referrer(self, **kwargs):
+        return render_to_string(
+            "ui/tests/referrer.html",
+        )

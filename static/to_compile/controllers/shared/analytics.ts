@@ -1,8 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
-import {
-  InteractionType as PosthogUIInteractionType,
-  PosthogEventType,
-} from "../../js/types"
+import { InteractionType as PosthogUIInteractionType } from "../../js/types"
 import posthog, { PostHogConfig } from "posthog-js"
 import { URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE } from "../../js/helpers"
 
@@ -79,15 +76,13 @@ export default class extends Controller<HTMLElement> {
   initialize(): void {
     posthog.init(this.posthogKeyValue, this.posthogConfig)
     this.#identifyAuthenticatedUser()
-    this.#checkIfWeAreInAnIframe()
+    this.#initialiseIframeRelatedPersonProperties()
     this.#syncSessionStorageWithLocalConversionScore()
     this.#setupIntersectionObserver()
     this.#computeConversionScoreFromSessionStorage()
     this.#setInitialActionValue()
 
-    if (this.posthogDebugValue) {
-      posthog.debug()
-    }
+    posthog.debug(!!this.posthogDebugValue)
   }
 
   userConversionScoreValueChanged(value) {
@@ -139,18 +134,39 @@ export default class extends Controller<HTMLElement> {
   // - If the iframe integration does not use our script
   // In all these cases, we still want to determine
   // whether the user browse inside an iframe or not.
-  #checkIfWeAreInAnIframe() {
-    const [weAreInAnIframe, referrer] = this.#areWeInAnIframe()
+  #initialiseIframeRelatedPersonProperties() {
+    const weAreInAnIframe = this.#areWeInAnIframe()
     this.personProperties.iframe = weAreInAnIframe
-    this.personProperties.iframeReferrer = referrer
+
+    const referrer = this.#fetchReferrer(weAreInAnIframe)
+    if (referrer) {
+      this.personProperties.iframeReferrer = referrer
+    }
+
     const url = new URL(window.location.href)
     this.personProperties.iframeFromScript = url.searchParams.has(
       URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE,
     )
   }
 
-  #areWeInAnIframe(): [boolean, string | undefined] {
+  #areWeInAnIframe(): boolean {
     let weAreInAnIframe = false
+
+    try {
+      if (window.self !== window.top) {
+        weAreInAnIframe = true
+      }
+    } catch (e) {
+      // Unable to access window.top
+      // this might be due to cross-origin restrictions.
+      // Assuming it's inside an iframe.
+      weAreInAnIframe = true
+    }
+
+    return weAreInAnIframe
+  }
+
+  #fetchReferrer(weAreInAnIframe: boolean): string | undefined {
     let referrer
 
     // First, try to get the stored referrer from sessionStorage
@@ -160,30 +176,26 @@ export default class extends Controller<HTMLElement> {
       referrer = storedReferrer
     }
 
+    // For same-origin iframes, we can access the parent URL directly
     try {
       if (window.self !== window.top) {
-        weAreInAnIframe = true
-        // For same-origin iframes, we can access the parent URL directly
         referrer = window.top?.location.href
       }
     } catch (e) {
-      // Unable to access window.top
-      // this might be due to cross-origin restrictions.
-      // Assuming it's inside an iframe.
-      weAreInAnIframe = true
+      // Unable to access window.top due to cross-origin restrictions
     }
 
     // For cross-origin iframes, document.referrer contains the parent URL
     // But only on the first load - so we need to persist it
     if (document.referrer && !document.referrer.includes(document.location.origin)) {
-      weAreInAnIframe = true
-
       // Only set referrer if we don't already have one
       // This prevents overwriting the original referrer on subsequent navigations
       if (!referrer) {
         referrer = document.referrer
       }
     }
+
+    console.log({ storedReferrer, referrer, weAreInAnIframe })
 
     // Persist the referrer in sessionStorage so it survives navigations
     // Only store if we have a referrer and are in an iframe
@@ -196,7 +208,7 @@ export default class extends Controller<HTMLElement> {
       }
     }
 
-    return [weAreInAnIframe, referrer]
+    return referrer
   }
 
   #computeConversionScoreFromSessionStorage() {
