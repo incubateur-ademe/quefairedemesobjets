@@ -1,6 +1,11 @@
 {# Analytics controller is enabled on assistant layout #}
+{% load dsfr_tags %}
+
+{% dsfr_callout title="iFrame de test uniquement" text="L'iframe ci-dessous est utilisée dans les tests Playwright pour vérifier que le referrer est défini comme attendu" icon_class="fr-icon-alert-line" %}
 
 <iframe
+  width="100%"
+  height="700px"
   src="http://localhost:8000"
   id="test"
   referrerpolicy="unsafe-url"

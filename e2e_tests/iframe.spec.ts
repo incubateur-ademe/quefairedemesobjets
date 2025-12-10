@@ -176,10 +176,9 @@ test.describe("📦 Système d'Intégration Iframe", () => {
       page,
     }) => {
       // Navigate to the test page
-      await page.goto(
-        "/lookbook/preview/tests/referrer/?timestamp=1765378324992&display=%257B%2522theme%2522%253A%2522light%2522%257D",
-        { waitUntil: "domcontentloaded" },
-      )
+      await page.goto("/lookbook/preview/tests/referrer", {
+        waitUntil: "domcontentloaded",
+      })
 
       // Get the parent window location for comparison
       const parentLocation = page.url()
@@ -187,47 +186,45 @@ test.describe("📦 Système d'Intégration Iframe", () => {
       // Locate the test iframe
       const iframe = page.frameLocator("iframe#test")
 
-      // Wait for iframe content to load and analytics controller to initialize
-      await iframe.locator("body").waitFor({ timeout: 10000 })
+      // Wait for iframe to load by waiting for the body with Stimulus controller
+      await expect(iframe.locator("body[data-controller*='analytics']")).toBeAttached({
+        timeout: 10000,
+      })
 
-      // Wait a bit for the analytics controller to fully initialize
-      await page.waitForTimeout(500)
+      // Find a visible link using Playwright's built-in visibility detection
+      const visibleLink = iframe.locator("a:visible").first()
+      await expect(visibleLink).toBeVisible({ timeout: 10000 })
 
-      // Find and click any visible link inside the iframe
-      const links = iframe.locator("a")
-      const linkCount = await links.count()
+      // Get the current URL before clicking to detect navigation
+      const initialUrl = await iframe
+        .locator("body")
+        .evaluate(() => window.location.href)
 
-      // Ensure there's at least one link
-      expect(linkCount).toBeGreaterThan(0)
+      await visibleLink.click()
 
-      // Find the first visible link
-      let clickedLink = false
-      for (let i = 0; i < linkCount; i++) {
-        const link = links.nth(i)
-        if (await link.isVisible()) {
-          await link.click()
-          clickedLink = true
-          break
-        }
-      }
+      // Wait for navigation by checking that the URL has actually changed
+      await expect(async () => {
+        const currentUrl = await iframe
+          .locator("body")
+          .evaluate(() => window.location.href)
+        expect(currentUrl).not.toBe(initialUrl)
+      }).toPass({ timeout: 10000 })
 
-      // If no visible link found, just click the first one and scroll to it
-      if (!clickedLink) {
-        const firstLink = links.first()
-        await firstLink.scrollIntoViewIfNeeded()
-        await firstLink.click()
-      }
-
-      // Wait for navigation to complete inside the iframe
-      await page.waitForTimeout(1000)
-
-      // Wait for the body to be present after navigation
-      await iframe.locator("body").waitFor({ timeout: 10000 })
-
-      // Wait for analytics controller to initialize after navigation
-      await page.waitForTimeout(500)
+      // Wait for the analytics controller to be available after navigation
+      await expect(async () => {
+        const hasController = await iframe.locator("body").evaluate(() => {
+          return !!(window as any).stimulus?.getControllerForElementAndIdentifier(
+            document.querySelector("body"),
+            "analytics",
+          )
+        })
+        expect(hasController).toBe(true)
+      }).toPass({ timeout: 5000 })
 
       // Execute JavaScript inside the iframe to get personProperties
+      // This can seem a bit cumbersome, but is the result of quite a lot of trial
+      // and error.
+      // Playwright does not play well with iframes...
       const personProperties = await iframe.locator("body").evaluate(() => {
         const controller = (
           window as any
