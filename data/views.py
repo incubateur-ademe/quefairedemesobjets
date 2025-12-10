@@ -40,18 +40,74 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
     template_name = "data/_partials/suggestion_groupe_refresh_stream.html"
 
     def _manage_tab_in_context(self, context, request, suggestion_groupe):
+
+        def _append_location_to_points(
+            points, latitude_data, longitude_data, key, color, draggable
+        ):
+            points.append(
+                {
+                    "latitude": float(latitude_data[key]),
+                    "longitude": float(longitude_data[key]),
+                    "color": color,
+                    "draggable": draggable,
+                }
+            )
+
         context["tab"] = request.GET.get("tab", request.POST.get("tab", None))
         if context["tab"] == "acteur":
             context["uuid"] = suggestion_groupe.displayed_acteur_uuid()
-        # TODO: Handle the marker options here
         if context["tab"] == "localisation":
             if (
                 "latitude" in context["fields_values"]
                 and "longitude" in context["fields_values"]
             ):
+                latitude_data = context["fields_values"]["latitude"]
+                longitude_data = context["fields_values"]["longitude"]
+
+                # Prepare point list to display in map
+                points = []
+
+                # Point pour old_value (rouge, non draggable)
+                if latitude_data.get("old_value") and longitude_data.get("old_value"):
+                    _append_location_to_points(
+                        points, latitude_data, longitude_data, "old_value", "red", False
+                    )
+
+                # Point pour new_value (vert #26A69A, non draggable)
+                if latitude_data.get("new_value") and longitude_data.get("new_value"):
+                    _append_location_to_points(
+                        points,
+                        latitude_data,
+                        longitude_data,
+                        "new_value",
+                        "#26A69A",
+                        False,
+                    )
+
+                if latitude_data.get("updated_displayed_value") and longitude_data.get(
+                    "updated_displayed_value"
+                ):
+                    _append_location_to_points(
+                        points,
+                        latitude_data,
+                        longitude_data,
+                        "updated_displayed_value",
+                        "#00695C",
+                        True,
+                    )
+                elif latitude_data.get("displayed_value") and longitude_data.get(
+                    "displayed_value"
+                ):
+                    _append_location_to_points(
+                        points,
+                        latitude_data,
+                        longitude_data,
+                        "displayed_value",
+                        "#00695C",
+                        True,
+                    )
                 context["localisation"] = {
-                    "latitude": context["fields_values"]["latitude"],
-                    "longitude": context["fields_values"]["longitude"],
+                    "points": points,
                 }
         return context
 
