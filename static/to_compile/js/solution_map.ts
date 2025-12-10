@@ -56,10 +56,6 @@ export class SolutionMap {
             id: "carto-light-layer",
             type: "raster",
             source: "carto-light",
-            minzoom: 0,
-            // zoom value from which the layer is not displayed
-            // cf. https://github.com/maplibre/maplibre-gl-js/issues/1549
-            maxzoom: DEFAULT_MAX_ZOOM + 1,
           },
         ],
       },
