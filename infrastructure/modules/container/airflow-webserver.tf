@@ -15,7 +15,7 @@ resource "scaleway_container" "airflow_webserver" {
 
   health_check {
     http {
-      path = "/health"
+      path = "/api/v2/version"
     }
     failure_threshold = 5
     interval          = "30s"
@@ -32,6 +32,7 @@ resource "scaleway_container" "airflow_webserver" {
     AIRFLOW__CORE__EXECUTOR                    = "LocalExecutor"
     AIRFLOW__CORE__FERNET_KEY                  = ""
     AIRFLOW__CORE__LOAD_EXAMPLES               = "false"
+    AIRFLOW__CORE__AUTH_MANAGER                = "airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager"
     AIRFLOW__LOGGING__ENCRYPT_S3_LOGS          = "false"
     AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER   = "s3://${var.prefix}-${var.environment}-airflow"
     AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID       = "scalewaylogs"
@@ -44,11 +45,14 @@ resource "scaleway_container" "airflow_webserver" {
     ENVIRONMENT                                = var.environment
   }
   secret_environment_variables = {
-    _AIRFLOW_WWW_USER_USERNAME          = var._AIRFLOW_WWW_USER_USERNAME
-    _AIRFLOW_WWW_USER_PASSWORD          = var._AIRFLOW_WWW_USER_PASSWORD
-    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN = var.AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
-    DATABASE_URL                        = var.DATABASE_URL
-    DB_WAREHOUSE                        = var.DB_WAREHOUSE
-    AIRFLOW_CONN_WEBAPP_DB              = var.AIRFLOW_CONN_WEBAPP_DB
+    _AIRFLOW_WWW_USER_USERNAME              = var._AIRFLOW_WWW_USER_USERNAME
+    _AIRFLOW_WWW_USER_PASSWORD              = var._AIRFLOW_WWW_USER_PASSWORD
+    AIRFLOW__CORE__EXECUTION_API_SERVER_URL = var.AIRFLOW__CORE__EXECUTION_API_SERVER_URL
+    AIRFLOW__API_AUTH__JWT_SECRET           = var.AIRFLOW__API_AUTH__JWT_SECRET
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN     = var.AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+    DATABASE_URL                            = var.DATABASE_URL
+    DB_WAREHOUSE                            = var.DB_WAREHOUSE
+    AIRFLOW_CONN_WEBAPP_DB                  = var.AIRFLOW_CONN_WEBAPP_DB
+    AIRFLOW_CONN_SCALEWAYLOGS               = var.AIRFLOW_CONN_SCALEWAYLOGS
   }
 }

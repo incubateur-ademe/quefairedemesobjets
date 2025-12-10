@@ -5,9 +5,8 @@
 import pytest
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-
-from dags.e2e_tests.e2e_utils import airflow_init, ti_get
-from dags.shared.config.start_dates import START_DATES
+from e2e_tests.e2e_utils import airflow_init, ti_get
+from shared.config.start_dates import START_DATES
 
 airflow_init()
 
