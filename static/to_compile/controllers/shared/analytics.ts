@@ -195,8 +195,6 @@ export default class extends Controller<HTMLElement> {
       }
     }
 
-    console.log({ storedReferrer, referrer, weAreInAnIframe })
-
     // Persist the referrer in sessionStorage so it survives navigations
     // Only store if we have a referrer and are in an iframe
     if (weAreInAnIframe && referrer && !storedReferrer) {
