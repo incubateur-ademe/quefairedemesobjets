@@ -170,6 +170,88 @@ test.describe("📦 Système d'Intégration Iframe", () => {
       }
     })
   })
+
+  test.describe("Referrer tracking in iframe", () => {
+    test("tracks parent referrer correctly when clicking links inside iframe", async ({
+      page,
+    }) => {
+      // Navigate to the test page
+      await page.goto(
+        "/lookbook/preview/tests/referrer/?timestamp=1765378324992&display=%257B%2522theme%2522%253A%2522light%2522%257D",
+        { waitUntil: "domcontentloaded" },
+      )
+
+      // Get the parent window location for comparison
+      const parentLocation = page.url()
+
+      // Locate the test iframe
+      const iframe = page.frameLocator("iframe#test")
+
+      // Wait for iframe content to load and analytics controller to initialize
+      await iframe.locator("body").waitFor({ timeout: 10000 })
+
+      // Wait a bit for the analytics controller to fully initialize
+      await page.waitForTimeout(500)
+
+      // Find and click any visible link inside the iframe
+      const links = iframe.locator("a")
+      const linkCount = await links.count()
+
+      // Ensure there's at least one link
+      expect(linkCount).toBeGreaterThan(0)
+
+      // Find the first visible link
+      let clickedLink = false
+      for (let i = 0; i < linkCount; i++) {
+        const link = links.nth(i)
+        if (await link.isVisible()) {
+          await link.click()
+          clickedLink = true
+          break
+        }
+      }
+
+      // If no visible link found, just click the first one and scroll to it
+      if (!clickedLink) {
+        const firstLink = links.first()
+        await firstLink.scrollIntoViewIfNeeded()
+        await firstLink.click()
+      }
+
+      // Wait for navigation to complete inside the iframe
+      await page.waitForTimeout(1000)
+
+      // Wait for the body to be present after navigation
+      await iframe.locator("body").waitFor({ timeout: 10000 })
+
+      // Wait for analytics controller to initialize after navigation
+      await page.waitForTimeout(500)
+
+      // Execute JavaScript inside the iframe to get personProperties
+      const personProperties = await iframe.locator("body").evaluate(() => {
+        const controller = (
+          window as any
+        ).stimulus?.getControllerForElementAndIdentifier(
+          document.querySelector("body"),
+          "analytics",
+        )
+        if (!controller) {
+          return null
+        }
+        return controller.personProperties
+      })
+
+      // Verify analytics controller is loaded
+      expect(personProperties).not.toBeNull()
+
+      // Verify that iframe is set to true
+      expect(personProperties.iframe).toBe(true)
+
+      // Verify that iframeReferrer is set and matches the parent window location
+      expect(personProperties.iframeReferrer).toBeDefined()
+      expect(personProperties.iframeReferrer).toBe(parentLocation)
+    })
+  })
 })
 test.describe("📜 Vérification des scripts", () => {
   /**
