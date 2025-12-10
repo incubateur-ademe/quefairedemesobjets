@@ -260,10 +260,6 @@ class SuggestionGroupeAdmin(
             "revision_acteur__parent",
         ).annotate(suggestion_unitaires_count=Count("suggestion_unitaires"))
 
-    def changelist_view(self, request, extra_context=None):
-        self.csrf_token = request.META.get("CSRF_COOKIE")
-        return super().changelist_view(request, extra_context)
-
     def groupe_de_suggestions(self, obj):
         template_name = "data/_partials/suggestion_groupe_details.html"
         return render_to_string(template_name, obj.serialize().to_dict())

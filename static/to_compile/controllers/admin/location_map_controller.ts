@@ -5,7 +5,7 @@ import "maplibre-gl/dist/maplibre-gl.css"
 import { SolutionMap } from "../../js/solution_map"
 
 const DEFAULT_INITIAL_ZOOM: number = 14
-const DEFAULT_MAX_ZOOM: number = 21
+const DEFAULT_MAX_ZOOM: number = 20
 
 interface LocalisationData {
   latitude: {
@@ -44,31 +44,27 @@ export default class extends Controller<HTMLElement> {
       style: {
         version: 8,
         sources: {
-          "carto-light": {
+          "raster-tiles": {
             type: "raster",
-            tiles: [
-              "https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
-              "https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
-              "https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
-            ],
+            tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
             tileSize: 256,
+            minzoom: 0,
+            maxzoom: DEFAULT_MAX_ZOOM - 1,
           },
         },
         layers: [
           {
-            id: "carto-light-layer",
+            id: "simple-tiles",
             type: "raster",
-            source: "carto-light",
-            minzoom: 0,
-            maxzoom: DEFAULT_MAX_ZOOM,
+            source: "raster-tiles",
           },
         ],
       },
       zoom: DEFAULT_INITIAL_ZOOM,
-      maxZoom: DEFAULT_MAX_ZOOM - 1,
+      maxZoom: DEFAULT_MAX_ZOOM,
       attributionControl: {
         compact: true,
-        customAttribution: "© OpenStreetMap contributors, © CARTO",
+        customAttribution: "© OpenStreetMap contributors",
       },
     })
     // Ajouter les contrôles de zoom
