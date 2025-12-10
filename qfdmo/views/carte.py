@@ -6,6 +6,7 @@ from typing import Any, TypedDict, override
 from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.core.cache import cache
+from django.db.models import Q
 from django.forms import Form
 from django.utils.functional import cached_property
 from django.views.generic import DetailView
@@ -517,22 +518,22 @@ class CarteConfigView(DetailView, CarteSearchActeursView):
         """Cache the object to avoid repeated queries"""
         return self.get_object()
 
-    # def _compile_acteurs_queryset(self, *args, **kwargs):
-    #     filters, excludes = super()._compile_acteurs_queryset(*args, **kwargs)
+    def _compile_acteurs_queryset(self, *args, **kwargs):
+        filters, excludes = super()._compile_acteurs_queryset(*args, **kwargs)
 
-    #     # TODO: remove this
-    #     if source_filter := self.carte_config.source.all():
-    #         filters &= Q(source__in=source_filter)
+        # TODO: remove this
+        if source_filter := self.carte_config.source.all():
+            filters &= Q(source__in=source_filter)
 
-    #     # TODO: remove this
-    #     if label_filter := self.carte_config.label_qualite.all():
-    #         filters &= Q(labels__in=label_filter)
+        # TODO: remove this
+        if label_filter := self.carte_config.label_qualite.all():
+            filters &= Q(labels__in=label_filter)
 
-    #     # TODO: remove this
-    #     if acteur_type_filter := self.carte_config.acteur_type.all():
-    #         filters &= Q(acteur_type__in=acteur_type_filter)
+        # TODO: remove this
+        if acteur_type_filter := self.carte_config.acteur_type.all():
+            filters &= Q(acteur_type__in=acteur_type_filter)
 
-    #     return filters, excludes
+        return filters, excludes
 
     def _get_sous_categorie_ids(self) -> list[int]:
         """Get sous_categorie IDs with the following priority:
