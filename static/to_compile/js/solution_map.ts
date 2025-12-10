@@ -57,12 +57,14 @@ export class SolutionMap {
             type: "raster",
             source: "carto-light",
             minzoom: 0,
-            maxzoom: DEFAULT_MAX_ZOOM,
+            // zoom value from which the layer is not displayed
+            // cf. https://github.com/maplibre/maplibre-gl-js/issues/1549
+            maxzoom: DEFAULT_MAX_ZOOM + 1,
           },
         ],
       },
       zoom: initialZoom,
-      maxZoom: DEFAULT_MAX_ZOOM - 1,
+      maxZoom: DEFAULT_MAX_ZOOM,
       center: DEFAULT_LOCATION,
       attributionControl: {
         compact: true,
