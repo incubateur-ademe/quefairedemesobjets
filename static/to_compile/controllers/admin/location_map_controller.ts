@@ -7,19 +7,15 @@ import { SolutionMap } from "../../js/solution_map"
 const DEFAULT_INITIAL_ZOOM: number = 14
 const DEFAULT_MAX_ZOOM: number = 20
 
+interface LocalisationPoint {
+  latitude: number
+  longitude: number
+  color: string
+  draggable: boolean
+}
+
 interface LocalisationData {
-  latitude: {
-    displayed_value: string
-    updated_displayed_value: string
-    new_value: string
-    old_value: string
-  }
-  longitude: {
-    displayed_value: string
-    updated_displayed_value: string
-    new_value: string
-    old_value: string
-  }
+  points: LocalisationPoint[]
 }
 
 export default class extends Controller<HTMLElement> {
@@ -69,75 +65,28 @@ export default class extends Controller<HTMLElement> {
     })
     // Ajouter les contrôles de zoom
     // this.#addZoomControl()
-    const points: Array<Array<Number>> = []
-    if (this.localisationData) {
-      if (
-        this.localisationData.latitude.old_value &&
-        this.localisationData.longitude.old_value
-      ) {
-        new Marker({ color: "red" })
-          .setLngLat([
-            parseFloat(this.localisationData.longitude.old_value),
-            parseFloat(this.localisationData.latitude.old_value),
-          ])
+    const boundsPoints: Array<Array<Number>> = []
+    if (this.localisationData && this.localisationData.points) {
+      this.localisationData.points.forEach((point) => {
+        const marker = new Marker({
+          color: point.color,
+          draggable: point.draggable,
+        })
+          .setLngLat([point.longitude, point.latitude])
           .addTo(this.map)
-        points.push([
-          parseFloat(this.localisationData.longitude.old_value),
-          parseFloat(this.localisationData.latitude.old_value),
-        ])
-      }
-      if (
-        this.localisationData.latitude.new_value &&
-        this.localisationData.longitude.new_value
-      ) {
-        new Marker({ color: "#26A69A" })
-          .setLngLat([
-            parseFloat(this.localisationData.longitude.new_value),
-            parseFloat(this.localisationData.latitude.new_value),
-          ])
-          .addTo(this.map)
-        points.push([
-          parseFloat(this.localisationData.longitude.new_value),
-          parseFloat(this.localisationData.latitude.new_value),
-        ])
-      }
-      if (
-        this.localisationData.latitude.updated_displayed_value &&
-        this.localisationData.longitude.updated_displayed_value
-      ) {
-        this.draggableMarker = new Marker({ color: "#00695C", draggable: true })
-          .setLngLat([
-            parseFloat(this.localisationData.longitude.updated_displayed_value),
-            parseFloat(this.localisationData.latitude.updated_displayed_value),
-          ])
-          .addTo(this.map)
-        this.#setupMarkerDragListener(this.draggableMarker)
-        points.push([
-          parseFloat(this.localisationData.longitude.updated_displayed_value),
-          parseFloat(this.localisationData.latitude.updated_displayed_value),
-        ])
-      } else {
-        if (
-          this.localisationData.latitude.displayed_value &&
-          this.localisationData.longitude.displayed_value
-        ) {
-          this.draggableMarker = new Marker({ color: "#00695C", draggable: true })
-            .setLngLat([
-              parseFloat(this.localisationData.longitude.displayed_value),
-              parseFloat(this.localisationData.latitude.displayed_value),
-            ])
-            .addTo(this.map)
-          this.#setupMarkerDragListener(this.draggableMarker)
-          points.push([
-            parseFloat(this.localisationData.longitude.displayed_value),
-            parseFloat(this.localisationData.latitude.displayed_value),
-          ])
+
+        if (point.draggable) {
+          this.draggableMarker = marker
+          this.#setupMarkerDragListener(marker)
         }
-      }
+
+        boundsPoints.push([point.longitude, point.latitude])
+      })
+
       // Fit bounds on points
-      if (points.length > 0) {
-        const lngs = points.map((point) => point[0] as number)
-        const lats = points.map((point) => point[1] as number)
+      if (boundsPoints.length > 0) {
+        const lngs = boundsPoints.map((point) => point[0] as number)
+        const lats = boundsPoints.map((point) => point[1] as number)
         const bounds: LngLatBoundsLike = [
           [Math.min(...lngs), Math.min(...lats)], // Sud-ouest
           [Math.max(...lngs), Math.max(...lats)], // Nord-est
