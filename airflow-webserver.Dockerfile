@@ -20,8 +20,10 @@ RUN uv sync --group airflow
 # Runtime
 # --- --- --- ---
 FROM apache/airflow:slim-3.1.3-python3.12 AS webserver
+
 USER ${AIRFLOW_UID:-50000}
-ENV VIRTUAL_ENV=/home/airflow/.local \
+
+ENV VIRTUAL_ENV=/opt/airflow/.venv \
     PATH="/opt/airflow/.venv/bin:$PATH" \
     PORT="8080"
 
