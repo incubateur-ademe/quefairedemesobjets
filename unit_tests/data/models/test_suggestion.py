@@ -79,32 +79,6 @@ class TestSuggestionGroupe:
 
         assert str(groupe) == "my_action - ID123"
 
-    def test_get_suggestion_unitaires_by_champs_groups_by_fields(self):
-        groupe = SuggestionGroupeFactory()
-
-        # Deux suggestions avec les mêmes champs mais dans un ordre différent
-        su1 = SuggestionUnitaireFactory(
-            suggestion_groupe=groupe,
-            champs=["nom", "ville"],
-        )
-        su2 = SuggestionUnitaireFactory(
-            suggestion_groupe=groupe,
-            champs=["ville", "nom"],
-        )
-
-        # Une suggestion avec des champs différents
-        su3 = SuggestionUnitaireFactory(
-            suggestion_groupe=groupe,
-            champs=["code_postal"],
-        )
-
-        result = groupe.get_suggestion_unitaires_by_champs()
-
-        # Les deux premières doivent être regroupées ensemble
-        assert set(result[(("nom", "ville"))]) == {su1, su2}
-        # La troisième dans un groupe séparé
-        assert result[(("code_postal",))] == [su3]
-
 
 @pytest.mark.django_db
 class TestSuggestionGroupeSerialiser:

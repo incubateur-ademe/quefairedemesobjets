@@ -26,6 +26,7 @@ from dags.sources.config.shared_constants import (
 from data.models.apply_models.abstract_apply_model import AbstractApplyModel
 from data.models.apply_models.source_apply_model import SourceApplyModel
 from data.models.change import SuggestionChange
+from data.models.utils import data_latlong_to_location
 from qfdmo.models.acteur import (
     Acteur,
     ActeurService,
@@ -530,20 +531,6 @@ class SuggestionGroupe(TimestampedModel):
             libelle += f" - {self.acteur.identifiant_unique}"
         return libelle
 
-    def get_suggestion_unitaires_by_champs(self) -> dict[tuple, list]:
-        champs_modifies = {
-            tuple(suggestion_unitaire.champs)
-            for suggestion_unitaire in self.suggestion_unitaires.all()
-        }
-        return {
-            champs: [
-                suggestion_unitaire
-                for suggestion_unitaire in self.suggestion_unitaires.all()
-                if set(tuple(suggestion_unitaire.champs)) == set(champs)
-            ]
-            for champs in champs_modifies
-        }
-
     def acteur_overridden_by(self) -> RevisionActeur | None:
         return (
             self.revision_acteur.parent
@@ -723,22 +710,19 @@ class SuggestionGroupe(TimestampedModel):
         Check if the proposed updates are valid
         Returns a dictionary of errors (empty if valid)
         """
-        # Validate and convert coordinates if either is present
-        if "longitude" in values_to_update or "latitude" in values_to_update:
-            for coord_field in ["longitude", "latitude"]:
-                try:
-                    value = values_to_update.get(
-                        coord_field,
-                        fields_values.get(coord_field, {}).get("displayed_value", ""),
-                    )
-                    values_to_update[coord_field] = float(value)
-                except (ValueError, KeyError) as e:
-                    logger.warning(f"ValueError for {coord_field}: {e}")
-                    return {coord_field: f"{coord_field} must be a float: {e}"}
-
         # Validate the RevisionActeur with the proposed values
         try:
-            revision_acteur = RevisionActeur(**values_to_update)
+            values_to_update = data_latlong_to_location(values_to_update)
+        except (ValueError, KeyError) as e:
+            logger.warning(f"ValueError for : {e}")
+            return {
+                "latitude": f"latitude must be a float: {e}",
+                "longitude": f"longitude must be a float: {e}",
+            }
+        try:
+            revision_acteur = RevisionActeur(
+                **data_latlong_to_location(values_to_update)
+            )
             revision_acteur.full_clean()
         except ValidationError as e:
             logger.warning(f"RevisionActeur is not valid: {e}")
@@ -898,9 +882,11 @@ class SuggestionUnitaire(TimestampedModel):
         null=True,
     )
     ordre = models.IntegerField(default=1, blank=True)
-    raison = models.TextField(blank=True, default="")
-    parametres = models.JSONField(blank=True, default=dict)
-    suggestion_modele = models.CharField(max_length=255, blank=True, default="")
+    raison = models.TextField(blank=True, db_default="", default="")
+    parametres = models.JSONField(blank=True, db_default="", default="")
+    suggestion_modele = models.CharField(
+        max_length=255, blank=True, db_default="", default="", choices=[]
+    )
     champs = ArrayField(
         models.TextField(),
         blank=True,
@@ -950,7 +936,7 @@ class SuggestionLog(TimestampedModel):
     origine_colonnes = ArrayField(models.CharField(max_length=255), null=True)
     origine_valeurs = ArrayField(models.TextField(), null=True)
     destination_colonnes = ArrayField(models.CharField(max_length=255), null=True)
-    message = models.TextField(blank=True, default="")
+    message = models.TextField(blank=True, db_default="", default="")
 
 
 class BANCache(models.Model):

@@ -43,6 +43,7 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
         context["tab"] = request.GET.get("tab", request.POST.get("tab", None))
         if context["tab"] == "acteur":
             context["uuid"] = suggestion_groupe.displayed_acteur_uuid()
+        # TODO: Handle the marker options here
         if context["tab"] == "localisation":
             if (
                 "latitude" in context["fields_values"]
