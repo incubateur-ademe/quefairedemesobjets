@@ -69,31 +69,38 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
 
                 # Point pour old_value (rouge, non draggable)
                 if latitude_data.get("old_value") and longitude_data.get("old_value"):
-                    _append_location_to_points(
-                        points, latitude_data, longitude_data, "old_value", "red", False
+                    points.append(
+                        {
+                            "latitude": float(latitude_data["old_value"]),
+                            "longitude": float(longitude_data["old_value"]),
+                            "color": "red",
+                            "draggable": False,
+                        }
                     )
 
                 # Point pour new_value (vert #26A69A, non draggable)
                 if latitude_data.get("new_value") and longitude_data.get("new_value"):
-                    _append_location_to_points(
-                        points,
-                        latitude_data,
-                        longitude_data,
-                        "new_value",
-                        "#26A69A",
-                        False,
+                    points.append(
+                        {
+                            "latitude": float(latitude_data["new_value"]),
+                            "longitude": float(longitude_data["new_value"]),
+                            "color": "blue",
+                            "draggable": False,
+                        }
                     )
 
                 if latitude_data.get("updated_displayed_value") and longitude_data.get(
                     "updated_displayed_value"
                 ):
-                    _append_location_to_points(
-                        points,
-                        latitude_data,
-                        longitude_data,
-                        "updated_displayed_value",
-                        "#00695C",
-                        True,
+                    points.append(
+                        {
+                            "latitude": float(latitude_data["updated_displayed_value"]),
+                            "longitude": float(
+                                longitude_data["updated_displayed_value"]
+                            ),
+                            "color": "green",
+                            "draggable": True,
+                        }
                     )
                 elif latitude_data.get("displayed_value") and longitude_data.get(
                     "displayed_value"
@@ -109,6 +116,7 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
                 context["localisation"] = {
                     "points": points,
                 }
+
         return context
 
     def get(self, request, suggestion_groupe_id):

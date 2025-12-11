@@ -4,7 +4,10 @@
     id="suggestion_groupe_{{ id }}"
     data-controller="suggestion-groupe-row"
     data-update-suggestion-url="{% url 'data:suggestion_groupe' id %}"
-    data-action="admin--location-map:markerDragged->suggestion-groupe-row#handleMarkerDragged">
+    data-action="map:markerDragged->suggestion-groupe-row#handleMarkerDragged"
+    data-suggestion-groupe-row-fields-values-value='{{ fields_values|tojson }}'
+    data-suggestion-groupe-row-fields-groups-value='{{ fields_groups|tojson }}'
+    >
 
     <h3>
         {% block suggestion_title %}

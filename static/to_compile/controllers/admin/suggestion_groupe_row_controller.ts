@@ -2,10 +2,13 @@ import { Controller } from "@hotwired/stimulus"
 import * as Turbo from "@hotwired/turbo"
 
 export default class extends Controller<HTMLElement> {
-  static targets = ["fieldsValues", "fieldsGroups"]
+  static values = {
+    fieldsValues: String,
+    fieldsGroups: String,
+  }
 
-  declare readonly fieldsValuesTarget: HTMLInputElement
-  declare readonly fieldsGroupsTarget: HTMLInputElement
+  declare readonly fieldsValuesValue: string
+  declare readonly fieldsGroupsValue: string
 
   fieldDisplayedFocus(event: Event) {
     const value = this.#getFieldsValues()
@@ -90,8 +93,8 @@ export default class extends Controller<HTMLElement> {
     }
     fieldsValues["longitude"]["updated_displayed_value"] = longitude
 
-    // Update hidden field to synchronize DOM
-    this.fieldsValuesTarget.value = JSON.stringify(fieldsValues)
+    // Update the controller value to synchronize DOM
+    this.fieldsValuesValue = JSON.stringify(fieldsValues)
 
     this.#postFieldsValues(fieldsValues, "localisation")
   }
@@ -102,7 +105,7 @@ export default class extends Controller<HTMLElement> {
   }
 
   #getFieldsValues() {
-    const valueJson = this.fieldsValuesTarget.value
+    const valueJson = this.fieldsValuesValue
     const value = JSON.parse(valueJson)
     return value
   }
@@ -146,7 +149,7 @@ export default class extends Controller<HTMLElement> {
       return
     }
     const formData = new FormData()
-    const groupsJson = this.fieldsGroupsTarget.value
+    const groupsJson = this.fieldsGroupsValue
     formData.append("fields_values", JSON.stringify(valuesJson))
     formData.append("fields_groups", groupsJson)
     if (opened_tab) {
