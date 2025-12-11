@@ -1,9 +1,7 @@
 import json
 import logging
-from datetime import datetime
 
 import pandas as pd
-from shared.tasks.database_logic.db_manager import PostgresConnectionManager
 from sources.config import shared_constants as constants
 from utils.django import django_setup_full
 
@@ -12,21 +10,17 @@ django_setup_full()
 logger = logging.getLogger(__name__)
 
 
-def db_write_type_action_suggestions(
-    dag_name: str,
-    run_id: str,
+def _build_suggestion_logs(
+    *,
+    df_log_error: pd.DataFrame,
+    df_log_warning: pd.DataFrame,
     df_acteur_to_create: pd.DataFrame,
-    df_acteur_to_delete: pd.DataFrame,
     df_acteur_to_update: pd.DataFrame,
+    df_acteur_to_delete: pd.DataFrame,
     metadata_to_create: dict,
     metadata_to_update: dict,
     metadata_to_delete: dict,
-    df_log_error: pd.DataFrame,
-    df_log_warning: pd.DataFrame,
 ):
-
-    run_name = run_id.replace("__", " - ")
-
     # get df_log_error and df_log_warning intersection with df_acteur_to_create
     df_log_error_to_create = df_log_error[
         df_log_error["identifiant_unique"].isin(
@@ -105,6 +99,51 @@ def db_write_type_action_suggestions(
         [df_log_warning_to_update, df_log_warning_left_over]
     )
 
+    return (
+        df_log_error_to_create,
+        df_log_warning_to_create,
+        df_log_error_to_update,
+        df_log_warning_to_update,
+        metadata_to_create,
+        metadata_to_update,
+        metadata_to_delete,
+    )
+
+
+def db_write_type_action_suggestions(
+    dag_name: str,
+    run_id: str,
+    df_acteur_to_create: pd.DataFrame,
+    df_acteur_to_delete: pd.DataFrame,
+    df_acteur_to_update: pd.DataFrame,
+    metadata_to_create: dict,
+    metadata_to_update: dict,
+    metadata_to_delete: dict,
+    df_log_error: pd.DataFrame,
+    df_log_warning: pd.DataFrame,
+):
+
+    (
+        df_log_error_to_create,
+        df_log_warning_to_create,
+        df_log_error_to_update,
+        df_log_warning_to_update,
+        metadata_to_create,
+        metadata_to_update,
+        metadata_to_delete,
+    ) = _build_suggestion_logs(
+        df_log_error=df_log_error,
+        df_log_warning=df_log_warning,
+        df_acteur_to_create=df_acteur_to_create,
+        df_acteur_to_update=df_acteur_to_update,
+        df_acteur_to_delete=df_acteur_to_delete,
+        metadata_to_create=metadata_to_create,
+        metadata_to_update=metadata_to_update,
+        metadata_to_delete=metadata_to_delete,
+    )
+
+    run_name = run_id.replace("__", " - ")
+
     insert_suggestion(
         df=df_acteur_to_create,
         metadata=metadata_to_create,
@@ -141,84 +180,127 @@ def insert_suggestion(
     df_log_error: pd.DataFrame = pd.DataFrame(),
     df_log_warning: pd.DataFrame = pd.DataFrame(),
 ):
-    from data.models.suggestion import SuggestionLog
+    from data.models.suggestion import (
+        SuggestionCohorte,
+        SuggestionGroupe,
+        SuggestionLog,
+        SuggestionUnitaire,
+    )
+    from qfdmo.models.acteur import Acteur, RevisionActeur
 
     if df.empty:
         return
-    engine = PostgresConnectionManager().engine
-    current_date = datetime.now()
 
-    with engine.connect() as conn:
-        # Insert a new suggestion
-        result = conn.execute(
-            """
-            INSERT INTO data_suggestioncohorte
-            (
-                identifiant_action,
-                identifiant_execution,
-                type_action,
-                statut,
-                metadata,
-                cree_le,
-                modifie_le
-            )
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
-            RETURNING ID;
-        """,
-            (
-                dag_name,
-                run_name,
-                type_action,
-                constants.SUGGESTION_AVALIDER,
-                json.dumps(metadata),
-                current_date,
-                current_date,
-            ),
-        )
-        suggestion_cohorte_id = result.fetchone()[0]
+    # Create a new cohorte
+    suggestion_cohorte = SuggestionCohorte(
+        identifiant_action=dag_name,
+        identifiant_execution=run_name,
+        type_action=type_action,
+        statut=constants.SUGGESTION_AVALIDER,
+        metadata=metadata,
+    )
+    suggestion_cohorte.save()
 
     # Insert suggestion_logs
     if not df_log_error.empty:
-        df_log_error["suggestion_cohorte_id"] = suggestion_cohorte_id
-        df_log_error["niveau_de_log"] = SuggestionLog.SuggestionLogLevel.ERROR
-        df_log_error.to_sql(
-            "data_suggestionlog",
-            engine,
-            if_exists="append",
-            index=False,
-            method="multi",
-            chunksize=1000,
-        )
+        for index, row in df_log_error.iterrows():
+            SuggestionLog(
+                suggestion_cohorte=suggestion_cohorte,
+                niveau_de_log=SuggestionLog.SuggestionLogLevel.ERROR,
+                fonction_de_transformation=row["fonction_de_transformation"],
+                origine_colonnes=row["origine_colonnes"],
+                origine_valeurs=row["origine_valeurs"],
+                destination_colonnes=row["destination_colonnes"],
+                message=row["message"],
+            ).save()
     if not df_log_warning.empty:
-        df_log_warning["suggestion_cohorte_id"] = suggestion_cohorte_id
-        df_log_warning["niveau_de_log"] = SuggestionLog.SuggestionLogLevel.WARNING
-        df_log_warning.to_sql(
-            "data_suggestionlog",
-            engine,
-            if_exists="append",
-            index=False,
-            method="multi",
-            chunksize=1000,
-        )
-    df_log_warning.to_sql(
-        "data_suggestionlog",
-        engine,
-        if_exists="append",
-        index=False,
-        method="multi",
-        chunksize=1000,
-    )
+        for index, row in df_log_warning.iterrows():
+            SuggestionLog(
+                suggestion_cohorte=suggestion_cohorte,
+                niveau_de_log=SuggestionLog.SuggestionLogLevel.WARNING,
+                fonction_de_transformation=row["fonction_de_transformation"],
+                origine_colonnes=row["origine_colonnes"],
+                origine_valeurs=row["origine_valeurs"],
+                destination_colonnes=row["destination_colonnes"],
+                message=row["message"],
+            ).save()
 
-    # Insert dag_run_change
-    df["suggestion_cohorte_id"] = suggestion_cohorte_id
-    df["statut"] = constants.SUGGESTION_AVALIDER
-    # TODO: here the Suggestion model could be used instead of using pandas to insert
-    # the data into the database
-    df[["contexte", "suggestion", "suggestion_cohorte_id", "statut"]].to_sql(
-        "data_suggestion",
-        engine,
-        if_exists="append",
-        index=False,
-        method="multi",
-        chunksize=1000,
-    )
+    for _, row in df.iterrows():
+        acteur = None
+        revision_acteur = None
+        if identifiant_unique := row.get("identifiant_unique"):
+            acteur = Acteur.objects.filter(
+                identifiant_unique=identifiant_unique
+            ).first()
+            revision_acteur = RevisionActeur.objects.filter(
+                identifiant_unique=identifiant_unique
+            ).first()
+        parent = (
+            revision_acteur.parent
+            if revision_acteur and revision_acteur.parent
+            else None
+        )
+        suggestion_groupe = SuggestionGroupe(
+            suggestion_cohorte=suggestion_cohorte,
+            statut=constants.SUGGESTION_AVALIDER,
+            acteur=acteur,
+            revision_acteur=parent or revision_acteur,
+            contexte=row["contexte"],
+        )
+        suggestion_groupe.save()
+        suggestion = json.loads(row["suggestion"])
+        try:
+            contexte = json.loads(row["contexte"])
+        except TypeError:
+            contexte = {}
+
+        grouped_keys = [["latitude", "longitude"]]
+        flattened_grouped_keys = [item for sublist in grouped_keys for item in sublist]
+        keys_and_grouped_keys = [
+            [key]
+            for key in suggestion.keys()
+            if key not in ["location", "sous_categorie_codes", "action_codes"]
+            and key not in flattened_grouped_keys
+        ]
+        for grouped_key in grouped_keys:
+            if all(key in suggestion for key in grouped_key):
+                keys_and_grouped_keys.append(grouped_key)
+
+        # for key, value in suggestion.items():
+        for keys in keys_and_grouped_keys:
+            should_add_suggestion_unitaire = False
+            for key in keys:
+                if key not in contexte or contexte[key] != suggestion[key]:
+                    should_add_suggestion_unitaire = True
+                    break
+            if not should_add_suggestion_unitaire:
+                continue
+            values = []
+            for key in keys:
+                values.append(suggestion[key])
+            SuggestionUnitaire(
+                suggestion_groupe=suggestion_groupe,
+                statut=constants.SUGGESTION_AVALIDER,
+                acteur=acteur,
+                # Acteur will be updated when a source is updated
+                suggestion_modele="Acteur",
+                # fields should be grouped, ex : latitude and longitude
+                champs=keys,
+                valeurs=values,
+            ).save()
+            # Special case for SUPPRESSION which should be applied to its revision
+            # if it exists
+            if (
+                suggestion_cohorte.type_action == constants.SUGGESTION_SOURCE_SUPRESSION
+                and keys == ["statut"]
+                and revision_acteur
+            ):
+                SuggestionUnitaire(
+                    suggestion_groupe=suggestion_groupe,
+                    statut=constants.SUGGESTION_AVALIDER,
+                    acteur=acteur,
+                    revision_acteur=revision_acteur,
+                    suggestion_modele="RevisionActeur",
+                    champs=keys,
+                    valeurs=values,
+                ).save()

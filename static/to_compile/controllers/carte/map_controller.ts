@@ -3,9 +3,6 @@ import debounce from "lodash/debounce"
 import { removeHash } from "../../js/helpers"
 import { SolutionMap } from "../../js/solution_map"
 import { ActorLocation, DisplayedActeur } from "../../js/types"
-import SearchFormController from "./search_solution_form_controller"
-import { Map } from "maplibre-gl"
-import PinpointController from "./pinpoint_controller"
 
 export class Actor implements DisplayedActeur {
   uuid: string
@@ -35,6 +32,7 @@ class MapController extends Controller<HTMLElement> {
   static values = {
     location: { type: Object, default: {} },
     initialZoom: Number,
+    theme: { type: String, default: "carto-light" },
   }
   declare readonly acteurTargets: Array<HTMLElement>
   declare readonly searchInZoneButtonTarget: HTMLButtonElement
@@ -44,6 +42,7 @@ class MapController extends Controller<HTMLElement> {
   declare readonly hasBboxTarget: boolean
   declare readonly locationValue: object
   declare readonly initialZoomValue: number
+  declare readonly themeValue: string
 
   connect() {
     this.actorsMap = new SolutionMap({
@@ -51,6 +50,7 @@ class MapController extends Controller<HTMLElement> {
       location: this.locationValue,
       initialZoom: this.initialZoomValue,
       controller: this,
+      theme: this.themeValue,
     })
 
     if (this.hasBboxTarget && this.bboxTarget.value !== "") {
@@ -76,12 +76,6 @@ class MapController extends Controller<HTMLElement> {
   #displaySearchInZoneButton() {
     if (this.hasSearchInZoneButtonTarget) {
       this.searchInZoneButtonTarget.classList.remove("qf-hidden")
-    }
-  }
-
-  #hideSearchInZoneButton() {
-    if (this.hasSearchInZoneButtonTarget) {
-      this.searchInZoneButtonTarget.classList.add("qf-hidden")
     }
   }
 }

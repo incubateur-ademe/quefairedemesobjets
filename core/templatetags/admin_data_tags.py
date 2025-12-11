@@ -6,6 +6,8 @@ from django.template.defaulttags import register
 from django.urls.base import reverse
 from django.utils.safestring import mark_safe
 
+from data.models.suggestion import SuggestionGroupe
+
 logger = logging.getLogger(__name__)
 
 
@@ -179,3 +181,37 @@ def valuetype(value):
 @register.filter(name="quote")
 def quote_filter(value):
     return quote(value)
+
+
+@register.filter
+def get_item(dictionary, key):
+    return dictionary.get(key)
+
+
+@register.filter
+def is_not_editable(key):
+    return key in SuggestionGroupe.NOT_EDITABLE_FIELDS
+
+
+@register.filter
+def display_diff_values(old_value, new_value):
+    if not new_value:
+        return old_value
+    if not old_value:
+        return new_value
+    return diff_display(old_value, new_value)
+
+
+@register.inclusion_tag("data/_partials/helper_updated_values.html")
+def helper_updated_values(field, value):
+    if field in ["siren", "siret"]:
+        url_map = {
+            "siren": f"https://annuaire-entreprises.data.gouv.fr/entreprise/{value}",
+            "siret": f"https://annuaire-entreprises.data.gouv.fr/etablissement/{value}",
+        }
+        return {
+            "extra_links": [(url_map[field], value)],
+        }
+    elif isinstance(value, str) and value.startswith("http"):
+        return {"extra_links": [(value, value)]}
+    return {}

@@ -10,14 +10,18 @@ django_setup_full()
 # in this case w would like to inspect what happened and before reprocess it
 
 
-def get_suggestions_toprocess():
-    from data.models.suggestion import Suggestion
+def get_suggestions_toprocess(use_suggestion_groupe: bool = False):
+    from data.models.suggestion import Suggestion, SuggestionGroupe
 
-    return Suggestion.objects.prefetch_related("suggestion_cohorte").filter(
+    cls = Suggestion
+    if use_suggestion_groupe:
+        cls = SuggestionGroupe
+
+    return cls.objects.prefetch_related("suggestion_cohorte").filter(
         statut=constants.SUGGESTION_ATRAITER
     )
 
 
-def db_check_suggestion_to_process(**kwargs):
-    suggestions = get_suggestions_toprocess()
+def db_check_suggestion_to_process(use_suggestion_groupe: bool = False, **kwargs):
+    suggestions = get_suggestions_toprocess(use_suggestion_groupe=use_suggestion_groupe)
     return suggestions.exists()

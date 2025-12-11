@@ -16,8 +16,8 @@ def suggestion_apply_atomic(suggestion):
         suggestion.apply()
 
 
-def db_apply_suggestion():
-    suggestions = get_suggestions_toprocess()
+def db_apply_suggestion(use_suggestion_groupe: bool = False):
+    suggestions = get_suggestions_toprocess(use_suggestion_groupe=use_suggestion_groupe)
 
     for suggestion in suggestions:
         try:

@@ -87,6 +87,7 @@ urlpatterns = (
         path("embed/backlink", backlink),
         path("", include(("qfdmo.urls", "qfdmo"), namespace="qfdmo")),
         path("", include(("qfdmd.urls", "qfdmd"), namespace="qfdmd")),
+        path("data/", include(("data.urls", "data"), namespace="data")),
         path("infotri/", include(("infotri.urls", "infotri"), namespace="infotri")),
         path(
             "docs/",
