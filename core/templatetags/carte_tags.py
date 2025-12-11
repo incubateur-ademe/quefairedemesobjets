@@ -75,9 +75,9 @@ def distance_to_acteur(context, acteur):
         * 111320
     )
     if distance_meters >= 1000:
-        return f"{round(distance_meters / 1000, 1)} km".replace(".", ",")
+        return f"({round(distance_meters / 1000, 1)} km)".replace(".", ",")
     else:
-        return f"{round(distance_meters / 10) * 10} m"
+        return f"({round(distance_meters / 10) * 10} m)"
 
 
 @register.filter

@@ -36,6 +36,69 @@ from qfdmo.widgets import (
 )
 
 
+def get_epcis_for_carte_form():
+    return [(code, code) for code in cast(list[str], epcis_from(["code"]))]
+
+
+class MapForm(GetFormMixin, CarteConfigFormMixin, forms.Form):
+    epci_codes = forms.MultipleChoiceField(
+        choices=get_epcis_for_carte_form,
+        widget=forms.MultipleHiddenInput(),
+        required=False,
+    )
+    adresse = forms.CharField(
+        widget=AutoCompleteInput(
+            attrs={
+                "class": "fr-input",
+                "placeholder": "Rechercher autour d'une adresse",
+                "autocomplete": "off",
+                "aria-label": "Saisir une adresse - obligatoire",
+            },
+            data_controller="address-autocomplete",
+        ),
+        label="",
+        required=False,
+    )
+    bounding_box = forms.CharField(
+        widget=forms.HiddenInput(
+            attrs={
+                "data-search-solution-form-target": "bbox",
+                "data-map-target": "bbox",
+            }
+        ),
+        required=False,
+    )
+    latitude = forms.FloatField(
+        widget=forms.HiddenInput(
+            attrs={
+                "data-address-autocomplete-target": "latitude",
+                "data-search-solution-form-target": "latitudeInput",
+            }
+        ),
+        required=False,
+    )
+
+    longitude = forms.FloatField(
+        widget=forms.HiddenInput(
+            attrs={
+                "data-address-autocomplete-target": "longitude",
+                "data-search-solution-form-target": "longitudeInput",
+            }
+        ),
+        required=False,
+    )
+
+    def _apply_legacy_querystring_overrides(self, legacy_form):
+        if not legacy_form:
+            return
+
+        request_data = legacy_form.decode_querystring()
+
+        # Handle action_displayed: filter the queryset
+        if bounding_box := request_data.get("bounding_box"):
+            self.fields["bounding_box"].initial = bounding_box
+
+
 class AddressesForm(forms.Form):
     def load_choices(self, request: HttpRequest, **kwargs) -> None:
         if address_placeholder := request.GET.get("address_placeholder"):
@@ -50,7 +113,6 @@ class AddressesForm(forms.Form):
         ),
         required=False,
     )
-
     latitude = forms.FloatField(
         widget=forms.HiddenInput(
             attrs={
@@ -261,6 +323,7 @@ class LegacySupportForm(GetFormMixin, forms.Form):
         "action_displayed",
         "label_reparacteur",
         "pas_exclusivite_reparation",
+        "bounding_box",
         CarteConfig.SOUS_CATEGORIE_QUERY_PARAM,
     ]
 
@@ -454,32 +517,6 @@ class ActionDirectionForm(GetFormMixin, DsfrBaseForm):
         # TODO: handle label in UI without displaying it
         label="",
         # label="Direction des actions",
-        required=False,
-    )
-
-
-def get_epcis_for_carte_form():
-    return [(code, code) for code in cast(list[str], epcis_from(["code"]))]
-
-
-class CarteForm(AddressesForm):
-    adresse = forms.CharField(
-        widget=AutoCompleteInput(
-            attrs={
-                "class": "fr-input",
-                "placeholder": "Rechercher autour d'une adresse",
-                "autocomplete": "off",
-                "aria-label": "Saisir une adresse - obligatoire",
-            },
-            data_controller="address-autocomplete",
-        ),
-        label="",
-        required=False,
-    )
-
-    epci_codes = forms.MultipleChoiceField(
-        choices=get_epcis_for_carte_form,
-        widget=forms.MultipleHiddenInput(),
         required=False,
     )
 

@@ -1,7 +1,6 @@
 import json
 import logging
 from abc import ABC, abstractmethod
-from typing import cast
 
 import unidecode
 from django.conf import settings
@@ -10,7 +9,7 @@ from django.contrib.postgres.search import TrigramWordDistance
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
-from django.db.models import Prefetch, Q
+from django.db.models import Q
 from django.db.models.functions import Length, Lower
 from django.db.models.query import QuerySet
 from django.http import Http404, JsonResponse
@@ -103,6 +102,10 @@ class SearchActeursView(
         """The distance after which we stop displaying acteurs on the first request"""
         return settings.DISTANCE_MAX
 
+    @abstractmethod
+    def _get_bounding_box(self) -> str:
+        pass
+
     # TODO : supprimer
     is_iframe = False
     is_carte = False
@@ -187,12 +190,6 @@ class SearchActeursView(
         if not self.is_carte:
             kwargs.update(is_formulaire=True)
 
-        if form.is_valid():
-            self.cleaned_data = form.cleaned_data
-        else:
-            # TODO : refacto forms : handle this case properly
-            self.cleaned_data = form.cleaned_data
-
         # Manage the selection of sous_categorie_objet and actions
         acteurs = self._build_acteurs_queryset_from_sous_categorie_objet_and_actions()
         bbox, acteurs = self._build_acteurs_queryset_from_location(acteurs, **kwargs)
@@ -258,7 +255,7 @@ class SearchActeursView(
             "proposition_services__action__groupe_action",
             "labels",
             "action_principale",
-        )
+        ).with_displayable_labels()
         if getattr(acteurs, "_needs_reparer_bonus", False):
             acteurs = acteurs.with_bonus().with_reparer()
 
@@ -267,16 +264,11 @@ class SearchActeursView(
         return bbox, acteurs
 
     def _bbox_and_acteurs_from_location_or_epci(self, acteurs):
-        custom_bbox = cast(
-            str, self.get_data_from_request_or_bounded_form("bounding_box")
-        )
-        center = center_from_frontend_bbox(custom_bbox)
-        latitude = center[1] or self.get_data_from_request_or_bounded_form("latitude")
-        longitude = center[0] or self.get_data_from_request_or_bounded_form("longitude")
-
-        # Store for later assignation in get_context_data
-        if latitude and longitude:
-            self.location = json.dumps({"latitude": latitude, "longitude": longitude})
+        custom_bbox = self._get_bounding_box()
+        # center = center_from_frontend_bbox(custom_bbox) if custom_bbox else ["", ""]
+        latitude = self.get_data_from_request_or_bounded_form("latitude")
+        longitude = self.get_data_from_request_or_bounded_form("longitude")
+        self.location = json.dumps({"latitude": latitude, "longitude": longitude})
 
         # A BBOX was set in the Configurateur OR the user interacted with
         # the map, that set a bounding box in its browser.
@@ -461,27 +453,17 @@ def acteur_detail(request, uuid):
     direction = request.GET.get("direction")
 
     try:
-        # Import here to avoid circular imports
-        from qfdmo.models.acteur import LabelQualite
-
-        # Prefetch labels ordered by bonus (desc) and type_enseigne
-        # This allows the template tag to simply take the first label
-        ordered_labels = Prefetch(
-            "labels",
-            queryset=LabelQualite.objects.filter(afficher=True).order_by(
-                "-bonus", "type_enseigne"
-            ),
-            to_attr="displayable_labels_ordered",
+        displayed_acteur = (
+            DisplayedActeur.objects.prefetch_related(
+                "proposition_services__sous_categories",
+                "proposition_services__sous_categories__categorie",
+                "proposition_services__action__groupe_action",
+                "labels",
+                "sources",
+            )
+            .with_displayable_labels()
+            .get(uuid=uuid)
         )
-
-        displayed_acteur = DisplayedActeur.objects.prefetch_related(
-            "proposition_services__sous_categories",
-            "proposition_services__sous_categories__categorie",
-            "proposition_services__action__groupe_action",
-            ordered_labels,
-            "labels",  # Keep original for other uses
-            "sources",
-        ).get(uuid=uuid)
     except DisplayedActeur.DoesNotExist:
         # FIXME: it is impossible to get check if the revisionacteur has a parent
         # because the revision_acteur doesn't have any UUID
