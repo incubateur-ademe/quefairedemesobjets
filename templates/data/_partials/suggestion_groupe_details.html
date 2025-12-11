@@ -4,8 +4,6 @@
 
 {% block suggestion_details %}
 
-    <input type="hidden" name="fields_values" value='{{ fields_values|tojson }}' data-suggestion-groupe-row-target="fieldsValues">
-    <input type="hidden" name="fields_groups" value='{{ fields_groups|tojson }}' data-suggestion-groupe-row-target="fieldsGroups">
     {% if errors and errors.error %}
         <div class="qf-text-red-500">
             {{ errors.error }}
@@ -133,14 +131,25 @@
             </div>
         {% elif tab == "localisation" %}
             {% if localisation %}
-                <div data-controller="admin--location-map">
-                    <script data-admin--location-map-target="latslongs" data-localisation-value='{{ localisation|tojson }}'></script>
-                        <div
-                            data-admin--location-map-target="mapContainer"
-                            class="qf-w-full qf-h-[400px] qf-border qf-rounded"
-                        ></div>
+                <div
+                    class="
+                    qf-w-1/2
+                    qf-aspect-video
+                    qf-relative"
+                    data-controller="map"
+                    data-map-initial-zoom-value="3"
+                    data-map-theme-value="osm"
+                >
+                    <div
+                        data-map-target="mapContainer"
+                        class="qf-inset-0 qf-h-full qf-relative qf-z-0"
+                    >
+                        {% for point in localisation.points %}
+                            {% location_pinpoint_tag point.latitude point.longitude point.color point.draggable %}
+                        {% endfor %}
                     </div>
                 </div>
+
 
             {% else %}
                 <p>Aucune localisation disponible pour cet acteur.</p>

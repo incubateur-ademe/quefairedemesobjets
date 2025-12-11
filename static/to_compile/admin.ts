@@ -7,13 +7,13 @@ import * as Turbo from "@hotwired/turbo"
 
 // TODO : import here  the stimulus controllers
 import SuggestionGroupeRowController from "./controllers/admin/suggestion_groupe_row_controller"
-import LocationMapController from "./controllers/admin/location_map_controller"
+import MapController from "./controllers/carte/map_controller"
 
 window.stimulus = Application.start()
 
 // TODO : register here the stimulus controllers
 stimulus.register("suggestion-groupe-row", SuggestionGroupeRowController)
-stimulus.register("admin--location-map", LocationMapController)
+stimulus.register("map", MapController)
 
 Turbo.session.drive = false
 

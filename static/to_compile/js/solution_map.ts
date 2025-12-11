@@ -27,37 +27,51 @@ export class SolutionMap {
     location,
     controller,
     initialZoom = DEFAULT_INITIAL_ZOOM,
+    theme,
   }: {
     selector: HTMLDivElement
     location: Location
     controller: MapController
     initialZoom: number
+    theme: string
   }) {
     this.#location = location
     this.#controller = controller
+
+    // Définir uniquement la source nécessaire selon le thème
+    const sources: Record<string, any> = {}
+    const sourceId = theme === "carto-light" ? "carto-light" : "osm"
+
+    if (theme === "carto-light") {
+      sources["carto-light"] = {
+        type: "raster",
+        tiles: [
+          "https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+          "https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+          "https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+        ],
+        tileSize: 256,
+      }
+    } else {
+      // Utiliser Carto pour le thème osm également, car les tuiles OSM directes peuvent être bloquées
+      // Carto utilise les données OSM mais avec un service plus fiable
+      sources.osm = {
+        type: "raster",
+        tiles: [
+          "https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png",
+          "https://b.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png",
+          "https://c.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png",
+        ],
+        tileSize: 256,
+      }
+    }
 
     this.map = new Map({
       container: selector,
       style: {
         version: 8,
-        sources: {
-          "carto-light": {
-            type: "raster",
-            tiles: [
-              "https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
-              "https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
-              "https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
-            ],
-            tileSize: 256,
-          },
-        },
-        layers: [
-          {
-            id: "carto-light-layer",
-            type: "raster",
-            source: "carto-light",
-          },
-        ],
+        sources,
+        layers: [{ type: "raster", id: `${theme}-layer`, source: sourceId }],
       },
       zoom: initialZoom,
       maxZoom: DEFAULT_MAX_ZOOM,
@@ -99,6 +113,7 @@ export class SolutionMap {
     actors.forEach(function (actor: HTMLElement) {
       const longitude = actor.dataset?.longitude
       const latitude = actor.dataset?.latitude
+      const draggable = actor.dataset?.draggable === "true"
 
       if (longitude && latitude) {
         let longitudeFloat = parseFloat(longitude.replace(",", "."))
@@ -107,13 +122,32 @@ export class SolutionMap {
 
         const marker: Marker = new maplibregl.Marker({
           element: actor,
+          draggable: draggable,
         }).setLngLat([longitudeFloat, latitudeFloat])
+
+        if (draggable) {
+          this.#setupMarkerDragListener(marker)
+        }
 
         marker.addTo(this.map)
         points.push([latitudeFloat, longitudeFloat])
       }
     }, this)
     this.fitBounds(points, bboxValue)
+  }
+
+  #setupMarkerDragListener(marker: Marker) {
+    marker.on("dragend", () => {
+      const lngLat = marker.getLngLat()
+      this.#controller.dispatch("markerDragged", {
+        detail: {
+          latitude: lngLat.lat.toString(),
+          longitude: lngLat.lng.toString(),
+        },
+        bubbles: true,
+        cancelable: false,
+      })
+    })
   }
 
   fitBounds(points, bboxValue) {
