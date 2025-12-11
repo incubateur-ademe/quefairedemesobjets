@@ -10,16 +10,14 @@
         data-testid="rechercher-adresses-submit"
     >
         <div class="form-group">
-            {{ form.adresse.label_tag }}
-            {% if form.adresse.help_text %}
+            {{ forms.map.adresse.label_tag }}
+            {% if forms.map.adresse.help_text %}
                 <span class="fr-hint-text fr-mt-1v" id="{{ form.adresse.id_for_label }}_helptext">
-                    {{ form.adresse.help_text }}
+                    {{ forms.map.adresse.help_text }}
                 </span>
             {% endif %}
-            {{ form.adresse }}
+            {{ forms.map.adresse }}
         </div>
-        {{ form.longitude }}
-        {{ form.latitude }}
     </div>
     <p class="fr-error-text fr-mt-1v qf-hidden" data-search-solution-form-target="adresseError">
         Veuillez saisir une adresse

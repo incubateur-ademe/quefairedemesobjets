@@ -188,12 +188,6 @@ class SearchActeursView(
         if not self.is_carte:
             kwargs.update(is_formulaire=True)
 
-        if form.is_valid():
-            self.cleaned_data = form.cleaned_data
-        else:
-            # TODO : refacto forms : handle this case properly
-            self.cleaned_data = form.cleaned_data
-
         # Manage the selection of sous_categorie_objet and actions
         acteurs = self._build_acteurs_queryset_from_sous_categorie_objet_and_actions()
         bbox, acteurs = self._build_acteurs_queryset_from_location(acteurs, **kwargs)
@@ -269,13 +263,10 @@ class SearchActeursView(
 
     def _bbox_and_acteurs_from_location_or_epci(self, acteurs):
         custom_bbox = self._get_bounding_box()
-        center = center_from_frontend_bbox(custom_bbox) if custom_bbox else ["", ""]
-        latitude = center[1] or self.get_data_from_request_or_bounded_form("latitude")
-        longitude = center[0] or self.get_data_from_request_or_bounded_form("longitude")
-
-        # Store for later assignation in get_context_data
-        if latitude and longitude:
-            self.location = json.dumps({"latitude": latitude, "longitude": longitude})
+        # center = center_from_frontend_bbox(custom_bbox) if custom_bbox else ["", ""]
+        latitude = self.get_data_from_request_or_bounded_form("latitude")
+        longitude = self.get_data_from_request_or_bounded_form("longitude")
+        self.location = json.dumps({"latitude": latitude, "longitude": longitude})
 
         # A BBOX was set in the Configurateur OR the user interacted with
         # the map, that set a bounding box in its browser.

@@ -36,12 +36,53 @@ from qfdmo.widgets import (
 )
 
 
-class MapForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
+def get_epcis_for_carte_form():
+    return [(code, code) for code in cast(list[str], epcis_from(["code"]))]
+
+
+class MapForm(GetFormMixin, CarteConfigFormMixin, forms.Form):
+    epci_codes = forms.MultipleChoiceField(
+        choices=get_epcis_for_carte_form,
+        widget=forms.MultipleHiddenInput(),
+        required=False,
+    )
+    adresse = forms.CharField(
+        widget=AutoCompleteInput(
+            attrs={
+                "class": "fr-input",
+                "placeholder": "Rechercher autour d'une adresse",
+                "autocomplete": "off",
+                "aria-label": "Saisir une adresse - obligatoire",
+            },
+            data_controller="address-autocomplete",
+        ),
+        label="",
+        required=False,
+    )
     bounding_box = forms.CharField(
         widget=forms.HiddenInput(
             attrs={
                 "data-search-solution-form-target": "bbox",
                 "data-map-target": "bbox",
+            }
+        ),
+        required=False,
+    )
+    latitude = forms.FloatField(
+        widget=forms.HiddenInput(
+            attrs={
+                "data-address-autocomplete-target": "latitude",
+                "data-search-solution-form-target": "latitudeInput",
+            }
+        ),
+        required=False,
+    )
+
+    longitude = forms.FloatField(
+        widget=forms.HiddenInput(
+            attrs={
+                "data-address-autocomplete-target": "longitude",
+                "data-search-solution-form-target": "longitudeInput",
             }
         ),
         required=False,
@@ -477,26 +518,6 @@ class ActionDirectionForm(GetFormMixin, DsfrBaseForm):
         # TODO: handle label in UI without displaying it
         label="",
         # label="Direction des actions",
-        required=False,
-    )
-
-
-def get_epcis_for_carte_form():
-    return [(code, code) for code in cast(list[str], epcis_from(["code"]))]
-
-
-class CarteForm(AddressesForm):
-    adresse = forms.CharField(
-        widget=AutoCompleteInput(
-            attrs={
-                "class": "fr-input",
-                "placeholder": "Rechercher autour d'une adresse",
-                "autocomplete": "off",
-                "aria-label": "Saisir une adresse - obligatoire",
-            },
-            data_controller="address-autocomplete",
-        ),
-        label="",
         required=False,
     )
 
