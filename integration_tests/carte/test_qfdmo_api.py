@@ -28,7 +28,11 @@ def sous_categorie():
 @pytest.fixture
 def displayed_acteur():
     DisplayedActeurFactory(
-        pk="UN-ACTEUR", location=Point(2.3, 48.86), statut=ActeurStatus.ACTIF
+        pk="UN-ACTEUR",
+        location=Point(2.3, 48.86),
+        longitude=2.3,
+        latitude=48.86,
+        statut=ActeurStatus.ACTIF,
     )
 
 
