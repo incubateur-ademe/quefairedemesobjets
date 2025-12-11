@@ -19,7 +19,7 @@ test.describe("🗺️ Check display of Carte according to resolutions", () => {
           width: resolution.width,
           height: resolution.height,
         })
-        await page.goto(`https://quefairedemesdechets.ademe.local/carte`, {
+        await page.goto(`/carte`, {
           waitUntil: "domcontentloaded",
         })
 
@@ -52,7 +52,7 @@ test.describe("🗺️ Check display of Carte according to resolutions", () => {
           width: resolution.width,
           height: resolution.height,
         })
-        await page.goto(`https://quefairedemesdechets.ademe.local/carte`, {
+        await page.goto(`/carte`, {
           waitUntil: "domcontentloaded",
         })
 
@@ -69,7 +69,7 @@ test.describe("🗺️ Check display of Carte according to resolutions", () => {
           width: resolution.width,
           height: resolution.height,
         })
-        await page.goto(`https://quefairedemesdechets.ademe.local/carte`, {
+        await page.goto(`/carte`, {
           waitUntil: "domcontentloaded",
         })
 
@@ -97,7 +97,7 @@ test.describe("🗺️ Check display of Carte according to resolutions", () => {
           width: resolution.width,
           height: resolution.height,
         })
-        await page.goto(`https://quefairedemesdechets.ademe.local/carte`, {
+        await page.goto(`/carte`, {
           waitUntil: "domcontentloaded",
         })
 
@@ -114,7 +114,7 @@ test.describe("🗺️ Check display of Carte according to resolutions", () => {
           width: resolution.width,
           height: resolution.height,
         })
-        await page.goto(`https://quefairedemesdechets.ademe.local/carte`, {
+        await page.goto(`/carte`, {
           waitUntil: "domcontentloaded",
         })
 
