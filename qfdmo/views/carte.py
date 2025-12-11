@@ -16,7 +16,6 @@ from qfdmd.models import Produit
 from qfdmo.forms import (
     ActionDirectionForm,
     AutoSubmitLegendeForm,
-    CarteForm,
     FiltresForm,
     FiltresFormWithoutSynonyme,
     LegacySupportForm,
@@ -76,7 +75,8 @@ class CarteFormsInstance(TypedDict):
 class CarteSearchActeursView(SearchActeursView):
     is_carte = True
     template_name = "ui/pages/carte.html"
-    form_class = CarteForm
+    # TODO: voir si on peut mettre à None ici
+    form_class = MapForm
     filtres_form_class = FiltresForm
 
     @property

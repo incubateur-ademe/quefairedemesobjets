@@ -43,7 +43,9 @@
     >
         <input type="hidden" name="{{ MAP_CONTAINER_ID }}" value="{% main_frame_id %}">
         {{ forms.legacy }}
-        {{ forms.map }}
+        {{ forms.map.latitude }}
+        {{ forms.map.longitude }}
+        {{ forms.map.bounding_box }}
         <section class="map-grid qf-relative">
             {% include 'ui/components/carte/header.html' %}
 
