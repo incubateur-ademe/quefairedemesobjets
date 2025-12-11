@@ -89,10 +89,10 @@ models:
         data_type: boolean
         data_tests:
           - not_null
-      - name: enfants_liste
+      - name: liste_enfants
         description: "La liste des enfants de l'acteur"
         data_type: jsonb
-      - name: enfants_nombre
+      - name: nombre_enfants
         description: "Le nombre d'enfants de l'acteur"
         data_type: integer
       - name: est_dans_carte
