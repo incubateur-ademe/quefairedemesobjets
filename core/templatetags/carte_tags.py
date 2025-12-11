@@ -234,13 +234,10 @@ def location_pinpoint_tag(
     return {
         "latitude": latitude,
         "longitude": longitude,
-        "marker_icon": "",
         "marker_couleur": color,
         "mask_id": color,
-        "marker_icon_file": "",
         "marker_bonus": False,
         "marker_fill_background": draggable,
-        "marker_icon_extra_classes": "",
         "draggable": draggable,
     }
 
