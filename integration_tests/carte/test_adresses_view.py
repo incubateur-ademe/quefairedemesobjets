@@ -1,3 +1,5 @@
+from urllib.parse import urlencode
+
 import pytest
 from django.contrib.gis.geos import Point
 from django.http import HttpRequest
@@ -520,15 +522,32 @@ class TestLayers:
         assert 'data-testid="adresse-missing"' in str(response.content)
 
     def test_adresse_missing_layer_is_not_displayed_with_bbox(self, client):
-        url = "/carte=1&direction=jai&bounding_box=%7B%22southWest%22%3A%7B%22lat%22%3A48.916%2C%22lng%22%3A2.298202514648438%7D%2C%22northEast%22%3A%7B%22lat%22%3A48.98742568330284%2C%22lng%22%3A2.483596801757813%7D%7D"  # noqa: E501
+        params = {
+            "carte": 1,
+            "direction": "jai",
+            "bounding_box": (
+                '{"southWest":{"lat":48.916,"lng":2.298202514648438},'
+                '"northEast":{"lat":48.98742568330284,"lng":2.483596801757813}}'
+            ),
+        }
+        url = f"/{urlencode(params)}"
         response = client.get(url)
         assert 'data-testid="adresse-missing"' not in str(response.content)
 
     def test_adresse_missing_layer_is_not_displayed_for_epcis(
         self, client, action_reparer
     ):
-        url = "/carte?action_list=reparer%7Cdonner%7Cechanger%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cacheter%7Crevendre&epci_codes=200055887&limit=50"  # noqa: E501
+        params = {
+            "action_list": (
+                "reparer|donner|echanger|preter|emprunter|louer|"
+                "mettreenlocation|acheter|revendre"
+            ),
+            "epci_codes": "200055887",
+            "limit": "50",
+        }
+        url = f"/carte?{urlencode(params)}"
         response = client.get(url)
+
         assert 'data-testid="adresse-missing"' not in str(response.content)
 
 

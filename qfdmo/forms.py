@@ -261,6 +261,7 @@ class LegacySupportForm(GetFormMixin, forms.Form):
         "action_displayed",
         "label_reparacteur",
         "pas_exclusivite_reparation",
+        "epci_codes",
         CarteConfig.SOUS_CATEGORIE_QUERY_PARAM,
     ]
 
@@ -474,12 +475,6 @@ class CarteForm(AddressesForm):
             data_controller="address-autocomplete",
         ),
         label="",
-        required=False,
-    )
-
-    epci_codes = forms.MultipleChoiceField(
-        choices=get_epcis_for_carte_form,
-        widget=forms.MultipleHiddenInput(),
         required=False,
     )
 

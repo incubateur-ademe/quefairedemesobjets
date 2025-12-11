@@ -59,7 +59,7 @@ def epcis_from(fields: List[str] = []) -> Union[List, List[tuple]]:
     return epcis
 
 
-def retrieve_epci_geojson(epci):
+def retrieve_epci_geojson_from_api_or_cache(epci):
     all_codes = epcis_from(["code"])
     if epci not in all_codes:
         raise ValueError(f"The provided EPCI code does not seem to exist | {epci}")
