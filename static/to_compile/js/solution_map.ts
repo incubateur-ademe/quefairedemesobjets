@@ -38,7 +38,7 @@ export class SolutionMap {
     this.#location = location
     this.#controller = controller
 
-    // Définir uniquement la source nécessaire selon le thème
+    // Manage sources following theme
     const sources: Record<string, any> = {}
     const sourceId = theme === "carto-light" ? "carto-light" : "osm"
 
@@ -53,49 +53,51 @@ export class SolutionMap {
         tileSize: 256,
       }
     } else {
-      // Utiliser Carto pour le thème osm également, car les tuiles OSM directes peuvent être bloquées
-      // Carto utilise les données OSM mais avec un service plus fiable
+      // Use OSM standard tiles with multiple servers as fallback
+      // These tiles contain all OSM data and are very reliable
+      // Multiple servers (a, b, c) allow better availability
       sources.osm = {
         type: "raster",
         tiles: [
-          "https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png",
-          "https://b.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png",
-          "https://c.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png",
+          "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+          "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
+          "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
+          "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png",
         ],
         tileSize: 256,
       }
-    }
 
-    this.map = new Map({
-      container: selector,
-      style: {
-        version: 8,
-        sources,
-        layers: [{ type: "raster", id: `${theme}-layer`, source: sourceId }],
-      },
-      zoom: initialZoom,
-      maxZoom: DEFAULT_MAX_ZOOM,
-      center: DEFAULT_LOCATION,
-      attributionControl: {
-        compact: true,
-        customAttribution: "© OpenStreetMap contributors, © CARTO",
-      },
-    })
-    // Ajouter les contrôles de zoom
-    this.#addZoomControl()
-
-    if (
-      this.#location.latitude !== undefined &&
-      this.#location.longitude !== undefined
-    ) {
-      new maplibregl.Marker({
-        element: this.#generateHomeHTMLMarker(),
+      this.map = new Map({
+        container: selector,
+        style: {
+          version: 8,
+          sources,
+          layers: [{ type: "raster", id: `${theme}-layer`, source: sourceId }],
+        },
+        zoom: initialZoom,
+        maxZoom: DEFAULT_MAX_ZOOM,
+        center: DEFAULT_LOCATION,
+        attributionControl: {
+          compact: true,
+          customAttribution: "© OpenStreetMap contributors, © CARTO",
+        },
       })
-        .setLngLat([this.#location.longitude, this.#location.latitude])
-        .setPopup(
-          new maplibregl.Popup().setHTML("<p><strong>Vous êtes ici !</strong></p>"),
-        )
-        .addTo(this.map)
+      // Add zoom controls
+      this.#addZoomControl()
+
+      if (
+        this.#location.latitude !== undefined &&
+        this.#location.longitude !== undefined
+      ) {
+        new maplibregl.Marker({
+          element: this.#generateHomeHTMLMarker(),
+        })
+          .setLngLat([this.#location.longitude, this.#location.latitude])
+          .setPopup(
+            new maplibregl.Popup().setHTML("<p><strong>Vous êtes ici !</strong></p>"),
+          )
+          .addTo(this.map)
+      }
     }
   }
 
@@ -171,8 +173,8 @@ export class SolutionMap {
       const lngs = points.map((point) => point[1])
       const lats = points.map((point) => point[0])
       const bounds: LngLatBoundsLike = [
-        [Math.min(...lngs), Math.min(...lats)], // Sud-ouest
-        [Math.max(...lngs), Math.max(...lats)], // Nord-est
+        [Math.min(...lngs), Math.min(...lats)], // South-west
+        [Math.max(...lngs), Math.max(...lats)], // North-east
       ]
       this.map.fitBounds(bounds, fitBoundsOptions)
     }
