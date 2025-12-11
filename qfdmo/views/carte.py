@@ -518,6 +518,7 @@ class CarteConfigView(DetailView, CarteSearchActeursView):
                 "action",
                 "direction",
                 "direction__actions",
+                "epci",
             )
         )
 
