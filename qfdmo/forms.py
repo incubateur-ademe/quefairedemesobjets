@@ -1,5 +1,4 @@
 import base64
-import uuid
 from typing import cast
 
 from django import forms
@@ -7,13 +6,13 @@ from django.core.cache import cache
 from django.db.models import TextChoices
 from django.db.utils import cached_property
 from django.http import HttpRequest, QueryDict
-from django.shortcuts import reverse
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from dsfr.enums import SegmentedControlChoices
 from dsfr.forms import DsfrBaseForm
 from dsfr.widgets import SegmentedControl
 
+from core.widgets import AddressAutocompleteInput, SynonymeAutocompleteInput
 from qfdmd.models import Synonyme
 from qfdmo.fields import GroupeActionChoiceField, LabelQualiteChoiceField
 from qfdmo.geo_api import epcis_from, formatted_epcis_as_list_of_tuple
@@ -40,36 +39,6 @@ class AddressesForm(forms.Form):
     def load_choices(self, request: HttpRequest, **kwargs) -> None:
         if address_placeholder := request.GET.get("address_placeholder"):
             self.fields["adresse"].widget.attrs["placeholder"] = address_placeholder
-
-    bounding_box = forms.CharField(
-        widget=forms.HiddenInput(
-            attrs={
-                "data-search-solution-form-target": "bbox",
-                "data-map-target": "bbox",
-            }
-        ),
-        required=False,
-    )
-
-    latitude = forms.FloatField(
-        widget=forms.HiddenInput(
-            attrs={
-                "data-address-autocomplete-target": "latitude",
-                "data-search-solution-form-target": "latitudeInput",
-            }
-        ),
-        required=False,
-    )
-
-    longitude = forms.FloatField(
-        widget=forms.HiddenInput(
-            attrs={
-                "data-address-autocomplete-target": "longitude",
-                "data-search-solution-form-target": "longitudeInput",
-            }
-        ),
-        required=False,
-    )
 
 
 class FormulaireForm(AddressesForm):
@@ -167,6 +136,35 @@ class FormulaireForm(AddressesForm):
         ),
         help_text="20 av. du Grésillé 49000 Angers",
         label="Autour de l'adresse suivante ",
+        required=False,
+    )
+    bounding_box = forms.CharField(
+        widget=forms.HiddenInput(
+            attrs={
+                "data-search-solution-form-target": "bbox",
+                "data-map-target": "bbox",
+            }
+        ),
+        required=False,
+    )
+
+    latitude = forms.FloatField(
+        widget=forms.HiddenInput(
+            attrs={
+                "data-address-autocomplete-target": "latitude",
+                "data-search-solution-form-target": "latitudeInput",
+            }
+        ),
+        required=False,
+    )
+
+    longitude = forms.FloatField(
+        widget=forms.HiddenInput(
+            attrs={
+                "data-address-autocomplete-target": "longitude",
+                "data-search-solution-form-target": "longitudeInput",
+            }
+        ),
         required=False,
     )
 
@@ -305,43 +303,13 @@ class AutoSubmitLegendeForm(AutoSubmitMixin, LegendeForm):
     autosubmit_fields = ["groupe_action"]
 
 
-class NextAutocompleteInput(forms.TextInput):
-    template_name = "ui/forms/widgets/autocomplete/input.html"
-
-    def __init__(
-        self,
-        search_view,
-        limit=5,
-        *args,
-        **kwargs,
-    ):
-        # TODO: add optional template args
-        self.search_view = search_view
-        self.limit = limit
-        self.turbo_frame_id = str(uuid.uuid4())
-
-        super().__init__(*args, **kwargs)
-
-    def get_context(self, name, value, attrs):
-        context = super().get_context(name, value, attrs)
-        endpoint_url = reverse(self.search_view)
-        return {
-            **context,
-            "endpoint_url": endpoint_url,
-            "limit": self.limit,
-            "turbo_frame_id": self.turbo_frame_id,
-        }
-
-
 class FiltresForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
     carte_config_initial_mapping = {
         "label_qualite": "label_qualite",
     }
     synonyme = forms.ModelChoiceField(
         queryset=Synonyme.objects.all(),
-        widget=NextAutocompleteInput(
-            search_view="autocomplete_synonyme",
-        ),
+        widget=SynonymeAutocompleteInput(),
         help_text="pantalon, perceuse, canapé...",
         label="Indiquer un objet",
         required=False,
@@ -480,6 +448,53 @@ class CarteForm(AddressesForm):
     epci_codes = forms.MultipleChoiceField(
         choices=get_epcis_for_carte_form,
         widget=forms.MultipleHiddenInput(),
+        required=False,
+    )
+
+
+class MapForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
+    """Form for map-based address search with autocomplete.
+
+    Uses NextAutocompleteInput to provide address suggestions from the
+    French government geocoding service (data.geopf.fr).
+    """
+
+    adresse = forms.CharField(
+        label="",
+        required=False,
+        widget=AddressAutocompleteInput(
+            attrs={
+                "class": "fr-input",
+                "placeholder": "Rechercher autour d'une adresse",
+                "autocomplete": "off",
+                "aria-label": "Saisir une adresse",
+                "data-map-address-autocomplete-target": "input",
+            },
+        ),
+    )
+
+    latitude = forms.DecimalField(
+        widget=forms.HiddenInput(
+            attrs={
+                "data-map-address-autocomplete-target": "latitudeInput",
+            }
+        ),
+        required=False,
+        localize=True,
+    )
+
+    longitude = forms.DecimalField(
+        widget=forms.HiddenInput(
+            attrs={
+                "data-map-address-autocomplete-target": "longitudeInput",
+            }
+        ),
+        required=False,
+        localize=True,
+    )
+
+    bounding_box = forms.CharField(
+        widget=forms.HiddenInput(),
         required=False,
     )
 

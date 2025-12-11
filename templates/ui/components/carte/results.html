@@ -7,7 +7,6 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
 {% endcomment %}
 
 {% load carte_tags %}
-{% with address_ok=form.initial.adresse|default:form.initial.bounding_box|default:form.initial.epci_codes|default:form.initial.latitude %}
 <div
     class="
     qf-relative
@@ -24,7 +23,7 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
     {% endif %}
     {% endif %}
 >
-    {% if address_ok %}
+    {% if has_location_data %}
         {% include "ui/components/carte/legend.html" %}
         {% include "ui/components/carte/shared/_search_in_zone.html" %}
         {% include "ui/components/carte/buttons/ajouter_un_lieu.html" %}
@@ -39,7 +38,7 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
         {% include "ui/components/carte/pinpoints/home.html" %}
     </div>
 
-    {% if address_ok %}
+    {% if has_location_data %}
         <div class="qf-absolute qf-left-0 qf-right-0 qf-bottom-0 qf-text-center qf-bg-white lg:qf-hidden">
             {% include "ui/components/carte/_declaration_accessibilite.html" %}
         </div>
@@ -52,4 +51,3 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
         {% include "ui/components/carte/shared/disclaimers/adresse_missing.html" %}
     {% endif %}
 </div>
-{% endwith %}
