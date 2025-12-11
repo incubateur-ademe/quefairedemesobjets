@@ -269,7 +269,7 @@ class SearchActeursView(
 
     def _bbox_and_acteurs_from_location_or_epci(self, acteurs):
         custom_bbox = self._get_bounding_box()
-        center = center_from_frontend_bbox(custom_bbox)
+        center = center_from_frontend_bbox(custom_bbox) if custom_bbox else ["", ""]
         latitude = center[1] or self.get_data_from_request_or_bounded_form("latitude")
         longitude = center[0] or self.get_data_from_request_or_bounded_form("longitude")
 
