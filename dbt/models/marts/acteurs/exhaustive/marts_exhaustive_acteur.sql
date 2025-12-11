@@ -9,7 +9,7 @@ WITH enfants AS (
 select a.*,
     COALESCE(cae.code_commune_insee, '') as code_commune_insee,
     epci.id as epci_id,
-    -- TODO : add lat and long, issue intrpreting double precision by dbt
+    -- TODO : add lat and long, issue interpreting double precision by dbt
     CAST(ST_X(a.location::geometry) AS DOUBLE PRECISION) AS latitude,
     CAST(ST_Y(a.location::geometry) AS DOUBLE PRECISION) AS longitude,
     e.enfants IS NOT NULL AS est_parent,
