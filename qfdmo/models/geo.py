@@ -1,6 +1,9 @@
 from django.db import models
 
-from qfdmo.geo_api import bbox_from_list_of_geojson, retrieve_epci_geojson
+from qfdmo.geo_api import (
+    bbox_from_list_of_geojson,
+    retrieve_epci_geojson_from_api_or_cache,
+)
 from qfdmo.map_utils import compile_frontend_bbox
 
 
@@ -8,7 +11,9 @@ class EPCIManager(models.Manager):
     def get_bbox_from_epci_codes(self, codes):
         epcis = self.filter(code__in=codes)
         if epcis.exists():
-            geojson_list = [retrieve_epci_geojson(code) for code in codes]
+            geojson_list = [
+                retrieve_epci_geojson_from_api_or_cache(code) for code in codes
+            ]
             bbox = bbox_from_list_of_geojson(geojson_list, buffer=0)
             return compile_frontend_bbox(bbox)
         return None

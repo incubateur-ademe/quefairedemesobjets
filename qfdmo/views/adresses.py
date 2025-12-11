@@ -20,7 +20,7 @@ from django.views.generic.edit import FormView
 from wagtail.query import Any
 
 from qfdmd.models import Synonyme
-from qfdmo.geo_api import retrieve_epci_geojson
+from qfdmo.geo_api import retrieve_epci_geojson_from_api_or_cache
 from qfdmo.map_utils import center_from_frontend_bbox, sanitize_frontend_bbox
 from qfdmo.models import Acteur, ActeurStatus, DisplayedActeur, RevisionActeur
 from qfdmo.models.action import get_reparer_action_id
@@ -309,7 +309,9 @@ class SearchActeursView(
 
     def _get_acteurs_from_epci_codes(self, acteurs):
         if epci_codes := self._get_epci_codes():
-            geojson_list = [retrieve_epci_geojson(code) for code in epci_codes]
+            geojson_list = [
+                retrieve_epci_geojson_from_api_or_cache(code) for code in epci_codes
+            ]
             if geojson_list:
                 acteurs = acteurs.in_geojson(
                     [json.dumps(geojson) for geojson in geojson_list]

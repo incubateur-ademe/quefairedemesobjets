@@ -7,7 +7,9 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
 {% endcomment %}
 
 {% load carte_tags %}
-{% with address_ok=form.initial.adresse|default:form.initial.bounding_box|default:form.initial.latitude|default:acteurs|length %}
+
+{% with address_ok=form.initial.adresse|default:form.initial.bounding_box|default:form.initial.latitude|default:epci_codes %}
+
 <div
     class="
     qf-relative

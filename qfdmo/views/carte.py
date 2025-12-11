@@ -348,6 +348,13 @@ class CarteSearchActeursView(SearchActeursView):
         # it needs to be kept after the forms are initialised above.
         context = super().get_context_data(**kwargs)
 
+        # TODO address_ok in result.html use this epci_codes from context
+        # when address_ok will be remove from template and the condition will be
+        # initialized from view, this context assignation will be removed
+        context["epci_codes"] = []
+        if epci_codes := self._get_epci_codes():
+            context["epci_codes"] = epci_codes
+
         carte_config = self._get_carte_config()
         icon_lookup = self._build_icon_lookup(carte_config) if carte_config else {}
 
