@@ -131,6 +131,7 @@
             </div>
         {% elif tab == "localisation" %}
             {% if localisation %}
+                <div class="qf-flex qf-flex-row qf-gap-1v">
                 <div
                     class="
                     qf-w-1/2
@@ -149,8 +150,27 @@
                         {% endfor %}
                     </div>
                 </div>
-
-
+                <div class="qf-w-1/2">
+                    <!--display google streetview from last localisation.points in a iframe-->
+                    {% if localisation.points %}
+                        {% for point in localisation.points %}
+                            {% if forloop.last %}
+                                {# La vue proxy retourne une page HTML complète avec l'iframe, masquant la clé API #}
+                                <iframe
+                                width="600"
+                                height="450"
+                                style="border:0"
+                                loading="lazy"
+                                allowfullscreen
+                                src="{% url 'data:google_streetview_proxy' %}?latitude={{ point.latitude }}&longitude={{ point.longitude }}&heading=210&pitch=10&fov=80">
+                              </iframe>
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <p>Aucune localisation disponible pour afficher Street View.</p>
+                    {% endif %}
+                  </div>
+                </div>
             {% else %}
                 <p>Aucune localisation disponible pour cet acteur.</p>
             {% endif %}
