@@ -61,6 +61,7 @@ CARTE_MAX_SOLUTION_DISPLAYED = decouple.config(
 )
 DISTANCE_MAX = decouple.config("DISTANCE_MAX", cast=int, default=30000)
 
+GOOGLE_MAPS_API_KEY = decouple.config("GOOGLE_MAPS_API_KEY", cast=str, default="")
 
 NB_CORRECTION_DISPLAYED = decouple.config(
     "NB_CORRECTION_DISPLAYED", cast=int, default=100
