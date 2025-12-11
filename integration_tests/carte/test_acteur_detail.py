@@ -225,6 +225,8 @@ class TestSEO:
             ville="Groland",
             code_postal="12345",
             location=Point(1, 2),
+            longitude=1.0,
+            latitude=2.0,
         )
         return adresse
 

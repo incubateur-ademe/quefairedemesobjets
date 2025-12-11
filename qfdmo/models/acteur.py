@@ -1265,7 +1265,7 @@ class VuePerimetreADomicile(BasePerimetreADomicile):
     )
 
 
-class DisplayedActeur(FinalActeur, LatLngPropertiesMixin):
+class DisplayedActeur(FinalActeur):
     objects = DisplayedActeurManager()
 
     def natural_key(self):
