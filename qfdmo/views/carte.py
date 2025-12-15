@@ -25,7 +25,7 @@ from qfdmo.forms import (
 )
 from qfdmo.models import CarteConfig
 from qfdmo.models.action import Action
-from qfdmo.views.adresses import SearchActeursView
+from qfdmo.views.adresses import AbstractSearchActeursView
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +72,7 @@ class CarteFormsInstance(TypedDict):
     legende_filtres: None | LegendeForm
 
 
-class CarteSearchActeursView(SearchActeursView):
+class CarteSearchActeursView(AbstractSearchActeursView):
     is_carte = True
     template_name = "ui/pages/carte.html"
     # TODO: voir si on peut mettre à None ici
@@ -81,8 +81,12 @@ class CarteSearchActeursView(SearchActeursView):
 
     @override
     def _should_show_results(self):
-        return True
-        # self._get_ui_form("map").is_bound
+        return (
+            self._get_field_value_for("map", "adresse")
+            or self._get_bounding_box()
+            or self._get_latitude()
+            or self._get_epci_codes()
+        )
 
     @property
     def forms(self) -> CarteForms:
@@ -344,14 +348,28 @@ class CarteSearchActeursView(SearchActeursView):
         location = getattr(self, "location", None)
         if not getattr(acteurs, "_has_distance_field", False) and location:
             location_data = json.loads(location)
-            reference_point = Point(
-                location_data["longitude"], location_data["latitude"], srid=4326
-            )
-            # Convert to list and sort in Python since queryset is already sliced
-            acteurs_list = list(acteurs)
-            for acteur in acteurs_list:
-                acteur.distance = acteur.location.distance(reference_point)
-            acteurs = sorted(acteurs_list, key=lambda a: a.distance)
+            longitude = location_data.get("longitude")
+            latitude = location_data.get("latitude")
+
+            # Only create Point if we have valid coordinates
+            # Convert to float and validate (skip if None or empty string)
+            try:
+                if longitude and latitude:
+                    lon_float = float(longitude)
+                    lat_float = float(latitude)
+                    reference_point = Point(lon_float, lat_float, srid=4326)
+                    # Convert to list and sort in Python
+                    # since queryset is already sliced
+                    acteurs_list = list(acteurs)
+                    for acteur in acteurs_list:
+                        acteur.distance = acteur.location.distance(reference_point)
+                    acteurs = sorted(acteurs_list, key=lambda a: a.distance)
+            except (ValueError, TypeError) as e:
+                # Invalid coordinates, skip distance sorting
+                logger.warning(
+                    f"Invalid coordinates for distance calculation: "
+                    f"longitude={longitude}, latitude={latitude}, error={e}"
+                )
         elif getattr(acteurs, "_has_distance_field", False):
             # Only reorder via SQL if queryset hasn't been sliced yet
             try:
