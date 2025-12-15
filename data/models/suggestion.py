@@ -50,8 +50,8 @@ class SuggestionStatut(models.TextChoices):
     REJETEE = SUGGESTION_REJETEE, "🔴 Rejetée"
     ATRAITER = SUGGESTION_ATRAITER, "⏳ À traiter"
     ENCOURS = SUGGESTION_ENCOURS, "⏳ En cours de traitement"
-    ERREUR = SUGGESTION_ERREUR, "❌ Fini en erreur"
-    SUCCES = SUGGESTION_SUCCES, "✅ Fini avec succès"
+    ERREUR = SUGGESTION_ERREUR, "❌ Finie en erreur"
+    SUCCES = SUGGESTION_SUCCES, "✅ Finie avec succès"
 
 
 class SuggestionCohorteStatut(models.TextChoices):
