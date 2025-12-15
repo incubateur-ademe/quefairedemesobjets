@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: exposure_carte_acteur
+  - name: exposure_sample_acteur
     description: "Vue sur les acteurs affichés sur la carte"
     columns:
       - name: identifiant_unique
@@ -128,7 +128,7 @@ models:
     config:
       tags:
         - exposure
-        - carte
+        - sample
         - acteurs
         - acteur
       contract:
@@ -178,8 +178,8 @@ models:
     tests:
       - dbt_expectations.expect_table_row_count_to_be_between:
           arguments:
-            min_value: 350000
-  - name: exposure_carte_propositionservice
+            min_value: 1000
+  - name: exposure_sample_propositionservice
     description: "Vue sur les propositions de service affichées sur la carte"
     columns:
       - name: id
@@ -201,7 +201,7 @@ models:
     config:
       tags:
         - exposure
-        - carte
+        - sample
         - acteurs
         - propositionservice
       materialized: table
@@ -220,7 +220,7 @@ models:
         - type: foreign_key
           columns: [acteur_id]
           ref_columns: [identifiant_unique]
-          ref_table: exposure_carte_acteur
+          ref_table: exposure_sample_acteur
           deferrable: true
           initially_deferred: true
         - type: foreign_key
@@ -236,8 +236,8 @@ models:
             - action_id
       - dbt_expectations.expect_table_row_count_to_be_between:
           arguments:
-            min_value: 400000
-  - name: exposure_carte_propositionservice_sous_categories
+            min_value: 1000
+  - name: exposure_sample_propositionservice_sous_categories
     description: "Vue sur les sous-catégories des propositions de service affichées sur la carte"
     columns:
       - name: id
@@ -258,7 +258,7 @@ models:
     config:
       tags:
         - exposure
-        - carte
+        - sample
         - acteurs
         - propositionservice_sous_categories
       materialized: table
@@ -275,7 +275,7 @@ models:
         - type: foreign_key
           columns: [displayedpropositionservice_id]
           ref_columns: [id]
-          ref_table: exposure_carte_propositionservice
+          ref_table: exposure_sample_propositionservice
           deferrable: true
           initially_deferred: true
         - type: foreign_key
@@ -291,8 +291,8 @@ models:
             - souscategorieobjet_id
       - dbt_expectations.expect_table_row_count_to_be_between:
           arguments:
-            min_value: 1250000
-  - name: exposure_carte_acteur_acteur_services
+            min_value: 1000
+  - name: exposure_sample_acteur_acteur_services
     description: "Lien entre acteur de la carte et acteur_services"
     columns:
       - name: id
@@ -313,7 +313,7 @@ models:
     config:
       tags:
         - exposure
-        - carte
+        - sample
         - acteurs
         - acteur_acteur_services
       materialized: table
@@ -330,7 +330,7 @@ models:
         - type: foreign_key
           columns: [displayedacteur_id]
           ref_columns: [identifiant_unique]
-          ref_table: exposure_carte_acteur
+          ref_table: exposure_sample_acteur
           deferrable: true
           initially_deferred: true
         - type: foreign_key
@@ -346,8 +346,8 @@ models:
             - acteurservice_id
       - dbt_expectations.expect_table_row_count_to_be_between:
           arguments:
-            min_value: 350000
-  - name: exposure_carte_acteur_labels
+            min_value: 1000
+  - name: exposure_sample_acteur_labels
     description: "Lien entre acteur de la carte et labels"
     columns:
       - name: id
@@ -369,7 +369,7 @@ models:
     config:
       tags:
         - exposure
-        - carte
+        - sample
         - acteurs
         - acteur_labels
       materialized: table
@@ -386,7 +386,7 @@ models:
         - type: foreign_key
           columns: [displayedacteur_id]
           ref_columns: [identifiant_unique]
-          ref_table: exposure_carte_acteur
+          ref_table: exposure_sample_acteur
           deferrable: true
           initially_deferred: true
         - type: foreign_key
@@ -402,8 +402,8 @@ models:
             - labelqualite_id
       - dbt_expectations.expect_table_row_count_to_be_between:
           arguments:
-            min_value: 18000
-  - name: exposure_carte_acteur_sources
+            min_value: 100
+  - name: exposure_sample_acteur_sources
     description: "Lien entre acteur de la carte et sources"
     columns:
       - name: id
@@ -441,7 +441,7 @@ models:
         - type: foreign_key
           columns: [displayedacteur_id]
           ref_columns: [identifiant_unique]
-          ref_table: exposure_carte_acteur
+          ref_table: exposure_sample_acteur
           deferrable: true
           initially_deferred: true
         - type: foreign_key
@@ -452,8 +452,8 @@ models:
     tests:
       - dbt_expectations.expect_table_row_count_to_be_between:
           arguments:
-            min_value: 350000
-  - name: exposure_carte_perimetreadomicile
+            min_value: 1000
+  - name: exposure_sample_perimetreadomicile
     description: "Vue sur les périmètres à domicile affichés sur la carte"
     columns:
       - name: id
@@ -481,7 +481,7 @@ models:
     config:
       tags:
         - exposure
-        - carte
+        - sample
         - acteurs
         - perimetreadomicile
       materialized: table
@@ -495,4 +495,4 @@ models:
     tests:
       - dbt_expectations.expect_table_row_count_to_be_between:
           arguments:
-            min_value: 50
+            min_value: 2

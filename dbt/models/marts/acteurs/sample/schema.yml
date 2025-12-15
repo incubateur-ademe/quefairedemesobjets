@@ -1,0 +1,120 @@
+# From exhaustive_acteurs, build acteurs tables which will be used to display them in the carte
+
+version: 2
+
+models:
+  - name: marts_sample_acteur
+    description: "Echantillon d'acteurs affichés sur la carte"
+    columns:
+      - name: uuid
+        description: "L'identifiant unique de l'acteur"
+        data_tests:
+          - not_null
+          - unique
+      - name: identifiant_unique
+        description: "L'identifiant unique de l'acteur"
+        data_tests:
+          - not_null
+          - unique
+    config:
+      tags:
+        - marts
+        - sample
+        - acteurs
+        - acteur
+      materialized: view
+  - name: marts_sample_perimetreadomicile
+    description: "Périmètres à domicile de l'échantillon"
+    columns:
+      - name: id
+        description: "L'identifiant du périmètre à domicile"
+        data_tests:
+          - not_null
+          - unique
+      - name: acteur_id
+        description: "L'identifiant de l'acteur"
+        data_tests:
+          - not_null
+    config:
+      tags:
+        - marts
+        - sample
+        - acteurs
+        - perimetreadomicile
+      materialized: view
+  - name: marts_sample_acteur_acteur_services
+    description: "Services de l'échantillon"
+    columns:
+      - name: id
+        description: "L'identifiant du service"
+        data_tests:
+          - not_null
+          - unique
+      - name: displayedacteur_id
+        description: "L'identifiant de l'acteur"
+        data_tests:
+          - not_null
+    config:
+      tags:
+        - marts
+        - sample
+        - acteurs
+        - acteur_acteur_services
+      materialized: view
+  - name: marts_sample_acteur_labels
+    description: "Labels de l'échantillon"
+    columns:
+      - name: id
+        description: "L'identifiant du label"
+        data_tests:
+          - not_null
+          - unique
+      - name: displayedacteur_id
+        description: "L'identifiant de l'acteur"
+        data_tests:
+          - not_null
+    config:
+      tags:
+        - marts
+        - sample
+        - acteurs
+        - acteur_labels
+      materialized: view
+  - name: marts_sample_propositionservice
+    description: "Propositions de services de l'échantillon"
+    columns:
+      - name: id
+        description: "L'identifiant de la proposition de service"
+        data_tests:
+          - not_null
+          - unique
+      - name: acteur_id
+        description: "L'identifiant de l'acteur"
+        data_tests:
+          - not_null
+    config:
+      tags:
+        - marts
+        - sample
+        - acteurs
+        - propositionservice
+      materialized: view
+  - name: marts_sample_propositionservice_sous_categories
+    description: "Sous-catégories de propositions de services de l'échantillon"
+    columns:
+      - name: id
+        description: "L'identifiant de la sous-catégorie de proposition de service"
+        data_tests:
+          - not_null
+          - unique
+      - name: displayedpropositionservice_id
+        description: "L'identifiant de la proposition de service"
+        data_tests:
+          - not_null
+    config:
+      tags:
+        - marts
+        - sample
+        - acteurs
+        - propositionservice_sous_categories
+      materialized: view

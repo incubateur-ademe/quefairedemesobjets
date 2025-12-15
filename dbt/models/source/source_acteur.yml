@@ -10,6 +10,13 @@ sources:
       - name : qfdmo_acteurtype
       - name : qfdmo_acteurservice
       - name : qfdmo_action
+      - name : qfdmo_displayedacteur
+      - name : qfdmo_displayedacteur_acteur_services
+      - name : qfdmo_displayedacteur_labels
+      - name : qfdmo_displayedacteur_sources
+      - name : qfdmo_displayedperimetreadomicile
+      - name : qfdmo_displayedpropositionservice
+      - name : qfdmo_displayedpropositionservice_sous_categories
       - name : qfdmo_labelqualite
       - name : qfdmo_perimetreadomicile
       - name : qfdmo_propositionservice
