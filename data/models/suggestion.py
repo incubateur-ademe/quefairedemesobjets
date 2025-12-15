@@ -450,6 +450,7 @@ class SuggestionGroupe(TimestampedModel):
         "label_codes",
         "proposition_service_codes",
         "source_code",
+        "acteur_type_code",
     ]
 
     ORDERED_FIELDS = [
@@ -769,7 +770,8 @@ class SuggestionGroupe(TimestampedModel):
         values_to_update = {
             field: by_state_values["updated_displayed_value"]
             for field, by_state_values in fields_values.items()
-            if "updated_displayed_value" in by_state_values
+            if field not in SuggestionGroupe.NOT_EDITABLE_FIELDS
+            and "updated_displayed_value" in by_state_values
             and (
                 by_state_values["updated_displayed_value"]
                 != by_state_values["displayed_value"]
@@ -780,6 +782,7 @@ class SuggestionGroupe(TimestampedModel):
                 )
             )
         }
+        values_to_update = {k: v for k, v in values_to_update.items() if v != ""}
 
         # Validate proposed updates
         if errors := self._validate_proposed_updates(values_to_update, fields_values):

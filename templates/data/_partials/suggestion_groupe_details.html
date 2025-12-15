@@ -1,6 +1,6 @@
 {% extends "data/_partials/suggestion_groupe.html" %}
 
-{% load admin_data_tags %}
+{% load admin_data_tags admin_suggestion_tags dict_tags %}
 
 {% block suggestion_details %}
 
@@ -71,7 +71,7 @@
                             <div>
                                 {% for field in fields %}
                                     {% with values=fields_values|get_item:field %}
-                                        {% helper_updated_values field values.updated_displayed_value|default:values.displayed_value %}
+                                        {% extra_links field values.updated_displayed_value|default:values.displayed_value %}
                                     {% endwith %}
                                 {% endfor %}
                             </div>
