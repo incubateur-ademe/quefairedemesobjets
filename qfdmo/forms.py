@@ -90,7 +90,7 @@ class MapForm(GetFormMixin, CarteConfigFormMixin, forms.Form):
             self.fields["bounding_box"].initial = bounding_box
 
 
-class AddressesForm(forms.Form):
+class FormulaireForm(forms.Form):
     def load_choices(self, request: HttpRequest, **kwargs) -> None:
         if address_placeholder := request.GET.get("address_placeholder"):
             self.fields["adresse"].widget.attrs["placeholder"] = address_placeholder
@@ -124,8 +124,6 @@ class AddressesForm(forms.Form):
         required=False,
     )
 
-
-class FormulaireForm(AddressesForm):
     sous_categorie_objet = forms.ModelChoiceField(
         queryset=SousCategorieObjet.objects.all(),
         to_field_name="libelle",
