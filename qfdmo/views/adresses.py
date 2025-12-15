@@ -208,6 +208,7 @@ class SearchActeursView(
         kwargs.update(
             carte=self.is_carte,
             is_carte=self.is_carte,
+            should_show_results=self._should_show_results(),
         )
 
         # Only add is_formulaire flag for non-carte views (formulaire mode)

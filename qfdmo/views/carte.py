@@ -81,7 +81,8 @@ class CarteSearchActeursView(SearchActeursView):
 
     @override
     def _should_show_results(self):
-        return super()._should_show_results()
+        return True
+        # self._get_ui_form("map").is_bound
 
     @property
     def forms(self) -> CarteForms:
@@ -247,7 +248,7 @@ class CarteSearchActeursView(SearchActeursView):
 
     def _check_if_label_qualite_is_set(self, label):
         try:
-            return label in self._get_ui_form("filtres")["label_qualite"].value()
+            return label in self._get_field_value_for("filtres", "label_qualite")
         except (TypeError, KeyError):
             return False
 
@@ -263,6 +264,16 @@ class CarteSearchActeursView(SearchActeursView):
         falling back to parent behavior if form is not available or invalid.
         """
         return self._get_field_value_for("map", "bounding_box")
+
+    def _get_epci_codes(self):
+        # TODO: récupérer PR epci
+        pass
+
+    def _get_latitude(self):
+        return self._get_field_value_for("map", "latitude")
+
+    def _get_longitude(self):
+        return self._get_field_value_for("map", "longitude")
 
     def _get_carte_config(self):
         return None

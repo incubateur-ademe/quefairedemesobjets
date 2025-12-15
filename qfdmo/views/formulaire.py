@@ -275,6 +275,13 @@ class FormulaireSearchActeursView(SearchActeursView):
     def _get_epci_codes(self):
         return self.get_data_from_request_or_bounded_form("epci_codes")
 
+    def _should_show_results(self):
+        return (
+            self.form.initial.adresse
+            or self.form.initial.bounding_box
+            or self.form.initial.epci_codes
+        )
+
     def _check_if_is_digital(self):
         return (
             self.digital_acteur_form["digital"].value()
