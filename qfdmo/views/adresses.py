@@ -19,8 +19,16 @@ from django.views.generic.edit import FormView
 from wagtail.query import Any
 
 from qfdmd.models import Synonyme
+<<<<<<< HEAD
 from qfdmo.geo_api import retrieve_epci_geojson_from_api_or_cache
 from qfdmo.map_utils import center_from_frontend_bbox, sanitize_frontend_bbox
+=======
+from qfdmo.geo_api import bbox_from_list_of_geojson, retrieve_epci_geojson
+from qfdmo.map_utils import (
+    compile_frontend_bbox,
+    sanitize_frontend_bbox,
+)
+>>>>>>> 88b5ce4a (Finish formulaire refactoring)
 from qfdmo.models import Acteur, ActeurStatus, DisplayedActeur, RevisionActeur
 from qfdmo.models.action import get_reparer_action_id
 from qfdmo.models.geo import EPCI
@@ -61,6 +69,10 @@ class SearchActeursView(
     TurboFormMixin,
     FormView,
 ):
+    @abstractmethod
+    def _should_show_results(self):
+        pass
+
     @abstractmethod
     def _get_direction(self):
         pass
@@ -105,12 +117,26 @@ class SearchActeursView(
     def _get_bounding_box(self) -> str:
         pass
 
+    @abstractmethod
+    def _get_latitude(self):
+        pass
+
+    @abstractmethod
+    def _get_longitude(self):
+        pass
+
+    @abstractmethod
+    def _get_epci_codes(self):
+        # get_data_from_request_or_bounded_form("epci_codes"):
+        pass
+
     # TODO : supprimer
     is_iframe = False
     is_carte = False
     is_embedded = True
     paginate = False
 
+<<<<<<< HEAD
     def get_initial(self):
         initial = super().get_initial()
         # TODO: refacto forms : delete this line
@@ -176,9 +202,9 @@ class SearchActeursView(
         except AttributeError:
             return self.request.GET.getlist(key, default)
 
+=======
+>>>>>>> 88b5ce4a (Finish formulaire refactoring)
     def get_context_data(self, **kwargs):
-        form = self.get_form_class()(self.request.GET)
-
         kwargs.update(
             carte=self.is_carte,
             is_carte=self.is_carte,
@@ -264,8 +290,8 @@ class SearchActeursView(
     def _bbox_and_acteurs_from_location_or_epci(self, acteurs):
         custom_bbox = self._get_bounding_box()
         # center = center_from_frontend_bbox(custom_bbox) if custom_bbox else ["", ""]
-        latitude = self.get_data_from_request_or_bounded_form("latitude")
-        longitude = self.get_data_from_request_or_bounded_form("longitude")
+        latitude = self._get_latitude()
+        longitude = self._get_longitude()
         self.location = json.dumps({"latitude": latitude, "longitude": longitude})
 
         # A BBOX was set in the Configurateur OR the user interacted with

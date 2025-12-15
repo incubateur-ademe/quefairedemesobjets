@@ -37,6 +37,17 @@ class FormulaireSearchActeursView(SearchActeursView):
         initial = super().get_initial()
 
         # TODO: refacto forms : delete this line
+        initial["adresse"] = self.request.GET.get("adresse")
+        # TODO: refacto forms : delete this line
+        initial["latitude"] = self.request.GET.get("latitude")
+        # TODO: refacto forms : delete this line
+        initial["longitude"] = self.request.GET.get("longitude")
+        initial["epci_codes"] = self.request.GET.getlist("epci_codes")
+
+        # TODO: refacto forms : delete this line
+        initial["bounding_box"] = self.request.GET.get("bounding_box")
+
+        # TODO: refacto forms : delete this line
         initial["sous_categorie_objet"] = self.request.GET.get("sous_categorie_objet")
         initial["pas_exclusivite_reparation"] = self.request.GET.get(
             "pas_exclusivite_reparation", True
@@ -59,6 +70,8 @@ class FormulaireSearchActeursView(SearchActeursView):
         return initial
 
     def get_form(self, form_class=None):
+        # TODO : vérifier s'il faut récupérer l'implémentation
+        #  de SearchActeursView ou pas
         form = super().get_form(form_class)
 
         action_displayed = self._set_action_displayed() if self.is_carte else None
@@ -253,6 +266,15 @@ class FormulaireSearchActeursView(SearchActeursView):
             str | None, self.get_data_from_request_or_bounded_form("bounding_box")
         )
 
+    def _get_longitude(self):
+        return self.get_data_from_request_or_bounded_form("longitude")
+
+    def _get_latitude(self):
+        return self.get_data_from_request_or_bounded_form("latitude")
+
+    def _get_epci_codes(self):
+        return self.get_data_from_request_or_bounded_form("epci_codes")
+
     def _check_if_is_digital(self):
         return (
             self.digital_acteur_form["digital"].value()
@@ -356,3 +378,39 @@ class FormulaireSearchActeursView(SearchActeursView):
             ][0].id
         except IndexError:
             raise Exception("Action 'Réparer' not found")
+
+    def get_data_from_request_or_bounded_form(self, key: str, default=None):
+        """Temporary dummy method
+
+        There is a flaw in the way the form is instantiated, because the
+        form is never bounded to its data.
+        The request is directly used to perform various tasks, like
+        populating some multiple choice field choices, hence missing all
+        the validation provided by django forms.
+
+        To prepare a future refactor of this form, the method here calls
+        the cleaned_data when the form is bounded and the request.GET
+        QueryDict when it is not bounded.
+        Note : we call getlist and not get because in some cases, the request
+        parameters needs to be treated as a list.
+
+        The form is currently used for various use cases:
+            - The map form
+            - The "iframe form" form (for https://epargnonsnosressources.gouv.fr)
+            - The turbo-frames
+        The form should be bounded at least when used in turbo-frames.
+
+        The name is explicitely very verbose because it is not meant to stay
+        a long time as is.
+
+        TODO: refacto forms : get rid of this method and use cleaned_data when
+        form is valid and request.GET for non-field request parameters"""
+        try:
+            return self.cleaned_data.get(key, default)
+        except AttributeError:
+            pass
+
+        try:
+            return self.request.GET.get(key, default)
+        except AttributeError:
+            return self.request.GET.getlist(key, default)
