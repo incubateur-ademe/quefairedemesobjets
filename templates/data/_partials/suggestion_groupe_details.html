@@ -58,8 +58,8 @@
                                         <div
                                             contentEditable="true"
                                             data-field="{{ field }}"
-                                            data-action="blur->suggestion-groupe-row#fieldDisplayedBlur
-                                            focus->suggestion-groupe-row#fieldDisplayedFocus">
+                                            data-action="blur->suggestion-groupe-row#saveFieldValue
+                                            focus->suggestion-groupe-row#replaceWithFieldValue">
                                             {% with values=fields_values|get_item:field %}
                                                 {{ values.displayed_value|display_diff_values:values.updated_displayed_value }}
                                             {% endwith %}
