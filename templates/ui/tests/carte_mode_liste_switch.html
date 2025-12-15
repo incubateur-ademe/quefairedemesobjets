@@ -1,0 +1,11 @@
+{% load dsfr_tags %}
+
+{% dsfr_callout title="Test du switch Carte/Liste avec bounding box" text="Cette page teste le basculement entre les modes carte et liste. Le script ci-dessous génère une iframe avec une carte ayant un bounding box initial. Cliquer sur 'Liste' puis revenir sur 'Carte' doit conserver le bounding box." icon_class="fr-icon-alert-line" %}
+
+<div id="carte-container">
+  <script
+    src="{{ base_url }}/static/carte.js"
+    data-action_list="preter|emprunter|louer|mettreenlocation|reparer|donner|echanger|acheter|revendre"
+    data-bounding_box='{"southWest": {"lat": 47.457526, "lng": -0.609453}, "northEast": {"lat": 47.489048, "lng": -0.51571}}'
+  ></script>
+</div>
