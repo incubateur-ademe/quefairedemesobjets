@@ -1,7 +1,7 @@
 import hashlib
 import json
 import logging
-from typing import Any, TypedDict, override
+from typing import Any, NotRequired, TypedDict, override
 
 from django.conf import settings
 from django.contrib.gis.geos import Point
@@ -33,28 +33,31 @@ logger = logging.getLogger(__name__)
 class ViewModeFormEntry(TypedDict):
     form: type[ViewModeForm]
     prefix: str
+    other_prefixes_to_check: NotRequired[list[str]]
 
 
 class MapFormEntry(TypedDict):
     form: type[MapForm]
     prefix: str
+    other_prefixes_to_check: NotRequired[list[str]]
 
 
 class FiltresFormEntry(TypedDict):
     form: type[FiltresForm]
     prefix: str
+    other_prefixes_to_check: NotRequired[list[str]]
 
 
 class LegendeFormEntry(TypedDict):
     form: type[LegendeForm]
     prefix: str
-    other_prefixes_to_check: list[str]
+    other_prefixes_to_check: NotRequired[list[str]]
 
 
 class AutoSubmitLegendeFormEntry(TypedDict):
     form: type[AutoSubmitLegendeForm]
     prefix: str
-    other_prefixes_to_check: list[str]
+    other_prefixes_to_check: NotRequired[list[str]]
 
 
 class CarteForms(TypedDict):
@@ -181,11 +184,22 @@ class CarteSearchActeursView(AbstractSearchActeursView):
 
     def _get_bounded_form_with_fallback(self, form_config, data, legacy_form):
         primary_prefix = self._generate_prefix(form_config["prefix"])
+        base_prefix = form_config["prefix"]
+
         form = self._create_form_instance(
             form_config["form"], data, primary_prefix, legacy_form
         )
         if form.is_valid():
             return form
+
+        # If the primary prefix includes map_container_id and the form is invalid,
+        # try the base prefix without map_container_id as a fallback
+        if primary_prefix != base_prefix:
+            base_form = self._create_form_instance(
+                form_config["form"], data, base_prefix, legacy_form
+            )
+            if base_form.is_valid():
+                return base_form
 
         for fallback_prefix in form_config.get("other_prefixes_to_check", []):
             generated_prefix = self._generate_prefix(fallback_prefix)
@@ -386,10 +400,8 @@ class CarteSearchActeursView(AbstractSearchActeursView):
 
     def get_context_data(self, **kwargs):
         self.ui_forms = self._get_forms()
-        self.paginate = (
-            self.ui_forms["view_mode"]["view"].value()
-            == ViewModeForm.ViewModeSegmentedControlChoices.LISTE
-        )
+        view_mode = self._get_field_value_for("view_mode", "view")
+        self.paginate = view_mode == ViewModeForm.ViewModeSegmentedControlChoices.LISTE
         # QuerySet is built in SearchActeursView.get_context_data method,
         # it needs to be kept after the forms are initialised above.
         context = super().get_context_data(**kwargs)
