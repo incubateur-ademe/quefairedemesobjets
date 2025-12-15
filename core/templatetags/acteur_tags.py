@@ -17,8 +17,14 @@ def acteur_url(context: dict, acteur, with_map: bool = True) -> str:
     query_params = {}
     request = context.get("request")
 
+    # TODO: what about other parameters from CarteConfig used in the Acteur URL ?
+    map_container_id = context.get("map_container_id")
+
     if request:
         query_params.update(request.GET.dict())
+
+    if map_container_id and "map_container_id" not in query_params:
+        query_params.update(map_container_id=map_container_id)
 
     if with_map:
         query_params.update(with_map=True)
