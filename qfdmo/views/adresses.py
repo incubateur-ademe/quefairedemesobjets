@@ -208,7 +208,6 @@ class SearchActeursView(
         kwargs.update(
             carte=self.is_carte,
             is_carte=self.is_carte,
-            should_show_results=self._should_show_results(),
         )
 
         # Only add is_formulaire flag for non-carte views (formulaire mode)
@@ -236,15 +235,10 @@ class SearchActeursView(
             kwargs.update(acteurs=acteurs)
 
         context = super().get_context_data(**kwargs)
-
-        context.update(location=getattr(self, "location", ""))
-
-        # TODO : refacto forms, gérer ça autrement
-        try:
-            if bbox is None:
-                context["form"].initial["bounding_box"] = None
-        except NameError:
-            pass
+        context.update(
+            location=getattr(self, "location", ""),
+            should_show_results=self._should_show_results(),
+        )
 
         return context
 
