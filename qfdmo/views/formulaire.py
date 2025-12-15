@@ -272,9 +272,6 @@ class FormulaireSearchActeursView(SearchActeursView):
     def _get_latitude(self):
         return self.get_data_from_request_or_bounded_form("latitude")
 
-    def _get_epci_codes(self):
-        return self.get_data_from_request_or_bounded_form("epci_codes")
-
     def _should_show_results(self):
         return (
             self.form.initial.adresse
