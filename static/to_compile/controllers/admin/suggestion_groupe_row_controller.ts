@@ -10,7 +10,7 @@ export default class extends Controller<HTMLElement> {
   declare readonly fieldsValuesValue: string
   declare readonly fieldsGroupsValue: string
 
-  fieldDisplayedFocus(event: Event) {
+  replaceWithFieldValue(event: FocusEvent) {
     const value = this.#getFieldsValues()
     const field = (event.target as HTMLElement).dataset.field
     if (!field || !(field in value)) {
@@ -22,7 +22,7 @@ export default class extends Controller<HTMLElement> {
       value[field]["updated_displayed_value"] || value[field]["displayed_value"]
   }
 
-  fieldDisplayedBlur(event: Event) {
+  saveFieldValue(event: Event) {
     const fieldsValues = this.#getFieldsValues()
     const field = this.#getField(event, fieldsValues)
     if (field != null) {
