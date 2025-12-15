@@ -5,7 +5,6 @@ import "./styles/admin.css"
 import { Application } from "@hotwired/stimulus"
 import * as Turbo from "@hotwired/turbo"
 
-// TODO : import here  the stimulus controllers
 import SuggestionGroupeRowController from "./controllers/admin/suggestion_groupe_row_controller"
 import MapController from "./controllers/carte/map_controller"
 
