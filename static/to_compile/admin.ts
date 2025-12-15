@@ -10,7 +10,6 @@ import MapController from "./controllers/carte/map_controller"
 
 window.stimulus = Application.start()
 
-// TODO : register here the stimulus controllers
 stimulus.register("suggestion-groupe-row", SuggestionGroupeRowController)
 stimulus.register("map", MapController)
 
