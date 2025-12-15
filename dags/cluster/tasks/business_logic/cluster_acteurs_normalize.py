@@ -27,9 +27,4 @@ def cluster_acteurs_normalize(
     for field in normalize_fields_order_unique_words:
         df[field] = df[field].map(normalize.string_order_unique_words)
 
-    # TODO: remnant of old code, might be able to delete now
-    if "nombre_enfants" in df.columns:
-        df[["nombre_enfants"]] = df[["nombre_enfants"]].fillna(0)
-        df["nombre_enfants"] = df["nombre_enfants"].astype(int)
-
     return df

@@ -76,9 +76,7 @@ def cluster_acteurs_one_cluster_parent_changes_mark(
     df.loc[parent_index, COL_CHANGE_ORDER] = 1
 
     # Ensuite tous les enfants (non-parents) doivent pointer vers le nouveau parent
-    filter_point = ((df["nombre_enfants"] == 0) | df["nombre_enfants"].isna()) & (
-        df["identifiant_unique"] != parent_id
-    )
+    filter_point = (df["nombre_enfants"] == 0) & (df["identifiant_unique"] != parent_id)
     df[COL_PARENT_ID_BEFORE] = df["parent_id"]  # Pour debug
     df.loc[filter_point, "parent_id"] = parent_id
     df.loc[filter_point, COL_CHANGE_MODEL_NAME] = ChangeActeurUpdateParentId.name()
@@ -151,6 +149,7 @@ def cluster_acteurs_parents_choose_new(df_clusters: pd.DataFrame) -> pd.DataFram
     dfs_marked = []
 
     df = df_clusters.copy()
+
     for cluster_id in df["cluster_id"].unique():
 
         # Pour chaque cluster on travaille sur sa df filtrée
