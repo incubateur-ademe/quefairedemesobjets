@@ -16,23 +16,33 @@ jobs:
       CONTAINER_ID: ${{ vars[inputs.container_key] }}
       REGISTRY_IMAGE: ${{ inputs.registry_image }}
     steps:
-    # See https://www.scaleway.com/en/developers/api/serverless-containers/#path-containers-update-an-existing-container
+    - name: Setup Scaleway CLI
+      uses: scaleway/action-scw@be2696f261325a78354eda14988c80405f33e082
+
+    # See https://www.scaleway.com/en/docs/serverless-containers/api-cli/deploy-container-cli/
     - name: Update image
       run: |
-        curl -X PATCH \
-        -H "X-Auth-Token: $SCALEWAY_DEPLOY_KEY" \
-        -H "Content-Type: application/json" \
-        -d "{\"registry_image\": \"$REGISTRY_IMAGE\"}" \
-        "https://api.scaleway.com/containers/v1beta1/regions/fr-par/containers/$CONTAINER_ID"
+        scw container container update $CONTAINER_ID \
+          registry-image=$REGISTRY_IMAGE \
+          region=fr-par
+      env:
+        SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
+        SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
+        SCW_DEFAULT_PROJECT_ID: ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
+        SCW_DEFAULT_ORGANIZATION_ID: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
+        SCW_DEFAULT_REGION: fr-par
 
-    # See https://www.scaleway.com/en/developers/api/serverless-containers/#path-containers-deploy-a-container
+        # See https://www.scaleway.com/en/docs/serverless-containers/api-cli/deploy-container-cli/
     - name: Deploy container
       run: |
-        curl -X POST \
-        -H "X-Auth-Token: $SCALEWAY_DEPLOY_KEY" \
-        -H "Content-Type: application/json" \
-        -d '{}' \
-        "https://api.scaleway.com/containers/v1beta1/regions/fr-par/containers/$CONTAINER_ID/deploy"
+        scw container container deploy $CONTAINER_ID \
+          region=fr-par
+      env:
+        SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
+        SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
+        SCW_DEFAULT_PROJECT_ID: ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
+        SCW_DEFAULT_ORGANIZATION_ID: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
+        SCW_DEFAULT_REGION: fr-par
 
     - name: Check deployment status
       run: |
@@ -40,7 +50,7 @@ jobs:
         ERROR_VALUE="error"
 
         while true; do
-            RESPONSE_VALUE=$(curl -s -X GET -H "X-Auth-Token: $SCALEWAY_DEPLOY_KEY" "https://api.scaleway.com/containers/v1beta1/regions/fr-par/containers/$CONTAINER_ID/" | jq -r '.status')
+            RESPONSE_VALUE=$(scw container container get $CONTAINER_ID region=fr-par -o json | jq -r '.status')
 
             echo "Current status: $RESPONSE_VALUE"
 
@@ -55,6 +65,12 @@ jobs:
 
             sleep 5
         done
+      env:
+        SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
+        SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
+        SCW_DEFAULT_PROJECT_ID: ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
+        SCW_DEFAULT_ORGANIZATION_ID: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
+        SCW_DEFAULT_REGION: fr-par
 
 # Address actions/missing-workflow-permissions rule in
 # code scanning alerts
