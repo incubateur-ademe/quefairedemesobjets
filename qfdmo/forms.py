@@ -37,6 +37,16 @@ from qfdmo.widgets import (
 
 
 class MapForm(GetFormMixin, CarteConfigFormMixin, forms.Form):
+    """
+    This forms holds all the hidden input used to display the Acteur results in the
+    frontend.
+    The hidden fields are not directly controlled by the user but by the maplibre
+    controller.
+
+    ⚠️⚠️⚠️ If this form must evolve, especially the attributes set on the fields,
+    the changes must be backported to qfdmo.forms.FormulaireForm.
+    """
+
     adresse = forms.CharField(
         widget=AutoCompleteInput(
             attrs={
