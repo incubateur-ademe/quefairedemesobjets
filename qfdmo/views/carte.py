@@ -79,6 +79,10 @@ class CarteSearchActeursView(SearchActeursView):
     form_class = MapForm
     filtres_form_class = FiltresForm
 
+    @override
+    def _should_show_results(self):
+        return super()._should_show_results()
+
     @property
     def forms(self) -> CarteForms:
         return {
@@ -147,9 +151,7 @@ class CarteSearchActeursView(SearchActeursView):
         if not legacy_form:
             return set()
 
-        ids_from_request = legacy_form.decode_querystring().getlist(
-            CarteConfig.SOUS_CATEGORIE_QUERY_PARAM
-        )
+        ids_from_request = legacy_form.decode_querystring().getlist("sc_id")
 
         if ids_from_request:
             return {int(id_) for id_ in ids_from_request if id_}
@@ -260,12 +262,7 @@ class CarteSearchActeursView(SearchActeursView):
         Override parent to use the bounded map form when available,
         falling back to parent behavior if form is not available or invalid.
         """
-        try:
-            map_form = self._get_ui_form("map")
-            return map_form["bounding_box"].value()
-        except (AttributeError, KeyError):
-            pass
-        return ""
+        return self._get_field_value_for("map", "bounding_box")
 
     def _get_carte_config(self):
         return None

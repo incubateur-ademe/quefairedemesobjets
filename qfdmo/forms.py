@@ -325,7 +325,7 @@ class LegacySupportForm(GetFormMixin, forms.Form):
         "pas_exclusivite_reparation",
         "epci_codes",
         "bounding_box",
-        CarteConfig.SOUS_CATEGORIE_QUERY_PARAM,
+        "sc_id",
     ]
 
     def __init__(self, *args, **kwargs):
