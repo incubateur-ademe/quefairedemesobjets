@@ -58,7 +58,7 @@ class TurboFormMixin:
         return context
 
 
-class SearchActeursView(
+class AbstractSearchActeursView(
     ABC,
     TurboFormMixin,
     FormView,

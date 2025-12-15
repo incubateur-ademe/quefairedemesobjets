@@ -11,10 +11,10 @@ from django.utils.html import mark_safe
 from qfdmo.forms import ActionDirectionForm, DigitalActeurForm, FormulaireForm
 from qfdmo.models.acteur import DisplayedActeur
 from qfdmo.models.action import Action, GroupeAction, get_action_instances
-from qfdmo.views.adresses import SearchActeursView
+from qfdmo.views.adresses import AbstractSearchActeursView
 
 
-class FormulaireSearchActeursView(SearchActeursView):
+class FormulaireSearchActeursView(AbstractSearchActeursView):
     """Affiche le formulaire utilisé sur epargnonsnosressources.gouv.fr
     Cette vue est à considérer en mode maintenance uniquement et ne doit pas être
     modifiée."""
@@ -273,10 +273,11 @@ class FormulaireSearchActeursView(SearchActeursView):
         return self.get_data_from_request_or_bounded_form("latitude")
 
     def _should_show_results(self):
+        initial = self.get_initial()
         return (
-            self.form.initial.adresse
-            or self.form.initial.bounding_box
-            or self.form.initial.epci_codes
+            initial.get("adresse")
+            or initial.get("bounding_box")
+            or initial.get("epci_codes")
         )
 
     def _check_if_is_digital(self):
