@@ -15,11 +15,7 @@ from core.constants import DEFAULT_MAP_CONTAINER_ID
 from infotri.forms import InfotriForm
 from qfdmd.forms import SearchForm
 from qfdmd.models import Suggestion, Synonyme
-from qfdmo.forms import (
-    LegendeForm,
-    NextAutocompleteInput,
-    ViewModeForm,
-)
+from qfdmo.forms import LegendeForm, NextAutocompleteInput, ViewModeForm
 from qfdmo.models.acteur import (
     ActeurType,
     DisplayedActeur,
@@ -83,6 +79,19 @@ class ProduitHeadingForm(forms.Form):
         ],
         help_text="Choisissez le pronom",
         initial="mon",
+    )
+
+
+class CarteConfigForm(forms.Form):
+    """
+    Form for carte config
+    """
+
+    carte_config = forms.ModelChoiceField(
+        label="Carte config",
+        help_text="Carte config",
+        required=False,
+        queryset=CarteConfig.objects.all(),
     )
 
 
@@ -596,7 +605,8 @@ class IframePreview(LookbookPreview):
         )
         return template.render(Context({}))
 
-    def carte_sur_mesure(self, **kwargs):
+    @register_form_class(CarteConfigForm)
+    def carte_sur_mesure(self, carte_config=None, **kwargs):
         """
         # Carte sur mesure
 
@@ -606,10 +616,16 @@ class IframePreview(LookbookPreview):
         <script src="{base_url}/static/carte.js" data-slug="cyclevia"></script>
         ```
         """
+        # carte_config is returned as a string by django-lookbook where we expected
+        # representing the id of a CarteConfig object.
+        if isinstance(carte_config, str) and carte_config:
+            carte_config = CarteConfig.objects.get(id=carte_config)
+
+        slug = carte_config.slug if carte_config else "cyclevia"
 
         template = Template(
             f"""
-            <script src="{base_url}/static/carte.js" data-slug="cyclevia"></script>
+            <script src="{base_url}/static/carte.js" data-slug="{slug}"></script>
             """,
         )
 
