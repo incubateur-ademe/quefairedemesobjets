@@ -16,7 +16,7 @@ from dsfr.widgets import SegmentedControl
 
 from qfdmd.models import Synonyme
 from qfdmo.fields import GroupeActionChoiceField, LabelQualiteChoiceField
-from qfdmo.geo_api import epcis_from, formatted_epcis_as_list_of_tuple
+from qfdmo.geo_api import formatted_epcis_as_list_of_tuple
 from qfdmo.mixins import AutoSubmitMixin, CarteConfigFormMixin, GetFormMixin
 from qfdmo.models import SousCategorieObjet
 from qfdmo.models.acteur import LabelQualite
@@ -36,16 +36,7 @@ from qfdmo.widgets import (
 )
 
 
-def get_epcis_for_carte_form():
-    return [(code, code) for code in cast(list[str], epcis_from(["code"]))]
-
-
 class MapForm(GetFormMixin, CarteConfigFormMixin, forms.Form):
-    epci_codes = forms.MultipleChoiceField(
-        choices=get_epcis_for_carte_form,
-        widget=forms.MultipleHiddenInput(),
-        required=False,
-    )
     adresse = forms.CharField(
         widget=AutoCompleteInput(
             attrs={
