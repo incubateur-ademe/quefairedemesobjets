@@ -215,7 +215,7 @@ class SuggestionGroupeAdmin(
 
     class SuggestionGroupeQLSchema(DjangoQLSchema):
         def get_fields(self, model):
-            """Surcharge pour exposer les relations et champs personnalisés."""
+            """Override to expose relations and custom fields."""
             fields = super().get_fields(model)
 
             if model == SuggestionGroupe:
