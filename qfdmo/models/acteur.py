@@ -382,16 +382,6 @@ class DisplayedActeurQuerySet(models.QuerySet):
         )
 
 
-class DisplayedActeurManager(models.Manager):
-    def get_queryset(self):
-        return DisplayedActeurQuerySet(self.model, using=self._db)
-
-    def get_by_natural_key(self, uuid):
-        return self.get(
-            uuid=uuid,
-        )
-
-
 class LatLngPropertiesMixin(models.Model):
     location: models.PointField
 
@@ -1183,9 +1173,29 @@ Model to display all acteurs in admin
 """
 
 
+class FinalActeurManager(models.Manager):
+    def get_active_parents(self):
+        return self.get_queryset().filter(
+            statut=ActeurStatus.ACTIF,
+            source_id__isnull=True,
+        )
+
+
+class DisplayedActeurManager(FinalActeurManager, models.Manager):
+    def get_queryset(self):
+        return DisplayedActeurQuerySet(self.model, using=self._db)
+
+    def get_by_natural_key(self, uuid):
+        return self.get(
+            uuid=uuid,
+        )
+
+
 class FinalActeur(BaseActeur):
     class Meta:
         abstract = True
+
+    objects = FinalActeurManager()
 
     uuid = models.CharField(
         max_length=255, default=generate_short_uuid, editable=False, db_index=True

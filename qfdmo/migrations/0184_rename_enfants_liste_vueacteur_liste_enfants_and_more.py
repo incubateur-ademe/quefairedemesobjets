@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("qfdmo", "0178_epci_displayedacteur_code_commune_insee_and_more"),
+        ("qfdmo", "0183_alter_labelqualite_options_labelqualite_order_and_more"),
     ]
 
     operations = [
