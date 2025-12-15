@@ -265,10 +265,6 @@ class CarteSearchActeursView(SearchActeursView):
         """
         return self._get_field_value_for("map", "bounding_box")
 
-    def _get_epci_codes(self):
-        # TODO: récupérer PR epci
-        pass
-
     def _get_latitude(self):
         return self._get_field_value_for("map", "latitude")
 
