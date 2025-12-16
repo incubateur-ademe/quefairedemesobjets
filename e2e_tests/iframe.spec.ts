@@ -184,7 +184,7 @@ test.describe("📦 Système d'Intégration Iframe", () => {
       page,
     }) => {
       // Navigate to the test page
-      await page.goto("/lookbook/preview/tests/referrer", {
+      await page.goto("/lookbook/preview/tests/t_1_referrer", {
         waitUntil: "domcontentloaded",
       })
 

@@ -3,7 +3,6 @@
         {% if widget.value != None %} value="{{ widget.value|stringformat:'s' }}"{% endif %}
         type="radio"
         name="{{ widget.name }}"
-        {% if widget.value %}data-testid="segmented-control-{{ widget.name }}-{{ widget.value }}"{% endif %}
         {% include "django/forms/widgets/attrs.html" %}
     >
     <label class="fr-label qf-justify-center" for="{{ widget.attrs.id }}">

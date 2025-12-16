@@ -13,8 +13,8 @@ Ici sont référencées toutes les applications développées ou maintenues par 
 
 Chemin d'accès aux différentes fonctionnalités
 
-- Carte en mode formulaire : `?iframe`
-- Carte en mode carte : `?carte`
+- Carte en mode formulaire : `/formulaire`
+- Carte en mode carte : `/carte`
 - Administration : `admin/`
 - Validation de DAGs : `dags/validations`
 - Configurateur d'Iframe complet (accès restreint) : `iframe/configurateur`
