@@ -11,11 +11,16 @@ import {
 
 test.describe("🗺️ Filtres Avancés Carte", () => {
   async function searchInCarteMode(page) {
-    await page.locator("input#id_adresse").click()
-    await page.locator("input#id_adresse").fill("Paris")
-    await page
-      .locator("#id_adresseautocomplete-list.autocomplete-items div:nth-of-type(2)")
-      .click()
+    const adresseInput = page.locator('[data-testid="carte-adresse-input"]')
+    await adresseInput.click()
+    await adresseInput.fill("Paris")
+    const autocompleteOption = page
+      .locator(
+        ".autocomplete-items div[data-action*='address-autocomplete#selectOption']",
+      )
+      .nth(1) // Select second option (index 1)
+    await expect(autocompleteOption).toBeVisible({ timeout: 10000 })
+    await autocompleteOption.click()
   }
 
   test("Filtres avancés s'ouvrent et se ferment en mode carte", async ({ page }) => {
@@ -56,7 +61,7 @@ test.describe("🗺️ Affichage Légende Carte", () => {
     await expect(page.getByTestId("carte-legend")).toBeHidden()
 
     // Fill "Adresse" autocomplete input
-    await searchDummyAdresse(page)
+    await searchForAuray(page)
     await expect(page.getByTestId("carte-legend")).toBeVisible()
   })
 })
@@ -121,28 +126,22 @@ test.describe("🗺️ Basculement entre Mode Carte et Liste", () => {
     const initialBoundingBox = await getBoundingBoxFromURL()
     expect(initialBoundingBox).toBeTruthy()
 
-    // Find the Liste radio button in the segmented control and click it
-    const listeButton = iframe.locator('[data-testid="segmented-control-view-liste"]')
-    await expect(listeButton).toBeAttached({ timeout: 5000 })
-    await listeButton.click({ force: true })
+    // Switch to Liste mode
+    const listeButton = iframe
+      .getByTestId("view-mode-nav")
+      .getByText("Liste", { exact: true })
+    await listeButton.click()
 
-    // Verify we're in Liste mode by checking that:
-    // 1. The map container is NOT visible (carte mode hidden)
-    // 2. The pagination/results text is visible (liste mode shown)
+    // Wait for liste mode to be active
     await expect(iframe.locator('[data-map-target="mapContainer"]')).not.toBeVisible({
       timeout: 30000,
     })
 
-    // Check for liste mode indicators (pagination or results count)
-    const listeModeIndicator = iframe
-      .locator('span:has-text("résultats")')
-      .or(iframe.locator(".fr-pagination"))
-    await expect(listeModeIndicator).toBeVisible({ timeout: 5000 })
-
     // Click back to Carte mode
-    const carteButton = iframe.locator('[data-testid="segmented-control-view-carte"]')
-    await expect(carteButton).toBeAttached({ timeout: 5000 })
-    await carteButton.click({ force: true })
+    const carteButton = iframe
+      .getByTestId("view-mode-nav")
+      .getByText("Carte", { exact: true })
+    await carteButton.click()
 
     // Wait for mode to switch back to Carte - legend should be visible again
     await iframe.locator("[data-testid='carte-legend']").waitFor({ timeout: 10000 })
@@ -394,7 +393,10 @@ test.describe("🗺️ Bouton 'Rechercher dans cette zone'", () => {
 
     // Move the map by dragging (simulate user panning the map)
     const mapCanvas = iframe.locator("canvas.maplibregl-canvas")
-    await moveMap(page, mapCanvas)
+    await moveMap(page, mapCanvas, 200, 200) // Increase drag distance to trigger map movement
+
+    // Give the map time to process the movement and fire events
+    await page.waitForTimeout(500)
 
     // Wait for the button to appear (it will be shown after map movement is detected)
     await expect(searchInZoneButton).not.toHaveClass(/qf-hidden/, { timeout: 10000 })

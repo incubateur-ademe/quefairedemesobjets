@@ -170,13 +170,17 @@ test.skip("🗺️ Affichage et Interaction Acteurs", () => {
       .click()
 
     // Fill adresse
-    inputSelector = "#id_adresse"
-    await iframe.locator(inputSelector).click()
+    const adresseInput = iframe.locator('[data-testid="formulaire-adresse-input"]')
+    await adresseInput.click()
     await mockApiAdresse(page)
-    await iframe.locator(inputSelector).fill("auray")
-    await iframe
-      .locator("#id_adresseautocomplete-list.autocomplete-items div:nth-child(1)")
-      .click()
+    await adresseInput.fill("auray")
+    const autocompleteOption = iframe
+      .locator(
+        ".autocomplete-items div[data-action*='address-autocomplete#selectOption']",
+      )
+      .first()
+    await expect(autocompleteOption).toBeVisible()
+    await autocompleteOption.click()
 
     // Submit form
     await iframe.getByTestId("formulaire-rechercher-adresses-submit").click()

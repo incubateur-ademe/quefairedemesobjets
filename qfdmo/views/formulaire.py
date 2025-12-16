@@ -315,6 +315,7 @@ class FormulaireSearchActeursView(AbstractSearchActeursView):
             action_direction_form=self.action_direction_form,
             digital_acteur_form=self.digital_acteur_form,
             selected_action_codes=self._get_action_codes(),
+            forms={"map": context["form"]},  # Add forms dict for template compatibility
         )
         return context
 
