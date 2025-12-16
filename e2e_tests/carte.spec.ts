@@ -91,7 +91,7 @@ test.describe("🗺️ Basculement entre Mode Carte et Liste", () => {
     page,
   }) => {
     // Navigate to the test preview page that generates the iframe
-    await page.goto("/lookbook/preview/tests/carte_mode_liste_switch", {
+    await page.goto("/lookbook/preview/tests/t_2_carte_mode_liste_switch", {
       waitUntil: "domcontentloaded",
     })
 
@@ -160,7 +160,7 @@ test.describe("🗺️ Affichage des Labels dans la Fiche Acteur", () => {
     page,
   }) => {
     // Navigate to the test preview page with ESS filter applied
-    await page.goto("/lookbook/preview/tests/ess_label_display", {
+    await page.goto("/lookbook/preview/tests/t_3_ess_label_display", {
       waitUntil: "domcontentloaded",
     })
 

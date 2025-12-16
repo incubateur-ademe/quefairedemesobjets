@@ -883,19 +883,40 @@ class AccessibilitePreview(LookbookPreview):
 
 
 class TestsPreview(LookbookPreview):
-    def referrer(self, **kwargs):
+    """
+    Test previews for e2e tests.
+
+    Naming convention:
+    - Prefix all methods with t_{number}_ where number is incremental (t_1_, t_2_, t_3_, etc.)
+    - The number represents the chronological order of test creation
+    - Oldest tests have lower numbers and appear first in the class
+    - When adding a new test, use the next available number and add it at the bottom
+    - Keep methods ordered by their number prefix for easy navigation
+
+    Example: t_1_referrer, t_2_carte_mode_liste_switch, t_3_ess_label_display
+
+    Adding a new test:
+    1. Create a dedicated template in templates/ui/tests/ (e.g., my_new_test.html)
+    2. Add a preview method here following the naming convention (e.g., t_4_my_new_test)
+    3. Create the corresponding e2e test in e2e_tests/ (usually in carte.spec.ts or dedicated file)
+    4. In the e2e test, navigate to /lookbook/preview/tests/t_4_my_new_test
+
+    Each test should be self-contained with its own template and e2e test specification.
+    """
+
+    def t_1_referrer(self, **kwargs):
         return render_to_string(
             "ui/tests/referrer.html",
         )
 
-    def carte_mode_liste_switch(self, **kwargs):
+    def t_2_carte_mode_liste_switch(self, **kwargs):
         """Test switching between carte and liste modes with bounding box"""
         return render_to_string(
             "ui/tests/carte_mode_liste_switch.html",
             {"base_url": base_url},
         )
 
-    def ess_label_display(self, **kwargs):
+    def t_3_ess_label_display(self, **kwargs):
         """Test ESS label display in acteur detail panel"""
         return render_to_string(
             "ui/tests/ess_label_display.html",
