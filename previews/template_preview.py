@@ -894,3 +894,9 @@ class TestsPreview(LookbookPreview):
             "ui/tests/carte_mode_liste_switch.html",
             {"base_url": base_url},
         )
+
+    def ess_label_display(self, **kwargs):
+        """Test ESS label display in acteur detail panel"""
+        return render_to_string(
+            "ui/tests/ess_label_display.html",
+        )

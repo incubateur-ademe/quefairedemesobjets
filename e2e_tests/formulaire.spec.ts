@@ -6,8 +6,8 @@ import {
   openAdvancedFilters,
 } from "./helpers"
 
-test.describe("🔍 Recherche et Modification Formulaire", () => {
-  test("Recherche et modification d'une recherche", async ({ page }) => {
+test.describe("🔍 Formulaire de Recherche", () => {
+  test("La recherche peut être effectuée puis modifiée", async ({ page }) => {
     // Helper function to handle autocomplete inputs
 
     // Navigate to the formulaire page
@@ -50,8 +50,10 @@ test.describe("🔍 Recherche et Modification Formulaire", () => {
     }
   })
 })
-test.describe("📝 Liste d'Actions Formulaire", () => {
-  test("Action list by default", async ({ page }) => {
+test.describe("📝 Sélection d'Actions dans le Formulaire", () => {
+  test("La liste d'actions par défaut contient toutes les actions", async ({
+    page,
+  }) => {
     await page.goto(`/formulaire`, {
       waitUntil: "domcontentloaded",
     })
@@ -62,7 +64,9 @@ test.describe("📝 Liste d'Actions Formulaire", () => {
     )
   })
 
-  test("Action list is well set with jai", async ({ page }) => {
+  test("Les actions sélectionnées dans la section 'J'ai' sont correctement ajoutées/retirées", async ({
+    page,
+  }) => {
     await page.goto(`/formulaire?direction=jai&action_list=preter`, {
       waitUntil: "domcontentloaded",
     })
@@ -82,7 +86,9 @@ test.describe("📝 Liste d'Actions Formulaire", () => {
     expect(id_action_list2).toBe("preter|reparer")
   })
 
-  test("Action list is well set with jecherche", async ({ page }) => {
+  test("Les actions sélectionnées dans la section 'Je cherche' sont correctement ajoutées/retirées", async ({
+    page,
+  }) => {
     await page.goto(`/formulaire?direction=jecherche&action_list=emprunter`, {
       waitUntil: "domcontentloaded",
     })

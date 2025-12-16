@@ -6,8 +6,10 @@ test.describe("♿ Conformité Accessibilité WCAG", () => {
   const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]
   const IFRAME_SELECTOR = "iframe"
 
-  test.describe("Tests de conformité WCAG", () => {
-    test("Formulaire iFrame", async ({ page }) => {
+  test.describe("Conformité WCAG 2.1 AA des pages principales", () => {
+    test("L'iframe du formulaire respecte les critères WCAG 2.1 AA", async ({
+      page,
+    }) => {
       await page.goto(`/lookbook/preview/iframe/formulaire/`, {
         waitUntil: "domcontentloaded",
       })
@@ -20,7 +22,7 @@ test.describe("♿ Conformité Accessibilité WCAG", () => {
       expect(accessibilityScanResults.violations).toEqual([])
     })
 
-    test("Carte iFrame", async ({ page }) => {
+    test("L'iframe de la carte respecte les critères WCAG 2.1 AA", async ({ page }) => {
       await page.goto(`/lookbook/preview/iframe/carte/`, {
         waitUntil: "domcontentloaded",
       })
@@ -33,7 +35,9 @@ test.describe("♿ Conformité Accessibilité WCAG", () => {
       expect(accessibilityScanResults.violations).toEqual([])
     })
 
-    test("Assistant Homepage", async ({ page }) => {
+    test("La page d'accueil de l'assistant respecte les critères WCAG 2.1 AA", async ({
+      page,
+    }) => {
       // TODO: Update the route for production
       await page.goto(`/`, { waitUntil: "domcontentloaded" })
 
@@ -45,7 +49,9 @@ test.describe("♿ Conformité Accessibilité WCAG", () => {
       expect(accessibilityScanResults.violations).toEqual([])
     })
 
-    test("Assistant Detail Page", async ({ page }) => {
+    test("La page de détail produit de l'assistant respecte les critères WCAG 2.1 AA", async ({
+      page,
+    }) => {
       await page.goto(`/dechet/smartphone`, {
         waitUntil: "domcontentloaded",
       })

@@ -53,8 +53,8 @@ test.describe("🗺️ Affichage Légende Carte", () => {
   })
 })
 
-test.describe("🗺️ Pinpoint Active State", () => {
-  test("Clicking a pinpoint adds active class and removes it from other pinpoints", async ({
+test.describe("🗺️ Sélection de Pinpoints", () => {
+  test("Le pinpoint cliqué devient actif et les autres sont désactivés", async ({
     page,
   }) => {
     // Navigate to the preview page with multiple pinpoints
@@ -86,8 +86,8 @@ test.describe("🗺️ Pinpoint Active State", () => {
   })
 })
 
-test.describe("🗺️ Mode Carte/Liste Switch with Bounding Box", () => {
-  test("Bounding box is preserved when switching between Carte and Liste modes", async ({
+test.describe("🗺️ Basculement entre Mode Carte et Liste", () => {
+  test("La zone de recherche (bounding box) est préservée lors du changement de mode", async ({
     page,
   }) => {
     // Navigate to the test preview page that generates the iframe
@@ -114,9 +114,7 @@ test.describe("🗺️ Mode Carte/Liste Switch with Bounding Box", () => {
     expect(initialBoundingBox).toBeTruthy()
 
     // Find the Liste radio button in the segmented control and click it
-    const listeButton = iframe
-      .locator('input[type="radio"][value="liste"]')
-      .or(iframe.locator('input[type="radio"][value="LISTE"]'))
+    const listeButton = iframe.locator('[data-testid="segmented-control-view-liste"]')
     await expect(listeButton).toBeAttached({ timeout: 5000 })
     await listeButton.click({ force: true })
 
@@ -134,9 +132,7 @@ test.describe("🗺️ Mode Carte/Liste Switch with Bounding Box", () => {
     await expect(listeModeIndicator).toBeVisible({ timeout: 5000 })
 
     // Click back to Carte mode
-    const carteButton = iframe
-      .locator('input[type="radio"][value="carte"]')
-      .or(iframe.locator('input[type="radio"][value="CARTE"]'))
+    const carteButton = iframe.locator('[data-testid="segmented-control-view-carte"]')
     await expect(carteButton).toBeAttached({ timeout: 5000 })
     await carteButton.click({ force: true })
 
@@ -156,5 +152,46 @@ test.describe("🗺️ Mode Carte/Liste Switch with Bounding Box", () => {
     // Verify that the map container is still present
     const mapContainer = iframe.locator('[data-map-target="mapContainer"]')
     await expect(mapContainer).toBeAttached()
+  })
+})
+
+test.describe("🗺️ Affichage des Labels dans la Fiche Acteur", () => {
+  test("Le label ESS est affiché dans le panneau de détails de l'acteur", async ({
+    page,
+  }) => {
+    // Navigate to the test preview page with ESS filter applied
+    await page.goto("/lookbook/preview/tests/ess_label_display", {
+      waitUntil: "domcontentloaded",
+    })
+
+    // Wait for the iframe to be loaded
+    const iframe = page.frameLocator("iframe").first()
+    await expect(iframe.locator("body")).toBeAttached({ timeout: 10000 })
+
+    // Wait for results to load - we should be in liste mode with ESS filtered actors
+    await iframe
+      .locator('span:has-text("lieux du plus proche au plus loin")')
+      .waitFor({ timeout: 10000 })
+
+    // Find the first "Voir la fiche" button and click it
+    const voirLaFicheButton = iframe.locator('[data-testid="voir-la-fiche"]').first()
+    await expect(voirLaFicheButton).toBeVisible({ timeout: 5000 })
+    await voirLaFicheButton.click()
+
+    // Wait for the acteur detail panel to load
+    await iframe
+      .locator("#acteurDetailsPanel [data-testid='acteur-detail-labels']")
+      .waitFor({ timeout: 10000 })
+
+    // Verify that the ESS label is displayed
+    const acteurDetailLabels = iframe.locator(
+      "#acteurDetailsPanel [data-testid='acteur-detail-labels']",
+    )
+    await expect(acteurDetailLabels).toContainText(
+      "Enseigne de l'économie sociale et solidaire",
+      {
+        timeout: 5000,
+      },
+    )
   })
 })
