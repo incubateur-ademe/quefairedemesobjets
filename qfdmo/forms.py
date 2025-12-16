@@ -54,6 +54,7 @@ class MapForm(GetFormMixin, CarteConfigFormMixin, forms.Form):
                 "placeholder": "Rechercher autour d'une adresse",
                 "autocomplete": "off",
                 "aria-label": "Saisir une adresse - obligatoire",
+                "data-testid": "carte-adresse-input",
             },
             data_controller="address-autocomplete",
         ),

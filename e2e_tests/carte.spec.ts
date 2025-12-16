@@ -1,5 +1,13 @@
 import { expect, test } from "@playwright/test"
-import { openAdvancedFilters, searchDummyAdresse } from "./helpers"
+import {
+  openAdvancedFilters,
+  searchDummyAdresse,
+  searchForAuray,
+  searchForAurayInIframe,
+  switchToListeMode,
+  switchToCarteMode,
+  moveMap,
+} from "./helpers"
 
 test.describe("🗺️ Filtres Avancés Carte", () => {
   async function searchInCarteMode(page) {
@@ -193,5 +201,226 @@ test.describe("🗺️ Affichage des Labels dans la Fiche Acteur", () => {
         timeout: 5000,
       },
     )
+  })
+})
+
+test.describe("🗺️ Persistance des Filtres de Légende", () => {
+  test("Les filtres de légende restent actifs après changement de mode carte/liste", async ({
+    page,
+  }) => {
+    // Navigate to the carte page
+    await page.goto(`/carte`, { waitUntil: "domcontentloaded" })
+
+    // Search for Auray
+    await searchForAuray(page)
+
+    // Wait for legend to be visible
+    await expect(page.getByTestId("carte-legend")).toBeVisible()
+
+    // Wait for results to be displayed
+    await expect(page.locator("#addressesPanel")).toBeVisible()
+
+    // Get the first filter checkbox by index (0)
+    const firstFilterCheckbox = page
+      .getByTestId("carte-legend")
+      .locator("input[type='checkbox']")
+      .nth(0)
+
+    // Get the first checkbox group by index
+    const firstCheckboxGroup = page
+      .getByTestId("carte-legend")
+      .locator(".fr-checkbox-group")
+      .nth(0)
+
+    // Get the icon class from the first filter's icon span
+    const iconSpan = firstCheckboxGroup.locator("span[class*='fr-icon-']")
+
+    // Wait for the icon to be visible
+    await expect(iconSpan).toBeAttached()
+
+    const iconClassAttribute = await iconSpan.getAttribute("class")
+
+    // Extract the actual icon class (e.g., "fr-icon-recycle-line")
+    const iconClasses = iconClassAttribute?.split(" ") || []
+    const iconClass = iconClasses.find(
+      (cls) => cls.startsWith("fr-icon-") && cls !== "fr-icon--sm",
+    )
+
+    // Verify the filter is initially checked
+    await expect(firstFilterCheckbox).toBeChecked()
+
+    // Verify markers with this icon are present in addressesPanel (using pinpoint data-controller)
+    const addressesPanelIconsBefore = page.locator(
+      `#addressesPanel [data-controller="pinpoint"] span.${iconClass}`,
+    )
+    const initialIconCount = await addressesPanelIconsBefore.count()
+    expect(initialIconCount).toBeGreaterThan(0)
+
+    // Get the label to click (since the checkbox is hidden with CSS)
+    const firstCheckboxLabel = firstCheckboxGroup.locator("label")
+
+    // Uncheck the filter by clicking on the label
+    await firstCheckboxLabel.click()
+
+    // Verify the checkbox is now unchecked
+    await expect(firstFilterCheckbox).not.toBeChecked()
+
+    // Wait for the loading spinner to appear and disappear (acteurs are being refreshed)
+    await expect(page.getByTestId("loading-solutions")).toBeVisible()
+    await expect(page.getByTestId("loading-solutions")).toBeHidden()
+
+    // Verify icons are no longer in addressesPanel
+    const addressesPanelIconsAfter = page.locator(
+      `#addressesPanel [data-controller="pinpoint"] span.${iconClass}`,
+    )
+    expect(await addressesPanelIconsAfter.count()).toBe(0)
+
+    // Verify markers with this icon are no longer visible on the map
+    const markersAfterUncheck = page.locator(
+      `[aria-label="Map marker"] span.${iconClass}`,
+    )
+    expect(await markersAfterUncheck.count()).toBe(0)
+
+    // Switch to liste mode
+    await switchToListeMode(page)
+
+    // Switch back to carte mode
+    await switchToCarteMode(page)
+
+    // Verify the filter is still unchecked
+    await expect(firstFilterCheckbox).not.toBeChecked()
+
+    // Verify icons are still not in addressesPanel
+    const addressesPanelIconsAfterSwitch = page.locator(
+      `#addressesPanel [data-controller="pinpoint"] span.${iconClass}`,
+    )
+    expect(await addressesPanelIconsAfterSwitch.count()).toBe(0)
+
+    // Verify markers with this icon are still not visible
+    const markersAfterModeSwitch = page.locator(
+      `[aria-label="Map marker"] span.${iconClass}`,
+    )
+    expect(await markersAfterModeSwitch.count()).toBe(0)
+
+    // Now test that we can uncheck another filter and it still works
+    // Get the second filter checkbox by index (1)
+    const secondFilterCheckbox = page
+      .getByTestId("carte-legend")
+      .locator("input[type='checkbox']")
+      .nth(1)
+
+    // Get the second checkbox group by index
+    const secondCheckboxGroup = page
+      .getByTestId("carte-legend")
+      .locator(".fr-checkbox-group")
+      .nth(1)
+
+    // Get the label to click (since the checkbox is hidden with CSS)
+    const secondCheckboxLabel = secondCheckboxGroup.locator("label")
+
+    // Get the icon class from the second filter's icon span
+    const secondIconSpan = secondCheckboxGroup.locator("span[class*='fr-icon-']")
+
+    const secondIconClassAttribute = await secondIconSpan.getAttribute("class")
+    const secondIconClasses = secondIconClassAttribute?.split(" ") || []
+    const secondIconClass = secondIconClasses.find(
+      (cls) => cls.startsWith("fr-icon-") && cls !== "fr-icon--sm",
+    )
+
+    // Verify there are icons with this class before unchecking
+    const secondIconsBefore = page.locator(
+      `#addressesPanel [data-controller="pinpoint"] span.${secondIconClass}`,
+    )
+    expect(await secondIconsBefore.count()).toBeGreaterThan(0)
+
+    // Uncheck the second filter
+    await secondCheckboxLabel.click()
+
+    // Wait for loading
+    await expect(page.getByTestId("loading-solutions")).toBeVisible()
+    await expect(page.getByTestId("loading-solutions")).toBeHidden()
+
+    // Verify the second filter is now unchecked
+    await expect(secondFilterCheckbox).not.toBeChecked()
+
+    // Verify icons with the second icon class are now gone
+    const secondIconsAfter = page.locator(
+      `#addressesPanel [data-controller="pinpoint"] span.${secondIconClass}`,
+    )
+    expect(await secondIconsAfter.count()).toBe(0)
+  })
+})
+
+test.describe("🗺️ Bouton 'Rechercher dans cette zone'", () => {
+  test("Le bouton apparaît après déplacement de la carte et met à jour les résultats", async ({
+    page,
+  }) => {
+    // Navigate to the test preview page that generates the iframe
+    await page.goto("/lookbook/preview/tests/t_5_rechercher_dans_zone", {
+      waitUntil: "domcontentloaded",
+    })
+
+    // Wait for the iframe to be loaded (generated by carte.js)
+    const iframe = page.frameLocator("iframe").first()
+    await expect(iframe.locator("body")).toBeAttached({ timeout: 10000 })
+
+    // Scroll the iframe into view
+    await page.locator("iframe").first().scrollIntoViewIfNeeded()
+
+    // Search for Auray in the iframe
+    await searchForAurayInIframe(iframe)
+
+    // Wait for legend to be visible
+    await iframe.locator("[data-testid='carte-legend']").waitFor({ timeout: 10000 })
+
+    // Wait for results to be displayed
+    await expect(iframe.locator("#addressesPanel")).toBeVisible()
+
+    // Count initial results
+    const initialResultsCount = await iframe
+      .locator("#addressesPanel [data-controller='pinpoint']")
+      .count()
+    expect(initialResultsCount).toBeGreaterThan(0)
+
+    // The search in zone button should be hidden initially (no bounding box yet)
+    const searchInZoneButton = iframe.getByTestId("searchInZone")
+    await expect(searchInZoneButton).toHaveClass(/qf-hidden/)
+
+    // Get the bounding box input (should be empty initially)
+    const bboxInput = iframe.locator('[data-search-solution-form-target="bbox"]')
+    await expect(bboxInput).toBeAttached()
+    const initialBoundingBox = await bboxInput.inputValue()
+    expect(initialBoundingBox).toBe("") // Should be empty before map movement
+
+    // Move the map by dragging (simulate user panning the map)
+    const mapCanvas = iframe.locator("canvas.maplibregl-canvas")
+    await moveMap(page, mapCanvas)
+
+    // Wait for the button to appear (it will be shown after map movement is detected)
+    await expect(searchInZoneButton).not.toHaveClass(/qf-hidden/, { timeout: 10000 })
+    await expect(searchInZoneButton).toBeVisible()
+
+    // Click the button
+    await searchInZoneButton.click()
+
+    // Wait for loading to complete
+    await expect(iframe.getByTestId("loading-solutions")).toBeVisible()
+    await expect(iframe.getByTestId("loading-solutions")).toBeHidden()
+
+    // Verify the bounding box has been set (should now have a value)
+    const newBoundingBox = await bboxInput.inputValue()
+    expect(newBoundingBox).toBeTruthy()
+    expect(newBoundingBox).not.toBe("") // Should now be populated
+
+    // Verify results have changed (count should be different)
+    const newResultsCount = await iframe
+      .locator("#addressesPanel [data-controller='pinpoint']")
+      .count()
+    // Results count might be different after searching in new zone
+    // We just verify we still have results
+    expect(newResultsCount).toBeGreaterThan(0)
+
+    // The button should be hidden again after clicking
+    await expect(searchInZoneButton).toHaveClass(/qf-hidden/)
   })
 })
