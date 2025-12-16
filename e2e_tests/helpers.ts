@@ -288,3 +288,67 @@ export const getMarkers = async (page) => {
   const count = await markers?.count()
   return [markers, count]
 }
+
+export const searchForAuray = async (page) => {
+  const adresseInput = page.locator('[data-testid="carte-adresse-input"]')
+  await adresseInput.click()
+  await adresseInput.fill("Auray")
+  const autocompleteOption = page
+    .locator(
+      ".autocomplete-items div[data-action*='address-autocomplete#selectOption']",
+    )
+    .first()
+  await expect(autocompleteOption).toBeVisible({ timeout: 10000 })
+  await autocompleteOption.click()
+}
+
+export const searchForAurayInIframe = async (iframe) => {
+  const adresseInput = iframe.locator('[data-testid="carte-adresse-input"]')
+  await adresseInput.click()
+  await adresseInput.fill("Auray")
+  const autocompleteOption = iframe
+    .locator(
+      ".autocomplete-items div[data-action*='address-autocomplete#selectOption']",
+    )
+    .first()
+  await expect(autocompleteOption).toBeVisible({ timeout: 10000 })
+  await autocompleteOption.click()
+}
+
+export const switchToListeMode = async (page) => {
+  const listeButton = page
+    .getByTestId("view-mode-nav")
+    .getByText("Liste", { exact: true })
+  await listeButton.click()
+
+  // Wait for liste mode to be active
+  await expect(page.locator('[data-map-target="mapContainer"]')).not.toBeVisible()
+}
+
+export const switchToCarteMode = async (page) => {
+  const carteButton = page
+    .getByTestId("view-mode-nav")
+    .getByText("Carte", { exact: true })
+  await carteButton.click()
+
+  // Wait for carte mode to be active
+  await expect(page.getByTestId("carte-legend")).toBeVisible()
+}
+
+export const moveMap = async (page, mapCanvasLocator, offsetX = 100, offsetY = 100) => {
+  // Get the bounding box of the canvas to calculate drag coordinates
+  await expect(mapCanvasLocator).toBeVisible()
+  const canvasBoundingBox = await mapCanvasLocator.boundingBox()
+  if (!canvasBoundingBox) {
+    throw new Error("Canvas bounding box not found")
+  }
+
+  // Drag from center to a new position (simulate panning)
+  const centerX = canvasBoundingBox.x + canvasBoundingBox.width / 2
+  const centerY = canvasBoundingBox.y + canvasBoundingBox.height / 2
+
+  await page.mouse.move(centerX, centerY)
+  await page.mouse.down()
+  await page.mouse.move(centerX + offsetX, centerY + offsetY, { steps: 10 })
+  await page.mouse.up()
+}

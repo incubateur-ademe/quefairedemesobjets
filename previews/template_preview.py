@@ -921,3 +921,16 @@ class TestsPreview(LookbookPreview):
         return render_to_string(
             "ui/tests/ess_label_display.html",
         )
+
+    def t_4_legend_filters_persistence(self, **kwargs):
+        """Test legend filters persistence when switching between carte and liste modes"""
+        return render_to_string(
+            "ui/tests/legend_filters_persistence.html",
+        )
+
+    def t_5_rechercher_dans_zone(self, **kwargs):
+        """Test search in zone button appearance and bounding box update"""
+        return render_to_string(
+            "ui/tests/search_in_zone_button.html",
+            {"base_url": base_url},
+        )
