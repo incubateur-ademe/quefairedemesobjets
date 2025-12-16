@@ -1,33 +1,29 @@
 import { expect, test } from "@playwright/test"
-import { getMarkers, mockApiAdresse } from "./helpers"
+import {
+  getMarkers,
+  mockApiAdresse,
+  searchAddress,
+  navigateTo,
+  getSessionStorage,
+  clickFirstAvailableMarker,
+  TIMEOUT,
+} from "./helpers"
 
 test.describe("🤖 Assistant et Recherche", () => {
   async function searchOnProduitPage(page, searchedAddress: string) {
     await mockApiAdresse(page) // Mock BEFORE interacting with input
-
-    const adresseInput = page.locator(
-      '#mauvais-etat-panel [data-testid="carte-adresse-input"]',
-    )
-
-    // Autour de moi
-    await adresseInput.click()
-    await adresseInput.fill(searchedAddress)
-    const autocompleteOption = page
-      .locator(
-        '#mauvais-etat-panel .autocomplete-items div[data-action*="address-autocomplete#selectOption"]',
-      )
-      .first()
-    await expect(autocompleteOption).toBeVisible({ timeout: 10000 })
-    await autocompleteOption.click()
+    await searchAddress(page, searchedAddress, "carte", {
+      parentSelector: "#mauvais-etat-panel",
+    })
   }
 
   test("L'adresse sélectionnée est stockée dans le sessionStorage", async ({
     page,
   }) => {
     // Navigate to the carte page
-    await page.goto(`/dechet/lave-linge`, { waitUntil: "domcontentloaded" })
+    await navigateTo(page, `/dechet/lave-linge`)
     await searchOnProduitPage(page, "Auray")
-    const sessionStorage = await page.evaluate(() => window.sessionStorage)
+    const sessionStorage = await getSessionStorage(page)
     expect(sessionStorage.adresse).toBe("Auray")
     expect(sessionStorage.latitude).toContain("47.6")
     expect(sessionStorage.longitude).toContain("-2.9")
@@ -35,7 +31,7 @@ test.describe("🤖 Assistant et Recherche", () => {
 
   test("Le lien infotri pointe vers le bon URL", async ({ page }) => {
     // Navigate to the carte page
-    await page.goto(`/dechet/lave-linge`, { waitUntil: "domcontentloaded" })
+    await navigateTo(page, `/dechet/lave-linge`)
     const href = await page.getByTestId("infotri-link").getAttribute("href")
     expect(href).toBe("https://www.ecologie.gouv.fr/info-tri")
   })
@@ -53,7 +49,7 @@ test.describe("🤖 Assistant et Recherche", () => {
     },
     async ({ page }) => {
       // Navigate to the carte page
-      await page.goto(`/`, { waitUntil: "domcontentloaded" })
+      await navigateTo(page, `/`)
 
       // Type in main serach
       let responsePromise = page.waitForResponse(
@@ -106,65 +102,47 @@ test.describe("🤖 Assistant et Recherche", () => {
     page,
   }) => {
     // Check that homepage scores 1
-    await page.goto(`/`, { waitUntil: "domcontentloaded" })
-    let sessionStorage = await page.evaluate(() => window.sessionStorage)
+    await navigateTo(page, `/`)
+    let sessionStorage = await getSessionStorage(page)
 
     expect(sessionStorage.homePageView).toBe("0")
 
     // Navigate to a produit page and check that it scores 1
-    await page.goto(`/dechet/lave-linge`, { waitUntil: "domcontentloaded" })
-    sessionStorage = await page.evaluate(() => window.sessionStorage)
+    await navigateTo(page, `/dechet/lave-linge`)
+    sessionStorage = await getSessionStorage(page)
     expect(sessionStorage.produitPageView).toBe("1")
 
     // Click on a pin on the map and check that it scores 1
     await searchOnProduitPage(page, "Auray")
-    const [markers, count] = await getMarkers(page)
-    for (let i = 0; i < count; i++) {
-      const item = markers?.nth(i)
-
-      try {
-        await item!.click({ force: true })
-        break
-      } catch (e) {
-        console.log("cannot click", e)
-      }
-    }
+    await getMarkers(page)
+    await clickFirstAvailableMarker(page)
 
     // Wait for sessionStorage to be updated after click
     await page.waitForFunction(
       () => window.sessionStorage.userInteractionWithMap !== undefined,
     )
-    sessionStorage = await page.evaluate(() => window.sessionStorage)
+    sessionStorage = await getSessionStorage(page)
     expect(sessionStorage.userInteractionWithMap).toBe("1")
 
     // Click on another pin on the map and check that it scores 1 more (2 in total)
-    for (let i = 0; i < count; i++) {
-      const item = markers?.nth(i)
-
-      try {
-        await item!.click({ force: true })
-        break
-      } catch (e) {
-        console.log("cannot click", e)
-      }
-    }
+    await clickFirstAvailableMarker(page)
 
     // Wait for sessionStorage to be updated after second click
     await page.waitForFunction(
       () => window.sessionStorage.userInteractionWithMap === "2",
     )
-    sessionStorage = await page.evaluate(() => window.sessionStorage)
+    sessionStorage = await getSessionStorage(page)
     expect(sessionStorage.userInteractionWithMap).toBe("2")
 
     // Click on share button in solution details
     await page.locator("[aria-describedby='mauvais-etat:shareTooltip']").click()
-    sessionStorage = await page.evaluate(() => window.sessionStorage)
+    sessionStorage = await getSessionStorage(page)
     expect(sessionStorage.userInteractionWithSolutionDetails).toBe("1")
 
     // Ensure that the scores does not increases after
     // several homepage visits
-    await page.goto(`/`, { waitUntil: "domcontentloaded" })
-    sessionStorage = await page.evaluate(() => window.sessionStorage)
+    await navigateTo(page, `/`)
+    sessionStorage = await getSessionStorage(page)
     expect(sessionStorage.homePageView).toBe("0")
   })
 })

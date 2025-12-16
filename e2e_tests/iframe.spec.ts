@@ -1,49 +1,40 @@
 import { test, expect } from "@playwright/test"
+import { navigateTo, getIframe, TIMEOUT } from "./helpers"
 
 test.describe("📦 Système d'Intégration Iframe", () => {
   test.describe("Génération des iframes avec ID corrects", () => {
     test("L'iframe de la carte a l'ID 'carte'", async ({ page }) => {
-      await page.goto("/lookbook/preview/iframe/carte", {
-        waitUntil: "domcontentloaded",
-      })
+      await navigateTo(page, "/lookbook/preview/iframe/carte")
 
       const iframe = page.locator("iframe#carte")
-      await expect(iframe).toBeAttached({ timeout: 10000 })
+      await expect(iframe).toBeAttached({ timeout: TIMEOUT.DEFAULT })
     })
 
     test("L'iframe du formulaire a l'ID 'formulaire'", async ({ page }) => {
-      await page.goto("/lookbook/preview/iframe/formulaire", {
-        waitUntil: "domcontentloaded",
-      })
+      await navigateTo(page, "/lookbook/preview/iframe/formulaire")
 
       const iframe = page.locator("iframe#formulaire")
-      await expect(iframe).toBeAttached({ timeout: 10000 })
+      await expect(iframe).toBeAttached({ timeout: TIMEOUT.DEFAULT })
     })
 
     test("L'iframe de l'assistant a l'ID 'assistant'", async ({ page }) => {
-      await page.goto("/lookbook/preview/iframe/assistant", {
-        waitUntil: "domcontentloaded",
-      })
+      await navigateTo(page, "/lookbook/preview/iframe/assistant")
 
       const iframe = page.locator("iframe#assistant")
-      await expect(iframe).toBeAttached({ timeout: 10000 })
+      await expect(iframe).toBeAttached({ timeout: TIMEOUT.DEFAULT })
     })
 
     test("L'iframe du configurateur infotri a l'ID 'infotri-configurator'", async ({
       page,
     }) => {
-      await page.goto("/lookbook/preview/iframe/infotri_configurator", {
-        waitUntil: "domcontentloaded",
-      })
+      await navigateTo(page, "/lookbook/preview/iframe/infotri_configurator")
 
       const iframe = page.locator("iframe#infotri-configurator")
       await expect(iframe).toBeAttached()
     })
 
     test("L'iframe infotri a l'ID 'infotri'", async ({ page }) => {
-      await page.goto("/lookbook/preview/iframe/infotri", {
-        waitUntil: "domcontentloaded",
-      })
+      await navigateTo(page, "/lookbook/preview/iframe/infotri")
 
       const iframe = page.locator("iframe#infotri")
       await expect(iframe).toBeAttached()
@@ -55,9 +46,7 @@ test.describe("📦 Système d'Intégration Iframe", () => {
       page,
       baseURL,
     }) => {
-      await page.goto(`/lookbook/preview/iframe/formulaire/`, {
-        waitUntil: "domcontentloaded",
-      })
+      await navigateTo(page, `/lookbook/preview/iframe/formulaire/`)
 
       const iframeElement = await page.$("iframe#formulaire")
       const attributes = await Promise.all([
@@ -89,14 +78,12 @@ test.describe("📦 Système d'Intégration Iframe", () => {
     test("Le formulaire est visible et a la bonne hauteur dans l'iframe", async ({
       page,
     }) => {
-      await page.goto(`/lookbook/preview/iframe/formulaire/`, {
-        waitUntil: "domcontentloaded",
-      })
+      await navigateTo(page, `/lookbook/preview/iframe/formulaire/`)
 
-      const iframeElement = page.frameLocator("iframe#formulaire")
+      const iframeElement = getIframe(page, "formulaire")
 
       const form = iframeElement.locator("#search_form")
-      await expect(form).toBeVisible({ timeout: 10000 })
+      await expect(form).toBeVisible({ timeout: TIMEOUT.DEFAULT })
 
       const formHeight = await iframeElement
         .locator("[data-testid='form-content']")
@@ -109,13 +96,13 @@ test.describe("📦 Système d'Intégration Iframe", () => {
     test("L'iframe de la carte s'affiche correctement (screenshot)", async ({
       page,
     }) => {
-      await page.goto(`/lookbook/preview/iframe/carte/`, {
-        waitUntil: "domcontentloaded",
-      })
+      await navigateTo(page, `/lookbook/preview/iframe/carte/`)
 
       await page.waitForTimeout(2000)
 
-      await expect(page).toHaveScreenshot("iframe-carte.png", { timeout: 10000 })
+      await expect(page).toHaveScreenshot("iframe-carte.png", {
+        timeout: TIMEOUT.DEFAULT,
+      })
     })
   })
 
@@ -124,9 +111,7 @@ test.describe("📦 Système d'Intégration Iframe", () => {
       page,
     }) => {
       test.slow()
-      await page.goto(`/lookbook/preview/iframe/assistant/`, {
-        waitUntil: "domcontentloaded",
-      })
+      await navigateTo(page, `/lookbook/preview/iframe/assistant/`)
 
       const iframe = page.locator("iframe#assistant")
 
@@ -136,16 +121,16 @@ test.describe("📦 Système d'Intégration Iframe", () => {
 
   test.describe("Rétrocompatibilité des URLs d'iframe", () => {
     test("Les anciennes URLs d'iframe fonctionnent toujours", async ({ page }) => {
-      await page.goto(
+      await navigateTo(
+        page,
         `/formulaire?direction=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre`,
-        { waitUntil: "domcontentloaded" },
       )
       await expect(page).toHaveURL(
         `/formulaire?direction=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre`,
       )
-      await page.goto(
+      await navigateTo(
+        page,
         `/carte?action_list=reparer%7Cdonner%7Cechanger%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cacheter%7Crevendre&epci_codes=200055887&limit=50`,
-        { waitUntil: "domcontentloaded" },
       )
       await expect(page).toHaveURL(
         `/carte?action_list=reparer%7Cdonner%7Cechanger%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cacheter%7Crevendre&epci_codes=200055887&limit=50`,
@@ -159,7 +144,7 @@ test.describe("📦 Système d'Intégration Iframe", () => {
       baseURL,
     }) => {
       test.slow()
-      await page.goto(`/?iframe`, { waitUntil: "domcontentloaded" })
+      await navigateTo(page, `/?iframe`)
       expect(page).not.toBeNull()
 
       for (let i = 0; i < 50; i++) {
@@ -184,24 +169,22 @@ test.describe("📦 Système d'Intégration Iframe", () => {
       page,
     }) => {
       // Navigate to the test page
-      await page.goto("/lookbook/preview/tests/t_1_referrer", {
-        waitUntil: "domcontentloaded",
-      })
+      await navigateTo(page, "/lookbook/preview/tests/t_1_referrer")
 
       // Get the parent window location for comparison
       const parentLocation = page.url()
 
       // Locate the test iframe
-      const iframe = page.frameLocator("iframe#test")
+      const iframe = getIframe(page, "test")
 
       // Wait for iframe to load by waiting for the body with Stimulus controller
       await expect(iframe.locator("body[data-controller*='analytics']")).toBeAttached({
-        timeout: 10000,
+        timeout: TIMEOUT.DEFAULT,
       })
 
       // Find a visible link using Playwright's built-in visibility detection
       const visibleLink = iframe.locator("a:visible").first()
-      await expect(visibleLink).toBeVisible({ timeout: 10000 })
+      await expect(visibleLink).toBeVisible({ timeout: TIMEOUT.DEFAULT })
 
       // Get the current URL before clicking to detect navigation
       const initialUrl = await iframe
@@ -216,7 +199,7 @@ test.describe("📦 Système d'Intégration Iframe", () => {
           .locator("body")
           .evaluate(() => window.location.href)
         expect(currentUrl).not.toBe(initialUrl)
-      }).toPass({ timeout: 10000 })
+      }).toPass({ timeout: TIMEOUT.DEFAULT })
 
       // Wait for the analytics controller to be available after navigation
       await expect(async () => {
@@ -227,7 +210,7 @@ test.describe("📦 Système d'Intégration Iframe", () => {
           )
         })
         expect(hasController).toBe(true)
-      }).toPass({ timeout: 5000 })
+      }).toPass({ timeout: TIMEOUT.SHORT })
 
       // Execute JavaScript inside the iframe to get personProperties
       // This can seem a bit cumbersome, but is the result of quite a lot of trial
