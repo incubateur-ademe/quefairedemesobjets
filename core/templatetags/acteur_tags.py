@@ -18,6 +18,12 @@ def acteur_url(context: dict, acteur, with_map: bool = True) -> str:
     request = context.get("request")
 
     # TODO: what about other parameters from CarteConfig used in the Acteur URL ?
+    # Should we add a logic to set the forms with carte_config parameters ?
+    # - redirect to a carte with bounding form ?
+    # - get the CarteConfig in adresse_detail view and apply the parameters when display
+    #   it : something like /carte/<carte_config.slug>/details/<uuid>, it can be useful
+    #   for futur specific setting to be applied in the acteur detail card or for the
+    #   share feature ?
     map_container_id = context.get("map_container_id")
 
     if request:
