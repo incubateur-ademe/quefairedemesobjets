@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test"
 import { getMarkers, mockApiAdresse } from "./helpers"
 
-test.describe("🤖 Recherche et Interaction Assistant", () => {
+test.describe("🤖 Assistant et Recherche", () => {
   function getItemSelector(index) {
     return `#mauvais-etat-panel #id_adresseautocomplete-list.autocomplete-items div[data-action="click->address-autocomplete#selectOption"]:nth-of-type(${index})`
   }
@@ -16,7 +16,7 @@ test.describe("🤖 Recherche et Interaction Assistant", () => {
     await page.locator(getItemSelector(1)).click()
   }
 
-  test("Le sessionStorage se peuple bien lors d'un choix d'adresse", async ({
+  test("L'adresse sélectionnée est stockée dans le sessionStorage", async ({
     page,
   }) => {
     // Navigate to the carte page
@@ -28,7 +28,7 @@ test.describe("🤖 Recherche et Interaction Assistant", () => {
     expect(sessionStorage.longitude).toContain("-2.9")
   })
 
-  test("Le lien infotri est bien défini", async ({ page }) => {
+  test("Le lien infotri pointe vers le bon URL", async ({ page }) => {
     // Navigate to the carte page
     await page.goto(`/dechet/lave-linge`, { waitUntil: "domcontentloaded" })
     const href = await page.getByTestId("infotri-link").getAttribute("href")
@@ -36,7 +36,7 @@ test.describe("🤖 Recherche et Interaction Assistant", () => {
   })
 
   test(
-    "Les deux recherches en page d'accueil fonctionnent",
+    "Les champs de recherche en page d'accueil (principal et header) fonctionnent indépendamment",
     {
       annotation: [
         {
@@ -97,7 +97,9 @@ test.describe("🤖 Recherche et Interaction Assistant", () => {
     },
   )
 
-  test("Le tracking PostHog fonctionne comme prévu", async ({ page }) => {
+  test("Les événements PostHog sont trackés correctement (pages vues, interactions carte, détails solution)", async ({
+    page,
+  }) => {
     // Check that homepage scores 1
     await page.goto(`/`, { waitUntil: "domcontentloaded" })
     let sessionStorage = await page.evaluate(() => window.sessionStorage)

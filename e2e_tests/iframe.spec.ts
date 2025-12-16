@@ -1,8 +1,8 @@
 import { test, expect } from "@playwright/test"
 
 test.describe("📦 Système d'Intégration Iframe", () => {
-  test.describe("Validation des ID d'iframe", () => {
-    test("carte lookbook generates iframe with ID 'carte'", async ({ page }) => {
+  test.describe("Génération des iframes avec ID corrects", () => {
+    test("L'iframe de la carte a l'ID 'carte'", async ({ page }) => {
       await page.goto("/lookbook/preview/iframe/carte", {
         waitUntil: "domcontentloaded",
       })
@@ -11,9 +11,7 @@ test.describe("📦 Système d'Intégration Iframe", () => {
       await expect(iframe).toBeAttached({ timeout: 10000 })
     })
 
-    test("formulaire lookbook generates iframe with ID 'formulaire'", async ({
-      page,
-    }) => {
+    test("L'iframe du formulaire a l'ID 'formulaire'", async ({ page }) => {
       await page.goto("/lookbook/preview/iframe/formulaire", {
         waitUntil: "domcontentloaded",
       })
@@ -22,9 +20,7 @@ test.describe("📦 Système d'Intégration Iframe", () => {
       await expect(iframe).toBeAttached({ timeout: 10000 })
     })
 
-    test("assistant lookbook generates iframe with ID 'assistant'", async ({
-      page,
-    }) => {
+    test("L'iframe de l'assistant a l'ID 'assistant'", async ({ page }) => {
       await page.goto("/lookbook/preview/iframe/assistant", {
         waitUntil: "domcontentloaded",
       })
@@ -33,7 +29,7 @@ test.describe("📦 Système d'Intégration Iframe", () => {
       await expect(iframe).toBeAttached({ timeout: 10000 })
     })
 
-    test("infotri-configurator lookbook generates iframe with ID 'infotri-configurator'", async ({
+    test("L'iframe du configurateur infotri a l'ID 'infotri-configurator'", async ({
       page,
     }) => {
       await page.goto("/lookbook/preview/iframe/infotri_configurator", {
@@ -44,7 +40,7 @@ test.describe("📦 Système d'Intégration Iframe", () => {
       await expect(iframe).toBeAttached()
     })
 
-    test("infotri lookbook generates iframe with ID 'infotri'", async ({ page }) => {
+    test("L'iframe infotri a l'ID 'infotri'", async ({ page }) => {
       await page.goto("/lookbook/preview/iframe/infotri", {
         waitUntil: "domcontentloaded",
       })
@@ -54,8 +50,11 @@ test.describe("📦 Système d'Intégration Iframe", () => {
     })
   })
 
-  test.describe("Iframe formulaire", () => {
-    test("is loaded with correct parameters", async ({ page, baseURL }) => {
+  test.describe("Configuration de l'iframe formulaire", () => {
+    test("L'iframe est chargée avec les bons paramètres et attributs", async ({
+      page,
+      baseURL,
+    }) => {
       await page.goto(`/lookbook/preview/iframe/formulaire/`, {
         waitUntil: "domcontentloaded",
       })
@@ -87,7 +86,9 @@ test.describe("📦 Système d'Intégration Iframe", () => {
       expect(title).toBe("Longue vie aux objets")
     })
 
-    test("form is visible in the iframe", async ({ page }) => {
+    test("Le formulaire est visible et a la bonne hauteur dans l'iframe", async ({
+      page,
+    }) => {
       await page.goto(`/lookbook/preview/iframe/formulaire/`, {
         waitUntil: "domcontentloaded",
       })
@@ -104,8 +105,10 @@ test.describe("📦 Système d'Intégration Iframe", () => {
     })
   })
 
-  test.describe("Iframe carte", () => {
-    test("displays correctly", async ({ page }) => {
+  test.describe("Affichage de l'iframe carte", () => {
+    test("L'iframe de la carte s'affiche correctement (screenshot)", async ({
+      page,
+    }) => {
       await page.goto(`/lookbook/preview/iframe/carte/`, {
         waitUntil: "domcontentloaded",
       })
@@ -116,8 +119,10 @@ test.describe("📦 Système d'Intégration Iframe", () => {
     })
   })
 
-  test.describe("Iframe assistant", () => {
-    test("displays correctly", async ({ page }) => {
+  test.describe("Configuration de l'iframe assistant", () => {
+    test("L'iframe de l'assistant a les bons attributs (géolocalisation)", async ({
+      page,
+    }) => {
       test.slow()
       await page.goto(`/lookbook/preview/iframe/assistant/`, {
         waitUntil: "domcontentloaded",
@@ -129,8 +134,8 @@ test.describe("📦 Système d'Intégration Iframe", () => {
     })
   })
 
-  test.describe("URLs iframe legacy", () => {
-    test("still work", async ({ page }) => {
+  test.describe("Rétrocompatibilité des URLs d'iframe", () => {
+    test("Les anciennes URLs d'iframe fonctionnent toujours", async ({ page }) => {
       await page.goto(
         `/formulaire?direction=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre`,
         { waitUntil: "domcontentloaded" },
@@ -148,8 +153,11 @@ test.describe("📦 Système d'Intégration Iframe", () => {
     })
   })
 
-  test.describe("Persistance mode iframe", () => {
-    test("persists across navigation", async ({ page, baseURL }) => {
+  test.describe("Persistance du mode iframe", () => {
+    test("Le mode iframe persiste lors de la navigation entre pages", async ({
+      page,
+      baseURL,
+    }) => {
       test.slow()
       await page.goto(`/?iframe`, { waitUntil: "domcontentloaded" })
       expect(page).not.toBeNull()
@@ -171,8 +179,8 @@ test.describe("📦 Système d'Intégration Iframe", () => {
     })
   })
 
-  test.describe("Referrer tracking in iframe", () => {
-    test("tracks parent referrer correctly when clicking links inside iframe", async ({
+  test.describe("Tracking du referrer dans les iframes", () => {
+    test("Le referrer parent est correctement tracké lors des clics sur des liens dans l'iframe", async ({
       page,
     }) => {
       // Navigate to the test page
@@ -250,7 +258,7 @@ test.describe("📦 Système d'Intégration Iframe", () => {
     })
   })
 })
-test.describe("📜 Vérification des scripts", () => {
+test.describe("📜 Accessibilité des Scripts d'Intégration", () => {
   /**
    * Tests for embed script routes
    *
@@ -258,7 +266,9 @@ test.describe("📜 Vérification des scripts", () => {
    * and return the correct content type using HTTP fetch.
    */
 
-  test("carte.js script is accessible", async ({ page }) => {
+  test("Le script carte.js est accessible avec le bon content-type", async ({
+    page,
+  }) => {
     const response = await page.goto("/static/carte.js")
     expect(response?.status()).toBe(200)
     expect(response?.headers()["content-type"]).toMatch(
@@ -266,7 +276,9 @@ test.describe("📜 Vérification des scripts", () => {
     )
   })
 
-  test("iframe.js script is accessible", async ({ page }) => {
+  test("Le script iframe.js est accessible avec le bon content-type", async ({
+    page,
+  }) => {
     const response = await page.goto("/static/iframe.js")
     expect(response?.status()).toBe(200)
     expect(response?.headers()["content-type"]).toMatch(
@@ -274,7 +286,9 @@ test.describe("📜 Vérification des scripts", () => {
     )
   })
 
-  test("infotri.js script is accessible", async ({ page }) => {
+  test("Le script infotri.js est accessible avec le bon content-type", async ({
+    page,
+  }) => {
     const response = await page.goto("/iframe.js")
     expect(response?.status()).toBe(200)
     expect(response?.headers()["content-type"]).toMatch(
@@ -282,7 +296,9 @@ test.describe("📜 Vérification des scripts", () => {
     )
   })
 
-  test("configurateur.js script is accessible", async ({ page }) => {
+  test("Le script configurateur.js est accessible avec le bon content-type", async ({
+    page,
+  }) => {
     const response = await page.goto("/infotri/configurateur.js")
     expect(response?.status()).toBe(200)
     expect(response?.headers()["content-type"]).toMatch(
