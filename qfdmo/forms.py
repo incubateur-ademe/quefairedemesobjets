@@ -224,6 +224,7 @@ class FormulaireForm(forms.Form):
                 "class": "fr-input sm:qf-w-[596px]",
                 "autocomplete": "off",
                 "aria-label": "Autour de l'adresse suivante - obligatoire",
+                "data-testid": "formulaire-adresse-input",
             },
             data_controller="address-autocomplete",
         ),

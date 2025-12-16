@@ -265,13 +265,18 @@ export const searchDummySousCategorieObjet = async (page) =>
     "#id_sous_categorie_objetautocomplete-list.autocomplete-items div:first-of-type",
   )
 
-export const searchDummyAdresse = async (page) =>
-  await fillAndSelectAutocomplete(
-    page,
-    "input#id_adresse",
-    "10 rue de la paix",
-    "#id_adresseautocomplete-list.autocomplete-items div:nth-of-type(2)",
-  )
+export const searchDummyAdresse = async (page) => {
+  const adresseInput = page.locator('[data-testid="formulaire-adresse-input"]')
+  await adresseInput.click()
+  await adresseInput.fill("10 rue de la paix")
+  const autocompleteOption = page
+    .locator(
+      ".autocomplete-items div[data-action*='address-autocomplete#selectOption']",
+    )
+    .nth(1) // Select second option (index 1)
+  await expect(autocompleteOption).toBeVisible()
+  await autocompleteOption.click()
+}
 
 export const getMarkers = async (page) => {
   await expect(page.locator("#pinpoint-home").first()).toBeAttached()

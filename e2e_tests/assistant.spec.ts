@@ -2,18 +2,23 @@ import { expect, test } from "@playwright/test"
 import { getMarkers, mockApiAdresse } from "./helpers"
 
 test.describe("🤖 Assistant et Recherche", () => {
-  function getItemSelector(index) {
-    return `#mauvais-etat-panel #id_adresseautocomplete-list.autocomplete-items div[data-action="click->address-autocomplete#selectOption"]:nth-of-type(${index})`
-  }
-
   async function searchOnProduitPage(page, searchedAddress: string) {
-    const inputSelector = "#mauvais-etat-panel input#id_adresse"
-    await mockApiAdresse(page)
+    await mockApiAdresse(page) // Mock BEFORE interacting with input
+
+    const adresseInput = page.locator(
+      '#mauvais-etat-panel [data-testid="carte-adresse-input"]',
+    )
 
     // Autour de moi
-    await page.locator(inputSelector).click()
-    await page.locator(inputSelector).fill(searchedAddress)
-    await page.locator(getItemSelector(1)).click()
+    await adresseInput.click()
+    await adresseInput.fill(searchedAddress)
+    const autocompleteOption = page
+      .locator(
+        '#mauvais-etat-panel .autocomplete-items div[data-action*="address-autocomplete#selectOption"]',
+      )
+      .first()
+    await expect(autocompleteOption).toBeVisible({ timeout: 10000 })
+    await autocompleteOption.click()
   }
 
   test("L'adresse sélectionnée est stockée dans le sessionStorage", async ({
