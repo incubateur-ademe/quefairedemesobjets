@@ -392,8 +392,10 @@ export async function switchToCarteMode(context: Page | FrameLocator) {
     .getByText("Carte", { exact: true })
   await carteButton.click()
 
-  // Wait for carte mode to be active
-  await expect(context.getByTestId("carte-legend")).toBeVisible()
+  // Wait for carte mode to be active - legend should appear
+  await expect(context.getByTestId("carte-legend")).toBeVisible({
+    timeout: TIMEOUT.DEFAULT,
+  })
 }
 
 /**
