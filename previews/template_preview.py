@@ -92,6 +92,7 @@ class CarteConfigForm(forms.Form):
         help_text="Carte config",
         required=False,
         queryset=CarteConfig.objects.all(),
+        initial=CarteConfig.objects.first(),
     )
 
 
@@ -933,4 +934,10 @@ class TestsPreview(LookbookPreview):
         return render_to_string(
             "ui/tests/search_in_zone_button.html",
             {"base_url": base_url},
+        )
+
+    def t_6_copy_controller(self, **kwargs):
+        """Test copy controller functionality with clipboard and button text updates"""
+        return render_to_string(
+            "ui/tests/copy_controller.html",
         )
