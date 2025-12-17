@@ -194,6 +194,7 @@ class CarteSearchActeursView(AbstractSearchActeursView):
 
         # If the primary prefix includes map_container_id and the form is invalid,
         # try the base prefix without map_container_id as a fallback
+        # TODO: understand why this is necessary.
         if primary_prefix != base_prefix:
             base_form = self._create_form_instance(
                 form_config["form"], data, base_prefix, legacy_form
