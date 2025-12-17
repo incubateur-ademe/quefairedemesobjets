@@ -175,3 +175,30 @@ airflow users create \
 ```
 
 Malheureusement on a pas d'accès shell actuellement sur nos instances déployées dans Scaleway...
+
+## Inspecter une image docker
+
+Si une image docker ne démarre pas, par exemple si elle ne trouve pas ses librairies. il est possible de la construire et de la parcourrir avec les commandes suivantes:
+
+Build:
+
+```sh
+docker build --no-cache -f airflow-webserver.Dockerfile -t airflow-webserver .
+```
+
+Executer un shell sur l'image:
+
+```sh
+docker run --rm -it --user root --entrypoint /bin/bash airflow-webserver
+```
+
+Par exemple, nous avons eu un problème `airflow.providers.amazon Module not found` que nous avons investiguer de la manière suivante :
+
+```sh
+$> docker run --rm -it --user root --entrypoint /bin/bash airflow-webserver
+root@1274bcd93c28:/opt/airflow# python
+Python 3.12.12 (main, Nov 14 2025, 13:51:59) [GCC 12.2.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import airflow.providers.amazon
+…
+```

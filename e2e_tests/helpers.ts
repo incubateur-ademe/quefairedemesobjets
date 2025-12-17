@@ -1,37 +1,129 @@
-import { expect } from "@playwright/test"
+import { expect, FrameLocator, Page } from "@playwright/test"
 
-export async function openAdvancedFilters(
-  page,
-  parentTestId = "form-content",
-  buttonDataTestId = "advanced-filters",
-  modalDataTestId = "advanced-filters-modal",
+// Constants
+export const TIMEOUT = {
+  SHORT: 5000,
+  DEFAULT: 10000,
+  LONG: 30000,
+}
+
+/**
+ * Navigation helper
+ */
+export async function navigateTo(page: Page, path: string) {
+  await page.goto(path, { waitUntil: "domcontentloaded" })
+}
+
+/**
+ * Generic autocomplete helper
+ * Works with both page and iframe contexts
+ */
+export async function searchAndSelectAutocomplete(
+  context: Page | FrameLocator,
+  inputSelector: string,
+  searchText: string,
+  options: {
+    autocompleteSelector?: string
+    optionIndex?: number | "first"
+    timeout?: number
+    parentSelector?: string
+  } = {},
 ) {
-  await page.getByTestId(parentTestId).getByTestId(buttonDataTestId).click()
+  const {
+    autocompleteSelector = ".autocomplete-items div[data-action*='address-autocomplete#selectOption']",
+    optionIndex = "first",
+    timeout = TIMEOUT.DEFAULT,
+    parentSelector,
+  } = options
 
-  await expect(
-    page.locator(`[data-testid="${modalDataTestId}"] .fr-modal__content h2`),
-  ).toBeInViewport()
-  await page
-    .locator(`[data-testid="${modalDataTestId}"] .fr-modal__header button`)
-    .click()
-  await expect(
-    page.locator(`[data-testid="${modalDataTestId}"] .fr-modal__content h2`),
-  ).toBeHidden()
+  // Build the input locator with optional parent
+  const inputLocator = parentSelector
+    ? context.locator(parentSelector).locator(inputSelector)
+    : context.locator(inputSelector)
+
+  await inputLocator.click()
+
+  // Clear any existing value first
+  await inputLocator.clear()
+
+  // Type the text to trigger autocomplete (more reliable than fill)
+  // Use a balanced delay - fast enough to not slow tests, slow enough to trigger events
+  await inputLocator.pressSequentially(searchText, { delay: 30 })
+
+  // Build the autocomplete option locator
+  const autocompleteLocator = parentSelector
+    ? context.locator(parentSelector).locator(autocompleteSelector)
+    : context.locator(autocompleteSelector)
+
+  // Wait for at least one result to appear first
+  await expect(autocompleteLocator.first()).toBeVisible({ timeout })
+
+  const optionLocator =
+    optionIndex === "first"
+      ? autocompleteLocator.first()
+      : autocompleteLocator.nth(optionIndex as number)
+
+  await expect(optionLocator).toBeVisible({ timeout })
+  await optionLocator.click()
 }
 
-const fillAndSelectAutocomplete = async (
-  page,
-  inputSelector,
-  inputText,
-  itemSelector,
-) => {
-  await page.locator(inputSelector).click()
-  await page.locator(inputSelector).fill(inputText)
-  await expect(page.locator(itemSelector)).toBeInViewport()
-  await page.locator(itemSelector).click()
+/**
+ * Address search helpers for specific contexts
+ */
+export async function searchAddress(
+  context: Page | FrameLocator,
+  searchText: string,
+  formContext: "carte" | "formulaire" = "carte",
+  options: { optionIndex?: number | "first"; parentSelector?: string } = {},
+) {
+  const inputSelector =
+    formContext === "carte"
+      ? '[data-testid="carte-adresse-input"]'
+      : '[data-testid="formulaire-adresse-input"]'
+
+  await searchAndSelectAutocomplete(context, inputSelector, searchText, {
+    optionIndex: options.optionIndex ?? "first",
+    parentSelector: options.parentSelector,
+  })
 }
 
-export const mockApiAdresse = async (page) =>
+/**
+ * Specific search helpers for common use cases
+ */
+export async function searchForAuray(page: Page, parentSelector?: string) {
+  await searchAddress(page, "Auray", "carte", { parentSelector })
+}
+
+export async function searchForAurayInIframe(
+  iframe: FrameLocator,
+  parentSelector?: string,
+) {
+  await searchAddress(iframe, "Auray", "carte", { parentSelector })
+}
+
+export async function searchDummyAdresse(page: Page) {
+  await searchAddress(page, "10 rue de la paix", "formulaire", { optionIndex: 1 })
+}
+
+/**
+ * Autocomplete for sous-categorie objet
+ */
+export async function searchDummySousCategorieObjet(page: Page) {
+  await searchAndSelectAutocomplete(
+    page,
+    "input#id_sous_categorie_objet",
+    "chaussures",
+    {
+      autocompleteSelector:
+        "#id_sous_categorie_objetautocomplete-list.autocomplete-items div:first-of-type",
+    },
+  )
+}
+
+/**
+ * API mocking helpers
+ */
+export const mockApiAdresse = async (page: Page) =>
   await page.route("https://data.geopf.fr/geocodage/search?q=auray", async (route) => {
     const json = {
       type: "FeatureCollection",
@@ -146,11 +238,11 @@ export const mockApiAdresse = async (page) =>
           type: "Feature",
           geometry: { type: "Point", coordinates: [-2.991392, 47.676459] },
           properties: {
-            label: "Rue de l’Amiral Coude 56400 Auray",
+            label: "Rue de l'Amiral Coude 56400 Auray",
             score: 0.6957854545454544,
             id: "56007_0040",
             banId: "ee93e999-c3e9-4d8a-a2ae-55ff3c8bb68e",
-            name: "Rue de l’Amiral Coude",
+            name: "Rue de l'Amiral Coude",
             postcode: "56400",
             citycode: "56007",
             x: 250868.01,
@@ -159,7 +251,7 @@ export const mockApiAdresse = async (page) =>
             context: "56, Morbihan, Bretagne",
             type: "street",
             importance: 0.65364,
-            street: "Rue de l’Amiral Coude",
+            street: "Rue de l'Amiral Coude",
             _type: "address",
           },
         },
@@ -257,34 +349,153 @@ export const mockApiAdresse = async (page) =>
     })
   })
 
-export const searchDummySousCategorieObjet = async (page) =>
-  await fillAndSelectAutocomplete(
-    page,
-    "input#id_sous_categorie_objet",
-    "chaussures",
-    "#id_sous_categorie_objetautocomplete-list.autocomplete-items div:first-of-type",
-  )
+/**
+ * Modal/Dialog helpers
+ */
+export async function openAdvancedFilters(
+  page: Page,
+  parentTestId = "form-content",
+  buttonDataTestId = "advanced-filters",
+  modalDataTestId = "advanced-filters-modal",
+) {
+  await page.getByTestId(parentTestId).getByTestId(buttonDataTestId).click()
 
-export const searchDummyAdresse = async (page) =>
-  await fillAndSelectAutocomplete(
-    page,
-    "input#id_adresse",
-    "10 rue de la paix",
-    "#id_adresseautocomplete-list.autocomplete-items div:nth-of-type(2)",
-  )
+  await expect(
+    page.locator(`[data-testid="${modalDataTestId}"] .fr-modal__content h2`),
+  ).toBeInViewport()
+  await page
+    .locator(`[data-testid="${modalDataTestId}"] .fr-modal__header button`)
+    .click()
+  await expect(
+    page.locator(`[data-testid="${modalDataTestId}"] .fr-modal__content h2`),
+  ).toBeHidden()
+}
 
-export const getMarkers = async (page) => {
+/**
+ * View mode switching helpers
+ */
+export async function switchToListeMode(context: Page | FrameLocator) {
+  const listeButton = context
+    .getByTestId("view-mode-nav")
+    .getByText("Liste", { exact: true })
+  await listeButton.click()
+
+  // Wait for liste mode to be active - map container should be hidden
+  await expect(context.locator('[data-map-target="mapContainer"]')).not.toBeVisible({
+    timeout: TIMEOUT.DEFAULT,
+  })
+}
+
+export async function switchToCarteMode(context: Page | FrameLocator) {
+  const carteButton = context
+    .getByTestId("view-mode-nav")
+    .getByText("Carte", { exact: true })
+  await carteButton.click()
+
+  // Wait for carte mode to be active - legend should appear
+  await expect(context.getByTestId("carte-legend")).toBeVisible({
+    timeout: TIMEOUT.DEFAULT,
+  })
+}
+
+/**
+ * Map interaction helpers
+ */
+export async function moveMap(
+  page: Page,
+  mapCanvasLocator,
+  offsetX = 100,
+  offsetY = 100,
+) {
+  // Get the bounding box of the canvas to calculate drag coordinates
+  await expect(mapCanvasLocator).toBeVisible()
+  const canvasBoundingBox = await mapCanvasLocator.boundingBox()
+  if (!canvasBoundingBox) {
+    throw new Error("Canvas bounding box not found")
+  }
+
+  // Drag from center to a new position (simulate panning)
+  const centerX = canvasBoundingBox.x + canvasBoundingBox.width / 2
+  const centerY = canvasBoundingBox.y + canvasBoundingBox.height / 2
+
+  await page.mouse.move(centerX, centerY)
+  await page.mouse.down()
+  await page.mouse.move(centerX + offsetX, centerY + offsetY, { steps: 10 })
+  await page.mouse.up()
+}
+
+/**
+ * Marker/Pinpoint helpers
+ */
+export async function getMarkers(page: Page) {
   await expect(page.locator("#pinpoint-home").first()).toBeAttached()
   await page.evaluate(() => {
     document.querySelectorAll("#pinpoint-home")?.forEach((element) => element.remove())
   })
 
-  const markers = await page?.locator(".maplibregl-marker:has(svg)")
+  const markers = page.locator(".maplibregl-marker:has(svg)")
 
-  // Ensure we have at least one marker, and let's click on a marker.
-  // The approach is feels cumbersome, this is because Playwright has a
-  // hard time clicking on leaflet markers.
-  await expect(markers?.nth(0)).toBeAttached()
-  const count = await markers?.count()
-  return [markers, count]
+  await expect(markers.nth(0)).toBeAttached()
+  const count = await markers.count()
+  return [markers, count] as const
+}
+
+export async function clickFirstAvailableMarker(
+  context: Page | FrameLocator,
+  markerSelector = ".maplibregl-marker:has(svg)",
+) {
+  const markers = context.locator(markerSelector)
+  const count = await markers.count()
+
+  for (let i = 0; i < count; i++) {
+    const item = markers.nth(i)
+    try {
+      await item.click({ force: true })
+      break
+    } catch (e) {
+      console.log(`Cannot click marker ${i}:`, e)
+    }
+  }
+}
+
+/**
+ * Loading state helpers
+ */
+export async function waitForLoadingComplete(
+  context: Page | FrameLocator,
+  selector = '[data-testid="loading-solutions"]',
+) {
+  await expect(context.locator(selector)).toBeVisible()
+  await expect(context.locator(selector)).toBeHidden({ timeout: TIMEOUT.LONG })
+}
+
+/**
+ * IFrame helpers
+ */
+export function getIframe(page: Page, iframeId?: string) {
+  if (iframeId) {
+    return page.frameLocator(`iframe#${iframeId}`)
+  }
+  return page.frameLocator("iframe").first()
+}
+
+/**
+ * SessionStorage helpers
+ */
+export async function getSessionStorage(page: Page) {
+  return await page.evaluate(() => window.sessionStorage)
+}
+
+export async function getSessionStorageValue(page: Page, key: string) {
+  const sessionStorage = await getSessionStorage(page)
+  return sessionStorage[key]
+}
+
+export async function expectSessionStorage(
+  page: Page,
+  key: string,
+  expectedValue: string,
+) {
+  const value = await getSessionStorageValue(page, key)
+  expect(value).toBe(expectedValue)
 }

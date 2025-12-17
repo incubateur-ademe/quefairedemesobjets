@@ -6,7 +6,6 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
 {% endcomment %}
 
 {% load carte_tags %}
-{% with address_ok=form.initial.adresse|default:form.initial.bounding_box|default:form.initial.epci_codes %}
 {% if request.user.is_authenticated and DEBUG %}
     <div class="qf-bg-blue-france-sun-113-625 qf-text-white qf-text-center qf-w-screen qf-py-1v qf-text-xs ">
         <details><summary>Afficher l'url</summary> {{ request.build_absolute_uri }}</details>
@@ -46,7 +45,7 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
             {% include "ui/components/carte/pinpoints/home.html" %}
         </div>
 
-        {% if address_ok %}
+        {% if should_show_results %}
             {% if not acteurs %}
                 {% include "ui/components/carte/shared/disclaimers/no_local_solution.html" %}
             {% endif %}
@@ -57,4 +56,3 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
 
     {% include "ui/components/carte/shared/disclaimers/loading_solutions.html" %}
 </div>
-{% endwith %}

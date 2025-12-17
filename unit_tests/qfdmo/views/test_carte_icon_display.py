@@ -259,9 +259,9 @@ class TestCarteIconDisplay:
         params = {
             "map_container_id": "mauvais-etat",
             "querystring": "c291c19jYXRlZ29yaWVfb2JqZXQ9MTA5",
-            "adresse": "Auray",
-            "longitude": "-2.990838",
-            "latitude": "47.668099",
+            "mauvais-etat_map-adresse": "Auray",
+            "mauvais-etat_map-longitude": "-2.990838",
+            "mauvais-etat_map-latitude": "47.668099",
             "view_mode-view": "carte",
             "mauvais-etat_legende-groupe_action": [
                 str(groupe_reparer.id),

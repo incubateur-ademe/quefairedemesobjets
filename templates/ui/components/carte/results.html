@@ -23,7 +23,7 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
     {% endif %}
     {% endif %}
 >
-    {% if has_location_data %}
+    {% if should_show_results %}
         {% include "ui/components/carte/legend.html" %}
         {% include "ui/components/carte/shared/_search_in_zone.html" %}
         {% include "ui/components/carte/buttons/ajouter_un_lieu.html" %}
@@ -38,7 +38,7 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
         {% include "ui/components/carte/pinpoints/home.html" %}
     </div>
 
-    {% if has_location_data %}
+    {% if should_show_results %}
         <div class="qf-absolute qf-left-0 qf-right-0 qf-bottom-0 qf-text-center qf-bg-white lg:qf-hidden">
             {% include "ui/components/carte/_declaration_accessibilite.html" %}
         </div>

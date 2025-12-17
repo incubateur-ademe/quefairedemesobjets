@@ -7,11 +7,10 @@ import maplibregl, {
 } from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
 import MapController from "../controllers/carte/map_controller"
-import { ACTIVE_PINPOINT_CLASSNAME, clearActivePinpoints } from "./helpers"
 import type { Location } from "./types"
 const DEFAULT_LOCATION: LngLat = new LngLat(2.213749, 46.227638)
 const DEFAULT_INITIAL_ZOOM: number = 5
-const DEFAULT_MAX_ZOOM: number = 18
+const DEFAULT_MAX_ZOOM: number = 20
 
 export class SolutionMap {
   map: Map
@@ -57,12 +56,11 @@ export class SolutionMap {
             id: "carto-light-layer",
             type: "raster",
             source: "carto-light",
-            minzoom: 0,
-            maxzoom: DEFAULT_MAX_ZOOM,
           },
         ],
       },
       zoom: initialZoom,
+      maxZoom: DEFAULT_MAX_ZOOM,
       center: DEFAULT_LOCATION,
       attributionControl: {
         compact: true,
@@ -77,7 +75,7 @@ export class SolutionMap {
       this.#location.longitude !== undefined
     ) {
       new maplibregl.Marker({
-        element: this.#generateHomeHTMLMarker(),
+        element: this.#initialiseHomeMarker(),
       })
         .setLngLat([this.#location.longitude, this.#location.latitude])
         .setPopup(
@@ -87,11 +85,14 @@ export class SolutionMap {
     }
   }
 
-  #generateHomeHTMLMarker() {
+  #initialiseHomeMarker() {
     const homePinPoint = document.getElementById("pinpoint-home")
     if (!homePinPoint) {
       return null
     }
+
+    // The home pin point is hidden by default
+    // so that it does not display randomly behind the preview screen.
     homePinPoint.classList.remove("qf-invisible")
     return homePinPoint
   }

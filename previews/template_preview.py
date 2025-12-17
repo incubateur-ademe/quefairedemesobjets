@@ -90,6 +90,19 @@ class ProduitHeadingForm(forms.Form):
     )
 
 
+class CarteConfigForm(forms.Form):
+    """
+    Form for carte config
+    """
+
+    carte_config = forms.ModelChoiceField(
+        label="Carte config",
+        help_text="Carte config",
+        required=False,
+        queryset=CarteConfig.objects.all(),
+    )
+
+
 def get_default_action():
     return Action.objects.get(code="reparer")
 
@@ -667,7 +680,8 @@ class IframePreview(LookbookPreview):
         )
         return template.render(Context({}))
 
-    def carte_sur_mesure(self, **kwargs):
+    @register_form_class(CarteConfigForm)
+    def carte_sur_mesure(self, carte_config=None, **kwargs):
         """
         # Carte sur mesure
 
@@ -677,10 +691,16 @@ class IframePreview(LookbookPreview):
         <script src="{base_url}/static/carte.js" data-slug="cyclevia"></script>
         ```
         """
+        # carte_config is returned as a string by django-lookbook where we expected
+        # representing the id of a CarteConfig object.
+        if isinstance(carte_config, str) and carte_config:
+            carte_config = CarteConfig.objects.get(id=carte_config)
+
+        slug = carte_config.slug if carte_config else "cyclevia"
 
         template = Template(
             f"""
-            <script src="{base_url}/static/carte.js" data-slug="cyclevia"></script>
+            <script src="{base_url}/static/carte.js" data-slug="{slug}"></script>
             """,
         )
 
@@ -709,6 +729,28 @@ class IframePreview(LookbookPreview):
             data-height="720px"
             data-bounding_box="{&quot;southWest&quot;: {&quot;lat&quot;: 47.570401, &quot;lng&quot;: 1.597977}, &quot;northEast&quot;: {&quot;lat&quot;: 48.313697, &quot;lng&quot;: 3.059159}}"
             ></script>
+            """,
+        )
+
+        return template.render(Context({}))
+
+    def integrations(self, **kwargs):
+        """
+        # Integrations
+
+        Copiez ce script pour intégrer une carte avec des paramètres spécifiques :
+
+        ```html
+        <script src="{base_url}/static/carte.js"
+            data-action_list="preter|emprunter|louer|mettreenlocation|reparer|donner|echanger|acheter|revendre"
+            data-bounding_box="{{'southWest': {{'lat': 47.457526, 'lng': -0.609453}}, 'northEast': {{'lat': 47.489048, 'lng': -0.51571}}}}">
+        </script>
+        ```
+        """
+
+        template = Template(
+            f"<script src='{base_url}/static/carte.js'"
+            """ data-action_list="preter|emprunter|louer|mettreenlocation|reparer|donner|echanger|acheter|revendre" data-bounding_box="{&quot;southWest&quot;: {&quot;lat&quot;: 47.457526, &quot;lng&quot;: -0.609453}, &quot;northEast&quot;: {&quot;lat&quot;: 47.489048, &quot;lng&quot;: -0.51571}}"></script>
             """,
         )
 
@@ -912,4 +954,58 @@ class AccessibilitePreview(LookbookPreview):
         return render_to_string(
             "sites_faciles_content_manager/blocks/breadcrumbs.html",
             context,
+        )
+
+
+class TestsPreview(LookbookPreview):
+    """
+    Test previews for e2e tests.
+
+    Naming convention:
+    - Prefix all methods with t_{number}_ where number is incremental (t_1_, t_2_, t_3_, etc.)
+    - The number represents the chronological order of test creation
+    - Oldest tests have lower numbers and appear first in the class
+    - When adding a new test, use the next available number and add it at the bottom
+    - Keep methods ordered by their number prefix for easy navigation
+
+    Example: t_1_referrer, t_2_carte_mode_liste_switch, t_3_ess_label_display
+
+    Adding a new test:
+    1. Create a dedicated template in templates/ui/tests/ (e.g., my_new_test.html)
+    2. Add a preview method here following the naming convention (e.g., t_4_my_new_test)
+    3. Create the corresponding e2e test in e2e_tests/ (usually in carte.spec.ts or dedicated file)
+    4. In the e2e test, navigate to /lookbook/preview/tests/t_4_my_new_test
+
+    Each test should be self-contained with its own template and e2e test specification.
+    """
+
+    def t_1_referrer(self, **kwargs):
+        return render_to_string(
+            "ui/tests/referrer.html",
+        )
+
+    def t_2_carte_mode_liste_switch(self, **kwargs):
+        """Test switching between carte and liste modes with bounding box"""
+        return render_to_string(
+            "ui/tests/carte_mode_liste_switch.html",
+            {"base_url": base_url},
+        )
+
+    def t_3_ess_label_display(self, **kwargs):
+        """Test ESS label display in acteur detail panel"""
+        return render_to_string(
+            "ui/tests/ess_label_display.html",
+        )
+
+    def t_4_legend_filters_persistence(self, **kwargs):
+        """Test legend filters persistence when switching between carte and liste modes"""
+        return render_to_string(
+            "ui/tests/legend_filters_persistence.html",
+        )
+
+    def t_5_rechercher_dans_zone(self, **kwargs):
+        """Test search in zone button appearance and bounding box update"""
+        return render_to_string(
+            "ui/tests/search_in_zone_button.html",
+            {"base_url": base_url},
         )

@@ -9,4 +9,5 @@ installation.md
 useful_command.md
 dependencies.md
 fixture_generation.md
+tests_e2e.md
 ```

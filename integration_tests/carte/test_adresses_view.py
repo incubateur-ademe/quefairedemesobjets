@@ -1,3 +1,5 @@
+from urllib.parse import urlencode
+
 import pytest
 from django.contrib.gis.geos import Point
 from django.http import HttpRequest
@@ -201,8 +203,8 @@ class TestReparacteur(RunViewMixin):
         LabelQualiteFactory(code="reparacteur")
         params = {
             "action_list": [action_reparer.code],
-            "latitude": 1,
-            "longitude": 1,
+            "map-latitude": 1,
+            "map-longitude": 1,
             "label_reparacteur": "true",
         }
 
@@ -222,8 +224,8 @@ class TestReparacteur(RunViewMixin):
     ):
         params = {
             "action_list": [action_reparer.code],
-            "latitude": 1,
-            "longitude": 1,
+            "map-latitude": 1,
+            "map-longitude": 1,
             "label_reparacteur": "true",
         }
 
@@ -242,8 +244,8 @@ class TestReparacteur(RunViewMixin):
     ):
         params = {
             "action_list": [f"{action_reparer.code}|{action_donner.code}"],
-            "latitude": 1,
-            "longitude": 1,
+            "map-latitude": 1,
+            "map-longitude": 1,
             "label_reparacteur": "true",
         }
 
@@ -261,8 +263,8 @@ class TestReparerAlternateIcon(RunViewMixin):
         request.GET = query_dict_from(
             {
                 "action_list": [action_donner.code],
-                "latitude": [1],
-                "longitude": [1],
+                "map-latitude": [1],
+                "map-longitude": [1],
             }
         )
         adresses_view.setup(request)
@@ -281,8 +283,8 @@ class TestReparerAlternateIcon(RunViewMixin):
     ):
         params = {
             "action_list": [action_donner.code, action_reparer.code],
-            "latitude": [1],
-            "longitude": [1],
+            "map-latitude": [1],
+            "map-longitude": [1],
         }
         _, context = self._run_view(rf, adresses_view_class, params)
 
@@ -296,8 +298,8 @@ class TestExclusiviteReparation(RunViewMixin):
     ):
         params = {
             "action_list": [action_preter.code],
-            "latitude": [1],
-            "longitude": [1],
+            "map-latitude": [1],
+            "map-longitude": [1],
             # This form is enabled by default
             # "pas_exclusivite_reparation": ["true"],
         }
@@ -312,8 +314,8 @@ class TestExclusiviteReparation(RunViewMixin):
         request.GET = query_dict_from(
             {
                 "action_list": [f"{action_reparer.code}|{action_preter.code}"],
-                "latitude": [1],
-                "longitude": [1],
+                "map-latitude": [1],
+                "map-longitude": [1],
                 "pas_exclusivite_reparation": ["true"],
             }
         )
@@ -328,8 +330,8 @@ class TestExclusiviteReparation(RunViewMixin):
         DisplayedActeur.objects.update(exclusivite_de_reprisereparation=False)
         params = {
             "action_list": [action_reparer.code],
-            "latitude": [1],
-            "longitude": [1],
+            "map-latitude": [1],
+            "map-longitude": [1],
             "pas_exclusivite_reparation": ["false"],
         }
         _, context = self._run_view(rf, adresses_view_class, params)
@@ -347,8 +349,8 @@ class TestExclusiviteReparation(RunViewMixin):
         sous_categorie_id = sous_categorie.id
         params = {
             "action_list": [action_reparer.code],
-            "latitude": [1],
-            "longitude": [1],
+            "map-latitude": [1],
+            "map-longitude": [1],
             "sc_id": [str(sous_categorie_id)],
             "pas_exclusivite_reparation": ["false"],
         }
@@ -379,8 +381,8 @@ class TestFilters(RunViewMixin):
 
         params = {
             "action_list": [f"{action_reparer.code}|{action_preter.code}"],
-            "latitude": [1],
-            "longitude": [1],
+            "map-latitude": [1],
+            "map-longitude": [1],
             "sc_id": [sous_categorie.id],
             "carte": carte,
         }
@@ -399,8 +401,8 @@ class TestFilters(RunViewMixin):
     ):
         sous_categorie_id = sous_categorie.id
         params = {
-            "latitude": [1],
-            "longitude": [1],
+            "map-latitude": [1],
+            "map-longitude": [1],
             "sc_id": [str(sous_categorie_id)],
         }
         _, context = self._run_view(rf, adresses_view_class, params)
@@ -422,8 +424,8 @@ class TestFilters(RunViewMixin):
         sous_categorie_id = sous_categorie.id
         params = {
             "action_list": [action_preter.code],
-            "latitude": [1],
-            "longitude": [1],
+            "map-latitude": [1],
+            "map-longitude": [1],
             "sc_id": [str(sous_categorie_id)],
         }
         _, context = self._run_view(rf, adresses_view_class, params)
@@ -446,8 +448,8 @@ class TestFilters(RunViewMixin):
         request.GET = query_dict_from(
             {
                 "action_list": [action_preter.code],
-                "latitude": [1],
-                "longitude": [1],
+                "map-latitude": [1],
+                "map-longitude": [1],
                 "sc_id": [str(sous_categorie_id)],
             }
         )
@@ -464,9 +466,10 @@ class TestBBOX:
         request = HttpRequest()
         adresses_view = CarteSearchActeursView()
         map_bbox = compile_frontend_bbox([1, 1, 1, 1])
-        request.GET = query_dict_from({})
-        request.GET.update(bounding_box=map_bbox)
+        request.GET = query_dict_from({"map-bounding_box": [map_bbox]})
         adresses_view.setup(request)
+        # Initialize forms so _get_bounding_box() can access form values
+        adresses_view.ui_forms = adresses_view._get_forms()
 
         acteurs = DisplayedActeur.objects.all()
         assert acteurs.count() == 0
@@ -481,9 +484,16 @@ class TestBBOX:
         adresses_view = CarteSearchActeursView()
         bbox = [0, 0, 0, 0]
         map_bbox = compile_frontend_bbox(bbox)
-        request.GET = query_dict_from({})
-        request.GET.update(bounding_box=map_bbox, latitude="1", longitude="1")
+        request.GET = query_dict_from(
+            {
+                "map-bounding_box": [map_bbox],
+                "map-latitude": ["1"],
+                "map-longitude": ["1"],
+            }
+        )
         adresses_view.setup(request)
+        # Initialize forms so _get_bounding_box() can access form values
+        adresses_view.ui_forms = adresses_view._get_forms()
 
         DisplayedActeurFactory.create_batch(2)
         acteurs = DisplayedActeur.objects.all()
@@ -499,9 +509,16 @@ class TestBBOX:
         adresses_view = CarteSearchActeursView()
         bbox = [-2, -2, 4, 4]  # Acteurs in factory are created with a location of 3, 3
         map_bbox = compile_frontend_bbox(bbox)
-        request.GET = query_dict_from({})
-        request.GET.update(bounding_box=map_bbox, latitude="1", longitude="1")
+        request.GET = query_dict_from(
+            {
+                "map-bounding_box": [map_bbox],
+                "map-latitude": ["1"],
+                "map-longitude": ["1"],
+            }
+        )
         adresses_view.setup(request)
+        # Initialize forms so _get_bounding_box() can access form values
+        adresses_view.ui_forms = adresses_view._get_forms()
 
         DisplayedActeurFactory.create_batch(2)
         acteurs = DisplayedActeur.objects.all()
@@ -520,15 +537,32 @@ class TestLayers:
         assert 'data-testid="adresse-missing"' in str(response.content)
 
     def test_adresse_missing_layer_is_not_displayed_with_bbox(self, client):
-        url = "/carte=1&direction=jai&bounding_box=%7B%22southWest%22%3A%7B%22lat%22%3A48.916%2C%22lng%22%3A2.298202514648438%7D%2C%22northEast%22%3A%7B%22lat%22%3A48.98742568330284%2C%22lng%22%3A2.483596801757813%7D%7D"  # noqa: E501
+        params = {
+            "carte": 1,
+            "direction": "jai",
+            "bounding_box": (
+                '{"southWest":{"lat":48.916,"lng":2.298202514648438},'
+                '"northEast":{"lat":48.98742568330284,"lng":2.483596801757813}}'
+            ),
+        }
+        url = f"/{urlencode(params)}"
         response = client.get(url)
         assert 'data-testid="adresse-missing"' not in str(response.content)
 
     def test_adresse_missing_layer_is_not_displayed_for_epcis(
         self, client, action_reparer
     ):
-        url = "/carte?action_list=reparer%7Cdonner%7Cechanger%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cacheter%7Crevendre&epci_codes=200055887&limit=50"  # noqa: E501
+        params = {
+            "action_list": (
+                "reparer|donner|echanger|preter|emprunter|louer|"
+                "mettreenlocation|acheter|revendre"
+            ),
+            "epci_codes": "200055887",
+            "limit": "50",
+        }
+        url = f"/carte?{urlencode(params)}"
         response = client.get(url)
+
         assert 'data-testid="adresse-missing"' not in str(response.content)
 
 
