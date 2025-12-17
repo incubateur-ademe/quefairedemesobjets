@@ -38,10 +38,18 @@ from qfdmo.widgets import (
 
 class MapForm(GetFormMixin, CarteConfigFormMixin, forms.Form):
     """
-    This forms holds all the hidden input used to display the Acteur results in the
-    frontend.
-    The hidden fields are not directly controlled by the user but by the maplibre
-    controller.
+    Form that manages geographic search parameters for the map interface.
+
+    This form contains both visible and hidden fields used to filter and display
+    Acteur results on the map:
+
+    - `adresse`: Visible autocomplete input field where users type an address
+    - `bounding_box`, `latitude`, `longitude`: Hidden fields automatically populated
+      by the MapLibre controller based on map interactions (panning, zooming,
+      address selection)
+
+    The hidden fields are not directly controlled by the user but are managed by
+    the address-autocomplete and maplibre Stimulus controllers in the frontend.
 
     ⚠️⚠️⚠️ If this form must evolve, especially the attributes set on the fields,
     the changes must be backported to qfdmo.forms.FormulaireForm.
