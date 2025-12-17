@@ -14,24 +14,23 @@ test.describe("📤 Acteur Share", () => {
   test("Le bouton copier dans le presse-papier copie l'URL complète de l'acteur", async ({
     page,
   }) => {
-    // Click the share button to open the tooltip
-    const shareButton = page.locator("button.fr-icon-share-line")
+    // Click the share button to open the tooltip (using aria-describedby to find it)
+    const shareButton = page.getByRole("button", { name: "partager" })
     await shareButton.click()
 
-    // Wait for the tooltip to be visible
-    await page.waitForSelector(".fr-tooltip", { state: "visible" })
+    // Wait for the tooltip to be visible (using role="tooltip")
+    await page.waitForSelector('[role="tooltip"]', { state: "visible" })
 
-    // Get the URL from the copy button's span before clicking
-    const urlInButton = await page
-      .locator('.fr-btn--copy [data-copy-target="toCopy"]')
-      .textContent()
+    // Get the URL from the copy button's span before clicking (using stimulus data attribute)
+    const urlInButton = await page.locator('[data-copy-target="toCopy"]').textContent()
 
     expect(urlInButton).toBeTruthy()
     expect(urlInButton).toMatch(/^https?:\/\//) // Should be a full URL with protocol
 
     // Click the copy button using JavaScript since the tooltip is positioned outside viewport
+    // Use stimulus data-action attribute to find the button
     await page.evaluate(() => {
-      const btn = document.querySelector(".fr-btn--copy")
+      const btn = document.querySelector('[data-action="copy#toClipboard"]')
       btn?.click()
     })
 
