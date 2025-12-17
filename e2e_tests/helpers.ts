@@ -42,12 +42,21 @@ export async function searchAndSelectAutocomplete(
     : context.locator(inputSelector)
 
   await inputLocator.click()
-  await inputLocator.fill(searchText)
+
+  // Clear any existing value first
+  await inputLocator.clear()
+
+  // Type the text to trigger autocomplete (more reliable than fill)
+  // Use a balanced delay - fast enough to not slow tests, slow enough to trigger events
+  await inputLocator.pressSequentially(searchText, { delay: 30 })
 
   // Build the autocomplete option locator
   const autocompleteLocator = parentSelector
     ? context.locator(parentSelector).locator(autocompleteSelector)
     : context.locator(autocompleteSelector)
+
+  // Wait for at least one result to appear first
+  await expect(autocompleteLocator.first()).toBeVisible({ timeout })
 
   const optionLocator =
     optionIndex === "first"
@@ -371,8 +380,10 @@ export async function switchToListeMode(context: Page | FrameLocator) {
     .getByText("Liste", { exact: true })
   await listeButton.click()
 
-  // Wait for liste mode to be active
-  await expect(context.locator('[data-map-target="mapContainer"]')).not.toBeVisible()
+  // Wait for liste mode to be active - map container should be hidden
+  await expect(context.locator('[data-map-target="mapContainer"]')).not.toBeVisible({
+    timeout: TIMEOUT.DEFAULT,
+  })
 }
 
 export async function switchToCarteMode(context: Page | FrameLocator) {
@@ -453,13 +464,13 @@ export async function waitForLoadingComplete(
   selector = '[data-testid="loading-solutions"]',
 ) {
   await expect(context.locator(selector)).toBeVisible()
-  await expect(context.locator(selector)).toBeHidden()
+  await expect(context.locator(selector)).toBeHidden({ timeout: TIMEOUT.LONG })
 }
 
 /**
  * IFrame helpers
  */
-export async function getIframe(page: Page, iframeId?: string) {
+export function getIframe(page: Page, iframeId?: string) {
   if (iframeId) {
     return page.frameLocator(`iframe#${iframeId}`)
   }
