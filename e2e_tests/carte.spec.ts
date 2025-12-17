@@ -439,3 +439,45 @@ test.describe("🗺️ Bouton 'Rechercher dans cette zone'", () => {
     await expect(searchInZoneButton).toHaveClass(/qf-hidden/)
   })
 })
+
+test.describe("🗺️ CarteConfig Bounding Box", () => {
+  test("La bounding box configurée dans CarteConfig est appliquée au chargement initial", async ({
+    page,
+  }) => {
+    // Navigate to the test preview page
+    await navigateTo(page, "/lookbook/preview/tests/t_6_carte_config_bounding_box")
+
+    // Wait for the iframe to be loaded
+    const iframe = page.frameLocator('[data-testid="carte-iframe"]').first()
+    await expect(iframe.locator("body")).toBeAttached({ timeout: 10000 })
+
+    // Wait for the map to be loaded
+    await expect(iframe.locator("#map-carte")).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+
+    // Get the bounding box input value
+    const bboxInput = iframe.locator('[data-map-target="bbox"]')
+    await expect(bboxInput).toBeAttached()
+
+    // Verify the bounding box has been set from CarteConfig
+    const boundingBox = await bboxInput.inputValue()
+    expect(boundingBox).toBeTruthy()
+
+    // Parse the bounding box JSON
+    const bbox = JSON.parse(boundingBox)
+
+    // Verify the structure matches expected format
+    expect(bbox).toHaveProperty("southWest")
+    expect(bbox).toHaveProperty("northEast")
+    expect(bbox.southWest).toHaveProperty("lat")
+    expect(bbox.southWest).toHaveProperty("lng")
+    expect(bbox.northEast).toHaveProperty("lat")
+    expect(bbox.northEast).toHaveProperty("lng")
+
+    // Verify the coordinates match the expected Angers bounding box
+    // with some tolerance for floating point precision
+    expect(bbox.southWest.lat).toBeCloseTo(47.457526, 5)
+    expect(bbox.southWest.lng).toBeCloseTo(-0.609453, 5)
+    expect(bbox.northEast.lat).toBeCloseTo(47.489048, 5)
+    expect(bbox.northEast.lng).toBeCloseTo(-0.51571, 5)
+  })
+})
