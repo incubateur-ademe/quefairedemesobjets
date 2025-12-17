@@ -121,3 +121,70 @@ class TestCarteConfigBonusReparation:
 
         # Verify the acteur has the bonus label
         assert bonus_label in acteurs[0].labels.all()
+
+    def test_carte_config_nombre_d_acteurs_affiches_limits_results(self, client):
+        """
+        Test that nombre_d_acteurs_affiches correctly limits the number of
+        displayed acteurs.
+        """
+        from qfdmo.models import Action
+
+        # Get the reparer action
+        action = Action.objects.get(code="reparer")
+        sous_categorie = SousCategorieObjetFactory()
+
+        # Create a bounding box covering France
+        france_bbox = Polygon.from_bbox((-5.0, 41.0, 10.0, 51.0))
+
+        # Create CarteConfig with limit of 2 acteurs
+        carte_config = CarteConfig.objects.create(
+            slug="test-limit-2",
+            nom="Test Limit 2 Acteurs",
+            nombre_d_acteurs_affiches=2,
+            bounding_box=france_bbox,
+        )
+
+        # Create 3 acteurs in France
+        acteur_1 = DisplayedActeurFactory(
+            nom="Acteur 1",
+            location=Point(2.347, 48.859, srid=4326),  # Paris
+            statut="ACTIF",
+        )
+        ps1 = DisplayedPropositionServiceFactory(action=action, acteur=acteur_1)
+        ps1.sous_categories.add(sous_categorie)
+
+        acteur_2 = DisplayedActeurFactory(
+            nom="Acteur 2",
+            location=Point(4.835, 45.764, srid=4326),  # Lyon
+            statut="ACTIF",
+        )
+        ps2 = DisplayedPropositionServiceFactory(action=action, acteur=acteur_2)
+        ps2.sous_categories.add(sous_categorie)
+
+        acteur_3 = DisplayedActeurFactory(
+            nom="Acteur 3",
+            location=Point(5.369, 43.296, srid=4326),  # Marseille
+            statut="ACTIF",
+        )
+        ps3 = DisplayedPropositionServiceFactory(action=action, acteur=acteur_3)
+        ps3.sous_categories.add(sous_categorie)
+
+        # Test with limit of 2
+        response = client.get(f"/carte/{carte_config.slug}/")
+        assert response.status_code == 200
+
+        acteurs = list(response.context.get("acteurs", []))
+        assert len(acteurs) == 2, f"Expected 2 acteurs with limit=2, got {len(acteurs)}"
+
+        # Update limit to 10
+        carte_config.nombre_d_acteurs_affiches = 10
+        carte_config.save()
+
+        # Test with limit of 10
+        response = client.get(f"/carte/{carte_config.slug}/")
+        assert response.status_code == 200
+
+        acteurs = list(response.context.get("acteurs", []))
+        assert (
+            len(acteurs) == 3
+        ), f"Expected 3 acteurs with limit=10, got {len(acteurs)}"
