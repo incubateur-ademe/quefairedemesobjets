@@ -2,7 +2,7 @@ import pytest
 from django.contrib.gis.geos import Point, Polygon
 from django.core.management import call_command
 
-from qfdmo.models import CarteConfig, LabelQualite
+from qfdmo.models import Action, CarteConfig, LabelQualite
 from unit_tests.qfdmo.acteur_factory import (
     DisplayedActeurFactory,
     DisplayedPropositionServiceFactory,
@@ -53,8 +53,15 @@ class TestCarteConfigBonusReparation:
             bounding_box=france_bbox,
         )
 
-        # Create test data
-        action = ActionFactory()
+        # Create test data - need to get the reparer action's group
+
+        # Get or create "reparer" action which is commonly used and has a groupe
+        try:
+            action = Action.objects.get(code="reparer")
+        except Action.DoesNotExist:
+            # Fallback to factory if reparer doesn't exist
+            action = ActionFactory()
+
         sous_categorie = SousCategorieObjetFactory()
 
         # Acteur WITH bonus label - in Paris
@@ -91,8 +98,7 @@ class TestCarteConfigBonusReparation:
         )
         ps3.sous_categories.add(sous_categorie)
 
-        # Make a request to the CarteConfig view with search parameters
-        # Use Paris as center with a large radius to cover all of France
+        # Make a request to the CarteConfig view
         response = client.get(
             f"/carte/{carte_config.slug}/",
         )
