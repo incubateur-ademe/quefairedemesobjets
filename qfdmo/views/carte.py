@@ -381,8 +381,11 @@ class CarteSearchActeursView(AbstractSearchActeursView):
             except (ValueError, TypeError) as e:
                 # Invalid coordinates, skip distance sorting
                 logger.warning(
-                    f"Invalid coordinates for distance calculation: "
-                    f"longitude={longitude}, latitude={latitude}, error={e}"
+                    "Invalid coordinates for distance calculation: "
+                    "longitude=%s, latitude=%s, error=%s",
+                    longitude,
+                    latitude,
+                    str(e),
                 )
         elif getattr(acteurs, "_has_distance_field", False):
             # Only reorder via SQL if queryset hasn't been sliced yet
