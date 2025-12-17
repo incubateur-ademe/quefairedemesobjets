@@ -1,8 +1,8 @@
 import logging
-import subprocess
-import tempfile
 
 from utils.django import django_setup_full
+
+from .copy_utils import dump_and_restore_db
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +50,7 @@ def copy_displayed_data_from_warehouse():
     from django.conf import settings
     from django.db import connections
 
-    dsn_warehouse_db = settings.DATABASE_URL
+    dsn_warehouse_db = settings.DB_WAREHOUSE
     dsn_webapp_sample_db = settings.DB_WEBAPP_SAMPLE
 
     # Step 1: Make sure exposure target tables doesn't exists in webapp_sample
@@ -58,54 +58,13 @@ def copy_displayed_data_from_warehouse():
     _drop_exposure_tables_from_webapp_sample()
 
     # Step 2: Dump exposure_sample_* tables from warehouse
-    with tempfile.NamedTemporaryFile(suffix=".dump", delete=False) as tmp_dump_file:
-        dump_file = tmp_dump_file.name
-
-        dump_cmd = [
-            "pg_dump",
-            "-d",
-            dsn_warehouse_db,
-            "--schema=public",
-            "--if-exists",
-            "--clean",
-            "--no-owner",
-            "--no-acl",
-            "--format=custom",
-        ]
-
-        for table in EXPOSURE_TABLE_MAPPINGS.keys():
-            dump_cmd.append("--table")
-            dump_cmd.append(f"public.{table}")
-
-        with open(dump_file, "wb") as f:
-            subprocess.run(
-                dump_cmd,
-                stdout=f,
-                stderr=subprocess.PIPE,
-                check=True,
-            )
-        logger.info("✅ Dump créé")
-
-        # Step 3: Restore the dump in webapp_sample (create the exposure_sample_*
-        # tables)
-        logger.info("📥 Import du dump dans webapp_sample...")
-        subprocess.run(
-            [
-                "pg_restore",
-                "-d",
-                dsn_webapp_sample_db,
-                "--schema=public",
-                "--clean",
-                "--if-exists",
-                "--no-owner",
-                "--no-acl",
-                "--no-privileges",
-                "--disable-triggers",
-                dump_file,
-            ],
-            check=False,
-        )
-        logger.info("✅ Données importées dans webapp_sample")
+    logger.info("📥 Import du dump dans webapp_sample...")
+    dump_and_restore_db(
+        source_dsn=dsn_warehouse_db,
+        dest_dsn=dsn_webapp_sample_db,
+        tables=list(EXPOSURE_TABLE_MAPPINGS.keys()),
+    )
+    logger.info("✅ Données importées dans webapp_sample")
 
     # Step 4: Copy the content of the exposure_sample_* tables to the qfdmo_* tables
     logger.info("📋 Copie des données vers les tables qfdmo_*...")

@@ -1,23 +1,13 @@
 import logging
-import subprocess
-import tempfile
 
 from utils.django import django_setup_full
+
+from .copy_utils import dump_and_restore_db
 
 logger = logging.getLogger(__name__)
 
 django_setup_full()
 
-INCLUDE_TABLES_STARTING_WITH = [
-    "auth_",
-    "django_",
-    "dsfr_",
-    "qfdmd_",
-    "qfdmo_",
-    "sites_faciles_",
-    "taggit_",
-    "wagtail",
-]
 
 EXCLUDE_TABLES = [
     "qfdmo_acteur_acteur_services",
@@ -58,13 +48,12 @@ def copy_db_data():
 
     logger.info("📊 Copie des données...")
 
-    # Get tables starting with INCLUDE_TABLES_STARTING_WITH from
-    # information_schema.tables
+    # Get tables and filter them
     with connections["webapp_sample"].cursor() as cursor:
         cursor.execute("SELECT table_name FROM information_schema.tables")
         tables = [table[0] for table in cursor.fetchall()]
 
-    # filter tables starting with INCLUDE_TABLES_STARTING_WITH
+    # filter tables starting with INSTALLED_APPS
     tables = [
         table
         for table in tables
@@ -77,67 +66,11 @@ def copy_db_data():
     logger.info(f"✅ {len(tables)} tables trouvées après filtrage")
 
     # Create data-only dump
-    data_dump_cmd = [
-        "pg_dump",
-        "-d",
-        dsn_webapp_db,
-        "--schema=public",
-        "--data-only",
-        "--no-owner",
-        "--no-acl",
-        "--format=custom",
-    ]
-
-    for table in tables:
-        data_dump_cmd.append("--table")
-        data_dump_cmd.append(f"public.{table}")
-
-    tmp_data_file = tempfile.NamedTemporaryFile(suffix=".dump", delete=False)
-    data_dump_file = tmp_data_file.name
-    tmp_data_file.close()  # Fermer le fichier pour permettre l'écriture
-
-    with tempfile.NamedTemporaryFile(suffix=".dump", delete=False) as tmp_data_file:
-        data_dump_file = tmp_data_file.name
-
-        # Create data dump for this table
-        with open(data_dump_file, "wb") as f:
-            subprocess.run(
-                data_dump_cmd,
-                stdout=f,
-                stderr=subprocess.PIPE,
-                check=True,
-            )
-
-            # Restore data to destination
-            subprocess.run(
-                [
-                    "pg_restore",
-                    "-d",
-                    dsn_webapp_sample_db,
-                    "--schema=public",
-                    "--no-owner",
-                    "--no-acl",
-                    "--no-privileges",
-                    "--disable-triggers",
-                    data_dump_file,
-                ],
-                check=False,
-            )
-            logger.info(f"✅ Données de {table} copiées avec succès")
+    dump_and_restore_db(
+        source_dsn=dsn_webapp_db,
+        dest_dsn=dsn_webapp_sample_db,
+        tables=tables,
+        data_only=True,
+    )
 
     logger.info("✅ Copie terminée avec succès")
-
-
-EXPOSURE_TABLE_MAPPINGS = {
-    "exposure_sample_displayedacteur": "qfdmo_displayedacteur",
-    "exposure_sample_displayedpropositionservice": "qfdmo_displayedpropositionservice",
-    "exposure_sample_displayedpropositionservice_sous_categories": (
-        "qfdmo_displayedpropositionservice_sous_categories"
-    ),
-    "exposure_sample_displayedacteur_acteur_services": (
-        "qfdmo_displayedacteur_acteur_services"
-    ),
-    "exposure_sample_displayedacteur_labels": "qfdmo_displayedacteur_labels",
-    "exposure_sample_displayedacteur_sources": "qfdmo_displayedacteur_sources",
-    "exposure_sample_displayedperimetreadomicile": "qfdmo_displayedperimetreadomicile",
-}
