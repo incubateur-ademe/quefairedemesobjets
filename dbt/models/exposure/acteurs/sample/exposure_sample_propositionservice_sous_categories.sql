@@ -1,1 +1,0 @@
-SELECT * FROM {{ ref('marts_sample_propositionservice_sous_categories') }}

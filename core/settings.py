@@ -318,13 +318,23 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 DATABASE_URL = decouple.config(
     "DATABASE_URL",
     default="postgis://qfdmo:qfdmo@localhost:6543/qfdmo",  # pragma: allowlist secret  # noqa: E501
+    cast=str,
 )
 
 DEFAULT_DATABASE_SETTINGS = {
     **dj_database_url.parse(DATABASE_URL),
     "ENGINE": "django.contrib.gis.db.backends.postgis",
-    "OPTIONS": {"options": "-c search_path=public,warehouse"},
-    # FIXME : est-ce que Django à besoin d'avoir les 2 bases de données ?
+}
+
+DB_WEBAPP_SAMPLE = decouple.config(
+    "DB_WEBAPP_SAMPLE",
+    default="postgis://webapp_sample:webapp_sample@localhost:6543/webapp_sample",  # pragma: allowlist secret  # noqa: E501
+    cast=str,
+)
+
+WEBAPP_SAMPLE_DATABASE_SETTINGS = {
+    **dj_database_url.parse(DB_WEBAPP_SAMPLE),
+    "ENGINE": "django.contrib.gis.db.backends.postgis",
 }
 
 DB_WAREHOUSE = decouple.config(
@@ -332,6 +342,7 @@ DB_WAREHOUSE = decouple.config(
     cast=str,
     default="postgis://qfdmo:qfdmo@localhost:6543/warehouse",  # pragma: allowlist secret  # noqa: E501
 )
+
 WAREHOUSE_DATABASE_SETTINGS = {
     **dj_database_url.parse(DB_WAREHOUSE),
     "ENGINE": "django.contrib.gis.db.backends.postgis",
@@ -340,6 +351,7 @@ WAREHOUSE_DATABASE_SETTINGS = {
 DATABASES = {
     "default": DEFAULT_DATABASE_SETTINGS,
     "warehouse": WAREHOUSE_DATABASE_SETTINGS,
+    "webapp_sample": WEBAPP_SAMPLE_DATABASE_SETTINGS,
 }
 
 REMOTE_WEBAPP_SERVERNAME = "webapp_server"

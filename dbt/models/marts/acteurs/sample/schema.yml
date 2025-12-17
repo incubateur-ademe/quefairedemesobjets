@@ -1,9 +1,9 @@
-# From exhaustive_acteurs, build acteurs tables which will be used to display them in the carte
+# From exhaustive_displayedacteurs, build acteurs tables which will be used to display them in the carte
 
 version: 2
 
 models:
-  - name: marts_sample_acteur
+  - name: marts_sample_displayedacteur
     description: "Echantillon d'acteurs affichés sur la carte"
     columns:
       - name: uuid
@@ -23,7 +23,7 @@ models:
         - acteurs
         - acteur
       materialized: view
-  - name: marts_sample_perimetreadomicile
+  - name: marts_sample_displayedperimetreadomicile
     description: "Périmètres à domicile de l'échantillon"
     columns:
       - name: id
@@ -40,9 +40,9 @@ models:
         - marts
         - sample
         - acteurs
-        - perimetreadomicile
+        - displayedperimetreadomicile
       materialized: view
-  - name: marts_sample_acteur_acteur_services
+  - name: marts_sample_displayedacteur_acteur_services
     description: "Services de l'échantillon"
     columns:
       - name: id
@@ -59,9 +59,9 @@ models:
         - marts
         - sample
         - acteurs
-        - acteur_acteur_services
+        - displayedacteur_acteur_services
       materialized: view
-  - name: marts_sample_acteur_labels
+  - name: marts_sample_displayedacteur_labels
     description: "Labels de l'échantillon"
     columns:
       - name: id
@@ -80,7 +80,7 @@ models:
         - acteurs
         - acteur_labels
       materialized: view
-  - name: marts_sample_propositionservice
+  - name: marts_sample_displayedpropositionservice
     description: "Propositions de services de l'échantillon"
     columns:
       - name: id
@@ -97,9 +97,9 @@ models:
         - marts
         - sample
         - acteurs
-        - propositionservice
+        - displayedpropositionservice
       materialized: view
-  - name: marts_sample_propositionservice_sous_categories
+  - name: marts_sample_displayedpropositionservice_sous_categories
     description: "Sous-catégories de propositions de services de l'échantillon"
     columns:
       - name: id
@@ -116,5 +116,24 @@ models:
         - marts
         - sample
         - acteurs
-        - propositionservice_sous_categories
+        - displayedpropositionservice_sous_categories
+      materialized: view
+  - name: marts_sample_displayedacteur_sources
+    description: "Sources de l'échantillon"
+    columns:
+      - name: id
+        description: "L'identifiant de la source"
+        data_tests:
+          - not_null
+          - unique
+      - name: displayedacteur_id
+        description: "L'identifiant de l'acteur"
+        data_tests:
+          - not_null
+    config:
+      tags:
+        - marts
+        - sample
+        - acteurs
+        - displayedacteur_sources
       materialized: view

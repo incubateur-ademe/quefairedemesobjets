@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: exposure_sample_acteur
+  - name: exposure_sample_displayedacteur
     description: "Vue sur les acteurs affichés sur la carte"
     columns:
       - name: identifiant_unique
@@ -130,7 +130,7 @@ models:
         - exposure
         - sample
         - acteurs
-        - acteur
+        - displayedacteur
       contract:
         enforced: true
       materialized: table
@@ -179,7 +179,7 @@ models:
       - dbt_expectations.expect_table_row_count_to_be_between:
           arguments:
             min_value: 1000
-  - name: exposure_sample_propositionservice
+  - name: exposure_sample_displayedpropositionservice
     description: "Vue sur les propositions de service affichées sur la carte"
     columns:
       - name: id
@@ -203,7 +203,7 @@ models:
         - exposure
         - sample
         - acteurs
-        - propositionservice
+        - displayedpropositionservice
       materialized: table
       contract:
         enforced: true
@@ -237,7 +237,7 @@ models:
       - dbt_expectations.expect_table_row_count_to_be_between:
           arguments:
             min_value: 1000
-  - name: exposure_sample_propositionservice_sous_categories
+  - name: exposure_sample_displayedpropositionservice_sous_categories
     description: "Vue sur les sous-catégories des propositions de service affichées sur la carte"
     columns:
       - name: id
@@ -260,7 +260,7 @@ models:
         - exposure
         - sample
         - acteurs
-        - propositionservice_sous_categories
+        - displayedpropositionservice_sous_categories
       materialized: table
       contract:
         enforced: true
@@ -292,7 +292,7 @@ models:
       - dbt_expectations.expect_table_row_count_to_be_between:
           arguments:
             min_value: 1000
-  - name: exposure_sample_acteur_acteur_services
+  - name: exposure_sample_displayedacteur_acteur_services
     description: "Lien entre acteur de la carte et acteur_services"
     columns:
       - name: id
@@ -315,7 +315,7 @@ models:
         - exposure
         - sample
         - acteurs
-        - acteur_acteur_services
+        - displayedacteur_acteur_services
       materialized: table
       contract:
         enforced: true
@@ -347,7 +347,7 @@ models:
       - dbt_expectations.expect_table_row_count_to_be_between:
           arguments:
             min_value: 1000
-  - name: exposure_sample_acteur_labels
+  - name: exposure_sample_displayedacteur_labels
     description: "Lien entre acteur de la carte et labels"
     columns:
       - name: id
@@ -371,7 +371,7 @@ models:
         - exposure
         - sample
         - acteurs
-        - acteur_labels
+        - displayedacteur_labels
       materialized: table
       contract:
         enforced: true
@@ -403,7 +403,7 @@ models:
       - dbt_expectations.expect_table_row_count_to_be_between:
           arguments:
             min_value: 100
-  - name: exposure_sample_acteur_sources
+  - name: exposure_sample_displayedacteur_sources
     description: "Lien entre acteur de la carte et sources"
     columns:
       - name: id
@@ -426,7 +426,7 @@ models:
         - exposure
         - carte
         - acteurs
-        - acteur_sources
+        - displayedacteur_sources
       materialized: table
       contract:
         enforced: true
@@ -453,7 +453,7 @@ models:
       - dbt_expectations.expect_table_row_count_to_be_between:
           arguments:
             min_value: 1000
-  - name: exposure_sample_perimetreadomicile
+  - name: exposure_sample_displayedperimetreadomicile
     description: "Vue sur les périmètres à domicile affichés sur la carte"
     columns:
       - name: id
@@ -483,7 +483,7 @@ models:
         - exposure
         - sample
         - acteurs
-        - perimetreadomicile
+        - displayedperimetreadomicile
       materialized: table
       contract:
         enforced: true
@@ -496,3 +496,55 @@ models:
       - dbt_expectations.expect_table_row_count_to_be_between:
           arguments:
             min_value: 2
+  - name: exposure_sample_displayedacteur_sources
+    description: "Sources de l'échantillon"
+    columns:
+      - name: id
+        description: "L'identifiant de la source"
+        data_type: bigint
+        tests:
+          - not_null
+          - unique
+      - name: displayedacteur_id
+        description: "L'identifiant de l'acteur"
+        data_type: varchar
+        tests:
+          - not_null
+      - name: source_id
+        description: "L'identifiant de la source"
+        data_type: integer
+        tests:
+          - not_null
+    config:
+      tags:
+        - exposure
+        - sample
+        - acteurs
+        - displayedacteur_sources
+      materialized: table
+      contract:
+        enforced: true
+      indexes:
+        - columns: ['displayedacteur_id', 'source_id']
+          unique: true
+        - columns: ['displayedacteur_id']
+          type: hash
+        - columns: ['source_id']
+          type: hash
+      constraints:
+        - type: foreign_key
+          columns: [displayedacteur_id]
+          ref_columns: [identifiant_unique]
+          ref_table: exposure_sample_acteur
+          deferrable: true
+          initially_deferred: true
+        - type: foreign_key
+          columns: [source_id]
+          ref_columns: [id]
+          ref_table: qfdmo_source
+          deferrable: true
+          initially_deferred: true
+    tests:
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          arguments:
+            min_value: 100
