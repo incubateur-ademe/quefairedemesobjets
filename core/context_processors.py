@@ -43,9 +43,7 @@ def global_context(request) -> dict:
         },
     }
 
-    header_search_form = SearchForm(prefix="header", initial={"id": "header"})
     home_search_form = SearchForm(prefix="home", initial={"id": "home"})
-    home_autocomplete_search_form = AutocompleteSearchForm(prefix="home-autocomplete")
     header_autocomplete_search_form = AutocompleteSearchForm(
         prefix="header-autocomplete"
     )
@@ -57,9 +55,7 @@ def global_context(request) -> dict:
 
     return {
         **base,
-        "header_search_form": header_search_form,
         "home_search_form": home_search_form,
-        "home_autocomplete_search_form": home_autocomplete_search_form,
         "header_autocomplete_search_form": header_autocomplete_search_form,
         "skiplinks": skiplinks,
         **constants.ASSISTANT,
