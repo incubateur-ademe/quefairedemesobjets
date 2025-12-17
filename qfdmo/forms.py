@@ -239,35 +239,6 @@ class FormulaireForm(forms.Form):
         label="Autour de l'adresse suivante ",
         required=False,
     )
-    bounding_box = forms.CharField(
-        widget=forms.HiddenInput(
-            attrs={
-                "data-search-solution-form-target": "bbox",
-                "data-map-target": "bbox",
-            }
-        ),
-        required=False,
-    )
-
-    latitude = forms.FloatField(
-        widget=forms.HiddenInput(
-            attrs={
-                "data-address-autocomplete-target": "latitude",
-                "data-search-solution-form-target": "latitudeInput",
-            }
-        ),
-        required=False,
-    )
-
-    longitude = forms.FloatField(
-        widget=forms.HiddenInput(
-            attrs={
-                "data-address-autocomplete-target": "longitude",
-                "data-search-solution-form-target": "longitudeInput",
-            }
-        ),
-        required=False,
-    )
 
 
 class LegendeForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):

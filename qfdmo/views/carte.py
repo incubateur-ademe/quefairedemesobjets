@@ -61,11 +61,11 @@ class AutoSubmitLegendeFormEntry(TypedDict):
 
 
 class CarteForms(TypedDict):
+    map: MapFormEntry
     view_mode: ViewModeFormEntry
     filtres: FiltresFormEntry
     legende: AutoSubmitLegendeFormEntry
     legende_filtres: LegendeFormEntry
-    map: MapFormEntry
 
 
 class CarteFormsInstance(TypedDict):
@@ -415,21 +415,6 @@ class CarteSearchActeursView(AbstractSearchActeursView):
         carte_config = self._get_carte_config()
         icon_lookup = self._build_icon_lookup(carte_config) if carte_config else {}
 
-        # Compute has_location_data to determine if we should display results
-        # Check if we have an address, bounding_box, epci_codes, or latitude
-        map_form = self.ui_forms.get("map")
-        has_location_data = bool(
-            (
-                map_form
-                and (
-                    map_form["adresse"].value()
-                    or map_form["bounding_box"].value()
-                    or map_form["latitude"].value()
-                )
-            )
-            or self.request.GET.get("epci_codes")
-        )
-
         context.update(
             forms=self.ui_forms,
             map_container_id=self._get_map_container_id(),
@@ -437,7 +422,6 @@ class CarteSearchActeursView(AbstractSearchActeursView):
             carte_config=carte_config,
             selected_action_codes=self._get_action_codes(),
             icon_lookup=icon_lookup,
-            has_location_data=has_location_data,
         )
 
         return context
