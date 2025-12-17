@@ -103,7 +103,7 @@ test.describe("🤖 Assistant et Recherche", () => {
     },
   )
 
-  test.skip("Les événements PostHog sont trackés correctement (pages vues, interactions carte, détails solution)", async ({
+  test("Les événements PostHog sont trackés correctement (pages vues, interactions carte, détails solution)", async ({
     page,
   }) => {
     // Check that homepage scores 1
@@ -122,10 +122,18 @@ test.describe("🤖 Assistant et Recherche", () => {
     await getMarkers(page)
     await clickFirstAvailableMarker(page)
 
-    // Wait a bit for the click to process
-    await page.waitForTimeout(1000)
+    // Wait for either solution details panel or actor panel to appear (confirms click worked)
+    await Promise.race([
+      page
+        .locator("#acteurDetailsPanel")
+        .waitFor({ state: "visible", timeout: TIMEOUT.DEFAULT }),
+    ]).catch(() => {
+      // If neither appears, just continue - maybe the tracking still works
+      console.log("Warning: Solution details panel did not appear after marker click")
+    })
 
     // Wait for sessionStorage to be updated after click
+    // Give extra time for PostHog to process the event
     await page.waitForFunction(
       () => window.sessionStorage.userInteractionWithMap !== undefined,
       { timeout: TIMEOUT.LONG },
@@ -139,6 +147,7 @@ test.describe("🤖 Assistant et Recherche", () => {
     // Wait for sessionStorage to be updated after second click
     await page.waitForFunction(
       () => window.sessionStorage.userInteractionWithMap === "2",
+      { timeout: TIMEOUT.LONG },
     )
     sessionStorage = await getSessionStorage(page)
     expect(sessionStorage.userInteractionWithMap).toBe("2")
