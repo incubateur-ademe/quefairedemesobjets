@@ -361,30 +361,24 @@ class CarteSearchActeursView(AbstractSearchActeursView):
         # Instead, we annotate here after the queryset has been limited.
         location = getattr(self, "location", None)
         if not getattr(acteurs, "_has_distance_field", False) and location:
-            location_data = json.loads(location)
-            longitude = location_data.get("longitude")
-            latitude = location_data.get("latitude")
-
-            # Only create Point if we have valid coordinates
-            # Convert to float and validate (skip if None or empty string)
+            # Sort by distance in Python (queryset already sliced, can't use SQL)
             try:
-                if longitude and latitude:
-                    lon_float = float(longitude)
-                    lat_float = float(latitude)
-                    reference_point = Point(lon_float, lat_float, srid=4326)
-                    # Convert to list and sort in Python
-                    # since queryset is already sliced
-                    acteurs_list = list(acteurs)
-                    for acteur in acteurs_list:
-                        acteur.distance = acteur.location.distance(reference_point)
-                    acteurs = sorted(acteurs_list, key=lambda a: a.distance)
-            except (ValueError, TypeError) as e:
-                # Invalid coordinates, skip distance sorting
+                location_data = json.loads(location)
+                longitude = float(location_data.get("longitude"))
+                latitude = float(location_data.get("latitude"))
+
+                reference_point = Point(longitude, latitude, srid=4326)
+                acteurs_list = list(acteurs)
+                for acteur in acteurs_list:
+                    acteur.distance = acteur.location.distance(reference_point)
+                acteurs = sorted(acteurs_list, key=lambda a: a.distance)
+            except (ValueError, TypeError, KeyError) as e:
+                # Invalid/missing coordinates, skip distance sorting
                 logger.warning(
                     "Invalid coordinates for distance calculation: "
                     "longitude=%s, latitude=%s, error=%s",
-                    longitude,
-                    latitude,
+                    location_data.get("longitude") if location_data else None,
+                    location_data.get("latitude") if location_data else None,
                     str(e),
                 )
         elif getattr(acteurs, "_has_distance_field", False):
