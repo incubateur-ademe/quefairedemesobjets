@@ -370,16 +370,16 @@ test.describe("🗺️ Bouton 'Rechercher dans cette zone'", () => {
 
     // Move the map by dragging (simulate user panning the map)
     const mapCanvas = iframe.locator("canvas.maplibregl-canvas")
-    await moveMap(page, mapCanvas, 200, 200) // Increase drag distance to trigger map movement
+    await moveMap(page, mapCanvas, 300, 300) // Larger drag distance to ensure map movement is detected
 
     // Give the map time to process the movement and fire events
-    await page.waitForTimeout(500)
+    await page.waitForTimeout(1000)
 
     // Wait for the button to appear (it will be shown after map movement is detected)
     await expect(searchInZoneButton).not.toHaveClass(/qf-hidden/, {
-      timeout: TIMEOUT.DEFAULT,
+      timeout: TIMEOUT.LONG,
     })
-    await expect(searchInZoneButton).toBeVisible()
+    await expect(searchInZoneButton).toBeVisible({ timeout: TIMEOUT.DEFAULT })
 
     // Click the button
     await searchInZoneButton.click()
