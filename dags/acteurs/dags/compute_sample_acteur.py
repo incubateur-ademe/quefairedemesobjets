@@ -1,7 +1,8 @@
 from acteurs.tasks.airflow_logic.check_not_prod_env import check_isnt_prod_env_task
-from acteurs.tasks.airflow_logic.copy_db_task import (
-    copy_db_data_task,
-    copy_db_schema_task,
+from acteurs.tasks.airflow_logic.copy_db_data_task import copy_db_data_task
+from acteurs.tasks.airflow_logic.copy_db_schema_task import copy_db_schema_task
+from acteurs.tasks.airflow_logic.copy_displayed_data_from_warehouse_task import (
+    copy_displayed_data_from_warehouse_task,
 )
 from airflow.decorators import dag
 from airflow.models.baseoperator import chain
@@ -42,6 +43,7 @@ def compute_sample_acteur():
         dbt_test_base_acteurs,
         copy_db_schema_task(),
         copy_db_data_task(),
+        copy_displayed_data_from_warehouse_task(),
     )
 
 
