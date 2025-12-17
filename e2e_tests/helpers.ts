@@ -288,3 +288,8 @@ export const getMarkers = async (page) => {
   const count = await markers?.count()
   return [markers, count]
 }
+
+export async function findViewModeLabel(page, labelText: string) {
+  const viewModeNav = page.getByTestId("view-mode-nav")
+  return viewModeNav.locator(`label:has-text("${labelText}")`).first()
+}
