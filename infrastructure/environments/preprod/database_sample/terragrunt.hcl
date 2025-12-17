@@ -9,6 +9,7 @@ include {
 dependency "database" {
   config_path = "../database"
 
+  # mock_outputs is used to avoid plan test because the dependency is not yet created
   mock_outputs = {
     webapp_instance_id = "fr-par/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
   }

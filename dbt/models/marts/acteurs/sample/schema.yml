@@ -1,5 +1,3 @@
-# From exhaustive_displayedacteurs, build acteurs tables which will be used to display them in the carte
-
 version: 2
 
 models:
