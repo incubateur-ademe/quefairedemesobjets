@@ -170,13 +170,8 @@ class SuggestionCohorteSerializer(BaseModel):
     def to_dict(self) -> dict:
         return self.model_dump()
 
-    def _stringify_keys(self, d: dict) -> dict:
-        return {
-            "|".join(k) if isinstance(k, tuple) else str(k): v for k, v in d.items()
-        }
-
     def to_json(self) -> str:
-        # On s'appuie sur to_dict pour garantir l'utilisation de model_to_dict
+        # We rely on to_dict to ensure the use of model_to_dict
         import json
 
         data = self.model_dump()
@@ -539,6 +534,7 @@ class SuggestionGroupe(TimestampedModel):
             else self.revision_acteur
         )
 
+    @property
     def displayed_acteur_uuid(self) -> str | None:
         acteur = self.acteur_overridden_by() or self.acteur
         if acteur:
@@ -898,7 +894,7 @@ class SuggestionUnitaire(TimestampedModel):
     )
     ordre = models.IntegerField(default=1, blank=True)
     raison = models.TextField(blank=True, db_default="", default="")
-    parametres = models.JSONField(blank=True, db_default="", default="")
+    parametres = models.JSONField(blank=True, default=dict)
     suggestion_modele = models.CharField(
         max_length=255, blank=True, db_default="", default="", choices=[]
     )

@@ -55,7 +55,7 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
 
         context["tab"] = request.GET.get("tab", request.POST.get("tab", None))
         if context["tab"] == "acteur":
-            context["uuid"] = suggestion_groupe.displayed_acteur_uuid()
+            context["uuid"] = suggestion_groupe.displayed_acteur_uuid
         if context["tab"] == "localisation":
             if (
                 "latitude" in context["fields_values"]
