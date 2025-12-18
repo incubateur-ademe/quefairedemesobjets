@@ -15,7 +15,7 @@ class TestDisplayAsIframe:
     @pytest.mark.django_db
     def test_display_as_iframe(self, client):
         url = "/formulaire"
-        response = client.get(url)
+        response = client.get(url, headers={"Sec-Fetch-Dest": "iframe"})
         assert response.status_code == 200
         assert 'class="fr-header' not in str(response.content)
         assert 'class="fr-footer' not in str(response.content)
