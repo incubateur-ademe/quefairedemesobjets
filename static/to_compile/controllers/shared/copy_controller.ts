@@ -13,11 +13,6 @@ export default class extends Controller<HTMLElement> {
 
   async toClipboard() {
     await navigator.clipboard.writeText(this.toCopyTarget.textContent!)
-    console.log("copy", { t: this }, this.toCopyTarget.textContent, {
-      hasButtonTarget: this.hasButtonTarget,
-      hasCopiedValue: this.hasCopiedValue,
-      copiedValue: this.copiedValue,
-    })
     if (this.hasButtonTarget && this.hasCopiedValue) {
       this.buttonTarget.textContent = this.copiedValue
     }
