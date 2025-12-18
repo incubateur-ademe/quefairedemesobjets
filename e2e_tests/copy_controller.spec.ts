@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test"
 
-test.describe("📋 Copy Controller", () => {
+test.describe("📋 Test de la fonctionnalité de copie au clic", () => {
   test.beforeEach(async ({ page, context }) => {
     // Grant clipboard permissions
     await context.grantPermissions(["clipboard-read", "clipboard-write"])
