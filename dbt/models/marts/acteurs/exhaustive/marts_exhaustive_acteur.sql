@@ -13,8 +13,8 @@ select a.*,
     CAST(ST_X(a.location::geometry) AS DOUBLE PRECISION) AS latitude,
     CAST(ST_Y(a.location::geometry) AS DOUBLE PRECISION) AS longitude,
     e.enfants IS NOT NULL AS est_parent,
-    e.enfants AS enfants_liste,
-    jsonb_array_length(e.enfants) AS enfants_nombre,
+    e.enfants AS liste_enfants,
+    jsonb_array_length(e.enfants) AS nombre_enfants,
     ca.identifiant_unique IS NOT NULL AS est_dans_carte,
     oa.identifiant_unique IS NOT NULL AS est_dans_opendata
 from {{ ref('int_acteur') }} as a

@@ -3,7 +3,7 @@ from cluster.tasks.business_logic.cluster_acteurs_read.children import (
     cluster_acteurs_read_children,
 )
 
-from unit_tests.qfdmo.acteur_factory import RevisionActeurFactory
+from unit_tests.qfdmo.acteur_factory import VueActeurFactory
 
 
 @pytest.mark.django_db
@@ -11,21 +11,21 @@ class TestClusterActeursSelectionChildren:
 
     @pytest.fixture
     def db_testdata_write(self):
-        p1 = RevisionActeurFactory(nom="Parent 1", statut="ACTIF")
-        p2 = RevisionActeurFactory(nom="Parent 2", statut="ACTIF")
+        p1 = VueActeurFactory(nom="Parent 1", statut="ACTIF")
+        p2 = VueActeurFactory(nom="Parent 2", statut="ACTIF")
         # 🔴 Pas sélectionné car pas de parent
-        RevisionActeurFactory(nom="Orphelin 1", statut="ACTIF")
+        VueActeurFactory(nom="Orphelin 1", statut="ACTIF")
 
         # 🟢 Sélectionné car actif + parent
-        RevisionActeurFactory(nom="Enfant p1 a", parent=p1, statut="ACTIF")
+        VueActeurFactory(nom="Enfant p1 a", parent=p1, statut="ACTIF")
         # 🔴 Pas sélectionné car inactif
-        RevisionActeurFactory(nom="INACTIF p1 b", parent=p1, statut="INACTIF")
+        VueActeurFactory(nom="INACTIF p1 b", parent=p1, statut="INACTIF")
         # 🟢 Sélectionné car actif + parent
-        RevisionActeurFactory(nom="Enfant p2 a", parent=p2, statut="ACTIF")
+        VueActeurFactory(nom="Enfant p2 a", parent=p2, statut="ACTIF")
         # 🟢 Sélectionné car actif + parent
-        RevisionActeurFactory(nom="Enfant p2 b", parent=p2, statut="ACTIF")
+        VueActeurFactory(nom="Enfant p2 b", parent=p2, statut="ACTIF")
         # 🔴 Pas sélectionné car pas de parent
-        RevisionActeurFactory(nom="AUTRE", statut="ACTIF")
+        VueActeurFactory(nom="AUTRE", statut="ACTIF")
         return p1, p2
 
     def test_selection_children(self, db_testdata_write):

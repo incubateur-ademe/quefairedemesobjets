@@ -48,6 +48,7 @@ class TestClusterActeursClustersDisplay:
             cluster_intra_source_is_allowed=False,
             fields_protected=["source_id"],
             fields_transformed=["ville"],
+            include_source_ids=[s1.id, s2.id],
         )
         assert df_clusters.empty
 
@@ -87,6 +88,85 @@ class TestClusterActeursClustersDisplay:
             cluster_intra_source_is_allowed=False,
             fields_protected=["source_id"],
             fields_transformed=["ville"],
+            include_source_ids=[s1.id, s2.id],
         )
         assert len(df_clusters) == 2
         assert df_clusters["cluster_id"].nunique() == 1
+
+    def test_remove_clusters_without_included_sources(self):
+        at1 = ActeurTypeFactory(code="at1")
+        s_included = SourceFactory(code="s_included")
+        s_excluded_1 = SourceFactory(code="s_excluded_1")
+        s_excluded_2 = SourceFactory(code="s_excluded_2")
+
+        DisplayedActeurFactory(
+            identifiant_unique="clusterA_1",
+            acteur_type=at1,
+            ville="Paris",
+            source=s_included,
+        )
+        DisplayedActeurFactory(
+            identifiant_unique="clusterA_2",
+            acteur_type=at1,
+            ville="Paris",
+            source=s_excluded_1,
+        )
+        DisplayedActeurFactory(
+            identifiant_unique="clusterB_1",
+            acteur_type=at1,
+            ville="Lyon",
+            source=s_excluded_1,
+        )
+        DisplayedActeurFactory(
+            identifiant_unique="clusterB_2",
+            acteur_type=at1,
+            ville="Lyon",
+            source=s_excluded_2,
+        )
+
+        df = pd.DataFrame(
+            {
+                "identifiant_unique": [
+                    "clusterA_1",
+                    "clusterA_2",
+                    "clusterB_1",
+                    "clusterB_2",
+                ],
+                "source_id": [
+                    s_included.id,
+                    s_excluded_1.id,
+                    s_excluded_1.id,
+                    s_excluded_2.id,
+                ],
+                "source_code": [
+                    s_included.code,
+                    s_excluded_1.code,
+                    s_excluded_1.code,
+                    s_excluded_2.code,
+                ],
+                "source_codes": [
+                    [s_included.code],
+                    [s_excluded_1.code],
+                    [s_excluded_1.code],
+                    [s_excluded_2.code],
+                ],
+                "acteur_type_id": [at1.id, at1.id, at1.id, at1.id],
+                "ville": ["Paris", "Paris", "Lyon", "Lyon"],
+                "nombre_enfants": [0, 0, 0, 0],
+                "nom": ["clusterA_1", "clusterA_2", "clusterB_1", "clusterB_2"],
+            }
+        )
+
+        df_clusters = cluster_acteurs_clusters_prepare(
+            df=df,
+            cluster_fields_exact=["ville"],
+            cluster_fields_fuzzy=[],
+            cluster_fuzzy_threshold=0.5,
+            cluster_intra_source_is_allowed=False,
+            fields_protected=["source_id"],
+            fields_transformed=["ville"],
+            include_source_ids=[s_included.id],
+        )
+
+        assert df_clusters["cluster_id"].nunique() == 1
+        assert set(df_clusters["identifiant_unique"]) == {"clusterA_1", "clusterA_2"}

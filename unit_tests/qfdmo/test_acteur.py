@@ -7,7 +7,14 @@ from django.forms import ValidationError, model_to_dict
 from factory.faker import Faker
 
 from qfdmo.models import Acteur, RevisionActeur, RevisionPropositionService
-from qfdmo.models.acteur import ActeurReprise, DisplayedActeur, LabelQualite, Source
+from qfdmo.models.acteur import (
+    ActeurReprise,
+    ActeurStatus,
+    DisplayedActeur,
+    LabelQualite,
+    Source,
+    VueActeur,
+)
 from unit_tests.qfdmo.acteur_factory import (
     ActeurFactory,
     ActeurServiceFactory,
@@ -20,6 +27,7 @@ from unit_tests.qfdmo.acteur_factory import (
     RevisionActeurFactory,
     RevisionPropositionServiceFactory,
     SourceFactory,
+    VueActeurFactory,
 )
 from unit_tests.qfdmo.action_factory import ActionDirectionFactory, ActionFactory
 from unit_tests.qfdmo.sscatobj_factory import SousCategorieObjetFactory
@@ -827,3 +835,62 @@ class TestActeurOrdering:
             first_acteur = (
                 DisplayedActeur.objects.all().in_geojson(geojson_whole_planet).first()
             )
+
+
+@pytest.mark.django_db
+class TestFinalActeurManagerGetActiveParents:
+    @pytest.mark.parametrize(
+        "factory,model",
+        [(VueActeurFactory, VueActeur), (DisplayedActeurFactory, DisplayedActeur)],
+    )
+    def test_finalacteur_get_active_parents_returns_only_active_without_source(
+        self, factory, model
+    ):
+        """Test that get_active_parents returns only active acteurs without source"""
+        acteur_type = ActeurTypeFactory()
+        source = SourceFactory()
+
+        # Active acteur without source - should be returned
+        acteur_1 = factory(
+            statut=ActeurStatus.ACTIF, source=None, acteur_type=acteur_type
+        )
+        acteur_2 = factory(
+            statut=ActeurStatus.ACTIF, source=None, acteur_type=acteur_type
+        )
+
+        # Inactive acteur without source - should not be returned
+        factory(statut=ActeurStatus.INACTIF, source=None, acteur_type=acteur_type)
+
+        # Active acteur with source - should not be returned
+        factory(statut=ActeurStatus.ACTIF, source=source, acteur_type=acteur_type)
+
+        # Deleted acteur without source - should not be returned
+        factory(statut=ActeurStatus.SUPPRIME, source=None, acteur_type=acteur_type)
+
+        result = model.objects.get_active_parents()
+
+        assert result.count() == 2
+        assert acteur_1 in result
+        assert acteur_2 in result
+
+    @pytest.mark.parametrize(
+        "factory,model",
+        [(VueActeurFactory, VueActeur), (DisplayedActeurFactory, DisplayedActeur)],
+    )
+    def test_finalacteur_get_active_parents_empty_when_no_matching(
+        self, factory, model
+    ):
+        """
+        Test that get_active_parents returns an empty queryset
+        when no actors match the criteria
+        """
+        acteur_type = ActeurTypeFactory()
+        source = SourceFactory()
+
+        # Create actors that do not match the criteria
+        factory(statut=ActeurStatus.INACTIF, source=None, acteur_type=acteur_type)
+        factory(statut=ActeurStatus.ACTIF, source=source, acteur_type=acteur_type)
+
+        result = model.objects.get_active_parents()
+
+        assert result.count() == 0

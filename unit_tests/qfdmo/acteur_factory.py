@@ -15,6 +15,7 @@ from qfdmo.models import (
     LabelQualite,
     PropositionService,
     Source,
+    VueActeur,
 )
 from qfdmo.models.acteur import (
     PerimetreADomicile,
@@ -85,6 +86,17 @@ class DisplayedActeurFactory(Factory):
     identifiant_unique = factory.fuzzy.FuzzyText(length=10)
     nom = Faker("company")
     location = Point(3, 3)
+    acteur_type = SubFactory(ActeurTypeFactory)
+    source = SubFactory(SourceFactory)
+
+
+class VueActeurFactory(Factory):
+    class Meta:
+        model = VueActeur
+
+    identifiant_unique = factory.fuzzy.FuzzyText(length=10)
+    nom = Faker("word")
+    location = Point(2, 2)
     acteur_type = SubFactory(ActeurTypeFactory)
     source = SubFactory(SourceFactory)
 
