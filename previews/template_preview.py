@@ -934,3 +934,10 @@ class TestsPreview(LookbookPreview):
             "ui/tests/search_in_zone_button.html",
             {"base_url": base_url},
         )
+
+    def t_6_iframe_navigation_persistence(self, **kwargs):
+        """Test that iframe-specific UI persists during navigation"""
+        return render_to_string(
+            "ui/tests/iframe_navigation_persistence.html",
+            {"base_url": base_url},
+        )
