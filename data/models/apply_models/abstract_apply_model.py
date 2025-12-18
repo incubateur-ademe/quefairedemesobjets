@@ -14,7 +14,15 @@ ACTEUR_MODEL = {
 
 
 class AbstractApplyModel(BaseModel, ABC):
-    """Abstract class to apply a model to an acteur"""
+    """
+    Abstract class to apply a model to an acteur
+
+    To be used in case of :
+    - update acteur/revision after an new source injection
+    - update revision when clustering some acteurs
+    - update acteur/revision when enriching some acteurs
+    - … other use cases
+    """
 
     identifiant_unique: str
     order: int = 0

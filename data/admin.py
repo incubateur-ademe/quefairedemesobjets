@@ -1,7 +1,6 @@
 import logging
 
 from django.contrib import admin, messages
-from django.db.models import Count
 from django.template.loader import render_to_string
 from django.utils.html import format_html
 from djangoql.admin import DjangoQLSearchMixin
@@ -258,7 +257,7 @@ class SuggestionGroupeAdmin(
             "acteur",
             "revision_acteur",
             "revision_acteur__parent",
-        ).annotate(suggestion_unitaires_count=Count("suggestion_unitaires"))
+        ).with_suggestion_unitaire_count()  # type: ignore[attr-defined]
 
     def groupe_de_suggestions(self, obj):
         template_name = "data/_partials/suggestion_groupe_details.html"

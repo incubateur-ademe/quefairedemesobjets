@@ -5,6 +5,7 @@ from datetime import datetime
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
+from django.db.models import Count
 from django.template.loader import render_to_string
 from more_itertools import first, flatten
 from pydantic import BaseModel, ConfigDict
@@ -437,6 +438,20 @@ class Suggestion(TimestampedModel):
             )
 
 
+class SuggestionGroupeQuerySet(models.QuerySet):
+    def with_suggestion_unitaire_count(self):
+        """Annotate queryset with suggestion_unitaires_count."""
+        return self.annotate(suggestion_unitaires_count=Count("suggestion_unitaires"))
+
+
+class SuggestionGroupeManager(models.Manager):
+    def get_queryset(self):
+        return SuggestionGroupeQuerySet(self.model, using=self._db)
+
+    def with_suggestion_unitaire_count(self):
+        return self.get_queryset().with_suggestion_unitaire_count()
+
+
 class SuggestionGroupe(TimestampedModel):
     NOT_EDITABLE_FIELDS = [
         "acteur_service_codes",
@@ -483,11 +498,14 @@ class SuggestionGroupe(TimestampedModel):
         ("label_codes",),
         ("acteur_service_codes",),
         ("proposition_service_codes",),
+        ("lieu_prestation",),
     ]
 
     class Meta:
         verbose_name = "2️⃣ ⏳ ⚠️ Suggestion Groupe - Livraison prochainement"
         verbose_name_plural = "2️⃣ ⏳ ⚠️ Suggestions Groupes - Livraison prochainement"
+
+    objects = SuggestionGroupeManager()
 
     id = models.AutoField(primary_key=True)
     suggestion_cohorte = models.ForeignKey(
@@ -528,6 +546,10 @@ class SuggestionGroupe(TimestampedModel):
         return libelle
 
     def acteur_overridden_by(self) -> RevisionActeur | None:
+        """
+        For a given Suggestion we check if a Parent or a Revision is override
+        Acteur data
+        """
         return (
             self.revision_acteur.parent
             if self.revision_acteur and self.revision_acteur.parent
