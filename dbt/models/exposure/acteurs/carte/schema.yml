@@ -2,7 +2,7 @@ version: 2
 
 models:
   - name: exposure_carte_acteur
-    description: "Vue sur les acteurs affichés sur la carte"
+    description: "Acteurs affichés sur la carte"
     columns:
       - name: identifiant_unique
         description: "The primary key for this table"
@@ -180,7 +180,7 @@ models:
           arguments:
             min_value: 350000
   - name: exposure_carte_propositionservice
-    description: "Vue sur les propositions de service affichées sur la carte"
+    description: "Propositions de service affichées sur la carte"
     columns:
       - name: id
         description: "L'identifiant de la proposition de service"
@@ -238,7 +238,7 @@ models:
           arguments:
             min_value: 400000
   - name: exposure_carte_propositionservice_sous_categories
-    description: "Vue sur les sous-catégories des propositions de service affichées sur la carte"
+    description: "Sous-catégories des propositions de service affichées sur la carte"
     columns:
       - name: id
         description: "L'identifiant de la sous-catégorie"
@@ -454,7 +454,7 @@ models:
           arguments:
             min_value: 350000
   - name: exposure_carte_perimetreadomicile
-    description: "Vue sur les périmètres à domicile affichés sur la carte"
+    description: "Périmètres à domicile des acteurs affichés sur la carte"
     columns:
       - name: id
         description: "L'identifiant du périmètre à domicile"

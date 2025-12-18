@@ -2,7 +2,7 @@ version: 2
 
 models:
   - name: exposure_sample_displayedacteur
-    description: "Vue sur les acteurs affichés sur la carte"
+    description: "Echantillon d'acteurs affichés sur la carte"
     columns:
       - name: identifiant_unique
         description: "The primary key for this table"
@@ -180,7 +180,7 @@ models:
           arguments:
             min_value: 1000
   - name: exposure_sample_displayedpropositionservice
-    description: "Vue sur les propositions de service affichées sur la carte"
+    description: "Propositions de service de l'échantillon des acteurs affichées sur la carte"
     columns:
       - name: id
         description: "L'identifiant de la proposition de service"
@@ -220,7 +220,7 @@ models:
         - type: foreign_key
           columns: [acteur_id]
           ref_columns: [identifiant_unique]
-          ref_table: exposure_sample_acteur
+          ref_table: exposure_sample_displayedacteur
           deferrable: true
           initially_deferred: true
         - type: foreign_key
@@ -238,7 +238,7 @@ models:
           arguments:
             min_value: 1000
   - name: exposure_sample_displayedpropositionservice_sous_categories
-    description: "Vue sur les sous-catégories des propositions de service affichées sur la carte"
+    description: "Sous-catégories des propositions de service de l'échantillon des acteurs affichées sur la carte"
     columns:
       - name: id
         description: "L'identifiant de la sous-catégorie"
@@ -275,7 +275,7 @@ models:
         - type: foreign_key
           columns: [displayedpropositionservice_id]
           ref_columns: [id]
-          ref_table: exposure_sample_propositionservice
+          ref_table: exposure_sample_displayedpropositionservice
           deferrable: true
           initially_deferred: true
         - type: foreign_key
@@ -293,7 +293,7 @@ models:
           arguments:
             min_value: 1000
   - name: exposure_sample_displayedacteur_acteur_services
-    description: "Lien entre acteur de la carte et acteur_services"
+    description: "Lien entre les acteurs de l'échantillon et les services"
     columns:
       - name: id
         description: "L'identifiant du lien entre acteur et acteur_services"
@@ -330,7 +330,7 @@ models:
         - type: foreign_key
           columns: [displayedacteur_id]
           ref_columns: [identifiant_unique]
-          ref_table: exposure_sample_acteur
+          ref_table: exposure_sample_displayedacteur
           deferrable: true
           initially_deferred: true
         - type: foreign_key
@@ -348,7 +348,7 @@ models:
           arguments:
             min_value: 1000
   - name: exposure_sample_displayedacteur_labels
-    description: "Lien entre acteur de la carte et labels"
+    description: "Lien entre les acteurs de l'échantillon et les labels"
     columns:
       - name: id
         description: "L'identifiant du lien entre acteur et label"
@@ -386,7 +386,7 @@ models:
         - type: foreign_key
           columns: [displayedacteur_id]
           ref_columns: [identifiant_unique]
-          ref_table: exposure_sample_acteur
+          ref_table: exposure_sample_displayedacteur
           deferrable: true
           initially_deferred: true
         - type: foreign_key
@@ -404,7 +404,7 @@ models:
           arguments:
             min_value: 100
   - name: exposure_sample_displayedperimetreadomicile
-    description: "Vue sur les périmètres à domicile affichés sur la carte"
+    description: "Périmètres à domicile de l'échantillon des acteurs affichés sur la carte"
     columns:
       - name: id
         description: "L'identifiant du périmètre à domicile"
@@ -447,7 +447,7 @@ models:
           arguments:
             min_value: 2
   - name: exposure_sample_displayedacteur_sources
-    description: "Sources de l'échantillon"
+    description: "Sources de l'échantillon des acteurs affichés sur la carte"
     columns:
       - name: id
         description: "L'identifiant de la source"
@@ -485,7 +485,7 @@ models:
         - type: foreign_key
           columns: [displayedacteur_id]
           ref_columns: [identifiant_unique]
-          ref_table: exposure_sample_acteur
+          ref_table: exposure_sample_displayedacteur
           deferrable: true
           initially_deferred: true
         - type: foreign_key

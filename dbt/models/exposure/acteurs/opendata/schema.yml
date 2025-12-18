@@ -2,7 +2,7 @@ version: 2
 
 models:
   - name: exposure_opendata_acteur
-    description: "Vue sur les acteurs affichés sur la carte"
+    description: "Acteurs partagés en Open Data"
     columns:
       - name: identifiant
         description: "L'identifiant unique de l'acteur"
