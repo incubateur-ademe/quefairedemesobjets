@@ -56,22 +56,6 @@ export default class extends Controller<HTMLElement> {
     this.#postFieldsValues(fieldsValues)
   }
 
-  updateStatus(event: Event) {
-    const target = event.target as HTMLButtonElement
-    const action = target.dataset.actionValue
-    const statusUrl = target.dataset.statusUrl
-
-    if (!action || !statusUrl) {
-      console.error("Action ou URL manquante")
-      return
-    }
-
-    const formData = new FormData()
-    formData.append("action", action)
-
-    this.#postSuggestion(statusUrl, formData)
-  }
-
   handleMarkerDragged(event: CustomEvent) {
     const { latitude, longitude } = event.detail
     if (!latitude || !longitude) {
@@ -160,12 +144,12 @@ export default class extends Controller<HTMLElement> {
   }
 
   #postSuggestion(postUrl: string, formData: FormData) {
+    // TODO: supprimer
     fetch(postUrl, {
       method: "POST",
       headers: {
         "X-Requested-With": "XMLHttpRequest",
         "X-CSRFToken": this.#getCsrfToken() ?? "",
-        Accept: "text/vnd.turbo-stream.html",
       },
       body: formData,
       credentials: "same-origin",
