@@ -448,8 +448,8 @@ test.describe("🗺️ CarteConfig Bounding Box", () => {
     await navigateTo(page, "/lookbook/preview/tests/t_6_carte_config_bounding_box")
 
     // Wait for the iframe to be loaded
-    const iframe = page.locator('[data-testid="carte-iframe"]').first().contentFrame()
-    await expect(iframe.locator("body")).toBeAttached({ timeout: 10000 })
+    const iframe = getIframe(page, "carte-iframe")
+    await expect(iframe.locator("body")).toBeAttached({ timeout: TIMEOUT.DEFAULT })
 
     // Wait for the map to be loaded
     await expect(iframe.locator('[data-map-target="mapContainer"]')).toBeVisible({
