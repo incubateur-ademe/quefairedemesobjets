@@ -49,6 +49,7 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
                     "latitude": float(latitude_data[key]),
                     "longitude": float(longitude_data[key]),
                     "color": color,
+                    "key": key,
                     "draggable": draggable,
                 }
             )
