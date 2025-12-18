@@ -65,38 +65,38 @@ export class SolutionMap {
         ],
         tileSize: 256,
       }
+    }
 
-      this.map = new Map({
-        container: selector,
-        style: {
-          version: 8,
-          sources,
-          layers: [{ type: "raster", id: `${theme}-layer`, source: sourceId }],
-        },
-        zoom: initialZoom,
-        maxZoom: DEFAULT_MAX_ZOOM,
-        center: DEFAULT_LOCATION,
-        attributionControl: {
-          compact: true,
-          customAttribution: "© OpenStreetMap contributors, © CARTO",
-        },
+    this.map = new Map({
+      container: selector,
+      style: {
+        version: 8,
+        sources,
+        layers: [{ type: "raster", id: `${theme}-layer`, source: sourceId }],
+      },
+      zoom: initialZoom,
+      maxZoom: DEFAULT_MAX_ZOOM,
+      center: DEFAULT_LOCATION,
+      attributionControl: {
+        compact: true,
+        customAttribution: "© OpenStreetMap contributors, © CARTO",
+      },
+    })
+    // Add zoom controls
+    this.#addZoomControl()
+
+    if (
+      this.#location.latitude !== undefined &&
+      this.#location.longitude !== undefined
+    ) {
+      new maplibregl.Marker({
+        element: this.#generateHomeHTMLMarker(),
       })
-      // Add zoom controls
-      this.#addZoomControl()
-
-      if (
-        this.#location.latitude !== undefined &&
-        this.#location.longitude !== undefined
-      ) {
-        new maplibregl.Marker({
-          element: this.#generateHomeHTMLMarker(),
-        })
-          .setLngLat([this.#location.longitude, this.#location.latitude])
-          .setPopup(
-            new maplibregl.Popup().setHTML("<p><strong>Vous êtes ici !</strong></p>"),
-          )
-          .addTo(this.map)
-      }
+        .setLngLat([this.#location.longitude, this.#location.latitude])
+        .setPopup(
+          new maplibregl.Popup().setHTML("<p><strong>Vous êtes ici !</strong></p>"),
+        )
+        .addTo(this.map)
     }
   }
 
