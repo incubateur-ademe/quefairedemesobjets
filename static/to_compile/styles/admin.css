@@ -3,6 +3,10 @@
 @tailwind components;
 @tailwind utilities;
 
+.model-suggestion.change-list .action-select {
+  height: 100px;
+}
+
 .tabs {
   @apply qf-border-0 qf-border-b qf-border-solid;
 }
