@@ -449,6 +449,7 @@ class SuggestionGroupe(TimestampedModel):
     ]
 
     ORDERED_FIELDS = [
+        ("lieu_prestation",),
         ("identifiant_unique",),
         ("source_code",),
         ("identifiant_externe",),
@@ -572,7 +573,6 @@ class SuggestionGroupe(TimestampedModel):
         }
 
     def serialize(self) -> SuggestionCohorteSerializer:
-
         def _flatten_suggestion_unitaires(
             suggestion_unitaires: dict[tuple, list],
         ) -> dict:
@@ -588,7 +588,6 @@ class SuggestionGroupe(TimestampedModel):
             acteur_suggestion_unitaires: dict,
             acteur_overridden_by_suggestion_unitaires: dict | None = None,
         ) -> list[tuple]:
-
             fields_groups = list(
                 set(acteur_suggestion_unitaires.keys())
                 | set(
@@ -635,7 +634,6 @@ class SuggestionGroupe(TimestampedModel):
         )
 
         if self.suggestion_cohorte.type_action == SuggestionAction.SOURCE_AJOUT:
-
             identifiant_unique = self.get_identifiant_unique_from_suggestion_unitaires()
             fields_values = {
                 key: {
