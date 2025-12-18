@@ -3,44 +3,40 @@ import json
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render
-from django.urls import reverse_lazy
-from django.views.generic import FormView, View
+from django.views.generic import View
 
-from data.forms import SuggestionGroupeStatusForm
 from data.models.suggestion import SuggestionGroupe, SuggestionStatut
 
 
-class SuggestionGroupeStatusView(LoginRequiredMixin, FormView):
-    form_class = SuggestionGroupeStatusForm
-
-    def get_success_url(self):
-        return reverse_lazy(
-            "data:suggestion_groupe",
-            kwargs={"suggestion_groupe_id": self.kwargs["suggestion_groupe_id"]},
-        )
-
-    def form_valid(self, form):
+class SuggestionGroupeStatusView(LoginRequiredMixin, View):
+    def get(self, request, suggestion_groupe_id, action):
         suggestion_groupe = get_object_or_404(
             SuggestionGroupe.objects,
-            id=self.kwargs["suggestion_groupe_id"],
+            id=suggestion_groupe_id,
         )
-        action = form.cleaned_data["action"]
+
         if action == "validate":
             suggestion_groupe.statut = SuggestionStatut.ATRAITER
         elif action == "reject":
             suggestion_groupe.statut = SuggestionStatut.REJETEE
         elif action == "to_process":
             suggestion_groupe.statut = SuggestionStatut.AVALIDER
+        else:
+            return HttpResponseBadRequest(f"Action invalide: {action}")
+
         suggestion_groupe.save()
 
-        return super().form_valid(form)
+        return render(
+            request,
+            "data/_partials/suggestion_groupe_details.html",
+            suggestion_groupe.serialize().to_dict(),
+        )
 
 
 class SuggestionGroupeView(LoginRequiredMixin, View):
-    template_name = "data/_partials/suggestion_groupe_refresh_stream.html"
+    template_name = "data/_partials/suggestion_groupe_details.html"
 
     def _manage_tab_in_context(self, context, request, suggestion_groupe):
-
         def _append_location_to_points(
             points, latitude_data, longitude_data, key, color, draggable
         ):
@@ -129,7 +125,6 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
             request,
             self.template_name,
             context,
-            content_type="text/vnd.turbo-stream.html",
         )
 
     def post(self, request, suggestion_groupe_id):

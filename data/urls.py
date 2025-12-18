@@ -11,7 +11,7 @@ urlpatterns = [
         name="suggestion_groupe",
     ),
     path(
-        "suggestion-groupe/<int:suggestion_groupe_id>/status/",
+        "suggestion-groupe/<int:suggestion_groupe_id>/<str:action>/status/",
         SuggestionGroupeStatusView.as_view(),
         name="suggestion_groupe_status",
     ),

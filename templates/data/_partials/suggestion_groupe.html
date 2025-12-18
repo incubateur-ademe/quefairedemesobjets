@@ -34,27 +34,15 @@
             <span class="qf-ml-3w qf-text-lg qf-italic">
                 {{ statut }}
             </span>
-            <button
-                type="button"
-                data-action="click->suggestion-groupe-row#updateStatus"
-                data-action-value="validate"
-                data-status-url="{% url 'data:suggestion_groupe_status' id %}">
+            <a href="{% url 'data:suggestion_groupe_status' id 'validate' %}">
                 ✅ VALIDER la suggestion
-            </button>
-            <button
-                type="button"
-                data-action="click->suggestion-groupe-row#updateStatus"
-                data-action-value="reject"
-                data-status-url="{% url 'data:suggestion_groupe_status' id %}">
+            </a>
+            <a href="{% url 'data:suggestion_groupe_status' id 'reject' %}">
                 ❌ REJETER la suggestion
-            </button>
-            <button
-                type="button"
-                data-action="click->suggestion-groupe-row#updateStatus"
-                data-action-value="to_process"
-                data-status-url="{% url 'data:suggestion_groupe_status' id %}">
+            </a>
+            <a href="{% url 'data:suggestion_groupe_status' id 'to_process' %}">
                 ⏳ Renvoyer à valider
-            </button>
+            </a>
         </div>
     </div>
     <div class="qf-my-3w">
