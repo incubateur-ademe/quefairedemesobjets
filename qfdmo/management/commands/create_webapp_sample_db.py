@@ -35,7 +35,9 @@ class Command(BaseCommand):
         try:
             conn.cursor().execute("CREATE DATABASE webapp_sample;")
         except ProgrammingError:
-            logger.warning("La base de données webapp_sample existe déjà")
+            self.stdout.write(
+                self.style.WARNING("La base de données webapp_sample existe déjà")
+            )
 
         # Create user and permissions if it doesn't exist
         file_path = (

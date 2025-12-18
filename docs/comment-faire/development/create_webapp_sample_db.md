@@ -1,7 +1,9 @@
 # Création de la base de données webapp_sample pour les tests
 
-La base de données `webapp_sample` est une base de données locale utilisée pour les tests.
+La base de données `webapp_sample` est une base de données généré en preprod dont on utilise le backup pour créer une base de tests.
 Elle permet de disposer d'un environnement de test isolé avec un échatillon de données d'acteurs à afficher sans impacter la base de données principale.
+
+Dans le cas de développement/debuggage de cette fonctionnalité, on a besoin de cette base de données configurée localement.
 
 ## Création de la base de données
 
