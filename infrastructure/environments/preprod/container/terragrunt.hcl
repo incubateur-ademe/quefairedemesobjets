@@ -32,6 +32,7 @@ inputs = {
   AIRFLOW_CONN_WEBAPP_DB              = "[AIRFLOW_CONN_WEBAPP_DB]"
   DATABASE_URL                        = "[DATABASE_URL]"
   DB_WAREHOUSE                        = "[DB_WAREHOUSE]"
+  DB_WEBAPP_SAMPLE                    = "[DB_WEBAPP_SAMPLE]"
   ENVIRONMENT                         = "[ENVIRONMENT]"
   POSTGRES_DB                         = "[POSTGRES_DB]"
   POSTGRES_HOST                       = "[POSTGRES_HOST]"
