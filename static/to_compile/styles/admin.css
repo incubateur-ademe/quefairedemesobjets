@@ -1,0 +1,26 @@
+/* Import de Tailwind CSS pour Django Admin */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.model-suggestion.change-list .action-select {
+  height: 100px;
+}
+
+.tabs {
+  @apply qf-border-0 qf-border-b qf-border-solid;
+}
+
+.tabs li {
+  @apply qf-inline-block qf-p-1w qf-text-center !important;
+}
+
+.tabs li.active {
+  @apply qf-border-b-2 qf-font-bold !important;
+}
+
+.tabs li:hover {
+}
+
+.tabs li:active {
+}

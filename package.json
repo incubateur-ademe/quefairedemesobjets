@@ -9,17 +9,17 @@
     "e2e_test": " npx playwright test --update-snapshots"
   },
   "source": [
-    "static/to_compile/qfdmd.ts",
-    "static/to_compile/qfdmo.ts",
-    "static/to_compile/embed/assistant.ts",
-    "static/to_compile/embed/formulaire.ts",
-    "static/to_compile/embed/carte.ts",
-    "static/to_compile/embed/infotri.ts",
-    "static/to_compile/embed/infotri-configurator.ts",
-    "static/to_compile/infotri-child.ts",
-    "static/to_compile/admin.css",
     "static/to_compile/admin-categorie-widget.ts",
-    "static/to_compile/admin-map-widget.ts"
+    "static/to_compile/admin-map-widget.ts",
+    "static/to_compile/admin.ts",
+    "static/to_compile/embed/assistant.ts",
+    "static/to_compile/embed/carte.ts",
+    "static/to_compile/embed/formulaire.ts",
+    "static/to_compile/embed/infotri-configurator.ts",
+    "static/to_compile/embed/infotri.ts",
+    "static/to_compile/infotri-child.ts",
+    "static/to_compile/qfdmd.ts",
+    "static/to_compile/qfdmo.ts"
   ],
   "targets": {
     "default": {

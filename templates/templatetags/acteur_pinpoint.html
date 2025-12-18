@@ -1,16 +1,31 @@
 {% load acteur_tags turbo_tags %}
-<a class="qf-w-[34px] qf-h-[45px] !qf-bg-none"
-    data-latitude="{{ acteur.latitude }}"
-    data-longitude="{{ acteur.longitude }}"
+{% if href %}
+<a
+    class="qf-w-[34px] qf-h-[45px] !qf-bg-none"
+    data-latitude="{{ latitude }}"
+    data-longitude="{{ longitude }}"
     data-map-target="acteur"
-    href="{% acteur_url acteur with_map=False %}"
+    href="{{ href }}"
     data-turbo-frame="{% acteur_frame_id %}"
     data-controller="pinpoint"
     data-action="analytics#captureInteractionWithMap pinpoint#setActive"
 >
+{% else %}
+<div
+    class="qf-w-[34px] qf-h-[45px] !qf-bg-none"
+    data-latitude="{{ latitude }}"
+    data-longitude="{{ longitude }}"
+    data-map-target="acteur"
+    data-draggable="{{ draggable|yesno:"true,false" }}"
+>
+{% endif %}
     <div data-animated="" class="qf-scale-75">
         {% if marker_icon_file %}
             <img class="qf--translate-y-2/4" height="61" width="46" src="{{ marker_icon_file }}">
+        {% elif draggable %}
+            <div class="qf--translate-y-2/4" style="color: {{ marker_couleur }};">
+                {% include "ui/components/carte/pinpoints/svg/hand-pinpoint.html" %}
+            </div>
         {% else %}
             <div class="qf--translate-y-2/4" style="color: {{ marker_couleur }};">
                 {% if marker_fill_background %}
@@ -25,8 +40,11 @@
                 {% endif %}
                 <span class="qf-absolute qf-top-[10] qf-left-[10.5] qf-margin-auto {{ marker_icon }} {{ marker_icon_extra_classes }}"></span>
             </div>
-
         {% endif %}
 
     </div>
+{% if href %}
 </a>
+{% else %}
+</div>
+{% endif %}

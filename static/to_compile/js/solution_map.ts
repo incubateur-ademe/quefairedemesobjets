@@ -27,61 +27,76 @@ export class SolutionMap {
     location,
     controller,
     initialZoom = DEFAULT_INITIAL_ZOOM,
+    theme,
   }: {
     selector: HTMLDivElement
     location: Location
     controller: MapController
     initialZoom: number
+    theme: string
   }) {
     this.#location = location
     this.#controller = controller
 
-    this.map = new Map({
-      container: selector,
-      style: {
-        version: 8,
-        sources: {
-          "carto-light": {
-            type: "raster",
-            tiles: [
-              "https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
-              "https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
-              "https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
-            ],
-            tileSize: 256,
-          },
-        },
-        layers: [
-          {
-            id: "carto-light-layer",
-            type: "raster",
-            source: "carto-light",
-          },
-        ],
-      },
-      zoom: initialZoom,
-      maxZoom: DEFAULT_MAX_ZOOM,
-      center: DEFAULT_LOCATION,
-      attributionControl: {
-        compact: true,
-        customAttribution: "© OpenStreetMap contributors, © CARTO",
-      },
-    })
-    // Ajouter les contrôles de zoom
-    this.#addZoomControl()
+    // Manage sources following theme
+    const sources: Record<string, any> = {}
+    const sourceId = theme === "carto-light" ? "carto-light" : "osm"
 
-    if (
-      this.#location.latitude !== undefined &&
-      this.#location.longitude !== undefined
-    ) {
-      new maplibregl.Marker({
-        element: this.#generateHomeHTMLMarker(),
+    if (theme === "carto-light") {
+      sources["carto-light"] = {
+        type: "raster",
+        tiles: [
+          "https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+          "https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+          "https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+        ],
+        tileSize: 256,
+      }
+    } else {
+      // Use OSM standard tiles with multiple servers as fallback
+      // These tiles contain all OSM data and are very reliable
+      // Multiple servers (a, b, c) allow better availability
+      sources.osm = {
+        type: "raster",
+        tiles: [
+          "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
+          "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
+          "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        ],
+        tileSize: 256,
+      }
+
+      this.map = new Map({
+        container: selector,
+        style: {
+          version: 8,
+          sources,
+          layers: [{ type: "raster", id: `${theme}-layer`, source: sourceId }],
+        },
+        zoom: initialZoom,
+        maxZoom: DEFAULT_MAX_ZOOM,
+        center: DEFAULT_LOCATION,
+        attributionControl: {
+          compact: true,
+          customAttribution: "© OpenStreetMap contributors, © CARTO",
+        },
       })
-        .setLngLat([this.#location.longitude, this.#location.latitude])
-        .setPopup(
-          new maplibregl.Popup().setHTML("<p><strong>Vous êtes ici !</strong></p>"),
-        )
-        .addTo(this.map)
+      // Add zoom controls
+      this.#addZoomControl()
+
+      if (
+        this.#location.latitude !== undefined &&
+        this.#location.longitude !== undefined
+      ) {
+        new maplibregl.Marker({
+          element: this.#generateHomeHTMLMarker(),
+        })
+          .setLngLat([this.#location.longitude, this.#location.latitude])
+          .setPopup(
+            new maplibregl.Popup().setHTML("<p><strong>Vous êtes ici !</strong></p>"),
+          )
+          .addTo(this.map)
+      }
     }
   }
 
@@ -99,6 +114,7 @@ export class SolutionMap {
     actors.forEach(function (actor: HTMLElement) {
       const longitude = actor.dataset?.longitude
       const latitude = actor.dataset?.latitude
+      const draggable = actor.dataset?.draggable === "true"
 
       if (longitude && latitude) {
         let longitudeFloat = parseFloat(longitude.replace(",", "."))
@@ -107,13 +123,32 @@ export class SolutionMap {
 
         const marker: Marker = new maplibregl.Marker({
           element: actor,
+          draggable: draggable,
         }).setLngLat([longitudeFloat, latitudeFloat])
+
+        if (draggable) {
+          this.#setupMarkerDragListener(marker)
+        }
 
         marker.addTo(this.map)
         points.push([latitudeFloat, longitudeFloat])
       }
     }, this)
     this.fitBounds(points, bboxValue)
+  }
+
+  #setupMarkerDragListener(marker: Marker) {
+    marker.on("dragend", () => {
+      const lngLat = marker.getLngLat()
+      this.#controller.dispatch("markerDragged", {
+        detail: {
+          latitude: lngLat.lat.toString(),
+          longitude: lngLat.lng.toString(),
+        },
+        bubbles: true,
+        cancelable: false,
+      })
+    })
   }
 
   fitBounds(points, bboxValue) {
@@ -137,8 +172,8 @@ export class SolutionMap {
       const lngs = points.map((point) => point[1])
       const lats = points.map((point) => point[0])
       const bounds: LngLatBoundsLike = [
-        [Math.min(...lngs), Math.min(...lats)], // Sud-ouest
-        [Math.max(...lngs), Math.max(...lats)], // Nord-est
+        [Math.min(...lngs), Math.min(...lats)], // South-west
+        [Math.max(...lngs), Math.max(...lats)], // North-east
       ]
       this.map.fitBounds(bounds, fitBoundsOptions)
     }
