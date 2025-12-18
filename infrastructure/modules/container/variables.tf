@@ -154,3 +154,6 @@ variable "AIRFLOW_CONN_SCALEWAYLOGS" {
   type      = string
   sensitive = true
 }
+variable "AIRFLOW__CORE__ALLOWED_DESERIALIZATION_CLASSES" {
+  type = string
+}

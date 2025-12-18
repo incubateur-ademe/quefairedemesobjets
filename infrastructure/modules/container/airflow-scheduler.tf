@@ -23,22 +23,23 @@ resource "scaleway_container" "airflow_scheduler" {
   }
 
   environment_variables = {
-    AIRFLOW__API__AUTH_BACKENDS                  = "airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session"
-    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION   = "true"
-    AIRFLOW__CORE__DAGS_FOLDER                   = "/opt/airflow/dags"
-    AIRFLOW__CORE__ENABLE_XCOM_PICKLING          = "true"
-    AIRFLOW__CORE__EXECUTOR                      = "LocalExecutor"
-    AIRFLOW__CORE__FERNET_KEY                    = ""
-    AIRFLOW__CORE__LOAD_EXAMPLES                 = "false"
-    AIRFLOW__LOGGING__ENCRYPT_S3_LOGS            = "false"
-    AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER     = "s3://${var.prefix}-${var.environment}-airflow"
-    AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID         = "scalewaylogs"
-    AIRFLOW__LOGGING__REMOTE_LOGGING             = "true"
-    AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK      = "true"
-    AIRFLOW__SCHEDULER__CATCHUP_BY_DEFAULT       = "false"
-    AIRFLOW__WEBSERVER__EXPOSE_CONFIG            = "true"
-    AIRFLOW__WEBSERVER__WARN_DEPLOYMENT_EXPOSURE = "false"
-    ENVIRONMENT                                  = var.environment
+    AIRFLOW__API__AUTH_BACKENDS                    = "airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session"
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION     = "true"
+    AIRFLOW__CORE__DAGS_FOLDER                     = "/opt/airflow/dags"
+    AIRFLOW__CORE__ENABLE_XCOM_PICKLING            = "true"
+    AIRFLOW__CORE__EXECUTOR                        = "LocalExecutor"
+    AIRFLOW__CORE__FERNET_KEY                      = ""
+    AIRFLOW__CORE__LOAD_EXAMPLES                   = "false"
+    AIRFLOW__CORE__ALLOWED_DESERIALIZATION_CLASSES = var.AIRFLOW__CORE__ALLOWED_DESERIALIZATION_CLASSES
+    AIRFLOW__LOGGING__ENCRYPT_S3_LOGS              = "false"
+    AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER       = "s3://${var.prefix}-${var.environment}-airflow"
+    AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID           = "scalewaylogs"
+    AIRFLOW__LOGGING__REMOTE_LOGGING               = "true"
+    AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK        = "true"
+    AIRFLOW__SCHEDULER__CATCHUP_BY_DEFAULT         = "false"
+    AIRFLOW__WEBSERVER__EXPOSE_CONFIG              = "true"
+    AIRFLOW__WEBSERVER__WARN_DEPLOYMENT_EXPOSURE   = "false"
+    ENVIRONMENT                                    = var.environment
   }
   secret_environment_variables = {
     AIRFLOW__CORE__EXECUTION_API_SERVER_URL = var.AIRFLOW__CORE__EXECUTION_API_SERVER_URL
