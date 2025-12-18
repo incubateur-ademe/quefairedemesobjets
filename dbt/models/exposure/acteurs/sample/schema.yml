@@ -1,8 +1,8 @@
 version: 2
 
 models:
-  - name: exposure_exhaustive_acteur
-    description: "Acteur model"
+  - name: exposure_sample_displayedacteur
+    description: "Echantillon d'acteurs affichés sur la carte"
     columns:
       - name: identifiant_unique
         description: "The primary key for this table"
@@ -113,43 +113,12 @@ models:
       - name: statut
         description: "Le statut de l'acteur"
         data_type: varchar(255)
-      - name: parent_id
-        description: "L'identifiant du parent de l'acteur"
-        data_type: varchar
-      - name: revision_existe
-        description: "Le fait que l'acteur ait une révision"
-        data_type: boolean
       - name: siret_is_closed
         description: "Information si on sait que le SIRET est fermé"
         data_type: boolean
       - name: lieu_prestation
         description: "Le lieu de prestation de l'acteur"
         data_type: varchar(255)
-      - name: est_parent
-        description: "Vrai si l'acteur est un parent"
-        data_type: boolean
-      - name: liste_enfants
-        description: "La liste des enfants de l'acteur"
-        data_type: jsonb
-      - name: nombre_enfants
-        description: "Le nombre d'enfants de l'acteur"
-        data_type: integer
-      - name: est_dans_carte
-        description: "Vrai si l'acteur est dans la carte"
-        data_type: boolean
-        data_tests:
-          - not_null
-      - name: est_dans_opendata
-        description: "Vrai si l'acteur est dans l'opendata"
-        data_type: boolean
-        data_tests:
-          - not_null
-      - name: latitude
-        description: "La latitude de la localisation de l'acteur"
-        data_type: float
-      - name: longitude
-        description: "La longitude de la localisation de l'acteur"
-        data_type: float
       - name: code_commune_insee
         description: "Le code commune de l'acteur"
         data_type: varchar(10)
@@ -159,9 +128,9 @@ models:
     config:
       tags:
         - exposure
-        - exhaustive
+        - sample
         - acteurs
-        - acteur
+        - displayedacteur
       contract:
         enforced: true
       materialized: table
@@ -209,9 +178,9 @@ models:
     tests:
       - dbt_expectations.expect_table_row_count_to_be_between:
           arguments:
-            min_value: 600000
-  - name: exposure_exhaustive_propositionservice
-    description: "Proposition Service model"
+            min_value: 1000
+  - name: exposure_sample_displayedpropositionservice
+    description: "Propositions de service de l'échantillon des acteurs affichées sur la carte"
     columns:
       - name: id
         description: "L'identifiant de la proposition de service"
@@ -232,9 +201,9 @@ models:
     config:
       tags:
         - exposure
-        - exhaustive
+        - sample
         - acteurs
-        - propositionservice
+        - displayedpropositionservice
       materialized: table
       contract:
         enforced: true
@@ -251,7 +220,7 @@ models:
         - type: foreign_key
           columns: [acteur_id]
           ref_columns: [identifiant_unique]
-          ref_table: exposure_exhaustive_acteur
+          ref_table: exposure_sample_displayedacteur
           deferrable: true
           initially_deferred: true
         - type: foreign_key
@@ -267,16 +236,16 @@ models:
             - action_id
       - dbt_expectations.expect_table_row_count_to_be_between:
           arguments:
-            min_value: 600000
-  - name: exposure_exhaustive_propositionservice_sous_categories
-    description: "Proposition Service Sous Categories model"
+            min_value: 1000
+  - name: exposure_sample_displayedpropositionservice_sous_categories
+    description: "Sous-catégories des propositions de service de l'échantillon des acteurs affichées sur la carte"
     columns:
       - name: id
         description: "L'identifiant de la sous-catégorie"
         data_type: bigint
         tests:
           - not_null
-      - name: vuepropositionservice_id
+      - name: displayedpropositionservice_id
         description: "L'identifiant de la proposition de service"
         data_type: varchar
         tests:
@@ -289,24 +258,24 @@ models:
     config:
       tags:
         - exposure
-        - exhaustive
+        - sample
         - acteurs
-        - propositionservice_sous_categories
+        - displayedpropositionservice_sous_categories
       materialized: table
       contract:
         enforced: true
       indexes:
-        - columns: ['vuepropositionservice_id', 'souscategorieobjet_id']
+        - columns: ['displayedpropositionservice_id', 'souscategorieobjet_id']
           unique: true
-        - columns: ['vuepropositionservice_id']
+        - columns: ['displayedpropositionservice_id']
           type: hash
         - columns: ['souscategorieobjet_id']
           type: hash
       constraints:
         - type: foreign_key
-          columns: [vuepropositionservice_id]
+          columns: [displayedpropositionservice_id]
           ref_columns: [id]
-          ref_table: exposure_exhaustive_propositionservice
+          ref_table: exposure_sample_displayedpropositionservice
           deferrable: true
           initially_deferred: true
         - type: foreign_key
@@ -318,20 +287,20 @@ models:
     tests:
       - dbt_utils.unique_combination_of_columns:
           combination_of_columns:
-            - vuepropositionservice_id
+            - displayedpropositionservice_id
             - souscategorieobjet_id
       - dbt_expectations.expect_table_row_count_to_be_between:
           arguments:
-            min_value: 1800000
-  - name: exposure_exhaustive_acteur_acteur_services
-    description: "Acteur Acteur Services model"
+            min_value: 1000
+  - name: exposure_sample_displayedacteur_acteur_services
+    description: "Lien entre les acteurs de l'échantillon et les services"
     columns:
       - name: id
         description: "L'identifiant du lien entre acteur et acteur_services"
         data_type: bigint
         tests:
           - not_null
-      - name: vueacteur_id
+      - name: displayedacteur_id
         description: "L'identifiant de l'acteur"
         data_type: varchar
         tests:
@@ -344,24 +313,24 @@ models:
     config:
       tags:
         - exposure
-        - exhaustive
+        - sample
         - acteurs
-        - acteur_acteur_services
+        - displayedacteur_acteur_services
       materialized: table
       contract:
         enforced: true
       indexes:
-        - columns: ['vueacteur_id', 'acteurservice_id']
+        - columns: ['displayedacteur_id', 'acteurservice_id']
           unique: true
-        - columns: ['vueacteur_id']
+        - columns: ['displayedacteur_id']
           type: hash
         - columns: ['acteurservice_id']
           type: hash
       constraints:
         - type: foreign_key
-          columns: [vueacteur_id]
+          columns: [displayedacteur_id]
           ref_columns: [identifiant_unique]
-          ref_table: exposure_exhaustive_acteur
+          ref_table: exposure_sample_displayedacteur
           deferrable: true
           initially_deferred: true
         - type: foreign_key
@@ -373,14 +342,13 @@ models:
     tests:
       - dbt_utils.unique_combination_of_columns:
           combination_of_columns:
-            - vueacteur_id
+            - displayedacteur_id
             - acteurservice_id
       - dbt_expectations.expect_table_row_count_to_be_between:
           arguments:
-            min_value: 500000
-
-  - name: exposure_exhaustive_acteur_labels
-    description: "Acteur Labels model"
+            min_value: 1000
+  - name: exposure_sample_displayedacteur_labels
+    description: "Lien entre les acteurs de l'échantillon et les labels"
     columns:
       - name: id
         description: "L'identifiant du lien entre acteur et label"
@@ -388,7 +356,7 @@ models:
         tests:
           - unique
           - not_null
-      - name: vueacteur_id
+      - name: displayedacteur_id
         description: "L'identifiant de l'acteur"
         data_type: varchar
         tests:
@@ -401,24 +369,24 @@ models:
     config:
       tags:
         - exposure
-        - exhaustive
+        - sample
         - acteurs
-        - acteur_labels
+        - displayedacteur_labels
       materialized: table
       contract:
         enforced: true
       indexes:
-        - columns: ['vueacteur_id', 'labelqualite_id']
+        - columns: ['displayedacteur_id', 'labelqualite_id']
           unique: true
-        - columns: ['vueacteur_id']
+        - columns: ['displayedacteur_id']
           type: hash
         - columns: ['labelqualite_id']
           type: hash
       constraints:
         - type: foreign_key
-          columns: [vueacteur_id]
+          columns: [displayedacteur_id]
           ref_columns: [identifiant_unique]
-          ref_table: exposure_exhaustive_acteur
+          ref_table: exposure_sample_displayedacteur
           deferrable: true
           initially_deferred: true
         - type: foreign_key
@@ -430,63 +398,13 @@ models:
     tests:
       - dbt_utils.unique_combination_of_columns:
           combination_of_columns:
-            - vueacteur_id
+            - displayedacteur_id
             - labelqualite_id
       - dbt_expectations.expect_table_row_count_to_be_between:
           arguments:
-            min_value: 30000
-  - name: exposure_exhaustive_acteur_sources
-    description: "Lien entre acteur de la exhaustive et sources"
-    columns:
-      - name: id
-        description: "L'identifiant de la source"
-        data_type: bigint
-        tests:
-          - not_null
-      - name: vueacteur_id
-        description: "L'identifiant de l'acteur"
-        data_type: varchar
-        tests:
-          - not_null
-      - name: source_id
-        description: "L'identifiant de la source"
-        data_type: integer
-        tests:
-          - not_null
-    config:
-      tags:
-        - exposure
-        - exhaustive
-        - acteurs
-        - acteur_sources
-      materialized: table
-      contract:
-        enforced: true
-      indexes:
-        - columns: ['vueacteur_id', 'source_id']
-          unique: true
-        - columns: ['vueacteur_id']
-          type: hash
-        - columns: ['source_id']
-          type: hash
-      constraints:
-        - type: foreign_key
-          columns: [vueacteur_id]
-          ref_columns: [identifiant_unique]
-          ref_table: exposure_exhaustive_acteur
-          deferrable: true
-          initially_deferred: true
-        - type: foreign_key
-          columns: [source_id]
-          ref_columns: [id]
-          ref_table: qfdmo_source
-          deferrable: true
-    tests:
-      - dbt_expectations.expect_table_row_count_to_be_between:
-          arguments:
-            min_value: 500000
-  - name: exposure_exhaustive_perimetreadomicile
-    description: "Vue exhaustive sur les périmètres à domicile"
+            min_value: 100
+  - name: exposure_sample_displayedperimetreadomicile
+    description: "Périmètres à domicile de l'échantillon des acteurs affichés sur la carte"
     columns:
       - name: id
         description: "L'identifiant du périmètre à domicile"
@@ -513,9 +431,9 @@ models:
     config:
       tags:
         - exposure
-        - exhaustive
+        - sample
         - acteurs
-        - perimetreadomicile
+        - displayedperimetreadomicile
       materialized: table
       contract:
         enforced: true
@@ -527,4 +445,56 @@ models:
     tests:
       - dbt_expectations.expect_table_row_count_to_be_between:
           arguments:
-            min_value: 50
+            min_value: 2
+  - name: exposure_sample_displayedacteur_sources
+    description: "Sources de l'échantillon des acteurs affichés sur la carte"
+    columns:
+      - name: id
+        description: "L'identifiant de la source"
+        data_type: bigint
+        tests:
+          - not_null
+          - unique
+      - name: displayedacteur_id
+        description: "L'identifiant de l'acteur"
+        data_type: varchar
+        tests:
+          - not_null
+      - name: source_id
+        description: "L'identifiant de la source"
+        data_type: integer
+        tests:
+          - not_null
+    config:
+      tags:
+        - exposure
+        - sample
+        - acteurs
+        - displayedacteur_sources
+      materialized: table
+      contract:
+        enforced: true
+      indexes:
+        - columns: ['displayedacteur_id', 'source_id']
+          unique: true
+        - columns: ['displayedacteur_id']
+          type: hash
+        - columns: ['source_id']
+          type: hash
+      constraints:
+        - type: foreign_key
+          columns: [displayedacteur_id]
+          ref_columns: [identifiant_unique]
+          ref_table: exposure_sample_displayedacteur
+          deferrable: true
+          initially_deferred: true
+        - type: foreign_key
+          columns: [source_id]
+          ref_columns: [id]
+          ref_table: qfdmo_source
+          deferrable: true
+          initially_deferred: true
+    tests:
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          arguments:
+            min_value: 100

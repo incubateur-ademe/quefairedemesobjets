@@ -5,6 +5,7 @@ provider "registry.opentofu.org/scaleway/scaleway" {
   version     = "2.58.0"
   constraints = ">= 2.55.0"
   hashes = [
+    "h1:LIniGw35c0iJcnmSOr9qRTamS3pQ771upC12zeHTTXo=",
     "h1:MILOY64KWM08bjod7Ek8QcoHN0RcFes0dAq9dx6uBGY=",
     "zh:1e6c393e50cdf4eecfd5b17172e992e7efc31892b2acb7b9dc2e34d9bb82bbe3",
     "zh:1fccf2f1a668e11e6ffe774f7bef3c592923d1aef92daeb6ef719f8e0cf55185",
