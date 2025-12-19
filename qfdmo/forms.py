@@ -431,6 +431,7 @@ class NextAutocompleteInput(forms.TextInput):
 class FiltresForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
     carte_config_initial_mapping = {
         "label_qualite": "label_qualite",
+        "bonus": "bonus_reparation",
     }
     synonyme = forms.ModelChoiceField(
         queryset=Synonyme.objects.all(),
