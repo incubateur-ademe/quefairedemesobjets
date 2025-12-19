@@ -1,4 +1,5 @@
 import base64
+import json
 import uuid
 from typing import cast
 
@@ -54,6 +55,27 @@ class MapForm(GetFormMixin, CarteConfigFormMixin, forms.Form):
     ⚠️⚠️⚠️ If this form must evolve, especially the attributes set on the fields,
     the changes must be backported to qfdmo.forms.FormulaireForm.
     """
+
+    carte_config_initial_mapping = {
+        "bounding_box": "bounding_box",
+    }
+
+    def _override_field_initial_from_carte_config(self) -> None:
+        """Override parent to handle bounding_box conversion from
+        PolygonField to JSON string."""
+        super()._override_field_initial_from_carte_config()
+
+        # Handle bounding_box conversion from PolygonField to JSON string
+        if self.carte_config and self.carte_config.bounding_box:
+            polygon = self.carte_config.bounding_box
+            # Extract coordinates: polygon.extent gives (xmin, ymin, xmax, ymax)
+            # which is (west, south, east, north)
+            extent = polygon.extent
+            bounding_box_json = {
+                "southWest": {"lat": extent[1], "lng": extent[0]},
+                "northEast": {"lat": extent[3], "lng": extent[2]},
+            }
+            self.fields["bounding_box"].initial = json.dumps(bounding_box_json)
 
     adresse = forms.CharField(
         widget=AutoCompleteInput(
