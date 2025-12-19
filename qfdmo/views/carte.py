@@ -1,7 +1,7 @@
 import hashlib
 import json
 import logging
-from typing import Any, TypedDict, override
+from typing import Any, NotRequired, TypedDict, override
 
 from django.conf import settings
 from django.contrib.gis.geos import Point
@@ -16,16 +16,16 @@ from qfdmd.models import Produit
 from qfdmo.forms import (
     ActionDirectionForm,
     AutoSubmitLegendeForm,
-    CarteForm,
     FiltresForm,
     FiltresFormWithoutSynonyme,
     LegacySupportForm,
     LegendeForm,
+    MapForm,
     ViewModeForm,
 )
 from qfdmo.models import CarteConfig
 from qfdmo.models.action import Action
-from qfdmo.views.adresses import SearchActeursView
+from qfdmo.views.adresses import AbstractSearchActeursView
 
 logger = logging.getLogger(__name__)
 
@@ -33,26 +33,35 @@ logger = logging.getLogger(__name__)
 class ViewModeFormEntry(TypedDict):
     form: type[ViewModeForm]
     prefix: str
+    other_prefixes_to_check: NotRequired[list[str]]
+
+
+class MapFormEntry(TypedDict):
+    form: type[MapForm]
+    prefix: str
+    other_prefixes_to_check: NotRequired[list[str]]
 
 
 class FiltresFormEntry(TypedDict):
     form: type[FiltresForm]
     prefix: str
+    other_prefixes_to_check: NotRequired[list[str]]
 
 
 class LegendeFormEntry(TypedDict):
     form: type[LegendeForm]
     prefix: str
-    other_prefixes_to_check: list[str]
+    other_prefixes_to_check: NotRequired[list[str]]
 
 
 class AutoSubmitLegendeFormEntry(TypedDict):
     form: type[AutoSubmitLegendeForm]
     prefix: str
-    other_prefixes_to_check: list[str]
+    other_prefixes_to_check: NotRequired[list[str]]
 
 
 class CarteForms(TypedDict):
+    map: MapFormEntry
     view_mode: ViewModeFormEntry
     filtres: FiltresFormEntry
     legende: AutoSubmitLegendeFormEntry
@@ -66,15 +75,29 @@ class CarteFormsInstance(TypedDict):
     legende_filtres: None | LegendeForm
 
 
-class CarteSearchActeursView(SearchActeursView):
+class CarteSearchActeursView(AbstractSearchActeursView):
     is_carte = True
     template_name = "ui/pages/carte.html"
-    form_class = CarteForm
+    # TODO: voir si on peut mettre à None ici
+    form_class = MapForm
     filtres_form_class = FiltresForm
+
+    @override
+    def _should_show_results(self):
+        return (
+            self._get_field_value_for("map", "adresse")
+            or self._get_bounding_box()
+            or self._get_latitude()
+            or self._get_epci_codes()
+        )
 
     @property
     def forms(self) -> CarteForms:
         return {
+            "map": {
+                "form": MapForm,
+                "prefix": "map",
+            },
             "view_mode": {
                 "form": ViewModeForm,
                 "prefix": "view_mode",
@@ -136,9 +159,7 @@ class CarteSearchActeursView(SearchActeursView):
         if not legacy_form:
             return set()
 
-        ids_from_request = legacy_form.decode_querystring().getlist(
-            CarteConfig.SOUS_CATEGORIE_QUERY_PARAM
-        )
+        ids_from_request = legacy_form.decode_querystring().getlist("sc_id")
 
         if ids_from_request:
             return {int(id_) for id_ in ids_from_request if id_}
@@ -163,11 +184,23 @@ class CarteSearchActeursView(SearchActeursView):
 
     def _get_bounded_form_with_fallback(self, form_config, data, legacy_form):
         primary_prefix = self._generate_prefix(form_config["prefix"])
+        base_prefix = form_config["prefix"]
+
         form = self._create_form_instance(
             form_config["form"], data, primary_prefix, legacy_form
         )
         if form.is_valid():
             return form
+
+        # If the primary prefix includes map_container_id and the form is invalid,
+        # try the base prefix without map_container_id as a fallback
+        # TODO: understand why this is necessary.
+        if primary_prefix != base_prefix:
+            base_form = self._create_form_instance(
+                form_config["form"], data, base_prefix, legacy_form
+            )
+            if base_form.is_valid():
+                return base_form
 
         for fallback_prefix in form_config.get("other_prefixes_to_check", []):
             generated_prefix = self._generate_prefix(fallback_prefix)
@@ -234,7 +267,7 @@ class CarteSearchActeursView(SearchActeursView):
 
     def _check_if_label_qualite_is_set(self, label):
         try:
-            return label in self._get_ui_form("filtres")["label_qualite"].value()
+            return label in self._get_field_value_for("filtres", "label_qualite")
         except (TypeError, KeyError):
             return False
 
@@ -242,6 +275,20 @@ class CarteSearchActeursView(SearchActeursView):
         if self.carte_config:
             return self.carte_config.slug
         return DEFAULT_MAP_CONTAINER_ID
+
+    def _get_bounding_box(self) -> str | None:
+        """Get bounding_box from the bounded map form.
+
+        Override parent to use the bounded map form when available,
+        falling back to parent behavior if form is not available or invalid.
+        """
+        return self._get_field_value_for("map", "bounding_box")
+
+    def _get_latitude(self):
+        return self._get_field_value_for("map", "latitude")
+
+    def _get_longitude(self):
+        return self._get_field_value_for("map", "longitude")
 
     def _get_carte_config(self):
         return None
@@ -315,15 +362,26 @@ class CarteSearchActeursView(SearchActeursView):
         # Instead, we annotate here after the queryset has been limited.
         location = getattr(self, "location", None)
         if not getattr(acteurs, "_has_distance_field", False) and location:
-            location_data = json.loads(location)
-            reference_point = Point(
-                location_data["longitude"], location_data["latitude"], srid=4326
-            )
-            # Convert to list and sort in Python since queryset is already sliced
-            acteurs_list = list(acteurs)
-            for acteur in acteurs_list:
-                acteur.distance = acteur.location.distance(reference_point)
-            acteurs = sorted(acteurs_list, key=lambda a: a.distance)
+            # Sort by distance in Python (queryset already sliced, can't use SQL)
+            try:
+                location_data = json.loads(location)
+                longitude = float(location_data.get("longitude"))
+                latitude = float(location_data.get("latitude"))
+
+                reference_point = Point(longitude, latitude, srid=4326)
+                acteurs_list = list(acteurs)
+                for acteur in acteurs_list:
+                    acteur.distance = acteur.location.distance(reference_point)
+                acteurs = sorted(acteurs_list, key=lambda a: a.distance)
+            except (ValueError, TypeError, KeyError) as e:
+                # Invalid/missing coordinates, skip distance sorting
+                logger.warning(
+                    "Invalid coordinates for distance calculation: "
+                    "longitude=%s, latitude=%s, error=%s",
+                    location_data.get("longitude") if location_data else None,
+                    location_data.get("latitude") if location_data else None,
+                    str(e),
+                )
         elif getattr(acteurs, "_has_distance_field", False):
             # Only reorder via SQL if queryset hasn't been sliced yet
             try:
@@ -340,10 +398,8 @@ class CarteSearchActeursView(SearchActeursView):
 
     def get_context_data(self, **kwargs):
         self.ui_forms = self._get_forms()
-        self.paginate = (
-            self.ui_forms["view_mode"]["view"].value()
-            == ViewModeForm.ViewModeSegmentedControlChoices.LISTE
-        )
+        view_mode = self._get_field_value_for("view_mode", "view")
+        self.paginate = view_mode == ViewModeForm.ViewModeSegmentedControlChoices.LISTE
         # QuerySet is built in SearchActeursView.get_context_data method,
         # it needs to be kept after the forms are initialised above.
         context = super().get_context_data(**kwargs)

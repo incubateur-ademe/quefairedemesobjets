@@ -90,7 +90,7 @@ export class SolutionMap {
       this.#location.longitude !== undefined
     ) {
       new maplibregl.Marker({
-        element: this.#generateHomeHTMLMarker(),
+        element: this.#initialiseHomeMarker(),
       })
         .setLngLat([this.#location.longitude, this.#location.latitude])
         .setPopup(
@@ -100,11 +100,14 @@ export class SolutionMap {
     }
   }
 
-  #generateHomeHTMLMarker() {
+  #initialiseHomeMarker() {
     const homePinPoint = document.getElementById("pinpoint-home")
     if (!homePinPoint) {
       return null
     }
+
+    // The home pin point is hidden by default
+    // so that it does not display randomly behind the preview screen.
     homePinPoint.classList.remove("qf-invisible")
     return homePinPoint
   }
