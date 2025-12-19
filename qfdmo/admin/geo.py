@@ -4,5 +4,5 @@ from qfdmo.models import EPCI
 
 
 @admin.register(EPCI)
-class CarteConfigAdmin(admin.ModelAdmin):
+class EPCIAdmin(admin.ModelAdmin):
     search_fields = ["code", "nom"]

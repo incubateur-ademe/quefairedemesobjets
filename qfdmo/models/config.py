@@ -1,3 +1,4 @@
+from django.contrib.gis.db import models as gis_models
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.http import QueryDict
@@ -173,6 +174,15 @@ class CarteConfig(index.Indexed, models.Model):
     )
 
     epci = models.ManyToManyField("qfdmo.EPCI", verbose_name="EPCI", blank=True)
+
+    bounding_box = gis_models.PolygonField(
+        verbose_name="Zone géographique (bounding box)",
+        help_text="Définir une zone géographique pour limiter l'affichage de la carte "
+        "à une région spécifique",
+        blank=True,
+        null=True,
+        srid=4326,
+    )
 
     def get_absolute_url(self, override_sous_categories=None, initial_query_string=""):
         """This view can be used with categories set from the parent page.

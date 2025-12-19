@@ -9,9 +9,7 @@ installation.md
 useful_command.md
 dependencies.md
 fixture_generation.md
-<<<<<<< HEAD
 create_webapp_sample_db.md
-=======
 tests_e2e.md
->>>>>>> 67bf381f (Add documentation)
+tests_e2e.md
 ```
