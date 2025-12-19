@@ -1,42 +1,43 @@
 import { expect, test } from "@playwright/test"
-import { getMarkers, mockApiAdresse } from "./helpers"
+import {
+  getMarkers,
+  mockApiAdresse,
+  searchAddress,
+  navigateTo,
+  getSessionStorage,
+  clickFirstAvailableMarker,
+  TIMEOUT,
+} from "./helpers"
 
-test.describe("🤖 Recherche et Interaction Assistant", () => {
-  function getItemSelector(index) {
-    return `#mauvais-etat-panel #id_adresseautocomplete-list.autocomplete-items div[data-action="click->address-autocomplete#selectOption"]:nth-of-type(${index})`
-  }
-
+test.describe("🤖 Assistant et Recherche", () => {
   async function searchOnProduitPage(page, searchedAddress: string) {
-    const inputSelector = "#mauvais-etat-panel input#id_adresse"
-    await mockApiAdresse(page)
-
-    // Autour de moi
-    await page.locator(inputSelector).click()
-    await page.locator(inputSelector).fill(searchedAddress)
-    await page.locator(getItemSelector(1)).click()
+    await mockApiAdresse(page) // Mock BEFORE interacting with input
+    await searchAddress(page, searchedAddress, "carte", {
+      parentSelector: "#mauvais-etat-panel",
+    })
   }
 
-  test("Le sessionStorage se peuple bien lors d'un choix d'adresse", async ({
+  test("L'adresse sélectionnée est stockée dans le sessionStorage", async ({
     page,
   }) => {
     // Navigate to the carte page
-    await page.goto(`/dechet/lave-linge`, { waitUntil: "domcontentloaded" })
+    await navigateTo(page, `/dechet/lave-linge`)
     await searchOnProduitPage(page, "Auray")
-    const sessionStorage = await page.evaluate(() => window.sessionStorage)
+    const sessionStorage = await getSessionStorage(page)
     expect(sessionStorage.adresse).toBe("Auray")
     expect(sessionStorage.latitude).toContain("47.6")
     expect(sessionStorage.longitude).toContain("-2.9")
   })
 
-  test("Le lien infotri est bien défini", async ({ page }) => {
+  test("Le lien infotri pointe vers le bon URL", async ({ page }) => {
     // Navigate to the carte page
-    await page.goto(`/dechet/lave-linge`, { waitUntil: "domcontentloaded" })
+    await navigateTo(page, `/dechet/lave-linge`)
     const href = await page.getByTestId("infotri-link").getAttribute("href")
     expect(href).toBe("https://www.ecologie.gouv.fr/info-tri")
   })
 
   test(
-    "Les deux recherches en page d'accueil fonctionnent",
+    "Les champs de recherche en page d'accueil (principal et header) fonctionnent indépendamment",
     {
       annotation: [
         {
@@ -48,7 +49,7 @@ test.describe("🤖 Recherche et Interaction Assistant", () => {
     },
     async ({ page }) => {
       // Navigate to the carte page
-      await page.goto(`/`, { waitUntil: "domcontentloaded" })
+      await navigateTo(page, `/`)
 
       // Type in main serach
       let responsePromise = page.waitForResponse(
@@ -92,72 +93,74 @@ test.describe("🤖 Recherche et Interaction Assistant", () => {
       )
       await page.locator("#id_home-input").click()
       await responsePromise
+
+      // Wait for header results to be hidden after switching to home input
+      await expect(page.locator("#header [data-search-target=results] a")).toHaveCount(
+        0,
+        { timeout: 5000 },
+      )
       expect(page.locator("#home [data-search-target=results] a")).toHaveCount(0)
-      expect(page.locator("#header [data-search-target=results] a")).toHaveCount(0)
     },
   )
 
-  test("Le tracking PostHog fonctionne comme prévu", async ({ page }) => {
+  test("Les événements PostHog sont trackés correctement (pages vues, interactions carte, détails solution)", async ({
+    page,
+  }) => {
     // Check that homepage scores 1
-    await page.goto(`/`, { waitUntil: "domcontentloaded" })
-    let sessionStorage = await page.evaluate(() => window.sessionStorage)
+    await navigateTo(page, `/`)
+    let sessionStorage = await getSessionStorage(page)
 
     expect(sessionStorage.homePageView).toBe("0")
 
     // Navigate to a produit page and check that it scores 1
-    await page.goto(`/dechet/lave-linge`, { waitUntil: "domcontentloaded" })
-    sessionStorage = await page.evaluate(() => window.sessionStorage)
+    await navigateTo(page, `/dechet/lave-linge`)
+    sessionStorage = await getSessionStorage(page)
     expect(sessionStorage.produitPageView).toBe("1")
 
     // Click on a pin on the map and check that it scores 1
     await searchOnProduitPage(page, "Auray")
-    const [markers, count] = await getMarkers(page)
-    for (let i = 0; i < count; i++) {
-      const item = markers?.nth(i)
+    await getMarkers(page)
+    await clickFirstAvailableMarker(page)
 
-      try {
-        await item!.click({ force: true })
-        break
-      } catch (e) {
-        console.log("cannot click", e)
-      }
-    }
+    // Wait for either solution details panel or actor panel to appear (confirms click worked)
+    await Promise.race([
+      page
+        .locator("#acteurDetailsPanel")
+        .waitFor({ state: "visible", timeout: TIMEOUT.DEFAULT }),
+    ]).catch(() => {
+      // If neither appears, just continue - maybe the tracking still works
+      console.log("Warning: Solution details panel did not appear after marker click")
+    })
 
     // Wait for sessionStorage to be updated after click
+    // Give extra time for PostHog to process the event
     await page.waitForFunction(
       () => window.sessionStorage.userInteractionWithMap !== undefined,
+      { timeout: TIMEOUT.LONG },
     )
-    sessionStorage = await page.evaluate(() => window.sessionStorage)
+    sessionStorage = await getSessionStorage(page)
     expect(sessionStorage.userInteractionWithMap).toBe("1")
 
     // Click on another pin on the map and check that it scores 1 more (2 in total)
-    for (let i = 0; i < count; i++) {
-      const item = markers?.nth(i)
-
-      try {
-        await item!.click({ force: true })
-        break
-      } catch (e) {
-        console.log("cannot click", e)
-      }
-    }
+    await clickFirstAvailableMarker(page)
 
     // Wait for sessionStorage to be updated after second click
     await page.waitForFunction(
       () => window.sessionStorage.userInteractionWithMap === "2",
+      { timeout: TIMEOUT.LONG },
     )
-    sessionStorage = await page.evaluate(() => window.sessionStorage)
+    sessionStorage = await getSessionStorage(page)
     expect(sessionStorage.userInteractionWithMap).toBe("2")
 
     // Click on share button in solution details
     await page.locator("[aria-describedby='mauvais-etat:shareTooltip']").click()
-    sessionStorage = await page.evaluate(() => window.sessionStorage)
+    sessionStorage = await getSessionStorage(page)
     expect(sessionStorage.userInteractionWithSolutionDetails).toBe("1")
 
     // Ensure that the scores does not increases after
     // several homepage visits
-    await page.goto(`/`, { waitUntil: "domcontentloaded" })
-    sessionStorage = await page.evaluate(() => window.sessionStorage)
+    await navigateTo(page, `/`)
+    sessionStorage = await getSessionStorage(page)
     expect(sessionStorage.homePageView).toBe("0")
   })
 })

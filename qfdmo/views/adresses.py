@@ -1,7 +1,6 @@
 import json
 import logging
 from abc import ABC, abstractmethod
-from typing import cast
 
 import unidecode
 from django.conf import settings
@@ -10,7 +9,7 @@ from django.contrib.postgres.search import TrigramWordDistance
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
-from django.db.models import Prefetch, Q
+from django.db.models import Q
 from django.db.models.functions import Length, Lower
 from django.db.models.query import QuerySet
 from django.http import Http404, JsonResponse
@@ -21,7 +20,9 @@ from wagtail.query import Any
 
 from qfdmd.models import Synonyme
 from qfdmo.geo_api import retrieve_epci_geojson_from_api_or_cache
-from qfdmo.map_utils import center_from_frontend_bbox, sanitize_frontend_bbox
+from qfdmo.map_utils import (
+    sanitize_frontend_bbox,
+)
 from qfdmo.models import Acteur, ActeurStatus, DisplayedActeur, RevisionActeur
 from qfdmo.models.action import get_reparer_action_id
 from qfdmo.models.geo import EPCI
@@ -57,11 +58,15 @@ class TurboFormMixin:
         return context
 
 
-class SearchActeursView(
+class AbstractSearchActeursView(
     ABC,
     TurboFormMixin,
     FormView,
 ):
+    @abstractmethod
+    def _should_show_results(self):
+        pass
+
     @abstractmethod
     def _get_direction(self):
         pass
@@ -102,80 +107,25 @@ class SearchActeursView(
         """The distance after which we stop displaying acteurs on the first request"""
         return settings.DISTANCE_MAX
 
+    @abstractmethod
+    def _get_bounding_box(self) -> str:
+        pass
+
+    @abstractmethod
+    def _get_latitude(self):
+        pass
+
+    @abstractmethod
+    def _get_longitude(self):
+        pass
+
     # TODO : supprimer
     is_iframe = False
     is_carte = False
     is_embedded = True
     paginate = False
 
-    def get_initial(self):
-        initial = super().get_initial()
-        # TODO: refacto forms : delete this line
-        initial["adresse"] = self.request.GET.get("adresse")
-        # TODO: refacto forms : delete this line
-        initial["latitude"] = self.request.GET.get("latitude")
-        # TODO: refacto forms : delete this line
-        initial["longitude"] = self.request.GET.get("longitude")
-
-        # TODO: refacto forms : delete this line
-        initial["bounding_box"] = self.request.GET.get("bounding_box")
-        return initial
-
-    def get_form(self, form_class=None):
-        if self.request.GET & self.get_form_class().base_fields.keys():
-            # TODO: refacto forms we should use a bounded form in this case
-            # Here we check that the request shares some parameters
-            # with the fields in the form. If this happens, this might
-            # means that we are badly using request instead of a bounded
-            # form and that we need to access a validated form.
-            #
-            # This case happens when the form is loaded inside a turbo-frame.
-            # form = self.get_form_class()(self.request.GET)
-            form = super().get_form(form_class)
-        else:
-            form = super().get_form(form_class)
-
-        return form
-
-    def get_data_from_request_or_bounded_form(self, key: str, default=None):
-        """Temporary dummy method
-
-        There is a flaw in the way the form is instantiated, because the
-        form is never bounded to its data.
-        The request is directly used to perform various tasks, like
-        populating some multiple choice field choices, hence missing all
-        the validation provided by django forms.
-
-        To prepare a future refactor of this form, the method here calls
-        the cleaned_data when the form is bounded and the request.GET
-        QueryDict when it is not bounded.
-        Note : we call getlist and not get because in some cases, the request
-        parameters needs to be treated as a list.
-
-        The form is currently used for various use cases:
-            - The map form
-            - The "iframe form" form (for https://epargnonsnosressources.gouv.fr)
-            - The turbo-frames
-        The form should be bounded at least when used in turbo-frames.
-
-        The name is explicitely very verbose because it is not meant to stay
-        a long time as is.
-
-        TODO: refacto forms : get rid of this method and use cleaned_data when
-        form is valid and request.GET for non-field request parameters"""
-        try:
-            return self.cleaned_data.get(key, default)
-        except AttributeError:
-            pass
-
-        try:
-            return self.request.GET.get(key, default)
-        except AttributeError:
-            return self.request.GET.getlist(key, default)
-
     def get_context_data(self, **kwargs):
-        form = self.get_form_class()(self.request.GET)
-
         kwargs.update(
             carte=self.is_carte,
             is_carte=self.is_carte,
@@ -184,12 +134,6 @@ class SearchActeursView(
         # Only add is_formulaire flag for non-carte views (formulaire mode)
         if not self.is_carte:
             kwargs.update(is_formulaire=True)
-
-        if form.is_valid():
-            self.cleaned_data = form.cleaned_data
-        else:
-            # TODO : refacto forms : handle this case properly
-            self.cleaned_data = form.cleaned_data
 
         # Manage the selection of sous_categorie_objet and actions
         acteurs = self._build_acteurs_queryset_from_sous_categorie_objet_and_actions()
@@ -212,15 +156,10 @@ class SearchActeursView(
             kwargs.update(acteurs=acteurs)
 
         context = super().get_context_data(**kwargs)
-
-        context.update(location=getattr(self, "location", ""))
-
-        # TODO : refacto forms, gérer ça autrement
-        try:
-            if bbox is None:
-                context["form"].initial["bounding_box"] = None
-        except NameError:
-            pass
+        context.update(
+            location=getattr(self, "location", ""),
+            should_show_results=self._should_show_results(),
+        )
 
         return context
 
@@ -256,7 +195,7 @@ class SearchActeursView(
             "proposition_services__action__groupe_action",
             "labels",
             "action_principale",
-        )
+        ).with_displayable_labels()
         if getattr(acteurs, "_needs_reparer_bonus", False):
             acteurs = acteurs.with_bonus().with_reparer()
 
@@ -265,16 +204,11 @@ class SearchActeursView(
         return bbox, acteurs
 
     def _bbox_and_acteurs_from_location_or_epci(self, acteurs):
-        custom_bbox = cast(
-            str, self.get_data_from_request_or_bounded_form("bounding_box")
-        )
-        center = center_from_frontend_bbox(custom_bbox)
-        latitude = center[1] or self.get_data_from_request_or_bounded_form("latitude")
-        longitude = center[0] or self.get_data_from_request_or_bounded_form("longitude")
-
-        # Store for later assignation in get_context_data
-        if latitude and longitude:
-            self.location = json.dumps({"latitude": latitude, "longitude": longitude})
+        custom_bbox = self._get_bounding_box()
+        # center = center_from_frontend_bbox(custom_bbox) if custom_bbox else ["", ""]
+        latitude = self._get_latitude()
+        longitude = self._get_longitude()
+        self.location = json.dumps({"latitude": latitude, "longitude": longitude})
 
         # A BBOX was set in the Configurateur OR the user interacted with
         # the map, that set a bounding box in its browser.
@@ -470,27 +404,17 @@ def acteur_detail(request, uuid):
     direction = request.GET.get("direction")
 
     try:
-        # Import here to avoid circular imports
-        from qfdmo.models.acteur import LabelQualite
-
-        # Prefetch labels ordered by bonus (desc) and type_enseigne
-        # This allows the template tag to simply take the first label
-        ordered_labels = Prefetch(
-            "labels",
-            queryset=LabelQualite.objects.filter(afficher=True).order_by(
-                "-bonus", "type_enseigne"
-            ),
-            to_attr="displayable_labels_ordered",
+        displayed_acteur = (
+            DisplayedActeur.objects.prefetch_related(
+                "proposition_services__sous_categories",
+                "proposition_services__sous_categories__categorie",
+                "proposition_services__action__groupe_action",
+                "labels",
+                "sources",
+            )
+            .with_displayable_labels()
+            .get(uuid=uuid)
         )
-
-        displayed_acteur = DisplayedActeur.objects.prefetch_related(
-            "proposition_services__sous_categories",
-            "proposition_services__sous_categories__categorie",
-            "proposition_services__action__groupe_action",
-            ordered_labels,
-            "labels",  # Keep original for other uses
-            "sources",
-        ).get(uuid=uuid)
     except DisplayedActeur.DoesNotExist:
         # FIXME: it is impossible to get check if the revisionacteur has a parent
         # because the revision_acteur doesn't have any UUID
