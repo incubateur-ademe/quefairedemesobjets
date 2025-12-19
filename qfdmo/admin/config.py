@@ -57,6 +57,7 @@ class CarteConfigAdmin(gis_admin.GISModelAdmin):
                     "acteur_type",
                     "source",
                     "label_qualite",
+                    "bonus_reparation",
                     "epci",
                     "bounding_box",
                 ),
