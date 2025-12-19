@@ -175,6 +175,13 @@ class CarteConfig(index.Indexed, models.Model):
 
     epci = models.ManyToManyField("qfdmo.EPCI", verbose_name="EPCI", blank=True)
 
+    bonus_reparation = models.BooleanField(
+        verbose_name="Bonus réparation uniquement",
+        default=False,
+        help_text="Cocher cette case pour afficher uniquement les acteurs proposant "
+        "le bonus réparation",
+    )
+
     bounding_box = gis_models.PolygonField(
         verbose_name="Zone géographique (bounding box)",
         help_text="Définir une zone géographique pour limiter l'affichage de la carte "
