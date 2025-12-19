@@ -89,12 +89,15 @@ class CarteConfigForm(forms.Form):
     Form for carte config
     """
 
+    def get_first_carte_config():
+        return CarteConfig.objects.first()
+
     carte_config = forms.ModelChoiceField(
         label="Carte config",
         help_text="Carte config",
         required=False,
         queryset=CarteConfig.objects.all(),
-        initial=CarteConfig.objects.first(),
+        initial=get_first_carte_config,
     )
 
 
