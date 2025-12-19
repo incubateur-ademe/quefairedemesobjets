@@ -16,7 +16,7 @@ from dsfr.widgets import SegmentedControl
 
 from qfdmd.models import Synonyme
 from qfdmo.fields import GroupeActionChoiceField, LabelQualiteChoiceField
-from qfdmo.geo_api import epcis_from, formatted_epcis_as_list_of_tuple
+from qfdmo.geo_api import formatted_epcis_as_list_of_tuple
 from qfdmo.mixins import AutoSubmitMixin, CarteConfigFormMixin, GetFormMixin
 from qfdmo.models import SousCategorieObjet
 from qfdmo.models.acteur import LabelQualite
@@ -36,11 +36,39 @@ from qfdmo.widgets import (
 )
 
 
-class AddressesForm(forms.Form):
-    def load_choices(self, request: HttpRequest, **kwargs) -> None:
-        if address_placeholder := request.GET.get("address_placeholder"):
-            self.fields["adresse"].widget.attrs["placeholder"] = address_placeholder
+class MapForm(GetFormMixin, CarteConfigFormMixin, forms.Form):
+    """
+    Form that manages geographic search parameters for the map interface.
 
+    This form contains both visible and hidden fields used to filter and display
+    Acteur results on the map:
+
+    - `adresse`: Visible autocomplete input field where users type an address
+    - `bounding_box`, `latitude`, `longitude`: Hidden fields automatically populated
+      by the MapLibre controller based on map interactions (panning, zooming,
+      address selection)
+
+    The hidden fields are not directly controlled by the user but are managed by
+    the address-autocomplete and maplibre Stimulus controllers in the frontend.
+
+    ⚠️⚠️⚠️ If this form must evolve, especially the attributes set on the fields,
+    the changes must be backported to qfdmo.forms.FormulaireForm.
+    """
+
+    adresse = forms.CharField(
+        widget=AutoCompleteInput(
+            attrs={
+                "class": "fr-input",
+                "placeholder": "Rechercher autour d'une adresse",
+                "autocomplete": "off",
+                "aria-label": "Saisir une adresse - obligatoire",
+                "data-testid": "carte-adresse-input",
+            },
+            data_controller="address-autocomplete",
+        ),
+        label="",
+        required=False,
+    )
     bounding_box = forms.CharField(
         widget=forms.HiddenInput(
             attrs={
@@ -50,7 +78,6 @@ class AddressesForm(forms.Form):
         ),
         required=False,
     )
-
     latitude = forms.FloatField(
         widget=forms.HiddenInput(
             attrs={
@@ -71,8 +98,51 @@ class AddressesForm(forms.Form):
         required=False,
     )
 
+    def _apply_legacy_querystring_overrides(self, legacy_form):
+        if not legacy_form:
+            return
 
-class FormulaireForm(AddressesForm):
+        request_data = legacy_form.decode_querystring()
+
+        # Handle action_displayed: filter the queryset
+        if bounding_box := request_data.get("bounding_box"):
+            self.fields["bounding_box"].initial = bounding_box
+
+
+class FormulaireForm(forms.Form):
+    def load_choices(self, request: HttpRequest, **kwargs) -> None:
+        if address_placeholder := request.GET.get("address_placeholder"):
+            self.fields["adresse"].widget.attrs["placeholder"] = address_placeholder
+
+    bounding_box = forms.CharField(
+        widget=forms.HiddenInput(
+            attrs={
+                "data-search-solution-form-target": "bbox",
+                "data-map-target": "bbox",
+            }
+        ),
+        required=False,
+    )
+    latitude = forms.FloatField(
+        widget=forms.HiddenInput(
+            attrs={
+                "data-address-autocomplete-target": "latitude",
+                "data-search-solution-form-target": "latitudeInput",
+            }
+        ),
+        required=False,
+    )
+
+    longitude = forms.FloatField(
+        widget=forms.HiddenInput(
+            attrs={
+                "data-address-autocomplete-target": "longitude",
+                "data-search-solution-form-target": "longitudeInput",
+            }
+        ),
+        required=False,
+    )
+
     sous_categorie_objet = forms.ModelChoiceField(
         queryset=SousCategorieObjet.objects.all(),
         to_field_name="libelle",
@@ -162,6 +232,7 @@ class FormulaireForm(AddressesForm):
                 "class": "fr-input sm:qf-w-[596px]",
                 "autocomplete": "off",
                 "aria-label": "Autour de l'adresse suivante - obligatoire",
+                "data-testid": "formulaire-adresse-input",
             },
             data_controller="address-autocomplete",
         ),
@@ -262,7 +333,8 @@ class LegacySupportForm(GetFormMixin, forms.Form):
         "label_reparacteur",
         "pas_exclusivite_reparation",
         "epci_codes",
-        CarteConfig.SOUS_CATEGORIE_QUERY_PARAM,
+        "bounding_box",
+        "sc_id",
     ]
 
     def __init__(self, *args, **kwargs):
@@ -455,26 +527,6 @@ class ActionDirectionForm(GetFormMixin, DsfrBaseForm):
         # TODO: handle label in UI without displaying it
         label="",
         # label="Direction des actions",
-        required=False,
-    )
-
-
-def get_epcis_for_carte_form():
-    return [(code, code) for code in cast(list[str], epcis_from(["code"]))]
-
-
-class CarteForm(AddressesForm):
-    adresse = forms.CharField(
-        widget=AutoCompleteInput(
-            attrs={
-                "class": "fr-input",
-                "placeholder": "Rechercher autour d'une adresse",
-                "autocomplete": "off",
-                "aria-label": "Saisir une adresse - obligatoire",
-            },
-            data_controller="address-autocomplete",
-        ),
-        label="",
         required=False,
     )
 
