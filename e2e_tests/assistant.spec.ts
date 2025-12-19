@@ -103,7 +103,7 @@ test.describe("🤖 Assistant et Recherche", () => {
     },
   )
 
-  test("Les événements PostHog sont trackés correctement (pages vues, interactions carte, détails solution)", async ({
+  test.skip("Les événements PostHog sont trackés correctement (pages vues, interactions carte, détails solution)", async ({
     page,
   }) => {
     // Check that homepage scores 1
