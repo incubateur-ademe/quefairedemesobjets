@@ -5,8 +5,10 @@ from pathlib import Path
 from django import forms
 from django.conf import settings
 from django.contrib.gis.geos import Point
+from django.core.paginator import Paginator
 from django.template import Context, Template
 from django.template.loader import render_to_string
+from django.test import RequestFactory
 from django_lookbook.preview import LookbookPreview
 from django_lookbook.utils import register_form_class
 from dsfr.forms import DsfrBaseForm
@@ -92,6 +94,7 @@ class CarteConfigForm(forms.Form):
         help_text="Carte config",
         required=False,
         queryset=CarteConfig.objects.all(),
+        initial=CarteConfig.objects.first(),
     )
 
 
@@ -140,9 +143,6 @@ class CartePreview(LookbookPreview):
 
     @component_docs("ui/components/carte/mode_liste.md")
     def mode_liste(self, **kwargs):
-        from django.core.paginator import Paginator
-        from django.test import RequestFactory
-
         acteurs = DisplayedActeur.objects.all()[:10]
         paginator = Paginator(acteurs, 5)
         page = paginator.get_page(1)
@@ -564,6 +564,18 @@ class PagesPreview(LookbookPreview):
         context = {"object": Synonyme.objects.first()}
         return render_to_string("ui/pages/produit.html", context)
 
+    def acteur(self, **kwargs):
+        acteur = DisplayedActeur.objects.first()
+        factory = RequestFactory()
+        request = factory.get("/")
+        context = {
+            "object": acteur,
+            "request": request,
+            "base_template": "ui/layout/base.html",
+            "turbo": False,
+        }
+        return render_to_string("ui/pages/acteur.html", context)
+
 
 class SnippetsPreview(LookbookPreview):
     @component_docs("ui/components/header/header.md")
@@ -967,4 +979,10 @@ class TestsPreview(LookbookPreview):
             {
                 "carte_config_url": carte_config_url,
             },
+        )
+
+    def t_7_copy_controller(self, **kwargs):
+        """Test copy controller functionality with clipboard and button text updates"""
+        return render_to_string(
+            "ui/tests/copy_controller.html",
         )

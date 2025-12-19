@@ -472,11 +472,11 @@ export async function waitForLoadingComplete(
 /**
  * IFrame helpers
  */
-export function getIframe(page: Page, iframeId?: string): FrameLocator {
+export function getIframe(page: Page, iframeId?: string) {
   if (iframeId) {
-    return page.locator(`iframe#${iframeId}`).contentFrame()
+    return page.frameLocator(`iframe#${iframeId}`)
   }
-  return page.locator("iframe").first().contentFrame()
+  return page.frameLocator("iframe").first()
 }
 
 /**
