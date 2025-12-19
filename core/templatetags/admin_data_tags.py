@@ -179,3 +179,27 @@ def valuetype(value):
 @register.filter(name="quote")
 def quote_filter(value):
     return quote(value)
+
+
+@register.filter
+def display_diff_values(old_value, new_value):
+    if not new_value:
+        return old_value
+    if not old_value:
+        return new_value
+    return diff_display(old_value, new_value)
+
+
+@register.inclusion_tag("data/_partials/extra_links.html")
+def extra_links(field, value):
+    if field in ["siren", "siret"]:
+        url_map = {
+            "siren": f"https://annuaire-entreprises.data.gouv.fr/entreprise/{value}",
+            "siret": f"https://annuaire-entreprises.data.gouv.fr/etablissement/{value}",
+        }
+        return {
+            "extra_links": [(url_map[field], value)],
+        }
+    elif isinstance(value, str) and value.startswith("http"):
+        return {"extra_links": [(value, value)]}
+    return {}

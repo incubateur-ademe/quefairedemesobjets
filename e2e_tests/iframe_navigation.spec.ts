@@ -4,7 +4,7 @@ import { navigateTo, getIframe, TIMEOUT } from "./helpers"
 test.describe("🧭 Navigation dans l'iframe avec persistance de l'UI", () => {
   test("L'interface iframe persiste lors de la navigation", async ({ page }) => {
     // Navigate to the test preview page
-    await navigateTo(page, "/lookbook/preview/tests/t_6_iframe_navigation_persistence")
+    await navigateTo(page, "/lookbook/preview/tests/t_8_iframe_navigation_persistence")
 
     // Wait for iframe to be created by the integration script
     const iframe = getIframe(page, "assistant")
@@ -73,7 +73,7 @@ test.describe("🧭 Navigation dans l'iframe avec persistance de l'UI", () => {
 
   test("Les liens internes maintiennent le mode iframe", async ({ page }) => {
     // Navigate to the test preview page
-    await navigateTo(page, "/lookbook/preview/tests/t_6_iframe_navigation_persistence")
+    await navigateTo(page, "/lookbook/preview/tests/t_8_iframe_navigation_persistence")
 
     // Wait for iframe to be created
     const iframe = getIframe(page, "assistant")

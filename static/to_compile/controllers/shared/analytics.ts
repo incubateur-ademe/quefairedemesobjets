@@ -176,6 +176,12 @@ export default class extends Controller<HTMLElement> {
       referrer = storedReferrer
     }
 
+    // Check if the referrer was passed via data attribute from the iframe script
+    // This is the most reliable method as it captures the full parent URL including query params
+    if (!referrer && this.element.dataset.referrer) {
+      referrer = this.element.dataset.referrer
+    }
+
     // For same-origin iframes, we can access the parent URL directly
     try {
       if (window.self !== window.top) {

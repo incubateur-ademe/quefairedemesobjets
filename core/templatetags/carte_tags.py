@@ -7,6 +7,7 @@ from django.template.defaulttags import register
 from django.template.loader import render_to_string
 
 from core.constants import DEFAULT_MAP_CONTAINER_ID, MAP_CONTAINER_ID
+from core.templatetags.acteur_tags import acteur_url
 from qfdmo.models import DisplayedActeur
 from qfdmo.models.action import get_actions_by_direction
 from qfdmo.models.config import CarteConfig, GroupeActionConfig
@@ -117,7 +118,6 @@ def acteur_pinpoint_tag(
     carte_config=None,
     sous_categorie_id=None,
     counter=None,
-    force_visible=False,
 ):
     """
     Template tags to display the acteur's pinpoint after increasing context with
@@ -136,7 +136,9 @@ def acteur_pinpoint_tag(
         mask_id += f"-{counter}"
 
     tag_context = {
-        "acteur": acteur,
+        "latitude": acteur.latitude,
+        "longitude": acteur.longitude,
+        "href": acteur_url(context, acteur, with_map=False),
         "request": context.get("request"),
         MAP_CONTAINER_ID: context.get(MAP_CONTAINER_ID),
         "mask_id": mask_id,
@@ -219,6 +221,29 @@ def acteur_pinpoint_tag(
     )
 
     return tag_context
+
+
+@register.inclusion_tag("templatetags/acteur_pinpoint.html")
+def generic_location_pinpoint_tag(
+    key,
+    latitude,
+    longitude,
+    color="blue",
+    draggable=False,
+):
+    """
+    Generic location pinpoint tag to display a location on a map
+    Used in SuggestionGroupe admin
+    """
+    return {
+        "latitude": latitude,
+        "longitude": longitude,
+        "marker_couleur": color,
+        "mask_id": key,
+        "marker_bonus": False,
+        "marker_fill_background": draggable,
+        "draggable": draggable,
+    }
 
 
 def render_acteur_table_row(acteur, context):

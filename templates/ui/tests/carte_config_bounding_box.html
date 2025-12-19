@@ -1,0 +1,7 @@
+{% load dsfr_tags %}
+
+{% dsfr_callout title="Test de la bounding box depuis CarteConfig" text="Cette page teste que la bounding box définie dans la configuration de carte est correctement appliquée lors du chargement initial de la carte." icon_class="fr-icon-alert-line" %}
+
+<div id="carte-container">
+  <iframe src="{{ carte_config_url }}" width="100%" height="800" data-testid="carte-iframe"></iframe>
+</div>
