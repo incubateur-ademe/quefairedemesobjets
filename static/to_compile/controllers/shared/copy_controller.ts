@@ -8,13 +8,13 @@ export default class extends Controller<HTMLElement> {
   declare readonly toCopyTarget: HTMLElement
   declare readonly buttonTarget: HTMLElement
   declare readonly hasButtonTarget: boolean
-  declare readonly successButtonText: string
+  declare readonly copiedValue: string
+  declare readonly hasCopiedValue: boolean
 
   async toClipboard() {
-    this.toCopyTarget.textContent
     await navigator.clipboard.writeText(this.toCopyTarget.textContent!)
-    if (this.successButtonText) {
-      this.buttonTarget.textContent = this.successButtonText
+    if (this.hasButtonTarget && this.hasCopiedValue) {
+      this.buttonTarget.textContent = this.copiedValue
     }
   }
 }
