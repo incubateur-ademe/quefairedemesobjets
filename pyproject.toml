@@ -39,7 +39,7 @@ dependencies = [
     "detect-secrets>=1.5.0",
     "djangoql>=0.18.1",
     "pydantic[email]>=2.11.7",
-    "django-admin-sortable2>=2.2.8",
+    "django-admin-sortable2>=2.2.8"
 ]
 
 [build-system]
@@ -100,6 +100,7 @@ airflow = [
     "dbt>=1.0.0.40.11",
     "dbt-core>=1.10.9,<2",
     "dbt-postgres>=1.9.1,<2",
+    "pyarrow>=22.0.0"
 ]
 
 [tool.pyright]
