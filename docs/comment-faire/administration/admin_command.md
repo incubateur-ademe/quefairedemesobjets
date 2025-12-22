@@ -37,3 +37,28 @@ Par exemple : on souhaite ajouter la sous-catégorie "Poêle et Casserole" aux p
 ```sh
 uv run python manage.py populate_propositionservice --new_sous_categorie_code poele_casserole --origin_sous_categorie_code vaisselle --dry-run
 ```
+
+## Génération des variables d'environnement pour les logs Airflow sur S3
+
+Cette commande génère les variables d'environnement nécessaires pour configurer le stockage des logs Airflow sur un bucket S3 compatible (Scaleway Object Storage).
+
+La commande crée une connexion AWS Airflow et affiche toutes les variables d'environnement à ajouter à votre configuration pour activer le logging distant sur S3.
+
+```sh
+(uv run) python manage.py generate_aws_conn_id_env --access_key ACCESS_KEY --secret_key SECRET_KEY --bucket_name BUCKET_NAME --conn_id CONN_ID
+```
+
+**Arguments :**
+
+- `--access_key` (requis) : Clé d'accès AWS/S3 (login)
+- `--secret_key` (requis) : Clé secrète AWS/S3 (password)
+- `--bucket_name` (optionnel) : Nom du bucket S3 (défaut: `qfdmo-airflow-logs`)
+- `--conn_id` (optionnel) : ID de la connexion Airflow (défaut: `log_default`)
+
+**Exemple d'utilisation :**
+
+```sh
+uv run python manage.py generate_aws_conn_id_env --access_key ACCESS_KEY --secret_key SECRET_KEY --bucket_name lvao-dev-airflow --conn_id log_conn_id
+```
+
+La commande affichera les variables d'environnement à copier dans votre configuration (`.env`, fichier de configuration Docker, etc.).

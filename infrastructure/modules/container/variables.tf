@@ -47,6 +47,26 @@ variable "airflow_webserver_timeout" {
   type = number
 }
 
+variable "airflow_dag_processor_registry_image" {
+  type = string
+}
+
+variable "airflow_dag_processor_cpu_limit" {
+  type = number
+}
+variable "airflow_dag_processor_memory_limit" {
+  type = number
+}
+variable "airflow_dag_processor_min_scale" {
+  type = number
+}
+variable "airflow_dag_processor_max_scale" {
+  type = number
+}
+variable "airflow_dag_processor_timeout" {
+  type = number
+}
+
 variable "AIRFLOW__DATABASE__SQL_ALCHEMY_CONN" {
   type      = string
   sensitive = true
@@ -124,5 +144,20 @@ variable "_AIRFLOW_WWW_USER_PASSWORD" {
   sensitive = true
 }
 variable "AIRFLOW__WEBSERVER__INSTANCE_NAME" {
+  type = string
+}
+variable "AIRFLOW__CORE__EXECUTION_API_SERVER_URL" {
+  type      = string
+  sensitive = true
+}
+variable "AIRFLOW__API_AUTH__JWT_SECRET" {
+  type      = string
+  sensitive = true
+}
+variable "AIRFLOW_CONN_SCALEWAYLOGS" {
+  type      = string
+  sensitive = true
+}
+variable "AIRFLOW__CORE__ALLOWED_DESERIALIZATION_CLASSES" {
   type = string
 }
