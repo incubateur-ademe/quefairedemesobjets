@@ -6,12 +6,16 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
     endpointUrl: String,
     turboFrameId: String,
     limit: String,
+    navigate: { type: Boolean, default: false },
+    showOnFocus: { type: Boolean, default: false },
   }
   declare readonly optionTargets: HTMLElement[]
   declare readonly resultsTarget: HTMLElement
   declare readonly turboFrameIdValue: string
   declare readonly endpointUrlValue: string
   declare readonly limitValue: string
+  declare readonly navigateValue: boolean
+  declare readonly showOnFocusValue: boolean
   declare readonly inputTarget: HTMLInputElement
   declare readonly hiddenInputTarget: HTMLInputElement
 
@@ -23,6 +27,19 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
 
   clickOutside(event) {
     this.hideListbox()
+  }
+
+  focus(event) {
+    if (this.showOnFocusValue) {
+      // Trigger a search with empty or current query to load results
+      const query = this.inputTarget.value || ""
+      const nextUrl = new URL(this.endpointUrlValue, window.location.origin)
+      nextUrl.searchParams.set("q", query)
+      nextUrl.searchParams.set("turbo_frame_id", this.turboFrameIdValue)
+      nextUrl.searchParams.set("limit", this.limitValue)
+      this.resultsTarget.setAttribute("src", nextUrl.toString())
+      this.showListbox()
+    }
   }
 
   search(event) {
@@ -39,29 +56,73 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
   navigate(event: KeyboardEvent) {
     const key = event.key
 
+    // Allow Tab key to work normally for keyboard navigation
+    if (key === "Tab") {
+      // Close listbox when tabbing away
+      this.hideListbox()
+      return
+    }
+
     switch (key) {
       case "ArrowDown":
         event.preventDefault()
+        // Alt+Down: Open listbox without moving focus
         if (event.altKey) {
           this.showListbox()
           return
         }
-        this.moveFocus(1)
+        // Down Arrow: Opens the listbox if closed and moves focus to first option
+        // If already open, moves focus to next option
+        if (this.resultsTarget.hidden) {
+          this.showListbox()
+          if (this.optionTargets.length > 0) {
+            this.setVisualFocus(0)
+          }
+        } else {
+          this.moveFocus(1)
+        }
         break
 
       case "ArrowUp":
         event.preventDefault()
-        this.moveFocus(-1)
+        // Up Arrow: Opens the listbox if closed and moves focus to last option
+        // If already open, moves focus to previous option
+        if (this.resultsTarget.hidden) {
+          this.showListbox()
+          if (this.optionTargets.length > 0) {
+            this.setVisualFocus(this.optionTargets.length - 1)
+          }
+        } else {
+          this.moveFocus(-1)
+        }
         break
 
       case "Enter":
         event.preventDefault()
+        // Enter: Accepts the focused value, closes listbox
         this.commitSelection()
         break
 
       case "Escape":
         event.preventDefault()
+        // Escape: Closes the listbox if displayed, otherwise clears the combobox
         this.escapeAction()
+        break
+
+      case "Home":
+        // Home: Moves focus to first option (if listbox is open)
+        if (!this.resultsTarget.hidden && this.optionTargets.length > 0) {
+          event.preventDefault()
+          this.setVisualFocus(0)
+        }
+        break
+
+      case "End":
+        // End: Moves focus to last option (if listbox is open)
+        if (!this.resultsTarget.hidden && this.optionTargets.length > 0) {
+          event.preventDefault()
+          this.setVisualFocus(this.optionTargets.length - 1)
+        }
         break
     }
   }
@@ -76,31 +137,83 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
 
   moveFocus(direction: number) {
     if (this.optionTargets.length === 0) {
-      this.showListbox()
       return
     }
 
-    this.currentIndex =
-      (this.currentIndex + direction + this.optionTargets.length) %
-      this.optionTargets.length
+    // Calculate new index with wrapping
+    let newIndex = this.currentIndex + direction
+
+    // Wrap around
+    if (newIndex < 0) {
+      newIndex = this.optionTargets.length - 1
+    } else if (newIndex >= this.optionTargets.length) {
+      newIndex = 0
+    }
+
+    this.setVisualFocus(newIndex)
+  }
+
+  setVisualFocus(index: number) {
+    if (index < 0 || index >= this.optionTargets.length) {
+      return
+    }
+
+    this.currentIndex = index
     const currentOption = this.optionTargets[this.currentIndex]
 
-    this.#blurOptions()
-    currentOption.focus()
+    // Remove aria-selected from all options
+    this.#removeSelection()
+
+    // Set aria-selected on current option
+    currentOption.setAttribute("aria-selected", "true")
+
+    // If option contains a link, focus it. Otherwise keep focus on input
+    const link = currentOption.querySelector("a")
+    if (link) {
+      link.focus()
+    } else {
+      // Keep focus on input, update aria-activedescendant
+      this.inputTarget.focus()
+    }
+
     this.inputTarget.setAttribute("aria-activedescendant", currentOption.id || "")
-    this.showListbox()
+
+    // Scroll into view if needed
+    currentOption.scrollIntoView({ block: "nearest", behavior: "smooth" })
   }
 
   commitSelection(event?) {
     let selected = this.optionTargets[this.currentIndex]
     if (event?.target) {
-      selected = event.target
+      selected = event.target.closest('[data-next-autocomplete-target="option"]')
     }
     if (!selected) return
 
-    this.hiddenInputTarget.value = selected.dataset.value?.trim() || ""
-    this.inputTarget.value = selected.dataset.selectedValue?.trim() || ""
+    const value = selected.dataset.value?.trim() || ""
+    const selectedValue = selected.dataset.selectedValue?.trim() || ""
+
+    this.hiddenInputTarget.value = value
+    this.inputTarget.value = selectedValue
     this.hideListbox()
+
+    // Emit custom event for other controllers to listen to
+    const commitEvent = new CustomEvent("next-autocomplete:commit", {
+      bubbles: true,
+      detail: { option: selected, value, selectedValue },
+    })
+    this.element.dispatchEvent(commitEvent)
+
+    // Navigate if configured to do so
+    if (this.navigateValue) {
+      // If the option contains a link, click it (for accessibility)
+      const link = selected.querySelector("a")
+      if (link) {
+        link.click()
+      } else if (value && (value.startsWith("/") || value.startsWith("http"))) {
+        // Fallback to JS navigation if no link present
+        window.location.href = value
+      }
+    }
   }
 
   escapeAction() {
@@ -116,15 +229,17 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
     this.inputTarget.setAttribute("aria-expanded", "true")
   }
 
-  #blurOptions() {
-    this.optionTargets.forEach((opt) => opt.blur())
+  #removeSelection() {
+    this.optionTargets.forEach((opt) => {
+      opt.removeAttribute("aria-selected")
+    })
   }
 
   hideListbox() {
     this.resultsTarget.hidden = true
     this.inputTarget.setAttribute("aria-expanded", "false")
     this.inputTarget.removeAttribute("aria-activedescendant")
-    this.#blurOptions()
+    this.#removeSelection()
     this.currentIndex = -1
   }
 }

@@ -1,6 +1,6 @@
 import logging
 import re
-from typing import Any
+from typing import Any, override
 
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
@@ -15,11 +15,11 @@ from wagtail.admin.viewsets.model import ModelViewSet
 from wagtail.models import Page
 
 from core.views import static_file_content_from
-from qfdmd.forms import SearchForm
 from qfdmd.models import (
     Bonus,
     Produit,
     ProduitIndexPage,
+    ProduitPage,
     ReusableContent,
     Suggestion,
     Synonyme,
@@ -54,7 +54,42 @@ def get_assistant_script(request):
 SEARCH_VIEW_TEMPLATE_NAME = "ui/components/search/view.html"
 
 
+class AutocompleteHomeSearchView(ListView):
+    """View for autocomplete search results on homepage.
+
+    Searches both ProduitPages and Synonymes.
+    """
+
+    template_name = "ui/components/search/autocomplete_results.html"
+
+    @override
+    def get_queryset(self):
+        query = self.request.GET.get("q", "")
+        limit = int(self.request.GET.get("limit", 10))
+
+        if not query:
+            return []
+
+        # Search in ProduitPages using autocomplete method
+        pages = list(ProduitPage.objects.live().autocomplete(query)[:limit])
+
+        # Also search in legacy Synonymes
+        synonymes = list(Synonyme.objects.filter(nom__icontains=query)[:limit])
+
+        # Combine and limit results
+        return (pages + synonymes)[:limit]
+
+    @override
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["turbo_frame_id"] = self.request.GET.get("turbo_frame_id")
+        context["results"] = self.get_queryset()
+        return context
+
+
 def search_view(request) -> HttpResponse:
+    from qfdmd.forms import SearchForm
+
     prefix_key = next(
         (key for key in request.GET.dict().keys() if key.endswith("-id")), ""
     )

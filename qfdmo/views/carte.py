@@ -73,6 +73,7 @@ class CarteFormsInstance(TypedDict):
     filtres: None | FiltresForm
     legende: None | AutoSubmitLegendeForm
     legende_filtres: None | LegendeForm
+    map: None | MapForm
 
 
 class CarteSearchActeursView(AbstractSearchActeursView):
@@ -351,7 +352,7 @@ class CarteSearchActeursView(AbstractSearchActeursView):
         cache_key = self._get_cache_key_for_acteurs()
         cached_result = cache.get(cache_key)
 
-        if cached_result is not None:
+        if not settings.DEBUG and cached_result is not None:
             # Return cached bbox and acteurs
             return cached_result
 
@@ -376,8 +377,11 @@ class CarteSearchActeursView(AbstractSearchActeursView):
             except (ValueError, TypeError, KeyError) as e:
                 # Invalid/missing coordinates, skip distance sorting
                 logger.warning(
-                    "Invalid coordinates for distance calculation: error=%s",
-                    type(e).__name__,
+                    "Invalid coordinates for distance calculation: "
+                    "longitude=%s, latitude=%s, error=%s",
+                    location_data.get("longitude") if location_data else None,
+                    location_data.get("latitude") if location_data else None,
+                    str(e),
                 )
         elif getattr(acteurs, "_has_distance_field", False):
             # Only reorder via SQL if queryset hasn't been sliced yet

@@ -10,6 +10,8 @@ from django.contrib.postgres.search import (
 from django.db.models import Case, F, Value, When
 from dsfr.forms import DsfrBaseForm
 
+from core.widgets import HomeSearchAutocompleteInput
+
 from .models import ProduitPage, Synonyme
 
 logger = logging.getLogger(__name__)
@@ -72,6 +74,20 @@ class SearchForm(DsfrBaseForm):
             ),
             default=F("similarity"),
         )
+
+
+class AutocompleteSearchForm(DsfrBaseForm):
+    search = forms.CharField(
+        label="Saisir un objet ou un déchet",
+        required=False,
+        widget=HomeSearchAutocompleteInput(
+            attrs={
+                "class": "fr-input",
+                "placeholder": "pantalon, perceuse, canapé...",
+                "autocomplete": "off",
+            },
+        ),
+    )
 
 
 class ContactForm(DsfrBaseForm):
