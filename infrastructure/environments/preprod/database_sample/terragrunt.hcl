@@ -22,5 +22,8 @@ inputs = {
   webapp_db_sample_name     = "webapp_sample"
   webapp_db_sample_username = "[webapp_db_sample_username]"
   webapp_db_sample_password = "[webapp_db_sample_password]"
-}
 
+  # Path to the create_extensions.sql script
+  # From infrastructure/environments/preprod/database_sample/, we go up 4 levels to the root
+  create_extensions_script_path = abspath("${get_terragrunt_dir()}/../../../../scripts/sql/create_extensions.sql")
+}
