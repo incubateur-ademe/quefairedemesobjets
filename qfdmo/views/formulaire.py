@@ -36,18 +36,11 @@ class FormulaireSearchActeursView(AbstractSearchActeursView):
     def get_initial(self):
         initial = super().get_initial()
 
-        # TODO: refacto forms : delete this line
         initial["adresse"] = self.request.GET.get("adresse")
-        # TODO: refacto forms : delete this line
         initial["latitude"] = self.request.GET.get("latitude")
-        # TODO: refacto forms : delete this line
         initial["longitude"] = self.request.GET.get("longitude")
         initial["epci_codes"] = self.request.GET.getlist("epci_codes")
-
-        # TODO: refacto forms : delete this line
         initial["bounding_box"] = self.request.GET.get("bounding_box")
-
-        # TODO: refacto forms : delete this line
         initial["sous_categorie_objet"] = self.request.GET.get("sous_categorie_objet")
         initial["pas_exclusivite_reparation"] = self.request.GET.get(
             "pas_exclusivite_reparation", True
