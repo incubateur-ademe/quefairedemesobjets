@@ -193,7 +193,6 @@ class AbstractSearchActeursView(
             "proposition_services__action",
             "proposition_services__action__directions",
             "proposition_services__action__groupe_action",
-            "labels",
             "action_principale",
         ).with_displayable_labels()
         if getattr(acteurs, "_needs_reparer_bonus", False):
