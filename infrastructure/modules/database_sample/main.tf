@@ -34,8 +34,8 @@ resource "null_resource" "create_extensions" {
   }
 
   triggers = {
-    database_id = scaleway_rdb_database.webapp_sample.id
-    user_id     = scaleway_rdb_user.webapp_sample.id
+    database_id  = scaleway_rdb_database.webapp_sample.id
+    user_id      = scaleway_rdb_user.webapp_sample.id
     privilege_id = scaleway_rdb_privilege.webapp_sample_privilege.id
   }
 }
