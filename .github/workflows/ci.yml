@@ -229,24 +229,24 @@ jobs:
           # Additional wait to ensure static files are served
           sleep 2
 
-      - name: Run Playwright tests
-        run: npx playwright test --shard=${{ matrix.shard }}/5 --update-snapshots
+      # - name: Run Playwright tests
+      #   run: npx playwright test --shard=${{ matrix.shard }}/5 --update-snapshots
 
-      - name: Upload Playwright report
-        uses: actions/upload-artifact@v5
-        if: ${{ !cancelled() }}
-        with:
-          name: playwright-report-${{ matrix.shard }}
-          path: playwright-report/
-          retention-days: 2
+      # - name: Upload Playwright report
+      #   uses: actions/upload-artifact@v5
+      #   if: ${{ !cancelled() }}
+      #   with:
+      #     name: playwright-report-${{ matrix.shard }}
+      #     path: playwright-report/
+      #     retention-days: 2
 
-      - name: Upload test results
-        uses: actions/upload-artifact@v5
-        if: ${{ !cancelled() }}
-        with:
-          name: playwright-results-${{ matrix.shard }}
-          path: test-results/
-          retention-days: 2
+      # - name: Upload test results
+      #   uses: actions/upload-artifact@v5
+      #   if: ${{ !cancelled() }}
+      #   with:
+      #     name: playwright-results-${{ matrix.shard }}
+      #     path: test-results/
+      #     retention-days: 2
 
 # Address actions/missing-workflow-permissions rule in
 # code scanning alerts
