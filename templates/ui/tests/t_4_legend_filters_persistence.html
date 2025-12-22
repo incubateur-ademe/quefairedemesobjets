@@ -1,0 +1,10 @@
+{% load dsfr_tags %}
+
+{% dsfr_callout title="Test de persistance des filtres de légende" text="Cette page teste que les filtres de la légende restent actifs après un changement de mode carte/liste. Décocher un filtre dans la légende doit retirer les marqueurs correspondants, et ce comportement doit persister après un changement de mode." icon_class="fr-icon-alert-line" %}
+
+<p>Le test vérifie que :</p>
+<ul>
+    <li>La recherche d'Auray affiche des résultats</li>
+    <li>Décocher un filtre retire les marqueurs correspondants de la carte</li>
+    <li>Après basculement en mode liste puis retour en mode carte, les filtres restent actifs</li>
+</ul>

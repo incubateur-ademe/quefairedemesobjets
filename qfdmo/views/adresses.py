@@ -192,7 +192,6 @@ class AbstractSearchActeursView(
             "proposition_services__action",
             "proposition_services__action__directions",
             "proposition_services__action__groupe_action",
-            "labels",
             "action_principale",
         ).with_displayable_labels()
         if getattr(acteurs, "_needs_reparer_bonus", False):
@@ -408,7 +407,6 @@ def acteur_detail(request, uuid):
                 "proposition_services__sous_categories",
                 "proposition_services__sous_categories__categorie",
                 "proposition_services__action__groupe_action",
-                "labels",
                 "sources",
             )
             .with_displayable_labels()

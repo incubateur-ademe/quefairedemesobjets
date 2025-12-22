@@ -414,7 +414,7 @@ class TestDisplayDiffValue:
     def test_handle_empty_values(
         self,
         value,
-        expected_result,  # , mock_reverse, mock_diff_display
+        expected_result,
     ):
         """Test la gestion des valeurs vides"""
         suggestion_contexte = {"key": "old_value"}
@@ -422,7 +422,7 @@ class TestDisplayDiffValue:
         assert result == expected_result
 
     def test_handle_empty_values_no_old_value(
-        self,  # , mock_reverse, mock_diff_display
+        self,
     ):
         """Test les valeurs vides sans ancienne valeur"""
         result = display_diff_value("key", None, {})

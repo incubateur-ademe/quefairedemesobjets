@@ -921,7 +921,7 @@ class TestsPreview(LookbookPreview):
 
     def t_1_referrer(self, **kwargs):
         return render_to_string(
-            "ui/tests/referrer.html",
+            "ui/tests/t_1_referrer.html",
         )
 
     def t_2_carte_mode_liste_switch(self, **kwargs):

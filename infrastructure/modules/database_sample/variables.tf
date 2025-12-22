@@ -20,3 +20,8 @@ variable "webapp_db_sample_password" {
   sensitive   = true
 }
 
+variable "create_extensions_script_path" {
+  description = "Chemin absolu vers le script SQL create_extensions.sql"
+  type        = string
+}
+
