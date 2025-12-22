@@ -40,6 +40,7 @@ EXCLUDE_TABLES = [
 
 
 def copy_db_data():
+    from django.apps import apps
     from django.conf import settings
     from django.db import connections
 
@@ -53,11 +54,14 @@ def copy_db_data():
         cursor.execute("SELECT table_name FROM information_schema.tables")
         tables = [table[0] for table in cursor.fetchall()]
 
-    # filter tables starting with INSTALLED_APPS
+    # Get labels of registered apps
+    table_prefixes = {app_config.label for app_config in apps.get_app_configs()}
+    # Add "django" for system tables
+    table_prefixes.add("django")
     tables = [
         table
         for table in tables
-        if any(table.startswith(prefix) for prefix in settings.INSTALLED_APPS)
+        if any(table.startswith(prefix) for prefix in table_prefixes)
     ]
     logger.info(f"✅ {len(tables)} tables trouvées")
 
