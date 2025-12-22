@@ -4,14 +4,19 @@ import {
   searchDummyAdresse,
   searchDummySousCategorieObjet,
   openAdvancedFilters,
+  navigateTo,
+  searchAddress,
+  getIframe,
+  clickFirstAvailableMarker,
+  TIMEOUT,
 } from "./helpers"
 
-test.describe("🔍 Recherche et Modification Formulaire", () => {
-  test("Recherche et modification d'une recherche", async ({ page }) => {
+test.describe("🔍 Formulaire de Recherche", () => {
+  test("La recherche peut être effectuée puis modifiée", async ({ page }) => {
     // Helper function to handle autocomplete inputs
 
     // Navigate to the formulaire page
-    await page.goto(`/formulaire`, { waitUntil: "domcontentloaded" })
+    await navigateTo(page, `/formulaire`)
 
     // Expect the Proposer une adresse button to be hidden
     await expect(page.getByTestId("formulaire-proposer-une-adresse")).not.toBeVisible()
@@ -50,11 +55,11 @@ test.describe("🔍 Recherche et Modification Formulaire", () => {
     }
   })
 })
-test.describe("📝 Liste d'Actions Formulaire", () => {
-  test("Action list by default", async ({ page }) => {
-    await page.goto(`/formulaire`, {
-      waitUntil: "domcontentloaded",
-    })
+test.describe("📝 Sélection d'Actions dans le Formulaire", () => {
+  test("La liste d'actions par défaut contient toutes les actions", async ({
+    page,
+  }) => {
+    await navigateTo(page, `/formulaire`)
 
     const id_action_list1 = await page.$eval("#id_action_list", (el) => el.value)
     expect(id_action_list1).toBe(
@@ -62,10 +67,10 @@ test.describe("📝 Liste d'Actions Formulaire", () => {
     )
   })
 
-  test("Action list is well set with jai", async ({ page }) => {
-    await page.goto(`/formulaire?direction=jai&action_list=preter`, {
-      waitUntil: "domcontentloaded",
-    })
+  test("Les actions sélectionnées dans la section 'J'ai' sont correctement ajoutées/retirées", async ({
+    page,
+  }) => {
+    await navigateTo(page, `/formulaire?direction=jai&action_list=preter`)
 
     const id_action_list1 = await page.$eval("#id_action_list", (el) => el.value)
     expect(id_action_list1).toBe("preter")
@@ -82,10 +87,10 @@ test.describe("📝 Liste d'Actions Formulaire", () => {
     expect(id_action_list2).toBe("preter|reparer")
   })
 
-  test("Action list is well set with jecherche", async ({ page }) => {
-    await page.goto(`/formulaire?direction=jecherche&action_list=emprunter`, {
-      waitUntil: "domcontentloaded",
-    })
+  test("Les actions sélectionnées dans la section 'Je cherche' sont correctement ajoutées/retirées", async ({
+    page,
+  }) => {
+    await navigateTo(page, `/formulaire?direction=jecherche&action_list=emprunter`)
 
     // check that the action list is well set by default
     const id_action_list1 = await page.$eval("#id_action_list", (el) => el.value)
@@ -105,19 +110,15 @@ test.describe("📝 Liste d'Actions Formulaire", () => {
 test.skip("Filtres avancés s'ouvrent et se ferment en mode formulaire", async ({
   page,
 }) => {
-  await page.goto(`/formulaire`, {
-    waitUntil: "domcontentloaded",
-  })
+  await navigateTo(page, `/formulaire`)
   await openAdvancedFilters(page)
 })
 
 test.skip("Les acteurs digitaux sont visibles sur le formulaire", async ({ page }) => {
   // Navigate to the lookbook preview page
-  await page.goto(`/lookbook/preview/iframe/formulaire/`, {
-    waitUntil: "domcontentloaded",
-  })
+  await navigateTo(page, `/lookbook/preview/iframe/formulaire/`)
 
-  const iframe = page.frameLocator("iframe#formulaire")
+  const iframe = getIframe(page, "formulaire")
   await mockApiAdresse(page)
   // Fill "Sous catégorie objet" autocomplete input
   await searchDummySousCategorieObjet(page)
@@ -146,12 +147,10 @@ test.skip("🗺️ Affichage et Interaction Acteurs", () => {
     page,
   }) => {
     // Navigate to the lookbook preview page
-    await page.goto(`/lookbook/preview/iframe/formulaire/`, {
-      waitUntil: "domcontentloaded",
-    })
+    await navigateTo(page, `/lookbook/preview/iframe/formulaire/`)
 
     // Use frameLocator for better iframe handling
-    const iframe = page.frameLocator("iframe#formulaire")
+    const iframe = getIframe(page, "formulaire")
 
     // Select a Produit
     let inputSelector = "#id_sous_categorie_objet"
@@ -164,33 +163,15 @@ test.skip("🗺️ Affichage et Interaction Acteurs", () => {
       .click()
 
     // Fill adresse
-    inputSelector = "#id_adresse"
-    await iframe.locator(inputSelector).click()
     await mockApiAdresse(page)
-    await iframe.locator(inputSelector).fill("auray")
-    await iframe
-      .locator("#id_adresseautocomplete-list.autocomplete-items div:nth-child(1)")
-      .click()
+    await searchAddress(iframe, "auray", "formulaire")
 
     // Submit form
     await iframe.getByTestId("formulaire-rechercher-adresses-submit").click()
 
-    // Remove the home marker (red dot) that prevents Playwright from clicking other markers
-    const markers = iframe.locator(".maplibregl-marker")
-    // const count = await markers.count()
-
     await page.waitForLoadState("networkidle")
 
-    const count = await markers.count()
-    for (let i = 0; i < count; i++) {
-      const item = markers.nth(i)
-      try {
-        await item.click({ force: true })
-        break
-      } catch (e) {
-        console.log(`Cannot click marker ${i}:`, e)
-      }
-    }
+    await clickFirstAvailableMarker(iframe, ".maplibregl-marker")
 
     // Wait for the panel to be shown (aria-hidden="false")
     await expect(iframe.locator("#acteurDetailsPanel")).toHaveAttribute(

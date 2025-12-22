@@ -39,6 +39,7 @@ Réutiliser la carte | {{ block.super }}
                 {# REFACTO JINJA : when Jinja will be dropped, use components/code/code.html here #}
                 <div
                     data-controller="copy"
+                    data-copy-copied-value="Copié"
                     class="qf-flex
                     qf-p-2w qf-bg-grey-975
                     "
@@ -55,7 +56,6 @@ Réutiliser la carte | {{ block.super }}
                         class="fr-btn qf-mb-auto qf-ml-auto"
                         title="Copier"
                         data-action="copy#toClipboard"
-                        data-copy-success-button-text="Copié"
                         data-copy-target="button"
                     >
                         Copier

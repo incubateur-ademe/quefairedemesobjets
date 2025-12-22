@@ -5,8 +5,10 @@ from pathlib import Path
 from django import forms
 from django.conf import settings
 from django.contrib.gis.geos import Point
+from django.core.paginator import Paginator
 from django.template import Context, Template
 from django.template.loader import render_to_string
+from django.test import RequestFactory
 from django_lookbook.preview import LookbookPreview
 from django_lookbook.utils import register_form_class
 from dsfr.forms import DsfrBaseForm
@@ -87,11 +89,15 @@ class CarteConfigForm(forms.Form):
     Form for carte config
     """
 
+    def get_first_carte_config():
+        return CarteConfig.objects.first()
+
     carte_config = forms.ModelChoiceField(
         label="Carte config",
         help_text="Carte config",
         required=False,
         queryset=CarteConfig.objects.all(),
+        initial=get_first_carte_config,
     )
 
 
@@ -140,9 +146,6 @@ class CartePreview(LookbookPreview):
 
     @component_docs("ui/components/carte/mode_liste.md")
     def mode_liste(self, **kwargs):
-        from django.core.paginator import Paginator
-        from django.test import RequestFactory
-
         acteurs = DisplayedActeur.objects.all()[:10]
         paginator = Paginator(acteurs, 5)
         page = paginator.get_page(1)
@@ -564,6 +567,18 @@ class PagesPreview(LookbookPreview):
         context = {"object": Synonyme.objects.first()}
         return render_to_string("ui/pages/produit.html", context)
 
+    def acteur(self, **kwargs):
+        acteur = DisplayedActeur.objects.first()
+        factory = RequestFactory()
+        request = factory.get("/")
+        context = {
+            "object": acteur,
+            "request": request,
+            "base_template": "ui/layout/base.html",
+            "turbo": False,
+        }
+        return render_to_string("ui/pages/acteur.html", context)
+
 
 class SnippetsPreview(LookbookPreview):
     @component_docs("ui/components/header/header.md")
@@ -654,6 +669,28 @@ class IframePreview(LookbookPreview):
             data-height="720px"
             data-bounding_box="{&quot;southWest&quot;: {&quot;lat&quot;: 47.570401, &quot;lng&quot;: 1.597977}, &quot;northEast&quot;: {&quot;lat&quot;: 48.313697, &quot;lng&quot;: 3.059159}}"
             ></script>
+            """,
+        )
+
+        return template.render(Context({}))
+
+    def integrations(self, **kwargs):
+        """
+        # Integrations
+
+        Copiez ce script pour intégrer une carte avec des paramètres spécifiques :
+
+        ```html
+        <script src="{base_url}/static/carte.js"
+            data-action_list="preter|emprunter|louer|mettreenlocation|reparer|donner|echanger|acheter|revendre"
+            data-bounding_box="{{'southWest': {{'lat': 47.457526, 'lng': -0.609453}}, 'northEast': {{'lat': 47.489048, 'lng': -0.51571}}}}">
+        </script>
+        ```
+        """
+
+        template = Template(
+            f"<script src='{base_url}/static/carte.js'"
+            """ data-action_list="preter|emprunter|louer|mettreenlocation|reparer|donner|echanger|acheter|revendre" data-bounding_box="{&quot;southWest&quot;: {&quot;lat&quot;: 47.457526, &quot;lng&quot;: -0.609453}, &quot;northEast&quot;: {&quot;lat&quot;: 47.489048, &quot;lng&quot;: -0.51571}}"></script>
             """,
         )
 
@@ -861,7 +898,94 @@ class AccessibilitePreview(LookbookPreview):
 
 
 class TestsPreview(LookbookPreview):
-    def referrer(self, **kwargs):
+    """
+    Test previews for e2e tests.
+
+    Naming convention:
+    - Prefix all methods with t_{number}_ where number is incremental (t_1_, t_2_, t_3_, etc.)
+    - The number represents the chronological order of test creation
+    - Oldest tests have lower numbers and appear first in the class
+    - When adding a new test, use the next available number and add it at the bottom
+    - Keep methods ordered by their number prefix for easy navigation
+
+    Example: t_1_referrer, t_2_carte_mode_liste_switch, t_3_ess_label_display
+
+    Adding a new test:
+    1. Create a dedicated template in templates/ui/tests/ (e.g., my_new_test.html)
+    2. Add a preview method here following the naming convention (e.g., t_4_my_new_test)
+    3. Create the corresponding e2e test in e2e_tests/ (usually in carte.spec.ts or dedicated file)
+    4. In the e2e test, navigate to /lookbook/preview/tests/t_4_my_new_test
+
+    Each test should be self-contained with its own template and e2e test specification.
+    """
+
+    def t_1_referrer(self, **kwargs):
         return render_to_string(
-            "ui/tests/referrer.html",
+            "ui/tests/t_1_referrer.html",
+        )
+
+    def t_2_carte_mode_liste_switch(self, **kwargs):
+        """Test switching between carte and liste modes with bounding box"""
+        return render_to_string(
+            "ui/tests/t_2_carte_mode_liste_switch.html",
+            {"base_url": base_url},
+        )
+
+    def t_3_ess_label_display(self, **kwargs):
+        """Test ESS label display in acteur detail panel"""
+        return render_to_string(
+            "ui/tests/t_3_ess_label_display.html",
+        )
+
+    def t_4_legend_filters_persistence(self, **kwargs):
+        """Test legend filters persistence when switching between carte and liste modes"""
+        return render_to_string(
+            "ui/tests/t_4_legend_filters_persistence.html",
+        )
+
+    def t_5_rechercher_dans_zone(self, **kwargs):
+        """Test search in zone button appearance and bounding box update"""
+        return render_to_string(
+            "ui/tests/t_5_rechercher_dans_zone.html",
+            {"base_url": base_url},
+        )
+
+    def t_6_carte_config_bounding_box(self, **kwargs):
+        """Test that bounding box from CarteConfig is correctly applied on initial load"""
+        from django.contrib.gis.geos import Polygon
+        from django.urls import reverse
+
+        # Create a test CarteConfig with a bounding box
+        # This bounding box covers Angers, France
+        bounding_box_polygon = Polygon.from_bbox(
+            (-0.609453, 47.457526, -0.51571, 47.489048)
+        )
+
+        carte_config, created = CarteConfig.objects.get_or_create(
+            slug="test-bounding-box",
+            defaults={
+                "nom": "Test Bounding Box",
+                "bounding_box": bounding_box_polygon,
+            },
+        )
+
+        if not created and carte_config.bounding_box != bounding_box_polygon:
+            carte_config.bounding_box = bounding_box_polygon
+            carte_config.save()
+
+        carte_config_url = reverse(
+            "qfdmo:carte_custom", kwargs={"slug": "test-bounding-box"}
+        )
+
+        return render_to_string(
+            "ui/tests/t_6_carte_config_bounding_box.html",
+            {
+                "carte_config_url": carte_config_url,
+            },
+        )
+
+    def t_7_copy_controller(self, **kwargs):
+        """Test copy controller functionality with clipboard and button text updates"""
+        return render_to_string(
+            "ui/tests/t_7_copy_controller.html",
         )
