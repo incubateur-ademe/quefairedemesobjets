@@ -6,7 +6,6 @@ import SearchFormController from "../carte/search_solution_form_controller"
 export default class extends Controller<HTMLElement> {
   static values = {
     location: Object,
-    iframe: Boolean,
   }
   static outlets = ["address-autocomplete", "search-solution-form"]
   declare addressAutocompleteOutlets: Array<AdresseAutocompleteController>
@@ -16,13 +15,11 @@ export default class extends Controller<HTMLElement> {
     latitude: string | null
     longitude: string | null
   }
-  declare iframeValue: boolean
   hasAddressAutocompleteOutletConnected = false
   hasSearchSolutionFormOutletConnected = false
 
   connect() {
     this.fetchLocationFromSessionStorageOnFirstLoad()
-    this.configureIframeSpecificUI()
   }
 
   addressAutocompleteOutletConnected(outlet, element) {
@@ -30,39 +27,6 @@ export default class extends Controller<HTMLElement> {
       return
     }
     this.updateUIFromGlobalState(outlet)
-  }
-
-  #redirectIfIframeMisconfigured() {
-    /**
-    In some situation, the sessionStorage read a true value for iframe whereas
-    the url does not contain the iframe param.
-    The cause is yet unclear, but as fallback we detect this situation and redirect
-    the user dynamically to the correct location, with iframe in the querystring.
-    */
-    const url = new URL(window.location.href)
-    const params = url.searchParams
-
-    if (!params.has("iframe")) {
-      params.set("iframe", "1")
-      url.search = params.toString()
-      window.location.href = url.toString()
-    }
-  }
-
-  configureIframeSpecificUI() {
-    if (sessionStorage.getItem("iframe") === "true") {
-      this.iframeValue = true
-      this.#redirectIfIframeMisconfigured()
-    }
-
-    if (this.iframeValue) {
-      document.querySelectorAll<HTMLLinkElement>('a[href^="/"]').forEach((link) => {
-        const url = new URL(link.href, window.location.origin)
-        url.searchParams.set("iframe", "1")
-        link.href = url.toString()
-      })
-      sessionStorage.setItem("iframe", "true")
-    }
   }
 
   fetchLocationFromSessionStorageOnFirstLoad() {

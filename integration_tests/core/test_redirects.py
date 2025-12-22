@@ -56,8 +56,8 @@ def test_forms_redirects(client, test_url):
         (
             "quefairedemesdechets.ademe.fr",
             "?iframe&direction=jai",
-            None,
-            200,
+            "https://quefairedemesdechets.ademe.fr/formulaire?direction=jai",
+            301,
         ),
         (
             "quefairedemesdechets.ademe.fr",

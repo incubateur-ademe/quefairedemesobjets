@@ -927,26 +927,26 @@ class TestsPreview(LookbookPreview):
     def t_2_carte_mode_liste_switch(self, **kwargs):
         """Test switching between carte and liste modes with bounding box"""
         return render_to_string(
-            "ui/tests/t_2_carte_mode_liste_switch.html",
+            "ui/tests/carte_mode_liste_switch.html",
             {"base_url": base_url},
         )
 
     def t_3_ess_label_display(self, **kwargs):
         """Test ESS label display in acteur detail panel"""
         return render_to_string(
-            "ui/tests/t_3_ess_label_display.html",
+            "ui/tests/ess_label_display.html",
         )
 
     def t_4_legend_filters_persistence(self, **kwargs):
         """Test legend filters persistence when switching between carte and liste modes"""
         return render_to_string(
-            "ui/tests/t_4_legend_filters_persistence.html",
+            "ui/tests/legend_filters_persistence.html",
         )
 
     def t_5_rechercher_dans_zone(self, **kwargs):
         """Test search in zone button appearance and bounding box update"""
         return render_to_string(
-            "ui/tests/t_5_rechercher_dans_zone.html",
+            "ui/tests/search_in_zone_button.html",
             {"base_url": base_url},
         )
 
@@ -978,7 +978,7 @@ class TestsPreview(LookbookPreview):
         )
 
         return render_to_string(
-            "ui/tests/t_6_carte_config_bounding_box.html",
+            "ui/tests/carte_config_bounding_box.html",
             {
                 "carte_config_url": carte_config_url,
             },
@@ -987,5 +987,12 @@ class TestsPreview(LookbookPreview):
     def t_7_copy_controller(self, **kwargs):
         """Test copy controller functionality with clipboard and button text updates"""
         return render_to_string(
-            "ui/tests/t_7_copy_controller.html",
+            "ui/tests/copy_controller.html",
+        )
+
+    def t_8_iframe_navigation_persistence(self, **kwargs):
+        """Test that iframe-specific UI persists during navigation"""
+        return render_to_string(
+            "ui/tests/iframe_navigation_persistence.html",
+            {"base_url": base_url},
         )

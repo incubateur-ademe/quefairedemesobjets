@@ -28,7 +28,7 @@ class BetaMiddleware:
         return response
 
 
-class AssistantMiddleware:
+class RequestEnhancementMiddleware:
     LOGGED_IN_COOKIE = "logged_in"
     CMS_CARTE_FALLBACK = "/lacarte"
     CARTE_PARAM = "carte"
@@ -77,15 +77,16 @@ class AssistantMiddleware:
         if resolve(request.path).view_name != "qfdmd:home":
             return
 
-        # Order matters: 'carte' takes precedence over 'iframe'
         if self.CARTE_PARAM in request.GET:
             return self._build_redirect_url(
                 "qfdmo:carte", request.GET, [self.CARTE_PARAM, self.IFRAME_PARAM]
             )
 
-        if self.FORMULAIRE_PARAM in request.GET:
+        if self.IFRAME_PARAM in request.GET or self.FORMULAIRE_PARAM in request.GET:
             return self._build_redirect_url(
-                "qfdmo:formulaire", request.GET, [self.FORMULAIRE_PARAM]
+                "qfdmo:formulaire",
+                request.GET,
+                [self.IFRAME_PARAM, self.FORMULAIRE_PARAM],
             )
         return None
 
@@ -152,24 +153,11 @@ class AssistantMiddleware:
             response.delete_cookie(cookie_name)
 
     def _prepare_request_if_iframe(self, request):
-        """Detect if the request comes from an iframe mode.
-        The iframe mode is usually set on the initial request, and must be passed
-        during the navigation.
-        To be RGPD-compliant, and to satisfy some of our users constraints, we
-        cannot use Django session's cookie.
-        We rely on a mix between querystring and referrer.
-
-        We also have a client-side fallback, based on sessionStorage : on initial
-        request, we set the iframe value in sessionStorage.
+        """Detect if the request comes from an iframe.
+        Detection is based on the Sec-Fetch-Dest header, which is set by modern
+        browsers when a request is made from within an iframe.
         """
-        is_in_iframe_mode = False
-        if request.headers.get("Sec-Fetch-Dest") == "iframe":
-            is_in_iframe_mode = True
-
-        if self.IFRAME_PARAM in request.GET:
-            is_in_iframe_mode = True
-
-        request.iframe = is_in_iframe_mode
+        request.iframe = request.headers.get("Sec-Fetch-Dest") == "iframe"
 
     def _persist_iframe_in_headers(self, request, response):
         """Persist iframe state in headers.

@@ -122,7 +122,6 @@ class AbstractSearchActeursView(
     # TODO : supprimer
     is_iframe = False
     is_carte = False
-    is_embedded = True
     paginate = False
 
     def get_context_data(self, **kwargs):
@@ -438,8 +437,6 @@ def acteur_detail(request, uuid):
         "object": displayed_acteur,  # We can use object here so that switching
         # to a DetailView later will not required a template update
         "latitude": latitude,
-        # TODO: remove when this view will be migrated to a class-based view
-        "is_embedded": "carte" in request.GET or "iframe" in request.GET,
         "longitude": longitude,
         "direction": direction,
         "display_labels_panel": display_labels_panel,

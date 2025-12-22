@@ -1465,8 +1465,6 @@ class DisplayedActeur(FinalActeur, LatLngPropertiesMixin):
         params = []
         if "carte" in request.GET:
             params.append("carte=1")
-        elif "iframe" in request.GET:
-            params.append("iframe=1")
         if direction:
             params.append(f"direction={direction}")
         return f"{base_url}?{'&'.join(params)}"
