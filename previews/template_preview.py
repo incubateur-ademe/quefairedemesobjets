@@ -5,8 +5,10 @@ from pathlib import Path
 from django import forms
 from django.conf import settings
 from django.contrib.gis.geos import Point
+from django.core.paginator import Paginator
 from django.template import Context, Template
 from django.template.loader import render_to_string
+from django.test import RequestFactory
 from django_lookbook.preview import LookbookPreview
 from django_lookbook.utils import register_form_class
 from dsfr.forms import DsfrBaseForm
@@ -95,11 +97,15 @@ class CarteConfigForm(forms.Form):
     Form for carte config
     """
 
+    def get_first_carte_config():
+        return CarteConfig.objects.first()
+
     carte_config = forms.ModelChoiceField(
         label="Carte config",
         help_text="Carte config",
         required=False,
         queryset=CarteConfig.objects.all(),
+        initial=get_first_carte_config,
     )
 
 
@@ -148,9 +154,6 @@ class CartePreview(LookbookPreview):
 
     @component_docs("ui/components/carte/mode_liste.md")
     def mode_liste(self, **kwargs):
-        from django.core.paginator import Paginator
-        from django.test import RequestFactory
-
         acteurs = DisplayedActeur.objects.all()[:10]
         paginator = Paginator(acteurs, 5)
         page = paginator.get_page(1)
@@ -639,6 +642,18 @@ class PagesPreview(LookbookPreview):
         context = {"object": Synonyme.objects.first()}
         return render_to_string("ui/pages/produit.html", context)
 
+    def acteur(self, **kwargs):
+        acteur = DisplayedActeur.objects.first()
+        factory = RequestFactory()
+        request = factory.get("/")
+        context = {
+            "object": acteur,
+            "request": request,
+            "base_template": "ui/layout/base.html",
+            "turbo": False,
+        }
+        return render_to_string("ui/pages/acteur.html", context)
+
 
 class SnippetsPreview(LookbookPreview):
     @component_docs("ui/components/header/header.md")
@@ -1008,4 +1023,44 @@ class TestsPreview(LookbookPreview):
         return render_to_string(
             "ui/tests/search_in_zone_button.html",
             {"base_url": base_url},
+        )
+
+    def t_6_carte_config_bounding_box(self, **kwargs):
+        """Test that bounding box from CarteConfig is correctly applied on initial load"""
+        from django.contrib.gis.geos import Polygon
+        from django.urls import reverse
+
+        # Create a test CarteConfig with a bounding box
+        # This bounding box covers Angers, France
+        bounding_box_polygon = Polygon.from_bbox(
+            (-0.609453, 47.457526, -0.51571, 47.489048)
+        )
+
+        carte_config, created = CarteConfig.objects.get_or_create(
+            slug="test-bounding-box",
+            defaults={
+                "nom": "Test Bounding Box",
+                "bounding_box": bounding_box_polygon,
+            },
+        )
+
+        if not created and carte_config.bounding_box != bounding_box_polygon:
+            carte_config.bounding_box = bounding_box_polygon
+            carte_config.save()
+
+        carte_config_url = reverse(
+            "qfdmo:carte_custom", kwargs={"slug": "test-bounding-box"}
+        )
+
+        return render_to_string(
+            "ui/tests/carte_config_bounding_box.html",
+            {
+                "carte_config_url": carte_config_url,
+            },
+        )
+
+    def t_7_copy_controller(self, **kwargs):
+        """Test copy controller functionality with clipboard and button text updates"""
+        return render_to_string(
+            "ui/tests/copy_controller.html",
         )

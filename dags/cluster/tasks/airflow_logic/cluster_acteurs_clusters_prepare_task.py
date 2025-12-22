@@ -57,6 +57,7 @@ def cluster_acteurs_clusters_prepare_wrapper(ti) -> None:
         cluster_intra_source_is_allowed=config.cluster_intra_source_is_allowed,
         fields_protected=config.fields_protected,
         fields_transformed=config.fields_transformed,
+        include_source_ids=config.include_source_ids,
     )
 
     if df.empty:

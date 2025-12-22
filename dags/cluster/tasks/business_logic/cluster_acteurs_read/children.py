@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-
 from utils.django import django_setup_full
 
 django_setup_full()
@@ -10,7 +9,7 @@ def cluster_acteurs_read_children(
     parent_ids: list[str],
     fields_to_include: list[str],
 ) -> pd.DataFrame:
-    from qfdmo.models.acteur import ActeurStatus, RevisionActeur
+    from qfdmo.models.acteur import ActeurStatus, VueActeur
 
     """Reading children from DB (acteurs already pointing to parents).
 
@@ -23,7 +22,7 @@ def cluster_acteurs_read_children(
     """
     children = [
         {field: getattr(x, field) for field in fields_to_include}
-        for x in RevisionActeur.objects.filter(parent__in=parent_ids).filter(
+        for x in VueActeur.objects.filter(parent__in=parent_ids).filter(
             statut=ActeurStatus.ACTIF
         )
     ]

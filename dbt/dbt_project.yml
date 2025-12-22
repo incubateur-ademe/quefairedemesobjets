@@ -35,9 +35,3 @@ clean-targets:
 
 models:
   +unlogged: true
-  base:
-    +materialized: view
-  intermediate:
-    +materialized: view
-  marts:
-    +materialized: table

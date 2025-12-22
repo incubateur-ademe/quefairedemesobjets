@@ -57,6 +57,7 @@ class TestCarteViews:
             view._get_max_displayed_acteurs() == 456
         ), "On affiche 10 acteurs sur le formulaire (ou en iframe)"
 
+    @override_settings(CARTE_MAX_SOLUTION_DISPLAYED=25)
     def test_carte_config_view(self, rf):
         carte_config = CarteConfigFactory()
         request = rf.get("/fake/")

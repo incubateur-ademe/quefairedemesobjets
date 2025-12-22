@@ -271,8 +271,12 @@ class BaseActeurAdmin(DjangoQLSearchMixin, admin.GISModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = list(super().get_readonly_fields(request, obj))
-        if obj and "identifiant_unique" not in readonly_fields:
-            readonly_fields += ["identifiant_unique"]
+
+        # get all not editable fields from objet class
+        not_editable_fields = [
+            field.name for field in obj._meta.fields if not field.editable
+        ]
+        readonly_fields += not_editable_fields
         return readonly_fields
 
 
@@ -765,6 +769,7 @@ class VueActeurAdmin(FinalActeurAdminMixin, BaseActeurAdmin):
         "epci",
         "code_commune_insee",
     ]
+    autocomplete_fields = ["parent"]
 
     def get_inline_instances(self, request, vue_acteur=None):
         if vue_acteur and vue_acteur.is_parent:

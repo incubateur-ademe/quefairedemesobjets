@@ -579,10 +579,6 @@ class CarteConfigView(DetailView, CarteSearchActeursView):
             )
         )
 
-    def _get_max_displayed_acteurs(self):
-        # Hardcoded value taken from dict previously used
-        return 25
-
     @override
     def _get_carte_config(self):
         """Cache the object to avoid repeated queries"""

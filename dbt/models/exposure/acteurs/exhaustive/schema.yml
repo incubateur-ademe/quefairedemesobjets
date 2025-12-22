@@ -128,10 +128,10 @@ models:
       - name: est_parent
         description: "Vrai si l'acteur est un parent"
         data_type: boolean
-      - name: enfants_liste
+      - name: liste_enfants
         description: "La liste des enfants de l'acteur"
         data_type: jsonb
-      - name: enfants_nombre
+      - name: nombre_enfants
         description: "Le nombre d'enfants de l'acteur"
         data_type: integer
       - name: est_dans_carte
@@ -208,7 +208,8 @@ models:
           initially_deferred: true
     tests:
       - dbt_expectations.expect_table_row_count_to_be_between:
-          min_value: 600000
+          arguments:
+            min_value: 600000
   - name: exposure_exhaustive_propositionservice
     description: "Proposition Service model"
     columns:
@@ -265,7 +266,8 @@ models:
             - acteur_id
             - action_id
       - dbt_expectations.expect_table_row_count_to_be_between:
-          min_value: 600000
+          arguments:
+            min_value: 600000
   - name: exposure_exhaustive_propositionservice_sous_categories
     description: "Proposition Service Sous Categories model"
     columns:
@@ -319,7 +321,8 @@ models:
             - vuepropositionservice_id
             - souscategorieobjet_id
       - dbt_expectations.expect_table_row_count_to_be_between:
-          min_value: 1800000
+          arguments:
+            min_value: 1800000
   - name: exposure_exhaustive_acteur_acteur_services
     description: "Acteur Acteur Services model"
     columns:
@@ -373,7 +376,8 @@ models:
             - vueacteur_id
             - acteurservice_id
       - dbt_expectations.expect_table_row_count_to_be_between:
-          min_value: 500000
+          arguments:
+            min_value: 500000
 
   - name: exposure_exhaustive_acteur_labels
     description: "Acteur Labels model"
@@ -429,7 +433,8 @@ models:
             - vueacteur_id
             - labelqualite_id
       - dbt_expectations.expect_table_row_count_to_be_between:
-          min_value: 30000
+          arguments:
+            min_value: 30000
   - name: exposure_exhaustive_acteur_sources
     description: "Lien entre acteur de la exhaustive et sources"
     columns:
@@ -478,7 +483,8 @@ models:
           deferrable: true
     tests:
       - dbt_expectations.expect_table_row_count_to_be_between:
-          min_value: 500000
+          arguments:
+            min_value: 500000
   - name: exposure_exhaustive_perimetreadomicile
     description: "Vue exhaustive sur les périmètres à domicile"
     columns:
@@ -520,4 +526,5 @@ models:
           type: hash
     tests:
       - dbt_expectations.expect_table_row_count_to_be_between:
-          min_value: 50
+          arguments:
+            min_value: 50

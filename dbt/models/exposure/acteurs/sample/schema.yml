@@ -1,0 +1,500 @@
+version: 2
+
+models:
+  - name: exposure_sample_displayedacteur
+    description: "Echantillon d'acteurs affichés sur la carte"
+    columns:
+      - name: identifiant_unique
+        description: "The primary key for this table"
+        data_type: varchar(255)
+        null_ok: false
+        tests:
+          - unique
+          - not_null
+          - not_empty_string
+      - name: uuid
+        description: "The uuid for this table"
+        data_type: varchar(255)
+        tests:
+          - unique
+          - not_null
+      - name: nom
+        description: "Le nom de l'acteur"
+        data_type: varchar(255)
+        tests:
+          - not_null
+          - not_empty_string
+      - name: description
+        description: "La description de l'acteur"
+        data_type: text
+      - name: acteur_type_id
+        description: "Le type d'acteur"
+        data_type: integer
+        tests:
+          - not_null
+      - name: adresse
+        description: "L'adresse de l'acteur"
+        data_type: varchar(255)
+      - name: adresse_complement
+        description: "L'adresse complémentaire de l'acteur"
+        data_type: varchar(255)
+      - name: code_postal
+        description: "Le code postal de l'acteur"
+        data_type: varchar(10)
+      - name: ville
+        description: "La ville de l'acteur"
+        data_type: varchar(255)
+      - name: url
+        description: "L'URL de l'acteur"
+        data_type: varchar(2048)
+      - name: email
+        description: "L'email de l'acteur"
+        data_type: varchar(254)
+      - name: location
+        description: "La localisation de l'acteur"
+        data_type: geography
+      - name: telephone
+        description: "Le numéro de téléphone de l'acteur"
+        data_type: varchar(255)
+      - name: nom_commercial
+        description: "Le nom commercial de l'acteur"
+        data_type: varchar(255)
+      - name: nom_officiel
+        description: "Le nom officiel de l'acteur"
+        data_type: varchar(255)
+      - name: siren
+        description: "Le numéro SIREN de l'acteur"
+        data_type: varchar(9)
+      - name: siret
+        description: "Le numéro SIRET de l'acteur"
+        data_type: varchar(14)
+      - name: source_id
+        description: "L'identifiant source de l'acteur"
+        data_type: integer
+      - name: identifiant_externe
+        description: "L'identifiant externe de l'acteur"
+        data_type: varchar(255)
+      - name: naf_principal
+        description: "Le code NAF principal de l'acteur"
+        data_type: varchar(255)
+      - name: commentaires
+        description: "Les commentaires de l'acteur"
+        data_type: text
+      - name: horaires_osm
+        description: "Les horaires OSM de l'acteur"
+        data_type: varchar
+      - name: horaires_description
+        description: "La description des horaires de l'acteur"
+        data_type: text
+      - name: public_accueilli
+        description: "Le public accueilli par l'acteur"
+        data_type: varchar(255)
+      - name: reprise
+        description: "La reprise de l'acteur"
+        data_type: varchar(255)
+      - name: exclusivite_de_reprisereparation
+        description: "L'exclusivité de la réparation de l'acteur"
+        data_type: boolean
+      - name: uniquement_sur_rdv
+        description: "Le fait que l'acteur soit uniquement sur RDV"
+        data_type: boolean
+      - name: consignes_dacces
+        description: "Les consignes d'accès de l'acteur"
+        data_type: text
+      - name: action_principale_id
+        description: "L'action principale de l'acteur"
+        data_type: integer
+      - name: modifie_le
+        description: "La date de modification de l'acteur"
+        data_type: timestamp with time zone
+      - name: cree_le
+        description: "La date de création de l'acteur"
+        data_type: timestamp with time zone
+      - name: statut
+        description: "Le statut de l'acteur"
+        data_type: varchar(255)
+      - name: siret_is_closed
+        description: "Information si on sait que le SIRET est fermé"
+        data_type: boolean
+      - name: lieu_prestation
+        description: "Le lieu de prestation de l'acteur"
+        data_type: varchar(255)
+      - name: code_commune_insee
+        description: "Le code commune de l'acteur"
+        data_type: varchar(10)
+      - name: epci_id
+        description: "L'identifiant de l'EPCI de l'acteur"
+        data_type: integer
+    config:
+      tags:
+        - exposure
+        - sample
+        - acteurs
+        - displayedacteur
+      contract:
+        enforced: true
+      materialized: table
+      indexes:
+        - columns: ['modifie_le', 'identifiant_unique']
+          type: btree
+        - columns: ['identifiant_unique']
+          type: btree
+          unique: true
+        - columns: ['code_postal']
+          type: btree
+        - columns: ['nom']
+          type: btree
+        - columns: ['siren']
+          type: btree
+        - columns: ['siret']
+          type: btree
+        - columns: ['source_id']
+          type: hash
+        - columns: ['ville']
+          type: btree
+        - columns: ['acteur_type_id']
+          type: hash
+        - columns: ['location']
+          type: gist
+      constraints:
+        - type: foreign_key
+          columns: [acteur_type_id]
+          ref_columns: [id]
+          ref_table: qfdmo_acteurtype
+          deferrable: true
+          initially_deferred: true
+        - type: foreign_key
+          columns: [action_principale_id]
+          ref_columns: [id]
+          ref_table: qfdmo_action
+          deferrable: true
+          initially_deferred: true
+        - type: foreign_key
+          columns: [source_id]
+          ref_columns: [id]
+          ref_table: qfdmo_source
+          deferrable: true
+          initially_deferred: true
+    tests:
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          arguments:
+            min_value: 1000
+  - name: exposure_sample_displayedpropositionservice
+    description: "Propositions de service de l'échantillon des acteurs affichées sur la carte"
+    columns:
+      - name: id
+        description: "L'identifiant de la proposition de service"
+        data_type: varchar
+        tests:
+          - not_null
+          - unique
+      - name: acteur_id
+        description: "L'identifiant de l'acteur"
+        data_type: varchar
+        tests:
+          - not_null
+      - name: action_id
+        description: "L'identifiant de l'action"
+        data_type: integer
+        tests:
+          - not_null
+    config:
+      tags:
+        - exposure
+        - sample
+        - acteurs
+        - displayedpropositionservice
+      materialized: table
+      contract:
+        enforced: true
+      indexes:
+        - columns: ['acteur_id', 'action_id']
+          unique: true
+        - columns: ['acteur_id']
+          type: hash
+        - columns: ['action_id']
+          type: hash
+        - columns: ['id']
+          type: hash
+      constraints:
+        - type: foreign_key
+          columns: [acteur_id]
+          ref_columns: [identifiant_unique]
+          ref_table: exposure_sample_displayedacteur
+          deferrable: true
+          initially_deferred: true
+        - type: foreign_key
+          columns: [action_id]
+          ref_columns: [id]
+          ref_table: qfdmo_action
+          deferrable: true
+          initially_deferred: true
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - acteur_id
+            - action_id
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          arguments:
+            min_value: 1000
+  - name: exposure_sample_displayedpropositionservice_sous_categories
+    description: "Sous-catégories des propositions de service de l'échantillon des acteurs affichées sur la carte"
+    columns:
+      - name: id
+        description: "L'identifiant de la sous-catégorie"
+        data_type: bigint
+        tests:
+          - not_null
+      - name: displayedpropositionservice_id
+        description: "L'identifiant de la proposition de service"
+        data_type: varchar
+        tests:
+          - not_null
+      - name: souscategorieobjet_id
+        description: "L'identifiant de la sous-catégorie"
+        data_type: integer
+        tests:
+          - not_null
+    config:
+      tags:
+        - exposure
+        - sample
+        - acteurs
+        - displayedpropositionservice_sous_categories
+      materialized: table
+      contract:
+        enforced: true
+      indexes:
+        - columns: ['displayedpropositionservice_id', 'souscategorieobjet_id']
+          unique: true
+        - columns: ['displayedpropositionservice_id']
+          type: hash
+        - columns: ['souscategorieobjet_id']
+          type: hash
+      constraints:
+        - type: foreign_key
+          columns: [displayedpropositionservice_id]
+          ref_columns: [id]
+          ref_table: exposure_sample_displayedpropositionservice
+          deferrable: true
+          initially_deferred: true
+        - type: foreign_key
+          columns: [souscategorieobjet_id]
+          ref_columns: [id]
+          ref_table: qfdmo_souscategorieobjet
+          deferrable: true
+          initially_deferred: true
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - displayedpropositionservice_id
+            - souscategorieobjet_id
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          arguments:
+            min_value: 1000
+  - name: exposure_sample_displayedacteur_acteur_services
+    description: "Lien entre les acteurs de l'échantillon et les services"
+    columns:
+      - name: id
+        description: "L'identifiant du lien entre acteur et acteur_services"
+        data_type: bigint
+        tests:
+          - not_null
+      - name: displayedacteur_id
+        description: "L'identifiant de l'acteur"
+        data_type: varchar
+        tests:
+          - not_null
+      - name: acteurservice_id
+        description: "L'identifiant du service"
+        data_type: integer
+        tests:
+          - not_null
+    config:
+      tags:
+        - exposure
+        - sample
+        - acteurs
+        - displayedacteur_acteur_services
+      materialized: table
+      contract:
+        enforced: true
+      indexes:
+        - columns: ['displayedacteur_id', 'acteurservice_id']
+          unique: true
+        - columns: ['displayedacteur_id']
+          type: hash
+        - columns: ['acteurservice_id']
+          type: hash
+      constraints:
+        - type: foreign_key
+          columns: [displayedacteur_id]
+          ref_columns: [identifiant_unique]
+          ref_table: exposure_sample_displayedacteur
+          deferrable: true
+          initially_deferred: true
+        - type: foreign_key
+          columns: [acteurservice_id]
+          ref_columns: [id]
+          ref_table: qfdmo_acteurservice
+          deferrable: true
+          initially_deferred: true
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - displayedacteur_id
+            - acteurservice_id
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          arguments:
+            min_value: 1000
+  - name: exposure_sample_displayedacteur_labels
+    description: "Lien entre les acteurs de l'échantillon et les labels"
+    columns:
+      - name: id
+        description: "L'identifiant du lien entre acteur et label"
+        data_type: bigint
+        tests:
+          - unique
+          - not_null
+      - name: displayedacteur_id
+        description: "L'identifiant de l'acteur"
+        data_type: varchar
+        tests:
+          - not_null
+      - name: labelqualite_id
+        description: "L'identifiant du label"
+        data_type: integer
+        tests:
+          - not_null
+    config:
+      tags:
+        - exposure
+        - sample
+        - acteurs
+        - displayedacteur_labels
+      materialized: table
+      contract:
+        enforced: true
+      indexes:
+        - columns: ['displayedacteur_id', 'labelqualite_id']
+          unique: true
+        - columns: ['displayedacteur_id']
+          type: hash
+        - columns: ['labelqualite_id']
+          type: hash
+      constraints:
+        - type: foreign_key
+          columns: [displayedacteur_id]
+          ref_columns: [identifiant_unique]
+          ref_table: exposure_sample_displayedacteur
+          deferrable: true
+          initially_deferred: true
+        - type: foreign_key
+          columns: [labelqualite_id]
+          ref_columns: [id]
+          ref_table: qfdmo_labelqualite
+          deferrable: true
+          initially_deferred: true
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - displayedacteur_id
+            - labelqualite_id
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          arguments:
+            min_value: 100
+  - name: exposure_sample_displayedperimetreadomicile
+    description: "Périmètres à domicile de l'échantillon des acteurs affichés sur la carte"
+    columns:
+      - name: id
+        description: "L'identifiant du périmètre à domicile"
+        data_type: bigint
+        tests:
+          - not_null
+          - unique
+      - name: acteur_id
+        description: "L'identifiant de l'acteur"
+        data_type: varchar
+        tests:
+          - not_null
+      - name: type
+        description: "Le type de périmètre à domicile"
+        data_type: varchar
+        tests:
+          - not_null
+          - not_empty_string
+      - name: valeur
+        description: "La valeur du périmètre à domicile"
+        data_type: varchar
+        tests:
+          - not_null
+    config:
+      tags:
+        - exposure
+        - sample
+        - acteurs
+        - displayedperimetreadomicile
+      materialized: table
+      contract:
+        enforced: true
+      indexes:
+        - columns: ['id']
+          unique: true
+        - columns: ['acteur_id']
+          type: hash
+    tests:
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          arguments:
+            min_value: 2
+  - name: exposure_sample_displayedacteur_sources
+    description: "Sources de l'échantillon des acteurs affichés sur la carte"
+    columns:
+      - name: id
+        description: "L'identifiant de la source"
+        data_type: bigint
+        tests:
+          - not_null
+          - unique
+      - name: displayedacteur_id
+        description: "L'identifiant de l'acteur"
+        data_type: varchar
+        tests:
+          - not_null
+      - name: source_id
+        description: "L'identifiant de la source"
+        data_type: integer
+        tests:
+          - not_null
+    config:
+      tags:
+        - exposure
+        - sample
+        - acteurs
+        - displayedacteur_sources
+      materialized: table
+      contract:
+        enforced: true
+      indexes:
+        - columns: ['displayedacteur_id', 'source_id']
+          unique: true
+        - columns: ['displayedacteur_id']
+          type: hash
+        - columns: ['source_id']
+          type: hash
+      constraints:
+        - type: foreign_key
+          columns: [displayedacteur_id]
+          ref_columns: [identifiant_unique]
+          ref_table: exposure_sample_displayedacteur
+          deferrable: true
+          initially_deferred: true
+        - type: foreign_key
+          columns: [source_id]
+          ref_columns: [id]
+          ref_table: qfdmo_source
+          deferrable: true
+          initially_deferred: true
+    tests:
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          arguments:
+            min_value: 100

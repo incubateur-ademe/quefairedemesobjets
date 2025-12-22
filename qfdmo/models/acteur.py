@@ -400,16 +400,6 @@ class DisplayedActeurQuerySet(models.QuerySet):
         )
 
 
-class DisplayedActeurManager(models.Manager):
-    def get_queryset(self):
-        return DisplayedActeurQuerySet(self.model, using=self._db)
-
-    def get_by_natural_key(self, uuid):
-        return self.get(
-            uuid=uuid,
-        )
-
-
 class LatLngPropertiesMixin(models.Model):
     location: models.PointField
 
@@ -976,10 +966,6 @@ class RevisionActeur(BaseActeur, LatLngPropertiesMixin):
         help_text="Raison du rattachement au parent",
     )
 
-    @property
-    def is_parent(self):
-        return self.pk and self.duplicats.exists()
-
     nom = models.CharField(max_length=255, blank=True, default="", db_default="")
     acteur_type = models.ForeignKey(
         ActeurType, on_delete=models.CASCADE, blank=True, null=True
@@ -991,6 +977,10 @@ class RevisionActeur(BaseActeur, LatLngPropertiesMixin):
         db_default="",
         validators=[EmptyEmailValidator()],
     )
+
+    @property
+    def is_parent(self):
+        return self.pk and self.duplicats.exists()
 
     @property
     def change_url(self):
@@ -1201,9 +1191,29 @@ Model to display all acteurs in admin
 """
 
 
+class FinalActeurManager(models.Manager):
+    def get_active_parents(self):
+        return self.get_queryset().filter(
+            statut=ActeurStatus.ACTIF,
+            source_id__isnull=True,
+        )
+
+
+class DisplayedActeurManager(FinalActeurManager, models.Manager):
+    def get_queryset(self):
+        return DisplayedActeurQuerySet(self.model, using=self._db)
+
+    def get_by_natural_key(self, uuid):
+        return self.get(
+            uuid=uuid,
+        )
+
+
 class FinalActeur(BaseActeur):
     class Meta:
         abstract = True
+
+    objects = FinalActeurManager()
 
     uuid = models.CharField(
         max_length=255, default=generate_short_uuid, editable=False, db_index=True
@@ -1231,6 +1241,13 @@ class VueActeur(FinalActeur):
         validators=[clean_parent],
     )
 
+    # Table name qfdmo_vueacteur_sources
+    sources = models.ManyToManyField(
+        Source,
+        blank=True,
+        related_name="vue_acteurs",
+    )
+
     # Readonly fields
     revision_existe = models.BooleanField(
         default=False, editable=False, verbose_name="Une correction existe"
@@ -1238,13 +1255,13 @@ class VueActeur(FinalActeur):
     est_parent = models.BooleanField(
         default=False, editable=False, verbose_name="L'acteur est un parent"
     )
-    enfants_liste = models.JSONField(
+    liste_enfants = models.JSONField(
         default=None,
         editable=False,
         null=True,
         verbose_name="La liste des enfants de l'acteur parent",
     )
-    enfants_nombre = models.IntegerField(
+    nombre_enfants = models.IntegerField(
         default=None,
         editable=False,
         null=True,
