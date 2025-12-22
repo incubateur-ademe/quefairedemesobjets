@@ -15,7 +15,7 @@ updates:
     schedule:
       interval: "weekly"
       day: "tuesday"
-      time: "06:00" # UTC
+      time: "06:15" # UTC
     cooldown:
       default-days: 7
     groups:
@@ -34,7 +34,7 @@ updates:
     schedule:
       interval: "weekly"
       day: "tuesday"
-      time: "06:00" # UTC
+      time: "06:30" # UTC
     cooldown:
       default-days: 7
   - package-ecosystem: "terraform"
@@ -42,6 +42,14 @@ updates:
     schedule:
       interval: "weekly"
       day: "tuesday"
-      time: "06:00" # UTC
+      time: "06:45" # UTC
+    cooldown:
+      default-days: 7
+  - package-ecosystem: "pre-commit"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "07:00" # UTC
     cooldown:
       default-days: 7
