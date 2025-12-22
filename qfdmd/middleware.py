@@ -79,7 +79,7 @@ class RequestEnhancementMiddleware:
 
         if self.CARTE_PARAM in request.GET:
             return self._build_redirect_url(
-                "qfdmo:carte", request.GET, [self.CARTE_PARAM]
+                "qfdmo:carte", request.GET, [self.CARTE_PARAM, self.IFRAME_PARAM]
             )
 
         if self.IFRAME_PARAM in request.GET or self.FORMULAIRE_PARAM in request.GET:
