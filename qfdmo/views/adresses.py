@@ -409,7 +409,6 @@ def acteur_detail(request, uuid):
                 "proposition_services__sous_categories",
                 "proposition_services__sous_categories__categorie",
                 "proposition_services__action__groupe_action",
-                "labels",
                 "sources",
             )
             .with_displayable_labels()
