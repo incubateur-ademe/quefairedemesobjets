@@ -272,9 +272,11 @@ class BaseActeurAdmin(DjangoQLSearchMixin, admin.GISModelAdmin):
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = list(super().get_readonly_fields(request, obj))
 
-        # get all not editable fields from objet class
+        # TODO: check if it is needed, does the super().get_readonly_fields already
+        # check editable or not fields
+        # get all not editable fields from model
         not_editable_fields = [
-            field.name for field in obj._meta.fields if not field.editable
+            field.name for field in self.model._meta.get_fields() if not field.editable
         ]
         readonly_fields += not_editable_fields
         return readonly_fields

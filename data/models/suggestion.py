@@ -689,6 +689,8 @@ class SuggestionGroupe(TimestampedModel):
         )
         displayed_values = {}
         for field in fields:
+            if field in SuggestionGroupe.NOT_EDITABLE_FIELDS:
+                continue
             value = (
                 getattr(acteur_overridden_by, field) if acteur_overridden_by else None
             )
