@@ -202,3 +202,11 @@ Type "help", "copyright", "credits" or "license" for more information.
 >>> import airflow.providers.amazon
 …
 ```
+
+## Résoudre des problèmes de formatting dans `infrastructure`
+
+Dans la CI en cas d'erreur de fomatting OpenTofu lors de l'exécution de l table `Run Tofu format check`, appliquer le formatage des fichiers du dossier `infrastructure`
+
+```sh
+tofu fmt -recursive infrastructure
+```
