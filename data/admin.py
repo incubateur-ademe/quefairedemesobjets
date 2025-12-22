@@ -1,8 +1,10 @@
 import logging
 
 from django.contrib import admin, messages
+from django.template.loader import render_to_string
 from django.utils.html import format_html
 from djangoql.admin import DjangoQLSearchMixin
+from djangoql.schema import DjangoQLSchema, IntField, StrField
 
 from core.admin import NotEditableMixin, NotSelfDeletableMixin, QuerysetFilterAdmin
 from data.models.suggestion import (
@@ -208,7 +210,29 @@ class SuggestionUnitaireInline(admin.TabularInline):
 class SuggestionGroupeAdmin(
     DjangoQLSearchMixin, NotEditableMixin, NotSelfDeletableMixin, QuerysetFilterAdmin
 ):
-    djangoql_completion_enabled_by_default = False
+    actions = [mark_as_rejected, mark_as_toproceed]
+
+    class SuggestionGroupeQLSchema(DjangoQLSchema):
+        def get_fields(self, model):
+            """Override to expose relations and custom fields."""
+            fields = super().get_fields(model)
+
+            if model == SuggestionGroupe:
+                return [
+                    field
+                    for field in fields
+                    if field not in ["suggestion_unitaires_count"]
+                ] + [IntField(name="suggestion_unitaires_count")]
+
+            # Force string field for champs and valeurs in SuggestionUnitaire
+            if model == SuggestionUnitaire:
+                return [
+                    field for field in fields if field not in ["champs", "valeurs"]
+                ] + [StrField(name="champs"), StrField(name="valeurs")]
+            return fields
+
+    djangoql_completion_enabled_by_default = True
+    djangoql_schema = SuggestionGroupeQLSchema
 
     class SuggestionCohorteFilter(admin.RelatedFieldListFilter):
         def field_choices(self, field, request, model_admin):
@@ -216,21 +240,28 @@ class SuggestionGroupeAdmin(
 
     search_fields = ["contexte", "metadata"]
     list_display = [
-        "id",
-        "suggestion_cohorte",
-        "statut",
-        "acteur",
-        "revision_acteur",
-        "contexte",
-        "metadata",
+        "groupe_de_suggestions",
     ]
+    list_display_links = None
     readonly_fields = ["cree_le", "modifie_le"]
     inlines = [SuggestionUnitaireInline]
     list_filter = [
         ("suggestion_cohorte", SuggestionCohorteFilter),
         ("statut", admin.ChoicesFieldListFilter),
     ]
-    # actions = [mark_as_rejected, mark_as_toproceed]
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        return queryset.prefetch_related(
+            "suggestion_unitaires",
+            "acteur",
+            "revision_acteur",
+            "revision_acteur__parent",
+        ).with_suggestion_unitaire_count()  # type: ignore[attr-defined]
+
+    def groupe_de_suggestions(self, obj):
+        template_name = "data/_partials/suggestion_groupe_details.html"
+        return render_to_string(template_name, obj.serialize().to_dict())
 
 
 @admin.register(SuggestionUnitaire)

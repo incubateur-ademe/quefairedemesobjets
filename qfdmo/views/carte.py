@@ -6,6 +6,7 @@ from typing import Any, TypedDict, override
 from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.core.cache import cache
+from django.db.models import Q
 from django.forms import Form
 from django.utils.functional import cached_property
 from django.views.generic import DetailView
@@ -144,6 +145,12 @@ class CarteSearchActeursView(SearchActeursView):
 
         return set()
 
+    def _get_epci_codes(self) -> list[str]:
+        legacy_form = self._get_legacy_form()
+        if not legacy_form:
+            return []
+        return legacy_form.decode_querystring().getlist("epci_codes")
+
     # Forms and field utilities
     # =========================
     def _create_form_instance(self, form_class, data, prefix, legacy_form):
@@ -159,7 +166,6 @@ class CarteSearchActeursView(SearchActeursView):
         form = self._create_form_instance(
             form_config["form"], data, primary_prefix, legacy_form
         )
-
         if form.is_valid():
             return form
 
@@ -342,6 +348,13 @@ class CarteSearchActeursView(SearchActeursView):
         # it needs to be kept after the forms are initialised above.
         context = super().get_context_data(**kwargs)
 
+        # TODO address_ok in result.html use this epci_codes from context
+        # when address_ok will be remove from template and the condition will be
+        # initialized from view, this context assignation will be removed
+        context["epci_codes"] = []
+        if epci_codes := self._get_epci_codes():
+            context["epci_codes"] = epci_codes
+
         carte_config = self._get_carte_config()
         icon_lookup = self._build_icon_lookup(carte_config) if carte_config else {}
 
@@ -505,6 +518,7 @@ class CarteConfigView(DetailView, CarteSearchActeursView):
                 "action",
                 "direction",
                 "direction__actions",
+                "epci",
             )
         )
 
@@ -517,22 +531,23 @@ class CarteConfigView(DetailView, CarteSearchActeursView):
         """Cache the object to avoid repeated queries"""
         return self.get_object()
 
-    # def _compile_acteurs_queryset(self, *args, **kwargs):
-    #     filters, excludes = super()._compile_acteurs_queryset(*args, **kwargs)
+    @override
+    def _compile_acteurs_queryset(self, *args, **kwargs):
+        filters, excludes = super()._compile_acteurs_queryset(*args, **kwargs)
 
-    #     # TODO: remove this
-    #     if source_filter := self.carte_config.source.all():
-    #         filters &= Q(source__in=source_filter)
+        # TODO: remove this
+        if source_filter := self.carte_config.source.all():
+            filters &= Q(source__in=source_filter)
 
-    #     # TODO: remove this
-    #     if label_filter := self.carte_config.label_qualite.all():
-    #         filters &= Q(labels__in=label_filter)
+        # TODO: remove this
+        if label_filter := self.carte_config.label_qualite.all():
+            filters &= Q(labels__in=label_filter)
 
-    #     # TODO: remove this
-    #     if acteur_type_filter := self.carte_config.acteur_type.all():
-    #         filters &= Q(acteur_type__in=acteur_type_filter)
+        # TODO: remove this
+        if acteur_type_filter := self.carte_config.acteur_type.all():
+            filters &= Q(acteur_type__in=acteur_type_filter)
 
-    #     return filters, excludes
+        return filters, excludes
 
     def _get_sous_categorie_ids(self) -> list[int]:
         """Get sous_categorie IDs with the following priority:
@@ -552,6 +567,13 @@ class CarteConfigView(DetailView, CarteSearchActeursView):
             result_ids = result_ids & filter_ids if result_ids else filter_ids
 
         return list(result_ids)
+
+    def _get_epci_codes(self) -> list[str]:
+        epci_codes = super()._get_epci_codes()
+        if not epci_codes:
+            epci_codes = self.carte_config.epci.all().values_list("code", flat=True)
+
+        return epci_codes
 
     def _get_action_ids(self) -> list[str]:
         action_ids = super()._get_action_ids()

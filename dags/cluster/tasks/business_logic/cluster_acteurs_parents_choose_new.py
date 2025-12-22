@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from cluster.config.constants import COL_PARENT_ID_BEFORE
 from cluster.tasks.business_logic.misc.df_sort import df_sort
+from utils.django import django_setup_full
 
 from data.models.change import (
     COL_CHANGE_MODEL_NAME,
@@ -19,7 +20,6 @@ from data.models.changes import (
     ChangeActeurUpdateParentId,
     ChangeActeurVerifyRevision,
 )
-from utils.django import django_setup_full
 
 django_setup_full()
 
@@ -149,6 +149,7 @@ def cluster_acteurs_parents_choose_new(df_clusters: pd.DataFrame) -> pd.DataFram
     dfs_marked = []
 
     df = df_clusters.copy()
+
     for cluster_id in df["cluster_id"].unique():
 
         # Pour chaque cluster on travaille sur sa df filtrée

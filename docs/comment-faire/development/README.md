@@ -9,4 +9,5 @@ installation.md
 useful_command.md
 dependencies.md
 fixture_generation.md
+create_webapp_sample_db.md
 ```

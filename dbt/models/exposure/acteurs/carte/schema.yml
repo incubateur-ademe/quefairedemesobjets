@@ -2,7 +2,7 @@ version: 2
 
 models:
   - name: exposure_carte_acteur
-    description: "Vue sur les acteurs affichés sur la carte"
+    description: "Acteurs affichés sur la carte"
     columns:
       - name: identifiant_unique
         description: "The primary key for this table"
@@ -177,9 +177,10 @@ models:
           initially_deferred: true
     tests:
       - dbt_expectations.expect_table_row_count_to_be_between:
-          min_value: 350000
+          arguments:
+            min_value: 350000
   - name: exposure_carte_propositionservice
-    description: "Vue sur les propositions de service affichées sur la carte"
+    description: "Propositions de service affichées sur la carte"
     columns:
       - name: id
         description: "L'identifiant de la proposition de service"
@@ -234,9 +235,10 @@ models:
             - acteur_id
             - action_id
       - dbt_expectations.expect_table_row_count_to_be_between:
-          min_value: 400000
+          arguments:
+            min_value: 400000
   - name: exposure_carte_propositionservice_sous_categories
-    description: "Vue sur les sous-catégories des propositions de service affichées sur la carte"
+    description: "Sous-catégories des propositions de service affichées sur la carte"
     columns:
       - name: id
         description: "L'identifiant de la sous-catégorie"
@@ -288,7 +290,8 @@ models:
             - displayedpropositionservice_id
             - souscategorieobjet_id
       - dbt_expectations.expect_table_row_count_to_be_between:
-          min_value: 1250000
+          arguments:
+            min_value: 1250000
   - name: exposure_carte_acteur_acteur_services
     description: "Lien entre acteur de la carte et acteur_services"
     columns:
@@ -342,7 +345,8 @@ models:
             - displayedacteur_id
             - acteurservice_id
       - dbt_expectations.expect_table_row_count_to_be_between:
-          min_value: 350000
+          arguments:
+            min_value: 350000
   - name: exposure_carte_acteur_labels
     description: "Lien entre acteur de la carte et labels"
     columns:
@@ -397,7 +401,8 @@ models:
             - displayedacteur_id
             - labelqualite_id
       - dbt_expectations.expect_table_row_count_to_be_between:
-          min_value: 18000
+          arguments:
+            min_value: 18000
   - name: exposure_carte_acteur_sources
     description: "Lien entre acteur de la carte et sources"
     columns:
@@ -446,9 +451,10 @@ models:
           deferrable: true
     tests:
       - dbt_expectations.expect_table_row_count_to_be_between:
-          min_value: 350000
+          arguments:
+            min_value: 350000
   - name: exposure_carte_perimetreadomicile
-    description: "Vue sur les périmètres à domicile affichés sur la carte"
+    description: "Périmètres à domicile des acteurs affichés sur la carte"
     columns:
       - name: id
         description: "L'identifiant du périmètre à domicile"
@@ -488,4 +494,5 @@ models:
           type: hash
     tests:
       - dbt_expectations.expect_table_row_count_to_be_between:
-          min_value: 50
+          arguments:
+            min_value: 50

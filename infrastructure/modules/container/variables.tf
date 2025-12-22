@@ -83,6 +83,10 @@ variable "DB_WAREHOUSE" {
   type      = string
   sensitive = true
 }
+variable "DB_WEBAPP_SAMPLE" {
+  type      = string
+  sensitive = true
+}
 variable "ENVIRONMENT" {
   type      = string
   sensitive = true
