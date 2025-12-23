@@ -2,6 +2,7 @@ import logging
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+from sources.tasks.airflow_logic.config_management import DAGConfig
 from sources.tasks.business_logic.db_write_type_action_suggestions import (
     db_write_type_action_suggestions,
 )
@@ -20,6 +21,8 @@ def db_write_type_action_suggestions_task(dag: DAG) -> PythonOperator:
 
 def db_write_type_action_suggestions_wrapper(**kwargs) -> None:
     dag_name = kwargs["dag"].dag_display_name or kwargs["dag"].dag_id
+    dag_config = DAGConfig.from_airflow_params(kwargs["params"])
+
     run_id = kwargs["run_id"]
     df_acteur_to_create = kwargs["ti"].xcom_pull(
         task_ids="db_data_prepare", key="df_acteur_to_create"
@@ -85,4 +88,5 @@ def db_write_type_action_suggestions_wrapper(**kwargs) -> None:
         metadata_to_delete={**metadata, **metadata_to_delete},
         df_log_error=df_log_error,
         df_log_warning=df_log_warning,
+        use_legacy_suggestions=dag_config.use_legacy_suggestions,
     )
