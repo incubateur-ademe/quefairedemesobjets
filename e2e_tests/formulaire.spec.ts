@@ -114,7 +114,7 @@ test("Filtres avancés s'ouvrent et se ferment en mode formulaire", async ({ pag
 })
 
 // FIXME: This test requires test data with digital acteurs to exist in the database
-test.skip("Les acteurs digitaux sont visibles sur le formulaire", async ({ page }) => {
+test("Les acteurs digitaux sont visibles sur le formulaire", async ({ page }) => {
   // Navigate to the lookbook preview page
   await navigateTo(page, `/lookbook/preview/iframe/formulaire/`)
 
@@ -165,7 +165,7 @@ test.skip("Les acteurs digitaux sont visibles sur le formulaire", async ({ page 
 
 test.describe("🗺️ Affichage et Interaction Acteurs", () => {
   // FIXME: This test requires test data with acteurs near the searched address
-  test.skip("Les acteurs sont visibles sur la carte du formulaire et fonctionnent", async ({
+  test("Les acteurs sont visibles sur la carte du formulaire et fonctionnent", async ({
     page,
   }) => {
     // Navigate to the lookbook preview page
