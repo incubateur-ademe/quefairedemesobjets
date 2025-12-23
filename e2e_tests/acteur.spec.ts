@@ -11,7 +11,7 @@ test.describe("📤 Acteur Share", () => {
     })
   })
 
-  test.skip("Le bouton copier dans le presse-papier copie l'URL complète de l'acteur", async ({
+  test("Le bouton copier dans le presse-papier copie l'URL complète de l'acteur", async ({
     page,
   }) => {
     // Click the share button to open the tooltip (using aria-describedby to find it)

@@ -144,7 +144,7 @@ test.describe("🗺️ Basculement entre Mode Carte et Liste", () => {
 })
 
 test.describe("🗺️ Affichage des Labels dans la Fiche Acteur", () => {
-  test.skip("Le label ESS est affiché dans le panneau de détails de l'acteur", async ({
+  test("Le label ESS est affiché dans le panneau de détails de l'acteur", async ({
     page,
   }) => {
     // Navigate to the test preview page with ESS filter applied
@@ -328,7 +328,7 @@ test.describe("🗺️ Persistance des Filtres de Légende", () => {
 })
 
 test.describe("🗺️ Bouton 'Rechercher dans cette zone'", () => {
-  test.skip("Le bouton apparaît après déplacement de la carte et met à jour les résultats", async ({
+  test("Le bouton apparaît après déplacement de la carte et met à jour les résultats", async ({
     page,
   }) => {
     // SKIPPED: Map movement detection doesn't work reliably in iframe test environment.
@@ -441,7 +441,7 @@ test.describe("🗺️ Bouton 'Rechercher dans cette zone'", () => {
 })
 
 test.describe("🗺️ CarteConfig Bounding Box", () => {
-  test.skip("La bounding box configurée dans CarteConfig est appliquée au chargement initial", async ({
+  test("La bounding box configurée dans CarteConfig est appliquée au chargement initial", async ({
     page,
   }) => {
     // Navigate to the test preview page
