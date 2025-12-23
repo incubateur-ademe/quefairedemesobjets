@@ -6,6 +6,7 @@ import {
   openAdvancedFilters,
   navigateTo,
   searchAddress,
+  searchAndSelectAutocomplete,
   getIframe,
   clickFirstAvailableMarker,
   TIMEOUT,
@@ -107,43 +108,64 @@ test.describe("📝 Sélection d'Actions dans le Formulaire", () => {
   })
 })
 
-test.skip("Filtres avancés s'ouvrent et se ferment en mode formulaire", async ({
-  page,
-}) => {
+test("Filtres avancés s'ouvrent et se ferment en mode formulaire", async ({ page }) => {
   await navigateTo(page, `/formulaire`)
   await openAdvancedFilters(page)
 })
 
+// FIXME: This test requires test data with digital acteurs to exist in the database
 test.skip("Les acteurs digitaux sont visibles sur le formulaire", async ({ page }) => {
   // Navigate to the lookbook preview page
   await navigateTo(page, `/lookbook/preview/iframe/formulaire/`)
 
   const iframe = getIframe(page, "formulaire")
   await mockApiAdresse(page)
+
   // Fill "Sous catégorie objet" autocomplete input
-  await searchDummySousCategorieObjet(page)
+  await searchAndSelectAutocomplete(
+    iframe,
+    "input#id_sous_categorie_objet",
+    "chaussures",
+    {
+      autocompleteSelector:
+        "#id_sous_categorie_objetautocomplete-list.autocomplete-items div:first-of-type",
+    },
+  )
 
   // Fill "Adresse" autocomplete input
-  await searchDummyAdresse(page)
+  await searchAddress(iframe, "10 rue de la paix", "formulaire", { optionIndex: 1 })
 
   // Submit the search form
-  await page
+  await iframe
     .locator("button[data-testid=formulaire-rechercher-adresses-submit]")
     .click()
 
-  const someLeafletMarker = iframe.locator(".maplibregl-marker").first()
-  await expect(someLeafletMarker).toBeAttached()
+  // Wait for results to load
+  await expect(iframe.locator(".maplibregl-marker").first()).toBeAttached({
+    timeout: TIMEOUT.LONG,
+  })
 
-  // Digital acteurs
-  await iframe.locator("#id_digital_1").click({ force: true })
+  // Switch to digital acteurs by clicking "En ligne" label
+  await iframe.locator('label:has-text("En ligne")').click()
+
+  // Wait for digital acteurs results to appear
+  await expect(iframe.locator('[data-testid="digital-acteurs-results"]')).toBeVisible({
+    timeout: TIMEOUT.DEFAULT,
+  })
+
+  // Click on first digital acteur
   await iframe.locator("[aria-controls=acteurDetailsPanel]").first().click()
+
+  // Verify details panel opens
   await expect(iframe.locator("#acteurDetailsPanel")).toHaveAttribute(
     "aria-hidden",
     "false",
   )
 })
-test.skip("🗺️ Affichage et Interaction Acteurs", () => {
-  test("Les acteurs sont visibles sur la carte du formulaire et fonctionnent", async ({
+
+test.describe("🗺️ Affichage et Interaction Acteurs", () => {
+  // FIXME: This test requires test data with acteurs near the searched address
+  test.skip("Les acteurs sont visibles sur la carte du formulaire et fonctionnent", async ({
     page,
   }) => {
     // Navigate to the lookbook preview page
@@ -169,7 +191,10 @@ test.skip("🗺️ Affichage et Interaction Acteurs", () => {
     // Submit form
     await iframe.getByTestId("formulaire-rechercher-adresses-submit").click()
 
-    await page.waitForLoadState("networkidle")
+    // Wait for markers to appear on the map
+    await expect(iframe.locator(".maplibregl-marker").first()).toBeVisible({
+      timeout: TIMEOUT.LONG,
+    })
 
     await clickFirstAvailableMarker(iframe, ".maplibregl-marker")
 
@@ -177,6 +202,7 @@ test.skip("🗺️ Affichage et Interaction Acteurs", () => {
     await expect(iframe.locator("#acteurDetailsPanel")).toHaveAttribute(
       "aria-hidden",
       "false",
+      { timeout: TIMEOUT.LONG },
     )
   })
 })
