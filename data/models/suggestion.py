@@ -461,6 +461,7 @@ class SuggestionGroupe(TimestampedModel):
         "proposition_service_codes",
         "source_code",
         "acteur_type_code",
+        "perimetre_adomicile_codes",
     ]
 
     ORDERED_FIELDS = [
@@ -499,6 +500,7 @@ class SuggestionGroupe(TimestampedModel):
         ("acteur_service_codes",),
         ("proposition_service_codes",),
         ("lieu_prestation",),
+        ("perimetre_adomicile_codes",),
     ]
 
     class Meta:
