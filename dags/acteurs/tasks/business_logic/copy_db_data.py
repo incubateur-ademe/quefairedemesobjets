@@ -68,6 +68,8 @@ def copy_db_data():
     # filter tables not in EXCLUDE_TABLES
     tables = [table for table in tables if table not in EXCLUDE_TABLES]
     logger.info(f"✅ {len(tables)} tables trouvées après filtrage")
+    for table in tables:
+        logger.info(f"✅ {table} va être copiée")
 
     # Create data-only dump
     dump_and_restore_db(
