@@ -23,8 +23,9 @@ test.describe("📊 Analytics & Tracking", () => {
         timeout: TIMEOUT.DEFAULT,
       })
 
-      // Find a visible link using Playwright's built-in visibility detection
-      const visibleLink = iframe.locator("a:visible").first()
+      // Find a visible link in the main content area (not in the sidebar)
+      // The sidebar links don't trigger navigation, so we need to click on main content links
+      const visibleLink = iframe.locator("main a:visible").first()
       await expect(visibleLink).toBeVisible({ timeout: TIMEOUT.DEFAULT })
 
       // Get the current URL before clicking to detect navigation

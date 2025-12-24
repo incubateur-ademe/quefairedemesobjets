@@ -40,7 +40,8 @@ EXCLUDE_TABLES = [
 
 
 def copy_db_data():
-    from django.apps import apps
+    import importlib
+
     from django.conf import settings
     from django.db import connections
 
@@ -50,12 +51,22 @@ def copy_db_data():
     logger.info("📊 Copie des données...")
 
     # Get tables and filter them
-    with connections["webapp_sample"].cursor() as cursor:
+    with connections["default"].cursor() as cursor:
         cursor.execute("SELECT table_name FROM information_schema.tables")
         tables = [table[0] for table in cursor.fetchall()]
 
-    # Get labels of registered apps
-    table_prefixes = {app_config.label for app_config in apps.get_app_configs()}
+    # Get app labels from main Django settings (not Airflow settings)
+    # Import the main settings module to get the full INSTALLED_APPS list
+    main_settings = importlib.import_module("core.settings")
+
+    # Extract app labels from INSTALLED_APPS
+    table_prefixes = set()
+    for app in main_settings.INSTALLED_APPS:
+        # Get the last part of the app path (e.g., "qfdmd" from "qfdmd")
+        # or "auth" from "django.contrib.auth"
+        app_label = app.split(".")[-1]
+        table_prefixes.add(app_label)
+
     # Add "django" for system tables
     table_prefixes.add("django")
     tables = [
@@ -68,6 +79,8 @@ def copy_db_data():
     # filter tables not in EXCLUDE_TABLES
     tables = [table for table in tables if table not in EXCLUDE_TABLES]
     logger.info(f"✅ {len(tables)} tables trouvées après filtrage")
+    for table in tables:
+        logger.info(f"✅ {table} va être copiée")
 
     # Create data-only dump
     dump_and_restore_db(

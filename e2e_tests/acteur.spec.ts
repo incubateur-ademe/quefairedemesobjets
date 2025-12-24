@@ -9,9 +9,14 @@ test.describe("📤 Acteur Share", () => {
     await page.goto("/lookbook/preview/pages/acteur", {
       waitUntil: "domcontentloaded",
     })
+
+    // Wait for the share button to be visible
+    await page
+      .getByRole("button", { name: "partager" })
+      .waitFor({ state: "visible", timeout: 10000 })
   })
 
-  test.skip("Le bouton copier dans le presse-papier copie l'URL complète de l'acteur", async ({
+  test("Le bouton copier dans le presse-papier copie l'URL complète de l'acteur", async ({
     page,
   }) => {
     // Click the share button to open the tooltip (using aria-describedby to find it)

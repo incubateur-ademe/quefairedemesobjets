@@ -6,6 +6,7 @@ import {
   openAdvancedFilters,
   navigateTo,
   searchAddress,
+  searchAndSelectAutocomplete,
   getIframe,
   clickFirstAvailableMarker,
   TIMEOUT,
@@ -107,43 +108,44 @@ test.describe("📝 Sélection d'Actions dans le Formulaire", () => {
   })
 })
 
-test.skip("Filtres avancés s'ouvrent et se ferment en mode formulaire", async ({
-  page,
-}) => {
+test("Filtres avancés s'ouvrent et se ferment en mode formulaire", async ({ page }) => {
   await navigateTo(page, `/formulaire`)
   await openAdvancedFilters(page)
 })
 
+// FIXME: This test requires digital acteur data in the test database
+// Currently returns "Aucune solution en ligne n'a été trouvée pour votre recherche"
+// Need to seed digital acteur test data that matches: Perceuse + Auray + actions (mettreenlocation, reparer, echanger, revendre)
 test.skip("Les acteurs digitaux sont visibles sur le formulaire", async ({ page }) => {
-  // Navigate to the lookbook preview page
-  await navigateTo(page, `/lookbook/preview/iframe/formulaire/`)
+  // Navigate directly to formulaire with search parameters that return digital acteurs
+  await navigateTo(
+    page,
+    `/formulaire?map_container_id=formulaire&digital=digital&r=179&bounding_box=&direction=jai&action_displayed=preter|emprunter|louer|mettreenlocation|reparer|donner|echanger|acheter|revendre&action_list=mettreenlocation|reparer|echanger|revendre&sous_categorie_objet=Perceuse&sc_id=263&adresse=Auray&latitude=47.668099&longitude=-2.990838&mettreenlocation=on&reparer=on&echanger=on&echanger=on&revendre=on&emprunter=on&louer=on&acheter=on&pas_exclusivite_reparation=on`,
+  )
 
-  const iframe = getIframe(page, "formulaire")
-  await mockApiAdresse(page)
-  // Fill "Sous catégorie objet" autocomplete input
-  await searchDummySousCategorieObjet(page)
+  // Wait for digital acteurs results to appear
+  await expect(page.locator('[data-testid="digital-acteurs-results"]')).toBeVisible({
+    timeout: TIMEOUT.DEFAULT,
+  })
 
-  // Fill "Adresse" autocomplete input
-  await searchDummyAdresse(page)
+  // Verify at least one digital acteur is displayed
+  await expect(page.locator("[aria-controls=acteurDetailsPanel]").first()).toBeVisible({
+    timeout: TIMEOUT.DEFAULT,
+  })
 
-  // Submit the search form
-  await page
-    .locator("button[data-testid=formulaire-rechercher-adresses-submit]")
-    .click()
+  // Click on first digital acteur
+  await page.locator("[aria-controls=acteurDetailsPanel]").first().click()
 
-  const someLeafletMarker = iframe.locator(".maplibregl-marker").first()
-  await expect(someLeafletMarker).toBeAttached()
-
-  // Digital acteurs
-  await iframe.locator("#id_digital_1").click({ force: true })
-  await iframe.locator("[aria-controls=acteurDetailsPanel]").first().click()
-  await expect(iframe.locator("#acteurDetailsPanel")).toHaveAttribute(
+  // Verify details panel opens
+  await expect(page.locator("#acteurDetailsPanel")).toHaveAttribute(
     "aria-hidden",
     "false",
   )
 })
-test.skip("🗺️ Affichage et Interaction Acteurs", () => {
-  test("Les acteurs sont visibles sur la carte du formulaire et fonctionnent", async ({
+
+test.describe("🗺️ Affichage et Interaction Acteurs", () => {
+  // FIXME: This test requires test data with acteurs near the searched address
+  test.skip("Les acteurs sont visibles sur la carte du formulaire et fonctionnent", async ({
     page,
   }) => {
     // Navigate to the lookbook preview page
@@ -169,7 +171,10 @@ test.skip("🗺️ Affichage et Interaction Acteurs", () => {
     // Submit form
     await iframe.getByTestId("formulaire-rechercher-adresses-submit").click()
 
-    await page.waitForLoadState("networkidle")
+    // Wait for markers to appear on the map
+    await expect(iframe.locator(".maplibregl-marker").first()).toBeVisible({
+      timeout: TIMEOUT.LONG,
+    })
 
     await clickFirstAvailableMarker(iframe, ".maplibregl-marker")
 
@@ -177,6 +182,7 @@ test.skip("🗺️ Affichage et Interaction Acteurs", () => {
     await expect(iframe.locator("#acteurDetailsPanel")).toHaveAttribute(
       "aria-hidden",
       "false",
+      { timeout: TIMEOUT.LONG },
     )
   })
 })

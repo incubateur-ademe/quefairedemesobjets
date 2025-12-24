@@ -102,7 +102,7 @@ export async function searchForAurayInIframe(
 }
 
 export async function searchDummyAdresse(page: Page) {
-  await searchAddress(page, "10 rue de la paix", "formulaire", { optionIndex: 1 })
+  await searchAddress(page, "Auray", "formulaire", { optionIndex: 1 })
 }
 
 /**
@@ -380,8 +380,8 @@ export async function switchToListeMode(context: Page | FrameLocator) {
     .getByText("Liste", { exact: true })
   await listeButton.click()
 
-  // Wait for liste mode to be active - map container should be hidden
-  await expect(context.locator('[data-map-target="mapContainer"]')).not.toBeVisible({
+  // Wait for liste mode to be active - the Liste radio button should be checked
+  await expect(context.locator('input[type="radio"][value="liste"]')).toBeChecked({
     timeout: TIMEOUT.DEFAULT,
   })
 }

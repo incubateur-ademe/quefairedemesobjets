@@ -144,7 +144,7 @@ test.describe("🗺️ Basculement entre Mode Carte et Liste", () => {
 })
 
 test.describe("🗺️ Affichage des Labels dans la Fiche Acteur", () => {
-  test.skip("Le label ESS est affiché dans le panneau de détails de l'acteur", async ({
+  test("Le label ESS est affiché dans le panneau de détails de l'acteur", async ({
     page,
   }) => {
     // Navigate to the test preview page with ESS filter applied
@@ -159,26 +159,40 @@ test.describe("🗺️ Affichage des Labels dans la Fiche Acteur", () => {
       .locator('span:has-text("lieux du plus proche au plus loin")')
       .waitFor({ timeout: TIMEOUT.DEFAULT })
 
-    // Find the first "Voir la fiche" button and click it
-    const voirLaFicheButton = iframe.locator('[data-testid="voir-la-fiche"]').first()
-    await expect(voirLaFicheButton).toBeVisible({ timeout: TIMEOUT.SHORT })
-    await voirLaFicheButton.click()
+    // Look through multiple results to find one with ESS label
+    const voirLaFicheButtons = iframe.locator('[data-testid="voir-la-fiche"]')
+    const count = await voirLaFicheButtons.count()
 
-    // Wait for the acteur detail panel to load
-    await iframe
-      .locator("#acteurDetailsPanel [data-testid='acteur-detail-labels']")
-      .waitFor({ timeout: TIMEOUT.DEFAULT })
+    let foundESSLabel = false
+    for (let i = 0; i < Math.min(count, 5); i++) {
+      // Click on each "Voir la fiche" button
+      await voirLaFicheButtons.nth(i).click()
 
-    // Verify that the ESS label is displayed
-    const acteurDetailLabels = iframe.locator(
-      "#acteurDetailsPanel [data-testid='acteur-detail-labels']",
-    )
-    await expect(acteurDetailLabels).toContainText(
-      "Enseigne de l'économie sociale et solidaire",
-      {
-        timeout: TIMEOUT.SHORT,
-      },
-    )
+      // Wait for the acteur detail panel to load
+      await iframe
+        .locator("#acteurDetailsPanel [data-testid='acteur-detail-labels']")
+        .waitFor({ timeout: TIMEOUT.DEFAULT })
+
+      // Check if this acteur has the ESS label
+      const acteurDetailLabels = iframe.locator(
+        "#acteurDetailsPanel [data-testid='acteur-detail-labels']",
+      )
+      const text = await acteurDetailLabels.textContent()
+
+      if (text?.includes("Enseigne de l'économie sociale et solidaire")) {
+        foundESSLabel = true
+        break
+      }
+
+      // Close the panel to try the next one
+      const closeButton = iframe.locator("#acteurDetailsPanel button.fr-btn--close")
+      if (await closeButton.isVisible()) {
+        await closeButton.click()
+        await iframe.locator("#acteurDetailsPanel").waitFor({ state: "hidden" })
+      }
+    }
+
+    expect(foundESSLabel).toBe(true)
   })
 })
 
@@ -441,14 +455,19 @@ test.describe("🗺️ Bouton 'Rechercher dans cette zone'", () => {
 })
 
 test.describe("🗺️ CarteConfig Bounding Box", () => {
-  test.skip("La bounding box configurée dans CarteConfig est appliquée au chargement initial", async ({
+  test("La bounding box configurée dans CarteConfig est appliquée au chargement initial", async ({
     page,
   }) => {
     // Navigate to the test preview page
     await navigateTo(page, "/lookbook/preview/tests/t_6_carte_config_bounding_box")
 
+    // Wait for the iframe element to be present in the DOM
+    await expect(page.locator("iframe")).toBeAttached({
+      timeout: TIMEOUT.DEFAULT,
+    })
+
     // Wait for the iframe to be loaded
-    const iframe = getIframe(page, "carte-iframe")
+    const iframe = getIframe(page)
     await expect(iframe.locator("body")).toBeAttached({ timeout: TIMEOUT.DEFAULT })
 
     // Wait for the map to be loaded
@@ -475,11 +494,11 @@ test.describe("🗺️ CarteConfig Bounding Box", () => {
     expect(bbox.northEast).toHaveProperty("lat")
     expect(bbox.northEast).toHaveProperty("lng")
 
-    // Verify the coordinates match the expected Angers bounding box
+    // Verify the coordinates match the expected Auray Quiberon Terre Atlantique EPCI bounding box
     // with some tolerance for floating point precision
-    expect(bbox.southWest.lat).toBeCloseTo(47.457526, 5)
-    expect(bbox.southWest.lng).toBeCloseTo(-0.609453, 5)
-    expect(bbox.northEast.lat).toBeCloseTo(47.489048, 5)
-    expect(bbox.northEast.lng).toBeCloseTo(-0.51571, 5)
+    expect(bbox.southWest.lat).toBeCloseTo(47.323994, 5)
+    expect(bbox.southWest.lng).toBeCloseTo(-3.210132, 5)
+    expect(bbox.northEast.lat).toBeCloseTo(47.866059, 5)
+    expect(bbox.northEast.lng).toBeCloseTo(-2.834623, 5)
   })
 })

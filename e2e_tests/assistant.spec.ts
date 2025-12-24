@@ -103,7 +103,7 @@ test.describe("🤖 Assistant et Recherche", () => {
     },
   )
 
-  test.skip("Les événements PostHog sont trackés correctement (pages vues, interactions carte, détails solution)", async ({
+  test("Les événements PostHog sont trackés correctement (pages vues, interactions carte, détails solution)", async ({
     page,
   }) => {
     // Check that homepage scores 1
@@ -118,7 +118,26 @@ test.describe("🤖 Assistant et Recherche", () => {
     expect(sessionStorage.produitPageView).toBe("1")
 
     // Click on a pin on the map and check that it scores 1
+    // Wait for all /carte/* requests to complete after selecting address
+    const carteResponsePromise = page.waitForResponse(
+      (response) => response.url().includes("/carte/") && response.status() === 200,
+      { timeout: TIMEOUT.DEFAULT },
+    )
+
     await searchOnProduitPage(page, "Auray")
+
+    // Wait for the carte response to complete
+    await carteResponsePromise
+
+    // Wait for map markers to appear on the page
+    await page.locator(".maplibregl-marker:has(svg)").first().waitFor({
+      state: "attached",
+      timeout: TIMEOUT.DEFAULT,
+    })
+
+    // Give the map a moment to finish rendering and become fully interactive
+    await page.waitForTimeout(1000)
+
     await getMarkers(page)
     await clickFirstAvailableMarker(page)
 

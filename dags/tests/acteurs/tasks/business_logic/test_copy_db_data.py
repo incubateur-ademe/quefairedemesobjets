@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 from acteurs.tasks.business_logic.copy_db_data import copy_db_data
 
@@ -6,11 +6,16 @@ from acteurs.tasks.business_logic.copy_db_data import copy_db_data
 class TestCopyDbData:
     """Tests unitaires pour la fonction copy_db_data avec mocks"""
 
+    @patch("importlib.import_module")
     @patch("acteurs.tasks.business_logic.copy_db_data.dump_and_restore_db")
     @patch("django.db.connections")
     @patch("django.conf.settings")
     def test_copy_db_data_filters_tables_correctly(
-        self, mock_settings, mock_connections, mock_dump_and_restore_db
+        self,
+        mock_settings,
+        mock_connections,
+        mock_dump_and_restore_db,
+        mock_import_module,
     ):
         """
         Test that the function filters tables correctly according
@@ -19,7 +24,11 @@ class TestCopyDbData:
         # Mock settings
         mock_settings.DATABASE_URL = "postgresql://source_db"
         mock_settings.DB_WEBAPP_SAMPLE = "postgresql://dest_db"
-        mock_settings.INSTALLED_APPS = ["qfdmo", "data", "core"]
+
+        # Mock the imported core.settings module
+        mock_main_settings = Mock()
+        mock_main_settings.INSTALLED_APPS = ["qfdmo", "qfdmd", "data", "core"]
+        mock_import_module.return_value = mock_main_settings
 
         # Mock cursor and its SQL execution
         mock_cursor = MagicMock()
@@ -67,16 +76,25 @@ class TestCopyDbData:
         assert "qfdmo_acteur_acteur_services" not in tables_passed
         assert "other_table" not in tables_passed
 
+    @patch("importlib.import_module")
     @patch("acteurs.tasks.business_logic.copy_db_data.dump_and_restore_db")
     @patch("django.db.connections")
     @patch("django.conf.settings")
     def test_copy_db_data_passes_correct_parameters_to_dump_and_restore(
-        self, mock_settings, mock_connections, mock_dump_and_restore_db
+        self,
+        mock_settings,
+        mock_connections,
+        mock_dump_and_restore_db,
+        mock_import_module,
     ):
         """Test that all parameters are correctly passed to dump_and_restore_db"""
         mock_settings.DATABASE_URL = "postgresql://source_db"
         mock_settings.DB_WEBAPP_SAMPLE = "postgresql://dest_db"
-        mock_settings.INSTALLED_APPS = ["qfdmo", "data"]
+
+        # Mock the imported core.settings module
+        mock_main_settings = Mock()
+        mock_main_settings.INSTALLED_APPS = ["qfdmo", "data"]
+        mock_import_module.return_value = mock_main_settings
 
         mock_cursor = MagicMock()
         mock_cursor.fetchall.return_value = [
