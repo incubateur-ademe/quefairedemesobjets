@@ -43,6 +43,7 @@ CREATE VIEW {{view_name}} AS (
         "nicSiegeUniteLegale" AS nic_siege,
         "economieSocialeSolidaireUniteLegale" AS economie_sociale_solidaire,
         "societeMissionUniteLegale" AS societe_mission,
-        "caractereEmployeurUniteLegale" AS caractere_employeur
+        "caractereEmployeurUniteLegale" AS caractere_employeur,
+        "activitePrincipaleNAF25UniteLegale" AS activite_principale_naf_25
     FROM {{table_name}}
 )
