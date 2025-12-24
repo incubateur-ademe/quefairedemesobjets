@@ -102,7 +102,7 @@ export async function searchForAurayInIframe(
 }
 
 export async function searchDummyAdresse(page: Page) {
-  await searchAddress(page, "10 rue de la paix", "formulaire", { optionIndex: 1 })
+  await searchAddress(page, "Auray", "formulaire", { optionIndex: 1 })
 }
 
 /**

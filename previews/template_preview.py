@@ -657,7 +657,7 @@ class IframePreview(LookbookPreview):
             data-action_displayed="preter|emprunter|louer|mettreenlocation|reparer|donner|echanger|acheter|revendre"
             data-max-width="800px"
             data-height="720px"
-            data-bounding_box="{{'southWest': {{'lat': 47.570401, 'lng': 1.597977}}, 'northEast': {{'lat': 48.313697, 'lng': 3.059159}}}}">
+            data-bounding_box="{{ 'southWest': {{'lat': 47.570401, 'lng': 1.597977 }}, 'northEast': {{ 'lat': 48.313697, 'lng': 3.059159 }}}}">
         </script>
         ```
         """
@@ -683,7 +683,7 @@ class IframePreview(LookbookPreview):
         ```html
         <script src="{base_url}/static/carte.js"
             data-action_list="preter|emprunter|louer|mettreenlocation|reparer|donner|echanger|acheter|revendre"
-            data-bounding_box="{{'southWest': {{'lat': 47.457526, 'lng': -0.609453}}, 'northEast': {{'lat': 47.489048, 'lng': -0.51571}}}}">
+            data-bounding_box="{{ 'southWest': {{'lat': 47.457526, 'lng': -0.609453 }}, 'northEast': {{ 'lat': 47.489048, 'lng': -0.51571 }}}}">
         </script>
         ```
         """
@@ -708,7 +708,7 @@ class IframePreview(LookbookPreview):
             data-height="720px"
             data-direction="jai"
             data-action_list="reparer|echanger|mettreenlocation|revendre"
-            data-iframe_attributes='{{"loading":"lazy", "id" : "resize" }}'>
+            data-iframe_attributes='{{ "loading":"lazy", "id" : "resize" }}'>
         </script>
         ```
         """
@@ -922,6 +922,7 @@ class TestsPreview(LookbookPreview):
     def t_1_referrer(self, **kwargs):
         return render_to_string(
             "ui/tests/t_1_referrer.html",
+            {"base_url": base_url},
         )
 
     def t_2_carte_mode_liste_switch(self, **kwargs):
@@ -956,9 +957,11 @@ class TestsPreview(LookbookPreview):
         from django.urls import reverse
 
         # Create a test CarteConfig with a bounding box
-        # This bounding box covers Angers, France
+        # This bounding box covers Auray Quiberon Terre Atlantique EPCI (200043123)
+        # Southwest: lat=47.323994, lng=-3.210132
+        # Northeast: lat=47.866059, lng=-2.834623
         bounding_box_polygon = Polygon.from_bbox(
-            (-0.609453, 47.457526, -0.51571, 47.489048)
+            (-3.210132, 47.323994, -2.834623, 47.866059)
         )
 
         carte_config, created = CarteConfig.objects.get_or_create(

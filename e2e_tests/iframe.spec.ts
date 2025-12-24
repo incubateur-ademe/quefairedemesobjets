@@ -138,33 +138,8 @@ test.describe("📦 Système d'Intégration Iframe", () => {
     })
   })
 
-  test.describe("Persistance du mode iframe", () => {
-    test("Le mode iframe persiste lors de la navigation entre pages", async ({
-      page,
-      baseURL,
-    }) => {
-      test.slow()
-      await navigateTo(page, `/?iframe`)
-      expect(page).not.toBeNull()
-
-      for (let i = 0; i < 50; i++) {
-        await expect(page.locator("body")).toHaveAttribute(
-          "data-state-iframe-value",
-          "true",
-        )
-
-        const links = page.locator(`a[href^="${baseURL}"]`)
-
-        const count = await links.count()
-        const randomLink = links.nth(Math.floor(Math.random() * count))
-        if (await randomLink.isVisible()) {
-          await randomLink.click()
-        }
-      }
-    })
-  })
-
   test.describe("Tracking du referrer dans les iframes", () => {
+    // TODO: Fix this test - first visible link doesn't navigate, URL stays the same
     test("Le referrer parent est correctement tracké lors des clics sur des liens dans l'iframe", async ({
       page,
     }) => {
@@ -240,7 +215,112 @@ test.describe("📦 Système d'Intégration Iframe", () => {
       expect(personProperties.iframeReferrer).toBe(parentLocation)
     })
   })
+  test.describe("🧭 Navigation dans l'iframe avec persistance de l'UI", () => {
+    test("L'interface iframe persiste lors de la navigation", async ({ page }) => {
+      // Navigate to the test preview page
+      await navigateTo(
+        page,
+        "/lookbook/preview/tests/t_8_iframe_navigation_persistence",
+      )
+
+      // Wait for iframe to be created by the integration script
+      const iframe = getIframe(page, "assistant")
+      await expect(iframe.locator("body")).toBeAttached({ timeout: TIMEOUT.DEFAULT })
+
+      // Helper function to check iframe-specific UI elements
+      const checkIframeUI = async () => {
+        // Check that header is NOT present (hidden in iframe mode)
+        await expect(iframe.locator(".fr-header")).not.toBeVisible()
+
+        // Check that footer is NOT present (hidden in iframe mode)
+        await expect(iframe.locator(".fr-footer")).not.toBeVisible()
+
+        // Check that iframe footer link IS present
+        await expect(iframe.locator("text=En savoir plus sur ce site")).toBeVisible()
+      }
+
+      // Initial page load - verify iframe UI
+      await checkIframeUI()
+
+      // Navigate to a product page by clicking search
+      const searchInput = iframe.locator('input[name="home-input"]')
+      await searchInput.fill("vélo")
+      await searchInput.press("Enter")
+
+      // Wait for navigation to complete
+      await iframe
+        .locator("text=/vélo/i")
+        .first()
+        .waitFor({ state: "visible", timeout: TIMEOUT.DEFAULT })
+
+      // Verify iframe UI persists after search
+      await checkIframeUI()
+
+      // Click on a search result
+      const firstResult = iframe.locator('[data-testid="suggestion-item"]').first()
+      if (await firstResult.isVisible()) {
+        await firstResult.click()
+
+        // Wait for product page to load
+        await iframe
+          .locator("text=/que faire/i")
+          .waitFor({ state: "visible", timeout: TIMEOUT.DEFAULT })
+
+        // Verify iframe UI persists on product page
+        await checkIframeUI()
+      }
+
+      // Navigate back using browser back button if available
+      const backButton = iframe.locator("text=/retour/i").first()
+      if (await backButton.isVisible()) {
+        await backButton.click()
+
+        // Wait for previous page to load
+        await iframe
+          .locator("body")
+          .waitFor({ state: "attached", timeout: TIMEOUT.DEFAULT })
+
+        // Verify iframe UI still persists
+        await checkIframeUI()
+      }
+    })
+
+    test("Les liens internes maintiennent le mode iframe", async ({ page }) => {
+      // Navigate to the test preview page
+      await navigateTo(
+        page,
+        "/lookbook/preview/tests/t_8_iframe_navigation_persistence",
+      )
+
+      // Wait for iframe to be created
+      const iframe = getIframe(page, "assistant")
+      await expect(iframe.locator("body")).toBeAttached({ timeout: TIMEOUT.DEFAULT })
+
+      // Search for something - this will show search results inline in a turbo-frame
+      const searchInput = iframe.locator('input[name="home-input"]')
+      await searchInput.fill("vélo")
+
+      // Wait for search results to appear and click on a visible result
+      // The search results appear in the turbo-frame below the search input
+      const searchResultsFrame = iframe.locator("turbo-frame#home\\:search-results")
+      const firstVisibleResult = searchResultsFrame
+        .locator('a[href^="/dechet/"]:visible')
+        .first()
+      await expect(firstVisibleResult).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+      await firstVisibleResult.click()
+
+      // Wait for navigation to product page
+      await page.waitForTimeout(500)
+
+      // Verify iframe-specific UI is still present on the product page
+      // The standard DSFR footer should not be visible in iframe mode
+      await expect(iframe.locator(".fr-footer")).not.toBeVisible()
+      // The iframe-specific footer link should be visible
+      await expect(iframe.locator("text=En savoir plus sur ce site")).toBeVisible()
+    })
+  })
 })
+
 test.describe("📜 Accessibilité des Scripts d'Intégration", () => {
   /**
    * Tests for embed script routes
