@@ -90,6 +90,7 @@ def cluster_acteurs_one_cluster_parent_changes_mark(
     ].index
     df.loc[filter_unchanged, COL_CHANGE_MODEL_NAME] = ChangeActeurVerifyRevision.name()
     df.loc[filter_unchanged, COL_CHANGE_REASON] = REASON_ALREADY_POINT_TO_PARENT
+    df.loc[filter_unchanged, COL_CHANGE_ORDER] = 2
 
     # Enfin tous les anciens parents (si il y en a) doivent être supprimés
     filter_delete = (df["nombre_enfants"] > 0) & (df["identifiant_unique"] != parent_id)

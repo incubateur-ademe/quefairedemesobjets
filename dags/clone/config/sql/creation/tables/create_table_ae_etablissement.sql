@@ -64,7 +64,8 @@ CREATE TABLE {{table_name}} (
   "denominationUsuelleEtablissement" VARCHAR(125), -- 100 -> 125
   "activitePrincipaleEtablissement" VARCHAR(6), -- = Code NAF = 🟡 on reste scrict
   "nomenclatureActivitePrincipaleEtablissement" VARCHAR(7), -- 7 -> 10
-  "caractereEmployeurEtablissement" VARCHAR(1) -- 🟡 on reste scrict
+  "caractereEmployeurEtablissement" VARCHAR(1), -- 🟡 on reste scrict
+  "activitePrincipaleNAF25UniteLegale" VARCHAR(6) -- = Code NAF 2025= 🟡 on reste scrict
 );
 
 /* Constraints

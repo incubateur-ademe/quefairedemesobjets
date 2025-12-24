@@ -44,7 +44,8 @@ CREATE TABLE {{table_name}} (
   "nicSiegeUniteLegale" VARCHAR(5), -- 🟡 on reste scrict
   "economieSocialeSolidaireUniteLegale" VARCHAR(1), -- 🟡 on reste scrict
   "societeMissionUniteLegale" VARCHAR(50), -- None -> 50
-  "caractereEmployeurUniteLegale" VARCHAR(50)  -- None -> 50
+  "caractereEmployeurUniteLegale" VARCHAR(50), -- None -> 50
+  "activitePrincipaleNAF25UniteLegale" VARCHAR(6) -- = Code NAF 2025= 🟡 on reste scrict
 );
 
 /* Constraints
