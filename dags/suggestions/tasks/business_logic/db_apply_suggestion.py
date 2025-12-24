@@ -34,8 +34,15 @@ def db_apply_suggestion(use_suggestion_groupe: bool = False):
             logger.warning(
                 f"Error while applying suggestion {suggestion.id} - {type(e)}: {e}"
             )
-            suggestion.metadata = {
-                "error": e.args[0] if e.args else str(e),
-            }
             suggestion.statut = constants.SUGGESTION_ERREUR
-            suggestion.save()
+            try:
+                suggestion.metadata = {
+                    "error": e.args[0] if e.args else str(e),
+                }
+                suggestion.save()
+            except Exception:
+                # if the serialization fails, we use just the string representation
+                suggestion.metadata = {
+                    "error": str(e),
+                }
+                suggestion.save()
