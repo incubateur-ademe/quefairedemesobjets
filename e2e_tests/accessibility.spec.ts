@@ -1,6 +1,6 @@
 import { AxeBuilder } from "@axe-core/playwright"
 import { test, expect } from "@playwright/test"
-import { navigateTo } from "./helpers"
+import { navigateTo, TIMEOUT } from "./helpers"
 
 test.describe("♿ Conformité Accessibilité WCAG", () => {
   // Shared variables
@@ -13,6 +13,10 @@ test.describe("♿ Conformité Accessibilité WCAG", () => {
     }) => {
       await navigateTo(page, `/lookbook/preview/iframe/formulaire/`)
 
+      // Wait for the iframe to load and have content
+      const iframe = page.frameLocator(IFRAME_SELECTOR).first()
+      await expect(iframe.locator("body")).toBeAttached({ timeout: TIMEOUT.DEFAULT })
+
       const accessibilityScanResults = await new AxeBuilder({ page })
         .include(IFRAME_SELECTOR) // Restrict scan to the iframe
         .withTags(WCAG_TAGS)
@@ -23,6 +27,10 @@ test.describe("♿ Conformité Accessibilité WCAG", () => {
 
     test("L'iframe de la carte respecte les critères WCAG 2.1 AA", async ({ page }) => {
       await navigateTo(page, `/lookbook/preview/iframe/carte/`)
+
+      // Wait for the iframe to load and have content
+      const iframe = page.frameLocator(IFRAME_SELECTOR).first()
+      await expect(iframe.locator("body")).toBeAttached({ timeout: TIMEOUT.DEFAULT })
 
       const accessibilityScanResults = await new AxeBuilder({ page })
         .include(IFRAME_SELECTOR) // Restrict scan to the iframe
