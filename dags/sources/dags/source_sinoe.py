@@ -164,6 +164,7 @@ with DAG(
         "dechet_mapping": source_sinoe_dechet_mapping_get(),
         "validate_address_with_ban": False,
         "product_mapping": get_mapping_config("sous_categories_sinoe"),
+        "use_legacy_suggestions": True,
     },
 ) as dag:
     eo_task_chain(dag)

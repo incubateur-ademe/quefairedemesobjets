@@ -48,6 +48,7 @@ with DAG(
             On y associera alors le geste `donner`.
             """,
         ),
+        "use_legacy_suggestions": True,
     },
 ) as dag:
     eo_task_chain(dag)
