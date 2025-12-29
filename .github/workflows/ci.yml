@@ -158,7 +158,7 @@ jobs:
         run: make collectstatic
 
       - name: Upload build artifacts for e2e tests
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: e2e-build-artifacts
           path: |
@@ -233,7 +233,7 @@ jobs:
       #   run: npx playwright test --shard=${{ matrix.shard }}/5 --update-snapshots
 
       # - name: Upload Playwright report
-      #   uses: actions/upload-artifact@v5
+      #   uses: actions/upload-artifact@v6
       #   if: ${{ !cancelled() }}
       #   with:
       #     name: playwright-report-${{ matrix.shard }}
@@ -241,7 +241,7 @@ jobs:
       #     retention-days: 2
 
       # - name: Upload test results
-      #   uses: actions/upload-artifact@v5
+      #   uses: actions/upload-artifact@v6
       #   if: ${{ !cancelled() }}
       #   with:
       #     name: playwright-results-${{ matrix.shard }}
