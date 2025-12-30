@@ -805,7 +805,7 @@ wheels = [
 
 [[package]]
 name = "dbt-common"
-version = "1.29.0"
+version = "1.37.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "agate" },
@@ -822,14 +822,14 @@ dependencies = [
     { name = "requests" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d0/04/28ca2599232a51be0d226c6c6469df253ba2b6db863d1fd83f3274296ba3/dbt_common-1.29.0.tar.gz", hash = "sha256:46c59d24904c48253af7e5580a19cb74f607b1b1cb4078507c8bf1135bfafeb3", size = 84079, upload-time = "2025-09-04T18:50:16.856Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b7/ab/1d49b812472d4f064d715b6968f60f6636624ad18ef8e243055ee74ca5c2/dbt_common-1.37.2.tar.gz", hash = "sha256:f83f2b4c1ed234ef38edc6817e0c2bd19f27c653bc1eb8b8411285fe670c2d3c", size = 86051, upload-time = "2025-12-15T18:24:19.189Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/46/47/91c0f92872b7f6b0c70d7dd667543465771a716aa5f24db7fd74dbb08ce0/dbt_common-1.29.0-py3-none-any.whl", hash = "sha256:8f4d98343aabfaf6f4315059cf8315c06be7217510fa72069538f44216c54934", size = 86083, upload-time = "2025-09-04T18:50:15.076Z" },
+    { url = "https://files.pythonhosted.org/packages/b7/5a/cfc59817a398a96701243c03a4547b6457dbc18b62f375d6857a3d4c74f8/dbt_common-1.37.2-py3-none-any.whl", hash = "sha256:883a0b4af3e9a03e15b0d4862b654c5316d9525303683a8ead4dcc406eaa8a9a", size = 87670, upload-time = "2025-12-15T18:24:17.588Z" },
 ]
 
 [[package]]
 name = "dbt-core"
-version = "1.10.15"
+version = "1.11.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "agate" },
@@ -855,9 +855,9 @@ dependencies = [
     { name = "sqlparse" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/07/64/9d08f73c718e551b445c8766f44bc05e6863bf4d1f123c94ab710f38227b/dbt_core-1.10.15.tar.gz", hash = "sha256:0493858c5696a81f7c02f6b80f51f58280ac43a0406957c39a9303e8e54236aa", size = 899427, upload-time = "2025-11-12T20:11:35.514Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/89/82/662621bd430fc6d8ee8e0e917bc551efba1b08b82372b3c0f37fd3ef4746/dbt_core-1.11.2.tar.gz", hash = "sha256:3306fee149b9f4e648071f2c9a46c0551100e1c829f13ad7ce026eb7226ad454", size = 914480, upload-time = "2025-12-22T19:14:04.488Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/47/51/d2ceae95b49b2c7ed07655bf20b2f6350468dfd5de452b5aa4bf472bf30a/dbt_core-1.10.15-py3-none-any.whl", hash = "sha256:4de8e3897dfbd6636f98ddef2175e577c6ea25bc7941d8e85935726a2a1cb889", size = 986244, upload-time = "2025-11-12T20:11:33.345Z" },
+    { url = "https://files.pythonhosted.org/packages/02/57/dad11af27a21840252234b05d682d73ca8eb721fc79d1b4aa9502bb1b6f5/dbt_core-1.11.2-py3-none-any.whl", hash = "sha256:ac332fd61a4494494f48e1bbdc0696e309e79036b94eb0a929233bb71f4b3898", size = 1004018, upload-time = "2025-12-22T19:14:03.213Z" },
 ]
 
 [[package]]
@@ -901,14 +901,14 @@ wheels = [
 
 [[package]]
 name = "dbt-protos"
-version = "1.0.348"
+version = "1.0.410"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "protobuf" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a0/73/94a28249678aab925824497284f6bbb5f8e740613c10be6bf66042701aa7/dbt_protos-1.0.348.tar.gz", hash = "sha256:d8834c685c323b1533c1c7fdb5db5636cffab2f1a58515caba54b3dc13a3578b", size = 76628, upload-time = "2025-07-21T20:27:10.353Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/57/e1/c95f712213416a4edbebeb40c27174063f7f3e49f477b4b1d8fb547e9c26/dbt_protos-1.0.410.tar.gz", hash = "sha256:661dbc5fedd13bd48ef9cd7dd1c451fa2288dcae6202772f6e3a65f4e0dde427", size = 116692, upload-time = "2025-12-15T18:01:02.535Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c1/d1/90bd370d92db997c635412661e0d0088b64d481f1365088842bb4823ccc0/dbt_protos-1.0.348-py3-none-any.whl", hash = "sha256:5d89171b64058170b39a80fc69abbd344170ac637c5dee90e7b3cbd7b1a43fe4", size = 94035, upload-time = "2025-07-21T20:27:09.015Z" },
+    { url = "https://files.pythonhosted.org/packages/27/28/0ff773cf2467a7f2ba43aeebf508817bb725c6295d4e306ac9b4fd41e5c7/dbt_protos-1.0.410-py3-none-any.whl", hash = "sha256:f04910d664506f0dd9052b58a25419da86cc1c5cb671ab0150b653959174757a", size = 162828, upload-time = "2025-12-15T18:01:01.243Z" },
 ]
 
 [[package]]
