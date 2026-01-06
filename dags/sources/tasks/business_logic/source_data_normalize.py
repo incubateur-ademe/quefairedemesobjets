@@ -82,7 +82,6 @@ def _rename_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
 
 
 def _transform_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
-
     columns_to_transform = [
         t
         for t in dag_config.normalization_rules
@@ -109,7 +108,7 @@ def _transform_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
                         message=str(e),
                     )
                 )
-                df.at[index, column_to_transform.destination] = ""
+                transformed_column[index] = ""
         df[column_to_transform.destination] = transformed_column
 
         if column_to_transform.origin not in dag_config.get_expected_columns():
