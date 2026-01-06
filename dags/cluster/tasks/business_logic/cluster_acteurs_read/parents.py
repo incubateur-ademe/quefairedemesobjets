@@ -1,57 +1,25 @@
 import pandas as pd
-from shared.tasks.business_logic import normalize
-from utils.django import django_model_queryset_to_df, django_setup_full
+from cluster.tasks.business_logic.cluster_acteurs_read._common import (
+    _cluster_acteurs_read_base,
+)
+from utils.django import django_setup_full
 
 django_setup_full()
 
 
 def cluster_acteurs_read_parents(
-    acteur_type_ids: list[int],
     fields: list[str],
+    include_source_ids: list[int] = [],
+    include_acteur_type_ids: list[int] = [],
     include_only_if_regex_matches_nom: str | None = None,
-) -> pd.DataFrame:
-    from qfdmo.models import ActeurType, VueActeur
-
+    include_if_all_fields_filled: list[str] = [],
+) -> tuple[pd.DataFrame, str]:
     """Reading parents from DB (acteurs with children pointing to them)."""
-
-    # Ajout des champs nécessaires au fonctionnement de la fonction
-    # si manquant
-    if "nom" not in fields:
-        fields.append("nom")
-
-    # Petite validation (on ne fait pas confiance à l'appelant)
-    ids_in_db = list(ActeurType.objects.values_list("id", flat=True))
-    ids_invalid = set(acteur_type_ids) - set(ids_in_db)
-    if ids_invalid:
-        raise ValueError(f"acteur_type_ids {ids_invalid} pas trouvés en DB")
-
-    # On récupère les parents des acteurs types donnés
-    # qui sont censés être des acteurs sans source
-    parents = VueActeur.objects.get_active_parents().filter(
-        acteur_type__id__in=acteur_type_ids,
+    return _cluster_acteurs_read_base(
+        fields=fields,
+        include_source_ids=include_source_ids,
+        include_acteur_type_ids=include_acteur_type_ids,
+        include_only_if_regex_matches_nom=include_only_if_regex_matches_nom,
+        include_if_all_fields_filled=include_if_all_fields_filled,
+        est_parent=True,
     )
-
-    df = django_model_queryset_to_df(parents, fields)
-
-    # On ajoute la liste des codes des sources pour chaque acteur
-    source_codes_by_parent_identifiant_unique = {
-        parent.identifiant_unique: tuple(parent.sources.values_list("code", flat=True))
-        for parent in parents
-    }
-    df["source_codes"] = df["identifiant_unique"].map(
-        pd.Series(source_codes_by_parent_identifiant_unique)
-    )
-
-    # Si une regexp de nom est fournie, on l'applique
-    # pour filtrer la df, sinon on garde toute la df
-    if include_only_if_regex_matches_nom:
-        df = df[
-            df["nom"]
-            # On applique la normalisation de base à la volée
-            # pour simplifier les regex
-            .map(normalize.string_basic).str.contains(
-                include_only_if_regex_matches_nom, na=False, regex=True
-            )
-        ].copy()
-
-    return df
