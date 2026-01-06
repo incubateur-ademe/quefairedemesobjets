@@ -5,7 +5,7 @@ from datetime import datetime
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
-from django.db.models import Count
+from django.db.models import Case, Count, F, Value, When
 from django.template.loader import render_to_string
 from more_itertools import first, flatten
 from pydantic import BaseModel, ConfigDict
@@ -443,6 +443,16 @@ class SuggestionGroupeQuerySet(models.QuerySet):
         """Annotate queryset with suggestion_unitaires_count."""
         return self.annotate(suggestion_unitaires_count=Count("suggestion_unitaires"))
 
+    def with_has_parent(self):
+        """Annotate queryset with has_parent."""
+        return self.annotate(
+            has_parent=Case(
+                When(acteur_id=F("revision_acteur_id"), then=Value(False)),
+                When(revision_acteur_id__isnull=True, then=Value(False)),
+                default=Value(True),
+            )
+        )
+
 
 class SuggestionGroupeManager(models.Manager):
     def get_queryset(self):
@@ -450,6 +460,9 @@ class SuggestionGroupeManager(models.Manager):
 
     def with_suggestion_unitaire_count(self):
         return self.get_queryset().with_suggestion_unitaire_count()
+
+    def with_has_parent(self):
+        return self.get_queryset().with_has_parent()
 
 
 class SuggestionGroupe(TimestampedModel):

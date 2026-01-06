@@ -6,7 +6,7 @@ from django.db import models
 from django.template.loader import render_to_string
 from django.utils.html import format_html
 from djangoql.admin import DjangoQLSearchMixin
-from djangoql.schema import DjangoQLSchema, IntField, StrField
+from djangoql.schema import BoolField, DjangoQLSchema, IntField, StrField
 
 from core.admin import NotEditableMixin, NotSelfDeletableMixin
 from data.models.suggestion import (
@@ -240,11 +240,63 @@ class SuggestionUnitaireInline(admin.TabularInline):
     can_view = True
 
 
+@admin.action(description="Appliquer les suggestions au parent")
+def apply_suggestions_to_parent(self, request, queryset):
+    for suggestion_groupe in queryset:
+        # Only for SuggestionGroupe with parent
+        if (
+            suggestion_groupe.revision_acteur_id
+            and suggestion_groupe.acteur_id != suggestion_groupe.revision_acteur_id
+        ):
+            parent = suggestion_groupe.revision_acteur
+            # get all SuggestionUnitaire for the SuggestionGroupe usong1 request
+            suggestion_unitaires = suggestion_groupe.suggestion_unitaires.all()
+            # get all SuggestionUnitaire for the SuggestionGroupe using the Acteur model
+            suggestion_unitaires_acteur = [
+                suggestion_unitaire
+                for suggestion_unitaire in suggestion_unitaires
+                if suggestion_unitaire.suggestion_modele == "Acteur"
+            ]
+            # for each SuggestionUnitaire for the Acteur model,
+            # we check if there is a SuggestionUnitaire for the RevisionActeur model
+            # with the same champs and the same values
+            # Then we update or create the SuggestionUnitaire for the RevisionActeur
+            for suggestion_unitaire_acteur in suggestion_unitaires_acteur:
+                # get the SuggestionUnitaire for the RevisionActeur model
+                # with the same champs and the same values if exists
+                suggestion_unitaire_revision = next(
+                    (
+                        su
+                        for su in suggestion_unitaires
+                        if su.suggestion_modele == "RevisionActeur"
+                        and su.revision_acteur == parent
+                        and su.champs == suggestion_unitaire_acteur.champs
+                    ),
+                    None,
+                )
+                if suggestion_unitaire_revision:
+                    # if exists, we update the SuggestionUnitaire
+                    suggestion_unitaire_revision.valeurs = (
+                        suggestion_unitaire_acteur.valeurs
+                    )
+                else:
+                    # if not exists, we create the SuggestionUnitaire
+                    suggestion_unitaire_revision = suggestion_unitaire_acteur
+                    suggestion_unitaire_revision.id = None
+                    suggestion_unitaire_revision.revision_acteur = parent
+                    suggestion_unitaire_revision.suggestion_modele = "RevisionActeur"
+                suggestion_unitaire_revision.save()
+
+    self.message_user(
+        request, f"Les {queryset.count()} suggestions sélectionnées ont été appliquées"
+    )
+
+
 @admin.register(SuggestionGroupe)
 class SuggestionGroupeAdmin(
     DjangoQLSearchMixin, NotEditableMixin, NotSelfDeletableMixin
 ):
-    actions = [mark_as_rejected, mark_as_toproceed]
+    actions = [mark_as_rejected, mark_as_toproceed, apply_suggestions_to_parent]
 
     class SuggestionGroupeQLSchema(SuggestionQLSchemaMixin):
         def get_fields(self, model):
@@ -253,11 +305,15 @@ class SuggestionGroupeAdmin(
 
             # Works with with_suggestion_unitaire_count set in get_queryset
             if model == SuggestionGroupe:
-                return [
-                    field
-                    for field in fields
-                    if field not in ["suggestion_unitaires_count"]
-                ] + [IntField(name="suggestion_unitaires_count")]
+                return (
+                    [
+                        field
+                        for field in fields
+                        if field not in ["suggestion_unitaires_count"]
+                    ]
+                    + [IntField(name="suggestion_unitaires_count")]
+                    + [BoolField(name="has_parent")]
+                )
 
             return fields
 
@@ -282,12 +338,15 @@ class SuggestionGroupeAdmin(
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
-        return queryset.prefetch_related(
-            "suggestion_unitaires",
-            "acteur",
-            "revision_acteur",
-            "revision_acteur__parent",
-        ).with_suggestion_unitaire_count()  # type: ignore[attr-defined]
+        return (
+            queryset.prefetch_related(
+                "suggestion_unitaires",
+                "acteur",
+                "revision_acteur",
+            )
+            .with_suggestion_unitaire_count()
+            .with_has_parent()
+        )
 
     def groupe_de_suggestions(self, obj):
         template_name = "data/_partials/suggestion_groupe_details.html"
