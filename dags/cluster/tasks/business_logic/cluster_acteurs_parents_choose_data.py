@@ -71,19 +71,14 @@ def cluster_acteurs_parents_choose_data(
     keep_empty: bool = False,
     keep_parent_data_by_default: bool = True,
 ) -> pd.DataFrame:
-
-    from django.db.models import QuerySet
-
     from data.models.change import COL_CHANGE_MODEL_NAME
     from data.models.changes import ChangeActeurCreateAsParent, ChangeActeurKeepAsParent
-    from qfdmo.models.acteur import Acteur, RevisionActeur
+    from qfdmo.models.acteur import VueActeur
 
     def parent_choose_data(
-        parent: RevisionActeur | None,
-        acteurs_revision: QuerySet[RevisionActeur],
-        acteurs_base: QuerySet[Acteur],
+        parent: VueActeur | None,
+        acteurs_list: list[VueActeur],
         fields_to_include: list[str],
-        exclude_source_ids: list[int],
         prioritize_source_ids: list[int],
         keep_empty: bool = False,
         keep_parent_data_by_default: bool = True,
@@ -109,39 +104,13 @@ def cluster_acteurs_parents_choose_data(
                 else float("inf")
             )
 
-        def set_revision_source(
-            acteurs_base: list[Acteur], acteurs_revision: list[RevisionActeur]
-        ) -> list[RevisionActeur]:
-            source_by_acteur_base = {
-                acteur.identifiant_unique: acteur.source for acteur in acteurs_base
-            }
-            # set source_id for acteur_revision from source_by_acteur_base
-            # if not already set
-            for acteur_revision in acteurs_revision:
-                if (
-                    acteur_revision.source is None
-                    and acteur_revision.identifiant_unique in source_by_acteur_base
-                ):
-                    acteur_revision.source = source_by_acteur_base[
-                        acteur_revision.identifiant_unique
-                    ]
-            return acteurs_revision
-
-        # Acteurs to consider: first revisions, then base
-        acteurs_revision_list = list(acteurs_revision)
-        acteurs_base_list = list(acteurs_base)
-        acteurs_revision_list = set_revision_source(
-            acteurs_base_list, acteurs_revision_list
-        )
-        acteurs_revision_list.sort(key=source_priority)
-        acteurs_base_list.sort(key=source_priority)
-        acteurs = acteurs_revision_list + acteurs_base_list
+        acteurs_list = sorted(acteurs_list, key=source_priority)
 
         # On parent creation, we don't want to keep empty data
         if not parent:
             keep_empty = False
         if parent and keep_parent_data_by_default:
-            acteurs = [parent] + acteurs
+            acteurs_list = [parent] + acteurs_list
 
         # Fields: make sure we don't include unwanted fields
         fields = fields_to_include_clean(fields_to_include)  # TODO : check which
@@ -149,7 +118,7 @@ def cluster_acteurs_parents_choose_data(
         result = {}
         for field in fields:
             value_old = getattr(parent, field) if parent else None
-            values = [getattr(a, field) for a in acteurs]
+            values = [getattr(a, field) for a in acteurs_list]
             value_new = field_pick_value(
                 field,
                 values,
@@ -195,25 +164,20 @@ def cluster_acteurs_parents_choose_data(
             == ChangeActeurKeepAsParent.name()
         ):
             try:
-                parent = RevisionActeur.objects.get(pk=parent_id)
-            except RevisionActeur.DoesNotExist:
+                parent = VueActeur.objects.get(pk=parent_id)
+            except VueActeur.DoesNotExist:
                 ptype = df_parents[COL_CHANGE_MODEL_NAME].values[0]
                 raise ValueError(f"Parent {ptype} {parent_id} pas dans revision!!!")
 
         # We construct a list of acteurs, 1st from revision (higher prio
         # as might contain business-approved changes) and then from base
-        acteurs_revision = RevisionActeur.objects.filter(pk__in=acteur_ids).exclude(
-            source__id__in=exclude_source_ids
-        )
-        acteurs_base = Acteur.objects.filter(pk__in=acteur_ids).exclude(
+        acteurs = VueActeur.objects.filter(pk__in=acteur_ids).exclude(
             source__id__in=exclude_source_ids
         )
         parent_data_new = parent_choose_data(
             parent=parent,
-            acteurs_revision=acteurs_revision,
-            acteurs_base=acteurs_base,
+            acteurs_list=list(acteurs),
             fields_to_include=fields,
-            exclude_source_ids=exclude_source_ids,
             prioritize_source_ids=prioritize_source_ids,
             keep_empty=keep_empty,
             keep_parent_data_by_default=keep_parent_data_by_default,
