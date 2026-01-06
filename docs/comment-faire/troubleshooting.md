@@ -210,3 +210,50 @@ Dans la CI en cas d'erreur de fomatting OpenTofu lors de l'exécution de l table
 ```sh
 tofu fmt -recursive infrastructure
 ```
+
+## Construire et pousser les images Docker vers Scaleway
+
+La CI/CD prend en charge le déploiement des versions de code, le dépliement est automatique selon la gestion des tags. Cependant, si quelques chose se passe mal, il est possible de déployer des images docker par la suite de commande ci-dessous.
+
+Pour construire et pousser les images Docker (airflow-scheduler et airflow-webserver) vers le registre Scaleway avec un tag spécifique :
+
+### Configuration du registre Scaleway
+
+```sh
+SCALEWAY_REGISTRY="rg.fr-par.scw.cloud"
+SCALEWAY_NAMESPACE="ns-qfdmo"
+TAG="hotfix-vX.Y.Z"
+```
+
+### 1. Connexion au registre Scaleway (remplacer $SCALEWAY_DOCKER_SECRET par votre token)
+
+```sh
+echo $SCALEWAY_DOCKER_SECRET | docker login $SCALEWAY_REGISTRY -u nologin --password-stdin
+```
+
+### 2. Construction et push de l'image airflow-scheduler
+
+```sh
+docker build --platform=linux/amd64 -f airflow-scheduler.Dockerfile -t $SCALEWAY_REGISTRY/$SCALEWAY_NAMESPACE/airflow-scheduler:$TAG .
+docker push $SCALEWAY_REGISTRY/$SCALEWAY_NAMESPACE/airflow-scheduler:$TAG
+```
+
+### 3. Construction et push de l'image airflow-webserver
+
+```sh
+docker build --platform=linux/amd64 -f airflow-webserver.Dockerfile -t $SCALEWAY_REGISTRY/$SCALEWAY_NAMESPACE/airflow-webserver:$TAG .
+docker push $SCALEWAY_REGISTRY/$SCALEWAY_NAMESPACE/airflow-webserver:$TAG
+```
+
+**Note** : Remplacez `$SCALEWAY_DOCKER_SECRET` par votre token d'authentification Scaleway. Vous pouvez aussi définir la variable d'environnement avant d'exécuter les commandes :
+
+export SCALEWAY_DOCKER_SECRET="votre_token_scaleway" <!-- pragma: allowlist secret -->
+
+Les images seront disponibles aux adresses suivantes :
+
+- `rg.fr-par.scw.cloud/ns-qfdmo/airflow-scheduler:hotfix-vX.Y.Z`
+- `rg.fr-par.scw.cloud/ns-qfdmo/airflow-webserver:hotfix-vX.Y.Z`
+
+### 4. Déployer sur Scaleway
+
+À partir de `Serverless` > `Containers` > `Settings`, éditer l'image du container à utiliser et choisir le tag précédemment créé.
