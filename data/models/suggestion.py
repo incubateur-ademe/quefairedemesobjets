@@ -182,7 +182,7 @@ class SuggestionCohorteSerializer(BaseModel):
         )
         data["suggestion_cohorte"] = self.suggestion_cohorte.id
 
-        return json.dumps(data)
+        return json.dumps(data, ensure_ascii=False)
 
 
 class Suggestion(TimestampedModel):

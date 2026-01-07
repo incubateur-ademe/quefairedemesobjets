@@ -46,6 +46,19 @@ def _flatten_suggestion_unitaires(
     }
 
 
+def _dict_to_suggestion_source_model(
+    values_dict: dict[str, str],
+) -> SuggestionSourceModel:
+    """
+    Convert a dictionary of field values to a SuggestionSourceModel
+    force None values to empty strings
+    """
+
+    return SuggestionSourceModel(
+        **{key: values_dict.get(key, "") for key in values_dict.keys()}
+    )
+
+
 def _extract_acteur_values(
     acteur: Acteur | RevisionActeur, fields_to_include: list[str] | None = None
 ) -> SuggestionSourceModel:
@@ -78,14 +91,19 @@ def _extract_acteur_values(
             else []
         )
         if prop_services:
-            prop_data = [
-                {
-                    "action": prop.action.code,
-                    "sous_categories": [sc.code for sc in prop.sous_categories.all()],
-                }
-                for prop in prop_services
-            ]
-            return json.dumps(prop_data)
+            prop_data = sorted(
+                [
+                    {
+                        "action": prop.action.code,
+                        "sous_categories": sorted(
+                            [sc.code for sc in prop.sous_categories.all()]
+                        ),
+                    }
+                    for prop in prop_services
+                ],
+                key=lambda x: x["action"],
+            )
+            return json.dumps(prop_data, ensure_ascii=False).replace('"', "'")
         return ""
 
     def get_field_from_perimetre_adomicile_codes(
@@ -99,11 +117,15 @@ def _extract_acteur_values(
         )
         return (
             json.dumps(
-                [
-                    {"type": perimetre.type, "valeur": perimetre.valeur}
-                    for perimetre in perimetres
-                ]
-            )
+                sorted(
+                    [
+                        {"type": perimetre.type, "valeur": perimetre.valeur}
+                        for perimetre in perimetres
+                    ],
+                    key=lambda x: (x["type"], x["valeur"]),
+                ),
+                ensure_ascii=False,
+            ).replace('"', "'")
             if perimetres
             else ""
         )
@@ -120,7 +142,13 @@ def _extract_acteur_values(
             if hasattr(acteur, m2m_field_name)
             else []
         )
-        return json.dumps([obj.code for obj in m2m_objects]) if m2m_objects else ""
+        return (
+            json.dumps(
+                sorted([obj.code for obj in m2m_objects]), ensure_ascii=False
+            ).replace('"', "'")
+            if m2m_objects
+            else ""
+        )
 
     model_fields = SuggestionSourceModel.model_fields.keys()
     fields_to_process = fields_to_include if fields_to_include else list(model_fields)
@@ -146,18 +174,15 @@ def _extract_acteur_values(
 
 
 def _get_ordered_fields_groups(
-    acteur_suggestion_unitaires: dict,
-    acteur_overridden_by_suggestion_unitaires: dict | None = None,
+    suggestion_unitaires: list[SuggestionUnitaire],
 ) -> list[tuple]:
     """Get ordered fields groups using SuggestionSourceType validation"""
-    fields_groups = list(
-        set(acteur_suggestion_unitaires.keys())
-        | set(
-            acteur_overridden_by_suggestion_unitaires.keys()
-            if acteur_overridden_by_suggestion_unitaires
-            else set()
-        )
-    )
+
+    all_suggestion_unitaires = {
+        tuple(unit.champs): unit.valeurs for unit in suggestion_unitaires
+    }
+
+    fields_groups = list(set(all_suggestion_unitaires.keys()))
 
     # Validate using SuggestionSourceType
     ordered_fields = SuggestionSourceModel.get_ordered_fields()
@@ -209,30 +234,40 @@ def _validate_proposed_updates(values_to_update: dict, fields_values: dict) -> d
     return {}
 
 
+def _suggestion_unitaires_to_suggestion_source_model_by_model_name(
+    suggestion_unitaires: list[SuggestionUnitaire],
+    model_name: str,
+) -> SuggestionSourceModel:
+    suggestion_unitaires_dict = {
+        tuple(unit.champs): unit.valeurs
+        for unit in suggestion_unitaires
+        if unit.suggestion_modele == model_name
+    }
+    return _dict_to_suggestion_source_model(
+        _flatten_suggestion_unitaires(suggestion_unitaires_dict)
+    )
+
+
 def serialize_suggestion_groupe(
     suggestion_groupe: SuggestionGroupe,
 ) -> SuggestionCohorteSerializer:
     """Serialize a SuggestionGroupe using SuggestionSourceModel for validation"""
     # Get all suggestion_unitaires
     suggestion_unitaires = list(suggestion_groupe.suggestion_unitaires.all())
-
-    # Get all suggestion_unitaires for Acteur
-    acteur_suggestion_unitaires = {
-        tuple(unit.champs): unit.valeurs
-        for unit in suggestion_unitaires
-        if unit.suggestion_modele == "Acteur"
-    }
-    acteur_overridden_by_suggestion_unitaires = {
-        tuple(unit.champs): unit.valeurs
-        for unit in suggestion_unitaires
-        if unit.suggestion_modele == "RevisionActeur"
-    }
-    fields_groups = _get_ordered_fields_groups(
-        acteur_suggestion_unitaires, acteur_overridden_by_suggestion_unitaires
+    # Flatten and convert to SuggestionSourceModel
+    acteur_suggestion_unitaires_by_field = (
+        _suggestion_unitaires_to_suggestion_source_model_by_model_name(
+            suggestion_unitaires, "Acteur"
+        )
     )
-    acteur_overridden_by_suggestion_unitaires_by_field = _flatten_suggestion_unitaires(
-        acteur_overridden_by_suggestion_unitaires
+    # Flatten and convert to SuggestionSourceModel
+    acteur_overridden_by_suggestion_unitaires_by_field = (
+        _suggestion_unitaires_to_suggestion_source_model_by_model_name(
+            suggestion_unitaires, "RevisionActeur"
+        )
     )
+    fields_groups = _get_ordered_fields_groups(suggestion_unitaires)
+    flattened_fields_groups = [key for keys in fields_groups for key in keys]
 
     if (
         suggestion_groupe.suggestion_cohorte.type_action
@@ -241,16 +276,23 @@ def serialize_suggestion_groupe(
         identifiant_unique = (
             suggestion_groupe.get_identifiant_unique_from_suggestion_unitaires()
         )
+        # Get fields from acteur_suggestion_unitaires
         fields_values = {
             key: {
-                "displayed_value": value,
-                "new_value": value,
+                "displayed_value": getattr(
+                    acteur_suggestion_unitaires_by_field, key, None
+                )
+                or "",
+                "new_value": getattr(acteur_suggestion_unitaires_by_field, key, None)
+                or "",
                 "updated_displayed_value": (
-                    acteur_overridden_by_suggestion_unitaires_by_field.get(key, "")
+                    getattr(
+                        acteur_overridden_by_suggestion_unitaires_by_field, key, None
+                    )
+                    or ""
                 ),
             }
-            for fields, values in acteur_suggestion_unitaires.items()
-            for key, value in zip(fields, values)
+            for key in flattened_fields_groups
         }
         return SuggestionCohorteSerializer(
             **_build_serializer_common_fields(suggestion_groupe),
@@ -265,49 +307,42 @@ def serialize_suggestion_groupe(
     if not acteur:
         raise ValueError("acteur is required for non-SOURCE_AJOUT suggestions")
 
-    fields_groups = _get_ordered_fields_groups(acteur_suggestion_unitaires)
-
-    fields = [key for keys in fields_groups for key in keys]
-
-    acteur_suggestion_unitaires_by_field = _flatten_suggestion_unitaires(
-        acteur_suggestion_unitaires
-    )
-
     # Extract values using SuggestionSourceModel
-    acteur_values = _extract_acteur_values(acteur, fields_to_include=fields)
-    acteur_overridden_by_values = (
-        _extract_acteur_values(acteur_overridden_by, fields_to_include=fields)
-        if acteur_overridden_by
-        else None
+    acteur_values = _extract_acteur_values(
+        acteur, fields_to_include=flattened_fields_groups
     )
+    acteur_overridden_by_values = {}
+    if acteur_overridden_by:
+        acteur_overridden_by_values = _extract_acteur_values(
+            acteur_overridden_by, fields_to_include=flattened_fields_groups
+        )
 
     # Build displayed_values: priority is
     # acteur_overridden_by > acteur_suggestion_unitaires > acteur
-    displayed_values = {}
-    for field in fields:
+    displayed_values_dict = {}
+    for field in flattened_fields_groups:
         if field in SuggestionSourceModel.get_not_editable_fields():
             continue
-        value = (
-            getattr(acteur_overridden_by_values, field, None)
-            if acteur_overridden_by_values
-            else None
-        )
+        value = getattr(acteur_overridden_by_values, field, None)
         if value is None or value == "":
-            value = acteur_suggestion_unitaires_by_field.get(field, "")
+            value = getattr(acteur_suggestion_unitaires_by_field, field, None) or ""
         if value is None or value == "":
             value = getattr(acteur_values, field, "") or ""
-        displayed_values[field] = str(value) if value is not None else ""
+        displayed_values_dict[field] = str(value) if value is not None else ""
+
+    displayed_values = SuggestionSourceModel(**displayed_values_dict)
 
     fields_values = {}
-    for field in fields:
-        old_value = getattr(acteur_values, field, None) or ""
+    for field in flattened_fields_groups:
         fields_values[field] = {
-            "displayed_value": displayed_values.get(field, ""),
+            "displayed_value": getattr(displayed_values, field, None) or "",
             "updated_displayed_value": (
-                acteur_overridden_by_suggestion_unitaires_by_field.get(field, "")
+                getattr(acteur_overridden_by_suggestion_unitaires_by_field, field, None)
+                or ""
             ),
-            "new_value": acteur_suggestion_unitaires_by_field.get(field, ""),
-            "old_value": str(old_value),
+            "new_value": getattr(acteur_suggestion_unitaires_by_field, field, None)
+            or "",
+            "old_value": getattr(acteur_values, field, None) or "",
         }
 
     return SuggestionCohorteSerializer(
@@ -334,14 +369,15 @@ def update_suggestion_groupe(
       general errors are under the key "error"
       field errors are under the key "field_name"
     """
+
     # Build mapping of existing revision suggestions by field
-    revision_suggestion_unitaire_by_field = {
-        field: value
-        for unit in suggestion_groupe.suggestion_unitaires.filter(
-            suggestion_modele="RevisionActeur"
+    suggestion_unitaires = list(suggestion_groupe.suggestion_unitaires.all())
+    # Flatten and convert to SuggestionSourceModel
+    revision_suggestion_unitaire_by_field = (
+        _suggestion_unitaires_to_suggestion_source_model_by_model_name(
+            suggestion_unitaires, "RevisionActeur"
         )
-        for field, value in zip(unit.champs, unit.valeurs)
-    }
+    )
 
     # Determine which fields need to be updated using SuggestionSourceType
     values_to_update = {
