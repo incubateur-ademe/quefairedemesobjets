@@ -180,7 +180,14 @@ class SuggestionAdmin(DjangoQLSearchMixin, NotSelfDeletableMixin):
 
     class SuggestionCohorteFilter(admin.RelatedFieldListFilter):
         def field_choices(self, field, request, model_admin):
-            return field.get_choices(include_blank=False, ordering=("-cree_le",))
+            # Filtrer uniquement les cohortes qui ont des suggestions
+            cohorte_model = field.related_model
+            cohortes_avec_suggestions = (
+                cohorte_model.objects.filter(suggestions__isnull=False)
+                .distinct()
+                .order_by("-cree_le")
+            )
+            return [(cohorte.pk, str(cohorte)) for cohorte in cohortes_avec_suggestions]
 
     search_fields = ["id", "contexte", "suggestion", "metadata"]
     list_display = [
@@ -344,7 +351,14 @@ class SuggestionGroupeAdmin(
 
     class SuggestionCohorteFilter(admin.RelatedFieldListFilter):
         def field_choices(self, field, request, model_admin):
-            return field.get_choices(include_blank=False, ordering=("-cree_le",))
+            # Filtrer uniquement les cohortes qui ont des suggestions
+            cohorte_model = field.related_model
+            cohortes_avec_suggestions = (
+                cohorte_model.objects.filter(suggestion_groupes__isnull=False)
+                .distinct()
+                .order_by("-cree_le")
+            )
+            return [(cohorte.pk, str(cohorte)) for cohorte in cohortes_avec_suggestions]
 
     search_fields = ["id", "contexte", "metadata"]
     list_display = [
