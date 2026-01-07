@@ -7,7 +7,6 @@ from django.contrib.postgres.fields import ArrayField
 from django.db.models import Case, Count, F, Value, When
 from django.template.loader import render_to_string
 from more_itertools import first
-from pydantic import BaseModel, ConfigDict
 
 from core.models.mixin import TimestampedModel
 from dags.sources.config.shared_constants import (
@@ -151,38 +150,6 @@ class SuggestionCohorte(TimestampedModel):
 
     def __str__(self) -> str:
         return f"""{self.id} - {self.identifiant_action} -- {self.execution_datetime}"""
-
-
-class SuggestionCohorteSerializer(BaseModel):
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-
-    id: int
-    suggestion_cohorte: SuggestionCohorte
-    statut: str
-    action: str
-    identifiant_unique: str
-    fields_groups: list[tuple] = []
-    fields_values: dict = {}  # dict[str, dict[str, str]]
-    acteur: Acteur | None = None
-    acteur_overridden_by: RevisionActeur | None = None  # Revision or Parent
-
-    def to_dict(self) -> dict:
-        return self.model_dump()
-
-    def to_json(self) -> str:
-        # We rely on to_dict to ensure the use of model_to_dict
-        import json
-
-        data = self.model_dump()
-        data["acteur"] = self.acteur.identifiant_unique if self.acteur else None
-        data["acteur_overridden_by"] = (
-            self.acteur_overriden_by.identifiant_unique
-            if self.acteur_overriden_by
-            else None
-        )
-        data["suggestion_cohorte"] = self.suggestion_cohorte.id
-
-        return json.dumps(data, ensure_ascii=False)
 
 
 class Suggestion(TimestampedModel):
