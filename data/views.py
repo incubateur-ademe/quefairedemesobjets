@@ -12,7 +12,6 @@ from more_itertools import flatten
 from data.forms import SuggestionGroupeStatusForm
 from data.models.suggestion import (
     SuggestionAction,
-    SuggestionCohorteSerializer,
     SuggestionGroupe,
     SuggestionStatut,
     SuggestionUnitaire,
@@ -25,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 def _build_serializer_common_fields(suggestion_groupe: SuggestionGroupe) -> dict:
-    """Build common fields for SuggestionCohorteSerializer"""
+    """Build common fields"""
     return {
         "id": suggestion_groupe.id,
         "suggestion_cohorte": suggestion_groupe.suggestion_cohorte,
@@ -250,7 +249,7 @@ def _suggestion_unitaires_to_suggestion_source_model_by_model_name(
 
 def serialize_suggestion_groupe(
     suggestion_groupe: SuggestionGroupe,
-) -> SuggestionCohorteSerializer:
+) -> dict:
     """Serialize a SuggestionGroupe using SuggestionSourceModel for validation"""
     # Get all suggestion_unitaires
     suggestion_unitaires = list(suggestion_groupe.suggestion_unitaires.all())
@@ -294,12 +293,14 @@ def serialize_suggestion_groupe(
             }
             for key in flattened_fields_groups
         }
-        return SuggestionCohorteSerializer(
+        return {
             **_build_serializer_common_fields(suggestion_groupe),
-            identifiant_unique=identifiant_unique,
-            fields_groups=fields_groups,
-            fields_values=fields_values,
-        )
+            "identifiant_unique": identifiant_unique,
+            "fields_groups": fields_groups,
+            "fields_values": fields_values,
+            "acteur": suggestion_groupe.acteur,
+            "acteur_overridden_by": suggestion_groupe.revision_acteur,
+        }
 
     acteur = suggestion_groupe.acteur
     acteur_overridden_by = suggestion_groupe.revision_acteur
@@ -345,14 +346,14 @@ def serialize_suggestion_groupe(
             "old_value": getattr(acteur_values, field, None) or "",
         }
 
-    return SuggestionCohorteSerializer(
+    return {
         **_build_serializer_common_fields(suggestion_groupe),
-        fields_groups=fields_groups,
-        fields_values=fields_values,
-        acteur=acteur,
-        identifiant_unique=acteur.identifiant_unique,
-        acteur_overridden_by=acteur_overridden_by,
-    )
+        "fields_groups": fields_groups,
+        "fields_values": fields_values,
+        "acteur": acteur,
+        "identifiant_unique": acteur.identifiant_unique,
+        "acteur_overridden_by": acteur_overridden_by,
+    }
 
 
 def update_suggestion_groupe(
@@ -395,7 +396,7 @@ def update_suggestion_groupe(
             )
         )
     }
-    values_to_update = {k: v for k, v in values_to_update.items() if v != ""}
+    # values_to_update = {k: v for k, v in values_to_update.items() if v != ""}
 
     # Validate proposed updates
     if errors := _validate_proposed_updates(values_to_update, fields_values):
@@ -560,7 +561,7 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
         _, errors = update_suggestion_groupe(
             suggestion_groupe, fields_values, fields_groups
         )
-        context = serialize_suggestion_groupe(suggestion_groupe).to_dict()
+        context = serialize_suggestion_groupe(suggestion_groupe)
         context["errors"] = errors
         context = self._manage_tab_in_context(context, request, suggestion_groupe)
 

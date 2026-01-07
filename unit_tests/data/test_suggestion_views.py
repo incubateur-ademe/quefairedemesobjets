@@ -48,7 +48,7 @@ class TestSerializeSuggestionGroupe:
 
     @pytest.mark.django_db
     def test_serialize_source_ajout(self, suggestion_groupe_ajout):
-        result = serialize_suggestion_groupe(suggestion_groupe_ajout).to_dict()
+        result = serialize_suggestion_groupe(suggestion_groupe_ajout)
 
         expected_result = {
             "id": suggestion_groupe_ajout.id,
@@ -83,7 +83,7 @@ class TestSerializeSuggestionGroupe:
         self,
         suggestion_groupe_modification,
     ):
-        result = serialize_suggestion_groupe(suggestion_groupe_modification).to_dict()
+        result = serialize_suggestion_groupe(suggestion_groupe_modification)
 
         expected_result = {
             "id": suggestion_groupe_modification.id,
@@ -131,7 +131,7 @@ class TestSerializeSuggestionGroupe:
         )
         suggestion_groupe_modification.revision_acteur = revision_acteur
         suggestion_groupe_modification.save()
-        result = serialize_suggestion_groupe(suggestion_groupe_modification).to_dict()
+        result = serialize_suggestion_groupe(suggestion_groupe_modification)
 
         expected_result = {
             "id": suggestion_groupe_modification.id,
@@ -184,7 +184,7 @@ class TestSerializeSuggestionGroupe:
         )
         suggestion_groupe_modification.revision_acteur = revision_acteur_parent
         suggestion_groupe_modification.save()
-        result = serialize_suggestion_groupe(suggestion_groupe_modification).to_dict()
+        result = serialize_suggestion_groupe(suggestion_groupe_modification)
 
         expected_result = {
             "id": suggestion_groupe_modification.id,
@@ -248,7 +248,7 @@ class TestSerializeSuggestionGroupe:
             champs=["latitude", "longitude"],
             valeurs=["48.2222", "2.2222"],
         )
-        result = serialize_suggestion_groupe(suggestion_groupe_modification).to_dict()
+        result = serialize_suggestion_groupe(suggestion_groupe_modification)
 
         expected_result = {
             "id": suggestion_groupe_modification.id,
@@ -303,7 +303,7 @@ class TestSerializeSuggestionGroupe:
             champs=["nom"],
             valeurs=["Nouveau nom"],
         )
-        result = serialize_suggestion_groupe(suggestion_groupe).to_dict()
+        result = serialize_suggestion_groupe(suggestion_groupe)
 
         expected_result = {
             "id": suggestion_groupe.id,
@@ -348,7 +348,7 @@ class TestSerializeSuggestionGroupe:
             champs=["nom"],
             valeurs=["Revision nom"],
         )
-        result = serialize_suggestion_groupe(suggestion_groupe).to_dict()
+        result = serialize_suggestion_groupe(suggestion_groupe)
 
         expected_result = {
             "id": suggestion_groupe.id,
@@ -380,7 +380,7 @@ class TestSerializeSuggestionGroupe:
         suggestion_groupe_modification.suggestion_unitaires.exclude(
             champs__contains=["nom"]
         ).delete()
-        result = serialize_suggestion_groupe(suggestion_groupe_modification).to_dict()
+        result = serialize_suggestion_groupe(suggestion_groupe_modification)
 
         expected_result = {
             "id": suggestion_groupe_modification.id,
@@ -417,7 +417,7 @@ class TestSerializeSuggestionGroupe:
         )
         suggestion_groupe_modification.revision_acteur = revision_acteur
         suggestion_groupe_modification.save()
-        result = serialize_suggestion_groupe(suggestion_groupe_modification).to_dict()
+        result = serialize_suggestion_groupe(suggestion_groupe_modification)
 
         # When acteur_overridden_by doesn't have a location, we must use
         # acteur_suggestion_unitaires_by_field for latitude/longitude
@@ -467,7 +467,7 @@ class TestSerializeSuggestionGroupe:
             champs=["code_postal"],
             valeurs=["75001"],
         )
-        result = serialize_suggestion_groupe(suggestion_groupe_modification).to_dict()
+        result = serialize_suggestion_groupe(suggestion_groupe_modification)
 
         # The code_postal field should use getattr(acteur, field, "") which returns ""
         expected_result = {
@@ -526,7 +526,7 @@ class TestSerializeSuggestionGroupe:
         suggestion_groupe_modification.revision_acteur = revision_acteur
         suggestion_groupe_modification.save()
         # No revision_acteur_suggestion_unitaires
-        result = serialize_suggestion_groupe(suggestion_groupe_modification).to_dict()
+        result = serialize_suggestion_groupe(suggestion_groupe_modification)
 
         expected_result = {
             "id": suggestion_groupe_modification.id,
@@ -577,7 +577,7 @@ class TestSerializeSuggestionGroupe:
             champs=["nom"],
             valeurs=["Revision suggestion nom"],
         )
-        result = serialize_suggestion_groupe(suggestion_groupe_modification).to_dict()
+        result = serialize_suggestion_groupe(suggestion_groupe_modification)
 
         # acteur_overridden_by_suggestion_unitaires_by_field should be filled
         expected_result = {

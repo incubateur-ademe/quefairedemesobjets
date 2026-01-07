@@ -351,9 +351,7 @@ class SuggestionGroupeAdmin(
 
     def groupe_de_suggestions(self, obj):
         template_name = "data/_partials/suggestion_groupe_details.html"
-        return render_to_string(
-            template_name, serialize_suggestion_groupe(obj).to_dict()
-        )
+        return render_to_string(template_name, serialize_suggestion_groupe(obj))
 
 
 @admin.register(SuggestionUnitaire)
