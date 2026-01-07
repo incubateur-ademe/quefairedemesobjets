@@ -14,12 +14,12 @@ from data.models.suggestion import (
     SuggestionAction,
     SuggestionCohorteSerializer,
     SuggestionGroupe,
-    SuggestionSourceType,
     SuggestionStatut,
     SuggestionUnitaire,
 )
+from data.models.suggestions.source import SuggestionSourceModel
 from data.models.utils import data_latlong_to_location
-from qfdmo.models.acteur import RevisionActeur
+from qfdmo.models.acteur import Acteur, RevisionActeur
 
 logger = logging.getLogger(__name__)
 
@@ -46,6 +46,105 @@ def _flatten_suggestion_unitaires(
     }
 
 
+def _extract_acteur_values(
+    acteur: Acteur | RevisionActeur, fields_to_include: list[str] | None = None
+) -> SuggestionSourceModel:
+    """
+    Extract values from an Acteur or RevisionActeur instance
+    using SuggestionSourceModel fields.
+    Returns a SuggestionSourceModel instance with extracted values.
+    Empty string is returned for missing or None values.
+    """
+    import json
+
+    def get_field_from_code(acteur: Acteur | RevisionActeur, field_name: str) -> str:
+        """Extract code from a ForeignKey field."""
+        if field_name == "source_code":
+            source_obj = getattr(acteur, "source", None)
+            return source_obj.code if source_obj else ""
+        if not field_name.endswith("_code"):
+            raise ValueError(f"Field {field_name} is not a code field")
+        fk_field_name = field_name.removesuffix("_code")
+        object_field = getattr(acteur, fk_field_name, None)
+        return object_field.code if object_field else ""
+
+    def get_field_from_proposition_service_codes(
+        acteur: Acteur | RevisionActeur,
+    ) -> str:
+        """Extract proposition_service_codes as JSON string."""
+        prop_services = (
+            list(acteur.proposition_services.all())
+            if hasattr(acteur, "proposition_services")
+            else []
+        )
+        if prop_services:
+            prop_data = [
+                {
+                    "action": prop.action.code,
+                    "sous_categories": [sc.code for sc in prop.sous_categories.all()],
+                }
+                for prop in prop_services
+            ]
+            return json.dumps(prop_data)
+        return ""
+
+    def get_field_from_perimetre_adomicile_codes(
+        acteur: Acteur | RevisionActeur,
+    ) -> str:
+        """Extract perimetre_adomicile_codes as JSON string."""
+        perimetres = (
+            list(acteur.perimetre_adomiciles.all())
+            if hasattr(acteur, "perimetre_adomiciles")
+            else []
+        )
+        return (
+            json.dumps(
+                [
+                    {"type": perimetre.type, "valeur": perimetre.valeur}
+                    for perimetre in perimetres
+                ]
+            )
+            if perimetres
+            else ""
+        )
+
+    def get_field_from_codes(acteur: Acteur | RevisionActeur, field_name: str) -> str:
+        """Extract codes from ManyToMany fields as JSON string."""
+        if not field_name.endswith("_codes"):
+            raise ValueError(f"Field {field_name} is not a codes field")
+        # Remove _codes suffix and add 's' to get the ManyToMany field name
+        # e.g., label_codes -> labels, acteur_service_codes -> acteur_services
+        m2m_field_name = field_name.removesuffix("_codes") + "s"
+        m2m_objects = (
+            list(getattr(acteur, m2m_field_name).all())
+            if hasattr(acteur, m2m_field_name)
+            else []
+        )
+        return json.dumps([obj.code for obj in m2m_objects]) if m2m_objects else ""
+
+    model_fields = SuggestionSourceModel.model_fields.keys()
+    fields_to_process = fields_to_include if fields_to_include else list(model_fields)
+
+    values = {}
+    for field_name in fields_to_process:
+        if field_name not in model_fields:
+            raise ValueError(f"Field {field_name} not found in SuggestionSourceModel")
+        if field_name.endswith("_code"):
+            values[field_name] = get_field_from_code(acteur, field_name)
+        elif field_name == "proposition_service_codes":
+            values[field_name] = get_field_from_proposition_service_codes(acteur)
+        elif field_name == "perimetre_adomicile_codes":
+            values[field_name] = get_field_from_perimetre_adomicile_codes(acteur)
+        elif field_name.endswith("_codes"):
+            values[field_name] = get_field_from_codes(acteur, field_name)
+        else:
+            # Handle regular fields
+            value = getattr(acteur, field_name, None)
+            values[field_name] = str(value) if value is not None else ""
+
+    return SuggestionSourceModel(**values)
+
+
 def _get_ordered_fields_groups(
     acteur_suggestion_unitaires: dict,
     acteur_overridden_by_suggestion_unitaires: dict | None = None,
@@ -61,7 +160,7 @@ def _get_ordered_fields_groups(
     )
 
     # Validate using SuggestionSourceType
-    ordered_fields = SuggestionSourceType.get_ordered_fields()
+    ordered_fields = SuggestionSourceModel.get_ordered_fields()
     if any(fields not in ordered_fields for fields in fields_groups):
         raise ValueError(
             f"""fields in fields_groups are not in ORDERED_FIELDS:
@@ -113,7 +212,7 @@ def _validate_proposed_updates(values_to_update: dict, fields_values: dict) -> d
 def serialize_suggestion_groupe(
     suggestion_groupe: SuggestionGroupe,
 ) -> SuggestionCohorteSerializer:
-    """Serialize a SuggestionGroupe using SuggestionSourceType for validation"""
+    """Serialize a SuggestionGroupe using SuggestionSourceModel for validation"""
     # Get all suggestion_unitaires
     suggestion_unitaires = list(suggestion_groupe.suggestion_unitaires.all())
 
@@ -163,6 +262,9 @@ def serialize_suggestion_groupe(
     acteur = suggestion_groupe.acteur
     acteur_overridden_by = suggestion_groupe.revision_acteur
 
+    if not acteur:
+        raise ValueError("acteur is required for non-SOURCE_AJOUT suggestions")
+
     fields_groups = _get_ordered_fields_groups(acteur_suggestion_unitaires)
 
     fields = [key for keys in fields_groups for key in keys]
@@ -170,26 +272,42 @@ def serialize_suggestion_groupe(
     acteur_suggestion_unitaires_by_field = _flatten_suggestion_unitaires(
         acteur_suggestion_unitaires
     )
+
+    # Extract values using SuggestionSourceModel
+    acteur_values = _extract_acteur_values(acteur, fields_to_include=fields)
+    acteur_overridden_by_values = (
+        _extract_acteur_values(acteur_overridden_by, fields_to_include=fields)
+        if acteur_overridden_by
+        else None
+    )
+
+    # Build displayed_values: priority is
+    # acteur_overridden_by > acteur_suggestion_unitaires > acteur
     displayed_values = {}
     for field in fields:
-        if field in SuggestionSourceType.get_not_editable_fields():
+        if field in SuggestionSourceModel.get_not_editable_fields():
             continue
-        value = getattr(acteur_overridden_by, field) if acteur_overridden_by else None
-        if value is None:
-            value = acteur_suggestion_unitaires_by_field.get(field)
-            if value is None:
-                value = getattr(acteur, field)
-        displayed_values[field] = str(value)
+        value = (
+            getattr(acteur_overridden_by_values, field, None)
+            if acteur_overridden_by_values
+            else None
+        )
+        if value is None or value == "":
+            value = acteur_suggestion_unitaires_by_field.get(field, "")
+        if value is None or value == "":
+            value = getattr(acteur_values, field, "") or ""
+        displayed_values[field] = str(value) if value is not None else ""
 
     fields_values = {}
     for field in fields:
+        old_value = getattr(acteur_values, field, None) or ""
         fields_values[field] = {
-            "displayed_value": str(displayed_values.get(field, "")),
+            "displayed_value": displayed_values.get(field, ""),
             "updated_displayed_value": (
-                str(acteur_overridden_by_suggestion_unitaires_by_field.get(field, ""))
+                acteur_overridden_by_suggestion_unitaires_by_field.get(field, "")
             ),
-            "new_value": str(acteur_suggestion_unitaires_by_field.get(field, "")),
-            "old_value": str(getattr(acteur, field, "")),
+            "new_value": acteur_suggestion_unitaires_by_field.get(field, ""),
+            "old_value": str(old_value),
         }
 
     return SuggestionCohorteSerializer(
@@ -229,7 +347,7 @@ def update_suggestion_groupe(
     values_to_update = {
         field: by_state_values["updated_displayed_value"]
         for field, by_state_values in fields_values.items()
-        if field not in SuggestionSourceType.get_not_editable_fields()
+        if field not in SuggestionSourceModel.get_not_editable_fields()
         and "updated_displayed_value" in by_state_values
         and (
             by_state_values["updated_displayed_value"]
