@@ -17,6 +17,7 @@ from data.models.suggestion import (
     SuggestionStatut,
     SuggestionUnitaire,
 )
+from data.views import serialize_suggestion_groupe
 
 NB_SUGGESTIONS_DISPLAYED_WHEN_DELETING = 100
 
@@ -350,7 +351,9 @@ class SuggestionGroupeAdmin(
 
     def groupe_de_suggestions(self, obj):
         template_name = "data/_partials/suggestion_groupe_details.html"
-        return render_to_string(template_name, obj.serialize().to_dict())
+        return render_to_string(
+            template_name, serialize_suggestion_groupe(obj).to_dict()
+        )
 
 
 @admin.register(SuggestionUnitaire)
