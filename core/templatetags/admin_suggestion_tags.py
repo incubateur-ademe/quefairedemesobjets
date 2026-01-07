@@ -1,8 +1,8 @@
 from django.template.defaulttags import register
 
-from data.models.suggestion import SuggestionSourceType
+from data.models.suggestions.source import SuggestionSourceModel
 
 
 @register.filter
 def is_not_editable(key):
-    return key in SuggestionSourceType.get_not_editable_fields()
+    return key in SuggestionSourceModel.get_not_editable_fields()
