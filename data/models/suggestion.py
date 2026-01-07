@@ -4,10 +4,9 @@ from datetime import datetime
 
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields import ArrayField
-from django.core.exceptions import ValidationError
 from django.db.models import Case, Count, F, Value, When
 from django.template.loader import render_to_string
-from more_itertools import first, flatten
+from more_itertools import first
 from pydantic import BaseModel, ConfigDict
 
 from core.models.mixin import TimestampedModel
@@ -27,7 +26,6 @@ from dags.sources.config.shared_constants import (
 from data.models.apply_models.abstract_apply_model import AbstractApplyModel
 from data.models.apply_models.source_apply_model import SourceApplyModel
 from data.models.change import SuggestionChange
-from data.models.utils import data_latlong_to_location
 from qfdmo.models.acteur import (
     Acteur,
     ActeurService,
@@ -465,18 +463,91 @@ class SuggestionGroupeManager(models.Manager):
         return self.get_queryset().with_has_parent()
 
 
-class SuggestionGroupe(TimestampedModel):
-    NOT_EDITABLE_FIELDS = [
-        "acteur_service_codes",
-        "identifiant_externe",
-        "identifiant_unique",
-        "label_codes",
-        "proposition_service_codes",
-        "source_code",
-        "acteur_type_code",
-        "perimetre_adomicile_codes",
-    ]
+class SuggestionSourceType(BaseModel):
+    """
+    This model is used to validate and manipulate the suggestion of source type.
+    """
 
+    model_config = ConfigDict(frozen=True)
+
+    # Définition de tous les champs comme attributs optionnels
+    identifiant_unique: str | None = None
+    source_code: str | None = None
+    identifiant_externe: str | None = None
+    nom: str | None = None
+    nom_commercial: str | None = None
+    nom_officiel: str | None = None
+    siret: str | None = None
+    siren: str | None = None
+    naf_principal: str | None = None
+    description: str | None = None
+    acteur_type_code: str | None = None
+    url: str | None = None
+    email: str | None = None
+    telephone: str | None = None
+    adresse: str | None = None
+    adresse_complement: str | None = None
+    code_postal: str | None = None
+    ville: str | None = None
+    latitude: str | None = None
+    longitude: str | None = None
+    horaires_osm: str | None = None
+    horaires_description: str | None = None
+    public_accueilli: str | None = None
+    reprise: str | None = None
+    exclusivite_de_reprisereparation: str | None = None
+    uniquement_sur_rdv: str | None = None
+    consignes_dacces: str | None = None
+    statut: str | None = None
+    commentaires: str | None = None
+    label_codes: str | None = None
+    acteur_service_codes: str | None = None
+    proposition_service_codes: str | None = None
+    lieu_prestation: str | None = None
+    perimetre_adomicile_codes: str | None = None
+
+    @classmethod
+    def get_ordered_fields(cls) -> list[tuple[str]]:
+        GROUPED_FIELDS = [("latitude", "longitude")]
+
+        ordered_fields = []
+        grouped_fields_processed = []
+        for field in cls.model_fields:
+            # get grouped_fields from field
+            group_fields = next(
+                (
+                    grouped_field
+                    for grouped_field in GROUPED_FIELDS
+                    if field in grouped_field
+                ),
+                None,
+            )
+            if group_fields is not None:
+                if group_fields not in grouped_fields_processed:
+                    grouped_fields_processed.append(group_fields)
+                    ordered_fields.append(group_fields)
+                continue
+            ordered_fields.append((field,))
+        return ordered_fields
+
+    @classmethod
+    def get_not_editable_fields(cls) -> list[str]:
+        """
+        Retourne la liste formatée des champs non éditables.
+        """
+        return [
+            "acteur_service_codes",
+            "identifiant_externe",
+            "identifiant_unique",
+            "label_codes",
+            "proposition_service_codes",
+            "source_code",
+            "acteur_type_code",
+            "perimetre_adomicile_codes",
+        ]
+
+
+class SuggestionGroupe(TimestampedModel):
     ORDERED_FIELDS = [
         ("identifiant_unique",),
         ("source_code",),
@@ -598,246 +669,6 @@ class SuggestionGroupe(TimestampedModel):
             ),
             "",
         )
-
-    def _build_serializer_common_fields(self) -> dict:
-        """Build common fields for SuggestionCohorteSerializer"""
-        return {
-            "id": self.id,
-            "suggestion_cohorte": self.suggestion_cohorte,
-            "statut": self.get_statut_display(),
-            "action": self.suggestion_cohorte.type_action,
-        }
-
-    def serialize(self) -> SuggestionCohorteSerializer:
-        def _flatten_suggestion_unitaires(
-            suggestion_unitaires: dict[tuple, list],
-        ) -> dict:
-            return {
-                k: v
-                for k, v in zip(
-                    flatten(suggestion_unitaires.keys()),
-                    flatten(suggestion_unitaires.values()),
-                )
-            }
-
-        def _get_ordered_fields_groups(
-            acteur_suggestion_unitaires: dict,
-            acteur_overridden_by_suggestion_unitaires: dict | None = None,
-        ) -> list[tuple]:
-            fields_groups = list(
-                set(acteur_suggestion_unitaires.keys())
-                | set(
-                    acteur_overridden_by_suggestion_unitaires.keys()
-                    if acteur_overridden_by_suggestion_unitaires
-                    else set()
-                )
-            )
-
-            if any(
-                fields not in SuggestionGroupe.ORDERED_FIELDS
-                for fields in fields_groups
-            ):
-                raise ValueError(
-                    f"""fields in fields_groups are not in ORDERED_FIELDS:
-                                {fields_groups=}
-                                {SuggestionGroupe.ORDERED_FIELDS=}"""
-                )
-            return [
-                fields
-                for fields in SuggestionGroupe.ORDERED_FIELDS
-                if fields in fields_groups
-            ]
-
-        # Get all suggestion_unitaires
-        suggestion_unitaires = list(self.suggestion_unitaires.all())
-
-        # Get all suggestion_unitaires for Acteur
-        acteur_suggestion_unitaires = {
-            tuple(unit.champs): unit.valeurs
-            for unit in suggestion_unitaires
-            if unit.suggestion_modele == "Acteur"
-        }
-        acteur_overridden_by_suggestion_unitaires = {
-            tuple(unit.champs): unit.valeurs
-            for unit in suggestion_unitaires
-            if unit.suggestion_modele == "RevisionActeur"
-        }
-        fields_groups = _get_ordered_fields_groups(
-            acteur_suggestion_unitaires, acteur_overridden_by_suggestion_unitaires
-        )
-        acteur_overridden_by_suggestion_unitaires_by_field = (
-            _flatten_suggestion_unitaires(acteur_overridden_by_suggestion_unitaires)
-        )
-
-        if self.suggestion_cohorte.type_action == SuggestionAction.SOURCE_AJOUT:
-            identifiant_unique = self.get_identifiant_unique_from_suggestion_unitaires()
-            fields_values = {
-                key: {
-                    "displayed_value": value,
-                    "new_value": value,
-                    "updated_displayed_value": (
-                        acteur_overridden_by_suggestion_unitaires_by_field.get(key, "")
-                    ),
-                }
-                for fields, values in acteur_suggestion_unitaires.items()
-                for key, value in zip(fields, values)
-            }
-            return SuggestionCohorteSerializer(
-                **self._build_serializer_common_fields(),
-                identifiant_unique=identifiant_unique,
-                fields_groups=fields_groups,
-                fields_values=fields_values,
-            )
-
-        acteur = self.acteur
-        acteur_overridden_by = self.acteur_overridden_by()
-
-        fields_groups = _get_ordered_fields_groups(acteur_suggestion_unitaires)
-
-        fields = [key for keys in fields_groups for key in keys]
-
-        acteur_suggestion_unitaires_by_field = _flatten_suggestion_unitaires(
-            acteur_suggestion_unitaires
-        )
-        displayed_values = {}
-        for field in fields:
-            if field in SuggestionGroupe.NOT_EDITABLE_FIELDS:
-                continue
-            value = (
-                getattr(acteur_overridden_by, field) if acteur_overridden_by else None
-            )
-            if value is None:
-                value = acteur_suggestion_unitaires_by_field.get(field)
-                if value is None:
-                    value = getattr(acteur, field)
-            displayed_values[field] = str(value)
-
-        fields_values = {}
-        for field in fields:
-            fields_values[field] = {
-                "displayed_value": str(displayed_values.get(field, "")),
-                "updated_displayed_value": (
-                    str(
-                        acteur_overridden_by_suggestion_unitaires_by_field.get(
-                            field, ""
-                        )
-                    )
-                ),
-                "new_value": str(acteur_suggestion_unitaires_by_field.get(field, "")),
-                "old_value": str(getattr(acteur, field, "")),
-            }
-
-        return SuggestionCohorteSerializer(
-            **self._build_serializer_common_fields(),
-            fields_groups=fields_groups,
-            fields_values=fields_values,
-            acteur=acteur,
-            identifiant_unique=acteur.identifiant_unique,
-            acteur_overridden_by=acteur_overridden_by,
-        )
-
-    def _validate_proposed_updates(
-        self, values_to_update: dict, fields_values: dict
-    ) -> dict:
-        """
-        Check if the proposed updates are valid
-        Returns a dictionary of errors (empty if valid)
-        """
-        # Validate the RevisionActeur with the proposed values
-
-        if "longitude" in values_to_update or "latitude" in values_to_update:
-            for coord_field in ["longitude", "latitude"]:
-                try:
-                    values_to_update[coord_field] = values_to_update.get(
-                        coord_field,
-                        fields_values.get(coord_field, {}).get("displayed_value", ""),
-                    )
-                except (ValueError, KeyError) as e:
-                    logger.warning(f"ValueError for {coord_field}: {e}")
-                    return {coord_field: f"{coord_field} must be a float: {e}"}
-
-        try:
-            values_to_update = data_latlong_to_location(values_to_update)
-        except (ValueError, KeyError) as e:
-            logger.warning(f"ValueError for : {e}")
-            return {
-                "latitude": f"latitude must be a float: {e}",
-                "longitude": f"longitude must be a float: {e}",
-            }
-        try:
-            revision_acteur = RevisionActeur(
-                **data_latlong_to_location(values_to_update)
-            )
-            revision_acteur.full_clean()
-        except ValidationError as e:
-            logger.warning(f"RevisionActeur is not valid: {e}")
-            return e.error_dict
-        except TypeError as e:
-            logger.warning(f"RevisionActeur is not valid: {e}")
-            return {"error": str(e)}
-
-        return {}
-
-    def update_from_serialized_data(
-        self, fields_values: dict, fields_groups: list[tuple]
-    ) -> tuple[bool, dict | None]:
-        """
-        Try to create the RevisionActeur Suggestions
-        Returns a tuple with:
-        - bool: True if the update is successful, False otherwise
-        - dict: None if the update is successful, a dictionary of errors otherwise
-          general errors are under the key "error"
-          field errors are under the key "field_name"
-        """
-        # Build mapping of existing revision suggestions by field
-        revision_suggestion_unitaire_by_field = {
-            field: value
-            for unit in self.suggestion_unitaires.filter(
-                suggestion_modele="RevisionActeur"
-            )
-            for field, value in zip(unit.champs, unit.valeurs)
-        }
-
-        # Determine which fields need to be updated
-        values_to_update = {
-            field: by_state_values["updated_displayed_value"]
-            for field, by_state_values in fields_values.items()
-            if field not in SuggestionGroupe.NOT_EDITABLE_FIELDS
-            and "updated_displayed_value" in by_state_values
-            and (
-                by_state_values["updated_displayed_value"]
-                != by_state_values["displayed_value"]
-                or (
-                    field in revision_suggestion_unitaire_by_field
-                    and revision_suggestion_unitaire_by_field[field]
-                    != by_state_values["updated_displayed_value"]
-                )
-            )
-        }
-        values_to_update = {k: v for k, v in values_to_update.items() if v != ""}
-
-        # Validate proposed updates
-        if errors := self._validate_proposed_updates(values_to_update, fields_values):
-            return False, errors
-
-        # Create or update SuggestionUnitaire objects
-        for fields in fields_groups:
-            if any(field in values_to_update for field in fields):
-                suggestion_unitaire, _ = SuggestionUnitaire.objects.get_or_create(
-                    suggestion_groupe=self,
-                    champs=fields,
-                    suggestion_modele="RevisionActeur",
-                    defaults={
-                        "acteur": self.acteur,
-                        "revision_acteur": self.revision_acteur,
-                    },
-                )
-                suggestion_unitaire.valeurs = [
-                    values_to_update.get(field, "") for field in fields
-                ]
-                suggestion_unitaire.save()
-
-        return True, None
 
     def _get_apply_models(self) -> list[AbstractApplyModel]:
         if self.suggestion_cohorte.type_action in [
