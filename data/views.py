@@ -161,7 +161,7 @@ def serialize_suggestion_groupe(
         )
 
     acteur = suggestion_groupe.acteur
-    acteur_overridden_by = suggestion_groupe.acteur_overridden_by()
+    acteur_overridden_by = suggestion_groupe.revision_acteur
 
     fields_groups = _get_ordered_fields_groups(acteur_suggestion_unitaires)
 

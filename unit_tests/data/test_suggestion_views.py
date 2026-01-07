@@ -176,13 +176,13 @@ class TestSerializeSuggestionGroupe:
             nom="Parent nom",
             location=Point(2.1111, 48.1111),
         )
-        revision_acteur = RevisionActeurFactory(
+        RevisionActeurFactory(
             identifiant_unique=suggestion_groupe_modification.acteur.identifiant_unique,
             nom="Revision nom",
             location=Point(2.01, 48.01),
             parent=revision_acteur_parent,
         )
-        suggestion_groupe_modification.revision_acteur = revision_acteur
+        suggestion_groupe_modification.revision_acteur = revision_acteur_parent
         suggestion_groupe_modification.save()
         result = serialize_suggestion_groupe(suggestion_groupe_modification).to_dict()
 
@@ -228,13 +228,13 @@ class TestSerializeSuggestionGroupe:
             nom="Parent nom",
             location=Point(2.1111, 48.1111),
         )
-        revision_acteur = RevisionActeurFactory(
+        RevisionActeurFactory(
             identifiant_unique=suggestion_groupe_modification.acteur.identifiant_unique,
             nom="Revision nom",
             location=Point(2.01, 48.01),
             parent=revision_acteur_parent,
         )
-        suggestion_groupe_modification.revision_acteur = revision_acteur
+        suggestion_groupe_modification.revision_acteur = revision_acteur_parent
         suggestion_groupe_modification.save()
         SuggestionUnitaireFactory(
             suggestion_groupe=suggestion_groupe_modification,
@@ -580,7 +580,6 @@ class TestSerializeSuggestionGroupe:
         result = serialize_suggestion_groupe(suggestion_groupe_modification).to_dict()
 
         # acteur_overridden_by_suggestion_unitaires_by_field should be filled
-        # but acteur_overridden_by() returns None
         expected_result = {
             "id": suggestion_groupe_modification.id,
             "suggestion_cohorte": suggestion_groupe_modification.suggestion_cohorte,
