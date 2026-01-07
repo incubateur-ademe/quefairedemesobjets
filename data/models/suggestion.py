@@ -548,45 +548,6 @@ class SuggestionSourceType(BaseModel):
 
 
 class SuggestionGroupe(TimestampedModel):
-    ORDERED_FIELDS = [
-        ("identifiant_unique",),
-        ("source_code",),
-        ("identifiant_externe",),
-        ("nom",),
-        ("nom_commercial",),
-        ("nom_officiel",),
-        ("siret",),
-        ("siren",),
-        ("naf_principal",),
-        ("description",),
-        ("acteur_type_code",),
-        ("url",),
-        ("email",),
-        ("telephone",),
-        ("adresse",),
-        ("adresse_complement",),
-        ("code_postal",),
-        ("ville",),
-        (
-            "latitude",
-            "longitude",
-        ),
-        ("horaires_osm",),
-        ("horaires_description",),
-        ("public_accueilli",),
-        ("reprise",),
-        ("exclusivite_de_reprisereparation",),
-        ("uniquement_sur_rdv",),
-        ("consignes_dacces",),
-        ("statut",),
-        ("commentaires",),
-        ("label_codes",),
-        ("acteur_service_codes",),
-        ("proposition_service_codes",),
-        ("lieu_prestation",),
-        ("perimetre_adomicile_codes",),
-    ]
-
     class Meta:
         verbose_name = "2️⃣ ⏳ ⚠️ Suggestion Groupe - Livraison prochainement"
         verbose_name_plural = "2️⃣ ⏳ ⚠️ Suggestions Groupes - Livraison prochainement"
@@ -631,20 +592,9 @@ class SuggestionGroupe(TimestampedModel):
             libelle += f" - {self.acteur.identifiant_unique}"
         return libelle
 
-    def acteur_overridden_by(self) -> RevisionActeur | None:
-        """
-        For a given Suggestion we check if a Parent or a Revision is override
-        Acteur data
-        """
-        return (
-            self.revision_acteur.parent
-            if self.revision_acteur and self.revision_acteur.parent
-            else self.revision_acteur
-        )
-
     @property
     def displayed_acteur_uuid(self) -> str | None:
-        acteur = self.acteur_overridden_by() or self.acteur
+        acteur = self.revision_acteur or self.acteur
         if acteur:
             displayed_acteur = DisplayedActeur.objects.filter(
                 identifiant_unique=acteur.identifiant_unique
