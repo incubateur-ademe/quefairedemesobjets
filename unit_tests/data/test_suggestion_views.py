@@ -61,17 +61,17 @@ class TestSerializeSuggestionGroupe:
                 "nom": {
                     "displayed_value": "Nouveau nom",
                     "new_value": "Nouveau nom",
-                    "updated_displayed_value": "",
+                    "updated_displayed_value": None,
                 },
                 "latitude": {
                     "displayed_value": "48.56789",
                     "new_value": "48.56789",
-                    "updated_displayed_value": "",
+                    "updated_displayed_value": None,
                 },
                 "longitude": {
                     "displayed_value": "2.56789",
                     "new_value": "2.56789",
-                    "updated_displayed_value": "",
+                    "updated_displayed_value": None,
                 },
             },
             "acteur": None,
@@ -97,19 +97,19 @@ class TestSerializeSuggestionGroupe:
             "fields_values": {
                 "nom": {
                     "displayed_value": "Nouveau nom",
-                    "updated_displayed_value": "",
+                    "updated_displayed_value": None,
                     "new_value": "Nouveau nom",
                     "old_value": "Ancien nom",
                 },
                 "latitude": {
                     "displayed_value": "48.56789",
-                    "updated_displayed_value": "",
+                    "updated_displayed_value": None,
                     "new_value": "48.56789",
                     "old_value": "48.1234",
                 },
                 "longitude": {
                     "displayed_value": "2.56789",
-                    "updated_displayed_value": "",
+                    "updated_displayed_value": None,
                     "new_value": "2.56789",
                     "old_value": "2.1234",
                 },
@@ -145,19 +145,19 @@ class TestSerializeSuggestionGroupe:
             "fields_values": {
                 "nom": {
                     "displayed_value": "Revision nom",
-                    "updated_displayed_value": "",
+                    "updated_displayed_value": None,
                     "new_value": "Nouveau nom",
                     "old_value": "Ancien nom",
                 },
                 "latitude": {
                     "displayed_value": "48.01",
-                    "updated_displayed_value": "",
+                    "updated_displayed_value": None,
                     "new_value": "48.56789",
                     "old_value": "48.1234",
                 },
                 "longitude": {
                     "displayed_value": "2.01",
-                    "updated_displayed_value": "",
+                    "updated_displayed_value": None,
                     "new_value": "2.56789",
                     "old_value": "2.1234",
                 },
@@ -198,19 +198,19 @@ class TestSerializeSuggestionGroupe:
             "fields_values": {
                 "nom": {
                     "displayed_value": "Parent nom",
-                    "updated_displayed_value": "",
+                    "updated_displayed_value": None,
                     "new_value": "Nouveau nom",
                     "old_value": "Ancien nom",
                 },
                 "latitude": {
                     "displayed_value": "48.1111",
-                    "updated_displayed_value": "",
+                    "updated_displayed_value": None,
                     "new_value": "48.56789",
                     "old_value": "48.1234",
                 },
                 "longitude": {
                     "displayed_value": "2.1111",
-                    "updated_displayed_value": "",
+                    "updated_displayed_value": None,
                     "new_value": "2.56789",
                     "old_value": "2.1234",
                 },
@@ -309,19 +309,19 @@ class TestSerializeSuggestionGroupe:
             "id": suggestion_groupe.id,
             "suggestion_cohorte": suggestion_groupe.suggestion_cohorte,
             "statut": "🟠 À valider",
-            "action": "SOURCE_AJOUT",
+            "action": SuggestionAction.SOURCE_AJOUT,
             "identifiant_unique": "ID_UNIQUE_123",
             "fields_groups": [("identifiant_unique",), ("nom",)],
             "fields_values": {
                 "identifiant_unique": {
                     "displayed_value": "ID_UNIQUE_123",
                     "new_value": "ID_UNIQUE_123",
-                    "updated_displayed_value": "",
+                    "updated_displayed_value": None,
                 },
                 "nom": {
                     "displayed_value": "Nouveau nom",
                     "new_value": "Nouveau nom",
-                    "updated_displayed_value": "",
+                    "updated_displayed_value": None,
                 },
             },
             "acteur": None,
@@ -394,7 +394,7 @@ class TestSerializeSuggestionGroupe:
             "fields_values": {
                 "nom": {
                     "displayed_value": "Nouveau nom",
-                    "updated_displayed_value": "",
+                    "updated_displayed_value": None,
                     "new_value": "Nouveau nom",
                     "old_value": "Ancien nom",
                 },
@@ -433,19 +433,19 @@ class TestSerializeSuggestionGroupe:
             "fields_values": {
                 "nom": {
                     "displayed_value": "Revision nom",  # From acteur_overridden_by
-                    "updated_displayed_value": "",
+                    "updated_displayed_value": None,
                     "new_value": "Nouveau nom",
                     "old_value": "Ancien nom",
                 },
                 "latitude": {
                     "displayed_value": "48.56789",  # Not from acteur_overridden_by
-                    "updated_displayed_value": "",
+                    "updated_displayed_value": None,
                     "new_value": "48.56789",
                     "old_value": "48.1234",
                 },
                 "longitude": {
                     "displayed_value": "2.56789",  # Not from acteur_overridden_by
-                    "updated_displayed_value": "",
+                    "updated_displayed_value": None,
                     "new_value": "2.56789",
                     "old_value": "2.1234",
                 },
@@ -482,25 +482,25 @@ class TestSerializeSuggestionGroupe:
             "fields_values": {
                 "nom": {
                     "displayed_value": "Nouveau nom",
-                    "updated_displayed_value": "",
+                    "updated_displayed_value": None,
                     "new_value": "Nouveau nom",
                     "old_value": "Ancien nom",
                 },
                 "latitude": {
                     "displayed_value": "48.56789",
-                    "updated_displayed_value": "",
+                    "updated_displayed_value": None,
                     "new_value": "48.56789",
                     "old_value": "48.1234",
                 },
                 "longitude": {
                     "displayed_value": "2.56789",
-                    "updated_displayed_value": "",
+                    "updated_displayed_value": None,
                     "new_value": "2.56789",
                     "old_value": "2.1234",
                 },
                 "code_postal": {
                     "displayed_value": "75001",  # From acteur_suggestion_unitaires
-                    "updated_displayed_value": "",
+                    "updated_displayed_value": None,
                     "new_value": "75001",
                     "old_value": "",  # getattr(acteur, field, "") returns ""
                 },
@@ -540,19 +540,19 @@ class TestSerializeSuggestionGroupe:
             "fields_values": {
                 "nom": {
                     "displayed_value": "Revision nom",
-                    "updated_displayed_value": "",  # No RevisionActeur suggestion
+                    "updated_displayed_value": None,  # No RevisionActeur suggestion
                     "new_value": "Nouveau nom",
                     "old_value": "Ancien nom",
                 },
                 "latitude": {
                     "displayed_value": "48.01",
-                    "updated_displayed_value": "",  # No RevisionActeur suggestion
+                    "updated_displayed_value": None,  # No RevisionActeur suggestion
                     "new_value": "48.56789",
                     "old_value": "48.1234",
                 },
                 "longitude": {
                     "displayed_value": "2.01",
-                    "updated_displayed_value": "",  # No RevisionActeur suggestion
+                    "updated_displayed_value": None,  # No RevisionActeur suggestion
                     "new_value": "2.56789",
                     "old_value": "2.1234",
                 },
@@ -598,13 +598,13 @@ class TestSerializeSuggestionGroupe:
                 },
                 "latitude": {
                     "displayed_value": "48.56789",
-                    "updated_displayed_value": "",
+                    "updated_displayed_value": None,
                     "new_value": "48.56789",
                     "old_value": "48.1234",
                 },
                 "longitude": {
                     "displayed_value": "2.56789",
-                    "updated_displayed_value": "",
+                    "updated_displayed_value": None,
                     "new_value": "2.56789",
                     "old_value": "2.1234",
                 },

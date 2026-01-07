@@ -27,7 +27,7 @@
     <div class="qf-flex qf-flex-col qf-items-left qf-gap-1v">
         <span class="qf-ml-3w qf-text-xs qf-italic">
             {% block suggestion_subtitle %}
-                Cohorte : {{ suggestion_cohorte.get_type_action_display }}
+                Cohorte : {{ suggestion_cohorte.id }} - {{ suggestion_cohorte.get_type_action_display }}
             {% endblock suggestion_subtitle %}
         </span>
         <div class="qf-flex qf-flex-row qf-gap-1w">

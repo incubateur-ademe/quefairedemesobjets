@@ -3,7 +3,7 @@ import json
 from django.db import models
 
 from data.models.apply_models.abstract_apply_model import AbstractApplyModel
-from data.models.utils import data_latlong_to_location
+from data.models.utils import prepare_acteur_data_with_location
 from qfdmo.models.acteur import (
     Acteur,
     PerimetreADomicile,
@@ -21,7 +21,7 @@ class SourceApplyModel(AbstractApplyModel):
     def name(cls) -> str:
         return "SourceApplyModel"
 
-    def _set_acteur_linked_objects(self, acteur: Acteur | RevisionActeur, data: dict):
+    def _set_foreign_key_from_code(self, acteur: Acteur | RevisionActeur, data: dict):
         for key, value in data.items():
             if key.endswith("_code"):
                 # - source_code
@@ -40,7 +40,10 @@ class SourceApplyModel(AbstractApplyModel):
                         f"fount {field_name}_code key but Field {field_name} is not"
                         " a ForeignKey"
                     )
-            elif key == "proposition_service_codes":
+
+    def _set_acteur_linked_objects(self, acteur: Acteur | RevisionActeur, data: dict):
+        for key, value in data.items():
+            if key == "proposition_service_codes":
                 if isinstance(acteur, RevisionActeur):
                     propositon_service_class = RevisionPropositionService
                 else:
@@ -88,17 +91,22 @@ class SourceApplyModel(AbstractApplyModel):
 
     def validate(self) -> Acteur | RevisionActeur:
         """validate will raise an error if the data is invalid"""
-        acteur = self.acteur_model.objects.filter(
-            identifiant_unique=self.identifiant_unique
-        ).first()
-        data = data_latlong_to_location(self.data)
-        if not acteur:
-            acteur = self.acteur_model(
-                **data_latlong_to_location(self.data),
+        # get acteur if exists
+        try:
+            acteur = self.acteur_model.objects.get(
+                identifiant_unique=self.identifiant_unique
             )
+        except self.acteur_model.DoesNotExist:
+            acteur = None
+        data = prepare_acteur_data_with_location(self.data)
+        if "identifiant_unique" not in data:
+            data["identifiant_unique"] = self.identifiant_unique
+        if not acteur:
+            acteur = self.acteur_model(**data)
         else:
             for key, value in data.items():
                 setattr(acteur, key, value)
+        self._set_foreign_key_from_code(acteur, self.data)
         acteur.full_clean()
         return acteur
 

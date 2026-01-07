@@ -241,6 +241,44 @@ class SuggestionUnitaireInline(admin.TabularInline):
     can_view = True
 
 
+def _update_or_copy_suggestion_unitaires(suggestion_groupe):
+    revision = suggestion_groupe.revision_acteur
+    suggestion_unitaires = suggestion_groupe.suggestion_unitaires.all()
+    # get all SuggestionUnitaire for the SuggestionGroupe using the Acteur model
+    suggestion_unitaires_acteur = [
+        suggestion_unitaire
+        for suggestion_unitaire in suggestion_unitaires
+        if suggestion_unitaire.suggestion_modele == "Acteur"
+    ]
+    # for each SuggestionUnitaire for the Acteur model,
+    # we check if there is a SuggestionUnitaire for the RevisionActeur model
+    # with the same champs and the same values
+    # Then we update or create the SuggestionUnitaire for the RevisionActeur
+    for suggestion_unitaire_acteur in suggestion_unitaires_acteur:
+        # get the SuggestionUnitaire for the RevisionActeur model
+        # with the same champs and the same values if exists
+        suggestion_unitaire_revision = next(
+            (
+                su
+                for su in suggestion_unitaires
+                if su.suggestion_modele == "RevisionActeur"
+                and su.revision_acteur == revision
+                and su.champs == suggestion_unitaire_acteur.champs
+            ),
+            None,
+        )
+        if suggestion_unitaire_revision:
+            # if exists, we update the SuggestionUnitaire
+            suggestion_unitaire_revision.valeurs = suggestion_unitaire_acteur.valeurs
+        else:
+            # if not exists, we create the SuggestionUnitaire
+            suggestion_unitaire_revision = suggestion_unitaire_acteur
+            suggestion_unitaire_revision.id = None
+            suggestion_unitaire_revision.revision_acteur = revision
+            suggestion_unitaire_revision.suggestion_modele = "RevisionActeur"
+        suggestion_unitaire_revision.save()
+
+
 @admin.action(description="Appliquer les suggestions au parent")
 def apply_suggestions_to_parent(self, request, queryset):
     for suggestion_groupe in queryset:
@@ -249,44 +287,22 @@ def apply_suggestions_to_parent(self, request, queryset):
             suggestion_groupe.revision_acteur_id
             and suggestion_groupe.acteur_id != suggestion_groupe.revision_acteur_id
         ):
-            parent = suggestion_groupe.revision_acteur
-            # get all SuggestionUnitaire for the SuggestionGroupe usong1 request
-            suggestion_unitaires = suggestion_groupe.suggestion_unitaires.all()
-            # get all SuggestionUnitaire for the SuggestionGroupe using the Acteur model
-            suggestion_unitaires_acteur = [
-                suggestion_unitaire
-                for suggestion_unitaire in suggestion_unitaires
-                if suggestion_unitaire.suggestion_modele == "Acteur"
-            ]
-            # for each SuggestionUnitaire for the Acteur model,
-            # we check if there is a SuggestionUnitaire for the RevisionActeur model
-            # with the same champs and the same values
-            # Then we update or create the SuggestionUnitaire for the RevisionActeur
-            for suggestion_unitaire_acteur in suggestion_unitaires_acteur:
-                # get the SuggestionUnitaire for the RevisionActeur model
-                # with the same champs and the same values if exists
-                suggestion_unitaire_revision = next(
-                    (
-                        su
-                        for su in suggestion_unitaires
-                        if su.suggestion_modele == "RevisionActeur"
-                        and su.revision_acteur == parent
-                        and su.champs == suggestion_unitaire_acteur.champs
-                    ),
-                    None,
-                )
-                if suggestion_unitaire_revision:
-                    # if exists, we update the SuggestionUnitaire
-                    suggestion_unitaire_revision.valeurs = (
-                        suggestion_unitaire_acteur.valeurs
-                    )
-                else:
-                    # if not exists, we create the SuggestionUnitaire
-                    suggestion_unitaire_revision = suggestion_unitaire_acteur
-                    suggestion_unitaire_revision.id = None
-                    suggestion_unitaire_revision.revision_acteur = parent
-                    suggestion_unitaire_revision.suggestion_modele = "RevisionActeur"
-                suggestion_unitaire_revision.save()
+            _update_or_copy_suggestion_unitaires(suggestion_groupe)
+
+    self.message_user(
+        request, f"Les {queryset.count()} suggestions sélectionnées ont été appliquées"
+    )
+
+
+@admin.action(description="Appliquer les suggestions au correction de l'acteur")
+def apply_suggestions_to_revision(self, request, queryset):
+    for suggestion_groupe in queryset:
+        # Only for SuggestionGroupe with parent
+        if (
+            suggestion_groupe.revision_acteur_id
+            and suggestion_groupe.acteur_id == suggestion_groupe.revision_acteur_id
+        ):
+            _update_or_copy_suggestion_unitaires(suggestion_groupe)
 
     self.message_user(
         request, f"Les {queryset.count()} suggestions sélectionnées ont été appliquées"
@@ -297,7 +313,12 @@ def apply_suggestions_to_parent(self, request, queryset):
 class SuggestionGroupeAdmin(
     DjangoQLSearchMixin, NotEditableMixin, NotSelfDeletableMixin
 ):
-    actions = [mark_as_rejected, mark_as_toproceed, apply_suggestions_to_parent]
+    actions = [
+        mark_as_rejected,
+        mark_as_toproceed,
+        apply_suggestions_to_parent,
+        apply_suggestions_to_revision,
+    ]
 
     class SuggestionGroupeQLSchema(SuggestionQLSchemaMixin):
         def get_fields(self, model):
@@ -333,8 +354,8 @@ class SuggestionGroupeAdmin(
     readonly_fields = ["cree_le", "modifie_le"]
     inlines = [SuggestionUnitaireInline]
     list_filter = [
-        ("suggestion_cohorte", SuggestionCohorteFilter),
         ("statut", admin.ChoicesFieldListFilter),
+        ("suggestion_cohorte", SuggestionCohorteFilter),
     ]
 
     def get_queryset(self, request):

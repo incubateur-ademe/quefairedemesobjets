@@ -17,8 +17,8 @@ from data.models.suggestion import (
     SuggestionUnitaire,
 )
 from data.models.suggestions.source import SuggestionSourceModel
-from data.models.utils import data_latlong_to_location
-from qfdmo.models.acteur import Acteur, RevisionActeur
+from data.models.utils import prepare_acteur_data_with_location
+from qfdmo.models.acteur import Acteur, ActeurStatus, RevisionActeur
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +67,6 @@ def _extract_acteur_values(
     Returns a SuggestionSourceModel instance with extracted values.
     Empty string is returned for missing or None values.
     """
-    import json
 
     def get_field_from_code(acteur: Acteur | RevisionActeur, field_name: str) -> str:
         """Extract code from a ForeignKey field."""
@@ -213,7 +212,7 @@ def _validate_proposed_updates(values_to_update: dict, fields_values: dict) -> d
                 return {coord_field: f"{coord_field} must be a float: {e}"}
 
     try:
-        values_to_update = data_latlong_to_location(values_to_update)
+        values_to_update = prepare_acteur_data_with_location(values_to_update)
     except (ValueError, KeyError) as e:
         logger.warning(f"ValueError for : {e}")
         return {
@@ -221,7 +220,13 @@ def _validate_proposed_updates(values_to_update: dict, fields_values: dict) -> d
             "longitude": f"longitude must be a float: {e}",
         }
     try:
-        revision_acteur = RevisionActeur(**data_latlong_to_location(values_to_update))
+        revision_acteur = RevisionActeur(
+            **prepare_acteur_data_with_location(values_to_update)
+        )
+        # Statut should be set because Django don't set it automatically even
+        # if the field has a default value
+        if not revision_acteur.statut:
+            revision_acteur.statut = ActeurStatus.ACTIF
         revision_acteur.full_clean()
     except ValidationError as e:
         logger.warning(f"RevisionActeur is not valid: {e}")
@@ -273,22 +278,19 @@ def serialize_suggestion_groupe(
         == SuggestionAction.SOURCE_AJOUT
     ):
         identifiant_unique = (
-            suggestion_groupe.get_identifiant_unique_from_suggestion_unitaires()
+            suggestion_groupe.get_identifiant_unique_from_suggestion_unitaires("Acteur")
         )
         # Get fields from acteur_suggestion_unitaires
         fields_values = {
             key: {
                 "displayed_value": getattr(
                     acteur_suggestion_unitaires_by_field, key, None
-                )
-                or "",
-                "new_value": getattr(acteur_suggestion_unitaires_by_field, key, None)
-                or "",
+                ),
+                "new_value": getattr(acteur_suggestion_unitaires_by_field, key, None),
                 "updated_displayed_value": (
                     getattr(
                         acteur_overridden_by_suggestion_unitaires_by_field, key, None
                     )
-                    or ""
                 ),
             }
             for key in flattened_fields_groups
@@ -336,14 +338,12 @@ def serialize_suggestion_groupe(
     fields_values = {}
     for field in flattened_fields_groups:
         fields_values[field] = {
-            "displayed_value": getattr(displayed_values, field, None) or "",
+            "displayed_value": getattr(displayed_values, field, None),
             "updated_displayed_value": (
                 getattr(acteur_overridden_by_suggestion_unitaires_by_field, field, None)
-                or ""
             ),
-            "new_value": getattr(acteur_suggestion_unitaires_by_field, field, None)
-            or "",
-            "old_value": getattr(acteur_values, field, None) or "",
+            "new_value": getattr(acteur_suggestion_unitaires_by_field, field, None),
+            "old_value": getattr(acteur_values, field, None),
         }
 
     return {
@@ -390,17 +390,27 @@ def update_suggestion_groupe(
             by_state_values["updated_displayed_value"]
             != by_state_values["displayed_value"]
             or (
-                field in revision_suggestion_unitaire_by_field
-                and revision_suggestion_unitaire_by_field[field]
+                getattr(revision_suggestion_unitaire_by_field, field, None) is not None
+                and getattr(revision_suggestion_unitaire_by_field, field, None)
                 != by_state_values["updated_displayed_value"]
             )
         )
     }
-    # values_to_update = {k: v for k, v in values_to_update.items() if v != ""}
+
+    logging.info(f"values_to_update: {values_to_update}")
+
+    if suggestion_groupe.revision_acteur is None:
+        suggestion_groupe.revision_acteur = (
+            suggestion_groupe.acteur.get_or_create_revision()
+        )
 
     # Validate proposed updates
-    if errors := _validate_proposed_updates(values_to_update, fields_values):
-        return False, errors
+    try:
+        if errors := _validate_proposed_updates(values_to_update, fields_values):
+            return False, errors
+    except Exception as e:
+        logger.warning(f"Error validating proposed updates: {e}")
+        return False, {"error": str(e)}
 
     # Create or update SuggestionUnitaire objects
     for fields in fields_groups:
@@ -411,7 +421,7 @@ def update_suggestion_groupe(
                 suggestion_modele="RevisionActeur",
                 defaults={
                     "acteur": suggestion_groupe.acteur,
-                    "revision_acteur": suggestion_groupe.revision_acteur,
+                    "revision_acteur_id": suggestion_groupe.revision_acteur,
                 },
             )
             suggestion_unitaire.valeurs = [
@@ -534,7 +544,7 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
     def get(self, request, suggestion_groupe_id):
         suggestion_groupe = get_object_or_404(SuggestionGroupe, id=suggestion_groupe_id)
 
-        context = serialize_suggestion_groupe(suggestion_groupe).to_dict()
+        context = serialize_suggestion_groupe(suggestion_groupe)
         context = self._manage_tab_in_context(context, request, suggestion_groupe)
 
         return render(

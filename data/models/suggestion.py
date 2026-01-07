@@ -485,7 +485,7 @@ class SuggestionGroupe(TimestampedModel):
             return displayed_acteur.uuid if displayed_acteur else None
         return None
 
-    def get_identifiant_unique_from_suggestion_unitaires(self) -> str:
+    def get_identifiant_unique_from_suggestion_unitaires(self, model_name: str) -> str:
         """
         Get the identifiant_unique from the suggestion_unitaires for the Acteur model
         Useful for SOURCE_AJOUT
@@ -496,7 +496,7 @@ class SuggestionGroupe(TimestampedModel):
                     suggestion_unitaire.champs.index("identifiant_unique")
                 ]
                 for suggestion_unitaire in self.suggestion_unitaires.filter(
-                    suggestion_modele="Acteur"
+                    suggestion_modele=model_name
                 )
                 if "identifiant_unique" in suggestion_unitaire.champs
             ),
@@ -517,8 +517,8 @@ class SuggestionGroupe(TimestampedModel):
             if not acteur_suggestion_unitaires.exists():
                 raise ValueError("No acteur suggestion unitaires found")
             identifiant_unique = (
-                acteur_suggestion_unitaires.first().acteur_id
-                or self.get_identifiant_unique_from_suggestion_unitaires()
+                self.acteur_id
+                or self.get_identifiant_unique_from_suggestion_unitaires("Acteur")
             )
             apply_models.append(
                 SourceApplyModel(
@@ -539,8 +539,13 @@ class SuggestionGroupe(TimestampedModel):
             if revision_acteur_suggestion_unitaires := self.suggestion_unitaires.filter(
                 suggestion_modele="RevisionActeur"
             ).all():
-                first = revision_acteur_suggestion_unitaires.first()
-                identifiant_unique = first.revision_acteur_id or identifiant_unique
+                identifiant_unique = (
+                    self.revision_acteur_id
+                    or self.get_identifiant_unique_from_suggestion_unitaires(
+                        "RevisionActeur"
+                    )
+                    or identifiant_unique
+                )
                 apply_models.append(
                     SourceApplyModel(
                         identifiant_unique=identifiant_unique,
