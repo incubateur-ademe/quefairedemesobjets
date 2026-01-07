@@ -213,9 +213,9 @@ class TestSourceApplyModel:
         assert acteur.location.x == 2.3522  # longitude
         assert acteur.location.y == 48.8566  # latitude
         # Vérifier que data_latlong_to_location convertit correctement
-        from data.models.utils import data_latlong_to_location
+        from data.models.utils import prepare_acteur_data_with_location
 
-        converted_data = data_latlong_to_location(apply_model.data)
+        converted_data = prepare_acteur_data_with_location(apply_model.data)
         assert "latitude" not in converted_data
         assert "longitude" not in converted_data
         assert "location" in converted_data
@@ -248,8 +248,8 @@ class TestSourceApplyModel:
         assert acteur.location.x == 4.8357  # longitude
         assert acteur.location.y == 45.7640  # latitude
 
-    def test_set_acteur_linked_objects_with_foreign_key_codes(self):
-        """Test _set_acteur_linked_objects with ForeignKey fields ending with _code"""
+    def test_set_foreign_key_from_code_with_foreign_key_codes(self):
+        """Test _set_foreign_key_from_code with ForeignKey fields ending with _code"""
         acteur = ActeurFactory()
         new_source = SourceFactory(code="new_source")
         new_acteur_type = ActeurTypeFactory(code="new_type")
@@ -262,7 +262,7 @@ class TestSourceApplyModel:
             },
         )
 
-        apply_model._set_acteur_linked_objects(acteur, apply_model.data)
+        apply_model._set_foreign_key_from_code(acteur, apply_model.data)
 
         assert acteur.source == new_source
         assert acteur.acteur_type == new_acteur_type
@@ -506,9 +506,9 @@ class TestSourceApplyModel:
         assert service3 in acteur.acteur_services.all()
         assert service1 not in acteur.acteur_services.all()  # Ancien service supprimé
 
-    def test_set_acteur_linked_objects_raises_error_for_non_foreignkey_code(self):
+    def test_set_foreign_key_from_code_raises_error_for_non_foreignkey_code(self):
         """
-        Test that _set_acteur_linked_objects raises ValueError for non-ForeignKey fields
+        Test that _set_foreign_key_from_code raises ValueError for non-ForeignKey fields
         """
         acteur = ActeurFactory()
 
@@ -518,4 +518,4 @@ class TestSourceApplyModel:
         )
 
         with pytest.raises(ValueError, match="Field nom is not a ForeignKey"):
-            apply_model._set_acteur_linked_objects(acteur, apply_model.data)
+            apply_model._set_foreign_key_from_code(acteur, apply_model.data)

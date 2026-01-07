@@ -183,7 +183,7 @@ def quote_filter(value):
 
 @register.filter
 def display_diff_values(old_value, new_value):
-    if not new_value:
+    if new_value is None:
         return old_value
     if not old_value:
         return new_value
@@ -191,7 +191,9 @@ def display_diff_values(old_value, new_value):
 
 
 @register.inclusion_tag("data/_partials/extra_links.html")
-def extra_links(field, value):
+def extra_links(field, value, default_value):
+    if value is None:
+        value = default_value
     if field in ["siren", "siret"]:
         url_map = {
             "siren": f"https://annuaire-entreprises.data.gouv.fr/entreprise/{value}",

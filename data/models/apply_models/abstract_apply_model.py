@@ -5,7 +5,7 @@ from typing import Type
 
 from pydantic import BaseModel
 
-from qfdmo.models.acteur import Acteur, BaseActeur, RevisionActeur
+from qfdmo.models.acteur import Acteur, RevisionActeur
 
 ACTEUR_MODEL = {
     "Acteur": Acteur,
@@ -26,7 +26,7 @@ class AbstractApplyModel(BaseModel, ABC):
 
     identifiant_unique: str
     order: int = 0
-    acteur_model: Type[BaseActeur] = ACTEUR_MODEL["Acteur"]
+    acteur_model: Type[Acteur | RevisionActeur] = ACTEUR_MODEL["Acteur"]
     data: dict = {}
 
     @classmethod
