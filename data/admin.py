@@ -199,8 +199,8 @@ class SuggestionAdmin(DjangoQLSearchMixin, NotSelfDeletableMixin):
     ]
     readonly_fields = ["cree_le", "modifie_le"]
     list_filter = [
-        ("suggestion_cohorte", SuggestionCohorteFilter),
         ("statut", admin.ChoicesFieldListFilter),
+        ("suggestion_cohorte", SuggestionCohorteFilter),
     ]
     actions = [mark_as_rejected, mark_as_toproceed]
 
@@ -429,8 +429,8 @@ class SuggestionUnitaireAdmin(
     ]
     readonly_fields = ["cree_le", "modifie_le"]
     list_filter = [
-        ("suggestion_groupe__suggestion_cohorte", SuggestionCohorteFilter),
         ("statut", admin.ChoicesFieldListFilter),
+        ("suggestion_groupe__suggestion_cohorte", SuggestionCohorteFilter),
     ]
 
 
