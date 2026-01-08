@@ -351,9 +351,9 @@ class TestClusterActeursParentsChooseData:
         # Retrieve parent data
         assert df.loc[df["identifiant_unique"] == "p1", "parent_data_new"].values[0][
             "nom"
-        ] not in [""], (
-            "vue acteur a3 should not be chosen even if it doesn't have `nom` defined"
-        )
+        ] not in [
+            ""
+        ], "vue acteur a3 should not be chosen even if it doesn't have `nom` defined"
 
     def test_cluster_acteurs_parents_choose_data_parent_create_resolve_empty_nom(
         self,
@@ -380,6 +380,6 @@ class TestClusterActeursParentsChooseData:
         parent_data = df.loc[
             df["identifiant_unique"] == "p1", "parent_data_new"
         ].values[0]
-        assert "nom" not in parent_data or parent_data.get("nom") == "", (
-            "Si tous les noms sont vides, aucun nom ne devrait être choisi"
-        )
+        assert (
+            "nom" not in parent_data or parent_data.get("nom") == ""
+        ), "Si tous les noms sont vides, aucun nom ne devrait être choisi"
