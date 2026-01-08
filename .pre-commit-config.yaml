@@ -26,11 +26,13 @@ repos:
           language: system
           types: [python]
           args: [--fix]
-        - id: ruff-format
-          name: ruff (format)
-          entry: uvx ruff format
+        # Black hook
+        - id: black
+          name: black (format)
+          entry: uvx black
           language: system
           types: [python]
+          args: [--exclude=.venv]
         # Djade hook
         - id: djade
           name: djade
