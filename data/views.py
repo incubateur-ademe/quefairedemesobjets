@@ -397,8 +397,6 @@ def update_suggestion_groupe(
         )
     }
 
-    logging.info(f"values_to_update: {values_to_update}")
-
     if suggestion_groupe.revision_acteur is None:
         suggestion_groupe.revision_acteur = (
             suggestion_groupe.acteur.get_or_create_revision()
