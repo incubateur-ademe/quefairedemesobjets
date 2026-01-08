@@ -1002,6 +1002,12 @@ class RevisionActeur(BaseActeur, LatLngPropertiesMixin):
         # OPTIMIZE: if we need to validate the main action in the service propositions
         # I guess it should be here
 
+        # Apply the default value for statut before full_clean()
+        # because Django doesn't apply automatically the default values before the
+        # validation
+        if not self.statut:
+            self.statut = ActeurStatus.ACTIF
+
         acteur = self.set_default_fields_and_objects_before_save()
         self.full_clean()
         creating = self._state.adding  # Before calling save
@@ -1048,6 +1054,11 @@ class RevisionActeur(BaseActeur, LatLngPropertiesMixin):
         Won't create an Acteur instance
         """
         self.source = None
+        # Apply the default value for statut before full_clean()
+        # because Django doesn't apply automatically the default values before the
+        # validation
+        if not self.statut:
+            self.statut = ActeurStatus.ACTIF
         self.full_clean()
         return super().save(*args, **kwargs)
 
