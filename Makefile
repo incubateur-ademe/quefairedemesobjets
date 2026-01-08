@@ -59,8 +59,8 @@ init-dev:
 check-format:
 	uv run black --check --diff .
 
-.PHONY: fix
-fix:
+.PHONY: format
+format:
 	uv run ruff check . --fix
 	uv run black --exclude=.venv .
 

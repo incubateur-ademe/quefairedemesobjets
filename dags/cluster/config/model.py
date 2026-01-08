@@ -1,13 +1,13 @@
 """Configuration model for the clustering DAG"""
 
+import logging
+
 from cluster.config.constants import FIELDS_PROTECTED
 from pydantic import BaseModel, Field, field_validator, model_validator
-
 from utils.airflow_params import airflow_params_dropdown_selected_to_ids
 
 
 class ClusterConfig(BaseModel):
-
     # ---------------------------------------
     # Champs de base
     # ---------------------------------------
@@ -19,17 +19,15 @@ class ClusterConfig(BaseModel):
     # pour toutes les règles
     dry_run: bool
 
-    # SELECTION ACTEURS NON-PARENTS
+    # SELECTION ACTEURS
     include_sources: list[str]
+    apply_include_sources_to_parents: bool
     include_acteur_types: list[str]
+    apply_include_acteur_types_to_parents: bool
     include_only_if_regex_matches_nom: str | None
+    apply_include_only_if_regex_matches_nom_to_parents: bool
     include_if_all_fields_filled: list[str]
-    exclude_if_any_field_filled: list[str]
-
-    # SELECTION PARENTS EXISTANTS
-    # Pas de champ source car par définition parents = 0 source
-    # Pas de champ acteur type = on prend tous les acteur type ci-dessus
-    include_parents_only_if_regex_matches_nom: str | None
+    apply_include_if_all_fields_filled_to_parents: bool
 
     # NORMALISATION
     normalize_fields_basic: list[str]
@@ -94,12 +92,6 @@ class ClusterConfig(BaseModel):
             return False
         return v
 
-    @field_validator("exclude_if_any_field_filled", mode="before")
-    def check_exclude_if_any_field_filled(cls, v):
-        if v is None:
-            return []
-        return v
-
     @field_validator("include_only_if_regex_matches_nom", mode="before")
     def check_include_only_if_regex_matches_nom(cls, v):
         # Prevent empty string regex which would select all by mistake
@@ -110,7 +102,6 @@ class ClusterConfig(BaseModel):
     # Logique multi-champs
     @model_validator(mode="before")
     def check_model(cls, values):
-
         # Fields avec default []
         optionals = [
             "normalize_fields_basic",
@@ -161,7 +152,14 @@ class ClusterConfig(BaseModel):
         values["fields_transformed"] = []
         for k, v in values.items():
             # Exclude protected & enrichment fields
-            if "fields" in k and k not in ["fields_protected", "dedup_enrich_fields"]:
+            # Also exclude boolean fields that contain "fields" in their name
+            logging.info(f"k: {k}, v: {v}")
+            if (
+                "fields" in k
+                and k not in ["fields_protected", "dedup_enrich_fields"]
+                and v is not None
+                and not isinstance(v, bool)
+            ):
                 values["fields_transformed"] += [
                     x for x in v if x not in FIELDS_PROTECTED
                 ]

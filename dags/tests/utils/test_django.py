@@ -14,7 +14,6 @@ django_setup_full()
 
 @pytest.mark.django_db
 class TestDjangoModelFieldsGet:
-
     @pytest.fixture
     def without_props(self):
         from qfdmo.models import DisplayedActeur
@@ -50,13 +49,10 @@ def test_django_model_queryset_generate():
     # On vérifie qu'on est capable de sélectionner des champs
     # et des propriétés
     fields_include_all_filled = ["nom", "adresse"]
-    fields_exclude_any_filled = ["siret", "longitude", "ville"]
     # fields_to_select = ["latitude","numero_et_complement_de_rue"]
 
     # Generate queryset
-    queryset = django_model_queryset_generate(
-        Acteur, fields_include_all_filled, fields_exclude_any_filled
-    )
+    queryset = django_model_queryset_generate(Acteur, fields_include_all_filled)
 
     # Convert queryset to SQL string
     django_model_queryset_to_sql(queryset)
@@ -67,7 +63,6 @@ def test_django_model_queryset_generate():
         FROM "qfdmo_acteur"
         "WHERE (NOT ("nom" IS NULL) AND NOT ("nom" = '')
         AND NOT ("adresse" IS NULL) AND NOT ("adresse" = ''))
-        AND NOT (("siret" IS NOT NULL) OR ("siret" != ''))
         """
     # TODO: activer ce test une fois qu'on est content
     # avec le résultat final via Airflow
