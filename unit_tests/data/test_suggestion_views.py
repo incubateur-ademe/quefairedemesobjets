@@ -239,12 +239,14 @@ class TestSerializeSuggestionGroupe:
         SuggestionUnitaireFactory(
             suggestion_groupe=suggestion_groupe_modification,
             suggestion_modele="RevisionActeur",
+            revision_acteur=revision_acteur_parent,
             champs=["nom"],
             valeurs=["Suggestion nom"],
         )
         SuggestionUnitaireFactory(
             suggestion_groupe=suggestion_groupe_modification,
             suggestion_modele="RevisionActeur",
+            revision_acteur=revision_acteur_parent,
             champs=["latitude", "longitude"],
             valeurs=["48.2222", "2.2222"],
         )
