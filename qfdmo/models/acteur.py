@@ -427,7 +427,12 @@ class BaseActeur(TimestampedModel):
     nom = models.CharField(max_length=255, blank=False, null=False, db_index=True)
     description = models.TextField(blank=True, default="", db_default="")
     identifiant_unique = models.CharField(
-        max_length=255, unique=True, primary_key=True, blank=True, db_index=True
+        max_length=255,
+        unique=True,
+        primary_key=True,
+        blank=True,
+        db_index=True,
+        editable=False,
     )
     acteur_type = models.ForeignKey(ActeurType, on_delete=models.CASCADE)
     adresse = models.CharField(max_length=255, blank=True, default="", db_default="")
