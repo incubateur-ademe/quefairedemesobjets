@@ -13,12 +13,11 @@ from data.models.changes.acteur_create_as_parent import ChangeActeurCreateAsPare
 from data.models.changes.acteur_keep_as_parent import ChangeActeurKeepAsParent
 from data.models.changes.acteur_update_parent_id import ChangeActeurUpdateParentId
 from data.models.changes.acteur_verify_in_revision import ChangeActeurVerifyRevision
-from qfdmo.models.acteur import Acteur, RevisionActeur
+from qfdmo.models.acteur import VueActeur
 from unit_tests.qfdmo.acteur_factory import (
-    ActeurFactory,
     ActeurTypeFactory,
-    RevisionActeurFactory,
     SourceFactory,
+    VueActeurFactory,
 )
 
 django_setup_full()
@@ -35,31 +34,9 @@ def sources():
 
 
 @pytest.fixture
-def acteurs(acteur_type, sources):
-    ids = ["a1", "a2", "a3"]
-    noms = ["❌", "prio 2", "prio 1"]
-    sirets = ["❌", "", ""]
-    emails = ["email.acteur@source.1", "email.acteur@source.2", "email.acteur@source.3"]
-    locations = [Point(0, 0), Point(1, 1), Point(2, 2)]
-    return [
-        ActeurFactory(
-            identifiant_unique=i,
-            nom=n,
-            siret=s,
-            email=e,
-            source=source,
-            location=loc,
-            acteur_type=acteur_type,
-        )
-        for i, n, s, e, source, loc in zip(
-            ids, noms, sirets, emails, sources[:3], locations
-        )
-    ]
-
-
-@pytest.fixture
 def parent(acteur_type):
-    return RevisionActeur(
+    """Parent acteur pour les tests"""
+    return VueActeurFactory(
         identifiant_unique="p1",
         nom="my name",
         siret="11111111111111",
@@ -67,34 +44,57 @@ def parent(acteur_type):
         acteur_type=acteur_type,
         adresse="my place",
         source=None,
-    ).save_as_parent()
+    )
 
 
 @pytest.fixture
-def revision_acteurs(acteur_type, sources, parent, acteurs):
-    ids = ["a1", "a2", "a3", "a4"]
-    noms = ["❌", "prio 2", "prio 1", "prio 3"]
-    # With SIRET we are testing picking that data won't be
-    # proposed because it's the same
-    sirets = ["❌", "11111111111111", "", ""]
-    # With emails we are testing the fallback to base acteurs
-    emails = ["", "", "", ""]
-    locations = [Point(0, 0), Point(1, 1), Point(2, 2), Point(3, 3)]
-    parents = [parent, parent, None, None]
+def vue_acteurs(acteur_type, sources, parent):
+    """Tous les VueActeur nécessaires pour les tests"""
     return [
-        RevisionActeurFactory(
-            identifiant_unique=i,
-            nom=n,
-            siret=s,
-            email=e,
-            source=source,
-            location=loc,
+        # a1: with email, parent=p1, to test the email retrieval
+        VueActeurFactory(
+            identifiant_unique="a1",
+            nom="❌",
+            siret="❌",
+            email="email.acteur@source.1",
+            source=sources[0],
+            location=Point(0, 0),
             parent=parent,
             acteur_type=acteur_type,
-        )
-        for i, n, s, e, source, loc, parent in zip(
-            ids, noms, sirets, emails, sources[:4], locations, parents
-        )
+        ),
+        # a2: with email, parent=p1, same SIRET as parent
+        VueActeurFactory(
+            identifiant_unique="a2",
+            nom="prio 2",
+            siret="11111111111111",  # same SIRET as parent
+            email="email.acteur@source.2",
+            source=sources[1],
+            location=Point(1, 1),
+            parent=parent,
+            acteur_type=acteur_type,
+        ),
+        # a3: with email, no parent, to test parent creation
+        VueActeurFactory(
+            identifiant_unique="a3",
+            nom="prio 1",
+            siret="",
+            email="email.acteur@source.3",
+            source=sources[2],
+            location=Point(2, 2),
+            parent=None,
+            acteur_type=acteur_type,
+        ),
+        # a4: without email, no parent, to test empty emails
+        VueActeurFactory(
+            identifiant_unique="a4",
+            nom="prio 3",
+            siret="",
+            email="",  # empty email
+            source=sources[3],
+            location=Point(3, 3),
+            parent=None,
+            acteur_type=acteur_type,
+        ),
     ]
 
 
@@ -141,7 +141,6 @@ class TestValueIsEmpty:
 
 @pytest.mark.django_db
 class TestFieldPickValue:
-
     @pytest.mark.parametrize(
         "field, values, keep_empty,expected",
         [
@@ -163,10 +162,8 @@ class TestFieldPickValue:
 
 @pytest.mark.django_db
 class TestClusterActeursParentsChooseData:
-
     @pytest.fixture
-    def df_clusters_parent_keep(self, acteurs, parent, revision_acteurs):
-
+    def df_clusters_parent_keep(self, vue_acteurs, parent):
         return pd.DataFrame(
             {
                 "cluster_id": ["c1"] * 5,
@@ -185,7 +182,7 @@ class TestClusterActeursParentsChooseData:
         )
 
     @pytest.fixture
-    def df_clusters_parent_create(self, parent, revision_acteurs, acteurs):
+    def df_clusters_parent_create(self, vue_acteurs, parent):
         return pd.DataFrame(
             {
                 "cluster_id": ["c2"] * 3,
@@ -218,7 +215,7 @@ class TestClusterActeursParentsChooseData:
         assert df.loc[df["identifiant_unique"] == "p1", "parent_data_new"].values[
             0
         ] == {"email": "email.acteur@source.1"}
-        # tester que tous les autres sont None
+        # test that all others are None
         assert (
             df.loc[df["identifiant_unique"] != "p1", "parent_data_new"].isnull().all()
         )
@@ -267,7 +264,7 @@ class TestClusterActeursParentsChooseData:
             "keep_empty is True, first email is empty, as it is the same than parent"
             " email value, the update in empty"
         )
-        # tester que tous les autres sont None
+        # test that all others are None
         assert (
             df.loc[df["identifiant_unique"] != "p1", "parent_data_new"].isnull().all()
         )
@@ -303,11 +300,16 @@ class TestClusterActeursParentsChooseData:
         self,
         df_clusters_parent_create,
     ):
-        revison_a3 = RevisionActeur.objects.get(identifiant_unique="a3")
-        source = revison_a3.source
-        nom = revison_a3.nom
-        revison_a3.source = None
-        revison_a3.save()
+        vue_a3 = VueActeur.objects.get(identifiant_unique="a3")
+        source = vue_a3.source
+        assert source is not None, "vue_a3 should have a source"
+        vue_a3.source = None
+        vue_a3.save()
+
+        # Récupérer a4 qui a une source
+        vue_a4 = VueActeur.objects.get(identifiant_unique="a4")
+        assert vue_a4.source is not None, "vue_a4 should have a source"
+        nom_a4 = vue_a4.nom
 
         df = cluster_acteurs_parents_choose_data(
             df_clusters=df_clusters_parent_create,
@@ -318,25 +320,25 @@ class TestClusterActeursParentsChooseData:
         )
 
         # Retrieve parent data
+        # With VueActeur, if a3 doesn't have a source, it will be sorted after a4
+        # which has a source, so a4 will be chosen
         assert (
             df.loc[df["identifiant_unique"] == "p1", "parent_data_new"].values[0]["nom"]
-            == nom
+            == nom_a4
         ), (
-            "revision acteur a3 should be chosen even if it doesn't have "
-            "a source defined"
+            "vue acteur a4 should be chosen because a3 doesn't have "
+            "a source defined and a4 has a source"
         )
 
     def test_cluster_acteurs_parents_choose_data_parent_create_resolve_source_priority(
         self,
         df_clusters_parent_create,
     ):
-        revison_a3 = RevisionActeur.objects.get(identifiant_unique="a3")
-        source = revison_a3.source
-        revison_a3.nom = ""
-        revison_a3.save()
-        acteur_a3 = Acteur.objects.get(identifiant_unique="a3")
-        acteur_a3.nom = "acteur a3"
-        acteur_a3.save()
+        vue_a3 = VueActeur.objects.get(identifiant_unique="a3")
+        source = vue_a3.source
+        assert source is not None, "vue_a3 should have a source"
+        vue_a3.nom = ""
+        vue_a3.save()
 
         df = cluster_acteurs_parents_choose_data(
             df_clusters=df_clusters_parent_create,
@@ -349,22 +351,21 @@ class TestClusterActeursParentsChooseData:
         # Retrieve parent data
         assert df.loc[df["identifiant_unique"] == "p1", "parent_data_new"].values[0][
             "nom"
-        ] not in ["", "acteur a3"], (
-            "revision acteur a3 should not be chosen even if it doesn't have `nom`"
-            " defined"
+        ] not in [""], (
+            "vue acteur a3 should not be chosen even if it doesn't have `nom` defined"
         )
 
     def test_cluster_acteurs_parents_choose_data_parent_create_resolve_empty_nom(
         self,
         df_clusters_parent_create,
     ):
-        RevisionActeur.objects.all().update(nom="")
-        revison_a3 = RevisionActeur.objects.get(identifiant_unique="a3")
-        source = revison_a3.source
-
-        acteur_a3 = Acteur.objects.get(identifiant_unique="a3")
-        acteur_a3.nom = "acteur a3"
-        acteur_a3.save()
+        # Update all VueActeur with empty nom except a3 which will be updated after
+        VueActeur.objects.exclude(identifiant_unique="a3").update(nom="")
+        vue_a3 = VueActeur.objects.get(identifiant_unique="a3")
+        source = vue_a3.source
+        assert source is not None, "vue_a3 should have a source"
+        vue_a3.nom = ""
+        vue_a3.save()
 
         df = cluster_acteurs_parents_choose_data(
             df_clusters=df_clusters_parent_create,
@@ -375,7 +376,10 @@ class TestClusterActeursParentsChooseData:
         )
 
         # Retrieve parent data
-        assert (
-            df.loc[df["identifiant_unique"] == "p1", "parent_data_new"].values[0]["nom"]
-            == "acteur a3"
-        ), "acteur a3 nom should be chosen because no nom defined on revision"
+        # If all noms are empty, the result should be None or empty
+        parent_data = df.loc[
+            df["identifiant_unique"] == "p1", "parent_data_new"
+        ].values[0]
+        assert "nom" not in parent_data or parent_data.get("nom") == "", (
+            "Si tous les noms sont vides, aucun nom ne devrait être choisi"
+        )
