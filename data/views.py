@@ -426,7 +426,7 @@ def update_suggestion_groupe(
                 suggestion_modele="RevisionActeur",
                 defaults={
                     "acteur": suggestion_groupe.acteur,
-                    "revision_acteur_id": suggestion_groupe.revision_acteur,
+                    "revision_acteur": suggestion_groupe.revision_acteur,
                 },
             )
             suggestion_unitaire.valeurs = [
