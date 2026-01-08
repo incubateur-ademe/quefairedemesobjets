@@ -1002,8 +1002,8 @@ class RevisionActeur(BaseActeur, LatLngPropertiesMixin):
         # OPTIMIZE: if we need to validate the main action in the service propositions
         # I guess it should be here
 
-        # Appliquer la valeur par défaut pour statut avant full_clean()
-        # car Django n'applique pas automatiquement les valeurs par défaut avant la
+        # Apply the default value for statut before full_clean()
+        # because Django doesn't apply automatically the default values before the
         # validation
         if not self.statut:
             self.statut = ActeurStatus.ACTIF
@@ -1054,8 +1054,8 @@ class RevisionActeur(BaseActeur, LatLngPropertiesMixin):
         Won't create an Acteur instance
         """
         self.source = None
-        # Appliquer la valeur par défaut pour statut avant full_clean()
-        # car Django n'applique pas automatiquement les valeurs par défaut avant la
+        # Apply the default value for statut before full_clean()
+        # because Django doesn't apply automatically the default values before the
         # validation
         if not self.statut:
             self.statut = ActeurStatus.ACTIF
