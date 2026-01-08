@@ -241,11 +241,15 @@ def _validate_proposed_updates(values_to_update: dict, fields_values: dict) -> d
 def _suggestion_unitaires_to_suggestion_source_model_by_model_name(
     suggestion_unitaires: list[SuggestionUnitaire],
     model_name: str,
+    revision_acteur_id: int | None = None,
 ) -> SuggestionSourceModel:
     suggestion_unitaires_dict = {
         tuple(unit.champs): unit.valeurs
         for unit in suggestion_unitaires
         if unit.suggestion_modele == model_name
+        and (
+            revision_acteur_id is None or unit.revision_acteur_id == revision_acteur_id
+        )
     }
     return _dict_to_suggestion_source_model(
         _flatten_suggestion_unitaires(suggestion_unitaires_dict)
@@ -267,7 +271,9 @@ def serialize_suggestion_groupe(
     # Flatten and convert to SuggestionSourceModel
     acteur_overridden_by_suggestion_unitaires_by_field = (
         _suggestion_unitaires_to_suggestion_source_model_by_model_name(
-            suggestion_unitaires, "RevisionActeur"
+            suggestion_unitaires,
+            "RevisionActeur",
+            revision_acteur_id=suggestion_groupe.revision_acteur_id,
         )
     )
     fields_groups = _get_ordered_fields_groups(suggestion_unitaires)
@@ -401,6 +407,7 @@ def update_suggestion_groupe(
         suggestion_groupe.revision_acteur = (
             suggestion_groupe.acteur.get_or_create_revision()
         )
+        suggestion_groupe.save()
 
     # Validate proposed updates
     try:
