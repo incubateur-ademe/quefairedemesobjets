@@ -1224,6 +1224,19 @@ class FinalActeur(BaseActeur):
 
     epci = models.ForeignKey(EPCI, on_delete=models.CASCADE, blank=True, null=True)
 
+    latitude = models.FloatField(
+        editable=False,
+        null=True,
+        verbose_name="Latitude",
+        db_index=True,
+    )
+    longitude = models.FloatField(
+        editable=False,
+        null=True,
+        verbose_name="Longitude",
+        db_index=True,
+    )
+
 
 class VueActeur(FinalActeur):
     class Meta:
@@ -1275,12 +1288,6 @@ class VueActeur(FinalActeur):
         editable=False,
         verbose_name="L'acteur est dans le partage opendata",
     )
-    latitude = models.FloatField(
-        default=0.0, editable=False, null=True, verbose_name="La latitude de l'acteur"
-    )
-    longitude = models.FloatField(
-        default=0.0, editable=False, null=True, verbose_name="La longitude de l'acteur"
-    )
 
     @property
     def is_parent(self):
@@ -1293,7 +1300,7 @@ class VuePerimetreADomicile(BasePerimetreADomicile):
     )
 
 
-class DisplayedActeur(FinalActeur, LatLngPropertiesMixin):
+class DisplayedActeur(FinalActeur):
     objects = DisplayedActeurManager()
 
     def natural_key(self):
