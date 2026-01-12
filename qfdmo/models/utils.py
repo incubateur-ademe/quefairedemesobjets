@@ -93,3 +93,17 @@ def string_remove_substring_via_normalization(
         # Si à cause de la norma on peut pas retomber sur nos pieds, on
         # retourne le nom original
         return s1 or None
+
+
+def compute_identifiant_unique(source_code: str, identifiant_externe: str) -> str:
+    if not identifiant_externe:
+        raise ValueError(
+            "Identifiant externe is required to generate identifiant_unique"
+        )
+    if not source_code:
+        raise ValueError("Source code is required to generate identifiant_unique")
+    source_stub = unidecode(source_code.lower().strip()).replace(" ", "_")
+    identifiant_externe_stub = (
+        str(identifiant_externe).strip().replace("/", "-").replace(" ", "")
+    )
+    return source_stub + "_" + identifiant_externe_stub
