@@ -52,6 +52,9 @@ MANDATORY_COLUMNS_AFTER_NORMALISATION = [
 ]
 REGEX_BAN_SEPARATORS = r"\s,;-"
 STRIP_BAN = REGEX_BAN_SEPARATORS.replace("\\s", " ")
+# Quantifier pattern for postal codes (4 or 5 digits)
+# Used as variable to avoid that djade reformates the double braces
+POSTAL_CODE_QUANTIFIER = "{4,5}"
 REGEXPS_SERVICE_A_DOMICILE_UNIQUEMENT = [
     r"SERVICE\s*A\s*DOMICILE\s*UNIQUEMENT",
     r"OUI\s*EXCLUSIVEMENT",
@@ -199,14 +202,16 @@ def clean_identifiant_externe(row, _):
 
 
 def compute_identifiant_unique(identifiant_externe, source_code):
-    unique_str = str(identifiant_externe).replace("/", "-").strip()
-    if not unique_str:
+    from qfdmo.models.utils import compute_identifiant_unique
+
+    try:
+        return compute_identifiant_unique(source_code, identifiant_externe)
+    except ValueError:
         raise IdentifiantUniqueError(
             "L'identifiant unique est requis, il n'a pas pu être déduit des colonnes"
             f" `identifiant_externe` : `{identifiant_externe}`"
             f" et/ou `source_code`  : `{source_code}`"
         )
-    return source_code.lower() + "_" + unique_str
 
 
 def clean_identifiant_unique(row, _):
@@ -556,11 +561,12 @@ def _address_details_extract(
     """Extrait les détails de l'adresse, y compris le code postal et la ville."""
     address = postal_code = city = ""
 
+    # Use a variable to avoid that djade reformates the double braces
     pattern1 = re.compile(
-        rf"(.*)[{REGEX_BAN_SEPARATORS}]+(\d{{4,5}})[{REGEX_BAN_SEPARATORS}]*(.*)"
+        rf"(.*)[{REGEX_BAN_SEPARATORS}]+(\d{POSTAL_CODE_QUANTIFIER})[{REGEX_BAN_SEPARATORS}]*(.*)"
     )
     # Pattern pour capturer les codes postaux sans adresse
-    pattern2 = re.compile(rf"(\d{{4,5}})[{REGEX_BAN_SEPARATORS}]*(.*)")
+    pattern2 = re.compile(rf"(\d{POSTAL_CODE_QUANTIFIER})[{REGEX_BAN_SEPARATORS}]*(.*)")
     if match := pattern1.search(address_str):
         address = match.group(1).strip(STRIP_BAN) if match.group(1) else ""
         postal_code = match.group(2).strip(STRIP_BAN) if match.group(2) else ""
