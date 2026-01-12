@@ -118,11 +118,11 @@ class BasePropositionServiceForm(forms.ModelForm):
                 libelle_unaccent=Unaccent(Lower("libelle")),
             ).order_by("libelle_unaccent")
         if "sous_categories" in self.fields:
-            self.fields[
-                "sous_categories"
-            ].queryset = SousCategorieObjet.objects.annotate(
-                libelle_unaccent=Unaccent(Lower("libelle")),
-            ).order_by("libelle_unaccent")
+            self.fields["sous_categories"].queryset = (
+                SousCategorieObjet.objects.annotate(
+                    libelle_unaccent=Unaccent(Lower("libelle")),
+                ).order_by("libelle_unaccent")
+            )
 
     filter_horizontal = [
         "sous_categories",
