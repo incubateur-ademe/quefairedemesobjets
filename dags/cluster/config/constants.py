@@ -5,7 +5,6 @@
 # Protected fields are fields we don't want to
 # transformed nor used for enrichment
 FIELDS_PROTECTED = [
-    "nom",
     "source_id",
     "acteur_type_id",
     "identifiant_unique",

@@ -4,7 +4,7 @@ Test file for the cluster_acteurs_read_parents function
 
 import pandas as pd
 import pytest
-from cluster.tasks.business_logic.cluster_acteurs_read.parents import (
+from cluster.tasks.business_logic.cluster_acteurs_read.for_clustering import (
     cluster_acteurs_read_parents,
 )
 

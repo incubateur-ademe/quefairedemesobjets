@@ -1,7 +1,5 @@
 """Configuration model for the clustering DAG"""
 
-import logging
-
 from cluster.config.constants import FIELDS_PROTECTED
 from pydantic import BaseModel, Field, field_validator, model_validator
 from utils.airflow_params import airflow_params_dropdown_selected_to_ids
@@ -152,13 +150,11 @@ class ClusterConfig(BaseModel):
         values["fields_transformed"] = []
         for k, v in values.items():
             # Exclude protected & enrichment fields
-            # Also exclude boolean fields that contain "fields" in their name
-            logging.info(f"k: {k}, v: {v}")
+            # Also exclude boolean which ask if we need to apply to parents
             if (
                 "fields" in k
                 and k not in ["fields_protected", "dedup_enrich_fields"]
-                and v is not None
-                and not isinstance(v, bool)
+                and not (k.startswith("apply_") and k.endswith("_to_parents"))
             ):
                 values["fields_transformed"] += [
                     x for x in v if x not in FIELDS_PROTECTED
