@@ -81,7 +81,7 @@ PARAMS = {
     "apply_include_sources_to_parents": Param(
         False,
         type="boolean",
-        description_md="""**🔄 APPLIQUER AUX PARENTS**: si coché, la séléction des
+        description_md="""**🔄 APPLIQUER AUX PARENTS**: si coché, la sélection des
             sources des acteurs sera aussi appliquée aux parents
             """,
     ),
@@ -95,7 +95,7 @@ PARAMS = {
     "apply_include_acteur_types_to_parents": Param(
         True,
         type="boolean",
-        description_md="""**🔄 APPLIQUER AUX PARENTS**: si coché, la séléction des
+        description_md="""**🔄 APPLIQUER AUX PARENTS**: si coché, la sélection des
             types d'acteurs sera aussi appliquée aux parents
             """,
     ),
