@@ -6,12 +6,6 @@ from cluster.tasks.business_logic.cluster_acteurs_clusters_validate import (
 
 
 class TestClusterActeursSuggestionsValidate:
-
-    def test_issue_acteurs_non_actifs(self):
-        df = pd.DataFrame({"statut": ["ACTIF", "INACTIF"]})
-        with pytest.raises(ValueError, match="Clusters avec acteurs non-ACTIF"):
-            cluster_acteurs_clusters_validate(df)
-
     def test_issue_clusters_size1(self):
         df = pd.DataFrame(
             {

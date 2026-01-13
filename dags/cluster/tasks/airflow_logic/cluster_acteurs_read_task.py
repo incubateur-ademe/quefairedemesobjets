@@ -42,11 +42,17 @@ def cluster_acteurs_read_wrapper(ti) -> None:
 
     df = cluster_acteurs_read_for_clustering(
         include_source_ids=config.include_source_ids,
+        apply_include_sources_to_parents=config.apply_include_sources_to_parents,
         include_acteur_type_ids=config.include_acteur_type_ids,
+        apply_include_acteur_types_to_parents=config.apply_include_acteur_types_to_parents,
         include_only_if_regex_matches_nom=config.include_only_if_regex_matches_nom,
+        apply_include_only_if_regex_matches_nom_to_parents=(
+            config.apply_include_only_if_regex_matches_nom_to_parents
+        ),
         include_if_all_fields_filled=config.include_if_all_fields_filled,
-        exclude_if_any_field_filled=config.exclude_if_any_field_filled,
-        include_parents_only_if_regex_matches_nom=config.include_parents_only_if_regex_matches_nom,
+        apply_include_if_all_fields_filled_to_parents=(
+            config.apply_include_if_all_fields_filled_to_parents
+        ),
         fields_protected=config.fields_protected,
         fields_transformed=config.fields_transformed,
     )

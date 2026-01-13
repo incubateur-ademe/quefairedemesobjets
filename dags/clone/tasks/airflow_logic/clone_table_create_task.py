@@ -20,7 +20,7 @@ def task_info_get(config: CloneConfig) -> str:
     à partir de {config.data_endpoint}
 
     🎯 pourquoi: c'est le but de ce DAG, pouvoir mettre à jour
-    l'annuaire entreprise périodiquement
+    la table importée périodiquement
 
     🏗️ comment: on stream {config.data_endpoint} directement
     vers notre DB en utilisant zcat & psql
