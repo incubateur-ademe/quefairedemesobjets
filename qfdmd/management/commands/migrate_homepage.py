@@ -3,7 +3,10 @@ from wagtail.models import Page, Site
 
 
 class Command(BaseCommand):
-    help = "Move page 344 to root level, migrate children from page 2 to page 344, and update site root page"
+    help = (
+        "Move page 344 to root level, migrate children from page 2 to "
+        "page 344, and update site root page"
+    )
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -97,7 +100,9 @@ class Command(BaseCommand):
         if dry_run:
             self.stdout.write(
                 self.style.WARNING(
-                    f"[DRY RUN] Would update site root page from '{site.root_page.title}' (id={site.root_page.id}) to '{page_344.title}' (id=344)"
+                    f"[DRY RUN] Would update site root page from "
+                    f"'{site.root_page.title}' (id={site.root_page.id}) to "
+                    f"'{page_344.title}' (id=344)"
                 )
             )
         else:
@@ -115,7 +120,8 @@ class Command(BaseCommand):
         if dry_run:
             self.stdout.write(
                 self.style.WARNING(
-                    f"[DRY RUN] Would publish page 344: '{page_344.title}' (currently live={page_344.live})"
+                    f"[DRY RUN] Would publish page 344: '{page_344.title}' "
+                    f"(currently live={page_344.live})"
                 )
             )
         else:
@@ -139,7 +145,8 @@ class Command(BaseCommand):
         if dry_run:
             self.stdout.write(
                 self.style.WARNING(
-                    f"[DRY RUN] Would unpublish page 2: '{page_2.title}' (currently live={page_2.live})"
+                    f"[DRY RUN] Would unpublish page 2: '{page_2.title}' "
+                    f"(currently live={page_2.live})"
                 )
             )
         else:
