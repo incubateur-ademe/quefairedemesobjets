@@ -20,11 +20,6 @@ def cluster_acteurs_clusters_validate(df_clusters: pd.DataFrame) -> None:
 
     df = df_clusters
 
-    # We should never cluster INACTIVE acteurs
-    # df_non_actifs = df[df["statut"].str.upper() != ActeurStatus.ACTIF.upper()]
-    # raise_if_df_not_empty(df_non_actifs, "Clusters avec acteurs non-ACTIF")
-    # logger.info("100% acteurs actifs: 🟢")
-
     # There should be no duplicate acteurs
     df_multiple_clusters = df.groupby("identifiant_unique").filter(lambda x: len(x) > 1)
     raise_if_df_not_empty(df_multiple_clusters, "Acteurs définis plusieurs fois")
