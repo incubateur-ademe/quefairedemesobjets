@@ -543,19 +543,6 @@ class PagesPreview(LookbookPreview):
     def home(self, **kwargs):
         context = {
             "request": None,
-            "object_list": [],
-            "accordion": {
-                "id": "professionels",
-                "title": "Je suis un professionnel",
-                "content": "Actuellement, l’ensemble des recommandations ne concerne "
-                "que les particuliers. Pour des informations à destination des "
-                "professionnels, veuillez consulter le site "
-                "<a href='https://economie-circulaire.ademe.fr/dechets-activites-economiques'"
-                "target='_blank' rel='noreferrer' "
-                "title='Économie Circulaire ADEME - Nouvelle fenêtre'>"
-                "https://economie-circulaire.ademe.fr/dechets-activites-economiques"
-                "</a>.",
-            },
             "ASSISTANT": {"faites_decouvrir_ce_site": "Faites découvrir ce site !"},
         }
         return render_to_string("ui/pages/home.html", context)
