@@ -8,10 +8,9 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 # from django.core.management import call_command
 from django.test import override_settings
 
-from qfdmd.models import Suggestion, Synonyme
+from qfdmd.models import Synonyme
 from unit_tests.qfdmd.qfdmod_factory import (
     ProduitFactory,
-    SuggestionFactory,
     SynonymeFactory,
 )
 
@@ -57,17 +56,3 @@ class TestHomepage:
         response, soup = get_response()
         modal = soup.find(id="fr-modal-partager-le-site")
         assert "None" not in modal.get_text()
-
-    def test_suggestions(self, get_response, tmp_path):
-        produit = ProduitFactory(nom="Coucou le produit")
-        synonyme = SynonymeFactory(produit=produit, nom="Youpi le synonyme")
-        SuggestionFactory(produit=synonyme)
-        response, soup = get_response()
-        assert (
-            len(soup.css.select("[data-testid=suggestion]"))
-            == Suggestion.objects.all().count()
-        )
-        assert (
-            soup.css.select("[data-testid=suggestion]")[0].text.lower().strip()
-            == "Youpi le synonyme".lower()
-        )

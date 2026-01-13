@@ -16,7 +16,7 @@ from dsfr.forms import DsfrBaseForm
 from core.constants import DEFAULT_MAP_CONTAINER_ID
 from infotri.forms import InfotriForm
 from qfdmd.forms import SearchForm
-from qfdmd.models import Suggestion, Synonyme
+from qfdmd.models import Synonyme
 from qfdmo.forms import LegendeForm, NextAutocompleteInput, ViewModeForm
 from qfdmo.models.acteur import (
     ActeurType,
@@ -543,10 +543,7 @@ class PagesPreview(LookbookPreview):
     def home(self, **kwargs):
         context = {
             "request": None,
-            "object_list": [
-                Suggestion(produit=Synonyme.objects.first()),
-                Suggestion(produit=Synonyme.objects.last()),
-            ],
+            "object_list": [],
             "accordion": {
                 "id": "professionels",
                 "title": "Je suis un professionnel",
@@ -657,7 +654,7 @@ class IframePreview(LookbookPreview):
             data-action_displayed="preter|emprunter|louer|mettreenlocation|reparer|donner|echanger|acheter|revendre"
             data-max-width="800px"
             data-height="720px"
-            data-bounding_box="{{'southWest': {{'lat': 47.570401, 'lng': 1.597977}}, 'northEast': {{'lat': 48.313697, 'lng': 3.059159}}}}">
+            data-bounding_box="{{ 'southWest': {{'lat': 47.570401, 'lng': 1.597977 }}, 'northEast': {{ 'lat': 48.313697, 'lng': 3.059159 }}}}">
         </script>
         ```
         """
@@ -683,7 +680,7 @@ class IframePreview(LookbookPreview):
         ```html
         <script src="{base_url}/static/carte.js"
             data-action_list="preter|emprunter|louer|mettreenlocation|reparer|donner|echanger|acheter|revendre"
-            data-bounding_box="{{'southWest': {{'lat': 47.457526, 'lng': -0.609453}}, 'northEast': {{'lat': 47.489048, 'lng': -0.51571}}}}">
+            data-bounding_box="{{ 'southWest': {{'lat': 47.457526, 'lng': -0.609453 }}, 'northEast': {{ 'lat': 47.489048, 'lng': -0.51571 }}}}">
         </script>
         ```
         """
@@ -708,7 +705,7 @@ class IframePreview(LookbookPreview):
             data-height="720px"
             data-direction="jai"
             data-action_list="reparer|echanger|mettreenlocation|revendre"
-            data-iframe_attributes='{{"loading":"lazy", "id" : "resize" }}'>
+            data-iframe_attributes='{{ "loading":"lazy", "id" : "resize" }}'>
         </script>
         ```
         """
