@@ -6,7 +6,6 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
     endpointUrl: String,
     turboFrameId: String,
     limit: String,
-    navigate: { type: Boolean, default: false },
     showOnFocus: { type: Boolean, default: false },
   }
   declare readonly optionTargets: HTMLElement[]
@@ -14,7 +13,6 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
   declare readonly turboFrameIdValue: string
   declare readonly endpointUrlValue: string
   declare readonly limitValue: string
-  declare readonly navigateValue: boolean
   declare readonly showOnFocusValue: boolean
   declare readonly inputTarget: HTMLInputElement
   declare readonly hiddenInputTarget: HTMLInputElement
@@ -31,22 +29,17 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
 
   focus(event) {
     if (this.showOnFocusValue) {
-      // Trigger a search with empty or current query to load results
-      const query = this.inputTarget.value || ""
-      const nextUrl = new URL(this.endpointUrlValue, window.location.origin)
-      nextUrl.searchParams.set("q", query)
-      nextUrl.searchParams.set("turbo_frame_id", this.turboFrameIdValue)
-      nextUrl.searchParams.set("limit", this.limitValue)
-      this.resultsTarget.setAttribute("src", nextUrl.toString())
-      this.showListbox()
+      this.loadResults(this.inputTarget.value || "")
     }
   }
 
   search(event) {
-    const query = event.target.value
+    this.loadResults(event.target.value)
+  }
+
+  loadResults(query: string) {
     const nextUrl = new URL(this.endpointUrlValue, window.location.origin)
     nextUrl.searchParams.set("q", query)
-    // TODO : set query params key from django view
     nextUrl.searchParams.set("turbo_frame_id", this.turboFrameIdValue)
     nextUrl.searchParams.set("limit", this.limitValue)
     this.resultsTarget.setAttribute("src", nextUrl.toString())
@@ -58,7 +51,6 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
 
     // Allow Tab key to work normally for keyboard navigation
     if (key === "Tab") {
-      // Close listbox when tabbing away
       this.hideListbox()
       return
     }
@@ -74,10 +66,7 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
         // Down Arrow: Opens the listbox if closed and moves focus to first option
         // If already open, moves focus to next option
         if (this.resultsTarget.hidden) {
-          this.showListbox()
-          if (this.optionTargets.length > 0) {
-            this.setVisualFocus(0)
-          }
+          this.openListboxAndFocus(0)
         } else {
           this.moveFocus(1)
         }
@@ -88,10 +77,7 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
         // Up Arrow: Opens the listbox if closed and moves focus to last option
         // If already open, moves focus to previous option
         if (this.resultsTarget.hidden) {
-          this.showListbox()
-          if (this.optionTargets.length > 0) {
-            this.setVisualFocus(this.optionTargets.length - 1)
-          }
+          this.openListboxAndFocus(this.optionTargets.length - 1)
         } else {
           this.moveFocus(-1)
         }
@@ -111,7 +97,7 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
 
       case "Home":
         // Home: Moves focus to first option (if listbox is open)
-        if (!this.resultsTarget.hidden && this.optionTargets.length > 0) {
+        if (this.isListboxOpenWithOptions()) {
           event.preventDefault()
           this.setVisualFocus(0)
         }
@@ -119,7 +105,7 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
 
       case "End":
         // End: Moves focus to last option (if listbox is open)
-        if (!this.resultsTarget.hidden && this.optionTargets.length > 0) {
+        if (this.isListboxOpenWithOptions()) {
           event.preventDefault()
           this.setVisualFocus(this.optionTargets.length - 1)
         }
@@ -133,6 +119,21 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
 
   refreshOptions() {
     this.currentIndex = -1
+  }
+
+  isListboxOpenWithOptions(): boolean {
+    return !this.resultsTarget.hidden && this.optionTargets.length > 0
+  }
+
+  openListboxAndFocus(index: number) {
+    this.showListbox()
+    if (this.optionTargets.length > 0) {
+      this.setVisualFocus(index)
+    }
+  }
+
+  #getLinkFromOption(option: HTMLElement): HTMLAnchorElement | null {
+    return option.querySelector("a")
   }
 
   moveFocus(direction: number) {
@@ -168,7 +169,7 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
     currentOption.setAttribute("aria-selected", "true")
 
     // If option contains a link, focus it. Otherwise keep focus on input
-    const link = currentOption.querySelector("a")
+    const link = this.#getLinkFromOption(currentOption)
     if (link) {
       link.focus()
     } else {
@@ -189,6 +190,23 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
     }
     if (!selected) return
 
+    const link = this.#getLinkFromOption(selected)
+
+    // If clicking on a link, let the browser handle navigation naturally
+    if (event && link && (event.target === link || link.contains(event.target))) {
+      this.hideListbox()
+      // Let the default link behavior happen (browser will navigate)
+      return
+    }
+
+    // If selecting via keyboard (Enter key) and option has a link, trigger it
+    if (!event && link) {
+      this.hideListbox()
+      link.click()
+      return
+    }
+
+    // Otherwise, this is a form autocomplete - populate the form fields
     const value = selected.dataset.value?.trim() || ""
     const selectedValue = selected.dataset.selectedValue?.trim() || ""
 
@@ -202,18 +220,6 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
       detail: { option: selected, value, selectedValue },
     })
     this.element.dispatchEvent(commitEvent)
-
-    // Navigate if configured to do so
-    if (this.navigateValue) {
-      // If the option contains a link, click it (for accessibility)
-      const link = selected.querySelector("a")
-      if (link) {
-        link.click()
-      } else if (value && (value.startsWith("/") || value.startsWith("http"))) {
-        // Fallback to JS navigation if no link present
-        window.location.href = value
-      }
-    }
   }
 
   escapeAction() {

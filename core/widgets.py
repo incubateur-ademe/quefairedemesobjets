@@ -10,7 +10,6 @@ class NextAutocompleteInput(forms.TextInput):
     # Class attributes for configuration (can be overridden in subclasses)
     search_view = None
     limit = 5
-    navigate = False
     display_value = False
     show_on_focus = False
 
@@ -18,7 +17,6 @@ class NextAutocompleteInput(forms.TextInput):
         self,
         search_view=None,
         limit=None,
-        navigate=None,
         display_value=None,
         show_on_focus=None,
         wrapper_attrs=None,
@@ -28,7 +26,6 @@ class NextAutocompleteInput(forms.TextInput):
         # Use instance parameters if provided, otherwise fall back to class attributes
         self.search_view = search_view if search_view is not None else self.search_view
         self.limit = limit if limit is not None else self.limit
-        self.navigate = navigate if navigate is not None else self.navigate
         self.display_value = (
             display_value if display_value is not None else self.display_value
         )
@@ -53,7 +50,6 @@ class NextAutocompleteInput(forms.TextInput):
             **context,
             "endpoint_url": endpoint_url,
             "limit": self.limit,
-            "navigate": self.navigate,
             "display_value": self.display_value,
             "show_on_focus": self.show_on_focus,
             "turbo_frame_id": self.turbo_frame_id,
@@ -73,4 +69,3 @@ class HomeSearchAutocompleteInput(NextAutocompleteInput):
 
     search_view = "qfdmd:autocomplete_home_search"
     limit = 10
-    navigate = True

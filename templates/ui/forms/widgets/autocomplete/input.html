@@ -3,7 +3,6 @@
     data-next-autocomplete-endpoint-url-value="{{ endpoint_url }}"
     data-next-autocomplete-turbo-frame-id-value="{{ turbo_frame_id }}"
     data-next-autocomplete-limit-value="{{ limit }}"
-    {% if navigate %}data-next-autocomplete-navigate-value="true"{% endif %}
     {% if show_on_focus %}data-next-autocomplete-show-on-focus-value="true"{% endif %}
     {# TODO: add optional data-action block #}
     {% for key, value in wrapper_attrs.items %}{% if key != "data-controller" %}{{ key }}="{{ value }}" {% endif %}{% endfor %}
