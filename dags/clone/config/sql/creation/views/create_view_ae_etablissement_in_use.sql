@@ -62,6 +62,7 @@ CREATE VIEW {{view_name}} AS (
         "denominationUsuelleEtablissement" AS denomination_usuelle,
         "activitePrincipaleEtablissement" AS activite_principale,
         "nomenclatureActivitePrincipaleEtablissement" AS nomenclature_activite_principale,
-        "caractereEmployeurEtablissement" AS caractere_employeur
+        "caractereEmployeurEtablissement" AS caractere_employeur,
+        "activitePrincipaleNAF25UniteLegale" AS activite_principale_naf_25
     FROM {{table_name}}
 )

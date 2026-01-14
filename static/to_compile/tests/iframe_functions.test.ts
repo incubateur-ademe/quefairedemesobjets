@@ -129,9 +129,7 @@ describe("getIframeAttributesAndExtra function tests", () => {
     expect(iframeAttributes.style).toBe(
       "overflow: hidden; max-width: 100%; width: 100%; height: 100vh;",
     )
-    expect(iframeAttributes.src).toBe(
-      "https://example.com/dechet/test-objet?iframe=&s=1",
-    )
+    expect(iframeAttributes.src).toBe("https://example.com/dechet/test-objet?s=1")
   })
 
   test("should use default height (100vh) for formulaire iframe", () => {
@@ -156,7 +154,7 @@ describe("getIframeAttributesAndExtra function tests", () => {
       "overflow: hidden; max-width: 100%; width: 100%; height: 100vh;",
     )
     expect(iframeAttributes.src).toBe(
-      "https://example.com/infotri?iframe=&categorie=tous&consigne=1",
+      "https://example.com/infotri?categorie=tous&consigne=1",
     )
   })
 })

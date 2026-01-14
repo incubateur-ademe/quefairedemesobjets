@@ -38,6 +38,7 @@ with DAG(
         ],
         "validate_address_with_ban": False,
         "product_mapping": get_mapping_config("sous_categories"),
+        "use_legacy_suggestions": True,
     },
 ) as dag:
     eo_task_chain(dag)

@@ -28,6 +28,7 @@ from data.models.change import (
     COL_CHANGE_ORDER,
     COL_CHANGE_REASON,
 )
+from qfdmo.models.acteur import ActeurStatus
 
 COLS_ASSERT = [
     "identifiant_unique",
@@ -55,6 +56,7 @@ def df_no_parent() -> pd.DataFrame:
             "identifiant_unique": ["c0_a", "c0_b", "c0_c"],
             "parent_id": [None, None, None],
             "nombre_enfants": [0, 0, 0],
+            "statut": [ActeurStatus.ACTIF, ActeurStatus.ACTIF, ActeurStatus.ACTIF],
         }
     )
 
@@ -70,6 +72,7 @@ def df_one_parent() -> pd.DataFrame:
             # n'a pas de parent et est rattaché au cluster
             "parent_id": [None, None, "c1_b"],
             "nombre_enfants": [0, 1, 0],
+            "statut": [ActeurStatus.ACTIF, ActeurStatus.ACTIF, ActeurStatus.ACTIF],
         }
     )
 
@@ -84,6 +87,80 @@ def df_two_parents() -> pd.DataFrame:
             # a=2 enfants, b=1 enfant
             "parent_id": [None, None, "c2_b", "c2_a", "c2_a"],
             "nombre_enfants": [2, 1, 0, 0, 0],
+            "statut": [
+                ActeurStatus.ACTIF,
+                ActeurStatus.ACTIF,
+                ActeurStatus.ACTIF,
+                ActeurStatus.ACTIF,
+                ActeurStatus.ACTIF,
+            ],
+        }
+    )
+
+
+@pytest.fixture(scope="session")
+def df_two_parents_one_inactive() -> pd.DataFrame:
+    """Fixture avec 2 parents dont un seul est actif"""
+    cid3 = "c3_2parents_one_inactive"
+    return pd.DataFrame(
+        {
+            "cluster_id": [cid3, cid3, cid3, cid3, cid3],
+            "identifiant_unique": ["c3_a", "c3_b", "c3_c", "c3_d", "c3_e"],
+            # a=2 enfants (INACTIF), b=1 enfant (ACTIF)
+            "parent_id": [None, None, "c3_b", "c3_a", "c3_a"],
+            "nombre_enfants": [2, 1, 0, 0, 0],
+            "statut": [
+                ActeurStatus.INACTIF,  # a est inactif mais a plus d'enfants
+                ActeurStatus.ACTIF,  # b est actif mais a moins d'enfants
+                ActeurStatus.ACTIF,
+                ActeurStatus.ACTIF,
+                ActeurStatus.ACTIF,
+            ],
+        }
+    )
+
+
+@pytest.fixture(scope="session")
+def df_two_parents_both_active() -> pd.DataFrame:
+    """Fixture avec 2 parents actifs, on choisit celui avec le plus d'enfants"""
+    cid4 = "c4_2parents_both_active"
+    return pd.DataFrame(
+        {
+            "cluster_id": [cid4, cid4, cid4, cid4, cid4, cid4],
+            "identifiant_unique": ["c4_a", "c4_b", "c4_c", "c4_d", "c4_e", "c4_f"],
+            # a=3 enfants (ACTIF), b=1 enfant (ACTIF)
+            "parent_id": [None, None, "c4_b", "c4_a", "c4_a", "c4_a"],
+            "nombre_enfants": [3, 1, 0, 0, 0, 0],
+            "statut": [
+                ActeurStatus.ACTIF,  # a est actif et a plus d'enfants
+                ActeurStatus.ACTIF,  # b est actif mais a moins d'enfants
+                ActeurStatus.ACTIF,
+                ActeurStatus.ACTIF,
+                ActeurStatus.ACTIF,
+                ActeurStatus.ACTIF,
+            ],
+        }
+    )
+
+
+@pytest.fixture(scope="session")
+def df_two_parents_both_inactive() -> pd.DataFrame:
+    """Fixture avec 2 parents inactifs, on choisit celui avec le plus d'enfants"""
+    cid5 = "c5_2parents_both_inactive"
+    return pd.DataFrame(
+        {
+            "cluster_id": [cid5, cid5, cid5, cid5, cid5],
+            "identifiant_unique": ["c5_a", "c5_b", "c5_c", "c5_d", "c5_e"],
+            # a=2 enfants (INACTIF), b=1 enfant (INACTIF)
+            "parent_id": [None, None, "c5_b", "c5_a", "c5_a"],
+            "nombre_enfants": [2, 1, 0, 0, 0],
+            "statut": [
+                ActeurStatus.INACTIF,  # a est inactif mais a plus d'enfants
+                ActeurStatus.INACTIF,  # b est inactif et a moins d'enfants
+                ActeurStatus.ACTIF,
+                ActeurStatus.ACTIF,
+                ActeurStatus.ACTIF,
+            ],
         }
     )
 
@@ -119,6 +196,42 @@ class TestClusterACteursOneClusterParentChoose:
         assert change == CHANGE_CREATE
         assert reason == REASON_CREATE
 
+    def test_case_two_parents_both_active(self, df_two_parents_both_active):
+        # Cas de figure avec 2 parents actifs:
+        # a = 3 enfants (ACTIF) = on le garde parmi les actifs
+        # b = 1 enfant (ACTIF) = on le marque pour suppression
+        id, change, reason = cluster_acteurs_one_cluster_parent_choose(
+            df_two_parents_both_active
+        )
+        assert id == "c4_a", "On choisit le parent actif avec le plus d'enfants"
+        assert change == CHANGE_KEEP
+        assert reason == REASON_KEEP_MOST
+
+    def test_case_two_parents_both_inactive(self, df_two_parents_both_inactive):
+        # Cas de figure avec 2 parents inactifs:
+        # Comme aucun parent n'est actif, on choisit parmi tous les parents
+        # a = 2 enfants (INACTIF) = on le garde (car plus d'enfants)
+        # b = 1 enfant (INACTIF) = on le marque pour suppression
+        id, change, reason = cluster_acteurs_one_cluster_parent_choose(
+            df_two_parents_both_inactive
+        )
+        assert (
+            id == "c5_a"
+        ), "On choisit le parent avec le plus d'enfants quand aucun n'est actif"
+        assert change == CHANGE_KEEP
+        assert reason == REASON_KEEP_MOST
+
+    def test_case_two_parents_one_inactive(self, df_two_parents_one_inactive):
+        # Cas de figure avec 2 parents dont un seul est actif:
+        # a = 2 enfants (INACTIF)
+        # b = 1 enfant (ACTIF) = on le garde car c'est le seul actif
+        id, change, reason = cluster_acteurs_one_cluster_parent_choose(
+            df_two_parents_one_inactive
+        )
+        assert id == "c3_b", "On choisit le parent actif même s'il a moins d'enfants"
+        assert change == CHANGE_KEEP
+        assert reason == REASON_KEEP_MOST
+
 
 class TestClusterActeursOneClusterChangesMark:
 
@@ -138,6 +251,7 @@ class TestClusterActeursOneClusterChangesMark:
                             "identifiant_unique": parent_id_new,
                             "nombre_enfants": 0,
                             "parent_id": None,
+                            "statut": ActeurStatus.ACTIF,
                         }
                     ]
                 ),

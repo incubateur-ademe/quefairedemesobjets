@@ -35,7 +35,6 @@ from django.forms import ValidationError, model_to_dict
 from django.http import HttpRequest
 from django.urls import reverse
 from django.utils.functional import cached_property
-from unidecode import unidecode
 
 from core.constants import DIGITAL_ACTEUR_CODE
 from core.models.mixin import TimestampedModel
@@ -54,6 +53,7 @@ from qfdmo.models.categorie_objet import SousCategorieObjet
 from qfdmo.models.geo import EPCI
 from qfdmo.models.utils import (
     CodeAsNaturalKeyModel,
+    compute_identifiant_unique,
     string_remove_substring_via_normalization,
 )
 from qfdmo.validators import CodeValidator
@@ -427,7 +427,12 @@ class BaseActeur(TimestampedModel):
     nom = models.CharField(max_length=255, blank=False, null=False, db_index=True)
     description = models.TextField(blank=True, default="", db_default="")
     identifiant_unique = models.CharField(
-        max_length=255, unique=True, primary_key=True, blank=True, db_index=True
+        max_length=255,
+        unique=True,
+        primary_key=True,
+        blank=True,
+        db_index=True,
+        editable=False,
     )
     acteur_type = models.ForeignKey(ActeurType, on_delete=models.CASCADE)
     adresse = models.CharField(max_length=255, blank=True, default="", db_default="")
@@ -814,8 +819,11 @@ class BaseActeur(TimestampedModel):
 
     def generate_identifiant_unique_if_missing(self):
         if not self.identifiant_unique:
-            source_stub = unidecode(self.source.code.lower()).replace(" ", "_")
-            self.identifiant_unique = source_stub + "_" + str(self.identifiant_externe)
+            if not self.source:
+                raise ValueError("Source is required to generate identifiant_unique")
+            self.identifiant_unique = compute_identifiant_unique(
+                self.source.code, self.identifiant_externe
+            )
 
     def __str__(self):
         return self.nom
@@ -1465,8 +1473,6 @@ class DisplayedActeur(FinalActeur, LatLngPropertiesMixin):
         params = []
         if "carte" in request.GET:
             params.append("carte=1")
-        elif "iframe" in request.GET:
-            params.append("iframe=1")
         if direction:
             params.append(f"direction={direction}")
         return f"{base_url}?{'&'.join(params)}"

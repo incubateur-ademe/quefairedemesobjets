@@ -1,0 +1,5 @@
+{% load dsfr_tags %}
+
+{% dsfr_callout title="Test de persistance de l'iframe lors de la navigation" text="Cette page teste que l'interface spécifique à l'iframe (absence de header/footer, affichage des liens de réutilisation) est maintenue lors de la navigation entre les pages. Le script d'intégration charge l'assistant dans une iframe et on vérifie que l'état iframe persiste sur chaque navigation." icon_class="fr-icon-alert-line" %}
+
+<script src="{{ base_url }}/iframe.js" data-testid="integration-script"></script>

@@ -118,9 +118,6 @@ function processDatasetAttributes(
   const iframeExtraAttributes: Record<string, string> = {}
 
   // Add standard query parameters based on options
-  if (options.useAutoHeight) {
-    urlParams.set("iframe", "")
-  }
   if (options.addScriptModeParam) {
     urlParams.set(SCRIPT_MODE_PARAM, "1")
   }

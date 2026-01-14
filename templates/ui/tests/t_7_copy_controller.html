@@ -1,0 +1,64 @@
+{% load dsfr_tags %}
+
+{% dsfr_callout title="Test du contrôleur Copy" text="Cette page teste le contrôleur Stimulus Copy qui permet de copier du texte dans le presse-papier." icon_class="fr-icon-clipboard-line" %}
+
+<div class="qf-space-y-4 qf-p-4">
+    <!-- Test 1: Copy with button text change -->
+    <div>
+        <h2 class="fr-h3">Test 1: Copier avec feedback : changement de texte du bouton</h2>
+        <div
+            data-controller="copy"
+            data-copy-copied-value="Copié !"
+            data-testid="copy-with-button"
+            class="qf-flex qf-p-2w qf-bg-grey-975"
+        >
+            <pre
+                data-copy-target="toCopy"
+                data-testid="text-to-copy"
+                class="qf-m-0 qf-pr-1w qf-leading-[1.5] fr-text--md qf-text-blue-france-sun-113 qf-whitespace-break-spaces qf-break-all"
+            >Texte à copier pour le test</pre>
+            <button
+                class="fr-btn qf-my-auto qf-ml-auto"
+                title="Copier"
+                data-action="copy#toClipboard"
+                data-copy-target="button"
+                data-testid="copy-button"
+            >
+                Copier
+            </button>
+        </div>
+    </div>
+
+    <div>
+        <h2 class="fr-h3">Test 2: Copier sans feedback</h2>
+        <div
+            data-controller="copy"
+            data-testid="copy-without-button"
+            class="qf-flex qf-items-center qf-gap-2"
+        >
+            <span data-copy-target="toCopy" class="qf-hidden" data-testid="url-to-copy">https://example.com/test-url</span>
+            <button
+                class="fr-btn fr-btn--sm"
+                data-action="copy#toClipboard"
+                data-testid="copy-url-button"
+            >
+                📋 Copier l'URL
+            </button>
+        </div>
+    </div>
+
+    <div>
+        <h2 class="fr-h3">Test 3: Copier depuis un span inline (comme dans la modale de partage des fiches acteur)</h2>
+        <div data-controller="copy" data-testid="copy-inline">
+            <button
+                class="fr-btn "
+                data-action="copy#toClipboard"
+                type="button"
+                data-testid="copy-inline-button"
+            >
+                Copier "coucou" dans le presse-papier
+                <span data-copy-target="toCopy" class="qf-hidden">coucou</span>
+            </button>
+        </div>
+    </div>
+</div>

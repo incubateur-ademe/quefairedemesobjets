@@ -2,10 +2,12 @@ import logging
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+from sources.tasks.airflow_logic.config_management import DAGConfig
 from sources.tasks.business_logic.db_write_type_action_suggestions import (
     db_write_type_action_suggestions,
 )
 from utils import logging_utils as log
+from utils.db_tmp_tables import read_and_drop_temporary_table
 
 logger = logging.getLogger(__name__)
 
@@ -20,16 +22,25 @@ def db_write_type_action_suggestions_task(dag: DAG) -> PythonOperator:
 
 def db_write_type_action_suggestions_wrapper(**kwargs) -> None:
     dag_name = kwargs["dag"].dag_display_name or kwargs["dag"].dag_id
+    dag_config = DAGConfig.from_airflow_params(kwargs["params"])
+
     run_id = kwargs["run_id"]
-    df_acteur_to_create = kwargs["ti"].xcom_pull(
-        task_ids="db_data_prepare", key="df_acteur_to_create"
+
+    # Récupérer les noms des tables temporaires depuis XCom
+    table_name_create = kwargs["ti"].xcom_pull(
+        task_ids="db_data_prepare", key="table_name_create"
     )
-    df_acteur_to_delete = kwargs["ti"].xcom_pull(
-        task_ids="db_data_prepare", key="df_acteur_to_delete"
+    table_name_delete = kwargs["ti"].xcom_pull(
+        task_ids="db_data_prepare", key="table_name_delete"
     )
-    df_acteur_to_update = kwargs["ti"].xcom_pull(
-        task_ids="db_data_prepare", key="df_acteur_to_update"
+    table_name_update = kwargs["ti"].xcom_pull(
+        task_ids="db_data_prepare", key="table_name_update"
     )
+
+    # Load the DataFrames from the temporary tables
+    df_acteur_to_create = read_and_drop_temporary_table(table_name_create)
+    df_acteur_to_delete = read_and_drop_temporary_table(table_name_delete)
+    df_acteur_to_update = read_and_drop_temporary_table(table_name_update)
 
     metadata_to_create = kwargs["ti"].xcom_pull(
         task_ids="db_data_prepare", key="metadata_to_create"
@@ -85,4 +96,5 @@ def db_write_type_action_suggestions_wrapper(**kwargs) -> None:
         metadata_to_delete={**metadata, **metadata_to_delete},
         df_log_error=df_log_error,
         df_log_warning=df_log_warning,
+        use_legacy_suggestions=dag_config.use_legacy_suggestions,
     )

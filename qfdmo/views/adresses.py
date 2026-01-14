@@ -122,7 +122,6 @@ class AbstractSearchActeursView(
     # TODO : supprimer
     is_iframe = False
     is_carte = False
-    is_embedded = True
     paginate = False
 
     def get_context_data(self, **kwargs):
@@ -193,7 +192,6 @@ class AbstractSearchActeursView(
             "proposition_services__action",
             "proposition_services__action__directions",
             "proposition_services__action__groupe_action",
-            "labels",
             "action_principale",
         ).with_displayable_labels()
         if getattr(acteurs, "_needs_reparer_bonus", False):
@@ -409,7 +407,6 @@ def acteur_detail(request, uuid):
                 "proposition_services__sous_categories",
                 "proposition_services__sous_categories__categorie",
                 "proposition_services__action__groupe_action",
-                "labels",
                 "sources",
             )
             .with_displayable_labels()
@@ -440,8 +437,6 @@ def acteur_detail(request, uuid):
         "object": displayed_acteur,  # We can use object here so that switching
         # to a DetailView later will not required a template update
         "latitude": latitude,
-        # TODO: remove when this view will be migrated to a class-based view
-        "is_embedded": "carte" in request.GET or "iframe" in request.GET,
         "longitude": longitude,
         "direction": direction,
         "display_labels_panel": display_labels_panel,

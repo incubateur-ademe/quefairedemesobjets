@@ -4,18 +4,19 @@ from dags.cluster.config.model import ClusterConfig
 
 
 class TestClusterConfigModel:
-
     @pytest.fixture
     def params_working(self) -> dict:
         # Paramètres pour créer une config qui fonctionne
         return {
             "dry_run": True,
             "include_sources": ["source1 (id=1)", "source3 (id=3)"],
+            "apply_include_sources_to_parents": True,
             "include_acteur_types": ["atype2 (id=2)", "atype3 (id=3)"],
+            "apply_include_acteur_types_to_parents": True,
             "include_only_if_regex_matches_nom": "mon nom",
+            "apply_include_only_if_regex_matches_nom_to_parents": True,
             "include_if_all_fields_filled": ["f1_incl", "f2_incl"],
-            "exclude_if_any_field_filled": ["f3_excl", "f4_excl"],
-            "include_parents_only_if_regex_matches_nom": None,
+            "apply_include_if_all_fields_filled_to_parents": True,
             "normalize_fields_basic": ["basic1", "basic2"],
             "normalize_fields_no_words_size1": ["size1"],
             "normalize_fields_no_words_size2_or_less": ["size2"],
@@ -63,12 +64,21 @@ class TestClusterConfigModel:
         config = ClusterConfig(**params_working)
         assert config.include_only_if_regex_matches_nom is None
 
-    @pytest.mark.parametrize("input", [None, []])
-    def test_optional_exclude_if_any_field_filled(self, params_working, input):
-        # On peut ne pas fournir de champs à exclure
-        params_working["exclude_if_any_field_filled"] = input
+    @pytest.mark.parametrize("input", [[]])
+    def test_optional_include_if_all_fields_filled(self, params_working, input):
+        # We can not provide fields to include
+        params_working["include_if_all_fields_filled"] = input
         config = ClusterConfig(**params_working)
-        assert config.exclude_if_any_field_filled == []
+        assert config.include_if_all_fields_filled == []
+
+    @pytest.mark.parametrize("input", [True, False])
+    def test_optional_apply_include_if_all_fields_filled_to_parents(
+        self, params_working, input
+    ):
+        # We can not provide fields to include
+        params_working["apply_include_if_all_fields_filled_to_parents"] = input
+        config = ClusterConfig(**params_working)
+        assert config.apply_include_if_all_fields_filled_to_parents == input
 
     @pytest.mark.parametrize("input", [None, []])
     def test_optional_normalize_fields_basic(self, params_working, input):
@@ -169,3 +179,127 @@ class TestClusterConfigModel:
         params_working["dedup_enrich_exclude_sources"] = input
         config = ClusterConfig(**params_working)
         assert config.dedup_enrich_exclude_source_ids == []
+
+    def test_cluster_intra_source_is_allowed_none_defaults_to_false(
+        self, params_working
+    ):
+        # Si None est fourni, la valeur par défaut est False
+        params_working["cluster_intra_source_is_allowed"] = None
+        config = ClusterConfig(**params_working)
+        assert config.cluster_intra_source_is_allowed is False
+
+    def test_cluster_fuzzy_threshold_valid_range(self, params_working):
+        # Le seuil doit être entre 0 et 1
+        params_working["cluster_fuzzy_threshold"] = 0.0
+        config = ClusterConfig(**params_working)
+        assert config.cluster_fuzzy_threshold == 0.0
+
+        params_working["cluster_fuzzy_threshold"] = 1.0
+        config = ClusterConfig(**params_working)
+        assert config.cluster_fuzzy_threshold == 1.0
+
+        params_working["cluster_fuzzy_threshold"] = 0.5
+        config = ClusterConfig(**params_working)
+        assert config.cluster_fuzzy_threshold == 0.5
+
+    def test_cluster_fuzzy_threshold_invalid_below_zero(self, params_working):
+        # Erreur si le seuil est < 0
+        params_working["cluster_fuzzy_threshold"] = -0.1
+        with pytest.raises(ValueError):
+            ClusterConfig(**params_working)
+
+    def test_cluster_fuzzy_threshold_invalid_above_one(self, params_working):
+        # Erreur si le seuil est > 1
+        params_working["cluster_fuzzy_threshold"] = 1.1
+        with pytest.raises(ValueError):
+            ClusterConfig(**params_working)
+
+    def test_dedup_enrich_priority_source_ids_resolved(self, config_working):
+        # Vérification de la résolution des IDs de sources prioritaires
+        assert config_working.dedup_enrich_priority_source_ids == [1]
+
+    def test_dedup_enrich_priority_source_ids_multiple(self, params_working):
+        # Test avec plusieurs sources prioritaires
+        params_working["dedup_enrich_priority_sources"] = [
+            "source1 (id=1)",
+            "source3 (id=3)",
+        ]
+        config = ClusterConfig(**params_working)
+        assert config.dedup_enrich_priority_source_ids == [1, 3]
+
+    def test_ok_to_not_provide_dedup_enrich_priority_sources(self, params_working):
+        # Si aucune source prioritaire fournie, alors source_ids devrait être []
+        params_working["dedup_enrich_priority_sources"] = []
+        config = ClusterConfig(**params_working)
+        assert config.dedup_enrich_priority_source_ids == []
+
+    def test_error_dedup_enrich_exclude_sources_invalid_codes(self, params_working):
+        # Erreur si un code source n'existe pas dans le mapping pour exclude
+        params_working["dedup_enrich_exclude_sources"] = ["MAUVAISE SOURCE (id=666)"]
+        with pytest.raises(ValueError, match="Codes non trouvés dans le mapping"):
+            ClusterConfig(**params_working)
+
+    def test_error_dedup_enrich_priority_sources_invalid_codes(self, params_working):
+        # Erreur si un code source n'existe pas dans le mapping pour priority
+        params_working["dedup_enrich_priority_sources"] = ["MAUVAISE SOURCE (id=666)"]
+        with pytest.raises(ValueError, match="Codes non trouvés dans le mapping"):
+            ClusterConfig(**params_working)
+
+    def test_include_only_if_regex_matches_nom_empty_string_becomes_none(
+        self, params_working
+    ):
+        # Une chaîne vide ou avec seulement des espaces devient None
+        params_working["include_only_if_regex_matches_nom"] = "   "
+        config = ClusterConfig(**params_working)
+        assert config.include_only_if_regex_matches_nom is None
+
+    @pytest.mark.parametrize("input", [None, []])
+    def test_optional_normalize_fields_no_words_size1(self, params_working, input):
+        # On peut ne pas fournir de champs pour size1
+        params_working["normalize_fields_no_words_size1"] = input
+        config = ClusterConfig(**params_working)
+        assert config.normalize_fields_no_words_size1 == []
+
+    @pytest.mark.parametrize("input", [None, []])
+    def test_optional_normalize_fields_no_words_size2_or_less(
+        self, params_working, input
+    ):
+        # On peut ne pas fournir de champs pour size2
+        params_working["normalize_fields_no_words_size2_or_less"] = input
+        config = ClusterConfig(**params_working)
+        assert config.normalize_fields_no_words_size2_or_less == []
+
+    @pytest.mark.parametrize("input", [None, []])
+    def test_optional_normalize_fields_no_words_size3_or_less(
+        self, params_working, input
+    ):
+        # On peut ne pas fournir de champs pour size3
+        params_working["normalize_fields_no_words_size3_or_less"] = input
+        config = ClusterConfig(**params_working)
+        assert config.normalize_fields_no_words_size3_or_less == []
+
+    @pytest.mark.parametrize("input", [None, []])
+    def test_optional_cluster_fields_fuzzy(self, params_working, input):
+        # On peut ne pas fournir de champs fuzzy
+        params_working["cluster_fields_fuzzy"] = input
+        config = ClusterConfig(**params_working)
+        assert config.cluster_fields_fuzzy == []
+
+    def test_cluster_fields_exact_can_be_empty(self, params_working):
+        # On peut avoir une liste vide pour les champs exacts
+        params_working["cluster_fields_exact"] = []
+        config = ClusterConfig(**params_working)
+        assert config.cluster_fields_exact == []
+
+    def test_dedup_enrich_exclude_source_ids_resolved(self, config_working):
+        # Vérification de la résolution des IDs de sources exclues
+        assert config_working.dedup_enrich_exclude_source_ids == [1]
+
+    def test_dedup_enrich_exclude_source_ids_multiple(self, params_working):
+        # Test avec plusieurs sources exclues
+        params_working["dedup_enrich_exclude_sources"] = [
+            "source1 (id=1)",
+            "source2 (id=2)",
+        ]
+        config = ClusterConfig(**params_working)
+        assert config.dedup_enrich_exclude_source_ids == [1, 2]

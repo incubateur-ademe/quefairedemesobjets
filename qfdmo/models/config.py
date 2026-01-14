@@ -55,7 +55,7 @@ class GroupeActionConfig(models.Model):
 
 @register_snippet
 class CarteConfig(index.Indexed, models.Model):
-    SOUS_CATEGORIE_QUERY_PARAM = "sous_categorie_objet"
+    SOUS_CATEGORIE_QUERY_PARAM = "sc_id"
 
     nom = models.CharField(unique=True)
     SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url = models.CharField(

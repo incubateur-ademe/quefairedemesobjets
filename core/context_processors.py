@@ -13,7 +13,7 @@ def environment(request):
         "STIMULUS_DEBUG": settings.STIMULUS_DEBUG,
         "POSTHOG_DEBUG": settings.POSTHOG_DEBUG,
         "BLOCK_ROBOTS": settings.BLOCK_ROBOTS,
-        "is_embedded": True,
+        "is_embedded": getattr(request, "iframe", False),
         "turbo": request.headers.get("Turbo-Frame"),
         "VERSION": settings.VERSION,
         "APP": settings.APP,

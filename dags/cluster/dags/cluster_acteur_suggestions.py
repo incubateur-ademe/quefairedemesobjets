@@ -78,12 +78,26 @@ PARAMS = {
             💯 Si aucune valeur spécifiée =  tous les acteurs sont inclus
             """,
     ),
+    "apply_include_sources_to_parents": Param(
+        False,
+        type="boolean",
+        description_md="""**🔄 APPLIQUER AUX PARENTS**: si coché, la sélection des
+            sources des acteurs sera aussi appliquée aux parents
+            """,
+    ),
     "include_acteur_types": Param(
         [],
         type="array",
         examples=dropdown_acteur_types,
         description_md="""**➕ INCLUSION ACTEURS**: ceux qui sont de ces types
              (opérateur **OU/OR**)""",
+    ),
+    "apply_include_acteur_types_to_parents": Param(
+        True,
+        type="boolean",
+        description_md="""**🔄 APPLIQUER AUX PARENTS**: si coché, la sélection des
+            types d'acteurs sera aussi appliquée aux parents
+            """,
     ),
     "include_only_if_regex_matches_nom": Param(
         "",
@@ -96,6 +110,13 @@ PARAMS = {
 
             0️⃣ Si aucune valeur spécifiée =  cette option n'a PAS d'effet""",
     ),
+    "apply_include_only_if_regex_matches_nom_to_parents": Param(
+        True,
+        type="boolean",
+        description_md="""**🔄 APPLIQUER AUX PARENTS**: si coché, la regex
+            sera appliquée au nom des acteurs sera aussi appliquée lors de la
+            sélection des parents""",
+    ),
     "include_if_all_fields_filled": Param(
         ["code_postal"],
         type="array",
@@ -106,31 +127,12 @@ PARAMS = {
             exemple: travailler uniquement sur les acteurs avec SIRET
              """,
     ),
-    "exclude_if_any_field_filled": Param(
-        [],
-        type=["null", "array"],
-        examples=fields_all,
-        description_md=f"""**🛑 EXCLUSION ACTEURS**: ceux dont n'importe quel
-            de ces champs est **rempli** (opérateur **OU/OR**)
-
-            exemple: travailler uniquement sur les acteurs SANS SIRET
-
-            0️⃣ Si aucune valeur spécifiée =  cette option n'a PAS d'effet
-            {UI_PARAMS_SEPARATORS.READ_PARENTS}
-            """,
-    ),
-    "include_parents_only_if_regex_matches_nom": Param(
-        "",
-        type=["null", "string"],
-        description_md=f"""**➕ INCLUSION PARENTS**: ceux dont le champ 'nom'
-            correspond à cette expression régulière ([voir recettes](https://www.notion.so/accelerateur-transition-ecologique-ademe/Expressions-r-guli-res-regex-1766523d57d780939a37edd60f367b75))
-
-            🧹 Note: la normalisation basique est appliquée à la volée sur ce
-            champ avant l'application de la regex pour simplifier les expressions
-
-            0️⃣ Si aucune valeur spécifiée =  cette option n'a PAS d'effet
-
-            {UI_PARAMS_SEPARATORS.NORMALIZATION}""",
+    "apply_include_if_all_fields_filled_to_parents": Param(
+        True,
+        type="boolean",
+        description_md="""**🔄 APPLIQUER AUX PARENTS**: si coché, la condition que
+            tous les champs sont remplis sera aussi appliquée lors de la
+            sélection des parents""",
     ),
     "normalize_fields_basic": Param(
         [],

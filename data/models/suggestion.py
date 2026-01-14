@@ -461,6 +461,7 @@ class SuggestionGroupe(TimestampedModel):
         "proposition_service_codes",
         "source_code",
         "acteur_type_code",
+        "perimetre_adomicile_codes",
     ]
 
     ORDERED_FIELDS = [
@@ -499,6 +500,7 @@ class SuggestionGroupe(TimestampedModel):
         ("acteur_service_codes",),
         ("proposition_service_codes",),
         ("lieu_prestation",),
+        ("perimetre_adomicile_codes",),
     ]
 
     class Meta:
@@ -594,7 +596,6 @@ class SuggestionGroupe(TimestampedModel):
         }
 
     def serialize(self) -> SuggestionCohorteSerializer:
-
         def _flatten_suggestion_unitaires(
             suggestion_unitaires: dict[tuple, list],
         ) -> dict:
@@ -610,7 +611,6 @@ class SuggestionGroupe(TimestampedModel):
             acteur_suggestion_unitaires: dict,
             acteur_overridden_by_suggestion_unitaires: dict | None = None,
         ) -> list[tuple]:
-
             fields_groups = list(
                 set(acteur_suggestion_unitaires.keys())
                 | set(
@@ -657,7 +657,6 @@ class SuggestionGroupe(TimestampedModel):
         )
 
         if self.suggestion_cohorte.type_action == SuggestionAction.SOURCE_AJOUT:
-
             identifiant_unique = self.get_identifiant_unique_from_suggestion_unitaires()
             fields_values = {
                 key: {
@@ -689,6 +688,8 @@ class SuggestionGroupe(TimestampedModel):
         )
         displayed_values = {}
         for field in fields:
+            if field in SuggestionGroupe.NOT_EDITABLE_FIELDS:
+                continue
             value = (
                 getattr(acteur_overridden_by, field) if acteur_overridden_by else None
             )
@@ -858,27 +859,27 @@ class SuggestionGroupe(TimestampedModel):
             )
 
             # get the suggestion_unitaires on RevisionActeur model
-            revision_acteur_suggestion_unitaires = self.suggestion_unitaires.filter(
+            if revision_acteur_suggestion_unitaires := self.suggestion_unitaires.filter(
                 suggestion_modele="RevisionActeur"
-            ).all()
-            if first := revision_acteur_suggestion_unitaires.first():
+            ).all():
+                first = revision_acteur_suggestion_unitaires.first()
                 identifiant_unique = first.revision_acteur_id or identifiant_unique
-            apply_models.append(
-                SourceApplyModel(
-                    identifiant_unique=identifiant_unique,
-                    order=1,
-                    acteur_model=RevisionActeur,
-                    data={
-                        champ: valeur
-                        for suggestion_unitaire in (
-                            revision_acteur_suggestion_unitaires
-                        )
-                        for champ, valeur in zip(
-                            suggestion_unitaire.champs, suggestion_unitaire.valeurs
-                        )
-                    },
+                apply_models.append(
+                    SourceApplyModel(
+                        identifiant_unique=identifiant_unique,
+                        order=1,
+                        acteur_model=RevisionActeur,
+                        data={
+                            champ: valeur
+                            for suggestion_unitaire in (
+                                revision_acteur_suggestion_unitaires
+                            )
+                            for champ, valeur in zip(
+                                suggestion_unitaire.champs, suggestion_unitaire.valeurs
+                            )
+                        },
+                    )
                 )
-            )
             return apply_models
         return []
 
