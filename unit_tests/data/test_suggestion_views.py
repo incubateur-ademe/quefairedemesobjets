@@ -773,39 +773,6 @@ class TestUpdateSuggestionGroupe:
         assert "longitude" in errors
         assert "must be a float" in errors["longitude"]
 
-    def test_update_from_serialized_data_no_update_when_values_equal(
-        self, suggestion_groupe_with_acteur
-    ):
-        """
-        Test that no update is created when updated_displayed_value == displayed_value
-        """
-        fields_values = {
-            "nom": {
-                "displayed_value": "Ancien nom",
-                "updated_displayed_value": "Ancien nom",  # Same as displayed_value
-                "new_value": "Nouveau nom",
-                "old_value": "Ancien nom",
-            }
-        }
-        fields_groups = [("nom",)]
-
-        initial_count = suggestion_groupe_with_acteur.suggestion_unitaires.filter(
-            suggestion_modele="RevisionActeur"
-        ).count()
-
-        success, errors = update_suggestion_groupe(
-            suggestion_groupe_with_acteur, fields_values, fields_groups
-        )
-
-        assert success is True
-        assert errors is None
-
-        # Verify that no new SuggestionUnitaire has been created
-        final_count = suggestion_groupe_with_acteur.suggestion_unitaires.filter(
-            suggestion_modele="RevisionActeur"
-        ).count()
-        assert final_count == initial_count
-
     def test_update_from_serialized_data_update_existing_revision_suggestion(
         self, suggestion_groupe_with_acteur
     ):

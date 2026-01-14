@@ -392,21 +392,20 @@ def update_suggestion_groupe(
         for field, by_state_values in fields_values.items()
         if field not in SuggestionSourceModel.get_not_editable_fields()
         and "updated_displayed_value" in by_state_values
+        and by_state_values["updated_displayed_value"] is not None
         and (
             by_state_values["updated_displayed_value"]
             != by_state_values["displayed_value"]
+            # FIXME: 2 next case can be merged
             or (
-                getattr(revision_suggestion_unitaire_by_field, field, None) is not None
-                and getattr(revision_suggestion_unitaire_by_field, field, None)
+                getattr(revision_suggestion_unitaire_by_field, field, None)
                 != by_state_values["updated_displayed_value"]
             )
         )
     }
 
     if suggestion_groupe.revision_acteur is None:
-        suggestion_groupe.revision_acteur = (
-            suggestion_groupe.acteur.get_or_create_revision()
-        )
+        suggestion_groupe.revision_acteur_id = suggestion_groupe.acteur_id
         suggestion_groupe.save()
 
     # Validate proposed updates
@@ -425,8 +424,8 @@ def update_suggestion_groupe(
                 champs=fields,
                 suggestion_modele="RevisionActeur",
                 defaults={
-                    "acteur": suggestion_groupe.acteur,
-                    "revision_acteur": suggestion_groupe.revision_acteur,
+                    "acteur_id": suggestion_groupe.acteur_id,
+                    "revision_acteur_id": suggestion_groupe.revision_acteur_id,
                 },
             )
             suggestion_unitaire.valeurs = [

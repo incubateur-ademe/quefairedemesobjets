@@ -184,8 +184,8 @@ def quote_filter(value):
 @register.filter
 def display_diff_values(old_value, new_value):
     if new_value is None:
-        # None -> there sn't any update proposition for this field
-        return old_value
+        # None -> there isn't any update proposition for this field
+        return mark_safe(f'<span style="color: grey;">{old_value}</span>')
     if not old_value:
         return diff_display("", new_value)
     return diff_display(old_value, new_value)

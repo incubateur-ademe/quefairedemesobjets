@@ -471,12 +471,18 @@ class SuggestionGroupe(TimestampedModel):
         on_delete=models.CASCADE,
         related_name="suggestion_groupes",
         null=True,
+        # when it is a creation, the acteur is not created yet
+        # So the foreign key constraint is not applied yet
+        db_constraint=False,
     )
     revision_acteur = models.ForeignKey(
         RevisionActeur,
         on_delete=models.CASCADE,
         related_name="suggestion_groupes",
         null=True,
+        # when it is a creation, the revision_acteur is not created yet
+        # So the foreign key constraint is not applied yet
+        db_constraint=False,
     )
     contexte = models.JSONField(
         null=True,
@@ -622,12 +628,18 @@ class SuggestionUnitaire(TimestampedModel):
         on_delete=models.CASCADE,
         related_name="suggestion_unitaires",
         null=True,
+        # when it is a creation, the revision_acteur is not created yet
+        # So the foreign key constraint is not applied yet
+        db_constraint=False,
     )
     revision_acteur = models.ForeignKey(
         RevisionActeur,
         on_delete=models.CASCADE,
         related_name="suggestion_unitaires",
         null=True,
+        # when it is a creation, the revision_acteur is not created yet
+        # So the foreign key constraint is not applied yet
+        db_constraint=False,
     )
     ordre = models.IntegerField(default=1, blank=True)
     raison = models.TextField(blank=True, db_default="", default="")
