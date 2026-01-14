@@ -60,6 +60,37 @@ def command_ogr2ogr_import_geojson(
     return cmd
 
 
+def command_ogr2ogr_import_geojson_from_stdin(
+    table_name: str,
+    geometry_column_name: str = "contours_administratifs",
+) -> str:
+    """Command to load GeoJSON into DB using ogr2ogr from stdin"""
+    from django.conf import settings
+
+    warehouse_db_settings = settings.DATABASES["warehouse"]
+
+    # Build PostgreSQL connection string for ogr2ogr
+    pg_connection_string = (
+        f'PG:"dbname={warehouse_db_settings["NAME"]} '
+        f'user={warehouse_db_settings["USER"]} '
+        f'password={warehouse_db_settings["PASSWORD"]} '
+        f'host={warehouse_db_settings["HOST"]} '
+        f'port={warehouse_db_settings["PORT"]}"'
+    )
+
+    # Use /vsistdin/ to read from stdin (ogr2ogr auto-detects GeoJSON format)
+    cmd = (
+        f'ogr2ogr -f "PostgreSQL" {pg_connection_string} '
+        f"/vsistdin/ "
+        f"-overwrite "
+        f"-lco GEOMETRY_NAME={geometry_column_name} "
+        f"-lco FID=id "
+        f"-lco PRECISION=NO "
+        f"-nln {table_name}"
+    )
+    return cmd
+
+
 def commands_stream_directly(
     data_endpoint: AnyUrl,
     delimiter: str,
@@ -67,14 +98,32 @@ def commands_stream_directly(
     dry_run: bool,
 ):
     """Commands to create table while streaming directly to DB (no disk)"""
-
     logger.info("Pas de nettoyage requis en streaming")
 
-    cmd_psql = command_psql_copy_from_csv(table_name=table_name, delimiter=delimiter)
-    if str(data_endpoint).endswith(".gz") or str(data_endpoint).endswith(".zip"):
-        cmd_run(f"curl -s '{data_endpoint}' | zcat | {cmd_psql}", dry_run=dry_run)
+    # Check if it's a GeoJSON file
+    is_geojson = str(data_endpoint).endswith(".geojson.gz") or str(
+        data_endpoint
+    ).endswith(".geojson")
+
+    if is_geojson:
+        # For GeoJSON, stream directly using ogr2ogr with /vsistdin/
+        cmd_ogr2ogr = command_ogr2ogr_import_geojson_from_stdin(table_name=table_name)
+        if str(data_endpoint).endswith(".geojson.gz"):
+            cmd_run(
+                f"curl -s '{data_endpoint}' | gunzip | {cmd_ogr2ogr}",
+                dry_run=dry_run,
+            )
+        else:
+            cmd_run(f"curl -s '{data_endpoint}' | {cmd_ogr2ogr}", dry_run=dry_run)
     else:
-        cmd_run(f"curl -s '{data_endpoint}' | {cmd_psql}", dry_run=dry_run)
+        # For CSV files, stream directly to DB
+        cmd_psql = command_psql_copy_from_csv(
+            table_name=table_name, delimiter=delimiter
+        )
+        if str(data_endpoint).endswith(".gz") or str(data_endpoint).endswith(".zip"):
+            cmd_run(f"curl -s '{data_endpoint}' | zcat | {cmd_psql}", dry_run=dry_run)
+        else:
+            cmd_run(f"curl -s '{data_endpoint}' | {cmd_psql}", dry_run=dry_run)
 
 
 def commands_download_to_disk_first(
