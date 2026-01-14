@@ -1,5 +1,6 @@
 from django.contrib.gis import admin
 from django.http.request import HttpRequest
+from djangoql.admin import DjangoQLSearchMixin
 from import_export import admin as import_export_admin
 from import_export import fields, resources, widgets
 
@@ -25,11 +26,31 @@ class CategorieAdmin(CodeLibelleModelMixin, admin.ModelAdmin):
     inlines = [SousCategorieInline]
 
 
-class SousCategorieAdmin(CodeLibelleModelMixin, admin.ModelAdmin):
+class SousCategorieResource(resources.ModelResource):
+    delete = fields.Field(widget=widgets.BooleanWidget())
+
+    class Meta:
+        model = SousCategorieObjet
+        fields = (
+            "libelle",
+            "code",
+            "categorie__libelle",
+            "categorie__code",
+        )
+
+
+class SousCategorieAdmin(
+    DjangoQLSearchMixin,
+    CodeLibelleModelMixin,
+    import_export_admin.ExportMixin,
+    admin.ModelAdmin,
+):
+    djangoql_completion_enabled_by_default = False
     list_display = CodeLibelleModelMixin.list_display + (
         "categorie",
         "reemploi_possible",
     )
+    resource_classes = [SousCategorieResource]
     list_filter = ["afficher_carte"]
     autocomplete_fields = ("qfdmd_produits",)
     search_fields = CodeLibelleModelMixin.search_fields + [
