@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand
+from django.db import transaction
 from wagtail.models import Page, Site
 
 
@@ -15,39 +16,8 @@ class Command(BaseCommand):
             help="Run the command without making any changes",
         )
 
-    def handle(self, *args, **options):
-        dry_run = options["dry_run"]
-
-        # Get the pages and site
-        try:
-            root_page = Page.objects.get(id=1)
-            page_2 = Page.objects.get(id=2)
-            page_344 = Page.objects.get(id=344)
-            site = Site.objects.get(id=1)
-        except (Page.DoesNotExist, Site.DoesNotExist) as e:
-            self.stdout.write(self.style.ERROR(f"Error: {e}"))
-            return
-
-        # Display current state
-        self.stdout.write(self.style.SUCCESS("\n=== Current State ==="))
-        self.stdout.write(f"Site: {site.site_name}")
-        self.stdout.write(f"  - Hostname: {site.hostname}")
-        self.stdout.write(
-            f"  - Current root page: {site.root_page.title} (id={site.root_page.id})"
-        )
-
-        self.stdout.write(f"\nPage 2: {page_2.title}")
-        self.stdout.write(f"  - Depth: {page_2.depth}")
-        self.stdout.write(f"  - Parent: {page_2.get_parent().title}")
-        self.stdout.write(f"  - Children count: {page_2.get_children().count()}")
-        self.stdout.write(f"  - Live status: {page_2.live}")
-
-        self.stdout.write(f"\nPage 344: {page_344.title}")
-        self.stdout.write(f"  - Depth: {page_344.depth}")
-        self.stdout.write(f"  - Parent: {page_344.get_parent().title}")
-        self.stdout.write(f"  - Children count: {page_344.get_children().count()}")
-        self.stdout.write(f"  - Live status: {page_344.live}")
-
+    def _perform_migration_steps(self, root_page, page_2, page_344, site, dry_run):
+        """Perform all migration steps."""
         # Step 1: Move page 344 to root level (as sibling of page 2)
         self.stdout.write(
             self.style.SUCCESS("\n=== Step 1: Moving page 344 to root level ===")
@@ -163,6 +133,57 @@ class Command(BaseCommand):
                         f"Page 2 '{page_2.title}' is already unpublished"
                     )
                 )
+
+    def handle(self, *args, **options):
+        dry_run = options["dry_run"]
+
+        # Get the pages and site
+        try:
+            root_page = Page.objects.get(id=1)
+            page_2 = Page.objects.get(id=2)
+            page_344 = Page.objects.get(id=344)
+            site = Site.objects.get(id=1)
+        except (Page.DoesNotExist, Site.DoesNotExist) as e:
+            self.stdout.write(self.style.ERROR(f"Error: {e}"))
+            return
+
+        # Display current state
+        self.stdout.write(self.style.SUCCESS("\n=== Current State ==="))
+        self.stdout.write(f"Site: {site.site_name}")
+        self.stdout.write(f"  - Hostname: {site.hostname}")
+        self.stdout.write(
+            f"  - Current root page: {site.root_page.title} (id={site.root_page.id})"
+        )
+
+        self.stdout.write(f"\nPage 2: {page_2.title}")
+        self.stdout.write(f"  - Depth: {page_2.depth}")
+        self.stdout.write(f"  - Parent: {page_2.get_parent().title}")
+        self.stdout.write(f"  - Children count: {page_2.get_children().count()}")
+        self.stdout.write(f"  - Live status: {page_2.live}")
+
+        self.stdout.write(f"\nPage 344: {page_344.title}")
+        self.stdout.write(f"  - Depth: {page_344.depth}")
+        self.stdout.write(f"  - Parent: {page_344.get_parent().title}")
+        self.stdout.write(f"  - Children count: {page_344.get_children().count()}")
+        self.stdout.write(f"  - Live status: {page_344.live}")
+
+        if dry_run:
+            # Perform dry run without transaction
+            self._perform_migration_steps(
+                root_page, page_2, page_344, site, dry_run=True
+            )
+        else:
+            # Wrap all database operations in a transaction
+            try:
+                with transaction.atomic():
+                    self._perform_migration_steps(
+                        root_page, page_2, page_344, site, dry_run=False
+                    )
+            except Exception as e:
+                self.stdout.write(
+                    self.style.ERROR(f"\n✗ Migration failed and was rolled back: {e}")
+                )
+                raise
 
         # Display final state
         self.stdout.write(self.style.SUCCESS("\n=== Final State ==="))
