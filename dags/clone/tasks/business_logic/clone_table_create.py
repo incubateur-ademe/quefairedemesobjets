@@ -110,7 +110,7 @@ def commands_stream_directly(
         cmd_ogr2ogr = command_ogr2ogr_import_geojson_from_stdin(table_name=table_name)
         if str(data_endpoint).endswith(".gz"):
             cmd_run(
-                f"curl -s '{data_endpoint}' | gunzip | {cmd_ogr2ogr}",
+                f"curl -s '{data_endpoint}' | zcat | {cmd_ogr2ogr}",
                 dry_run=dry_run,
             )
         else:
@@ -152,7 +152,7 @@ def commands_download_to_disk_first(
             cmd_run(f"unzip {folder}/{file_downloaded} -d {folder}/", dry_run=dry_run)
         if str(file_downloaded).endswith(".gz"):
             cmd_run(
-                f"gunzip -c {folder}/{file_downloaded} > {folder}/{file_unpacked}",
+                f"zcat -c {folder}/{file_downloaded} > {folder}/{file_unpacked}",
                 dry_run=dry_run,
             )
 
@@ -199,12 +199,6 @@ def clone_table_create(
     from django.db import connections
 
     """Create a table in the DB from a CSV file downloaded via URL"""
-
-    # Force download_to_disk_first for GeoJSON files
-    if str(data_endpoint).endswith(".geojson.gz") or str(data_endpoint).endswith(
-        ".geojson"
-    ):
-        clone_method = "download_to_disk_first"
 
     logger.info(log.banner_string(f"Création du schema de la table {table_name}"))
 
