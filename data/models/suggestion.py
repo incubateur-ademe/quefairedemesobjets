@@ -90,10 +90,30 @@ class SuggestionAction(models.TextChoices):
     SOURCE_SUPPRESSION = SUGGESTION_SOURCE_SUPRESSION, "ingestion de source de données"
 
 
+class SuggestionCohorteManager(models.Manager):
+    def get_cohortes_with_suggestion_groupes(self):
+        return (
+            self.get_queryset()
+            .filter(suggestion_groupes__isnull=False)
+            .distinct()
+            .order_by("-cree_le")
+        )
+
+    def get_cohortes_with_suggestions(self):
+        return (
+            self.get_queryset()
+            .filter(suggestions__isnull=False)
+            .distinct()
+            .order_by("-cree_le")
+        )
+
+
 class SuggestionCohorte(TimestampedModel):
     class Meta:
         verbose_name = "1️⃣ Suggestion Cohorte"
         verbose_name_plural = "1️⃣ Suggestions Cohortes"
+
+    objects: SuggestionCohorteManager = SuggestionCohorteManager()
 
     id = models.AutoField(primary_key=True)
     # On utilise identifiant car le champ n'est pas utilisé pour résoudre une relation
@@ -569,6 +589,18 @@ class SuggestionGroupe(TimestampedModel):
         apply_models = self._get_apply_models()
         for apply_model in sorted(apply_models, key=lambda x: x.order):
             apply_model.apply()
+
+    def suggestion_acteur_has_parent(self) -> bool:
+        return (
+            self.revision_acteur_id is not None
+            and self.acteur_id != self.revision_acteur_id
+        )
+
+    def suggestion_acteur_has_revision(self) -> bool:
+        return (
+            self.revision_acteur_id is not None
+            and self.acteur_id == self.revision_acteur_id
+        )
 
 
 class SuggestionUnitaire(TimestampedModel):

@@ -184,9 +184,10 @@ def quote_filter(value):
 @register.filter
 def display_diff_values(old_value, new_value):
     if new_value is None:
+        # None -> there sn't any update proposition for this field
         return old_value
     if not old_value:
-        return new_value
+        return diff_display("", new_value)
     return diff_display(old_value, new_value)
 
 

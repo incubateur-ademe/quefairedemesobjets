@@ -80,6 +80,100 @@ class TestSuggestionGroupe:
 
 
 @pytest.mark.django_db
+class TestSuggestionGroupeSuggestionActeurHasParent:
+    def test_suggestion_acteur_has_parent_returns_false_when_no_revision_acteur(self):
+        """
+        Test that suggestion_acteur_has_parent returns False
+        when revision_acteur_id is None
+        """
+        acteur = ActeurFactory()
+        groupe = SuggestionGroupeFactory(acteur=acteur)
+
+        assert groupe.suggestion_acteur_has_parent() is False
+
+    def test_suggestion_acteur_has_parent_returns_false_when_same_ids(self):
+        """
+        Test that suggestion_acteur_has_parent returns False
+        when acteur_id == revision_acteur_id
+        """
+        acteur = ActeurFactory()
+        revision_acteur = RevisionActeurFactory(
+            identifiant_unique=acteur.identifiant_unique
+        )
+        groupe = SuggestionGroupeFactory(
+            acteur=acteur,
+            revision_acteur=revision_acteur,
+        )
+
+        # Verify that the IDs are different
+        assert groupe.acteur_id == groupe.revision_acteur_id
+        assert groupe.suggestion_acteur_has_parent() is False
+
+    def test_suggestion_acteur_has_parent_returns_true_when_different_ids(self):
+        """
+        Test that suggestion_acteur_has_parent returns True
+        when acteur_id != revision_acteur_id
+        """
+        acteur = ActeurFactory()
+        revision_acteur = RevisionActeurFactory()
+        groupe = SuggestionGroupeFactory(
+            acteur=acteur,
+            revision_acteur=revision_acteur,
+        )
+
+        # Verify that the IDs are different
+        assert groupe.acteur_id != groupe.revision_acteur_id
+        assert groupe.suggestion_acteur_has_parent() is True
+
+
+@pytest.mark.django_db
+class TestSuggestionGroupeSuggestionActeurHasRevision:
+    def test_suggestion_acteur_has_revision_returns_false_when_no_revision_acteur(self):
+        """
+        Test that suggestion_acteur_has_revision returns False
+        when revision_acteur_id is None
+        """
+        acteur = ActeurFactory()
+        groupe = SuggestionGroupeFactory(acteur=acteur)
+
+        assert groupe.suggestion_acteur_has_revision() is False
+
+    def test_suggestion_acteur_has_revision_returns_true_when_same_ids(self):
+        """
+        Test that suggestion_acteur_has_revision returns True
+        when acteur_id == revision_acteur_id
+        """
+        acteur = ActeurFactory()
+        revision_acteur = RevisionActeurFactory(
+            identifiant_unique=acteur.identifiant_unique
+        )
+        groupe = SuggestionGroupeFactory(
+            acteur=acteur,
+            revision_acteur=revision_acteur,
+        )
+
+        # Verify that the IDs are different
+        assert groupe.acteur_id == groupe.revision_acteur_id
+        assert groupe.suggestion_acteur_has_revision() is True
+
+    def test_suggestion_acteur_has_revision_returns_false_when_different_ids(self):
+        """
+        Test that suggestion_acteur_has_revision returns False
+        when acteur_id != revision_acteur_id
+        """
+        acteur = ActeurFactory()
+        revision_acteur = RevisionActeurFactory()
+        groupe = SuggestionGroupeFactory(
+            acteur=acteur,
+            revision_acteur=revision_acteur,
+        )
+
+        # Verify that the IDs are different
+        assert groupe.acteur_id != groupe.revision_acteur_id
+        assert groupe.suggestion_acteur_has_revision() is False
+
+
+@pytest.mark.django_db
 class TestSuggestionGroupeApply:
     @pytest.fixture
     def suggestion_groupe_source_ajout(self):

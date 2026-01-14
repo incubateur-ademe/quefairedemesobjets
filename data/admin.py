@@ -3,6 +3,7 @@ import logging
 from django.contrib import admin, messages
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
+from django.db.models import QuerySet
 from django.template.loader import render_to_string
 from django.utils.html import format_html
 from djangoql.admin import DjangoQLSearchMixin
@@ -180,12 +181,9 @@ class SuggestionAdmin(DjangoQLSearchMixin, NotSelfDeletableMixin):
 
     class SuggestionCohorteFilter(admin.RelatedFieldListFilter):
         def field_choices(self, field, request, model_admin):
-            # Filtrer uniquement les cohortes qui ont des suggestions
-            cohorte_model = field.related_model
+            # Filter only cohortes which have suggestions
             cohortes_avec_suggestions = (
-                cohorte_model.objects.filter(suggestions__isnull=False)
-                .distinct()
-                .order_by("-cree_le")
+                SuggestionCohorte.objects.get_cohortes_with_suggestions()
             )
             return [(cohorte.pk, str(cohorte)) for cohorte in cohortes_avec_suggestions]
 
@@ -287,13 +285,12 @@ def _update_or_copy_suggestion_unitaires(suggestion_groupe):
 
 
 @admin.action(description="Appliquer les suggestions au parent")
-def apply_suggestions_to_parent(self, request, queryset):
+def apply_suggestions_to_parent(
+    self, request, queryset: QuerySet[SuggestionGroupe]
+) -> None:
     for suggestion_groupe in queryset:
         # Only for SuggestionGroupe with parent
-        if (
-            suggestion_groupe.revision_acteur_id
-            and suggestion_groupe.acteur_id != suggestion_groupe.revision_acteur_id
-        ):
+        if suggestion_groupe.suggestion_acteur_has_parent():
             _update_or_copy_suggestion_unitaires(suggestion_groupe)
 
     self.message_user(
@@ -305,10 +302,7 @@ def apply_suggestions_to_parent(self, request, queryset):
 def apply_suggestions_to_revision(self, request, queryset):
     for suggestion_groupe in queryset:
         # Only for SuggestionGroupe with parent
-        if (
-            suggestion_groupe.revision_acteur_id
-            and suggestion_groupe.acteur_id == suggestion_groupe.revision_acteur_id
-        ):
+        if suggestion_groupe.suggestion_acteur_has_revision():
             _update_or_copy_suggestion_unitaires(suggestion_groupe)
 
     self.message_user(
@@ -334,15 +328,15 @@ class SuggestionGroupeAdmin(
 
             # Works with with_suggestion_unitaire_count set in get_queryset
             if model == SuggestionGroupe:
-                return (
-                    [
+                return [
+                    *[
                         field
                         for field in fields
                         if field not in ["suggestion_unitaires_count"]
-                    ]
-                    + [IntField(name="suggestion_unitaires_count")]
-                    + [BoolField(name="has_parent")]
-                )
+                    ],
+                    IntField(name="suggestion_unitaires_count"),
+                    BoolField(name="has_parent"),
+                ]
 
             return fields
 
@@ -351,12 +345,9 @@ class SuggestionGroupeAdmin(
 
     class SuggestionCohorteFilter(admin.RelatedFieldListFilter):
         def field_choices(self, field, request, model_admin):
-            # Filtrer uniquement les cohortes qui ont des suggestions
-            cohorte_model = field.related_model
+            # Filter only cohortes which have suggestion groupes
             cohortes_avec_suggestions = (
-                cohorte_model.objects.filter(suggestion_groupes__isnull=False)
-                .distinct()
-                .order_by("-cree_le")
+                SuggestionCohorte.objects.get_cohortes_with_suggestion_groupes()
             )
             return [(cohorte.pk, str(cohorte)) for cohorte in cohortes_avec_suggestions]
 
