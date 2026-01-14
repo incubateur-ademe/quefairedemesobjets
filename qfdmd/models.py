@@ -790,13 +790,6 @@ class Synonyme(index.Indexed, AbstractBaseProduit):
     ]
 
 
-class Suggestion(models.Model):
-    produit = models.OneToOneField(Synonyme, primary_key=True, on_delete=models.CASCADE)
-
-    def __str__(self) -> str:
-        return str(self.produit)
-
-
 @register_setting
 class FormPageValidationSettings(BaseGenericSetting):
     form_page = models.ForeignKey(
