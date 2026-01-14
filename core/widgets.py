@@ -1,7 +1,8 @@
 import uuid
 
 from django import forms
-from django.urls import reverse
+from django.core.exceptions import ImproperlyConfigured
+from django.urls import NoReverseMatch, reverse
 
 
 class NextAutocompleteInput(forms.TextInput):
@@ -45,7 +46,17 @@ class NextAutocompleteInput(forms.TextInput):
 
     def get_context(self, name, value, attrs):
         context = super().get_context(name, value, attrs)
-        endpoint_url = reverse(self.search_view)
+
+        # Validate that the view is actually registered in Django's URL configuration
+        try:
+            endpoint_url = reverse(self.search_view)
+        except NoReverseMatch:
+            raise ImproperlyConfigured(
+                f"{self.__class__.__name__}: The view '{self.search_view}' is not "
+                f"registered in Django's URL configuration. Please add it to your "
+                f"urlpatterns or check for typos in the view name."
+            )
+
         return {
             **context,
             "endpoint_url": endpoint_url,
