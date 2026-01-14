@@ -71,6 +71,7 @@ class CarteConfigAdmin(gis_admin.GISModelAdmin):
                     "mode_affichage",
                     "nombre_d_acteurs_affiches",
                     "cacher_legende",
+                    "cacher_filtre_objet",
                     "supprimer_branding",
                 )
             },
