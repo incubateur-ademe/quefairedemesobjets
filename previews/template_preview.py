@@ -537,9 +537,9 @@ class FormulairesPreview(LookbookPreview):
 
     def autocomplete_search_homepage(self, **kwargs):
         """Preview of the autocomplete search form used on the homepage."""
-        from qfdmd.forms import AutocompleteSearchForm
+        from qfdmd.forms import HomeSearchForm
 
-        form = AutocompleteSearchForm()
+        form = HomeSearchForm()
         template = Template(
             """
             <div class="qf-max-w-3xl qf-mx-auto qf-p-4w">

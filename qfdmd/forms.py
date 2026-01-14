@@ -76,7 +76,7 @@ class SearchForm(DsfrBaseForm):
         )
 
 
-class AutocompleteSearchForm(DsfrBaseForm):
+class HomeSearchForm(DsfrBaseForm):
     search = forms.CharField(
         label="Saisir un objet ou un déchet",
         required=False,

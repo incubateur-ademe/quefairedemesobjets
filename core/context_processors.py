@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.urls import reverse
 
-from qfdmd.forms import AutocompleteSearchForm, SearchForm
+from qfdmd.forms import HomeSearchForm, SearchForm
 
 from . import constants
 
@@ -44,9 +44,7 @@ def global_context(request) -> dict:
     }
 
     home_search_form = SearchForm(prefix="home", initial={"id": "home"})
-    header_autocomplete_search_form = AutocompleteSearchForm(
-        prefix="header-autocomplete"
-    )
+    header_autocomplete_search_form = HomeSearchForm(prefix="header-autocomplete")
 
     # Skip links for accessibility (DSFR component)
     skiplinks = [
