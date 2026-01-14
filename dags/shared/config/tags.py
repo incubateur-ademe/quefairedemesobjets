@@ -94,5 +94,6 @@ class TAGS:
     KOUMOUL: str = "koumoul"
     EPCI: str = "epci"
     INSEE: str = "insee"
+    CONTOURS_ADMINISTRATIFS: str = "contours administratifs"
     COMMUNE: str = "commune"
     LAPOSTE: str = "laposte"
