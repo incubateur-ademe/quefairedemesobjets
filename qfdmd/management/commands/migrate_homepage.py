@@ -109,8 +109,8 @@ class Command(BaseCommand):
                     )
                 )
 
-        # Step 5: Unpublish page 2
-        self.stdout.write(self.style.SUCCESS("\n=== Step 5: Unpublishing page 2 ==="))
+        # Step 6: Unpublish page 2
+        self.stdout.write(self.style.SUCCESS("\n=== Step 6: Unpublishing page 2 ==="))
 
         if dry_run:
             self.stdout.write(
@@ -133,6 +133,55 @@ class Command(BaseCommand):
                         f"Page 2 '{page_2.title}' is already unpublished"
                     )
                 )
+
+        # Step 7: Publish latest revisions for all live pages
+        self.stdout.write(
+            self.style.SUCCESS(
+                "\n=== Step 7: Publishing latest revisions for live pages ==="
+            )
+        )
+
+        live_pages = Page.objects.filter(live=True)
+        pages_published = 0
+
+        for page in live_pages:
+            latest_revision = page.get_latest_revision()
+            if latest_revision and not latest_revision.approved_go_live_at:
+                if dry_run:
+                    self.stdout.write(
+                        self.style.WARNING(
+                            f"[DRY RUN] Would publish latest revision for "
+                            f"'{page.title}' (id={page.id})"
+                        )
+                    )
+                else:
+                    try:
+                        latest_revision.publish()
+                        pages_published += 1
+                        self.stdout.write(
+                            self.style.SUCCESS(
+                                f"✓ Published latest revision for "
+                                f"'{page.title}' (id={page.id})"
+                            )
+                        )
+                    except Exception as e:
+                        self.stdout.write(
+                            self.style.ERROR(
+                                f"✗ Failed to publish '{page.title}' "
+                                f"(id={page.id}): {e}"
+                            )
+                        )
+
+        if dry_run:
+            self.stdout.write(
+                self.style.WARNING(
+                    "[DRY RUN] Would have published latest revisions for live pages"
+                )
+            )
+        else:
+            self.stdout.write(
+                self.style.SUCCESS(f"✓ Published {pages_published} page revision(s)")
+            )
 
     def handle(self, *args, **options):
         dry_run = options["dry_run"]
