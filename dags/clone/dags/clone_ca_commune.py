@@ -43,6 +43,15 @@ with DAG(
             type="string",
             description_md="📥 URL pour télécharger les données",
         ),
+        "clone_method": Param(
+            "download_to_disk_first",
+            type="string",
+            description_md=r"""📥 **Méthode de création** de la table:
+            - `download_to_disk_first`: télécharge/unpack sur disque avant import DB
+            - `stream_directly`: télécharge/unpack/charge en DB à la volée
+            """,
+            enum=["download_to_disk_first", "stream_directly"],
+        ),
         "file_downloaded": Param(
             "communes-50m.geojson.gz",
             type="string",
