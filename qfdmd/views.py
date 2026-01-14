@@ -8,7 +8,7 @@ from django.shortcuts import redirect, render
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control
 from django.views.decorators.vary import vary_on_headers
-from django.views.generic import DetailView, ListView
+from django.views.generic import DetailView, ListView, TemplateView
 from queryish.rest import APIModel
 from wagtail.admin.viewsets.chooser import ChooserViewSet
 from wagtail.admin.viewsets.model import ModelViewSet
@@ -18,10 +18,8 @@ from core.views import static_file_content_from
 from qfdmd.models import (
     Bonus,
     Produit,
-    ProduitIndexPage,
     ProduitPage,
     ReusableContent,
-    Suggestion,
     Synonyme,
 )
 
@@ -124,36 +122,13 @@ class AssistantBaseView:
 
 @method_decorator(cache_control(max_age=60 * 15), name="dispatch")
 @method_decorator(vary_on_headers("logged-in", "iframe"), name="dispatch")
-class HomeView(AssistantBaseView, ListView):
+class HomeView(AssistantBaseView, TemplateView):
     template_name = "ui/pages/home.html"
-    model = Suggestion
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
 
-        context.update(
-            accordion={
-                "id": "professionels",
-                "title": "Je suis un professionnel",
-                "content": "Actuellement, l’ensemble des recommandations ne concerne "
-                "que les particuliers. Pour des informations à destination des "
-                "professionnels, veuillez consulter le site "
-                "<a href='https://economie-circulaire.ademe.fr/dechets-activites-economiques'"
-                "target='_blank' rel='noreferrer' "
-                "title='Économie Circulaire ADEME - Nouvelle fenêtre'>"
-                "https://economie-circulaire.ademe.fr/dechets-activites-economiques"
-                "</a>.",
-            }
-        )
-
-        if self.request.beta:
-            # The ProduitIndexPage is unique and is the future homepage.
-            # It holds a body field that renders DSFR blocks.
-            # At the moment it is only available to beta testers
-            # but once it will be release to all users, the current homeview
-            # will be deprecated and the context will be directly pulled from
-            # the Wagtail page.
-            context.update(page=ProduitIndexPage.objects.first())
+        context.update(page=Page.objects.live().get(depth=2).specific)
 
         return context
 
