@@ -96,7 +96,7 @@ class AdresseAutocompleteController extends AutocompleteController {
   }
 
   dispatchLocationToGlobalState(adresse: string, latitude: string, longitude: string) {
-    this.dispatch("locationUpdated", { detail: { adresse, latitude, longitude } })
+    this.dispatch("change", { detail: { adresse, latitude, longitude } })
   }
 
   keydownEnter(event: KeyboardEvent): boolean {

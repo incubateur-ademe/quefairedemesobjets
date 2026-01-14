@@ -15,7 +15,6 @@ from dsfr.forms import DsfrBaseForm
 
 from core.constants import DEFAULT_MAP_CONTAINER_ID
 from core.widgets import (
-    AddressAutocompleteInput,
     HomeSearchAutocompleteInput,
     SynonymeAutocompleteInput,
 )
@@ -573,17 +572,6 @@ class FormulairesPreview(LookbookPreview):
                 required=False,
             )
 
-            adresse = forms.CharField(
-                label="Autocomplétion Adresse",
-                required=False,
-                widget=AddressAutocompleteInput(
-                    attrs={
-                        "class": "fr-input",
-                        "placeholder": "Rechercher une adresse",
-                        "autocomplete": "off",
-                    },
-                ),
-            )
             search = forms.CharField(
                 label="Autocomplétion Recherche d'accueil",
                 required=False,

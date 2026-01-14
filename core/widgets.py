@@ -56,19 +56,6 @@ class SynonymeAutocompleteInput(NextAutocompleteInput):
         )
 
 
-class AddressAutocompleteInput(NextAutocompleteInput):
-    def __init__(self, *args, **kwargs):
-        super().__init__(
-            search_view="autocomplete_address",
-            limit=kwargs.pop("limit", 10),
-            navigate=False,
-            show_on_focus=True,
-            display_value=True,
-            *args,
-            **kwargs,
-        )
-
-
 class HomeSearchAutocompleteInput(NextAutocompleteInput):
     def __init__(self, *args, **kwargs):
         super().__init__(

@@ -1,8 +1,6 @@
 import mimetypes
 from typing import override
-from urllib.parse import urlencode
 
-import requests
 import unidecode
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.lookups import Unaccent
@@ -10,10 +8,8 @@ from django.contrib.postgres.search import TrigramWordDistance
 from django.contrib.staticfiles import finders
 from django.db.models.functions import Length, Lower
 from django.http import HttpResponse
-from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.views.decorators.cache import cache_control
-from django.views.decorators.http import require_GET
 from django.views.generic import ListView
 from wagtail.templatetags.wagtailcore_tags import richtext
 
@@ -114,58 +110,3 @@ class AutocompleteSynonyme(ListView):
         context = super().get_context_data(**kwargs)
         context["turbo_frame_id"] = self.request.GET.get("turbo_frame_id")
         return context
-
-
-@require_GET
-@cache_control(max_age=3600)  # Cache for 1 hour
-def autocomplete_address(request):
-    """Proxy for data.geopf.fr geocoding API with caching.
-
-    This endpoint searches for French addresses using the official French
-    government geocoding service and caches results to reduce API calls.
-    Returns HTML for use with the autocomplete widget.
-
-    Matches the behavior of address_autocomplete_controller.ts by calling
-    the API without autocomplete or limit parameters.
-    """
-    import re
-
-    query = request.GET.get("q", "").strip()
-    turbo_frame_id = request.GET.get("turbo_frame_id")
-
-    if not query:
-        features = []
-    else:
-        try:
-            params = urlencode({"q": query})
-            url = f"https://data.geopf.fr/geocodage/search/?{params}"
-
-            response = requests.get(url, timeout=5)
-            response.raise_for_status()
-
-            data = response.json()
-            features = data.get("features", [])
-
-            # Highlight query terms in the labels
-            if features and query:
-                # Escape special regex characters and split query into words
-                query_words = [re.escape(word) for word in query.split()]
-                # Create pattern that matches any of the query words (case-insensitive)
-                pattern = re.compile(f"({'|'.join(query_words)})", re.IGNORECASE)
-
-                for feature in features:
-                    label = feature.get("properties", {}).get("label", "")
-                    # Wrap matched words in <b> tags
-                    highlighted_label = pattern.sub(r"<b>\1</b>", label)
-                    feature["properties"]["highlighted_label"] = highlighted_label
-
-        except requests.RequestException:
-            features = []
-
-    # Render the template with results
-    context = {
-        "features": features,
-        "turbo_frame_id": turbo_frame_id,
-    }
-
-    return render(request, "ui/forms/widgets/autocomplete/adresse.html", context)

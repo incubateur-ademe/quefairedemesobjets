@@ -4,7 +4,6 @@ import * as Turbo from "@hotwired/turbo"
 import CopyController from "../controllers/shared/copy_controller"
 import GenericAutocompleteController from "../controllers/shared/generic_autocomplete_controller"
 import ScrollController from "../controllers/shared/scroll_controller"
-import GeolocationController from "../controllers/shared/geolocation_controller"
 
 import AddressAutocompleteController from "../controllers/carte/address_autocomplete_controller"
 import MapController from "../controllers/carte/map_controller"
@@ -12,7 +11,6 @@ import SearchSolutionFormController from "../controllers/carte/search_solution_f
 import SsCatObjectAutocompleteController from "../controllers/carte/ss_cat_object_autocomplete_controller"
 import ActeurDetailsController from "../controllers/carte/acteur_details"
 import NextAutocompleteController from "../controllers/shared/next_autocomplete_controller"
-import MapAddressAutocompleteController from "../controllers/shared/map_address_autocomplete_controller"
 import ResponsiveController from "../controllers/carte/responsive_controller"
 import PinpointController from "../controllers/carte/pinpoint_controller"
 
@@ -31,11 +29,9 @@ stimulus.register("search-solution-form", SearchSolutionFormController)
 stimulus.register("autocomplete", GenericAutocompleteController)
 stimulus.register("copy", CopyController)
 stimulus.register("scroll", ScrollController)
-stimulus.register("geolocation", GeolocationController)
 stimulus.register("acteur-details", ActeurDetailsController)
 stimulus.register("next-autocomplete", NextAutocompleteController)
 stimulus.register("pinpoint", PinpointController)
-stimulus.register("map-address-autocomplete", MapAddressAutocompleteController)
 
 stimulus.register("search", SearchController)
 stimulus.register("blink", BlinkController)
