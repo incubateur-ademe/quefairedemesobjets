@@ -99,6 +99,10 @@ export async function searchForAurayInIframe(
   parentSelector?: string,
 ) {
   await searchAddress(iframe, "Auray", "carte", { parentSelector })
+
+  // Wait for the loading indicator to appear and disappear
+  // This ensures the search request has completed
+  await waitForLoadingComplete(iframe)
 }
 
 export async function searchDummyAdresse(page: Page) {

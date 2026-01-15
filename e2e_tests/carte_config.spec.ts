@@ -1,11 +1,25 @@
 import { expect, test } from "@playwright/test"
-import {
-  getIframe,
-  navigateTo,
-  openAdvancedFilters,
-  searchForAurayInIframe,
-  TIMEOUT,
-} from "./helpers"
+import { getIframe, navigateTo, searchForAurayInIframe, TIMEOUT } from "./helpers"
+
+/**
+ * Helper function to open filtres modal in iframe context
+ *
+ * Note: We cannot use openAdvancedFilters from helpers.ts because:
+ * 1. It opens AND closes the modal (we need it to stay open to check fields)
+ * 2. It's designed for different test IDs (advanced-filters vs modal-carte:filtres)
+ * 3. Using getByRole is more resilient than relying on parent test IDs
+ */
+async function openFiltresModal(iframe: ReturnType<typeof getIframe>) {
+  // Find the Filtres button by its role and name (works for any screen size)
+  const filtresButton = iframe.getByRole("button", { name: /Filtres/i })
+  await expect(filtresButton.first()).toBeVisible({ timeout: TIMEOUT.SHORT })
+  await filtresButton.first().click()
+
+  // Wait for the modal to open by checking if a form field appears
+  // Using bonus field since it's present in all filtres forms
+  const bonusField = iframe.locator('input[name="filtres-bonus"]')
+  await expect(bonusField).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+}
 
 test.describe("🎛️ Configuration Carte - Paramètre Legacy Bonus", () => {
   test("Le paramètre legacy bonus=1 en iframe initialise le filtre bonus comme coché", async ({
@@ -27,12 +41,7 @@ test.describe("🎛️ Configuration Carte - Paramètre Legacy Bonus", () => {
     await searchForAurayInIframe(iframe)
 
     // Open the filtres modal
-    await openAdvancedFilters(
-      iframe,
-      "carte-legend",
-      "modal-button-carte:filtres",
-      "modal-carte:filtres",
-    )
+    await openFiltresModal(iframe)
 
     // Verify that the bonus checkbox is checked
     const bonusCheckbox = iframe.locator('input[name="filtres-bonus"]')
@@ -58,12 +67,7 @@ test.describe("🎛️ Configuration Carte - Paramètre Legacy Bonus", () => {
     await searchForAurayInIframe(iframe)
 
     // Open the filtres modal
-    await openAdvancedFilters(
-      iframe,
-      "carte-legend",
-      "modal-button-carte:filtres",
-      "modal-carte:filtres",
-    )
+    await openFiltresModal(iframe)
 
     // Verify that the bonus checkbox is checked
     const bonusCheckbox = iframe.locator('input[name="filtres-bonus"]')
@@ -91,12 +95,7 @@ test.describe("🎛️ Configuration Carte - Cacher Filtre Objet", () => {
     await searchForAurayInIframe(iframe)
 
     // Open the filtres modal
-    await openAdvancedFilters(
-      iframe,
-      "carte-legend",
-      "modal-button-carte:filtres",
-      "modal-carte:filtres",
-    )
+    await openFiltresModal(iframe)
 
     // Verify that the synonyme field is NOT present in the form
     const synonymeField = iframe.locator('input[id="id_filtres-synonyme"]')
@@ -122,12 +121,7 @@ test.describe("🎛️ Configuration Carte - Cacher Filtre Objet", () => {
     await searchForAurayInIframe(iframe)
 
     // Open the filtres modal
-    await openAdvancedFilters(
-      iframe,
-      "carte-legend",
-      "modal-button-carte:filtres",
-      "modal-carte:filtres",
-    )
+    await openFiltresModal(iframe)
 
     // Verify that the synonyme field IS present in the form
     const synonymeField = iframe.locator('input[id="id_filtres-synonyme"]')
