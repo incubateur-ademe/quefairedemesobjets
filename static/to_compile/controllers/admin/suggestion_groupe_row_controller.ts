@@ -25,14 +25,20 @@ export default class extends Controller<HTMLElement> {
   saveFieldValue(event: Event) {
     const fieldsValues = this.#getFieldsValues()
     const field = this.#getField(event, fieldsValues)
-    const newFieldsValues = {}
-    if (field != null) {
-      newFieldsValues[field] = fieldsValues[field]
-      fieldsValues[field]["updated_displayed_value"] = (
-        event.target as HTMLElement
-      ).textContent
-      this.#postFieldsValues(newFieldsValues)
-    }
+    if (field == null) return
+
+    const fieldsGroups = JSON.parse(this.fieldsGroupsValue) as string[][]
+    const fieldsGroup = fieldsGroups.find((group) => group.includes(field))
+    if (!fieldsGroup) return
+
+    const newFieldsValues = Object.fromEntries(
+      fieldsGroup.map((f) => [f, { ...fieldsValues[f] }]),
+    )
+    newFieldsValues[field]["updated_displayed_value"] = (
+      event.target as HTMLElement
+    ).textContent
+
+    this.#postFieldsValues(newFieldsValues)
   }
 
   updateFieldsDisplayed(event: Event) {

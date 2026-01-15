@@ -1,3 +1,5 @@
+import json
+
 from pydantic import BaseModel, ConfigDict
 
 
@@ -43,6 +45,16 @@ class SuggestionSourceModel(BaseModel):
     proposition_service_codes: str | None = None
     lieu_prestation: str | None = None
     perimetre_adomicile_codes: str | None = None
+
+    @classmethod
+    def from_json(cls, json_data: str) -> "SuggestionSourceModel":
+        data = json.loads(json_data)
+        for key, value in data.items():
+            if key.endswith("_codes"):
+                data[key] = json.dumps(value)
+            elif value is not None and value != "":
+                data[key] = str(value)
+        return cls.model_validate(data)
 
     @classmethod
     def get_ordered_fields(cls) -> list[tuple[str]]:
