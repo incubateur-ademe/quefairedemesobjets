@@ -99,7 +99,7 @@ test.describe("🎛️ Configuration Carte - Cacher Filtre Objet", () => {
     )
 
     // Verify that the synonyme field is NOT present in the form
-    const synonymeField = iframe.locator('input[name="filtres-synonyme"]')
+    const synonymeField = iframe.locator('input[id="id_filtres-synonyme"]')
     await expect(synonymeField).not.toBeAttached()
   })
 
@@ -130,7 +130,7 @@ test.describe("🎛️ Configuration Carte - Cacher Filtre Objet", () => {
     )
 
     // Verify that the synonyme field IS present in the form
-    const synonymeField = iframe.locator('input[name="filtres-synonyme"]')
+    const synonymeField = iframe.locator('input[id="id_filtres-synonyme"]')
     await expect(synonymeField).toBeAttached({ timeout: TIMEOUT.SHORT })
     await expect(synonymeField).toBeVisible({ timeout: TIMEOUT.SHORT })
   })
