@@ -1,5 +1,1 @@
-{% if iframe %}
-    {% include "./_embedded.html" %}
-{% else %}
-    {% include "./_dsfr_footer.html" %}
-{% endif %}
+{% extends iframe|yesno:"ui/components/footer/base.iframe.html,ui/components/footer/base.html" %}
