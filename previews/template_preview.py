@@ -603,9 +603,13 @@ class PagesPreview(LookbookPreview):
 
         factory = RequestFactory()
         request = factory.get("/")
-        request.iframe = iframe
 
-        context = {"object": Synonyme.objects.first(), "request": request}
+        context = {
+            "object": Synonyme.objects.first(),
+            "request": request,
+            "iframe": iframe,
+        }
+
         return render_to_string("ui/pages/produit.html", context)
 
     @register_form_class(IframeForm)
@@ -617,13 +621,13 @@ class PagesPreview(LookbookPreview):
         acteur = DisplayedActeur.objects.first()
         factory = RequestFactory()
         request = factory.get("/")
-        request.iframe = iframe
 
         context = {
             "object": acteur,
             "request": request,
             "base_template": "ui/layout/base.html",
             "turbo": False,
+            "iframe": iframe,
         }
         return render_to_string("ui/pages/acteur.html", context)
 

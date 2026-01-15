@@ -1,0 +1,17 @@
+<div class="qf-bg-grey-1000-50-hover qf-py-9w">
+{% load dsfr_tags %}
+<div class="qf-flex qf-flex-col qf-items-center qf-justify-center qf-gap-4w">
+    {% comment %}
+    Using onclick with window.open() because django-dsfr doesn't currently support href attribute in buttons.
+    This could be updated if django-dsfr adds support for link buttons in the future.
+
+    Future alternative (doesn't display properly yet):
+    {% dsfr_link url="https://quefairedemesdechets.ademe.fr" label="En savoir plus sur ce site" is_external=True extra_classes="fr-btn fr-btn--tertiary" %}
+    {% endcomment %}
+    {% dsfr_button label="En savoir plus sur ce site" extra_classes="fr-btn--tertiary fr-btn--icon-left fr-icon-external-link-line" onclick="window.open('https://quefairedemesdechets.ademe.fr', '_blank', 'noopener,noreferrer')" %}
+    <div class="qf-flex qf-gap-2w">
+        <p class="fr-logo">République<br>française</p>
+        {% include "ui/components/logo/combined_logos.html" %}
+    </div>
+</div>
+</div>
