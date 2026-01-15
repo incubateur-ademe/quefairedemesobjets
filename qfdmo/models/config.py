@@ -197,6 +197,14 @@ class CarteConfig(index.Indexed, models.Model):
         srid=4326,
     )
 
+    test = models.BooleanField(
+        default=False,
+        verbose_name="Carte de test",
+        help_text="Cocher cette case pour marquer cette carte comme une carte de test "
+        "(utilisée pour les tests e2e). Les cartes de test sont masquées par défaut "
+        "dans l'interface d'administration",
+    )
+
     def get_absolute_url(self, override_sous_categories=None, initial_query_string=""):
         """This view can be used with categories set from the parent page.
         For example in the Assistant, with a Produit page, the sous_categorie_objet

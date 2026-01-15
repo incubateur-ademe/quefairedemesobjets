@@ -945,17 +945,14 @@ class TestsPreview(LookbookPreview):
             (-0.609453, 47.457526, -0.51571, 47.489048)
         )
 
-        carte_config, created = CarteConfig.objects.get_or_create(
+        carte_config, created = CarteConfig.objects.update_or_create(
             slug="test-bounding-box",
             defaults={
                 "nom": "Test Bounding Box",
                 "bounding_box": bounding_box_polygon,
+                "test": True,
             },
         )
-
-        if not created and carte_config.bounding_box != bounding_box_polygon:
-            carte_config.bounding_box = bounding_box_polygon
-            carte_config.save()
 
         carte_config_url = reverse(
             "qfdmo:carte_custom", kwargs={"slug": "test-bounding-box"}
@@ -979,4 +976,39 @@ class TestsPreview(LookbookPreview):
         return render_to_string(
             "ui/tests/iframe_navigation_persistence.html",
             {"base_url": base_url},
+        )
+
+    def t_9_bonus_legacy_parameter(self, **kwargs):
+        """Test that legacy bonus=1 parameter initializes the bonus filter as checked"""
+        return render_to_string(
+            "ui/tests/t_9_bonus_legacy_parameter.html",
+        )
+
+    def t_10_cacher_filtre_objet(self, **kwargs):
+        """Test that CarteConfig with cacher_filtre_objet=True hides the object filter"""
+        from django.urls import reverse
+
+        # Create or update test CarteConfig with cacher_filtre_objet=True
+        carte_config, created = CarteConfig.objects.update_or_create(
+            slug="test-cacher-filtre-objet",
+            defaults={
+                "nom": "Test Cacher Filtre Objet",
+                "cacher_filtre_objet": True,
+                "test": True,
+            },
+        )
+
+        carte_config_url = reverse(
+            "qfdmo:carte_custom", kwargs={"slug": "test-cacher-filtre-objet"}
+        )
+
+        return render_to_string(
+            "ui/tests/t_10_cacher_filtre_objet.html",
+            {"carte_config_url": carte_config_url},
+        )
+
+    def t_11_default_filtre_objet(self, **kwargs):
+        """Test that default CarteConfig shows the object filter"""
+        return render_to_string(
+            "ui/tests/t_11_default_filtre_objet.html",
         )
