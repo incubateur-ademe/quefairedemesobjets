@@ -58,7 +58,12 @@ test.describe("🎛️ Configuration Carte - Paramètre Legacy Bonus", () => {
     await searchForAurayInIframe(iframe)
 
     // Open the filtres modal
-    await openFiltresModal(iframe)
+    await openAdvancedFilters(
+      iframe,
+      "carte-legend",
+      "modal-button-carte:filtres",
+      "modal-carte:filtres",
+    )
 
     // Verify that the bonus checkbox is checked
     const bonusCheckbox = iframe.locator('input[name="filtres-bonus"]')
@@ -86,7 +91,12 @@ test.describe("🎛️ Configuration Carte - Cacher Filtre Objet", () => {
     await searchForAurayInIframe(iframe)
 
     // Open the filtres modal
-    await openFiltresModal(iframe)
+    await openAdvancedFilters(
+      iframe,
+      "carte-legend",
+      "modal-button-carte:filtres",
+      "modal-carte:filtres",
+    )
 
     // Verify that the synonyme field is NOT present in the form
     const synonymeField = iframe.locator('input[name="filtres-synonyme"]')
@@ -112,7 +122,12 @@ test.describe("🎛️ Configuration Carte - Cacher Filtre Objet", () => {
     await searchForAurayInIframe(iframe)
 
     // Open the filtres modal
-    await openFiltresModal(iframe)
+    await openAdvancedFilters(
+      iframe,
+      "carte-legend",
+      "modal-button-carte:filtres",
+      "modal-carte:filtres",
+    )
 
     // Verify that the synonyme field IS present in the form
     const synonymeField = iframe.locator('input[name="filtres-synonyme"]')
