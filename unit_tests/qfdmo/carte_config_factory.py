@@ -9,6 +9,7 @@ from unit_tests.qfdmo.action_factory import GroupeActionFactory
 class CarteConfigFactory(Factory):
     class Meta:
         model = CarteConfig
+        django_get_or_create = ("slug",)
 
     nom = "Carte sur mesure"
     slug = "carte-sur-mesure"

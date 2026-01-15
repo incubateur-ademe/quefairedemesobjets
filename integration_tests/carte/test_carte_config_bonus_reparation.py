@@ -22,6 +22,9 @@ def django_db_setup(django_db_setup, django_db_blocker):
             "labels",
             "acteur_services",
             "acteur_types",
+            "sources",
+            "produits",
+            "carte_configs",
         )
 
 
