@@ -1,24 +1,22 @@
 import { expect, test } from "@playwright/test"
-import { getIframe, navigateTo, searchForAurayInIframe, TIMEOUT } from "./helpers"
+import {
+  getIframe,
+  navigateTo,
+  openModal,
+  searchForAurayInIframe,
+  TIMEOUT,
+} from "./helpers"
 
 /**
- * Helper function to open filtres modal in iframe context
- *
- * Note: We cannot use openAdvancedFilters from helpers.ts because:
- * 1. It opens AND closes the modal (we need it to stay open to check fields)
- * 2. It's designed for different test IDs (advanced-filters vs modal-carte:filtres)
- * 3. Using getByRole is more resilient than relying on parent test IDs
+ * Helper function to open filtres modal in iframe context and keep it open
  */
 async function openFiltresModal(iframe: ReturnType<typeof getIframe>) {
-  // Find the Filtres button by its role and name (works for any screen size)
-  const filtresButton = iframe.getByRole("button", { name: /Filtres/i })
-  await expect(filtresButton.first()).toBeVisible({ timeout: TIMEOUT.SHORT })
-  await filtresButton.first().click()
-
-  // Wait for the modal to open by checking if a form field appears
-  // Using bonus field since it's present in all filtres forms
-  const bonusField = iframe.locator('input[name="filtres-bonus"]')
-  await expect(bonusField).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+  await openModal(iframe, {
+    buttonSelector: { role: "button", name: /Filtres/i },
+    modalDataTestId: "modal-carte:filtres",
+    modalContentSelector: 'input[name="filtres-bonus"]', // Wait for a field that's always present
+    closeModal: false, // Keep modal open so we can check fields
+  })
 }
 
 test.describe("🎛️ Configuration Carte - Paramètre Legacy Bonus", () => {
