@@ -322,13 +322,13 @@ class ComponentsPreview(LookbookPreview):
         }
         return render_to_string("ui/components/code/code.html", context)
 
-    @component_docs("ui/components/logo/header.md")
-    def logo(self, **kwargs):
-        return render_to_string("ui/components/logo/header.html")
+    @component_docs("ui/components/logo/site_logo_mini.md")
+    def site_logo_mini(self, **kwargs):
+        return render_to_string("ui/components/logo/site_logo_mini.html")
 
-    @component_docs("ui/components/logo/homepage.md")
-    def logo_homepage(self, **kwargs):
-        return render_to_string("ui/components/logo/homepage.html")
+    @component_docs("ui/components/logo/site_logo_large.md")
+    def site_logo_large(self, **kwargs):
+        return render_to_string("ui/components/logo/site_logo_large.html")
 
     @component_docs("ui/components/footer/combined_logos.md")
     def combined_logos(self, **kwargs):
