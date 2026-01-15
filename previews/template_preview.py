@@ -60,6 +60,15 @@ def component_docs(md_file_path):
     return decorator
 
 
+class FooterForm(forms.Form):
+    iframe = forms.BooleanField(
+        label="Version iframe",
+        help_text="Afficher la version iframe du footer",
+        initial=False,
+        required=False,
+    )
+
+
 class ProduitHeadingForm(forms.Form):
     """
     Form for produit heading with synonyme and pronom choices
@@ -321,6 +330,18 @@ class ComponentsPreview(LookbookPreview):
     def logo_homepage(self, **kwargs):
         return render_to_string("ui/components/logo/homepage.html")
 
+<<<<<<< HEAD
+=======
+    @component_docs("ui/components/logos/logos.md")
+    def logos(self, **kwargs):
+        return render_to_string("ui/components/logos/logos.html")
+
+    @component_docs("ui/components/produit/legacy_heading.md")
+    def produit_legacy_heading(self, **kwargs):
+        context = {"title": "Coucou !"}
+        return render_to_string("ui/components/produit/legacy_heading.html", context)
+
+>>>>>>> b617adba (fix logos)
     @register_form_class(ProduitHeadingForm)
     @component_docs("ui/components/produit/heading.md")
     def produit_heading(self, synonyme=None, pronom="mon", **kwargs):
@@ -419,6 +440,16 @@ class ComponentsPreview(LookbookPreview):
         ).render(Context(context_formulaire))
 
         return default_html + formulaire_html
+
+    @register_form_class(FooterForm)
+    @component_docs("ui/components/footer/footer.md")
+    def footer(self, iframe=False, **kwargs):
+        # Convert string values to boolean
+        if isinstance(iframe, str):
+            iframe = iframe.lower() == "true"
+
+        context = {"iframe": iframe}
+        return render_to_string("ui/components/footer/footer.html", context)
 
 
 class FiltresPreview(LookbookPreview):
@@ -546,8 +577,13 @@ class FormulairesPreview(LookbookPreview):
 
 class IframeForm(forms.Form):
     iframe = forms.BooleanField(
+<<<<<<< HEAD
         label="Mode iframe",
         help_text="Afficher en mode iframe",
+=======
+        label="Version iframe",
+        help_text="Afficher la version iframe de la page",
+>>>>>>> b617adba (fix logos)
         initial=False,
         required=False,
     )
@@ -556,25 +592,54 @@ class IframeForm(forms.Form):
 class PagesPreview(LookbookPreview):
     @register_form_class(IframeForm)
     def home(self, iframe=False, **kwargs):
+<<<<<<< HEAD
         if isinstance(iframe, str):
             iframe = iframe.lower() == "true"
 
         context = {
             "request": None,
             "page": get_homepage(),
+=======
+        # Convert string values to boolean
+        if isinstance(iframe, str):
+            iframe = iframe.lower() == "true"
+
+        factory = RequestFactory()
+        request = factory.get("/")
+        request.iframe = iframe
+
+        context = {
+            "request": request,
+>>>>>>> b617adba (fix logos)
             "ASSISTANT": {"faites_decouvrir_ce_site": "Faites découvrir ce site !"},
             "iframe": iframe,
         }
         return render_to_string("ui/pages/home.html", context)
 
-    def produit(self, **kwargs):
-        context = {"object": Synonyme.objects.first()}
+    @register_form_class(IframeForm)
+    def produit(self, iframe=False, **kwargs):
+        # Convert string values to boolean
+        if isinstance(iframe, str):
+            iframe = iframe.lower() == "true"
+
+        factory = RequestFactory()
+        request = factory.get("/")
+        request.iframe = iframe
+
+        context = {"object": Synonyme.objects.first(), "request": request}
         return render_to_string("ui/pages/produit.html", context)
 
-    def acteur(self, **kwargs):
+    @register_form_class(IframeForm)
+    def acteur(self, iframe=False, **kwargs):
+        # Convert string values to boolean
+        if isinstance(iframe, str):
+            iframe = iframe.lower() == "true"
+
         acteur = DisplayedActeur.objects.first()
         factory = RequestFactory()
         request = factory.get("/")
+        request.iframe = iframe
+
         context = {
             "object": acteur,
             "request": request,
@@ -589,9 +654,6 @@ class SnippetsPreview(LookbookPreview):
     def header(self, **kwargs):
         context = {"request": None}
         return render_to_string("ui/components/header/header.html", context)
-
-    def footer(self, **kwargs):
-        return render_to_string("ui/components/footer/footer.html")
 
     def suggestions(self, **kwargs):
         context = {
