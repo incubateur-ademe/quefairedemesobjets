@@ -554,7 +554,13 @@ class CarteSearchActeursView(AbstractSearchActeursView):
 class CarteConfigView(DetailView, CarteSearchActeursView):
     model = CarteConfig
     context_object_name = "carte_config"
-    filtres_form_class = FiltresFormWithoutSynonyme
+
+    @property
+    def filtres_form_class(self):
+        if self.object.cacher_filtre_objet:
+            return FiltresFormWithoutSynonyme
+        else:
+            return super().filtres_form_class
 
     def get_queryset(self):
         """Optimize queries by prefetching all ManyToMany relations"""
