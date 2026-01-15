@@ -2,10 +2,4 @@
 
 {% dsfr_callout title="Test Cacher Filtre Objet" text="Cette page teste qu'une CarteConfig avec cacher_filtre_objet=True masque correctement le champ de filtre synonyme (objet) dans la modale de filtres." icon_class="fr-icon-alert-line" %}
 
-<iframe
-  src="{{ carte_config_url }}"
-  width="100%"
-  height="800"
-  style="border: 1px solid #ccc;"
-  data-testid="carte-iframe"
-></iframe>
+{{ script|safe }}

@@ -981,13 +981,11 @@ class TestsPreview(LookbookPreview):
     def t_9_bonus_legacy_parameter(self, **kwargs):
         """Test that legacy bonus=1 parameter initializes the bonus filter as checked"""
         return render_to_string(
-            "ui/tests/t_9_bonus_legacy_parameter.html",
+            "ui/tests/t_9_bonus_legacy_parameter.html", {"base_url": base_url}
         )
 
     def t_10_cacher_filtre_objet(self, **kwargs):
         """Test that CarteConfig with cacher_filtre_objet=True hides the object filter"""
-        from django.urls import reverse
-
         # Create or update test CarteConfig with cacher_filtre_objet=True
         carte_config, created = CarteConfig.objects.update_or_create(
             slug="test-cacher-filtre-objet",
@@ -998,17 +996,18 @@ class TestsPreview(LookbookPreview):
             },
         )
 
-        carte_config_url = reverse(
-            "qfdmo:carte_custom", kwargs={"slug": "test-cacher-filtre-objet"}
-        )
+        script = f'<script src="{base_url}/static/carte.js" data-slug="{carte_config.slug}"></script>'
 
         return render_to_string(
             "ui/tests/t_10_cacher_filtre_objet.html",
-            {"carte_config_url": carte_config_url},
+            {"script": script},
         )
 
     def t_11_default_filtre_objet(self, **kwargs):
         """Test that default CarteConfig shows the object filter"""
+        script = f'<script src="{base_url}/static/carte.js"></script>'
+
         return render_to_string(
             "ui/tests/t_11_default_filtre_objet.html",
+            {"script": script},
         )
