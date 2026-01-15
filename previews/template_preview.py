@@ -330,8 +330,6 @@ class ComponentsPreview(LookbookPreview):
     def logo_homepage(self, **kwargs):
         return render_to_string("ui/components/logo/homepage.html")
 
-<<<<<<< HEAD
-=======
     @component_docs("ui/components/logos/logos.md")
     def logos(self, **kwargs):
         return render_to_string("ui/components/logos/logos.html")
@@ -341,7 +339,6 @@ class ComponentsPreview(LookbookPreview):
         context = {"title": "Coucou !"}
         return render_to_string("ui/components/produit/legacy_heading.html", context)
 
->>>>>>> b617adba (fix logos)
     @register_form_class(ProduitHeadingForm)
     @component_docs("ui/components/produit/heading.md")
     def produit_heading(self, synonyme=None, pronom="mon", **kwargs):
@@ -577,13 +574,8 @@ class FormulairesPreview(LookbookPreview):
 
 class IframeForm(forms.Form):
     iframe = forms.BooleanField(
-<<<<<<< HEAD
-        label="Mode iframe",
-        help_text="Afficher en mode iframe",
-=======
         label="Version iframe",
         help_text="Afficher la version iframe de la page",
->>>>>>> b617adba (fix logos)
         initial=False,
         required=False,
     )
@@ -592,25 +584,12 @@ class IframeForm(forms.Form):
 class PagesPreview(LookbookPreview):
     @register_form_class(IframeForm)
     def home(self, iframe=False, **kwargs):
-<<<<<<< HEAD
         if isinstance(iframe, str):
             iframe = iframe.lower() == "true"
 
         context = {
             "request": None,
             "page": get_homepage(),
-=======
-        # Convert string values to boolean
-        if isinstance(iframe, str):
-            iframe = iframe.lower() == "true"
-
-        factory = RequestFactory()
-        request = factory.get("/")
-        request.iframe = iframe
-
-        context = {
-            "request": request,
->>>>>>> b617adba (fix logos)
             "ASSISTANT": {"faites_decouvrir_ce_site": "Faites découvrir ce site !"},
             "iframe": iframe,
         }
