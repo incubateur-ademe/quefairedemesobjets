@@ -134,10 +134,10 @@ class Command(BaseCommand):
                     )
                 )
 
-        # Step 7: Publish latest revisions for all live pages
+        # Step 7: Publish live revisions for all live pages (preserve drafts)
         self.stdout.write(
             self.style.SUCCESS(
-                "\n=== Step 7: Publishing latest revisions for live pages ==="
+                "\n=== Step 7: Publishing live revisions for live pages ==="
             )
         )
 
@@ -145,22 +145,23 @@ class Command(BaseCommand):
         pages_published = 0
 
         for page in live_pages:
-            latest_revision = page.get_latest_revision()
-            if latest_revision and not latest_revision.approved_go_live_at:
+            # Use live_revision to preserve unpublished changes (drafts)
+            live_revision = page.live_revision
+            if live_revision and not live_revision.approved_go_live_at:
                 if dry_run:
                     self.stdout.write(
                         self.style.WARNING(
-                            f"[DRY RUN] Would publish latest revision for "
+                            f"[DRY RUN] Would publish live revision for "
                             f"'{page.title}' (id={page.id})"
                         )
                     )
                 else:
                     try:
-                        latest_revision.publish()
+                        live_revision.publish()
                         pages_published += 1
                         self.stdout.write(
                             self.style.SUCCESS(
-                                f"✓ Published latest revision for "
+                                f"✓ Published live revision for "
                                 f"'{page.title}' (id={page.id})"
                             )
                         )
@@ -175,13 +176,33 @@ class Command(BaseCommand):
         if dry_run:
             self.stdout.write(
                 self.style.WARNING(
-                    "[DRY RUN] Would have published latest revisions for live pages"
+                    "[DRY RUN] Would have published live revisions for live pages"
                 )
             )
         else:
             self.stdout.write(
                 self.style.SUCCESS(f"✓ Published {pages_published} page revision(s)")
             )
+
+        # Step 8: Save the site manually
+        self.stdout.write(self.style.SUCCESS("\n=== Step 8: Saving the site ==="))
+
+        if dry_run:
+            self.stdout.write(
+                self.style.WARNING(
+                    f"[DRY RUN] Would save site '{site.site_name}' (id={site.id})"
+                )
+            )
+        else:
+            try:
+                site.save()
+                self.stdout.write(
+                    self.style.SUCCESS(
+                        f"✓ Site '{site.site_name}' (id={site.id}) has been saved"
+                    )
+                )
+            except Exception as e:
+                self.stdout.write(self.style.ERROR(f"✗ Failed to save site: {e}"))
 
     def handle(self, *args, **options):
         dry_run = options["dry_run"]
