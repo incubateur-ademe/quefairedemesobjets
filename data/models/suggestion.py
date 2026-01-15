@@ -484,6 +484,15 @@ class SuggestionGroupe(TimestampedModel):
         # So the foreign key constraint is not applied yet
         db_constraint=False,
     )
+    parent_revision_acteur = models.ForeignKey(
+        RevisionActeur,
+        on_delete=models.CASCADE,
+        related_name="suggestion_groupes_from_parent",
+        null=True,
+        # when it is a creation, the revision_acteur is not created yet
+        # So the foreign key constraint is not applied yet
+        db_constraint=False,
+    )
     contexte = models.JSONField(
         null=True,
         blank=True,
@@ -636,6 +645,15 @@ class SuggestionUnitaire(TimestampedModel):
         RevisionActeur,
         on_delete=models.CASCADE,
         related_name="suggestion_unitaires",
+        null=True,
+        # when it is a creation, the revision_acteur is not created yet
+        # So the foreign key constraint is not applied yet
+        db_constraint=False,
+    )
+    parent_revision_acteur = models.ForeignKey(
+        RevisionActeur,
+        on_delete=models.CASCADE,
+        related_name="suggestion_unitaires_from_parent",
         null=True,
         # when it is a creation, the revision_acteur is not created yet
         # So the foreign key constraint is not applied yet
