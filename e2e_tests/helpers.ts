@@ -353,7 +353,7 @@ export const mockApiAdresse = async (page: Page) =>
  * Modal/Dialog helpers
  */
 export async function openAdvancedFilters(
-  page: Page,
+  page: Page | FrameLocator,
   parentTestId = "form-content",
   buttonDataTestId = "advanced-filters",
   modalDataTestId = "advanced-filters-modal",

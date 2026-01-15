@@ -1,0 +1,5 @@
+{% load dsfr_tags %}
+
+{% dsfr_callout title="Test paramètre data-bonus='1' via script" text="L'iframe ci-dessous teste que le paramètre legacy bonus=1 passé au script génère une iframe avec le filtre bonus comme coché dans le formulaire de filtres." icon_class="fr-icon-alert-line" %}
+
+<script src='{{base_url}}/static/carte.js' data-bonus="1"></script>

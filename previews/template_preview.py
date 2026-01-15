@@ -978,13 +978,20 @@ class TestsPreview(LookbookPreview):
             {"base_url": base_url},
         )
 
-    def t_9_bonus_legacy_parameter(self, **kwargs):
-        """Test that legacy bonus=1 parameter initializes the bonus filter as checked"""
+    def t_9_bonus_legacy_parameter_iframe(self, **kwargs):
+        """Test that legacy bonus=1 parameter in iframe URL initializes the bonus filter as checked"""
         return render_to_string(
-            "ui/tests/t_9_bonus_legacy_parameter.html", {"base_url": base_url}
+            "ui/tests/t_9_bonus_legacy_parameter_iframe.html",
         )
 
-    def t_10_cacher_filtre_objet(self, **kwargs):
+    def t_10_bonus_legacy_parameter_script(self, **kwargs):
+        """Test that legacy data-bonus='1' via script initializes the bonus filter as checked"""
+        return render_to_string(
+            "ui/tests/t_10_bonus_legacy_parameter_script.html",
+            {"base_url": base_url},
+        )
+
+    def t_11_cacher_filtre_objet(self, **kwargs):
         """Test that CarteConfig with cacher_filtre_objet=True hides the object filter"""
         # Create or update test CarteConfig with cacher_filtre_objet=True
         carte_config, created = CarteConfig.objects.update_or_create(
@@ -999,15 +1006,15 @@ class TestsPreview(LookbookPreview):
         script = f'<script src="{base_url}/static/carte.js" data-slug="{carte_config.slug}"></script>'
 
         return render_to_string(
-            "ui/tests/t_10_cacher_filtre_objet.html",
+            "ui/tests/t_11_cacher_filtre_objet.html",
             {"script": script},
         )
 
-    def t_11_default_filtre_objet(self, **kwargs):
+    def t_12_default_filtre_objet(self, **kwargs):
         """Test that default CarteConfig shows the object filter"""
         script = f'<script src="{base_url}/static/carte.js"></script>'
 
         return render_to_string(
-            "ui/tests/t_11_default_filtre_objet.html",
+            "ui/tests/t_12_default_filtre_objet.html",
             {"script": script},
         )
