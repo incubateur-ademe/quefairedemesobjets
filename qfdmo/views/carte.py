@@ -73,6 +73,7 @@ class CarteFormsInstance(TypedDict):
     filtres: None | FiltresForm
     legende: None | AutoSubmitLegendeForm
     legende_filtres: None | LegendeForm
+    map: None | MapForm
 
 
 class CarteSearchActeursView(AbstractSearchActeursView):
@@ -351,7 +352,7 @@ class CarteSearchActeursView(AbstractSearchActeursView):
         cache_key = self._get_cache_key_for_acteurs()
         cached_result = cache.get(cache_key)
 
-        if cached_result is not None:
+        if not settings.DEBUG and cached_result is not None:
             # Return cached bbox and acteurs
             return cached_result
 
