@@ -145,6 +145,12 @@ export default class extends Controller<HTMLElement> {
 - `maplibre-gl`: Mapping
 - `@gouvfr/dsfr`: Frontend Design System
 
+### API
+
+- `NinjaAPI` : Build api and its documentation
+
+details about how build and test API can be found here : [api.AGENTS.md](./api.AGENTS.md)
+
 ## 🚀 Development Workflow
 
 1. Frontend modifications:

@@ -13,5 +13,5 @@ data/README.md
 frontend/README.md
 iframe/README.md
 opendata/README.md
-api_stats/README.md
+apis/README.md
 ```
