@@ -60,10 +60,17 @@ def component_docs(md_file_path):
     return decorator
 
 
+<<<<<<< HEAD
 class IframeForm(forms.Form):
     iframe = forms.BooleanField(
         label="Version iframe",
         help_text="Afficher la version iframe de la page",
+=======
+class FooterForm(forms.Form):
+    iframe = forms.BooleanField(
+        label="Version iframe",
+        help_text="Afficher la version iframe du footer",
+>>>>>>> b4dbdab8 (fix logos)
         initial=False,
         required=False,
     )
@@ -330,9 +337,15 @@ class ComponentsPreview(LookbookPreview):
     def logo_homepage(self, **kwargs):
         return render_to_string("ui/components/logo/homepage.html")
 
+<<<<<<< HEAD
     @component_docs("ui/components/footer/combined_logos.md")
     def combined_logos(self, **kwargs):
         return render_to_string("ui/components/footer/combined_logos.html")
+=======
+    @component_docs("ui/components/logos/logos.md")
+    def logos(self, **kwargs):
+        return render_to_string("ui/components/logos/logos.html")
+>>>>>>> b4dbdab8 (fix logos)
 
     @component_docs("ui/components/produit/legacy_heading.md")
     def produit_legacy_heading(self, **kwargs):
@@ -438,7 +451,11 @@ class ComponentsPreview(LookbookPreview):
 
         return default_html + formulaire_html
 
+<<<<<<< HEAD
     @register_form_class(IframeForm)
+=======
+    @register_form_class(FooterForm)
+>>>>>>> b4dbdab8 (fix logos)
     @component_docs("ui/components/footer/footer.md")
     def footer(self, iframe=False, **kwargs):
         # Convert string values to boolean
@@ -448,6 +465,7 @@ class ComponentsPreview(LookbookPreview):
         context = {"iframe": iframe}
         return render_to_string("ui/components/footer/footer.html", context)
 
+<<<<<<< HEAD
     @register_form_class(IframeForm)
     @component_docs("ui/components/header/header.md")
     def header(self, iframe=False, **kwargs):
@@ -469,6 +487,8 @@ class ComponentsPreview(LookbookPreview):
         context = {"heading": "Faites découvrir ce site"}
         return render_to_string("ui/snippets/share_and_embed.html", context)
 
+=======
+>>>>>>> b4dbdab8 (fix logos)
 
 class FiltresPreview(LookbookPreview):
     """
@@ -593,15 +613,37 @@ class FormulairesPreview(LookbookPreview):
         return template.render(Context(context))
 
 
+class IframeForm(forms.Form):
+    iframe = forms.BooleanField(
+        label="Version iframe",
+        help_text="Afficher la version iframe de la page",
+        initial=False,
+        required=False,
+    )
+
+
 class PagesPreview(LookbookPreview):
     @register_form_class(IframeForm)
     def home(self, iframe=False, **kwargs):
+<<<<<<< HEAD
         if isinstance(iframe, str):
             iframe = iframe.lower() == "true"
 
         context = {
             "request": None,
             "page": get_homepage(),
+=======
+        # Convert string values to boolean
+        if isinstance(iframe, str):
+            iframe = iframe.lower() == "true"
+
+        factory = RequestFactory()
+        request = factory.get("/")
+        request.iframe = iframe
+
+        context = {
+            "request": request,
+>>>>>>> b4dbdab8 (fix logos)
             "ASSISTANT": {"faites_decouvrir_ce_site": "Faites découvrir ce site !"},
             "iframe": iframe,
         }
@@ -615,6 +657,7 @@ class PagesPreview(LookbookPreview):
 
         factory = RequestFactory()
         request = factory.get("/")
+<<<<<<< HEAD
 
         context = {
             "object": Synonyme.objects.first(),
@@ -622,6 +665,11 @@ class PagesPreview(LookbookPreview):
             "iframe": iframe,
         }
 
+=======
+        request.iframe = iframe
+
+        context = {"object": Synonyme.objects.first(), "request": request}
+>>>>>>> b4dbdab8 (fix logos)
         return render_to_string("ui/pages/produit.html", context)
 
     @register_form_class(IframeForm)
@@ -633,6 +681,10 @@ class PagesPreview(LookbookPreview):
         acteur = DisplayedActeur.objects.first()
         factory = RequestFactory()
         request = factory.get("/")
+<<<<<<< HEAD
+=======
+        request.iframe = iframe
+>>>>>>> b4dbdab8 (fix logos)
 
         context = {
             "object": acteur,
@@ -644,6 +696,27 @@ class PagesPreview(LookbookPreview):
         return render_to_string("ui/pages/acteur.html", context)
 
 
+<<<<<<< HEAD
+=======
+class SnippetsPreview(LookbookPreview):
+    @component_docs("ui/components/header/header.md")
+    def header(self, **kwargs):
+        context = {"request": None}
+        return render_to_string("ui/components/header/header.html", context)
+
+    def suggestions(self, **kwargs):
+        context = {
+            "heading": "Coucou",
+            "suggestions": [("coucou", "google.fr"), ("youpi", "google.fr")],
+        }
+        return render_to_string("ui/components/suggestions/suggestions.html", context)
+
+    def share_and_embed(self, **kwargs):
+        context = {"heading": "Faites découvrir ce site"}
+        return render_to_string("ui/snippets/share_and_embed.html", context)
+
+
+>>>>>>> b4dbdab8 (fix logos)
 class IframePreview(LookbookPreview):
     def carte(self, **kwargs):
         """
