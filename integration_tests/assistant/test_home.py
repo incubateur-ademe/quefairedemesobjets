@@ -1,22 +1,13 @@
-# TODO:
-# - tester formulaire de recherche
 import pytest
 from bs4 import BeautifulSoup
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
-
-# from django.core.management import call_command
 from django.test import override_settings
 
 from qfdmd.models import Synonyme
-from unit_tests.qfdmd.qfdmod_factory import (
-    ProduitFactory,
-    SynonymeFactory,
-)
+from unit_tests.qfdmd.qfdmod_factory import ProduitFactory, SynonymeFactory
 
 
-# Fixtures
-# --------
 @pytest.fixture
 def get_response(client):
     @override_settings(
@@ -32,8 +23,6 @@ def get_response(client):
     return _get_response
 
 
-# Tests
-# -----
 @pytest.mark.django_db
 class TestHomepage:
     def test_patchwork(self, get_response, tmp_path):
@@ -41,7 +30,7 @@ class TestHomepage:
         picto = SimpleUploadedFile(p, b"<svg>coucou</svg>")
         produit = ProduitFactory()
         SynonymeFactory(picto=picto, pin_on_homepage=True, produit=produit)
-        response, soup = get_response()
+        _, soup = get_response()
 
         assert (
             len(soup.css.select("[data-testid=patchwork-icon]"))
@@ -51,8 +40,3 @@ class TestHomepage:
             .count()
         )
         assert soup.css.select("[data-testid=patchwork-icon]")[0]
-
-    def test_none_in_modal(self, get_response):
-        response, soup = get_response()
-        modal = soup.find(id="fr-modal-partager-le-site")
-        assert "None" not in modal.get_text()

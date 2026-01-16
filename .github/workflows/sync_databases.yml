@@ -49,7 +49,7 @@ jobs:
           curl -O https://cli-dl.scalingo.com/install && bash install
       - name: Login Scalingo CLI
         run: scalingo login --api-token "${DUPLICATE_API_TOKEN}"
-      - name: Use CLI
+      - name: Use Scaleway CLI
         uses: scaleway/action-scw@be2696f261325a78354eda14988c80405f33e082
         with:
           save-config: true
