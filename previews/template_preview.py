@@ -60,10 +60,10 @@ def component_docs(md_file_path):
     return decorator
 
 
-class FooterForm(forms.Form):
+class IframeForm(forms.Form):
     iframe = forms.BooleanField(
         label="Version iframe",
-        help_text="Afficher la version iframe du footer",
+        help_text="Afficher la version iframe de la page",
         initial=False,
         required=False,
     )
@@ -265,12 +265,10 @@ class ComponentsPreview(LookbookPreview):
             "carte_config": carte_config,
             "sc_id": displayed_proposition_service.sous_categories.first().id,
         }
-        template = Template(
-            """
+        template = Template("""
             {% load carte_tags %}
             {% acteur_pinpoint_tag acteur=acteur direction=direction action_list=action_list carte=carte carte_config=carte_config sous_categorie_id=sc_id force_visible=True %}
-            """
-        )
+            """)
         return template.render(Context(context))
 
     def acteur_pinpoint_multiple(self, **kwargs):
@@ -295,8 +293,7 @@ class ComponentsPreview(LookbookPreview):
             "acteur_1": acteur_1,
             "acteur_2": acteur_2,
         }
-        template = Template(
-            """
+        template = Template("""
             {% load carte_tags %}
             <div class="qf-flex qf-gap-4 qf-p-4" data-controller="map">
                 <div data-testid="pinpoint-1">
@@ -306,8 +303,7 @@ class ComponentsPreview(LookbookPreview):
                     {% acteur_pinpoint_tag acteur=acteur_2 %}
                 </div>
             </div>
-            """
-        )
+            """)
         return template.render(Context(context))
 
     @component_docs("ui/components/button.md")
@@ -385,12 +381,10 @@ class ComponentsPreview(LookbookPreview):
         return render_to_string("ui/components/label_qualite/dsfr_label.html", context)
 
     def label_qualite(self, **kwargs):
-        template = Template(
-            """
+        template = Template("""
             {% load acteur_tags %}
             {% acteur_label %}
-            """
-        )
+            """)
         context = {
             "object": DisplayedActeur.objects.filter(
                 labels__code__in=["bonusrepar"],
@@ -414,27 +408,23 @@ class ComponentsPreview(LookbookPreview):
         }
 
         # Render both versions to show the difference
-        default_html = Template(
-            """
+        default_html = Template("""
             {% load acteur_tags %}
             <div style="padding: 1rem;">
                 <h3>Service tag - default (carte/list/acteur detail)</h3>
                 <p>Uses action.groupe_action - is_formulaire is not set (defaults to False)</p>
                 {% service_tag text=action.libelle action=action %}
             </div>
-            """
-        ).render(Context(context_default))
+            """).render(Context(context_default))
 
-        formulaire_html = Template(
-            """
+        formulaire_html = Template("""
             {% load acteur_tags %}
             <div style="padding: 1rem;">
                 <h3>Service tag - formulaire mode</h3>
                 <p>Uses action directly with reduced opacity - is_formulaire=True</p>
                 {% service_tag text=action.libelle action=action %}
             </div>
-            """
-        ).render(Context(context_formulaire))
+            """).render(Context(context_formulaire))
 
         return default_html + formulaire_html
 
@@ -554,15 +544,13 @@ class FormulairesPreview(LookbookPreview):
         form1 = LegendeForm(prefix="1")
         form2 = LegendeForm(prefix="2")
 
-        template = Template(
-            """
+        template = Template("""
             {% load turbo_tags %}
             <form>
                 {% include "ui/components/modals/filtres.html" with filtres_form=form1 id="filtres-legende" %}
                 {% include "ui/components/modals/filtres.html" with filtres_form=form2 id="filtres-legende-mobile" %}
             </form>
-            """
-        )
+            """)
         context = {"form1": form1, "form2": form2}
         return template.render(Context(context))
 
@@ -591,15 +579,6 @@ class FormulairesPreview(LookbookPreview):
         template = Template("{{ form }}")
         context = {"form": form}
         return template.render(Context(context))
-
-
-class IframeForm(forms.Form):
-    iframe = forms.BooleanField(
-        label="Version iframe",
-        help_text="Afficher la version iframe de la page",
-        initial=False,
-        required=False,
-    )
 
 
 class PagesPreview(LookbookPreview):
@@ -766,8 +745,7 @@ class IframePreview(LookbookPreview):
         """
 
         template = Template(
-            f"<script src='{base_url}/static/iframe.js'"
-            """
+            f"<script src='{base_url}/static/iframe.js'" """
                 data-max_width="100%"
                 data-height="720px"
                 data-direction="jai"
