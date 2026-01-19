@@ -448,6 +448,30 @@ class ComponentsPreview(LookbookPreview):
         context = {"iframe": iframe}
         return render_to_string("ui/components/footer/footer.html", context)
 
+<<<<<<< HEAD
+=======
+    @register_form_class(IframeForm)
+    @component_docs("ui/components/header/header.md")
+    def header(self, iframe=False, **kwargs):
+        # Convert string values to boolean
+        if isinstance(iframe, str):
+            iframe = iframe.lower() == "true"
+
+        context = {"request": None, "iframe": iframe}
+        return render_to_string("ui/components/header/header.html", context)
+
+    def suggestions(self, **kwargs):
+        context = {
+            "heading": "Coucou",
+            "suggestions": [("coucou", "google.fr"), ("youpi", "google.fr")],
+        }
+        return render_to_string("ui/components/suggestions/suggestions.html", context)
+
+    def share_and_embed(self, **kwargs):
+        context = {"heading": "Faites découvrir ce site"}
+        return render_to_string("ui/snippets/share_and_embed.html", context)
+
+>>>>>>> 35a34c3d (Hide later the search)
 
 class FiltresPreview(LookbookPreview):
     """
@@ -623,6 +647,7 @@ class PagesPreview(LookbookPreview):
         return render_to_string("ui/pages/acteur.html", context)
 
 
+<<<<<<< HEAD
 class SnippetsPreview(LookbookPreview):
     @component_docs("ui/components/header/header.md")
     def header(self, **kwargs):
@@ -641,6 +666,8 @@ class SnippetsPreview(LookbookPreview):
         return render_to_string("ui/snippets/share_and_embed.html", context)
 
 
+=======
+>>>>>>> 35a34c3d (Hide later the search)
 class IframePreview(LookbookPreview):
     def carte(self, **kwargs):
         """
