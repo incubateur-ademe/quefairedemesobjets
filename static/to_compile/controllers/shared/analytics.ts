@@ -172,9 +172,9 @@ export default class extends Controller<HTMLElement> {
     // First, try to get the stored referrer from sessionStorage
     // This ensures we don't lose it on subsequent navigations
     const storedReferrer = sessionStorage.getItem(IFRAME_REFERRER_SESSION_KEY)
-    // if (storedReferrer) {
-    //   referrer = storedReferrer
-    // }
+    if (storedReferrer) {
+      referrer = storedReferrer
+    }
 
     // Check if the referrer was passed via URL parameter from the iframe script
     // This is the most reliable method as it captures the full parent URL including query params
