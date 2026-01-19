@@ -210,9 +210,31 @@ class ProduitAdmin(
     inlines = [SynonymeInline, LienInline]
     exclude = ("infotri",)
     ordering = ["-modifie_le"]
+    readonly_fields = ["display_sous_categories"]
 
     def get_wagtail_page(self, obj):
         return obj.next_wagtail_page
+
+    def display_sous_categories(self, obj):
+        """Display sous_categories with links to their admin pages."""
+        if obj.pk is None:
+            return "-"
+
+        sous_categories = obj.sous_categories.all()
+        if not sous_categories:
+            return "-"
+
+        links = []
+        for sc in sous_categories:
+            url = reverse(
+                "admin:qfdmo_souscategorieobjet_change",
+                args=[sc.pk],
+            )
+            links.append(f'<a href="{url}">{sc.libelle}</a>')
+
+        return format_html("<br>".join(links))
+
+    display_sous_categories.short_description = "Sous-catégories"
 
 
 @admin.register(Lien)
