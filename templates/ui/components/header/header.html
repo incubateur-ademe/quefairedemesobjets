@@ -3,7 +3,6 @@
 {% load i18n menu_tags static %}
 
 {% block header_search %}
-  {% translate "Search" as search_label %}
   <div class="fr-header__search fr-modal" id="modal-search">
     <div class="fr-container fr-container-lg--fluid">
       {% translate "Close" as close_label %}
@@ -19,6 +18,7 @@
 {% endblock header_search %}
 
 {% block burger_menu %}
+  {% translate "Search" as search_label %}
   <div class="fr-header__navbar">
     <button class="fr-btn--search fr-btn"
             data-fr-opened="false"
