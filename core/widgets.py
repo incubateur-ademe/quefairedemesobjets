@@ -6,6 +6,24 @@ from django.urls import NoReverseMatch, reverse
 
 
 class NextAutocompleteInput(forms.TextInput):
+    """
+    Autocomplete input widget with dynamic search capabilities.
+
+    Usage:
+    1. By subclassing (recommended for reusable widgets):
+        class MyAutocomplete(NextAutocompleteInput):
+            search_view = "my_search_view"
+            limit = 10
+            show_on_focus = True
+    2. By passing parameters (for one-off usage):
+        widget = NextAutocompleteInput(
+            search_view="my_search_view",
+            limit=10,
+            show_on_focus=True
+        )
+
+    """
+
     template_name = "ui/forms/widgets/autocomplete/input.html"
 
     # Class attributes for configuration (can be overridden in subclasses)
@@ -24,15 +42,12 @@ class NextAutocompleteInput(forms.TextInput):
         *args,
         **kwargs,
     ):
-        # Use instance parameters if provided, otherwise fall back to class attributes
-        self.search_view = search_view if search_view is not None else self.search_view
-        self.limit = limit if limit is not None else self.limit
-        self.display_value = (
-            display_value if display_value is not None else self.display_value
-        )
-        self.show_on_focus = (
-            show_on_focus if show_on_focus is not None else self.show_on_focus
-        )
+        # Override class attributes with instance parameters if provided
+        for attr in ("search_view", "limit", "display_value", "show_on_focus"):
+            value = locals()[attr]
+            if value is not None:
+                setattr(self, attr, value)
+
         self.turbo_frame_id = str(uuid.uuid4())
         self.wrapper_attrs = wrapper_attrs or {}
 
