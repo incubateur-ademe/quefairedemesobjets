@@ -20,13 +20,6 @@ module.exports = {
     "sm:qf-w-[400px]",
     "qf-top-3/4",
     "qf-scale-115",
-    // Autocomplete styling for focus states
-    "focus:qf-bg-blue-france-sun-113-625",
-    "focus:qf-text-white",
-    "focus-within:qf-bg-blue-france-sun-113-625",
-    "focus-within:qf-text-white",
-    "aria-[selected=true]:qf-bg-blue-france-sun-113-625",
-    "aria-[selected=true]:qf-text-white",
 
     {
       pattern: new RegExp(`qf-(text|border|bg)-(${usedColors.join("|")})`),
