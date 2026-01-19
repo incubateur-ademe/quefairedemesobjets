@@ -15,6 +15,7 @@ from wagtail.admin.viewsets.model import ModelViewSet
 from wagtail.models import Page
 
 from core.views import static_file_content_from
+from qfdmd.forms import SearchForm
 from qfdmd.models import (
     Bonus,
     Produit,
@@ -88,8 +89,6 @@ class AutocompleteHomeSearchView(ListView):
 
 
 def search_view(request) -> HttpResponse:
-    from qfdmd.forms import SearchForm
-
     prefix_key = next(
         (key for key in request.GET.dict().keys() if key.endswith("-id")), ""
     )
