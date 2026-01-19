@@ -45,10 +45,15 @@ def global_context(request) -> dict:
 
     header_search_form = SearchForm(prefix="header", initial={"id": "header"})
     home_search_form = SearchForm(prefix="home", initial={"id": "home"})
+    # Skip links for accessibility (DSFR component)
+    skiplinks = [
+        {"link": "#main-content", "label": "Contenu"},
+    ]
 
     return {
         **base,
         "header_search_form": header_search_form,
         "home_search_form": home_search_form,
+        "skiplinks": skiplinks,
         **constants.ASSISTANT,
     }
