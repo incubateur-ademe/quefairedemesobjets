@@ -23,20 +23,20 @@ repos:
       - id: ruff
         name: ruff (lint)
         entry: uv run ruff check
-        language: system
+        language: python
         types: [python]
         args: [--fix]
       # Black hook
       - id: black
         name: black (format)
         entry: uv run black
-        language: system
+        language: python
         types: [python]
       # Djade hook
       - id: djade
         name: djade
         entry: uv run djade
-        language: system
+        language: python
         types: [python]
         args: [--target-version, "5.1"]
       # Prettier hook
