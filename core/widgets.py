@@ -15,6 +15,7 @@ class NextAutocompleteInput(forms.TextInput):
             search_view = "my_search_view"
             limit = 10
             show_on_focus = True
+
     2. By passing parameters (for one-off usage):
         widget = NextAutocompleteInput(
             search_view="my_search_view",
@@ -27,27 +28,29 @@ class NextAutocompleteInput(forms.TextInput):
     template_name = "ui/forms/widgets/autocomplete/input.html"
 
     # Class attributes for configuration (can be overridden in subclasses)
-    search_view = None
-    limit = 5
-    display_value = False
-    show_on_focus = False
+    search_view: str | None = None
+    limit: int = 5
+    display_value: bool = False
+    show_on_focus: bool = False
 
     def __init__(
         self,
-        search_view=None,
-        limit=None,
-        display_value=None,
-        show_on_focus=None,
-        wrapper_attrs=None,
+        search_view: str | None = None,
+        limit: int | None = None,
+        display_value: bool | None = None,
+        show_on_focus: bool | None = None,
+        wrapper_attrs: dict | None = None,
         *args,
         **kwargs,
     ):
-        # Override class attributes with instance parameters if provided
-        for attr in ("search_view", "limit", "display_value", "show_on_focus"):
-            value = locals()[attr]
-            if value is not None:
-                setattr(self, attr, value)
-
+        # Use instance parameters if provided, otherwise fall back to class attributes
+        self.limit = limit if limit is not None else self.limit
+        self.display_value = (
+            display_value if display_value is not None else self.display_value
+        )
+        self.show_on_focus = (
+            show_on_focus if show_on_focus is not None else self.show_on_focus
+        )
         self.turbo_frame_id = str(uuid.uuid4())
         self.wrapper_attrs = wrapper_attrs or {}
 
