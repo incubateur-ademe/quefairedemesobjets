@@ -122,10 +122,11 @@ function processDatasetAttributes(
     urlParams.set(SCRIPT_MODE_PARAM, "1")
   }
 
-  // Capture the full referrer URL and store it in a data attribute
+  // Capture the full referrer URL and pass it as a URL parameter (base64 encoded)
   // This allows the analytics controller to track the parent page URL including query params
   const fullReferrer = captureFullReferrer()
-  iframeExtraAttributes["data-referrer"] = fullReferrer
+  const encodedReferrer = btoa(fullReferrer)
+  urlParams.set("ref", encodedReferrer)
 
   // Process all dataset attributes in a single loop
   for (const [key, value] of Object.entries(scriptTag.dataset)) {

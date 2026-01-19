@@ -952,9 +952,7 @@ class TestsPreview(LookbookPreview):
     """
 
     def t_1_referrer(self, **kwargs):
-        return render_to_string(
-            "ui/tests/t_1_referrer.html",
-        )
+        return render_to_string("ui/tests/t_1_referrer.html", {"base_url": base_url})
 
     def t_2_carte_mode_liste_switch(self, **kwargs):
         """Test switching between carte and liste modes with bounding box"""
