@@ -202,7 +202,7 @@ class ProduitAdmin(
     admin.ModelAdmin,
 ):
     resource_classes = [ProduitResource, KoumoulProduitResource]
-    list_display = ("nom", "id", "modifie_le")
+    list_display = ("nom", "id", "display_sous_categories", "modifie_le")
     search_fields = ["nom__unaccent", "id", "synonymes_existants__unaccent"]
     # ajout des filtres de recherche sur bdd et code
     list_filter = ["bdd", "code"]
