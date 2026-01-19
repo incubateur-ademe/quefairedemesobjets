@@ -25,6 +25,9 @@ def content(request):
 
 
 def global_context(request) -> dict:
+    home_search_form = SearchForm(prefix="home", initial={"id": "home"})
+    header_autocomplete_search_form = HeaderSearchForm(prefix="header-autocomplete")
+
     base = {
         "iframe": getattr(request, "iframe", False),
         "BASE_URL": settings.BASE_URL,
@@ -32,6 +35,8 @@ def global_context(request) -> dict:
             "is_home": request.path == reverse("qfdmd:home"),
             "POSTHOG_KEY": settings.ASSISTANT["POSTHOG_KEY"],
             "MATOMO_ID": settings.ASSISTANT["MATOMO_ID"],
+            "header_autocomplete_search_form": header_autocomplete_search_form,
+            "home_search_form": home_search_form,
         },
         "CARTE": {
             "DECLARATION_ACCESSIBILITE_PAGE_ID": settings.CARTE[
@@ -42,13 +47,7 @@ def global_context(request) -> dict:
             **constants.CARTE,
         },
     }
-
-    home_search_form = SearchForm(prefix="home", initial={"id": "home"})
-    header_autocomplete_search_form = HeaderSearchForm(prefix="header-autocomplete")
-
     return {
         **base,
-        "home_search_form": home_search_form,
-        "header_autocomplete_search_form": header_autocomplete_search_form,
         **constants.ASSISTANT,
     }
