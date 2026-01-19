@@ -89,7 +89,7 @@ function createIframeAttributes(
     id: iframeId || IFRAME_ID,
     frameBorder: "0",
     scrolling: "no",
-    allow: "geolocation; clipboard-write",
+    allow: "geolocation *; clipboard-write *",
     allowFullscreen: true,
     title: IFRAME_TITLE,
     style: `overflow: hidden; max-width: ${maxWidth}; width: 100%; height: ${height};`,
