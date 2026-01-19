@@ -58,7 +58,7 @@ class AdresseAutocompleteController extends AutocompleteController {
       this.displaySpinner()
       navigator.geolocation.getCurrentPosition(
         this.getAndStorePosition.bind(this),
-        () => this.geolocationRefused(),
+        (error) => this.handleGeolocationError(error),
       )
     } else if (!("geolocation" in navigator)) {
       console.error("geolocation is not available")
@@ -105,6 +105,33 @@ class AdresseAutocompleteController extends AutocompleteController {
       this.dispatch("formSubmit")
     }
     return toSubmit
+  }
+
+  handleGeolocationError(error: GeolocationPositionError) {
+    let message: string
+
+    switch (error.code) {
+      case error.PERMISSION_DENIED:
+        message =
+          "Vous avez refusé l'accès à votre position. Veuillez autoriser la géolocalisation dans votre navigateur ou saisir votre adresse manuellement."
+        console.error("Geolocation permission denied")
+        break
+      case error.POSITION_UNAVAILABLE:
+        message =
+          "Votre position n'est pas disponible. Veuillez saisir votre adresse manuellement."
+        console.error("Geolocation position unavailable")
+        break
+      case error.TIMEOUT:
+        message =
+          "La demande de géolocalisation a expiré. Veuillez réessayer ou saisir votre adresse manuellement."
+        console.error("Geolocation timeout")
+        break
+      default:
+        message = "La géolocalisation est inaccessible sur votre appareil"
+        console.error("Geolocation error:", error.message)
+    }
+
+    this.geolocationRefused(message)
   }
 
   geolocationRefused(message?: string) {
