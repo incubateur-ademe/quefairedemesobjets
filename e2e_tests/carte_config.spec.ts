@@ -2,22 +2,11 @@ import { expect, test } from "@playwright/test"
 import {
   getIframe,
   navigateTo,
+  openFiltresModal,
   openModal,
   searchForAurayInIframe,
   TIMEOUT,
 } from "./helpers"
-
-/**
- * Helper function to open filtres modal in iframe context and keep it open
- */
-async function openFiltresModal(iframe: ReturnType<typeof getIframe>) {
-  await openModal(iframe, {
-    buttonSelector: { role: "button", name: /Filtres/i },
-    modalDataTestId: "modal-carte:filtres",
-    modalContentSelector: 'input[name="filtres-bonus"]', // Wait for a field that's always present
-    closeModal: false, // Keep modal open so we can check fields
-  })
-}
 
 test.describe("🎛️ Configuration Carte - Paramètre Legacy Bonus", () => {
   test("Le paramètre legacy bonus=1 en iframe initialise le filtre bonus comme coché", async ({

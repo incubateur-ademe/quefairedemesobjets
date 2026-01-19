@@ -456,6 +456,15 @@ class ModalForm(forms.Form):
     )
 
 
+class BonusForm(forms.Form):
+    bonus = forms.ChoiceField(
+        label="Bonus",
+        help_text="Bonus value (0 or 1)",
+        initial="1",
+        choices=((1, "Avec filtre bonus"), (None, "Sans filtre")),
+    )
+
+
 class ModalsPreview(LookbookPreview):
     @component_docs("ui/components/modals/integration.md")
     def integration(self, **kwargs):
@@ -978,17 +987,20 @@ class TestsPreview(LookbookPreview):
             {"base_url": base_url},
         )
 
-    def t_9_bonus_legacy_parameter_iframe(self, **kwargs):
+    @register_form_class(BonusForm)
+    def t_9_bonus_legacy_parameter_iframe(self, bonus="1", **kwargs):
         """Test that legacy bonus=1 parameter in iframe URL initializes the bonus filter as checked"""
         return render_to_string(
             "ui/tests/t_9_bonus_legacy_parameter_iframe.html",
+            {"bonus": bonus},
         )
 
-    def t_10_bonus_legacy_parameter_script(self, **kwargs):
+    @register_form_class(BonusForm)
+    def t_10_bonus_legacy_parameter_script(self, bonus="1", **kwargs):
         """Test that legacy data-bonus='1' via script initializes the bonus filter as checked"""
         return render_to_string(
             "ui/tests/t_10_bonus_legacy_parameter_script.html",
-            {"base_url": base_url},
+            {"base_url": base_url, "bonus": bonus},
         )
 
     def t_11_cacher_filtre_objet(self, **kwargs):

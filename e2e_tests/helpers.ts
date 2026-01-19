@@ -566,3 +566,14 @@ export async function expectSessionStorage(
   const value = await getSessionStorageValue(page, key)
   expect(value).toBe(expectedValue)
 }
+/**
+ * Helper function to open filtres modal in iframe context and keep it open
+ */
+export async function openFiltresModal(iframe: ReturnType<typeof getIframe>) {
+  await openModal(iframe, {
+    buttonSelector: { role: "button", name: /Filtres/i },
+    modalDataTestId: "modal-carte:filtres",
+    modalContentSelector: 'input[name="filtres-bonus"]', // Wait for a field that's always present
+    closeModal: false, // Keep modal open so we can check fields
+  })
+}
