@@ -6,29 +6,6 @@ L'endpoint `/api/qfdmo/` expose une API REST permettant d'accéder aux données 
 
 L'API est construite avec `django-ninja` et suit les conventions REST. Tous les endpoints retournent des données au format JSON.
 
-## Structure de l'API
-
-L'API est organisée autour de plusieurs concepts principaux :
-
-- **Acteurs** : Les lieux (associations, entreprises, etc.) qui proposent des services
-- **Actions** : Les actions possibles sur un objet (réparer, donner, prêter, etc.)
-- **Sous-catégories** : Les catégories d'objets (vêtements, électroménager, etc.)
-- **Sources** : Les sources de données des acteurs
-- **Services** : Les types de services proposés par les acteurs
-- **Types d'acteurs** : Les catégories d'acteurs (commerce, association, etc.)
-
-## Endpoints disponibles
-
-- `GET /api/qfdmo/sources` - Liste des sources de données
-- `GET /api/qfdmo/sous-categories` - Liste des sous-catégories d'objets
-- `GET /api/qfdmo/actions` - Liste des actions possibles
-- `GET /api/qfdmo/actions/groupes` - Liste des groupes d'actions
-- `GET /api/qfdmo/acteurs/types` - Liste des types d'acteurs
-- `GET /api/qfdmo/acteurs/services` - Liste des services proposés
-- `GET /api/qfdmo/acteurs` - Recherche d'acteurs (avec pagination et filtres géographiques)
-- `GET /api/qfdmo/acteur` - Détail d'un acteur spécifique
-- `GET /api/qfdmo/autocomplete/configurateur` - Autocomplétion EPCI
-
 ## Documentation interactive
 
 Pour les détails complets de chaque endpoint (paramètres, schémas de réponse, exemples), consultez la documentation interactive Swagger/OpenAPI disponible sur `/api/docs`.

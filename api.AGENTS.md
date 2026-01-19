@@ -9,7 +9,6 @@ instance defined in `core/api.py` and mounted in `core/urls.py`.
 - Each domain app exposes a `router` that is attached to the main API.
   Current routers are:
   - `qfdmo.api` at `/api/qfdmo/`
-  - `qfdmd.api` at `/api/qfdmd/`
   - `stats.api` at `/api/stats`
 - `core/urls.py` mounts the API under the `/api/` path.
 
