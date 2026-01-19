@@ -46,15 +46,9 @@ def global_context(request) -> dict:
     home_search_form = SearchForm(prefix="home", initial={"id": "home"})
     header_autocomplete_search_form = HomeSearchForm(prefix="header-autocomplete")
 
-    # Skip links for accessibility (DSFR component)
-    skiplinks = [
-        {"link": "#main-content", "label": "Contenu"},
-    ]
-
     return {
         **base,
         "home_search_form": home_search_form,
         "header_autocomplete_search_form": header_autocomplete_search_form,
-        "skiplinks": skiplinks,
         **constants.ASSISTANT,
     }
