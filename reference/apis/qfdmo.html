@@ -3,10 +3,10 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Recherche" href="../../search.html"><link rel="prev" title="API Statistiques" href="README.html">
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Recherche" href="../../search.html"><link rel="next" title="API Statistiques publiques" href="stats.html"><link rel="prev" title="APIs" href="README.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>API Statistiques publiques - Documentation Longue Vie Aux Objets</title>
+        <title>API Que faire de mes objets - Documentation Longue Vie Aux Objets</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
@@ -292,8 +292,9 @@
 <li class="toctree-l3"><a class="reference internal" href="../opendata/politique-de-version-du-jeu-de-donnees-open-data-interne.html">Organisation interne de la gestion des versions du jeu de données Open Data</a></li>
 </ul>
 </li>
-<li class="toctree-l2 current has-children"><a class="reference internal" href="README.html">API Statistiques</a><input aria-label="Toggle navigation of API Statistiques" checked="" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
-<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">API Statistiques publiques</a></li>
+<li class="toctree-l2 current has-children"><a class="reference internal" href="README.html">APIs</a><input aria-label="Toggle navigation of APIs" checked="" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">API Que faire de mes objets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stats.html">API Statistiques publiques</a></li>
 </ul>
 </li>
 </ul>
@@ -318,7 +319,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="../../_sources/reference/api_stats/stats.md.txt" title="View this page">
+  <a class="muted-link" href="../../_sources/reference/apis/qfdmo.md.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -336,145 +337,32 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="api-statistiques-publiques">
-<h1>API Statistiques publiques<a class="headerlink" href="#api-statistiques-publiques" title="Lien vers cette rubrique">¶</a></h1>
+          <section id="api-que-faire-de-mes-objets">
+<h1>API Que faire de mes objets<a class="headerlink" href="#api-que-faire-de-mes-objets" title="Lien vers cette rubrique">¶</a></h1>
 <section id="presentation">
 <h2>Présentation<a class="headerlink" href="#presentation" title="Lien vers cette rubrique">¶</a></h2>
-<p>L’endpoint <code class="docutils literal notranslate"><span class="pre">/api/stats</span></code> permet de récupérer les statistiques publiques sur les <strong>visiteurs orientés</strong> : visiteurs ayant consulté une page d’un produit ou ayant fait une recherche sur la carte.</p>
-<p>Les données sont agrégées depuis PostHog selon la périodicité demandée.</p>
-</section>
-<section id="endpoint">
-<h2>Endpoint<a class="headerlink" href="#endpoint" title="Lien vers cette rubrique">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GET</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">stats</span>
-</pre></div>
-</div>
-</section>
-<section id="parametres-de-requete">
-<h2>Paramètres de requête<a class="headerlink" href="#parametres-de-requete" title="Lien vers cette rubrique">¶</a></h2>
-<div class="table-wrapper colwidths-auto docutils container">
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>Paramètre</p></th>
-<th class="head"><p>Type</p></th>
-<th class="head"><p>Requis</p></th>
-<th class="head"><p>Valeur par défaut</p></th>
-<th class="head"><p>Description</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">periodicity</span></code></p></td>
-<td><p>string</p></td>
-<td><p>Non</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">month</span></code></p></td>
-<td><p>Granularité de regroupement des KPI. Valeurs possibles : <code class="docutils literal notranslate"><span class="pre">day</span></code>, <code class="docutils literal notranslate"><span class="pre">week</span></code>, <code class="docutils literal notranslate"><span class="pre">month</span></code>, <code class="docutils literal notranslate"><span class="pre">year</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">since</span></code></p></td>
-<td><p>integer</p></td>
-<td><p>Non</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">null</span></code></p></td>
-<td><p>Nombre d’itérations de la période souhaitée (ex: <code class="docutils literal notranslate"><span class="pre">30</span></code> pour 30 jours si <code class="docutils literal notranslate"><span class="pre">periodicity=day</span></code>)</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-</section>
-<section id="exemples-de-requetes">
-<h2>Exemples de requêtes<a class="headerlink" href="#exemples-de-requetes" title="Lien vers cette rubrique">¶</a></h2>
-<section id="statistiques-mensuelles-par-defaut">
-<h3>Statistiques mensuelles (par défaut)<a class="headerlink" href="#statistiques-mensuelles-par-defaut" title="Lien vers cette rubrique">¶</a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>GET<span class="w"> </span>/api/stats
-</pre></div>
-</div>
-</section>
-<section id="statistiques-des-30-derniers-jours">
-<h3>Statistiques des 30 derniers jours<a class="headerlink" href="#statistiques-des-30-derniers-jours" title="Lien vers cette rubrique">¶</a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>GET<span class="w"> </span>/api/stats?periodicity<span class="o">=</span>day<span class="p">&amp;</span><span class="nv">since</span><span class="o">=</span><span class="m">30</span>
-</pre></div>
-</div>
-</section>
-<section id="statistiques-des-12-derniers-mois">
-<h3>Statistiques des 12 derniers mois<a class="headerlink" href="#statistiques-des-12-derniers-mois" title="Lien vers cette rubrique">¶</a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>GET<span class="w"> </span>/api/stats?periodicity<span class="o">=</span>month<span class="p">&amp;</span><span class="nv">since</span><span class="o">=</span><span class="m">12</span>
-</pre></div>
-</div>
-</section>
-<section id="statistiques-des-4-dernieres-semaines">
-<h3>Statistiques des 4 dernières semaines<a class="headerlink" href="#statistiques-des-4-dernieres-semaines" title="Lien vers cette rubrique">¶</a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>GET<span class="w"> </span>/api/stats?periodicity<span class="o">=</span>week<span class="p">&amp;</span><span class="nv">since</span><span class="o">=</span><span class="m">4</span>
-</pre></div>
-</div>
-</section>
-</section>
-<section id="reponse">
-<h2>Réponse<a class="headerlink" href="#reponse" title="Lien vers cette rubrique">¶</a></h2>
-<section id="format">
-<h3>Format<a class="headerlink" href="#format" title="Lien vers cette rubrique">¶</a></h3>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Visiteurs orientés : visiteurs ayant consultés une page d&#39;un produit ou ayant fait une recherche sur la carte&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;stats&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1704067200</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;iso_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-01-01T00:00:00+00:00&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1234</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1704153600</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;iso_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-01-02T00:00:00+00:00&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1456</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">  </span><span class="p">]</span>
-<span class="p">}</span>
-</pre></div>
-</div>
-</section>
-<section id="champs-de-reponse">
-<h3>Champs de réponse<a class="headerlink" href="#champs-de-reponse" title="Lien vers cette rubrique">¶</a></h3>
-<div class="table-wrapper colwidths-auto docutils container">
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>Champ</p></th>
-<th class="head"><p>Type</p></th>
-<th class="head"><p>Description</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">description</span></code></p></td>
-<td><p>string</p></td>
-<td><p>Description de la métrique retournée</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">stats</span></code></p></td>
-<td><p>array</p></td>
-<td><p>Liste des points de données, triés par date croissante</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">stats[].date</span></code></p></td>
-<td><p>integer</p></td>
-<td><p>Timestamp Unix (secondes) du début de la période</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">stats[].iso_date</span></code></p></td>
-<td><p>string</p></td>
-<td><p>Date ISO 8601 du début de la période (UTC)</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">stats[].value</span></code></p></td>
-<td><p>float</p></td>
-<td><p>Nombre de visiteurs orientés pour cette période</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-</section>
+<p>L’endpoint <code class="docutils literal notranslate"><span class="pre">/api/qfdmo/</span></code> expose une API REST permettant d’accéder aux données de la carte « Longue vie aux objets ». Cette API permet de récupérer les informations sur les acteurs (lieux de réparation, don, etc.), les actions possibles, les catégories d’objets, et de rechercher des acteurs selon différents critères.</p>
+<p>L’API est construite avec <code class="docutils literal notranslate"><span class="pre">django-ninja</span></code> et suit les conventions REST. Tous les endpoints retournent des données au format JSON.</p>
 </section>
 <section id="documentation-interactive">
 <h2>Documentation interactive<a class="headerlink" href="#documentation-interactive" title="Lien vers cette rubrique">¶</a></h2>
-<p>Cette route API est testable sur <code class="docutils literal notranslate"><span class="pre">/api/docs</span></code> qui fournit une interface Swagger/OpenAPI interactive permettant de tester l’endpoint directement depuis le navigateur.</p>
+<p>Pour les détails complets de chaque endpoint (paramètres, schémas de réponse, exemples), consultez la documentation interactive Swagger/OpenAPI disponible sur <code class="docutils literal notranslate"><span class="pre">/api/docs</span></code>.</p>
+<p>Cette interface permet de tester tous les endpoints directement depuis le navigateur.</p>
 </section>
 <section id="notes-techniques">
 <h2>Notes techniques<a class="headerlink" href="#notes-techniques" title="Lien vers cette rubrique">¶</a></h2>
 <ul class="simple">
-<li><p>Les données sont récupérées depuis PostHog via l’API Query</p></li>
-<li><p>Les dates sont normalisées au début de la période demandée (ex: début du mois pour <code class="docutils literal notranslate"><span class="pre">month</span></code>)</p></li>
-<li><p>En cas d’erreur de communication avec PostHog, l’API retourne une erreur HTTP 502</p></li>
-<li><p>Le paramètre <code class="docutils literal notranslate"><span class="pre">since</span></code> permet de limiter la période de données retournées (ex: <code class="docutils literal notranslate"><span class="pre">since=30</span></code> avec <code class="docutils literal notranslate"><span class="pre">periodicity=day</span></code> retourne les 30 derniers jours)</p></li>
+<li><p>Tous les endpoints retournent du JSON</p></li>
+<li><p>Les acteurs inactifs ne sont jamais retournés par l’API</p></li>
+<li><p>Les sources et sous-catégories non affichables sont filtrées</p></li>
+<li><p>La pagination est activée par défaut sur l’endpoint <code class="docutils literal notranslate"><span class="pre">/acteurs</span></code></p></li>
+<li><p>Les coordonnées géographiques utilisent le système WGS84 (SRID 4326)</p></li>
+<li><p>Les distances sont calculées en utilisant PostGIS</p></li>
 </ul>
+</section>
+<section id="tests">
+<h2>Tests<a class="headerlink" href="#tests" title="Lien vers cette rubrique">¶</a></h2>
+<p>Les endpoints de cette API sont couverts par des tests d’intégration dans <code class="docutils literal notranslate"><span class="pre">integration_tests/carte/test_qfdmo_api.py</span></code>.</p>
 </section>
 </section>
 
@@ -483,7 +371,15 @@
       <footer>
         
         <div class="related-pages">
-          
+          <a class="next-page" href="stats.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">API Statistiques publiques</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
           <a class="prev-page" href="README.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
@@ -491,7 +387,7 @@
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">API Statistiques</div>
+                <div class="title">APIs</div>
                 
               </div>
             </a>
@@ -525,24 +421,11 @@
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">API Statistiques publiques</a><ul>
+<li><a class="reference internal" href="#">API Que faire de mes objets</a><ul>
 <li><a class="reference internal" href="#presentation">Présentation</a></li>
-<li><a class="reference internal" href="#endpoint">Endpoint</a></li>
-<li><a class="reference internal" href="#parametres-de-requete">Paramètres de requête</a></li>
-<li><a class="reference internal" href="#exemples-de-requetes">Exemples de requêtes</a><ul>
-<li><a class="reference internal" href="#statistiques-mensuelles-par-defaut">Statistiques mensuelles (par défaut)</a></li>
-<li><a class="reference internal" href="#statistiques-des-30-derniers-jours">Statistiques des 30 derniers jours</a></li>
-<li><a class="reference internal" href="#statistiques-des-12-derniers-mois">Statistiques des 12 derniers mois</a></li>
-<li><a class="reference internal" href="#statistiques-des-4-dernieres-semaines">Statistiques des 4 dernières semaines</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#reponse">Réponse</a><ul>
-<li><a class="reference internal" href="#format">Format</a></li>
-<li><a class="reference internal" href="#champs-de-reponse">Champs de réponse</a></li>
-</ul>
-</li>
 <li><a class="reference internal" href="#documentation-interactive">Documentation interactive</a></li>
 <li><a class="reference internal" href="#notes-techniques">Notes techniques</a></li>
+<li><a class="reference internal" href="#tests">Tests</a></li>
 </ul>
 </li>
 </ul>
