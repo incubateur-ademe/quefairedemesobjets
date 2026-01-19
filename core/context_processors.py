@@ -47,7 +47,7 @@ def global_context(request) -> dict:
     home_search_form = SearchForm(prefix="home", initial={"id": "home"})
     # Skip links for accessibility (DSFR component)
     skiplinks = [
-        {"link": "#main-content", "label": "Contenu"},
+        {"link": "#content", "label": "Contenu"},
     ]
 
     return {
