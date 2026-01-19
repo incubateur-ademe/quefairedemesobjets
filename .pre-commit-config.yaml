@@ -20,19 +20,22 @@ repos:
   - repo: local
     hooks:
       # Ruff hooks
+      # Mirror https://github.com/astral-sh/ruff-pre-commit/blob/main/.pre-commit-hooks.yaml
       - id: ruff
         name: ruff (lint)
-        entry: uv run ruff check
+        entry: uv run ruff check --force-exclude
         language: python
         types: [python]
         args: [--fix]
       # Black hook
+      # Mirrors https://github.com/psf/black/blob/main/.pre-commit-hooks.yaml#L6
       - id: black
         name: black (format)
         entry: uv run black
         language: python
         types: [python]
       # Djade hook
+      # Mirrors https://github.com/adamchainz/djade-pre-commit/blob/main/.pre-commit-hooks.yaml
       - id: djade
         name: djade
         entry: uv run djade

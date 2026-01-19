@@ -16,10 +16,10 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.utils.html import format_html
 from djangoql.admin import DjangoQLSearchMixin
-from import_export import admin as import_export_admin
 from import_export import fields, resources, widgets
+from import_export.admin import ExportMixin, ImportExportMixin
 
-from core.admin import CodeLibelleModelAdmin, NotMutableMixin
+from core.admin import CodeLibelleModelAdmin, CodeLibelleModelMixin, NotMutableMixin
 from qfdmo.admin.widgets import CategorieChoiceWidget, SousCategorieChoiceWidget
 from qfdmo.models import (
     Acteur,
@@ -342,7 +342,7 @@ class ActeurResource(resources.ModelResource):
         ]
 
 
-class ActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
+class ActeurAdmin(ExportMixin, BaseActeurAdmin):
     change_form_template = "admin/acteur/change_form.html"
     modifiable = False
     ordering = ("nom",)
@@ -444,7 +444,7 @@ class CustomRevisionActeurForm(forms.ModelForm):
         return nom
 
 
-class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin):
+class RevisionActeurAdmin(ImportExportMixin, BaseActeurAdmin):
     change_form_template = "admin/revision_acteur/change_form.html"
     form = CustomRevisionActeurForm
     gis_widget = CustomOSMWidget
@@ -640,9 +640,7 @@ class PropositionServiceResource(BasePropositionServiceResource):
         model = PropositionService
 
 
-class PropositionServiceAdmin(
-    import_export_admin.ExportMixin, BasePropositionServiceAdmin
-):
+class PropositionServiceAdmin(ExportMixin, BasePropositionServiceAdmin):
     resource_classes = [PropositionServiceResource]
     search_fields = [
         "acteur__nom",
@@ -669,9 +667,7 @@ class RevisionPropositionServiceResource(BasePropositionServiceResource):
         model = RevisionPropositionService
 
 
-class RevisionPropositionServiceAdmin(
-    import_export_admin.ImportExportMixin, BasePropositionServiceAdmin
-):
+class RevisionPropositionServiceAdmin(ImportExportMixin, BasePropositionServiceAdmin):
     def sous_categorie_list(self, obj):
         return ", ".join([str(sc) for sc in obj.sous_categories.all()])
 
@@ -708,9 +704,7 @@ class DisplayedActeurResource(ActeurResource):
         model = DisplayedActeur
 
 
-class DisplayedActeurAdmin(
-    import_export_admin.ExportMixin, FinalActeurAdminMixin, BaseActeurAdmin
-):
+class DisplayedActeurAdmin(ExportMixin, FinalActeurAdminMixin, BaseActeurAdmin):
     list_display = list(BaseActeurAdmin.list_display) + ["uuid"]
     search_fields = list(BaseActeurAdmin.search_fields) + ["uuid"]
     change_form_template = "admin/acteur/change_form.html"
@@ -1072,6 +1066,29 @@ class LabelQualiteAdmin(SortableAdminMixin, CodeLibelleModelAdmin):
     )
 
 
+class SourceResource(resources.ModelResource):
+    class Meta:
+        model = Source
+        fields = (
+            "libelle",
+            "code",
+            "licence",
+            "afficher",
+        )
+
+
+class SourceAdmin(
+    DjangoQLSearchMixin,
+    CodeLibelleModelMixin,
+    ExportMixin,
+    admin.ModelAdmin,
+):
+    resource_classes = [SourceResource]
+    djangoql_completion_enabled_by_default = False
+    # Need it to displaythe switch between DjangoQL and classic search
+    search_fields = CodeLibelleModelMixin.search_fields
+
+
 admin.site.register(Acteur, ActeurAdmin)
 admin.site.register(ActeurService, CodeLibelleModelAdmin)
 admin.site.register(ActeurType, CodeLibelleModelAdmin)
@@ -1080,5 +1097,5 @@ admin.site.register(PropositionService, PropositionServiceAdmin)
 admin.site.register(RevisionActeur, RevisionActeurAdmin)
 admin.site.register(RevisionActeurParent, RevisionActeurParentAdmin)
 admin.site.register(RevisionPropositionService, RevisionPropositionServiceAdmin)
-admin.site.register(Source, CodeLibelleModelAdmin)
+admin.site.register(Source, SourceAdmin)
 admin.site.register(VueActeur, VueActeurAdmin)

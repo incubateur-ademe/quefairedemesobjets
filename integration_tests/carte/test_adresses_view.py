@@ -2,6 +2,7 @@ from urllib.parse import urlencode
 
 import pytest
 from django.contrib.gis.geos import Point
+from django.core.management import call_command
 from django.http import HttpRequest
 from django.test import RequestFactory, override_settings
 
@@ -25,6 +26,20 @@ from unit_tests.qfdmo.acteur_factory import (
 )
 from unit_tests.qfdmo.action_factory import ActionFactory, GroupeActionFactory
 from unit_tests.qfdmo.sscatobj_factory import SousCategorieObjetFactory
+
+
+@pytest.fixture(scope="session")
+def django_db_setup(django_db_setup, django_db_blocker):
+    """Load fixtures needed for the test"""
+    with django_db_blocker.unblock():
+        call_command(
+            "loaddata",
+            "produits",
+            "categories",
+            "actions",
+            "acteur_services",
+            "acteur_types",
+        )
 
 
 @pytest.fixture
