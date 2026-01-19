@@ -495,7 +495,7 @@ class FiltresForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
             )
 
         if bonus := initial_legacy_request_data.get("bonus"):
-            if bonus == "1":
+            if forms.BooleanField().to_python(bonus):
                 self.fields["bonus"].initial = True
 
 
