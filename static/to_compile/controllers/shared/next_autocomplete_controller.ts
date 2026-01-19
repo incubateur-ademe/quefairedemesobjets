@@ -99,7 +99,7 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
         // Home: Moves focus to first option (if listbox is open)
         if (this.isListboxOpenWithOptions()) {
           event.preventDefault()
-          this.setVisualFocus(0)
+          this.#setVisualFocus(0)
         }
         break
 
@@ -107,7 +107,7 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
         // End: Moves focus to last option (if listbox is open)
         if (this.isListboxOpenWithOptions()) {
           event.preventDefault()
-          this.setVisualFocus(this.optionTargets.length - 1)
+          this.#setVisualFocus(this.optionTargets.length - 1)
         }
         break
     }
@@ -128,7 +128,7 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
   openListboxAndFocus(index: number) {
     this.showListbox()
     if (this.optionTargets.length > 0) {
-      this.setVisualFocus(index)
+      this.#setVisualFocus(index)
     }
   }
 
@@ -151,10 +151,10 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
       newIndex = 0
     }
 
-    this.setVisualFocus(newIndex)
+    this.#setVisualFocus(newIndex)
   }
 
-  setVisualFocus(index: number) {
+  #setVisualFocus(index: number) {
     if (index < 0 || index >= this.optionTargets.length) {
       return
     }
