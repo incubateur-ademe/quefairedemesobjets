@@ -540,7 +540,6 @@ INSTALLED_APPS.extend(
         "wagtail.admin",
         "wagtail.contrib.typed_table_block",
         "wagtail",
-        "wagtail.contrib.routable_page",
         "modelcluster",
         "taggit",
     ]
