@@ -15,7 +15,7 @@ from dsfr.forms import DsfrBaseForm
 
 from core.constants import DEFAULT_MAP_CONTAINER_ID
 from core.widgets import (
-    HomeSearchAutocompleteInput,
+    HeaderSearchAutocompleteInput,
     SynonymeAutocompleteInput,
 )
 from infotri.forms import InfotriForm
@@ -546,7 +546,7 @@ class FormulairesPreview(LookbookPreview):
             search = forms.CharField(
                 label="Autocomplétion Recherche d'accueil",
                 required=False,
-                widget=HomeSearchAutocompleteInput(
+                widget=HeaderSearchAutocompleteInput(
                     attrs={
                         "class": "fr-input",
                         "placeholder": "pantalon, perceuse, canapé...",

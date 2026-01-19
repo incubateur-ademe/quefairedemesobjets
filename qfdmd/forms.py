@@ -10,7 +10,7 @@ from django.contrib.postgres.search import (
 from django.db.models import Case, F, Value, When
 from dsfr.forms import DsfrBaseForm
 
-from core.widgets import HomeSearchAutocompleteInput
+from core.widgets import HeaderSearchAutocompleteInput
 
 from .models import ProduitPage, Synonyme
 
@@ -79,7 +79,7 @@ class SearchForm(DsfrBaseForm):
 class HeaderSearchForm(DsfrBaseForm):
     search = forms.CharField(
         required=False,
-        widget=HomeSearchAutocompleteInput(
+        widget=HeaderSearchAutocompleteInput(
             attrs={
                 "class": "fr-input",
                 "placeholder": "pantalon, perceuse, canapé...",

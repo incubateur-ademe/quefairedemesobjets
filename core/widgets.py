@@ -75,8 +75,9 @@ class SynonymeAutocompleteInput(NextAutocompleteInput):
     limit = 5
 
 
-class HomeSearchAutocompleteInput(NextAutocompleteInput):
+class HeaderSearchAutocompleteInput(NextAutocompleteInput):
     """Autocomplete widget for homepage search."""
 
     search_view = "qfdmd:autocomplete_home_search"
+    show_on_focus = True
     limit = 10
