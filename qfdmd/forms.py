@@ -76,9 +76,8 @@ class SearchForm(DsfrBaseForm):
         )
 
 
-class HomeSearchForm(DsfrBaseForm):
+class HeaderSearchForm(DsfrBaseForm):
     search = forms.CharField(
-        label="Saisir un objet ou un déchet",
         required=False,
         widget=HomeSearchAutocompleteInput(
             attrs={
