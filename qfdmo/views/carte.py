@@ -352,7 +352,7 @@ class CarteSearchActeursView(AbstractSearchActeursView):
         cache_key = self._get_cache_key_for_acteurs()
         cached_result = cache.get(cache_key)
 
-        if not settings.DEBUG and cached_result is not None:
+        if cached_result is not None:
             # Return cached bbox and acteurs
             return cached_result
 
