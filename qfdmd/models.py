@@ -702,7 +702,7 @@ class Lien(models.Model):
 
 
 class ProduitLien(models.Model):
-    produit = models.ForeignKey(Produit, on_delete=models.CASCADE)
+    produit = models.ForeignKey(Produit, on_delete=models.CASCADE, db_index=False)
     lien = models.ForeignKey(Lien, on_delete=models.CASCADE)
     poids = models.IntegerField(
         default=0,

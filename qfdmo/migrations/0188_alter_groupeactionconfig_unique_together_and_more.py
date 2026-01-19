@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("qfdmo", "0178_epci_displayedacteur_code_commune_insee_and_more"),
+        ("qfdmo", "0187_alter_acteur_identifiant_unique_and_more"),
     ]
 
     operations = [

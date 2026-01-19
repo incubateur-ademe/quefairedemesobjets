@@ -514,6 +514,7 @@ class BaseActeur(TimestampedModel):
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
+        db_index=False,
     )
     consignes_dacces = models.TextField(
         verbose_name="Consignes d'accès",
@@ -843,7 +844,7 @@ class Acteur(BaseActeur, LatLngPropertiesMixin):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["source_id", "identifiant_externe"],
+                fields=["source", "identifiant_externe"],
                 condition=Q(statut=ActeurStatus.ACTIF),
                 name="acteur_unique_by_source_and_external_id",
             )
@@ -867,7 +868,7 @@ class Acteur(BaseActeur, LatLngPropertiesMixin):
                 "statut",
             ],
         )
-        (revisionacteur, created) = RevisionActeur.objects.get_or_create(
+        revisionacteur, created = RevisionActeur.objects.get_or_create(
             identifiant_unique=self.identifiant_unique, defaults=fields
         )
 
@@ -1107,7 +1108,7 @@ class RevisionActeur(BaseActeur, LatLngPropertiesMixin):
             }
         )
 
-        (acteur, created) = Acteur.objects.get_or_create(
+        acteur, created = Acteur.objects.get_or_create(
             identifiant_unique=self.identifiant_unique,
             defaults=default_acteur_fields,
         )
@@ -1542,6 +1543,7 @@ class PropositionService(BasePropositionService):
         on_delete=models.CASCADE,
         null=False,
         related_name="proposition_services",
+        db_index=False,
     )
 
     def __str__(self):
@@ -1565,6 +1567,7 @@ class RevisionPropositionService(BasePropositionService):
         on_delete=models.CASCADE,
         null=False,
         related_name="proposition_services",
+        db_index=False,
     )
 
     def __str__(self):

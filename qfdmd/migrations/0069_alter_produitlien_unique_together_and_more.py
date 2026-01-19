@@ -6,7 +6,10 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("qfdmd", "0066_remove_temporarysynonymemodel_page_and_more"),
+        (
+            "qfdmd",
+            "0068_alter_legacyintermediateproduitpagesynonymeexclusion_page_and_more",
+        ),
     ]
 
     operations = [
