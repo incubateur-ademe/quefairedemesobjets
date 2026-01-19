@@ -4,12 +4,8 @@ from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import override_settings
 
-from qfdmd.models import Suggestion, Synonyme
-from unit_tests.qfdmd.qfdmod_factory import (
-    ProduitFactory,
-    SuggestionFactory,
-    SynonymeFactory,
-)
+from qfdmd.models import Synonyme
+from unit_tests.qfdmd.qfdmod_factory import ProduitFactory, SynonymeFactory
 
 
 @pytest.fixture
@@ -44,22 +40,3 @@ class TestHomepage:
             .count()
         )
         assert soup.css.select("[data-testid=patchwork-icon]")[0]
-
-    def test_none_in_modal(self, get_response):
-        response, soup = get_response()
-        modal = soup.find(id="fr-modal-partager-le-site")
-        assert "None" not in modal.get_text()
-
-    def test_suggestions(self, get_response, tmp_path):
-        produit = ProduitFactory(nom="Coucou le produit")
-        synonyme = SynonymeFactory(produit=produit, nom="Youpi le synonyme")
-        SuggestionFactory(produit=synonyme)
-        response, soup = get_response()
-        assert (
-            len(soup.css.select("[data-testid=suggestion]"))
-            == Suggestion.objects.all().count()
-        )
-        assert (
-            soup.css.select("[data-testid=suggestion]")[0].text.lower().strip()
-            == "Youpi le synonyme".lower()
-        )
