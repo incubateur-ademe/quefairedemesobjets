@@ -72,10 +72,10 @@ Pour que les logs du scheduler soient stockés sur S3, les instances Scaleway so
 ```
 AIRFLOW__LOGGING__REMOTE_LOGGING=true
 AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER=s3://qfdmo-airflow-logs
-AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID=s3logs
+AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID=scalewaylogs
 AIRFLOW__LOGGING__ENCRYPT_S3_LOGS=false
 ```
 
-`s3logs` est une connection configuré dans l'interface d'Airflow
+`scalewaylogs` est une connection configuré dans l'interface d'Airflow
 
 Attention à ajouter le paramètre endpoint_url pour le stockage S3 de Scaleway
