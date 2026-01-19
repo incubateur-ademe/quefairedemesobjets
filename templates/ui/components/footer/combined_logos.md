@@ -5,7 +5,7 @@ This component displays the ADEME logo alongside the site logo (mini version). I
 ## Usage
 
 ```django
-{% include "ui/components/logo/combined_logos.html" %}
+{% include "ui/components/footer/combined_logos.html" %}
 ```
 
 ## Where it's used

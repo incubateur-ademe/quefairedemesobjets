@@ -1,8 +1,0 @@
-{% comment %}
-This tag is excluded from our automated axe accessibilty tests because
-it triggers a false positive. Its contrast is sufficient at 4.62 for
-a big title, but for some reason Axe does not detect that the text
-here is displayed in a large font-size.
-{% endcomment %}
-
-Que faire de{% if line_break %}<br>{% endif %} mes <span class="qf-text-green-menthe-sun-373-moon-652" data-disable-axe>objets</span> {% if second_line_break %}<br>{% endif %}et <span class="qf-text-green-menthe-sun-373-moon-652">déchets</span> ?
