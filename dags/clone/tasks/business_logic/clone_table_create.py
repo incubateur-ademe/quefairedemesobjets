@@ -108,7 +108,7 @@ def commands_stream_directly(
     if is_geojson:
         # For GeoJSON, stream directly using ogr2ogr with /vsistdin/
         cmd_ogr2ogr = command_ogr2ogr_import_geojson_from_stdin(table_name=table_name)
-        if str(data_endpoint).endswith(".geojson.gz"):
+        if str(data_endpoint).endswith(".gz"):
             cmd_run(
                 f"curl -s '{data_endpoint}' | gunzip | {cmd_ogr2ogr}",
                 dry_run=dry_run,
