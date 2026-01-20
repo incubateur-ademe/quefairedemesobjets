@@ -400,8 +400,8 @@ def acteur_detail(request, uuid):
         base_template = "ui/layout/turbo.html"
 
     map_form = MapForm(request.GET, prefix=MAP_FORM_PREFIX)
-    latitude = map_form["latitude"].value()
-    longitude = map_form["longitude"].value()
+    search_latitude = map_form["latitude"].value()
+    search_longitude = map_form["longitude"].value()
 
     direction = request.GET.get("direction")
 
@@ -436,22 +436,12 @@ def acteur_detail(request, uuid):
         source.afficher for source in displayed_acteur.sources.all()
     )
 
-    location = ""
-    if latitude and longitude:
-        try:
-            location = json.dumps(
-                {"latitude": float(latitude), "longitude": float(longitude)}
-            )
-        except (ValueError, TypeError):
-            location = ""
-
     context = {
         "base_template": base_template,
         "object": displayed_acteur,  # We can use object here so that switching
         # to a DetailView later will not required a template update
-        "latitude": latitude,
-        "longitude": longitude,
-        "location": location,
+        "latitude": search_latitude,
+        "longitude": search_longitude,
         "direction": direction,
         "display_labels_panel": display_labels_panel,
         "display_sources_panel": display_sources_panel,
@@ -463,10 +453,10 @@ def acteur_detail(request, uuid):
     if not ("carte" in request.GET or "with_map" in request.GET):
         context["is_formulaire"] = True
 
-    if latitude and longitude and not displayed_acteur.is_digital:
+    if search_latitude and search_longitude and not displayed_acteur.is_digital:
         context.update(
             itineraire_url=generate_google_maps_itineraire_url(
-                latitude, longitude, displayed_acteur
+                search_latitude, search_longitude, displayed_acteur
             )
         )
 
