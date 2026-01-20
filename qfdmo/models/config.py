@@ -50,7 +50,12 @@ class GroupeActionConfig(models.Model):
     )
 
     class Meta:
-        unique_together = ["carte_config", "groupe_action", "acteur_type"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["carte_config", "groupe_action", "acteur_type"],
+                name="unique_carte_config_groupe_action_acteur_type",
+            )
+        ]
 
 
 @register_snippet
