@@ -84,6 +84,6 @@
     "typescript-eslint": "^8.52.0"
   },
   "optionalDependencies": {
-    "@parcel/watcher-linux-x64-glibc": "^2.5.1"
+    "@parcel/watcher-linux-x64-glibc": "^2.5.4"
   }
 }
