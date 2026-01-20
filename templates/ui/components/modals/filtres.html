@@ -1,5 +1,5 @@
 {% extends "ui/components/modals/base.html" %}
-{% load script_tags turbo_tags %}
+{% load modal_tags script_tags turbo_tags %}
 
 {% block button_text %}
 {{ button_text|default:"Filtres" }}
@@ -14,7 +14,7 @@ Filtres
 {% endblock modal_title %}
 
 {% block modal_header %}
-{% include "ui/components/modals/infos.html" with button_extra_classes="fr-btn--sm" button_only=True %}
+{% modal_button modal_id="infos" button_text="Infos" button_extra_classes="fr-btn--secondary fr-btn--icon-left fr-icon-info-line fr-btn--sm" %}
 {% endblock modal_header %}
 
 {% block modal_content %}
@@ -41,6 +41,9 @@ Filtres
     <button type="submit" class="fr-btn" title="Valider" form="{{ form_id }}">
     Appliquer
   </button>
+</li>
+<li>
+    {% modal_button modal_id="infos" button_text="Infos" button_extra_classes="fr-btn--secondary fr-btn--icon-left fr-icon-info-line md:qf-hidden qf-w-full qf-justify-center" %}
 </li>
 {% endblock modal_footer_buttons %}
 
