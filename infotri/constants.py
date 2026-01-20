@@ -3,10 +3,10 @@
 # Categorie choices
 CATEGORIE_CHOICES = [
     ("tous", "Tous"),
-    ("chaussures", "Chaussures"),
-    ("vetement", "Linges de maison"),
     ("textile", "Textiles d'habillement"),
-]
+    ("vetement", "Linges de maison"),
+    ("chaussures", "Chaussures"),
+    ]
 
 # Consigne choices
 CONSIGNE_CHOICES = [
