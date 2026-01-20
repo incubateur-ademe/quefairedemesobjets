@@ -32,6 +32,7 @@ with DAG(
             dbt_models_refresh_commands=[
                 "dbt build --select +tag:intermediate,tag:ae",
                 "dbt build --select +tag:intermediate,tag:ban",
+                "dbt build --select +tag:intermediate,tag:laposte,tag:koumoul_epci",
             ],
         )
     ),

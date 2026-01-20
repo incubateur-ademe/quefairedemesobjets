@@ -140,4 +140,5 @@ DAG_ID_TO_CONFIG_MODEL = {
     "enrich_acteurs_rgpd": EnrichActeursRGPDConfig,
     "enrich_dbt_models_refresh": EnrichDbtModelsRefreshConfig,
     "enrich_acteurs_villes": EnrichActeursVillesConfig,
+    "enrich_acteurs_cp_ville": EnrichActeursVillesConfig,
 }
