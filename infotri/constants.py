@@ -4,8 +4,8 @@
 CATEGORIE_CHOICES = [
     ("tous", "Tous"),
     ("chaussures", "Chaussures"),
-    ("vetement", "Vêtement"),
-    ("textile", "Textile"),
+    ("vetement", "Linges de maison"),
+    ("textile", "Textiles d'habillement"),
 ]
 
 # Consigne choices
