@@ -13,6 +13,7 @@ from django.views.generic import DetailView
 
 from core.constants import DEFAULT_MAP_CONTAINER_ID, MAP_CONTAINER_ID
 from qfdmd.models import Produit
+from qfdmo.constants import MAP_FORM_PREFIX
 from qfdmo.forms import (
     ActionDirectionForm,
     AutoSubmitLegendeForm,
@@ -96,7 +97,7 @@ class CarteSearchActeursView(AbstractSearchActeursView):
         return {
             "map": {
                 "form": MapForm,
-                "prefix": "map",
+                "prefix": MAP_FORM_PREFIX,
             },
             "view_mode": {
                 "form": ViewModeForm,

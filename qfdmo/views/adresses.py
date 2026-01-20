@@ -19,6 +19,8 @@ from django.views.generic.edit import FormView
 from wagtail.query import Any
 
 from qfdmd.models import Synonyme
+from qfdmo.constants import MAP_FORM_PREFIX
+from qfdmo.forms import MapForm
 from qfdmo.geo_api import retrieve_epci_geojson_from_api_or_cache
 from qfdmo.map_utils import (
     sanitize_frontend_bbox,
@@ -397,8 +399,10 @@ def acteur_detail(request, uuid):
     if request.headers.get("Turbo-Frame"):
         base_template = "ui/layout/turbo.html"
 
-    latitude = request.GET.get("map-latitude")
-    longitude = request.GET.get("map-longitude")
+    map_form = MapForm(request.GET, prefix=MAP_FORM_PREFIX)
+    latitude = map_form["latitude"].value()
+    longitude = map_form["longitude"].value()
+
     direction = request.GET.get("direction")
 
     try:
