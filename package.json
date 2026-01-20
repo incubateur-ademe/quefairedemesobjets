@@ -59,7 +59,7 @@
     "@playwright/test": "^1.57.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@types/jest": "^30.0.0",
-    "@types/lodash": "^4.17.21",
+    "@types/lodash": "^4.17.23",
     "@types/node": "^25.0.3",
     "@typescript-eslint/eslint-plugin": "^8.52.0",
     "buffer": "^6.0.3",
