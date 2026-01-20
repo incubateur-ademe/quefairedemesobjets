@@ -6,7 +6,7 @@ CATEGORIE_CHOICES = [
     ("textile", "Textiles d'habillement"),
     ("vetement", "Linges de maison"),
     ("chaussures", "Chaussures"),
-    ]
+]
 
 # Consigne choices
 CONSIGNE_CHOICES = [
