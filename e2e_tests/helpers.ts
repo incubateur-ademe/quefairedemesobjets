@@ -99,6 +99,10 @@ export async function searchForAurayInIframe(
   parentSelector?: string,
 ) {
   await searchAddress(iframe, "Auray", "carte", { parentSelector })
+
+  // Wait for the loading indicator to appear and disappear
+  // This ensures the search request has completed
+  await waitForLoadingComplete(iframe)
 }
 
 export async function searchDummyAdresse(page: Page) {
@@ -352,23 +356,86 @@ export const mockApiAdresse = async (page: Page) =>
 /**
  * Modal/Dialog helpers
  */
+/**
+ * Generic function to open a modal in the page or iframe
+ *
+ * @param page - Page or FrameLocator context
+ * @param options - Configuration options
+ * @param options.buttonSelector - Optional: Direct selector for button (e.g., { role: 'button', name: /Filtres/i })
+ * @param options.parentTestId - Optional: Parent test ID to scope the button search
+ * @param options.buttonDataTestId - Optional: Button's data-testid attribute
+ * @param options.modalDataTestId - Modal's data-testid attribute
+ * @param options.modalContentSelector - Optional: Selector to wait for modal content
+ * @param options.closeModal - Whether to close the modal after opening (default: true)
+ * @param options.timeout - Timeout for visibility checks (default: TIMEOUT.DEFAULT)
+ */
+export async function openModal(
+  page: Page | FrameLocator,
+  options: {
+    buttonSelector?: { role: string; name: RegExp | string }
+    parentTestId?: string
+    buttonDataTestId?: string
+    modalDataTestId: string
+    modalContentSelector?: string
+    closeModal?: boolean
+    timeout?: number
+  },
+) {
+  const {
+    buttonSelector,
+    parentTestId,
+    buttonDataTestId,
+    modalDataTestId,
+    modalContentSelector = `[data-testid="${modalDataTestId}"] .fr-modal__content h2`,
+    closeModal = true,
+    timeout = TIMEOUT.DEFAULT,
+  } = options
+
+  // Click the button to open modal
+  if (buttonSelector) {
+    // Use role-based selector (more resilient)
+    const button = page.getByRole(buttonSelector.role as any, {
+      name: buttonSelector.name,
+    })
+    await expect(button.first()).toBeVisible({ timeout: TIMEOUT.SHORT })
+    await button.first().click()
+  } else if (parentTestId && buttonDataTestId) {
+    // Use test ID-based selector (more specific)
+    await page.getByTestId(parentTestId).getByTestId(buttonDataTestId).click()
+  } else {
+    throw new Error(
+      "Either buttonSelector or (parentTestId + buttonDataTestId) must be provided",
+    )
+  }
+
+  // Wait for modal to be visible
+  await expect(page.locator(modalContentSelector)).toBeVisible({ timeout })
+
+  // Optionally close the modal
+  if (closeModal) {
+    await page
+      .locator(`[data-testid="${modalDataTestId}"] .fr-modal__header button`)
+      .click()
+    await expect(page.locator(modalContentSelector)).toBeHidden({ timeout })
+  }
+}
+
+/**
+ * Legacy function - kept for backward compatibility
+ * Use openModal instead for new code
+ */
 export async function openAdvancedFilters(
-  page: Page,
+  page: Page | FrameLocator,
   parentTestId = "form-content",
   buttonDataTestId = "advanced-filters",
   modalDataTestId = "advanced-filters-modal",
 ) {
-  await page.getByTestId(parentTestId).getByTestId(buttonDataTestId).click()
-
-  await expect(
-    page.locator(`[data-testid="${modalDataTestId}"] .fr-modal__content h2`),
-  ).toBeInViewport()
-  await page
-    .locator(`[data-testid="${modalDataTestId}"] .fr-modal__header button`)
-    .click()
-  await expect(
-    page.locator(`[data-testid="${modalDataTestId}"] .fr-modal__content h2`),
-  ).toBeHidden()
+  await openModal(page, {
+    parentTestId,
+    buttonDataTestId,
+    modalDataTestId,
+    closeModal: true,
+  })
 }
 
 /**
@@ -498,4 +565,15 @@ export async function expectSessionStorage(
 ) {
   const value = await getSessionStorageValue(page, key)
   expect(value).toBe(expectedValue)
+}
+/**
+ * Helper function to open filtres modal in iframe context and keep it open
+ */
+export async function openFiltresModal(iframe: ReturnType<typeof getIframe>) {
+  await openModal(iframe, {
+    buttonSelector: { role: "button", name: /Filtres/i },
+    modalDataTestId: "modal-carte:filtres",
+    modalContentSelector: 'input[name="filtres-bonus"]', // Wait for a field that's always present
+    closeModal: false, // Keep modal open so we can check fields
+  })
 }
