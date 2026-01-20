@@ -7,7 +7,7 @@ from django.utils.html import format_html
 from import_export import fields, resources
 from import_export.admin import ImportExportModelAdmin
 
-from qfdmd.models import Lien, Produit, Suggestion, Synonyme
+from qfdmd.models import Lien, Produit, Synonyme
 
 
 class LienResource(resources.ModelResource):
@@ -125,11 +125,6 @@ class ProduitInline(admin.StackedInline):
     model = Produit.liens.through
     autocomplete_fields = ["produit"]
     extra = 0
-
-
-@admin.register(Suggestion)
-class SuggestionAdmin(admin.ModelAdmin):
-    autocomplete_fields = ["produit"]
 
 
 class MoveFieldsToFirstPositionMixin:
