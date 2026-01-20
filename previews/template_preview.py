@@ -16,7 +16,7 @@ from dsfr.forms import DsfrBaseForm
 from core.constants import DEFAULT_MAP_CONTAINER_ID
 from infotri.forms import InfotriForm
 from qfdmd.forms import SearchForm
-from qfdmd.models import Suggestion, Synonyme
+from qfdmd.models import Synonyme
 from qfdmo.forms import LegendeForm, NextAutocompleteInput, ViewModeForm
 from qfdmo.models.acteur import (
     ActeurType,
@@ -552,22 +552,6 @@ class PagesPreview(LookbookPreview):
     def home(self, **kwargs):
         context = {
             "request": None,
-            "object_list": [
-                Suggestion(produit=Synonyme.objects.first()),
-                Suggestion(produit=Synonyme.objects.last()),
-            ],
-            "accordion": {
-                "id": "professionels",
-                "title": "Je suis un professionnel",
-                "content": "Actuellement, l’ensemble des recommandations ne concerne "
-                "que les particuliers. Pour des informations à destination des "
-                "professionnels, veuillez consulter le site "
-                "<a href='https://economie-circulaire.ademe.fr/dechets-activites-economiques'"
-                "target='_blank' rel='noreferrer' "
-                "title='Économie Circulaire ADEME - Nouvelle fenêtre'>"
-                "https://economie-circulaire.ademe.fr/dechets-activites-economiques"
-                "</a>.",
-            },
             "ASSISTANT": {"faites_decouvrir_ce_site": "Faites découvrir ce site !"},
         }
         return render_to_string("ui/pages/home.html", context)
