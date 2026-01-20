@@ -1,4 +1,4 @@
-{% load dsfr_tags %}
+{% load dsfr_tags modal_tags %}
 <header
     class="
     qf-bg-white qf-border-b qf-border-solid qf-border-t-0 qf-border-x-0 qf-border-grey-900
@@ -31,7 +31,7 @@
         <div class="nolegend:qf-px-2w max-nolegend:qf-flex qf-justify-between qf-items-end" id="view-mode-nav" data-testid="view-mode-nav">
             {{ forms.view_mode }}
             <div class="nolegend:qf-hidden">
-            {% include "ui/components/modals/filtres.html" with button_extra_classes="fr-btn--sm" id="filtres" button_only=True %}
+            {% modal_button modal_id="filtres" button_text="Filtres" button_extra_classes="fr-btn--secondary fr-btn--icon-left fr-icon-equalizer-line fr-btn--sm" %}
             </div>
         </div>
     </div>
