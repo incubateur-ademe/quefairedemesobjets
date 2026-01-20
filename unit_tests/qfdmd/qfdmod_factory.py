@@ -1,7 +1,7 @@
 from factory import Faker, SubFactory
 from factory.django import DjangoModelFactory as Factory
 
-from qfdmd.models import Lien, Produit, Suggestion, Synonyme
+from qfdmd.models import Lien, Produit, Synonyme
 
 
 class LienFactory(Factory):
@@ -27,11 +27,4 @@ class SynonymeFactory(Factory):
         django_get_or_create = ("nom",)
 
     nom = Faker("sentence", nb_words=3)
-    produit = SubFactory(ProduitFactory)
-
-
-class SuggestionFactory(Factory):
-    class Meta:
-        model = Suggestion
-
     produit = SubFactory(ProduitFactory)
