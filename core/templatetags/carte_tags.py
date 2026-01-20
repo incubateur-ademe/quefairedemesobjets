@@ -270,7 +270,8 @@ def acteurs_table(context, acteurs):
         "table": {
             "header": ["Nom du lieu", "Actions", "Distance", ""],
             "content": [render_acteur_table_row(acteur, context) for acteur in acteurs],
-            "extra_classes": "fr-table--mode-liste fr-table--multiline qf-w-full",
+            "extra_classes": "fr-table--mode-liste fr-table--multiline "
+            "qf-w-full fr-table--clickable-row",
         }
     }
 
