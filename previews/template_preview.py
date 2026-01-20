@@ -456,6 +456,15 @@ class ModalForm(forms.Form):
     )
 
 
+class BonusForm(forms.Form):
+    bonus = forms.ChoiceField(
+        label="Bonus",
+        help_text="Bonus value (0 or 1)",
+        initial="1",
+        choices=((1, "Avec filtre bonus"), (None, "Sans filtre")),
+    )
+
+
 class ModalsPreview(LookbookPreview):
     @component_docs("ui/components/modals/integration.md")
     def integration(self, **kwargs):
@@ -945,17 +954,14 @@ class TestsPreview(LookbookPreview):
             (-0.609453, 47.457526, -0.51571, 47.489048)
         )
 
-        carte_config, created = CarteConfig.objects.get_or_create(
+        carte_config, created = CarteConfig.objects.update_or_create(
             slug="test-bounding-box",
             defaults={
                 "nom": "Test Bounding Box",
                 "bounding_box": bounding_box_polygon,
+                "test": True,
             },
         )
-
-        if not created and carte_config.bounding_box != bounding_box_polygon:
-            carte_config.bounding_box = bounding_box_polygon
-            carte_config.save()
 
         carte_config_url = reverse(
             "qfdmo:carte_custom", kwargs={"slug": "test-bounding-box"}
@@ -979,4 +985,48 @@ class TestsPreview(LookbookPreview):
         return render_to_string(
             "ui/tests/iframe_navigation_persistence.html",
             {"base_url": base_url},
+        )
+
+    @register_form_class(BonusForm)
+    def t_9_bonus_legacy_parameter_iframe(self, bonus="1", **kwargs):
+        """Test that legacy bonus=1 parameter in iframe URL initializes the bonus filter as checked"""
+        return render_to_string(
+            "ui/tests/t_9_bonus_legacy_parameter_iframe.html",
+            {"bonus": bonus},
+        )
+
+    @register_form_class(BonusForm)
+    def t_10_bonus_legacy_parameter_script(self, bonus="1", **kwargs):
+        """Test that legacy data-bonus='1' via script initializes the bonus filter as checked"""
+        return render_to_string(
+            "ui/tests/t_10_bonus_legacy_parameter_script.html",
+            {"base_url": base_url, "bonus": bonus},
+        )
+
+    def t_11_cacher_filtre_objet(self, **kwargs):
+        """Test that CarteConfig with cacher_filtre_objet=True hides the object filter"""
+        # Create or update test CarteConfig with cacher_filtre_objet=True
+        carte_config, created = CarteConfig.objects.update_or_create(
+            slug="test-cacher-filtre-objet",
+            defaults={
+                "nom": "Test Cacher Filtre Objet",
+                "cacher_filtre_objet": True,
+                "test": True,
+            },
+        )
+
+        script = f'<script src="{base_url}/static/carte.js" data-slug="{carte_config.slug}"></script>'
+
+        return render_to_string(
+            "ui/tests/t_11_cacher_filtre_objet.html",
+            {"script": script},
+        )
+
+    def t_12_default_filtre_objet(self, **kwargs):
+        """Test that default CarteConfig shows the object filter"""
+        script = f'<script src="{base_url}/static/carte.js"></script>'
+
+        return render_to_string(
+            "ui/tests/t_12_default_filtre_objet.html",
+            {"script": script},
         )
