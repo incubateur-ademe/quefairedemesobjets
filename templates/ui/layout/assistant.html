@@ -63,7 +63,7 @@ https://github.com/numerique-gouv/sites-faciles/blob/main/templates/base.html
         {% endif %}"
         {% if STIMULUS_DEBUG %}data-stimulus-debug="true"{% endif %}
         {% block body_attrs %}{% endblock %}
-        data-controller="state analytics dsfr"
+        data-controller="state analytics"
         {# State #}
         {% if location %}
         data-map-location-value="{{ location }}"
