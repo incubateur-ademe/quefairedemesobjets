@@ -397,8 +397,8 @@ def acteur_detail(request, uuid):
     if request.headers.get("Turbo-Frame"):
         base_template = "ui/layout/turbo.html"
 
-    latitude = request.GET.get("latitude")
-    longitude = request.GET.get("longitude")
+    latitude = request.GET.get("map-latitude")
+    longitude = request.GET.get("map-longitude")
     direction = request.GET.get("direction")
 
     try:
@@ -432,12 +432,22 @@ def acteur_detail(request, uuid):
         source.afficher for source in displayed_acteur.sources.all()
     )
 
+    location = ""
+    if latitude and longitude:
+        try:
+            location = json.dumps(
+                {"latitude": float(latitude), "longitude": float(longitude)}
+            )
+        except (ValueError, TypeError):
+            location = ""
+
     context = {
         "base_template": base_template,
         "object": displayed_acteur,  # We can use object here so that switching
         # to a DetailView later will not required a template update
         "latitude": latitude,
         "longitude": longitude,
+        "location": location,
         "direction": direction,
         "display_labels_panel": display_labels_panel,
         "display_sources_panel": display_sources_panel,

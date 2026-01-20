@@ -6,13 +6,19 @@
     qf-relative"
     data-controller="map"
     data-map-initial-zoom-value="3"
-    data-map-location-value="{{ location|to_latlng_json }}"
+    {% if search_location %}
+    data-map-location-value="{{ search_location }}"
+    {% elif search_latitude and search_longitude %}
+    data-map-location-value='{"latitude": {{ search_latitude }}, "longitude": {{ search_longitude }}}'
+    {% endif %}
 >
       <div
           data-map-target="mapContainer"
           class="qf-inset-0 qf-h-full qf-relative qf-z-0"
       >
           {% acteur_pinpoint_tag acteur=acteur carte=True %}
+          {% if search_location or search_latitude and search_longitude %}
           {% include "ui/components/carte/pinpoints/home.html" %}
+          {% endif %}
       </div>
 </div>
