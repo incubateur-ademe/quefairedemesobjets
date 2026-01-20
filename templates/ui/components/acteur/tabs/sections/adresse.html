@@ -8,7 +8,7 @@ Adresse
 
 {% if request.GET.with_map %}
 <div class="max-md:qf-hidden">
-    {% include "ui/components/mini_carte/mini_carte.html" with location=object.location acteur=object %}
+    {% include "ui/components/mini_carte/mini_carte.html" with search_location=location search_latitude=latitude search_longitude=longitude acteur=object %}
 </div>
 {% endif %}
 
