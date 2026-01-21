@@ -25,7 +25,7 @@
     <header class="
     md:qf-row-start-1 md:qf-col-start-1
     max-md:qf-order-1
-    qf-flex qf-flex-col qf-gap-3w">
+    qf-flex qf-flex-col qf-gap-3w qf-items-start">
         <a
             href="{% url 'qfdmd:home' %}"
             class="qf-flex qf-gap-1v qf-justify-center qf-items-center
@@ -40,7 +40,9 @@
         <h1 class="qf-m-0">
             {{ object.nom|capfirst }}
         </h1>
-        {% include "ui/components/produit/_infotri.html" with infotri=produit.infotri %}
+        <div class="mr-auto">
+            {% include "ui/components/produit/_infotri.html" with infotri=produit.infotri %}
+        </div>
     </header>
 
     {% include "ui/snippets/share_and_embed_produit.html" with extra_classes="max-md:qf-order-last md:qf-min-w-[17rem] md:qf-row-start-1 md:qf-col-start-2" %}
