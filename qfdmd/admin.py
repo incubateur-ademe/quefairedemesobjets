@@ -8,6 +8,7 @@ from import_export import fields, resources
 from import_export.admin import ImportExportModelAdmin
 
 from qfdmd.models import Lien, Produit, Suggestion, Synonyme
+from qfdmo.models import SousCategorieObjet
 
 
 class LienResource(resources.ModelResource):
@@ -121,6 +122,22 @@ class LienInline(admin.StackedInline):
     extra = 0
 
 
+class SousCategorieInline(admin.TabularInline):
+    model = SousCategorieObjet.qfdmd_produits.through
+    extra = 0
+    verbose_name = "Sous-catégorie"
+    verbose_name_plural = "Sous-catégories"
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
 class ProduitInline(admin.StackedInline):
     model = Produit.liens.through
     autocomplete_fields = ["produit"]
@@ -202,39 +219,17 @@ class ProduitAdmin(
     admin.ModelAdmin,
 ):
     resource_classes = [ProduitResource, KoumoulProduitResource]
-    list_display = ("nom", "id", "display_sous_categories", "modifie_le")
+    list_display = ("nom", "id", "modifie_le")
     search_fields = ["nom__unaccent", "id", "synonymes_existants__unaccent"]
     # ajout des filtres de recherche sur bdd et code
     list_filter = ["bdd", "code"]
     fields_to_display_in_first_position = ["nom"]
-    inlines = [SynonymeInline, LienInline]
+    inlines = [SousCategorieInline, SynonymeInline, LienInline]
     exclude = ("infotri",)
     ordering = ["-modifie_le"]
-    readonly_fields = ["display_sous_categories"]
 
     def get_wagtail_page(self, obj):
         return obj.next_wagtail_page
-
-    def display_sous_categories(self, obj):
-        """Display sous_categories with links to their admin pages."""
-        if obj.pk is None:
-            return "-"
-
-        sous_categories = obj.sous_categories.all()
-        if not sous_categories:
-            return "-"
-
-        links = []
-        for sc in sous_categories:
-            url = reverse(
-                "admin:qfdmo_souscategorieobjet_change",
-                args=[sc.pk],
-            )
-            links.append(f'<a href="{url}">{sc.libelle}</a>')
-
-        return format_html("<br>".join(links))
-
-    display_sous_categories.short_description = "Sous-catégories"
 
 
 @admin.register(Lien)
