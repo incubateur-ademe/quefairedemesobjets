@@ -7,6 +7,7 @@ from django.utils.html import format_html
 from import_export import fields, resources
 from import_export.admin import ImportExportModelAdmin
 
+from qfdmo.models import SousCategorieObjet
 from qfdmd.models import Lien, Produit, Synonyme
 
 
@@ -121,6 +122,22 @@ class LienInline(admin.StackedInline):
     extra = 0
 
 
+class SousCategorieInline(admin.TabularInline):
+    model = SousCategorieObjet.qfdmd_produits.through
+    extra = 0
+    verbose_name = "Sous-catégorie"
+    verbose_name_plural = "Sous-catégories"
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
 class ProduitInline(admin.StackedInline):
     model = Produit.liens.through
     autocomplete_fields = ["produit"]
@@ -202,7 +219,7 @@ class ProduitAdmin(
     # ajout des filtres de recherche sur bdd et code
     list_filter = ["bdd", "code"]
     fields_to_display_in_first_position = ["nom"]
-    inlines = [SynonymeInline, LienInline]
+    inlines = [SousCategorieInline, SynonymeInline, LienInline]
     exclude = ("infotri",)
     ordering = ["-modifie_le"]
 
