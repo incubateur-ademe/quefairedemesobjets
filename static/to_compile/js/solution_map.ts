@@ -6,13 +6,13 @@ import maplibregl, {
   Marker,
 } from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
-import "carte-facile/carte-facile.css"
-import { mapStyles } from "carte-facile"
+import "carte-facile/dist/carte-facile.css"
+import { mapStyles, Overlay, addOverlay } from "carte-facile"
 import MapController from "../controllers/carte/map_controller"
 import type { Location } from "./types"
 const DEFAULT_LOCATION: LngLat = new LngLat(2.213749, 46.227638)
 const DEFAULT_INITIAL_ZOOM: number = 5
-const DEFAULT_MAX_ZOOM: number = 20
+const DEFAULT_MAX_ZOOM: number = 18.9 // Carte Facile recommendation
 
 export class SolutionMap {
   map: Map
@@ -47,12 +47,13 @@ export class SolutionMap {
       container: selector,
       style: mapStyle,
       zoom: initialZoom,
-      maxZoom: 18.9, // Carte Facile recommended max zoom
+      maxZoom: DEFAULT_MAX_ZOOM,
       center: DEFAULT_LOCATION,
       attributionControl: {
         compact: true,
       },
     })
+    addOverlay(this.map, Overlay.administrativeBoundaries)
     // Add zoom controls
     this.#addZoomControl()
 
@@ -131,7 +132,6 @@ export class SolutionMap {
     const fitBoundsOptions: FitBoundsOptions = {
       padding: this.mapPadding,
       duration: 0,
-      maxZoom: DEFAULT_MAX_ZOOM - 1,
     }
     if (typeof bboxValue !== "undefined") {
       this.map.fitBounds(
