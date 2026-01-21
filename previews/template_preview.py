@@ -258,7 +258,7 @@ class ComponentsPreview(LookbookPreview):
         template = Template(
             """
             {% load carte_tags %}
-            {% acteur_pinpoint_tag acteur=acteur direction=direction action_list=action_list carte=carte carte_config=carte_config sous_categorie_id=sc_id force_visible=True %}
+            {% acteur_pinpoint_tag acteur=acteur direction=direction action_list=action_list carte=carte carte_config=carte_config sous_categorie_id=sc_id %}
             """
         )
         return template.render(Context(context))
