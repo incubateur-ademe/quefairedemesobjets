@@ -13,11 +13,13 @@ from django.db.models import Q
 from django.db.models.functions import Length, Lower
 from django.db.models.query import QuerySet
 from django.http import Http404, JsonResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect
 from django.views.decorators.http import require_GET
+from django.views.generic import DetailView
 from django.views.generic.edit import FormView
 from wagtail.query import Any
 
+from core.constants import MAP_CONTAINER_ID
 from qfdmd.models import Synonyme
 from qfdmo.constants import MAP_FORM_PREFIX
 from qfdmo.forms import MapForm
@@ -43,6 +45,31 @@ def generate_google_maps_itineraire_url(
         f"&destination={displayed_acteur.latitude},"
         f"{displayed_acteur.longitude}&travelMode=WALKING"
     )
+
+
+class MapPrefixMixin:
+    """Mixin to generate form prefixes based on map_container_id.
+
+    This ensures that forms are properly namespaced when multiple maps
+    exist on the same page.
+    """
+
+    def _generate_prefix(self, prefix: str) -> str:
+        """Generate a form prefix based on map_container_id if present.
+
+        Args:
+            prefix: The base prefix for the form
+
+        Returns:
+            A prefixed string in the format "{map_container_id}_{prefix}"
+            if map_container_id is present in the request, otherwise
+            returns the base prefix unchanged.
+        """
+        try:
+            id = self.request.GET[MAP_CONTAINER_ID]
+            return f"{id}_{prefix}"
+        except (KeyError, AttributeError):
+            return prefix
 
 
 class TurboFormMixin:
@@ -393,74 +420,91 @@ def acteur_detail_redirect(request, identifiant_unique):
     return redirect("qfdmo:acteur-detail", uuid=displayed_acteur.uuid, permanent=True)
 
 
-def acteur_detail(request, uuid):
-    base_template = "ui/layout/base.html"
+class ActeurDetailView(MapPrefixMixin, TurboFormMixin, DetailView):
+    """Detail view for a displayed acteur."""
 
-    if request.headers.get("Turbo-Frame"):
-        base_template = "ui/layout/turbo.html"
+    model = DisplayedActeur
+    template_name = "ui/pages/acteur.html"
+    slug_field = "uuid"
+    slug_url_kwarg = "uuid"
 
-    map_form = MapForm(request.GET, prefix=MAP_FORM_PREFIX)
-    search_latitude = map_form["latitude"].value()
-    search_longitude = map_form["longitude"].value()
-
-    direction = request.GET.get("direction")
-
-    try:
-        displayed_acteur = (
-            DisplayedActeur.objects.prefetch_related(
+    def get_queryset(self):
+        """Optimize queries by prefetching all related data."""
+        return (
+            super()
+            .get_queryset()
+            .prefetch_related(
                 "proposition_services__sous_categories",
                 "proposition_services__sous_categories__categorie",
                 "proposition_services__action__groupe_action",
                 "sources",
             )
             .with_displayable_labels()
-            .get(uuid=uuid)
         )
-    except DisplayedActeur.DoesNotExist:
-        # FIXME: it is impossible to get check if the revisionacteur has a parent
-        # because the revision_acteur doesn't have any UUID
-        # to resolve it we need compute uuid on revisionacteur layer
-        raise Http404("L'adresse que vous cherchez n'existe plus")
 
-    # FIXME: This case shouldn't occure because we compute only active displayed
-    # acteurs in dislayedacteur table
-    if displayed_acteur is None or displayed_acteur.statut != ActeurStatus.ACTIF:
-        return redirect(settings.BASE_URL, permanent=True)
+    def get(self, request, *args, **kwargs):
+        """Override get to handle inactive acteurs with redirect."""
+        try:
+            self.object = self.get_object()
+        except Http404:
+            raise
+        except DisplayedActeur.DoesNotExist:
+            # FIXME: it is impossible to get check if the revisionacteur has a parent
+            # because the revision_acteur doesn't have any UUID
+            # to resolve it we need compute uuid on revisionacteur layer
+            raise Http404("L'adresse que vous cherchez n'existe plus")
 
-    # Use prefetched data to avoid additional queries
-    display_labels_panel = any(
-        label.afficher and not label.type_enseigne
-        for label in displayed_acteur.labels.all()
-    )
-    display_sources_panel = any(
-        source.afficher for source in displayed_acteur.sources.all()
-    )
+        # FIXME: This case shouldn't occure because we compute only active displayed
+        # acteurs in dislayedacteur table
+        if self.object.statut != ActeurStatus.ACTIF:
+            return redirect(settings.BASE_URL, permanent=True)
 
-    context = {
-        "base_template": base_template,
-        "object": displayed_acteur,  # We can use object here so that switching
-        # to a DetailView later will not required a template update
-        "latitude": search_latitude,
-        "longitude": search_longitude,
-        "direction": direction,
-        "display_labels_panel": display_labels_panel,
-        "display_sources_panel": display_sources_panel,
-        "is_carte": "carte" in request.GET or "with_map" in request.GET,
-        "map_container_id": request.GET.get("map_container_id", "carte"),
-    }
+        context = self.get_context_data(object=self.object)
+        return self.render_to_response(context)
 
-    # Set is_formulaire flag when not coming from carte/list modes
-    if not ("carte" in request.GET or "with_map" in request.GET):
-        context["is_formulaire"] = True
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        displayed_acteur = self.object
 
-    if search_latitude and search_longitude and not displayed_acteur.is_digital:
+        # Get map form data with dynamic prefix
+        map_prefix = self._generate_prefix(MAP_FORM_PREFIX)
+        map_form = MapForm(self.request.GET, prefix=map_prefix)
+        search_latitude = map_form["latitude"].value()
+        search_longitude = map_form["longitude"].value()
+
+        # Use prefetched data to avoid additional queries
+        display_labels_panel = any(
+            label.afficher and not label.type_enseigne
+            for label in displayed_acteur.labels.all()
+        )
+        display_sources_panel = any(
+            source.afficher for source in displayed_acteur.sources.all()
+        )
+
         context.update(
-            itineraire_url=generate_google_maps_itineraire_url(
+            latitude=search_latitude,
+            longitude=search_longitude,
+            direction=self.request.GET.get("direction"),
+            display_labels_panel=display_labels_panel,
+            display_sources_panel=display_sources_panel,
+            is_carte="carte" in self.request.GET or "with_map" in self.request.GET,
+            map_container_id=self.request.GET.get("map_container_id", "carte"),
+        )
+
+        # Set is_formulaire flag when not coming from carte/list modes
+        if not ("carte" in self.request.GET or "with_map" in self.request.GET):
+            context["is_formulaire"] = True
+
+        if search_latitude and search_longitude and not displayed_acteur.is_digital:
+            context["itineraire_url"] = generate_google_maps_itineraire_url(
                 search_latitude, search_longitude, displayed_acteur
             )
-        )
 
-    return render(request, "ui/pages/acteur.html", context)
+        return context
+
+
+# Function-based view wrapper for backwards compatibility
+acteur_detail = ActeurDetailView.as_view()
 
 
 def solution_admin(request, identifiant_unique):
