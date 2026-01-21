@@ -120,7 +120,7 @@ class CarteSearchActeursView(AbstractSearchActeursView):
 
     def _generate_prefix(self, prefix: str) -> str:
         try:
-            id = self.request.GET[MAP_CONTAINER_ID]
+            id = self._get_map_container_id()
             return f"{id}_{prefix}"
         except (KeyError, AttributeError):
             return prefix
@@ -274,6 +274,10 @@ class CarteSearchActeursView(AbstractSearchActeursView):
     def _get_map_container_id(self):
         if self.carte_config:
             return self.carte_config.slug
+
+        if MAP_CONTAINER_ID in self.request.GET:
+            return self.request.GET[MAP_CONTAINER_ID]
+
         return DEFAULT_MAP_CONTAINER_ID
 
     def _get_bounding_box(self) -> str | None:
