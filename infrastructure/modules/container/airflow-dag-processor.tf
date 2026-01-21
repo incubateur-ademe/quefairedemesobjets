@@ -1,30 +1,27 @@
-resource "scaleway_container" "airflow_webserver" {
-  name           = "${var.prefix}-airflow-webserver"
-  tags           = [var.environment, var.prefix, "airflow", "webserver"]
+resource "scaleway_container" "airflow_dag_processor" {
+  name           = "${var.prefix}-airflow-dag-processor"
+  tags           = [var.environment, var.prefix, "airflow", "dag-processor"]
   namespace_id   = scaleway_container_namespace.main.id
-  registry_image = var.airflow_webserver_registry_image
-  port           = 8080
-  cpu_limit      = var.airflow_webserver_cpu_limit
-  memory_limit   = var.airflow_webserver_memory_limit
-  min_scale      = var.airflow_webserver_min_scale
-  max_scale      = var.airflow_webserver_max_scale
-  timeout        = var.airflow_webserver_timeout
+  registry_image = var.airflow_dag_processor_registry_image
+  port           = 80
+  cpu_limit      = var.airflow_dag_processor_cpu_limit
+  memory_limit   = var.airflow_dag_processor_memory_limit
+  min_scale      = var.airflow_dag_processor_min_scale
+  max_scale      = var.airflow_dag_processor_max_scale
+  timeout        = var.airflow_dag_processor_timeout
   deploy         = true
   privacy        = "public"
   protocol       = "http1"
 
   health_check {
     http {
-      path = "/api/v2/version"
+      path = "/"
     }
     failure_threshold = 5
     interval          = "30s"
   }
 
   environment_variables = {
-    _AIRFLOW_DB_MIGRATE                            = "true"
-    _AIRFLOW_WWW_USER_CREATE                       = "true"
-    _PIP_ADDITIONAL_REQUIREMENTS                   = ""
     AIRFLOW__API__AUTH_BACKENDS                    = "airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session"
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION     = "true"
     AIRFLOW__CORE__DAGS_FOLDER                     = "/opt/airflow/dags"
@@ -32,7 +29,6 @@ resource "scaleway_container" "airflow_webserver" {
     AIRFLOW__CORE__EXECUTOR                        = "LocalExecutor"
     AIRFLOW__CORE__FERNET_KEY                      = ""
     AIRFLOW__CORE__LOAD_EXAMPLES                   = "false"
-    AIRFLOW__CORE__AUTH_MANAGER                    = "airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager"
     AIRFLOW__CORE__ALLOWED_DESERIALIZATION_CLASSES = var.AIRFLOW__CORE__ALLOWED_DESERIALIZATION_CLASSES
     AIRFLOW__LOGGING__ENCRYPT_S3_LOGS              = "false"
     AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER       = "s3://${var.prefix}-${var.environment}-airflow"
@@ -40,20 +36,27 @@ resource "scaleway_container" "airflow_webserver" {
     AIRFLOW__LOGGING__REMOTE_LOGGING               = "true"
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK        = "true"
     AIRFLOW__WEBSERVER__EXPOSE_CONFIG              = "true"
-    AIRFLOW__WEBSERVER__INSTANCE_NAME              = var.AIRFLOW__WEBSERVER__INSTANCE_NAME
-    AIRFLOW__WEBSERVER__WORKERS                    = "1"
-    AIRFLOW_WEBSERVER_WARN_DEPLOYMENT_EXPOSURE     = "false"
-    ENVIRONMENT                                    = var.environment
+    AIRFLOW__WEBSERVER__WARN_DEPLOYMENT_EXPOSURE   = "false"
   }
   secret_environment_variables = {
-    _AIRFLOW_WWW_USER_USERNAME              = var._AIRFLOW_WWW_USER_USERNAME
-    _AIRFLOW_WWW_USER_PASSWORD              = var._AIRFLOW_WWW_USER_PASSWORD
     AIRFLOW__CORE__EXECUTION_API_SERVER_URL = var.AIRFLOW__CORE__EXECUTION_API_SERVER_URL
     AIRFLOW__API_AUTH__JWT_SECRET           = var.AIRFLOW__API_AUTH__JWT_SECRET
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN     = var.AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
-    DATABASE_URL                            = var.DATABASE_URL
-    DB_WAREHOUSE                            = var.DB_WAREHOUSE
     AIRFLOW_CONN_WEBAPP_DB                  = var.AIRFLOW_CONN_WEBAPP_DB
     AIRFLOW_CONN_SCALEWAYLOGS               = var.AIRFLOW_CONN_SCALEWAYLOGS
+    DATABASE_URL                            = var.DATABASE_URL
+    DB_WAREHOUSE                            = var.DB_WAREHOUSE
+    ENVIRONMENT                             = var.ENVIRONMENT
+    POSTGRES_DB                             = var.POSTGRES_DB
+    POSTGRES_HOST                           = var.POSTGRES_HOST
+    POSTGRES_PASSWORD                       = var.POSTGRES_PASSWORD
+    POSTGRES_PORT                           = var.POSTGRES_PORT
+    POSTGRES_SCHEMA                         = var.POSTGRES_SCHEMA
+    POSTGRES_USER                           = var.POSTGRES_USER
+    SCW_ACCESS_KEY                          = var.SCW_ACCESS_KEY
+    SCW_DEFAULT_ORGANIZATION_ID             = var.SCW_DEFAULT_ORGANIZATION_ID
+    SCW_DEFAULT_PROJECT_ID                  = var.SCW_DEFAULT_PROJECT_ID
+    SCW_SECRET_KEY                          = var.SCW_SECRET_KEY
+    SECRET_KEY                              = var.SECRET_KEY
   }
 }

@@ -3,12 +3,12 @@ to complete the pipeline entirely, but instead skips tasks as needed"""
 
 import pytest
 from airflow.utils.state import State
+from cluster.config.tasks import TASKS
 from django.contrib.gis.geos import Point
+from e2e_tests.e2e_utils import airflow_init, ti_get
+from shared.config.start_dates import START_DATES
+from tests.cluster.helpers.configs import CONF_BASE_DICT
 
-from dags.cluster.config.tasks import TASKS
-from dags.e2e_tests.e2e_utils import airflow_init, ti_get
-from dags.shared.config.start_dates import START_DATES
-from dags.tests.cluster.helpers.configs import CONF_BASE_DICT
 from unit_tests.qfdmo.acteur_factory import (
     ActeurTypeFactory,
     DisplayedActeur,
@@ -19,7 +19,7 @@ from unit_tests.qfdmo.acteur_factory import (
 airflow_init()
 
 # Need to wait for airflow_init() to be called before importing
-from dags.cluster.config.model import ClusterConfig  # noqa: E402
+from cluster.config.model import ClusterConfig  # noqa: E402
 
 
 @pytest.mark.django_db()
@@ -54,7 +54,7 @@ class TestClusterDedupSkipped:
 
     def test_up_to_config(self, db_sources_acteur_types, conf):
         """DAG run should stop at config because data acteurs data available"""
-        from dags.cluster.dags.cluster_acteur_suggestions import dag
+        from cluster.dags.cluster_acteur_suggestions import dag
 
         dag.test(execution_date=START_DATES.DEFAULT, run_conf=conf)
         tis = dag.get_task_instances()
@@ -82,7 +82,7 @@ class TestClusterDedupSkipped:
         """Now we create some acteurs and we expect them to be selected
         but we intentionally set them in different cities so they can't be clustered"""
         s1, s2, at1 = db_sources_acteur_types
-        from dags.cluster.dags.cluster_acteur_suggestions import dag
+        from cluster.dags.cluster_acteur_suggestions import dag
 
         # The parent which exists in both Revision & Displayed
         p1 = RevisionActeur(

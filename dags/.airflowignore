@@ -1,2 +1,5 @@
-tests/
+e2e_tests/
+**/e2e_tests/**
+**/tests/**
 tests/conftest.py
+

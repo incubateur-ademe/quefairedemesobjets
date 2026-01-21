@@ -12,8 +12,9 @@ terraform {
 }
 
 provider "scaleway" {
-  zone   = "fr-par-1" # Zone de Paris
-  region = "fr-par"   # Région de Paris
+  zone       = "fr-par-1" # Zone de Paris
+  region     = "fr-par"   # Région de Paris
+  project_id = var.project_id
 }
 EOF
 }
@@ -30,7 +31,6 @@ terraform {
     region                      = "fr-par"
     skip_credentials_validation = true
     skip_region_validation      = true
-    encrypt                     = true
     access_key                  = var.access_key
     secret_key                  = var.secret_key
   }
