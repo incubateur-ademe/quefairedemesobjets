@@ -64,6 +64,15 @@ function parseDatasetJSON(dataset: string): string | null {
 }
 
 /**
+ * Captures the full referrer URL including path and query parameters.
+ * Returns the complete URL of the parent page.
+ */
+function captureFullReferrer(): string {
+  // Get the full current URL including pathname and search params
+  return window.location.href
+}
+
+/**
  * Creates iframe HTML attributes configuration
  */
 function createIframeAttributes(
@@ -109,12 +118,14 @@ function processDatasetAttributes(
   const iframeExtraAttributes: Record<string, string> = {}
 
   // Add standard query parameters based on options
-  if (options.useAutoHeight) {
-    urlParams.set("iframe", "")
-  }
   if (options.addScriptModeParam) {
     urlParams.set(SCRIPT_MODE_PARAM, "1")
   }
+
+  // Capture the full referrer URL and store it in a data attribute
+  // This allows the analytics controller to track the parent page URL including query params
+  const fullReferrer = captureFullReferrer()
+  iframeExtraAttributes["data-referrer"] = fullReferrer
 
   // Process all dataset attributes in a single loop
   for (const [key, value] of Object.entries(scriptTag.dataset)) {

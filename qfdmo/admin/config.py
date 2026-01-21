@@ -1,6 +1,8 @@
 from django.contrib import admin
+from django.contrib.gis import admin as gis_admin
 
 from qfdmo.models import CarteConfig, GroupeActionConfig
+from qfdmo.widgets import CustomOSMWidget
 
 
 class GroupeActionConfigInline(admin.StackedInline):
@@ -12,8 +14,10 @@ class GroupeActionConfigInline(admin.StackedInline):
 
 
 @admin.register(CarteConfig)
-class CarteConfigAdmin(admin.ModelAdmin):
+class CarteConfigAdmin(gis_admin.GISModelAdmin):
     prepopulated_fields = {"slug": ["nom"]}
+    gis_widget = CustomOSMWidget
+    list_filter = ("test",)
     autocomplete_fields = [
         "sous_categorie_objet",
         "source",
@@ -24,6 +28,7 @@ class CarteConfigAdmin(admin.ModelAdmin):
         "acteur_type",
         "label_qualite",
     ]
+
     fieldsets = (
         (
             "Informations générales",
@@ -31,6 +36,7 @@ class CarteConfigAdmin(admin.ModelAdmin):
                 "fields": (
                     "nom",
                     "slug",
+                    "test",
                 )
             },
         ),
@@ -54,7 +60,9 @@ class CarteConfigAdmin(admin.ModelAdmin):
                     "acteur_type",
                     "source",
                     "label_qualite",
+                    "bonus_reparation",
                     "epci",
+                    "bounding_box",
                 ),
                 "description": "Filtrer les acteurs et objets affichés sur la carte",
             },
@@ -66,6 +74,7 @@ class CarteConfigAdmin(admin.ModelAdmin):
                     "mode_affichage",
                     "nombre_d_acteurs_affiches",
                     "cacher_legende",
+                    "cacher_filtre_objet",
                     "supprimer_branding",
                 )
             },

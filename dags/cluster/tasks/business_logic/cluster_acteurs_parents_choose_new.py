@@ -90,6 +90,7 @@ def cluster_acteurs_one_cluster_parent_changes_mark(
     ].index
     df.loc[filter_unchanged, COL_CHANGE_MODEL_NAME] = ChangeActeurVerifyRevision.name()
     df.loc[filter_unchanged, COL_CHANGE_REASON] = REASON_ALREADY_POINT_TO_PARENT
+    df.loc[filter_unchanged, COL_CHANGE_ORDER] = 2
 
     # Enfin tous les anciens parents (si il y en a) doivent être supprimés
     filter_delete = (df["nombre_enfants"] > 0) & (df["identifiant_unique"] != parent_id)
@@ -101,27 +102,33 @@ def cluster_acteurs_one_cluster_parent_changes_mark(
 
 
 def cluster_acteurs_one_cluster_parent_choose(df: pd.DataFrame) -> tuple[str, str, str]:
-    """Décide de la sélection du parent sur 1 cluster"""
+    """Generate the decision on the parent selection for 1 cluster"""
+    from qfdmo.models.acteur import ActeurStatus
 
     try:
         parents_count = df[df["nombre_enfants"] > 0]["identifiant_unique"].nunique()
 
         if parents_count == 1:
-            # Cas: 1 parent = on le garde
+            # Case: 1 parent = we keep it
             index = df[df["nombre_enfants"] > 0].index[0]
             parent_id = df.at[index, "identifiant_unique"]
             change_model_name = ChangeActeurKeepAsParent.name()
             change_reason = REASON_ONE_PARENT_KEPT
 
         elif parents_count >= 2:
-            # Cas: 2+ parents = on en choisit le parent avec le + d'enfants
-            index = df["nombre_enfants"].idxmax()
-            parent_id = df.at[index, "identifiant_unique"]
+            # Case: 2+ parents = we choose the parent with the most children
+            # choose the parent with the most children among the active parents
+            df_parents = df[df["nombre_enfants"] > 0]
+            df_active_parents = df_parents[df_parents["statut"] == ActeurStatus.ACTIF]
+            if df_active_parents.empty:
+                df_active_parents = df_parents
+            index = df_active_parents["nombre_enfants"].idxmax()
+            parent_id = df_active_parents.at[index, "identifiant_unique"]
             change_model_name = ChangeActeurKeepAsParent.name()
             change_reason = REASON_PARENTS_KEEP_MOST_CHILDREN
 
         elif parents_count == 0:
-            # Cas: 0 parent = on en crée un
+            # Case: 0 parent = we create one
             ids_non_parents = df[df["nombre_enfants"] == 0][
                 "identifiant_unique"
             ].tolist()
@@ -130,8 +137,8 @@ def cluster_acteurs_one_cluster_parent_choose(df: pd.DataFrame) -> tuple[str, st
             change_reason = REASON_NO_PARENT_CREATE_ONE
 
         else:
-            # Safety net si logique mal refactorisée et q'uon oublie de gérer un cas
-            raise ValueError(f"Cas non géré/logique male pensée: {parents_count=}")
+            # Safety net if logic not refactored and we forget to handle a case
+            raise ValueError(f"Cas non géré/logique mal pensée: {parents_count=}")
 
         return parent_id, change_model_name, change_reason
     except Exception as e:
@@ -141,7 +148,7 @@ def cluster_acteurs_one_cluster_parent_choose(df: pd.DataFrame) -> tuple[str, st
 
 
 def cluster_acteurs_parents_choose_new(df_clusters: pd.DataFrame) -> pd.DataFrame:
-    """Choisit et assigne les nouveaux parents d'une dataframe
+    """Select and assign the new parents to a dataframe
     comprenant 1 ou plusieurs clusters.'"""
 
     from data.models.change import COL_CHANGE_ORDER
@@ -152,10 +159,10 @@ def cluster_acteurs_parents_choose_new(df_clusters: pd.DataFrame) -> pd.DataFram
 
     for cluster_id in df["cluster_id"].unique():
 
-        # Pour chaque cluster on travaille sur sa df filtrée
+        # For each cluster we work on its filtered df
         df_cluster = df[df["cluster_id"] == cluster_id]
 
-        # Décision sur le nouveau parent
+        # Decision on the new parent
         parent_id, change_model_name, change_reason = (
             cluster_acteurs_one_cluster_parent_choose(df_cluster)
         )

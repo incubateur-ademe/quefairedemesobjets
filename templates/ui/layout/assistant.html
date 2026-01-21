@@ -68,7 +68,6 @@ https://github.com/numerique-gouv/sites-faciles/blob/main/templates/base.html
         {% if location %}
         data-map-location-value="{{ location }}"
         {% endif %}
-        data-state-iframe-value="{{ iframe|yesno:"true,false" }}"
         data-state-map-outlet="[data-controller='map']"
         data-state-address-autocomplete-outlet="[data-controller='address-autocomplete']"
         data-state-search-solution-form-outlet="[data-controller='search-solution-form']"
@@ -78,8 +77,11 @@ https://github.com/numerique-gouv/sites-faciles/blob/main/templates/base.html
         data-action="address-autocomplete:change->state#setLocation"
     >
         {% wagtailuserbar %}
+        {# Skip links for accessibility - using DSFR component #}
+        {% dsfr_skiplinks skiplinks %}
 
         {% if request.user.is_authenticated %}
+        {% wagtailuserbar %}
         <div class="qf-mt-2w qf-bg-red-marianne-main-472 qf-text-white qf-text-center qf-w-full qf-py-1v qf-text-xs">
         Vous êtes bien authentifié, vos statistiques PostHog seront ignorées pour cette session | <a href="{% url 'admin:index' %}">accéder à l'administration</a>
         </div>
@@ -92,7 +94,7 @@ https://github.com/numerique-gouv/sites-faciles/blob/main/templates/base.html
         {% block pre_main %}
         {% endblock pre_main %}
 
-        <main class="{% block main_classes %}fr-container{% endblock %} qf-pb-7w">
+        <main id="content" class="{% block main_classes %}fr-container{% endblock %} qf-pb-7w">
             {% block main %}
             {% endblock main %}
         </main>

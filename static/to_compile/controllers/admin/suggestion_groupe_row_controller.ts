@@ -25,21 +25,26 @@ export default class extends Controller<HTMLElement> {
   saveFieldValue(event: Event) {
     const fieldsValues = this.#getFieldsValues()
     const field = this.#getField(event, fieldsValues)
+    const newFieldsValues = {}
     if (field != null) {
+      newFieldsValues[field] = fieldsValues[field]
       fieldsValues[field]["updated_displayed_value"] = (
         event.target as HTMLElement
       ).textContent
-      this.#postFieldsValues(fieldsValues)
+      this.#postFieldsValues(newFieldsValues)
     }
   }
 
   updateFieldsDisplayed(event: Event) {
     const fieldsValues = this.#getFieldsValues()
     const fields = this.#getFields(event, fieldsValues)
+    const newFieldsValues = {}
     fields.forEach((field: string) => {
-      fieldsValues[field]["updated_displayed_value"] = fieldsValues[field]["new_value"]
+      newFieldsValues[field] = fieldsValues[field]
+      newFieldsValues[field]["updated_displayed_value"] =
+        fieldsValues[field]["new_value"]
     })
-    this.#postFieldsValues(fieldsValues)
+    this.#postFieldsValues(newFieldsValues)
   }
 
   updateAllDisplayed(event: Event) {

@@ -165,7 +165,7 @@ MIDDLEWARE = [
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "qfdmd.middleware.AssistantMiddleware",
+    "qfdmd.middleware.RequestEnhancementMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "qfdmd.middleware.BetaMiddleware",
@@ -540,6 +540,7 @@ INSTALLED_APPS.extend(
         "wagtail.admin",
         "wagtail.contrib.typed_table_block",
         "wagtail",
+        "wagtail.contrib.routable_page",
         "modelcluster",
         "taggit",
     ]

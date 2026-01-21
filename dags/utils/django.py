@@ -108,11 +108,7 @@ def django_model_fields_get(model_class, include_properties=True) -> list[str]:
     return [x for x in results if x not in excluded]
 
 
-def django_model_queryset_generate(
-    model_class,
-    fields_include_all_filled: list[str],
-    fields_exclude_any_filled: list[str],
-):
+def django_model_queryset_generate(model_class, fields_include_all_filled: list[str]):
     """Génère une requête Django à partir d'une liste de champs
     et de filtres pour un modèle donné.
 
@@ -121,35 +117,21 @@ def django_model_queryset_generate(
 
     from django.db.models import Q
 
-    # Pour faciliter l'utilisation de cette fonction on
-    # exclude automatiquement les champs qui ne sont pas dans la
-    # DB (ex: @property)
+    # Remove fields not in DB to avoid errors
     db_fields = {f.name for f in model_class._meta.get_fields()}
-
     include_fields = [
         field for field in fields_include_all_filled if field in db_fields
     ]
-    exclude_fields = [
-        field for field in fields_exclude_any_filled if field in db_fields
-    ]
-    # select_fields = [field for field in fields_to_select if field in db_fields]
 
-    # Inclure uniquement si TOUS les champs sont remplis
+    # Only include if ALL fields are filled
+    # Exclude both empty strings ("") and NULL values
     include_all_filled_filter = Q()
     for field in include_fields:
-        include_all_filled_filter &= ~Q(**{f"{field}": ""})
+        include_all_filled_filter &= ~Q(**{f"{field}": ""}) & Q(
+            **{f"{field}__isnull": False}
+        )
 
-    # Exclure si N'IMPORTE QUEL champ est rempli
-    # note: ce champ étant la négation de l'inclusion, on le construit
-    # comme l'incusion et on fait une négation d'ensemble ensuite
-    exclude_any_filled_filter = Q()
-    for field in exclude_fields:
-        exclude_any_filled_filter &= ~Q(**{f"{field}": ""})
-    exclude_any_filled_filter = ~exclude_any_filled_filter
-
-    final_filter = include_all_filled_filter & exclude_any_filled_filter
-
-    return model_class.objects.filter(final_filter)
+    return model_class.objects.filter(include_all_filled_filter)
 
 
 def django_model_queryset_to_sql(query: Any) -> str:

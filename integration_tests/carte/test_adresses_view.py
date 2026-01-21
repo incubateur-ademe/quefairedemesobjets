@@ -2,6 +2,7 @@ from urllib.parse import urlencode
 
 import pytest
 from django.contrib.gis.geos import Point
+from django.core.management import call_command
 from django.http import HttpRequest
 from django.test import RequestFactory, override_settings
 
@@ -25,6 +26,20 @@ from unit_tests.qfdmo.acteur_factory import (
 )
 from unit_tests.qfdmo.action_factory import ActionFactory, GroupeActionFactory
 from unit_tests.qfdmo.sscatobj_factory import SousCategorieObjetFactory
+
+
+@pytest.fixture(scope="session")
+def django_db_setup(django_db_setup, django_db_blocker):
+    """Load fixtures needed for the test"""
+    with django_db_blocker.unblock():
+        call_command(
+            "loaddata",
+            "produits",
+            "categories",
+            "actions",
+            "acteur_services",
+            "acteur_types",
+        )
 
 
 @pytest.fixture
@@ -203,8 +218,8 @@ class TestReparacteur(RunViewMixin):
         LabelQualiteFactory(code="reparacteur")
         params = {
             "action_list": [action_reparer.code],
-            "latitude": 1,
-            "longitude": 1,
+            "map-latitude": 1,
+            "map-longitude": 1,
             "label_reparacteur": "true",
         }
 
@@ -224,8 +239,8 @@ class TestReparacteur(RunViewMixin):
     ):
         params = {
             "action_list": [action_reparer.code],
-            "latitude": 1,
-            "longitude": 1,
+            "map-latitude": 1,
+            "map-longitude": 1,
             "label_reparacteur": "true",
         }
 
@@ -244,8 +259,8 @@ class TestReparacteur(RunViewMixin):
     ):
         params = {
             "action_list": [f"{action_reparer.code}|{action_donner.code}"],
-            "latitude": 1,
-            "longitude": 1,
+            "map-latitude": 1,
+            "map-longitude": 1,
             "label_reparacteur": "true",
         }
 
@@ -263,8 +278,8 @@ class TestReparerAlternateIcon(RunViewMixin):
         request.GET = query_dict_from(
             {
                 "action_list": [action_donner.code],
-                "latitude": [1],
-                "longitude": [1],
+                "map-latitude": [1],
+                "map-longitude": [1],
             }
         )
         adresses_view.setup(request)
@@ -283,8 +298,8 @@ class TestReparerAlternateIcon(RunViewMixin):
     ):
         params = {
             "action_list": [action_donner.code, action_reparer.code],
-            "latitude": [1],
-            "longitude": [1],
+            "map-latitude": [1],
+            "map-longitude": [1],
         }
         _, context = self._run_view(rf, adresses_view_class, params)
 
@@ -298,8 +313,8 @@ class TestExclusiviteReparation(RunViewMixin):
     ):
         params = {
             "action_list": [action_preter.code],
-            "latitude": [1],
-            "longitude": [1],
+            "map-latitude": [1],
+            "map-longitude": [1],
             # This form is enabled by default
             # "pas_exclusivite_reparation": ["true"],
         }
@@ -314,8 +329,8 @@ class TestExclusiviteReparation(RunViewMixin):
         request.GET = query_dict_from(
             {
                 "action_list": [f"{action_reparer.code}|{action_preter.code}"],
-                "latitude": [1],
-                "longitude": [1],
+                "map-latitude": [1],
+                "map-longitude": [1],
                 "pas_exclusivite_reparation": ["true"],
             }
         )
@@ -330,8 +345,8 @@ class TestExclusiviteReparation(RunViewMixin):
         DisplayedActeur.objects.update(exclusivite_de_reprisereparation=False)
         params = {
             "action_list": [action_reparer.code],
-            "latitude": [1],
-            "longitude": [1],
+            "map-latitude": [1],
+            "map-longitude": [1],
             "pas_exclusivite_reparation": ["false"],
         }
         _, context = self._run_view(rf, adresses_view_class, params)
@@ -349,8 +364,8 @@ class TestExclusiviteReparation(RunViewMixin):
         sous_categorie_id = sous_categorie.id
         params = {
             "action_list": [action_reparer.code],
-            "latitude": [1],
-            "longitude": [1],
+            "map-latitude": [1],
+            "map-longitude": [1],
             "sc_id": [str(sous_categorie_id)],
             "pas_exclusivite_reparation": ["false"],
         }
@@ -381,8 +396,8 @@ class TestFilters(RunViewMixin):
 
         params = {
             "action_list": [f"{action_reparer.code}|{action_preter.code}"],
-            "latitude": [1],
-            "longitude": [1],
+            "map-latitude": [1],
+            "map-longitude": [1],
             "sc_id": [sous_categorie.id],
             "carte": carte,
         }
@@ -401,8 +416,8 @@ class TestFilters(RunViewMixin):
     ):
         sous_categorie_id = sous_categorie.id
         params = {
-            "latitude": [1],
-            "longitude": [1],
+            "map-latitude": [1],
+            "map-longitude": [1],
             "sc_id": [str(sous_categorie_id)],
         }
         _, context = self._run_view(rf, adresses_view_class, params)
@@ -424,8 +439,8 @@ class TestFilters(RunViewMixin):
         sous_categorie_id = sous_categorie.id
         params = {
             "action_list": [action_preter.code],
-            "latitude": [1],
-            "longitude": [1],
+            "map-latitude": [1],
+            "map-longitude": [1],
             "sc_id": [str(sous_categorie_id)],
         }
         _, context = self._run_view(rf, adresses_view_class, params)
@@ -448,8 +463,8 @@ class TestFilters(RunViewMixin):
         request.GET = query_dict_from(
             {
                 "action_list": [action_preter.code],
-                "latitude": [1],
-                "longitude": [1],
+                "map-latitude": [1],
+                "map-longitude": [1],
                 "sc_id": [str(sous_categorie_id)],
             }
         )
@@ -466,9 +481,10 @@ class TestBBOX:
         request = HttpRequest()
         adresses_view = CarteSearchActeursView()
         map_bbox = compile_frontend_bbox([1, 1, 1, 1])
-        request.GET = query_dict_from({})
-        request.GET.update(bounding_box=map_bbox)
+        request.GET = query_dict_from({"map-bounding_box": [map_bbox]})
         adresses_view.setup(request)
+        # Initialize forms so _get_bounding_box() can access form values
+        adresses_view.ui_forms = adresses_view._get_forms()
 
         acteurs = DisplayedActeur.objects.all()
         assert acteurs.count() == 0
@@ -483,9 +499,16 @@ class TestBBOX:
         adresses_view = CarteSearchActeursView()
         bbox = [0, 0, 0, 0]
         map_bbox = compile_frontend_bbox(bbox)
-        request.GET = query_dict_from({})
-        request.GET.update(bounding_box=map_bbox, latitude="1", longitude="1")
+        request.GET = query_dict_from(
+            {
+                "map-bounding_box": [map_bbox],
+                "map-latitude": ["1"],
+                "map-longitude": ["1"],
+            }
+        )
         adresses_view.setup(request)
+        # Initialize forms so _get_bounding_box() can access form values
+        adresses_view.ui_forms = adresses_view._get_forms()
 
         DisplayedActeurFactory.create_batch(2)
         acteurs = DisplayedActeur.objects.all()
@@ -501,9 +524,16 @@ class TestBBOX:
         adresses_view = CarteSearchActeursView()
         bbox = [-2, -2, 4, 4]  # Acteurs in factory are created with a location of 3, 3
         map_bbox = compile_frontend_bbox(bbox)
-        request.GET = query_dict_from({})
-        request.GET.update(bounding_box=map_bbox, latitude="1", longitude="1")
+        request.GET = query_dict_from(
+            {
+                "map-bounding_box": [map_bbox],
+                "map-latitude": ["1"],
+                "map-longitude": ["1"],
+            }
+        )
         adresses_view.setup(request)
+        # Initialize forms so _get_bounding_box() can access form values
+        adresses_view.ui_forms = adresses_view._get_forms()
 
         DisplayedActeurFactory.create_batch(2)
         acteurs = DisplayedActeur.objects.all()

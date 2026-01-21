@@ -59,8 +59,8 @@ init-dev:
 check-format:
 	uv run black --check --diff .
 
-.PHONY: fix
-fix:
+.PHONY: format
+format:
 	uv run ruff check . --fix
 	uv run black --exclude=.venv .
 
@@ -116,7 +116,7 @@ createsuperuser:
 
 .PHONY: seed-database
 seed-database:
-	$(DJANGO_ADMIN) loaddata_with_computed_fields categories labels sources actions produits acteur_services acteur_types objets synonymes suggestions carte_configs
+	$(DJANGO_ADMIN) loaddata_with_computed_fields categories labels sources actions produits acteur_services acteur_types objets synonymes carte_configs
 	$(DJANGO_ADMIN) loaddata_with_computed_fields acteurs propositions_services
 
 .PHONY: createsuperuser-example
@@ -140,7 +140,6 @@ generate-fixtures:
 	$(DJANGO_ADMIN) dumpdata qfdmo.carteconfig qfdmo.groupeactionconfig $(FIXTURES_OPTIONS) -o qfdmo/fixtures/carte_configs.json
 	$(DJANGO_ADMIN) dumpdata qfdmd.synonyme $(FIXTURES_OPTIONS) -o qfdmd/fixtures/synonymes.json
 	$(DJANGO_ADMIN) dumpdata qfdmd.produit $(FIXTURES_OPTIONS) -o qfdmd/fixtures/produits.json
-	$(DJANGO_ADMIN) dumpdata qfdmd.suggestion $(FIXTURES_OPTIONS) -o qfdmd/fixtures/suggestions.json
 
 .PHONY: clear-cache
 clear-cache:

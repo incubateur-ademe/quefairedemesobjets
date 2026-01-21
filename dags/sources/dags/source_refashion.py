@@ -33,6 +33,7 @@ with DAG(
         "validate_address_with_ban": False,
         "label_bonus_reparation": "refashion",
         "product_mapping": get_mapping_config(),
+        "use_legacy_suggestions": True,
     },
 ) as dag:
     eo_task_chain(dag)

@@ -34,10 +34,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
       - name: Install uv
-        uses:  astral-sh/setup-uv@1e862dfacbd1d6d858c55d9b792c756523627244
+        uses:  astral-sh/setup-uv@61cb8a9741eeb8a550a1b8544337180c0fc8476b
         with:
           enable-cache: true
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         name: Define a cache for the virtual environment based on the dependencies lock file
         with:
           path: ./.venv
@@ -49,7 +49,7 @@ jobs:
           curl -O https://cli-dl.scalingo.com/install && bash install
       - name: Login Scalingo CLI
         run: scalingo login --api-token "${DUPLICATE_API_TOKEN}"
-      - name: Use CLI
+      - name: Use Scaleway CLI
         uses: scaleway/action-scw@be2696f261325a78354eda14988c80405f33e082
         with:
           save-config: true

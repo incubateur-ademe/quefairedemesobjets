@@ -1,0 +1,13 @@
+{% load dsfr_tags %}
+
+{% dsfr_callout title="Test Rechercher dans cette zone" text="Cette page teste l'apparition du bouton 'Nouvelle recherche dans cette zone' lors du déplacement de la carte et la mise à jour des résultats après son clic." icon_class="fr-icon-alert-line" %}
+
+<p>Le test vérifie que :</p>
+<ul>
+    <li>La recherche d'Auray affiche la carte avec des résultats</li>
+    <li>Le déplacement de la carte fait apparaître le bouton "Nouvelle recherche dans cette zone"</li>
+    <li>Le clic sur ce bouton met à jour le bounding box</li>
+    <li>Les résultats affichés changent après le clic</li>
+</ul>
+
+<script src="{{ base_url }}/static/carte.js"></script>

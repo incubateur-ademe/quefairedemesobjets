@@ -1,8 +1,11 @@
 import { expect, test } from "@playwright/test"
+import { navigateTo } from "./helpers"
 
 test.describe("🌐 Compatibilité Navigateur", () => {
-  test("Browser version alert is not displayed", async ({ page }) => {
-    await page.goto(`/formulaire`, { waitUntil: "domcontentloaded" })
+  test("L'alerte de version de navigateur obsolète n'est pas affichée pour les navigateurs modernes", async ({
+    page,
+  }) => {
+    await navigateTo(page, `/formulaire`)
 
     const titlePage = await page.title()
     expect(titlePage).toBe("Longue vie aux objets")

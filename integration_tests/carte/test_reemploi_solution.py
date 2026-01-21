@@ -29,21 +29,32 @@ class TestInitialValue:
         response = client.get(url)
 
         assert response.status_code == 200
-        assert response.context_data["location"] == ""
+        assert (
+            response.context_data["location"] == '{"latitude": null, "longitude": null}'
+        )
         assert len(response.context_data["acteurs"]) == 0
-        assert response.context_data["form"].initial == {
-            **self.default_context,
-            "action_displayed": "preter|emprunter|louer|mettreenlocation"
-            "|reparer|donner|echanger|acheter|revendre",
-            "action_list": "preter|emprunter|louer|mettreenlocation|"
-            "reparer|donner|echanger|acheter|revendre",
-            "bonus": None,
-            "ess": None,
-            "label_reparacteur": None,
-            "pas_exclusivite_reparation": True,
-            "sc_id": None,
-            "sous_categorie_objet": None,
-        }
+
+        # Check form initial values
+        # Formulaire uses the old form structure with form (not forms dict)
+        form = response.context_data["form"]
+        assert form.initial["adresse"] is None
+        assert form.initial["latitude"] is None
+        assert form.initial["longitude"] is None
+        assert form.initial["bounding_box"] is None
+        assert form.initial["action_displayed"] == (
+            "preter|emprunter|louer|mettreenlocation"
+            "|reparer|donner|echanger|acheter|revendre"
+        )
+        assert form.initial["action_list"] == (
+            "preter|emprunter|louer|mettreenlocation|"
+            "reparer|donner|echanger|acheter|revendre"
+        )
+        assert form.initial["bonus"] is None
+        assert form.initial["ess"] is None
+        assert form.initial["label_reparacteur"] is None
+        assert form.initial["pas_exclusivite_reparation"] is True
+        assert form.initial["sc_id"] is None
+        assert form.initial["sous_categorie_objet"] is None
 
     def test_carte_without_parameters(self, client):
         url = "/carte"
@@ -51,6 +62,14 @@ class TestInitialValue:
         response = client.get(url)
 
         assert response.status_code == 200
-        assert response.context_data["location"] == ""
+        assert (
+            response.context_data["location"] == '{"latitude": null, "longitude": null}'
+        )
         assert len(response.context_data["acteurs"]) == 0
-        assert response.context_data["form"].initial == self.default_context
+
+        # Check map form initial values
+        forms = response.context_data["forms"]
+        assert forms["map"]["adresse"].value() is None
+        assert forms["map"]["latitude"].value() is None
+        assert forms["map"]["longitude"].value() is None
+        assert forms["map"]["bounding_box"].value() is None

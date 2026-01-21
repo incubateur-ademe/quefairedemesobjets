@@ -13,7 +13,7 @@ def environment(request):
         "STIMULUS_DEBUG": settings.STIMULUS_DEBUG,
         "POSTHOG_DEBUG": settings.POSTHOG_DEBUG,
         "BLOCK_ROBOTS": settings.BLOCK_ROBOTS,
-        "is_embedded": True,
+        "is_embedded": getattr(request, "iframe", False),
         "turbo": request.headers.get("Turbo-Frame"),
         "VERSION": settings.VERSION,
         "APP": settings.APP,
@@ -45,10 +45,15 @@ def global_context(request) -> dict:
 
     header_search_form = SearchForm(prefix="header", initial={"id": "header"})
     home_search_form = SearchForm(prefix="home", initial={"id": "home"})
+    # Skip links for accessibility (DSFR component)
+    skiplinks = [
+        {"link": "#content", "label": "Contenu"},
+    ]
 
     return {
         **base,
         "header_search_form": header_search_form,
         "home_search_form": home_search_form,
+        "skiplinks": skiplinks,
         **constants.ASSISTANT,
     }

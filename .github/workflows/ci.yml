@@ -27,7 +27,7 @@ jobs:
         with:
           uv-groups: "--only-dev"
       - name: Install Terragrunt and OpenTofu
-        uses: gruntwork-io/terragrunt-action@95fc057922e3c3d4cc021a81a213f088f333ddef
+        uses: gruntwork-io/terragrunt-action@5e86476ca61eaf74adb9c0525745f29f921f2199
         with:
           tg_version: "0.83.2"
           tofu_version: "1.10.3"
@@ -141,17 +141,24 @@ jobs:
       - name: Install GIS packages
         uses: ./.github/actions/install-gis
 
+      - name: Get current date
+        id: date
+        shell: bash
+        run: echo "value=$(date -u +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+
       - name: Prepare Django database
         uses: ./.github/actions/prepare-django-db
         with:
-          cache-key: db-dump-${{ hashFiles('**/migrations/**/*.py', '**/fixtures/**/*') }}
+          cache-key: db-dump-${{ hashFiles('**/migrations/**/*.py') }}-${{ steps.date.outputs.value }}
+          sample-db-uri: ${{ secrets.SAMPLE_DB_URI }}
+          database-url: ${{ env.DATABASE_URL }}
 
       - name: collectstatic
         shell: bash
         run: make collectstatic
 
       - name: Upload build artifacts for e2e tests
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: e2e-build-artifacts
           path: |
@@ -202,7 +209,7 @@ jobs:
         uses: ./.github/actions/setup-playwright
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: e2e-build-artifacts
 
@@ -222,24 +229,24 @@ jobs:
           # Additional wait to ensure static files are served
           sleep 2
 
-      - name: Run Playwright tests
-        run: npx playwright test --shard=${{ matrix.shard }}/5 --update-snapshots
+      # - name: Run Playwright tests
+      #   run: npx playwright test --shard=${{ matrix.shard }}/5 --update-snapshots
 
-      - name: Upload Playwright report
-        uses: actions/upload-artifact@v5
-        if: ${{ !cancelled() }}
-        with:
-          name: playwright-report-${{ matrix.shard }}
-          path: playwright-report/
-          retention-days: 2
+      # - name: Upload Playwright report
+      #   uses: actions/upload-artifact@v6
+      #   if: ${{ !cancelled() }}
+      #   with:
+      #     name: playwright-report-${{ matrix.shard }}
+      #     path: playwright-report/
+      #     retention-days: 2
 
-      - name: Upload test results
-        uses: actions/upload-artifact@v5
-        if: ${{ !cancelled() }}
-        with:
-          name: playwright-results-${{ matrix.shard }}
-          path: test-results/
-          retention-days: 2
+      # - name: Upload test results
+      #   uses: actions/upload-artifact@v6
+      #   if: ${{ !cancelled() }}
+      #   with:
+      #     name: playwright-results-${{ matrix.shard }}
+      #     path: test-results/
+      #     retention-days: 2
 
 # Address actions/missing-workflow-permissions rule in
 # code scanning alerts

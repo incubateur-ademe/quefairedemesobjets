@@ -35,7 +35,6 @@ from django.forms import ValidationError, model_to_dict
 from django.http import HttpRequest
 from django.urls import reverse
 from django.utils.functional import cached_property
-from unidecode import unidecode
 
 from core.constants import DIGITAL_ACTEUR_CODE
 from core.models.mixin import TimestampedModel
@@ -54,6 +53,7 @@ from qfdmo.models.categorie_objet import SousCategorieObjet
 from qfdmo.models.geo import EPCI
 from qfdmo.models.utils import (
     CodeAsNaturalKeyModel,
+    compute_identifiant_unique,
     string_remove_substring_via_normalization,
 )
 from qfdmo.validators import CodeValidator
@@ -320,6 +320,24 @@ class DisplayedActeurQuerySet(models.QuerySet):
         )
         return self.annotate(bonus=Exists(bonus_label_qualite))
 
+    def with_displayable_labels(self):
+        """
+        Prefetch labels ordered by bonus (desc) and type_enseigne.
+        This allows the acteur_label template tag to simply take the first label.
+
+        Returns a queryset with displayable_labels_ordered attribute on each acteur.
+        """
+        from django.db.models import Prefetch
+
+        ordered_labels = Prefetch(
+            "labels",
+            queryset=LabelQualite.objects.filter(afficher=True).order_by(
+                "-bonus", "type_enseigne"
+            ),
+            to_attr="displayable_labels_ordered",
+        )
+        return self.prefetch_related(ordered_labels)
+
     def digital(self):
         # 1. Get ordered primary keys
         # List here ensures queryset is not re-evaluated, causing
@@ -409,7 +427,12 @@ class BaseActeur(TimestampedModel):
     nom = models.CharField(max_length=255, blank=False, null=False, db_index=True)
     description = models.TextField(blank=True, default="", db_default="")
     identifiant_unique = models.CharField(
-        max_length=255, unique=True, primary_key=True, blank=True, db_index=True
+        max_length=255,
+        unique=True,
+        primary_key=True,
+        blank=True,
+        db_index=True,
+        editable=False,
     )
     acteur_type = models.ForeignKey(ActeurType, on_delete=models.CASCADE)
     adresse = models.CharField(max_length=255, blank=True, default="", db_default="")
@@ -796,8 +819,11 @@ class BaseActeur(TimestampedModel):
 
     def generate_identifiant_unique_if_missing(self):
         if not self.identifiant_unique:
-            source_stub = unidecode(self.source.code.lower()).replace(" ", "_")
-            self.identifiant_unique = source_stub + "_" + str(self.identifiant_externe)
+            if not self.source:
+                raise ValueError("Source is required to generate identifiant_unique")
+            self.identifiant_unique = compute_identifiant_unique(
+                self.source.code, self.identifiant_externe
+            )
 
     def __str__(self):
         return self.nom
@@ -984,6 +1010,7 @@ class RevisionActeur(BaseActeur, LatLngPropertiesMixin):
         # OPTIMIZE: if we need to validate the main action in the service propositions
         # I guess it should be here
 
+        self.set_default_statut_before_save()
         acteur = self.set_default_fields_and_objects_before_save()
         self.full_clean()
         creating = self._state.adding  # Before calling save
@@ -1030,8 +1057,18 @@ class RevisionActeur(BaseActeur, LatLngPropertiesMixin):
         Won't create an Acteur instance
         """
         self.source = None
+        self.set_default_statut_before_save()
         self.full_clean()
         return super().save(*args, **kwargs)
+
+    def set_default_statut_before_save(self):
+        """
+        Apply the default value for statut before full_clean()
+        because Django doesn't apply automatically the default values before the
+        validation
+        """
+        if not self.statut:
+            self.statut = ActeurStatus.ACTIF
 
     def set_default_fields_and_objects_before_save(self) -> Acteur | None:
         if self.is_parent:
@@ -1447,8 +1484,6 @@ class DisplayedActeur(FinalActeur, LatLngPropertiesMixin):
         params = []
         if "carte" in request.GET:
             params.append("carte=1")
-        elif "iframe" in request.GET:
-            params.append("iframe=1")
         if direction:
             params.append(f"direction={direction}")
         return f"{base_url}?{'&'.join(params)}"

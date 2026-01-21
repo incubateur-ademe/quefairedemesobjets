@@ -9,6 +9,14 @@ inputs:
     description: "Path to store database dump"
     required: false
     default: "database-dump.pgdump"
+  sample-db-uri:
+    description: "PostgreSQL URI to dump sample database from (e.g., postgres://user:pass@host:port/dbname)" # pragma: allowlist secret
+    required: false
+    default: ""
+  database-url:
+    description: "PostgreSQL database URL for local database"
+    required: false
+    default: ""
 
 outputs:
   cache-hit:
@@ -25,17 +33,23 @@ runs:
         path: ${{ inputs.database-dump-path }}
         key: ${{ inputs.cache-key }}
 
+    - name: Dump and restore sample database
+      if: steps.cache-db.outputs.cache-hit != 'true' && inputs.sample-db-uri != ''
+      shell: bash
+      run: |
+        echo "Dumping sample database from remote..."
+        pg_dump -Fc "${{ inputs.sample-db-uri }}" -f sample-database.pgdump
+        echo "Sample database dumped successfully"
+        echo "Restoring sample database to local database..."
+        pg_restore -d ${{ inputs.database-url }} --clean --if-exists sample-database.pgdump || true
+        echo "Sample database restored successfully"
+
     - name: Prepare django, migrate, collect static files
       if: steps.cache-db.outputs.cache-hit != 'true'
       shell: bash
       run: |
         make createcachetable
         make migrate
-
-    - name: Populate database
-      if: steps.cache-db.outputs.cache-hit != 'true'
-      shell: bash
-      run: make seed-database
 
     - name: Init django admin superuser
       if: steps.cache-db.outputs.cache-hit != 'true'

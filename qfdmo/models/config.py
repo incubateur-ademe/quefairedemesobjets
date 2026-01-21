@@ -1,3 +1,4 @@
+from django.contrib.gis.db import models as gis_models
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.http import QueryDict
@@ -54,7 +55,7 @@ class GroupeActionConfig(models.Model):
 
 @register_snippet
 class CarteConfig(index.Indexed, models.Model):
-    SOUS_CATEGORIE_QUERY_PARAM = "sous_categorie_objet"
+    SOUS_CATEGORIE_QUERY_PARAM = "sc_id"
 
     nom = models.CharField(unique=True)
     SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url = models.CharField(
@@ -89,6 +90,12 @@ class CarteConfig(index.Indexed, models.Model):
         help_text="Supprime le logo dans l'entête de la carte ainsi que"
         " le bouton Infos. Ce mode est utilisé essentiellement "
         "pour la carte affichée dans l'assistant",
+    )
+    cacher_filtre_objet = models.BooleanField(
+        default=False,
+        verbose_name="Cacher le filtre objet",
+        help_text="Cocher cette case cache le filtre permettant de sélectionner "
+        "les objets dans la carte",
     )
     titre_previsualisation = models.CharField(
         blank=True,
@@ -173,6 +180,29 @@ class CarteConfig(index.Indexed, models.Model):
     )
 
     epci = models.ManyToManyField("qfdmo.EPCI", verbose_name="EPCI", blank=True)
+
+    bonus_reparation = models.BooleanField(
+        verbose_name="Bonus réparation uniquement",
+        default=False,
+        help_text="Cocher cette case pour afficher uniquement les acteurs proposant "
+        "le bonus réparation",
+    )
+
+    bounding_box = gis_models.PolygonField(
+        verbose_name="Zone géographique (bounding box)",
+        help_text="Définir une zone géographique pour limiter l'affichage de la carte "
+        "à une région spécifique",
+        blank=True,
+        null=True,
+        srid=4326,
+    )
+
+    test = models.BooleanField(
+        default=False,
+        verbose_name="Carte de test",
+        help_text="Cocher cette case pour marquer cette carte comme une carte de test "
+        "(utilisée pour les tests end-to-end).",
+    )
 
     def get_absolute_url(self, override_sous_categories=None, initial_query_string=""):
         """This view can be used with categories set from the parent page.

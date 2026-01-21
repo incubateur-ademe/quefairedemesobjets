@@ -76,9 +76,9 @@ def distance_to_acteur(context, acteur):
         * 111320
     )
     if distance_meters >= 1000:
-        return f"{round(distance_meters / 1000, 1)} km".replace(".", ",")
+        return f"({round(distance_meters / 1000, 1)} km)".replace(".", ",")
     else:
-        return f"{round(distance_meters / 10) * 10} m"
+        return f"({round(distance_meters / 10) * 10} m)"
 
 
 @register.filter
@@ -255,7 +255,7 @@ def render_acteur_table_row(acteur, context):
         "request": context["request"],
     }
     return [
-        render_to_string("ui/components/acteur/acteur_labels.html", _context),
+        render_to_string("ui/components/acteur/acteur_table_name.html", _context),
         render_to_string("ui/components/acteur/acteur_services.html", _context),
         distance_to_acteur(context, acteur),
         render_to_string("ui/components/acteur/acteur_lien.html", _context),

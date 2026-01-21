@@ -6,10 +6,12 @@ from sources.config.airflow_params import TRANSFORMATION_MAPPING
 from sources.tasks.airflow_logic.config_management import DAGConfig
 from sources.tasks.business_logic.source_data_normalize import (
     _remove_undesired_lines,
+    _transform_columns,
     df_normalize_pharmacie,
     df_normalize_sinoe,
     source_data_normalize,
 )
+from sources.tasks.transform.exceptions import ImportSourceValueWarning
 
 """
 TODO:
@@ -110,7 +112,6 @@ NORMALIZATION_RULES = [
 
 
 class TestSourceDataNormalize:
-
     def test_source_data_normalize_normalization_rules_are_called(self):
         dag_config_kwargs = {
             "normalization_rules": NORMALIZATION_RULES,
@@ -155,6 +156,54 @@ class TestSourceDataNormalize:
         assert df["identifiant_unique"].iloc[0] == "id"
 
         assert "col_to_remove" not in df.columns
+
+    def test_transform_columns_returns_empty_string_on_warning(self):
+        """
+        Test  that if an ImportSourceValueWarning is raised,
+        the value in the DataFrame is an empty string
+        """
+        normalization_rules = [
+            {
+                "origin": "col_origin",
+                "transformation": "test_fct_raise_warning",
+                "destination": "col_destination",
+            },
+            {"keep": "identifiant_unique"},
+        ]
+        dag_config_kwargs = {
+            "normalization_rules": normalization_rules,
+            "product_mapping": {},
+            "endpoint": "http://example.com/api",
+        }
+
+        class ImportSourceValueWarningTest(ImportSourceValueWarning):
+            pass
+
+        # Fonction de transformation qui lève une ImportSourceValueWarning
+        def raise_warning(value, dag_config):
+            raise ImportSourceValueWarningTest("Test warning")
+
+        TRANSFORMATION_MAPPING["test_fct_raise_warning"] = raise_warning
+
+        df = pd.DataFrame(
+            {
+                "identifiant_unique": ["id1", "id2"],
+                "col_origin": ["value1", "value2"],
+            }
+        )
+        # Initialiser log_warning comme dans source_data_normalize
+        df["log_warning"] = [[] for _ in range(len(df))]
+
+        result_df = _transform_columns(df, DAGConfig.model_validate(dag_config_kwargs))
+
+        # Vérifier que la colonne de destination existe
+        assert "col_destination" in result_df.columns
+        # Vérifier que toutes les valeurs sont des chaînes vides car l'erreur est levée
+        assert result_df["col_destination"].iloc[0] == ""
+        assert result_df["col_destination"].iloc[1] == ""
+        # Vérifier que les warnings ont été ajoutés
+        assert len(result_df["log_warning"].iloc[0]) == 1
+        assert len(result_df["log_warning"].iloc[1]) == 1
 
     def test_source_data_normalize_normalization_remove_unknown_columns(self):
         normalization_rules = [

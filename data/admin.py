@@ -1,12 +1,15 @@
 import logging
 
 from django.contrib import admin, messages
+from django.contrib.postgres.fields import ArrayField
+from django.db import models
+from django.db.models import QuerySet
 from django.template.loader import render_to_string
 from django.utils.html import format_html
 from djangoql.admin import DjangoQLSearchMixin
-from djangoql.schema import DjangoQLSchema, IntField, StrField
+from djangoql.schema import BoolField, DjangoQLSchema, IntField, StrField
 
-from core.admin import NotEditableMixin, NotSelfDeletableMixin, QuerysetFilterAdmin
+from core.admin import NotEditableMixin, NotSelfDeletableMixin
 from data.models.suggestion import (
     Suggestion,
     SuggestionCohorte,
@@ -15,6 +18,7 @@ from data.models.suggestion import (
     SuggestionStatut,
     SuggestionUnitaire,
 )
+from data.views import serialize_suggestion_groupe
 
 NB_SUGGESTIONS_DISPLAYED_WHEN_DELETING = 100
 
@@ -53,15 +57,42 @@ class SuggestionLogInline(admin.TabularInline):
     can_view = True
 
 
+class SuggestionQLSchemaMixin(DjangoQLSchema):
+    """Force JSON fields to be string fields for text search"""
+
+    def get_fields(self, model):
+        """Override to force JSON fields as string fields for text search."""
+        fields = super().get_fields(model)
+        result = []
+        for field in fields:
+            # Get field name (field can be a string or a Field object)
+            field_name = field if isinstance(field, str) else field.name
+
+            # Check if the field is a JSONField in the model
+            model_field = model._meta.get_field(field_name)
+            if model_field and (
+                isinstance(model_field, models.JSONField)
+                or isinstance(model_field, ArrayField)
+            ):
+                field = StrField(name=field_name)
+            result.append(field)
+        return result
+
+
 class SuggestionCohorteAdmin(DjangoQLSearchMixin, NotEditableMixin, admin.ModelAdmin):
-    djangoql_completion_enabled_by_default = False
+    class SuggestionCohorteQLSchema(SuggestionQLSchemaMixin):
+        pass
+
+    djangoql_completion_enabled_by_default = True
+    djangoql_schema = SuggestionCohorteQLSchema
+
     list_display = [
         "__str__",
         "statut",
         "metadonnees",
     ]
 
-    search_fields = ["metadata", "identifiant_action", "identifiant_execution"]
+    search_fields = ["id", "metadata", "identifiant_action", "identifiant_execution"]
     list_filter = [
         ("statut", admin.ChoicesFieldListFilter),
         ("type_action", admin.ChoicesFieldListFilter),
@@ -141,12 +172,22 @@ def mark_as_toproceed(self, request, queryset):
     )
 
 
-class SuggestionAdmin(NotSelfDeletableMixin, QuerysetFilterAdmin):
+class SuggestionAdmin(DjangoQLSearchMixin, NotSelfDeletableMixin):
+    class SuggestionQLSchema(SuggestionQLSchemaMixin):
+        pass
+
+    djangoql_completion_enabled_by_default = True
+    djangoql_schema = SuggestionQLSchema
+
     class SuggestionCohorteFilter(admin.RelatedFieldListFilter):
         def field_choices(self, field, request, model_admin):
-            return field.get_choices(include_blank=False, ordering=("-cree_le",))
+            # Filter only cohortes which have suggestions
+            cohortes_avec_suggestions = (
+                SuggestionCohorte.objects.get_cohortes_with_suggestions()
+            )
+            return [(cohorte.pk, str(cohorte)) for cohorte in cohortes_avec_suggestions]
 
-    search_fields = ["contexte", "suggestion", "metadata"]
+    search_fields = ["id", "contexte", "suggestion", "metadata"]
     list_display = [
         "id",
         "cohorte",
@@ -156,8 +197,8 @@ class SuggestionAdmin(NotSelfDeletableMixin, QuerysetFilterAdmin):
     ]
     readonly_fields = ["cree_le", "modifie_le"]
     list_filter = [
-        ("suggestion_cohorte", SuggestionCohorteFilter),
         ("statut", admin.ChoicesFieldListFilter),
+        ("suggestion_cohorte", SuggestionCohorteFilter),
     ]
     actions = [mark_as_rejected, mark_as_toproceed]
 
@@ -198,7 +239,6 @@ class SuggestionAdmin(NotSelfDeletableMixin, QuerysetFilterAdmin):
 
 class SuggestionUnitaireInline(admin.TabularInline):
     model = SuggestionUnitaire
-    # fields = ("statut", "acteur", "revision_acteur", "contexte", "metadata")
     extra = 0
     can_delete = False
     can_add = False
@@ -206,29 +246,98 @@ class SuggestionUnitaireInline(admin.TabularInline):
     can_view = True
 
 
+def _update_or_copy_suggestion_unitaires(suggestion_groupe):
+    revision = suggestion_groupe.revision_acteur
+    suggestion_unitaires = suggestion_groupe.suggestion_unitaires.all()
+    # get all SuggestionUnitaire for the SuggestionGroupe using the Acteur model
+    suggestion_unitaires_acteur = [
+        suggestion_unitaire
+        for suggestion_unitaire in suggestion_unitaires
+        if suggestion_unitaire.suggestion_modele == "Acteur"
+    ]
+    # for each SuggestionUnitaire for the Acteur model,
+    # we check if there is a SuggestionUnitaire for the RevisionActeur model
+    # with the same champs and the same values
+    # Then we update or create the SuggestionUnitaire for the RevisionActeur
+    for suggestion_unitaire_acteur in suggestion_unitaires_acteur:
+        # get the SuggestionUnitaire for the RevisionActeur model
+        # with the same champs and the same values if exists
+        suggestion_unitaire_revision = next(
+            (
+                su
+                for su in suggestion_unitaires
+                if su.suggestion_modele == "RevisionActeur"
+                and su.revision_acteur == revision
+                and su.champs == suggestion_unitaire_acteur.champs
+            ),
+            None,
+        )
+        if suggestion_unitaire_revision:
+            # if exists, we update the SuggestionUnitaire
+            suggestion_unitaire_revision.valeurs = suggestion_unitaire_acteur.valeurs
+        else:
+            # if not exists, we create the SuggestionUnitaire
+            suggestion_unitaire_revision = suggestion_unitaire_acteur
+            suggestion_unitaire_revision.id = None
+            suggestion_unitaire_revision.revision_acteur = revision
+            suggestion_unitaire_revision.suggestion_modele = "RevisionActeur"
+        suggestion_unitaire_revision.save()
+
+
+@admin.action(description="Appliquer les suggestions au parent")
+def apply_suggestions_to_parent(
+    self, request, queryset: QuerySet[SuggestionGroupe]
+) -> None:
+    for suggestion_groupe in queryset:
+        # Only for SuggestionGroupe with parent
+        if suggestion_groupe.suggestion_acteur_has_parent():
+            _update_or_copy_suggestion_unitaires(suggestion_groupe)
+
+    self.message_user(
+        request, f"Les {queryset.count()} suggestions sélectionnées ont été appliquées"
+    )
+
+
+@admin.action(description="Appliquer les suggestions au correction de l'acteur")
+def apply_suggestions_to_revision(self, request, queryset):
+    for suggestion_groupe in queryset:
+        # Only for SuggestionGroupe with parent
+        if suggestion_groupe.suggestion_acteur_has_revision():
+            _update_or_copy_suggestion_unitaires(suggestion_groupe)
+
+    self.message_user(
+        request, f"Les {queryset.count()} suggestions sélectionnées ont été appliquées"
+    )
+
+
 @admin.register(SuggestionGroupe)
 class SuggestionGroupeAdmin(
-    DjangoQLSearchMixin, NotEditableMixin, NotSelfDeletableMixin, QuerysetFilterAdmin
+    DjangoQLSearchMixin, NotEditableMixin, NotSelfDeletableMixin
 ):
-    actions = [mark_as_rejected, mark_as_toproceed]
+    actions = [
+        mark_as_rejected,
+        mark_as_toproceed,
+        apply_suggestions_to_parent,
+        apply_suggestions_to_revision,
+    ]
 
-    class SuggestionGroupeQLSchema(DjangoQLSchema):
+    class SuggestionGroupeQLSchema(SuggestionQLSchemaMixin):
         def get_fields(self, model):
             """Override to expose relations and custom fields."""
             fields = super().get_fields(model)
 
+            # Works with with_suggestion_unitaire_count set in get_queryset
             if model == SuggestionGroupe:
                 return [
-                    field
-                    for field in fields
-                    if field not in ["suggestion_unitaires_count"]
-                ] + [IntField(name="suggestion_unitaires_count")]
+                    *[
+                        field
+                        for field in fields
+                        if field not in ["suggestion_unitaires_count"]
+                    ],
+                    IntField(name="suggestion_unitaires_count"),
+                    BoolField(name="has_parent"),
+                ]
 
-            # Force string field for champs and valeurs in SuggestionUnitaire
-            if model == SuggestionUnitaire:
-                return [
-                    field for field in fields if field not in ["champs", "valeurs"]
-                ] + [StrField(name="champs"), StrField(name="valeurs")]
             return fields
 
     djangoql_completion_enabled_by_default = True
@@ -236,9 +345,13 @@ class SuggestionGroupeAdmin(
 
     class SuggestionCohorteFilter(admin.RelatedFieldListFilter):
         def field_choices(self, field, request, model_admin):
-            return field.get_choices(include_blank=False, ordering=("-cree_le",))
+            # Filter only cohortes which have suggestion groupes
+            cohortes_avec_suggestions = (
+                SuggestionCohorte.objects.get_cohortes_with_suggestion_groupes()
+            )
+            return [(cohorte.pk, str(cohorte)) for cohorte in cohortes_avec_suggestions]
 
-    search_fields = ["contexte", "metadata"]
+    search_fields = ["id", "contexte", "metadata"]
     list_display = [
         "groupe_de_suggestions",
     ]
@@ -246,22 +359,25 @@ class SuggestionGroupeAdmin(
     readonly_fields = ["cree_le", "modifie_le"]
     inlines = [SuggestionUnitaireInline]
     list_filter = [
-        ("suggestion_cohorte", SuggestionCohorteFilter),
         ("statut", admin.ChoicesFieldListFilter),
+        ("suggestion_cohorte", SuggestionCohorteFilter),
     ]
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
-        return queryset.prefetch_related(
-            "suggestion_unitaires",
-            "acteur",
-            "revision_acteur",
-            "revision_acteur__parent",
-        ).with_suggestion_unitaire_count()  # type: ignore[attr-defined]
+        return (
+            queryset.prefetch_related(
+                "suggestion_unitaires",
+                "acteur",
+                "revision_acteur",
+            )
+            .with_suggestion_unitaire_count()
+            .with_has_parent()
+        )
 
     def groupe_de_suggestions(self, obj):
         template_name = "data/_partials/suggestion_groupe_details.html"
-        return render_to_string(template_name, obj.serialize().to_dict())
+        return render_to_string(template_name, serialize_suggestion_groupe(obj))
 
 
 @admin.register(SuggestionUnitaire)
@@ -269,9 +385,12 @@ class SuggestionUnitaireAdmin(
     DjangoQLSearchMixin,
     NotEditableMixin,
     NotSelfDeletableMixin,
-    QuerysetFilterAdmin,
 ):
-    djangoql_completion_enabled_by_default = False
+    class SuggestionUnitaireQLSchema(SuggestionQLSchemaMixin):
+        pass
+
+    djangoql_completion_enabled_by_default = True
+    djangoql_schema = SuggestionUnitaireQLSchema
 
     class SuggestionCohorteFilter(admin.RelatedFieldListFilter):
         def field_choices(self, field, request, model_admin):
@@ -292,17 +411,17 @@ class SuggestionUnitaireAdmin(
     ]
 
     search_fields = [
+        "id",
         "raison",
         "parametres",
         "suggestion_modele",
         "champs",
         "valeurs",
-        "metadata",
     ]
     readonly_fields = ["cree_le", "modifie_le"]
     list_filter = [
-        ("suggestion_groupe__suggestion_cohorte", SuggestionCohorteFilter),
         ("statut", admin.ChoicesFieldListFilter),
+        ("suggestion_groupe__suggestion_cohorte", SuggestionCohorteFilter),
     ]
 
 
