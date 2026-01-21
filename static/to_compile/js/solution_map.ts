@@ -6,6 +6,8 @@ import maplibregl, {
   Marker,
 } from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
+import "carte-facile/carte-facile.css"
+import { mapStyles } from "carte-facile"
 import MapController from "../controllers/carte/map_controller"
 import type { Location } from "./types"
 const DEFAULT_LOCATION: LngLat = new LngLat(2.213749, 46.227638)
@@ -38,48 +40,17 @@ export class SolutionMap {
     this.#location = location
     this.#controller = controller
 
-    // Manage sources following theme
-    const sources: Record<string, any> = {}
-    const sourceId = theme === "carto-light" ? "carto-light" : "osm"
-
-    if (theme === "carto-light") {
-      sources["carto-light"] = {
-        type: "raster",
-        tiles: [
-          "https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
-          "https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
-          "https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
-        ],
-        tileSize: 256,
-      }
-    } else {
-      // Use OSM standard tiles with multiple servers as fallback
-      // These tiles contain all OSM data and are very reliable
-      // Multiple servers (a, b, c) allow better availability
-      sources.osm = {
-        type: "raster",
-        tiles: [
-          "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
-          "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
-          "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        ],
-        tileSize: 256,
-      }
-    }
+    // Map theme to Carte Facile styles
+    let mapStyle = mapStyles.desaturated
 
     this.map = new Map({
       container: selector,
-      style: {
-        version: 8,
-        sources,
-        layers: [{ type: "raster", id: `${theme}-layer`, source: sourceId }],
-      },
+      style: mapStyle,
       zoom: initialZoom,
-      maxZoom: DEFAULT_MAX_ZOOM,
+      maxZoom: 18.9, // Carte Facile recommended max zoom
       center: DEFAULT_LOCATION,
       attributionControl: {
         compact: true,
-        customAttribution: "© OpenStreetMap contributors, © CARTO",
       },
     })
     // Add zoom controls
