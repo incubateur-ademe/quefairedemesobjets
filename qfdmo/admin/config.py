@@ -17,6 +17,7 @@ class GroupeActionConfigInline(admin.StackedInline):
 class CarteConfigAdmin(gis_admin.GISModelAdmin):
     prepopulated_fields = {"slug": ["nom"]}
     gis_widget = CustomOSMWidget
+    list_filter = ("test",)
     autocomplete_fields = [
         "sous_categorie_objet",
         "source",
@@ -27,6 +28,7 @@ class CarteConfigAdmin(gis_admin.GISModelAdmin):
         "acteur_type",
         "label_qualite",
     ]
+
     fieldsets = (
         (
             "Informations générales",
@@ -34,6 +36,7 @@ class CarteConfigAdmin(gis_admin.GISModelAdmin):
                 "fields": (
                     "nom",
                     "slug",
+                    "test",
                 )
             },
         ),
@@ -71,6 +74,7 @@ class CarteConfigAdmin(gis_admin.GISModelAdmin):
                     "mode_affichage",
                     "nombre_d_acteurs_affiches",
                     "cacher_legende",
+                    "cacher_filtre_objet",
                     "supprimer_branding",
                 )
             },

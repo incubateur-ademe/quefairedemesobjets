@@ -1,3 +1,4 @@
+{% load modal_tags %}
 {% if not carte_config or not carte_config.cacher_legende %}
 <aside
     data-controller="responsive" data-responsive-media-query-value="(min-width: 768px)"
@@ -16,7 +17,7 @@
     <hr class="qf-pb-2w qf-pt-0">
 
     <div class="qf-flex qf-gap-2w qf-flex-col">
-        {% include "ui/components/modals/filtres.html" with button_extra_classes="fr-btn--sm qf-w-full qf-justify-center" button_only=True %}
+        {% modal_button modal_id="filtres" button_text="Filtres" button_extra_classes="fr-btn--secondary fr-btn--icon-left fr-icon-equalizer-line fr-btn--sm qf-w-full qf-justify-center" %}
 
         {% comment %}
         Check if the branding configuration is not set or if branding is allowed.
@@ -24,7 +25,7 @@
         {% endcomment %}
 
         {% if not carte_config or not carte_config.supprimer_branding %}
-            {% include "ui/components/modals/infos.html" with button_extra_classes="max-md:qf-hidden fr-btn--sm qf-w-full qf-justify-center" button_only=True %}
+            {% modal_button modal_id="infos" button_text="Infos" button_extra_classes="fr-btn--secondary fr-btn--icon-left fr-icon-info-line max-md:qf-hidden fr-btn--sm qf-w-full qf-justify-center" %}
         {% endif %}
 
         <div>

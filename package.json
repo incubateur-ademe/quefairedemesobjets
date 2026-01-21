@@ -48,7 +48,7 @@
     "bowser": "^2.13.1",
     "eslint-config-prettier": "^10.1.8",
     "posthog-js": "^1.314.0",
-    "maplibre-gl": "^5.15.0",
+    "maplibre-gl": "^5.16.0",
     "stimulus-use": "^0.52.3",
     "tailwindcss": "^3.4.19"
   },
@@ -59,12 +59,12 @@
     "@playwright/test": "^1.57.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@types/jest": "^30.0.0",
-    "@types/lodash": "^4.17.21",
-    "@types/node": "^25.0.3",
-    "@typescript-eslint/eslint-plugin": "^8.52.0",
+    "@types/lodash": "^4.17.23",
+    "@types/node": "^25.0.7",
+    "@typescript-eslint/eslint-plugin": "^8.53.0",
     "buffer": "^6.0.3",
     "eslint": "^9.39.2",
-    "eslint-config-love": "^140.0.0",
+    "eslint-config-love": "^144.0.0",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-n": "^17.23.1",
     "eslint-plugin-prettier": "^5.5.4",
@@ -81,9 +81,9 @@
     "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.52.0"
+    "typescript-eslint": "^8.53.0"
   },
   "optionalDependencies": {
-    "@parcel/watcher-linux-x64-glibc": "^2.5.1"
+    "@parcel/watcher-linux-x64-glibc": "^2.5.4"
   }
 }

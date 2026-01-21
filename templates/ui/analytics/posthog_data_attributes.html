@@ -1,5 +1,5 @@
 data-analytics-posthog-key-value="{{ key }}"
-data-analytics-posthog-debug-value="{{ POSTHOG_DEBUG|lower }}"
+data-analytics-posthog-debug-value="{{ debug|yesno:'true,false' }}"
 {% if request.user.is_authenticated %}
     data-analytics-user-username-value="{{ request.user.username }}"
     data-analytics-user-email-value="{{ request.user.email }}"
