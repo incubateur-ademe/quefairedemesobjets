@@ -140,8 +140,14 @@ class ReusableContent(index.Indexed, models.Model):
 class CompiledFieldMixin(Page):
     @cached_property
     def famille(self):
-        if famille := self.get_ancestors().type(FamilyPage).first():
-            return famille
+        """
+        Returns the parent ProduitPage if it exists.
+        A 'famille' is a ProduitPage that is parent to the current ProduitPage.
+        """
+        from qfdmd.models import ProduitPage
+
+        if parent := self.get_ancestors().type(ProduitPage).last():
+            return parent
 
     @cached_property
     def compiled_body(self):
@@ -223,17 +229,19 @@ class ProduitPageTag(TaggedItemBase):
 
 
 class AncestorFieldsMixin:
-    @property
-    def family(self):
-        return FamilyPage.objects.ancestor_of(self).first()
+    pass
 
 
 class ProduitPage(
     CompiledFieldMixin, Page, GenreNombreModel, TitleFields, AncestorFieldsMixin
 ):
     template = "ui/pages/produit_page.html"
-    subpage_types = []
-    parent_page_types = ["qfdmd.produitindexpage", "qfdmd.familypage"]
+    subpage_types = ["qfdmd.produitpage"]
+    parent_page_types = [
+        "qfdmd.produitindexpage",
+        "qfdmd.produitpage",
+        "qfdmd.familypage",
+    ]
 
     # Taxonomie
     tags = ClusterTaggableManager(through=ProduitPageTag, blank=True, related_name="+")
@@ -259,6 +267,13 @@ class ProduitPage(
     usage_unique = models.BooleanField(
         "À usage unique",
         default=False,
+    )
+
+    est_famille = models.BooleanField(
+        "Est une famille",
+        default=False,
+        help_text="Si cochée, cette page sera affichée avec le template famille "
+        "(fond vert) et pourra contenir des sous-produits.",
     )
 
     infotri = StreamField([("image", ImageBlock())], blank=True)
@@ -355,6 +370,7 @@ class ProduitPage(
         ),
         MultiFieldPanel(
             [
+                FieldPanel("est_famille"),
                 FieldPanel("usage_unique"),
                 FieldPanel("tags"),
                 FieldPanel("sous_categorie_objet"),
@@ -425,10 +441,16 @@ class ProduitPage(
                     # No exclusion exists, that's fine
                     pass
 
+    def get_template(self, request, *args, **kwargs):
+        if self.est_famille:
+            return "ui/pages/family_page.html"
+        return "ui/pages/produit_page.html"
+
     class Meta:
         verbose_name = "Produit"
 
 
+# TODO: Remove FamilyPageTag in a future PR (replaced by ProduitPage.est_famille)
 class FamilyPageTag(TaggedItemBase):
     content_object = ParentalKey(
         "qfdmd.FamilyPage",
@@ -437,7 +459,14 @@ class FamilyPageTag(TaggedItemBase):
     )
 
 
+# TODO: Remove FamilyPage in a future PR (replaced by ProduitPage.est_famille)
 class FamilyPage(ProduitPage):
+    """
+    DEPRECATED: This model is kept for backwards compatibility.
+    Use ProduitPage with est_famille=True instead.
+    This model will be removed in a future PR.
+    """
+
     template = "ui/pages/family_page.html"
     subpage_types = ["qfdmd.produitpage"]
 
