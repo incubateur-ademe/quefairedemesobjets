@@ -6,9 +6,11 @@ from django.core.exceptions import ValidationError
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy
+from django.utils.safestring import mark_safe
 from django.views.generic import FormView, View
 from more_itertools import flatten
 
+from core.templatetags.admin_data_tags import display_diff_values
 from data.forms import SuggestionGroupeStatusForm
 from data.models.suggestion import (
     SuggestionAction,
@@ -101,7 +103,7 @@ def _extract_acteur_values(
                 ],
                 key=lambda x: x["action"],
             )
-            return json.dumps(prop_data, ensure_ascii=False).replace('"', "'")
+            return json.dumps(prop_data, ensure_ascii=False)  # .replace('"', "'")
         return ""
 
     def get_field_from_perimetre_adomicile_codes(
@@ -123,7 +125,7 @@ def _extract_acteur_values(
                     key=lambda x: (x["type"], x["valeur"]),
                 ),
                 ensure_ascii=False,
-            ).replace('"', "'")
+            )  # .replace('"', "'")
             if perimetres
             else ""
         )
@@ -143,7 +145,7 @@ def _extract_acteur_values(
         return (
             json.dumps(
                 sorted([obj.code for obj in m2m_objects]), ensure_ascii=False
-            ).replace('"', "'")
+            )  # .replace('"', "'")
             if m2m_objects
             else ""
         )
@@ -241,25 +243,60 @@ def _validate_proposed_updates(values_to_update: dict, fields_values: dict) -> d
 def _suggestion_unitaires_to_suggestion_source_model_by_model_name(
     suggestion_unitaires: list[SuggestionUnitaire],
     model_name: str,
-    revision_acteur_id: int | None = None,
 ) -> SuggestionSourceModel:
     suggestion_unitaires_dict = {
         tuple(unit.champs): unit.valeurs
         for unit in suggestion_unitaires
         if unit.suggestion_modele == model_name
-        and (
-            revision_acteur_id is None or unit.revision_acteur_id == revision_acteur_id
-        )
     }
     return _dict_to_suggestion_source_model(
         _flatten_suggestion_unitaires(suggestion_unitaires_dict)
     )
 
 
+def _field_without_suggestion_display(field_value: str | None) -> str:
+    if field_value is None or field_value == "":
+        field_value = "-"
+    return mark_safe(f'<span style="color: grey;">{field_value}</span>')
+
+
+def _display_suggestion_unitaire_for_a_field(
+    field_name: str,
+    suggestion_source_model: SuggestionSourceModel,
+    field_value: str | None = None,
+) -> str:
+    suggestion_unitaire = getattr(suggestion_source_model, field_name)
+    if suggestion_unitaire is None:
+        return _field_without_suggestion_display(field_value)
+    return display_diff_values(field_value, suggestion_unitaire)
+
+
 def serialize_suggestion_groupe(
     suggestion_groupe: SuggestionGroupe,
 ) -> dict:
-    """Serialize a SuggestionGroupe using SuggestionSourceModel for validation"""
+    """
+    Serialize a SuggestionGroupe using SuggestionSourceModel for validation
+
+    enhancements:
+    - get acteur + suggestion on acteur
+    - get revision_acteur + suggestion on revision_acteur
+    - get parent_revision_acteur + suggestion on parent_revision_acteur
+
+    get all field_group edited
+
+    for each field_group edited:
+        for each [Acteur, RevisionActeur, ParentRevisionActeur]:
+            if no suggestion:
+                display the "acteur" value in grey, default - if not value
+            if suggestion:
+                display diff between suggestion and "acteur" value
+    return the dict:
+        fields_values: {
+            "acteur": value_to_display,
+            "revision_acteur": value_to_display,
+            "parent_revision_acteur": value_to_display,
+        }
+    """
     # Get all suggestion_unitaires
     suggestion_unitaires = list(suggestion_groupe.suggestion_unitaires.all())
     # Flatten and convert to SuggestionSourceModel
@@ -273,7 +310,6 @@ def serialize_suggestion_groupe(
         _suggestion_unitaires_to_suggestion_source_model_by_model_name(
             suggestion_unitaires,
             "RevisionActeur",
-            revision_acteur_id=suggestion_groupe.revision_acteur_id,
         )
     )
     fields_groups = _get_ordered_fields_groups(suggestion_unitaires)
@@ -289,29 +325,33 @@ def serialize_suggestion_groupe(
         # Get fields from acteur_suggestion_unitaires
         fields_values = {
             key: {
-                "displayed_value": getattr(
-                    acteur_suggestion_unitaires_by_field, key, None
-                ),
-                "new_value": getattr(acteur_suggestion_unitaires_by_field, key, None),
-                "updated_displayed_value": (
-                    getattr(
-                        acteur_overridden_by_suggestion_unitaires_by_field, key, None
-                    )
+                "acteur": _display_suggestion_unitaire_for_a_field(
+                    key, acteur_suggestion_unitaires_by_field
+                ),  # FIXME: display the diff suggestion
+                "revision_acteur": _display_suggestion_unitaire_for_a_field(
+                    key, acteur_overridden_by_suggestion_unitaires_by_field
                 ),
             }
             for key in flattened_fields_groups
         }
         return {
-            **_build_serializer_common_fields(suggestion_groupe),
+            "suggestion_groupe": suggestion_groupe,
             "identifiant_unique": identifiant_unique,
             "fields_groups": fields_groups,
             "fields_values": fields_values,
-            "acteur": suggestion_groupe.acteur,
-            "acteur_overridden_by": suggestion_groupe.revision_acteur,
         }
 
     acteur = suggestion_groupe.acteur
-    acteur_overridden_by = suggestion_groupe.revision_acteur
+    revision_acteur = suggestion_groupe.revision_acteur
+    parent_revision_acteur = suggestion_groupe.parent_revision_acteur
+
+    # Flatten and convert to SuggestionSourceModel
+    parent_revision_acteur_suggestion_unitaires_by_field = (
+        _suggestion_unitaires_to_suggestion_source_model_by_model_name(
+            suggestion_unitaires,
+            "ParentRevisionActeur",
+        )
+    )
 
     if not acteur:
         raise ValueError("acteur is required for non-SOURCE_AJOUT suggestions")
@@ -320,45 +360,44 @@ def serialize_suggestion_groupe(
     acteur_values = _extract_acteur_values(
         acteur, fields_to_include=flattened_fields_groups
     )
-    acteur_overridden_by_values = {}
-    if acteur_overridden_by:
-        acteur_overridden_by_values = _extract_acteur_values(
-            acteur_overridden_by, fields_to_include=flattened_fields_groups
+    revision_acteur_values = SuggestionSourceModel()
+    if revision_acteur:
+        revision_acteur_values = _extract_acteur_values(
+            revision_acteur, fields_to_include=flattened_fields_groups
+        )
+    parent_revision_acteur_values = SuggestionSourceModel()
+    if parent_revision_acteur:
+        parent_revision_acteur_values = _extract_acteur_values(
+            parent_revision_acteur, fields_to_include=flattened_fields_groups
         )
 
-    # Build displayed_values: priority is
-    # acteur_overridden_by > acteur_suggestion_unitaires > acteur
-    displayed_values_dict = {}
-    for field in flattened_fields_groups:
-        if field in SuggestionSourceModel.get_not_editable_fields():
-            continue
-        value = getattr(acteur_overridden_by_values, field, None)
-        if value is None or value == "":
-            value = getattr(acteur_suggestion_unitaires_by_field, field, None) or ""
-        if value is None or value == "":
-            value = getattr(acteur_values, field, "") or ""
-        displayed_values_dict[field] = str(value) if value is not None else ""
-
-    displayed_values = SuggestionSourceModel(**displayed_values_dict)
-
-    fields_values = {}
-    for field in flattened_fields_groups:
-        fields_values[field] = {
-            "displayed_value": getattr(displayed_values, field, None),
-            "updated_displayed_value": (
-                getattr(acteur_overridden_by_suggestion_unitaires_by_field, field, None)
+    fields_values = {
+        key: {
+            "acteur": _display_suggestion_unitaire_for_a_field(
+                key, acteur_suggestion_unitaires_by_field, getattr(acteur_values, key)
+            ),  # FIXME: display the diff suggestion
+            "revision_acteur": _display_suggestion_unitaire_for_a_field(
+                key,
+                acteur_overridden_by_suggestion_unitaires_by_field,
+                getattr(revision_acteur_values, key),
             ),
-            "new_value": getattr(acteur_suggestion_unitaires_by_field, field, None),
-            "old_value": getattr(acteur_values, field, None),
+            "parent_revision_acteur": _display_suggestion_unitaire_for_a_field(
+                key,
+                parent_revision_acteur_suggestion_unitaires_by_field,
+                getattr(parent_revision_acteur_values, key),
+            ),
         }
+        for key in flattened_fields_groups
+    }
 
     return {
-        **_build_serializer_common_fields(suggestion_groupe),
+        "suggestion_groupe": suggestion_groupe,
+        "identifiant_unique": acteur.identifiant_unique,
         "fields_groups": fields_groups,
         "fields_values": fields_values,
         "acteur": acteur,
-        "identifiant_unique": acteur.identifiant_unique,
-        "acteur_overridden_by": acteur_overridden_by,
+        "revision_acteur": revision_acteur,
+        "parent_revision_acteur": parent_revision_acteur,
     }
 
 

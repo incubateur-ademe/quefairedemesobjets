@@ -303,15 +303,16 @@ def insert_suggestion(
             # if it exists
             if (
                 suggestion_cohorte.type_action == constants.SUGGESTION_SOURCE_SUPRESSION
-                and keys == ["statut"]
+                and "statut" in keys
                 and revision_acteur
             ):
+                logging.warning(
+                    f"SUGGESTION_SOURCE_SUPRESSION - Revision acteur: {revision_acteur}"
+                )
                 SuggestionUnitaire(
                     suggestion_groupe=suggestion_groupe,
                     statut=constants.SUGGESTION_AVALIDER,
-                    acteur=acteur,
                     revision_acteur=revision_acteur,
-                    parent_revision_acteur=parent,
                     suggestion_modele="RevisionActeur",
                     champs=keys,
                     valeurs=values,

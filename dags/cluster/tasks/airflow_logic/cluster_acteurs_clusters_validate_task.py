@@ -45,9 +45,9 @@ def cluster_acteurs_clusters_validate_wrapper(ti) -> None:
 
     cluster_acteurs_clusters_validate(df)
 
-    logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
-    logging.info(" - Validation des suggestions: succès ✅")
-    logging.info(" - 0 modification de quoi que ce soit à ce stade (validation pure)")
+    logger.info(log.banner_string("🏁 Résultat final de cette tâche"))
+    logger.info(" - Validation des suggestions: succès ✅")
+    logger.info(" - 0 modification de quoi que ce soit à ce stade (validation pure)")
 
 
 def cluster_acteurs_clusters_validate_task(dag: DAG) -> PythonOperator:

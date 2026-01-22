@@ -44,7 +44,7 @@ def cluster_acteurs_read_for_clustering(
     # --------------------------------
     # 1) Select orphans
     # --------------------------------
-    logging.info(log.banner_string("Sélection des orphelins"))
+    logger.info(log.banner_string("Sélection des orphelins"))
     fields = fields_protected + fields_transformed + include_if_all_fields_filled
     df_orphans, sql = cluster_acteurs_read_orphans(
         fields=fields,
@@ -67,7 +67,7 @@ def cluster_acteurs_read_for_clustering(
     # --------------------------------
     # 2) Select parents only
     # --------------------------------
-    logging.info(log.banner_string("Sélection des parents"))
+    logger.info(log.banner_string("Sélection des parents"))
 
     df_parents, sql_parents = cluster_acteurs_read_parents(
         fields=fields,
@@ -95,7 +95,7 @@ def cluster_acteurs_read_for_clustering(
     # --------------------------------
     # 3) Fusion acteurs + orphelins
     # --------------------------------
-    logging.info(log.banner_string("Fusion parents + orphelins"))
+    logger.info(log.banner_string("Fusion parents + orphelins"))
     ids = set()
     ids.update(df_orphans["identifiant_unique"].values)
     ids.update(df_parents["identifiant_unique"].values)

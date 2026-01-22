@@ -86,7 +86,7 @@ Modifier le fichier `/etc/hosts`, ajouter les lignes
 Copier la base de données de prod
 
 ```sh
-make db-restore
+make db-restore-local-from-prod
 ```
 
 Lancer l'application
