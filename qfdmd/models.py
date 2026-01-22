@@ -379,7 +379,6 @@ class ProduitPage(
                 FieldPanel("usage_unique"),
                 FieldPanel("tags"),
                 FieldPanel("search_tags"),
-                FieldPanel("search_variants"),
                 FieldPanel("sous_categorie_objet"),
             ],
             heading="Taxonomie",

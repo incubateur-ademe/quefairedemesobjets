@@ -4,7 +4,10 @@ from django.urls import path, reverse
 from wagtail import hooks
 from wagtail.admin.action_menu import ActionMenuItem
 
+from qfdmd.models import ProduitPage
 from qfdmd.views import (
+    bonus_viewset,
+    import_legacy_synonymes,
     legacy_migrate,
     pokemon_chooser_viewset,
     search_term_viewset,
@@ -54,9 +57,29 @@ class MigratePageMenuItem(ActionMenuItem):
         return False
 
 
+class ImportLegacySynonymesMenuItem(ActionMenuItem):
+    name = "import-legacy-synonymes"
+    label = "Importer les synonymes de recherche"
+    icon_name = "download"
+
+    def get_url(self, context):
+        page = context["page"]
+        return reverse("import_legacy_synonymes", args=[page.id])
+
+    def is_shown(self, context):
+        """Only show this button for ProduitPage instances."""
+        page = context.get("page")
+        return page and isinstance(page.specific, ProduitPage)
+
+
 @hooks.register("register_page_action_menu_item")
 def register_sync_page_menu_item():
     return MigratePageMenuItem(order=10)
+
+
+@hooks.register("register_page_action_menu_item")
+def register_import_legacy_synonymes_menu_item():
+    return ImportLegacySynonymesMenuItem(order=11)
 
 
 @hooks.register("register_admin_urls")
@@ -66,6 +89,11 @@ def register_legacy_migrate_url():
             "legacy/migrate/<str:id>/",
             legacy_migrate,
             name="legacy_migrate",
+        ),
+        path(
+            "legacy/import-synonymes/<str:id>/",
+            import_legacy_synonymes,
+            name="import_legacy_synonymes",
         ),
     ]
 

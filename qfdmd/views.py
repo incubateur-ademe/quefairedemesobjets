@@ -42,6 +42,91 @@ def legacy_migrate(request, id):
     return redirect("wagtailadmin_pages:edit", id)
 
 
+def import_legacy_synonymes(request, id):
+    """
+    Import legacy synonymes as SearchTags for a ProduitPage.
+
+    This view collects all legacy synonymes from:
+    - legacy_synonymes: directly linked synonymes
+    - legacy_produit: synonymes from linked legacy products
+
+    Excluding:
+    - legacy_synonymes_to_exclude: synonymes marked for exclusion
+
+    For each collected synonyme:
+    1. Mark the Synonyme and its SearchTerm as legacy=True
+    2. Create a SearchTag linked to the ProduitPage
+    """
+    from qfdmd.models import ProduitPage, SearchTag, TaggedSearchTag
+
+    page = Page.objects.get(id=id).specific
+
+    if not isinstance(page, ProduitPage):
+        messages.error(
+            request,
+            "Cette action n'est disponible que pour les pages Produit.",
+        )
+        return redirect("wagtailadmin_pages:edit", id)
+
+    # Collect synonymes to exclude
+    excluded_synonyme_ids = set(
+        page.legacy_synonymes_to_exclude.values_list("synonyme_id", flat=True)
+    )
+
+    # Collect all synonymes from legacy_synonymes
+    direct_synonymes = list(
+        Synonyme.objects.filter(next_wagtail_page__page=page).exclude(
+            id__in=excluded_synonyme_ids
+        )
+    )
+
+    # Collect all synonymes from legacy_produit (products linked to this page)
+    product_synonymes = list(
+        Synonyme.objects.filter(produit__next_wagtail_page__page=page).exclude(
+            id__in=excluded_synonyme_ids
+        )
+    )
+
+    # Combine and deduplicate
+    all_synonymes = {s.id: s for s in direct_synonymes + product_synonymes}.values()
+
+    imported_count = 0
+    for synonyme in all_synonymes:
+        # 1. Mark Synonyme as legacy by syncing its SearchTerm with legacy=True
+        # The Synonyme.get_search_term_legacy() already returns True,
+        # so we just need to sync it
+        search_term, _ = SearchTerm.sync_from_object(synonyme)
+
+        # 2. Create or get SearchTag with the synonyme name
+        search_tag, tag_created = SearchTag.objects.get_or_create(
+            name=synonyme.nom,
+            defaults={"slug": synonyme.slug},
+        )
+
+        # 3. Link the SearchTag to the ProduitPage if not already linked
+        tagged, tagged_created = TaggedSearchTag.objects.get_or_create(
+            tag=search_tag,
+            content_object=page,
+        )
+
+        if tagged_created:
+            imported_count += 1
+
+    if imported_count > 0:
+        messages.success(
+            request,
+            f"{imported_count} synonyme(s) de recherche importé(s) avec succès.",
+        )
+    else:
+        messages.info(
+            request,
+            "Aucun nouveau synonyme à importer. "
+            "Tous les synonymes sont déjà présents ou aucun synonyme legacy n'est lié.",
+        )
+
+    return redirect("wagtailadmin_pages:edit", id)
+
+
 @cache_control(max_age=31536000)
 def get_assistant_script(request):
     return static_file_content_from("embed/assistant.js")
