@@ -140,12 +140,18 @@ class ReusableContent(index.Indexed, models.Model):
 class CompiledFieldMixin(Page):
     @cached_property
     def famille(self):
+        from qfdmd.models import ProduitPage
+
         """
         Returns the parent ProduitPage if it exists.
         A 'famille' is a ProduitPage that is parent to the current ProduitPage.
         """
 
-        if parent := self.get_ancestors().type(ProduitPage).last():
+        if (
+            parent := ProduitPage.objects.filter(est_famille=True)
+            .ancestor_of(self)
+            .first()
+        ):
             return parent
 
     @cached_property
