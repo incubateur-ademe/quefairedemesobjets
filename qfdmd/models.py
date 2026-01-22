@@ -342,18 +342,6 @@ class ProduitPage(
         default=False,
     )
 
-    search_variants = models.TextField(
-        verbose_name="Variantes de recherche",
-        blank=True,
-        default="",
-        help_text=(
-            "Termes alternatifs permettant de trouver cette page dans la recherche. "
-            "Ces variantes sont invisibles pour les utilisateurs mais améliorent "
-            "la recherche. Séparez les termes par des virgules ou des retours "
-            "à la ligne."
-        ),
-    )
-
     infotri = StreamField([("image", ImageBlock())], blank=True)
     body = StreamField(
         STREAMFIELD_COMMON_BLOCKS,
@@ -451,7 +439,6 @@ class ProduitPage(
                 FieldPanel("usage_unique"),
                 FieldPanel("tags"),
                 FieldPanel("search_tags"),
-                FieldPanel("search_variants"),
                 FieldPanel("sous_categorie_objet"),
             ],
             heading="Taxonomie",
