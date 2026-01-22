@@ -17,6 +17,31 @@ def is_page(potential_page):
     return isinstance(potential_page, Page)
 
 
+@register.filter
+def is_search_term(potential_search_term):
+    from search.models import SearchTerm
+
+    return isinstance(potential_search_term, SearchTerm)
+
+
+@register.filter
+def genre_nombre_from(reusable_content: ReusableContent, page):
+    """Retrieves reusable content based on page genre and nombre.
+
+    Takes a ReusableContent object and a page (ProduitPage or FamilyPage) and returns
+    the appropriate content with placeholder replacement. The content is retrieved based
+    on the page's genre and nombre attributes, and any "<objet>" placeholder
+    in the content is replaced with the page's titre_phrase or title.
+    """
+    if not reusable_content:
+        return ""
+
+    content = reusable_content.get_from_genre_nombre(page.genre, page.nombre)
+
+    replacement = page.titre_phrase if page.titre_phrase else page.title
+    return richtext(content.replace("&lt;objet&gt;", replacement))
+
+
 @register.inclusion_tag("ui/components/patchwork/patchwork.html")
 def patchwork() -> dict:
     from qfdmd.models import Synonyme

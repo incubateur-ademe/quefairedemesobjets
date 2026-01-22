@@ -19,6 +19,7 @@ from qfdmd.models import (
     Produit,
     Synonyme,
 )
+from search.models import SearchTerm
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +64,7 @@ def search_view(request) -> HttpResponse:
     template_name = SEARCH_VIEW_TEMPLATE_NAME
 
     if form.is_valid():
-        form.search(request.beta)
+        form.search()
         context.update(search_form=form)
 
     return render(request, template_name, context=context)
@@ -169,3 +170,29 @@ class BlockChooserViewSet(ChooserViewSet):
 
 
 pokemon_chooser_viewset = BlockChooserViewSet("pokemon_chooser")
+
+
+class SearchTermViewSet(ModelViewSet):
+    model = SearchTerm
+    form_fields = ["term", "url", "search_variants", "legacy"]
+    icon = "search"
+    add_to_admin_menu = True
+    menu_label = "Termes de recherche"
+    copy_view_enabled = False
+    inspect_view_enabled = True
+    list_display = ["term", "url", "legacy", "updated_at"]
+    list_filter = ["legacy", "linked_content_type"]
+
+
+class BonusViewSet(ModelViewSet):
+    model = Bonus
+    form_fields = ["title", "montant_min", "montant_max"]
+    icon = "tag"
+    list_filter = ["montant_min", "montant_max"]
+    add_to_admin_menu = True
+    copy_view_enabled = False
+    inspect_view_enabled = True
+
+
+search_term_viewset = SearchTermViewSet("termes-de-recherche")
+bonus_viewset = BonusViewSet("bonus")

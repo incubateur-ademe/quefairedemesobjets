@@ -146,6 +146,7 @@ INSTALLED_APPS = [
     "colorfield",
     "core",
     "stats",
+    "search",
     "qfdmd",
     "qfdmo",
     "infotri",
