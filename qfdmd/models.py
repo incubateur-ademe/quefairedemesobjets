@@ -144,7 +144,6 @@ class CompiledFieldMixin(Page):
         Returns the parent ProduitPage if it exists.
         A 'famille' is a ProduitPage that is parent to the current ProduitPage.
         """
-        from qfdmd.models import ProduitPage
 
         if parent := self.get_ancestors().type(ProduitPage).last():
             return parent
@@ -228,13 +227,7 @@ class ProduitPageTag(TaggedItemBase):
     )
 
 
-class AncestorFieldsMixin:
-    pass
-
-
-class ProduitPage(
-    CompiledFieldMixin, Page, GenreNombreModel, TitleFields, AncestorFieldsMixin
-):
+class ProduitPage(CompiledFieldMixin, Page, GenreNombreModel, TitleFields):
     template = "ui/pages/produit_page.html"
     subpage_types = ["qfdmd.produitpage"]
     parent_page_types = [
