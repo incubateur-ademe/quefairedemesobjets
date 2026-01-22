@@ -12,7 +12,9 @@
         <nav class="qf-flex qf-justify-end qf-gap-2w max-md:qf-pt-2w md:qf-py-2w">
             {% modal_button modal_id="filtres" button_text="Filtres" button_extra_classes="fr-btn--secondary fr-btn--icon-left fr-icon-equalizer-line max-md:qf-hidden" %}
             {% include "ui/components/carte/buttons/ajouter_un_lieu_mode_liste.html" %}
+            {% if not carte_config or not carte_config.supprimer_branding %}
             {% modal_button modal_id="infos" button_text="Infos" button_extra_classes="fr-btn--secondary fr-btn--icon-left fr-icon-info-line max-md:qf-hidden" %}
+            {% endif %}
         </nav>
         <div class="qf-flex qf-flex-col qf-justify-center qf-items-center">
             {% if paginated_acteurs_obj %}
