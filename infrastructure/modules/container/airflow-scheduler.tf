@@ -12,11 +12,11 @@ resource "scaleway_container" "airflow_scheduler" {
   deploy              = true
   privacy             = "public"
   protocol            = "http1"
-  local_storage_limit = 10240 # 10 GB
+  local_storage_limit = 10250 # 10 GB
   sandbox             = "v1"
   health_check {
     http {
-      path = "/health"
+      path = "/api/v1/health"
     }
     failure_threshold = 5
     interval          = "30s"
@@ -30,6 +30,7 @@ resource "scaleway_container" "airflow_scheduler" {
     AIRFLOW__CORE__EXECUTOR                      = "LocalExecutor"
     AIRFLOW__CORE__FERNET_KEY                    = ""
     AIRFLOW__CORE__LOAD_EXAMPLES                 = "false"
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONNECT_ARGS  = "airflow_local_settings.keepalive_kwargs"
     AIRFLOW__LOGGING__ENCRYPT_S3_LOGS            = "false"
     AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER     = "s3://${var.prefix}-${var.environment}-airflow"
     AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID         = "scalewaylogs"

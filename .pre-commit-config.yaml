@@ -51,11 +51,15 @@ repos:
       # OpenTofu hooks
       - id: tofu_fmt
         name: tofu fmt
-        entry: tofu fmt
+        entry: tofu fmt -recursive infrastructure
         language: system
         types: [hcl]
+        pass_filenames: false
+        exclude: \.lock\.hcl$
       - id: tofu_docs
         name: tofu docs
-        entry: tofu fmt
+        entry: tofu fmt -recursive infrastructure
         language: system
         types: [hcl]
+        pass_filenames: false
+        exclude: \.lock\.hcl$
