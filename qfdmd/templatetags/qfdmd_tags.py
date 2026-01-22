@@ -13,18 +13,6 @@ logger = logging.getLogger(__name__)
 
 
 @register.filter
-def is_page(potential_page):
-    return isinstance(potential_page, Page)
-
-
-@register.filter
-def is_search_term(potential_search_term):
-    from search.models import SearchTerm
-
-    return isinstance(potential_search_term, SearchTerm)
-
-
-@register.filter
 def genre_nombre_from(reusable_content: ReusableContent, page):
     """Retrieves reusable content based on page genre and nombre.
 
