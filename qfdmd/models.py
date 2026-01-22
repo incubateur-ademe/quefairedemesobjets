@@ -266,14 +266,6 @@ class SearchTag(SearchTermSyncMixin, TagBase):
             pass
         return None
 
-    @classmethod
-    def get_search_fields(cls) -> list:
-        """Returns the search fields for Wagtail indexing."""
-        return [
-            index.SearchField("name"),
-            index.AutocompleteField("name"),
-        ]
-
 
 class TaggedSearchTag(ItemBase):
     """Through model for SearchTag on ProduitPage."""
@@ -520,11 +512,6 @@ class ProduitPage(
     def get_search_term_parent_object(self):
         """Returns the family page (parent) if it exists."""
         return self.family
-
-    @classmethod
-    def get_search_fields(cls) -> list:
-        """Returns the search fields for Wagtail indexing."""
-        return cls.search_fields
 
     def clean(self):
         super().clean()
@@ -959,11 +946,6 @@ class Synonyme(SearchTermSyncMixin, index.Indexed, AbstractBaseProduit):
     def get_search_term_legacy(self) -> bool:
         """Returns True to indicate this is a legacy search term."""
         return True
-
-    @classmethod
-    def get_search_fields(cls) -> list:
-        """Returns the search fields for indexing."""
-        return cls.search_fields
 
 
 @register_setting
