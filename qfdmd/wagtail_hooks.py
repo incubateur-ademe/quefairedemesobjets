@@ -8,7 +8,7 @@ from qfdmd.views import (
     bonus_viewset,
     legacy_migrate,
     pokemon_chooser_viewset,
-    reusable_content_viewset,
+    search_term_viewset,
 )
 
 
@@ -23,8 +23,8 @@ def register_pokemon_chooser_viewset():
 
 
 @hooks.register("register_admin_viewset")
-def register_reusable_viewset():
-    return reusable_content_viewset
+def register_search_term_viewset():
+    return search_term_viewset
 
 
 @hooks.register("register_admin_viewset")

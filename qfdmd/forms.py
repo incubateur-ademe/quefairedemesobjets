@@ -1,5 +1,4 @@
 import logging
-from typing import Any
 
 from django import forms
 from django.contrib.postgres.lookups import Unaccent
@@ -9,6 +8,8 @@ from django.contrib.postgres.search import (
 )
 from django.db.models import Case, F, Value, When
 from dsfr.forms import DsfrBaseForm
+
+from search.models import SearchTerm
 
 from .models import ProduitPage, Synonyme
 
@@ -27,16 +28,14 @@ class SearchForm(DsfrBaseForm):
         widget=SearchInput,
     )
 
-    def search(self, beta: bool) -> list[dict[str, Any]]:
-        """Main search method that orchestrates the search process."""
+    def search(self) -> list:
+        """Search using the SearchTerm model with django-modelsearch autocomplete."""
         search_query = self.cleaned_data.get("input")
         if not search_query:
-            return []
+            self.results = []
+            return self.results
 
-        if beta:
-            self.results = self._search_pages(search_query)
-        else:
-            self.results = self._search_legacy_synonymes(search_query)
+        self.results = list(SearchTerm.objects.autocomplete(search_query)[:10])
         return self.results
 
     def _search_pages(self, search_query: str):
