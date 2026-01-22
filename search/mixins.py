@@ -43,15 +43,6 @@ class SearchTermSyncMixin:
             "Subclasses must implement get_search_term_parent_object()"
         )
 
-    @classmethod
-    @abstractmethod
-    def get_search_fields(cls) -> list:
-        """
-        Returns the list of search fields for Wagtail search indexing.
-        These fields are used by the SearchTerm model for dynamic search.
-        """
-        raise NotImplementedError("Subclasses must implement get_search_fields()")
-
     def get_search_term_variants(self) -> str:
         """
         Returns additional search variants for this object.

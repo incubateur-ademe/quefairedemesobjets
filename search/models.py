@@ -8,8 +8,6 @@ from wagtail.snippets.models import register_snippet
 
 
 class SearchTermQuerySet(SearchableQuerySetMixin, QuerySet):
-    """Custom QuerySet that enables search and autocomplete methods."""
-
     pass
 
 
