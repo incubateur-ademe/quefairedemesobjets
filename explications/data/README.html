@@ -401,11 +401,11 @@
 <p>Pour que les logs du scheduler soient stockés sur S3, les instances Scaleway sont lancés avec les variables d’environnement:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">AIRFLOW__LOGGING__REMOTE_LOGGING</span><span class="o">=</span><span class="n">true</span>
 <span class="n">AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER</span><span class="o">=</span><span class="n">s3</span><span class="p">:</span><span class="o">//</span><span class="n">qfdmo</span><span class="o">-</span><span class="n">airflow</span><span class="o">-</span><span class="n">logs</span>
-<span class="n">AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID</span><span class="o">=</span><span class="n">s3logs</span>
+<span class="n">AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID</span><span class="o">=</span><span class="n">scalewaylogs</span>
 <span class="n">AIRFLOW__LOGGING__ENCRYPT_S3_LOGS</span><span class="o">=</span><span class="n">false</span>
 </pre></div>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">s3logs</span></code> est une connection configuré dans l’interface d’Airflow</p>
+<p><code class="docutils literal notranslate"><span class="pre">scalewaylogs</span></code> est une connection configuré dans l’interface d’Airflow</p>
 <p>Attention à ajouter le paramètre endpoint_url pour le stockage S3 de Scaleway</p>
 </section>
 </section>
