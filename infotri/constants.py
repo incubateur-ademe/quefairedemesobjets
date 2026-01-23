@@ -15,6 +15,6 @@ CONSIGNE_CHOICES = [
     (
         "3",
         "À déposer dans un conteneur, dans une association ou dans"
-        " un magasin volontaire",
+        "un magasin volontaire",
     ),
 ]
