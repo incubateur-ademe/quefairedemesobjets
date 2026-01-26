@@ -23,27 +23,31 @@ export default class extends Controller<HTMLElement> {
   }
 
   saveFieldValue(event: Event) {
-    const fieldsValues = this.#getFieldsValues()
-    const field = this.#getField(event, fieldsValues)
-    if (field == null) return
+    const target = event.target as HTMLElement
 
-    const fieldsGroups = JSON.parse(this.fieldsGroupsValue) as string[][]
-    const fieldsGroup = fieldsGroups.find((group) => group.includes(field))
-    if (!fieldsGroup) return
+    const suggestionModele = target.dataset.suggestionModele
+    if (!suggestionModele) {
+      console.error("suggestionModele manquant")
+      return
+    }
 
-    const newFieldsValues = Object.fromEntries(
-      fieldsGroup.map((f) => [f, { ...fieldsValues[f] }]),
-    )
-    newFieldsValues[field]["updated_displayed_value"] = (
-      event.target as HTMLElement
-    ).textContent
+    const field = target.dataset.field
+    if (!field) {
+      console.error("field manquant")
+      return
+    }
 
-    this.#postFieldsValues(newFieldsValues)
+    const value = target.textContent
+
+    this.#postFieldsValues2(suggestionModele, { [field]: value })
+    return
   }
 
   updateFieldsDisplayed(event: Event) {
     const fieldsValues = this.#getFieldsValues()
     const fields = this.#getFields(event, fieldsValues)
+    console.log(fields)
+    console.log(fieldsValues)
     const newFieldsValues = {}
     fields.forEach((field: string) => {
       newFieldsValues[field] = fieldsValues[field]
@@ -54,17 +58,28 @@ export default class extends Controller<HTMLElement> {
   }
 
   updateAllDisplayed(event: Event) {
+    console.log("updateAllDisplayed")
+
+    const target = event.target as HTMLElement
+
+    const suggestionModele = target.dataset.suggestionModele
+    if (!suggestionModele) {
+      console.error("suggestionModele manquant")
+      return
+    }
+
     const fieldsValues = this.#getFieldsValues()
+    console.log(fieldsValues)
+
+    const newFieldsValues = {}
     for (let key in fieldsValues) {
-      if (
-        (fieldsValues[key]["updated_displayed_value"] === undefined &&
-          fieldsValues[key]["new_value"] !== undefined) ||
-        fieldsValues[key]["updated_displayed_value"] !== fieldsValues[key]["new_value"]
-      ) {
-        fieldsValues[key]["updated_displayed_value"] = fieldsValues[key]["new_value"]
+      if (fieldsValues[key]["acteur_suggestion_value"] !== undefined) {
+        newFieldsValues[key] = fieldsValues[key]["acteur_suggestion_value"]
       }
     }
-    this.#postFieldsValues(fieldsValues)
+    console.log(suggestionModele)
+    console.log(newFieldsValues)
+    this.#postFieldsValues2(suggestionModele, newFieldsValues)
   }
 
   updateStatus(event: Event) {
@@ -163,6 +178,29 @@ export default class extends Controller<HTMLElement> {
     const groupsJson = this.fieldsGroupsValue
     formData.append("fields_values", JSON.stringify(valuesJson))
     formData.append("fields_groups", groupsJson)
+    formData.append("suggestion_modele", "RevisionActeur")
+    if (opened_tab) {
+      formData.append("tab", opened_tab)
+    }
+
+    this.#postSuggestion(updateSuggestionUrl, formData)
+  }
+
+  #postFieldsValues2(
+    suggestionModele: string,
+    fieldsValues: Record<string, any>,
+    opened_tab: string = "",
+  ) {
+    const updateSuggestionUrl = this.element.dataset.updateSuggestionUrl
+    if (!updateSuggestionUrl) {
+      console.error("URL de mise à jour de la suggestion manquante")
+      return
+    }
+    const formData = new FormData()
+    const groupsJson = this.fieldsGroupsValue
+    formData.append("fields_values", JSON.stringify(fieldsValues))
+    formData.append("fields_groups", groupsJson)
+    formData.append("suggestion_modele", suggestionModele)
     if (opened_tab) {
       formData.append("tab", opened_tab)
     }

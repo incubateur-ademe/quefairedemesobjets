@@ -504,6 +504,24 @@ class SuggestionGroupe(TimestampedModel):
         verbose_name="Metadata de la cohorte, données statistiques",
     )
 
+    def get_acteur_or_none(self) -> Acteur | None:
+        try:
+            return self.acteur
+        except Acteur.DoesNotExist:
+            return None
+
+    def get_revision_acteur_or_none(self) -> RevisionActeur | None:
+        try:
+            return self.revision_acteur
+        except RevisionActeur.DoesNotExist:
+            return None
+
+    def get_parent_revision_acteur_or_none(self) -> RevisionActeur | None:
+        try:
+            return self.parent_revision_acteur
+        except RevisionActeur.DoesNotExist:
+            return None
+
     def __str__(self) -> str:
         libelle = self.suggestion_cohorte.identifiant_action
         if self.acteur:
@@ -520,7 +538,9 @@ class SuggestionGroupe(TimestampedModel):
             return displayed_acteur.uuid if displayed_acteur else None
         return None
 
-    def get_identifiant_unique_from_suggestion_unitaires(self, model_name: str) -> str:
+    def get_identifiant_unique_from_suggestion_unitaires(
+        self, model_name: str = "Acteur"
+    ) -> str:
         """
         Get the identifiant_unique from the suggestion_unitaires for the Acteur model
         Useful for SOURCE_AJOUT

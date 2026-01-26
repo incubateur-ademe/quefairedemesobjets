@@ -27,7 +27,7 @@
                         </div>
                     </th>
                     <th class="qf-text-center qf-text-2xl">
-                        <div data-action="click->suggestion-groupe-row#updateAllDisplayed" class="qf-cursor-pointer">
+                        <div data-action="click->suggestion-groupe-row#updateAllDisplayed" data-suggestion-modele="RevisionActeur" class="qf-cursor-pointer">
                             ▶️
                         </div>
                     </th>
@@ -44,7 +44,7 @@
                     </th>
                     {% if parent_revision_acteur %}
                         <th class="qf-text-center qf-text-2xl">
-                            <div data-action="click->suggestion-groupe-row#updateAllDisplayed" class="qf-cursor-pointer">
+                            <div data-action="click->suggestion-groupe-row#updateAllDisplayed" data-suggestion-modele="ParentRevisionActeur" class="qf-cursor-pointer">
                                 ⏩
                             </div>
                         </th>
@@ -75,7 +75,7 @@
                             {% endfor %}
                         </td>
                         <td class="qf-text-center qf-cursor-pointer qf-text-2xl">
-                            <div class="qf-cursor-pointer" data-action="click->suggestion-groupe-row#updateFieldsDisplayed" data-fields='{{ fields|join:"|" }}'>
+                            <div class="qf-cursor-pointer" data-action="click->suggestion-groupe-row#updateFieldsDisplayed" data-fields='{{ fields|join:"|" }}' data-suggestion-modele="RevisionActeur">
                             ▶️
                             </div>
                         </td>
@@ -88,6 +88,7 @@
                                         <div
                                             contentEditable="true"
                                             data-field="{{ field }}"
+                                            data-suggestion-modele="RevisionActeur"
                                             data-action="blur->suggestion-groupe-row#saveFieldValue
                                             focus->suggestion-groupe-row#replaceWithFieldValue">
                                             {% with values=fields_values|get_item:field %}
@@ -116,7 +117,7 @@
                         </td>
                         {% if suggestion_groupe.parent_revision_acteur %}
                             <td class="qf-text-center qf-text-2xl">
-                                <div data-action="click->suggestion-groupe-row#updateAllDisplayed" class="qf-cursor-pointer">
+                                <div data-action="click->suggestion-groupe-row#updateAllDisplayed" data-suggestion-modele="ParentRevisionActeur" class="qf-cursor-pointer">
                                     ⏩
                                 </div>
                             </td>
@@ -129,6 +130,7 @@
                                             <div
                                                 contentEditable="true"
                                                 data-field="{{ field }}"
+                                                data-suggestion-modele="ParentRevisionActeur"
                                                 data-action="blur->suggestion-groupe-row#saveFieldValue
                                                 focus->suggestion-groupe-row#replaceWithFieldValue">
                                                 {% with values=fields_values|get_item:field %}

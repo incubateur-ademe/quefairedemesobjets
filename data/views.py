@@ -201,13 +201,14 @@ def _validate_proposed_updates(values_to_update: dict, fields_values: dict) -> d
     Returns a dictionary of errors (empty if valid)
     """
     # Validate the RevisionActeur with the proposed values
-
+    logging.warning(f"{values_to_update=}")
+    logging.warning(f"{fields_values=}")
     if "longitude" in values_to_update or "latitude" in values_to_update:
         for coord_field in ["longitude", "latitude"]:
             try:
                 values_to_update[coord_field] = values_to_update.get(
                     coord_field,
-                    fields_values.get(coord_field, {}).get("displayed_value", ""),
+                    fields_values.get(coord_field, "0.0"),
                 )
             except (ValueError, KeyError) as e:
                 logger.warning(f"ValueError for {coord_field}: {e}")
@@ -278,6 +279,7 @@ def serialize_suggestion_groupe(
     Serialize a SuggestionGroupe using SuggestionSourceModel for validation
 
     enhancements:
+    - get acteur_suggestion_value get original value of suggestion by field
     - get acteur + suggestion on acteur
     - get revision_acteur + suggestion on revision_acteur
     - get parent_revision_acteur + suggestion on parent_revision_acteur
@@ -292,6 +294,7 @@ def serialize_suggestion_groupe(
                 display diff between suggestion and "acteur" value
     return the dict:
         fields_values: {
+            "acteur_suggestion_value": value_to_display,
             "acteur": value_to_display,
             "revision_acteur": value_to_display,
             "parent_revision_acteur": value_to_display,
@@ -325,6 +328,9 @@ def serialize_suggestion_groupe(
         # Get fields from acteur_suggestion_unitaires
         fields_values = {
             key: {
+                "acteur_suggestion_value": getattr(
+                    acteur_suggestion_unitaires_by_field, key, None
+                ),
                 "acteur": _display_suggestion_unitaire_for_a_field(
                     key, acteur_suggestion_unitaires_by_field
                 ),  # FIXME: display the diff suggestion
@@ -341,9 +347,9 @@ def serialize_suggestion_groupe(
             "fields_values": fields_values,
         }
 
-    acteur = suggestion_groupe.acteur
-    revision_acteur = suggestion_groupe.revision_acteur
-    parent_revision_acteur = suggestion_groupe.parent_revision_acteur
+    acteur = suggestion_groupe.get_acteur_or_none()
+    revision_acteur = suggestion_groupe.get_revision_acteur_or_none()
+    parent_revision_acteur = suggestion_groupe.get_parent_revision_acteur_or_none()
 
     # Flatten and convert to SuggestionSourceModel
     parent_revision_acteur_suggestion_unitaires_by_field = (
@@ -373,6 +379,9 @@ def serialize_suggestion_groupe(
 
     fields_values = {
         key: {
+            "acteur_suggestion_value": getattr(
+                acteur_suggestion_unitaires_by_field, key, None
+            ),
             "acteur": _display_suggestion_unitaire_for_a_field(
                 key, acteur_suggestion_unitaires_by_field, getattr(acteur_values, key)
             ),  # FIXME: display the diff suggestion
@@ -403,49 +412,63 @@ def serialize_suggestion_groupe(
 
 def update_suggestion_groupe(
     suggestion_groupe: SuggestionGroupe,
+    suggestion_modele: str,
     fields_values: dict,
     fields_groups: list[tuple],
+    acteur: Acteur | RevisionActeur | None,
 ) -> tuple[bool, dict | None]:
     """
-    Try to create the RevisionActeur Suggestions using SuggestionSourceType for
-    validation
-    Returns a tuple with:
-    - bool: True if the update is successful, False otherwise
-    - dict: None if the update is successful, a dictionary of errors otherwise
-      general errors are under the key "error"
-      field errors are under the key "field_name"
-    """
+    pour chaque champs à modifier
 
-    # Build mapping of existing revision suggestions by field
+    si il existe une suggestion qui modifie déjà ce champ, on mets à jour cette modification
+    si il n'existe pas d'objet acteur ni de suggestion qui modifie ce champ, on crée une suggestion de modification
+    si il existe un objet acteur (selon le modèle) et que le champs est différent de la valeur de l'objet acteur, on crée une suggestion de modification
+    """
+    if suggestion_modele not in ["Acteur", "RevisionActeur", "ParentRevisionActeur"]:
+        raise ValueError(f"Invalid suggestion_modele: {suggestion_modele}")
+
+    acteur = (
+        suggestion_groupe.get_acteur_or_none()
+        if suggestion_modele == "Acteur"
+        else (
+            suggestion_groupe.get_revision_acteur_or_none()
+            if suggestion_modele == "RevisionActeur"
+            else suggestion_groupe.get_parent_revision_acteur_or_none()
+        )
+    )
+    identifiant_unique = (
+        (acteur and acteur.identifiant_unique)
+        or suggestion_groupe.acteur_id
+        or suggestion_groupe.get_identifiant_unique_from_suggestion_unitaires()
+    )
+
+    if not identifiant_unique:
+        raise ValueError("identifiant_unique is missing")
+
     suggestion_unitaires = list(suggestion_groupe.suggestion_unitaires.all())
     # Flatten and convert to SuggestionSourceModel
     revision_suggestion_unitaire_by_field = (
         _suggestion_unitaires_to_suggestion_source_model_by_model_name(
-            suggestion_unitaires, "RevisionActeur"
+            suggestion_unitaires, suggestion_modele
         )
     )
 
-    # Determine which fields need to be updated using SuggestionSourceType
     values_to_update = {
-        field: by_state_values["updated_displayed_value"]
-        for field, by_state_values in fields_values.items()
-        if field not in SuggestionSourceModel.get_not_editable_fields()
-        and "updated_displayed_value" in by_state_values
-        and by_state_values["updated_displayed_value"] is not None
-        and (
-            by_state_values["updated_displayed_value"]
-            != by_state_values["displayed_value"]
-            # FIXME: 2 next case can be merged
-            or (
-                getattr(revision_suggestion_unitaire_by_field, field, None)
-                != by_state_values["updated_displayed_value"]
-            )
-        )
+        field: value
+        for field, value in fields_values.items()
+        # if exists a suggestion that modify already this field, update this
+        # modification
+        if getattr(revision_suggestion_unitaire_by_field, field, None) is not None
+        # if there is no acteur nor suggestion that modify this field, create a
+        # suggestion of modification
+        or not acteur
+        # if there is an acteur (according to the model) and that the field is
+        # different from the acteur value, create a suggestion of modification
+        or (acteur and getattr(acteur, field, None) != value)
     }
 
-    if suggestion_groupe.revision_acteur is None:
-        suggestion_groupe.revision_acteur_id = suggestion_groupe.acteur_id
-        suggestion_groupe.save()
+    # Build mapping of existing revision suggestions by field
+    logging.warning(f"{revision_suggestion_unitaire_by_field=}")
 
     # Validate proposed updates
     try:
@@ -461,12 +484,24 @@ def update_suggestion_groupe(
             suggestion_unitaire, _ = SuggestionUnitaire.objects.get_or_create(
                 suggestion_groupe=suggestion_groupe,
                 champs=fields,
-                suggestion_modele="RevisionActeur",
+                suggestion_modele=suggestion_modele,
                 defaults={
-                    "acteur_id": suggestion_groupe.acteur_id,
-                    "revision_acteur_id": suggestion_groupe.revision_acteur_id,
+                    "acteur_id": (
+                        identifiant_unique if suggestion_modele == "Acteur" else None
+                    ),
+                    "revision_acteur_id": (
+                        identifiant_unique
+                        if suggestion_modele == "RevisionActeur"
+                        else None
+                    ),
+                    "parent_revision_acteur_id": (
+                        identifiant_unique
+                        if suggestion_modele == "ParentRevisionActeur"
+                        else None
+                    ),
                 },
             )
+            # FIXME: when edit lat long when "- , -", manage only 1 of 2 value is updated
             suggestion_unitaire.valeurs = [
                 values_to_update.get(field, "") for field in fields
             ]
@@ -531,56 +566,56 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
 
                 # Prepare point list to display in map
                 points = []
+        # FIXME : to redo
+        # Point pour old_value (rouge, non draggable)
+        # if latitude_data.get("old_value") and longitude_data.get("old_value"):
+        #     points.append(
+        #         {
+        #             "latitude": float(latitude_data["old_value"]),
+        #             "longitude": float(longitude_data["old_value"]),
+        #             "color": "red",
+        #             "draggable": False,
+        #         }
+        #     )
 
-                # Point pour old_value (rouge, non draggable)
-                if latitude_data.get("old_value") and longitude_data.get("old_value"):
-                    points.append(
-                        {
-                            "latitude": float(latitude_data["old_value"]),
-                            "longitude": float(longitude_data["old_value"]),
-                            "color": "red",
-                            "draggable": False,
-                        }
-                    )
+        # # Point pour new_value (vert #26A69A, non draggable)
+        # if latitude_data.get("new_value") and longitude_data.get("new_value"):
+        #     points.append(
+        #         {
+        #             "latitude": float(latitude_data["new_value"]),
+        #             "longitude": float(longitude_data["new_value"]),
+        #             "color": "blue",
+        #             "draggable": False,
+        #         }
+        #     )
 
-                # Point pour new_value (vert #26A69A, non draggable)
-                if latitude_data.get("new_value") and longitude_data.get("new_value"):
-                    points.append(
-                        {
-                            "latitude": float(latitude_data["new_value"]),
-                            "longitude": float(longitude_data["new_value"]),
-                            "color": "blue",
-                            "draggable": False,
-                        }
-                    )
-
-                if latitude_data.get("updated_displayed_value") and longitude_data.get(
-                    "updated_displayed_value"
-                ):
-                    points.append(
-                        {
-                            "latitude": float(latitude_data["updated_displayed_value"]),
-                            "longitude": float(
-                                longitude_data["updated_displayed_value"]
-                            ),
-                            "color": "green",
-                            "draggable": True,
-                        }
-                    )
-                elif latitude_data.get("displayed_value") and longitude_data.get(
-                    "displayed_value"
-                ):
-                    _append_location_to_points(
-                        points,
-                        latitude_data,
-                        longitude_data,
-                        "displayed_value",
-                        "#00695C",
-                        True,
-                    )
-                context["localisation"] = {
-                    "points": points,
-                }
+        # if latitude_data.get("updated_displayed_value") and longitude_data.get(
+        #     "updated_displayed_value"
+        # ):
+        #     points.append(
+        #         {
+        #             "latitude": float(latitude_data["updated_displayed_value"]),
+        #             "longitude": float(
+        #                 longitude_data["updated_displayed_value"]
+        #             ),
+        #             "color": "green",
+        #             "draggable": True,
+        #         }
+        #     )
+        # elif latitude_data.get("displayed_value") and longitude_data.get(
+        #     "displayed_value"
+        # ):
+        #     _append_location_to_points(
+        #         points,
+        #         latitude_data,
+        #         longitude_data,
+        #         "displayed_value",
+        #         "#00695C",
+        #         True,
+        #     )
+        # context["localisation"] = {
+        #     "points": points,
+        # }
 
         return context
 
@@ -602,6 +637,21 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
 
         fields_values_payload = request.POST.get("fields_values", "{}")
         fields_groups_payload = request.POST.get("fields_groups", "{}")
+        suggestion_modele_payload = request.POST.get("suggestion_modele")
+        if suggestion_modele_payload not in [
+            "RevisionActeur",
+            "ParentRevisionActeur",
+        ]:
+            return HttpResponseBadRequest(
+                "suggestion_modele must be RevisionActeur or ParentRevisionActeur"
+            )
+        if suggestion_modele_payload == "ParentRevisionActeur":
+            acteur = suggestion_groupe.get_parent_revision_acteur_or_none()
+        elif suggestion_modele_payload == "RevisionActeur":
+            acteur = suggestion_groupe.get_revision_acteur_or_none()
+        else:
+            acteur = suggestion_groupe.get_acteur_or_none()
+
         try:
             fields_values = (
                 json.loads(fields_values_payload) if fields_values_payload else {}
@@ -609,14 +659,19 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
             fields_groups = (
                 json.loads(fields_groups_payload) if fields_groups_payload else []
             )
-        except json.JSONDecodeError:
-            return HttpResponseBadRequest("Payload fields_list invalide")
+        except json.JSONDecodeError as e:
+            return HttpResponseBadRequest(f"Payload fields_list invalide : {e}")
         _, errors = update_suggestion_groupe(
-            suggestion_groupe, fields_values, fields_groups
+            suggestion_groupe,
+            suggestion_modele_payload,
+            fields_values,
+            fields_groups,
+            acteur,
         )
+
         context = serialize_suggestion_groupe(suggestion_groupe)
-        context["errors"] = errors
         context = self._manage_tab_in_context(context, request, suggestion_groupe)
+        context["errors"] = errors if errors else {}
 
         return render(
             request,

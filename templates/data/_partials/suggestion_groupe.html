@@ -1,7 +1,7 @@
 {% load admin_data_tags %}
 
 <turbo-frame
-    id="suggestion_groupe_{{ id }}"
+    id="suggestion_groupe_{{ suggestion_groupe.id }}"
     data-controller="suggestion-groupe-row"
     data-update-suggestion-url="{% url 'data:suggestion_groupe' suggestion_groupe.id %}"
     data-action="map:markerDragged->suggestion-groupe-row#handleMarkerDragged"
