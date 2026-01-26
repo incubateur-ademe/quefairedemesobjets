@@ -27,8 +27,11 @@ from sources.tasks.transform.transform_df import compute_location, merge_duplica
 from sqlalchemy import text
 from tenacity import retry, stop_after_attempt, wait_fixed
 from utils import logging_utils as log
+from utils.django import django_setup_full
 
 logger = logging.getLogger(__name__)
+
+django_setup_full()
 
 REPLACE_NULL_MAPPING = {
     key: ""

@@ -16,6 +16,7 @@ from sources.tasks.transform.exceptions import (
     IdentifiantExterneError,
     IdentifiantUniqueError,
     TelephoneWarning,
+    UrlWarning,
 )
 from sources.tasks.transform.formatter import format_libelle_to_code
 from sources.tasks.transform.transform_column import (
@@ -24,6 +25,7 @@ from sources.tasks.transform.transform_column import (
     clean_number,
     clean_siren,
     clean_siret,
+    clean_url,
 )
 from unidecode import unidecode
 from utils import logging_utils as log
@@ -159,6 +161,24 @@ def clean_telephone(row: pd.Series, _):
 
     row["telephone"] = number
     return row[["telephone"]]
+
+
+def clean_url_from_multi_columns(row: pd.Series, _) -> pd.Series:
+    # get value from first column if exists then second then third etc.
+    value = ""
+    error = None
+    for column in row.keys():
+        if row[column]:
+            try:
+                value = clean_url(row[column], _)
+                break
+            except UrlWarning as e:
+                error = e
+                continue
+    if error and value == "":
+        raise error
+    row["url"] = value
+    return row[["url"]]
 
 
 def clean_siret_and_siren(row: pd.Series, _) -> pd.Series:
