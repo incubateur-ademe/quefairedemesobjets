@@ -85,6 +85,10 @@ class AssistantBaseView:
         return super().dispatch(request, *args, **kwargs)
 
 
+def get_homepage():
+    return Page.objects.live().get(depth=2).specific
+
+
 @method_decorator(cache_control(max_age=60 * 15), name="dispatch")
 @method_decorator(vary_on_headers("logged-in", "iframe"), name="dispatch")
 class HomeView(AssistantBaseView, TemplateView):
@@ -93,7 +97,7 @@ class HomeView(AssistantBaseView, TemplateView):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
 
-        context.update(page=Page.objects.live().get(depth=2).specific)
+        context.update(page=get_homepage())
 
         return context
 

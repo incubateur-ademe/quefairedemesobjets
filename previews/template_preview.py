@@ -17,6 +17,7 @@ from core.constants import DEFAULT_MAP_CONTAINER_ID
 from infotri.forms import InfotriForm
 from qfdmd.forms import SearchForm
 from qfdmd.models import Synonyme
+from qfdmd.views import get_homepage
 from qfdmo.forms import LegendeForm, NextAutocompleteInput, ViewModeForm
 from qfdmo.models.acteur import (
     ActeurType,
@@ -543,11 +544,26 @@ class FormulairesPreview(LookbookPreview):
         return template.render(Context(context))
 
 
+class IframeForm(forms.Form):
+    iframe = forms.BooleanField(
+        label="Mode iframe",
+        help_text="Afficher en mode iframe",
+        initial=False,
+        required=False,
+    )
+
+
 class PagesPreview(LookbookPreview):
-    def home(self, **kwargs):
+    @register_form_class(IframeForm)
+    def home(self, iframe=False, **kwargs):
+        if isinstance(iframe, str):
+            iframe = iframe.lower() == "true"
+
         context = {
             "request": None,
+            "page": get_homepage(),
             "ASSISTANT": {"faites_decouvrir_ce_site": "Faites découvrir ce site !"},
+            "iframe": iframe,
         }
         return render_to_string("ui/pages/home.html", context)
 

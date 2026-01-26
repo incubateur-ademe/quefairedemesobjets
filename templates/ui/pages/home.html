@@ -18,9 +18,11 @@
         </div>
     </div>
 
+    {% if not iframe %}
     <div class="qf-mx-auto qf-mt-4w">
         {% include "sites_faciles_content_manager/blocks/blocks_stream.html" with stream=page.body page=page %}
     </div>
+    {% endif %}
 </div>
 
 {% endblock main %}
