@@ -117,7 +117,7 @@
                         </td>
                         {% if suggestion_groupe.parent_revision_acteur %}
                             <td class="qf-text-center qf-text-2xl">
-                                <div data-action="click->suggestion-groupe-row#updateAllDisplayed" data-suggestion-modele="ParentRevisionActeur" class="qf-cursor-pointer">
+                                <div data-action="click->suggestion-groupe-row#updateFieldsDisplayed" data-suggestion-modele="ParentRevisionActeur" class="qf-cursor-pointer">
                                     ⏩
                                 </div>
                             </td>
@@ -230,7 +230,7 @@
             {% endif %}
         {% elif tab == "annuaire_entreprise" %}
             <div>
-                <p>Annuaire entreprise : Comming Soon…</p>
+                <p>Annuaire entreprise : Coming Soon…</p>
                 <p>Vérification si l'etablissement et l'entreprise existe dans l'annuaire entreprise, intéraction avec l'api d'annuaire entreprise ou une IA si tel n'est pas le cas</p>
                 <p>Affichage d'une alerte dans la case au dessus des tab si l'etablissement ou l'entreprise n'existe pas dans l'annuaire entreprise</p>
                 <p>Option IA : Recherche si l'acteur à déménagé ou si l'entreprise a été vendue mais qu'il y a toujours un établissement qui fait lamême chose à la même adresse et proposer des corrections si nécessaire</p>

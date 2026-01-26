@@ -44,22 +44,6 @@ export default class extends Controller<HTMLElement> {
   }
 
   updateFieldsDisplayed(event: Event) {
-    const fieldsValues = this.#getFieldsValues()
-    const fields = this.#getFields(event, fieldsValues)
-    console.log(fields)
-    console.log(fieldsValues)
-    const newFieldsValues = {}
-    fields.forEach((field: string) => {
-      newFieldsValues[field] = fieldsValues[field]
-      newFieldsValues[field]["updated_displayed_value"] =
-        fieldsValues[field]["new_value"]
-    })
-    this.#postFieldsValues(newFieldsValues)
-  }
-
-  updateAllDisplayed(event: Event) {
-    console.log("updateAllDisplayed")
-
     const target = event.target as HTMLElement
 
     const suggestionModele = target.dataset.suggestionModele
@@ -69,7 +53,30 @@ export default class extends Controller<HTMLElement> {
     }
 
     const fieldsValues = this.#getFieldsValues()
-    console.log(fieldsValues)
+
+    const fields = this.#getFields(event, fieldsValues)
+
+    const newFieldsValues = {}
+
+    for (let key of fields) {
+      if (fieldsValues[key]["acteur_suggestion_value"] !== undefined) {
+        newFieldsValues[key] = fieldsValues[key]["acteur_suggestion_value"]
+      }
+    }
+
+    this.#postFieldsValues2(suggestionModele, newFieldsValues)
+  }
+
+  updateAllDisplayed(event: Event) {
+    const target = event.target as HTMLElement
+
+    const suggestionModele = target.dataset.suggestionModele
+    if (!suggestionModele) {
+      console.error("suggestionModele manquant")
+      return
+    }
+
+    const fieldsValues = this.#getFieldsValues()
 
     const newFieldsValues = {}
     for (let key in fieldsValues) {
@@ -77,8 +84,6 @@ export default class extends Controller<HTMLElement> {
         newFieldsValues[key] = fieldsValues[key]["acteur_suggestion_value"]
       }
     }
-    console.log(suggestionModele)
-    console.log(newFieldsValues)
     this.#postFieldsValues2(suggestionModele, newFieldsValues)
   }
 

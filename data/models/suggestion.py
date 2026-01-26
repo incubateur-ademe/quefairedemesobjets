@@ -4,7 +4,7 @@ from datetime import datetime
 
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields import ArrayField
-from django.db.models import Case, Count, F, Value, When
+from django.db.models import BooleanField, Count, ExpressionWrapper, Q
 from django.template.loader import render_to_string
 from more_itertools import first
 
@@ -431,10 +431,9 @@ class SuggestionGroupeQuerySet(models.QuerySet):
     def with_has_parent(self):
         """Annotate queryset with has_parent."""
         return self.annotate(
-            has_parent=Case(
-                When(acteur_id=F("revision_acteur_id"), then=Value(False)),
-                When(revision_acteur_id__isnull=True, then=Value(False)),
-                default=Value(True),
+            has_parent=ExpressionWrapper(
+                Q(parent_revision_acteur_id__isnull=False),
+                output_field=BooleanField(),
             )
         )
 
