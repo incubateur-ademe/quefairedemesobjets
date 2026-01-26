@@ -11,7 +11,7 @@ from django.utils.functional import cached_property
 from django_extensions.db.fields import AutoSlugField
 from modelcluster.contrib.taggit import ClusterTaggableManager
 from modelcluster.fields import ParentalManyToManyField
-from taggit.models import TaggedItemBase
+from taggit.models import ItemBase, TagBase, TaggedItemBase
 from wagtail.admin.panels import (
     FieldPanel,
     FieldRowPanel,
@@ -31,6 +31,7 @@ from wagtail.snippets.models import register_snippet
 
 from qfdmd.blocks import STREAMFIELD_COMMON_BLOCKS
 from qfdmo.models.utils import NomAsNaturalKeyModel
+from search.mixins import SearchTermSyncMixin
 
 logger = logging.getLogger(__name__)
 
@@ -222,6 +223,75 @@ class ProduitPageTag(TaggedItemBase):
     )
 
 
+class SearchTag(SearchTermSyncMixin, TagBase):
+    """
+    A custom tag model for search functionality.
+    Implements SearchTermSyncMixin to sync with SearchTerm model.
+    """
+
+    class Meta:
+        verbose_name = "Synonyme de recherche"
+        verbose_name_plural = "Synonymes de recherche"
+
+    def get_search_term_verbose_name(self) -> str:
+        """Returns the tag name as the search term."""
+        return self.name
+
+    def get_search_term_url(self) -> str:
+        """Returns the URL of the parent page if available."""
+        try:
+            if self.tagged_produit_page and self.tagged_produit_page.content_object:
+                return self.tagged_produit_page.content_object.url
+        except TaggedSearchTag.DoesNotExist:
+            pass
+        return ""
+
+    def get_search_term_parent_object(self):
+        """Returns the parent page (ProduitPage) if available."""
+        try:
+            if self.tagged_produit_page:
+                return self.tagged_produit_page.content_object
+        except TaggedSearchTag.DoesNotExist:
+            pass
+        return None
+
+
+class TaggedSearchTag(ItemBase):
+    """Through model for SearchTag on ProduitPage."""
+
+    tag = models.OneToOneField(
+        SearchTag,
+        on_delete=models.CASCADE,
+        related_name="tagged_produit_page",
+    )
+    content_object = ParentalKey(
+        "qfdmd.ProduitPage",
+        on_delete=models.CASCADE,
+        related_name="search_tags_items",
+    )
+
+    class Meta:
+        verbose_name = "Synonyme de recherche"
+        verbose_name_plural = "Synonymes de recherche"
+
+    def save(self, *args, **kwargs):
+        """Sync the SearchTag with SearchTerm after the relationship is created."""
+        super().save(*args, **kwargs)
+        # Sync the tag now that it has a parent page
+        if self.tag:
+            self.tag._sync_search_term()
+
+    def delete(self, *args, **kwargs):
+        """Remove the SearchTag's SearchTerm when relationship is removed."""
+        tag = self.tag
+        super().delete(*args, **kwargs)
+        # Delete the SearchTerm since the tag is no longer linked to any page
+        if tag:
+            from search.models import SearchTerm
+
+            SearchTerm.delete_for_object(tag)
+
+
 class AncestorFieldsMixin:
     @property
     def family(self):
@@ -229,7 +299,12 @@ class AncestorFieldsMixin:
 
 
 class ProduitPage(
-    CompiledFieldMixin, Page, GenreNombreModel, TitleFields, AncestorFieldsMixin
+    SearchTermSyncMixin,
+    CompiledFieldMixin,
+    Page,
+    GenreNombreModel,
+    TitleFields,
+    AncestorFieldsMixin,
 ):
     template = "ui/pages/produit_page.html"
     subpage_types = []
@@ -237,6 +312,12 @@ class ProduitPage(
 
     # Taxonomie
     tags = ClusterTaggableManager(through=ProduitPageTag, blank=True, related_name="+")
+    search_tags = ClusterTaggableManager(
+        through="qfdmd.TaggedSearchTag",
+        blank=True,
+        related_name="+",
+        verbose_name="Synonyme de recherche",
+    )
     sous_categorie_objet = ParentalManyToManyField(
         "qfdmo.SousCategorieObjet",
         related_name="produit_pages",
@@ -357,6 +438,7 @@ class ProduitPage(
             [
                 FieldPanel("usage_unique"),
                 FieldPanel("tags"),
+                FieldPanel("search_tags"),
                 FieldPanel("sous_categorie_objet"),
             ],
             heading="Taxonomie",
@@ -383,6 +465,19 @@ class ProduitPage(
     search_fields = Page.search_fields + [
         index.AutocompleteField("title"),
     ]
+
+    # SearchTermSyncMixin implementation
+    def get_search_term_verbose_name(self) -> str:
+        """Returns the title used for search term."""
+        return self.title
+
+    def get_search_term_url(self) -> str:
+        """Returns the URL of this page."""
+        return self.url
+
+    def get_search_term_parent_object(self):
+        """Returns the family page (parent) if it exists."""
+        return self.family
 
     def clean(self):
         super().clean()
@@ -719,8 +814,7 @@ class ProduitLien(models.Model):
         unique_together = ("produit", "lien")  # Prevent duplicate relations
 
 
-@register_snippet
-class Synonyme(index.Indexed, AbstractBaseProduit):
+class Synonyme(SearchTermSyncMixin, index.Indexed, AbstractBaseProduit):
     slug = AutoSlugField(populate_from=["nom"], max_length=255)
     nom = models.CharField(blank=True, unique=True, help_text="Nom du produit")
     produit = models.ForeignKey(
@@ -788,6 +882,23 @@ class Synonyme(index.Indexed, AbstractBaseProduit):
             "produit", [index.SearchField("id"), index.SearchField("nom")]
         ),
     ]
+
+    # SearchTermSyncMixin implementation
+    def get_search_term_verbose_name(self) -> str:
+        """Returns the synonyme name as the search term."""
+        return self.nom
+
+    def get_search_term_url(self) -> str:
+        """Returns the URL of the synonyme detail page."""
+        return self.get_absolute_url()
+
+    def get_search_term_parent_object(self):
+        """Returns None for legacy synonymes."""
+        return None
+
+    def get_search_term_legacy(self) -> bool:
+        """Returns True to indicate this is a legacy search term."""
+        return True
 
 
 @register_setting
