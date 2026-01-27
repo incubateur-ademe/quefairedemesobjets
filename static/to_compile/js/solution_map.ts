@@ -44,45 +44,35 @@ export class SolutionMap {
     // Use OSM tiles for Django admin, Carte Facile for public site
     this.#useOsm = theme === "osm"
 
-    if (this.#useOsm) {
-      // OSM tiles for Django admin
-      this.map = new Map({
-        container: selector,
-        style: {
-          version: 8,
-          sources: {
-            osm: {
-              type: "raster",
-              tiles: [
-                "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png",
-              ],
-              tileSize: 256,
-            },
-          },
-          layers: [{ type: "raster", id: "osm-layer", source: "osm" }],
+    const osmStyle = {
+      version: 8 as const,
+      sources: {
+        osm: {
+          type: "raster" as const,
+          tiles: [
+            "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png",
+          ],
+          tileSize: 256,
         },
-        zoom: initialZoom,
-        maxZoom: 20,
-        center: DEFAULT_LOCATION,
-        attributionControl: {
-          compact: true,
-          customAttribution: "© OpenStreetMap contributors",
-        },
-      })
-    } else {
-      // Carte Facile for public site
-      this.map = new Map({
-        container: selector,
-        style: mapStyles.desaturated,
-        zoom: initialZoom,
-        maxZoom: 18.9, // Carte Facile recommendation
-        center: DEFAULT_LOCATION,
-        attributionControl: {
-          compact: true,
-        },
-      })
+      },
+      layers: [{ type: "raster" as const, id: "osm-layer", source: "osm" }],
+    }
+
+    this.map = new Map({
+      container: selector,
+      style: this.#useOsm ? osmStyle : mapStyles.desaturated,
+      zoom: initialZoom,
+      maxZoom: this.#useOsm ? DEFAULT_MAX_ZOOM : 18.9,
+      center: DEFAULT_LOCATION,
+      attributionControl: {
+        compact: true,
+        ...(this.#useOsm && { customAttribution: "© OpenStreetMap contributors" }),
+      },
+    })
+
+    if (!this.#useOsm) {
       addOverlay(this.map, Overlay.administrativeBoundaries)
     }
     // Add zoom controls
