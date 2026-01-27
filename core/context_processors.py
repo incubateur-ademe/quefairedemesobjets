@@ -28,7 +28,7 @@ def global_context(request) -> dict:
     home_search_form = SearchForm(prefix="home", initial={"id": "home"})
     header_autocomplete_search_form = HeaderSearchForm(prefix="header-autocomplete")
 
-    base = {
+    return {
         "iframe": getattr(request, "iframe", False),
         "BASE_URL": settings.BASE_URL,
         "assistant": {
@@ -46,8 +46,5 @@ def global_context(request) -> dict:
             "MATOMO_ID": settings.CARTE["MATOMO_ID"],
             **constants.CARTE,
         },
-    }
-    return {
-        **base,
         **constants.ASSISTANT,
     }

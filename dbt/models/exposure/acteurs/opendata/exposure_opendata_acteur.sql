@@ -121,6 +121,7 @@ SELECT
   {{ sscat_from_action('ps.services', 'echanger') }} as "echanger",
   {{ sscat_from_action('ps.services', 'revendre') }} as "revendre",
   {{ sscat_from_action('ps.services', 'acheter') }} as "acheter",
+  {{ sscat_from_action('ps.services', 'rapporter') }} as "rapporter",
   to_char(da.modifie_le, 'YYYY-MM-DD') as "date_de_derniere_modification"
 FROM {{ ref('marts_opendata_acteur') }}  AS da
 LEFT JOIN {{ source('qfdmo', 'qfdmo_acteurtype') }} AS at ON da.acteur_type_id = at.id

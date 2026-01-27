@@ -3,9 +3,9 @@
 # Categorie choices
 CATEGORIE_CHOICES = [
     ("tous", "Tous"),
+    ("textile", "Textiles d'habillement"),
+    ("vetement", "Linges de maison"),
     ("chaussures", "Chaussures"),
-    ("vetement", "Vêtement"),
-    ("textile", "Textile"),
 ]
 
 # Consigne choices

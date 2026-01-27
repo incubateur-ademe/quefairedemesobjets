@@ -7,9 +7,7 @@ import requests
 from crawl.config.cohorts import COHORTS
 from crawl.config.columns import COLS
 from crawl.config.constants import SORT_COLS
-from crawl.tasks.business_logic.crawl_urls_check_syntax import (
-    urls_are_diff_standard,
-)
+from crawl.tasks.business_logic.crawl_urls_check_syntax import urls_are_diff_standard
 from pydantic import BaseModel
 from sources.config.shared_constants import EMPTY_ACTEUR_FIELD
 from utils import logging_utils as log
@@ -157,7 +155,7 @@ def df_cohorts_split(
             df_ok_diff_standard = df_sort(df_ok_diff_standard, sort_cols=SORT_COLS)
             df_ok_diff_other = df_sort(df_ok_diff_other, sort_cols=SORT_COLS)
 
-    logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
+    logger.info(log.banner_string("🏁 Résultat final de cette tâche"))
     log.preview_df_as_markdown(COHORTS.CRAWL_OK_SAME, df_ok_same)
     log.preview_df_as_markdown(COHORTS.CRAWL_DIFF_STANDARD, df_ok_diff_standard)
     log.preview_df_as_markdown(COHORTS.CRAWL_DIFF_OTHER, df_ok_diff_other)

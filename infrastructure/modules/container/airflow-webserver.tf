@@ -15,7 +15,7 @@ resource "scaleway_container" "airflow_webserver" {
 
   health_check {
     http {
-      path = "/health"
+      path = "/api/v1/health"
     }
     failure_threshold = 5
     interval          = "30s"

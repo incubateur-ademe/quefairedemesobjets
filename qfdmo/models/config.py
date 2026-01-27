@@ -91,6 +91,12 @@ class CarteConfig(index.Indexed, models.Model):
         " le bouton Infos. Ce mode est utilisé essentiellement "
         "pour la carte affichée dans l'assistant",
     )
+    cacher_filtre_objet = models.BooleanField(
+        default=False,
+        verbose_name="Cacher le filtre objet",
+        help_text="Cocher cette case cache le filtre permettant de sélectionner "
+        "les objets dans la carte",
+    )
     titre_previsualisation = models.CharField(
         blank=True,
         verbose_name="Titre de l'écran de prévisualisation",
@@ -189,6 +195,13 @@ class CarteConfig(index.Indexed, models.Model):
         blank=True,
         null=True,
         srid=4326,
+    )
+
+    test = models.BooleanField(
+        default=False,
+        verbose_name="Carte de test",
+        help_text="Cocher cette case pour marquer cette carte comme une carte de test "
+        "(utilisée pour les tests end-to-end).",
     )
 
     def get_absolute_url(self, override_sous_categories=None, initial_query_string=""):

@@ -1,4 +1,5 @@
 from django import template
+from django.conf import settings
 
 register = template.Library()
 
@@ -10,4 +11,5 @@ def matomo(id):
 
 @register.inclusion_tag("ui/analytics/posthog_data_attributes.html")
 def posthog_data_attributes(key):
-    return {"key": key}
+    debug = settings.POSTHOG_DEBUG
+    return {"key": key, "debug": debug}

@@ -228,6 +228,11 @@ models:
         data_type: text
         tests:
           - dbt_expectations.expect_column_to_exist
+      - name: rapporter
+        description: "Les sous-categories associées à l'action rapporter de l'acteur"
+        data_type: text
+        tests:
+          - dbt_expectations.expect_column_to_exist
       - name: date_de_derniere_modification
         description: "La date de dernière modification de l'acteur"
         data_type: text
@@ -239,7 +244,7 @@ models:
             min_value: 250000
       - dbt_expectations.expect_table_column_count_to_equal:
           arguments:
-            value: 43
+            value: 44
     config:
       contract:
         enforced: true

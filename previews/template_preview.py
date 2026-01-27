@@ -25,6 +25,7 @@ from qfdmo.forms import (
     LegendeForm,
     ViewModeForm,
 )
+from qfdmd.views import get_homepage
 from qfdmo.models.acteur import (
     ActeurType,
     DisplayedActeur,
@@ -64,6 +65,15 @@ def component_docs(md_file_path):
         return func
 
     return decorator
+
+
+class IframeForm(forms.Form):
+    iframe = forms.BooleanField(
+        label="Version iframe",
+        help_text="Afficher la version iframe de la page",
+        initial=False,
+        required=False,
+    )
 
 
 class ProduitHeadingForm(forms.Form):
@@ -319,13 +329,17 @@ class ComponentsPreview(LookbookPreview):
         }
         return render_to_string("ui/components/code/code.html", context)
 
-    @component_docs("ui/components/logo/header.md")
-    def logo(self, **kwargs):
-        return render_to_string("ui/components/logo/header.html")
+    @component_docs("ui/components/logo/site_logo_mini.md")
+    def site_logo_mini(self, **kwargs):
+        return render_to_string("ui/components/logo/site_logo_mini.html")
 
-    @component_docs("ui/components/logo/homepage.md")
-    def logo_homepage(self, **kwargs):
-        return render_to_string("ui/components/logo/homepage.html")
+    @component_docs("ui/components/logo/site_logo_large.md")
+    def site_logo_large(self, **kwargs):
+        return render_to_string("ui/components/logo/site_logo_large.html")
+
+    @component_docs("ui/components/footer/combined_logos.md")
+    def combined_logos(self, **kwargs):
+        return render_to_string("ui/components/footer/combined_logos.html")
 
     @component_docs("ui/components/produit/legacy_heading.md")
     def produit_legacy_heading(self, **kwargs):
@@ -431,6 +445,26 @@ class ComponentsPreview(LookbookPreview):
 
         return default_html + formulaire_html
 
+    @register_form_class(IframeForm)
+    @component_docs("ui/components/footer/footer.md")
+    def footer(self, iframe=False, **kwargs):
+        # Convert string values to boolean
+        if isinstance(iframe, str):
+            iframe = iframe.lower() == "true"
+
+        context = {"iframe": iframe}
+        return render_to_string("ui/components/footer/footer.html", context)
+
+    @register_form_class(IframeForm)
+    @component_docs("ui/components/header/header.md")
+    def header(self, iframe=False, **kwargs):
+        # Convert string values to boolean
+        if isinstance(iframe, str):
+            iframe = iframe.lower() == "true"
+
+        context = {"request": None, "iframe": iframe}
+        return render_to_string("ui/components/header/header.html", context)
+
 
 class FiltresPreview(LookbookPreview):
     """
@@ -460,6 +494,15 @@ class ModalForm(forms.Form):
     modal_only = forms.BooleanField(
         label="Seulement la modal",
         help_text="Ne doit rien afficher, mais en inspectant la preview, on doit retrouver le tag <dialog>",
+    )
+
+
+class BonusForm(forms.Form):
+    bonus = forms.ChoiceField(
+        label="Bonus",
+        help_text="Bonus value (0 or 1)",
+        initial="1",
+        choices=((1, "Avec filtre bonus"), (None, "Sans filtre")),
     )
 
 
@@ -586,49 +629,54 @@ class FormulairesPreview(LookbookPreview):
 
 
 class PagesPreview(LookbookPreview):
-    def home(self, **kwargs):
+    @register_form_class(IframeForm)
+    def home(self, iframe=False, **kwargs):
+        if isinstance(iframe, str):
+            iframe = iframe.lower() == "true"
+
         context = {
             "request": None,
+            "page": get_homepage(),
             "ASSISTANT": {"faites_decouvrir_ce_site": "Faites découvrir ce site !"},
+            "iframe": iframe,
         }
         return render_to_string("ui/pages/home.html", context)
 
-    def produit(self, **kwargs):
-        context = {"object": Synonyme.objects.first()}
+    @register_form_class(IframeForm)
+    def produit(self, iframe=False, **kwargs):
+        # Convert string values to boolean
+        if isinstance(iframe, str):
+            iframe = iframe.lower() == "true"
+
+        factory = RequestFactory()
+        request = factory.get("/")
+
+        context = {
+            "object": Synonyme.objects.first(),
+            "request": request,
+            "iframe": iframe,
+        }
+
         return render_to_string("ui/pages/produit.html", context)
 
-    def acteur(self, **kwargs):
+    @register_form_class(IframeForm)
+    def acteur(self, iframe=False, **kwargs):
+        # Convert string values to boolean
+        if isinstance(iframe, str):
+            iframe = iframe.lower() == "true"
+
         acteur = DisplayedActeur.objects.first()
         factory = RequestFactory()
         request = factory.get("/")
+
         context = {
             "object": acteur,
             "request": request,
             "base_template": "ui/layout/base.html",
             "turbo": False,
+            "iframe": iframe,
         }
         return render_to_string("ui/pages/acteur.html", context)
-
-
-class SnippetsPreview(LookbookPreview):
-    @component_docs("ui/components/header/header.md")
-    def header(self, **kwargs):
-        context = {"request": None}
-        return render_to_string("ui/components/header/header.html", context)
-
-    def footer(self, **kwargs):
-        return render_to_string("ui/components/footer/footer.html")
-
-    def suggestions(self, **kwargs):
-        context = {
-            "heading": "Coucou",
-            "suggestions": [("coucou", "google.fr"), ("youpi", "google.fr")],
-        }
-        return render_to_string("ui/components/suggestions/suggestions.html", context)
-
-    def share_and_embed(self, **kwargs):
-        context = {"heading": "Faites découvrir ce site"}
-        return render_to_string("ui/snippets/share_and_embed.html", context)
 
 
 class IframePreview(LookbookPreview):
@@ -991,17 +1039,14 @@ class TestsPreview(LookbookPreview):
             (-0.609453, 47.457526, -0.51571, 47.489048)
         )
 
-        carte_config, created = CarteConfig.objects.get_or_create(
+        carte_config, created = CarteConfig.objects.update_or_create(
             slug="test-bounding-box",
             defaults={
                 "nom": "Test Bounding Box",
                 "bounding_box": bounding_box_polygon,
+                "test": True,
             },
         )
-
-        if not created and carte_config.bounding_box != bounding_box_polygon:
-            carte_config.bounding_box = bounding_box_polygon
-            carte_config.save()
 
         carte_config_url = reverse(
             "qfdmo:carte_custom", kwargs={"slug": "test-bounding-box"}
@@ -1025,4 +1070,48 @@ class TestsPreview(LookbookPreview):
         return render_to_string(
             "ui/tests/iframe_navigation_persistence.html",
             {"base_url": base_url},
+        )
+
+    @register_form_class(BonusForm)
+    def t_9_bonus_legacy_parameter_iframe(self, bonus="1", **kwargs):
+        """Test that legacy bonus=1 parameter in iframe URL initializes the bonus filter as checked"""
+        return render_to_string(
+            "ui/tests/t_9_bonus_legacy_parameter_iframe.html",
+            {"bonus": bonus},
+        )
+
+    @register_form_class(BonusForm)
+    def t_10_bonus_legacy_parameter_script(self, bonus="1", **kwargs):
+        """Test that legacy data-bonus='1' via script initializes the bonus filter as checked"""
+        return render_to_string(
+            "ui/tests/t_10_bonus_legacy_parameter_script.html",
+            {"base_url": base_url, "bonus": bonus},
+        )
+
+    def t_11_cacher_filtre_objet(self, **kwargs):
+        """Test that CarteConfig with cacher_filtre_objet=True hides the object filter"""
+        # Create or update test CarteConfig with cacher_filtre_objet=True
+        carte_config, created = CarteConfig.objects.update_or_create(
+            slug="test-cacher-filtre-objet",
+            defaults={
+                "nom": "Test Cacher Filtre Objet",
+                "cacher_filtre_objet": True,
+                "test": True,
+            },
+        )
+
+        script = f'<script src="{base_url}/static/carte.js" data-slug="{carte_config.slug}"></script>'
+
+        return render_to_string(
+            "ui/tests/t_11_cacher_filtre_objet.html",
+            {"script": script},
+        )
+
+    def t_12_default_filtre_objet(self, **kwargs):
+        """Test that default CarteConfig shows the object filter"""
+        script = f'<script src="{base_url}/static/carte.js"></script>'
+
+        return render_to_string(
+            "ui/tests/t_12_default_filtre_objet.html",
+            {"script": script},
         )

@@ -9,7 +9,6 @@ from cluster.config.xcoms import XCOMS, xcom_pull
 from cluster.tasks.business_logic.cluster_acteurs_parents_choose_data import (
     cluster_acteurs_parents_choose_data,
 )
-
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
@@ -55,7 +54,7 @@ def cluster_acteurs_parents_choose_data_wrapper(ti) -> None:
         keep_parent_data_by_default=config.dedup_enrich_keep_parent_data_by_default,
     )
 
-    logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
+    logger.info(log.banner_string("🏁 Résultat final de cette tâche"))
     log.preview_df_as_markdown("clusters avec data parent", df, groupby="cluster_id")
 
     ti.xcom_push(key=XCOMS.DF_PARENTS_CHOOSE_DATA, value=df)

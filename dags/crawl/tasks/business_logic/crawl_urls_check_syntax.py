@@ -181,7 +181,7 @@ def crawl_urls_check_syntax(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFram
     df_syntax_fail = df_sort(df_syntax_fail, sort_cols=SORT_COLS)
 
     # Debug
-    logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
+    logger.info(log.banner_string("🏁 Résultat final de cette tâche"))
     log.preview_df_as_markdown(COHORTS.SYNTAX_OK, df_syntax_ok)
     log.preview_df_as_markdown(COHORTS.SYNTAX_FAIL, df_syntax_fail)
     return df_syntax_ok, df_syntax_fail

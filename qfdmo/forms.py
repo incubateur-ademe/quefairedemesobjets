@@ -356,6 +356,7 @@ class LegacySupportForm(GetFormMixin, forms.Form):
         "epci_codes",
         "bounding_box",
         "sc_id",
+        "bonus",
     ]
 
     def __init__(self, *args, **kwargs):
@@ -441,6 +442,7 @@ class FiltresForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
         """Apply legacy querystring parameters to override form behavior.
 
         - label_reparacteur: set initial value to reparacteur checked
+        - bonus: set initial value to bonus checked
         """
         if not legacy_form:
             return
@@ -460,6 +462,10 @@ class FiltresForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
             self.fields["pas_exclusivite_reparation"].initial = (
                 pas_exclusivite_reparation == "false"
             )
+
+        if bonus := initial_legacy_request_data.get("bonus"):
+            if forms.BooleanField().to_python(bonus):
+                self.fields["bonus"].initial = True
 
 
 class FiltresFormWithoutSynonyme(FiltresForm):

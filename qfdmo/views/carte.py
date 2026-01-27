@@ -121,7 +121,7 @@ class CarteSearchActeursView(AbstractSearchActeursView):
 
     def _generate_prefix(self, prefix: str) -> str:
         try:
-            id = self.request.GET[MAP_CONTAINER_ID]
+            id = self._get_map_container_id()
             return f"{id}_{prefix}"
         except (KeyError, AttributeError):
             return prefix
@@ -275,6 +275,10 @@ class CarteSearchActeursView(AbstractSearchActeursView):
     def _get_map_container_id(self):
         if self.carte_config:
             return self.carte_config.slug
+
+        if MAP_CONTAINER_ID in self.request.GET:
+            return self.request.GET[MAP_CONTAINER_ID]
+
         return DEFAULT_MAP_CONTAINER_ID
 
     def _get_bounding_box(self) -> str | None:
@@ -555,7 +559,13 @@ class CarteSearchActeursView(AbstractSearchActeursView):
 class CarteConfigView(DetailView, CarteSearchActeursView):
     model = CarteConfig
     context_object_name = "carte_config"
-    filtres_form_class = FiltresFormWithoutSynonyme
+
+    @property
+    def filtres_form_class(self):
+        if self.object.cacher_filtre_objet:
+            return FiltresFormWithoutSynonyme
+        else:
+            return super().filtres_form_class
 
     def get_queryset(self):
         """Optimize queries by prefetching all ManyToMany relations"""

@@ -136,7 +136,7 @@ def cluster_acteurs_clusters_prepare(
         cluster_fields_fuzzy=cluster_fields_fuzzy,
     )
 
-    logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
+    logger.info(log.banner_string("🏁 Résultat final de cette tâche"))
     log.preview_df_as_markdown(
         "suggestions de clusters", df_combined, groupby="cluster_id"
     )

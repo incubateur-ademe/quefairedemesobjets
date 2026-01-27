@@ -116,7 +116,7 @@ createsuperuser:
 
 .PHONY: seed-database
 seed-database:
-	$(DJANGO_ADMIN) loaddata_with_computed_fields categories labels sources actions produits acteur_services acteur_types objets synonymes suggestions carte_configs
+	$(DJANGO_ADMIN) loaddata_with_computed_fields categories labels sources actions produits acteur_services acteur_types objets synonymes carte_configs
 	$(DJANGO_ADMIN) loaddata_with_computed_fields acteurs propositions_services
 
 .PHONY: createsuperuser-example
@@ -140,7 +140,6 @@ generate-fixtures:
 	$(DJANGO_ADMIN) dumpdata qfdmo.carteconfig qfdmo.groupeactionconfig $(FIXTURES_OPTIONS) -o qfdmo/fixtures/carte_configs.json
 	$(DJANGO_ADMIN) dumpdata qfdmd.synonyme $(FIXTURES_OPTIONS) -o qfdmd/fixtures/synonymes.json
 	$(DJANGO_ADMIN) dumpdata qfdmd.produit $(FIXTURES_OPTIONS) -o qfdmd/fixtures/produits.json
-	$(DJANGO_ADMIN) dumpdata qfdmd.suggestion $(FIXTURES_OPTIONS) -o qfdmd/fixtures/suggestions.json
 
 .PHONY: clear-cache
 clear-cache:
@@ -220,12 +219,16 @@ create-schema-public:
 psql:
 	docker compose exec lvao-db psql -U qfdmo -d qfdmo
 
-.PHONY: dump-production
-dump-production:
-	sh scripts/infrastructure/backup-db.sh
+.PHONY: dump-prod
+dump-prod:
+	sh scripts/infrastructure/backup-db.sh --env prod
 
-.PHONY: dump-production-quiet
-dump-production-quiet:
+.PHONY: dump-preprod
+dump-preprod:
+	sh scripts/infrastructure/backup-db.sh --quiet --env preprod
+
+.PHONY: dump-prod-quiet
+dump-prod-quiet:
 	sh scripts/infrastructure/backup-db.sh --quiet
 
 # We need to create extensions because they are not restored by pg_restore
@@ -233,29 +236,45 @@ dump-production-quiet:
 create_sql_extensions:
 
 .SILENT:
-.PHONY: load-production-dump
-load-production-dump:
-	@DUMP_FILE=$$(find tmpbackup -type f -name "*.custom" -print -quit); \
+.PHONY: load-prod-dump
+load-prod-dump:
+	@DUMP_FILE=$$(find tmpbackup-prod -type f -name "*.custom" -print -quit); \
 	psql -d '$(DB_URL)' -f scripts/sql/create_extensions.sql && \
 	pg_restore -d '$(DB_URL)' --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
 
-.PHONY: db-restore
-db-restore:
-	make dump-production
+.SILENT:
+.PHONY: load-preprod-dump
+load-preprod-dump:
+	@DUMP_FILE=$$(find tmpbackup-preprod -type f -name "*.custom" -print -quit); \
+	psql -d '$(DB_URL)' -f scripts/sql/create_extensions.sql && \
+	pg_restore -d '$(DB_URL)' --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
+
+.PHONY: db-restore-local-from-prod
+db-restore-local-from-prod:
+	make dump-prod
 	make drop-schema-public
 	make create-schema-public
-	make load-production-dump
+	make load-prod-dump
 	make migrate
 	make create-remote-db-server
 
-.PHONY: db-restore-preprod
-db-restore-preprod:
-	make dump-production-quiet
-	make drop-all-tables
-	make load-production-dump
+.PHONY: db-restore-local-from-preprod
+db-restore-local-from-preprod:
+	make dump-preprod
+	make drop-schema-public
+	make create-schema-public
+	make load-preprod-dump
+	make migrate
+	make create-remote-db-server
 
-.PHONY: db-restore-for-tests
-db-restore-for-tests:
+.PHONY: db-restore-preprod-from-prod
+db-restore-preprod-from-prod:
+	make dump-prod-quiet
+	make drop-all-tables
+	make load-prod-dump
+
+.PHONY: db-restore-local-for-tests
+db-restore-local-for-tests:
 	make drop-schema-public
 	make create-schema-public
 	make migrate

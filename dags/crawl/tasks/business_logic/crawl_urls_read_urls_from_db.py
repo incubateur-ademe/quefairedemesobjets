@@ -43,6 +43,6 @@ def crawl_urls_read_urls_from_db(limit: int | None = None) -> pd.DataFrame:
     )
     df.columns = [COLS.URL_ORIGIN, COLS.ACTEURS]
     df = df_sort(df, sort_cols=SORT_COLS)
-    logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
+    logger.info(log.banner_string("🏁 Résultat final de cette tâche"))
     log.preview_df_as_markdown("URLs à parcourir", df)
     return df
