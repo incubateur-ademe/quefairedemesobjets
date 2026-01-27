@@ -40,20 +40,50 @@ export class SolutionMap {
     this.#location = location
     this.#controller = controller
 
-    // Map theme to Carte Facile styles
-    let mapStyle = mapStyles.desaturated
+    // Use OSM tiles for Django admin, Carte Facile for public site
+    const useOsm = theme === "osm"
 
-    this.map = new Map({
-      container: selector,
-      style: mapStyle,
-      zoom: initialZoom,
-      maxZoom: DEFAULT_MAX_ZOOM,
-      center: DEFAULT_LOCATION,
-      attributionControl: {
-        compact: true,
-      },
-    })
-    addOverlay(this.map, Overlay.administrativeBoundaries)
+    if (useOsm) {
+      // OSM tiles for Django admin
+      this.map = new Map({
+        container: selector,
+        style: {
+          version: 8,
+          sources: {
+            osm: {
+              type: "raster",
+              tiles: [
+                "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png",
+              ],
+              tileSize: 256,
+            },
+          },
+          layers: [{ type: "raster", id: "osm-layer", source: "osm" }],
+        },
+        zoom: initialZoom,
+        maxZoom: 20,
+        center: DEFAULT_LOCATION,
+        attributionControl: {
+          compact: true,
+          customAttribution: "© OpenStreetMap contributors",
+        },
+      })
+    } else {
+      // Carte Facile for public site
+      this.map = new Map({
+        container: selector,
+        style: mapStyles.desaturated,
+        zoom: initialZoom,
+        maxZoom: DEFAULT_MAX_ZOOM,
+        center: DEFAULT_LOCATION,
+        attributionControl: {
+          compact: true,
+        },
+      })
+      addOverlay(this.map, Overlay.administrativeBoundaries)
+    }
     // Add zoom controls
     this.#addZoomControl()
 
