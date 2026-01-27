@@ -61,7 +61,7 @@ jobs:
           default-organization-id: ${{ env.SCW_DEFAULT_ORGANIZATION_ID }}
       - name: Restore DB from prod to preprod
         run: |
-          DB_URL=${PREPROD_DB_WEBAPP_DSN} make -e db-restore-preprod
+          DB_URL=${PREPROD_DB_WEBAPP_DSN} make -e db-restore-preprod-from-prod
       - name: Execute migrations in one-off container
         run: |
           scalingo --app ${PREPROD_APP} run python manage.py migrate
