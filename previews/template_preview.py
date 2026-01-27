@@ -19,7 +19,7 @@ from core.widgets import (
     SynonymeAutocompleteInput,
 )
 from infotri.forms import InfotriForm
-from qfdmd.forms import SearchForm
+from qfdmd.forms import HomeSearchForm
 from qfdmd.models import Synonyme
 from qfdmo.forms import (
     LegendeForm,
@@ -930,17 +930,17 @@ class AccessibilitePreview(LookbookPreview):
 
     @component_docs("ui/components/accessibilite/P01_3_3.md")
     def P01_3_3(self, **kwargs):
-        context = {"search_form": SearchForm()}
+        context = {"search_form": HomeSearchForm()}
         return render_to_string("ui/components/search/view.html", context)
 
     @component_docs("ui/components/accessibilite/P01_10_2.md")
     def P01_10_2(self, **kwargs):
-        context = {"search_form": SearchForm()}
+        context = {"search_form": HomeSearchForm()}
         return render_to_string("ui/components/search/view.html", context)
 
     @component_docs("ui/components/accessibilite/P01_10_7.md")
     def P01_10_7(self, **kwargs):
-        context = {"search_form": SearchForm()}
+        context = {"search_form": HomeSearchForm()}
         return render_to_string("ui/components/search/view.html", context)
 
     @component_docs("ui/components/accessibilite/P01_13_8.md")
