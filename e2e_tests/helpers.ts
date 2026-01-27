@@ -526,6 +526,40 @@ export async function clickFirstAvailableMarker(
 }
 
 /**
+ * Click on the first acteur marker that is not obstructed by other elements.
+ * Cycles through markers and attempts to click each one until successful.
+ * Excludes the home marker (#pinpoint-home) which often overlaps acteur markers.
+ */
+export async function clickFirstClickableActeurMarker(
+  context: Page | FrameLocator,
+  options: { timeout?: number } = {},
+) {
+  const { timeout = 1000 } = options
+
+  const acteurMarkers = context.locator(
+    '.maplibregl-marker[data-controller="pinpoint"]:not(#pinpoint-home)',
+  )
+  const count = await acteurMarkers.count()
+
+  for (let i = 0; i < count; i++) {
+    const marker = acteurMarkers.nth(i)
+    try {
+      // Try to click without force - this will fail if element is obstructed
+      await marker.click({ timeout })
+      return // Success - exit the function
+    } catch {
+      // This marker is obstructed, try the next one
+      continue
+    }
+  }
+
+  // If all markers failed, throw an error
+  throw new Error(
+    `Could not click any of the ${count} acteur markers - all are obstructed`,
+  )
+}
+
+/**
  * Loading state helpers
  */
 export async function waitForLoadingComplete(
