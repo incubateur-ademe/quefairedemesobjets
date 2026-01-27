@@ -25,7 +25,7 @@ https://github.com/numerique-gouv/sites-faciles/blob/main/templates/base.html
         {% endblock title %}
 
         {% block description %}
-            <meta name="description" content="{{ page.search_description|default:seo.description }}" />
+            <meta name="description" content="{% firstof page.search_description seo.description %}" />
         {% endblock description %}
 
         {% canonical_url %}
@@ -34,7 +34,7 @@ https://github.com/numerique-gouv/sites-faciles/blob/main/templates/base.html
             <meta property="og:site_name" content="{{ request.get_host }}" />
             <meta property="og:title" content="{% if page.seo_title %}{{ page.seo_title }}{% else %}{{ page.title }}{% endif %}" />
             <meta property="og:type" content="article" />
-            <meta property="og:description" content="{{ page.search_description|default:seo.description }}" />
+            <meta property="og:description" content="{% firstof page.search_description seo.description %}" />
             <meta property="og:locale" content="{{ LANGUAGE_CODE }}" />
             {% if page.get_translations.live %}
                 {% for translation in page.get_translations.live %}
@@ -42,7 +42,7 @@ https://github.com/numerique-gouv/sites-faciles/blob/main/templates/base.html
                 {% endfor %}
             {% endif %}
             <meta name="twitter:title" content="{% if page.seo_title %}{{ page.seo_title }}{% else %}{{ page.title }}{% endif %}" />
-            <meta name="twitter:description" content="{{ page.search_description|default:seo.description }}" />
+            <meta name="twitter:description" content="{% firstof page.search_description seo.description %}" />
             <meta property="og:image" content="{% static 'assistant/og-image.jpg' %}" />
         {% endblock social_media %}
 

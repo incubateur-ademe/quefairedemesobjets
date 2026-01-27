@@ -1,4 +1,16 @@
 {% extends "ui/layout/assistant.html" %}
+{% load static %}
+
+{% block title %}
+<title>Erreur</title>
+{% endblock title %}
+
+{% block description %}
+{% endblock description %}
+
+{% block social_media %}
+<meta property="og:image" content="{% static 'assistant/og-image.jpg' %}" />
+{% endblock social_media %}
 
 {% block header %}
 {% endblock header %}
