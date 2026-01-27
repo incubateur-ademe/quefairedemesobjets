@@ -7,10 +7,15 @@ on:
       registry_image:
         type: string
         required: true
+      environment:
+        type: string
+        required: true
+
 jobs:
   deploy_container:
     name: Scaleway deploy container
     runs-on: ubuntu-slim
+    environment: ${{ inputs.environment }}
     env:
       SCALEWAY_DEPLOY_KEY: ${{ secrets.SCALEWAY_DEPLOY_KEY }}
       CONTAINER_ID: ${{ vars[inputs.container_key] }}
@@ -24,7 +29,7 @@ jobs:
       run: |
         scw container container update $CONTAINER_ID \
           registry-image=$REGISTRY_IMAGE \
-          region=fr-par
+          region=$SCW_DEFAULT_REGION
       env:
         SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
         SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
@@ -36,7 +41,7 @@ jobs:
     - name: Deploy container
       run: |
         scw container container deploy $CONTAINER_ID \
-          region=fr-par
+          region=$SCW_DEFAULT_REGION
       env:
         SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
         SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
