@@ -11,6 +11,10 @@
   @apply qf-text-green-800;
 }
 
+.no-suggestion-text {
+  @apply qf-text-grey-200-850;
+}
+
 .model-suggestion.change-list .action-select {
   height: 100px;
 }
