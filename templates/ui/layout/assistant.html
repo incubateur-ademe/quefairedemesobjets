@@ -1,4 +1,4 @@
-{% load analytics_tags dsfr_tags qfdmd_tags static wagtailuserbar %}
+{% load analytics_tags dsfr_tags qfdmd_tags static wagtailuserbar wagtailcore_tags %}
 
 {% comment %}
 SEO tags are taken from Sites Faciles templates
@@ -21,16 +21,29 @@ https://github.com/numerique-gouv/sites-faciles/blob/main/templates/base.html
             content="width=device-width, initial-scale=1, shrink-to-fit=no"
         />
         {% block title %}
-            <title>
-            {% if title %}{{ title }} —{% endif %}
-            {{ settings.sites_faciles_content_manager.CmsDsfrConfig.site_title }}</title>
+            <title>{{ page.seo_title|default:page.title }}</title>
         {% endblock title %}
 
-        {% canonical_url %}
-
         {% block description %}
-        <meta name="description" content="{% block meta_description %}{{ seo.description }}{% endblock %}">
+            <meta name="description" content="{{ page.search_description|default:seo.description }}" />
         {% endblock description %}
+
+        {% block social_media %}
+            <meta property="og:site_name" content="{{ request.get_host }}" />
+            <meta property="og:title" content="{% if page.seo_title %}{{ page.seo_title }}{% else %}{{ page.title }}{% endif %}" />
+            <meta property="og:type" content="article" />
+            <meta property="og:url" content="{% canonical_url %}" />
+            <meta property="og:description" content="{{ page.search_description|default:seo.description }}" />
+            <meta property="og:locale" content="{{ LANGUAGE_CODE }}" />
+            {% if page.get_translations.live %}
+                {% for translation in page.get_translations.live %}
+                    <meta property="og:locale:alternate" content="{{ translation.locale.language_code }}" />
+                {% endfor %}
+            {% endif %}
+            <meta name="twitter:title" content="{% if page.seo_title %}{{ page.seo_title }}{% else %}{{ page.title }}{% endif %}" />
+            <meta name="twitter:description" content="{{ page.search_description|default:seo.description }}" />
+            <meta property="og:image" content="{% static 'assistant/og-image.jpg' %}" />
+        {% endblock social_media %}
 
         {% if block_robots %}<meta name="robots" content="noindex, nofollow" />{% endif %}
         {% favicon %}
@@ -41,10 +54,6 @@ https://github.com/numerique-gouv/sites-faciles/blob/main/templates/base.html
 
         {% dsfr_css %}
         <link rel="stylesheet" href="{% static 'qfdmd.css' %}">
-
-        {% block social_media %}
-        <meta property="og:image" content="{% static 'assistant/og-image.jpg' %}" />
-        {% endblock social_media %}
 
         {% matomo assistant.MATOMO_ID %}
 
