@@ -46,6 +46,7 @@
     "@iframe-resizer/child": "^5.5.7",
     "@iframe-resizer/parent": "^5.5.7",
     "bowser": "^2.13.1",
+    "carte-facile": "^0.8.1",
     "eslint-config-prettier": "^10.1.8",
     "posthog-js": "^1.331.0",
     "maplibre-gl": "^5.16.0",
