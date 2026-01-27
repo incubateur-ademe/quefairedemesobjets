@@ -60,8 +60,8 @@ def cluster_acteurs_suggestions_to_db_wrapper(ti, dag, run_id) -> None:
         cluster_fields_fuzzy=config.cluster_fields_fuzzy,
     )
 
-    logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
-    logging.info(f"{len(suggestions)} suggestions de clusters écrites en base")
+    logger.info(log.banner_string("🏁 Résultat final de cette tâche"))
+    logger.info(f"{len(suggestions)} suggestions de clusters écrites en base")
 
 
 def cluster_acteurs_suggestions_to_db_task(dag: DAG) -> PythonOperator:
