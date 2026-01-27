@@ -1,6 +1,6 @@
 # Combined Logos
 
-This component displays the ADEME logo alongside the site logo (mini version). It's used in both the header and footer.
+This component displays the République française, ADEME and QFDMOD (mini version) logos aside. It's used in both the header and footer.
 
 ## Usage
 
