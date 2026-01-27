@@ -1,9 +1,14 @@
 {% load analytics_tags dsfr_tags qfdmd_tags static wagtailuserbar wagtailcore_tags %}
 
 {% comment %}
-SEO tags are taken from Sites Faciles templates
-https://github.com/numerique-gouv/sites-faciles/blob/main/content_manager/templates/content_manager/content_page.html
-https://github.com/numerique-gouv/sites-faciles/blob/main/templates/base.html
+SEO meta tags are mirrored from Sites Faciles templates:
+https://github.com/numerique-gouv/sites-faciles/blob/0e712bc21e392b8aea51db4df8ad9d0ea3d61019/content_manager/templates/content_manager/content_page.html#L13-L34
+This might not be aligned with the coding style of our project.
+
+We use {% firstof %} instead of |default for cross-context fallbacks (e.g., page.search_description
+to seo.description) because Django's |default filter evaluates both arguments during template
+parsing, which raises VariableDoesNotExist when seo is not in context (e.g., error pages).
+{% firstof %} only evaluates until it finds a truthy value, avoiding this issue.
 {% endcomment %}
 
 {% with contact_modal_id="contact" %}
@@ -21,7 +26,7 @@ https://github.com/numerique-gouv/sites-faciles/blob/main/templates/base.html
             content="width=device-width, initial-scale=1, shrink-to-fit=no"
         />
         {% block title %}
-            <title>{{ page.seo_title|default:page.title }}</title>
+            <title>{% firstof page.seo_title page.title %}</title>
         {% endblock title %}
 
         {% block description %}
@@ -32,7 +37,7 @@ https://github.com/numerique-gouv/sites-faciles/blob/main/templates/base.html
 
         {% block social_media %}
             <meta property="og:site_name" content="{{ request.get_host }}" />
-            <meta property="og:title" content="{% if page.seo_title %}{{ page.seo_title }}{% else %}{{ page.title }}{% endif %}" />
+            <meta property="og:title" content="{% firstof page.seo_title page.title %}" />
             <meta property="og:type" content="article" />
             <meta property="og:description" content="{% firstof page.search_description seo.description %}" />
             <meta property="og:locale" content="{{ LANGUAGE_CODE }}" />
@@ -41,7 +46,7 @@ https://github.com/numerique-gouv/sites-faciles/blob/main/templates/base.html
                     <meta property="og:locale:alternate" content="{{ translation.locale.language_code }}" />
                 {% endfor %}
             {% endif %}
-            <meta name="twitter:title" content="{% if page.seo_title %}{{ page.seo_title }}{% else %}{{ page.title }}{% endif %}" />
+            <meta name="twitter:title" content="{% firstof page.seo_title page.title %}" />
             <meta name="twitter:description" content="{% firstof page.search_description seo.description %}" />
             <meta property="og:image" content="{% static 'assistant/og-image.jpg' %}" />
         {% endblock social_media %}
