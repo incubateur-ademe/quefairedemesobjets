@@ -249,15 +249,15 @@ wheels = [
 
 [[package]]
 name = "apache-airflow-providers-common-compat"
-version = "1.10.1"
+version = "1.12.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apache-airflow" },
     { name = "asgiref" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e5/3f/aa273a82fd3754c3bb1cb0fe6876d7c5acc6819884f178c0b6982e61b982/apache_airflow_providers_common_compat-1.10.1.tar.gz", hash = "sha256:04715659b9ef6912dd9508af15d852dca97b7283816fd0fc2b2772d503ae271b", size = 37250, upload-time = "2025-12-13T15:08:27.69Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/87/4d/799055a57de69089caa8a7ba3fdeb4e795583c06d90cd135f8acfa7f604d/apache_airflow_providers_common_compat-1.12.0.tar.gz", hash = "sha256:32dc86d81330e2755dbb7bf18dcd3bd92bb9e745269eaad82e3e227f9be0097d", size = 38232, upload-time = "2026-01-17T10:48:25.159Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/12/a1/4e0960fa9d7d683968aae5be5bf4ddc768f262e46e68e4ba5454afef2d64/apache_airflow_providers_common_compat-1.10.1-py3-none-any.whl", hash = "sha256:3a22c63441e597aa473ffd0dc7302171feab41981b0e09806f07f6d77301befc", size = 39770, upload-time = "2025-12-13T15:07:17.19Z" },
+    { url = "https://files.pythonhosted.org/packages/f0/c3/136905c257e8d003e315d0fb8e5910f88b81d4dd169ca9f480b01ff4b4bc/apache_airflow_providers_common_compat-1.12.0-py3-none-any.whl", hash = "sha256:009274ead750ba0a11d94f33a3ee73fa736da4d1766f9dcc9805dc638f3ca33c", size = 41149, upload-time = "2026-01-17T10:46:30.063Z" },
 ]
 
 [[package]]
@@ -347,7 +347,7 @@ wheels = [
 
 [[package]]
 name = "apache-airflow-providers-postgres"
-version = "6.5.1"
+version = "6.5.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apache-airflow" },
@@ -356,9 +356,9 @@ dependencies = [
     { name = "asyncpg" },
     { name = "psycopg2-binary" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/2a/09/f7a2fa23de55690e6d2c26012440473b9028596bcc4017e3833790804de5/apache_airflow_providers_postgres-6.5.1.tar.gz", hash = "sha256:ed0c308264c2c3212e9b4de5cfe7d27fbcd1df2e22f7046b0443abbca12dc4d8", size = 60995, upload-time = "2025-12-13T15:08:53.648Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b7/75/7d57b316924460c023bbc23a4f238a23dda6dfa09faf6fbcdd78a17f9e7b/apache_airflow_providers_postgres-6.5.2.tar.gz", hash = "sha256:979d1494bf9064e32bb7b1faf833789b42899746f75a46f05d7a8055b97fa306", size = 61211, upload-time = "2026-01-17T10:49:10.262Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/6d/ac/5d04ab4e715b4adeb75482bee27b8c59cab7f9d99f370166ed37421c40b5/apache_airflow_providers_postgres-6.5.1-py3-none-any.whl", hash = "sha256:41b436ad2d98fd1ad847969d1852c258a476e9ec9730454284148b9f8d0058f7", size = 23532, upload-time = "2025-12-13T15:07:50.31Z" },
+    { url = "https://files.pythonhosted.org/packages/33/d8/3e5d8575322979e2970228a3721153ab61c9c51233a1c30d7c159478082c/apache_airflow_providers_postgres-6.5.2-py3-none-any.whl", hash = "sha256:506b85c87bc394f4f7579aa858c34dfae2c59f6e31c41c7439344b980d9b1d41", size = 23630, upload-time = "2026-01-17T10:47:27.407Z" },
 ]
 
 [[package]]
