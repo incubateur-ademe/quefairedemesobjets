@@ -11,7 +11,7 @@ from django.forms import Form
 from django.utils.functional import cached_property
 from django.views.generic import DetailView
 
-from core.constants import DEFAULT_MAP_CONTAINER_ID
+from core.constants import DEFAULT_MAP_CONTAINER_ID, MAP_CONTAINER_ID
 from qfdmd.models import Produit
 from qfdmo.constants import MAP_FORM_PREFIX
 from qfdmo.forms import (
@@ -119,7 +119,6 @@ class CarteSearchActeursView(MapPrefixMixin, AbstractSearchActeursView):
             },
         }
 
-<<<<<<< HEAD
     def _generate_prefix(self, prefix: str) -> str:
         try:
             id = self._get_map_container_id()
@@ -127,8 +126,6 @@ class CarteSearchActeursView(MapPrefixMixin, AbstractSearchActeursView):
         except (KeyError, AttributeError):
             return prefix
 
-=======
->>>>>>> 5e47f314 (Use mixin for map prefix)
     # Legacy querystring support
     # ==========================
     def _initialize_legacy_form(self, data):
