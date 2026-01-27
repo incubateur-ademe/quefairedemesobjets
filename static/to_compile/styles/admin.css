@@ -3,6 +3,14 @@
 @tailwind components;
 @tailwind utilities;
 
+.suggestion-text-removed {
+  @apply qf-text-red-500 qf-line-through;
+}
+
+.suggestion-text-added {
+  @apply qf-text-green-800;
+}
+
 .model-suggestion.change-list .action-select {
   height: 100px;
 }
