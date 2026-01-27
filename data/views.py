@@ -201,8 +201,6 @@ def _validate_proposed_updates(values_to_update: dict, fields_values: dict) -> d
     Returns a dictionary of errors (empty if valid)
     """
     # Validate the RevisionActeur with the proposed values
-    logging.warning(f"{values_to_update=}")
-    logging.warning(f"{fields_values=}")
     if "longitude" in values_to_update or "latitude" in values_to_update:
         for coord_field in ["longitude", "latitude"]:
             try:
@@ -415,7 +413,6 @@ def update_suggestion_groupe(
     suggestion_modele: str,
     fields_values: dict,
     fields_groups: list[tuple],
-    acteur: Acteur | RevisionActeur | None,
 ) -> tuple[bool, dict | None]:
     """
     pour chaque champs à modifier
@@ -466,9 +463,6 @@ def update_suggestion_groupe(
         # different from the acteur value, create a suggestion of modification
         or (acteur and getattr(acteur, field, None) != value)
     }
-
-    # Build mapping of existing revision suggestions by field
-    logging.warning(f"{revision_suggestion_unitaire_by_field=}")
 
     # Validate proposed updates
     try:
@@ -645,12 +639,6 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
             return HttpResponseBadRequest(
                 "suggestion_modele must be RevisionActeur or ParentRevisionActeur"
             )
-        if suggestion_modele_payload == "ParentRevisionActeur":
-            acteur = suggestion_groupe.get_parent_revision_acteur_or_none()
-        elif suggestion_modele_payload == "RevisionActeur":
-            acteur = suggestion_groupe.get_revision_acteur_or_none()
-        else:
-            acteur = suggestion_groupe.get_acteur_or_none()
 
         try:
             fields_values = (
@@ -662,11 +650,7 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
         except json.JSONDecodeError as e:
             return HttpResponseBadRequest(f"Payload fields_list invalide : {e}")
         _, errors = update_suggestion_groupe(
-            suggestion_groupe,
-            suggestion_modele_payload,
-            fields_values,
-            fields_groups,
-            acteur,
+            suggestion_groupe, suggestion_modele_payload, fields_values, fields_groups
         )
 
         context = serialize_suggestion_groupe(suggestion_groupe)

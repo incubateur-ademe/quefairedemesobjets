@@ -306,9 +306,6 @@ def insert_suggestion(
                 and "statut" in keys
                 and revision_acteur
             ):
-                logging.warning(
-                    f"SUGGESTION_SOURCE_SUPRESSION - Revision acteur: {revision_acteur}"
-                )
                 SuggestionUnitaire(
                     suggestion_groupe=suggestion_groupe,
                     statut=constants.SUGGESTION_AVALIDER,
