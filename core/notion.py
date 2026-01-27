@@ -18,7 +18,7 @@ class ContactFormData(BaseModel):
 def create_new_row_in_notion_table(database_id: str, data: ContactFormData):
     notion_token = settings.NOTION.get("TOKEN")
     if not notion_token:
-        logging.error("The notion token is not set in local environment")
+        logger.error("The notion token is not set in local environment")
         return
 
     headers = {

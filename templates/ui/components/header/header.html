@@ -1,4 +1,4 @@
-{% extends request.iframe|yesno:"ui/components/header/base.iframe.html,ui/components/header/base.html" %}
+{% extends iframe|yesno:"ui/components/header/base.iframe.html,ui/components/header/base.html" %}
 
 {% load menu_tags static %}
 
@@ -28,14 +28,11 @@
   </div>
 {% endblock burger_menu %}
 
+{% block brand %}{% endblock %}
+
 {% block operator_logo %}
 <div class="fr-header__operator max-md:qf-pl-0 max-sm:qf-pr-0">
-    <div class="qf-grid qf-auto-cols-max qf-grid-flow-col qf-max-h-8w md:qf-max-h-9w qf-gap-1w md:qf-gap-2w">
-        <div class="qf-w-8w qf-px-1v">
-            {% include "./_logo_ademe.html" %}
-        </div>
-        {% include "ui/components/logo/header.html" %}
-    </div>
+    {% include "ui/components/header/combined_logos.html" %}
 </div>
 {% endblock operator_logo %}
 

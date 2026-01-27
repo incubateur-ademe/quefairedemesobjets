@@ -91,9 +91,9 @@ def airflow_cleanup_db():
                 if oldest_execution_date:
                     oldest_timestamp_list.append(oldest_execution_date.isoformat())
                 else:
-                    logging.info(f"No data found for {table_name}, skipping...")
+                    logger.info(f"No data found for {table_name}, skipping...")
             else:
-                logging.warning(f"Table {table_name} not found. Skipping.")
+                logger.warning(f"Table {table_name} not found. Skipping.")
 
         if oldest_timestamp_list:
             return min(oldest_timestamp_list)
