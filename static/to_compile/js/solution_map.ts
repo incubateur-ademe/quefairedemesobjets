@@ -144,6 +144,7 @@ export class SolutionMap {
         detail: {
           latitude: lngLat.lat.toString(),
           longitude: lngLat.lng.toString(),
+          markerElement: marker.getElement(),
         },
         bubbles: true,
         cancelable: false,

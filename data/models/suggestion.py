@@ -616,6 +616,31 @@ class SuggestionGroupe(TimestampedModel):
                         },
                     )
                 )
+
+            # get the suggestion_unitaires on RevisionActeur model
+            if parent_revision_acteur_suggestion_unitaires := (
+                self.suggestion_unitaires.filter(
+                    suggestion_modele="ParentRevisionActeur"
+                ).all()
+            ):
+                identifiant_unique = self.parent_revision_acteur_id
+                apply_models.append(
+                    SourceApplyModel(
+                        identifiant_unique=identifiant_unique,
+                        order=1,
+                        acteur_model=RevisionActeur,
+                        data={
+                            champ: valeur
+                            for suggestion_unitaire in (
+                                parent_revision_acteur_suggestion_unitaires
+                            )
+                            for champ, valeur in zip(
+                                suggestion_unitaire.champs, suggestion_unitaire.valeurs
+                            )
+                        },
+                    )
+                )
+
             return apply_models
         return []
 
