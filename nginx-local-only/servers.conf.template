@@ -1,0 +1,50 @@
+proxy_cache_path /tmp/nginx_assistant_cache levels=1:2 keys_zone=assistant:10m max_size=1g inactive=60m use_temp_path=off;
+
+# Define a variable to disable cache if the logged_in cookie is set
+map $http_cookie $cookie_no_cache {
+    default 0;
+    "~*logged_in=.*" 1;
+}
+
+# Combine cookie-based and env-based cache control
+# Cache is disabled if either condition is true
+# NGINX_DISABLE_CACHE is substituted by envsubst at container startup
+map "$cookie_no_cache:${NGINX_DISABLE_CACHE}" $no_cache {
+    default 0;
+    "1:0" 1;
+    "1:1" 1;
+    "0:1" 1;
+}
+
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name _;
+	# Certificates for all domain need to live in a single file in order to
+    # prevent a repeated block below.
+    ssl_certificate /etc/nginx/ssl/quefairedemesdechets.ademe.local.pem;
+    ssl_certificate_key /etc/nginx/ssl/quefairedemesdechets.ademe.local-key.pem;
+
+    location / {
+        proxy_pass http://host.docker.internal:8000;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Port $server_port;
+        include /etc/nginx/conf.d/cache.conf;
+    }
+}
+
+server {
+    listen 80;
+    server_name _;
+
+    if ($host != "quefairedemesdechets.ademe.local") {
+        return 301 https://quefairedemesdechets.ademe.local$request_uri;
+    }
+
+    location / {
+        proxy_pass http://host.docker.internal:8000;
+        include /etc/nginx/conf.d/cache.conf;
+    }
+}
