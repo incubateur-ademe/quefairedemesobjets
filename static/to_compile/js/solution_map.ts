@@ -12,7 +12,7 @@ import MapController from "../controllers/carte/map_controller"
 import type { Location } from "./types"
 const DEFAULT_LOCATION: LngLat = new LngLat(2.213749, 46.227638)
 const DEFAULT_INITIAL_ZOOM: number = 5
-const DEFAULT_MAX_ZOOM: number = 18.9 // Carte Facile recommendation
+const DEFAULT_MAX_ZOOM: number = 20
 
 export class SolutionMap {
   map: Map
@@ -77,7 +77,7 @@ export class SolutionMap {
         container: selector,
         style: mapStyles.desaturated,
         zoom: initialZoom,
-        maxZoom: DEFAULT_MAX_ZOOM,
+        maxZoom: 18.9, // Carte Facile recommendation
         center: DEFAULT_LOCATION,
         attributionControl: {
           compact: true,
