@@ -178,16 +178,14 @@ export default class extends Controller<HTMLElement> {
 
     // Check if the referrer was passed via URL parameter from the iframe script
     // This is the most reliable method as it captures the full parent URL including query params
-    if (!referrer) {
-      const url = new URL(window.location.href)
-      console.log({ window, url })
-      const encodedReferrer = url.searchParams.get("ref")
-      if (encodedReferrer) {
-        try {
-          referrer = atob(encodedReferrer)
-        } catch (e) {
-          console.warn("Unable to decode referrer from URL parameter:", e)
-        }
+    const url = new URL(window.location.href)
+    const encodedReferrer = url.searchParams.get("ref")
+    if (encodedReferrer) {
+      try {
+        const decodedReferrer = atob(encodedReferrer)
+        referrer = decodedReferrer
+      } catch (e) {
+        console.warn("Unable to decode referrer from URL parameter:", e)
       }
     }
 

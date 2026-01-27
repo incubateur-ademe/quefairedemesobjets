@@ -7,7 +7,6 @@ const DEFAULT_MAX_WIDTH = "100%"
 const DEFAULT_HEIGHT = "100vh" // As recommended by iframe-resizer docs
 const IFRAME_ID = "lvao_iframe"
 const IFRAME_TITLE = "Longue vie aux objets"
-const SCRIPT_MODE_PARAM = "s" // URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE
 
 // Special dataset attributes that require custom handling
 const SPECIAL_ATTRIBUTES = {
@@ -116,11 +115,6 @@ function processDatasetAttributes(
   let height = options.height || DEFAULT_HEIGHT
   const urlParams = new URLSearchParams()
   const iframeExtraAttributes: Record<string, string> = {}
-
-  // Add standard query parameters based on options
-  if (options.addScriptModeParam) {
-    urlParams.set(SCRIPT_MODE_PARAM, "1")
-  }
 
   // Capture the full referrer URL and pass it as a URL parameter (base64 encoded)
   // This allows the analytics controller to track the parent page URL including query params
