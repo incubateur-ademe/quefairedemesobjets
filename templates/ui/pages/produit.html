@@ -15,7 +15,6 @@
     <meta property="og:site_name" content="{{ request.get_host }}" />
     <meta property="og:title" content="{{ object.nom }}" />
     <meta property="og:type" content="article" />
-    <meta property="og:url" content="{% canonical_url %}" />
     {% if object.meta_description %}<meta property="og:description" content="{{ object.meta_description }}" />{% endif %}
     <meta property="og:locale" content="{{ LANGUAGE_CODE }}" />
     <meta name="twitter:title" content="{{ object.nom }}" />

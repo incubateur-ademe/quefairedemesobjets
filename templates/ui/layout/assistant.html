@@ -28,11 +28,12 @@ https://github.com/numerique-gouv/sites-faciles/blob/main/templates/base.html
             <meta name="description" content="{{ page.search_description|default:seo.description }}" />
         {% endblock description %}
 
+        {% canonical_url %}
+
         {% block social_media %}
             <meta property="og:site_name" content="{{ request.get_host }}" />
             <meta property="og:title" content="{% if page.seo_title %}{{ page.seo_title }}{% else %}{{ page.title }}{% endif %}" />
             <meta property="og:type" content="article" />
-            <meta property="og:url" content="{% canonical_url %}" />
             <meta property="og:description" content="{{ page.search_description|default:seo.description }}" />
             <meta property="og:locale" content="{{ LANGUAGE_CODE }}" />
             {% if page.get_translations.live %}
