@@ -406,7 +406,7 @@ git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </sp
 <p>En local, on utilise généralement une base de production mais il peut être intéressant d’installer les fixtures afin d’avoir un environnement <em>iso-CI</em>.
 Pour ce faire :</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># ⚠️ Cette commande va supprimer les données locales, elle est donc à executer en conscience</span>
-make<span class="w"> </span>db-restore-for-tests
+make<span class="w"> </span>db-restore-local-for-tests
 </pre></div>
 </div>
 <p>Dans les tests, les fixtures peuvent être importées en utilisant la fonction <code class="docutils literal notranslate"><span class="pre">callcommand</span></code> de Django :</p>
