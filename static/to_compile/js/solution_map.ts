@@ -19,6 +19,7 @@ export class SolutionMap {
   #location: Location
   #mapWidthBeforeResize: number
   #controller: MapController
+  #useOsm: boolean
   bboxValue?: Array<Number>
   points: Array<Array<Number>>
   mapPadding: number = 50
@@ -41,9 +42,9 @@ export class SolutionMap {
     this.#controller = controller
 
     // Use OSM tiles for Django admin, Carte Facile for public site
-    const useOsm = theme === "osm"
+    this.#useOsm = theme === "osm"
 
-    if (useOsm) {
+    if (this.#useOsm) {
       // OSM tiles for Django admin
       this.map = new Map({
         container: selector,
@@ -162,6 +163,7 @@ export class SolutionMap {
     const fitBoundsOptions: FitBoundsOptions = {
       padding: this.mapPadding,
       duration: 0,
+      ...(this.#useOsm && { maxZoom: DEFAULT_MAX_ZOOM - 1 }),
     }
     if (typeof bboxValue !== "undefined") {
       this.map.fitBounds(
