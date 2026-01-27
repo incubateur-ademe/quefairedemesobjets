@@ -322,13 +322,13 @@ class ComponentsPreview(LookbookPreview):
         }
         return render_to_string("ui/components/code/code.html", context)
 
-    @component_docs("ui/components/logo/header.md")
-    def logo(self, **kwargs):
-        return render_to_string("ui/components/logo/header.html")
+    @component_docs("ui/components/logo/site_logo_mini.md")
+    def site_logo_mini(self, **kwargs):
+        return render_to_string("ui/components/logo/site_logo_mini.html")
 
-    @component_docs("ui/components/logo/homepage.md")
-    def logo_homepage(self, **kwargs):
-        return render_to_string("ui/components/logo/homepage.html")
+    @component_docs("ui/components/logo/site_logo_large.md")
+    def site_logo_large(self, **kwargs):
+        return render_to_string("ui/components/logo/site_logo_large.html")
 
     @component_docs("ui/components/footer/combined_logos.md")
     def combined_logos(self, **kwargs):
@@ -447,6 +447,16 @@ class ComponentsPreview(LookbookPreview):
 
         context = {"iframe": iframe}
         return render_to_string("ui/components/footer/footer.html", context)
+
+    @register_form_class(IframeForm)
+    @component_docs("ui/components/header/header.md")
+    def header(self, iframe=False, **kwargs):
+        # Convert string values to boolean
+        if isinstance(iframe, str):
+            iframe = iframe.lower() == "true"
+
+        context = {"request": None, "iframe": iframe}
+        return render_to_string("ui/components/header/header.html", context)
 
 
 class FiltresPreview(LookbookPreview):
@@ -621,24 +631,6 @@ class PagesPreview(LookbookPreview):
             "iframe": iframe,
         }
         return render_to_string("ui/pages/acteur.html", context)
-
-
-class SnippetsPreview(LookbookPreview):
-    @component_docs("ui/components/header/header.md")
-    def header(self, **kwargs):
-        context = {"request": None}
-        return render_to_string("ui/components/header/header.html", context)
-
-    def suggestions(self, **kwargs):
-        context = {
-            "heading": "Coucou",
-            "suggestions": [("coucou", "google.fr"), ("youpi", "google.fr")],
-        }
-        return render_to_string("ui/components/suggestions/suggestions.html", context)
-
-    def share_and_embed(self, **kwargs):
-        context = {"heading": "Faites découvrir ce site"}
-        return render_to_string("ui/snippets/share_and_embed.html", context)
 
 
 class IframePreview(LookbookPreview):

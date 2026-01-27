@@ -8,7 +8,8 @@
         qf-ml-auto
         qf-relative
         -qf-top-3w
-        max-lg:qf-hidden qf-text-left"
+        {% if not iframe %}max-lg:qf-hidden{% endif %}
+        qf-text-left"
     >
         <div class="qf-absolute qf-left-0 qf-right-0 my-auto">
         {% include "ui/components/search/view.html" with search_form=header_search_form %}

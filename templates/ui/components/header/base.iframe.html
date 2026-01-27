@@ -1,9 +1,10 @@
 {% if not assistant.is_home %}
-<header role="banner" class="fr-container qf-filter-none fr-header max-md:qf-hidden" data-testid="header-iframe">
+<header role="banner" class="fr-container qf-filter-none fr-header max-sm:qf-hidden" data-testid="header-iframe">
   <div class="fr-header__body">
     <div class="fr-container">
       <div class="fr-header__body-row">
         {% block brand %}
+        {% include "ui/components/logo/site_logo_mini.html" %}
         {% endblock brand %}
 
         {% block header_search %}
