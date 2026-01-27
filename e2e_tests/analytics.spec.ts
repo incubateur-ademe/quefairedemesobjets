@@ -7,16 +7,17 @@ test.describe("📊 Analytics & Tracking", () => {
       page,
     }) => {
       // Navigate to the test page with query parameters to test full URL capture
-      const fullPageWithQueryParams =
-        "/lookbook/preview/tests/t_1_referrer?test_param=value&another=123"
+      // Uses script_type=assistant to load the assistant template (has clickable links)
+      const testQueryParams = "test_param=value&another=123"
+      const fullPageWithQueryParams = `/lookbook/preview/tests/t_1_referrer?script_type=assistant&${testQueryParams}`
       await navigateTo(page, fullPageWithQueryParams)
 
       // Get the parent window location for comparison (should include query params)
       const parentLocation = page.url()
-      expect(parentLocation.endsWith(fullPageWithQueryParams))
+      expect(parentLocation).toContain(testQueryParams)
 
-      // Locate the test iframe
-      const iframe = getIframe(page, "test")
+      // Locate the assistant iframe
+      const iframe = getIframe(page, "assistant")
 
       // Wait for iframe to load by waiting for the body with Stimulus controller
       await expect(iframe.locator("body[data-controller*='analytics']")).toBeAttached({

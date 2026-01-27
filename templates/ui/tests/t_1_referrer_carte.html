@@ -1,0 +1,13 @@
+{% load dsfr_tags %}
+
+{% dsfr_callout title="Test du referrer - Carte" text="Cette iframe utilise carte.js pour vérifier que le referrer est correctement capturé." icon_class="fr-icon-flask-line" %}
+
+<div class="fr-alert fr-alert--info fr-mb-3w">
+  <h3 class="fr-alert__title">Comment vérifier le referrer</h3>
+  <p>Ouvrez les DevTools (F12) et vérifiez :</p>
+  <ol>
+    <li><strong>SessionStorage</strong> : Dans l'onglet "Application" > "Session Storage", cherchez la clé <code>qf_ifr</code>. Elle doit contenir l'URL complète de cette page (avec les query params).</li>
+  </ol>
+</div>
+
+<script src="{{ base_url }}/static/carte.js"></script>

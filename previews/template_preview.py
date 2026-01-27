@@ -149,6 +149,22 @@ class PinPointForm(forms.Form):
     )
 
 
+class ReferrerTestForm(forms.Form):
+    """
+    Form for referrer test with script type choice
+    """
+
+    script_type = forms.ChoiceField(
+        label="Type de script",
+        choices=[
+            ("carte", "Carte (carte.js)"),
+            ("assistant", "Assistant (iframe.js)"),
+        ],
+        help_text="Choisissez le type de script à tester",
+        initial="carte",
+    )
+
+
 class CartePreview(LookbookPreview):
     """
     Previews for carte components
@@ -951,8 +967,14 @@ class TestsPreview(LookbookPreview):
     Each test should be self-contained with its own template and e2e test specification.
     """
 
-    def t_1_referrer(self, **kwargs):
-        return render_to_string("ui/tests/t_1_referrer.html", {"base_url": base_url})
+    @register_form_class(ReferrerTestForm)
+    def t_1_referrer(self, script_type="carte", **kwargs):
+        template_map = {
+            "carte": "ui/tests/t_1_referrer_carte.html",
+            "assistant": "ui/tests/t_1_referrer_assistant.html",
+        }
+        template = template_map.get(script_type, "ui/tests/t_1_referrer_carte.html")
+        return render_to_string(template, {"base_url": base_url})
 
     def t_2_carte_mode_liste_switch(self, **kwargs):
         """Test switching between carte and liste modes with bounding box"""
