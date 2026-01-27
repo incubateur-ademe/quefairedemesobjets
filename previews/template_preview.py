@@ -49,7 +49,7 @@ class ContextAwareLookbookPreview(LookbookPreview):
     context_processors = [environment, content, global_context]
 
     @classmethod
-    def get_base_context(cls, request=None):
+    def get_base_context(cls, path="/"):
         """Build context from context processors.
 
         Args:
@@ -58,9 +58,8 @@ class ContextAwareLookbookPreview(LookbookPreview):
         Returns:
             dict: Combined context from all configured context processors.
         """
-        if request is None:
-            request = RequestFactory().get("/")
-        context = {}
+        request = RequestFactory().get(path)
+        context = {"request": request}
         for processor in cls.context_processors:
             context.update(processor(request))
         return context
@@ -676,7 +675,7 @@ class PagesPreview(ContextAwareLookbookPreview):
         if isinstance(iframe, str):
             iframe = iframe.lower() == "true"
 
-        context = self.get_base_context()
+        context = self.get_base_context("/un-produit")
         context.update(
             {
                 "object": Synonyme.objects.first(),
@@ -690,7 +689,7 @@ class PagesPreview(ContextAwareLookbookPreview):
         if isinstance(iframe, str):
             iframe = iframe.lower() == "true"
 
-        context = self.get_base_context()
+        context = self.get_base_context("un-acteur")
         context.update(
             {
                 "object": DisplayedActeur.objects.first(),
