@@ -73,7 +73,7 @@ def crawl_urls_check_dns(
     # Assigning suggestion values
     df_dns_fail[COLS.SUGGEST_VALUE] = EMPTY_ACTEUR_FIELD
 
-    logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
+    logger.info(log.banner_string("🏁 Résultat final de cette tâche"))
     log.preview_df_as_markdown(COHORTS.DNS_OK, df_dns_ok)
     log.preview_df_as_markdown(COHORTS.DNS_FAIL, df_dns_fail)
     return df_dns_ok, df_dns_fail
