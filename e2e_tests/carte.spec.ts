@@ -12,6 +12,7 @@ import {
   waitForLoadingComplete,
   getIframe,
   TIMEOUT,
+  clickFirstClickableActeurMarker,
 } from "./helpers"
 
 test.describe("🗺️ Filtres Avancés Carte", () => {
@@ -485,6 +486,33 @@ test.describe("🗺️ CarteConfig Bounding Box", () => {
 })
 
 test.describe("🗺️ Bouton Itinéraire", () => {
+  test("Le bouton Itinéraire est visible sur la carte simple", async ({ page }) => {
+    // Navigate directly to the carte page
+    await navigateTo(page, "/carte")
+
+    // Search for Auray
+    await searchForAuray(page)
+
+    // Wait for acteur markers to appear
+    const acteurMarkers = page.locator(
+      '.maplibregl-marker[data-controller="pinpoint"]:not(#pinpoint-home)',
+    )
+    await expect(acteurMarkers.first()).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+
+    // Click on the first clickable acteur marker (cycles through to find one not obstructed)
+    await clickFirstClickableActeurMarker(page)
+
+    // Wait for the acteur details panel to load
+    const itineraireLink = page.locator("a").filter({ hasText: "Itinéraire" })
+    await expect(itineraireLink).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+
+    // Verify the itinéraire link has the correct Google Maps URL structure
+    const href = await itineraireLink.getAttribute("href")
+    expect(href).toContain("https://www.google.com/maps/dir/")
+    expect(href).toContain("origin=47.668099")
+    expect(href).toContain("-2.990838")
+  })
+
   test("Le bouton Itinéraire est visible sur une carte sur mesure", async ({
     page,
   }) => {
@@ -508,7 +536,7 @@ test.describe("🗺️ Bouton Itinéraire", () => {
     await expect(acteurMarkers.first()).toBeVisible({ timeout: TIMEOUT.DEFAULT })
 
     // Click on the first acteur marker
-    await acteurMarkers.first().click()
+    await acteurMarkers.first().click({ force: true })
 
     // Wait for the acteur details panel to load via turbo-frame
     // The itinéraire link should be visible
