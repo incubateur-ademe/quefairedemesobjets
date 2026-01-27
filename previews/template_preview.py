@@ -17,10 +17,7 @@ from core.constants import DEFAULT_MAP_CONTAINER_ID
 from infotri.forms import InfotriForm
 from qfdmd.forms import SearchForm
 from qfdmd.models import Synonyme
-<<<<<<< HEAD
 from qfdmd.views import get_homepage
-=======
->>>>>>> c6628153 (Refactor footer logos)
 from qfdmo.forms import LegendeForm, NextAutocompleteInput, ViewModeForm
 from qfdmo.models.acteur import (
     ActeurType,
