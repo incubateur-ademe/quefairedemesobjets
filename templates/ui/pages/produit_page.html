@@ -1,36 +1,6 @@
-{% extends "ui/pages/produit.html" %}
+{% extends "ui/layout/assistant.html" %}
 
 {% load static wagtail_dsfr_tags wagtailcore_tags %}
-
-{% block title %}
-  <title>{{ page.seo_title|default:page.title }}</title>
-{% endblock title %}
-
-{% block description %}
-  {% if page.search_description %}<meta name="description" content="{{ page.search_description }}" />{% endif %}
-{% endblock description %}
-
-{% block social_media %}
-  <meta property="og:site_name" content="{{ request.get_host }}" />
-  <meta property="og:title"
-        content="{% if page.seo_title %}{{ page.seo_title }}{% else %}{{ page.title }}{% endif %}" />
-  <meta property="og:type" content="article" />
-  <meta property="og:url" content="{% canonical_url %}" />
-  <meta property="og:description" content="{{ page.search_description }}" />
-  <meta property="og:locale" content="{{ LANGUAGE_CODE }}" />
-
-  {% if page.get_translations.live %}
-    {% for translation in page.get_translations.live %}
-      <meta property="og:locale:alternate"
-            content="{{ translation.locale.language_code }}" />
-    {% endfor %}
-  {% endif %}
-
-  <meta name="twitter:title"
-        content="{% if page.seo_title %}{{ page.seo_title }}{% else %}{{ page.title }}{% endif %}" />
-  <meta name="twitter:description" content="{{ page.search_description }}" />
-  <meta property="og:image" content="{% static 'assistant/og-image.jpg' %}" />
-{% endblock social_media %}
 
 {% comment %}
 Here we want to remove the fr-container class set on the <main> tag
