@@ -20,7 +20,7 @@ from data.models.suggestion import (
 )
 from data.models.suggestions.source import SuggestionSourceModel
 from data.models.utils import prepare_acteur_data_with_location
-from qfdmo.models.acteur import Acteur, ActeurStatus, RevisionActeur
+from qfdmo.models.acteur import Acteur, ActeurStatus, DisplayedActeur, RevisionActeur
 
 logger = logging.getLogger(__name__)
 
@@ -468,6 +468,31 @@ def update_suggestion_groupe(
         or (acteur and getattr(acteur, field, None) != value)
     }
 
+    # complete fields_groups with value of the other field in field_groups
+    # if it is not in values_to_update
+    new_values_to_update = {}
+    for field in values_to_update.keys():
+        # find field_group that contains field
+        field_group = next(
+            (field_group for field_group in fields_groups if field in field_group), None
+        )
+        if field_group and len(field_group) > 1:
+            for other_field in field_group:
+                if other_field == field:
+                    continue
+                if other_field not in values_to_update.keys():
+                    # set the value by default of the other field
+                    if (
+                        getattr(revision_suggestion_unitaire_by_field, other_field)
+                        is not None
+                    ):
+                        new_values_to_update[other_field] = getattr(
+                            revision_suggestion_unitaire_by_field, other_field
+                        )
+                    elif acteur:
+                        new_values_to_update[other_field] = getattr(acteur, other_field)
+    values_to_update.update(new_values_to_update)
+
     # Validate proposed updates
     try:
         if errors := _validate_proposed_updates(values_to_update, fields_values):
@@ -499,7 +524,6 @@ def update_suggestion_groupe(
                     ),
                 },
             )
-            # FIXME: when edit lat long when "- , -", manage only 1 of 2 value is updated
             suggestion_unitaire.valeurs = [
                 values_to_update.get(field, "") for field in fields
             ]
@@ -537,83 +561,144 @@ class SuggestionGroupeStatusView(LoginRequiredMixin, FormView):
 class SuggestionGroupeView(LoginRequiredMixin, View):
     template_name = "data/_partials/suggestion_groupe_refresh_stream.html"
 
-    def _manage_tab_in_context(self, context, request, suggestion_groupe):
-        def _append_location_to_points(
-            points, latitude_data, longitude_data, key, color, draggable
-        ):
-            points.append(
-                {
-                    "latitude": float(latitude_data[key]),
-                    "longitude": float(longitude_data[key]),
-                    "color": color,
-                    "key": key,
-                    "draggable": draggable,
-                }
+    # "fields_values": fields_values,
+    # "acteur": acteur,
+    # "revision_acteur": revision_acteur,
+    # "parent_revision_acteur": parent_revision_acteur,
+
+    def _manage_tab_in_context(
+        self,
+        tab,
+        suggestion_groupe: SuggestionGroupe,
+        acteur: Acteur | None | None,
+        revision_acteur: RevisionActeur | None,
+        parent_revision_acteur: RevisionActeur | None,
+    ):
+
+        def _get_displayed_acteur_uuid(acteur, revision_acteur, parent_revision_acteur):
+            final_acteur = parent_revision_acteur or revision_acteur or acteur
+            if final_acteur:
+                displayed_acteur = DisplayedActeur.objects.filter(
+                    identifiant_unique=final_acteur.identifiant_unique
+                ).first()
+                return displayed_acteur.uuid if displayed_acteur else None
+            return None
+
+        suggestion_unitaires = suggestion_groupe.suggestion_unitaires.all()
+        acteur_suggestion_unitaires_latlong = next(
+            (
+                suggestion_unitaire
+                for suggestion_unitaire in suggestion_unitaires
+                if suggestion_unitaire.suggestion_modele == "Acteur"
+                and suggestion_unitaire.champs == ["latitude", "longitude"]
+            ),
+            None,
+        )
+        revision_acteur_suggestion_unitaires_latlong = next(
+            (
+                suggestion_unitaire
+                for suggestion_unitaire in suggestion_unitaires
+                if suggestion_unitaire.suggestion_modele == "RevisionActeur"
+                and suggestion_unitaire.champs == ["latitude", "longitude"]
+            ),
+            None,
+        )
+        parent_revision_acteur_suggestion_unitaires_latlong = next(
+            (
+                suggestion_unitaire
+                for suggestion_unitaire in suggestion_unitaires
+                if suggestion_unitaire.suggestion_modele == "ParentRevisionActeur"
+                and suggestion_unitaire.champs == ["latitude", "longitude"]
+            ),
+            None,
+        )
+        context = {"tab": tab}
+        if tab == "acteur":
+            context["uuid"] = _get_displayed_acteur_uuid(
+                acteur, revision_acteur, parent_revision_acteur
             )
-
-        context["tab"] = request.GET.get("tab", request.POST.get("tab", None))
-        if context["tab"] == "acteur":
-            context["uuid"] = suggestion_groupe.displayed_acteur_uuid
-        if context["tab"] == "localisation":
+        points = []
+        if tab == "localisation":
+            if acteur and acteur.latitude and acteur.longitude:
+                points.append(
+                    {
+                        "latitude": float(acteur.latitude),
+                        "longitude": float(acteur.longitude),
+                        "color": "grey",
+                        "key": "Origin",
+                        "draggable": False,
+                    }
+                )
+            if acteur_suggestion_unitaires_latlong:
+                points.append(
+                    {
+                        "latitude": float(
+                            acteur_suggestion_unitaires_latlong.valeurs[0]
+                        ),
+                        "longitude": float(
+                            acteur_suggestion_unitaires_latlong.valeurs[1]
+                        ),
+                        "color": "green",
+                        "key": "Suggestion",
+                        "text": "A",
+                        "draggable": False,
+                    }
+                )
             if (
-                "latitude" in context["fields_values"]
-                and "longitude" in context["fields_values"]
+                revision_acteur
+                and revision_acteur.latitude
+                and revision_acteur.longitude
+            ) or revision_acteur_suggestion_unitaires_latlong:
+                latitude = (
+                    revision_acteur_suggestion_unitaires_latlong.valeurs[0]
+                    if revision_acteur_suggestion_unitaires_latlong
+                    else revision_acteur.latitude
+                )
+                longitude = (
+                    revision_acteur_suggestion_unitaires_latlong.valeurs[1]
+                    if revision_acteur_suggestion_unitaires_latlong
+                    else revision_acteur.longitude
+                )
+                points.append(
+                    {
+                        "latitude": float(latitude),
+                        "longitude": float(longitude),
+                        "color": "blue",
+                        "key": "RevisionActeur",
+                        "text": "▶️",
+                        "draggable": True,
+                    }
+                )
+            if parent_revision_acteur_suggestion_unitaires_latlong or (
+                parent_revision_acteur
+                and parent_revision_acteur.latitude
+                and parent_revision_acteur.longitude
             ):
-                latitude_data = context["fields_values"]["latitude"]
-                longitude_data = context["fields_values"]["longitude"]
+                latitude = (
+                    parent_revision_acteur_suggestion_unitaires_latlong.valeurs[0]
+                    if parent_revision_acteur_suggestion_unitaires_latlong
+                    else parent_revision_acteur.latitude
+                )
+                longitude = (
+                    parent_revision_acteur_suggestion_unitaires_latlong.valeurs[1]
+                    if parent_revision_acteur_suggestion_unitaires_latlong
+                    else parent_revision_acteur.longitude
+                )
+                points.append(
+                    {
+                        "latitude": float(latitude),
+                        "longitude": float(longitude),
+                        "color": "red",
+                        "key": "ParentRevisionActeur",
+                        "text": "⏩",
+                        "draggable": True,
+                    }
+                )
 
-                # Prepare point list to display in map
-                points = []
-        # FIXME : to redo
-        # Point pour old_value (rouge, non draggable)
-        # if latitude_data.get("old_value") and longitude_data.get("old_value"):
-        #     points.append(
-        #         {
-        #             "latitude": float(latitude_data["old_value"]),
-        #             "longitude": float(longitude_data["old_value"]),
-        #             "color": "red",
-        #             "draggable": False,
-        #         }
-        #     )
-
-        # # Point pour new_value (vert #26A69A, non draggable)
-        # if latitude_data.get("new_value") and longitude_data.get("new_value"):
-        #     points.append(
-        #         {
-        #             "latitude": float(latitude_data["new_value"]),
-        #             "longitude": float(longitude_data["new_value"]),
-        #             "color": "blue",
-        #             "draggable": False,
-        #         }
-        #     )
-
-        # if latitude_data.get("updated_displayed_value") and longitude_data.get(
-        #     "updated_displayed_value"
-        # ):
-        #     points.append(
-        #         {
-        #             "latitude": float(latitude_data["updated_displayed_value"]),
-        #             "longitude": float(
-        #                 longitude_data["updated_displayed_value"]
-        #             ),
-        #             "color": "green",
-        #             "draggable": True,
-        #         }
-        #     )
-        # elif latitude_data.get("displayed_value") and longitude_data.get(
-        #     "displayed_value"
-        # ):
-        #     _append_location_to_points(
-        #         points,
-        #         latitude_data,
-        #         longitude_data,
-        #         "displayed_value",
-        #         "#00695C",
-        #         True,
-        #     )
-        # context["localisation"] = {
-        #     "points": points,
-        # }
+        if points:
+            context["localisation"] = {
+                "points": points,
+            }
 
         return context
 
@@ -621,7 +706,15 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
         suggestion_groupe = get_object_or_404(SuggestionGroupe, id=suggestion_groupe_id)
 
         context = serialize_suggestion_groupe(suggestion_groupe)
-        context = self._manage_tab_in_context(context, request, suggestion_groupe)
+        tab = request.GET.get("tab", request.POST.get("tab", None))
+        to_add_in_context = self._manage_tab_in_context(
+            tab,
+            suggestion_groupe,
+            context["acteur"],
+            context["revision_acteur"],
+            context["parent_revision_acteur"],
+        )
+        context.update(to_add_in_context)
 
         return render(
             request,
@@ -658,7 +751,15 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
         )
 
         context = serialize_suggestion_groupe(suggestion_groupe)
-        context = self._manage_tab_in_context(context, request, suggestion_groupe)
+        tab = request.GET.get("tab", request.POST.get("tab", None))
+        to_add_in_context = self._manage_tab_in_context(
+            tab,
+            suggestion_groupe,
+            context["acteur"],
+            context["revision_acteur"],
+            context["parent_revision_acteur"],
+        )
+        context.update(to_add_in_context)
         context["errors"] = errors if errors else {}
 
         return render(

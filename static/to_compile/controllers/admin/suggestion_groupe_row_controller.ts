@@ -64,7 +64,7 @@ export default class extends Controller<HTMLElement> {
 
     const value = target.textContent
 
-    this.#postFieldsValues2(suggestionModele, { [field]: value })
+    this.#postFieldsValues(suggestionModele, { [field]: value })
     return
   }
 
@@ -89,7 +89,7 @@ export default class extends Controller<HTMLElement> {
       }
     }
 
-    this.#postFieldsValues2(suggestionModele, newFieldsValues)
+    this.#postFieldsValues(suggestionModele, newFieldsValues)
   }
 
   updateAllDisplayed(event: Event) {
@@ -109,7 +109,7 @@ export default class extends Controller<HTMLElement> {
         newFieldsValues[key] = fieldsValues[key]["acteur_suggestion_value"]
       }
     }
-    this.#postFieldsValues2(suggestionModele, newFieldsValues)
+    this.#postFieldsValues(suggestionModele, newFieldsValues)
   }
 
   updateStatus(event: Event) {
@@ -129,30 +129,25 @@ export default class extends Controller<HTMLElement> {
   }
 
   handleMarkerDragged(event: CustomEvent) {
-    const { latitude, longitude } = event.detail
+    console.log("handleMarkerDragged", event.detail)
+    const { latitude, longitude, markerElement } = event.detail
+    console.log("markerElement", markerElement)
+    const markerKey = markerElement.dataset.markerKey
     if (!latitude || !longitude) {
       console.error("Coordonnées manquantes dans l'événement")
       return
     }
-
-    const fieldsValues = this.#getFieldsValues()
-
-    // Create the structure if it doesn't exist for latitude
-    if (!("latitude" in fieldsValues)) {
-      fieldsValues["latitude"] = { updated_displayed_value: "" }
+    if (!markerKey) {
+      console.error("Clé du marker manquante dans l'élément")
+      return
     }
-    fieldsValues["latitude"]["updated_displayed_value"] = latitude
 
-    // Create the structure if it doesn't exist for longitude
-    if (!("longitude" in fieldsValues)) {
-      fieldsValues["longitude"] = { updated_displayed_value: "" }
+    const fieldsValues = {
+      latitude: latitude,
+      longitude: longitude,
     }
-    fieldsValues["longitude"]["updated_displayed_value"] = longitude
 
-    // Update the controller value to synchronize DOM
-    this.fieldsValuesValue = JSON.stringify(fieldsValues)
-
-    this.#postFieldsValues(fieldsValues, "localisation")
+    this.#postFieldsValues(markerKey, fieldsValues, "localisation")
   }
 
   #getCsrfToken(): string | null {
@@ -198,25 +193,7 @@ export default class extends Controller<HTMLElement> {
     return fields.split("|")
   }
 
-  #postFieldsValues(valuesJson: Record<string, any>, opened_tab: string = "") {
-    const updateSuggestionUrl = this.element.dataset.updateSuggestionUrl
-    if (!updateSuggestionUrl) {
-      console.error("URL de mise à jour de la suggestion manquante")
-      return
-    }
-    const formData = new FormData()
-    const groupsJson = this.fieldsGroupsValue
-    formData.append("fields_values", JSON.stringify(valuesJson))
-    formData.append("fields_groups", groupsJson)
-    formData.append("suggestion_modele", "RevisionActeur")
-    if (opened_tab) {
-      formData.append("tab", opened_tab)
-    }
-
-    this.#postSuggestion(updateSuggestionUrl, formData)
-  }
-
-  #postFieldsValues2(
+  #postFieldsValues(
     suggestionModele: string,
     fieldsValues: Record<string, any>,
     opened_tab: string = "",

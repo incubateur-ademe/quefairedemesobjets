@@ -219,7 +219,7 @@
                         class="qf-inset-0 qf-h-full qf-relative qf-z-0"
                     >
                         {% for point in localisation.points %}
-                            {% generic_location_pinpoint_tag point.key point.latitude point.longitude point.color point.draggable %}
+                            {% generic_location_pinpoint_tag point.key point.latitude point.longitude point.color point.draggable point.text %}
                         {% endfor %}
                     </div>
                 </div>
