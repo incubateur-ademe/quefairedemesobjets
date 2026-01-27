@@ -230,6 +230,7 @@ def generic_location_pinpoint_tag(
     longitude,
     color="blue",
     draggable=False,
+    text="",
 ):
     """
     Generic location pinpoint tag to display a location on a map
@@ -243,6 +244,7 @@ def generic_location_pinpoint_tag(
         "marker_bonus": False,
         "marker_fill_background": draggable,
         "draggable": draggable,
+        "text": text,
     }
 
 

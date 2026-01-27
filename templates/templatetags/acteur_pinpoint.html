@@ -38,7 +38,9 @@
                         {% include "ui/components/carte/pinpoints/svg/bonus-icon.svg" %}
                     </span>
                 {% endif %}
-                <span class="qf-absolute qf-top-[10] qf-left-[10.5] qf-margin-auto {{ marker_icon }} {{ marker_icon_extra_classes }}"></span>
+                <span class="qf-absolute qf-top-[10] qf-left-[10.5] qf-margin-auto {{ marker_icon }} {{ marker_icon_extra_classes }}">
+                    {% if text %}<span class="qf-text-2xl qf-pl-1v">{{ text }}</span>{% endif %}
+                </span>
             </div>
         {% endif %}
 
