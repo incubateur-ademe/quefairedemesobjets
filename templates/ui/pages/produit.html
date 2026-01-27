@@ -1,5 +1,5 @@
 {% extends "ui/layout/assistant.html" %}
-{% load static %}
+{% load static wagtailcore_tags qfdmd_tags %}
 
 {% block analytics_action %}produitPageView{% endblock %}
 
@@ -7,10 +7,23 @@
 <title>{{ object.nom }} | {{ seo.title }}</title>
 {% endblock title %}
 
+{% block description %}
+    {% if object.meta_description %}<meta name="description" content="{{ object.meta_description }}" />{% endif %}
+{% endblock description %}
+
+{% block social_media %}
+    <meta property="og:site_name" content="{{ request.get_host }}" />
+    <meta property="og:title" content="{{ object.nom }}" />
+    <meta property="og:type" content="article" />
+    {% if object.meta_description %}<meta property="og:description" content="{{ object.meta_description }}" />{% endif %}
+    <meta property="og:locale" content="{{ LANGUAGE_CODE }}" />
+    <meta name="twitter:title" content="{{ object.nom }}" />
+    {% if object.meta_description %}<meta name="twitter:description" content="{{ object.meta_description }}" />{% endif %}
+    <meta property="og:image" content="{% static 'assistant/og-image.jpg' %}" />
+{% endblock social_media %}
+
 {% block extra_js %}
 {% endblock extra_js %}
-
-{% block meta_description %}{{ object.meta_description|default:block.super }}{% endblock %}
 
 {% block main %}
 {% with produit=object.produit %}
