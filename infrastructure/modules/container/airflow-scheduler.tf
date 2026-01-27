@@ -16,7 +16,7 @@ resource "scaleway_container" "airflow_scheduler" {
   sandbox             = "v1"
   health_check {
     http {
-      path = "/api/v1/health"
+      path = "/health"
     }
     failure_threshold = 5
     interval          = "30s"

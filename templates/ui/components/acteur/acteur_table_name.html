@@ -4,8 +4,11 @@
 {% acteur_frame_id as frame_id %}
 
 <div class="qf-flex qf-gap-1v qf-max-w-[300px] qf-flex-col">
-    <a href="{{ url }}" data-turbo-frame="{{ frame_id }}" data-uuid="{{ object.uuid }}" class="qf-mr-auto">
-        <strong class="max-md:qf-text-lg max-md:qf-text-blue-france-sun-113-625">{{ object.libelle|title }}</strong>
-    </a>
+    <span class="qf-inline">
+        {# The wrapping span here prevents the link underline to span over several lines. #}
+        <a href="{{ url }}" data-turbo-frame="{{ frame_id }}" data-uuid="{{ object.uuid }}" class="qf-mr-auto">
+            <strong class="max-md:qf-text-lg max-md:qf-text-blue-france-sun-113-625">{{ object.libelle|title }}</strong>
+        </a>
+    </span>
     {% acteur_label %}
 </div>
