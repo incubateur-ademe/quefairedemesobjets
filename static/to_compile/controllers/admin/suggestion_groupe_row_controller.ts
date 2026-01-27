@@ -18,8 +18,33 @@ export default class extends Controller<HTMLElement> {
       return
     }
     const target = event.target as HTMLElement
-    target.textContent =
-      value[field]["updated_displayed_value"] || value[field]["displayed_value"]
+    if (target.textContent?.trim() === "-") {
+      target.textContent = value[field]["acteur_suggestion_value"] || ""
+    } else {
+      // FIXME : get it from request
+      // Nettoyer le contenu HTML :
+      // - Supprimer les spans rouges (barrés) ET leur contenu
+      // - Garder le contenu des spans verts mais supprimer les balises
+
+      // Supprimer les spans rouges (supprimés) et leur contenu
+      const redSpans = target.querySelectorAll("span.qf-suggestion-removed")
+      redSpans.forEach((span) => span.remove())
+
+      // Garder le contenu des spans verts (ajoutés) mais supprimer les balises (unwrap)
+      const greenSpans = target.querySelectorAll("span.qf-suggestion-added")
+      greenSpans.forEach((span) => {
+        const parent = span.parentNode
+        if (parent) {
+          while (span.firstChild) {
+            parent.insertBefore(span.firstChild, span)
+          }
+          span.remove()
+        }
+      })
+
+      // Récupérer le texte nettoyé et le mettre comme contenu
+      target.textContent = target.textContent?.trim() || ""
+    }
   }
 
   saveFieldValue(event: Event) {

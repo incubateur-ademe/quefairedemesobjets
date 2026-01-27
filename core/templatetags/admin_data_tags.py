@@ -28,13 +28,17 @@ def diff_display(old_value, new_value):
             result.append(text)
         elif op == -1:  # supprimé
             result.append(
-                f'<span style="color: red; text-decoration: line-through;">{text}'
+                f'<span class="qf-suggestion-removed" style="color: red; text-decoration: line-through;">{text}'
                 "</span>"
             )
         elif op == 1:  # ajouté
-            result.append(f'<span style="color: green;">{text}</span>')
-
-    return mark_safe("".join(result))
+            result.append(
+                f'<span class="qf-suggestion-added" style="color: green;">{text}</span>'
+            )
+    result = "".join(result)
+    if result == "":
+        result = "-"
+    return mark_safe(result)
 
 
 @register.inclusion_tag("data/_partials/display_diff_value.html")

@@ -415,11 +415,15 @@ def update_suggestion_groupe(
     fields_groups: list[tuple],
 ) -> tuple[bool, dict | None]:
     """
-    pour chaque champs à modifier
+    for each fields to update
 
-    si il existe une suggestion qui modifie déjà ce champ, on mets à jour cette modification
-    si il n'existe pas d'objet acteur ni de suggestion qui modifie ce champ, on crée une suggestion de modification
-    si il existe un objet acteur (selon le modèle) et que le champs est différent de la valeur de l'objet acteur, on crée une suggestion de modification
+    if there is a suggestion that modify already this field
+      -> update this modification
+    if there is no acteur nor suggestion that modify this field
+      -> create a suggestion of modification
+    if there is an acteur (according to the model)
+       and that the field is different from the acteur value
+      -> create a suggestion of modification
     """
     if suggestion_modele not in ["Acteur", "RevisionActeur", "ParentRevisionActeur"]:
         raise ValueError(f"Invalid suggestion_modele: {suggestion_modele}")

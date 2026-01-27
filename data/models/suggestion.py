@@ -529,7 +529,7 @@ class SuggestionGroupe(TimestampedModel):
 
     @property
     def displayed_acteur_uuid(self) -> str | None:
-        acteur = self.revision_acteur or self.acteur
+        acteur = self.parent_revision_acteur or self.revision_acteur or self.acteur
         if acteur:
             displayed_acteur = DisplayedActeur.objects.filter(
                 identifiant_unique=acteur.identifiant_unique
