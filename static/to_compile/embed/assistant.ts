@@ -11,7 +11,7 @@ const setupIframe = () => {
   const [iframeAttributes, iframeExtraAttributes] = getIframeAttributesAndExtra(
     scriptTag,
     "dechet",
-    { useAutoHeight: true, iframeId: "assistant" },
+    { useAutoHeight: true, addScriptModeParam: true, iframeId: "assistant" },
   )
 
   buildAndInsertIframeFrom(
