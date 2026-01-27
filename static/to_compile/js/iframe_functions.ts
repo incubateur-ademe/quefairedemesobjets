@@ -1,6 +1,7 @@
 import iframeResize from "@iframe-resizer/parent"
 import { BacklinkKey, generateBackLink } from "../embed/helpers"
 import { getBaseUrlFromScript } from "./url_utils"
+import { URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE } from "./helpers"
 
 // Constants
 const DEFAULT_MAX_WIDTH = "100%"
@@ -115,6 +116,11 @@ function processDatasetAttributes(
   let height = options.height || DEFAULT_HEIGHT
   const urlParams = new URLSearchParams()
   const iframeExtraAttributes: Record<string, string> = {}
+
+  // Add standard query parameters based on options
+  if (options.addScriptModeParam) {
+    urlParams.set(URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE, "1")
+  }
 
   // Capture the full referrer URL and pass it as a URL parameter (base64 encoded)
   // This allows the analytics controller to track the parent page URL including query params
