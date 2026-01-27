@@ -14,6 +14,7 @@ from django_lookbook.utils import register_form_class
 from dsfr.forms import DsfrBaseForm
 
 from core.constants import DEFAULT_MAP_CONTAINER_ID
+from core.context_processors import content, environment, global_context
 from core.widgets import (
     HeaderSearchAutocompleteInput,
     SynonymeAutocompleteInput,
@@ -36,6 +37,33 @@ from qfdmo.models.action import Action
 from qfdmo.models.config import CarteConfig
 
 base_url = settings.BASE_URL
+
+
+class ContextAwareLookbookPreview(LookbookPreview):
+    """Base preview class that applies context processors like regular Django views.
+
+    This ensures previews have access to the same context variables (e.g., `assistant`,
+    `CARTE`, etc.) that are available in production views.
+    """
+
+    context_processors = [environment, content, global_context]
+
+    @classmethod
+    def get_base_context(cls, request=None):
+        """Build context from context processors.
+
+        Args:
+            request: Optional request object. If None, creates a mock request.
+
+        Returns:
+            dict: Combined context from all configured context processors.
+        """
+        if request is None:
+            request = RequestFactory().get("/")
+        context = {}
+        for processor in cls.context_processors:
+            context.update(processor(request))
+        return context
 
 
 def component_docs(md_file_path):
@@ -628,54 +656,49 @@ class FormulairesPreview(LookbookPreview):
         return template.render(Context(context))
 
 
-class PagesPreview(LookbookPreview):
+class PagesPreview(ContextAwareLookbookPreview):
     @register_form_class(IframeForm)
     def home(self, iframe=False, **kwargs):
         if isinstance(iframe, str):
             iframe = iframe.lower() == "true"
 
-        context = {
-            "request": None,
-            "page": get_homepage(),
-            "ASSISTANT": {"faites_decouvrir_ce_site": "Faites découvrir ce site !"},
-            "iframe": iframe,
-        }
+        context = self.get_base_context()
+        context.update(
+            {
+                "page": get_homepage(),
+                "iframe": iframe,
+            }
+        )
         return render_to_string("ui/pages/home.html", context)
 
     @register_form_class(IframeForm)
     def produit(self, iframe=False, **kwargs):
-        # Convert string values to boolean
         if isinstance(iframe, str):
             iframe = iframe.lower() == "true"
 
-        factory = RequestFactory()
-        request = factory.get("/")
-
-        context = {
-            "object": Synonyme.objects.first(),
-            "request": request,
-            "iframe": iframe,
-        }
-
+        context = self.get_base_context()
+        context.update(
+            {
+                "object": Synonyme.objects.first(),
+                "iframe": iframe,
+            }
+        )
         return render_to_string("ui/pages/produit.html", context)
 
     @register_form_class(IframeForm)
     def acteur(self, iframe=False, **kwargs):
-        # Convert string values to boolean
         if isinstance(iframe, str):
             iframe = iframe.lower() == "true"
 
-        acteur = DisplayedActeur.objects.first()
-        factory = RequestFactory()
-        request = factory.get("/")
-
-        context = {
-            "object": acteur,
-            "request": request,
-            "base_template": "ui/layout/base.html",
-            "turbo": False,
-            "iframe": iframe,
-        }
+        context = self.get_base_context()
+        context.update(
+            {
+                "object": DisplayedActeur.objects.first(),
+                "base_template": "ui/layout/base.html",
+                "turbo": False,
+                "iframe": iframe,
+            }
+        )
         return render_to_string("ui/pages/acteur.html", context)
 
 

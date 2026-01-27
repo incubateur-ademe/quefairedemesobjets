@@ -20,30 +20,30 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
   currentIndex = -1
 
   connect() {
-    this.hideListbox()
+    this.#hideListbox()
   }
 
   clickOutside(event) {
-    this.hideListbox()
+    this.#hideListbox()
   }
 
   focus(event) {
     if (this.showOnFocusValue) {
-      this.loadResults(this.inputTarget.value || "")
+      this.#loadResults(this.inputTarget.value || "")
     }
   }
 
   search(event) {
-    this.loadResults(event.target.value)
+    this.#loadResults(event.target.value)
   }
 
-  loadResults(query: string) {
+  #loadResults(query: string) {
     const nextUrl = new URL(this.endpointUrlValue, window.location.origin)
     nextUrl.searchParams.set("q", query)
     nextUrl.searchParams.set("turbo_frame_id", this.turboFrameIdValue)
     nextUrl.searchParams.set("limit", this.limitValue)
     this.resultsTarget.setAttribute("src", nextUrl.toString())
-    this.showListbox()
+    this.#showListbox()
   }
 
   navigate(event: KeyboardEvent) {
@@ -51,7 +51,7 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
 
     // Allow Tab key to work normally for keyboard navigation
     if (key === "Tab") {
-      this.hideListbox()
+      this.#hideListbox()
       return
     }
 
@@ -60,15 +60,15 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
         event.preventDefault()
         // Alt+Down: Open listbox without moving focus
         if (event.altKey) {
-          this.showListbox()
+          this.#showListbox()
           return
         }
         // Down Arrow: Opens the listbox if closed and moves focus to first option
         // If already open, moves focus to next option
         if (this.resultsTarget.hidden) {
-          this.openListboxAndFocus(0)
+          this.#openListboxAndFocus(0)
         } else {
-          this.moveFocus(1)
+          this.#moveFocus(1)
         }
         break
 
@@ -77,9 +77,9 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
         // Up Arrow: Opens the listbox if closed and moves focus to last option
         // If already open, moves focus to previous option
         if (this.resultsTarget.hidden) {
-          this.openListboxAndFocus(this.optionTargets.length - 1)
+          this.#openListboxAndFocus(this.optionTargets.length - 1)
         } else {
-          this.moveFocus(-1)
+          this.#moveFocus(-1)
         }
         break
 
@@ -92,12 +92,12 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
       case "Escape":
         event.preventDefault()
         // Escape: Closes the listbox if displayed, otherwise clears the combobox
-        this.escapeAction()
+        this.#escapeAction()
         break
 
       case "Home":
         // Home: Moves focus to first option (if listbox is open)
-        if (this.isListboxOpenWithOptions()) {
+        if (this.#isListboxOpenWithOptions()) {
           event.preventDefault()
           this.#setVisualFocus(0)
         }
@@ -105,7 +105,7 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
 
       case "End":
         // End: Moves focus to last option (if listbox is open)
-        if (this.isListboxOpenWithOptions()) {
+        if (this.#isListboxOpenWithOptions()) {
           event.preventDefault()
           this.#setVisualFocus(this.optionTargets.length - 1)
         }
@@ -114,19 +114,19 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
   }
 
   optionTargetConnected() {
-    this.refreshOptions()
+    this.#refreshOptions()
   }
 
-  refreshOptions() {
+  #refreshOptions() {
     this.currentIndex = -1
   }
 
-  isListboxOpenWithOptions(): boolean {
+  #isListboxOpenWithOptions(): boolean {
     return !this.resultsTarget.hidden && this.optionTargets.length > 0
   }
 
-  openListboxAndFocus(index: number) {
-    this.showListbox()
+  #openListboxAndFocus(index: number) {
+    this.#showListbox()
     if (this.optionTargets.length > 0) {
       this.#setVisualFocus(index)
     }
@@ -136,7 +136,7 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
     return option.querySelector("a")
   }
 
-  moveFocus(direction: number) {
+  #moveFocus(direction: number) {
     if (this.optionTargets.length === 0) {
       return
     }
@@ -194,14 +194,14 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
 
     // If clicking on a link, let the browser handle navigation naturally
     if (event && link && (event.target === link || link.contains(event.target))) {
-      this.hideListbox()
+      this.#hideListbox()
       // Let the default link behavior happen (browser will navigate)
       return
     }
 
     // If selecting via keyboard (Enter key) and option has a link, trigger it
     if (!event && link) {
-      this.hideListbox()
+      this.#hideListbox()
       link.click()
       return
     }
@@ -212,7 +212,7 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
 
     this.hiddenInputTarget.value = value
     this.inputTarget.value = selectedValue
-    this.hideListbox()
+    this.#hideListbox()
 
     // Emit custom event for other controllers to listen to
     const commitEvent = new CustomEvent("next-autocomplete:commit", {
@@ -222,15 +222,15 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
     this.element.dispatchEvent(commitEvent)
   }
 
-  escapeAction() {
+  #escapeAction() {
     if (!this.resultsTarget.hidden) {
-      this.hideListbox()
+      this.#hideListbox()
     } else {
       this.inputTarget.value = ""
     }
   }
 
-  showListbox() {
+  #showListbox() {
     this.resultsTarget.hidden = false
     this.inputTarget.setAttribute("aria-expanded", "true")
   }
@@ -241,7 +241,7 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
     })
   }
 
-  hideListbox() {
+  #hideListbox() {
     this.resultsTarget.hidden = true
     this.inputTarget.setAttribute("aria-expanded", "false")
     this.inputTarget.removeAttribute("aria-activedescendant")
