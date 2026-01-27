@@ -7,6 +7,8 @@ from django.db import connection, transaction
 
 from qfdmo.models.acteur import Source
 
+logger = logging.getLogger(__name__)
+
 MAPPING_ACTEUR_ID_TABLE = {
     "qfdmo_acteur": "identifiant_unique",
     "qfdmo_revisionacteur": "identifiant_unique",
@@ -24,7 +26,7 @@ def update_source_code(old_code, new_code):
 
     # filtre pour les tests
     if not Source.objects.filter(code=old_code).exists():
-        logging.warning(f"Source with old code {old_code} doesn't exist")
+        logger.warning(f"Source with old code {old_code} doesn't exist")
         return
     if Source.objects.filter(code=new_code).exists():
         raise ValueError(f"Source with new code {new_code} already exist")
@@ -38,7 +40,7 @@ def update_source_code(old_code, new_code):
                 SET {acteur_id_field} = REPLACE({acteur_id_field}, %s, %s)
                 WHERE {acteur_id_field} LIKE %s;
                 """
-            logging.warning(
+            logger.warning(
                 f"Executing SQL: {sql} with params: {old_code}, {new_code}, {old_code}%"
             )
             cursor.execute(sql, [old_code, new_code, f"{old_code}%"])

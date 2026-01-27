@@ -48,7 +48,7 @@ def cluster_acteurs_parents_choose_new_wrapper(ti) -> None:
 
     df = cluster_acteurs_parents_choose_new(df)
 
-    logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
+    logger.info(log.banner_string("🏁 Résultat final de cette tâche"))
     log.preview_df_as_markdown(
         "clusters avec parents sélectionnés", df, groupby="cluster_id"
     )

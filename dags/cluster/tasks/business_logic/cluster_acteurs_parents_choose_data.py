@@ -58,7 +58,7 @@ def field_pick_value(
                 """
                 return value
             except Exception as e:
-                logging.error(f"Invalid value for field {field}: {value}: {e}")
+                logger.error(f"Invalid value for field {field}: {value}: {e}")
                 pass
     return None
 

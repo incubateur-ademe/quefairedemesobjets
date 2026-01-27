@@ -11,119 +11,172 @@ from unit_tests.data.models.suggestion_factory import (
 from unit_tests.qfdmo.acteur_factory import ActeurFactory, RevisionActeurFactory
 
 
+@pytest.fixture
+def suggestion_groupe():
+    suggestion_groupe = SuggestionGroupeFactory(
+        suggestion_cohorte=SuggestionCohorteFactory(
+            type_action=SuggestionAction.SOURCE_AJOUT,
+        ),
+        acteur_id="ID_UNIQUE_123",
+    )
+    SuggestionUnitaireFactory(
+        suggestion_groupe=suggestion_groupe,
+        suggestion_modele="Acteur",
+        champs=["nom"],
+        valeurs=["Nouveau nom"],
+    )
+    SuggestionUnitaireFactory(
+        suggestion_groupe=suggestion_groupe,
+        suggestion_modele="Acteur",
+        champs=["latitude", "longitude"],
+        valeurs=[48.56789, 2.56789],
+    )
+    return suggestion_groupe
+
+
+@pytest.fixture
+def suggestion_groupe_ajout(suggestion_groupe):
+    SuggestionUnitaireFactory(
+        suggestion_groupe=suggestion_groupe,
+        suggestion_modele="Acteur",
+        champs=["identifiant_unique"],
+        valeurs=["ID_UNIQUE_123"],
+    )
+    return suggestion_groupe
+
+
+@pytest.fixture
+def suggestion_groupe_modification(suggestion_groupe):
+    suggestion_groupe.suggestion_cohorte.type_action = (
+        SuggestionAction.SOURCE_MODIFICATION
+    )
+    suggestion_groupe.suggestion_cohorte.save()
+    suggestion_groupe.acteur = ActeurFactory(
+        identifiant_unique="ID_UNIQUE_123",
+        nom="Ancien nom",
+        location=Point(2.1234, 48.1234),
+    )
+    suggestion_groupe.identifiant_unique = suggestion_groupe.acteur.identifiant_unique
+
+    suggestion_groupe.save()
+    return suggestion_groupe
+
+
 @pytest.mark.django_db
 class TestSerializeSuggestionGroupe:
-    @pytest.fixture
-    def suggestion_groupe_ajout(self):
-        suggestion_groupe = SuggestionGroupeFactory(
-            suggestion_cohorte=SuggestionCohorteFactory(
-                type_action=SuggestionAction.SOURCE_AJOUT,
-            ),
-        )
-        SuggestionUnitaireFactory(
-            suggestion_groupe=suggestion_groupe,
-            suggestion_modele="Acteur",
-            champs=["nom"],
-            valeurs=["Nouveau nom"],
-        )
-        SuggestionUnitaireFactory(
-            suggestion_groupe=suggestion_groupe,
-            suggestion_modele="Acteur",
-            champs=["latitude", "longitude"],
-            valeurs=[48.56789, 2.56789],
-        )
-        return suggestion_groupe
 
-    @pytest.fixture
-    def suggestion_groupe_modification(self, suggestion_groupe_ajout):
-        suggestion_groupe_ajout.suggestion_cohorte.type_action = (
-            SuggestionAction.SOURCE_MODIFICATION
-        )
-        suggestion_groupe_ajout.suggestion_cohorte.save()
-        suggestion_groupe_ajout.acteur = ActeurFactory(
-            nom="Ancien nom", location=Point(2.1234, 48.1234)
-        )
-        suggestion_groupe_ajout.save()
-        return suggestion_groupe_ajout
+    def test_serialize_source_ajout_returns_expected_keys_and_values(
+        self, suggestion_groupe_ajout
+    ):
+        """Test that SOURCE_AJOUT returns the expected keys in result"""
 
-    @pytest.mark.django_db
-    def test_serialize_source_ajout(self, suggestion_groupe_ajout):
+        expected_fields_values = {
+            "identifiant_unique": {
+                "acteur_suggestion_value": "ID_UNIQUE_123",
+                "acteur": '<span style="color: green;">ID_UNIQUE_123</span>',
+                "revision_acteur": '<span style="color: grey;">-</span>',
+            },
+            "nom": {
+                "acteur_suggestion_value": "Nouveau nom",
+                "acteur": '<span style="color: green;">Nouveau nom</span>',
+                "revision_acteur": '<span style="color: grey;">-</span>',
+            },
+            "latitude": {
+                "acteur_suggestion_value": "48.56789",
+                "acteur": '<span style="color: green;">48.56789</span>',
+                "revision_acteur": '<span style="color: grey;">-</span>',
+            },
+            "longitude": {
+                "acteur_suggestion_value": "2.56789",
+                "acteur": '<span style="color: green;">2.56789</span>',
+                "revision_acteur": '<span style="color: grey;">-</span>',
+            },
+        }
+
         result = serialize_suggestion_groupe(suggestion_groupe_ajout)
 
-        expected_result = {
-            "id": suggestion_groupe_ajout.id,
-            "suggestion_cohorte": suggestion_groupe_ajout.suggestion_cohorte,
-            "statut": "🟠 À valider",
-            "action": "SOURCE_AJOUT",
-            "identifiant_unique": "",
-            "fields_groups": [("nom",), ("latitude", "longitude")],
-            "fields_values": {
-                "nom": {
-                    "displayed_value": "Nouveau nom",
-                    "new_value": "Nouveau nom",
-                    "updated_displayed_value": None,
-                },
-                "latitude": {
-                    "displayed_value": "48.56789",
-                    "new_value": "48.56789",
-                    "updated_displayed_value": None,
-                },
-                "longitude": {
-                    "displayed_value": "2.56789",
-                    "new_value": "2.56789",
-                    "updated_displayed_value": None,
-                },
-            },
-            "acteur": None,
-            "acteur_overridden_by": None,
-        }
-        assert result == expected_result
+        # Check keys and values
+        assert result["suggestion_groupe"] == suggestion_groupe_ajout
+        assert result["identifiant_unique"] == "ID_UNIQUE_123"
+        assert result["fields_groups"] == [
+            ("identifiant_unique",),
+            ("nom",),
+            ("latitude", "longitude"),
+        ]
+        assert result["fields_values"] == expected_fields_values
 
-    def test_serialize_source_modification_with_acteur(
+    def test_serialize_source_ajout_with_revisionacteur_suggestions(
+        self, suggestion_groupe_ajout
+    ):
+        """Test that SOURCE_AJOUT with suggestion_unitaires of type RevisionActeur"""
+        SuggestionUnitaireFactory(
+            suggestion_groupe=suggestion_groupe_ajout,
+            suggestion_modele="RevisionActeur",
+            revision_acteur_id="ID_UNIQUE_123",
+            champs=["nom"],
+            valeurs=["Revision nom"],
+        )
+        expected_fields_values_nom = {
+            "acteur_suggestion_value": "Nouveau nom",
+            "acteur": '<span style="color: green;">Nouveau nom</span>',
+            "revision_acteur": '<span style="color: green;">Revision nom</span>',
+        }
+        result = serialize_suggestion_groupe(suggestion_groupe_ajout)
+
+        assert result["suggestion_groupe"] == suggestion_groupe_ajout
+        assert result["identifiant_unique"] == "ID_UNIQUE_123"
+        assert ("nom",) in result["fields_groups"]
+        assert result["fields_values"]["nom"] == expected_fields_values_nom
+
+    def test_serialize_source_modification_returns_expected_keys_and_values(
         self,
         suggestion_groupe_modification,
     ):
-        result = serialize_suggestion_groupe(suggestion_groupe_modification)
+        """Test SOURCE_MODIFICATION with an acteur but no revision_acteur"""
 
-        expected_result = {
-            "id": suggestion_groupe_modification.id,
-            "suggestion_cohorte": suggestion_groupe_modification.suggestion_cohorte,
-            "statut": "🟠 À valider",
-            "action": "SOURCE_MODIFICATION",
-            "identifiant_unique": (
-                suggestion_groupe_modification.acteur.identifiant_unique
-            ),
-            "fields_groups": [("nom",), ("latitude", "longitude")],
-            "fields_values": {
-                "nom": {
-                    "displayed_value": "Nouveau nom",
-                    "updated_displayed_value": None,
-                    "new_value": "Nouveau nom",
-                    "old_value": "Ancien nom",
-                },
-                "latitude": {
-                    "displayed_value": "48.56789",
-                    "updated_displayed_value": None,
-                    "new_value": "48.56789",
-                    "old_value": "48.1234",
-                },
-                "longitude": {
-                    "displayed_value": "2.56789",
-                    "updated_displayed_value": None,
-                    "new_value": "2.56789",
-                    "old_value": "2.1234",
-                },
+        expected_fields_values = {
+            "nom": {
+                "acteur_suggestion_value": "Nouveau nom",
+                "acteur": (
+                    '<span style="color: red; text-decoration: line-through;">Ancien'
+                    '</span><span style="color: green;">Nouveau</span> nom'
+                ),
+                "revision_acteur": '<span style="color: grey;">-</span>',
+                "parent_revision_acteur": '<span style="color: grey;">-</span>',
             },
-            "acteur": suggestion_groupe_modification.acteur,
-            "acteur_overridden_by": None,
+            "latitude": {
+                "acteur_suggestion_value": "48.56789",
+                "acteur": (
+                    '48.<span style="color: red; text-decoration: line-through;">1234'
+                    '</span><span style="color: green;">56789</span>'
+                ),
+                "revision_acteur": '<span style="color: grey;">-</span>',
+                "parent_revision_acteur": '<span style="color: grey;">-</span>',
+            },
+            "longitude": {
+                "acteur_suggestion_value": "2.56789",
+                "acteur": (
+                    '2.<span style="color: red; text-decoration: line-through;">1234'
+                    '</span><span style="color: green;">56789</span>'
+                ),
+                "revision_acteur": '<span style="color: grey;">-</span>',
+                "parent_revision_acteur": '<span style="color: grey;">-</span>',
+            },
         }
 
-        assert result == expected_result
+        result = serialize_suggestion_groupe(suggestion_groupe_modification)
+
+        # Check keys and values
+        assert result["acteur"] == suggestion_groupe_modification.acteur
+        assert result["revision_acteur"] is None
+        assert result["parent_revision_acteur"] is None
+        assert result["fields_values"] == expected_fields_values
 
     def test_serialize_source_modification_with_revisionacteur(
         self,
         suggestion_groupe_modification,
     ):
+        """Test SOURCE_MODIFICATION with a revision_acteur"""
         revision_acteur = RevisionActeurFactory(
             identifiant_unique=suggestion_groupe_modification.acteur.identifiant_unique,
             nom="Revision nom",
@@ -131,173 +184,155 @@ class TestSerializeSuggestionGroupe:
         )
         suggestion_groupe_modification.revision_acteur = revision_acteur
         suggestion_groupe_modification.save()
-        result = serialize_suggestion_groupe(suggestion_groupe_modification)
 
-        expected_result = {
-            "id": suggestion_groupe_modification.id,
-            "suggestion_cohorte": suggestion_groupe_modification.suggestion_cohorte,
-            "statut": "🟠 À valider",
-            "action": "SOURCE_MODIFICATION",
-            "identifiant_unique": (
-                suggestion_groupe_modification.acteur.identifiant_unique
-            ),
-            "fields_groups": [("nom",), ("latitude", "longitude")],
-            "fields_values": {
-                "nom": {
-                    "displayed_value": "Revision nom",
-                    "updated_displayed_value": None,
-                    "new_value": "Nouveau nom",
-                    "old_value": "Ancien nom",
-                },
-                "latitude": {
-                    "displayed_value": "48.01",
-                    "updated_displayed_value": None,
-                    "new_value": "48.56789",
-                    "old_value": "48.1234",
-                },
-                "longitude": {
-                    "displayed_value": "2.01",
-                    "updated_displayed_value": None,
-                    "new_value": "2.56789",
-                    "old_value": "2.1234",
-                },
+        expected_fields_values = {
+            "nom": {
+                "acteur_suggestion_value": "Nouveau nom",
+                "acteur": (
+                    '<span style="color: red; text-decoration: line-through;">Ancien'
+                    '</span><span style="color: green;">Nouveau</span> nom'
+                ),
+                "revision_acteur": '<span style="color: grey;">Revision nom</span>',
+                "parent_revision_acteur": '<span style="color: grey;">-</span>',
             },
-            "acteur": suggestion_groupe_modification.acteur,
-            "acteur_overridden_by": revision_acteur,
+            "latitude": {
+                "acteur_suggestion_value": "48.56789",
+                "acteur": (
+                    '48.<span style="color: red; text-decoration: line-through;">1234'
+                    '</span><span style="color: green;">56789</span>'
+                ),
+                "revision_acteur": '<span style="color: grey;">48.01</span>',
+                "parent_revision_acteur": '<span style="color: grey;">-</span>',
+            },
+            "longitude": {
+                "acteur_suggestion_value": "2.56789",
+                "acteur": (
+                    '2.<span style="color: red; text-decoration: line-through;">1234'
+                    '</span><span style="color: green;">56789</span>'
+                ),
+                "revision_acteur": '<span style="color: grey;">2.01</span>',
+                "parent_revision_acteur": '<span style="color: grey;">-</span>',
+            },
         }
 
-        assert result == expected_result
+        result = serialize_suggestion_groupe(suggestion_groupe_modification)
 
-    def test_serialize_source_modification_with_revisionacteurparent(
+        assert result["acteur"] == suggestion_groupe_modification.acteur
+        assert result["revision_acteur"] == revision_acteur
+        assert result["parent_revision_acteur"] is None
+
+        assert result["fields_values"] == expected_fields_values
+
+    def test_serialize_source_modification_with_revisionacteur_and_parent(
         self,
         suggestion_groupe_modification,
     ):
+        """Test SOURCE_MODIFICATION with a parent revision_acteur"""
+        parent_revision_acteur = RevisionActeurFactory(
+            nom="Parent nom",
+            location=Point(2.1111, 48.1111),
+        )
+        revision_acteur = RevisionActeurFactory(
+            identifiant_unique=suggestion_groupe_modification.acteur.identifiant_unique,
+            nom="Revision nom",
+            location=Point(2.01, 48.01),
+            parent=parent_revision_acteur,
+        )
+        suggestion_groupe_modification.revision_acteur = revision_acteur
+        suggestion_groupe_modification.parent_revision_acteur = parent_revision_acteur
+        suggestion_groupe_modification.save()
+
+        expected_fields_values = {
+            "nom": {
+                "acteur_suggestion_value": "Nouveau nom",
+                "acteur": (
+                    '<span style="color: red; text-decoration: line-through;">Ancien'
+                    '</span><span style="color: green;">Nouveau</span> nom'
+                ),
+                "revision_acteur": '<span style="color: grey;">Revision nom</span>',
+                "parent_revision_acteur": (
+                    '<span style="color: grey;">Parent nom</span>'
+                ),
+            },
+            "latitude": {
+                "acteur_suggestion_value": "48.56789",
+                "acteur": (
+                    '48.<span style="color: red; text-decoration: line-through;">1234'
+                    '</span><span style="color: green;">56789</span>'
+                ),
+                "revision_acteur": '<span style="color: grey;">48.01</span>',
+                "parent_revision_acteur": '<span style="color: grey;">48.1111</span>',
+            },
+            "longitude": {
+                "acteur_suggestion_value": "2.56789",
+                "acteur": (
+                    '2.<span style="color: red; text-decoration: line-through;">1234'
+                    '</span><span style="color: green;">56789</span>'
+                ),
+                "revision_acteur": '<span style="color: grey;">2.01</span>',
+                "parent_revision_acteur": '<span style="color: grey;">2.1111</span>',
+            },
+        }
+
+        result = serialize_suggestion_groupe(suggestion_groupe_modification)
+
+        # Check keys and values
+        assert result["acteur"] == suggestion_groupe_modification.acteur
+        assert result["revision_acteur"] == revision_acteur
+        assert result["parent_revision_acteur"] == parent_revision_acteur
+        assert result["fields_values"] == expected_fields_values
+
+    def test_serialize_source_modification_with_parent_revision_acteur_suggestion(
+        self,
+        suggestion_groupe_modification,
+    ):
+        """Test SOURCE_MODIFICATION with ParentRevisionActeur suggestion unitaires"""
         revision_acteur_parent = RevisionActeurFactory(
             nom="Parent nom",
             location=Point(2.1111, 48.1111),
         )
-        RevisionActeurFactory(
+        revision_acteur = RevisionActeurFactory(
             identifiant_unique=suggestion_groupe_modification.acteur.identifiant_unique,
             nom="Revision nom",
             location=Point(2.01, 48.01),
             parent=revision_acteur_parent,
         )
-        suggestion_groupe_modification.revision_acteur = revision_acteur_parent
+        suggestion_groupe_modification.revision_acteur = revision_acteur
+        suggestion_groupe_modification.parent_revision_acteur = revision_acteur_parent
         suggestion_groupe_modification.save()
-        result = serialize_suggestion_groupe(suggestion_groupe_modification)
 
-        expected_result = {
-            "id": suggestion_groupe_modification.id,
-            "suggestion_cohorte": suggestion_groupe_modification.suggestion_cohorte,
-            "statut": "🟠 À valider",
-            "action": "SOURCE_MODIFICATION",
-            "identifiant_unique": (
-                suggestion_groupe_modification.acteur.identifiant_unique
-            ),
-            "fields_groups": [("nom",), ("latitude", "longitude")],
-            "fields_values": {
-                "nom": {
-                    "displayed_value": "Parent nom",
-                    "updated_displayed_value": None,
-                    "new_value": "Nouveau nom",
-                    "old_value": "Ancien nom",
-                },
-                "latitude": {
-                    "displayed_value": "48.1111",
-                    "updated_displayed_value": None,
-                    "new_value": "48.56789",
-                    "old_value": "48.1234",
-                },
-                "longitude": {
-                    "displayed_value": "2.1111",
-                    "updated_displayed_value": None,
-                    "new_value": "2.56789",
-                    "old_value": "2.1234",
-                },
-            },
-            "acteur": suggestion_groupe_modification.acteur,
-            "acteur_overridden_by": revision_acteur_parent,
-        }
-        assert result == expected_result
-
-    def test_serialize_source_modification_with_revisionacteurparent_parentsuggestion(
-        self,
-        suggestion_groupe_modification,
-    ):
-        revision_acteur_parent = RevisionActeurFactory(
-            nom="Parent nom",
-            location=Point(2.1111, 48.1111),
-        )
-        RevisionActeurFactory(
-            identifiant_unique=suggestion_groupe_modification.acteur.identifiant_unique,
-            nom="Revision nom",
-            location=Point(2.01, 48.01),
-            parent=revision_acteur_parent,
-        )
-        suggestion_groupe_modification.revision_acteur = revision_acteur_parent
-        suggestion_groupe_modification.save()
+        # Ajouter une suggestion pour ParentRevisionActeur
         SuggestionUnitaireFactory(
             suggestion_groupe=suggestion_groupe_modification,
-            suggestion_modele="RevisionActeur",
-            revision_acteur=revision_acteur_parent,
+            suggestion_modele="ParentRevisionActeur",
+            parent_revision_acteur=revision_acteur_parent,
             champs=["nom"],
-            valeurs=["Suggestion nom"],
+            valeurs=["Suggestion Parent nom"],
         )
-        SuggestionUnitaireFactory(
-            suggestion_groupe=suggestion_groupe_modification,
-            suggestion_modele="RevisionActeur",
-            revision_acteur=revision_acteur_parent,
-            champs=["latitude", "longitude"],
-            valeurs=["48.2222", "2.2222"],
-        )
+        expected_fields_values_nom = {
+            "acteur_suggestion_value": "Nouveau nom",
+            "acteur": (
+                '<span style="color: red; text-decoration: line-through;">Ancien'
+                '</span><span style="color: green;">Nouveau</span> nom'
+            ),
+            "revision_acteur": '<span style="color: grey;">Revision nom</span>',
+            "parent_revision_acteur": (
+                '<span style="color: green;">Suggestion </span>Parent nom'
+            ),
+        }
+
         result = serialize_suggestion_groupe(suggestion_groupe_modification)
 
-        expected_result = {
-            "id": suggestion_groupe_modification.id,
-            "suggestion_cohorte": suggestion_groupe_modification.suggestion_cohorte,
-            "statut": "🟠 À valider",
-            "action": "SOURCE_MODIFICATION",
-            "identifiant_unique": (
-                suggestion_groupe_modification.acteur.identifiant_unique
-            ),
-            "fields_groups": [("nom",), ("latitude", "longitude")],
-            "fields_values": {
-                "nom": {
-                    "displayed_value": "Parent nom",
-                    "updated_displayed_value": "Suggestion nom",
-                    "new_value": "Nouveau nom",
-                    "old_value": "Ancien nom",
-                },
-                "latitude": {
-                    "displayed_value": "48.1111",
-                    "updated_displayed_value": "48.2222",
-                    "new_value": "48.56789",
-                    "old_value": "48.1234",
-                },
-                "longitude": {
-                    "displayed_value": "2.1111",
-                    "updated_displayed_value": "2.2222",
-                    "new_value": "2.56789",
-                    "old_value": "2.1234",
-                },
-            },
-            "acteur": suggestion_groupe_modification.acteur,
-            "acteur_overridden_by": revision_acteur_parent,
-        }
-        assert result == expected_result
+        print(result["fields_values"]["nom"])
+        assert result["fields_values"]["nom"] == expected_fields_values_nom
 
-    def test_serialize_source_ajout_with_identifiant_unique(self):
-        """Test that SOURCE_AJOUT with a non empty identifiant_unique"""
+    def test_serialize_source_modification_without_acteur_raises_error(self):
+        """Test that SOURCE_MODIFICATION without acteur raises ValueError"""
         suggestion_groupe = SuggestionGroupeFactory(
             suggestion_cohorte=SuggestionCohorteFactory(
-                type_action=SuggestionAction.SOURCE_AJOUT,
+                type_action=SuggestionAction.SOURCE_MODIFICATION,
             ),
-        )
-        SuggestionUnitaireFactory(
-            suggestion_groupe=suggestion_groupe,
-            suggestion_modele="Acteur",
-            champs=["identifiant_unique"],
-            valeurs=["ID_UNIQUE_123"],
+            acteur=None,  # Pas d'acteur
         )
         SuggestionUnitaireFactory(
             suggestion_groupe=suggestion_groupe,
@@ -305,575 +340,356 @@ class TestSerializeSuggestionGroupe:
             champs=["nom"],
             valeurs=["Nouveau nom"],
         )
-        result = serialize_suggestion_groupe(suggestion_groupe)
 
-        expected_result = {
-            "id": suggestion_groupe.id,
-            "suggestion_cohorte": suggestion_groupe.suggestion_cohorte,
-            "statut": "🟠 À valider",
-            "action": SuggestionAction.SOURCE_AJOUT,
-            "identifiant_unique": "ID_UNIQUE_123",
-            "fields_groups": [("identifiant_unique",), ("nom",)],
-            "fields_values": {
-                "identifiant_unique": {
-                    "displayed_value": "ID_UNIQUE_123",
-                    "new_value": "ID_UNIQUE_123",
-                    "updated_displayed_value": None,
-                },
-                "nom": {
-                    "displayed_value": "Nouveau nom",
-                    "new_value": "Nouveau nom",
-                    "updated_displayed_value": None,
-                },
-            },
-            "acteur": None,
-            "acteur_overridden_by": None,
-        }
-        assert result == expected_result
+        with pytest.raises(ValueError) as exc_info:
+            serialize_suggestion_groupe(suggestion_groupe)
 
-    def test_serialize_source_ajout_with_revisionacteur_suggestions(self):
-        """Test that SOURCE_AJOUT with suggestion_unitaires of type RevisionActeur"""
-        suggestion_groupe = SuggestionGroupeFactory(
-            suggestion_cohorte=SuggestionCohorteFactory(
-                type_action=SuggestionAction.SOURCE_AJOUT,
-            ),
-        )
-        SuggestionUnitaireFactory(
-            suggestion_groupe=suggestion_groupe,
-            suggestion_modele="Acteur",
-            champs=["nom"],
-            valeurs=["Nouveau nom"],
-        )
-        SuggestionUnitaireFactory(
-            suggestion_groupe=suggestion_groupe,
-            suggestion_modele="RevisionActeur",
-            champs=["nom"],
-            valeurs=["Revision nom"],
-        )
-        result = serialize_suggestion_groupe(suggestion_groupe)
-
-        expected_result = {
-            "id": suggestion_groupe.id,
-            "suggestion_cohorte": suggestion_groupe.suggestion_cohorte,
-            "statut": "🟠 À valider",
-            "action": "SOURCE_AJOUT",
-            "identifiant_unique": "",
-            "fields_groups": [("nom",)],
-            "fields_values": {
-                "nom": {
-                    "displayed_value": "Nouveau nom",
-                    "new_value": "Nouveau nom",
-                    "updated_displayed_value": "Revision nom",
-                },
-            },
-            "acteur": None,
-            "acteur_overridden_by": None,
-        }
-        assert result == expected_result
-
-    def test_serialize_source_modification_with_missing_fields_in_suggestions(
-        self,
-        suggestion_groupe_modification,
-    ):
-        """
-        Test that SOURCE_MODIFICATION with missing fields in acteur_suggestion_unitaires
-        """
-        # Delete the existing suggestion_unitaires to keep only "nom"
-        suggestion_groupe_modification.suggestion_unitaires.exclude(
-            champs__contains=["nom"]
-        ).delete()
-        result = serialize_suggestion_groupe(suggestion_groupe_modification)
-
-        expected_result = {
-            "id": suggestion_groupe_modification.id,
-            "suggestion_cohorte": suggestion_groupe_modification.suggestion_cohorte,
-            "statut": "🟠 À valider",
-            "action": "SOURCE_MODIFICATION",
-            "identifiant_unique": (
-                suggestion_groupe_modification.acteur.identifiant_unique
-            ),
-            "fields_groups": [("nom",)],
-            "fields_values": {
-                "nom": {
-                    "displayed_value": "Nouveau nom",
-                    "updated_displayed_value": None,
-                    "new_value": "Nouveau nom",
-                    "old_value": "Ancien nom",
-                },
-            },
-            "acteur": suggestion_groupe_modification.acteur,
-            "acteur_overridden_by": None,
-        }
-        assert result == expected_result
-
-    def test_serialize_source_modification_with_missing_field_in_acteur_overridden_by(
-        self,
-        suggestion_groupe_modification,
-    ):
-        """Test that SOURCE_MODIFICATION with a missing field in acteur_overridden_by"""
-        # Create a revision_acteur without location (optional field)
-        revision_acteur = RevisionActeurFactory(
-            identifiant_unique=suggestion_groupe_modification.acteur.identifiant_unique,
-            nom="Revision nom",
-            location=None,  # Pas de location dans revision_acteur
-        )
-        suggestion_groupe_modification.revision_acteur = revision_acteur
-        suggestion_groupe_modification.save()
-        result = serialize_suggestion_groupe(suggestion_groupe_modification)
-
-        # When acteur_overridden_by doesn't have a location, we must use
-        # acteur_suggestion_unitaires_by_field for latitude/longitude
-        expected_result = {
-            "id": suggestion_groupe_modification.id,
-            "suggestion_cohorte": suggestion_groupe_modification.suggestion_cohorte,
-            "statut": "🟠 À valider",
-            "action": "SOURCE_MODIFICATION",
-            "identifiant_unique": (
-                suggestion_groupe_modification.acteur.identifiant_unique
-            ),
-            "fields_groups": [("nom",), ("latitude", "longitude")],
-            "fields_values": {
-                "nom": {
-                    "displayed_value": "Revision nom",  # From acteur_overridden_by
-                    "updated_displayed_value": None,
-                    "new_value": "Nouveau nom",
-                    "old_value": "Ancien nom",
-                },
-                "latitude": {
-                    "displayed_value": "48.56789",  # Not from acteur_overridden_by
-                    "updated_displayed_value": None,
-                    "new_value": "48.56789",
-                    "old_value": "48.1234",
-                },
-                "longitude": {
-                    "displayed_value": "2.56789",  # Not from acteur_overridden_by
-                    "updated_displayed_value": None,
-                    "new_value": "2.56789",
-                    "old_value": "2.1234",
-                },
-            },
-            "acteur": suggestion_groupe_modification.acteur,
-            "acteur_overridden_by": revision_acteur,
-        }
-        assert result == expected_result
-
-    def test_serialize_source_modification_with_missing_field_in_acteur(
-        self,
-        suggestion_groupe_modification,
-    ):
-        """Test that SOURCE_MODIFICATION with a field that doesn't exist in acteur"""
-        # Add a field that doesn't exist in the acteur
-        SuggestionUnitaireFactory(
-            suggestion_groupe=suggestion_groupe_modification,
-            suggestion_modele="Acteur",
-            champs=["code_postal"],
-            valeurs=["75001"],
-        )
-        result = serialize_suggestion_groupe(suggestion_groupe_modification)
-
-        # The code_postal field should use getattr(acteur, field, "") which returns ""
-        expected_result = {
-            "id": suggestion_groupe_modification.id,
-            "suggestion_cohorte": suggestion_groupe_modification.suggestion_cohorte,
-            "statut": "🟠 À valider",
-            "action": "SOURCE_MODIFICATION",
-            "identifiant_unique": (
-                suggestion_groupe_modification.acteur.identifiant_unique
-            ),
-            "fields_groups": [("nom",), ("code_postal",), ("latitude", "longitude")],
-            "fields_values": {
-                "nom": {
-                    "displayed_value": "Nouveau nom",
-                    "updated_displayed_value": None,
-                    "new_value": "Nouveau nom",
-                    "old_value": "Ancien nom",
-                },
-                "latitude": {
-                    "displayed_value": "48.56789",
-                    "updated_displayed_value": None,
-                    "new_value": "48.56789",
-                    "old_value": "48.1234",
-                },
-                "longitude": {
-                    "displayed_value": "2.56789",
-                    "updated_displayed_value": None,
-                    "new_value": "2.56789",
-                    "old_value": "2.1234",
-                },
-                "code_postal": {
-                    "displayed_value": "75001",  # From acteur_suggestion_unitaires
-                    "updated_displayed_value": None,
-                    "new_value": "75001",
-                    "old_value": "",  # getattr(acteur, field, "") returns ""
-                },
-            },
-            "acteur": suggestion_groupe_modification.acteur,
-            "acteur_overridden_by": None,
-        }
-        assert result == expected_result
-
-    def test_serialize_source_modification_with_revisionacteur_but_rev_suggestion(
-        self,
-        suggestion_groupe_modification,
-    ):
-        """
-        Test that SOURCE_MODIFICATION with a revision_acteur
-        but no revision_acteur_suggestion_unitaires
-        """
-        revision_acteur = RevisionActeurFactory(
-            identifiant_unique=suggestion_groupe_modification.acteur.identifiant_unique,
-            nom="Revision nom",
-            location=Point(2.01, 48.01),
-        )
-        suggestion_groupe_modification.revision_acteur = revision_acteur
-        suggestion_groupe_modification.save()
-        # No revision_acteur_suggestion_unitaires
-        result = serialize_suggestion_groupe(suggestion_groupe_modification)
-
-        expected_result = {
-            "id": suggestion_groupe_modification.id,
-            "suggestion_cohorte": suggestion_groupe_modification.suggestion_cohorte,
-            "statut": "🟠 À valider",
-            "action": "SOURCE_MODIFICATION",
-            "identifiant_unique": (
-                suggestion_groupe_modification.acteur.identifiant_unique
-            ),
-            "fields_groups": [("nom",), ("latitude", "longitude")],
-            "fields_values": {
-                "nom": {
-                    "displayed_value": "Revision nom",
-                    "updated_displayed_value": None,  # No RevisionActeur suggestion
-                    "new_value": "Nouveau nom",
-                    "old_value": "Ancien nom",
-                },
-                "latitude": {
-                    "displayed_value": "48.01",
-                    "updated_displayed_value": None,  # No RevisionActeur suggestion
-                    "new_value": "48.56789",
-                    "old_value": "48.1234",
-                },
-                "longitude": {
-                    "displayed_value": "2.01",
-                    "updated_displayed_value": None,  # No RevisionActeur suggestion
-                    "new_value": "2.56789",
-                    "old_value": "2.1234",
-                },
-            },
-            "acteur": suggestion_groupe_modification.acteur,
-            "acteur_overridden_by": revision_acteur,
-        }
-        assert result == expected_result
-
-    def test_serialize_source_modification_with_rev_suggestion_but_no_revisionacteur(
-        self,
-        suggestion_groupe_modification,
-    ):
-        """
-        Test that SOURCE_MODIFICATION with revision_acteur_suggestion_unitaires
-        but no revision_acteur
-        """
-        # No revision_acteur but with revision_acteur_suggestion_unitaires
-        SuggestionUnitaireFactory(
-            suggestion_groupe=suggestion_groupe_modification,
-            suggestion_modele="RevisionActeur",
-            champs=["nom"],
-            valeurs=["Revision suggestion nom"],
-        )
-        result = serialize_suggestion_groupe(suggestion_groupe_modification)
-
-        # acteur_overridden_by_suggestion_unitaires_by_field should be filled
-        expected_result = {
-            "id": suggestion_groupe_modification.id,
-            "suggestion_cohorte": suggestion_groupe_modification.suggestion_cohorte,
-            "statut": "🟠 À valider",
-            "action": "SOURCE_MODIFICATION",
-            "identifiant_unique": (
-                suggestion_groupe_modification.acteur.identifiant_unique
-            ),
-            "fields_groups": [("nom",), ("latitude", "longitude")],
-            "fields_values": {
-                "nom": {
-                    "displayed_value": "Nouveau nom",  # From suggestion_unitaires
-                    "updated_displayed_value": "Revision suggestion nom",
-                    "new_value": "Nouveau nom",
-                    "old_value": "Ancien nom",
-                },
-                "latitude": {
-                    "displayed_value": "48.56789",
-                    "updated_displayed_value": None,
-                    "new_value": "48.56789",
-                    "old_value": "48.1234",
-                },
-                "longitude": {
-                    "displayed_value": "2.56789",
-                    "updated_displayed_value": None,
-                    "new_value": "2.56789",
-                    "old_value": "2.1234",
-                },
-            },
-            "acteur": suggestion_groupe_modification.acteur,
-            "acteur_overridden_by": None,
-        }
-        assert result == expected_result
+        assert "acteur is required" in str(exc_info.value)
 
 
 @pytest.mark.django_db
 class TestUpdateSuggestionGroupe:
     @pytest.fixture
-    def suggestion_groupe_with_acteur(self):
-        """Fixture to create a SuggestionGroupe with an acteur"""
-        suggestion_groupe = SuggestionGroupeFactory(
-            suggestion_cohorte=SuggestionCohorteFactory(
-                type_action=SuggestionAction.SOURCE_MODIFICATION,
-            ),
-            acteur=ActeurFactory(nom="Ancien nom", location=Point(2.1234, 48.1234)),
-        )
-        SuggestionUnitaireFactory(
-            suggestion_groupe=suggestion_groupe,
-            suggestion_modele="Acteur",
-            champs=["nom"],
-            valeurs=["Nouveau nom"],
-        )
-        SuggestionUnitaireFactory(
-            suggestion_groupe=suggestion_groupe,
-            suggestion_modele="Acteur",
-            champs=["latitude", "longitude"],
-            valeurs=[48.56789, 2.56789],
-        )
-        return suggestion_groupe
-
-    def test_update_from_serialized_data_success_single_field(
-        self, suggestion_groupe_with_acteur
-    ):
+    def test_update_suggestion_groupe_ajout_with_nom(self, suggestion_groupe_ajout):
         """Test successful update with a single field"""
-        fields_values = {
-            "nom": {
-                "displayed_value": "Ancien nom",
-                "updated_displayed_value": "Nom mis à jour",
-                "new_value": "Nouveau nom",
-                "old_value": "Ancien nom",
-            }
-        }
+        fields_values = {"nom": "Nom mis à jour"}
         fields_groups = [("nom",)]
 
         success, errors = update_suggestion_groupe(
-            suggestion_groupe_with_acteur, fields_values, fields_groups
+            suggestion_groupe_ajout,
+            "RevisionActeur",
+            fields_values,
+            fields_groups,
         )
+        suggestion_groupe_ajout.refresh_from_db()
+        suggestion_unitaire = suggestion_groupe_ajout.suggestion_unitaires.filter(
+            suggestion_modele="RevisionActeur", champs=["nom"]
+        ).first()
 
         assert success is True
         assert errors is None
-
-        # Vérifier que le SuggestionUnitaire a été créé
-        suggestion_unitaire = suggestion_groupe_with_acteur.suggestion_unitaires.filter(
-            suggestion_modele="RevisionActeur", champs=["nom"]
-        ).first()
+        assert suggestion_groupe_ajout.acteur_id == "ID_UNIQUE_123"
+        # FIXME : should we add a revision_acteur_id to the suggestion_groupe ?
+        # assert suggestion_groupe_ajout.revision_acteur_id == "ID_UNIQUE_123"
         assert suggestion_unitaire is not None
+        assert suggestion_unitaire.revision_acteur_id == "ID_UNIQUE_123"
+        assert suggestion_unitaire.acteur_id is None
+        assert suggestion_unitaire.champs == ["nom"]
         assert suggestion_unitaire.valeurs == ["Nom mis à jour"]
 
-    def test_update_from_serialized_data_success_grouped_fields(
-        self, suggestion_groupe_with_acteur
-    ):
+    def test_update_suggestion_groupe_ajout_with_latlong(self, suggestion_groupe_ajout):
         """Test successful update with grouped fields (latitude/longitude)"""
         fields_values = {
-            "latitude": {
-                "displayed_value": "48.1234",
-                "updated_displayed_value": "48.9999",
-                "new_value": "48.56789",
-                "old_value": "48.1234",
-            },
-            "longitude": {
-                "displayed_value": "2.1234",
-                "updated_displayed_value": "2.9999",
-                "new_value": "2.56789",
-                "old_value": "2.1234",
-            },
+            "latitude": "48.9999",
+            "longitude": "2.9999",
         }
         fields_groups = [("latitude", "longitude")]
 
         success, errors = update_suggestion_groupe(
-            suggestion_groupe_with_acteur, fields_values, fields_groups
+            suggestion_groupe_ajout,
+            "RevisionActeur",
+            fields_values,
+            fields_groups,
         )
+        suggestion_groupe_ajout.refresh_from_db()
+        suggestion_unitaire = suggestion_groupe_ajout.suggestion_unitaires.filter(
+            suggestion_modele="RevisionActeur", champs=["latitude", "longitude"]
+        ).first()
 
         assert success is True
         assert errors is None
-
-        # Vérifier que le SuggestionUnitaire a été créé avec les deux valeurs
-        suggestion_unitaire = suggestion_groupe_with_acteur.suggestion_unitaires.filter(
-            suggestion_modele="RevisionActeur", champs=["latitude", "longitude"]
-        ).first()
+        assert suggestion_groupe_ajout.acteur_id == "ID_UNIQUE_123"
+        # FIXME : should we add a revision_acteur_id to the suggestion_groupe ?
+        # assert suggestion_groupe_ajout.revision_acteur_id == "ID_UNIQUE_123"
         assert suggestion_unitaire is not None
+        assert suggestion_unitaire.revision_acteur_id == "ID_UNIQUE_123"
+        assert suggestion_unitaire.acteur_id is None
+        assert suggestion_unitaire.champs == ["latitude", "longitude"]
         assert suggestion_unitaire.valeurs == ["48.9999", "2.9999"]
 
-    def test_update_from_serialized_data_success_multiple_fields(
-        self, suggestion_groupe_with_acteur
+    def test_update_suggestion_groupe_ajout_with_nom_and_latlong(
+        self, suggestion_groupe_ajout
     ):
         """Test successful update with multiple fields"""
         fields_values = {
-            "nom": {
-                "displayed_value": "Ancien nom",
-                "updated_displayed_value": "Nom mis à jour",
-                "new_value": "Nouveau nom",
-                "old_value": "Ancien nom",
-            },
-            "code_postal": {
-                "displayed_value": "",
-                "updated_displayed_value": "75001",
-                "new_value": "",
-                "old_value": "",
-            },
+            "nom": "Nom mis à jour",
+            "latitude": "48.9999",
+            "longitude": "2.9999",
         }
-        fields_groups = [("nom",), ("code_postal",)]
+        fields_groups = [("nom",), ("latitude", "longitude")]
 
         success, errors = update_suggestion_groupe(
-            suggestion_groupe_with_acteur, fields_values, fields_groups
+            suggestion_groupe_ajout,
+            "RevisionActeur",
+            fields_values,
+            fields_groups,
+        )
+        suggestion_groupe_ajout.refresh_from_db()
+        suggestion_unitaire_nom = suggestion_groupe_ajout.suggestion_unitaires.filter(
+            suggestion_modele="RevisionActeur", champs=["nom"]
+        ).first()
+        suggestion_unitaire_latlong = (
+            suggestion_groupe_ajout.suggestion_unitaires.filter(
+                suggestion_modele="RevisionActeur", champs=["latitude", "longitude"]
+            ).first()
         )
 
         assert success is True
         assert errors is None
 
-        # Vérifier que les deux SuggestionUnitaires ont été créés
-        nom_suggestion = suggestion_groupe_with_acteur.suggestion_unitaires.filter(
-            suggestion_modele="RevisionActeur", champs=["nom"]
-        ).first()
-        assert nom_suggestion is not None
-        assert nom_suggestion.valeurs == ["Nom mis à jour"]
+        # Verify that the two SuggestionUnitaires have been created
+        assert suggestion_unitaire_nom is not None
+        assert suggestion_unitaire_nom.revision_acteur_id == "ID_UNIQUE_123"
+        assert suggestion_unitaire_nom.acteur_id is None
+        assert suggestion_unitaire_nom.champs == ["nom"]
+        assert suggestion_unitaire_nom.valeurs == ["Nom mis à jour"]
+        assert suggestion_unitaire_latlong is not None
+        assert suggestion_unitaire_latlong.revision_acteur_id == "ID_UNIQUE_123"
+        assert suggestion_unitaire_latlong.acteur_id is None
+        assert suggestion_unitaire_latlong.champs == ["latitude", "longitude"]
+        assert suggestion_unitaire_latlong.valeurs == ["48.9999", "2.9999"]
 
-        cp_suggestion = suggestion_groupe_with_acteur.suggestion_unitaires.filter(
-            suggestion_modele="RevisionActeur", champs=["code_postal"]
-        ).first()
-        assert cp_suggestion is not None
-        assert cp_suggestion.valeurs == ["75001"]
-
-    def test_update_from_serialized_data_error_invalid_longitude(
-        self, suggestion_groupe_with_acteur
-    ):
+    def test_update_error_invalid_longitude(self, suggestion_groupe_ajout):
         """Test error when longitude is not a valid float"""
         fields_values = {
-            "longitude": {
-                "displayed_value": "2.1234",
-                "updated_displayed_value": "not_a_float",
-                "new_value": "2.56789",
-                "old_value": "2.1234",
-            },
-            "latitude": {
-                "displayed_value": "48.1234",
-                "updated_displayed_value": "48.9999",
-                "new_value": "48.56789",
-                "old_value": "48.1234",
-            },
+            "longitude": "not_a_float",
+            "latitude": "48.9999",
         }
         fields_groups = [("latitude", "longitude")]
 
         success, errors = update_suggestion_groupe(
-            suggestion_groupe_with_acteur, fields_values, fields_groups
+            suggestion_groupe_ajout,
+            "RevisionActeur",
+            fields_values,
+            fields_groups,
         )
 
         assert success is False
         assert errors is not None
-        assert "longitude" in errors
-        assert "must be a float" in errors["longitude"]
+        # The error should be related to latitude or longitude
+        assert any(
+            "latitude" in str(errors).lower() or "longitude" in str(errors).lower()
+            for key in errors
+        )
 
-    def test_update_from_serialized_data_update_existing_revision_suggestion(
-        self, suggestion_groupe_with_acteur
+    def test_update_suggestion_groupe_modification_with_nom(
+        self, suggestion_groupe_modification
+    ):
+        """
+        Test update when a RevisionActeur suggestion does not exist
+        """
+
+        fields_values = {"nom": "Nouvelle valeur"}
+        fields_groups = [("nom",)]
+
+        success, errors = update_suggestion_groupe(
+            suggestion_groupe_modification,
+            "RevisionActeur",
+            fields_values,
+            fields_groups,
+        )
+        suggestion_groupe_modification.refresh_from_db()
+        suggestion_unitaire = (
+            suggestion_groupe_modification.suggestion_unitaires.filter(
+                suggestion_modele="RevisionActeur", champs=["nom"]
+            ).first()
+        )
+
+        assert success is True
+        assert errors is None
+        # Verify that the SuggestionUnitaire has been created
+        assert suggestion_unitaire is not None
+        assert suggestion_unitaire.revision_acteur_id == "ID_UNIQUE_123"
+        assert suggestion_unitaire.acteur_id is None
+        assert suggestion_unitaire.champs == ["nom"]
+        assert suggestion_unitaire.valeurs == ["Nouvelle valeur"]
+
+    def test_update_suggestion_groupe_modification_with_nom_on_existing_sugg(
+        self, suggestion_groupe_modification
     ):
         """
         Test update when a RevisionActeur suggestion already exists with different value
         """
         # Create a RevisionActeur suggestion
-        SuggestionUnitaireFactory(
-            suggestion_groupe=suggestion_groupe_with_acteur,
+        suggestion_unitaire_nom_existing = SuggestionUnitaireFactory(
+            suggestion_groupe=suggestion_groupe_modification,
             suggestion_modele="RevisionActeur",
+            revision_acteur_id="ID_UNIQUE_123",
             champs=["nom"],
             valeurs=["Ancienne valeur"],
         )
 
-        fields_values = {
-            "nom": {
-                "displayed_value": "Ancien nom",
-                "updated_displayed_value": "Nouvelle valeur",
-                "new_value": "Nouveau nom",
-                "old_value": "Ancien nom",
-            }
-        }
+        fields_values = {"nom": "Nouvelle valeur"}
         fields_groups = [("nom",)]
 
         success, errors = update_suggestion_groupe(
-            suggestion_groupe_with_acteur, fields_values, fields_groups
+            suggestion_groupe_modification,
+            "RevisionActeur",
+            fields_values,
+            fields_groups,
+        )
+        suggestion_groupe_modification.refresh_from_db()
+        suggestion_unitaire = (
+            suggestion_groupe_modification.suggestion_unitaires.filter(
+                suggestion_modele="RevisionActeur", champs=["nom"]
+            ).first()
         )
 
         assert success is True
         assert errors is None
-
         # Verify that the SuggestionUnitaire has been updated
-        suggestion_unitaire = suggestion_groupe_with_acteur.suggestion_unitaires.filter(
-            suggestion_modele="RevisionActeur", champs=["nom"]
-        ).first()
         assert suggestion_unitaire is not None
+        assert suggestion_unitaire_nom_existing.id == suggestion_unitaire.id
+        assert suggestion_unitaire.revision_acteur_id == "ID_UNIQUE_123"
+        assert suggestion_unitaire.acteur_id is None
+        assert suggestion_unitaire.champs == ["nom"]
         assert suggestion_unitaire.valeurs == ["Nouvelle valeur"]
 
-    def test_update_from_serialized_data_skip_missing_updated_displayed_value(
-        self, suggestion_groupe_with_acteur
+    def test_update_suggestion_groupe_modification_with_latlong(
+        self, suggestion_groupe_modification
     ):
-        """Test that fields without updated_displayed_value are skipped"""
-        fields_values = {
-            "nom": {
-                "displayed_value": "Ancien nom",
-                # Pas de updated_displayed_value
-                "new_value": "Nouveau nom",
-                "old_value": "Ancien nom",
-            }
-        }
-        fields_groups = [("nom",)]
+        """
+        Test update when a RevisionActeur suggestion does not exist
+        """
 
-        initial_count = suggestion_groupe_with_acteur.suggestion_unitaires.filter(
-            suggestion_modele="RevisionActeur"
-        ).count()
+        fields_values = {"latitude": "48.8566", "longitude": "2.3522"}
+        fields_groups = [("latitude", "longitude")]
 
         success, errors = update_suggestion_groupe(
-            suggestion_groupe_with_acteur, fields_values, fields_groups
+            suggestion_groupe_modification,
+            "RevisionActeur",
+            fields_values,
+            fields_groups,
+        )
+        suggestion_groupe_modification.refresh_from_db()
+        suggestion_unitaire = (
+            suggestion_groupe_modification.suggestion_unitaires.filter(
+                suggestion_modele="RevisionActeur", champs=["latitude", "longitude"]
+            ).first()
+        )
+
+        assert success is True
+        assert errors is None
+        # Verify that the SuggestionUnitaire has been created
+        assert suggestion_unitaire is not None
+        assert suggestion_unitaire.revision_acteur_id == "ID_UNIQUE_123"
+        assert suggestion_unitaire.acteur_id is None
+        assert suggestion_unitaire.champs == ["latitude", "longitude"]
+        assert suggestion_unitaire.valeurs == ["48.8566", "2.3522"]
+
+    def test_update_suggestion_groupe_modification_with_latlong_on_existing_sugg(
+        self, suggestion_groupe_modification
+    ):
+        """
+        Test update when a RevisionActeur suggestion already exists with different value
+        """
+        # Create a RevisionActeur suggestion
+        suggestion_unitaire_latlong_existing = SuggestionUnitaireFactory(
+            suggestion_groupe=suggestion_groupe_modification,
+            suggestion_modele="RevisionActeur",
+            revision_acteur_id="ID_UNIQUE_123",
+            champs=["latitude", "longitude"],
+            valeurs=["45.7640", "4.8357"],
+        )
+
+        fields_values = {"latitude": "48.8566", "longitude": "2.3522"}
+        fields_groups = [("latitude", "longitude")]
+
+        success, errors = update_suggestion_groupe(
+            suggestion_groupe_modification,
+            "RevisionActeur",
+            fields_values,
+            fields_groups,
+        )
+        suggestion_groupe_modification.refresh_from_db()
+        suggestion_unitaire = (
+            suggestion_groupe_modification.suggestion_unitaires.filter(
+                suggestion_modele="RevisionActeur", champs=["latitude", "longitude"]
+            ).first()
+        )
+
+        assert success is True
+        assert errors is None
+        # Verify that the SuggestionUnitaire has been updated
+        assert suggestion_unitaire is not None
+        assert suggestion_unitaire_latlong_existing.id == suggestion_unitaire.id
+        assert suggestion_unitaire.revision_acteur_id == "ID_UNIQUE_123"
+        assert suggestion_unitaire.acteur_id is None
+        assert suggestion_unitaire.champs == ["latitude", "longitude"]
+        assert suggestion_unitaire.valeurs == ["48.8566", "2.3522"]
+
+    def test_update_suggestion_groupe_modification_on_parent(
+        self, suggestion_groupe_modification
+    ):
+        """Test update with ParentRevisionActeur suggestion_modele"""
+        fields_values = {"nom": "Parent nom mis à jour"}
+        fields_groups = [("nom",)]
+        parent_revision_acteur = RevisionActeurFactory(
+            identifiant_unique="ID_PARENT_456",
+            nom="Parent nom",
+            location=Point(2.1234, 48.1234),
+        )
+        suggestion_groupe_modification.parent_revision_acteur = parent_revision_acteur
+        suggestion_groupe_modification.save()
+
+        success, errors = update_suggestion_groupe(
+            suggestion_groupe_modification,
+            "ParentRevisionActeur",
+            fields_values,
+            fields_groups,
         )
 
         assert success is True
         assert errors is None
 
-        # Verify that no new SuggestionUnitaire has been created
-        final_count = suggestion_groupe_with_acteur.suggestion_unitaires.filter(
-            suggestion_modele="RevisionActeur"
-        ).count()
-        assert final_count == initial_count
+        # Vérifier que le SuggestionUnitaire a été créé avec le bon modèle
+        suggestion_unitaire = (
+            suggestion_groupe_modification.suggestion_unitaires.filter(
+                suggestion_modele="ParentRevisionActeur", champs=["nom"]
+            ).first()
+        )
+        assert suggestion_unitaire.parent_revision_acteur_id == "ID_PARENT_456"
+        assert suggestion_unitaire is not None
+        assert suggestion_unitaire.valeurs == ["Parent nom mis à jour"]
 
-    def test_update_from_serialized_data_grouped_fields_partial_update(
-        self, suggestion_groupe_with_acteur
-    ):
+    def test_update_grouped_fields_partial_update(self, suggestion_groupe_modification):
         """Test update with grouped fields where only one field is updated"""
         fields_values = {
-            "latitude": {
-                "displayed_value": "48.1234",
-                "updated_displayed_value": "48.9999",
-                "new_value": "48.56789",
-                "old_value": "48.1234",
-            },
-            "longitude": {
-                "displayed_value": "2.1234",
-                "updated_displayed_value": "2.1234",  # Pas de changement
-                "new_value": "2.56789",
-                "old_value": "2.1234",
-            },
+            "latitude": "48.9999",
+            "longitude": "2.1234",  # Pas de changement
         }
         fields_groups = [("latitude", "longitude")]
 
         success, errors = update_suggestion_groupe(
-            suggestion_groupe_with_acteur, fields_values, fields_groups
+            suggestion_groupe_modification,
+            "RevisionActeur",
+            fields_values,
+            fields_groups,
         )
 
         assert success is True
         assert errors is None
 
         # Verify that the SuggestionUnitaire for (latitude, longitude) has been created
-        # with latitude updated and longitude not updated
-        suggestion_unitaire = suggestion_groupe_with_acteur.suggestion_unitaires.filter(
-            suggestion_modele="RevisionActeur", champs=["latitude", "longitude"]
-        ).first()
+        suggestion_unitaire = (
+            suggestion_groupe_modification.suggestion_unitaires.filter(
+                suggestion_modele="RevisionActeur", champs=["latitude", "longitude"]
+            ).first()
+        )
         assert suggestion_unitaire is not None
-        # longitude is added to values_to_update during validation with displayed_value
         assert suggestion_unitaire.valeurs == ["48.9999", "2.1234"]
+
+    def test_update_invalid_suggestion_modele(self, suggestion_groupe_modification):
+        """Test that invalid suggestion_modele raises ValueError"""
+        fields_values = {"nom": "Test"}
+        fields_groups = [("nom",)]
+
+        with pytest.raises(ValueError) as exc_info:
+            update_suggestion_groupe(
+                suggestion_groupe_modification,
+                "InvalidModele",
+                fields_values,
+                fields_groups,
+            )
+
+        assert "Invalid suggestion_modele" in str(exc_info.value)

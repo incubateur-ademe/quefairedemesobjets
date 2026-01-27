@@ -60,7 +60,7 @@ def cluster_acteurs_read_wrapper(ti) -> None:
     if df.empty:
         raise AirflowSkipException("Aucun orphelin trouvé, on s'arrête là")
 
-    logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
+    logger.info(log.banner_string("🏁 Résultat final de cette tâche"))
     log.preview_df_as_markdown("acteurs sélectionnés", df)
 
     ti.xcom_push(key=XCOMS.DF_READ, value=df)

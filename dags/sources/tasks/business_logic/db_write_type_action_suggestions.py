@@ -9,6 +9,7 @@ from utils.django import django_setup_full
 
 django_setup_full()
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -194,6 +195,7 @@ def insert_suggestion(
         SuggestionLog,
         SuggestionUnitaire,
     )
+    from data.models.suggestions.source import SuggestionSourceModel
     from qfdmo.models.acteur import Acteur, RevisionActeur
 
     if df.empty:
@@ -252,40 +254,41 @@ def insert_suggestion(
             suggestion_cohorte=suggestion_cohorte,
             statut=constants.SUGGESTION_AVALIDER,
             acteur=acteur,
-            revision_acteur=parent or revision_acteur,
+            revision_acteur=revision_acteur,
+            parent_revision_acteur=parent,
             contexte=row["contexte"],
         )
         suggestion_groupe.save()
-        suggestion = json.loads(row["suggestion"])
-        try:
-            contexte = json.loads(row["contexte"])
-        except TypeError:
-            contexte = {}
+        suggestion: SuggestionSourceModel = SuggestionSourceModel.from_json(
+            row["suggestion"]
+        )
+        if row.get("contexte") is not None:
+            contexte: SuggestionSourceModel = SuggestionSourceModel.from_json(
+                row["contexte"]
+            )
+        else:
+            contexte: SuggestionSourceModel = SuggestionSourceModel()
 
-        grouped_keys = [["latitude", "longitude"]]
-        flattened_grouped_keys = [item for sublist in grouped_keys for item in sublist]
-        keys_and_grouped_keys = [
-            [key]
-            for key in suggestion.keys()
-            if key not in ["location", "sous_categorie_codes", "action_codes"]
-            and key not in flattened_grouped_keys
-        ]
-        for grouped_key in grouped_keys:
-            if all(key in suggestion for key in grouped_key):
-                keys_and_grouped_keys.append(grouped_key)
-
-        # for key, value in suggestion.items():
-        for keys in keys_and_grouped_keys:
+        for keys in SuggestionSourceModel.get_ordered_fields():
             should_add_suggestion_unitaire = False
             for key in keys:
-                if key not in contexte or contexte[key] != suggestion[key]:
+                if (
+                    # The context value isn't defined and the suggestion is not empty
+                    (getattr(contexte, key) is None and getattr(suggestion, key))
+                    # The context value is defined and the suggestion value is different
+                    or (
+                        getattr(contexte, key) is not None
+                        and getattr(suggestion, key) is not None
+                        and getattr(contexte, key) != getattr(suggestion, key)
+                    )
+                ):
                     should_add_suggestion_unitaire = True
                     break
             if not should_add_suggestion_unitaire:
                 continue
             values = []
             for key in keys:
-                values.append(suggestion[key])
+                values.append(getattr(suggestion, key, ""))
             SuggestionUnitaire(
                 suggestion_groupe=suggestion_groupe,
                 statut=constants.SUGGESTION_AVALIDER,
@@ -300,13 +303,12 @@ def insert_suggestion(
             # if it exists
             if (
                 suggestion_cohorte.type_action == constants.SUGGESTION_SOURCE_SUPRESSION
-                and keys == ["statut"]
+                and "statut" in keys
                 and revision_acteur
             ):
                 SuggestionUnitaire(
                     suggestion_groupe=suggestion_groupe,
                     statut=constants.SUGGESTION_AVALIDER,
-                    acteur=acteur,
                     revision_acteur=revision_acteur,
                     suggestion_modele="RevisionActeur",
                     champs=keys,

@@ -28,5 +28,5 @@ make create-remote-db-server
 ## Copier la base de données de prod en local
 
 ```sh
-make db-restore
+make db-restore-local-from-prod
 ```
