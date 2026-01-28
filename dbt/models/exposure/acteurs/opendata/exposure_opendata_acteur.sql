@@ -90,10 +90,11 @@ SELECT
     ) THEN NULL
     ELSE da.telephone
   END as "telephone",
-  da.adresse as "adresse",
-  da.adresse_complement as "complement_dadresse",
-  da.code_postal as "code_postal",
-  da.ville as "ville",
+  -- Exclude addresses for actors 'A_DOMICILE'
+  CASE WHEN da.lieu_prestation = 'A_DOMICILE' THEN NULL ELSE da.adresse END as "adresse",
+  CASE WHEN da.lieu_prestation = 'A_DOMICILE' THEN NULL ELSE da.adresse_complement END as "complement_dadresse",
+  CASE WHEN da.lieu_prestation = 'A_DOMICILE' THEN NULL ELSE da.code_postal END as "code_postal",
+  CASE WHEN da.lieu_prestation = 'A_DOMICILE' THEN NULL ELSE da.ville END as "ville",
   da.code_commune_insee as "code_commune",
   aepci.code_epci as "code_epci",
   aepci.nom_epci as "nom_epci",
