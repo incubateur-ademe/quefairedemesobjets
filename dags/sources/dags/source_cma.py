@@ -59,11 +59,6 @@ with DAG(
                 "transformation": "clean_sous_categorie_codes",
                 "destination": "sous_categorie_codes",
             },
-            {
-                "origin": "website",
-                "transformation": "clean_url",
-                "destination": "url",
-            },
             # 3. Ajout des colonnes avec une valeur par défaut
             {
                 "column": "statut",
@@ -94,6 +89,11 @@ with DAG(
                 "value": "cma_reparacteur",
             },
             # 4. Transformation du dataframe
+            {
+                "origin": ["website", "facebook", "instagram"],
+                "transformation": "clean_url_from_multi_columns",
+                "destination": ["url"],
+            },
             {
                 "origin": ["latitude", "longitude"],
                 "transformation": "compute_location",
@@ -132,9 +132,9 @@ with DAG(
             {"remove": "activites_detaillees"},
             {"remove": "ban_latitude"},
             {"remove": "ban_longitude"},
-            {"remove": "categorie"},
             {"remove": "categorie_2"},
             {"remove": "categorie_3"},
+            {"remove": "categorie"},
             {"remove": "cma_code"},
             {"remove": "code_departement"},
             {"remove": "code_region"},
@@ -148,6 +148,7 @@ with DAG(
             {"remove": "final_longitude"},
             {"remove": "geocode"},
             {"remove": "instagram"},
+            {"remove": "libelle_naf"},
             {"remove": "linkedin"},
             {"remove": "logo_file"},
             {"remove": "naf"},
@@ -157,7 +158,7 @@ with DAG(
             {"remove": "techloadts"},
             {"remove": "techprocessid"},
             {"remove": "techsource"},
-            {"remove": "libelle_naf"},
+            {"remove": "website"},
             # 6. Colonnes à garder (rien à faire, utilisé pour le controle)
             {"keep": "nom"},
             {"keep": "adresse"},

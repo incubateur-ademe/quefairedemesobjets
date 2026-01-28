@@ -5,6 +5,8 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
+from django.core.exceptions import ValidationError
+from django.core.validators import URLValidator
 from opening_hours import OpeningHours, ParserError
 from sources.config import shared_constants as constants
 from sources.tasks.airflow_logic.config_management import DAGConfig
@@ -25,6 +27,7 @@ from sources.tasks.transform.formatter import format_libelle_to_code
 from sources.tasks.transform.opening_hours import interprete_opening_hours
 
 logger = logging.getLogger(__name__)
+url_validator = URLValidator(schemes=["http", "https"])
 
 CLOSED_THIS_DAY = "Fermé"
 
@@ -193,15 +196,17 @@ def clean_reprise(value, _):
 
 
 def clean_url(url, _) -> str:
+
     if pd.isna(url) or not url:
         return ""
-    url = str(url)
+    url = str(url).strip()
 
     if not (url.startswith("http://") or url.startswith("https://")):
         url = "https://" + url
 
-    # regexp to check if url is valid
-    if not re.match(r"^https?://[^/\s]+[^\s]*$", url):
+    try:
+        url_validator(url)
+    except ValidationError:
         raise UrlWarning(f"L'URL n'est pas valide : `{url}`")
 
     return url
