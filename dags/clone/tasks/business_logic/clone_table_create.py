@@ -33,7 +33,11 @@ def command_ogr2ogr_import_geojson(
     geojson_file_path: str,
     geometry_column_name: str = "contours_administratifs",
 ) -> str:
-    """Command to load GeoJSON into DB using ogr2ogr, factored out for reuse"""
+    """
+    Command to load GeoJSON into DB using ogr2ogr, factored out for reuse
+
+    For more information about ogr2ogr, see: https://gdal.gloobe.org/ogr/ogr2ogr.html
+    """
     from django.conf import settings
 
     warehouse_db_settings = settings.DATABASES["warehouse"]
