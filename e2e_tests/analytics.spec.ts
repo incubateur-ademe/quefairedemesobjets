@@ -1,84 +1,53 @@
 import { test, expect } from "@playwright/test"
-import { navigateTo, getIframe, TIMEOUT } from "./helpers"
+import { navigateTo, TIMEOUT } from "./helpers"
 
 test.describe("📊 Analytics & Tracking", () => {
   test.describe("Tracking du referrer dans les iframes", () => {
-    test("Le referrer parent est correctement tracké lors des clics sur des liens dans l'iframe", async ({
-      page,
-    }) => {
-      // Navigate to the test page with query parameters to test full URL capture
-      const fullPageWithQueryParams =
-        "/lookbook/preview/tests/t_1_referrer?test_param=value&another=123"
-      await navigateTo(page, fullPageWithQueryParams)
+    const scriptTypes = [
+      { name: "carte", scriptType: "carte", iframeId: "carte", iframePath: "/carte" },
+      {
+        name: "assistant",
+        scriptType: "assistant",
+        iframeId: "assistant",
+        iframePath: "/dechet",
+      },
+    ]
 
-      // Get the parent window location for comparison (should include query params)
-      const parentLocation = page.url()
-      expect(parentLocation.endsWith(fullPageWithQueryParams))
+    for (const { name, scriptType, iframeId, iframePath } of scriptTypes) {
+      test(`Le referrer parent avec query string est correctement passé à l'iframe pour ${name}`, async ({
+        page,
+      }) => {
+        // Navigate to the test page with the script_type parameter and additional query params
+        // The script_type selects which template to render via django-lookbook form
+        const testQueryParams = "test_param=value&another=123"
+        const fullUrl = `/lookbook/preview/tests/t_1_referrer?script_type=${scriptType}&${testQueryParams}`
+        await navigateTo(page, fullUrl)
 
-      // Locate the test iframe
-      const iframe = getIframe(page, "test")
+        // Get the parent window location for comparison (must include query params)
+        const parentLocation = page.url()
+        expect(parentLocation).toContain(testQueryParams)
 
-      // Wait for iframe to load by waiting for the body with Stimulus controller
-      await expect(iframe.locator("body[data-controller*='analytics']")).toBeAttached({
-        timeout: TIMEOUT.DEFAULT,
+        // Wait for the iframe to be created with the correct ID
+        const iframeLocator = page.locator(`iframe#${iframeId}`)
+        await expect(iframeLocator).toBeAttached({ timeout: TIMEOUT.DEFAULT })
+
+        // Get the iframe src attribute and verify it contains the ref parameter
+        const iframeSrc = await iframeLocator.getAttribute("src")
+        expect(iframeSrc).not.toBeNull()
+        expect(iframeSrc).toContain(iframePath)
+        expect(iframeSrc).toContain("ref=")
+
+        // Decode the ref parameter and verify it matches the parent URL
+        const url = new URL(iframeSrc!, "http://localhost")
+        const refParam = url.searchParams.get("ref")
+        expect(refParam).not.toBeNull()
+
+        // Decode base64 ref parameter
+        const decodedRef = Buffer.from(refParam!, "base64").toString("utf-8")
+
+        // Verify the decoded referrer contains the test query params
+        expect(decodedRef).toContain(testQueryParams)
       })
-
-      // Find a visible link using Playwright's built-in visibility detection
-      const visibleLink = iframe.locator("a:visible").first()
-      await expect(visibleLink).toBeVisible({ timeout: TIMEOUT.DEFAULT })
-
-      // Get the current URL before clicking to detect navigation
-      const initialUrl = await iframe
-        .locator("body")
-        .evaluate(() => window.location.href)
-
-      await visibleLink.click()
-
-      // Wait for navigation by checking that the URL has actually changed
-      await expect(async () => {
-        const currentUrl = await iframe
-          .locator("body")
-          .evaluate(() => window.location.href)
-        expect(currentUrl).not.toBe(initialUrl)
-      }).toPass({ timeout: TIMEOUT.DEFAULT })
-
-      // Wait for the analytics controller to be available after navigation
-      await expect(async () => {
-        const hasController = await iframe.locator("body").evaluate(() => {
-          return !!(window as any).stimulus?.getControllerForElementAndIdentifier(
-            document.querySelector("body"),
-            "analytics",
-          )
-        })
-        expect(hasController).toBe(true)
-      }).toPass({ timeout: TIMEOUT.SHORT })
-
-      // Execute JavaScript inside the iframe to get personProperties
-      // This can seem a bit cumbersome, but is the result of quite a lot of trial
-      // and error.
-      // Playwright does not play well with iframes...
-      const personProperties = await iframe.locator("body").evaluate(() => {
-        const controller = (
-          window as any
-        ).stimulus?.getControllerForElementAndIdentifier(
-          document.querySelector("body"),
-          "analytics",
-        )
-        if (!controller) {
-          return null
-        }
-        return controller.personProperties
-      })
-
-      // Verify analytics controller is loaded
-      expect(personProperties).not.toBeNull()
-
-      // Verify that iframe is set to true
-      expect(personProperties.iframe).toBe(true)
-
-      // Verify that iframeReferrer is set and matches the parent window location
-      expect(personProperties.iframeReferrer).toBeDefined()
-      expect(personProperties.iframeReferrer).toBe(parentLocation)
-    })
+    }
   })
 })

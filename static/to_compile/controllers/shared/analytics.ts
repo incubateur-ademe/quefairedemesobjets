@@ -176,10 +176,17 @@ export default class extends Controller<HTMLElement> {
       referrer = storedReferrer
     }
 
-    // Check if the referrer was passed via data attribute from the iframe script
+    // Check if the referrer was passed via URL parameter from the iframe script
     // This is the most reliable method as it captures the full parent URL including query params
-    if (!referrer && this.element.dataset.referrer) {
-      referrer = this.element.dataset.referrer
+    const url = new URL(window.location.href)
+    const encodedReferrer = url.searchParams.get("ref")
+    if (encodedReferrer) {
+      try {
+        const decodedReferrer = atob(encodedReferrer)
+        referrer = decodedReferrer
+      } catch (e) {
+        console.warn("Unable to decode referrer from URL parameter:", e)
+      }
     }
 
     // For same-origin iframes, we can access the parent URL directly
