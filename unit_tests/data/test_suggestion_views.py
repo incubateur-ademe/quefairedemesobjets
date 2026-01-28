@@ -442,6 +442,47 @@ class TestUpdateSuggestionGroupe:
         assert suggestion_unitaire.champs == ["latitude", "longitude"]
         assert suggestion_unitaire.valeurs == ["48.9999", "2.9999"]
 
+    def test_update_suggestion_groupe_ajout_with_latitude_only(
+        self, suggestion_groupe_ajout
+    ):
+        """
+        Test that updating only latitude retrieves longitude from existing
+        RevisionActeur suggestion
+        """
+        # Create an existing RevisionActeur suggestion with latitude/longitude
+        SuggestionUnitaireFactory(
+            suggestion_groupe=suggestion_groupe_ajout,
+            suggestion_modele="RevisionActeur",
+            revision_acteur_id="ID_UNIQUE_123",
+            champs=["latitude", "longitude"],
+            valeurs=["45.0000", "3.0000"],
+        )
+
+        # Update only latitude
+        fields_values = {
+            "latitude": "48.9999",
+        }
+        fields_groups = [("latitude", "longitude")]
+
+        success, errors = update_suggestion_groupe(
+            suggestion_groupe_ajout,
+            "RevisionActeur",
+            fields_values,
+            fields_groups,
+        )
+        suggestion_groupe_ajout.refresh_from_db()
+        suggestion_unitaire = suggestion_groupe_ajout.suggestion_unitaires.filter(
+            suggestion_modele="RevisionActeur", champs=["latitude", "longitude"]
+        ).first()
+
+        assert success is True
+        assert errors is None
+        assert suggestion_unitaire is not None
+        assert suggestion_unitaire.revision_acteur_id == "ID_UNIQUE_123"
+        assert suggestion_unitaire.champs == ["latitude", "longitude"]
+        # Latitude is updated, longitude is retrieved from existing suggestion
+        assert suggestion_unitaire.valeurs == ["48.9999", "3.0000"]
+
     def test_update_suggestion_groupe_ajout_with_nom_and_latlong(
         self, suggestion_groupe_ajout
     ):
