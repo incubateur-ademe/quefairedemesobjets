@@ -277,9 +277,13 @@ def serialize_suggestion_groupe(
     Serialize a SuggestionGroupe using SuggestionSourceModel for validation
 
     enhancements:
-    - get acteur_suggestion_value get original value of suggestion by field
+    - get acteur_target_value get the value assign to acteur after suggestion is applied
     - get acteur + suggestion on acteur
+    - get revision_acteur_target_value get the value assign to revision_acteur after
+      suggestion is applied
     - get revision_acteur + suggestion on revision_acteur
+    - get parent_revision_acteur_target_value get the value assign to
+      parent_revision_acteur after suggestion is applied
     - get parent_revision_acteur + suggestion on parent_revision_acteur
 
     get all field_group edited
@@ -292,9 +296,11 @@ def serialize_suggestion_groupe(
                 display diff between suggestion and "acteur" value
     return the dict:
         fields_values: {
-            "acteur_suggestion_value": value,
+            "acteur_target_value": value,
             "acteur": value_to_display,
+            "revision_acteur_target_value": value,
             "revision_acteur": value_to_display,
+            "parent_revision_acteur_target_value": value,
             "parent_revision_acteur": value_to_display,
         }
     """
@@ -326,12 +332,15 @@ def serialize_suggestion_groupe(
         # Get fields from acteur_suggestion_unitaires
         fields_values = {
             key: {
-                "acteur_suggestion_value": getattr(
+                "acteur_target_value": getattr(
                     acteur_suggestion_unitaires_by_field, key, None
                 ),
                 "acteur": _display_suggestion_unitaire_for_a_field(
                     key, acteur_suggestion_unitaires_by_field
                 ),  # FIXME: display the diff suggestion
+                "revision_acteur_target_value": getattr(
+                    acteur_overridden_by_suggestion_unitaires_by_field, key, None
+                ),
                 "revision_acteur": _display_suggestion_unitaire_for_a_field(
                     key, acteur_overridden_by_suggestion_unitaires_by_field
                 ),
@@ -377,7 +386,7 @@ def serialize_suggestion_groupe(
 
     fields_values = {
         key: {
-            "acteur_suggestion_value": getattr(
+            "acteur_target_value": getattr(
                 acteur_suggestion_unitaires_by_field, key, None
             ),
             "acteur": _display_suggestion_unitaire_for_a_field(
@@ -388,9 +397,19 @@ def serialize_suggestion_groupe(
                 acteur_overridden_by_suggestion_unitaires_by_field,
                 getattr(revision_acteur_values, key),
             ),
+            "revision_acteur_target_value": getattr(
+                acteur_overridden_by_suggestion_unitaires_by_field,
+                key,
+                getattr(revision_acteur_values, key),
+            ),
             "parent_revision_acteur": _display_suggestion_unitaire_for_a_field(
                 key,
                 parent_revision_acteur_suggestion_unitaires_by_field,
+                getattr(parent_revision_acteur_values, key),
+            ),
+            "parent_revision_acteur_target_value": getattr(
+                parent_revision_acteur_suggestion_unitaires_by_field,
+                key,
                 getattr(parent_revision_acteur_values, key),
             ),
         }

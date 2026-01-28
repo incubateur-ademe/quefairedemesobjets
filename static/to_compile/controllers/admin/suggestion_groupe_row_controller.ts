@@ -11,39 +11,27 @@ export default class extends Controller<HTMLElement> {
   declare readonly fieldsGroupsValue: string
 
   replaceWithFieldValue(event: FocusEvent) {
-    const value = this.#getFieldsValues()
-    const field = (event.target as HTMLElement).dataset.field
-    if (!field || !(field in value)) {
-      console.error("Champs manquants")
+    const target = event.target as HTMLElement
+    const field = target.dataset.field
+    const suggestionModele = target.dataset.suggestionModele
+    if (!suggestionModele || !field) {
+      console.error("suggestionModele ou field manquant")
       return
     }
-    const target = event.target as HTMLElement
-    if (target.textContent?.trim() === "-") {
-      target.textContent = value[field]["acteur_suggestion_value"] || ""
-    } else {
-      // FIXME : get it from request
-      // Clean the HTML content :
-      // - Remove the red spans (strikethrough) and their content
-      // - Keep the content of the green spans but remove the tags (unwrap)
+    const value = this.#getFieldsValues()
 
-      // Remove the red spans (removed) and their content
-      const redSpans = target.querySelectorAll("span.qf-suggestion-removed")
-      redSpans.forEach((span) => span.remove())
-
-      // Keep the content of the green spans but remove the tags (unwrap)
-      const greenSpans = target.querySelectorAll("span.qf-suggestion-added")
-      greenSpans.forEach((span) => {
-        const parent = span.parentNode
-        if (parent) {
-          while (span.firstChild) {
-            parent.insertBefore(span.firstChild, span)
-          }
-          span.remove()
-        }
-      })
-
-      // Get the cleaned text and set it as content
-      target.textContent = target.textContent?.trim() || ""
+    if (suggestionModele == "Acteur") {
+      target.textContent = value[field]["acteur_target_value"] || ""
+    }
+    if (suggestionModele == "RevisionActeur") {
+      target.textContent =
+        value[field]["revision_acteur_target_value"] ||
+        value[field]["acteur_target_value"]
+    }
+    if (suggestionModele == "ParentRevisionActeur") {
+      target.textContent =
+        value[field]["parent_revision_acteur_target_value"] ||
+        value[field]["acteur_target_value"]
     }
   }
 
@@ -84,8 +72,8 @@ export default class extends Controller<HTMLElement> {
     const newFieldsValues = {}
 
     for (let key of fields) {
-      if (fieldsValues[key]["acteur_suggestion_value"] !== undefined) {
-        newFieldsValues[key] = fieldsValues[key]["acteur_suggestion_value"]
+      if (fieldsValues[key]["acteur_target_value"] !== undefined) {
+        newFieldsValues[key] = fieldsValues[key]["acteur_target_value"]
       }
     }
 
@@ -105,8 +93,8 @@ export default class extends Controller<HTMLElement> {
 
     const newFieldsValues = {}
     for (let key in fieldsValues) {
-      if (fieldsValues[key]["acteur_suggestion_value"] !== undefined) {
-        newFieldsValues[key] = fieldsValues[key]["acteur_suggestion_value"]
+      if (fieldsValues[key]["acteur_target_value"] !== undefined) {
+        newFieldsValues[key] = fieldsValues[key]["acteur_target_value"]
       }
     }
     this.#postFieldsValues(suggestionModele, newFieldsValues)

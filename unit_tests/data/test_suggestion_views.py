@@ -72,24 +72,28 @@ class TestSerializeSuggestionGroupe:
 
         expected_fields_values = {
             "identifiant_unique": {
-                "acteur_suggestion_value": "ID_UNIQUE_123",
+                "acteur_target_value": "ID_UNIQUE_123",
                 "acteur": '<span class="suggestion-text-added">ID_UNIQUE_123</span>',
                 "revision_acteur": '<span class="no-suggestion-text">-</span>',
+                "revision_acteur_target_value": None,
             },
             "nom": {
-                "acteur_suggestion_value": "Nouveau nom",
+                "acteur_target_value": "Nouveau nom",
                 "acteur": '<span class="suggestion-text-added">Nouveau nom</span>',
                 "revision_acteur": '<span class="no-suggestion-text">-</span>',
+                "revision_acteur_target_value": None,
             },
             "latitude": {
-                "acteur_suggestion_value": "48.56789",
+                "acteur_target_value": "48.56789",
                 "acteur": '<span class="suggestion-text-added">48.56789</span>',
                 "revision_acteur": '<span class="no-suggestion-text">-</span>',
+                "revision_acteur_target_value": None,
             },
             "longitude": {
-                "acteur_suggestion_value": "2.56789",
+                "acteur_target_value": "2.56789",
                 "acteur": '<span class="suggestion-text-added">2.56789</span>',
                 "revision_acteur": '<span class="no-suggestion-text">-</span>',
+                "revision_acteur_target_value": None,
             },
         }
 
@@ -117,11 +121,12 @@ class TestSerializeSuggestionGroupe:
             valeurs=["Revision nom"],
         )
         expected_fields_values_nom = {
-            "acteur_suggestion_value": "Nouveau nom",
+            "acteur_target_value": "Nouveau nom",
             "acteur": '<span class="suggestion-text-added">Nouveau nom</span>',
             "revision_acteur": (
                 '<span class="suggestion-text-added">Revision nom</span>'
             ),
+            "revision_acteur_target_value": "Revision nom",
         }
         result = serialize_suggestion_groupe(suggestion_groupe_ajout)
 
@@ -138,31 +143,37 @@ class TestSerializeSuggestionGroupe:
 
         expected_fields_values = {
             "nom": {
-                "acteur_suggestion_value": "Nouveau nom",
+                "acteur_target_value": "Nouveau nom",
                 "acteur": (
                     '<span class="suggestion-text-removed">Ancien'
                     '</span><span class="suggestion-text-added">Nouveau</span> nom'
                 ),
                 "revision_acteur": '<span class="no-suggestion-text">-</span>',
+                "revision_acteur_target_value": None,
                 "parent_revision_acteur": '<span class="no-suggestion-text">-</span>',
+                "parent_revision_acteur_target_value": None,
             },
             "latitude": {
-                "acteur_suggestion_value": "48.56789",
+                "acteur_target_value": "48.56789",
                 "acteur": (
                     '48.<span class="suggestion-text-removed">1234'
                     '</span><span class="suggestion-text-added">56789</span>'
                 ),
                 "revision_acteur": '<span class="no-suggestion-text">-</span>',
+                "revision_acteur_target_value": None,
                 "parent_revision_acteur": '<span class="no-suggestion-text">-</span>',
+                "parent_revision_acteur_target_value": None,
             },
             "longitude": {
-                "acteur_suggestion_value": "2.56789",
+                "acteur_target_value": "2.56789",
                 "acteur": (
                     '2.<span class="suggestion-text-removed">1234'
                     '</span><span class="suggestion-text-added">56789</span>'
                 ),
                 "revision_acteur": '<span class="no-suggestion-text">-</span>',
+                "revision_acteur_target_value": None,
                 "parent_revision_acteur": '<span class="no-suggestion-text">-</span>',
+                "parent_revision_acteur_target_value": None,
             },
         }
 
@@ -189,7 +200,7 @@ class TestSerializeSuggestionGroupe:
 
         expected_fields_values = {
             "nom": {
-                "acteur_suggestion_value": "Nouveau nom",
+                "acteur_target_value": "Nouveau nom",
                 "acteur": (
                     '<span class="suggestion-text-removed">Ancien'
                     '</span><span class="suggestion-text-added">Nouveau</span> nom'
@@ -197,25 +208,31 @@ class TestSerializeSuggestionGroupe:
                 "revision_acteur": (
                     '<span class="no-suggestion-text">Revision nom</span>'
                 ),
+                "revision_acteur_target_value": None,
                 "parent_revision_acteur": '<span class="no-suggestion-text">-</span>',
+                "parent_revision_acteur_target_value": None,
             },
             "latitude": {
-                "acteur_suggestion_value": "48.56789",
+                "acteur_target_value": "48.56789",
                 "acteur": (
                     '48.<span class="suggestion-text-removed">1234'
                     '</span><span class="suggestion-text-added">56789</span>'
                 ),
                 "revision_acteur": '<span class="no-suggestion-text">48.01</span>',
+                "revision_acteur_target_value": None,
                 "parent_revision_acteur": '<span class="no-suggestion-text">-</span>',
+                "parent_revision_acteur_target_value": None,
             },
             "longitude": {
-                "acteur_suggestion_value": "2.56789",
+                "acteur_target_value": "2.56789",
                 "acteur": (
                     '2.<span class="suggestion-text-removed">1234'
                     '</span><span class="suggestion-text-added">56789</span>'
                 ),
                 "revision_acteur": '<span class="no-suggestion-text">2.01</span>',
+                "revision_acteur_target_value": None,
                 "parent_revision_acteur": '<span class="no-suggestion-text">-</span>',
+                "parent_revision_acteur_target_value": None,
             },
         }
 
@@ -248,7 +265,7 @@ class TestSerializeSuggestionGroupe:
 
         expected_fields_values = {
             "nom": {
-                "acteur_suggestion_value": "Nouveau nom",
+                "acteur_target_value": "Nouveau nom",
                 "acteur": (
                     '<span class="suggestion-text-removed">Ancien'
                     '</span><span class="suggestion-text-added">Nouveau</span> nom'
@@ -256,31 +273,37 @@ class TestSerializeSuggestionGroupe:
                 "revision_acteur": (
                     '<span class="no-suggestion-text">Revision nom</span>'
                 ),
+                "revision_acteur_target_value": None,
                 "parent_revision_acteur": (
                     '<span class="no-suggestion-text">Parent nom</span>'
                 ),
+                "parent_revision_acteur_target_value": None,
             },
             "latitude": {
-                "acteur_suggestion_value": "48.56789",
+                "acteur_target_value": "48.56789",
                 "acteur": (
                     '48.<span class="suggestion-text-removed">1234'
                     '</span><span class="suggestion-text-added">56789</span>'
                 ),
                 "revision_acteur": '<span class="no-suggestion-text">48.01</span>',
+                "revision_acteur_target_value": None,
                 "parent_revision_acteur": (
                     '<span class="no-suggestion-text">48.1111</span>'
                 ),
+                "parent_revision_acteur_target_value": None,
             },
             "longitude": {
-                "acteur_suggestion_value": "2.56789",
+                "acteur_target_value": "2.56789",
                 "acteur": (
                     '2.<span class="suggestion-text-removed">1234'
                     '</span><span class="suggestion-text-added">56789</span>'
                 ),
                 "revision_acteur": '<span class="no-suggestion-text">2.01</span>',
+                "revision_acteur_target_value": None,
                 "parent_revision_acteur": (
                     '<span class="no-suggestion-text">2.1111</span>'
                 ),
+                "parent_revision_acteur_target_value": None,
             },
         }
 
@@ -320,15 +343,17 @@ class TestSerializeSuggestionGroupe:
             valeurs=["Suggestion Parent nom"],
         )
         expected_fields_values_nom = {
-            "acteur_suggestion_value": "Nouveau nom",
+            "acteur_target_value": "Nouveau nom",
             "acteur": (
                 '<span class="suggestion-text-removed">Ancien'
                 '</span><span class="suggestion-text-added">Nouveau</span> nom'
             ),
             "revision_acteur": '<span class="no-suggestion-text">Revision nom</span>',
+            "revision_acteur_target_value": None,
             "parent_revision_acteur": (
                 '<span class="suggestion-text-added">Suggestion </span>Parent nom'
             ),
+            "parent_revision_acteur_target_value": "Suggestion Parent nom",
         }
 
         result = serialize_suggestion_groupe(suggestion_groupe_modification)

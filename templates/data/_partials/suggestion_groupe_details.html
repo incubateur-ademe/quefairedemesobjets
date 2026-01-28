@@ -117,7 +117,7 @@
                         </td>
                         {% if suggestion_groupe.parent_revision_acteur %}
                             <td class="qf-text-center qf-text-2xl">
-                                <div data-action="click->suggestion-groupe-row#updateFieldsDisplayed" data-suggestion-modele="ParentRevisionActeur" class="qf-cursor-pointer">
+                                <div data-action="click->suggestion-groupe-row#updateFieldsDisplayed" data-suggestion-modele="ParentRevisionActeur" data-fields='{{ fields|join:"|" }}' class="qf-cursor-pointer">
                                     ⏩
                                 </div>
                             </td>
