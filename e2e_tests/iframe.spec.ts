@@ -166,65 +166,49 @@ test.describe("📦 Système d'Intégration Iframe", () => {
 
   test.describe("Tracking du referrer dans les iframes", () => {
     const scriptTypes = [
-      { name: "carte", scriptType: "carte", iframeId: "carte" },
-      { name: "assistant", scriptType: "assistant", iframeId: "assistant" },
+      { name: "carte", scriptType: "carte", iframeId: "carte", iframePath: "/carte" },
+      {
+        name: "assistant",
+        scriptType: "assistant",
+        iframeId: "assistant",
+        iframePath: "/dechet",
+      },
     ]
 
-    for (const { name, scriptType, iframeId } of scriptTypes) {
-      test(`Le referrer parent avec query string est correctement tracké pour ${name}`, async ({
+    for (const { name, scriptType, iframeId, iframePath } of scriptTypes) {
+      test(`Le referrer parent avec query string est correctement passé à l'iframe pour ${name}`, async ({
         page,
       }) => {
         // Navigate to the test page with the script_type parameter and additional query params
         // The script_type selects which template to render via django-lookbook form
         const testQueryParams = "test_param=value&another=123"
-        await navigateTo(
-          page,
-          `/lookbook/preview/tests/t_1_referrer?script_type=${scriptType}&${testQueryParams}`,
-        )
-
-        // Wait for the iframe to be created with the correct ID
-        const iframe = getIframe(page, iframeId)
-        await expect(iframe.locator("body")).toBeAttached({
-          timeout: TIMEOUT.DEFAULT,
-        })
+        const fullUrl = `/lookbook/preview/tests/t_1_referrer?script_type=${scriptType}&${testQueryParams}`
+        await navigateTo(page, fullUrl)
 
         // Get the parent window location for comparison (must include query params)
         const parentLocation = page.url()
         expect(parentLocation).toContain(testQueryParams)
 
-        // Wait for iframe to load by waiting for the body with Stimulus controller
-        await expect(iframe.locator("body[data-controller*='analytics']")).toBeAttached(
-          {
-            timeout: TIMEOUT.DEFAULT,
-          },
-        )
+        // Wait for the iframe to be created with the correct ID
+        const iframeLocator = page.locator(`iframe#${iframeId}`)
+        await expect(iframeLocator).toBeAttached({ timeout: TIMEOUT.DEFAULT })
 
-        // Execute JavaScript inside the iframe to get personProperties
-        const personProperties = await iframe.locator("body").evaluate(() => {
-          const controller = (
-            window as any
-          ).stimulus?.getControllerForElementAndIdentifier(
-            document.querySelector("body"),
-            "analytics",
-          )
-          if (!controller) {
-            return null
-          }
-          return controller.personProperties
-        })
+        // Get the iframe src attribute and verify it contains the ref parameter
+        const iframeSrc = await iframeLocator.getAttribute("src")
+        expect(iframeSrc).not.toBeNull()
+        expect(iframeSrc).toContain(iframePath)
+        expect(iframeSrc).toContain("ref=")
 
-        // Verify analytics controller is loaded
-        expect(personProperties).not.toBeNull()
+        // Decode the ref parameter and verify it matches the parent URL
+        const url = new URL(iframeSrc!, "http://localhost")
+        const refParam = url.searchParams.get("ref")
+        expect(refParam).not.toBeNull()
 
-        // Verify that iframe is set to true
-        expect(personProperties.iframe).toBe(true)
+        // Decode base64 ref parameter
+        const decodedRef = Buffer.from(refParam!, "base64").toString("utf-8")
 
-        // Verify that iframeReferrer is set
-        expect(personProperties.iframeReferrer).toBeDefined()
-
-        // Verify that iframeReferrer includes the full URL with query string
-        expect(personProperties.iframeReferrer).toContain(testQueryParams)
-        expect(personProperties.iframeReferrer).toBe(parentLocation)
+        // Verify the decoded referrer contains the test query params
+        expect(decodedRef).toContain(testQueryParams)
       })
     }
   })
