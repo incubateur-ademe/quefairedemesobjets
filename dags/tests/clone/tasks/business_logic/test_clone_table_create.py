@@ -88,6 +88,6 @@ class TestCommands:
             )
             assert len(mock_cmd_run.call_args_list) == 4
             assert "curl" in mock_cmd_run.call_args_list[0][0][0]
-            assert "gunzip" in mock_cmd_run.call_args_list[1][0][0]
+            assert "zcat" in mock_cmd_run.call_args_list[1][0][0]
             assert "wc" in mock_cmd_run.call_args_list[2][0][0]
             assert "psql" in mock_cmd_run.call_args_list[3][0][0]

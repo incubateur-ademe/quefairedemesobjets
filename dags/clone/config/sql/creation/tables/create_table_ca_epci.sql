@@ -1,0 +1,10 @@
+/*
+Schema table for « Contours Administratifs - EPCI »
+*/
+
+CREATE TABLE {{table_name}} (
+    "id" INTEGER, -- 🟡 on reste scrict sur max (des IDs avec 16)
+    "contours_administratifs" GEOMETRY(GEOMETRY, 4326), -- 🟡 geometry from geojson (accepts Polygon and MultiPolygon)
+    "code" VARCHAR(9), -- 🟡 on reste scrict (code EPCI)
+    "nom" VARCHAR(100)
+);

@@ -2,7 +2,7 @@ import logging
 import re
 
 from utils import logging_utils as log
-from utils.django import DJANGO_WH_CONNECTION_NAME, django_setup_full
+from utils.django import django_setup_full
 
 logger = logging.getLogger(__name__)
 
@@ -13,9 +13,8 @@ def clone_old_tables_remove(
     dry_run: bool,
 ) -> None:
     django_setup_full()
-    from django.db import connections
+    from django.db import connection
 
-    connection = connections[DJANGO_WH_CONNECTION_NAME]
     # Narrowing down to old tbls to remove
     tbls_all = connection.introspection.table_names()
     tbls_matched = [x for x in tbls_all if remove_table_name_pattern.match(x)]
