@@ -17,26 +17,39 @@ jobs:
       image_tag: ${{ inputs.tag_name }}
       environment: ${{ inputs.environment }}
 
+  # Job which retrieves the container IDs from the environment
+  # Approbation is done once here
+  get_container_ids:
+    name: 🔑 Get container IDs
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    outputs:
+      scheduler_id: ${{ steps.get_ids.outputs.scheduler_id }}
+      webserver_id: ${{ steps.get_ids.outputs.webserver_id }}
+    steps:
+      - name: Get container IDs from environment
+        id: get_ids
+        run: |
+          echo "scheduler_id=${{ vars.SCALEWAY_AIRFLOW_SCHEDULER_CONTAINER_ID }}" >> $GITHUB_OUTPUT
+          echo "webserver_id=${{ vars.SCALEWAY_AIRFLOW_WEBSERVER_CONTAINER_ID }}" >> $GITHUB_OUTPUT
 
   deploy_scaleway_scheduler:
     name: 🟣⏳ Scaleway Airflow scheduler
     secrets: inherit # pragma: allowlist secret`
     uses: ./.github/workflows/_scaleway-container-deploy.yml
-    needs: [airflow_docker]
+    needs: [airflow_docker, get_container_ids]
     with:
-      container_key: SCALEWAY_AIRFLOW_SCHEDULER_CONTAINER_ID
+      container_id: ${{ needs.get_container_ids.outputs.scheduler_id }}
       registry_image: ${{ format('{0}:{1}', 'rg.fr-par.scw.cloud/ns-qfdmo/airflow-scheduler', inputs.tag_name) }}
-      environment: ${{ inputs.environment }}
 
   deploy_scaleway_webserver:
     secrets: inherit # pragma: allowlist secret`
     name: 🟣⏳ Scaleway Airflow webserver
-    needs: [airflow_docker]
+    needs: [airflow_docker, get_container_ids]
     uses: ./.github/workflows/_scaleway-container-deploy.yml
     with:
-      container_key: SCALEWAY_AIRFLOW_WEBSERVER_CONTAINER_ID
+      container_id: ${{ needs.get_container_ids.outputs.webserver_id }}
       registry_image: ${{ format('{0}:{1}', 'rg.fr-par.scw.cloud/ns-qfdmo/airflow-webserver', inputs.tag_name) }}
-      environment: ${{ inputs.environment }}
 
 # Address actions/missing-workflow-permissions rule in
 # code scanning alerts
