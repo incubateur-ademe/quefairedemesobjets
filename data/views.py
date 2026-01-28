@@ -445,6 +445,22 @@ def update_suggestion_groupe(
     if suggestion_modele not in ["Acteur", "RevisionActeur", "ParentRevisionActeur"]:
         raise ValueError(f"Invalid suggestion_modele: {suggestion_modele}")
 
+    # Filter fields_values to only include fields that are reportable on the
+    # suggestion_modele
+    if suggestion_modele == "RevisionActeur":
+        fields_values = {
+            field: value
+            for field, value in fields_values.items()
+            if field
+            not in SuggestionSourceModel.get_not_reportable_on_revision_fields()
+        }
+    elif suggestion_modele == "ParentRevisionActeur":
+        fields_values = {
+            field: value
+            for field, value in fields_values.items()
+            if field not in SuggestionSourceModel.get_not_reportable_on_parent_fields()
+        }
+
     acteur = (
         suggestion_groupe.get_acteur_or_none()
         if suggestion_modele == "Acteur"
