@@ -5,6 +5,7 @@ from sources.tasks.transform.exceptions import (
     ActionCodesWarning,
     AdresseWarning,
     IdentifiantExterneError,
+    UrlWarning,
 )
 from sources.tasks.transform.transform_df import (
     clean_acteur_service_codes,
@@ -17,6 +18,7 @@ from sources.tasks.transform.transform_df import (
     clean_service_a_domicile,
     clean_siret_and_siren,
     clean_telephone,
+    clean_url_from_multi_columns,
     compute_location,
     get_latlng_from_geopoint,
     merge_duplicates,
@@ -1053,3 +1055,58 @@ class TestParseFloat:
         assert parse_any_to_float("abc") is None
         assert parse_any_to_float("1234abc") is None
         assert parse_any_to_float("12,34,56") is None
+
+
+class TestCleanUrlFromMultiColumns:
+    @pytest.mark.parametrize(
+        "row_columns, expected_url",
+        [
+            # Case where the first column has a valid URL
+            ({"url1": "https://example.com"}, "https://example.com"),
+            ({"url1": "http://example.com"}, "http://example.com"),
+            ({"url1": "example.com"}, "https://example.com"),
+            ({"url1": " https://example.com "}, "https://example.com"),
+            # Case where the first column is empty and the second has a valid URL
+            ({"url1": "", "url2": "https://example.com"}, "https://example.com"),
+            ({"url1": None, "url2": "https://example.com"}, "https://example.com"),
+            # Case with multiple columns, the first empty, the second valid
+            (
+                {
+                    "url1": "",
+                    "url2": "https://example.com",
+                    "url3": "https://other.com",
+                },
+                "https://example.com",
+            ),
+            # Case where all columns are empty
+            ({"url1": "", "url2": ""}, ""),
+            ({"url1": None, "url2": None}, ""),
+            # Case where the first column raises a UrlWarning but the second is valid
+            (
+                {"url1": "https://toto", "url2": "https://example.com"},
+                "https://example.com",
+            ),
+            # Case with multiple columns: empty, invalid, valid
+            (
+                {"url1": "", "url2": "https://toto", "url3": "https://other.com"},
+                "https://other.com",
+            ),
+        ],
+    )
+    def test_clean_url_from_multi_columns(self, row_columns, expected_url):
+        row = pd.Series(row_columns)
+        result = clean_url_from_multi_columns(row, None)
+        assert result["url"] == expected_url
+
+    @pytest.mark.parametrize(
+        "row_columns",
+        [
+            {"url1": "https://toto", "url2": "http://toto"},
+            {"url1": "identifiantFacebook", "url2": "identifiantTwitter"},
+        ],
+    )
+    def test_clean_url_from_multi_columns_all_invalid(self, row_columns):
+        # Case where all columns raise a UrlWarning
+        row = pd.Series(row_columns)
+        with pytest.raises(UrlWarning):
+            clean_url_from_multi_columns(row, None)
