@@ -5,6 +5,8 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
+from django.core.exceptions import ValidationError
+from django.core.validators import URLValidator
 from opening_hours import OpeningHours, ParserError
 from sources.config import shared_constants as constants
 from sources.tasks.airflow_logic.config_management import DAGConfig
@@ -23,11 +25,9 @@ from sources.tasks.transform.exceptions import (
 )
 from sources.tasks.transform.formatter import format_libelle_to_code
 from sources.tasks.transform.opening_hours import interprete_opening_hours
-from utils.django import django_setup_full
-
-django_setup_full()
 
 logger = logging.getLogger(__name__)
+url_validator = URLValidator(schemes=["http", "https"])
 
 CLOSED_THIS_DAY = "Fermé"
 
@@ -196,10 +196,6 @@ def clean_reprise(value, _):
 
 
 def clean_url(url, _) -> str:
-    from django.core.exceptions import ValidationError
-    from django.core.validators import URLValidator
-
-    url_validator = URLValidator(schemes=["http", "https"])
 
     if pd.isna(url) or not url:
         return ""
