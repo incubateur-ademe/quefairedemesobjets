@@ -1,13 +1,13 @@
 import iframeResize from "@iframe-resizer/parent"
 import { BacklinkKey, generateBackLink } from "../embed/helpers"
 import { getBaseUrlFromScript } from "./url_utils"
+import { URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE } from "./helpers"
 
 // Constants
 const DEFAULT_MAX_WIDTH = "100%"
 const DEFAULT_HEIGHT = "100vh" // As recommended by iframe-resizer docs
 const IFRAME_ID = "lvao_iframe"
 const IFRAME_TITLE = "Longue vie aux objets"
-const SCRIPT_MODE_PARAM = "s" // URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE
 
 // Special dataset attributes that require custom handling
 const SPECIAL_ATTRIBUTES = {
@@ -119,13 +119,14 @@ function processDatasetAttributes(
 
   // Add standard query parameters based on options
   if (options.addScriptModeParam) {
-    urlParams.set(SCRIPT_MODE_PARAM, "1")
+    urlParams.set(URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE, "1")
   }
 
-  // Capture the full referrer URL and store it in a data attribute
+  // Capture the full referrer URL and pass it as a URL parameter (base64 encoded)
   // This allows the analytics controller to track the parent page URL including query params
   const fullReferrer = captureFullReferrer()
-  iframeExtraAttributes["data-referrer"] = fullReferrer
+  const encodedReferrer = btoa(fullReferrer)
+  urlParams.set("ref", encodedReferrer)
 
   // Process all dataset attributes in a single loop
   for (const [key, value] of Object.entries(scriptTag.dataset)) {

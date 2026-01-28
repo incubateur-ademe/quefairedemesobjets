@@ -6,7 +6,6 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from clone.config import TASKS, XCOMS, CloneConfig, xcom_pull
 from clone.tasks.business_logic.clone_old_tables_remove import clone_old_tables_remove
-
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)

@@ -59,10 +59,15 @@ services:
       - 80:80
       - 443:443
     volumes:
-      - ./nginx-local-only/servers.conf:/etc/nginx/servers.conf
+      - ./nginx-local-only/servers.conf.template:/etc/nginx/templates/servers.conf.template
       - ./nginx-local-only/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx-local-only/cache.conf:/etc/nginx/conf.d/cache.conf
       - ./nginx-local-only/certs:/etc/nginx/ssl
+    environment:
+      - NGINX_DISABLE_CACHE=${NGINX_DISABLE_CACHE:-0}
+      - NGINX_ENVSUBST_OUTPUT_DIR=/etc/nginx
+      # Only substitute NGINX_DISABLE_CACHE, preserve nginx variables like $host
+      - NGINX_ENVSUBST_FILTER=NGINX_DISABLE_CACHE
     profiles: [lvao]
   airflow-db:
     image: postgres:15

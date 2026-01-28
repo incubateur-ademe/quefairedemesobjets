@@ -1,8 +1,19 @@
 proxy_cache_path /tmp/nginx_assistant_cache levels=1:2 keys_zone=assistant:10m max_size=1g inactive=60m use_temp_path=off;
+
 # Define a variable to disable cache if the logged_in cookie is set
-map $http_cookie $no_cache {
+map $http_cookie $cookie_no_cache {
     default 0;
     "~*logged_in=.*" 1;
+}
+
+# Combine cookie-based and env-based cache control
+# Cache is disabled if either condition is true
+# NGINX_DISABLE_CACHE is substituted by envsubst at container startup
+map "$cookie_no_cache:${NGINX_DISABLE_CACHE}" $no_cache {
+    default 0;
+    "1:0" 1;
+    "1:1" 1;
+    "0:1" 1;
 }
 
 
