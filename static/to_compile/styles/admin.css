@@ -12,7 +12,7 @@
 }
 
 .no-suggestion-text {
-  @apply qf-text-grey-200-850;
+  @apply qf-text-grey-425-625;
 }
 
 .model-suggestion.change-list .action-select {
