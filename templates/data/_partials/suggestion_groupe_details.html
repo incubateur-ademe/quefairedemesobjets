@@ -75,27 +75,30 @@
                             {% endfor %}
                         </td>
                         <td class="qf-text-center qf-cursor-pointer qf-text-2xl">
-                            <div class="qf-cursor-pointer" data-action="click->suggestion-groupe-row#updateFieldsDisplayed" data-fields='{{ fields|join:"|" }}' data-suggestion-modele="RevisionActeur">
-                            ▶️
-                            </div>
+                            {% if fields|is_not_editable %}
+                                <div>🚫</div>
+                            {% else %}
+                                <div class="qf-cursor-pointer" data-action="click->suggestion-groupe-row#updateFieldsDisplayed" data-fields='{{ fields|join:"|" }}' data-suggestion-modele="RevisionActeur">
+                                    ▶️
+                                </div>
+                            {% endif %}
                         </td>
                         <td>
                             <div class="qf-flex qf-flex-row qf-items-center qf-gap-1">
                                 {% for field in fields %}
                                     {% if field|is_not_editable %}
                                         <div>🚫</div>
-                                    {% else %}
-                                        <div
-                                            contentEditable="true"
-                                            data-field="{{ field }}"
-                                            data-suggestion-modele="RevisionActeur"
-                                            data-action="blur->suggestion-groupe-row#saveFieldValue
-                                            focus->suggestion-groupe-row#replaceWithFieldValue">
-                                            {% with values=fields_values|get_item:field %}
-                                                {{ values.revision_acteur }}
-                                            {% endwith %}
-                                        </div>
                                     {% endif %}
+                                    <div
+                                        contentEditable="{{ field|is_not_editable|yesno:"false,true" }}"
+                                        data-field="{{ field }}"
+                                        data-suggestion-modele="RevisionActeur"
+                                        data-action="blur->suggestion-groupe-row#saveFieldValue
+                                        focus->suggestion-groupe-row#replaceWithFieldValue">
+                                        {% with values=fields_values|get_item:field %}
+                                            {{ values.revision_acteur }}
+                                        {% endwith %}
+                                    </div>
                                     {% if not forloop.last %}<span>&nbsp;,&nbsp;</span> {% endif %}
                                 {% endfor %}
                             </div>
@@ -117,27 +120,30 @@
                         </td>
                         {% if suggestion_groupe.parent_revision_acteur %}
                             <td class="qf-text-center qf-text-2xl">
-                                <div data-action="click->suggestion-groupe-row#updateFieldsDisplayed" data-suggestion-modele="ParentRevisionActeur" data-fields='{{ fields|join:"|" }}' class="qf-cursor-pointer">
-                                    ⏩
-                                </div>
+                                {% if fields|is_not_editable %}
+                                    <div>🚫</div>
+                                {% else %}
+                                    <div data-action="click->suggestion-groupe-row#updateFieldsDisplayed" data-suggestion-modele="ParentRevisionActeur" data-fields='{{ fields|join:"|" }}' class="qf-cursor-pointer">
+                                        ⏩
+                                    </div>
+                                {% endif %}
                             </td>
                             <td class="qf-w-1/4">
                                 <div class="qf-flex qf-flex-row qf-items-center qf-gap-1">
                                     {% for field in fields %}
                                         {% if field|is_not_editable %}
                                             <div>🚫</div>
-                                        {% else %}
-                                            <div
-                                                contentEditable="true"
-                                                data-field="{{ field }}"
-                                                data-suggestion-modele="ParentRevisionActeur"
-                                                data-action="blur->suggestion-groupe-row#saveFieldValue
-                                                focus->suggestion-groupe-row#replaceWithFieldValue">
-                                                {% with values=fields_values|get_item:field %}
-                                                    {{ values.parent_revision_acteur }}
-                                                {% endwith %}
-                                            </div>
                                         {% endif %}
+                                        <div
+                                            contentEditable="{{ field|is_not_editable|yesno:"false,true" }}"
+                                            data-field="{{ field }}"
+                                            data-suggestion-modele="ParentRevisionActeur"
+                                            data-action="blur->suggestion-groupe-row#saveFieldValue
+                                            focus->suggestion-groupe-row#replaceWithFieldValue">
+                                            {% with values=fields_values|get_item:field %}
+                                                {{ values.parent_revision_acteur }}
+                                            {% endwith %}
+                                        </div>
                                         {% if not forloop.last %}<span>&nbsp;,&nbsp;</span> {% endif %}
                                     {% endfor %}
                                 </div>
