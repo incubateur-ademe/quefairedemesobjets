@@ -776,8 +776,8 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
             fields_groups = (
                 json.loads(fields_groups_payload) if fields_groups_payload else []
             )
-        except json.JSONDecodeError as e:
-            return HttpResponseBadRequest(f"Payload fields_list invalide : {e}")
+        except json.JSONDecodeError:
+            return HttpResponseBadRequest("Payload fields_list invalide")
         _, errors = update_suggestion_groupe(
             suggestion_groupe, suggestion_modele_payload, fields_values, fields_groups
         )
