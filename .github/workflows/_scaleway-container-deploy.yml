@@ -1,13 +1,10 @@
 on:
   workflow_call:
     inputs:
-      container_key:
+      container_id:
         type: string
         required: true
       registry_image:
-        type: string
-        required: true
-      environment:
         type: string
         required: true
 
@@ -15,10 +12,9 @@ jobs:
   deploy_container:
     name: Scaleway deploy container
     runs-on: ubuntu-slim
-    environment: ${{ inputs.environment }}
     env:
       SCALEWAY_DEPLOY_KEY: ${{ secrets.SCALEWAY_DEPLOY_KEY }}
-      CONTAINER_ID: ${{ vars[inputs.container_key] }}
+      CONTAINER_ID: ${{ inputs.container_id }}
       REGISTRY_IMAGE: ${{ inputs.registry_image }}
     steps:
     - name: Setup Scaleway CLI
