@@ -503,10 +503,6 @@ class ActeurDetailView(MapPrefixMixin, TurboFormMixin, DetailView):
         return context
 
 
-# Function-based view wrapper for backwards compatibility
-acteur_detail = ActeurDetailView.as_view()
-
-
 def solution_admin(request, identifiant_unique):
     revision_acteur = RevisionActeur.objects.filter(
         identifiant_unique=identifiant_unique
