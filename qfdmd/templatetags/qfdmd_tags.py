@@ -6,6 +6,10 @@ from django.core.cache import cache
 from django.forms import FileField
 from django.utils.safestring import mark_safe
 from wagtail.models import Page
+from wagtail.templatetags.wagtailcore_tags import richtext
+
+from qfdmd.models import ReusableContent
+from search.models import SearchTerm
 
 from search.models import SearchTerm
 
@@ -18,6 +22,8 @@ logger = logging.getLogger(__name__)
 def get_search_term_name(context):
     """
     Retrieve the search term name from the request's search_term_id query parameter.
+
+    Returns the SearchTerm.term value if found, otherwise returns None.
     """
     request = context.get("request")
     if not request:
@@ -29,9 +35,11 @@ def get_search_term_name(context):
 
     try:
         search_term = SearchTerm.objects.get(id=search_term_id)
-        return str(search_term.specific)
+        return search_term.term
     except (SearchTerm.DoesNotExist, ValueError):
         return None
+
+
 
 
 @register.inclusion_tag("ui/components/patchwork/patchwork.html")
