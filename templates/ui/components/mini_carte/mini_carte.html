@@ -6,11 +6,7 @@
     qf-relative"
     data-controller="map"
     data-map-initial-zoom-value="3"
-    {% if acteur_location %}
-    data-map-location-value="{{ acteur_location }}"
-    {% elif search_latitude and search_longitude %}
     data-map-location-value='{"latitude": {{ search_latitude }}, "longitude": {{ search_longitude }}}'
-    {% endif %}
 >
       <div
           data-map-target="mapContainer"

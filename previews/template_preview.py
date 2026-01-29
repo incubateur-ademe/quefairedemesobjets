@@ -381,8 +381,14 @@ class ComponentsPreview(LookbookPreview):
 
     @component_docs("ui/components/mini_carte/mini_carte.md")
     def mini_carte(self, **kwargs):
-        context = {"preview": True, "acteur": None, "home": None}
-        context.update(acteur=DisplayedActeur.objects.first(), location=Point(-2, 48))
+        acteur = DisplayedActeur.objects.first()
+        acteur.location = Point(-2, 48)
+        context = {
+            "preview": True,
+            "acteur": acteur,
+            "search_latitude": "48.1",
+            "search_longitude": "-2.01",
+        }
 
         return render_to_string("ui/components/mini_carte/mini_carte.html", context)
 
