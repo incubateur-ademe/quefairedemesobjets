@@ -12,6 +12,7 @@ from sources.tasks.transform.exceptions import (
     SirenWarning,
     SiretWarning,
     SousCategorieCodesError,
+    UrlWarning,
 )
 from sources.tasks.transform.transform_column import (
     cast_eo_boolean_or_string_to_boolean,
@@ -378,6 +379,13 @@ class TestCleanUrl:
     )
     def test_clean_url(self, url, expected_url):
         assert clean_url(url, None) == expected_url
+
+    @pytest.mark.parametrize(
+        "url", ["https://toto", "http://toto", "identifiantFacebook"]
+    )
+    def test_clean_url_warning(self, url):
+        with pytest.raises(UrlWarning):
+            clean_url(url, None)
 
 
 class TestCleanEmail:

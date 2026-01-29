@@ -37,9 +37,11 @@ Filtres
     Appliquer
   </button>
 </li>
+{% if not carte_config or not carte_config.supprimer_branding %}
 <li>
     {% modal_button modal_id="infos" button_text="Infos" button_extra_classes="fr-btn--secondary fr-btn--icon-left fr-icon-info-line md:qf-hidden qf-w-full qf-justify-center" %}
 </li>
+{% endif %}
 {% endblock modal_footer_buttons %}
 
 {% block modal_wrapper_for_id %}

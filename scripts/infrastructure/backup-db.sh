@@ -3,6 +3,7 @@
 
 # Initialiser les variables
 QUIET=false
+ENV="prod"
 
 # Traitement des arguments
 while [[ $# -gt 0 ]]; do
@@ -11,10 +12,15 @@ while [[ $# -gt 0 ]]; do
             QUIET=true
             shift
             ;;
+        --env|-e)
+            ENV="$2"
+            shift 2
+            ;;
         --help|-h)
-            echo "Usage: $0 [--quiet|-q] [--help|-h]"
-            echo "  --quiet, -q: Ne pas poser de question de confirmation"
-            echo "  --help, -h:  Afficher cette aide"
+            echo "Usage: $0 [--quiet|-q] [--env|-e ENV] [--help|-h]"
+            echo "  --quiet, -q:        Ne pas poser de question de confirmation"
+            echo "  --env, -e ENV:      Environnement à utiliser (défaut: production)"
+            echo "  --help, -h:         Afficher cette aide"
             exit 0
             ;;
         *)
@@ -26,12 +32,12 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Récupérer l'ID de l'instance
-INSTANCE_ID=$(scw rdb instance list | grep "lvao-prod-webapp" | awk '{print $1}')
+INSTANCE_ID=$(scw rdb instance list | grep "lvao-${ENV}-webapp" | awk '{print $1}')
 TODAY=$(date +%Y%m%d)
 EXISTING_BACKUPS=$(scw rdb backup list instance-id=$INSTANCE_ID | grep "$TODAY")
 
 if [ -z "$INSTANCE_ID" ]; then
-    echo "Instance lvao-prod-webapp non trouvée"
+    echo "Instance lvao-${ENV}-webapp non trouvée"
     exit 1
 fi
 
@@ -81,8 +87,8 @@ done
 # Télécharger le backup
 echo "Téléchargement du backup..."
 
-mkdir -p tmpbackup
-cd tmpbackup
+mkdir -p tmpbackup-${ENV}
+cd tmpbackup-${ENV}
 
 rm -rf *.custom
 

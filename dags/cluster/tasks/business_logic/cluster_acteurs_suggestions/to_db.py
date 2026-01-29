@@ -49,7 +49,7 @@ def cluster_acteurs_suggestions_to_db(
         # which would allow getting all data from context and not mismatch
         # context & changes
         cluster_id = sugg_dict["cluster_id"]
-        logging.info(f"suggestion {cluster_id=}")
+        logger.info(f"suggestion {cluster_id=}")
         df_cluster = df_clusters[df_clusters["cluster_id"] == cluster_id]
 
         # Fixed following PR1501 but comment/raise to help debug in case of regression

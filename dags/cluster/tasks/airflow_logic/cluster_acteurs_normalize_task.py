@@ -57,7 +57,7 @@ def cluster_acteurs_normalize_wrapper(ti) -> None:
         normalize_fields_order_unique_words=config.normalize_fields_order_unique_words,
     )
 
-    logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
+    logger.info(log.banner_string("🏁 Résultat final de cette tâche"))
     df_norm = df_sort(df_norm)
     log.preview_df_as_markdown("acteurs normalisés", df_norm)
 

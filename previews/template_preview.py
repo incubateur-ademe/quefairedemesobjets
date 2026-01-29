@@ -17,6 +17,7 @@ from core.constants import DEFAULT_MAP_CONTAINER_ID
 from infotri.forms import InfotriForm
 from qfdmd.forms import SearchForm
 from qfdmd.models import Synonyme
+from qfdmd.views import get_homepage
 from qfdmo.forms import LegendeForm, NextAutocompleteInput, ViewModeForm
 from qfdmo.models.acteur import (
     ActeurType,
@@ -57,6 +58,15 @@ def component_docs(md_file_path):
         return func
 
     return decorator
+
+
+class IframeForm(forms.Form):
+    iframe = forms.BooleanField(
+        label="Version iframe",
+        help_text="Afficher la version iframe de la page",
+        initial=False,
+        required=False,
+    )
 
 
 class ProduitHeadingForm(forms.Form):
@@ -136,6 +146,22 @@ class PinPointForm(forms.Form):
         required=False,
         queryset=ActeurType.objects.all(),
         initial="",
+    )
+
+
+class ReferrerTestForm(forms.Form):
+    """
+    Form for referrer test with script type choice
+    """
+
+    script_type = forms.ChoiceField(
+        label="Type de script",
+        choices=[
+            ("carte", "Carte (carte.js)"),
+            ("assistant", "Assistant (iframe.js)"),
+        ],
+        help_text="Choisissez le type de script à tester",
+        initial="carte",
     )
 
 
@@ -312,13 +338,22 @@ class ComponentsPreview(LookbookPreview):
         }
         return render_to_string("ui/components/code/code.html", context)
 
-    @component_docs("ui/components/logo/header.md")
-    def logo(self, **kwargs):
-        return render_to_string("ui/components/logo/header.html")
+    @component_docs("ui/components/logo/site_logo_mini.md")
+    def site_logo_mini(self, **kwargs):
+        return render_to_string("ui/components/logo/site_logo_mini.html")
 
-    @component_docs("ui/components/logo/homepage.md")
-    def logo_homepage(self, **kwargs):
-        return render_to_string("ui/components/logo/homepage.html")
+    @component_docs("ui/components/logo/site_logo_large.md")
+    def site_logo_large(self, **kwargs):
+        return render_to_string("ui/components/logo/site_logo_large.html")
+
+    @component_docs("ui/components/footer/combined_logos.md")
+    def combined_logos(self, **kwargs):
+        return render_to_string("ui/components/footer/combined_logos.html")
+
+    @component_docs("ui/components/produit/legacy_heading.md")
+    def produit_legacy_heading(self, **kwargs):
+        context = {"title": "Coucou !"}
+        return render_to_string("ui/components/produit/legacy_heading.html", context)
 
     @register_form_class(ProduitHeadingForm)
     @component_docs("ui/components/produit/heading.md")
@@ -418,6 +453,26 @@ class ComponentsPreview(LookbookPreview):
         ).render(Context(context_formulaire))
 
         return default_html + formulaire_html
+
+    @register_form_class(IframeForm)
+    @component_docs("ui/components/footer/footer.md")
+    def footer(self, iframe=False, **kwargs):
+        # Convert string values to boolean
+        if isinstance(iframe, str):
+            iframe = iframe.lower() == "true"
+
+        context = {"iframe": iframe}
+        return render_to_string("ui/components/footer/footer.html", context)
+
+    @register_form_class(IframeForm)
+    @component_docs("ui/components/header/header.md")
+    def header(self, iframe=False, **kwargs):
+        # Convert string values to boolean
+        if isinstance(iframe, str):
+            iframe = iframe.lower() == "true"
+
+        context = {"request": None, "iframe": iframe}
+        return render_to_string("ui/components/header/header.html", context)
 
 
 class FiltresPreview(LookbookPreview):
@@ -544,49 +599,54 @@ class FormulairesPreview(LookbookPreview):
 
 
 class PagesPreview(LookbookPreview):
-    def home(self, **kwargs):
+    @register_form_class(IframeForm)
+    def home(self, iframe=False, **kwargs):
+        if isinstance(iframe, str):
+            iframe = iframe.lower() == "true"
+
         context = {
             "request": None,
+            "page": get_homepage(),
             "ASSISTANT": {"faites_decouvrir_ce_site": "Faites découvrir ce site !"},
+            "iframe": iframe,
         }
         return render_to_string("ui/pages/home.html", context)
 
-    def produit(self, **kwargs):
-        context = {"object": Synonyme.objects.first()}
+    @register_form_class(IframeForm)
+    def produit(self, iframe=False, **kwargs):
+        # Convert string values to boolean
+        if isinstance(iframe, str):
+            iframe = iframe.lower() == "true"
+
+        factory = RequestFactory()
+        request = factory.get("/")
+
+        context = {
+            "object": Synonyme.objects.first(),
+            "request": request,
+            "iframe": iframe,
+        }
+
         return render_to_string("ui/pages/produit.html", context)
 
-    def acteur(self, **kwargs):
+    @register_form_class(IframeForm)
+    def acteur(self, iframe=False, **kwargs):
+        # Convert string values to boolean
+        if isinstance(iframe, str):
+            iframe = iframe.lower() == "true"
+
         acteur = DisplayedActeur.objects.first()
         factory = RequestFactory()
         request = factory.get("/")
+
         context = {
             "object": acteur,
             "request": request,
             "base_template": "ui/layout/base.html",
             "turbo": False,
+            "iframe": iframe,
         }
         return render_to_string("ui/pages/acteur.html", context)
-
-
-class SnippetsPreview(LookbookPreview):
-    @component_docs("ui/components/header/header.md")
-    def header(self, **kwargs):
-        context = {"request": None}
-        return render_to_string("ui/components/header/header.html", context)
-
-    def footer(self, **kwargs):
-        return render_to_string("ui/components/footer/footer.html")
-
-    def suggestions(self, **kwargs):
-        context = {
-            "heading": "Coucou",
-            "suggestions": [("coucou", "google.fr"), ("youpi", "google.fr")],
-        }
-        return render_to_string("ui/components/suggestions/suggestions.html", context)
-
-    def share_and_embed(self, **kwargs):
-        context = {"heading": "Faites découvrir ce site"}
-        return render_to_string("ui/snippets/share_and_embed.html", context)
 
 
 class IframePreview(LookbookPreview):
@@ -907,10 +967,14 @@ class TestsPreview(LookbookPreview):
     Each test should be self-contained with its own template and e2e test specification.
     """
 
-    def t_1_referrer(self, **kwargs):
-        return render_to_string(
-            "ui/tests/t_1_referrer.html",
-        )
+    @register_form_class(ReferrerTestForm)
+    def t_1_referrer(self, script_type="carte", **kwargs):
+        template_map = {
+            "carte": "ui/tests/t_1_referrer_carte.html",
+            "assistant": "ui/tests/t_1_referrer_assistant.html",
+        }
+        template = template_map.get(script_type, "ui/tests/t_1_referrer_carte.html")
+        return render_to_string(template, {"base_url": base_url})
 
     def t_2_carte_mode_liste_switch(self, **kwargs):
         """Test switching between carte and liste modes with bounding box"""

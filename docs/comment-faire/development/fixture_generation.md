@@ -74,7 +74,7 @@ Pour ce faire :
 
 ```sh
 # ⚠️ Cette commande va supprimer les données locales, elle est donc à executer en conscience
-make db-restore-for-tests
+make db-restore-local-for-tests
 ```
 
 Dans les tests, les fixtures peuvent être importées en utilisant la fonction `callcommand` de Django :

@@ -23,7 +23,8 @@ def backlink(request):
     if key == "infotri-configurator":
         text_content = (
             '<a style="color: black; text-decoration: none;" '
-            'href="https://quefairedemesdechets.fr" rel="noopener noreferrer" '
+            'href="https://quefairedemesdechets.ademe.fr/integrer-info-tri/" '
+            'rel="noopener noreferrer" '
             'onMouseOver="this.style.textDecoration=`underline`"'
             'onMouseOut="this.style.textDecoration=`none`"'
             'target="_blank">configurateur proposé par quefairedemesdechets.fr</a>'

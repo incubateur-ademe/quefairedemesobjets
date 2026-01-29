@@ -3,7 +3,6 @@ import logging
 import pandas as pd
 from crawl.config.columns import COLS
 from crawl.config.constants import LABEL_URL_ORIGINE, LABEL_URL_PROPOSEE
-
 from utils import logging_utils as log
 from utils.dataframes import (
     df_col_assert_get_unique,
@@ -80,7 +79,7 @@ def suggestions_prepare(
             }
         )
 
-    logging.info(log.banner_string(f"🏁 Résultat pour {cohorte=}"))
+    logger.info(log.banner_string(f"🏁 Résultat pour {cohorte=}"))
     logger.info(f"Suggestion générées: {len(suggestions)}")
     for s in suggestions:
         title = s["suggestion"]["title"]
@@ -143,7 +142,7 @@ def crawl_urls_suggest(
     suggestions = suggestions_prepare(df)
     written_to_db_count = 0
 
-    logging.info(log.banner_string("✍️ Ecritures en DB"))
+    logger.info(log.banner_string("✍️ Ecritures en DB"))
     if dry_run:
         logger.info(f"{dry_run=}, on ne fait pas")
     else:
