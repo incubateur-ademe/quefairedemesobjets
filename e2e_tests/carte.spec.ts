@@ -485,6 +485,82 @@ test.describe("🗺️ CarteConfig Bounding Box", () => {
   })
 })
 
+test.describe("🗺️ Mini Carte - Affichage des Pinpoints", () => {
+  test("La mini carte du lookbook affiche le pinpoint acteur et le pinpoint home", async ({
+    page,
+  }) => {
+    // Navigate to the mini_carte lookbook preview
+    await navigateTo(page, "/lookbook/preview/components/mini_carte")
+
+    // Wait for the map container to be visible
+    const mapContainer = page.locator('[data-map-target="mapContainer"]')
+    await expect(mapContainer).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+
+    // Verify the acteur pinpoint is visible (has data-controller="pinpoint" and is not the home marker)
+    const acteurPinpoint = page.locator(
+      '.maplibregl-marker[data-controller="pinpoint"]:not(#pinpoint-home)',
+    )
+    await expect(acteurPinpoint.first()).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+
+    // Verify the home pinpoint is visible
+    const homePinpoint = page.locator("#pinpoint-home")
+    await expect(homePinpoint).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+  })
+
+  test("La fiche acteur affiche une mini carte avec les pinpoints acteur et home", async ({
+    page,
+  }) => {
+    // Navigate to the carte page
+    await navigateTo(page, "/carte")
+
+    // Search for Auray
+    await searchForAuray(page)
+
+    // Wait for results to load
+    await waitForLoadingComplete(page)
+
+    // Switch to liste mode to access "Voir la fiche" links
+    await switchToListeMode(page)
+
+    // Wait for liste mode to be fully loaded
+    const voirLaFicheButtons = page.locator('[data-testid="voir-la-fiche"]')
+    await expect(voirLaFicheButtons.first()).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+
+    // Click on the 5th result's "Voir la fiche" link (index 4)
+    // Using the 5th result to avoid bias from acteurs whose address is just a city
+    const fifthVoirLaFiche = voirLaFicheButtons.nth(4)
+    await expect(fifthVoirLaFiche).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+
+    // Get the href and navigate with the with_map parameter to show the mini map
+    const href = await fifthVoirLaFiche.getAttribute("href")
+    expect(href).toBeTruthy()
+
+    // Navigate to the acteur page with with_map parameter to display the mini carte
+    await navigateTo(page, `${href}&with_map=1`)
+
+    // Wait for the page to load
+    await expect(page.locator('[data-testid="acteur-detail-about-panel"]')).toBeVisible(
+      {
+        timeout: TIMEOUT.DEFAULT,
+      },
+    )
+
+    // Verify the mini map container is present
+    const miniMapContainer = page.locator('[data-map-target="mapContainer"]')
+    await expect(miniMapContainer).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+
+    // Verify the acteur pinpoint is visible on the mini map
+    const acteurPinpoint = page.locator(
+      '.maplibregl-marker[data-controller="pinpoint"]:not(#pinpoint-home)',
+    )
+    await expect(acteurPinpoint.first()).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+
+    // Verify the home pinpoint is visible on the mini map
+    const homePinpoint = page.locator("#pinpoint-home")
+    await expect(homePinpoint).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+  })
+})
+
 test.describe("🗺️ Bouton Itinéraire", () => {
   test("Le bouton Itinéraire est visible sur la carte simple", async ({ page }) => {
     // Navigate directly to the carte page
