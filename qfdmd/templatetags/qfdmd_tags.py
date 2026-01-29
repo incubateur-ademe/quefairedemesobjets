@@ -20,8 +20,6 @@ logger = logging.getLogger(__name__)
 def get_search_term_name(context):
     """
     Retrieve the search term name from the request's search_term_id query parameter.
-
-    Returns the SearchTerm.term value if found, otherwise returns None.
     """
     request = context.get("request")
     if not request:
