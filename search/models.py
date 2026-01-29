@@ -18,6 +18,8 @@ class SearchTerm(index.Indexed, models.Model):
     This enables unified search across different models like ProduitPage and FamilyPage.
     """
 
+    objects = SearchTermQuerySet.as_manager()
+
     # Supported content types for the search feature
     supported_content_types = [
         ("qfdmd", "produitpage"),
@@ -26,7 +28,7 @@ class SearchTerm(index.Indexed, models.Model):
         ("qfdmd", "synonyme"),
     ]
 
-    # The search term text
+    # The search term text, usually displayed in the frontend
     term = models.CharField(max_length=255, db_index=True)
 
     # Search variants - additional terms that should match this search term
@@ -48,7 +50,7 @@ class SearchTerm(index.Indexed, models.Model):
         help_text="Indique si ce terme de recherche provient d'un modèle legacy",
     )
 
-    # URL for the search result
+    # URL for the search result, used for links in search dropdowns
     url = models.CharField(max_length=500, blank=True, default="")
 
     # GenericForeignKey for the main object
@@ -73,16 +75,12 @@ class SearchTerm(index.Indexed, models.Model):
     parent_object_id = models.PositiveIntegerField(null=True, blank=True)
     parent_object = GenericForeignKey("parent_content_type", "parent_object_id")
 
-    # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    # Custom manager with search capabilities
-    objects = SearchTermQuerySet.as_manager()
-
     class Meta:
-        verbose_name = "Search Term"
-        verbose_name_plural = "Search Terms"
+        verbose_name = "Terme de recherche"
+        verbose_name_plural = "Termes de recherche"
         indexes = [
             models.Index(fields=["linked_content_type", "linked_object_id"]),
             models.Index(fields=["parent_content_type", "parent_object_id"]),
@@ -93,8 +91,7 @@ class SearchTerm(index.Indexed, models.Model):
         return self.term
 
     @classmethod
-    def get_supported_content_types(cls):
-        """Return QuerySet of supported ContentType objects."""
+    def get_supported_content_types(cls) -> models.QuerySet[ContentType]:
         from django.db.models import Q
 
         queries = Q()

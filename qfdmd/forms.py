@@ -29,7 +29,6 @@ class SearchForm(DsfrBaseForm):
     )
 
     def search(self) -> list:
-        """Search using the SearchTerm model with django-modelsearch autocomplete."""
         search_query = self.cleaned_data.get("input")
         if not search_query:
             self.results = []
