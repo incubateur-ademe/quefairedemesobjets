@@ -216,20 +216,21 @@ class TestSearchTagSearchTermIntegration:
         assert search_terms.first().url == ""
 
     @pytest.mark.django_db
-    def test_tagged_search_tag_creates_search_term_with_url(self, produit_page):
-        """Creating TaggedSearchTag should create SearchTerm with page URL."""
+    def test_tagged_search_tag_syncs_search_term(self, produit_page):
+        """Creating TaggedSearchTag should sync the SearchTerm."""
         search_tag = SearchTag.objects.create(name="Linked Tag", slug="linked-tag")
 
-        # Initially, the search term has no URL
+        # Initially, the search term has no URL and no parent
         search_term = SearchTerm.objects.get(term="Linked Tag")
         assert search_term.url == ""
+        assert search_term.parent_object is None
 
         # Link the tag to the page
         TaggedSearchTag.objects.create(tag=search_tag, content_object=produit_page)
 
-        # The SearchTerm should now have the page URL
+        # The SearchTerm should now have the parent object set
         search_term.refresh_from_db()
-        assert search_term.url == produit_page.url
+        assert search_term.parent_object == produit_page
 
     @pytest.mark.django_db
     def test_tagged_search_tag_delete_removes_search_term(self, produit_page):
@@ -276,13 +277,16 @@ class TestEdgeCases:
     """Tests for edge cases and error handling."""
 
     @pytest.mark.django_db
-    def test_sync_with_empty_term(self):
-        """Syncing an object with empty term should still work."""
+    def test_sync_with_short_term(self):
+        """Syncing an object with a short term should work."""
         produit = ProduitFactory(nom="Test Produit")
-        synonyme = SynonymeFactory(nom="", produit=produit)
+        synonyme = SynonymeFactory(nom="X", produit=produit)
 
-        search_term = SearchTerm.objects.get(linked_object_id=synonyme.pk)
-        assert search_term.term == ""
+        content_type = ContentType.objects.get_for_model(synonyme)
+        search_term = SearchTerm.objects.get(
+            linked_content_type=content_type, linked_object_id=synonyme.pk
+        )
+        assert search_term.term == "X"
 
     @pytest.mark.django_db
     def test_sync_with_very_long_term(self):

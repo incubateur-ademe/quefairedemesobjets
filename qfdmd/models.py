@@ -231,6 +231,7 @@ class AncestorFieldsMixin:
 
 class ProduitPage(
     SearchTermSyncMixin,
+    AncestorFieldsMixin,
     CompiledFieldMixin,
     Page,
     GenreNombreModel,
