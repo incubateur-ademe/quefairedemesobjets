@@ -22,6 +22,7 @@ export class SolutionMap {
   #useOsm: boolean
   bboxValue?: Array<Number>
   points: Array<Array<Number>>
+  #homePoint: Array<Number> | null = null
   mapPadding: number = 50
   initialZoom: number = DEFAULT_INITIAL_ZOOM
 
@@ -90,6 +91,9 @@ export class SolutionMap {
           new maplibregl.Popup().setHTML("<p><strong>Vous êtes ici !</strong></p>"),
         )
         .addTo(this.map)
+
+      // Store home point for inclusion in fitBounds
+      this.#homePoint = [this.#location.latitude, this.#location.longitude]
     }
   }
 
@@ -163,15 +167,20 @@ export class SolutionMap {
         ],
         fitBoundsOptions,
       )
-    } else if (points.length > 0) {
-      // Compute bbox from points
-      const lngs = points.map((point) => point[1])
-      const lats = points.map((point) => point[0])
-      const bounds: LngLatBoundsLike = [
-        [Math.min(...lngs), Math.min(...lats)], // South-west
-        [Math.max(...lngs), Math.max(...lats)], // North-east
-      ]
-      this.map.fitBounds(bounds, fitBoundsOptions)
+    } else {
+      // Include home point (user location) in bounds calculation
+      const allPoints = this.#homePoint ? [...points, this.#homePoint] : points
+
+      if (allPoints.length > 0) {
+        // Compute bbox from points
+        const lngs = allPoints.map((point) => point[1])
+        const lats = allPoints.map((point) => point[0])
+        const bounds: LngLatBoundsLike = [
+          [Math.min(...lngs), Math.min(...lats)], // South-west
+          [Math.max(...lngs), Math.max(...lats)], // North-east
+        ]
+        this.map.fitBounds(bounds, fitBoundsOptions)
+      }
     }
   }
 
