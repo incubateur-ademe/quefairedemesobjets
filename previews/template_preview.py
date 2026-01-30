@@ -183,6 +183,22 @@ class PinPointForm(forms.Form):
     )
 
 
+class ReferrerTestForm(forms.Form):
+    """
+    Form for referrer test with script type choice
+    """
+
+    script_type = forms.ChoiceField(
+        label="Type de script",
+        choices=[
+            ("carte", "Carte (carte.js)"),
+            ("assistant", "Assistant (iframe.js)"),
+        ],
+        help_text="Choisissez le type de script à tester",
+        initial="carte",
+    )
+
+
 class CartePreview(LookbookPreview):
     """
     Previews for carte components
@@ -399,8 +415,14 @@ class ComponentsPreview(LookbookPreview):
 
     @component_docs("ui/components/mini_carte/mini_carte.md")
     def mini_carte(self, **kwargs):
-        context = {"preview": True, "acteur": None, "home": None}
-        context.update(acteur=DisplayedActeur.objects.first(), location=Point(-2, 48))
+        acteur = DisplayedActeur.objects.first()
+        acteur.location = Point(-2, 48)
+        context = {
+            "preview": True,
+            "acteur": acteur,
+            "search_latitude": "48.1",
+            "search_longitude": "-2.01",
+        }
 
         return render_to_string("ui/components/mini_carte/mini_carte.html", context)
 
@@ -1019,10 +1041,14 @@ class TestsPreview(LookbookPreview):
     Each test should be self-contained with its own template and e2e test specification.
     """
 
-    def t_1_referrer(self, **kwargs):
-        return render_to_string(
-            "ui/tests/t_1_referrer.html",
-        )
+    @register_form_class(ReferrerTestForm)
+    def t_1_referrer(self, script_type="carte", **kwargs):
+        template_map = {
+            "carte": "ui/tests/t_1_referrer_carte.html",
+            "assistant": "ui/tests/t_1_referrer_assistant.html",
+        }
+        template = template_map.get(script_type, "ui/tests/t_1_referrer_carte.html")
+        return render_to_string(template, {"base_url": base_url})
 
     def t_2_carte_mode_liste_switch(self, **kwargs):
         """Test switching between carte and liste modes with bounding box"""
@@ -1135,5 +1161,17 @@ class TestsPreview(LookbookPreview):
 
         return render_to_string(
             "ui/tests/t_12_default_filtre_objet.html",
+            {"script": script},
+        )
+
+    def t_13_itineraire_button_carte_sur_mesure(self, **kwargs):
+        """Test that itinéraire button is visible in carte sur mesure with correct coordinates"""
+        # Use cyclevia as an existing carte sur mesure
+        script = (
+            f'<script src="{base_url}/static/carte.js" data-slug="cyclevia"></script>'
+        )
+
+        return render_to_string(
+            "ui/tests/t_13_itineraire_button_carte_sur_mesure.html",
             {"script": script},
         )
