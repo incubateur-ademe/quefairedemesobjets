@@ -90,6 +90,7 @@ class TAGS:
     SOREN: str = "soren"  # eco-organisme
     SOURCE: str = "source"
     SQL: str = "sql"
+    STATS: str = "stats"
     SUGGESTIONS: str = "suggestions"
     TEMPLATE: str = "template"
     TEST: str = "test"

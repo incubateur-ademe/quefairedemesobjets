@@ -1,0 +1,13 @@
+version: 2
+
+sources:
+  - name: stats_qfdmo
+    schema: webapp_public
+    tables:
+      - name : qfdmo_vueacteur
+  - name: stats_clone
+    schema: public
+    tables:
+      - name : clone_ca_epci_in_use
+      - name : clone_ae_unite_legale_in_use
+      - name : clone_ae_etablissement_in_use
