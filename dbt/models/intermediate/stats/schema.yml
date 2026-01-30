@@ -1,0 +1,131 @@
+version: 2
+
+models:
+  - name: int_acteur_visible_location
+    description: "Acteurs visibles : identifiant et localisation"
+    columns:
+      - name: identifiant_unique
+        description: "L'identifiant unique de l'acteur"
+      - name: latitude
+        description: "La latitude de l'acteur"
+      - name: longitude
+        description: "La longitude de l'acteur"
+    config:
+      materialized: table
+      indexes:
+        - columns: ['latitude', 'longitude']
+      tags:
+        - stats
+        - intermediate
+        - acteurs
+        - visible
+        - location
+  - name: int_acteur_visible_location_rounded
+    description: "Acteurs visibles : identifiant et localisation"
+    columns:
+      - name: identifiant_unique
+        description: "L'identifiant unique de l'acteur"
+      - name: latitude
+        description: "La latitude de l'acteur"
+      - name: longitude
+        description: "La longitude de l'acteur"
+    config:
+      materialized: table
+      tags:
+        - stats
+        - intermediate
+        - acteurs
+        - visible
+        - location
+        - rounded
+  - name: int_stacked_location
+    description: "Localisations stackées"
+    columns:
+      - name: latitude
+        description: "La latitude de la localisation"
+      - name: longitude
+        description: "La longitude de la localisation"
+    config:
+      materialized: table
+      tags:
+        - stats
+        - intermediate
+        - stacked
+        - location
+  - name: int_stacked_location_rounded
+    description: "Localisations stackées (arrondies à 4 décimales)"
+    columns:
+      - name: latitude
+        description: "La latitude de la localisation"
+      - name: longitude
+        description: "La longitude de la localisation"
+    config:
+      materialized: table
+      tags:
+        - stats
+        - intermediate
+        - stacked
+        - location
+        - rounded
+  - name: int_acteur_with_siret
+    description: "Acteurs avec un SIRET correctement formaté (14 chiffres)"
+    columns:
+      - name: identifiant_unique
+        description: "L'identifiant unique de l'acteur"
+      - name: siret
+        description: "Le numéro SIRET de l'acteur"
+    config:
+      materialized: table
+      indexes:
+        - columns: ['siret']
+      tags:
+        - stats
+        - intermediate
+        - acteurs
+        - siret
+  - name: int_acteur_with_siren
+    description: "Acteurs avec un SIREN correctement formaté (9 chiffres)"
+    columns:
+      - name: identifiant_unique
+        description: "L'identifiant unique de l'acteur"
+      - name: siren
+        description: "Le numéro SIREN de l'acteur"
+    config:
+      materialized: table
+      indexes:
+        - columns: ['siren']
+      tags:
+        - stats
+        - intermediate
+        - acteurs
+        - siren
+  - name: int_ae_siren_in_acteur
+    description: "Unités légales de l'Annuaire Entreprises (AE) dont le SIREN est dans la base acteur visible"
+    columns:
+      - name: siren
+        description: "Le numéro SIREN de l'unité légale"
+      - name: etat_administratif
+        description: "L'état administratif de l'unité légale"
+    config:
+      materialized: table
+      indexes:
+        - columns: ['siren']
+      tags:
+        - stats
+        - intermediate
+        - ae
+  - name: int_ae_siret_in_acteur
+    description: "Établissements de l'Annuaire Entreprises (AE) dont le SIRET est dans la base acteur visible"
+    columns:
+      - name: siret
+        description: "Le numéro SIRET de l'établissement"
+      - name: etat_administratif
+        description: "L'état administratif de l'établissement"
+    config:
+      materialized: table
+      indexes:
+        - columns: ['siret']
+      tags:
+        - stats
+        - intermediate
+        - ae
