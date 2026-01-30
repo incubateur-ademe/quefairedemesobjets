@@ -54,11 +54,7 @@
         >
             {% if search_form.results %}
                 {% for result in search_form.results %}
-                    {% if result|is_page %}
-                        {% include "./_search_result_beta.html" %}
-                    {% else %}
-                        {% include "./_search_result.html" %}
-                    {% endif %}
+                    {% include "./_search_term.html" %}
                 {% endfor %}
             {% endif %}
         </turbo-frame>
