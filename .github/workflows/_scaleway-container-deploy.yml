@@ -13,9 +13,13 @@ jobs:
     name: Scaleway deploy container
     runs-on: ubuntu-slim
     env:
-      SCALEWAY_DEPLOY_KEY: ${{ secrets.SCALEWAY_DEPLOY_KEY }}
       CONTAINER_ID: ${{ inputs.container_id }}
       REGISTRY_IMAGE: ${{ inputs.registry_image }}
+      SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
+      SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
+      SCW_DEFAULT_PROJECT_ID: ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
+      SCW_DEFAULT_ORGANIZATION_ID: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
+      SCW_DEFAULT_REGION: fr-par
     steps:
     - name: Setup Scaleway CLI
       uses: scaleway/action-scw@be2696f261325a78354eda14988c80405f33e082
@@ -26,24 +30,12 @@ jobs:
         scw container container update $CONTAINER_ID \
           registry-image=$REGISTRY_IMAGE \
           region=$SCW_DEFAULT_REGION
-      env:
-        SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
-        SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
-        SCW_DEFAULT_PROJECT_ID: ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
-        SCW_DEFAULT_ORGANIZATION_ID: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
-        SCW_DEFAULT_REGION: fr-par
 
         # See https://www.scaleway.com/en/docs/serverless-containers/api-cli/deploy-container-cli/
     - name: Deploy container
       run: |
         scw container container deploy $CONTAINER_ID \
           region=$SCW_DEFAULT_REGION
-      env:
-        SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
-        SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
-        SCW_DEFAULT_PROJECT_ID: ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
-        SCW_DEFAULT_ORGANIZATION_ID: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
-        SCW_DEFAULT_REGION: fr-par
 
     - name: Check deployment status
       run: |
@@ -66,12 +58,6 @@ jobs:
 
             sleep 5
         done
-      env:
-        SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
-        SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
-        SCW_DEFAULT_PROJECT_ID: ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
-        SCW_DEFAULT_ORGANIZATION_ID: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
-        SCW_DEFAULT_REGION: fr-par
 
 # Address actions/missing-workflow-permissions rule in
 # code scanning alerts
