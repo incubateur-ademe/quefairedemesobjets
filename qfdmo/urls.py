@@ -8,7 +8,7 @@ from qfdmo.views import (
     google_verification,
 )
 from qfdmo.views.adresses import (
-    acteur_detail,
+    ActeurDetailView,
     acteur_detail_redirect,
     get_synonyme_list,
     getorcreate_revisionacteur,
@@ -72,7 +72,7 @@ urlpatterns = [
     ),
     path(
         "adresse_details/<str:uuid>",
-        acteur_detail,
+        ActeurDetailView.as_view(),
         name="acteur-detail",
     ),
     path(

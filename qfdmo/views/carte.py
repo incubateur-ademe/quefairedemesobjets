@@ -13,6 +13,7 @@ from django.views.generic import DetailView
 
 from core.constants import DEFAULT_MAP_CONTAINER_ID, MAP_CONTAINER_ID
 from qfdmd.models import Produit
+from qfdmo.constants import MAP_FORM_PREFIX
 from qfdmo.forms import (
     ActionDirectionForm,
     AutoSubmitLegendeForm,
@@ -25,7 +26,7 @@ from qfdmo.forms import (
 )
 from qfdmo.models import CarteConfig
 from qfdmo.models.action import Action
-from qfdmo.views.adresses import AbstractSearchActeursView
+from qfdmo.views.adresses import AbstractSearchActeursView, MapPrefixMixin
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +76,7 @@ class CarteFormsInstance(TypedDict):
     legende_filtres: None | LegendeForm
 
 
-class CarteSearchActeursView(AbstractSearchActeursView):
+class CarteSearchActeursView(MapPrefixMixin, AbstractSearchActeursView):
     is_carte = True
     template_name = "ui/pages/carte.html"
     # TODO: voir si on peut mettre à None ici
@@ -96,7 +97,7 @@ class CarteSearchActeursView(AbstractSearchActeursView):
         return {
             "map": {
                 "form": MapForm,
-                "prefix": "map",
+                "prefix": MAP_FORM_PREFIX,
             },
             "view_mode": {
                 "form": ViewModeForm,
