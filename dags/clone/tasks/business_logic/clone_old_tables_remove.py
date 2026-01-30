@@ -13,7 +13,9 @@ def clone_old_tables_remove(
     dry_run: bool,
 ) -> None:
     django_setup_full()
-    from django.db import connection
+    from django.db import connections
+
+    connection = connections["warehouse"]
 
     # Narrowing down to old tbls to remove
     tbls_all = connection.introspection.table_names()
