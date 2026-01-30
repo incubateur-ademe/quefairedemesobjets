@@ -132,10 +132,10 @@ class SearchTerm(index.Indexed, models.Model):
         if hasattr(obj, "get_search_term_url"):
             url = obj.get_search_term_url() or ""
 
-        # Get the term
+        # Get the term (truncate to max_length of 255)
         term = ""
         if hasattr(obj, "get_search_term_verbose_name"):
-            term = obj.get_search_term_verbose_name()
+            term = obj.get_search_term_verbose_name()[:255]
 
         # Get the legacy flag if available
         legacy = False
