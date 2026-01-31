@@ -16,6 +16,8 @@ def diff_display(old_value, new_value):
     diff-match-patch.
     """
     if old_value == new_value:
+        if new_value == "":
+            return "-"
         return str(new_value)
 
     dmp = diff_match_patch()
@@ -181,10 +183,7 @@ def quote_filter(value):
 
 
 @register.filter
-def display_diff_values(old_value, new_value):
-    if new_value is None:
-        # None -> there isn't any update proposition for this field
-        return mark_safe(f'<span style="color: grey;">{old_value}</span>')
+def display_diff_values(old_value: str | None, new_value: str):
     if not old_value:
         return diff_display("", new_value)
     return diff_display(old_value, new_value)

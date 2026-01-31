@@ -11,54 +11,93 @@ export default class extends Controller<HTMLElement> {
   declare readonly fieldsGroupsValue: string
 
   replaceWithFieldValue(event: FocusEvent) {
-    const value = this.#getFieldsValues()
-    const field = (event.target as HTMLElement).dataset.field
-    if (!field || !(field in value)) {
-      console.error("Champs manquants")
+    const target = event.target as HTMLElement
+    const field = target.dataset.field
+    const suggestionModele = target.dataset.suggestionModele
+    if (!suggestionModele || !field) {
+      console.error("suggestionModele ou field manquant")
       return
     }
-    const target = event.target as HTMLElement
-    target.textContent =
-      value[field]["updated_displayed_value"] || value[field]["displayed_value"]
+    const value = this.#getFieldsValues()
+
+    if (suggestionModele == "Acteur") {
+      target.textContent = value[field]["acteur_target_value"] || ""
+    }
+    if (suggestionModele == "RevisionActeur") {
+      target.textContent =
+        value[field]["revision_acteur_target_value"] ||
+        value[field]["acteur_target_value"]
+    }
+    if (suggestionModele == "ParentRevisionActeur") {
+      target.textContent =
+        value[field]["parent_revision_acteur_target_value"] ||
+        value[field]["acteur_target_value"]
+    }
   }
 
   saveFieldValue(event: Event) {
-    const fieldsValues = this.#getFieldsValues()
-    const field = this.#getField(event, fieldsValues)
-    const newFieldsValues = {}
-    if (field != null) {
-      newFieldsValues[field] = fieldsValues[field]
-      fieldsValues[field]["updated_displayed_value"] = (
-        event.target as HTMLElement
-      ).textContent
-      this.#postFieldsValues(newFieldsValues)
+    const target = event.target as HTMLElement
+
+    const suggestionModele = target.dataset.suggestionModele
+    if (!suggestionModele) {
+      console.error("suggestionModele manquant")
+      return
     }
+
+    const field = target.dataset.field
+    if (!field) {
+      console.error("field manquant")
+      return
+    }
+
+    const value = target.textContent
+
+    this.#postFieldsValues(suggestionModele, { [field]: value })
+    return
   }
 
   updateFieldsDisplayed(event: Event) {
+    const target = event.target as HTMLElement
+
+    const suggestionModele = target.dataset.suggestionModele
+    if (!suggestionModele) {
+      console.error("suggestionModele manquant")
+      return
+    }
+
     const fieldsValues = this.#getFieldsValues()
+
     const fields = this.#getFields(event, fieldsValues)
+
     const newFieldsValues = {}
-    fields.forEach((field: string) => {
-      newFieldsValues[field] = fieldsValues[field]
-      newFieldsValues[field]["updated_displayed_value"] =
-        fieldsValues[field]["new_value"]
-    })
-    this.#postFieldsValues(newFieldsValues)
+
+    for (let key of fields) {
+      if (fieldsValues[key]["acteur_target_value"] !== undefined) {
+        newFieldsValues[key] = fieldsValues[key]["acteur_target_value"]
+      }
+    }
+
+    this.#postFieldsValues(suggestionModele, newFieldsValues)
   }
 
   updateAllDisplayed(event: Event) {
+    const target = event.target as HTMLElement
+
+    const suggestionModele = target.dataset.suggestionModele
+    if (!suggestionModele) {
+      console.error("suggestionModele manquant")
+      return
+    }
+
     const fieldsValues = this.#getFieldsValues()
+
+    const newFieldsValues = {}
     for (let key in fieldsValues) {
-      if (
-        (fieldsValues[key]["updated_displayed_value"] === undefined &&
-          fieldsValues[key]["new_value"] !== undefined) ||
-        fieldsValues[key]["updated_displayed_value"] !== fieldsValues[key]["new_value"]
-      ) {
-        fieldsValues[key]["updated_displayed_value"] = fieldsValues[key]["new_value"]
+      if (fieldsValues[key]["acteur_target_value"] !== undefined) {
+        newFieldsValues[key] = fieldsValues[key]["acteur_target_value"]
       }
     }
-    this.#postFieldsValues(fieldsValues)
+    this.#postFieldsValues(suggestionModele, newFieldsValues)
   }
 
   updateStatus(event: Event) {
@@ -78,30 +117,23 @@ export default class extends Controller<HTMLElement> {
   }
 
   handleMarkerDragged(event: CustomEvent) {
-    const { latitude, longitude } = event.detail
+    const { latitude, longitude, markerElement } = event.detail
+    const markerKey = markerElement.dataset.markerKey
     if (!latitude || !longitude) {
       console.error("Coordonnées manquantes dans l'événement")
       return
     }
-
-    const fieldsValues = this.#getFieldsValues()
-
-    // Create the structure if it doesn't exist for latitude
-    if (!("latitude" in fieldsValues)) {
-      fieldsValues["latitude"] = { updated_displayed_value: "" }
+    if (!markerKey) {
+      console.error("Clé du marker manquante dans l'élément")
+      return
     }
-    fieldsValues["latitude"]["updated_displayed_value"] = latitude
 
-    // Create the structure if it doesn't exist for longitude
-    if (!("longitude" in fieldsValues)) {
-      fieldsValues["longitude"] = { updated_displayed_value: "" }
+    const fieldsValues = {
+      latitude: latitude,
+      longitude: longitude,
     }
-    fieldsValues["longitude"]["updated_displayed_value"] = longitude
 
-    // Update the controller value to synchronize DOM
-    this.fieldsValuesValue = JSON.stringify(fieldsValues)
-
-    this.#postFieldsValues(fieldsValues, "localisation")
+    this.#postFieldsValues(markerKey, fieldsValues, "localisation")
   }
 
   #getCsrfToken(): string | null {
@@ -147,7 +179,11 @@ export default class extends Controller<HTMLElement> {
     return fields.split("|")
   }
 
-  #postFieldsValues(valuesJson: Record<string, any>, opened_tab: string = "") {
+  #postFieldsValues(
+    suggestionModele: string,
+    fieldsValues: Record<string, any>,
+    opened_tab: string = "",
+  ) {
     const updateSuggestionUrl = this.element.dataset.updateSuggestionUrl
     if (!updateSuggestionUrl) {
       console.error("URL de mise à jour de la suggestion manquante")
@@ -155,8 +191,9 @@ export default class extends Controller<HTMLElement> {
     }
     const formData = new FormData()
     const groupsJson = this.fieldsGroupsValue
-    formData.append("fields_values", JSON.stringify(valuesJson))
+    formData.append("fields_values", JSON.stringify(fieldsValues))
     formData.append("fields_groups", groupsJson)
+    formData.append("suggestion_modele", suggestionModele)
     if (opened_tab) {
       formData.append("tab", opened_tab)
     }
