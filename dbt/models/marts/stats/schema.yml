@@ -1,0 +1,60 @@
+version: 2
+
+models:
+  - name: marts_acteur_stacked
+    description: "Acteurs visibles et stackés"
+    columns:
+      - name: identifiant_unique
+        description: "L'identifiant unique de l'acteur"
+      - name: latitude
+        description: "La latitude de l'acteur"
+      - name: longitude
+        description: "La longitude de l'acteur"
+    config:
+      materialized: table
+      tags:
+        - stats
+        - marts
+        - acteurs
+        - stacked
+  - name: marts_acteur_stacked_rounded
+    description: "Acteurs visibles et stackés"
+    columns:
+      - name: identifiant_unique
+        description: "L'identifiant unique de l'acteur"
+      - name: rounded_latitude
+        description: "La latitude de l'acteur"
+      - name: rounded_longitude
+        description: "La longitude de l'acteur"
+    config:
+      materialized: table
+      tags:
+        - stats
+        - marts
+        - acteurs
+        - stacked
+        - rounded
+  - name: marts_acteur_siren_actif
+    description: "Acteurs visibles avec un SIREN actif (AE)"
+    columns:
+      - name: identifiant_unique
+        description: "L'identifiant unique de l'acteur"
+    config:
+      materialized: table
+      tags:
+        - stats
+        - marts
+        - acteurs
+        - siren
+  - name: marts_acteur_siret_actif
+    description: "Acteurs visibles avec un SIRET actif (AE)"
+    columns:
+      - name: identifiant_unique
+        description: "L'identifiant unique de l'acteur"
+    config:
+      materialized: table
+      tags:
+        - stats
+        - marts
+        - acteurs
+        - siret
