@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: exposure_nb_acteur_stacked_history
+  - name: exposure_stats_nb_acteur_stacked_history
     description: "Historique du nombre d'acteurs stackés (coordonnées arrondies). Une ligne est ajoutée à chaque exécution de dbt."
     columns:
       - name: date_snapshot
@@ -9,7 +9,7 @@ models:
         data_tests:
           - not_null
           - unique
-      - name: nombre_acteurs_stacked
+      - name: nb_acteurs_stacked
         description: "Nombre d'acteurs ayant des coordonnées identiques (arrondies à 4 décimales)"
         data_tests:
           - not_null
@@ -22,7 +22,7 @@ models:
           - stats
           - acteurs
           - stacked
-  - name: exposure_nb_acteur_stacked_rounded_history
+  - name: exposure_stats_nb_acteur_stacked_rounded_history
     description: "Historique du nombre d'acteurs stackés (coordonnées arrondies). Une ligne est ajoutée à chaque exécution de dbt."
     columns:
       - name: date_snapshot
@@ -30,7 +30,7 @@ models:
         data_tests:
           - not_null
           - unique
-      - name: nombre_acteurs_stacked
+      - name: nb_acteurs_stacked
         description: "Nombre d'acteurs ayant des coordonnées identiques (arrondies à 4 décimales)"
         data_tests:
           - not_null
@@ -44,7 +44,7 @@ models:
           - acteurs
           - stacked
 
-  - name: exposure_nb_acteur_visible_history
+  - name: exposure_stats_nb_acteur_visible_history
     description: "Nombre d'acteurs visibles"
     columns:
       - name: date_snapshot
@@ -52,7 +52,7 @@ models:
         data_tests:
           - not_null
           - unique
-      - name: nombre_acteurs_visible
+      - name: nb_acteurs_visible
         description: "Nombre d'acteurs visibles"
         data_tests:
           - not_null
@@ -65,7 +65,7 @@ models:
         - stats
         - acteurs
         - visible
-  - name: exposure_nb_acteur_visible_with_siret_history
+  - name: exposure_stats_nb_acteur_visible_with_siret_history
     description: "Nombre d'acteurs visibles avec un SIRET bien formatté (14 chiffres)"
     columns:
       - name: date_snapshot
@@ -73,7 +73,7 @@ models:
         data_tests:
           - not_null
           - unique
-      - name: nombre_acteurs_visible_with_siret
+      - name: nb_acteurs_visible_with_siret
         description: "Nombre d'acteurs visibles avec un SIRET bien formatté (14 chiffres)"
         data_tests:
           - not_null
@@ -87,7 +87,7 @@ models:
         - acteurs
         - visible
         - siret
-  - name: exposure_taux_acteur_visible_with_siret_history
+  - name: exposure_stats_rate_acteur_visible_with_siret_history
     description: "Taux d'acteurs visibles avec un SIRET bien formatté (14 chiffres) vs acteur visible"
     columns:
       - name: date_snapshot
@@ -99,7 +99,18 @@ models:
         description: "Taux d'acteurs visibles avec un SIRET bien formatté (14 chiffres)"
         data_tests:
           - not_null
-  - name: exposure_nb_acteur_visible_with_siret_actif_history
+    config:
+      materialized: incremental
+      unique_key: date_snapshot
+      incremental_strategy: delete+insert
+      tags:
+        - exposure
+        - stats
+        - acteurs
+        - visible
+        - siret
+        - rate
+  - name: exposure_stats_nb_acteur_visible_with_siret_actif_history
     description: "Nombre d'acteurs visibles avec un SIRET actif (AE)"
     columns:
       - name: date_snapshot
@@ -122,7 +133,7 @@ models:
         - visible
         - siret
         - actif
-  - name: exposure_taux_acteur_visible_with_siret_actif_history
+  - name: exposure_stats_rate_acteur_visible_with_siret_actif_history
     description: "Taux d'acteurs visibles avec un SIRET actif (AE) vs acteur avec SIRET"
     columns:
       - name: date_snapshot
@@ -145,8 +156,8 @@ models:
         - visible
         - siret
         - actif
-
-  - name: exposure_nb_acteur_visible_with_siren_history
+        - rate
+  - name: exposure_stats_nb_acteur_visible_with_siren_history
     description: "Nombre d'acteurs visibles avec un SIREN bien formatté (9 chiffres)"
     columns:
       - name: date_snapshot
@@ -154,7 +165,7 @@ models:
         data_tests:
           - not_null
           - unique
-      - name: nombre_acteurs_visible_with_siren
+      - name: nb_acteurs_visible_with_siren
         description: "Nombre d'acteurs visibles avec un SIRET bien formatté (14 chiffres)"
         data_tests:
           - not_null
@@ -168,7 +179,7 @@ models:
         - acteurs
         - visible
         - siren
-  - name: exposure_taux_acteur_visible_with_siren_history
+  - name: exposure_stats_rate_acteur_visible_with_siren_history
     description: "Taux d'acteurs visibles avec un SIREN bien formatté (9 chiffres) vs acteur visible"
     columns:
       - name: date_snapshot
@@ -180,7 +191,18 @@ models:
         description: "Taux d'acteurs visibles avec un SIREN bien formatté (9 chiffres)"
         data_tests:
           - not_null
-  - name: exposure_nb_acteur_visible_with_siren_actif_history
+    config:
+      materialized: incremental
+      unique_key: date_snapshot
+      incremental_strategy: delete+insert
+      tags:
+        - exposure
+        - stats
+        - acteurs
+        - visible
+        - siret
+        - rate
+  - name: exposure_stats_nb_acteur_visible_with_siren_actif_history
     description: "Nombre d'acteurs visibles avec un SIREN actif (AE)"
     columns:
       - name: date_snapshot
@@ -203,7 +225,7 @@ models:
         - visible
         - siren
         - actif
-  - name: exposure_taux_acteur_visible_with_siren_actif_history
+  - name: exposure_stats_rate_acteur_visible_with_siren_actif_history
     description: "Taux d'acteurs visibles avec un SIREN actif (AE) vs acteur avec SIREN"
     columns:
       - name: date_snapshot
@@ -226,3 +248,4 @@ models:
         - visible
         - siren
         - actif
+        - rate
