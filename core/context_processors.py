@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.urls import reverse
 
-from qfdmd.forms import SearchForm
+from qfdmd.forms import HeaderSearchForm, HomeSearchForm
 
 from . import constants
 
@@ -25,13 +25,18 @@ def content(request):
 
 
 def global_context(request) -> dict:
-    base = {
+    home_search_form = HomeSearchForm(prefix="home", initial={"id": "home"})
+    header_autocomplete_search_form = HeaderSearchForm(prefix="header-autocomplete")
+
+    return {
         "iframe": getattr(request, "iframe", False),
         "BASE_URL": settings.BASE_URL,
         "assistant": {
             "is_home": request.path == reverse("qfdmd:home"),
             "POSTHOG_KEY": settings.ASSISTANT["POSTHOG_KEY"],
             "MATOMO_ID": settings.ASSISTANT["MATOMO_ID"],
+            "header_autocomplete_search_form": header_autocomplete_search_form,
+            "home_search_form": home_search_form,
         },
         "CARTE": {
             "DECLARATION_ACCESSIBILITE_PAGE_ID": settings.CARTE[
@@ -41,19 +46,5 @@ def global_context(request) -> dict:
             "MATOMO_ID": settings.CARTE["MATOMO_ID"],
             **constants.CARTE,
         },
-    }
-
-    header_search_form = SearchForm(prefix="header", initial={"id": "header"})
-    home_search_form = SearchForm(prefix="home", initial={"id": "home"})
-    # Skip links for accessibility (DSFR component)
-    skiplinks = [
-        {"link": "#content", "label": "Contenu"},
-    ]
-
-    return {
-        **base,
-        "header_search_form": header_search_form,
-        "home_search_form": home_search_form,
-        "skiplinks": skiplinks,
         **constants.ASSISTANT,
     }
