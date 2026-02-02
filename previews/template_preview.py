@@ -521,6 +521,18 @@ class BonusForm(forms.Form):
     )
 
 
+class CarteCentreeForm(forms.Form):
+    mode = forms.ChoiceField(
+        label="Mode de centrage",
+        help_text="Choisissez comment centrer la carte",
+        initial="epci",
+        choices=(
+            ("epci", "EPCI (Auray Quiberon Terre Atlantique)"),
+            ("bounding_box", "Bounding Box"),
+        ),
+    )
+
+
 class ModalsPreview(LookbookPreview):
     @component_docs("ui/components/modals/integration.md")
     def integration(self, **kwargs):
@@ -1105,5 +1117,25 @@ class TestsPreview(LookbookPreview):
 
         return render_to_string(
             "ui/tests/t_13_itineraire_button_carte_sur_mesure.html",
+            {"script": script},
+        )
+
+    @register_form_class(CarteCentreeForm)
+    def t_14_carte_mal_centree(self, mode="epci", **kwargs):
+        """Test that carte is centered correctly without showing home pinpoint"""
+        if mode == "epci":
+            script = (
+                f"<script src='{base_url}/static/carte.js' "
+                "data-action_list='preter|emprunter|louer|mettreenlocation|reparer|donner|echanger|acheter|revendre' "
+                "data-epci_codes='200043123'></script>"
+            )
+        else:
+            script = (
+                f"<script src='{base_url}/static/carte.js' "
+                "data-action_list='preter|emprunter|louer|mettreenlocation|reparer|donner|echanger|acheter|revendre' "
+                'data-bounding_box=\'{"southWest": {"lat": 47.4, "lng": -3.3}, "northEast": {"lat": 47.75, "lng": -2.8}}\'></script>'
+            )
+        return render_to_string(
+            "ui/tests/t_14_carte_mal_centree.html",
             {"script": script},
         )
