@@ -1,0 +1,84 @@
+version: 2
+
+models:
+  - name: base_vueacteur_visible
+    description: "Acteurs visibles"
+    columns:
+      - name: identifiant_unique
+        description: "L'identifiant unique de l'acteur"
+        data_tests:
+          - not_null
+          - unique
+      - name: nom
+        description: "Le nom de l'acteur"
+        data_tests:
+          - not_null
+      - name: description
+        description: "La description de l'acteur"
+      - name: acteur_type_id
+        description: "Le type d'acteur"
+      - name: adresse
+        description: "L'adresse de l'acteur"
+      - name: adresse_complement
+        description: "L'adresse complémentaire de l'acteur"
+      - name: code_postal
+        description: "Le code postal de l'acteur"
+      - name: ville
+        description: "La ville de l'acteur"
+      - name: url
+        description: "L'URL de l'acteur"
+      - name: email
+        description: "L'email de l'acteur"
+      - name: location
+        description: "La localisation de l'acteur"
+      - name: telephone
+        description: "Le numéro de téléphone de l'acteur"
+      - name: nom_commercial
+        description: "Le nom commercial de l'acteur"
+      - name: nom_officiel
+        description: "Le nom officiel de l'acteur"
+      - name: siren
+        description: "Le numéro SIREN de l'acteur"
+      - name: siret
+        description: "Le numéro SIRET de l'acteur"
+      - name: source_id
+        description: "L'identifiant source de l'acteur"
+      - name: identifiant_externe
+        description: "L'identifiant externe de l'acteur"
+      - name: naf_principal
+        description: "Le code NAF principal de l'acteur"
+      - name: commentaires
+        description: "Les commentaires de l'acteur"
+      - name: horaires_osm
+        description: "Les horaires OSM de l'acteur"
+      - name: horaires_description
+        description: "La description des horaires de l'acteur"
+      - name: public_accueilli
+        description: "Le public accueilli par l'acteur"
+      - name: reprise
+        description: "La reprise de l'acteur"
+      - name: exclusivite_de_reprisereparation
+        description: "L'exclusivité de la réparation de l'acteur"
+      - name: uniquement_sur_rdv
+        description: "Le fait que l'acteur soit uniquement sur RDV"
+      - name: consignes_dacces
+        description: "Les consignes d'accès de l'acteur"
+      - name: action_principale_id
+        description: "L'action principale de l'acteur"
+      - name: modifie_le
+        description: "La date de modification de l'acteur"
+      - name: parent_id
+        description: "L'identifiant du parent de l'acteur"
+      - name: cree_le
+        description: "La date de création de l'acteur"
+      - name: statut
+        description: "Le statut de l'acteur"
+      - name: siret_is_closed
+        description: "Information si on sait que le SIRET est fermé"
+    config:
+      materialized: table
+      tags:
+        - stats
+        - base
+        - acteurs
+        - visible
