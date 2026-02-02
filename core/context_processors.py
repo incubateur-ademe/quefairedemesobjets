@@ -27,6 +27,9 @@ def content(request):
 def global_context(request) -> dict:
     home_search_form = HomeSearchForm(prefix="home", initial={"id": "home"})
     header_autocomplete_search_form = HeaderSearchForm(prefix="header-autocomplete")
+    skiplinks = [
+        {"link": "#content", "label": "Contenu"},
+    ]
 
     return {
         "iframe": getattr(request, "iframe", False),
@@ -46,5 +49,6 @@ def global_context(request) -> dict:
             "MATOMO_ID": settings.CARTE["MATOMO_ID"],
             **constants.CARTE,
         },
+        "skiplinks": skiplinks,
         **constants.ASSISTANT,
     }
