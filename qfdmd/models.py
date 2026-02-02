@@ -730,7 +730,7 @@ class Lien(models.Model):
 
 
 class ProduitLien(models.Model):
-    produit = models.ForeignKey(Produit, on_delete=models.CASCADE)
+    produit = models.ForeignKey(Produit, on_delete=models.CASCADE, db_index=False)
     lien = models.ForeignKey(Lien, on_delete=models.CASCADE)
     poids = models.IntegerField(
         default=0,
@@ -744,7 +744,12 @@ class ProduitLien(models.Model):
 
     class Meta:
         ordering = ("poids",)
-        unique_together = ("produit", "lien")  # Prevent duplicate relations
+        constraints = [
+            models.UniqueConstraint(
+                fields=["produit", "lien"],
+                name="unique_produit_lien",
+            )
+        ]
 
 
 @register_snippet
