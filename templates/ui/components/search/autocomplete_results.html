@@ -23,7 +23,7 @@
                 <a
                     href="{{ result.url }}"
                     data-turbo="false"
-                    class="fr-link qf-underline hover:qf-decoration-2 qf-flex qf-justify-between"
+                    class="fr-link fr-link--no-underline qf-underline hover:qf-decoration-2 qf-flex qf-justify-between"
                 >
                     <span>{{ result.title }}</span>
                     <span class="qf-ml-auto qf-text-green-menthe-sun-373-moon-652">{{ result.famille|default_if_none:"" }}</span>
@@ -33,7 +33,7 @@
                 <a
                     href="{% url 'qfdmd:synonyme-detail' slug=result.slug %}"
                     data-turbo="false"
-                    class="fr-link qf-underline hover:qf-decoration-2 qf-block"
+                    class="fr-link fr-link--no-underline qf-underline hover:qf-decoration-2 qf-block"
                 >
                     {{ result.nom|capfirst }}
                 </a>
