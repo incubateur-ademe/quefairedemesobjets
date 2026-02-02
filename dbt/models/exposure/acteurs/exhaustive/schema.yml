@@ -262,9 +262,10 @@ models:
           initially_deferred: true
     tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns:
-            - acteur_id
-            - action_id
+          arguments:
+            combination_of_columns:
+              - acteur_id
+              - action_id
       - dbt_expectations.expect_table_row_count_to_be_between:
           arguments:
             min_value: 600000
@@ -317,9 +318,10 @@ models:
           initially_deferred: true
     tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns:
-            - vuepropositionservice_id
-            - souscategorieobjet_id
+          arguments:
+            combination_of_columns:
+              - vuepropositionservice_id
+              - souscategorieobjet_id
       - dbt_expectations.expect_table_row_count_to_be_between:
           arguments:
             min_value: 1800000
@@ -372,9 +374,10 @@ models:
           initially_deferred: true
     tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns:
-            - vueacteur_id
-            - acteurservice_id
+          arguments:
+            combination_of_columns:
+              - vueacteur_id
+              - acteurservice_id
       - dbt_expectations.expect_table_row_count_to_be_between:
           arguments:
             min_value: 500000
@@ -429,9 +432,10 @@ models:
           initially_deferred: true
     tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns:
-            - vueacteur_id
-            - labelqualite_id
+          arguments:
+            combination_of_columns:
+              - vueacteur_id
+              - labelqualite_id
       - dbt_expectations.expect_table_row_count_to_be_between:
           arguments:
             min_value: 30000

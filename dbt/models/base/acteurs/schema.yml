@@ -97,9 +97,10 @@ models:
           - not_null
     tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns:
-            - acteur_id
-            - acteurservice_id
+          arguments:
+            combination_of_columns:
+              - acteur_id
+              - acteurservice_id
     config:
       tags:
         - base
@@ -123,9 +124,10 @@ models:
           - not_null
     tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns:
-            - acteur_id
-            - labelqualite_id
+          arguments:
+            combination_of_columns:
+              - acteur_id
+              - labelqualite_id
     config:
       tags:
         - base
@@ -155,9 +157,10 @@ models:
         description: "The revision_existe for this table"
     tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns:
-            - acteur_id
-            - action_id
+          arguments:
+            combination_of_columns:
+              - acteur_id
+              - action_id
     config:
       tags:
         - base
@@ -180,9 +183,10 @@ models:
           - not_null
     tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns:
-            - propositionservice_id
-            - souscategorieobjet_id
+          arguments:
+            combination_of_columns:
+              - propositionservice_id
+              - souscategorieobjet_id
     config:
       tags:
         - base
@@ -279,9 +283,10 @@ models:
           - not_null
     tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns:
-            - revisionacteur_id
-            - acteurservice_id
+          arguments:
+            combination_of_columns:
+              - revisionacteur_id
+              - acteurservice_id
     config:
       tags:
         - base
@@ -305,9 +310,10 @@ models:
           - not_null
     tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns:
-            - revisionacteur_id
-            - labelqualite_id
+          arguments:
+            combination_of_columns:
+              - revisionacteur_id
+              - labelqualite_id
     config:
       tags:
         - base
@@ -337,9 +343,10 @@ models:
         description: "The revision_existe for this table"
     tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns:
-            - acteur_id
-            - action_id
+          arguments:
+            combination_of_columns:
+              - acteur_id
+              - action_id
     config:
       tags:
         - base
@@ -362,9 +369,10 @@ models:
           - not_null
     tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns:
-            - revisionpropositionservice_id
-            - souscategorieobjet_id
+          arguments:
+            combination_of_columns:
+              - revisionpropositionservice_id
+              - souscategorieobjet_id
     config:
       tags:
         - base
