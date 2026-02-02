@@ -472,7 +472,6 @@ class BaseActeur(TimestampedModel):
         verbose_name="SIRET fermé",
         help_text="Indique si le SIRET est fermé ou non dans l'Annuaire Entreprises",
     )
-    source = models.ForeignKey(Source, on_delete=models.CASCADE, blank=True, null=True)
     identifiant_externe = models.CharField(
         max_length=255, blank=True, default="", db_default=""
     )
@@ -852,6 +851,8 @@ class Acteur(BaseActeur, LatLngPropertiesMixin):
         verbose_name = "ACTEUR de l'EC - IMPORTÉ"
         verbose_name_plural = "ACTEURS de l'EC - IMPORTÉ"
 
+    source = models.ForeignKey(Source, on_delete=models.CASCADE, blank=True, null=True)
+
     @property
     def change_url(self):
         # quote() taken from django source
@@ -955,6 +956,8 @@ class RevisionActeur(BaseActeur, LatLngPropertiesMixin):
     class Meta:
         verbose_name = "ACTEUR de l'EC - CORRIGÉ"
         verbose_name_plural = "ACTEURS de l'EC - CORRIGÉ"
+
+    source = models.ForeignKey(Source, on_delete=models.CASCADE, blank=True, null=True)
 
     parent = models.ForeignKey(
         "RevisionActeurParent",
@@ -1214,7 +1217,7 @@ class FinalActeurManager(models.Manager):
     def get_active_parents(self):
         return self.get_queryset().filter(
             statut=ActeurStatus.ACTIF,
-            source_id__isnull=True,
+            est_parent=True,
         )
 
 
@@ -1239,6 +1242,9 @@ class FinalActeur(BaseActeur):
     )
     code_commune_insee = models.CharField(
         max_length=10, blank=True, default="", db_index=True
+    )
+    est_parent = models.BooleanField(
+        default=False, editable=False, verbose_name="L'acteur est un parent"
     )
 
     epci = models.ForeignKey(EPCI, on_delete=models.CASCADE, blank=True, null=True)
@@ -1270,9 +1276,6 @@ class VueActeur(FinalActeur):
     # Readonly fields
     revision_existe = models.BooleanField(
         default=False, editable=False, verbose_name="Une correction existe"
-    )
-    est_parent = models.BooleanField(
-        default=False, editable=False, verbose_name="L'acteur est un parent"
     )
     liste_enfants = models.JSONField(
         default=None,
