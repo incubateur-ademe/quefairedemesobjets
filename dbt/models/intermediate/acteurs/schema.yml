@@ -113,9 +113,10 @@ models:
       materialized: table
     tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns:
-            - acteur_id
-            - acteurservice_id
+          arguments:
+            combination_of_columns:
+              - acteur_id
+              - acteurservice_id
   - name: int_acteur_labels
     description: "Acteur Labels model"
     columns:
@@ -140,9 +141,10 @@ models:
       materialized: table
     tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns:
-            - acteur_id
-            - labelqualite_id
+          arguments:
+            combination_of_columns:
+              - acteur_id
+              - labelqualite_id
   - name: int_propositionservice
     description: "Proposition Service model"
     columns:
@@ -173,9 +175,10 @@ models:
       materialized: table
     tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns:
-            - acteur_id
-            - action_id
+          arguments:
+            combination_of_columns:
+              - acteur_id
+              - action_id
   - name: int_propositionservice_sous_categories
     description: "Proposition Service Sous Categories model"
     columns:
@@ -199,9 +202,10 @@ models:
       materialized: table
     tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns:
-            - propositionservice_id
-            - souscategorieobjet_id
+          arguments:
+            combination_of_columns:
+              - propositionservice_id
+              - souscategorieobjet_id
   - name: int_perimetreadomicile
     description: "Perimètre à domicile model"
     columns:

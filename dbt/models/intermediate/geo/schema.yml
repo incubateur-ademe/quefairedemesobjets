@@ -13,7 +13,8 @@ models:
         data_tests:
           - not_null
           - dbt_expectations.expect_column_value_lengths_to_equal:
-              value: 9
+              arguments:
+                value: 9
       - name: nom_epci
         description: "The name of the EPCI"
         data_tests:

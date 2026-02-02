@@ -55,7 +55,8 @@ models:
         data_type: boolean
         data_tests:
           - accepted_values:
-              values: [false]
+              arguments:
+                values: [false]
       - name: etab_code_postal
         description: Code postal de l'établissement fermé
       - name: etab_adresse

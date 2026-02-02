@@ -128,21 +128,24 @@ models:
         tests:
           - dbt_expectations.expect_column_to_exist
           - accepted_values:
-              values: ['','1 pour 1', '1 pour 0']
+              arguments:
+                values: ['','1 pour 1', '1 pour 0']
       - name: exclusivite_de_reprisereparation
         description: "L'exclusivité de reprise/réparation de l'acteur"
         data_type: boolean
         tests:
           - dbt_expectations.expect_column_to_exist
           - accepted_values:
-              values: [true, false]
+              arguments:
+                values: [true, false]
       - name: uniquement_sur_rdv
         description: "L'uniquement sur RDV de l'acteur"
         data_type: boolean
         tests:
           - dbt_expectations.expect_column_to_exist
           - accepted_values:
-              values: [true, false]
+              arguments:
+                values: [true, false]
       - name: type_de_services
         description: "Le type de services de l'acteur"
         data_type: text

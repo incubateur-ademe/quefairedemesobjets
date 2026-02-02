@@ -159,9 +159,10 @@ models:
           initially_deferred: true
     tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns:
-            - acteur_id
-            - action_id
+          arguments:
+            combination_of_columns:
+              - acteur_id
+              - action_id
   - name: marts_opendata_propositionservice_sous_categories
     description: "Vue sur les sous-catégories des propositions de service affichées sur la opendata"
     columns:
@@ -201,9 +202,10 @@ models:
           initially_deferred: true
     tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns:
-            - propositionservice_id
-            - souscategorieobjet_id
+          arguments:
+            combination_of_columns:
+              - propositionservice_id
+              - souscategorieobjet_id
 
   - name: marts_opendata_acteur_acteur_services
     description: "Lien entre acteur de la opendata et acteur_services"
@@ -244,9 +246,10 @@ models:
           initially_deferred: true
     tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns:
-            - acteur_id
-            - acteurservice_id
+          arguments:
+            combination_of_columns:
+              - acteur_id
+              - acteurservice_id
 
   - name: marts_opendata_acteur_labels
     description: "Lien entre acteur de la opendata et labels"
@@ -287,9 +290,10 @@ models:
           initially_deferred: true
     tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns:
-            - acteur_id
-            - labelqualite_id
+          arguments:
+            combination_of_columns:
+              - acteur_id
+              - labelqualite_id
 
   - name: marts_opendata_acteur_sources
     description: "Lien entre acteur de la opendata et sources"
