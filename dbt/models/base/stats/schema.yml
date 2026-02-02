@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: base_acteur_visible
+  - name: base_vueacteur_visible
     description: "Acteurs visibles"
     columns:
       - name: identifiant_unique

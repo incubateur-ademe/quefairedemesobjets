@@ -2,6 +2,6 @@
 -- car 4 décimal ~11 m
 
 SELECT identifiant_unique, siret
-FROM {{ ref('base_acteur_visible') }}
+FROM {{ ref('base_vueacteur_visible') }}
 WHERE LENGTH(siret) = 14
 AND siret ~ '^[0-9]+$'

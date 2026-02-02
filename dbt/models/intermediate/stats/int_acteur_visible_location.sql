@@ -2,6 +2,6 @@
 -- car 4 décimal ~11 m
 
 SELECT identifiant_unique, latitude, longitude
-FROM {{ ref('base_acteur_visible') }}
+FROM {{ ref('base_vueacteur_visible') }}
 WHERE latitude IS NOT NULL AND longitude IS NOT NULL
 AND latitude != 0 AND longitude != 0
