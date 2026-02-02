@@ -17,16 +17,15 @@ from core.constants import DEFAULT_MAP_CONTAINER_ID
 from core.context_processors import content, environment, global_context
 from core.widgets import (
     HeaderSearchAutocompleteInput,
-    SynonymeAutocompleteInput,
 )
 from infotri.forms import InfotriForm
 from qfdmd.forms import HomeSearchForm
 from qfdmd.models import Synonyme
+from qfdmd.views import get_homepage
 from qfdmo.forms import (
     LegendeForm,
     ViewModeForm,
 )
-from qfdmd.views import get_homepage
 from qfdmo.models.acteur import (
     ActeurType,
     DisplayedActeur,
@@ -35,6 +34,7 @@ from qfdmo.models.acteur import (
 )
 from qfdmo.models.action import Action
 from qfdmo.models.config import CarteConfig
+from qfdmo.widgets import SynonymeAutocompleteInput
 
 base_url = settings.BASE_URL
 

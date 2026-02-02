@@ -13,7 +13,6 @@ from dsfr.enums import SegmentedControlChoices
 from dsfr.forms import DsfrBaseForm
 from dsfr.widgets import SegmentedControl
 
-from core.widgets import SynonymeAutocompleteInput
 from qfdmd.models import Synonyme
 from qfdmo.fields import GroupeActionChoiceField, LabelQualiteChoiceField
 from qfdmo.geo_api import formatted_epcis_as_list_of_tuple
@@ -33,6 +32,7 @@ from qfdmo.widgets import (
     GenericAutoCompleteInput,
     RangeInput,
     SegmentedControlSelect,
+    SynonymeAutocompleteInput,
 )
 
 

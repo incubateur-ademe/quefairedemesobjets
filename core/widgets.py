@@ -86,13 +86,6 @@ class NextAutocompleteInput(forms.TextInput):
         }
 
 
-class SynonymeAutocompleteInput(NextAutocompleteInput):
-    """Autocomplete widget for Synonyme objects."""
-
-    search_view = "autocomplete_synonyme"
-    limit = 5
-
-
 class HeaderSearchAutocompleteInput(NextAutocompleteInput):
     """Autocomplete widget for homepage search."""
 
