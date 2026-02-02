@@ -14,18 +14,11 @@ from django_lookbook.utils import register_form_class
 from dsfr.forms import DsfrBaseForm
 
 from core.constants import DEFAULT_MAP_CONTAINER_ID
-from core.context_processors import content, environment, global_context
-from core.widgets import (
-    HeaderSearchAutocompleteInput,
-)
 from infotri.forms import InfotriForm
-from qfdmd.forms import HomeSearchForm
+from qfdmd.forms import SearchForm
 from qfdmd.models import Synonyme
 from qfdmd.views import get_homepage
-from qfdmo.forms import (
-    LegendeForm,
-    ViewModeForm,
-)
+from qfdmo.forms import LegendeForm, NextAutocompleteInput, ViewModeForm
 from qfdmo.models.acteur import (
     ActeurType,
     DisplayedActeur,
@@ -34,35 +27,8 @@ from qfdmo.models.acteur import (
 )
 from qfdmo.models.action import Action
 from qfdmo.models.config import CarteConfig
-from qfdmo.widgets import SynonymeAutocompleteInput
 
 base_url = settings.BASE_URL
-
-
-class ContextAwareLookbookPreview(LookbookPreview):
-    """Base preview class that applies context processors like regular Django views.
-
-    This ensures previews have access to the same context variables (e.g., `assistant`,
-    `CARTE`, etc.) that are available in production views.
-    """
-
-    context_processors = [environment, content, global_context]
-
-    @classmethod
-    def get_base_context(cls, path="/"):
-        """Build context from context processors.
-
-        Args:
-            request: Optional request object. If None, creates a mock request.
-
-        Returns:
-            dict: Combined context from all configured context processors.
-        """
-        request = RequestFactory().get(path)
-        context = {"request": request}
-        for processor in cls.context_processors:
-            context.update(processor(request))
-        return context
 
 
 def component_docs(md_file_path):
@@ -615,7 +581,10 @@ class FormulairesPreview(LookbookPreview):
         class AutocompleteForm(DsfrBaseForm):
             synonyme = forms.ModelChoiceField(
                 queryset=Synonyme.objects.all(),
-                widget=SynonymeAutocompleteInput(),
+                widget=NextAutocompleteInput(
+                    search_view="autocomplete_synonyme",
+                    limit=10,
+                ),
                 help_text="pantalon, perceuse, canapé...",
                 label="Indiquer un objet ",
                 empty_label="",
@@ -634,92 +603,55 @@ class FormulairesPreview(LookbookPreview):
         context = {"form": form}
         return template.render(Context(context))
 
-    def autocomplete_widgets(self, **kwargs):
-        """Prévisualisation de tous les types de widgets d'autocomplétion sur une seule page."""
 
-        class AutocompleteFormExample(DsfrBaseForm):
-            synonyme = forms.ModelChoiceField(
-                queryset=Synonyme.objects.all(),
-                widget=SynonymeAutocompleteInput(),
-                help_text="pantalon, perceuse, canapé...",
-                label="Autocomplétion Synonyme",
-                empty_label="",
-                required=False,
-            )
-
-            search = forms.CharField(
-                label="Autocomplétion Recherche d'accueil",
-                required=False,
-                widget=HeaderSearchAutocompleteInput(
-                    attrs={
-                        "class": "fr-input",
-                        "placeholder": "pantalon, perceuse, canapé...",
-                        "autocomplete": "off",
-                    },
-                ),
-            )
-
-        form = AutocompleteFormExample()
-
-        template = Template(
-            """
-            <div class="qf-max-w-3xl qf-space-y-4w">
-                <h2 class="qf-text-2xl qf-font-bold qf-mb-4w">Widgets d'autocomplétion</h2>
-                <hr>
-
-                {{ form }}
-            </div>
-            """
-        )
-        context = {
-            "form": form,
-        }
-        return template.render(Context(context))
-
-
-class PagesPreview(ContextAwareLookbookPreview):
+class PagesPreview(LookbookPreview):
     @register_form_class(IframeForm)
     def home(self, iframe=False, **kwargs):
         if isinstance(iframe, str):
             iframe = iframe.lower() == "true"
 
-        context = self.get_base_context()
-        context.update(
-            {
-                "page": get_homepage(),
-                "iframe": iframe,
-            }
-        )
+        context = {
+            "request": None,
+            "page": get_homepage(),
+            "ASSISTANT": {"faites_decouvrir_ce_site": "Faites découvrir ce site !"},
+            "iframe": iframe,
+        }
         return render_to_string("ui/pages/home.html", context)
 
     @register_form_class(IframeForm)
     def produit(self, iframe=False, **kwargs):
+        # Convert string values to boolean
         if isinstance(iframe, str):
             iframe = iframe.lower() == "true"
 
-        context = self.get_base_context("/un-produit")
-        context.update(
-            {
-                "object": Synonyme.objects.first(),
-                "iframe": iframe,
-            }
-        )
+        factory = RequestFactory()
+        request = factory.get("/")
+
+        context = {
+            "object": Synonyme.objects.first(),
+            "request": request,
+            "iframe": iframe,
+        }
+
         return render_to_string("ui/pages/produit.html", context)
 
     @register_form_class(IframeForm)
     def acteur(self, iframe=False, **kwargs):
+        # Convert string values to boolean
         if isinstance(iframe, str):
             iframe = iframe.lower() == "true"
 
-        context = self.get_base_context("un-acteur")
-        context.update(
-            {
-                "object": DisplayedActeur.objects.first(),
-                "base_template": "ui/layout/base.html",
-                "turbo": False,
-                "iframe": iframe,
-            }
-        )
+        acteur = DisplayedActeur.objects.first()
+        factory = RequestFactory()
+        request = factory.get("/")
+
+        context = {
+            "object": acteur,
+            "request": request,
+            "base_template": "ui/layout/base.html",
+            "turbo": False,
+            "iframe": iframe,
+        }
         return render_to_string("ui/pages/acteur.html", context)
 
 
@@ -974,17 +906,17 @@ class AccessibilitePreview(LookbookPreview):
 
     @component_docs("ui/components/accessibilite/P01_3_3.md")
     def P01_3_3(self, **kwargs):
-        context = {"search_form": HomeSearchForm()}
+        context = {"search_form": SearchForm()}
         return render_to_string("ui/components/search/view.html", context)
 
     @component_docs("ui/components/accessibilite/P01_10_2.md")
     def P01_10_2(self, **kwargs):
-        context = {"search_form": HomeSearchForm()}
+        context = {"search_form": SearchForm()}
         return render_to_string("ui/components/search/view.html", context)
 
     @component_docs("ui/components/accessibilite/P01_10_7.md")
     def P01_10_7(self, **kwargs):
-        context = {"search_form": HomeSearchForm()}
+        context = {"search_form": SearchForm()}
         return render_to_string("ui/components/search/view.html", context)
 
     @component_docs("ui/components/accessibilite/P01_13_8.md")

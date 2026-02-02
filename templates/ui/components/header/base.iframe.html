@@ -1,18 +1,13 @@
-{% load i18n %}
 {% if not assistant.is_home %}
 <header role="banner" class="fr-container qf-filter-none fr-header max-sm:qf-hidden" data-testid="header-iframe">
   <div class="fr-header__body">
     <div class="fr-container">
       <div class="fr-header__body-row">
         {% block brand %}
+        {% include "ui/components/logo/site_logo_mini.html" %}
         {% endblock brand %}
 
         {% block header_search %}
-        <div class="fr-header__search md:qf-min-w-[24rem]">
-            <div class="fr-search-bar" id="search-bar" role="search">
-                {% include "ui/components/search/autocomplete_header_view.html" with autocomplete_search_form=assistant.header_autocomplete_search_form %}
-            </div>
-        </div>
         {% endblock header_search %}
       </div>
     </div>
