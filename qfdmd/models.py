@@ -223,15 +223,8 @@ class TaggedSearchTag(ItemBase):
             SearchTerm.delete_for_object(tag)
 
 
-class AncestorFieldsMixin:
-    @property
-    def family(self):
-        return FamilyPage.objects.ancestor_of(self).first()
-
-
 class ProduitPage(
     SearchTermSyncMixin,
-    AncestorFieldsMixin,
     CompiledFieldMixin,
     Page,
     GenreNombreModel,
@@ -411,7 +404,7 @@ class ProduitPage(
 
     def get_search_term_parent_object(self):
         """Returns the family page (parent) if it exists."""
-        return self.family
+        return FamilyPage.objects.ancestor_of(self).first()
 
     def clean(self):
         super().clean()
