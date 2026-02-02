@@ -1,5 +1,6 @@
 import base64
 import json
+import uuid
 from typing import cast
 
 from django import forms
@@ -7,6 +8,7 @@ from django.core.cache import cache
 from django.db.models import TextChoices
 from django.db.utils import cached_property
 from django.http import HttpRequest, QueryDict
+from django.shortcuts import reverse
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from dsfr.enums import SegmentedControlChoices
@@ -32,7 +34,6 @@ from qfdmo.widgets import (
     GenericAutoCompleteInput,
     RangeInput,
     SegmentedControlSelect,
-    SynonymeAutocompleteInput,
 )
 
 
@@ -400,6 +401,34 @@ class AutoSubmitLegendeForm(AutoSubmitMixin, LegendeForm):
     autosubmit_fields = ["groupe_action"]
 
 
+class NextAutocompleteInput(forms.TextInput):
+    template_name = "ui/forms/widgets/autocomplete/input.html"
+
+    def __init__(
+        self,
+        search_view,
+        limit=5,
+        *args,
+        **kwargs,
+    ):
+        # TODO: add optional template args
+        self.search_view = search_view
+        self.limit = limit
+        self.turbo_frame_id = str(uuid.uuid4())
+
+        super().__init__(*args, **kwargs)
+
+    def get_context(self, name, value, attrs):
+        context = super().get_context(name, value, attrs)
+        endpoint_url = reverse(self.search_view)
+        return {
+            **context,
+            "endpoint_url": endpoint_url,
+            "limit": self.limit,
+            "turbo_frame_id": self.turbo_frame_id,
+        }
+
+
 class FiltresForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
     carte_config_initial_mapping = {
         "label_qualite": "label_qualite",
@@ -407,7 +436,9 @@ class FiltresForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
     }
     synonyme = forms.ModelChoiceField(
         queryset=Synonyme.objects.all(),
-        widget=SynonymeAutocompleteInput(),
+        widget=NextAutocompleteInput(
+            search_view="autocomplete_synonyme",
+        ),
         help_text="pantalon, perceuse, canapé...",
         label="Indiquer un objet",
         required=False,

@@ -1,28 +1,20 @@
 <div
-    data-controller="next-autocomplete{% for key, value in wrapper_attrs.items %}{% if key == "data-controller" %} {{ value }}{% endif %}{% endfor %}"
+    data-controller="next-autocomplete"
     data-next-autocomplete-endpoint-url-value="{{ endpoint_url }}"
     data-next-autocomplete-turbo-frame-id-value="{{ turbo_frame_id }}"
     data-next-autocomplete-limit-value="{{ limit }}"
-    {% if show_on_focus %}data-next-autocomplete-show-on-focus-value="true"{% endif %}
     {# TODO: add optional data-action block #}
-    {% for key, value in wrapper_attrs.items %}{% if key != "data-controller" %}{{ key }}="{{ value }}" {% endif %}{% endfor %}
-    class="qf-relative"
 >
     {# Input, copy pasted from django/forms/widgets/input.html #}
     <input
         type="search"
         {% include "django/forms/widgets/attrs.html" %}
-        {% if display_value %}
-        name="{{ widget.name }}"
-        {% if widget.value != None %} value="{{ widget.value }}"{% endif %}
-        {% endif %}
         {# Custom attributes to match w3c combobox pattern #}
         role="combobox"
-        aria-controls="{{ turbo_frame_id }}-listbox"
+        aria-controls="results-frame"
         aria-expanded="false"
         aria-activedescendant=""
-        aria-autocomplete="both"
-        data-action="next-autocomplete#search keydown->next-autocomplete#navigate focus->next-autocomplete#focus"
+        data-action="next-autocomplete#search keydown->next-autocomplete#navigate focus->next-autocomplete#showListbox"
         data-next-autocomplete-target="input"
     >
     <input
@@ -35,7 +27,7 @@
     {% include "ui/forms/widgets/autocomplete/results.html" %}
     {# spinner displays only when parent turbo frame is loading #}
 
-    <div class="peer-aria-[busy]:qf-visible qf-invisible qf-absolute qf-z-50 qf-right-1w qf-top-auto qf-bottom-[3px]">
+    <div class="peer-aria-[busy]:qf-visible qf-invisible qf-absolute qf-right-1w qf-top-auto qf-bottom-[3px]">
     {% include "ui/components/spinner.html" with small=True %}
     </div>
 </div>
