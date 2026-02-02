@@ -40,10 +40,14 @@ class RequestEnhancementMiddleware:
 
     def __call__(self, request):
         # Prepare request
-        if url_to_redirect := self._check_redirect_from_legacy_domains(request):
-            return redirect(url_to_redirect, permanent=True)
-
+        # Detect iframe early to prevent redirects that would break permissions
         self._prepare_request_if_iframe(request)
+
+        # Skip redirects for iframe requests to preserve geolocation permissions
+        if not request.iframe:
+            if url_to_redirect := self._check_redirect_from_legacy_domains(request):
+                return redirect(url_to_redirect, permanent=True)
+
         response = self.get_response(request)
 
         # Prepare response
