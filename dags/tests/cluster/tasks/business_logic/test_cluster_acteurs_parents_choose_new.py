@@ -56,6 +56,7 @@ def df_no_parent() -> pd.DataFrame:
             "identifiant_unique": ["c0_a", "c0_b", "c0_c"],
             "parent_id": [None, None, None],
             "nombre_enfants": [0, 0, 0],
+            "est_parent": [False, False, False],
             "statut": [ActeurStatus.ACTIF, ActeurStatus.ACTIF, ActeurStatus.ACTIF],
         }
     )
@@ -72,6 +73,7 @@ def df_one_parent() -> pd.DataFrame:
             # n'a pas de parent et est rattaché au cluster
             "parent_id": [None, None, "c1_b"],
             "nombre_enfants": [0, 1, 0],
+            "est_parent": [False, True, False],
             "statut": [ActeurStatus.ACTIF, ActeurStatus.ACTIF, ActeurStatus.ACTIF],
         }
     )
@@ -87,6 +89,7 @@ def df_two_parents() -> pd.DataFrame:
             # a=2 enfants, b=1 enfant
             "parent_id": [None, None, "c2_b", "c2_a", "c2_a"],
             "nombre_enfants": [2, 1, 0, 0, 0],
+            "est_parent": [True, True, False, False, False],
             "statut": [
                 ActeurStatus.ACTIF,
                 ActeurStatus.ACTIF,
@@ -109,6 +112,7 @@ def df_two_parents_one_inactive() -> pd.DataFrame:
             # a=2 enfants (INACTIF), b=1 enfant (ACTIF)
             "parent_id": [None, None, "c3_b", "c3_a", "c3_a"],
             "nombre_enfants": [2, 1, 0, 0, 0],
+            "est_parent": [True, True, False, False, False],
             "statut": [
                 ActeurStatus.INACTIF,  # a est inactif mais a plus d'enfants
                 ActeurStatus.ACTIF,  # b est actif mais a moins d'enfants
@@ -131,6 +135,7 @@ def df_two_parents_both_active() -> pd.DataFrame:
             # a=3 enfants (ACTIF), b=1 enfant (ACTIF)
             "parent_id": [None, None, "c4_b", "c4_a", "c4_a", "c4_a"],
             "nombre_enfants": [3, 1, 0, 0, 0, 0],
+            "est_parent": [True, True, False, False, False, False],
             "statut": [
                 ActeurStatus.ACTIF,  # a est actif et a plus d'enfants
                 ActeurStatus.ACTIF,  # b est actif mais a moins d'enfants
@@ -154,6 +159,7 @@ def df_two_parents_both_inactive() -> pd.DataFrame:
             # a=2 enfants (INACTIF), b=1 enfant (INACTIF)
             "parent_id": [None, None, "c5_b", "c5_a", "c5_a"],
             "nombre_enfants": [2, 1, 0, 0, 0],
+            "est_parent": [True, True, False, False, False],
             "statut": [
                 ActeurStatus.INACTIF,  # a est inactif mais a plus d'enfants
                 ActeurStatus.INACTIF,  # b est inactif et a moins d'enfants
