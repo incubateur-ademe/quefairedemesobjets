@@ -57,6 +57,7 @@ class TAGS:
     ETABLISSEMENT: str = "etablissement"
     EXPORT: str = "export"
     FEDERATION: str = "fédération"
+    GENERIC: str = "generic"
     INSEE: str = "insee"
     JOUET: str = "JOUET"  # Fillière Jouet
     KOUMOUL: str = "koumoul"
