@@ -597,7 +597,7 @@ class CarteConfigView(DetailView, CarteSearchActeursView):
 
         # TODO: remove this
         if source_filter := self.carte_config.source.all():
-            filters &= Q(source__in=source_filter)
+            filters &= Q(sources__in=source_filter)
 
         # TODO: remove this
         if label_filter := self.carte_config.label_qualite.all():
