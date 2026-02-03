@@ -235,7 +235,8 @@ class AbstractSearchActeursView(
         # center = center_from_frontend_bbox(custom_bbox) if custom_bbox else ["", ""]
         latitude = self._get_latitude()
         longitude = self._get_longitude()
-        self.location = json.dumps({"latitude": latitude, "longitude": longitude})
+        if latitude and longitude:
+            self.location = json.dumps({"latitude": latitude, "longitude": longitude})
 
         # A BBOX was set in the Configurateur OR the user interacted with
         # the map, that set a bounding box in its browser.
