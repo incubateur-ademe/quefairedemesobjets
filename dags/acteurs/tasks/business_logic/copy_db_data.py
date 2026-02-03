@@ -51,7 +51,7 @@ def copy_db_data():
     logger.info("📊 Copie des données...")
 
     # Get tables and filter them
-    with connections["default"].cursor() as cursor:
+    with connections["webapp_sample"].cursor() as cursor:
         cursor.execute("SELECT table_name FROM information_schema.tables")
         tables = [table[0] for table in cursor.fetchall()]
 
