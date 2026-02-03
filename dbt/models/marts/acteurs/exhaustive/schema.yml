@@ -130,6 +130,32 @@ models:
             combination_of_columns:
               - acteur_id
               - acteurservice_id
+  - name: marts_exhaustive_acteur_sources
+    description: "Acteur Sources model"
+    columns:
+      - name: id
+        description: "The primary key for this table"
+        data_tests:
+          - not_null
+      - name: acteur_id
+        description: "The acteur_id for this table"
+        data_tests:
+          - not_null
+      - name: source_id
+        description: "The source_id for this table"
+        data_tests:
+          - not_null
+      - name: identifiant_externe
+        description: "The identifiant_externe for this table"
+        data_tests:
+          - not_null
+    config:
+      materialized: table
+      tags:
+        - marts
+        - exhaustive
+        - acteurs
+        - acteur_sources
   - name: marts_exhaustive_acteur_labels
     description: "Acteur Labels model"
     columns:
@@ -228,8 +254,38 @@ models:
         data_tests:
           - not_null
     config:
+      materialized: table
       tags:
         - marts
         - exhaustive
         - acteurs
         - perimetreadomicile
+  - name: marts_exhaustive_acteur_epci
+    description: "Lien entre acteur et code EPCI"
+    columns:
+
+      - name: identifiant_unique
+        description: "The identifiant_unique for this table"
+        data_tests:
+          - not_null
+      - name: code_postal
+        description: "The code_postal for this table"
+      - name: upper_acteur_ville
+        description: "The upper_acteur_ville for this table"
+      - name: upper_epci_nom_commune
+        description: "The upper_epci_nom_commune for this table"
+      - name: code_commune_insee
+        description: "The code_commune_insee for this table"
+      - name: code_epci
+        description: "The code_epci for this table"
+      - name: nom_epci
+        description: "The nom_epci for this table"
+      - name: similarity_score
+        description: "The similarity_score for this table"
+    config:
+      materialized: table
+      tags:
+        - marts
+        - exhaustive
+        - acteurs
+        - epci

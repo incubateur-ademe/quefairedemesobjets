@@ -757,7 +757,8 @@ class VueActeurAdmin(FinalActeurAdminMixin, BaseActeurAdmin):
     fields = [
         "est_parent",
         "uuid",
-        *BaseActeurAdmin.fields,
+        "sources",
+        *[field for field in BaseActeurAdmin.fields if field not in ["source"]],
         "parent",
         "revision_existe",
         "est_dans_carte",

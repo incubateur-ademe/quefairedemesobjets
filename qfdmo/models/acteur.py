@@ -1308,6 +1308,12 @@ class VueActeur(FinalActeur):
     def is_parent(self):
         return self.pk and self.duplicats.exists()
 
+    @property
+    def change_url(self):
+        return reverse(
+            "admin:qfdmo_vueacteur_change", args=[quote(self.identifiant_unique)]
+        )
+
 
 class VuePerimetreADomicile(BasePerimetreADomicile):
     acteur = models.ForeignKey(
