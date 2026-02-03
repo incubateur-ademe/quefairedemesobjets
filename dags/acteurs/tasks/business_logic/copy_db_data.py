@@ -50,14 +50,16 @@ def copy_db_data():
     logger.info("📊 Copie des données...")
 
     # Get tables and filter them
-    with connections["webapp_sample"].cursor() as cursor:
+    with connections["default"].cursor() as cursor:
         cursor.execute("SELECT table_name FROM information_schema.tables")
         tables = [table[0] for table in cursor.fetchall()]
 
     # Get labels of registered apps
     table_prefixes = {app_config.label for app_config in apps.get_app_configs()}
-    # Add "django" for system tables
-    table_prefixes.add("django")
+
+    for prefix in ["django", "wagtail", "sites_faciles"]:
+        table_prefixes.add(prefix)
+
     tables = [
         table
         for table in tables
