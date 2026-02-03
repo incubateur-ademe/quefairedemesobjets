@@ -24,9 +24,7 @@ from qfdmd.models import Synonyme
 from qfdmo.constants import MAP_FORM_PREFIX
 from qfdmo.forms import MapForm
 from qfdmo.geo_api import retrieve_epci_geojson_from_api_or_cache
-from qfdmo.map_utils import (
-    sanitize_frontend_bbox,
-)
+from qfdmo.map_utils import sanitize_frontend_bbox
 from qfdmo.models import Acteur, ActeurStatus, DisplayedActeur, RevisionActeur
 from qfdmo.models.action import get_reparer_action_id
 from qfdmo.models.geo import EPCI

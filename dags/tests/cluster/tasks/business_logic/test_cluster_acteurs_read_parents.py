@@ -55,12 +55,12 @@ class TestClusterActeursReadParents:
         )
         # Créer un enfant pour que le parent soit vraiment un parent
         VueActeurFactory(
-            source=sources["s1"],
             acteur_type=acteur_types["at1"],
             identifiant_unique="enfant_at1_001",
             nom="Enfant at1",
             parent=parent_at1,
             statut="ACTIF",
+            sources=[sources["s1"]],
         )
         # Add sources to parent (via ManyToMany)
         parent_at1.sources.add(sources["s1"])
@@ -77,20 +77,20 @@ class TestClusterActeursReadParents:
             est_parent=True,
         )
         VueActeurFactory(
-            source=sources["s1"],
             acteur_type=acteur_types["at2"],
             identifiant_unique="enfant_at2a_s1_001",
             nom="Enfant at2a s1",
             parent=parent_at2a,
             statut="ACTIF",
+            sources=[sources["s1"]],
         )
         VueActeurFactory(
-            source=sources["s2"],
             acteur_type=acteur_types["at2"],
             identifiant_unique="enfant_at2a_s2_001",
             nom="Enfant at2a s2",
             parent=parent_at2a,
             statut="ACTIF",
+            sources=[sources["s2"]],
         )
         # Add sources to parent (via ManyToMany)
         parent_at2a.sources.add(sources["s1"], sources["s2"])
@@ -107,12 +107,12 @@ class TestClusterActeursReadParents:
             est_parent=True,
         )
         VueActeurFactory(
-            source=sources["s1"],
             acteur_type=acteur_types["at2"],
             identifiant_unique="enfant_at2b_001",
             nom="Enfant at2b",
             parent=parent_at2b,
             statut="ACTIF",
+            sources=[sources["s1"]],
         )
         # Add sources to parent (via ManyToMany)
         parent_at2b.sources.add(sources["s1"])
@@ -129,12 +129,12 @@ class TestClusterActeursReadParents:
             est_parent=True,
         )
         VueActeurFactory(
-            source=sources["s1"],
             acteur_type=acteur_types["at4"],
             identifiant_unique="enfant_at4_001",
             nom="Enfant at4",
             parent=parent_at4,
             statut="ACTIF",
+            sources=[sources["s1"]],
         )
         # Add sources to parent (via ManyToMany)
         parent_at4.sources.add(sources["s1"])
@@ -151,12 +151,12 @@ class TestClusterActeursReadParents:
             est_parent=True,
         )
         VueActeurFactory(
-            source=sources["s1"],
             acteur_type=acteur_types["at4"],
             identifiant_unique="enfant_at4_inactif_001",
             nom="Enfant at4 inactif",
             parent=parent_at4_inactif,
             statut="ACTIF",
+            sources=[sources["s1"]],
         )
         # Add sources to parent (via ManyToMany)
         parent_at4_inactif.sources.add(sources["s1"])
@@ -164,7 +164,6 @@ class TestClusterActeursReadParents:
 
         # Actor with source but not a parent (to test exclusion)
         acteur_pas_parent = VueActeurFactory(
-            source=sources["s1"],
             acteur_type=acteur_types["at2"],
             identifiant_unique="pas_parent_001",
             nom="Pas parent",
@@ -172,6 +171,7 @@ class TestClusterActeursReadParents:
             code_postal="33000",
             statut="ACTIF",
             est_parent=False,
+            sources=[sources["s1"]],
         )
         acteurs["pas_parent"] = acteur_pas_parent
 
@@ -445,12 +445,12 @@ class TestClusterActeursReadParents:
         )
         # Créer un enfant pour que le parent soit vraiment un parent
         enfant = VueActeurFactory(
-            source=sources["s1"],
             acteur_type=acteur_types["at1"],
             identifiant_unique="test_enfant_001",
             nom="Enfant test",
             parent=parent,
             statut="ACTIF",
+            sources=[sources["s1"]],
         )
         enfant.sources.add(sources["s1"])
         # Add sources to parent (via ManyToMany)
@@ -458,7 +458,6 @@ class TestClusterActeursReadParents:
 
         # Create an orphan (not a parent)
         orphelin = VueActeurFactory(
-            source=sources["s1"],
             acteur_type=acteur_types["at1"],
             identifiant_unique="test_orphelin_001",
             nom="Orphelin test",
@@ -466,6 +465,7 @@ class TestClusterActeursReadParents:
             code_postal="75001",
             statut="ACTIF",
             est_parent=False,
+            sources=[sources["s1"]],
         )
         orphelin.sources.add(sources["s1"])
 
@@ -535,12 +535,12 @@ class TestClusterActeursReadParents:
             est_parent=True,
         )
         enfant = VueActeurFactory(
-            source=sources["s1"],
             acteur_type=acteur_types["at1"],
             identifiant_unique="test_enfant_vide_001",
             nom="Enfant",
             parent=parent,
             statut="ACTIF",
+            sources=[sources["s1"]],
         )
         enfant.sources.add(sources["s1"])
         # Add sources to parent (via ManyToMany)
@@ -572,7 +572,7 @@ class TestClusterActeursReadParents:
     def test_combination_of_filters(self, sources, acteur_types, acteurs_parents):
         """Verify that combining multiple filters works"""
         df, _ = cluster_acteurs_read_parents(
-            fields=["nom", "identifiant_unique", "source_id", "acteur_type_id"],
+            fields=["nom", "identifiant_unique", "acteur_type_id"],
             include_source_ids=[sources["s1"].id],
             include_acteur_type_ids=[acteur_types["at2"].id, acteur_types["at4"].id],
             include_only_if_regex_matches_nom="parent",

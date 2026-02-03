@@ -87,7 +87,6 @@ class DisplayedActeurFactory(Factory):
     nom = Faker("company")
     location = Point(3, 3)
     acteur_type = SubFactory(ActeurTypeFactory)
-    source = SubFactory(SourceFactory)
 
 
 class VueActeurFactory(Factory):
@@ -98,7 +97,6 @@ class VueActeurFactory(Factory):
     nom = Faker("word")
     location = Point(2, 2)
     acteur_type = SubFactory(ActeurTypeFactory)
-    source = SubFactory(SourceFactory)
 
 
 class ActeurServiceFactory(Factory):

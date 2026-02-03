@@ -848,24 +848,23 @@ class TestFinalActeurManagerGetActiveParents:
     ):
         """Test that get_active_parents returns only active acteurs without source"""
         acteur_type = ActeurTypeFactory()
-        source = SourceFactory()
 
         # Active acteur without source - should be returned
         acteur_1 = factory(
-            statut=ActeurStatus.ACTIF, source=None, acteur_type=acteur_type
+            statut=ActeurStatus.ACTIF, est_parent=True, acteur_type=acteur_type
         )
         acteur_2 = factory(
-            statut=ActeurStatus.ACTIF, source=None, acteur_type=acteur_type
+            statut=ActeurStatus.ACTIF, est_parent=True, acteur_type=acteur_type
         )
 
         # Inactive acteur without source - should not be returned
-        factory(statut=ActeurStatus.INACTIF, source=None, acteur_type=acteur_type)
+        factory(statut=ActeurStatus.INACTIF, est_parent=True, acteur_type=acteur_type)
 
         # Active acteur with source - should not be returned
-        factory(statut=ActeurStatus.ACTIF, source=source, acteur_type=acteur_type)
+        factory(statut=ActeurStatus.ACTIF, est_parent=False, acteur_type=acteur_type)
 
         # Deleted acteur without source - should not be returned
-        factory(statut=ActeurStatus.SUPPRIME, source=None, acteur_type=acteur_type)
+        factory(statut=ActeurStatus.SUPPRIME, est_parent=True, acteur_type=acteur_type)
 
         result = model.objects.get_active_parents()
 
@@ -885,11 +884,10 @@ class TestFinalActeurManagerGetActiveParents:
         when no actors match the criteria
         """
         acteur_type = ActeurTypeFactory()
-        source = SourceFactory()
 
         # Create actors that do not match the criteria
-        factory(statut=ActeurStatus.INACTIF, source=None, acteur_type=acteur_type)
-        factory(statut=ActeurStatus.ACTIF, source=source, acteur_type=acteur_type)
+        factory(statut=ActeurStatus.INACTIF, acteur_type=acteur_type)
+        factory(statut=ActeurStatus.ACTIF, acteur_type=acteur_type)
 
         result = model.objects.get_active_parents()
 

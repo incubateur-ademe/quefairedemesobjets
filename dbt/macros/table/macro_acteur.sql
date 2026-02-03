@@ -1,6 +1,14 @@
 {%- macro acteur(ephemeral_filtered_acteur, propositionservice, acteur_epci ) -%}
 
-with parentacteur_lieuprestation AS (
+WITH enfants AS (
+    select
+        distinct(parent_id) as parent_id,
+        jsonb_agg(identifiant_unique) as enfants
+    from {{ ref(ephemeral_filtered_acteur) }}
+    group by parent_id
+),
+
+parentacteur_lieuprestation AS (
     SELECT
     acteur.parent_id AS acteur_id,
     -- AGGREGATION, on prend le lieu de prestation dans l'ordre : SUR_PLACE_OU_A_DOMICILE, A_DOMICILE, SUR_PLACE
@@ -58,8 +66,11 @@ SELECT DISTINCT efa.uuid,
     efa.statut,
     efa.siret_is_closed,
     COALESCE(aepci.code_commune_insee, '') as code_commune_insee,
-    epci.id as epci_id
+    epci.id as epci_id,
+    e.enfants IS NOT NULL AS est_parent
 FROM {{ ref(ephemeral_filtered_acteur) }} AS efa
+LEFT JOIN enfants AS e
+  ON efa.identifiant_unique = e.parent_id
 INNER JOIN {{ ref(propositionservice) }} AS cps
     ON efa.identifiant_unique = cps.acteur_id
 LEFT OUTER JOIN parentacteur_lieuprestation AS plp
