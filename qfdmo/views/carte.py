@@ -74,7 +74,6 @@ class CarteFormsInstance(TypedDict):
     filtres: None | FiltresForm
     legende: None | AutoSubmitLegendeForm
     legende_filtres: None | LegendeForm
-    map: None | MapForm
 
 
 class CarteSearchActeursView(MapPrefixMixin, AbstractSearchActeursView):

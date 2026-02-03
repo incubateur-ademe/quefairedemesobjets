@@ -29,9 +29,8 @@ class TestInitialValue:
         response = client.get(url)
 
         assert response.status_code == 200
-        assert (
-            response.context_data["location"] == '{"latitude": null, "longitude": null}'
-        )
+        # When no location is provided, location should be empty string
+        assert response.context_data["location"] == ""
         assert len(response.context_data["acteurs"]) == 0
 
         # Check form initial values
@@ -62,9 +61,8 @@ class TestInitialValue:
         response = client.get(url)
 
         assert response.status_code == 200
-        assert (
-            response.context_data["location"] == '{"latitude": null, "longitude": null}'
-        )
+        # When no location is provided, location should be empty string
+        assert response.context_data["location"] == ""
         assert len(response.context_data["acteurs"]) == 0
 
         # Check map form initial values
