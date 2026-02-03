@@ -13,7 +13,7 @@ from utils.airflow_params import airflow_params_dropdown_from_mapping
 from utils.django import django_model_fields_get, django_setup_full
 
 django_setup_full()
-from qfdmo.models import Acteur, ActeurType, Source  # noqa: E402
+from qfdmo.models import ActeurType, Source, VueActeur  # noqa: E402
 
 # -------------------------------------------
 # Manage dropdowns in Airflow
@@ -32,11 +32,11 @@ dropdown_acteur_types = airflow_params_dropdown_from_mapping(
     mapping_acteur_type_id_by_code
 )
 
-fields_all = django_model_fields_get(Acteur)
+fields_all = django_model_fields_get(VueActeur)
 fields_enrich = sorted(
     list(
         # Can't want to enrich calculated properties
-        set(django_model_fields_get(Acteur, include_properties=False))
+        set(django_model_fields_get(VueActeur, include_properties=False))
         # Exclude some fields based on business rules (ex: source)
         - set(FIELDS_PARENT_DATA_EXCLUDED)
     )

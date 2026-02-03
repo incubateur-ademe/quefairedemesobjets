@@ -142,17 +142,16 @@ class TestValueIsEmpty:
 @pytest.mark.django_db
 class TestFieldPickValue:
     @pytest.mark.parametrize(
-        "field, values, keep_empty,expected",
+        "values, keep_empty, expected",
         [
-            ("email", ["💩", "i@me.com", "💩"], False, "💩"),
-            ("email", [" ", None, "i@me.com", "💩"], False, "i@me.com"),
-            ("email", [" ", None, "i@me.com", "💩"], True, " "),
+            (["💩", "i@me.com", "💩"], False, "💩"),
+            ([" ", None, "i@me.com", "💩"], False, "i@me.com"),
+            ([" ", None, "i@me.com", "💩"], True, " "),
         ],
     )
-    def test_acteurs_get_one_field(self, field, values, keep_empty, expected):
+    def test_field_pick_value(self, values, keep_empty, expected):
         assert (
             field_pick_value(
-                field,
                 values,
                 keep_empty,
             )
