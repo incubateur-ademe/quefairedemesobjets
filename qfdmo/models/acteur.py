@@ -997,6 +997,12 @@ class RevisionActeur(BaseActeur, LatLngPropertiesMixin):
         )
 
     @property
+    def vueacteur_change_url(self):
+        return reverse(
+            "admin:qfdmo_vueacteur_change", args=[quote(self.identifiant_unique)]
+        )
+
+    @property
     def nombre_enfants(self) -> int:
         """Calcul le nombre d'enfants dont le parent_id
         pointent vers l'identifiant_unique de cet acteur"""
@@ -1304,6 +1310,12 @@ class VueActeur(FinalActeur):
     @property
     def is_parent(self):
         return self.pk and self.duplicats.exists()
+
+    @property
+    def change_url(self):
+        return reverse(
+            "admin:qfdmo_vueacteur_change", args=[quote(self.identifiant_unique)]
+        )
 
 
 class VuePerimetreADomicile(BasePerimetreADomicile):

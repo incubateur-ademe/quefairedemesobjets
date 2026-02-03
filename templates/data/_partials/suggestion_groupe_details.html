@@ -17,19 +17,49 @@
                         <div class="qf-truncate"></div>
                     </th>
                     <th class="qf-w-1/4">
-                        <div class="qf-truncate">Importé</div>
+                        <div class="qf-truncate">
+                            Acteur Importé
+                            {% if acteur %}
+                                (
+                                <a href="{{ acteur.change_url }}" target="_blank" rel="noreferrer" data-turbo="false">importé</a>
+                                )
+                            {% endif %}
+                        </div>
                     </th>
                     <th class="qf-text-center qf-text-2xl">
-                        <div data-action="click->suggestion-groupe-row#updateAllDisplayed" class="qf-cursor-pointer">
-                            ➡️
+                        <div data-action="click->suggestion-groupe-row#updateAllDisplayed" data-suggestion-modele="RevisionActeur" class="qf-cursor-pointer">
+                            ▶️
                         </div>
                     </th>
                     <th class="qf-w-1/4">
-                        <div class="qf-truncate">Affiché</div>
-                        {% if acteur_overridden_by.nombre_enfants %}
-                            <div class="qf-truncate">{{ acteur_overridden_by.nombre_enfants }} enfants impactés</div>
-                        {% endif %}
+                        <div class="qf-truncate">
+                            Correction
+                            {% if revision_acteur %}
+                                (
+                                    <a href="{{ revision_acteur.change_url }}" target="_blank" rel="noreferrer" data-turbo="false">corrigé</a>
+                                    , <a href="{{ revision_acteur.vueacteur_change_url }}" target="_blank" rel="noreferrer" data-turbo="false">affiché</a>
+                                )
+                            {% endif %}
+                        </div>
                     </th>
+                    {% if parent_revision_acteur %}
+                        <th class="qf-text-center qf-text-2xl">
+                            <div data-action="click->suggestion-groupe-row#updateAllDisplayed" data-suggestion-modele="ParentRevisionActeur" class="qf-cursor-pointer">
+                                ⏩
+                            </div>
+                        </th>
+                        <th class="qf-w-1/4">
+                            <div class="qf-truncate">Parent
+                                (
+                                    <a href="{{ parent_revision_acteur.change_url }}" target="_blank" rel="noreferrer" data-turbo="false">corrigé</a>
+                                    , <a href="{{ parent_revision_acteur.vueacteur_change_url }}" target="_blank" rel="noreferrer" data-turbo="false">affiché</a>
+                                )
+                            </div>
+                            {% if parent_revision_acteur.nombre_enfants %}
+                                <div class="qf-truncate">{{ parent_revision_acteur.nombre_enfants }} enfants impactés</div>
+                            {% endif %}
+                        </th>
+                    {% endif %}
                 </tr>
             </thead>
             <tbody>
@@ -39,14 +69,14 @@
                         <td>
                             {% for field in fields %}
                                 {% with values=fields_values|get_item:field %}
-                                    {{ values.old_value|display_diff_values:values.new_value }}
+                                    {{ values.acteur }}
                                 {% endwith %}
                                 {% if not forloop.last %}, {% endif %}
                             {% endfor %}
                         </td>
                         <td class="qf-text-center qf-cursor-pointer qf-text-2xl">
-                            <div class="qf-cursor-pointer" data-action="click->suggestion-groupe-row#updateFieldsDisplayed" data-fields='{{ fields|join:"|" }}'>
-                            ➡️
+                            <div class="qf-cursor-pointer" data-action="click->suggestion-groupe-row#updateFieldsDisplayed" data-fields='{{ fields|join:"|" }}' data-suggestion-modele="RevisionActeur">
+                            ▶️
                             </div>
                         </td>
                         <td>
@@ -58,10 +88,11 @@
                                         <div
                                             contentEditable="true"
                                             data-field="{{ field }}"
+                                            data-suggestion-modele="RevisionActeur"
                                             data-action="blur->suggestion-groupe-row#saveFieldValue
                                             focus->suggestion-groupe-row#replaceWithFieldValue">
                                             {% with values=fields_values|get_item:field %}
-                                                {{ values.displayed_value|display_diff_values:values.updated_displayed_value }}
+                                                {{ values.revision_acteur }}
                                             {% endwith %}
                                         </div>
                                     {% endif %}
@@ -71,7 +102,6 @@
                             <div>
                                 {% for field in fields %}
                                     {% with values=fields_values|get_item:field %}
-                                        {% extra_links field values.updated_displayed_value values.displayed_value %}
                                     {% endwith %}
                                 {% endfor %}
                             </div>
@@ -85,6 +115,50 @@
                                 {% endfor %}
                             </div>
                         </td>
+                        {% if suggestion_groupe.parent_revision_acteur %}
+                            <td class="qf-text-center qf-text-2xl">
+                                <div data-action="click->suggestion-groupe-row#updateFieldsDisplayed" data-suggestion-modele="ParentRevisionActeur" data-fields='{{ fields|join:"|" }}' class="qf-cursor-pointer">
+                                    ⏩
+                                </div>
+                            </td>
+                            <td class="qf-w-1/4">
+                                <div class="qf-flex qf-flex-row qf-items-center qf-gap-1">
+                                    {% for field in fields %}
+                                        {% if field|is_not_editable %}
+                                            <div>🚫</div>
+                                        {% else %}
+                                            <div
+                                                contentEditable="true"
+                                                data-field="{{ field }}"
+                                                data-suggestion-modele="ParentRevisionActeur"
+                                                data-action="blur->suggestion-groupe-row#saveFieldValue
+                                                focus->suggestion-groupe-row#replaceWithFieldValue">
+                                                {% with values=fields_values|get_item:field %}
+                                                    {{ values.parent_revision_acteur }}
+                                                {% endwith %}
+                                            </div>
+                                        {% endif %}
+                                        {% if not forloop.last %}<span>&nbsp;,&nbsp;</span> {% endif %}
+                                    {% endfor %}
+                                </div>
+                                <div>
+                                    {% for field in fields %}
+                                        {% with values=fields_values|get_item:field %}
+                                            <!-- TODO: gestion des extralink -->
+                                        {% endwith %}
+                                    {% endfor %}
+                                </div>
+                                <div>
+                                    {% for field in fields %}
+                                        {% if errors and errors|get_item:field %}
+                                            <div class="qf-text-red-500">
+                                                {{ errors|get_item:field }}
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </td>
+                        {% endif %}
                     </tr>
                 {% endfor %}
             </tbody>
@@ -92,10 +166,10 @@
     </div>
 
     <ul class="tabs">
-        <li {% if tab == "acteur" %}class="active"{% endif %}><a href="{% url 'data:suggestion_groupe' id %}?tab=acteur">Acteur affiché</a></li>
-        <li {% if tab == "localisation" %}class="active"{% endif %}><a href="{% url 'data:suggestion_groupe' id %}?tab=localisation">Localisation</a></li>
-        <li {% if tab == "annuaire_entreprise" %}class="active"{% endif %}><a href="{% url 'data:suggestion_groupe' id %}?tab=annuaire_entreprise">Annuaire entreprise</a></li>
-        <li ><a href="{% url 'data:suggestion_groupe' id %}">❌ Cacher les détails</a></li>
+        <li {% if tab == "acteur" %}class="active"{% endif %}><a href="{{ suggestion_groupe.change_url }}?tab=acteur">Acteur affiché</a></li>
+        <li {% if tab == "localisation" %}class="active"{% endif %}><a href="{{ suggestion_groupe.change_url }}?tab=localisation">Localisation</a></li>
+        <li {% if tab == "annuaire_entreprise" %}class="active"{% endif %}><a href="{{ suggestion_groupe.change_url }}?tab=annuaire_entreprise">Annuaire entreprise</a></li>
+        <li ><a href="{{ suggestion_groupe.change_url }}">❌ Cacher les détails</a></li>
     </ul>
 
     <div>
@@ -145,7 +219,7 @@
                         class="qf-inset-0 qf-h-full qf-relative qf-z-0"
                     >
                         {% for point in localisation.points %}
-                            {% generic_location_pinpoint_tag point.key point.latitude point.longitude point.color point.draggable %}
+                            {% generic_location_pinpoint_tag point.key point.latitude point.longitude point.color point.draggable point.text %}
                         {% endfor %}
                     </div>
                 </div>
@@ -156,7 +230,7 @@
             {% endif %}
         {% elif tab == "annuaire_entreprise" %}
             <div>
-                <p>Annuaire entreprise : Comming Soon…</p>
+                <p>Annuaire entreprise : Coming Soon…</p>
                 <p>Vérification si l'etablissement et l'entreprise existe dans l'annuaire entreprise, intéraction avec l'api d'annuaire entreprise ou une IA si tel n'est pas le cas</p>
                 <p>Affichage d'une alerte dans la case au dessus des tab si l'etablissement ou l'entreprise n'existe pas dans l'annuaire entreprise</p>
                 <p>Option IA : Recherche si l'acteur à déménagé ou si l'entreprise a été vendue mais qu'il y a toujours un établissement qui fait lamême chose à la même adresse et proposer des corrections si nécessaire</p>

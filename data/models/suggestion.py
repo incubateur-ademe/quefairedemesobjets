@@ -2,10 +2,12 @@ import logging
 import re
 from datetime import datetime
 
+from django.contrib.admin.utils import quote
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields import ArrayField
-from django.db.models import Case, Count, F, Value, When
+from django.db.models import BooleanField, Count, ExpressionWrapper, Q
 from django.template.loader import render_to_string
+from django.urls import reverse
 from more_itertools import first
 
 from core.models.mixin import TimestampedModel
@@ -431,10 +433,9 @@ class SuggestionGroupeQuerySet(models.QuerySet):
     def with_has_parent(self):
         """Annotate queryset with has_parent."""
         return self.annotate(
-            has_parent=Case(
-                When(acteur_id=F("revision_acteur_id"), then=Value(False)),
-                When(revision_acteur_id__isnull=True, then=Value(False)),
-                default=Value(True),
+            has_parent=ExpressionWrapper(
+                Q(parent_revision_acteur_id__isnull=False),
+                output_field=BooleanField(),
             )
         )
 
@@ -484,6 +485,15 @@ class SuggestionGroupe(TimestampedModel):
         # So the foreign key constraint is not applied yet
         db_constraint=False,
     )
+    parent_revision_acteur = models.ForeignKey(
+        RevisionActeur,
+        on_delete=models.CASCADE,
+        related_name="suggestion_groupes_from_parent",
+        null=True,
+        # when it is a creation, the revision_acteur is not created yet
+        # So the foreign key constraint is not applied yet
+        db_constraint=False,
+    )
     contexte = models.JSONField(
         null=True,
         blank=True,
@@ -495,6 +505,24 @@ class SuggestionGroupe(TimestampedModel):
         verbose_name="Metadata de la cohorte, données statistiques",
     )
 
+    def get_acteur_or_none(self) -> Acteur | None:
+        try:
+            return self.acteur
+        except Acteur.DoesNotExist:
+            return None
+
+    def get_revision_acteur_or_none(self) -> RevisionActeur | None:
+        try:
+            return self.revision_acteur
+        except RevisionActeur.DoesNotExist:
+            return None
+
+    def get_parent_revision_acteur_or_none(self) -> RevisionActeur | None:
+        try:
+            return self.parent_revision_acteur
+        except RevisionActeur.DoesNotExist:
+            return None
+
     def __str__(self) -> str:
         libelle = self.suggestion_cohorte.identifiant_action
         if self.acteur:
@@ -503,7 +531,7 @@ class SuggestionGroupe(TimestampedModel):
 
     @property
     def displayed_acteur_uuid(self) -> str | None:
-        acteur = self.revision_acteur or self.acteur
+        acteur = self.parent_revision_acteur or self.revision_acteur or self.acteur
         if acteur:
             displayed_acteur = DisplayedActeur.objects.filter(
                 identifiant_unique=acteur.identifiant_unique
@@ -511,7 +539,13 @@ class SuggestionGroupe(TimestampedModel):
             return displayed_acteur.uuid if displayed_acteur else None
         return None
 
-    def get_identifiant_unique_from_suggestion_unitaires(self, model_name: str) -> str:
+    @property
+    def change_url(self):
+        return reverse("data:suggestion_groupe", args=[quote(self.id)])
+
+    def get_identifiant_unique_from_suggestion_unitaires(
+        self, model_name: str = "Acteur"
+    ) -> str:
         """
         Get the identifiant_unique from the suggestion_unitaires for the Acteur model
         Useful for SOURCE_AJOUT
@@ -588,6 +622,31 @@ class SuggestionGroupe(TimestampedModel):
                         },
                     )
                 )
+
+            # get the suggestion_unitaires on RevisionActeur model
+            if parent_revision_acteur_suggestion_unitaires := (
+                self.suggestion_unitaires.filter(
+                    suggestion_modele="ParentRevisionActeur"
+                ).all()
+            ):
+                identifiant_unique = self.parent_revision_acteur_id
+                apply_models.append(
+                    SourceApplyModel(
+                        identifiant_unique=identifiant_unique,
+                        order=1,
+                        acteur_model=RevisionActeur,
+                        data={
+                            champ: valeur
+                            for suggestion_unitaire in (
+                                parent_revision_acteur_suggestion_unitaires
+                            )
+                            for champ, valeur in zip(
+                                suggestion_unitaire.champs, suggestion_unitaire.valeurs
+                            )
+                        },
+                    )
+                )
+
             return apply_models
         return []
 
@@ -636,6 +695,15 @@ class SuggestionUnitaire(TimestampedModel):
         RevisionActeur,
         on_delete=models.CASCADE,
         related_name="suggestion_unitaires",
+        null=True,
+        # when it is a creation, the revision_acteur is not created yet
+        # So the foreign key constraint is not applied yet
+        db_constraint=False,
+    )
+    parent_revision_acteur = models.ForeignKey(
+        RevisionActeur,
+        on_delete=models.CASCADE,
+        related_name="suggestion_unitaires_from_parent",
         null=True,
         # when it is a creation, the revision_acteur is not created yet
         # So the foreign key constraint is not applied yet
