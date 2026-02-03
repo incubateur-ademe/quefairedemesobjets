@@ -77,8 +77,72 @@ models:
         description: "Information si on sait que le SIRET est fermé"
     config:
       materialized: table
+      unique_key: identifiant_unique
       tags:
         - stats
         - base
         - acteurs
         - visible
+  - name: base_vuepropositionservice
+    description: "Propositions de services"
+    columns:
+      - name: id
+        description: "L'identifiant de la proposition de service"
+      - name: acteur_id
+        description: "L'identifiant de l'acteur"
+      - name: action_id
+        description: "L'identifiant de l'action"
+    config:
+      materialized: table
+      indexes:
+        - columns: ['acteur_id']
+      tags:
+        - stats
+        - base
+        - propositionservice
+        - visible
+  - name: base_vuepropositionservice_visible
+    description: "Propositions de services visibles"
+    columns:
+      - name: id
+        description: "L'identifiant de la proposition de service"
+      - name: acteur_id
+        description: "L'identifiant de l'acteur"
+      - name: action_id
+        description: "L'identifiant de l'action"
+    config:
+      materialized: table
+      indexes:
+        - columns: ['acteur_id', 'action_id']
+      tags:
+        - stats
+        - base
+        - propositionservice
+        - visible
+  - name: base_action
+    description: "Actions"
+    columns:
+      - name: id
+        description: "L'identifiant de l'action"
+      - name: nom
+        description: "Le nom de l'action"
+    config:
+      materialized: table
+      tags:
+        - stats
+        - base
+        - actions
+        - visible
+  - name: base_random_position
+    description: "Positions aléatoires dans la France"
+    columns:
+      - name: longitude
+        description: "La longitude"
+      - name: latitude
+        description: "La latitude"
+    config:
+      materialized: table
+      tags:
+        - stats
+        - base
+        - random_position
