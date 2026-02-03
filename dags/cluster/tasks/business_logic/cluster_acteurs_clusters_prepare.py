@@ -89,12 +89,8 @@ def cluster_acteurs_clusters_prepare(
         lambda x: acteur_to_parent_ids_all.get(x, None)
     )
 
-    # Ensure nombre_enfants is an integer and not NaN
-    df_clusters["nombre_enfants"] = df_clusters["nombre_enfants"].fillna(0)
-    df_clusters["nombre_enfants"] = df_clusters["nombre_enfants"].astype(int)
-
     # Case with no parents (no existing parents found or clustered)
-    df_parents = df_clusters[df_clusters["nombre_enfants"] > 0]
+    df_parents = df_clusters[df_clusters["est_parent"] is True]
     logger.info(f"# parents trouvés dans les clusters: {len(df_parents)}")
     if df_parents.empty:
         logger.info("Pas de parents dans clusters -> pas d'enfants à ajouter")
