@@ -115,6 +115,7 @@ def django_model_queryset_generate(model_class, fields_include_all_filled: list[
     Utile pour des tâches Airflow qui doivent récupérer des données
     de la DB pour les traiter."""
 
+    from django.db import models
     from django.db.models import Q
 
     # Remove fields not in DB to avoid errors
@@ -127,9 +128,15 @@ def django_model_queryset_generate(model_class, fields_include_all_filled: list[
     # Exclude both empty strings ("") and NULL values
     include_all_filled_filter = Q()
     for field in include_fields:
-        include_all_filled_filter &= ~Q(**{f"{field}": ""}) & Q(
-            **{f"{field}__isnull": False}
-        )
+
+        # Check if field is Nullable and is charField using the model field
+        field_obj = model_class._meta.get_field(field)
+        if not isinstance(field_obj, (models.CharField, models.TextField)):
+            include_all_filled_filter &= Q(**{f"{field}__isnull": False})
+        else:
+            include_all_filled_filter &= ~Q(**{f"{field}": ""}) & Q(
+                **{f"{field}__isnull": False}
+            )
 
     return model_class.objects.filter(include_all_filled_filter)
 
