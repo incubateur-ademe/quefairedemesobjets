@@ -103,7 +103,7 @@ def _extract_acteur_values(
                 ],
                 key=lambda x: x["action"],
             )
-            return json.dumps(prop_data, ensure_ascii=False)  # .replace('"', "'")
+            return json.dumps(prop_data, ensure_ascii=False)
         return ""
 
     def get_field_from_perimetre_adomicile_codes(
@@ -125,7 +125,7 @@ def _extract_acteur_values(
                     key=lambda x: (x["type"], x["valeur"]),
                 ),
                 ensure_ascii=False,
-            )  # .replace('"', "'")
+            )
             if perimetres
             else ""
         )
@@ -143,9 +143,7 @@ def _extract_acteur_values(
             else []
         )
         return (
-            json.dumps(
-                sorted([obj.code for obj in m2m_objects]), ensure_ascii=False
-            )  # .replace('"', "'")
+            json.dumps(sorted([obj.code for obj in m2m_objects]), ensure_ascii=False)
             if m2m_objects
             else ""
         )

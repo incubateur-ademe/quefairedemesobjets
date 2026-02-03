@@ -21,7 +21,7 @@
                             Acteur Importé
                             {% if acteur %}
                                 (
-                                <a href="{% url 'admin:qfdmo_acteur_change' acteur.identifiant_unique|quote %}" target="_blank" rel="noreferrer" data-turbo="false">importé</a>
+                                <a href="{{ acteur.change_url }}" target="_blank" rel="noreferrer" data-turbo="false">importé</a>
                                 )
                             {% endif %}
                         </div>
@@ -36,8 +36,8 @@
                             Correction
                             {% if revision_acteur %}
                                 (
-                                    <a href="{% url 'admin:qfdmo_revisionacteur_change' revision_acteur.identifiant_unique|quote %}" target="_blank" rel="noreferrer" data-turbo="false">corrigé</a>
-                                    , <a href="{% url 'admin:qfdmo_vueacteur_change' acteur.identifiant_unique|quote %}" target="_blank" rel="noreferrer" data-turbo="false">affiché</a>
+                                    <a href="{{ revision_acteur.change_url }}" target="_blank" rel="noreferrer" data-turbo="false">corrigé</a>
+                                    , <a href="{{ revision_acteur.vueacteur_change_url }}" target="_blank" rel="noreferrer" data-turbo="false">affiché</a>
                                 )
                             {% endif %}
                         </div>
@@ -51,8 +51,8 @@
                         <th class="qf-w-1/4">
                             <div class="qf-truncate">Parent
                                 (
-                                    <a href="{% url 'admin:qfdmo_revisionacteur_change' parent_revision_acteur.identifiant_unique|quote %}" target="_blank" rel="noreferrer" data-turbo="false">corrigé</a>
-                                    , <a href="{% url 'admin:qfdmo_vueacteur_change' parent_revision_acteur.identifiant_unique|quote %}" target="_blank" rel="noreferrer" data-turbo="false">affiché</a>
+                                    <a href="{{ parent_revision_acteur.change_url }}" target="_blank" rel="noreferrer" data-turbo="false">corrigé</a>
+                                    , <a href="{{ parent_revision_acteur.vueacteur_change_url }}" target="_blank" rel="noreferrer" data-turbo="false">affiché</a>
                                 )
                             </div>
                             {% if parent_revision_acteur.nombre_enfants %}
@@ -166,10 +166,10 @@
     </div>
 
     <ul class="tabs">
-        <li {% if tab == "acteur" %}class="active"{% endif %}><a href="{% url 'data:suggestion_groupe' suggestion_groupe.id %}?tab=acteur">Acteur affiché</a></li>
-        <li {% if tab == "localisation" %}class="active"{% endif %}><a href="{% url 'data:suggestion_groupe' suggestion_groupe.id %}?tab=localisation">Localisation</a></li>
-        <li {% if tab == "annuaire_entreprise" %}class="active"{% endif %}><a href="{% url 'data:suggestion_groupe' suggestion_groupe.id %}?tab=annuaire_entreprise">Annuaire entreprise</a></li>
-        <li ><a href="{% url 'data:suggestion_groupe' suggestion_groupe.id %}">❌ Cacher les détails</a></li>
+        <li {% if tab == "acteur" %}class="active"{% endif %}><a href="{{ suggestion_groupe.change_url }}?tab=acteur">Acteur affiché</a></li>
+        <li {% if tab == "localisation" %}class="active"{% endif %}><a href="{{ suggestion_groupe.change_url }}?tab=localisation">Localisation</a></li>
+        <li {% if tab == "annuaire_entreprise" %}class="active"{% endif %}><a href="{{ suggestion_groupe.change_url }}?tab=annuaire_entreprise">Annuaire entreprise</a></li>
+        <li ><a href="{{ suggestion_groupe.change_url }}">❌ Cacher les détails</a></li>
     </ul>
 
     <div>

@@ -9,7 +9,7 @@
                     target="_blank"
                     rel="noreferrer"
                     data-turbo=false
-                    href="{% url 'admin:qfdmo_vueacteur_change' object.identifiant_unique|quote %}"
+                    href="{{ object.change_url }}"
                 >
                     Lien vers l'admin
                 </a>

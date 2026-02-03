@@ -2,10 +2,12 @@ import logging
 import re
 from datetime import datetime
 
+from django.contrib.admin.utils import quote
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.db.models import BooleanField, Count, ExpressionWrapper, Q
 from django.template.loader import render_to_string
+from django.urls import reverse
 from more_itertools import first
 
 from core.models.mixin import TimestampedModel
@@ -536,6 +538,10 @@ class SuggestionGroupe(TimestampedModel):
             ).first()
             return displayed_acteur.uuid if displayed_acteur else None
         return None
+
+    @property
+    def change_url(self):
+        return reverse("data:suggestion_groupe", args=[quote(self.id)])
 
     def get_identifiant_unique_from_suggestion_unitaires(
         self, model_name: str = "Acteur"
