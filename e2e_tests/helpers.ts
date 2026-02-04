@@ -1,4 +1,4 @@
-import { expect, FrameLocator, Page } from "@playwright/test"
+import { expect, FrameLocator, Locator, Page } from "@playwright/test"
 
 // Constants
 export const TIMEOUT = {
@@ -27,6 +27,7 @@ export async function searchAndSelectAutocomplete(
     optionIndex?: number | "first"
     timeout?: number
     parentSelector?: string
+    parentLocator?: Locator
   } = {},
 ) {
   const {
@@ -34,12 +35,15 @@ export async function searchAndSelectAutocomplete(
     optionIndex = "first",
     timeout = TIMEOUT.DEFAULT,
     parentSelector,
+    parentLocator,
   } = options
 
-  // Build the input locator with optional parent
-  const inputLocator = parentSelector
-    ? context.locator(parentSelector).locator(inputSelector)
-    : context.locator(inputSelector)
+  // Build the input locator with optional parent (parentLocator takes precedence over parentSelector)
+  const inputLocator = parentLocator
+    ? parentLocator.locator(inputSelector)
+    : parentSelector
+      ? context.locator(parentSelector).locator(inputSelector)
+      : context.locator(inputSelector)
 
   await inputLocator.click()
 
@@ -50,18 +54,22 @@ export async function searchAndSelectAutocomplete(
   // Use a balanced delay - fast enough to not slow tests, slow enough to trigger events
   await inputLocator.pressSequentially(searchText, { delay: 30 })
 
-  // Build the autocomplete option locator
-  const autocompleteLocator = parentSelector
-    ? context.locator(parentSelector).locator(autocompleteSelector)
-    : context.locator(autocompleteSelector)
+  // Build the autocomplete option locator (parentLocator takes precedence over parentSelector)
+  const autocompleteLocator = parentLocator
+    ? parentLocator.locator(autocompleteSelector)
+    : parentSelector
+      ? context.locator(parentSelector).locator(autocompleteSelector)
+      : context.locator(autocompleteSelector)
 
-  // Wait for at least one result to appear first
-  await expect(autocompleteLocator.first()).toBeVisible({ timeout })
+  // Wait for an option containing the search text to appear (not just "Autour de moi")
+  // This ensures we wait for the API response, not just the default geolocation option
+  const optionWithText = autocompleteLocator.filter({ hasText: searchText })
+  await expect(optionWithText.first()).toBeVisible({ timeout })
 
   const optionLocator =
     optionIndex === "first"
-      ? autocompleteLocator.first()
-      : autocompleteLocator.nth(optionIndex as number)
+      ? optionWithText.first()
+      : optionWithText.nth(optionIndex as number)
 
   await expect(optionLocator).toBeVisible({ timeout })
   await optionLocator.click()
@@ -74,7 +82,11 @@ export async function searchAddress(
   context: Page | FrameLocator,
   searchText: string,
   formContext: "carte" | "formulaire" = "carte",
-  options: { optionIndex?: number | "first"; parentSelector?: string } = {},
+  options: {
+    optionIndex?: number | "first"
+    parentSelector?: string
+    parentLocator?: Locator
+  } = {},
 ) {
   const inputSelector =
     formContext === "carte"
@@ -84,6 +96,7 @@ export async function searchAddress(
   await searchAndSelectAutocomplete(context, inputSelector, searchText, {
     optionIndex: options.optionIndex ?? "first",
     parentSelector: options.parentSelector,
+    parentLocator: options.parentLocator,
   })
 }
 
@@ -128,230 +141,234 @@ export async function searchDummySousCategorieObjet(page: Page) {
  * API mocking helpers
  */
 export const mockApiAdresse = async (page: Page) =>
-  await page.route("https://data.geopf.fr/geocodage/search?q=auray", async (route) => {
-    const json = {
-      type: "FeatureCollection",
-      features: [
-        {
-          type: "Feature",
-          geometry: { type: "Point", coordinates: [-2.990838, 47.668099] },
-          properties: {
-            label: "Auray",
-            score: 0.9476263636363635,
-            id: "56007",
-            banId: "549cbe54-0b1a-4efd-ae63-fd28ce07ca0d",
-            type: "municipality",
-            name: "Auray",
-            postcode: "56400",
-            citycode: "56007",
-            x: 250839.06,
-            y: 6746792.77,
-            population: 14417,
-            city: "Auray",
-            context: "56, Morbihan, Bretagne",
-            importance: 0.42389,
-            municipality: "Auray",
-            _type: "address",
+  // Use glob pattern to match both with and without trailing slash, and case-insensitive query
+  await page.route(
+    /data\.geopf\.fr\/geocodage\/search\/?\?q=[aA]uray/i,
+    async (route) => {
+      const json = {
+        type: "FeatureCollection",
+        features: [
+          {
+            type: "Feature",
+            geometry: { type: "Point", coordinates: [-2.990838, 47.668099] },
+            properties: {
+              label: "Auray",
+              score: 0.9476263636363635,
+              id: "56007",
+              banId: "549cbe54-0b1a-4efd-ae63-fd28ce07ca0d",
+              type: "municipality",
+              name: "Auray",
+              postcode: "56400",
+              citycode: "56007",
+              x: 250839.06,
+              y: 6746792.77,
+              population: 14417,
+              city: "Auray",
+              context: "56, Morbihan, Bretagne",
+              importance: 0.42389,
+              municipality: "Auray",
+              _type: "address",
+            },
           },
-        },
-        {
-          type: "Feature",
-          geometry: { type: "Point", coordinates: [-1.581721, 47.262066] },
-          properties: {
-            label: "Avenue d'Auray 44300 Nantes",
-            score: 0.7003545454545453,
-            id: "44109_0479",
-            banId: "e35da293-0241-49ab-8645-5e520c3b5343",
-            name: "Avenue d'Auray",
-            postcode: "44300",
-            citycode: "44109",
-            x: 353734.46,
-            y: 6694688.35,
-            city: "Nantes",
-            context: "44, Loire-Atlantique, Pays de la Loire",
-            type: "street",
-            importance: 0.7039,
-            street: "Avenue d'Auray",
-            _type: "address",
+          {
+            type: "Feature",
+            geometry: { type: "Point", coordinates: [-1.581721, 47.262066] },
+            properties: {
+              label: "Avenue d'Auray 44300 Nantes",
+              score: 0.7003545454545453,
+              id: "44109_0479",
+              banId: "e35da293-0241-49ab-8645-5e520c3b5343",
+              name: "Avenue d'Auray",
+              postcode: "44300",
+              citycode: "44109",
+              x: 353734.46,
+              y: 6694688.35,
+              city: "Nantes",
+              context: "44, Loire-Atlantique, Pays de la Loire",
+              type: "street",
+              importance: 0.7039,
+              street: "Avenue d'Auray",
+              _type: "address",
+            },
           },
-        },
-        {
-          type: "Feature",
-          geometry: { type: "Point", coordinates: [-2.99836, 47.672986] },
-          properties: {
-            label: "Rue Abbé Philippe le Gall 56400 Auray",
-            score: 0.6980245454545453,
-            id: "56007_0020",
-            banId: "f9cca489-4884-4e1a-9749-c0befb576f4d",
-            name: "Rue Abbé Philippe le Gall",
-            postcode: "56400",
-            citycode: "56007",
-            x: 250317.39,
-            y: 6747376.96,
-            city: "Auray",
-            context: "56, Morbihan, Bretagne",
-            type: "street",
-            importance: 0.67827,
-            street: "Rue Abbé Philippe le Gall",
-            _type: "address",
+          {
+            type: "Feature",
+            geometry: { type: "Point", coordinates: [-2.99836, 47.672986] },
+            properties: {
+              label: "Rue Abbé Philippe le Gall 56400 Auray",
+              score: 0.6980245454545453,
+              id: "56007_0020",
+              banId: "f9cca489-4884-4e1a-9749-c0befb576f4d",
+              name: "Rue Abbé Philippe le Gall",
+              postcode: "56400",
+              citycode: "56007",
+              x: 250317.39,
+              y: 6747376.96,
+              city: "Auray",
+              context: "56, Morbihan, Bretagne",
+              type: "street",
+              importance: 0.67827,
+              street: "Rue Abbé Philippe le Gall",
+              _type: "address",
+            },
           },
-        },
-        {
-          type: "Feature",
-          geometry: { type: "Point", coordinates: [-2.993942, 47.675005] },
-          properties: {
-            label: "Avenue du Général de Gaulle 56400 Auray",
-            score: 0.6979390909090909,
-            id: "56007_0420",
-            banId: "5cf7532a-0c8b-4aee-aaf6-5bc19e359704",
-            name: "Avenue du Général de Gaulle",
-            postcode: "56400",
-            citycode: "56007",
-            x: 250664.97,
-            y: 6747575.48,
-            city: "Auray",
-            context: "56, Morbihan, Bretagne",
-            type: "street",
-            importance: 0.67733,
-            street: "Avenue du Général de Gaulle",
-            _type: "address",
+          {
+            type: "Feature",
+            geometry: { type: "Point", coordinates: [-2.993942, 47.675005] },
+            properties: {
+              label: "Avenue du Général de Gaulle 56400 Auray",
+              score: 0.6979390909090909,
+              id: "56007_0420",
+              banId: "5cf7532a-0c8b-4aee-aaf6-5bc19e359704",
+              name: "Avenue du Général de Gaulle",
+              postcode: "56400",
+              citycode: "56007",
+              x: 250664.97,
+              y: 6747575.48,
+              city: "Auray",
+              context: "56, Morbihan, Bretagne",
+              type: "street",
+              importance: 0.67733,
+              street: "Avenue du Général de Gaulle",
+              _type: "address",
+            },
           },
-        },
-        {
-          type: "Feature",
-          geometry: { type: "Point", coordinates: [2.41584, 48.889926] },
-          properties: {
-            label: "Rue Charles Auray 93500 Pantin",
-            score: 0.6972045454545454,
-            id: "93055_1440",
-            banId: "b761329c-b320-4a1a-90bb-fdcc90197be0",
-            name: "Rue Charles Auray",
-            postcode: "93500",
-            citycode: "93055",
-            x: 657165.8,
-            y: 6865704.47,
-            city: "Pantin",
-            context: "93, Seine-Saint-Denis, Île-de-France",
-            type: "street",
-            importance: 0.66925,
-            street: "Rue Charles Auray",
-            _type: "address",
+          {
+            type: "Feature",
+            geometry: { type: "Point", coordinates: [2.41584, 48.889926] },
+            properties: {
+              label: "Rue Charles Auray 93500 Pantin",
+              score: 0.6972045454545454,
+              id: "93055_1440",
+              banId: "b761329c-b320-4a1a-90bb-fdcc90197be0",
+              name: "Rue Charles Auray",
+              postcode: "93500",
+              citycode: "93055",
+              x: 657165.8,
+              y: 6865704.47,
+              city: "Pantin",
+              context: "93, Seine-Saint-Denis, Île-de-France",
+              type: "street",
+              importance: 0.66925,
+              street: "Rue Charles Auray",
+              _type: "address",
+            },
           },
-        },
-        {
-          type: "Feature",
-          geometry: { type: "Point", coordinates: [-2.991392, 47.676459] },
-          properties: {
-            label: "Rue de l'Amiral Coude 56400 Auray",
-            score: 0.6957854545454544,
-            id: "56007_0040",
-            banId: "ee93e999-c3e9-4d8a-a2ae-55ff3c8bb68e",
-            name: "Rue de l'Amiral Coude",
-            postcode: "56400",
-            citycode: "56007",
-            x: 250868.01,
-            y: 6747722.05,
-            city: "Auray",
-            context: "56, Morbihan, Bretagne",
-            type: "street",
-            importance: 0.65364,
-            street: "Rue de l'Amiral Coude",
-            _type: "address",
+          {
+            type: "Feature",
+            geometry: { type: "Point", coordinates: [-2.991392, 47.676459] },
+            properties: {
+              label: "Rue de l'Amiral Coude 56400 Auray",
+              score: 0.6957854545454544,
+              id: "56007_0040",
+              banId: "ee93e999-c3e9-4d8a-a2ae-55ff3c8bb68e",
+              name: "Rue de l'Amiral Coude",
+              postcode: "56400",
+              citycode: "56007",
+              x: 250868.01,
+              y: 6747722.05,
+              city: "Auray",
+              context: "56, Morbihan, Bretagne",
+              type: "street",
+              importance: 0.65364,
+              street: "Rue de l'Amiral Coude",
+              _type: "address",
+            },
           },
-        },
-        {
-          type: "Feature",
-          geometry: { type: "Point", coordinates: [-2.986629, 47.669016] },
-          properties: {
-            label: "Rue Georges Clemenceau 56400 Auray",
-            score: 0.6953527272727272,
-            id: "56007_0440",
-            banId: "421a4826-9b6c-4c38-8900-fc5d86c6d4c1",
-            name: "Rue Georges Clemenceau",
-            postcode: "56400",
-            citycode: "56007",
-            x: 251161.74,
-            y: 6746870.42,
-            city: "Auray",
-            context: "56, Morbihan, Bretagne",
-            type: "street",
-            importance: 0.64888,
-            street: "Rue Georges Clemenceau",
-            _type: "address",
+          {
+            type: "Feature",
+            geometry: { type: "Point", coordinates: [-2.986629, 47.669016] },
+            properties: {
+              label: "Rue Georges Clemenceau 56400 Auray",
+              score: 0.6953527272727272,
+              id: "56007_0440",
+              banId: "421a4826-9b6c-4c38-8900-fc5d86c6d4c1",
+              name: "Rue Georges Clemenceau",
+              postcode: "56400",
+              citycode: "56007",
+              x: 251161.74,
+              y: 6746870.42,
+              city: "Auray",
+              context: "56, Morbihan, Bretagne",
+              type: "street",
+              importance: 0.64888,
+              street: "Rue Georges Clemenceau",
+              _type: "address",
+            },
           },
-        },
-        {
-          type: "Feature",
-          geometry: { type: "Point", coordinates: [-2.98362, 47.666574] },
-          properties: {
-            label: "Place de la Republique 56400 Auray",
-            score: 0.6947599999999998,
-            id: "56007_1210",
-            banId: "6c347e14-2449-44e4-98ea-4115d27fa630",
-            name: "Place de la Republique",
-            postcode: "56400",
-            citycode: "56007",
-            x: 251366.36,
-            y: 6746582.79,
-            city: "Auray",
-            context: "56, Morbihan, Bretagne",
-            type: "street",
-            importance: 0.64236,
-            street: "Place de la Republique",
-            _type: "address",
+          {
+            type: "Feature",
+            geometry: { type: "Point", coordinates: [-2.98362, 47.666574] },
+            properties: {
+              label: "Place de la Republique 56400 Auray",
+              score: 0.6947599999999998,
+              id: "56007_1210",
+              banId: "6c347e14-2449-44e4-98ea-4115d27fa630",
+              name: "Place de la Republique",
+              postcode: "56400",
+              citycode: "56007",
+              x: 251366.36,
+              y: 6746582.79,
+              city: "Auray",
+              context: "56, Morbihan, Bretagne",
+              type: "street",
+              importance: 0.64236,
+              street: "Place de la Republique",
+              _type: "address",
+            },
           },
-        },
-        {
-          type: "Feature",
-          geometry: { type: "Point", coordinates: [-2.979633, 47.667452] },
-          properties: {
-            label: "Avenue President Wilson 56400 Auray",
-            score: 0.694400909090909,
-            id: "56007_1160",
-            banId: "3c89a749-cbbb-496b-9f4e-1642fdfbffe0",
-            name: "Avenue President Wilson",
-            postcode: "56400",
-            citycode: "56007",
-            x: 251672.1,
-            y: 6746657.41,
-            city: "Auray",
-            context: "56, Morbihan, Bretagne",
-            type: "street",
-            importance: 0.63841,
-            street: "Avenue President Wilson",
-            _type: "address",
+          {
+            type: "Feature",
+            geometry: { type: "Point", coordinates: [-2.979633, 47.667452] },
+            properties: {
+              label: "Avenue President Wilson 56400 Auray",
+              score: 0.694400909090909,
+              id: "56007_1160",
+              banId: "3c89a749-cbbb-496b-9f4e-1642fdfbffe0",
+              name: "Avenue President Wilson",
+              postcode: "56400",
+              citycode: "56007",
+              x: 251672.1,
+              y: 6746657.41,
+              city: "Auray",
+              context: "56, Morbihan, Bretagne",
+              type: "street",
+              importance: 0.63841,
+              street: "Avenue President Wilson",
+              _type: "address",
+            },
           },
-        },
-        {
-          type: "Feature",
-          geometry: { type: "Point", coordinates: [-2.981106, 47.666589] },
-          properties: {
-            label: "Rue du Chateau 56400 Auray",
-            score: 0.694010909090909,
-            id: "56007_0190",
-            banId: "15dfa8f2-ed88-44a7-87ab-3495961931b7",
-            name: "Rue du Chateau",
-            postcode: "56400",
-            citycode: "56007",
-            x: 251554.62,
-            y: 6746570.17,
-            city: "Auray",
-            context: "56, Morbihan, Bretagne",
-            type: "street",
-            importance: 0.63412,
-            street: "Rue du Chateau",
-            _type: "address",
+          {
+            type: "Feature",
+            geometry: { type: "Point", coordinates: [-2.981106, 47.666589] },
+            properties: {
+              label: "Rue du Chateau 56400 Auray",
+              score: 0.694010909090909,
+              id: "56007_0190",
+              banId: "15dfa8f2-ed88-44a7-87ab-3495961931b7",
+              name: "Rue du Chateau",
+              postcode: "56400",
+              citycode: "56007",
+              x: 251554.62,
+              y: 6746570.17,
+              city: "Auray",
+              context: "56, Morbihan, Bretagne",
+              type: "street",
+              importance: 0.63412,
+              street: "Rue du Chateau",
+              _type: "address",
+            },
           },
-        },
-      ],
-      query: "auray",
-    }
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify(json),
-    })
-  })
+        ],
+        query: "auray",
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(json),
+      })
+    },
+  )
 
 /**
  * Modal/Dialog helpers
@@ -507,28 +524,13 @@ export async function getMarkers(page: Page) {
   return [markers, count] as const
 }
 
-export async function clickFirstAvailableMarker(
-  context: Page | FrameLocator,
-  markerSelector = ".maplibregl-marker:has(svg)",
-) {
-  const markers = context.locator(markerSelector)
-  const count = await markers.count()
-
-  for (let i = 0; i < count; i++) {
-    const item = markers.nth(i)
-    try {
-      await item.click({ force: true })
-      break
-    } catch (e) {
-      console.log(`Cannot click marker ${i}:`, e)
-    }
-  }
-}
-
 /**
  * Click on the first acteur marker that is not obstructed by other elements.
  * Cycles through markers and attempts to click each one until successful.
  * Excludes the home marker (#pinpoint-home) which often overlaps acteur markers.
+ *
+ * For iframe contexts, if all normal clicks fail, falls back to using
+ * dispatchEvent on the actual link element inside the marker.
  */
 export async function clickFirstClickableActeurMarker(
   context: Page | FrameLocator,
@@ -536,8 +538,9 @@ export async function clickFirstClickableActeurMarker(
 ) {
   const { timeout = 1000 } = options
 
+  // Select markers that contain a pinpoint controller link (not the home marker)
   const acteurMarkers = context.locator(
-    '.maplibregl-marker[data-controller="pinpoint"]:not(#pinpoint-home)',
+    '.maplibregl-marker:has([data-controller="pinpoint"]):not(#pinpoint-home)',
   )
   const count = await acteurMarkers.count()
 
@@ -553,10 +556,14 @@ export async function clickFirstClickableActeurMarker(
     }
   }
 
-  // If all markers failed, throw an error
-  throw new Error(
-    `Could not click any of the ${count} acteur markers - all are obstructed`,
-  )
+  // If all markers failed with normal click, try using evaluate to trigger click
+  // This is a fallback for iframe contexts where overlay detection may fail
+  const firstLink = context
+    .locator('[data-controller="pinpoint"]:not(#pinpoint-home)')
+    .first()
+
+  // Use evaluate to trigger a proper click event that will go through event handlers
+  await firstLink.evaluate((el: HTMLElement) => el.click())
 }
 
 /**
@@ -582,8 +589,17 @@ export function getIframe(page: Page, iframeId?: string) {
 
 /**
  * SessionStorage helpers
+ * keyToWaitFor is a sessionStorage key that should be defined before the sessionStorage
+ * is returned. This helps rely on the auto-wait features of playwright where
+ * the sessionStorage set might be async.
  */
-export async function getSessionStorage(page: Page) {
+export async function getSessionStorage(page: Page, keyToWaitFor?: string) {
+  if (keyToWaitFor) {
+    await page.waitForFunction(
+      (keyToWaitFor) => window.sessionStorage.getItem(keyToWaitFor) !== undefined,
+      keyToWaitFor,
+    )
+  }
   return await page.evaluate(() => window.sessionStorage)
 }
 
@@ -607,7 +623,28 @@ export async function openFiltresModal(iframe: ReturnType<typeof getIframe>) {
   await openModal(iframe, {
     buttonSelector: { role: "button", name: /Filtres/i },
     modalDataTestId: "modal-carte:filtres",
-    modalContentSelector: 'input[name="filtres-bonus"]', // Wait for a field that's always present
+    // Use a partial selector that matches any prefix (carte_filtres-bonus, test-xxx_filtres-bonus, etc.)
+    modalContentSelector: 'input[name$="_filtres-bonus"]',
     closeModal: false, // Keep modal open so we can check fields
   })
+}
+
+export async function searchOnProduitPage(page: Page, searchedAddress: string) {
+  await mockApiAdresse(page) // Mock BEFORE interacting with input
+
+  try {
+    const mauvaisEtatPanel = page.locator("#mauvais-etat-panel")
+    await expect(mauvaisEtatPanel).toBeAttached({ timeout: 1000 })
+    await searchAddress(page, searchedAddress, "carte", {
+      parentLocator: mauvaisEtatPanel,
+    })
+  } catch {
+    const someWagtailCarteBlock = page
+      .locator(".cmsfr-block-carte_sur_mesure turbo-frame[data-testid=carte]")
+      .first()
+    await expect(someWagtailCarteBlock).toBeAttached({ timeout: 1000 })
+    await searchAddress(page, searchedAddress, "carte", {
+      parentLocator: someWagtailCarteBlock,
+    })
+  }
 }

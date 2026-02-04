@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test"
 import {
   getIframe,
+  mockApiAdresse,
   navigateTo,
   openFiltresModal,
   openModal,
@@ -24,14 +25,17 @@ test.describe("🎛️ Configuration Carte - Paramètre Legacy Bonus", () => {
       .locator('[data-testid="carte-adresse-input"]')
       .waitFor({ timeout: TIMEOUT.DEFAULT })
 
+    // Mock the address API before searching
+    await mockApiAdresse(page)
+
     // Perform a search to make the filtres button appear
     await searchForAurayInIframe(iframe)
 
     // Open the filtres modal
     await openFiltresModal(iframe)
 
-    // Verify that the bonus checkbox is checked
-    const bonusCheckbox = iframe.locator('input[name="filtres-bonus"]')
+    // Verify that the bonus checkbox is checked (use partial selector to handle different prefixes)
+    const bonusCheckbox = iframe.locator('input[name$="_filtres-bonus"]')
     await expect(bonusCheckbox).toBeChecked({ timeout: TIMEOUT.SHORT })
   })
 
@@ -50,14 +54,17 @@ test.describe("🎛️ Configuration Carte - Paramètre Legacy Bonus", () => {
       .locator('[data-testid="carte-adresse-input"]')
       .waitFor({ timeout: TIMEOUT.DEFAULT })
 
+    // Mock the address API before searching
+    await mockApiAdresse(page)
+
     // Perform a search to make the filtres button appear
     await searchForAurayInIframe(iframe)
 
     // Open the filtres modal
     await openFiltresModal(iframe)
 
-    // Verify that the bonus checkbox is checked
-    const bonusCheckbox = iframe.locator('input[name="filtres-bonus"]')
+    // Verify that the bonus checkbox is checked (use partial selector to handle different prefixes)
+    const bonusCheckbox = iframe.locator('input[name$="_filtres-bonus"]')
     await expect(bonusCheckbox).toBeChecked({ timeout: TIMEOUT.SHORT })
   })
 })
@@ -78,14 +85,17 @@ test.describe("🎛️ Configuration Carte - Cacher Filtre Objet", () => {
       .locator('[data-testid="carte-adresse-input"]')
       .waitFor({ timeout: TIMEOUT.DEFAULT })
 
+    // Mock the address API before searching
+    await mockApiAdresse(page)
+
     // Perform a search to make the filtres button appear
     await searchForAurayInIframe(iframe)
 
     // Open the filtres modal
     await openFiltresModal(iframe)
 
-    // Verify that the synonyme field is NOT present in the form
-    const synonymeField = iframe.locator('input[id="id_filtres-synonyme"]')
+    // Verify that the synonyme field is NOT present in the form (use partial selector to handle different prefixes)
+    const synonymeField = iframe.locator('input[id$="_filtres-synonyme"]')
     await expect(synonymeField).not.toBeAttached()
   })
 
@@ -104,14 +114,17 @@ test.describe("🎛️ Configuration Carte - Cacher Filtre Objet", () => {
       .locator('[data-testid="carte-adresse-input"]')
       .waitFor({ timeout: TIMEOUT.DEFAULT })
 
+    // Mock the address API before searching
+    await mockApiAdresse(page)
+
     // Perform a search to make the filtres button appear
     await searchForAurayInIframe(iframe)
 
     // Open the filtres modal
     await openFiltresModal(iframe)
 
-    // Verify that the synonyme field IS present in the form
-    const synonymeField = iframe.locator('input[id="id_filtres-synonyme"]')
+    // Verify that the synonyme field IS present in the form (use partial selector to handle different prefixes)
+    const synonymeField = iframe.locator('input[id$="_filtres-synonyme"]')
     await expect(synonymeField).toBeAttached({ timeout: TIMEOUT.SHORT })
     await expect(synonymeField).toBeVisible({ timeout: TIMEOUT.SHORT })
   })
