@@ -12,6 +12,7 @@ jobs:
   ci:
     name: 🤖 CI
     uses: ./.github/workflows/ci.yml
+    secrets: inherit #pragma: allowlist secret
 
   webapp:
     name: 🟠 Webapp

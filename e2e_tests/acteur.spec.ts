@@ -11,6 +11,10 @@ test.describe("📤 Acteur Share", () => {
     })
   })
 
+  // This test is skipped because the tooltip on http://quefairedemesdechets.ademe.local/lookbook/preview/pages/acteur/
+  // cannot be properly displayed on hover.
+  // The position of the tooltip continuously change, which is not an intended behaviour.
+  // To be adresses when we will remove the tooltip, that is not accessible.
   test.skip("Le bouton copier dans le presse-papier copie l'URL complète de l'acteur", async ({
     page,
   }) => {

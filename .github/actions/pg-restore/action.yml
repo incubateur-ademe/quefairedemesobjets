@@ -1,0 +1,21 @@
+name: Restore PostgreSQL Database
+description: Restore a PostgreSQL database from a dump file
+
+inputs:
+  database-url:
+    description: "PostgreSQL database URL"
+    required: true
+  dump-path:
+    description: "Path to the database dump file"
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Restore PostgreSQL database
+      shell: bash
+      run: |
+        pg_restore -d ${{ inputs.database-url }} \
+            --clean --if-exists \
+            --no-owner --no-privileges \
+            ${{ inputs.dump-path }} || true

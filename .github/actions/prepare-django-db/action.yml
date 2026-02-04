@@ -5,10 +5,14 @@ inputs:
   cache-key:
     description: "Cache key for database dump"
     required: true
-  database-dump-path:
-    description: "Path to store database dump"
+  local-dump-path:
+    description: "Path to store local database dump"
     required: false
     default: "database-dump.pgdump"
+  sample-dump-path:
+    description: "Path to store the sample dump"
+    required: false
+    default: "sample-dump.pgdump"
   sample-db-uri:
     description: "PostgreSQL URI to dump sample database from (e.g., postgres://user:pass@host:port/dbname)" # pragma: allowlist secret
     required: false
@@ -28,21 +32,25 @@ runs:
   steps:
     - name: Check database cache
       id: cache-db
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
-        path: ${{ inputs.database-dump-path }}
+        path: ${{ inputs.local-dump-path }}
         key: ${{ inputs.cache-key }}
 
-    - name: Dump and restore sample database
-      if: steps.cache-db.outputs.cache-hit != 'true' && inputs.sample-db-uri != ''
+    - name: Dump sample database from remote
+      if: steps.cache-db.outputs.cache-hit != 'true'
       shell: bash
       run: |
         echo "Dumping sample database from remote..."
-        pg_dump -Fc "${{ inputs.sample-db-uri }}" -f sample-database.pgdump
+        pg_dump -Fc "${{ inputs.sample-db-uri }}" -f ${{ inputs.sample-dump-path }}
         echo "Sample database dumped successfully"
-        echo "Restoring sample database to local database..."
-        pg_restore -d ${{ inputs.database-url }} --clean --if-exists sample-database.pgdump || true
-        echo "Sample database restored successfully"
+
+    - name: Restore sample database
+      if: steps.cache-db.outputs.cache-hit != 'true'
+      uses: ./.github/actions/pg-restore
+      with:
+        database-url: ${{ inputs.database-url }}
+        dump-path: ${{ inputs.sample-dump-path }}
 
     - name: Prepare django, migrate, collect static files
       if: steps.cache-db.outputs.cache-hit != 'true'
@@ -59,4 +67,4 @@ runs:
     - name: Dump PostgreSQL database
       if: steps.cache-db.outputs.cache-hit != 'true'
       shell: bash
-      run: pg_dump -Fc -f ${{ inputs.database-dump-path }}
+      run: pg_dump -Fc -f ${{ inputs.local-dump-path }}
