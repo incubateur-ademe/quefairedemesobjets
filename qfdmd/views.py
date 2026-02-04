@@ -13,6 +13,7 @@ from queryish.rest import APIModel
 from wagtail.admin.viewsets.chooser import ChooserViewSet
 from wagtail.models import Page
 
+from core.constants import SEARCH_TERM_ID_QUERY_PARAM
 from core.views import static_file_content_from
 from qfdmd.forms import SearchForm
 from qfdmd.models import (
@@ -189,13 +190,23 @@ class SynonymeDetailView(AssistantBaseView, DetailView):
     template_name = "ui/pages/produit.html"
     model = Synonyme
 
+    def _build_redirect_url(self, request: HttpRequest, base_url: str) -> str:
+        """Build redirect URL, preserving search_term_id if present."""
+        search_term_id = request.GET.get(SEARCH_TERM_ID_QUERY_PARAM)
+        if search_term_id:
+            return f"{base_url}?{SEARCH_TERM_ID_QUERY_PARAM}={search_term_id}"
+        return base_url
+
     def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         synonyme = self.get_object()
 
         # First, check if the synonyme has a direct redirection
         try:
             synonyme_intermediate_page = synonyme.next_wagtail_page
-            return redirect(synonyme_intermediate_page.page.url)
+            redirect_url = self._build_redirect_url(
+                request, synonyme_intermediate_page.page.url
+            )
+            return redirect(redirect_url)
         except Synonyme.next_wagtail_page.RelatedObjectDoesNotExist:
             pass
 
@@ -207,7 +218,10 @@ class SynonymeDetailView(AssistantBaseView, DetailView):
                 or synonyme.should_not_redirect_to.page != intermediate_page.page
             )
             if synonyme_can_be_redirected:
-                return redirect(intermediate_page.page.url)
+                redirect_url = self._build_redirect_url(
+                    request, intermediate_page.page.url
+                )
+                return redirect(redirect_url)
         except Produit.next_wagtail_page.RelatedObjectDoesNotExist:
             pass
 

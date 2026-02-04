@@ -8,6 +8,7 @@ from django.contrib.postgres.search import (
 )
 from django.db.models import Case, F, Value, When
 from dsfr.forms import DsfrBaseForm
+from modelsearch.query import Fuzzy
 
 from search.models import SearchTerm
 
@@ -34,7 +35,7 @@ class SearchForm(DsfrBaseForm):
             self.results = []
             return self.results
 
-        self.results = list(SearchTerm.objects.autocomplete(search_query)[:10])
+        self.results = list(SearchTerm.objects.autocomplete(Fuzzy(search_query))[:10])
         return self.results
 
     def _search_pages(self, search_query: str):
