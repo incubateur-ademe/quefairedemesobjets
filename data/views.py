@@ -389,7 +389,7 @@ def serialize_suggestion_groupe(
             ),
             "acteur": _display_suggestion_unitaire_for_a_field(
                 key, acteur_suggestion_unitaires_by_field, getattr(acteur_values, key)
-            ),  # FIXME: display the diff suggestion
+            ),
             "revision_acteur": _display_suggestion_unitaire_for_a_field(
                 key,
                 acteur_overridden_by_suggestion_unitaires_by_field,

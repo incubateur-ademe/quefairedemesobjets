@@ -1,6 +1,26 @@
 import json
+from enum import Enum
 
 from pydantic import BaseModel, ConfigDict
+
+from data.models.suggestion import SuggestionUnitaire
+
+# FIXME: update classes naming because it is confusing
+
+
+class SuggestionModele(str, Enum):
+    """
+    Reference to kind of model (meta model)
+
+    - Acteur: Acteur model
+    - RevisionActeur: RevisionActeur model
+    - ParentRevisionActeur: RevisionActeur model as parent
+
+    """
+
+    ACTEUR = "Acteur"
+    REVISION_ACTEUR = "RevisionActeur"
+    PARENT_REVISION_ACTEUR = "ParentRevisionActeur"
 
 
 class SuggestionSourceModel(BaseModel):
@@ -129,3 +149,36 @@ class SuggestionSourceModel(BaseModel):
             "proposition_service_codes",
             "perimetre_adomicile_codes",
         ]
+
+
+class SuggestionUnitaireInstance(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    suggestion_modele: SuggestionModele
+    field_name: str
+    instance: SuggestionSourceModel
+    suggestion_unitaire: SuggestionUnitaire | None = None
+
+    def target_value(self) -> str | None:
+        """
+        field value once the suggestion is valided
+        """
+        pass
+
+    def display_value(self):
+        """
+        suggestion visualisation of the field
+        """
+        pass
+        # return _display_suggestion_unitaire_for_a_field(
+        #      self.field_name,
+        #      acteur_suggestion_unitaires_by_field,
+        #      getattr(acteur_values, key),
+        #  )
+        pass
+        # "acteur_target_value": getattr(
+        #     acteur_suggestion_unitaires_by_field, key, None
+        # ),
+        # "acteur": _display_suggestion_unitaire_for_a_field(
+        #     key, acteur_suggestion_unitaires_by_field, getattr(acteur_values, key)
+        # ),
