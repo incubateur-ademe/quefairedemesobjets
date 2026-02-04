@@ -720,6 +720,8 @@ class DisplayedActeurAdmin(ExportMixin, FinalActeurAdminMixin, BaseActeurAdmin):
         "uuid",
         "identifiant_unique",
         "sources",
+        "latitude",
+        "longitude",
         *base_fields,
         "epci",
         "code_commune_insee",
@@ -757,6 +759,8 @@ class VueActeurAdmin(FinalActeurAdminMixin, BaseActeurAdmin):
     fields = [
         "est_parent",
         "uuid",
+        "latitude",
+        "longitude",
         *BaseActeurAdmin.fields,
         "parent",
         "revision_existe",

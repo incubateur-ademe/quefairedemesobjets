@@ -125,6 +125,12 @@ models:
       - name: epci_id
         description: "L'identifiant de l'EPCI de l'acteur"
         data_type: integer
+      - name: latitude
+        description: "La latitude de la localisation de l'acteur"
+        data_type: float
+      - name: longitude
+        description: "La longitude de la localisation de l'acteur"
+        data_type: float
     config:
       tags:
         - exposure

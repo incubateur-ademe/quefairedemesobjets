@@ -1,1 +1,1 @@
-select * from {{ ref('marts_exhaustive_acteur') }}
+SELECT * FROM {{ ref('marts_exhaustive_acteur') }}
