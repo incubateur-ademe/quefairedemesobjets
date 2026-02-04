@@ -42,8 +42,7 @@ class SearchTerm(index.Indexed, models.Model):
         ),
     )
 
-    # Legacy flag - indicates if this search term comes from a legacy model
-    # (e.g., Synonyme)
+    # Legacy flag - indicates if this search term comes from a legacy model (Synonyme)
     legacy = models.BooleanField(
         verbose_name="Legacy",
         default=False,
@@ -164,7 +163,10 @@ class SearchTerm(index.Indexed, models.Model):
 
     @classmethod
     def delete_for_object(cls, obj):
-        """Delete SearchTerm for the given object."""
+        """Delete SearchTerm for the given object.
+        This is usually called in the delete method of classes
+        that needs to sync their removal with their SearchTerm,
+        Wagtail pages' SearchTag for example."""
         content_type = ContentType.objects.get_for_model(obj)
         cls.objects.filter(
             linked_content_type=content_type, linked_object_id=obj.pk
