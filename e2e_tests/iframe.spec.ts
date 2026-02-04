@@ -140,6 +140,57 @@ test.describe("📦 Système d'Intégration Iframe", () => {
       )
     })
   })
+
+  test.describe("Persistance du mode iframe", () => {
+    // NOTE: This test is skipped because iframe mode is detected via the Sec-Fetch-Dest
+    // header (set automatically by browsers when loading inside an <iframe>), not via
+    // URL parameters. Navigating directly to /?iframe doesn't enable iframe mode.
+    // For proper iframe navigation testing, see iframe_navigation.spec.ts which uses
+    // an actual iframe via /lookbook/preview/tests/t_8_iframe_navigation_persistence
+    test.skip("Le mode iframe persiste lors de la navigation entre pages", async ({
+      page,
+      baseURL,
+    }) => {
+      test.slow()
+      await navigateTo(page, `/?iframe`)
+      expect(page).not.toBeNull()
+
+      // Reduced iterations for stability, and added better link selection
+      for (let i = 0; i < 10; i++) {
+        await expect(page.locator("body")).toHaveAttribute(
+          "data-state-iframe-value",
+          "true",
+        )
+
+        // Find visible links that point to internal pages
+        const links = page.locator(`a[href^="${baseURL}"]:visible`)
+        const count = await links.count()
+
+        if (count === 0) {
+          // No more internal links on this page, test passed
+          break
+        }
+
+        const randomIndex = Math.floor(Math.random() * count)
+        const randomLink = links.nth(randomIndex)
+
+        try {
+          await randomLink.click({ timeout: 5000 })
+          // Wait for navigation to complete
+          await page.waitForLoadState("domcontentloaded")
+        } catch {
+          // If click fails, try next iteration
+          continue
+        }
+      }
+
+      // Final check that iframe mode is still active
+      await expect(page.locator("body")).toHaveAttribute(
+        "data-state-iframe-value",
+        "true",
+      )
+    })
+  })
 })
 test.describe("📜 Accessibilité des Scripts d'Intégration", () => {
   /**
