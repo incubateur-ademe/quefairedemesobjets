@@ -24,11 +24,6 @@ def register_pokemon_chooser_viewset():
 
 
 @hooks.register("register_admin_viewset")
-def register_search_term_viewset():
-    return search_term_viewset
-
-
-@hooks.register("register_admin_viewset")
 def register_bonus_viewset():
     return bonus_viewset
 
