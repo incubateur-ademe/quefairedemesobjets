@@ -5,6 +5,8 @@ sources:
     schema: webapp_public
     tables:
       - name : qfdmo_vueacteur
+      - name : qfdmo_vuepropositionservice
+      - name : qfdmo_action
   - name: stats_clone
     schema: public
     tables:

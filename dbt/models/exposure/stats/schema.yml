@@ -249,3 +249,38 @@ models:
         - siren
         - actif
         - rate
+  - name: exposure_stats_distance_nb_acteur_by_action
+    description: "Statistiques de distance et nombre de solutions par action. Calcule la moyenne de distance_m et nb_solutions_100km par action et globalement (TOUTES_ACTIONS)."
+    columns:
+      - name: date_snapshot
+        description: "Date de l'exécution dbt"
+        data_tests:
+          - not_null
+      - name: action_id
+        description: "ID de l'action (NULL pour la ligne globale TOUTES_ACTIONS)"
+      - name: action_code
+        description: "Code de l'action ou 'TOUTES_ACTIONS' pour le calcul global"
+        data_tests:
+          - not_null
+      - name: avg_distance_m
+        description: "Distance moyenne en mètres vers l'acteur le plus proche"
+        data_tests:
+          - not_null
+      - name: avg_nb_solutions_100km
+        description: "Nombre moyen de solutions dans un rayon de 100km"
+        data_tests:
+          - not_null
+      - name: nb_positions
+        description: "Nombre de positions utilisées pour le calcul"
+        data_tests:
+          - not_null
+    config:
+      materialized: incremental
+      unique_key: [date_snapshot, action_code]
+      incremental_strategy: delete+insert
+      tags:
+        - exposure
+        - stats
+        - acteurs
+        - distance
+        - action
