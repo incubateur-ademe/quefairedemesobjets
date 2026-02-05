@@ -90,7 +90,7 @@ def cluster_acteurs_clusters_prepare(
     )
 
     # Case with no parents (no existing parents found or clustered)
-    df_parents = df_clusters[df_clusters["est_parent"] == True]  # noqa: E712
+    df_parents = df_clusters[df_clusters["est_parent"]]  # noqa: E712
     logger.info(f"# parents trouvés dans les clusters: {len(df_parents)}")
     if df_parents.empty:
         logger.info("Pas de parents dans clusters -> pas d'enfants à ajouter")

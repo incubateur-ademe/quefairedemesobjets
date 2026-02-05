@@ -76,7 +76,7 @@ def cluster_acteurs_one_cluster_parent_changes_mark(
     df.loc[parent_index, COL_CHANGE_ORDER] = 1
 
     # Ensuite tous les enfants (non-parents) doivent pointer vers le nouveau parent
-    filter_point = (df["est_parent"] == False) & (  # noqa: E712
+    filter_point = (~df["est_parent"].fillna(False)) & (
         df["identifiant_unique"] != parent_id
     )
     df[COL_PARENT_ID_BEFORE] = df["parent_id"]  # Pour debug
@@ -95,9 +95,7 @@ def cluster_acteurs_one_cluster_parent_changes_mark(
     df.loc[filter_unchanged, COL_CHANGE_ORDER] = 2
 
     # Enfin tous les anciens parents (si il y en a) doivent être supprimés
-    filter_delete = (df["est_parent"] == True) & (  # noqa: E712
-        df["identifiant_unique"] != parent_id
-    )
+    filter_delete = (df["est_parent"]) & (df["identifiant_unique"] != parent_id)
     df.loc[filter_delete, COL_CHANGE_MODEL_NAME] = ChangeActeurDeleteAsParent.name()
     df.loc[filter_delete, COL_CHANGE_REASON] = REASON_PARENT_TO_DELETE
     df.loc[filter_delete, COL_CHANGE_ORDER] = 3
@@ -110,13 +108,11 @@ def cluster_acteurs_one_cluster_parent_choose(df: pd.DataFrame) -> tuple[str, st
     from qfdmo.models.acteur import ActeurStatus
 
     try:
-        parents_count = df[df["est_parent"] == True][  # noqa: E712
-            "identifiant_unique"
-        ].nunique()
+        parents_count = df[df["est_parent"]]["identifiant_unique"].nunique()
 
         if parents_count == 1:
             # Case: 1 parent = we keep it
-            index = df[df["est_parent"] == True].index[0]  # noqa: E712
+            index = df[df["est_parent"]].index[0]
             parent_id = df.at[index, "identifiant_unique"]
             change_model_name = ChangeActeurKeepAsParent.name()
             change_reason = REASON_ONE_PARENT_KEPT
@@ -124,7 +120,7 @@ def cluster_acteurs_one_cluster_parent_choose(df: pd.DataFrame) -> tuple[str, st
         elif parents_count >= 2:
             # Case: 2+ parents = we choose the parent with the most children
             # choose the parent with the most children among the active parents
-            df_parents = df[df["est_parent"] == True]  # noqa: E712
+            df_parents = df[df["est_parent"]]
             df_active_parents = df_parents[df_parents["statut"] == ActeurStatus.ACTIF]
             if df_active_parents.empty:
                 df_active_parents = df_parents
