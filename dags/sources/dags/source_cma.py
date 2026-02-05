@@ -70,7 +70,7 @@ with DAG(
             },
             {
                 "column": "acteur_type_code",
-                "value": "commerce",
+                "value": "artisan",
             },
             {
                 "column": "acteur_service_codes",
