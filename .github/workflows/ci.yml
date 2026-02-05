@@ -168,11 +168,61 @@ jobs:
           retention-days: 1
   lighthouse:
     name: Test accessibilite
+    needs: e2e_prepare
     runs-on: ubuntu-latest
     steps:
-      - name: Run Lighthouse tests
-        run: |
-          npm run lighthouse
+      services:
+        postgres:
+          image: postgis/postgis:15-3.3-alpine
+          options: >-
+            --health-cmd pg_isready
+            --health-interval 1s
+            --health-timeout 1s
+            --health-retries 50
+          ports:
+            - 5432:5432
+          env:
+            POSTGRES_USER: webapp
+            POSTGRES_PASSWORD: webapp # pragma: allowlist secret
+            POSTGRES_DB: webapp
+      steps:
+        - uses: actions/checkout@v6
+
+        # PREPARE e2e
+        - name: Setup frontend environment
+          uses: ./.github/actions/setup-frontend
+
+        - name: Install GIS packages
+          uses: ./.github/actions/install-gis
+
+        - name: Setup backend environment
+          uses: ./.github/actions/setup-backend
+          with:
+            uv-groups: "--group dev"
+        - name: Download build artifacts
+          uses: actions/download-artifact@v7
+          with:
+            name: e2e-build-artifacts
+
+        - name: Restore Django database
+          uses: ./.github/actions/restore-django-db
+          with:
+            database-url: ${{ env.DATABASE_URL }}
+
+        # RUN e2e
+        - name: Run server
+          run: |
+            uv run python manage.py runserver --noreload &
+
+        - name: Wait for server to be ready
+          run: |
+            timeout 20 sh -c 'until curl -s $BASE_URL > /dev/null; do sleep 1; done' || exit 1
+            # Additional wait to ensure static files are served
+            sleep 2
+
+        - name: Run Lighthouse tests
+          run: |
+            npm run lighthouse
   e2e:
     name: Tests de bout en bout
     needs: e2e_prepare
