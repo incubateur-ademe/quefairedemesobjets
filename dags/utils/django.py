@@ -139,45 +139,6 @@ def django_model_queryset_to_sql(query: Any) -> str:
     return str(query.query)
 
 
-def django_model_to_pandas_schema(model_class: Any) -> dict[str, str]:
-    """Génère un schema compatible avec pandas' dtype quand on construit
-    une dataframe pour éviter que pandas ne fasse des inférences de type
-    et ne vienne tout casser (ex: code_postal casté en float et qui créé
-    bcp de bruit quand on renormalise en string: 53000 -> 53000.0 -> "53000.0")
-    """
-    # TODO: support pour des types complexes du genre
-    # django.contrib.gis.db.models.fields.PointField pour lesquels
-    # on devra peut être utiliser des libraries genre https://geopandas.org/en/stable/
-    from django.db import models
-
-    dtype_mapping = {
-        models.AutoField: "int64",
-        models.IntegerField: "int64",
-        models.FloatField: "float64",
-        models.DecimalField: "float64",
-        models.BooleanField: "bool",
-        models.CharField: "object",
-        models.TextField: "object",
-        models.DateField: "datetime64[ns]",
-        models.DateTimeField: "datetime64[ns]",
-        models.TimeField: "object",
-        models.EmailField: "object",
-        models.URLField: "object",
-        models.UUIDField: "object",
-        models.BinaryField: "object",
-        models.ForeignKey: "int64",
-    }
-
-    schema = {}
-    for field in model_class._meta.get_fields():
-        if isinstance(field, models.Field):
-            # Par défaut tout ce qui n'est pas trouvé
-            # est attribué le type "object" (chaine de caractères)
-            schema[field.name] = dtype_mapping.get(type(field), "object")  # type: ignore
-
-    return schema
-
-
 def django_model_queryset_to_df(query: Any, fields: list[str]) -> pd.DataFrame:
     """Converts a Django QuerySet into a dataframe"""
     fn = "django_model_queryset_to_df"

@@ -24,42 +24,13 @@ def value_is_empty(value) -> bool:
 
 
 def field_pick_value(
-    field: str,
     values: list[Any],
     keep_empty: bool = False,
 ) -> Any:
-    """Get the value of a field from a list of acteurs whilst
-    ensuring the value is compliant with our models.
-
-    DO NOT sort acteurs here with
-
-    Args:
-        acteurs (list[dict]): a sorted list of acteurs to consider
-        field (str): field to get
-        keep_empty (bool): if True, keep None values in the result if they come
-
-    Returns:
-        value: the value of the field
-    """
-    # TODO: we do want to inherit from the oldest cree_le
-    # from cluster acteurs
+    """Get the value of a field from a list of acteurs list."""
     for value in values:
         if not value_is_empty(value) or keep_empty:
-            try:
-                # TODO: once we have fixed the validation mess we should
-                # be able to rely on RevisionActeur.full_clean() only
-                # TODO: we should also be able to rely on individual field
-                # validation and not have to reconstruct an entire acteur
-                # (e.g. now it's asking for acteur type etc...)
-                """
-                data = {field: value}
-                Acteur(**data).full_clean()
-                RevisionActeur(**data).full_clean()
-                """
-                return value
-            except Exception as e:
-                logger.error(f"Invalid value for field {field}: {value}: {e}")
-                pass
+            return value
     return None
 
 
@@ -119,11 +90,7 @@ def cluster_acteurs_parents_choose_data(
         for field in fields:
             value_old = getattr(parent, field) if parent else None
             values = [getattr(a, field) for a in acteurs_list]
-            value_new = field_pick_value(
-                field,
-                values,
-                keep_empty,
-            )
+            value_new = field_pick_value(values, keep_empty)
             if value_new == value_old:
                 continue
             if value_new is None and not keep_empty:
