@@ -1,0 +1,14 @@
+{% extends "./_search_result.html" %}
+
+{% block href %}{{ result.get_search_term_url }}{% endblock %}
+
+{% block nom %}
+<div class="qf-flex qf-justify-between qf-pr-2w">
+    {{ result.name|capfirst }}
+    {% with parent=result.get_search_term_parent_object %}
+        {% if parent %}
+            <span class="qf-ml-auto qf-text-green-menthe-sun-373-moon-652">{{ parent.title }}</span>
+        {% endif %}
+    {% endwith %}
+</div>
+{% endblock %}
