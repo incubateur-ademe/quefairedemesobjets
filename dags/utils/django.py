@@ -108,6 +108,16 @@ def django_model_fields_get(model_class, include_properties=True) -> list[str]:
     return [x for x in results if x not in excluded]
 
 
+def _is_filled(field_name: str, is_text_field: bool):
+    """Returns Q filter for a field that is filled (not null, not empty for text)."""
+    from django.db.models import Q
+
+    q = Q(**{f"{field_name}__isnull": False})
+    if is_text_field:
+        q &= ~Q(**{field_name: ""})
+    return q
+
+
 def django_model_queryset_generate(model_class, fields_include_all_filled: list[str]):
     """Génère une requête Django à partir d'une liste de champs
     et de filtres pour un modèle donné.
@@ -115,6 +125,7 @@ def django_model_queryset_generate(model_class, fields_include_all_filled: list[
     Utile pour des tâches Airflow qui doivent récupérer des données
     de la DB pour les traiter."""
 
+    from django.db import models
     from django.db.models import Q
 
     # Remove fields not in DB to avoid errors
@@ -127,9 +138,10 @@ def django_model_queryset_generate(model_class, fields_include_all_filled: list[
     # Exclude both empty strings ("") and NULL values
     include_all_filled_filter = Q()
     for field in include_fields:
-        include_all_filled_filter &= ~Q(**{f"{field}": ""}) & Q(
-            **{f"{field}__isnull": False}
-        )
+        # Check if field is Nullable and is charField using the model field
+        field_obj = model_class._meta.get_field(field)
+        is_text = isinstance(field_obj, (models.CharField, models.TextField))
+        include_all_filled_filter &= _is_filled(field, is_text)
 
     return model_class.objects.filter(include_all_filled_filter)
 
