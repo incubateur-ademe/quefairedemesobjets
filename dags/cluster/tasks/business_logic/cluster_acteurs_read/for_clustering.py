@@ -155,6 +155,7 @@ def _cluster_acteurs_read_base(
     include_only_if_regex_matches_nom: str | None,
     include_if_all_fields_filled: list[str],
     est_parent: bool,
+    only_active: bool = True,
 ) -> tuple[pd.DataFrame, str]:
     """
     Reading actors from DB (orphans or parents).
@@ -178,6 +179,7 @@ def _cluster_acteurs_read_base(
         tuple[pd.DataFrame, str]: DataFrame of actors and SQL query used
     """
     from qfdmo.models import ActeurType, Source, VueActeur
+    from qfdmo.models.acteur import ActeurStatus
 
     # Remove duplicates
     fields = list(set(fields))
@@ -195,6 +197,8 @@ def _cluster_acteurs_read_base(
         query = query.filter(acteur_type_id__in=include_acteur_type_ids)
     if include_only_if_regex_matches_nom:
         query = query.filter(nom__iregex=include_only_if_regex_matches_nom)
+    if only_active:
+        query = query.filter(statut=ActeurStatus.ACTIF)
     query = query.filter(parent_id__isnull=True)
     query = query.filter(est_parent=est_parent)
 

@@ -9,6 +9,7 @@ FIELDS_PROTECTED = [
     "acteur_type_id",
     "identifiant_unique",
     "statut",
+    "est_parent",
     "nombre_enfants",
     "cree_le",
     "modifie_le",
