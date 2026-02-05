@@ -52,11 +52,13 @@ class SearchTerm(index.Indexed, models.Model):
         Returns the most specific child instance for proper indexing.
         This ensures django-modelsearch indexes all fields from child models.
         """
-        # Check if this object is a Novel or ProgrammingGuide and return the specific object
+        # Check if this object is a Novel or ProgrammingGuide and return
+        # the specific object
         synonyme = Synonyme.objects.filter(searchterm_ptr_id=self.id).first()
         search_tag = SearchTag.objects.filter(searchterm_ptr_id=self.id).first()
 
-        # Return the novel/programming guide object if there is one, otherwise return self
+        # Return the novel/programming guide object if there is one,
+        # otherwise return self
         return synonyme or search_tag or self
 
     @classmethod
