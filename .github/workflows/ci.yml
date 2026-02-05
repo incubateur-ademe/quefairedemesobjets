@@ -166,6 +166,13 @@ jobs:
             static/compiled
             database-dump.pgdump
           retention-days: 1
+  lighthouse:
+    name: Test accessibilite
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run Lighthouse tests
+        run: |
+          npm run lighthouse
   e2e:
     name: Tests de bout en bout
     needs: e2e_prepare

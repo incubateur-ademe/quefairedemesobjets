@@ -1,0 +1,18 @@
+{
+  "ci": {
+    "collect": {
+      "numberOfRuns": 1,
+      "url": [
+        "https://quefairedemesdechets.ademe.local/",
+        "https://quefairedemesdechets.ademe.local/dechet/pile-jetable/"
+      ]
+    },
+    "assert": {
+      "assertions": {
+        "categories:performance": "off",
+        "categories:pwa": "off",
+        "categories:accessibility": ["error", { "minScore": 1 }]
+      }
+    }
+  }
+}
