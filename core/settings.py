@@ -146,6 +146,7 @@ INSTALLED_APPS = [
     "colorfield",
     "core",
     "stats",
+    "search",
     "qfdmd",
     "qfdmo",
     "infotri",
@@ -511,6 +512,7 @@ WAGTAIL_SEARCH_BACKENDS = {
     "default": {
         "BACKEND": "wagtail.search.backends.database",
         "SEARCH_CONFIG": "wagtail_french",
+        "FUZZY_SIMILARITY_THRESHOLD": 0.2,
     }
 }
 

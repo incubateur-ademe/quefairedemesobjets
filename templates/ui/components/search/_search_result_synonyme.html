@@ -1,0 +1,9 @@
+{% extends "./_search_result.html" %}
+
+{% block href %}{% url 'qfdmd:synonyme-detail' slug=result.slug %}{% endblock %}
+
+{% block nom %}
+<div class="qf-flex qf-justify-between qf-pr-2w">
+    {{ result.nom|capfirst }}
+</div>
+{% endblock %}

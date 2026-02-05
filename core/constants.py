@@ -59,3 +59,5 @@ ASSISTANT = {
 }
 
 MAP_CONTAINER_ID = "map_container_id"
+
+SEARCH_TERM_ID_QUERY_PARAM = "search_term_id"
