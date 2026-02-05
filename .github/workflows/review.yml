@@ -34,7 +34,7 @@ jobs:
     needs: [ci]
     with:
       environment: preprod
-      tag_name: preprod
+      tag_name: pr-${{ github.event.pull_request.number }}-${{ github.sha }}
 
   # FIXME: tmp pour tester
   update_release_draft_for_review:
@@ -57,13 +57,6 @@ jobs:
     outputs:
       tag_name: ${{ steps.release-drafter.outputs.tag_name }}
 
-  # airflow_docker_for_prod:
-  #   name: 🐳 Airflow Docker
-  #   uses: ./.github/workflows/airflow_docker.yml
-  #   secrets: inherit # pragma: allowlist secret`
-  #   needs: [update_release_draft_for_review]
-  #   with:
-  #     image_tag: ${{ needs.update_release_draft_for_review.steps.release-drafter.outputs.tag_name }}
 
 # Address actions/missing-workflow-permissions rule in
 # code scanning alerts
