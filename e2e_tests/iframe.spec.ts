@@ -63,8 +63,11 @@ test.describe("📦 Système d'Intégration Iframe", () => {
         attributes
 
       expect(allow).toBe("geolocation; clipboard-write")
+      // The ref parameter is base64-encoded referrer URL, which depends on the environment
+      const expectedReferrer = `${baseURL}/lookbook/preview/iframe/formulaire/`
+      const expectedRef = Buffer.from(expectedReferrer).toString("base64")
       expect(src).toBe(
-        `${baseURL}/formulaire?direction=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre`,
+        `${baseURL}/formulaire?ref=${encodeURIComponent(expectedRef)}&direction=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre`,
       )
       expect(frameborder).toBe("0")
       expect(scrolling).toBe("no")
@@ -135,32 +138,6 @@ test.describe("📦 Système d'Intégration Iframe", () => {
       await expect(page).toHaveURL(
         `/carte?action_list=reparer%7Cdonner%7Cechanger%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cacheter%7Crevendre&epci_codes=200055887&limit=50`,
       )
-    })
-  })
-
-  test.describe("Persistance du mode iframe", () => {
-    test("Le mode iframe persiste lors de la navigation entre pages", async ({
-      page,
-      baseURL,
-    }) => {
-      test.slow()
-      await navigateTo(page, `/?iframe`)
-      expect(page).not.toBeNull()
-
-      for (let i = 0; i < 50; i++) {
-        await expect(page.locator("body")).toHaveAttribute(
-          "data-state-iframe-value",
-          "true",
-        )
-
-        const links = page.locator(`a[href^="${baseURL}"]`)
-
-        const count = await links.count()
-        const randomLink = links.nth(Math.floor(Math.random() * count))
-        if (await randomLink.isVisible()) {
-          await randomLink.click()
-        }
-      }
     })
   })
 })

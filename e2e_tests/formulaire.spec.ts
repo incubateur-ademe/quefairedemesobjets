@@ -7,7 +7,6 @@ import {
   navigateTo,
   searchAddress,
   getIframe,
-  clickFirstAvailableMarker,
   TIMEOUT,
 } from "./helpers"
 
@@ -107,13 +106,14 @@ test.describe("📝 Sélection d'Actions dans le Formulaire", () => {
   })
 })
 
-test.skip("Filtres avancés s'ouvrent et se ferment en mode formulaire", async ({
-  page,
-}) => {
+test("Filtres avancés s'ouvrent et se ferment en mode formulaire", async ({ page }) => {
   await navigateTo(page, `/formulaire`)
   await openAdvancedFilters(page)
 })
 
+// TODO: Fix this test - it incorrectly uses page instead of iframe for form interactions
+// The form elements are inside the iframe but the test calls searchDummySousCategorieObjet(page)
+// and searchDummyAdresse(page) which look for elements on the main page
 test.skip("Les acteurs digitaux sont visibles sur le formulaire", async ({ page }) => {
   // Navigate to the lookbook preview page
   await navigateTo(page, `/lookbook/preview/iframe/formulaire/`)
@@ -142,7 +142,7 @@ test.skip("Les acteurs digitaux sont visibles sur le formulaire", async ({ page 
     "false",
   )
 })
-test.skip("🗺️ Affichage et Interaction Acteurs", () => {
+test.describe("🗺️ Affichage et Interaction Acteurs", () => {
   test("Les acteurs sont visibles sur la carte du formulaire et fonctionnent", async ({
     page,
   }) => {
@@ -169,14 +169,22 @@ test.skip("🗺️ Affichage et Interaction Acteurs", () => {
     // Submit form
     await iframe.getByTestId("formulaire-rechercher-adresses-submit").click()
 
-    await page.waitForLoadState("networkidle")
+    // Wait for acteur markers to appear (exclude home marker)
+    const acteurMarkers = iframe.locator(
+      '.maplibregl-marker[data-controller="pinpoint"]:not(#pinpoint-home)',
+    )
+    await expect(acteurMarkers.first()).toBeVisible({
+      timeout: TIMEOUT.DEFAULT,
+    })
 
-    await clickFirstAvailableMarker(iframe, ".maplibregl-marker")
+    // Click on the first acteur marker
+    await acteurMarkers.first().click({ force: true })
 
     // Wait for the panel to be shown (aria-hidden="false")
     await expect(iframe.locator("#acteurDetailsPanel")).toHaveAttribute(
       "aria-hidden",
       "false",
+      { timeout: TIMEOUT.DEFAULT },
     )
   })
 })
