@@ -10,7 +10,6 @@ from qfdmd.views import (
     import_legacy_synonymes,
     legacy_migrate,
     pokemon_chooser_viewset,
-    search_term_viewset,
 )
 
 
@@ -22,11 +21,6 @@ def register_permissions():
 @hooks.register("register_admin_viewset")
 def register_pokemon_chooser_viewset():
     return pokemon_chooser_viewset
-
-
-@hooks.register("register_admin_viewset")
-def register_search_term_viewset():
-    return search_term_viewset
 
 
 @hooks.register("register_admin_viewset")

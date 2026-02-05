@@ -20,7 +20,6 @@ from qfdmd.models import (
     Produit,
     Synonyme,
 )
-from search.models import SearchTerm
 
 logger = logging.getLogger(__name__)
 
@@ -55,8 +54,8 @@ def import_legacy_synonymes(request, id):
     - legacy_synonymes_to_exclude: synonymes marked for exclusion
 
     For each collected synonyme:
-    1. Mark the Synonyme and its SearchTerm as legacy=True
-    2. Create a SearchTag linked to the ProduitPage
+    1. Create a SearchTag linked to the ProduitPage
+    2. Mark the Synonyme as imported (links to the SearchTag)
     """
     from qfdmd.models import ProduitPage, SearchTag, TaggedSearchTag
 
@@ -93,25 +92,27 @@ def import_legacy_synonymes(request, id):
 
     imported_count = 0
     for synonyme in all_synonymes:
-        # 1. Mark Synonyme as legacy by syncing its SearchTerm with legacy=True
-        # The Synonyme.get_search_term_legacy() already returns True,
-        # so we just need to sync it
-        search_term, _ = SearchTerm.sync_from_object(synonyme)
+        # Skip if already imported as a SearchTag
+        if synonyme.imported_as_search_tag is not None:
+            continue
 
-        # 2. Create or get SearchTag with the synonyme name
+        # 1. Create or get SearchTag with the synonyme name
         search_tag, tag_created = SearchTag.objects.get_or_create(
             name=synonyme.nom,
             defaults={"slug": synonyme.slug},
         )
 
-        # 3. Link the SearchTag to the ProduitPage if not already linked
-        tagged, tagged_created = TaggedSearchTag.objects.get_or_create(
+        # 2. Link the SearchTag to the ProduitPage if not already linked
+        TaggedSearchTag.objects.get_or_create(
             tag=search_tag,
             content_object=page,
         )
 
-        if tagged_created:
-            imported_count += 1
+        # 3. Mark the Synonyme as imported
+        synonyme.imported_as_search_tag = search_tag
+        synonyme.save(update_fields=["imported_as_search_tag"])
+
+        imported_count += 1
 
     if imported_count > 0:
         messages.success(
@@ -271,18 +272,6 @@ class BlockChooserViewSet(ChooserViewSet):
 pokemon_chooser_viewset = BlockChooserViewSet("pokemon_chooser")
 
 
-class SearchTermViewSet(ModelViewSet):
-    model = SearchTerm
-    form_fields = ["term", "url", "search_variants", "legacy"]
-    icon = "search"
-    add_to_admin_menu = True
-    menu_label = "Termes de recherche"
-    copy_view_enabled = False
-    inspect_view_enabled = True
-    list_display = ["term", "url", "legacy", "updated_at"]
-    list_filter = ["legacy", "linked_content_type"]
-
-
 class BonusViewSet(ModelViewSet):
     model = Bonus
     form_fields = ["title", "montant_min", "montant_max"]
@@ -293,5 +282,4 @@ class BonusViewSet(ModelViewSet):
     inspect_view_enabled = True
 
 
-search_term_viewset = SearchTermViewSet("termes-de-recherche")
 bonus_viewset = BonusViewSet("bonus")

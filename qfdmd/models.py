@@ -31,7 +31,7 @@ from wagtail.snippets.models import register_snippet
 
 from qfdmd.blocks import STREAMFIELD_COMMON_BLOCKS
 from qfdmo.models.utils import NomAsNaturalKeyModel
-from search.mixins import SearchTermSyncMixin
+from search.models import SearchTerm
 
 logger = logging.getLogger(__name__)
 
@@ -154,11 +154,16 @@ class ProduitPageTag(TaggedItemBase):
     )
 
 
-class SearchTag(SearchTermSyncMixin, TagBase):
+class SearchTag(SearchTerm, TagBase):
     """
     A custom tag model for search functionality.
-    Implements SearchTermSyncMixin to sync with SearchTerm model.
+    Inherits from SearchTerm for unified search across different content types.
     """
+
+    search_fields = [
+        index.SearchField("name"),
+        index.AutocompleteField("name"),
+    ]
 
     class Meta:
         verbose_name = "Synonyme de recherche"
@@ -205,26 +210,26 @@ class TaggedSearchTag(ItemBase):
         verbose_name = "Synonyme de recherche"
         verbose_name_plural = "Synonymes de recherche"
 
-    def save(self, *args, **kwargs):
-        """Sync the SearchTag with SearchTerm after the relationship is created."""
-        super().save(*args, **kwargs)
-        # Sync the tag now that it has a parent page
-        if self.tag:
-            self.tag._sync_search_term()
-
     def delete(self, *args, **kwargs):
-        """Remove the SearchTag's SearchTerm when relationship is removed."""
+        """
+        Clean up when a SearchTag is removed from a ProduitPage.
+
+        This method:
+        1. Clears the imported_as_search_tag link on any Synonymes
+           that were imported as this SearchTag
+        2. Deletes the SearchTag itself (since it's no longer linked to any page)
+        """
         tag = self.tag
         super().delete(*args, **kwargs)
-        # Delete the SearchTerm since the tag is no longer linked to any page
-        if tag:
-            from search.models import SearchTerm
 
-            SearchTerm.delete_for_object(tag)
+        if tag:
+            # Clear the link on any Synonymes imported as this SearchTag
+            tag.imported_synonymes.update(imported_as_search_tag=None)
+            # Delete the SearchTag since it's no longer linked to any page
+            tag.delete()
 
 
 class ProduitPage(
-    SearchTermSyncMixin,
     CompiledFieldMixin,
     Page,
     GenreNombreModel,
@@ -392,19 +397,6 @@ class ProduitPage(
     search_fields = Page.search_fields + [
         index.AutocompleteField("title"),
     ]
-
-    # SearchTermSyncMixin implementation
-    def get_search_term_verbose_name(self) -> str:
-        """Returns the title used for search term."""
-        return self.title
-
-    def get_search_term_url(self) -> str:
-        """Returns the URL of this page."""
-        return self.url
-
-    def get_search_term_parent_object(self):
-        """Returns the family page (parent) if it exists."""
-        return FamilyPage.objects.ancestor_of(self).first()
 
     def clean(self):
         super().clean()
@@ -730,13 +722,23 @@ class ProduitLien(models.Model):
         unique_together = ("produit", "lien")  # Prevent duplicate relations
 
 
-class Synonyme(SearchTermSyncMixin, index.Indexed, AbstractBaseProduit):
+class Synonyme(SearchTerm, AbstractBaseProduit):
     slug = AutoSlugField(populate_from=["nom"], max_length=255)
     nom = models.CharField(blank=True, unique=True, help_text="Nom du produit")
     produit = models.ForeignKey(
         Produit,
         related_name="synonymes",
         on_delete=models.CASCADE,
+    )
+    imported_as_search_tag = models.ForeignKey(
+        "qfdmd.SearchTag",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="imported_synonymes",
+        verbose_name="Importé comme SearchTag",
+        help_text="Si renseigné, ce synonyme a été importé comme SearchTag "
+        "et ne devrait plus apparaître dans les résultats de recherche.",
     )
     picto = models.FileField(
         upload_to="pictos",
@@ -792,14 +794,10 @@ class Synonyme(SearchTermSyncMixin, index.Indexed, AbstractBaseProduit):
         return self.nom
 
     search_fields = [
+        index.SearchField("nom"),
         index.AutocompleteField("nom"),
-        index.SearchField("id"),
-        index.RelatedFields(
-            "produit", [index.SearchField("id"), index.SearchField("nom")]
-        ),
     ]
 
-    # SearchTermSyncMixin implementation
     def get_search_term_verbose_name(self) -> str:
         """Returns the synonyme name as the search term."""
         return self.nom
@@ -811,10 +809,6 @@ class Synonyme(SearchTermSyncMixin, index.Indexed, AbstractBaseProduit):
     def get_search_term_parent_object(self):
         """Returns None for legacy synonymes."""
         return None
-
-    def get_search_term_legacy(self) -> bool:
-        """Returns True to indicate this is a legacy search term."""
-        return True
 
 
 @register_setting
