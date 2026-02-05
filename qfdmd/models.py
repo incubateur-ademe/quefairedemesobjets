@@ -173,16 +173,8 @@ class SearchTag(SearchTerm, TagBase):
         """Returns the tag name as the search term."""
         return self.name
 
-    def get_search_term_url(self) -> str:
-        """Returns the URL of the parent page if available."""
-        try:
-            if self.tagged_produit_page and self.tagged_produit_page.content_object:
-                return self.tagged_produit_page.content_object.url
-        except TaggedSearchTag.DoesNotExist:
-            pass
-        return ""
-
-    def get_search_term_parent_object(self):
+    @property
+    def page(self):
         """Returns the parent page (ProduitPage) if available."""
         try:
             if self.tagged_produit_page:
