@@ -6,7 +6,8 @@
     "format": "prettier static/to_compile --write",
     "test": "jest ./static/to_compile",
     "watch": "parcel watch --no-hmr",
-    "e2e_test": " npx playwright test --update-snapshots"
+    "e2e_test": " npx playwright test --update-snapshots",
+    "lighthouse": "lhci autorun"
   },
   "source": [
     "static/to_compile/admin-categorie-widget.ts",
@@ -45,11 +46,12 @@
     "@hotwired/turbo": "^8.0.21",
     "@iframe-resizer/child": "^5.5.8",
     "@iframe-resizer/parent": "^5.5.7",
+    "@lhci/cli": "^0.15.1",
     "bowser": "^2.13.1",
     "carte-facile": "^0.8.1",
     "eslint-config-prettier": "^10.1.8",
-    "posthog-js": "^1.331.0",
     "maplibre-gl": "^5.16.0",
+    "posthog-js": "^1.331.0",
     "stimulus-use": "^0.52.3",
     "tailwindcss": "^3.4.19"
   },
