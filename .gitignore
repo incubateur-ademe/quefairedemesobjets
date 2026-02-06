@@ -40,5 +40,6 @@ media
 _build
 .obsidian
 *.pem
+.lighthouseci/
 
 tmpbackup*
