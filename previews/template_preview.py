@@ -351,11 +351,6 @@ class ComponentsPreview(LookbookPreview):
     def combined_logos(self, **kwargs):
         return render_to_string("ui/components/footer/combined_logos.html")
 
-    @component_docs("ui/components/produit/legacy_heading.md")
-    def produit_legacy_heading(self, **kwargs):
-        context = {"title": "Coucou !"}
-        return render_to_string("ui/components/produit/legacy_heading.html", context)
-
     @register_form_class(ProduitHeadingForm)
     @component_docs("ui/components/produit/heading.md")
     def produit_heading(self, search_term=None, pronom="mon", **kwargs):
