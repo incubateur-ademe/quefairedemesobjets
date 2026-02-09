@@ -169,6 +169,10 @@ class SearchTag(SearchTerm, TagBase):
         verbose_name = "Synonyme de recherche"
         verbose_name_plural = "Synonymes de recherche"
 
+    @property
+    def search_result_template(self):
+        return "ui/components/search/_search_result_searchtag.html"
+
     def get_search_term_verbose_name(self) -> str:
         """Returns the tag name as the search term."""
         return self.name
@@ -438,6 +442,10 @@ class ProduitPage(
                 except LegacyIntermediateProduitPageSynonymeExclusion.DoesNotExist:
                     # No exclusion exists, that's fine
                     pass
+
+    @property
+    def search_result_template(self):
+        return "ui/components/search/_search_result_produitpage.html"
 
     def get_template(self, request, *args, **kwargs):
         if self.est_famille:
@@ -801,6 +809,10 @@ class Synonyme(SearchTerm, AbstractBaseProduit):
             [index.SearchField("nom"), index.AutocompleteField("nom")],
         ),
     ]
+
+    @property
+    def search_result_template(self):
+        return "ui/components/search/_search_result_synonyme.html"
 
     def get_search_term_verbose_name(self) -> str:
         """Returns the synonyme name as the search term."""

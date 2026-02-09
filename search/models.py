@@ -45,6 +45,10 @@ class SearchTerm(index.Indexed, models.Model):
             return str(instance)
         return f"SearchTerm {self.pk}"
 
+    @property
+    def search_result_template(self):
+        return "ui/components/search/_search_result.html"
+
     def get_indexed_instance(self):
         from qfdmd.models import SearchTag, Synonyme
 
@@ -52,14 +56,20 @@ class SearchTerm(index.Indexed, models.Model):
         Returns the most specific child instance for proper indexing.
         This ensures django-modelsearch indexes all fields from child models.
         """
-        # Check if this object is a Novel or ProgrammingGuide and return
-        # the specific object
         synonyme = Synonyme.objects.filter(searchterm_ptr_id=self.id).first()
-        search_tag = SearchTag.objects.filter(searchterm_ptr_id=self.id).first()
+        if synonyme:
+            return synonyme
 
-        # Return the novel/programming guide object if there is one,
-        # otherwise return self
-        return synonyme or search_tag or self
+        search_tag = SearchTag.objects.filter(searchterm_ptr_id=self.id).first()
+        if search_tag:
+            return search_tag
+
+        # Check if linked to a ProduitPage via OneToOne reverse
+        produit_page = getattr(self, "produit_page", None)
+        if produit_page:
+            return produit_page
+
+        return self
 
     @classmethod
     def get_indexed_objects(cls):

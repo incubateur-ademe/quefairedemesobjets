@@ -1,7 +1,0 @@
-{% with specific=result.specific %}
-    {% if specific.nom %}
-        {% include "./_search_result_synonyme.html" with result=specific %}
-    {% else %}
-        {% include "./_search_result_searchtag.html" with result=specific %}
-    {% endif %}
-{% endwith %}
