@@ -2,9 +2,9 @@ import logging
 
 from django import forms
 from dsfr.forms import DsfrBaseForm
+from modelsearch.query import Fuzzy
 
 from search.models import SearchTerm
-
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ class SearchForm(DsfrBaseForm):
             self.results = []
             return self.results
 
-        self.results = SearchTerm.objects.search(search_query)[:10]
+        self.results = SearchTerm.objects.autocomplete(Fuzzy(search_query))[:10]
         return self.results
 
 
