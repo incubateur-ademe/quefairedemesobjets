@@ -54,7 +54,9 @@
         >
             {% if search_form.results %}
                 {% for result in search_form.results %}
-                    {% include specific.search_result_template with result=result.specific %}
+                    {% with specific=result.specific %}
+                        {% include specific.search_result_template with result=specific %}
+                    {% endwith %}
                 {% endfor %}
             {% endif %}
         </turbo-frame>
