@@ -1,6 +1,7 @@
 import logging
 import re
 from typing import Any
+from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
@@ -194,9 +195,12 @@ class SynonymeDetailView(AssistantBaseView, DetailView):
     def _build_redirect_url(self, request: HttpRequest, base_url: str) -> str:
         """Build redirect URL, preserving search_term_id if present."""
         search_term_id = request.GET.get(SEARCH_TERM_ID_QUERY_PARAM)
-        if search_term_id:
-            return f"{base_url}?{SEARCH_TERM_ID_QUERY_PARAM}={search_term_id}"
-        return base_url
+        if not search_term_id:
+            return base_url
+        parsed = urlparse(base_url)
+        params = parse_qsl(parsed.query)
+        params.append((SEARCH_TERM_ID_QUERY_PARAM, search_term_id))
+        return urlunparse(parsed._replace(query=urlencode(params)))
 
     def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         synonyme = self.get_object()
