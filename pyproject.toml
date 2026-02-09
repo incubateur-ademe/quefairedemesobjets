@@ -31,7 +31,6 @@ dependencies = [
     "django-dsfr>=3,<4",
     "rapidfuzz>=3.13.0,<4",
     "sites-faciles-experiment~=2.1.0rc9",
-    "wagtail-honeypot @ git+https://github.com/Luzzzi/wagtail-honeypot@feature/i18n-required-honeypot",
     "diff-match-patch>=20241021,<20241022",
     "django-lookbook>=1.0.2,<2",
     "queryish>=0.2,<0.4",
@@ -40,6 +39,7 @@ dependencies = [
     "pydantic[email]>=2.11.7",
     "django-admin-sortable2>=2.2.8",
     "more-itertools>=10.7.0",
+    "wagtail-honeypot>=1.2.0",
 ]
 
 [build-system]
