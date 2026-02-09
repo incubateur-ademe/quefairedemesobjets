@@ -131,7 +131,7 @@ def cluster_acteurs_one_cluster_parent_choose(df: pd.DataFrame) -> tuple[str, st
 
         elif parents_count == 0:
             # Case: 0 parent = we create one
-            ids_non_parents = df[df["est_parent"] == False][  # noqa: E712
+            ids_non_parents = df[~df["est_parent"].fillna(False)][
                 "identifiant_unique"
             ].tolist()
             parent_id = parent_id_generate(ids_non_parents)
