@@ -804,10 +804,6 @@ class Synonyme(SearchTerm, AbstractBaseProduit):
     search_fields = [
         index.SearchField("nom"),
         index.AutocompleteField("nom"),
-        index.RelatedFields(
-            "produit",
-            [index.SearchField("nom"), index.AutocompleteField("nom")],
-        ),
     ]
 
     @property

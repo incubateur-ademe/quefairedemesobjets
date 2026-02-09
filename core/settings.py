@@ -510,7 +510,7 @@ WAGTAIL_SITE_NAME = "Longue vie aux objets"
 WAGTAILADMIN_BASE_URL = BASE_URL
 WAGTAIL_SEARCH_BACKENDS = {
     "default": {
-        "BACKEND": "wagtail.search.backends.database",
+        "BACKEND": "modelsearch.backends.database",
         "SEARCH_CONFIG": "wagtail_french",
         "FUZZY_ALGORITHM": "levenshtein",
         "FUZZY_SIMILARITY_THRESHOLD": 0.2,

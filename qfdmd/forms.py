@@ -22,12 +22,13 @@ class SearchForm(DsfrBaseForm):
     )
 
     def search(self) -> list:
+        self.results = []
         search_query = self.cleaned_data.get("input")
         if not search_query:
             self.results = []
             return self.results
 
-        self.results = SearchTerm.objects.autocomplete(Fuzzy(search_query))[:10]
+        self.results = SearchTerm.objects.search(Fuzzy(search_query))[:10]
         return self.results
 
 
