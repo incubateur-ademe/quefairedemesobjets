@@ -36,6 +36,7 @@ class TestClusterActeursClustersDisplay:
                 "acteur_type_id": [at1.id, at1.id],
                 "ville": ["Paris", "Laval"],
                 "nombre_enfants": [1, 0],
+                "est_parent": [True, False],
                 "nom": ["p1", "orphan1"],
             }
         )
@@ -76,6 +77,7 @@ class TestClusterActeursClustersDisplay:
                 "acteur_type_id": [at1.id, at1.id, at1.id],
                 "ville": ["Paris", "Laval", "Laval"],
                 "nombre_enfants": [1, 0, 0],
+                "est_parent": [True, False, False],
                 "nom": ["p1", "orphan1", "orphan2"],
             }
         )
@@ -153,6 +155,7 @@ class TestClusterActeursClustersDisplay:
                 "acteur_type_id": [at1.id, at1.id, at1.id, at1.id],
                 "ville": ["Paris", "Paris", "Lyon", "Lyon"],
                 "nombre_enfants": [0, 0, 0, 0],
+                "est_parent": [False, False, False, False],
                 "nom": ["clusterA_1", "clusterA_2", "clusterB_1", "clusterB_2"],
             }
         )

@@ -76,7 +76,9 @@ def cluster_acteurs_one_cluster_parent_changes_mark(
     df.loc[parent_index, COL_CHANGE_ORDER] = 1
 
     # Ensuite tous les enfants (non-parents) doivent pointer vers le nouveau parent
-    filter_point = (df["nombre_enfants"] == 0) & (df["identifiant_unique"] != parent_id)
+    filter_point = (~df["est_parent"].fillna(False)) & (
+        df["identifiant_unique"] != parent_id
+    )
     df[COL_PARENT_ID_BEFORE] = df["parent_id"]  # Pour debug
     df.loc[filter_point, "parent_id"] = parent_id
     df.loc[filter_point, COL_CHANGE_MODEL_NAME] = ChangeActeurUpdateParentId.name()
@@ -93,7 +95,7 @@ def cluster_acteurs_one_cluster_parent_changes_mark(
     df.loc[filter_unchanged, COL_CHANGE_ORDER] = 2
 
     # Enfin tous les anciens parents (si il y en a) doivent être supprimés
-    filter_delete = (df["nombre_enfants"] > 0) & (df["identifiant_unique"] != parent_id)
+    filter_delete = (df["est_parent"]) & (df["identifiant_unique"] != parent_id)
     df.loc[filter_delete, COL_CHANGE_MODEL_NAME] = ChangeActeurDeleteAsParent.name()
     df.loc[filter_delete, COL_CHANGE_REASON] = REASON_PARENT_TO_DELETE
     df.loc[filter_delete, COL_CHANGE_ORDER] = 3
@@ -106,11 +108,11 @@ def cluster_acteurs_one_cluster_parent_choose(df: pd.DataFrame) -> tuple[str, st
     from qfdmo.models.acteur import ActeurStatus
 
     try:
-        parents_count = df[df["nombre_enfants"] > 0]["identifiant_unique"].nunique()
+        parents_count = df[df["est_parent"]]["identifiant_unique"].nunique()
 
         if parents_count == 1:
             # Case: 1 parent = we keep it
-            index = df[df["nombre_enfants"] > 0].index[0]
+            index = df[df["est_parent"]].index[0]
             parent_id = df.at[index, "identifiant_unique"]
             change_model_name = ChangeActeurKeepAsParent.name()
             change_reason = REASON_ONE_PARENT_KEPT
@@ -118,7 +120,7 @@ def cluster_acteurs_one_cluster_parent_choose(df: pd.DataFrame) -> tuple[str, st
         elif parents_count >= 2:
             # Case: 2+ parents = we choose the parent with the most children
             # choose the parent with the most children among the active parents
-            df_parents = df[df["nombre_enfants"] > 0]
+            df_parents = df[df["est_parent"]]
             df_active_parents = df_parents[df_parents["statut"] == ActeurStatus.ACTIF]
             if df_active_parents.empty:
                 df_active_parents = df_parents
@@ -129,7 +131,7 @@ def cluster_acteurs_one_cluster_parent_choose(df: pd.DataFrame) -> tuple[str, st
 
         elif parents_count == 0:
             # Case: 0 parent = we create one
-            ids_non_parents = df[df["nombre_enfants"] == 0][
+            ids_non_parents = df[~df["est_parent"].fillna(False)][
                 "identifiant_unique"
             ].tolist()
             parent_id = parent_id_generate(ids_non_parents)
@@ -179,7 +181,6 @@ def cluster_acteurs_parents_choose_new(df_clusters: pd.DataFrame) -> pd.DataFram
                                 "identifiant_unique": parent_id,
                                 "parent_id": None,
                                 "cluster_id": cluster_id,
-                                "nombre_enfants": 0,
                             }
                         ]
                     ),
