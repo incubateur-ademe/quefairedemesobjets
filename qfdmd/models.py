@@ -388,6 +388,8 @@ class ProduitPage(
 
     search_fields = Page.search_fields + [
         index.AutocompleteField("title"),
+        index.AutocompleteField("search_variants"),
+        index.SearchField("search_variants"),
     ]
 
     def clean(self):
@@ -794,6 +796,10 @@ class Synonyme(SearchTerm, AbstractBaseProduit):
     search_fields = [
         index.SearchField("nom"),
         index.AutocompleteField("nom"),
+        index.RelatedFields(
+            "produit",
+            [index.SearchField("nom"), index.AutocompleteField("nom")],
+        ),
     ]
 
     def get_search_term_verbose_name(self) -> str:
