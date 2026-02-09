@@ -2,6 +2,7 @@
 
 {% load static wagtail_dsfr_tags wagtailcore_tags %}
 
+
 {% block analytics_action %}produitPageView{% endblock %}
 
 {% comment %}
@@ -9,7 +10,6 @@ Here we want to remove the fr-container class set on the <main> tag
 so that the green background heading can properly expand to the full
 page width.
 {% endcomment %}
-{% block main_classes %}{% endblock %}
 
 {% block main %}
 <div
