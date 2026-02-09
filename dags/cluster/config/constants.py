@@ -21,22 +21,36 @@ FIELDS_PROTECTED = [
 FIELDS_PARENT_DATA_EXCLUDED = [
     # Depending on contexte, foreign keys are sometimes
     # represented in their Django model form without _id
-    "proposition_services",
-    "source",
-    "source_id",
-    "statut",
-    "lieu_prestation",
-    "perimetre_adomiciles",
-    "suggestion_groupes",
-    "suggestion_unitaires",
     # TODO: we can't set cree_le consistently
     # (see test_data_serialize_reconstruct), thus
     # we exclude it for now (maybe solution is to compute)
     # it via a view from all children for each parent
+    # assigned during creation
     "cree_le",
-    "modifie_le",
-    "identifiant_unique",
+    # Inherited from children
+    "duplicats",
+    # # assigned during creation
     "identifiant_externe",
+    # assigned during creation
+    "identifiant_unique",
+    # Inherited from children
+    "lieu_prestation",
+    # assigned during update
+    "modifie_le",
+    # Inherited from children
+    "perimetre_adomiciles",
+    # Inherited from children
+    "proposition_services",
+    # Inherited from children
+    "source_id",
+    # Inherited from children
+    "source",
+    # Inherited from children
+    "statut",
+    # used by source ingestion
+    "suggestion_groupes",
+    # used by source ingestion
+    "suggestion_unitaires",
 ]
 
 # ---------------------------------------
