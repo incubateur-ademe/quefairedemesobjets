@@ -395,15 +395,21 @@ class ProduitPage(
 
         # Validate legacy_synonyme inline items
         for synonyme_item in self.legacy_synonymes.all():
-            if synonyme_item.synonyme:
+            try:
+                synonyme = synonyme_item.synonyme
+            except Synonyme.DoesNotExist:
+                # The related synonyme was deleted, skip validation
+                continue
+
+            if synonyme:
                 # Check if the synonyme's produit is already redirected
                 try:
-                    produit_page = synonyme_item.synonyme.produit.next_wagtail_page
+                    produit_page = synonyme.produit.next_wagtail_page
                     if produit_page.page != self:
                         logger.warning(
-                            f"Synonyme '{synonyme_item.synonyme.nom}' has a direct "
+                            f"Synonyme '{synonyme.nom}' has a direct "
                             f"redirection to page '{self.title}' but its "
-                            f"produit '{synonyme_item.synonyme.produit.nom}' is "
+                            f"produit '{synonyme.produit.nom}' is "
                             f"redirected to '{produit_page.page.title}'. "
                             "The synonyme redirection will take priority."
                         )
@@ -415,12 +421,12 @@ class ProduitPage(
                 try:
                     exclusion = (
                         LegacyIntermediateProduitPageSynonymeExclusion.objects.get(
-                            synonyme=synonyme_item.synonyme
+                            synonyme=synonyme
                         )
                     )
                     if exclusion.page != self:
                         raise ValidationError(
-                            f"Conflit : le synonyme '{synonyme_item.synonyme.nom}' "
+                            f"Conflit : le synonyme '{synonyme.nom}' "
                             "est marqué comme exclu de la redirection vers la page "
                             f"'{exclusion.page.title}'. "
                             "Vous ne pouvez pas créer une redirection directe "
