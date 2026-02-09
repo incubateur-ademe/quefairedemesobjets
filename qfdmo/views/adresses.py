@@ -376,7 +376,7 @@ def get_synonyme_list(request):
             nom_unaccent=Unaccent(Lower("nom")),
         )
         .prefetch_related("produit__sous_categories")
-        .annotate(
+        .annotate(  # TODO: use django-modelsearch
             distance=TrigramWordDistance(query, "nom_unaccent"),
             length=Length("nom"),
         )
