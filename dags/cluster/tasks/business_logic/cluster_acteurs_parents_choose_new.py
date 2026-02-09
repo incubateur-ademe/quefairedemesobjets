@@ -181,8 +181,6 @@ def cluster_acteurs_parents_choose_new(df_clusters: pd.DataFrame) -> pd.DataFram
                                 "identifiant_unique": parent_id,
                                 "parent_id": None,
                                 "cluster_id": cluster_id,
-                                "est_parent": True,
-                                "nombre_enfants": 0,
                             }
                         ]
                     ),
