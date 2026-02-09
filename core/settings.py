@@ -508,7 +508,7 @@ SILENCED_SYSTEM_CHECKS = ["wagtailadmin.W002"]
 HOST_PROTO = decouple.config("HOST_PROTO", default="https")
 WAGTAIL_SITE_NAME = "Longue vie aux objets"
 WAGTAILADMIN_BASE_URL = BASE_URL
-WAGTAIL_SEARCH_BACKENDS = {
+MODELSEARCH_BACKENDS = {
     "default": {
         "BACKEND": "modelsearch.backends.database",
         "SEARCH_CONFIG": "wagtail_french",
@@ -540,7 +540,7 @@ INSTALLED_APPS.extend(
         "wagtail.snippets",
         "wagtail.documents",
         "wagtail.images",
-        "wagtail.search",
+        "modelsearch",
         "wagtail.admin",
         "wagtail.contrib.typed_table_block",
         "wagtail",

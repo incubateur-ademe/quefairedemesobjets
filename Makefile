@@ -218,6 +218,13 @@ drop-schema-public:
 create-schema-public:
 	psql -d '$(DB_URL)' -c "CREATE SCHEMA IF NOT EXISTS public;"
 
+
+.SILENT:
+.PHONY: create-extensions
+create-extensions:
+	@echo "Creating required extensions"
+	psql -d '$(DB_URL)' -f scripts/sql/create_extensions.sql
+
 .PHONY: psql
 psql:
 	docker compose exec lvao-db psql -U qfdmo -d qfdmo
@@ -234,9 +241,6 @@ dump-preprod:
 dump-prod-quiet:
 	sh scripts/infrastructure/backup-db.sh --quiet
 
-# We need to create extensions because they are not restored by pg_restore
-.PHONY: create-sql-extensions
-create_sql_extensions:
 
 .SILENT:
 .PHONY: load-prod-dump
