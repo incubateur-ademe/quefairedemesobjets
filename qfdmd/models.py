@@ -374,6 +374,7 @@ class ProduitPage(
                 FieldPanel("usage_unique"),
                 FieldPanel("tags"),
                 FieldPanel("search_tags"),
+                FieldPanel("search_variants"),
                 FieldPanel("sous_categorie_objet"),
             ],
             heading="Taxonomie",
@@ -392,8 +393,8 @@ class ProduitPage(
 
     search_fields = Page.search_fields + [
         index.AutocompleteField("title"),
-        index.AutocompleteField("search_variants"),
-        index.SearchField("search_variants"),
+        index.AutocompleteField("search_variants", boost=2.0),
+        index.SearchField("search_variants", boost=2.0),
     ]
 
     def clean(self):

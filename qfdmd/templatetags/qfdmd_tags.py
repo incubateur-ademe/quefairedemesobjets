@@ -31,7 +31,7 @@ def get_search_term_name(context):
 
     try:
         search_term = SearchTerm.objects.get(id=search_term_id)
-        return search_term.term
+        return search_term.specific.get_search_term_verbose_name()
     except (SearchTerm.DoesNotExist, ValueError):
         return None
 
