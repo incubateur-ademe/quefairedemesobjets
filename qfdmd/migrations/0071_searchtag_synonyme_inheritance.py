@@ -1,4 +1,4 @@
-# Migration for SearchTag and Synonyme to inherit from SearchTerm
+# Migration for SearchTag, Synonyme inheritance, search_variants and search_term
 
 import django.db.models.deletion
 import modelcluster.contrib.taggit
@@ -12,9 +12,7 @@ def create_search_terms_for_synonymes(apps, schema_editor):
     SearchTerm = apps.get_model("search", "SearchTerm")
 
     for synonyme in Synonyme.objects.all():
-        # Create a SearchTerm for this synonyme
         search_term = SearchTerm.objects.create()
-        # Link it to the synonyme
         synonyme.searchterm_ptr_id = search_term.id
         synonyme.save(update_fields=["searchterm_ptr_id"])
 
@@ -24,11 +22,32 @@ def reverse_search_terms_for_synonymes(apps, schema_editor):
     Synonyme = apps.get_model("qfdmd", "Synonyme")
     SearchTerm = apps.get_model("search", "SearchTerm")
 
-    # Get all searchterm_ptr IDs from synonymes and delete them
     search_term_ids = Synonyme.objects.exclude(
         searchterm_ptr_id__isnull=True
     ).values_list("searchterm_ptr_id", flat=True)
     SearchTerm.objects.filter(pk__in=list(search_term_ids)).delete()
+
+
+def create_search_terms_for_produit_pages(apps, schema_editor):
+    """Create a SearchTerm for each existing ProduitPage."""
+    ProduitPage = apps.get_model("qfdmd", "ProduitPage")
+    SearchTerm = apps.get_model("search", "SearchTerm")
+
+    for page in ProduitPage.objects.all():
+        search_term = SearchTerm.objects.create()
+        page.search_term = search_term
+        page.save(update_fields=["search_term"])
+
+
+def delete_search_terms_for_produit_pages(apps, schema_editor):
+    """Delete SearchTerms associated with ProduitPages."""
+    ProduitPage = apps.get_model("qfdmd", "ProduitPage")
+    SearchTerm = apps.get_model("search", "SearchTerm")
+
+    search_term_ids = ProduitPage.objects.filter(search_term__isnull=False).values_list(
+        "search_term_id", flat=True
+    )
+    SearchTerm.objects.filter(id__in=list(search_term_ids)).delete()
 
 
 class Migration(migrations.Migration):
@@ -168,5 +187,33 @@ class Migration(migrations.Migration):
                 to="qfdmd.searchtag",
                 verbose_name="Importé comme SearchTag",
             ),
+        ),
+        # Add search_variants field to ProduitPage (from 0072)
+        migrations.AddField(
+            model_name="produitpage",
+            name="search_variants",
+            field=models.TextField(
+                blank=True,
+                default="",
+                help_text="Termes alternatifs permettant de trouver cette page dans la recherche. Ces variantes sont invisibles pour les utilisateurs mais améliorent la recherche. Séparez les termes par des virgules ou des retours à la ligne.",
+                verbose_name="Variantes de recherche",
+            ),
+        ),
+        # Add search_term field to ProduitPage (from 0073)
+        migrations.AddField(
+            model_name="produitpage",
+            name="search_term",
+            field=models.OneToOneField(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="produit_page",
+                to="search.searchterm",
+            ),
+        ),
+        # Populate SearchTerm for existing ProduitPages
+        migrations.RunPython(
+            create_search_terms_for_produit_pages,
+            delete_search_terms_for_produit_pages,
         ),
     ]
