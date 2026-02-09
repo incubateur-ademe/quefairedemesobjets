@@ -206,24 +206,6 @@ class TaggedSearchTag(ItemBase):
         verbose_name = "Synonyme de recherche"
         verbose_name_plural = "Synonymes de recherche"
 
-    def delete(self, *args, **kwargs):
-        """
-        Clean up when a SearchTag is removed from a ProduitPage.
-
-        This method:
-        1. Clears the imported_as_search_tag link on any Synonymes
-           that were imported as this SearchTag
-        2. Deletes the SearchTag itself (since it's no longer linked to any page)
-        """
-        tag = self.tag
-        super().delete(*args, **kwargs)
-
-        if tag:
-            # Clear the link on any Synonymes imported as this SearchTag
-            tag.imported_synonymes.update(imported_as_search_tag=None)
-            # Delete the SearchTag since it's no longer linked to any page
-            tag.delete()
-
 
 class ProduitPage(
     CompiledFieldMixin,
