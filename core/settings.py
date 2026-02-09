@@ -512,8 +512,9 @@ WAGTAIL_SEARCH_BACKENDS = {
     "default": {
         "BACKEND": "wagtail.search.backends.database",
         "SEARCH_CONFIG": "wagtail_french",
+        "FUZZY_ALGORITHM": "levenshtein",
         "FUZZY_SIMILARITY_THRESHOLD": 0.2,
-        "FUZZY_PREFIX_BOOST": 1.0,
+        "FUZZY_PREFIX_BOOST": 0.5,
     }
 }
 
