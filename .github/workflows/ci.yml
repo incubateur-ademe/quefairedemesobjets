@@ -152,6 +152,7 @@ jobs:
           cache-key: db-dump-${{ hashFiles('**/migrations/**/*.py') }}-${{ steps.date.outputs.value }}
           sample-db-uri: ${{ secrets.SAMPLE_DB_URI }}
           database-url: ${{ env.DATABASE_URL }}
+          local-dump-path: "database-dump.pgdump"
 
       - name: collectstatic
         shell: bash
@@ -214,9 +215,10 @@ jobs:
           name: e2e-build-artifacts
 
       - name: Restore Django database
-        uses: ./.github/actions/restore-django-db
+        uses: ./.github/actions/pg-restore
         with:
           database-url: ${{ env.DATABASE_URL }}
+          dump-path: database-dump.pgdump
 
       # RUN e2e
       - name: Run server
@@ -229,24 +231,24 @@ jobs:
           # Additional wait to ensure static files are served
           sleep 2
 
-      # - name: Run Playwright tests
-      #   run: npx playwright test --shard=${{ matrix.shard }}/5 --update-snapshots
+      - name: Run Playwright tests
+        run: npx playwright test --shard=${{ matrix.shard }}/5 --update-snapshots
 
-      # - name: Upload Playwright report
-      #   uses: actions/upload-artifact@v6
-      #   if: ${{ !cancelled() }}
-      #   with:
-      #     name: playwright-report-${{ matrix.shard }}
-      #     path: playwright-report/
-      #     retention-days: 2
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v6
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report-${{ matrix.shard }}
+          path: playwright-report/
+          retention-days: 2
 
-      # - name: Upload test results
-      #   uses: actions/upload-artifact@v6
-      #   if: ${{ !cancelled() }}
-      #   with:
-      #     name: playwright-results-${{ matrix.shard }}
-      #     path: test-results/
-      #     retention-days: 2
+      - name: Upload test results
+        uses: actions/upload-artifact@v6
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-results-${{ matrix.shard }}
+          path: test-results/
+          retention-days: 2
 
 # Address actions/missing-workflow-permissions rule in
 # code scanning alerts

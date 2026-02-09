@@ -13,6 +13,7 @@ import {
   getIframe,
   TIMEOUT,
   clickFirstClickableActeurMarker,
+  mockApiAdresse,
 } from "./helpers"
 
 test.describe("🗺️ Filtres Avancés Carte", () => {
@@ -52,6 +53,9 @@ test.describe("🗺️ Affichage Légende Carte", () => {
     await navigateTo(page, `/carte`)
 
     await expect(page.getByTestId("carte-legend")).toBeHidden()
+
+    // Mock the address API before searching
+    await mockApiAdresse(page)
 
     // Fill "Adresse" autocomplete input
     await searchForAuray(page)
@@ -145,7 +149,7 @@ test.describe("🗺️ Basculement entre Mode Carte et Liste", () => {
 })
 
 test.describe("🗺️ Affichage des Labels dans la Fiche Acteur", () => {
-  test.skip("Le label ESS est affiché dans le panneau de détails de l'acteur", async ({
+  test("Le label ESS est affiché dans le panneau de détails de l'acteur", async ({
     page,
   }) => {
     // Navigate to the test preview page with ESS filter applied
@@ -190,14 +194,19 @@ test.describe("🗺️ Persistance des Filtres de Légende", () => {
     // Navigate to the carte page
     await navigateTo(page, `/carte`)
 
+    // Mock the address API before searching
+    await mockApiAdresse(page)
+
     // Search for Auray
     await searchForAuray(page)
 
     // Wait for legend to be visible
     await expect(page.getByTestId("carte-legend")).toBeVisible()
 
-    // Wait for results to be displayed
-    await expect(page.locator("#addressesPanel")).toBeVisible()
+    // Wait for results to be displayed (pinpoints in the addresses panel)
+    await expect(
+      page.locator('#addressesPanel [data-controller="pinpoint"]').first(),
+    ).toBeVisible({ timeout: TIMEOUT.DEFAULT })
 
     // Get the first filter checkbox by index (0)
     const firstFilterCheckbox = page
@@ -244,14 +253,11 @@ test.describe("🗺️ Persistance des Filtres de Légende", () => {
     // Verify the checkbox is now unchecked
     await expect(firstFilterCheckbox).not.toBeChecked()
 
-    // Wait for the loading spinner to appear and disappear (acteurs are being refreshed)
-    await waitForLoadingComplete(page)
-
-    // Verify icons are no longer in addressesPanel
+    // Wait for icons to be removed from addressesPanel (results are refreshed after filter change)
     const addressesPanelIconsAfter = page.locator(
       `#addressesPanel [data-controller="pinpoint"] span.${iconClass}`,
     )
-    expect(await addressesPanelIconsAfter.count()).toBe(0)
+    await expect(addressesPanelIconsAfter).toHaveCount(0, { timeout: TIMEOUT.DEFAULT })
 
     // Verify markers with this icon are no longer visible on the map
     const markersAfterUncheck = page.locator(
@@ -264,6 +270,11 @@ test.describe("🗺️ Persistance des Filtres de Légende", () => {
 
     // Switch back to carte mode
     await switchToCarteMode(page)
+
+    // Wait for results to be displayed after mode switch
+    await expect(
+      page.locator('#addressesPanel [data-controller="pinpoint"]').first(),
+    ).toBeVisible({ timeout: TIMEOUT.DEFAULT })
 
     // Verify the filter is still unchecked
     await expect(firstFilterCheckbox).not.toBeChecked()
@@ -314,26 +325,24 @@ test.describe("🗺️ Persistance des Filtres de Légende", () => {
     // Uncheck the second filter
     await secondCheckboxLabel.click()
 
-    // Wait for loading
-    await waitForLoadingComplete(page)
-
     // Verify the second filter is now unchecked
     await expect(secondFilterCheckbox).not.toBeChecked()
 
-    // Verify icons with the second icon class are now gone
+    // Wait for icons with the second icon class to be removed
     const secondIconsAfter = page.locator(
       `#addressesPanel [data-controller="pinpoint"] span.${secondIconClass}`,
     )
-    expect(await secondIconsAfter.count()).toBe(0)
+    await expect(secondIconsAfter).toHaveCount(0, { timeout: TIMEOUT.DEFAULT })
   })
 })
 
 test.describe("🗺️ Bouton 'Rechercher dans cette zone'", () => {
+  // TODO: Fix this test - programmatic map movement events don't trigger the button visibility
+  // The mapChanged event needs to be triggered by actual map drag/zoom interactions
+  // which are difficult to simulate reliably in an iframe test environment
   test.skip("Le bouton apparaît après déplacement de la carte et met à jour les résultats", async ({
     page,
   }) => {
-    // SKIPPED: Map movement detection doesn't work reliably in iframe test environment.
-    // The moveend event listener attachment timing and iframe cross-origin issues prevent proper testing.
     // Navigate to the test preview page that generates the iframe
     await navigateTo(page, "/lookbook/preview/tests/t_5_rechercher_dans_zone")
 
@@ -442,14 +451,14 @@ test.describe("🗺️ Bouton 'Rechercher dans cette zone'", () => {
 })
 
 test.describe("🗺️ CarteConfig Bounding Box", () => {
-  test.skip("La bounding box configurée dans CarteConfig est appliquée au chargement initial", async ({
+  test("La bounding box configurée dans CarteConfig est appliquée au chargement initial", async ({
     page,
   }) => {
     // Navigate to the test preview page
     await navigateTo(page, "/lookbook/preview/tests/t_6_carte_config_bounding_box")
 
-    // Wait for the iframe to be loaded
-    const iframe = getIframe(page, "carte-iframe")
+    // Wait for the iframe to be loaded (uses data-testid, not id)
+    const iframe = page.frameLocator('iframe[data-testid="carte-iframe"]')
     await expect(iframe.locator("body")).toBeAttached({ timeout: TIMEOUT.DEFAULT })
 
     // Wait for the map to be loaded
@@ -476,12 +485,13 @@ test.describe("🗺️ CarteConfig Bounding Box", () => {
     expect(bbox.northEast).toHaveProperty("lat")
     expect(bbox.northEast).toHaveProperty("lng")
 
-    // Verify the coordinates match the expected Angers bounding box
+    // Verify the coordinates match the expected bounding box
+    // (Auray Quiberon Terre Atlantique EPCI from the preview)
     // with some tolerance for floating point precision
-    expect(bbox.southWest.lat).toBeCloseTo(47.457526, 5)
-    expect(bbox.southWest.lng).toBeCloseTo(-0.609453, 5)
-    expect(bbox.northEast.lat).toBeCloseTo(47.489048, 5)
-    expect(bbox.northEast.lng).toBeCloseTo(-0.51571, 5)
+    expect(bbox.southWest.lat).toBeCloseTo(47.323994, 5)
+    expect(bbox.southWest.lng).toBeCloseTo(-3.210132, 5)
+    expect(bbox.northEast.lat).toBeCloseTo(47.866059, 5)
+    expect(bbox.northEast.lng).toBeCloseTo(-2.834623, 5)
   })
 })
 
@@ -513,11 +523,16 @@ test.describe("🗺️ Mini Carte - Affichage des Pinpoints", () => {
     // Navigate to the carte page
     await navigateTo(page, "/carte")
 
+    // Mock the address API before searching
+    await mockApiAdresse(page)
+
     // Search for Auray
     await searchForAuray(page)
 
-    // Wait for results to load
-    await waitForLoadingComplete(page)
+    // Wait for results to be displayed (pinpoints in the addresses panel)
+    await expect(
+      page.locator('#addressesPanel [data-controller="pinpoint"]').first(),
+    ).toBeVisible({ timeout: TIMEOUT.DEFAULT })
 
     // Switch to liste mode to access "Voir la fiche" links
     await switchToListeMode(page)
@@ -613,6 +628,9 @@ test.describe("🗺️ Bouton Itinéraire", () => {
     // Navigate directly to the carte page
     await navigateTo(page, "/carte")
 
+    // Mock the address API before searching
+    await mockApiAdresse(page)
+
     // Search for Auray
     await searchForAuray(page)
 
@@ -649,6 +667,9 @@ test.describe("🗺️ Bouton Itinéraire", () => {
     const iframe = getIframe(page)
     await expect(iframe.locator("body")).toBeAttached({ timeout: TIMEOUT.DEFAULT })
 
+    // Mock the address API before searching
+    await mockApiAdresse(page)
+
     // Search for Auray in the iframe
     await searchForAurayInIframe(iframe)
 
@@ -658,10 +679,9 @@ test.describe("🗺️ Bouton Itinéraire", () => {
     )
     await expect(acteurMarkers.first()).toBeVisible({ timeout: TIMEOUT.DEFAULT })
 
-    // Click on the first acteur marker
-    await acteurMarkers.first().click({ force: true })
+    // Click on the first clickable acteur marker (cycles through to find one not obstructed)
+    await clickFirstClickableActeurMarker(iframe)
 
-    // Wait for the acteur details panel to load via turbo-frame
     // The itinéraire link should be visible
     const itineraireLink = iframe.locator("a").filter({ hasText: "Itinéraire" })
     await expect(itineraireLink).toBeVisible({ timeout: TIMEOUT.DEFAULT })
