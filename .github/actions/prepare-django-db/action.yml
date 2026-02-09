@@ -58,6 +58,7 @@ runs:
       run: |
         make createcachetable
         make migrate
+        make index
 
     - name: Init django admin superuser
       if: steps.cache-db.outputs.cache-hit != 'true'

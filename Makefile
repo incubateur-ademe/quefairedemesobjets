@@ -97,6 +97,9 @@ makemigrations:
 merge-migrations:
 	$(DJANGO_ADMIN) makemigrations --merge
 
+.PHONY: index
+index:
+	$(DJANGO_ADMIN) update_index
 
 .PHONY: createcachetable
 createcachetable:
