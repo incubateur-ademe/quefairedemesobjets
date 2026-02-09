@@ -39,7 +39,7 @@ dependencies = [
     "pydantic[email]>=2.11.7",
     "django-admin-sortable2>=2.2.8",
     "more-itertools>=10.7.0",
-    "wagtail-honeypot>=1.2.0",
+    "wagtail-honeypot>=1.2.1",
 ]
 
 [build-system]
