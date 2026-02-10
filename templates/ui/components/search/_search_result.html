@@ -1,5 +1,5 @@
 <a
-    href="{% block href %}{% url 'qfdmd:synonyme-detail' slug=result.slug %}{% endblock %}"
+    href="{% block href %}{{ result.url }}{% endblock %}"
     data-turbo="false"
     style="background-image: none;"
     class="

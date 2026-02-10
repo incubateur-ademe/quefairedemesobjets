@@ -31,6 +31,7 @@ from wagtail.snippets.models import register_snippet
 
 from qfdmd.blocks import STREAMFIELD_COMMON_BLOCKS
 from qfdmo.models.utils import NomAsNaturalKeyModel
+from search.constants import SEARCH_TAG_HELP_TEXT
 from search.models import SearchTerm
 
 logger = logging.getLogger(__name__)
@@ -160,6 +161,16 @@ class SearchTag(SearchTerm, TagBase):
     Inherits from SearchTerm for unified search across different content types.
     """
 
+    legacy_existing_synonyme = models.ForeignKey(
+        "qfdmd.Synonyme",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="search_tag_reference",
+        verbose_name="Synonyme legacy associé",
+        help_text="Référence vers le synonyme legacy dont ce tag est issu.",
+    )
+
     search_fields = [
         index.SearchField("name"),
         index.AutocompleteField("name"),
@@ -168,6 +179,10 @@ class SearchTag(SearchTerm, TagBase):
     class Meta:
         verbose_name = "Synonyme de recherche"
         verbose_name_plural = "Synonymes de recherche"
+
+    def save(self, *args, **kwargs):
+        self.name = self.name.lower()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.name}"
@@ -208,6 +223,16 @@ class TaggedSearchTag(ItemBase):
     class Meta:
         verbose_name = "Synonyme de recherche"
         verbose_name_plural = "Synonymes de recherche"
+
+    def delete(self, *args, **kwargs):
+        tag = self.tag
+        super().delete(*args, **kwargs)
+        if not TaggedSearchTag.objects.filter(tag=tag).exists():
+            # Re-index the orphaned SearchTag (removes it from search index)
+            tag.save()
+            # Re-index the legacy synonyme so it reappears in search
+            if tag.legacy_existing_synonyme_id:
+                tag.legacy_existing_synonyme.save()
 
 
 class ProduitPage(
@@ -373,6 +398,7 @@ class ProduitPage(
     search_panels = [
         MultiFieldPanel(
             [
+                HelpPanel(content=SEARCH_TAG_HELP_TEXT),
                 FieldPanel("search_tags"),
                 FieldPanel("search_variants"),
             ],

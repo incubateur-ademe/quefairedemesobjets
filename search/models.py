@@ -7,12 +7,36 @@ from modelsearch.queryset import SearchableQuerySetMixin
 class SearchTermQuerySet(SearchableQuerySetMixin, QuerySet):
     def exclude_imported_synonymes(self):
         """
-        Exclude Synonyme instances that have been imported as SearchTags.
-        These synonymes have imported_as_search_tag set and should not
-        appear in search results (the SearchTag should appear instead).
+        Exclude from search results:
+        - Synonymes that have a SearchTag linked to a ProduitPage
+          (the SearchTag replaces the synonyme in results)
+        - Orphaned SearchTags not linked to any ProduitPage
+
+        Uses evaluated ID lists to avoid complex subqueries that the
+        search backend cannot introspect.
         """
+        from qfdmd.models import SearchTag, Synonyme, TaggedSearchTag
+
+        # Synonymes replaced by a SearchTag linked to a page
+        imported_synonyme_ids = list(
+            Synonyme.objects.filter(
+                search_tag_reference__in=TaggedSearchTag.objects.values_list(
+                    "tag_id", flat=True
+                ),
+            ).values_list("searchterm_ptr_id", flat=True)
+        )
+
+        # Orphaned SearchTags (not linked to any page)
+        orphaned_tag_ids = list(
+            SearchTag.objects.exclude(
+                searchterm_ptr_id__in=TaggedSearchTag.objects.values_list(
+                    "tag_id", flat=True
+                ),
+            ).values_list("searchterm_ptr_id", flat=True)
+        )
+
         return self.exclude(
-            synonyme__imported_as_search_tag__isnull=False,
+            id__in=imported_synonyme_ids + orphaned_tag_ids,
         )
 
 
@@ -96,11 +120,15 @@ class SearchTerm(index.Indexed, models.Model):
                 id__in=SearchTag.objects.values_list("searchterm_ptr_id", flat=True)
             )
 
-        # Exclude Synonymes that have been imported as SearchTags
+        # Exclude Synonymes that have a SearchTag linked to a ProduitPage
         if cls is Synonyme:
             indexed_objects = indexed_objects.exclude(
-                imported_as_search_tag__isnull=False
+                search_tag_reference__tagged_produit_page__isnull=False
             )
+
+        # Exclude orphaned SearchTags (no page and no legacy synonyme)
+        if cls is SearchTag:
+            indexed_objects = indexed_objects.filter(tagged_produit_page__isnull=False)
 
         return indexed_objects
 

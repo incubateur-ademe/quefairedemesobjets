@@ -55,8 +55,9 @@ def import_legacy_synonymes(request, id):
     - legacy_synonymes_to_exclude: synonymes marked for exclusion
 
     For each collected synonyme:
-    1. Create a SearchTag linked to the ProduitPage
-    2. Mark the Synonyme as imported (links to the SearchTag)
+    1. Create or update a SearchTag based on the synonyme nom (lowercased)
+    2. Store the reference between the legacy synonyme and the SearchTag
+    3. Add the SearchTag to the ProduitPage
     """
     from qfdmd.models import ProduitPage, SearchTag, TaggedSearchTag
 
@@ -93,25 +94,27 @@ def import_legacy_synonymes(request, id):
 
     imported_count = 0
     for synonyme in all_synonymes:
-        # Skip if already imported as a SearchTag
-        if synonyme.imported_as_search_tag is not None:
-            continue
+        tag_name = synonyme.nom.lower()
 
-        # 1. Create or get SearchTag with the synonyme name
-        search_tag, tag_created = SearchTag.objects.get_or_create(
-            name=synonyme.nom,
+        # Create or get SearchTag based on the lowercased synonyme name
+        search_tag, _ = SearchTag.objects.get_or_create(
+            name=tag_name,
             defaults={"slug": synonyme.slug},
         )
 
-        # 2. Link the SearchTag to the ProduitPage if not already linked
+        # Store the reference between legacy synonyme and SearchTag
+        if search_tag.legacy_existing_synonyme is None:
+            search_tag.legacy_existing_synonyme = synonyme
+            search_tag.save(update_fields=["legacy_existing_synonyme"])
+
+        # Add the SearchTag to the ProduitPage if not already linked
         TaggedSearchTag.objects.get_or_create(
             tag=search_tag,
             content_object=page,
         )
 
-        # 3. Mark the Synonyme as imported
-        synonyme.imported_as_search_tag = search_tag
-        synonyme.save(update_fields=["imported_as_search_tag"])
+        # Save the synonyme to trigger re-indexing (removes it from search index)
+        synonyme.save()
 
         imported_count += 1
 
