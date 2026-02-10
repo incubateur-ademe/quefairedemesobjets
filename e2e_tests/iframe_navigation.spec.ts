@@ -18,9 +18,9 @@ test.describe("🧭 Navigation dans l'iframe avec persistance de l'UI", () => {
       // Check that footer is NOT present (hidden in iframe mode)
       await expect(iframe.locator(".fr-footer")).not.toBeVisible()
 
-      // Check that iframe-specific button is present
+      // Check that iframe-specific link is present
       await expect(
-        iframe.locator('button:has-text("En savoir plus sur ce site")'),
+        iframe.locator('a:has-text("En savoir plus sur ce site")'),
       ).toBeVisible()
     }
 
@@ -98,7 +98,7 @@ test.describe("🧭 Navigation dans l'iframe avec persistance de l'UI", () => {
       iframe.locator('.fr-header:not([data-testid="header-iframe"])'),
     ).not.toBeVisible()
     await expect(
-      iframe.locator('button:has-text("En savoir plus sur ce site")'),
+      iframe.locator('a:has-text("En savoir plus sur ce site")'),
     ).toBeVisible()
 
     // Navigate using an external link on the product page to test internal navigation
