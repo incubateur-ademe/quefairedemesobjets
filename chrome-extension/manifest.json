@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "QFDMO Inspector",
+  "name": "Que faire de mes réutilisateurs ?",
   "description": "Detecte et analyse les iframes Que Faire De Mes Objets / Dechets sur les pages web",
   "action": {
     "default_popup": "src/pages/popup/index.html",
