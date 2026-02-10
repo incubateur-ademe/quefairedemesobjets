@@ -4,11 +4,8 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths:
-      - "chrome-extension/**"
   pull_request:
-    paths:
-      - "chrome-extension/**"
+    types: [opened, synchronize]
 
 permissions:
   contents: read
@@ -42,3 +39,45 @@ jobs:
           name: chrome-extension-dist
           path: chrome-extension/dist_chrome
           retention-days: 5
+
+  e2e:
+    name: 🧪 E2E Tests
+    needs: build
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    env:
+      BASE_URL: "https://quefairedemesdechets.ademe.fr"
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup frontend environment
+        uses: ./.github/actions/setup-frontend
+
+      - name: Download Chrome extension build
+        uses: actions/download-artifact@v7
+        with:
+          name: chrome-extension-dist
+          path: chrome-extension/dist_chrome
+
+      - name: Setup Playwright
+        uses: ./.github/actions/setup-playwright
+
+      - name: Run Chrome Extension e2e tests
+        # Extensions require headed mode; xvfb provides a virtual display on CI
+        run: xvfb-run npx playwright test --config=playwright.extension.config.ts
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v6
+        if: ${{ !cancelled() }}
+        with:
+          name: chrome-extension-playwright-report
+          path: playwright-report/
+          retention-days: 2
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v6
+        if: ${{ !cancelled() }}
+        with:
+          name: chrome-extension-test-results
+          path: test-results/
+          retention-days: 2
