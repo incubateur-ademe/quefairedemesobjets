@@ -96,11 +96,12 @@ def import_legacy_synonymes(request, id):
     for synonyme in all_synonymes:
         tag_name = synonyme.nom.lower()
 
-        # Create or get SearchTag based on the synonyme slug
-        search_tag, _ = SearchTag.objects.get_or_create(
-            slug=synonyme.slug,
-            defaults={"name": tag_name},
-        )
+        # Find existing SearchTag by slug or name before creating
+        search_tag = SearchTag.objects.filter(slug=synonyme.slug).first()
+        if search_tag is None:
+            search_tag = SearchTag.objects.filter(name=tag_name).first()
+        if search_tag is None:
+            search_tag = SearchTag.objects.create(name=tag_name, slug=synonyme.slug)
 
         # Store the reference between legacy synonyme and SearchTag
         if search_tag.legacy_existing_synonyme is None:
