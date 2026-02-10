@@ -152,22 +152,12 @@ class RequestEnhancementMiddleware:
         elif request.COOKIES.get(cookie_name):
             response.delete_cookie(cookie_name)
 
-    FORCE_IFRAME_PARAM = "FORCE_IFRAME"
-
     def _prepare_request_if_iframe(self, request):
         """Detect if the request comes from an iframe.
         Detection is based on the Sec-Fetch-Dest header, which is set by modern
         browsers when a request is made from within an iframe.
-        Authenticated users can also force iframe mode via the FORCE_IFRAME
-        query parameter.
         """
-        is_iframe_header = request.headers.get("Sec-Fetch-Dest") == "iframe"
-        is_forced = (
-            self.FORCE_IFRAME_PARAM in request.GET
-            and hasattr(request, "user")
-            and request.user.is_authenticated
-        )
-        request.iframe = is_iframe_header or is_forced
+        request.iframe = request.headers.get("Sec-Fetch-Dest") == "iframe"
 
     def _persist_iframe_in_headers(self, request, response):
         """Persist iframe state in headers.
