@@ -458,14 +458,9 @@ class ProduitPage(
         from search.models import SearchTerm
 
         if self.search_term_id:
-            SearchTerm.objects.update_or_create(
-                pk=self.search_term_id,
-                defaults={"search_variants": self.search_variants},
-            )
+            SearchTerm.objects.filter(pk=self.search_term_id).update()
         else:
-            self.search_term = SearchTerm.objects.create(
-                search_variants=self.search_variants,
-            )
+            self.search_term = SearchTerm.objects.create()
 
         super().save(*args, **kwargs)
 

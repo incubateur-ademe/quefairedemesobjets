@@ -1,6 +1,7 @@
 {% extends "./_search_result.html" %}
+{% load wagtailcore_tags %}
 
-{% block href %}{{ result.page.url }}{% endblock %}
+{% block href %}{% if result.page %}{% pageurl result.page %}{% endif %}{% endblock %}
 
 {% block nom %}
 <div class="qf-flex qf-justify-between qf-pr-2w">

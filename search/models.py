@@ -60,6 +60,8 @@ class SearchTerm(index.Indexed, models.Model):
 
     search_fields = [
         index.FilterField("id"),
+        index.SearchField("__str__"),
+        index.AutocompleteField("__str__"),
         index.SearchField("search_variants"),
         index.AutocompleteField("search_variants"),
     ]
