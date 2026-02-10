@@ -257,7 +257,13 @@ class ProduitPage(
             "à la ligne."
         ),
     )
-
+    search_term = models.OneToOneField(
+        "search.SearchTerm",
+        on_delete=models.SET_NULL,
+        related_name="produit_page",
+        blank=True,
+        null=True,
+    )
     infotri = StreamField([("image", ImageBlock())], blank=True)
     body = StreamField(
         STREAMFIELD_COMMON_BLOCKS,
@@ -375,8 +381,6 @@ class ProduitPage(
 
     search_fields = Page.search_fields + [
         index.AutocompleteField("title"),
-        index.AutocompleteField("search_variants", boost=2.0),
-        index.SearchField("search_variants", boost=2.0),
     ]
 
     def clean(self):
@@ -425,6 +429,21 @@ class ProduitPage(
                 except LegacyIntermediateProduitPageSynonymeExclusion.DoesNotExist:
                     # No exclusion exists, that's fine
                     pass
+
+    def save(self, *args, **kwargs):
+        from search.models import SearchTerm
+
+        if self.search_term_id:
+            SearchTerm.objects.update_or_create(
+                pk=self.search_term_id,
+                defaults={"search_variants": self.search_variants},
+            )
+        else:
+            self.search_term = SearchTerm.objects.create(
+                search_variants=self.search_variants,
+            )
+
+        super().save(*args, **kwargs)
 
     @property
     def search_result_template(self):
@@ -784,7 +803,7 @@ class Synonyme(SearchTerm, AbstractBaseProduit):
     def __str__(self) -> str:
         return self.nom
 
-    search_fields = [
+    search_fields = SearchTerm.search_fields + [
         index.SearchField("nom"),
         index.AutocompleteField("nom"),
     ]

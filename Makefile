@@ -99,7 +99,7 @@ merge-migrations:
 
 .PHONY: index
 index:
-	$(DJANGO_ADMIN) update_index
+	$(DJANGO_ADMIN) rebuild_modelsearch_index
 
 .PHONY: createcachetable
 createcachetable:

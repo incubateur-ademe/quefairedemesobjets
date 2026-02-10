@@ -2,7 +2,6 @@ from django.db import models
 from django.db.models import QuerySet
 from modelsearch import index
 from modelsearch.queryset import SearchableQuerySetMixin
-from wagtail.snippets.models import register_snippet
 
 
 class SearchTermQuerySet(SearchableQuerySetMixin, QuerySet):
@@ -17,19 +16,28 @@ class SearchTermQuerySet(SearchableQuerySetMixin, QuerySet):
         )
 
 
-@register_snippet
 class SearchTerm(index.Indexed, models.Model):
     """
     Base model for search terms. Child models (Synonyme, SearchTag) inherit
     from this to enable unified search across different content types.
     """
 
-    # search_fields must be non-empty for SearchTerm to be recognized as indexed.
-    # This enables searching across all child models (Synonyme, SearchTag) via
-    # SearchTerm.objects.search(). Child models define their own search_fields
-    # which are used for actual indexing.
+    search_variants = models.TextField(
+        verbose_name="Variantes de recherche",
+        blank=True,
+        default="",
+        help_text=(
+            "Termes alternatifs permettant de trouver cette page dans la recherche. "
+            "Ces variantes sont invisibles pour les utilisateurs mais améliorent "
+            "la recherche. Séparez les termes par des virgules ou des retours "
+            "à la ligne."
+        ),
+    )
+
     search_fields = [
         index.FilterField("id"),
+        index.SearchField("search_variants"),
+        index.AutocompleteField("search_variants"),
     ]
 
     objects = SearchTermQuerySet.as_manager()
@@ -47,7 +55,9 @@ class SearchTerm(index.Indexed, models.Model):
 
     @property
     def search_result_template(self):
-        return "ui/components/search/_search_result.html"
+        raise NotImplementedError(
+            f"{type(self).__name__} (pk={self.pk}) must define search_result_template"
+        )
 
     def get_indexed_instance(self):
         from qfdmd.models import SearchTag, Synonyme
