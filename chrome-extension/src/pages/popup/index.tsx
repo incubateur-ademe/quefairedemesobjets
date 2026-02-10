@@ -1,8 +1,11 @@
-import React from 'react';
-import { createRoot } from 'react-dom/client';
-import '@pages/popup/index.css';
-import '@assets/styles/tailwind.css';
-import Popup from '@pages/popup/Popup';
+import React from "react"
+import { createRoot } from "react-dom/client"
+import { startReactDsfr } from "@codegouvfr/react-dsfr/spa"
+import "@codegouvfr/react-dsfr/main.css"
+import "@pages/popup/index.css"
+import Popup from "./Popup"
+
+startReactDsfr({ defaultColorScheme: "light" })
 
 function init() {
   const rootContainer = document.querySelector("#__root")

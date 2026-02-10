@@ -2,20 +2,16 @@ import { Controller } from "@hotwired/stimulus"
 import { InteractionType as PosthogUIInteractionType } from "../../js/types"
 import posthog, { PostHogConfig } from "posthog-js"
 import { URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE } from "../../js/helpers"
-
-const IFRAME_REFERRER_SESSION_KEY = "qf_ifr"
+import {
+  IFRAME_REFERRER_SESSION_KEY,
+  UserConversionConfig,
+  USER_CONVERSION_SCORE_CONFIG,
+} from "../../js/shared_constants"
 
 type PersonProperties = {
   iframe: boolean
   iframeReferrer?: string
   iframeFromScript?: boolean
-}
-
-type UserConversionConfig = {
-  homePageView: number
-  produitPageView: number
-  userInteractionWithMap: number
-  userInteractionWithSolutionDetails: number
 }
 
 export default class extends Controller<HTMLElement> {
@@ -66,12 +62,7 @@ export default class extends Controller<HTMLElement> {
   //
   // Each action is listed in the object below with the format :
   // { action name : points added when action is triggered }
-  userConversionScoreConfig: UserConversionConfig = {
-    homePageView: 0,
-    produitPageView: 1,
-    userInteractionWithMap: 1,
-    userInteractionWithSolutionDetails: 1,
-  }
+  userConversionScoreConfig: UserConversionConfig = USER_CONVERSION_SCORE_CONFIG
 
   initialize(): void {
     posthog.init(this.posthogKeyValue, this.posthogConfig)
