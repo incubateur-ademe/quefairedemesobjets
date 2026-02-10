@@ -96,10 +96,10 @@ def import_legacy_synonymes(request, id):
     for synonyme in all_synonymes:
         tag_name = synonyme.nom.lower()
 
-        # Create or get SearchTag based on the lowercased synonyme name
+        # Create or get SearchTag based on the synonyme slug
         search_tag, _ = SearchTag.objects.get_or_create(
-            name=tag_name,
-            defaults={"slug": synonyme.slug},
+            slug=synonyme.slug,
+            defaults={"name": tag_name},
         )
 
         # Store the reference between legacy synonyme and SearchTag
