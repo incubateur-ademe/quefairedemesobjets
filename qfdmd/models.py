@@ -361,11 +361,19 @@ class ProduitPage(
                 FieldPanel("est_famille"),
                 FieldPanel("usage_unique"),
                 FieldPanel("tags"),
-                FieldPanel("search_tags"),
-                FieldPanel("search_variants"),
                 FieldPanel("sous_categorie_objet"),
             ],
             heading="Taxonomie",
+        ),
+    ]
+
+    search_panels = [
+        MultiFieldPanel(
+            [
+                FieldPanel("search_tags"),
+                FieldPanel("search_variants"),
+            ],
+            heading="Recherche",
         ),
     ]
 
@@ -373,6 +381,7 @@ class ProduitPage(
         [
             ObjectList(content_panels, heading="Contenu"),
             ObjectList(config_panels, heading="Configuration"),
+            ObjectList(search_panels, heading="Recherche"),
             ObjectList(migration_panels, heading="Migration"),
             ObjectList(Page.promote_panels, heading="Promotion (SEO)"),
             ObjectList(Page.settings_panels, heading="Paramètres"),

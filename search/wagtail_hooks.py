@@ -47,7 +47,7 @@ class SynonymeViewSet(SnippetViewSet):
 class RechercheViewSetGroup(SnippetViewSetGroup):
     items = (SearchTermViewSet, SearchTagViewSet, SynonymeViewSet)
     menu_icon = "search"
-    menu_label = "Recherche"
+    menu_label = "Moteur de recherche"
     menu_name = "recherche"
 
 
