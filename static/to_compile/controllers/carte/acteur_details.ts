@@ -3,42 +3,19 @@ import { WindowResizeController } from "stimulus-use"
 import PinpointController from "./pinpoint_controller"
 
 class ActeurController extends WindowResizeController {
-  static targets = ["handle", "actions", "content"]
-  static values = { mapContainerId: String, draggable: Boolean }
-  isDragging = false
+  static targets = ["actions", "content"]
+  static values = { mapContainerId: String }
   panelHeight: number
-  startY: number
-  currentTranslateY: number
   hidden = true
-  startTranslateY = 0
   initialTranslateY = 200
   initialTransition = "transform ease 0.5s"
-  // snapPoints defines the area in percentage of the parent where the
-  // panel will adhere with magnetism.
-  // When the user drags the panel close to a snapPoint, the panel will
-  // stop at this point. This allows to control the panel's position precisely
-  // 0 = fully open, 1 = fully closed
-  snapPoints = [0.3, 0.5, 0.8, 1]
 
   declare readonly mapContainerIdValue: string
-  declare readonly draggableValue: boolean
-  declare readonly handleTarget: HTMLElement
   declare readonly contentTarget: HTMLElement
   declare readonly actionsTarget: HTMLElement
   declare readonly hasActionsTarget: Function
 
   initialize() {
-    if (this.draggableValue) {
-      this.element.addEventListener("mousedown", this.#dragStart.bind(this))
-      this.handleTarget.addEventListener("touchstart", this.#dragStart.bind(this))
-
-      this.element.addEventListener("mousemove", this.#dragMove.bind(this))
-      this.element.addEventListener("touchmove", this.#dragMove.bind(this))
-
-      window.addEventListener("mouseup", this.#dragEnd.bind(this))
-      window.addEventListener("touchend", this.#dragEnd.bind(this))
-    }
-
     if (this.hasActionsTarget) {
       this.initialTranslateY = 20 + this.actionsTarget.getBoundingClientRect().bottom
     }
@@ -49,16 +26,6 @@ class ActeurController extends WindowResizeController {
     this.element.style.transform = ``
     this.contentTarget.style.maxHeight = ``
     this.#setTranslateY()
-  }
-
-  #computePanelTranslateY(): number {
-    const matrix = window.getComputedStyle(this.element).transform
-
-    if (matrix !== "none") {
-      return Math.abs(parseFloat(matrix.split(",")[5]))
-    }
-
-    return this.initialTranslateY
   }
 
   #show() {
@@ -128,19 +95,7 @@ class ActeurController extends WindowResizeController {
     )
   }
 
-  #dragStart(event: TouchEvent) {
-    this.isDragging = true
-    const eventY = event?.y || event?.touches[0].clientY
-    this.startY = Math.abs(eventY)
-    this.startTranslateY = this.#computePanelTranslateY()
-    this.element.style.transition = ""
-  }
-
   #setTranslateY(value: number) {
-    if (!this.draggableValue) {
-      return
-    }
-
     if (window.matchMedia("screen and (max-width:768px)").matches) {
       let nextValue = value
       if (Math.abs(value) < this.initialTranslateY) {
@@ -152,53 +107,10 @@ class ActeurController extends WindowResizeController {
     this.#resizeContent()
   }
 
-  #dragMove(event: MouseEvent | TouchEvent) {
-    if (!this.isDragging) return
-
-    // Prevent text selection the element being moved
-    event.preventDefault()
-    this.element.classList.add("qf-select-none")
-
-    const eventY = event?.y || event?.touches[0].clientY
-    const pixelsDragged = this.startY - eventY
-    const pixelsDraggedOffsetted = pixelsDragged + this.startTranslateY
-
-    this.currentTranslateY = Math.min(pixelsDraggedOffsetted, this.panelHeight)
-    this.#setTranslateY(-1 * this.currentTranslateY)
-  }
-
   #resetTransition() {
     if (window.matchMedia("screen and (max-width:768px)").matches) {
       this.element.style.transition = this.initialTransition
     }
-  }
-
-  #dragEnd(event: MouseEvent | TouchEvent) {
-    if (!this.isDragging) return
-    this.isDragging = false
-    this.#resetTransition()
-    this.element.classList.remove("qf-select-none")
-
-    const currentDragRatio = this.currentTranslateY / this.panelHeight
-
-    // Find closest snap point
-    let closestSnapPoint = this.snapPoints[0]
-    let minDiff = Math.abs(currentDragRatio - closestSnapPoint)
-    for (const snapPoint of this.snapPoints) {
-      const diff = Math.abs(currentDragRatio - snapPoint)
-      if (diff < minDiff) {
-        minDiff = diff
-        closestSnapPoint = snapPoint
-      }
-    }
-
-    // Snap to the closest point
-    const snapY = -1 * closestSnapPoint * this.panelHeight
-    this.#setTranslateY(snapY)
-
-    this.element.addEventListener("transitionend", this.#resizeContent.bind(this), {
-      once: true,
-    })
   }
 
   #resizeContent() {
