@@ -189,10 +189,7 @@ def _cluster_acteurs_read_base(
     # -----------------------------------
     query = django_model_queryset_generate(VueActeur, include_if_all_fields_filled)
     if include_source_ids:
-        if est_parent:
-            query = query.filter(sources__id__in=include_source_ids)
-        else:
-            query = query.filter(source_id__in=include_source_ids)
+        query = query.filter(sources__id__in=include_source_ids)
     if include_acteur_type_ids:
         query = query.filter(acteur_type_id__in=include_acteur_type_ids)
     if include_only_if_regex_matches_nom:

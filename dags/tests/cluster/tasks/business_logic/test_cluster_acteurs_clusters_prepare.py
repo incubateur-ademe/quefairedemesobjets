@@ -25,7 +25,7 @@ class TestClusterActeursClustersDisplay:
         s2 = SourceFactory(code="s2")
         DisplayedActeurFactory(identifiant_unique="p1", acteur_type=at1, ville="Paris")
         DisplayedActeurFactory(
-            identifiant_unique="orphan1", acteur_type=at1, ville="Laval", source=s1
+            identifiant_unique="orphan1", acteur_type=at1, ville="Laval", sources=[s1]
         )
         df = pd.DataFrame(
             {
@@ -63,10 +63,10 @@ class TestClusterActeursClustersDisplay:
         s2 = SourceFactory(code="s2")
         DisplayedActeurFactory(identifiant_unique="p1", acteur_type=at1, ville="Paris")
         DisplayedActeurFactory(
-            identifiant_unique="orphan1", acteur_type=at1, ville="Laval", source=s1
+            identifiant_unique="orphan1", acteur_type=at1, ville="Laval", sources=[s1]
         )
         DisplayedActeurFactory(
-            identifiant_unique="orphan2", acteur_type=at1, ville="Laval", source=s2
+            identifiant_unique="orphan2", acteur_type=at1, ville="Laval", sources=[s2]
         )
         df = pd.DataFrame(
             {
@@ -105,25 +105,25 @@ class TestClusterActeursClustersDisplay:
             identifiant_unique="clusterA_1",
             acteur_type=at1,
             ville="Paris",
-            source=s_included,
+            sources=[s_included],
         )
         DisplayedActeurFactory(
             identifiant_unique="clusterA_2",
             acteur_type=at1,
             ville="Paris",
-            source=s_excluded_1,
+            sources=[s_included],
         )
         DisplayedActeurFactory(
             identifiant_unique="clusterB_1",
             acteur_type=at1,
             ville="Lyon",
-            source=s_excluded_1,
+            sources=[s_included],
         )
         DisplayedActeurFactory(
             identifiant_unique="clusterB_2",
             acteur_type=at1,
             ville="Lyon",
-            source=s_excluded_2,
+            sources=[s_included],
         )
 
         df = pd.DataFrame(

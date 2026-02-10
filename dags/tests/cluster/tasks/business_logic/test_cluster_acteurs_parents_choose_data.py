@@ -34,7 +34,7 @@ def sources():
 
 
 @pytest.fixture
-def parent(acteur_type):
+def parent(acteur_type, sources):
     """Parent acteur pour les tests"""
     return VueActeurFactory(
         identifiant_unique="p1",
@@ -43,7 +43,7 @@ def parent(acteur_type):
         email="",  # empty value
         acteur_type=acteur_type,
         adresse="my place",
-        source=None,
+        sources=sources,
     )
 
 
@@ -57,7 +57,7 @@ def vue_acteurs(acteur_type, sources, parent):
             nom="❌",
             siret="❌",
             email="email.acteur@source.1",
-            source=sources[0],
+            sources=[sources[0]],
             location=Point(0, 0),
             parent=parent,
             acteur_type=acteur_type,
@@ -68,7 +68,7 @@ def vue_acteurs(acteur_type, sources, parent):
             nom="prio 2",
             siret="11111111111111",  # same SIRET as parent
             email="email.acteur@source.2",
-            source=sources[1],
+            sources=[sources[1]],
             location=Point(1, 1),
             parent=parent,
             acteur_type=acteur_type,
@@ -79,7 +79,7 @@ def vue_acteurs(acteur_type, sources, parent):
             nom="prio 1",
             siret="",
             email="email.acteur@source.3",
-            source=sources[2],
+            sources=[sources[2]],
             location=Point(2, 2),
             parent=None,
             acteur_type=acteur_type,
@@ -90,7 +90,7 @@ def vue_acteurs(acteur_type, sources, parent):
             nom="prio 3",
             siret="",
             email="",  # empty email
-            source=sources[3],
+            sources=[sources[3]],
             location=Point(3, 3),
             parent=None,
             acteur_type=acteur_type,

@@ -44,91 +44,91 @@ class TestClusterActeursReadOrphans:
 
         # Actor with all fields filled - source 1, type 1
         acteurs["orphelin_complet_s1_at1"] = VueActeurFactory(
-            source=sources["s1"],
             acteur_type=acteur_types["at1"],
             nom="Acteur complet s1 at1",
             adresse="123 rue de la Paix",
             ville="Paris",
             code_postal="75001",
             statut="ACTIF",
+            sources=[sources["s1"]],
         )
 
         # Actor with all fields filled - source 1, type 2
         acteurs["orphelin_complet_s1_at2"] = VueActeurFactory(
-            source=sources["s1"],
             acteur_type=acteur_types["at2"],
             nom="Acteur complet s1 at2",
             adresse="456 avenue des Champs",
             ville="Lyon",
             code_postal="69001",
             statut="ACTIF",
+            sources=[sources["s1"]],
         )
 
         # Actor with all fields filled - source 2, type 1
         acteurs["orphelin_complet_s2_at1"] = VueActeurFactory(
-            source=sources["s2"],
             acteur_type=acteur_types["at1"],
             nom="Acteur complet s2 at1",
             adresse="789 boulevard Saint-Michel",
             ville="Marseille",
             code_postal="13001",
             statut="ACTIF",
+            sources=[sources["s2"]],
         )
 
         # INACTIVE actor (should be included if no status filter)
         acteurs["orphelin_inactif"] = VueActeurFactory(
-            source=sources["s1"],
             acteur_type=acteur_types["at1"],
             nom="Acteur inactif",
             adresse="999 rue inactive",
             ville="Toulouse",
             code_postal="31000",
             statut="INACTIF",
+            sources=[sources["s1"]],
         )
 
         # Actor with empty city (should be excluded if city in
         # include_if_all_fields_filled)
         acteurs["orphelin_ville_vide"] = VueActeurFactory(
-            source=sources["s1"],
             acteur_type=acteur_types["at1"],
             nom="Acteur ville vide",
             adresse="111 rue sans ville",
             ville="",
             code_postal="75002",
             statut="ACTIF",
+            sources=[sources["s1"]],
         )
 
         # Actor with name that doesn't match the regex
         acteurs["orphelin_nom_non_match"] = VueActeurFactory(
-            source=sources["s1"],
             acteur_type=acteur_types["at1"],
             nom="XYZ ne match pas",
             adresse="222 rue XYZ",
             ville="Nice",
             code_postal="06000",
             statut="ACTIF",
+            sources=[sources["s1"]],
         )
 
         # Actor with excluded source
         acteurs["orphelin_source_exclue"] = VueActeurFactory(
-            source=sources["s3"],
             acteur_type=acteur_types["at1"],
             nom="Acteur source exclue",
             adresse="333 rue exclue",
             ville="Bordeaux",
             code_postal="33000",
             statut="ACTIF",
+            sources=[sources["s3"]],
         )
 
         # Actor with excluded type
         acteurs["orphelin_type_exclu"] = VueActeurFactory(
-            source=sources["s1"],
             acteur_type=acteur_types["at3"],
             nom="Acteur type exclu",
             adresse="444 rue type exclu",
             ville="Nantes",
             code_postal="44000",
             statut="ACTIF",
+            sources=[sources["s1"]],
         )
 
         return acteurs
@@ -386,36 +386,36 @@ class TestClusterActeursReadOrphans:
         """Verify that only orphans are returned (no parent, not a parent)"""
         # Create an orphan
         orphelin = VueActeurFactory(
-            source=sources["s1"],
             acteur_type=acteur_types["at1"],
             nom="Orphelin",
             ville="Paris",
             code_postal="75001",
             statut="ACTIF",
+            sources=[sources["s1"]],
         )
         orphelin.sources.add(sources["s1"])
 
         # Create a parent
         parent = VueActeurFactory(
-            source=sources["s1"],
             acteur_type=acteur_types["at1"],
             nom="Parent",
             ville="Paris",
             code_postal="75001",
             statut="ACTIF",
             est_parent=True,
+            sources=[sources["s1"]],
         )
         parent.sources.add(sources["s1"])
 
         # Create a child (with parent_id)
         enfant = VueActeurFactory(
-            source=sources["s1"],
             acteur_type=acteur_types["at1"],
             nom="Enfant",
             ville="Paris",
             code_postal="75001",
             statut="ACTIF",
             parent=parent,
+            sources=[sources["s1"]],
         )
         enfant.sources.add(sources["s1"])
 
@@ -455,13 +455,13 @@ class TestClusterActeursReadOrphans:
     def test_empty_strings_converted_to_none(self, sources, acteur_types):
         """Verify that empty strings are converted to None"""
         acteur = VueActeurFactory(
-            source=sources["s1"],
             acteur_type=acteur_types["at1"],
             nom="Acteur avec champs vides",
             adresse="",
             ville="Paris",
             code_postal="75001",
             statut="ACTIF",
+            sources=[sources["s1"]],
         )
         acteur.sources.add(sources["s1"])
 

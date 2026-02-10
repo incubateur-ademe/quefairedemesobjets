@@ -125,6 +125,11 @@ models:
       - name: epci_id
         description: "L'identifiant de l'EPCI de l'acteur"
         data_type: integer
+      - name: est_parent
+        description: "Vrai si l'acteur est un parent"
+        data_type: boolean
+        data_tests:
+          - not_null
     config:
       tags:
         - exposure

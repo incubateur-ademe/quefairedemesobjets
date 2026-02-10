@@ -209,10 +209,10 @@ class TestClusterActeursSuggestionsToDb:
                     nom=row["identifiant_unique"],
                 )
                 DisplayedActeurFactory(
-                    source=s1,
                     acteur_type=at1,
                     identifiant_unique=row["identifiant_unique"],
                     nom=row["identifiant_unique"],
+                    sources=[s1],
                 )
                 parents[row["identifiant_unique"]] = rev
             # No acteur to mock if it's to be created
