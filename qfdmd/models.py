@@ -169,6 +169,9 @@ class SearchTag(SearchTerm, TagBase):
         verbose_name = "Synonyme de recherche"
         verbose_name_plural = "Synonymes de recherche"
 
+    def __str__(self):
+        return f"{self.name}"
+
     @property
     def search_result_template(self):
         return "ui/components/search/_search_result_searchtag.html"
