@@ -49,7 +49,7 @@
     "carte-facile": "^0.8.1",
     "eslint-config-prettier": "^10.1.8",
     "posthog-js": "^1.331.0",
-    "maplibre-gl": "^5.16.0",
+    "maplibre-gl": "^5.17.0",
     "stimulus-use": "^0.52.3",
     "tailwindcss": "^3.4.19"
   },
