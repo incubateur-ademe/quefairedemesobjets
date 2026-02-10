@@ -10,6 +10,9 @@ dotenv.config({ path: path.resolve(__dirname, ".env") })
 
 export const config: PlaywrightTestConfig = {
   testDir: "./e2e_tests",
+  /* Exclude chrome extension tests (they use their own persistent context) */
+  testIgnore: ["**/chrome_extension.spec.ts"],
+  /* Run tests in files in parallel */
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: 4,
