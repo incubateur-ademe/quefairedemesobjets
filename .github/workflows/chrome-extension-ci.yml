@@ -1,0 +1,44 @@
+name: 🧩 Chrome Extension CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "chrome-extension/**"
+  pull_request:
+    paths:
+      - "chrome-extension/**"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: 🔨 Build Chrome Extension
+    timeout-minutes: 15
+    runs-on: ubuntu-slim
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: "npm"
+          cache-dependency-path: chrome-extension/package-lock.json
+
+      - name: Install dependencies
+        working-directory: chrome-extension
+        run: npm ci
+
+      - name: Build
+        working-directory: chrome-extension
+        run: npm run build
+
+      - name: Upload Chrome extension artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: chrome-extension-dist
+          path: chrome-extension/dist_chrome
+          retention-days: 5
