@@ -11,14 +11,12 @@ from django.views.decorators.vary import vary_on_headers
 from django.views.generic import DetailView, TemplateView
 from queryish.rest import APIModel
 from wagtail.admin.viewsets.chooser import ChooserViewSet
-from wagtail.admin.viewsets.model import ModelViewSet
 from wagtail.models import Page
 
 from core.views import static_file_content_from
 from qfdmd.forms import SearchForm
 from qfdmd.models import (
     Produit,
-    ReusableContent,
     Synonyme,
 )
 
@@ -171,15 +169,3 @@ class BlockChooserViewSet(ChooserViewSet):
 
 
 pokemon_chooser_viewset = BlockChooserViewSet("pokemon_chooser")
-
-
-class ReusableContentViewSet(ModelViewSet):
-    model = ReusableContent
-    form_fields = ["title", "genre", "nombre"]
-    icon = "resubmit"
-    add_to_admin_menu = True
-    copy_view_enabled = True
-    inspect_view_enabled = True
-
-
-reusable_content_viewset = ReusableContentViewSet("contenu-reutilisable")

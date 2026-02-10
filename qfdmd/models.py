@@ -61,63 +61,6 @@ class GenreNombreModel(models.Model):
         abstract = True
 
 
-@register_snippet
-class ReusableContent(index.Indexed, models.Model):
-    title = models.CharField(verbose_name="Titre", unique=True)
-    feminin_singulier = RichTextField(verbose_name="Contenu - Féminin singulier")
-    feminin_pluriel = RichTextField(verbose_name="Contenu - Féminin pluriel")
-    masculin_singulier = RichTextField(verbose_name="Contenu - Masculin singulier")
-    masculin_pluriel = RichTextField(verbose_name="Contenu - Masculin pluriel")
-
-    search_fields = [
-        index.SearchField("title"),
-        index.AutocompleteField("title"),
-    ]
-
-    panels = [
-        FieldPanel("title"),
-        FieldPanel("feminin_singulier"),
-        FieldPanel("feminin_pluriel"),
-        FieldPanel("masculin_singulier"),
-        FieldPanel("masculin_pluriel"),
-    ]
-
-    def get_from_genre_nombre(
-        self,
-        genre: str,
-        nombre: int,
-    ):
-        if (
-            genre == GenreNombreModel.Genre.MASCULIN
-            and nombre == GenreNombreModel.Nombre.SINGULIER
-        ):
-            return self.masculin_singulier
-
-        if (
-            genre == GenreNombreModel.Genre.FEMININ
-            and nombre == GenreNombreModel.Nombre.SINGULIER
-        ):
-            return self.feminin_singulier
-        if (
-            genre == GenreNombreModel.Genre.MASCULIN
-            and nombre == GenreNombreModel.Nombre.PLURIEL
-        ):
-            return self.masculin_pluriel
-
-        if (
-            genre == GenreNombreModel.Genre.FEMININ
-            and nombre == GenreNombreModel.Nombre.PLURIEL
-        ):
-            return self.feminin_pluriel
-
-    def __str__(self):
-        return self.title
-
-    class Meta:
-        verbose_name = "Contenu réutilisable"
-        verbose_name_plural = "Contenus réutilisables"
-
-
 class CompiledFieldMixin(Page):
     @cached_property
     def famille(self):

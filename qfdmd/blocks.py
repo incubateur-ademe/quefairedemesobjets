@@ -27,11 +27,6 @@ class Bonus(blocks.StaticBlock):
 class CustomBlockMixin(CommonStreamBlock):
     """Mixin to add common custom blocks to any block class."""
 
-    reusable = SnippetChooserBlock(
-        "qfdmd.reusablecontent",
-        label="Contenu réutilisable",
-        template="ui/blocks/reusable.html",
-    )
     carte_sur_mesure = SnippetChooserBlock(
         "qfdmo.CarteConfig",
         label="Carte sur mesure",
@@ -63,14 +58,6 @@ class TabsBlock(sites_faciles_blocks.TabsBlock):
 
 STREAMFIELD_COMMON_BLOCKS = [
     *SITES_FACILES_BLOCKS,
-    (
-        "reusable",
-        SnippetChooserBlock(
-            "qfdmd.reusablecontent",
-            label="Contenu réutilisable",
-            template="ui/blocks/reusable.html",
-        ),
-    ),
     (
         "carte_sur_mesure",
         SnippetChooserBlock(
