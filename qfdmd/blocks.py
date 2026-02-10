@@ -19,6 +19,11 @@ class WagtailBlockChoiceBlock(blocks.StaticBlock):
     pass
 
 
+class Bonus(blocks.StaticBlock):
+    # Deprecated, kept to prevent migrations failure
+    pass
+
+
 class CustomBlockMixin(CommonStreamBlock):
     """Mixin to add common custom blocks to any block class."""
 
@@ -56,15 +61,8 @@ class TabsBlock(sites_faciles_blocks.TabsBlock):
     tabs = TabBlock(label=_("Tab"), minnum=1, max_num=15)
 
 
-class Bonus(blocks.StaticBlock):
-    class Meta:
-        template = "ui/blocks/bonus.html"
-        label = "Bonus réparation"
-
-
 STREAMFIELD_COMMON_BLOCKS = [
     *SITES_FACILES_BLOCKS,
-    ("bonus", Bonus()),
     (
         "reusable",
         SnippetChooserBlock(

@@ -2,7 +2,7 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-from qfdmd.models import FamilyPage, ProduitPage, ReusableContent
+from qfdmd.models import ProduitPage, ReusableContent
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ def merge_reusable_content():
                 base_content.nombre = None
                 base_content.save()
 
-        for page in [*FamilyPage.objects.all(), *ProduitPage.objects.all()]:
+        for page in ProduitPage.objects.all():
             update_block_inplace(page.body, base_content, batch)
 
             for block in page.body.blocks_by_name("tabs"):

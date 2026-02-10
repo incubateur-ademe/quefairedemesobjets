@@ -17,7 +17,6 @@ from wagtail.models import Page
 from core.views import static_file_content_from
 from qfdmd.forms import SearchForm
 from qfdmd.models import (
-    Bonus,
     Produit,
     ReusableContent,
     Synonyme,
@@ -183,15 +182,4 @@ class ReusableContentViewSet(ModelViewSet):
     inspect_view_enabled = True
 
 
-class BonusViewSet(ModelViewSet):
-    model = Bonus
-    form_fields = ["title", "montant_min", "montant_max"]
-    icon = "tag"
-    list_filter = ["montant_min", "montant_max"]
-    add_to_admin_menu = True
-    copy_view_enabled = False
-    inspect_view_enabled = True
-
-
 reusable_content_viewset = ReusableContentViewSet("contenu-reutilisable")
-bonus_viewset = BonusViewSet("bonus")

@@ -24,7 +24,7 @@ def is_page(potential_page):
 def genre_nombre_from(reusable_content: ReusableContent, page):
     """Retrieves reusable content based on page genre and nombre.
 
-    Takes a ReusableContent object and a page (ProduitPage or FamilyPage) and returns
+    Takes a ReusableContent object and a page (ProduitPage) and returns
     the appropriate content with placeholder replacement. The content is retrieved based
     on the page's genre and nombre attributes, and any "<objet>" placeholder
     in the content is replaced with the page's titre_phrase or title.

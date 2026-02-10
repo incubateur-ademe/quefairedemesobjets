@@ -62,25 +62,6 @@ class GenreNombreModel(models.Model):
 
 
 @register_snippet
-class Bonus(index.Indexed, models.Model):
-    title = models.CharField(unique=True)
-    montant_min = models.IntegerField()
-    montant_max = models.IntegerField(null=True)
-
-    search_fields = [
-        index.SearchField("title"),
-        index.AutocompleteField("title"),
-    ]
-
-    def __str__(self):
-        return self.title
-
-    class Meta:
-        verbose_name_plural = "Bonus"
-        verbose_name = "Bonus"
-
-
-@register_snippet
 class ReusableContent(index.Indexed, models.Model):
     title = models.CharField(verbose_name="Titre", unique=True)
     feminin_singulier = RichTextField(verbose_name="Contenu - Féminin singulier")
@@ -159,10 +140,6 @@ class CompiledFieldMixin(Page):
         return self._get_inherited_field("body")
 
     @cached_property
-    def compiled_bonus(self):
-        return self._get_inherited_field("bonus", "disable_bonus_inheritance")
-
-    @cached_property
     def compiled_infotri(self):
         return self._get_inherited_field("infotri")
 
@@ -208,7 +185,7 @@ class TitleFields(models.Model):
 
 class ProduitIndexPage(CompiledFieldMixin, Page):
     template = "ui/pages/produit_index_page.html"
-    subpage_types = ["qfdmd.produitpage", "qfdmd.familypage"]
+    subpage_types = ["qfdmd.produitpage"]
     body = StreamField(
         STREAMFIELD_COMMON_BLOCKS,
         verbose_name="Corps de texte",
@@ -239,7 +216,6 @@ class ProduitPage(CompiledFieldMixin, Page, GenreNombreModel, TitleFields):
     parent_page_types = [
         "qfdmd.produitindexpage",
         "qfdmd.produitpage",
-        "qfdmd.familypage",
     ]
 
     # Taxonomie
@@ -251,18 +227,6 @@ class ProduitPage(CompiledFieldMixin, Page, GenreNombreModel, TitleFields):
     )
 
     # Config
-    bonus = models.ForeignKey(
-        "qfdmd.bonus",
-        on_delete=models.SET_NULL,
-        related_name="produit_page",
-        blank=True,
-        null=True,
-    )
-    disable_bonus_inheritance = models.BooleanField(
-        "Désactiver l'héritage du bonus",
-        default=False,
-    )
-
     usage_unique = models.BooleanField(
         "À usage unique",
         default=False,
@@ -376,13 +340,6 @@ class ProduitPage(CompiledFieldMixin, Page, GenreNombreModel, TitleFields):
             ],
             heading="Taxonomie",
         ),
-        MultiFieldPanel(
-            [
-                FieldPanel("bonus"),
-                FieldPanel("disable_bonus_inheritance"),
-            ],
-            heading="Bonus",
-        ),
     ]
 
     edit_handler = TabbedInterface(
@@ -447,30 +404,6 @@ class ProduitPage(CompiledFieldMixin, Page, GenreNombreModel, TitleFields):
 
     class Meta:
         verbose_name = "Produit"
-
-
-# TODO: Remove FamilyPageTag in a future PR (replaced by ProduitPage.est_famille)
-class FamilyPageTag(TaggedItemBase):
-    content_object = ParentalKey(
-        "qfdmd.FamilyPage",
-        on_delete=models.CASCADE,
-        related_name="tagged_items",
-    )
-
-
-# TODO: Remove FamilyPage in a future PR (replaced by ProduitPage.est_famille)
-class FamilyPage(ProduitPage):
-    """
-    DEPRECATED: This model is kept for backwards compatibility.
-    Use ProduitPage with est_famille=True instead.
-    This model will be removed in a future PR.
-    """
-
-    template = "ui/pages/family_page.html"
-    subpage_types = ["qfdmd.produitpage"]
-
-    class Meta:
-        verbose_name = "Famille"
 
 
 # LEGACY MODELS
