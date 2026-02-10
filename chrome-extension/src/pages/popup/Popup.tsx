@@ -254,6 +254,8 @@ export default function Popup() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    let intervalId: ReturnType<typeof setInterval> | null = null
+
     async function fetchAnalysis() {
       try {
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true })
@@ -275,6 +277,13 @@ export default function Popup() {
     }
 
     fetchAnalysis()
+
+    // Auto-refresh every 2s to pick up iframe-resizer once scripts finish loading
+    intervalId = setInterval(fetchAnalysis, 2000)
+
+    return () => {
+      if (intervalId) clearInterval(intervalId)
+    }
   }, [])
 
   return (
@@ -286,7 +295,9 @@ export default function Popup() {
       }}
     >
       <div style={{ display: "flex", alignItems: "center", marginBottom: "1rem" }}>
-        <h2 style={{ margin: 0, fontSize: "1.1rem" }}>QFDMO Inspector</h2>
+        <h2 style={{ margin: 0, fontSize: "1.1rem" }}>
+          Que faire de mes réutilisateurs ?
+        </h2>
       </div>
 
       {loading && <p>Analyse en cours...</p>}

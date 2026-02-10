@@ -23,6 +23,8 @@ export const FORMULAIRE_SCRIPT_FILENAME = "iframe.js"
 
 export const CARTE_ROUTE = "carte"
 export const FORMULAIRE_ROUTE = "formulaire"
+// The deployed version of quefairedemesdechets uses "dechet" as the assistant route
+export const DECHET_ROUTE = "dechet"
 
 // -- Session storage keys --
 

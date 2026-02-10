@@ -7,6 +7,8 @@ import {
   MAIN_DOMAIN,
   CARTE_ROUTE,
   FORMULAIRE_ROUTE,
+  DECHET_ROUTE,
+  CARTE_SCRIPT_FILENAME,
   FORMULAIRE_SCRIPT_FILENAME,
   SESSION_STORAGE_KEYS,
 } from "../../types"
@@ -16,8 +18,11 @@ function getIframeType(src: string): { type: DetectedIframe["type"]; slug?: stri
     const url = new URL(src)
     const pathname = url.pathname
 
-    // Assistant / Formulaire
-    if (pathname.startsWith(`/${FORMULAIRE_ROUTE}`)) {
+    // Assistant / Formulaire / Dechet
+    if (
+      pathname.startsWith(`/${FORMULAIRE_ROUTE}`) ||
+      pathname.startsWith(`/${DECHET_ROUTE}`)
+    ) {
       return { type: "assistant" }
     }
 
@@ -83,7 +88,11 @@ function findAdjacentScript(iframe: HTMLIFrameElement): HTMLScriptElement | null
 function getDataAttributes(el: HTMLElement): Record<string, string> {
   const attrs: Record<string, string> = {}
   for (const attr of Array.from(el.attributes)) {
-    if (attr.name.startsWith("data-") && attr.name !== "data-testid") {
+    if (
+      attr.name.startsWith("data-") &&
+      attr.name !== "data-testid" &&
+      !attr.name.startsWith("data-qfdmo-")
+    ) {
       attrs[attr.name] = attr.value
     }
   }
@@ -91,21 +100,57 @@ function getDataAttributes(el: HTMLElement): Record<string, string> {
 }
 
 /**
- * Detects iframe-resizer by injecting a script into the page context.
- * Content scripts run in an isolated world and can't access page JS globals,
- * so we inject a small inline script that checks window.iFrameResize
- * and stores the result in a data attribute on <html>.
+ * Injects a probe script that checks if a specific iframe has been processed
+ * by iframe-resizer. When iframe-resizer v5 processes an iframe, it sets
+ * `iframe.iframeResizer` (and `iframe.iFrameResizer`) as an API object
+ * directly on the DOM element. Since content scripts run in an isolated world,
+ * we inject into the page context to check these properties.
+ *
+ * Results are stored as data attributes on each iframe so the content script
+ * can read them.
  */
-function detectIframeResizer(): boolean {
-  // Check the result from our injected probe
-  const probeResult = document.documentElement.getAttribute("data-qfdmo-iframe-resizer")
-  if (probeResult === "true") return true
+function injectIframeResizerProbe(): void {
+  const script = document.createElement("script")
+  script.textContent = `
+    (function() {
+      var iframes = document.querySelectorAll("iframe");
+      for (var i = 0; i < iframes.length; i++) {
+        var iframe = iframes[i];
+        var hasResizer = !!(iframe.iframeResizer || iframe.iFrameResizer);
+        iframe.setAttribute("data-qfdmo-has-iframe-resizer", hasResizer ? "true" : "false");
+      }
+      // Also check for global (UMD fallback)
+      var hasGlobal = (typeof window.iFrameResize !== "undefined") || (typeof window.iframeResize !== "undefined");
+      document.documentElement.setAttribute("data-qfdmo-iframe-resizer-global", hasGlobal ? "true" : "false");
+    })();
+  `
+  document.documentElement.appendChild(script)
+  script.remove()
+}
 
-  // Fallback: check script src attributes
+/**
+ * Checks if a specific iframe has iframe-resizer attached.
+ * Reads the data attribute set by the injected probe.
+ */
+function detectIframeResizerOnIframe(iframe: HTMLIFrameElement): boolean {
+  // Check per-iframe probe result
+  if (iframe.getAttribute("data-qfdmo-has-iframe-resizer") === "true") return true
+
+  // Check global probe result (UMD fallback)
+  if (
+    document.documentElement.getAttribute("data-qfdmo-iframe-resizer-global") === "true"
+  )
+    return true
+
+  // Fallback: check if carte.js or iframe.js scripts are present (they bundle iframe-resizer)
   const scripts = document.querySelectorAll("script")
   for (const script of scripts) {
     const src = script.getAttribute("src") || ""
-    if (src.includes(FORMULAIRE_SCRIPT_FILENAME) && isKnownDomain(getDomain(src))) {
+    if (
+      (src.includes(CARTE_SCRIPT_FILENAME) ||
+        src.includes(FORMULAIRE_SCRIPT_FILENAME)) &&
+      isKnownDomain(getDomain(src))
+    ) {
       return true
     }
   }
@@ -113,21 +158,9 @@ function detectIframeResizer(): boolean {
   return false
 }
 
-/**
- * Injects a probe script into the page context to check for window.iFrameResize.
- * The result is written to a data attribute on <html> so the content script can read it.
- */
-function injectIframeResizerProbe(): void {
-  const script = document.createElement("script")
-  script.textContent = `document.documentElement.setAttribute("data-qfdmo-iframe-resizer", typeof window.iFrameResize !== "undefined" ? "true" : "false");`
-  document.documentElement.appendChild(script)
-  script.remove()
-}
-
 function processIframe(
   iframe: HTMLIFrameElement,
   insideTemplate: boolean,
-  globalIframeResizerDetected: boolean,
 ): DetectedIframe | null {
   const src = iframe.getAttribute("src") || ""
   const domain = getDomain(src)
@@ -139,7 +172,7 @@ function processIframe(
   const hasAdjacentScript = adjacentScript !== null
   const scriptDataAttributes = adjacentScript ? getDataAttributes(adjacentScript) : {}
   const iframeDataAttributes = getDataAttributes(iframe)
-  const hasIframeResizer = globalIframeResizerDetected
+  const hasIframeResizer = insideTemplate ? false : detectIframeResizerOnIframe(iframe)
 
   const warnings: Warning[] = []
 
@@ -218,15 +251,16 @@ function readSessionStorage(): SessionStorageData | null {
   }
 }
 
-function analyzePage(): PageAnalysis {
+function collectIframes(): DetectedIframe[] {
   const detected: DetectedIframe[] = []
+
+  // Inject probe to check iframe-resizer on all iframes
   injectIframeResizerProbe()
-  const globalIframeResizerDetected = detectIframeResizer()
 
   // Scan live DOM iframes
   const liveIframes = document.querySelectorAll("iframe")
   for (const iframe of liveIframes) {
-    const result = processIframe(iframe, false, globalIframeResizerDetected)
+    const result = processIframe(iframe, false)
     if (result) detected.push(result)
   }
 
@@ -235,15 +269,15 @@ function analyzePage(): PageAnalysis {
   for (const template of templates) {
     const templateIframes = template.content.querySelectorAll("iframe")
     for (const iframe of templateIframes) {
-      const result = processIframe(
-        iframe as HTMLIFrameElement,
-        true,
-        globalIframeResizerDetected,
-      )
+      const result = processIframe(iframe as HTMLIFrameElement, true)
       if (result) detected.push(result)
     }
   }
 
+  return detected
+}
+
+function buildAnalysis(detected: DetectedIframe[]): PageAnalysis {
   return {
     iframes: detected,
     totalWarnings: detected.reduce((sum, iframe) => sum + iframe.warnings.length, 0),
@@ -254,8 +288,9 @@ function analyzePage(): PageAnalysis {
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.type === "ANALYZE_PAGE") {
-    const analysis = analyzePage()
-    sendResponse(analysis)
+    // Return results immediately (synchronous)
+    const detected = collectIframes()
+    sendResponse(buildAnalysis(detected))
   }
   return true
 })
