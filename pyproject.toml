@@ -8,7 +8,7 @@ license = "MIT"
 dependencies = [
     "boto3<1.43",
     "dj-database-url>=3.0.1,<4",
-    "django==5.2.9",
+    "django==6.0.2",
     "django-extensions~=4.1",
     "django-import-export[xls, xlsx]>=4.3.8,<5",
     "django-ninja>=1.4.3,<2",
