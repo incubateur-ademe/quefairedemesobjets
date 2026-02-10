@@ -187,9 +187,7 @@ class SearchTag(SearchTerm, TagBase):
     def __str__(self):
         return f"{self.name}"
 
-    @property
-    def search_result_template(self):
-        return "ui/components/search/_search_result_searchtag.html"
+    search_result_template = "ui/components/search/_search_result_searchtag.html"
 
     def get_search_term_verbose_name(self) -> str:
         """Returns the tag name as the search term."""
@@ -273,17 +271,6 @@ class ProduitPage(
         default=False,
         help_text="Si cochée, cette page sera affichée avec le template famille "
         "(fond vert) et pourra contenir des sous-produits.",
-    )
-    search_variants = models.TextField(
-        verbose_name="Variantes de recherche",
-        blank=True,
-        default="",
-        help_text=(
-            "Termes alternatifs permettant de trouver cette page dans la recherche. "
-            "Ces variantes sont invisibles pour les utilisateurs mais améliorent "
-            "la recherche. Séparez les termes par des virgules ou des retours "
-            "à la ligne."
-        ),
     )
     search_term = models.OneToOneField(
         "search.SearchTerm",
@@ -400,7 +387,6 @@ class ProduitPage(
             [
                 HelpPanel(content=SEARCH_TAG_HELP_TEXT),
                 FieldPanel("search_tags"),
-                FieldPanel("search_variants"),
             ],
             heading="Recherche",
         ),
@@ -483,9 +469,7 @@ class ProduitPage(
 
         super().save(*args, **kwargs)
 
-    @property
-    def search_result_template(self):
-        return "ui/components/search/_search_result_produitpage.html"
+    search_result_template = "ui/components/search/_search_result_produitpage.html"
 
     def get_template(self, request, *args, **kwargs):
         if self.est_famille:
@@ -846,9 +830,7 @@ class Synonyme(SearchTerm, AbstractBaseProduit):
         index.AutocompleteField("nom"),
     ]
 
-    @property
-    def search_result_template(self):
-        return "ui/components/search/_search_result_synonyme.html"
+    search_result_template = "ui/components/search/_search_result_synonyme.html"
 
     def get_search_term_verbose_name(self) -> str:
         """Returns the synonyme name as the search term."""

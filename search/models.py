@@ -77,11 +77,11 @@ class SearchTerm(index.Indexed, models.Model):
             return str(instance)
         return f"SearchTerm {self.pk}"
 
-    @property
-    def search_result_template(self):
-        raise NotImplementedError(
-            f"{type(self).__name__} (pk={self.pk}) must define search_result_template"
-        )
+    # TODO: move into init
+    # def search_result_template(self):
+    #     raise NotImplementedError(
+    #         f"{type(self).__name__} (pk={self.pk}) must define search_result_template"
+    #     )
 
     def get_indexed_instance(self):
         from qfdmd.models import SearchTag, Synonyme
