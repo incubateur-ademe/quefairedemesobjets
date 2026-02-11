@@ -1,4 +1,63 @@
 import { test, expect } from "@playwright/test"
+import {
+  navigateTo,
+  getIframe,
+  mockApiAdresse,
+  searchAddress,
+  TIMEOUT,
+} from "./helpers"
+
+test.describe("📋 Fiche Acteur Viewport", () => {
+  test(
+    "La fiche acteur est visible dans le viewport sans scroll sur mobile",
+    { tag: ["@mobile"] },
+    async ({ page }) => {
+      await navigateTo(page, "/lookbook/preview/tests/t_15_acteur_fiche_viewport")
+
+      const iframe = getIframe(page, "assistant")
+      await expect(iframe.locator("body")).toBeAttached({ timeout: TIMEOUT.DEFAULT })
+
+      // Scroll the search form into view
+      const searchForm = iframe
+        .locator('[data-controller="search-solution-form"]')
+        .first()
+      await searchForm.scrollIntoViewIfNeeded()
+
+      // Wait for the carte turbo-frame to load inside the produit page
+      await mockApiAdresse(page)
+      const mauvaisEtatPanel = iframe.locator("#mauvais-etat-panel")
+      await expect(mauvaisEtatPanel).toBeAttached({ timeout: TIMEOUT.DEFAULT })
+      await expect(
+        mauvaisEtatPanel.locator('[data-testid="carte-adresse-input"]'),
+      ).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+
+      // Search for Auray in the carte embedded in the produit page
+      await searchAddress(iframe, "Auray", "carte", {
+        parentLocator: mauvaisEtatPanel,
+      })
+
+      // Wait for acteur markers to appear
+      const acteurMarkers = iframe.locator(
+        '.maplibregl-marker[data-controller="pinpoint"]:not(#pinpoint-home)',
+      )
+      await expect(acteurMarkers.first()).toBeVisible({ timeout: TIMEOUT.LONG })
+
+      // Click on the first acteur marker via evaluate to trigger proper navigation
+      await acteurMarkers.first().evaluate((el: HTMLElement) => el.click())
+
+      // Wait for the acteur detail panel in the mauvais-etat tab to be shown
+      const acteurDetailsPanel = mauvaisEtatPanel.locator("#acteurDetailsPanel")
+      await expect(acteurDetailsPanel).toHaveAttribute("aria-hidden", "false", {
+        timeout: TIMEOUT.DEFAULT,
+      })
+
+      // Assert that the acteur title is visible in the viewport without scrolling
+      const acteurTitle = iframe.getByTestId("acteur-title")
+      await expect(acteurTitle).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+      await expect(acteurTitle).toBeInViewport()
+    },
+  )
+})
 
 test.describe("📤 Acteur Share", () => {
   test.beforeEach(async ({ page, context }) => {
