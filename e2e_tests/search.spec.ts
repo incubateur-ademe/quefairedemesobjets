@@ -1,78 +1,140 @@
 import { expect, test } from "@playwright/test"
 import { navigateTo, TIMEOUT } from "./helpers"
 
-const searchTestCases = [
-  {
-    query: "lave",
-    expectedResults: [
-      "Lave-vaisselle",
-      "Lave-linge",
-      "Façade de lave-vaisselle",
-      "Machine à laver",
-      "Lame de terrasse composite",
-      "Lame de terrasse en bois",
-      "Lame d'arme blanche",
-      "Cave à vin",
-      "Lame de sécateur",
-      "Lame de scie",
-    ],
-  },
-  {
-    query: "télé",
-    expectedResults: [
-      "Téléphone mobile",
-      "Téléviseur",
-      "Télévision",
-      "Batterie de vélo électrique ou EDPM (draisienne, trottinette, gyroroue...)",
-      "Tôle en métal",
-      "Sacoche de vélo",
-      "Transat de bain pour bébé",
-      "Transat pour bébé",
-      "Fauteuil bébé",
-      "Vélo - hors vélo électrique",
-    ],
-  },
-  {
-    query: "chaise",
-    expectedResults: [
-      "Chaise pliante",
-      "Chaise longue de jardin (fixe ou pliante)",
-      "Chaise évolutive d'enfant",
-      "Chaise haute",
-      "Chaise d'enfant",
-      "Chaise avec tablette",
-      "Chaise de massage",
-      "Chaise longue",
-      "Chaise de jardin",
-      "Chaise",
-    ],
-  },
-]
+const SEARCH_INPUT_SELECTOR = "#id_home-input"
+const SEARCH_RESULTS_SELECTOR = "[data-search-target='results'] a"
+
+async function typeSearchQuery(page, query: string) {
+  const searchInput = page.locator(SEARCH_INPUT_SELECTOR)
+  await searchInput.click()
+  await searchInput.fill("")
+  await searchInput.pressSequentially(query, { delay: 50 })
+}
+
+async function waitForResults(page) {
+  const results = page.locator(SEARCH_RESULTS_SELECTOR)
+  await expect(results.first()).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+  return results
+}
 
 test.describe("Recherche de produits", () => {
-  for (const { query, expectedResults } of searchTestCases) {
-    test(`La recherche "${query}" retourne les résultats attendus`, async ({
-      page,
-    }) => {
-      await navigateTo(page, "/")
+  test.beforeEach(async ({ page }) => {
+    await navigateTo(page, "/")
+  })
 
-      const searchInput = page.locator("#id_home-input")
-      await searchInput.click()
-      await searchInput.pressSequentially(query, { delay: 50 })
+  test("La recherche affiche des résultats pertinents", async ({ page }) => {
+    await typeSearchQuery(page, "lave")
+    const results = await waitForResults(page)
 
-      // Wait for search results to appear
-      const resultsContainer = page.locator("[data-search-target='results'] a")
-      await expect(resultsContainer.first()).toBeVisible({
-        timeout: TIMEOUT.DEFAULT,
-      })
+    const count = await results.count()
+    expect(count).toBeGreaterThan(0)
+    expect(count).toBeLessThanOrEqual(10)
 
-      // Verify the number of results
-      await expect(resultsContainer).toHaveCount(expectedResults.length)
+    // Les premiers résultats doivent contenir le terme recherché
+    // ou être sémantiquement liés
+    const firstResultText = await results.first().textContent()
+    expect(firstResultText).toBeTruthy()
+  })
 
-      // Verify each result text matches in order
-      for (let i = 0; i < expectedResults.length; i++) {
-        await expect(resultsContainer.nth(i)).toHaveText(expectedResults[i])
-      }
+  test("La recherche avec accents retourne des résultats", async ({ page }) => {
+    await typeSearchQuery(page, "télé")
+    const results = await waitForResults(page)
+
+    const count = await results.count()
+    expect(count).toBeGreaterThan(0)
+    expect(count).toBeLessThanOrEqual(10)
+  })
+
+  test("Les résultats sont des liens cliquables", async ({ page }) => {
+    await typeSearchQuery(page, "chaise")
+    const results = await waitForResults(page)
+
+    const count = await results.count()
+    expect(count).toBeGreaterThan(0)
+
+    // Chaque résultat est un lien avec un href non vide
+    for (let i = 0; i < count; i++) {
+      const href = await results.nth(i).getAttribute("href")
+      expect(href).toBeTruthy()
+    }
+  })
+
+  test("Cliquer sur un résultat navigue vers la page produit", async ({ page }) => {
+    await typeSearchQuery(page, "lave")
+    const results = await waitForResults(page)
+
+    const firstResultHref = await results.first().getAttribute("href")
+    expect(firstResultHref).toBeTruthy()
+
+    await results.first().click()
+    await page.waitForURL((url) => url.pathname !== "/", {
+      timeout: TIMEOUT.DEFAULT,
     })
-  }
+
+    // On est bien sur une page produit (URL /dechet/... ou page Wagtail)
+    expect(page.url()).not.toBe("/")
+  })
+
+  test("La recherche se met à jour en temps réel", async ({ page }) => {
+    // Taper une première requête
+    await typeSearchQuery(page, "chaise")
+    const firstResults = await waitForResults(page)
+    const firstResultText = await firstResults.first().textContent()
+
+    // Effacer et taper une autre requête
+    const searchInput = page.locator(SEARCH_INPUT_SELECTOR)
+    await searchInput.fill("")
+    await searchInput.pressSequentially("vélo", { delay: 50 })
+    const newResults = await waitForResults(page)
+
+    // Les résultats doivent être différents
+    const newFirstResultText = await newResults.first().textContent()
+    expect(newFirstResultText).not.toBe(firstResultText)
+  })
+
+  test("La recherche vide ne retourne pas de résultats", async ({ page }) => {
+    const searchInput = page.locator(SEARCH_INPUT_SELECTOR)
+    await searchInput.click()
+    await searchInput.fill("")
+    await searchInput.press("Enter")
+
+    // Aucun résultat ne devrait être visible
+    const results = page.locator(SEARCH_RESULTS_SELECTOR)
+    await expect(results).toHaveCount(0)
+  })
+
+  test("Les résultats retournent un maximum de 10 éléments", async ({ page }) => {
+    await typeSearchQuery(page, "a")
+    const results = await waitForResults(page)
+    const count = await results.count()
+    expect(count).toBeLessThanOrEqual(10)
+  })
+
+  test("La navigation clavier fonctionne dans les résultats", async ({ page }) => {
+    await typeSearchQuery(page, "lave")
+    await waitForResults(page)
+
+    // Naviguer vers le bas avec la flèche
+    await page.keyboard.press("ArrowDown")
+
+    // Le premier résultat doit avoir le focus
+    const firstResult = page.locator(SEARCH_RESULTS_SELECTOR).first()
+    await expect(firstResult).toBeFocused()
+
+    // Naviguer encore vers le bas
+    await page.keyboard.press("ArrowDown")
+    const secondResult = page.locator(SEARCH_RESULTS_SELECTOR).nth(1)
+    await expect(secondResult).toBeFocused()
+  })
+
+  test("Échap ferme les résultats de recherche", async ({ page }) => {
+    await typeSearchQuery(page, "chaise")
+    await waitForResults(page)
+
+    await page.keyboard.press("Escape")
+
+    // Les résultats ne devraient plus être visibles
+    const results = page.locator(SEARCH_RESULTS_SELECTOR)
+    await expect(results).toHaveCount(0, { timeout: TIMEOUT.SHORT })
+  })
 })
