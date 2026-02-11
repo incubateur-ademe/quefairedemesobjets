@@ -11,6 +11,7 @@ from django.utils.functional import cached_property
 from django_extensions.db.fields import AutoSlugField
 from modelcluster.contrib.taggit import ClusterTaggableManager
 from modelcluster.fields import ParentalManyToManyField
+from modelsearch import index
 from taggit.models import ItemBase, TagBase, TaggedItemBase
 from wagtail.admin.panels import (
     FieldPanel,
@@ -26,7 +27,6 @@ from wagtail.contrib.settings.models import BaseGenericSetting, register_setting
 from wagtail.fields import RichTextField, StreamField
 from wagtail.images.blocks import ImageBlock
 from wagtail.models import Page, ParentalKey
-from wagtail.search import index
 from wagtail.snippets.models import register_snippet
 
 from qfdmd.blocks import STREAMFIELD_COMMON_BLOCKS

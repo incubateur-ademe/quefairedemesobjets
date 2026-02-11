@@ -4,7 +4,7 @@ from django.db import models
 from django.http import QueryDict
 from django.urls import reverse
 from django.utils.safestring import mark_safe
-from wagtail.search import index
+from modelsearch import index
 from wagtail.snippets.models import register_snippet
 
 

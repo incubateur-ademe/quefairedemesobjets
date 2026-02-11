@@ -84,6 +84,7 @@ class RechercheViewSetGroup(SnippetViewSetGroup):
     menu_icon = "search"
     menu_label = "Moteur de recherche"
     menu_name = "recherche"
+    menu_order = 260
 
 
 register_snippet(RechercheViewSetGroup)
