@@ -1,4 +1,5 @@
 import pytest
+from django.contrib.auth.models import User
 from django.contrib.messages import get_messages
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.contrib.sessions.backends.db import SessionStore
@@ -54,10 +55,14 @@ def produit_page(produit_index_page):
     return page
 
 
-def _make_request():
+def _make_request(method="get"):
     factory = RequestFactory()
-    request = factory.get("/")
+    if method == "post":
+        request = factory.post("/")
+    else:
+        request = factory.get("/")
     request.session = SessionStore()
+    request.user, _ = User.objects.get_or_create(username="testuser")
     messages = FallbackStorage(request)
     setattr(request, "_messages", messages)
     return request
@@ -73,7 +78,7 @@ class TestImportLegacySynonymesView:
             page=produit_page, synonyme=synonyme
         )
 
-        request = _make_request()
+        request = _make_request("post")
         import_legacy_synonymes(request, produit_page.id)
 
         assert SearchTag.objects.filter(name="lave-linge").exists()
@@ -86,7 +91,7 @@ class TestImportLegacySynonymesView:
             page=produit_page, synonyme=synonyme
         )
 
-        request = _make_request()
+        request = _make_request("post")
         import_legacy_synonymes(request, produit_page.id)
 
         tag = SearchTag.objects.get(name="lave-linge")
@@ -100,7 +105,7 @@ class TestImportLegacySynonymesView:
             page=produit_page, synonyme=synonyme
         )
 
-        request = _make_request()
+        request = _make_request("post")
         import_legacy_synonymes(request, produit_page.id)
 
         tag = SearchTag.objects.get(name="lave-linge")
@@ -118,7 +123,7 @@ class TestImportLegacySynonymesView:
             page=produit_page, synonyme=synonyme
         )
 
-        request = _make_request()
+        request = _make_request("post")
         import_legacy_synonymes(request, produit_page.id)
 
         assert SearchTag.objects.filter(name="lave-linge").count() == 1
@@ -127,15 +132,15 @@ class TestImportLegacySynonymesView:
 
     def test_imports_synonymes_from_produit_redirection(self, produit_page):
         """Import collects synonymes from products linked to the page."""
-        produit = ProduitFactory(nom="Produit Test")
-        SynonymeFactory(nom="Machine à laver", produit=produit)
+        produit = ProduitFactory(nom="Produit Redirection Test")
+        SynonymeFactory(nom="Lave-Vaisselle Redirection", produit=produit)
         LegacyIntermediateProduitPage.objects.create(page=produit_page, produit=produit)
 
-        request = _make_request()
+        request = _make_request("post")
         import_legacy_synonymes(request, produit_page.id)
 
-        assert SearchTag.objects.filter(name="machine à laver").exists()
-        tag = SearchTag.objects.get(name="machine à laver")
+        assert SearchTag.objects.filter(name="lave-vaisselle redirection").exists()
+        tag = SearchTag.objects.get(name="lave-vaisselle redirection")
         assert TaggedSearchTag.objects.filter(
             tag=tag, content_object=produit_page
         ).exists()
@@ -150,7 +155,7 @@ class TestImportLegacySynonymesView:
             page=produit_page, synonyme=synonyme_excluded
         )
 
-        request = _make_request()
+        request = _make_request("post")
         import_legacy_synonymes(request, produit_page.id)
 
         assert SearchTag.objects.filter(name="inclus").exists()
@@ -172,7 +177,7 @@ class TestImportLegacySynonymesView:
             page=produit_page, synonyme=second_synonyme
         )
 
-        request = _make_request()
+        request = _make_request("post")
         import_legacy_synonymes(request, produit_page.id)
 
         existing_tag.refresh_from_db()
@@ -185,7 +190,7 @@ class TestImportLegacySynonymesView:
         SynonymeFactory(nom="Syn2", produit=produit)
         LegacyIntermediateProduitPage.objects.create(page=produit_page, produit=produit)
 
-        request = _make_request()
+        request = _make_request("post")
         import_legacy_synonymes(request, produit_page.id)
 
         messages = list(get_messages(request))
@@ -194,12 +199,199 @@ class TestImportLegacySynonymesView:
 
     def test_info_message_when_no_synonymes(self, produit_page):
         """Import shows an info message when there are no synonymes to import."""
-        request = _make_request()
+        request = _make_request("post")
         import_legacy_synonymes(request, produit_page.id)
 
         messages = list(get_messages(request))
         assert len(messages) == 1
         assert "Aucun nouveau synonyme" in str(messages[0])
+
+
+@pytest.mark.django_db
+class TestImportConfirmationPage:
+    """GET shows a confirmation page, POST executes the import."""
+
+    def test_get_returns_confirmation_page(self, produit_page):
+        """GET request renders the confirmation template."""
+        produit = ProduitFactory(nom="Produit Test")
+        SynonymeFactory(nom="Lave-Linge", produit=produit)
+        LegacyIntermediateProduitPage.objects.create(page=produit_page, produit=produit)
+
+        request = _make_request("get")
+        response = import_legacy_synonymes(request, produit_page.id)
+
+        assert response.status_code == 200
+
+    def test_get_does_not_execute_import(self, produit_page):
+        """GET request does not create SearchTags."""
+        produit = ProduitFactory(nom="Produit Test")
+        SynonymeFactory(nom="Lave-Linge", produit=produit)
+        LegacyIntermediateProduitPage.objects.create(page=produit_page, produit=produit)
+
+        request = _make_request("get")
+        import_legacy_synonymes(request, produit_page.id)
+
+        assert not SearchTag.objects.filter(name="lave-linge").exists()
+
+    def test_get_blocked_when_already_migrated(self, produit_page):
+        """GET redirects with warning if migration already done."""
+        produit_page.migree_depuis_synonymes_legacy = True
+        produit_page.save(update_fields=["migree_depuis_synonymes_legacy"])
+
+        request = _make_request("get")
+        response = import_legacy_synonymes(request, produit_page.id)
+
+        assert response.status_code == 302
+        messages = list(get_messages(request))
+        assert len(messages) == 1
+        assert "déjà été effectuée" in str(messages[0])
+
+    def test_post_blocked_when_already_migrated(self, produit_page):
+        """POST redirects with warning if migration already done."""
+        produit_page.migree_depuis_synonymes_legacy = True
+        produit_page.save(update_fields=["migree_depuis_synonymes_legacy"])
+
+        request = _make_request("post")
+        response = import_legacy_synonymes(request, produit_page.id)
+
+        assert response.status_code == 302
+        messages = list(get_messages(request))
+        assert len(messages) == 1
+        assert "déjà été effectuée" in str(messages[0])
+
+
+@pytest.mark.django_db
+class TestImportSetsImportedAsSearchTag:
+    """Import sets imported_as_search_tag on the Synonyme."""
+
+    def test_sets_imported_as_search_tag_on_synonyme(self, produit_page):
+        produit = ProduitFactory(nom="Produit Test")
+        synonyme = SynonymeFactory(nom="Lave-Linge", produit=produit)
+        LegacyIntermediateSynonymePage.objects.create(
+            page=produit_page, synonyme=synonyme
+        )
+
+        request = _make_request("post")
+        import_legacy_synonymes(request, produit_page.id)
+
+        synonyme.refresh_from_db()
+        tag = SearchTag.objects.get(name="lave-linge")
+        assert synonyme.imported_as_search_tag == tag
+
+    def test_does_not_overwrite_existing_imported_as_search_tag(self, produit_page):
+        produit = ProduitFactory(nom="Produit Test")
+        synonyme = SynonymeFactory(nom="Lave-Linge", produit=produit)
+
+        existing_tag = SearchTag.objects.create(name="other-tag", slug="other-tag")
+        synonyme.imported_as_search_tag = existing_tag
+        synonyme.save(update_fields=["imported_as_search_tag"])
+
+        LegacyIntermediateSynonymePage.objects.create(
+            page=produit_page, synonyme=synonyme
+        )
+
+        request = _make_request("post")
+        import_legacy_synonymes(request, produit_page.id)
+
+        synonyme.refresh_from_db()
+        assert synonyme.imported_as_search_tag == existing_tag
+
+
+@pytest.mark.django_db
+class TestImportSetsNextWagtailPage:
+    """Import creates LegacyIntermediateSynonymePage for synonymes from products."""
+
+    def test_creates_legacy_intermediate_synonyme_page(self, produit_page):
+        """Synonymes from products get a next_wagtail_page pointing to the page."""
+        produit = ProduitFactory(nom="Produit NextPage Test")
+        synonyme = SynonymeFactory(nom="Aspirateur NextPage", produit=produit)
+        LegacyIntermediateProduitPage.objects.create(page=produit_page, produit=produit)
+
+        request = _make_request("post")
+        import_legacy_synonymes(request, produit_page.id)
+
+        assert LegacyIntermediateSynonymePage.objects.filter(
+            synonyme=synonyme, page=produit_page
+        ).exists()
+
+    def test_does_not_overwrite_existing_next_wagtail_page(
+        self, produit_page, produit_index_page
+    ):
+        """If synonyme already has next_wagtail_page, keep the existing one."""
+        other_page = ProduitPage(title="Other Page", slug="other-page")
+        produit_index_page.add_child(instance=other_page)
+        other_page.save()
+
+        produit = ProduitFactory(nom="Produit Overwrite Test")
+        synonyme = SynonymeFactory(nom="Aspirateur Overwrite", produit=produit)
+        LegacyIntermediateSynonymePage.objects.create(
+            page=other_page, synonyme=synonyme
+        )
+        LegacyIntermediateProduitPage.objects.create(page=produit_page, produit=produit)
+
+        request = _make_request("post")
+        import_legacy_synonymes(request, produit_page.id)
+
+        intermediate = LegacyIntermediateSynonymePage.objects.get(synonyme=synonyme)
+        assert intermediate.page_id == other_page.id
+
+
+@pytest.mark.django_db
+class TestImportClearsMigrationPanels:
+    """Import clears exclusions but keeps legacy_produit and legacy_synonymes."""
+
+    def test_clears_legacy_synonymes_to_exclude(self, produit_page):
+        produit = ProduitFactory(nom="Produit Test")
+        SynonymeFactory(nom="Inclus", produit=produit)
+        synonyme_excluded = SynonymeFactory(nom="Exclu", produit=produit)
+        LegacyIntermediateProduitPage.objects.create(page=produit_page, produit=produit)
+        LegacyIntermediateProduitPageSynonymeExclusion.objects.create(
+            page=produit_page, synonyme=synonyme_excluded
+        )
+
+        request = _make_request("post")
+        import_legacy_synonymes(request, produit_page.id)
+
+        assert not LegacyIntermediateProduitPageSynonymeExclusion.objects.filter(
+            page=produit_page
+        ).exists()
+
+    def test_keeps_legacy_produit(self, produit_page):
+        produit = ProduitFactory(nom="Produit Test")
+        SynonymeFactory(nom="Syn1", produit=produit)
+        LegacyIntermediateProduitPage.objects.create(page=produit_page, produit=produit)
+
+        request = _make_request("post")
+        import_legacy_synonymes(request, produit_page.id)
+
+        assert LegacyIntermediateProduitPage.objects.filter(page=produit_page).exists()
+
+
+@pytest.mark.django_db
+class TestImportSetsMigrationFlag:
+    """Import sets migree_depuis_synonymes_legacy to True."""
+
+    def test_sets_flag_after_import(self, produit_page):
+        produit = ProduitFactory(nom="Produit Test")
+        SynonymeFactory(nom="Syn1", produit=produit)
+        LegacyIntermediateProduitPage.objects.create(page=produit_page, produit=produit)
+
+        assert not produit_page.migree_depuis_synonymes_legacy
+
+        request = _make_request("post")
+        import_legacy_synonymes(request, produit_page.id)
+
+        produit_page.refresh_from_db()
+        assert produit_page.migree_depuis_synonymes_legacy
+
+    def test_sets_flag_even_with_no_synonymes(self, produit_page):
+        assert not produit_page.migree_depuis_synonymes_legacy
+
+        request = _make_request("post")
+        import_legacy_synonymes(request, produit_page.id)
+
+        produit_page.refresh_from_db()
+        assert produit_page.migree_depuis_synonymes_legacy
 
 
 @pytest.mark.django_db
@@ -232,6 +424,25 @@ class TestSynonymeIndexExclusion:
 
         indexed = Synonyme.get_indexed_objects()
         assert synonyme not in indexed
+
+    def test_synonyme_excluded_when_imported_as_search_tag_set(self):
+        """Synonyme with imported_as_search_tag set is excluded from index."""
+        produit = ProduitFactory(nom="Produit Test")
+        synonyme = SynonymeFactory(nom="Lave-Linge", produit=produit)
+        tag = SearchTag.objects.create(name="lave-linge", slug="lave-linge")
+        synonyme.imported_as_search_tag = tag
+        synonyme.save(update_fields=["imported_as_search_tag"])
+
+        indexed = Synonyme.get_indexed_objects()
+        assert synonyme not in indexed
+
+    def test_synonyme_not_excluded_when_imported_as_search_tag_null(self):
+        """Synonyme without imported_as_search_tag remains in index."""
+        produit = ProduitFactory(nom="Produit Test")
+        synonyme = SynonymeFactory(nom="Lave-Linge", produit=produit)
+
+        indexed = Synonyme.get_indexed_objects()
+        assert synonyme in indexed
 
     def test_synonyme_not_excluded_when_search_tag_has_no_page(self):
         produit = ProduitFactory(nom="Produit Test")

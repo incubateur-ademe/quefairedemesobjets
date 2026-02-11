@@ -261,6 +261,10 @@ class ProduitPage(
     )
 
     # Config
+    migree_depuis_synonymes_legacy = models.BooleanField(
+        "Migration des synonymes effectuée",
+        default=False,
+    )
     usage_unique = models.BooleanField(
         "À usage unique",
         default=False,
@@ -392,12 +396,19 @@ class ProduitPage(
         ),
     ]
 
+    class _MigrationObjectList(ObjectList):
+        class BoundPanel(ObjectList.BoundPanel):
+            def is_shown(self):
+                if getattr(self.instance, "migree_depuis_synonymes_legacy", False):
+                    return False
+                return super().is_shown()
+
     edit_handler = TabbedInterface(
         [
             ObjectList(content_panels, heading="Contenu"),
             ObjectList(config_panels, heading="Configuration"),
             ObjectList(search_panels, heading="Recherche"),
-            ObjectList(migration_panels, heading="Migration"),
+            _MigrationObjectList(migration_panels, heading="Migration"),
             ObjectList(Page.promote_panels, heading="Promotion (SEO)"),
             ObjectList(Page.settings_panels, heading="Paramètres"),
         ],

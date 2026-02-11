@@ -26,6 +26,13 @@ class SearchTermQuerySet(SearchableQuerySetMixin, QuerySet):
             ).values_list("searchterm_ptr_id", flat=True)
         )
 
+        # Synonymes with imported_as_search_tag set
+        imported_via_flag_ids = list(
+            Synonyme.objects.filter(
+                imported_as_search_tag__isnull=False,
+            ).values_list("searchterm_ptr_id", flat=True)
+        )
+
         # Orphaned SearchTags (not linked to any page)
         orphaned_tag_ids = list(
             SearchTag.objects.exclude(
@@ -36,7 +43,7 @@ class SearchTermQuerySet(SearchableQuerySetMixin, QuerySet):
         )
 
         return self.exclude(
-            id__in=imported_synonyme_ids + orphaned_tag_ids,
+            id__in=imported_synonyme_ids + imported_via_flag_ids + orphaned_tag_ids,
         )
 
 
@@ -126,6 +133,9 @@ class SearchTerm(index.Indexed, models.Model):
         if cls is Synonyme:
             indexed_objects = indexed_objects.exclude(
                 search_tag_reference__tagged_produit_page__isnull=False
+            )
+            indexed_objects = indexed_objects.exclude(
+                imported_as_search_tag__isnull=False
             )
 
         # Exclude orphaned SearchTags (no page and no legacy synonyme)

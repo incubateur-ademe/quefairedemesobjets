@@ -46,9 +46,15 @@ class ImportLegacySynonymesMenuItem(ActionMenuItem):
         return reverse("import_legacy_synonymes", args=[page.id])
 
     def is_shown(self, context):
-        """Only show this button for ProduitPage instances."""
+        """Only show for ProduitPage instances that have not been migrated."""
         page = context.get("page")
-        return page and isinstance(page.specific, ProduitPage)
+        if not page:
+            return False
+        specific = page.specific if hasattr(page, "specific") else page
+        return (
+            isinstance(specific, ProduitPage)
+            and not specific.migree_depuis_synonymes_legacy
+        )
 
 
 @hooks.register("register_page_action_menu_item")
@@ -75,6 +81,13 @@ def register_legacy_migrate_url():
             name="import_legacy_synonymes",
         ),
     ]
+
+
+@hooks.register("register_admin_viewset")
+def register_produitpage_viewset():
+    from qfdmd.views import ProduitsViewSetGroup
+
+    return ProduitsViewSetGroup()
 
 
 @hooks.register("after_edit_page")
