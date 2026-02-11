@@ -111,7 +111,7 @@ class TestSearchTermSpecificResolution:
 
         assert (
             search_term.specific.search_result_template
-            == "ui/components/search/_search_result_synonyme.html"
+            == "ui/components/search/search_result_synonyme.html"
         )
 
     @pytest.mark.django_db
@@ -121,12 +121,12 @@ class TestSearchTermSpecificResolution:
 
         assert (
             search_term.specific.search_result_template
-            == "ui/components/search/_search_result_searchtag.html"
+            == "ui/components/search/search_result_searchtag.html"
         )
 
     @pytest.mark.django_db
     def test_search_result_template_for_produit_page(self, produit_page):
         assert (
             produit_page.search_result_template
-            == "ui/components/search/_search_result_produitpage.html"
+            == "ui/components/search/search_result_produitpage.html"
         )

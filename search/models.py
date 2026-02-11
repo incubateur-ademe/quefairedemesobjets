@@ -17,15 +17,6 @@ class SearchTermQuerySet(SearchableQuerySetMixin, QuerySet):
         """
         from qfdmd.models import SearchTag, Synonyme, TaggedSearchTag
 
-        # Synonymes replaced by a SearchTag linked to a page
-        imported_synonyme_ids = list(
-            Synonyme.objects.filter(
-                search_tag_reference__in=TaggedSearchTag.objects.values_list(
-                    "tag_id", flat=True
-                ),
-            ).values_list("searchterm_ptr_id", flat=True)
-        )
-
         # Synonymes with imported_as_search_tag set
         imported_via_flag_ids = list(
             Synonyme.objects.filter(
@@ -43,7 +34,7 @@ class SearchTermQuerySet(SearchableQuerySetMixin, QuerySet):
         )
 
         return self.exclude(
-            id__in=imported_synonyme_ids + imported_via_flag_ids + orphaned_tag_ids,
+            id__in=imported_via_flag_ids + orphaned_tag_ids,
         )
 
 
@@ -86,8 +77,10 @@ class SearchTerm(index.Indexed, models.Model):
             return str(instance)
         return f"SearchTerm {self.pk}"
 
+    search_result_template = "ui/components/search/search_result.html"
+
     def __init__(self, *args, **kwargs) -> None:
-        if not hasattr(self, "search_result_template"):
+        if not (hasattr(type(self), "search_result_template")):
             raise NotImplementedError(
                 f"{type(self).__name__} must define search_result_template"
             )

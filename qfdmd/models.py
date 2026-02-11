@@ -112,6 +112,11 @@ class CompiledFieldMixin(Page):
             return getattr(self.get_parent().specific, field_name)
         return getattr(self, field_name)
 
+    def __str__(self):
+        if str := getattr(self, "titre_phrase", None):
+            return str
+        return super().__str__()
+
     class Meta:
         abstract = True
 
@@ -187,7 +192,7 @@ class SearchTag(SearchTerm, TagBase):
     def __str__(self):
         return f"{self.name}"
 
-    search_result_template = "ui/components/search/_search_result_searchtag.html"
+    search_result_template = "ui/components/search/search_result_searchtag.html"
 
     @property
     def page(self):
@@ -229,11 +234,26 @@ class TaggedSearchTag(ItemBase):
                 tag.legacy_existing_synonyme.save()
 
 
+class ProduitPageSearchTerm(SearchTerm):
+    search_term = models.OneToOneField(
+        "search.SearchTerm",
+        on_delete=models.SET_NULL,
+        related_name="produit_page",
+        blank=True,
+        null=True,
+    )
+    searchable_title = models.CharField()
+    search_fields = Page.search_fields + [
+        index.AutocompleteField("title"),
+    ]
+
+
 class ProduitPage(
     CompiledFieldMixin,
     Page,
     GenreNombreModel,
     TitleFields,
+    SearchTerm,
 ):
     template = "ui/pages/produit_page.html"
     subpage_types = ["qfdmd.produitpage"]
@@ -271,13 +291,6 @@ class ProduitPage(
         default=False,
         help_text="Si cochée, cette page sera affichée avec le template famille "
         "(fond vert) et pourra contenir des sous-produits.",
-    )
-    search_term = models.OneToOneField(
-        "search.SearchTerm",
-        on_delete=models.SET_NULL,
-        related_name="produit_page",
-        blank=True,
-        null=True,
     )
     infotri = StreamField([("image", ImageBlock())], blank=True)
     body = StreamField(
@@ -471,7 +484,7 @@ class ProduitPage(
 
         super().save(*args, **kwargs)
 
-    search_result_template = "ui/components/search/_search_result_produitpage.html"
+    search_result_template = "ui/components/search/search_result_produitpage.html"
 
     def get_template(self, request, *args, **kwargs):
         if self.est_famille:
@@ -832,7 +845,7 @@ class Synonyme(SearchTerm, AbstractBaseProduit):
         index.AutocompleteField("nom"),
     ]
 
-    search_result_template = "ui/components/search/_search_result_synonyme.html"
+    search_result_template = "ui/components/search/search_result_synonyme.html"
 
 
 @register_setting
