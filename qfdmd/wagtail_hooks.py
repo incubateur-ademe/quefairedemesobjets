@@ -6,29 +6,14 @@ from wagtail.admin.action_menu import ActionMenuItem
 
 from qfdmd.models import ProduitPage
 from qfdmd.views import (
-    bonus_viewset,
     import_legacy_synonymes,
     legacy_migrate,
-    pokemon_chooser_viewset,
 )
 
 
 @hooks.register("register_permissions")
 def register_permissions():
     return Permission.objects.filter(codename__in=["can_see_beta_search"])
-
-
-@hooks.register("register_admin_viewset")
-def register_pokemon_chooser_viewset():
-    return pokemon_chooser_viewset
-
-
-@hooks.register("register_admin_viewset")
-def register_bonus_viewset():
-    return bonus_viewset
-
-
-WagtailBlockChooserWidget = pokemon_chooser_viewset.widget_class
 
 
 class MigratePageMenuItem(ActionMenuItem):

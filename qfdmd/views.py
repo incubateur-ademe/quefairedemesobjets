@@ -1,5 +1,4 @@
 import logging
-import re
 from typing import Any
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
@@ -10,8 +9,6 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control
 from django.views.decorators.vary import vary_on_headers
 from django.views.generic import DetailView, TemplateView
-from queryish.rest import APIModel
-from wagtail.admin.viewsets.chooser import ChooserViewSet
 from wagtail.models import Page
 
 from core.constants import SEARCH_TERM_ID_QUERY_PARAM
@@ -235,59 +232,3 @@ class SynonymeDetailView(AssistantBaseView, DetailView):
             pass
 
         return super().get(request, *args, **kwargs)
-
-
-# WAGTAIL
-# =======
-
-
-class WagtailBlock(APIModel):
-    class Meta:
-        base_url = "https://pokeapi.co/api/v2/pokemon/"
-        detail_url = "https://pokeapi.co/api/v2/pokemon/%s/"
-        fields = ["id", "name"]
-        pagination_style = "offset-limit"
-        verbose_name_plural = "pokemon"
-
-    @classmethod
-    def from_query_data(cls, data):
-        return cls(
-            id=int(
-                re.match(
-                    r"https://pokeapi.co/api/v2/pokemon/(\d+)/", data["url"]
-                ).group(1)
-            ),
-            name=data["name"],
-        )
-
-    @classmethod
-    def from_individual_data(cls, data):
-        return cls(
-            id=data["id"],
-            name=data["name"],
-        )
-
-    def __str__(self):
-        return self.name
-
-
-class BlockChooserViewSet(ChooserViewSet):
-    model = WagtailBlock
-    choose_one_text = "Choisir un bloc"
-    choose_another_text = "Choisir un autre bloc"
-
-
-pokemon_chooser_viewset = BlockChooserViewSet("pokemon_chooser")
-
-
-class BonusViewSet(ModelViewSet):
-    model = Bonus
-    form_fields = ["title", "montant_min", "montant_max"]
-    icon = "tag"
-    list_filter = ["montant_min", "montant_max"]
-    add_to_admin_menu = True
-    copy_view_enabled = False
-    inspect_view_enabled = True
-
-
-bonus_viewset = BonusViewSet("bonus")
