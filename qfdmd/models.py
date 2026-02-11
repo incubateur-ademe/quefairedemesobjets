@@ -223,28 +223,25 @@ class TaggedSearchTag(ItemBase):
         verbose_name = "Synonyme de recherche"
         verbose_name_plural = "Synonymes de recherche"
 
-    def delete(self, *args, **kwargs):
-        tag = self.tag
-        super().delete(*args, **kwargs)
-        if not TaggedSearchTag.objects.filter(tag=tag).exists():
-            # Re-index the orphaned SearchTag (removes it from search index)
-            tag.save()
-            # Re-index the legacy synonyme so it reappears in search
-            if tag.legacy_existing_synonyme_id:
-                tag.legacy_existing_synonyme.save()
-
 
 class ProduitPageSearchTerm(SearchTerm):
-    search_term = models.OneToOneField(
-        "search.SearchTerm",
+    """Intermediate model to allow text searchable fields to be searched
+    using current trigram implementation in django modelsearch.
+    This could be removed if the implementation support searching accross
+    index.RelatedFields.
+    For now, these are kept in sync when saving ProduitPage."""
+
+    produit_page = models.OneToOneField(
+        "qfdmd.ProduitPage",
         on_delete=models.SET_NULL,
-        related_name="produit_page",
+        related_name="produit_page_search_term",
         blank=True,
         null=True,
     )
     searchable_title = models.CharField()
-    search_fields = Page.search_fields + [
-        index.AutocompleteField("title"),
+
+    search_fields = SearchTerm.search_fields + [
+        index.SearchField("searchable_title"),
     ]
 
 
@@ -253,7 +250,6 @@ class ProduitPage(
     Page,
     GenreNombreModel,
     TitleFields,
-    SearchTerm,
 ):
     template = "ui/pages/produit_page.html"
     subpage_types = ["qfdmd.produitpage"]
@@ -475,12 +471,10 @@ class ProduitPage(
                     pass
 
     def save(self, *args, **kwargs):
-        from search.models import SearchTerm
-
-        if self.search_term_id:
-            SearchTerm.objects.filter(pk=self.search_term_id).update()
-        else:
-            self.search_term = SearchTerm.objects.create()
+        ProduitPageSearchTerm.objects.update_or_create(
+            produit_page=self,
+            defaults={"searchable_title": self.titre_phrase or self.title},
+        )
 
         super().save(*args, **kwargs)
 

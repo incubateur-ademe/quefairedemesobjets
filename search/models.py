@@ -5,37 +5,18 @@ from modelsearch.queryset import SearchableQuerySetMixin
 
 
 class SearchTermQuerySet(SearchableQuerySetMixin, QuerySet):
-    def exclude_imported_synonymes(self):
-        """
-        Exclude from search results:
-        - Synonymes that have a SearchTag linked to a ProduitPage
-          (the SearchTag replaces the synonyme in results)
-        - Orphaned SearchTags not linked to any ProduitPage
+    def _exclude(self, qs):
+        qs = qs.exclude(synonyme__imported_as_search_tag__isnull=False)
+        qs = qs.exclude(searchtag__tagged_produit_page__isnull=True)
+        return qs
 
-        Uses evaluated ID lists to avoid complex subqueries that the
-        search backend cannot introspect.
-        """
-        from qfdmd.models import SearchTag, Synonyme, TaggedSearchTag
+    def search(self, *args, **kwargs):
+        qs = super().search(*args, **kwargs)
+        return self._exclude(qs)
 
-        # Synonymes with imported_as_search_tag set
-        imported_via_flag_ids = list(
-            Synonyme.objects.filter(
-                imported_as_search_tag__isnull=False,
-            ).values_list("searchterm_ptr_id", flat=True)
-        )
-
-        # Orphaned SearchTags (not linked to any page)
-        orphaned_tag_ids = list(
-            SearchTag.objects.exclude(
-                searchterm_ptr_id__in=TaggedSearchTag.objects.values_list(
-                    "tag_id", flat=True
-                ),
-            ).values_list("searchterm_ptr_id", flat=True)
-        )
-
-        return self.exclude(
-            id__in=imported_via_flag_ids + orphaned_tag_ids,
-        )
+    def autocomplete(self, *args, **kwargs):
+        qs = super().autocomplete(*args, **kwargs)
+        return self._exclude(qs)
 
 
 class SearchTerm(index.Indexed, models.Model):
@@ -87,56 +68,25 @@ class SearchTerm(index.Indexed, models.Model):
         return super().__init__(*args, **kwargs)
 
     def get_indexed_instance(self):
-        from qfdmd.models import SearchTag, Synonyme
+        from qfdmd.models import ProduitPageSearchTerm, SearchTag, Synonyme
 
         """
         Returns the most specific child instance for proper indexing.
         This ensures django-modelsearch indexes all fields from child models.
         """
-        synonyme = Synonyme.objects.filter(searchterm_ptr_id=self.id).first()
-        if synonyme:
+        if synonyme := Synonyme.objects.filter(searchterm_ptr_id=self.id).first():
             return synonyme
 
-        search_tag = SearchTag.objects.filter(searchterm_ptr_id=self.id).first()
-        if search_tag:
+        if search_tag := SearchTag.objects.filter(searchterm_ptr_id=self.id).first():
             return search_tag
 
         # Check if linked to a ProduitPage via OneToOne reverse
-        produit_page = getattr(self, "produit_page", None)
-        if produit_page:
-            return produit_page
+        if produit_page_search_term := ProduitPageSearchTerm.objects.filter(
+            searchterm_ptr_id=self.id
+        ).first():
+            return produit_page_search_term.produit_page
 
         return self
-
-    @classmethod
-    def get_indexed_objects(cls):
-        from qfdmd.models import SearchTag, Synonyme
-
-        indexed_objects = super().get_indexed_objects()
-
-        # Don't index SearchTerm base class when they have a more specific type
-        if cls is SearchTerm:
-            indexed_objects = indexed_objects.exclude(
-                id__in=Synonyme.objects.values_list("searchterm_ptr_id", flat=True)
-            )
-            indexed_objects = indexed_objects.exclude(
-                id__in=SearchTag.objects.values_list("searchterm_ptr_id", flat=True)
-            )
-
-        # Exclude Synonymes that have a SearchTag linked to a ProduitPage
-        if cls is Synonyme:
-            indexed_objects = indexed_objects.exclude(
-                search_tag_reference__tagged_produit_page__isnull=False
-            )
-            indexed_objects = indexed_objects.exclude(
-                imported_as_search_tag__isnull=False
-            )
-
-        # Exclude orphaned SearchTags (no page and no legacy synonyme)
-        if cls is SearchTag:
-            indexed_objects = indexed_objects.filter(tagged_produit_page__isnull=False)
-
-        return indexed_objects
 
     def get_specific(self):
         """
