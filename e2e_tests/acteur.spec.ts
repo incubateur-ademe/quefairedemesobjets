@@ -4,7 +4,6 @@ import {
   getIframe,
   mockApiAdresse,
   searchAddress,
-  waitForLoadingComplete,
   TIMEOUT,
 } from "./helpers"
 
@@ -15,7 +14,7 @@ test.describe("📋 Fiche Acteur Viewport", () => {
     async ({ page }) => {
       await navigateTo(page, "/lookbook/preview/tests/t_15_acteur_fiche_viewport")
 
-      const iframe = getIframe(page)
+      const iframe = getIframe(page, "assistant")
       await expect(iframe.locator("body")).toBeAttached({ timeout: TIMEOUT.DEFAULT })
 
       // Scroll the search form into view
@@ -24,25 +23,33 @@ test.describe("📋 Fiche Acteur Viewport", () => {
         .first()
       await searchForm.scrollIntoViewIfNeeded()
 
-      // Search for Auray
+      // Wait for the carte turbo-frame to load inside the produit page
       await mockApiAdresse(page)
-      await searchAddress(iframe, "Auray", "formulaire")
+      const mauvaisEtatPanel = iframe.locator("#mauvais-etat-panel")
+      await expect(mauvaisEtatPanel).toBeAttached({ timeout: TIMEOUT.DEFAULT })
+      await expect(
+        mauvaisEtatPanel.locator('[data-testid="carte-adresse-input"]'),
+      ).toBeVisible({ timeout: TIMEOUT.DEFAULT })
 
-      // Submit the search form
-      await iframe.getByTestId("formulaire-rechercher-adresses-submit").click()
+      // Search for Auray in the carte embedded in the produit page
+      await searchAddress(iframe, "Auray", "carte", {
+        parentLocator: mauvaisEtatPanel,
+      })
 
-      // Wait for results to load
-      await waitForLoadingComplete(iframe)
-
-      // Click on the first acteur result
-      await iframe.locator("[aria-controls=acteurDetailsPanel]").first().click()
-
-      // Wait for the acteur detail panel to be shown
-      await expect(iframe.locator("#acteurDetailsPanel")).toHaveAttribute(
-        "aria-hidden",
-        "false",
-        { timeout: TIMEOUT.DEFAULT },
+      // Wait for acteur markers to appear
+      const acteurMarkers = iframe.locator(
+        '.maplibregl-marker[data-controller="pinpoint"]:not(#pinpoint-home)',
       )
+      await expect(acteurMarkers.first()).toBeVisible({ timeout: TIMEOUT.LONG })
+
+      // Click on the first acteur marker via evaluate to trigger proper navigation
+      await acteurMarkers.first().evaluate((el: HTMLElement) => el.click())
+
+      // Wait for the acteur detail panel in the mauvais-etat tab to be shown
+      const acteurDetailsPanel = mauvaisEtatPanel.locator("#acteurDetailsPanel")
+      await expect(acteurDetailsPanel).toHaveAttribute("aria-hidden", "false", {
+        timeout: TIMEOUT.DEFAULT,
+      })
 
       // Assert that the acteur title is visible in the viewport without scrolling
       const acteurTitle = iframe.getByTestId("acteur-title")
