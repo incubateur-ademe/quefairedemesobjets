@@ -74,7 +74,6 @@ def _collect_synonymes_for_page(page):
 def _execute_import(page, all_synonymes):
     """Execute the import of legacy synonymes as SearchTags."""
     from qfdmd.models import (
-        LegacyIntermediateSynonymePage,
         SearchTag,
         TaggedSearchTag,
     )
@@ -100,13 +99,6 @@ def _execute_import(page, all_synonymes):
         if synonyme.imported_as_search_tag is None:
             synonyme.imported_as_search_tag = search_tag
             synonyme.save(update_fields=["imported_as_search_tag"])
-
-        LegacyIntermediateSynonymePage.objects.get_or_create(
-            synonyme=synonyme,
-            defaults={"page": page},
-        )
-
-    page.legacy_synonymes_to_exclude.all().delete()
 
 
 def import_legacy_synonymes(request, id):
@@ -147,6 +139,9 @@ def import_legacy_synonymes(request, id):
                 request,
                 "Aucun nouveau synonyme à importer.",
             )
+        page.legacy_synonymes.all().delete()
+        page.legacy_produit.all().delete()
+        page.legacy_synonymes_to_exclude.all().delete()
         page.migree_depuis_synonymes_legacy = True
         page.save(update_fields=["migree_depuis_synonymes_legacy"])
         return redirect("wagtailadmin_pages:edit", id)
@@ -162,7 +157,7 @@ def import_legacy_synonymes(request, id):
     )
 
 
-# --- Wagtail admin viewsets ---
+# Wagtail admin viewsets
 
 
 class MigrationStatusFilter(django_filters.ChoiceFilter):
@@ -302,7 +297,7 @@ class ProduitsViewSetGroup(ViewSetGroup):
     menu_order = 250
 
 
-# --- Frontend views ---
+# Frontend views
 
 
 @cache_control(max_age=31536000)

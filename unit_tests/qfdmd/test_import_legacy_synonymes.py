@@ -298,47 +298,8 @@ class TestImportSetsImportedAsSearchTag:
 
 
 @pytest.mark.django_db
-class TestImportSetsNextWagtailPage:
-    """Import creates LegacyIntermediateSynonymePage for synonymes from products."""
-
-    def test_creates_legacy_intermediate_synonyme_page(self, produit_page):
-        """Synonymes from products get a next_wagtail_page pointing to the page."""
-        produit = ProduitFactory(nom="Produit NextPage Test")
-        synonyme = SynonymeFactory(nom="Aspirateur NextPage", produit=produit)
-        LegacyIntermediateProduitPage.objects.create(page=produit_page, produit=produit)
-
-        request = _make_request("post")
-        import_legacy_synonymes(request, produit_page.id)
-
-        assert LegacyIntermediateSynonymePage.objects.filter(
-            synonyme=synonyme, page=produit_page
-        ).exists()
-
-    def test_does_not_overwrite_existing_next_wagtail_page(
-        self, produit_page, produit_index_page
-    ):
-        """If synonyme already has next_wagtail_page, keep the existing one."""
-        other_page = ProduitPage(title="Other Page", slug="other-page")
-        produit_index_page.add_child(instance=other_page)
-        other_page.save()
-
-        produit = ProduitFactory(nom="Produit Overwrite Test")
-        synonyme = SynonymeFactory(nom="Aspirateur Overwrite", produit=produit)
-        LegacyIntermediateSynonymePage.objects.create(
-            page=other_page, synonyme=synonyme
-        )
-        LegacyIntermediateProduitPage.objects.create(page=produit_page, produit=produit)
-
-        request = _make_request("post")
-        import_legacy_synonymes(request, produit_page.id)
-
-        intermediate = LegacyIntermediateSynonymePage.objects.get(synonyme=synonyme)
-        assert intermediate.page_id == other_page.id
-
-
-@pytest.mark.django_db
-class TestImportClearsMigrationPanels:
-    """Import clears exclusions but keeps legacy_produit and legacy_synonymes."""
+class TestImportClearsMigrationPanelsData:
+    """Import clears all migration_panels inline data after migration."""
 
     def test_clears_legacy_synonymes_to_exclude(self, produit_page):
         produit = ProduitFactory(nom="Produit Test")
@@ -356,7 +317,7 @@ class TestImportClearsMigrationPanels:
             page=produit_page
         ).exists()
 
-    def test_keeps_legacy_produit(self, produit_page):
+    def test_clears_legacy_produit(self, produit_page):
         produit = ProduitFactory(nom="Produit Test")
         SynonymeFactory(nom="Syn1", produit=produit)
         LegacyIntermediateProduitPage.objects.create(page=produit_page, produit=produit)
@@ -364,7 +325,22 @@ class TestImportClearsMigrationPanels:
         request = _make_request("post")
         import_legacy_synonymes(request, produit_page.id)
 
-        assert LegacyIntermediateProduitPage.objects.filter(page=produit_page).exists()
+        assert not LegacyIntermediateProduitPage.objects.filter(
+            page=produit_page
+        ).exists()
+
+    def test_clears_legacy_synonymes(self, produit_page):
+        synonyme = SynonymeFactory(nom="Direct Syn")
+        LegacyIntermediateSynonymePage.objects.create(
+            page=produit_page, synonyme=synonyme
+        )
+
+        request = _make_request("post")
+        import_legacy_synonymes(request, produit_page.id)
+
+        assert not LegacyIntermediateSynonymePage.objects.filter(
+            page=produit_page
+        ).exists()
 
 
 @pytest.mark.django_db
