@@ -27,14 +27,12 @@ def reverse_search_terms_for_synonymes(apps, schema_editor):
 
 
 def create_search_terms_for_produit_pages(apps, schema_editor):
-    """Create a SearchTerm for each existing ProduitPage, copying search_variants."""
+    """Create a SearchTerm for each existing ProduitPage."""
     ProduitPage = apps.get_model("qfdmd", "ProduitPage")
     SearchTerm = apps.get_model("search", "SearchTerm")
 
     for page in ProduitPage.objects.all():
-        search_term = SearchTerm.objects.create(
-            search_variants=page.search_variants,
-        )
+        search_term = SearchTerm.objects.create()
         page.search_term = search_term
         page.save(update_fields=["search_term"])
 
@@ -53,12 +51,14 @@ def reverse_search_terms_for_produit_pages(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("qfdmd", "0070_produitpage_est_famille"),
+        ("qfdmd", "0071_remove_produitpage_bonus_and_more"),
         ("search", "0001_initial"),
     ]
 
     operations = [
-        # --- SearchTag (inherits from SearchTerm) ---
+        # ==========================================
+        # SearchTag model (inherits from SearchTerm)
+        # ==========================================
         migrations.CreateModel(
             name="SearchTag",
             fields=[
@@ -86,6 +86,18 @@ class Migration(migrations.Migration):
                         verbose_name="slug",
                     ),
                 ),
+                (
+                    "legacy_existing_synonyme",
+                    models.ForeignKey(
+                        blank=True,
+                        help_text="Référence vers le synonyme legacy dont ce tag est issu.",
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="search_tag_reference",
+                        to="qfdmd.synonyme",
+                        verbose_name="Synonyme legacy associé",
+                    ),
+                ),
             ],
             options={
                 "verbose_name": "Synonyme de recherche",
@@ -93,7 +105,9 @@ class Migration(migrations.Migration):
             },
             bases=("search.searchterm", models.Model),
         ),
-        # --- TaggedSearchTag through model ---
+        # ==========================================
+        # TaggedSearchTag through model
+        # ==========================================
         migrations.CreateModel(
             name="TaggedSearchTag",
             fields=[
@@ -128,7 +142,9 @@ class Migration(migrations.Migration):
                 "verbose_name_plural": "Synonymes de recherche",
             },
         ),
-        # --- ProduitPage: add search_tags manager ---
+        # ==========================================
+        # ProduitPage: add search_tags manager
+        # ==========================================
         migrations.AddField(
             model_name="produitpage",
             name="search_tags",
@@ -140,7 +156,9 @@ class Migration(migrations.Migration):
                 verbose_name="Synonyme de recherche",
             ),
         ),
-        # --- Synonyme: multi-table inheritance from SearchTerm ---
+        # ==========================================
+        # Synonyme: multi-table inheritance from SearchTerm
+        # ==========================================
         # Step 1: Add searchterm_ptr as nullable
         migrations.AddField(
             model_name="synonyme",
@@ -175,7 +193,9 @@ class Migration(migrations.Migration):
                 to="search.searchterm",
             ),
         ),
-        # --- Synonyme: imported_as_search_tag FK ---
+        # ==========================================
+        # Synonyme: imported_as_search_tag FK
+        # ==========================================
         migrations.AddField(
             model_name="synonyme",
             name="imported_as_search_tag",
@@ -192,23 +212,9 @@ class Migration(migrations.Migration):
                 verbose_name="Importé comme SearchTag",
             ),
         ),
-        # --- ProduitPage: add search_variants ---
-        migrations.AddField(
-            model_name="produitpage",
-            name="search_variants",
-            field=models.TextField(
-                blank=True,
-                default="",
-                help_text=(
-                    "Termes alternatifs permettant de trouver cette page dans la "
-                    "recherche. Ces variantes sont invisibles pour les utilisateurs "
-                    "mais améliorent la recherche. Séparez les termes par des "
-                    "virgules ou des retours à la ligne."
-                ),
-                verbose_name="Variantes de recherche",
-            ),
-        ),
-        # --- ProduitPage: add search_term OneToOne ---
+        # ==========================================
+        # ProduitPage: search_term OneToOne + data migration
+        # ==========================================
         migrations.AddField(
             model_name="produitpage",
             name="search_term",
@@ -220,9 +226,19 @@ class Migration(migrations.Migration):
                 to="search.searchterm",
             ),
         ),
-        # --- Data: create SearchTerms for existing ProduitPages ---
         migrations.RunPython(
             create_search_terms_for_produit_pages,
             reverse_search_terms_for_produit_pages,
+        ),
+        # ==========================================
+        # ProduitPage: migration tracking flag
+        # ==========================================
+        migrations.AddField(
+            model_name="produitpage",
+            name="migree_depuis_synonymes_legacy",
+            field=models.BooleanField(
+                default=False,
+                verbose_name="Migration des synonymes effectuée",
+            ),
         ),
     ]

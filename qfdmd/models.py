@@ -189,10 +189,6 @@ class SearchTag(SearchTerm, TagBase):
 
     search_result_template = "ui/components/search/_search_result_searchtag.html"
 
-    def get_search_term_verbose_name(self) -> str:
-        """Returns the tag name as the search term."""
-        return self.name
-
     @property
     def page(self):
         """Returns the parent page (ProduitPage) if available."""
@@ -837,18 +833,6 @@ class Synonyme(SearchTerm, AbstractBaseProduit):
     ]
 
     search_result_template = "ui/components/search/_search_result_synonyme.html"
-
-    def get_search_term_verbose_name(self) -> str:
-        """Returns the synonyme name as the search term."""
-        return self.nom
-
-    def get_search_term_url(self) -> str:
-        """Returns the URL of the synonyme detail page."""
-        return self.get_absolute_url()
-
-    def get_search_term_parent_object(self):
-        """Returns None for legacy synonymes."""
-        return None
 
 
 @register_setting
