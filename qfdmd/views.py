@@ -64,7 +64,11 @@ def _collect_synonymes_for_page(page):
         )
     )
 
-    return list({s.id: s for s in direct_synonymes + product_synonymes}.values())
+    return list(
+        {
+            synonyme.id: synonyme for synonyme in direct_synonymes + product_synonymes
+        }.values()
+    )
 
 
 def _execute_import(page, all_synonymes):
