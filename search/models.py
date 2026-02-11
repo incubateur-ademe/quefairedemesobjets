@@ -5,18 +5,7 @@ from modelsearch.queryset import SearchableQuerySetMixin
 
 
 class SearchTermQuerySet(SearchableQuerySetMixin, QuerySet):
-    def _exclude(self, qs):
-        qs = qs.exclude(synonyme__imported_as_search_tag__isnull=False)
-        qs = qs.exclude(searchtag__tagged_produit_page__isnull=True)
-        return qs
-
-    def search(self, *args, **kwargs):
-        qs = super().search(*args, **kwargs)
-        return self._exclude(qs)
-
-    def autocomplete(self, *args, **kwargs):
-        qs = super().autocomplete(*args, **kwargs)
-        return self._exclude(qs)
+    pass
 
 
 class SearchTerm(index.Indexed, models.Model):
@@ -39,8 +28,6 @@ class SearchTerm(index.Indexed, models.Model):
 
     search_fields = [
         index.FilterField("id"),
-        index.SearchField("__str__"),
-        index.AutocompleteField("__str__"),
         index.SearchField("search_variants"),
         index.AutocompleteField("search_variants"),
     ]
@@ -87,6 +74,19 @@ class SearchTerm(index.Indexed, models.Model):
             return produit_page_search_term.produit_page
 
         return self
+
+    @classmethod
+    def get_indexed_objects(cls):
+        from qfdmd.models import SearchTag, Synonyme
+
+        indexed_objects = super().get_indexed_objects()
+
+        if cls is Synonyme:
+            indexed_objects.exclude(imported_as_search_tag__isnull=False)
+        if cls is SearchTag:
+            indexed_objects.exclude(tagged_produit_page__isnull=True)
+
+        return indexed_objects
 
     def get_specific(self):
         """

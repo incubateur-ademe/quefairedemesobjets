@@ -176,7 +176,7 @@ class SearchTag(SearchTerm, TagBase):
         help_text="Référence vers le synonyme legacy dont ce tag est issu.",
     )
 
-    search_fields = [
+    search_fields = SearchTerm.search_fields + [
         index.SearchField("name"),
         index.AutocompleteField("name"),
     ]
