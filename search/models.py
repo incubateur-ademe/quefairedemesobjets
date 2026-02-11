@@ -82,9 +82,16 @@ class SearchTerm(index.Indexed, models.Model):
         indexed_objects = super().get_indexed_objects()
 
         if cls is Synonyme:
-            indexed_objects.exclude(imported_as_search_tag__isnull=False)
+            indexed_objects = indexed_objects.exclude(
+                imported_as_search_tag__isnull=False
+            )
+
+        if cls is SearchTerm:
+            # Don't index standalone search terms
+            indexed_objects = indexed_objects.none()
+
         if cls is SearchTag:
-            indexed_objects.exclude(tagged_produit_page__isnull=True)
+            indexed_objects = indexed_objects.exclude(tagged_produit_page__isnull=True)
 
         return indexed_objects
 
