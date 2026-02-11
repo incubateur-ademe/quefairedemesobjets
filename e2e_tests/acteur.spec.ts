@@ -1,4 +1,56 @@
 import { test, expect } from "@playwright/test"
+import {
+  navigateTo,
+  getIframe,
+  mockApiAdresse,
+  searchAddress,
+  waitForLoadingComplete,
+  TIMEOUT,
+} from "./helpers"
+
+test.describe("📋 Fiche Acteur Viewport", () => {
+  test(
+    "La fiche acteur est visible dans le viewport sans scroll sur mobile",
+    { tag: ["@mobile"] },
+    async ({ page }) => {
+      await navigateTo(page, "/lookbook/preview/tests/t_15_acteur_fiche_viewport")
+
+      const iframe = getIframe(page)
+      await expect(iframe.locator("body")).toBeAttached({ timeout: TIMEOUT.DEFAULT })
+
+      // Scroll the search form into view
+      const searchForm = iframe
+        .locator('[data-controller="search-solution-form"]')
+        .first()
+      await searchForm.scrollIntoViewIfNeeded()
+
+      // Search for Auray
+      await mockApiAdresse(page)
+      await searchAddress(iframe, "Auray", "formulaire")
+
+      // Submit the search form
+      await iframe.getByTestId("formulaire-rechercher-adresses-submit").click()
+
+      // Wait for results to load
+      await waitForLoadingComplete(iframe)
+
+      // Click on the first acteur result
+      await iframe.locator("[aria-controls=acteurDetailsPanel]").first().click()
+
+      // Wait for the acteur detail panel to be shown
+      await expect(iframe.locator("#acteurDetailsPanel")).toHaveAttribute(
+        "aria-hidden",
+        "false",
+        { timeout: TIMEOUT.DEFAULT },
+      )
+
+      // Assert that the acteur title is visible in the viewport without scrolling
+      const acteurTitle = iframe.getByTestId("acteur-title")
+      await expect(acteurTitle).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+      await expect(acteurTitle).toBeInViewport()
+    },
+  )
+})
 
 test.describe("📤 Acteur Share", () => {
   test.beforeEach(async ({ page, context }) => {
