@@ -77,7 +77,7 @@ class SearchTerm(index.Indexed, models.Model):
 
     @classmethod
     def get_indexed_objects(cls):
-        from qfdmd.models import SearchTag, Synonyme
+        from qfdmd.models import ProduitPageSearchTerm, SearchTag, Synonyme
 
         indexed_objects = super().get_indexed_objects()
 
@@ -86,12 +86,11 @@ class SearchTerm(index.Indexed, models.Model):
                 imported_as_search_tag__isnull=False
             )
 
-        if cls is SearchTerm:
-            # Don't index standalone search terms
-            indexed_objects = indexed_objects.none()
-
         if cls is SearchTag:
             indexed_objects = indexed_objects.exclude(tagged_produit_page__isnull=True)
+
+        if cls is ProduitPageSearchTerm:
+            indexed_objects = indexed_objects.exclude(produit_page__live=False)
 
         return indexed_objects
 

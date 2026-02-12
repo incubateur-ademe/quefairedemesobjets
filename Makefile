@@ -101,6 +101,7 @@ merge-migrations:
 index:
 	$(DJANGO_ADMIN) rebuild_modelsearch_index
 
+
 .PHONY: createcachetable
 createcachetable:
 	$(DJANGO_ADMIN) createcachetable
