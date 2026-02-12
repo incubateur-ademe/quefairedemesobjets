@@ -60,27 +60,6 @@ models:
           - stats
           - acteurs
           - stacked
-  - name: exposure_stats_nb_acteur_stacked_history
-    description: "DEPRECATED (remplacé par exposure_stats_acteur_stacked_history): Historique du nombre d'acteurs empilés. Une ligne est ajoutée à chaque exécution de dbt."
-    columns:
-      - name: date_snapshot
-        description: "Date de l'exécution dbt"
-        data_tests:
-          - not_null
-          - unique
-      - name: nb_acteurs_stacked
-        description: "Nombre d'acteurs empilés"
-        data_tests:
-          - not_null
-    config:
-        materialized: incremental
-        unique_key: date_snapshot
-        incremental_strategy: delete+insert
-        tags:
-          - exposure
-          - stats
-          - acteurs
-          - stacked
   - name: exposure_stats_acteur_siren_siret_history
     description: "Historique du nombre et taux d'acteurs visibles avec un SIREN et un SIRET. Une ligne est ajoutée à chaque exécution de dbt."
     columns:
