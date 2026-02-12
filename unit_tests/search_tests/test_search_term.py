@@ -139,9 +139,7 @@ class TestProduitPageSearchTermIndexExclusion:
 
     @pytest.mark.django_db
     def test_indexed_when_page_is_live(self, produit_page):
-        search_term = ProduitPageSearchTerm.objects.create(
-            produit_page=produit_page, searchable_title="Test Product"
-        )
+        search_term = produit_page.produit_page_search_term
 
         indexed = ProduitPageSearchTerm.get_indexed_objects()
         assert search_term in indexed
@@ -150,9 +148,7 @@ class TestProduitPageSearchTermIndexExclusion:
     def test_excluded_when_page_is_not_live(self, produit_page):
         produit_page.live = False
         produit_page.save(update_fields=["live"])
-        search_term = ProduitPageSearchTerm.objects.create(
-            produit_page=produit_page, searchable_title="Test Product"
-        )
+        search_term = produit_page.produit_page_search_term
 
         indexed = ProduitPageSearchTerm.get_indexed_objects()
         assert search_term not in indexed
@@ -206,9 +202,7 @@ class TestSearchableQuerySet:
     def test_excludes_produit_page_search_term_on_non_live_page(self, produit_page):
         produit_page.live = False
         produit_page.save(update_fields=["live"])
-        search_term = ProduitPageSearchTerm.objects.create(
-            produit_page=produit_page, searchable_title="Test"
-        )
+        search_term = produit_page.produit_page_search_term
 
         searchable_ids = list(
             SearchTerm.objects.searchable().values_list("id", flat=True)
@@ -217,9 +211,7 @@ class TestSearchableQuerySet:
 
     @pytest.mark.django_db
     def test_includes_produit_page_search_term_on_live_page(self, produit_page):
-        search_term = ProduitPageSearchTerm.objects.create(
-            produit_page=produit_page, searchable_title="Test"
-        )
+        search_term = produit_page.produit_page_search_term
 
         searchable_ids = list(
             SearchTerm.objects.searchable().values_list("id", flat=True)

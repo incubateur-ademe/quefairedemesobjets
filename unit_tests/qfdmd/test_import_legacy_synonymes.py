@@ -410,15 +410,22 @@ class TestTaggedSearchTagDeleteReindex:
             slug="lave-linge",
             legacy_existing_synonyme=synonyme,
         )
+        synonyme.imported_as_search_tag = tag
+        synonyme.save(update_fields=["imported_as_search_tag"])
         tagged = TaggedSearchTag.objects.create(tag=tag, content_object=produit_page)
 
         # Synonyme excluded while linked
         assert synonyme not in Synonyme.get_indexed_objects()
 
-        # Delete the link
+        # Delete the link — synonyme stays excluded because
+        # imported_as_search_tag is still set
         tagged.delete()
+        synonyme.refresh_from_db()
+        assert synonyme not in Synonyme.get_indexed_objects()
 
-        # Synonyme should be back in the index
+        # Clearing imported_as_search_tag brings the synonyme back
+        synonyme.imported_as_search_tag = None
+        synonyme.save(update_fields=["imported_as_search_tag"])
         assert synonyme in Synonyme.get_indexed_objects()
 
     def test_no_error_when_tag_has_no_legacy_synonyme(self, produit_page):

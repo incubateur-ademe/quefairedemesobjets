@@ -473,12 +473,12 @@ class ProduitPage(
                     pass
 
     def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
         ProduitPageSearchTerm.objects.update_or_create(
             produit_page=self,
             defaults={"searchable_title": self.titre_phrase or self.title},
         )
-
-        super().save(*args, **kwargs)
 
     search_result_template = "ui/components/search/search_result_produitpage.html"
 
