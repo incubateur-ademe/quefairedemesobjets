@@ -1,7 +1,7 @@
 {% extends "./search_result.html" %}
 {% load wagtailcore_tags %}
 
-{% block href %}{% if result.page %}{% pageurl result.page %}{% endif %}{% endblock %}
+{% block href %}{% if result.page %}{% pageurl result.page %}?{{ SEARCH_TERM_ID_QUERY_PARAM }}={{ result.pk }}&position={{ position }}&search_term={{ result.name|urlencode }}{% endif %}{% endblock %}
 
 {% block nom %}
 <div class="qf-flex qf-justify-between qf-pr-2w">

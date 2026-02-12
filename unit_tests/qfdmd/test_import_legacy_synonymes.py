@@ -342,7 +342,9 @@ class TestSearchTagLowercaseOnSave:
 class TestSynonymeIndexExclusion:
     """Synonymes with a SearchTag linked to a ProduitPage are excluded from index."""
 
-    def test_synonyme_excluded_when_search_tag_linked_to_page(self, produit_page):
+    def test_synonyme_excluded_when_imported_as_search_tag_linked_to_page(
+        self, produit_page
+    ):
         produit = ProduitFactory(nom="Produit Test")
         synonyme = SynonymeFactory(nom="Lave-Linge", produit=produit)
         tag = SearchTag.objects.create(
@@ -351,6 +353,8 @@ class TestSynonymeIndexExclusion:
             legacy_existing_synonyme=synonyme,
         )
         TaggedSearchTag.objects.create(tag=tag, content_object=produit_page)
+        synonyme.imported_as_search_tag = tag
+        synonyme.save(update_fields=["imported_as_search_tag"])
 
         indexed = Synonyme.get_indexed_objects()
         assert synonyme not in indexed

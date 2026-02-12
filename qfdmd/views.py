@@ -73,6 +73,8 @@ def _collect_synonymes_for_page(page):
 
 def _execute_import(page, all_synonymes):
     """Execute the import of legacy synonymes as SearchTags."""
+    from modelsearch.index import insert_or_update_object
+
     from qfdmd.models import (
         SearchTag,
         TaggedSearchTag,
@@ -97,6 +99,11 @@ def _execute_import(page, all_synonymes):
             tag=search_tag,
             content_object=page,
         )
+
+        # Re-index now that the tag is linked to the page, since the
+        # post_save signal fired before the TaggedSearchTag existed
+        # and get_indexed_objects excluded the orphan tag.
+        insert_or_update_object(search_tag)
 
         if synonyme.imported_as_search_tag is None:
             synonyme.imported_as_search_tag = search_tag
