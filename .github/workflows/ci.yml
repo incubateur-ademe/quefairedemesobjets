@@ -154,6 +154,14 @@ jobs:
           database-url: ${{ env.DATABASE_URL }}
           local-dump-path: "database-dump.pgdump"
 
+      - name: Build search index
+        shell: bash
+        run: make index
+
+      - name: Populate search terms
+        shell: bash
+        run: uv run python manage.py populate_search_terms
+
       - name: collectstatic
         shell: bash
         run: make collectstatic
