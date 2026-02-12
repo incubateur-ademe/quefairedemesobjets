@@ -145,7 +145,7 @@ test.describe("Recherche de produits", () => {
   test("Les liens des résultats SearchTag contiennent search_term_id, position et search_term", async ({
     page,
   }) => {
-    await typeSearchQuery(page, "lave")
+    await typeSearchQuery(page, "canapé d'angle")
     const results = await waitForResults(page)
 
     const count = await results.count()

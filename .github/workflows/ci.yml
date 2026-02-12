@@ -161,6 +161,10 @@ jobs:
         shell: bash
         run: uv run python manage.py populate_search_terms
 
+      - name: Populate fake search tags
+        shell: bash
+        run: uv run python manage.py populate_fake_search_tags
+
       - name: Build search index
         shell: bash
         run: make index
