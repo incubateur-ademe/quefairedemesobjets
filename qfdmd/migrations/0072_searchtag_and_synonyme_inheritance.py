@@ -4,28 +4,6 @@ import modelcluster.fields
 from django.db import migrations, models
 
 
-def create_search_terms_for_synonymes(apps, schema_editor):
-    """Create SearchTerm records for existing Synonyme instances."""
-    Synonyme = apps.get_model("qfdmd", "Synonyme")
-    SearchTerm = apps.get_model("search", "SearchTerm")
-
-    for synonyme in Synonyme.objects.all():
-        search_term = SearchTerm.objects.create()
-        synonyme.searchterm_ptr_id = search_term.id
-        synonyme.save(update_fields=["searchterm_ptr_id"])
-
-
-def reverse_search_terms_for_synonymes(apps, schema_editor):
-    """Reverse: delete SearchTerm records created for Synonyme instances."""
-    Synonyme = apps.get_model("qfdmd", "Synonyme")
-    SearchTerm = apps.get_model("search", "SearchTerm")
-
-    search_term_ids = Synonyme.objects.exclude(
-        searchterm_ptr_id__isnull=True
-    ).values_list("searchterm_ptr_id", flat=True)
-    SearchTerm.objects.filter(pk__in=list(search_term_ids)).delete()
-
-
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -135,10 +113,6 @@ class Migration(migrations.Migration):
                 parent_link=True,
                 to="search.searchterm",
             ),
-        ),
-        migrations.RunPython(
-            create_search_terms_for_synonymes,
-            reverse_search_terms_for_synonymes,
         ),
         migrations.RemoveField(
             model_name="synonyme",
