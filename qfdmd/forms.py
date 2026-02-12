@@ -28,7 +28,7 @@ class SearchForm(DsfrBaseForm):
             self.results = []
             return self.results
 
-        self.results = SearchTerm.objects.search(Fuzzy(search_query))[:10]
+        self.results = SearchTerm.objects.searchable().search(Fuzzy(search_query))[:10]
         return self.results
 
 

@@ -404,6 +404,7 @@ class ProduitPage(
     class _MigrationObjectList(ObjectList):
         class BoundPanel(ObjectList.BoundPanel):
             def is_shown(self):
+                # return True
                 if getattr(self.instance, "migree_depuis_synonymes_legacy", False):
                     return False
                 return super().is_shown()

@@ -1,11 +1,25 @@
 from django.db import models
-from django.db.models import QuerySet
+from django.db.models import Q, QuerySet
 from modelsearch import index
 from modelsearch.queryset import SearchableQuerySetMixin
 
 
 class SearchTermQuerySet(SearchableQuerySetMixin, QuerySet):
-    pass
+    def searchable(self):
+        """Exclude SearchTerms that should not appear in search results.
+        Mirrors the logic in SearchTerm.get_indexed_objects."""
+        excluded_ids = self.model.objects.filter(
+            Q(
+                synonyme__isnull=False,
+                synonyme__imported_as_search_tag__isnull=False,
+            )
+            | Q(searchtag__isnull=False, searchtag__tagged_produit_page__isnull=True)
+            | Q(
+                produitpagesearchterm__isnull=False,
+                produitpagesearchterm__produit_page__live=False,
+            )
+        ).values_list("id", flat=True)
+        return self.exclude(id__in=excluded_ids)
 
 
 class SearchTerm(index.Indexed, models.Model):
