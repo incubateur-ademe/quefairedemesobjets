@@ -137,4 +137,41 @@ test.describe("Recherche de produits", () => {
     const results = page.locator(SEARCH_RESULTS_SELECTOR)
     await expect(results).toHaveCount(0, { timeout: TIMEOUT.SHORT })
   })
+
+  test("Les liens des résultats SearchTag contiennent search_term_id, position et search_term", async ({
+    page,
+  }) => {
+    await typeSearchQuery(page, "lave")
+    const results = await waitForResults(page)
+
+    const count = await results.count()
+    expect(count).toBeGreaterThan(0)
+
+    // Parcourir les résultats et vérifier les liens qui contiennent search_term_id
+    // (seuls les résultats de type SearchTag ont ces paramètres)
+    let searchTagFound = false
+    for (let i = 0; i < count; i++) {
+      const href = await results.nth(i).getAttribute("href")
+      if (href && href.includes("search_term_id=")) {
+        searchTagFound = true
+        const url = new URL(href, "http://localhost")
+
+        // search_term_id doit être un nombre
+        const searchTermId = url.searchParams.get("search_term_id")
+        expect(searchTermId).toBeTruthy()
+        expect(Number(searchTermId)).toBeGreaterThan(0)
+
+        // position doit correspondre à la position dans la liste (1-indexed)
+        const position = url.searchParams.get("position")
+        expect(position).toBe(String(i + 1))
+
+        // search_term doit être présent et non vide
+        const searchTerm = url.searchParams.get("search_term")
+        expect(searchTerm).toBeTruthy()
+        expect(searchTerm!.length).toBeGreaterThan(0)
+      }
+    }
+
+    expect(searchTagFound).toBe(true)
+  })
 })
