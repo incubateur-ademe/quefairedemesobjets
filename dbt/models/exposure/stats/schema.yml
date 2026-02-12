@@ -1,6 +1,56 @@
 version: 2
 
 models:
+  - name: exposure_stats_acteur_revision_siren
+    description: "Acteur et correction avec un SIREN différent et une source plus récente"
+    columns:
+      - name: identifiant_unique
+        description: "L'identifiant unique de l'acteur"
+      - name: nom
+        description: "Le nom de l'acteur"
+      - name: source_code
+        description: "Le code de la source de l'acteur"
+      - name: acteur_siren
+        description: "Le SIREN de l'acteur"
+      - name: revision_siren
+        description: "Le SIREN de la révision"
+      - name: acteur_modifie_le
+        description: "La date de modification de l'acteur"
+      - name: revision_modifie_le
+        description: "La date de modification de la révision"
+    config:
+      materialized: table
+      tags:
+        - exposure
+        - stats
+        - acteurs
+        - revision
+        - siren
+  - name: exposure_stats_acteur_revision_siret
+    description: "Acteur et correction avec un SIRET différent et une source plus récente"
+    columns:
+      - name: identifiant_unique
+        description: "L'identifiant unique de l'acteur"
+      - name: nom
+        description: "Le nom de l'acteur"
+      - name: source_code
+        description: "Le code de la source de l'acteur"
+      - name: acteur_siret
+        description: "Le SIRET de l'acteur"
+      - name: revision_siret
+        description: "Le SIRET de la révision"
+      - name: acteur_modifie_le
+        description: "La date de modification de l'acteur"
+      - name: revision_modifie_le
+        description: "La date de modification de la révision"
+    config:
+      materialized: table
+      tags:
+        - exposure
+        - stats
+        - acteurs
+        - revision
+        - siret
   - name: exposure_stats_acteur_revision_statut
     description: "Acteurs avec une révision affichée (ACTIVE) alors que l'acteur n'est pas actif"
     columns:
