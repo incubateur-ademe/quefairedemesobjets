@@ -1,6 +1,6 @@
 import pytest
+from django.core.management import call_command
 from django.test import Client
-from modelsearch.index import insert_or_update_object
 from wagtail.models import Page
 
 from qfdmd.models import (
@@ -31,9 +31,6 @@ def produit_page():
 def search_tag_on_page(produit_page):
     tag = SearchTag.objects.create(name="lave-linge", slug="lave-linge")
     TaggedSearchTag.objects.create(tag=tag, content_object=produit_page)
-    # Re-index after linking to page (the initial post_save skipped indexing
-    # because the tag had no page link yet)
-    insert_or_update_object(tag)
     return tag
 
 
@@ -41,6 +38,13 @@ def search_tag_on_page(produit_page):
 def synonyme():
     produit = Produit.objects.create(nom="Lave-linge")
     return Synonyme.objects.create(nom="Lave-linge", produit=produit)
+
+
+def _rebuild_index():
+    """Rebuild the search index, same as `make index` (rebuild_modelsearch_index).
+    Must be called after all test data has been created so the index
+    includes SearchTags, Synonymes, and ProduitPageSearchTerms."""
+    call_command("rebuild_modelsearch_index")
 
 
 @pytest.mark.django_db
@@ -51,6 +55,8 @@ class TestSearchViewResultTypes:
     def test_synonyme_and_search_tag_returned(
         self, produit_page, search_tag_on_page, synonyme
     ):
+        _rebuild_index()
+
         client = Client()
         response = client.get(
             "/assistant/recherche",
@@ -74,6 +80,8 @@ class TestSearchViewSearchTagLinkParams:
     def test_search_tag_link_contains_all_params(
         self, produit_page, search_tag_on_page
     ):
+        _rebuild_index()
+
         client = Client()
         response = client.get(
             "/assistant/recherche",
@@ -92,6 +100,8 @@ class TestSearchViewSearchTagLinkParams:
     def test_search_tag_result_shows_parent_page_title(
         self, produit_page, search_tag_on_page
     ):
+        _rebuild_index()
+
         client = Client()
         response = client.get(
             "/assistant/recherche",
