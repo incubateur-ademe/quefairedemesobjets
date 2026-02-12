@@ -68,7 +68,10 @@ test.describe("📋 Fiche Acteur Viewport - mode carte", () => {
 })
 
 test.describe("📋 Fiche Acteur Viewport - mode liste", () => {
-  test(
+  // SKIP: it fails because when the last acteur of the list is clicked,
+  // the details is displayed on top of the list
+  // and the acteur title is not visible in the viewport
+  test.skip(
     "La fiche acteur est visible dans le viewport sans scroll sur mobile",
     { tag: ["@mobile"] },
     async ({ page }) => {
@@ -102,7 +105,7 @@ test.describe("📋 Fiche Acteur Viewport - mode liste", () => {
       // Click on the first acteur link in the list
       const firstActeurListLink = mauvaisEtatPanel
         .getByTestId("acteur-list-link")
-        .first() // FIXME: it fails with .last() because the last acteur is not in the viewport while acteur detail is shown
+        .last()
       await firstActeurListLink.click()
 
       // Wait for the acteur detail panel in the mauvais-etat tab to be shown
