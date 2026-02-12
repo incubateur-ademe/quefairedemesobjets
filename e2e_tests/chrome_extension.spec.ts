@@ -5,7 +5,7 @@ import * as dotenv from "dotenv"
 dotenv.config({ path: path.resolve(__dirname, "../.env") })
 
 const EXTENSION_PATH = path.resolve(__dirname, "../chrome-extension/dist_chrome")
-const BASE_URL = process.env.BASE_URL!
+const BASE_URL = process.env.BASE_URL || "https://quefairedemesdechets.ademe.fr"
 
 const TIMEOUT = {
   SHORT: 5000,
@@ -46,14 +46,24 @@ const test = base.extend<{
 
 /**
  * Helper: open a target page then the extension popup.
- * The popup queries the active tab for analysis results.
+ *
+ * The popup uses chrome.tabs.query({ active: true, currentWindow: true })
+ * to find which tab to analyse. Opening the popup as a new page would make
+ * it the active tab, so we must ensure the target page is the active tab
+ * when the popup performs its initial analysis.
+ *
+ * Strategy:
+ *   1. Open target page, wait for embed scripts to inject iframes.
+ *   2. Open popup page (becomes active – its initial fetch targets itself → fails).
+ *   3. Bring target page to front so Chrome considers it the active tab.
+ *   4. Reload the popup so its mount-time fetch now picks up the target tab.
  */
 async function openPopupForPage(
   context: BrowserContext,
   extensionId: string,
   targetUrl: string,
 ) {
-  // Open the target page first (becomes the active tab)
+  // 1. Open the target page and let embed scripts run
   const targetPage = await context.newPage()
   await targetPage.goto(targetUrl, { waitUntil: "domcontentloaded" })
 
@@ -63,11 +73,17 @@ async function openPopupForPage(
     .catch(() => {})
   await targetPage.waitForTimeout(1000)
 
-  // Open popup as a new page (the popup queries the active tab)
+  // 2. Open popup (its first fetch will fail – that's expected)
   const popup = await context.newPage()
   await popup.goto(`chrome-extension://${extensionId}/src/pages/popup/index.html`, {
     waitUntil: "domcontentloaded",
   })
+
+  // 3. Make the target page the active tab
+  await targetPage.bringToFront()
+
+  // 4. Reload the popup so its initial fetchAnalysis() targets the correct tab
+  await popup.reload({ waitUntil: "domcontentloaded" })
 
   return { targetPage, popup }
 }
@@ -102,9 +118,10 @@ test.describe("🧩 Extension Chrome - Detection des iframes QFDMO", () => {
 
       // Should detect iframe-resizer (carte.js bundles it)
       // Wait for auto-refresh to pick up the iframe-resizer status
-      await expect(popup.locator(".fr-tag").filter({ hasText: "Detecte" })).toBeVisible(
-        { timeout: TIMEOUT.LONG },
-      )
+      // Use exact text match to avoid matching "Non detecte"
+      await expect(
+        popup.locator(".fr-tag").filter({ hasText: /^(?!.*Non).*Detecte/ }),
+      ).toBeVisible({ timeout: TIMEOUT.LONG })
 
       await targetPage.close()
       await popup.close()
@@ -203,9 +220,10 @@ test.describe("🧩 Extension Chrome - Detection des iframes QFDMO", () => {
       await expect(popup.locator("text=iframe.js")).toBeVisible()
 
       // Should detect iframe-resizer (iframe.js bundles it)
-      await expect(popup.locator(".fr-tag").filter({ hasText: "Detecte" })).toBeVisible(
-        { timeout: TIMEOUT.LONG },
-      )
+      // Use exact text match to avoid matching "Non detecte"
+      await expect(
+        popup.locator(".fr-tag").filter({ hasText: /^(?!.*Non).*Detecte/ }),
+      ).toBeVisible({ timeout: TIMEOUT.LONG })
 
       await targetPage.close()
       await popup.close()
