@@ -3,7 +3,6 @@
 
 {% block analytics_action %}produitPageView{% endblock %}
 
-{% block main_classes %}fr-container{% endblock %}
 
 {% block title %}
 <title>{{ object.nom }} | {{ seo.title }}</title>
@@ -32,7 +31,7 @@
 {% with bon_etat=object.bon_etat %}
 {% with mauvais_etat=object.mauvais_etat %}
 <article
-    class="qf-flex qf-flex-col md:qf-grid md:qf-grid-cols-[minmax(200px,1fr)] md:qf-grid-rows-[auto] md:qf-gap-4
+    class="fr-container qf-flex qf-flex-col md:qf-grid md:qf-grid-cols-[minmax(200px,1fr)] md:qf-grid-rows-[auto] md:qf-gap-4
     qf-auto-rows-min qf-auto-cols-min
     qf-gap-6w max-lg:qf-pr-0
     qf-pt-3w md:qf-pt-5w"
