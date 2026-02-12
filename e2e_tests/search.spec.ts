@@ -81,9 +81,13 @@ test.describe("Recherche de produits", () => {
     const firstResults = await waitForResults(page)
     const firstResultText = await firstResults.first().textContent()
 
-    // Effacer et taper une autre requête
+    // Effacer et attendre que les résultats disparaissent
     const searchInput = page.locator(SEARCH_INPUT_SELECTOR)
     await searchInput.fill("")
+    const results = page.locator(SEARCH_RESULTS_SELECTOR)
+    await expect(results).toHaveCount(0, { timeout: TIMEOUT.DEFAULT })
+
+    // Taper une autre requête
     await searchInput.pressSequentially("vélo", { delay: 50 })
     const newResults = await waitForResults(page)
 
