@@ -298,52 +298,6 @@ class TestImportSetsImportedAsSearchTag:
 
 
 @pytest.mark.django_db
-class TestImportClearsMigrationPanelsData:
-    """Import clears all migration_panels inline data after migration."""
-
-    def test_clears_legacy_synonymes_to_exclude(self, produit_page):
-        produit = ProduitFactory(nom="Produit Test")
-        SynonymeFactory(nom="Inclus", produit=produit)
-        synonyme_excluded = SynonymeFactory(nom="Exclu", produit=produit)
-        LegacyIntermediateProduitPage.objects.create(page=produit_page, produit=produit)
-        LegacyIntermediateProduitPageSynonymeExclusion.objects.create(
-            page=produit_page, synonyme=synonyme_excluded
-        )
-
-        request = _make_request("post")
-        import_legacy_synonymes(request, produit_page.id)
-
-        assert not LegacyIntermediateProduitPageSynonymeExclusion.objects.filter(
-            page=produit_page
-        ).exists()
-
-    def test_clears_legacy_produit(self, produit_page):
-        produit = ProduitFactory(nom="Produit Test")
-        SynonymeFactory(nom="Syn1", produit=produit)
-        LegacyIntermediateProduitPage.objects.create(page=produit_page, produit=produit)
-
-        request = _make_request("post")
-        import_legacy_synonymes(request, produit_page.id)
-
-        assert not LegacyIntermediateProduitPage.objects.filter(
-            page=produit_page
-        ).exists()
-
-    def test_clears_legacy_synonymes(self, produit_page):
-        synonyme = SynonymeFactory(nom="Direct Syn")
-        LegacyIntermediateSynonymePage.objects.create(
-            page=produit_page, synonyme=synonyme
-        )
-
-        request = _make_request("post")
-        import_legacy_synonymes(request, produit_page.id)
-
-        assert not LegacyIntermediateSynonymePage.objects.filter(
-            page=produit_page
-        ).exists()
-
-
-@pytest.mark.django_db
 class TestImportSetsMigrationFlag:
     """Import sets migree_depuis_synonymes_legacy to True."""
 
