@@ -149,7 +149,8 @@ jobs:
       - name: Prepare Django database
         uses: ./.github/actions/prepare-django-db
         with:
-          cache-key: db-dump-${{ hashFiles('**/migrations/**/*.py') }}-${{ steps.date.outputs.value }}
+          # TODO: restore cache key once search tags are in the sample database
+          cache-key: no-cache-${{ github.run_id }}
           sample-db-uri: ${{ secrets.SAMPLE_DB_URI }}
           database-url: ${{ env.DATABASE_URL }}
           local-dump-path: "database-dump.pgdump"
