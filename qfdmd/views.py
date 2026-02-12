@@ -139,9 +139,6 @@ def import_legacy_synonymes(request, id):
                 request,
                 "Aucun nouveau synonyme à importer.",
             )
-        page.legacy_synonymes.all().delete()
-        page.legacy_produit.all().delete()
-        page.legacy_synonymes_to_exclude.all().delete()
         page.migree_depuis_synonymes_legacy = True
         page.save(update_fields=["migree_depuis_synonymes_legacy"])
         return redirect("wagtailadmin_pages:edit", id)

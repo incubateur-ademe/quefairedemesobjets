@@ -367,6 +367,7 @@ class ProduitPage(
             heading="Exceptions aux redirections",
         ),
         FieldPanel("commentaire"),
+        FieldPanel("migree_depuis_synonymes_legacy"),
     ]
 
     config_panels = [
