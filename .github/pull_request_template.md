@@ -12,6 +12,8 @@ Carte Notion/Mattermost/Sentry : [Titre](__url__)
 
 **🤔 comment**: <!-- Descrire l'ensemble des tâches réalisées (bullet points) -->
 
+**🤓 comment tester**: <!-- Descrire les étapes pour tester la fonctionnalité -->
+
 ## Exemple résultats / UI / Data
 
 ![image](__url__)
