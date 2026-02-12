@@ -467,7 +467,9 @@ class ComponentsPreview(LookbookPreview):
         if isinstance(iframe, str):
             iframe = iframe.lower() == "true"
 
-        context = {"iframe": iframe}
+        factory = RequestFactory()
+        request = factory.get("/")
+        context = {"iframe": iframe, "request": request}
         return render_to_string("ui/components/footer/footer.html", context)
 
     @register_form_class(IframeForm)
@@ -1139,4 +1141,11 @@ class TestsPreview(LookbookPreview):
         return render_to_string(
             "ui/tests/t_14_carte_mal_centree.html",
             {"script": script},
+        )
+
+    def t_15_acteur_fiche_viewport(self, **kwargs):
+        """Test that acteur fiche is visible in viewport without scrolling on mobile"""
+        return render_to_string(
+            "ui/tests/t_15_acteur_fiche_viewport.html",
+            {"base_url": base_url},
         )

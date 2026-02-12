@@ -5,10 +5,8 @@ from wagtail import hooks
 from wagtail.admin.action_menu import ActionMenuItem
 
 from qfdmd.views import (
-    bonus_viewset,
     legacy_migrate,
     pokemon_chooser_viewset,
-    reusable_content_viewset,
 )
 
 
@@ -20,16 +18,6 @@ def register_permissions():
 @hooks.register("register_admin_viewset")
 def register_pokemon_chooser_viewset():
     return pokemon_chooser_viewset
-
-
-@hooks.register("register_admin_viewset")
-def register_reusable_viewset():
-    return reusable_content_viewset
-
-
-@hooks.register("register_admin_viewset")
-def register_bonus_viewset():
-    return bonus_viewset
 
 
 WagtailBlockChooserWidget = pokemon_chooser_viewset.widget_class

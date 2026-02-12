@@ -2,7 +2,7 @@ version: 2
 
 models:
   - name: exposure_stats_nb_acteur_stacked_history
-    description: "Historique du nombre d'acteurs stackés (coordonnées arrondies). Une ligne est ajoutée à chaque exécution de dbt."
+    description: "Historique du nombre d'acteurs empilés. Une ligne est ajoutée à chaque exécution de dbt."
     columns:
       - name: date_snapshot
         description: "Date de l'exécution dbt"
@@ -22,8 +22,34 @@ models:
           - stats
           - acteurs
           - stacked
+  - name: exposure_stats_rate_acteur_stacked_history
+    description: "Historique du taux d'acteurs empilés par rapport au nombre total d'acteurs visibles avec coordonnées (int_acteur_visible_location). Une ligne est ajoutée à chaque exécution de dbt."
+    columns:
+      - name: date_snapshot
+        description: "Date de l'exécution dbt"
+        data_tests:
+          - not_null
+          - unique
+      - name: nb_acteurs_stacked
+        description: "Nombre d'acteurs empilés (même lat/long)"
+      - name: nb_acteurs_visible_with_location
+        description: "Nombre total d'acteurs visibles avec coordonnées (dénominateur)"
+      - name: rate_acteur_stacked
+        description: "Taux d'acteurs empilés (nb_acteurs_stacked / nb_acteurs_visible_with_location), entre 0 et 1"
+        data_tests:
+          - not_null
+    config:
+        materialized: incremental
+        unique_key: date_snapshot
+        incremental_strategy: delete+insert
+        tags:
+          - exposure
+          - stats
+          - acteurs
+          - stacked
+          - rate
   - name: exposure_stats_nb_acteur_stacked_rounded_history
-    description: "Historique du nombre d'acteurs stackés (coordonnées arrondies). Une ligne est ajoutée à chaque exécution de dbt."
+    description: "Historique du nombre d'acteurs empilés à 11 m près (coordonnées arrondies). Une ligne est ajoutée à chaque exécution de dbt."
     columns:
       - name: date_snapshot
         description: "Date de l'exécution dbt"
@@ -43,7 +69,33 @@ models:
           - stats
           - acteurs
           - stacked
-
+  - name: exposure_stats_rate_acteur_stacked_rounded_history
+    description: "Historique du taux d'acteurs empilés à 11 m près (coordonnées arrondies) par rapport au nombre total d'acteurs visibles avec coordonnées (int_acteur_visible_location). Une ligne est ajoutée à chaque exécution de dbt."
+    columns:
+      - name: date_snapshot
+        description: "Date de l'exécution dbt"
+        data_tests:
+          - not_null
+          - unique
+      - name: nb_acteurs_stacked
+        description: "Nombre d'acteurs empilés à 11 m près (coordonnées arrondies)"
+      - name: nb_acteurs_visible_with_location
+        description: "Nombre total d'acteurs visibles avec coordonnées (dénominateur)"
+      - name: rate_acteur_stacked_rounded
+        description: "Taux d'acteurs empilés à 11 m près (nb_acteurs_stacked / nb_acteurs_visible_with_location), entre 0 et 1"
+        data_tests:
+          - not_null
+    config:
+        materialized: incremental
+        unique_key: date_snapshot
+        incremental_strategy: delete+insert
+        tags:
+          - exposure
+          - stats
+          - acteurs
+          - stacked
+          - rounded
+          - rate
   - name: exposure_stats_nb_acteur_visible_history
     description: "Nombre d'acteurs visibles"
     columns:

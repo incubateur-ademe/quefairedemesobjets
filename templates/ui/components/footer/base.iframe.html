@@ -1,14 +1,13 @@
 {% load dsfr_tags %}
-<div class="qf-flex qf-flex-col qf-items-center qf-justify-center qf-gap-4w md:qf-gap-6w qf-mb-2w">
-    {% comment %}
-    Using onclick with window.open() because django-dsfr doesn't currently support href attribute in buttons.
-    This could be updated if django-dsfr adds support for link buttons in the future.
+<div class="qf-flex qf-flex-col qf-items-center qf-justify-center qf-gap-1w md:qf-gap-2w qf-mb-2w">
+    {% dsfr_link url="https://quefairedemesdechets.ademe.fr" label="En savoir plus sur ce site" is_external=True %}
 
-    Future alternative (doesn't display properly yet):
-    {% dsfr_link url="https://quefairedemesdechets.ademe.fr" label="En savoir plus sur ce site" is_external=True extra_classes="fr-btn fr-btn--tertiary" %}
-    {% endcomment %}
-    {% dsfr_button label="En savoir plus sur ce site" extra_classes="fr-btn--tertiary fr-btn--icon-left fr-icon-external-link-line" onclick="window.open('https://quefairedemesdechets.ademe.fr', '_blank', 'noopener,noreferrer')" %}
     <div class="qf-flex qf-gap-2w md:qf-gap-4w">
         {% include "ui/components/footer/combined_logos.html" %}
+    </div>
+
+    <div class="qf-flex qf-gap-2w">
+        {% include "ui/components/modals/share.html" with button_text="Partager" button_extra_classes="fr-btn--secondary fr-btn--icon-left fr-icon-share-line" %}
+        {% include "ui/components/modals/embed.html" with button_text="Intégrer" button_extra_classes="fr-btn--tertiary fr-btn--icon-left fr-icon-code-s-slash-line" %}
     </div>
 </div>

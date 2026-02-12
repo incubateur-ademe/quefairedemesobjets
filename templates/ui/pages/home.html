@@ -13,13 +13,13 @@
 <div data-home class="qf-group qf-flex qf-flex-col qf-gap-5w">
     {# search + patchwork #}
     <div class="qf-w-full qf-max-w-3xl qf-m-auto qf-relative qf-pb-6w">
-        <div class="qf-absolute qf-left-0 qf-right-0 qf-top-0">
+        <div class="qf-absolute qf-left-1w qf-right-1w qf-top-0">
             {% include "ui/components/search/view.html" with big=True search_form=home_search_form %}
         </div>
     </div>
 
     {% if not iframe %}
-    <div class="qf-mx-auto qf-mt-4w">
+    <div class="qf-mx-auto qf-mt-4w qf-w-full">
         {% include "sites_faciles_content_manager/blocks/blocks_stream.html" with stream=page.body page=page %}
     </div>
     {% endif %}

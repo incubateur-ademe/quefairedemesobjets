@@ -458,7 +458,7 @@ export async function openAdvancedFilters(
 /**
  * View mode switching helpers
  */
-export async function switchToListeMode(context: Page | FrameLocator) {
+export async function switchToListeMode(context: Page | FrameLocator | Locator) {
   const listeButton = context
     .getByTestId("view-mode-nav")
     .getByText("Liste", { exact: true })
