@@ -29,7 +29,7 @@ jobs:
     needs: [ci]
     with:
       environment: preprod
-      tag_name: main-${{ github.sha }}
+      tag_name: ${{ github.sha }}
 
   update_release_draft:
     # Uncomment when anchor are supported in GitHub Actions

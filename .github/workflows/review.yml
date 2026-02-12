@@ -34,7 +34,7 @@ jobs:
     needs: [ci]
     with:
       environment: preprod
-      tag_name: pr-${{ github.event.pull_request.number }}-${{ github.sha }}
+      tag_name: pr-${{ github.event.pull_request.number }}
 
   # FIXME: tmp pour tester
   update_release_draft_for_review:
