@@ -79,7 +79,9 @@ def _execute_import(page, all_synonymes):
     )
 
     for synonyme in all_synonymes:
-        tag_name = synonyme.nom.lower()
+        # Replace commas with fullwidth commas to prevent taggit from
+        # splitting the tag name on commas during admin round-trips.
+        tag_name = synonyme.nom.lower().replace(",", "\uff0c")
 
         search_tag = SearchTag.objects.filter(slug=synonyme.slug).first()
         if search_tag is None:
