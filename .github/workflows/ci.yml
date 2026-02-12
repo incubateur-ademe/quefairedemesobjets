@@ -155,24 +155,6 @@ jobs:
           database-url: ${{ env.DATABASE_URL }}
           local-dump-path: "database-dump.pgdump"
 
-      # TODO: remove once synonyme de recherche work
-      # will be merged and deployed as the sample database
-      # will have required data.
-      - name: Populate search terms
-        shell: bash
-        run: uv run python manage.py populate_search_terms
-
-      # TODO: remove once synonyme de recherche work
-      # will be merged and deployed as the sample database
-      # will have required data.
-      - name: Populate fake search tags
-        shell: bash
-        run: uv run python manage.py populate_fake_search_tags
-
-      - name: Build search index
-        shell: bash
-        run: make index
-
       - name: collectstatic
         shell: bash
         run: make collectstatic
@@ -238,6 +220,24 @@ jobs:
         with:
           database-url: ${{ env.DATABASE_URL }}
           dump-path: database-dump.pgdump
+
+      # TODO: remove once synonyme de recherche work
+      # will be merged and deployed as the sample database
+      # will have required data.
+      - name: Populate search terms
+        shell: bash
+        run: uv run python manage.py populate_search_terms
+
+      # TODO: remove once synonyme de recherche work
+      # will be merged and deployed as the sample database
+      # will have required data.
+      - name: Populate fake search tags
+        shell: bash
+        run: uv run python manage.py populate_fake_search_tags
+
+      - name: Build search index
+        shell: bash
+        run: make index
 
       # RUN e2e
       - name: Run server
