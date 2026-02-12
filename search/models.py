@@ -7,7 +7,11 @@ from modelsearch.queryset import SearchableQuerySetMixin
 class SearchTermQuerySet(SearchableQuerySetMixin, QuerySet):
     def searchable(self):
         """Exclude SearchTerms that should not appear in search results.
-        Mirrors the logic in SearchTerm.get_indexed_objects."""
+        Mirrors the logic in SearchTerm.get_indexed_objects.
+        At the moment, some objects in SearchTerm might end up indexed even if
+        they are properly excluded in get_indexed_objects.
+        This is a bug that have been raised to django-modelsearch, we will
+        work on a resolution there first."""
         excluded_ids = self.model.objects.filter(
             Q(
                 synonyme__isnull=False,
