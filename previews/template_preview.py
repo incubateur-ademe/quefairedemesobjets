@@ -467,9 +467,7 @@ class ComponentsPreview(LookbookPreview):
         if isinstance(iframe, str):
             iframe = iframe.lower() == "true"
 
-        factory = RequestFactory()
-        request = factory.get("/")
-        context = {"iframe": iframe, "request": request}
+        context = {"iframe": iframe}
         return render_to_string("ui/components/footer/footer.html", context)
 
     @register_form_class(IframeForm)
