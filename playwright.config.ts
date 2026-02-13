@@ -16,6 +16,8 @@ dotenv.config({ path: path.resolve(__dirname, ".env") })
 
 export default defineConfig({
   testDir: "./e2e_tests",
+  /* Exclude chrome extension tests (they use their own persistent context) */
+  testIgnore: ["**/chrome_extension.spec.ts"],
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
