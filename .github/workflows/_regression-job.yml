@@ -60,7 +60,7 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
       - run: wget https://raw.githubusercontent.com/incubateur-ademe/quefairedemesobjets/refs/heads/add-regression-testing/playwright.regression.ts
-      - run: wget https://raw.githubusercontent.com/incubateur-ademe/quefairedemesobjets/refs/heads/add-regression-testing/e2e_tests/regression.spec.ts
+      - run: wget https://raw.githubusercontent.com/incubateur-ademe/quefairedemesobjets/refs/heads/add-regression-testing/e2e_tests/regression.spec.ts ./e2e_tests
 
       - name: Setup Playwright
         uses: ./.github/actions/setup-playwright
