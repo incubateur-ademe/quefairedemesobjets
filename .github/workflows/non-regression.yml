@@ -76,3 +76,5 @@ jobs:
         run: |
           gh api repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments \
             -f body="${{ steps.body.outputs.body }}"
+permissions:
+  pull-requests: write
