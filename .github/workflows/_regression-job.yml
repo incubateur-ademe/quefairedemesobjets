@@ -28,9 +28,6 @@ env:
   PGUSER: webapp
   PGPASSWORD: webapp # pragma: allowlist secret
   PGDATABASE: webapp
-  POSTGRES_USER: webapp
-  POSTGRES_PASSWORD: webapp # pragma: allowlist secret
-  POSTGRES_DB: webapp
   UV_PROJECT_ENVIRONMENT: .venv
   BASE_URL: http://localhost:8000
   DATABASE_URL: postgres://webapp:webapp@localhost:5432/webapp # pragma: allowlist secret
@@ -52,6 +49,10 @@ jobs:
           --health-retries 50
         ports:
           - 5432:5432
+        env:
+          POSTGRES_USER: webapp
+          POSTGRES_PASSWORD: webapp # pragma: allowlist secret
+          POSTGRES_DB: webapp
 
     steps:
       - name: Checkout
