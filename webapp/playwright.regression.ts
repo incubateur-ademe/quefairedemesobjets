@@ -9,6 +9,11 @@ const config: PlaywrightTestConfig = {
   ...baseConfig,
   testIgnore: "",
   testMatch: "*regression*",
+  expect: {
+    toHaveScreenshot: {
+      pathTemplate: `./${process.env.SCREENSHOTS_BASE_PATH || "__screenshots__"}/{testFilePath}/{arg}{ext}`,
+    },
+  },
 }
 
 export default defineConfig(config)

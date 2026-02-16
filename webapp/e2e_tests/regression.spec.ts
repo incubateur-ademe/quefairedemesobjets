@@ -3,7 +3,6 @@ import { navigateTo, getIframe, TIMEOUT } from "./helpers"
 import crypto from "node:crypto"
 
 const urlsToTest = ["https://google.fr"]
-const basePath = process.env.SCREENSHOTS_BASE_PATH || "screenshots"
 
 test("Les pages et composants n'ont pas changé", async ({ page }) => {
   await navigateTo(page, `/lookbook`)
@@ -19,7 +18,7 @@ test("Les pages et composants n'ont pas changé", async ({ page }) => {
   for (const pageToTest of urlsToTest) {
     await navigateTo(page, pageToTest)
     const filename = crypto.hash("sha1", pageToTest)
-    const screenshotPath = `${basePath}/${filename}.png`
+    const screenshotPath = `${filename}.png`
     await expect(page).toHaveScreenshot(screenshotPath)
   }
 })
