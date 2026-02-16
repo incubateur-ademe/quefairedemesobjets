@@ -64,10 +64,10 @@ jobs:
       - name: Setup Playwright
         uses: ./.github/actions/setup-playwright
 
-      # - name: Setup frontend
-      #   uses: ./.github/actions/setup-frontend
-      #   with:
-      #     build: "true"
+      - name: Setup frontend
+        uses: ./.github/actions/setup-frontend
+        with:
+          build: "true"
 
       # - name: Setup backend
       #   uses: ./.github/actions/setup-backend
