@@ -16,6 +16,7 @@ env:
   DATABASE_URL: "postgres://webapp:webapp@localhost:5432/webapp" # pragma: allowlist secret
   SECRET_KEY: coucou # pragma: allowlist secret
   CI: true
+  SCREENSHOTS_BASE_PATH: "${{ github.workspace }}/screenshots"
 
 jobs:
   regression_testing_main:
@@ -95,10 +96,16 @@ jobs:
       - name: Run Playwright tests to generate screenshot on main branch
         run: npx playwright test --update-snapshots --config=next/playwright.regression.ts
         env:
-          SCREENSHOT_BASE_PATH: "${{ github.workspace }}/screenshots"
+
+      - name: Upload baseline screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-screenshots
+          path: ${{ env.SCREENSHOTS_BASE_PATH }}
 
   regression_testing_current_branch:
     name: Tests de non-régression
+    needs: regression_testing_main
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -116,6 +123,11 @@ jobs:
           POSTGRES_DB: webapp
     steps:
       - uses: actions/checkout@v6
+      - name: Download baseline screenshots
+        uses: actions/download-artifact@v4
+        with:
+          name: regression-screenshots
+          path: ${{ env.SCREENSHOTS_BASE_PATH }}
 
       - name: Setup frontend environment
         uses: ./.github/actions/setup-frontend
@@ -166,8 +178,6 @@ jobs:
 
       - name: Run Playwright tests to generate screenshot on main branch
         run: npx playwright test --update-snapshots --config=playwright.regression.ts
-        env:
-          SCREENSHOT_BASE_PATH: "${{ github.workspace }}/screenshots"
 
 
 # Address actions/missing-workflow-permissions rule in
