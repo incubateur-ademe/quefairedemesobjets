@@ -59,8 +59,8 @@ jobs:
         uses: actions/checkout@v6
         with:
           ref: ${{ inputs.ref }}
-      - run: wget https://raw.githubusercontent.com/incubateur-ademe/quefairedemesobjets/refs/heads/add-regression-testing/playwright.regression.ts
-      - run: wget https://raw.githubusercontent.com/incubateur-ademe/quefairedemesobjets/refs/heads/add-regression-testing/e2e_tests/regression.spec.ts -o ./e2e_tests/regression.spec.ts
+      - run: wget -O playwright.regression.ts https://raw.githubusercontent.com/incubateur-ademe/quefairedemesobjets/refs/heads/add-regression-testing/playwright.regression.ts
+      - run: wget -O ./e2e_tests/regression.spec.ts https://raw.githubusercontent.com/incubateur-ademe/quefairedemesobjets/refs/heads/add-regression-testing/e2e_tests/regression.spec.ts
 
       - name: Setup Playwright
         uses: ./.github/actions/setup-playwright
