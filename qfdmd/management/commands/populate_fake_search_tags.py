@@ -5,6 +5,16 @@ from qfdmd.models import ProduitPage, SearchTag, TaggedSearchTag
 
 
 class Command(BaseCommand):
+    """
+    This is useful only once, for the initial development of Synonymes
+    de recherche (SearchTag) feature.
+    Once this feature will be deployed on production, the sample database
+    used for e2e testing will be populated with search terms and we won't
+    need to generate fake ones.
+
+    TODO: remove this command when Synonymes de recherche is live.
+    """
+
     help = "Create a fake SearchTag for e2e test coverage of SearchTag link parameters"
 
     def handle(self, *args, **options):
