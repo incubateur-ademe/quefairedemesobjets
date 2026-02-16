@@ -25,6 +25,7 @@ from qfdmo.models.acteur import (
     DisplayedPropositionService,
     LabelQualite,
 )
+from search.models import SearchTerm
 from qfdmo.models.action import Action
 from qfdmo.models.config import CarteConfig
 
@@ -73,8 +74,6 @@ class ProduitHeadingForm(forms.Form):
     """
     Form for produit heading with search_term and pronom choices
     """
-
-    from search.models import SearchTerm
 
     search_term = forms.ModelChoiceField(
         label="Terme de recherche",
@@ -354,7 +353,6 @@ class ComponentsPreview(LookbookPreview):
     @register_form_class(ProduitHeadingForm)
     @component_docs("ui/components/produit/heading.md")
     def produit_heading(self, search_term=None, pronom="mon", **kwargs):
-        from search.models import SearchTerm
 
         factory = RequestFactory()
         request = factory.get("/")
@@ -373,7 +371,6 @@ class ComponentsPreview(LookbookPreview):
     @register_form_class(ProduitHeadingForm)
     @component_docs("ui/components/produit/heading_family.md")
     def produit_heading_family(self, search_term=None, pronom="mon", **kwargs):
-        from search.models import SearchTerm
 
         factory = RequestFactory()
         request = factory.get("/")
