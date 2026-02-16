@@ -1,44 +1,42 @@
-name: 🪢 Non-régression
+name: Regression Job
 
 on:
-  workflow_dispatch:
-  pull_request:
-    types: [opened, synchronize]
+  workflow_call:
+    inputs:
+      ref:
+        required: true
+        type: string
+      update_snapshots:
+        required: true
+        type: boolean
+      playwright_config:
+        required: true
+        type: string
+      upload_screenshots:
+        required: true
+        type: boolean
+      download_screenshots:
+        required: true
+        type: boolean
+    secrets:
+      SAMPLE_DB_URI:
+        required: true
 
 env:
   PGHOST: localhost
   PGPORT: 5432
   PGUSER: webapp
-  POSTGRES_USER: webapp
-  POSTGRES_PASSWORD: webapp # pragma: allowlist secret
-  POSTGRES_DB: webapp # pragma: allowlist secret
-  PGPASSWORD: webapp # pragma: allowlist secret
+  PGPASSWORD: webapp
   PGDATABASE: webapp
   UV_PROJECT_ENVIRONMENT: .venv
   BASE_URL: http://localhost:8000
-  DATABASE_URL: postgres://webapp:webapp@localhost:5432/webapp # pragma: allowlist secret
-  SECRET_KEY: coucou # pragma: allowlist secret
+  DATABASE_URL: postgres://webapp:webapp@localhost:5432/webapp
+  SECRET_KEY: coucou
   CI: true
 
 jobs:
   regression:
-    name: Regression – ${{ matrix.name }}
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        include:
-          - name: main
-            ref: main
-            update_snapshots: true
-            playwright_config: next/playwright.regression.ts
-            upload: true
-
-          - name: current
-            ref: ${{ github.ref }}
-            update_snapshots: false
-            playwright_config: playwright.regression.ts
-            download: true
 
     services:
       postgres:
@@ -50,19 +48,16 @@ jobs:
           --health-retries 50
         ports:
           - 5432:5432
+        env:
+          POSTGRES_USER: webapp
+          POSTGRES_PASSWORD: webapp
+          POSTGRES_DB: webapp
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          ref: ${{ matrix.ref }}
-          path: app
-
-      - name: Checkout main (for comparison)
-        if: matrix.name == 'main'
-        uses: actions/checkout@v6
-        with:
-          ref: main
+          ref: ${{ inputs.ref }}
 
       - name: Setup frontend
         uses: ./.github/actions/setup-frontend
@@ -99,7 +94,7 @@ jobs:
           dump-path: database-dump.pgdump
 
       - name: Download baseline screenshots
-        if: matrix.download
+        if: inputs.download_screenshots
         uses: actions/download-artifact@v4
         with:
           name: regression-screenshots
@@ -115,20 +110,27 @@ jobs:
 
       - name: Run Playwright
         run: |
-          if [ "${{ matrix.update_snapshots }}" = "true" ]; then
-            npx playwright test --update-snapshots --config=${{ matrix.playwright_config }}
+          if [ "${{ inputs.update_snapshots }}" = "true" ]; then
+            npx playwright test --update-snapshots --config=${{ inputs.playwright_config }}
           else
-            npx playwright test --config=${{ matrix.playwright_config }}
+            npx playwright test --config=${{ inputs.playwright_config }}
           fi
         env:
           SCREENSHOT_BASE_PATH: ${{ github.workspace }}/screenshots
 
       - name: Upload baseline screenshots
-        if: matrix.upload
+        if: inputs.upload_screenshots
         uses: actions/upload-artifact@v4
         with:
           name: regression-screenshots
           path: screenshots
 
-permissions:
-  contents: read
+      - name: Upload Playwright diffs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-diffs
+          path: |
+            **/*-expected.png
+            **/*-actual.png
+            **/*-diff.png
