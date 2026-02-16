@@ -129,3 +129,6 @@ jobs:
         with:
           name: regression-screenshots
           path: screenshots
+
+permissions:
+  contents: read
