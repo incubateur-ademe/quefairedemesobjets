@@ -33,6 +33,7 @@ env:
   DATABASE_URL: postgres://webapp:webapp@localhost:5432/webapp
   SECRET_KEY: coucou
   CI: true
+  SCREENSHOTS_BASE_PATH: ${{ github.workspace }}/screenshots
 
 jobs:
   regression:
@@ -108,7 +109,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: regression-screenshots
-          path: screenshots
+          path: ${{ env.SCREENSHOTS_BASE_PATH }}
 
       - name: Run server
         run: uv run python manage.py runserver --noreload &
@@ -125,15 +126,13 @@ jobs:
           else
             npx playwright test --config=${{ inputs.playwright_config }}
           fi
-        env:
-          SCREENSHOT_BASE_PATH: ${{ github.workspace }}/screenshots
 
       - name: Upload baseline screenshots
         if: inputs.upload_screenshots
         uses: actions/upload-artifact@v4
         with:
           name: regression-screenshots
-          path: screenshots
+          path: ${{ env.SCREENSHOTS_BASE_PATH }}
 
       - name: Upload Playwright diffs on failure
         if: failure()
