@@ -71,6 +71,9 @@ jobs:
         with:
           build: "true"
 
+      - name: Setup Playwright
+        uses: ./.github/actions/setup-playwright
+
       - name: Setup backend
         uses: ./.github/actions/setup-backend
         with:
