@@ -1,0 +1,173 @@
+name: 🪢 Non-régression
+
+on:
+  workflow_call:
+
+env:
+  PGHOST: localhost
+  PGPORT: 5432
+  PGUSER: webapp
+  PGPASSWORD: webapp # pragma: allowlist secret
+  PGDATABASE: webapp
+  UV_PROJECT_ENVIRONMENT: .venv
+  BASE_URL: http://localhost:8000
+  DATABASE_URL: "postgres://webapp:webapp@localhost:5432/webapp" # pragma: allowlist secret
+  SECRET_KEY: coucou # pragma: allowlist secret
+  CI: true
+
+jobs:
+  regression_testing_main:
+    name: Tests de non-régression
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:15-3.3-alpine
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 1s
+          --health-timeout 1s
+          --health-retries 50
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: webapp
+          POSTGRES_PASSWORD: webapp # pragma: allowlist secret
+          POSTGRES_DB: webapp
+    steps:
+      - name: Checkout main branch first
+        uses: actions/checkout@v6
+        with:
+          ref: main
+      - name: Checkout current branch in subdirectory
+        uses: actions/checkout@v6
+        with:
+          path: next
+
+      - name: Setup frontend environment
+        uses: ./.github/actions/setup-frontend
+        with:
+          build: "true"
+
+      - name: Setup backend environment
+        uses: ./.github/actions/setup-backend
+        with:
+          uv-groups: "--group dev"
+
+      - name: Install GIS packages
+        uses: ./.github/actions/install-gis
+
+      - name: Get current date
+        id: date
+        shell: bash
+        run: echo "value=$(date -u +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+
+      - name: Prepare Django database
+        uses: ./.github/actions/prepare-django-db
+        with:
+          cache-key: db-dump-${{ hashFiles('**/migrations/**/*.py') }}-${{ steps.date.outputs.value }}
+          sample-db-uri: ${{ secrets.SAMPLE_DB_URI }}
+          database-url: ${{ env.DATABASE_URL }}
+          local-dump-path: "database-dump.pgdump"
+
+      - name: collectstatic
+        shell: bash
+        run: make collectstatic
+
+      - name: Restore Django database
+        uses: ./.github/actions/pg-restore
+        with:
+          database-url: ${{ env.DATABASE_URL }}
+          dump-path: database-dump.pgdump
+
+      # RUN e2e
+      - name: Run server
+        run: |
+          uv run python manage.py runserver --noreload &
+
+      - name: Wait for server to be ready
+        run: |
+          timeout 20 sh -c 'until curl -s $BASE_URL > /dev/null; do sleep 1; done' || exit 1
+          # Additional wait to ensure static files are served
+          sleep 2
+
+      - name: Run Playwright tests to generate screenshot on main branch
+        run: npx playwright test --update-snapshots --config=next/playwright.regression.ts
+        env:
+          SCREENSHOT_BASE_PATH: "${{ github.workspace }}/screenshots"
+
+  regression_testing_current_branch:
+    name: Tests de non-régression
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:15-3.3-alpine
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 1s
+          --health-timeout 1s
+          --health-retries 50
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: webapp
+          POSTGRES_PASSWORD: webapp # pragma: allowlist secret
+          POSTGRES_DB: webapp
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup frontend environment
+        uses: ./.github/actions/setup-frontend
+        with:
+          build: "true"
+
+      - name: Setup backend environment
+        uses: ./.github/actions/setup-backend
+        with:
+          uv-groups: "--group dev"
+
+      - name: Install GIS packages
+        uses: ./.github/actions/install-gis
+
+      - name: Get current date
+        id: date
+        shell: bash
+        run: echo "value=$(date -u +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+
+      - name: Prepare Django database
+        uses: ./.github/actions/prepare-django-db
+        with:
+          cache-key: db-dump-${{ hashFiles('**/migrations/**/*.py') }}-${{ steps.date.outputs.value }}
+          sample-db-uri: ${{ secrets.SAMPLE_DB_URI }}
+          database-url: ${{ env.DATABASE_URL }}
+          local-dump-path: "database-dump.pgdump"
+
+      - name: collectstatic
+        shell: bash
+        run: make collectstatic
+
+      - name: Restore Django database
+        uses: ./.github/actions/pg-restore
+        with:
+          database-url: ${{ env.DATABASE_URL }}
+          dump-path: database-dump.pgdump
+
+      # RUN e2e
+      - name: Run server
+        run: |
+          uv run python manage.py runserver --noreload &
+
+      - name: Wait for server to be ready
+        run: |
+          timeout 20 sh -c 'until curl -s $BASE_URL > /dev/null; do sleep 1; done' || exit 1
+          # Additional wait to ensure static files are served
+          sleep 2
+
+      - name: Run Playwright tests to generate screenshot on main branch
+        run: npx playwright test --update-snapshots --config=playwright.regression.ts
+        env:
+          SCREENSHOT_BASE_PATH: "${{ github.workspace }}/screenshots"
+
+
+# Address actions/missing-workflow-permissions rule in
+# code scanning alertspermissions:
+  contents: read
