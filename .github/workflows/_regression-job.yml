@@ -63,7 +63,7 @@ jobs:
         if: inputs.update_snapshots
         uses: actions/checkout@v6
         with:
-          ref: ${{ inputs.ref }}
+          ref: ${{ github.ref }}
           path: next
 
       - name: Setup frontend
