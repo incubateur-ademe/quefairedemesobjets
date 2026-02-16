@@ -26,12 +26,15 @@ env:
   PGHOST: localhost
   PGPORT: 5432
   PGUSER: webapp
-  PGPASSWORD: webapp
+  PGPASSWORD: webapp # pragma: allowlist secret
   PGDATABASE: webapp
+  POSTGRES_USER: webapp
+  POSTGRES_PASSWORD: webapp # pragma: allowlist secret
+  POSTGRES_DB: webapp
   UV_PROJECT_ENVIRONMENT: .venv
   BASE_URL: http://localhost:8000
-  DATABASE_URL: postgres://webapp:webapp@localhost:5432/webapp
-  SECRET_KEY: coucou
+  DATABASE_URL: postgres://webapp:webapp@localhost:5432/webapp # pragma: allowlist secret
+  SECRET_KEY: coucou # pragma: allowlist secret
   CI: true
   SCREENSHOTS_BASE_PATH: ${{ github.workspace }}/screenshots
 
@@ -49,10 +52,6 @@ jobs:
           --health-retries 50
         ports:
           - 5432:5432
-        env:
-          POSTGRES_USER: webapp
-          POSTGRES_PASSWORD: webapp
-          POSTGRES_DB: webapp
 
     steps:
       - name: Checkout
@@ -143,3 +142,6 @@ jobs:
             **/*-expected.png
             **/*-actual.png
             **/*-diff.png
+
+permissions:
+  contents: read
