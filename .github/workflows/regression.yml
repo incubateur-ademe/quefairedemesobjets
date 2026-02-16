@@ -9,19 +9,37 @@ env:
   PGHOST: localhost
   PGPORT: 5432
   PGUSER: webapp
+  POSTGRES_USER: webapp
+  POSTGRES_PASSWORD: webapp # pragma: allowlist secret
+  POSTGRES_DB: webapp # pragma: allowlist secret
   PGPASSWORD: webapp # pragma: allowlist secret
   PGDATABASE: webapp
   UV_PROJECT_ENVIRONMENT: .venv
   BASE_URL: http://localhost:8000
-  DATABASE_URL: "postgres://webapp:webapp@localhost:5432/webapp" # pragma: allowlist secret
+  DATABASE_URL: postgres://webapp:webapp@localhost:5432/webapp # pragma: allowlist secret
   SECRET_KEY: coucou # pragma: allowlist secret
   CI: true
-  SCREENSHOTS_BASE_PATH: "${{ github.workspace }}/screenshots"
 
 jobs:
-  regression_testing_main:
-    name: Tests de non-régression
+  regression:
+    name: Regression – ${{ matrix.name }}
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        include:
+          - name: main
+            ref: main
+            update_snapshots: true
+            playwright_config: next/playwright.regression.ts
+            upload: true
+
+          - name: current
+            ref: ${{ github.ref }}
+            update_snapshots: false
+            playwright_config: playwright.regression.ts
+            download: true
+
     services:
       postgres:
         image: postgis/postgis:15-3.3-alpine
@@ -32,26 +50,26 @@ jobs:
           --health-retries 50
         ports:
           - 5432:5432
-        env:
-          POSTGRES_USER: webapp
-          POSTGRES_PASSWORD: webapp # pragma: allowlist secret
-          POSTGRES_DB: webapp
+
     steps:
-      - name: Checkout main branch first
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ matrix.ref }}
+          path: app
+
+      - name: Checkout main (for comparison)
+        if: matrix.name == 'main'
         uses: actions/checkout@v6
         with:
           ref: main
-      - name: Checkout current branch in subdirectory
-        uses: actions/checkout@v6
-        with:
-          path: next
 
-      - name: Setup frontend environment
+      - name: Setup frontend
         uses: ./.github/actions/setup-frontend
         with:
           build: "true"
 
-      - name: Setup backend environment
+      - name: Setup backend
         uses: ./.github/actions/setup-backend
         with:
           uv-groups: "--group dev"
@@ -61,7 +79,6 @@ jobs:
 
       - name: Get current date
         id: date
-        shell: bash
         run: echo "value=$(date -u +'%Y-%m-%d')" >> $GITHUB_OUTPUT
 
       - name: Prepare Django database
@@ -70,116 +87,45 @@ jobs:
           cache-key: db-dump-${{ hashFiles('**/migrations/**/*.py') }}-${{ steps.date.outputs.value }}
           sample-db-uri: ${{ secrets.SAMPLE_DB_URI }}
           database-url: ${{ env.DATABASE_URL }}
-          local-dump-path: "database-dump.pgdump"
+          local-dump-path: database-dump.pgdump
 
       - name: collectstatic
-        shell: bash
         run: make collectstatic
 
-      - name: Restore Django database
+      - name: Restore database
         uses: ./.github/actions/pg-restore
         with:
           database-url: ${{ env.DATABASE_URL }}
           dump-path: database-dump.pgdump
 
-      # RUN e2e
-      - name: Run server
-        run: |
-          uv run python manage.py runserver --noreload &
-
-      - name: Wait for server to be ready
-        run: |
-          timeout 20 sh -c 'until curl -s $BASE_URL > /dev/null; do sleep 1; done' || exit 1
-          # Additional wait to ensure static files are served
-          sleep 2
-
-      - name: Run Playwright tests to generate screenshot on main branch
-        run: npx playwright test --update-snapshots --config=next/playwright.regression.ts
-        env:
-
-      - name: Upload baseline screenshots
-        uses: actions/upload-artifact@v4
-        with:
-          name: regression-screenshots
-          path: ${{ env.SCREENSHOTS_BASE_PATH }}
-
-  regression_testing_current_branch:
-    name: Tests de non-régression
-    needs: regression_testing_main
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgis/postgis:15-3.3-alpine
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 1s
-          --health-timeout 1s
-          --health-retries 50
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_USER: webapp
-          POSTGRES_PASSWORD: webapp # pragma: allowlist secret
-          POSTGRES_DB: webapp
-    steps:
-      - uses: actions/checkout@v6
       - name: Download baseline screenshots
+        if: matrix.download
         uses: actions/download-artifact@v4
         with:
           name: regression-screenshots
-          path: ${{ env.SCREENSHOTS_BASE_PATH }}
+          path: screenshots
 
-      - name: Setup frontend environment
-        uses: ./.github/actions/setup-frontend
-        with:
-          build: "true"
-
-      - name: Setup backend environment
-        uses: ./.github/actions/setup-backend
-        with:
-          uv-groups: "--group dev"
-
-      - name: Install GIS packages
-        uses: ./.github/actions/install-gis
-
-      - name: Get current date
-        id: date
-        shell: bash
-        run: echo "value=$(date -u +'%Y-%m-%d')" >> $GITHUB_OUTPUT
-
-      - name: Prepare Django database
-        uses: ./.github/actions/prepare-django-db
-        with:
-          cache-key: db-dump-${{ hashFiles('**/migrations/**/*.py') }}-${{ steps.date.outputs.value }}
-          sample-db-uri: ${{ secrets.SAMPLE_DB_URI }}
-          database-url: ${{ env.DATABASE_URL }}
-          local-dump-path: "database-dump.pgdump"
-
-      - name: collectstatic
-        shell: bash
-        run: make collectstatic
-
-      - name: Restore Django database
-        uses: ./.github/actions/pg-restore
-        with:
-          database-url: ${{ env.DATABASE_URL }}
-          dump-path: database-dump.pgdump
-
-      # RUN e2e
       - name: Run server
-        run: |
-          uv run python manage.py runserver --noreload &
+        run: uv run python manage.py runserver --noreload &
 
-      - name: Wait for server to be ready
+      - name: Wait for server
         run: |
-          timeout 20 sh -c 'until curl -s $BASE_URL > /dev/null; do sleep 1; done' || exit 1
-          # Additional wait to ensure static files are served
+          timeout 20 sh -c 'until curl -s $BASE_URL > /dev/null; do sleep 1; done'
           sleep 2
 
-      - name: Run Playwright tests to generate screenshot on main branch
-        run: npx playwright test --update-snapshots --config=playwright.regression.ts
+      - name: Run Playwright
+        run: |
+          if [ "${{ matrix.update_snapshots }}" = "true" ]; then
+            npx playwright test --update-snapshots --config=${{ matrix.playwright_config }}
+          else
+            npx playwright test --config=${{ matrix.playwright_config }}
+          fi
+        env:
+          SCREENSHOT_BASE_PATH: ${{ github.workspace }}/screenshots
 
-
-# Address actions/missing-workflow-permissions rule in
-# code scanning alertspermissions:
-  contents: read
+      - name: Upload baseline screenshots
+        if: matrix.upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-screenshots
+          path: screenshots
