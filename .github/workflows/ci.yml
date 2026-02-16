@@ -128,18 +128,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Setup frontend environment
-        uses: ./.github/actions/setup-frontend
+      - name: Setup E2E tools
+        uses: ./.github/actions/setup-e2e-tools
         with:
-          build: "true"
-
-      - name: Setup backend environment
-        uses: ./.github/actions/setup-backend
-        with:
-          uv-groups: "--group dev"
-
-      - name: Install GIS packages
-        uses: ./.github/actions/install-gis
+          build-frontend: "true"
+          install-playwright: "false"
 
       - name: Get current date
         id: date
@@ -195,20 +188,8 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      # PREPARE e2e
-      - name: Setup frontend environment
-        uses: ./.github/actions/setup-frontend
-
-      - name: Install GIS packages
-        uses: ./.github/actions/install-gis
-
-      - name: Setup backend environment
-        uses: ./.github/actions/setup-backend
-        with:
-          uv-groups: "--group dev"
-
-      - name: Setup Playwright
-        uses: ./.github/actions/setup-playwright
+      - name: Setup E2E tools
+        uses: ./.github/actions/setup-e2e-tools
 
       - name: Download build artifacts
         uses: actions/download-artifact@v7
@@ -239,16 +220,8 @@ jobs:
         shell: bash
         run: make rebuild-search-index
 
-      # RUN e2e
-      - name: Run server
-        run: |
-          uv run python manage.py runserver --noreload &
-
-      - name: Wait for server to be ready
-        run: |
-          timeout 20 sh -c 'until curl -s $BASE_URL > /dev/null; do sleep 1; done' || exit 1
-          # Additional wait to ensure static files are served
-          sleep 2
+      - name: Start Django server
+        uses: ./.github/actions/start-django-server
 
       - name: Run Playwright tests
         run: npx playwright test --shard=${{ matrix.shard }}/5 --update-snapshots
