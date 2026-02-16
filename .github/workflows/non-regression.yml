@@ -12,7 +12,6 @@ jobs:
     with:
       ref: main
       update_snapshots: true
-      playwright_config: playwright.regression.ts
       upload_screenshots: true
       download_screenshots: false
     secrets:
@@ -27,7 +26,6 @@ jobs:
     with:
       ref: ${{ github.ref }}
       update_snapshots: false
-      playwright_config: playwright.regression.ts
       upload_screenshots: false
       download_screenshots: true
     secrets:
