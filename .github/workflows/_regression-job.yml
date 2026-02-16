@@ -59,6 +59,13 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
 
+      - name: Checkout current branch Playwright config
+        if: inputs.update_snapshots
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref }}
+          path: next
+
       - name: Setup frontend
         uses: ./.github/actions/setup-frontend
         with:
