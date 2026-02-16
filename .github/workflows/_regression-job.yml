@@ -59,14 +59,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           ref: ${{ inputs.ref }}
-
-      - name: Checkout current branch Playwright config
-        if: inputs.update_snapshots
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ github.ref }}
-          path: next
-
+      - run: wget https://raw.githubusercontent.com/incubateur-ademe/quefairedemesobjets/refs/heads/add-regression-testing/playwright.regression.ts
       - name: Setup frontend
         uses: ./.github/actions/setup-frontend
         with:

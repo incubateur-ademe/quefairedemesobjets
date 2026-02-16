@@ -12,7 +12,7 @@ jobs:
     with:
       ref: main
       update_snapshots: true
-      playwright_config: next/playwright.regression.ts
+      playwright_config: playwright.regression.ts
       upload_screenshots: true
       download_screenshots: false
     secrets:
@@ -42,7 +42,6 @@ jobs:
       failure() &&
       github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-
     permissions:
       contents: read
       pull-requests: write
