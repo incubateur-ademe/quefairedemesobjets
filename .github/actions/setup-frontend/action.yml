@@ -17,8 +17,7 @@ runs:
       uses: actions/setup-node@v6
       with:
         node-version-file: ".tool-versions"
-        cache: "npm"
-        cache-dependency-path: ${{ inputs.working-directory && format('{0}/package-lock.json', inputs.working-directory) || 'package-lock.json' }}
+        # cache: "npm"
 
     - name: Install npm dependencies
       shell: bash
