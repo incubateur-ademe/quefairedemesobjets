@@ -108,6 +108,15 @@ jobs:
       - name: Start Django server
         uses: ./.github/actions/start-django-server
 
+      - name: Debug - list screenshots before Playwright
+        run: |
+          echo "=== SCREENSHOTS_BASE_PATH: ${{ env.SCREENSHOTS_BASE_PATH }} ==="
+          echo "=== inputs.update_snapshots: ${{ inputs.update_snapshots }} ==="
+          echo "=== inputs.download_screenshots: ${{ inputs.download_screenshots }} ==="
+          echo "=== inputs.upload_screenshots: ${{ inputs.upload_screenshots }} ==="
+          echo "=== ls -laR ${{ env.SCREENSHOTS_BASE_PATH }} ==="
+          ls -laR ${{ env.SCREENSHOTS_BASE_PATH }} 2>&1 || echo "Directory does not exist"
+
       - name: Run Playwright
         run: |
           if [ "${{ inputs.update_snapshots }}" = "true" ]; then
@@ -115,6 +124,12 @@ jobs:
           else
             npx playwright test --config=playwright.regression.ts
           fi
+
+      - name: Debug - list screenshots after Playwright
+        if: always()
+        run: |
+          echo "=== ls -laR ${{ env.SCREENSHOTS_BASE_PATH }} ==="
+          ls -laR ${{ env.SCREENSHOTS_BASE_PATH }} 2>&1 || echo "Directory does not exist"
 
       - name: Upload baseline screenshots
         if: inputs.upload_screenshots
