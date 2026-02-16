@@ -135,19 +135,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Setup frontend environment
-        uses: ./.github/actions/setup-frontend
+      - name: Setup E2E tools
+        uses: ./.github/actions/setup-e2e-tools
         with:
-          build: "true"
-          working-directory: webapp
-
-      - name: Setup backend environment
-        uses: ./.github/actions/setup-backend
-        with:
-          uv-groups: "--all-packages --group dev"
-
-      - name: Install GIS packages
-        uses: ./.github/actions/install-gis
+          build-frontend: "true"
+          install-playwright: "false"
 
       - name: Get current date
         id: date
@@ -201,22 +193,8 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      # PREPARE e2e
-      - name: Setup frontend environment
-        uses: ./.github/actions/setup-frontend
-        with:
-          working-directory: webapp
-
-      - name: Install GIS packages
-        uses: ./.github/actions/install-gis
-
-      - name: Setup backend environment
-        uses: ./.github/actions/setup-backend
-        with:
-          uv-groups: "--all-packages --group dev"
-
-      - name: Setup Playwright
-        uses: ./.github/actions/setup-playwright
+      - name: Setup E2E tools
+        uses: ./.github/actions/setup-e2e-tools
 
       - name: Download build artifacts
         uses: actions/download-artifact@v7
@@ -229,16 +207,26 @@ jobs:
           database-url: ${{ env.DATABASE_URL }}
           dump-path: database-dump.pgdump
 
-      # RUN e2e
-      - name: Run server
-        run: |
-          cd webapp && uv run python manage.py runserver --noreload &
+      # TODO: remove once synonyme de recherche work
+      # will be merged and deployed as the sample database
+      # will have required data.
+      - name: Populate search terms
+        shell: bash
+        run: uv run python manage.py populate_search_terms
 
-      - name: Wait for server to be ready
-        run: |
-          timeout 20 sh -c 'until curl -s $BASE_URL > /dev/null; do sleep 1; done' || exit 1
-          # Additional wait to ensure static files are served
-          sleep 2
+      # TODO: remove once synonyme de recherche work
+      # will be merged and deployed as the sample database
+      # will have required data.
+      - name: Populate fake search tags
+        shell: bash
+        run: uv run python manage.py populate_fake_search_tags
+
+      - name: Build search index
+        shell: bash
+        run: make rebuild-search-index
+
+      - name: Start Django server
+        uses: ./.github/actions/start-django-server
 
       - name: Run Playwright tests
         run: npx playwright test --shard=${{ matrix.shard }}/5 --update-snapshots

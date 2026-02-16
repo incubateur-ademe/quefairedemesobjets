@@ -1,0 +1,25 @@
+name: Start Django Server
+description: Start the Django development server and wait for it to be ready
+
+inputs:
+  base-url:
+    description: "URL to poll for readiness"
+    required: false
+    default: "http://localhost:8000"
+  timeout:
+    description: "Seconds to wait for server"
+    required: false
+    default: "20"
+
+runs:
+  using: composite
+  steps:
+    - name: Run server
+      shell: bash
+      run: uv run python manage.py runserver --noreload &
+
+    - name: Wait for server to be ready
+      shell: bash
+      run: |
+        timeout ${{ inputs.timeout }} sh -c 'until curl -s ${{ inputs.base-url }} > /dev/null; do sleep 1; done' || exit 1
+        sleep 2
