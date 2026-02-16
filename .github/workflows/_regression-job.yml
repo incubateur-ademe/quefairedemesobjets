@@ -39,20 +39,20 @@ jobs:
   regression:
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgis/postgis:15-3.3-alpine
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 1s
-          --health-timeout 1s
-          --health-retries 50
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_USER: webapp
-          POSTGRES_PASSWORD: webapp # pragma: allowlist secret
-          POSTGRES_DB: webapp
+    # services:
+    #   postgres:
+    #     image: postgis/postgis:15-3.3-alpine
+    #     options: >-
+    #       --health-cmd pg_isready
+    #       --health-interval 1s
+    #       --health-timeout 1s
+    #       --health-retries 50
+    #     ports:
+    #       - 5432:5432
+    #     env:
+    #       POSTGRES_USER: webapp
+    #       POSTGRES_PASSWORD: webapp # pragma: allowlist secret
+    #       POSTGRES_DB: webapp
 
     steps:
       - name: Checkout
@@ -60,42 +60,43 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
       - run: wget https://raw.githubusercontent.com/incubateur-ademe/quefairedemesobjets/refs/heads/add-regression-testing/playwright.regression.ts
-      - name: Setup frontend
-        uses: ./.github/actions/setup-frontend
-        with:
-          build: "true"
 
       - name: Setup Playwright
         uses: ./.github/actions/setup-playwright
 
-      - name: Setup backend
-        uses: ./.github/actions/setup-backend
-        with:
-          uv-groups: "--group dev"
+      # - name: Setup frontend
+      #   uses: ./.github/actions/setup-frontend
+      #   with:
+      #     build: "true"
 
-      - name: Install GIS packages
-        uses: ./.github/actions/install-gis
+      # - name: Setup backend
+      #   uses: ./.github/actions/setup-backend
+      #   with:
+      #     uv-groups: "--group dev"
 
-      - name: Get current date
-        id: date
-        run: echo "value=$(date -u +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+      # - name: Install GIS packages
+      #   uses: ./.github/actions/install-gis
 
-      - name: Prepare Django database
-        uses: ./.github/actions/prepare-django-db
-        with:
-          cache-key: db-dump-${{ hashFiles('**/migrations/**/*.py') }}-${{ steps.date.outputs.value }}
-          sample-db-uri: ${{ secrets.SAMPLE_DB_URI }}
-          database-url: ${{ env.DATABASE_URL }}
-          local-dump-path: database-dump.pgdump
+      # - name: Get current date
+      #   id: date
+      #   run: echo "value=$(date -u +'%Y-%m-%d')" >> $GITHUB_OUTPUT
 
-      - name: collectstatic
-        run: make collectstatic
+      # - name: Prepare Django database
+      #   uses: ./.github/actions/prepare-django-db
+      #   with:
+      #     cache-key: db-dump-${{ hashFiles('**/migrations/**/*.py') }}-${{ steps.date.outputs.value }}
+      #     sample-db-uri: ${{ secrets.SAMPLE_DB_URI }}
+      #     database-url: ${{ env.DATABASE_URL }}
+      #     local-dump-path: database-dump.pgdump
 
-      - name: Restore database
-        uses: ./.github/actions/pg-restore
-        with:
-          database-url: ${{ env.DATABASE_URL }}
-          dump-path: database-dump.pgdump
+      # - name: collectstatic
+      #   run: make collectstatic
+
+      # - name: Restore database
+      #   uses: ./.github/actions/pg-restore
+      #   with:
+      #     database-url: ${{ env.DATABASE_URL }}
+      #     dump-path: database-dump.pgdump
 
       - name: Download baseline screenshots
         if: inputs.download_screenshots
@@ -104,13 +105,13 @@ jobs:
           name: regression-screenshots
           path: ${{ env.SCREENSHOTS_BASE_PATH }}
 
-      - name: Run server
-        run: uv run python manage.py runserver --noreload &
+      # - name: Run server
+      #   run: uv run python manage.py runserver --noreload &
 
-      - name: Wait for server
-        run: |
-          timeout 20 sh -c 'until curl -s $BASE_URL > /dev/null; do sleep 1; done'
-          sleep 2
+      # - name: Wait for server
+      #   run: |
+      #     timeout 20 sh -c 'until curl -s $BASE_URL > /dev/null; do sleep 1; done'
+      #     sleep 2
 
       - name: Run Playwright
         run: |
