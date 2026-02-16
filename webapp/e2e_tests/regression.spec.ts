@@ -19,6 +19,7 @@ test("Les pages et composants n'ont pas changé", async ({ page }) => {
     await navigateTo(page, pageToTest)
     const filename = crypto.hash("sha1", pageToTest)
     const screenshotPath = `${filename}.png`
+    await page.waitForTimeout(2000)
     await expect(page).toHaveScreenshot(screenshotPath)
   }
 })
