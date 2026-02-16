@@ -65,6 +65,7 @@ jobs:
         with:
           ref: ${{ github.ref }}
           sparse-checkout: |
+            playwright.config.ts
             playwright.regression.ts
             e2e_tests/regression.spec.ts
             .github/actions/setup-e2e-tools
@@ -74,6 +75,7 @@ jobs:
 
       - name: Overlay regression test files
         run: |
+          cp __regression_tests__/playwright.config.ts ./playwright.config.ts
           cp __regression_tests__/playwright.regression.ts ./playwright.regression.ts
           cp __regression_tests__/e2e_tests/regression.spec.ts ./e2e_tests/regression.spec.ts
           cp -r __regression_tests__/.github/actions/setup-e2e-tools ./.github/actions/setup-e2e-tools
