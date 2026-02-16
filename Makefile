@@ -97,8 +97,8 @@ makemigrations:
 merge-migrations:
 	$(DJANGO_ADMIN) makemigrations --merge
 
-.PHONY: index
-index:
+.PHONY: rebuild-search-index
+rebuild-search-index:
 	$(DJANGO_ADMIN) rebuild_modelsearch_index
 
 
@@ -221,7 +221,7 @@ create-schema-public:
 
 
 .SILENT:
-.PHONY: create-extensions
+.PHONY: create-db-extensions
 create-extensions:
 	@echo "Creating required extensions"
 	psql -d '$(DB_URL)' -f scripts/sql/create_extensions.sql
