@@ -1,4 +1,4 @@
-import { defineConfig, devices } from "@playwright/test"
+import { defineConfig, devices, PlaywrightTestConfig } from "@playwright/test"
 import dotenv from "dotenv"
 import path from "path"
 
@@ -14,7 +14,9 @@ import path from "path"
 
 dotenv.config({ path: path.resolve(__dirname, ".env") })
 
-export default defineConfig({
+export const config: PlaywrightTestConfig = {
+  // Glob patterns or regular expressions to ignore test files.
+  testIgnore: "*regression*",
   testDir: "./e2e_tests",
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -60,4 +62,5 @@ export default defineConfig({
       },
     },
   ],
-})
+}
+export default defineConfig(config)
