@@ -17,6 +17,8 @@ jobs:
       download_screenshots: false
     secrets:
       SAMPLE_DB_URI: ${{ secrets.SAMPLE_DB_URI }}
+    permissions:
+      contents: read
 
   compare:
     name: Compare (current branch)
@@ -30,6 +32,8 @@ jobs:
       download_screenshots: true
     secrets:
       SAMPLE_DB_URI: ${{ secrets.SAMPLE_DB_URI }}
+    permissions:
+      contents: read
 
   comment-visual-diffs:
     name: Comment visual regression diffs
@@ -76,5 +80,7 @@ jobs:
         run: |
           gh api repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments \
             -f body="${{ steps.body.outputs.body }}"
+
 permissions:
   pull-requests: write
+  contents: read
