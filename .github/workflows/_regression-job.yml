@@ -9,9 +9,6 @@ on:
       update_snapshots:
         required: true
         type: boolean
-      playwright_config:
-        required: true
-        type: string
       upload_screenshots:
         required: true
         type: boolean
@@ -59,8 +56,21 @@ jobs:
         uses: actions/checkout@v6
         with:
           ref: ${{ inputs.ref }}
-      - run: wget -O playwright.regression.ts https://raw.githubusercontent.com/incubateur-ademe/quefairedemesobjets/refs/heads/add-regression-testing/playwright.regression.ts
-      - run: wget -O ./e2e_tests/regression.spec.ts https://raw.githubusercontent.com/incubateur-ademe/quefairedemesobjets/refs/heads/add-regression-testing/e2e_tests/regression.spec.ts
+      - name: Checkout regression test files
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref }}
+          sparse-checkout: |
+            playwright.regression.ts
+            e2e_tests/regression.spec.ts
+          sparse-checkout-cone-mode: false
+          path: __regression_tests__
+
+      - name: Overlay regression test files
+        run: |
+          cp __regression_tests__/playwright.regression.ts ./playwright.regression.ts
+          cp __regression_tests__/e2e_tests/regression.spec.ts ./e2e_tests/regression.spec.ts
+          rm -rf __regression_tests__
 
       - name: Setup Playwright
         uses: ./.github/actions/setup-playwright
@@ -117,9 +127,9 @@ jobs:
       - name: Run Playwright
         run: |
           if [ "${{ inputs.update_snapshots }}" = "true" ]; then
-            npx playwright test --update-snapshots --config=${{ inputs.playwright_config }}
+            npx playwright test --update-snapshots --config=playwright.regression.ts
           else
-            npx playwright test --config=${{ inputs.playwright_config }}
+            npx playwright test --config=playwright.regression.ts
           fi
 
       - name: Upload baseline screenshots
