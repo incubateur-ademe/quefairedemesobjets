@@ -512,7 +512,7 @@ MODELSEARCH_BACKENDS = {
     "default": {
         "BACKEND": "modelsearch.backends.database",
         "SEARCH_CONFIG": "wagtail_french",
-        "FUZZY_ALGORITHM": "levenshtein",
+        "FUZZY_ALGORITHM": "trigram",
         "FUZZY_SIMILARITY_THRESHOLD": 0.2,
         "FUZZY_PREFIX_BOOST": 0.5,
     }
