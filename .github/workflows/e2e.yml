@@ -82,9 +82,9 @@ jobs:
     uses: ./.github/workflows/_e2e.yml
     with:
       ref: ${{ github.ref }}
-      update_snapshots: false
-      upload_screenshots: false
-      download_screenshots: true
+      update_snapshots: true
+      upload_screenshots: true
+      download_screenshots: false
     permissions:
       contents: read
 
@@ -95,9 +95,9 @@ jobs:
     with:
       ref: main
       regression_only: true
-      update_snapshots: true
+      update_snapshots: false
       upload_screenshots: true
-      download_screenshots: false
+      download_screenshots: true
     permissions:
       contents: read
 
