@@ -41,6 +41,9 @@ jobs:
 
   e2e:
     name: 🪤 E2E
+    permissions:
+      contents: write
+      pull-requests: write
     uses: ./.github/workflows/e2e.yml
     secrets: inherit #pragma: allowlist secret
 
