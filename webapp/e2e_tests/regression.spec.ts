@@ -32,17 +32,14 @@ test("Les pages et composants n'ont pas changé", async ({ page }) => {
 
     try {
       const response = await page.goto(pageToTest, { waitUntil: "domcontentloaded" })
-      result.status = response?.status()
 
-      if (result.status !== 200) {
-        result.errors.push(`HTTP ${result.status}`)
+      await page.waitForTimeout(5000)
+      try {
+        expect(response!.status()).toBe(200)
+      } catch (e) {
+        result.errors.push(`HTTP ${response!.status()}`)
         hasErrors = true
-        manifest[filename] = result
-        continue
       }
-
-      await page.waitForTimeout(2000)
-
       try {
         await expect(page).toHaveScreenshot(`${filename}.png`, { fullPage: true })
       } catch (e) {
