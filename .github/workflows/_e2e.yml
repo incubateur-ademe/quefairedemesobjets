@@ -12,9 +12,6 @@ on:
       regression_only:
         required: false
         type: boolean
-      update_snapshots:
-        required: true
-        type: boolean
       download_screenshots:
         required: true
         type: boolean
@@ -97,7 +94,8 @@ jobs:
         with:
           database-url: ${{ env.DATABASE_URL }}
           dump-path: database-dump.pgdump
-      - name: prepare search index
+
+      - name: TEMPORARY - prepare search index
         run: |
           uv run python manage.py populate_fake_search_tags
           uv run python manage.py populate_search_terms
