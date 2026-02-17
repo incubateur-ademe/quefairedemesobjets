@@ -157,6 +157,7 @@ jobs:
             **/*-expected.png
             **/*-actual.png
             **/*-diff.png
+            manifest.json
 
 permissions:
   contents: read
