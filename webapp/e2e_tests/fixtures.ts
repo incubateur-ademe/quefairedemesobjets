@@ -6,7 +6,6 @@ export const test = base.extend<{ forEachTest: void }>({
       await use()
       const hasRegressionTag = testInfo.tags.includes("@regression")
       if (hasRegressionTag) {
-        const filename = crypto.hash("sha1", `${testInfo.titlePath}-${page.url()}`)
         await expect.soft(page).toHaveScreenshot({
           fullPage: true,
         })
