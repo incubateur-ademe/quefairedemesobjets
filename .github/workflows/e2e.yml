@@ -91,7 +91,7 @@ jobs:
 
   e2e-compare:
     name: Compare (main)
-    needs: e2e
+    needs: e2e-prepare
     uses: ./.github/workflows/_e2e.yml
     with:
       ref: main
