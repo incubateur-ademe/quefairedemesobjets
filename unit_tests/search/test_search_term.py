@@ -10,10 +10,10 @@ from unit_tests.qfdmd.qfdmod_factory import (
 )
 
 
+@pytest.mark.django_db
 class TestSearchTermModel:
     """Tests for the SearchTerm model itself."""
 
-    @pytest.mark.django_db
     def test_str_returns_term(self):
         """SearchTerm __str__ should return the term field."""
         content_type = ContentType.objects.get_for_model(SearchTag)
@@ -24,7 +24,6 @@ class TestSearchTermModel:
         )
         assert str(search_term) == "test term"
 
-    @pytest.mark.django_db
     def test_get_supported_content_types(self):
         """Should return ContentTypes for all supported models."""
         content_types = SearchTerm.get_supported_content_types()
@@ -33,7 +32,6 @@ class TestSearchTermModel:
         for app_label, model in SearchTerm.supported_content_types:
             assert (app_label, model) in app_models
 
-    @pytest.mark.django_db
     def test_unique_together_constraint(self):
         """Should not allow duplicate SearchTerms for the same object."""
         content_type = ContentType.objects.get_for_model(SearchTag)
@@ -51,10 +49,10 @@ class TestSearchTermModel:
             )
 
 
+@pytest.mark.django_db
 class TestSearchTermSyncFromObject:
     """Tests for SearchTerm.sync_from_object method."""
 
-    @pytest.mark.django_db
     def test_sync_creates_search_term_for_synonyme(self):
         """Syncing a Synonyme should create a SearchTerm."""
         produit = ProduitFactory(nom="Test Produit")
@@ -66,7 +64,6 @@ class TestSearchTermSyncFromObject:
         assert search_term.term == "Test Synonyme"
         assert search_term.legacy is True
 
-    @pytest.mark.django_db
     def test_sync_updates_existing_search_term(self):
         """Syncing an existing object should update the SearchTerm."""
         produit = ProduitFactory(nom="Test Produit")
@@ -85,7 +82,6 @@ class TestSearchTermSyncFromObject:
         assert search_term2.pk == search_term1.pk
         assert search_term2.term == "Updated Name"
 
-    @pytest.mark.django_db
     def test_sync_sets_parent_object_when_available(self):
         """Syncing should set parent object when available."""
         # For Synonyme, parent_object is None (legacy)
@@ -99,10 +95,10 @@ class TestSearchTermSyncFromObject:
         assert search_term.parent_object_id is None
 
 
+@pytest.mark.django_db
 class TestSearchTermDeleteForObject:
     """Tests for SearchTerm.delete_for_object method."""
 
-    @pytest.mark.django_db
     def test_delete_for_object_removes_search_term(self):
         """Deleting for an object should remove its SearchTerm."""
         produit = ProduitFactory(nom="Test Produit")
@@ -113,7 +109,6 @@ class TestSearchTermDeleteForObject:
         SearchTerm.delete_for_object(synonyme)
         assert not SearchTerm.objects.filter(term="Test Synonyme").exists()
 
-    @pytest.mark.django_db
     def test_delete_for_object_handles_nonexistent_search_term(self):
         """Deleting for an object without a SearchTerm should not raise."""
         produit = ProduitFactory(nom="Test Produit")
@@ -126,10 +121,10 @@ class TestSearchTermDeleteForObject:
         SearchTerm.delete_for_object(synonyme)
 
 
+@pytest.mark.django_db
 class TestSynonymeSearchTermIntegration:
     """Tests for Synonyme <-> SearchTerm integration via SearchTermSyncMixin."""
 
-    @pytest.mark.django_db
     def test_synonyme_save_creates_search_term(self):
         """Saving a Synonyme should automatically create a SearchTerm."""
         produit = ProduitFactory(nom="Test Produit")
@@ -144,7 +139,6 @@ class TestSynonymeSearchTermIntegration:
         search_term = SearchTerm.objects.get(term="Auto Sync Test")
         assert search_term.legacy is True
 
-    @pytest.mark.django_db
     def test_synonyme_save_updates_search_term(self):
         """Updating a Synonyme should update its SearchTerm."""
         produit = ProduitFactory(nom="Test Produit")
@@ -162,7 +156,6 @@ class TestSynonymeSearchTermIntegration:
         search_term.refresh_from_db()
         assert search_term.term == "Updated"
 
-    @pytest.mark.django_db
     def test_synonyme_delete_removes_search_term(self):
         """Deleting a Synonyme should remove its SearchTerm."""
         produit = ProduitFactory(nom="Test Produit")
@@ -174,7 +167,6 @@ class TestSynonymeSearchTermIntegration:
 
         assert not SearchTerm.objects.filter(term="To Delete").exists()
 
-    @pytest.mark.django_db
     def test_synonyme_url_is_synced(self):
         """Synonyme's URL should be synced to SearchTerm."""
         produit = ProduitFactory(nom="Test Produit")
@@ -185,6 +177,7 @@ class TestSynonymeSearchTermIntegration:
         assert search_term.url == expected_url
 
 
+@pytest.mark.django_db
 class TestSearchTagSearchTermIntegration:
     """Tests for SearchTag <-> SearchTerm integration."""
 
@@ -203,7 +196,6 @@ class TestSearchTagSearchTermIntegration:
         index_page.add_child(instance=produit_page)
         return produit_page
 
-    @pytest.mark.django_db
     def test_search_tag_without_page_has_empty_url(self):
         """A SearchTag not linked to a page should have empty URL."""
         SearchTag.objects.create(name="Orphan Tag", slug="orphan-tag")
@@ -215,7 +207,6 @@ class TestSearchTagSearchTermIntegration:
         assert search_terms.exists()
         assert search_terms.first().url == ""
 
-    @pytest.mark.django_db
     def test_tagged_search_tag_creates_search_term_with_url(self, produit_page):
         """Creating TaggedSearchTag should create SearchTerm with page URL."""
         search_tag = SearchTag.objects.create(name="Linked Tag", slug="linked-tag")
@@ -231,7 +222,6 @@ class TestSearchTagSearchTermIntegration:
         search_term.refresh_from_db()
         assert search_term.url == produit_page.url
 
-    @pytest.mark.django_db
     def test_tagged_search_tag_delete_removes_search_term(self, produit_page):
         """Deleting TaggedSearchTag should remove the SearchTerm."""
         search_tag = SearchTag.objects.create(name="To Unlink", slug="to-unlink")
@@ -247,7 +237,6 @@ class TestSearchTagSearchTermIntegration:
         # SearchTerm should be removed
         assert not SearchTerm.objects.filter(term="To Unlink").exists()
 
-    @pytest.mark.django_db
     def test_search_tag_delete_removes_search_term(self, produit_page):
         """Deleting a SearchTag should remove its SearchTerm."""
         search_tag = SearchTag.objects.create(name="Tag To Delete", slug="tag-delete")
@@ -261,7 +250,6 @@ class TestSearchTagSearchTermIntegration:
         # SearchTerm should be gone
         assert not SearchTerm.objects.filter(term="Tag To Delete").exists()
 
-    @pytest.mark.django_db
     def test_search_tag_parent_object_is_produit_page(self, produit_page):
         """SearchTag's parent_object should be the linked ProduitPage."""
         search_tag = SearchTag.objects.create(name="Parent Test", slug="parent-test")
@@ -272,10 +260,10 @@ class TestSearchTagSearchTermIntegration:
         assert search_term.parent_object == produit_page
 
 
+@pytest.mark.django_db
 class TestEdgeCases:
     """Tests for edge cases and error handling."""
 
-    @pytest.mark.django_db
     def test_sync_with_empty_term(self):
         """Syncing an object with empty term should still work."""
         produit = ProduitFactory(nom="Test Produit")
@@ -284,7 +272,6 @@ class TestEdgeCases:
         search_term = SearchTerm.objects.get(linked_object_id=synonyme.pk)
         assert search_term.term == ""
 
-    @pytest.mark.django_db
     def test_sync_with_very_long_term(self):
         """Syncing with a term at max length should work."""
         produit = ProduitFactory(nom="Test Produit")
@@ -294,7 +281,6 @@ class TestEdgeCases:
         search_term = SearchTerm.objects.get(linked_object_id=synonyme.pk)
         assert len(search_term.term) == 255
 
-    @pytest.mark.django_db
     def test_multiple_synonymes_create_separate_search_terms(self):
         """Each Synonyme should have its own SearchTerm."""
         produit = ProduitFactory(nom="Test Produit")
@@ -309,7 +295,6 @@ class TestEdgeCases:
         st2 = SearchTerm.objects.get(term="Synonyme Two")
         assert st1.pk != st2.pk
 
-    @pytest.mark.django_db
     def test_delete_nonexistent_object_is_safe(self):
         """Calling delete_for_object without SearchTerm should not raise."""
         produit = ProduitFactory(nom="Test Produit")
@@ -321,7 +306,6 @@ class TestEdgeCases:
         # Calling again should not raise
         SearchTerm.delete_for_object(synonyme)
 
-    @pytest.mark.django_db
     def test_search_term_legacy_flag_for_synonyme(self):
         """Synonyme should always have legacy=True on its SearchTerm."""
         produit = ProduitFactory(nom="Test Produit")
@@ -345,7 +329,6 @@ class TestEdgeCases:
         index_page.add_child(instance=produit_page)
         return produit_page
 
-    @pytest.mark.django_db
     def test_search_tag_legacy_flag_is_false(self, produit_page_for_edge_cases):
         """SearchTag should have legacy=False on its SearchTerm."""
         search_tag = SearchTag.objects.create(name="Non Legacy", slug="non-legacy")

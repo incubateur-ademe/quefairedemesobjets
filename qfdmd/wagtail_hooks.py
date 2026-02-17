@@ -5,10 +5,7 @@ from wagtail import hooks
 from wagtail.admin.action_menu import ActionMenuItem
 
 from qfdmd.models import ProduitPage
-from qfdmd.views import (
-    import_legacy_synonymes,
-    legacy_migrate,
-)
+from qfdmd.views import import_legacy_synonymes, legacy_migrate, ProduitsViewSetGroup
 
 
 @hooks.register("register_permissions")
@@ -85,8 +82,6 @@ def register_legacy_migrate_url():
 
 @hooks.register("register_admin_viewset")
 def register_produitpage_viewset():
-    from qfdmd.views import ProduitsViewSetGroup
-
     return ProduitsViewSetGroup()
 
 
