@@ -848,7 +848,7 @@ class FormPageValidationSettings(BaseGenericSetting):
     )
 
     panels = [
-        PageChooserPanel("form_page", "sites_faciles_forms.FormPage"),
+        PageChooserPanel("form_page", "sites_conformes_forms.FormPage"),
     ]
 
     class Meta:

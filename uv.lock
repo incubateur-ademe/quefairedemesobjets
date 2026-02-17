@@ -3133,7 +3133,7 @@ dependencies = [
     { name = "requests" },
     { name = "sentry-sdk" },
     { name = "shortuuid" },
-    { name = "sites-faciles-experiment" },
+    { name = "sites-conformes" },
     { name = "unidecode" },
     { name = "wagtail-honeypot" },
     { name = "whitenoise" },
@@ -3213,7 +3213,7 @@ requires-dist = [
     { name = "requests", specifier = ">=2.32.4,<3" },
     { name = "sentry-sdk", specifier = ">=2.37.0,<3" },
     { name = "shortuuid", specifier = ">=1.0.13,<2" },
-    { name = "sites-faciles-experiment", specifier = "~=2.1.0rc9" },
+    { name = "sites-conformes", specifier = ">=2.5.2rc1" },
     { name = "unidecode", specifier = ">=1.4.0,<2" },
     { name = "wagtail-honeypot", specifier = ">=1.2.1" },
     { name = "whitenoise", specifier = ">=6.8.2,<7" },
@@ -3629,8 +3629,8 @@ wheels = [
 ]
 
 [[package]]
-name = "sites-faciles-experiment"
-version = "2.1.0rc9"
+name = "sites-conformes"
+version = "2.5.2rc2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "beautifulsoup4" },
@@ -3654,9 +3654,9 @@ dependencies = [
     { name = "wagtail-modeladmin" },
     { name = "wagtailmenus" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/89/69/064d393f3109c97067180e62cca1358a318cadb608cd32f6fe7a08fa9cf9/sites_faciles_experiment-2.1.0rc9.tar.gz", hash = "sha256:103bb07afcc2575043ddfd2c646fdd3c93b996af5e177c03531c498861978c5b", size = 2576417, upload-time = "2025-09-29T12:17:32.042Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/26/2e/82554b70b88044ad351b4a4fefbc6a67aae278ef55a5172d52e27fe0fe6a/sites_conformes-2.5.2rc2.tar.gz", hash = "sha256:004c67a554ad955042740aca0dcedef6c714cbfbb3737af277b91d2f8c229c60", size = 7053763, upload-time = "2026-02-18T01:15:59.296Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/49/1f/48bf2e0786b50275bb76d0e3531dde305e43bf7681f1646adc5e68d5d88a/sites_faciles_experiment-2.1.0rc9-py3-none-any.whl", hash = "sha256:34fee07ec8543cb720829735d555c975be397ab949489626b974a11f1356ae14", size = 2877972, upload-time = "2025-09-29T12:17:30.004Z" },
+    { url = "https://files.pythonhosted.org/packages/44/18/0e73e885a20a30d17b7f2b38d2f633ed6b58db31cdca4d296990e1dd6052/sites_conformes-2.5.2rc2-py3-none-any.whl", hash = "sha256:51bd37f9d38285f2e8aabcfb32f303b43b4d9b5daed8f0605eee506261278adf", size = 7441270, upload-time = "2026-02-18T01:15:56.574Z" },
 ]
 
 [[package]]

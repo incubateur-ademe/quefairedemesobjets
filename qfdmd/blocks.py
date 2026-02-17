@@ -1,11 +1,11 @@
 import logging
 
 from django.utils.translation import gettext_lazy as _
-from sites_faciles.content_manager import blocks as sites_faciles_blocks
-from sites_faciles.content_manager.blocks import (
-    STREAMFIELD_COMMON_BLOCKS as SITES_FACILES_BLOCKS,
+from sites_conformes.content_manager import blocks as sites_conformes_blocks
+from sites_conformes.content_manager.blocks import (
+    STREAMFIELD_COMMON_BLOCKS as sites_conformes_BLOCKS,
 )
-from sites_faciles.content_manager.blocks import (
+from sites_conformes.content_manager.blocks import (
     CommonStreamBlock,
 )
 from wagtail import blocks
@@ -40,24 +40,24 @@ class CustomBlockMixin(CommonStreamBlock):
 
 
 class ColumnBlock(CustomBlockMixin):
-    card = sites_faciles_blocks.VerticalCardBlock(
+    card = sites_conformes_blocks.VerticalCardBlock(
         label=_("Vertical card"), group=_("DSFR components")
     )
-    contact_card = sites_faciles_blocks.VerticalContactCardBlock(
+    contact_card = sites_conformes_blocks.VerticalContactCardBlock(
         label=_("Contact card"), group=_("Extra components")
     )
 
 
-class TabBlock(sites_faciles_blocks.TabBlock):
+class TabBlock(sites_conformes_blocks.TabBlock):
     content = ColumnBlock(label=_("Content"))
 
 
-class TabsBlock(sites_faciles_blocks.TabsBlock):
+class TabsBlock(sites_conformes_blocks.TabsBlock):
     tabs = TabBlock(label=_("Tab"), minnum=1, max_num=15)
 
 
 STREAMFIELD_COMMON_BLOCKS = [
-    *SITES_FACILES_BLOCKS,
+    *sites_conformes_BLOCKS,
     (
         "carte_sur_mesure",
         SnippetChooserBlock(
