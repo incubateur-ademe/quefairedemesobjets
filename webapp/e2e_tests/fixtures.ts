@@ -1,5 +1,4 @@
 import { test as base, expect } from "@playwright/test"
-import crypto from "node:crypto"
 
 export const test = base.extend<{ forEachTest: void }>({
   forEachTest: [
@@ -7,8 +6,11 @@ export const test = base.extend<{ forEachTest: void }>({
       await use()
       const hasRegressionTag = testInfo.tags.includes("@regression")
       if (hasRegressionTag) {
-        const filename = crypto.hash("sha1", page.url())
-        await expect.soft(page).toHaveScreenshot(filename, { fullPage: true })
+        await expect
+          .soft(page)
+          .toHaveScreenshot(`${testInfo.titlePath}-${page.url()}.png`, {
+            fullPage: true,
+          })
       }
     },
     { auto: true },
