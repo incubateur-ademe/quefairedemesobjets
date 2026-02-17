@@ -7,9 +7,13 @@ dotenv.config({ path: path.resolve(__dirname, ".env") })
 
 const config: PlaywrightTestConfig = {
   ...baseConfig,
-  testIgnore: "",
   timeout: 1800_000,
-  testMatch: "*regression*",
+  grep: /@regression/,
+  use: {
+    ...baseConfig.use,
+    // Capture screenshot after each test.
+    screenshot: "on",
+  },
   expect: {
     toHaveScreenshot: {
       pathTemplate: `./${process.env.SCREENSHOTS_BASE_PATH || "__screenshots__"}/{testFilePath}/{arg}{ext}`,
