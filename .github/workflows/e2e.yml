@@ -83,8 +83,8 @@ jobs:
     with:
       ref: ${{ github.ref }}
       update_snapshots: true
-      upload_screenshots: true
       download_screenshots: false
+      upload_screenshots: true
     permissions:
       contents: read
 
@@ -95,9 +95,8 @@ jobs:
     with:
       ref: main
       regression_only: true
-      update_snapshots: false
-      upload_screenshots: true
       download_screenshots: true
+      upload_screenshots: true
     permissions:
       contents: read
 
