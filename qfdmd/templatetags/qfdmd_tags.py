@@ -6,12 +6,9 @@ from django.core.cache import cache
 from django.forms import FileField
 from django.utils.safestring import mark_safe
 from wagtail.models import Page
-from wagtail.templatetags.wagtailcore_tags import richtext
-
-from qfdmd.models import ReusableContent
-from search.models import SearchTerm
 
 from search.models import SearchTerm
+
 
 register = template.Library()
 
@@ -38,8 +35,6 @@ def get_search_term_name(context):
         return search_term.term
     except (SearchTerm.DoesNotExist, ValueError):
         return None
-
-
 
 
 @register.inclusion_tag("ui/components/patchwork/patchwork.html")
