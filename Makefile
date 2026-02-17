@@ -10,6 +10,8 @@ DJANGO_ADMIN := $(PYTHON) manage.py
 PYTEST := uv run pytest
 HONCHO := uv run honcho
 DB_URL := postgres://webapp:webapp@localhost:6543/webapp# pragma: allowlist secret
+SAMPLE_DB_URL ?= $(if $(SAMPLE_DATABASE_URL),$(SAMPLE_DATABASE_URL),$(DB_URL))
+SAMPLE_DUMP_FILE ?= tmpbackup-sample/sample.custom
 BASE_DOMAIN := quefairedemesdechets.ademe.local
 FIXTURES_OPTIONS := --indent 4 --natural-foreign --natural-primary
 
@@ -97,6 +99,10 @@ makemigrations:
 merge-migrations:
 	$(DJANGO_ADMIN) makemigrations --merge
 
+.PHONY: rebuild-search-index
+rebuild-search-index:
+	$(DJANGO_ADMIN) rebuild_modelsearch_index
+
 
 .PHONY: createcachetable
 createcachetable:
@@ -138,7 +144,7 @@ generate-fixtures:
 	$(DJANGO_ADMIN) dumpdata qfdmo.labelqualite $(FIXTURES_OPTIONS) -o qfdmo/fixtures/labels.json
 	$(DJANGO_ADMIN) dumpdata qfdmo.source $(FIXTURES_OPTIONS) -o qfdmo/fixtures/sources.json
 	$(DJANGO_ADMIN) dumpdata qfdmo.carteconfig qfdmo.groupeactionconfig $(FIXTURES_OPTIONS) -o qfdmo/fixtures/carte_configs.json
-	$(DJANGO_ADMIN) dumpdata qfdmd.synonyme $(FIXTURES_OPTIONS) -o qfdmd/fixtures/synonymes.json
+	$(DJANGO_ADMIN) dumpdata search.searchterm qfdmd.synonyme $(FIXTURES_OPTIONS) -o qfdmd/fixtures/synonymes.json
 	$(DJANGO_ADMIN) dumpdata qfdmd.produit $(FIXTURES_OPTIONS) -o qfdmd/fixtures/produits.json
 
 .PHONY: clear-cache
@@ -211,9 +217,26 @@ drop-schema-public:
 	psql -d '$(DB_URL)' -c "DROP SCHEMA IF EXISTS public CASCADE;"
 
 .SILENT:
+.PHONY: drop-schema-public-sample
+drop-schema-public-sample:
+	psql -d '$(SAMPLE_DB_URL)' -c "DROP SCHEMA IF EXISTS public CASCADE;"
+
+.SILENT:
 .PHONY: create-schema-public
 create-schema-public:
 	psql -d '$(DB_URL)' -c "CREATE SCHEMA IF NOT EXISTS public;"
+
+.SILENT:
+.PHONY: create-schema-public-sample
+create-schema-public-sample:
+	psql -d '$(SAMPLE_DB_URL)' -c "CREATE SCHEMA IF NOT EXISTS public;"
+
+
+.SILENT:
+.PHONY: create-db-extensions
+create-extensions:
+	@echo "Creating required extensions"
+	psql -d '$(DB_URL)' -f scripts/sql/create_extensions.sql
 
 .PHONY: psql
 psql:
@@ -231,9 +254,12 @@ dump-preprod:
 dump-prod-quiet:
 	sh scripts/infrastructure/backup-db.sh --quiet
 
-# We need to create extensions because they are not restored by pg_restore
-.PHONY: create-sql-extensions
-create_sql_extensions:
+.PHONY: dump-sample
+dump-sample:
+	@[ -n "$(REMOTE_SAMPLE_DATABASE_URL)" ] || { echo "REMOTE_SAMPLE_DATABASE_URL is not set"; exit 1; }
+	mkdir -p $(dir $(SAMPLE_DUMP_FILE))
+	pg_dump --format=custom --no-acl --no-owner --no-privileges "$(REMOTE_SAMPLE_DATABASE_URL)" --file="$(SAMPLE_DUMP_FILE)"
+
 
 .SILENT:
 .PHONY: load-prod-dump
@@ -248,6 +274,15 @@ load-preprod-dump:
 	@DUMP_FILE=$$(find tmpbackup-preprod -type f -name "*.custom" -print -quit); \
 	psql -d '$(DB_URL)' -f scripts/sql/create_extensions.sql && \
 	pg_restore -d '$(DB_URL)' --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
+
+.SILENT:
+.PHONY: load-sample-dump
+load-sample-dump:
+	@DUMP_FILE=$(SAMPLE_DUMP_FILE); \
+	[ -f "$$DUMP_FILE" ] || DUMP_FILE=$$(find tmpbackup-sample -type f -name "*.custom" -print -quit); \
+	[ -n "$$DUMP_FILE" ] || { echo "No sample dump found"; exit 1; }; \
+	psql -d '$(SAMPLE_DB_URL)' -f scripts/sql/create_extensions.sql && \
+	pg_restore -d '$(SAMPLE_DB_URL)' --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
 
 .PHONY: db-restore-local-from-prod
 db-restore-local-from-prod:
@@ -272,6 +307,16 @@ db-restore-preprod-from-prod:
 	make dump-prod-quiet
 	make drop-all-tables
 	make load-prod-dump
+
+.PHONY: db-restore-local-from-sample
+db-restore-local-from-sample:
+	make dump-sample
+	make drop-schema-public-sample
+	make create-schema-public-sample
+	make load-sample-dump
+# .PHONY: db-restore-sample-locally
+# db-restore-sample-locally:
+# 	sh scripts/restore_sample_locally.sh
 
 .PHONY: db-restore-local-for-tests
 db-restore-local-for-tests:

@@ -146,6 +146,7 @@ INSTALLED_APPS = [
     "colorfield",
     "core",
     "stats",
+    "search",
     "qfdmd",
     "qfdmo",
     "infotri",
@@ -507,10 +508,13 @@ SILENCED_SYSTEM_CHECKS = ["wagtailadmin.W002"]
 HOST_PROTO = decouple.config("HOST_PROTO", default="https")
 WAGTAIL_SITE_NAME = "Longue vie aux objets"
 WAGTAILADMIN_BASE_URL = BASE_URL
-WAGTAIL_SEARCH_BACKENDS = {
+MODELSEARCH_BACKENDS = {
     "default": {
-        "BACKEND": "wagtail.search.backends.database",
+        "BACKEND": "modelsearch.backends.database",
         "SEARCH_CONFIG": "wagtail_french",
+        "FUZZY_ALGORITHM": "trigram",
+        "FUZZY_SIMILARITY_THRESHOLD": 0.2,
+        "FUZZY_PREFIX_BOOST": 0.5,
     }
 }
 
@@ -536,7 +540,7 @@ INSTALLED_APPS.extend(
         "wagtail.snippets",
         "wagtail.documents",
         "wagtail.images",
-        "wagtail.search",
+        "modelsearch",
         "wagtail.admin",
         "wagtail.contrib.typed_table_block",
         "wagtail",
