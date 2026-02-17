@@ -302,6 +302,14 @@ def serialize_suggestion_groupe(
             "parent_revision_acteur": value_to_display,
         }
     """
+
+    if suggestion_groupe.suggestion_cohorte.type_action not in [
+        SuggestionAction.SOURCE_AJOUT,
+        SuggestionAction.SOURCE_MODIFICATION,
+        SuggestionAction.SOURCE_SUPPRESSION,
+    ]:
+        return {"suggestion_groupe": suggestion_groupe}
+
     # Get all suggestion_unitaires
     suggestion_unitaires = list(suggestion_groupe.suggestion_unitaires.all())
     # Flatten and convert to SuggestionSourceModel

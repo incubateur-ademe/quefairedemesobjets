@@ -1223,6 +1223,13 @@ class FinalActeurManager(models.Manager):
             source_id__isnull=True,
         )
 
+    def get_visible_acteurs(self):
+        return (
+            self.get_queryset()
+            .filter(statut=ActeurStatus.ACTIF)
+            .filter(Q(est_dans_carte=True) | Q(est_dans_opendata=True))
+        )
+
 
 class DisplayedActeurManager(FinalActeurManager, models.Manager):
     def get_queryset(self):

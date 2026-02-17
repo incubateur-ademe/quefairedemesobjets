@@ -10,7 +10,8 @@ class COLS:
     # which gets renamed to below during pipeline
     # to be more explicit and distinguish vs. all
     # other URL fields
-    URL_ORIGIN: str = "url_origin"
+    URL_ORIGIN: str = "url"
+    COUNT: str = "count"
     URL_HTTPS: str = "url_is_https_version"
     URLS_TO_TRY: str = "urls_to_try"
     URLS_RESULTS: str = "urls_results"

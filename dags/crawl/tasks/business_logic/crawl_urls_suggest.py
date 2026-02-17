@@ -4,11 +4,7 @@ import pandas as pd
 from crawl.config.columns import COLS
 from crawl.config.constants import LABEL_URL_ORIGINE, LABEL_URL_PROPOSEE
 from utils import logging_utils as log
-from utils.dataframes import (
-    df_col_assert_get_unique,
-    df_col_count_lists,
-    df_none_or_empty,
-)
+from utils.dataframes import df_col_assert_get_unique, df_none_or_empty
 from utils.django import django_setup_full
 
 logger = logging.getLogger(__name__)
@@ -24,7 +20,7 @@ def suggestions_metadata(
     cohort = df[COLS.COHORT].iloc[0]
 
     meta[f"{cohort}: # URLs"] = len(df)
-    meta[f"{cohort}: # Acteurs"] = df_col_count_lists(df=df, col=COLS.ACTEURS)
+    meta[f"{cohort}: # Acteurs"] = df[COLS.COUNT].sum()
 
     df_meta = pd.DataFrame(list(meta.items()), columns=["Cas de figure", "Nombre"])
     logger.info(f"Metadata de la cohorte {cohort}:")
@@ -129,28 +125,80 @@ def crawl_urls_suggestions_to_db(
 
 def crawl_urls_suggest(
     df: pd.DataFrame, dag_display_name: str, run_id: str, dry_run: bool = True
-) -> int:
+):
     """Main function to generate suggestions for URLs"""
+
+    from data.models.suggestion import (
+        SuggestionAction,
+        SuggestionCohorte,
+        SuggestionGroupe,
+        SuggestionUnitaire,
+    )
+    from qfdmo.models.acteur import Acteur, RevisionActeur
+
     if df_none_or_empty(df):
         raise ValueError("DF vide ou None on devrait pas être là")
 
-    cohort = df_col_assert_get_unique(df, COLS.COHORT)
+    cohort_label = df_col_assert_get_unique(df, COLS.COHORT)
 
     log.preview_df_as_markdown("df d'entrée", df)
 
+    # 1. Create a SuggestionCohorte (same as today)
+    identifiant_action = f"{dag_display_name} - {cohort_label}"
+    identifiant_execution = f"{run_id}"
     metadata = suggestions_metadata(df)
-    suggestions = suggestions_prepare(df)
-    written_to_db_count = 0
+    logging.warning(f"{identifiant_action=}")
+    logging.warning(f"{identifiant_execution=}")
+    logging.warning(f"{SuggestionAction.CRAWL_URLS=}")
+    logging.warning(f"{metadata=}")
 
-    logger.info(log.banner_string("✍️ Ecritures en DB"))
-    if dry_run:
-        logger.info(f"{dry_run=}, on ne fait pas")
-    else:
-        crawl_urls_suggestions_to_db(
-            metadata=metadata,
-            suggestions=suggestions,
-            identifiant_action=f"{dag_display_name} - {cohort}",
-            identifiant_execution=f"{run_id}",
+    metadata = {}
+    cohort = SuggestionCohorte(
+        identifiant_action=identifiant_action,
+        identifiant_execution=identifiant_execution,
+        type_action=SuggestionAction.CRAWL_URLS,
+        metadata={k: v for k, v in metadata.items()},
+    )
+    cohort.save()
+
+    # 2. Create a SuggestionGroupe by url to update
+
+    for _, row in df.iterrows():
+        suggestion_groupe = SuggestionGroupe(
+            suggestion_cohorte=cohort,
+            contexte={
+                COLS.URL_ORIGIN: row[COLS.URL_ORIGIN],
+                COLS.SUGGEST_VALUE: row[COLS.SUGGEST_VALUE],
+            },
+            metadata={
+                "nb d'acteurs impactés": row[COLS.COUNT],
+            },
         )
-        written_to_db_count = len(suggestions)
-    return written_to_db_count
+        suggestion_groupe.save()
+
+        # 3. Create a SuggestionUnitaire by acteur/revision to update
+
+        # get all acteur without revision
+        revision_acteurs = RevisionActeur.objects.filter(url=row[COLS.URL_ORIGIN])
+        for revision_acteur in revision_acteurs:
+            SuggestionUnitaire(
+                suggestion_groupe=suggestion_groupe,
+                revision_acteur=revision_acteur,
+                suggestion_modele="RevisionActeur",
+                champs=[COLS.URL_ORIGIN],
+                valeurs=[row[COLS.SUGGEST_VALUE]],
+            ).save()
+        acteurs = Acteur.objects.filter(url=row[COLS.URL_ORIGIN])
+        for acteur in acteurs:
+            # Check that url is not overridden by a revision
+            revision = RevisionActeur.objects.filter(
+                identifiant_unique=acteur.identifiant_unique
+            ).first()
+            if revision and not revision.url:
+                SuggestionUnitaire(
+                    suggestion_groupe=suggestion_groupe,
+                    acteur=acteur,
+                    suggestion_modele="Acteur",
+                    champs=[COLS.URL_ORIGIN],
+                    valeurs=[row[COLS.SUGGEST_VALUE]],
+                ).save()
