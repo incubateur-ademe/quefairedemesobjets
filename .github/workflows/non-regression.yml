@@ -41,7 +41,7 @@ jobs:
       github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       pull-requests: write
 
     steps:
@@ -51,10 +51,30 @@ jobs:
           name: playwright-diffs
           path: diffs
 
+      - name: Push images to artifact branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          BRANCH="regression-artifacts/pr-${{ github.event.pull_request.number }}"
+          REPO="https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
+
+          git init temp-repo
+          cd temp-repo
+          git checkout --orphan "$BRANCH"
+          cp -r ../diffs .
+          git add diffs
+          git -c user.name="github-actions" -c user.email="actions@github.com" \
+            commit -m "Visual regression diffs for ${{ github.event.pull_request.head.sha }}"
+          git push "$REPO" "$BRANCH" --force
+          cd ..
+
       - name: Build PR comment body
         id: body
         shell: bash
         run: |
+          BRANCH="regression-artifacts/pr-${{ github.event.pull_request.number }}"
+          BASE_URL="https://raw.githubusercontent.com/${{ github.repository }}/${BRANCH}"
+
           echo "body<<EOF" >> $GITHUB_OUTPUT
           echo "## ❌ Visual regression detected" >> $GITHUB_OUTPUT
           echo "" >> $GITHUB_OUTPUT
@@ -64,7 +84,7 @@ jobs:
           for expected in $(find diffs -name '*-expected.png'); do
             actual="${expected/-expected/-actual}"
             diff="${expected/-expected/-diff}"
-            echo "| ![]($expected) | ![]($actual) | ![]($diff) |" >> $GITHUB_OUTPUT
+            echo "| ![]($BASE_URL/$expected) | ![]($BASE_URL/$actual) | ![]($BASE_URL/$diff) |" >> $GITHUB_OUTPUT
           done
 
           echo "" >> $GITHUB_OUTPUT
