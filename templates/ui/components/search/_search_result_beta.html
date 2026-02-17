@@ -1,5 +1,0 @@
-{% extends "./_search_result.html" %}
-
-{% block href %}{{ result.url }}{% endblock %}
-
-{% block nom %}<div class="qf-flex qf-justify-between qf-pr-2w">{{ result.title }} <span class="qf-ml-auto qf-text-green-menthe-sun-373-moon-652">{{ result.famille|default_if_none:"" }}</span></div>{% endblock %}

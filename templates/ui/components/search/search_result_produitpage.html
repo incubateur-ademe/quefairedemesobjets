@@ -1,0 +1,10 @@
+{% extends "./search_result.html" %}
+{% load wagtailcore_tags %}
+
+{% block href %}{% pageurl result %}{% endblock %}
+
+{% block nom %}
+<div class="qf-flex qf-justify-between qf-pr-2w">
+    {{ result.titre_phrase|capfirst }}
+</div>
+{% endblock %}
