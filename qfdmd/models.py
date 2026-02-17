@@ -251,7 +251,13 @@ class ProduitPage(
     GenreNombreModel,
     TitleFields,
 ):
-    template = "ui/pages/produit_page.html"
+    search_result_template = "ui/components/search/search_result_produitpage.html"
+
+    def get_template(self, request, *args, **kwargs):
+        if self.est_famille:
+            return "ui/pages/family_page.html"
+        return "ui/pages/produit_page.html"
+
     subpage_types = ["qfdmd.produitpage"]
     parent_page_types = [
         "qfdmd.produitindexpage",
@@ -402,20 +408,12 @@ class ProduitPage(
         ),
     ]
 
-    class _MigrationObjectList(ObjectList):
-        class BoundPanel(ObjectList.BoundPanel):
-            def is_shown(self):
-                # return True
-                if getattr(self.instance, "migree_depuis_synonymes_legacy", False):
-                    return False
-                return super().is_shown()
-
     edit_handler = TabbedInterface(
         [
             ObjectList(content_panels, heading="Contenu"),
             ObjectList(config_panels, heading="Configuration"),
             ObjectList(search_panels, heading="Recherche"),
-            _MigrationObjectList(migration_panels, heading="Migration"),
+            ObjectList(migration_panels, heading="Migration"),
             ObjectList(Page.promote_panels, heading="Promotion (SEO)"),
             ObjectList(Page.settings_panels, heading="Paramètres"),
         ],
@@ -479,13 +477,6 @@ class ProduitPage(
             produit_page=self,
             defaults={"searchable_title": self.titre_phrase or self.title},
         )
-
-    search_result_template = "ui/components/search/search_result_produitpage.html"
-
-    def get_template(self, request, *args, **kwargs):
-        if self.est_famille:
-            return "ui/pages/family_page.html"
-        return "ui/pages/produit_page.html"
 
     class Meta:
         verbose_name = "Produit"

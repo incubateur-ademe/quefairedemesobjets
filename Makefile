@@ -281,9 +281,12 @@ db-restore-preprod-from-prod:
 	make drop-all-tables
 	make load-prod-dump
 
-.PHONY: db-restore-sample-locally
-db-restore-sample-locally:
-	sh scripts/restore_sample_locally.sh
+.PHONY: db-restore-local-from-sample
+db-restore-local-from-sample:
+	make dump-sample
+# .PHONY: db-restore-sample-locally
+# db-restore-sample-locally:
+# 	sh scripts/restore_sample_locally.sh
 
 .PHONY: db-restore-local-for-tests
 db-restore-local-for-tests:
