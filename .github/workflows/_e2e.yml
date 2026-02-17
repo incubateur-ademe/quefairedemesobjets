@@ -78,6 +78,7 @@ jobs:
 
       - name: Overlay regression test files
         run: |
+          shopt -s dotglob
           cp -r __regression_tests__/* .
           rm -rf __regression_tests__
 

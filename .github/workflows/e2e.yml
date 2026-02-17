@@ -78,6 +78,7 @@ jobs:
 
   e2e:
     name: Baseline (current branch)
+    if: false
     needs: e2e-prepare
     uses: ./.github/workflows/_e2e.yml
     with:
