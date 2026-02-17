@@ -154,10 +154,10 @@ jobs:
           RAW_BASE="https://raw.githubusercontent.com/${REPO}/${BRANCH}"
 
           {
-            echo "## Visual regression detected"
+            echo "## Régression détectée"
             echo ""
-            echo "| Test | Expected | Actual | Diff |"
-            echo "|------|----------|--------|------|"
+            echo "| Test | Avant (main) | Après (PR) | Diff |"
+            echo "|------|--------------|------------|------|"
 
             for expected in $(find diffs -name '*-expected.png' | sort); do
               actual="${expected/-expected/-actual}"
@@ -166,7 +166,7 @@ jobs:
               dir_name=$(basename "$(dirname "$expected")")
               test_name=$(echo "$dir_name" | sed 's/-chromium.*//;s/-/ /g')
 
-              echo "| ${test_name} | ![expected](${RAW_BASE}/${expected}) | ![actual](${RAW_BASE}/${actual}) | ![diff](${RAW_BASE}/${diff}) |"
+              echo "| ${test_name} | ![avant](${RAW_BASE}/${actual}) | ![après](${RAW_BASE}/${expected}) | ![diff](${RAW_BASE}/${diff}) |"
             done
 
             echo ""
