@@ -4,6 +4,11 @@ from django.conf import settings
 from django.views.generic import FormView
 
 from core.views import static_file_content_from
+from infotri.constants import (
+    CATEGORIE_SVG_TEMPLATES,
+    CONSIGNE_SVG_TEMPLATES,
+    PHRASE_SVG_TEMPLATES,
+)
 from infotri.forms import InfotriForm
 
 
@@ -36,6 +41,9 @@ class InfotriConfiguratorView(FormView):
         context = super().get_context_data(**kwargs)
         context["base_url"] = settings.BASE_URL
         context["show_code"] = self.request.GET.get("show_code") == "true"
+        context["categorie_svg_templates"] = CATEGORIE_SVG_TEMPLATES
+        context["consigne_svg_templates"] = CONSIGNE_SVG_TEMPLATES
+        context["phrase_svg_templates"] = PHRASE_SVG_TEMPLATES
         return context
 
     def form_valid(self, form):

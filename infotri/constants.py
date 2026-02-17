@@ -8,6 +8,14 @@ CATEGORIE_CHOICES = [
     ("chaussures", "Chaussures"),
 ]
 
+# Maps each categorie value to its SVG template path
+CATEGORIE_SVG_TEMPLATES = {
+    "tous": "ui/components/infotri/svg/tous.html",
+    "textile": "ui/components/infotri/svg/textile.html",
+    "vetement": "ui/components/infotri/svg/linge.html",
+    "chaussures": "ui/components/infotri/svg/chaussures.html",
+}
+
 # Consigne choices
 CONSIGNE_CHOICES = [
     ("1", "À déposer dans un conteneur"),
@@ -18,3 +26,17 @@ CONSIGNE_CHOICES = [
         " un magasin volontaire",
     ),
 ]
+
+# Maps each consigne value to its SVG template path
+CONSIGNE_SVG_TEMPLATES = {
+    "1": "ui/components/infotri/svg/consigne-1.html",
+    "2": "ui/components/infotri/svg/consigne-2.html",
+    "3": "ui/components/infotri/svg/consigne-3.html",
+}
+
+# Maps each consigne value to its phrase SVG template path
+PHRASE_SVG_TEMPLATES = {
+    "1": "ui/components/infotri/svg/phrase-1.html",
+    "2": "ui/components/infotri/svg/phrase-2.html",
+    "3": "ui/components/infotri/svg/phrase-3.html",
+}
