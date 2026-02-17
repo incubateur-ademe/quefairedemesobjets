@@ -40,7 +40,7 @@ jobs:
       tag_name: pr-${{ github.event.pull_request.number }}
 
   e2e:
-    name: 🧩 E2E
+    name: 🪤 E2E
     uses: ./.github/workflows/e2e.yml
     secrets: inherit #pragma: allowlist secret
 
