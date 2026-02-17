@@ -4,6 +4,12 @@ import crypto from "node:crypto"
 import fs from "node:fs"
 import path from "node:path"
 
+interface PageResult {
+  url: string
+  status?: number
+  errors: string[]
+}
+
 const urlsToTest = ["https://google.fr"]
 
 test("Les pages et composants n'ont pas changé", async ({ page }) => {
@@ -17,22 +23,48 @@ test("Les pages et composants n'ont pas changé", async ({ page }) => {
     }
   }
 
-  const errors: Error[] = []
-  const sha1ToUrl: Record<string, string> = {}
+  const manifest: Record<string, PageResult> = {}
+  let hasErrors = false
 
   for (const pageToTest of urlsToTest) {
-    await navigateTo(page, pageToTest)
     const filename = crypto.hash("sha1", pageToTest)
-    sha1ToUrl[filename] = pageToTest
-    const screenshotPath = `${filename}.png`
-    await page.waitForTimeout(2000)
+    const result: PageResult = { url: pageToTest, errors: [] }
+
     try {
-      await expect(page).toHaveScreenshot(screenshotPath, { fullPage: true })
+      const response = await page.goto(pageToTest, { waitUntil: "domcontentloaded" })
+      result.status = response?.status()
+
+      if (result.status !== 200) {
+        result.errors.push(`HTTP ${result.status}`)
+        hasErrors = true
+        manifest[filename] = result
+        continue
+      }
+
+      await page.waitForTimeout(2000)
+
+      try {
+        await expect(page).toHaveScreenshot(`${filename}.png`, { fullPage: true })
+      } catch (e) {
+        result.errors.push("screenshot_mismatch")
+        hasErrors = true
+      }
     } catch (e) {
-      errors.push(e)
+      result.errors.push(`navigation_error: ${(e as Error).message}`)
+      hasErrors = true
     }
+
+    manifest[filename] = result
   }
 
-  const mappingPath = path.join(process.cwd(), "manifest.json")
-  fs.writeFileSync(mappingPath, JSON.stringify(sha1ToUrl, null, 2))
+  const mappingPath = path.join(process.cwd(), "__regression_manifest.json")
+  fs.writeFileSync(mappingPath, JSON.stringify(manifest, null, 2))
+
+  expect(
+    hasErrors,
+    `Regression errors detected:\n${Object.values(manifest)
+      .filter((r) => r.errors.length > 0)
+      .map((r) => `  ${r.url}: ${r.errors.join(", ")}`)
+      .join("\n")}`,
+  ).toBe(false)
 })

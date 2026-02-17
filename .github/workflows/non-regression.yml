@@ -74,12 +74,36 @@ jobs:
         run: |
           BRANCH="regression-artifacts/pr-${{ github.event.pull_request.number }}"
           BASE_URL="https://raw.githubusercontent.com/${{ github.repository }}/${BRANCH}"
-          MAPPING="diffs/manifest.json"
+          MAPPING="diffs/__regression_manifest.json"
 
           echo "body<<EOF" >> $GITHUB_OUTPUT
           echo "## ❌ Visual regression detected" >> $GITHUB_OUTPUT
           echo "" >> $GITHUB_OUTPUT
 
+          # Report HTTP errors from manifest
+          if [ -f "$MAPPING" ]; then
+            http_errors=$(jq -r 'to_entries[] | select(.value.errors[] | startswith("HTTP")) | "\(.value.url): \(.value.errors | join(", "))"' "$MAPPING")
+            if [ -n "$http_errors" ]; then
+              echo "### HTTP errors" >> $GITHUB_OUTPUT
+              echo "" >> $GITHUB_OUTPUT
+              echo '```' >> $GITHUB_OUTPUT
+              echo "$http_errors" >> $GITHUB_OUTPUT
+              echo '```' >> $GITHUB_OUTPUT
+              echo "" >> $GITHUB_OUTPUT
+            fi
+
+            nav_errors=$(jq -r 'to_entries[] | select(.value.errors[] | startswith("navigation_error")) | "\(.value.url): \(.value.errors | join(", "))"' "$MAPPING")
+            if [ -n "$nav_errors" ]; then
+              echo "### Navigation errors" >> $GITHUB_OUTPUT
+              echo "" >> $GITHUB_OUTPUT
+              echo '```' >> $GITHUB_OUTPUT
+              echo "$nav_errors" >> $GITHUB_OUTPUT
+              echo '```' >> $GITHUB_OUTPUT
+              echo "" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+          # Report screenshot diffs
           for expected in $(find diffs -name '*-expected.png'); do
             actual="${expected/-expected/-actual}"
             diff="${expected/-expected/-diff}"
@@ -88,7 +112,7 @@ jobs:
             sha1=$(basename "$expected" | sed 's/-expected\.png$//')
             url=""
             if [ -f "$MAPPING" ]; then
-              url=$(jq -r --arg k "$sha1" '.[$k] // empty' "$MAPPING")
+              url=$(jq -r --arg k "$sha1" '.[$k].url // empty' "$MAPPING")
             fi
 
             if [ -n "$url" ]; then

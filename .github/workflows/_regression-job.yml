@@ -35,6 +35,7 @@ env:
 jobs:
   regression:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
 
     services:
       postgres:
@@ -157,7 +158,7 @@ jobs:
             **/*-expected.png
             **/*-actual.png
             **/*-diff.png
-            manifest.json
+            __regression_manifest.json
 
 permissions:
   contents: read

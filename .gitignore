@@ -22,3 +22,4 @@ _build
 
 tmpbackup*
 __screenshots__
+__regression_manifest.json
