@@ -1,0 +1,141 @@
+name: End to end test job
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        required: true
+        type: string
+      upload_screenshots:
+        required: true
+        type: boolean
+      download_screenshots:
+        required: true
+        type: boolean
+
+env:
+  PGHOST: localhost
+  PGPORT: 5432
+  PGUSER: webapp
+  PGPASSWORD: webapp # pragma: allowlist secret
+  PGDATABASE: webapp
+  UV_PROJECT_ENVIRONMENT: .venv
+  BASE_URL: http://localhost:8000
+  DATABASE_URL: postgres://webapp:webapp@localhost:5432/webapp # pragma: allowlist secret
+  SECRET_KEY: coucou # pragma: allowlist secret
+  CI: true
+  SCREENSHOTS_BASE_PATH: __screenshots__
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5]
+
+    services:
+      postgres:
+        image: postgis/postgis:15-3.3-alpine
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 1s
+          --health-timeout 1s
+          --health-retries 50
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: webapp
+          POSTGRES_PASSWORD: webapp # pragma: allowlist secret
+          POSTGRES_DB: webapp
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref }}
+      # The regression test files and GitHub actions may not exist on the
+      # checked-out ref (e.g. main). We sparse-checkout them from the PR branch
+      # and overlay them onto the working tree so both baseline and compare jobs
+      # use the same test definitions and action definitions.
+      - name: Checkout regression test files from PR branch
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref }}
+          sparse-checkout: |
+            playwright.config.ts
+            e2e_tests
+            .github
+          sparse-checkout-cone-mode: false
+          path: __regression_tests__
+
+      - name: Overlay regression test files
+        run: |
+          cp -r __regression_tests__/* .
+          rm -rf __regression_tests__
+
+      - name: Setup E2E tools
+        uses: ./.github/actions/setup-e2e-tools
+        with:
+          build-frontend: "true"
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v7
+        with:
+          name: e2e-build-artifacts
+
+      - name: Restore Django database
+        uses: ./.github/actions/pg-restore
+        with:
+          database-url: ${{ env.DATABASE_URL }}
+          dump-path: database-dump.pgdump
+
+      - name: Start Django server
+        uses: ./.github/actions/start-django-server
+
+      - name: Download baseline screenshots
+        if: inputs.download_screenshots
+        uses: actions/download-artifact@v4
+        with:
+          name: regression-screenshots
+          path: ${{ env.SCREENSHOTS_BASE_PATH }}
+
+      - name: Run Playwright tests
+        run: npx playwright test --shard=${{ matrix.shard }}/5 --update-snapshots
+
+      - name: Upload baseline screenshots
+        if: inputs.upload_screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-screenshots
+          path: ${{ env.SCREENSHOTS_BASE_PATH }}
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v6
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report-${{ matrix.shard }}
+          path: playwright-report/
+          retention-days: 2
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v6
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-results-${{ matrix.shard }}
+          path: test-results/
+          retention-days: 2
+
+      - name: Upload Playwright diffs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-diffs
+          path: |
+            **/*-expected.png
+            **/*-actual.png
+            **/*-diff.png
+
+permissions:
+  contents: read
