@@ -33,7 +33,7 @@ env:
   SCREENSHOTS_BASE_PATH: __screenshots__
 
 jobs:
-  regression:
+  end-to-end:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:
