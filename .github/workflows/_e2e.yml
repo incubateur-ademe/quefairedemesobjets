@@ -34,7 +34,7 @@ env:
 
 jobs:
   end-to-end:
-    name: 🪤 Tests end-to-end
+    name: Playwright
     runs-on: ubuntu-latest
     timeout-minutes: 60
     # strategy:
@@ -72,9 +72,8 @@ jobs:
           ref: ${{ github.ref }}
           sparse-checkout: |
             playwright.config.ts
-            e2e_tests
-            .github
-          sparse-checkout-cone-mode: false
+            e2e_tests/
+            .github/
           path: __regression_tests__
 
       - name: Overlay regression test files
