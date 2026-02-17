@@ -10,10 +10,10 @@
 {% block content %}
 <turbo-frame
     id="infotri-form"
-    class="qf-grid qf-min-h-screen {% if not iframe %}qf-w-screen{% endif %} qf-grid-cols-1 md:qf-grid-cols-3
+    class="qf-flex qf-flex-col md:qf-flex-row qf-min-h-screen {% if not iframe %}qf-w-screen{% endif %}
     {% if iframe %}qf-rounded-lg !qf-border-2 !qf-border-solid !qf-border-grey-900 {% endif %}"
 >
-    <main class="qf-flex qf-flex-col qf-items-start qf-gap-2w qf-p-2w md:qf-col-span-2">
+    <main class="qf-flex qf-flex-1 qf-min-w-0 qf-flex-col qf-items-start qf-gap-2w qf-p-2w">
         <h1 class="qf-mb-1w qf-text-2xl qf-leading-none qf-font-extrabold qf-tracking-tight qf-text-gray-900 md:qf-text-3xl lg:qf-text-4xl">
             Concevez facilement votre Info-tri
         </h1>
@@ -98,8 +98,8 @@
             {% endif %}
     </main>
 
-    <aside class="qf-flex qf-flex-col md:qf-sticky md:qf-top-0">
-        <div class="qf-flex qf-items-center qf-justify-center qf-h-full qf-p-4w">
+    <aside class="qf-flex qf-flex-col qf-shrink-0 md:qf-sticky md:qf-top-0">
+        <div class="qf-flex qf-items-center qf-justify-end qf-h-full qf-p-4w">
             <div class="qf-bg-white qf-shadow-lg qf-p-3w">
                 {% include "ui/components/infotri/infotri.html" %}
             </div>
