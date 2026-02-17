@@ -185,6 +185,7 @@ jobs:
     uses: ./.github/workflows/_e2e.yml
     with:
       ref: main
+      regression_only: true
       update_snapshots: true
       upload_screenshots: true
       download_screenshots: false
