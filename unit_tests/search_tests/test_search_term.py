@@ -28,14 +28,13 @@ def produit_page():
     return page
 
 
+@pytest.mark.django_db
 class TestSynonymeCreatesSearchTerm:
-    @pytest.mark.django_db
     def test_creating_synonyme_creates_search_term(self, produit):
         synonyme = Synonyme.objects.create(nom="Lave-linge", produit=produit)
 
         assert SearchTerm.objects.filter(pk=synonyme.searchterm_ptr_id).exists()
 
-    @pytest.mark.django_db
     def test_updating_synonyme_preserves_search_term(self, produit):
         synonyme = Synonyme.objects.create(nom="Lave-linge", produit=produit)
         original_ptr_id = synonyme.searchterm_ptr_id
@@ -47,7 +46,6 @@ class TestSynonymeCreatesSearchTerm:
         assert synonyme.searchterm_ptr_id == original_ptr_id
         assert SearchTerm.objects.filter(pk=original_ptr_id).exists()
 
-    @pytest.mark.django_db
     def test_deleting_synonyme_removes_search_term(self, produit):
         synonyme = Synonyme.objects.create(nom="Lave-linge", produit=produit)
         ptr_id = synonyme.searchterm_ptr_id
@@ -57,14 +55,13 @@ class TestSynonymeCreatesSearchTerm:
         assert not SearchTerm.objects.filter(pk=ptr_id).exists()
 
 
+@pytest.mark.django_db
 class TestSearchTagCreatesSearchTerm:
-    @pytest.mark.django_db
     def test_creating_search_tag_creates_search_term(self):
         tag = SearchTag.objects.create(name="réfrigérateur", slug="refrigerateur")
 
         assert SearchTerm.objects.filter(pk=tag.searchterm_ptr_id).exists()
 
-    @pytest.mark.django_db
     def test_updating_search_tag_preserves_search_term(self):
         tag = SearchTag.objects.create(name="réfrigérateur", slug="refrigerateur")
         original_ptr_id = tag.searchterm_ptr_id
@@ -77,7 +74,6 @@ class TestSearchTagCreatesSearchTerm:
         assert tag.searchterm_ptr_id == original_ptr_id
         assert SearchTerm.objects.filter(pk=original_ptr_id).exists()
 
-    @pytest.mark.django_db
     def test_deleting_search_tag_removes_search_term(self):
         tag = SearchTag.objects.create(name="réfrigérateur", slug="refrigerateur")
         ptr_id = tag.searchterm_ptr_id
@@ -87,8 +83,8 @@ class TestSearchTagCreatesSearchTerm:
         assert not SearchTerm.objects.filter(pk=ptr_id).exists()
 
 
+@pytest.mark.django_db
 class TestSearchTermSpecificResolution:
-    @pytest.mark.django_db
     def test_specific_returns_synonyme(self, produit):
         synonyme = Synonyme.objects.create(nom="Lave-linge", produit=produit)
         search_term = SearchTerm.objects.get(pk=synonyme.searchterm_ptr_id)
@@ -97,7 +93,6 @@ class TestSearchTermSpecificResolution:
         assert isinstance(specific, Synonyme)
         assert specific.pk == synonyme.pk
 
-    @pytest.mark.django_db
     def test_specific_returns_search_tag(self):
         tag = SearchTag.objects.create(name="réfrigérateur", slug="refrigerateur")
         search_term = SearchTerm.objects.get(pk=tag.searchterm_ptr_id)
@@ -106,7 +101,6 @@ class TestSearchTermSpecificResolution:
         assert isinstance(specific, SearchTag)
         assert specific.pk == tag.pk
 
-    @pytest.mark.django_db
     def test_search_result_template_for_synonyme(self, produit):
         synonyme = Synonyme.objects.create(nom="Lave-linge", produit=produit)
         search_term = SearchTerm.objects.get(pk=synonyme.searchterm_ptr_id)
@@ -116,7 +110,6 @@ class TestSearchTermSpecificResolution:
             == "ui/components/search/search_result_synonyme.html"
         )
 
-    @pytest.mark.django_db
     def test_search_result_template_for_search_tag(self):
         tag = SearchTag.objects.create(name="réfrigérateur", slug="refrigerateur")
         search_term = SearchTerm.objects.get(pk=tag.searchterm_ptr_id)
@@ -126,7 +119,6 @@ class TestSearchTermSpecificResolution:
             == "ui/components/search/search_result_searchtag.html"
         )
 
-    @pytest.mark.django_db
     def test_search_result_template_for_produit_page(self, produit_page):
         assert (
             produit_page.search_result_template
@@ -134,17 +126,16 @@ class TestSearchTermSpecificResolution:
         )
 
 
+@pytest.mark.django_db
 class TestProduitPageSearchTermIndexExclusion:
     """ProduitPageSearchTerms linked to non-live pages are excluded from index."""
 
-    @pytest.mark.django_db
     def test_indexed_when_page_is_live(self, produit_page):
         search_term = produit_page.produit_page_search_term
 
         indexed = ProduitPageSearchTerm.get_indexed_objects()
         assert search_term in indexed
 
-    @pytest.mark.django_db
     def test_excluded_when_page_is_not_live(self, produit_page):
         produit_page.live = False
         produit_page.save(update_fields=["live"])
@@ -154,11 +145,11 @@ class TestProduitPageSearchTermIndexExclusion:
         assert search_term not in indexed
 
 
+@pytest.mark.django_db
 class TestSearchableQuerySet:
     """SearchTerm.objects.searchable() excludes the same items
     as get_indexed_objects."""
 
-    @pytest.mark.django_db
     def test_excludes_synonyme_with_imported_as_search_tag(self, produit):
         synonyme = Synonyme.objects.create(nom="Lave-linge", produit=produit)
         tag = SearchTag.objects.create(name="lave-linge", slug="lave-linge")
@@ -170,7 +161,6 @@ class TestSearchableQuerySet:
         )
         assert synonyme.searchterm_ptr_id not in searchable_ids
 
-    @pytest.mark.django_db
     def test_includes_synonyme_without_imported_as_search_tag(self, produit):
         synonyme = Synonyme.objects.create(nom="Lave-linge", produit=produit)
 
@@ -179,7 +169,6 @@ class TestSearchableQuerySet:
         )
         assert synonyme.searchterm_ptr_id in searchable_ids
 
-    @pytest.mark.django_db
     def test_excludes_search_tag_without_page(self):
         tag = SearchTag.objects.create(name="frigo", slug="frigo")
 
@@ -188,7 +177,6 @@ class TestSearchableQuerySet:
         )
         assert tag.searchterm_ptr_id not in searchable_ids
 
-    @pytest.mark.django_db
     def test_includes_search_tag_with_page(self, produit_page):
         tag = SearchTag.objects.create(name="frigo", slug="frigo")
         TaggedSearchTag.objects.create(tag=tag, content_object=produit_page)
@@ -198,7 +186,6 @@ class TestSearchableQuerySet:
         )
         assert tag.searchterm_ptr_id in searchable_ids
 
-    @pytest.mark.django_db
     def test_excludes_produit_page_search_term_on_non_live_page(self, produit_page):
         produit_page.live = False
         produit_page.save(update_fields=["live"])
@@ -209,7 +196,6 @@ class TestSearchableQuerySet:
         )
         assert search_term.searchterm_ptr_id not in searchable_ids
 
-    @pytest.mark.django_db
     def test_includes_produit_page_search_term_on_live_page(self, produit_page):
         search_term = produit_page.produit_page_search_term
 
