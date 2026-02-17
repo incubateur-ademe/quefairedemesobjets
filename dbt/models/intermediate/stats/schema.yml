@@ -30,6 +30,74 @@ models:
         - acteur
       indexes:
         - columns: ['identifiant_unique']
+  - name: int_propositonservices_with_revision
+    description: "Propositions de services des acteurs avec une révision"
+    columns:
+      - name: id
+        description: "L'identifiant de la proposition de service"
+      - name: acteur_id
+        description: "L'identifiant de l'acteur"
+      - name: action_id
+        description: "L'identifiant de l'action"
+    config:
+      materialized: table
+      tags:
+        - stats
+        - intermediate
+        - propositionservice
+      indexes:
+        - columns: ['id']
+        - columns: ['acteur_id']
+        - columns: ['action_id']
+  - name: int_propositionservice_sous_categories_with_revision
+    description: "table de lien entre proposition de service et acteur avec une révision"
+    columns:
+      - name: id
+        description : "L'identifiant"
+      - name: propositionservice_id
+        description : "L'identifiant de la proposition de service"
+      - name: souscategorieobjet_id
+        description : "L'identifiant de la sous-catégorie d'objet"
+    config:
+      materialized: table
+      tags:
+        - stats
+        - intermediate
+        - propositionservice_sous_categories
+  - name: int_revisionpropositonservices_with_acteur
+    description: "Propositions de services des révisions avec une action"
+    columns:
+      - name: id
+        description: "L'identifiant de la proposition de service"
+      - name: acteur_id
+        description: "L'identifiant de l'acteur"
+      - name: action_id
+        description: "L'identifiant de l'action"
+    config:
+      materialized: table
+      tags:
+        - stats
+        - intermediate
+        - revisionpropositionservice
+      indexes:
+        - columns: ['id']
+        - columns: ['acteur_id']
+        - columns: ['action_id']
+  - name: int_revisionpropositonservice_sous_categories_with_acteur
+    description: "table de lien entre proposition de service et revision avec un acteur"
+    columns:
+      - name: id
+        description : "L'identifiant"
+      - name: revisionpropositionservice_id
+        description : "L'identifiant de la proposition de service"
+      - name: souscategorieobjet_id
+        description : "L'identifiant de la sous-catégorie d'objet"
+    config:
+      materialized: table
+      tags:
+        - stats
+        - intermediate
+        - revisionpropositionservice_sous_categories
   - name: int_acteur_visible_location
     description: "Acteurs visibles : identifiant et localisation"
     columns:

@@ -80,6 +80,7 @@ models:
         - base
         - acteurs
         - acteur
+        - stats
   - name: base_acteur_acteur_services
     description: "Services des acteurs"
     columns:
@@ -166,6 +167,7 @@ models:
         - base
         - acteurs
         - propositionservice
+        - stats
   - name: base_propositionservice_sous_categories
     description: "Sous-catégories de propositions de services"
     columns:
@@ -192,6 +194,7 @@ models:
         - base
         - acteurs
         - propositionservice_sous_categories
+        - stats
   - name: base_revisionacteur
     description: "Correction sur les acteurs"
     columns:
@@ -266,6 +269,7 @@ models:
         - base
         - acteurs
         - revisionacteur
+        - stats
   - name: base_revisionacteur_acteur_services
     description: "Services des acteurs"
     columns:
@@ -352,6 +356,7 @@ models:
         - base
         - acteurs
         - revisionpropositionservice
+        - stats
   - name: base_revisionpropositionservice_sous_categories
     description: "Sous-catégories de propositions de services"
     columns:
@@ -378,6 +383,7 @@ models:
         - base
         - acteurs
         - revisionpropositionservice_sous_categories
+        - stats
   - name: base_source
     description: "Sources"
     columns:
@@ -409,6 +415,7 @@ models:
         - base
         - acteurs
         - source
+        - stats
   - name: base_acteur_type
     description: "Types d'acteurs"
     columns:
