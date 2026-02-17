@@ -115,7 +115,7 @@ jobs:
 
       - name: Run Playwright tests (regression only)
         if: inputs.regression_only
-        run: npx playwright test --grep=@regression --update-snapshots
+        run: npx playwright test --grep=@regression
 
       - name: Upload baseline screenshots
         if: inputs.upload_screenshots
