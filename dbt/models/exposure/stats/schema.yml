@@ -73,6 +73,44 @@ models:
         - revision
         - statut
         - actif
+  - name: exposure_stats_proposionservice_only_on_acteur
+    description: "Acteurs avec des propositions de service présentes côté acteur mais pas côté révision"
+    columns:
+      - name: identifiant_unique
+        description: "L'identifiant unique de l'acteur"
+      - name: nom
+        description: "Le nom de l'acteur"
+      - name: more_propositionservice
+        description: "JSON des propositions de service trouvées dans marts_acteur_vs_revision_propositon_services (action_code -> sous_categorie_code list)"
+      - name: propositionservices
+        description: "Propositions de service attachées à l'acteur au même format (action_code -> sous_categorie_code list)"
+    config:
+      materialized: table
+      tags:
+        - exposure
+        - stats
+        - acteurs
+        - revision
+        - propositionservice
+  - name: exposure_stats_proposionservice_only_on_revision
+    description: "Acteurs avec des propositions de service présentes côté révision mais pas côté acteur"
+    columns:
+      - name: identifiant_unique
+        description: "L'identifiant unique de l'acteur"
+      - name: nom
+        description: "Le nom de l'acteur"
+      - name: more_propositionservice
+        description: "JSON des propositions de service trouvées dans marts_acteur_vs_revision_propositon_services (action_code -> sous_categorie_code list)"
+      - name: propositionservices
+        description: "Propositions de service de la révision attachées à l'acteur au même format (action_code -> sous_categorie_code list)"
+    config:
+      materialized: table
+      tags:
+        - exposure
+        - stats
+        - acteurs
+        - revision
+        - propositionservice
   - name: exposure_stats_nb_acteur_stacked_history
     description: "Historique du nombre d'acteurs empilés. Une ligne est ajoutée à chaque exécution de dbt."
     columns:

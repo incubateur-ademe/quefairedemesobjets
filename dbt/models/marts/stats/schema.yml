@@ -91,6 +91,25 @@ models:
         - marts
         - acteurs
         - siret
+  - name: marts_acteur_vs_revision_propositon_services
+    description: "propositions de services différentes entre acteur et révision"
+    columns:
+      - name: identifiant_unique
+        description: "L'identifiant unique de l'acteur"
+      - name: action_id
+        description: "L'identifiant de l'action"
+      - name: souscategorieobjet_id
+        description: "L'identifiant de la sous-catégorie d'objet"
+      - name: source
+        description: "Le source de la proposition de service (acteur ou revision)"
+    config:
+      materialized: table
+      tags:
+        - stats
+        - marts
+        - acteur
+        - revision
+        - propositionservice
   - name: marts_distance_first_action
     description: "Distance entre la position aléatoire et l'acteur le plus proche pour chaque action"
     columns:
