@@ -9,6 +9,9 @@ on:
       upload_screenshots:
         required: true
         type: boolean
+      regression_only:
+        required: true
+        type: boolean
       download_screenshots:
         required: true
         type: boolean
@@ -102,7 +105,12 @@ jobs:
           path: ${{ env.SCREENSHOTS_BASE_PATH }}
 
       - name: Run Playwright tests
+        if: ${{ !inputs.regression_only }}
         run: npx playwright test --shard=${{ matrix.shard }}/5 --update-snapshots
+
+      - name: Run Playwright tests (regression only)
+        if: inputs.regression_only
+        run: npx playwright test --grep=@regression --update-snapshots
 
       - name: Upload baseline screenshots
         if: inputs.upload_screenshots
