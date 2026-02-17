@@ -15,6 +15,7 @@ from wagtail.admin.views.pages.listing import IndexView
 from wagtail.admin.viewsets.base import ViewSetGroup
 from wagtail.admin.viewsets.pages import PageListingViewSet
 from wagtail.models import Page
+from modelsearch.index import insert_or_update_object
 
 from core.constants import SEARCH_TERM_ID_QUERY_PARAM
 from core.views import static_file_content_from
@@ -23,6 +24,8 @@ from qfdmd.models import (
     Produit,
     ProduitPage,
     Synonyme,
+    SearchTag,
+    TaggedSearchTag,
 )
 
 logger = logging.getLogger(__name__)
@@ -73,12 +76,6 @@ def _collect_synonymes_for_page(page):
 
 def _execute_import(page, all_synonymes):
     """Execute the import of legacy synonymes as SearchTags."""
-    from modelsearch.index import insert_or_update_object
-
-    from qfdmd.models import (
-        SearchTag,
-        TaggedSearchTag,
-    )
 
     for synonyme in all_synonymes:
         # Replace commas with fullwidth commas to prevent taggit from
