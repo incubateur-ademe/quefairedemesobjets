@@ -34,7 +34,7 @@ env:
 
 jobs:
   end-to-end:
-    name: Playwright
+    name: Playwright (${{ inputs.ref }})
     runs-on: ubuntu-latest
     timeout-minutes: 60
     # strategy:
