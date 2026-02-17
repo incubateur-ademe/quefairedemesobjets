@@ -57,7 +57,7 @@
     "@fullhuman/postcss-purgecss": "^8.0.0",
     "@parcel/optimizer-svgo": "^2.16.4",
     "@parcel/transformer-inline-string": "^2.16.4",
-    "@playwright/test": "^1.58.0",
+    "@playwright/test": "^1.58.2",
     "@testing-library/jest-dom": "^6.9.1",
     "@types/jest": "^30.0.0",
     "@types/lodash": "^4.17.23",
