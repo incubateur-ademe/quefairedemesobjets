@@ -116,7 +116,7 @@ jobs:
       - name: Run Playwright tests
         if: ${{ !inputs.regression_only }}
         # run: npx playwright test --shard=${{ matrix.shard }}/5 --update-snapshots
-        run: npx playwright test --update-snapshots
+        run: npx playwright test --update-snapshots --grep=@regression
 
       - name: Run Playwright tests (regression only)
         if: inputs.regression_only
