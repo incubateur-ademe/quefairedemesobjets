@@ -16,7 +16,6 @@ dotenv.config({ path: path.resolve(__dirname, ".env") })
 
 export const config: PlaywrightTestConfig = {
   // Glob patterns or regular expressions to ignore test files.
-  testIgnore: "*regression*",
   testDir: "./e2e_tests",
   /* Run tests in files in parallel */
   fullyParallel: true,

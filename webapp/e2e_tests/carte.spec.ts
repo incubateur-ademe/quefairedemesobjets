@@ -48,19 +48,25 @@ test.describe("🗺️ Filtres Avancés Carte", () => {
   )
 })
 test.describe("🗺️ Affichage Légende Carte", () => {
-  test("La carte affiche la légende après une recherche", async ({ page }) => {
-    // Navigate to the carte page
-    await navigateTo(page, `/carte`)
+  test(
+    "La carte affiche la légende après une recherche",
+    {
+      tag: ["@regression"],
+    },
+    async ({ page }) => {
+      // Navigate to the carte page
+      await navigateTo(page, `/carte`)
 
-    await expect(page.getByTestId("carte-legend")).toBeHidden()
+      await expect(page.getByTestId("carte-legend")).toBeHidden()
 
-    // Mock the address API before searching
-    await mockApiAdresse(page)
+      // Mock the address API before searching
+      await mockApiAdresse(page)
 
-    // Fill "Adresse" autocomplete input
-    await searchForAuray(page)
-    await expect(page.getByTestId("carte-legend")).toBeVisible()
-  })
+      // Fill "Adresse" autocomplete input
+      await searchForAuray(page)
+      await expect(page.getByTestId("carte-legend")).toBeVisible()
+    },
+  )
 })
 
 test.describe("🗺️ Sélection de Pinpoints", () => {

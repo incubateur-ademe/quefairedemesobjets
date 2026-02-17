@@ -158,7 +158,6 @@ jobs:
             **/*-expected.png
             **/*-actual.png
             **/*-diff.png
-            __regression_manifest.json
 
 permissions:
   contents: read
