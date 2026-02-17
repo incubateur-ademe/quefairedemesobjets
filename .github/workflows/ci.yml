@@ -112,7 +112,7 @@ jobs:
   # we avoid duplicating this expensive setup work across multiple shard runners.
   # Each shard can then download the pre-built artifacts and start testing immediately,
   # significantly reducing total E2E test execution time.
-  e2e_prepare:
+  e2e-prepare:
     name: Préparation des tests e2e
     # On s'assure que npm ci et uv sync aient tourné au moins une fois.
     # needs: [frontend_linter, backend_linter]
@@ -170,7 +170,7 @@ jobs:
 
   e2e:
     name: Baseline (current branch)
-    needs: [e2e_prepare]
+    needs: e2e-prepare
     uses: ./.github/workflows/_e2e.yml
     with:
       ref: ${{ github.ref }}
@@ -182,6 +182,7 @@ jobs:
 
   e2e-compare:
     name: Compare (main)
+    needs: e2e
     uses: ./.github/workflows/_e2e.yml
     with:
       ref: main
