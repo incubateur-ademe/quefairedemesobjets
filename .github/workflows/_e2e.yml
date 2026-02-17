@@ -130,7 +130,7 @@ jobs:
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v6
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && inputs.ref == github.ref }}
         with:
           name: playwright-report-${{ matrix.shard }}
           path: playwright-report/
@@ -138,7 +138,7 @@ jobs:
 
       - name: Upload test results
         uses: actions/upload-artifact@v6
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && inputs.ref == github.ref }}
         with:
           name: playwright-results-${{ matrix.shard }}
           path: test-results/
