@@ -32,7 +32,7 @@ jobs:
       tag_name: ${{ github.sha }}
 
   e2e:
-    name: 🧩 E2E
+    name: 🪤 E2E
     uses: ./.github/workflows/e2e.yml
     secrets: inherit #pragma: allowlist secret
 
