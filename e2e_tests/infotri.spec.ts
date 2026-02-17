@@ -8,13 +8,12 @@ test.describe("🏷️ Configurateur Info-tri", () => {
       waitUntil: "domcontentloaded",
     })
 
-    // Verify the infotri_script_url template tag renders a valid URL
+    // Verify the infotri_script_url template tag renders a non empty url
     const scriptUrlElement = page.locator('[data-testid="infotri-script-url"]')
     const scriptUrl = await scriptUrlElement.textContent()
     expect(scriptUrl).toBeTruthy()
     expect(scriptUrl!.trim()).toContain("/infotri/")
 
-    // The configurateur script creates a same-origin iframe
     const iframe = page.frameLocator("iframe").first()
     await expect(iframe.locator("body")).toBeAttached({ timeout: 10000 })
 
