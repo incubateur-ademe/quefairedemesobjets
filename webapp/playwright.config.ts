@@ -3,35 +3,27 @@ import dotenv from "dotenv"
 import path from "path"
 
 /**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
- */
-// require('dotenv').config();
-
-/**
  * See https://playwright.dev/docs/test-configuration.
  */
 
 dotenv.config({ path: path.resolve(__dirname, ".env") })
 
 export const config: PlaywrightTestConfig = {
-  // Glob patterns or regular expressions to ignore test files.
   testDir: "./e2e_tests",
-  /* Run tests in files in parallel */
   fullyParallel: true,
-  /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
-  /* Retry failed tests (same as CI) */
   retries: 4,
-  /* Run tests sequentially (same as CI) */
   workers: 1,
-  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: "html",
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     baseURL: process.env.BASE_URL!,
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
+  },
+  expect: {
+    toHaveScreenshot: {
+      pathTemplate: `./${process.env.SCREENSHOTS_BASE_PATH || "__screenshots__"}/{testFilePath}/{arg}{ext}`,
+      maxDiffPixels: 100,
+    },
   },
 
   /* Configure projects for major browsers */
@@ -62,4 +54,5 @@ export const config: PlaywrightTestConfig = {
     },
   ],
 }
+
 export default defineConfig(config)
