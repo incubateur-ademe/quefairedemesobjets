@@ -10,7 +10,7 @@ on:
         required: true
         type: boolean
       regression_only:
-        required: true
+        required: false
         type: boolean
       download_screenshots:
         required: true
