@@ -12,6 +12,7 @@ from crawl.config.xcoms import XCOMS
 from crawl.tasks.business_logic.crawl_urls_read_urls_from_db import (
     crawl_urls_read_urls_from_db,
 )
+from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +40,8 @@ def crawl_urls_read_urls_from_db_wrapper(ti, params) -> None:
 
     if df.empty:
         raise AirflowSkipException("Pas d'URLs à parcourir = on s'arrête là")
+
+    log.preview_df_as_markdown("URLs à parcourir", df)
 
     ti.xcom_push(key=XCOMS.DF_READ, value=df)
 

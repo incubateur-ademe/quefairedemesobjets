@@ -72,13 +72,6 @@ def df_none_or_empty(df: pd.DataFrame) -> bool:
     return df is None or df.empty
 
 
-def df_col_count_lists(df: pd.DataFrame, col: str) -> int:
-    """Total count of items in list-type columns,
-    with the catch to return integer (np64 by default)
-    to avoid JSON serialization issues"""
-    return int(df[col].apply(len).sum())
-
-
 def df_split_on_filter(
     df: pd.DataFrame, filter: pd.Series
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
