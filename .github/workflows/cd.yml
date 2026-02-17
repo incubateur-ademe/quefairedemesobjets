@@ -31,6 +31,11 @@ jobs:
       environment: preprod
       tag_name: ${{ github.sha }}
 
+  e2e:
+    name: 🧩 E2E
+    uses: ./.github/workflows/e2e.yml
+    secrets: inherit #pragma: allowlist secret
+
   update_release_draft:
     # Uncomment when anchor are supported in GitHub Actions
     # See : https://github.com/actions/runner/issues/1182
