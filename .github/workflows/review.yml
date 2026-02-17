@@ -62,3 +62,4 @@ jobs:
 # code scanning alerts
 permissions:
   contents: read
+  pull-requests: write
