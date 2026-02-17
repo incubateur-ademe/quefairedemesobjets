@@ -12,6 +12,9 @@ on:
       regression_only:
         required: false
         type: boolean
+      update_snapshots:
+        required: true
+        type: boolean
       download_screenshots:
         required: true
         type: boolean
