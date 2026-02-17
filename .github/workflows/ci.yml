@@ -237,7 +237,7 @@ jobs:
 
       - name: Build search index
         shell: bash
-        run: make index
+        run: make rebuild-search-index
 
       # RUN e2e
       - name: Run server
