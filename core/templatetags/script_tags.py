@@ -35,3 +35,8 @@ def assistant_iframe_script(context: dict) -> str:
 @register.simple_tag()
 def infotri_script_url() -> str:
     return f"{settings.BASE_URL}{reverse('infotri:infotri_script')}"
+
+
+@register.simple_tag()
+def infotri_configurateur_script_url() -> str:
+    return f"{settings.BASE_URL}{reverse('infotri:infotri_configurator_script')}"

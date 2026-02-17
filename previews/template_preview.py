@@ -25,9 +25,9 @@ from qfdmo.models.acteur import (
     DisplayedPropositionService,
     LabelQualite,
 )
-from search.models import SearchTerm
 from qfdmo.models.action import Action
 from qfdmo.models.config import CarteConfig
+from search.models import SearchTerm
 
 base_url = settings.BASE_URL
 
@@ -353,7 +353,6 @@ class ComponentsPreview(LookbookPreview):
     @register_form_class(ProduitHeadingForm)
     @component_docs("ui/components/produit/heading.md")
     def produit_heading(self, search_term=None, pronom="mon", **kwargs):
-
         factory = RequestFactory()
         request = factory.get("/")
 
@@ -371,7 +370,6 @@ class ComponentsPreview(LookbookPreview):
     @register_form_class(ProduitHeadingForm)
     @component_docs("ui/components/produit/heading_family.md")
     def produit_heading_family(self, search_term=None, pronom="mon", **kwargs):
-
         factory = RequestFactory()
         request = factory.get("/")
 
@@ -1160,4 +1158,10 @@ class TestsPreview(LookbookPreview):
         return render_to_string(
             "ui/tests/t_15_acteur_fiche_viewport.html",
             {"base_url": base_url},
+        )
+
+    def t_16_infotri_configurator(self, **kwargs):
+        """Test that the infotri configurator generates a script tag with a valid src URL"""
+        return render_to_string(
+            "ui/tests/t_16_infotri_configurator.html",
         )

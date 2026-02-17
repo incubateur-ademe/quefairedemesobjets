@@ -1,0 +1,7 @@
+{% load dsfr_tags script_tags %}
+
+{% dsfr_callout title="Test du configurateur Info-tri" text="Cette page teste que le configurateur Info-tri génère correctement le code d'intégration avec une URL de script valide." icon_class="fr-icon-alert-line" %}
+
+<div data-testid="infotri-script-url">{% infotri_script_url %}</div>
+
+<script src="{% infotri_script_url %}"></script>
