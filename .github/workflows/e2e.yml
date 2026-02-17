@@ -82,7 +82,6 @@ jobs:
     uses: ./.github/workflows/_e2e.yml
     with:
       ref: ${{ github.ref }}
-      update_snapshots: true
       download_screenshots: false
       upload_screenshots: true
     permissions:
