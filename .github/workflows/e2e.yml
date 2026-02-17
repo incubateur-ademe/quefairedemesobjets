@@ -22,7 +22,7 @@ jobs:
   # Each shard can then download the pre-built artifacts and start testing immediately,
   # significantly reducing total E2E test execution time.
   e2e-prepare:
-    name: Préparation des tests e2e
+    name: Préparation
     # On s'assure que npm ci et uv sync aient tourné au moins une fois.
     # needs: [frontend_linter, backend_linter]
     runs-on: ubuntu-latest
