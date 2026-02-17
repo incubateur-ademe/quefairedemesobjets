@@ -180,7 +180,7 @@ jobs:
     permissions:
       contents: read
 
-  non_regression:
+  e2e-compare:
     name: Compare (main)
     uses: ./.github/workflows/_e2e.yml
     with:
@@ -194,7 +194,7 @@ jobs:
 
   comment-visual-diffs:
     name: Comment visual regression diffs
-    needs: compare
+    needs: e2e-compare
     if: |
       failure() &&
       github.event_name == 'pull_request'
