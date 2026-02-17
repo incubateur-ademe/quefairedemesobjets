@@ -5,7 +5,7 @@ inputs:
   uv-groups:
     description: 'UV sync groups (e.g., "--all-packages --group dev")'
     required: false
-    default: '--all-packages --group dev'
+    default: "--all-packages --group dev"
 
 runs:
   using: composite
@@ -16,11 +16,13 @@ runs:
         enable-cache: true
 
     - name: Cache virtual environment
+      id: cache-venv
       uses: actions/cache@v4
       with:
         path: ./.venv
         key: venv-${{ inputs.uv-groups }}-${{ hashFiles('uv.lock') }}
 
     - name: Install Python dependencies
+      if: steps.cache-venv.outputs.cache-hit != 'true'
       shell: bash
       run: uv sync ${{ inputs.uv-groups }}
