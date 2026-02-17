@@ -6,13 +6,7 @@ on:
       ref:
         required: true
         type: string
-      upload_screenshots:
-        required: true
-        type: boolean
-      regression_only:
-        required: false
-        type: boolean
-      download_screenshots:
+      compare:
         required: true
         type: boolean
 
@@ -100,7 +94,7 @@ jobs:
         uses: ./.github/actions/start-django-server
 
       - name: Download baseline screenshots
-        if: inputs.download_screenshots
+        if: inputs.compare
         uses: actions/download-artifact@v4
         with:
           name: regression-screenshots
@@ -115,7 +109,7 @@ jobs:
         run: npx playwright test --grep=@regression
 
       - name: Upload baseline screenshots
-        if: inputs.upload_screenshots
+        if: ${{ !inputs.compare }}
         uses: actions/upload-artifact@v4
         with:
           name: regression-screenshots
