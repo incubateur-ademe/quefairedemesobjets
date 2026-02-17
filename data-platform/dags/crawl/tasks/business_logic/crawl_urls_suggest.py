@@ -211,6 +211,7 @@ def crawl_urls_suggest(
     use_legacy_suggestions: bool = False,
 ) -> int:
     """Main function to generate suggestions for URLs"""
+
     if df_none_or_empty(df):
         raise ValueError("DF vide ou None on devrait pas être là")
 
