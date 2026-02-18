@@ -113,10 +113,9 @@ unit-test:
 integration-test:
 	$(PYTEST) ./integration_tests
 
-
 .PHONY: dags-test
 dags-test:
-	$(PYTEST) ./dags/tests
+	$(PYTEST) ../data-platform/dags/tests
 
 .PHONY: e2e-test
 e2e-test:
