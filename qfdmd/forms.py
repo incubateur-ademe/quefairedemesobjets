@@ -2,44 +2,17 @@ import logging
 
 from django import forms
 from dsfr.forms import DsfrBaseForm
-from modelsearch.query import Fuzzy
 
-from search.models import SearchTerm
-from core.widgets import HeaderSearchAutocompleteInput
+from core.widgets import SearchAutocompleteInput
 
-from .mixins import HomeSearchMixin
 
 logger = logging.getLogger(__name__)
-
-
-class SearchInput(forms.TextInput):
-    template_name = "ui/components/search/widget.html"
-
-
-class HomeSearchForm(HomeSearchMixin, DsfrBaseForm):
-    id = forms.CharField(required=False, widget=forms.HiddenInput())
-    input = forms.CharField(
-        help_text="Entrez un objet ou un déchet",
-        required=False,
-        widget=SearchInput,
-    )
-
-    def search(self) -> list:
-        self.results = []
-        search_query = self.cleaned_data.get("input")
-        if not search_query:
-            self.results = []
-            return self.results
-
-        self.results = SearchTerm.objects.searchable().search(Fuzzy(search_query))[:10]
-        return self.results
-
 
 
 class HeaderSearchForm(DsfrBaseForm):
     search = forms.CharField(
         required=False,
-        widget=HeaderSearchAutocompleteInput(
+        widget=SearchAutocompleteInput(
             attrs={
                 "class": "fr-input",
                 "placeholder": "pantalon, perceuse, canapé...",
@@ -47,6 +20,11 @@ class HeaderSearchForm(DsfrBaseForm):
             },
         ),
     )
+
+
+# TODO: backward compatibility only
+class HomeSearchForm(HeaderSearchForm):
+    pass
 
 
 class ContactForm(DsfrBaseForm):

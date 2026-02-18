@@ -16,7 +16,7 @@ from dsfr.forms import DsfrBaseForm
 from core.constants import DEFAULT_MAP_CONTAINER_ID
 from core.context_processors import content, environment, global_context
 from core.widgets import (
-    HeaderSearchAutocompleteInput,
+    SearchAutocompleteInput,
 )
 from infotri.forms import InfotriForm
 from qfdmd.forms import HomeSearchForm
@@ -34,8 +34,8 @@ from qfdmo.models.acteur import (
 )
 from qfdmo.models.action import Action
 from qfdmo.models.config import CarteConfig
-from search.models import SearchTerm
 from qfdmo.widgets import SynonymeAutocompleteInput
+from search.models import SearchTerm
 
 base_url = settings.BASE_URL
 
@@ -674,7 +674,7 @@ class FormulairesPreview(LookbookPreview):
             search = forms.CharField(
                 label="Autocomplétion Recherche d'accueil",
                 required=False,
-                widget=HeaderSearchAutocompleteInput(
+                widget=SearchAutocompleteInput(
                     attrs={
                         "class": "fr-input",
                         "placeholder": "pantalon, perceuse, canapé...",

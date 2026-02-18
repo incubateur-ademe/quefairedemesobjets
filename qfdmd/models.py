@@ -204,6 +204,14 @@ class SearchTag(SearchTerm, TagBase):
             pass
         return None
 
+    @property
+    def search_url(self) -> str:
+        return self.page.url if self.page else ""
+
+    @property
+    def search_label(self) -> str:
+        return self.name
+
 
 class TaggedSearchTag(ItemBase):
     """Through model for SearchTag on ProduitPage."""
@@ -252,6 +260,14 @@ class ProduitPage(
     TitleFields,
 ):
     search_result_template = "ui/components/search/search_result_produitpage.html"
+
+    @property
+    def search_url(self) -> str:
+        return self.url
+
+    @property
+    def search_label(self) -> str:
+        return self.title
 
     def get_template(self, request, *args, **kwargs):
         if self.est_famille:
@@ -831,6 +847,14 @@ class Synonyme(SearchTerm, AbstractBaseProduit):
         index.SearchField("nom"),
         index.AutocompleteField("nom"),
     ]
+
+    @property
+    def search_url(self) -> str:
+        return self.url
+
+    @property
+    def search_label(self) -> str:
+        return self.nom
 
     search_result_template = "ui/components/search/search_result_synonyme.html"
 
