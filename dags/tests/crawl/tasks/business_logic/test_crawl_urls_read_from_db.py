@@ -4,7 +4,7 @@ from dags.crawl.config.columns import COLS
 from dags.crawl.tasks.business_logic.crawl_urls_read_urls_from_db import (
     crawl_urls_read_urls_from_db,
 )
-from dags.sources.config.shared_constants import EMPTY_ACTEUR_FIELD
+from core.models.constants import EMPTY_ACTEUR_FIELD
 from unit_tests.qfdmo.acteur_factory import DisplayedActeurFactory
 
 

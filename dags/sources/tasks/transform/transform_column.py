@@ -8,7 +8,6 @@ import pandas as pd
 from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 from opening_hours import OpeningHours, ParserError
-from sources.config import shared_constants as constants
 from sources.tasks.airflow_logic.config_management import DAGConfig
 from sources.tasks.transform.exceptions import (
     ActeurTypeCodeError,
@@ -25,6 +24,9 @@ from sources.tasks.transform.exceptions import (
 )
 from sources.tasks.transform.formatter import format_libelle_to_code
 from sources.tasks.transform.opening_hours import interprete_opening_hours
+from utils.django import django_setup_full
+
+django_setup_full()
 
 logger = logging.getLogger(__name__)
 url_validator = URLValidator(schemes=["http", "https"])
@@ -156,43 +158,51 @@ def clean_acteur_type_code(value, _):
 
 
 def clean_public_accueilli(value, _):
+    from qfdmo.models.acteur import ActeurPublicAccueilli
+
     if not value:
-        return constants.PUBLIC_NP
+        return ActeurPublicAccueilli.UNKNOWN.value
 
     values_mapping = {
-        "particuliers et professionnels": constants.PUBLIC_PRO_ET_PAR,
-        "professionnels": constants.PUBLIC_PRO,
-        "particuliers": constants.PUBLIC_PAR,
-        "aucun": constants.PUBLIC_AUCUN,
-        "dma/pro": constants.PUBLIC_PRO_ET_PAR,
-        "dma": constants.PUBLIC_PAR,
-        "pro": constants.PUBLIC_PRO,
-        "np": constants.PUBLIC_NP,
+        "particuliers et professionnels": (
+            ActeurPublicAccueilli.PROFESSIONNELS_ET_PARTICULIERS.value
+        ),
+        "professionnels": ActeurPublicAccueilli.PROFESSIONNELS.value,
+        "particuliers": ActeurPublicAccueilli.PARTICULIERS.value,
+        "aucun": ActeurPublicAccueilli.AUCUN.value,
+        "dma/pro": ActeurPublicAccueilli.PROFESSIONNELS_ET_PARTICULIERS.value,
+        "dma": ActeurPublicAccueilli.PARTICULIERS.value,
+        "pro": ActeurPublicAccueilli.PROFESSIONNELS.value,
+        "np": ActeurPublicAccueilli.UNKNOWN.value,
     }
     if value.lower().strip() not in values_mapping:
         raise PublicAccueilliWarning(
             f"Public accueilli `{value}` not found in mapping : {values_mapping.keys()}"
         )
 
-    return values_mapping.get(value.lower().strip(), constants.PUBLIC_NP)
+    return values_mapping.get(
+        value.lower().strip(), ActeurPublicAccueilli.UNKNOWN.value
+    )
 
 
 def clean_reprise(value, _):
+    from qfdmo.models.acteur import ActeurReprise
+
     if not value:
-        return constants.REPRISE_NP
+        return ActeurReprise.UNKNOWN.value
 
     values_mapping = {
-        "1 pour 0": constants.REPRISE_1POUR0,
-        "1 pour 1": constants.REPRISE_1POUR1,
-        "non": constants.REPRISE_1POUR0,
-        "oui": constants.REPRISE_1POUR1,
+        "1 pour 0": ActeurReprise.UN_POUR_ZERO.value,
+        "1 pour 1": ActeurReprise.UN_POUR_UN.value,
+        "non": ActeurReprise.UN_POUR_ZERO.value,
+        "oui": ActeurReprise.UN_POUR_UN.value,
     }
     if value.lower().strip() not in values_mapping:
         raise RepriseWarning(
             f"Reprise `{value}` not found in mapping : {values_mapping.keys()}"
         )
 
-    return values_mapping.get(value.lower().strip(), constants.REPRISE_NP)
+    return values_mapping.get(value.lower().strip(), ActeurReprise.UNKNOWN.value)
 
 
 def clean_url(url, _) -> str:

@@ -1,4 +1,3 @@
-from sources.config import shared_constants as constants
 from utils.django import django_setup_full
 
 django_setup_full()
@@ -11,14 +10,14 @@ django_setup_full()
 
 
 def get_suggestions_toprocess(use_suggestion_groupe: bool = False):
-    from data.models.suggestion import Suggestion, SuggestionGroupe
+    from data.models.suggestion import Suggestion, SuggestionGroupe, SuggestionStatut
 
     cls = Suggestion
     if use_suggestion_groupe:
         cls = SuggestionGroupe
 
     return cls.objects.prefetch_related("suggestion_cohorte").filter(
-        statut=constants.SUGGESTION_ATRAITER
+        statut=SuggestionStatut.ATRAITER
     )
 
 

@@ -10,9 +10,11 @@ import pandas as pd
 from crawl.config.cohorts import COHORTS
 from crawl.config.columns import COLS
 from crawl.config.constants import SORT_COLS
-from sources.config.shared_constants import EMPTY_ACTEUR_FIELD
 from utils import logging_utils as log
 from utils.dataframes import df_sort, df_split_on_filter
+from utils.django import django_setup_full
+
+django_setup_full()
 
 logger = logging.getLogger(__name__)
 
@@ -160,6 +162,9 @@ def crawl_urls_check_syntax(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFram
     - urls we should try to crawl (= at least one suggestion)
     - urls we should discard (= no suggestion)
     """
+
+    from core.models.constants import EMPTY_ACTEUR_FIELD
+
     df[COLS.URLS_TO_TRY] = df[COLS.URL_ORIGIN].apply(url_to_urls_to_try)
     df[COLS.DOMAINS_TO_TRY] = df[COLS.URLS_TO_TRY].apply(
         lambda x: url_to_dns_to_try(x[0]) if x else None

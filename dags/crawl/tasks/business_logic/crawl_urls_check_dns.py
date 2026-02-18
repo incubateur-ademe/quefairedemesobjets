@@ -8,9 +8,11 @@ import pandas as pd
 from crawl.config.cohorts import COHORTS
 from crawl.config.columns import COLS
 from crawl.tasks.business_logic.crawl_urls_check_syntax import url_domain_get
-from sources.config.shared_constants import EMPTY_ACTEUR_FIELD
 from utils import logging_utils as log
 from utils.dataframes import df_split_on_filter
+from utils.django import django_setup_full
+
+django_setup_full()
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +37,7 @@ def crawl_urls_check_dns(
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Checks if the domains of the URLs are reachable,
     returns 2 sub-dataframes (working/failing)"""
+    from core.models.constants import EMPTY_ACTEUR_FIELD
 
     log.preview_df_as_markdown("🔎 Domaines à résoudre", df)
 

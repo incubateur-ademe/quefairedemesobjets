@@ -3,7 +3,6 @@ import logging
 
 import numpy as np
 import pandas as pd
-from sources.config import shared_constants as constants
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
@@ -13,6 +12,8 @@ def db_data_prepare(
     df_acteur: pd.DataFrame,
     df_acteur_from_db: pd.DataFrame,
 ):
+    from qfdmo.models.acteur import ActeurStatus
+
     # Before apply json.dumps, replace NaN by None
     df_acteur = df_acteur.replace({np.nan: None})
     df_acteur_from_db = df_acteur_from_db.replace({np.nan: None})
@@ -25,7 +26,7 @@ def db_data_prepare(
     )
 
     df_acteur_from_db_actifs = df_acteur_from_db[
-        df_acteur_from_db["statut"] == constants.ACTEUR_ACTIF
+        df_acteur_from_db["statut"] == ActeurStatus.ACTIF.value
     ]
 
     df_acteur_to_delete = df_acteur_from_db_actifs[
