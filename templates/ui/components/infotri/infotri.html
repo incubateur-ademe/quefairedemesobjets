@@ -1,3 +1,4 @@
+{% load dict_tags %}
 <div>
     {% if not form.categorie.value %}
             <div class="qf-flex qf-items-center qf-justify-center qf-min-h-[400px]">
@@ -9,15 +10,13 @@
         {# Info-tri Preview Display #}
         <div class="qf-flex qf-flex-col qf-items-center">
             {% if form.avec_phrase.value %}
-                <div class="qf-flex qf-justify-center">
-                    {% if form.consigne.value == "1" %}
-                        {% include "ui/components/infotri/svg/phrase-1.html" %}
-                    {% elif form.consigne.value == "2" %}
-                        {% include "ui/components/infotri/svg/phrase-2.html" %}
-                    {% elif form.consigne.value == "3" %}
-                        {% include "ui/components/infotri/svg/phrase-3.html" %}
+                {% with phrase_svg_templates|get_item:form.consigne.value as phrase_template %}
+                    {% if phrase_template %}
+                        <div class="qf-flex qf-justify-center">
+                            {% include phrase_template %}
+                        </div>
                     {% endif %}
-                </div>
+                {% endwith %}
             {% endif %}
 
             <div class="qf-pt-3v qf-flex qf-gap-1w">
@@ -33,24 +32,18 @@
                         {% include "ui/components/infotri/svg/cartouche-fr.html" %}
 
                         {# Category symbol #}
-                        {% if form.categorie.value == "chaussures" %}
-                            {% include "ui/components/infotri/svg/chaussures.html" %}
-                        {% elif form.categorie.value == "vetement" %}
-                            {% include "ui/components/infotri/svg/vetement.html" %}
-                        {% elif form.categorie.value == "tissu" %}
-                            {% include "ui/components/infotri/svg/tissu.html" %}
-                        {% elif form.categorie.value == "tous" %}
-                            {% include "ui/components/infotri/svg/tous.html" %}
-                        {% endif %}
+                        {% with categorie_svg_templates|get_item:form.categorie.value as categorie_template %}
+                            {% if categorie_template %}
+                                {% include categorie_template %}
+                            {% endif %}
+                        {% endwith %}
 
                         {# Consigne symbol #}
-                        {% if form.consigne.value == "1" %}
-                            {% include "ui/components/infotri/svg/consigne-1.html" %}
-                        {% elif form.consigne.value == "2" %}
-                            {% include "ui/components/infotri/svg/consigne-2.html" %}
-                        {% elif form.consigne.value == "3" %}
-                            {% include "ui/components/infotri/svg/consigne-3.html" %}
-                        {% endif %}
+                        {% with consigne_svg_templates|get_item:form.consigne.value as consigne_template %}
+                            {% if consigne_template %}
+                                {% include consigne_template %}
+                            {% endif %}
+                        {% endwith %}
                     </div>
                 {% endif %}
             </div>

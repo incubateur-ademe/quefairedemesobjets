@@ -1,5 +1,5 @@
 {% extends "ui/layout/base.html" %}
-{% load dsfr_tags static %}
+{% load dsfr_tags static script_tags %}
 
 {% block page_title %}Concevez facilement votre Info-tri - Longue vie aux objets{% endblock %}
 
@@ -10,20 +10,20 @@
 {% block content %}
 <turbo-frame
     id="infotri-form"
-    class="qf-grid qf-min-h-screen {% if not iframe %}qf-w-screen{% endif %} qf-grid-cols-1 md:qf-grid-cols-3
+    class="qf-flex qf-flex-col md:qf-flex-row qf-min-h-screen {% if not iframe %}qf-w-screen{% endif %}
     {% if iframe %}qf-rounded-lg !qf-border-2 !qf-border-solid !qf-border-grey-900 {% endif %}"
 >
-    <main class="qf-flex qf-flex-col qf-items-start qf-gap-2w qf-p-2w md:qf-col-span-2">
+    <main class="qf-flex qf-flex-1 qf-min-w-0 qf-flex-col qf-items-start qf-gap-2w qf-p-2w">
         <h1 class="qf-mb-1w qf-text-2xl qf-leading-none qf-font-extrabold qf-tracking-tight qf-text-gray-900 md:qf-text-3xl lg:qf-text-4xl">
             Concevez facilement votre Info-tri
         </h1>
 
         <p class="qf-max-w-prose">
-            Ce configurateur, conçu pour la filière TLC (textiles d'habillement, linge de maison et/ou chaussures), 
+            Ce configurateur, conçu pour la filière TLC (textiles d'habillement, linge de maison et/ou chaussures),
             vous permet de personnaliser l'Info-tri règlementaire et de l’intégrer facilement en widget à chaque page produit sur vos plateformes e-commerce.
             <br>
-            Ainsi, pour aller plus loin dans votre engagement environnemental et sur votre conformité en matière d'information aux consommateurs, 
-            cet Info-tri permet de sensibiliser sur la fin de vie de vos produits et d'orienter vers les bonnes consignes et adresses pour les trier, 
+            Ainsi, pour aller plus loin dans votre engagement environnemental et sur votre conformité en matière d'information aux consommateurs,
+            cet Info-tri permet de sensibiliser sur la fin de vie de vos produits et d'orienter vers les bonnes consignes et adresses pour les trier,
             les réparer ou les donner.
         </p>
 
@@ -83,8 +83,8 @@
                     </p>
                 </div>
 
-                <div class="fr-callout" data-controller="copy">
-                    <pre class="qf-whitespace-normal qf-break-all qf-mb-1w qf-p-1w qf-bg-gray-100 qf-rounded qf-text-sm qf-font-mono" data-copy-target="toCopy">&lt;script src="{{ base_url }}/infotri/static/infotri.js" data-config="categorie={{ form.categorie.value }}&consigne={{ form.consigne.value }}&avec_phrase={{ form.avec_phrase.value|yesno:'true,false' }}"&gt;&lt;/script&gt;</pre>
+                <div class="fr-callout" data-controller="copy" data-copy-copied-value="Copié !">
+                    <pre class="qf-whitespace-normal qf-break-all qf-mb-1w qf-p-1w qf-bg-gray-100 qf-rounded qf-text-sm qf-font-mono" data-copy-target="toCopy">&lt;script src="{% infotri_script_url %}" data-config="categorie={{ form.categorie.value }}&consigne={{ form.consigne.value }}&avec_phrase={{ form.avec_phrase.value|yesno:'true,false' }}"&gt;&lt;/script&gt;</pre>
                     <button
                         type="button"
                         class="fr-btn"
@@ -98,8 +98,8 @@
             {% endif %}
     </main>
 
-    <aside class="qf-flex qf-flex-col md:qf-sticky md:qf-top-0">
-        <div class="qf-flex qf-items-center qf-justify-center qf-h-full qf-p-4w">
+    <aside class="qf-flex qf-flex-col qf-shrink-0 md:qf-sticky md:qf-top-0">
+        <div class="qf-flex qf-items-center qf-justify-end qf-h-full qf-p-4w">
             <div class="qf-bg-white qf-shadow-lg qf-p-3w">
                 {% include "ui/components/infotri/infotri.html" %}
             </div>
