@@ -47,6 +47,7 @@ def django_settings_to_dict() -> dict:
 
 def django_setup_full() -> None:
     """Full init of our Django environment"""
+
     django_add_to_sys_path()
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.airflow_settings")
 

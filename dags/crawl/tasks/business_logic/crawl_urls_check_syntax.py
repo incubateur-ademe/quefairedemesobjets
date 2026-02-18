@@ -12,9 +12,6 @@ from crawl.config.columns import COLS
 from crawl.config.constants import SORT_COLS
 from utils import logging_utils as log
 from utils.dataframes import df_sort, df_split_on_filter
-from utils.django import django_setup_full
-
-django_setup_full()
 
 logger = logging.getLogger(__name__)
 
