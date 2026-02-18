@@ -1,0 +1,24 @@
+# Keep in sync with .prettierignore until we can use several prettierignore files
+# https://github.com/prettier/prettier/issues/8048
+.env
+.parcel-cache
+.venv
+*.bak
+*.swp
+
+
+# JS
+static/collected
+static/compiled
+node_modules
+
+# compiled
+staticfiles
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/tests-examples/
+e2e_tests/*-snapshots
+
+media
