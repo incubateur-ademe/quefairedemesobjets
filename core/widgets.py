@@ -86,7 +86,7 @@ class NextAutocompleteInput(forms.TextInput):
         }
 
 
-class HeaderSearchAutocompleteInput(NextAutocompleteInput):
+class SearchAutocompleteInput(NextAutocompleteInput):
     """Autocomplete widget for homepage search."""
 
     search_view = "qfdmd:autocomplete_home_search"

@@ -11,6 +11,7 @@ from django.views.decorators.cache import cache_control
 from django.views.decorators.vary import vary_on_headers
 from django.views.generic import DetailView, ListView, TemplateView
 from modelsearch.index import insert_or_update_object
+from modelsearch.query import Fuzzy
 from wagtail.admin.filters import WagtailFilterSet
 from wagtail.admin.views.pages.listing import IndexView
 from wagtail.admin.viewsets.base import ViewSetGroup
@@ -20,7 +21,6 @@ from wagtail.models import Page
 from core.constants import SEARCH_TERM_ID_QUERY_PARAM
 from core.views import static_file_content_from
 from qfdmd.forms import HomeSearchForm
-from qfdmd.mixins import HomeSearchMixin
 from qfdmd.models import (
     Produit,
     ProduitPage,
@@ -28,6 +28,7 @@ from qfdmd.models import (
     Synonyme,
     TaggedSearchTag,
 )
+from search.models import SearchTerm
 
 logger = logging.getLogger(__name__)
 
@@ -318,10 +319,10 @@ def get_assistant_script(request):
 SEARCH_VIEW_TEMPLATE_NAME = "ui/components/search/view.html"
 
 
-class AutocompleteHomeSearchView(HomeSearchMixin, ListView):
+class AutocompleteHomeSearchView(ListView):
     """View for autocomplete search results on homepage.
 
-    Searches both ProduitPages and Synonymes using HomeSearchMixin.
+    Searches using SearchTerm.objects.searchable().search().
     """
 
     template_name = "ui/components/search/autocomplete_results.html"
@@ -329,8 +330,10 @@ class AutocompleteHomeSearchView(HomeSearchMixin, ListView):
     @override
     def get_queryset(self):
         query = self.request.GET.get("q", "")
-        limit = int(self.request.GET.get("limit", self.DEFAULT_LIMIT))
-        return self.search_home(query, limit=limit)
+        limit = int(self.request.GET.get("limit", 10))
+        if not query:
+            return []
+        return SearchTerm.objects.searchable().search(Fuzzy(query))[:limit]
 
     @override
     def get_context_data(self, **kwargs):
