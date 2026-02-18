@@ -22,7 +22,7 @@ export const config: PlaywrightTestConfig = {
   expect: {
     toHaveScreenshot: {
       pathTemplate: `./__screenshots__/{testFilePath}/{testName}/{arg}{ext}`,
-      maxDiffPixelRatio: 0.1,
+      maxDiffPixelRatio: 0.05,
     },
   },
 
