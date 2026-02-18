@@ -10,7 +10,7 @@ Usage:
 """
 
 from django.core.management.base import BaseCommand
-from django.db import connection
+from django.db import connection, transaction
 
 
 class Command(BaseCommand):
@@ -52,7 +52,10 @@ class Command(BaseCommand):
 
             # Build the WHERE clause dynamically from APPS_TO_MIGRATE
             like_clauses = " OR ".join(
-                [f"table_name LIKE '{app}_%'" for app in self.APPS_TO_MIGRATE]
+                [
+                    f"table_name LIKE '{app.replace('_', r'\\_')}_%' ESCAPE '\\'"
+                    for app in self.APPS_TO_MIGRATE
+                ]
             )
 
             query = f"""
@@ -75,7 +78,8 @@ class Command(BaseCommand):
             )
             table_renames = []
             for (table_name,) in tables_to_rename:
-                new_name = table_name.replace("sites_faciles", "sites_conformes")
+                # Only replace the sites_faciles_ prefix, not inner occurrences
+                new_name = table_name.replace("sites_faciles_", "sites_conformes_", 1)
                 table_renames.append((table_name, new_name))
                 self.stdout.write(f"  - {table_name} → {new_name}")
 
@@ -109,7 +113,7 @@ class Command(BaseCommand):
                 )
                 migration_updates = []
                 for app, count in migrations_to_update:
-                    new_app = "sites_conformes_" + app
+                    new_app = app.replace("sites_faciles_", "sites_conformes_", 1)
                     migration_updates.append((app, new_app, count))
                     self.stdout.write(f"  - {app}: {count} migration(s) → {new_app}")
 
@@ -128,60 +132,69 @@ class Command(BaseCommand):
 
             self.stdout.write("\n3. Starting transaction...")
 
-            # Step 4: Rename tables
-            self.stdout.write("\n4. Renaming tables...")
-            renamed_count = 0
-            for table_name, new_name in table_renames:
-                try:
-                    cursor.execute(
-                        f'ALTER TABLE "{table_name}" RENAME TO "{new_name}";'
+            with transaction.atomic():
+                # Step 4: Rename tables
+                self.stdout.write("\n4. Renaming tables...")
+                renamed_count = 0
+                for table_name, new_name in table_renames:
+                    try:
+                        cursor.execute(
+                            f'ALTER TABLE "{table_name}" RENAME TO "{new_name}";'
+                        )
+                        self.stdout.write(
+                            self.style.SUCCESS(
+                                f"  ✓ Renamed: {table_name} → {new_name}"
+                            )
+                        )
+                        renamed_count += 1
+                    except Exception as e:
+                        self.stdout.write(
+                            self.style.ERROR(f"  ✗ Error renaming {table_name}: {e}")
+                        )
+
+                self.stdout.write(
+                    self.style.SUCCESS(f"\nRenamed {renamed_count} tables.")
+                )
+
+                # Step 5: Update django_migrations
+                if migration_updates:
+                    self.stdout.write("\n5. Updating django_migrations table...")
+
+                    # Build the IN clause dynamically from APPS_TO_MIGRATE
+                    apps_in_clause = ", ".join(
+                        [f"'{app}'" for app in self.APPS_TO_MIGRATE]
                     )
+
+                    query = f"""
+                        UPDATE django_migrations
+                        SET app = REPLACE(app, 'sites_faciles_', 'sites_conformes_')
+                        WHERE app IN ({apps_in_clause});
+                    """
+                    cursor.execute(query)
+                    updated_rows = cursor.rowcount
                     self.stdout.write(
-                        self.style.SUCCESS(f"  ✓ Renamed: {table_name} → {new_name}")
-                    )
-                    renamed_count += 1
-                except Exception as e:
-                    self.stdout.write(
-                        self.style.ERROR(f"  ✗ Error renaming {table_name}: {e}")
+                        self.style.SUCCESS(
+                            f"  ✓ Updated {updated_rows} migration records"
+                        )
                     )
 
-            self.stdout.write(self.style.SUCCESS(f"\nRenamed {renamed_count} tables."))
+                # Step 6: Update django_content_type
+                self.stdout.write("\n6. Updating django_content_type table...")
 
-            # Step 5: Update django_migrations
-            if migration_updates:
-                self.stdout.write("\n5. Updating django_migrations table...")
-
-                # Build the IN clause dynamically from APPS_TO_MIGRATE
                 apps_in_clause = ", ".join([f"'{app}'" for app in self.APPS_TO_MIGRATE])
 
                 query = f"""
-                    UPDATE django_migrations
-                    SET app = 'sites_conformes_' || app
-                    WHERE app IN ({apps_in_clause});
+                UPDATE django_content_type
+                SET app_label = REPLACE(app_label, 'sites_faciles_', 'sites_conformes_')
+                WHERE app_label IN ({apps_in_clause});
                 """
                 cursor.execute(query)
-                updated_rows = cursor.rowcount
+                updated_content_types = cursor.rowcount
                 self.stdout.write(
-                    self.style.SUCCESS(f"  ✓ Updated {updated_rows} migration records")
+                    self.style.SUCCESS(
+                        f"  ✓ Updated {updated_content_types} content type records"
+                    )
                 )
-
-            # Step 6: Update django_content_type
-            self.stdout.write("\n6. Updating django_content_type table...")
-
-            apps_in_clause = ", ".join([f"'{app}'" for app in self.APPS_TO_MIGRATE])
-
-            query = f"""
-                UPDATE django_content_type
-                SET app_label = 'sites_conformes_' || app_label
-                WHERE app_label IN ({apps_in_clause});
-            """
-            cursor.execute(query)
-            updated_content_types = cursor.rowcount
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"  ✓ Updated {updated_content_types} content type records"
-                )
-            )
 
             # Step 7: Verify changes
             self.stdout.write("\n7. Verifying changes...")
