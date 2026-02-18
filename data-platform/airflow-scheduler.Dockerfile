@@ -43,17 +43,17 @@ ENV VIRTUAL_ENV=/opt/airflow/.venv \
 COPY --from=python-builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
 # Nécessaire pour faire fonctionner Django dans Airflow
-COPY ./core/ /opt/airflow/core/
-COPY ./data/ /opt/airflow/data/
-COPY ./dbt/ /opt/airflow/dbt/
-COPY ./dsfr_hacks/ /opt/airflow/dsfr_hacks/
-COPY ./qfdmo/ /opt/airflow/qfdmo/
-COPY ./scripts/ /opt/airflow/scripts/
+COPY ./webapp/core/ /opt/airflow/core/
+COPY ./webapp/data/ /opt/airflow/data/
+COPY ./data-platform/dbt/ /opt/airflow/dbt/
+COPY ./webapp/dsfr_hacks/ /opt/airflow/dsfr_hacks/
+COPY ./webapp/qfdmo/ /opt/airflow/qfdmo/
+COPY ./data-platform/scripts/ /opt/airflow/scripts/
 
 # Classique Airflow
-COPY ./dags/ /opt/airflow/dags/
-COPY ./config/ /opt/airflow/config/
-COPY ./plugins/ /opt/airflow/plugins/
+COPY ./data-platform/dags/ /opt/airflow/dags/
+COPY ./data-platform/config/ /opt/airflow/config/
+COPY ./data-platform/plugins/ /opt/airflow/plugins/
 
 RUN mkdir -p /opt/airflow/tmp
 RUN chown -R ${AIRFLOW_UID:-50000}:0 /opt/airflow/tmp

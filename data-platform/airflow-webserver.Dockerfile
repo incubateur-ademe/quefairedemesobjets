@@ -26,7 +26,7 @@ ENV VIRTUAL_ENV=/home/airflow/.local \
 COPY --from=python-builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
 WORKDIR /opt/airflow
-COPY ./dags /opt/airflow/dags
+COPY ./data-platform/dags /opt/airflow/dags
 
 EXPOSE 8080
 

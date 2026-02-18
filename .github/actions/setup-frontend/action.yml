@@ -19,8 +19,10 @@ runs:
     - name: Install npm dependencies
       shell: bash
       run: npm ci
+      working-directory: webapp
 
     - name: Build assets
       if: inputs.build == 'true'
       shell: bash
       run: npm run build
+      working-directory: webapp
