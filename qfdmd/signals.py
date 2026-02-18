@@ -4,7 +4,7 @@ from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from pydantic import ValidationError
-from sites_faciles.forms.models import FormPage
+from sites_conformes.forms.models import FormPage
 from wagtail.contrib.forms.models import FormSubmission
 
 from core.notion import ContactFormData, create_new_row_in_notion_table
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 @receiver(post_save, sender=submission_class)
-def submit_sites_faciles_form(sender, instance, created, **kwargs):
+def submit_sites_conformes_form(sender, instance, created, **kwargs):
     if created:
         form_data = instance.get_data()
         fields_names = [field.clean_name for field in instance.page.get_form_fields()]

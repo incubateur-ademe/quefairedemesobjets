@@ -422,7 +422,7 @@ class Migration(migrations.Migration):
                         },
                     ),
                     36: (
-                        "sites_faciles.content_manager.blocks.IconPickerBlock",
+                        "sites_conformes.content_manager.blocks.IconPickerBlock",
                         (),
                         {"label": "Icon", "required": False},
                     ),
@@ -964,7 +964,7 @@ class Migration(migrations.Migration):
                         {"label": "Top detail: text", "required": False},
                     ),
                     94: (
-                        "sites_faciles.content_manager.blocks.IconPickerBlock",
+                        "sites_conformes.content_manager.blocks.IconPickerBlock",
                         (),
                         {"label": "Top detail: icon", "required": False},
                     ),
@@ -989,7 +989,7 @@ class Migration(migrations.Migration):
                         },
                     ),
                     99: (
-                        "sites_faciles.content_manager.blocks.IconPickerBlock",
+                        "sites_conformes.content_manager.blocks.IconPickerBlock",
                         (),
                         {"label": "Bottom detail: icon", "required": False},
                     ),
@@ -1167,7 +1167,7 @@ class Migration(migrations.Migration):
                         (),
                         {
                             "label": "Blog",
-                            "page_type": ["sites_faciles_blog.BlogIndexPage"],
+                            "page_type": ["sites_conformes_blog.BlogIndexPage"],
                         },
                     ),
                     120: (
@@ -1183,22 +1183,22 @@ class Migration(migrations.Migration):
                     ),
                     121: (
                         "wagtail.snippets.blocks.SnippetChooserBlock",
-                        ("sites_faciles_blog.Category",),
+                        ("sites_conformes_blog.Category",),
                         {"label": "Filter by category", "required": False},
                     ),
                     122: (
                         "wagtail.snippets.blocks.SnippetChooserBlock",
-                        ("sites_faciles_content_manager.Tag",),
+                        ("sites_conformes_content_manager.Tag",),
                         {"label": "Filter by tag", "required": False},
                     ),
                     123: (
                         "wagtail.snippets.blocks.SnippetChooserBlock",
-                        ("sites_faciles_blog.Person",),
+                        ("sites_conformes_blog.Person",),
                         {"label": "Filter by author", "required": False},
                     ),
                     124: (
                         "wagtail.snippets.blocks.SnippetChooserBlock",
-                        ("sites_faciles_blog.Organization",),
+                        ("sites_conformes_blog.Organization",),
                         {
                             "help_text": "The source is the organization of the post author",
                             "label": "Filter by source",
@@ -1232,7 +1232,7 @@ class Migration(migrations.Migration):
                         (),
                         {
                             "label": "Event calendar",
-                            "page_type": ["sites_faciles_events.EventsIndexPage"],
+                            "page_type": ["sites_conformes_events.EventsIndexPage"],
                         },
                     ),
                     128: (
@@ -1400,7 +1400,7 @@ class Migration(migrations.Migration):
                     ),
                     145: (
                         "wagtail.snippets.blocks.SnippetChooserBlock",
-                        ("sites_faciles_blog.Person",),
+                        ("sites_conformes_blog.Person",),
                         {
                             "help_text": "Optional, all values can be manually specified or overriden below",
                             "label": "Person",
@@ -1964,7 +1964,7 @@ class Migration(migrations.Migration):
                             "admin_text": "A simple, alphabetical list of the subpages of the current page.",
                             "group": "Website structure",
                             "label": "Subpages list",
-                            "template": "sites_faciles_content_manager/blocks/subpages_list.html",
+                            "template": "sites_conformes_content_manager/blocks/subpages_list.html",
                         },
                     ),
                     184: ("qfdmd.blocks.Bonus", (), {}),
@@ -2383,7 +2383,7 @@ class Migration(migrations.Migration):
                         },
                     ),
                     36: (
-                        "sites_faciles.content_manager.blocks.IconPickerBlock",
+                        "sites_conformes.content_manager.blocks.IconPickerBlock",
                         (),
                         {"label": "Icon", "required": False},
                     ),
@@ -2925,7 +2925,7 @@ class Migration(migrations.Migration):
                         {"label": "Top detail: text", "required": False},
                     ),
                     94: (
-                        "sites_faciles.content_manager.blocks.IconPickerBlock",
+                        "sites_conformes.content_manager.blocks.IconPickerBlock",
                         (),
                         {"label": "Top detail: icon", "required": False},
                     ),
@@ -2950,7 +2950,7 @@ class Migration(migrations.Migration):
                         },
                     ),
                     99: (
-                        "sites_faciles.content_manager.blocks.IconPickerBlock",
+                        "sites_conformes.content_manager.blocks.IconPickerBlock",
                         (),
                         {"label": "Bottom detail: icon", "required": False},
                     ),
@@ -3128,7 +3128,7 @@ class Migration(migrations.Migration):
                         (),
                         {
                             "label": "Blog",
-                            "page_type": ["sites_faciles_blog.BlogIndexPage"],
+                            "page_type": ["sites_conformes_blog.BlogIndexPage"],
                         },
                     ),
                     120: (
@@ -3144,22 +3144,22 @@ class Migration(migrations.Migration):
                     ),
                     121: (
                         "wagtail.snippets.blocks.SnippetChooserBlock",
-                        ("sites_faciles_blog.Category",),
+                        ("sites_conformes_blog.Category",),
                         {"label": "Filter by category", "required": False},
                     ),
                     122: (
                         "wagtail.snippets.blocks.SnippetChooserBlock",
-                        ("sites_faciles_content_manager.Tag",),
+                        ("sites_conformes_content_manager.Tag",),
                         {"label": "Filter by tag", "required": False},
                     ),
                     123: (
                         "wagtail.snippets.blocks.SnippetChooserBlock",
-                        ("sites_faciles_blog.Person",),
+                        ("sites_conformes_blog.Person",),
                         {"label": "Filter by author", "required": False},
                     ),
                     124: (
                         "wagtail.snippets.blocks.SnippetChooserBlock",
-                        ("sites_faciles_blog.Organization",),
+                        ("sites_conformes_blog.Organization",),
                         {
                             "help_text": "The source is the organization of the post author",
                             "label": "Filter by source",
@@ -3193,7 +3193,7 @@ class Migration(migrations.Migration):
                         (),
                         {
                             "label": "Event calendar",
-                            "page_type": ["sites_faciles_events.EventsIndexPage"],
+                            "page_type": ["sites_conformes_events.EventsIndexPage"],
                         },
                     ),
                     128: (
@@ -3361,7 +3361,7 @@ class Migration(migrations.Migration):
                     ),
                     145: (
                         "wagtail.snippets.blocks.SnippetChooserBlock",
-                        ("sites_faciles_blog.Person",),
+                        ("sites_conformes_blog.Person",),
                         {
                             "help_text": "Optional, all values can be manually specified or overriden below",
                             "label": "Person",
@@ -3925,7 +3925,7 @@ class Migration(migrations.Migration):
                             "admin_text": "A simple, alphabetical list of the subpages of the current page.",
                             "group": "Website structure",
                             "label": "Subpages list",
-                            "template": "sites_faciles_content_manager/blocks/subpages_list.html",
+                            "template": "sites_conformes_content_manager/blocks/subpages_list.html",
                         },
                     ),
                     184: ("qfdmd.blocks.Bonus", (), {}),

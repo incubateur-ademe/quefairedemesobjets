@@ -68,7 +68,7 @@ def copy_db_data():
         table_prefixes.add(app_label)
 
     # Add "django" for system tables
-    for prefix in ["django", "wagtail", "sites_faciles"]:
+    for prefix in ["django", "wagtail", "sites_conformes"]:
         table_prefixes.add(prefix)
 
     tables = [

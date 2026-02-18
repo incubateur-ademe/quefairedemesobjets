@@ -22,7 +22,6 @@ dependencies = [
     "requests>=2.32.4,<3",
     "sentry-sdk>=2.37.0,<3",
     "shortuuid>=1.0.13,<2",
-    "tqdm>=4.67.1,<5",
     "unidecode>=1.4.0,<2",
     "whitenoise>=6.8.2,<7",
     "django-widget-tweaks>=1.5.0,<2",
@@ -30,7 +29,6 @@ dependencies = [
     "django-colorfield>=0.14.0,<0.15",
     "django-dsfr>=3,<4",
     "rapidfuzz>=3.13.0,<4",
-    "sites-faciles-experiment~=2.1.0rc9",
     "diff-match-patch>=20241021,<20241022",
     "django-lookbook>=1.0.2,<2",
     "queryish>=0.2,<0.4",
@@ -44,6 +42,8 @@ dependencies = [
     # Once these changes will be merged, we will be able to go back to the main repo
     # through official pypi package.
     "modelsearch @ git+https://github.com/fabienheureux/django-modelsearch@add-fuzzy-postgres-search",
+    "sites-conformes>=2.5.2rc1",
+    "wagtail==7.3",
 ]
 
 [build-system]

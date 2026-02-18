@@ -839,7 +839,18 @@ def clean_parent(parent):
         raise ValidationError("You can't define a Parent which is already a duplicate.")
 
 
-class Acteur(BaseActeur, LatLngPropertiesMixin):
+class DisplayedActeurLinkMixin:
+
+    identifiant_unique: str
+
+    @property
+    def displayedacteur_change_url(self):
+        return reverse(
+            "admin:qfdmo_displayedacteur_change", args=[quote(self.identifiant_unique)]
+        )
+
+
+class Acteur(BaseActeur, LatLngPropertiesMixin, DisplayedActeurLinkMixin):
     class Meta:
         constraints = [
             models.UniqueConstraint(
@@ -949,7 +960,7 @@ def parents_cache_invalidate():
     PARENTS_CACHE = None
 
 
-class RevisionActeur(BaseActeur, LatLngPropertiesMixin):
+class RevisionActeur(BaseActeur, LatLngPropertiesMixin, DisplayedActeurLinkMixin):
     parent_model_name = "RevisionActeurParent"
 
     class Meta:
@@ -994,12 +1005,6 @@ class RevisionActeur(BaseActeur, LatLngPropertiesMixin):
     def change_url(self):
         return reverse(
             "admin:qfdmo_revisionacteur_change", args=[quote(self.identifiant_unique)]
-        )
-
-    @property
-    def vueacteur_change_url(self):
-        return reverse(
-            "admin:qfdmo_vueacteur_change", args=[quote(self.identifiant_unique)]
         )
 
     @property

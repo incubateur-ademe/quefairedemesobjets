@@ -297,8 +297,8 @@ TEMPLATES = [
                 # Sites faciles
                 "wagtail.contrib.settings.context_processors.settings",
                 "wagtailmenus.context_processors.wagtailmenus",
-                "sites_faciles.content_manager.context_processors.skiplinks",
-                "sites_faciles.content_manager.context_processors.mega_menus",
+                "sites_conformes.content_manager.context_processors.skiplinks",
+                "sites_conformes.content_manager.context_processors.mega_menus",
             ],
         },
     },
@@ -521,12 +521,12 @@ MODELSEARCH_BACKENDS = {
 INSTALLED_APPS.extend(
     [
         # Sites faciles
-        "sites_faciles",
-        "sites_faciles.blog",
-        "sites_faciles.content_manager",
-        "sites_faciles.events",
+        "sites_conformes",
+        "sites_conformes.blog",
+        "sites_conformes.content_manager",
+        "sites_conformes.events",
         "wagtail.contrib.settings",
-        "sites_faciles.forms",
+        "sites_conformes.forms",
         "wagtail_modeladmin",
         "wagtailmenus",
         "wagtailmarkdown",
