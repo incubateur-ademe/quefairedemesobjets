@@ -37,7 +37,9 @@
                             {% if revision_acteur %}
                                 (
                                     <a href="{{ revision_acteur.change_url }}" target="_blank" rel="noreferrer" data-turbo="false">corrigé</a>
-                                    , <a href="{{ revision_acteur.vueacteur_change_url }}" target="_blank" rel="noreferrer" data-turbo="false">affiché</a>
+                                    {% if not parent_revision_acteur %}
+                                        , <a href="{{ revision_acteur.displayedacteur_change_url }}" target="_blank" rel="noreferrer" data-turbo="false">affiché</a>
+                                    {% endif %}
                                 )
                             {% endif %}
                         </div>
@@ -52,7 +54,7 @@
                             <div class="qf-truncate">Parent
                                 (
                                     <a href="{{ parent_revision_acteur.change_url }}" target="_blank" rel="noreferrer" data-turbo="false">corrigé</a>
-                                    , <a href="{{ parent_revision_acteur.vueacteur_change_url }}" target="_blank" rel="noreferrer" data-turbo="false">affiché</a>
+                                    , <a href="{{ parent_revision_acteur.displayedacteur_change_url }}" target="_blank" rel="noreferrer" data-turbo="false">affiché</a>
                                 )
                             </div>
                             {% if parent_revision_acteur.nombre_enfants %}
