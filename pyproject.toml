@@ -42,7 +42,7 @@ dependencies = [
     # Once these changes will be merged, we will be able to go back to the main repo
     # through official pypi package.
     "modelsearch @ git+https://github.com/fabienheureux/django-modelsearch@add-fuzzy-postgres-search",
-    "sites-conformes>=2.5.2rc1",
+    "sites-conformes==2.5.2rc4",
     "wagtail==7.3",
 ]
 
