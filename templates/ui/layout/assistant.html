@@ -60,7 +60,7 @@ parsing, which raises VariableDoesNotExist when seo is not in context (e.g., err
 
         {% dsfr_css %}
         <link rel="stylesheet" href="{% static 'qfdmd.css' %}">
-        <link href="{% static 'css/style.css' %}" rel="stylesheet" type="text/css" />
+        <link href="{% static 'sites_conformes/css/style.css' %}" rel="stylesheet" type="text/css" />
 
         {% matomo assistant.MATOMO_ID %}
 
@@ -102,10 +102,9 @@ parsing, which raises VariableDoesNotExist when seo is not in context (e.g., err
         {% endif %}
 
         {% wagtailuserbar %}
-        {% include "blocks/header.html" %}
 
         {% if settings.content_manager.CmsDsfrConfig.notice_title or settings.content_manager.CmsDsfrConfig.notice_description %}
-            {% include "blocks/notice.html" %}
+            {% include "sites_conformes/blocks/notice.html" %}
         {% endif %}
 
         {% block header %}
