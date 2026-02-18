@@ -154,6 +154,7 @@ test.describe("Recherche de produits", () => {
     // Parcourir les résultats et vérifier les liens qui contiennent search_term_id
     // (seuls les résultats de type SearchTag ont ces paramètres)
     let searchTagFound = false
+    let nextUrl = ""
     for (let i = 0; i < count; i++) {
       const href = await results.nth(i).getAttribute("href")
       if (href && href.includes("search_term_id=")) {
@@ -173,9 +174,13 @@ test.describe("Recherche de produits", () => {
         const searchTerm = url.searchParams.get("search_term")
         expect(searchTerm).toBeTruthy()
         expect(searchTerm!.length).toBeGreaterThan(0)
+        nextUrl = href
       }
     }
 
     expect(searchTagFound).toBe(true)
+    expect(nextUrl).toBeTruthy()
+    const response = await page.goto(nextUrl)
+    expect(response?.status()).toBe(200)
   })
 })
