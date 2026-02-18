@@ -24,7 +24,7 @@
                 {# TODO : appliquer la bonne couleur depuis le Figma #}
                 <div class="qf-text-black qf-text-lg">
                 {# TODO: revoir wording #}
-                Votre recherche {% dsfr_tag label=search_term_name %} correspond aux recommandations de la fiche suivante :
+                Votre recherche {% dsfr_tag label=search_term_name|lower %} correspond aux recommandations de la fiche suivante :
                 </div>
             {% endblock synonyme %}
         {% endif %}
