@@ -1159,3 +1159,9 @@ class TestsPreview(LookbookPreview):
             "ui/tests/t_15_acteur_fiche_viewport.html",
             {"base_url": base_url},
         )
+
+    def t_16_infotri_configurator(self, **kwargs):
+        """Test that the infotri configurator generates a script tag with a valid src URL"""
+        return render_to_string(
+            "ui/tests/t_16_infotri_configurator.html",
+        )
