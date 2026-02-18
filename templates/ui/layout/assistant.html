@@ -60,6 +60,8 @@ parsing, which raises VariableDoesNotExist when seo is not in context (e.g., err
 
         {% dsfr_css %}
         <link rel="stylesheet" href="{% static 'qfdmd.css' %}">
+        {# Sites Conformes css #}
+        <link href="{% static 'css/style.css' %}" rel="stylesheet" type="text/css" />
 
         {% matomo assistant.MATOMO_ID %}
 
@@ -95,15 +97,20 @@ parsing, which raises VariableDoesNotExist when seo is not in context (e.g., err
         {% dsfr_skiplinks skiplinks %}
 
         {% if request.user.is_authenticated %}
-        {% wagtailuserbar %}
         <div class="qf-mt-2w qf-bg-red-marianne-main-472 qf-text-white qf-text-center qf-w-full qf-py-1v qf-text-xs">
         Vous êtes bien authentifié, vos statistiques PostHog seront ignorées pour cette session | <a href="{% url 'admin:index' %}">accéder à l'administration</a>
         </div>
         {% endif %}
 
+        {% wagtailuserbar %}
+
         {% block header %}
         {% include "ui/components/header/header.html" %}
         {% endblock header %}
+        {% if settings.sites_conformes_content_manager.CmsDsfrConfig.notice_title or settings.sites_conformes_content_manager.CmsDsfrConfig.notice_description %}
+            {% include "blocks/notice.html" %}
+        {% endif %}
+
 
         {% block pre_main %}
         {% endblock pre_main %}
