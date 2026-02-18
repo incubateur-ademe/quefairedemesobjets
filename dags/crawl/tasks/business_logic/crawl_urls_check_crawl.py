@@ -9,7 +9,6 @@ from crawl.config.columns import COLS
 from crawl.config.constants import SORT_COLS
 from crawl.tasks.business_logic.crawl_urls_check_syntax import urls_are_diff_standard
 from pydantic import BaseModel
-from sources.config.shared_constants import EMPTY_ACTEUR_FIELD
 from utils import logging_utils as log
 from utils.dataframes import (
     df_discard_if_col_vals_frequent,
@@ -17,7 +16,9 @@ from utils.dataframes import (
     df_split_on_filter,
     dfs_assert_add_up_to_df,
 )
+from utils.django import django_setup_full
 
+django_setup_full()
 logger = logging.getLogger(__name__)
 
 # Bear minimum to pretend we're a browser
@@ -101,11 +102,12 @@ def df_cohorts_split(
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """Takes the df output of df_check_crawl and splits it into cohorts"""
 
+    from core.models.constants import EMPTY_ACTEUR_FIELD
+
     # TODO: the nested ifs below aren't great but needed since pandas won't
     # allow certain operations on empty dataframes (see df_ok_diff.apply)
     # and we have several successive splitings to create cohorts. Maybe
     # we could refactor this to be more elegant.
-
     # Final df for each cohort: init to None due to nested
     # if structure meaning certain dfs might never be set
     empty = pd.DataFrame()

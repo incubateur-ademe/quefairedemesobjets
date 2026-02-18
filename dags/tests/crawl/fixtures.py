@@ -1,6 +1,6 @@
 import pandas as pd
 import pytest
-from sources.config.shared_constants import EMPTY_ACTEUR_FIELD
+from core.models.constants import EMPTY_ACTEUR_FIELD
 
 from dags.crawl.config.cohorts import COHORTS
 from dags.crawl.config.columns import COLS

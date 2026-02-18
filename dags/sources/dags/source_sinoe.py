@@ -1,12 +1,13 @@
 from airflow import DAG
 from shared.config.airflow import DEFAULT_ARGS_NO_RETRIES
 from shared.config.tags import TAGS
-from sources.config import shared_constants as constants
 from sources.config.airflow_params import (
     get_mapping_config,
     source_sinoe_dechet_mapping_get,
 )
 from sources.tasks.airflow_logic.operators import default_params, eo_task_chain
+
+from qfdmo.models.acteur import ActeurStatus
 
 with DAG(
     dag_id="source_sinoe",
@@ -89,7 +90,7 @@ with DAG(
             },
             {
                 "column": "statut",
-                "value": constants.ACTEUR_ACTIF,
+                "value": ActeurStatus.ACTIF.value,
             },
             # 4. Transformation du dataframe
             {

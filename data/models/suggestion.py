@@ -11,19 +11,6 @@ from django.urls import reverse
 from more_itertools import first
 
 from core.models.mixin import TimestampedModel
-from dags.sources.config.shared_constants import (
-    SUGGESTION_ATRAITER,
-    SUGGESTION_AVALIDER,
-    SUGGESTION_CLUSTERING,
-    SUGGESTION_CRAWL_URLS,
-    SUGGESTION_ENCOURS,
-    SUGGESTION_ERREUR,
-    SUGGESTION_REJETEE,
-    SUGGESTION_SOURCE_AJOUT,
-    SUGGESTION_SOURCE_MODIFICATION,
-    SUGGESTION_SOURCE_SUPRESSION,
-    SUGGESTION_SUCCES,
-)
 from data.models.apply_models.abstract_apply_model import AbstractApplyModel
 from data.models.apply_models.source_apply_model import SourceApplyModel
 from data.models.change import SuggestionChange
@@ -46,22 +33,22 @@ logger = logging.getLogger(__name__)
 
 
 class SuggestionStatut(models.TextChoices):
-    AVALIDER = SUGGESTION_AVALIDER, "🟠 À valider"
-    REJETEE = SUGGESTION_REJETEE, "🔴 Rejetée"
-    ATRAITER = SUGGESTION_ATRAITER, "⏳ À traiter"
-    ENCOURS = SUGGESTION_ENCOURS, "⏳ En cours de traitement"
-    ERREUR = SUGGESTION_ERREUR, "❌ Finie en erreur"
-    SUCCES = SUGGESTION_SUCCES, "✅ Finie avec succès"
+    AVALIDER = "AVALIDER", "🟠 À valider"
+    REJETEE = "REJETEE", "🔴 Rejetée"
+    ATRAITER = "ATRAITER", "⏳ À traiter"
+    ENCOURS = "ENCOURS", "⏳ En cours de traitement"
+    ERREUR = "ERREUR", "❌ Finie en erreur"
+    SUCCES = "SUCCES", "✅ Finie avec succès"
 
 
 class SuggestionCohorteStatut(models.TextChoices):
-    AVALIDER = SUGGESTION_AVALIDER, "Suggestions à valider"
-    ENCOURS = SUGGESTION_ENCOURS, "Suggestions en cours de traitement"
-    SUCCES = SUGGESTION_SUCCES, "Suggestions traitées"
+    AVALIDER = "AVALIDER", "Suggestions à valider"
+    ENCOURS = "ENCOURS", "Suggestions en cours de traitement"
+    SUCCES = "SUCCES", "Suggestions traitées"
 
 
 class SuggestionAction(models.TextChoices):
-    CRAWL_URLS = SUGGESTION_CRAWL_URLS, "🔗 URLs scannées"
+    CRAWL_URLS = "CRAWL_URLS", "🔗 URLs scannées"
     ENRICH_ACTEURS_CLOSED = "ENRICH_ACTEURS_CLOSED", "🚪 Acteurs fermés"
     ENRICH_ACTEURS_RGPD = "ENRICH_ACTEURS_RGPD", "🕵 Anonymisation RGPD"
     ENRICH_ACTEURS_VILLES_TYPO = (
@@ -80,16 +67,16 @@ class SuggestionAction(models.TextChoices):
         "ENRICH_REVISION_ACTEURS_CP_TYPO",
         "🏙️ Revision acteurs codes postaux non conformes",
     )
-    CLUSTERING = SUGGESTION_CLUSTERING, "regroupement/déduplication des acteurs"
+    CLUSTERING = "CLUSTERING", "regroupement/déduplication des acteurs"
     SOURCE_AJOUT = (
-        SUGGESTION_SOURCE_AJOUT,
+        "SOURCE_AJOUT",
         "ingestion de source de données - nouveau acteur",
     )
     SOURCE_MODIFICATION = (
-        SUGGESTION_SOURCE_MODIFICATION,
+        "SOURCE_MODIFICATION",
         "ingestion de source de données - modification d'acteur existant",
     )
-    SOURCE_SUPPRESSION = SUGGESTION_SOURCE_SUPRESSION, "ingestion de source de données"
+    SOURCE_SUPPRESSION = "SOURCE_SUPRESSION", "ingestion de source de données"
 
 
 class SuggestionCohorteManager(models.Manager):
