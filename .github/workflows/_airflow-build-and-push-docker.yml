@@ -64,7 +64,7 @@ jobs:
           push: true
           tags: ${{ inputs.image_tag && format('{0}/{1}/{2}:{3}', env.SCALEWAY_REGISTRY, env.SCALEWAY_NAMESPACE, 'airflow-scheduler', inputs.image_tag) || steps.airflow_scheduler_meta_scaleway.outputs.tags }}
           labels: ${{ steps.airflow_scheduler_meta_scaleway.outputs.labels }}
-          file: airflow-scheduler.Dockerfile
+          file: data-platform/airflow-scheduler.Dockerfile
 
       - name: "[🟣 Scaleway] Extract metadata (tags, labels) for Docker"
         id: airflow_webserver_meta_scaleway
@@ -82,4 +82,4 @@ jobs:
           push: true
           tags: ${{ inputs.image_tag && format('{0}/{1}/{2}:{3}', env.SCALEWAY_REGISTRY, env.SCALEWAY_NAMESPACE, 'airflow-webserver', inputs.image_tag) || steps.airflow_webserver_meta_scaleway.outputs.tags }}
           labels: ${{ steps.airflow_webserver_meta_scaleway.outputs.labels }}
-          file: airflow-webserver.Dockerfile
+          file: data-platform/airflow-webserver.Dockerfile

@@ -50,6 +50,7 @@ jobs:
 
       - name: Check code formatting
         run: npm run format:check
+        working-directory: webapp
 
   backend_tests:
     name: ✅ Backend Tests
@@ -80,13 +81,13 @@ jobs:
         with:
           uv-groups: "--group dev --group airflow"
       - name: Run unit tests
-        run: make unit-test
+        run: make -C webapp unit-test
       - name: Run integration tests
-        run: make integration-test
+        run: make -C webapp integration-test
       - name: Run data tests
-        run: uv run pytest dags/tests
+        run: uv run pytest data-platform/dags/tests
       - name: Check for missing migrations
-        run: uv run python manage.py makemigrations --check --no-input --settings=core.test_settings
+        run: cd webapp && uv run python manage.py makemigrations --check --no-input --settings=core.test_settings
 
   frontend_tests:
     name: ✅ Frontend Tests
@@ -100,6 +101,7 @@ jobs:
 
       - name: Run tests
         run: npm run test
+        working-directory: webapp
 
   # This job prepares all necessary artifacts for E2E test shards to run in parallel.
   # By building assets, populating the database, and caching Playwright browsers once,
@@ -156,15 +158,15 @@ jobs:
 
       - name: collectstatic
         shell: bash
-        run: make collectstatic
+        run: make -C webapp collectstatic
 
       - name: Upload build artifacts for e2e tests
         uses: actions/upload-artifact@v6
         with:
           name: e2e-build-artifacts
           path: |
-            staticfiles
-            static/compiled
+            webapp/staticfiles
+            webapp/static/compiled
             database-dump.pgdump
           retention-days: 1
   e2e:
@@ -223,7 +225,7 @@ jobs:
       # RUN e2e
       - name: Run server
         run: |
-          uv run python manage.py runserver --noreload &
+          cd webapp && uv run python manage.py runserver --noreload &
 
       - name: Wait for server to be ready
         run: |
@@ -233,6 +235,7 @@ jobs:
 
       - name: Run Playwright tests
         run: npx playwright test --shard=${{ matrix.shard }}/5 --update-snapshots
+        working-directory: webapp
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v6
