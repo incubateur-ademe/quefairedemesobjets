@@ -970,7 +970,7 @@ class AccessibilitePreview(LookbookPreview):
             },
         }
         return render_to_string(
-            "sites_faciles_content_manager/blocks/breadcrumbs.html",
+            "sites_conformes_content_manager/blocks/breadcrumbs.html",
             context,
         )
 
