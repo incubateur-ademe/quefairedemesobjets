@@ -56,14 +56,14 @@ runs:
       if: steps.cache-db.outputs.cache-hit != 'true'
       shell: bash
       run: |
-        make createcachetable
-        make migrate
-        make rebuild-search-index
+        make -C webapp createcachetable
+        make -C webapp migrate
+        make -C webapp rebuild-search-index
 
     - name: Init django admin superuser
       if: steps.cache-db.outputs.cache-hit != 'true'
       shell: bash
-      run: make createsuperuser-example
+      run: make -C webapp createsuperuser-example
 
     - name: Dump PostgreSQL database
       if: steps.cache-db.outputs.cache-hit != 'true'

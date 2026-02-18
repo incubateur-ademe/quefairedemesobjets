@@ -98,8 +98,8 @@ services:
       _PIP_ADDITIONAL_REQUIREMENTS: ""
     user: "0:0"
     build:
-      context: ./data-platform
-      dockerfile: airflow-webserver.Dockerfile
+      context: .
+      dockerfile: data-platform/airflow-webserver.Dockerfile
     ports:
       - "8080:8080"
     healthcheck:
@@ -117,8 +117,8 @@ services:
     env_file:
       - ./data-platform/dags/.env
     build:
-      context: ./data-platform
-      dockerfile: airflow-scheduler.Dockerfile
+      context: .
+      dockerfile: data-platform/airflow-scheduler.Dockerfile
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8974/health"]
       interval: 30s
