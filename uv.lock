@@ -3214,7 +3214,7 @@ requires-dist = [
     { name = "requests", specifier = ">=2.32.4,<3" },
     { name = "sentry-sdk", specifier = ">=2.37.0,<3" },
     { name = "shortuuid", specifier = ">=1.0.13,<2" },
-    { name = "sites-conformes", specifier = "==2.5.2rc3" },
+    { name = "sites-conformes", specifier = ">=2.5.2rc1" },
     { name = "unidecode", specifier = ">=1.4.0,<2" },
     { name = "wagtail", specifier = "==7.3" },
     { name = "wagtail-honeypot", specifier = ">=1.2.1" },
@@ -3632,7 +3632,7 @@ wheels = [
 
 [[package]]
 name = "sites-conformes"
-version = "2.5.2rc3"
+version = "2.5.2rc2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "beautifulsoup4" },
@@ -3656,9 +3656,9 @@ dependencies = [
     { name = "wagtail-modeladmin" },
     { name = "wagtailmenus" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/4e/3c/a9b9734dd9ff3582424f4b708e70e06f97f9debeeb1fc81f92780269a8e9/sites_conformes-2.5.2rc3.tar.gz", hash = "sha256:ff949714f13e5bcd1c6a90eccc3f854514593492ce12a1353d315e946068b0a8", size = 7054015, upload-time = "2026-02-18T13:42:30.448Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/26/2e/82554b70b88044ad351b4a4fefbc6a67aae278ef55a5172d52e27fe0fe6a/sites_conformes-2.5.2rc2.tar.gz", hash = "sha256:004c67a554ad955042740aca0dcedef6c714cbfbb3737af277b91d2f8c229c60", size = 7053763, upload-time = "2026-02-18T01:15:59.296Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/09/1a/292c991a437b3bf6d92f578582901cefeb69eba732d60ed11b93370e3c43/sites_conformes-2.5.2rc3-py3-none-any.whl", hash = "sha256:73373e4ad02a0302a878e440b4e42da63cde6ec5357d6e6a7b67c2036c7c782e", size = 7445314, upload-time = "2026-02-18T13:42:28.355Z" },
+    { url = "https://files.pythonhosted.org/packages/44/18/0e73e885a20a30d17b7f2b38d2f633ed6b58db31cdca4d296990e1dd6052/sites_conformes-2.5.2rc2-py3-none-any.whl", hash = "sha256:51bd37f9d38285f2e8aabcfb32f303b43b4d9b5daed8f0605eee506261278adf", size = 7441270, upload-time = "2026-02-18T01:15:56.574Z" },
 ]
 
 [[package]]
