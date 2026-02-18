@@ -87,8 +87,18 @@ class NextAutocompleteInput(forms.TextInput):
 
 
 class SearchAutocompleteInput(NextAutocompleteInput):
-    """Autocomplete widget for homepage search."""
+    """DSFR autocomplete widget for homepage search."""
 
     search_view = "qfdmd:autocomplete_home_search"
     show_on_focus = True
     limit = 10
+
+
+class QfSearchAutocompleteInput(SearchAutocompleteInput):
+    """Quefaire-styled autocomplete widget.
+
+    Inherits all search behaviour from SearchAutocompleteInput but
+    renders the input with a custom template.
+    """
+
+    template_name = "ui/forms/widgets/autocomplete/input.qf.html"

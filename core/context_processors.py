@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.urls import reverse
 
-from qfdmd.forms import HeaderSearchForm, HomeSearchForm
+from qfdmd.forms import HeaderSearchForm, HomeSearchForm, QfSearchForm
 
 from . import constants
 
@@ -27,6 +27,7 @@ def content(request):
 def global_context(request) -> dict:
     home_search_form = HomeSearchForm(prefix="home", initial={"id": "home"})
     header_autocomplete_search_form = HeaderSearchForm(prefix="header-autocomplete")
+    qf_search_form = QfSearchForm(prefix="qf-search")
     skiplinks = [
         {"link": "#content", "label": "Contenu"},
     ]
@@ -40,6 +41,7 @@ def global_context(request) -> dict:
             "MATOMO_ID": settings.ASSISTANT["MATOMO_ID"],
             "header_autocomplete_search_form": header_autocomplete_search_form,
             "home_search_form": home_search_form,
+            "qf_search_form": qf_search_form,
         },
         "CARTE": {
             "DECLARATION_ACCESSIBILITE_PAGE_ID": settings.CARTE[
