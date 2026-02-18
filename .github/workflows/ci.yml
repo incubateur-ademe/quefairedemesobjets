@@ -85,7 +85,7 @@ jobs:
       - name: Run integration tests
         run: make -C webapp integration-test
       - name: Run data tests
-        run: uv run pytest data-platform/dags/tests
+        run: make -C webapp dags-test
       - name: Check for missing migrations
         run: cd webapp && uv run python manage.py makemigrations --check --no-input --settings=core.test_settings
 

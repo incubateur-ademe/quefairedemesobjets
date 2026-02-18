@@ -7,11 +7,17 @@ import pytest
 from django.core.management import call_command
 from faker import Faker
 
-from dags.sources.tasks.airflow_logic.config_management import DAGConfig
-
 
 def pytest_configure(config):
-    sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "dags"))
+    project_root = Path(__file__).resolve().parents[3]
+
+    dags_path = project_root / "data-platform" / "dags"
+    webapp_path = project_root / "webapp"
+
+    for path in (dags_path, webapp_path):
+        path_str = str(path)
+        if path_str not in sys.path:
+            sys.path.insert(0, path_str)
 
 
 @pytest.fixture(scope="session")
@@ -140,6 +146,8 @@ def source_id_by_code():
 
 @pytest.fixture
 def dag_config():
+    from dags.sources.tasks.airflow_logic.config_management import DAGConfig
+
     return DAGConfig.model_validate(
         {
             "normalization_rules": [
