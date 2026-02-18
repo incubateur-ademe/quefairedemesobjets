@@ -18,13 +18,13 @@ class Command(BaseCommand):
 
     # Apps to migrate (from search-and-replace.yml)
     APPS_TO_MIGRATE = [
-        "sites_conformes_blog",
-        "sites_conformes_events",
-        "sites_conformes_forms",
-        "sites_conformes_content_manager",
-        "sites_conformes_config",
-        "sites_conformes_proconnect",
-        "sites_conformes_dashboard",
+        "sites_faciles_blog",
+        "sites_faciles_events",
+        "sites_faciles_forms",
+        "sites_faciles_content_manager",
+        "sites_faciles_config",
+        "sites_faciles_proconnect",
+        "sites_faciles_dashboard",
     ]
 
     def add_arguments(self, parser):
@@ -75,12 +75,7 @@ class Command(BaseCommand):
             )
             table_renames = []
             for (table_name,) in tables_to_rename:
-                if table_name.startswith("content_manager_"):
-                    new_name = table_name.replace(
-                        "content_manager_", "sites_conformes_content_manager_"
-                    )
-                else:
-                    new_name = "sites_conformes_" + table_name
+                new_name = "sites_conformes_" + table_name
                 table_renames.append((table_name, new_name))
                 self.stdout.write(f"  - {table_name} → {new_name}")
 
@@ -229,9 +224,3 @@ class Command(BaseCommand):
             self.stdout.write(
                 self.style.SUCCESS("✓ All operations completed successfully!")
             )
-            self.stdout.write("\n" + self.style.WARNING("IMPORTANT NEXT STEPS:"))
-            self.stdout.write("1. Update your Django model Meta.db_table attributes")
-            self.stdout.write(
-                "2. Verify INSTALLED_APPS in settings.py matches new app names"
-            )
-            self.stdout.write("3. Test your application thoroughly")

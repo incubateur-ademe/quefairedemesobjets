@@ -43,6 +43,7 @@ dependencies = [
     # through official pypi package.
     "modelsearch @ git+https://github.com/fabienheureux/django-modelsearch@add-fuzzy-postgres-search",
     "sites-conformes>=2.5.2rc1",
+    "wagtail==7.3",
 ]
 
 [build-system]
