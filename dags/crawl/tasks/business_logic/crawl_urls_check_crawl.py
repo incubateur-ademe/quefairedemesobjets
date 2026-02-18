@@ -16,9 +16,7 @@ from utils.dataframes import (
     df_split_on_filter,
     dfs_assert_add_up_to_df,
 )
-from utils.django import django_setup_full
 
-django_setup_full()
 logger = logging.getLogger(__name__)
 
 # Bear minimum to pretend we're a browser

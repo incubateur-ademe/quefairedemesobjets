@@ -24,11 +24,9 @@ from sources.tasks.transform.exceptions import (
 )
 from sources.tasks.transform.formatter import format_libelle_to_code
 from sources.tasks.transform.opening_hours import interprete_opening_hours
-from utils.django import django_setup_full
-
-django_setup_full()
 
 logger = logging.getLogger(__name__)
+
 url_validator = URLValidator(schemes=["http", "https"])
 
 CLOSED_THIS_DAY = "Fermé"
