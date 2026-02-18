@@ -123,14 +123,6 @@ jobs:
           path: playwright-report/
           retention-days: 2
 
-      - name: Upload test results
-        uses: actions/upload-artifact@v6
-        if: ${{ !cancelled() && inputs.ref == github.ref }}
-        with:
-          name: playwright-results
-          path: test-results/
-          retention-days: 2
-
       - name: Upload Playwright diffs on failure
         if: failure()
         uses: actions/upload-artifact@v4
