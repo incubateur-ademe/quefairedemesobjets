@@ -1,14 +1,8 @@
-# Keep in sync with .prettierignore until we can use several prettierignore files
-# https://github.com/prettier/prettier/issues/8048
+# Caches
 __pycache__
 .DS_Store
-.env
-.parcel-cache
-.venv
-.cursor
 *.bak
 *.swp
-local_iframe.html
 
 # DB
 pgdata
@@ -16,27 +10,12 @@ webapp_dbdata
 warehouse_dbdata
 airflow_dbdata
 
-# JS
-static/collected
-static/compiled
-node_modules
+# Environment
+.env
+webapp/.venv
 
-# compiled
-staticfiles
-/test-results/
-/playwright-report/
-/blob-report/
-/playwright/.cache/
-/tests-examples/
-e2e_tests/*-snapshots
-
-# airflow
-airflow_settings.yaml
-logs
-airflow-pgdata/
-
-media
-
+# Others
+.cursor
 _build
 .obsidian
 *.pem

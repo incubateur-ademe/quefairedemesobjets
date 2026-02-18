@@ -3,17 +3,18 @@ x-airflow-common: &airflow-common
   tmpfs:
     - /tmp
   env_file:
-    - ./dags/.env
+    - ./data-platform/dags/.env
   volumes:
-    - ./config:/opt/airflow/config
-    - ./core:/opt/airflow/core
-    - ./dags:/opt/airflow/dags
-    - ./data:/opt/airflow/data
-    - ./dbt:/opt/airflow/dbt
-    - ./logs:/opt/airflow/logs
-    - ./plugins:/opt/airflow/plugins
-    - ./qfdmo:/opt/airflow/qfdmo
-    - ./scripts:/opt/airflow/scripts
+    - ./data-platform/config:/opt/airflow/config
+    - ./data-platform/dags:/opt/airflow/dags
+    - ./data-platform/dbt:/opt/airflow/dbt
+    - ./data-platform/logs:/opt/airflow/logs
+    - ./data-platform/plugins:/opt/airflow/plugins
+    - ./data-platform/scripts:/opt/airflow/scripts
+    # FIXME : charger le volume webapp à la place des 3 suivants
+    - ./webapp/core:/opt/airflow/core
+    - ./webapp/data:/opt/airflow/data
+    - ./webapp/qfdmo:/opt/airflow/qfdmo
   # Voir la doc et s'assurer que AIRFLOW_UID est
   # définit dans le .env pour correspondre à votre UID
   # sed -i '/^AIRFLOW_UID=/d' .env && echo "AIRFLOW_UID=$(id -u)" >> .env
@@ -97,7 +98,7 @@ services:
       _PIP_ADDITIONAL_REQUIREMENTS: ""
     user: "0:0"
     build:
-      context: .
+      context: ./data-platform
       dockerfile: airflow-webserver.Dockerfile
     ports:
       - "8080:8080"
@@ -114,9 +115,9 @@ services:
   airflow-scheduler:
     <<: *airflow-common
     env_file:
-      - ./dags/.env
+      - ./data-platform/dags/.env
     build:
-      context: .
+      context: ./data-platform
       dockerfile: airflow-scheduler.Dockerfile
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8974/health"]
