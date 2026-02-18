@@ -28,8 +28,8 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
   }
 
   focus(event) {
-    if (this.showOnFocusValue) {
-      this.#loadResults(this.inputTarget.value || "")
+    if (this.showOnFocusValue && this.inputTarget.value) {
+      this.#loadResults(this.inputTarget.value)
     }
   }
 

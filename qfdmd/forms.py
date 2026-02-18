@@ -3,19 +3,40 @@ import logging
 from django import forms
 from dsfr.forms import DsfrBaseForm
 
-from core.widgets import SearchAutocompleteInput
+from core.widgets import QfSearchAutocompleteInput, SearchAutocompleteInput
 
 
 logger = logging.getLogger(__name__)
 
 
 class HeaderSearchForm(DsfrBaseForm):
+    """DSFR-styled search form used in the site header."""
+
     search = forms.CharField(
         required=False,
         widget=SearchAutocompleteInput(
             attrs={
                 "class": "fr-input",
                 "placeholder": "pantalon, perceuse, canapé...",
+                "autocomplete": "off",
+            },
+        ),
+    )
+
+
+class QfSearchForm(forms.Form):
+    """Quefaire-styled search form used on the homepage.
+
+    Intentionally does NOT inherit DsfrBaseForm to avoid DSFR injecting
+    fr-input class and its label/wrapper markup.
+    """
+
+    search = forms.CharField(
+        required=False,
+        label="",
+        widget=QfSearchAutocompleteInput(
+            attrs={
+                "placeholder": "exemple : canapé, téléphone, CD-ROM...",
                 "autocomplete": "off",
             },
         ),
