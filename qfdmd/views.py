@@ -67,6 +67,8 @@ def _collect_synonymes_for_page(page):
         )
     )
 
+    # todo : do not include synonyme that are added on other pages here
+
     return list(
         {
             synonyme.id: synonyme for synonyme in direct_synonymes + product_synonymes
