@@ -4,7 +4,6 @@ from datetime import datetime
 
 import pandas as pd
 from shared.tasks.database_logic.db_manager import PostgresConnectionManager
-from sources.config import shared_constants as constants
 from utils.django import django_setup_full
 
 django_setup_full()
@@ -127,6 +126,8 @@ def db_write_type_action_suggestions(
     use_legacy_suggestions: bool,
 ):
 
+    from data.models.suggestion import SuggestionAction
+
     (
         df_log_error_to_create,
         df_log_warning_to_create,
@@ -158,7 +159,7 @@ def db_write_type_action_suggestions(
         metadata=metadata_to_create,
         dag_name=f"{dag_name} - AJOUT",
         run_name=run_name,
-        type_action=constants.SUGGESTION_SOURCE_AJOUT,
+        type_action=SuggestionAction.SOURCE_AJOUT,
         df_log_error=df_log_error_to_create,
         df_log_warning=df_log_warning_to_create,
     )
@@ -167,14 +168,14 @@ def db_write_type_action_suggestions(
         metadata=metadata_to_delete,
         dag_name=f"{dag_name} - SUP",
         run_name=run_name,
-        type_action=constants.SUGGESTION_SOURCE_SUPRESSION,
+        type_action=SuggestionAction.SOURCE_SUPPRESSION,
     )
     function_to_use(
         df=df_acteur_to_update,
         metadata=metadata_to_update,
         dag_name=f"{dag_name} - MODIF",
         run_name=run_name,
-        type_action=constants.SUGGESTION_SOURCE_MODIFICATION,
+        type_action=SuggestionAction.SOURCE_MODIFICATION,
         df_log_error=df_log_error_to_update,
         df_log_warning=df_log_warning_to_update,
     )
@@ -190,9 +191,12 @@ def insert_suggestion(
     df_log_warning: pd.DataFrame = pd.DataFrame(),
 ):
     from data.models.suggestion import (
+        SuggestionAction,
         SuggestionCohorte,
+        SuggestionCohorteStatut,
         SuggestionGroupe,
         SuggestionLog,
+        SuggestionStatut,
         SuggestionUnitaire,
     )
     from data.models.suggestions.source import SuggestionSourceModel
@@ -206,7 +210,7 @@ def insert_suggestion(
         identifiant_action=dag_name,
         identifiant_execution=run_name,
         type_action=type_action,
-        statut=constants.SUGGESTION_AVALIDER,
+        statut=SuggestionCohorteStatut.AVALIDER,
         metadata=metadata,
     )
     suggestion_cohorte.save()
@@ -252,7 +256,7 @@ def insert_suggestion(
         )
         suggestion_groupe = SuggestionGroupe(
             suggestion_cohorte=suggestion_cohorte,
-            statut=constants.SUGGESTION_AVALIDER,
+            statut=SuggestionStatut.AVALIDER,
             acteur=acteur,
             revision_acteur=revision_acteur,
             parent_revision_acteur=parent,
@@ -291,7 +295,7 @@ def insert_suggestion(
                 values.append(getattr(suggestion, key, ""))
             SuggestionUnitaire(
                 suggestion_groupe=suggestion_groupe,
-                statut=constants.SUGGESTION_AVALIDER,
+                statut=SuggestionStatut.AVALIDER,
                 acteur=acteur,
                 # Acteur will be updated when a source is updated
                 suggestion_modele="Acteur",
@@ -302,13 +306,13 @@ def insert_suggestion(
             # Special case for SUPPRESSION which should be applied to its revision
             # if it exists
             if (
-                suggestion_cohorte.type_action == constants.SUGGESTION_SOURCE_SUPRESSION
+                suggestion_cohorte.type_action == SuggestionAction.SOURCE_SUPPRESSION
                 and "statut" in keys
                 and revision_acteur
             ):
                 SuggestionUnitaire(
                     suggestion_groupe=suggestion_groupe,
-                    statut=constants.SUGGESTION_AVALIDER,
+                    statut=SuggestionStatut.AVALIDER,
                     revision_acteur=revision_acteur,
                     suggestion_modele="RevisionActeur",
                     champs=keys,
@@ -325,7 +329,7 @@ def insert_suggestion_legacy(
     df_log_error: pd.DataFrame = pd.DataFrame(),
     df_log_warning: pd.DataFrame = pd.DataFrame(),
 ):
-    from data.models.suggestion import SuggestionLog
+    from data.models.suggestion import SuggestionCohorteStatut, SuggestionLog
 
     if df.empty:
         return
@@ -353,7 +357,7 @@ def insert_suggestion_legacy(
                 dag_name,
                 run_name,
                 type_action,
-                constants.SUGGESTION_AVALIDER,
+                SuggestionCohorteStatut.AVALIDER.value,
                 json.dumps(metadata),
                 current_date,
                 current_date,
@@ -395,7 +399,7 @@ def insert_suggestion_legacy(
 
     # Insert dag_run_change
     df["suggestion_cohorte_id"] = suggestion_cohorte_id
-    df["statut"] = constants.SUGGESTION_AVALIDER
+    df["statut"] = SuggestionCohorteStatut.AVALIDER.value
     # TODO: here the Suggestion model could be used instead of using pandas to insert
     # the data into the database
     df[["contexte", "suggestion", "suggestion_cohorte_id", "statut"]].to_sql(

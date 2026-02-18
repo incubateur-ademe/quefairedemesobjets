@@ -1,7 +1,7 @@
 import pytest
 from crawl.fixtures import UNREACHABLE, df_read  # noqa: F401
-from sources.config.shared_constants import EMPTY_ACTEUR_FIELD
 
+from core.models.constants import EMPTY_ACTEUR_FIELD
 from dags.crawl.config.cohorts import COHORTS
 from dags.crawl.config.columns import COLS
 from dags.crawl.tasks.business_logic.crawl_urls_check_dns import (
