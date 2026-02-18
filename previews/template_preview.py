@@ -25,9 +25,9 @@ from qfdmo.models.acteur import (
     DisplayedPropositionService,
     LabelQualite,
 )
-from search.models import SearchTerm
 from qfdmo.models.action import Action
 from qfdmo.models.config import CarteConfig
+from search.models import SearchTerm
 
 base_url = settings.BASE_URL
 
@@ -353,7 +353,6 @@ class ComponentsPreview(LookbookPreview):
     @register_form_class(ProduitHeadingForm)
     @component_docs("ui/components/produit/heading.md")
     def produit_heading(self, search_term=None, pronom="mon", **kwargs):
-
         factory = RequestFactory()
         request = factory.get("/")
 
@@ -371,7 +370,6 @@ class ComponentsPreview(LookbookPreview):
     @register_form_class(ProduitHeadingForm)
     @component_docs("ui/components/produit/heading_family.md")
     def produit_heading_family(self, search_term=None, pronom="mon", **kwargs):
-
         factory = RequestFactory()
         request = factory.get("/")
 
@@ -972,7 +970,7 @@ class AccessibilitePreview(LookbookPreview):
             },
         }
         return render_to_string(
-            "sites_faciles_content_manager/blocks/breadcrumbs.html",
+            "sites_conformes_content_manager/blocks/breadcrumbs.html",
             context,
         )
 

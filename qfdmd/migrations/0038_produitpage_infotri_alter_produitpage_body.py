@@ -369,7 +369,7 @@ class Migration(migrations.Migration):
                         },
                     ),
                     31: (
-                        "sites_faciles.content_manager.blocks.IconPickerBlock",
+                        "sites_conformes.content_manager.blocks.IconPickerBlock",
                         (),
                         {"label": "Icon", "required": False},
                     ),
@@ -881,7 +881,7 @@ class Migration(migrations.Migration):
                         {"label": "Top detail: text", "required": False},
                     ),
                     86: (
-                        "sites_faciles.content_manager.blocks.IconPickerBlock",
+                        "sites_conformes.content_manager.blocks.IconPickerBlock",
                         (),
                         {"label": "Top detail: icon", "required": False},
                     ),
@@ -906,7 +906,7 @@ class Migration(migrations.Migration):
                         },
                     ),
                     91: (
-                        "sites_faciles.content_manager.blocks.IconPickerBlock",
+                        "sites_conformes.content_manager.blocks.IconPickerBlock",
                         (),
                         {"label": "Bottom detail: icon", "required": False},
                     ),
@@ -1100,7 +1100,7 @@ class Migration(migrations.Migration):
                         (),
                         {
                             "label": "Blog",
-                            "page_type": ["sites_faciles_blog.BlogIndexPage"],
+                            "page_type": ["sites_conformes_blog.BlogIndexPage"],
                         },
                     ),
                     113: (
@@ -1116,22 +1116,22 @@ class Migration(migrations.Migration):
                     ),
                     114: (
                         "wagtail.snippets.blocks.SnippetChooserBlock",
-                        ("sites_faciles_blog.Category",),
+                        ("sites_conformes_blog.Category",),
                         {"label": "Filter by category", "required": False},
                     ),
                     115: (
                         "wagtail.snippets.blocks.SnippetChooserBlock",
-                        ("sites_faciles_content_manager.Tag",),
+                        ("sites_conformes_content_manager.Tag",),
                         {"label": "Filter by tag", "required": False},
                     ),
                     116: (
                         "wagtail.snippets.blocks.SnippetChooserBlock",
-                        ("sites_faciles_blog.Person",),
+                        ("sites_conformes_blog.Person",),
                         {"label": "Filter by author", "required": False},
                     ),
                     117: (
                         "wagtail.snippets.blocks.SnippetChooserBlock",
-                        ("sites_faciles_blog.Organization",),
+                        ("sites_conformes_blog.Organization",),
                         {
                             "help_text": "The source is the organization of the post author",
                             "label": "Filter by source",
@@ -1165,7 +1165,7 @@ class Migration(migrations.Migration):
                         (),
                         {
                             "label": "Event calendar",
-                            "page_type": ["sites_faciles_events.EventsIndexPage"],
+                            "page_type": ["sites_conformes_events.EventsIndexPage"],
                         },
                     ),
                     121: (
@@ -1307,7 +1307,7 @@ class Migration(migrations.Migration):
                     ),
                     134: (
                         "wagtail.snippets.blocks.SnippetChooserBlock",
-                        ("sites_faciles_blog.Person",),
+                        ("sites_conformes_blog.Person",),
                         {
                             "help_text": "Optional, all values can be manually specified or overriden below",
                             "label": "Person",
