@@ -75,7 +75,7 @@ class Command(BaseCommand):
             )
             table_renames = []
             for (table_name,) in tables_to_rename:
-                new_name = "sites_conformes_" + table_name
+                new_name = table_name.replace("sites_faciles", "sites_conformes")
                 table_renames.append((table_name, new_name))
                 self.stdout.write(f"  - {table_name} → {new_name}")
 
