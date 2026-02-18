@@ -101,11 +101,11 @@ jobs:
           path: ${{ env.SCREENSHOTS_BASE_PATH }}
 
       - name: Run Playwright tests
-        if: ${{ !inputs.regression_only }}
+        if: ${{ !inputs.compare }}
         run: npx playwright test --update-snapshots
 
       - name: Run Playwright tests (regression only)
-        if: inputs.regression_only
+        if: inputs.compare
         run: npx playwright test --grep=@regression
 
       - name: Upload baseline screenshots
