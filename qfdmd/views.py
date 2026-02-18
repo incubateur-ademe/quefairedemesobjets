@@ -10,12 +10,12 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control
 from django.views.decorators.vary import vary_on_headers
 from django.views.generic import DetailView, TemplateView
+from modelsearch.index import insert_or_update_object
 from wagtail.admin.filters import WagtailFilterSet
 from wagtail.admin.views.pages.listing import IndexView
 from wagtail.admin.viewsets.base import ViewSetGroup
 from wagtail.admin.viewsets.pages import PageListingViewSet
 from wagtail.models import Page
-from modelsearch.index import insert_or_update_object
 
 from core.constants import SEARCH_TERM_ID_QUERY_PARAM
 from core.views import static_file_content_from
@@ -23,8 +23,8 @@ from qfdmd.forms import SearchForm
 from qfdmd.models import (
     Produit,
     ProduitPage,
-    Synonyme,
     SearchTag,
+    Synonyme,
     TaggedSearchTag,
 )
 
@@ -61,13 +61,17 @@ def _collect_synonymes_for_page(page):
         )
     )
 
-    product_synonymes = list(
-        Synonyme.objects.filter(produit__next_wagtail_page__page=page).exclude(
-            id__in=excluded_synonyme_ids
-        )
+    other_pages_synonyme_ids = set(
+        Synonyme.objects.filter(next_wagtail_page__isnull=False)
+        .exclude(next_wagtail_page__page=page)
+        .values_list("id", flat=True)
     )
 
-    # todo : do not include synonyme that are added on other pages here
+    product_synonymes = list(
+        Synonyme.objects.filter(produit__next_wagtail_page__page=page)
+        .exclude(id__in=excluded_synonyme_ids)
+        .exclude(id__in=other_pages_synonyme_ids)
+    )
 
     return list(
         {
