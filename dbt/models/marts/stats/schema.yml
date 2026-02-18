@@ -1,6 +1,27 @@
 version: 2
 
 models:
+  - name: marts_acteur_revision_statut
+    description: "Acteurs avec une révision"
+    columns:
+      - name: identifiant_unique
+        description: "L'identifiant unique de l'acteur"
+      - name: nom
+        description: "Le nom de l'acteur"
+      - name: source_code
+        description: "Le code de la source de l'acteur"
+      - name: acteur_statut
+        description: "Le statut de l'acteur"
+      - name: revision_statut
+        description: "Le statut de la révision"
+    config:
+      materialized: table
+      tags:
+        - stats
+        - marts
+        - acteurs
+        - revision
+        - statut
   - name: marts_acteur_stacked
     description: "Acteurs visibles et stackés"
     columns:

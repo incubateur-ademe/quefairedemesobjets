@@ -1,6 +1,35 @@
 version: 2
 
 models:
+  - name: int_acteur_with_revision
+    description: "Acteurs avec une révision"
+    columns:
+      - name: identifiant_unique
+        description: "L'identifiant unique de l'acteur"
+    config:
+      materialized: table
+      tags:
+        - stats
+        - intermediate
+        - acteurs
+        - revision
+        - acteur
+      indexes:
+        - columns: ['identifiant_unique']
+  - name: int_revision_with_acteur
+    description: "Révisions avec un acteur"
+    columns:
+      - name: identifiant_unique
+        description: "L'identifiant unique de la révision"
+    config:
+      materialized: table
+      tags:
+        - stats
+        - intermediate
+        - revision
+        - acteur
+      indexes:
+        - columns: ['identifiant_unique']
   - name: int_acteur_visible_location
     description: "Acteurs visibles : identifiant et localisation"
     columns:
