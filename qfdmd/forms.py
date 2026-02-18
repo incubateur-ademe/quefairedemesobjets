@@ -5,6 +5,9 @@ from dsfr.forms import DsfrBaseForm
 from modelsearch.query import Fuzzy
 
 from search.models import SearchTerm
+from core.widgets import HeaderSearchAutocompleteInput
+
+from .mixins import HomeSearchMixin
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +16,7 @@ class SearchInput(forms.TextInput):
     template_name = "ui/components/search/widget.html"
 
 
-class SearchForm(DsfrBaseForm):
+class HomeSearchForm(HomeSearchMixin, DsfrBaseForm):
     id = forms.CharField(required=False, widget=forms.HiddenInput())
     input = forms.CharField(
         help_text="Entrez un objet ou un déchet",
@@ -30,6 +33,20 @@ class SearchForm(DsfrBaseForm):
 
         self.results = SearchTerm.objects.searchable().search(Fuzzy(search_query))[:10]
         return self.results
+
+
+
+class HeaderSearchForm(DsfrBaseForm):
+    search = forms.CharField(
+        required=False,
+        widget=HeaderSearchAutocompleteInput(
+            attrs={
+                "class": "fr-input",
+                "placeholder": "pantalon, perceuse, canapé...",
+                "autocomplete": "off",
+            },
+        ),
+    )
 
 
 class ContactForm(DsfrBaseForm):
