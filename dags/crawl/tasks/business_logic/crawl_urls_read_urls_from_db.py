@@ -8,7 +8,6 @@ import pandas as pd
 from crawl.config.columns import COLS
 from crawl.config.constants import SORT_COLS
 from django.db.models import Q
-from sources.config.shared_constants import EMPTY_ACTEUR_FIELD
 from utils import logging_utils as log
 from utils.dataframes import df_sort
 from utils.django import django_setup_full
@@ -20,6 +19,8 @@ logger = logging.getLogger(__name__)
 
 def crawl_urls_read_urls_from_db(limit: int | None = None) -> pd.DataFrame:
     """Get URLs to crawl from DB"""
+    from core.models.constants import EMPTY_ACTEUR_FIELD
+
     logger.info(f"{limit=}")
     from qfdmo.models import ActeurStatus, DisplayedActeur
 

@@ -1,9 +1,10 @@
 from airflow import DAG
 from shared.config.airflow import DEFAULT_ARGS
 from shared.config.tags import TAGS
-from sources.config import shared_constants as constants
 from sources.config.airflow_params import get_mapping_config
 from sources.tasks.airflow_logic.operators import default_params, eo_task_chain
+
+from qfdmo.models.acteur import ActeurPublicAccueilli, ActeurStatus
 
 with DAG(
     dag_id="pharmacies",
@@ -53,7 +54,7 @@ with DAG(
             # 3. Ajout des colonnes avec une valeur par défaut
             {
                 "column": "statut",
-                "value": constants.ACTEUR_ACTIF,
+                "value": ActeurStatus.ACTIF.value,
             },
             {
                 "column": "uniquement_sur_rdv",
@@ -77,7 +78,7 @@ with DAG(
             },
             {
                 "column": "public_accueilli",
-                "value": constants.PUBLIC_PAR,
+                "value": ActeurPublicAccueilli.PARTICULIERS.value,
             },
             {
                 "column": "acteur_type_code",
