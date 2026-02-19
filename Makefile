@@ -99,10 +99,6 @@ makemigrations:
 merge-migrations:
 	$(DJANGO_ADMIN) makemigrations --merge
 
-.PHONY: rebuild-search-index
-rebuild-search-index:
-	$(DJANGO_ADMIN) rebuild_modelsearch_index
-
 
 .PHONY: createcachetable
 createcachetable:
@@ -144,7 +140,7 @@ generate-fixtures:
 	$(DJANGO_ADMIN) dumpdata qfdmo.labelqualite $(FIXTURES_OPTIONS) -o qfdmo/fixtures/labels.json
 	$(DJANGO_ADMIN) dumpdata qfdmo.source $(FIXTURES_OPTIONS) -o qfdmo/fixtures/sources.json
 	$(DJANGO_ADMIN) dumpdata qfdmo.carteconfig qfdmo.groupeactionconfig $(FIXTURES_OPTIONS) -o qfdmo/fixtures/carte_configs.json
-	$(DJANGO_ADMIN) dumpdata search.searchterm qfdmd.synonyme $(FIXTURES_OPTIONS) -o qfdmd/fixtures/synonymes.json
+	$(DJANGO_ADMIN) dumpdata qfdmd.synonyme $(FIXTURES_OPTIONS) -o qfdmd/fixtures/synonymes.json
 	$(DJANGO_ADMIN) dumpdata qfdmd.produit $(FIXTURES_OPTIONS) -o qfdmd/fixtures/produits.json
 
 .PHONY: clear-cache

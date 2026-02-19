@@ -4,13 +4,23 @@ from django.urls import path, reverse
 from wagtail import hooks
 from wagtail.admin.action_menu import ActionMenuItem
 
-from qfdmd.models import ProduitPage
-from qfdmd.views import import_legacy_synonymes, legacy_migrate, ProduitsViewSetGroup
+from qfdmd.views import (
+    legacy_migrate,
+    pokemon_chooser_viewset,
+)
 
 
 @hooks.register("register_permissions")
 def register_permissions():
     return Permission.objects.filter(codename__in=["can_see_beta_search"])
+
+
+@hooks.register("register_admin_viewset")
+def register_pokemon_chooser_viewset():
+    return pokemon_chooser_viewset
+
+
+WagtailBlockChooserWidget = pokemon_chooser_viewset.widget_class
 
 
 class MigratePageMenuItem(ActionMenuItem):
@@ -33,35 +43,9 @@ class MigratePageMenuItem(ActionMenuItem):
         return False
 
 
-class ImportLegacySynonymesMenuItem(ActionMenuItem):
-    name = "import-legacy-synonymes"
-    label = "Importer les synonymes de recherche"
-    icon_name = "download"
-
-    def get_url(self, context):
-        page = context["page"]
-        return reverse("import_legacy_synonymes", args=[page.id])
-
-    def is_shown(self, context):
-        """Only show for ProduitPage instances that have not been migrated."""
-        page = context.get("page")
-        if not page:
-            return False
-        specific = page.specific if hasattr(page, "specific") else page
-        return (
-            isinstance(specific, ProduitPage)
-            and not specific.migree_depuis_synonymes_legacy
-        )
-
-
 @hooks.register("register_page_action_menu_item")
 def register_sync_page_menu_item():
     return MigratePageMenuItem(order=10)
-
-
-@hooks.register("register_page_action_menu_item")
-def register_import_legacy_synonymes_menu_item():
-    return ImportLegacySynonymesMenuItem(order=11)
 
 
 @hooks.register("register_admin_urls")
@@ -72,17 +56,7 @@ def register_legacy_migrate_url():
             legacy_migrate,
             name="legacy_migrate",
         ),
-        path(
-            "legacy/import-synonymes/<str:id>/",
-            import_legacy_synonymes,
-            name="import_legacy_synonymes",
-        ),
     ]
-
-
-@hooks.register("register_admin_viewset")
-def register_produitpage_viewset():
-    return ProduitsViewSetGroup()
 
 
 @hooks.register("after_edit_page")

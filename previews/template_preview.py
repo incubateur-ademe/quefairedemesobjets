@@ -27,7 +27,6 @@ from qfdmo.models.acteur import (
 )
 from qfdmo.models.action import Action
 from qfdmo.models.config import CarteConfig
-from search.models import SearchTerm
 
 base_url = settings.BASE_URL
 
@@ -72,13 +71,14 @@ class IframeForm(forms.Form):
 
 class ProduitHeadingForm(forms.Form):
     """
-    Form for produit heading with search_term and pronom choices
+    Form for produit heading with synonyme and pronom choices
     """
 
-    search_term = forms.ModelChoiceField(
-        label="Terme de recherche",
-        queryset=SearchTerm.objects.all(),
-        help_text="Sélectionnez un terme de recherche",
+    synonyme = forms.CharField(
+        label="Synonyme",
+        max_length=100,
+        help_text="Entrez le nom d'un synonyme",
+        initial="",
         required=False,
     )
 
@@ -350,46 +350,34 @@ class ComponentsPreview(LookbookPreview):
     def combined_logos(self, **kwargs):
         return render_to_string("ui/components/footer/combined_logos.html")
 
+    @component_docs("ui/components/produit/legacy_heading.md")
+    def produit_legacy_heading(self, **kwargs):
+        context = {"title": "Coucou !"}
+        return render_to_string("ui/components/produit/legacy_heading.html", context)
+
     @register_form_class(ProduitHeadingForm)
     @component_docs("ui/components/produit/heading.md")
-    def produit_heading(self, search_term=None, pronom="mon", **kwargs):
-        factory = RequestFactory()
-        request = factory.get("/")
+    def produit_heading(self, synonyme=None, pronom="mon", **kwargs):
+        context = {"title": "Coucou !"}
 
-        # If search_term is provided (as string ID from form), add it to the request
-        if search_term:
-            if isinstance(search_term, str):
-                request = factory.get("/", {"search_term_id": search_term})
-            elif isinstance(search_term, SearchTerm):
-                request = factory.get("/", {"search_term_id": search_term.id})
+        if synonyme:
+            context.update(synonyme=synonyme)
 
-        context = {"title": "Coucou !", "request": request, "pronom": pronom}
+        context.update(pronom=pronom)
 
-        return render_to_string("ui/components/produit/heading.html", context, request)
+        return render_to_string("ui/components/produit/heading.html", context)
 
     @register_form_class(ProduitHeadingForm)
     @component_docs("ui/components/produit/heading_family.md")
-    def produit_heading_family(self, search_term=None, pronom="mon", **kwargs):
-        factory = RequestFactory()
-        request = factory.get("/")
+    def produit_heading_family(self, synonyme=None, pronom="mon", **kwargs):
+        context = {"label": "youpi", "title": "Coucou !"}
 
-        # If search_term is provided (as string ID from form), add it to the request
-        if search_term:
-            if isinstance(search_term, str):
-                request = factory.get("/", {"search_term_id": search_term})
-            elif isinstance(search_term, SearchTerm):
-                request = factory.get("/", {"search_term_id": search_term.id})
+        if synonyme:
+            context.update(synonyme=synonyme)
 
-        context = {
-            "label": "youpi",
-            "title": "Coucou !",
-            "request": request,
-            "pronom": pronom,
-        }
+        context.update(pronom=pronom)
 
-        return render_to_string(
-            "ui/components/produit/heading_family.html", context, request
-        )
+        return render_to_string("ui/components/produit/heading_family.html", context)
 
     @component_docs("ui/components/mini_carte/mini_carte.md")
     def mini_carte(self, **kwargs):
