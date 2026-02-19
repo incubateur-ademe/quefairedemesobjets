@@ -14,9 +14,9 @@ Les fichiers qui concerne la plateforme data :
 
 - `pyproject.toml` définition des dépendances dans la section [dependency-groups]
 - `./dags` répertoire dans lequels sont stockés tous les dags executés sur le cluster Airflow
-- `airflow-scheduler.Dockerfile` et `airflow-webserver.Dockerfile`, fichier de configuration docker executer dans tous les environnements
-- `docker-compose.yml` orchestre les dockers en envronnemnt de développement
-- `./dags/tests` répertoire qui contient les tests des dags
+- `data-platform/dags/airflow-scheduler.Dockerfile` et `data-platform/dags/airflow-webserver.Dockerfile`, fichiers de configuration Docker exécutés dans tous les environnements
+- `docker-compose.yml` orchestre les conteneurs en environnement de développement
+- `data-platform/dags/tests` répertoire qui contient les tests des dags
 
 ## Environnements
 
@@ -61,9 +61,9 @@ De la même manière que l'interface, cela permet de garder la cohérance entre 
 
 #### Variable d'environnement du cluster Airflow
 
-Les variables d'environnement sont déployés lors de l'exécution des recettes terraform.
+Les variables d'environnement sont déployées lors de l'exécution des recettes Terraform.
 
-Un exemple à adapter selon l'environnement est disponible sur le fichier [.env.templates](../../../dags/.env.template)
+Un exemple à adapter selon l'environnement est disponible dans le fichier [`data-platform/dags/.env.template`](../../../data-platform/dags/.env.template)
 
 #### Gestion des logs
 

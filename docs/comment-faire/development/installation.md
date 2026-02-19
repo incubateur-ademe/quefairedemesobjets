@@ -216,10 +216,10 @@ pre-commit install
 
 ## Installation de la plateforme DATA
 
-Copier les variable d'environnement dags/.env.template vers dags/.env
+Copier les variables d'environnement `data-platform/dags/.env.template` vers `data-platform/dags/.env` :
 
 ```sh
-cp dags/.env.template dags/.env
+cp data-platform/dags/.env.template data-platform/dags/.env
 ```
 
 Lancer les containers docker avec docker compose:

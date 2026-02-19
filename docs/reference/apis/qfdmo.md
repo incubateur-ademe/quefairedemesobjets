@@ -23,4 +23,4 @@ Cette interface permet de tester tous les endpoints directement depuis le naviga
 
 ## Tests
 
-Les endpoints de cette API sont couverts par des tests d'intégration dans `integration_tests/carte/test_qfdmo_api.py`.
+Les endpoints de cette API sont couverts par des tests d'intégration dans `webapp/integration_tests/carte/test_qfdmo_api.py`.

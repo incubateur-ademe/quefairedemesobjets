@@ -6,30 +6,39 @@ This file contains important guidelines for understanding and working effectivel
 
 ### Tech Stack
 
-- Administration commands: in the `Makefile`
-- Backend: Django 5.2+ (Python 3.12), dependency management and python commands with `uv`
-- Frontend: TypeScript with Stimulus 3.x and Turbo 8.x and templating with Django templates
-- Build: Parcel 2.x
-- Orchestration: Apache Airflow 2.11+
-- Data: PostgreSQL with postgis extension, dbt for transformation
+- Administration commands: in the root `Makefile` and `scripts/`
+- Backend (webapp): Django 5.2+ (Python 3.12), dependency management and python commands with `uv`
+- Frontend (webapp): TypeScript with Stimulus 3.x and Turbo 8.x and templating avec Django templates
+- Build (webapp): Parcel 2.x
+- Orchestration (data-platform): Apache Airflow 2.11+
+- Data (data-platform): PostgreSQL with postgis extension, dbt for transformation
 - Design System: DSFR (French State Design System) via `django-dsfr`
 
 ### Project Structure
 
 ```txt
 /
-├── core/              # Main Django configuration (settings, urls, wsgi)
-├── data/              # Django app for data management and suggestions
-├── qfdmo/             # Main Django app (business models)
-├── qfdmd/             # Django app for CMS
-├── dags/              # Airflow DAGs (clone, enrich, crawl, etc.)
-├── static/            # Compiled static assets
-│   └── to_compile/    # TypeScript/JavaScript sources to compile
-├── templates/         # Django templates (HTML)
-├── dbt/               # dbt models for data transformation
-├── unit_tests/        # Unit tests with pytest
-├── integration_tests/ # Integration tests with pytest
-└── e2e_tests/         # End-to-end tests with Playwright
+├── .github/           # CI/CD workflows
+├── webapp/            # Application Django + Stimulus « Que faire de mes objets et déchets »
+│   ├── core/          # Django configuration (settings, urls, wsgi)
+│   ├── qfdmo/         # Main Django app (business models)
+│   ├── qfdmd/         # Django app for CMS
+│   ├── static/        # Compiled static assets
+│   │   └── to_compile/ # TypeScript/JavaScript sources to compile
+│   ├── templates/     # Django templates (HTML)
+│   ├── unit_tests/    # Unit tests with pytest
+│   ├── integration_tests/ # Integration tests with pytest
+│   └── e2e_tests/     # End-to-end tests with Playwright
+├── data-platform/     # Plateforme data (Airflow, dbt, notebooks…)
+│   ├── dags/          # Airflow DAGs (clone, enrich, crawl, etc.)
+│   └── dbt/           # dbt models for data transformation
+├── docs/              # Documentation technique
+├── infrastructure/    # Gestion et déploiement de l'infrastructure
+├── docker-compose.yml # Exécution en local
+├── nginx-local-only/  # Configuration Nginx pour le dev local
+├── Makefile           # Commandes globales
+├── scripts/           # Scripts hors webapp
+└── pyproject.toml     # Dépendances Python (uv)
 ```
 
 ## 📝 Code Conventions
@@ -59,17 +68,17 @@ This file contains important guidelines for understanding and working effectivel
 
 ### Stimulus Controllers
 
-- Controllers are in `static/to_compile/controllers/`
+- Controllers are in `webapp/static/to_compile/controllers/`
 - Use Stimulus targets and values
 - Export as `export default class extends Controller`
 - Structure example:
 
 ```typescript
-import { Controller } from "@hotwired/stimulus"
+import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller<HTMLElement> {
-  static targets = ["targetName"]
-  declare readonly targetNameTarget: HTMLElement
+  static targets = ["targetName"];
+  declare readonly targetNameTarget: HTMLElement;
 
   connect() {
     // Initialization
@@ -82,18 +91,18 @@ export default class extends Controller<HTMLElement> {
 - Use class-based views when appropriate
 - Prefer `LoginRequiredMixin` for protected views
 - Use `prefetch_related` and `select_related` to optimize queries
-- Admin views are in `data/admin.py`
+- Admin views are mainly in `webapp/qfdmo/admin.py` and `webapp/qfdmd/admin.py`
 
 ### Django Templates
 
-- Use partials in `templates/data/_partials/` for reusability
-- Base layout is in `templates/ui/layout/base.html`
-- Use template tags from `core/templatetags/` for reusable logic
+- Use partials in `webapp/templates/data/_partials/` for reusability
+- Base layout is in `webapp/templates/ui/layout/base.html`
+- Use template tags from `webapp/core/templatetags/` for reusable logic
 
 ### Airflow DAGs
 
-- Organized by domain in `dags/` (clone, enrich, crawl, etc.)
-- Use shared utilities in `dags/shared/`
+- Organized by domain in `data-platform/dags/` (clone, enrich, crawl, etc.)
+- Use shared utilities in `data-platform/dags/shared/`
 - DAG organization:
   - DAGs are in `./dags/<EPIC>/dags/`
   - Tasks are in `./dags/<EPIC>/tasks/`
@@ -111,17 +120,17 @@ export default class extends Controller<HTMLElement> {
 
 ### Tests
 
-- `npm test`: Jest tests
-- `npm run e2e_test`: Playwright tests
+- `npm test`: Jest tests (webapp)
+- `npm run e2e_test`: Playwright tests (webapp)
 - `uv run pytest` Python tests, or:
-  - `make unit-test`: unit tests
-  - `make integration-test`: integration tests
-  - `make dags-test`: DAG tests
+  - `make unit-test`: unit tests (webapp)
+  - `make integration-test`: integration tests (webapp)
+  - `make dags-test`: DAG tests (data-platform)
 
 ### Database
 
-- Django migrations are in `*/migrations/`
-- dbt models are in `dbt/models/`
+- Django migrations are in `webapp/*/migrations/`
+- dbt models are in `data-platform/dbt/models/`
 
 ## 🎨 Design System (DSFR)
 
@@ -153,14 +162,14 @@ details about how build and test API can be found here : [api.AGENTS.md](./api.A
 
 ## 🚀 Development Workflow
 
-1. Frontend modifications:
+1. Frontend modifications (webapp) :
 
-- Edit in `static/to_compile/`, Parcel compiles automatically
-- `templates/` Django templating engine
+- Edit in `webapp/static/to_compile/`, Parcel compiles automatically
+- `webapp/templates/` Django templating engine
 
-2. Backend modifications: Edit directly, Django reloads automatically in dev
-3. New features: Create migrations if necessary, test with pytest (`uv run pytest`)
-4. E2E tests: Use Playwright for e2e tests
+1. Backend modifications (webapp) : Edit directly, Django reloads automatically in dev
+1. New features : Create migrations if necessary, test with pytest (`uv run pytest`)
+1. E2E tests : Use Playwright for e2e tests in `webapp/e2e_tests/`
 
 ## ⚠️ Important Points
 
@@ -179,9 +188,9 @@ details about how build and test API can be found here : [api.AGENTS.md](./api.A
 
 ### Key Files to Know
 
-- `core/settings.py`: Django configuration
-- `core/urls.py`: Main URLs
-- `static/to_compile/admin.ts`: JS code entry point
+- `webapp/core/settings.py`: Django configuration
+- `webapp/core/urls.py`: Main URLs
+- `webapp/static/to_compile/admin.ts`: JS code entry point
 
 ### Search Patterns
 

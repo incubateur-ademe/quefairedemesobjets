@@ -13,21 +13,22 @@ Le projet utilise deux outils complémentaires pour les tests de régression :
 
 Les tests E2E sont organisés en trois parties :
 
-1. **Templates de test** (`templates/ui/tests/`) : Pages HTML dédiées aux tests
-2. **Previews Lookbook** (`previews/template_preview.py`) : Méthodes Python qui rendent les templates
-3. **Tests Playwright** (`e2e_tests/`) : Scripts de test qui interagissent avec les previews
+1. **Templates de test** (`webapp/templates/ui/tests/`) : Pages HTML dédiées aux tests
+2. **Previews Lookbook** (`webapp/previews/template_preview.py`) : Méthodes Python qui rendent les templates
+3. **Tests Playwright** (`webapp/e2e_tests/`) : Scripts de test qui interagissent avec les previews
 
 ## Ajouter un nouveau test E2E
 
 ### Étape 1 : Créer un template de test
 
-Créez un fichier HTML dans `templates/ui/tests/` qui contient le scénario de test.
+Créez un fichier HTML dans `webapp/templates/ui/tests/` qui contient le scénario de test.
 
-**Exemple** : `templates/ui/tests/mon_nouveau_test.html`
+**Exemple** : `webapp/templates/ui/tests/mon_nouveau_test.html`
 
 ```html
-{% load dsfr_tags %} {% dsfr_callout title="Test de mon fonctionnalité" text="Cette page
-teste [décrire ce qui est testé]." icon_class="fr-icon-alert-line" %}
+{% load dsfr_tags %} {% dsfr_callout title="Test de mon fonctionnalité"
+text="Cette page teste [décrire ce qui est testé]."
+icon_class="fr-icon-alert-line" %}
 
 <!-- Contenu du test : iframe, formulaire, carte, etc. -->
 <iframe src="..." width="100%" height="800"></iframe>
@@ -60,7 +61,7 @@ class TestsPreview(LookbookPreview):
 
 ### Étape 3 : Créer le test Playwright
 
-Ajoutez un test dans `e2e_tests/` (généralement `carte.spec.ts` ou un fichier dédié).
+Ajoutez un test dans `webapp/e2e_tests/` (généralement `carte.spec.ts` ou un fichier dédié).
 
 **Exemple** :
 
@@ -70,22 +71,22 @@ test.describe("🎯 Ma Fonctionnalité", () => {
     // Naviguer vers la preview Lookbook
     await page.goto("/lookbook/preview/tests/t_4_mon_nouveau_test", {
       waitUntil: "domcontentloaded",
-    })
+    });
 
     // Si le test utilise une iframe
-    const iframe = page.frameLocator("iframe").first()
-    await expect(iframe.locator("body")).toBeAttached({ timeout: 10000 })
+    const iframe = page.frameLocator("iframe").first();
+    await expect(iframe.locator("body")).toBeAttached({ timeout: 10000 });
 
     // Interagir avec les éléments (utiliser data-testid autant que possible)
-    await iframe.locator('[data-testid="mon-element"]').click()
+    await iframe.locator('[data-testid="mon-element"]').click();
 
     // Vérifier le comportement attendu
-    await expect(iframe.locator('[data-testid="resultat"]')).toBeVisible()
+    await expect(iframe.locator('[data-testid="resultat"]')).toBeVisible();
     await expect(iframe.locator('[data-testid="resultat"]')).toContainText(
       "Texte attendu",
-    )
-  })
-})
+    );
+  });
+});
 ```
 
 ### Étape 4 : Utiliser les data-testid
@@ -101,7 +102,7 @@ Pour des tests robustes, utilisez des attributs `data-testid` dans vos templates
 Puis dans le test :
 
 ```typescript
-await page.locator('[data-testid="mon-bouton"]').click()
+await page.locator('[data-testid="mon-bouton"]').click();
 ```
 
 ## Bonnes pratiques
@@ -125,11 +126,11 @@ Si votre test utilise une iframe (par exemple pour tester `carte.js` ou `formula
 
 ```typescript
 // Attendre que l'iframe soit chargée
-const iframe = page.frameLocator("iframe").first()
-await expect(iframe.locator("body")).toBeAttached({ timeout: 10000 })
+const iframe = page.frameLocator("iframe").first();
+await expect(iframe.locator("body")).toBeAttached({ timeout: 10000 });
 
 // Interagir avec les éléments dans l'iframe
-await iframe.locator('[data-testid="element"]').click()
+await iframe.locator('[data-testid="element"]').click();
 ```
 
 ## Exécuter les tests
@@ -143,7 +144,7 @@ npm run test:e2e
 ### Un fichier spécifique
 
 ```bash
-npx playwright test e2e_tests/carte.spec.ts
+npx playwright test webapp/e2e_tests/carte.spec.ts
 ```
 
 ### Un test spécifique
@@ -191,5 +192,5 @@ Playwright dispose de mécanismes d'auto-waiting intégrés. Consultez les bonne
 - [Documentation Playwright](https://playwright.dev/)
 - [Best Practices Playwright](https://playwright.dev/docs/best-practices)
 - [Documentation Django Lookbook](https://django-lookbook.readthedocs.io/en/latest/)
-- [Tests existants](../../e2e_tests/)
-- [Previews de test](../../previews/template_preview.py)
+- [Tests existants](../../../webapp/e2e_tests/)
+- [Previews de test](../../../webapp/previews/template_preview.py)

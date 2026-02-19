@@ -34,9 +34,9 @@ graph LR
 
 ### Source
 
-Déclaration des sources dans [sources.yml](../../../dbt/models/source/source_acteur.yml)
+Déclaration des sources dans [`sources.yml`](../../../data-platform/dbt/models/source/source_acteur.yml)
 
-Décrit les tables sources qui seront utilisées par DBT.
+Ce fichier décrit les tables sources qui seront utilisées par dbt.
 
 ### Base (Vues)
 

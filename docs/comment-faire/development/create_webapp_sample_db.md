@@ -23,4 +23,4 @@ Si la base de données existe déjà, la commande affichera un avertissement mai
 
 ## Configuration
 
-La base de données `webapp_sample` est configurée dans `core/settings.py` en utilisant la variable d'environnement `DB_WEBAPP_SAMPLE`
+La base de données `webapp_sample` est configurée dans `webapp/core/settings.py` en utilisant la variable d'environnement `DB_WEBAPP_SAMPLE`
