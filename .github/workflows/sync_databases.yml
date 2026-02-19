@@ -64,6 +64,7 @@ jobs:
           DB_URL=${PREPROD_DB_WEBAPP_DSN} make -e db-restore-preprod-from-prod
       - name: Execute migrations in one-off container
         run: |
+          scalingo --app ${PREPROD_APP} run "python manage.py migrate_from_sites_faciles_experiment --no-input"
           scalingo --app ${PREPROD_APP} run python manage.py migrate
       - name: Truncate the suggestions table
         run: |
