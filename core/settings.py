@@ -333,6 +333,12 @@ DB_WEBAPP_SAMPLE = decouple.config(
     cast=str,
 )
 
+PROD_DATABASE_URL = decouple.config(
+    "PROD_DATABASE_URL",
+    default="",  # pragma: allowlist secret
+    cast=str,
+)
+
 WEBAPP_SAMPLE_DATABASE_SETTINGS = {
     **dj_database_url.parse(DB_WEBAPP_SAMPLE),
     "ENGINE": "django.contrib.gis.db.backends.postgis",

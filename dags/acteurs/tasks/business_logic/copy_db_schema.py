@@ -22,11 +22,11 @@ def _get_all_tables(cursor):
     return tables
 
 
-def copy_db_schema():
+def copy_db_schema(source_dsn: str | None = None):
     from django.conf import settings
     from django.db import connections
 
-    dsn_webapp_db = settings.DATABASE_URL
+    dsn_webapp_db = source_dsn or settings.DATABASE_URL
     dsn_webapp_sample_db = settings.DB_WEBAPP_SAMPLE
 
     # Remove all tables from webapp_sample without needing rights on the DB

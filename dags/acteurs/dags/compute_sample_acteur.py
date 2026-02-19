@@ -1,4 +1,3 @@
-from acteurs.tasks.airflow_logic.check_not_prod_env import check_isnt_prod_env_task
 from acteurs.tasks.airflow_logic.copy_db_data_task import copy_db_data_task
 from acteurs.tasks.airflow_logic.copy_db_schema_task import copy_db_schema_task
 from acteurs.tasks.airflow_logic.copy_displayed_data_from_warehouse_task import (
@@ -6,12 +5,30 @@ from acteurs.tasks.airflow_logic.copy_displayed_data_from_warehouse_task import 
 )
 from airflow.decorators import dag
 from airflow.models.baseoperator import chain
+from airflow.models.param import Param
 from airflow.operators.bash import BashOperator
 from shared.config.airflow import DEFAULT_ARGS
 from shared.config.dbt_commands import DBT_RUN, DBT_TEST
 from shared.config.schedules import SCHEDULES
 from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
+
+SOURCE_DB_CURRENT_ENV = "current_env"
+SOURCE_DB_PROD = "prod"
+
+PARAMS = {
+    "source_db": Param(
+        SOURCE_DB_CURRENT_ENV,
+        enum=[SOURCE_DB_CURRENT_ENV, SOURCE_DB_PROD],
+        description_md="""
+            🗄️ Source de la BDD pour construire l'échantillon.
+
+            - `current_env` : BDD de l'environnement courant (preprod)
+            - `prod` : BDD de production
+              (nécessite `PROD_DATABASE_URL` dans les variables Airflow)
+        """,
+    ),
+}
 
 
 @dag(
@@ -23,10 +40,9 @@ from shared.config.tags import TAGS
     description=("Ce DAG construit l'échantillon des acteurs utilisables pour tester"),
     tags=[TAGS.TEST, TAGS.ACTEURS, TAGS.DBT],
     max_active_runs=1,
+    params=PARAMS,
 )
 def compute_sample_acteur():
-
-    check_prod_env = check_isnt_prod_env_task()
 
     dbt_run_base_acteurs = BashOperator(
         task_id="dbt_run_base_acteurs",
@@ -38,7 +54,6 @@ def compute_sample_acteur():
     )
 
     chain(
-        check_prod_env,
         dbt_run_base_acteurs,
         dbt_test_base_acteurs,
         copy_db_schema_task(),

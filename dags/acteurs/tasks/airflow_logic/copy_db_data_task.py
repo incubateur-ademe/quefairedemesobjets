@@ -1,5 +1,6 @@
 import logging
 
+from acteurs.tasks.airflow_logic.copy_db_schema_task import _resolve_source_dsn
 from acteurs.tasks.business_logic.copy_db_data import copy_db_data
 from airflow.operators.python import PythonOperator
 
@@ -14,4 +15,4 @@ def copy_db_data_task():
 
 
 def copy_db_data_wrapper(ti, params):
-    copy_db_data()
+    copy_db_data(source_dsn=_resolve_source_dsn(params))

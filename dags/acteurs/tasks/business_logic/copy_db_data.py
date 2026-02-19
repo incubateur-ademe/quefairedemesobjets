@@ -39,13 +39,13 @@ EXCLUDE_TABLES = [
 ]
 
 
-def copy_db_data():
+def copy_db_data(source_dsn: str | None = None):
     import importlib
 
     from django.conf import settings
     from django.db import connections
 
-    dsn_webapp_db = settings.DATABASE_URL
+    dsn_webapp_db = source_dsn or settings.DATABASE_URL
     dsn_webapp_sample_db = settings.DB_WEBAPP_SAMPLE
 
     logger.info("📊 Copie des données...")
