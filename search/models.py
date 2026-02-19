@@ -13,7 +13,8 @@ class SearchTermQuerySet(SearchableQuerySetMixin, QuerySet):
         This is a bug that have been raised to django-modelsearch, we will
         work on a resolution there first."""
         excluded_ids = self.model.objects.filter(
-            Q(
+            Q(synonyme__isnull=False, synonyme__disabled=True)
+            | Q(
                 synonyme__isnull=False,
                 synonyme__imported_as_search_tag__isnull=False,
             )

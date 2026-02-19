@@ -145,6 +145,31 @@ class TestImportLegacySynonymesView:
             tag=tag, content_object=produit_page
         ).exists()
 
+    def test_does_not_import_product_synonyme_already_assigned_to_another_page(
+        self, produit_index_page, produit_page
+    ):
+        """A synonyme collected via a produit must not be imported if it is already
+        directly assigned (via next_wagtail_page) to a different page."""
+        # page_a already owns "aspirateur" as a direct synonyme
+        page_a = ProduitPage(title="Page A", slug="page-a")
+        produit_index_page.add_child(instance=page_a)
+        page_a.save()
+
+        produit = ProduitFactory(nom="Petit electromenager")
+        synonyme_aspirateur = SynonymeFactory(nom="Aspirateur", produit=produit)
+        LegacyIntermediateSynonymePage.objects.create(
+            page=page_a, synonyme=synonyme_aspirateur
+        )
+
+        # page_b (produit_page) is linked to the same produit
+        LegacyIntermediateProduitPage.objects.create(page=produit_page, produit=produit)
+
+        # Migrate page_b — "aspirateur" must NOT be collected
+        request = _make_request("post")
+        import_legacy_synonymes(request, produit_page.id)
+
+        assert not SearchTag.objects.filter(name="aspirateur").exists()
+
     def test_excludes_synonymes_marked_for_exclusion(self, produit_page):
         """Import skips synonymes that are in the exclusion list."""
         produit = ProduitFactory(nom="Produit Test")

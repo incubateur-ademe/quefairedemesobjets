@@ -169,6 +169,16 @@ class TestSearchableQuerySet:
         )
         assert synonyme.searchterm_ptr_id in searchable_ids
 
+    def test_excludes_synonyme_disabled(self, produit):
+        synonyme = Synonyme.objects.create(
+            nom="Biodechet", disabled=True, produit=produit
+        )
+
+        searchable_ids = list(
+            SearchTerm.objects.searchable().values_list("id", flat=True)
+        )
+        assert synonyme.searchterm_ptr_id not in searchable_ids
+
     def test_excludes_search_tag_without_page(self):
         tag = SearchTag.objects.create(name="frigo", slug="frigo")
 

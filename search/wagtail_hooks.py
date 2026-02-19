@@ -71,10 +71,11 @@ class SynonymeViewSet(SnippetViewSet):
     icon = "doc-full"
     menu_label = "Synonymes (ancienne version)"
     menu_name = "synonymes"
-    list_display = ["nom"]
+    list_display = ["nom", "modifie_le"]
     search_fields = ["nom"]
     panels = [
         FieldPanel("nom"),
+        FieldPanel("disabled"),
         FieldPanel("search_variants"),
     ]
 
