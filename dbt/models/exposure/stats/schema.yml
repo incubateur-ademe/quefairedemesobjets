@@ -1,6 +1,56 @@
 version: 2
 
 models:
+  - name: exposure_stats_acteur_revision_siren
+    description: "Acteur et correction avec un SIREN différent et une source plus récente"
+    columns:
+      - name: identifiant_unique
+        description: "L'identifiant unique de l'acteur"
+      - name: nom
+        description: "Le nom de l'acteur"
+      - name: source_code
+        description: "Le code de la source de l'acteur"
+      - name: acteur_siren
+        description: "Le SIREN de l'acteur"
+      - name: revision_siren
+        description: "Le SIREN de la révision"
+      - name: acteur_modifie_le
+        description: "La date de modification de l'acteur"
+      - name: revision_modifie_le
+        description: "La date de modification de la révision"
+    config:
+      materialized: table
+      tags:
+        - exposure
+        - stats
+        - acteurs
+        - revision
+        - siren
+  - name: exposure_stats_acteur_revision_siret
+    description: "Acteur et correction avec un SIRET différent et une source plus récente"
+    columns:
+      - name: identifiant_unique
+        description: "L'identifiant unique de l'acteur"
+      - name: nom
+        description: "Le nom de l'acteur"
+      - name: source_code
+        description: "Le code de la source de l'acteur"
+      - name: acteur_siret
+        description: "Le SIRET de l'acteur"
+      - name: revision_siret
+        description: "Le SIRET de la révision"
+      - name: acteur_modifie_le
+        description: "La date de modification de l'acteur"
+      - name: revision_modifie_le
+        description: "La date de modification de la révision"
+    config:
+      materialized: table
+      tags:
+        - exposure
+        - stats
+        - acteurs
+        - revision
+        - siret
   - name: exposure_stats_acteur_revision_statut
     description: "Acteurs avec une révision affichée (ACTIVE) alors que l'acteur n'est pas actif"
     columns:
@@ -23,7 +73,7 @@ models:
         - revision
         - statut
         - actif
-  - name: exposure_stats_nb_acteur_stacked_history
+  - name: exposure_stats_acteur_stacked_history
     description: "Historique du nombre d'acteurs empilés. Une ligne est ajoutée à chaque exécution de dbt."
     columns:
       - name: date_snapshot
@@ -31,80 +81,24 @@ models:
         data_tests:
           - not_null
           - unique
-      - name: nb_acteurs_stacked
-        description: "Nombre d'acteurs ayant des coordonnées identiques (arrondies à 4 décimales)"
-        data_tests:
-          - not_null
-    config:
-        materialized: incremental
-        unique_key: date_snapshot
-        incremental_strategy: delete+insert
-        tags:
-          - exposure
-          - stats
-          - acteurs
-          - stacked
-  - name: exposure_stats_rate_acteur_stacked_history
-    description: "Historique du taux d'acteurs empilés par rapport au nombre total d'acteurs visibles avec coordonnées (int_acteur_visible_location). Une ligne est ajoutée à chaque exécution de dbt."
-    columns:
-      - name: date_snapshot
-        description: "Date de l'exécution dbt"
-        data_tests:
-          - not_null
-          - unique
-      - name: nb_acteurs_stacked
-        description: "Nombre d'acteurs empilés (même lat/long)"
-      - name: nb_acteurs_visible_with_location
+      - name: nb_total
         description: "Nombre total d'acteurs visibles avec coordonnées (dénominateur)"
-      - name: rate_acteur_stacked
-        description: "Taux d'acteurs empilés (nb_acteurs_stacked / nb_acteurs_visible_with_location), entre 0 et 1"
         data_tests:
           - not_null
-    config:
-        materialized: incremental
-        unique_key: date_snapshot
-        incremental_strategy: delete+insert
-        tags:
-          - exposure
-          - stats
-          - acteurs
-          - stacked
-          - rate
-  - name: exposure_stats_nb_acteur_stacked_rounded_history
-    description: "Historique du nombre d'acteurs empilés à 11 m près (coordonnées arrondies). Une ligne est ajoutée à chaque exécution de dbt."
-    columns:
-      - name: date_snapshot
-        description: "Date de l'exécution dbt"
+      - name: nb_stacked
+        description: "Nombre d'acteurs empilés"
         data_tests:
           - not_null
-          - unique
-      - name: nb_acteurs_stacked
-        description: "Nombre d'acteurs ayant des coordonnées identiques (arrondies à 4 décimales)"
-        data_tests:
-          - not_null
-    config:
-        materialized: incremental
-        unique_key: date_snapshot
-        incremental_strategy: delete+insert
-        tags:
-          - exposure
-          - stats
-          - acteurs
-          - stacked
-  - name: exposure_stats_rate_acteur_stacked_rounded_history
-    description: "Historique du taux d'acteurs empilés à 11 m près (coordonnées arrondies) par rapport au nombre total d'acteurs visibles avec coordonnées (int_acteur_visible_location). Une ligne est ajoutée à chaque exécution de dbt."
-    columns:
-      - name: date_snapshot
-        description: "Date de l'exécution dbt"
-        data_tests:
-          - not_null
-          - unique
-      - name: nb_acteurs_stacked
+      - name: nb_stacked_rounded
         description: "Nombre d'acteurs empilés à 11 m près (coordonnées arrondies)"
-      - name: nb_acteurs_visible_with_location
-        description: "Nombre total d'acteurs visibles avec coordonnées (dénominateur)"
-      - name: rate_acteur_stacked_rounded
-        description: "Taux d'acteurs empilés à 11 m près (nb_acteurs_stacked / nb_acteurs_visible_with_location), entre 0 et 1"
+        data_tests:
+          - not_null
+      - name: rate_stacked
+        description: "Taux d'acteurs empilés (nb_acteurs / nb_total), entre 0 et 1"
+        data_tests:
+          - not_null
+      - name: rate_stacked_rounded
+        description: "Taux d'acteurs empilés à 11 m près (nb_acteurs_stacked / nb_total), entre 0 et 1"
         data_tests:
           - not_null
     config:
@@ -116,213 +110,77 @@ models:
           - stats
           - acteurs
           - stacked
-          - rounded
-          - rate
-  - name: exposure_stats_nb_acteur_visible_history
-    description: "Nombre d'acteurs visibles"
+  - name: exposure_stats_acteur_siren_siret_history
+    description: "Historique du nombre et taux d'acteurs visibles avec un SIREN et un SIRET. Une ligne est ajoutée à chaque exécution de dbt."
     columns:
       - name: date_snapshot
         description: "Date de l'exécution dbt"
         data_tests:
           - not_null
           - unique
-      - name: nb_acteurs_visible
-        description: "Nombre d'acteurs visibles"
+      - name: nb_total
+        description: "Nombre total d'acteurs visibles"
         data_tests:
           - not_null
-    config:
-      materialized: incremental
-      unique_key: date_snapshot
-      incremental_strategy: delete+insert
-      tags:
-        - exposure
-        - stats
-        - acteurs
-        - visible
-  - name: exposure_stats_nb_acteur_visible_with_siret_history
-    description: "Nombre d'acteurs visibles avec un SIRET bien formatté (14 chiffres)"
-    columns:
-      - name: date_snapshot
-        description: "Date de l'exécution dbt"
+      - name: nb_with_siren
+        description: "Nombre d'acteurs visibles avec un SIREN bien formatté (9 chiffres)"
         data_tests:
           - not_null
-          - unique
-      - name: nb_acteurs_visible_with_siret
-        description: "Nombre d'acteurs visibles avec un SIRET bien formatté (14 chiffres)"
-        data_tests:
-          - not_null
-    config:
-      materialized: incremental
-      unique_key: date_snapshot
-      incremental_strategy: delete+insert
-      tags:
-        - exposure
-        - stats
-        - acteurs
-        - visible
-        - siret
-  - name: exposure_stats_rate_acteur_visible_with_siret_history
-    description: "Taux d'acteurs visibles avec un SIRET bien formatté (14 chiffres) vs acteur visible"
-    columns:
-      - name: date_snapshot
-        description: "Date de l'exécution dbt"
-        data_tests:
-          - not_null
-          - unique
-      - name: taux_acteur_visible_with_siret
-        description: "Taux d'acteurs visibles avec un SIRET bien formatté (14 chiffres)"
-        data_tests:
-          - not_null
-    config:
-      materialized: incremental
-      unique_key: date_snapshot
-      incremental_strategy: delete+insert
-      tags:
-        - exposure
-        - stats
-        - acteurs
-        - visible
-        - siret
-        - rate
-  - name: exposure_stats_nb_acteur_visible_with_siret_actif_history
-    description: "Nombre d'acteurs visibles avec un SIRET actif (AE)"
-    columns:
-      - name: date_snapshot
-        description: "Date de l'exécution dbt"
-        data_tests:
-          - not_null
-          - unique
-      - name: nb_acteur_visible_with_siret_actif
-        description: "Nombre d'acteurs visibles avec un SIRET actif (AE)"
-        data_tests:
-          - not_null
-    config:
-      materialized: incremental
-      unique_key: date_snapshot
-      incremental_strategy: delete+insert
-      tags:
-        - exposure
-        - stats
-        - acteurs
-        - visible
-        - siret
-        - actif
-  - name: exposure_stats_rate_acteur_visible_with_siret_actif_history
-    description: "Taux d'acteurs visibles avec un SIRET actif (AE) vs acteur avec SIRET"
-    columns:
-      - name: date_snapshot
-        description: "Date de l'exécution dbt"
-        data_tests:
-          - not_null
-          - unique
-      - name: taux_acteur_visible_with_siret_actif
-        description: "Taux d'acteurs visibles avec un SIRET actif (AE) vs acteur avec SIRET"
-        data_tests:
-          - not_null
-    config:
-      materialized: incremental
-      unique_key: date_snapshot
-      incremental_strategy: delete+insert
-      tags:
-        - exposure
-        - stats
-        - acteurs
-        - visible
-        - siret
-        - actif
-        - rate
-  - name: exposure_stats_nb_acteur_visible_with_siren_history
-    description: "Nombre d'acteurs visibles avec un SIREN bien formatté (9 chiffres)"
-    columns:
-      - name: date_snapshot
-        description: "Date de l'exécution dbt"
-        data_tests:
-          - not_null
-          - unique
-      - name: nb_acteurs_visible_with_siren
-        description: "Nombre d'acteurs visibles avec un SIRET bien formatté (14 chiffres)"
-        data_tests:
-          - not_null
-    config:
-      materialized: incremental
-      unique_key: date_snapshot
-      incremental_strategy: delete+insert
-      tags:
-        - exposure
-        - stats
-        - acteurs
-        - visible
-        - siren
-  - name: exposure_stats_rate_acteur_visible_with_siren_history
-    description: "Taux d'acteurs visibles avec un SIREN bien formatté (9 chiffres) vs acteur visible"
-    columns:
-      - name: date_snapshot
-        description: "Date de l'exécution dbt"
-        data_tests:
-          - not_null
-          - unique
-      - name: taux_acteur_visible_with_siren
-        description: "Taux d'acteurs visibles avec un SIREN bien formatté (9 chiffres)"
-        data_tests:
-          - not_null
-    config:
-      materialized: incremental
-      unique_key: date_snapshot
-      incremental_strategy: delete+insert
-      tags:
-        - exposure
-        - stats
-        - acteurs
-        - visible
-        - siret
-        - rate
-  - name: exposure_stats_nb_acteur_visible_with_siren_actif_history
-    description: "Nombre d'acteurs visibles avec un SIREN actif (AE)"
-    columns:
-      - name: date_snapshot
-        description: "Date de l'exécution dbt"
-        data_tests:
-          - not_null
-          - unique
-      - name: nb_acteur_visible_with_siren_actif
+      - name: nb_with_siren_actif
         description: "Nombre d'acteurs visibles avec un SIREN actif (AE)"
         data_tests:
           - not_null
-    config:
-      materialized: incremental
-      unique_key: date_snapshot
-      incremental_strategy: delete+insert
-      tags:
-        - exposure
-        - stats
-        - acteurs
-        - visible
-        - siren
-        - actif
-  - name: exposure_stats_rate_acteur_visible_with_siren_actif_history
-    description: "Taux d'acteurs visibles avec un SIREN actif (AE) vs acteur avec SIREN"
-    columns:
-      - name: date_snapshot
-        description: "Date de l'exécution dbt"
+      - name: nb_with_siren_inactive
+        description: "Nombre d'acteurs visibles avec un SIREN bien formatté (9 chiffres) mais inactif"
         data_tests:
           - not_null
-          - unique
-      - name: taux_acteur_visible_with_siren_actif
-        description: "Taux d'acteurs visibles avec un SIREN actif (AE) vs acteur avec SIREN"
+      - name: nb_with_siret
+        description: "Nombre d'acteurs visibles avec un SIRET bien formatté (14 chiffres)"
+        data_tests:
+          - not_null
+      - name: nb_with_siret_actif
+        description: "Nombre d'acteurs visibles avec un SIRET actif (AE)"
+        data_tests:
+          - not_null
+      - name: nb_with_siret_inactive
+        description: "Nombre d'acteurs visibles avec un SIRET bien formatté (14 chiffres) mais inactif"
+        data_tests:
+          - not_null
+      - name: rate_siren
+        description: "Taux d'acteurs visibles avec un SIREN bien formatté (9 chiffres)"
+        data_tests:
+          - not_null
+      - name: rate_siren_actif
+        description: "Taux d'acteurs visibles avec un SIREN actif (AE)"
+        data_tests:
+          - not_null
+      - name: rate_siren_inactive
+        description: "Taux d'acteurs visibles avec un SIREN bien formatté (9 chiffres) mais inactif"
+        data_tests:
+          - not_null
+      - name: rate_siret
+        description: "Taux d'acteurs visibles avec un SIRET bien formatté (14 chiffres)"
+        data_tests:
+          - not_null
+      - name: rate_siret_actif
+        description: "Taux d'acteurs visibles avec un SIRET actif (AE)"
+        data_tests:
+          - not_null
+      - name: rate_siret_inactive
+        description: "Taux d'acteurs visibles avec un SIRET bien formatté (14 chiffres) mais inactif"
         data_tests:
           - not_null
     config:
-      materialized: incremental
-      unique_key: date_snapshot
-      incremental_strategy: delete+insert
-      tags:
-        - exposure
-        - stats
-        - acteurs
-        - visible
-        - siren
-        - actif
-        - rate
+        materialized: incremental
+        unique_key: date_snapshot
+        incremental_strategy: delete+insert
+        tags:
+          - exposure
+          - stats
+          - acteurs
+          - siren
+          - siret
+
   - name: exposure_stats_distance_nb_acteur_by_action
     description: "Statistiques de distance et nombre de solutions par action. Calcule la moyenne de distance_m et nb_solutions_100km par action et globalement (TOUTES_ACTIONS)."
     columns:
@@ -358,3 +216,306 @@ models:
         - acteurs
         - distance
         - action
+
+
+  - name: exposure_stats_nb_acteur_stacked_history
+    description: "DEPRECATED (remplacé par exposure_stats_acteur_stacked_history): Historique du nombre d'acteurs empilés. Une ligne est ajoutée à chaque exécution de dbt."
+    columns:
+      - name: date_snapshot
+        description: "Date de l'exécution dbt"
+        data_tests:
+          - not_null
+          - unique
+      - name: nb_acteurs_stacked
+        description: "Nombre d'acteurs ayant des coordonnées identiques (arrondies à 4 décimales)"
+        data_tests:
+          - not_null
+    config:
+        materialized: incremental
+        unique_key: date_snapshot
+        incremental_strategy: delete+insert
+        tags:
+          - exposure
+          - stats
+          - acteurs
+          - stacked
+  - name: exposure_stats_rate_acteur_stacked_history
+    description: "DEPRECATED (remplacé par exposure_stats_acteur_stacked_history): Historique du taux d'acteurs empilés par rapport au nombre total d'acteurs visibles avec coordonnées (int_acteur_visible_location). Une ligne est ajoutée à chaque exécution de dbt."
+    columns:
+      - name: date_snapshot
+        description: "Date de l'exécution dbt"
+        data_tests:
+          - not_null
+          - unique
+      - name: nb_acteurs_stacked
+        description: "Nombre d'acteurs empilés (même lat/long)"
+      - name: nb_acteurs_visible_with_location
+        description: "Nombre total d'acteurs visibles avec coordonnées (dénominateur)"
+      - name: rate_acteur_stacked
+        description: "Taux d'acteurs empilés (nb_acteurs_stacked / nb_acteurs_visible_with_location), entre 0 et 1"
+        data_tests:
+          - not_null
+    config:
+        materialized: incremental
+        unique_key: date_snapshot
+        incremental_strategy: delete+insert
+        tags:
+          - exposure
+          - stats
+          - acteurs
+          - stacked
+          - rate
+  - name: exposure_stats_nb_acteur_stacked_rounded_history
+    description: "DEPRECATED (remplacé par exposure_stats_acteur_stacked_history): Historique du nombre d'acteurs empilés à 11 m près (coordonnées arrondies). Une ligne est ajoutée à chaque exécution de dbt."
+    columns:
+      - name: date_snapshot
+        description: "Date de l'exécution dbt"
+        data_tests:
+          - not_null
+          - unique
+      - name: nb_acteurs_stacked
+        description: "Nombre d'acteurs ayant des coordonnées identiques (arrondies à 4 décimales)"
+        data_tests:
+          - not_null
+    config:
+        materialized: incremental
+        unique_key: date_snapshot
+        incremental_strategy: delete+insert
+        tags:
+          - exposure
+          - stats
+          - acteurs
+          - stacked
+  - name: exposure_stats_rate_acteur_stacked_rounded_history
+    description: "DEPRECATED (remplacé par exposure_stats_acteur_stacked_history): Historique du taux d'acteurs empilés à 11 m près (coordonnées arrondies) par rapport au nombre total d'acteurs visibles avec coordonnées (int_acteur_visible_location). Une ligne est ajoutée à chaque exécution de dbt."
+    columns:
+      - name: date_snapshot
+        description: "Date de l'exécution dbt"
+        data_tests:
+          - not_null
+          - unique
+      - name: nb_acteurs_stacked
+        description: "Nombre d'acteurs empilés à 11 m près (coordonnées arrondies)"
+      - name: nb_acteurs_visible_with_location
+        description: "Nombre total d'acteurs visibles avec coordonnées (dénominateur)"
+      - name: rate_acteur_stacked_rounded
+        description: "Taux d'acteurs empilés à 11 m près (nb_acteurs_stacked / nb_acteurs_visible_with_location), entre 0 et 1"
+        data_tests:
+          - not_null
+    config:
+        materialized: incremental
+        unique_key: date_snapshot
+        incremental_strategy: delete+insert
+        tags:
+          - exposure
+          - stats
+          - acteurs
+          - stacked
+          - rounded
+          - rate
+  - name: exposure_stats_nb_acteur_visible_history
+    description: "DEPRECATED (remplacé par exposure_stats_acteur_siren_siret_history): Nombre d'acteurs visibles"
+    columns:
+      - name: date_snapshot
+        description: "Date de l'exécution dbt"
+        data_tests:
+          - not_null
+          - unique
+      - name: nb_acteurs_visible
+        description: "Nombre d'acteurs visibles"
+        data_tests:
+          - not_null
+    config:
+      materialized: incremental
+      unique_key: date_snapshot
+      incremental_strategy: delete+insert
+      tags:
+        - exposure
+        - stats
+        - acteurs
+        - visible
+  - name: exposure_stats_nb_acteur_visible_with_siret_history
+    description: "DEPRECATED (remplacé par exposure_stats_acteur_siren_siret_history): Nombre d'acteurs visibles avec un SIRET bien formatté (14 chiffres)"
+    columns:
+      - name: date_snapshot
+        description: "Date de l'exécution dbt"
+        data_tests:
+          - not_null
+          - unique
+      - name: nb_acteurs_visible_with_siret
+        description: "Nombre d'acteurs visibles avec un SIRET bien formatté (14 chiffres)"
+        data_tests:
+          - not_null
+    config:
+      materialized: incremental
+      unique_key: date_snapshot
+      incremental_strategy: delete+insert
+      tags:
+        - exposure
+        - stats
+        - acteurs
+        - visible
+        - siret
+  - name: exposure_stats_rate_acteur_visible_with_siret_history
+    description: "DEPRECATED (remplacé par exposure_stats_acteur_siren_siret_history): Taux d'acteurs visibles avec un SIRET bien formatté (14 chiffres) vs acteur visible"
+    columns:
+      - name: date_snapshot
+        description: "Date de l'exécution dbt"
+        data_tests:
+          - not_null
+          - unique
+      - name: taux_acteur_visible_with_siret
+        description: "Taux d'acteurs visibles avec un SIRET bien formatté (14 chiffres)"
+        data_tests:
+          - not_null
+    config:
+      materialized: incremental
+      unique_key: date_snapshot
+      incremental_strategy: delete+insert
+      tags:
+        - exposure
+        - stats
+        - acteurs
+        - visible
+        - siret
+        - rate
+  - name: exposure_stats_nb_acteur_visible_with_siret_actif_history
+    description: "DEPRECATED (remplacé par exposure_stats_acteur_siren_siret_history): Nombre d'acteurs visibles avec un SIRET actif (AE)"
+    columns:
+      - name: date_snapshot
+        description: "Date de l'exécution dbt"
+        data_tests:
+          - not_null
+          - unique
+      - name: nb_acteur_visible_with_siret_actif
+        description: "Nombre d'acteurs visibles avec un SIRET actif (AE)"
+        data_tests:
+          - not_null
+    config:
+      materialized: incremental
+      unique_key: date_snapshot
+      incremental_strategy: delete+insert
+      tags:
+        - exposure
+        - stats
+        - acteurs
+        - visible
+        - siret
+        - actif
+  - name: exposure_stats_rate_acteur_visible_with_siret_actif_history
+    description: "DEPRECATED (remplacé par exposure_stats_acteur_siren_siret_history): Taux d'acteurs visibles avec un SIRET actif (AE) vs acteur avec SIRET"
+    columns:
+      - name: date_snapshot
+        description: "Date de l'exécution dbt"
+        data_tests:
+          - not_null
+          - unique
+      - name: taux_acteur_visible_with_siret_actif
+        description: "Taux d'acteurs visibles avec un SIRET actif (AE) vs acteur avec SIRET"
+        data_tests:
+          - not_null
+    config:
+      materialized: incremental
+      unique_key: date_snapshot
+      incremental_strategy: delete+insert
+      tags:
+        - exposure
+        - stats
+        - acteurs
+        - visible
+        - siret
+        - actif
+        - rate
+  - name: exposure_stats_nb_acteur_visible_with_siren_history
+    description: "DEPRECATED (remplacé par exposure_stats_acteur_siren_siret_history): Nombre d'acteurs visibles avec un SIREN bien formatté (9 chiffres)"
+    columns:
+      - name: date_snapshot
+        description: "Date de l'exécution dbt"
+        data_tests:
+          - not_null
+          - unique
+      - name: nb_acteurs_visible_with_siren
+        description: "Nombre d'acteurs visibles avec un SIRET bien formatté (14 chiffres)"
+        data_tests:
+          - not_null
+    config:
+      materialized: incremental
+      unique_key: date_snapshot
+      incremental_strategy: delete+insert
+      tags:
+        - exposure
+        - stats
+        - acteurs
+        - visible
+        - siren
+  - name: exposure_stats_rate_acteur_visible_with_siren_history
+    description: "DEPRECATED (remplacé par exposure_stats_acteur_siren_siret_history): Taux d'acteurs visibles avec un SIREN bien formatté (9 chiffres) vs acteur visible"
+    columns:
+      - name: date_snapshot
+        description: "Date de l'exécution dbt"
+        data_tests:
+          - not_null
+          - unique
+      - name: taux_acteur_visible_with_siren
+        description: "Taux d'acteurs visibles avec un SIREN bien formatté (9 chiffres)"
+        data_tests:
+          - not_null
+    config:
+      materialized: incremental
+      unique_key: date_snapshot
+      incremental_strategy: delete+insert
+      tags:
+        - exposure
+        - stats
+        - acteurs
+        - visible
+        - siret
+        - rate
+  - name: exposure_stats_nb_acteur_visible_with_siren_actif_history
+    description: "DEPRECATED (remplacé par exposure_stats_acteur_siren_siret_history): Nombre d'acteurs visibles avec un SIREN actif (AE)"
+    columns:
+      - name: date_snapshot
+        description: "Date de l'exécution dbt"
+        data_tests:
+          - not_null
+          - unique
+      - name: nb_acteur_visible_with_siren_actif
+        description: "Nombre d'acteurs visibles avec un SIREN actif (AE)"
+        data_tests:
+          - not_null
+    config:
+      materialized: incremental
+      unique_key: date_snapshot
+      incremental_strategy: delete+insert
+      tags:
+        - exposure
+        - stats
+        - acteurs
+        - visible
+        - siren
+        - actif
+  - name: exposure_stats_rate_acteur_visible_with_siren_actif_history
+    description: "DEPRECATED (remplacé par exposure_stats_acteur_siren_siret_history): Taux d'acteurs visibles avec un SIREN actif (AE) vs acteur avec SIREN"
+    columns:
+      - name: date_snapshot
+        description: "Date de l'exécution dbt"
+        data_tests:
+          - not_null
+          - unique
+      - name: taux_acteur_visible_with_siren_actif
+        description: "Taux d'acteurs visibles avec un SIREN actif (AE) vs acteur avec SIREN"
+        data_tests:
+          - not_null
+    config:
+      materialized: incremental
+      unique_key: date_snapshot
+      incremental_strategy: delete+insert
+      tags:
+        - exposure
+        - stats
+        - acteurs
+        - visible
+        - siren
+        - actif
+        - rate
+
