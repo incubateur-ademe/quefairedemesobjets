@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: marts_acteur_revision_statut
+  - name: marts_acteur_revision
     description: "Acteurs avec une révision"
     columns:
       - name: identifiant_unique
@@ -10,10 +10,22 @@ models:
         description: "Le nom de l'acteur"
       - name: source_code
         description: "Le code de la source de l'acteur"
+      - name: acteur_siren
+        description: "Le SIREN de l'acteur"
+      - name: acteur_siret
+        description: "Le SIRET de l'acteur"
       - name: acteur_statut
         description: "Le statut de l'acteur"
+      - name: acteur_modifie_le
+        description: "La date de modification de l'acteur"
+      - name: revision_siren
+        description: "Le SIREN de la révision"
+      - name: revision_siret
+        description: "Le SIRET de la révision"
       - name: revision_statut
         description: "Le statut de la révision"
+      - name: revision_modifie_le
+        description: "La date de modification de la révision"
     config:
       materialized: table
       tags:
