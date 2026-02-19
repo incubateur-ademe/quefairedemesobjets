@@ -11,8 +11,7 @@ from django.utils.functional import cached_property
 from django_extensions.db.fields import AutoSlugField
 from modelcluster.contrib.taggit import ClusterTaggableManager
 from modelcluster.fields import ParentalManyToManyField
-from modelsearch import index
-from taggit.models import ItemBase, TagBase, TaggedItemBase
+from taggit.models import TaggedItemBase
 from wagtail.admin.panels import (
     FieldPanel,
     FieldRowPanel,
@@ -27,12 +26,11 @@ from wagtail.contrib.settings.models import BaseGenericSetting, register_setting
 from wagtail.fields import RichTextField, StreamField
 from wagtail.images.blocks import ImageBlock
 from wagtail.models import Page, ParentalKey
+from wagtail.search import index
 from wagtail.snippets.models import register_snippet
 
 from qfdmd.blocks import STREAMFIELD_COMMON_BLOCKS
 from qfdmo.models.utils import NomAsNaturalKeyModel
-from search.constants import SEARCH_TAG_HELP_TEXT
-from search.models import SearchTerm
 
 logger = logging.getLogger(__name__)
 
@@ -112,11 +110,6 @@ class CompiledFieldMixin(Page):
             return getattr(self.get_parent().specific, field_name)
         return getattr(self, field_name)
 
-    def __str__(self):
-        if str := getattr(self, "titre_phrase", None):
-            return str
-        return super().__str__()
-
     class Meta:
         abstract = True
 
@@ -160,104 +153,8 @@ class ProduitPageTag(TaggedItemBase):
     )
 
 
-class SearchTag(SearchTerm, TagBase):
-    """
-    A custom tag model for search functionality.
-    Inherits from SearchTerm for unified search across different content types.
-    """
-
-    legacy_existing_synonyme = models.ForeignKey(
-        "qfdmd.Synonyme",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="search_tag_reference",
-        verbose_name="Synonyme legacy associé",
-        help_text="Référence vers le synonyme legacy dont ce tag est issu.",
-    )
-
-    search_fields = SearchTerm.search_fields + [
-        index.SearchField("name"),
-        index.AutocompleteField("name"),
-    ]
-
-    class Meta:
-        verbose_name = "Synonyme de recherche"
-        verbose_name_plural = "Synonymes de recherche"
-
-    def save(self, *args, **kwargs):
-        self.name = self.name.lower()
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"{self.name}"
-
-    search_result_template = "ui/components/search/search_result_searchtag.html"
-
-    @property
-    def page(self):
-        """Returns the parent page (ProduitPage) if available."""
-        try:
-            if self.tagged_produit_page:
-                return self.tagged_produit_page.content_object
-        except TaggedSearchTag.DoesNotExist:
-            pass
-        return None
-
-
-class TaggedSearchTag(ItemBase):
-    """Through model for SearchTag on ProduitPage."""
-
-    tag = models.OneToOneField(
-        SearchTag,
-        on_delete=models.CASCADE,
-        related_name="tagged_produit_page",
-    )
-    content_object = ParentalKey(
-        "qfdmd.ProduitPage",
-        on_delete=models.CASCADE,
-        related_name="search_tags_items",
-    )
-
-    class Meta:
-        verbose_name = "Synonyme de recherche"
-        verbose_name_plural = "Synonymes de recherche"
-
-
-class ProduitPageSearchTerm(SearchTerm):
-    """Intermediate model to allow text searchable fields to be searched
-    using current trigram implementation in django modelsearch.
-    This could be removed if the implementation support searching accross
-    index.RelatedFields.
-    For now, these are kept in sync when saving ProduitPage."""
-
-    produit_page = models.OneToOneField(
-        "qfdmd.ProduitPage",
-        on_delete=models.SET_NULL,
-        related_name="produit_page_search_term",
-        blank=True,
-        null=True,
-    )
-    searchable_title = models.CharField()
-
-    search_fields = SearchTerm.search_fields + [
-        index.SearchField("searchable_title"),
-    ]
-
-
-class ProduitPage(
-    CompiledFieldMixin,
-    Page,
-    GenreNombreModel,
-    TitleFields,
-):
-    search_result_template = "ui/components/search/search_result_produitpage.html"
-
-    def get_template(self, request, *args, **kwargs):
-        if self.est_famille:
-            return "ui/pages/family_page.html"
-        return "ui/pages/produit_page.html"
-
+class ProduitPage(CompiledFieldMixin, Page, GenreNombreModel, TitleFields):
+    template = "ui/pages/produit_page.html"
     subpage_types = ["qfdmd.produitpage"]
     parent_page_types = [
         "qfdmd.produitindexpage",
@@ -266,12 +163,6 @@ class ProduitPage(
 
     # Taxonomie
     tags = ClusterTaggableManager(through=ProduitPageTag, blank=True, related_name="+")
-    search_tags = ClusterTaggableManager(
-        through="qfdmd.TaggedSearchTag",
-        blank=True,
-        related_name="+",
-        verbose_name="Synonyme de recherche",
-    )
     sous_categorie_objet = ParentalManyToManyField(
         "qfdmo.SousCategorieObjet",
         related_name="produit_pages",
@@ -279,10 +170,6 @@ class ProduitPage(
     )
 
     # Config
-    migree_depuis_synonymes_legacy = models.BooleanField(
-        "Migration des synonymes effectuée",
-        default=False,
-    )
     usage_unique = models.BooleanField(
         "À usage unique",
         default=False,
@@ -294,6 +181,7 @@ class ProduitPage(
         help_text="Si cochée, cette page sera affichée avec le template famille "
         "(fond vert) et pourra contenir des sous-produits.",
     )
+
     infotri = StreamField([("image", ImageBlock())], blank=True)
     body = StreamField(
         STREAMFIELD_COMMON_BLOCKS,
@@ -373,7 +261,6 @@ class ProduitPage(
             heading="Exceptions aux redirections",
         ),
         FieldPanel("commentaire"),
-        FieldPanel("migree_depuis_synonymes_legacy"),
     ]
 
     config_panels = [
@@ -398,21 +285,10 @@ class ProduitPage(
         ),
     ]
 
-    search_panels = [
-        MultiFieldPanel(
-            [
-                HelpPanel(content=SEARCH_TAG_HELP_TEXT),
-                FieldPanel("search_tags"),
-            ],
-            heading="Recherche",
-        ),
-    ]
-
     edit_handler = TabbedInterface(
         [
             ObjectList(content_panels, heading="Contenu"),
             ObjectList(config_panels, heading="Configuration"),
-            ObjectList(search_panels, heading="Recherche"),
             ObjectList(migration_panels, heading="Migration"),
             ObjectList(Page.promote_panels, heading="Promotion (SEO)"),
             ObjectList(Page.settings_panels, heading="Paramètres"),
@@ -428,21 +304,15 @@ class ProduitPage(
 
         # Validate legacy_synonyme inline items
         for synonyme_item in self.legacy_synonymes.all():
-            try:
-                synonyme = synonyme_item.synonyme
-            except Synonyme.DoesNotExist:
-                # The related synonyme was deleted, skip validation
-                continue
-
-            if synonyme:
+            if synonyme_item.synonyme:
                 # Check if the synonyme's produit is already redirected
                 try:
-                    produit_page = synonyme.produit.next_wagtail_page
+                    produit_page = synonyme_item.synonyme.produit.next_wagtail_page
                     if produit_page.page != self:
                         logger.warning(
-                            f"Synonyme '{synonyme.nom}' has a direct "
+                            f"Synonyme '{synonyme_item.synonyme.nom}' has a direct "
                             f"redirection to page '{self.title}' but its "
-                            f"produit '{synonyme.produit.nom}' is "
+                            f"produit '{synonyme_item.synonyme.produit.nom}' is "
                             f"redirected to '{produit_page.page.title}'. "
                             "The synonyme redirection will take priority."
                         )
@@ -454,12 +324,12 @@ class ProduitPage(
                 try:
                     exclusion = (
                         LegacyIntermediateProduitPageSynonymeExclusion.objects.get(
-                            synonyme=synonyme
+                            synonyme=synonyme_item.synonyme
                         )
                     )
                     if exclusion.page != self:
                         raise ValidationError(
-                            f"Conflit : le synonyme '{synonyme.nom}' "
+                            f"Conflit : le synonyme '{synonyme_item.synonyme.nom}' "
                             "est marqué comme exclu de la redirection vers la page "
                             f"'{exclusion.page.title}'. "
                             "Vous ne pouvez pas créer une redirection directe "
@@ -470,13 +340,10 @@ class ProduitPage(
                     # No exclusion exists, that's fine
                     pass
 
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-
-        ProduitPageSearchTerm.objects.update_or_create(
-            produit_page=self,
-            defaults={"searchable_title": self.titre_phrase or self.title},
-        )
+    def get_template(self, request, *args, **kwargs):
+        if self.est_famille:
+            return "ui/pages/family_page.html"
+        return "ui/pages/produit_page.html"
 
     class Meta:
         verbose_name = "Produit"
@@ -756,23 +623,14 @@ class ProduitLien(models.Model):
         unique_together = ("produit", "lien")  # Prevent duplicate relations
 
 
-class Synonyme(SearchTerm, AbstractBaseProduit):
+@register_snippet
+class Synonyme(index.Indexed, AbstractBaseProduit):
     slug = AutoSlugField(populate_from=["nom"], max_length=255)
     nom = models.CharField(blank=True, unique=True, help_text="Nom du produit")
     produit = models.ForeignKey(
         Produit,
         related_name="synonymes",
         on_delete=models.CASCADE,
-    )
-    imported_as_search_tag = models.ForeignKey(
-        "qfdmd.SearchTag",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="imported_synonymes",
-        verbose_name="Importé comme SearchTag",
-        help_text="Si renseigné, ce synonyme a été importé comme SearchTag "
-        "et ne devrait plus apparaître dans les résultats de recherche.",
     )
     picto = models.FileField(
         upload_to="pictos",
@@ -827,12 +685,13 @@ class Synonyme(SearchTerm, AbstractBaseProduit):
     def __str__(self) -> str:
         return self.nom
 
-    search_fields = SearchTerm.search_fields + [
-        index.SearchField("nom"),
+    search_fields = [
         index.AutocompleteField("nom"),
+        index.SearchField("id"),
+        index.RelatedFields(
+            "produit", [index.SearchField("id"), index.SearchField("nom")]
+        ),
     ]
-
-    search_result_template = "ui/components/search/search_result_synonyme.html"
 
 
 @register_setting
