@@ -1,4 +1,5 @@
 import logging
+import uuid
 
 from django import forms
 from dsfr.forms import DsfrBaseForm
@@ -41,6 +42,12 @@ class QfSearchForm(forms.Form):
             },
         ),
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Generate a fresh turbo_frame_id per instance so that multiple forms
+        # on the same page don't share the same turbo-frame element ID.
+        self.fields["search"].widget.turbo_frame_id = str(uuid.uuid4())
 
 
 # TODO: backward compatibility only

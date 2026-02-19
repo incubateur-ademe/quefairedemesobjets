@@ -9,7 +9,6 @@ from wagtail.models import Page
 
 from search.models import SearchTerm
 
-
 register = template.Library()
 
 logger = logging.getLogger(__name__)
