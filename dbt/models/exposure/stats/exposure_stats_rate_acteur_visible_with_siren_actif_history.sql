@@ -1,3 +1,4 @@
+-- DEPRECATED: will use exposure_stats_acteur_siren_siret_history instead
 
 SELECT
     CURRENT_DATE AS date_snapshot,
