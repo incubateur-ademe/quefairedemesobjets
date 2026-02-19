@@ -14,7 +14,7 @@ Dans la section `Databases` > `… PostgreSQL …`, Créer une nouvelle base de 
 Localiser la DB en France \
 Préférer une base de données cryptées \
 Choisir 15 K IOPS pour des besoins intensifs (data) et choisir le plan en fonction des besoins \
-Nommer la base de données selon la convention : [Conventions](../../reference/infrastructure/scaleway.md#conventions)
+Nommer la base de données selon les conventions définies avec l'équipe technique (voir [Infrastructure](../../reference/infrastructure/README.md)).
 
 ### Créer la base de données
 

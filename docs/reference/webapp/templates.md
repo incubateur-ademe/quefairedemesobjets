@@ -29,7 +29,7 @@ The goal is to keep the **top-level templates as flat and readable as possible**
 
 For example, if we are working on the detail page template for an “actor” entity, and this page uses a `tag` component, we can use the following directory structure:
 
-```txt
+```text
 shared
 - tag.html        # reusable component template
 

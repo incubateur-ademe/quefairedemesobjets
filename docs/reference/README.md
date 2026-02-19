@@ -1,6 +1,6 @@
 # 🧐 REFERENCE
 
-Cette section décrit comment l'application fonctionne d'un point de vue technique
+Here is technical the documentation abouteach part of the application
 
 ```{toctree}
 :maxdepth: 2

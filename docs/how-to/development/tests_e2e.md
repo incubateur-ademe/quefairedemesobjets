@@ -111,14 +111,15 @@ await page.locator('[data-testid="mon-bouton"]').click();
 
 - **Groupes de tests** : Utilisez des emojis et des noms descriptifs en français
 
-  ```typescript
-  test.describe("🗺️ Affichage de la Carte", () => { ... })
-  ```
+```typescript
+test.describe("🗺️ Affichage de la Carte", () => { ... })
+```
 
 - **Noms de tests individuels** : Décrivez clairement le comportement vérifié
-  ```typescript
-  test("La carte affiche la légende après une recherche", async ({ page }) => { ... })
-  ```
+
+```typescript
+test("La carte affiche la légende après une recherche", async ({ page }) => { ... })
+```
 
 ### Utilisation des iframes
 

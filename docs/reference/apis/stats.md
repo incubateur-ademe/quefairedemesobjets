@@ -8,7 +8,7 @@ Data is aggregated from PostHog according to the requested periodicity.
 
 ## Endpoint
 
-```http
+```text
 GET /api/stats
 ```
 

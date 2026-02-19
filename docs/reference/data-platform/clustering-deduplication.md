@@ -27,16 +27,16 @@
 
 ## ➡️ State transitions: scenarios
 
-| change model                                                                    | State before | State after          | Scenario                                                         | Impact in revision                                                                                                                                      | Impact in displayed                |
-| ------------------------------------------------------------------------------- | ------------ | -------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
-| [`acteur_create_as_parent`](data/models/changes/acteur_create_as_parent.py)     | Orphan       | Parent               | ➕ New parent for new cluster                                    | ➕ Parent to create<br>➕ Data enriched as best as possible                                                                                             | same as revision                   |
-| [`acteur_keep_as_parent`](data/models/changes/acteur_keep_as_parent.py)         | Parent       | Parent               | 1️⃣ Single existing parent → keep                                 | 🟰 Still parent of cluster<br>➕ Data enriched as best as possible                                                                                      | same as revision                   |
-| [`acteur_keep_as_parent`](data/models/changes/acteur_keep_as_parent.py)         | Parent       | Parent               | 🎖️ 2+ parents in cluster → the one with most children → keep     | 🟰 Still parent of cluster<br>➕ Data enriched as best as possible                                                                                      | same as revision                   |
-| [`acteur_delete_as_parent`](data/models/changes/acteur_delete_as_parent.py)     | Parent       | Will no longer exist | 🔴 2+ parents in cluster → not chosen → to delete                | 🛑 Should be automatically deleted after these children are updated (see [`PR1247`](https://github.com/incubateur-ademe/quefairedemesobjets/pull/1247)) | 🛑 Should disappear from displayed |
-| [`acteur_verify_in_revision`](data/models/changes/acteur_verify_in_revision.py) | Child        | Child                | 🟰 Already points to new parent → nothing to do                  | None                                                                                                                                                    | None                               |
-| [`acteur_update_parent_id`](data/models/changes/acteur_update_parent_id.py)     | Child        | Child                | 🔀 Pointed to a parent that was not chosen → point to new parent | 🔀 Update parent_id to point to new parent                                                                                                              | None                               |
-| [`acteur_update_parent_id`](data/models/changes/acteur_update_parent_id.py)     | Orphan       | Child                | 🔀 to point to a parent                                          | 🔀 Update parent_id to point to new parent                                                                                                              | 🛑 Should disappear from displayed |
-| _(none)_                                                                        | Orphan       | Orphan               | Still not part of any cluster (no change)                        | None                                                                                                                                                    | None                               |
+| change model                | State before | State after          | Scenario                                                         | Impact in revision                                                                                                                                      | Impact in displayed                |
+| --------------------------- | ------------ | -------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| `acteur_create_as_parent`   | Orphan       | Parent               | ➕ New parent for new cluster                                    | ➕ Parent to create<br>➕ Data enriched as best as possible                                                                                             | same as revision                   |
+| `acteur_keep_as_parent`     | Parent       | Parent               | 1️⃣ Single existing parent → keep                                 | 🟰 Still parent of cluster<br>➕ Data enriched as best as possible                                                                                      | same as revision                   |
+| `acteur_keep_as_parent`     | Parent       | Parent               | 🎖️ 2+ parents in cluster → the one with most children → keep     | 🟰 Still parent of cluster<br>➕ Data enriched as best as possible                                                                                      | same as revision                   |
+| `acteur_delete_as_parent`   | Parent       | Will no longer exist | 🔴 2+ parents in cluster → not chosen → to delete                | 🛑 Should be automatically deleted after these children are updated (see [`PR1247`](https://github.com/incubateur-ademe/quefairedemesobjets/pull/1247)) | 🛑 Should disappear from displayed |
+| `acteur_verify_in_revision` | Child        | Child                | 🟰 Already points to new parent → nothing to do                  | None                                                                                                                                                    | None                               |
+| `acteur_update_parent_id`   | Child        | Child                | 🔀 Pointed to a parent that was not chosen → point to new parent | 🔀 Update parent_id to point to new parent                                                                                                              | None                               |
+| `acteur_update_parent_id`   | Orphan       | Child                | 🔀 to point to a parent                                          | 🔀 Update parent_id to point to new parent                                                                                                              | 🛑 Should disappear from displayed |
+| _(none)_                    | Orphan       | Orphan               | Still not part of any cluster (no change)                        | None                                                                                                                                                    | None                               |
 
 ## 🧪 Algorithm
 
@@ -86,24 +86,24 @@ graph TD
    end
 
    subgraph normalization["🧹 <b>normalization</b>"]
-	    norma["lower case, no accents etc..."]
+       norma["lower case, no accents etc..."]
    end
 
    subgraph clustering["📦 <b>clustering</b>"]
-		  similar["exact + fuzzy similarity"]
+        similar["exact + fuzzy similarity"]
    end
 
    subgraph dedup["1️⃣ <b>deduplication</b>"]
-		  parents_choose["🥇 Choose new parents"]
-		  parents_data["🗄️ Choose parents' data (from non-normalized data)"]
-		  parents_choose-->parents_data
-		  parents_data-->children_feed["⬅️ Add existing children"]
-		  children_feed-->changes_mark["📋 Define changes"]
+        parents_choose["🥇 Choose new parents"]
+        parents_data["🗄️ Choose parents' data (from non-normalized data)"]
+        parents_choose-->parents_data
+        parents_data-->children_feed["⬅️ Add existing children"]
+        children_feed-->changes_mark["📋 Define changes"]
    end
 
    subgraph suggestions[" <b>suggestions</b>"]
       propose
-	 end
+    end
 
    parents-->|displayed| normalization
    orphans-->|displayed| normalization
