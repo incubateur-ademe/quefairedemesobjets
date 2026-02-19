@@ -507,15 +507,14 @@ test.describe("🗺️ Mini Carte - Affichage des Pinpoints", () => {
     await expect(mapContainer).toBeVisible({ timeout: TIMEOUT.DEFAULT })
 
     // Verify the acteur pinpoint is visible (has data-controller="pinpoint" and is not the home marker)
-    // Use TIMEOUT.LONG to allow MapLibre time to initialize and add maplibregl-marker class
     const acteurPinpoint = page.locator(
       '.maplibregl-marker[data-controller="pinpoint"]:not(#pinpoint-home)',
     )
-    await expect(acteurPinpoint.first()).toBeVisible({ timeout: TIMEOUT.LONG })
+    await expect(acteurPinpoint.first()).toBeVisible({ timeout: TIMEOUT.DEFAULT })
 
     // Verify the home pinpoint is visible
     const homePinpoint = page.locator("#pinpoint-home")
-    await expect(homePinpoint).toBeVisible({ timeout: TIMEOUT.LONG })
+    await expect(homePinpoint).toBeVisible({ timeout: TIMEOUT.DEFAULT })
   })
 
   test("La fiche acteur affiche une mini carte avec les pinpoints acteur et home", async ({
@@ -566,15 +565,14 @@ test.describe("🗺️ Mini Carte - Affichage des Pinpoints", () => {
     await expect(miniMapContainer).toBeVisible({ timeout: TIMEOUT.DEFAULT })
 
     // Verify the acteur pinpoint is visible on the mini map
-    // Use TIMEOUT.LONG to allow MapLibre time to initialize and add maplibregl-marker class
     const acteurPinpoint = page.locator(
       '.maplibregl-marker[data-controller="pinpoint"]:not(#pinpoint-home)',
     )
-    await expect(acteurPinpoint.first()).toBeVisible({ timeout: TIMEOUT.LONG })
+    await expect(acteurPinpoint.first()).toBeVisible({ timeout: TIMEOUT.DEFAULT })
 
     // Verify the home pinpoint is visible on the mini map
     const homePinpoint = page.locator("#pinpoint-home")
-    await expect(homePinpoint).toBeVisible({ timeout: TIMEOUT.LONG })
+    await expect(homePinpoint).toBeVisible({ timeout: TIMEOUT.DEFAULT })
   })
 })
 
@@ -590,11 +588,10 @@ test.describe("🗺️ Absence du Pinpoint Home sans Adresse", () => {
     await expect(iframe.locator("body")).toBeAttached({ timeout: TIMEOUT.DEFAULT })
 
     // Wait for the map to be loaded and acteur markers to appear
-    // Use TIMEOUT.LONG since iframe map initialization takes extra time
     const acteurMarkers = iframe.locator(
       '.maplibregl-marker[data-controller="pinpoint"]:not(#pinpoint-home)',
     )
-    await expect(acteurMarkers.first()).toBeVisible({ timeout: TIMEOUT.LONG })
+    await expect(acteurMarkers.first()).toBeVisible({ timeout: TIMEOUT.DEFAULT })
 
     // Verify that the home pinpoint is NOT visible (should remain invisible without an address)
     const homePinpoint = iframe.locator("#pinpoint-home")
@@ -615,11 +612,10 @@ test.describe("🗺️ Absence du Pinpoint Home sans Adresse", () => {
     await expect(iframe.locator("body")).toBeAttached({ timeout: TIMEOUT.DEFAULT })
 
     // Wait for the map to be loaded and acteur markers to appear
-    // Use TIMEOUT.LONG since iframe map initialization takes extra time
     const acteurMarkers = iframe.locator(
       '.maplibregl-marker[data-controller="pinpoint"]:not(#pinpoint-home)',
     )
-    await expect(acteurMarkers.first()).toBeVisible({ timeout: TIMEOUT.LONG })
+    await expect(acteurMarkers.first()).toBeVisible({ timeout: TIMEOUT.DEFAULT })
 
     // Verify that the home pinpoint is NOT visible (should remain invisible without an address)
     const homePinpoint = iframe.locator("#pinpoint-home")
@@ -639,11 +635,10 @@ test.describe("🗺️ Bouton Itinéraire", () => {
     await searchForAuray(page)
 
     // Wait for acteur markers to appear
-    // Use TIMEOUT.LONG to allow MapLibre time to initialize and add maplibregl-marker class
     const acteurMarkers = page.locator(
       '.maplibregl-marker[data-controller="pinpoint"]:not(#pinpoint-home)',
     )
-    await expect(acteurMarkers.first()).toBeVisible({ timeout: TIMEOUT.LONG })
+    await expect(acteurMarkers.first()).toBeVisible({ timeout: TIMEOUT.DEFAULT })
 
     // Click on the first clickable acteur marker (cycles through to find one not obstructed)
     await clickFirstClickableActeurMarker(page)
@@ -679,11 +674,10 @@ test.describe("🗺️ Bouton Itinéraire", () => {
     await searchForAurayInIframe(iframe)
 
     // Wait for acteur markers to appear (excluding the home marker which has id="pinpoint-home")
-    // Use TIMEOUT.LONG since iframe map initialization takes extra time
     const acteurMarkers = iframe.locator(
       '.maplibregl-marker[data-controller="pinpoint"]:not(#pinpoint-home)',
     )
-    await expect(acteurMarkers.first()).toBeVisible({ timeout: TIMEOUT.LONG })
+    await expect(acteurMarkers.first()).toBeVisible({ timeout: TIMEOUT.DEFAULT })
 
     // Click on the first clickable acteur marker (cycles through to find one not obstructed)
     await clickFirstClickableActeurMarker(iframe)

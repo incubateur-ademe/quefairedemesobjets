@@ -156,11 +156,11 @@ test.describe("🗺️ Affichage et Interaction Acteurs", () => {
     let inputSelector = "#id_sous_categorie_objet"
     await iframe.locator(inputSelector).click()
     await iframe.locator(inputSelector).fill("perceuse")
-    const firstAutocompleteItem = iframe.locator(
-      "#id_sous_categorie_objetautocomplete-list.autocomplete-items div:nth-child(1)",
-    )
-    await expect(firstAutocompleteItem).toBeVisible({ timeout: TIMEOUT.DEFAULT })
-    await firstAutocompleteItem.click()
+    await iframe
+      .locator(
+        "#id_sous_categorie_objetautocomplete-list.autocomplete-items div:nth-child(1)",
+      )
+      .click()
 
     // Fill adresse
     await mockApiAdresse(page)
@@ -174,7 +174,7 @@ test.describe("🗺️ Affichage et Interaction Acteurs", () => {
       '.maplibregl-marker[data-controller="pinpoint"]:not(#pinpoint-home)',
     )
     await expect(acteurMarkers.first()).toBeVisible({
-      timeout: TIMEOUT.LONG,
+      timeout: TIMEOUT.DEFAULT,
     })
 
     // Click on the first acteur marker
