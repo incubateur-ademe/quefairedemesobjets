@@ -47,9 +47,12 @@ jobs:
 
       - name: Setup frontend environment
         uses: ./.github/actions/setup-frontend
+        with:
+          working-directory: webapp
 
       - name: Check code formatting
         run: npm run format:check
+        working-directory: webapp
 
   backend_tests:
     name: ✅ Backend Tests
@@ -80,13 +83,13 @@ jobs:
         with:
           uv-groups: "--group dev --group airflow"
       - name: Run unit tests
-        run: make unit-test
+        run: make -C webapp unit-test
       - name: Run integration tests
-        run: make integration-test
+        run: make -C webapp integration-test
       - name: Run data tests
-        run: uv run pytest dags/tests
+        run: make -C webapp dags-test
       - name: Check for missing migrations
-        run: uv run python manage.py makemigrations --check --no-input --settings=core.test_settings
+        run: cd webapp && uv run python manage.py makemigrations --check --no-input --settings=core.test_settings
 
   frontend_tests:
     name: ✅ Frontend Tests
@@ -97,9 +100,12 @@ jobs:
 
       - name: Setup frontend environment
         uses: ./.github/actions/setup-frontend
+        with:
+          working-directory: webapp
 
       - name: Run tests
         run: npm run test
+        working-directory: webapp
 
   # This job prepares all necessary artifacts for E2E test shards to run in parallel.
   # By building assets, populating the database, and caching Playwright browsers once,
@@ -132,6 +138,7 @@ jobs:
         uses: ./.github/actions/setup-frontend
         with:
           build: "true"
+          working-directory: webapp
 
       - name: Setup backend environment
         uses: ./.github/actions/setup-backend
@@ -157,15 +164,15 @@ jobs:
 
       - name: collectstatic
         shell: bash
-        run: make collectstatic
+        run: make -C webapp collectstatic
 
       - name: Upload build artifacts for e2e tests
         uses: actions/upload-artifact@v6
         with:
           name: e2e-build-artifacts
           path: |
-            staticfiles
-            static/compiled
+            webapp/staticfiles
+            webapp/static/compiled
             database-dump.pgdump
           retention-days: 1
   e2e:
@@ -198,6 +205,8 @@ jobs:
       # PREPARE e2e
       - name: Setup frontend environment
         uses: ./.github/actions/setup-frontend
+        with:
+          working-directory: webapp
 
       - name: Install GIS packages
         uses: ./.github/actions/install-gis
@@ -226,23 +235,23 @@ jobs:
       # will have required data.
       - name: Populate search terms
         shell: bash
-        run: uv run python manage.py populate_search_terms
+        run: cd webapp && uv run python manage.py populate_search_terms
 
       # TODO: remove once synonyme de recherche work
       # will be merged and deployed as the sample database
       # will have required data.
       - name: Populate fake search tags
         shell: bash
-        run: uv run python manage.py populate_fake_search_tags
+        run: cd webapp && uv run python manage.py populate_fake_search_tags
 
       - name: Build search index
         shell: bash
-        run: make rebuild-search-index
+        run: make -C webapp rebuild-search-index
 
       # RUN e2e
       - name: Run server
         run: |
-          uv run python manage.py runserver --noreload &
+          cd webapp && uv run python manage.py runserver --noreload &
 
       - name: Wait for server to be ready
         run: |
@@ -252,6 +261,7 @@ jobs:
 
       - name: Run Playwright tests
         run: npx playwright test --shard=${{ matrix.shard }}/5 --update-snapshots
+        working-directory: webapp
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v6

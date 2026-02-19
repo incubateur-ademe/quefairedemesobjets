@@ -13,6 +13,7 @@ runs:
       id: playwright-version
       shell: bash
       run: echo "version=$(npm list @playwright/test --depth=0 --json | jq -r '.dependencies["@playwright/test"].version')" >> $GITHUB_OUTPUT
+      working-directory: webapp
 
     - name: Cache Playwright browsers
       id: cache-playwright
@@ -27,8 +28,10 @@ runs:
       if: steps.cache-playwright.outputs.cache-hit != 'true'
       shell: bash
       run: npx playwright install --with-deps
+      working-directory: webapp
 
     - name: Install system dependencies for Playwright
       if: steps.cache-playwright.outputs.cache-hit == 'true'
       shell: bash
       run: npx playwright install-deps
+      working-directory: webapp

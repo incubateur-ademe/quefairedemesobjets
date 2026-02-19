@@ -6,6 +6,9 @@ inputs:
     description: "Build frontend assets"
     required: false
     default: "false"
+  working-directory:
+    description: "Working directory"
+    required: false
 
 runs:
   using: composite
@@ -15,12 +18,15 @@ runs:
       with:
         node-version-file: ".tool-versions"
         cache: "npm"
+        cache-dependency-path: ${{ inputs.working-directory && format('{0}/package-lock.json', inputs.working-directory) || 'package-lock.json' }}
 
     - name: Install npm dependencies
       shell: bash
       run: npm ci
+      working-directory: ${{ inputs.working-directory }}
 
     - name: Build assets
       if: inputs.build == 'true'
       shell: bash
       run: npm run build
+      working-directory: ${{ inputs.working-directory }}
