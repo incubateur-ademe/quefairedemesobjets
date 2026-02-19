@@ -47,6 +47,8 @@ jobs:
 
       - name: Setup frontend environment
         uses: ./.github/actions/setup-frontend
+        with:
+          working-directory: webapp
 
       - name: Check code formatting
         run: npm run format:check
@@ -98,6 +100,8 @@ jobs:
 
       - name: Setup frontend environment
         uses: ./.github/actions/setup-frontend
+        with:
+          working-directory: webapp
 
       - name: Run tests
         run: npm run test
@@ -134,6 +138,7 @@ jobs:
         uses: ./.github/actions/setup-frontend
         with:
           build: "true"
+          working-directory: webapp
 
       - name: Setup backend environment
         uses: ./.github/actions/setup-backend
@@ -199,6 +204,8 @@ jobs:
       # PREPARE e2e
       - name: Setup frontend environment
         uses: ./.github/actions/setup-frontend
+        with:
+          working-directory: webapp
 
       - name: Install GIS packages
         uses: ./.github/actions/install-gis
