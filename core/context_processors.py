@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.urls import reverse
 
-from qfdmd.forms import HeaderSearchForm, HomeSearchForm, QfSearchForm
+from qfdmd.forms import HomeSearchForm, QfSearchForm
 
 from . import constants
 
@@ -26,7 +26,10 @@ def content(request):
 
 def global_context(request) -> dict:
     home_search_form = HomeSearchForm(prefix="home", initial={"id": "home"})
-    header_autocomplete_search_form = HeaderSearchForm(prefix="header-autocomplete")
+    header_autocomplete_search_form = QfSearchForm(prefix="header-autocomplete")
+    header_autocomplete_search_form.fields["search"].widget.attrs[
+        "placeholder"
+    ] = "Rechercher un objet ou un déchet"
     qf_search_form = QfSearchForm(prefix="qf-search")
     skiplinks = [
         {"link": "#content", "label": "Contenu"},
