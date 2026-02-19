@@ -1,46 +1,52 @@
-# Organisation des bases de données
+# Database organisation
 
-## Utilisation de deux bases de données
+## Using two databases instance
 
-L'application utilise deux bases de données :
+The application uses two PostgreSQL databases:
 
-- webapp : pour administrer et afficher les objets utils aux applications « La Carte » et « L'Assistant »
-- warehouse : utilisé pour tous le travail de calcul et consolidation de la données
+- `webapp`: stores and serves the data used to administer and display objects for the “La Carte” and “L’Assistant” applications
+- `warehouse`: used for all data processing, calculations, and consolidation work
 
-L'objectif est de séparer les bases de données pour que le travail sur la donnée n'impacte pas les performance de la webapp.
-De même, nous avons besoin de beaucoup plus de place pour le travailler sur la données et de plus de rapidité pour la webapp.
+The goal is to separate the databases so that data processing does not impact the performance of the web application.
+We also need much more storage capacity for data processing, and higher responsiveness for the web application.
 
-## Lien entre bases de données
+## Links between databases
 
-Le calcul avec DBT est effectué sur la base de données `warehouse`, cependant, il est nécessaire d'accéder aux données de de `webapp`
+dbt computations are performed on the `warehouse` database. However, they need to read data from the `webapp` database.
 
-De même, il est nécessaire de mettre à disposition les données calculées sur la partie `warehouse` pour les afficher à la `webapp`
+Conversely, data computed in `warehouse` must be made available to `webapp` so that it can be displayed in the application.
 
-Pour gérer ces liens entre bases de données, l'application utilise l'extension `postgres_fdw` qui crée une représentation de la base distante dans un schema dédié
+To manage these cross-database links, the application uses the `postgres_fdw` extension, which exposes a remote database in a dedicated schema.
 
-- la base de données `webapp` est disponible en lecture sur le schema `webapp_public` sur la base de données `warehouse`
-- la base de données `warehouse` est disponible en lecture sur le schema `warehouse_public` sur la base de données `webapp`
+- the `webapp` database is available read-only via the `webapp_public` schema on the `warehouse` database
+- the `warehouse` database is available read-only via the `warehouse_public` schema on the `webapp` database
 
 ```mermaid
 graph TB
-    subgraph ide2 [Appications]
+    subgraph ide2 [Applications]
         direction LR
-        A[DBT - via Airflow]
+        A[dbt - via Airflow]
         B[Airflow]
-        C[La carte / l'Assistant]
+        C[La Carte / L’Assistant]
     end
-    subgraph ide1 [Bases de données]
+    subgraph ide1 [Databases]
         direction LR
         D[(DB warehouse)]
         E[(DB webapp)]
-        D <-. potgres_fdw .-> E
+        D <-. postgres_fdw .-> E
     end
-    A[DBT - via Airflow] --> D
+    A[dbt - via Airflow] --> D
     B[Airflow] --> D
     B[Airflow] --> E
-    C[La carte / l'Assistant] --> E
+    C[La Carte / L’Assistant] --> E
 ```
 
-Ces schemas sont rafraichis à chaque mise en prod (après les migrations)
+These schemas are refreshed on each production deployment (after applying migrations).
 
-commande utile : [Création des liens entre bases de données](../../comment-faire/development/useful_command.md#creation-des-liens-entre-bases-de-donnees)
+Useful command: [Create links between databases](../../how-to/development/useful_command.md#creation-des-liens-entre-bases-de-donnees)
+
+## `webapp_sample` database
+
+`webapp_sample` is a database stored in `webapp` instance in preprod and locally (not in prod)
+
+It is used to compute a sample of data (Auray and Montbeliard), this sample is computed weekly via a Airflow DAG is used to run tests

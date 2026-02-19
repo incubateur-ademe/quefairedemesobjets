@@ -55,9 +55,39 @@ The **French State Design System (DSFR)** is used to comply with accessibility a
 
 More details in [look-and-feel.md](./look-and-feel.md)
 
+## 🔧 Useful Tools and Commands
+
+from `webapp` folder
+
+### Development
+
+- `npm run watch`: Watch mode for Parcel (automatic compilation)
+- `npm run build`: Production build
+- `npm run lint`: TypeScript/JavaScript linter
+- `npm run format`: Format code with Prettier
+
+### Tests
+
+- `npm test`: Jest tests
+- `npm run e2e_test`: Playwright tests
+- `uv run pytest` Python tests, or:
+  - `make unit-test`: unit tests
+  - `make integration-test`: integration tests
+  - `make dags-test`: DAG tests (data-platform)
+
+## ⚠️ Important Points
+
+- Django Migrations: Always create migrations for model changes
+- Frontend compilation: Check that Parcel has compiled properly before committing
+- Tests: Tests must pass before merging
+- Secrets: Use `python-decouple` for environment variables, never hardcode secrets, new secrets must be referenced in `.env.template`
+- Airflow: DAGs must be idempotent and handle errors gracefully
+
 ```{toctree}
 :maxdepth: 2
 
 templates.md
 look-and-feel.md
+javascript.md
+django.md
 ```

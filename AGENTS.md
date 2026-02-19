@@ -4,45 +4,48 @@
 
 ## Main monorepo architecture
 
-| Repository or file   | Purpose                                                      |
-| -------------------- | ------------------------------------------------------------ |
-| `.github/`           | CI/CD                                                        |
-| `webapp/`            | Django + Stimulus app “What to do with my objects and waste” |
-| `data-platform/`     | Data platform (Airflow, dbt, notebooks…)                     |
-| `docs/`              | Technical documentation                                      |
-| `infrastructure/`    | Infrastructure deployment and management                     |
-| `docker-compose.yml` | Local execution                                              |
-| `nginx-local-only/`  | Nginx config for local development                           |
-| `Makefile`           | Global commands                                              |
-| `scripts/`           | Scripts outside webapp                                       |
-| `pyproject.toml`     | Python dependencies (uv)                                     |
+| Repository or file   | Purpose                                                      | Technologies                                               |
+| -------------------- | ------------------------------------------------------------ | ---------------------------------------------------------- |
+| `.github/`           | CI/CD                                                        | Github action                                              |
+| `webapp/`            | Django + Stimulus app “What to do with my objects and waste” | Django, Typescript, Stimulus, pytest, playwright, tailwind |
+| `data-platform/`     | Data platform (Airflow, dbt, notebooks…)                     | Airflow, dbt, python, pytest                               |
+| `docs/`              | Technical documentation                                      | sphinx, markdown                                           |
+| `infrastructure/`    | Infrastructure deployment and management                     | opentofu, terragrunt, Scaleway                             |
+| `docker-compose.yml` | Local execution                                              | docker, docker compose                                     |
+| `nginx-local-only/`  | Nginx config for local development                           | nginx                                                      |
+| `Makefile`           | Global commands                                              |                                                            |
+| `scripts/`           | Scripts outside webapp                                       | bash                                                       |
+| `pyproject.toml`     | Python dependencies (uv)                                     |                                                            |
+
+Note : `webapp/Makefile` handle `webapp` specific command
 
 ## Using English or French
 
-Use English by default, for more guidelines : [](docs/reference/coding/french-vs-english.md)
+Use English by default, for more guidelines : [docs/reference/coding/README.md](./docs/reference/coding/README.md)
 
 ## Quick Lookup
 
 For each kind of task below, refer to the specific documentation
 
-| Is concerned                             | Go to...                                                                           |
-| ---------------------------------------- | ---------------------------------------------------------------------------------- |
-| API features                             | [docs/reference/apis/README.md](./docs/reference/apis/README.md)                   |
-| Webapp features (Django app/Javascript)  | [docs/reference/webapp/README.md](./docs/reference/webapp/README.md)               |
-| in Webapp, more specificly Templating    | [docs/reference/webapp/templates.md](./docs/reference/webapp/templates.md)         |
-| in Webapp, more specificly Look and feel | [docs/reference/webapp/look-and-feel.md](./docs/reference/webapp/look-and-feel.md) |
+| Is concerned                               | Go to...                                                                                         |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| API features                               | [docs/reference/apis/README.md](./docs/reference/apis/README.md)                                 |
+| Webapp features (Django app/Javascript)    | [docs/reference/webapp/README.md](./docs/reference/webapp/README.md)                             |
+| in Webapp, more specifically Django        | [docs/reference/webapp/django.md](./docs/reference/webapp/django.md)                             |
+| in Webapp, more specifically Templating    | [docs/reference/webapp/templates.md](./docs/reference/webapp/templates.md)                       |
+| in Webapp, more specifically Look and feel | [docs/reference/webapp/look-and-feel.md](./docs/reference/webapp/look-and-feel.md)               |
+| Infrastructure                             | [docs/reference/infrastructure/provisioning.md](./docs/reference/infrastructure/provisioning.md) |
+| Monitoring                                 | [docs/reference/infrastructure/monitoring.md](./docs/reference/infrastructure/monitoring.md)     |
+| CI/CD                                      | [docs/reference/infrastructure/ci-cd.md](./docs/reference/infrastructure/ci-cd.md)               |
+| Javascript (Stimulus/Maplibre/Turbo)       | [docs/reference/webapp/javascript.md](./docs/reference/webapp/javascript.md)                     |
+| Airflow                                    | [docs/reference/data-platform/airflow.md](./docs/reference/data-platform/airflow.md)             |
+| DBT                                        | [docs/reference/data-platform/dbt.md](./docs/reference/data-platform/dbt.md)                     |
 
-## 🏗️ General Architecture
+## General Coding guidelines
 
-### Tech Stack
-
-- Administration commands: in the root `Makefile` and `scripts/`
-- Backend (webapp): Django 5.2+ (Python 3.12), dependency management and python commands with `uv`
-- Frontend (webapp): TypeScript with Stimulus 3.x and Turbo 8.x and templating avec Django templates
-- Build (webapp): Parcel 2.x
-- Orchestration (data-platform): Apache Airflow 2.11+
-- Data (data-platform): PostgreSQL with postgis extension, dbt for transformation
-- Design System: DSFR (French State Design System) via `django-dsfr`
+- Nommage (et [Swift API Guidelines](https://www.swift.org/documentation/api-design-guidelines/))
+- La base de code python suit les conventions décrites par [PEP8](https://peps.python.org/pep-0008/). Garanti en CI par `ruff`
+- La base de code Typescript suit les conventions décrites par [TypeScript style guide](https://ts.dev/style/). Garanti en CI par `eslint` / `prettier`
 
 ### Project Structure
 
@@ -81,142 +84,12 @@ For each kind of task below, refer to the specific documentation
 - Imports: Organized according to Django conventions (stdlib, third-party, local)
 - Tests: pytest with pytest-django
 
-### TypeScript/JavaScript
+## 🔍 Codebase Search
 
-- Linter: ESLint with "love" config
-- Formatting: Prettier (trailing comma: all, printWidth: 88, semi: false)
-- Framework: Stimulus for controllers, Turbo for navigation
-- Build: Parcel compiles `static/to_compile/` to `static/compiled/`
-
-### Naming conventions
-
-- Python: snake_case for variables/functions, PascalCase for classes
-- TypeScript: camelCase for variables/functions, PascalCase for classes
-- Files: snake_case for Python, kebab-case for TypeScript
-
-## 🎯 Important Patterns
-
-### Stimulus Controllers
-
-- Controllers are in `webapp/static/to_compile/controllers/`
-- Use Stimulus targets and values
-- Export as `export default class extends Controller`
-- Structure example:
-
-```typescript
-import { Controller } from "@hotwired/stimulus";
-
-export default class extends Controller<HTMLElement> {
-  static targets = ["targetName"];
-  declare readonly targetNameTarget: HTMLElement;
-
-  connect() {
-    // Initialization
-  }
-}
-```
-
-### Django Views
-
-- Use class-based views when appropriate
-- Prefer `LoginRequiredMixin` for protected views
-- Use `prefetch_related` and `select_related` to optimize queries
-- Admin views are mainly in `webapp/qfdmo/admin.py` and `webapp/qfdmd/admin.py`
-
-### Django Templates
-
-- Use partials in `webapp/templates/data/_partials/` for reusability
-- Base layout is in `webapp/templates/ui/layout/base.html`
-- Use template tags from `webapp/core/templatetags/` for reusable logic
-
-### Airflow DAGs
-
-- Organized by domain in `data-platform/dags/` (clone, enrich, crawl, etc.)
-- Use shared utilities in `data-platform/dags/shared/`
-- DAG organization:
-  - DAGs are in `./dags/<EPIC>/dags/`
-  - Tasks are in `./dags/<EPIC>/tasks/`
-  - Wrappers between Airflow and business code in `./dags/<EPIC>/tasks/airflow_logic/`
-  - Business logic in `./dags/<EPIC>/tasks/business_logic/` independent of Airflow
-
-## 🔧 Useful Tools and Commands
-
-### Development
-
-- `npm run watch`: Watch mode for Parcel (automatic compilation)
-- `npm run build`: Production build
-- `npm run lint`: TypeScript/JavaScript linter
-- `npm run format`: Format code with Prettier
-
-### Tests
-
-- `npm test`: Jest tests (webapp)
-- `npm run e2e_test`: Playwright tests (webapp)
-- `uv run pytest` Python tests, or:
-  - `make unit-test`: unit tests (webapp)
-  - `make integration-test`: integration tests (webapp)
-  - `make dags-test`: DAG tests (data-platform)
-
-### Database
-
-- Django migrations are in `webapp/*/migrations/`
-- dbt models are in `data-platform/dbt/models/`
-
-## 🎨 Design System (DSFR)
-
-- Use DSFR components via `django-dsfr`
-- Colors and icons used are tracked in `dsfr_hacks/`
-- Respect DSFR accessibility guidelines
-
-## 📦 Important Dependencies
-
-### Backend
-
-- `django-ninja`: REST API
-- `django-import-export`: Data import/export
-- `rapidfuzz`: Fuzzy matching for suggestions
-- `django-dsfr`: Design System integration
-
-### Frontend
-
-- `@hotwired/stimulus`: Controller framework
-- `@hotwired/turbo`: SPA-like navigation
-- `maplibre-gl`: Mapping
-- `@gouvfr/dsfr`: Frontend Design System
-
-## 🚀 Development Workflow
-
-1. Frontend modifications (webapp) :
-
-- Edit in `webapp/static/to_compile/`, Parcel compiles automatically
-- `webapp/templates/` Django templating engine
-
-1. Backend modifications (webapp) : Edit directly, Django reloads automatically in dev
-1. New features : Create migrations if necessary, test with pytest (`uv run pytest`)
-1. E2E tests : Use Playwright for e2e tests in `webapp/e2e_tests/`
-
-## ⚠️ Important Points
-
-- Django Migrations: Always create migrations for model changes
-- Frontend compilation: Check that Parcel has compiled properly before committing
-- Tests: Tests must pass before merging
-- Secrets: Use `python-decouple` for environment variables, never hardcode secrets, new secrets must be referenced in `.env.template`
-- Airflow: DAGs must be idempotent and handle errors gracefully
+- Use `codebase_search` to understand flows
+- Use `grep` to find exact occurrences
 
 ## 📚 Documentation
 
 - Technical documentation is in `docs/` and published on GitHub Pages
 - Specific READMEs are in each important subfolder
-
-## 🔍 Codebase Search
-
-### Key Files to Know
-
-- `webapp/core/settings.py`: Django configuration
-- `webapp/core/urls.py`: Main URLs
-- `webapp/static/to_compile/admin.ts`: JS code entry point
-
-### Search Patterns
-
-- Use `codebase_search` to understand flows
-- Use `grep` to find exact occurrences

@@ -3,7 +3,7 @@
 Parfois Nos partenaires fournisseurs de données ne peuvent pas assurer la continuitédes identifiant qu'ils utilisent.
 Il se peut qu'ils nous fournissent une table de correspondance d'identifiants.
 Dans ce cas, nous devont modifier les identifiants exetrne des acteurs concernés pour garantir la continuité des acteurs, i.e. garder les corrections et le regroupement des acteurs de cette source
-Cette action n'est pas disponible via l'interface, ce "comment-faire" explique comment procéder à cette modification
+Cette action n'est pas disponible via l'interface, ce "how-to" explique comment procéder à cette modification
 
 ## pre-requis
 

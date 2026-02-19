@@ -5,8 +5,8 @@
 This project uses Tailwind **in addition to** the French State Design System (DSFR).
 **DSFR is the primary design system**, and Tailwind is mainly used to customize or extend styles when DSFR alone is not sufficient.
 
-- **DSFR**: integrated through the **django-dsfr** package (templates, components, tags) and **@gouvfr/dsfr** assets (CSS/JS). Global DSFR stylesheets are included in layouts (e.g. `templates/dsfr/global_css.html`).
-- **Tailwind**: configured in `tailwind.config.js` with a **`qf-`** class prefix to avoid conflicts with DSFR classes. The config extends the theme with **DSFR colors** (via `dsfr_hacks/colors`) and spacing/utilities aligned with the design system. `corePlugins.preflight` is disabled to avoid overriding DSFR base styles.
+- **DSFR**: integrated through the **django-dsfr** package (templates, components, tags) and **@gouvfr/dsfr** assets (CSS/JS).
+- **Tailwind**: configured in `tailwind.config.js` with a **`qf-`** class prefix to avoid conflicts with DSFR classes.
 
 In practice, templates use both **DSFR** classes and components (buttons, header, footer, forms, etc.) and **Tailwind** classes with the `qf-` prefix (`qf-flex`, `qf-mt-2w`, etc.) for layout and visual fine‑tuning.
 
