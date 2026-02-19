@@ -3,8 +3,4 @@
 
 {% block href %}{% pageurl result %}{% endblock %}
 
-{% block nom %}
-<div class="qf-flex qf-justify-between qf-pr-2w">
-    {{ result.titre_phrase|capfirst }}
-</div>
-{% endblock %}
+{% block nom %}{{ result.titre_phrase|capfirst }}{% endblock %}

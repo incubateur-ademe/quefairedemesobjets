@@ -192,21 +192,14 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
 
     const link = this.#getLinkFromOption(selected)
 
-    // If clicking on a link, let the browser handle navigation naturally
-    if (event && link && (event.target === link || link.contains(event.target))) {
-      this.#hideListbox()
-      // Let the default link behavior happen (browser will navigate)
-      return
-    }
-
-    // If selecting via keyboard (Enter key) and option has a link, trigger it
+    // Link mode: keyboard Enter triggers the link
     if (!event && link) {
       this.#hideListbox()
       link.click()
       return
     }
 
-    // Otherwise, this is a form autocomplete - populate the form fields
+    // Form mode: populate the form fields and emit commit event
     const value = selected.dataset.value?.trim() || ""
     const selectedValue = selected.dataset.selectedValue?.trim() || ""
 
@@ -214,7 +207,6 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
     this.inputTarget.value = selectedValue
     this.#hideListbox()
 
-    // Emit custom event for other controllers to listen to
     const commitEvent = new CustomEvent("next-autocomplete:commit", {
       bubbles: true,
       detail: { option: selected, value, selectedValue },
