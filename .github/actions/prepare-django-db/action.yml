@@ -57,6 +57,7 @@ runs:
       shell: bash
       run: |
         make createcachetable
+        uv run python manage.py migrate_from_sites_faciles_experiment --no-input
         make migrate
 
     - name: Init django admin superuser
