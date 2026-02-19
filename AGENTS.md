@@ -1,6 +1,36 @@
-# Cursor Guidelines - What to do with my objects
+# AGENT Guidelines - Monorepo Guide
 
-This file contains important guidelines for understanding and working effectively on this project.
+> **Purpose**: Context for AI assistants and developers. For app-specific patterns, see individual README.md files.
+
+## Main monorepo architecture
+
+| Repository or file   | Purpose                                                      |
+| -------------------- | ------------------------------------------------------------ |
+| `.github/`           | CI/CD                                                        |
+| `webapp/`            | Django + Stimulus app “What to do with my objects and waste” |
+| `data-platform/`     | Data platform (Airflow, dbt, notebooks…)                     |
+| `docs/`              | Technical documentation                                      |
+| `infrastructure/`    | Infrastructure deployment and management                     |
+| `docker-compose.yml` | Local execution                                              |
+| `nginx-local-only/`  | Nginx config for local development                           |
+| `Makefile`           | Global commands                                              |
+| `scripts/`           | Scripts outside webapp                                       |
+| `pyproject.toml`     | Python dependencies (uv)                                     |
+
+## Using English or French
+
+Use English by default, for more guidelines : [](docs/reference/coding/french-vs-english.md)
+
+## Quick Lookup
+
+For each kind of task below, refer to the specific documentation
+
+| Is concerned                             | Go to...                                                                           |
+| ---------------------------------------- | ---------------------------------------------------------------------------------- |
+| API features                             | [docs/reference/apis/README.md](./docs/reference/apis/README.md)                   |
+| Webapp features (Django app/Javascript)  | [docs/reference/webapp/README.md](./docs/reference/webapp/README.md)               |
+| in Webapp, more specificly Templating    | [docs/reference/webapp/templates.md](./docs/reference/webapp/templates.md)         |
+| in Webapp, more specificly Look and feel | [docs/reference/webapp/look-and-feel.md](./docs/reference/webapp/look-and-feel.md) |
 
 ## 🏗️ General Architecture
 
@@ -153,12 +183,6 @@ export default class extends Controller<HTMLElement> {
 - `@hotwired/turbo`: SPA-like navigation
 - `maplibre-gl`: Mapping
 - `@gouvfr/dsfr`: Frontend Design System
-
-### API
-
-- `NinjaAPI` : Build api and its documentation
-
-details about how build and test API can be found here : [api.AGENTS.md](./api.AGENTS.md)
 
 ## 🚀 Development Workflow
 
