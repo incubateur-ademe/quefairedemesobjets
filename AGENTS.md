@@ -1,35 +1,77 @@
-# Cursor Guidelines - What to do with my objects
+# AGENT Guidelines - Monorepo Guide
 
-This file contains important guidelines for understanding and working effectively on this project.
+> **Purpose**: Context for AI assistants and developers. For app-specific patterns, see individual README.md files.
 
-## 🏗️ General Architecture
+## Main monorepo architecture
 
-### Tech Stack
+| Repository or file   | Purpose                                                      | Technologies                                               |
+| -------------------- | ------------------------------------------------------------ | ---------------------------------------------------------- |
+| `.github/`           | CI/CD                                                        | Github action                                              |
+| `webapp/`            | Django + Stimulus app “What to do with my objects and waste” | Django, Typescript, Stimulus, pytest, playwright, tailwind |
+| `data-platform/`     | Data platform (Airflow, dbt, notebooks…)                     | Airflow, dbt, python, pytest                               |
+| `docs/`              | Technical documentation                                      | sphinx, markdown                                           |
+| `infrastructure/`    | Infrastructure deployment and management                     | opentofu, terragrunt, Scaleway                             |
+| `docker-compose.yml` | Local execution                                              | docker, docker compose                                     |
+| `nginx-local-only/`  | Nginx config for local development                           | nginx                                                      |
+| `Makefile`           | Global commands                                              |                                                            |
+| `scripts/`           | Scripts outside webapp                                       | bash                                                       |
+| `pyproject.toml`     | Python dependencies (uv)                                     |                                                            |
 
-- Administration commands: in the `Makefile`
-- Backend: Django 5.2+ (Python 3.12), dependency management and python commands with `uv`
-- Frontend: TypeScript with Stimulus 3.x and Turbo 8.x and templating with Django templates
-- Build: Parcel 2.x
-- Orchestration: Apache Airflow 2.11+
-- Data: PostgreSQL with postgis extension, dbt for transformation
-- Design System: DSFR (French State Design System) via `django-dsfr`
+Note : `webapp/Makefile` handle `webapp` specific command
+
+## Using English or French
+
+Use English by default, for more guidelines : [docs/reference/coding/README.md](./docs/reference/coding/README.md)
+
+## Quick Lookup
+
+For each kind of task below, refer to the specific documentation
+
+| Is concerned                               | Go to...                                                                                         |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| API features                               | [docs/reference/apis/README.md](./docs/reference/apis/README.md)                                 |
+| Webapp features (Django app/Javascript)    | [docs/reference/webapp/README.md](./docs/reference/webapp/README.md)                             |
+| in Webapp, more specifically Django        | [docs/reference/webapp/django.md](./docs/reference/webapp/django.md)                             |
+| in Webapp, more specifically Templating    | [docs/reference/webapp/templates.md](./docs/reference/webapp/templates.md)                       |
+| in Webapp, more specifically Look and feel | [docs/reference/webapp/look-and-feel.md](./docs/reference/webapp/look-and-feel.md)               |
+| Infrastructure                             | [docs/reference/infrastructure/provisioning.md](./docs/reference/infrastructure/provisioning.md) |
+| Monitoring                                 | [docs/reference/infrastructure/monitoring.md](./docs/reference/infrastructure/monitoring.md)     |
+| CI/CD                                      | [docs/reference/infrastructure/ci-cd.md](./docs/reference/infrastructure/ci-cd.md)               |
+| Javascript (Stimulus/Maplibre/Turbo)       | [docs/reference/webapp/javascript.md](./docs/reference/webapp/javascript.md)                     |
+| Airflow                                    | [docs/reference/data-platform/airflow.md](./docs/reference/data-platform/airflow.md)             |
+| DBT                                        | [docs/reference/data-platform/dbt.md](./docs/reference/data-platform/dbt.md)                     |
+
+## General Coding guidelines
+
+- Nommage (et [Swift API Guidelines](https://www.swift.org/documentation/api-design-guidelines/))
+- La base de code python suit les conventions décrites par [PEP8](https://peps.python.org/pep-0008/). Garanti en CI par `ruff`
+- La base de code Typescript suit les conventions décrites par [TypeScript style guide](https://ts.dev/style/). Garanti en CI par `eslint` / `prettier`
 
 ### Project Structure
 
 ```txt
 /
-├── core/              # Main Django configuration (settings, urls, wsgi)
-├── data/              # Django app for data management and suggestions
-├── qfdmo/             # Main Django app (business models)
-├── qfdmd/             # Django app for CMS
-├── dags/              # Airflow DAGs (clone, enrich, crawl, etc.)
-├── static/            # Compiled static assets
-│   └── to_compile/    # TypeScript/JavaScript sources to compile
-├── templates/         # Django templates (HTML)
-├── dbt/               # dbt models for data transformation
-├── unit_tests/        # Unit tests with pytest
-├── integration_tests/ # Integration tests with pytest
-└── e2e_tests/         # End-to-end tests with Playwright
+├── .github/           # CI/CD workflows
+├── webapp/            # Application Django + Stimulus « Que faire de mes objets et déchets »
+│   ├── core/          # Django configuration (settings, urls, wsgi)
+│   ├── qfdmo/         # Main Django app (business models)
+│   ├── qfdmd/         # Django app for CMS
+│   ├── static/        # Compiled static assets
+│   │   └── to_compile/ # TypeScript/JavaScript sources to compile
+│   ├── templates/     # Django templates (HTML)
+│   ├── unit_tests/    # Unit tests with pytest
+│   ├── integration_tests/ # Integration tests with pytest
+│   └── e2e_tests/     # End-to-end tests with Playwright
+├── data-platform/     # Plateforme data (Airflow, dbt, notebooks…)
+│   ├── dags/          # Airflow DAGs (clone, enrich, crawl, etc.)
+│   └── dbt/           # dbt models for data transformation
+├── docs/              # Documentation technique
+├── infrastructure/    # Gestion et déploiement de l'infrastructure
+├── docker-compose.yml # Exécution en local
+├── nginx-local-only/  # Configuration Nginx pour le dev local
+├── Makefile           # Commandes globales
+├── scripts/           # Scripts hors webapp
+└── pyproject.toml     # Dépendances Python (uv)
 ```
 
 ## 📝 Code Conventions
@@ -42,148 +84,12 @@ This file contains important guidelines for understanding and working effectivel
 - Imports: Organized according to Django conventions (stdlib, third-party, local)
 - Tests: pytest with pytest-django
 
-### TypeScript/JavaScript
+## 🔍 Codebase Search
 
-- Linter: ESLint with "love" config
-- Formatting: Prettier (trailing comma: all, printWidth: 88, semi: false)
-- Framework: Stimulus for controllers, Turbo for navigation
-- Build: Parcel compiles `static/to_compile/` to `static/compiled/`
-
-### Naming conventions
-
-- Python: snake_case for variables/functions, PascalCase for classes
-- TypeScript: camelCase for variables/functions, PascalCase for classes
-- Files: snake_case for Python, kebab-case for TypeScript
-
-## 🎯 Important Patterns
-
-### Stimulus Controllers
-
-- Controllers are in `static/to_compile/controllers/`
-- Use Stimulus targets and values
-- Export as `export default class extends Controller`
-- Structure example:
-
-```typescript
-import { Controller } from "@hotwired/stimulus"
-
-export default class extends Controller<HTMLElement> {
-  static targets = ["targetName"]
-  declare readonly targetNameTarget: HTMLElement
-
-  connect() {
-    // Initialization
-  }
-}
-```
-
-### Django Views
-
-- Use class-based views when appropriate
-- Prefer `LoginRequiredMixin` for protected views
-- Use `prefetch_related` and `select_related` to optimize queries
-- Admin views are in `data/admin.py`
-
-### Django Templates
-
-- Use partials in `templates/data/_partials/` for reusability
-- Base layout is in `templates/ui/layout/base.html`
-- Use template tags from `core/templatetags/` for reusable logic
-
-### Airflow DAGs
-
-- Organized by domain in `dags/` (clone, enrich, crawl, etc.)
-- Use shared utilities in `dags/shared/`
-- DAG organization:
-  - DAGs are in `./dags/<EPIC>/dags/`
-  - Tasks are in `./dags/<EPIC>/tasks/`
-  - Wrappers between Airflow and business code in `./dags/<EPIC>/tasks/airflow_logic/`
-  - Business logic in `./dags/<EPIC>/tasks/business_logic/` independent of Airflow
-
-## 🔧 Useful Tools and Commands
-
-### Development
-
-- `npm run watch`: Watch mode for Parcel (automatic compilation)
-- `npm run build`: Production build
-- `npm run lint`: TypeScript/JavaScript linter
-- `npm run format`: Format code with Prettier
-
-### Tests
-
-- `npm test`: Jest tests
-- `npm run e2e_test`: Playwright tests
-- `uv run pytest` Python tests, or:
-  - `make unit-test`: unit tests
-  - `make integration-test`: integration tests
-  - `make dags-test`: DAG tests
-
-### Database
-
-- Django migrations are in `*/migrations/`
-- dbt models are in `dbt/models/`
-
-## 🎨 Design System (DSFR)
-
-- Use DSFR components via `django-dsfr`
-- Colors and icons used are tracked in `dsfr_hacks/`
-- Respect DSFR accessibility guidelines
-
-## 📦 Important Dependencies
-
-### Backend
-
-- `django-ninja`: REST API
-- `django-import-export`: Data import/export
-- `rapidfuzz`: Fuzzy matching for suggestions
-- `django-dsfr`: Design System integration
-
-### Frontend
-
-- `@hotwired/stimulus`: Controller framework
-- `@hotwired/turbo`: SPA-like navigation
-- `maplibre-gl`: Mapping
-- `@gouvfr/dsfr`: Frontend Design System
-
-### API
-
-- `NinjaAPI` : Build api and its documentation
-
-details about how build and test API can be found here : [api.AGENTS.md](./api.AGENTS.md)
-
-## 🚀 Development Workflow
-
-1. Frontend modifications:
-
-- Edit in `static/to_compile/`, Parcel compiles automatically
-- `templates/` Django templating engine
-
-2. Backend modifications: Edit directly, Django reloads automatically in dev
-3. New features: Create migrations if necessary, test with pytest (`uv run pytest`)
-4. E2E tests: Use Playwright for e2e tests
-
-## ⚠️ Important Points
-
-- Django Migrations: Always create migrations for model changes
-- Frontend compilation: Check that Parcel has compiled properly before committing
-- Tests: Tests must pass before merging
-- Secrets: Use `python-decouple` for environment variables, never hardcode secrets, new secrets must be referenced in `.env.template`
-- Airflow: DAGs must be idempotent and handle errors gracefully
+- Use `codebase_search` to understand flows
+- Use `grep` to find exact occurrences
 
 ## 📚 Documentation
 
 - Technical documentation is in `docs/` and published on GitHub Pages
 - Specific READMEs are in each important subfolder
-
-## 🔍 Codebase Search
-
-### Key Files to Know
-
-- `core/settings.py`: Django configuration
-- `core/urls.py`: Main URLs
-- `static/to_compile/admin.ts`: JS code entry point
-
-### Search Patterns
-
-- Use `codebase_search` to understand flows
-- Use `grep` to find exact occurrences
