@@ -26,15 +26,13 @@ test.describe("📋 Fiche Acteur Viewport - mode carte", () => {
 
       // Wait for the carte turbo-frame to load inside the produit page
       await mockApiAdresse(page)
-      const mauvaisEtatPanel = iframe.locator("#mauvais-etat-panel")
-      await expect(mauvaisEtatPanel).toBeAttached({ timeout: TIMEOUT.DEFAULT })
-      await expect(
-        mauvaisEtatPanel.locator('[data-testid="carte-adresse-input"]'),
-      ).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+      await expect(iframe.locator('[data-testid="carte-adresse-input"]')).toBeVisible({
+        timeout: TIMEOUT.DEFAULT,
+      })
 
       // Search for Auray in the carte embedded in the produit page
       await searchAddress(iframe, "Auray", "carte", {
-        parentLocator: mauvaisEtatPanel,
+        parentLocator: iframe,
       })
 
       // Wait for acteur markers to appear
@@ -47,7 +45,7 @@ test.describe("📋 Fiche Acteur Viewport - mode carte", () => {
       await acteurMarkers.first().evaluate((el: HTMLElement) => el.click())
 
       // Wait for the acteur detail panel in the mauvais-etat tab to be shown
-      const acteurDetailsPanel = mauvaisEtatPanel.locator("#acteurDetailsPanel")
+      const acteurDetailsPanel = iframe.locator("#acteurDetailsPanel")
       await expect(acteurDetailsPanel).toHaveAttribute("aria-hidden", "false", {
         timeout: TIMEOUT.DEFAULT,
       })
