@@ -1,46 +1,49 @@
-# Documentation technique de l'application
+# «Que faire de mes objets et déchets» Technical documentation
 
-## Sommaire
+## Summary
 
 ```{toctree}
 :maxdepth: 1
 
-comment-faire/README
-explications/README
+getting-started/README
+how-to/README
+explanations/README
 reference/README
 ```
 
-## Par ou commencer ?
+## Where to start?
 
-Cette documentation aide les développeurs et toute personne s'intéressant à la construction technique de la plateforme à comprendre son architecture, son fonctionnement et les prises de décision qui y ont abouties.
+This documentation helps developers and anyone interested in the technical construction of the platform to understand its architecture, how it works, and the decisions that led to it.
 
-Elle est répartie en 4 sections suivant la convention [DIATAXIS](https://diataxis.fr)
+It is divided into 4 sections (partly inspired by the [DIATAXIS](https://diataxis.fr) convention)
 
-![](https://diataxis.fr/_images/diataxis.png)
+### Getting started
 
-Pour en savoir plus sur la construction de cette documentation, suivez le guide : [Guide de la documentation technique](./reference/documentation/documentation-technique.md)
+Explain how install and use the application locally
 
-### Référence
+-> This section should be implemented
 
-Contient toute la description technique de l'application, par exemple :
+### Reference
 
-- Architecture des fichiers
-- Architecture des données
-- Conventions de code et de base de données
+Contains the full technical description of the application, for example:
+
+- File architecture
+- Data architecture
+- Code and database conventions
   …
 
-### Explications
+### Explanations
 
-Description de comment ça marche et des prises de décision, par exemple :
+Describes how things work and the decisions made, for example:
 
-- Pourquoi ce choix d'architecture des données
-- Principe sanitaire mise en place sur la platefome données
+- Why this choice of data architecture
+- Safety principles implemented on the data platform
   …
 
-### Comment faire ?
+### How-to guides
 
-Guide l'utilisateur pour résoudre un problème, par exemple :
+Helps the user solve a problem, for example:
 
-- Copie de la base de données de prod vers preprod
-- Debugage
+- Copying the production database to preproduction
+- Debugging
   …

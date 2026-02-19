@@ -1,22 +1,28 @@
-# Provisionner l'infrastructure
+# Provisioning the infrastructure
 
-Cette configuration OpenTofu gère l'infrastructure de QueFaireDeMesObjets sur Scaleway.
+This OpenTofu configuration manages the QueFaireDeMesObjets infrastructure on Scaleway.
+
+## Scaleway
+
+All resources on Scaleway are provisioned in the organization `Incubateur ADEME (Pathtech)` and the project `longuevieauxobjets`.
+
+All resources are named following the pattern `lvao-{env}-{explicit-name}` (for example: `lvao-prod-webapp-db`).
 
 ## OpenTofu & Terragrunt
 
-Nous utilisons OpenTofu, version open-source de `Terraform`, pour automatiser le provisionning de l'infractructure. [Suivre la documentation](https://opentofu.org/docs/intro/install/) pour installer OpenTofu.
+We use OpenTofu, the open-source version of `Terraform`, to automate infrastructure provisioning. [Follow the documentation](https://opentofu.org/docs/intro/install/) to install OpenTofu.
 
-[Terragrunt](https://terragrunt.gruntwork.io/) est utilisé en complément d'OpenTofu pour avoir une configuration DRY. [Suivre la documentation](https://terragrunt.gruntwork.io/docs/getting-started/install/) pour installer Terragrunt.
+[Terragrunt](https://terragrunt.gruntwork.io/) is used alongside OpenTofu to keep the configuration DRY. [Follow the documentation](https://terragrunt.gruntwork.io/docs/getting-started/install/) to install Terragrunt.
 
-La configuration est définie dans le dossier `infrastructure`
+The configuration is defined in the `infrastructure` directory.
 
-### Prérequis
+### Prerequisites
 
-Installer et configurer le client Scaleway en suivant [les instructions de Scaleway](https://www.scaleway.com/en/docs/scaleway-cli/quickstart/)
+Install and configure the Scaleway CLI by following [Scaleway's instructions](https://www.scaleway.com/en/docs/scaleway-cli/quickstart/).
 
-Vérifer que vous avez les droits d'administration du projet concerné par cette planificaton d'infrastructure
+Make sure you have administration rights on the project targeted by this infrastructure plan.
 
-### IaC : Infrastructure as Code
+### IaC: Infrastructure as Code
 
 #### Structure
 
@@ -26,7 +32,7 @@ infrastructure/
 │   ├── prod/
 │   │   ├── terragrunt.hcl
 │   │   ├── terraform.tfvars.example
-│   │   └── terraform.tfvars -> non partagé
+│   │   └── terraform.tfvars -> not versioned
 │   ├── preprod/
 │   └── preview/
 └── modules/
@@ -39,40 +45,40 @@ infrastructure/
 
 #### Configuration
 
-1. Copier le fichier `environments/<ENV>/terraform.tfvars.example` vers `terraform.tfvars`
-2. Modifier les valeurs dans `terraform.tfvars` avec vos informations :
-   - `project_id` : ID du projet Scaleway
-   - `organization_id` : ID de l'organisation Scaleway
-   - `db_password` : Mot de passe sécurisé pour la base de données
+1. Copy `environments/<ENV>/terraform.tfvars.example` to `terraform.tfvars`.
+2. Edit the values in `terraform.tfvars` with your information:
+   - `project_id`: Scaleway project ID
+   - `organization_id`: Scaleway organization ID
+   - `db_password`: secure password for the database
    - …
 
-### Exécution
+### Execution
 
 #### tfstate
 
-⚠️ le `state` est enregistré sur une répertoire s3 de Scaleway `s3://lvao-terraform-state`
+⚠️ The Terraform state is stored in a Scaleway S3 bucket: `s3://lvao-terraform-state`.
 
-#### Par environnement
+#### Per environment
 
-L'environnement de `preview` est utilisé pour tester notre projet IaC, on détruit volontairement l'infrastructure créée sur cet environnement une fois que la configuration terraform est testée.
+The `preview` environment is used to test our IaC project. We intentionally destroy the infrastructure created in this environment once the Terraform configuration has been tested.
 
-Pour chaque environnement :
+For each environment:
 
-- en **Preprod** dans le dossier infrastructure/environments/preprod à la racine du projet
-- en **Prod** dans le dossier infrastructure/environments/prod à la racine du projet
+- **Preprod**: `infrastructure/environments/preprod` at the repository root
+- **Prod**: `infrastructure/environments/prod` at the repository root
 
-Se placer dans le répertoire `infrastructure/environments/<ENV>` et exécuter les commandes suivantes
+Change directory to `infrastructure/environments/<ENV>` and run:
 
 ```sh
-terragrunt init -reconfigure
+terragrunt init -reconfigure --all
 ```
 
 ```sh
-teragrunt plan
+terragrunt plan --all
 ```
 
 ```sh
-teragrunt apply
+terragrunt apply --all
 ```
 
-Pour chaque commande, l'environnement doit-être précisé
+For each command, the environment must be specified.

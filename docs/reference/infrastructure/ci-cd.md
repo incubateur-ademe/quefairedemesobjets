@@ -1,134 +1,134 @@
-# Documentation CI/CD
+# CI/CD Documentation
 
-Cette documentation décrit les différents workflows de CI/CD du projet et ce qui se passe dans chaque cas d'usage.
+This documentation describes the different CI/CD workflows of the project and what happens in each use case.
 
-## Création ou mise à jour d'une Pull Request
+## Creating or updating a Pull Request
 
-Lorsqu'une Pull Request est créée ou mise à jour (événements `opened` ou `synchronize`), le workflow **Review** ([review.yml](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/review.yml)) est déclenché.
+When a Pull Request is created or updated (events `opened` or `synchronize`), the **Review** workflow ([review.yml](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/review.yml)) is triggered.
 
-Les tests et les linters sont exécutés et il est possible de déployer la branche de la PR en environnement de `preprod`.
+Tests and linters are run and it is possible to deploy the PR branch to the `preprod` environment.
 
-### Flux du workflow Review
-
-```mermaid
-graph TD
-    B[Workflow Review déclenché] --> C
-
-    subgraph C["Exécution CI"]
-        C1[Linter backend<br/>formatage, ruff, tofu, terragrunt]
-        C2[Linter frontend<br/>prettier]
-        C3["Tests backend<br/>Vérification migrations<br/>unitaires, intégration, data"]
-        C4[Tests frontend]
-        C5[Tests E2E<br/>si branche main ou label frontend]
-
-    end
-
-    subgraph E[Deploiement Airflow]
-        E1[Déploiement du Webserver]
-        E2[Déploiement du Scheduler]
-    end
-
-    C --> D{Confirmation de Déploiement en preprod ?}
-    D -->|Oui| F[Déploiement Webapp en preprod]
-    D -->|Oui| G[Build & Push de l'image Docker de Airflow]
-    G --> E[Deploiement de Airflow sur Scaleway]
-    F --> H[Mise à jour de la release en Draft]
-```
-
-## Merge d'une PR sur main
-
-Lorsqu'une Pull Request est mergée sur la branche `main`, le workflow **CD** ([cd.yml](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/cd.yml)) est déclenché.
-
-le Workkflow est très semblable au workflow de review : Les tests et les linters sont exécutés et il est possible de déployer la branche `main` en environnement de `preprod`.
-
-### Flux du workflow CD
+### Review workflow flow
 
 ```mermaid
 graph TD
-    B[Workflow Review déclenché] --> C
+    B[Review workflow triggered] --> C
 
-    subgraph C["Exécution CI"]
-        C1[Linter backend<br/>formatage, ruff, tofu, terragrunt]
-        C2[Linter frontend<br/>prettier]
-        C3["Tests backend<br/>Vérification migrations<br/>unitaires, intégration, data"]
-        C4[Tests frontend]
-        C5[Tests E2E]
+    subgraph C["CI execution"]
+        C1[Backend linter<br/>formatting, ruff, tofu, terragrunt]
+        C2[Frontend linter<br/>prettier]
+        C3["Backend tests<br/>Migration checks<br/>unit, integration, data"]
+        C4[Frontend tests]
+        C5[E2E tests<br/>if main branch or frontend label]
+
     end
 
-    subgraph E[Deploiement Airflow]
-        E1[Déploiement du Webserver]
-        E2[Déploiement du Scheduler]
+    subgraph E[Airflow deployment]
+        E1[Webserver deployment]
+        E2[Scheduler deployment]
     end
 
-    C --> D{Confirmation de Déploiement en preprod ?}
-    D -->|Oui| F[Déploiement Webapp en preprod]
-    D -->|Oui| G[Build & Push de l'image Docker de Airflow]
-    G --> E[Deploiement de Airflow sur Scaleway]
-    F --> H[Mise à jour de la release en Draft]
+    C --> D{Confirm deployment to preprod?}
+    D -->|Yes| F[Webapp deployment to preprod]
+    D -->|Yes| G[Build & push of the Airflow Docker image]
+    G --> E[Deployment of Airflow on Scaleway]
+    F --> H[Update of the Draft release]
 ```
 
-## Publication d'une release
+## Merging a PR into main
 
-Lorsqu'une release est publiée sur GitHub (événement `published`), le workflow **Deploy** ([deploy.yml](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/deploy.yml)) est déclenché pour déployer en production.
+When a Pull Request is merged into the `main` branch, the **CD** workflow ([cd.yml](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/cd.yml)) is triggered.
 
-La version de code tag est déployé en environnement de `prod`
+The workflow is very similar to the review workflow: tests and linters are run and it is possible to deploy the `main` branch to the `preprod` environment.
 
-### Flux du workflow Deploy
+### CD workflow flow
 
 ```mermaid
 graph TD
-    C[Déploiement de la version de release de la Webapp en production]
-    F[Build images Docker Airflow<br/>L'image est tagué avec le numéro de version<br/>On utilise cette image tagué pour le déploiement en production]
-    F --> H[Déploiement Scheduler Scaleway en production]
-    F --> I[Déploiement Webserver Scaleway en production]
+    B[CD workflow triggered] --> C
+
+    subgraph C["CI execution"]
+        C1[Backend linter<br/>formatting, ruff, tofu, terragrunt]
+        C2[Frontend linter<br/>prettier]
+        C3["Backend tests<br/>Migration checks<br/>unit, integration, data"]
+        C4[Frontend tests]
+        C5[E2E tests]
+    end
+
+    subgraph E[Airflow deployment]
+        E1[Webserver deployment]
+        E2[Scheduler deployment]
+    end
+
+    C --> D{Confirm deployment to preprod?}
+    D -->|Yes| F[Webapp deployment to preprod]
+    D -->|Yes| G[Build & push of the Airflow Docker image]
+    G --> E[Deployment of Airflow on Scaleway]
+    F --> H[Update of the Draft release]
 ```
 
-## Workflows planifiés
+## Publishing a release
 
-### Synchronisation des bases de données
+When a release is published on GitHub (event `published`), the **Deploy** workflow ([deploy.yml](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/deploy.yml)) is triggered to deploy to production.
 
-Le workflow `sync_databases.yml` synchronise les données de production vers la préproduction.
+The tagged version of the code is deployed to the `prod` environment.
 
-**Planification** : Tous les dimanches à minuit (cron: `0 0 * * SUN`)
+### Deploy workflow flow
 
-**Actions effectuées** :
+```mermaid
+graph TD
+    C[Deployment of the webapp release version to production]
+    F[Build Airflow Docker images<br/>The image is tagged with the version number<br/>This tagged image is used for the production deployment]
+    F --> H[Deployment of the Scheduler on Scaleway in production]
+    F --> I[Deployment of the Webserver on Scaleway in production]
+```
 
-- Restauration de la base de données de production vers la préproduction
-- Exécution des migrations dans un conteneur one-off
-- Réinitialisation de la table des suggestions
-- Création du serveur de base de données distant entre webapp et warehouse
-- Synchronisation des buckets S3 (copie de prod vers preprod)
+## Scheduled workflows
+
+### Database synchronization
+
+The `sync_databases.yml` workflow synchronizes production data to preproduction.
+
+**Schedule**: Every Sunday at midnight (cron: `0 0 * * SUN`)
+
+**Actions performed**:
+
+- Restore the production database to preproduction
+- Run migrations in a one-off container
+- Reset the suggestions table
+- Create the remote database server between webapp and warehouse
+- Synchronize S3 buckets (copy from prod to preprod)
 
 ### Dependabot
 
-Le fichier `dependabot.yml` configure les mises à jour automatiques des dépendances.
+The `dependabot.yml` file configures automatic dependency updates.
 
-**Planification** : Tous les mardis à 06:00 UTC
+**Schedule**: Every Tuesday at 06:00 UTC
 
-**Ecosystèmes surveillés** :
+**Ecosystems monitored**:
 
-- **uv** : Dépendances Python (hebdomadaire)
-- **npm** : Dépendances JavaScript (hebdomadaire, avec groupement par catégories : parcel, jest, eslint)
-- **GitHub Actions** : Actions utilisées dans les workflows (hebdomadaire)
-- **Terraform** : Modules Terraform dans `/infrastructure` (hebdomadaire)
+- **uv**: Python dependencies (weekly)
+- **npm**: JavaScript dependencies (weekly, grouped by categories: parcel, jest, eslint)
+- **GitHub Actions**: Actions used in the workflows (weekly)
+- **Terraform**: Terraform modules in `/infrastructure` (weekly)
 
-### Publication de la documentation
+### Documentation publication
 
-Le workflow `publish-docs.yml` publie automatiquement la documentation sur GitHub Pages.
+The `publish-docs.yml` workflow automatically publishes the documentation to GitHub Pages.
 
-**Déclenchement** : À chaque push sur la branche `main`
+**Trigger**: On every push to the `main` branch
 
-la documentation est disponible ici : https://incubateur-ademe.github.io/quefairedemesobjets/README.html
+The documentation is available here: https://incubateur-ademe.github.io/quefairedemesobjets/README.html
 
-## Environnements
+## Environments
 
-Le projet utilise plusieurs environnements github pour stocker les variables d'environnement spécifiques à chacun : **preprod** et **prod**
+The project uses several GitHub environments to store environment variables specific to each of them: **preprod** and **prod**.
 
 ## Notifications
 
-Les déploiements en production déclenchent des notifications Mattermost dans le canal `lvao-tour-de-controle` :
+Production deployments trigger Mattermost notifications in the `lvao-tour-de-controle` channel:
 
-- Notification de début de déploiement
-- Notification de succès avec URL
-- Notification d'échec avec lien vers les logs
-- Notification si le site est down après déploiement
+- Deployment start notification
+- Success notification with URL
+- Failure notification with a link to the logs
+- Notification if the site is down after deployment

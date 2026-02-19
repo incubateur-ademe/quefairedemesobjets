@@ -1,57 +1,57 @@
-# API Statistiques publiques
+# Public statistics API
 
-## Présentation
+## Overview
 
-L'endpoint `/api/stats` permet de récupérer les statistiques publiques sur les **visiteurs orientés** : visiteurs ayant consulté une page d'un produit ou ayant fait une recherche sur la carte.
+The `/api/stats` endpoint returns public statistics on **oriented visitors**: visitors who viewed a product page or performed a search on the map.
 
-Les données sont agrégées depuis PostHog selon la périodicité demandée.
+Data is aggregated from PostHog according to the requested periodicity.
 
 ## Endpoint
 
-```
+```text
 GET /api/stats
 ```
 
-## Paramètres de requête
+## Query parameters
 
-| Paramètre     | Type    | Requis | Valeur par défaut | Description                                                                               |
-| ------------- | ------- | ------ | ----------------- | ----------------------------------------------------------------------------------------- |
-| `periodicity` | string  | Non    | `month`           | Granularité de regroupement des KPI. Valeurs possibles : `day`, `week`, `month`, `year`   |
-| `since`       | integer | Non    | `null`            | Nombre d'itérations de la période souhaitée (ex: `30` pour 30 jours si `periodicity=day`) |
+| Parameter     | Type    | Required | Default | Description                                                                           |
+| ------------- | ------- | -------- | ------- | ------------------------------------------------------------------------------------- |
+| `periodicity` | string  | No       | `month` | KPI grouping granularity. Allowed values: `day`, `week`, `month`, `year`              |
+| `since`       | integer | No       | `null`  | Number of period iterations to include (e.g. `30` for 30 days when `periodicity=day`) |
 
-## Exemples de requêtes
+## Request examples
 
-### Statistiques mensuelles (par défaut)
+### Monthly statistics (default)
 
 ```bash
 GET /api/stats
 ```
 
-### Statistiques des 30 derniers jours
+### Last 30 days statistics
 
 ```bash
 GET /api/stats?periodicity=day&since=30
 ```
 
-### Statistiques des 12 derniers mois
+### Last 12 months statistics
 
 ```bash
 GET /api/stats?periodicity=month&since=12
 ```
 
-### Statistiques des 4 dernières semaines
+### Last 4 weeks statistics
 
 ```bash
 GET /api/stats?periodicity=week&since=4
 ```
 
-## Réponse
+## Response
 
 ### Format
 
 ```json
 {
-  "description": "Visiteurs orientés : visiteurs ayant consultés une page d'un produit ou ayant fait une recherche sur la carte",
+  "description": "Oriented visitors: visitors who viewed a product page or performed a search on the map",
   "stats": [
     {
       "date": 1704067200,
@@ -67,23 +67,27 @@ GET /api/stats?periodicity=week&since=4
 }
 ```
 
-### Champs de réponse
+### Response fields
 
-| Champ              | Type    | Description                                            |
-| ------------------ | ------- | ------------------------------------------------------ |
-| `description`      | string  | Description de la métrique retournée                   |
-| `stats`            | array   | Liste des points de données, triés par date croissante |
-| `stats[].date`     | integer | Timestamp Unix (secondes) du début de la période       |
-| `stats[].iso_date` | string  | Date ISO 8601 du début de la période (UTC)             |
-| `stats[].value`    | float   | Nombre de visiteurs orientés pour cette période        |
+<!-- markdownlint-disable MD060 -->
 
-## Documentation interactive
+| Field              | Type    | Description                                          |
+| ------------------ | ------- | ---------------------------------------------------- |
+| `description`      | string  | Description of the returned metric                   |
+| `stats`            | array   | List of data points, sorted by ascending date        |
+| `stats[].date`     | integer | Unix timestamp (seconds) for the start of the period |
+| `stats[].iso_date` | string  | ISO 8601 date for the start of the period (UTC)      |
+| `stats[].value`    | float   | Number of oriented visitors for this period          |
 
-Cette route API est testable sur `/api/docs` qui fournit une interface Swagger/OpenAPI interactive permettant de tester l'endpoint directement depuis le navigateur.
+<!-- markdownlint-enable MD060 -->
 
-## Notes techniques
+## Interactive documentation
 
-- Les données sont récupérées depuis PostHog via l'API Query
-- Les dates sont normalisées au début de la période demandée (ex: début du mois pour `month`)
-- En cas d'erreur de communication avec PostHog, l'API retourne une erreur HTTP 502
-- Le paramètre `since` permet de limiter la période de données retournées (ex: `since=30` avec `periodicity=day` retourne les 30 derniers jours)
+This API route can be tested at `/api/docs`, which provides an interactive Swagger/OpenAPI interface to try the endpoint directly from the browser.
+
+## Technical notes
+
+- Data is fetched from PostHog via the Query API
+- Dates are normalized to the start of the requested period (e.g. start of month for `month`)
+- If communication with PostHog fails, the API returns an HTTP 502 error
+- The `since` parameter limits the time range of returned data (e.g. `since=30` with `periodicity=day` returns the last 30 days)
