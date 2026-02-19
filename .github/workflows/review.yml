@@ -16,6 +16,9 @@ concurrency:
 jobs:
   ci:
     name: 🤖 CI
+    permissions:
+      contents: read
+      pull-requests: write
     uses: ./.github/workflows/ci.yml
     secrets: inherit # pragma: allowlist secret
 
@@ -35,6 +38,14 @@ jobs:
     with:
       environment: preprod
       tag_name: pr-${{ github.event.pull_request.number }}
+
+  e2e:
+    name: 🪤 E2E
+    permissions:
+      contents: write
+      pull-requests: write
+    uses: ./.github/workflows/e2e.yml
+    secrets: inherit #pragma: allowlist secret
 
   # FIXME: tmp pour tester
   update_release_draft_for_review:
@@ -57,8 +68,8 @@ jobs:
     outputs:
       tag_name: ${{ steps.release-drafter.outputs.tag_name }}
 
-
 # Address actions/missing-workflow-permissions rule in
 # code scanning alerts
 permissions:
   contents: read
+  pull-requests: write
