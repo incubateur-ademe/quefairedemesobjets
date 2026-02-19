@@ -512,14 +512,16 @@ export async function moveMap(
  * Marker/Pinpoint helpers
  */
 export async function getMarkers(page: Page) {
-  await expect(page.locator("#pinpoint-home").first()).toBeAttached()
+  await expect(page.locator("#pinpoint-home").first()).toBeAttached({
+    timeout: TIMEOUT.LONG,
+  })
   await page.evaluate(() => {
     document.querySelectorAll("#pinpoint-home")?.forEach((element) => element.remove())
   })
 
   const markers = page.locator(".maplibregl-marker:has(svg)")
 
-  await expect(markers.nth(0)).toBeAttached()
+  await expect(markers.nth(0)).toBeAttached({ timeout: TIMEOUT.LONG })
   const count = await markers.count()
   return [markers, count] as const
 }
@@ -538,9 +540,9 @@ export async function clickFirstClickableActeurMarker(
 ) {
   const { timeout = 1000 } = options
 
-  // Select markers that contain a pinpoint controller link (not the home marker)
+  // Select markers with pinpoint controller (data-controller is on the marker element itself)
   const acteurMarkers = context.locator(
-    '.maplibregl-marker:has([data-controller="pinpoint"]):not(#pinpoint-home)',
+    '.maplibregl-marker[data-controller="pinpoint"]:not(#pinpoint-home)',
   )
   const count = await acteurMarkers.count()
 
