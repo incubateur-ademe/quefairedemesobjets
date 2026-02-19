@@ -7,11 +7,9 @@
             id="option-{{ forloop.counter }}"
             role="option"
             tabindex="-1"
-            class="qf-list-none"
+            class="qf-list-none qf-p-1w qf-flex qf-justify-between"
             data-next-autocomplete-target="option"
-            data-value="{{ specific.search_url }}"
-            data-selected-value="{{ specific.search_label|capfirst }}"
-            data-action="keydown->next-autocomplete#navigate:prevent click->next-autocomplete#commitSelection"
+            data-action="keydown->next-autocomplete#navigate:prevent"
         >
             {% include specific.search_result_template with result=specific position=forloop.counter %}
         </li>
