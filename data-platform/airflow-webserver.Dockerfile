@@ -13,7 +13,7 @@ USER ${AIRFLOW_UID:-50000}
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 WORKDIR /opt/airflow/
 COPY pyproject.toml uv.lock ./
-RUN uv sync --group airflow
+RUN uv sync --frozen --group airflow
 
 # Runtime
 # --- --- --- ---
