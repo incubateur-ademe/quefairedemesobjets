@@ -90,7 +90,7 @@ class SearchTerm(index.Indexed, models.Model):
         if produit_page_search_term := ProduitPageSearchTerm.objects.filter(
             searchterm_ptr_id=self.id
         ).first():
-            return produit_page_search_term.produit_page
+            return produit_page_search_term
 
         return self
 

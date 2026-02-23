@@ -231,6 +231,8 @@ class ProduitPageSearchTerm(SearchTerm):
     index.RelatedFields.
     For now, these are kept in sync when saving ProduitPage."""
 
+    search_result_template = "ui/components/search/search_result_produitpage.html"
+
     produit_page = models.OneToOneField(
         "qfdmd.ProduitPage",
         on_delete=models.SET_NULL,
@@ -251,8 +253,6 @@ class ProduitPage(
     GenreNombreModel,
     TitleFields,
 ):
-    search_result_template = "ui/components/search/search_result_produitpage.html"
-
     def get_template(self, request, *args, **kwargs):
         if self.est_famille:
             return "ui/pages/family_page.html"
@@ -471,8 +471,17 @@ class ProduitPage(
                     pass
 
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
+        # Ensure titre_phrase is always populated on newly created
+        # produit page.
+        # This should not be a requirement for initial page creation,
+        # so is not enforced at the database level, but is now needed
+        # for search.
+        if not self.titre_phrase:
+            self.titre_phrase = self.title
 
+        super().save(*args, **kwargs)
+        # TODO: test that a produitpage update properly updates
+        # its related ProduitPageSearchTerm entry
         ProduitPageSearchTerm.objects.update_or_create(
             produit_page=self,
             defaults={"searchable_title": self.titre_phrase or self.title},
