@@ -16,6 +16,7 @@ from wagtail.admin.views.pages.listing import IndexView
 from wagtail.admin.viewsets.base import ViewSetGroup
 from wagtail.admin.viewsets.pages import PageListingViewSet
 from wagtail.models import Page
+from modelsearch.index import insert_or_update_object
 
 from core.constants import SEARCH_TERM_ID_QUERY_PARAM
 from core.views import static_file_content_from
