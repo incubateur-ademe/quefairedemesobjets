@@ -84,11 +84,11 @@ jobs:
           database-url: ${{ env.DATABASE_URL }}
           dump-path: database-dump.pgdump
 
-      # - name: TEMPORARY - prepare search index
-      #   run: |
-          # cd webapp && uv run python manage.py populate_fake_search_tags
-          # cd webapp && uv run python manage.py populate_search_terms
-          # make -C webapp rebuild-search-index
+      - name: TEMPORARY - prepare search index
+        run: |
+          cd webapp && uv run python manage.py populate_fake_search_tags
+          cd webapp && uv run python manage.py populate_search_terms
+          make -C webapp rebuild-search-index
 
       - name: Start Django server
         uses: ./.github/actions/start-django-server
