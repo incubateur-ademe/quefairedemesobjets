@@ -8,6 +8,9 @@ import path from "path"
 
 dotenv.config({ path: path.resolve(__dirname, ".env") })
 
+const PORT = 8888
+const BASE_URL = `http://localhost:${PORT}`
+
 export const config: PlaywrightTestConfig = {
   testDir: "./e2e_tests",
   timeout: 45000,

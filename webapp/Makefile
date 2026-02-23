@@ -26,6 +26,10 @@ run-all:
 	$(HONCHO) start -f Procfile.all.dev
 
 # Local django operations
+.PHONY: runserver
+runserver:
+	$(DJANGO_ADMIN) runserver
+
 .PHONY: migrate
 migrate:
 	$(DJANGO_ADMIN) migrate
