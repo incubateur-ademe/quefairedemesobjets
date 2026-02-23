@@ -59,13 +59,12 @@ class TestSearchViewResultTypes:
 
         client = Client()
         response = client.get(
-            "/assistant/recherche",
-            {"home-id": "home", "home-input": "lave-linge"},
+            "/assistant/autocomplete-search",
+            {"q": "lave-linge"},
         )
         assert response.status_code == 200
 
-        form = response.context["search_form"]
-        results = form.results
+        results = response.context["results"]
 
         specific_types = {type(r.specific).__name__ for r in results}
         assert "Synonyme" in specific_types
@@ -84,8 +83,8 @@ class TestSearchViewSearchTagLinkParams:
 
         client = Client()
         response = client.get(
-            "/assistant/recherche",
-            {"home-id": "home", "home-input": "lave-linge"},
+            "/assistant/autocomplete-search",
+            {"q": "lave-linge"},
         )
         assert response.status_code == 200
         content = response.content.decode()
@@ -104,8 +103,8 @@ class TestSearchViewSearchTagLinkParams:
 
         client = Client()
         response = client.get(
-            "/assistant/recherche",
-            {"home-id": "home", "home-input": "lave-linge"},
+            "/assistant/autocomplete-search",
+            {"q": "lave-linge"},
         )
         content = response.content.decode()
 
