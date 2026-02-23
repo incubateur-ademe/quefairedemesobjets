@@ -1,20 +1,12 @@
 <a
     href="{% block href %}{{ result.url }}{% endblock %}"
     data-turbo="false"
-    style="background-image: none;"
-    class="
-    focus:!no-underline
-    focus:!bg-none
-    focus:!qf-bg-grey-1000-50-hover
-    hover:!no-underline
-    hover:!bg-none
-    hover:!qf-bg-grey-1000-50-hover
-    qf-py-1w md:qf-py-3v qf-pl-3w
-    qf-text-xs md:qf-text-base qf-font-bold
-    "
+    class="fr-link"
     tabindex="0"
 >
     {% block nom %}
     {{ result|capfirst }}
     {% endblock nom %}
 </a>
+
+{% block parent %}{% endblock parent %}

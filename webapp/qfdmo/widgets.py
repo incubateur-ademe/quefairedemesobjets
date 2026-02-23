@@ -3,6 +3,15 @@ from django import forms
 from django.contrib.gis import forms as gis_forms
 from django.forms import widgets
 
+from core.widgets import NextAutocompleteInput
+
+
+class SynonymeAutocompleteInput(NextAutocompleteInput):
+    """Autocomplete widget for Synonyme objects."""
+
+    search_view = "autocomplete_synonyme"
+    limit = 5
+
 
 class RangeInput(widgets.NumberInput):
     template_name = "ui/forms/widgets/range_input.html"

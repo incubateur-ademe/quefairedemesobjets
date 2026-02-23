@@ -1,6 +1,9 @@
 /** @type {import('tailwindcss').Config | null} */
 import DSFRColors from "./dsfr_hacks/colors"
 import usedColors from "./dsfr_hacks/used_colors"
+import { backgroundColors, textColors } from "./dsfr_hacks/semantic_colors"
+import dsfrTypography from "./dsfr_hacks/typography"
+import plugin from "tailwindcss/plugin"
 
 module.exports = {
   content: [
@@ -30,6 +33,7 @@ module.exports = {
       // https://www.systeme-de-design.gouv.fr/elements-d-interface/fondamentaux-techniques/espacements
       0: 0,
       "1v": "0.25rem",
+      "0-5v": "0.125rem",
       "1w": "0.5rem",
       "3v": "0.75rem",
       "2w": "1rem",
@@ -51,6 +55,7 @@ module.exports = {
         },
         black: "black",
         white: "white",
+        focus: "#0a76f6", // Hardcoded in dsfr https://github.com/GouvernementFR/dsfr/blob/b828f9e99cde96062d3d6eebc17a6b654994285b/src/module/color/variable/_static.scss#L3
         ...DSFRColors,
       },
       height: {
@@ -105,5 +110,29 @@ module.exports = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate"),
+    // Semantic DSFR color utilities: qf-bg-<name> and qf-text-<name>
+    plugin(({ addUtilities }) => {
+      const bgUtils = Object.fromEntries(
+        Object.entries(backgroundColors).map(([key, val]) => [
+          `.qf-bg-${key}`,
+          { "background-color": val },
+        ]),
+      )
+      const textUtils = Object.fromEntries(
+        Object.entries(textColors).map(([key, val]) => [
+          `.qf-text-${key}`,
+          { color: val },
+        ]),
+      )
+      addUtilities({ ...bgUtils, ...textUtils })
+    }),
+    // Responsive DSFR typography utilities: fr-h1..fr-h6, fr-display--*, fr-text--*
+    // Registers them as Tailwind utilities so responsive variants work (e.g. md:fr-h6, max-md:fr-h3)
+    // Classes are extracted from @gouvfr/dsfr/dist/core/core.main.css at build time.
+    plugin(({ addUtilities }) => {
+      addUtilities(dsfrTypography, { respectPrefix: false })
+    }),
+  ],
 }
