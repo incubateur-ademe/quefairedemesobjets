@@ -42,11 +42,7 @@ export default defineConfig({
         ...devices["Desktop Chrome"],
         userAgent: "playwright",
         launchOptions: {
-          args: [
-            "--ignore-certificate-errors",
-            "--use-gl=swiftshader",
-            "--disable-gpu-sandbox",
-          ],
+          args: ["--ignore-certificate-errors"],
         },
       },
     },

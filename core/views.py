@@ -88,6 +88,7 @@ class AutocompleteSynonyme(ListView):
 
         query = unidecode.unidecode(query)
 
+        # TODO: use django-modelsearch
         synonymes = (
             super()
             .get_queryset()
