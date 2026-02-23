@@ -111,3 +111,38 @@ class TestSearchViewSearchTagLinkParams:
 
         # The result should display the parent page's titre_phrase
         assert "Lave-linge" in content
+
+
+@pytest.mark.django_db
+class TestSearchViewProduitPageResults:
+    def test_produit_page_search_term_appears_in_results(self, produit_page):
+        _rebuild_index()
+        client = Client()
+        response = client.get(
+            "/assistant/recherche",
+            {"home-id": "home", "home-input": "Lave-linge"},
+        )
+        assert response.status_code == 200
+        specific_types = {
+            type(r.specific).__name__ for r in response.context["search_form"].results
+        }
+        assert "ProduitPageSearchTerm" in specific_types
+
+    def test_produit_page_titre_phrase_in_rendered_html(self, produit_page):
+        _rebuild_index()
+        response = Client().get(
+            "/assistant/recherche",
+            {"home-id": "home", "home-input": "Lave-linge"},
+        )
+        assert "Lave-linge" in response.content.decode()
+
+    def test_produit_page_result_renders_anchor_tag(self, produit_page):
+        _rebuild_index()
+        response = Client().get(
+            "/assistant/recherche",
+            {"home-id": "home", "home-input": "Lave-linge"},
+        )
+        # The template renders an <a href="..."> using pageurl. In the test environment
+        # Wagtail has no Site configured so pageurl returns None,
+        # but the anchor still renders.
+        assert "href=" in response.content.decode()

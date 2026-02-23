@@ -119,11 +119,21 @@ class TestSearchTermSpecificResolution:
             == "ui/components/search/search_result_searchtag.html"
         )
 
-    def test_search_result_template_for_produit_page(self, produit_page):
+    def test_search_result_template_for_produit_page_search_term(self, produit_page):
+        search_term = produit_page.produit_page_search_term
         assert (
-            produit_page.search_result_template
+            search_term.search_result_template
             == "ui/components/search/search_result_produitpage.html"
         )
+
+    def test_specific_returns_produit_page_search_term(self, produit_page):
+        """get_indexed_instance() must return ProduitPageSearchTerm, not ProduitPage."""
+        search_term_base = SearchTerm.objects.get(
+            pk=produit_page.produit_page_search_term.searchterm_ptr_id
+        )
+        specific = search_term_base.specific
+        assert isinstance(specific, ProduitPageSearchTerm)
+        assert specific.pk == produit_page.produit_page_search_term.pk
 
 
 @pytest.mark.django_db
@@ -213,3 +223,44 @@ class TestSearchableQuerySet:
             SearchTerm.objects.searchable().values_list("id", flat=True)
         )
         assert search_term.searchterm_ptr_id in searchable_ids
+
+
+@pytest.mark.django_db
+class TestProduitPageSaveSync:
+    def test_save_creates_produit_page_search_term(self, produit_page):
+        assert ProduitPageSearchTerm.objects.filter(produit_page=produit_page).exists()
+
+    def test_searchable_title_matches_titre_phrase_on_creation(self, produit_page):
+        assert (
+            produit_page.produit_page_search_term.searchable_title
+            == produit_page.titre_phrase
+        )
+
+    def test_updating_titre_phrase_updates_searchable_title(self, produit_page):
+        produit_page.titre_phrase = "Nouveau titre"
+        produit_page.save()
+        produit_page.produit_page_search_term.refresh_from_db()
+        assert produit_page.produit_page_search_term.searchable_title == "Nouveau titre"
+
+    def test_empty_titre_phrase_falls_back_to_title(self, produit_page):
+        produit_page.titre_phrase = ""
+        produit_page.save()
+        produit_page.produit_page_search_term.refresh_from_db()
+        assert (
+            produit_page.produit_page_search_term.searchable_title == produit_page.title
+        )
+
+    def test_only_one_search_term_created_per_page(self, produit_page):
+        produit_page.titre_phrase = "Deuxième sauvegarde"
+        produit_page.save()
+        assert (
+            ProduitPageSearchTerm.objects.filter(produit_page=produit_page).count() == 1
+        )
+
+    def test_resave_updates_same_row(self, produit_page):
+        original_pk = produit_page.produit_page_search_term.pk
+        produit_page.titre_phrase = "Titre mis à jour"
+        produit_page.save()
+        updated = ProduitPageSearchTerm.objects.get(produit_page=produit_page)
+        assert updated.pk == original_pk
+        assert updated.searchable_title == "Titre mis à jour"
