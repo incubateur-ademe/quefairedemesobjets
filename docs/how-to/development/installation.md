@@ -136,7 +136,7 @@ Installation des dépendances python et javascript
 
 ```sh
 uv env activate
-uv sync --group dev --group airflow
+uv sync --all-packages
 npm ci
 ```
 

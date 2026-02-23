@@ -49,6 +49,10 @@ init-certs:
 # 	make createsuperuser
 # 	make seed-database
 
+.PHONY: sync
+sync:
+	uv sync --all-packages
+
 .PHONY: check-format
 check-format:
 	uv run black --check --diff .

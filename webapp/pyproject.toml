@@ -1,9 +1,8 @@
 [project]
-name = "quefairedemesobjets"
+name = "webapp"
 version = "1.57.0"
-description = ""
+description = "Django app - Que faire de mes objets et dechets"
 requires-python = ">=3.12,<3.13"
-readme = "README.md"
 license = "MIT"
 dependencies = [
     "boto3<1.43",
@@ -47,6 +46,9 @@ dependencies = [
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.hatch.build.targets.wheel]
+packages = ["core", "data", "dsfr_hacks", "infotri", "qfdmd", "qfdmo", "search", "stats"]
+
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "core.test_settings"
 env_files = [".env.template"]
@@ -84,100 +86,6 @@ docs = [
     "detect-secrets>=1.5.0,<2",
     "sphinxcontrib-mermaid>=1.0.0,<3",
 ]
-airflow = [
-    "apache-airflow-providers-postgres>=6.2.2,<7",
-    "fuzzywuzzy>=0.18.0,<0.19",
-    "python-decouple~=3.8",
-    "ratelimit>=2.2.1,<3",
-    "shortuuid>=1.0.13,<2",
-    "unidecode>=1.4.0,<2",
-    "scikit-learn==1.8.0",
-    "apache-airflow>=2.11.0,<3",
-    "pandas<2.2",
-    "dbt-core>=1.10.9,<2",
-    "dbt-postgres>=1.9.1,<2",
-    "apache-airflow-providers-amazon>=9.4.0",
-]
-
-[tool.pyright]
-venvPath = "."
-venv = ".venv"
-typeCheckingMode = "basic"
-# Disable strict type checking rules that are incompatible with Django's patterns.
-# Django uses metaclasses and descriptors (e.g., models.CharField) which appear as
-# one type at the class level but resolve to different types at the instance level.
-# These settings prevent false positives while maintaining useful type checking.
-reportUnannotatedClassAttribute = "none"  # Django model fields don't need type annotations
-reportMissingTypeStubs = "none"           # Ignore missing stubs for third-party libraries
-reportUnknownMemberType = "none"          # Allow unknown types for Django descriptors
-reportUnknownVariableType = "none"        # Allow variables with inferred types
-reportUnknownArgumentType = "none"        # Allow function arguments with inferred types
-
-[tool.uv]
-package = false
-default-groups = [
-    "dev",
-    "docs",
-    "airflow",
-]
 
 [tool.uv.sources]
 django-dsfr = { git = "https://github.com/fabienheureux/django-dsfr", rev = "d26ab6f77014b04c43c4c54f694111179d1de0ef" } # pragma: allowlist secret
-
-[tool.ruff]
-# Exclude a variety of commonly ignored directories.
-exclude = [
-  ".bzr",
-  ".direnv",
-  ".eggs",
-  ".git",
-  ".git-rewrite",
-  ".hg",
-  ".mypy_cache",
-  ".nox",
-  ".pants.d",
-  ".pytype",
-  ".ruff_cache",
-  ".svn",
-  ".tox",
-  ".venv",
-  "__pypackages__",
-  "_build",
-  "buck-out",
-  "build",
-  "dist",
-  "node_modules",
-  "venv",
-  "**/migrations/*.py",
-  "*.ipynb",
-]
-
-# Same as Black.
-line-length = 88
-
-# Assume Python 3.12.
-target-version = "py312"
-
-[tool.ruff.lint]
-# Enable the pycodestyle (`E`) and Pyflakes (`F`) rules by default.
-# Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
-# McCabe complexity (`C901`) by default.
-select = ["E", "F"]
-ignore = []
-exclude = [
-  "**/migrations/*.py",
-]
-
-# Allow autofix for all enabled rules (when `--fix`) is provided.
-fixable = ["ALL"]
-unfixable = []
-
-per-file-ignores = {}
-
-# Allow unused variables when underscore-prefixed.
-dummy-variable-rgx = "ˆ(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
-
-[tool.mypy]
-exclude = ["migrations/"]
-ignore_missing_imports = true
-warn_return_any = false
