@@ -152,6 +152,59 @@ class ProduitIndexPage(CompiledFieldMixin, Page):
         verbose_name = "Index des familles & produits"
 
 
+class HomePage(Page):
+    template = "ui/pages/home.html"
+    max_count = 1
+    parent_page_types = ["wagtailcore.Page"]
+    subpage_types = []
+
+    hero_title = RichTextField(
+        "Titre de la page d'accueil",
+        blank=True,
+    )
+    hero_subtitle = RichTextField(
+        "Sous-titre",
+        blank=True,
+    )
+    hero_search_label = models.CharField(
+        "Label du champ de recherche",
+        max_length=255,
+        blank=True,
+    )
+    icons = StreamField(
+        [("image", ImageBlock())],
+        verbose_name="Icônes de la page d'accueil",
+        blank=True,
+    )
+    body = StreamField(
+        STREAMFIELD_COMMON_BLOCKS,
+        verbose_name="Corps de texte",
+        blank=True,
+    )
+
+    content_panels = Page.content_panels + [
+        MultiFieldPanel(
+            [
+                FieldPanel("hero_title"),
+                FieldPanel("hero_subtitle"),
+                FieldPanel("hero_search_label"),
+            ],
+            heading="Bandeau hero",
+        ),
+        FieldPanel("icons"),
+        FieldPanel("body"),
+    ]
+
+    @override
+    def serve(self, request, *args, **kwargs):
+        from qfdmd.views import HomeView
+
+        return HomeView.as_view()(request, *args, **kwargs)
+
+    class Meta:
+        verbose_name = "Page d'accueil"
+
+
 class ProduitPageTag(TaggedItemBase):
     content_object = ParentalKey(
         "qfdmd.ProduitPage",

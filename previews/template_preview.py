@@ -716,6 +716,29 @@ class PagesPreview(ContextAwareLookbookPreview):
         )
         return render_to_string("ui/pages/home.html", context)
 
+    def home_hero(self, **kwargs):
+        """
+        # Accueil — Bandeau hero
+
+        Renders the green hero banner (title, subtitle, search bar) as it appears
+        on the homepage. Reads `hero_title`, `hero_subtitle`, and `hero_search_label`
+        from the `HomePage` page object; falls back to hardcoded defaults when empty.
+        """
+        context = self.get_base_context()
+        context.update({"page": get_homepage(), "iframe": False})
+        return render_to_string("ui/pages/home.html", context)
+
+    def home_patchwork(self, **kwargs):
+        """
+        # Accueil — Patchwork d'icônes
+
+        Renders only the patchwork section. The icons are pulled from
+        `HomePage.icons`; if none are configured the section is hidden.
+        """
+        context = self.get_base_context()
+        context.update({"page": get_homepage(), "iframe": False})
+        return render_to_string("ui/pages/home.html", context)
+
     @register_form_class(IframeForm)
     def produit(self, iframe=False, **kwargs):
         if isinstance(iframe, str):
