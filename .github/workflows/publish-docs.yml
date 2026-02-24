@@ -1,6 +1,7 @@
 name: 📚 Deploy Documentation
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
 
@@ -20,17 +21,18 @@ jobs:
       with:
         enable-cache: true
     - uses: actions/cache@v5
-      name: Define a cache for the virtual environment based on the dependencies lock file
+      name: Define a cache for the virtual environment based on the docs dependencies lock file
       with:
-        path: ./.venv
-        key: venv-dev-docs-${{ hashFiles('uv.lock') }}
-    - name: Install the project dependencies
-      run: uv sync --group docs
+        path: ./docs/.venv
+        key: venv-docs-${{ hashFiles('docs/uv.lock') }}
+    - name: Install the docs project dependencies
+      working-directory: docs
+      run: uv sync
     - name: Build the documentation
-      run: |
-        uv run make build-docs
+      working-directory: docs
+      run: make build-docs
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e # v4
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./_build  # Path to your built HTML files
+        publish_dir: ./docs/_build  # Path to your built HTML files
