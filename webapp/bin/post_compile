@@ -1,0 +1,21 @@
+#!/bin/sh
+
+# .apt is created by the Apt buildpack in the app root.
+# When deploying, the app root is webapp/ (this script is in webapp/bin/), so .apt is at webapp/.apt.
+APP_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+APT_PREFIX="${APP_ROOT}/.apt"
+
+echo "APT_PREFIX: ${APT_PREFIX}"
+echo "PYTHONPATH: ${PYTHONPATH}"
+echo "LD_LIBRARY_PATH: ${LD_LIBRARY_PATH}"
+echo "PROJ_LIB: ${PROJ_LIB}"
+list_aptprefix = $(ls -la ${APT_PREFIX})
+echo "list_aptprefix: ${list_aptprefix}"
+
+export PYTHONPATH="${APT_PREFIX}/usr/lib/python3/dist-packages:${PYTHONPATH}"
+# libblas.so.3 is in blas/ subdir when installed via dpkg -x (postinst not run)
+export LD_LIBRARY_PATH="${APT_PREFIX}/usr/lib/x86_64-linux-gnu/blas:${APT_PREFIX}/usr/lib/x86_64-linux-gnu/lapack:${APT_PREFIX}/usr/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH}"
+export PROJ_LIB="${APT_PREFIX}/usr/share/proj"
+
+python manage.py collectstatic --noinput
+

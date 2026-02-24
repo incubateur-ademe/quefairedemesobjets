@@ -1,46 +1,46 @@
-# Architecture de la base de données de La Carte
+# «La Carte» database architecture
 
-## Modèle de données
+## Data model
 
-Chaque acteur du ré-emploi et recyclage expose des propositions de service associées à un geste et une liste de catégories d'objet.
+Each reuse and recycling actor exposes service propositions associated with an action and a list of object categories.
 
-### Objets d'administration en base de données
+### Administration objects in the database
 
-Certains objets de la base de données sont des objets d'administration qui n'ont pas vocation aest mis à jour régulièrement. Ci-dessous les populations de ces objets en date du 18 septembre 2023.
+Some database objects are administration objects that are not meant to be updated regularly. Below are the populations of these objects as of 18 September 2023.
 
-**Direction de l'action** (qfdmo_actiondirection):
+**Direction** (`qfdmo_actiondirection`):
 
-Détenir ou chercher un objet (spécifique à l'utilisation de «Épargnons nos ressources»
+Look for an objects or Try to get rid of an object
 
-**Action** (qfdmo_action):
+**Action** (`qfdmo_action`):
 
-Quelle action souhaitez vous faire, Exemple : réparer un objet, acheter de seconde main…
+What action do you want to perform, for example: réparer un objet, acheter de seconde main…
 
-**Groupe d'Action** (qfdmo_groupeaction):
+**Groupe d'Action** (`qfdmo_groupeaction`):
 
-Manière de regrouper les actions lorsque la direction n'est pas précisée
+Way of grouping actions when the direction is not specified.
 
-**Catégorie / Sous-catégorie / Objet** (qfdmo_categorieobjet, qfdmo_souscategorieobjet)
+**Catégorie / Sous-catégorie / Objet** (`qfdmo_categorieobjet`, `qfdmo_souscategorieobjet`)
 
-Classification des objets
+Classification of objects.
 
-**Type de service** (qfdmo_acteurservice)
+**Type de service** (`qfdmo_acteurservice`)
 
-Type des services rendu par l'acteur, Exemple : Achat/revente entre particuliers, Location par un professionnel, Pièces détachées…
+Type of services provided by the actor, for example: Achat/revente entre particuliers, Location par un professionnel, Pièces détachées…
 
-**Type d'acteur** (qfdmo_acteurtype)
+**Type d'acteur** (`qfdmo_acteurtype`)
 
-Exemple : commerce, association, acteur digital…
+For example: commerce, association, acteur digital…
 
-**Source** (qfdmo_source)
+**Source** (`qfdmo_source`)
 
-Partenaires ayant contribué à la collecte de cette acteur
+Partners who contributed to the collection of this actor.
 
-## Schema simplifié de base de données
+## Simplified database schema
 
 ```mermaid
 ---
-title: Schéma simplifié les acteurs
+title: Simplified schema of actors
 ---
 
 classDiagram
@@ -139,21 +139,20 @@ classDiagram
     GroupeAction --> Action
 ```
 
-## Architecture des Acteurs et de leurs propositions de service
+## Architecture of Actors and their service propositions
 
-Les acteurs sont configurés selon 3 couches:
+Actors are configured according to three layers:
 
-- Une couche d'import (Acteurs Importés) qui représente les acteurs tels qu'ils ont été partagés par nos partenaires moyennant une normalisation (cf. table qfdmo_acteur et qfdmo_propositionservice)
-- Une couche de révision (Acteurs Revisions) qui nous permet de corriger les données des acteurs importés et de les regrouper un même acteur a été partagé par plusieurs partenaires. La logique de correction est un coalesce:
-    - champ par champ, si la correction est non null et non vide, alors on la valeur à afficher est celle de la correction
-    - pour les objets liés (proposition de service, services), c'est la valeur de la correction qui sera affiché
-    - pour les regroupement d'acteur, la valeur des champs de l'acteur parent est affichés pour chaque champs, les objets liés sont collectés sur tous les enfants (acteurs regroupés sous la même entité)
-- Une couche d'affichage (Acteurs Affichés) qui calcule les acteurs à afficher selon les acteurs importés et leur révision
-
+- An import layer (Acteurs Importés) which represents the actors as they were shared by our partners, with some normalization (see tables `qfdmo_acteur` and `qfdmo_propositionservice`).
+- A revision layer (Acteurs Revisions) which allows us to correct the data of imported actors and to group them when the same actor has been shared by several partners. The correction logic is a coalesce:
+  - field by field, if the correction is not null and not empty, then the value to display is the correction
+  - for related objects (proposition de service, services), the value of the correction will be displayed
+  - for actor groupings, the value of the parent actor fields is displayed for each field, and related objects are collected across all children (actors grouped under the same entity)
+- A display layer (Acteurs Affichés) which computes the actors to display based on imported actors and their revision.
 
 ```mermaid
 ---
-title: Schéma de l'application des corrections des acteurs
+title: Schema of applying actor corrections
 ---
 
 flowchart TB
@@ -175,4 +174,3 @@ flowchart TB
     PropositionService --> CorrectionEquipePropositionService --> DisplayedPropositionService
     PropositionService --> DisplayedPropositionService
 ```
-

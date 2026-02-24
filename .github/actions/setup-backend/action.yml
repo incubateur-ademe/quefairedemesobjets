@@ -3,9 +3,9 @@ description: Install uv and Python dependencies
 
 inputs:
   uv-groups:
-    description: 'UV sync groups (e.g., "--group dev --group airflow")'
+    description: 'UV sync groups (e.g., "--all-packages --group dev")'
     required: false
-    default: '--group dev'
+    default: '--all-packages --group dev'
 
 runs:
   using: composite

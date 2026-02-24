@@ -2,6 +2,13 @@ version = 1
 revision = 3
 requires-python = "==3.12.*"
 
+[manifest]
+members = [
+    "data-platform",
+    "quefairedemesobjets-workspace",
+    "webapp",
+]
+
 [[package]]
 name = "accessible-pygments"
 version = "0.0.5"
@@ -782,6 +789,45 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/e1/d0/c0a1374db3afad0f9dfe6c795e5df102af03d49ad5e6e8502fb09eb88110/daff-1.4.2.tar.gz", hash = "sha256:47f0391eda7e2b5011f7ccac006b9178accb465bcb94a2c9f284257fff5d2686", size = 148251, upload-time = "2025-05-04T19:24:11.521Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/29/fe/d54a874e8d7b88bc03c459f63a993305db50039b734fab751a0466dabfc1/daff-1.4.2-py3-none-any.whl", hash = "sha256:88981a21d065e4378b5c4bd40b975dbfdea9b7ff540071f3bb5e20cc8b3590b5", size = 144922, upload-time = "2025-05-04T19:24:09.999Z" },
+]
+
+[[package]]
+name = "data-platform"
+version = "0.0.0"
+source = { virtual = "data-platform" }
+dependencies = [
+    { name = "apache-airflow" },
+    { name = "apache-airflow-providers-amazon" },
+    { name = "apache-airflow-providers-postgres" },
+    { name = "dbt-core" },
+    { name = "dbt-postgres" },
+    { name = "fuzzywuzzy" },
+    { name = "numpy" },
+    { name = "pandas" },
+    { name = "python-decouple" },
+    { name = "ratelimit" },
+    { name = "scikit-learn" },
+    { name = "shortuuid" },
+    { name = "unidecode" },
+    { name = "webapp" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "apache-airflow", specifier = ">=2.11.0,<3" },
+    { name = "apache-airflow-providers-amazon", specifier = ">=9.4.0" },
+    { name = "apache-airflow-providers-postgres", specifier = ">=6.2.2,<7" },
+    { name = "dbt-core", specifier = ">=1.10.9,<2" },
+    { name = "dbt-postgres", specifier = ">=1.9.1,<2" },
+    { name = "fuzzywuzzy", specifier = ">=0.18.0,<0.19" },
+    { name = "numpy", specifier = ">=1.26.0,<2" },
+    { name = "pandas", specifier = "<2.2" },
+    { name = "python-decouple", specifier = "~=3.8" },
+    { name = "ratelimit", specifier = ">=2.2.1,<3" },
+    { name = "scikit-learn", specifier = "==1.8.0" },
+    { name = "shortuuid", specifier = ">=1.0.13,<2" },
+    { name = "unidecode", specifier = ">=1.4.0,<2" },
+    { name = "webapp", editable = "webapp" },
 ]
 
 [[package]]
@@ -1722,6 +1768,7 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/44/69/9b804adb5fd0671f367781560eb5eb586c4d495277c93bde4307b9e28068/greenlet-3.2.4-cp312-cp312-macosx_11_0_universal2.whl", hash = "sha256:3b67ca49f54cede0186854a008109d6ee71f66bd57bb36abd6d0a0267b540cdd", size = 274079, upload-time = "2025-08-07T13:15:45.033Z" },
     { url = "https://files.pythonhosted.org/packages/46/e9/d2a80c99f19a153eff70bc451ab78615583b8dac0754cfb942223d2c1a0d/greenlet-3.2.4-cp312-cp312-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:ddf9164e7a5b08e9d22511526865780a576f19ddd00d62f8a665949327fde8bb", size = 640997, upload-time = "2025-08-07T13:42:56.234Z" },
     { url = "https://files.pythonhosted.org/packages/3b/16/035dcfcc48715ccd345f3a93183267167cdd162ad123cd93067d86f27ce4/greenlet-3.2.4-cp312-cp312-manylinux2014_ppc64le.manylinux_2_17_ppc64le.whl", hash = "sha256:f28588772bb5fb869a8eb331374ec06f24a83a9c25bfa1f38b6993afe9c1e968", size = 655185, upload-time = "2025-08-07T13:45:27.624Z" },
+    { url = "https://files.pythonhosted.org/packages/31/da/0386695eef69ffae1ad726881571dfe28b41970173947e7c558d9998de0f/greenlet-3.2.4-cp312-cp312-manylinux2014_s390x.manylinux_2_17_s390x.whl", hash = "sha256:5c9320971821a7cb77cfab8d956fa8e39cd07ca44b6070db358ceb7f8797c8c9", size = 649926, upload-time = "2025-08-07T13:53:15.251Z" },
     { url = "https://files.pythonhosted.org/packages/68/88/69bf19fd4dc19981928ceacbc5fd4bb6bc2215d53199e367832e98d1d8fe/greenlet-3.2.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:c60a6d84229b271d44b70fb6e5fa23781abb5d742af7b808ae3f6efd7c9c60f6", size = 651839, upload-time = "2025-08-07T13:18:30.281Z" },
     { url = "https://files.pythonhosted.org/packages/19/0d/6660d55f7373b2ff8152401a83e02084956da23ae58cddbfb0b330978fe9/greenlet-3.2.4-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:3b3812d8d0c9579967815af437d96623f45c0f2ae5f04e366de62a12d83a8fb0", size = 607586, upload-time = "2025-08-07T13:18:28.544Z" },
     { url = "https://files.pythonhosted.org/packages/8e/1a/c953fdedd22d81ee4629afbb38d2f9d71e37d23caace44775a3a969147d4/greenlet-3.2.4-cp312-cp312-musllinux_1_1_aarch64.whl", hash = "sha256:abbf57b5a870d30c4675928c37278493044d7c14378350b3aa5d484fa65575f0", size = 1123281, upload-time = "2025-08-07T13:42:39.858Z" },
@@ -3091,167 +3138,9 @@ wheels = [
 ]
 
 [[package]]
-name = "quefairedemesobjets"
-version = "1.57.0"
+name = "quefairedemesobjets-workspace"
+version = "0.0.0"
 source = { virtual = "." }
-dependencies = [
-    { name = "boto3" },
-    { name = "detect-secrets" },
-    { name = "diff-match-patch" },
-    { name = "dj-database-url" },
-    { name = "django" },
-    { name = "django-admin-sortable2" },
-    { name = "django-colorfield" },
-    { name = "django-cors-headers" },
-    { name = "django-dsfr" },
-    { name = "django-extensions" },
-    { name = "django-import-export", extra = ["xls", "xlsx"] },
-    { name = "django-lookbook" },
-    { name = "django-ninja" },
-    { name = "django-storages" },
-    { name = "django-widget-tweaks" },
-    { name = "djangoql" },
-    { name = "gunicorn" },
-    { name = "more-itertools" },
-    { name = "opening-hours-py" },
-    { name = "orjson" },
-    { name = "pillow" },
-    { name = "psycopg" },
-    { name = "pydantic", extra = ["email"] },
-    { name = "python-decouple" },
-    { name = "queryish" },
-    { name = "rapidfuzz" },
-    { name = "requests" },
-    { name = "sentry-sdk" },
-    { name = "shortuuid" },
-    { name = "sites-conformes" },
-    { name = "unidecode" },
-    { name = "wagtail" },
-    { name = "wagtail-honeypot" },
-    { name = "whitenoise" },
-]
-
-[package.dev-dependencies]
-airflow = [
-    { name = "apache-airflow" },
-    { name = "apache-airflow-providers-amazon" },
-    { name = "apache-airflow-providers-postgres" },
-    { name = "dbt-core" },
-    { name = "dbt-postgres" },
-    { name = "fuzzywuzzy" },
-    { name = "pandas" },
-    { name = "python-decouple" },
-    { name = "ratelimit" },
-    { name = "scikit-learn" },
-    { name = "shortuuid" },
-    { name = "unidecode" },
-]
-dev = [
-    { name = "beautifulsoup4" },
-    { name = "black" },
-    { name = "djade" },
-    { name = "django-browser-reload" },
-    { name = "django-debug-toolbar" },
-    { name = "dslr" },
-    { name = "factory-boy" },
-    { name = "honcho" },
-    { name = "pre-commit" },
-    { name = "ptpython" },
-    { name = "pytest" },
-    { name = "pytest-django" },
-    { name = "pytest-dotenv" },
-    { name = "pytest-mock" },
-    { name = "ruff" },
-    { name = "shapely" },
-    { name = "wagtail-factories" },
-]
-docs = [
-    { name = "detect-secrets" },
-    { name = "furo" },
-    { name = "myst-parser" },
-    { name = "sphinx" },
-    { name = "sphinxcontrib-mermaid" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "boto3", specifier = "<1.43" },
-    { name = "detect-secrets", specifier = ">=1.5.0" },
-    { name = "diff-match-patch", specifier = ">=20241021,<20241022" },
-    { name = "dj-database-url", specifier = ">=3.0.1,<4" },
-    { name = "django", specifier = ">=5.2.11,<6" },
-    { name = "django-admin-sortable2", specifier = ">=2.2.8" },
-    { name = "django-colorfield", specifier = ">=0.14.0,<0.15" },
-    { name = "django-cors-headers", specifier = ">=4.6.0,<5" },
-    { name = "django-dsfr", git = "https://github.com/fabienheureux/django-dsfr?rev=d26ab6f77014b04c43c4c54f694111179d1de0ef" },
-    { name = "django-extensions", specifier = "~=4.1" },
-    { name = "django-import-export", extras = ["xls", "xlsx"], specifier = ">=4.3.8,<5" },
-    { name = "django-lookbook", specifier = ">=1.0.2,<2" },
-    { name = "django-ninja", specifier = ">=1.4.3,<2" },
-    { name = "django-storages", specifier = ">=1.14.6,<2" },
-    { name = "django-widget-tweaks", specifier = ">=1.5.0,<2" },
-    { name = "djangoql", specifier = ">=0.18.1" },
-    { name = "gunicorn", specifier = ">=23.0.0,<24" },
-    { name = "more-itertools", specifier = ">=10.7.0" },
-    { name = "opening-hours-py", specifier = ">=1.1.3,<2" },
-    { name = "orjson", specifier = ">=3.11.1,<4" },
-    { name = "pillow", specifier = ">=11.2.1,<13" },
-    { name = "psycopg" },
-    { name = "pydantic", extras = ["email"], specifier = ">=2.11.7" },
-    { name = "python-decouple", specifier = "~=3.8" },
-    { name = "queryish", specifier = ">=0.2,<0.4" },
-    { name = "rapidfuzz", specifier = ">=3.13.0,<4" },
-    { name = "requests", specifier = ">=2.32.4,<3" },
-    { name = "sentry-sdk", specifier = ">=2.37.0,<3" },
-    { name = "shortuuid", specifier = ">=1.0.13,<2" },
-    { name = "sites-conformes", specifier = ">=2.5.2rc1" },
-    { name = "unidecode", specifier = ">=1.4.0,<2" },
-    { name = "wagtail", specifier = "==7.3" },
-    { name = "wagtail-honeypot", specifier = ">=1.2.1" },
-    { name = "whitenoise", specifier = ">=6.8.2,<7" },
-]
-
-[package.metadata.requires-dev]
-airflow = [
-    { name = "apache-airflow", specifier = ">=2.11.0,<3" },
-    { name = "apache-airflow-providers-amazon", specifier = ">=9.4.0" },
-    { name = "apache-airflow-providers-postgres", specifier = ">=6.2.2,<7" },
-    { name = "dbt-core", specifier = ">=1.10.9,<2" },
-    { name = "dbt-postgres", specifier = ">=1.9.1,<2" },
-    { name = "fuzzywuzzy", specifier = ">=0.18.0,<0.19" },
-    { name = "pandas", specifier = "<2.2" },
-    { name = "python-decouple", specifier = "~=3.8" },
-    { name = "ratelimit", specifier = ">=2.2.1,<3" },
-    { name = "scikit-learn", specifier = "==1.8.0" },
-    { name = "shortuuid", specifier = ">=1.0.13,<2" },
-    { name = "unidecode", specifier = ">=1.4.0,<2" },
-]
-dev = [
-    { name = "beautifulsoup4", specifier = ">=4.13.5,<5" },
-    { name = "black", specifier = ">=25.1.0,<26" },
-    { name = "djade", specifier = ">=1.6.0,<2" },
-    { name = "django-browser-reload", specifier = ">=1.17.0,<2" },
-    { name = "django-debug-toolbar", specifier = ">=6.0.0,<7" },
-    { name = "dslr", specifier = ">=0.6.0,<0.7" },
-    { name = "factory-boy", specifier = ">=3.3.1,<4" },
-    { name = "honcho", specifier = ">=2.0.0,<3" },
-    { name = "pre-commit", specifier = ">=4.3.0,<5" },
-    { name = "ptpython", specifier = ">=3.0.30,<4" },
-    { name = "pytest", specifier = ">=8.4.2,<10" },
-    { name = "pytest-django", specifier = ">=4.9.0,<5" },
-    { name = "pytest-dotenv", specifier = ">=0.5.2,<0.6" },
-    { name = "pytest-mock", specifier = ">=3.14.1,<4" },
-    { name = "ruff", specifier = ">=0.12.10,<0.15" },
-    { name = "shapely", specifier = ">=2.1.1,<3" },
-    { name = "wagtail-factories", specifier = ">=4.2.1,<5" },
-]
-docs = [
-    { name = "detect-secrets", specifier = ">=1.5.0,<2" },
-    { name = "furo", specifier = ">=2025.7.19,<2026" },
-    { name = "myst-parser", specifier = ">=4.0.0,<5" },
-    { name = "sphinx", specifier = ">=8.1.3,<9" },
-    { name = "sphinxcontrib-mermaid", specifier = ">=1.0.0,<3" },
-]
 
 [[package]]
 name = "queryish"
@@ -4172,6 +4061,143 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/6c/63/53559446a878410fc5a5974feb13d31d78d752eb18aeba59c7fef1af7598/wcwidth-0.2.13.tar.gz", hash = "sha256:72ea0c06399eb286d978fdedb6923a9eb47e1c486ce63e9b4e64fc18303972b5", size = 101301, upload-time = "2024-01-06T02:10:57.829Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/fd/84/fd2ba7aafacbad3c4201d395674fc6348826569da3c0937e75505ead3528/wcwidth-0.2.13-py2.py3-none-any.whl", hash = "sha256:3da69048e4540d84af32131829ff948f1e022c1c6bdb8d6102117aac784f6859", size = 34166, upload-time = "2024-01-06T02:10:55.763Z" },
+]
+
+[[package]]
+name = "webapp"
+version = "1.57.0"
+source = { editable = "webapp" }
+dependencies = [
+    { name = "boto3" },
+    { name = "detect-secrets" },
+    { name = "diff-match-patch" },
+    { name = "dj-database-url" },
+    { name = "django" },
+    { name = "django-admin-sortable2" },
+    { name = "django-colorfield" },
+    { name = "django-cors-headers" },
+    { name = "django-dsfr" },
+    { name = "django-extensions" },
+    { name = "django-import-export", extra = ["xls", "xlsx"] },
+    { name = "django-lookbook" },
+    { name = "django-ninja" },
+    { name = "django-storages" },
+    { name = "django-widget-tweaks" },
+    { name = "djangoql" },
+    { name = "gunicorn" },
+    { name = "more-itertools" },
+    { name = "opening-hours-py" },
+    { name = "orjson" },
+    { name = "pillow" },
+    { name = "pre-commit" },
+    { name = "psycopg" },
+    { name = "pydantic", extra = ["email"] },
+    { name = "python-decouple" },
+    { name = "queryish" },
+    { name = "rapidfuzz" },
+    { name = "requests" },
+    { name = "sentry-sdk" },
+    { name = "shortuuid" },
+    { name = "sites-conformes" },
+    { name = "unidecode" },
+    { name = "wagtail" },
+    { name = "wagtail-honeypot" },
+    { name = "whitenoise" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "beautifulsoup4" },
+    { name = "black" },
+    { name = "djade" },
+    { name = "django-browser-reload" },
+    { name = "django-debug-toolbar" },
+    { name = "dslr" },
+    { name = "factory-boy" },
+    { name = "honcho" },
+    { name = "pre-commit" },
+    { name = "ptpython" },
+    { name = "pytest" },
+    { name = "pytest-django" },
+    { name = "pytest-dotenv" },
+    { name = "pytest-mock" },
+    { name = "ruff" },
+    { name = "shapely" },
+    { name = "wagtail-factories" },
+]
+docs = [
+    { name = "detect-secrets" },
+    { name = "furo" },
+    { name = "myst-parser" },
+    { name = "sphinx" },
+    { name = "sphinxcontrib-mermaid" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "boto3", specifier = "<1.43" },
+    { name = "detect-secrets", specifier = ">=1.5.0" },
+    { name = "diff-match-patch", specifier = ">=20241021,<20241022" },
+    { name = "dj-database-url", specifier = ">=3.0.1,<4" },
+    { name = "django", specifier = ">=5.2.11,<6" },
+    { name = "django-admin-sortable2", specifier = ">=2.2.8" },
+    { name = "django-colorfield", specifier = ">=0.14.0,<0.15" },
+    { name = "django-cors-headers", specifier = ">=4.6.0,<5" },
+    { name = "django-dsfr", git = "https://github.com/fabienheureux/django-dsfr?rev=d26ab6f77014b04c43c4c54f694111179d1de0ef" },
+    { name = "django-extensions", specifier = "~=4.1" },
+    { name = "django-import-export", extras = ["xls", "xlsx"], specifier = ">=4.3.8,<5" },
+    { name = "django-lookbook", specifier = ">=1.0.2,<2" },
+    { name = "django-ninja", specifier = ">=1.4.3,<2" },
+    { name = "django-storages", specifier = ">=1.14.6,<2" },
+    { name = "django-widget-tweaks", specifier = ">=1.5.0,<2" },
+    { name = "djangoql", specifier = ">=0.18.1" },
+    { name = "gunicorn", specifier = ">=23.0.0,<24" },
+    { name = "more-itertools", specifier = ">=10.7.0" },
+    { name = "opening-hours-py", specifier = ">=1.1.3,<2" },
+    { name = "orjson", specifier = ">=3.11.1,<4" },
+    { name = "pillow", specifier = ">=11.2.1,<13" },
+    { name = "pre-commit", specifier = ">=4.5.1" },
+    { name = "psycopg" },
+    { name = "pydantic", extras = ["email"], specifier = ">=2.11.7" },
+    { name = "python-decouple", specifier = "~=3.8" },
+    { name = "queryish", specifier = ">=0.2,<0.4" },
+    { name = "rapidfuzz", specifier = ">=3.13.0,<4" },
+    { name = "requests", specifier = ">=2.32.4,<3" },
+    { name = "sentry-sdk", specifier = ">=2.37.0,<3" },
+    { name = "shortuuid", specifier = ">=1.0.13,<2" },
+    { name = "sites-conformes", specifier = ">=2.5.2rc1" },
+    { name = "unidecode", specifier = ">=1.4.0,<2" },
+    { name = "wagtail", specifier = "==7.3" },
+    { name = "wagtail-honeypot", specifier = ">=1.2.1" },
+    { name = "whitenoise", specifier = ">=6.8.2,<7" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "beautifulsoup4", specifier = ">=4.13.5,<5" },
+    { name = "black", specifier = ">=25.1.0,<26" },
+    { name = "djade", specifier = ">=1.6.0,<2" },
+    { name = "django-browser-reload", specifier = ">=1.17.0,<2" },
+    { name = "django-debug-toolbar", specifier = ">=6.0.0,<7" },
+    { name = "dslr", specifier = ">=0.6.0,<0.7" },
+    { name = "factory-boy", specifier = ">=3.3.1,<4" },
+    { name = "honcho", specifier = ">=2.0.0,<3" },
+    { name = "pre-commit", specifier = ">=4.3.0,<5" },
+    { name = "ptpython", specifier = ">=3.0.30,<4" },
+    { name = "pytest", specifier = ">=8.4.2,<10" },
+    { name = "pytest-django", specifier = ">=4.9.0,<5" },
+    { name = "pytest-dotenv", specifier = ">=0.5.2,<0.6" },
+    { name = "pytest-mock", specifier = ">=3.14.1,<4" },
+    { name = "ruff", specifier = ">=0.12.10,<0.15" },
+    { name = "shapely", specifier = ">=2.1.1,<3" },
+    { name = "wagtail-factories", specifier = ">=4.2.1,<5" },
+]
+docs = [
+    { name = "detect-secrets", specifier = ">=1.5.0,<2" },
+    { name = "furo", specifier = ">=2025.7.19,<2026" },
+    { name = "myst-parser", specifier = ">=4.0.0,<5" },
+    { name = "sphinx", specifier = ">=8.1.3,<9" },
+    { name = "sphinxcontrib-mermaid", specifier = ">=1.0.0,<3" },
 ]
 
 [[package]]

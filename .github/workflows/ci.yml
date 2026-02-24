@@ -25,7 +25,7 @@ jobs:
       - name: Setup backend environment
         uses: ./.github/actions/setup-backend
         with:
-          uv-groups: "--only-dev"
+          uv-groups: "--package webapp --only-group dev"
       - name: Install Terragrunt and OpenTofu
         uses: gruntwork-io/terragrunt-action@5e86476ca61eaf74adb9c0525745f29f921f2199
         with:
@@ -47,9 +47,12 @@ jobs:
 
       - name: Setup frontend environment
         uses: ./.github/actions/setup-frontend
+        with:
+          working-directory: webapp
 
       - name: Check code formatting
         run: npm run format:check
+        working-directory: webapp
 
   backend_tests:
     name: ✅ Backend Tests
@@ -78,15 +81,15 @@ jobs:
       - name: Setup backend environment
         uses: ./.github/actions/setup-backend
         with:
-          uv-groups: "--group dev --group airflow"
+          uv-groups: "--all-packages --group dev"
       - name: Run unit tests
-        run: make unit-test
+        run: make -C webapp unit-test
       - name: Run integration tests
-        run: make integration-test
+        run: make -C webapp integration-test
       - name: Run data tests
-        run: uv run pytest dags/tests
+        run: make -C webapp dags-test
       - name: Check for missing migrations
-        run: uv run python manage.py makemigrations --check --no-input --settings=core.test_settings
+        run: cd webapp && uv run python manage.py makemigrations --check --no-input --settings=core.test_settings
 
   frontend_tests:
     name: ✅ Frontend Tests
@@ -97,9 +100,12 @@ jobs:
 
       - name: Setup frontend environment
         uses: ./.github/actions/setup-frontend
+        with:
+          working-directory: webapp
 
       - name: Run tests
         run: npm run test
+        working-directory: webapp
 
   # This job prepares all necessary artifacts for E2E test shards to run in parallel.
   # By building assets, populating the database, and caching Playwright browsers once,
@@ -111,6 +117,7 @@ jobs:
     # On s'assure que npm ci et uv sync aient tourné au moins une fois.
     # needs: [frontend_linter, backend_linter]
     runs-on: ubuntu-latest
+    if: ${{ github.ref_name == 'main' || (github.event_name ==  'pull_request' && contains( github.event.pull_request.labels.*.name, 'frontend')) }}
     services:
       postgres:
         image: postgis/postgis:15-3.3-alpine
@@ -132,11 +139,12 @@ jobs:
         uses: ./.github/actions/setup-frontend
         with:
           build: "true"
+          working-directory: webapp
 
       - name: Setup backend environment
         uses: ./.github/actions/setup-backend
         with:
-          uv-groups: "--group dev"
+          uv-groups: "--all-packages --group dev"
 
       - name: Install GIS packages
         uses: ./.github/actions/install-gis
@@ -156,22 +164,21 @@ jobs:
 
       - name: collectstatic
         shell: bash
-        run: make collectstatic
+        run: make -C webapp collectstatic
 
       - name: Upload build artifacts for e2e tests
         uses: actions/upload-artifact@v6
         with:
           name: e2e-build-artifacts
           path: |
-            staticfiles
-            static/compiled
+            webapp/staticfiles
+            webapp/static/compiled
             database-dump.pgdump
           retention-days: 1
   e2e:
     name: Tests de bout en bout
     needs: e2e_prepare
     runs-on: ubuntu-latest
-    # needs: [backend_tests, frontend_tests]
     if: ${{ github.ref_name == 'main' || (github.event_name ==  'pull_request' && contains( github.event.pull_request.labels.*.name, 'frontend')) }}
     strategy:
       fail-fast: false
@@ -197,6 +204,8 @@ jobs:
       # PREPARE e2e
       - name: Setup frontend environment
         uses: ./.github/actions/setup-frontend
+        with:
+          working-directory: webapp
 
       - name: Install GIS packages
         uses: ./.github/actions/install-gis
@@ -204,7 +213,7 @@ jobs:
       - name: Setup backend environment
         uses: ./.github/actions/setup-backend
         with:
-          uv-groups: "--group dev"
+          uv-groups: "--all-packages --group dev"
 
       - name: Setup Playwright
         uses: ./.github/actions/setup-playwright
@@ -223,7 +232,7 @@ jobs:
       # RUN e2e
       - name: Run server
         run: |
-          uv run python manage.py runserver --noreload &
+          cd webapp && uv run python manage.py runserver --noreload &
 
       - name: Wait for server to be ready
         run: |
@@ -233,6 +242,7 @@ jobs:
 
       - name: Run Playwright tests
         run: npx playwright test --shard=${{ matrix.shard }}/5 --update-snapshots
+        working-directory: webapp
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v6
