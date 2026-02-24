@@ -509,22 +509,6 @@ export async function moveMap(
 }
 
 /**
- * Marker/Pinpoint helpers
- */
-export async function getMarkers(page: Page) {
-  await expect(page.locator("#pinpoint-home").first()).toBeAttached()
-  await page.evaluate(() => {
-    document.querySelectorAll("#pinpoint-home")?.forEach((element) => element.remove())
-  })
-
-  const markers = page.locator(".maplibregl-marker:has(svg)")
-
-  await expect(markers.nth(0)).toBeAttached()
-  const count = await markers.count()
-  return [markers, count] as const
-}
-
-/**
  * Click on the first acteur marker that is not obstructed by other elements.
  * Cycles through markers and attempts to click each one until successful.
  * Excludes the home marker (#pinpoint-home) which often overlaps acteur markers.
