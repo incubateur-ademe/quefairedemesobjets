@@ -7,6 +7,7 @@ from sources.tasks.airflow_logic.config_management import (
     NormalizationColumnTransform,
     NormalizationDFTransform,
 )
+from sources.tasks.transform.sequence_utils import normalize_to_list
 from sources.tasks.transform.transform_df import MANDATORY_COLUMNS_AFTER_NORMALISATION
 from utils import logging_utils as log
 
@@ -45,8 +46,7 @@ Expected columns from dag_config: {expected_columns}"""
     # Le mapping est 1->N, donc on doit écraser pour avoir une liste aplatie
     codes_sc_params = set(
         chain.from_iterable(
-            (x if isinstance(x, list) else [x])
-            for x in dag_config.product_mapping.values()
+            normalize_to_list(x) for x in dag_config.product_mapping.values()
         )
     )
     codes_sc_invalid = codes_sc_params - codes_sc_db
