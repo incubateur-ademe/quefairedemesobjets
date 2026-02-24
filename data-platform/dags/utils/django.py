@@ -1,14 +1,7 @@
-"""Utilities to work with Django from Airflow
-
-🟠 For Django to work in Airflow, the various django
-folders (e.g. qfdmo/, data/ etc...) must be mounted
-on the Airflow container.
-"""
+"""Utilities to work with Django from Airflow"""
 
 import logging
 import os
-import sys
-from pathlib import Path
 from typing import Any
 
 import pandas as pd
@@ -17,14 +10,6 @@ from utils import logging_utils as log
 logger = logging.getLogger(__name__)
 
 DJANGO_WH_CONNECTION_NAME = "warehouse"
-
-
-def django_add_to_sys_path() -> None:
-    """
-    Adds Django project root to sys.path, based on current file path
-    """
-    django_root = str(Path(__file__).resolve().parent.parent.parent)
-    sys.path.insert(0, django_root)
 
 
 def django_settings_to_dict() -> dict:
@@ -48,7 +33,6 @@ def django_settings_to_dict() -> dict:
 def django_setup_full() -> None:
     """Full init of our Django environment"""
 
-    django_add_to_sys_path()
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.airflow_settings")
 
     import django

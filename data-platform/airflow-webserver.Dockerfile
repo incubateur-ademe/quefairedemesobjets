@@ -12,8 +12,22 @@ RUN apt-get update && \
 USER ${AIRFLOW_UID:-50000}
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 WORKDIR /opt/airflow/
+# Copy workspace structure for uv resolution
 COPY pyproject.toml uv.lock ./
-RUN uv sync --frozen --group airflow
+COPY webapp/pyproject.toml webapp/pyproject.toml
+COPY data-platform/pyproject.toml data-platform/pyproject.toml
+
+# Copy webapp source (needed for package install)
+COPY webapp/core/ webapp/core/
+COPY webapp/data/ webapp/data/
+COPY webapp/dsfr_hacks/ webapp/dsfr_hacks/
+COPY webapp/infotri/ webapp/infotri/
+COPY webapp/qfdmd/ webapp/qfdmd/
+COPY webapp/qfdmo/ webapp/qfdmo/
+COPY webapp/search/ webapp/search/
+COPY webapp/stats/ webapp/stats/
+
+RUN uv sync --frozen --all-packages --no-editable
 
 # Runtime
 # --- --- --- ---

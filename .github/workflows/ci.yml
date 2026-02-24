@@ -25,7 +25,7 @@ jobs:
       - name: Setup backend environment
         uses: ./.github/actions/setup-backend
         with:
-          uv-groups: "--only-dev"
+          uv-groups: "--package webapp --only-group dev"
       - name: Install Terragrunt and OpenTofu
         uses: gruntwork-io/terragrunt-action@5e86476ca61eaf74adb9c0525745f29f921f2199
         with:
@@ -81,7 +81,7 @@ jobs:
       - name: Setup backend environment
         uses: ./.github/actions/setup-backend
         with:
-          uv-groups: "--group dev --group airflow"
+          uv-groups: "--all-packages --group dev"
       - name: Run unit tests
         run: make -C webapp unit-test
       - name: Run integration tests
@@ -117,6 +117,7 @@ jobs:
     # On s'assure que npm ci et uv sync aient tourné au moins une fois.
     # needs: [frontend_linter, backend_linter]
     runs-on: ubuntu-latest
+    if: ${{ github.ref_name == 'main' || (github.event_name ==  'pull_request' && contains( github.event.pull_request.labels.*.name, 'frontend')) }}
     services:
       postgres:
         image: postgis/postgis:15-3.3-alpine
@@ -143,7 +144,7 @@ jobs:
       - name: Setup backend environment
         uses: ./.github/actions/setup-backend
         with:
-          uv-groups: "--group dev"
+          uv-groups: "--all-packages --group dev"
 
       - name: Install GIS packages
         uses: ./.github/actions/install-gis
@@ -178,7 +179,6 @@ jobs:
     name: Tests de bout en bout
     needs: e2e_prepare
     runs-on: ubuntu-latest
-    # needs: [backend_tests, frontend_tests]
     if: ${{ github.ref_name == 'main' || (github.event_name ==  'pull_request' && contains( github.event.pull_request.labels.*.name, 'frontend')) }}
     strategy:
       fail-fast: false
@@ -213,7 +213,7 @@ jobs:
       - name: Setup backend environment
         uses: ./.github/actions/setup-backend
         with:
-          uv-groups: "--group dev"
+          uv-groups: "--all-packages --group dev"
 
       - name: Setup Playwright
         uses: ./.github/actions/setup-playwright
