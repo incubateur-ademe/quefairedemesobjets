@@ -192,7 +192,7 @@ db-restore-local-for-tests:
 # Docs
 .PHONY: build-docs
 build-docs:
-	uv run sphinx-build -b html -c docs docs _build
+	uv run --project docs sphinx-build -b html -c docs docs _build
 
 .PHONY: fmt-infra
 fmt-infra:
