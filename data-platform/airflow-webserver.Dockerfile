@@ -1,6 +1,6 @@
 # Builder python
 # --- --- --- ---
-FROM apache/airflow:2.11.0 AS python-builder
+FROM apache/airflow:slim-3.1.7-python3.12 AS python-builder
 
 # system dependencies
 USER root
@@ -36,11 +36,11 @@ RUN uv sync --project data-platform --frozen --no-editable
 
 # Runtime
 # --- --- --- ---
-FROM apache/airflow:slim-2.11.0-python3.12 AS webserver
+FROM apache/airflow:slim-3.1.7-python3.12 AS webserver
 
 USER ${AIRFLOW_UID:-50000}
 
-ENV VIRTUAL_ENV=/home/airflow/.local \
+ENV VIRTUAL_ENV=/opt/airflow/.venv \
     PATH="/opt/airflow/.venv/bin:$PATH" \
     PORT="8080"
 
@@ -51,4 +51,4 @@ COPY ./data-platform/dags /opt/airflow/dags
 
 EXPOSE 8080
 
-CMD ["webserver", "--port", "8080"]
+CMD ["api-server"]

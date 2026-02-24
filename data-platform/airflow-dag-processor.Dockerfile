@@ -11,16 +11,15 @@ RUN apt-get update && \
 
 # python dependencies
 USER ${AIRFLOW_UID:-50000}:0
-
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 WORKDIR /opt/airflow/
 
-# Copy data-platform uv project structure
+# Copy workspace structure for uv resolution
+COPY pyproject.toml uv.lock ./
+COPY webapp/pyproject.toml webapp/pyproject.toml
 COPY data-platform/pyproject.toml data-platform/pyproject.toml
-COPY data-platform/uv.lock data-platform/uv.lock
 
 # Copy webapp source (needed for package install)
-COPY webapp/pyproject.toml webapp/pyproject.toml
 COPY webapp/core/ webapp/core/
 COPY webapp/data/ webapp/data/
 COPY webapp/dsfr_hacks/ webapp/dsfr_hacks/
@@ -30,9 +29,7 @@ COPY webapp/qfdmo/ webapp/qfdmo/
 COPY webapp/search/ webapp/search/
 COPY webapp/stats/ webapp/stats/
 
-# Venv at /opt/airflow/.venv so shebangs match runtime (not data-platform/.venv)
-ENV UV_PROJECT_ENVIRONMENT=/opt/airflow/.venv
-RUN uv sync --project data-platform --frozen --no-editable
+RUN uv sync --frozen --all-packages --no-editable
 
 # Runtime
 # --- --- --- ---
@@ -48,8 +45,22 @@ RUN apt-get install -y unzip curl
 RUN apt-get install -y --no-install-recommends \
     gdal-bin libgdal-dev jq
 
+# Nginx
+RUN apt-get install -y nginx
+
 # Installation du client Scaleway CLI
-RUN curl -s https://raw.githubusercontent.com/scaleway/scaleway-cli/master/scripts/get.sh | sh
+# RUN curl -s https://raw.githubusercontent.com/scaleway/scaleway-cli/master/scripts/get.sh | sh
+
+# Nginx
+RUN echo 'worker_processes 1; \
+    events { worker_connections 1024; } \
+    http { \
+    server { \
+    listen 80 default_server; \
+    location / { return 200 "Hello"; } \
+    } \
+    }' > /etc/nginx/nginx.conf
+
 
 USER ${AIRFLOW_UID:-50000}:0
 WORKDIR /opt/airflow
@@ -67,17 +78,20 @@ COPY ./data-platform/dags/ /opt/airflow/dags/
 COPY ./data-platform/config/ /opt/airflow/config/
 COPY ./data-platform/plugins/ /opt/airflow/plugins/
 
+COPY ./data-platform/airflow-dag-processor-start.sh /opt/airflow/airflow-dag-processor-start.sh
+
 RUN mkdir -p /opt/airflow/tmp
 RUN chown -R ${AIRFLOW_UID:-50000}:0 /opt/airflow/tmp
 
-WORKDIR /opt/airflow/dbt
+WORKDIR /opt/airflow
 USER 0
 RUN chown -R ${AIRFLOW_UID:-50000}:0 /opt/airflow/dbt
+RUN touch /run/nginx.pid
+RUN chown -R ${AIRFLOW_UID:-50000}:0 /var/lib/nginx /var/log/nginx /run/nginx.pid
+RUN chmod +x /opt/airflow/airflow-dag-processor-start.sh
 USER ${AIRFLOW_UID:-50000}:0
 
-ENV DBT_PROFILES_DIR=/opt/airflow/dbt
-ENV DBT_PROJECT_DIR=/opt/airflow/dbt
+EXPOSE 80
 
-RUN dbt deps
-
-CMD ["scheduler"]
+ENTRYPOINT ["/opt/airflow/airflow-dag-processor-start.sh"]
+CMD [""]
