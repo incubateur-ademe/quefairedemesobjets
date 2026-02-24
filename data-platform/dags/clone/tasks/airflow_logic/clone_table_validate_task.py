@@ -3,10 +3,9 @@
 import logging
 
 from airflow import DAG
-from airflow.operators.python import PythonOperator
+from airflow.providers.standard.operators.python import PythonOperator
 from clone.config import DIR_SQL_VALIDATION, TASKS, XCOMS, CloneConfig, xcom_pull
 from clone.tasks.business_logic.clone_table_validate import clone_table_validate
-
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)

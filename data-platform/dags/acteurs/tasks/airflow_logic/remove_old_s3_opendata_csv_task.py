@@ -7,7 +7,7 @@ from acteurs.tasks.business_logic.remove_old_s3_opendata_csv import (
     remove_old_s3_opendata_csv,
 )
 from airflow import DAG
-from airflow.operators.python import PythonOperator
+from airflow.providers.standard.operators.python import PythonOperator
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)

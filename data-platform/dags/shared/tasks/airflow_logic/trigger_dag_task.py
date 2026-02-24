@@ -1,7 +1,7 @@
 from airflow.exceptions import AirflowSkipException
 from airflow.models import DagRun
-from airflow.operators.python import PythonOperator
 from airflow.operators.trigger_dagrun import TriggerDagRunOperator
+from airflow.providers.standard.operators.python import PythonOperator
 from airflow.utils.session import provide_session
 from airflow.utils.state import State
 
