@@ -5,8 +5,8 @@ import logging
 from airflow import DAG
 from airflow.exceptions import AirflowSkipException
 from airflow.models.taskinstance import TaskInstance
-from airflow.operators.python import PythonOperator
-from airflow.utils.trigger_rule import TriggerRule
+from airflow.providers.standard.operators.python import PythonOperator
+from airflow.task.trigger_rule import TriggerRule
 from enrich.config.xcoms import XCOMS, xcom_pull
 from enrich.tasks.business_logic.enrich_dbt_model_suggest import (
     enrich_dbt_model_suggest,
