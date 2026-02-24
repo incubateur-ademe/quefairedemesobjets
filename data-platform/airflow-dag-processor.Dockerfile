@@ -45,8 +45,22 @@ RUN apt-get install -y unzip curl
 RUN apt-get install -y --no-install-recommends \
     gdal-bin libgdal-dev jq
 
+# Nginx
+RUN apt-get install -y nginx
+
 # Installation du client Scaleway CLI
-RUN curl -s https://raw.githubusercontent.com/scaleway/scaleway-cli/master/scripts/get.sh | sh
+# RUN curl -s https://raw.githubusercontent.com/scaleway/scaleway-cli/master/scripts/get.sh | sh
+
+# Nginx
+RUN echo 'worker_processes 1; \
+    events { worker_connections 1024; } \
+    http { \
+    server { \
+    listen 80 default_server; \
+    location / { return 200 "Hello"; } \
+    } \
+    }' > /etc/nginx/nginx.conf
+
 
 USER ${AIRFLOW_UID:-50000}:0
 WORKDIR /opt/airflow
@@ -64,17 +78,20 @@ COPY ./data-platform/dags/ /opt/airflow/dags/
 COPY ./data-platform/config/ /opt/airflow/config/
 COPY ./data-platform/plugins/ /opt/airflow/plugins/
 
+COPY ./data-platform/airflow-dag-processor-start.sh /opt/airflow/airflow-dag-processor-start.sh
+
 RUN mkdir -p /opt/airflow/tmp
 RUN chown -R ${AIRFLOW_UID:-50000}:0 /opt/airflow/tmp
 
-WORKDIR /opt/airflow/dbt
+WORKDIR /opt/airflow
 USER 0
 RUN chown -R ${AIRFLOW_UID:-50000}:0 /opt/airflow/dbt
+RUN touch /run/nginx.pid
+RUN chown -R ${AIRFLOW_UID:-50000}:0 /var/lib/nginx /var/log/nginx /run/nginx.pid
+RUN chmod +x /opt/airflow/airflow-dag-processor-start.sh
 USER ${AIRFLOW_UID:-50000}:0
 
-ENV DBT_PROFILES_DIR=/opt/airflow/dbt
-ENV DBT_PROJECT_DIR=/opt/airflow/dbt
+EXPOSE 80
 
-RUN dbt deps
-
-CMD ["scheduler"]
+ENTRYPOINT ["/opt/airflow/airflow-dag-processor-start.sh"]
+CMD [""]
