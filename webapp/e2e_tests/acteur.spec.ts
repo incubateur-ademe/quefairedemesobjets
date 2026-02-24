@@ -1,4 +1,5 @@
-import { expect, test } from "@playwright/test"
+import { expect } from "@playwright/test"
+import { test } from "./fixtures"
 import {
   getIframe,
   mockApiAdresse,
@@ -11,7 +12,7 @@ import {
 test.describe("📋 Fiche Acteur Viewport - mode carte", () => {
   test(
     "La fiche acteur est visible dans le viewport sans scroll sur mobile",
-    { tag: ["@mobile"] },
+    { tag: ["@mobile", "@regression"] },
     async ({ page }) => {
       await navigateTo(page, "/lookbook/preview/tests/t_15_acteur_fiche_viewport")
 
@@ -71,7 +72,7 @@ test.describe("📋 Fiche Acteur Viewport - mode liste", () => {
   // and the acteur title is not visible in the viewport
   test.skip(
     "La fiche acteur est visible dans le viewport sans scroll sur mobile",
-    { tag: ["@mobile"] },
+    { tag: ["@mobile", "@regression"] },
     async ({ page }) => {
       await navigateTo(page, "/lookbook/preview/tests/t_15_acteur_fiche_viewport")
 

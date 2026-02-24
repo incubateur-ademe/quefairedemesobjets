@@ -1,4 +1,5 @@
-import { test, expect } from "@playwright/test"
+import { expect } from "@playwright/test"
+import { test } from "./fixtures"
 import { navigateTo, getIframe, TIMEOUT } from "./helpers"
 
 test.describe("📦 Système d'Intégration Iframe", () => {

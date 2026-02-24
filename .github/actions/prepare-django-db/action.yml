@@ -60,6 +60,7 @@ runs:
         make createcachetable
         uv run python manage.py migrate_from_sites_faciles_experiment --no-input
         make migrate
+        # make rebuild-search-index
 
     - name: Init django admin superuser
       if: steps.cache-db.outputs.cache-hit != 'true'

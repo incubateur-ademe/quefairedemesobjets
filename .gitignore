@@ -21,3 +21,4 @@ _build
 *.pem
 
 tmpbackup*
+__screenshots__

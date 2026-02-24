@@ -1,4 +1,4 @@
-import { expect, FrameLocator, Locator, Page } from "@playwright/test"
+import { test as base, expect, FrameLocator, Locator, Page } from "@playwright/test"
 
 // Constants
 export const TIMEOUT = {
