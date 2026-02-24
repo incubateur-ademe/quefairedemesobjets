@@ -27,19 +27,19 @@ runs:
         key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
     - name: Install npm dependencies
-      if: steps.cache-node-modules.outputs.cache-hit != 'true'
+      # if: steps.cache-node-modules.outputs.cache-hit != 'true'
       shell: bash
       run: npm ci
       working-directory: ${{ inputs.working-directory }}
 
-    - name: Cache Parcel build cache
-      if: inputs.build == 'true'
-      uses: actions/cache@v4
-      with:
-        path: .parcel-cache
-        key: parcel-${{ runner.os }}-${{ hashFiles('static/to_compile/**') }}
-        restore-keys: |
-          parcel-${{ runner.os }}-
+    # - name: Cache Parcel build cache
+    #   if: inputs.build == 'true'
+    #   uses: actions/cache@v4
+    #   with:
+    #     path: .parcel-cache
+    #     key: parcel-${{ runner.os }}-${{ hashFiles('static/to_compile/**') }}
+    #     restore-keys: |
+    #       parcel-${{ runner.os }}-
 
     - name: Build assets
       if: inputs.build == 'true'
