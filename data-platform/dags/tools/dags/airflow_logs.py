@@ -1,7 +1,7 @@
 import logging
 
 from airflow import DAG
-from airflow.operators.python import PythonOperator
+from airflow.providers.standard.operators.python import PythonOperator
 from shared.config.airflow import DEFAULT_ARGS_NO_RETRIES
 from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS

@@ -5,7 +5,7 @@ some business logic (e.g. if http -> first try https)"""
 import logging
 
 from airflow import DAG
-from airflow.operators.python import PythonOperator
+from airflow.providers.standard.operators.python import PythonOperator
 from crawl.config.tasks import TASKS
 from crawl.config.xcoms import XCOMS, xcom_pull
 from crawl.tasks.business_logic.crawl_urls_check_syntax import crawl_urls_check_syntax

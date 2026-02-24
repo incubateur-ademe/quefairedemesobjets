@@ -2,8 +2,8 @@ import logging
 
 from airflow import DAG
 from airflow.exceptions import AirflowFailException, AirflowSkipException
-from airflow.operators.python import PythonOperator
-from airflow.utils.trigger_rule import TriggerRule
+from airflow.providers.standard.operators.python import PythonOperator
+from airflow.task.trigger_rule import TriggerRule
 from cluster.config.tasks import TASKS
 from cluster.config.xcoms import XCOMS, xcom_pull
 from utils import logging_utils as log

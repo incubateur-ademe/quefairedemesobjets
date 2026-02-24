@@ -3,7 +3,7 @@
 import logging
 
 from airflow import DAG
-from airflow.operators.python import PythonOperator
+from airflow.providers.standard.operators.python import PythonOperator
 from clone.config import TASKS, XCOMS, CloneConfig
 from clone.tasks.business_logic.clone_config_create import clone_config_create
 from utils import logging_utils as log

@@ -5,7 +5,7 @@ import logging
 from airflow import DAG
 from airflow.exceptions import AirflowSkipException
 from airflow.operators.bash import BashOperator
-from airflow.operators.python import PythonOperator
+from airflow.providers.standard.operators.python import PythonOperator
 from enrich.config.models import EnrichBaseConfig
 from enrich.config.tasks import TASKS
 from enrich.config.xcoms import XCOMS, xcom_pull

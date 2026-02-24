@@ -1,4 +1,4 @@
-from airflow.operators.python import ShortCircuitOperator
+from airflow.providers.standard.operators.python import ShortCircuitOperator
 from suggestions.tasks.business_logic.db_check_suggestion_to_process import (
     db_check_suggestion_to_process,
 )

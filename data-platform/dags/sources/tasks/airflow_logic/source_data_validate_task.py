@@ -1,8 +1,8 @@
 import logging
 
 from airflow import DAG
-from airflow.operators.python import PythonOperator
-from airflow.utils.trigger_rule import TriggerRule
+from airflow.providers.standard.operators.python import PythonOperator
+from airflow.task.trigger_rule import TriggerRule
 from sources.tasks.airflow_logic.config_management import DAGConfig
 from sources.tasks.business_logic.source_data_validate import source_data_validate
 from utils import logging_utils as log

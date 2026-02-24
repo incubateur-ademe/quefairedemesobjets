@@ -2,8 +2,8 @@ import logging
 
 import pandas as pd
 from airflow import DAG
-from airflow.operators.python import PythonOperator
-from airflow.utils.trigger_rule import TriggerRule
+from airflow.providers.standard.operators.python import PythonOperator
+from airflow.task.trigger_rule import TriggerRule
 from shared.tasks.database_logic.db_manager import PostgresConnectionManager
 from sources.tasks.airflow_logic.config_management import DAGConfig
 from sources.tasks.business_logic.source_config_validate import source_config_validate
