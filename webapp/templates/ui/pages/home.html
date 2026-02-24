@@ -1,28 +1,61 @@
 {% extends "ui/layout/assistant.html" %}
-{% load dsfr_tags qfdmd_tags suggestions_tags %}
-
-{% block pre_main %}
-<div class="fr-container">
-{% patchwork %}
-</div>
-{% endblock pre_main %}
+{% load dsfr_tags qfdmd_tags suggestions_tags wagtailimages_tags wagtailcore_tags %}
 
 {% block analytics_action %}homePageView{% endblock %}
 
 {% block main %}
-<div data-home class="qf-group qf-flex qf-flex-col qf-gap-5w">
-    {# search + patchwork #}
-    <div class="qf-w-full qf-max-w-3xl qf-m-auto qf-relative qf-pb-6w">
-        <div class="qf-absolute qf-left-1w qf-right-1w qf-top-0">
-            {% include "ui/components/search/view.html" with big=True search_form=home_search_form %}
-        </div>
+<div data-home class="qf-group qf-flex qf-justify-center qf-flex-col qf-gap-2w">
+    <div class="qf-bg-green-menthe-975-75 qf-py-4w
+    qf-flex qf-flex-col qf-gap-2w qf-justify-center qf-text-center">
+
+    {# title — falls back to the SVG logo when no hero_title is set #}
+    <div class="logo">
+        {% if page.hero_title %}
+            <div class="qf-max-w-[650px] qf-mx-auto">{{ page.hero_title|richtext }}</div>
+        {% else %}
+            {% include "ui/components/logo/site_logo_large.html" %}
+        {% endif %}
     </div>
 
-    {% if not iframe %}
-    <div class="qf-mx-auto qf-mt-4w qf-w-full">
-        {% include "sites_conformes_content_manager/blocks/blocks_stream.html" with stream=page.body page=page %}
+    {# subtitle #}
+    {%comment%}
+    values in rem below must be kept as is as the current framework spacing values do not allow
+    to match precisely the mockup.
+    {% endcomment %}
+    {% if page.hero_subtitle %}
+    <div class="fr-h4 qf-mb-3v [&_strong]:qf-px-[0.25rem] [&_strong]:qf-py-[0.2rem] qf-max-w-[650px] qf-mx-auto [&_strong]:qf-rounded-full [&_strong]:qf-bg-green-menthe-sun-373-moon-652 [&_strong]:qf-text-white [&_strong]:qf-leading-none [&_strong]:qf-inline-block">
+        {{ page.hero_subtitle|richtext }}
     </div>
     {% endif %}
+
+    {# search #}
+    <div class="qf-w-full qf-mx-auto qf-max-w-3xl qf-pb-6w qf-text-left">
+        {% if page.hero_search_label %}
+        <p class="qf-font-bold qf-mb-1w qf-text-lg">{{ page.hero_search_label }}</p>
+        {% endif %}
+        {{ assistant.qf_search_form }}
+    </div>
+
+    {# patchwork of icons #}
+    {% if page.icons %}
+    <div class="qf-w-full qf-overflow-hidden" aria-hidden="true">
+        <div class="qf-flex qf-flex-wrap qf-justify-center qf-gap-3w qf-py-2w">
+            {% for block in page.icons %}
+                <div class="qf-w-[3rem] qf-h-[3rem] qf-opacity-60">
+                    {% image block.value fill-48x48 as icon_img %}
+                    <img src="{{ icon_img.url }}" alt="" width="48" height="48">
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% if not iframe %}
+<div class="qf-mx-auto qf-mt-4w qf-w-full">
+    {% include "sites_conformes_content_manager/blocks/blocks_stream.html" with stream=page.body page=page %}
+</div>
+{% endif %}
 </div>
 
 {% endblock main %}

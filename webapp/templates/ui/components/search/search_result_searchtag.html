@@ -3,6 +3,7 @@
 
 {% block href %}{% if result.page %}{% pageurl result.page %}?{{ SEARCH_TERM_ID_QUERY_PARAM }}={{ result.pk }}&position={{ position }}&search_term={{ result.name|urlencode }}{% endif %}{% endblock %}
 
+<<<<<<< HEAD
 {% block nom %}
 <div class="qf-flex qf-justify-between qf-pr-2w">
     {{ result.name|capfirst }}
@@ -11,3 +12,7 @@
     {% endif %}
 </div>
 {% endblock %}
+=======
+{% block nom %}{{ result.name|capfirst }}{% endblock %}
+{% block parent %}{% if result.page and request.beta %} <span class="qf-text-grey-200-850 qf-italic">{{ result.page.titre_phrase|capfirst }}</span>{% endif %}{% endblock parent %}
+>>>>>>> 3a429b74 (replay changes)

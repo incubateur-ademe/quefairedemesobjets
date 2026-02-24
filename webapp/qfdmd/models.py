@@ -29,6 +29,8 @@ from wagtail.images.blocks import ImageBlock
 from wagtail.models import Page, ParentalKey
 from wagtail.snippets.models import register_snippet
 
+from sites_conformes.content_manager.models import ContentPage
+
 from qfdmd.blocks import STREAMFIELD_COMMON_BLOCKS
 from qfdmo.models.utils import NomAsNaturalKeyModel
 from search.constants import SEARCH_TAG_HELP_TEXT
@@ -150,6 +152,48 @@ class ProduitIndexPage(CompiledFieldMixin, Page):
 
     class Meta:
         verbose_name = "Index des familles & produits"
+
+
+class HomePage(ContentPage):
+    template = "ui/pages/home.html"
+    max_count = 1
+    parent_page_types = ["wagtailcore.Page"]
+    subpage_types = []
+
+    hero_subtitle = RichTextField(
+        "Sous-titre",
+        blank=True,
+    )
+    hero_search_label = models.CharField(
+        "Label du champ de recherche",
+        max_length=255,
+        blank=True,
+    )
+    icons = StreamField(
+        [("image", ImageBlock())],
+        verbose_name="Icônes de la page d'accueil",
+        blank=True,
+    )
+
+    content_panels = ContentPage.content_panels + [
+        MultiFieldPanel(
+            [
+                FieldPanel("hero_subtitle"),
+                FieldPanel("hero_search_label"),
+            ],
+            heading="Bandeau hero",
+        ),
+        FieldPanel("icons"),
+    ]
+
+    @override
+    def serve(self, request, *args, **kwargs):
+        from qfdmd.views import HomeView
+
+        return HomeView.as_view()(request, *args, **kwargs)
+
+    class Meta:
+        verbose_name = "Page d'accueil"
 
 
 class ProduitPageTag(TaggedItemBase):

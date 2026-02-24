@@ -30,6 +30,7 @@ module.exports = {
       // https://www.systeme-de-design.gouv.fr/elements-d-interface/fondamentaux-techniques/espacements
       0: 0,
       "1v": "0.25rem",
+      "0-5v": "0.125rem",
       "1w": "0.5rem",
       "3v": "0.75rem",
       "2w": "1rem",

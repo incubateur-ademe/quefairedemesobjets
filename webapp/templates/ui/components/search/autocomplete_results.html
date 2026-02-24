@@ -1,0 +1,22 @@
+{% extends "ui/forms/widgets/autocomplete/results.html" %}
+
+{% block results %}
+    {% for result in results %}
+        {% with specific=result.specific %}
+        <li
+            id="option-{{ forloop.counter }}"
+            role="option"
+            tabindex="-1"
+            class="qf-list-none qf-p-1w qf-flex qf-justify-between"
+            data-next-autocomplete-target="option"
+            data-action="keydown->next-autocomplete#navigate:prevent"
+        >
+            {% include specific.search_result_template with result=specific position=forloop.counter %}
+        </li>
+        {% endwith %}
+    {% empty %}
+        <li class="qf-list-none qf-px-2w qf-py-1w qf-text-gray-500">
+            Aucun résultat trouvé
+        </li>
+    {% endfor %}
+{% endblock results %}

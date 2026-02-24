@@ -1,6 +1,8 @@
 import logging
 from typing import Any
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
+import re
+from typing import Any, override
 
 import django_filters
 from django.contrib import messages
@@ -9,17 +11,18 @@ from django.shortcuts import redirect, render
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control
 from django.views.decorators.vary import vary_on_headers
-from django.views.generic import DetailView, TemplateView
+from django.views.generic import DetailView, TemplateView, ListView
 from modelsearch.index import insert_or_update_object
 from wagtail.admin.filters import WagtailFilterSet
 from wagtail.admin.views.pages.listing import IndexView
 from wagtail.admin.viewsets.base import ViewSetGroup
 from wagtail.admin.viewsets.pages import PageListingViewSet
+from modelsearch.query import Fuzzy
 from wagtail.models import Page
 
 from core.constants import SEARCH_TERM_ID_QUERY_PARAM
 from core.views import static_file_content_from
-from qfdmd.forms import SearchForm
+from qfdmd.forms import HomeSearchForm
 from qfdmd.models import (
     Produit,
     ProduitPage,
@@ -27,6 +30,7 @@ from qfdmd.models import (
     Synonyme,
     TaggedSearchTag,
 )
+from search.models import SearchTerm
 
 logger = logging.getLogger(__name__)
 
@@ -317,6 +321,30 @@ def get_assistant_script(request):
 SEARCH_VIEW_TEMPLATE_NAME = "ui/components/search/view.html"
 
 
+class AutocompleteHomeSearchView(ListView):
+    """View for autocomplete search results on homepage.
+
+    Searches using SearchTerm.objects.searchable().search().
+    """
+
+    template_name = "ui/components/search/autocomplete_results.html"
+
+    @override
+    def get_queryset(self):
+        query = self.request.GET.get("q", "")
+        limit = int(self.request.GET.get("limit", 10))
+        if not query:
+            return []
+        return SearchTerm.objects.searchable().search(Fuzzy(query))[:limit]
+
+    @override
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["turbo_frame_id"] = self.request.GET.get("turbo_frame_id")
+        context["results"] = self.get_queryset()
+        return context
+
+
 def search_view(request) -> HttpResponse:
     prefix_key = next(
         (key for key in request.GET.dict().keys() if key.endswith("-id")), ""
@@ -326,7 +354,7 @@ def search_view(request) -> HttpResponse:
     if prefix := request.GET[prefix_key]:
         form_kwargs.update(prefix=prefix, initial={"id": prefix})
 
-    form = SearchForm(request.GET, **form_kwargs)
+    form = HomeSearchForm(request.GET, **form_kwargs)
     context = {"prefix": form_kwargs, "prefix_key": prefix_key}
     template_name = SEARCH_VIEW_TEMPLATE_NAME
 
