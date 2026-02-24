@@ -100,8 +100,6 @@ jobs:
 
       - name: Setup frontend environment
         uses: ./.github/actions/setup-frontend
-        with:
-          working-directory: webapp
 
       - name: Run tests
         run: npm run test

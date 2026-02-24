@@ -9,6 +9,7 @@ inputs:
   working-directory:
     description: "Working directory"
     required: false
+    default: "webapp"
 
 runs:
   using: composite
