@@ -16,7 +16,7 @@ runs:
   steps:
     - name: Run server
       shell: bash
-      run: uv run python manage.py runserver --noreload &
+      run: cd webapp && uv run python manage.py runserver --noreload &
 
     - name: Wait for server to be ready
       shell: bash

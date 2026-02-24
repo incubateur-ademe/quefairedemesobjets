@@ -21,7 +21,7 @@ env:
   DATABASE_URL: postgres://webapp:webapp@localhost:5432/webapp # pragma: allowlist secret
   SECRET_KEY: coucou # pragma: allowlist secret
   CI: true
-  SCREENSHOTS_BASE_PATH: __screenshots__
+  SCREENSHOTS_BASE_PATH: webapp/__screenshots__
 
 jobs:
   end-to-end:
@@ -57,15 +57,15 @@ jobs:
         with:
           ref: ${{ github.ref }}
           sparse-checkout: |
-            playwright.config.ts
-            e2e_tests/
+            webapp/playwright.config.ts
+            webapp/e2e_tests/
             .github/
           path: __regression_tests__
 
       - name: Overlay regression test files
         run: |
-          shopt -s dotglob
-          cp -r __regression_tests__/* .
+          cp -r __regression_tests__/webapp/* webapp/
+          cp -r __regression_tests__/.github .
           rm -rf __regression_tests__
 
       - name: Setup E2E tools
@@ -86,9 +86,9 @@ jobs:
 
       - name: TEMPORARY - prepare search index
         run: |
-          uv run python manage.py populate_fake_search_tags
-          uv run python manage.py populate_search_terms
-          make rebuild-search-index
+          cd webapp && uv run python manage.py populate_fake_search_tags
+          cd webapp && uv run python manage.py populate_search_terms
+          make -C webapp rebuild-search-index
 
       - name: Start Django server
         uses: ./.github/actions/start-django-server
@@ -103,10 +103,12 @@ jobs:
       - name: Run Playwright tests
         if: ${{ !inputs.compare }}
         run: npx playwright test --update-snapshots
+        working-directory: webapp
 
       - name: Run Playwright tests (regression only)
         if: inputs.compare
         run: npx playwright test --grep=@regression
+        working-directory: webapp
 
       - name: Upload baseline screenshots
         if: ${{ !inputs.compare }}

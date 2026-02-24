@@ -22,6 +22,7 @@ runs:
       uses: ./.github/actions/setup-frontend
       with:
         build: ${{ inputs.build-frontend }}
+        working-directory: webapp
 
     - name: Setup backend environment
       uses: ./.github/actions/setup-backend

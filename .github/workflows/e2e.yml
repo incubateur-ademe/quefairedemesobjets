@@ -64,15 +64,15 @@ jobs:
 
       - name: collectstatic
         shell: bash
-        run: make collectstatic
+        run: make -C webapp collectstatic
 
       - name: Upload build artifacts for e2e tests
         uses: actions/upload-artifact@v6
         with:
           name: e2e-build-artifacts
           path: |
-            staticfiles
-            static/compiled
+            webapp/staticfiles
+            webapp/static/compiled
             database-dump.pgdump
           retention-days: 1
 
