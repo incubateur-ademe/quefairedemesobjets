@@ -3,6 +3,7 @@ import logging
 
 import numpy as np
 import pandas as pd
+from sources.tasks.transform.sequence_utils import is_empty_sequence
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
@@ -50,7 +51,7 @@ def db_data_prepare(
     # FIXME : à faire avant dans la normalisation des données
     # Inactivate acteur if propositions_services is empty
     df_acteur.loc[
-        df_acteur["proposition_service_codes"].apply(lambda x: x == []), "statut"
+        df_acteur["proposition_service_codes"].apply(is_empty_sequence), "statut"
     ] = "INACTIF"
 
     df_acteur["suggestion"] = df_acteur.apply(
