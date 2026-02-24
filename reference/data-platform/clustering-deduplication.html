@@ -1,0 +1,1072 @@
+<!doctype html>
+<html class="no-js" lang="fr" data-content_root="../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Recherche" href="../../search.html"><link rel="next" title="Webapp" href="../webapp/README.html"><link rel="prev" title="DBT" href="dbt.html">
+
+    <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
+        <title>Clustering &amp; Deduplication - Documentation Longue Vie Aux Objets</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../README.html"><div class="brand">Documentation Longue Vie Aux Objets </div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../README.html">
+  
+  <span class="sidebar-brand-text">Documentation Longue Vie Aux Objets </span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Recherche" name="q" aria-label="Recherche">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started/README.html">Getting started</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../how-to/README.html">🤔 COMMENT FAIRE</a><input aria-label="Toggle navigation of 🤔 COMMENT FAIRE" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../how-to/development/README.html">👩‍💻 Espace développeur•euse</a><input aria-label="Toggle navigation of 👩‍💻 Espace développeur•euse" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/development/installation.html">Installation de l’application en local</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/development/useful_command.html">Commandes Django utiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/development/dependencies.html">Gestion de package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/development/fixture_generation.html">Utiliser les fixtures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/development/create_webapp_sample_db.html">Création de la base de données webapp_sample pour les tests</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/development/tests_e2e.html">Tests de Régression E2E</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/development/test_iframe_referrer.html">Tester le referrer d’une iframe</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../how-to/deployment/README.html">🛹 Déploiement de la plateforme</a><input aria-label="Toggle navigation of 🛹 Déploiement de la plateforme" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/deployment/deployment.html">DevOps, déploiement, opérations</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../how-to/administration/README.html">Administration de la plateforme</a><input aria-label="Toggle navigation of Administration de la plateforme" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/administration/update-ext-id.html">Mettre à jour les identifiants externe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/administration/admin_command.html">Commandes Django d’administration</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../how-to/infrastructure/README.html">🏢 Gestion de l’infrastructure</a><input aria-label="Toggle navigation of 🏢 Gestion de l’infrastructure" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/infrastructure/create_db.html">Créaton d’un base de données sur Scaleway</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/infrastructure/monitoring.html">Monitoring sur Scaleway</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../how-to/troubleshooting.html">☎️ 3615 jaidesproblemes</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../explanations/README.html">❓ EXPLICATIONS</a><input aria-label="Toggle navigation of ❓ EXPLICATIONS" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../explanations/data/README.html">📊 Plateforme de données</a><input aria-label="Toggle navigation of 📊 Plateforme de données" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../explanations/data/ingestion-de-source.html">Ingestion des sources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../explanations/data/flux-dbt.html">Description des flux DBT</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../explanations/data/flux-enrich.html">Enrichissement de données</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../explanations/db/README.html">Bases de données</a><input aria-label="Toggle navigation of Bases de données" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../explanations/db/prestation-delivery.html">Lieu de prestation</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../explanations/frontend/README.html">🎨 Frontend</a><input aria-label="Toggle navigation of 🎨 Frontend" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../explanations/frontend/routing-nginx-cache.html">🚏 Routing, nginx et cache</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../explanations/frontend/routing-nginx-cache.html#nginx">nginx</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../explanations/frontend/routing-nginx-cache.html#whitenoise">Whitenoise</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../explanations/frontend/routing-nginx-cache.html#middlewares">Middlewares</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../explanations/frontend/historique.html">Historique</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../explanations/iframe/README.html">Afficher l’application dans une Iframe</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../README.html">🧐 REFERENCE</a><input aria-label="Toggle navigation of 🧐 REFERENCE" checked="" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../coding/README.html">Code Guidelines</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../infrastructure/README.html">Infrastructure, monitoring, CI/CD</a><input aria-label="Toggle navigation of Infrastructure, monitoring, CI/CD" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../infrastructure/provisioning.html">Provisioning the infrastructure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../infrastructure/ci-cd.html">CI/CD Documentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../infrastructure/monitoring.html">Monitoring</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../db/README.html">Postgresql Database</a><input aria-label="Toggle navigation of Postgresql Database" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../db/db_organisation.html">Database organisation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../db/architecture.html">«La Carte» database architecture</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current has-children"><a class="reference internal" href="README.html">Data Platform</a><input aria-label="Toggle navigation of Data Platform" checked="" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="airflow.html">Airflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dbt.html">DBT</a></li>
+<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">Clustering &amp; Deduplication</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../webapp/README.html">Webapp</a><input aria-label="Toggle navigation of Webapp" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../webapp/templates.html">Templates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../webapp/look-and-feel.html">Look and feel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../webapp/javascript.html">Javascript</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../webapp/django.html">Django</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../opendata/README.html">Open Data</a><input aria-label="Toggle navigation of Open Data" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../opendata/changelog.html">Changelog du jeu de données Open Data : « Acteurs de l’économie circulaire - Longue Vie Aux Objets »</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../opendata/exposure-opendata-acteur.html">Jeu de données open data : acteurs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../opendata/politique-de-version-du-jeu-de-donnees-open-data.html">Politique de version du jeu de données Open Data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../opendata/politique-de-version-du-jeu-de-donnees-open-data-interne.html">Organisation interne de la gestion des versions du jeu de données Open Data</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../apis/README.html">API Guidelines</a><input aria-label="Toggle navigation of API Guidelines" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../apis/qfdmo.html">«Que faire de mes objets et déchets» API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apis/stats.html">Public statistics API</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../security/README.html">Security</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../../_sources/reference/data-platform/clustering-deduplication.md.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="clustering-deduplication">
+<h1>Clustering &amp; Deduplication<a class="headerlink" href="#clustering-deduplication" title="Lien vers cette rubrique">¶</a></h1>
+<ul class="simple">
+<li><p>🗺️ <strong>Context</strong>: we ingest data on circular economy actors from <a class="reference external" href="https://data.ademe.fr/">multiple sources</a></p></li>
+<li><p>🔴 <strong>Problem</strong>: some actors are duplicated, polluting the user application</p></li>
+<li><p>🟢 <strong>Solution</strong>: work to reduce duplicates and improve data consistency</p></li>
+<li><p>🤔 <strong>How</strong>: see below</p></li>
+</ul>
+<section id="known-limitations">
+<h2>⚠️ Known limitations<a class="headerlink" href="#known-limitations" title="Lien vers cette rubrique">¶</a></h2>
+<ul class="simple">
+<li><p><strong>We do not split children from an existing cluster</strong>: our choice for now; we only want to add new children. To change this would require <a class="reference external" href="https://www.notion.so/CLUSTERING-DEDUP-re-clusteriser-les-enfants-existants-1956523d57d7801abe3bc132ec7e33b0?pvs=21">CLUSTERING &amp; DEDUP: re-cluster existing children</a>. For now:</p>
+<ul>
+<li><p>🟢 <strong>advantage</strong>: no risk of damaging existing clusters</p></li>
+<li><p>🟠 <strong>drawback</strong>: no opportunity to re-cluster existing bad clusters</p></li>
+</ul>
+</li>
+<li><p><strong>No child re-clustering = no child context</strong>: consequence of the above; children do not have their data fetched or normalized, which can cause context issues, so we did https://github.com/incubateur-ademe/quefairedemesobjets/pull/1379 in the meantime</p></li>
+</ul>
+</section>
+<section id="definition">
+<h2>📜 Definition<a class="headerlink" href="#definition" title="Lien vers cette rubrique">¶</a></h2>
+<ul class="simple">
+<li><p>📦 <strong>Clustering:</strong> the act of <strong>grouping</strong> actors by their <strong>similarity</strong></p></li>
+<li><p>1️⃣ <strong>Deduplication</strong>: turn a <strong>cluster</strong> into <strong>a single actor</strong> so there are <strong>no more duplicates</strong></p></li>
+<li><p>🎏 <strong>Ideal final state of an actor</strong>: we focus on actors with status=ACTIF (ACTIVE)</p></li>
+</ul>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>State 🇫🇷</p></th>
+<th class="head"><p>Code 🇬🇧</p></th>
+<th class="head"><p>Definition</p></th>
+<th class="head"><p>Corresponds to a specific source</p></th>
+<th class="head"><p>Visible on the map</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>parent(s)</p></td>
+<td><p>parent(s)</p></td>
+<td><p>actor that has 1 or more children attached to it</p></td>
+<td><p>🟠 NO<br>we create an « artificial » parent so it lives independently from its children = more robust over time, no need to change the parent whenever children change</p></td>
+<td><p>🟢 YES</p></td>
+</tr>
+<tr class="row-odd"><td><p>child/children</p></td>
+<td><p>child / children</p></td>
+<td><p>actor attached to 1 parent (1 is the maximum)</p></td>
+<td><p>🟢 YES<br>This is the source the actor comes from</p></td>
+<td><p>🟠 NO<br>The parent is displayed</p></td>
+</tr>
+<tr class="row-even"><td><p>orphan(s)</p></td>
+<td><p>orphan(s)</p></td>
+<td><p>actor attached to 0 parents</p></td>
+<td><p>🟢 YES<br>This is the source the actor comes from</p></td>
+<td><p>🟢 YES</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="state-transitions-scenarios">
+<h2>➡️ State transitions: scenarios<a class="headerlink" href="#state-transitions-scenarios" title="Lien vers cette rubrique">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>change model</p></th>
+<th class="head"><p>State before</p></th>
+<th class="head"><p>State after</p></th>
+<th class="head"><p>Scenario</p></th>
+<th class="head"><p>Impact in revision</p></th>
+<th class="head"><p>Impact in displayed</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">acteur_create_as_parent</span></code></p></td>
+<td><p>Orphan</p></td>
+<td><p>Parent</p></td>
+<td><p>➕ New parent for new cluster</p></td>
+<td><p>➕ Parent to create<br>➕ Data enriched as best as possible</p></td>
+<td><p>same as revision</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">acteur_keep_as_parent</span></code></p></td>
+<td><p>Parent</p></td>
+<td><p>Parent</p></td>
+<td><p>1️⃣ Single existing parent → keep</p></td>
+<td><p>🟰 Still parent of cluster<br>➕ Data enriched as best as possible</p></td>
+<td><p>same as revision</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">acteur_keep_as_parent</span></code></p></td>
+<td><p>Parent</p></td>
+<td><p>Parent</p></td>
+<td><p>🎖️ 2+ parents in cluster → the one with most children → keep</p></td>
+<td><p>🟰 Still parent of cluster<br>➕ Data enriched as best as possible</p></td>
+<td><p>same as revision</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">acteur_delete_as_parent</span></code></p></td>
+<td><p>Parent</p></td>
+<td><p>Will no longer exist</p></td>
+<td><p>🔴 2+ parents in cluster → not chosen → to delete</p></td>
+<td><p>🛑 Should be automatically deleted after these children are updated (see <a class="reference external" href="https://github.com/incubateur-ademe/quefairedemesobjets/pull/1247"><code class="docutils literal notranslate"><span class="pre">PR1247</span></code></a>)</p></td>
+<td><p>🛑 Should disappear from displayed</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">acteur_verify_in_revision</span></code></p></td>
+<td><p>Child</p></td>
+<td><p>Child</p></td>
+<td><p>🟰 Already points to new parent → nothing to do</p></td>
+<td><p>None</p></td>
+<td><p>None</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">acteur_update_parent_id</span></code></p></td>
+<td><p>Child</p></td>
+<td><p>Child</p></td>
+<td><p>🔀 Pointed to a parent that was not chosen → point to new parent</p></td>
+<td><p>🔀 Update parent_id to point to new parent</p></td>
+<td><p>None</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">acteur_update_parent_id</span></code></p></td>
+<td><p>Orphan</p></td>
+<td><p>Child</p></td>
+<td><p>🔀 to point to a parent</p></td>
+<td><p>🔀 Update parent_id to point to new parent</p></td>
+<td><p>🛑 Should disappear from displayed</p></td>
+</tr>
+<tr class="row-odd"><td><p><em>(none)</em></p></td>
+<td><p>Orphan</p></td>
+<td><p>Orphan</p></td>
+<td><p>Still not part of any cluster (no change)</p></td>
+<td><p>None</p></td>
+<td><p>None</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="algorithm">
+<h2>🧪 Algorithm<a class="headerlink" href="#algorithm" title="Lien vers cette rubrique">¶</a></h2>
+<section id="past-attempts">
+<h3>🗓️ Past attempts<a class="headerlink" href="#past-attempts" title="Lien vers cette rubrique">¶</a></h3>
+<ul class="simple">
+<li><p><strong>Consideration of https://github.com/dedupeio/dedupe</strong>: but seeing that the <a class="reference external" href="https://github.com/search?q=repo%3Adedupeio%2Fdedupe+comparator&amp;amp;type=code">comparator</a> evaluates 2 values at a time = <strong>O(n²) complexity</strong> at runtime, and with our volumes (~500K actors) = concern about going with a non-vectorized approach. We see <a class="reference external" href="https://github.com/dedupeio/dedupe/issues/940">user feedback in that direction</a> (matching time exploding when going from a 1K to 5K sample).</p></li>
+<li><p><strong>Vectorized attempt</strong>: tried basic vectorization (e.g. TF-IDF to naturally deprioritize noise/redundancy) but without compute infra (e.g. state startup = frugal) the idea was abandoned (risk of building models we could not operate via Airflow).</p></li>
+</ul>
+</section>
+<section id="current">
+<h3>👉🏻 Current<a class="headerlink" href="#current" title="Lien vers cette rubrique">¶</a></h3>
+<ul class="simple">
+<li><p><strong>Very primitive</strong>: with normalization and TF-IDF but running at too small a scale to be really relevant. Lacks fuzzy tolerance.</p></li>
+</ul>
+</section>
+<section id="improvements">
+<h3>💡 Improvements<a class="headerlink" href="#improvements" title="Lien vers cette rubrique">¶</a></h3>
+<ul class="simple">
+<li><p><strong>Continue upstream normalization</strong>: because it benefits not only clustering but also data quality on the map:</p>
+<ul>
+<li><p><strong>old → new city conversion</strong>: thanks to <a class="reference external" href="https://github.com/incubateur-ademe/quefairedemesobjets/pull/1451">BAN</a></p></li>
+<li><p><strong>address normalization</strong>: still with BAN</p></li>
+<li><p><strong>name enrichment</strong> at matching time for more embeddings via <a class="reference external" href="https://github.com/incubateur-ademe/quefairedemesobjets/pulls?q=Annuaire+entreprise">AE</a></p></li>
+</ul>
+</li>
+<li><p><strong>Extend vectorized scope</strong>: e.g. at department level, to offer a relevance vs. model size trade-off</p></li>
+<li><p><strong>Reconsider https://github.com/dedupeio/dedupe</strong>: again on subsets (e.g. city) to benefit from the library (which offers useful things like distances) without suffering too much from O(n²)</p></li>
+<li><p><strong>Embeddings</strong>: due to very diverse representations (e.g. waste collection centre vs. waste disposal sites)</p></li>
+<li><p><strong>Conversion mappings</strong> for limited/known cases (e.g. street name abbreviations, e.g. ESP → ESPLANADE)</p></li>
+<li><p><strong>Phonetic algorithms</strong> for typos</p></li>
+<li><p><strong>Language models</strong>: potentially compact models (SLMs) that would outperform the above by asking the simple question (« please cluster these samples »)</p></li>
+</ul>
+</section>
+</section>
+<section id="performance">
+<h2>🚤 Performance<a class="headerlink" href="#performance" title="Lien vers cette rubrique">¶</a></h2>
+<section id="id1">
+<h3>👉🏻 Current<a class="headerlink" href="#id1" title="Lien vers cette rubrique">¶</a></h3>
+<ul class="simple">
+<li><p><strong>Poor but sufficient for the business</strong>: runs the algorithm on Airflow and does something else while waiting</p></li>
+<li><p><strong>Main reason</strong>: loops and successive round-trips to choose parents and their data</p></li>
+<li><p><strong>Example</strong>: clustering 150K actors took ~6 hours</p></li>
+</ul>
+</section>
+<section id="id2">
+<h3>💡 Improvements<a class="headerlink" href="#id2" title="Lien vers cette rubrique">¶</a></h3>
+<ul class="simple">
+<li><p><strong>Rewrite tasks</strong> to use DBT models that prepare the data = eliminate loops / DB round-trips via Python.</p></li>
+</ul>
+</section>
+</section>
+<section id="schema">
+<h2>🔀 Schema<a class="headerlink" href="#schema" title="Lien vers cette rubrique">¶</a></h2>
+<pre  class="mermaid">
+        graph TD
+   subgraph selection[&quot;🔎 &lt;b&gt;selection&lt;/b&gt;: statut=ACTIF&quot;]
+      direction LR
+      parents
+      orphans
+      children
+   end
+
+   subgraph normalization[&quot;🧹 &lt;b&gt;normalization&lt;/b&gt;&quot;]
+       norma[&quot;lower case, no accents etc...&quot;]
+   end
+
+   subgraph clustering[&quot;📦 &lt;b&gt;clustering&lt;/b&gt;&quot;]
+        similar[&quot;exact + fuzzy similarity&quot;]
+   end
+
+   subgraph dedup[&quot;1️⃣ &lt;b&gt;deduplication&lt;/b&gt;&quot;]
+        parents_choose[&quot;🥇 Choose new parents&quot;]
+        parents_data[&quot;🗄️ Choose parents' data (from non-normalized data)&quot;]
+        parents_choose--&gt;parents_data
+        parents_data--&gt;children_feed[&quot;⬅️ Add existing children&quot;]
+        children_feed--&gt;changes_mark[&quot;📋 Define changes&quot;]
+   end
+
+   subgraph suggestions[&quot; &lt;b&gt;suggestions&lt;/b&gt;&quot;]
+      propose
+    end
+
+   parents--&gt;|displayed| normalization
+   orphans--&gt;|displayed| normalization
+   normalization --&gt; clustering
+   children--&gt;|revision| children_feed
+   clustering--&gt;dedup
+   changes_mark--&gt;suggestions
+    </pre></section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="../webapp/README.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Webapp</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="dbt.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">DBT</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2024, Fabien Le Frapper (@fabienheureux), Nicolas Oudard, Max Corbeau
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Clustering &amp; Deduplication</a><ul>
+<li><a class="reference internal" href="#known-limitations">⚠️ Known limitations</a></li>
+<li><a class="reference internal" href="#definition">📜 Definition</a></li>
+<li><a class="reference internal" href="#state-transitions-scenarios">➡️ State transitions: scenarios</a></li>
+<li><a class="reference internal" href="#algorithm">🧪 Algorithm</a><ul>
+<li><a class="reference internal" href="#past-attempts">🗓️ Past attempts</a></li>
+<li><a class="reference internal" href="#current">👉🏻 Current</a></li>
+<li><a class="reference internal" href="#improvements">💡 Improvements</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#performance">🚤 Performance</a><ul>
+<li><a class="reference internal" href="#id1">👉🏻 Current</a></li>
+<li><a class="reference internal" href="#id2">💡 Improvements</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#schema">🔀 Schema</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../../_static/documentation_options.js?v=d1a510d7"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../../_static/translations.js?v=e6b791cb"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+    <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
+
+
+
+
+
+const initStyles = () => {
+    const defaultStyle = document.createElement('style');
+    defaultStyle.textContent = `pre.mermaid {
+    /* Same as .mermaid-container > pre */
+    display: block;
+    width: 100%;
+}
+
+pre.mermaid > svg {
+    /* Same as .mermaid-container > pre > svg */
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}`;
+    document.head.appendChild(defaultStyle);
+
+    const fullscreenStyle = document.createElement('style');
+    fullscreenStyle.textContent = `.mermaid-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+.mermaid-container > pre {
+    display: block;
+    width: 100%;
+}
+
+.mermaid-container > pre > svg {
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}
+
+.mermaid-fullscreen-btn {
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    color: #333;
+}
+
+.mermaid-fullscreen-btn:hover {
+    opacity: 100% !important;
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-btn.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-btn.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal {
+    display: none;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 95vw;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.98);
+    z-index: 9999;
+    padding: 20px;
+    overflow: auto;
+}
+
+.mermaid-fullscreen-modal.dark-theme {
+    background: rgba(0, 0, 0, 0.98);
+}
+
+.mermaid-fullscreen-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen {
+    position: relative;
+    width: 95vw;
+    height: 90vh;
+    max-width: 95vw;
+    max-height: 90vh;
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen.dark-theme {
+    background: #1a1a1a;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+}
+
+.mermaid-container-fullscreen pre.mermaid {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen .mermaid svg {
+    height: 100% !important;
+    width: 100% !important;
+    cursor: grab;
+}
+
+.mermaid-fullscreen-close {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s;
+    font-size: 24px;
+    line-height: 1;
+    color: #333;
+}
+
+.mermaid-fullscreen-close:hover {
+    background: white;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-close.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-close.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal .mermaid-fullscreen-btn {
+    display: none !important;
+}`;
+    document.head.appendChild(fullscreenStyle);
+}
+
+// Detect if page has dark background
+const isDarkTheme = () => {
+    // We use a set of heuristics:
+    // 1. Check for common dark mode classes or attributes
+    // 2. Check computed background color brightness
+    if (document.documentElement.classList.contains('dark') ||
+        document.documentElement.getAttribute('data-theme') === 'dark' ||
+        document.body.classList.contains('dark') ||
+        document.body.getAttribute('data-theme') === 'dark') {
+        // console.log("Dark theme detected via class/attribute");
+        return true;
+    }
+    if (document.documentElement.classList.contains('light') ||
+        document.documentElement.getAttribute('data-theme') === 'light' ||
+        document.body.classList.contains('light') ||
+        document.body.getAttribute('data-theme') === 'light') {
+        // console.log("Light theme detected via class/attribute");
+        return false;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // console.log("Dark theme detected via prefers-color-scheme");
+        return true;
+    }
+    const bgColor = window.getComputedStyle(document.body).backgroundColor;
+    const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        // console.log("Background color brightness:", brightness);
+        return brightness < 128;
+    }
+    // console.log("No dark or light theme detected, defaulting to light theme");
+    return false;
+};
+
+let darkTheme = isDarkTheme();
+let modal = null;
+let modalContent = null;
+let previousScrollOffset = [window.scrollX, window.scrollY];
+
+const runMermaid = async (rerun) => {
+    console.log("Running mermaid diagrams, rerun =", rerun);
+    // clear all existing mermaid charts
+    let all_mermaids = document.querySelectorAll(".mermaid");
+
+    if (rerun) {
+        all_mermaids.forEach((el) => {
+            if(!el.hasAttribute("data-original-code")) {
+                // store original code
+                // console.log(`Storing original code for first run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+            if(el.getAttribute("data-processed") === "true") {
+                // remove and restore original
+                el.removeAttribute("data-processed");
+                // console.log(`Restoring original code for re-run: `, el.getAttribute('data-original-code'));
+                el.innerHTML = el.getAttribute('data-original-code');
+            } else {
+                // store original code
+                // console.log(`Storing original code for re-run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+        });
+        await mermaid.run();
+    }
+
+    all_mermaids = document.querySelectorAll(".mermaid");
+    const mermaids_processed = document.querySelectorAll(".mermaid[data-processed='true']");
+
+    if ("False" === "True") {
+        const mermaids_to_add_zoom = -1 === -1 ? all_mermaids.length : -1;
+        if(mermaids_to_add_zoom > 0) {
+            var svgs = d3.selectAll("");
+            if(all_mermaids.length !== mermaids_processed.length) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            } else if(svgs.size() !== mermaids_to_add_zoom) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            } else {
+                svgs.each(function() {
+                    var svg = d3.select(this);
+                    svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+                    var inner = svg.select("g");
+                    var zoom = d3.zoom().on("zoom", function(event) {
+                        inner.attr("transform", event.transform);
+                    });
+                    svg.call(zoom);
+                });
+            }
+        }
+    } else if(all_mermaids.length !== mermaids_processed.length) {
+        // Wait for mermaid to process all diagrams
+        setTimeout(() => runMermaid(false), 200);
+        return;
+    }
+
+    // Stop here if not adding fullscreen capability
+    if ("True" !== "True") return;
+
+    if (modal !== null ) {
+        // Destroy existing modal
+        modal.remove();
+        modal = null;
+        modalContent = null;
+    }
+
+    modal = document.createElement('div');
+    modal.className = 'mermaid-fullscreen-modal' + (darkTheme ? ' dark-theme' : '');
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Fullscreen diagram viewer');
+    modal.innerHTML = `
+        <button class="mermaid-fullscreen-close${darkTheme ? ' dark-theme' : ''}" aria-label="Close fullscreen">✕</button>
+        <div class="mermaid-container-fullscreen${darkTheme ? ' dark-theme' : ''}"></div>
+    `;
+    document.body.appendChild(modal);
+
+    modalContent = modal.querySelector('.mermaid-container-fullscreen');
+    const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
+
+    const closeModal = () => {
+        modal.classList.remove('active');
+        modalContent.innerHTML = '';
+        document.body.style.overflow = ''
+        window.scrollTo({left: previousScrollOffset[0], top: previousScrollOffset[1], behavior: 'instant'});
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeModal();
+        }
+    });
+
+    document.querySelectorAll('.mermaid').forEach((mermaidDiv) => {
+        if (mermaidDiv.parentNode.classList.contains('mermaid-container') ||
+            mermaidDiv.closest('.mermaid-fullscreen-modal')) {
+            // Already processed, adjust button class if needed
+            const existingBtn = mermaidDiv.parentNode.querySelector('.mermaid-fullscreen-btn');
+            if (existingBtn) {
+                existingBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+            }
+            return;
+        }
+
+        const container = document.createElement('div');
+        container.className = 'mermaid-container';
+        mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+        container.appendChild(mermaidDiv);
+
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+        fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
+        fullscreenBtn.textContent = '⛶';
+        fullscreenBtn.style.opacity = '50%';
+
+        // Calculate dynamic position based on diagram's margin and padding
+        const diagramStyle = window.getComputedStyle(mermaidDiv);
+        const marginTop = parseFloat(diagramStyle.marginTop) || 0;
+        const marginRight = parseFloat(diagramStyle.marginRight) || 0;
+        const paddingTop = parseFloat(diagramStyle.paddingTop) || 0;
+        const paddingRight = parseFloat(diagramStyle.paddingRight) || 0;
+        fullscreenBtn.style.top = `${marginTop + paddingTop + 4}px`;
+        fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
+
+        fullscreenBtn.addEventListener('click', () => {
+            previousScrollOffset = [window.scroll, window.scrollY];
+            const clone = mermaidDiv.cloneNode(true);
+            modalContent.innerHTML = '';
+            modalContent.appendChild(clone);
+
+            const svg = clone.querySelector('svg');
+            if (svg) {
+                svg.removeAttribute('width');
+                svg.removeAttribute('height');
+                svg.style.width = '100%';
+                svg.style.height = 'auto';
+                svg.style.maxWidth = '100%';
+                svg.style.sdisplay = 'block';
+
+                if ("False" === "True") {
+                    setTimeout(() => {
+                        const g = svg.querySelector('g');
+                        if (g) {
+                            var svgD3 = d3.select(svg);
+                            svgD3.html("<g class='wrapper'>" + svgD3.html() + "</g>");
+                            var inner = svgD3.select("g");
+                            var zoom = d3.zoom().on("zoom", function(event) {
+                                inner.attr("transform", event.transform);
+                            });
+                            svgD3.call(zoom);
+                        }
+                    }, 100);
+                }
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+        container.appendChild(fullscreenBtn);
+    });
+};
+
+const load = async () => {
+    initStyles();
+
+    await runMermaid(true);
+
+    const reRunIfThemeChanges = async () => {
+        const newDarkTheme = isDarkTheme();
+        if (newDarkTheme !== darkTheme) {
+            darkTheme = newDarkTheme;
+            console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
+            await mermaid.initialize(
+                {...JSON.parse(
+                    `{"startOnLoad": false}`
+                ),
+                ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+                }
+            );
+            await runMermaid(true);
+        }
+    };
+
+    // Update theme classes when theme changes
+    const themeObserver = new MutationObserver(reRunIfThemeChanges);
+    themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+    themeObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+};
+
+
+
+
+
+console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
+mermaid.initialize(
+    {...JSON.parse(
+        `{"startOnLoad": false}`
+    ),
+    ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+    }
+);
+
+window.addEventListener("load", load);</script>
+    </body>
+</html>

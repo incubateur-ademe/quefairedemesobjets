@@ -3,10 +3,10 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Recherche" href="../../search.html"><link rel="next" title="Prérequis concernant les bases de données" href="prerequis.html"><link rel="prev" title="Provisionner l’infrastructure" href="../infrastructure/provisioning.html">
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Recherche" href="../../search.html"><link rel="next" title="Database organisation" href="db_organisation.html"><link rel="prev" title="Monitoring" href="../infrastructure/monitoring.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>Bases de données - Documentation Longue Vie Aux Objets</title>
+        <title>Postgresql Database - Documentation Longue Vie Aux Objets</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
@@ -172,7 +172,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
@@ -191,113 +191,96 @@
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <ul class="current">
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../comment-faire/README.html">🤔 COMMENT FAIRE</a><input aria-label="Toggle navigation of 🤔 COMMENT FAIRE" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../comment-faire/development/README.html">👩‍💻 Espace développeur•euse</a><input aria-label="Toggle navigation of 👩‍💻 Espace développeur•euse" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../comment-faire/development/installation.html">Installation de l’application en local</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../comment-faire/development/useful_command.html">Commandes Django utiles</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../comment-faire/development/dependencies.html">Gestion de package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../comment-faire/development/fixture_generation.html">Utiliser les fixtures</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../comment-faire/development/create_webapp_sample_db.html">Création de la base de données webapp_sample pour les tests</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../comment-faire/development/tests_e2e.html">Tests de Régression E2E</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../comment-faire/development/test_iframe_referrer.html">Tester le referrer d’une iframe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started/README.html">Getting started</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../how-to/README.html">🤔 COMMENT FAIRE</a><input aria-label="Toggle navigation of 🤔 COMMENT FAIRE" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../how-to/development/README.html">👩‍💻 Espace développeur•euse</a><input aria-label="Toggle navigation of 👩‍💻 Espace développeur•euse" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/development/installation.html">Installation de l’application en local</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/development/useful_command.html">Commandes Django utiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/development/dependencies.html">Gestion de package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/development/fixture_generation.html">Utiliser les fixtures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/development/create_webapp_sample_db.html">Création de la base de données webapp_sample pour les tests</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/development/tests_e2e.html">Tests de Régression E2E</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/development/test_iframe_referrer.html">Tester le referrer d’une iframe</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../comment-faire/deployment/README.html">🛹 Déploiement de la plateforme</a><input aria-label="Toggle navigation of 🛹 Déploiement de la plateforme" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../comment-faire/deployment/deployment.html">DevOps, déploiement, opérations</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../how-to/deployment/README.html">🛹 Déploiement de la plateforme</a><input aria-label="Toggle navigation of 🛹 Déploiement de la plateforme" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/deployment/deployment.html">DevOps, déploiement, opérations</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../comment-faire/administration/README.html">Administration de la plateforme</a><input aria-label="Toggle navigation of Administration de la plateforme" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../comment-faire/administration/update-ext-id.html">Mettre à jour les identifiants externe</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../comment-faire/administration/admin_command.html">Commandes Django d’administration</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../how-to/administration/README.html">Administration de la plateforme</a><input aria-label="Toggle navigation of Administration de la plateforme" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/administration/update-ext-id.html">Mettre à jour les identifiants externe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/administration/admin_command.html">Commandes Django d’administration</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../comment-faire/infrastructure/README.html">🏢 Gestion de l’infrastructure</a><input aria-label="Toggle navigation of 🏢 Gestion de l’infrastructure" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../comment-faire/infrastructure/create_db.html">Créaton d’un base de données sur Scaleway</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../comment-faire/infrastructure/monitoring.html">Monitoring sur Scaleway</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../how-to/infrastructure/README.html">🏢 Gestion de l’infrastructure</a><input aria-label="Toggle navigation of 🏢 Gestion de l’infrastructure" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/infrastructure/create_db.html">Créaton d’un base de données sur Scaleway</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/infrastructure/monitoring.html">Monitoring sur Scaleway</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../../comment-faire/troubleshooting.html">☎️ 3615 jaidesproblemes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../how-to/troubleshooting.html">☎️ 3615 jaidesproblemes</a></li>
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../explications/README.html">❓ EXPLICATIONS</a><input aria-label="Toggle navigation of ❓ EXPLICATIONS" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../explications/data/README.html">📊 Plateforme de données</a><input aria-label="Toggle navigation of 📊 Plateforme de données" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../explications/data/ingestion-de-source.html">Ingestion des sources</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../explications/data/flux-dbt.html">Description des flux DBT</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../explications/data/flux-enrich.html">Enrichissement de données</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../explanations/README.html">❓ EXPLICATIONS</a><input aria-label="Toggle navigation of ❓ EXPLICATIONS" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../explanations/data/README.html">📊 Plateforme de données</a><input aria-label="Toggle navigation of 📊 Plateforme de données" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../explanations/data/ingestion-de-source.html">Ingestion des sources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../explanations/data/flux-dbt.html">Description des flux DBT</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../explanations/data/flux-enrich.html">Enrichissement de données</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../explications/db/README.html">Bases de données</a><input aria-label="Toggle navigation of Bases de données" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../explications/db/prestation-delivery.html">Lieu de prestation</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../explanations/db/README.html">Bases de données</a><input aria-label="Toggle navigation of Bases de données" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../explanations/db/prestation-delivery.html">Lieu de prestation</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../explications/frontend/README.html">🎨 Frontend</a><input aria-label="Toggle navigation of 🎨 Frontend" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../explications/frontend/routing-nginx-cache.html">🚏 Routing, nginx et cache</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../explications/frontend/routing-nginx-cache.html#nginx">nginx</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../explications/frontend/routing-nginx-cache.html#whitenoise">Whitenoise</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../explications/frontend/routing-nginx-cache.html#middlewares">Middlewares</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../explications/frontend/historique.html">Historique</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../explanations/frontend/README.html">🎨 Frontend</a><input aria-label="Toggle navigation of 🎨 Frontend" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../explanations/frontend/routing-nginx-cache.html">🚏 Routing, nginx et cache</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../explanations/frontend/routing-nginx-cache.html#nginx">nginx</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../explanations/frontend/routing-nginx-cache.html#whitenoise">Whitenoise</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../explanations/frontend/routing-nginx-cache.html#middlewares">Middlewares</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../explanations/frontend/historique.html">Historique</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../../explications/iframe/README.html">Afficher l’application dans une Iframe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../explanations/iframe/README.html">Afficher l’application dans une Iframe</a></li>
 </ul>
 </li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="../README.html">🧐 REFERENCE</a><input aria-label="Toggle navigation of 🧐 REFERENCE" checked="" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
-<li class="toctree-l2 has-children"><a class="reference internal" href="../documentation/README.html">Documentation</a><input aria-label="Toggle navigation of Documentation" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../documentation/documentation-technique.html">Guide de la documentation technique</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../documentation/security.html">Sécurité</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../coding/README.html">Code Guidelines</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../infrastructure/README.html">Infrastructure, monitoring, CI/CD</a><input aria-label="Toggle navigation of Infrastructure, monitoring, CI/CD" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../infrastructure/provisioning.html">Provisioning the infrastructure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../infrastructure/ci-cd.html">CI/CD Documentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../infrastructure/monitoring.html">Monitoring</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../coding/README.html">Règles de codage</a><input aria-label="Toggle navigation of Règles de codage" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../coding/coding-guidelines.html">Règles de codage python et typescript</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../coding/francais-vs-anglais.html">Utilisation des langues françaises et anglaises</a></li>
+<li class="toctree-l2 current has-children current-page"><a class="current reference internal" href="#">Postgresql Database</a><input aria-label="Toggle navigation of Postgresql Database" checked="" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="db_organisation.html">Database organisation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="architecture.html">«La Carte» database architecture</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../infrastructure/README.html">Infrastructure</a><input aria-label="Toggle navigation of Infrastructure" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../infrastructure/ci-cd.html">Documentation CI/CD</a></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../infrastructure/scaleway.html">Infrastructure Scaleway</a><input aria-label="Toggle navigation of Infrastructure Scaleway" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../infrastructure/provisioning.html">Provisionner l’infrastructure</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../data-platform/README.html">Data Platform</a><input aria-label="Toggle navigation of Data Platform" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../data-platform/airflow.html">Airflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../data-platform/dbt.html">DBT</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../data-platform/clustering-deduplication.html">Clustering &amp; Deduplication</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../infrastructure/provisioning.html">Provisionner l’infrastructure</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../webapp/README.html">Webapp</a><input aria-label="Toggle navigation of Webapp" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../webapp/templates.html">Templates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../webapp/look-and-feel.html">Look and feel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../webapp/javascript.html">Javascript</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../webapp/django.html">Django</a></li>
 </ul>
 </li>
-<li class="toctree-l2 current has-children current-page"><a class="current reference internal" href="#">Bases de données</a><input aria-label="Toggle navigation of Bases de données" checked="" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="prerequis.html">Prérequis concernant les bases de données</a></li>
-<li class="toctree-l3"><a class="reference internal" href="db_organisation.html">Organisation des bases de données</a></li>
-<li class="toctree-l3"><a class="reference internal" href="architecture.html">Architecture de la base de données de La Carte</a></li>
-<li class="toctree-l3"><a class="reference internal" href="contraintes.html">Utilisation des contraintes SQL</a></li>
-<li class="toctree-l3"><a class="reference internal" href="valeurs-defaut.html">Gestion de valeurs par défaut dans la base de données</a></li>
-</ul>
-</li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../data/README.html">Gestion des données</a><input aria-label="Toggle navigation of Gestion des données" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../data/organisation-des-fichiers.html">Architecture des fichiers de code de la partie data</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../data/systeme-de-suggestions.html">Système de suggestion</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../data/gestion-des-identifiants.html">Gestion des identifiants</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../data/clustering-deduplication.html">Clustering &amp; Déduplication</a></li>
-</ul>
-</li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../frontend/README.html">Frontend</a><input aria-label="Toggle navigation of Frontend" class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../frontend/parcel.html">Parcel</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../frontend/templates.html">Templates</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../frontend/tailwind.html">Tailwind</a></li>
-</ul>
-</li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../iframe/README.html">IFrame</a><input aria-label="Toggle navigation of IFrame" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../iframe/iframe.html">Iframe</a></li>
-</ul>
-</li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../opendata/README.html">Open Data</a><input aria-label="Toggle navigation of Open Data" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../opendata/README.html">Open Data</a><input aria-label="Toggle navigation of Open Data" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../opendata/changelog.html">Changelog du jeu de données Open Data : « Acteurs de l’économie circulaire - Longue Vie Aux Objets »</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../opendata/exposure-opendata-acteur.html">Jeu de données open data : acteurs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../opendata/politique-de-version-du-jeu-de-donnees-open-data.html">Politique de version du jeu de données Open Data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../opendata/politique-de-version-du-jeu-de-donnees-open-data-interne.html">Organisation interne de la gestion des versions du jeu de données Open Data</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../apis/README.html">APIs</a><input aria-label="Toggle navigation of APIs" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../apis/qfdmo.html">API Que faire de mes objets</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../apis/stats.html">API Statistiques publiques</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../apis/README.html">API Guidelines</a><input aria-label="Toggle navigation of API Guidelines" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../apis/qfdmo.html">«Que faire de mes objets et déchets» API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apis/stats.html">Public statistics API</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../security/README.html">Security</a></li>
 </ul>
 </li>
 </ul>
@@ -333,44 +316,81 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="bases-de-donnees">
-<h1>Bases de données<a class="headerlink" href="#bases-de-donnees" title="Lien vers cette rubrique">¶</a></h1>
-<p>Cette section référence l’organnisation de la donnée : schema, interaction…</p>
+          <section id="postgresql-database">
+<h1>Postgresql Database<a class="headerlink" href="#postgresql-database" title="Lien vers cette rubrique">¶</a></h1>
+<p>This project uses <strong>PostgreSQL</strong> as the main database engine for both the web application and the data platform.</p>
+<section id="versions">
+<h2>Versions<a class="headerlink" href="#versions" title="Lien vers cette rubrique">¶</a></h2>
+<p>We try to stay up to date with the latest <strong>major versions</strong> of PostgreSQL, without breaking compatibility with our frameworks and libraries.</p>
+</section>
+<section id="databases">
+<h2>Databases<a class="headerlink" href="#databases" title="Lien vers cette rubrique">¶</a></h2>
+<p>We currently use <strong>multiple PostgreSQL databases</strong></p>
+<p>For more details, read <a class="reference internal" href="db_organisation.html"><span class="std std-doc">db_organisation.md</span></a></p>
+</section>
+<section id="postgresql-extensions">
+<h2>PostgreSQL extensions<a class="headerlink" href="#postgresql-extensions" title="Lien vers cette rubrique">¶</a></h2>
+<p>We rely on several <strong>PostgreSQL extensions</strong>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">postgis</span></code>: spatial / GIS support for geographic data (used for locations, maps, distance computations, etc.).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pg_stat_statements</span></code>: query statistics to monitor and optimize SQL performance.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">unaccent</span></code>: accent-insensitive text search and comparisons.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pg_trgm</span></code>: trigram-based text similarity and fuzzy search (for example for suggestions and search-as-you-type).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">uuid-ossp</span></code>: generation of UUID identifiers in PostgreSQL.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">postgres_fdw</span></code>: foreign data wrapper to read data from other PostgreSQL servers or databases.</p></li>
+</ul>
+<p>These extensions are (re)created automatically by a SQL script when restoring the database, because dropping/restoring the <code class="docutils literal notranslate"><span class="pre">public</span></code> schema does <strong>not</strong> recreate the extensions: <a class="reference download internal" download="" href="../../_downloads/142aa9b9f39d5f22afba640e3a2ddc4e/create_extensions.sql"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">scripts/sql/create_extensions.sql</span></code></span></a>.</p>
+<p>If you add new features that depend on PostgreSQL extensions, update both:</p>
+<ul class="simple">
+<li><p>this documentation file, to explain what the extension is used for, and</p></li>
+<li><p>the <code class="docutils literal notranslate"><span class="pre">create_extensions.sql</span></code> script, to ensure the extension is installed in new environments and during restores.</p></li>
+</ul>
+</section>
+<section id="handling-default-values-in-the-database">
+<h2>Handling default values in the database<a class="headerlink" href="#handling-default-values-in-the-database" title="Lien vers cette rubrique">¶</a></h2>
+<section id="string-fields">
+<h3>String fields<a class="headerlink" href="#string-fields" title="Lien vers cette rubrique">¶</a></h3>
+<p>For fields of type string that must not be nullable, the default value is an empty string, as indicated in the Django documentation: <a class="reference external" href="https://docs.djangoproject.com/en/5.1/ref/models/fields/#field-options">https://docs.djangoproject.com/en/5.1/ref/models/fields/#field-options</a></p>
+</section>
+<section id="boolean-fields">
+<h3>Boolean fields<a class="headerlink" href="#boolean-fields" title="Lien vers cette rubrique">¶</a></h3>
+<p>Boolean fields can have a null value, which means that the information is unknown.</p>
+<p>Example: <code class="docutils literal notranslate"><span class="pre">uniquement_sur_rdv</span></code>: <code class="docutils literal notranslate"><span class="pre">True</span></code> / <code class="docutils literal notranslate"><span class="pre">False</span></code> / <code class="docutils literal notranslate"><span class="pre">None</span></code> → Yes / No / We do not have this information</p>
+</section>
+</section>
+<section id="using-sql-constraints">
+<h2>Using SQL constraints<a class="headerlink" href="#using-sql-constraints" title="Lien vers cette rubrique">¶</a></h2>
+<p>We use SQL constraints to enforce data quality criteria. These constraints must be implemented via Django models (the <a class="reference external" href="https://docs.djangoproject.com/en/5.1/ref/models/options/#django.db.models.Options.constraints"><code class="docutils literal notranslate"><span class="pre">Meta.constraints</span></code> option</a>). See the <a class="reference external" href="https://github.com/incubateur-ademe/quefairedemesobjets/pull/1227">initial proposal</a>.</p>
+<section id="conditional-constraints">
+<h3>Conditional constraints<a class="headerlink" href="#conditional-constraints" title="Lien vers cette rubrique">¶</a></h3>
+<p>We also use conditional constraints, for example, the uniqueness of the (<code class="docutils literal notranslate"><span class="pre">source_id</span></code>, <code class="docutils literal notranslate"><span class="pre">external_identifier</span></code>) pair for <code class="docutils literal notranslate"><span class="pre">active</span></code> actors only.</p>
+</section>
+</section>
+<section id="architecture">
+<h2>Architecture<a class="headerlink" href="#architecture" title="Lien vers cette rubrique">¶</a></h2>
+<p>More about architecture of data in <code class="docutils literal notranslate"><span class="pre">webapp</span></code> database</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="prerequis.html">Prérequis concernant les bases de données</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="prerequis.html#versions">Versions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="prerequis.html#base-de-donnees">Base de données</a></li>
-<li class="toctree-l2"><a class="reference internal" href="prerequis.html#extensions">Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="db_organisation.html">Database organisation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="db_organisation.html#using-two-databases-instance">Using two databases instance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db_organisation.html#links-between-databases">Links between databases</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db_organisation.html#webapp-sample-database"><code class="docutils literal notranslate"><span class="pre">webapp_sample</span></code> database</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="db_organisation.html">Organisation des bases de données</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="db_organisation.html#utilisation-de-deux-bases-de-donnees">Utilisation de deux bases de données</a></li>
-<li class="toctree-l2"><a class="reference internal" href="db_organisation.html#lien-entre-bases-de-donnees">Lien entre bases de données</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture de la base de données de La Carte</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="architecture.html#modele-de-donnees">Modèle de données</a></li>
-<li class="toctree-l2"><a class="reference internal" href="architecture.html#schema-simplifie-de-base-de-donnees">Schema simplifié de base de données</a></li>
-<li class="toctree-l2"><a class="reference internal" href="architecture.html#architecture-des-acteurs-et-de-leurs-propositions-de-service">Architecture des Acteurs et de leurs propositions de service</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="contraintes.html">Utilisation des contraintes SQL</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="contraintes.html#contraintes-conditionnelles">Contraintes conditionnelles</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="valeurs-defaut.html">Gestion de valeurs par défaut dans la base de données</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="valeurs-defaut.html#chaines-de-caracteres">Chaînes de caractères</a></li>
-<li class="toctree-l2"><a class="reference internal" href="valeurs-defaut.html#booleen">Booleen</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">«La Carte» database architecture</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#data-model">Data model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#simplified-database-schema">Simplified database schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#architecture-of-actors-and-their-service-propositions">Architecture of Actors and their service propositions</a></li>
 </ul>
 </li>
 </ul>
 </div>
+</section>
 </section>
 
         </article>
@@ -378,23 +398,23 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="prerequis.html">
+          <a class="next-page" href="db_organisation.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Prérequis concernant les bases de données</div>
+                <div class="title">Database organisation</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="../infrastructure/provisioning.html">
+          <a class="prev-page" href="../infrastructure/monitoring.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Provisionner l’infrastructure</div>
+                <div class="title">Monitoring</div>
                 
               </div>
             </a>
@@ -416,8 +436,39 @@
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Postgresql Database</a><ul>
+<li><a class="reference internal" href="#versions">Versions</a></li>
+<li><a class="reference internal" href="#databases">Databases</a></li>
+<li><a class="reference internal" href="#postgresql-extensions">PostgreSQL extensions</a></li>
+<li><a class="reference internal" href="#handling-default-values-in-the-database">Handling default values in the database</a><ul>
+<li><a class="reference internal" href="#string-fields">String fields</a></li>
+<li><a class="reference internal" href="#boolean-fields">Boolean fields</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#using-sql-constraints">Using SQL constraints</a><ul>
+<li><a class="reference internal" href="#conditional-constraints">Conditional constraints</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#architecture">Architecture</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>

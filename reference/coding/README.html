@@ -3,10 +3,10 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Recherche" href="../../search.html"><link rel="next" title="Règles de codage python et typescript" href="coding-guidelines.html"><link rel="prev" title="Sécurité" href="../documentation/security.html">
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Recherche" href="../../search.html"><link rel="next" title="Infrastructure, monitoring, CI/CD" href="../infrastructure/README.html"><link rel="prev" title="🧐 REFERENCE" href="../README.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>Règles de codage - Documentation Longue Vie Aux Objets</title>
+        <title>Code Guidelines - Documentation Longue Vie Aux Objets</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
@@ -172,7 +172,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
@@ -191,113 +191,96 @@
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <ul class="current">
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../comment-faire/README.html">🤔 COMMENT FAIRE</a><input aria-label="Toggle navigation of 🤔 COMMENT FAIRE" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../comment-faire/development/README.html">👩‍💻 Espace développeur•euse</a><input aria-label="Toggle navigation of 👩‍💻 Espace développeur•euse" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../comment-faire/development/installation.html">Installation de l’application en local</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../comment-faire/development/useful_command.html">Commandes Django utiles</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../comment-faire/development/dependencies.html">Gestion de package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../comment-faire/development/fixture_generation.html">Utiliser les fixtures</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../comment-faire/development/create_webapp_sample_db.html">Création de la base de données webapp_sample pour les tests</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../comment-faire/development/tests_e2e.html">Tests de Régression E2E</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../comment-faire/development/test_iframe_referrer.html">Tester le referrer d’une iframe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started/README.html">Getting started</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../how-to/README.html">🤔 COMMENT FAIRE</a><input aria-label="Toggle navigation of 🤔 COMMENT FAIRE" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../how-to/development/README.html">👩‍💻 Espace développeur•euse</a><input aria-label="Toggle navigation of 👩‍💻 Espace développeur•euse" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/development/installation.html">Installation de l’application en local</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/development/useful_command.html">Commandes Django utiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/development/dependencies.html">Gestion de package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/development/fixture_generation.html">Utiliser les fixtures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/development/create_webapp_sample_db.html">Création de la base de données webapp_sample pour les tests</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/development/tests_e2e.html">Tests de Régression E2E</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/development/test_iframe_referrer.html">Tester le referrer d’une iframe</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../comment-faire/deployment/README.html">🛹 Déploiement de la plateforme</a><input aria-label="Toggle navigation of 🛹 Déploiement de la plateforme" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../comment-faire/deployment/deployment.html">DevOps, déploiement, opérations</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../how-to/deployment/README.html">🛹 Déploiement de la plateforme</a><input aria-label="Toggle navigation of 🛹 Déploiement de la plateforme" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/deployment/deployment.html">DevOps, déploiement, opérations</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../comment-faire/administration/README.html">Administration de la plateforme</a><input aria-label="Toggle navigation of Administration de la plateforme" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../comment-faire/administration/update-ext-id.html">Mettre à jour les identifiants externe</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../comment-faire/administration/admin_command.html">Commandes Django d’administration</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../how-to/administration/README.html">Administration de la plateforme</a><input aria-label="Toggle navigation of Administration de la plateforme" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/administration/update-ext-id.html">Mettre à jour les identifiants externe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/administration/admin_command.html">Commandes Django d’administration</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../comment-faire/infrastructure/README.html">🏢 Gestion de l’infrastructure</a><input aria-label="Toggle navigation of 🏢 Gestion de l’infrastructure" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../comment-faire/infrastructure/create_db.html">Créaton d’un base de données sur Scaleway</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../comment-faire/infrastructure/monitoring.html">Monitoring sur Scaleway</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../how-to/infrastructure/README.html">🏢 Gestion de l’infrastructure</a><input aria-label="Toggle navigation of 🏢 Gestion de l’infrastructure" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/infrastructure/create_db.html">Créaton d’un base de données sur Scaleway</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/infrastructure/monitoring.html">Monitoring sur Scaleway</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../../comment-faire/troubleshooting.html">☎️ 3615 jaidesproblemes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../how-to/troubleshooting.html">☎️ 3615 jaidesproblemes</a></li>
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../explications/README.html">❓ EXPLICATIONS</a><input aria-label="Toggle navigation of ❓ EXPLICATIONS" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../explications/data/README.html">📊 Plateforme de données</a><input aria-label="Toggle navigation of 📊 Plateforme de données" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../explications/data/ingestion-de-source.html">Ingestion des sources</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../explications/data/flux-dbt.html">Description des flux DBT</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../explications/data/flux-enrich.html">Enrichissement de données</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../explanations/README.html">❓ EXPLICATIONS</a><input aria-label="Toggle navigation of ❓ EXPLICATIONS" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../explanations/data/README.html">📊 Plateforme de données</a><input aria-label="Toggle navigation of 📊 Plateforme de données" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../explanations/data/ingestion-de-source.html">Ingestion des sources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../explanations/data/flux-dbt.html">Description des flux DBT</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../explanations/data/flux-enrich.html">Enrichissement de données</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../explications/db/README.html">Bases de données</a><input aria-label="Toggle navigation of Bases de données" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../explications/db/prestation-delivery.html">Lieu de prestation</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../explanations/db/README.html">Bases de données</a><input aria-label="Toggle navigation of Bases de données" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../explanations/db/prestation-delivery.html">Lieu de prestation</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../explications/frontend/README.html">🎨 Frontend</a><input aria-label="Toggle navigation of 🎨 Frontend" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../explications/frontend/routing-nginx-cache.html">🚏 Routing, nginx et cache</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../explications/frontend/routing-nginx-cache.html#nginx">nginx</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../explications/frontend/routing-nginx-cache.html#whitenoise">Whitenoise</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../explications/frontend/routing-nginx-cache.html#middlewares">Middlewares</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../explications/frontend/historique.html">Historique</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../explanations/frontend/README.html">🎨 Frontend</a><input aria-label="Toggle navigation of 🎨 Frontend" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../explanations/frontend/routing-nginx-cache.html">🚏 Routing, nginx et cache</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../explanations/frontend/routing-nginx-cache.html#nginx">nginx</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../explanations/frontend/routing-nginx-cache.html#whitenoise">Whitenoise</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../explanations/frontend/routing-nginx-cache.html#middlewares">Middlewares</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../explanations/frontend/historique.html">Historique</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../../explications/iframe/README.html">Afficher l’application dans une Iframe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../explanations/iframe/README.html">Afficher l’application dans une Iframe</a></li>
 </ul>
 </li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="../README.html">🧐 REFERENCE</a><input aria-label="Toggle navigation of 🧐 REFERENCE" checked="" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
-<li class="toctree-l2 has-children"><a class="reference internal" href="../documentation/README.html">Documentation</a><input aria-label="Toggle navigation of Documentation" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../documentation/documentation-technique.html">Guide de la documentation technique</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../documentation/security.html">Sécurité</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Code Guidelines</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../infrastructure/README.html">Infrastructure, monitoring, CI/CD</a><input aria-label="Toggle navigation of Infrastructure, monitoring, CI/CD" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../infrastructure/provisioning.html">Provisioning the infrastructure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../infrastructure/ci-cd.html">CI/CD Documentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../infrastructure/monitoring.html">Monitoring</a></li>
 </ul>
 </li>
-<li class="toctree-l2 current has-children current-page"><a class="current reference internal" href="#">Règles de codage</a><input aria-label="Toggle navigation of Règles de codage" checked="" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="coding-guidelines.html">Règles de codage python et typescript</a></li>
-<li class="toctree-l3"><a class="reference internal" href="francais-vs-anglais.html">Utilisation des langues françaises et anglaises</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../db/README.html">Postgresql Database</a><input aria-label="Toggle navigation of Postgresql Database" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../db/db_organisation.html">Database organisation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../db/architecture.html">«La Carte» database architecture</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../infrastructure/README.html">Infrastructure</a><input aria-label="Toggle navigation of Infrastructure" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../infrastructure/ci-cd.html">Documentation CI/CD</a></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../infrastructure/scaleway.html">Infrastructure Scaleway</a><input aria-label="Toggle navigation of Infrastructure Scaleway" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../infrastructure/provisioning.html">Provisionner l’infrastructure</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../data-platform/README.html">Data Platform</a><input aria-label="Toggle navigation of Data Platform" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../data-platform/airflow.html">Airflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../data-platform/dbt.html">DBT</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../data-platform/clustering-deduplication.html">Clustering &amp; Deduplication</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../infrastructure/provisioning.html">Provisionner l’infrastructure</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../webapp/README.html">Webapp</a><input aria-label="Toggle navigation of Webapp" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../webapp/templates.html">Templates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../webapp/look-and-feel.html">Look and feel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../webapp/javascript.html">Javascript</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../webapp/django.html">Django</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../db/README.html">Bases de données</a><input aria-label="Toggle navigation of Bases de données" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../db/prerequis.html">Prérequis concernant les bases de données</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../db/db_organisation.html">Organisation des bases de données</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../db/architecture.html">Architecture de la base de données de La Carte</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../db/contraintes.html">Utilisation des contraintes SQL</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../db/valeurs-defaut.html">Gestion de valeurs par défaut dans la base de données</a></li>
-</ul>
-</li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../data/README.html">Gestion des données</a><input aria-label="Toggle navigation of Gestion des données" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../data/organisation-des-fichiers.html">Architecture des fichiers de code de la partie data</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../data/systeme-de-suggestions.html">Système de suggestion</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../data/gestion-des-identifiants.html">Gestion des identifiants</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../data/clustering-deduplication.html">Clustering &amp; Déduplication</a></li>
-</ul>
-</li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../frontend/README.html">Frontend</a><input aria-label="Toggle navigation of Frontend" class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../frontend/parcel.html">Parcel</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../frontend/templates.html">Templates</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../frontend/tailwind.html">Tailwind</a></li>
-</ul>
-</li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../iframe/README.html">IFrame</a><input aria-label="Toggle navigation of IFrame" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../iframe/iframe.html">Iframe</a></li>
-</ul>
-</li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../opendata/README.html">Open Data</a><input aria-label="Toggle navigation of Open Data" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../opendata/README.html">Open Data</a><input aria-label="Toggle navigation of Open Data" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../opendata/changelog.html">Changelog du jeu de données Open Data : « Acteurs de l’économie circulaire - Longue Vie Aux Objets »</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../opendata/exposure-opendata-acteur.html">Jeu de données open data : acteurs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../opendata/politique-de-version-du-jeu-de-donnees-open-data.html">Politique de version du jeu de données Open Data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../opendata/politique-de-version-du-jeu-de-donnees-open-data-interne.html">Organisation interne de la gestion des versions du jeu de données Open Data</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../apis/README.html">APIs</a><input aria-label="Toggle navigation of APIs" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../apis/qfdmo.html">API Que faire de mes objets</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../apis/stats.html">API Statistiques publiques</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../apis/README.html">API Guidelines</a><input aria-label="Toggle navigation of API Guidelines" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../apis/qfdmo.html">«Que faire de mes objets et déchets» API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../apis/stats.html">Public statistics API</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../security/README.html">Security</a></li>
 </ul>
 </li>
 </ul>
@@ -333,25 +316,71 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="regles-de-codage">
-<h1>Règles de codage<a class="headerlink" href="#regles-de-codage" title="Lien vers cette rubrique">¶</a></h1>
-<p>Cette section contient la documentation sur les règles de codage à appliquer</p>
-<div class="toctree-wrapper compound">
+          <section id="code-guidelines">
+<h1>Code Guidelines<a class="headerlink" href="#code-guidelines" title="Lien vers cette rubrique">¶</a></h1>
+<section id="use-of-french-and-english-languages">
+<h2>Use of French and English languages<a class="headerlink" href="#use-of-french-and-english-languages" title="Lien vers cette rubrique">¶</a></h2>
+<p>We follow industry rules and standards, which we enforce on each commit and Pull Request with tools such as <code class="docutils literal notranslate"><span class="pre">ruff</span></code> or <code class="docutils literal notranslate"><span class="pre">eslint</span></code>.</p>
+<p>However, this project is developed and operated by the French State and must be easily usable and manageable by as many people as possible. We therefore apply a specific rule regarding the use of the French versus the English language, and have defined the use cases for these two languages.</p>
+<section id="in-french">
+<h3>🇫🇷 In French<a class="headerlink" href="#in-french" title="Lien vers cette rubrique">¶</a></h3>
+<p>For citizens, administrations, administrators, and the “Longue vie aux objets” team:</p>
+<ul class="simple">
+<li><p>Git/GitHub commits and Pull Requests</p></li>
+<li><p>Names and fields of database tables</p></li>
+</ul>
+</section>
+<section id="in-english">
+<h3>🇬🇧 In English<a class="headerlink" href="#in-english" title="Lien vers cette rubrique">¶</a></h3>
+<p>In the code, for technical teams:</p>
+<ul class="simple">
+<li><p>Function names</p></li>
+<li><p>Variable names</p></li>
+<li><p>Error messages in exceptions</p></li>
+<li><p>Comments in the code</p></li>
+<li><p>Technical documentation in markdown files</p></li>
+</ul>
+</section>
+</section>
+<section id="accepted-side-effects">
+<h2>Accepted side effects<a class="headerlink" href="#accepted-side-effects" title="Lien vers cette rubrique">¶</a></h2>
+<p>Some variables combining an object name and a suffix or prefix may be in “Franglais”.</p>
+<p>Example: <code class="docutils literal notranslate"><span class="pre">acteur_by_id</span></code></p>
+</section>
+<section id="python-and-typescript-coding-guidelines">
+<h2>Python and TypeScript coding guidelines<a class="headerlink" href="#python-and-typescript-coding-guidelines" title="Lien vers cette rubrique">¶</a></h2>
+<ul class="simple">
+<li><p>Naming (see also the <a class="reference external" href="https://www.swift.org/documentation/api-design-guidelines/">Swift API Guidelines</a>)</p></li>
+<li><p>The Python codebase follows the conventions described in <a class="reference external" href="https://peps.python.org/pep-0008/">PEP 8</a>. This is enforced in CI by <code class="docutils literal notranslate"><span class="pre">ruff</span></code>.</p></li>
+<li><p>The TypeScript codebase follows the conventions described in the <a class="reference external" href="https://ts.dev/style/">TypeScript style guide</a>. This is enforced in CI by <code class="docutils literal notranslate"><span class="pre">eslint</span></code> / <code class="docutils literal notranslate"><span class="pre">prettier</span></code>.</p></li>
+</ul>
+<section id="local-linting-and-formatting">
+<h3>Local linting and formatting<a class="headerlink" href="#local-linting-and-formatting" title="Lien vers cette rubrique">¶</a></h3>
+<p>From root folder:</p>
+<ul class="simple">
+<li><p><strong>Python</strong></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="coding-guidelines.html">Règles de codage python et typescript</a></li>
-<li class="toctree-l1"><a class="reference internal" href="francais-vs-anglais.html">Utilisation des langues françaises et anglaises</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="francais-vs-anglais.html#en-francais">🇫🇷 En Français</a></li>
-<li class="toctree-l2"><a class="reference internal" href="francais-vs-anglais.html#en-anglais">🇬🇧 En Anglais</a></li>
-<li class="toctree-l2"><a class="reference internal" href="francais-vs-anglais.html#effets-de-bord-acceptes">Effets de bord acceptés</a></li>
+<li><p><strong>Lint</strong>: run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">check-format</span></code> at the root of the project.</p></li>
+<li><p><strong>Format</strong>: run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">format</span></code> to apply formatting.</p></li>
 </ul>
 </li>
 </ul>
-</div>
+<p>From <code class="docutils literal notranslate"><span class="pre">webapp</span></code> folder:</p>
+<ul class="simple">
+<li><p><strong>TypeScript</strong></p>
+<ul>
+<li><p><strong>Lint</strong>: run <code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">run</span> <span class="pre">lint</span></code> from the project root to check the frontend code.</p></li>
+<li><p><strong>Format</strong>: run <code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">run</span> <span class="pre">format</span></code> to apply Prettier on the frontend code.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+</section>
 </section>
 
         </article>
@@ -359,23 +388,23 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="coding-guidelines.html">
+          <a class="next-page" href="../infrastructure/README.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Règles de codage python et typescript</div>
+                <div class="title">Infrastructure, monitoring, CI/CD</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="../documentation/security.html">
+          <a class="prev-page" href="../README.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Sécurité</div>
+                <div class="title">🧐 REFERENCE</div>
                 
               </div>
             </a>
@@ -397,8 +426,36 @@
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Code Guidelines</a><ul>
+<li><a class="reference internal" href="#use-of-french-and-english-languages">Use of French and English languages</a><ul>
+<li><a class="reference internal" href="#in-french">🇫🇷 In French</a></li>
+<li><a class="reference internal" href="#in-english">🇬🇧 In English</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#accepted-side-effects">Accepted side effects</a></li>
+<li><a class="reference internal" href="#python-and-typescript-coding-guidelines">Python and TypeScript coding guidelines</a><ul>
+<li><a class="reference internal" href="#local-linting-and-formatting">Local linting and formatting</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>

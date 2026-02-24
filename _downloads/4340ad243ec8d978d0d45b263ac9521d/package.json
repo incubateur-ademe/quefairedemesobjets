@@ -1,0 +1,89 @@
+{
+  "scripts": {
+    "build": "parcel build",
+    "lint": "eslint . --fix",
+    "format:check": "prettier --check static/to_compile",
+    "format": "prettier static/to_compile --write",
+    "test": "jest ./static/to_compile",
+    "watch": "parcel watch --no-hmr",
+    "e2e_test": " npx playwright test --update-snapshots"
+  },
+  "source": [
+    "static/to_compile/admin-categorie-widget.ts",
+    "static/to_compile/admin-map-widget.ts",
+    "static/to_compile/admin.ts",
+    "static/to_compile/embed/assistant.ts",
+    "static/to_compile/embed/carte.ts",
+    "static/to_compile/embed/formulaire.ts",
+    "static/to_compile/embed/infotri-configurator.ts",
+    "static/to_compile/embed/infotri.ts",
+    "static/to_compile/infotri-child.ts",
+    "static/to_compile/qfdmd.ts",
+    "static/to_compile/qfdmo.ts"
+  ],
+  "targets": {
+    "default": {
+      "distDir": "./static/compiled"
+    }
+  },
+  "browserslist": [
+    "defaults",
+    "iOS 14"
+  ],
+  "@parcel/transformer-css": {
+    "errorRecovery": true
+  },
+  "prettier": {
+    "trailingComma": "all",
+    "printWidth": 88,
+    "semi": false
+  },
+  "dependencies": {
+    "@axe-core/playwright": "^4.11.0",
+    "@gouvfr/dsfr": "^1.14",
+    "@hotwired/stimulus": "^3.2.2",
+    "@hotwired/turbo": "^8.0.21",
+    "@iframe-resizer/child": "^5.5.9",
+    "@iframe-resizer/parent": "^5.5.9",
+    "bowser": "^2.13.1",
+    "carte-facile": "^0.8.1",
+    "eslint-config-prettier": "^10.1.8",
+    "posthog-js": "^1.345.2",
+    "maplibre-gl": "^5.17.0",
+    "stimulus-use": "^0.52.3",
+    "tailwindcss": "^3.4.19"
+  },
+  "devDependencies": {
+    "@parcel/optimizer-svgo": "^2.16.4",
+    "@parcel/transformer-inline-string": "^2.16.4",
+    "@playwright/test": "^1.58.2",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@types/jest": "^30.0.0",
+    "@types/lodash": "^4.17.23",
+    "@types/node": "^25.0.9",
+    "@typescript-eslint/eslint-plugin": "^8.55.0",
+    "buffer": "^6.0.3",
+    "eslint": "^9.39.2",
+    "eslint-config-love": "^149.0.0",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-n": "^17.23.2",
+    "eslint-plugin-prettier": "^5.5.5",
+    "eslint-plugin-promise": "^7.2.1",
+    "jest": "^30.2.0",
+    "jest-environment-jsdom": "^30.2.0",
+    "lodash": "^4.17.23",
+    "parcel": "^2.16.4",
+    "postcss": "^8.5.6",
+    "postcss-nesting": "^14.0.0",
+    "prettier": "^3.8.1",
+    "svgo": "^3.3.2",
+    "tailwindcss-animate": "^1.0.7",
+    "ts-jest": "^29.4.6",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.54.0"
+  },
+  "optionalDependencies": {
+    "@parcel/watcher-linux-x64-glibc": "^2.5.6"
+  }
+}
