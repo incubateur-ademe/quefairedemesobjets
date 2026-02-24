@@ -1,1 +1,85 @@
-webapp/pyproject.toml
+[project]
+name = "quefairedemesobjets-workspace"
+version = "0.0.0"
+requires-python = ">=3.12,<3.13"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = ["webapp", "data-platform"]
+
+[tool.uv.sources]
+django-dsfr = { git = "https://github.com/fabienheureux/django-dsfr", rev = "d26ab6f77014b04c43c4c54f694111179d1de0ef" } # pragma: allowlist secret
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "core.test_settings"
+env_files = [".env.template"]
+addopts = "--reuse-db --ignore=scripts"
+filterwarnings = [
+  "ignore::pydantic.warnings.PydanticDeprecatedSince20",
+  "ignore::django.utils.deprecation.RemovedInDjango60Warning",
+]
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
+typeCheckingMode = "basic"
+reportUnannotatedClassAttribute = "none"
+reportMissingTypeStubs = "none"
+reportUnknownMemberType = "none"
+reportUnknownVariableType = "none"
+reportUnknownArgumentType = "none"
+
+[tool.ruff]
+exclude = [
+  ".bzr",
+  ".direnv",
+  ".eggs",
+  ".git",
+  ".git-rewrite",
+  ".hg",
+  ".mypy_cache",
+  ".nox",
+  ".pants.d",
+  ".pytype",
+  ".ruff_cache",
+  ".svn",
+  ".tox",
+  ".venv",
+  "__pypackages__",
+  "_build",
+  "buck-out",
+  "build",
+  "dist",
+  "node_modules",
+  "venv",
+  "**/migrations/*.py",
+  "*.ipynb",
+]
+
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F"]
+ignore = []
+exclude = [
+  "**/migrations/*.py",
+]
+
+fixable = ["ALL"]
+unfixable = []
+
+per-file-ignores = {}
+
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.mypy]
+exclude = ["migrations/"]
+ignore_missing_imports = true
+warn_return_any = false

@@ -1,8 +1,0 @@
-docs
-unit_tests
-dags/tests
-notebooks
-node_modules
-integration_tests
-.parcel-cache
-.vscode

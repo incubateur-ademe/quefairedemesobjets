@@ -11,10 +11,6 @@ x-airflow-common: &airflow-common
     - ./data-platform/logs:/opt/airflow/logs
     - ./data-platform/plugins:/opt/airflow/plugins
     - ./data-platform/scripts:/opt/airflow/scripts
-    # FIXME : charger le volume webapp à la place des 3 suivants
-    - ./webapp/core:/opt/airflow/core
-    - ./webapp/data:/opt/airflow/data
-    - ./webapp/qfdmo:/opt/airflow/qfdmo
   # Voir la doc et s'assurer que AIRFLOW_UID est
   # définit dans le .env pour correspondre à votre UID
   # sed -i '/^AIRFLOW_UID=/d' .env && echo "AIRFLOW_UID=$(id -u)" >> .env

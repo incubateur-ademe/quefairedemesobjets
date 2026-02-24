@@ -1,0 +1,4 @@
+.parcel-cache
+integration_tests
+node_modules
+unit_tests

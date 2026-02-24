@@ -11,10 +11,10 @@ from faker import Faker
 def pytest_configure(config):
     project_root = Path(__file__).resolve().parents[3]
 
-    dags_path = project_root / "data-platform" / "dags"
-    webapp_path = project_root / "webapp"
+    data_platform_path = project_root / "data-platform"
+    dags_root_path = data_platform_path / "dags"
 
-    for path in (dags_path, webapp_path):
+    for path in (data_platform_path, dags_root_path):
         path_str = str(path)
         if path_str not in sys.path:
             sys.path.insert(0, path_str)
