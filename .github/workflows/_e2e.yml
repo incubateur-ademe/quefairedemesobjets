@@ -85,6 +85,7 @@ jobs:
           dump-path: database-dump.pgdump
 
       - name: TEMPORARY - prepare search index
+        if: inputs.ref == github.ref
         run: |
           cd webapp && uv run python manage.py populate_fake_search_tags
           uv run python manage.py populate_search_terms
