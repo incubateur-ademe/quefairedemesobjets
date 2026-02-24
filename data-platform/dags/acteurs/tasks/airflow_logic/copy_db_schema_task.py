@@ -1,7 +1,7 @@
 import logging
 
 from acteurs.tasks.business_logic.copy_db_schema import copy_db_schema
-from airflow.operators.python import PythonOperator
+from airflow.providers.standard.operators.python import PythonOperator
 
 logger = logging.getLogger(__name__)
 

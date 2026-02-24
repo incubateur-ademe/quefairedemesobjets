@@ -1,5 +1,5 @@
 from airflow import DAG
-from airflow.models.baseoperator import chain
+from airflow.sdk.bases.operator import chain
 from cluster.tasks.airflow_logic.cluster_acteurs_clusters_prepare_task import (
     cluster_acteurs_clusters_prepare_task,
 )

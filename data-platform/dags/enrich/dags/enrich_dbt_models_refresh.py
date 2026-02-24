@@ -4,9 +4,9 @@ import logging
 import re
 
 from airflow import DAG
-from airflow.models.baseoperator import chain
 from airflow.operators.bash import BashOperator
-from airflow.utils.trigger_rule import TriggerRule
+from airflow.sdk.bases.operator import chain
+from airflow.task.trigger_rule import TriggerRule
 from enrich.config.models import EnrichDbtModelsRefreshConfig
 from shared.config.airflow import DEFAULT_ARGS_NO_RETRIES
 from shared.config.models import config_to_airflow_params

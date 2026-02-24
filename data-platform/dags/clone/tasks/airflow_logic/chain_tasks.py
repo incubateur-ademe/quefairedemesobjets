@@ -1,5 +1,5 @@
 from airflow import DAG
-from airflow.models.baseoperator import chain
+from airflow.sdk.bases.operator import chain
 from clone.tasks.airflow_logic.clone_config_create_task import clone_config_create_task
 from clone.tasks.airflow_logic.clone_old_tables_remove_task import (
     clone_old_tables_remove_task,

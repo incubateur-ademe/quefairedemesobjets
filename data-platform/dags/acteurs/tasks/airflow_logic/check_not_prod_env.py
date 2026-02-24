@@ -1,6 +1,6 @@
 import os
 
-from airflow.operators.python import ShortCircuitOperator
+from airflow.providers.standard.operators.python import ShortCircuitOperator
 
 
 def check_isnt_prod_env() -> bool:
