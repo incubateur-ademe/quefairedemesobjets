@@ -6,10 +6,6 @@ inputs:
     description: "Build frontend assets"
     required: false
     default: "false"
-  uv-groups:
-    description: "UV sync groups"
-    required: false
-    default: "--group dev"
   install-playwright:
     description: "Install Playwright browsers"
     required: false
@@ -27,7 +23,7 @@ runs:
     - name: Setup backend environment
       uses: ./.github/actions/setup-backend
       with:
-        uv-groups: ${{ inputs.uv-groups }}
+        uv-groups: "--package webapp --only-group dev"
 
     - name: Install GIS packages
       uses: ./.github/actions/install-gis
