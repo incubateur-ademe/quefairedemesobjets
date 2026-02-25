@@ -1,13 +1,9 @@
 # Aliases
 PYTHON := uv run python
-DJANGO_ADMIN := $(PYTHON) manage.py
-PYTEST := uv run pytest
-HONCHO := uv run honcho
 DB_URL := postgres://webapp:webapp@localhost:6543/webapp# pragma: allowlist secret
 SAMPLE_DB_URL ?= $(if $(SAMPLE_DATABASE_URL),$(SAMPLE_DATABASE_URL),$(DB_URL))
 SAMPLE_DUMP_FILE ?= tmpbackup-sample/sample.custom
 BASE_DOMAIN := quefairedemesdechets.ademe.local
-FIXTURES_OPTIONS := --indent 4 --natural-foreign --natural-primary
 
 # Makefile config
 .PHONY: check
@@ -67,132 +63,112 @@ format:
 run-airflow:
 	docker compose --profile airflow up -d
 
-# Local django operations
-.PHONY: migrate
-migrate:
-	$(DJANGO_ADMIN) migrate
+# Local django operations (delegated to webapp/Makefile)
+.PHONY: webapp-migrate
+webapp-migrate:
+	$(MAKE) -C webapp migrate
 
-.PHONY: collectstatic
-collectstatic:
-	$(DJANGO_ADMIN) collectstatic --noinput
+.PHONY: webapp-collectstatic
+webapp-collectstatic:
+	$(MAKE) -C webapp collectstatic
 
-.PHONY: shell
-shell:
-	$(DJANGO_ADMIN) shell
+.PHONY: webapp-shell
+webapp-shell:
+	$(MAKE) -C webapp shell
 
-.PHONY: makemigrations
-makemigrations:
-	$(DJANGO_ADMIN) makemigrations
+.PHONY: webapp-makemigrations
+webapp-makemigrations:
+	$(MAKE) -C webapp makemigrations
 
-.PHONY: merge-migrations
-merge-migrations:
-	$(DJANGO_ADMIN) makemigrations --merge
+.PHONY: webapp-merge-migrations
+webapp-merge-migrations:
+	$(MAKE) -C webapp merge-migrations
 
-.PHONY: rebuild-search-index
-rebuild-search-index:
-	$(DJANGO_ADMIN) rebuild_modelsearch_index
+.PHONY: webapp-rebuild-search-index
+webapp-rebuild-search-index:
+	$(MAKE) -C webapp rebuild-search-index
 
+.PHONY: webapp-createcachetable
+webapp-createcachetable:
+	$(MAKE) -C webapp createcachetable
 
-.PHONY: createcachetable
-createcachetable:
-	$(DJANGO_ADMIN) createcachetable
+.PHONY: webapp-clearsessions
+webapp-clearsessions:
+	$(MAKE) -C webapp clearsessions
 
-.PHONY: clearsessions
-clearsessions:
-	$(DJANGO_ADMIN) clearsessions
+.PHONY: webapp-create-remote-db-server
+webapp-create-remote-db-server:
+	$(MAKE) -C webapp create-remote-db-server
 
-.PHONY: create-remote-db-server
-create-remote-db-server:
-	$(DJANGO_ADMIN) create_remote_db_server
+.PHONY: webapp-createsuperuser
+webapp-createsuperuser:
+	$(MAKE) -C webapp createsuperuser
 
-.PHONY: createsuperuser
-createsuperuser:
-	$(DJANGO_ADMIN) createsuperuser
+.PHONY: webapp-seed-database
+webapp-seed-database:
+	$(MAKE) -C webapp seed-database
 
-.PHONY: seed-database
-seed-database:
-	$(DJANGO_ADMIN) loaddata_with_computed_fields categories labels sources actions produits acteur_services acteur_types objets synonymes carte_configs
-	$(DJANGO_ADMIN) loaddata_with_computed_fields acteurs propositions_services
+.PHONY: webapp-createsuperuser-example
+webapp-createsuperuser-example:
+	$(MAKE) -C webapp createsuperuser-example
 
-.PHONY: createsuperuser-example
-createsuperuser-example:
-	@echo "Creating Django superuser..."
-	$(DJANGO_ADMIN) shell -c "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('admin', password='admin')"
+.PHONY: webapp-generate-fixtures-acteurs
+webapp-generate-fixtures-acteurs:
+	$(MAKE) -C webapp generate-fixtures-acteurs
 
-.PHONY: generate-fixtures-acteurs
-generate-fixtures-acteurs:
-	$(DJANGO_ADMIN) dumpdata_acteurs
+.PHONY: webapp-generate-fixtures
+webapp-generate-fixtures:
+	$(MAKE) -C webapp generate-fixtures
 
-.PHONY: generate-fixtures
-generate-fixtures:
-	$(DJANGO_ADMIN) dumpdata qfdmo.objet $(FIXTURES_OPTIONS) -o qfdmo/fixtures/objets.json
-	$(DJANGO_ADMIN) dumpdata qfdmo.categorieobjet qfdmo.souscategorieobjet $(FIXTURES_OPTIONS) -o qfdmo/fixtures/categories.json
-	$(DJANGO_ADMIN) dumpdata qfdmo.actiondirection qfdmo.groupeaction qfdmo.action $(FIXTURES_OPTIONS) -o qfdmo/fixtures/actions.json
-	$(DJANGO_ADMIN) dumpdata qfdmo.acteurtype $(FIXTURES_OPTIONS) -o qfdmo/fixtures/acteur_types.json
-	$(DJANGO_ADMIN) dumpdata qfdmo.acteurservice $(FIXTURES_OPTIONS) -o qfdmo/fixtures/acteur_services.json
-	$(DJANGO_ADMIN) dumpdata qfdmo.labelqualite $(FIXTURES_OPTIONS) -o qfdmo/fixtures/labels.json
-	$(DJANGO_ADMIN) dumpdata qfdmo.source $(FIXTURES_OPTIONS) -o qfdmo/fixtures/sources.json
-	$(DJANGO_ADMIN) dumpdata qfdmo.carteconfig qfdmo.groupeactionconfig $(FIXTURES_OPTIONS) -o qfdmo/fixtures/carte_configs.json
-	$(DJANGO_ADMIN) dumpdata search.searchterm qfdmd.synonyme $(FIXTURES_OPTIONS) -o qfdmd/fixtures/synonymes.json
-	$(DJANGO_ADMIN) dumpdata qfdmd.produit $(FIXTURES_OPTIONS) -o qfdmd/fixtures/produits.json
+.PHONY: webapp-clear-cache
+webapp-clear-cache:
+	$(MAKE) -C webapp clear-cache
 
-.PHONY: clear-cache
-clear-cache:
-	$(DJANGO_ADMIN) clear_cache --all
-
-.PHONY: npm-upgrade
-npm-upgrade:
-	npx npm-upgrade
+.PHONY: webapp-npm-upgrade
+webapp-npm-upgrade:
+	$(MAKE) -C webapp npm-upgrade
 
 # Happy testing
-.PHONY: unit-test
-unit-test:
-	$(PYTEST) ./unit_tests
+.PHONY: webapp-unit-test
+webapp-unit-test:
+	$(MAKE) -C webapp unit-test
 
-.PHONY: integration-test
-integration-test:
-	$(PYTEST) ./integration_tests
+.PHONY: webapp-integration-test
+webapp-integration-test:
+	$(MAKE) -C webapp integration-test
 
+.PHONY: webapp-dags-test
+webapp-dags-test:
+	$(MAKE) -C webapp dags-test
 
-.PHONY: dags-test
-dags-test:
-	$(PYTEST) ./dags/tests
+.PHONY: webapp-e2e-test
+webapp-e2e-test:
+	$(MAKE) -C webapp e2e-test
 
-.PHONY: e2e-test
-e2e-test:
-	npx playwright test --update-snapshots all
+.PHONY: webapp-e2e-test-ui
+webapp-e2e-test-ui:
+	$(MAKE) -C webapp e2e-test-ui
 
-.PHONY: e2e-test-ui
-e2e-test-ui:
-	npx playwright test --update-snapshots all --ui
+.PHONY: webapp-a11y
+webapp-a11y:
+	$(MAKE) -C webapp a11y
 
-.PHONY: a11y
-a11y:
-	npx playwright test --reporter=list ./e2e_tests/accessibility.spec.ts
+.PHONY: webapp-js-test
+webapp-js-test:
+	$(MAKE) -C webapp js-test
 
-.PHONY: js-test
-js-test:
-	npm run test
+.PHONY: webapp-backend-test
+webapp-backend-test:
+	$(MAKE) -C webapp backend-test
 
-.PHONY: backend-test
-backend-test:
-	@make unit-test
-	@make integration-test
-	@make dags-test
-
-.PHONY: test
-test:
-	@make unit-test
-	@make e2e-test
-	@make integration-test
-	@make dags-test
+.PHONY: webapp-test
+webapp-test:
+	$(MAKE) -C webapp test
 
 # DSFR
-.PHONY: extract-dsfr
-extract-dsfr:
-	$(PYTHON) ./dsfr_hacks/extract_dsfr_colors.py
-	$(PYTHON) ./dsfr_hacks/extract_used_colors.py
-	$(PYTHON) ./dsfr_hacks/extract_used_icons.py
+.PHONY: webapp-extract-dsfr
+webapp-extract-dsfr:
+	$(MAKE) -C webapp extract-dsfr
 
 .SILENT:
 .PHONY: drop-all-tables
@@ -279,8 +255,8 @@ db-restore-local-from-prod:
 	make drop-schema-public
 	make create-schema-public
 	make load-prod-dump
-	make migrate
-	make create-remote-db-server
+	make webapp-migrate
+	make webapp-create-remote-db-server
 
 .PHONY: db-restore-local-from-preprod
 db-restore-local-from-preprod:
@@ -288,8 +264,8 @@ db-restore-local-from-preprod:
 	make drop-schema-public
 	make create-schema-public
 	make load-preprod-dump
-	make migrate
-	make create-remote-db-server
+	make webapp-migrate
+	make webapp-create-remote-db-server
 
 .PHONY: db-restore-preprod-from-prod
 db-restore-preprod-from-prod:
@@ -308,8 +284,8 @@ db-restore-local-from-sample:
 db-restore-local-for-tests:
 	make drop-schema-public
 	make create-schema-public
-	make migrate
-	make seed-database
+	make webapp-migrate
+	make webapp-seed-database
 
 # Docs
 .PHONY: build-docs
