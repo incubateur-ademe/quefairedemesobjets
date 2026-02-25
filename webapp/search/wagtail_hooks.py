@@ -7,6 +7,7 @@ from wagtail.snippets.views.snippets import SnippetViewSet, SnippetViewSetGroup
 from qfdmd.models import SearchTag, Synonyme, TaggedSearchTag
 from search.constants import SEARCH_TAG_HELP_TEXT
 from search.models import SearchTerm
+from django.conf import settings
 
 
 class SearchTermViewSet(SnippetViewSet):
@@ -15,7 +16,7 @@ class SearchTermViewSet(SnippetViewSet):
     menu_label = "Termes de recherche"
     menu_name = "search-terms"
     list_display = ["__str__", "search_variants"]
-    search_fields = ["search_variants"]
+    search_backend_name = settings.MODELSEARCH_BACKENDS["default"]["BACKEND"]
     panels = [
         FieldPanel("search_variants"),
     ]
@@ -57,7 +58,7 @@ class SearchTagViewSet(SnippetViewSet):
     menu_label = "Synonymes de recherche"
     menu_name = "search-tags"
     list_display = ["name"]
-    search_fields = ["name"]
+    search_backend_name = settings.MODELSEARCH_BACKENDS["default"]["BACKEND"]
     filterset_class = SearchTagFilterSet
     panels = [
         HelpPanel(content=SEARCH_TAG_HELP_TEXT),
