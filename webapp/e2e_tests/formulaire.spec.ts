@@ -8,6 +8,7 @@ import {
   searchAddress,
   getIframe,
   TIMEOUT,
+  waitForLoadingComplete,
 } from "./helpers"
 
 test.describe("🔍 Formulaire de Recherche", () => {
@@ -168,6 +169,7 @@ test.describe("🗺️ Affichage et Interaction Acteurs", () => {
 
     // Submit form
     await iframe.getByTestId("formulaire-rechercher-adresses-submit").click()
+    await waitForLoadingComplete(iframe)
 
     // Wait for acteur markers to appear (exclude home marker)
     const acteurMarkers = iframe.locator(

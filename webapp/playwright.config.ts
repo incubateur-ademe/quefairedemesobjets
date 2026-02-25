@@ -15,8 +15,20 @@ export const config: PlaywrightTestConfig = {
   retries: 4,
   workers: 1,
   reporter: "html",
+  webServer: {
+    command: "uv run python manage.py runserver 0.0.0.0:6666",
+    port: 6666,
+    reuseExistingServer: !process.env.CI,
+    env: {
+      ...(process.env as Record<string, string>),
+      DATABASE_URL: process.env.SAMPLE_DATABASE_URL!,
+      SECRET_KEY: process.env.SECRET_KEY!,
+      BASE_URL: "http://localhost:6666",
+    },
+    cwd: path.resolve(__dirname),
+  },
   use: {
-    baseURL: process.env.BASE_URL!,
+    baseURL: process.env.CI ? process.env.BASE_URL! : "http://localhost:6666",
     trace: "on-first-retry",
   },
   expect: {

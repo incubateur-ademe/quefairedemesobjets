@@ -281,6 +281,7 @@ test.describe("🗺️ Persistance des Filtres de Légende", () => {
 
     // Switch back to carte mode
     await switchToCarteMode(page)
+    await waitForLoadingComplete(page)
 
     // Wait for results to be displayed after mode switch
     await expect(

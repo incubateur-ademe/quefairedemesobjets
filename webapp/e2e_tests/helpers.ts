@@ -105,6 +105,7 @@ export async function searchAddress(
  */
 export async function searchForAuray(page: Page, parentSelector?: string) {
   await searchAddress(page, "Auray", "carte", { parentSelector })
+  await waitForLoadingComplete(page)
 }
 
 export async function searchForAurayInIframe(
@@ -533,6 +534,11 @@ export async function clickFirstClickableActeurMarker(
     try {
       // Try to click without force - this will fail if element is obstructed
       await marker.click({ timeout })
+      await expect(context.locator("#acteurDetailsPanel")).toHaveAttribute(
+        "aria-hidden",
+        "false",
+        { timeout: TIMEOUT.DEFAULT },
+      )
       return // Success - exit the function
     } catch {
       // This marker is obstructed, try the next one
@@ -548,6 +554,11 @@ export async function clickFirstClickableActeurMarker(
 
   // Use evaluate to trigger a proper click event that will go through event handlers
   await firstLink.evaluate((el: HTMLElement) => el.click())
+  await expect(context.locator("#acteurDetailsPanel")).toHaveAttribute(
+    "aria-hidden",
+    "false",
+    { timeout: TIMEOUT.DEFAULT },
+  )
 }
 
 /**
