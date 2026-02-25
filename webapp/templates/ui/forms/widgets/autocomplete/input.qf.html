@@ -53,7 +53,7 @@
     >
 
     {# Results #}
-    {% include "ui/forms/widgets/autocomplete/results.html" %}
+    {% include "ui/forms/widgets/autocomplete/results.html" with extra_classes="qf-mt-1w" %}
 
     <div class="peer-aria-[busy]:qf-visible qf-invisible qf-absolute qf-z-50 qf-right-1w qf-top-auto qf-bottom-[3px]">
     {% include "ui/components/spinner.html" with small=True %}
