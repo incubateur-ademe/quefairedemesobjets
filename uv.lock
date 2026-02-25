@@ -2277,14 +2277,10 @@ wheels = [
 [[package]]
 name = "modelsearch"
 version = "1.1.1"
-source = { registry = "https://pypi.org/simple" }
+source = { git = "https://github.com/fabienheureux/django-modelsearch?rev=add-fuzzy-postgres-search#de59d0bd51fc7c2824981d463ae0244b7dac6312" }
 dependencies = [
     { name = "django" },
     { name = "django-tasks" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/3f/49/751b8872bb9c1ec667d0d312ab90022f0426326109163ade4719466c2e4d/modelsearch-1.1.1.tar.gz", hash = "sha256:25f329c4d93572729c931f65c46cedb5cfc32d368690ebdabc223aa6205251d6", size = 87514, upload-time = "2025-11-10T14:29:57.223Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/88/4b/e3eb1f4e4f7ca4bfa9b71cea497352c1ce13261254d59cb33a36bcbff335/modelsearch-1.1.1-py3-none-any.whl", hash = "sha256:d2580790af76c3a6404f651c9d8ca8695b284551583bb8ca6ddeb17eca0cfb52", size = 106987, upload-time = "2025-11-10T14:29:55.946Z" },
 ]
 
 [[package]]
@@ -4096,6 +4092,7 @@ dependencies = [
     { name = "django-widget-tweaks" },
     { name = "djangoql" },
     { name = "gunicorn" },
+    { name = "modelsearch" },
     { name = "more-itertools" },
     { name = "opening-hours-py" },
     { name = "orjson" },
@@ -4163,6 +4160,7 @@ requires-dist = [
     { name = "django-widget-tweaks", specifier = ">=1.5.0,<2" },
     { name = "djangoql", specifier = ">=0.18.1" },
     { name = "gunicorn", specifier = ">=23.0.0,<24" },
+    { name = "modelsearch", git = "https://github.com/fabienheureux/django-modelsearch?rev=add-fuzzy-postgres-search" },
     { name = "more-itertools", specifier = ">=10.7.0" },
     { name = "opening-hours-py", specifier = ">=1.1.3,<2" },
     { name = "orjson", specifier = ">=3.11.1,<4" },

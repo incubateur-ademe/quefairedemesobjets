@@ -40,6 +40,7 @@ dependencies = [
     "sites-conformes>=2.5.2rc1",
     "wagtail==7.3",
     "pre-commit>=4.5.1",
+    "modelsearch>=1.1.1",
 ]
 
 [build-system]
@@ -89,3 +90,4 @@ docs = [
 
 [tool.uv.sources]
 django-dsfr = { git = "https://github.com/fabienheureux/django-dsfr", rev = "d26ab6f77014b04c43c4c54f694111179d1de0ef" } # pragma: allowlist secret
+modelsearch = { git = "https://github.com/fabienheureux/django-modelsearch", rev="add-fuzzy-postgres-search"}
