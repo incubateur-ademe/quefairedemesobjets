@@ -52,6 +52,7 @@ module.exports = {
         },
         black: "black",
         white: "white",
+        focus: "#0a76f6", // Hardcoded in dsfr https://github.com/GouvernementFR/dsfr/blob/b828f9e99cde96062d3d6eebc17a6b654994285b/src/module/color/variable/_static.scss#L3
         ...DSFRColors,
       },
       height: {
