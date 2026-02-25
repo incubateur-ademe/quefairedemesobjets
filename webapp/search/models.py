@@ -58,12 +58,13 @@ class SearchTerm(index.Indexed, models.Model):
         return self.get_title()
 
     def get_title(self):
-        logger.warning(
-            "%s does not implement get_title(). "
-            "Fuzzy search ranking will be degraded for this model. "
-            "Please implement get_title() to return the primary display name.",
-            type(self).__name__,
-        )
+        if type(self) is not SearchTerm:
+            logger.warning(
+                "%s does not implement get_title(). "
+                "Fuzzy search ranking will be degraded for this model. "
+                "Please implement get_title() to return the primary display name.",
+                type(self).__name__,
+            )
         return ""
 
     search_fields = [
