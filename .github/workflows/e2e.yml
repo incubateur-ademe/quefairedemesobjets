@@ -24,7 +24,7 @@ jobs:
   e2e-prepare:
     name: Préparation
     # On s'assure que npm ci et uv sync aient tourné au moins une fois.
-    # needs: [frontend_linter, backend_linter]
+    if: ${{ github.ref_name == 'main' || (github.event_name ==  'pull_request' && contains( github.event.pull_request.labels.*.name, 'frontend')) }}
     runs-on: ubuntu-latest
     services:
       postgres:
