@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand
+from django.conf import settings
 from django.utils.text import slugify
 
 from qfdmd.models import ProduitPage, SearchTag, TaggedSearchTag
@@ -18,6 +19,9 @@ class Command(BaseCommand):
     help = "Create a fake SearchTag for e2e test coverage of SearchTag link parameters"
 
     def handle(self, *args, **options):
+        if settings.ENVIRONMENT == "production":
+            self.stdout.write("This won't run on a production environment, sorry.")
+            return
         name = "canapé d'angle"
         slug = slugify(name, allow_unicode=True)
 
