@@ -9,7 +9,8 @@ def matomo(id):
     return {"matomo_url": "stats.beta.gouv.fr", "matomo_id": id}
 
 
-@register.inclusion_tag("ui/analytics/posthog_data_attributes.html")
-def posthog_data_attributes(key):
+@register.inclusion_tag("ui/analytics/posthog_data_attributes.html", takes_context=True)
+def posthog_data_attributes(context, key):
+    request = context["request"]
     debug = settings.POSTHOG_DEBUG
-    return {"key": key, "debug": debug}
+    return {"key": key, "debug": debug, "request": request}
