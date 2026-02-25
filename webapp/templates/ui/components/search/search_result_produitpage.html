@@ -3,12 +3,4 @@
 
 {% block href %}{% pageurl result.produit_page %}{% endblock %}
 
-<<<<<<< HEAD
-{% block nom %}
-<div class="qf-flex qf-justify-between qf-pr-2w">
-    {{ result.produit_page.titre_phrase|capfirst }}
-</div>
-{% endblock %}
-=======
-{% block nom %}{{ result.produit.titre_phrase|capfirst }}{% endblock %}
->>>>>>> 3a429b74 (replay changes)
+{% block nom %}{{ result.produit_page.titre_phrase|capfirst }}{% endblock %}

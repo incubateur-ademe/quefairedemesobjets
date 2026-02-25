@@ -70,6 +70,10 @@ run-airflow:
 	docker compose --profile airflow up -d
 
 # Local django operations (delegated to webapp/Makefile)
+.PHONY: webapp-runserver
+webapp-runserver:
+	$(MAKE) -C webapp runserver
+
 .PHONY: webapp-migrate
 webapp-migrate:
 	$(MAKE) -C webapp migrate
