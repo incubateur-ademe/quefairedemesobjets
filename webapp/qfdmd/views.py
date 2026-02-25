@@ -1,8 +1,7 @@
 import logging
 from typing import Any
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
-import re
-from typing import Any, override
+from typing import override
 
 import django_filters
 from django.contrib import messages
@@ -24,6 +23,7 @@ from core.constants import SEARCH_TERM_ID_QUERY_PARAM
 from core.views import static_file_content_from
 from qfdmd.forms import HomeSearchForm
 from qfdmd.models import (
+    HomePage,
     Produit,
     ProduitPage,
     SearchTag,
@@ -379,7 +379,9 @@ class AssistantBaseView:
 
 
 def get_homepage():
-    return Page.objects.live().get(depth=2).specific
+    if homepage := HomePage.objects.first():
+        return homepage
+    return Page.objects.filter(depth=2).first()
 
 
 @method_decorator(cache_control(max_age=60 * 15), name="dispatch")

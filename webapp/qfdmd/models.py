@@ -158,7 +158,6 @@ class HomePage(ContentPage):
     template = "ui/pages/home.html"
     max_count = 1
     parent_page_types = ["wagtailcore.Page"]
-    subpage_types = []
 
     hero_subtitle = RichTextField(
         "Sous-titre",
