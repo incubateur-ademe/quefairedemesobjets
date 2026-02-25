@@ -76,6 +76,10 @@ webapp-collectstatic:
 webapp-shell:
 	$(MAKE) -C webapp shell
 
+.PHONY: webapp-dbshell
+webapp-dbshell:
+	$(MAKE) -C webapp dbshell
+
 .PHONY: webapp-makemigrations
 webapp-makemigrations:
 	$(MAKE) -C webapp makemigrations

@@ -37,8 +37,11 @@ export const config: PlaywrightTestConfig = {
         launchOptions: {
           args: [
             "--ignore-certificate-errors",
-            "--use-gl=swiftshader",
-            "--disable-gpu-sandbox",
+            "--use-angle=gl",
+            "--use-gl=angle",
+            "--ignore-gpu-blacklist",
+            // "--use-gl=swiftshader",
+            // "--disable-gpu-sandbox",
           ],
         },
       },

@@ -38,6 +38,10 @@ collectstatic:
 shell:
 	$(DJANGO_ADMIN) shell
 
+.PHONY: dbshell
+dbshell:
+	$(DJANGO_ADMIN) dbshell
+
 .PHONY: makemigrations
 makemigrations:
 	$(DJANGO_ADMIN) makemigrations

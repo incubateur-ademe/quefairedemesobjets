@@ -19,7 +19,7 @@ import {
 
 test.describe("🗺️ Filtres Avancés Carte", () => {
   async function searchInCarteMode(page) {
-    await searchAddress(page, "Paris", "carte", { optionIndex: 1 })
+    await searchForAuray(page)
   }
 
   test("Filtres avancés s'ouvrent et se ferment en mode carte", async ({ page }) => {
