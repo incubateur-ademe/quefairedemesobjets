@@ -176,8 +176,10 @@ class SearchTag(SearchTerm, TagBase):
         help_text="Référence vers le synonyme legacy dont ce tag est issu.",
     )
 
+    def get_title(self):
+        return self.name
+
     search_fields = SearchTerm.search_fields + [
-        index.SearchField("name"),
         index.AutocompleteField("name"),
     ]
 
@@ -242,9 +244,10 @@ class ProduitPageSearchTerm(SearchTerm):
     )
     searchable_title = models.CharField()
 
-    search_fields = SearchTerm.search_fields + [
-        index.SearchField("searchable_title"),
-    ]
+    def get_title(self):
+        return self.searchable_title
+
+    search_fields = SearchTerm.search_fields
 
 
 class ProduitPage(
@@ -420,7 +423,7 @@ class ProduitPage(
     )
 
     search_fields = Page.search_fields + [
-        index.AutocompleteField("title"),
+        index.SearchField("title", boost=10),
     ]
 
     def clean(self):
@@ -842,8 +845,10 @@ class Synonyme(SearchTerm, AbstractBaseProduit):
     def __str__(self) -> str:
         return self.nom
 
+    def get_title(self):
+        return self.nom
+
     search_fields = SearchTerm.search_fields + [
-        index.SearchField("nom"),
         index.AutocompleteField("nom"),
     ]
 

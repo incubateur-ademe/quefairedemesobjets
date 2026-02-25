@@ -1,7 +1,11 @@
+import logging
+
 from django.db import models
 from django.db.models import Q, QuerySet
 from modelsearch import index
 from modelsearch.queryset import SearchableQuerySetMixin
+
+logger = logging.getLogger(__name__)
 
 
 class SearchTermQuerySet(SearchableQuerySetMixin, QuerySet):
@@ -45,8 +49,27 @@ class SearchTerm(index.Indexed, models.Model):
         ),
     )
 
+    @property
+    def title(self):
+        """
+        The title of this search term, used for fuzzy ranking (title_text slot).
+        Subclasses must implement get_title().
+        """
+        return self.get_title()
+
+    def get_title(self):
+        logger.warning(
+            "%s does not implement get_title(). "
+            "Fuzzy search ranking will be degraded for this model. "
+            "Please implement get_title() to return the primary display name.",
+            type(self).__name__,
+        )
+        return ""
+
     search_fields = [
         index.FilterField("id"),
+        index.SearchField("title"),
+        index.AutocompleteField("title"),
         index.SearchField("search_variants"),
         index.AutocompleteField("search_variants"),
     ]
