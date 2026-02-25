@@ -55,7 +55,12 @@
     {# Results #}
     {% include "ui/forms/widgets/autocomplete/results.html" with extra_classes="qf-mt-1w" %}
 
-    <div class="peer-aria-[busy]:qf-visible qf-invisible qf-absolute qf-z-50 qf-right-1w qf-top-auto qf-bottom-[3px]">
+    {% comment %}
+    The combination of margin-top and position / top here is to prevent setting a pixel value
+    for the positionning that would break responsiveness for user who do not use standard browser
+    font size while maintaining pixel perfect integration for most cases.
+    {% endcomment %}
+    <div class="peer-aria-[busy]:qf-visible qf-invisible qf-absolute qf-z-50 qf-right-2w qf-top-2w qf-mt-[5px]">
     {% include "ui/components/spinner.html" with small=True %}
     </div>
 </div>
