@@ -11,6 +11,6 @@ def matomo(id):
 
 @register.inclusion_tag("ui/analytics/posthog_data_attributes.html", takes_context=True)
 def posthog_data_attributes(context, key):
-    request = context["request"]
+    request = context.get("request")
     debug = settings.POSTHOG_DEBUG
     return {"key": key, "debug": debug, "request": request}
