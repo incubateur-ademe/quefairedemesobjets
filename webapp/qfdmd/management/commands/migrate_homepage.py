@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from wagtail.models import Page
+from wagtail.models import Page, Site
 
 from qfdmd.models import HomePage
 
@@ -33,13 +33,27 @@ class Command(BaseCommand):
             hero_search_label=self.DEFAULT_HERO_SEARCH_LABEL,
         )
         homepage.add_sibling(instance=next_homepage, pos="right")
+
+        # Move children from old homepage to new homepage
+        for child in homepage.get_children():
+            child.move(next_homepage, pos="last-child")
+
+        # Update the site root page
+        site = Site.objects.first()
+        if site:
+            site.root_page = next_homepage
+            site.save()
+        else:
+            self.stdout.write(
+                self.style.WARNING("No Wagtail site found. root_page not updated.")
+            )
+
+        # Unpublish old homepage
         homepage.unpublish()
-        r = homepage.save_revision()
-        homepage.publish(r)
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"Done. Page id={homepage.id} is now a HomePage. "
+                f"Done. Page id={next_homepage.id} is now the HomePage. "
                 "Edit it in the Wagtail admin to customise hero_title and icons."
             )
         )
