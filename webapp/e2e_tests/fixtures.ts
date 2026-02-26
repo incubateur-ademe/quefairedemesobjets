@@ -8,6 +8,7 @@ export const test = base.extend<{ forEachTest: void }>({
       if (hasRegressionTag) {
         await expect.soft(page).toHaveScreenshot({
           fullPage: true,
+          timeout: 15000,
         })
       }
     },

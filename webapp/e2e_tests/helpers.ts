@@ -527,6 +527,10 @@ export async function clickFirstClickableActeurMarker(
   const acteurMarkers = context.locator(
     '.maplibregl-marker[data-controller="pinpoint"]:not(#pinpoint-home)',
   )
+
+  // Wait for at least one marker to appear before attempting clicks
+  await expect(acteurMarkers.first()).toBeVisible({ timeout: TIMEOUT.LONG })
+
   const count = await acteurMarkers.count()
 
   for (let i = 0; i < count; i++) {
