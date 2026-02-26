@@ -525,7 +525,7 @@ export async function clickFirstClickableActeurMarker(
 
   // Select markers that contain a pinpoint controller link (not the home marker)
   const acteurMarkers = context.locator(
-    '.maplibregl-marker:has([data-controller="pinpoint"]):not(#pinpoint-home)',
+    '.maplibregl-marker[data-controller="pinpoint"]:not(#pinpoint-home)',
   )
   const count = await acteurMarkers.count()
 
