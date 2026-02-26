@@ -16,16 +16,16 @@ class Migration(migrations.Migration):
             name="bonus",
         ),
         migrations.RemoveField(
-            model_name="familypage",
-            name="produitpage_ptr",
-        ),
-        migrations.RemoveField(
             model_name="familypagetag",
             name="content_object",
         ),
         migrations.RemoveField(
             model_name="familypagetag",
             name="tag",
+        ),
+        migrations.RemoveField(
+            model_name="familypage",
+            name="produitpage_ptr",
         ),
         migrations.DeleteModel(
             name="ReusableContent",

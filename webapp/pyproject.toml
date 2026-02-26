@@ -7,7 +7,7 @@ license = "MIT"
 dependencies = [
     "boto3<1.43",
     "dj-database-url>=3.0.1,<4",
-    "django>=5.2.11,<6",
+    "django>=6.0,<7",
     "django-extensions~=4.1",
     "django-import-export[xls, xlsx]>=4.3.8,<5",
     "django-ninja>=1.4.3,<2",
@@ -40,6 +40,7 @@ dependencies = [
     "sites-conformes>=2.5.2rc1",
     "wagtail==7.3",
     "pre-commit>=4.5.1",
+    "wagtailmenus>=4.0.6",
 ]
 
 [build-system]
@@ -56,7 +57,6 @@ addopts = "--reuse-db --ignore=scripts"
 filterwarnings = [
   # Because of django-ninja package, cf. https://github.com/vitalik/django-ninja/issues/1266
   "ignore::pydantic.warnings.PydanticDeprecatedSince20",
-  "ignore::django.utils.deprecation.RemovedInDjango60Warning",
 ]
 
 [dependency-groups]
