@@ -22,7 +22,6 @@ env_files = [".env.template"]
 addopts = "--reuse-db --ignore=scripts"
 filterwarnings = [
   "ignore::pydantic.warnings.PydanticDeprecatedSince20",
-  "ignore::django.utils.deprecation.RemovedInDjango60Warning",
 ]
 
 [tool.pyright]
