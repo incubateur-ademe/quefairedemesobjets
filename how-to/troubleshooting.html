@@ -508,6 +508,57 @@ Type<span class="w"> </span><span class="s2">&quot;help&quot;</span>,<span class
 </pre></div>
 </div>
 </section>
+<section id="construire-et-pousser-les-images-docker-vers-scaleway">
+<h2>Construire et pousser les images Docker vers Scaleway<a class="headerlink" href="#construire-et-pousser-les-images-docker-vers-scaleway" title="Lien vers cette rubrique">¶</a></h2>
+<p>La CI/CD prend en charge le déploiement des versions de code, le déploiement est automatique selon la gestion des tags. Cependant, si quelques chose se passe mal, il est possible de déployer des images docker par la suite de commande ci-dessous.</p>
+<p>Pour construire et pousser les images Docker (airflow-scheduler et airflow-webserver) vers le registre Scaleway avec un tag spécifique :</p>
+<section id="configuration-du-registre-scaleway">
+<h3>Configuration du registre Scaleway<a class="headerlink" href="#configuration-du-registre-scaleway" title="Lien vers cette rubrique">¶</a></h3>
+<section id="prerequis">
+<h4>Prérequis<a class="headerlink" href="#prerequis" title="Lien vers cette rubrique">¶</a></h4>
+<p>le CLI scaleway <code class="docutils literal notranslate"><span class="pre">scw</span></code> doit-être installé et connecté avec son compte.
+Si ce n’est pas le cas suivre <a class="reference external" href="https://github.com/scaleway/scaleway-cli">les instructions d’installation et initialisation</a></p>
+</section>
+<section id="variables-d-environnement">
+<h4>Variables d’environnement<a class="headerlink" href="#variables-d-environnement" title="Lien vers cette rubrique">¶</a></h4>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nv">SCALEWAY_REGISTRY</span><span class="o">=</span><span class="s2">&quot;rg.fr-par.scw.cloud&quot;</span>
+<span class="nv">SCALEWAY_NAMESPACE</span><span class="o">=</span><span class="s2">&quot;ns-qfdmo&quot;</span>
+<span class="nv">TAG</span><span class="o">=</span><span class="s2">&quot;hotfix-vX.Y.Z&quot;</span>
+<span class="nv">SCALEWAY_DOCKER_SECRET</span><span class="o">=</span><span class="k">$(</span>scw<span class="w"> </span>config<span class="w"> </span>get<span class="w"> </span>secret-key<span class="k">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="connexion-au-registre-scaleway-remplacer-scaleway-docker-secret-par-votre-token">
+<h3>1. Connexion au registre Scaleway (remplacer $SCALEWAY_DOCKER_SECRET par votre token)<a class="headerlink" href="#connexion-au-registre-scaleway-remplacer-scaleway-docker-secret-par-votre-token" title="Lien vers cette rubrique">¶</a></h3>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span><span class="w"> </span><span class="nv">$SCALEWAY_DOCKER_SECRET</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>docker<span class="w"> </span>login<span class="w"> </span><span class="nv">$SCALEWAY_REGISTRY</span><span class="w"> </span>-u<span class="w"> </span>nologin<span class="w"> </span>--password-stdin
+</pre></div>
+</div>
+</section>
+<section id="construction-et-push-de-l-image-airflow-scheduler">
+<h3>2. Construction et push de l’image airflow-scheduler<a class="headerlink" href="#construction-et-push-de-l-image-airflow-scheduler" title="Lien vers cette rubrique">¶</a></h3>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>build<span class="w"> </span>--platform<span class="o">=</span>linux/amd64<span class="w"> </span>-f<span class="w"> </span>./data-platform/airflow-scheduler.Dockerfile<span class="w"> </span>-t<span class="w"> </span><span class="nv">$SCALEWAY_REGISTRY</span>/<span class="nv">$SCALEWAY_NAMESPACE</span>/airflow-scheduler:<span class="nv">$TAG</span><span class="w"> </span>.
+docker<span class="w"> </span>push<span class="w"> </span><span class="nv">$SCALEWAY_REGISTRY</span>/<span class="nv">$SCALEWAY_NAMESPACE</span>/airflow-scheduler:<span class="nv">$TAG</span>
+</pre></div>
+</div>
+</section>
+<section id="construction-et-push-de-l-image-airflow-webserver">
+<h3>3. Construction et push de l’image airflow-webserver<a class="headerlink" href="#construction-et-push-de-l-image-airflow-webserver" title="Lien vers cette rubrique">¶</a></h3>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>build<span class="w"> </span>--platform<span class="o">=</span>linux/amd64<span class="w"> </span>-f<span class="w"> </span>./data-platform/airflow-webserver.Dockerfile<span class="w"> </span>-t<span class="w"> </span><span class="nv">$SCALEWAY_REGISTRY</span>/<span class="nv">$SCALEWAY_NAMESPACE</span>/airflow-webserver:<span class="nv">$TAG</span><span class="w"> </span>.
+docker<span class="w"> </span>push<span class="w"> </span><span class="nv">$SCALEWAY_REGISTRY</span>/<span class="nv">$SCALEWAY_NAMESPACE</span>/airflow-webserver:<span class="nv">$TAG</span>
+</pre></div>
+</div>
+<p>Les images seront disponibles aux adresses suivantes :</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">rg.fr-par.scw.cloud/ns-qfdmo/airflow-scheduler:hotfix-vX.Y.Z</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rg.fr-par.scw.cloud/ns-qfdmo/airflow-webserver:hotfix-vX.Y.Z</span></code></p></li>
+</ul>
+</section>
+<section id="deployer-sur-scaleway">
+<h3>4. Déployer sur Scaleway<a class="headerlink" href="#deployer-sur-scaleway" title="Lien vers cette rubrique">¶</a></h3>
+<p>À partir de <code class="docutils literal notranslate"><span class="pre">Serverless</span></code> &gt; <code class="docutils literal notranslate"><span class="pre">Containers</span></code> &gt; <code class="docutils literal notranslate"><span class="pre">Settings</span></code>, éditer l’image du container à utiliser et choisir le tag précédemment créé.</p>
+</section>
+</section>
 </section>
 
         </article>
@@ -588,6 +639,18 @@ Type<span class="w"> </span><span class="s2">&quot;help&quot;</span>,<span class
 <li><a class="reference internal" href="#creer-un-utilisateur-sur-airflow-sans-acces-a-la-ui">Créer un utilisateur sur Airflow sans accès à la UI</a></li>
 <li><a class="reference internal" href="#inspecter-une-image-docker">Inspecter une image docker</a></li>
 <li><a class="reference internal" href="#resoudre-des-problemes-de-formatting-dans-infrastructure">Résoudre des problèmes de formatting dans <code class="docutils literal notranslate"><span class="pre">infrastructure</span></code></a></li>
+<li><a class="reference internal" href="#construire-et-pousser-les-images-docker-vers-scaleway">Construire et pousser les images Docker vers Scaleway</a><ul>
+<li><a class="reference internal" href="#configuration-du-registre-scaleway">Configuration du registre Scaleway</a><ul>
+<li><a class="reference internal" href="#prerequis">Prérequis</a></li>
+<li><a class="reference internal" href="#variables-d-environnement">Variables d’environnement</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#connexion-au-registre-scaleway-remplacer-scaleway-docker-secret-par-votre-token">1. Connexion au registre Scaleway (remplacer $SCALEWAY_DOCKER_SECRET par votre token)</a></li>
+<li><a class="reference internal" href="#construction-et-push-de-l-image-airflow-scheduler">2. Construction et push de l’image airflow-scheduler</a></li>
+<li><a class="reference internal" href="#construction-et-push-de-l-image-airflow-webserver">3. Construction et push de l’image airflow-webserver</a></li>
+<li><a class="reference internal" href="#deployer-sur-scaleway">4. Déployer sur Scaleway</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
