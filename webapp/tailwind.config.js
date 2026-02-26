@@ -1,6 +1,9 @@
 /** @type {import('tailwindcss').Config | null} */
 import DSFRColors from "./dsfr_hacks/colors"
 import usedColors from "./dsfr_hacks/used_colors"
+import { backgroundColors, textColors } from "./dsfr_hacks/semantic_colors"
+import dsfrTypography from "./dsfr_hacks/typography"
+import plugin from "tailwindcss/plugin"
 
 module.exports = {
   content: [
@@ -107,5 +110,29 @@ module.exports = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate"),
+    // Semantic DSFR color utilities: qf-bg-<name> and qf-text-<name>
+    plugin(({ addUtilities }) => {
+      const bgUtils = Object.fromEntries(
+        Object.entries(backgroundColors).map(([key, val]) => [
+          `.qf-bg-${key}`,
+          { "background-color": val },
+        ]),
+      )
+      const textUtils = Object.fromEntries(
+        Object.entries(textColors).map(([key, val]) => [
+          `.qf-text-${key}`,
+          { color: val },
+        ]),
+      )
+      addUtilities({ ...bgUtils, ...textUtils })
+    }),
+    // Responsive DSFR typography utilities: fr-h1..fr-h6, fr-display--*, fr-text--*
+    // Registers them as Tailwind utilities so responsive variants work (e.g. md:fr-h6, max-md:fr-h3)
+    // Classes are extracted from @gouvfr/dsfr/dist/core/core.main.css at build time.
+    plugin(({ addUtilities }) => {
+      addUtilities(dsfrTypography, { respectPrefix: false })
+    }),
+  ],
 }

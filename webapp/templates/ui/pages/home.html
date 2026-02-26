@@ -6,32 +6,35 @@
 {% block main %}
 <div data-home class="qf-group qf-flex qf-justify-center qf-flex-col qf-gap-2w">
     <div class="qf-bg-green-menthe-975-75 qf-py-4w
-    qf-flex qf-flex-col qf-gap-2w qf-justify-center qf-text-center">
+    qf-flex qf-flex-col qf-gap-3w">
 
-    <div class="logo">
-        {% if page.hero_title %}
-            <div class="qf-max-w-[650px] qf-mx-auto">{{ page.hero_title|richtext }}</div>
-        {% else %}
-            {% include "ui/components/logo/site_logo_large.html" %}
+    {# Wrapper for padding on mobile #}
+    <div class="qf-flex qf-flex-col qf-gap-2w qf-justify-center qf-text-center qf-items-center max-md:qf-px-2w">
+        <div class="logo">
+            {% if page.hero_title %}
+                <div class="qf-max-w-[650px] qf-mx-auto">{{ page.hero_title|richtext }}</div>
+            {% else %}
+                {% include "ui/components/logo/site_logo_large.html" %}
+            {% endif %}
+        </div>
+
+        {% if page.hero_subtitle %}
+        <div class="max-md:fr-h6 fr-h4 !qf-mb-3v [&_b]:qf-px-[0.25rem] [&_b]:qf-py-[0.2rem] qf-max-w-[650px] qf-mx-auto [&_b]:qf-rounded-full [&_b]:qf-bg-green-menthe-sun-373-moon-652 [&_b]:qf-text-white [&_b]:qf-leading-none [&_b]:qf-inline-block">
+            {{ page.hero_subtitle|richtext }}
+        </div>
         {% endif %}
-    </div>
 
-    {% if page.hero_subtitle %}
-    <div class="fr-h4 qf-mb-3v [&_b]:qf-px-[0.25rem] [&_b]:qf-py-[0.2rem] qf-max-w-[650px] qf-mx-auto [&_b]:qf-rounded-full [&_b]:qf-bg-green-menthe-sun-373-moon-652 [&_b]:qf-text-white [&_b]:qf-leading-none [&_b]:qf-inline-block">
-        {{ page.hero_subtitle|richtext }}
-    </div>
-    {% endif %}
-
-    <div class="qf-w-full qf-mx-auto qf-max-w-3xl qf-text-left">
-        {% if page.hero_search_label %}
-        <p class="qf-font-bold qf-mb-1w qf-text-lg">{{ page.hero_search_label }}</p>
-        {% endif %}
-        {{ assistant.qf_search_form }}
+        <div class="qf-w-full qf-mx-auto qf-max-w-3xl qf-text-left">
+            {% if page.hero_search_label %}
+            <p class="qf-font-bold !qf-mb-1w fr-text--md md:fr-text--lg">{{ page.hero_search_label }}</p>
+            {% endif %}
+            {{ assistant.qf_search_form }}
+        </div>
     </div>
 
     {% if page.icons %}
     <div class="qf-w-full qf-overflow-hidden" aria-hidden="true">
-        <div class="qf-grid qf-grid-cols-[repeat(27,calc(30px+0.5rem))] md:qf-grid-cols-[repeat(27,calc(50px+0.5rem))] qf-justify-center qf-pt-2w">
+        <div class="qf-grid qf-grid-cols-[repeat(27,calc(30px+0.5rem))] md:qf-grid-cols-[repeat(27,calc(50px+0.5rem))] qf-justify-center">
             {% for block in page.icons %}
                 {% if forloop.counter <= 27 %}
                     <div class="qf-w-[30px] qf-h-[30px] md:qf-w-[50px] md:qf-h-[50px] qf-mx-1v">
@@ -43,7 +46,7 @@
                 {% endif %}
             {% endfor %}
         </div>
-        <div class="qf-grid qf-grid-cols-[repeat(27,calc(30px+0.5rem))] md:qf-grid-cols-[repeat(27,calc(50px+0.5rem))] qf-justify-center qf-pt-2w qf-translate-x-[calc((30px+0.5rem)/2)] md:qf-translate-x-[calc((50px+0.5rem)/2)]">
+        <div class="qf-grid qf-grid-cols-[repeat(27,calc(30px+0.5rem))] md:qf-grid-cols-[repeat(27,calc(50px+0.5rem))] qf-justify-center qf-pt-1v qf-translate-x-[calc((30px+0.5rem)/2)] md:qf-translate-x-[calc((50px+0.5rem)/2)]">
             {% for block in page.icons %}
                 {% if forloop.counter > 27 %}
                     <div class="qf-w-[30px] qf-h-[30px] md:qf-w-[50px] md:qf-h-[50px] qf-mx-1v">
