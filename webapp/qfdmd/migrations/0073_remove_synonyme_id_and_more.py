@@ -64,11 +64,18 @@ class Migration(migrations.Migration):
             create_search_terms_for_synonymes,
             reverse_search_terms_for_synonymes,
         ),
-        # Django 6.0 no longer uses CASCADE when dropping a column, so we must
-        # manually re-point the FK constraints on legacy tables that reference
-        # synonyme.id before we can drop that column.
+        # Django 6.0 no longer uses CASCADE when dropping a column, so FK
+        # constraints on legacy tables that reference synonyme.id must be
+        # handled explicitly before we can drop that column.
+        # Step A: drop the FK constraints and remap the FK values to the new PK
         migrations.RunSQL(
             sql="""
+                -- Drop old FK constraints referencing synonyme.id
+                ALTER TABLE qfdmd_legacyintermediateproduitpagesynonymeexclusion
+                    DROP CONSTRAINT qfdmd_legacyintermed_synonyme_id_775c903b_fk_qfdmd_syn;
+                ALTER TABLE qfdmd_legacyintermediatesynonymepage
+                    DROP CONSTRAINT qfdmd_legacyintermed_synonyme_id_748f673c_fk_qfdmd_syn;
+
                 -- Remap FK values: old synonyme.id → new synonyme.searchterm_ptr_id
                 UPDATE qfdmd_legacyintermediateproduitpagesynonymeexclusion exc
                 SET synonyme_id = syn.searchterm_ptr_id
@@ -79,27 +86,10 @@ class Migration(migrations.Migration):
                 SET synonyme_id = syn.searchterm_ptr_id
                 FROM qfdmd_synonyme syn
                 WHERE sp.synonyme_id = syn.id;
-
-                -- Drop old FK constraints referencing synonyme.id
-                ALTER TABLE qfdmd_legacyintermediateproduitpagesynonymeexclusion
-                    DROP CONSTRAINT qfdmd_legacyintermed_synonyme_id_775c903b_fk_qfdmd_syn;
-                ALTER TABLE qfdmd_legacyintermediatesynonymepage
-                    DROP CONSTRAINT qfdmd_legacyintermed_synonyme_id_748f673c_fk_qfdmd_syn;
-
-                -- Re-add FK constraints now referencing synonyme.searchterm_ptr_id
-                ALTER TABLE qfdmd_legacyintermediateproduitpagesynonymeexclusion
-                    ADD CONSTRAINT qfdmd_legacyintermed_synonyme_id_775c903b_fk_qfdmd_syn
-                    FOREIGN KEY (synonyme_id)
-                    REFERENCES qfdmd_synonyme(searchterm_ptr_id)
-                    DEFERRABLE INITIALLY DEFERRED;
-                ALTER TABLE qfdmd_legacyintermediatesynonymepage
-                    ADD CONSTRAINT qfdmd_legacyintermed_synonyme_id_748f673c_fk_qfdmd_syn
-                    FOREIGN KEY (synonyme_id)
-                    REFERENCES qfdmd_synonyme(searchterm_ptr_id)
-                    DEFERRABLE INITIALLY DEFERRED;
             """,
             reverse_sql=migrations.RunSQL.noop,
         ),
+        # Step B: now id has no dependents, drop it and promote searchterm_ptr to PK
         migrations.RemoveField(
             model_name="synonyme",
             name="id",
@@ -115,6 +105,22 @@ class Migration(migrations.Migration):
                 serialize=False,
                 to="search.searchterm",
             ),
+        ),
+        # Step C: re-add FK constraints now referencing the new PK
+        migrations.RunSQL(
+            sql="""
+                ALTER TABLE qfdmd_legacyintermediateproduitpagesynonymeexclusion
+                    ADD CONSTRAINT qfdmd_legacyintermed_synonyme_id_775c903b_fk_qfdmd_syn
+                    FOREIGN KEY (synonyme_id)
+                    REFERENCES qfdmd_synonyme(searchterm_ptr_id)
+                    DEFERRABLE INITIALLY DEFERRED;
+                ALTER TABLE qfdmd_legacyintermediatesynonymepage
+                    ADD CONSTRAINT qfdmd_legacyintermed_synonyme_id_748f673c_fk_qfdmd_syn
+                    FOREIGN KEY (synonyme_id)
+                    REFERENCES qfdmd_synonyme(searchterm_ptr_id)
+                    DEFERRABLE INITIALLY DEFERRED;
+            """,
+            reverse_sql=migrations.RunSQL.noop,
         ),
         migrations.CreateModel(
             name="ProduitPageSearchTerm",
