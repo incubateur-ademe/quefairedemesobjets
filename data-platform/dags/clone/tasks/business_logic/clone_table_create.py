@@ -45,16 +45,17 @@ def command_ogr2ogr_import_geojson(
     # Build PostgreSQL connection string for ogr2ogr
     # Format: PG:"dbname=name user=user password=pass host=host port=port"
     pg_connection_string = (
-        f'PG:"dbname={warehouse_db_settings["NAME"]} '
-        f'user={warehouse_db_settings["USER"]} '
-        f'password={warehouse_db_settings["PASSWORD"]} '
-        f'host={warehouse_db_settings["HOST"]} '
-        f'port={warehouse_db_settings["PORT"]}"'
+        f"PG:'dbname={warehouse_db_settings['NAME']} "
+        f"user={warehouse_db_settings['USER']} "
+        f"password={warehouse_db_settings['PASSWORD']} "
+        f"host={warehouse_db_settings['HOST']} "
+        f"port={warehouse_db_settings['PORT']}'"
     )
 
     cmd = (
         f'ogr2ogr -f "PostgreSQL" {pg_connection_string} '
         f"-overwrite "
+        f"--config OGR_PG_ENABLE_METADATA NO "
         f"-lco GEOMETRY_NAME={geometry_column_name} "
         f"-lco FID=id "
         f"-lco PRECISION=NO "
