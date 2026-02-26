@@ -111,7 +111,7 @@ class ActeurService(CodeAsNaturalKeyModel):
         verbose_name_plural = "Services proposés"
         constraints = [
             CheckConstraint(
-                check=Q(code__regex=CodeValidator.regex),
+                condition=Q(code__regex=CodeValidator.regex),
                 name="acteur_service_code_format",
             ),
         ]
@@ -141,7 +141,8 @@ class ActeurType(CodeAsNaturalKeyModel):
         verbose_name_plural = "Types d'acteur"
         constraints = [
             CheckConstraint(
-                check=Q(code__regex=CodeValidator.regex), name="acteur_type_code_format"
+                condition=Q(code__regex=CodeValidator.regex),
+                name="acteur_type_code_format",
             ),
         ]
 
@@ -181,7 +182,8 @@ class Source(CodeAsNaturalKeyModel):
         verbose_name_plural = "Sources de données"
         constraints = [
             CheckConstraint(
-                check=Q(code__regex=CodeValidator.regex), name="source_code_format"
+                condition=Q(code__regex=CodeValidator.regex),
+                name="source_code_format",
             ),
         ]
 
