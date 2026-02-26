@@ -21,7 +21,7 @@ export const config: PlaywrightTestConfig = {
     reuseExistingServer: !process.env.CI,
     env: {
       ...(process.env as Record<string, string>),
-      DATABASE_URL: process.env.SAMPLE_DATABASE_URL!,
+      DATABASE_URL: (process.env.SAMPLE_DATABASE_URL ?? process.env.DATABASE_URL)!,
       SECRET_KEY: process.env.SECRET_KEY!,
       BASE_URL: "http://localhost:8888",
     },
