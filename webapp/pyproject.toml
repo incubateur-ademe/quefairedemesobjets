@@ -54,7 +54,7 @@ packages = ["core", "data", "dsfr_hacks", "infotri", "qfdmd", "qfdmo", "search",
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "core.test_settings"
 env_files = [".env.template"]
-addopts = "--reuse-db --ignore=scripts"
+addopts = "--ignore=scripts"
 filterwarnings = [
   # Because of django-ninja package, cf. https://github.com/vitalik/django-ninja/issues/1266
   "ignore::pydantic.warnings.PydanticDeprecatedSince20",

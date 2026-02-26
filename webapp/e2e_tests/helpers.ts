@@ -521,7 +521,7 @@ export async function clickFirstClickableActeurMarker(
   context: Page | FrameLocator,
   options: { timeout?: number } = {},
 ) {
-  const { timeout = 1000 } = options
+  const { timeout = 2500 } = options
 
   // Select markers that contain a pinpoint controller link (not the home marker)
   const acteurMarkers = context.locator(

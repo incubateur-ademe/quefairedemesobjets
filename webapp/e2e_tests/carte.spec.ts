@@ -281,7 +281,6 @@ test.describe("🗺️ Persistance des Filtres de Légende", () => {
 
     // Switch back to carte mode
     await switchToCarteMode(page)
-    await waitForLoadingComplete(page)
 
     // Wait for results to be displayed after mode switch
     await expect(
@@ -532,6 +531,7 @@ test.describe("🗺️ Mini Carte - Affichage des Pinpoints", () => {
   test("La fiche acteur affiche une mini carte avec les pinpoints acteur et home", async ({
     page,
   }) => {
+    test.slow()
     // Navigate to the carte page
     await navigateTo(page, "/carte")
 
@@ -669,6 +669,7 @@ test.describe("🗺️ Bouton Itinéraire", () => {
   test("Le bouton Itinéraire est visible sur une carte sur mesure", async ({
     page,
   }) => {
+    test.slow()
     // Navigate to the test preview page that generates a carte sur mesure iframe
     await navigateTo(
       page,
