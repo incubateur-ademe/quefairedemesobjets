@@ -12,7 +12,7 @@ resource "scaleway_container" "airflow_scheduler" {
   deploy              = true
   privacy             = "public"
   protocol            = "http1"
-  local_storage_limit = 10250 # 10 GB
+  local_storage_limit = 20480 # 20 GB
   sandbox             = "v1"
   health_check {
     http {
