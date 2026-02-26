@@ -17,7 +17,6 @@ env:
   PGPASSWORD: webapp # pragma: allowlist secret
   PGDATABASE: webapp
   UV_PROJECT_ENVIRONMENT: .venv
-  BASE_URL: http://localhost:8000
   DATABASE_URL: postgres://webapp:webapp@localhost:5432/webapp # pragma: allowlist secret
   SECRET_KEY: coucou # pragma: allowlist secret
   CI: true
@@ -91,8 +90,8 @@ jobs:
           uv run python manage.py populate_search_terms
           make rebuild-search-index
 
-      - name: Start Django server
-        uses: ./.github/actions/start-django-server
+      # - name: Start Django server
+      #   uses: ./.github/actions/start-django-server
 
       - name: Download baseline screenshots
         if: inputs.compare

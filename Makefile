@@ -5,6 +5,12 @@ SAMPLE_DB_URL ?= $(if $(SAMPLE_DATABASE_URL),$(SAMPLE_DATABASE_URL),$(DB_URL))
 SAMPLE_DUMP_FILE ?= tmpbackup-sample/sample.custom
 BASE_DOMAIN := quefairedemesdechets.ademe.local
 
+# Loading environment variables
+ifneq (,$(wildcard ./.env))
+    include .env
+    export
+endif
+
 # Makefile config
 .PHONY: check
 check:
