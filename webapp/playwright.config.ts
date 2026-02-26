@@ -52,8 +52,6 @@ export const config: PlaywrightTestConfig = {
             "--use-angle=gl",
             "--use-gl=angle",
             "--ignore-gpu-blacklist",
-            // "--use-gl=swiftshader",
-            // "--disable-gpu-sandbox",
           ],
         },
       },

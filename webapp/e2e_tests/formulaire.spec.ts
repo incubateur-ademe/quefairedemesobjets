@@ -157,11 +157,11 @@ test.describe("🗺️ Affichage et Interaction Acteurs", () => {
     let inputSelector = "#id_sous_categorie_objet"
     await iframe.locator(inputSelector).click()
     await iframe.locator(inputSelector).fill("perceuse")
-    await iframe
-      .locator(
-        "#id_sous_categorie_objetautocomplete-list.autocomplete-items div:nth-child(1)",
-      )
-      .click()
+    const firstProductOption = iframe.locator(
+      "#id_sous_categorie_objetautocomplete-list.autocomplete-items div:nth-child(1)",
+    )
+    await expect(firstProductOption).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+    await firstProductOption.click()
 
     // Fill adresse
     await mockApiAdresse(page)
