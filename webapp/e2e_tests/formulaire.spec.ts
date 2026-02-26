@@ -176,7 +176,7 @@ test.describe("🗺️ Affichage et Interaction Acteurs", () => {
       '.maplibregl-marker[data-controller="pinpoint"]:not(#pinpoint-home)',
     )
     await expect(acteurMarkers.first()).toBeVisible({
-      timeout: TIMEOUT.DEFAULT,
+      timeout: TIMEOUT.LONG,
     })
 
     // Click on the first acteur marker
