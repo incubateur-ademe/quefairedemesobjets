@@ -64,6 +64,10 @@ class MapController extends Controller<HTMLElement> {
     removeHash()
   }
 
+  disconnect() {
+    this.actorsMap?.map?.remove()
+  }
+
   initialize() {
     this.mapChanged = debounce(this.mapChanged, 300).bind(this)
   }
