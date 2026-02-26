@@ -8,7 +8,6 @@
     <div class="qf-bg-green-menthe-975-75 qf-py-4w
     qf-flex qf-flex-col qf-gap-2w qf-justify-center qf-text-center">
 
-    {# title — falls back to the SVG logo when no hero_title is set #}
     <div class="logo">
         {% if page.hero_title %}
             <div class="qf-max-w-[650px] qf-mx-auto">{{ page.hero_title|richtext }}</div>
@@ -17,34 +16,43 @@
         {% endif %}
     </div>
 
-    {# subtitle #}
-    {%comment%}
-    values in rem below must be kept as is as the current framework spacing values do not allow
-    to match precisely the mockup.
-    {% endcomment %}
     {% if page.hero_subtitle %}
     <div class="fr-h4 qf-mb-3v [&_b]:qf-px-[0.25rem] [&_b]:qf-py-[0.2rem] qf-max-w-[650px] qf-mx-auto [&_b]:qf-rounded-full [&_b]:qf-bg-green-menthe-sun-373-moon-652 [&_b]:qf-text-white [&_b]:qf-leading-none [&_b]:qf-inline-block">
         {{ page.hero_subtitle|richtext }}
     </div>
     {% endif %}
 
-    {# search #}
-    <div class="qf-w-full qf-mx-auto qf-max-w-3xl qf-pb-6w qf-text-left">
+    <div class="qf-w-full qf-mx-auto qf-max-w-3xl qf-text-left">
         {% if page.hero_search_label %}
         <p class="qf-font-bold qf-mb-1w qf-text-lg">{{ page.hero_search_label }}</p>
         {% endif %}
         {{ assistant.qf_search_form }}
     </div>
 
-    {# patchwork of icons #}
     {% if page.icons %}
     <div class="qf-w-full qf-overflow-hidden" aria-hidden="true">
-        <div class="qf-flex qf-flex-wrap qf-justify-center qf-gap-3w qf-py-2w">
+        <div class="qf-grid qf-grid-cols-[repeat(27,calc(30px+0.5rem))] md:qf-grid-cols-[repeat(27,calc(50px+0.5rem))] qf-justify-center qf-pt-2w">
             {% for block in page.icons %}
-                <div class="qf-w-[3rem] qf-h-[3rem] qf-opacity-60">
-                    {% image block.value fill-48x48 as icon_img %}
-                    <img src="{{ icon_img.url }}" alt="" width="48" height="48">
-                </div>
+                {% if forloop.counter <= 27 %}
+                    <div class="qf-w-[30px] qf-h-[30px] md:qf-w-[50px] md:qf-h-[50px] qf-mx-1v">
+                        {% image block.value fill-30x30 as icon_img_sm %}
+                        {% image block.value fill-50x50 as icon_img_lg %}
+                        <img class="md:qf-hidden" src="{{ icon_img_sm.url }}" alt="" width="30" height="30">
+                        <img class="qf-hidden md:qf-block" src="{{ icon_img_lg.url }}" alt="" width="50" height="50">
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        <div class="qf-grid qf-grid-cols-[repeat(27,calc(30px+0.5rem))] md:qf-grid-cols-[repeat(27,calc(50px+0.5rem))] qf-justify-center qf-pt-2w qf-translate-x-[calc((30px+0.5rem)/2)] md:qf-translate-x-[calc((50px+0.5rem)/2)]">
+            {% for block in page.icons %}
+                {% if forloop.counter > 27 %}
+                    <div class="qf-w-[30px] qf-h-[30px] md:qf-w-[50px] md:qf-h-[50px] qf-mx-1v">
+                        {% image block.value fill-30x30 as icon_img_sm %}
+                        {% image block.value fill-50x50 as icon_img_lg %}
+                        <img class="md:qf-hidden" src="{{ icon_img_sm.url }}" alt="" width="30" height="30">
+                        <img class="qf-hidden md:qf-block" src="{{ icon_img_lg.url }}" alt="" width="50" height="50">
+                    </div>
+                {% endif %}
             {% endfor %}
         </div>
     </div>

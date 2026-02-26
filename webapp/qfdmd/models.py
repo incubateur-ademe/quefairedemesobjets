@@ -174,7 +174,7 @@ class HomePage(ContentPage):
         blank=True,
     )
 
-    content_panels = ContentPage.content_panels + [
+    header_panels = [
         MultiFieldPanel(
             [
                 FieldPanel("hero_subtitle"),
@@ -184,6 +184,14 @@ class HomePage(ContentPage):
         ),
         FieldPanel("icons"),
     ]
+    edit_handler = TabbedInterface(
+        [
+            ObjectList(ContentPage.content_panels, heading="Contenu"),
+            ObjectList(header_panels, heading="Entête"),
+            ObjectList(ContentPage.promote_panels, heading="Promotion (SEO)"),
+            ObjectList(ContentPage.settings_panels, heading="Paramètres"),
+        ],
+    )
 
     @override
     def serve(self, request, *args, **kwargs):
