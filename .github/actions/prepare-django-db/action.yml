@@ -30,15 +30,15 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Check database cache
-      id: cache-db
-      uses: actions/cache@v5
-      with:
-        path: ${{ inputs.local-dump-path }}
-        key: ${{ inputs.cache-key }}
+    # - name: Check database cache
+    #   id: cache-db
+    #   uses: actions/cache@v5
+    #   with:
+    #     path: ${{ inputs.local-dump-path }}
+    #     key: ${{ inputs.cache-key }}
 
     - name: Dump sample database from remote
-      # if: steps.cache-db.outputs.cache-hit != 'true'
+      if: steps.cache-db.outputs.cache-hit != 'true'
       shell: bash
       run: |
         echo "Dumping sample database from remote..."
