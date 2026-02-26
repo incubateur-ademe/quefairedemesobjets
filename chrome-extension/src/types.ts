@@ -1,73 +1,73 @@
 import {
+  CONVERSION_SCORE_KEYS as _CONVERSION_SCORE_KEYS,
   IFRAME_REFERRER_SESSION_KEY as _IFRAME_REFERRER_SESSION_KEY,
   LOCATION_SESSION_KEYS as _LOCATION_SESSION_KEYS,
-  CONVERSION_SCORE_KEYS as _CONVERSION_SCORE_KEYS,
-} from "../../static/to_compile/js/shared_constants"
+} from "../../webapp/static/to_compile/js/shared_constants";
 
 export {
-  KNOWN_DOMAINS,
-  MAIN_DOMAIN,
-  CARTE_SCRIPT_FILENAME,
-  FORMULAIRE_SCRIPT_FILENAME,
   CARTE_ROUTE,
-  FORMULAIRE_ROUTE,
-  DECHET_ROUTE,
-  IFRAME_REFERRER_SESSION_KEY,
-  LOCATION_SESSION_KEYS,
+  CARTE_SCRIPT_FILENAME,
   CONVERSION_SCORE_KEYS,
+  DECHET_ROUTE,
+  FORMULAIRE_ROUTE,
+  FORMULAIRE_SCRIPT_FILENAME,
+  IFRAME_REFERRER_SESSION_KEY,
+  KNOWN_DOMAINS,
+  LOCATION_SESSION_KEYS,
+  MAIN_DOMAIN,
   USER_CONVERSION_SCORE_CONFIG,
-} from "../../static/to_compile/js/shared_constants"
-export type { UserConversionConfig } from "../../static/to_compile/js/shared_constants"
+} from "../../webapp/static/to_compile/js/shared_constants";
+export type { UserConversionConfig } from "../../webapp/static/to_compile/js/shared_constants";
 
 export type IframeType =
   | "carte"
   | "carte_sur_mesure"
   | "carte_preconfiguree"
   | "assistant"
-  | "unknown"
+  | "unknown";
 
 export interface DetectedIframe {
-  src: string
-  domain: string
-  type: IframeType
-  slug?: string
-  hasAdjacentScript: boolean
-  scriptSrc?: string
-  scriptDataAttributes: Record<string, string>
-  iframeDataAttributes: Record<string, string>
-  hasIframeResizer: boolean
-  insideTemplate: boolean
-  warnings: Warning[]
+  src: string;
+  domain: string;
+  type: IframeType;
+  slug?: string;
+  hasAdjacentScript: boolean;
+  scriptSrc?: string;
+  scriptDataAttributes: Record<string, string>;
+  iframeDataAttributes: Record<string, string>;
+  hasIframeResizer: boolean;
+  insideTemplate: boolean;
+  warnings: Warning[];
 }
 
 export interface Warning {
-  message: string
-  severity: "error" | "warning" | "info"
+  message: string;
+  severity: "error" | "warning" | "info";
 }
 
 export interface SessionStorageData {
   // Location
-  adresse: string | null
-  latitude: string | null
-  longitude: string | null
+  adresse: string | null;
+  latitude: string | null;
+  longitude: string | null;
   // Conversion score
-  homePageView: string | null
-  produitPageView: string | null
-  userInteractionWithMap: string | null
-  userInteractionWithSolutionDetails: string | null
+  homePageView: string | null;
+  produitPageView: string | null;
+  userInteractionWithMap: string | null;
+  userInteractionWithSolutionDetails: string | null;
   // Iframe referrer
-  qf_ifr: string | null
+  qf_ifr: string | null;
 }
 
 export const SESSION_STORAGE_KEYS: (keyof SessionStorageData)[] = [
   ..._LOCATION_SESSION_KEYS,
   ..._CONVERSION_SCORE_KEYS,
   _IFRAME_REFERRER_SESSION_KEY,
-] as (keyof SessionStorageData)[]
+] as (keyof SessionStorageData)[];
 
 export interface PageAnalysis {
-  iframes: DetectedIframe[]
-  totalWarnings: number
-  sessionStorage: SessionStorageData | null
-  isQfdmoPage: boolean
+  iframes: DetectedIframe[];
+  totalWarnings: number;
+  sessionStorage: SessionStorageData | null;
+  isQfdmoPage: boolean;
 }

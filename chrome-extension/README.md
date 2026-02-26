@@ -1,16 +1,13 @@
-<div align="center">
-<img src="public/icon-128.png" alt="logo"/>
-<h1> Minimalist Chrome/Firefox Extension Boilerplate with<br/>React + Vite + TypeScript + TailwindCSS</h1>
+![logo](public/icon-128.png)
 
-<h5>
-This template repository is a side product of my Chrome Extension <a target="_blank" rel="noopener noreferrer" href="https://chrome.google.com/webstore/detail/supatabs/icbcnjlaegndjabnjbaeihnnmidbfigk">Supatabs</a>.
-<br />
-If you tend to have tons of tabs open, or are a OneTab user, make sure to check it out <a target="_blank" rel="noopener noreferrer" href="https://chrome.google.com/webstore/detail/supatabs/icbcnjlaegndjabnjbaeihnnmidbfigk">here</a>!
-</h5>
+# Minimalist Chrome/Firefox Extension Boilerplate with
 
-<h5>Supatabs is an example and showcase of what you can develop with this template. (anything you want, really 🚀)</h5>
+React + Vite + TypeScript + TailwindCSS
 
-</div>
+This template repository is a side product of my Chrome Extension [Supatabs](https://chrome.google.com/webstore/detail/supatabs/icbcnjlaegndjabnjbaeihnnmidbfigk).
+If you tend to have tons of tabs open, or are a OneTab user, make sure to check it out [here](https://chrome.google.com/webstore/detail/supatabs/icbcnjlaegndjabnjbaeihnnmidbfigk)!
+
+Supatabs is an example and showcase of what you can develop with this template (anything you want, really).
 
 ## Table of Contents
 
