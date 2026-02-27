@@ -135,15 +135,17 @@ jobs:
           path: playwright-report/
           retention-days: 2
 
+      - name: Compute failure artifact name
+        if: failure()
+        id: failure-artifact-name
+        run: echo "value=playwright-report-${{ inputs.compare && 'compare' || 'baseline' }}-${{ inputs.shard && inputs.shard || 'all' }}" | tr '/' '-' >> $GITHUB_OUTPUT
+
       - name: Upload Playwright diffs on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-diffs
-          path: |
-            **/*-expected.png
-            **/*-actual.png
-            **/*-diff.png
+          name: ${{ steps.failure-artifact-name.outputs.value }}
+          path: webapp/test-results/
 
 permissions:
   contents: read

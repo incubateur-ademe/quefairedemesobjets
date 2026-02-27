@@ -352,7 +352,7 @@ test.describe("🗺️ Bouton 'Rechercher dans cette zone'", () => {
   // TODO: Fix this test - programmatic map movement events don't trigger the button visibility
   // The mapChanged event needs to be triggered by actual map drag/zoom interactions
   // which are difficult to simulate reliably in an iframe test environment
-  test.skip("Le bouton apparaît après déplacement de la carte et met à jour les résultats", async ({
+  test("Le bouton apparaît après déplacement de la carte et met à jour les résultats", async ({
     page,
   }) => {
     // Navigate to the test preview page that generates the iframe
@@ -401,36 +401,19 @@ test.describe("🗺️ Bouton 'Rechercher dans cette zone'", () => {
     const mapCanvas = iframe.locator("canvas.maplibregl-canvas")
     await expect(mapCanvas).toBeVisible()
 
-    // Trigger map change event directly by calling the controller's mapChanged method
+    // Trigger a moveend event on the MapLibre map instance directly.
+    // This goes through the same code path as a real user drag:
+    //   map.on("moveend") → #dispatchMapChangedEvent → controller.mapChanged → show button
     await iframe.locator("body").evaluate(() => {
       const mapElement = document.querySelector('[data-controller*="map"]') as any
       if (!mapElement) return
-
-      // Get current map bounds to create event detail
       const map = mapElement.actorsMap?.map
       if (!map) return
-
-      const bounds = map.getBounds()
-      const detail = {
-        center: bounds.getCenter(),
-        southWest: bounds.getSouthWest(),
-        northEast: bounds.getNorthEast(),
-      }
-
-      // Create and dispatch the custom event that triggers mapChanged
-      const event = new CustomEvent("maplibre:mapChanged", {
-        detail,
-        bubbles: true,
-      })
-
-      // Call mapChanged directly on the controller
-      if (mapElement.mapChanged) {
-        mapElement.mapChanged(event)
-      }
+      map.fire("moveend")
     })
 
-    // Give time for the debounced mapChanged function (300ms) to execute
-    await page.waitForTimeout(1000)
+    // Give time for the debounced mapChanged (300ms) to execute
+    await page.waitForTimeout(500)
 
     // Wait for the button to appear (it will be shown after map movement is detected)
     await expect(searchInZoneButton).not.toHaveClass(/qf-hidden/, {
