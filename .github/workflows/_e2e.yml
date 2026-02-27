@@ -115,11 +115,16 @@ jobs:
         run: npx playwright test --grep=@regression ${{ inputs.shard && format('--shard={0}', inputs.shard) || '' }}
         working-directory: webapp
 
+      - name: Compute shard artifact name
+        if: ${{ !inputs.compare }}
+        id: artifact-name
+        run: echo "value=regression-screenshots-${{ inputs.shard && inputs.shard || 'all' }}" | tr '/' '-' >> $GITHUB_OUTPUT
+
       - name: Upload baseline screenshots
         if: ${{ !inputs.compare }}
         uses: actions/upload-artifact@v4
         with:
-          name: regression-screenshots-${{ inputs.shard && replace(inputs.shard, '/', '-') || 'all' }}
+          name: ${{ steps.artifact-name.outputs.value }}
           path: ${{ env.SCREENSHOTS_BASE_PATH }}
 
       - name: Upload Playwright report
