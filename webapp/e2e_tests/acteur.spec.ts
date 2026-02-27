@@ -4,7 +4,7 @@ import {
   getIframe,
   mockApiAdresse,
   navigateTo,
-  searchAddress,
+  searchCarteAndWaitForActeurs,
   switchToListeMode,
   TIMEOUT,
 } from "./helpers"
@@ -32,11 +32,9 @@ test.describe("📋 Fiche Acteur Viewport - mode carte", () => {
       })
 
       // Search for Auray in the carte embedded in the produit page
-      await searchAddress(iframe, "Auray", "carte", {
-        parentLocator: iframe,
-      })
+      await searchCarteAndWaitForActeurs(page, "Auray", iframe)
 
-      // Wait for acteur markers to appear
+      // Wait for acteur markers to be visible (already attached by searchCarteAndWaitForActeurs)
       const acteurMarkers = iframe.locator(
         '.maplibregl-marker[data-controller="pinpoint"]:not(#pinpoint-home)',
       )
@@ -94,7 +92,7 @@ test.describe("📋 Fiche Acteur Viewport - mode liste", () => {
       ).toBeVisible({ timeout: TIMEOUT.DEFAULT })
 
       // Search for Auray in the carte embedded in the produit page
-      await searchAddress(iframe, "Auray", "carte", {
+      await searchCarteAndWaitForActeurs(page, "Auray", iframe, {
         parentLocator: mauvaisEtatPanel,
       })
 

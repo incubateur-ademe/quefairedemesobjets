@@ -365,7 +365,7 @@ test.describe("🗺️ Bouton 'Rechercher dans cette zone'", () => {
     await page.locator("iframe").first().scrollIntoViewIfNeeded()
 
     // Search for Auray in the iframe
-    await searchForAurayInIframe(iframe)
+    await searchForAurayInIframe(iframe, undefined, page)
 
     // Wait for legend to be visible
     await iframe
@@ -684,7 +684,7 @@ test.describe("🗺️ Bouton Itinéraire", () => {
     await mockApiAdresse(page)
 
     // Search for Auray in the iframe
-    await searchForAurayInIframe(iframe)
+    await searchForAurayInIframe(iframe, undefined, page)
 
     // Wait for acteur markers to appear (excluding the home marker which has id="pinpoint-home")
     const acteurMarkers = iframe.locator(

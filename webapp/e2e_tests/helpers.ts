@@ -101,22 +101,111 @@ export async function searchAddress(
 }
 
 /**
+ * Search for an address in the carte and wait until acteur markers are ready.
+ *
+ * This is the preferred way to trigger an address search in carte tests because
+ * it waits for the right network signal instead of polling the loading spinner:
+ *
+ * 1. Types the address text into the autocomplete input
+ * 2. Registers a response listener BEFORE clicking (avoids race conditions)
+ * 3. Clicks the matching suggestion → triggers a Turbo Frame fetch to /carte
+ * 4. Awaits the fetch response (identified by the Turbo-Frame request header)
+ * 5. Waits for MapLibre to attach .maplibregl-marker to the pinpoint elements
+ *
+ * Live-confirmed behavior (Playwright MCP exploration):
+ * - Selecting an address sends `Turbo-Frame: <map_container_id>` in the request
+ * - The response HTML (~365 KB) contains the acteur pinpoints
+ * - MapLibre adds .maplibregl-marker directly to each <a data-controller="pinpoint">
+ *
+ * @param page       - The Playwright Page (used for network interception)
+ * @param searchText - Address text to type (e.g. "Auray")
+ * @param context    - DOM context for locators: either the Page or an iframe FrameLocator
+ * @param options    - parentSelector / parentLocator to scope the input locator
+ */
+export async function searchCarteAndWaitForActeurs(
+  page: Page,
+  searchText: string,
+  context: Page | FrameLocator = page,
+  options: {
+    parentSelector?: string
+    parentLocator?: Locator
+  } = {},
+): Promise<void> {
+  const inputSelector = '[data-testid="carte-adresse-input"]'
+  const autocompleteSelector =
+    ".autocomplete-items div[data-action*='address-autocomplete#selectOption']"
+
+  // Build the input locator, respecting optional parent scoping
+  const inputLocator = options.parentLocator
+    ? options.parentLocator.locator(inputSelector)
+    : options.parentSelector
+      ? context.locator(options.parentSelector).locator(inputSelector)
+      : context.locator(inputSelector)
+
+  await inputLocator.click()
+  await inputLocator.clear()
+  await inputLocator.pressSequentially(searchText, { delay: 30 })
+
+  // Wait for the autocomplete suggestion containing the search text
+  const autocompleteLocator = options.parentLocator
+    ? options.parentLocator.locator(autocompleteSelector)
+    : options.parentSelector
+      ? context.locator(options.parentSelector).locator(autocompleteSelector)
+      : context.locator(autocompleteSelector)
+
+  const optionWithText = autocompleteLocator.filter({ hasText: searchText })
+  await expect(optionWithText.first()).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+
+  // Register the network listener BEFORE clicking to avoid a race condition.
+  // The click triggers a Turbo Frame fetch to /carte.
+  // We identify the right response by the presence of the Turbo-Frame request header
+  // (its value is the map_container_id, e.g. "carte" or a custom id for embedded maps).
+  const carteResponsePromise = page.waitForResponse(
+    (response) => {
+      const turboFrame = response.request().headers()["turbo-frame"]
+      return (
+        response.url().includes("/carte") &&
+        turboFrame !== undefined &&
+        turboFrame !== "" &&
+        response.status() === 200
+      )
+    },
+    { timeout: TIMEOUT.LONG },
+  )
+
+  await optionWithText.first().click()
+  await carteResponsePromise
+
+  // Wait for MapLibre to attach .maplibregl-marker to the pinpoint <a> elements.
+  // This class is added by MapLibre after reading the rendered Turbo Frame HTML,
+  // and signals that the markers are positioned on the map and ready to be clicked.
+  const acteurMarkers = context.locator(
+    '.maplibregl-marker[data-controller="pinpoint"]:not(#pinpoint-home)',
+  )
+  await expect(acteurMarkers.first()).toBeAttached({ timeout: TIMEOUT.LONG })
+}
+
+/**
  * Specific search helpers for common use cases
  */
 export async function searchForAuray(page: Page, parentSelector?: string) {
-  await searchAddress(page, "Auray", "carte", { parentSelector })
-  await waitForLoadingComplete(page)
+  await searchCarteAndWaitForActeurs(page, "Auray", page, { parentSelector })
 }
 
 export async function searchForAurayInIframe(
   iframe: FrameLocator,
   parentSelector?: string,
+  page?: Page,
 ) {
-  await searchAddress(iframe, "Auray", "carte", { parentSelector })
-
-  // Wait for the loading indicator to appear and disappear
-  // This ensures the search request has completed
-  await waitForLoadingComplete(iframe)
+  // For iframe contexts we still need the top-level page for network interception.
+  // If page is not provided we fall back to the loading-spinner approach.
+  if (page) {
+    await searchCarteAndWaitForActeurs(page, "Auray", iframe, { parentSelector })
+  } else {
+    await searchAddress(iframe, "Auray", "carte", { parentSelector })
+    // Wait for the loading indicator to appear and disappear
+    await waitForLoadingComplete(iframe)
+  }
 }
 
 export async function searchDummyAdresse(page: Page) {
@@ -634,7 +723,7 @@ export async function searchOnProduitPage(page: Page, searchedAddress: string) {
   try {
     const mauvaisEtatPanel = page.locator("#mauvais-etat-panel")
     await expect(mauvaisEtatPanel).toBeAttached({ timeout: 1000 })
-    await searchAddress(page, searchedAddress, "carte", {
+    await searchCarteAndWaitForActeurs(page, searchedAddress, page, {
       parentLocator: mauvaisEtatPanel,
     })
   } catch {
@@ -642,7 +731,7 @@ export async function searchOnProduitPage(page: Page, searchedAddress: string) {
       .locator(".cmsfr-block-carte_sur_mesure turbo-frame[data-testid=carte]")
       .first()
     await expect(someWagtailCarteBlock).toBeAttached({ timeout: 1000 })
-    await searchAddress(page, searchedAddress, "carte", {
+    await searchCarteAndWaitForActeurs(page, searchedAddress, page, {
       parentLocator: someWagtailCarteBlock,
     })
   }
