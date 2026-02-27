@@ -74,6 +74,9 @@ Just to verify that our import is working correctly
 ALTER TABLE {{table_name}}
 ADD CONSTRAINT pk_{{table_name}} PRIMARY KEY (siret);
 
+/* Add index to siren */
+CREATE INDEX idx_siren_{{table_name}} ON {{table_name}} (siren);
+
 /* Indexes
 🔴 DO NOT USE indexes on those import tables: they can easily
 reach > 1 GB per index (e.g. SIRET on etablissement = 1.2GB)
