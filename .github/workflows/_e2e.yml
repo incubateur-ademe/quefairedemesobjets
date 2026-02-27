@@ -9,6 +9,10 @@ on:
       compare:
         required: true
         type: boolean
+      shard:
+        required: false
+        type: string
+        default: ""
 
 env:
   PGHOST: localhost
@@ -97,24 +101,25 @@ jobs:
         if: inputs.compare
         uses: actions/download-artifact@v4
         with:
-          name: regression-screenshots
+          pattern: regression-screenshots-*
+          merge-multiple: true
           path: ${{ env.SCREENSHOTS_BASE_PATH }}
 
       - name: Run Playwright tests
         if: ${{ !inputs.compare }}
-        run: npx playwright test --update-snapshots
+        run: npx playwright test --update-snapshots ${{ inputs.shard && format('--shard={0}', inputs.shard) || '' }}
         working-directory: webapp
 
       - name: Run Playwright tests (regression only)
         if: inputs.compare
-        run: npx playwright test --grep=@regression
+        run: npx playwright test --grep=@regression ${{ inputs.shard && format('--shard={0}', inputs.shard) || '' }}
         working-directory: webapp
 
       - name: Upload baseline screenshots
         if: ${{ !inputs.compare }}
         uses: actions/upload-artifact@v4
         with:
-          name: regression-screenshots
+          name: regression-screenshots-${{ inputs.shard && inputs.shard || 'all' }}
           path: ${{ env.SCREENSHOTS_BASE_PATH }}
 
       - name: Upload Playwright report

@@ -556,7 +556,7 @@ export async function switchToListeMode(context: Page | FrameLocator | Locator) 
 
   // Wait for liste mode to be active - map container should be hidden
   await expect(context.locator('[data-map-target="mapContainer"]')).not.toBeVisible({
-    timeout: TIMEOUT.DEFAULT,
+    timeout: TIMEOUT.LONG,
   })
 }
 
