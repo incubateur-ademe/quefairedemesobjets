@@ -661,7 +661,7 @@ export async function waitForLoadingComplete(
   context: Page | FrameLocator,
   selector = '[data-testid="loading-solutions"]',
 ) {
-  await expect(context.locator(selector)).toBeVisible()
+  // The spinner may appear briefly or be skipped entirely — only wait for it to be gone
   await expect(context.locator(selector)).toBeHidden({ timeout: TIMEOUT.LONG })
 }
 
