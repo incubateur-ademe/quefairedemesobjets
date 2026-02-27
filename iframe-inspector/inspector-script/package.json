@@ -1,0 +1,12 @@
+{
+  "name": "qfdmo-scripts",
+  "private": true,
+  "scripts": {
+    "check": "npx tsx check_carte_integrations.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "tsx": "^4.19.0",
+    "typescript": "^5.8.0"
+  }
+}

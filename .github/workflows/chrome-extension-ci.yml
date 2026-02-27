@@ -23,7 +23,7 @@ jobs:
         with:
           node-version: 18
           cache: "npm"
-          cache-dependency-path: chrome-extension/package-lock.json
+          cache-dependency-path: iframe-inspector/chrome-extension/package-lock.json
 
       - name: Install dependencies
         working-directory: chrome-extension
@@ -37,7 +37,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: chrome-extension-dist
-          path: chrome-extension/dist_chrome
+          path: iframe-inspector/chrome-extension/dist_chrome
           retention-days: 5
 
   e2e:
@@ -57,7 +57,7 @@ jobs:
         uses: actions/download-artifact@v7
         with:
           name: chrome-extension-dist
-          path: chrome-extension/dist_chrome
+          path: iframe-inspector/chrome-extension/dist_chrome
 
       - name: Setup Playwright
         uses: ./.github/actions/setup-playwright

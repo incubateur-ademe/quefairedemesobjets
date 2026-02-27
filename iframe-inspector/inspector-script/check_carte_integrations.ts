@@ -4,18 +4,16 @@
  * Reuses the same detection logic as the Chrome extension.
  *
  * Usage:
- *   NODE_PATH=webapp/node_modules npx tsx scripts/check_carte_integrations.ts <input> <output.csv>
+ *   cd iframe-inspector/inspector-script && npm install && npx playwright install chromium
+ *   npx tsx check_carte_integrations.ts <input> <output.csv>
  *
  * Input formats:
  *   - Text file: one URL per line
  *   - CSV file: reads URLs from column "Lien carte ou données"
  *
- * Dependencies (from webapp/node_modules):
+ * Dependencies (managed via inspector-script/package.json):
  *   - @playwright/test (Playwright browser automation)
  *   - tsx (TypeScript execution)
- *
- * Note: NODE_PATH is required because the script lives in scripts/ but
- * dependencies are installed in webapp/node_modules.
  */
 
 import { chromium } from "@playwright/test";
@@ -28,7 +26,7 @@ import {
   detectIframeIntegrations,
   detectScriptIntegrations,
   buildDetectionConfig,
-} from "../webapp/static/to_compile/js/shared_detection";
+} from "../shared/detection";
 import {
   KNOWN_DOMAINS,
   MAIN_DOMAIN,
@@ -37,7 +35,7 @@ import {
   DECHET_ROUTE,
   CARTE_SCRIPT_FILENAME,
   FORMULAIRE_SCRIPT_FILENAME,
-} from "../webapp/static/to_compile/js/shared_constants";
+} from "../shared/constants";
 
 // -- Config --
 

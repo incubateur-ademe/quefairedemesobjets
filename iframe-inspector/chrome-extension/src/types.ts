@@ -2,15 +2,15 @@ import {
   CONVERSION_SCORE_KEYS as _CONVERSION_SCORE_KEYS,
   IFRAME_REFERRER_SESSION_KEY as _IFRAME_REFERRER_SESSION_KEY,
   LOCATION_SESSION_KEYS as _LOCATION_SESSION_KEYS,
-} from "../../webapp/static/to_compile/js/shared_constants";
+} from "../../shared/constants";
 
 // Re-export shared detection types
 export type {
   DetectedIframe,
   DetectionConfig,
   IframeType,
-} from "../../webapp/static/to_compile/js/shared_detection";
-export type { IntegrationWarning as Warning } from "../../webapp/static/to_compile/js/shared_detection";
+} from "../../shared/detection";
+export type { IntegrationWarning as Warning } from "../../shared/detection";
 
 // Re-export shared constants
 export {
@@ -25,14 +25,14 @@ export {
   LOCATION_SESSION_KEYS,
   MAIN_DOMAIN,
   USER_CONVERSION_SCORE_CONFIG,
-} from "../../webapp/static/to_compile/js/shared_constants";
-export type { UserConversionConfig } from "../../webapp/static/to_compile/js/shared_constants";
+} from "../../shared/constants";
+export type { UserConversionConfig } from "../../shared/constants";
 
 // Re-export shared detection functions
 export {
   buildDetectionConfig,
   detectIframeIntegrations,
-} from "../../webapp/static/to_compile/js/shared_detection";
+} from "../../shared/detection";
 
 // -- Chrome-extension-specific types --
 
@@ -57,7 +57,7 @@ export const SESSION_STORAGE_KEYS: (keyof SessionStorageData)[] = [
 ] as (keyof SessionStorageData)[];
 
 export interface PageAnalysis {
-  iframes: import("../../webapp/static/to_compile/js/shared_detection").DetectedIframe[];
+  iframes: import("../../shared/detection").DetectedIframe[];
   totalWarnings: number;
   sessionStorage: SessionStorageData | null;
   isQfdmoPage: boolean;

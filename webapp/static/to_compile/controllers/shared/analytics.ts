@@ -6,7 +6,7 @@ import {
   IFRAME_REFERRER_SESSION_KEY,
   UserConversionConfig,
   USER_CONVERSION_SCORE_CONFIG,
-} from "../../js/shared_constants"
+} from "../../js/constants"
 
 type PersonProperties = {
   iframe: boolean
