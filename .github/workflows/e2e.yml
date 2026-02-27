@@ -119,12 +119,21 @@ jobs:
           fetch-depth: 0
 
       - name: Download Playwright diffs
+        id: download-diffs
+        continue-on-error: true
         uses: actions/download-artifact@v4
         with:
           name: playwright-diffs
           path: diffs
 
+      - name: Check for visual diff PNGs
+        id: check-pngs
+        run: |
+          count=$(find diffs -name '*.png' 2>/dev/null | wc -l)
+          echo "count=$count" >> $GITHUB_OUTPUT
+
       - name: Push diff images to branch
+        if: steps.check-pngs.outputs.count != '0'
         id: push-images
         env:
           GH_TOKEN: ${{ github.token }}
@@ -148,6 +157,7 @@ jobs:
           echo "branch=$BRANCH" >> $GITHUB_OUTPUT
 
       - name: Build PR comment body
+        if: steps.check-pngs.outputs.count != '0'
         env:
           BRANCH: ${{ steps.push-images.outputs.branch }}
           REPO: ${{ github.repository }}
@@ -176,6 +186,7 @@ jobs:
           } > comment_body.md
 
       - name: Post PR comment
+        if: steps.check-pngs.outputs.count != '0'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
