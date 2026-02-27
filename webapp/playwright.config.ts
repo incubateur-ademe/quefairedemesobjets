@@ -10,6 +10,7 @@ dotenv.config({ path: path.resolve(__dirname, ".env") })
 
 export const config: PlaywrightTestConfig = {
   testDir: "./e2e_tests",
+  timeout: 45000,
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: 4,

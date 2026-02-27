@@ -19,6 +19,7 @@ import {
 
 test.describe("🗺️ Filtres Avancés Carte", () => {
   async function searchInCarteMode(page) {
+    await mockApiAdresse(page)
     await searchForAuray(page)
   }
 
