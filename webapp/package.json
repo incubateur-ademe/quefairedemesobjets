@@ -6,7 +6,8 @@
     "format": "prettier static/to_compile --write",
     "test": "jest ./static/to_compile",
     "watch": "parcel watch --no-hmr",
-    "e2e_test": " npx playwright test --update-snapshots"
+    "e2e_test": " npx playwright test --update-snapshots",
+    "e2e_test:extension": "npx playwright test --config=playwright.extension.config.ts"
   },
   "source": [
     "static/to_compile/admin-categorie-widget.ts",
