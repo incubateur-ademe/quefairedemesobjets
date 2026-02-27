@@ -4,6 +4,15 @@ import {
   LOCATION_SESSION_KEYS as _LOCATION_SESSION_KEYS,
 } from "../../webapp/static/to_compile/js/shared_constants";
 
+// Re-export shared detection types
+export type {
+  DetectedIframe,
+  DetectionConfig,
+  IframeType,
+} from "../../webapp/static/to_compile/js/shared_detection";
+export type { IntegrationWarning as Warning } from "../../webapp/static/to_compile/js/shared_detection";
+
+// Re-export shared constants
 export {
   CARTE_ROUTE,
   CARTE_SCRIPT_FILENAME,
@@ -19,31 +28,13 @@ export {
 } from "../../webapp/static/to_compile/js/shared_constants";
 export type { UserConversionConfig } from "../../webapp/static/to_compile/js/shared_constants";
 
-export type IframeType =
-  | "carte"
-  | "carte_sur_mesure"
-  | "carte_preconfiguree"
-  | "assistant"
-  | "unknown";
+// Re-export shared detection functions
+export {
+  buildDetectionConfig,
+  detectIframeIntegrations,
+} from "../../webapp/static/to_compile/js/shared_detection";
 
-export interface DetectedIframe {
-  src: string;
-  domain: string;
-  type: IframeType;
-  slug?: string;
-  hasAdjacentScript: boolean;
-  scriptSrc?: string;
-  scriptDataAttributes: Record<string, string>;
-  iframeDataAttributes: Record<string, string>;
-  hasIframeResizer: boolean;
-  insideTemplate: boolean;
-  warnings: Warning[];
-}
-
-export interface Warning {
-  message: string;
-  severity: "error" | "warning" | "info";
-}
+// -- Chrome-extension-specific types --
 
 export interface SessionStorageData {
   // Location
@@ -66,7 +57,7 @@ export const SESSION_STORAGE_KEYS: (keyof SessionStorageData)[] = [
 ] as (keyof SessionStorageData)[];
 
 export interface PageAnalysis {
-  iframes: DetectedIframe[];
+  iframes: import("../../webapp/static/to_compile/js/shared_detection").DetectedIframe[];
   totalWarnings: number;
   sessionStorage: SessionStorageData | null;
   isQfdmoPage: boolean;

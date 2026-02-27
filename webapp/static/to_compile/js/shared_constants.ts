@@ -10,6 +10,7 @@ export const KNOWN_DOMAINS = [
   "quefairedemesobjets.fr",
   "quefairedemesobjets.ademe.fr",
   "quefairedemesdechets.ademe.fr",
+  "lvao.ademe.fr",
 ] as const
 
 export const MAIN_DOMAIN = "quefairedemesdechets.ademe.fr"
