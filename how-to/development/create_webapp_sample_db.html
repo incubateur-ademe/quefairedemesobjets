@@ -340,6 +340,43 @@ Elle permet de disposer d’un environnement de test isolé avec un échatillon 
 </ol>
 <p>Si la base de données existe déjà, la commande affichera un avertissement mais continuera l’exécution pour s’assurer que les permissions et extensions sont correctement configurées.</p>
 </section>
+<section id="restaurer-la-base-de-donnees-depuis-une-base-distante">
+<h2>Restaurer la base de données depuis une base distante<a class="headerlink" href="#restaurer-la-base-de-donnees-depuis-une-base-distante" title="Lien vers cette rubrique">¶</a></h2>
+<p>Pour peupler la base de données <code class="docutils literal notranslate"><span class="pre">webapp_sample</span></code> locale à partir d’une base distante (ex : preprod), utilisez le script :</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>db-restore-local-from-sample
+</pre></div>
+</div>
+<p>Ce script effectue automatiquement :</p>
+<ol class="arabic simple">
+<li><p><strong>Dump</strong> de la base distante via <code class="docutils literal notranslate"><span class="pre">pg_dump</span></code></p></li>
+<li><p><strong>Suppression et recréation</strong> du schéma <code class="docutils literal notranslate"><span class="pre">public</span></code> local</p></li>
+<li><p><strong>Création des extensions</strong> PostgreSQL requises</p></li>
+<li><p><strong>Restauration</strong> du dump dans la base locale</p></li>
+<li><p><strong>Suppression</strong> du fichier de dump temporaire</p></li>
+</ol>
+<section id="variables-d-environnement-requises">
+<h3>Variables d’environnement requises<a class="headerlink" href="#variables-d-environnement-requises" title="Lien vers cette rubrique">¶</a></h3>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Variable</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">REMOTE_SAMPLE_DATABASE_URL</span></code></p></td>
+<td><p>URL de connexion à la base distante à copier (ex : preprod)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SAMPLE_DATABASE_URL</span></code></p></td>
+<td><p>URL de connexion à la base locale cible</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Ces deux variables doivent être définies dans le fichier <code class="docutils literal notranslate"><span class="pre">.env</span></code> (voir <code class="docutils literal notranslate"><span class="pre">.env.template</span></code>).</p>
+<p><code class="docutils literal notranslate"><span class="pre">REMOTE_SAMPLE_DATABASE_URL</span></code> doit pointer vers une base accessible depuis votre machine.</p>
+</section>
+</section>
 <section id="configuration">
 <h2>Configuration<a class="headerlink" href="#configuration" title="Lien vers cette rubrique">¶</a></h2>
 <p>La base de données <code class="docutils literal notranslate"><span class="pre">webapp_sample</span></code> est configurée dans <code class="docutils literal notranslate"><span class="pre">webapp/core/settings.py</span></code> en utilisant la variable d’environnement <code class="docutils literal notranslate"><span class="pre">DB_WEBAPP_SAMPLE</span></code></p>
@@ -403,6 +440,10 @@ Elle permet de disposer d’un environnement de test isolé avec un échatillon 
             <ul>
 <li><a class="reference internal" href="#">Création de la base de données webapp_sample pour les tests</a><ul>
 <li><a class="reference internal" href="#creation-de-la-base-de-donnees">Création de la base de données</a></li>
+<li><a class="reference internal" href="#restaurer-la-base-de-donnees-depuis-une-base-distante">Restaurer la base de données depuis une base distante</a><ul>
+<li><a class="reference internal" href="#variables-d-environnement-requises">Variables d’environnement requises</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#configuration">Configuration</a></li>
 </ul>
 </li>
