@@ -1,0 +1,64 @@
+name: Backend Test Job
+
+on:
+  workflow_call:
+    inputs:
+      make-target:
+        description: "Make target to run (e.g. unit-test, integration-test, dags-test)"
+        required: true
+        type: string
+      check-migrations:
+        description: "Whether to check for missing migrations"
+        required: false
+        type: boolean
+        default: false
+
+env:
+  PGHOST: localhost
+  PGPORT: 5432
+  PGUSER: webapp
+  PGPASSWORD: webapp # pragma: allowlist secret
+  PGDATABASE: webapp
+  UV_PROJECT_ENVIRONMENT: .venv
+  BASE_URL: http://localhost:8000
+  DATABASE_URL: "postgres://webapp:webapp@localhost:5432/webapp" # pragma: allowlist secret
+  SECRET_KEY: coucou # pragma: allowlist secret
+  CI: true
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:15-3.3-alpine
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 1s
+          --health-timeout 1s
+          --health-retries 50
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: webapp
+          POSTGRES_PASSWORD: webapp # pragma: allowlist secret
+          POSTGRES_DB: webapp
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install GIS packages
+        uses: ./.github/actions/install-gis
+
+      - name: Setup backend environment
+        uses: ./.github/actions/setup-backend
+        with:
+          uv-groups: "--all-packages --group dev"
+
+      - name: Run tests
+        run: make -C webapp ${{ inputs.make-target }}
+
+      - name: Check for missing migrations
+        if: inputs.check-migrations
+        run: cd webapp && uv run python manage.py makemigrations --check --no-input --settings=core.test_settings
+
+permissions:
+  contents: read
