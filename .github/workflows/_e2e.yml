@@ -9,6 +9,10 @@ on:
       compare:
         required: true
         type: boolean
+      shard:
+        required: false
+        type: string
+        default: ""
 
 env:
   PGHOST: localhost
@@ -17,7 +21,6 @@ env:
   PGPASSWORD: webapp # pragma: allowlist secret
   PGDATABASE: webapp
   UV_PROJECT_ENVIRONMENT: .venv
-  BASE_URL: http://localhost:8000
   DATABASE_URL: postgres://webapp:webapp@localhost:5432/webapp # pragma: allowlist secret
   SECRET_KEY: coucou # pragma: allowlist secret
   CI: true
@@ -84,37 +87,44 @@ jobs:
           database-url: ${{ env.DATABASE_URL }}
           dump-path: database-dump.pgdump
 
-      # - name: TEMPORARY - prepare search index
-      #   run: |
-          # cd webapp && uv run python manage.py populate_fake_search_tags
-          # cd webapp && uv run python manage.py populate_search_terms
-          # make -C webapp rebuild-search-index
+      - name: TEMPORARY - prepare search index
+        if: inputs.ref == github.ref
+        run: |
+          cd webapp && uv run python manage.py populate_fake_search_tags
+          uv run python manage.py populate_search_terms
+          make rebuild-search-index
 
-      - name: Start Django server
-        uses: ./.github/actions/start-django-server
+      # - name: Start Django server
+      #   uses: ./.github/actions/start-django-server
 
       - name: Download baseline screenshots
         if: inputs.compare
         uses: actions/download-artifact@v4
         with:
-          name: regression-screenshots
+          pattern: regression-screenshots-*
+          merge-multiple: true
           path: ${{ env.SCREENSHOTS_BASE_PATH }}
 
       - name: Run Playwright tests
         if: ${{ !inputs.compare }}
-        run: npx playwright test --update-snapshots
+        run: npx playwright test --update-snapshots ${{ inputs.shard && format('--shard={0}', inputs.shard) || '' }}
         working-directory: webapp
 
       - name: Run Playwright tests (regression only)
         if: inputs.compare
-        run: npx playwright test --grep=@regression
+        run: npx playwright test --grep=@regression ${{ inputs.shard && format('--shard={0}', inputs.shard) || '' }}
         working-directory: webapp
+
+      - name: Compute shard artifact name
+        if: ${{ !inputs.compare }}
+        id: artifact-name
+        run: echo "value=regression-screenshots-${{ inputs.shard && inputs.shard || 'all' }}" | tr '/' '-' >> $GITHUB_OUTPUT
 
       - name: Upload baseline screenshots
         if: ${{ !inputs.compare }}
         uses: actions/upload-artifact@v4
         with:
-          name: regression-screenshots
+          name: ${{ steps.artifact-name.outputs.value }}
           path: ${{ env.SCREENSHOTS_BASE_PATH }}
 
       - name: Upload Playwright report
@@ -130,10 +140,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: playwright-diffs
-          path: |
-            **/*-expected.png
-            **/*-actual.png
-            **/*-diff.png
+          if-no-files-found: ignore
+          path: webapp/test-results/
 
 permissions:
   contents: read

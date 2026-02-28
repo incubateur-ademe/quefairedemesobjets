@@ -1,6 +1,5 @@
 import { expect, test } from "@playwright/test"
 import {
-  getMarkers,
   navigateTo,
   getSessionStorage,
   clickFirstClickableActeurMarker,
@@ -124,7 +123,6 @@ test.describe("🤖 Assistant et Recherche", () => {
 
     // Click on a pin on the map and check that it scores 1
     await searchOnProduitPage(page, "Auray")
-    await getMarkers(page)
     await clickFirstClickableActeurMarker(page)
 
     page

@@ -1,8 +1,6 @@
 #!/bin/env bash
 
 python manage.py createcachetable
-# TODO: remove once sites faciles has been migrated to sites conformes
-python manage.py migrate_from_sites_faciles_experiment --no-input
 python manage.py migrate
 python manage.py clearsessions
 python manage.py clear_cache --all

@@ -12,11 +12,13 @@ INSTALLED_APPS = [
     "django.contrib.gis",
     # Wagtail dependencies (required by qfdmo.models.config)
     # because it is used un carte_config as decorator
+    # TODO: do not duplicate installed apps here, they need to be centralized
+    # to prevent unnoticed changes breaking tests or DAG runs.
     "taggit",
     "modelcluster",
     "wagtail",
     "wagtail.snippets",
-    "wagtail.search",
+    "modelsearch",
     "wagtail.sites",
     "wagtail.users",
     "wagtail.images",

@@ -1,13 +1,15 @@
 # Aliases
 PYTHON := uv run python
-DJANGO_ADMIN := $(PYTHON) manage.py
-PYTEST := uv run pytest
-HONCHO := uv run honcho
 DB_URL := postgres://webapp:webapp@localhost:6543/webapp# pragma: allowlist secret
 SAMPLE_DB_URL ?= $(if $(SAMPLE_DATABASE_URL),$(SAMPLE_DATABASE_URL),$(DB_URL))
 SAMPLE_DUMP_FILE ?= tmpbackup-sample/sample.custom
 BASE_DOMAIN := quefairedemesdechets.ademe.local
-FIXTURES_OPTIONS := --indent 4 --natural-foreign --natural-primary
+
+# Loading environment variables
+ifneq (,$(wildcard ./.env))
+    include .env
+    export
+endif
 
 # Makefile config
 .PHONY: check
@@ -67,10 +69,116 @@ format:
 run-airflow:
 	docker compose --profile airflow up -d
 
-# Local django operations
-.PHONY: migrate
-migrate:
-	make -C webapp migrate
+# Local django operations (delegated to webapp/Makefile)
+.PHONY: webapp-migrate
+webapp-migrate:
+	$(MAKE) -C webapp migrate
+
+.PHONY: webapp-collectstatic
+webapp-collectstatic:
+	$(MAKE) -C webapp collectstatic
+
+.PHONY: webapp-shell
+webapp-shell:
+	$(MAKE) -C webapp shell
+
+.PHONY: webapp-dbshell
+webapp-dbshell:
+	$(MAKE) -C webapp dbshell
+
+.PHONY: webapp-makemigrations
+webapp-makemigrations:
+	$(MAKE) -C webapp makemigrations
+
+.PHONY: webapp-merge-migrations
+webapp-merge-migrations:
+	$(MAKE) -C webapp merge-migrations
+
+.PHONY: webapp-rebuild-search-index
+webapp-rebuild-search-index:
+	$(MAKE) -C webapp rebuild-search-index
+
+.PHONY: webapp-createcachetable
+webapp-createcachetable:
+	$(MAKE) -C webapp createcachetable
+
+.PHONY: webapp-clearsessions
+webapp-clearsessions:
+	$(MAKE) -C webapp clearsessions
+
+.PHONY: webapp-create-remote-db-server
+webapp-create-remote-db-server:
+	$(MAKE) -C webapp create-remote-db-server
+
+.PHONY: webapp-createsuperuser
+webapp-createsuperuser:
+	$(MAKE) -C webapp createsuperuser
+
+.PHONY: webapp-seed-database
+webapp-seed-database:
+	$(MAKE) -C webapp seed-database
+
+.PHONY: webapp-createsuperuser-example
+webapp-createsuperuser-example:
+	$(MAKE) -C webapp createsuperuser-example
+
+.PHONY: webapp-generate-fixtures-acteurs
+webapp-generate-fixtures-acteurs:
+	$(MAKE) -C webapp generate-fixtures-acteurs
+
+.PHONY: webapp-generate-fixtures
+webapp-generate-fixtures:
+	$(MAKE) -C webapp generate-fixtures
+
+.PHONY: webapp-clear-cache
+webapp-clear-cache:
+	$(MAKE) -C webapp clear-cache
+
+.PHONY: webapp-npm-upgrade
+webapp-npm-upgrade:
+	$(MAKE) -C webapp npm-upgrade
+
+# Happy testing
+.PHONY: webapp-unit-test
+webapp-unit-test:
+	$(MAKE) -C webapp unit-test
+
+.PHONY: webapp-integration-test
+webapp-integration-test:
+	$(MAKE) -C webapp integration-test
+
+.PHONY: webapp-dags-test
+webapp-dags-test:
+	$(MAKE) -C webapp dags-test
+
+.PHONY: webapp-e2e-test
+webapp-e2e-test:
+	$(MAKE) -C webapp e2e-test
+
+.PHONY: webapp-e2e-test-ui
+webapp-e2e-test-ui:
+	$(MAKE) -C webapp e2e-test-ui
+
+.PHONY: webapp-a11y
+webapp-a11y:
+	$(MAKE) -C webapp a11y
+
+.PHONY: webapp-js-test
+webapp-js-test:
+	$(MAKE) -C webapp js-test
+
+.PHONY: webapp-backend-test
+webapp-backend-test:
+	$(MAKE) -C webapp backend-test
+
+.PHONY: webapp-test
+webapp-test:
+	$(MAKE) -C webapp test
+
+# DSFR
+.PHONY: webapp-extract-dsfr
+webapp-extract-dsfr:
+	$(MAKE) -C webapp extract-dsfr
 
 .SILENT:
 .PHONY: drop-all-tables
@@ -157,8 +265,8 @@ db-restore-local-from-prod:
 	make drop-schema-public
 	make create-schema-public
 	make load-prod-dump
-	make migrate
-	make create-remote-db-server
+	make webapp-migrate
+	make webapp-create-remote-db-server
 
 .PHONY: db-restore-local-from-preprod
 db-restore-local-from-preprod:
@@ -166,8 +274,8 @@ db-restore-local-from-preprod:
 	make drop-schema-public
 	make create-schema-public
 	make load-preprod-dump
-	make migrate
-	make create-remote-db-server
+	make webapp-migrate
+	make webapp-create-remote-db-server
 
 .PHONY: db-restore-preprod-from-prod
 db-restore-preprod-from-prod:
@@ -186,8 +294,8 @@ db-restore-local-from-sample:
 db-restore-local-for-tests:
 	make drop-schema-public
 	make create-schema-public
-	make migrate
-	make seed-database
+	make webapp-migrate
+	make webapp-seed-database
 
 # Docs
 .PHONY: build-docs

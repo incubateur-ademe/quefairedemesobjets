@@ -1,5 +1,5 @@
 <a
-    href="{% block href %}{% url 'qfdmd:synonyme-detail' slug=result.slug %}{% endblock %}"
+    href="{% block href %}{{ result.url }}{% endblock %}"
     data-turbo="false"
     style="background-image: none;"
     class="
@@ -15,6 +15,6 @@
     tabindex="0"
 >
     {% block nom %}
-    {{ result.nom|capfirst }}
+    {{ result|capfirst }}
     {% endblock nom %}
 </a>

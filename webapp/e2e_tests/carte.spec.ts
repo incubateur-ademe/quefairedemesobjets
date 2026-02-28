@@ -19,7 +19,8 @@ import {
 
 test.describe("🗺️ Filtres Avancés Carte", () => {
   async function searchInCarteMode(page) {
-    await searchAddress(page, "Paris", "carte", { optionIndex: 1 })
+    await mockApiAdresse(page)
+    await searchForAuray(page)
   }
 
   test("Filtres avancés s'ouvrent et se ferment en mode carte", async ({ page }) => {
@@ -365,7 +366,7 @@ test.describe("🗺️ Bouton 'Rechercher dans cette zone'", () => {
     await page.locator("iframe").first().scrollIntoViewIfNeeded()
 
     // Search for Auray in the iframe
-    await searchForAurayInIframe(iframe)
+    await searchForAurayInIframe(iframe, undefined, page)
 
     // Wait for legend to be visible
     await iframe
@@ -400,36 +401,19 @@ test.describe("🗺️ Bouton 'Rechercher dans cette zone'", () => {
     const mapCanvas = iframe.locator("canvas.maplibregl-canvas")
     await expect(mapCanvas).toBeVisible()
 
-    // Trigger map change event directly by calling the controller's mapChanged method
+    // Trigger a moveend event on the MapLibre map instance directly.
+    // This goes through the same code path as a real user drag:
+    //   map.on("moveend") → #dispatchMapChangedEvent → controller.mapChanged → show button
     await iframe.locator("body").evaluate(() => {
       const mapElement = document.querySelector('[data-controller*="map"]') as any
       if (!mapElement) return
-
-      // Get current map bounds to create event detail
       const map = mapElement.actorsMap?.map
       if (!map) return
-
-      const bounds = map.getBounds()
-      const detail = {
-        center: bounds.getCenter(),
-        southWest: bounds.getSouthWest(),
-        northEast: bounds.getNorthEast(),
-      }
-
-      // Create and dispatch the custom event that triggers mapChanged
-      const event = new CustomEvent("maplibre:mapChanged", {
-        detail,
-        bubbles: true,
-      })
-
-      // Call mapChanged directly on the controller
-      if (mapElement.mapChanged) {
-        mapElement.mapChanged(event)
-      }
+      map.fire("moveend")
     })
 
-    // Give time for the debounced mapChanged function (300ms) to execute
-    await page.waitForTimeout(1000)
+    // Give time for the debounced mapChanged (300ms) to execute
+    await page.waitForTimeout(500)
 
     // Wait for the button to appear (it will be shown after map movement is detected)
     await expect(searchInZoneButton).not.toHaveClass(/qf-hidden/, {
@@ -531,6 +515,7 @@ test.describe("🗺️ Mini Carte - Affichage des Pinpoints", () => {
   test("La fiche acteur affiche une mini carte avec les pinpoints acteur et home", async ({
     page,
   }) => {
+    test.slow()
     // Navigate to the carte page
     await navigateTo(page, "/carte")
 
@@ -668,6 +653,7 @@ test.describe("🗺️ Bouton Itinéraire", () => {
   test("Le bouton Itinéraire est visible sur une carte sur mesure", async ({
     page,
   }) => {
+    test.slow()
     // Navigate to the test preview page that generates a carte sur mesure iframe
     await navigateTo(
       page,
@@ -682,7 +668,7 @@ test.describe("🗺️ Bouton Itinéraire", () => {
     await mockApiAdresse(page)
 
     // Search for Auray in the iframe
-    await searchForAurayInIframe(iframe)
+    await searchForAurayInIframe(iframe, undefined, page)
 
     // Wait for acteur markers to appear (excluding the home marker which has id="pinpoint-home")
     const acteurMarkers = iframe.locator(
