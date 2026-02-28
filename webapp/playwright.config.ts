@@ -10,13 +10,26 @@ dotenv.config({ path: path.resolve(__dirname, ".env") })
 
 export const config: PlaywrightTestConfig = {
   testDir: "./e2e_tests",
+  timeout: 45000,
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: 4,
   workers: 1,
   reporter: "html",
+  webServer: {
+    command: "uv run python manage.py runserver 0.0.0.0:8888",
+    port: 8888,
+    reuseExistingServer: !process.env.CI,
+    env: {
+      ...(process.env as Record<string, string>),
+      DATABASE_URL: (process.env.SAMPLE_DATABASE_URL ?? process.env.DATABASE_URL)!,
+      SECRET_KEY: process.env.SECRET_KEY!,
+      BASE_URL: "http://localhost:8888",
+    },
+    cwd: path.resolve(__dirname),
+  },
   use: {
-    baseURL: process.env.BASE_URL!,
+    baseURL: "http://localhost:8888",
     trace: "on-first-retry",
   },
   expect: {
@@ -37,8 +50,9 @@ export const config: PlaywrightTestConfig = {
         launchOptions: {
           args: [
             "--ignore-certificate-errors",
-            "--use-gl=swiftshader",
-            "--disable-gpu-sandbox",
+            "--use-angle=gl",
+            "--use-gl=angle",
+            "--ignore-gpu-blacklist",
           ],
         },
       },

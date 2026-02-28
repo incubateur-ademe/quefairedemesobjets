@@ -10,8 +10,6 @@ DJANGO_ADMIN := $(PYTHON) manage.py
 PYTEST := uv run pytest
 HONCHO := uv run honcho
 DB_URL := postgres://webapp:webapp@localhost:6543/webapp# pragma: allowlist secret
-SAMPLE_DB_URL ?= $(if $(SAMPLE_DATABASE_URL),$(SAMPLE_DATABASE_URL),$(DB_URL))
-SAMPLE_DUMP_FILE ?= tmpbackup-sample/sample.custom
 BASE_DOMAIN := quefairedemesdechets.ademe.local
 FIXTURES_OPTIONS := --indent 4 --natural-foreign --natural-primary
 HONCHO := uv run honcho
@@ -39,6 +37,10 @@ collectstatic:
 .PHONY: shell
 shell:
 	$(DJANGO_ADMIN) shell
+
+.PHONY: dbshell
+dbshell:
+	$(DJANGO_ADMIN) dbshell
 
 .PHONY: makemigrations
 makemigrations:

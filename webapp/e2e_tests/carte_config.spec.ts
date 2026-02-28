@@ -29,7 +29,7 @@ test.describe("🎛️ Configuration Carte - Paramètre Legacy Bonus", () => {
     await mockApiAdresse(page)
 
     // Perform a search to make the filtres button appear
-    await searchForAurayInIframe(iframe)
+    await searchForAurayInIframe(iframe, undefined, page)
 
     // Open the filtres modal
     await openFiltresModal(iframe)
@@ -58,7 +58,7 @@ test.describe("🎛️ Configuration Carte - Paramètre Legacy Bonus", () => {
     await mockApiAdresse(page)
 
     // Perform a search to make the filtres button appear
-    await searchForAurayInIframe(iframe)
+    await searchForAurayInIframe(iframe, undefined, page)
 
     // Open the filtres modal
     await openFiltresModal(iframe)
@@ -89,7 +89,7 @@ test.describe("🎛️ Configuration Carte - Cacher Filtre Objet", () => {
     await mockApiAdresse(page)
 
     // Perform a search to make the filtres button appear
-    await searchForAurayInIframe(iframe)
+    await searchForAurayInIframe(iframe, undefined, page)
 
     // Open the filtres modal
     await openFiltresModal(iframe)
@@ -118,7 +118,7 @@ test.describe("🎛️ Configuration Carte - Cacher Filtre Objet", () => {
     await mockApiAdresse(page)
 
     // Perform a search to make the filtres button appear
-    await searchForAurayInIframe(iframe)
+    await searchForAurayInIframe(iframe, undefined, page)
 
     // Open the filtres modal
     await openFiltresModal(iframe)

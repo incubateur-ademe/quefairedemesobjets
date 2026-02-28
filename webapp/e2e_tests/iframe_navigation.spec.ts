@@ -36,10 +36,12 @@ test.describe("🧭 Navigation dans l'iframe avec persistance de l'UI", () => {
     await searchInput.pressSequentially("chaussures", { delay: 50 })
 
     // Wait for search results to appear in the turbo frame
-    const autocompleteResult = iframe.getByRole("link", {
-      name: "Chaussures",
-      exact: true,
-    })
+    const autocompleteResult = iframe
+      .getByRole("link", {
+        name: "Chaussures",
+        exact: true,
+      })
+      .first()
     // Use retry logic: if autocomplete doesn't appear, try pressing a key to trigger it
     try {
       await expect(autocompleteResult).toBeVisible({ timeout: TIMEOUT.DEFAULT })
