@@ -13,3 +13,4 @@ sources:
       - name : clone_ca_epci_in_use
       - name : clone_ae_unite_legale_in_use
       - name : clone_ae_etablissement_in_use
+      - name : clone_ae_lien_succession_in_use
