@@ -5,7 +5,7 @@ Tâche Airflow pour créer la configuration de clustering
 import logging
 
 from airflow import DAG
-from airflow.operators.python import PythonOperator
+from airflow.providers.standard.operators.python import PythonOperator
 from cluster.config.model import ClusterConfig
 from cluster.config.tasks import TASKS
 from cluster.tasks.business_logic.cluster_acteurs_config_create import (

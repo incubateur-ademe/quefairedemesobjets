@@ -5,8 +5,8 @@ from acteurs.tasks.airflow_logic.copy_displayed_data_from_warehouse_task import 
     copy_displayed_data_from_warehouse_task,
 )
 from airflow.decorators import dag
-from airflow.models.baseoperator import chain
 from airflow.operators.bash import BashOperator
+from airflow.sdk.bases.operator import chain
 from shared.config.airflow import DEFAULT_ARGS
 from shared.config.dbt_commands import DBT_RUN, DBT_TEST
 from shared.config.schedules import SCHEDULES

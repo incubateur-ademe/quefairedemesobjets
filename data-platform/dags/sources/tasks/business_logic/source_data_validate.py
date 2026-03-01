@@ -7,6 +7,7 @@ from sources.tasks.airflow_logic.config_management import DAGConfig
 from sources.tasks.transform.read_mapping_from_postgres import (
     read_mapping_from_postgres,
 )
+from sources.tasks.transform.sequence_utils import normalize_to_list
 from sources.tasks.transform.transform_df import MANDATORY_COLUMNS_AFTER_NORMALISATION
 from utils import logging_utils as log
 
@@ -72,8 +73,7 @@ def source_data_validate(df: pd.DataFrame, dag_config: DAGConfig) -> None:
     codes_db = set(souscats_codes_to_ids.keys())
     codes_mapping = set(
         chain.from_iterable(
-            x if isinstance(x, list) else [x]
-            for x in dag_config.product_mapping.values()
+            normalize_to_list(x) for x in dag_config.product_mapping.values()
         )
     )
     codes_invalid = codes_mapping - codes_db
@@ -83,9 +83,7 @@ def source_data_validate(df: pd.DataFrame, dag_config: DAGConfig) -> None:
     # ------------------------------------
     # vérification des codes des acteurservices
     df_acteurservice_code = set(
-        chain.from_iterable(
-            x if isinstance(x, list) else [x] for x in df["acteur_service_codes"]
-        )
+        chain.from_iterable(normalize_to_list(x) for x in df["acteur_service_codes"])
     )
     db_acteurservice_code = set(
         db_tasks.read_data_from_postgres(table_name="qfdmo_acteurservice")["code"]
@@ -99,9 +97,7 @@ def source_data_validate(df: pd.DataFrame, dag_config: DAGConfig) -> None:
     # ------------------------------------
     # vérification des codes des labels
     df_label_code = set(
-        chain.from_iterable(
-            x if isinstance(x, list) else [x] for x in df["label_codes"]
-        )
+        chain.from_iterable(normalize_to_list(x) for x in df["label_codes"])
     )
     db_label_code = set(
         db_tasks.read_data_from_postgres(table_name="qfdmo_labelqualite")["code"]
@@ -113,9 +109,7 @@ def source_data_validate(df: pd.DataFrame, dag_config: DAGConfig) -> None:
     # ------------------------------------
     # vérification des codes des labels
     df_sscat_code = set(
-        chain.from_iterable(
-            x if isinstance(x, list) else [x] for x in df["sous_categorie_codes"]
-        )
+        chain.from_iterable(normalize_to_list(x) for x in df["sous_categorie_codes"])
     )
     db_sscat_code = set(
         db_tasks.read_data_from_postgres(table_name="qfdmo_souscategorieobjet")["code"]

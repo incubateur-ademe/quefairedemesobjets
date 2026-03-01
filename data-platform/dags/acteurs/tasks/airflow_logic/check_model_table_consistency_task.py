@@ -6,7 +6,7 @@ from acteurs.tasks.business_logic.check_model_table_consistency import (
     check_model_table_consistency,
 )
 from airflow.exceptions import AirflowFailException
-from airflow.operators.python import PythonOperator
+from airflow.providers.standard.operators.python import PythonOperator
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)

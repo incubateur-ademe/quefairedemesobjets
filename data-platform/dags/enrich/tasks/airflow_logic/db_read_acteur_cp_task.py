@@ -3,7 +3,7 @@
 import logging
 
 from airflow import DAG
-from airflow.operators.python import PythonOperator
+from airflow.providers.standard.operators.python import PythonOperator
 from enrich.config.tasks import TASKS
 from enrich.config.xcoms import XCOMS
 from enrich.tasks.business_logic.db_read_acteur_cp import (

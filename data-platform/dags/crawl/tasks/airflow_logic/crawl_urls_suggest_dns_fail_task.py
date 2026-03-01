@@ -1,7 +1,7 @@
 import logging
 
 from airflow import DAG
-from airflow.operators.python import PythonOperator
+from airflow.providers.standard.operators.python import PythonOperator
 from crawl.config.cohorts import COHORTS
 from crawl.config.tasks import TASKS
 from crawl.config.xcoms import XCOMS, xcom_pull

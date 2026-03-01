@@ -1,5 +1,5 @@
 from airflow import DAG
-from airflow.models.baseoperator import chain
+from airflow.sdk.bases.operator import chain
 from shared.config.start_dates import START_DATES
 from sources.tasks.airflow_logic.db_data_prepare_task import db_data_prepare_task
 from sources.tasks.airflow_logic.db_write_type_action_suggestions_task import (

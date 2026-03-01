@@ -3,10 +3,9 @@
 import logging
 
 from airflow import DAG
-from airflow.operators.python import PythonOperator
+from airflow.providers.standard.operators.python import PythonOperator
 from clone.config import TASKS, XCOMS, CloneConfig, xcom_pull
 from clone.tasks.business_logic.clone_view_in_use_switch import clone_view_in_use_switch
-
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
