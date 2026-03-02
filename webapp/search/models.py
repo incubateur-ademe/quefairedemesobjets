@@ -154,3 +154,46 @@ class SearchTerm(index.Indexed, models.Model):
     def specific(self):
         """Property alias for get_specific()."""
         return self.get_specific()
+
+    @property
+    def kind(self) -> str:
+        instance = self.get_indexed_instance()
+        from qfdmd.models import ProduitPageSearchTerm, SearchTag, Synonyme
+
+        if isinstance(instance, Synonyme):
+            return "Synonyme (ancienne version)"
+        if isinstance(instance, SearchTag):
+            return "Synonyme de recherche"
+        if isinstance(instance, ProduitPageSearchTerm):
+            return "Page produit"
+        return "Terme de recherche"
+
+    kind.fget.short_description = "Type"
+
+    @property
+    def redirect_destination(self) -> str | None:
+        instance = self.get_indexed_instance()
+        from qfdmd.models import ProduitPageSearchTerm, SearchTag, Synonyme
+
+        if isinstance(instance, ProduitPageSearchTerm):
+            if instance.produit_page:
+                return instance.produit_page.url
+            return None
+        if isinstance(instance, SearchTag):
+            try:
+                return instance.tagged_produit_page.content_object.url
+            except Exception:
+                return None
+        if isinstance(instance, Synonyme):
+            try:
+                return instance.next_wagtail_page.page.url
+            except Exception:
+                pass
+            try:
+                return instance.produit.next_wagtail_page.page.url
+            except Exception:
+                pass
+            return instance.get_absolute_url()
+        return None
+
+    redirect_destination.fget.short_description = "Destination de redirection"

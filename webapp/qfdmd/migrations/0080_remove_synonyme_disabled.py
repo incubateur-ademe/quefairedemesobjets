@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("qfdmd", "0079_remove_homepage_hero_title"),
+        ("qfdmd", "0074_synonyme_disabled"),
     ]
 
     operations = [

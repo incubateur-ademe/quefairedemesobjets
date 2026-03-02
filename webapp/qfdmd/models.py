@@ -247,6 +247,11 @@ class ProduitPageSearchTerm(SearchTerm):
     def get_title(self):
         return self.searchable_title
 
+    def __str__(self) -> str:
+        if self.produit_page_id:
+            return self.searchable_title or f"ProduitPage #{self.produit_page_id}"
+        return self.searchable_title or f"SearchTerm {self.pk}"
+
     search_fields = SearchTerm.search_fields
 
 
