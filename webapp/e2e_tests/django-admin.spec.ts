@@ -129,7 +129,10 @@ test.describe("🛠️ Django Admin - Carte géographique", () => {
     await expect(searchInput).toBeVisible({ timeout: TIMEOUT.DEFAULT })
 
     await searchInput.fill("Mairie de Paris")
-    await page.locator('[data-action="click->map-search#search"]').click()
+    // Force is required as the button might be out of the dom
+    await page
+      .locator('[data-action="click->map-search#search"]')
+      .click({ force: true })
 
     // The textarea should now contain GeoJSON with the mocked coordinates
     await expect(page.locator(".vSerializedField")).not.toHaveValue("", {
