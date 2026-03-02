@@ -19,6 +19,7 @@ class SearchTermViewSet(SnippetViewSet):
     search_backend_name = settings.MODELSEARCH_BACKENDS["default"]["BACKEND"]
     panels = [
         FieldPanel("search_variants"),
+        FieldPanel("disabled"),
     ]
 
 
@@ -63,6 +64,7 @@ class SearchTagViewSet(SnippetViewSet):
     panels = [
         HelpPanel(content=SEARCH_TAG_HELP_TEXT),
         FieldPanel("name"),
+        FieldPanel("disabled"),
         FieldPanel("search_variants"),
     ]
 
@@ -73,7 +75,7 @@ class SynonymeViewSet(SnippetViewSet):
     menu_label = "Synonymes (ancienne version)"
     menu_name = "synonymes"
     list_display = ["nom", "modifie_le"]
-    search_fields = ["nom"]
+    search_backend_name = settings.MODELSEARCH_BACKENDS["default"]["BACKEND"]
     panels = [
         FieldPanel("nom"),
         FieldPanel("disabled"),

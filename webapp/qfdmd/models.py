@@ -786,12 +786,6 @@ class Synonyme(SearchTerm, AbstractBaseProduit):
         help_text="Si renseigné, ce synonyme a été importé comme SearchTag "
         "et ne devrait plus apparaître dans les résultats de recherche.",
     )
-    disabled = models.BooleanField(
-        "Désactivé",
-        default=False,
-        help_text="Un synonyme désactivé ne s'affichera nulle part. \n"
-        "On le conserve en base de données pour conserver les redirections",
-    )
     picto = models.FileField(
         upload_to="pictos",
         blank=True,

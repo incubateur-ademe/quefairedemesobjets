@@ -17,7 +17,7 @@ class SearchTermQuerySet(SearchableQuerySetMixin, QuerySet):
         This is a bug that have been raised to django-modelsearch, we will
         work on a resolution there first."""
         excluded_ids = self.model.objects.filter(
-            Q(synonyme__isnull=False, synonyme__disabled=True)
+            Q(disabled=True)
             | Q(
                 synonyme__isnull=False,
                 synonyme__imported_as_search_tag__isnull=False,
@@ -47,6 +47,12 @@ class SearchTerm(index.Indexed, models.Model):
             "la recherche. Séparez les termes par des virgules ou des retours "
             "à la ligne."
         ),
+    )
+    disabled = models.BooleanField(
+        "Désactivé",
+        default=False,
+        help_text="Un terme de recherche désactivé ne s'affichera nulle part. \n"
+        "On le conserve en base de données pour conserver les redirections",
     )
 
     @property
