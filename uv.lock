@@ -3518,7 +3518,7 @@ wheels = [
 
 [[package]]
 name = "sites-conformes"
-version = "2.5.3rc1"
+version = "2.5.3rc2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "beautifulsoup4" },
@@ -3542,9 +3542,9 @@ dependencies = [
     { name = "wagtail-modeladmin" },
     { name = "wagtailmenus" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/99/8b/ec753371a698e94291d850cfde917c7fd760b9caa2ad63272869fe4f72f7/sites_conformes-2.5.3rc1.tar.gz", hash = "sha256:3cc4499838739a19a7c99a5b0e9d9c1f4a052a4778d23b324d440cff69948c53", size = 7058605, upload-time = "2026-03-02T12:59:18.134Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b7/0a/1cb0c3067449bf896a071833f966e658ff4e6b0402951a04b330bfbf7289/sites_conformes-2.5.3rc2.tar.gz", hash = "sha256:81de9ba63cf4eb0f837d9afceda83489607f2f995c482ed0bbea61892cb4db79", size = 7059629, upload-time = "2026-03-02T14:08:02.67Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/58/67/56bc05d41e39f6b8c21cba132ce2063d5f41f0241d551ef083f43979857d/sites_conformes-2.5.3rc1-py3-none-any.whl", hash = "sha256:91279f192621fcec96dbb7ead9f55eff85b687db4843cea1a316c8e45e45105b", size = 7447640, upload-time = "2026-03-02T12:59:16.512Z" },
+    { url = "https://files.pythonhosted.org/packages/ce/94/87fa7309bada8dec14b59397a5ad9ab140ceb6a3ab73d3ac00ce0d841bf8/sites_conformes-2.5.3rc2-py3-none-any.whl", hash = "sha256:414101171da5c61385435b46ae694255b6aafeb829637a00772989ac6e171efa", size = 7449243, upload-time = "2026-03-02T14:07:59.907Z" },
 ]
 
 [[package]]
@@ -4175,7 +4175,7 @@ requires-dist = [
     { name = "requests", specifier = ">=2.32.4,<3" },
     { name = "sentry-sdk", specifier = ">=2.37.0,<3" },
     { name = "shortuuid", specifier = ">=1.0.13,<2" },
-    { name = "sites-conformes", specifier = ">=2.5.3rc1" },
+    { name = "sites-conformes", specifier = ">=2.5.3rc2" },
     { name = "unidecode", specifier = ">=1.4.0,<2" },
     { name = "wagtail", specifier = "==7.3" },
     { name = "wagtail-honeypot", specifier = ">=1.2.1" },
