@@ -4,9 +4,9 @@ import { navigateTo, TIMEOUT } from "./helpers"
 
 async function loginAsAdmin(page: Page) {
   await navigateTo(page, "/admin/login/")
-  await page.getByRole("textbox", { name: "Nom d'utilisateur" }).fill("admin")
-  await page.getByRole("textbox", { name: "Mot de passe" }).fill("admin")
-  await page.getByRole("button", { name: "Connexion" }).click()
+  await page.locator('input[name="username"]').fill("admin")
+  await page.locator('input[name="password"]').fill("admin")
+  await page.locator('[type="submit"]').click()
   await page.waitForURL("**/admin/")
 }
 
