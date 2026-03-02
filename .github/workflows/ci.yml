@@ -54,42 +54,27 @@ jobs:
         run: npm run format:check
         working-directory: webapp
 
-  backend_tests:
-    name: ✅ Backend Tests
-    runs-on: ubuntu-latest
+  backend_unit_tests:
+    name: ✅ Backend Unit Tests
     needs: backend_linter
-    services:
-      postgres:
-        image: postgis/postgis:15-3.3-alpine
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 1s
-          --health-timeout 1s
-          --health-retries 50
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_USER: webapp
-          POSTGRES_PASSWORD: webapp # pragma: allowlist secret
-          POSTGRES_DB: webapp
-    steps:
-      - uses: actions/checkout@v6
+    uses: ./.github/workflows/_backend-test-job.yml
+    with:
+      make-target: unit-test
+      check-migrations: true
 
-      - name: Install GIS packages
-        uses: ./.github/actions/install-gis
+  backend_integration_tests:
+    name: ✅ Backend Integration Tests
+    needs: backend_linter
+    uses: ./.github/workflows/_backend-test-job.yml
+    with:
+      make-target: integration-test
 
-      - name: Setup backend environment
-        uses: ./.github/actions/setup-backend
-        with:
-          uv-groups: "--all-packages --group dev"
-      - name: Run unit tests
-        run: make -C webapp unit-test
-      - name: Run integration tests
-        run: make -C webapp integration-test
-      - name: Run data tests
-        run: make -C webapp dags-test
-      - name: Check for missing migrations
-        run: cd webapp && uv run python manage.py makemigrations --check --no-input --settings=core.test_settings
+  backend_data_tests:
+    name: ✅ Backend Data Tests
+    needs: backend_linter
+    uses: ./.github/workflows/_backend-test-job.yml
+    with:
+      make-target: dags-test
 
   frontend_tests:
     name: ✅ Frontend Tests
