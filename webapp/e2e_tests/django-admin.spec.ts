@@ -11,7 +11,7 @@ async function loginAsAdmin(page: Page) {
 }
 
 async function openFirstActeur(page: Page) {
-  await navigateTo(page, "/admin/qfdmo/revisionacteur/")
+  await navigateTo(page, "/admin/qfdmo/displayedacteur/")
   await page.locator("#result_list .field-nom a").first().click()
   await page.waitForLoadState("domcontentloaded")
 }

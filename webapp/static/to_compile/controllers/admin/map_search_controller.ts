@@ -7,18 +7,36 @@ import { Controller } from "@hotwired/stimulus"
 //
 //   <div data-controller="map-search"
 //        data-map-search-widget-id-value="<textarea_id>"
-//        data-map-search-initial-value="<address string">
+//        data-map-search-address-field-ids-value="id_adresse,id_adresse_complement,id_code_postal,id_ville"
 //   >
 //     <input data-map-search-target="input" type="text" />
-//     <button data-action="map-search#search">Placer sur la carte</button>
+//     <input type="button" data-action="click->map-search#search" value="Placer sur la carte" />
 //   </div>
+//
+// On connect(), the input is pre-filled by joining the values of the listed
+// address fields (space-separated for the last two, comma-separated otherwise).
 
 export default class extends Controller<HTMLElement> {
   static targets = ["input"]
-  static values = { widgetId: String }
+  static values = {
+    widgetId: String,
+    addressFieldIds: String,
+  }
 
   declare readonly inputTarget: HTMLInputElement
   declare readonly widgetIdValue: string
+  declare readonly addressFieldIdsValue: string
+
+  connect() {
+    if (!this.addressFieldIdsValue) return
+    const ids = this.addressFieldIdsValue.split(",").map((s) => s.trim())
+    const parts: string[] = []
+    for (const id of ids) {
+      const el = document.getElementById(id) as HTMLInputElement | null
+      if (el?.value) parts.push(el.value)
+    }
+    if (parts.length) this.inputTarget.value = parts.join(", ")
+  }
 
   async search(event: Event) {
     event.preventDefault()

@@ -2,30 +2,14 @@
 
 <div data-controller="map-search"
      data-map-search-widget-id-value="{{ widget.attrs.id }}"
-     class="flex gap-2 mt-2">
+     data-map-search-address-field-ids-value="id_adresse,id_adresse_complement,id_code_postal,id_ville">
     <input data-map-search-target="input"
            type="text"
            id="map-search-input"
            name="search"
-           value="{{ widget.attrs.default_address|default:'' }}"
            class="vTextField"
            placeholder="Adresse à rechercher…" />
     <input type="button"
            data-action="click->map-search#search"
            value="Placer sur la carte" />
 </div>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        var address_composed = []
-        var adresse = document.getElementById("id_adresse")
-        var complement = document.getElementById("id_adresse_complement")
-        var cp = document.getElementById("id_code_postal")
-        var ville = document.getElementById("id_ville")
-        if (adresse) address_composed.push(adresse.value)
-        if (complement && complement.value) address_composed.push(complement.value)
-        if (cp && ville) address_composed.push(cp.value + ' ' + ville.value)
-        var input = document.getElementById("map-search-input")
-        if (input) input.value = address_composed.join(', ')
-    })
-</script>
