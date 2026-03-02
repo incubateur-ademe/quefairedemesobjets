@@ -87,9 +87,6 @@ jobs:
           database-url: ${{ env.DATABASE_URL }}
           dump-path: database-dump.pgdump
 
-      - name: Create Django superuser for e2e tests
-        run: make -C webapp createsuperuser-example
-
       - name: TEMPORARY - prepare search index
         if: inputs.ref == github.ref
         run: |

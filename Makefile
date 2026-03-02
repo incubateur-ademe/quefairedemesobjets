@@ -27,7 +27,6 @@ init-certs:
 	docker compose restart lvao-proxy
 
 # FIXME : Reactive it !
-
 # .PHONY: init-dev
 # init-dev:
 # 	# python

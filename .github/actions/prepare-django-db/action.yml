@@ -59,6 +59,7 @@ runs:
         cd webapp
         make createcachetable
         make migrate
+        make createsuperuser-example
         make rebuild-search-index
 
     - name: Init django admin superuser
