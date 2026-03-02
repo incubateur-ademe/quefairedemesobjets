@@ -1,44 +1,31 @@
-{% include "admin/custom-openlayers.html" %}
+{% include "gis/openlayers.html" %}
 
-<div>
-    <input type="text" id="search" name="search" value="" />
-    <input type="button" id="search-button" name="search-button" value="Placer sur la carte" />
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            var address_composed = []
-            address_composed.push(document.getElementById("id_adresse").value);
-            address_composed.push(document.getElementById("id_adresse_complement").value);
-            address_composed.push(document.getElementById("id_code_postal").value + ' ' + document.getElementById("id_ville").value);
-            var search = document.getElementById("search").value = address_composed.join(', ');
-        });
-        document.addEventListener("DOMContentLoaded", function() {
-            var searchButton = document.getElementById("search-button");
-            searchButton.addEventListener("click", function() {
-                var search = document.getElementById("search").value;
-                var url = "https://data.geopf.fr/geocodage/search/?q=" + search + "&limit=1";
-                fetch(url)
-                    .then(response => response.json())
-                    .then(data => {
-                        var lon = data.features[0].geometry.coordinates[0];
-                        var lat = data.features[0].geometry.coordinates[1];
-                        var widget = window.geodjangoWidgets["{{ widget.attrs.id }}"];
-
-                        // Supprimer tous les marqueurs de la carte
-                        widget.clearFeatures();
-                        document.getElementById(widget.options.id).value = '{ "type": "Point", "coordinates": [ ' + lon + ', ' + lat + ' ] }'
-                        var point = new ol.Feature({
-                            geometry: new ol.geom.Point(ol.proj.fromLonLat([lon, lat]))
-                        });
-                        widget.featureCollection.push(point);
-                        widget.map.setView(new ol.View({
-                            center: ol.proj.fromLonLat([lon, lat]),
-                            zoom: 15
-                        }));
-
-                    })
-                    .catch(error => console.error(error));
-            });
-        });
-    </script>
-
+<div data-controller="map-search"
+     data-map-search-widget-id-value="{{ widget.attrs.id }}"
+     class="flex gap-2 mt-2">
+    <input data-map-search-target="input"
+           type="text"
+           id="map-search-input"
+           name="search"
+           value="{{ widget.attrs.default_address|default:'' }}"
+           class="vTextField"
+           placeholder="Adresse à rechercher…" />
+    <input type="button"
+           data-action="click->map-search#search"
+           value="Placer sur la carte" />
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var address_composed = []
+        var adresse = document.getElementById("id_adresse")
+        var complement = document.getElementById("id_adresse_complement")
+        var cp = document.getElementById("id_code_postal")
+        var ville = document.getElementById("id_ville")
+        if (adresse) address_composed.push(adresse.value)
+        if (complement && complement.value) address_composed.push(complement.value)
+        if (cp && ville) address_composed.push(cp.value + ' ' + ville.value)
+        var input = document.getElementById("map-search-input")
+        if (input) input.value = address_composed.join(', ')
+    })
+</script>
