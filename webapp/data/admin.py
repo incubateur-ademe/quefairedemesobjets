@@ -5,7 +5,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import QuerySet
 from django.template.loader import render_to_string
-from django.utils.html import format_html
+from django.utils.html import format_html, mark_safe
 from djangoql.admin import DjangoQLSearchMixin
 from djangoql.schema import BoolField, DjangoQLSchema, IntField, StrField
 
@@ -100,7 +100,7 @@ class SuggestionCohorteAdmin(DjangoQLSearchMixin, NotEditableMixin, admin.ModelA
     inlines = [SuggestionLogInline]
 
     def metadonnees(self, obj):
-        return format_html(dict_to_html_table(obj.metadata or {}))
+        return mark_safe(dict_to_html_table(obj.metadata or {}))
 
     def get_deleted_objects(self, objs, request):
         """
@@ -208,7 +208,7 @@ class SuggestionAdmin(DjangoQLSearchMixin, NotSelfDeletableMixin):
 
     def cohorte(self, obj):
         coh = obj.suggestion_cohorte
-        return format_html(str(coh).replace(" -- ", "<br/>"))
+        return mark_safe(str(coh).replace(" -- ", "<br/>"))
 
     def acteur_link_html(self, id):
         return format_html(

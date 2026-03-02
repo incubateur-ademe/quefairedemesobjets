@@ -193,8 +193,9 @@ class WagtailRedirectMixin:
                         format_html(
                             "Vous avez été redirigé vers la page suivante car elle"
                             " n'est plus éditable dans Django Admin. "
-                            f"<a style='color:white;' href='{django_admin_url}'>"
-                            "<u>Cliquez ici pour revenir à Django Admin</u></a>."
+                            "<a style='color:white;' href='{}'>"
+                            "<u>Cliquez ici pour revenir à Django Admin</u></a>.",
+                            django_admin_url,
                         ),
                     )
                     return redirect(
