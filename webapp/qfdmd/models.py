@@ -247,6 +247,11 @@ class ProduitPageSearchTerm(SearchTerm):
     def get_title(self):
         return self.searchable_title
 
+    def __str__(self) -> str:
+        if self.produit_page_id:
+            return self.searchable_title or f"ProduitPage #{self.produit_page_id}"
+        return self.searchable_title or f"SearchTerm {self.pk}"
+
     search_fields = SearchTerm.search_fields
 
 
@@ -785,12 +790,6 @@ class Synonyme(SearchTerm, AbstractBaseProduit):
         verbose_name="Importé comme SearchTag",
         help_text="Si renseigné, ce synonyme a été importé comme SearchTag "
         "et ne devrait plus apparaître dans les résultats de recherche.",
-    )
-    disabled = models.BooleanField(
-        "Désactivé",
-        default=False,
-        help_text="Un synonyme désactivé ne s'affichera nulle part. \n"
-        "On le conserve en base de données pour conserver les redirections",
     )
     picto = models.FileField(
         upload_to="pictos",

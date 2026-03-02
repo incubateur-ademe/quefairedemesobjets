@@ -10,15 +10,55 @@ from search.models import SearchTerm
 from django.conf import settings
 
 
+class KindFilter(django_filters.ChoiceFilter):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault(
+            "choices",
+            [
+                ("synonyme", "Synonyme (ancienne version)"),
+                ("search_tag", "Synonyme de recherche"),
+                ("produit_page", "Page produit"),
+            ],
+        )
+        kwargs.setdefault("label", "Type")
+        kwargs.setdefault("empty_label", "Tous les types")
+        super().__init__(*args, **kwargs)
+
+    def filter(self, qs, value):
+
+        if value == "synonyme":
+            return qs.filter(synonyme__isnull=False)
+        if value == "search_tag":
+            return qs.filter(searchtag__isnull=False)
+        if value == "produit_page":
+            return qs.filter(produitpagesearchterm__isnull=False)
+        return qs
+
+
+class SearchTermFilterSet(WagtailFilterSet):
+    kind = KindFilter()
+    disabled = django_filters.BooleanFilter(
+        label="Désactivé",
+        field_name="disabled",
+        widget=django_filters.widgets.BooleanWidget(),
+    )
+
+    class Meta:
+        model = SearchTerm
+        fields = []
+
+
 class SearchTermViewSet(SnippetViewSet):
     model = SearchTerm
     icon = "search"
     menu_label = "Termes de recherche"
     menu_name = "search-terms"
-    list_display = ["__str__", "search_variants"]
+    list_display = ["__str__", "kind", "redirect_destination", "search_variants"]
     search_backend_name = settings.MODELSEARCH_BACKENDS["default"]["BACKEND"]
+    filterset_class = SearchTermFilterSet
     panels = [
         FieldPanel("search_variants"),
+        FieldPanel("disabled"),
     ]
 
 
@@ -63,6 +103,7 @@ class SearchTagViewSet(SnippetViewSet):
     panels = [
         HelpPanel(content=SEARCH_TAG_HELP_TEXT),
         FieldPanel("name"),
+        FieldPanel("disabled"),
         FieldPanel("search_variants"),
     ]
 
@@ -73,7 +114,7 @@ class SynonymeViewSet(SnippetViewSet):
     menu_label = "Synonymes (ancienne version)"
     menu_name = "synonymes"
     list_display = ["nom", "modifie_le"]
-    search_fields = ["nom"]
+    search_backend_name = settings.MODELSEARCH_BACKENDS["default"]["BACKEND"]
     panels = [
         FieldPanel("nom"),
         FieldPanel("disabled"),
