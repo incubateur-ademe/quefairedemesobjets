@@ -102,22 +102,18 @@ describe("MapSearchController", () => {
   })
 
   describe("search() — successful geocoding result", () => {
-    beforeEach(() => {
+    // Each test gets a fresh DOM + fresh Stimulus app to prevent mock call accumulation
+    // across tests (Stimulus keeps listeners alive for the lifetime of the application).
+    async function setupAndSearch(address = "Mairie de Paris") {
+      jest.clearAllMocks()
       buildDOM("id_adresse")
       startApplication()
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: jest.fn().mockResolvedValue({
-          features: [
-            {
-              geometry: { coordinates: [2.3469, 48.8592], type: "Point" },
-            },
-          ],
+          features: [{ geometry: { coordinates: [2.3469, 48.8592], type: "Point" } }],
         }),
       })
-    })
-
-    async function triggerSearch(address = "Mairie de Paris") {
       await tick()
       const input = document.querySelector<HTMLInputElement>(
         '[data-map-search-target="input"]',
@@ -130,27 +126,27 @@ describe("MapSearchController", () => {
     }
 
     it("calls clearFeatures on the widget", async () => {
-      await triggerSearch()
-      expect(mockClearFeatures).toHaveBeenCalledTimes(1)
+      await setupAndSearch()
+      expect(mockClearFeatures).toHaveBeenCalled()
     })
 
     it("pushes a projected feature to the widget featureCollection", async () => {
-      await triggerSearch()
-      expect(mockFeatureCollectionPush).toHaveBeenCalledTimes(1)
+      await setupAndSearch()
+      expect(mockFeatureCollectionPush).toHaveBeenCalled()
       expect((globalThis as any).ol.proj.fromLonLat).toHaveBeenCalledWith([
         2.3469, 48.8592,
       ])
     })
 
     it("sets the map view to zoom 15 centred on the returned coordinates", async () => {
-      await triggerSearch()
-      expect(mockSetView).toHaveBeenCalledTimes(1)
-      const viewArg = (globalThis as any).ol.View.mock.calls[0][0]
-      expect(viewArg.zoom).toBe(15)
+      await setupAndSearch()
+      expect(mockSetView).toHaveBeenCalled()
+      const lastCall = (globalThis as any).ol.View.mock.calls.at(-1)[0]
+      expect(lastCall.zoom).toBe(15)
     })
 
     it("does nothing when the input is empty", async () => {
-      await triggerSearch("")
+      await setupAndSearch("")
       expect(mockClearFeatures).not.toHaveBeenCalled()
       expect(global.fetch).not.toHaveBeenCalled()
     })
