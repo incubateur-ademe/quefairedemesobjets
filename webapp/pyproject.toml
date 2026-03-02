@@ -37,7 +37,7 @@ dependencies = [
     "django-admin-sortable2>=2.2.8",
     "more-itertools>=10.7.0",
     "wagtail-honeypot>=1.2.1",
-    "sites-conformes>=2.5.3rc1",
+    "sites-conformes>=2.5.3rc2",
     "wagtail==7.3",
     "pre-commit>=4.5.1",
     "modelsearch>=1.1.1",
