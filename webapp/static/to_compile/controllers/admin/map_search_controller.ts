@@ -14,7 +14,7 @@ import { Controller } from "@hotwired/stimulus"
 //   </div>
 //
 // On connect(), the input is pre-filled by joining the values of the listed
-// address fields (space-separated for the last two, comma-separated otherwise).
+// address fields with ", " as separator.
 
 export default class extends Controller<HTMLElement> {
   static targets = ["input"]
@@ -67,10 +67,6 @@ export default class extends Controller<HTMLElement> {
     }
 
     widget.clearFeatures()
-    // Set the serialized textarea value directly (EPSG:4326 coordinates)
-    ;(document.getElementById(widget.options.id) as HTMLTextAreaElement).value =
-      `{ "type": "Point", "coordinates": [ ${lon}, ${lat} ] }`
-    // Add the projected feature to the map
     const point = new (ol as any).Feature({
       geometry: new (ol as any).geom.Point((ol as any).proj.fromLonLat([lon, lat])),
     })

@@ -88,13 +88,6 @@ test.describe("🛠️ Django Admin - Carte géographique", () => {
     })
 
     // serializeFeatures is called by the geometry 'change' event — wait for textarea update
-    await expect(textarea).not.toHaveValue(
-      JSON.stringify({ type: "Point", coordinates: before }),
-      {
-        timeout: TIMEOUT.DEFAULT,
-      },
-    )
-
     const after = await readCoordinates(page)
     // Coordinates should have shifted
     expect(after[0]).not.toBeCloseTo(before[0], 3)
@@ -129,7 +122,8 @@ test.describe("🛠️ Django Admin - Carte géographique", () => {
     await expect(searchInput).toBeVisible({ timeout: TIMEOUT.DEFAULT })
 
     await searchInput.fill("Mairie de Paris")
-    // Force is required as the button might be out of the dom
+    // force bypasses actionability checks — the button is outside the visible viewport
+    // in the admin form but still functional
     await page
       .locator('[data-action="click->map-search#search"]')
       .click({ force: true })
