@@ -1,0 +1,66 @@
+<div
+    data-controller="next-autocomplete{% for key, value in wrapper_attrs.items %}{% if key == "data-controller" %} {{ value }}{% endif %}{% endfor %}"
+    data-next-autocomplete-endpoint-url-value="{{ endpoint_url }}"
+    data-next-autocomplete-turbo-frame-id-value="{{ turbo_frame_id }}"
+    data-next-autocomplete-limit-value="{{ limit }}"
+    {% if show_on_focus %}data-next-autocomplete-show-on-focus-value="true"{% endif %}
+    {% for key, value in wrapper_attrs.items %}{% if key != "data-controller" %}{{ key }}="{{ value }}" {% endif %}{% endfor %}
+    class="qf-relative"
+>
+    <label for="{{ widget.attrs.id }}" class="qf-sr-only">Entrez un objet ou un déchet :</label>
+
+    <div class="
+        qf-flex qf-items-center qf-gap-1w
+        qf-bg-white
+        qf-border-2 qf-border-solid qf-border-green-menthe-sun-373-moon-652-hover
+        qf-rounded
+        qf-p-2w
+        qf-pr-0
+        focus-within:qf-outline focus-within:qf-outline-2 focus-within:qf-outline-offset-2 focus-within:qf-outline-focus
+    ">
+        {# Search icon #}
+        <span
+            class="fr-icon-search-line qf-text-green-menthe-sun-373-moon-652-hover qf-shrink-0"
+            aria-hidden="true"
+        ></span>
+
+        <input
+            type="search"
+            {% include "django/forms/widgets/attrs.html" %}
+            {% if display_value %}
+            name="{{ widget.name }}"
+            {% if widget.value != None %} value="{{ widget.value }}"{% endif %}
+            {% endif %}
+            role="combobox"
+            aria-controls="{{ turbo_frame_id }}-listbox"
+            aria-expanded="false"
+            aria-activedescendant=""
+            aria-autocomplete="both"
+            data-action="next-autocomplete#search keydown->next-autocomplete#navigate focus->next-autocomplete#focus"
+            data-next-autocomplete-target="input"
+            class="qf-flex-1 qf-bg-transparent qf-border-none qf-outline-none
+                qf-text-bold
+                   qf-text-base qf-text-grey-50
+                   placeholder:qf-italic placeholder:qf-text-grey-425
+                   focus:qf-outline-none"
+        >
+    </div>
+
+    <input
+        type="hidden"
+        data-next-autocomplete-target="hiddenInput"
+        name="{{ widget.name }}"{% if widget.value != None %} value="{{ widget.value }}"{% endif %}
+    >
+
+    {# Results #}
+    {% include "ui/forms/widgets/autocomplete/results.html" with extra_classes="qf-mt-1w" %}
+
+    {% comment %}
+    The combination of margin-top and position / top here is to prevent setting a pixel value
+    for the positionning that would break responsiveness for user who do not use standard browser
+    font size while maintaining pixel perfect integration for most cases.
+    {% endcomment %}
+    <div class="peer-aria-[busy]:qf-visible qf-invisible qf-absolute qf-z-50 qf-right-2w qf-top-2w qf-mt-[5px]">
+    {% include "ui/components/spinner.html" with small=True %}
+    </div>
+</div>

@@ -1,24 +1,17 @@
 {% extends iframe|yesno:"ui/components/header/base.iframe.html,ui/components/header/base.html" %}
 
-{% load menu_tags static %}
-
-{% block header_search %}
-    <div
-        class="qf-w-[320px]
-        qf-ml-auto
-        qf-relative
-        -qf-top-3w
-        {% if not iframe %}max-lg:qf-hidden{% endif %}
-        qf-text-left"
-    >
-        <div class="qf-absolute qf-left-0 qf-right-0 my-auto">
-        {% include "ui/components/search/view.html" with search_form=header_search_form %}
-        </div>
-    </div>
-{% endblock header_search %}
+{% load i18n menu_tags static %}
 
 {% block burger_menu %}
+  {% translate "Search" as search_label %}
   <div class="fr-header__navbar">
+    <button class="fr-btn--search fr-btn"
+            data-fr-opened="false"
+            aria-controls="modal-search"
+            id="fr-btn-search-mobile"
+            title="{{ search_label }}">
+    {{ search_label }}
+    </button>
     <button class="fr-btn--menu fr-btn"
             data-fr-opened="false"
             aria-controls="fr-menu-mobile"
@@ -29,7 +22,8 @@
   </div>
 {% endblock burger_menu %}
 
-{% block brand %}{% endblock %}
+{% block brand %}
+{% endblock %}
 
 {% block operator_logo %}
 <div class="fr-header__operator max-md:qf-pl-0 max-sm:qf-pr-0">

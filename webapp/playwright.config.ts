@@ -8,6 +8,9 @@ import path from "path"
 
 dotenv.config({ path: path.resolve(__dirname, ".env") })
 
+const PORT = 8888
+const BASE_URL = `http://localhost:${PORT}`
+
 export const config: PlaywrightTestConfig = {
   testDir: "./e2e_tests",
   timeout: 45000,
@@ -17,19 +20,19 @@ export const config: PlaywrightTestConfig = {
   workers: 1,
   reporter: "html",
   webServer: {
-    command: "uv run python manage.py runserver 0.0.0.0:8888",
-    port: 8888,
+    command: `uv run python manage.py runserver 0.0.0.0:${PORT}`,
+    port: PORT,
     reuseExistingServer: !process.env.CI,
     env: {
       ...(process.env as Record<string, string>),
       DATABASE_URL: (process.env.SAMPLE_DATABASE_URL ?? process.env.DATABASE_URL)!,
       SECRET_KEY: process.env.SECRET_KEY!,
-      BASE_URL: "http://localhost:8888",
+      BASE_URL: BASE_URL,
     },
     cwd: path.resolve(__dirname),
   },
   use: {
-    baseURL: "http://localhost:8888",
+    baseURL: BASE_URL,
     trace: "on-first-retry",
   },
   expect: {
