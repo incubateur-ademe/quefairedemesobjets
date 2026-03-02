@@ -21,16 +21,16 @@
                     .then(data => {
                         var lon = data.features[0].geometry.coordinates[0];
                         var lat = data.features[0].geometry.coordinates[1];
-                        var map = geodjango_location.map;
+                        var widget = window.geodjangoWidgets["{{ widget.attrs.id }}"];
 
-                    // Supprimer tous les marqueurs de la carte
-                        geodjango_location.clearFeatures();
-                        document.getElementById(geodjango_location.options.id).value = '{ "type": "Point", "coordinates": [ ' + lon + ', ' + lat + ' ] }'
+                        // Supprimer tous les marqueurs de la carte
+                        widget.clearFeatures();
+                        document.getElementById(widget.options.id).value = '{ "type": "Point", "coordinates": [ ' + lon + ', ' + lat + ' ] }'
                         var point = new ol.Feature({
                             geometry: new ol.geom.Point(ol.proj.fromLonLat([lon, lat]))
                         });
-                        geodjango_location.featureCollection.push(point);
-                        geodjango_location.map.setView(new ol.View({
+                        widget.featureCollection.push(point);
+                        widget.map.setView(new ol.View({
                             center: ol.proj.fromLonLat([lon, lat]),
                             zoom: 15
                         }));
