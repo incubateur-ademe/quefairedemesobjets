@@ -130,33 +130,33 @@ jobs:
           path: blob-report
           retention-days: 1
 
-    create-report:
-      name: 📔 Create test report
-      if: always()
-      needs: [test]
-      runs-on: ubuntu-latest
+  create-report:
+    name: 📔 Create test report
+    if: always()
+    needs: [test]
+    runs-on: ubuntu-latest
 
-      steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
-      - name: Install dependencies
-        run: npm ci
+    steps:
+    - uses: actions/checkout@v5
+    - uses: actions/setup-node@v5
+    - name: Install dependencies
+      run: npm ci
 
-      - name: Download blob reports from GitHub Actions Artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: all-blob-reports
-          path: blob-report-*
+    - name: Download blob reports from GitHub Actions Artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: all-blob-reports
+        path: blob-report-*
 
-      - name: Merge into HTML Report
-        run: npx playwright merge-reports --reporter html ./all-blob-reports
+    - name: Merge into HTML Report
+      run: npx playwright merge-reports --reporter html ./all-blob-reports
 
-      - name: Upload HTML report
-        uses: actions/upload-artifact@v3
-        with:
-          name: html-report--attempt-${{ github.run_attempt }}
-          path: playwright-report
-          retention-days: 7
+    - name: Upload HTML report
+      uses: actions/upload-artifact@v3
+      with:
+        name: html-report--attempt-${{ github.run_attempt }}
+        path: playwright-report
+        retention-days: 7
 
 permissions:
   contents: read
