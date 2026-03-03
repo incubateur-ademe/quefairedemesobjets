@@ -15,7 +15,7 @@ export const config: PlaywrightTestConfig = {
   forbidOnly: !!process.env.CI,
   retries: 1,
   workers: 1,
-  reporter: "html",
+  reporter: process.env.CI ? "blob" : "html",
   webServer: {
     command: "uv run python manage.py runserver 0.0.0.0:8888",
     port: 8888,
