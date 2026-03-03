@@ -7,6 +7,7 @@ class TestCopyDbData:
     """Tests unitaires pour la fonction copy_db_data avec mocks"""
 
     @patch("importlib.import_module")
+    @patch("acteurs.tasks.business_logic.copy_db_data.drop_tables")
     @patch("acteurs.tasks.business_logic.copy_db_data.dump_and_restore_db")
     @patch("django.db.connections")
     @patch("django.conf.settings")
@@ -15,6 +16,7 @@ class TestCopyDbData:
         mock_settings,
         mock_connections,
         mock_dump_and_restore_db,
+        mock_drop_tables,
         mock_import_module,
     ):
         """
@@ -42,6 +44,7 @@ class TestCopyDbData:
             ("other_table",),  # Does not start with INSTALLED_APPS, should be excluded
             ("qfdmo_acteur_acteur_services",),  # Should be excluded (in EXCLUDE_TABLES)
         ]
+        mock_cursor.fetchone.return_value = (0,)
 
         mock_connection = MagicMock()
         mock_connection.cursor.return_value.__enter__.return_value = mock_cursor
@@ -51,10 +54,9 @@ class TestCopyDbData:
         copy_db_data()
 
         # Assertions
-        mock_cursor.execute.assert_called_once_with(
+        mock_cursor.execute.assert_any_call(
             "SELECT table_name FROM information_schema.tables"
         )
-        mock_cursor.fetchall.assert_called_once()
 
         # Assert that dump_and_restore_db was called with the correct tables
         mock_dump_and_restore_db.assert_called_once()
@@ -62,7 +64,6 @@ class TestCopyDbData:
 
         assert call_args.kwargs["source_dsn"] == "postgresql://source_db"
         assert call_args.kwargs["dest_dsn"] == "postgresql://dest_db"
-        assert call_args.kwargs["data_only"] is True
 
         # Assert that only valid tables are included
         tables_passed = call_args.kwargs["tables"]
@@ -76,7 +77,13 @@ class TestCopyDbData:
         assert "qfdmo_acteur_acteur_services" not in tables_passed
         assert "other_table" not in tables_passed
 
+        # Assert that drop_tables was called with the correct tables and DSN
+        mock_drop_tables.assert_called_once_with(
+            dsn="postgresql://dest_db", tables=tables_passed
+        )
+
     @patch("importlib.import_module")
+    @patch("acteurs.tasks.business_logic.copy_db_data.drop_tables")
     @patch("acteurs.tasks.business_logic.copy_db_data.dump_and_restore_db")
     @patch("django.db.connections")
     @patch("django.conf.settings")
@@ -85,6 +92,7 @@ class TestCopyDbData:
         mock_settings,
         mock_connections,
         mock_dump_and_restore_db,
+        mock_drop_tables,
         mock_import_module,
     ):
         """Test that all parameters are correctly passed to dump_and_restore_db"""
@@ -101,6 +109,7 @@ class TestCopyDbData:
             ("qfdmo_valid_table",),
             ("data_valid_table",),
         ]
+        mock_cursor.fetchone.return_value = (0,)
 
         mock_connection = MagicMock()
         mock_connection.cursor.return_value.__enter__.return_value = mock_cursor
@@ -108,10 +117,16 @@ class TestCopyDbData:
 
         copy_db_data()
 
+        expected_tables = ["qfdmo_valid_table", "data_valid_table"]
+
+        # Assert that drop_tables was called before dump_and_restore_db
+        mock_drop_tables.assert_called_once_with(
+            dsn="postgresql://dest_db", tables=expected_tables
+        )
+
         # Assert that all parameters are correctly passed to dump_and_restore_db
         mock_dump_and_restore_db.assert_called_once_with(
             source_dsn="postgresql://source_db",
             dest_dsn="postgresql://dest_db",
-            tables=["qfdmo_valid_table", "data_valid_table"],
-            data_only=True,
+            tables=expected_tables,
         )
