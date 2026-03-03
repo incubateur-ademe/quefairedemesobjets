@@ -134,7 +134,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: blob-report-${{ inputs.shard }}
+          name: blob-report-${{ matrix.shard }}
           path: webapp/blob-report
           retention-days: 1
 
