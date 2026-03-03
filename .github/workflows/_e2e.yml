@@ -37,7 +37,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: ["1/4", "2/4", "3/4", "4/4"]
+        shard: ["1", "2", "3", "4"]
     timeout-minutes: 60
     services:
       postgres:
@@ -115,12 +115,12 @@ jobs:
 
       - name: Run Playwright tests
         if: ${{ !inputs.compare }}
-        run: npx playwright test --update-snapshots ${{ inputs.shard && format('--shard={0}', matrix.shard) || '' }}
+        run: npx playwright test --update-snapshots ${{ format('--shard={0}/4', matrix.shard) || '' }}
         working-directory: webapp
 
       - name: Run Playwright tests (regression only)
         if: inputs.compare
-        run: npx playwright test --grep=@regression ${{ inputs.shard && format('--shard={0}', matrix.shard) || '' }}
+        run: npx playwright test --grep=@regression ${{ format('--shard={0}/4', matrix.shard) || '' }}
         working-directory: webapp
 
       - name: Upload baseline screenshots
