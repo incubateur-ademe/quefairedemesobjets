@@ -13,6 +13,10 @@ on:
         required: false
         type: string
         default: ""
+      total:
+        required: false
+        type: string
+        default: ""
 
 env:
   PGHOST: localhost
@@ -107,12 +111,12 @@ jobs:
 
       - name: Run Playwright tests
         if: ${{ !inputs.compare }}
-        run: npx playwright test --update-snapshots ${{ inputs.shard && format('--shard={0}', inputs.shard) || '' }}
+        run: npx playwright test --update-snapshots ${{ inputs.shard && format('--shard={0}/{1}', inputs.shard, inputs.total) || '' }}
         working-directory: webapp
 
       - name: Run Playwright tests (regression only)
         if: inputs.compare
-        run: npx playwright test --grep=@regression ${{ inputs.shard && format('--shard={0}', inputs.shard) || '' }}
+        run: npx playwright test --grep=@regression ${{ inputs.shard && format('--shard={0}/{1}', inputs.shard, inputs.total) || '' }}
         working-directory: webapp
 
       - name: Upload baseline screenshots
