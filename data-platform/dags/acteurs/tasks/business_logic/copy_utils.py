@@ -8,22 +8,14 @@ import psycopg2
 logger = logging.getLogger(__name__)
 
 
-def _truncate_tables(dsn: str, tables: list[str]) -> None:
-    """Truncate tables in the destination DB before restoring data."""
+def drop_tables(dsn: str, tables: list[str]) -> None:
+    """Drop tables in the destination DB before restoring."""
     conn = psycopg2.connect(dsn)
     conn.autocommit = True
     with conn.cursor() as cursor:
-        # Only truncate tables that actually exist in the destination
-        placeholders = ",".join(["%s"] * len(tables))
-        cursor.execute(
-            f"SELECT table_name FROM information_schema.tables"
-            f" WHERE table_schema = 'public' AND table_name IN ({placeholders})",
-            tables,
-        )
-        existing = [row[0] for row in cursor.fetchall()]
-        for table in existing:
-            cursor.execute(f'TRUNCATE TABLE "{table}" CASCADE')
-            logger.info(f"  ✓ Table {table} tronquée")
+        for table in tables:
+            cursor.execute(f'DROP TABLE IF EXISTS "{table}" CASCADE')
+            logger.info(f"  ✓ Table {table} supprimée")
     conn.close()
 
 
@@ -69,12 +61,6 @@ def dump_and_restore_db(
             )
 
         logger.info("✅ Dump créé")
-
-        # Truncate destination tables before restoring data
-        # to avoid duplicate key errors
-        if data_only and tables:
-            logger.info("🗑️  Truncating destination tables before restore...")
-            _truncate_tables(dsn=dest_dsn, tables=tables)
 
         # Restore the dump
         restore_cmd = [
