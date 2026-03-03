@@ -262,24 +262,47 @@ class ProduitPageSearchTerm(SearchTerm):
     search_fields = SearchTerm.search_fields
 
 
+def find_duplicate_search_tag_names(tag_names, page_id=None):
+    """Return tag names that would create a case-insensitive duplicate.
+
+    A duplicate is any submitted name that matches (case-insensitively) an
+    existing SearchTag that is NOT the exact same object being submitted
+    (i.e. same name with different casing, or a tag already on another page).
+
+    Args:
+        tag_names: iterable of tag name strings to check
+        page_id: pk of the page being edited
+    """
+    duplicates = []
+    for name in tag_names:
+        qs = SearchTag.objects.filter(name__iexact=name).exclude(name=name)
+        if page_id:
+            # Also flag tags with the exact same name on a different page
+            qs_other_page = SearchTag.objects.filter(
+                name=name,
+                tagged_produit_page__isnull=False,
+            ).exclude(tagged_produit_page__content_object_id=page_id)
+            if qs.exists() or qs_other_page.exists():
+                duplicates.append(name)
+        elif qs.exists():
+            duplicates.append(name)
+    return duplicates
+
+
 class ProduitPageForm(WagtailAdminPageForm):
     def clean(self):
         cleaned_data = super().clean()
-        submitted_tags = cleaned_data.get("search_tags", "")
-        # ClusterTaggableManager gives a comma-separated string of tag names
-        tag_names = [t.strip() for t in submitted_tags.split(",") if t.strip()]
+        submitted_tags = cleaned_data.get("search_tags") or []
+        # ClusterTaggableManager gives a list of SearchTag instances or tag name strings
+        tag_names = [
+            t.name if isinstance(t, SearchTag) else str(t) for t in submitted_tags
+        ]
 
-        page_id = self.instance.pk
-        for name in tag_names:
-            qs = SearchTag.objects.filter(name__iexact=name)
-            if page_id:
-                # Exclude tags already belonging to this page
-                qs = qs.exclude(tagged_produit_page__content_object_id=page_id)
-            if qs.exists():
-                self.add_error(
-                    "search_tags",
-                    f"A search tag with the name '{name}' already exists on another page.",
-                )
+        for name in find_duplicate_search_tag_names(tag_names, self.instance.pk):
+            self.add_error(
+                "search_tags",
+                f"A search tag with the name '{name}' already exists on another page.",
+            )
         return cleaned_data
 
 

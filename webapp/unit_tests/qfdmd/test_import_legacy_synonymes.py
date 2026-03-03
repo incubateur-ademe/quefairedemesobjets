@@ -15,6 +15,7 @@ from qfdmd.models import (
     SearchTag,
     Synonyme,
     TaggedSearchTag,
+    find_duplicate_search_tag_names,
 )
 from qfdmd.views import import_legacy_synonymes
 from unit_tests.qfdmd.qfdmod_factory import ProduitFactory, SynonymeFactory
@@ -364,31 +365,14 @@ class TestSearchTagPreservesCase:
 
 
 @pytest.mark.django_db
-class TestProduitPageFormSearchTagValidation:
-    """ProduitPageForm.clean() rejects search_tags that duplicate an existing tag
-    on a different page (case-insensitive).
+class TestFindDuplicateSearchTagNames:
+    """find_duplicate_search_tag_names() returns names that already exist
+    on a different page (case-insensitive)."""
 
-    We test clean() directly by instantiating ProduitPageForm with a pre-populated
-    cleaned_data dict and a mock errors dict, bypassing the full Wagtail form
-    validation which requires many unrelated fields (StreamFields, etc.).
-    """
+    def test_returns_empty_when_no_existing_tag(self):
+        assert find_duplicate_search_tag_names(["NouveauTag"]) == []
 
-    def _run_clean(self, search_tags_value, instance):
-        """Instantiate ProduitPageForm and call clean() with controlled cleaned_data."""
-        from qfdmd.models import ProduitPageForm
-
-        form = ProduitPageForm.__new__(ProduitPageForm)
-        form.instance = instance
-        form._errors = {}
-        form.cleaned_data = {"search_tags": search_tags_value}
-        form.clean()
-        return form
-
-    def test_valid_when_no_existing_tag(self, produit_page):
-        form = self._run_clean("NouveauTag", produit_page)
-        assert "search_tags" not in form._errors
-
-    def test_error_when_tag_exists_on_another_page(
+    def test_returns_name_when_tag_exists_on_another_page(
         self, produit_index_page, produit_page
     ):
         other_page = ProduitPage(title="Other Page", slug="other-page")
@@ -398,10 +382,11 @@ class TestProduitPageFormSearchTagValidation:
         tag = SearchTag.objects.create(name="TV", slug="tv")
         TaggedSearchTag.objects.create(tag=tag, content_object=other_page)
 
-        form = self._run_clean("TV", produit_page)
-        assert "search_tags" in form._errors
+        assert find_duplicate_search_tag_names(["TV"], page_id=produit_page.pk) == [
+            "TV"
+        ]
 
-    def test_error_is_case_insensitive(self, produit_index_page, produit_page):
+    def test_case_insensitive(self, produit_index_page, produit_page):
         other_page = ProduitPage(title="Other Page 2", slug="other-page-2")
         produit_index_page.add_child(instance=other_page)
         other_page.save()
@@ -409,22 +394,91 @@ class TestProduitPageFormSearchTagValidation:
         tag = SearchTag.objects.create(name="TV", slug="tv")
         TaggedSearchTag.objects.create(tag=tag, content_object=other_page)
 
-        form = self._run_clean("tv", produit_page)
-        assert "search_tags" in form._errors
+        assert find_duplicate_search_tag_names(["tv"], page_id=produit_page.pk) == [
+            "tv"
+        ]
 
-    def test_no_error_for_own_existing_tag(self, produit_page):
+    def test_excludes_own_page_tags(self, produit_page):
         tag = SearchTag.objects.create(name="TV", slug="tv")
         TaggedSearchTag.objects.create(tag=tag, content_object=produit_page)
 
-        form = self._run_clean("TV", produit_page)
-        assert "search_tags" not in form._errors
+        assert find_duplicate_search_tag_names(["TV"], page_id=produit_page.pk) == []
 
-    def test_no_error_for_unlinked_tag(self, produit_page):
-        """A SearchTag not linked to any page does not trigger the error."""
+    def test_ignores_unlinked_tags(self):
+        """A SearchTag not linked to any page is not a duplicate."""
         SearchTag.objects.create(name="TV", slug="tv")
 
-        form = self._run_clean("TV", produit_page)
-        assert "search_tags" not in form._errors
+        assert find_duplicate_search_tag_names(["TV"]) == []
+
+
+@pytest.mark.django_db
+class TestProduitPageFormClean:
+    """ProduitPageForm.clean() raises a validation error when a submitted
+    SearchTag duplicates an existing tag on another page (case-insensitive)."""
+
+    def _run_clean(self, tags, instance):
+        """Call clean() with a list of SearchTag instances, mirroring Wagtail's form.
+
+        We patch super().clean() and add_error() to isolate ProduitPageForm.clean()
+        from the full Wagtail form machinery.
+        """
+        from unittest.mock import patch
+
+        from qfdmd.models import ProduitPageForm
+
+        cleaned_data = {"search_tags": tags}
+        errors = []
+
+        with patch.object(
+            ProduitPageForm,
+            "add_error",
+            side_effect=lambda field, msg: errors.append((field, msg)),
+        ):
+            with patch(
+                "wagtail.admin.forms.WagtailAdminPageForm.clean",
+                return_value=cleaned_data,
+            ):
+                form = ProduitPageForm.__new__(ProduitPageForm)
+                form.instance = instance
+                form.clean()
+
+        return errors
+
+    def test_raises_error_when_tag_exists_on_another_page_with_different_casing(
+        self, produit_index_page, produit_page
+    ):
+        other_page = ProduitPage(title="Other Page", slug="other-page")
+        produit_index_page.add_child(instance=other_page)
+        other_page.save()
+
+        existing_tag = SearchTag.objects.create(name="TV", slug="tv")
+        TaggedSearchTag.objects.create(tag=existing_tag, content_object=other_page)
+
+        # Submit "tv" (lowercase) while "TV" already belongs to another page
+        new_tag = SearchTag.objects.create(name="tv", slug="tv-2")
+        errors = self._run_clean([new_tag], produit_page)
+
+        assert any(field == "search_tags" for field, _ in errors)
+
+    def test_no_error_when_tag_belongs_to_current_page(self, produit_page):
+        tag = SearchTag.objects.create(name="TV", slug="tv")
+        TaggedSearchTag.objects.create(tag=tag, content_object=produit_page)
+
+        errors = self._run_clean([tag], produit_page)
+
+        assert not any(field == "search_tags" for field, _ in errors)
+
+    def test_raises_error_when_adding_differently_cased_duplicate_to_same_page(
+        self, produit_page
+    ):
+        """Adding 'EmBallage' when 'emballage' already exists raises a validation error."""
+        existing_tag = SearchTag.objects.create(name="emballage", slug="emballage")
+        TaggedSearchTag.objects.create(tag=existing_tag, content_object=produit_page)
+
+        new_tag = SearchTag.objects.create(name="EmBallage", slug="emballage-2")
+        errors = self._run_clean([existing_tag, new_tag], produit_page)
+
+        assert any(field == "search_tags" for field, _ in errors)
 
 
 @pytest.mark.django_db
