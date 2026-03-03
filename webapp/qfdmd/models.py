@@ -195,7 +195,10 @@ class SearchTag(SearchTerm, TagBase):
             qs = qs.exclude(pk=self.pk)
         if qs.exists():
             raise ValidationError(
-                {"name": f"A SearchTag with the name '{self.name}' already exists."}
+                {
+                    "name": f"Un synonyme de recherche avec le nom « {self.name} » "
+                    "existe déjà."
+                }
             )
 
     def __str__(self):
@@ -301,7 +304,7 @@ class ProduitPageForm(WagtailAdminPageForm):
         for name in find_duplicate_search_tag_names(tag_names, self.instance.pk):
             self.add_error(
                 "search_tags",
-                f"A search tag with the name '{name}' already exists on another page.",
+                f"Un synonyme de recherche avec le nom « {name} » existe déjà.",
             )
         return cleaned_data
 

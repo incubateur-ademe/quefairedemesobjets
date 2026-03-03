@@ -22,3 +22,6 @@ _build
 
 tmpbackup*
 __screenshots__
+
+# Translations
+*.mo

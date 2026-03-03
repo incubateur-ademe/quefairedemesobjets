@@ -471,7 +471,8 @@ class TestProduitPageFormClean:
     def test_raises_error_when_adding_differently_cased_duplicate_to_same_page(
         self, produit_page
     ):
-        """Adding 'EmBallage' when 'emballage' already exists raises a validation error."""
+        """Adding 'EmBallage' when 'emballage' already exists raises
+        a validation error."""
         existing_tag = SearchTag.objects.create(name="emballage", slug="emballage")
         TaggedSearchTag.objects.create(tag=existing_tag, content_object=produit_page)
 
