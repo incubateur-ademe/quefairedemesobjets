@@ -3,7 +3,20 @@ import subprocess
 import tempfile
 from typing import Optional
 
+import psycopg2
+
 logger = logging.getLogger(__name__)
+
+
+def drop_tables(dsn: str, tables: list[str]) -> None:
+    """Drop tables in the destination DB before restoring."""
+    conn = psycopg2.connect(dsn)
+    conn.autocommit = True
+    with conn.cursor() as cursor:
+        for table in tables:
+            cursor.execute(f'DROP TABLE IF EXISTS "{table}" CASCADE')
+            logger.info(f"  ✓ Table {table} supprimée")
+    conn.close()
 
 
 def dump_and_restore_db(
@@ -64,7 +77,9 @@ def dump_and_restore_db(
             dump_file,
         ]
 
-        subprocess.run(
-            restore_cmd,
-            check=False,
-        )
+        result = subprocess.run(restore_cmd, capture_output=True)
+        if result.returncode != 0:
+            logger.warning(
+                f"⚠️  pg_restore exited with code {result.returncode}:\n"
+                f"{result.stderr.decode()}"
+            )

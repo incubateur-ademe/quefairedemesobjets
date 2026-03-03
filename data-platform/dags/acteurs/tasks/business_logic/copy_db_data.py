@@ -2,7 +2,7 @@ import logging
 
 from utils.django import django_setup_full
 
-from .copy_utils import dump_and_restore_db
+from .copy_utils import drop_tables, dump_and_restore_db
 
 logger = logging.getLogger(__name__)
 
@@ -84,12 +84,33 @@ def copy_db_data():
     for table in tables:
         logger.info(f"✅ {table} va être copiée")
 
-    # Create data-only dump
+    # Debug: count qfdmd_synonyme rows in source before copy
+    with connections["default"].cursor() as cursor:
+        cursor.execute("SELECT COUNT(*) FROM qfdmd_synonyme")
+        count_before_source = cursor.fetchone()[0]
+    logger.info(f"🔍 qfdmd_synonyme dans la source (avant) : {count_before_source}")
+
+    # Debug: count qfdmd_synonyme rows in destination before copy
+    with connections["webapp_sample"].cursor() as cursor:
+        cursor.execute("SELECT COUNT(*) FROM qfdmd_synonyme")
+        count_before_dest = cursor.fetchone()[0]
+    logger.info(f"🔍 qfdmd_synonyme dans la destination (avant) : {count_before_dest}")
+
+    # Drop destination tables before restoring to avoid duplicate key errors
+    logger.info("🗑️  Suppression des tables dans la destination avant restauration...")
+    drop_tables(dsn=dsn_webapp_sample_db, tables=tables)
+
+    # Dump and restore (schema + data)
     dump_and_restore_db(
         source_dsn=dsn_webapp_db,
         dest_dsn=dsn_webapp_sample_db,
         tables=tables,
-        data_only=True,
     )
+
+    # Debug: count qfdmd_synonyme rows in destination after copy
+    with connections["webapp_sample"].cursor() as cursor:
+        cursor.execute("SELECT COUNT(*) FROM qfdmd_synonyme")
+        count_after_dest = cursor.fetchone()[0]
+    logger.info(f"🔍 qfdmd_synonyme dans la destination (après) : {count_after_dest}")
 
     logger.info("✅ Copie terminée avec succès")
