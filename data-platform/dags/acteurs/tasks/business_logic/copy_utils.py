@@ -13,7 +13,15 @@ def _truncate_tables(dsn: str, tables: list[str]) -> None:
     conn = psycopg2.connect(dsn)
     conn.autocommit = True
     with conn.cursor() as cursor:
-        for table in tables:
+        # Only truncate tables that actually exist in the destination
+        placeholders = ",".join(["%s"] * len(tables))
+        cursor.execute(
+            f"SELECT table_name FROM information_schema.tables"
+            f" WHERE table_schema = 'public' AND table_name IN ({placeholders})",
+            tables,
+        )
+        existing = [row[0] for row in cursor.fetchall()]
+        for table in existing:
             cursor.execute(f'TRUNCATE TABLE "{table}" CASCADE')
             logger.info(f"  ✓ Table {table} tronquée")
     conn.close()
