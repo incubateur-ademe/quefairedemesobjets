@@ -27,7 +27,7 @@ env:
   SCREENSHOTS_BASE_PATH: webapp/__screenshots__
 
 jobs:
-  end-to-end:
+  test:
     name: Playwright (${{ inputs.ref }})
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -115,11 +115,6 @@ jobs:
         run: npx playwright test --grep=@regression ${{ inputs.shard && format('--shard={0}', inputs.shard) || '' }}
         working-directory: webapp
 
-      - name: Compute shard artifact name
-        if: ${{ !inputs.compare }}
-        id: artifact-name
-        run: echo "value=regression-screenshots-${{ inputs.shard && inputs.shard || 'all' }}" | tr '/' '-' >> $GITHUB_OUTPUT
-
       - name: Upload baseline screenshots
         if: ${{ !inputs.compare }}
         uses: actions/upload-artifact@v4
@@ -127,21 +122,41 @@ jobs:
           name: ${{ steps.artifact-name.outputs.value }}
           path: ${{ env.SCREENSHOTS_BASE_PATH }}
 
-      - name: Upload Playwright report
+      - name: Upload report
+        if: always()
         uses: actions/upload-artifact@v6
-        if: ${{ !cancelled() && inputs.ref == github.ref }}
         with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 2
+          name: blob-report-${{ inputs.shard }}
+          path: blob-report
+          retention-days: 1
 
-      - name: Upload Playwright diffs on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
+    create-report:
+      name: 📔 Create test report
+      if: always()
+      needs: [test]
+      runs-on: ubuntu-latest
+
+      steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download blob reports from GitHub Actions Artifacts
+        uses: actions/download-artifact@v3
         with:
-          name: playwright-diffs
-          if-no-files-found: ignore
-          path: webapp/test-results/
+          name: all-blob-reports
+          path: blob-report-*
+
+      - name: Merge into HTML Report
+        run: npx playwright merge-reports --reporter html ./all-blob-reports
+
+      - name: Upload HTML report
+        uses: actions/upload-artifact@v3
+        with:
+          name: html-report--attempt-${{ github.run_attempt }}
+          path: playwright-report
+          retention-days: 7
 
 permissions:
   contents: read
