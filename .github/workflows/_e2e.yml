@@ -135,6 +135,7 @@ jobs:
     if: always()
     needs: [test]
     runs-on: ubuntu-latest
+    working-directory: webapp
 
     steps:
     - uses: actions/checkout@v6
