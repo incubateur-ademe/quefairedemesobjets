@@ -13,6 +13,7 @@ from modelcluster.contrib.taggit import ClusterTaggableManager
 from modelcluster.fields import ParentalManyToManyField
 from modelsearch import index
 from taggit.models import ItemBase, TagBase, TaggedItemBase
+from wagtail.admin.forms import WagtailAdminPageForm
 from wagtail.admin.panels import (
     FieldPanel,
     FieldRowPanel,
@@ -187,9 +188,15 @@ class SearchTag(SearchTerm, TagBase):
         verbose_name = "Synonyme de recherche"
         verbose_name_plural = "Synonymes de recherche"
 
-    def save(self, *args, **kwargs):
-        self.name = self.name.lower()
-        super().save(*args, **kwargs)
+    def clean(self):
+        super().clean()
+        qs = SearchTag.objects.filter(name__iexact=self.name)
+        if self.pk:
+            qs = qs.exclude(pk=self.pk)
+        if qs.exists():
+            raise ValidationError(
+                {"name": f"A SearchTag with the name '{self.name}' already exists."}
+            )
 
     def __str__(self):
         return f"{self.name}"
@@ -255,6 +262,27 @@ class ProduitPageSearchTerm(SearchTerm):
     search_fields = SearchTerm.search_fields
 
 
+class ProduitPageForm(WagtailAdminPageForm):
+    def clean(self):
+        cleaned_data = super().clean()
+        submitted_tags = cleaned_data.get("search_tags", "")
+        # ClusterTaggableManager gives a comma-separated string of tag names
+        tag_names = [t.strip() for t in submitted_tags.split(",") if t.strip()]
+
+        page_id = self.instance.pk
+        for name in tag_names:
+            qs = SearchTag.objects.filter(name__iexact=name)
+            if page_id:
+                # Exclude tags already belonging to this page
+                qs = qs.exclude(tagged_produit_page__content_object_id=page_id)
+            if qs.exists():
+                self.add_error(
+                    "search_tags",
+                    f"A search tag with the name '{name}' already exists on another page.",
+                )
+        return cleaned_data
+
+
 class ProduitPage(
     CompiledFieldMixin,
     Page,
@@ -265,6 +293,8 @@ class ProduitPage(
         if self.est_famille:
             return "ui/pages/family_page.html"
         return "ui/pages/produit_page.html"
+
+    base_form_class = ProduitPageForm
 
     subpage_types = ["qfdmd.produitpage"]
     parent_page_types = [

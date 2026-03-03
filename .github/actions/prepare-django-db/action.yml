@@ -62,11 +62,6 @@ runs:
         make createsuperuser-example
         make rebuild-search-index
 
-    - name: Init django admin superuser
-      if: steps.cache-db.outputs.cache-hit != 'true'
-      shell: bash
-      run: make -C webapp createsuperuser-example
-
     - name: Dump PostgreSQL database
       if: steps.cache-db.outputs.cache-hit != 'true'
       shell: bash
