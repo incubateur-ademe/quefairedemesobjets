@@ -4,7 +4,8 @@ from qfdmd.models import SearchTag
 
 
 class Command(BaseCommand):
-    help = "Replace SearchTag names with the original casing from their linked Synonyme.nom"
+    help = """Replace SearchTag names with the original
+    casing from their linked Synonyme.nom"""
 
     def handle(self, *args, **options):
         tags = SearchTag.objects.filter(
