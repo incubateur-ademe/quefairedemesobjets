@@ -109,7 +109,7 @@ jobs:
         if: inputs.compare
         uses: actions/download-artifact@v8
         with:
-          pattern: regression-screenshots-*
+          pattern: screenshots-*
           merge-multiple: true
           path: ${{ env.SCREENSHOTS_BASE_PATH }}
 
@@ -127,7 +127,7 @@ jobs:
         if: ${{ !inputs.compare }}
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.artifact-name.outputs.value }}
+          name: screenshots-${{ matrix.shard }}
           path: ${{ env.SCREENSHOTS_BASE_PATH }}
 
       - name: Upload report
