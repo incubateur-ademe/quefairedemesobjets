@@ -13,7 +13,7 @@ export const config: PlaywrightTestConfig = {
   timeout: 45000,
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: 4,
+  retries: 1,
   workers: 1,
   reporter: "html",
   webServer: {
