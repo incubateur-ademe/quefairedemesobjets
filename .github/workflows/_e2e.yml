@@ -74,7 +74,7 @@ jobs:
       - name: Setup E2E tools
         uses: ./.github/actions/setup-e2e-tools
         with:
-          build-frontend: "true"
+          build-frontend: "false"
 
       - name: Download build artifacts
         uses: actions/download-artifact@v8

@@ -395,7 +395,12 @@ LOGIN_URL = "admin:login"
 TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
-LANGUAGE_CODE = "fr-fr"
+LANGUAGE_CODE = "fr"
+
+WAGTAIL_CONTENT_LANGUAGES = LANGUAGES = [
+    ("en", "English"),
+    ("fr", "Français"),
+]
 
 
 # Static files (CSS, JavaScript, Images)
@@ -530,6 +535,8 @@ INSTALLED_APPS.extend(
         "sites_conformes.forms",
         "wagtail_modeladmin",
         "wagtailmenus",
+        "wagtail_localize",
+        "wagtail_localize.locales",
         "wagtailmarkdown",
         "wagtail_honeypot",
         # wagtail
