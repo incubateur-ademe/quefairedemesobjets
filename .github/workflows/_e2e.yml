@@ -138,6 +138,15 @@ jobs:
           path: webapp/blob-report
           retention-days: 1
 
+      - name: Upload Playwright diffs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-diffs-${{ matrix.shard }}
+          if-no-files-found: ignore
+          path: ${{ env.SCREENSHOTS_BASE_PATH }}
+
+
   create-report:
     name: 📔 Create test report
     if: always()
@@ -167,6 +176,7 @@ jobs:
         name: html-report--attempt-${{ github.run_attempt }}
         path: playwright-report
         retention-days: 7
+
 
 permissions:
   contents: read
