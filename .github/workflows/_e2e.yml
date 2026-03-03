@@ -34,6 +34,10 @@ jobs:
   test:
     name: Playwright (${{ inputs.ref }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: ["1/4", "2/4", "3/4", "4/4"]
     timeout-minutes: 60
     services:
       postgres:
@@ -111,12 +115,12 @@ jobs:
 
       - name: Run Playwright tests
         if: ${{ !inputs.compare }}
-        run: npx playwright test --update-snapshots ${{ inputs.shard && format('--shard={0}/{1}', inputs.shard, inputs.total) || '' }}
+        run: npx playwright test --update-snapshots ${{ inputs.shard && format('--shard={0}', matrix.shard) || '' }}
         working-directory: webapp
 
       - name: Run Playwright tests (regression only)
         if: inputs.compare
-        run: npx playwright test --grep=@regression ${{ inputs.shard && format('--shard={0}/{1}', inputs.shard, inputs.total) || '' }}
+        run: npx playwright test --grep=@regression ${{ inputs.shard && format('--shard={0}', matrix.shard) || '' }}
         working-directory: webapp
 
       - name: Upload baseline screenshots
@@ -150,8 +154,9 @@ jobs:
     - name: Download blob reports from GitHub Actions Artifacts
       uses: actions/download-artifact@v8
       with:
-        name: all-blob-reports
-        path: blob-report-*
+        path: all-blob-reports
+        pattern: blob-report-*
+        merge-multiple: true
 
     - name: Merge into HTML Report
       run: npx playwright merge-reports --reporter html ./all-blob-reports

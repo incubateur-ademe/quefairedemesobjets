@@ -79,16 +79,10 @@ jobs:
   e2e:
     name: Baseline shard ${{ matrix.shard }}
     needs: e2e-prepare
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: ["1", "2", "3", "4"]
     uses: ./.github/workflows/_e2e.yml
     with:
       ref: ${{ github.ref }}
       compare: false
-      shard: ${{ matrix.shard }}
-      total: 4
     permissions:
       contents: read
 
