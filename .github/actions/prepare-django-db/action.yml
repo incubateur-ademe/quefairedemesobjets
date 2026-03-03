@@ -38,7 +38,7 @@ runs:
         key: ${{ inputs.cache-key }}
 
     - name: Dump sample database from remote
-      if: steps.cache-db.outputs.cache-hit != 'true'
+      # if: steps.cache-db.outputs.cache-hit != 'true'
       shell: bash
       run: |
         echo "Dumping sample database from remote..."
