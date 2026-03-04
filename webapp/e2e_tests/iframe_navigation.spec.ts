@@ -1,6 +1,11 @@
 import { test, expect, FrameLocator } from "@playwright/test"
-import { navigateTo, getIframe, TIMEOUT } from "./helpers"
-import { typeSearchQuery, waitForResults } from "./search.spec"
+import {
+  navigateTo,
+  getIframe,
+  TIMEOUT,
+  waitForResults,
+  typeSearchQuery,
+} from "./helpers"
 
 // Helper function to check iframe-specific UI elements
 const checkIframeUIIsPersisted = async (iframe: FrameLocator) => {
