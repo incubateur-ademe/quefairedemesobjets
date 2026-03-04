@@ -1,21 +1,5 @@
 import { expect, test } from "@playwright/test"
-import { navigateTo, TIMEOUT } from "./helpers"
-
-const SEARCH_INPUT_SELECTOR = "#id_qf-search-search"
-const SEARCH_RESULTS_SELECTOR = "[data-next-autocomplete-target='option'] a"
-
-async function typeSearchQuery(page, query: string) {
-  const searchInput = page.locator(SEARCH_INPUT_SELECTOR)
-  await searchInput.click()
-  await searchInput.fill("")
-  await searchInput.pressSequentially(query, { delay: 50 })
-}
-
-async function waitForResults(page) {
-  const results = page.locator(SEARCH_RESULTS_SELECTOR)
-  await expect(results.first()).toBeVisible({ timeout: TIMEOUT.DEFAULT })
-  return results
-}
+import { navigateTo, TIMEOUT, typeSearchQuery, waitForResults } from "./helpers"
 
 test.describe("Recherche de produits", () => {
   test.beforeEach(async ({ page }) => {
