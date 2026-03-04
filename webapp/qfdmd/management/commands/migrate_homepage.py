@@ -81,7 +81,9 @@ class Command(BaseCommand):
         homepage.icons = []
 
         MIN_ICONS = 53
-        paths = sorted(p for p in icons_dir.iterdir() if not p.is_dir())
+        paths = icons_dir.iterdir()
+        paths = sorted(paths, key=lambda p: int(p.stem))
+        print(paths)
         # Repeat the list until we reach the minimum count
         imported = 0
         for path in itertools.islice(
