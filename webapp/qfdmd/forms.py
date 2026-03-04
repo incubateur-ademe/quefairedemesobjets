@@ -3,9 +3,6 @@ import uuid
 
 from django import forms
 from dsfr.forms import DsfrBaseForm
-from modelsearch.query import Fuzzy
-
-from search.models import SearchTerm
 from core.widgets import QfSearchAutocompleteInput, SearchAutocompleteInput
 
 logger = logging.getLogger(__name__)
