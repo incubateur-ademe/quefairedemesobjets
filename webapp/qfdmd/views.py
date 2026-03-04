@@ -10,7 +10,7 @@ from django.shortcuts import redirect, render
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control
 from django.views.decorators.vary import vary_on_headers
-from django.views.generic import DetailView, TemplateView
+from django.views.generic import DetailView, ListView, TemplateView
 from modelsearch.index import insert_or_update_object
 from wagtail.admin.filters import WagtailFilterSet
 from wagtail.admin.views.pages.listing import IndexView
