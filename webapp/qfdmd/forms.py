@@ -24,7 +24,7 @@ class HeaderSearchForm(DsfrBaseForm):
 
 
 class QfSearchForm(forms.Form):
-    """Quefaire-styled search form used on the homepage.
+    """QFDMOD-styled search form used on the homepage.
 
     Intentionally does NOT inherit DsfrBaseForm to avoid DSFR injecting
     fr-input class and its label/wrapper markup.
