@@ -35,10 +35,7 @@ from qfdmo.models.acteur import (
 from qfdmo.models.action import Action
 from qfdmo.models.config import CarteConfig
 from search.models import SearchTerm
-<<<<<<< HEAD
 from qfdmo.widgets import SynonymeAutocompleteInput
-=======
->>>>>>> 88fbd813 (Moteur de recherches : synonymes, variantes (#2569))
 
 base_url = settings.BASE_URL
 
@@ -726,17 +723,6 @@ class PagesPreview(ContextAwareLookbookPreview):
         Renders the green hero banner (title, subtitle, search bar) as it appears
         on the homepage. Reads `hero_title`, `hero_subtitle`, and `hero_search_label`
         from the `HomePage` page object; falls back to hardcoded defaults when empty.
-        """
-        context = self.get_base_context()
-        context.update({"page": get_homepage(), "iframe": False})
-        return render_to_string("ui/pages/home.html", context)
-
-    def home_patchwork(self, **kwargs):
-        """
-        # Accueil — Patchwork d'icônes
-
-        Renders only the patchwork section. The icons are pulled from
-        `HomePage.icons`; if none are configured the section is hidden.
         """
         context = self.get_base_context()
         context.update({"page": get_homepage(), "iframe": False})
