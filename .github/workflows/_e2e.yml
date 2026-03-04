@@ -9,6 +9,10 @@ on:
       compare:
         required: true
         type: boolean
+      shard:
+        required: false
+        type: string
+        default: '["1", "2", "3", "4"]'
 
 env:
   PGHOST: localhost
@@ -29,7 +33,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: ["1", "2", "3", "4"]
+        shard: ${{ fromJSON(inputs.shard) }}
     timeout-minutes: 60
     services:
       postgres:
