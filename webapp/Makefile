@@ -1,3 +1,5 @@
+SHELL := /bin/bash
+
 # Loading environment variables
 ifneq (,$(wildcard ./.env))
 	include .env
@@ -32,7 +34,7 @@ runserver:
 
 .PHONY: runserver-e2e
 runserver-e2e:
-	make DATABASE_URL=postgres://webapp_sample:webapp_sample@localhost:6543/webapp_sample runserver
+	make DATABASE_URL=$(SAMPLE_DATABASE_URL) runserver
 
 .PHONY: migrate
 migrate:
@@ -129,10 +131,10 @@ dags-test:
 .PHONY: prepare-e2e-test
 prepare-e2e-test:
 	make -C .. db-restore-local-from-sample
-	make DATABASE_URL=postgres://webapp_sample:webapp_sample@localhost:6543/webapp_sample migrate
-	DATABASE_URL=postgres://webapp_sample:webapp_sample@localhost:6543/webapp_sample uv run python manage.py migrate_homepage
-	make DATABASE_URL=postgres://webapp_sample:webapp_sample@localhost:6543/webapp_sample rebuild-search-index
-	make DATABASE_URL=postgres://webapp_sample:webapp_sample@localhost:6543/webapp_sample createsuperuser-example
+	make DATABASE_URL=$(SAMPLE_DATABASE_URL) migrate
+	DATABASE_URL=$(SAMPLE_DATABASE_URL) uv run python manage.py migrate_homepage
+	make DATABASE_URL=$(SAMPLE_DATABASE_URL) rebuild-search-index
+	make DATABASE_URL=$(SAMPLE_DATABASE_URL) createsuperuser-example
 	npm run build
 
 .PHONY: e2e-test
