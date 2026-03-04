@@ -141,7 +141,7 @@ jobs:
 
   create-report:
     name: 📔 Create test report
-    if: always()
+    if: ${{ !inputs.compare }}
     needs: [test]
     runs-on: ubuntu-latest
 
