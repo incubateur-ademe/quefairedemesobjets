@@ -11,17 +11,14 @@
     {# Wrapper for padding on mobile #}
     <div class="qf-flex qf-flex-col qf-gap-2w qf-justify-center qf-text-center qf-items-center max-md:qf-px-2w">
         <div class="logo">
-            {% if page.hero_title %}
-                <div class="qf-max-w-[650px] qf-mx-auto">{{ page.hero_title|richtext }}</div>
-            {% else %}
-                {% include "ui/components/logo/site_logo_large.html" %}
-            {% endif %}
+            {% include "ui/components/logo/site_logo_large.html" %}
         </div>
 
         {% if page.hero_subtitle %}
         <div class="
         max-md:fr-h6 fr-h4
         max-md:[&_p]:fr-h6 [&_p]:fr-h4
+        [&_p]:qf-m-0
         !qf-mb-3v [&_b]:qf-px-[0.25rem] [&_b]:qf-py-[0.2rem] qf-max-w-[650px] qf-mx-auto [&_b]:qf-rounded-full [&_b]:qf-bg-green-menthe-sun-373-moon-652 [&_b]:qf-text-white [&_b]:qf-leading-none [&_b]:qf-inline-block">
             {{ page.hero_subtitle|richtext }}
         </div>
