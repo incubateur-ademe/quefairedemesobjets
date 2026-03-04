@@ -1,5 +1,12 @@
 import { expect, test } from "@playwright/test"
-import { navigateTo, TIMEOUT, typeSearchQuery, waitForResults } from "./helpers"
+import {
+  navigateTo,
+  SEARCH_INPUT_SELECTOR,
+  SEARCH_RESULTS_SELECTOR,
+  TIMEOUT,
+  typeSearchQuery,
+  waitForResults,
+} from "./helpers"
 
 test.describe("Recherche de produits", () => {
   test.beforeEach(async ({ page }) => {
