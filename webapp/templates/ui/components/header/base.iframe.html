@@ -1,6 +1,10 @@
 {% load i18n %}
 {% if not assistant.is_home %}
-<header role="search" class=" fr-container qf-filter-none fr-header max-sm:qf-hidden" data-testid="header-iframe">
+<header
+  role="search"
+  class="fr-container qf-filter-none fr-header max-sm:qf-hidden qf-pt-1w{% if background %}qf-bg-green-menthe-975-75{% endif %}"
+  data-testid="header-iframe"
+>
   <div class="fr-header__body">
     <div class="fr-container">
       <div class="fr-header__body-row">

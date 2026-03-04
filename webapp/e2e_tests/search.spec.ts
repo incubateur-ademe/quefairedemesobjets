@@ -131,7 +131,7 @@ test.describe("Recherche de produits", () => {
 
     // Les résultats ne devraient plus être visibles
     const results = page.locator(SEARCH_RESULT_DROPDOWN_SELECTOR)
-    await expect(results).toBeHidden
+    expect(results).toBeHidden
   })
 
   test("Les liens des résultats SearchTag contiennent search_term_id, position et search_term", async ({
