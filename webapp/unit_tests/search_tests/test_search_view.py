@@ -118,8 +118,8 @@ class TestSearchViewProduitPageResults:
         _rebuild_index()
         client = Client()
         response = client.get(
-            "/assistant/recherche",
-            {"home-id": "home", "home-input": "Lave-linge"},
+            "/assistant/autocomplete-search",
+            {"q": "lave-linge"},
         )
         assert response.status_code == 200
         specific_types = {
@@ -130,16 +130,16 @@ class TestSearchViewProduitPageResults:
     def test_produit_page_titre_phrase_in_rendered_html(self, produit_page):
         _rebuild_index()
         response = Client().get(
-            "/assistant/recherche",
-            {"home-id": "home", "home-input": "Lave-linge"},
+            "/assistant/autocomplete-search",
+            {"q": "lave-linge"},
         )
         assert "Lave-linge" in response.content.decode()
 
     def test_produit_page_result_renders_anchor_tag(self, produit_page):
         _rebuild_index()
         response = Client().get(
-            "/assistant/recherche",
-            {"home-id": "home", "home-input": "Lave-linge"},
+            "/assistant/autocomplete-search",
+            {"q": "lave-linge"},
         )
         # The template renders an <a href="..."> using pageurl. In the test environment
         # Wagtail has no Site configured so pageurl returns None,
