@@ -1,8 +1,8 @@
 import { expect, test } from "@playwright/test"
 import { navigateTo, TIMEOUT } from "./helpers"
 
-const SEARCH_INPUT_SELECTOR = "#id_home-input"
-const SEARCH_RESULTS_SELECTOR = "[data-search-target='results'] a"
+const SEARCH_INPUT_SELECTOR = "#id_qf-search-search"
+const SEARCH_RESULTS_SELECTOR = "[data-next-autocomplete-target='option'] a"
 
 async function typeSearchQuery(page, query: string) {
   const searchInput = page.locator(SEARCH_INPUT_SELECTOR)
