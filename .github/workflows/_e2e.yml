@@ -9,14 +9,6 @@ on:
       compare:
         required: true
         type: boolean
-      shard:
-        required: false
-        type: string
-        default: ""
-      total:
-        required: false
-        type: string
-        default: ""
 
 env:
   PGHOST: localhost
