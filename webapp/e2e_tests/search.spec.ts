@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test"
 import {
   navigateTo,
   SEARCH_INPUT_SELECTOR,
+  SEARCH_RESULT_DROPDOWN_SELECTOR,
   SEARCH_RESULTS_SELECTOR,
   TIMEOUT,
   typeSearchQuery,
@@ -129,8 +130,8 @@ test.describe("Recherche de produits", () => {
     await page.keyboard.press("Escape")
 
     // Les résultats ne devraient plus être visibles
-    const results = page.locator(SEARCH_RESULTS_SELECTOR)
-    await expect(results).toHaveCount(0, { timeout: TIMEOUT.SHORT })
+    const results = page.locator(SEARCH_RESULT_DROPDOWN_SELECTOR)
+    await expect(results).toBeHidden
   })
 
   test("Les liens des résultats SearchTag contiennent search_term_id, position et search_term", async ({
