@@ -133,6 +133,7 @@ prepare-e2e-test:
 	DATABASE_URL=postgres://webapp_sample:webapp_sample@localhost:6543/webapp_sample uv run python manage.py migrate_homepage
 	make DATABASE_URL=postgres://webapp_sample:webapp_sample@localhost:6543/webapp_sample rebuild-search-index
 	make DATABASE_URL=postgres://webapp_sample:webapp_sample@localhost:6543/webapp_sample createsuperuser-example
+	npm run build
 
 .PHONY: e2e-test
 e2e-test:
