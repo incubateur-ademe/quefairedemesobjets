@@ -116,7 +116,7 @@ jobs:
 
       - name: Run Playwright tests (regression only)
         if: inputs.compare
-        run: npx playwright test --grep=@regression ${{ format('--shard={0}/4', matrix.shard) || '' }}
+        run: npx playwright test --grep=@regression
         working-directory: webapp
 
       - name: Upload baseline screenshots
