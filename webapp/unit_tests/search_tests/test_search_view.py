@@ -123,7 +123,7 @@ class TestSearchViewProduitPageResults:
         )
         assert response.status_code == 200
         specific_types = {
-            type(r.specific).__name__ for r in response.context["search_form"].results
+            type(r.specific).__name__ for r in response.context["results"]
         }
         assert "ProduitPageSearchTerm" in specific_types
 
