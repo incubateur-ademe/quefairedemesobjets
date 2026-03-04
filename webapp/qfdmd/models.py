@@ -13,6 +13,7 @@ from modelcluster.contrib.taggit import ClusterTaggableManager
 from modelcluster.fields import ParentalManyToManyField
 from modelsearch import index
 from taggit.models import ItemBase, TagBase, TaggedItemBase
+from wagtail.admin.forms import WagtailAdminPageForm
 from wagtail.admin.panels import (
     FieldPanel,
     FieldRowPanel,
@@ -187,9 +188,18 @@ class SearchTag(SearchTerm, TagBase):
         verbose_name = "Synonyme de recherche"
         verbose_name_plural = "Synonymes de recherche"
 
-    def save(self, *args, **kwargs):
-        self.name = self.name.lower()
-        super().save(*args, **kwargs)
+    def clean(self):
+        super().clean()
+        qs = SearchTag.objects.filter(name__iexact=self.name)
+        if self.pk:
+            qs = qs.exclude(pk=self.pk)
+        if qs.exists():
+            raise ValidationError(
+                {
+                    "name": f"Un synonyme de recherche avec le nom « {self.name} » "
+                    "existe déjà."
+                }
+            )
 
     def __str__(self):
         return f"{self.name}"
@@ -255,6 +265,50 @@ class ProduitPageSearchTerm(SearchTerm):
     search_fields = SearchTerm.search_fields
 
 
+def find_duplicate_search_tag_names(tag_names, page_id=None):
+    """Return tag names that would create a case-insensitive duplicate.
+
+    A duplicate is any submitted name that matches (case-insensitively) an
+    existing SearchTag that is NOT the exact same object being submitted
+    (i.e. same name with different casing, or a tag already on another page).
+
+    Args:
+        tag_names: iterable of tag name strings to check
+        page_id: pk of the page being edited
+    """
+    duplicates = []
+    for name in tag_names:
+        qs = SearchTag.objects.filter(name__iexact=name).exclude(name=name)
+        if page_id:
+            # Also flag tags with the exact same name on a different page
+            qs_other_page = SearchTag.objects.filter(
+                name=name,
+                tagged_produit_page__isnull=False,
+            ).exclude(tagged_produit_page__content_object_id=page_id)
+            if qs.exists() or qs_other_page.exists():
+                duplicates.append(name)
+        elif qs.exists():
+            duplicates.append(name)
+    return duplicates
+
+
+class ProduitPageForm(WagtailAdminPageForm):
+    def clean(self):
+        cleaned_data = super().clean()
+        submitted_tags = cleaned_data.get("search_tags") or []
+        # ClusterTaggableManager gives a list of SearchTag instances or tag name strings
+        tag_names = [
+            t.name if isinstance(t, SearchTag) else str(t) for t in submitted_tags
+        ]
+
+        for name in find_duplicate_search_tag_names(tag_names, self.instance.pk):
+            self.add_error(
+                "search_tags",
+                f"Un synonyme de recherche avec le nom « {name} » existe déjà.",
+            )
+        return cleaned_data
+
+
 class ProduitPage(
     CompiledFieldMixin,
     Page,
@@ -265,6 +319,8 @@ class ProduitPage(
         if self.est_famille:
             return "ui/pages/family_page.html"
         return "ui/pages/produit_page.html"
+
+    base_form_class = ProduitPageForm
 
     subpage_types = ["qfdmd.produitpage"]
     parent_page_types = [

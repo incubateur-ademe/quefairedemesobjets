@@ -15,6 +15,7 @@ from qfdmd.models import (
     SearchTag,
     Synonyme,
     TaggedSearchTag,
+    find_duplicate_search_tag_names,
 )
 from qfdmd.views import import_legacy_synonymes
 from unit_tests.qfdmd.qfdmod_factory import ProduitFactory, SynonymeFactory
@@ -71,7 +72,7 @@ def _make_request(method="get"):
 @pytest.mark.django_db
 class TestImportLegacySynonymesView:
     def test_creates_search_tag_from_synonyme(self, produit_page):
-        """Import creates a SearchTag with the lowercased synonyme name."""
+        """Import creates a SearchTag preserving the synonyme name casing."""
         produit = ProduitFactory(nom="Produit Test")
         synonyme = SynonymeFactory(nom="Lave-Linge", produit=produit)
         LegacyIntermediateSynonymePage.objects.create(
@@ -81,7 +82,7 @@ class TestImportLegacySynonymesView:
         request = _make_request("post")
         import_legacy_synonymes(request, produit_page.id)
 
-        assert SearchTag.objects.filter(name="lave-linge").exists()
+        assert SearchTag.objects.filter(name="Lave-Linge").exists()
 
     def test_stores_legacy_reference_on_search_tag(self, produit_page):
         """Import stores the legacy synonyme reference on the SearchTag."""
@@ -94,7 +95,7 @@ class TestImportLegacySynonymesView:
         request = _make_request("post")
         import_legacy_synonymes(request, produit_page.id)
 
-        tag = SearchTag.objects.get(name="lave-linge")
+        tag = SearchTag.objects.get(name="Lave-Linge")
         assert tag.legacy_existing_synonyme == synonyme
 
     def test_adds_search_tag_to_produit_page(self, produit_page):
@@ -108,14 +109,14 @@ class TestImportLegacySynonymesView:
         request = _make_request("post")
         import_legacy_synonymes(request, produit_page.id)
 
-        tag = SearchTag.objects.get(name="lave-linge")
+        tag = SearchTag.objects.get(name="Lave-Linge")
         assert TaggedSearchTag.objects.filter(
             tag=tag, content_object=produit_page
         ).exists()
 
     def test_reuses_existing_search_tag(self, produit_page):
-        """Import reuses an existing SearchTag with the same lowercased name."""
-        existing_tag = SearchTag.objects.create(name="lave-linge", slug="lave-linge")
+        """Import reuses an existing SearchTag with the same name."""
+        existing_tag = SearchTag.objects.create(name="Lave-Linge", slug="lave-linge")
 
         produit = ProduitFactory(nom="Produit Test")
         synonyme = SynonymeFactory(nom="Lave-Linge", produit=produit)
@@ -126,7 +127,7 @@ class TestImportLegacySynonymesView:
         request = _make_request("post")
         import_legacy_synonymes(request, produit_page.id)
 
-        assert SearchTag.objects.filter(name="lave-linge").count() == 1
+        assert SearchTag.objects.filter(name="Lave-Linge").count() == 1
         existing_tag.refresh_from_db()
         assert existing_tag.legacy_existing_synonyme == synonyme
 
@@ -139,8 +140,8 @@ class TestImportLegacySynonymesView:
         request = _make_request("post")
         import_legacy_synonymes(request, produit_page.id)
 
-        assert SearchTag.objects.filter(name="lave-vaisselle redirection").exists()
-        tag = SearchTag.objects.get(name="lave-vaisselle redirection")
+        assert SearchTag.objects.filter(name="Lave-Vaisselle Redirection").exists()
+        tag = SearchTag.objects.get(name="Lave-Vaisselle Redirection")
         assert TaggedSearchTag.objects.filter(
             tag=tag, content_object=produit_page
         ).exists()
@@ -150,7 +151,7 @@ class TestImportLegacySynonymesView:
     ):
         """A synonyme collected via a produit must not be imported if it is already
         directly assigned (via next_wagtail_page) to a different page."""
-        # page_a already owns "aspirateur" as a direct synonyme
+        # page_a already owns "Aspirateur" as a direct synonyme
         page_a = ProduitPage(title="Page A", slug="page-a")
         produit_index_page.add_child(instance=page_a)
         page_a.save()
@@ -164,11 +165,11 @@ class TestImportLegacySynonymesView:
         # page_b (produit_page) is linked to the same produit
         LegacyIntermediateProduitPage.objects.create(page=produit_page, produit=produit)
 
-        # Migrate page_b — "aspirateur" must NOT be collected
+        # Migrate page_b — "Aspirateur" must NOT be collected
         request = _make_request("post")
         import_legacy_synonymes(request, produit_page.id)
 
-        assert not SearchTag.objects.filter(name="aspirateur").exists()
+        assert not SearchTag.objects.filter(name="Aspirateur").exists()
 
     def test_excludes_synonymes_marked_for_exclusion(self, produit_page):
         """Import skips synonymes that are in the exclusion list."""
@@ -183,8 +184,8 @@ class TestImportLegacySynonymesView:
         request = _make_request("post")
         import_legacy_synonymes(request, produit_page.id)
 
-        assert SearchTag.objects.filter(name="inclus").exists()
-        assert not SearchTag.objects.filter(name="exclu").exists()
+        assert SearchTag.objects.filter(name="Inclus").exists()
+        assert not SearchTag.objects.filter(name="Exclu").exists()
 
     def test_does_not_overwrite_existing_legacy_reference(self, produit_page):
         """If a SearchTag already has a legacy_existing_synonyme, don't overwrite it."""
@@ -300,7 +301,7 @@ class TestImportSetsImportedAsSearchTag:
         import_legacy_synonymes(request, produit_page.id)
 
         synonyme.refresh_from_db()
-        tag = SearchTag.objects.get(name="lave-linge")
+        tag = SearchTag.objects.get(name="Lave-Linge")
         assert synonyme.imported_as_search_tag == tag
 
     def test_does_not_overwrite_existing_imported_as_search_tag(self, produit_page):
@@ -350,17 +351,135 @@ class TestImportSetsMigrationFlag:
 
 
 @pytest.mark.django_db
-class TestSearchTagLowercaseOnSave:
-    def test_name_is_lowercased_on_create(self):
+class TestSearchTagPreservesCase:
+    def test_name_preserves_casing_on_create(self):
         tag = SearchTag.objects.create(name="Réfrigérateur", slug="refrigerateur")
-        assert tag.name == "réfrigérateur"
+        assert tag.name == "Réfrigérateur"
 
-    def test_name_is_lowercased_on_update(self):
+    def test_name_preserves_casing_on_update(self):
         tag = SearchTag.objects.create(name="frigo", slug="frigo")
         tag.name = "FRIGO"
         tag.save()
         tag.refresh_from_db()
-        assert tag.name == "frigo"
+        assert tag.name == "FRIGO"
+
+
+@pytest.mark.django_db
+class TestFindDuplicateSearchTagNames:
+    """find_duplicate_search_tag_names() returns names that already exist
+    on a different page (case-insensitive)."""
+
+    def test_returns_empty_when_no_existing_tag(self):
+        assert find_duplicate_search_tag_names(["NouveauTag"]) == []
+
+    def test_returns_name_when_tag_exists_on_another_page(
+        self, produit_index_page, produit_page
+    ):
+        other_page = ProduitPage(title="Other Page", slug="other-page")
+        produit_index_page.add_child(instance=other_page)
+        other_page.save()
+
+        tag = SearchTag.objects.create(name="TV", slug="tv")
+        TaggedSearchTag.objects.create(tag=tag, content_object=other_page)
+
+        assert find_duplicate_search_tag_names(["TV"], page_id=produit_page.pk) == [
+            "TV"
+        ]
+
+    def test_case_insensitive(self, produit_index_page, produit_page):
+        other_page = ProduitPage(title="Other Page 2", slug="other-page-2")
+        produit_index_page.add_child(instance=other_page)
+        other_page.save()
+
+        tag = SearchTag.objects.create(name="TV", slug="tv")
+        TaggedSearchTag.objects.create(tag=tag, content_object=other_page)
+
+        assert find_duplicate_search_tag_names(["tv"], page_id=produit_page.pk) == [
+            "tv"
+        ]
+
+    def test_excludes_own_page_tags(self, produit_page):
+        tag = SearchTag.objects.create(name="TV", slug="tv")
+        TaggedSearchTag.objects.create(tag=tag, content_object=produit_page)
+
+        assert find_duplicate_search_tag_names(["TV"], page_id=produit_page.pk) == []
+
+    def test_ignores_unlinked_tags(self):
+        """A SearchTag not linked to any page is not a duplicate."""
+        SearchTag.objects.create(name="TV", slug="tv")
+
+        assert find_duplicate_search_tag_names(["TV"]) == []
+
+
+@pytest.mark.django_db
+class TestProduitPageFormClean:
+    """ProduitPageForm.clean() raises a validation error when a submitted
+    SearchTag duplicates an existing tag on another page (case-insensitive)."""
+
+    def _run_clean(self, tags, instance):
+        """Call clean() with a list of SearchTag instances, mirroring Wagtail's form.
+
+        We patch super().clean() and add_error() to isolate ProduitPageForm.clean()
+        from the full Wagtail form machinery.
+        """
+        from unittest.mock import patch
+
+        from qfdmd.models import ProduitPageForm
+
+        cleaned_data = {"search_tags": tags}
+        errors = []
+
+        with patch.object(
+            ProduitPageForm,
+            "add_error",
+            side_effect=lambda field, msg: errors.append((field, msg)),
+        ):
+            with patch(
+                "wagtail.admin.forms.WagtailAdminPageForm.clean",
+                return_value=cleaned_data,
+            ):
+                form = ProduitPageForm.__new__(ProduitPageForm)
+                form.instance = instance
+                form.clean()
+
+        return errors
+
+    def test_raises_error_when_tag_exists_on_another_page_with_different_casing(
+        self, produit_index_page, produit_page
+    ):
+        other_page = ProduitPage(title="Other Page", slug="other-page")
+        produit_index_page.add_child(instance=other_page)
+        other_page.save()
+
+        existing_tag = SearchTag.objects.create(name="TV", slug="tv")
+        TaggedSearchTag.objects.create(tag=existing_tag, content_object=other_page)
+
+        # Submit "tv" (lowercase) while "TV" already belongs to another page
+        new_tag = SearchTag.objects.create(name="tv", slug="tv-2")
+        errors = self._run_clean([new_tag], produit_page)
+
+        assert any(field == "search_tags" for field, _ in errors)
+
+    def test_no_error_when_tag_belongs_to_current_page(self, produit_page):
+        tag = SearchTag.objects.create(name="TV", slug="tv")
+        TaggedSearchTag.objects.create(tag=tag, content_object=produit_page)
+
+        errors = self._run_clean([tag], produit_page)
+
+        assert not any(field == "search_tags" for field, _ in errors)
+
+    def test_raises_error_when_adding_differently_cased_duplicate_to_same_page(
+        self, produit_page
+    ):
+        """Adding 'EmBallage' when 'emballage' already exists raises
+        a validation error."""
+        existing_tag = SearchTag.objects.create(name="emballage", slug="emballage")
+        TaggedSearchTag.objects.create(tag=existing_tag, content_object=produit_page)
+
+        new_tag = SearchTag.objects.create(name="EmBallage", slug="emballage-2")
+        errors = self._run_clean([existing_tag, new_tag], produit_page)
+
+        assert any(field == "search_tags" for field, _ in errors)
 
 
 @pytest.mark.django_db
