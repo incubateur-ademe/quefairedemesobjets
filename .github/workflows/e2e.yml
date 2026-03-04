@@ -79,7 +79,7 @@ jobs:
 
   e2e:
     name: Baseline shard ${{ matrix.shard }}
-    # needs: e2e-prepare
+    needs: e2e-prepare
     uses: ./.github/workflows/_e2e.yml
     with:
       ref: ${{ github.ref }}
