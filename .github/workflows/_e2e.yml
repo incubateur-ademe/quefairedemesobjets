@@ -131,7 +131,7 @@ jobs:
           path: ${{ env.SCREENSHOTS_BASE_PATH }}
 
       - name: Upload report
-        if: always()
+        if: ${{ !inputs.compare }}
         uses: actions/upload-artifact@v6
         with:
           name: blob-report-${{ matrix.shard }}
