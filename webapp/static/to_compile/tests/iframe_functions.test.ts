@@ -58,7 +58,7 @@ describe("getIframeAttributesAndExtra function tests", () => {
 
   beforeEach(() => {
     scriptTag = document.createElement("script")
-    scriptTag.src = "https://example.com/script.js"
+    scriptTag.src = `${process.env.BASE_URL}/script.js`
   })
 
   test.each([
@@ -72,8 +72,7 @@ describe("getIframeAttributesAndExtra function tests", () => {
       },
       route: "carte",
       options: { height: "700px" },
-      expectedSrc:
-        "https://example.com/carte?ref=aHR0cDovL2xvY2FsaG9zdC8%3D&address_placeholder=toto%2Ctata&bounding_box=%7B%22southWest%22%3A%7B%22lat%22%3A48.916%2C%22lng%22%3A2.298202514648438%7D%2C%22northEast%22%3A%7B%22lat%22%3A48.98742568330284%2C%22lng%22%3A2.483596801757813%7D%7D&direction=jai",
+      expectedSrc: `${process.env.BASE_URL}/carte?ref=aHR0cDovL2xvY2FsaG9zdC8%3D&address_placeholder=toto%2Ctata&bounding_box=%7B%22southWest%22%3A%7B%22lat%22%3A48.916%2C%22lng%22%3A2.298202514648438%7D%2C%22northEast%22%3A%7B%22lat%22%3A48.98742568330284%2C%22lng%22%3A2.483596801757813%7D%7D&direction=jai`,
     },
     {
       description: "with a single EPCI code",
@@ -85,8 +84,7 @@ describe("getIframeAttributesAndExtra function tests", () => {
       },
       route: "carte",
       options: { height: "700px" },
-      expectedSrc:
-        "https://example.com/carte?ref=aHR0cDovL2xvY2FsaG9zdC8%3D&action_list=acheter%7Crevendre%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cdonner%7Cechanger%7Creparer&epci_codes=200073146&limit=71",
+      expectedSrc: `${process.env.BASE_URL}/carte?ref=aHR0cDovL2xvY2FsaG9zdC8%3D&action_list=acheter%7Crevendre%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cdonner%7Cechanger%7Creparer&epci_codes=200073146&limit=71`,
     },
     {
       description: "with multiple EPCI codes",
@@ -98,8 +96,7 @@ describe("getIframeAttributesAndExtra function tests", () => {
       },
       route: "carte",
       options: { height: "700px" },
-      expectedSrc:
-        "https://example.com/carte?ref=aHR0cDovL2xvY2FsaG9zdC8%3D&action_list=acheter%7Crevendre%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cdonner%7Cechanger%7Creparer&epci_codes=200073146&epci_codes=200040442&epci_codes=245804497&limit=71",
+      expectedSrc: `${process.env.BASE_URL}/carte?ref=aHR0cDovL2xvY2FsaG9zdC8%3D&action_list=acheter%7Crevendre%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cdonner%7Cechanger%7Creparer&epci_codes=200073146&epci_codes=200040442&epci_codes=245804497&limit=71`,
     },
   ])(
     "should generate correct iframe attributes $description",
@@ -130,7 +127,7 @@ describe("getIframeAttributesAndExtra function tests", () => {
       "overflow: hidden; max-width: 100%; width: 100%; height: 100vh;",
     )
     expect(iframeAttributes.src).toBe(
-      "https://example.com/dechet/test-objet?s=1&ref=aHR0cDovL2xvY2FsaG9zdC8%3D",
+      `${process.env.BASE_URL}/dechet/test-objet?s=1&ref=aHR0cDovL2xvY2FsaG9zdC8%3D`,
     )
   })
 
@@ -143,7 +140,7 @@ describe("getIframeAttributesAndExtra function tests", () => {
       "overflow: hidden; max-width: 800px; width: 100%; height: 100vh;",
     )
     expect(iframeAttributes.src).toBe(
-      "https://example.com/formulaire?ref=aHR0cDovL2xvY2FsaG9zdC8%3D",
+      `${process.env.BASE_URL}/formulaire?ref=aHR0cDovL2xvY2FsaG9zdC8%3D`,
     )
   })
 
@@ -158,7 +155,7 @@ describe("getIframeAttributesAndExtra function tests", () => {
       "overflow: hidden; max-width: 100%; width: 100%; height: 100vh;",
     )
     expect(iframeAttributes.src).toBe(
-      "https://example.com/infotri?ref=aHR0cDovL2xvY2FsaG9zdC8%3D&categorie=tous&consigne=1",
+      `${process.env.BASE_URL}/infotri?ref=aHR0cDovL2xvY2FsaG9zdC8%3D&categorie=tous&consigne=1`,
     )
   })
 })

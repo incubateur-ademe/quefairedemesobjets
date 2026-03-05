@@ -87,7 +87,9 @@ jobs:
         uses: ./.github/actions/setup-frontend
 
       - name: Run tests
-        run: npm run test
+        run: |
+          cp .env.example .env
+          npm run test
         working-directory: webapp
 
 # Address actions/missing-workflow-permissions rule in
