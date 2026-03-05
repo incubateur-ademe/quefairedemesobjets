@@ -8,6 +8,6 @@
  * Get base URL from environment variable.
  * Returns dynamically to support test mocking.
  */
-function getBaseUrlFromEnv(): string {
+export function getBaseUrlFromEnv(): string {
   return process.env.BASE_URL || "https://quefairedemesdechets.ademe.fr"
 }
