@@ -121,7 +121,7 @@ class CarteConfig(index.Indexed, models.Model):
             " <code>data-slug</code>, "
             "par exemple : <br/>"
             "<code>&lt;script "
-            "src='https://quefairedemesobjets.ademe.fr/static/carte.js' "
+            "src='https://quefairedemesdechets.ademe.fr/static/carte.js' "
             "data-slug='cyclevia'&gt;&lt;/script&gt;</code>"
         ),
     )

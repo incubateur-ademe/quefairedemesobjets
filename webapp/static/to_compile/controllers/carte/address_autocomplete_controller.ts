@@ -58,7 +58,7 @@ class AdresseAutocompleteController extends AutocompleteController {
       this.displaySpinner()
       navigator.geolocation.getCurrentPosition(
         this.getAndStorePosition.bind(this),
-        () => this.geolocationRefused(),
+        (err) => this.geolocationRefused(err),
       )
     } else if (!("geolocation" in navigator)) {
       console.error("geolocation is not available")

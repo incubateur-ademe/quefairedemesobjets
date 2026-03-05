@@ -130,9 +130,8 @@ dags-test:
 
 .PHONY: prepare-e2e-test
 prepare-e2e-test:
-	make -C .. db-restore-local-from-sample
 	make DATABASE_URL=$(SAMPLE_DATABASE_URL) migrate
-	DATABASE_URL=$(SAMPLE_DATABASE_URL) uv run python manage.py migrate_homepage
+	# DATABASE_URL=$(SAMPLE_DATABASE_URL) uv run python manage.py migrate_homepage
 	make DATABASE_URL=$(SAMPLE_DATABASE_URL) rebuild-search-index
 	make DATABASE_URL=$(SAMPLE_DATABASE_URL) createsuperuser-example
 	npm run build
@@ -143,7 +142,7 @@ e2e-test:
 
 .PHONY: e2e-test-ui
 e2e-test-ui:
-	npx playwright test --update-snapshots all --ui
+	npx playwright test --update-snapshots all --ui --workers=4
 
 .PHONY: a11y
 a11y:
