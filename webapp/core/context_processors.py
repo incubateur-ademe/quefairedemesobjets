@@ -25,11 +25,11 @@ def content(request):
 
 
 def global_context(request) -> dict:
-    header_autocomplete_search_form = QfSearchForm(prefix="header-autocomplete")
-    header_autocomplete_search_form.fields["search"].widget.attrs[
+    header_search_form = QfSearchForm(prefix="header-autocomplete")
+    header_search_form.fields["search"].widget.attrs[
         "placeholder"
     ] = "Rechercher un objet ou un déchet"
-    qf_search_form = QfSearchForm(prefix="qf-search")
+    homepage_search_form = QfSearchForm(prefix="home")
     skiplinks = [
         {"link": "#content", "label": "Contenu"},
     ]
@@ -41,8 +41,8 @@ def global_context(request) -> dict:
             "is_home": request.path == reverse("qfdmd:home"),
             "POSTHOG_KEY": settings.ASSISTANT["POSTHOG_KEY"],
             "MATOMO_ID": settings.ASSISTANT["MATOMO_ID"],
-            "header_autocomplete_search_form": header_autocomplete_search_form,
-            "qf_search_form": qf_search_form,
+            "header_search_form": header_search_form,
+            "homepage_search_form": homepage_search_form,
         },
         "CARTE": {
             "DECLARATION_ACCESSIBILITE_PAGE_ID": settings.CARTE[
