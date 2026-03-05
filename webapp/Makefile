@@ -1,3 +1,5 @@
+SHELL := /bin/bash
+
 # Loading environment variables
 ifneq (,$(wildcard ./.env))
 	include .env
@@ -26,6 +28,14 @@ run-all:
 	$(HONCHO) start -f Procfile.all.dev
 
 # Local django operations
+.PHONY: runserver
+runserver:
+	$(DJANGO_ADMIN) runserver
+
+.PHONY: runserver-e2e
+runserver-e2e:
+	make DATABASE_URL=$(SAMPLE_DATABASE_URL) runserver
+
 .PHONY: migrate
 migrate:
 	$(DJANGO_ADMIN) migrate
@@ -78,8 +88,7 @@ seed-database:
 
 .PHONY: createsuperuser-example
 createsuperuser-example:
-	@echo "Creating Django superuser..."
-	$(DJANGO_ADMIN) shell -c "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('admin', password='admin')"
+	$(DJANGO_ADMIN) createsuperuser_example
 
 .PHONY: generate-fixtures-acteurs
 generate-fixtures-acteurs:
@@ -118,6 +127,15 @@ integration-test:
 .PHONY: dags-test
 dags-test:
 	$(PYTEST) ../data-platform/dags/tests
+
+.PHONY: prepare-e2e-test
+prepare-e2e-test:
+	make -C .. db-restore-local-from-sample
+	make DATABASE_URL=$(SAMPLE_DATABASE_URL) migrate
+	DATABASE_URL=$(SAMPLE_DATABASE_URL) uv run python manage.py migrate_homepage
+	make DATABASE_URL=$(SAMPLE_DATABASE_URL) rebuild-search-index
+	make DATABASE_URL=$(SAMPLE_DATABASE_URL) createsuperuser-example
+	npm run build
 
 .PHONY: e2e-test
 e2e-test:

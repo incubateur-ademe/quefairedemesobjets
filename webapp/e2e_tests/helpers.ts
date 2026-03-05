@@ -6,6 +6,8 @@ export const TIMEOUT = {
   DEFAULT: 10000,
   LONG: 30000,
 }
+export const SEARCH_INPUT_SELECTOR = "#id_qf-search-search"
+export const SEARCH_RESULTS_SELECTOR = "[data-next-autocomplete-target='option'] a"
 
 /**
  * Navigation helper
@@ -668,7 +670,7 @@ export async function waitForLoadingComplete(
 /**
  * IFrame helpers
  */
-export function getIframe(page: Page, iframeId?: string) {
+export function getIframe(page: Page, iframeId?: string): FrameLocator {
   if (iframeId) {
     return page.frameLocator(`iframe#${iframeId}`)
   }
@@ -735,4 +737,17 @@ export async function searchOnProduitPage(page: Page, searchedAddress: string) {
       parentLocator: someWagtailCarteBlock,
     })
   }
+}
+
+export async function typeSearchQuery(locator: Page | FrameLocator, query: string) {
+  const searchInput = locator.locator(SEARCH_INPUT_SELECTOR)
+  await searchInput.click()
+  await searchInput.fill("")
+  await searchInput.pressSequentially(query, { delay: 50 })
+}
+
+export async function waitForResults(locator: Page | FrameLocator) {
+  const results = locator.locator(SEARCH_RESULTS_SELECTOR)
+  await expect(results.first()).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+  return results
 }

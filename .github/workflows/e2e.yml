@@ -93,6 +93,8 @@ jobs:
     with:
       ref: main
       compare: true
+      # No sharding when comparing
+      shard: '["1"]'
     permissions:
       contents: read
 

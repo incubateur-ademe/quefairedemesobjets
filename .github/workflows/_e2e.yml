@@ -9,6 +9,10 @@ on:
       compare:
         required: true
         type: boolean
+      shard:
+        required: false
+        type: string
+        default: '["1", "2", "3", "4"]'
 
 env:
   PGHOST: localhost
@@ -29,7 +33,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: ["1", "2", "3", "4"]
+        shard: ${{ fromJSON(inputs.shard) }}
     timeout-minutes: 60
     services:
       postgres:
@@ -112,7 +116,7 @@ jobs:
 
       - name: Run Playwright tests (regression only)
         if: inputs.compare
-        run: npx playwright test --grep=@regression ${{ format('--shard={0}/4', matrix.shard) || '' }}
+        run: npx playwright test --grep=@regression
         working-directory: webapp
 
       - name: Upload baseline screenshots

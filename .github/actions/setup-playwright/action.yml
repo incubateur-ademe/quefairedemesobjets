@@ -12,7 +12,7 @@ runs:
     - name: Get Playwright version
       id: playwright-version
       shell: bash
-      run: echo "version=$(npm list @playwright/test --depth=0 --json | jq -r '.dependencies["@playwright/test"].version')" >> $GITHUB_OUTPUT
+      run: echo "version=$(jq -r '.packages["node_modules/@playwright/test"].version' package-lock.json)" >> $GITHUB_OUTPUT
       working-directory: webapp
 
     - name: Cache Playwright browsers
