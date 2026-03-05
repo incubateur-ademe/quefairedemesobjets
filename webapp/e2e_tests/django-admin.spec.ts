@@ -18,7 +18,7 @@ async function openFirstActeur(page: Page) {
 
 /** Read the current textarea value and parse it as GeoJSON coordinates */
 async function readCoordinates(page: Page): Promise<[number, number]> {
-  const raw = await page.locator(".vSerializedField").inputValue()
+  const raw = await page.locator("#id_location").inputValue()
   const parsed = JSON.parse(raw)
   return parsed.coordinates as [number, number]
 }
@@ -42,14 +42,14 @@ test.describe("🛠️ Django Admin - Carte géographique", () => {
     await expect(mapCanvas).toBeAttached({ timeout: TIMEOUT.DEFAULT })
 
     // The serialized coordinates textarea should contain valid GeoJSON
-    const textarea = page.locator(".vSerializedField")
+    const textarea = page.locator("#id_location")
     const value = await textarea.inputValue()
     expect(value).toContain('"type": "Point"')
     expect(value).toContain('"coordinates"')
 
     // The widget instance should be registered in the JS registry
     const isRegistered = await page.evaluate(() => {
-      const textarea = document.querySelector<HTMLTextAreaElement>(".vSerializedField")
+      const textarea = document.querySelector<HTMLTextAreaElement>("#id_location")
       if (!textarea) return false
       return !!(
         (window as any).geodjangoWidgets &&
@@ -69,7 +69,7 @@ test.describe("🛠️ Django Admin - Carte géographique", () => {
   }) => {
     await openFirstActeur(page)
 
-    const textarea = page.locator(".vSerializedField")
+    const textarea = page.locator("#id_location")
     await expect(textarea).not.toHaveValue("", { timeout: TIMEOUT.DEFAULT })
 
     const before = await readCoordinates(page)
@@ -77,7 +77,7 @@ test.describe("🛠️ Django Admin - Carte géographique", () => {
     // Move the feature via the OpenLayers JS API, simulating what a drag does.
     // This is equivalent to what OL's Modify interaction does after a drag gesture.
     await page.evaluate(() => {
-      const ta = document.querySelector<HTMLTextAreaElement>(".vSerializedField")!
+      const ta = document.querySelector<HTMLTextAreaElement>("#id_location")!
       const widget = (window as any).geodjangoWidgets[ta.id]
       const features = widget.featureOverlay.getSource().getFeatures()
       if (!features.length) throw new Error("No features on map")
@@ -115,7 +115,7 @@ test.describe("🛠️ Django Admin - Carte géographique", () => {
 
     // Clear the current position first
     await page.locator(".clear_features a").click()
-    await expect(page.locator(".vSerializedField")).toHaveValue("")
+    await expect(page.locator("#id_location")).toHaveValue("")
 
     // The search input should be present (rendered by the Stimulus controller)
     const searchInput = page.locator('[data-map-search-target="input"]')
@@ -129,7 +129,7 @@ test.describe("🛠️ Django Admin - Carte géographique", () => {
       .click({ force: true })
 
     // The textarea should now contain GeoJSON with the mocked coordinates
-    await expect(page.locator(".vSerializedField")).not.toHaveValue("", {
+    await expect(page.locator("#id_location")).not.toHaveValue("", {
       timeout: TIMEOUT.DEFAULT,
     })
 
