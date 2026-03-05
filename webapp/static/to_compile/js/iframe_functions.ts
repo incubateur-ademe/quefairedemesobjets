@@ -1,6 +1,5 @@
 import iframeResize from "@iframe-resizer/parent"
 import { BacklinkKey, generateBackLink } from "../embed/helpers"
-import { getBaseUrlFromScript } from "./url_utils"
 import { URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE } from "./helpers"
 
 // Constants
@@ -241,7 +240,7 @@ export async function buildAndInsertIframeFrom(
   options?: BuildIframeOptions,
 ): Promise<void> {
   const iframe = document.createElement("iframe")
-  const baseUrl = getBaseUrlFromScript(scriptTag)
+  const baseUrl = getBaseUrlFromEnv()
 
   // Apply all attributes
   applyAttributesToIframe(iframe, iframeAttributes, iframeExtraAttributes)
@@ -267,7 +266,7 @@ export function getIframeAttributesAndExtra(
   baseRoute: string,
   options: IframeSetupOptions = {},
 ): [Record<string, string>, Record<string, string>] {
-  const baseUrl = getBaseUrlFromScript(scriptTag)
+  const baseUrl = getBaseUrl(scriptTag)
 
   // Process all dataset attributes
   const { route, urlParams, iframeExtraAttributes, maxWidth, height } =

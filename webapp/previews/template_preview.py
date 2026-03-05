@@ -805,6 +805,16 @@ class IframePreview(LookbookPreview):
 
         return template.render(Context({}))
 
+    def prod(self, **kwargs):
+        template = Template(
+            """
+               <script src="https://quefairedemesdechets.ademe.fr/static/carte.js" data-slug="cyclevia">
+</script>
+            """
+        )
+
+        return template.render(Context({}))
+
     def assistant(self, **kwargs):
         """
         # Assistant
