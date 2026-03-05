@@ -5,7 +5,7 @@
     data-next-autocomplete-limit-value="{{ limit }}"
     {% if show_on_focus %}data-next-autocomplete-show-on-focus-value="true"{% endif %}
     {% for key, value in wrapper_attrs.items %}{% if key != "data-controller" %}{{ key }}="{{ value }}" {% endif %}{% endfor %}
-    class="qf-relative"
+    class="qf-relative qf-flex-1"
 >
     <label for="{{ widget.attrs.id }}" class="qf-sr-only">Entrez un objet ou un déchet :</label>
 
