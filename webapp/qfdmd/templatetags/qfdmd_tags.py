@@ -92,38 +92,6 @@ def render_file_content(file_field: FileField) -> str:
         return ""
 
 
-@register.simple_tag
-def render_svg_image(image) -> str:
-    """Renders a Wagtail Image as inline SVG content and caches the result.
-
-    Falls back to an empty string if the image is not an SVG or not found."""
-    if not image or not image.file:
-        return ""
-
-    if not image.is_svg():
-        logger.warning(f"render_svg_image: {image.file.name} is not an SVG file")
-        return ""
-
-    file_field = image.file
-
-    def get_svg_content() -> str:
-        with file_field.storage.open(file_field.name) as f:
-            return mark_safe(f.read().decode("utf-8"))  # noqa: S308
-
-    try:
-        return cast(
-            str,
-            cache.get_or_set(
-                f"svg-image-{file_field.name}-"
-                f"{file_field.size if hasattr(file_field, 'size') else 0}",
-                get_svg_content,
-            ),
-        )
-    except FileNotFoundError as e:
-        logger.error(f"file not found {file_field.name=}, original error : {e}")
-        return ""
-
-
 @register.inclusion_tag("templatetags/favicon.html")
 def favicon() -> dict:
     return {}

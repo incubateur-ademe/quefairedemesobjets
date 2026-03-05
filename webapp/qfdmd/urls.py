@@ -3,18 +3,14 @@ from django.urls import path
 from django.views.generic import RedirectView
 
 from qfdmd.views import (
-    AutocompleteHomeSearchView,
     HomeView,
     SynonymeDetailView,
     get_assistant_script,
+    search_view,
 )
 
 urlpatterns = [
-    path(
-        "assistant/autocomplete-search",
-        AutocompleteHomeSearchView.as_view(),
-        name="autocomplete_home_search",
-    ),
+    path("assistant/recherche", search_view, name="search"),
     path(
         "assistant-enquete",
         RedirectView.as_view(

@@ -2,4 +2,8 @@
 
 {% block href %}{{ result.url }}{% endblock %}
 
-{% block nom %}{{ result.nom|capfirst }}{% endblock %}
+{% block nom %}
+<div class="qf-flex qf-justify-between qf-pr-2w">
+    {{ result.nom|capfirst }}
+</div>
+{% endblock %}

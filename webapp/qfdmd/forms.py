@@ -1,56 +1,35 @@
 import logging
-import uuid
 
 from django import forms
 from dsfr.forms import DsfrBaseForm
-from core.widgets import QfSearchAutocompleteInput, SearchAutocompleteInput
+from modelsearch.query import Fuzzy
+
+from search.models import SearchTerm
 
 logger = logging.getLogger(__name__)
 
 
-class HeaderSearchForm(DsfrBaseForm):
-    """DSFR-styled search form used in the site header."""
+class SearchInput(forms.TextInput):
+    template_name = "ui/components/search/widget.html"
 
-    search = forms.CharField(
+
+class SearchForm(DsfrBaseForm):
+    id = forms.CharField(required=False, widget=forms.HiddenInput())
+    input = forms.CharField(
+        help_text="Entrez un objet ou un déchet",
         required=False,
-        widget=SearchAutocompleteInput(
-            attrs={
-                "class": "fr-input",
-                "placeholder": "pantalon, perceuse, canapé...",
-                "autocomplete": "off",
-            },
-        ),
+        widget=SearchInput,
     )
 
+    def search(self) -> list:
+        self.results = []
+        search_query = self.cleaned_data.get("input")
+        if not search_query:
+            self.results = []
+            return self.results
 
-class QfSearchForm(forms.Form):
-    """QFDMOD-styled search form used on the homepage.
-
-    Intentionally does NOT inherit DsfrBaseForm to avoid DSFR injecting
-    fr-input class and its label/wrapper markup.
-    """
-
-    search = forms.CharField(
-        required=False,
-        label="",
-        widget=QfSearchAutocompleteInput(
-            attrs={
-                "placeholder": "exemple : canapé, téléphone, CD-ROM...",
-                "autocomplete": "off",
-            },
-        ),
-    )
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Generate a fresh turbo_frame_id per instance so that multiple forms
-        # on the same page don't share the same turbo-frame element ID.
-        self.fields["search"].widget.turbo_frame_id = str(uuid.uuid4())
-
-
-# TODO: backward compatibility only
-class HomeSearchForm(HeaderSearchForm):
-    pass
+        self.results = SearchTerm.objects.searchable().search(Fuzzy(search_query))[:10]
+        return self.results
 
 
 class ContactForm(DsfrBaseForm):

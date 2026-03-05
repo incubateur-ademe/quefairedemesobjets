@@ -59,12 +59,13 @@ class TestSearchViewResultTypes:
 
         client = Client()
         response = client.get(
-            "/assistant/autocomplete-search",
-            {"q": "lave-linge"},
+            "/assistant/recherche",
+            {"home-id": "home", "home-input": "lave-linge"},
         )
         assert response.status_code == 200
 
-        results = response.context["results"]
+        form = response.context["search_form"]
+        results = form.results
 
         specific_types = {type(r.specific).__name__ for r in results}
         assert "Synonyme" in specific_types
@@ -83,8 +84,8 @@ class TestSearchViewSearchTagLinkParams:
 
         client = Client()
         response = client.get(
-            "/assistant/autocomplete-search",
-            {"q": "lave-linge"},
+            "/assistant/recherche",
+            {"home-id": "home", "home-input": "lave-linge"},
         )
         assert response.status_code == 200
         content = response.content.decode()
@@ -103,8 +104,8 @@ class TestSearchViewSearchTagLinkParams:
 
         client = Client()
         response = client.get(
-            "/assistant/autocomplete-search",
-            {"q": "lave-linge"},
+            "/assistant/recherche",
+            {"home-id": "home", "home-input": "lave-linge"},
         )
         content = response.content.decode()
 
@@ -118,28 +119,28 @@ class TestSearchViewProduitPageResults:
         _rebuild_index()
         client = Client()
         response = client.get(
-            "/assistant/autocomplete-search",
-            {"q": "lave-linge"},
+            "/assistant/recherche",
+            {"home-id": "home", "home-input": "Lave-linge"},
         )
         assert response.status_code == 200
         specific_types = {
-            type(r.specific).__name__ for r in response.context["results"]
+            type(r.specific).__name__ for r in response.context["search_form"].results
         }
         assert "ProduitPageSearchTerm" in specific_types
 
     def test_produit_page_titre_phrase_in_rendered_html(self, produit_page):
         _rebuild_index()
         response = Client().get(
-            "/assistant/autocomplete-search",
-            {"q": "lave-linge"},
+            "/assistant/recherche",
+            {"home-id": "home", "home-input": "Lave-linge"},
         )
         assert "Lave-linge" in response.content.decode()
 
     def test_produit_page_result_renders_anchor_tag(self, produit_page):
         _rebuild_index()
         response = Client().get(
-            "/assistant/autocomplete-search",
-            {"q": "lave-linge"},
+            "/assistant/recherche",
+            {"home-id": "home", "home-input": "Lave-linge"},
         )
         # The template renders an <a href="..."> using pageurl. In the test environment
         # Wagtail has no Site configured so pageurl returns None,
