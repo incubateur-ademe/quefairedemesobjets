@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test"
 import {
   navigateTo,
   SEARCH_INPUT_SELECTOR,
-  SEARCH_RESULT_DROPDOWN_SELECTOR,
+  SEARCH_RESULTS_DROPDOWN_SELECTOR,
   SEARCH_RESULTS_SELECTOR,
   TIMEOUT,
   typeSearchQuery,
