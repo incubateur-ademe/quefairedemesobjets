@@ -1,6 +1,7 @@
 import iframeResize from "@iframe-resizer/parent"
 import { BacklinkKey, generateBackLink } from "../embed/helpers"
 import { URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE } from "./helpers"
+import { getBaseUrlFromEnv } from "./url_utils"
 
 // Constants
 const DEFAULT_MAX_WIDTH = "100%"
@@ -266,7 +267,7 @@ export function getIframeAttributesAndExtra(
   baseRoute: string,
   options: IframeSetupOptions = {},
 ): [Record<string, string>, Record<string, string>] {
-  const baseUrl = getBaseUrl(scriptTag)
+  const baseUrl = getBaseUrlFromEnv()
 
   // Process all dataset attributes
   const { route, urlParams, iframeExtraAttributes, maxWidth, height } =
