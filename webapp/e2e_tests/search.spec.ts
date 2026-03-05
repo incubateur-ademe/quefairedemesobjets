@@ -130,7 +130,7 @@ test.describe("Recherche de produits", () => {
     await page.keyboard.press("Escape")
 
     // Les résultats ne devraient plus être visibles
-    const results = page.locator(SEARCH_RESULT_DROPDOWN_SELECTOR)
+    const results = page.locator(SEARCH_RESULTS_DROPDOWN_SELECTOR)
     expect(results).toBeHidden
   })
 
