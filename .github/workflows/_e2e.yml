@@ -141,7 +141,7 @@ jobs:
         with:
           name: playwright-diffs-${{ matrix.shard }}
           if-no-files-found: ignore
-          path: ${{ env.SCREENSHOTS_BASE_PATH }}
+          path: webapp/test-results
 
 
   create-report:
