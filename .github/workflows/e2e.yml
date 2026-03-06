@@ -68,7 +68,7 @@ jobs:
         run: make -C webapp collectstatic
 
       - name: Upload build artifacts for e2e tests
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: e2e-build-artifacts
           path: |
@@ -121,7 +121,8 @@ jobs:
         continue-on-error: true
         uses: actions/download-artifact@v8
         with:
-          name: playwright-diffs
+          pattern: playwright-diffs-*
+          merge-multiple: true
           path: diffs
 
       - name: Check for visual diff PNGs
