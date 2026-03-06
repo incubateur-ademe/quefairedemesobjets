@@ -6,8 +6,10 @@ export const TIMEOUT = {
   DEFAULT: 10000,
   LONG: 30000,
 }
-export const SEARCH_INPUT_SELECTOR = "#id_qf-search-search"
+export const SEARCH_INPUT_SELECTOR = "#id_home-search"
 export const SEARCH_RESULTS_SELECTOR = "[data-next-autocomplete-target='option'] a"
+export const SEARCH_RESULTS_DROPDOWN_SELECTOR =
+  "[data-next-autocomplete-target='results']"
 
 /**
  * Navigation helper
@@ -741,14 +743,17 @@ export async function searchOnProduitPage(page: Page, searchedAddress: string) {
   }
 }
 
-export async function typeSearchQuery(locator: Page | FrameLocator, query: string) {
+export async function typeSearchQuery(
+  locator: Locator | Page | FrameLocator,
+  query: string,
+) {
   const searchInput = locator.locator(SEARCH_INPUT_SELECTOR)
   await searchInput.click()
   await searchInput.fill("")
   await searchInput.pressSequentially(query, { delay: 50 })
 }
 
-export async function waitForResults(locator: Page | FrameLocator) {
+export async function waitForResults(locator: Locator | Page | FrameLocator) {
   const results = locator.locator(SEARCH_RESULTS_SELECTOR)
   await expect(results.first()).toBeVisible({ timeout: TIMEOUT.DEFAULT })
   return results

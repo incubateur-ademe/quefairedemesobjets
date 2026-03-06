@@ -1,1 +1,18 @@
 {% extends "dsfr/header.html" %}
+
+{% load i18n %}
+
+{% block header_search %}
+  <div class="fr-header__search fr-modal" id="modal-search">
+    <div class="fr-container fr-container-lg--fluid">
+      {% translate "Close" as close_label %}
+      <button class="fr-btn--close fr-btn"
+              aria-controls="modal-search"
+              title="{{ close_label }}">
+        {{ close_label }}
+      </button>
+    <div class="fr-search-bar qf-ml-auto qf-max-w-[21.5rem]" id="search-bar" role="search">
+      {{ assistant.header_search_form.search }}
+    </div>
+  </div>
+{% endblock header_search %}
