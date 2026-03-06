@@ -79,6 +79,7 @@ jobs:
         uses: ./.github/actions/setup-e2e-tools
         with:
           build-frontend: "true"
+          base-url: ${{ env.BASE_URL }}
 
       - name: Download build artifacts
         uses: actions/download-artifact@v8

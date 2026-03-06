@@ -6,6 +6,10 @@ inputs:
     description: "Build frontend assets"
     required: false
     default: "false"
+  base-url:
+    description: "Base URL for frontend build"
+    required: false
+    default: ""
   working-directory:
     description: "Working directory"
     required: false
@@ -46,3 +50,5 @@ runs:
       shell: bash
       run: npm run build
       working-directory: ${{ inputs.working-directory }}
+      env:
+        BASE_URL: ${{ inputs.base-url }}

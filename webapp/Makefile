@@ -134,7 +134,7 @@ prepare-e2e-test:
 	make migrate
 	make rebuild-search-index
 	make createsuperuser-example
-	npm run build
+	BASE_URL=http://localhost:8888 npm run build
 
 .PHONY: prepare-e2e-test-local
 prepare-e2e-test-local:
