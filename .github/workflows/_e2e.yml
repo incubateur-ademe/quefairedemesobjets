@@ -64,6 +64,7 @@ jobs:
       # and overlay them onto the working tree so both baseline and compare jobs
       # use the same test definitions and action definitions.
       - name: Checkout regression test files from PR branch
+        if: inputs.ref != github.ref
         uses: actions/checkout@v6
         with:
           ref: ${{ github.ref }}
@@ -74,9 +75,10 @@ jobs:
           path: __regression_tests__
 
       - name: Overlay regression test files
+        if: inputs.ref != github.ref
         run: |
           cp -r __regression_tests__/webapp/e2e_tests webapp/e2e_tests
-          cp -r __regression_tests__/playwright.config.ts ./webapp/
+          cp -r __regression_tests__/webapp/playwright.config.ts ./webapp/
           cp -r __regression_tests__/.github .
           rm -rf __regression_tests__
 
