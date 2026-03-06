@@ -64,7 +64,7 @@ jobs:
       # and overlay them onto the working tree so both baseline and compare jobs
       # use the same test definitions and action definitions.
       - name: Checkout regression test files from PR branch
-        if: inputs.ref != github.ref
+        if: inputs.compare
         uses: actions/checkout@v6
         with:
           ref: ${{ github.ref }}
@@ -75,7 +75,7 @@ jobs:
           path: __regression_tests__
 
       - name: Overlay regression test files
-        if: inputs.ref != github.ref
+        if: inputs.compare
         run: |
           cp -r __regression_tests__/webapp/e2e_tests/. webapp/e2e_tests
           cp -r __regression_tests__/webapp/playwright.config.ts ./webapp/
@@ -131,7 +131,7 @@ jobs:
           path: ${{ env.SCREENSHOTS_BASE_PATH }}
 
       - name: Upload report
-        if: ${{ !inputs.compare }}
+        if: ${{ !inputs.compare && failure() }}
         uses: actions/upload-artifact@v7
         with:
           name: blob-report-${{ matrix.shard }}
