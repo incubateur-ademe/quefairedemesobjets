@@ -121,7 +121,8 @@ jobs:
         continue-on-error: true
         uses: actions/download-artifact@v8
         with:
-          name: playwright-diffs
+          pattern: playwright-diffs-*
+          merge-multiple: true
           path: diffs
 
       - name: Check for visual diff PNGs
