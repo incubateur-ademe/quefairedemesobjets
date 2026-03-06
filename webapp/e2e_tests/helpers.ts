@@ -624,7 +624,9 @@ export async function clickFirstClickableActeurMarker(
 
   const count = await acteurMarkers.count()
 
-  for (let i = 0; i < count; i++) {
+  // We start from the end to ensure markers are not too close to each other
+  // because this could be harder for playwright to click
+  for (let i = count; i > 0; i--) {
     const marker = acteurMarkers.nth(i)
     try {
       // Try to click without force - this will fail if element is obstructed

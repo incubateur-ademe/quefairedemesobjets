@@ -13,6 +13,10 @@ on:
         required: false
         type: string
         default: '["1", "2", "3", "4"]'
+      base-url:
+        required: false
+        type: string
+        default: "http://localhost:8888"
 
 env:
   PGHOST: localhost
@@ -97,9 +101,6 @@ jobs:
           cd webapp && uv run python manage.py populate_fake_search_tags
           uv run python manage.py populate_search_terms
           make rebuild-search-index
-
-      # - name: Start Django server
-      #   uses: ./.github/actions/start-django-server
 
       - name: Download baseline screenshots
         if: inputs.compare

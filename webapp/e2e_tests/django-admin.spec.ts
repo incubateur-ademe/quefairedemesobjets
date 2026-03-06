@@ -12,6 +12,20 @@ async function loginAsAdmin(page: Page) {
 
 async function openFirstActeur(page: Page) {
   await navigateTo(page, "/admin/qfdmo/displayedacteur/")
+  // In order to get acteurs with adresse, we manually sort.
+  // We do not rely here on url because this might changed with django admin settings and it
+  // is more robust to rely on explicit UI interactions.
+
+  // First sort on adresse field
+  await page.locator(".sortable.column-adresse a").click()
+
+  // Then invert sort order
+  await page.waitForEvent("domcontentloaded")
+  // We force because it might require to scroll horizontally to get the column to be displayed
+  await page.locator(".sortable.column-adresse a.ascending").click()
+
+  const firstRow = page.locator("#result_list tbody tr td.field-adresse").first()
+  expect(firstRow.textContent).not.toBe("-")
   await page.locator("#result_list .field-nom a").first().click()
   await page.waitForLoadState("domcontentloaded")
 }

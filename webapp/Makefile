@@ -128,13 +128,17 @@ integration-test:
 dags-test:
 	$(PYTEST) ../data-platform/dags/tests
 
+
 .PHONY: prepare-e2e-test
 prepare-e2e-test:
-	make DATABASE_URL=$(SAMPLE_DATABASE_URL) migrate
-	# DATABASE_URL=$(SAMPLE_DATABASE_URL) uv run python manage.py migrate_homepage
-	make DATABASE_URL=$(SAMPLE_DATABASE_URL) rebuild-search-index
-	make DATABASE_URL=$(SAMPLE_DATABASE_URL) createsuperuser-example
-	npm run build
+	make migrate
+	make rebuild-search-index
+	make createsuperuser-example
+	BASE_URL=http://localhost:8888 npm run build
+
+.PHONY: prepare-e2e-test-local
+prepare-e2e-test-local:
+	make DATABASE_URL=$(SAMPLE_DATABASE_URL) prepare-e2e-test
 
 .PHONY: e2e-test
 e2e-test:
