@@ -77,7 +77,7 @@ jobs:
       - name: Overlay regression test files
         if: inputs.ref != github.ref
         run: |
-          cp -r __regression_tests__/webapp/e2e_tests webapp/e2e_tests
+          cp -r __regression_tests__/webapp/e2e_tests/. webapp/e2e_tests
           cp -r __regression_tests__/webapp/playwright.config.ts ./webapp/
           cp -r __regression_tests__/.github .
           rm -rf __regression_tests__
