@@ -13,6 +13,10 @@ on:
         required: false
         type: string
         default: '["1", "2", "3", "4"]'
+      base-url:
+        required: false
+        type: string
+        default: "http://localhost:8888"
 
 env:
   PGHOST: localhost
@@ -79,7 +83,6 @@ jobs:
         uses: ./.github/actions/setup-e2e-tools
         with:
           build-frontend: "true"
-          base-url: ${{ env.BASE_URL }}
 
       - name: Download build artifacts
         uses: actions/download-artifact@v8

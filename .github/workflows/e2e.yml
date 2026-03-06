@@ -48,6 +48,7 @@ jobs:
         with:
           build-frontend: "true"
           install-playwright: "false"
+          base-url: ${{ env.BASE_URL }}
 
       - name: Get current date
         id: date
