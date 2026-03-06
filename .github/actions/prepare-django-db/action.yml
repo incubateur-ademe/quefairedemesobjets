@@ -30,12 +30,12 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Check database cache
-      id: cache-db
-      uses: actions/cache@v5
-      with:
-        path: ${{ inputs.local-dump-path }}
-        key: ${{ inputs.cache-key }}
+    # - name: Check database cache
+    #   id: cache-db
+    #   uses: actions/cache@v5
+    #   with:
+    #     path: ${{ inputs.local-dump-path }}
+    #     key: ${{ inputs.cache-key }}
 
     - name: Dump sample database from remote
       if: steps.cache-db.outputs.cache-hit != 'true'
@@ -56,11 +56,11 @@ runs:
       if: steps.cache-db.outputs.cache-hit != 'true'
       shell: bash
       run: |
+        # TODO: user make prepare-e2e-test here
         cd webapp
-        make createcachetable
         make migrate
-        make createsuperuser-example
         make rebuild-search-index
+        make createsuperuser-example
 
     - name: Dump PostgreSQL database
       if: steps.cache-db.outputs.cache-hit != 'true'

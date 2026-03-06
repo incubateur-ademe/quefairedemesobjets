@@ -6,6 +6,10 @@ inputs:
     description: "Build frontend assets"
     required: false
     default: "false"
+  base-url:
+    description: "Base URL for frontend build"
+    required: false
+    default: ""
   install-playwright:
     description: "Install Playwright browsers"
     required: false
@@ -18,6 +22,7 @@ runs:
       uses: ./.github/actions/setup-frontend
       with:
         build: ${{ inputs.build-frontend }}
+        base-url: ${{ inputs.base-url }}
 
     - name: Setup backend environment
       uses: ./.github/actions/setup-backend

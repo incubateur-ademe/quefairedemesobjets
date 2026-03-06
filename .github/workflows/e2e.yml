@@ -10,7 +10,7 @@ env:
   PGPASSWORD: webapp # pragma: allowlist secret
   PGDATABASE: webapp
   UV_PROJECT_ENVIRONMENT: .venv
-  BASE_URL: http://localhost:8000
+  BASE_URL: http://localhost:8888
   DATABASE_URL: "postgres://webapp:webapp@localhost:5432/webapp" # pragma: allowlist secret
   SECRET_KEY: coucou # pragma: allowlist secret
   CI: true
@@ -48,6 +48,7 @@ jobs:
         with:
           build-frontend: "true"
           install-playwright: "false"
+          base-url: ${{ env.BASE_URL }}
 
       - name: Get current date
         id: date
