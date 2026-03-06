@@ -162,6 +162,7 @@ jobs:
 
     - name: Download blob reports from GitHub Actions Artifacts
       uses: actions/download-artifact@v8
+      working-directory: webapp
       with:
         path: all-blob-reports
         pattern: blob-report-*
@@ -169,9 +170,11 @@ jobs:
 
     - name: Merge into HTML Report
       run: npx playwright merge-reports --reporter html ./all-blob-reports
+      working-directory: webapp
 
     - name: Upload HTML report
       uses: actions/upload-artifact@v7
+      working-directory: webapp
       with:
         name: html-report--attempt-${{ github.run_attempt }}
         path: playwright-report
