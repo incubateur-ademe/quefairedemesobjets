@@ -3,6 +3,7 @@ from typing import Any, List
 
 import orjson
 from adminsortable2.admin import SortableAdminMixin
+from core.admin import CodeLibelleModelAdmin, CodeLibelleModelMixin, NotMutableMixin
 from django import forms
 from django.conf import settings
 from django.contrib.gis import admin
@@ -18,8 +19,6 @@ from django.utils.html import format_html
 from djangoql.admin import DjangoQLSearchMixin
 from import_export import fields, resources, widgets
 from import_export.admin import ExportMixin, ImportExportMixin
-
-from core.admin import CodeLibelleModelAdmin, CodeLibelleModelMixin, NotMutableMixin
 from qfdmo.admin.widgets import CategorieChoiceWidget, SousCategorieChoiceWidget
 from qfdmo.models import (
     Acteur,
@@ -787,7 +786,7 @@ class GenericExporterMixin:
     licenses = []
 
     def get_sources(self, acteur):
-        sources = ["Longue Vie Aux Objets", "ADEME"]
+        sources = ["Que faire de mes objets et déchets", "ADEME"]
         acteur_sources = acteur.sources.all()
         if self.licenses:
             acteur_sources = acteur_sources.filter(licence__in=self.licenses)

@@ -8,7 +8,7 @@ test.describe("🌐 Compatibilité Navigateur", () => {
     await navigateTo(page, `/formulaire`)
 
     const titlePage = await page.title()
-    expect(titlePage).toBe("Longue vie aux objets")
+    expect(titlePage).toBe("Que faire de mes objets et déchets")
 
     // Check that the browser version alert is not displayed
     const alert = await page.$("#obsolete_browser_message")

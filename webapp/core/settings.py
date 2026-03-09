@@ -515,7 +515,7 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = decouple.config(
 # ----------------
 SILENCED_SYSTEM_CHECKS = ["wagtailadmin.W002"]
 HOST_PROTO = decouple.config("HOST_PROTO", default="https")
-WAGTAIL_SITE_NAME = "Longue vie aux objets"
+WAGTAIL_SITE_NAME = "Que faire de mes objets et déchets"
 WAGTAILADMIN_BASE_URL = BASE_URL
 MODELSEARCH_BACKENDS = {
     "default": {

@@ -1,6 +1,6 @@
 # Enrichissement de données
 
-Le principe de l'enrichissement de données est d'hidrater et/ou corriger les données de «Longue vie aux objets» grâce à des sources partenaires ou exécutant des scripts de cohérence.
+Le principe de l'enrichissement de données est d'hidrater et/ou corriger les données de «Que faire de mes objets et déchets» grâce à des sources partenaires ou exécutant des scripts de cohérence.
 
 ## Enrichissements via des sources partenaires
 

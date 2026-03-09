@@ -1,4 +1,4 @@
-# Changelog du jeu de données Open Data : « Acteurs de l'économie circulaire - Longue Vie Aux Objets »
+# Changelog du jeu de données Open Data : « Acteurs de l'économie circulaire - Que faire de mes objets et déchets »
 
 Ce document fait référence au jeu de données open data suivant :
 [Acteurs de l'économie circulaire - ADEME](https://data.ademe.fr/datasets/longue-vie-aux-objets-acteurs-de-leconomie-circulaire)

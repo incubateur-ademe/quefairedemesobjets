@@ -13,7 +13,7 @@
 {
     "model": "qfdmo.source",
     "fields": {
-        "libelle": "Longue Vie Aux Objets",
+        "libelle": "Que Faire De Mes Objets & Déchets / Longue Vie Aux Objets",
         "code": "lvao",
         "afficher": true,
         "url": "https://longuevieauxobjets.ademe.fr/",
@@ -134,7 +134,7 @@
 {
     "model": "qfdmo.source",
     "fields": {
-        "libelle": "Communauté Longue Vie Aux Objets",
+        "libelle": "Communauté Que Faire De Mes Objets & Déchets / Longue Vie Aux Objets",
         "code": "communautelvao",
         "afficher": true,
         "url": "https://longuevieauxobjets.ademe.fr/",

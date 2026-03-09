@@ -8,7 +8,7 @@ However, this project is developed and operated by the French State and must be 
 
 ### 🇫🇷 In French
 
-For citizens, administrations, administrators, and the “Longue vie aux objets” team:
+For citizens, administrations, administrators, and the “Que faire de mes objets et déchets” team:
 
 - Git/GitHub commits and Pull Requests
 - Names and fields of database tables

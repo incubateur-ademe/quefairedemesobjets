@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "c3a2e043-227a-46a6-9585-c70201ed4b8b",
-		"name": "Longue vie aux objets",
+		"name": "Que faire de mes objets et déchets",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "13517415",
 		"_collection_link": "https://speeding-escape-588206.postman.co/workspace/L'%25C3%25A9tabli~15bf6b4b-56f8-49ce-99e0-4f954dff67e1/collection/13517415-c3a2e043-227a-46a6-9585-c70201ed4b8b?action=share&source=collection_link&creator=13517415"
@@ -63,7 +63,7 @@
 												}
 											]
 										},
-										"description": "Les acteurs correspondant à un point sur la carte Longue Vie Aux Objets\n\nPour retrouver les acteurs à proximité :\n- Indiquer une latitude / longitude (exemple : latitude=48.86 et longitude=2.3)\n- Indiquer un rayon (optionnel) en km : les résultats en dehors de ce rayon ne seront pas retournés\n\nSi la latitude ou longitude sont manquantes, alors tous les résultats seront retournés triés par nom."
+										"description": "Les acteurs correspondant à un point sur la carte Que faire de mes objets et déchets\n\nPour retrouver les acteurs à proximité :\n- Indiquer une latitude / longitude (exemple : latitude=48.86 et longitude=2.3)\n- Indiquer un rayon (optionnel) en km : les résultats en dehors de ce rayon ne seront pas retournés\n\nSi la latitude ou longitude sont manquantes, alors tous les résultats seront retournés triés par nom."
 									},
 									"response": [
 										{
