@@ -36,3 +36,17 @@
 
 .tabs li:active {
 }
+
+/*
+Applied to all links in admin, selector was observed in dev tools
+added :not(:focus) to keep underline the last link clicked
+*/
+a:not(
+    [role="button"],
+    #header a,
+    #nav-sidebar a,
+    #content-main.app-list a,
+    .object-tools a
+  ):not(:focus) {
+  @apply qf-no-underline;
+}
