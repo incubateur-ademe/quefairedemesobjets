@@ -68,8 +68,8 @@ SELECT
   da.uuid as "identifiant",
   CASE
     WHEN ds.sources_list IS NOT NULL
-    THEN 'Longue Vie Aux Objets|ADEME|' || ds.sources_list
-    ELSE 'Longue Vie Aux Objets|ADEME'
+    THEN 'Que faire de mes objets et déchets|ADEME|' || ds.sources_list
+    ELSE 'Que faire de mes objets et déchets|ADEME'
   END as "paternite",
   ds.identifiants_par_source as "identifiants_des_contributeurs",
   da.nom as "nom",

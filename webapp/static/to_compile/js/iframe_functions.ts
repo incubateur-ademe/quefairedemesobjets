@@ -7,7 +7,7 @@ import { getBaseUrlFromEnv } from "./url_utils"
 const DEFAULT_MAX_WIDTH = "100%"
 const DEFAULT_HEIGHT = "100vh" // As recommended by iframe-resizer docs
 const IFRAME_ID = "lvao_iframe"
-const IFRAME_TITLE = "Longue vie aux objets"
+const IFRAME_TITLE = "Que faire de mes objets et déchets"
 
 // Special dataset attributes that require custom handling
 const SPECIAL_ATTRIBUTES = {

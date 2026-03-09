@@ -1,6 +1,6 @@
 # LVAO
 
-Ici sont référencées toutes les applications développées ou maintenues par l'équipe Longue vie aux objets
+Ici sont référencées toutes les applications développées ou maintenues par l'équipe «Que faire de mes objets et déchets»
 
 ## La carte
 

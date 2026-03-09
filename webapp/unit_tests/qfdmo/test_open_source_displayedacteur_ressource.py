@@ -1,5 +1,4 @@
 import pytest
-
 from qfdmo.admin.acteur import OpenSourceDisplayedActeurResource
 from qfdmo.models.acteur import DataLicense
 from unit_tests.qfdmo.acteur_factory import (
@@ -133,7 +132,7 @@ class TestOpenSourceDisplayedActeurResource:
         dataset_dict = dataset.dict
 
         contributeurs = dataset_dict[0]["Paternité"].split("|")
-        assert contributeurs[0] == "Longue Vie Aux Objets"
+        assert contributeurs[0] == "Que faire de mes objets et déchets"
         assert contributeurs[1] == "ADEME"
         assert sorted(contributeurs[2:]) == sorted(expected_other_contributeurs)
 
@@ -175,7 +174,7 @@ class TestOpenSourceDisplayedActeurResource:
         assert row_multi["Identifiant"] == acteur_multi_licences.uuid
         assert (
             row_multi["Paternité"]
-            == f"Longue Vie Aux Objets|ADEME|{source_open_licence.libelle}"
+            == f"Que faire de mes objets et déchets|ADEME|{source_open_licence.libelle}"
         )
 
         dataset = OpenSourceDisplayedActeurResource(

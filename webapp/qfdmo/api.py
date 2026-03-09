@@ -7,7 +7,6 @@ from django.contrib.gis.measure import D
 from django.shortcuts import get_object_or_404
 from ninja import Field, FilterSchema, ModelSchema, Query, Router
 from ninja.pagination import paginate
-
 from qfdmo.admin.acteur import GenericExporterMixin
 from qfdmo.geo_api import search_epci_code
 from qfdmo.models import (
@@ -181,7 +180,7 @@ def acteurs(
     rayon: int = 2,
 ):
     """
-    Les acteurs correspondant à un point sur la carte Longue Vie Aux Objets
+    Les acteurs correspondant à un point sur la carte Que faire de mes objets et déchets
 
     Pour retrouver les acteurs à proximité :
     - Indiquer une latitude / longitude (exemple : latitude=48.86 et longitude=2.3)

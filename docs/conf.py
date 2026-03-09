@@ -6,7 +6,7 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = "Longue Vie Aux Objets"
+project = "Que faire de mes objets et déchets"
 copyright = "2024, Fabien Le Frapper (@fabienheureux), Nicolas Oudard, Max Corbeau"
 author = "Fabien Le Frapper, Nicolas Oudard, Max Corbeaux"
 

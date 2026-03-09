@@ -1,6 +1,6 @@
 import { expect } from "@playwright/test"
 import { test } from "./fixtures"
-import { navigateTo, getIframe, TIMEOUT } from "./helpers"
+import { getIframe, navigateTo, TIMEOUT } from "./helpers"
 
 test.describe("📦 Système d'Intégration Iframe", () => {
   test.describe("Génération des iframes avec ID corrects", () => {
@@ -76,7 +76,7 @@ test.describe("📦 Système d'Intégration Iframe", () => {
       expect(style).toContain("width: 100%;")
       expect(style).toContain("height: 720px;")
       expect(style).toContain("max-width: 100%;")
-      expect(title).toBe("Longue vie aux objets")
+      expect(title).toBe("Que faire de mes objets et déchets")
     })
 
     test("Le formulaire est visible et a la bonne hauteur dans l'iframe", async ({

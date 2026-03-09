@@ -12,7 +12,7 @@
 
 - Un site grand public : [`https://quefairedemesobjets.ademe.fr/`](https://quefairedemesobjets.ademe.fr/)
 - Carte intégrable en iframe via un script JS : [configurateur d'iframe](https://longuevieauxobjets.ademe.fr/configurateur/)
-- Nos données en opendata : [Longue Vie Aux Objets - Acteurs de l'économie circulaire - Version Beta](https://data.ademe.fr/datasets/longue-vie-aux-objets-acteurs-de-leconomie-circulaire)
+- Nos données en opendata : [Acteurs de l'économie circulaire - Que Faire De Mes Objets & Déchets](https://data.ademe.fr/datasets/longue-vie-aux-objets-acteurs-de-leconomie-circulaire)
 - Une API : contacter l'équipe pour en savoir plus
 
 ## Architecture du dépôt

@@ -52,7 +52,7 @@ describe("getIframeAttributesAndExtra function tests", () => {
       scrolling: "no",
       src: expectedSrc,
       style: "overflow: hidden; max-width: 100%; width: 100%; height: 700px;",
-      title: "Longue vie aux objets",
+      title: "Que faire de mes objets et déchets",
     })
   }
 
