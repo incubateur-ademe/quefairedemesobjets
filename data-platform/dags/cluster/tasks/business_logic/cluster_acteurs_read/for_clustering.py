@@ -97,8 +97,10 @@ def cluster_acteurs_read_for_clustering(
     # --------------------------------
     logger.info(log.banner_string("Fusion parents + orphelins"))
     ids = set()
-    ids.update(df_orphans["identifiant_unique"].values)
-    ids.update(df_parents["identifiant_unique"].values)
+    if not df_orphans.empty:
+        ids.update(df_orphans["identifiant_unique"].values)
+    if not df_parents.empty:
+        ids.update(df_parents["identifiant_unique"].values)
     log.preview("IDs avant la fusion", ids)
     df = pd.concat([df_orphans, df_parents], ignore_index=True).replace({np.nan: None})
     df = df.drop_duplicates(subset="identifiant_unique", keep="first")
