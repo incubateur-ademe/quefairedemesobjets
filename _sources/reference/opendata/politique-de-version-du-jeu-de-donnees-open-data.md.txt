@@ -1,6 +1,6 @@
 # Politique de version du jeu de données Open Data
 
-Cette page explique comment évoluent les données « Acteurs de l'économie circulaire - Longue Vie Aux Objets » et ce que cela implique pour leurs réutilisateurs.
+Cette page explique comment évoluent les données « Acteurs de l'économie circulaire - Que faire de mes objets et déchets » et ce que cela implique pour leurs réutilisateurs.
 
 ## 1. Mises à jour du contenu
 
@@ -25,8 +25,8 @@ Toutes les évolutions (qu’elles soient compatibles ou majeures) sont consign�
 
 - Chaque version majeure correspond à un nouveau jeu de données.
 - Le numéro de version figure dans le titre, par exemple :
-  - `Acteurs de l'économie circulaire - Longue Vie Aux Objets - Version 1`
-  - `Acteurs de l'économie circulaire - Longue Vie Aux Objets - Version 2`
+  - `Acteurs de l'économie circulaire - Que faire de mes objets et déchets - Version 1`
+  - `Acteurs de l'économie circulaire - Que faire de mes objets et déchets - Version 2`
 
 ## 4. Cycle de vie d’une version
 

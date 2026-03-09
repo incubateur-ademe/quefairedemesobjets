@@ -2,7 +2,7 @@
 
 ## Présentation
 
-- **Finalité** : partager en open data la liste des acteurs de l'économie circulaire collectée par l'équipe Longue Vie Aux Objets (ADEME) avec leurs métadonnées principales.
+- **Finalité** : partager en open data la liste des acteurs de l'économie circulaire collectée par l'équipe Que faire de mes objets et déchets (ADEME) avec leurs métadonnées principales.
 - **Couverture** : acteurs actifs après déduplication et consolidation multi-sources (au moins 250 000 acteurs). Seules les données partagées en licences ouvertes sont mises à disposition.
 - **Diffusion** : publication hebdomadaire (chaque lundi matin).
 - **Licence et paternité** : diffusion sous licence ouverte ADEME ; la colonne `paternite` liste les contributeurs à la donnée compilée de chaque acteur. # Obligation de mentionner la paternité lors de la réutilisation de celle-ci.
@@ -14,7 +14,7 @@
 | Colonne                          | Type  | Description                                             | Format ou valeurs                                                                |
 | -------------------------------- | ----- | ------------------------------------------------------- | -------------------------------------------------------------------------------- |
 | `identifiant`                    | texte | Identifiant stable (base57) de l'acteur.                | Exemple : `aDcrby2bghAZFM3yYCRTue`.                                              |
-| `paternite`                      | texte | Paternité juridique du jeu de données.                  | `Longue Vie Aux Objets\|ADEME\|<libelle_source_1>\|...`.                         |
+| `paternite`                      | texte | Paternité juridique du jeu de données.                  | `Que faire de mes objets et déchets\|ADEME\|<libelle_source_1>\|...`.            |
 | `identifiants_des_contributeurs` | jsonb | Identifiants des sources ayant contribuées à la donnée. | Ex. `[{"ECOMAISON": "1234567890"}, {"REFASHION": "TLC-REFASHION-PAV-1234567"}]`. |
 | `nom`                            | texte | Nom de l'acteur.                                        | Texte libre, non vide.                                                           |
 | `nom_commercial`                 | texte | Enseigne commerciale (si différente).                   | Texte libre ; peut être vide.                                                    |
@@ -119,7 +119,7 @@ Acteur issu des fixtures (`qfdmo/fixtures/acteurs.json`) :
 ```json
 {
   "identifiant": "aDcrgdtbqxAZFM3yYCRTue",
-  "paternite": "Longue Vie Aux Objets|ADEME|ADEME - SINOE|ECOMAISON|ECOLOGIC|ECOSYSTEM|REFASHION",
+  "paternite": "Que faire de mes objets et déchets|ADEME|ADEME - SINOE|ECOMAISON|ECOLOGIC|ECOSYSTEM|REFASHION",
   "identifiants_des_contributeurs": [
     { "ADEME - SINOE": "SINOE-12345-123" },
     { "ECOMAISON": "1234567890" },

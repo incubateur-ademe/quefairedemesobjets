@@ -2,7 +2,7 @@
 
 > ⚠️⚠️⚠️ Créer une nouvelle version du jeu de données Open Data est un processus lourd : on évite tant que possible d’en créer de nouvelles.
 >
-> La création d’une nouvelle version doit être une décision collégiale de l’équipe Longue vie aux objets.
+> La création d’une nouvelle version doit être une décision collégiale de l’équipe «Que faire de mes objets et déchets».
 
 En complément de la [Politique de version du jeu de données Open Data](./politique-de-version-du-jeu-de-donnees-open-data.md)
 
