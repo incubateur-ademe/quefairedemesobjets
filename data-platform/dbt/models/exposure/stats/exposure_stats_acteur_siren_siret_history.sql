@@ -67,7 +67,31 @@ SELECT
     CASE
         WHEN visible.nb_total = 0 THEN 0
         ELSE ROUND(((siret.nb_with_siret - siret_actif.nb_with_siret_actif)::NUMERIC / siret.nb_with_siret) * 100, 2)
-    END AS rate_siret_inactive
+    END AS rate_siret_inactive,
+    CASE
+        WHEN visible.nb_total = 0 THEN 0
+        ELSE ROUND((siren.nb_with_siren::NUMERIC / visible.nb_total) * 100, 2)
+    END AS rate_with_siren,
+    CASE
+        WHEN visible.nb_total = 0 THEN 0
+        ELSE ROUND((siren_actif.nb_with_siren_actif::NUMERIC / siren.nb_with_siren) * 100, 2)
+    END AS rate_with_siren_actif,
+    CASE
+        WHEN visible.nb_total = 0 THEN 0
+        ELSE ROUND(((siren.nb_with_siren - siren_actif.nb_with_siren_actif)::NUMERIC / siren.nb_with_siren) * 100, 2)
+    END AS rate_with_siren_inactive,
+    CASE
+        WHEN visible.nb_total = 0 THEN 0
+        ELSE ROUND((siret.nb_with_siret::NUMERIC / visible.nb_total) * 100, 2)
+    END AS rate_with_siret,
+    CASE
+        WHEN visible.nb_total = 0 THEN 0
+        ELSE ROUND((siret_actif.nb_with_siret_actif::NUMERIC / siret.nb_with_siret) * 100, 2)
+    END AS rate_with_siret_actif,
+    CASE
+        WHEN visible.nb_total = 0 THEN 0
+        ELSE ROUND(((siret.nb_with_siret - siret_actif.nb_with_siret_actif)::NUMERIC / siret.nb_with_siret) * 100, 2)
+    END AS rate_with_siret_inactive
 FROM visible
 CROSS JOIN siren
 CROSS JOIN siren_actif
