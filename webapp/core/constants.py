@@ -44,8 +44,8 @@ ASSISTANT = {
     },
     "seo": {
         # Utilisé comme balise <title> dans les pages d'accueil et produit
-        "title": "Que Faire de mes objets & déchets : votre assistant au réemploi,"
-        " à la réparation et au recyclage",
+        "title": "Que Faire de mes objets & déchets : votre assistant à la réparation,"
+        " au réemploi, et au recyclage",
         # Utilisé comme meta-description en l'absence de meta
         # description définie sur le produit
         "description": "Ne jetez pas vos objets ! Découvrez des adresses "
