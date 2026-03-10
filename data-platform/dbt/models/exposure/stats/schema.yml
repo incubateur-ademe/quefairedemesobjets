@@ -1,6 +1,38 @@
 version: 2
 
 models:
+  - name: exposure_stats_acteur_no_siren_actif
+    description: "Acteurs visibles, SIREN bien formatté (9 chiffres), sans SIREN actif dans la table AE"
+    columns:
+      - name: identifiant_unique
+        description: "L'identifiant unique de l'acteur"
+      - name: siren
+        description: "Le SIREN de l'acteur"
+    config:
+      materialized: table
+      tags:
+        - exposure
+        - stats
+        - acteurs
+        - siren
+        - actif
+
+  - name: exposure_stats_acteur_no_siret_actif
+    description: "Acteurs visibles, SIRET bien formatté (14 chiffres), sans SIRET actif dans la table AE"
+    columns:
+      - name: identifiant_unique
+        description: "L'identifiant unique de l'acteur"
+      - name: siret
+        description: "Le SIRET de l'acteur"
+    config:
+      materialized: table
+      tags:
+        - exposure
+        - stats
+        - acteurs
+        - siret
+        - actif
+
   - name: exposure_stats_acteur_revision_siren
     description: "Acteur et correction avec un SIREN différent et une source plus récente"
     columns:
