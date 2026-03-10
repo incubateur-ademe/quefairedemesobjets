@@ -1072,6 +1072,7 @@ class SourceResource(resources.ModelResource):
             "libelle",
             "code",
             "licence",
+            "url",
             "afficher",
         )
 
