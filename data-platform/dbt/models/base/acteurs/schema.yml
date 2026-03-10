@@ -80,6 +80,7 @@ models:
         - base
         - acteurs
         - acteur
+        - stats
   - name: base_acteur_acteur_services
     description: "Services des acteurs"
     columns:
@@ -266,6 +267,7 @@ models:
         - base
         - acteurs
         - revisionacteur
+        - stats
   - name: base_revisionacteur_acteur_services
     description: "Services des acteurs"
     columns:
@@ -409,6 +411,7 @@ models:
         - base
         - acteurs
         - source
+        - stats
   - name: base_acteur_type
     description: "Types d'acteurs"
     columns:
