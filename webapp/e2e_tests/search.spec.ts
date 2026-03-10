@@ -1,21 +1,13 @@
 import { expect, test } from "@playwright/test"
-import { navigateTo, TIMEOUT } from "./helpers"
-
-const SEARCH_INPUT_SELECTOR = "#id_home-input"
-const SEARCH_RESULTS_SELECTOR = "[data-search-target='results'] a"
-
-async function typeSearchQuery(page, query: string) {
-  const searchInput = page.locator(SEARCH_INPUT_SELECTOR)
-  await searchInput.click()
-  await searchInput.fill("")
-  await searchInput.pressSequentially(query, { delay: 50 })
-}
-
-async function waitForResults(page) {
-  const results = page.locator(SEARCH_RESULTS_SELECTOR)
-  await expect(results.first()).toBeVisible({ timeout: TIMEOUT.DEFAULT })
-  return results
-}
+import {
+  navigateTo,
+  SEARCH_INPUT_SELECTOR,
+  SEARCH_RESULTS_DROPDOWN_SELECTOR,
+  SEARCH_RESULTS_SELECTOR,
+  TIMEOUT,
+  typeSearchQuery,
+  waitForResults,
+} from "./helpers"
 
 test.describe("Recherche de produits", () => {
   test.beforeEach(async ({ page }) => {
@@ -138,8 +130,8 @@ test.describe("Recherche de produits", () => {
     await page.keyboard.press("Escape")
 
     // Les résultats ne devraient plus être visibles
-    const results = page.locator(SEARCH_RESULTS_SELECTOR)
-    await expect(results).toHaveCount(0, { timeout: TIMEOUT.SHORT })
+    const results = page.locator(SEARCH_RESULTS_DROPDOWN_SELECTOR)
+    expect(results).toBeHidden
   })
 
   test("Les liens des résultats SearchTag contiennent search_term_id, position et search_term", async ({
