@@ -1,13 +1,13 @@
 import logging
 
+from core.notion import ContactFormData, create_new_row_in_notion_table
 from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from pydantic import ValidationError
+from qfdmd.models import FormPageValidationSettings
 from sites_conformes.forms.models import FormPage
 from wagtail.contrib.forms.models import FormSubmission
-
-from core.notion import ContactFormData, create_new_row_in_notion_table
 
 # Warning : this could change if Sites Faciles creates their
 # own form submission class.
@@ -24,6 +24,14 @@ logger = logging.getLogger(__name__)
 @receiver(post_save, sender=submission_class)
 def submit_sites_conformes_form(sender, instance, created, **kwargs):
     if created:
+        settings_instance = FormPageValidationSettings.objects.first()
+        if (
+            not settings_instance
+            or not settings_instance.form_page
+            or instance.page_id != settings_instance.form_page_id
+        ):
+            return
+
         form_data = instance.get_data()
         fields_names = [field.clean_name for field in instance.page.get_form_fields()]
         data_dict = {
@@ -52,10 +60,8 @@ def validate_form_page_fields(sender, instance: FormPage, created, **kwargs):
     These 4 fields are used in Notion bridge in core/notion.py and
     in the signal above.
     """
-    from qfdmd.models import FormPageValidationSettings
-
     settings_instance = FormPageValidationSettings.objects.first()
-    if not settings_instance.form_page:
+    if not settings_instance or not settings_instance.form_page:
         return
 
     # Check if this is the configured form page
