@@ -1,0 +1,1 @@
+select * from {{ ref('marts_acteur_no_siren_actif') }}

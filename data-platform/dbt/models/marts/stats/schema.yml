@@ -1,6 +1,38 @@
 version: 2
 
 models:
+  - name: marts_acteur_no_siren_actif
+    description: "Acteurs visibles sans SIREN actif (AE)"
+    columns:
+      - name: identifiant_unique
+        description: "L'identifiant unique de l'acteur"
+      - name: siren
+        description: "Le SIREN de l'acteur"
+    config:
+      materialized: table
+      tags:
+        - stats
+        - marts
+        - acteurs
+        - siren
+        - actif
+
+  - name: marts_acteur_no_siret_actif
+    description: "Acteurs visibles sans SIRET actif (AE)"
+    columns:
+      - name: identifiant_unique
+        description: "L'identifiant unique de l'acteur"
+      - name: siret
+        description: "Le SIRET de l'acteur"
+    config:
+      materialized: table
+      tags:
+        - stats
+        - marts
+        - acteurs
+        - siret
+        - actif
+
   - name: marts_acteur_revision
     description: "Acteurs avec une révision"
     columns:
