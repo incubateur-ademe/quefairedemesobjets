@@ -122,14 +122,14 @@ jobs:
 
       - name: Upload baseline screenshots
         if: ${{ !inputs.compare }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: screenshots-${{ matrix.shard }}
           path: ${{ env.SCREENSHOTS_BASE_PATH }}
 
       - name: Upload report
         if: ${{ !inputs.compare }}
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: blob-report-${{ matrix.shard }}
           path: webapp/blob-report
@@ -137,7 +137,7 @@ jobs:
 
       - name: Upload Playwright diffs on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-diffs-${{ matrix.shard }}
           if-no-files-found: ignore
@@ -168,7 +168,7 @@ jobs:
       run: npx playwright merge-reports --reporter html ./all-blob-reports
 
     - name: Upload HTML report
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: html-report--attempt-${{ github.run_attempt }}
         path: playwright-report
