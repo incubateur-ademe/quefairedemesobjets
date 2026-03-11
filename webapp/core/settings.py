@@ -24,7 +24,6 @@ from sentry_sdk.integrations.django import DjangoIntegration
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Assistant settings
 # ------------------
 ASSISTANT = {
@@ -320,7 +319,7 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 DATABASE_URL = decouple.config(
     "DATABASE_URL",
-    default="postgis://qfdmo:qfdmo@localhost:6543/qfdmo",  # pragma: allowlist secret  # noqa: E501
+    default="postgis://webapp:webapp@localhost:6543/qfdmo",  # pragma: allowlist secret  # noqa: E501
     cast=str,
 )
 
@@ -343,7 +342,7 @@ WEBAPP_SAMPLE_DATABASE_SETTINGS = {
 DB_WAREHOUSE = decouple.config(
     "DB_WAREHOUSE",
     cast=str,
-    default="postgis://qfdmo:qfdmo@localhost:6543/warehouse",  # pragma: allowlist secret  # noqa: E501
+    default="postgis://warehouse:warehouse@localhost:6543/warehouse",  # pragma: allowlist secret  # noqa: E501
 )
 
 WAREHOUSE_DATABASE_SETTINGS = {
