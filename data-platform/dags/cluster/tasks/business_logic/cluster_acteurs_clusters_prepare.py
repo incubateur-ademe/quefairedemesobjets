@@ -10,6 +10,7 @@ from cluster.tasks.business_logic.cluster_acteurs_read.children import (
     cluster_acteurs_read_children,
 )
 from cluster.tasks.business_logic.misc.df_sort import df_sort
+from sources.tasks.transform.sequence_utils import df_convert_numpy_to_jsonify
 from utils import logging_utils as log
 from utils.dataframes import df_add_original_columns
 
@@ -125,6 +126,8 @@ def cluster_acteurs_clusters_prepare(
     df_combined = filter_clusters_without_any_included_sources(
         df_combined, include_source_ids
     )
+
+    df_combined = df_convert_numpy_to_jsonify(df_combined)
 
     df_combined = df_sort(
         df_combined,

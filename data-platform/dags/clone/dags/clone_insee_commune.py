@@ -9,7 +9,7 @@ cf. https://explore.data.gouv.fr/fr/datasets/58c984b088ee386cdb1261f3/#/resource
 """
 
 from airflow import DAG
-from airflow.models.param import Param
+from airflow.sdk import Param
 from clone.tasks.airflow_logic.chain_tasks import chain_tasks
 from shared.config.airflow import DEFAULT_ARGS_NO_RETRIES
 from shared.config.schedules import SCHEDULES

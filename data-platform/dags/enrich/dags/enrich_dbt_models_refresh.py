@@ -4,7 +4,7 @@ import logging
 import re
 
 from airflow import DAG
-from airflow.operators.bash import BashOperator
+from airflow.providers.standard.operators.bash import BashOperator
 from airflow.sdk.bases.operator import chain
 from airflow.task.trigger_rule import TriggerRule
 from enrich.config.models import EnrichDbtModelsRefreshConfig

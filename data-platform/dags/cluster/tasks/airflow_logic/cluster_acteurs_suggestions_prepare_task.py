@@ -8,6 +8,7 @@ from cluster.config.xcoms import XCOMS, xcom_pull
 from cluster.tasks.business_logic.cluster_acteurs_suggestions.prepare import (
     cluster_acteurs_suggestions_prepare,
 )
+from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +38,9 @@ def cluster_acteurs_suggestions_prepare_wrapper(ti) -> None:
     logger.info(task_info_get())
 
     df: pd.DataFrame = xcom_pull(ti, XCOMS.DF_PARENTS_CHOOSE_DATA)
+    if "acteur_type" in df.columns:
+        df["acteur_type"] = df["acteur_type"].astype("Int64")
+    log.preview("df after cast", df)
 
     if df.empty:
         raise ValueError("Pas de clusters récupérés, on ne devrait pas être là")

@@ -6,6 +6,9 @@ from airflow.providers.standard.operators.python import PythonOperator
 from cluster.config.model import ClusterConfig
 from cluster.config.tasks import TASKS
 from cluster.config.xcoms import XCOMS, xcom_pull
+from cluster.tasks.business_logic.cluster_acteurs_config_create import (
+    cluster_acteurs_config_create,
+)
 from cluster.tasks.business_logic.cluster_acteurs_normalize import (
     cluster_acteurs_normalize,
 )
@@ -34,11 +37,11 @@ def task_info_get():
     """
 
 
-def cluster_acteurs_normalize_wrapper(ti) -> None:
+def cluster_acteurs_normalize_wrapper(ti, params) -> None:
     logger.info(task_info_get())
 
     # use xcom to get the params from the previous task
-    config: ClusterConfig = xcom_pull(ti, XCOMS.CONFIG)
+    config: ClusterConfig = cluster_acteurs_config_create(params)
     df: pd.DataFrame = xcom_pull(ti, XCOMS.DF_READ)
 
     if df.empty:
