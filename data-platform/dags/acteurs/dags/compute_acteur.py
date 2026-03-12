@@ -5,7 +5,7 @@ from acteurs.tasks.airflow_logic.replace_acteur_table_task import (
     replace_acteur_table_task,
 )
 from airflow import DAG
-from airflow.operators.bash import BashOperator
+from airflow.providers.standard.operators.bash import BashOperator
 from shared.config.airflow import DEFAULT_ARGS
 from shared.config.dbt_commands import DBT_RUN, DBT_TEST
 from shared.config.schedules import SCHEDULES

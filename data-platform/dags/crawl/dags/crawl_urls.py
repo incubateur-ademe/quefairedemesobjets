@@ -1,5 +1,5 @@
 from airflow import DAG
-from airflow.models.param import Param
+from airflow.sdk import Param
 from crawl.tasks.airflow_logic.crawl_urls_check_crawl_task import (
     crawl_urls_check_crawl_task,
 )

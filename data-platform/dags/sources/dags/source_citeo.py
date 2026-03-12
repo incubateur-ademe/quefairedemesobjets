@@ -1,7 +1,7 @@
 import json
 
 from airflow import DAG
-from airflow.models.param import Param
+from airflow.sdk import Param
 from airflow.sdk.definitions.param import ParamsDict
 from shared.config.airflow import DEFAULT_ARGS
 from shared.config.tags import TAGS
