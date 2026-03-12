@@ -346,35 +346,6 @@ wheels = [
 
 [[package]]
 name = "apache-airflow-providers-fab"
-version = "1.7.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "apache-airflow" },
-    { name = "apache-airflow-providers-common-compat" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/5f/02/3f48d369030078467d477ef69059c190f74d667e1af3263588c35d779e51/apache_airflow_providers_common_io-1.7.1.tar.gz", hash = "sha256:f6a1063439b694b0b2188663645205c711fb02880baa9e262e0ccad8c3a4800b", size = 24009, upload-time = "2026-01-17T10:48:25.979Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/e9/16/41e5c8fe1a062f2f6fbb64ed52686656831dd85c59fd1f722b041e4ffee4/apache_airflow_providers_common_io-1.7.1-py3-none-any.whl", hash = "sha256:01ecac29f0a899ff66d0bc77653903d0c07a28dd1c4a0b56341fbdca03c631bb", size = 19806, upload-time = "2026-01-17T10:46:31.051Z" },
-]
-
-[[package]]
-name = "apache-airflow-providers-common-sql"
-version = "1.31.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "apache-airflow" },
-    { name = "apache-airflow-providers-common-compat" },
-    { name = "methodtools" },
-    { name = "more-itertools" },
-    { name = "sqlparse" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/4b/25/0f2ee4fe1e4619a356854855be95b800e34af997d715f23aed2ff12b37e8/apache_airflow_providers_common_sql-1.31.0.tar.gz", hash = "sha256:c873a3d6f78999405d07568ee7f68823133c843420cf391e049ff24512fb3822", size = 107657, upload-time = "2026-02-14T13:23:23.559Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/82/c3/bbc56c980ac27dce5907121a8f84e3631cee016c0e0584fa43c0126d3952/apache_airflow_providers_common_sql-1.31.0-py3-none-any.whl", hash = "sha256:9a3403f3db6a862e8cb4adec10bfd33af82e694dfe33f09be40c9ecaa6533a7c", size = 68188, upload-time = "2026-02-14T13:22:40.84Z" },
-]
-
-[[package]]
-name = "apache-airflow-providers-fab"
 version = "3.3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
