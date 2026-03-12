@@ -4,6 +4,7 @@ from datetime import datetime
 
 import pandas as pd
 from shared.tasks.database_logic.db_manager import PostgresConnectionManager
+from sources.tasks.transform.sequence_utils import df_convert_numpy_to_jsonify
 from utils.django import django_setup_full
 
 django_setup_full()
@@ -215,8 +216,8 @@ def insert_suggestion(
     )
     suggestion_cohorte.save()
 
-    # Insert suggestion_logs
     if not df_log_error.empty:
+        df_log_error = df_convert_numpy_to_jsonify(df_log_error)
         for index, row in df_log_error.iterrows():
             SuggestionLog(
                 suggestion_cohorte=suggestion_cohorte,
@@ -228,6 +229,7 @@ def insert_suggestion(
                 message=row["message"],
             ).save()
     if not df_log_warning.empty:
+        df_log_warning = df_convert_numpy_to_jsonify(df_log_warning)
         for index, row in df_log_warning.iterrows():
             SuggestionLog(
                 suggestion_cohorte=suggestion_cohorte,
@@ -365,8 +367,8 @@ def insert_suggestion_legacy(
         )
         suggestion_cohorte_id = result.fetchone()[0]
 
-    # Insert suggestion_logs
     if not df_log_error.empty:
+        df_log_error = df_convert_numpy_to_jsonify(df_log_error)
         df_log_error["suggestion_cohorte_id"] = suggestion_cohorte_id
         df_log_error["niveau_de_log"] = SuggestionLog.SuggestionLogLevel.ERROR
         df_log_error.to_sql(
@@ -378,6 +380,7 @@ def insert_suggestion_legacy(
             chunksize=1000,
         )
     if not df_log_warning.empty:
+        df_log_warning = df_convert_numpy_to_jsonify(df_log_warning)
         df_log_warning["suggestion_cohorte_id"] = suggestion_cohorte_id
         df_log_warning["niveau_de_log"] = SuggestionLog.SuggestionLogLevel.WARNING
         df_log_warning.to_sql(

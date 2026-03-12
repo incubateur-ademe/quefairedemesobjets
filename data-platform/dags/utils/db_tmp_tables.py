@@ -4,6 +4,7 @@ import json
 import logging
 
 import pandas as pd
+from sources.tasks.transform.sequence_utils import convert_numpy_to_jsonify
 from sqlalchemy import text
 from utils.django import DJANGO_WH_CONNECTION_NAME, django_conn_to_sqlalchemy_engine
 
@@ -21,7 +22,15 @@ def convert_dict_list_columns_to_json(df: pd.DataFrame) -> pd.DataFrame:
 
         # Convert columns ending with '_codes' to JSON strings
         df_copy[col] = df_copy[col].apply(
-            lambda x: (json.dumps(x, default=str) if isinstance(x, (dict, list)) else x)
+            lambda x: (
+                json.dumps(convert_numpy_to_jsonify(x))
+                if isinstance(x, (dict, list, tuple, set))
+                else (
+                    json.dumps(convert_numpy_to_jsonify(x))
+                    if hasattr(x, "dtype")
+                    else x
+                )
+            )
         )
 
     return df_copy

@@ -2,7 +2,7 @@ import hashlib
 import logging
 
 from airflow import DAG
-from airflow.operators.python import PythonOperator
+from airflow.providers.standard.operators.python import PythonOperator
 from sources.tasks.business_logic.db_data_prepare import db_data_prepare
 from utils import logging_utils as log
 from utils.db_tmp_tables import create_temporary_table
