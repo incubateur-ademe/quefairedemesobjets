@@ -2,6 +2,7 @@
 
 from airflow import DAG
 from airflow.models.param import Param
+from airflow.sdk import Param
 from cluster.config.constants import FIELDS_PARENT_DATA_EXCLUDED, UNNORMALIZABLE_FIELDS
 from cluster.config.model import ClusterConfig
 from cluster.tasks.airflow_logic.chain_tasks import chain_tasks

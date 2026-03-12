@@ -8,8 +8,8 @@ from typing import List, Optional
 
 from airflow.cli.commands.db_command import all_tables
 from airflow.decorators import dag, task
-from airflow.models.param import Param
-from airflow.operators.bash import BashOperator
+from airflow.providers.standard.operators.bash import BashOperator
+from airflow.sdk import Param
 from airflow.utils.db import reflect_tables
 from airflow.utils.db_cleanup import _effective_table_names
 from airflow.utils.session import NEW_SESSION, provide_session
@@ -120,9 +120,9 @@ def airflow_cleanup_db():
         task_id="clean_archive_tables",
         bash_command="""\
             airflow db drop-archived \
-        {% if params.tables -%}
+        {% if params.tables - %}
              --tables {{ params.tables|join(',') }} \
-        {% endif -%}
+        {% endif - %}
              --yes \
         """,
         do_xcom_push=False,
@@ -138,13 +138,13 @@ def airflow_cleanup_db():
             bash_command="""\
             airflow db clean \
              --clean-before-timestamp $BATCH_TS \
-        {% if params.dry_run -%}
+        {% if params.dry_run - %}
              --dry-run \
-        {% endif -%}
+        {% endif - %}
              --skip-archive \
-        {% if params.tables -%}
+        {% if params.tables - %}
              --tables '{{ params.tables|join(',') }}' \
-        {% endif -%}
+        {% endif - %}
              --verbose \
              --yes \
         """,
