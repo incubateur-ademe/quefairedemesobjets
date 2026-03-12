@@ -41,7 +41,6 @@ def cluster_acteurs_config_create_wrapper(ti, params):
     logger.info(task_info_get())
     config: ClusterConfig = cluster_acteurs_config_create(params)
     log.preview("Config", config)
-    ti.xcom_push(key="config", value=config)
 
 
 def cluster_acteurs_config_create_task(dag: DAG) -> PythonOperator:

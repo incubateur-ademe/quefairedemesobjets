@@ -4,7 +4,7 @@ import logging
 
 from airflow import DAG
 from airflow.exceptions import AirflowSkipException
-from airflow.operators.bash import BashOperator
+from airflow.providers.standard.operators.bash import BashOperator
 from airflow.providers.standard.operators.python import PythonOperator
 from enrich.config.models import EnrichBaseConfig
 from enrich.config.tasks import TASKS

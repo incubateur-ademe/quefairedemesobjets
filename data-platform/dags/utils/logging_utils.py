@@ -10,6 +10,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 from pydantic import BaseModel
+from sources.tasks.transform.sequence_utils import df_convert_numpy_to_jsonify
 
 
 def logger_get(levels: int = 3) -> logging.Logger:
@@ -130,6 +131,9 @@ def preview_df_as_markdown(label: str, df: pd.DataFrame, groupby=None) -> None:
     groupby: permet par exemple de grouper la df en sous df pour
     l'affichage du clustering
     """
+    # On convertit les types numpy en structures JSON-compatibles
+    # pour éviter les soucis avec tabulate/to_markdown
+    df = df_convert_numpy_to_jsonify(df.copy())
     size = size_info_get(df)
     log = logger_get()
     log.info(f"::group::📦 {label}: taille={size}, 🔽 Cliquer pour révéler la table 🔽")

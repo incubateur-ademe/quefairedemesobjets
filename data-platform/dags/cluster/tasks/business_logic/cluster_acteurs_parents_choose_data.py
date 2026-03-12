@@ -3,6 +3,7 @@ from typing import Any
 
 import pandas as pd
 from cluster.config.constants import COL_PARENT_DATA_NEW, FIELDS_PARENT_DATA_EXCLUDED
+from sources.tasks.transform.sequence_utils import df_convert_numpy_to_jsonify
 from utils.django import django_setup_full
 
 django_setup_full()
@@ -43,8 +44,9 @@ def cluster_acteurs_parents_choose_data(
     keep_parent_data_by_default: bool = True,
 ) -> pd.DataFrame:
     from data.models.change import COL_CHANGE_MODEL_NAME
-    from data.models.changes import ChangeActeurCreateAsParent, ChangeActeurKeepAsParent
     from qfdmo.models.acteur import VueActeur
+
+    from data.models.changes import ChangeActeurCreateAsParent, ChangeActeurKeepAsParent
 
     def parent_choose_data(
         parent: VueActeur | None,
@@ -151,5 +153,7 @@ def cluster_acteurs_parents_choose_data(
         )
 
         df_clusters.at[parent_iloc, COL_PARENT_DATA_NEW] = parent_data_new
+
+    df_clusters = df_convert_numpy_to_jsonify(df_clusters)
 
     return df_clusters

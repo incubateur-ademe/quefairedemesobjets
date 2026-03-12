@@ -1,5 +1,6 @@
 import pandas as pd
 from shared.tasks.business_logic import normalize
+from sources.tasks.transform.sequence_utils import df_convert_numpy_to_jsonify
 
 
 def cluster_acteurs_normalize(
@@ -26,5 +27,7 @@ def cluster_acteurs_normalize(
 
     for field in normalize_fields_order_unique_words:
         df[field] = df[field].map(normalize.string_order_unique_words)
+
+    df = df_convert_numpy_to_jsonify(df)
 
     return df

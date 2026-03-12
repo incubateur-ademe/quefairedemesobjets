@@ -1,3 +1,5 @@
+from datetime import date, datetime
+
 import numpy as np
 import pandas as pd
 
@@ -36,6 +38,9 @@ def df_convert_numpy_to_jsonify(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def convert_numpy_to_jsonify(obj) -> list | dict | str | int | float | bool | None:
+    from django.contrib.gis.geos import Point
+    from qfdmo.models.acteur import ActeurType, Source, VueActeur
+
     """Recursively convert numpy types and sequences to JSON-serialisable structures."""
     if isinstance(obj, np.ndarray):
         return [convert_numpy_to_jsonify(v) for v in obj.tolist()]
@@ -45,6 +50,12 @@ def convert_numpy_to_jsonify(obj) -> list | dict | str | int | float | bool | No
         return {k: convert_numpy_to_jsonify(v) for k, v in obj.items()}
     if isinstance(obj, (np.integer, np.floating)):
         return obj.item()
-    if isinstance(obj, (pd.Timestamp, pd.Timedelta)):
+    if isinstance(obj, (pd.Timestamp, pd.Timedelta, datetime, date)):
         return obj.isoformat()
+    if isinstance(obj, (ActeurType, Source)):
+        return int(obj.id)
+    if isinstance(obj, Point):
+        return obj.coords
+    if isinstance(obj, VueActeur):
+        return obj.identifiant_unique
     return obj
