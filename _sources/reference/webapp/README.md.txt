@@ -90,4 +90,5 @@ templates.md
 look-and-feel.md
 javascript.md
 django.md
+internationalization.md
 ```
