@@ -73,6 +73,10 @@ createcachetable:
 clearsessions:
 	$(DJANGO_ADMIN) clearsessions
 
+.PHONY: compilemessages
+compilemessages:
+	$(DJANGO_ADMIN) compilemessages -l fr
+
 .PHONY: create-remote-db-server
 create-remote-db-server:
 	$(DJANGO_ADMIN) create_remote_db_server
