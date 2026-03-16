@@ -1,0 +1,117 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-16 09:53+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+#: qfdmd/blocks.py:44
+msgid "Vertical card"
+msgstr ""
+
+#: qfdmd/blocks.py:44 qfdmd/blocks.py:77
+msgid "DSFR components"
+msgstr ""
+
+#: qfdmd/blocks.py:47
+msgid "Contact card"
+msgstr ""
+
+#: qfdmd/blocks.py:47
+msgid "Extra components"
+msgstr ""
+
+#: qfdmd/blocks.py:52
+msgid "Content"
+msgstr ""
+
+#: qfdmd/blocks.py:56
+msgid "Tab"
+msgstr ""
+
+#: qfdmd/blocks.py:77
+msgid "Tabs"
+msgstr ""
+
+#: templates/admin/acteur/change_form.html:9
+#: templates/ui/components/header/header_menu.html:8
+msgid "Close"
+msgstr ""
+
+#: templates/admin/input_filter.html:3
+#, python-format
+msgid " By %(filter_title)s "
+msgstr ""
+
+#: templates/admin/input_filter.html:17
+msgid "Remove"
+msgstr ""
+
+#: templates/admin/nav_sidebar.html:2
+msgid "Toggle navigation"
+msgstr ""
+
+#: templates/admin/nav_sidebar.html:3
+msgid "Sidebar"
+msgstr ""
+
+#: templates/admin/nav_sidebar.html:5
+msgid "Start typing to filter…"
+msgstr ""
+
+#: templates/admin/nav_sidebar.html:6
+msgid "Filter navigation items"
+msgstr ""
+
+#: templates/dsfr/pagination.html:2
+msgid "Pagination"
+msgstr ""
+
+#: templates/dsfr/pagination.html:9
+msgid "First page"
+msgstr ""
+
+#: templates/dsfr/pagination.html:14
+msgid "Previous page"
+msgstr ""
+
+#: templates/dsfr/pagination.html:25
+msgid "Page"
+msgstr ""
+
+#: templates/dsfr/pagination.html:46
+msgid "Next page"
+msgstr ""
+
+#: templates/dsfr/pagination.html:52
+msgid "Last page"
+msgstr ""
+
+#: templates/sites_conformes_content_manager/blocks/tabs.html:4
+msgid "Tabs group"
+msgstr ""
+
+#: templates/ui/components/header/header_menu.html:12
+msgid "Main menu"
+msgstr ""
+
+msgid "Submit form"
+msgstr "Valider"
+
+msgid "Fields marked with an asterisk (*) are mandatory."
+msgstr "Les champs marqués d'un asterisque (*) sont obligatoires."
+
+msgid "All fields are mandatory."
+msgstr "Tous les champs sont obligatoires."
