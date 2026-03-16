@@ -396,9 +396,11 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 LANGUAGE_CODE = "fr"
+USE_L10N = True
+
+WAGTAIL_I18N_ENABLED = True
 
 WAGTAIL_CONTENT_LANGUAGES = LANGUAGES = [
-    ("en", "English"),
     ("fr", "Français"),
 ]
 
@@ -571,6 +573,7 @@ STATICFILES_FINDERS = [
 MIDDLEWARE.extend(
     [
         "wagtail.contrib.redirects.middleware.RedirectMiddleware",
+        "django.middleware.locale.LocaleMiddleware",
     ]
 )
 

@@ -105,6 +105,10 @@ webapp-createcachetable:
 webapp-clearsessions:
 	$(MAKE) -C webapp clearsessions
 
+.PHONY: webapp-compilemessages
+webapp-compilemessages:
+	$(MAKE) -C webapp compilemessages
+
 .PHONY: webapp-create-remote-db-server
 webapp-create-remote-db-server:
 	$(MAKE) -C webapp create-remote-db-server
