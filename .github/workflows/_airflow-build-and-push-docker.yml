@@ -49,7 +49,7 @@ jobs:
       # https://github.com/docker/metadata-action
       - name: "[🟣 Scaleway] Extract metadata (tags, labels) for Docker"
         id: airflow_scheduler_meta_scaleway
-        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051
+        uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf
         with:
           images: ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/airflow-scheduler
 
@@ -68,7 +68,7 @@ jobs:
 
       - name: "[🟣 Scaleway] Extract metadata (tags, labels) for Docker"
         id: airflow_webserver_meta_scaleway
-        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051
+        uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf
         with:
           images: ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/airflow-webserver
 
