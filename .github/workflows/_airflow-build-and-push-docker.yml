@@ -56,7 +56,7 @@ jobs:
       # https://github.com/docker/build-push-action
       - name: "[🟣 Scaleway] Build and push Docker image (airflow-scheduler)"
         id: build-and-push-scheduler
-        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
+        uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294
         with:
           context: .
           cache-from: type=gha,scope=scheduler
@@ -74,7 +74,7 @@ jobs:
 
       - name: "[🟣 Scaleway] Build and push Docker image (airflow-webserver)"
         id: build-and-push-webserver
-        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
+        uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294
         with:
           context: .
           cache-from: type=gha,scope=webserver
