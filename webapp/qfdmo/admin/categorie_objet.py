@@ -36,6 +36,7 @@ class SousCategorieResource(resources.ModelResource):
             "code",
             "categorie__libelle",
             "categorie__code",
+            "delete",
         )
 
 
