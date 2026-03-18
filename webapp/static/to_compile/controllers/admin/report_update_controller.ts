@@ -5,10 +5,12 @@ export default class extends Controller<HTMLElement> {
   static values = {
     fields: String,
     suggestionModele: String,
+    updateUrl: String,
   }
 
   declare readonly fieldsValue: string
   declare readonly suggestionModeleValue: string
+  declare readonly updateUrlValue: string
 
   report() {
     const { fieldsValues } = getSharedData(this.element)
@@ -21,6 +23,11 @@ export default class extends Controller<HTMLElement> {
       }
     }
 
-    postFieldsValues(this.element, this.suggestionModeleValue, newFieldsValues)
+    postFieldsValues(
+      this.element,
+      this.updateUrlValue,
+      this.suggestionModeleValue,
+      newFieldsValues,
+    )
   }
 }

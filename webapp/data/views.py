@@ -24,7 +24,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils.safestring import mark_safe
 from django.views.generic import FormView, View
 from more_itertools import flatten
@@ -279,6 +279,7 @@ def _display_suggestion_unitaire_for_a_field(
 def _build_comparison_table_for_type_source(
     fields_groups: list[tuple],
     fields_values: dict,
+    update_url: str = "",
     acteur=None,
     revision_acteur=None,
     parent_revision_acteur=None,
@@ -312,6 +313,7 @@ def _build_comparison_table_for_type_source(
                 values={
                     "fields": "|".join(flattened),
                     "suggestion-modele": "RevisionActeur",
+                    "update-url": update_url,
                 },
                 actions=["click->report-update#report"],
             ),
@@ -352,6 +354,7 @@ def _build_comparison_table_for_type_source(
                     values={
                         "fields": "|".join(flattened),
                         "suggestion-modele": "ParentRevisionActeur",
+                        "update-url": update_url,
                     },
                     actions=["click->report-update#report"],
                 ),
@@ -415,6 +418,7 @@ def _build_comparison_table_for_type_source(
                         values={
                             "fields": fields_str,
                             "suggestion-modele": "RevisionActeur",
+                            "update-url": update_url,
                         },
                         actions=["click->report-update#report"],
                     )
@@ -440,6 +444,7 @@ def _build_comparison_table_for_type_source(
                                 values={
                                     "field": field,
                                     "suggestion-modele": "RevisionActeur",
+                                    "update-url": update_url,
                                 },
                                 actions=[
                                     "blur->cell-edit#save",
@@ -477,6 +482,7 @@ def _build_comparison_table_for_type_source(
                             values={
                                 "fields": fields_str,
                                 "suggestion-modele": "ParentRevisionActeur",
+                                "update-url": update_url,
                             },
                             actions=["click->report-update#report"],
                         )
@@ -503,6 +509,7 @@ def _build_comparison_table_for_type_source(
                                     values={
                                         "field": field,
                                         "suggestion-modele": "ParentRevisionActeur",
+                                        "update-url": update_url,
                                     },
                                     actions=[
                                         "blur->cell-edit#save",
@@ -613,6 +620,9 @@ def serialize_suggestion_groupe(
             "comparison_table": _build_comparison_table_for_type_source(
                 fields_groups=fields_groups,
                 fields_values=fields_values,
+                update_url=reverse(
+                    "data:suggestion_groupe", args=[suggestion_groupe.id]
+                ),
             ),
         }
 
@@ -689,6 +699,7 @@ def serialize_suggestion_groupe(
         "comparison_table": _build_comparison_table_for_type_source(
             fields_groups=fields_groups,
             fields_values=fields_values,
+            update_url=reverse("data:suggestion_groupe", args=[suggestion_groupe.id]),
             acteur=acteur,
             revision_acteur=revision_acteur,
             parent_revision_acteur=parent_revision_acteur,
@@ -1087,6 +1098,9 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
             context["comparison_table"] = _build_comparison_table_for_type_source(
                 fields_groups=context["fields_groups"],
                 fields_values=context["fields_values"],
+                update_url=reverse(
+                    "data:suggestion_groupe", args=[suggestion_groupe.id]
+                ),
                 acteur=context.get("acteur"),
                 revision_acteur=context.get("revision_acteur"),
                 parent_revision_acteur=context.get("parent_revision_acteur"),

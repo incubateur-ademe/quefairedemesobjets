@@ -2,6 +2,12 @@ import { Controller } from "@hotwired/stimulus"
 import { postFieldsValues } from "./suggestion_post"
 
 export default class extends Controller<HTMLElement> {
+  static values = {
+    updateUrl: String,
+  }
+
+  declare readonly updateUrlValue: string
+
   handleMarkerDragged(event: CustomEvent) {
     const { latitude, longitude, markerElement } = event.detail
     const markerKey = markerElement.dataset.markerKey
@@ -14,6 +20,12 @@ export default class extends Controller<HTMLElement> {
       return
     }
 
-    postFieldsValues(this.element, markerKey, { latitude, longitude }, "localisation")
+    postFieldsValues(
+      this.element,
+      this.updateUrlValue,
+      markerKey,
+      { latitude, longitude },
+      "localisation",
+    )
   }
 }
