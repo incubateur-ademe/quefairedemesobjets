@@ -80,6 +80,59 @@ export default class extends Controller<HTMLElement> {
     this.#postFieldsValues(suggestionModele, newFieldsValues)
   }
 
+  reportUpdate(event: CustomEvent) {
+    const { fields: fieldsStr, suggestionModele } = event.detail
+    if (!suggestionModele || !fieldsStr) {
+      console.error("suggestionModele ou fields manquant")
+      return
+    }
+
+    const fieldsValues = this.#getFieldsValues()
+    const fields = fieldsStr.split("|")
+    const newFieldsValues = {}
+
+    for (let key of fields) {
+      if (fieldsValues[key] && fieldsValues[key]["acteur_target_value"] !== undefined) {
+        newFieldsValues[key] = fieldsValues[key]["acteur_target_value"]
+      }
+    }
+
+    this.#postFieldsValues(suggestionModele, newFieldsValues)
+  }
+
+  cellEditSave(event: CustomEvent) {
+    const { field, suggestionModele, value } = event.detail
+    if (!suggestionModele || !field) {
+      console.error("suggestionModele ou field manquant")
+      return
+    }
+    this.#postFieldsValues(suggestionModele, { [field]: value })
+  }
+
+  cellEditReplace(event: CustomEvent) {
+    const { field, suggestionModele } = event.detail
+    if (!suggestionModele || !field) {
+      console.error("suggestionModele ou field manquant")
+      return
+    }
+    const element = event.target as HTMLElement
+    const fieldsValues = this.#getFieldsValues()
+
+    if (suggestionModele == "Acteur") {
+      element.textContent = fieldsValues[field]["acteur_target_value"] || ""
+    }
+    if (suggestionModele == "RevisionActeur") {
+      element.textContent =
+        fieldsValues[field]["revision_acteur_target_value"] ||
+        fieldsValues[field]["acteur_target_value"]
+    }
+    if (suggestionModele == "ParentRevisionActeur") {
+      element.textContent =
+        fieldsValues[field]["parent_revision_acteur_target_value"] ||
+        fieldsValues[field]["acteur_target_value"]
+    }
+  }
+
   updateAllDisplayed(event: Event) {
     const target = event.target as HTMLElement
 

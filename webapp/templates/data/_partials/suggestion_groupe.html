@@ -4,7 +4,7 @@
     id="suggestion_groupe_{{ suggestion_groupe.id }}"
     data-controller="suggestion-groupe-row"
     data-update-suggestion-url="{% url 'data:suggestion_groupe' suggestion_groupe.id %}"
-    data-action="map:markerDragged->suggestion-groupe-row#handleMarkerDragged"
+    data-action="map:markerDragged->suggestion-groupe-row#handleMarkerDragged report-update:report->suggestion-groupe-row#reportUpdate cell-edit:save->suggestion-groupe-row#cellEditSave cell-edit:replace->suggestion-groupe-row#cellEditReplace"
     data-suggestion-groupe-row-fields-values-value='{{ fields_values|tojson }}'
     data-suggestion-groupe-row-fields-groups-value='{{ fields_groups|tojson }}'
     >
