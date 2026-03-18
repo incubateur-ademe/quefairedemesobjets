@@ -1,3 +1,5 @@
+import { addOverlay, mapStyles, Overlay } from "carte-facile"
+import "carte-facile/dist/carte-facile.css"
 import maplibregl, {
   FitBoundsOptions,
   LngLat,
@@ -6,13 +8,11 @@ import maplibregl, {
   Marker,
 } from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
-import "carte-facile/dist/carte-facile.css"
-import { mapStyles, Overlay, addOverlay } from "carte-facile"
 import MapController from "../controllers/carte/map_controller"
 import type { Location } from "./types"
 const DEFAULT_LOCATION: LngLat = new LngLat(2.213749, 46.227638)
 const DEFAULT_INITIAL_ZOOM: number = 5
-const DEFAULT_MAX_ZOOM: number = 20
+const DEFAULT_MAX_ZOOM: number = 18
 
 export class SolutionMap {
   map: Map
