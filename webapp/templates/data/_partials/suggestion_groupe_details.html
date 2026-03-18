@@ -1,6 +1,6 @@
 {% extends "data/_partials/suggestion_groupe.html" %}
 
-{% load admin_data_tags admin_suggestion_tags dict_tags %}
+{% load admin_data_tags comparison_table_tags %}
 
 {% block suggestion_details %}
 
@@ -13,176 +13,81 @@
         <table>
             <thead>
                 <tr>
-                    <th class="qf-w-1/4">
-                        <div class="qf-truncate"></div>
-                    </th>
-                    <th class="qf-w-1/4">
-                        <div class="qf-truncate">
-                            Acteur Importé
-                            {% if acteur %}
-                                (
-                                <a href="{{ acteur.change_url }}" target="_blank" rel="noreferrer" data-turbo="false">importé</a>
-                                )
-                            {% endif %}
-                        </div>
-                    </th>
-                    <th class="qf-text-center qf-text-2xl">
-                        <div data-controller="report-update"
-                             data-report-update-fields-value="{{ flattened_fields_groups|join:"|" }}"
-                             data-report-update-suggestion-modele-value="RevisionActeur"
-                             data-action="click->report-update#report"
-                             class="qf-cursor-pointer">
-                            ▶️
-                        </div>
-                    </th>
-                    <th class="qf-w-1/4">
-                        <div class="qf-truncate">
-                            Correction
-                            {% if revision_acteur %}
-                                (
-                                    <a href="{{ revision_acteur.change_url }}" target="_blank" rel="noreferrer" data-turbo="false">corrigé</a>
-                                    {% if not parent_revision_acteur %}
-                                        , <a href="{{ revision_acteur.displayedacteur_change_url }}" target="_blank" rel="noreferrer" data-turbo="false">affiché</a>
+                    {% for column in comparison_table.columns %}
+                        <th class="{{ column.css_classes }}">
+                            {% if column.header_action %}
+                                <div {{ column.header_action|stimulus_attrs }} class="qf-cursor-pointer">
+                                    {{ column.label }}
+                                </div>
+                            {% else %}
+                                <div class="qf-truncate">
+                                    {{ column.label }}
+                                    {% if column.links %}
+                                        (
+                                        {% for link in column.links %}
+                                            {% if not forloop.first %}, {% endif %}
+                                            <a href="{{ link.url }}" target="_blank" rel="noreferrer" data-turbo="false">{{ link.label }}</a>
+                                        {% endfor %}
+                                        )
                                     {% endif %}
-                                )
+                                </div>
                             {% endif %}
-                        </div>
-                    </th>
-                    {% if parent_revision_acteur %}
-                        <th class="qf-text-center qf-text-2xl">
-                            <div data-controller="report-update"
-                                 data-report-update-fields-value="{{ flattened_fields_groups|join:"|" }}"
-                                 data-report-update-suggestion-modele-value="ParentRevisionActeur"
-                                 data-action="click->report-update#report"
-                                 class="qf-cursor-pointer">
-                                ⏩
-                            </div>
-                        </th>
-                        <th class="qf-w-1/4">
-                            <div class="qf-truncate">Parent
-                                (
-                                    <a href="{{ parent_revision_acteur.change_url }}" target="_blank" rel="noreferrer" data-turbo="false">corrigé</a>
-                                    , <a href="{{ parent_revision_acteur.displayedacteur_change_url }}" target="_blank" rel="noreferrer" data-turbo="false">affiché</a>
-                                )
-                            </div>
-                            {% if parent_revision_acteur.nombre_enfants %}
-                                <div class="qf-truncate">{{ parent_revision_acteur.nombre_enfants }} enfants impactés</div>
+                            {% if column.subtitle %}
+                                <div class="qf-truncate">{{ column.subtitle }}</div>
                             {% endif %}
                         </th>
-                    {% endif %}
+                    {% endfor %}
                 </tr>
             </thead>
             <tbody>
-                {% for fields in fields_groups %}
+                {% for row in comparison_table.rows %}
                     <tr>
-                        <td>{{ fields|join:", " }}</td>
-                        <td>
-                            {% for field in fields %}
-                                {% with values=fields_values|get_item:field %}
-                                    {{ values.acteur }}
-                                {% endwith %}
-                                {% if not forloop.last %}, {% endif %}
-                            {% endfor %}
-                        </td>
-                        <td class="qf-text-center qf-cursor-pointer qf-text-2xl">
-                            {% if fields|suggestion_is_reportable_on_revision %}
-                                <div data-controller="report-update"
-                                     data-report-update-fields-value="{{ fields|join:"|" }}"
-                                     data-report-update-suggestion-modele-value="RevisionActeur"
-                                     data-action="click->report-update#report"
-                                     class="qf-cursor-pointer">
-                                    ▶️
-                                </div>
-                            {% else %}
-                                <div>🚫</div>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <div class="qf-flex qf-flex-row qf-items-center qf-gap-1">
-                                {% for field in fields %}
-                                    {% if not field|suggestion_is_editable %}
-                                        <div>🚫</div>
-                                    {% endif %}
-                                    <div
-                                        contentEditable="{{ field|suggestion_is_editable|yesno:"true,false" }}"
-                                        data-controller="cell-edit"
-                                        data-cell-edit-field-value="{{ field }}"
-                                        data-cell-edit-suggestion-modele-value="RevisionActeur"
-                                        data-action="blur->cell-edit#save focus->cell-edit#replace">
-                                        {% with values=fields_values|get_item:field %}
-                                            {{ values.revision_acteur }}
-                                        {% endwith %}
-                                    </div>
-                                    {% if not forloop.last %}<span>&nbsp;,&nbsp;</span> {% endif %}
-                                {% endfor %}
-                            </div>
-                            <div>
-                                {% for field in fields %}
-                                    {% with values=fields_values|get_item:field %}
-                                    {% endwith %}
-                                {% endfor %}
-                            </div>
-                            <div>
-                                {% for field in fields %}
-                                    {% if errors and errors|get_item:field %}
-                                        <div class="qf-text-red-500">
-                                            {{ errors|get_item:field }}
-                                        </div>
-                                    {% endif %}
-                                {% endfor %}
-                            </div>
-                        </td>
-                        {% if suggestion_groupe.parent_revision_acteur %}
-                            <td class="qf-text-center qf-text-2xl">
-                                {% if fields|suggestion_is_reportable_on_parent %}
-                                    <div data-controller="report-update"
-                                         data-report-update-fields-value="{{ fields|join:"|" }}"
-                                         data-report-update-suggestion-modele-value="ParentRevisionActeur"
-                                         data-action="click->report-update#report"
-                                         class="qf-cursor-pointer">
-                                        ⏩
-                                    </div>
-                                {% else %}
-                                    <div>🚫</div>
-                                {% endif %}
-                            </td>
-                            <td class="qf-w-1/4">
-                                <div class="qf-flex qf-flex-row qf-items-center qf-gap-1">
-                                    {% for field in fields %}
-                                        {% if not field|suggestion_is_editable %}
-                                            <div>🚫</div>
-                                        {% endif %}
-                                        <div
-                                            contentEditable="{{ field|suggestion_is_editable|yesno:"true,false" }}"
-                                            data-controller="cell-edit"
-                                            data-cell-edit-field-value="{{ field }}"
-                                            data-cell-edit-suggestion-modele-value="ParentRevisionActeur"
-                                            data-action="blur->cell-edit#save focus->cell-edit#replace">
-                                            {% with values=fields_values|get_item:field %}
-                                                {{ values.parent_revision_acteur }}
-                                            {% endwith %}
-                                        </div>
-                                        {% if not forloop.last %}<span>&nbsp;,&nbsp;</span> {% endif %}
+                        <td>{{ row.label }}</td>
+                        {% for cell in row.cells %}
+                            {% if cell.cell_type == "display" %}
+                                <td>
+                                    {% for field in cell.fields %}
+                                        {{ field.display_html|safe }}
+                                        {% if not forloop.last %}, {% endif %}
                                     {% endfor %}
-                                </div>
-                                <div>
-                                    {% for field in fields %}
-                                        {% with values=fields_values|get_item:field %}
-                                            <!-- TODO: gestion des extralink -->
-                                        {% endwith %}
-                                    {% endfor %}
-                                </div>
-                                <div>
-                                    {% for field in fields %}
-                                        {% if errors and errors|get_item:field %}
-                                            <div class="qf-text-red-500">
-                                                {{ errors|get_item:field }}
+                                </td>
+                            {% elif cell.cell_type == "action" %}
+                                <td class="qf-text-center qf-text-2xl">
+                                    {% if cell.enabled %}
+                                        <div {{ cell.stimulus|stimulus_attrs }} class="qf-cursor-pointer">
+                                            {{ cell.action_icon }}
+                                        </div>
+                                    {% else %}
+                                        <div>{{ cell.disabled_icon }}</div>
+                                    {% endif %}
+                                </td>
+                            {% elif cell.cell_type == "editable" %}
+                                <td>
+                                    <div class="qf-flex qf-flex-row qf-items-center qf-gap-1">
+                                        {% for field in cell.fields %}
+                                            {% if not field.editable %}
+                                                <div>🚫</div>
+                                            {% endif %}
+                                            <div
+                                                contentEditable="{{ field.editable|yesno:"true,false" }}"
+                                                {% if field.stimulus %}{{ field.stimulus|stimulus_attrs }}{% endif %}>
+                                                {{ field.display_html|safe }}
                                             </div>
-                                        {% endif %}
-                                    {% endfor %}
-                                </div>
-                            </td>
-                        {% endif %}
+                                            {% if not forloop.last %}<span>&nbsp;,&nbsp;</span> {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                    <div>
+                                        {% for field in cell.fields %}
+                                            {% if field.error %}
+                                                <div class="qf-text-red-500">
+                                                    {{ field.error }}
+                                                </div>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </td>
+                            {% endif %}
+                        {% endfor %}
                     </tr>
                 {% endfor %}
             </tbody>
@@ -230,6 +135,10 @@
         {% elif tab == "localisation" %}
             {% if localisation %}
                 <div
+                    data-controller="suggestion-map-update"
+                    data-action="map:markerDragged->suggestion-map-update#handleMarkerDragged"
+                >
+                <div
                     class="
                     qf-w-1/2
                     qf-aspect-video
@@ -247,7 +156,7 @@
                         {% endfor %}
                     </div>
                 </div>
-
+                </div>
 
             {% else %}
                 <p>Aucune localisation disponible pour cet acteur.</p>

@@ -6,6 +6,8 @@ from pydantic import BaseModel, ConfigDict
 class SuggestionSourceModel(BaseModel):
     """
     This model is used to validate and manipulate the suggestion of source type.
+    Represent any updates for a given object :
+    Acteur, RevisionActeur, ParentRevisionActeur.
     """
 
     model_config = ConfigDict(frozen=True)
