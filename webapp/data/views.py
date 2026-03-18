@@ -640,35 +640,23 @@ def serialize_suggestion_groupe(
     suggestion_groupe: SuggestionGroupe,
 ) -> dict:
     """
-    Serialize a SuggestionGroupe using SuggestionSourceModel for validation
+    Serialize a SuggestionGroupe into a ComparisonTable for generic rendering.
 
-    enhancements:
-    - get acteur_target_value get the value assign to acteur after suggestion is applied
-    - get acteur + suggestion on acteur
-    - get revision_acteur_target_value get the value assign to revision_acteur after
-      suggestion is applied
-    - get revision_acteur + suggestion on revision_acteur
-    - get parent_revision_acteur_target_value get the value assign to
-      parent_revision_acteur after suggestion is applied
-    - get parent_revision_acteur + suggestion on parent_revision_acteur
+    Collects suggestion_unitaires, groups them by field, and builds a
+    ComparisonTable with one column per model (Acteur, RevisionActeur,
+    ParentRevisionActeur) and one row per field_group.
 
-    get all field_group edited
+    Each cell includes:
+    - display_html: diff between current value and suggested value,
+      or greyed-out current value when no suggestion exists
+    - Stimulus controller configs (cell-edit, report-update) with
+      pre-computed values (updateUrl, fieldsGroups, targetValues, replaceText)
 
-    for each field_group edited:
-        for each [Acteur, RevisionActeur, ParentRevisionActeur]:
-            if no suggestion:
-                display the "acteur" value in grey, default - if not value
-            if suggestion:
-                display diff between suggestion and "acteur" value
-    return the dict:
-        fields_values: {
-            "acteur_target_value": value,
-            "acteur": value_to_display,
-            "revision_acteur_target_value": value,
-            "revision_acteur": value_to_display,
-            "parent_revision_acteur_target_value": value,
-            "parent_revision_acteur": value_to_display,
-        }
+    Returns a dict with:
+        - suggestion_groupe: the SuggestionGroupe instance
+        - identifiant_unique: the acteur identifier
+        - comparison_table: a ComparisonTable Pydantic model
+        - acteur, revision_acteur, parent_revision_acteur (for non-SOURCE_AJOUT)
     """
     # Get all suggestion_unitaires
     suggestion_unitaires = list(suggestion_groupe.suggestion_unitaires.all())
@@ -686,7 +674,6 @@ def serialize_suggestion_groupe(
         )
     )
     fields_groups = _get_ordered_fields_groups(suggestion_unitaires)
-    flattened_fields_groups = [key for keys in fields_groups for key in keys]
 
     if (
         suggestion_groupe.suggestion_cohorte.type_action
@@ -695,30 +682,10 @@ def serialize_suggestion_groupe(
         identifiant_unique = (
             suggestion_groupe.get_identifiant_unique_from_suggestion_unitaires("Acteur")
         )
-        # Get fields from acteur_suggestion_unitaires
-        fields_values = {
-            key: {
-                "acteur_target_value": getattr(
-                    acteur_suggestion_unitaires_by_field, key, None
-                ),
-                "acteur": _display_suggestion_unitaire_for_a_field(
-                    key, acteur_suggestion_unitaires_by_field
-                ),  # FIXME: display the diff suggestion
-                "revision_acteur_target_value": getattr(
-                    revision_acteur_suggestion_unitaires_by_field, key, None
-                ),
-                "revision_acteur": _display_suggestion_unitaire_for_a_field(
-                    key, revision_acteur_suggestion_unitaires_by_field
-                ),
-            }
-            for key in flattened_fields_groups
-        }
         return {
             "suggestion_groupe": suggestion_groupe,
             "identifiant_unique": identifiant_unique,
             # TODO: simplifier la gestion des fields_groups et fields_values
-            "fields_groups": fields_groups,
-            "fields_values": fields_values,
             "comparison_table": _build_comparison_table_for_type_source(
                 fields_groups=fields_groups,
                 update_url=reverse(
@@ -749,58 +716,9 @@ def serialize_suggestion_groupe(
     if not acteur:
         raise ValueError("acteur is required for non-SOURCE_AJOUT suggestions")
 
-    # Extract values using SuggestionSourceModel
-    acteur_values = _extract_acteur_values(
-        acteur, fields_to_include=flattened_fields_groups
-    )
-    revision_acteur_values = SuggestionSourceModel()
-    if revision_acteur:
-        revision_acteur_values = _extract_acteur_values(
-            revision_acteur, fields_to_include=flattened_fields_groups
-        )
-    parent_revision_acteur_values = SuggestionSourceModel()
-    if parent_revision_acteur:
-        parent_revision_acteur_values = _extract_acteur_values(
-            parent_revision_acteur, fields_to_include=flattened_fields_groups
-        )
-
-    fields_values = {
-        key: {
-            "acteur_target_value": getattr(
-                acteur_suggestion_unitaires_by_field, key, None
-            ),
-            "acteur": _display_suggestion_unitaire_for_a_field(
-                key, acteur_suggestion_unitaires_by_field, getattr(acteur_values, key)
-            ),  # FIXME: display the diff suggestion
-            "revision_acteur": _display_suggestion_unitaire_for_a_field(
-                key,
-                revision_acteur_suggestion_unitaires_by_field,
-                getattr(revision_acteur_values, key),
-            ),
-            "revision_acteur_target_value": getattr(
-                revision_acteur_suggestion_unitaires_by_field,
-                key,
-                getattr(revision_acteur_values, key),
-            ),
-            "parent_revision_acteur": _display_suggestion_unitaire_for_a_field(
-                key,
-                parent_revision_acteur_suggestion_unitaires_by_field,
-                getattr(parent_revision_acteur_values, key),
-            ),
-            "parent_revision_acteur_target_value": getattr(
-                parent_revision_acteur_suggestion_unitaires_by_field,
-                key,
-                getattr(parent_revision_acteur_values, key),
-            ),
-        }
-        for key in flattened_fields_groups
-    }
-
     return {
         "suggestion_groupe": suggestion_groupe,
         "identifiant_unique": acteur.identifiant_unique,
-        "fields_groups": fields_groups,
-        "fields_values": fields_values,
         "acteur": acteur,
         "revision_acteur": revision_acteur,
         "parent_revision_acteur": parent_revision_acteur,

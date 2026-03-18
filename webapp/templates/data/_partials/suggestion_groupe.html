@@ -1,10 +1,6 @@
 {% load admin_data_tags %}
 
-<turbo-frame
-    id="suggestion_groupe_{{ suggestion_groupe.id }}"
-    data-fields-values='{{ fields_values|tojson }}'
-    data-fields-groups='{{ fields_groups|tojson }}'
-    >
+<turbo-frame id="suggestion_groupe_{{ suggestion_groupe.id }}">
 
     <h3>
         {% block suggestion_title %}
