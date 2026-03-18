@@ -1,17 +1,17 @@
 import json
 import logging
 
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import ValidationError
-from django.http import HttpResponseBadRequest
-from django.shortcuts import get_object_or_404, render
-from django.urls import reverse_lazy
-from django.utils.safestring import mark_safe
-from django.views.generic import FormView, View
-from more_itertools import flatten
-
 from core.templatetags.admin_data_tags import display_diff_values
 from data.forms import SuggestionGroupeStatusForm
+from data.models.comparison_table import (
+    CellContent,
+    CellField,
+    ColumnHeader,
+    ComparisonTable,
+    HeaderLink,
+    StimulusControllerConfig,
+    TableRow,
+)
 from data.models.suggestion import (
     SuggestionAction,
     SuggestionGroupe,
@@ -20,6 +20,14 @@ from data.models.suggestion import (
 )
 from data.models.suggestions.source import SuggestionSourceModel
 from data.models.utils import prepare_acteur_data_with_location
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ValidationError
+from django.http import HttpResponseBadRequest
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse_lazy
+from django.utils.safestring import mark_safe
+from django.views.generic import FormView, View
+from more_itertools import flatten
 from qfdmo.models.acteur import Acteur, ActeurStatus, DisplayedActeur, RevisionActeur
 
 logger = logging.getLogger(__name__)
@@ -268,6 +276,258 @@ def _display_suggestion_unitaire_for_a_field(
     return display_diff_values(field_value, suggestion_unitaire)
 
 
+def _build_comparison_table_for_type_source(
+    fields_groups: list[tuple],
+    fields_values: dict,
+    acteur=None,
+    revision_acteur=None,
+    parent_revision_acteur=None,
+    errors: dict | None = None,
+) -> ComparisonTable:
+    """Build a domain-agnostic ComparisonTable from suggestion data."""
+    not_editable = SuggestionSourceModel.get_not_editable_fields()
+    not_reportable_revision = (
+        SuggestionSourceModel.get_not_reportable_on_revision_fields()
+    )
+    not_reportable_parent = SuggestionSourceModel.get_not_reportable_on_parent_fields()
+    flattened = [key for keys in fields_groups for key in keys]
+
+    # --- Columns ---
+    columns = [
+        ColumnHeader(key="label", css_classes="qf-w-1/4"),
+        ColumnHeader(
+            key="source",
+            label="Acteur Importé",
+            css_classes="qf-w-1/4",
+            links=(
+                [HeaderLink(label="importé", url=acteur.change_url)] if acteur else []
+            ),
+        ),
+        ColumnHeader(
+            key="report_revision",
+            label="▶️",
+            css_classes="qf-text-center qf-text-2xl",
+            header_action=StimulusControllerConfig(
+                controller="report-update",
+                values={
+                    "fields": "|".join(flattened),
+                    "suggestion-modele": "RevisionActeur",
+                },
+                actions=["click->report-update#report"],
+            ),
+        ),
+    ]
+
+    # Correction column
+    correction_links = []
+    if revision_acteur:
+        correction_links.append(
+            HeaderLink(label="corrigé", url=revision_acteur.change_url)
+        )
+        if not parent_revision_acteur:
+            correction_links.append(
+                HeaderLink(
+                    label="affiché",
+                    url=revision_acteur.displayedacteur_change_url,
+                )
+            )
+    columns.append(
+        ColumnHeader(
+            key="correction",
+            label="Correction",
+            css_classes="qf-w-1/4",
+            links=correction_links,
+        )
+    )
+
+    # Parent columns (conditional)
+    if parent_revision_acteur:
+        columns.append(
+            ColumnHeader(
+                key="report_parent",
+                label="⏩",
+                css_classes="qf-text-center qf-text-2xl",
+                header_action=StimulusControllerConfig(
+                    controller="report-update",
+                    values={
+                        "fields": "|".join(flattened),
+                        "suggestion-modele": "ParentRevisionActeur",
+                    },
+                    actions=["click->report-update#report"],
+                ),
+            )
+        )
+        parent_links = [
+            HeaderLink(label="corrigé", url=parent_revision_acteur.change_url),
+            HeaderLink(
+                label="affiché",
+                url=parent_revision_acteur.displayedacteur_change_url,
+            ),
+        ]
+        columns.append(
+            ColumnHeader(
+                key="parent",
+                label="Parent",
+                css_classes="qf-w-1/4",
+                links=parent_links,
+                subtitle=(
+                    f"{parent_revision_acteur.nombre_enfants} enfants impactés"
+                    if parent_revision_acteur.nombre_enfants
+                    else None
+                ),
+            )
+        )
+
+    # --- Rows ---
+    rows = []
+    for field_group in fields_groups:
+        fields_str = "|".join(field_group)
+        cells: list[CellContent] = []
+
+        # Source (display) cell
+        cells.append(
+            CellContent(
+                column_key="source",
+                cell_type="display",
+                fields=[
+                    CellField(
+                        field_name=field,
+                        display_html=fields_values[field].get("acteur", ""),
+                    )
+                    for field in field_group
+                ],
+            )
+        )
+
+        # Report to revision (action) cell
+        reportable_on_revision = all(
+            f not in not_reportable_revision for f in field_group
+        )
+        cells.append(
+            CellContent(
+                column_key="report_revision",
+                cell_type="action",
+                enabled=reportable_on_revision,
+                action_icon="▶️",
+                stimulus=(
+                    StimulusControllerConfig(
+                        controller="report-update",
+                        values={
+                            "fields": fields_str,
+                            "suggestion-modele": "RevisionActeur",
+                        },
+                        actions=["click->report-update#report"],
+                    )
+                    if reportable_on_revision
+                    else None
+                ),
+            )
+        )
+
+        # Correction (editable) cell
+        cells.append(
+            CellContent(
+                column_key="correction",
+                cell_type="editable",
+                fields=[
+                    CellField(
+                        field_name=field,
+                        display_html=fields_values[field].get("revision_acteur", ""),
+                        editable=field not in not_editable,
+                        stimulus=(
+                            StimulusControllerConfig(
+                                controller="cell-edit",
+                                values={
+                                    "field": field,
+                                    "suggestion-modele": "RevisionActeur",
+                                },
+                                actions=[
+                                    "blur->cell-edit#save",
+                                    "focus->cell-edit#replace",
+                                ],
+                            )
+                            if field not in not_editable
+                            else None
+                        ),
+                        error=(
+                            str(errors.get(field, ""))
+                            if errors and errors.get(field)
+                            else None
+                        ),
+                    )
+                    for field in field_group
+                ],
+            )
+        )
+
+        # Parent columns (conditional)
+        if parent_revision_acteur:
+            reportable_on_parent = all(
+                f not in not_reportable_parent for f in field_group
+            )
+            cells.append(
+                CellContent(
+                    column_key="report_parent",
+                    cell_type="action",
+                    enabled=reportable_on_parent,
+                    action_icon="⏩",
+                    stimulus=(
+                        StimulusControllerConfig(
+                            controller="report-update",
+                            values={
+                                "fields": fields_str,
+                                "suggestion-modele": "ParentRevisionActeur",
+                            },
+                            actions=["click->report-update#report"],
+                        )
+                        if reportable_on_parent
+                        else None
+                    ),
+                )
+            )
+
+            cells.append(
+                CellContent(
+                    column_key="parent",
+                    cell_type="editable",
+                    fields=[
+                        CellField(
+                            field_name=field,
+                            display_html=fields_values[field].get(
+                                "parent_revision_acteur", ""
+                            ),
+                            editable=field not in not_editable,
+                            stimulus=(
+                                StimulusControllerConfig(
+                                    controller="cell-edit",
+                                    values={
+                                        "field": field,
+                                        "suggestion-modele": "ParentRevisionActeur",
+                                    },
+                                    actions=[
+                                        "blur->cell-edit#save",
+                                        "focus->cell-edit#replace",
+                                    ],
+                                )
+                                if field not in not_editable
+                                else None
+                            ),
+                            error=(
+                                str(errors.get(field, ""))
+                                if errors and errors.get(field)
+                                else None
+                            ),
+                        )
+                        for field in field_group
+                    ],
+                )
+            )
+
+        rows.append(TableRow(label=", ".join(field_group), cells=cells))
+
+    return ComparisonTable(columns=columns, rows=rows)
+
+
 def serialize_suggestion_groupe(
     suggestion_groupe: SuggestionGroupe,
 ) -> dict:
@@ -349,8 +609,11 @@ def serialize_suggestion_groupe(
             "suggestion_groupe": suggestion_groupe,
             "identifiant_unique": identifiant_unique,
             "fields_groups": fields_groups,
-            "flattened_fields_groups": flattened_fields_groups,
             "fields_values": fields_values,
+            "comparison_table": _build_comparison_table_for_type_source(
+                fields_groups=fields_groups,
+                fields_values=fields_values,
+            ),
         }
 
     acteur = suggestion_groupe.get_acteur_or_none()
@@ -419,11 +682,17 @@ def serialize_suggestion_groupe(
         "suggestion_groupe": suggestion_groupe,
         "identifiant_unique": acteur.identifiant_unique,
         "fields_groups": fields_groups,
-        "flattened_fields_groups": flattened_fields_groups,
         "fields_values": fields_values,
         "acteur": acteur,
         "revision_acteur": revision_acteur,
         "parent_revision_acteur": parent_revision_acteur,
+        "comparison_table": _build_comparison_table_for_type_source(
+            fields_groups=fields_groups,
+            fields_values=fields_values,
+            acteur=acteur,
+            revision_acteur=revision_acteur,
+            parent_revision_acteur=parent_revision_acteur,
+        ),
     }
 
 
@@ -814,6 +1083,15 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
         )
         context.update(to_add_in_context)
         context["errors"] = errors if errors else {}
+        if errors:
+            context["comparison_table"] = _build_comparison_table_for_type_source(
+                fields_groups=context["fields_groups"],
+                fields_values=context["fields_values"],
+                acteur=context.get("acteur"),
+                revision_acteur=context.get("revision_acteur"),
+                parent_revision_acteur=context.get("parent_revision_acteur"),
+                errors=errors,
+            )
 
         return render(
             request,
