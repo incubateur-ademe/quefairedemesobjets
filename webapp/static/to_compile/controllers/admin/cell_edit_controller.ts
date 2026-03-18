@@ -5,14 +5,16 @@ export default class extends Controller<HTMLElement> {
   static values = {
     field: String,
     suggestionModele: String,
+    updateUrl: String,
   }
 
   declare readonly fieldValue: string
   declare readonly suggestionModeleValue: string
+  declare readonly updateUrlValue: string
 
   save() {
     const value = this.element.textContent
-    postFieldsValues(this.element, this.suggestionModeleValue, {
+    postFieldsValues(this.element, this.updateUrlValue, this.suggestionModeleValue, {
       [this.fieldValue]: value,
     })
   }
