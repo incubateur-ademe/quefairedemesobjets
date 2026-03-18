@@ -278,11 +278,19 @@ def _display_suggestion_unitaire_for_a_field(
 
 def _build_comparison_table_for_type_source(
     fields_groups: list[tuple],
-    fields_values: dict,
     update_url: str = "",
-    acteur=None,
-    revision_acteur=None,
-    parent_revision_acteur=None,
+    acteur: Acteur | None = None,
+    revision_acteur: RevisionActeur | None = None,
+    parent_revision_acteur: RevisionActeur | None = None,
+    acteur_suggestion_unitaires_by_field: (
+        SuggestionSourceModel
+    ) = SuggestionSourceModel(),
+    revision_acteur_suggestion_unitaires_by_field: (
+        SuggestionSourceModel
+    ) = SuggestionSourceModel(),
+    parent_revision_acteur_suggestion_unitaires_by_field: (
+        SuggestionSourceModel
+    ) = SuggestionSourceModel(),
     errors: dict | None = None,
 ) -> ComparisonTable:
     """Build a domain-agnostic ComparisonTable from suggestion data."""
@@ -291,7 +299,90 @@ def _build_comparison_table_for_type_source(
         SuggestionSourceModel.get_not_reportable_on_revision_fields()
     )
     not_reportable_parent = SuggestionSourceModel.get_not_reportable_on_parent_fields()
+    fields_groups_json = json.dumps(fields_groups)
     flattened = [key for keys in fields_groups for key in keys]
+
+    acteur_values = (
+        _extract_acteur_values(acteur, fields_to_include=flattened)
+        if acteur
+        else SuggestionSourceModel()
+    )
+
+    revision_acteur_values = (
+        _extract_acteur_values(revision_acteur, fields_to_include=flattened)
+        if revision_acteur
+        else SuggestionSourceModel()
+    )
+
+    parent_revision_acteur_values = (
+        _extract_acteur_values(parent_revision_acteur, fields_to_include=flattened)
+        if parent_revision_acteur
+        else SuggestionSourceModel()
+    )
+
+    def _get_field_value(model, field):
+        return getattr(model, field, None) if model else None
+
+    def _target_values_json(fields):
+        return json.dumps(
+            {
+                field: getattr(acteur_suggestion_unitaires_by_field, field)
+                for field in fields
+                if getattr(acteur_suggestion_unitaires_by_field, field, None)
+                is not None
+            }
+        )
+
+    def _revision_replace_text(field):
+        return (
+            getattr(
+                revision_acteur_suggestion_unitaires_by_field,
+                field,
+                None,
+            )
+            or getattr(
+                acteur_suggestion_unitaires_by_field,
+                field,
+                None,
+            )
+            or ""
+        )
+
+    def _parent_replace_text(field):
+        return (
+            getattr(
+                parent_revision_acteur_suggestion_unitaires_by_field,
+                field,
+                None,
+            )
+            or getattr(
+                acteur_suggestion_unitaires_by_field,
+                field,
+                None,
+            )
+            or ""
+        )
+
+    def _source_display(field):
+        return _display_suggestion_unitaire_for_a_field(
+            field,
+            acteur_suggestion_unitaires_by_field,
+            _get_field_value(acteur_values, field),
+        )
+
+    def _revision_display(field):
+        return _display_suggestion_unitaire_for_a_field(
+            field,
+            revision_acteur_suggestion_unitaires_by_field,
+            _get_field_value(revision_acteur_values, field),
+        )
+
+    def _parent_display(field):
+        return _display_suggestion_unitaire_for_a_field(
+            field,
+            parent_revision_acteur_suggestion_unitaires_by_field,
+            _get_field_value(parent_revision_acteur_values, field),
+        )
 
     # --- Columns ---
     columns = [
@@ -314,6 +405,8 @@ def _build_comparison_table_for_type_source(
                     "fields": "|".join(flattened),
                     "suggestion-modele": "RevisionActeur",
                     "update-url": update_url,
+                    "target-values": _target_values_json(flattened),
+                    "fields-groups": fields_groups_json,
                 },
                 actions=["click->report-update#report"],
             ),
@@ -355,6 +448,8 @@ def _build_comparison_table_for_type_source(
                         "fields": "|".join(flattened),
                         "suggestion-modele": "ParentRevisionActeur",
                         "update-url": update_url,
+                        "target-values": _target_values_json(flattened),
+                        "fields-groups": fields_groups_json,
                     },
                     actions=["click->report-update#report"],
                 ),
@@ -395,7 +490,7 @@ def _build_comparison_table_for_type_source(
                 fields=[
                     CellField(
                         field_name=field,
-                        display_html=fields_values[field].get("acteur", ""),
+                        display_html=_source_display(field),
                     )
                     for field in field_group
                 ],
@@ -419,6 +514,8 @@ def _build_comparison_table_for_type_source(
                             "fields": fields_str,
                             "suggestion-modele": "RevisionActeur",
                             "update-url": update_url,
+                            "target-values": _target_values_json(field_group),
+                            "fields-groups": fields_groups_json,
                         },
                         actions=["click->report-update#report"],
                     )
@@ -436,7 +533,7 @@ def _build_comparison_table_for_type_source(
                 fields=[
                     CellField(
                         field_name=field,
-                        display_html=fields_values[field].get("revision_acteur", ""),
+                        display_html=_revision_display(field),
                         editable=field not in not_editable,
                         stimulus=(
                             StimulusControllerConfig(
@@ -445,6 +542,8 @@ def _build_comparison_table_for_type_source(
                                     "field": field,
                                     "suggestion-modele": "RevisionActeur",
                                     "update-url": update_url,
+                                    "replace-text": _revision_replace_text(field),
+                                    "fields-groups": fields_groups_json,
                                 },
                                 actions=[
                                     "blur->cell-edit#save",
@@ -483,6 +582,8 @@ def _build_comparison_table_for_type_source(
                                 "fields": fields_str,
                                 "suggestion-modele": "ParentRevisionActeur",
                                 "update-url": update_url,
+                                "target-values": _target_values_json(field_group),
+                                "fields-groups": fields_groups_json,
                             },
                             actions=["click->report-update#report"],
                         )
@@ -499,9 +600,7 @@ def _build_comparison_table_for_type_source(
                     fields=[
                         CellField(
                             field_name=field,
-                            display_html=fields_values[field].get(
-                                "parent_revision_acteur", ""
-                            ),
+                            display_html=_parent_display(field),
                             editable=field not in not_editable,
                             stimulus=(
                                 StimulusControllerConfig(
@@ -510,6 +609,8 @@ def _build_comparison_table_for_type_source(
                                         "field": field,
                                         "suggestion-modele": "ParentRevisionActeur",
                                         "update-url": update_url,
+                                        "replace-text": _parent_replace_text(field),
+                                        "fields-groups": fields_groups_json,
                                     },
                                     actions=[
                                         "blur->cell-edit#save",
@@ -578,7 +679,7 @@ def serialize_suggestion_groupe(
         )
     )
     # Flatten and convert to SuggestionSourceModel
-    acteur_overridden_by_suggestion_unitaires_by_field = (
+    revision_acteur_suggestion_unitaires_by_field = (
         _suggestion_unitaires_to_suggestion_source_model_by_model_name(
             suggestion_unitaires,
             "RevisionActeur",
@@ -604,10 +705,10 @@ def serialize_suggestion_groupe(
                     key, acteur_suggestion_unitaires_by_field
                 ),  # FIXME: display the diff suggestion
                 "revision_acteur_target_value": getattr(
-                    acteur_overridden_by_suggestion_unitaires_by_field, key, None
+                    revision_acteur_suggestion_unitaires_by_field, key, None
                 ),
                 "revision_acteur": _display_suggestion_unitaire_for_a_field(
-                    key, acteur_overridden_by_suggestion_unitaires_by_field
+                    key, revision_acteur_suggestion_unitaires_by_field
                 ),
             }
             for key in flattened_fields_groups
@@ -615,13 +716,20 @@ def serialize_suggestion_groupe(
         return {
             "suggestion_groupe": suggestion_groupe,
             "identifiant_unique": identifiant_unique,
+            # TODO: simplifier la gestion des fields_groups et fields_values
             "fields_groups": fields_groups,
             "fields_values": fields_values,
             "comparison_table": _build_comparison_table_for_type_source(
                 fields_groups=fields_groups,
-                fields_values=fields_values,
                 update_url=reverse(
-                    "data:suggestion_groupe", args=[suggestion_groupe.id]
+                    "data:suggestion_groupe",
+                    args=[suggestion_groupe.id],
+                ),
+                acteur_suggestion_unitaires_by_field=(
+                    acteur_suggestion_unitaires_by_field
+                ),
+                revision_acteur_suggestion_unitaires_by_field=(
+                    revision_acteur_suggestion_unitaires_by_field
                 ),
             ),
         }
@@ -666,11 +774,11 @@ def serialize_suggestion_groupe(
             ),  # FIXME: display the diff suggestion
             "revision_acteur": _display_suggestion_unitaire_for_a_field(
                 key,
-                acteur_overridden_by_suggestion_unitaires_by_field,
+                revision_acteur_suggestion_unitaires_by_field,
                 getattr(revision_acteur_values, key),
             ),
             "revision_acteur_target_value": getattr(
-                acteur_overridden_by_suggestion_unitaires_by_field,
+                revision_acteur_suggestion_unitaires_by_field,
                 key,
                 getattr(revision_acteur_values, key),
             ),
@@ -698,11 +806,20 @@ def serialize_suggestion_groupe(
         "parent_revision_acteur": parent_revision_acteur,
         "comparison_table": _build_comparison_table_for_type_source(
             fields_groups=fields_groups,
-            fields_values=fields_values,
-            update_url=reverse("data:suggestion_groupe", args=[suggestion_groupe.id]),
+            update_url=reverse(
+                "data:suggestion_groupe",
+                args=[suggestion_groupe.id],
+            ),
             acteur=acteur,
             revision_acteur=revision_acteur,
             parent_revision_acteur=parent_revision_acteur,
+            acteur_suggestion_unitaires_by_field=acteur_suggestion_unitaires_by_field,
+            revision_acteur_suggestion_unitaires_by_field=(
+                revision_acteur_suggestion_unitaires_by_field
+            ),
+            parent_revision_acteur_suggestion_unitaires_by_field=(
+                parent_revision_acteur_suggestion_unitaires_by_field
+            ),
         ),
     }
 
@@ -1097,13 +1214,27 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
         if errors:
             context["comparison_table"] = _build_comparison_table_for_type_source(
                 fields_groups=context["fields_groups"],
-                fields_values=context["fields_values"],
                 update_url=reverse(
-                    "data:suggestion_groupe", args=[suggestion_groupe.id]
+                    "data:suggestion_groupe",
+                    args=[suggestion_groupe.id],
                 ),
                 acteur=context.get("acteur"),
                 revision_acteur=context.get("revision_acteur"),
                 parent_revision_acteur=context.get("parent_revision_acteur"),
+                acteur_values=context.get("acteur_values"),
+                revision_acteur_values=context.get("revision_acteur_values"),
+                parent_revision_acteur_values=context.get(
+                    "parent_revision_acteur_values"
+                ),
+                acteur_suggestion_unitaires_by_field=context.get(
+                    "acteur_suggestion_unitaires_by_field"
+                ),
+                revision_acteur_suggestion_unitaires_by_field=context.get(
+                    "revision_acteur_suggestion_unitaires_by_field"
+                ),
+                parent_revision_acteur_suggestion_unitaires_by_field=context.get(
+                    "parent_revision_acteur_suggestion_unitaires_by_field"
+                ),
                 errors=errors,
             )
 

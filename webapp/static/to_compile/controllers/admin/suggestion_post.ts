@@ -5,32 +5,18 @@ function getCsrfToken(): string | null {
   return match ? decodeURIComponent(match[1]) : null
 }
 
-export function getSharedData(element: HTMLElement): {
-  fieldsValues: Record<string, any>
-  fieldsGroups: string
-} {
-  const turboFrame = element.closest("turbo-frame") as HTMLElement | null
-  if (!turboFrame) {
-    throw new Error("No parent turbo-frame found")
-  }
-  return {
-    fieldsValues: JSON.parse(turboFrame.dataset.fieldsValues || "{}"),
-    fieldsGroups: turboFrame.dataset.fieldsGroups || "[]",
-  }
-}
-
 export function postFieldsValues(
   element: HTMLElement,
   updateUrl: string,
   suggestionModele: string,
   fieldsValues: Record<string, any>,
+  fieldsGroups: string,
   openedTab: string = "",
 ): void {
   if (!updateUrl) {
     console.error("URL de mise à jour de la suggestion manquante")
     return
   }
-  const { fieldsGroups } = getSharedData(element)
   const formData = new FormData()
   formData.append("fields_values", JSON.stringify(fieldsValues))
   formData.append("fields_groups", fieldsGroups)
