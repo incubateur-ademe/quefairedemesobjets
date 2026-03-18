@@ -2,11 +2,9 @@
 
 <turbo-frame
     id="suggestion_groupe_{{ suggestion_groupe.id }}"
-    data-controller="suggestion-groupe-row"
+    data-fields-values='{{ fields_values|tojson }}'
+    data-fields-groups='{{ fields_groups|tojson }}'
     data-update-suggestion-url="{% url 'data:suggestion_groupe' suggestion_groupe.id %}"
-    data-action="map:markerDragged->suggestion-groupe-row#handleMarkerDragged report-update:report->suggestion-groupe-row#reportUpdate cell-edit:save->suggestion-groupe-row#cellEditSave cell-edit:replace->suggestion-groupe-row#cellEditReplace"
-    data-suggestion-groupe-row-fields-values-value='{{ fields_values|tojson }}'
-    data-suggestion-groupe-row-fields-groups-value='{{ fields_groups|tojson }}'
     >
 
     <h3>
@@ -32,7 +30,7 @@
         <span class="qf-ml-3w qf-text-xs qf-italic">
             {% block suggestion_subtitle %}
                 Cohorte :
-                <a href="{% url 'admin:data_suggestioncohorte_change' suggestion_groupe.suggestion_cohorte.id %}" rel="noreferrer" data-turbo="false">{{ suggestion_groupe.suggestion_cohorte.id }} - {{ suggestion_groupe.suggestion_cohorte.get_type_action_display }}</a>
+                <a href="{% url 'admin:data_suggestioncohorte_change' suggestion_groupe.suggestion_cohorte.id %}" rel="noreferrer" data-turbo="false">{{ suggestion_groupe.suggestion_cohorte.id }} - {{ suggestion_groupe.suggestion_cohorte.get_type_action_display }}</a>
             {% endblock suggestion_subtitle %}
         </span>
         <div class="qf-flex qf-flex-row qf-gap-1w">
@@ -41,23 +39,26 @@
             </span>
             <button
                 type="button"
-                data-action="click->suggestion-groupe-row#updateStatus"
-                data-action-value="validate"
-                data-status-url="{% url 'data:suggestion_groupe_status' suggestion_groupe.id %}">
+                data-controller="suggestion-status"
+                data-suggestion-status-action-value="validate"
+                data-suggestion-status-status-url-value="{% url 'data:suggestion_groupe_status' suggestion_groupe.id %}"
+                data-action="click->suggestion-status#update">
                 ✅ VALIDER la suggestion
             </button>
             <button
                 type="button"
-                data-action="click->suggestion-groupe-row#updateStatus"
-                data-action-value="reject"
-                data-status-url="{% url 'data:suggestion_groupe_status' suggestion_groupe.id %}">
+                data-controller="suggestion-status"
+                data-suggestion-status-action-value="reject"
+                data-suggestion-status-status-url-value="{% url 'data:suggestion_groupe_status' suggestion_groupe.id %}"
+                data-action="click->suggestion-status#update">
                 ❌ REJETER la suggestion
             </button>
             <button
                 type="button"
-                data-action="click->suggestion-groupe-row#updateStatus"
-                data-action-value="to_process"
-                data-status-url="{% url 'data:suggestion_groupe_status' suggestion_groupe.id %}">
+                data-controller="suggestion-status"
+                data-suggestion-status-action-value="to_process"
+                data-suggestion-status-status-url-value="{% url 'data:suggestion_groupe_status' suggestion_groupe.id %}"
+                data-action="click->suggestion-status#update">
                 ⏳ Renvoyer à valider
             </button>
         </div>
