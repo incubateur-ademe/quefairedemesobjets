@@ -8,7 +8,6 @@ function getCsrfToken(): string | null {
 export function getSharedData(element: HTMLElement): {
   fieldsValues: Record<string, any>
   fieldsGroups: string
-  updateSuggestionUrl: string
 } {
   const turboFrame = element.closest("turbo-frame") as HTMLElement | null
   if (!turboFrame) {
@@ -17,21 +16,21 @@ export function getSharedData(element: HTMLElement): {
   return {
     fieldsValues: JSON.parse(turboFrame.dataset.fieldsValues || "{}"),
     fieldsGroups: turboFrame.dataset.fieldsGroups || "[]",
-    updateSuggestionUrl: turboFrame.dataset.updateSuggestionUrl || "",
   }
 }
 
 export function postFieldsValues(
   element: HTMLElement,
+  updateUrl: string,
   suggestionModele: string,
   fieldsValues: Record<string, any>,
   openedTab: string = "",
 ): void {
-  const { fieldsGroups, updateSuggestionUrl } = getSharedData(element)
-  if (!updateSuggestionUrl) {
+  if (!updateUrl) {
     console.error("URL de mise à jour de la suggestion manquante")
     return
   }
+  const { fieldsGroups } = getSharedData(element)
   const formData = new FormData()
   formData.append("fields_values", JSON.stringify(fieldsValues))
   formData.append("fields_groups", fieldsGroups)
@@ -39,7 +38,7 @@ export function postFieldsValues(
   if (openedTab) {
     formData.append("tab", openedTab)
   }
-  postSuggestion(updateSuggestionUrl, formData)
+  postSuggestion(updateUrl, formData)
 }
 
 export function postSuggestion(postUrl: string, formData: FormData): void {

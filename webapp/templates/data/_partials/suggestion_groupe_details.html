@@ -136,6 +136,7 @@
             {% if localisation %}
                 <div
                     data-controller="suggestion-map-update"
+                    data-suggestion-map-update-update-url-value="{% url 'data:suggestion_groupe' suggestion_groupe.id %}"
                     data-action="map:markerDragged->suggestion-map-update#handleMarkerDragged"
                 >
                 <div
