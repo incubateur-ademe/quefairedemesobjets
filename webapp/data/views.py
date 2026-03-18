@@ -349,6 +349,7 @@ def serialize_suggestion_groupe(
             "suggestion_groupe": suggestion_groupe,
             "identifiant_unique": identifiant_unique,
             "fields_groups": fields_groups,
+            "flattened_fields_groups": flattened_fields_groups,
             "fields_values": fields_values,
         }
 
@@ -418,6 +419,7 @@ def serialize_suggestion_groupe(
         "suggestion_groupe": suggestion_groupe,
         "identifiant_unique": acteur.identifiant_unique,
         "fields_groups": fields_groups,
+        "flattened_fields_groups": flattened_fields_groups,
         "fields_values": fields_values,
         "acteur": acteur,
         "revision_acteur": revision_acteur,
