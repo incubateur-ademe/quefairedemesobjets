@@ -1,6 +1,9 @@
 import pytest
 from data.models.suggestion import SuggestionAction
-from data.views import serialize_suggestion_groupe, update_suggestion_groupe
+from data.views import (
+    get_context_from_suggestion_groupe_type_source,
+    update_suggestion_groupe,
+)
 from django.contrib.gis.geos import Point
 from unit_tests.data.models.suggestion_factory import (
     SuggestionCohorteFactory,
@@ -87,7 +90,7 @@ class TestSerializeSuggestionGroupe:
     ):
         """Test that SOURCE_AJOUT returns the expected keys in result"""
 
-        result = serialize_suggestion_groupe(suggestion_groupe_ajout)
+        result = get_context_from_suggestion_groupe_type_source(suggestion_groupe_ajout)
 
         assert result["suggestion_groupe"] == suggestion_groupe_ajout
         assert result["identifiant_unique"] == "ID_UNIQUE_123"
@@ -131,7 +134,7 @@ class TestSerializeSuggestionGroupe:
             champs=["nom"],
             valeurs=["Revision nom"],
         )
-        result = serialize_suggestion_groupe(suggestion_groupe_ajout)
+        result = get_context_from_suggestion_groupe_type_source(suggestion_groupe_ajout)
 
         assert result["suggestion_groupe"] == suggestion_groupe_ajout
         assert result["identifiant_unique"] == "ID_UNIQUE_123"
@@ -153,7 +156,9 @@ class TestSerializeSuggestionGroupe:
     ):
         """Test SOURCE_MODIFICATION with an acteur but no revision_acteur"""
 
-        result = serialize_suggestion_groupe(suggestion_groupe_modification)
+        result = get_context_from_suggestion_groupe_type_source(
+            suggestion_groupe_modification
+        )
 
         assert result["acteur"] == suggestion_groupe_modification.acteur
         assert result["revision_acteur"] is None
@@ -197,7 +202,9 @@ class TestSerializeSuggestionGroupe:
         suggestion_groupe_modification.revision_acteur = revision_acteur
         suggestion_groupe_modification.save()
 
-        result = serialize_suggestion_groupe(suggestion_groupe_modification)
+        result = get_context_from_suggestion_groupe_type_source(
+            suggestion_groupe_modification
+        )
 
         assert result["acteur"] == suggestion_groupe_modification.acteur
         assert result["revision_acteur"] == revision_acteur
@@ -241,7 +248,9 @@ class TestSerializeSuggestionGroupe:
         suggestion_groupe_modification.parent_revision_acteur = parent_revision_acteur
         suggestion_groupe_modification.save()
 
-        result = serialize_suggestion_groupe(suggestion_groupe_modification)
+        result = get_context_from_suggestion_groupe_type_source(
+            suggestion_groupe_modification
+        )
 
         assert result["acteur"] == suggestion_groupe_modification.acteur
         assert result["revision_acteur"] == revision_acteur
@@ -291,7 +300,9 @@ class TestSerializeSuggestionGroupe:
             valeurs=["Suggestion Parent nom"],
         )
 
-        result = serialize_suggestion_groupe(suggestion_groupe_modification)
+        result = get_context_from_suggestion_groupe_type_source(
+            suggestion_groupe_modification
+        )
         table = result["comparison_table"]
 
         # Source display (diff acteur vs suggestion)
@@ -324,7 +335,7 @@ class TestSerializeSuggestionGroupe:
         )
 
         with pytest.raises(ValueError) as exc_info:
-            serialize_suggestion_groupe(suggestion_groupe)
+            get_context_from_suggestion_groupe_type_source(suggestion_groupe)
 
         assert "acteur is required" in str(exc_info.value)
 
