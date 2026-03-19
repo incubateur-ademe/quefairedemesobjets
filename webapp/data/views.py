@@ -55,130 +55,6 @@ def _flatten_suggestion_unitaires(
     }
 
 
-def _dict_to_suggestion_source_model(
-    values_dict: dict[str, str],
-) -> SuggestionSourceModel:
-    """
-    Convert a dictionary of field values to a SuggestionSourceModel
-    force None values to empty strings
-    """
-
-    return SuggestionSourceModel(
-        **{key: values_dict.get(key, "") for key in values_dict.keys()}
-    )
-
-
-def _extract_acteur_values(
-    acteur: Acteur | RevisionActeur, fields_to_include: list[str] | None = None
-) -> SuggestionSourceModel:
-    """
-    Extract values from an Acteur or RevisionActeur instance
-    using SuggestionSourceModel fields.
-    Returns a SuggestionSourceModel instance with extracted values.
-    Empty string is returned for missing or None values.
-    """
-
-    def get_field_from_code(acteur: Acteur | RevisionActeur, field_name: str) -> str:
-        """Extract code from a ForeignKey field."""
-        if field_name == "source_code":
-            source_obj = getattr(acteur, "source", None)
-            return source_obj.code if source_obj else ""
-        if not field_name.endswith("_code"):
-            raise ValueError(f"Field {field_name} is not a code field")
-        fk_field_name = field_name.removesuffix("_code")
-        object_field = getattr(acteur, fk_field_name, None)
-        return object_field.code if object_field else ""
-
-    def get_field_from_proposition_service_codes(
-        acteur: Acteur | RevisionActeur,
-    ) -> str:
-        """Extract proposition_service_codes as JSON string."""
-        prop_services = (
-            list(acteur.proposition_services.all())
-            if hasattr(acteur, "proposition_services")
-            else []
-        )
-        if prop_services:
-            prop_data = sorted(
-                [
-                    {
-                        "action": prop.action.code,
-                        "sous_categories": sorted(
-                            [sc.code for sc in prop.sous_categories.all()]
-                        ),
-                    }
-                    for prop in prop_services
-                ],
-                key=lambda x: x["action"],
-            )
-            return json.dumps(prop_data, ensure_ascii=False)
-        return ""
-
-    def get_field_from_perimetre_adomicile_codes(
-        acteur: Acteur | RevisionActeur,
-    ) -> str:
-        """Extract perimetre_adomicile_codes as JSON string."""
-        perimetres = (
-            list(acteur.perimetre_adomiciles.all())
-            if hasattr(acteur, "perimetre_adomiciles")
-            else []
-        )
-        return (
-            json.dumps(
-                sorted(
-                    [
-                        {"type": perimetre.type, "valeur": perimetre.valeur}
-                        for perimetre in perimetres
-                    ],
-                    key=lambda x: (x["type"], x["valeur"]),
-                ),
-                ensure_ascii=False,
-            )
-            if perimetres
-            else ""
-        )
-
-    def get_field_from_codes(acteur: Acteur | RevisionActeur, field_name: str) -> str:
-        """Extract codes from ManyToMany fields as JSON string."""
-        if not field_name.endswith("_codes"):
-            raise ValueError(f"Field {field_name} is not a codes field")
-        # Remove _codes suffix and add 's' to get the ManyToMany field name
-        # e.g., label_codes -> labels, acteur_service_codes -> acteur_services
-        m2m_field_name = field_name.removesuffix("_codes") + "s"
-        m2m_objects = (
-            list(getattr(acteur, m2m_field_name).all())
-            if hasattr(acteur, m2m_field_name)
-            else []
-        )
-        return (
-            json.dumps(sorted([obj.code for obj in m2m_objects]), ensure_ascii=False)
-            if m2m_objects
-            else ""
-        )
-
-    model_fields = SuggestionSourceModel.model_fields.keys()
-    fields_to_process = fields_to_include if fields_to_include else list(model_fields)
-
-    values = {}
-    for field_name in fields_to_process:
-        if field_name not in model_fields:
-            raise ValueError(f"Field {field_name} not found in SuggestionSourceModel")
-        if field_name.endswith("_code"):
-            values[field_name] = get_field_from_code(acteur, field_name)
-        elif field_name == "proposition_service_codes":
-            values[field_name] = get_field_from_proposition_service_codes(acteur)
-        elif field_name == "perimetre_adomicile_codes":
-            values[field_name] = get_field_from_perimetre_adomicile_codes(acteur)
-        elif field_name.endswith("_codes"):
-            values[field_name] = get_field_from_codes(acteur, field_name)
-        else:
-            # Handle regular fields
-            value = getattr(acteur, field_name, None)
-            values[field_name] = str(value) if value is not None else ""
-
-    return SuggestionSourceModel(**values)
-
-
 def _get_ordered_fields_groups(
     suggestion_unitaires: list[SuggestionUnitaire],
 ) -> list[tuple]:
@@ -254,7 +130,7 @@ def _suggestion_unitaires_to_suggestion_source_model_by_model_name(
         for unit in suggestion_unitaires
         if unit.suggestion_modele == model_name
     }
-    return _dict_to_suggestion_source_model(
+    return SuggestionSourceModel.from_dict(
         _flatten_suggestion_unitaires(suggestion_unitaires_dict)
     )
 
@@ -302,22 +178,16 @@ def _build_comparison_table_for_type_source(
     fields_groups_json = json.dumps(fields_groups)
     flattened = [key for keys in fields_groups for key in keys]
 
-    acteur_values = (
-        _extract_acteur_values(acteur, fields_to_include=flattened)
-        if acteur
-        else SuggestionSourceModel()
+    acteur_values = SuggestionSourceModel.from_acteur(
+        acteur, fields_to_include=flattened
     )
 
-    revision_acteur_values = (
-        _extract_acteur_values(revision_acteur, fields_to_include=flattened)
-        if revision_acteur
-        else SuggestionSourceModel()
+    revision_acteur_values = SuggestionSourceModel.from_acteur(
+        revision_acteur, fields_to_include=flattened
     )
 
-    parent_revision_acteur_values = (
-        _extract_acteur_values(parent_revision_acteur, fields_to_include=flattened)
-        if parent_revision_acteur
-        else SuggestionSourceModel()
+    parent_revision_acteur_values = SuggestionSourceModel.from_acteur(
+        parent_revision_acteur, fields_to_include=flattened
     )
 
     def _get_field_value(model, field):

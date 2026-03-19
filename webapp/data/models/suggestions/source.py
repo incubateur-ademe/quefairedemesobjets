@@ -1,6 +1,7 @@
 import json
 
 from pydantic import BaseModel, ConfigDict
+from qfdmo.models.acteur import Acteur, RevisionActeur
 
 
 class SuggestionSourceModel(BaseModel):
@@ -57,6 +58,136 @@ class SuggestionSourceModel(BaseModel):
             elif value is not None and value != "":
                 data[key] = str(value)
         return cls.model_validate(data)
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "SuggestionSourceModel":
+        return cls(**{key: data.get(key, "") for key in data.keys()})
+
+    @classmethod
+    def from_acteur(
+        cls,
+        acteur: Acteur | RevisionActeur | None,
+        fields_to_include: list[str] | None = None,
+    ) -> "SuggestionSourceModel":
+        """
+        Extract values from an Acteur or RevisionActeur instance
+        using SuggestionSourceModel fields.
+        Returns a SuggestionSourceModel instance with extracted values.
+        Empty string is returned for missing or None values.
+        """
+
+        def get_field_from_code(
+            acteur: Acteur | RevisionActeur, field_name: str
+        ) -> str:
+            """Extract code from a ForeignKey field."""
+            if field_name == "source_code":
+                source_obj = getattr(acteur, "source", None)
+                return source_obj.code if source_obj else ""
+            if not field_name.endswith("_code"):
+                raise ValueError(f"Field {field_name} is not a code field")
+            fk_field_name = field_name.removesuffix("_code")
+            object_field = getattr(acteur, fk_field_name, None)
+            return object_field.code if object_field else ""
+
+        def get_field_from_proposition_service_codes(
+            acteur: Acteur | RevisionActeur,
+        ) -> str:
+            """Extract proposition_service_codes as JSON string."""
+            prop_services = (
+                list(acteur.proposition_services.all())
+                if hasattr(acteur, "proposition_services")
+                else []
+            )
+            if prop_services:
+                prop_data = sorted(
+                    [
+                        {
+                            "action": prop.action.code,
+                            "sous_categories": sorted(
+                                [sc.code for sc in prop.sous_categories.all()]
+                            ),
+                        }
+                        for prop in prop_services
+                    ],
+                    key=lambda x: x["action"],
+                )
+                return json.dumps(prop_data, ensure_ascii=False)
+            return ""
+
+        def get_field_from_perimetre_adomicile_codes(
+            acteur: Acteur | RevisionActeur,
+        ) -> str:
+            """Extract perimetre_adomicile_codes as JSON string."""
+            perimetres = (
+                list(acteur.perimetre_adomiciles.all())
+                if hasattr(acteur, "perimetre_adomiciles")
+                else []
+            )
+            return (
+                json.dumps(
+                    sorted(
+                        [
+                            {"type": perimetre.type, "valeur": perimetre.valeur}
+                            for perimetre in perimetres
+                        ],
+                        key=lambda x: (x["type"], x["valeur"]),
+                    ),
+                    ensure_ascii=False,
+                )
+                if perimetres
+                else ""
+            )
+
+        def get_field_from_codes(
+            acteur: Acteur | RevisionActeur, field_name: str
+        ) -> str:
+            """Extract codes from ManyToMany fields as JSON string."""
+            if not field_name.endswith("_codes"):
+                raise ValueError(f"Field {field_name} is not a codes field")
+            # Remove _codes suffix and add 's' to get the ManyToMany field name
+            # e.g., label_codes -> labels, acteur_service_codes -> acteur_services
+            m2m_field_name = field_name.removesuffix("_codes") + "s"
+            m2m_objects = (
+                list(getattr(acteur, m2m_field_name).all())
+                if hasattr(acteur, m2m_field_name)
+                else []
+            )
+            return (
+                json.dumps(
+                    sorted([obj.code for obj in m2m_objects]), ensure_ascii=False
+                )
+                if m2m_objects
+                else ""
+            )
+
+        if acteur is None:
+            return cls()
+
+        model_fields = SuggestionSourceModel.model_fields.keys()
+        fields_to_process = (
+            fields_to_include if fields_to_include else list(model_fields)
+        )
+
+        values = {}
+        for field_name in fields_to_process:
+            if field_name not in model_fields:
+                raise ValueError(
+                    f"Field {field_name} not found in SuggestionSourceModel"
+                )
+            if field_name.endswith("_code"):
+                values[field_name] = get_field_from_code(acteur, field_name)
+            elif field_name == "proposition_service_codes":
+                values[field_name] = get_field_from_proposition_service_codes(acteur)
+            elif field_name == "perimetre_adomicile_codes":
+                values[field_name] = get_field_from_perimetre_adomicile_codes(acteur)
+            elif field_name.endswith("_codes"):
+                values[field_name] = get_field_from_codes(acteur, field_name)
+            else:
+                # Handle regular fields
+                value = getattr(acteur, field_name, None)
+                values[field_name] = str(value) if value is not None else ""
+
+        return cls(**values)
 
     @classmethod
     def get_ordered_fields(cls) -> list[tuple[str]]:
