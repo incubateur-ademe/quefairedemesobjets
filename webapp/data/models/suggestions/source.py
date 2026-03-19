@@ -1,7 +1,27 @@
-import json
+from __future__ import annotations
 
+import json
+from typing import TYPE_CHECKING
+
+from core.templatetags.admin_data_tags import display_diff_values
+from data.models.comparison_table import (
+    CellContent,
+    CellField,
+    ColumnHeader,
+    ComparisonTable,
+    HeaderLink,
+    StimulusControllerConfig,
+    TableRow,
+)
+from data.models.suggestion import SuggestionGroupe
+from django.urls import reverse
+from django.utils.safestring import mark_safe
+from more_itertools import flatten
 from pydantic import BaseModel, ConfigDict
 from qfdmo.models.acteur import Acteur, RevisionActeur
+
+if TYPE_CHECKING:
+    from data.models.suggestion import SuggestionUnitaire
 
 
 class SuggestionSourceModel(BaseModel):
@@ -262,3 +282,568 @@ class SuggestionSourceModel(BaseModel):
             "proposition_service_codes",
             "perimetre_adomicile_codes",
         ]
+
+
+def _field_without_suggestion_display(field_value: str | None) -> str:
+    if field_value is None or field_value == "":
+        field_value = "-"
+    return mark_safe(f'<span class="no-suggestion-text">{field_value}</span>')
+
+
+def _display_suggestion_unitaire_for_a_field(
+    field_name: str,
+    suggestion_source_model: SuggestionSourceModel,
+    field_value: str | None = None,
+) -> str:
+    suggestion_unitaire = getattr(suggestion_source_model, field_name)
+    if suggestion_unitaire is None:
+        return _field_without_suggestion_display(field_value)
+    return display_diff_values(field_value, suggestion_unitaire)
+
+
+def _flatten_suggestion_unitaires(
+    suggestion_unitaires: dict[tuple, list],
+) -> dict:
+    return {
+        k: v
+        for k, v in zip(
+            flatten(suggestion_unitaires.keys()),
+            flatten(suggestion_unitaires.values()),
+        )
+    }
+
+
+def _suggestion_unitaires_to_suggestion_source_model(
+    suggestion_unitaires: list[SuggestionUnitaire],
+    model_name: str,
+) -> SuggestionSourceModel:
+    suggestion_unitaires_dict = {
+        tuple(unit.champs): unit.valeurs
+        for unit in suggestion_unitaires
+        if unit.suggestion_modele == model_name
+    }
+    return SuggestionSourceModel.from_dict(
+        _flatten_suggestion_unitaires(suggestion_unitaires_dict)
+    )
+
+
+def _get_ordered_fields_groups(
+    suggestion_unitaires: list[SuggestionUnitaire],
+) -> list[tuple]:
+    all_suggestion_unitaires = {
+        tuple(unit.champs): unit.valeurs for unit in suggestion_unitaires
+    }
+    fields_groups = list(set(all_suggestion_unitaires.keys()))
+    ordered_fields = SuggestionSourceModel.get_ordered_fields()
+    if any(fields not in ordered_fields for fields in fields_groups):
+        raise ValueError(
+            f"""fields in fields_groups are not in ORDERED_FIELDS:
+                        {fields_groups=}
+                        {ordered_fields=}"""
+        )
+    return [fields for fields in ordered_fields if fields in fields_groups]
+
+
+class SuggestionGroupeTypeSource(BaseModel):
+    """
+    Represents a SuggestionGroupe of type SOURCE (AJOUT, MODIFICATION, SUPPRESSION)
+    with all its SuggestionUnitaires, organized by target model.
+
+    Encapsulates:
+    - SuggestionSourceModel instances for each model's suggested changes
+    - SuggestionSourceModel instances for each model's current DB values
+    - The logic to build a ComparisonTable for UI rendering
+    """
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    fields_groups: list[tuple[str, ...]]
+    identifiant_unique: str
+
+    suggestion_groupe: SuggestionGroupe
+
+    acteur: Acteur | None = None
+    revision_acteur: RevisionActeur | None = None
+    parent_revision_acteur: RevisionActeur | None = None
+
+    # Current DB values (extracted via SuggestionSourceModel.from_acteur)
+    acteur_values: SuggestionSourceModel = SuggestionSourceModel()
+    revision_acteur_values: SuggestionSourceModel = SuggestionSourceModel()
+    parent_revision_acteur_values: SuggestionSourceModel = SuggestionSourceModel()
+
+    # Suggested changes (extracted from SuggestionUnitaires)
+    acteur_suggestions: SuggestionSourceModel = SuggestionSourceModel()
+    revision_acteur_suggestions: SuggestionSourceModel = SuggestionSourceModel()
+    parent_revision_acteur_suggestions: SuggestionSourceModel = SuggestionSourceModel()
+
+    @classmethod
+    def from_suggestion_groupe(
+        cls, suggestion_groupe: SuggestionGroupe
+    ) -> SuggestionGroupeTypeSource:
+        """
+        Build a SuggestionGroupeTypeSource from a SuggestionGroupe.
+
+        Raises ValueError if the type_action is not SOURCE_AJOUT,
+        SOURCE_MODIFICATION, or SOURCE_SUPPRESSION.
+        """
+        from data.models.suggestion import SuggestionAction
+
+        type_action = suggestion_groupe.suggestion_cohorte.type_action
+
+        source_actions = {
+            SuggestionAction.SOURCE_AJOUT,
+            SuggestionAction.SOURCE_MODIFICATION,
+            SuggestionAction.SOURCE_SUPPRESSION,
+        }
+        if type_action not in source_actions:
+            raise ValueError(
+                f"SuggestionGroupe type_action must be one of {source_actions}, "
+                f"got {type_action}"
+            )
+
+        # SOURCE_MODIFICATION or SOURCE_SUPPRESSION
+        acteur = suggestion_groupe.get_acteur_or_none()
+        revision_acteur = suggestion_groupe.get_revision_acteur_or_none()
+        parent_revision_acteur = suggestion_groupe.get_parent_revision_acteur_or_none()
+
+        suggestion_unitaires = list(suggestion_groupe.suggestion_unitaires.all())
+        fields_groups = _get_ordered_fields_groups(suggestion_unitaires)
+        flattened = [key for keys in fields_groups for key in keys]
+
+        acteur_suggestions = _suggestion_unitaires_to_suggestion_source_model(
+            suggestion_unitaires, "Acteur"
+        )
+        revision_acteur_suggestions = _suggestion_unitaires_to_suggestion_source_model(
+            suggestion_unitaires, "RevisionActeur"
+        )
+
+        if type_action == SuggestionAction.SOURCE_AJOUT:
+            identifiant_unique = (
+                suggestion_groupe.get_identifiant_unique_from_suggestion_unitaires(
+                    "Acteur"
+                )
+            )
+            return cls(
+                suggestion_groupe=suggestion_groupe,
+                acteur=acteur,
+                revision_acteur=revision_acteur,
+                parent_revision_acteur=parent_revision_acteur,
+                fields_groups=fields_groups,
+                identifiant_unique=identifiant_unique,
+                acteur_suggestions=acteur_suggestions,
+                revision_acteur_suggestions=revision_acteur_suggestions,
+            )
+
+        if not acteur:
+            raise ValueError("acteur is required for non-SOURCE_AJOUT suggestions")
+
+        parent_revision_acteur_suggestions = (
+            _suggestion_unitaires_to_suggestion_source_model(
+                suggestion_unitaires, "ParentRevisionActeur"
+            )
+        )
+
+        return cls(
+            suggestion_groupe=suggestion_groupe,
+            acteur=acteur,
+            revision_acteur=revision_acteur,
+            parent_revision_acteur=parent_revision_acteur,
+            fields_groups=fields_groups,
+            identifiant_unique=acteur.identifiant_unique,
+            acteur_values=SuggestionSourceModel.from_acteur(
+                acteur, fields_to_include=flattened
+            ),
+            revision_acteur_values=SuggestionSourceModel.from_acteur(
+                revision_acteur, fields_to_include=flattened
+            ),
+            parent_revision_acteur_values=SuggestionSourceModel.from_acteur(
+                parent_revision_acteur, fields_to_include=flattened
+            ),
+            acteur_suggestions=acteur_suggestions,
+            revision_acteur_suggestions=revision_acteur_suggestions,
+            parent_revision_acteur_suggestions=parent_revision_acteur_suggestions,
+        )
+
+    # --- Display helpers ---
+
+    @property
+    def update_url(self) -> str:
+        return reverse("data:suggestion_groupe", args=[self.suggestion_groupe.id])
+
+    @property
+    def acteur_change_url(self) -> str | None:
+        return self.acteur.change_url if self.acteur else None
+
+    @property
+    def revision_acteur_change_url(self) -> str | None:
+        return self.revision_acteur.change_url if self.revision_acteur else None
+
+    @property
+    def revision_acteur_displayedacteur_change_url(self) -> str | None:
+        return (
+            self.revision_acteur.displayedacteur_change_url
+            if self.revision_acteur
+            else None
+        )
+
+    @property
+    def parent_revision_acteur_change_url(self) -> str | None:
+        return (
+            self.parent_revision_acteur.change_url
+            if self.parent_revision_acteur
+            else None
+        )
+
+    @property
+    def parent_revision_acteur_displayedacteur_change_url(self) -> str | None:
+        return (
+            self.parent_revision_acteur.displayedacteur_change_url
+            if self.parent_revision_acteur
+            else None
+        )
+
+    @property
+    def parent_revision_acteur_nombre_enfants(self) -> int | None:
+        return (
+            self.parent_revision_acteur.nombre_enfants
+            if self.parent_revision_acteur
+            else None
+        )
+
+    @property
+    def has_parent_revision_acteur(self) -> bool:
+        return self.parent_revision_acteur is not None
+
+    @property
+    def flattened_fields(self) -> list[str]:
+        return [key for keys in self.fields_groups for key in keys]
+
+    @property
+    def fields_groups_json(self) -> str:
+        return json.dumps(self.fields_groups)
+
+    def _get_field_value(self, model: SuggestionSourceModel, field: str) -> str | None:
+        value = getattr(model, field, None)
+        return value if value else None
+
+    def _target_values_json(self, fields: tuple[str, ...] | list[str]) -> str:
+        return json.dumps(
+            {
+                field: getattr(self.acteur_suggestions, field)
+                for field in fields
+                if getattr(self.acteur_suggestions, field, None) is not None
+            }
+        )
+
+    def _revision_replace_text(self, field: str) -> str:
+        return (
+            getattr(self.revision_acteur_suggestions, field, None)
+            or getattr(self.acteur_suggestions, field, None)
+            or ""
+        )
+
+    def _parent_replace_text(self, field: str) -> str:
+        return (
+            getattr(self.parent_revision_acteur_suggestions, field, None)
+            or getattr(self.acteur_suggestions, field, None)
+            or ""
+        )
+
+    def _source_display(self, field: str) -> str:
+        return _display_suggestion_unitaire_for_a_field(
+            field,
+            self.acteur_suggestions,
+            self._get_field_value(self.acteur_values, field),
+        )
+
+    def _revision_display(self, field: str) -> str:
+        return _display_suggestion_unitaire_for_a_field(
+            field,
+            self.revision_acteur_suggestions,
+            self._get_field_value(self.revision_acteur_values, field),
+        )
+
+    def _parent_display(self, field: str) -> str:
+        return _display_suggestion_unitaire_for_a_field(
+            field,
+            self.parent_revision_acteur_suggestions,
+            self._get_field_value(self.parent_revision_acteur_values, field),
+        )
+
+    # --- ComparisonTable builder ---
+
+    def to_comparison_table(self, errors: dict | None = None) -> ComparisonTable:
+        """Build a domain-agnostic ComparisonTable from this model's data."""
+        not_editable = SuggestionSourceModel.get_not_editable_fields()
+        not_reportable_revision = (
+            SuggestionSourceModel.get_not_reportable_on_revision_fields()
+        )
+        not_reportable_parent = (
+            SuggestionSourceModel.get_not_reportable_on_parent_fields()
+        )
+        flattened = self.flattened_fields
+
+        # --- Columns ---
+        columns = [
+            ColumnHeader(key="label", css_classes="qf-w-1/4"),
+            ColumnHeader(
+                key="source",
+                label="Acteur Importé",
+                css_classes="qf-w-1/4",
+                links=(
+                    [HeaderLink(label="importé", url=self.acteur_change_url)]
+                    if self.acteur_change_url
+                    else []
+                ),
+            ),
+            ColumnHeader(
+                key="report_revision",
+                label="▶️",
+                css_classes="qf-text-center qf-text-2xl",
+                header_action=StimulusControllerConfig(
+                    controller="report-update",
+                    values={
+                        "fields": "|".join(flattened),
+                        "suggestion-modele": "RevisionActeur",
+                        "update-url": self.update_url,
+                        "target-values": self._target_values_json(flattened),
+                        "fields-groups": self.fields_groups_json,
+                    },
+                    actions=["click->report-update#report"],
+                ),
+            ),
+        ]
+
+        # Correction column
+        correction_links = []
+        if self.revision_acteur_change_url:
+            correction_links.append(
+                HeaderLink(label="corrigé", url=self.revision_acteur_change_url)
+            )
+            if not self.has_parent_revision_acteur:
+                correction_links.append(
+                    HeaderLink(
+                        label="affiché",
+                        url=self.revision_acteur_displayedacteur_change_url or "",
+                    )
+                )
+        columns.append(
+            ColumnHeader(
+                key="correction",
+                label="Correction",
+                css_classes="qf-w-1/4",
+                links=correction_links,
+            )
+        )
+
+        # Parent columns (conditional)
+        if self.has_parent_revision_acteur:
+            columns.append(
+                ColumnHeader(
+                    key="report_parent",
+                    label="⏩",
+                    css_classes="qf-text-center qf-text-2xl",
+                    header_action=StimulusControllerConfig(
+                        controller="report-update",
+                        values={
+                            "fields": "|".join(flattened),
+                            "suggestion-modele": "ParentRevisionActeur",
+                            "update-url": self.update_url,
+                            "target-values": self._target_values_json(flattened),
+                            "fields-groups": self.fields_groups_json,
+                        },
+                        actions=["click->report-update#report"],
+                    ),
+                )
+            )
+            parent_links = [
+                HeaderLink(
+                    label="corrigé",
+                    url=self.parent_revision_acteur_change_url or "",
+                ),
+                HeaderLink(
+                    label="affiché",
+                    url=self.parent_revision_acteur_displayedacteur_change_url or "",
+                ),
+            ]
+            columns.append(
+                ColumnHeader(
+                    key="parent",
+                    label="Parent",
+                    css_classes="qf-w-1/4",
+                    links=parent_links,
+                    subtitle=(
+                        f"{self.parent_revision_acteur_nombre_enfants} enfants impactés"
+                        if self.parent_revision_acteur_nombre_enfants
+                        else None
+                    ),
+                )
+            )
+
+        # --- Rows ---
+        rows = []
+        for field_group in self.fields_groups:
+            fields_str = "|".join(field_group)
+            cells: list[CellContent] = []
+
+            # Source (display) cell
+            cells.append(
+                CellContent(
+                    column_key="source",
+                    cell_type="display",
+                    fields=[
+                        CellField(
+                            field_name=field,
+                            display_html=self._source_display(field),
+                        )
+                        for field in field_group
+                    ],
+                )
+            )
+
+            # Report to revision (action) cell
+            reportable_on_revision = all(
+                f not in not_reportable_revision for f in field_group
+            )
+            cells.append(
+                CellContent(
+                    column_key="report_revision",
+                    cell_type="action",
+                    enabled=reportable_on_revision,
+                    action_icon="▶️",
+                    stimulus=(
+                        StimulusControllerConfig(
+                            controller="report-update",
+                            values={
+                                "fields": fields_str,
+                                "suggestion-modele": "RevisionActeur",
+                                "update-url": self.update_url,
+                                "target-values": self._target_values_json(field_group),
+                                "fields-groups": self.fields_groups_json,
+                            },
+                            actions=["click->report-update#report"],
+                        )
+                        if reportable_on_revision
+                        else None
+                    ),
+                )
+            )
+
+            # Correction (editable) cell
+            cells.append(
+                CellContent(
+                    column_key="correction",
+                    cell_type="editable",
+                    fields=[
+                        CellField(
+                            field_name=field,
+                            display_html=self._revision_display(field),
+                            editable=field not in not_editable,
+                            stimulus=(
+                                StimulusControllerConfig(
+                                    controller="cell-edit",
+                                    values={
+                                        "field": field,
+                                        "suggestion-modele": "RevisionActeur",
+                                        "update-url": self.update_url,
+                                        "replace-text": self._revision_replace_text(
+                                            field
+                                        ),
+                                        "fields-groups": self.fields_groups_json,
+                                    },
+                                    actions=[
+                                        "blur->cell-edit#save",
+                                        "focus->cell-edit#replace",
+                                    ],
+                                )
+                                if field not in not_editable
+                                else None
+                            ),
+                            error=(
+                                str(errors.get(field, ""))
+                                if errors and errors.get(field)
+                                else None
+                            ),
+                        )
+                        for field in field_group
+                    ],
+                )
+            )
+
+            # Parent columns (conditional)
+            if self.has_parent_revision_acteur:
+                reportable_on_parent = all(
+                    f not in not_reportable_parent for f in field_group
+                )
+                cells.append(
+                    CellContent(
+                        column_key="report_parent",
+                        cell_type="action",
+                        enabled=reportable_on_parent,
+                        action_icon="⏩",
+                        stimulus=(
+                            StimulusControllerConfig(
+                                controller="report-update",
+                                values={
+                                    "fields": fields_str,
+                                    "suggestion-modele": "ParentRevisionActeur",
+                                    "update-url": self.update_url,
+                                    "target-values": self._target_values_json(
+                                        field_group
+                                    ),
+                                    "fields-groups": self.fields_groups_json,
+                                },
+                                actions=["click->report-update#report"],
+                            )
+                            if reportable_on_parent
+                            else None
+                        ),
+                    )
+                )
+
+                cells.append(
+                    CellContent(
+                        column_key="parent",
+                        cell_type="editable",
+                        fields=[
+                            CellField(
+                                field_name=field,
+                                display_html=self._parent_display(field),
+                                editable=field not in not_editable,
+                                stimulus=(
+                                    StimulusControllerConfig(
+                                        controller="cell-edit",
+                                        values={
+                                            "field": field,
+                                            "suggestion-modele": "ParentRevisionActeur",
+                                            "update-url": self.update_url,
+                                            "replace-text": self._parent_replace_text(
+                                                field
+                                            ),
+                                            "fields-groups": self.fields_groups_json,
+                                        },
+                                        actions=[
+                                            "blur->cell-edit#save",
+                                            "focus->cell-edit#replace",
+                                        ],
+                                    )
+                                    if field not in not_editable
+                                    else None
+                                ),
+                                error=(
+                                    str(errors.get(field, ""))
+                                    if errors and errors.get(field)
+                                    else None
+                                ),
+                            )
+                            for field in field_group
+                        ],
+                    )
+                )
+
+            rows.append(TableRow(label=", ".join(field_group), cells=cells))
+
+        return ComparisonTable(columns=columns, rows=rows)
+
+
+SuggestionGroupeTypeSource.model_rebuild()
