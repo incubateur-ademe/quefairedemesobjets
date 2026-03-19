@@ -1,14 +1,5 @@
 import logging
 
-from django.contrib import admin, messages
-from django.contrib.postgres.fields import ArrayField
-from django.db import models
-from django.db.models import QuerySet
-from django.template.loader import render_to_string
-from django.utils.html import format_html, mark_safe
-from djangoql.admin import DjangoQLSearchMixin
-from djangoql.schema import BoolField, DjangoQLSchema, IntField, StrField
-
 from core.admin import NotEditableMixin, NotSelfDeletableMixin
 from data.models.suggestion import (
     Suggestion,
@@ -18,7 +9,15 @@ from data.models.suggestion import (
     SuggestionStatut,
     SuggestionUnitaire,
 )
-from data.views import serialize_suggestion_groupe
+from data.views import get_context_from_suggestion_groupe_type_source
+from django.contrib import admin, messages
+from django.contrib.postgres.fields import ArrayField
+from django.db import models
+from django.db.models import QuerySet
+from django.template.loader import render_to_string
+from django.utils.html import format_html, mark_safe
+from djangoql.admin import DjangoQLSearchMixin
+from djangoql.schema import BoolField, DjangoQLSchema, IntField, StrField
 
 NB_SUGGESTIONS_DISPLAYED_WHEN_DELETING = 100
 
@@ -377,7 +376,9 @@ class SuggestionGroupeAdmin(
 
     def groupe_de_suggestions(self, obj):
         template_name = "data/_partials/suggestion_groupe_details.html"
-        return render_to_string(template_name, serialize_suggestion_groupe(obj))
+        return render_to_string(
+            template_name, get_context_from_suggestion_groupe_type_source(obj)
+        )
 
 
 @admin.register(SuggestionUnitaire)
