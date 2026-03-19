@@ -570,6 +570,94 @@ class SuggestionGroupeTypeSource(BaseModel):
             self._get_field_value(self.parent_revision_acteur_values, field),
         )
 
+    # --- ComparisonTable builder helpers ---
+
+    def _build_report_stimulus(
+        self,
+        fields: str,
+        suggestion_modele: str,
+        target_values_fields: tuple[str, ...] | list[str],
+    ) -> StimulusControllerConfig:
+        return StimulusControllerConfig(
+            controller="report-update",
+            values={
+                "fields": fields,
+                "suggestion-modele": suggestion_modele,
+                "update-url": self.update_url,
+                "target-values": self._target_values_json(target_values_fields),
+                "fields-groups": self.fields_groups_json,
+            },
+            actions=["click->report-update#report"],
+        )
+
+    def _build_target_row_cells(
+        self,
+        field_group: tuple[str, ...],
+        *,
+        suggestion_modele: str,
+        action_column_key: str,
+        editable_column_key: str,
+        action_icon: str,
+        not_reportable: list[str],
+        not_editable: list[str],
+        display_fn,
+        replace_text_fn,
+        errors: dict | None,
+    ) -> list[CellContent]:
+        """Build the action cell + editable cell pair for a target model."""
+        fields_str = "|".join(field_group)
+        reportable = all(f not in not_reportable for f in field_group)
+
+        action_cell = CellContent(
+            column_key=action_column_key,
+            cell_type="action",
+            enabled=reportable,
+            action_icon=action_icon,
+            stimulus=(
+                self._build_report_stimulus(fields_str, suggestion_modele, field_group)
+                if reportable
+                else None
+            ),
+        )
+
+        editable_cell = CellContent(
+            column_key=editable_column_key,
+            cell_type="editable",
+            fields=[
+                CellField(
+                    field_name=field,
+                    display_html=display_fn(field),
+                    editable=field not in not_editable,
+                    stimulus=(
+                        StimulusControllerConfig(
+                            controller="cell-edit",
+                            values={
+                                "field": field,
+                                "suggestion-modele": suggestion_modele,
+                                "update-url": self.update_url,
+                                "replace-text": replace_text_fn(field),
+                                "fields-groups": self.fields_groups_json,
+                            },
+                            actions=[
+                                "blur->cell-edit#save",
+                                "focus->cell-edit#replace",
+                            ],
+                        )
+                        if field not in not_editable
+                        else None
+                    ),
+                    error=(
+                        str(errors.get(field, ""))
+                        if errors and errors.get(field)
+                        else None
+                    ),
+                )
+                for field in field_group
+            ],
+        )
+
+        return [action_cell, editable_cell]
+
     # --- ComparisonTable builder ---
 
     def to_comparison_table(self, errors: dict | None = None) -> ComparisonTable:
@@ -600,16 +688,8 @@ class SuggestionGroupeTypeSource(BaseModel):
                 key="report_revision",
                 label="▶️",
                 css_classes="qf-text-center qf-text-2xl",
-                header_action=StimulusControllerConfig(
-                    controller="report-update",
-                    values={
-                        "fields": "|".join(flattened),
-                        "suggestion-modele": "RevisionActeur",
-                        "update-url": self.update_url,
-                        "target-values": self._target_values_json(flattened),
-                        "fields-groups": self.fields_groups_json,
-                    },
-                    actions=["click->report-update#report"],
+                header_action=self._build_report_stimulus(
+                    "|".join(flattened), "RevisionActeur", flattened
                 ),
             ),
         ]
@@ -643,35 +723,27 @@ class SuggestionGroupeTypeSource(BaseModel):
                     key="report_parent",
                     label="⏩",
                     css_classes="qf-text-center qf-text-2xl",
-                    header_action=StimulusControllerConfig(
-                        controller="report-update",
-                        values={
-                            "fields": "|".join(flattened),
-                            "suggestion-modele": "ParentRevisionActeur",
-                            "update-url": self.update_url,
-                            "target-values": self._target_values_json(flattened),
-                            "fields-groups": self.fields_groups_json,
-                        },
-                        actions=["click->report-update#report"],
+                    header_action=self._build_report_stimulus(
+                        "|".join(flattened), "ParentRevisionActeur", flattened
                     ),
                 )
             )
-            parent_links = [
-                HeaderLink(
-                    label="corrigé",
-                    url=self.parent_revision_acteur_change_url or "",
-                ),
-                HeaderLink(
-                    label="affiché",
-                    url=self.parent_revision_acteur_displayedacteur_change_url or "",
-                ),
-            ]
             columns.append(
                 ColumnHeader(
                     key="parent",
                     label="Parent",
                     css_classes="qf-w-1/4",
-                    links=parent_links,
+                    links=[
+                        HeaderLink(
+                            label="corrigé",
+                            url=self.parent_revision_acteur_change_url or "",
+                        ),
+                        HeaderLink(
+                            label="affiché",
+                            url=self.parent_revision_acteur_displayedacteur_change_url
+                            or "",
+                        ),
+                    ],
                     subtitle=(
                         f"{self.parent_revision_acteur_nombre_enfants} enfants impactés"
                         if self.parent_revision_acteur_nombre_enfants
@@ -683,7 +755,6 @@ class SuggestionGroupeTypeSource(BaseModel):
         # --- Rows ---
         rows = []
         for field_group in self.fields_groups:
-            fields_str = "|".join(field_group)
             cells: list[CellContent] = []
 
             # Source (display) cell
@@ -701,143 +772,36 @@ class SuggestionGroupeTypeSource(BaseModel):
                 )
             )
 
-            # Report to revision (action) cell
-            reportable_on_revision = all(
-                f not in not_reportable_revision for f in field_group
-            )
-            cells.append(
-                CellContent(
-                    column_key="report_revision",
-                    cell_type="action",
-                    enabled=reportable_on_revision,
+            # Revision target cells (action + editable)
+            cells.extend(
+                self._build_target_row_cells(
+                    field_group,
+                    suggestion_modele="RevisionActeur",
+                    action_column_key="report_revision",
+                    editable_column_key="correction",
                     action_icon="▶️",
-                    stimulus=(
-                        StimulusControllerConfig(
-                            controller="report-update",
-                            values={
-                                "fields": fields_str,
-                                "suggestion-modele": "RevisionActeur",
-                                "update-url": self.update_url,
-                                "target-values": self._target_values_json(field_group),
-                                "fields-groups": self.fields_groups_json,
-                            },
-                            actions=["click->report-update#report"],
-                        )
-                        if reportable_on_revision
-                        else None
-                    ),
+                    not_reportable=not_reportable_revision,
+                    not_editable=not_editable,
+                    display_fn=self._revision_display,
+                    replace_text_fn=self._revision_replace_text,
+                    errors=errors,
                 )
             )
 
-            # Correction (editable) cell
-            cells.append(
-                CellContent(
-                    column_key="correction",
-                    cell_type="editable",
-                    fields=[
-                        CellField(
-                            field_name=field,
-                            display_html=self._revision_display(field),
-                            editable=field not in not_editable,
-                            stimulus=(
-                                StimulusControllerConfig(
-                                    controller="cell-edit",
-                                    values={
-                                        "field": field,
-                                        "suggestion-modele": "RevisionActeur",
-                                        "update-url": self.update_url,
-                                        "replace-text": self._revision_replace_text(
-                                            field
-                                        ),
-                                        "fields-groups": self.fields_groups_json,
-                                    },
-                                    actions=[
-                                        "blur->cell-edit#save",
-                                        "focus->cell-edit#replace",
-                                    ],
-                                )
-                                if field not in not_editable
-                                else None
-                            ),
-                            error=(
-                                str(errors.get(field, ""))
-                                if errors and errors.get(field)
-                                else None
-                            ),
-                        )
-                        for field in field_group
-                    ],
-                )
-            )
-
-            # Parent columns (conditional)
+            # Parent target cells (conditional)
             if self.has_parent_revision_acteur:
-                reportable_on_parent = all(
-                    f not in not_reportable_parent for f in field_group
-                )
-                cells.append(
-                    CellContent(
-                        column_key="report_parent",
-                        cell_type="action",
-                        enabled=reportable_on_parent,
+                cells.extend(
+                    self._build_target_row_cells(
+                        field_group,
+                        suggestion_modele="ParentRevisionActeur",
+                        action_column_key="report_parent",
+                        editable_column_key="parent",
                         action_icon="⏩",
-                        stimulus=(
-                            StimulusControllerConfig(
-                                controller="report-update",
-                                values={
-                                    "fields": fields_str,
-                                    "suggestion-modele": "ParentRevisionActeur",
-                                    "update-url": self.update_url,
-                                    "target-values": self._target_values_json(
-                                        field_group
-                                    ),
-                                    "fields-groups": self.fields_groups_json,
-                                },
-                                actions=["click->report-update#report"],
-                            )
-                            if reportable_on_parent
-                            else None
-                        ),
-                    )
-                )
-
-                cells.append(
-                    CellContent(
-                        column_key="parent",
-                        cell_type="editable",
-                        fields=[
-                            CellField(
-                                field_name=field,
-                                display_html=self._parent_display(field),
-                                editable=field not in not_editable,
-                                stimulus=(
-                                    StimulusControllerConfig(
-                                        controller="cell-edit",
-                                        values={
-                                            "field": field,
-                                            "suggestion-modele": "ParentRevisionActeur",
-                                            "update-url": self.update_url,
-                                            "replace-text": self._parent_replace_text(
-                                                field
-                                            ),
-                                            "fields-groups": self.fields_groups_json,
-                                        },
-                                        actions=[
-                                            "blur->cell-edit#save",
-                                            "focus->cell-edit#replace",
-                                        ],
-                                    )
-                                    if field not in not_editable
-                                    else None
-                                ),
-                                error=(
-                                    str(errors.get(field, ""))
-                                    if errors and errors.get(field)
-                                    else None
-                                ),
-                            )
-                            for field in field_group
-                        ],
+                        not_reportable=not_reportable_parent,
+                        not_editable=not_editable,
+                        display_fn=self._parent_display,
+                        replace_text_fn=self._parent_replace_text,
+                        errors=errors,
                     )
                 )
 

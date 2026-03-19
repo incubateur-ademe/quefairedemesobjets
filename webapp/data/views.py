@@ -268,174 +268,133 @@ class SuggestionGroupeStatusView(LoginRequiredMixin, FormView):
 class SuggestionGroupeView(LoginRequiredMixin, View):
     template_name = "data/_partials/suggestion_groupe_refresh_stream.html"
 
+    @staticmethod
+    def _find_latlong_suggestion(suggestion_unitaires, modele):
+        return next(
+            (
+                su
+                for su in suggestion_unitaires
+                if su.suggestion_modele == modele
+                and su.champs == ["latitude", "longitude"]
+            ),
+            None,
+        )
+
+    @staticmethod
+    def _make_point(lat, lng, color, key, text=None, draggable=False):
+        point = {
+            "latitude": float(lat),
+            "longitude": float(lng),
+            "color": color,
+            "key": key,
+            "draggable": draggable,
+        }
+        if text is not None:
+            point["text"] = text
+        return point
+
+    @staticmethod
+    def _get_coords_from_suggestion_or_acteur(suggestion, acteur):
+        if suggestion:
+            return suggestion.valeurs[0], suggestion.valeurs[1]
+        if acteur and acteur.latitude and acteur.longitude:
+            return acteur.latitude, acteur.longitude
+        return None, None
+
     def _manage_tab_in_context(
         self,
         *,
         tab: str | None,
         suggestion_groupe: SuggestionGroupe,
-        acteur: Acteur | None | None,
+        acteur: Acteur | None,
         revision_acteur: RevisionActeur | None,
         parent_revision_acteur: RevisionActeur | None,
     ):
-
-        def _get_displayed_acteur_uuid(acteur, revision_acteur, parent_revision_acteur):
+        context = {"tab": tab}
+        if tab == "acteur":
             final_acteur = parent_revision_acteur or revision_acteur or acteur
             if final_acteur:
                 displayed_acteur = DisplayedActeur.objects.filter(
                     identifiant_unique=final_acteur.identifiant_unique
                 ).first()
-                return displayed_acteur.uuid if displayed_acteur else None
-            return None
+                context["uuid"] = displayed_acteur.uuid if displayed_acteur else None
+
+        if tab != "localisation":
+            return context
 
         suggestion_unitaires = suggestion_groupe.suggestion_unitaires.all()
-        acteur_suggestion_unitaires_latlong = next(
-            (
-                suggestion_unitaire
-                for suggestion_unitaire in suggestion_unitaires
-                if suggestion_unitaire.suggestion_modele == "Acteur"
-                and suggestion_unitaire.champs == ["latitude", "longitude"]
-            ),
-            None,
-        )
-        revision_acteur_suggestion_unitaires_latlong = next(
-            (
-                suggestion_unitaire
-                for suggestion_unitaire in suggestion_unitaires
-                if suggestion_unitaire.suggestion_modele == "RevisionActeur"
-                and suggestion_unitaire.champs == ["latitude", "longitude"]
-            ),
-            None,
-        )
-        parent_revision_acteur_suggestion_unitaires_latlong = next(
-            (
-                suggestion_unitaire
-                for suggestion_unitaire in suggestion_unitaires
-                if suggestion_unitaire.suggestion_modele == "ParentRevisionActeur"
-                and suggestion_unitaire.champs == ["latitude", "longitude"]
-            ),
-            None,
-        )
-        context = {"tab": tab}
-        if tab == "acteur":
-            context["uuid"] = _get_displayed_acteur_uuid(
-                acteur, revision_acteur, parent_revision_acteur
-            )
         points = []
-        if tab == "localisation":
-            # Pinpoint of the acteur as it is saved in the database
-            # Not editable by the user (draggable is False)
-            if acteur and acteur.latitude and acteur.longitude:
-                points.append(
-                    {
-                        "latitude": float(acteur.latitude),
-                        "longitude": float(acteur.longitude),
-                        "color": "grey",
-                        "key": "Origin",
-                        "draggable": False,
-                    }
+
+        # Origin: acteur as saved in DB (not draggable)
+        if acteur and acteur.latitude and acteur.longitude:
+            points.append(
+                self._make_point(acteur.latitude, acteur.longitude, "grey", "Origin")
+            )
+
+        # Suggestion: acteur as suggested by source (not draggable)
+        acteur_suggestion = self._find_latlong_suggestion(
+            suggestion_unitaires, "Acteur"
+        )
+        if acteur_suggestion:
+            points.append(
+                self._make_point(
+                    acteur_suggestion.valeurs[0],
+                    acteur_suggestion.valeurs[1],
+                    "green",
+                    "Suggestion",
+                    text="A",
                 )
-            # Pinpoint of the acteur as it is suggested by the source
-            # Not editable by the user (draggable is False)
-            if acteur_suggestion_unitaires_latlong:
-                points.append(
-                    {
-                        "latitude": float(
-                            acteur_suggestion_unitaires_latlong.valeurs[0]
-                        ),
-                        "longitude": float(
-                            acteur_suggestion_unitaires_latlong.valeurs[1]
-                        ),
-                        "color": "green",
-                        "key": "Suggestion",
-                        "text": "A",
-                        "draggable": False,
-                    }
+            )
+
+        # Correction: from suggestion if exists, else from revision_acteur (draggable)
+        revision_suggestion = self._find_latlong_suggestion(
+            suggestion_unitaires, "RevisionActeur"
+        )
+        lat, lng = self._get_coords_from_suggestion_or_acteur(
+            revision_suggestion, revision_acteur
+        )
+        if lat is not None:
+            points.append(
+                self._make_point(
+                    lat, lng, "blue", "RevisionActeur", text="▶️", draggable=True
                 )
-            # Pinpoint of the correction
-            # From suggestion over the correction suggestion if exists
-            # Then from Correction itself if exists
-            # Editable by the user (draggable is True)
-            if (
-                revision_acteur
-                and revision_acteur.latitude
-                and revision_acteur.longitude
-            ) or revision_acteur_suggestion_unitaires_latlong:
-                latitude = (
-                    revision_acteur_suggestion_unitaires_latlong.valeurs[0]
-                    if revision_acteur_suggestion_unitaires_latlong
-                    else revision_acteur.latitude
+            )
+
+        # Parent:
+        # from suggestion if exists, else from parent_revision_acteur (draggable)
+        parent_suggestion = self._find_latlong_suggestion(
+            suggestion_unitaires, "ParentRevisionActeur"
+        )
+        lat, lng = self._get_coords_from_suggestion_or_acteur(
+            parent_suggestion, parent_revision_acteur
+        )
+        if lat is not None:
+            points.append(
+                self._make_point(
+                    lat, lng, "red", "ParentRevisionActeur", text="⏩", draggable=True
                 )
-                longitude = (
-                    revision_acteur_suggestion_unitaires_latlong.valeurs[1]
-                    if revision_acteur_suggestion_unitaires_latlong
-                    else revision_acteur.longitude
-                )
-                points.append(
-                    {
-                        "latitude": float(latitude),
-                        "longitude": float(longitude),
-                        "color": "blue",
-                        "key": "RevisionActeur",
-                        "text": "▶️",
-                        "draggable": True,
-                    }
-                )
-            # Pinpoint of the parent
-            # From suggestion over the parent suggestion if exists
-            # Then from Parent itself if exists
-            # Editable by the user (draggable is True)
-            if parent_revision_acteur_suggestion_unitaires_latlong or (
-                parent_revision_acteur
-                and parent_revision_acteur.latitude
-                and parent_revision_acteur.longitude
-            ):
-                latitude = (
-                    parent_revision_acteur_suggestion_unitaires_latlong.valeurs[0]
-                    if parent_revision_acteur_suggestion_unitaires_latlong
-                    else parent_revision_acteur.latitude
-                )
-                longitude = (
-                    parent_revision_acteur_suggestion_unitaires_latlong.valeurs[1]
-                    if parent_revision_acteur_suggestion_unitaires_latlong
-                    else parent_revision_acteur.longitude
-                )
-                points.append(
-                    {
-                        "latitude": float(latitude),
-                        "longitude": float(longitude),
-                        "color": "red",
-                        "key": "ParentRevisionActeur",
-                        "text": "⏩",
-                        "draggable": True,
-                    }
-                )
+            )
 
         if points:
-            context["localisation"] = {
-                "points": points,
-            }
+            context["localisation"] = {"points": points}
 
+        return context
+
+    def _build_full_context(self, request, suggestion_groupe):
+        context = get_context_from_suggestion_groupe_type_source(suggestion_groupe)
+        tab_context = self._manage_tab_in_context(
+            tab=request.GET.get("tab", request.POST.get("tab", None)),
+            suggestion_groupe=suggestion_groupe,
+            acteur=context.get("acteur"),
+            revision_acteur=context.get("revision_acteur"),
+            parent_revision_acteur=context.get("parent_revision_acteur"),
+        )
+        context.update(tab_context)
         return context
 
     def get(self, request, suggestion_groupe_id):
         suggestion_groupe = get_object_or_404(SuggestionGroupe, id=suggestion_groupe_id)
-
-        context = get_context_from_suggestion_groupe_type_source(suggestion_groupe)
-        to_add_in_context = self._manage_tab_in_context(
-            tab=request.GET.get("tab", request.POST.get("tab", None)),
-            suggestion_groupe=suggestion_groupe,
-            acteur=context["acteur"] if "acteur" in context else None,
-            revision_acteur=(
-                context["revision_acteur"] if "revision_acteur" in context else None
-            ),
-            parent_revision_acteur=(
-                context["parent_revision_acteur"]
-                if "parent_revision_acteur" in context
-                else None
-            ),
-        )
-        context.update(to_add_in_context)
-
+        context = self._build_full_context(request, suggestion_groupe)
         return render(
             request,
             self.template_name,
@@ -466,27 +425,14 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
             )
         except json.JSONDecodeError:
             return HttpResponseBadRequest("Payload fields_list invalide")
+
         _, errors = update_suggestion_groupe(
             suggestion_groupe, suggestion_modele_payload, fields_values, fields_groups
         )
 
-        context = get_context_from_suggestion_groupe_type_source(suggestion_groupe)
-        to_add_in_context = self._manage_tab_in_context(
-            tab=request.GET.get("tab", request.POST.get("tab", None)),
-            suggestion_groupe=suggestion_groupe,
-            acteur=context["acteur"] if "acteur" in context else None,
-            revision_acteur=(
-                context["revision_acteur"] if "revision_acteur" in context else None
-            ),
-            parent_revision_acteur=(
-                context["parent_revision_acteur"]
-                if "parent_revision_acteur" in context
-                else None
-            ),
-        )
-        context.update(to_add_in_context)
-        context["errors"] = errors if errors else {}
+        context = self._build_full_context(request, suggestion_groupe)
         if errors:
+            context["errors"] = errors
             sg_type_source = context["suggestion_groupe_type_source"]
             context["comparison_table"] = sg_type_source.to_comparison_table(
                 errors=errors
