@@ -24,3 +24,4 @@ class COLS:
     SUGGEST_VALUE: str = "suggest_value"
     COHORT: str = "suggest_cohort"
     ID: str = "identifiant_unique"
+    EST_PARENT: str = "est_parent"

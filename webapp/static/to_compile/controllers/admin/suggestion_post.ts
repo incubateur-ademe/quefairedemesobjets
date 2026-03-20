@@ -12,6 +12,7 @@ export function postFieldsValues(
   fieldsValues: Record<string, any>,
   fieldsGroups: Array<string[]>,
   openedTab: string = "",
+  identifiantUnique: string = "",
 ): void {
   if (!updateUrl) {
     console.error("URL de mise à jour de la suggestion manquante")
@@ -24,6 +25,7 @@ export function postFieldsValues(
   const formData = new FormData()
   formData.append("fields_values", JSON.stringify(fieldsValues))
   formData.append("fields_groups", JSON.stringify(fieldsGroups))
+  formData.append("identifiant_unique", identifiantUnique)
   formData.append("suggestion_modele", suggestionModele)
   if (openedTab) {
     formData.append("tab", openedTab)

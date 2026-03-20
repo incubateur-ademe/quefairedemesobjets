@@ -2,8 +2,8 @@ import json
 
 from core.templatetags.admin_data_tags import display_diff_values
 from data.models.comparison_table import (
-    CellContent,
     CellField,
+    CellFieldsContent,
     ColumnHeader,
     ComparisonTable,
     HeaderLink,
@@ -599,12 +599,12 @@ class SuggestionGroupeTypeSource(BaseModel):
         display_fn,
         replace_text_fn,
         errors: dict | None,
-    ) -> list[CellContent]:
+    ) -> list[CellFieldsContent]:
         """Build the action cell + editable cell pair for a target model."""
         fields_str = "|".join(field_group)
         reportable = all(f not in not_reportable for f in field_group)
 
-        action_cell = CellContent(
+        action_cell = CellFieldsContent(
             column_key=action_column_key,
             cell_type="action",
             enabled=reportable,
@@ -616,7 +616,7 @@ class SuggestionGroupeTypeSource(BaseModel):
             ),
         )
 
-        editable_cell = CellContent(
+        editable_cell = CellFieldsContent(
             column_key=editable_column_key,
             cell_type="editable",
             fields=[
@@ -752,11 +752,11 @@ class SuggestionGroupeTypeSource(BaseModel):
         # --- Rows ---
         rows = []
         for field_group in self.fields_groups:
-            cells: list[CellContent] = []
+            cells: list[CellFieldsContent] = []
 
             # Source (display) cell
             cells.append(
-                CellContent(
+                CellFieldsContent(
                     column_key="source",
                     cell_type="display",
                     fields=[

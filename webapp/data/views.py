@@ -3,10 +3,12 @@ import logging
 
 from data.forms import SuggestionGroupeStatusForm
 from data.models.suggestion import (
+    SuggestionAction,
     SuggestionGroupe,
     SuggestionStatut,
     SuggestionUnitaire,
 )
+from data.models.suggestions.enrich_multi import SuggestionGroupeTypeEnrichMulti
 from data.models.suggestions.source import (
     SuggestionGroupeTypeSource,
     SuggestionSourceModel,
@@ -24,6 +26,44 @@ from qfdmo.models.acteur import Acteur, ActeurStatus, DisplayedActeur, RevisionA
 logger = logging.getLogger(__name__)
 
 
+def get_context_from_suggestion_groupe(
+    suggestion_groupe: SuggestionGroupe,
+) -> dict:
+    """ """
+    type_action = suggestion_groupe.suggestion_cohorte.type_action
+
+    if type_action in [
+        SuggestionAction.SOURCE_AJOUT,
+        SuggestionAction.SOURCE_MODIFICATION,
+        SuggestionAction.SOURCE_SUPPRESSION,
+    ]:
+        return get_context_from_suggestion_groupe_type_source(suggestion_groupe)
+    elif type_action in [
+        SuggestionAction.CRAWL_URLS,
+    ]:
+        return get_context_from_suggestion_groupe_type_enrich_multi(suggestion_groupe)
+
+    raise NotImplementedError(f"Not implemented for type_action: {type_action}")
+
+
+def get_context_from_suggestion_groupe_type_enrich_multi(
+    suggestion_groupe: SuggestionGroupe,
+) -> dict:
+    """
+    Serialize a SuggestionGroupe into a SuggestionGroupeTypeEnrichMulti and
+    return a template context dict with the ComparisonTable.
+    """
+    sg_type_enrich_multi = SuggestionGroupeTypeEnrichMulti.from_suggestion_groupe(
+        suggestion_groupe
+    )
+    context: dict = {
+        "suggestion_groupe": suggestion_groupe,
+        "suggestion_groupe_type": sg_type_enrich_multi,
+        "comparison_table": sg_type_enrich_multi.to_comparison_table(),
+    }
+    return context
+
+
 def get_context_from_suggestion_groupe_type_source(
     suggestion_groupe: SuggestionGroupe,
 ) -> dict:
@@ -35,7 +75,7 @@ def get_context_from_suggestion_groupe_type_source(
         - suggestion_groupe: the SuggestionGroupe instance
         - identifiant_unique: the acteur identifier
         - comparison_table: a ComparisonTable Pydantic model
-        - suggestion_groupe_type_source: the SuggestionGroupeTypeSource instance
+        - suggestion_groupe_type: the SuggestionGroupeTypeSource instance
         - acteur, revision_acteur, parent_revision_acteur (for non-SOURCE_AJOUT)
     """
     sg_type_source = SuggestionGroupeTypeSource.from_suggestion_groupe(
@@ -45,7 +85,7 @@ def get_context_from_suggestion_groupe_type_source(
     context: dict = {
         "suggestion_groupe": suggestion_groupe,
         "identifiant_unique": sg_type_source.identifiant_unique,
-        "suggestion_groupe_type_source": sg_type_source,
+        "suggestion_groupe_type": sg_type_source,
         "comparison_table": sg_type_source.to_comparison_table(),
         "acteur": sg_type_source.acteur,
         "revision_acteur": sg_type_source.revision_acteur,
@@ -61,6 +101,7 @@ def update_suggestion_groupe(
     suggestion_modele: str,
     fields_values: dict,
     fields_groups: list[tuple],
+    identifiant_unique: str = "",
 ) -> tuple[bool, dict | None]:
     """
     for each fields to update
@@ -88,13 +129,11 @@ def update_suggestion_groupe(
                         fields_values.get(coord_field, "0.0"),
                     )
                 except (ValueError, KeyError) as e:
-                    logger.warning(f"ValueError for {coord_field}: {e}")
                     return {coord_field: f"{coord_field} must be a float: {e}"}
 
         try:
             values_to_update = prepare_acteur_data_with_location(values_to_update)
         except (ValueError, KeyError) as e:
-            logger.warning(f"ValueError for : {e}")
             return {
                 "latitude": f"latitude must be a float: {e}",
                 "longitude": f"longitude must be a float: {e}",
@@ -109,10 +148,8 @@ def update_suggestion_groupe(
                 revision_acteur.statut = ActeurStatus.ACTIF
             revision_acteur.full_clean()
         except ValidationError as e:
-            logger.warning(f"RevisionActeur is not valid: {e}")
             return e.error_dict
         except TypeError as e:
-            logger.warning(f"RevisionActeur is not valid: {e}")
             return {"error": str(e)}
 
         return {}
@@ -145,11 +182,12 @@ def update_suggestion_groupe(
             else suggestion_groupe.get_parent_revision_acteur_or_none()
         )
     )
-    identifiant_unique = (
-        (acteur and acteur.identifiant_unique)
-        or suggestion_groupe.acteur_id
-        or suggestion_groupe.get_identifiant_unique_from_suggestion_unitaires()
-    )
+    if not identifiant_unique:
+        identifiant_unique = (
+            (acteur and acteur.identifiant_unique)
+            or suggestion_groupe.acteur_id
+            or suggestion_groupe.get_identifiant_unique_from_suggestion_unitaires()
+        )
 
     if not identifiant_unique:
         raise ValueError("identifiant_unique is missing")
@@ -206,31 +244,24 @@ def update_suggestion_groupe(
         if errors := _validate_proposed_updates(values_to_update, fields_values):
             return False, errors
     except Exception as e:
-        logger.warning(f"Error validating proposed updates: {e}")
         return False, {"error": str(e)}
 
     # Create or update SuggestionUnitaire objects
     for fields in fields_groups:
         if any(field in values_to_update for field in fields):
+            suggestion_fields = {
+                "suggestion_groupe": suggestion_groupe,
+                "champs": fields,
+                "suggestion_modele": suggestion_modele,
+            }
+            if suggestion_modele == "Acteur":
+                suggestion_fields["acteur_id"] = identifiant_unique
+            elif suggestion_modele == "RevisionActeur":
+                suggestion_fields["revision_acteur_id"] = identifiant_unique
+            elif suggestion_modele == "ParentRevisionActeur":
+                suggestion_fields["parent_revision_acteur_id"] = identifiant_unique
             suggestion_unitaire, _ = SuggestionUnitaire.objects.get_or_create(
-                suggestion_groupe=suggestion_groupe,
-                champs=fields,
-                suggestion_modele=suggestion_modele,
-                defaults={
-                    "acteur_id": (
-                        identifiant_unique if suggestion_modele == "Acteur" else None
-                    ),
-                    "revision_acteur_id": (
-                        identifiant_unique
-                        if suggestion_modele == "RevisionActeur"
-                        else None
-                    ),
-                    "parent_revision_acteur_id": (
-                        identifiant_unique
-                        if suggestion_modele == "ParentRevisionActeur"
-                        else None
-                    ),
-                },
+                **suggestion_fields
             )
             suggestion_unitaire.valeurs = [
                 values_to_update.get(field, "") for field in fields
@@ -382,16 +413,23 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
         return context
 
     def _build_full_context(self, request, suggestion_groupe):
-        context = get_context_from_suggestion_groupe_type_source(suggestion_groupe)
-        tab_context = self._manage_tab_in_context(
-            tab=request.GET.get("tab", request.POST.get("tab", None)),
-            suggestion_groupe=suggestion_groupe,
-            acteur=context.get("acteur"),
-            revision_acteur=context.get("revision_acteur"),
-            parent_revision_acteur=context.get("parent_revision_acteur"),
-        )
-        context.update(tab_context)
-        return context
+        if suggestion_groupe.suggestion_cohorte.type_action in [
+            SuggestionAction.CRAWL_URLS,
+        ]:
+            return get_context_from_suggestion_groupe_type_enrich_multi(
+                suggestion_groupe
+            )
+        else:
+            context = get_context_from_suggestion_groupe_type_source(suggestion_groupe)
+            tab_context = self._manage_tab_in_context(
+                tab=request.GET.get("tab", request.POST.get("tab", None)),
+                suggestion_groupe=suggestion_groupe,
+                acteur=context.get("acteur"),
+                revision_acteur=context.get("revision_acteur"),
+                parent_revision_acteur=context.get("parent_revision_acteur"),
+            )
+            context.update(tab_context)
+            return context
 
     def get(self, request, suggestion_groupe_id):
         suggestion_groupe = get_object_or_404(SuggestionGroupe, id=suggestion_groupe_id)
@@ -428,14 +466,18 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
             return HttpResponseBadRequest("Payload fields_list invalide")
 
         _, errors = update_suggestion_groupe(
-            suggestion_groupe, suggestion_modele_payload, fields_values, fields_groups
+            suggestion_groupe,
+            suggestion_modele_payload,
+            fields_values,
+            fields_groups,
+            request.POST.get("identifiant_unique", ""),
         )
 
         context = self._build_full_context(request, suggestion_groupe)
         if errors:
             context["errors"] = errors
-            sg_type_source = context["suggestion_groupe_type_source"]
-            context["comparison_table"] = sg_type_source.to_comparison_table(
+            suggestion_groupe_type = context["suggestion_groupe_type"]
+            context["comparison_table"] = suggestion_groupe_type.to_comparison_table(
                 errors=errors
             )
 
