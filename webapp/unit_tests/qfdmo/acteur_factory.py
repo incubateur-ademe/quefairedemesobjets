@@ -5,7 +5,6 @@ import factory.fuzzy
 from django.contrib.gis.geos import Point
 from factory import Faker, LazyFunction, SubFactory
 from factory.django import DjangoModelFactory as Factory
-
 from qfdmo.models import (
     Acteur,
     ActeurService,
@@ -99,6 +98,9 @@ class VueActeurFactory(Factory):
     location = Point(2, 2)
     acteur_type = SubFactory(ActeurTypeFactory)
     source = SubFactory(SourceFactory)
+    est_dans_opendata = True
+    est_dans_carte = True
+    est_parent = False
 
 
 class ActeurServiceFactory(Factory):

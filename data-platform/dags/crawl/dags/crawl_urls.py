@@ -70,6 +70,14 @@ with DAG(
             les URLs pour voir si leurs pages sont accessibles
             et/ou si elles redirigent""",
         ),
+        "use_legacy_suggestions": Param(
+            True,
+            type="boolean",
+            description_md="""**🔄 Utilisation des suggestions legacy**:
+            si coché, les suggestions seront basées sur les suggestions legacy
+            sinon, les suggestions seront basées sur les groupes de suggestions
+            """,
+        ),
     },
 ) as dag:
     read = crawl_urls_read_urls_from_db_task(dag)

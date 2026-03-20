@@ -5,7 +5,6 @@ import pytest
 # how to fix properly via pytest conf?
 from crawl.fixtures import acteurs_create, df_syntax_fail  # noqa
 from crawl.tasks.business_logic.crawl_urls_suggest import crawl_urls_suggest
-
 from dags.crawl.config.columns import COLS
 
 
@@ -33,6 +32,7 @@ class TestCrawlUrlsSuggest:
             dry_run=dry_run,
             dag_display_name=f"test_crawl_urls_action_{dry_run=}",
             run_id=f"test_crawl_urls_execution_{dry_run=}",
+            use_legacy_suggestions=True,
         )
         assert written_to_db_count == db_cnt_sugg
         assert SuggestionCohorte.objects.count() == db_cnt_cohort

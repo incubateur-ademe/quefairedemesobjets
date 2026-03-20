@@ -1,7 +1,10 @@
+import logging
 from html import escape
 
 from django.template.defaulttags import register
 from django.utils.safestring import mark_safe
+
+logger = logging.getLogger(__name__)
 
 
 @register.filter
