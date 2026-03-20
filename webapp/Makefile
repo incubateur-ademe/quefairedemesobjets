@@ -37,7 +37,7 @@ runserver-e2e:
 	make DATABASE_URL=$(SAMPLE_DATABASE_URL) runserver
 
 .PHONY: migrate_homepage
-migrate:
+migrate_homepage:
 	$(DJANGO_ADMIN) migrate_homepage
 
 .PHONY: migrate
