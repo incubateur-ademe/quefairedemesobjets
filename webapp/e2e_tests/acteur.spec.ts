@@ -66,9 +66,6 @@ test.describe("📋 Fiche Acteur - mode carte", () => {
 })
 
 test.describe("📋 Fiche Acteur - mode liste", () => {
-  // SKIP: it fails because when the last acteur of the list is clicked,
-  // the details is displayed on top of the list
-  // and the acteur title is not visible in the viewport
   test(
     "La fiche acteur est visible dans le viewport sans scroll sur mobile",
     { tag: ["@mobile", "@regression"] },
