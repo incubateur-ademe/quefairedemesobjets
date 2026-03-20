@@ -59,6 +59,7 @@ runs:
         # TODO: user make prepare-e2e-test here
         cd webapp
         make migrate
+        make migrate_homepage
         make rebuild-search-index
         make createsuperuser-example
 
