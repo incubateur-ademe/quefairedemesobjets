@@ -141,7 +141,7 @@
                 <div
                     data-controller="suggestion-map-update"
                     data-suggestion-map-update-update-url-value="{% url 'data:suggestion_groupe' suggestion_groupe.id %}"
-                    data-suggestion-map-update-fields-groups-value="{{ fields_groups|tojson }}"
+                    data-suggestion-map-update-fields-groups-value='[["latitude", "longitude"]]'
                     data-action="map:markerDragged->suggestion-map-update#handleMarkerDragged"
                 >
                 <div

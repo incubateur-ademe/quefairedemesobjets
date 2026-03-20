@@ -1,9 +1,11 @@
 import json
+from abc import abstractmethod
 
-from django.db import models
-
-from data.models.apply_models.abstract_apply_model import AbstractApplyModel
+from data.models.comparison_table import ComparisonTable
+from data.models.suggestion import SuggestionGroupe
 from data.models.utils import prepare_acteur_data_with_location
+from django.db import models as django_models
+from pydantic import BaseModel, ConfigDict
 from qfdmo.models.acteur import (
     Acteur,
     PerimetreADomicile,
@@ -16,22 +18,62 @@ from qfdmo.models.action import Action
 from qfdmo.models.categorie_objet import SousCategorieObjet
 
 
-class SourceApplyModel(AbstractApplyModel):
-    @classmethod
-    def name(cls) -> str:
-        return "SourceApplyModel"
+class SuggestionGroupeType(BaseModel):
+    """Abstract base class for SuggestionGroupe type handlers."""
 
-    def _set_foreign_key_from_code(self, acteur: Acteur | RevisionActeur, data: dict):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    suggestion_groupe: SuggestionGroupe
+
+    @abstractmethod
+    def from_suggestion_groupe(
+        self, suggestion_groupe: SuggestionGroupe
+    ) -> "SuggestionGroupeType":
+        pass
+
+    @abstractmethod
+    def to_comparison_table(self) -> ComparisonTable:
+        pass
+
+    @abstractmethod
+    def apply(self):
+        pass
+
+    @staticmethod
+    def _apply_one(
+        acteur_model: type[Acteur | RevisionActeur],
+        identifiant_unique: str,
+        data: dict,
+    ) -> Acteur | RevisionActeur:
+
+        try:
+            acteur = acteur_model.objects.get(identifiant_unique=identifiant_unique)
+        except acteur_model.DoesNotExist:
+            acteur = None
+
+        prepared = prepare_acteur_data_with_location(data)
+        if "identifiant_unique" not in prepared:
+            prepared["identifiant_unique"] = identifiant_unique
+
+        if not acteur:
+            acteur = acteur_model(**prepared)
+        else:
+            for key, value in prepared.items():
+                setattr(acteur, key, value)
+
+        SuggestionGroupeType._set_foreign_key_from_code(acteur, data)
+        acteur.full_clean()
+        acteur.save()
+        return acteur
+
+    @staticmethod
+    def _set_foreign_key_from_code(acteur: Acteur | RevisionActeur, data: dict):
+
         for key, value in data.items():
             if key.endswith("_code"):
-                # - source_code
-                # - acteur_type_code
                 field_name = key.removesuffix("_code")
-                # Get the ForeignKey field from model metadata
                 field = acteur._meta.get_field(field_name)
-
-                # Verify it's a ForeignKey and set relationship
-                if isinstance(field, models.ForeignKey):
+                if isinstance(field, django_models.ForeignKey):
                     related_model_class = field.related_model
                     related_instance = related_model_class.objects.get(code=value)
                     setattr(acteur, field_name, related_instance)
@@ -41,7 +83,9 @@ class SourceApplyModel(AbstractApplyModel):
                         " a ForeignKey"
                     )
 
-    def _set_acteur_linked_objects(self, acteur: Acteur | RevisionActeur, data: dict):
+    @staticmethod
+    def _set_acteur_linked_objects(acteur: Acteur | RevisionActeur, data: dict):
+
         for key, value in data.items():
             if key == "proposition_service_codes":
                 if isinstance(acteur, RevisionActeur):
@@ -77,8 +121,6 @@ class SourceApplyModel(AbstractApplyModel):
                         acteur=acteur,
                     )
             elif key.endswith("_codes"):
-                # - label_codes
-                # - acteur_service_codes
                 field_name = key.removesuffix("_codes") + "s"
                 linked_objects = getattr(acteur, field_name)
                 linked_object_class = acteur._meta.get_field(field_name).related_model
@@ -88,30 +130,3 @@ class SourceApplyModel(AbstractApplyModel):
                     linked_objects.add(
                         linked_object_class.objects.get(code=linked_object)
                     )
-
-    def validate(self) -> Acteur | RevisionActeur:
-        """validate will raise an error if the data is invalid"""
-        # get acteur if exists
-        try:
-            acteur = self.acteur_model.objects.get(
-                identifiant_unique=self.identifiant_unique
-            )
-        except self.acteur_model.DoesNotExist:
-            acteur = None
-        data = prepare_acteur_data_with_location(self.data)
-        if "identifiant_unique" not in data:
-            data["identifiant_unique"] = self.identifiant_unique
-        if not acteur:
-            acteur = self.acteur_model(**data)
-        else:
-            for key, value in data.items():
-                setattr(acteur, key, value)
-        self._set_foreign_key_from_code(acteur, self.data)
-        acteur.full_clean()
-        return acteur
-
-    def apply(self):
-        """Apply the data updates to the acteur"""
-        acteur = self.validate()
-        acteur.save()
-        self._set_acteur_linked_objects(acteur, self.data)

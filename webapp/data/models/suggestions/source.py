@@ -2,6 +2,7 @@ import json
 
 from core.templatetags.admin_data_tags import display_diff_values
 from data.models.comparison_table import (
+    CellContent,
     CellField,
     CellFieldsContent,
     ColumnHeader,
@@ -15,6 +16,7 @@ from data.models.suggestion import (
     SuggestionGroupe,
     SuggestionUnitaire,
 )
+from data.models.suggestions.abstract import SuggestionGroupeType
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from more_itertools import flatten
@@ -340,7 +342,7 @@ def _get_ordered_fields_groups(
     return [fields for fields in ordered_fields if fields in fields_groups]
 
 
-class SuggestionGroupeTypeSource(BaseModel):
+class SuggestionGroupeTypeSource(SuggestionGroupeType):
     """
     Represents a SuggestionGroupe of type SOURCE (AJOUT, MODIFICATION, SUPPRESSION)
     with all its SuggestionUnitaires, organized by target model.
@@ -351,12 +353,8 @@ class SuggestionGroupeTypeSource(BaseModel):
     - The logic to build a ComparisonTable for UI rendering
     """
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-
     fields_groups: list[tuple[str, ...]]
     identifiant_unique: str
-
-    suggestion_groupe: SuggestionGroupe
 
     acteur: Acteur | None = None
     revision_acteur: RevisionActeur | None = None
@@ -752,7 +750,7 @@ class SuggestionGroupeTypeSource(BaseModel):
         # --- Rows ---
         rows = []
         for field_group in self.fields_groups:
-            cells: list[CellFieldsContent] = []
+            cells: list[CellFieldsContent | CellContent] = []
 
             # Source (display) cell
             cells.append(
@@ -805,6 +803,40 @@ class SuggestionGroupeTypeSource(BaseModel):
             rows.append(TableRow(label=", ".join(field_group), cells=cells))
 
         return ComparisonTable(columns=columns, rows=rows)
+
+    def apply(self):
+        acteur_data = self.acteur_suggestions.model_dump(exclude_none=True)
+        if not acteur_data:
+            raise ValueError("No acteur suggestion unitaires found")
+
+        # Apply Acteur suggestions
+        acteur = self._apply_one(Acteur, self.identifiant_unique, acteur_data)
+        self._set_acteur_linked_objects(acteur, acteur_data)
+
+        # Apply RevisionActeur suggestions
+        revision_data = self.revision_acteur_suggestions.model_dump(exclude_none=True)
+        if revision_data:
+            identifiant_unique_revision = (
+                self.revision_acteur.identifiant_unique
+                if self.revision_acteur
+                else self.identifiant_unique
+            )
+            revision_acteur = self._apply_one(
+                RevisionActeur, identifiant_unique_revision, revision_data
+            )
+            self._set_acteur_linked_objects(revision_acteur, revision_data)
+
+        # Apply ParentRevisionActeur suggestions
+        parent_data = self.parent_revision_acteur_suggestions.model_dump(
+            exclude_none=True
+        )
+        if parent_data and self.parent_revision_acteur:
+            parent_acteur = self._apply_one(
+                RevisionActeur,
+                self.parent_revision_acteur.identifiant_unique,
+                parent_data,
+            )
+            self._set_acteur_linked_objects(parent_acteur, parent_data)
 
 
 SuggestionGroupeTypeSource.model_rebuild()
