@@ -20,21 +20,11 @@ class ActeurController extends WindowResizeController {
     if (this.element.ariaHidden !== "false") {
       this.element.ariaHidden = "false"
     }
-
-    this.element.dataset.exitAnimationEnded = "false"
-    this.#resizeContent()
   }
 
   hide() {
     this.element.ariaExpanded = "false"
     this.element.ariaHidden = "true"
-    this.element.addEventListener(
-      "animationend",
-      () => {
-        this.element.dataset.exitAnimationEnded = "true"
-      },
-      { once: true },
-    )
     PinpointController.clearActivePinpoints()
   }
 
