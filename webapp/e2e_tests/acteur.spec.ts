@@ -5,11 +5,12 @@ import {
   mockApiAdresse,
   navigateTo,
   searchCarteAndWaitForActeurs,
+  searchOnProduitPage,
   switchToListeMode,
   TIMEOUT,
 } from "./helpers"
 
-test.describe("📋 Fiche Acteur Viewport - mode carte", () => {
+test.describe("📋 Fiche Acteur - mode carte", () => {
   test(
     "La fiche acteur est visible dans le viewport sans scroll sur mobile",
     { tag: ["@mobile", "@regression"] },
@@ -64,11 +65,11 @@ test.describe("📋 Fiche Acteur Viewport - mode carte", () => {
   )
 })
 
-test.describe("📋 Fiche Acteur Viewport - mode liste", () => {
+test.describe("📋 Fiche Acteur - mode liste", () => {
   // SKIP: it fails because when the last acteur of the list is clicked,
   // the details is displayed on top of the list
   // and the acteur title is not visible in the viewport
-  test.skip(
+  test(
     "La fiche acteur est visible dans le viewport sans scroll sur mobile",
     { tag: ["@mobile", "@regression"] },
     async ({ page }) => {
@@ -85,28 +86,25 @@ test.describe("📋 Fiche Acteur Viewport - mode liste", () => {
 
       // Wait for the carte turbo-frame to load inside the produit page
       await mockApiAdresse(page)
-      const mauvaisEtatPanel = iframe.locator("#mauvais-etat-panel")
-      await expect(mauvaisEtatPanel).toBeAttached({ timeout: TIMEOUT.DEFAULT })
-      await expect(
-        mauvaisEtatPanel.locator('[data-testid="carte-adresse-input"]'),
-      ).toBeVisible({ timeout: TIMEOUT.DEFAULT })
 
       // Search for Auray in the carte embedded in the produit page
-      await searchCarteAndWaitForActeurs(page, "Auray", iframe, {
-        parentLocator: mauvaisEtatPanel,
+      const someWagtailCarteBlock = page
+        .locator(".cmsfr-block-carte_sur_mesure turbo-frame[data-testid=carte]")
+        .first()
+      await expect(someWagtailCarteBlock).toBeAttached({ timeout: 1000 })
+      await searchCarteAndWaitForActeurs(page, "auray", iframe, {
+        parentLocator: someWagtailCarteBlock,
       })
 
       // Switch to list view
-      await switchToListeMode(mauvaisEtatPanel)
+      await switchToListeMode(iframe)
 
       // Click on the first acteur link in the list
-      const firstActeurListLink = mauvaisEtatPanel
-        .getByTestId("acteur-list-link")
-        .last()
+      const firstActeurListLink = iframe.getByTestId("acteur-list-link").last()
       await firstActeurListLink.click()
 
       // Wait for the acteur detail panel in the mauvais-etat tab to be shown
-      const acteurDetailsPanel = mauvaisEtatPanel.locator("#acteurDetailsPanel")
+      const acteurDetailsPanel = iframe.locator("#acteurDetailsPanel")
       await expect(acteurDetailsPanel).toHaveAttribute("aria-hidden", "false", {
         timeout: TIMEOUT.DEFAULT,
       })
