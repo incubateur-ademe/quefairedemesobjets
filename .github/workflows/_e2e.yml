@@ -64,6 +64,7 @@ jobs:
       # and overlay them onto the working tree so both baseline and compare jobs
       # use the same test definitions and action definitions.
       - name: Checkout regression test files from PR branch
+        if: inputs.compare
         uses: actions/checkout@v6
         with:
           ref: ${{ github.ref }}
@@ -74,8 +75,10 @@ jobs:
           path: __regression_tests__
 
       - name: Overlay regression test files
+        if: inputs.compare
         run: |
-          cp -r __regression_tests__/webapp/* webapp/
+          cp -r __regression_tests__/webapp/e2e_tests/. webapp/e2e_tests
+          cp -r __regression_tests__/webapp/playwright.config.ts ./webapp/
           cp -r __regression_tests__/.github .
           rm -rf __regression_tests__
 
@@ -96,7 +99,7 @@ jobs:
           dump-path: database-dump.pgdump
 
       - name: TEMPORARY - prepare search index
-        if: inputs.ref == github.ref
+        if: ${{ !inputs.compare }}
         run: |
           cd webapp && uv run python manage.py populate_fake_search_tags
           uv run python manage.py populate_search_terms
@@ -128,7 +131,7 @@ jobs:
           path: ${{ env.SCREENSHOTS_BASE_PATH }}
 
       - name: Upload report
-        if: ${{ !inputs.compare }}
+        if: ${{ !inputs.compare && failure() }}
         uses: actions/upload-artifact@v7
         with:
           name: blob-report-${{ matrix.shard }}
@@ -141,7 +144,7 @@ jobs:
         with:
           name: playwright-diffs-${{ matrix.shard }}
           if-no-files-found: ignore
-          path: ${{ env.SCREENSHOTS_BASE_PATH }}
+          path: webapp/test-results
 
 
   create-report:
@@ -165,13 +168,14 @@ jobs:
         merge-multiple: true
 
     - name: Merge into HTML Report
-      run: npx playwright merge-reports --reporter html ./all-blob-reports
+      run: npx playwright merge-reports --reporter html ../all-blob-reports
+      working-directory: webapp
 
     - name: Upload HTML report
       uses: actions/upload-artifact@v7
       with:
         name: html-report--attempt-${{ github.run_attempt }}
-        path: playwright-report
+        path: ./webapp/playwright-report
         retention-days: 7
 
 

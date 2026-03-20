@@ -30,6 +30,8 @@ outputs:
 runs:
   using: composite
   steps:
+    # TODO: re-enable cache when tests are stabilised, but for now
+    # it is safer to get a fresh db each time.
     # - name: Check database cache
     #   id: cache-db
     #   uses: actions/cache@v5
