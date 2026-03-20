@@ -44,7 +44,11 @@
                     <tr>
                         <td>{{ row.label }}</td>
                         {% for cell in row.cells %}
-                            {% if cell.cell_type == "display" %}
+                            {% if cell.cell_type == "html" %}
+                                <td>
+                                    {{ cell.html_content|safe }}
+                                </td>
+                            {% elif cell.cell_type == "display" %}
                                 <td>
                                     {% for field in cell.fields %}
                                         {{ field.display_html|safe }}
