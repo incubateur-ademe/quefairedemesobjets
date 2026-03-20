@@ -1,6 +1,7 @@
 import { expect } from "@playwright/test"
 import { test } from "./fixtures"
 import {
+  clickFirstClickableActeurMarker,
   getIframe,
   mockApiAdresse,
   navigateTo,
@@ -61,6 +62,24 @@ test.describe("📋 Fiche Acteur - mode carte", () => {
       await expect(acteurDetailsPanel).toHaveAttribute("aria-hidden", "true", {
         timeout: TIMEOUT.DEFAULT,
       })
+    },
+  )
+  test(
+    "La fiche acteur est immédiatement masquée après sa fermeture",
+    { tag: ["@regression"] },
+    async ({ page }) => {
+      await navigateTo(page, "/carte")
+
+      await searchCarteAndWaitForActeurs(page, "auray")
+      await clickFirstClickableActeurMarker(page)
+      const closeButton = page.getByTestId("acteur-details-close")
+      await closeButton.click()
+      const acteurHeading = page.locator("#acteurDetailsPanel h3").first()
+      // We check for a very short timeout in order to ensure that the acteur
+      // detail is immediately hidden after click.
+      // Sub 100ms interactions are not visible for the users
+      // See https://uxuiprinciples.com/en/principles/response-time-limits
+      await expect(acteurHeading).not.toBeVisible({ timeout: 50 })
     },
   )
 })
