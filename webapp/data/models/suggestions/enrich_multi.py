@@ -1,4 +1,5 @@
 import json
+import logging
 
 from core.templatetags.admin_data_tags import display_diff_values
 from data.models.comparison_table import (
@@ -11,21 +12,20 @@ from data.models.comparison_table import (
     TableRow,
 )
 from data.models.suggestion import SuggestionGroupe
+from data.models.suggestions.abstract import SuggestionGroupeType
 from django.urls import reverse
-from pydantic import BaseModel, ConfigDict
+from qfdmo.models.acteur import Acteur, RevisionActeur
+
+logger = logging.getLogger(__name__)
 
 
-class SuggestionGroupeTypeEnrichMulti(BaseModel):
+class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
     """
     Represents a SuggestionGroupe of type ENRICH_MULTI (CRAWL_URLS) with all its
     SuggestionUnitaires.
 
     Concerne when the Suggestion Groupe update a value for several acteurs.
     """
-
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-
-    suggestion_groupe: SuggestionGroupe
 
     @property
     def update_url(self) -> str:
@@ -120,10 +120,17 @@ class SuggestionGroupeTypeEnrichMulti(BaseModel):
                     )
                 )
             else:
+                revision_acteur = (
+                    RevisionActeur.objects.filter(
+                        identifiant_unique=suggestion_unitaire.revision_acteur_id
+                    ).first()
+                    if suggestion_unitaire.revision_acteur_id
+                    else None
+                )
                 identifiant_unique = (
-                    suggestion_unitaire.revision_acteur.identifiant_unique
-                    if suggestion_unitaire.revision_acteur
-                    else suggestion_unitaire.acteur.identifiant_unique
+                    revision_acteur.identifiant_unique
+                    if revision_acteur
+                    else suggestion_unitaire.acteur_id
                 )
                 row_label = f"Acteur {identifiant_unique}"
                 acteur = suggestion_unitaire.acteur
@@ -198,3 +205,61 @@ class SuggestionGroupeTypeEnrichMulti(BaseModel):
             )
 
         return ComparisonTable(columns=columns, rows=rows)
+
+    def apply(self):
+        suggestion_groupe = self.suggestion_groupe
+
+        # Acteur suggestions
+        for acteur_suggestion_unitaire in suggestion_groupe.suggestion_unitaires.all():
+            if acteur_suggestion_unitaire.suggestion_modele == "RevisionActeur":
+                identifiant_unique = (
+                    acteur_suggestion_unitaire.revision_acteur_id
+                    or acteur_suggestion_unitaire.acteur_id
+                )
+                if not identifiant_unique:
+                    raise ValueError(
+                        "No identifiant_unique found for acteur_suggestion_unitaire"
+                        f" {acteur_suggestion_unitaire}"
+                    )
+                acteur = Acteur.objects.get(identifiant_unique=identifiant_unique)
+                revision_acteur = acteur.get_or_create_revision()
+                acteur_data = {
+                    champ: valeur
+                    for champ, valeur in zip(
+                        acteur_suggestion_unitaire.champs,
+                        acteur_suggestion_unitaire.valeurs,
+                    )
+                }
+
+                revision_acteur = self._apply_one(
+                    RevisionActeur, identifiant_unique, acteur_data
+                )
+                self._set_acteur_linked_objects(revision_acteur, acteur_data)
+
+            elif acteur_suggestion_unitaire.suggestion_modele == "ParentRevisionActeur":
+                identifiant_unique = (
+                    acteur_suggestion_unitaire.parent_revision_acteur_id
+                )
+                if not identifiant_unique:
+                    raise ValueError(
+                        "No identifiant_unique found for acteur_suggestion_unitaire"
+                        f" {acteur_suggestion_unitaire}"
+                    )
+                parent_revision_acteur = RevisionActeur.objects.get(
+                    identifiant_unique=identifiant_unique
+                )
+                parent_revision_acteur_data = {
+                    champ: valeur
+                    for champ, valeur in zip(
+                        acteur_suggestion_unitaire.champs,
+                        acteur_suggestion_unitaire.valeurs,
+                    )
+                }
+                parent_revision_acteur = self._apply_one(
+                    RevisionActeur,
+                    identifiant_unique,
+                    parent_revision_acteur_data,
+                )
+                self._set_acteur_linked_objects(
+                    parent_revision_acteur, parent_revision_acteur_data
+                )
