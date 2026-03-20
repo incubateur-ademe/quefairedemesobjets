@@ -36,6 +36,10 @@ runserver:
 runserver-e2e:
 	make DATABASE_URL=$(SAMPLE_DATABASE_URL) runserver
 
+.PHONY: migrate_homepage
+migrate:
+	$(DJANGO_ADMIN) migrate_homepage
+
 .PHONY: migrate
 migrate:
 	$(DJANGO_ADMIN) migrate
@@ -136,6 +140,7 @@ dags-test:
 .PHONY: prepare-e2e-test
 prepare-e2e-test:
 	make migrate
+	make migrate_homepage
 	make rebuild-search-index
 	make createsuperuser-example
 	BASE_URL=http://localhost:8888 npm run build
