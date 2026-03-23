@@ -1770,6 +1770,7 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/44/69/9b804adb5fd0671f367781560eb5eb586c4d495277c93bde4307b9e28068/greenlet-3.2.4-cp312-cp312-macosx_11_0_universal2.whl", hash = "sha256:3b67ca49f54cede0186854a008109d6ee71f66bd57bb36abd6d0a0267b540cdd", size = 274079, upload-time = "2025-08-07T13:15:45.033Z" },
     { url = "https://files.pythonhosted.org/packages/46/e9/d2a80c99f19a153eff70bc451ab78615583b8dac0754cfb942223d2c1a0d/greenlet-3.2.4-cp312-cp312-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:ddf9164e7a5b08e9d22511526865780a576f19ddd00d62f8a665949327fde8bb", size = 640997, upload-time = "2025-08-07T13:42:56.234Z" },
     { url = "https://files.pythonhosted.org/packages/3b/16/035dcfcc48715ccd345f3a93183267167cdd162ad123cd93067d86f27ce4/greenlet-3.2.4-cp312-cp312-manylinux2014_ppc64le.manylinux_2_17_ppc64le.whl", hash = "sha256:f28588772bb5fb869a8eb331374ec06f24a83a9c25bfa1f38b6993afe9c1e968", size = 655185, upload-time = "2025-08-07T13:45:27.624Z" },
+    { url = "https://files.pythonhosted.org/packages/31/da/0386695eef69ffae1ad726881571dfe28b41970173947e7c558d9998de0f/greenlet-3.2.4-cp312-cp312-manylinux2014_s390x.manylinux_2_17_s390x.whl", hash = "sha256:5c9320971821a7cb77cfab8d956fa8e39cd07ca44b6070db358ceb7f8797c8c9", size = 649926, upload-time = "2025-08-07T13:53:15.251Z" },
     { url = "https://files.pythonhosted.org/packages/68/88/69bf19fd4dc19981928ceacbc5fd4bb6bc2215d53199e367832e98d1d8fe/greenlet-3.2.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:c60a6d84229b271d44b70fb6e5fa23781abb5d742af7b808ae3f6efd7c9c60f6", size = 651839, upload-time = "2025-08-07T13:18:30.281Z" },
     { url = "https://files.pythonhosted.org/packages/19/0d/6660d55f7373b2ff8152401a83e02084956da23ae58cddbfb0b330978fe9/greenlet-3.2.4-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:3b3812d8d0c9579967815af437d96623f45c0f2ae5f04e366de62a12d83a8fb0", size = 607586, upload-time = "2025-08-07T13:18:28.544Z" },
     { url = "https://files.pythonhosted.org/packages/8e/1a/c953fdedd22d81ee4629afbb38d2f9d71e37d23caace44775a3a969147d4/greenlet-3.2.4-cp312-cp312-musllinux_1_1_aarch64.whl", hash = "sha256:abbf57b5a870d30c4675928c37278493044d7c14378350b3aa5d484fa65575f0", size = 1123281, upload-time = "2025-08-07T13:42:39.858Z" },
@@ -3520,7 +3521,7 @@ wheels = [
 
 [[package]]
 name = "sites-conformes"
-version = "2.5.3rc2"
+version = "2.5.3rc4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "beautifulsoup4" },
@@ -3544,9 +3545,9 @@ dependencies = [
     { name = "wagtail-modeladmin" },
     { name = "wagtailmenus" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b7/0a/1cb0c3067449bf896a071833f966e658ff4e6b0402951a04b330bfbf7289/sites_conformes-2.5.3rc2.tar.gz", hash = "sha256:81de9ba63cf4eb0f837d9afceda83489607f2f995c482ed0bbea61892cb4db79", size = 7059629, upload-time = "2026-03-02T14:08:02.67Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/dd/0c/d71a3722f091f6f680711edbe958a535809ceeee870b680741d79e36ecaa/sites_conformes-2.5.3rc4.tar.gz", hash = "sha256:9d6c4d8e555c8194a162046f97f0709ab07688a68293e2cec84531e05b6c2c34", size = 7100957, upload-time = "2026-03-23T11:47:24.266Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ce/94/87fa7309bada8dec14b59397a5ad9ab140ceb6a3ab73d3ac00ce0d841bf8/sites_conformes-2.5.3rc2-py3-none-any.whl", hash = "sha256:414101171da5c61385435b46ae694255b6aafeb829637a00772989ac6e171efa", size = 7449243, upload-time = "2026-03-02T14:07:59.907Z" },
+    { url = "https://files.pythonhosted.org/packages/31/9f/e9ad10458bf9d4d46e0c189afb2d38991797a43ad0d6e314e0aef5a14520/sites_conformes-2.5.3rc4-py3-none-any.whl", hash = "sha256:76badb12d1529ccf41ff4578bd0ede280ee202a8a4f655ced171906d2882ffc0", size = 7495068, upload-time = "2026-03-23T11:47:22.004Z" },
 ]
 
 [[package]]
@@ -4177,7 +4178,7 @@ requires-dist = [
     { name = "requests", specifier = ">=2.32.4,<3" },
     { name = "sentry-sdk", specifier = ">=2.37.0,<3" },
     { name = "shortuuid", specifier = ">=1.0.13,<2" },
-    { name = "sites-conformes", specifier = ">=2.5.3rc2" },
+    { name = "sites-conformes", specifier = ">=2.5.3rc4" },
     { name = "unidecode", specifier = ">=1.4.0,<2" },
     { name = "wagtail", specifier = "==7.3" },
     { name = "wagtail-honeypot", specifier = ">=1.2.1" },

@@ -401,6 +401,7 @@ USE_L10N = True
 WAGTAIL_I18N_ENABLED = True
 
 WAGTAIL_CONTENT_LANGUAGES = LANGUAGES = [
+    ("en", "English"),
     ("fr", "Français"),
 ]
 
