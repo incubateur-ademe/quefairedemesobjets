@@ -331,7 +331,7 @@ class AutocompleteHomeSearchView(ListView):
     @override
     def get_queryset(self):
         query = self.request.GET.get("q", "")
-        limit = int(self.request.GET.get("limit", 10))
+        limit = 7
         if not query:
             return []
         return SearchTerm.objects.searchable().search(Fuzzy(query))[:limit]
