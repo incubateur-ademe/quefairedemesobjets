@@ -1,18 +1,12 @@
-import { WindowResizeController } from "stimulus-use"
-
 import PinpointController from "./pinpoint_controller"
+import { Controller } from "@hotwired/stimulus"
 
-class ActeurController extends WindowResizeController {
+class ActeurController extends Controller {
   static targets = ["content"]
   static values = { mapContainerId: String }
 
   declare readonly mapContainerIdValue: string
   declare readonly contentTarget: HTMLElement
-
-  windowResize({ width, height, event }) {
-    this.contentTarget.style.maxHeight = ``
-    this.#resizeContent()
-  }
 
   #show() {
     // Reset scroll when jumping from a acteur detail to another.
@@ -20,21 +14,11 @@ class ActeurController extends WindowResizeController {
     if (this.element.ariaHidden !== "false") {
       this.element.ariaHidden = "false"
     }
-
-    this.element.dataset.exitAnimationEnded = "false"
-    this.#resizeContent()
   }
 
   hide() {
     this.element.ariaExpanded = "false"
     this.element.ariaHidden = "true"
-    this.element.addEventListener(
-      "animationend",
-      () => {
-        this.element.dataset.exitAnimationEnded = "true"
-      },
-      { once: true },
-    )
     PinpointController.clearActivePinpoints()
   }
 
@@ -52,18 +36,6 @@ class ActeurController extends WindowResizeController {
       "turbo:frame-load",
       this.#showPanelWhenTurboFrameLoad.bind(this),
     )
-  }
-
-  #resizeContent() {
-    const mapContainer = this.element.parentElement!
-    const elementsAboveContentHeight = Math.abs(
-      mapContainer.getBoundingClientRect().top -
-        this.contentTarget.getBoundingClientRect().top,
-    )
-    const currentPanelHeight = mapContainer.offsetHeight
-    const nextContentHeight = currentPanelHeight - elementsAboveContentHeight
-
-    this.contentTarget.style.maxHeight = `${nextContentHeight}px`
   }
 }
 
