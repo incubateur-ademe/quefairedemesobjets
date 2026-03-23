@@ -5,7 +5,7 @@
 
 {% block main %}
 <div data-home class="qf-group qf-flex qf-justify-center qf-flex-col qf-gap-2w">
-    <div class="qf-bg-green-menthe-975-75 {% if iframe %}qf-py-1w{% else %}qf-py-2w qf-pb-3w md:qf-pb-4w md:qf-py-4w{% endif %}
+    <div class="qf-bg-green-menthe-975-75 {% if iframe %}[@media(min-height:600px)]:qf-py-1w qf-py-2w{% else %}qf-py-2w qf-pb-3w md:qf-pb-4w md:qf-py-4w{% endif %}
     qf-flex qf-flex-col qf-gap-3w">
 
     {# Wrapper for padding on mobile #}
