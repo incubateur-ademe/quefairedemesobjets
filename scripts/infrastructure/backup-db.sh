@@ -58,12 +58,12 @@ fi
 # Créer le backup
 BACKUP_NAME="backup-manuel-qfdmo-$(date +%Y%m%d%H%M%S)"
 # Définir la date d'expiration dans une semaine au format ISO 8601
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    # macOS
+if date -v+7d > /dev/null 2>&1; then
+    # MacOS
     EXPIRATION_DATE=$(date -u -v+7d +"%Y-%m-%dT%H:%M:%SZ")
 else
     # Linux
-    EXPIRATION_DATE=$(date -u --date="7 days" +"%Y-%m-%dT%H:%M:%SZ")
+    EXPIRATION_DATE=$(date -u -d "+7 days" +"%Y-%m-%dT%H:%M:%SZ")
 fi
 echo "Création du backup $BACKUP_NAME (expire le $EXPIRATION_DATE)..."
 BACKUP_ID=$(scw rdb backup create instance-id=$INSTANCE_ID database-name=webapp name=$BACKUP_NAME expires-at=$EXPIRATION_DATE | grep "^ID\s" | awk '{print $2}')
