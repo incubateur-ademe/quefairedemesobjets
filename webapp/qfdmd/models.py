@@ -315,6 +315,14 @@ class ProduitPage(
     GenreNombreModel,
     TitleFields,
 ):
+    exclude_fields_in_copy = [
+        "legacy_synonymes_to_exclude",
+        "legacy_produit",
+        "legacy_synonymes",
+        "produit_page_search_term",
+        "search_tags_items",
+    ]
+
     def get_template(self, request, *args, **kwargs):
         if self.est_famille:
             return "ui/pages/family_page.html"
