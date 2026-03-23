@@ -945,6 +945,13 @@ class IframePreview(LookbookPreview):
     def assistant_600px(self, **kwargs):
         template = Template(
             f"""
+            <div class="fr-alert fr-alert--info fr-mb-3w">
+              <h3 class="fr-alert__title">iframe de 600px</h3>
+              <p>L'iframe ci-dessous est générée avec une hauteur de 600px maximum (sans utiliser le script). <br>
+              On attend que celle-ci soit visible sans scroll dans l'iframe
+              </p>
+            </div>
+            <hr>
             <iframe src="{base_url}" style="width:100%;height:600px;" title="Page embarquée"></iframe>
             """,
         )
