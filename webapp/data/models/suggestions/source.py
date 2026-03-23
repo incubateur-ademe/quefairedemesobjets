@@ -13,7 +13,7 @@ from data.models.comparison_table import (
     StimulusControllerConfig,
     TableRow,
 )
-from data.models.suggestion import SuggestionGroupe
+from data.models.suggestion import SuggestionAction, SuggestionGroupe
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from more_itertools import flatten
@@ -386,7 +386,6 @@ class SuggestionGroupeTypeSource(BaseModel):
         Raises ValueError if the type_action is not SOURCE_AJOUT,
         SOURCE_MODIFICATION, or SOURCE_SUPPRESSION.
         """
-        from data.models.suggestion import SuggestionAction
 
         type_action = suggestion_groupe.suggestion_cohorte.type_action
 
@@ -401,11 +400,6 @@ class SuggestionGroupeTypeSource(BaseModel):
                 f"got {type_action}"
             )
 
-        # SOURCE_MODIFICATION or SOURCE_SUPPRESSION
-        acteur = suggestion_groupe.get_acteur_or_none()
-        revision_acteur = suggestion_groupe.get_revision_acteur_or_none()
-        parent_revision_acteur = suggestion_groupe.get_parent_revision_acteur_or_none()
-
         suggestion_unitaires = list(suggestion_groupe.suggestion_unitaires.all())
         fields_groups = _get_ordered_fields_groups(suggestion_unitaires)
         flattened = [key for keys in fields_groups for key in keys]
@@ -417,6 +411,7 @@ class SuggestionGroupeTypeSource(BaseModel):
             suggestion_unitaires, "RevisionActeur"
         )
 
+        # SOURCE_AJOUT
         if type_action == SuggestionAction.SOURCE_AJOUT:
             identifiant_unique = (
                 suggestion_groupe.get_identifiant_unique_from_suggestion_unitaires(
@@ -425,14 +420,19 @@ class SuggestionGroupeTypeSource(BaseModel):
             )
             return cls(
                 suggestion_groupe=suggestion_groupe,
-                acteur=acteur,
-                revision_acteur=revision_acteur,
-                parent_revision_acteur=parent_revision_acteur,
+                acteur=None,
+                revision_acteur=None,
+                parent_revision_acteur=None,
                 fields_groups=fields_groups,
                 identifiant_unique=identifiant_unique,
                 acteur_suggestions=acteur_suggestions,
                 revision_acteur_suggestions=revision_acteur_suggestions,
             )
+
+        # SOURCE_MODIFICATION or SOURCE_SUPPRESSION
+        acteur = suggestion_groupe.get_acteur_or_none()
+        revision_acteur = suggestion_groupe.get_revision_acteur_or_none()
+        parent_revision_acteur = suggestion_groupe.get_parent_revision_acteur_or_none()
 
         if not acteur:
             raise ValueError("acteur is required for non-SOURCE_AJOUT suggestions")
@@ -636,6 +636,7 @@ class SuggestionGroupeTypeSource(BaseModel):
                                 "suggestion-modele": suggestion_modele,
                                 "update-url": self.update_url,
                                 "replace-text": replace_text_fn(field),
+                                # TODO: may be json.dumps(field_group) is enough
                                 "fields-groups": self.fields_groups_json,
                             },
                             actions=[
