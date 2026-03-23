@@ -24,6 +24,7 @@ from sources.tasks.transform.exceptions import (
 )
 from sources.tasks.transform.formatter import format_libelle_to_code
 from sources.tasks.transform.opening_hours import interprete_opening_hours
+from sources.tasks.transform.sequence_utils import convert_numpy_to_jsonify
 
 logger = logging.getLogger(__name__)
 
@@ -267,6 +268,8 @@ def clean_sous_categorie_codes(
     sscat_list: str | list[str] | None, dag_config: DAGConfig
 ) -> list[str]:
     sous_categorie_codes = []
+    if sscat_list is not None:
+        sscat_list = convert_numpy_to_jsonify(sscat_list)
 
     if not sscat_list:
         return sous_categorie_codes

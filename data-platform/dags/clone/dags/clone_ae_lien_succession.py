@@ -8,7 +8,7 @@ Sirene : Fichier StockEtablissementLiensSuccession
 """
 
 from airflow import DAG
-from airflow.models.param import Param
+from airflow.sdk import Param
 from clone.tasks.airflow_logic.chain_tasks import chain_tasks
 from shared.config.airflow import DEFAULT_ARGS_NO_RETRIES
 from shared.config.start_dates import START_DATES
