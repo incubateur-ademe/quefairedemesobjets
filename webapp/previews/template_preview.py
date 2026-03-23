@@ -942,6 +942,15 @@ class IframePreview(LookbookPreview):
 
         return template.render(Context({}))
 
+    def assistant_600px(self, **kwargs):
+        template = Template(
+            f"""
+            <iframe src="{base_url}" style="width:100%;height:600px;" title="Page embarquée"></iframe>
+            """,
+        )
+
+        return template.render(Context({}))
+
     @register_form_class(InfotriForm)
     def infotri(self, categorie="", consigne="", avec_phrase="false", **kwargs):
         """
