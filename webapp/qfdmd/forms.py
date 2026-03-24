@@ -1,35 +1,36 @@
 import logging
+import uuid
 
 from django import forms
 from dsfr.forms import DsfrBaseForm
-from modelsearch.query import Fuzzy
-
-from search.models import SearchTerm
+from core.widgets import QfSearchAutocompleteInput
 
 logger = logging.getLogger(__name__)
 
 
-class SearchInput(forms.TextInput):
-    template_name = "ui/components/search/widget.html"
+class QfSearchForm(forms.Form):
+    """QFDMOD-styled search form used on the homepage.
 
+    Intentionally does NOT inherit DsfrBaseForm to avoid DSFR injecting
+    fr-input class and its label/wrapper markup.
+    """
 
-class SearchForm(DsfrBaseForm):
-    id = forms.CharField(required=False, widget=forms.HiddenInput())
-    input = forms.CharField(
-        help_text="Entrez un objet ou un déchet",
+    search = forms.CharField(
         required=False,
-        widget=SearchInput,
+        label="",
+        widget=QfSearchAutocompleteInput(
+            attrs={
+                "placeholder": "exemple : canapé, téléphone, CD-ROM...",
+                "autocomplete": "off",
+            },
+        ),
     )
 
-    def search(self) -> list:
-        self.results = []
-        search_query = self.cleaned_data.get("input")
-        if not search_query:
-            self.results = []
-            return self.results
-
-        self.results = SearchTerm.objects.searchable().search(Fuzzy(search_query))[:10]
-        return self.results
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Generate a fresh turbo_frame_id per instance so that multiple forms
+        # on the same page don't share the same turbo-frame element ID.
+        self.fields["search"].widget.turbo_frame_id = str(uuid.uuid4())
 
 
 class ContactForm(DsfrBaseForm):

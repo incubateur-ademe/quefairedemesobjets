@@ -21,4 +21,15 @@ test.describe("Page d'accueil", () => {
       expect(hasHorizontalOverflow).toBe(false)
     },
   )
+  test("Pas de scrollbar sur la home en iframe sur 600 pixels de haut", async ({
+    page,
+  }) => {
+    await navigateTo(page, "/lookbook/preview/iframe/assistant_600px")
+    const iframeAssistant = page.locator(`iframe`)
+    const bodyInIframe = iframeAssistant.contentFrame().locator("body")
+
+    const iframeAssistantBb = await iframeAssistant.boundingBox()
+    const bodyBb = await bodyInIframe.boundingBox()
+    expect(iframeAssistantBb!.height).toBeGreaterThan(bodyBb!.height)
+  })
 })

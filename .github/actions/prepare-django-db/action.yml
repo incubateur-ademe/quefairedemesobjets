@@ -30,12 +30,12 @@ outputs:
 runs:
   using: composite
   steps:
-    # - name: Check database cache
-    #   id: cache-db
-    #   uses: actions/cache@v5
-    #   with:
-    #     path: ${{ inputs.local-dump-path }}
-    #     key: ${{ inputs.cache-key }}
+    - name: Check database cache
+      id: cache-db
+      uses: actions/cache@v5
+      with:
+        path: ${{ inputs.local-dump-path }}
+        key: ${{ inputs.cache-key }}
 
     - name: Dump sample database from remote
       if: steps.cache-db.outputs.cache-hit != 'true'
@@ -59,6 +59,9 @@ runs:
         # TODO: user make prepare-e2e-test here
         cd webapp
         make migrate
+        # TEMPORARY : must be removed once homepage is on production
+        # and sample dag has run once
+        make migrate_homepage
         make rebuild-search-index
         make createsuperuser-example
 
