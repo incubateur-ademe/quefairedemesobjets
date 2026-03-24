@@ -59,6 +59,8 @@ runs:
         # TODO: user make prepare-e2e-test here
         cd webapp
         make migrate
+        # TEMPORARY : must be removed once homepage is on production
+        # and sample dag has run once
         make migrate_homepage
         make rebuild-search-index
         make createsuperuser-example

@@ -140,6 +140,8 @@ dags-test:
 .PHONY: prepare-e2e-test
 prepare-e2e-test:
 	make migrate
+    # TEMPORARY : must be removed once homepage is on production
+    # and sample dag has run once
 	make migrate_homepage
 	make rebuild-search-index
 	make createsuperuser-example
