@@ -328,10 +328,14 @@ class AutocompleteHomeSearchView(ListView):
 
     template_name = "ui/components/search/autocomplete_results.html"
 
+    # This limit comes from a UI/UX decision to display only
+    # seven results.
+    NUMBER_OF_ITEMS_DISPLAYED = 7
+
     @override
     def get_queryset(self):
         query = self.request.GET.get("q", "")
-        limit = 7
+        limit = self.NUMBER_OF_ITEMS_DISPLAYED
         if not query:
             return []
         return SearchTerm.objects.searchable().search(Fuzzy(query))[:limit]
