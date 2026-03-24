@@ -309,3 +309,15 @@ build-docs:
 fmt-infra:
 	tofu fmt -recursive infrastructure
 	terragrunt hcl fmt infrastructure
+
+.PHONY: dbt-generate-docs
+dbt-generate-docs:
+	make -C data-platform/dbt generate-docs
+
+.PHONY: dbt-serve-docs
+dbt-serve-docs:
+	make -C data-platform/dbt serve-docs
+
+.PHONY: dbt-clean
+dbt-clean-docs:
+	make -C data-platform/dbt clean-docs
