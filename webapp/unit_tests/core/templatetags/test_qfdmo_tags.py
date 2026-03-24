@@ -681,23 +681,28 @@ class TestDistanceToActeur:
     @pytest.mark.parametrize(
         "request_params,expected",
         [
-            (QueryDict("longitude=0&latitude=0"), "(0 m)"),
-            ({"longitude": str(1051 / 111320), "latitude": "0"}, "(1,1 km)"),
+            (QueryDict("map-longitude=0&map-latitude=0"), "(0 m)"),
+            ({"map-longitude": str(1051 / 111320), "map-latitude": "0"}, "(1,1 km)"),
             (
-                {"longitude": str(1000 / 111320), "latitude": str(1000 / 111320)},
+                {
+                    "map-longitude": str(1000 / 111320),
+                    "map-latitude": str(1000 / 111320),
+                },
                 "(1,4 km)",
             ),
-            ({"longitude": str(99999 / 111320), "latitude": "0"}, "(100,0 km)"),
-            (QueryDict(f"longitude={954 / 111320}&latitude=0"), "(950 m)"),
-            (QueryDict(f"longitude=0&latitude=-{954 / 111320}"), "(950 m)"),
-            (QueryDict(f"longitude={955 / 111320}&latitude=0"), "(960 m)"),
-            (QueryDict(f"longitude={1049 / 111320}&latitude=0"), "(1,0 km)"),
-            (QueryDict(f"longitude={1051 / 111320}&latitude=0"), "(1,1 km)"),
+            ({"map-longitude": str(99999 / 111320), "map-latitude": "0"}, "(100,0 km)"),
+            (QueryDict(f"map-longitude={954 / 111320}&map-latitude=0"), "(950 m)"),
+            (QueryDict(f"map-longitude=0&map-latitude=-{954 / 111320}"), "(950 m)"),
+            (QueryDict(f"map-longitude={955 / 111320}&map-latitude=0"), "(960 m)"),
+            (QueryDict(f"map-longitude={1049 / 111320}&map-latitude=0"), "(1,0 km)"),
+            (QueryDict(f"map-longitude={1051 / 111320}&map-latitude=0"), "(1,1 km)"),
             (
-                QueryDict(f"longitude={1000 / 111320}&latitude={1000 / 111320}"),
+                QueryDict(
+                    f"map-longitude={1000 / 111320}&map-latitude={1000 / 111320}"
+                ),
                 "(1,4 km)",
             ),
-            (QueryDict(f"longitude={99999 / 111320}&latitude=0"), "(100,0 km)"),
+            (QueryDict(f"map-longitude={99999 / 111320}&map-latitude=0"), "(100,0 km)"),
         ],
     )
     def test_distance_to_acteur_not_digital(self, adresse, request_params, expected):
@@ -709,6 +714,8 @@ class TestDistanceToActeur:
     def test_distance_to_acteur_digital(self, adresse):
         adresse.acteur_type = ActeurTypeFactory(code="acteur_digital")
         request = HttpRequest()
-        request.GET = QueryDict(f"longitude={1000 / 111320}&latitude={1000 / 111320}")
+        request.GET = QueryDict(
+            f"map-longitude={1000 / 111320}&map-latitude={1000 / 111320}"
+        )
         context = {"request": request}
         assert distance_to_acteur(context, adresse) == ""
