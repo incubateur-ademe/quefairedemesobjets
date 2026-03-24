@@ -24,10 +24,7 @@ class TestCrawlUrlsSelectFromDb:
         )
 
         limit = 3
-        print("before")
         df = crawl_urls_read_urls_from_db(limit)
-        print("df")
-        print(df)
         assert df[COLS.URL_ORIGIN].tolist() == [
             "https://test.com/1",
             "https://test.com/2",

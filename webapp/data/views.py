@@ -129,6 +129,7 @@ def update_suggestion_groupe(
                         fields_values.get(coord_field, "0.0"),
                     )
                 except (ValueError, KeyError) as e:
+                    logger.warning(f"ValueError for {coord_field}: {e}")
                     return {coord_field: f"{coord_field} must be a float: {e}"}
 
         try:
@@ -148,8 +149,10 @@ def update_suggestion_groupe(
                 revision_acteur.statut = ActeurStatus.ACTIF
             revision_acteur.full_clean()
         except ValidationError as e:
+            logger.warning(f"RevisionActeur is not valid: {e}")
             return e.error_dict
         except TypeError as e:
+            logger.warning(f"RevisionActeur is not valid: {e}")
             return {"error": str(e)}
 
         return {}
@@ -244,6 +247,7 @@ def update_suggestion_groupe(
         if errors := _validate_proposed_updates(values_to_update, fields_values):
             return False, errors
     except Exception as e:
+        logger.warning(f"Error validating proposed updates: {e}")
         return False, {"error": str(e)}
 
     # Create or update SuggestionUnitaire objects
