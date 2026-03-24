@@ -121,12 +121,8 @@ class CarteSearchActeursView(MapPrefixMixin, AbstractSearchActeursView):
             },
         }
 
-    def _generate_prefix(self, prefix: str) -> str:
-        try:
-            id = self._get_map_container_id()
-            return generate_form_prefix(id, prefix)
-        except (KeyError, AttributeError):
-            return prefix
+    def _generate_prefix(self, prefix: str = MAP_FORM_PREFIX) -> str:
+        return generate_form_prefix(id=self._get_map_container_id(), prefix=prefix)
 
     # Legacy querystring support
     # ==========================

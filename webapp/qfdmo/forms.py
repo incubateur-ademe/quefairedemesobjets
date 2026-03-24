@@ -2,8 +2,6 @@ import base64
 import json
 from typing import cast
 
-from core.constants import MAP_CONTAINER_ID
-from qfdmo.constants import MAP_FORM_PREFIX
 from django import forms
 from django.core.cache import cache
 from django.db.models import TextChoices
@@ -37,16 +35,17 @@ from qfdmo.widgets import (
     SynonymeAutocompleteInput,
 )
 
+from core.constants import MAP_CONTAINER_ID
+from qfdmo.constants import MAP_FORM_PREFIX
+
 
 def generate_form_prefix(
     id: str | None = None, prefix: str = "", request: HttpRequest | None = None
 ) -> str:
-    if request and not id:
+    if not id and request:
         id = request.GET.get(MAP_CONTAINER_ID)
-        return f"{id}_{prefix}"
     if id:
         return f"{id}_{prefix}"
-
     return prefix
 
 
