@@ -179,6 +179,11 @@ CACHES = {
 
 X_FRAME_OPTIONS = "ALLOWALL"
 
+WITH_DJANGO_DEBUG_TOOLBAR = decouple.config(
+    "WITH_DJANGO_DEBUG_TOOLBAR", default=True, cast=bool
+)
+WITH_DJANGO_SILK = decouple.config("WITH_DJANGO_SILK", default=False, cast=bool)
+
 if DEBUG:
     # FIXME: A CSRF error can occur locally when using HTTPS.
     # It is not clear yet what causes it, it might be http host headers
@@ -186,15 +191,22 @@ if DEBUG:
     # only local development and can be considered harmless, but this
     # might be nice to remove this setting someday.
     CSRF_TRUSTED_ORIGINS = [BASE_URL]
-    INSTALLED_APPS.extend(["debug_toolbar", "django_browser_reload"])
+    INSTALLED_APPS.extend(["django_browser_reload"])
     MEDIA_ROOT = "media"
     MEDIA_URL = "/media/"
     MIDDLEWARE.extend(
         [
-            "debug_toolbar.middleware.DebugToolbarMiddleware",
             "django_browser_reload.middleware.BrowserReloadMiddleware",
         ]
     )
+
+    if WITH_DJANGO_DEBUG_TOOLBAR:
+        INSTALLED_APPS.append("debug_toolbar")
+        MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
+
+    if WITH_DJANGO_SILK:
+        INSTALLED_APPS.append("silk")
+        MIDDLEWARE.insert(0, "silk.middleware.SilkyMiddleware")
 
     CORS_ALLOW_ALL_ORIGINS = DEBUG
 
@@ -202,22 +214,27 @@ if DEBUG:
 with suppress(ModuleNotFoundError):
     from debug_toolbar.settings import CONFIG_DEFAULTS
 
-    def show_toolbar_callback(request):
-        path_is_not_excluded = not any(p in request.path for p in patterns_to_exclude)
+    if WITH_DJANGO_DEBUG_TOOLBAR:
 
-        if request.headers.get("User-Agent") == "playwright":
-            return False
-        if request.headers.get("Sec-Fetch-Dest") == "iframe":
-            # Hide in iframe
-            return False
+        def show_toolbar_callback(request):
+            path_is_not_excluded = not any(
+                p in request.path for p in patterns_to_exclude
+            )
 
-        return path_is_not_excluded
+            if request.headers.get("User-Agent") == "playwright":
+                return False
+            if request.headers.get("Sec-Fetch-Dest") == "iframe":
+                # Hide in iframe
+                return False
 
-    patterns_to_exclude = ["/lookbook", "/cms"]
-    DEBUG_TOOLBAR_CONFIG = {
-        "SHOW_TOOLBAR_CALLBACK": show_toolbar_callback,
-        "HIDE_IN_STACKTRACES": CONFIG_DEFAULTS["HIDE_IN_STACKTRACES"] + ("sentry_sdk",),
-    }
+            return path_is_not_excluded
+
+        patterns_to_exclude = ["/lookbook", "/cms"]
+        DEBUG_TOOLBAR_CONFIG = {
+            "SHOW_TOOLBAR_CALLBACK": show_toolbar_callback,
+            "HIDE_IN_STACKTRACES": CONFIG_DEFAULTS["HIDE_IN_STACKTRACES"]
+            + ("sentry_sdk",),
+        }
 
 LOGLEVEL = decouple.config(
     "LOGLEVEL", default="info" if DEBUG else "error", cast=str
