@@ -25,7 +25,7 @@
                     {# TODO: use an alternative template instead of a conditionnal inside the html tag #}
                     <{% if turbo %}h3{% else %}h1{% endif %} class="qf-text-lg qf-m-0 qf-max-w-[90%]" data-testid="acteur-title">{{ object.libelle|title }}</{% if turbo %}h3{% else %}h1{% endif %}>
                     <p class="qf-text-sm qf-m-0">
-                        {{ object.acteur_services_display }} {% if distance %}({{ distance}}){% endif %}
+                        {{ object.acteur_services_display }} {% if distance %}<span data-testid="acteur-detail:distance-to-acteur">({{ distance }})</span>{% endif %}
                     </p>
                 </div>
 
