@@ -368,7 +368,9 @@ def get_homepage():
 
 
 @method_decorator(cache_control(max_age=60 * 15), name="dispatch")
-@method_decorator(vary_on_headers("logged-in", "iframe"), name="dispatch")
+@method_decorator(
+    vary_on_headers("logged-in", "iframe", "sec-fetch-dest"), name="dispatch"
+)
 class HomeView(AssistantBaseView, TemplateView):
     template_name = "ui/pages/home.html"
 
