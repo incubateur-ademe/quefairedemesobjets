@@ -522,6 +522,8 @@ SILENCED_SYSTEM_CHECKS = ["wagtailadmin.W002"]
 HOST_PROTO = decouple.config("HOST_PROTO", default="https")
 WAGTAIL_SITE_NAME = "Que faire de mes objets et déchets"
 WAGTAILADMIN_BASE_URL = BASE_URL
+# Disable autosave
+WAGTAIL_AUTOSAVE_INTERVAL = 0
 MODELSEARCH_BACKENDS = {
     "default": {
         "BACKEND": "modelsearch.backends.database",
