@@ -1,9 +1,9 @@
 proxy_cache_path /tmp/nginx_assistant_cache levels=1:2 keys_zone=assistant:10m max_size=1g inactive=60m use_temp_path=off;
 
-# Define a variable to disable cache if the specific cookie is set
+# Disable cache when the user is logged in (session cookie present)
 map $http_cookie $no_cache {
-    default 0; # Enable caching by default
-    "~*logged_in=.*" 1; # Disable caching if 'logged_in' is set
+    default 0;
+    "~*logged_in=.*" 1;
 }
 
 map $host $is_valid_host {
@@ -13,6 +13,8 @@ map $host $is_valid_host {
 }
 upstream gunicorn {
     server unix:/tmp/gunicorn.sock;
+    # keepalive: maintain persistent connections to gunicorn to avoid
+    # TCP handshake overhead on every request
     keepalive 32;
 }
 
@@ -31,31 +33,14 @@ server {
         alias /app/staticfiles/;
     }
 
-    location /iframe.js {
+    # Cache embeddable JS assets (iframe.js, carte.js) - these are served to
+    # third-party sites and must not vary by session
+    location ~ ^/(static/)?(iframe|carte)\.js$ {
+        # HTTP/1.1 + empty Connection header required for upstream keepalive
         proxy_pass http://gunicorn;
         proxy_http_version 1.1;
         proxy_set_header Connection "";
-        proxy_cache assistant;
-        proxy_cache_valid 200 301 302 10m;
-        proxy_cache_valid 404 1m;
-        add_header X-Cache-Status $upstream_cache_status;
-    }
 
-    location /static/iframe.js {
-        proxy_pass http://gunicorn;
-        proxy_http_version 1.1;
-        proxy_set_header Connection "";
-        proxy_cache assistant;
-        proxy_cache_valid 200 301 302 10m;
-        proxy_cache_valid 404 1m;
-        add_header X-Cache-Status $upstream_cache_status;
-    }
-
-
-    location /static/carte.js {
-        proxy_pass http://gunicorn;
-        proxy_http_version 1.1;
-        proxy_set_header Connection "";
         proxy_cache assistant;
         proxy_cache_valid 200 301 302 10m;
         proxy_cache_valid 404 1m;
@@ -63,15 +48,19 @@ server {
     }
 
     location / {
+        # HTTP/1.1 + empty Connection header required for upstream keepalive
         proxy_pass http://gunicorn;
         proxy_http_version 1.1;
         proxy_set_header Connection "";
 
+        # Bypass cache for logged-in users
         proxy_cache_bypass $no_cache;
         proxy_no_cache $no_cache;
 
         proxy_cache assistant;
         proxy_set_header Host $http_host;
+        # Include $http_sec_fetch_dest in cache key to serve different cached
+        # versions for standalone page loads vs iframe embeds
         proxy_cache_key $request_method$scheme$host$request_uri$http_sec_fetch_dest;
         proxy_cache_valid 200 301 302 10m;
         proxy_cache_valid 404 1m;
