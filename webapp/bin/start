@@ -1,4 +1,4 @@
 #!/bin/bash
 
-gunicorn core.wsgi --bind unix:/tmp/gunicorn.sock --timeout 120 --workers 3 &
+gunicorn core.wsgi --bind unix:/tmp/gunicorn.sock --timeout 120 --workers "${GUNICORN_WORKERS:-4}" &
 /app/bin/run
