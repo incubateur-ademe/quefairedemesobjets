@@ -109,18 +109,15 @@ def render_svg_image(image) -> str:
         with file_field.storage.open(file_field.name) as f:
             return mark_safe(f.read().decode("utf-8"))  # noqa: S308
 
+    svg = ""
     try:
-        return cast(
-            str,
-            cache.get_or_set(
-                f"svg-image-{file_field.name}-"
-                f"{file_field.size if hasattr(file_field, 'size') else 0}",
-                get_svg_content,
-            ),
-        )
+        with file_field.storage.open(file_field.name) as f:
+            svg = str(mark_safe(f.read().decode("utf-8")))  # noqa: S308
     except FileNotFoundError as e:
         logger.error(f"file not found {file_field.name=}, original error : {e}")
-        return ""
+        pass
+
+    return svg
 
 
 @register.inclusion_tag("templatetags/favicon.html")

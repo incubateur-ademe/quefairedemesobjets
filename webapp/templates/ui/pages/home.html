@@ -1,5 +1,5 @@
 {% extends "ui/layout/assistant.html" %}
-{% load dsfr_tags qfdmd_tags suggestions_tags wagtailimages_tags wagtailcore_tags %}
+{% load dsfr_tags qfdmd_tags suggestions_tags wagtailimages_tags wagtailcore_tags wagtail_cache %}
 
 {% block analytics_action %}homePageView{% endblock %}
 
@@ -34,6 +34,7 @@
     </div>
 
     {% if page.icons %}
+    {% wagtailcache 3600 "icons-home" %}
     <div class="qf-w-full qf-overflow-hidden" aria-hidden="true">
         <div class="qf-grid qf-grid-cols-[repeat(27,calc(30px+0.5rem))] md:qf-grid-cols-[repeat(27,calc(50px+0.5rem))] qf-justify-center">
             {% for block in page.icons %}
@@ -54,6 +55,7 @@
             {% endfor %}
         </div>
     </div>
+    {% endwagtailcache %}
     {% endif %}
 </div>
 

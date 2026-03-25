@@ -2,7 +2,6 @@ import logging
 
 from core.notion import ContactFormData, create_new_row_in_notion_table
 from django.conf import settings
-from django.core.cache import cache
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from modelsearch.index import insert_or_update_object
@@ -11,7 +10,6 @@ from qfdmd.models import FormPageValidationSettings, ProduitPage
 from sites_conformes.forms.models import FormPage
 from wagtail.contrib.forms.models import FormSubmission
 from wagtail.signals import page_published
-from wagtailmenus.models import FlatMenu, MainMenu
 
 # Warning : this could change if Sites Faciles creates their
 # own form submission class.
@@ -99,34 +97,3 @@ def validate_form_page_fields(sender, instance: FormPage, created, **kwargs):
             "silently logged but should be addressed quickly."
         )
         logger.error(error_message)
-
-
-def _invalidate_menu_fragment_caches():
-    """Delete template fragment cache keys for all menus and languages."""
-    from django.conf import settings as django_settings
-    from django.core.cache.utils import make_template_fragment_key
-
-    languages = [
-        code for code, _ in getattr(django_settings, "LANGUAGES", [("fr", "Français")])
-    ]
-    fragment_names = [
-        "main_menu",
-        "flat_menu_surfooter_assistant",
-        "flat_menu_footer_assistant",
-    ]
-    keys = [
-        make_template_fragment_key(name, [lang])
-        for name in fragment_names
-        for lang in languages
-    ]
-    cache.delete_many(keys)
-
-
-@receiver(post_save, sender=MainMenu)
-def invalidate_main_menu_cache(sender, **kwargs):
-    _invalidate_menu_fragment_caches()
-
-
-@receiver(post_save, sender=FlatMenu)
-def invalidate_flat_menu_cache(sender, **kwargs):
-    _invalidate_menu_fragment_caches()

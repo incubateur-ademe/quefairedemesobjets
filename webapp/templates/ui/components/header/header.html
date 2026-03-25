@@ -1,6 +1,6 @@
 {% extends iframe|yesno:"ui/components/header/base.iframe.html,ui/components/header/base.html" %}
 
-{% load i18n menu_tags static %}
+{% load i18n menu_tags static wagtail_cache %}
 
 {% block burger_menu %}
   {% translate "Search" as search_label %}
@@ -44,6 +44,6 @@
 
 {% block main_menu %}
 {% if request %}
-{% main_menu max_levels=1 template="ui/components/header/header_menu.html" %}
+  {% main_menu max_levels=1 template="ui/components/header/header_menu.html" %}
 {% endif %}
 {% endblock main_menu %}

@@ -199,11 +199,25 @@ if DEBUG:
 
     if WITH_DJANGO_DEBUG_TOOLBAR:
         INSTALLED_APPS.append("debug_toolbar")
-        MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
+        MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")
+        DEBUG_TOOLBAR_CONFIG = {
+            # "RESULTS_CACHE_SIZE": 1000,
+            "DISABLE_PANELS": (
+                "debug_toolbar.panels.request.RequestPanel",
+                "debug_toolbar.panels.staticfiles.StaticFilesPanel",
+                "debug_toolbar.panels.alerts.AlertsPanel",
+                "debug_toolbar.panels.cache.CachePanel",
+                "debug_toolbar.panels.signals.SignalsPanel",
+                "debug_toolbar.panels.community.CommunityPanel",
+                "debug_toolbar.panels.redirects.RedirectsPanel",
+                "debug_toolbar.panels.profiling.ProfilingPanel",
+            ),
+            "TOOLBAR_STORE_CLASS": "debug_toolbar.store.DatabaseStore",
+        }
 
     if WITH_DJANGO_SILK:
         INSTALLED_APPS.append("silk")
-        MIDDLEWARE.insert(0, "silk.middleware.SilkyMiddleware")
+        MIDDLEWARE.append("silk.middleware.SilkyMiddleware")
 
     CORS_ALLOW_ALL_ORIGINS = DEBUG
 
@@ -226,11 +240,14 @@ with suppress(ModuleNotFoundError):
 
             return path_is_not_excluded
 
-        patterns_to_exclude = ["/lookbook", "/cms"]
+        patterns_to_exclude = ["/lookbook"]
+        # ROOT_TAG_EXTRA_ATTRS is required so Turbo doesn't replace the toolbar
+        # between navigations, which would cause "panel data no longer available".
         DEBUG_TOOLBAR_CONFIG = {
             "SHOW_TOOLBAR_CALLBACK": show_toolbar_callback,
             "HIDE_IN_STACKTRACES": CONFIG_DEFAULTS["HIDE_IN_STACKTRACES"]
             + ("sentry_sdk",),
+            "ROOT_TAG_EXTRA_ATTRS": "data-turbo-permanent",
         }
 
 LOGLEVEL = decouple.config(
