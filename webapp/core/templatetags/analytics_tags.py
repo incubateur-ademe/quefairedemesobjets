@@ -14,3 +14,11 @@ def posthog_data_attributes(context, key):
     request = context.get("request")
     debug = settings.POSTHOG_DEBUG
     return {"key": key, "debug": debug, "request": request}
+
+
+@register.inclusion_tag("ui/analytics/sentry_data_attributes.html")
+def sentry_data_attributes():
+    return {
+        "dsn": settings.SENTRY_DSN,
+        "environment": settings.ENVIRONMENT,
+    }

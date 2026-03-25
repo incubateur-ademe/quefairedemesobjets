@@ -15,11 +15,14 @@ from contextlib import suppress
 from pathlib import Path
 from urllib.parse import urlparse
 
+import logging
+
 import decouple
 import dj_database_url
 import sentry_sdk
 from import_export.formats.base_formats import CSV, XLS, XLSX
 from sentry_sdk.integrations.django import DjangoIntegration
+from sentry_sdk.integrations.logging import LoggingIntegration
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -448,9 +451,16 @@ WHITENOISE_KEEP_ONLY_HASHED_FILES = True
 
 # Sentry
 # ------
+SENTRY_DSN = decouple.config("SENTRY_DSN", cast=str, default="")
 sentry_sdk.init(
-    dsn=decouple.config("SENTRY_DSN", cast=str, default=""),
-    integrations=[DjangoIntegration()],
+    dsn=SENTRY_DSN,
+    integrations=[
+        DjangoIntegration(),
+        LoggingIntegration(
+            level=logging.INFO,  # INFO+ log records attached as breadcrumbs
+            event_level=logging.ERROR,  # ERROR+ log records create Sentry events
+        ),
+    ],
     environment=ENVIRONMENT,
     # If you wish to associate users to errors (assuming you are using
     # django.contrib.auth) you may enable sending PII data.
