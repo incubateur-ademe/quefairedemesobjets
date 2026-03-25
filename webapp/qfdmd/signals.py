@@ -2,6 +2,7 @@ import logging
 
 from core.notion import ContactFormData, create_new_row_in_notion_table
 from django.conf import settings
+from core.constants import FRAGMENT_CACHE_KEYS
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 from django.db.models.signals import post_save
@@ -43,14 +44,14 @@ def index_search_tags_on_publish(sender, instance, **kwargs):
 @receiver(page_published, sender=HomePage)
 def invalidate_icons_home_cache(sender, instance, **kwargs):
     """Invalidate the homepage icons fragment cache when the page is published."""
-    cache.delete(make_template_fragment_key("icons-home"))
+    cache.delete(make_template_fragment_key(FRAGMENT_CACHE_KEYS["icons_home"]))
 
 
 @receiver(post_save, sender=FlatMenu)
 def invalidate_footer_cache(sender, instance, **kwargs):
     """Invalidate footer fragment caches when any FlatMenu is saved."""
-    cache.delete(make_template_fragment_key("footer-top"))
-    cache.delete(make_template_fragment_key("footer-links"))
+    cache.delete(make_template_fragment_key(FRAGMENT_CACHE_KEYS["footer_top"]))
+    cache.delete(make_template_fragment_key(FRAGMENT_CACHE_KEYS["footer_links"]))
 
 @receiver(post_save, sender=submission_class)
 def submit_sites_conformes_form(sender, instance, created, **kwargs):

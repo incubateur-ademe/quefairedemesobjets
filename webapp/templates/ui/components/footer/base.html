@@ -5,7 +5,7 @@
 <div class="fr-footer__top">
     <div class="fr-container">
     {% if request %}
-        {% wagtailcache 3600 "footer-top" %}
+        {% wagtailcache None FRAGMENT_CACHE_KEYS.footer_top %}
             {% flat_menu show_menu_heading=True handle="surfooter_assistant" template="ui/components/footer/footer-top-menu.html" %}
         {% endwagtailcache %}
     {% endif %}
@@ -15,7 +15,7 @@
 
 {% block footer_links %}
 {% if request %}
-{% wagtailcache 3600 "footer-links" %}
+{% wagtailcache None FRAGMENT_CACHE_KEYS.footer_links %}
 {% flat_menu handle="footer_assistant" template="ui/components/footer/footer-menu.html" %}
 {% endwagtailcache %}
 {% endif %}

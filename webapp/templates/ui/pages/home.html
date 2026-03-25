@@ -34,7 +34,7 @@
     </div>
 
     {% if page.icons %}
-    {% wagtailcache 3600 "icons-home" %}
+    {% wagtailcache None FRAGMENT_CACHE_KEYS.icons_home %}
     <div class="qf-w-full qf-overflow-hidden" aria-hidden="true">
         <div class="qf-grid qf-grid-cols-[repeat(27,calc(30px+0.5rem))] md:qf-grid-cols-[repeat(27,calc(50px+0.5rem))] qf-justify-center">
             {% for block in page.icons %}
