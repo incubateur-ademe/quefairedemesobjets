@@ -1,4 +1,4 @@
 #!/bin/bash
 
-gunicorn core.wsgi --bind unix:/tmp/gunicorn.sock --timeout 120 --workers "${GUNICORN_WORKERS:-4}" &
+gunicorn core.wsgi --bind unix:/tmp/gunicorn.sock --timeout 120 --workers "${GUNICORN_WORKERS:-2}" --max-requests 1000 --max-requests-jitter 100 &
 /app/bin/run
