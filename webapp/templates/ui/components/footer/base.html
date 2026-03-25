@@ -1,13 +1,11 @@
 {% extends "dsfr/footer.html" %}
-{% load menu_tags wagtail_cache %}
+{% load menu_tags %}
 
 {% block footer_top %}
 <div class="fr-footer__top">
     <div class="fr-container">
     {% if request %}
-    {% wagtailcache 3600 "flat_menu_surfooter_assistant" LANGUAGE_CODE %}
     {% flat_menu show_menu_heading=True handle="surfooter_assistant" template="ui/components/footer/footer-top-menu.html" %}
-    {% endwagtailcache %}
     {% endif %}
     </div>
 </div>
@@ -15,9 +13,7 @@
 
 {% block footer_links %}
 {% if request %}
-{% wagtailcache 3600 "flat_menu_footer_assistant" LANGUAGE_CODE %}
 {% flat_menu handle="footer_assistant" template="ui/components/footer/footer-menu.html" %}
-{% endwagtailcache %}
 {% endif %}
 
 {% endblock footer_links %}
