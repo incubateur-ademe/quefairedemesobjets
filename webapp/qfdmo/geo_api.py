@@ -4,10 +4,8 @@ from typing import List, Tuple, Union, cast
 
 import requests
 from django.contrib.gis.geos import GEOSGeometry
-from django.core.cache import caches
+from django.core.cache import cache
 from rapidfuzz import fuzz, process
-
-db_cache = caches["database"]
 
 
 logger = logging.getLogger(__name__)
@@ -47,7 +45,7 @@ def epcis_from(fields: List[str] = []) -> Union[List, List[tuple]]:
     """
     raw_codes = cast(
         List,
-        db_cache.get_or_set("all_epci_codes", fetch_epci_codes, timeout=3600 * 24 * 30),
+        cache.get_or_set("all_epci_codes", fetch_epci_codes, timeout=3600 * 24 * 30),
     )
     epcis = [[code.get(field) for field in fields] for code in raw_codes]
 
@@ -71,7 +69,7 @@ def retrieve_epci_geojson_from_api_or_cache(epci):
         contour = response.json()["contour"]
         return contour
 
-    return db_cache.get_or_set(
+    return cache.get_or_set(
         f"{epci}_bounding_box", fetch_epci_bounding_box, timeout=3600 * 24 * 365
     )
 
