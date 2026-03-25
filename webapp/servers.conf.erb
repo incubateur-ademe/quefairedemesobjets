@@ -11,6 +11,10 @@ map $host $is_valid_host {
     "<%= ENV["BASE_DOMAIN"] %>"                      1;
     "<%= ENV["LEGACY_SITE_VITRINE_DOMAIN"] %>"       1;
 }
+upstream gunicorn {
+    server unix:/tmp/gunicorn.sock;
+    keepalive 32;
+}
 
 server {
     listen <%= ENV["PORT"] %>;
@@ -28,33 +32,49 @@ server {
     }
 
     location /iframe.js {
-        proxy_pass http://unix:/tmp/gunicorn.sock;
+        proxy_pass http://gunicorn;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
         proxy_cache assistant;
+        proxy_cache_valid 200 301 302 10m;
+        proxy_cache_valid 404 1m;
         add_header X-Cache-Status $upstream_cache_status;
     }
 
     location /static/iframe.js {
-        proxy_pass http://unix:/tmp/gunicorn.sock;
+        proxy_pass http://gunicorn;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
         proxy_cache assistant;
+        proxy_cache_valid 200 301 302 10m;
+        proxy_cache_valid 404 1m;
         add_header X-Cache-Status $upstream_cache_status;
     }
 
 
     location /static/carte.js {
-        proxy_pass http://unix:/tmp/gunicorn.sock;
+        proxy_pass http://gunicorn;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
         proxy_cache assistant;
+        proxy_cache_valid 200 301 302 10m;
+        proxy_cache_valid 404 1m;
         add_header X-Cache-Status $upstream_cache_status;
     }
 
     location / {
-        proxy_pass http://unix:/tmp/gunicorn.sock;
+        proxy_pass http://gunicorn;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
 
         proxy_cache_bypass $no_cache;
         proxy_no_cache $no_cache;
 
         proxy_cache assistant;
         proxy_set_header Host $http_host;
-        proxy_cache_key $request_method$request_uri$is_args$args;
+        proxy_cache_key $request_method$scheme$host$request_uri;
+        proxy_cache_valid 200 301 302 10m;
+        proxy_cache_valid 404 1m;
         proxy_cache_lock on;
         proxy_cache_lock_timeout 10s;
         proxy_cache_use_stale error timeout updating;

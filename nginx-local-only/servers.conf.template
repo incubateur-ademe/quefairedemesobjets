@@ -27,7 +27,7 @@ server {
     ssl_certificate_key /etc/nginx/ssl/quefairedemesdechets.ademe.local-key.pem;
 
     location / {
-        proxy_pass http://host.docker.internal:8000;
+        proxy_pass http://django;
         proxy_set_header X-Forwarded-Proto https;
         proxy_set_header X-Forwarded-Host $host;
         proxy_set_header X-Forwarded-Port $server_port;
@@ -38,13 +38,5 @@ server {
 server {
     listen 80;
     server_name _;
-
-    if ($host != "quefairedemesdechets.ademe.local") {
-        return 301 https://quefairedemesdechets.ademe.local$request_uri;
-    }
-
-    location / {
-        proxy_pass http://host.docker.internal:8000;
-        include /etc/nginx/conf.d/cache.conf;
-    }
+    return 301 https://$host$request_uri;
 }
