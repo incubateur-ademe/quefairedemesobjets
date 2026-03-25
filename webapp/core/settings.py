@@ -538,6 +538,8 @@ WAGTAIL_SITE_NAME = "Que faire de mes objets et déchets"
 WAGTAILADMIN_BASE_URL = BASE_URL
 # Disable autosave
 WAGTAIL_AUTOSAVE_INTERVAL = 0
+# increase ping delay : 30s
+WAGTAIL_EDITING_SESSION_PING_INTERVAL = 30000
 MODELSEARCH_BACKENDS = {
     "default": {
         "BACKEND": "modelsearch.backends.database",
