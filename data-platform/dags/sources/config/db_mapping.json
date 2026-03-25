@@ -229,6 +229,7 @@
       "materiel_hifi_et_video",
       "materiel_photo_et_cinema",
       "autre_equipement_electronique",
+      "smartphone_tablette_et_console",
       "luminaire"
     ],
     "pam (petits appareils ménagers)": [
@@ -236,6 +237,7 @@
       "materiel_hifi_et_video",
       "materiel_photo_et_cinema",
       "autre_equipement_electronique",
+      "smartphone_tablette_et_console",
       "luminaire"
     ],
     "panneaux photovoltaïques": "panneaux_photovoltaiques",
