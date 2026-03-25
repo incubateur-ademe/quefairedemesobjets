@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Recherche" href="../../search.html"><link rel="next" title="Clustering &amp; Deduplication" href="clustering-deduplication.html"><link rel="prev" title="Airflow" href="airflow.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>DBT - Documentation Que faire de mes objets et déchets</title>
+        <title>dbt Documentation - Documentation Que faire de mes objets et déchets</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
@@ -257,7 +257,7 @@
 </li>
 <li class="toctree-l2 current has-children"><a class="reference internal" href="README.html">Data Platform</a><input aria-label="Toggle navigation of Data Platform" checked="" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="airflow.html">Airflow</a></li>
-<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">DBT</a></li>
+<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">dbt Documentation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="clustering-deduplication.html">Clustering &amp; Deduplication</a></li>
 </ul>
 </li>
@@ -322,19 +322,496 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="dbt">
-<h1>DBT<a class="headerlink" href="#dbt" title="Lien vers cette rubrique">¶</a></h1>
-<p>DBT is orchestrated by Airflow</p>
-<section id="orgnisation">
-<h2>Orgnisation<a class="headerlink" href="#orgnisation" title="Lien vers cette rubrique">¶</a></h2>
-<p>dbt code is organized following recommended DBT layers:</p>
+          <section id="dbt-documentation">
+<h1>dbt Documentation<a class="headerlink" href="#dbt-documentation" title="Lien vers cette rubrique">¶</a></h1>
+<p>Production-ready patterns for dbt (data build tool) including model organization, testing strategies, documentation, and incremental processing.</p>
+<section id="model-layers">
+<h2>Model Layers<a class="headerlink" href="#model-layers" title="Lien vers cette rubrique">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>source/           Source definitions (YAML only, declares external tables)
+    ↓
+base/             1:1 with source, light cleaning / filtering
+    ↓
+intermediate/     Business logic, joins, aggregations, normalisation
+    ↓
+marts/            Business-ready models (combines intermediate models)
+    ↓
+exposure/         Final tables exposed to consumers (API, dashboards, Open Data)
+</pre></div>
+</div>
+</section>
+<section id="naming-conventions">
+<h2>Naming Conventions<a class="headerlink" href="#naming-conventions" title="Lien vers cette rubrique">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Layer</p></th>
+<th class="head"><p>Prefix</p></th>
+<th class="head"><p>Example</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Source</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">source_</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">source_stats.yml</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Base</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">base_</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">base_vueacteur_visible.sql</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Intermediate</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">int_</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">int_acteur_visible_location.sql</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Marts</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">marts_</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">marts_acteur_stacked.sql</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Exposure</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">exposure_</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">exposure_stats_acteur_stacked_history.sql</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Each layer is organized by <strong>subject</strong> (business domain): <code class="docutils literal notranslate"><span class="pre">acteurs</span></code>, <code class="docutils literal notranslate"><span class="pre">stats</span></code>, <code class="docutils literal notranslate"><span class="pre">geo</span></code>, <code class="docutils literal notranslate"><span class="pre">ban</span></code>, <code class="docutils literal notranslate"><span class="pre">ae_annuaire_entreprises</span></code>, <code class="docutils literal notranslate"><span class="pre">enrich</span></code>.</p>
+</section>
+<section id="project-structure">
+<h2>Project Structure<a class="headerlink" href="#project-structure" title="Lien vers cette rubrique">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>data-platform/dbt/
+├── dbt_project.yml
+├── Makefile
+├── macros/
+│   ├── field/                           Field-level helpers
+│   │   ├── acteur_status_is_active.sql
+│   │   ├── coalesce_empty.sql
+│   │   ├── field_empty.sql
+│   │   └── sscat_from_action.sql
+│   ├── table/                           Table-level macros (reusable model logic)
+│   │   ├── macro_acteur.sql
+│   │   ├── macro_acteur_sources.sql
+│   │   ├── macro_acteur_labels.sql
+│   │   ├── macro_acteur_epci.sql
+│   │   ├── macro_propositionservice.sql
+│   │   └── ...
+│   ├── udf/                             User-defined functions (created on-run-start)
+│   │   ├── udf_encode_base57.sql
+│   │   ├── udf_uuid_to_int.sql
+│   │   └── ...
+│   └── constants/                       Shared constants
+│       ├── value_unavailable.sql
+│       └── public_accueilli_exclus.sql
+└── models/
+    ├── source/                          Source definitions (YAML only)
+    │   ├── source_acteur.yml
+    │   ├── source_stats.yml
+    │   ├── source_ban_base_adresse_nationale.yml
+    │   ├── source_ae_annuaire_entreprises.yml
+    │   └── source_enrich.yml
+    ├── base/                            1:1 with source, light cleaning
+    │   ├── acteurs/
+    │   │   ├── schema.yml
+    │   │   ├── base_acteur.sql
+    │   │   ├── base_acteur_acteur_services.sql
+    │   │   ├── base_propositionservice.sql
+    │   │   └── base_source.sql
+    │   ├── stats/
+    │   │   ├── schema.yml
+    │   │   ├── base_action.sql
+    │   │   ├── base_vueacteur_visible.sql
+    │   │   ├── base_vuepropositionservice.sql
+    │   │   ├── base_vuepropositionservice_visible.sql
+    │   │   └── base_random_position.sql
+    │   ├── ban/
+    │   │   ├── schema.yml
+    │   │   ├── base_ban_adresses.sql
+    │   │   └── base_ban_lieux_dits.sql
+    │   └── ae_annuaire_entreprises/
+    │       ├── schema.yml
+    │       ├── base_ae_unite_legale.sql
+    │       └── base_ae_etablissement.sql
+    ├── intermediate/                    Business logic, joins, aggregations
+    │   ├── acteurs/
+    │   │   ├── schema.yml
+    │   │   └── int_acteur.sql
+    │   ├── stats/
+    │   │   ├── schema.yml
+    │   │   ├── int_acteur_visible_location.sql
+    │   │   ├── int_acteur_visible_location_rounded.sql
+    │   │   ├── int_acteur_with_siren.sql
+    │   │   ├── int_acteur_with_siret.sql
+    │   │   ├── int_acteur_with_revision.sql
+    │   │   ├── int_stacked_location.sql
+    │   │   └── int_stacked_location_rounded.sql
+    │   ├── geo/
+    │   │   ├── schema.yml
+    │   │   └── int_epci.sql
+    │   ├── ban/
+    │   │   ├── int_ban_adresses.sql
+    │   │   └── int_ban_villes.sql
+    │   └── ae_annuaire_entreprises/
+    │       ├── schema.yml
+    │       ├── int_ae_unite_legale.sql
+    │       └── int_ae_etablissement.sql
+    ├── marts/                           Business-ready models
+    │   ├── acteurs/
+    │   │   ├── carte/                   Models for the map (carte)
+    │   │   │   ├── schema.yml
+    │   │   │   ├── marts_carte_acteur.sql
+    │   │   │   └── ...
+    │   │   ├── opendata/                Models for Open Data export
+    │   │   │   ├── schema.yml
+    │   │   │   ├── marts_opendata_acteur.sql
+    │   │   │   └── ...
+    │   │   ├── exhaustive/              All acteurs without filtering
+    │   │   │   └── ...
+    │   │   └── sample/                  Sample/displayed acteurs
+    │   │       └── ...
+    │   ├── stats/                       Statistics and metrics
+    │   │   ├── schema.yml
+    │   │   ├── marts_acteur_stacked.sql
+    │   │   ├── marts_acteur_siren_actif.sql
+    │   │   ├── marts_distance_first_action.sql
+    │   │   └── ...
+    │   └── enrich/                      Data enrichment suggestions
+    │       ├── schema.yml
+    │       ├── marts_enrich_acteurs_closed_candidates.sql
+    │       └── ...
+    └── exposure/                        Final tables exposed to consumers
+        ├── acteurs/
+        │   ├── carte/
+        │   │   ├── schema.yml
+        │   │   └── exposure_carte_acteur.sql
+        │   ├── opendata/
+        │   │   └── schema.yml
+        │   ├── exhaustive/
+        │   │   └── ...
+        │   └── sample/
+        │       └── ...
+        ├── stats/
+        │   ├── schema.yml
+        │   ├── exposure_stats_acteur_stacked_history.sql
+        │   ├── exposure_stats_acteur_no_siren_actif.sql
+        │   ├── exposure_stats_distance_nb_acteur_by_action.sql
+        │   └── ...
+        └── geo/
+            ├── schema.yml
+            └── exposure_epci.sql
+</pre></div>
+</div>
+</section>
+<section id="patterns">
+<h2>Patterns<a class="headerlink" href="#patterns" title="Lien vers cette rubrique">¶</a></h2>
+<p>All examples below use real models from the <code class="docutils literal notranslate"><span class="pre">stats</span></code> subject.</p>
+<section id="pattern-1-source-definitions">
+<h3>Pattern 1: Source Definitions<a class="headerlink" href="#pattern-1-source-definitions" title="Lien vers cette rubrique">¶</a></h3>
+<p>Sources are declared in YAML files in <code class="docutils literal notranslate"><span class="pre">models/source/</span></code>. Each source maps to a database schema.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># models/source/source_stats.yml</span>
+<span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+
+<span class="nt">sources</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">stats_qfdmo</span>
+<span class="w">    </span><span class="nt">schema</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webapp_public</span>
+<span class="w">    </span><span class="nt">tables</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">qfdmo_vueacteur</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">qfdmo_vuepropositionservice</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">qfdmo_action</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">stats_clone</span>
+<span class="w">    </span><span class="nt">schema</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">public</span>
+<span class="w">    </span><span class="nt">tables</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">clone_ca_epci_in_use</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">clone_ae_unite_legale_in_use</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">clone_ae_etablissement_in_use</span>
+</pre></div>
+</div>
+</section>
+<section id="pattern-2-base-models">
+<h3>Pattern 2: Base Models<a class="headerlink" href="#pattern-2-base-models" title="Lien vers cette rubrique">¶</a></h3>
+<p>Base models are 1:1 with source tables. They apply minimal transformations: filtering, sampling.</p>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="c1">-- models/base/stats/base_vueacteur_visible.sql</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
+<span class="k">FROM</span><span class="w"> </span><span class="err">{{</span><span class="w"> </span><span class="k">source</span><span class="p">(</span><span class="s1">&#39;stats_qfdmo&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;qfdmo_vueacteur&#39;</span><span class="p">)</span><span class="w"> </span><span class="err">}}</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">est_dans_carte</span><span class="w"> </span><span class="k">IS</span><span class="w"> </span><span class="k">TRUE</span><span class="w"> </span><span class="k">OR</span><span class="w"> </span><span class="n">est_dans_opendata</span><span class="w"> </span><span class="k">IS</span><span class="w"> </span><span class="k">TRUE</span>
+<span class="err">{</span><span class="o">%</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">env_var</span><span class="p">(</span><span class="s1">&#39;DBT_SAMPLING&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;false&#39;</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s1">&#39;true&#39;</span><span class="w"> </span><span class="o">%</span><span class="err">}</span>
+<span class="n">TABLESAMPLE</span><span class="w"> </span><span class="k">SYSTEM</span><span class="w"> </span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="err">{</span><span class="o">%</span><span class="w"> </span><span class="n">endif</span><span class="w"> </span><span class="o">%</span><span class="err">}</span>
+</pre></div>
+</div>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="c1">-- models/base/stats/base_action.sql</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
+<span class="k">FROM</span><span class="w"> </span><span class="err">{{</span><span class="w"> </span><span class="k">source</span><span class="p">(</span><span class="s1">&#39;stats_qfdmo&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;qfdmo_action&#39;</span><span class="p">)</span><span class="w"> </span><span class="err">}}</span>
+</pre></div>
+</div>
+<p>Base models that combine two base models with a simple join are also acceptable:</p>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="c1">-- models/base/stats/base_vuepropositionservice_visible.sql</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
+<span class="k">FROM</span><span class="w"> </span><span class="err">{{</span><span class="w"> </span><span class="k">ref</span><span class="p">(</span><span class="s1">&#39;base_vuepropositionservice&#39;</span><span class="p">)</span><span class="w"> </span><span class="err">}}</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">propositionservice</span>
+<span class="k">INNER</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="err">{{</span><span class="w"> </span><span class="k">ref</span><span class="p">(</span><span class="s1">&#39;base_vueacteur_visible&#39;</span><span class="p">)</span><span class="w"> </span><span class="err">}}</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">acteur</span>
+<span class="w">    </span><span class="k">ON</span><span class="w"> </span><span class="n">propositionservice</span><span class="p">.</span><span class="n">acteur_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">acteur</span><span class="p">.</span><span class="n">identifiant_unique</span>
+</pre></div>
+</div>
+</section>
+<section id="pattern-3-intermediate-models">
+<h3>Pattern 3: Intermediate Models<a class="headerlink" href="#pattern-3-intermediate-models" title="Lien vers cette rubrique">¶</a></h3>
+<p>Intermediate models apply business logic: filtering, validation, rounding, aggregation.</p>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="c1">-- models/intermediate/stats/int_acteur_visible_location.sql</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">identifiant_unique</span><span class="p">,</span><span class="w"> </span><span class="n">latitude</span><span class="p">,</span><span class="w"> </span><span class="n">longitude</span>
+<span class="k">FROM</span><span class="w"> </span><span class="err">{{</span><span class="w"> </span><span class="k">ref</span><span class="p">(</span><span class="s1">&#39;base_vueacteur_visible&#39;</span><span class="p">)</span><span class="w"> </span><span class="err">}}</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">latitude</span><span class="w"> </span><span class="k">IS</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">longitude</span><span class="w"> </span><span class="k">IS</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span>
+<span class="k">AND</span><span class="w"> </span><span class="n">latitude</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">longitude</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span>
+</pre></div>
+</div>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="c1">-- models/intermediate/stats/int_acteur_with_siret.sql</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">identifiant_unique</span><span class="p">,</span><span class="w"> </span><span class="n">siret</span>
+<span class="k">FROM</span><span class="w"> </span><span class="err">{{</span><span class="w"> </span><span class="k">ref</span><span class="p">(</span><span class="s1">&#39;base_vueacteur_visible&#39;</span><span class="p">)</span><span class="w"> </span><span class="err">}}</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="k">LENGTH</span><span class="p">(</span><span class="n">siret</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">14</span>
+<span class="k">AND</span><span class="w"> </span><span class="n">siret</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="s1">&#39;^[0-9]+$&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="c1">-- models/intermediate/stats/int_stacked_location.sql</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">latitude</span><span class="p">,</span><span class="w"> </span><span class="n">longitude</span>
+<span class="k">FROM</span><span class="w"> </span><span class="err">{{</span><span class="w"> </span><span class="k">ref</span><span class="p">(</span><span class="s1">&#39;int_acteur_visible_location&#39;</span><span class="p">)</span><span class="w"> </span><span class="err">}}</span>
+<span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">latitude</span><span class="p">,</span><span class="w"> </span><span class="n">longitude</span>
+<span class="k">HAVING</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span>
+</pre></div>
+</div>
+</section>
+<section id="pattern-4-marts-models">
+<h3>Pattern 4: Marts Models<a class="headerlink" href="#pattern-4-marts-models" title="Lien vers cette rubrique">¶</a></h3>
+<p>Marts models combine intermediate models to produce business-ready datasets.</p>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="c1">-- models/marts/stats/marts_acteur_stacked.sql</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">identifiant_unique</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">latitude</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">longitude</span>
+<span class="k">FROM</span><span class="w"> </span><span class="err">{{</span><span class="w"> </span><span class="k">ref</span><span class="p">(</span><span class="s1">&#39;int_acteur_visible_location&#39;</span><span class="p">)</span><span class="w"> </span><span class="err">}}</span><span class="w"> </span><span class="n">a</span>
+<span class="k">INNER</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="err">{{</span><span class="w"> </span><span class="k">ref</span><span class="p">(</span><span class="s1">&#39;int_stacked_location&#39;</span><span class="p">)</span><span class="w"> </span><span class="err">}}</span><span class="w"> </span><span class="k">c</span>
+<span class="w">    </span><span class="k">ON</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">latitude</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">c</span><span class="p">.</span><span class="n">latitude</span>
+<span class="w">    </span><span class="k">AND</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">longitude</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">c</span><span class="p">.</span><span class="n">longitude</span>
+<span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">latitude</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">longitude</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">identifiant_unique</span>
+</pre></div>
+</div>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="c1">-- models/marts/stats/marts_acteur_siren_actif.sql</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">identifiant_unique</span>
+<span class="k">FROM</span><span class="w"> </span><span class="err">{{</span><span class="w"> </span><span class="k">ref</span><span class="p">(</span><span class="s1">&#39;int_acteur_with_siren&#39;</span><span class="p">)</span><span class="w"> </span><span class="err">}}</span><span class="w"> </span><span class="n">a</span>
+<span class="k">INNER</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="err">{{</span><span class="w"> </span><span class="k">ref</span><span class="p">(</span><span class="s1">&#39;int_ae_siren_in_acteur&#39;</span><span class="p">)</span><span class="w"> </span><span class="err">}}</span><span class="w"> </span><span class="n">ae</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">siren</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ae</span><span class="p">.</span><span class="n">siren</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">ae</span><span class="p">.</span><span class="n">etat_administratif</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;A&#39;</span>
+</pre></div>
+</div>
+</section>
+<section id="pattern-5-exposure-models">
+<h3>Pattern 5: Exposure Models<a class="headerlink" href="#pattern-5-exposure-models" title="Lien vers cette rubrique">¶</a></h3>
+<p>Exposure models are the final tables exposed to consumers. They can be simple pass-throughs or incremental models that track history.</p>
+<p>Simple pass-through:</p>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="c1">-- models/exposure/stats/exposure_stats_acteur_no_siren_actif.sql</span>
+<span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="err">{{</span><span class="w"> </span><span class="k">ref</span><span class="p">(</span><span class="s1">&#39;marts_acteur_no_siren_actif&#39;</span><span class="p">)</span><span class="w"> </span><span class="err">}}</span>
+</pre></div>
+</div>
+<p>Exposure with filtering/projection:</p>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="c1">-- models/exposure/stats/exposure_stats_acteur_revision_siren.sql</span>
+<span class="k">SELECT</span>
+<span class="w">  </span><span class="n">identifiant_unique</span><span class="p">,</span>
+<span class="w">  </span><span class="n">nom</span><span class="p">,</span>
+<span class="w">  </span><span class="n">source_code</span><span class="p">,</span>
+<span class="w">  </span><span class="n">acteur_siren</span><span class="p">,</span>
+<span class="w">  </span><span class="n">revision_siren</span><span class="p">,</span>
+<span class="w">  </span><span class="n">acteur_modifie_le</span><span class="p">,</span>
+<span class="w">  </span><span class="n">revision_modifie_le</span>
+<span class="k">FROM</span><span class="w"> </span><span class="err">{{</span><span class="w"> </span><span class="k">ref</span><span class="p">(</span><span class="s1">&#39;marts_acteur_revision&#39;</span><span class="p">)</span><span class="w"> </span><span class="err">}}</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">revision_siren</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s1">&#39;&#39;</span>
+<span class="k">AND</span><span class="w"> </span><span class="n">acteur_siren</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s1">&#39;&#39;</span>
+<span class="k">AND</span><span class="w"> </span><span class="n">acteur_statut</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;ACTIF&#39;</span>
+<span class="k">AND</span><span class="w"> </span><span class="n">revision_statut</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;ACTIF&#39;</span>
+<span class="k">AND</span><span class="w"> </span><span class="n">revision_siren</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">acteur_siren</span>
+<span class="k">AND</span><span class="w"> </span><span class="n">revision_modifie_le</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">acteur_modifie_le</span>
+</pre></div>
+</div>
+<p>Incremental exposure (history tracking):</p>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="c1">-- models/exposure/stats/exposure_stats_acteur_stacked_history.sql</span>
+<span class="k">WITH</span><span class="w"> </span><span class="n">stacked</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="k">SELECT</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">nb_stacked</span>
+<span class="w">    </span><span class="k">FROM</span><span class="w"> </span><span class="err">{{</span><span class="w"> </span><span class="k">ref</span><span class="p">(</span><span class="s1">&#39;marts_acteur_stacked&#39;</span><span class="p">)</span><span class="w"> </span><span class="err">}}</span>
+<span class="p">),</span>
+<span class="n">stacked_rounded</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="k">SELECT</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">nb_stacked_rounded</span>
+<span class="w">    </span><span class="k">FROM</span><span class="w"> </span><span class="err">{{</span><span class="w"> </span><span class="k">ref</span><span class="p">(</span><span class="s1">&#39;marts_acteur_stacked_rounded&#39;</span><span class="p">)</span><span class="w"> </span><span class="err">}}</span>
+<span class="p">),</span>
+<span class="n">visible</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="k">SELECT</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">nb_total</span>
+<span class="w">    </span><span class="k">FROM</span><span class="w"> </span><span class="err">{{</span><span class="w"> </span><span class="k">ref</span><span class="p">(</span><span class="s1">&#39;int_acteur_visible_location&#39;</span><span class="p">)</span><span class="w"> </span><span class="err">}}</span>
+<span class="p">)</span>
+<span class="k">SELECT</span>
+<span class="w">    </span><span class="k">CURRENT_DATE</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">date_snapshot</span><span class="p">,</span>
+<span class="w">    </span><span class="n">v</span><span class="p">.</span><span class="n">nb_total</span><span class="p">,</span>
+<span class="w">    </span><span class="n">s</span><span class="p">.</span><span class="n">nb_stacked</span><span class="p">,</span>
+<span class="w">    </span><span class="n">sr</span><span class="p">.</span><span class="n">nb_stacked_rounded</span><span class="p">,</span>
+<span class="w">    </span><span class="k">CASE</span>
+<span class="w">        </span><span class="k">WHEN</span><span class="w"> </span><span class="n">v</span><span class="p">.</span><span class="n">nb_total</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="k">THEN</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">        </span><span class="k">ELSE</span><span class="w"> </span><span class="n">ROUND</span><span class="p">((</span><span class="n">s</span><span class="p">.</span><span class="n">nb_stacked</span><span class="p">::</span><span class="nb">NUMERIC</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">v</span><span class="p">.</span><span class="n">nb_total</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span>
+<span class="w">    </span><span class="k">END</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">rate_stacked</span><span class="p">,</span>
+<span class="w">    </span><span class="k">CASE</span>
+<span class="w">        </span><span class="k">WHEN</span><span class="w"> </span><span class="n">v</span><span class="p">.</span><span class="n">nb_total</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="k">THEN</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">        </span><span class="k">ELSE</span><span class="w"> </span><span class="n">ROUND</span><span class="p">((</span><span class="n">sr</span><span class="p">.</span><span class="n">nb_stacked_rounded</span><span class="p">::</span><span class="nb">NUMERIC</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">v</span><span class="p">.</span><span class="n">nb_total</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span>
+<span class="w">    </span><span class="k">END</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">rate_stacked_rounded</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">visible</span><span class="w"> </span><span class="n">v</span>
+<span class="k">CROSS</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="n">stacked</span><span class="w"> </span><span class="n">s</span>
+<span class="k">CROSS</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="n">stacked_rounded</span><span class="w"> </span><span class="n">sr</span>
+</pre></div>
+</div>
+</section>
+<section id="pattern-6-schema-testing">
+<h3>Pattern 6: Schema &amp; Testing<a class="headerlink" href="#pattern-6-schema-testing" title="Lien vers cette rubrique">¶</a></h3>
+<p>Each folder contains a <code class="docutils literal notranslate"><span class="pre">schema.yml</span></code> that documents and tests models.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># models/base/stats/schema.yml</span>
+<span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+
+<span class="nt">models</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">base_vueacteur_visible</span>
+<span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Acteurs</span><span class="nv"> </span><span class="s">visibles&quot;</span>
+<span class="w">    </span><span class="nt">columns</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">identifiant_unique</span>
+<span class="w">        </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;L&#39;identifiant</span><span class="nv"> </span><span class="s">unique</span><span class="nv"> </span><span class="s">de</span><span class="nv"> </span><span class="s">l&#39;acteur&quot;</span>
+<span class="w">        </span><span class="nt">data_tests</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">not_null</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unique</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nom</span>
+<span class="w">        </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Le</span><span class="nv"> </span><span class="s">nom</span><span class="nv"> </span><span class="s">de</span><span class="nv"> </span><span class="s">l&#39;acteur&quot;</span>
+<span class="w">        </span><span class="nt">data_tests</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">not_null</span>
+<span class="w">    </span><span class="nt">config</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">materialized</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">table</span>
+<span class="w">      </span><span class="nt">unique_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">identifiant_unique</span>
+<span class="w">      </span><span class="nt">tags</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">stats</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">base</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">acteurs</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">visible</span>
+</pre></div>
+</div>
+<p>Incremental exposure models use <code class="docutils literal notranslate"><span class="pre">delete+insert</span></code> strategy:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># models/exposure/stats/schema.yml (extract)</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">exposure_stats_acteur_stacked_history</span>
+<span class="w">  </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Historique</span><span class="nv"> </span><span class="s">du</span><span class="nv"> </span><span class="s">nombre</span><span class="nv"> </span><span class="s">d&#39;acteurs</span><span class="nv"> </span><span class="s">empilés&quot;</span>
+<span class="w">  </span><span class="nt">columns</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">date_snapshot</span>
+<span class="w">      </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Date</span><span class="nv"> </span><span class="s">de</span><span class="nv"> </span><span class="s">l&#39;exécution</span><span class="nv"> </span><span class="s">dbt&quot;</span>
+<span class="w">      </span><span class="nt">data_tests</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">not_null</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unique</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nb_total</span>
+<span class="w">      </span><span class="nt">data_tests</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">not_null</span>
+<span class="w">  </span><span class="nt">config</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">materialized</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">incremental</span>
+<span class="w">    </span><span class="nt">unique_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">date_snapshot</span>
+<span class="w">    </span><span class="nt">incremental_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">delete+insert</span>
+<span class="w">    </span><span class="nt">tags</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">exposure</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">stats</span>
+</pre></div>
+</div>
+</section>
+<section id="pattern-7-sampling-in-dev">
+<h3>Pattern 7: Sampling in Dev<a class="headerlink" href="#pattern-7-sampling-in-dev" title="Lien vers cette rubrique">¶</a></h3>
+<p>Use the <code class="docutils literal notranslate"><span class="pre">DBT_SAMPLING</span></code> environment variable to limit data in development:</p>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
+<span class="k">FROM</span><span class="w"> </span><span class="err">{{</span><span class="w"> </span><span class="k">source</span><span class="p">(</span><span class="s1">&#39;stats_qfdmo&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;qfdmo_vueacteur&#39;</span><span class="p">)</span><span class="w"> </span><span class="err">}}</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">est_dans_carte</span><span class="w"> </span><span class="k">IS</span><span class="w"> </span><span class="k">TRUE</span><span class="w"> </span><span class="k">OR</span><span class="w"> </span><span class="n">est_dans_opendata</span><span class="w"> </span><span class="k">IS</span><span class="w"> </span><span class="k">TRUE</span>
+<span class="err">{</span><span class="o">%</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">env_var</span><span class="p">(</span><span class="s1">&#39;DBT_SAMPLING&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;false&#39;</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s1">&#39;true&#39;</span><span class="w"> </span><span class="o">%</span><span class="err">}</span>
+<span class="n">TABLESAMPLE</span><span class="w"> </span><span class="k">SYSTEM</span><span class="w"> </span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="err">{</span><span class="o">%</span><span class="w"> </span><span class="n">endif</span><span class="w"> </span><span class="o">%</span><span class="err">}</span>
+</pre></div>
+</div>
+</section>
+<section id="pattern-8-udfs-user-defined-functions">
+<h3>Pattern 8: UDFs (User-Defined Functions)<a class="headerlink" href="#pattern-8-udfs-user-defined-functions" title="Lien vers cette rubrique">¶</a></h3>
+<p>UDFs are created automatically at the start of each dbt run via <code class="docutils literal notranslate"><span class="pre">on-run-start</span></code> in <code class="docutils literal notranslate"><span class="pre">dbt_project.yml</span></code>:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># dbt_project.yml (extract)</span>
+<span class="nt">on-run-start</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">create_udf_encode_base57()</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">create_udf_uuid_to_int()</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">create_udf_safe_divmod()</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">create_udf_normalize_string_alpha_for_match()</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">create_udf_ae_string_cleanup()</span><span class="nv"> </span><span class="s">}}&quot;</span>
+</pre></div>
+</div>
+<p>UDF macros live in <code class="docutils literal notranslate"><span class="pre">macros/udf/</span></code>.</p>
+</section>
+</section>
+<section id="makefile-commands">
+<h2>Makefile Commands<a class="headerlink" href="#makefile-commands" title="Lien vers cette rubrique">¶</a></h2>
+<p>Run these commands from <code class="docutils literal notranslate"><span class="pre">data-platform/dbt/</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>generate-docs<span class="w">    </span><span class="c1"># Generate dbt documentation (HTML)</span>
+make<span class="w"> </span>serve-docs<span class="w">       </span><span class="c1"># Serve documentation locally on port 8085</span>
+make<span class="w"> </span>clean-docs<span class="w">       </span><span class="c1"># Remove generated documentation (target/)</span>
+</pre></div>
+</div>
+<p>These commands use <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">run</span> <span class="pre">dbt</span></code> to ensure the correct Python environment.</p>
+</section>
+<section id="dbt-commands">
+<h2>dbt Commands<a class="headerlink" href="#dbt-commands" title="Lien vers cette rubrique">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run models</span>
+uv<span class="w"> </span>run<span class="w"> </span>dbt<span class="w"> </span>run<span class="w">                              </span><span class="c1"># Run all models</span>
+uv<span class="w"> </span>run<span class="w"> </span>dbt<span class="w"> </span>run<span class="w"> </span>--select<span class="w"> </span>stats<span class="w">               </span><span class="c1"># Run all stats models</span>
+uv<span class="w"> </span>run<span class="w"> </span>dbt<span class="w"> </span>run<span class="w"> </span>--select<span class="w"> </span>+marts_acteur_stacked<span class="w">  </span><span class="c1"># Run model and its upstream dependencies</span>
+uv<span class="w"> </span>run<span class="w"> </span>dbt<span class="w"> </span>run<span class="w"> </span>--select<span class="w"> </span>marts_acteur_stacked+<span class="w">  </span><span class="c1"># Run model and its downstream dependents</span>
+uv<span class="w"> </span>run<span class="w"> </span>dbt<span class="w"> </span>run<span class="w"> </span>--full-refresh<span class="w">               </span><span class="c1"># Rebuild incremental models from scratch</span>
+uv<span class="w"> </span>run<span class="w"> </span>dbt<span class="w"> </span>run<span class="w"> </span>--select<span class="w"> </span>tag:stats<span class="w">           </span><span class="c1"># Run models tagged &quot;stats&quot;</span>
+
+<span class="c1"># Testing</span>
+uv<span class="w"> </span>run<span class="w"> </span>dbt<span class="w"> </span><span class="nb">test</span><span class="w">                             </span><span class="c1"># Run all tests</span>
+uv<span class="w"> </span>run<span class="w"> </span>dbt<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--select<span class="w"> </span>stats<span class="w">              </span><span class="c1"># Test stats models only</span>
+uv<span class="w"> </span>run<span class="w"> </span>dbt<span class="w"> </span>build<span class="w">                            </span><span class="c1"># Run + test in DAG order</span>
+
+<span class="c1"># Documentation</span>
+uv<span class="w"> </span>run<span class="w"> </span>dbt<span class="w"> </span>docs<span class="w"> </span>generate<span class="w">                    </span><span class="c1"># Generate docs</span>
+uv<span class="w"> </span>run<span class="w"> </span>dbt<span class="w"> </span>docs<span class="w"> </span>serve<span class="w">                       </span><span class="c1"># Serve docs locally</span>
+
+<span class="c1"># Debugging</span>
+uv<span class="w"> </span>run<span class="w"> </span>dbt<span class="w"> </span>compile<span class="w">                          </span><span class="c1"># Compile SQL without running</span>
+uv<span class="w"> </span>run<span class="w"> </span>dbt<span class="w"> </span>debug<span class="w">                            </span><span class="c1"># Test database connection</span>
+uv<span class="w"> </span>run<span class="w"> </span>dbt<span class="w"> </span>ls<span class="w"> </span>--select<span class="w"> </span>tag:stats<span class="w">            </span><span class="c1"># List models by tag</span>
+
+<span class="c1"># Sampling (dev only, reduces dataset to ~10%)</span>
+<span class="nv">DBT_SAMPLING</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>uv<span class="w"> </span>run<span class="w"> </span>dbt<span class="w"> </span>run
+</pre></div>
+</div>
+</section>
+<section id="data-flow-example-stats-stacked-acteurs">
+<h2>Data Flow Example: Stats Stacked Acteurs<a class="headerlink" href="#data-flow-example-stats-stacked-acteurs" title="Lien vers cette rubrique">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>source_stats.yml (qfdmo_vueacteur)
+    ↓
+base_vueacteur_visible.sql          (filter: visible acteurs only)
+    ↓
+int_acteur_visible_location.sql     (extract lat/lon, filter nulls)
+    ↓
+int_stacked_location.sql            (GROUP BY lat/lon HAVING COUNT &gt; 1)
+    ↓
+marts_acteur_stacked.sql            (JOIN acteurs with stacked locations)
+    ↓
+exposure_stats_acteur_stacked_history.sql  (incremental: daily snapshot with counts &amp; rates)
+</pre></div>
+</div>
+</section>
+<section id="best-practices">
+<h2>Best Practices<a class="headerlink" href="#best-practices" title="Lien vers cette rubrique">¶</a></h2>
+<section id="do-s">
+<h3>Do’s<a class="headerlink" href="#do-s" title="Lien vers cette rubrique">¶</a></h3>
 <ul class="simple">
-<li><p>base</p></li>
-<li><p>intermediate</p></li>
-<li><p>marts</p></li>
-<li><p>exposure</p></li>
+<li><p><strong>Use base layer</strong> - Clean data once in base, reuse everywhere</p></li>
+<li><p><strong>Test aggressively</strong> - <code class="docutils literal notranslate"><span class="pre">not_null</span></code>, <code class="docutils literal notranslate"><span class="pre">unique</span></code>, <code class="docutils literal notranslate"><span class="pre">data_tests</span></code> on key columns</p></li>
+<li><p><strong>Document everything</strong> - Column descriptions in <code class="docutils literal notranslate"><span class="pre">schema.yml</span></code></p></li>
+<li><p><strong>Use incremental</strong> - For history/snapshot tables (exposure layer)</p></li>
+<li><p><strong>Use tags</strong> - Tag models by subject (<code class="docutils literal notranslate"><span class="pre">stats</span></code>, <code class="docutils literal notranslate"><span class="pre">acteurs</span></code>) and layer (<code class="docutils literal notranslate"><span class="pre">base</span></code>, <code class="docutils literal notranslate"><span class="pre">marts</span></code>)</p></li>
+<li><p><strong>Use <code class="docutils literal notranslate"><span class="pre">env_var</span></code> for sampling</strong> - <code class="docutils literal notranslate"><span class="pre">DBT_SAMPLING=true</span></code> for faster dev cycles</p></li>
 </ul>
-<p>cf. https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview</p>
+</section>
+<section id="don-ts">
+<h3>Don’ts<a class="headerlink" href="#don-ts" title="Lien vers cette rubrique">¶</a></h3>
+<ul class="simple">
+<li><p><strong>Don’t skip base</strong> - Source → marts is tech debt</p></li>
+<li><p><strong>Don’t hardcode schemas</strong> - Declare sources in <code class="docutils literal notranslate"><span class="pre">source_*.yml</span></code></p></li>
+<li><p><strong>Don’t repeat logic</strong> - Extract to macros (<code class="docutils literal notranslate"><span class="pre">macros/table/</span></code>, <code class="docutils literal notranslate"><span class="pre">macros/field/</span></code>)</p></li>
+<li><p><strong>Don’t test in prod</strong> - Use sampling and dev targets</p></li>
+<li><p><strong>Don’t forget <code class="docutils literal notranslate"><span class="pre">schema.yml</span></code></strong> - Every folder needs one for documentation and tests</p></li>
+</ul>
+</section>
 </section>
 </section>
 
@@ -393,8 +870,29 @@
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">DBT</a><ul>
-<li><a class="reference internal" href="#orgnisation">Orgnisation</a></li>
+<li><a class="reference internal" href="#">dbt Documentation</a><ul>
+<li><a class="reference internal" href="#model-layers">Model Layers</a></li>
+<li><a class="reference internal" href="#naming-conventions">Naming Conventions</a></li>
+<li><a class="reference internal" href="#project-structure">Project Structure</a></li>
+<li><a class="reference internal" href="#patterns">Patterns</a><ul>
+<li><a class="reference internal" href="#pattern-1-source-definitions">Pattern 1: Source Definitions</a></li>
+<li><a class="reference internal" href="#pattern-2-base-models">Pattern 2: Base Models</a></li>
+<li><a class="reference internal" href="#pattern-3-intermediate-models">Pattern 3: Intermediate Models</a></li>
+<li><a class="reference internal" href="#pattern-4-marts-models">Pattern 4: Marts Models</a></li>
+<li><a class="reference internal" href="#pattern-5-exposure-models">Pattern 5: Exposure Models</a></li>
+<li><a class="reference internal" href="#pattern-6-schema-testing">Pattern 6: Schema &amp; Testing</a></li>
+<li><a class="reference internal" href="#pattern-7-sampling-in-dev">Pattern 7: Sampling in Dev</a></li>
+<li><a class="reference internal" href="#pattern-8-udfs-user-defined-functions">Pattern 8: UDFs (User-Defined Functions)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#makefile-commands">Makefile Commands</a></li>
+<li><a class="reference internal" href="#dbt-commands">dbt Commands</a></li>
+<li><a class="reference internal" href="#data-flow-example-stats-stacked-acteurs">Data Flow Example: Stats Stacked Acteurs</a></li>
+<li><a class="reference internal" href="#best-practices">Best Practices</a><ul>
+<li><a class="reference internal" href="#do-s">Do’s</a></li>
+<li><a class="reference internal" href="#don-ts">Don’ts</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
