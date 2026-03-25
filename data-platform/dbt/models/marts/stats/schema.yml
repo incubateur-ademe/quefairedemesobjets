@@ -8,6 +8,8 @@ models:
         description: "L'identifiant unique de l'acteur"
       - name: siren
         description: "Le SIREN de l'acteur"
+      - name: etat_administratif_successeur
+        description: "L'état administratif, Null si le siret n'est pas dans la table AE"
     config:
       materialized: table
       tags:
@@ -24,6 +26,8 @@ models:
         description: "L'identifiant unique de l'acteur"
       - name: siret
         description: "Le SIRET de l'acteur"
+      - name: etat_administratif
+        description: "L'état administratif, Null si le siret n'est pas dans la table AE"
     config:
       materialized: table
       tags:
@@ -123,6 +127,35 @@ models:
         - marts
         - acteurs
         - siret
+  - name: marts_ae_lien_succession_resolved_vueacteur
+    description: "Lien de succession résolu croisé avec les sirets de la table vueacteur"
+    columns:
+      - name: identifiant_unique
+        description: "L'identifiant unique de l'acteur"
+      - name: siren
+        description: "Le SIREN de l'acteur"
+      - name: acteur_siret
+        description: "Le SIRET de l'acteur"
+      - name: siren_successeur
+        description: "Le SIREN de l'acteur successeur"
+      - name: siret_successeur
+        description: "Le SIRET de l'acteur successeur"
+      - name: etat_administratif_successeur
+        description: "L'état administratif de l'acteur successeur"
+      - name: date_lien_succession
+        description: "La date du lien de succession"
+      - name: transfert_siege
+        description: "Le transfert de siège"
+      - name: continuite_economique
+        description: "La continuité économique"
+    config:
+      materialized: table
+      tags:
+        - stats
+        - marts
+        - ae
+        - lien_succession
+        - vueacteur
   - name: marts_distance_first_action
     description: "Distance entre la position aléatoire et l'acteur le plus proche pour chaque action"
     columns:

@@ -102,3 +102,124 @@ models:
           type: hash
         - columns: ['adresse_normalize_string_for_match']
           type: hash
+  - name: int_ae_lien_succession_resolved
+    description: >
+      Liens de succession résolus transitivement.
+      Si x->y, y->z, z->a, alors on obtient x->a, y->a, z->a.
+      Chaque prédécesseur pointe vers son successeur final.
+    columns:
+      - name: siret_predecesseur
+        description: "Numéro SIRET du prédécesseur d'origine"
+        data_type: varchar(14)
+        data_tests:
+          - not_null
+      - name: etat_administratif_predecesseur
+        description: "État administratif du prédécesseur"
+        data_type: varchar(1)
+      - name: siren_successeur
+        description: "Numéro SIREN du successeur final (bout de la chaîne)"
+        data_type: varchar(9)
+        data_tests:
+          - not_null
+      - name: siret_successeur
+        description: "Numéro SIRET du successeur final (bout de la chaîne)"
+        data_type: varchar(14)
+        data_tests:
+          - not_null
+      - name: etat_administratif_successeur
+        description: "État administratif du successeur"
+        data_type: varchar(1)
+      - name: date_lien_succession
+        description: "Date minimum parmi tous les liens de la chaîne de succession"
+        data_type: date
+      - name: transfert_siege
+        description: "True si tous les liens de la chaîne ont transfert_siege = true"
+        data_type: boolean
+      - name: continuite_economique
+        description: "True si tous les liens de la chaîne ont continuite_economique = true"
+        data_type: boolean
+      - name: profondeur
+        description: "Nombre de sauts dans la chaîne de succession (1 = succession directe)"
+        data_type: integer
+    config:
+      materialized: table
+      tags:
+        - stats
+        - intermediate
+        - ae
+        - annuaire_entreprises
+        - lien_succession
+      indexes:
+        - columns: ['siret_predecesseur']
+          type: btree
+        - columns: ['siret_successeur']
+          type: btree
+        - columns: ['etat_administratif_successeur']
+          type: btree
+
+unit_tests:
+  - name: test_transitive_succession_resolution
+    description: >
+      Given:  x -> b, x -> y, y -> z, z -> a
+      Result: x -> b, x -> a, y -> a, z -> a
+      Vérifie la résolution transitive des chaînes de succession
+      avec propagation correcte de date (LEAST), transfert_siege (AND)
+      et continuite_economique (AND).
+    model: int_ae_lien_succession_resolved
+    given:
+      - input: ref('base_ae_lien_succession')
+        rows:
+          - siret_predecesseur: "11111111111111"
+            siret_successeur: "55555555555555"
+            etat_administratif_successeur: "A"
+            date_lien_succession: "2024-01-01"
+            transfert_siege: true
+            continuite_economique: true
+          - siret_predecesseur: "11111111111111"
+            siret_successeur: "22222222222222"
+            etat_administratif_successeur: "A"
+            date_lien_succession: "2024-02-01"
+            transfert_siege: true
+            continuite_economique: true
+          - siret_predecesseur: "22222222222222"
+            siret_successeur: "33333333333333"
+            etat_administratif_successeur: "A"
+            date_lien_succession: "2024-03-01"
+            transfert_siege: true
+            continuite_economique: true
+          - siret_predecesseur: "33333333333333"
+            siret_successeur: "44444444444444"
+            etat_administratif_successeur: "A"
+            date_lien_succession: "2024-04-01"
+            transfert_siege: false
+            continuite_economique: true
+    expect:
+      rows:
+        - siret_predecesseur: "11111111111111"
+          siret_successeur: "55555555555555"
+          etat_administratif_successeur: "A"
+          date_lien_succession: "2024-01-01"
+          transfert_siege: true
+          continuite_economique: true
+          profondeur: 1
+        - siret_predecesseur: "11111111111111"
+          siret_successeur: "44444444444444"
+          etat_administratif_successeur: "A"
+          date_lien_succession: "2024-02-01"
+          transfert_siege: false
+          continuite_economique: true
+          profondeur: 3
+        - siret_predecesseur: "22222222222222"
+          siret_successeur: "44444444444444"
+          etat_administratif_successeur: "A"
+          date_lien_succession: "2024-03-01"
+          transfert_siege: false
+          continuite_economique: true
+          profondeur: 2
+        - siret_predecesseur: "33333333333333"
+          siret_successeur: "44444444444444"
+          etat_administratif_successeur: "A"
+          date_lien_succession: "2024-04-01"
+          transfert_siege: false
+          continuite_economique: true
+          profondeur: 1
