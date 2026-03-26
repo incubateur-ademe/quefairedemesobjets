@@ -1,5 +1,100 @@
 version: 2
 models:
+
+  - name: base_ae_etablissement
+    description: Établissements de l'Annuaire Entreprises (AE)
+    columns:
+      - name: siret
+        description: Numéro SIRET
+        data_type: varchar(14)
+      - name: activite_principale
+        description: Code NAF Rev2
+        data_type: string
+      - name: denomination_usuelle
+        description: Nom de l'établissement
+        data_type: string
+      - name: etat_administratif
+        description: A = Actif, F = Fermé
+        data_type: varchar(1)
+      - name: numero_voie
+        description: Numéro de voie
+        data_type: string
+      - name: complement_adresse
+        description: 'Complement d''adresse (ex: étage, bâtiment)'
+        data_type: string
+      - name: type_voie
+        description: 'Type de voie (ex: rue, avenue)'
+        data_type: string
+      - name: libelle_voie
+        description: Nom de la voie
+        data_type: string
+      - name: code_postal
+        description: Postal code
+        data_type: string
+      - name: libelle_commune
+        description: Nom de la ville
+        data_type: string
+    config:
+      materialized: table
+      tags:
+        - base
+        - ae
+        - stats
+        - annuaire_entreprises
+        - etablissement
+        - lien_succession
+      indexes:
+        - columns: ['siret']
+          unique: true
+        - columns: ['siren']
+          type: btree
+  - name: base_ae_lien_succession
+    description: Liens de succession de l'Annuaire Entreprises (AE)
+    columns:
+      - name: siret_predecesseur
+        description: Numéro SIRET du prédécesseur
+        data_type: varchar(14)
+      - name: etat_administratif_predecesseur
+        description: État administratif du prédécesseur
+        data_type: varchar(1)
+      - name: siren_successeur
+        description: Numéro SIREN du successeur
+        data_type: varchar(9)
+      - name: siret_successeur
+        description: Numéro SIRET du successeur
+        data_type: varchar(14)
+      - name: etat_administratif_successeur
+        description: État administratif du successeur
+        data_type: varchar(1)
+      - name: date_lien_succession
+        description: Date du lien de succession
+        data_type: date
+      - name: transfert_siege
+        description: Transfert de siège
+        data_type: boolean
+      - name: continuite_economique
+        description: Continuité économique
+        data_type: boolean
+      - name: date_dernier_traitement
+        description: Date du dernier traitement
+        data_type: date
+    config:
+      materialized: table
+      tags:
+        - base
+        - ae
+        - stats
+        - annuaire_entreprises
+        - lien_succession
+      indexes:
+        - columns: ['siret_predecesseur']
+          type: btree
+        - columns: ['siret_successeur']
+          type: btree
+        - columns: ['date_lien_succession']
+          type: btree
+        - columns: ['transfert_siege']
+          type: btree
   - name: base_ae_unite_legale
     description: Unités légales de l'Annuaire Entreprises (AE)
     columns:
@@ -50,48 +145,3 @@ models:
         - columns: ['siren']
           type: btree
           unique: true
-  - name: base_ae_etablissement
-    description: Établissements de l'Annuaire Entreprises (AE)
-    columns:
-      - name: siret
-        description: Numéro SIRET
-        data_type: varchar(14)
-      - name: activite_principale
-        description: Code NAF Rev2
-        data_type: string
-      - name: denomination_usuelle
-        description: Nom de l'établissement
-        data_type: string
-      - name: etat_administratif
-        description: A = Actif, F = Fermé
-        data_type: varchar(1)
-      - name: numero_voie
-        description: Numéro de voie
-        data_type: string
-      - name: complement_adresse
-        description: 'Complement d''adresse (ex: étage, bâtiment)'
-        data_type: string
-      - name: type_voie
-        description: 'Type de voie (ex: rue, avenue)'
-        data_type: string
-      - name: libelle_voie
-        description: Nom de la voie
-        data_type: string
-      - name: code_postal
-        description: Postal code
-        data_type: string
-      - name: libelle_commune
-        description: Nom de la ville
-        data_type: string
-    config:
-      materialized: table
-      tags:
-        - base
-        - ae
-        - annuaire_entreprises
-        - etablissement
-      indexes:
-        - columns: ['siret']
-          unique: true
-        - columns: ['siren']
-          type: btree
