@@ -180,7 +180,7 @@ CACHES = {
 X_FRAME_OPTIONS = "ALLOWALL"
 
 WITH_DJANGO_DEBUG_TOOLBAR = decouple.config(
-    "WITH_DJANGO_DEBUG_TOOLBAR", default=True, cast=bool
+    "WITH_DJANGO_DEBUG_TOOLBAR", default=False, cast=bool
 )
 WITH_DJANGO_SILK = decouple.config("WITH_DJANGO_SILK", default=False, cast=bool)
 
