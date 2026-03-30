@@ -9,8 +9,13 @@ from wagtail.models import Page
 class Command(BaseCommand):
     help = "Import legacy Redirects"
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "csv_path", type=Path, help="Path to the redirects CSV file"
+        )
+
     def handle(self, *args, **options):
-        csv_path = Path(__file__).resolve().parents[3] / "redirects.csv"
+        csv_path = options["csv_path"]
 
         created = 0
         skipped = 0
@@ -45,7 +50,7 @@ class Command(BaseCommand):
                     errors += 1
                     continue
 
-                _, was_created = Redirect.objects.get_or_create(
+                _, was_created = Redirect.objects.update_or_create(
                     old_path=Redirect.normalise_path(old_path),
                     defaults={"redirect_page": page},
                 )
