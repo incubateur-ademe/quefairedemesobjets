@@ -29,3 +29,8 @@ package = false
 
 [tool.uv.sources]
 webapp = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "jupyterlab>=4.5.6",
+]

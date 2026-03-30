@@ -300,6 +300,11 @@ db-restore-local-for-tests:
 	make webapp-migrate
 	make webapp-seed-database
 
+# Notebooks
+.PHONY: notebook
+notebook:
+	cd data-platform/notebooks && uv run jupyter lab
+
 # Docs
 .PHONY: build-docs
 build-docs:
