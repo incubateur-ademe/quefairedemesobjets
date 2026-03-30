@@ -87,9 +87,15 @@ def display_diff_value(key, value, suggestion_contexte):
     def _handle_identifiant_unique(value, old_value_exists, old_value):
         """Handle identifiant_unique and id fields"""
         extra_links = [
-            (reverse("admin:qfdmo_acteur_change", args=[value]), "base"),
-            (reverse("qfdmo:getorcreate_revisionacteur", args=[value]), "revision"),
-            (reverse("admin:qfdmo_displayedacteur_change", args=[value]), "displayed"),
+            (reverse("admin:qfdmo_acteur_change", args=[quote(value)]), "base"),
+            (
+                reverse("qfdmo:getorcreate_revisionacteur", args=[value]),
+                "revision",
+            ),
+            (
+                reverse("admin:qfdmo_displayedacteur_change", args=[quote(value)]),
+                "displayed",
+            ),
         ]
         return {
             "diff_value": _get_diff_value(old_value_exists, old_value, value),
