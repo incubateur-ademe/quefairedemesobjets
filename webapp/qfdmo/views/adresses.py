@@ -19,10 +19,9 @@ from django.views.generic import DetailView
 from django.views.generic.edit import FormView
 from wagtail.query import Any
 
-from core.constants import MAP_CONTAINER_ID
 from qfdmd.models import Synonyme
 from qfdmo.constants import MAP_FORM_PREFIX
-from qfdmo.forms import MapForm
+from qfdmo.forms import MapForm, generate_form_prefix
 from qfdmo.geo_api import retrieve_epci_geojson_from_api_or_cache
 from qfdmo.map_utils import (
     sanitize_frontend_bbox,
@@ -54,22 +53,9 @@ class MapPrefixMixin:
     exist on the same page.
     """
 
-    def _generate_prefix(self, prefix: str) -> str:
-        """Generate a form prefix based on map_container_id if present.
-
-        Args:
-            prefix: The base prefix for the form
-
-        Returns:
-            A prefixed string in the format "{map_container_id}_{prefix}"
-            if map_container_id is present in the request, otherwise
-            returns the base prefix unchanged.
-        """
-        try:
-            id = self.request.GET[MAP_CONTAINER_ID]
-            return f"{id}_{prefix}"
-        except (KeyError, AttributeError):
-            return prefix
+    def _generate_prefix(self, prefix=MAP_FORM_PREFIX) -> str:
+        """Generate a form prefix based on map_container_id if present."""
+        return generate_form_prefix(prefix=prefix, request=self.request)
 
 
 class TurboFormMixin:
@@ -468,8 +454,7 @@ class ActeurDetailView(MapPrefixMixin, TurboFormMixin, DetailView):
         displayed_acteur = self.object
 
         # Get map form data with dynamic prefix
-        map_prefix = self._generate_prefix(MAP_FORM_PREFIX)
-        map_form = MapForm(self.request.GET, prefix=map_prefix)
+        map_form = MapForm(self.request.GET)
         search_latitude = map_form["latitude"].value()
         search_longitude = map_form["longitude"].value()
 

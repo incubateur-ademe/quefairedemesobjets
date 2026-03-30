@@ -35,6 +35,19 @@ from qfdmo.widgets import (
     SynonymeAutocompleteInput,
 )
 
+from core.constants import MAP_CONTAINER_ID
+from qfdmo.constants import MAP_FORM_PREFIX
+
+
+def generate_form_prefix(
+    id: str | None = None, prefix: str = "", request: HttpRequest | None = None
+) -> str:
+    if not id and request:
+        id = request.GET.get(MAP_CONTAINER_ID)
+    if id:
+        return f"{id}_{prefix}"
+    return prefix
+
 
 class MapForm(GetFormMixin, CarteConfigFormMixin, forms.Form):
     """
@@ -54,6 +67,17 @@ class MapForm(GetFormMixin, CarteConfigFormMixin, forms.Form):
     ⚠️⚠️⚠️ If this form must evolve, especially the attributes set on the fields,
     the changes must be backported to qfdmo.forms.FormulaireForm.
     """
+
+    def __init__(self, *args, **kwargs):
+        if "prefix" not in kwargs:
+            data = args[0] if args else kwargs.get("data")
+            map_container_id = (
+                data.get(MAP_CONTAINER_ID) if hasattr(data, "get") else None
+            )
+            kwargs["prefix"] = generate_form_prefix(
+                id=map_container_id, prefix=MAP_FORM_PREFIX
+            )
+        super().__init__(*args, **kwargs)
 
     carte_config_initial_mapping = {
         "bounding_box": "bounding_box",
