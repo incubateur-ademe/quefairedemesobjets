@@ -1462,7 +1462,7 @@
         "categorie": [
             "materiau_de_construction_du_batiment"
         ],
-        "code": "mélange_d_inertes_produits_et_materiaux_de_construction_du_batiment",
+        "code": "melange_d_inertes_produits_et_materiaux_de_construction_du_batiment",
         "afficher": false,
         "afficher_carte": true,
         "reemploi_possible": true,
