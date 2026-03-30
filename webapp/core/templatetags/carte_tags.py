@@ -8,6 +8,7 @@ from django.template.loader import render_to_string
 
 from core.constants import DEFAULT_MAP_CONTAINER_ID, MAP_CONTAINER_ID
 from core.templatetags.acteur_tags import acteur_url
+from qfdmo.forms import MapForm
 from qfdmo.models import DisplayedActeur
 from qfdmo.models.action import get_actions_by_direction
 from qfdmo.models.config import CarteConfig, GroupeActionConfig
@@ -64,8 +65,9 @@ def hide_object_filter(context):
 def distance_to_acteur(context, acteur):
     """distance from user location to displayed acteur"""
     request = context["request"]
-    longitude = request.GET.get("longitude")
-    latitude = request.GET.get("latitude")
+    map_form = MapForm(request.GET)
+    latitude = map_form["latitude"].value()
+    longitude = map_form["longitude"].value()
     location = acteur.location
 
     if not (longitude and latitude and location and not acteur.is_digital):
@@ -76,9 +78,9 @@ def distance_to_acteur(context, acteur):
         * 111320
     )
     if distance_meters >= 1000:
-        return f"({round(distance_meters / 1000, 1)} km)".replace(".", ",")
+        return f"{round(distance_meters / 1000, 1)} km".replace(".", ",")
     else:
-        return f"({round(distance_meters / 10) * 10} m)"
+        return f"{round(distance_meters / 10) * 10} m"
 
 
 @register.filter
