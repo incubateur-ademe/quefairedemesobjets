@@ -12,7 +12,7 @@ dependencies = [
     "shortuuid>=1.0.13,<2",
     "unidecode>=1.4.0,<2",
     "scikit-learn==1.8.0",
-    "apache-airflow>=2.11.0,<4",
+    "apache-airflow>=2.11.0,<3",
     "numpy>=1.26.0,<2",
     "pandas<2.2",
     "dbt-core>=1.10.9,<2",
