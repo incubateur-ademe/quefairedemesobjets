@@ -1,428 +1,59 @@
 import json
 import logging
 
+from data.forms import SuggestionGroupeStatusForm
+from data.models.suggestion import (
+    SuggestionGroupe,
+    SuggestionStatut,
+    SuggestionUnitaire,
+)
+from data.models.suggestions.source import (
+    SuggestionGroupeTypeSource,
+    SuggestionSourceModel,
+    _suggestion_unitaires_to_suggestion_source_model,
+)
+from data.models.utils import prepare_acteur_data_with_location
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy
-from django.utils.safestring import mark_safe
 from django.views.generic import FormView, View
-from more_itertools import flatten
-
-from core.templatetags.admin_data_tags import display_diff_values
-from data.forms import SuggestionGroupeStatusForm
-from data.models.suggestion import (
-    SuggestionAction,
-    SuggestionGroupe,
-    SuggestionStatut,
-    SuggestionUnitaire,
-)
-from data.models.suggestions.source import SuggestionSourceModel
-from data.models.utils import prepare_acteur_data_with_location
 from qfdmo.models.acteur import Acteur, ActeurStatus, DisplayedActeur, RevisionActeur
 
 logger = logging.getLogger(__name__)
 
 
-def _build_serializer_common_fields(suggestion_groupe: SuggestionGroupe) -> dict:
-    """Build common fields"""
-    return {
-        "id": suggestion_groupe.id,
-        "suggestion_cohorte": suggestion_groupe.suggestion_cohorte,
-        "statut": suggestion_groupe.get_statut_display(),
-        "action": suggestion_groupe.suggestion_cohorte.type_action,
-    }
-
-
-def _flatten_suggestion_unitaires(
-    suggestion_unitaires: dict[tuple, list],
-) -> dict:
-    return {
-        k: v
-        for k, v in zip(
-            flatten(suggestion_unitaires.keys()),
-            flatten(suggestion_unitaires.values()),
-        )
-    }
-
-
-def _dict_to_suggestion_source_model(
-    values_dict: dict[str, str],
-) -> SuggestionSourceModel:
-    """
-    Convert a dictionary of field values to a SuggestionSourceModel
-    force None values to empty strings
-    """
-
-    return SuggestionSourceModel(
-        **{key: values_dict.get(key, "") for key in values_dict.keys()}
-    )
-
-
-def _extract_acteur_values(
-    acteur: Acteur | RevisionActeur, fields_to_include: list[str] | None = None
-) -> SuggestionSourceModel:
-    """
-    Extract values from an Acteur or RevisionActeur instance
-    using SuggestionSourceModel fields.
-    Returns a SuggestionSourceModel instance with extracted values.
-    Empty string is returned for missing or None values.
-    """
-
-    def get_field_from_code(acteur: Acteur | RevisionActeur, field_name: str) -> str:
-        """Extract code from a ForeignKey field."""
-        if field_name == "source_code":
-            source_obj = getattr(acteur, "source", None)
-            return source_obj.code if source_obj else ""
-        if not field_name.endswith("_code"):
-            raise ValueError(f"Field {field_name} is not a code field")
-        fk_field_name = field_name.removesuffix("_code")
-        object_field = getattr(acteur, fk_field_name, None)
-        return object_field.code if object_field else ""
-
-    def get_field_from_proposition_service_codes(
-        acteur: Acteur | RevisionActeur,
-    ) -> str:
-        """Extract proposition_service_codes as JSON string."""
-        prop_services = (
-            list(acteur.proposition_services.all())
-            if hasattr(acteur, "proposition_services")
-            else []
-        )
-        if prop_services:
-            prop_data = sorted(
-                [
-                    {
-                        "action": prop.action.code,
-                        "sous_categories": sorted(
-                            [sc.code for sc in prop.sous_categories.all()]
-                        ),
-                    }
-                    for prop in prop_services
-                ],
-                key=lambda x: x["action"],
-            )
-            return json.dumps(prop_data, ensure_ascii=False)
-        return ""
-
-    def get_field_from_perimetre_adomicile_codes(
-        acteur: Acteur | RevisionActeur,
-    ) -> str:
-        """Extract perimetre_adomicile_codes as JSON string."""
-        perimetres = (
-            list(acteur.perimetre_adomiciles.all())
-            if hasattr(acteur, "perimetre_adomiciles")
-            else []
-        )
-        return (
-            json.dumps(
-                sorted(
-                    [
-                        {"type": perimetre.type, "valeur": perimetre.valeur}
-                        for perimetre in perimetres
-                    ],
-                    key=lambda x: (x["type"], x["valeur"]),
-                ),
-                ensure_ascii=False,
-            )
-            if perimetres
-            else ""
-        )
-
-    def get_field_from_codes(acteur: Acteur | RevisionActeur, field_name: str) -> str:
-        """Extract codes from ManyToMany fields as JSON string."""
-        if not field_name.endswith("_codes"):
-            raise ValueError(f"Field {field_name} is not a codes field")
-        # Remove _codes suffix and add 's' to get the ManyToMany field name
-        # e.g., label_codes -> labels, acteur_service_codes -> acteur_services
-        m2m_field_name = field_name.removesuffix("_codes") + "s"
-        m2m_objects = (
-            list(getattr(acteur, m2m_field_name).all())
-            if hasattr(acteur, m2m_field_name)
-            else []
-        )
-        return (
-            json.dumps(sorted([obj.code for obj in m2m_objects]), ensure_ascii=False)
-            if m2m_objects
-            else ""
-        )
-
-    model_fields = SuggestionSourceModel.model_fields.keys()
-    fields_to_process = fields_to_include if fields_to_include else list(model_fields)
-
-    values = {}
-    for field_name in fields_to_process:
-        if field_name not in model_fields:
-            raise ValueError(f"Field {field_name} not found in SuggestionSourceModel")
-        if field_name.endswith("_code"):
-            values[field_name] = get_field_from_code(acteur, field_name)
-        elif field_name == "proposition_service_codes":
-            values[field_name] = get_field_from_proposition_service_codes(acteur)
-        elif field_name == "perimetre_adomicile_codes":
-            values[field_name] = get_field_from_perimetre_adomicile_codes(acteur)
-        elif field_name.endswith("_codes"):
-            values[field_name] = get_field_from_codes(acteur, field_name)
-        else:
-            # Handle regular fields
-            value = getattr(acteur, field_name, None)
-            values[field_name] = str(value) if value is not None else ""
-
-    return SuggestionSourceModel(**values)
-
-
-def _get_ordered_fields_groups(
-    suggestion_unitaires: list[SuggestionUnitaire],
-) -> list[tuple]:
-    """Get ordered fields groups using SuggestionSourceType validation"""
-
-    all_suggestion_unitaires = {
-        tuple(unit.champs): unit.valeurs for unit in suggestion_unitaires
-    }
-
-    fields_groups = list(set(all_suggestion_unitaires.keys()))
-
-    # Validate using SuggestionSourceType
-    ordered_fields = SuggestionSourceModel.get_ordered_fields()
-    if any(fields not in ordered_fields for fields in fields_groups):
-        raise ValueError(
-            f"""fields in fields_groups are not in ORDERED_FIELDS:
-                        {fields_groups=}
-                        {ordered_fields=}"""
-        )
-    return [fields for fields in ordered_fields if fields in fields_groups]
-
-
-def _validate_proposed_updates(values_to_update: dict, fields_values: dict) -> dict:
-    """
-    Check if the proposed updates are valid using SuggestionSourceType
-    Returns a dictionary of errors (empty if valid)
-    """
-    # Validate the RevisionActeur with the proposed values
-    if "longitude" in values_to_update or "latitude" in values_to_update:
-        for coord_field in ["longitude", "latitude"]:
-            try:
-                values_to_update[coord_field] = values_to_update.get(
-                    coord_field,
-                    fields_values.get(coord_field, "0.0"),
-                )
-            except (ValueError, KeyError) as e:
-                logger.warning(f"ValueError for {coord_field}: {e}")
-                return {coord_field: f"{coord_field} must be a float: {e}"}
-
-    try:
-        values_to_update = prepare_acteur_data_with_location(values_to_update)
-    except (ValueError, KeyError) as e:
-        logger.warning(f"ValueError for : {e}")
-        return {
-            "latitude": f"latitude must be a float: {e}",
-            "longitude": f"longitude must be a float: {e}",
-        }
-    try:
-        revision_acteur = RevisionActeur(
-            **prepare_acteur_data_with_location(values_to_update)
-        )
-        # Statut should be set because Django don't set it automatically even
-        # if the field has a default value
-        if not revision_acteur.statut:
-            revision_acteur.statut = ActeurStatus.ACTIF
-        revision_acteur.full_clean()
-    except ValidationError as e:
-        logger.warning(f"RevisionActeur is not valid: {e}")
-        return e.error_dict
-    except TypeError as e:
-        logger.warning(f"RevisionActeur is not valid: {e}")
-        return {"error": str(e)}
-
-    return {}
-
-
-def _suggestion_unitaires_to_suggestion_source_model_by_model_name(
-    suggestion_unitaires: list[SuggestionUnitaire],
-    model_name: str,
-) -> SuggestionSourceModel:
-    suggestion_unitaires_dict = {
-        tuple(unit.champs): unit.valeurs
-        for unit in suggestion_unitaires
-        if unit.suggestion_modele == model_name
-    }
-    return _dict_to_suggestion_source_model(
-        _flatten_suggestion_unitaires(suggestion_unitaires_dict)
-    )
-
-
-def _field_without_suggestion_display(field_value: str | None) -> str:
-    if field_value is None or field_value == "":
-        field_value = "-"
-    return mark_safe(f'<span class="no-suggestion-text">{field_value}</span>')
-
-
-def _display_suggestion_unitaire_for_a_field(
-    field_name: str,
-    suggestion_source_model: SuggestionSourceModel,
-    field_value: str | None = None,
-) -> str:
-    suggestion_unitaire = getattr(suggestion_source_model, field_name)
-    if suggestion_unitaire is None:
-        return _field_without_suggestion_display(field_value)
-    return display_diff_values(field_value, suggestion_unitaire)
-
-
-def serialize_suggestion_groupe(
+def get_context_from_suggestion_groupe_type_source(
     suggestion_groupe: SuggestionGroupe,
 ) -> dict:
     """
-    Serialize a SuggestionGroupe using SuggestionSourceModel for validation
+    Serialize a SuggestionGroupe into a SuggestionGroupeTypeSource and
+    return a template context dict with the ComparisonTable.
 
-    enhancements:
-    - get acteur_target_value get the value assign to acteur after suggestion is applied
-    - get acteur + suggestion on acteur
-    - get revision_acteur_target_value get the value assign to revision_acteur after
-      suggestion is applied
-    - get revision_acteur + suggestion on revision_acteur
-    - get parent_revision_acteur_target_value get the value assign to
-      parent_revision_acteur after suggestion is applied
-    - get parent_revision_acteur + suggestion on parent_revision_acteur
-
-    get all field_group edited
-
-    for each field_group edited:
-        for each [Acteur, RevisionActeur, ParentRevisionActeur]:
-            if no suggestion:
-                display the "acteur" value in grey, default - if not value
-            if suggestion:
-                display diff between suggestion and "acteur" value
-    return the dict:
-        fields_values: {
-            "acteur_target_value": value,
-            "acteur": value_to_display,
-            "revision_acteur_target_value": value,
-            "revision_acteur": value_to_display,
-            "parent_revision_acteur_target_value": value,
-            "parent_revision_acteur": value_to_display,
-        }
+    Returns a dict with:
+        - suggestion_groupe: the SuggestionGroupe instance
+        - identifiant_unique: the acteur identifier
+        - comparison_table: a ComparisonTable Pydantic model
+        - suggestion_groupe_type_source: the SuggestionGroupeTypeSource instance
+        - acteur, revision_acteur, parent_revision_acteur (for non-SOURCE_AJOUT)
     """
-    # Get all suggestion_unitaires
-    suggestion_unitaires = list(suggestion_groupe.suggestion_unitaires.all())
-    # Flatten and convert to SuggestionSourceModel
-    acteur_suggestion_unitaires_by_field = (
-        _suggestion_unitaires_to_suggestion_source_model_by_model_name(
-            suggestion_unitaires, "Acteur"
-        )
-    )
-    # Flatten and convert to SuggestionSourceModel
-    acteur_overridden_by_suggestion_unitaires_by_field = (
-        _suggestion_unitaires_to_suggestion_source_model_by_model_name(
-            suggestion_unitaires,
-            "RevisionActeur",
-        )
-    )
-    fields_groups = _get_ordered_fields_groups(suggestion_unitaires)
-    flattened_fields_groups = [key for keys in fields_groups for key in keys]
-
-    if (
-        suggestion_groupe.suggestion_cohorte.type_action
-        == SuggestionAction.SOURCE_AJOUT
-    ):
-        identifiant_unique = (
-            suggestion_groupe.get_identifiant_unique_from_suggestion_unitaires("Acteur")
-        )
-        # Get fields from acteur_suggestion_unitaires
-        fields_values = {
-            key: {
-                "acteur_target_value": getattr(
-                    acteur_suggestion_unitaires_by_field, key, None
-                ),
-                "acteur": _display_suggestion_unitaire_for_a_field(
-                    key, acteur_suggestion_unitaires_by_field
-                ),  # FIXME: display the diff suggestion
-                "revision_acteur_target_value": getattr(
-                    acteur_overridden_by_suggestion_unitaires_by_field, key, None
-                ),
-                "revision_acteur": _display_suggestion_unitaire_for_a_field(
-                    key, acteur_overridden_by_suggestion_unitaires_by_field
-                ),
-            }
-            for key in flattened_fields_groups
-        }
-        return {
-            "suggestion_groupe": suggestion_groupe,
-            "identifiant_unique": identifiant_unique,
-            "fields_groups": fields_groups,
-            "fields_values": fields_values,
-        }
-
-    acteur = suggestion_groupe.get_acteur_or_none()
-    revision_acteur = suggestion_groupe.get_revision_acteur_or_none()
-    parent_revision_acteur = suggestion_groupe.get_parent_revision_acteur_or_none()
-
-    # Flatten and convert to SuggestionSourceModel
-    parent_revision_acteur_suggestion_unitaires_by_field = (
-        _suggestion_unitaires_to_suggestion_source_model_by_model_name(
-            suggestion_unitaires,
-            "ParentRevisionActeur",
-        )
+    sg_type_source = SuggestionGroupeTypeSource.from_suggestion_groupe(
+        suggestion_groupe
     )
 
-    if not acteur:
-        raise ValueError("acteur is required for non-SOURCE_AJOUT suggestions")
-
-    # Extract values using SuggestionSourceModel
-    acteur_values = _extract_acteur_values(
-        acteur, fields_to_include=flattened_fields_groups
-    )
-    revision_acteur_values = SuggestionSourceModel()
-    if revision_acteur:
-        revision_acteur_values = _extract_acteur_values(
-            revision_acteur, fields_to_include=flattened_fields_groups
-        )
-    parent_revision_acteur_values = SuggestionSourceModel()
-    if parent_revision_acteur:
-        parent_revision_acteur_values = _extract_acteur_values(
-            parent_revision_acteur, fields_to_include=flattened_fields_groups
-        )
-
-    fields_values = {
-        key: {
-            "acteur_target_value": getattr(
-                acteur_suggestion_unitaires_by_field, key, None
-            ),
-            "acteur": _display_suggestion_unitaire_for_a_field(
-                key, acteur_suggestion_unitaires_by_field, getattr(acteur_values, key)
-            ),  # FIXME: display the diff suggestion
-            "revision_acteur": _display_suggestion_unitaire_for_a_field(
-                key,
-                acteur_overridden_by_suggestion_unitaires_by_field,
-                getattr(revision_acteur_values, key),
-            ),
-            "revision_acteur_target_value": getattr(
-                acteur_overridden_by_suggestion_unitaires_by_field,
-                key,
-                getattr(revision_acteur_values, key),
-            ),
-            "parent_revision_acteur": _display_suggestion_unitaire_for_a_field(
-                key,
-                parent_revision_acteur_suggestion_unitaires_by_field,
-                getattr(parent_revision_acteur_values, key),
-            ),
-            "parent_revision_acteur_target_value": getattr(
-                parent_revision_acteur_suggestion_unitaires_by_field,
-                key,
-                getattr(parent_revision_acteur_values, key),
-            ),
-        }
-        for key in flattened_fields_groups
-    }
-
-    return {
+    context: dict = {
         "suggestion_groupe": suggestion_groupe,
-        "identifiant_unique": acteur.identifiant_unique,
-        "fields_groups": fields_groups,
-        "fields_values": fields_values,
-        "acteur": acteur,
-        "revision_acteur": revision_acteur,
-        "parent_revision_acteur": parent_revision_acteur,
+        "identifiant_unique": sg_type_source.identifiant_unique,
+        "suggestion_groupe_type_source": sg_type_source,
+        "comparison_table": sg_type_source.to_comparison_table(),
+        "acteur": sg_type_source.acteur,
+        "revision_acteur": sg_type_source.revision_acteur,
+        "parent_revision_acteur": sg_type_source.parent_revision_acteur,
+        "fields_groups": sg_type_source.fields_groups,
     }
+
+    return context
 
 
 def update_suggestion_groupe(
@@ -442,6 +73,50 @@ def update_suggestion_groupe(
        and that the field is different from the acteur value
       -> create a suggestion of modification
     """
+
+    def _validate_proposed_updates(values_to_update: dict, fields_values: dict) -> dict:
+        """
+        Check if the proposed updates are valid using SuggestionSourceType
+        Returns a dictionary of errors (empty if valid)
+        """
+        # Validate the RevisionActeur with the proposed values
+        if "longitude" in values_to_update or "latitude" in values_to_update:
+            for coord_field in ["longitude", "latitude"]:
+                try:
+                    values_to_update[coord_field] = values_to_update.get(
+                        coord_field,
+                        fields_values.get(coord_field, "0.0"),
+                    )
+                except (ValueError, KeyError) as e:
+                    logger.warning(f"ValueError for {coord_field}: {e}")
+                    return {coord_field: f"{coord_field} must be a float: {e}"}
+
+        try:
+            values_to_update = prepare_acteur_data_with_location(values_to_update)
+        except (ValueError, KeyError) as e:
+            logger.warning(f"ValueError for : {e}")
+            return {
+                "latitude": f"latitude must be a float: {e}",
+                "longitude": f"longitude must be a float: {e}",
+            }
+        try:
+            revision_acteur = RevisionActeur(
+                **prepare_acteur_data_with_location(values_to_update)
+            )
+            # Statut should be set because Django don't set it automatically even
+            # if the field has a default value
+            if not revision_acteur.statut:
+                revision_acteur.statut = ActeurStatus.ACTIF
+            revision_acteur.full_clean()
+        except ValidationError as e:
+            logger.warning(f"RevisionActeur is not valid: {e}")
+            return e.error_dict
+        except TypeError as e:
+            logger.warning(f"RevisionActeur is not valid: {e}")
+            return {"error": str(e)}
+
+        return {}
+
     if suggestion_modele not in ["Acteur", "RevisionActeur", "ParentRevisionActeur"]:
         raise ValueError(f"Invalid suggestion_modele: {suggestion_modele}")
 
@@ -482,7 +157,7 @@ def update_suggestion_groupe(
     suggestion_unitaires = list(suggestion_groupe.suggestion_unitaires.all())
     # Flatten and convert to SuggestionSourceModel
     revision_suggestion_unitaire_by_field = (
-        _suggestion_unitaires_to_suggestion_source_model_by_model_name(
+        _suggestion_unitaires_to_suggestion_source_model(
             suggestion_unitaires, suggestion_modele
         )
     )
@@ -594,174 +269,133 @@ class SuggestionGroupeStatusView(LoginRequiredMixin, FormView):
 class SuggestionGroupeView(LoginRequiredMixin, View):
     template_name = "data/_partials/suggestion_groupe_refresh_stream.html"
 
+    @staticmethod
+    def _find_latlong_suggestion(suggestion_unitaires, modele):
+        return next(
+            (
+                su
+                for su in suggestion_unitaires
+                if su.suggestion_modele == modele
+                and su.champs == ["latitude", "longitude"]
+            ),
+            None,
+        )
+
+    @staticmethod
+    def _make_point(lat, lng, color, key, text=None, draggable=False):
+        point = {
+            "latitude": float(lat),
+            "longitude": float(lng),
+            "color": color,
+            "key": key,
+            "draggable": draggable,
+        }
+        if text is not None:
+            point["text"] = text
+        return point
+
+    @staticmethod
+    def _get_coords_from_suggestion_or_acteur(suggestion, acteur):
+        if suggestion:
+            return suggestion.valeurs[0], suggestion.valeurs[1]
+        if acteur and acteur.latitude and acteur.longitude:
+            return acteur.latitude, acteur.longitude
+        return None, None
+
     def _manage_tab_in_context(
         self,
         *,
         tab: str | None,
         suggestion_groupe: SuggestionGroupe,
-        acteur: Acteur | None | None,
+        acteur: Acteur | None,
         revision_acteur: RevisionActeur | None,
         parent_revision_acteur: RevisionActeur | None,
     ):
-
-        def _get_displayed_acteur_uuid(acteur, revision_acteur, parent_revision_acteur):
+        context = {"tab": tab}
+        if tab == "acteur":
             final_acteur = parent_revision_acteur or revision_acteur or acteur
             if final_acteur:
                 displayed_acteur = DisplayedActeur.objects.filter(
                     identifiant_unique=final_acteur.identifiant_unique
                 ).first()
-                return displayed_acteur.uuid if displayed_acteur else None
-            return None
+                context["uuid"] = displayed_acteur.uuid if displayed_acteur else None
+
+        if tab != "localisation":
+            return context
 
         suggestion_unitaires = suggestion_groupe.suggestion_unitaires.all()
-        acteur_suggestion_unitaires_latlong = next(
-            (
-                suggestion_unitaire
-                for suggestion_unitaire in suggestion_unitaires
-                if suggestion_unitaire.suggestion_modele == "Acteur"
-                and suggestion_unitaire.champs == ["latitude", "longitude"]
-            ),
-            None,
-        )
-        revision_acteur_suggestion_unitaires_latlong = next(
-            (
-                suggestion_unitaire
-                for suggestion_unitaire in suggestion_unitaires
-                if suggestion_unitaire.suggestion_modele == "RevisionActeur"
-                and suggestion_unitaire.champs == ["latitude", "longitude"]
-            ),
-            None,
-        )
-        parent_revision_acteur_suggestion_unitaires_latlong = next(
-            (
-                suggestion_unitaire
-                for suggestion_unitaire in suggestion_unitaires
-                if suggestion_unitaire.suggestion_modele == "ParentRevisionActeur"
-                and suggestion_unitaire.champs == ["latitude", "longitude"]
-            ),
-            None,
-        )
-        context = {"tab": tab}
-        if tab == "acteur":
-            context["uuid"] = _get_displayed_acteur_uuid(
-                acteur, revision_acteur, parent_revision_acteur
-            )
         points = []
-        if tab == "localisation":
-            # Pinpoint of the acteur as it is saved in the database
-            # Not editable by the user (draggable is False)
-            if acteur and acteur.latitude and acteur.longitude:
-                points.append(
-                    {
-                        "latitude": float(acteur.latitude),
-                        "longitude": float(acteur.longitude),
-                        "color": "grey",
-                        "key": "Origin",
-                        "draggable": False,
-                    }
+
+        # Origin: acteur as saved in DB (not draggable)
+        if acteur and acteur.latitude and acteur.longitude:
+            points.append(
+                self._make_point(acteur.latitude, acteur.longitude, "grey", "Origin")
+            )
+
+        # Suggestion: acteur as suggested by source (not draggable)
+        acteur_suggestion = self._find_latlong_suggestion(
+            suggestion_unitaires, "Acteur"
+        )
+        if acteur_suggestion:
+            points.append(
+                self._make_point(
+                    acteur_suggestion.valeurs[0],
+                    acteur_suggestion.valeurs[1],
+                    "green",
+                    "Suggestion",
+                    text="A",
                 )
-            # Pinpoint of the acteur as it is suggested by the source
-            # Not editable by the user (draggable is False)
-            if acteur_suggestion_unitaires_latlong:
-                points.append(
-                    {
-                        "latitude": float(
-                            acteur_suggestion_unitaires_latlong.valeurs[0]
-                        ),
-                        "longitude": float(
-                            acteur_suggestion_unitaires_latlong.valeurs[1]
-                        ),
-                        "color": "green",
-                        "key": "Suggestion",
-                        "text": "A",
-                        "draggable": False,
-                    }
+            )
+
+        # Correction: from suggestion if exists, else from revision_acteur (draggable)
+        revision_suggestion = self._find_latlong_suggestion(
+            suggestion_unitaires, "RevisionActeur"
+        )
+        lat, lng = self._get_coords_from_suggestion_or_acteur(
+            revision_suggestion, revision_acteur
+        )
+        if lat is not None:
+            points.append(
+                self._make_point(
+                    lat, lng, "blue", "RevisionActeur", text="▶️", draggable=True
                 )
-            # Pinpoint of the correction
-            # From suggestion over the correction suggestion if exists
-            # Then from Correction itself if exists
-            # Editable by the user (draggable is True)
-            if (
-                revision_acteur
-                and revision_acteur.latitude
-                and revision_acteur.longitude
-            ) or revision_acteur_suggestion_unitaires_latlong:
-                latitude = (
-                    revision_acteur_suggestion_unitaires_latlong.valeurs[0]
-                    if revision_acteur_suggestion_unitaires_latlong
-                    else revision_acteur.latitude
+            )
+
+        # Parent:
+        # from suggestion if exists, else from parent_revision_acteur (draggable)
+        parent_suggestion = self._find_latlong_suggestion(
+            suggestion_unitaires, "ParentRevisionActeur"
+        )
+        lat, lng = self._get_coords_from_suggestion_or_acteur(
+            parent_suggestion, parent_revision_acteur
+        )
+        if lat is not None:
+            points.append(
+                self._make_point(
+                    lat, lng, "red", "ParentRevisionActeur", text="⏩", draggable=True
                 )
-                longitude = (
-                    revision_acteur_suggestion_unitaires_latlong.valeurs[1]
-                    if revision_acteur_suggestion_unitaires_latlong
-                    else revision_acteur.longitude
-                )
-                points.append(
-                    {
-                        "latitude": float(latitude),
-                        "longitude": float(longitude),
-                        "color": "blue",
-                        "key": "RevisionActeur",
-                        "text": "▶️",
-                        "draggable": True,
-                    }
-                )
-            # Pinpoint of the parent
-            # From suggestion over the parent suggestion if exists
-            # Then from Parent itself if exists
-            # Editable by the user (draggable is True)
-            if parent_revision_acteur_suggestion_unitaires_latlong or (
-                parent_revision_acteur
-                and parent_revision_acteur.latitude
-                and parent_revision_acteur.longitude
-            ):
-                latitude = (
-                    parent_revision_acteur_suggestion_unitaires_latlong.valeurs[0]
-                    if parent_revision_acteur_suggestion_unitaires_latlong
-                    else parent_revision_acteur.latitude
-                )
-                longitude = (
-                    parent_revision_acteur_suggestion_unitaires_latlong.valeurs[1]
-                    if parent_revision_acteur_suggestion_unitaires_latlong
-                    else parent_revision_acteur.longitude
-                )
-                points.append(
-                    {
-                        "latitude": float(latitude),
-                        "longitude": float(longitude),
-                        "color": "red",
-                        "key": "ParentRevisionActeur",
-                        "text": "⏩",
-                        "draggable": True,
-                    }
-                )
+            )
 
         if points:
-            context["localisation"] = {
-                "points": points,
-            }
+            context["localisation"] = {"points": points}
 
+        return context
+
+    def _build_full_context(self, request, suggestion_groupe):
+        context = get_context_from_suggestion_groupe_type_source(suggestion_groupe)
+        tab_context = self._manage_tab_in_context(
+            tab=request.GET.get("tab", request.POST.get("tab", None)),
+            suggestion_groupe=suggestion_groupe,
+            acteur=context.get("acteur"),
+            revision_acteur=context.get("revision_acteur"),
+            parent_revision_acteur=context.get("parent_revision_acteur"),
+        )
+        context.update(tab_context)
         return context
 
     def get(self, request, suggestion_groupe_id):
         suggestion_groupe = get_object_or_404(SuggestionGroupe, id=suggestion_groupe_id)
-
-        context = serialize_suggestion_groupe(suggestion_groupe)
-        to_add_in_context = self._manage_tab_in_context(
-            tab=request.GET.get("tab", request.POST.get("tab", None)),
-            suggestion_groupe=suggestion_groupe,
-            acteur=context["acteur"] if "acteur" in context else None,
-            revision_acteur=(
-                context["revision_acteur"] if "revision_acteur" in context else None
-            ),
-            parent_revision_acteur=(
-                context["parent_revision_acteur"]
-                if "parent_revision_acteur" in context
-                else None
-            ),
-        )
-        context.update(to_add_in_context)
-
+        context = self._build_full_context(request, suggestion_groupe)
         return render(
             request,
             self.template_name,
@@ -792,26 +426,18 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
             )
         except json.JSONDecodeError:
             return HttpResponseBadRequest("Payload fields_list invalide")
+
         _, errors = update_suggestion_groupe(
             suggestion_groupe, suggestion_modele_payload, fields_values, fields_groups
         )
 
-        context = serialize_suggestion_groupe(suggestion_groupe)
-        to_add_in_context = self._manage_tab_in_context(
-            tab=request.GET.get("tab", request.POST.get("tab", None)),
-            suggestion_groupe=suggestion_groupe,
-            acteur=context["acteur"] if "acteur" in context else None,
-            revision_acteur=(
-                context["revision_acteur"] if "revision_acteur" in context else None
-            ),
-            parent_revision_acteur=(
-                context["parent_revision_acteur"]
-                if "parent_revision_acteur" in context
-                else None
-            ),
-        )
-        context.update(to_add_in_context)
-        context["errors"] = errors if errors else {}
+        context = self._build_full_context(request, suggestion_groupe)
+        if errors:
+            context["errors"] = errors
+            sg_type_source = context["suggestion_groupe_type_source"]
+            context["comparison_table"] = sg_type_source.to_comparison_table(
+                errors=errors
+            )
 
         return render(
             request,

@@ -10,6 +10,10 @@ from urllib.parse import urlencode
 
 import opening_hours
 import shortuuid
+from core.constants import DIGITAL_ACTEUR_CODE
+from core.models.constants import EMPTY_ACTEUR_FIELD
+from core.models.mixin import TimestampedModel
+from core.validators import EmptyEmailValidator
 from django.conf import settings
 from django.contrib.admin.utils import quote
 from django.contrib.gis.db import models
@@ -35,11 +39,6 @@ from django.forms import ValidationError, model_to_dict
 from django.http import HttpRequest
 from django.urls import reverse
 from django.utils.functional import cached_property
-
-from core.constants import DIGITAL_ACTEUR_CODE
-from core.models.constants import EMPTY_ACTEUR_FIELD
-from core.models.mixin import TimestampedModel
-from core.validators import EmptyEmailValidator
 from qfdmo.models.action import Action, get_action_instances
 from qfdmo.models.categorie_objet import SousCategorieObjet
 

@@ -1,8 +1,10 @@
 import pytest
-from django.contrib.gis.geos import Point
-
 from data.models.suggestion import SuggestionAction
-from data.views import serialize_suggestion_groupe, update_suggestion_groupe
+from data.views import (
+    get_context_from_suggestion_groupe_type_source,
+    update_suggestion_groupe,
+)
+from django.contrib.gis.geos import Point
 from unit_tests.data.models.suggestion_factory import (
     SuggestionCohorteFactory,
     SuggestionGroupeFactory,
@@ -62,6 +64,24 @@ def suggestion_groupe_modification(suggestion_groupe):
     return suggestion_groupe
 
 
+def _get_cell(table, row_label, column_key):
+    """Helper to find a cell by row label and column key in a ComparisonTable."""
+    for row in table.rows:
+        if row.label == column_key or row.label == row_label:
+            for cell in row.cells:
+                if cell.column_key == column_key:
+                    return cell
+    return None
+
+
+def _get_display_htmls(table, row_label, column_key):
+    """Helper to get display_html values for all fields in a cell."""
+    cell = _get_cell(table, row_label, column_key)
+    if not cell:
+        return {}
+    return {f.field_name: f.display_html for f in cell.fields}
+
+
 @pytest.mark.django_db
 class TestSerializeSuggestionGroupe:
 
@@ -70,44 +90,38 @@ class TestSerializeSuggestionGroupe:
     ):
         """Test that SOURCE_AJOUT returns the expected keys in result"""
 
-        expected_fields_values = {
-            "identifiant_unique": {
-                "acteur_target_value": "ID_UNIQUE_123",
-                "acteur": '<span class="suggestion-text-added">ID_UNIQUE_123</span>',
-                "revision_acteur": '<span class="no-suggestion-text">-</span>',
-                "revision_acteur_target_value": None,
-            },
-            "nom": {
-                "acteur_target_value": "Nouveau nom",
-                "acteur": '<span class="suggestion-text-added">Nouveau nom</span>',
-                "revision_acteur": '<span class="no-suggestion-text">-</span>',
-                "revision_acteur_target_value": None,
-            },
-            "latitude": {
-                "acteur_target_value": "48.56789",
-                "acteur": '<span class="suggestion-text-added">48.56789</span>',
-                "revision_acteur": '<span class="no-suggestion-text">-</span>',
-                "revision_acteur_target_value": None,
-            },
-            "longitude": {
-                "acteur_target_value": "2.56789",
-                "acteur": '<span class="suggestion-text-added">2.56789</span>',
-                "revision_acteur": '<span class="no-suggestion-text">-</span>',
-                "revision_acteur_target_value": None,
-            },
-        }
+        result = get_context_from_suggestion_groupe_type_source(suggestion_groupe_ajout)
 
-        result = serialize_suggestion_groupe(suggestion_groupe_ajout)
-
-        # Check keys and values
         assert result["suggestion_groupe"] == suggestion_groupe_ajout
         assert result["identifiant_unique"] == "ID_UNIQUE_123"
-        assert result["fields_groups"] == [
-            ("identifiant_unique",),
-            ("nom",),
-            ("latitude", "longitude"),
+
+        table = result["comparison_table"]
+
+        # Verify rows match field groups
+        assert [row.label for row in table.rows] == [
+            "identifiant_unique",
+            "nom",
+            "latitude, longitude",
         ]
-        assert result["fields_values"] == expected_fields_values
+
+        # Verify source display_html for each field
+        assert _get_display_htmls(table, "identifiant_unique", "source") == {
+            "identifiant_unique": (
+                '<span class="suggestion-text-added">ID_UNIQUE_123</span>'
+            ),
+        }
+        assert _get_display_htmls(table, "nom", "source") == {
+            "nom": '<span class="suggestion-text-added">Nouveau nom</span>',
+        }
+        assert _get_display_htmls(table, "latitude, longitude", "source") == {
+            "latitude": '<span class="suggestion-text-added">48.56789</span>',
+            "longitude": '<span class="suggestion-text-added">2.56789</span>',
+        }
+
+        # Verify correction display_html (no suggestion → dash)
+        assert _get_display_htmls(table, "nom", "correction") == {
+            "nom": '<span class="no-suggestion-text">-</span>',
+        }
 
     def test_serialize_source_ajout_with_revisionacteur_suggestions(
         self, suggestion_groupe_ajout
@@ -120,20 +134,21 @@ class TestSerializeSuggestionGroupe:
             champs=["nom"],
             valeurs=["Revision nom"],
         )
-        expected_fields_values_nom = {
-            "acteur_target_value": "Nouveau nom",
-            "acteur": '<span class="suggestion-text-added">Nouveau nom</span>',
-            "revision_acteur": (
-                '<span class="suggestion-text-added">Revision nom</span>'
-            ),
-            "revision_acteur_target_value": "Revision nom",
-        }
-        result = serialize_suggestion_groupe(suggestion_groupe_ajout)
+        result = get_context_from_suggestion_groupe_type_source(suggestion_groupe_ajout)
 
         assert result["suggestion_groupe"] == suggestion_groupe_ajout
         assert result["identifiant_unique"] == "ID_UNIQUE_123"
-        assert ("nom",) in result["fields_groups"]
-        assert result["fields_values"]["nom"] == expected_fields_values_nom
+
+        table = result["comparison_table"]
+
+        # Source cell for nom
+        assert _get_display_htmls(table, "nom", "source") == {
+            "nom": '<span class="suggestion-text-added">Nouveau nom</span>',
+        }
+        # Correction cell for nom (has RevisionActeur suggestion)
+        assert _get_display_htmls(table, "nom", "correction") == {
+            "nom": '<span class="suggestion-text-added">Revision nom</span>',
+        }
 
     def test_serialize_source_modification_returns_expected_keys_and_values(
         self,
@@ -141,49 +156,38 @@ class TestSerializeSuggestionGroupe:
     ):
         """Test SOURCE_MODIFICATION with an acteur but no revision_acteur"""
 
-        expected_fields_values = {
-            "nom": {
-                "acteur_target_value": "Nouveau nom",
-                "acteur": (
-                    '<span class="suggestion-text-removed">Ancien'
-                    '</span><span class="suggestion-text-added">Nouveau</span> nom'
-                ),
-                "revision_acteur": '<span class="no-suggestion-text">-</span>',
-                "revision_acteur_target_value": None,
-                "parent_revision_acteur": '<span class="no-suggestion-text">-</span>',
-                "parent_revision_acteur_target_value": None,
-            },
-            "latitude": {
-                "acteur_target_value": "48.56789",
-                "acteur": (
-                    '48.<span class="suggestion-text-removed">1234'
-                    '</span><span class="suggestion-text-added">56789</span>'
-                ),
-                "revision_acteur": '<span class="no-suggestion-text">-</span>',
-                "revision_acteur_target_value": None,
-                "parent_revision_acteur": '<span class="no-suggestion-text">-</span>',
-                "parent_revision_acteur_target_value": None,
-            },
-            "longitude": {
-                "acteur_target_value": "2.56789",
-                "acteur": (
-                    '2.<span class="suggestion-text-removed">1234'
-                    '</span><span class="suggestion-text-added">56789</span>'
-                ),
-                "revision_acteur": '<span class="no-suggestion-text">-</span>',
-                "revision_acteur_target_value": None,
-                "parent_revision_acteur": '<span class="no-suggestion-text">-</span>',
-                "parent_revision_acteur_target_value": None,
-            },
-        }
+        result = get_context_from_suggestion_groupe_type_source(
+            suggestion_groupe_modification
+        )
 
-        result = serialize_suggestion_groupe(suggestion_groupe_modification)
-
-        # Check keys and values
         assert result["acteur"] == suggestion_groupe_modification.acteur
         assert result["revision_acteur"] is None
         assert result["parent_revision_acteur"] is None
-        assert result["fields_values"] == expected_fields_values
+
+        table = result["comparison_table"]
+
+        # Verify source display (diff between acteur and suggestion)
+        assert _get_display_htmls(table, "nom", "source") == {
+            "nom": (
+                '<span class="suggestion-text-removed">Ancien'
+                '</span><span class="suggestion-text-added">Nouveau</span> nom'
+            ),
+        }
+        assert _get_display_htmls(table, "latitude, longitude", "source") == {
+            "latitude": (
+                '48.<span class="suggestion-text-removed">1234'
+                '</span><span class="suggestion-text-added">56789</span>'
+            ),
+            "longitude": (
+                '2.<span class="suggestion-text-removed">1234'
+                '</span><span class="suggestion-text-added">56789</span>'
+            ),
+        }
+
+        # Verify correction display (no suggestion → dash)
+        assert _get_display_htmls(table, "nom", "correction") == {
+            "nom": '<span class="no-suggestion-text">-</span>',
+        }
 
     def test_serialize_source_modification_with_revisionacteur(
         self,
@@ -198,51 +202,32 @@ class TestSerializeSuggestionGroupe:
         suggestion_groupe_modification.revision_acteur = revision_acteur
         suggestion_groupe_modification.save()
 
-        expected_fields_values = {
-            "nom": {
-                "acteur_target_value": "Nouveau nom",
-                "acteur": (
-                    '<span class="suggestion-text-removed">Ancien'
-                    '</span><span class="suggestion-text-added">Nouveau</span> nom'
-                ),
-                "revision_acteur": (
-                    '<span class="no-suggestion-text">Revision nom</span>'
-                ),
-                "revision_acteur_target_value": None,
-                "parent_revision_acteur": '<span class="no-suggestion-text">-</span>',
-                "parent_revision_acteur_target_value": None,
-            },
-            "latitude": {
-                "acteur_target_value": "48.56789",
-                "acteur": (
-                    '48.<span class="suggestion-text-removed">1234'
-                    '</span><span class="suggestion-text-added">56789</span>'
-                ),
-                "revision_acteur": '<span class="no-suggestion-text">48.01</span>',
-                "revision_acteur_target_value": None,
-                "parent_revision_acteur": '<span class="no-suggestion-text">-</span>',
-                "parent_revision_acteur_target_value": None,
-            },
-            "longitude": {
-                "acteur_target_value": "2.56789",
-                "acteur": (
-                    '2.<span class="suggestion-text-removed">1234'
-                    '</span><span class="suggestion-text-added">56789</span>'
-                ),
-                "revision_acteur": '<span class="no-suggestion-text">2.01</span>',
-                "revision_acteur_target_value": None,
-                "parent_revision_acteur": '<span class="no-suggestion-text">-</span>',
-                "parent_revision_acteur_target_value": None,
-            },
-        }
-
-        result = serialize_suggestion_groupe(suggestion_groupe_modification)
+        result = get_context_from_suggestion_groupe_type_source(
+            suggestion_groupe_modification
+        )
 
         assert result["acteur"] == suggestion_groupe_modification.acteur
         assert result["revision_acteur"] == revision_acteur
         assert result["parent_revision_acteur"] is None
 
-        assert result["fields_values"] == expected_fields_values
+        table = result["comparison_table"]
+
+        # Source display (diff)
+        assert _get_display_htmls(table, "nom", "source") == {
+            "nom": (
+                '<span class="suggestion-text-removed">Ancien'
+                '</span><span class="suggestion-text-added">Nouveau</span> nom'
+            ),
+        }
+
+        # Correction display (revision_acteur value, no suggestion → greyed)
+        assert _get_display_htmls(table, "nom", "correction") == {
+            "nom": '<span class="no-suggestion-text">Revision nom</span>',
+        }
+        assert _get_display_htmls(table, "latitude, longitude", "correction") == {
+            "latitude": '<span class="no-suggestion-text">48.01</span>',
+            "longitude": '<span class="no-suggestion-text">2.01</span>',
+        }
 
     def test_serialize_source_modification_with_revisionacteur_and_parent(
         self,
@@ -263,57 +248,29 @@ class TestSerializeSuggestionGroupe:
         suggestion_groupe_modification.parent_revision_acteur = parent_revision_acteur
         suggestion_groupe_modification.save()
 
-        expected_fields_values = {
-            "nom": {
-                "acteur_target_value": "Nouveau nom",
-                "acteur": (
-                    '<span class="suggestion-text-removed">Ancien'
-                    '</span><span class="suggestion-text-added">Nouveau</span> nom'
-                ),
-                "revision_acteur": (
-                    '<span class="no-suggestion-text">Revision nom</span>'
-                ),
-                "revision_acteur_target_value": None,
-                "parent_revision_acteur": (
-                    '<span class="no-suggestion-text">Parent nom</span>'
-                ),
-                "parent_revision_acteur_target_value": None,
-            },
-            "latitude": {
-                "acteur_target_value": "48.56789",
-                "acteur": (
-                    '48.<span class="suggestion-text-removed">1234'
-                    '</span><span class="suggestion-text-added">56789</span>'
-                ),
-                "revision_acteur": '<span class="no-suggestion-text">48.01</span>',
-                "revision_acteur_target_value": None,
-                "parent_revision_acteur": (
-                    '<span class="no-suggestion-text">48.1111</span>'
-                ),
-                "parent_revision_acteur_target_value": None,
-            },
-            "longitude": {
-                "acteur_target_value": "2.56789",
-                "acteur": (
-                    '2.<span class="suggestion-text-removed">1234'
-                    '</span><span class="suggestion-text-added">56789</span>'
-                ),
-                "revision_acteur": '<span class="no-suggestion-text">2.01</span>',
-                "revision_acteur_target_value": None,
-                "parent_revision_acteur": (
-                    '<span class="no-suggestion-text">2.1111</span>'
-                ),
-                "parent_revision_acteur_target_value": None,
-            },
-        }
+        result = get_context_from_suggestion_groupe_type_source(
+            suggestion_groupe_modification
+        )
 
-        result = serialize_suggestion_groupe(suggestion_groupe_modification)
-
-        # Check keys and values
         assert result["acteur"] == suggestion_groupe_modification.acteur
         assert result["revision_acteur"] == revision_acteur
         assert result["parent_revision_acteur"] == parent_revision_acteur
-        assert result["fields_values"] == expected_fields_values
+
+        table = result["comparison_table"]
+
+        # Correction display
+        assert _get_display_htmls(table, "nom", "correction") == {
+            "nom": '<span class="no-suggestion-text">Revision nom</span>',
+        }
+
+        # Parent display
+        assert _get_display_htmls(table, "nom", "parent") == {
+            "nom": '<span class="no-suggestion-text">Parent nom</span>',
+        }
+        assert _get_display_htmls(table, "latitude, longitude", "parent") == {
+            "latitude": '<span class="no-suggestion-text">48.1111</span>',
+            "longitude": '<span class="no-suggestion-text">2.1111</span>',
+        }
 
     def test_serialize_source_modification_with_parent_revision_acteur_suggestion(
         self,
@@ -342,24 +299,25 @@ class TestSerializeSuggestionGroupe:
             champs=["nom"],
             valeurs=["Suggestion Parent nom"],
         )
-        expected_fields_values_nom = {
-            "acteur_target_value": "Nouveau nom",
-            "acteur": (
+
+        result = get_context_from_suggestion_groupe_type_source(
+            suggestion_groupe_modification
+        )
+        table = result["comparison_table"]
+
+        # Source display (diff acteur vs suggestion)
+        assert _get_display_htmls(table, "nom", "source") == {
+            "nom": (
                 '<span class="suggestion-text-removed">Ancien'
                 '</span><span class="suggestion-text-added">Nouveau</span> nom'
             ),
-            "revision_acteur": '<span class="no-suggestion-text">Revision nom</span>',
-            "revision_acteur_target_value": None,
-            "parent_revision_acteur": (
-                '<span class="suggestion-text-added">Suggestion </span>Parent nom'
-            ),
-            "parent_revision_acteur_target_value": "Suggestion Parent nom",
         }
 
-        result = serialize_suggestion_groupe(suggestion_groupe_modification)
-
-        print(result["fields_values"]["nom"])
-        assert result["fields_values"]["nom"] == expected_fields_values_nom
+        # Parent display
+        # (diff parent_revision_acteur vs ParentRevisionActeur suggestion)
+        assert _get_display_htmls(table, "nom", "parent") == {
+            "nom": ('<span class="suggestion-text-added">Suggestion </span>Parent nom'),
+        }
 
     def test_serialize_source_modification_without_acteur_raises_error(self):
         """Test that SOURCE_MODIFICATION without acteur raises ValueError"""
@@ -377,7 +335,7 @@ class TestSerializeSuggestionGroupe:
         )
 
         with pytest.raises(ValueError) as exc_info:
-            serialize_suggestion_groupe(suggestion_groupe)
+            get_context_from_suggestion_groupe_type_source(suggestion_groupe)
 
         assert "acteur is required" in str(exc_info.value)
 
