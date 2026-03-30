@@ -6,24 +6,22 @@ export default class extends Controller<HTMLElement> {
     fields: String,
     suggestionModele: String,
     updateUrl: String,
-    targetValues: String,
-    fieldsGroups: String,
+    targetValues: { type: Object, default: {} },
+    fieldsGroups: { type: Array, default: [] },
   }
 
   declare readonly fieldsValue: string
   declare readonly suggestionModeleValue: string
   declare readonly updateUrlValue: string
-  declare readonly targetValuesValue: string
-  declare readonly fieldsGroupsValue: string
+  declare readonly targetValuesValue: object
+  declare readonly fieldsGroupsValue: Array<string[]>
 
   report() {
-    const targetValues = JSON.parse(this.targetValuesValue || "{}")
-
     postFieldsValues(
       this.element,
       this.updateUrlValue,
       this.suggestionModeleValue,
-      targetValues,
+      this.targetValuesValue,
       this.fieldsGroupsValue,
     )
   }

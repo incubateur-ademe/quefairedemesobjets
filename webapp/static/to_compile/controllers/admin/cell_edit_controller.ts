@@ -7,14 +7,14 @@ export default class extends Controller<HTMLElement> {
     suggestionModele: String,
     updateUrl: String,
     replaceText: String,
-    fieldsGroups: String,
+    fieldsGroups: { type: Array, default: [] },
   }
 
   declare readonly fieldValue: string
   declare readonly suggestionModeleValue: string
   declare readonly updateUrlValue: string
   declare readonly replaceTextValue: string
-  declare readonly fieldsGroupsValue: string
+  declare readonly fieldsGroupsValue: Array<string[]>
 
   save() {
     const value = this.element.textContent

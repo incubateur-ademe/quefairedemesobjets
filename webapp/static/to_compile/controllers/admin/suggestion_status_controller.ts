@@ -15,6 +15,10 @@ export default class extends Controller<HTMLElement> {
       console.error("Action ou URL manquante")
       return
     }
+    /*
+  We need to create a form on the fly because the html fragment is already included in a form
+  to manage checkboxes of the admin list view
+  */
     const formData = new FormData()
     formData.append("action", this.actionValue)
     postSuggestion(this.statusUrlValue, formData)

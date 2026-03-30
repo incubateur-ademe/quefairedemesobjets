@@ -1,7 +1,4 @@
-from __future__ import annotations
-
 import json
-from typing import TYPE_CHECKING
 
 from core.templatetags.admin_data_tags import display_diff_values
 from data.models.comparison_table import (
@@ -13,15 +10,16 @@ from data.models.comparison_table import (
     StimulusControllerConfig,
     TableRow,
 )
-from data.models.suggestion import SuggestionAction, SuggestionGroupe
+from data.models.suggestion import (
+    SuggestionAction,
+    SuggestionGroupe,
+    SuggestionUnitaire,
+)
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from more_itertools import flatten
 from pydantic import BaseModel, ConfigDict
 from qfdmo.models.acteur import Acteur, RevisionActeur
-
-if TYPE_CHECKING:
-    from data.models.suggestion import SuggestionUnitaire
 
 
 class SuggestionSourceModel(BaseModel):
@@ -118,21 +116,21 @@ class SuggestionSourceModel(BaseModel):
                 if hasattr(acteur, "proposition_services")
                 else []
             )
-            if prop_services:
-                prop_data = sorted(
-                    [
-                        {
-                            "action": prop.action.code,
-                            "sous_categories": sorted(
-                                [sc.code for sc in prop.sous_categories.all()]
-                            ),
-                        }
-                        for prop in prop_services
-                    ],
-                    key=lambda x: x["action"],
-                )
-                return json.dumps(prop_data, ensure_ascii=False)
-            return ""
+            if not prop_services:
+                return ""
+            prop_data = sorted(
+                [
+                    {
+                        "action": prop.action.code,
+                        "sous_categories": sorted(
+                            [sc.code for sc in prop.sous_categories.all()]
+                        ),
+                    }
+                    for prop in prop_services
+                ],
+                key=lambda x: x["action"],
+            )
+            return json.dumps(prop_data, ensure_ascii=False)
 
         def get_field_from_perimetre_adomicile_codes(
             acteur: Acteur | RevisionActeur,
@@ -143,19 +141,17 @@ class SuggestionSourceModel(BaseModel):
                 if hasattr(acteur, "perimetre_adomiciles")
                 else []
             )
-            return (
-                json.dumps(
-                    sorted(
-                        [
-                            {"type": perimetre.type, "valeur": perimetre.valeur}
-                            for perimetre in perimetres
-                        ],
-                        key=lambda x: (x["type"], x["valeur"]),
-                    ),
-                    ensure_ascii=False,
-                )
-                if perimetres
-                else ""
+            if not perimetres:
+                return ""
+            return json.dumps(
+                sorted(
+                    [
+                        {"type": perimetre.type, "valeur": perimetre.valeur}
+                        for perimetre in perimetres
+                    ],
+                    key=lambda x: (x["type"], x["valeur"]),
+                ),
+                ensure_ascii=False,
             )
 
         def get_field_from_codes(
@@ -379,7 +375,7 @@ class SuggestionGroupeTypeSource(BaseModel):
     @classmethod
     def from_suggestion_groupe(
         cls, suggestion_groupe: SuggestionGroupe
-    ) -> SuggestionGroupeTypeSource:
+    ) -> "SuggestionGroupeTypeSource":
         """
         Build a SuggestionGroupeTypeSource from a SuggestionGroupe.
 

@@ -10,16 +10,20 @@ export function postFieldsValues(
   updateUrl: string,
   suggestionModele: string,
   fieldsValues: Record<string, any>,
-  fieldsGroups: string,
+  fieldsGroups: Array<string[]>,
   openedTab: string = "",
 ): void {
   if (!updateUrl) {
     console.error("URL de mise à jour de la suggestion manquante")
     return
   }
+  /*
+  We need to create a form on the fly because the html fragment is already included in a form
+  to manage checkboxes of the admin list view
+  */
   const formData = new FormData()
   formData.append("fields_values", JSON.stringify(fieldsValues))
-  formData.append("fields_groups", fieldsGroups)
+  formData.append("fields_groups", JSON.stringify(fieldsGroups))
   formData.append("suggestion_modele", suggestionModele)
   if (openedTab) {
     formData.append("tab", openedTab)
@@ -45,6 +49,9 @@ export function postSuggestion(postUrl: string, formData: FormData): void {
       return response.text()
     })
     .then((html) => {
+      /*
+      TODO: handle refresh of the fragment using Turdo frame instead of Turbo stream
+      */
       Turbo.renderStreamMessage(html)
     })
     .catch((error) => {

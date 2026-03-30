@@ -4,11 +4,11 @@ import { postFieldsValues } from "./suggestion_post"
 export default class extends Controller<HTMLElement> {
   static values = {
     updateUrl: String,
-    fieldsGroups: String,
+    fieldsGroups: { type: Array, default: [] },
   }
 
   declare readonly updateUrlValue: string
-  declare readonly fieldsGroupsValue: string
+  declare readonly fieldsGroupsValue: Array<string[]>
 
   handleMarkerDragged(event: CustomEvent) {
     const { latitude, longitude, markerElement } = event.detail

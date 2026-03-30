@@ -50,6 +50,7 @@ def get_context_from_suggestion_groupe_type_source(
         "acteur": sg_type_source.acteur,
         "revision_acteur": sg_type_source.revision_acteur,
         "parent_revision_acteur": sg_type_source.parent_revision_acteur,
+        "fields_groups": sg_type_source.fields_groups,
     }
 
     return context
