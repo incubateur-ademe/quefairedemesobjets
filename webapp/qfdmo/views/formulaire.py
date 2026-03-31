@@ -20,6 +20,8 @@ class FormulaireSearchActeursView(AbstractSearchActeursView):
     modifiée."""
 
     is_iframe = True
+    is_carte = False
+    is_formulaire = True
     template_name = "ui/pages/formulaire.html"
     form_class = FormulaireForm
 
@@ -304,6 +306,7 @@ class FormulaireSearchActeursView(AbstractSearchActeursView):
             context.update(is_digital=True)
 
         context.update(
+            is_formulaire=True,
             map_container_id="formulaire",
             action_direction_form=self.action_direction_form,
             digital_acteur_form=self.digital_acteur_form,
