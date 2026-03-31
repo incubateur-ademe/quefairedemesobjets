@@ -17,6 +17,7 @@ from data.models.suggestions.source import (
 from data.models.utils import prepare_acteur_data_with_location
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy
@@ -469,21 +470,22 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
         except json.JSONDecodeError:
             return HttpResponseBadRequest("Payload fields_list invalide")
 
-        _, errors = update_suggestion_groupe(
-            suggestion_groupe,
-            suggestion_modele_payload,
-            fields_values,
-            fields_groups,
-            request.POST.get("identifiant_unique", ""),
-        )
-
-        context = self._build_full_context(request, suggestion_groupe)
-        if errors:
-            context["errors"] = errors
-            suggestion_groupe_type = context["suggestion_groupe_type"]
-            context["comparison_table"] = suggestion_groupe_type.to_comparison_table(
-                errors=errors
+        with transaction.atomic():
+            _, errors = update_suggestion_groupe(
+                suggestion_groupe,
+                suggestion_modele_payload,
+                fields_values,
+                fields_groups,
+                request.POST.get("identifiant_unique", ""),
             )
+
+            context = self._build_full_context(request, suggestion_groupe)
+            if errors:
+                context["errors"] = errors
+                suggestion_groupe_type = context["suggestion_groupe_type"]
+                context["comparison_table"] = (
+                    suggestion_groupe_type.to_comparison_table(errors=errors)
+                )
 
         return render(
             request,

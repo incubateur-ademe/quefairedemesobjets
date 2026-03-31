@@ -167,7 +167,7 @@ def crawl_urls_suggestion_groupes_to_db(
         for acteur in acteurs:
             identifiant_unique = acteur[COLS.ID]
             est_parent = acteur[COLS.EST_PARENT]
-            acteur = revision = parent_revision = None
+            parent_revision = None
             suggestion_modele = "RevisionActeur"
             if est_parent:
                 parent_revision = RevisionActeur.objects.get(
@@ -175,16 +175,20 @@ def crawl_urls_suggestion_groupes_to_db(
                 )
                 suggestion_modele = "ParentRevisionActeur"
             else:
-                acteur = Acteur.objects.get(identifiant_unique=identifiant_unique)
-                revision = RevisionActeur.objects.filter(
-                    identifiant_unique=identifiant_unique
-                ).first()
+                # Check if the acteur exists
+                Acteur.objects.get(identifiant_unique=identifiant_unique)
 
             SuggestionUnitaire.objects.create(
                 suggestion_groupe=suggestion_groupe,
                 statut=SuggestionStatut.AVALIDER,
-                acteur=acteur,
-                revision_acteur=revision,
+                acteur_id=(
+                    identifiant_unique if suggestion_modele == "Acteur" else None
+                ),
+                revision_acteur_id=(
+                    identifiant_unique
+                    if suggestion_modele == "RevisionActeur"
+                    else None
+                ),
                 parent_revision_acteur=parent_revision,
                 suggestion_modele=suggestion_modele,
                 champs=[COLS.URL_DB],

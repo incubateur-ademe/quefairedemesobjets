@@ -1,13 +1,14 @@
 import logging
 import re
 from datetime import datetime
+from typing import Protocol
 
 from core.models.mixin import TimestampedModel
 from data.models.change import SuggestionChange
 from django.contrib.admin.utils import quote
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields import ArrayField
-from django.db.models import BooleanField, Count, ExpressionWrapper, Q
+from django.db.models import BooleanField, CheckConstraint, Count, ExpressionWrapper, Q
 from django.template.loader import render_to_string
 from django.urls import reverse
 from more_itertools import first
@@ -435,7 +436,41 @@ class SuggestionGroupeManager(models.Manager):
         return self.get_queryset().with_has_parent()
 
 
-class SuggestionGroupe(TimestampedModel):
+class _HasOptionalActeurFks(Protocol):
+    """
+    Shared Foreign keys between SuggestionGroupe and SuggestionUnitaire
+    """
+
+    acteur: Acteur | None
+    revision_acteur: RevisionActeur | None
+    parent_revision_acteur: RevisionActeur | None
+
+
+class SuggestionActeurRelationsMixin:
+    def get_acteur_or_none(self: _HasOptionalActeurFks) -> Acteur | None:
+        try:
+            return self.acteur
+        except Acteur.DoesNotExist:
+            return None
+
+    def get_revision_acteur_or_none(
+        self: _HasOptionalActeurFks,
+    ) -> RevisionActeur | None:
+        try:
+            return self.revision_acteur
+        except RevisionActeur.DoesNotExist:
+            return None
+
+    def get_parent_revision_acteur_or_none(
+        self: _HasOptionalActeurFks,
+    ) -> RevisionActeur | None:
+        try:
+            return self.parent_revision_acteur
+        except RevisionActeur.DoesNotExist:
+            return None
+
+
+class SuggestionGroupe(TimestampedModel, SuggestionActeurRelationsMixin):
     class Meta:
         verbose_name = "2️⃣ ⏳ ⚠️ Suggestion Groupe - Livraison prochainement"
         verbose_name_plural = "2️⃣ ⏳ ⚠️ Suggestions Groupes - Livraison prochainement"
@@ -488,24 +523,6 @@ class SuggestionGroupe(TimestampedModel):
         blank=True,
         verbose_name="Metadata de la cohorte, données statistiques",
     )
-
-    def get_acteur_or_none(self) -> Acteur | None:
-        try:
-            return self.acteur
-        except Acteur.DoesNotExist:
-            return None
-
-    def get_revision_acteur_or_none(self) -> RevisionActeur | None:
-        try:
-            return self.revision_acteur
-        except RevisionActeur.DoesNotExist:
-            return None
-
-    def get_parent_revision_acteur_or_none(self) -> RevisionActeur | None:
-        try:
-            return self.parent_revision_acteur
-        except RevisionActeur.DoesNotExist:
-            return None
 
     def __str__(self) -> str:
         libelle = self.suggestion_cohorte.identifiant_action
@@ -574,10 +591,26 @@ class SuggestionGroupe(TimestampedModel):
         )
 
 
-class SuggestionUnitaire(TimestampedModel):
+class SuggestionUnitaire(TimestampedModel, SuggestionActeurRelationsMixin):
     class Meta:
         verbose_name = "3️⃣ ⏳ ⚠️ Suggestion Unitaire - Livraison prochainement"
         verbose_name_plural = "3️⃣ ⏳ ⚠️ Suggestions Unitaires - Livraison prochainement"
+        constraints = [
+            CheckConstraint(
+                condition=~Q(
+                    suggestion_modele="RevisionActeur",
+                    revision_acteur_id__isnull=True,
+                ),
+                name="data_su_revision_acteur_if_modele_revision_acteur",
+            ),
+            CheckConstraint(
+                condition=~Q(
+                    suggestion_modele="ParentRevisionActeur",
+                    parent_revision_acteur_id__isnull=True,
+                ),
+                name="data_su_parent_revision_acteur_if_modele_parent_revision_acteur",
+            ),
+        ]
 
     id = models.AutoField(primary_key=True)
     suggestion_groupe = models.ForeignKey(

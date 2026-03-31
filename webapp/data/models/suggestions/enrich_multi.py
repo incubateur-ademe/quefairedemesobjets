@@ -120,21 +120,18 @@ class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
                     )
                 )
             else:
+                identifiant_unique = suggestion_unitaire.revision_acteur_id
                 revision_acteur = (
                     RevisionActeur.objects.filter(
-                        identifiant_unique=suggestion_unitaire.revision_acteur_id
+                        identifiant_unique=identifiant_unique
                     ).first()
                     if suggestion_unitaire.revision_acteur_id
                     else None
                 )
-                identifiant_unique = (
-                    revision_acteur.identifiant_unique
-                    if revision_acteur
-                    else suggestion_unitaire.acteur_id
+                acteur = suggestion_unitaire.acteur or Acteur.objects.get(
+                    identifiant_unique=identifiant_unique
                 )
                 row_label = f"Acteur {identifiant_unique}"
-                acteur = suggestion_unitaire.acteur
-                revision_acteur = suggestion_unitaire.revision_acteur
 
                 cells.append(
                     CellFieldsContent(
