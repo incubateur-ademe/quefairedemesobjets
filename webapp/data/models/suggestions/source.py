@@ -353,6 +353,8 @@ class SuggestionGroupeTypeSource(SuggestionGroupeType):
     - The logic to build a ComparisonTable for UI rendering
     """
 
+    display_tab: bool = True
+
     fields_groups: list[tuple[str, ...]]
     identifiant_unique: str
 

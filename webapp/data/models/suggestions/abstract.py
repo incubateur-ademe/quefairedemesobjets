@@ -24,6 +24,7 @@ class SuggestionGroupeType(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     suggestion_groupe: SuggestionGroupe
+    display_tab: bool = False
 
     @abstractmethod
     def from_suggestion_groupe(
