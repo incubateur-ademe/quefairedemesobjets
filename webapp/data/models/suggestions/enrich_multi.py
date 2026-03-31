@@ -3,9 +3,9 @@ import logging
 
 from core.templatetags.admin_data_tags import display_diff_values
 from data.models.comparison_table import (
-    CellContent,
     CellField,
     CellFieldsContent,
+    CellHtmlContent,
     ColumnHeader,
     ComparisonTable,
     StimulusControllerConfig,
@@ -55,7 +55,7 @@ class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
             row_label = ""
             cells = []
             cells.append(
-                CellContent(
+                CellHtmlContent(
                     column_key="source",
                     html_content=f"{", ".join(suggestion_unitaire.champs)}",
                 )
@@ -67,7 +67,7 @@ class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
                 parent_revision_acteur = suggestion_unitaire.parent_revision_acteur
                 row_label = f"Parent {identifiant_unique}"
                 cells.append(
-                    CellContent(
+                    CellHtmlContent(
                         column_key="source",
                         html_content="🚫",
                     )

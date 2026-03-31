@@ -14,7 +14,7 @@ class StimulusControllerConfig(BaseModel):
     actions: list[str] = []
 
 
-class HeaderLink(BaseModel):
+class CellLink(BaseModel):
     """A hyperlink rendered inside a column header."""
 
     model_config = ConfigDict(frozen=True)
@@ -23,7 +23,15 @@ class HeaderLink(BaseModel):
     url: str
 
 
-class CellField(BaseModel):
+class Cell(BaseModel):
+    """A single table cell (<td>)."""
+
+    model_config = ConfigDict(frozen=True)
+
+    links: list[CellLink] = []
+
+
+class CellField(Cell):
     """
     One field within a cell (cells may contain multiple fields for grouped fields).
     """
@@ -37,22 +45,22 @@ class CellField(BaseModel):
     error: str | None = None
 
 
-class BaseCellContent(BaseModel, ABC):
+class BaseCellContent(Cell, ABC):
     model_config = ConfigDict(frozen=True)
 
     column_key: str
     cell_type: str
 
 
-class CellContent(BaseCellContent):
-    """A single table cell (<td>)."""
+class CellHtmlContent(BaseCellContent):
+    """A single table cell (<td>) with html content."""
 
     html_content: str = ""
     cell_type: Literal["html"] = "html"
 
 
 class CellFieldsContent(BaseCellContent):
-    """A single table cell (<td>)."""
+    """A single table cell (<td>) with CellField (one by item of group_fields)."""
 
     model_config = ConfigDict(frozen=True)
 
@@ -72,7 +80,7 @@ class ColumnHeader(BaseModel):
     key: str
     label: str = ""
     css_classes: str = ""
-    links: list[HeaderLink] = []
+    links: list[CellLink] = []
     subtitle: str | None = None
     header_action: StimulusControllerConfig | None = None
 
@@ -83,7 +91,7 @@ class TableRow(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     label: str
-    cells: list[CellFieldsContent | CellContent]
+    cells: list[CellFieldsContent | CellHtmlContent]
 
 
 class ComparisonTable(BaseModel):

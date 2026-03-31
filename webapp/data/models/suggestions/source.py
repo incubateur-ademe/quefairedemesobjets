@@ -2,12 +2,12 @@ import json
 
 from core.templatetags.admin_data_tags import display_diff_values
 from data.models.comparison_table import (
-    CellContent,
     CellField,
     CellFieldsContent,
+    CellHtmlContent,
+    CellLink,
     ColumnHeader,
     ComparisonTable,
-    HeaderLink,
     StimulusControllerConfig,
     TableRow,
 )
@@ -22,6 +22,9 @@ from django.utils.safestring import mark_safe
 from more_itertools import flatten
 from pydantic import BaseModel, ConfigDict
 from qfdmo.models.acteur import Acteur, RevisionActeur
+
+AE_ETABLISSEMENT_URL = "https://annuaire-entreprises.data.gouv.fr/etablissement/"
+AE_ENTREPRISE_URL = "https://annuaire-entreprises.data.gouv.fr/entreprise/"
 
 
 class SuggestionSourceModel(BaseModel):
@@ -584,6 +587,55 @@ class SuggestionGroupeTypeSource(SuggestionGroupeType):
             actions=["click->report-update#report"],
         )
 
+    def _get_suggestion_source_model_from_modele(
+        self,
+        suggestion_modele: str,
+    ) -> SuggestionSourceModel:
+        if suggestion_modele == "Acteur":
+            return self.acteur_suggestions
+        elif suggestion_modele == "RevisionActeur":
+            return self.revision_acteur_suggestions
+        elif suggestion_modele == "ParentRevisionActeur":
+            return self.parent_revision_acteur_suggestions
+        else:
+            raise ValueError(f"Invalid suggestion_modele: {suggestion_modele}")
+
+    def _get_fields_links(
+        self,
+        field_group: tuple[str, ...],
+        suggestion_modele: str,
+    ) -> list[CellLink]:
+        links = []
+        suggestion_source_model = self._get_suggestion_source_model_from_modele(
+            suggestion_modele
+        )
+        if "siret" in field_group:
+            if siret := getattr(suggestion_source_model, "siret", None):
+                links.append(
+                    CellLink(
+                        label="etablissement",
+                        url=f"{AE_ETABLISSEMENT_URL}{siret}",
+                    )
+                )
+        if "siren" in field_group:
+            if siren := getattr(suggestion_source_model, "siren", None):
+                links.append(
+                    CellLink(
+                        label="unité légale",
+                        url=f"{AE_ENTREPRISE_URL}{siren}",
+                    )
+                )
+        if "url" in field_group:
+            if url := getattr(suggestion_source_model, "url", None):
+                links.append(
+                    CellLink(
+                        label="site web",
+                        url=url,
+                    )
+                )
+
+        return links
+
     def _build_target_row_cells(
         self,
         field_group: tuple[str, ...],
@@ -602,6 +654,8 @@ class SuggestionGroupeTypeSource(SuggestionGroupeType):
         fields_str = "|".join(field_group)
         reportable = all(f not in not_reportable for f in field_group)
 
+        links = self._get_fields_links(field_group, suggestion_modele)
+
         action_cell = CellFieldsContent(
             column_key=action_column_key,
             cell_type="action",
@@ -617,6 +671,7 @@ class SuggestionGroupeTypeSource(SuggestionGroupeType):
         editable_cell = CellFieldsContent(
             column_key=editable_column_key,
             cell_type="editable",
+            links=links,
             fields=[
                 CellField(
                     field_name=field,
@@ -674,7 +729,7 @@ class SuggestionGroupeTypeSource(SuggestionGroupeType):
                 label="Acteur Importé",
                 css_classes="qf-w-1/4",
                 links=(
-                    [HeaderLink(label="importé", url=self.acteur_change_url)]
+                    [CellLink(label="importé", url=self.acteur_change_url)]
                     if self.acteur_change_url
                     else []
                 ),
@@ -693,11 +748,11 @@ class SuggestionGroupeTypeSource(SuggestionGroupeType):
         correction_links = []
         if self.revision_acteur_change_url:
             correction_links.append(
-                HeaderLink(label="corrigé", url=self.revision_acteur_change_url)
+                CellLink(label="corrigé", url=self.revision_acteur_change_url)
             )
             if not self.has_parent_revision_acteur:
                 correction_links.append(
-                    HeaderLink(
+                    CellLink(
                         label="affiché",
                         url=self.revision_acteur_displayedacteur_change_url or "",
                     )
@@ -729,11 +784,11 @@ class SuggestionGroupeTypeSource(SuggestionGroupeType):
                     label="Parent",
                     css_classes="qf-w-1/4",
                     links=[
-                        HeaderLink(
+                        CellLink(
                             label="corrigé",
                             url=self.parent_revision_acteur_change_url or "",
                         ),
-                        HeaderLink(
+                        CellLink(
                             label="affiché",
                             url=self.parent_revision_acteur_displayedacteur_change_url
                             or "",
@@ -750,13 +805,14 @@ class SuggestionGroupeTypeSource(SuggestionGroupeType):
         # --- Rows ---
         rows = []
         for field_group in self.fields_groups:
-            cells: list[CellFieldsContent | CellContent] = []
+            cells: list[CellFieldsContent | CellHtmlContent] = []
 
             # Source (display) cell
             cells.append(
                 CellFieldsContent(
                     column_key="source",
                     cell_type="display",
+                    links=self._get_fields_links(field_group, "Acteur"),
                     fields=[
                         CellField(
                             field_name=field,
