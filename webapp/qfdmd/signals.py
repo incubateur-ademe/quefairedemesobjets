@@ -24,21 +24,17 @@ logger = logging.getLogger(__name__)
 
 
 @receiver(page_published, sender=ProduitPage)
-def index_produit_page_search_term(sender, instance, **kwargs):
+def index_search_tags_on_publish(sender, instance, **kwargs):
     """
-    Re-index the ProduitPageSearchTerm when a ProduitPage is published.
+    Re-index SearchTags (synonymes de recherche) when a ProduitPage is published.
 
-    The search index is updated here (rather than relying solely on post_save)
-    because Wagtail drafts call save() on the revision without publishing,
-    and get_indexed_objects excludes terms whose page is not live.
-    Triggering indexing on page_published ensures the term becomes searchable
-    as soon as the page goes live.
+    get_indexed_objects excludes SearchTags not linked to any page, so a tag
+    saved while the page was a draft won't be in the index yet. Triggering
+    indexing on page_published ensures all linked tags become searchable as
+    soon as the page goes live.
     """
-    try:
-        search_term = instance.produit_page_search_term
-    except instance.__class__.produit_page_search_term.RelatedObjectDoesNotExist:
-        return
-    insert_or_update_object(search_term)
+    for item in instance.search_tags_items.select_related("tag"):
+        insert_or_update_object(item.tag)
 
 
 @receiver(post_save, sender=submission_class)
