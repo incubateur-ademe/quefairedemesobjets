@@ -42,7 +42,7 @@ class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
 
         columns = [ColumnHeader(key="label", css_classes="qf-w-1/4")]
 
-        for column_name in ["Champ(s)", "Acteur", "Mise à jour"]:
+        for column_name in ["Champ(s)", "Acteur", "Correction"]:
             columns.append(
                 ColumnHeader(
                     key=column_name,
@@ -194,12 +194,8 @@ class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
                     )
                 )
 
-            rows.append(
-                TableRow(
-                    label=row_label,
-                    cells=cells,
-                )
-            )
+            label_cell = CellHtmlContent(column_key="label", html_content=row_label)
+            rows.append(TableRow(cells=[label_cell, *cells]))
 
         return ComparisonTable(columns=columns, rows=rows)
 

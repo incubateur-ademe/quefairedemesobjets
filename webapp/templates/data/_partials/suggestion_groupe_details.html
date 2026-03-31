@@ -41,86 +41,10 @@
             <tbody>
                 {% for row in comparison_table.rows %}
                     <tr>
-                        <td>{{ row.label }}</td>
                         {% for cell in row.cells %}
-                            {% if cell.cell_type == "html" %}
-                                <td>
-                                    {{ cell.html_content|safe }}
-                                    {% if cell.links %}
-                                        <br>(
-                                        {% for link in cell.links %}
-                                            {% if not forloop.first %}, {% endif %}
-                                            <a href="{{ link.url }}" target="_blank" rel="noreferrer" data-turbo="false">{{ link.label }}</a>
-                                        {% endfor %}
-                                        )
-                                    {% endif %}
-
-                                </td>
-                            {% elif cell.cell_type == "display" %}
-                                <td>
-                                    {% for field in cell.fields %}
-                                        {{ field.display_html|safe }}
-                                        {% if not forloop.last %}, {% endif %}
-                                    {% endfor %}
-                                    {% if cell.links %}
-                                        <div>
-                                            (
-                                            {% for link in cell.links %}
-                                                {% if not forloop.first %}, {% endif %}
-                                                <a href="{{ link.url }}" target="_blank" rel="noreferrer" data-turbo="false">{{ link.label }}</a>
-                                            {% endfor %}
-                                            )
-                                        </div>
-                                    {% endif %}
-                                </td>
-                            {% elif cell.cell_type == "action" %}
-                                <td class="qf-text-center qf-text-2xl">
-                                    {% if cell.enabled %}
-                                        <div {{ cell.stimulus|stimulus_attrs }} class="qf-cursor-pointer">
-                                            {{ cell.action_icon }}
-                                        </div>
-                                    {% else %}
-                                        <div>{{ cell.disabled_icon }}</div>
-                                    {% endif %}
-                                </td>
-                            {% elif cell.cell_type == "editable" %}
-                                <td>
-                                    <div class="qf-flex qf-flex-row qf-items-center qf-gap-1">
-                                        {% for field in cell.fields %}
-                                            {% if not field.editable %}
-                                                <div>🚫</div>
-                                            {% endif %}
-                                            <div
-                                                contentEditable="{{ field.editable|yesno:"true,false" }}"
-                                                {% if field.stimulus %}{{ field.stimulus|stimulus_attrs }}{% endif %}>
-                                                {{ field.display_html|safe }}
-                                            </div>
-                                            {% if not forloop.last %}<span>&nbsp;,&nbsp;</span> {% endif %}
-                                        {% endfor %}
-
-                                    </div>
-                                    {% if cell.links %}
-                                        <div>
-                                            (
-                                            {% for link in cell.links %}
-                                                {% if not forloop.first %}, {% endif %}
-                                                <a href="{{ link.url }}" target="_blank" rel="noreferrer" data-turbo="false">{{ link.label }}</a>
-                                            {% endfor %}
-                                            )
-                                        </div>
-                                    {% endif %}
-
-                                    <div>
-                                        {% for field in cell.fields %}
-                                            {% if field.error %}
-                                                <div class="qf-text-red-500">
-                                                    {{ field.error }}
-                                                </div>
-                                            {% endif %}
-                                        {% endfor %}
-                                    </div>
-                                </td>
-                            {% endif %}
+                            <td>
+                                {% display_cell_as_html cell %}
+                            </td>
                         {% endfor %}
                     </tr>
                 {% endfor %}

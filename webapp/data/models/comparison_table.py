@@ -90,7 +90,6 @@ class TableRow(BaseModel):
 
     model_config = ConfigDict(frozen=True)
 
-    label: str
     cells: list[CellFieldsContent | CellHtmlContent]
 
 

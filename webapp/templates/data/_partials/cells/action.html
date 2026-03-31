@@ -1,0 +1,10 @@
+{% load comparison_table_tags %}
+<div class="qf-text-center qf-text-2xl">
+    {% if cell.enabled %}
+        <div {{ cell.stimulus|stimulus_attrs }} class="qf-cursor-pointer">
+            {{ cell.action_icon }}
+        </div>
+    {% else %}
+        <div>{{ cell.disabled_icon }}</div>
+    {% endif %}
+</div>

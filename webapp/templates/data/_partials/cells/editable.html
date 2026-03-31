@@ -1,0 +1,33 @@
+{% load comparison_table_tags %}
+<div class="qf-flex qf-flex-row qf-items-center qf-gap-1">
+    {% for field in cell.fields %}
+        {% if not field.editable %}
+            <div>🚫</div>
+        {% endif %}
+        <div
+            contentEditable="{{ field.editable|yesno:"true,false" }}"
+            {% if field.stimulus %}{{ field.stimulus|stimulus_attrs }}{% endif %}>
+            {{ field.display_html|safe }}
+        </div>
+        {% if not forloop.last %}<span>&nbsp;,&nbsp;</span> {% endif %}
+    {% endfor %}
+</div>
+{% if cell.links %}
+    <div>
+        (
+        {% for link in cell.links %}
+            {% if not forloop.first %}, {% endif %}
+            <a href="{{ link.url }}" target="_blank" rel="noreferrer" data-turbo="false">{{ link.label }}</a>
+        {% endfor %}
+        )
+    </div>
+{% endif %}
+<div>
+    {% for field in cell.fields %}
+        {% if field.error %}
+            <div class="qf-text-red-500">
+                {{ field.error }}
+            </div>
+        {% endif %}
+    {% endfor %}
+</div>

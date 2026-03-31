@@ -1,0 +1,10 @@
+{% load comparison_table_tags %}
+{{ cell.html_content|safe }}
+{% if cell.links %}
+    <br>(
+    {% for link in cell.links %}
+        {% if not forloop.first %}, {% endif %}
+        <a href="{{ link.url }}" target="_blank" rel="noreferrer" data-turbo="false">{{ link.label }}</a>
+    {% endfor %}
+    )
+{% endif %}

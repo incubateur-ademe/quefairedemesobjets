@@ -856,7 +856,10 @@ class SuggestionGroupeTypeSource(SuggestionGroupeType):
                     )
                 )
 
-            rows.append(TableRow(label=", ".join(field_group), cells=cells))
+            label_cell = CellHtmlContent(
+                column_key="label", html_content=", ".join(field_group)
+            )
+            rows.append(TableRow(cells=[label_cell, *cells]))
 
         return ComparisonTable(columns=columns, rows=rows)
 
