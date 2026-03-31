@@ -582,6 +582,19 @@ class TestLayers:
 
 
 @pytest.mark.django_db
+class TestIsCarteContext:
+    def test_carte_view_sets_is_carte(self, client):
+        """CarteSearchActeursView always sets is_carte=True in context."""
+        response = client.get("/carte")
+        assert response.context["is_carte"] is True
+
+    def test_carte_view_does_not_set_is_formulaire(self, client):
+        """CarteSearchActeursView never sets is_formulaire in context."""
+        response = client.get("/carte")
+        assert response.context.get("is_formulaire") is not True
+
+
+@pytest.mark.django_db
 class TestGetOrCreateRevisionActeur:
     def test_get_or_create_revision_acteur_only_acteur(
         self, client, acteur_type_commerce

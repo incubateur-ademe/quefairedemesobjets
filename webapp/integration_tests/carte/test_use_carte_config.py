@@ -86,6 +86,20 @@ class TestCarteConfig:
             soup.find(attrs={"data-testid": "preview-content"}).text.strip() == "Coucou"
         )
 
+    def test_carte_config_sets_is_carte(self, get_carte_config_response_and_soup):
+        """CarteConfigView always sets is_carte=True in context."""
+        carte_config = CarteConfigFactory()
+        response, _ = get_carte_config_response_and_soup(carte_config.slug)
+        assert response.context["is_carte"] is True
+
+    def test_carte_config_does_not_set_is_formulaire(
+        self, get_carte_config_response_and_soup
+    ):
+        """CarteConfigView never sets is_formulaire in context."""
+        carte_config = CarteConfigFactory()
+        response, _ = get_carte_config_response_and_soup(carte_config.slug)
+        assert response.context.get("is_formulaire") is not True
+
     def test_cyclevia_regresion(self, get_carte_config_response_and_soup):
         """A regression introduced by adding the CarteConfig as a wagtail block
         caused the Cyclevia CarteConfig to fail after a search, because it does

@@ -2,6 +2,19 @@ import pytest
 
 
 @pytest.mark.django_db
+class TestFormulaireContext:
+    def test_formulaire_sets_is_formulaire(self, client):
+        """FormulaireSearchActeursView always sets is_formulaire=True in context."""
+        response = client.get("/formulaire")
+        assert response.context["is_formulaire"] is True
+
+    def test_formulaire_sets_is_carte_false(self, client):
+        """FormulaireSearchActeursView always sets is_carte=False in context."""
+        response = client.get("/formulaire")
+        assert response.context["is_carte"] is False
+
+
+@pytest.mark.django_db
 class TestFormulaire:
     def test_common_routes_for_200(self, client):
         """Here are some common routes used in the Formulaire that
