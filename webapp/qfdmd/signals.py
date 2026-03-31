@@ -4,10 +4,12 @@ from core.notion import ContactFormData, create_new_row_in_notion_table
 from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from modelsearch.index import insert_or_update_object
 from pydantic import ValidationError
-from qfdmd.models import FormPageValidationSettings
+from qfdmd.models import FormPageValidationSettings, ProduitPage
 from sites_conformes.forms.models import FormPage
 from wagtail.contrib.forms.models import FormSubmission
+from wagtail.signals import page_published
 
 # Warning : this could change if Sites Faciles creates their
 # own form submission class.
@@ -19,6 +21,24 @@ from wagtail.contrib.forms.models import FormSubmission
 submission_class = FormSubmission
 
 logger = logging.getLogger(__name__)
+
+
+@receiver(page_published, sender=ProduitPage)
+def index_produit_page_search_term(sender, instance, **kwargs):
+    """
+    Re-index the ProduitPageSearchTerm when a ProduitPage is published.
+
+    The search index is updated here (rather than relying solely on post_save)
+    because Wagtail drafts call save() on the revision without publishing,
+    and get_indexed_objects excludes terms whose page is not live.
+    Triggering indexing on page_published ensures the term becomes searchable
+    as soon as the page goes live.
+    """
+    try:
+        search_term = instance.produit_page_search_term
+    except instance.__class__.produit_page_search_term.RelatedObjectDoesNotExist:
+        return
+    insert_or_update_object(search_term)
 
 
 @receiver(post_save, sender=submission_class)
