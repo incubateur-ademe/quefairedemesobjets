@@ -1,19 +1,17 @@
 import logging
 import re
 from datetime import datetime
+from typing import Protocol
 
+from core.models.mixin import TimestampedModel
+from data.models.change import SuggestionChange
 from django.contrib.admin.utils import quote
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields import ArrayField
-from django.db.models import BooleanField, Count, ExpressionWrapper, Q
+from django.db.models import BooleanField, CheckConstraint, Count, ExpressionWrapper, Q
 from django.template.loader import render_to_string
 from django.urls import reverse
 from more_itertools import first
-
-from core.models.mixin import TimestampedModel
-from data.models.apply_models.abstract_apply_model import AbstractApplyModel
-from data.models.apply_models.source_apply_model import SourceApplyModel
-from data.models.change import SuggestionChange
 from qfdmo.models.acteur import (
     Acteur,
     ActeurService,
@@ -438,7 +436,41 @@ class SuggestionGroupeManager(models.Manager):
         return self.get_queryset().with_has_parent()
 
 
-class SuggestionGroupe(TimestampedModel):
+class _HasOptionalActeurFks(Protocol):
+    """
+    Shared Foreign keys between SuggestionGroupe and SuggestionUnitaire
+    """
+
+    acteur: Acteur | None
+    revision_acteur: RevisionActeur | None
+    parent_revision_acteur: RevisionActeur | None
+
+
+class SuggestionActeurRelationsMixin:
+    def get_acteur_or_none(self: _HasOptionalActeurFks) -> Acteur | None:
+        try:
+            return self.acteur
+        except Acteur.DoesNotExist:
+            return None
+
+    def get_revision_acteur_or_none(
+        self: _HasOptionalActeurFks,
+    ) -> RevisionActeur | None:
+        try:
+            return self.revision_acteur
+        except RevisionActeur.DoesNotExist:
+            return None
+
+    def get_parent_revision_acteur_or_none(
+        self: _HasOptionalActeurFks,
+    ) -> RevisionActeur | None:
+        try:
+            return self.parent_revision_acteur
+        except RevisionActeur.DoesNotExist:
+            return None
+
+
+class SuggestionGroupe(TimestampedModel, SuggestionActeurRelationsMixin):
     class Meta:
         verbose_name = "2️⃣ ⏳ ⚠️ Suggestion Groupe - Livraison prochainement"
         verbose_name_plural = "2️⃣ ⏳ ⚠️ Suggestions Groupes - Livraison prochainement"
@@ -492,24 +524,6 @@ class SuggestionGroupe(TimestampedModel):
         verbose_name="Metadata de la cohorte, données statistiques",
     )
 
-    def get_acteur_or_none(self) -> Acteur | None:
-        try:
-            return self.acteur
-        except Acteur.DoesNotExist:
-            return None
-
-    def get_revision_acteur_or_none(self) -> RevisionActeur | None:
-        try:
-            return self.revision_acteur
-        except RevisionActeur.DoesNotExist:
-            return None
-
-    def get_parent_revision_acteur_or_none(self) -> RevisionActeur | None:
-        try:
-            return self.parent_revision_acteur
-        except RevisionActeur.DoesNotExist:
-            return None
-
     def __str__(self) -> str:
         libelle = self.suggestion_cohorte.identifiant_action
         if self.acteur:
@@ -550,97 +564,19 @@ class SuggestionGroupe(TimestampedModel):
             "",
         )
 
-    def _get_apply_models(self) -> list[AbstractApplyModel]:
-        if self.suggestion_cohorte.type_action in [
+    def apply(self):
+        from data.models.suggestions.enrich_multi import SuggestionGroupeTypeEnrichMulti
+        from data.models.suggestions.source import SuggestionGroupeTypeSource
+
+        type_action = self.suggestion_cohorte.type_action
+        if type_action in [
             SuggestionAction.SOURCE_AJOUT,
             SuggestionAction.SOURCE_MODIFICATION,
             SuggestionAction.SOURCE_SUPPRESSION,
         ]:
-            apply_models = []
-            # get the suggestion_unitaires on Acteur model
-            acteur_suggestion_unitaires = self.suggestion_unitaires.filter(
-                suggestion_modele="Acteur"
-            ).all()
-            if not acteur_suggestion_unitaires.exists():
-                raise ValueError("No acteur suggestion unitaires found")
-            identifiant_unique = (
-                self.acteur_id
-                or self.get_identifiant_unique_from_suggestion_unitaires("Acteur")
-            )
-            apply_models.append(
-                SourceApplyModel(
-                    identifiant_unique=identifiant_unique,
-                    order=0,
-                    acteur_model=Acteur,
-                    data={
-                        champ: valeur
-                        for suggestion_unitaire in acteur_suggestion_unitaires
-                        for champ, valeur in zip(
-                            suggestion_unitaire.champs, suggestion_unitaire.valeurs
-                        )
-                    },
-                )
-            )
-
-            # get the suggestion_unitaires on RevisionActeur model
-            if revision_acteur_suggestion_unitaires := self.suggestion_unitaires.filter(
-                suggestion_modele="RevisionActeur"
-            ).all():
-                identifiant_unique = (
-                    self.revision_acteur_id
-                    or self.get_identifiant_unique_from_suggestion_unitaires(
-                        "RevisionActeur"
-                    )
-                    or identifiant_unique
-                )
-                apply_models.append(
-                    SourceApplyModel(
-                        identifiant_unique=identifiant_unique,
-                        order=1,
-                        acteur_model=RevisionActeur,
-                        data={
-                            champ: valeur
-                            for suggestion_unitaire in (
-                                revision_acteur_suggestion_unitaires
-                            )
-                            for champ, valeur in zip(
-                                suggestion_unitaire.champs, suggestion_unitaire.valeurs
-                            )
-                        },
-                    )
-                )
-
-            # get the suggestion_unitaires on RevisionActeur model
-            if parent_revision_acteur_suggestion_unitaires := (
-                self.suggestion_unitaires.filter(
-                    suggestion_modele="ParentRevisionActeur"
-                ).all()
-            ):
-                identifiant_unique = self.parent_revision_acteur_id
-                apply_models.append(
-                    SourceApplyModel(
-                        identifiant_unique=identifiant_unique,
-                        order=1,
-                        acteur_model=RevisionActeur,
-                        data={
-                            champ: valeur
-                            for suggestion_unitaire in (
-                                parent_revision_acteur_suggestion_unitaires
-                            )
-                            for champ, valeur in zip(
-                                suggestion_unitaire.champs, suggestion_unitaire.valeurs
-                            )
-                        },
-                    )
-                )
-
-            return apply_models
-        return []
-
-    def apply(self):
-        apply_models = self._get_apply_models()
-        for apply_model in sorted(apply_models, key=lambda x: x.order):
-            apply_model.apply()
+            SuggestionGroupeTypeSource.from_suggestion_groupe(self).apply()
+        elif type_action == SuggestionAction.CRAWL_URLS:
+            SuggestionGroupeTypeEnrichMulti.from_suggestion_groupe(self).apply()
 
     def suggestion_acteur_has_parent(self) -> bool:
         return (
@@ -655,10 +591,26 @@ class SuggestionGroupe(TimestampedModel):
         )
 
 
-class SuggestionUnitaire(TimestampedModel):
+class SuggestionUnitaire(TimestampedModel, SuggestionActeurRelationsMixin):
     class Meta:
         verbose_name = "3️⃣ ⏳ ⚠️ Suggestion Unitaire - Livraison prochainement"
         verbose_name_plural = "3️⃣ ⏳ ⚠️ Suggestions Unitaires - Livraison prochainement"
+        constraints = [
+            CheckConstraint(
+                condition=~Q(
+                    suggestion_modele="RevisionActeur",
+                    revision_acteur_id__isnull=True,
+                ),
+                name="data_su_revision_acteur_if_modele_revision_acteur",
+            ),
+            CheckConstraint(
+                condition=~Q(
+                    suggestion_modele="ParentRevisionActeur",
+                    parent_revision_acteur_id__isnull=True,
+                ),
+                name="data_su_parent_revision_acteur_if_modele_parent_revision_acteur",
+            ),
+        ]
 
     id = models.AutoField(primary_key=True)
     suggestion_groupe = models.ForeignKey(

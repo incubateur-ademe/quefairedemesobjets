@@ -9,7 +9,7 @@ from data.models.suggestion import (
     SuggestionStatut,
     SuggestionUnitaire,
 )
-from data.views import get_context_from_suggestion_groupe_type_source
+from data.views import get_context_from_suggestion_groupe
 from django.contrib import admin, messages
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
@@ -376,9 +376,7 @@ class SuggestionGroupeAdmin(
 
     def groupe_de_suggestions(self, obj):
         template_name = "data/_partials/suggestion_groupe_details.html"
-        return render_to_string(
-            template_name, get_context_from_suggestion_groupe_type_source(obj)
-        )
+        return render_to_string(template_name, get_context_from_suggestion_groupe(obj))
 
 
 @admin.register(SuggestionUnitaire)

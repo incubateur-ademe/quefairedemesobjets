@@ -35,6 +35,7 @@ def crawl_urls_suggest_crawl_diff_other_wrapper(ti, params, dag, run_id) -> None
         dag_display_name=dag.dag_display_name,
         run_id=run_id,
         dry_run=params.get("dry_run", True),
+        use_legacy_suggestions=params.get("use_legacy_suggestions", True),
     )
 
 

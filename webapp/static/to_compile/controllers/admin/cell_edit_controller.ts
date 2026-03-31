@@ -8,6 +8,7 @@ export default class extends Controller<HTMLElement> {
     updateUrl: String,
     replaceText: String,
     fieldsGroups: { type: Array, default: [] },
+    identifiantUnique: String,
   }
 
   declare readonly fieldValue: string
@@ -15,6 +16,7 @@ export default class extends Controller<HTMLElement> {
   declare readonly updateUrlValue: string
   declare readonly replaceTextValue: string
   declare readonly fieldsGroupsValue: Array<string[]>
+  declare readonly identifiantUniqueValue: string
 
   save() {
     const value = this.element.textContent
@@ -24,6 +26,8 @@ export default class extends Controller<HTMLElement> {
       this.suggestionModeleValue,
       { [this.fieldValue]: value },
       this.fieldsGroupsValue,
+      "",
+      this.identifiantUniqueValue,
     )
   }
 

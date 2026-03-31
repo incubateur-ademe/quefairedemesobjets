@@ -1,3 +1,4 @@
+from abc import ABC
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict
@@ -36,12 +37,25 @@ class CellField(BaseModel):
     error: str | None = None
 
 
-class CellContent(BaseModel):
+class BaseCellContent(BaseModel, ABC):
+    model_config = ConfigDict(frozen=True)
+
+    column_key: str
+    cell_type: str
+
+
+class CellContent(BaseCellContent):
+    """A single table cell (<td>)."""
+
+    html_content: str = ""
+    cell_type: Literal["html"] = "html"
+
+
+class CellFieldsContent(BaseCellContent):
     """A single table cell (<td>)."""
 
     model_config = ConfigDict(frozen=True)
 
-    column_key: str
     cell_type: Literal["display", "action", "editable"]
     fields: list[CellField] = []
     enabled: bool = True
@@ -69,7 +83,7 @@ class TableRow(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     label: str
-    cells: list[CellContent]
+    cells: list[CellFieldsContent | CellContent]
 
 
 class ComparisonTable(BaseModel):

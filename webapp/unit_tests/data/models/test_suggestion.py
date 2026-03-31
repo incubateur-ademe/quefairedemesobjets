@@ -281,18 +281,13 @@ class TestSuggestionGroupeApply:
         revision_acteur.refresh_from_db()
         assert revision_acteur.nom == "Nouveau nom Revision"
 
-    def test_apply_returns_empty_list_for_non_source_actions(self):
+    def test_apply_does_nothing_for_non_source_actions(self):
         """Test that apply() does nothing for actions that are not SOURCE_*"""
         suggestion_groupe = SuggestionGroupeFactory(
             suggestion_cohorte=SuggestionCohorteFactory(
                 type_action=SuggestionAction.CLUSTERING,
             ),
         )
-
-        # apply() should not raise an error but do nothing
-        # because _get_apply_models() returns an empty list
-        apply_models = suggestion_groupe._get_apply_models()
-        assert apply_models == []
 
         # apply() should not raise an error but do nothing
         suggestion_groupe.apply()
