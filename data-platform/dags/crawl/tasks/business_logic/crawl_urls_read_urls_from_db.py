@@ -25,7 +25,7 @@ def crawl_urls_read_urls_from_db(limit: int | None = None) -> pd.DataFrame:
     from qfdmo.models import ActeurStatus, VueActeur
 
     results = (
-        VueActeur.objects.filter(est_dans_opendata=True, est_dans_carte=True)
+        VueActeur.objects.get_visible_acteurs()
         .filter(Q(url__isnull=False) & ~Q(url__exact=""))
         .filter(~Q(url__exact=EMPTY_ACTEUR_FIELD))
         .filter(statut=ActeurStatus.ACTIF)

@@ -1,6 +1,7 @@
 from django.contrib.gis.geos import Point
 
 
+# TODO : to check if we can type this dict `acteur_data` with Pydantic
 def prepare_acteur_data_with_location(acteur_data: dict) -> dict:
     """Convert latitude and longitude to location from a dictionary"""
     result = acteur_data.copy()
