@@ -1,9 +1,13 @@
 name: Setup Backend Environment
-description: Install uv and Python dependencies
+description: Install uv and Python dependencies for a project directory (webapp or data-platform)
 
 inputs:
+  working-directory:
+    description: "Directory that contains pyproject.toml and uv.lock (e.g. webapp, data-platform)"
+    required: false
+    default: "webapp"
   uv-groups:
-    description: 'UV sync groups (e.g., "--group dev")'
+    description: 'Arguments passed to uv sync (e.g. "--group dev")'
     required: false
     default: "--group dev"
 
@@ -19,10 +23,11 @@ runs:
       id: cache-venv
       uses: actions/cache@v4
       with:
-        path: ./.venv
-        key: venv-${{ inputs.uv-groups }}-${{ hashFiles('uv.lock') }}
+        path: ${{ inputs.working-directory }}/.venv
+        key: venv-${{ inputs.working-directory }}-${{ inputs.uv-groups }}-${{ hashFiles(format('{0}/uv.lock', inputs.working-directory)) }}
 
     - name: Install Python dependencies
       if: steps.cache-venv.outputs.cache-hit != 'true'
       shell: bash
+      working-directory: ${{ inputs.working-directory }}
       run: uv sync ${{ inputs.uv-groups }}

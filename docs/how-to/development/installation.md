@@ -132,21 +132,20 @@ Pour lancer uniquement les services utiliser par la webapp
 docker compose  --profile lvao up -d
 ```
 
-Installation des dépendances python et javascript
+Installation des dépendances Python et JavaScript (depuis le dossier **`webapp/`**) :
 
 ```sh
-uv env activate
-uv sync --all-packages
+uv sync
 npm ci
 ```
 
-Migration
+Migrations Django (toujours depuis **`webapp/`**) :
 
 ```sh
-python manage.py migrate
+uv run python manage.py migrate
 ```
 
-Créer la table de cache
+Créer la table de cache (depuis **`webapp/`**) :
 
 ```sh
 make createcachetable
@@ -154,7 +153,7 @@ make createcachetable
 
 Pour peupler la base de données `webapp` le plus simple est de copier la base de données de production, cf. [Copier la base de données de prod en local](useful_command.md#copier-la-base-de-donnees-de-prod-en-local)
 
-Sinon, utiliser la command de peuplement ci-dessous
+Sinon, utiliser la commande de peuplement ci-dessous (depuis **`webapp/`**) :
 
 ```sh
 make seed-database
@@ -162,10 +161,10 @@ make seed-database
 
 ### Créer un superutilisatteur
 
-Si vous n'en avez pas déjà un
+Si vous n'en avez pas déjà un (depuis **`webapp/`**) :
 
 ```sh
-python manage.py createsuperuser
+uv run python manage.py createsuperuser
 ```
 
 ### Lancement
@@ -179,20 +178,20 @@ Une fois les processus démarrés, le serveur web sera accessible à l'adresse [
 
 ### Tester l'application
 
-Test python avec pytest
+Tests Python (pytest), depuis le dossier **`webapp/`** :
 
 ```sh
 make unit-test
 make integration-test
 ```
 
-Test Js unitaire (DEPRECATED ?)
+Tests JS unitaires
 
 ```sh
 npm run test
 ```
 
-End to end avec Playwright
+End to end avec Playwright (depuis **`webapp/`**) :
 
 ```sh
 make init-playwright
@@ -200,7 +199,7 @@ make e2e-test
 make e2e-test-ui
 ```
 
-Test d'accessibilité
+Test d'accessibilité (depuis **`webapp/`**) :
 
 ```sh
 make a11y
@@ -239,8 +238,9 @@ accéder à l'interface d'Airflow en local [http://localhost:8080](http://localh
 
 ### Tester la plateforme Data
 
-Test python avec pytest
+Tests Python des DAGs (pytest), depuis le dossier **`data-platform/`** :
 
 ```sh
+uv sync
 make dags-test
 ```

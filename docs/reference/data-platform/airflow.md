@@ -25,6 +25,14 @@ This structure is mainly used when (re)organising files for source‑ingestion D
 
 Tests follow the same structure as `data-platform/dags`, under `data-platform/dags/tests`.
 
+Run them from **`data-platform/`** (requires `uv sync`):
+
+```sh
+make dags-test
+```
+
+Pytest uses `core.test_settings` (see `data-platform/pyproject.toml`).
+
 ## Follow the rules
 
 for each dags, try to follow the steps and rules

@@ -20,6 +20,16 @@ HONCHO := uv run honcho
 sync:
 	uv sync
 
+.PHONY: check-format
+check-format:
+	uv run black --check --diff .
+	uv run ruff check .
+
+.PHONY: format
+format:
+	uv run ruff check . --fix
+	uv run black --exclude=.venv .
+
 .PHONY: init-playwright
 init-playwright:
 	npx playwright install --with-deps
