@@ -3,8 +3,9 @@
 {% block wrapper_attrs %}id="bonus"{% endblock %}
 
 {% block title %}
-{# TODO : icone #}
-<span class="fr-icon qf-mr-1w fr-icon-percent-line"></span>{{ bonus_reparation }}
+<span class="qf-flex qf-gap-1v">
+{% include "ui/components/icons/bonus.html" %} {{ bonus_reparation }}
+</span>
 {% endblock title %}
 
 {% block content %}
