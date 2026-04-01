@@ -44,6 +44,10 @@ dependencies = [
     "wagtailmenus>=4.0.6",
 ]
 
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [tool.hatch.build.targets.wheel]
 packages = ["core", "data", "dsfr_hacks", "infotri", "qfdmd", "qfdmo", "search", "stats"]
 
@@ -146,7 +150,7 @@ docs = [
 ]
 
 [tool.uv]
-package = false
+package = true
 
 [tool.uv.sources]
 django-dsfr = { git = "https://github.com/fabienheureux/django-dsfr", rev = "d26ab6f77014b04c43c4c54f694111179d1de0ef" } # pragma: allowlist secret

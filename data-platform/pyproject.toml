@@ -20,12 +20,5 @@ dependencies = [
     "apache-airflow-providers-amazon>=9.4.0",
 ]
 
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
 [tool.uv]
 package = false
-
-[tool.uv.sources]
-webapp = { workspace = true }
