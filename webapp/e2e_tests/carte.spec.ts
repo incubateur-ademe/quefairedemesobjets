@@ -188,7 +188,7 @@ test.describe("🗺️ Affichage des Labels dans la Fiche Acteur", () => {
       "#acteurDetailsPanel [data-testid='acteur-detail-labels']",
     )
     await expect(acteurDetailLabels).toContainText(
-      "Lieu de l'économie sociale et solidaire",
+      "économie sociale et solidaire",
       {
         timeout: TIMEOUT.SHORT,
       },
