@@ -51,7 +51,7 @@ jobs:
       - name: Setup backend environment
         uses: ./.github/actions/setup-backend
         with:
-          uv-groups: "--all-packages --group dev"
+          uv-groups: "--group dev"
 
       - name: Run tests
         run: make -C webapp ${{ inputs.make-target }}

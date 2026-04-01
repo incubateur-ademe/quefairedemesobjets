@@ -1,4 +1,11 @@
 # flake8: noqa: F405, F403
+import os
+
+# Tests (webapp + data-platform) must not require django-debug-toolbar /
+# django-browser-reload. If DEBUG=True comes from the environment, core.settings
+# would register those apps before this module loads; force DEBUG off first.
+os.environ["DEBUG"] = "false"
+
 from core.settings import *
 
 # Add test hosts to ALLOWED_HOSTS for integration tests

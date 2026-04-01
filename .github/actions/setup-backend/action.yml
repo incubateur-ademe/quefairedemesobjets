@@ -3,9 +3,9 @@ description: Install uv and Python dependencies
 
 inputs:
   uv-groups:
-    description: 'UV sync groups (e.g., "--all-packages --group dev")'
+    description: 'UV sync groups (e.g., "--group dev")'
     required: false
-    default: "--all-packages --group dev"
+    default: "--group dev"
 
 runs:
   using: composite

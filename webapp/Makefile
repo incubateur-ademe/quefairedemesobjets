@@ -16,6 +16,10 @@ BASE_DOMAIN := quefairedemesdechets.ademe.local
 FIXTURES_OPTIONS := --indent 4 --natural-foreign --natural-primary
 HONCHO := uv run honcho
 
+.PHONY: sync
+sync:
+	uv sync
+
 .PHONY: init-playwright
 init-playwright:
 	npx playwright install --with-deps
@@ -121,11 +125,6 @@ unit-test:
 integration-test:
 	$(PYTEST) ./integration_tests
 
-.PHONY: dags-test
-dags-test:
-	$(PYTEST) ../data-platform/dags/tests
-
-
 .PHONY: prepare-e2e-test
 prepare-e2e-test:
 	make migrate
@@ -157,14 +156,12 @@ js-test:
 backend-test:
 	@make unit-test
 	@make integration-test
-	@make dags-test
 
 .PHONY: test
 test:
 	@make unit-test
 	@make e2e-test
 	@make integration-test
-	@make dags-test
 
 # DSFR
 .PHONY: extract-dsfr

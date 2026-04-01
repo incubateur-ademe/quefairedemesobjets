@@ -138,14 +138,6 @@ dev = [
     "wagtail-factories>=4.2.1,<5",
     "ruff>=0.12.10,<0.15",
     "djade>=1.6.0,<2",
-    "dslr>=0.6.0,<0.7",
-]
-docs = [
-    "myst-parser>=4.0.0,<5",
-    "sphinx>=8.1.3,<9",
-    "furo>=2025.7.19,<2026",
-    "detect-secrets>=1.5.0,<2",
-    "sphinxcontrib-mermaid>=1.0.0,<3",
 ]
 
 [tool.uv]
