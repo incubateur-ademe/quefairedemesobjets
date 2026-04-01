@@ -6,13 +6,18 @@ map $http_cookie $no_cache {
     "~*logged_in=.*" 1; # Disable caching if 'logged_in' is set
 }
 
+map $host $is_valid_host {
+    default                                          0;
+    "<%= ENV["BASE_DOMAIN"] %>"                      1;
+    "<%= ENV["LEGACY_SITE_VITRINE_DOMAIN"] %>"       1;
+}
 
 server {
     listen <%= ENV["PORT"] %>;
     server_name _;
 
-    # Redirect if host is different from the BASE_URL host
-    if ($host != "<%= ENV["BASE_DOMAIN"] %>") {
+    # Redirect if host is not one of the allowed domains
+    if ($is_valid_host = 0) {
         return 301 https://<%= ENV["BASE_DOMAIN"] %>$request_uri;
     }
 
