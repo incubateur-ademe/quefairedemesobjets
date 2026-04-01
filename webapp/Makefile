@@ -20,13 +20,6 @@ HONCHO := uv run honcho
 init-playwright:
 	npx playwright install --with-deps
 
-.PHONY: run-django
-run-django:
-	$(HONCHO) start -f Procfile.django.dev
-
-run-all:
-	$(HONCHO) start -f Procfile.all.dev
-
 # Local django operations
 .PHONY: runserver
 runserver:

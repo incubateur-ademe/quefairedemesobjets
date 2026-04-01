@@ -23,7 +23,7 @@ repos:
       # Mirror https://github.com/astral-sh/ruff-pre-commit/blob/main/.pre-commit-hooks.yaml
       - id: ruff
         name: ruff (lint)
-        entry: uv run ruff check --force-exclude
+        entry: uvx run ruff check --force-exclude
         language: python
         types: [python]
         args: [--fix]
@@ -31,14 +31,14 @@ repos:
       # Mirrors https://github.com/psf/black/blob/main/.pre-commit-hooks.yaml#L6
       - id: black
         name: black (format)
-        entry: uv run black
+        entry: uvx run black
         language: python
         types: [python]
       # Djade hook
       # Mirrors https://github.com/adamchainz/djade-pre-commit/blob/main/.pre-commit-hooks.yaml
       - id: djade
         name: djade
-        entry: uv run djade
+        entry: uvx run djade
         language: python
         types: [python]
         args: [--target-version, "5.1"]
