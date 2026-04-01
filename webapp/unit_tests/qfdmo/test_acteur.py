@@ -5,7 +5,6 @@ import pytest
 from django.contrib.gis.geos import Point
 from django.forms import ValidationError, model_to_dict
 from factory.faker import Faker
-
 from qfdmo.models import Acteur, RevisionActeur, RevisionPropositionService
 from qfdmo.models.acteur import (
     ActeurReprise,
@@ -894,3 +893,25 @@ class TestFinalActeurManagerGetActiveParents:
         result = model.objects.get_active_parents()
 
         assert result.count() == 0
+
+
+@pytest.mark.django_db
+class TestVueActeurManagerGetActiveParents:
+    def test_get_visible_acteurs(self):
+        vue_acteur_both = VueActeurFactory(est_dans_carte=True, est_dans_opendata=True)
+        vue_acteur_carte = VueActeurFactory(
+            est_dans_carte=True, est_dans_opendata=False
+        )
+        vue_acteur_opendata = VueActeurFactory(
+            est_dans_carte=False, est_dans_opendata=True
+        )
+        vue_acteur_none = VueActeurFactory(
+            est_dans_carte=False, est_dans_opendata=False
+        )
+
+        visible_acteurs = VueActeur.objects.get_visible_acteurs()
+
+        assert vue_acteur_both in visible_acteurs
+        assert vue_acteur_carte in visible_acteurs
+        assert vue_acteur_opendata in visible_acteurs
+        assert vue_acteur_none not in visible_acteurs

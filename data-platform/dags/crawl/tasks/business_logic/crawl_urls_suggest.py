@@ -127,30 +127,118 @@ def crawl_urls_suggestions_to_db(
         ).save()
 
 
+def crawl_urls_suggestion_groupes_to_db(
+    metadata: dict,
+    df: pd.DataFrame,
+    identifiant_action: str,
+    identifiant_execution: str,
+) -> int:
+    """Writing suggestion_groupes to DB"""
+    from data.models.suggestion import (
+        SuggestionAction,
+        SuggestionCohorte,
+        SuggestionGroupe,
+        SuggestionStatut,
+        SuggestionUnitaire,
+    )
+    from qfdmo.models.acteur import Acteur, RevisionActeur
+
+    cohorte = SuggestionCohorte(
+        identifiant_action=identifiant_action,
+        identifiant_execution=identifiant_execution,
+        type_action=SuggestionAction.CRAWL_URLS,
+        statut=SuggestionStatut.AVALIDER,
+        metadata=metadata,
+    )
+    cohorte.save()
+
+    nb_suggestion_groupes = 0
+    for _, row in df.iterrows():
+        acteurs = row[COLS.ACTEURS]
+        suggestion_groupe = SuggestionGroupe.objects.create(
+            suggestion_cohorte=cohorte,
+            statut=SuggestionStatut.AVALIDER,
+            contexte={
+                LABEL_URL_ORIGINE: row[COLS.URL_ORIGIN],
+                LABEL_URL_PROPOSEE: row[COLS.SUGGEST_VALUE],
+            },
+        )
+        nb_suggestion_groupes += 1
+        for acteur in acteurs:
+            identifiant_unique = acteur[COLS.ID]
+            est_parent = acteur[COLS.EST_PARENT]
+            parent_revision = None
+            suggestion_modele = "RevisionActeur"
+            if est_parent:
+                parent_revision = RevisionActeur.objects.get(
+                    identifiant_unique=identifiant_unique
+                )
+                suggestion_modele = "ParentRevisionActeur"
+            else:
+                # Check if the acteur exists
+                Acteur.objects.get(identifiant_unique=identifiant_unique)
+
+            SuggestionUnitaire.objects.create(
+                suggestion_groupe=suggestion_groupe,
+                statut=SuggestionStatut.AVALIDER,
+                acteur_id=(
+                    identifiant_unique if suggestion_modele == "Acteur" else None
+                ),
+                revision_acteur_id=(
+                    identifiant_unique
+                    if suggestion_modele == "RevisionActeur"
+                    else None
+                ),
+                parent_revision_acteur=parent_revision,
+                suggestion_modele=suggestion_modele,
+                champs=[COLS.URL_DB],
+                valeurs=[row[COLS.SUGGEST_VALUE]],
+            )
+    return nb_suggestion_groupes
+
+
 def crawl_urls_suggest(
-    df: pd.DataFrame, dag_display_name: str, run_id: str, dry_run: bool = True
+    df: pd.DataFrame,
+    dag_display_name: str,
+    run_id: str,
+    dry_run: bool = True,
+    use_legacy_suggestions: bool = True,
 ) -> int:
     """Main function to generate suggestions for URLs"""
     if df_none_or_empty(df):
         raise ValueError("DF vide ou None on devrait pas être là")
 
     cohort = df_col_assert_get_unique(df, COLS.COHORT)
+    identifiant_action = f"{dag_display_name} - {cohort}"
+    identifiant_execution = f"{run_id}"
 
     log.preview_df_as_markdown("df d'entrée", df)
-
     metadata = suggestions_metadata(df)
-    suggestions = suggestions_prepare(df)
-    written_to_db_count = 0
+    logger.info(f"{metadata=}")
 
-    logger.info(log.banner_string("✍️ Ecritures en DB"))
-    if dry_run:
-        logger.info(f"{dry_run=}, on ne fait pas")
+    if use_legacy_suggestions:
+        logger.warning("use_legacy_suggestions=True")
+        suggestions = suggestions_prepare(df)
+        written_to_db_count = 0
+
+        logger.info(log.banner_string("✍️ Ecritures en DB"))
+        if dry_run:
+            logger.info(f"{dry_run=}, on ne fait pas")
+        else:
+            crawl_urls_suggestions_to_db(
+                metadata=metadata,
+                suggestions=suggestions,
+                identifiant_action=identifiant_action,
+                identifiant_execution=identifiant_execution,
+            )
+            written_to_db_count = len(suggestions)
+        return written_to_db_count
     else:
-        crawl_urls_suggestions_to_db(
+        logger.warning("use_legacy_suggestions=False")
+        nb_suggestion_groupes = crawl_urls_suggestion_groupes_to_db(
             metadata=metadata,
-            suggestions=suggestions,
-            identifiant_action=f"{dag_display_name} - {cohort}",
-            identifiant_execution=f"{run_id}",
+            df=df,
+            identifiant_action=identifiant_action,
+            identifiant_execution=identifiant_execution,
         )
-        written_to_db_count = len(suggestions)
-    return written_to_db_count
+        return nb_suggestion_groupes

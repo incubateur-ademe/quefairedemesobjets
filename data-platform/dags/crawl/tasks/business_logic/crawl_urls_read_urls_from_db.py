@@ -22,17 +22,18 @@ def crawl_urls_read_urls_from_db(limit: int | None = None) -> pd.DataFrame:
     from core.models.constants import EMPTY_ACTEUR_FIELD
 
     logger.info(f"{limit=}")
-    from qfdmo.models import ActeurStatus, DisplayedActeur
+    from qfdmo.models import ActeurStatus, VueActeur
 
     results = (
-        DisplayedActeur.objects.filter(Q(url__isnull=False) & ~Q(url__exact=""))
+        VueActeur.objects.get_visible_acteurs()
+        .filter(Q(url__isnull=False) & ~Q(url__exact=""))
         .filter(~Q(url__exact=EMPTY_ACTEUR_FIELD))
         .filter(statut=ActeurStatus.ACTIF)
         # To help with lru caching DNS checks without
         # having to implement yet another level of grouping
         # (i.e. acteurs -> by URL -> by domain)
         .order_by("url")
-        .values("url", "identifiant_unique", "nom")
+        .values("url", "identifiant_unique", "nom", "est_parent")
     )
     if limit is not None:
         results = results[:limit]

@@ -1252,10 +1252,20 @@ class FinalActeur(BaseActeur):
     epci = models.ForeignKey(EPCI, on_delete=models.CASCADE, blank=True, null=True)
 
 
+class VueActeurManager(FinalActeurManager, models.Manager):
+
+    def get_visible_acteurs(self):
+        return self.get_queryset().filter(
+            Q(est_dans_carte=True) | Q(est_dans_opendata=True),
+        )
+
+
 class VueActeur(FinalActeur):
     class Meta:
         verbose_name = "ACTEUR de l'EC - Vue sur l'acteur"
         verbose_name_plural = "ACTEURS de l'EC - Vues sur tous les acteurs"
+
+    objects = VueActeurManager()
 
     parent = models.ForeignKey(
         "self",

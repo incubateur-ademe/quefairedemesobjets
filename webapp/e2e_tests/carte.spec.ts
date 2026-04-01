@@ -1,20 +1,17 @@
 import { expect } from "@playwright/test"
 import { test } from "./fixtures"
 import {
+  clickFirstClickableActeurMarker,
+  getIframe,
+  mockApiAdresse,
+  navigateTo,
   openAdvancedFilters,
-  searchDummyAdresse,
   searchForAuray,
   searchForAurayInIframe,
-  switchToListeMode,
   switchToCarteMode,
-  moveMap,
-  navigateTo,
-  searchAddress,
-  waitForLoadingComplete,
-  getIframe,
+  switchToListeMode,
   TIMEOUT,
-  clickFirstClickableActeurMarker,
-  mockApiAdresse,
+  waitForLoadingComplete,
 } from "./helpers"
 
 test.describe("🗺️ Filtres Avancés Carte", () => {
@@ -191,7 +188,7 @@ test.describe("🗺️ Affichage des Labels dans la Fiche Acteur", () => {
       "#acteurDetailsPanel [data-testid='acteur-detail-labels']",
     )
     await expect(acteurDetailLabels).toContainText(
-      "Enseigne de l'économie sociale et solidaire",
+      "Lieu de l'économie sociale et solidaire",
       {
         timeout: TIMEOUT.SHORT,
       },

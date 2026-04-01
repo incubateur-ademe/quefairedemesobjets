@@ -44,7 +44,11 @@
                     <tr>
                         <td>{{ row.label }}</td>
                         {% for cell in row.cells %}
-                            {% if cell.cell_type == "display" %}
+                            {% if cell.cell_type == "html" %}
+                                <td>
+                                    {{ cell.html_content|safe }}
+                                </td>
+                            {% elif cell.cell_type == "display" %}
                                 <td>
                                     {% for field in cell.fields %}
                                         {{ field.display_html|safe }}
@@ -94,83 +98,85 @@
         </table>
     </div>
 
-    <ul class="tabs">
-        <li {% if tab == "acteur" %}class="active"{% endif %}><a href="{{ suggestion_groupe.change_url }}?tab=acteur">Acteur affiché</a></li>
-        <li {% if tab == "localisation" %}class="active"{% endif %}><a href="{{ suggestion_groupe.change_url }}?tab=localisation">Localisation</a></li>
-        <li {% if tab == "annuaire_entreprise" %}class="active"{% endif %}><a href="{{ suggestion_groupe.change_url }}?tab=annuaire_entreprise">Annuaire entreprise</a></li>
-        <li ><a href="{{ suggestion_groupe.change_url }}">❌ Cacher les détails</a></li>
-    </ul>
+    {% if suggestion_groupe_type.display_tab %}
+        <ul class="tabs">
+            <li {% if tab == "acteur" %}class="active"{% endif %}><a href="{{ suggestion_groupe.change_url }}?tab=acteur">Acteur affiché</a></li>
+            <li {% if tab == "localisation" %}class="active"{% endif %}><a href="{{ suggestion_groupe.change_url }}?tab=localisation">Localisation</a></li>
+            <li {% if tab == "annuaire_entreprise" %}class="active"{% endif %}><a href="{{ suggestion_groupe.change_url }}?tab=annuaire_entreprise">Annuaire entreprise</a></li>
+            <li ><a href="{{ suggestion_groupe.change_url }}">❌ Cacher les détails</a></li>
+        </ul>
 
-    <div>
-        {% if tab == "acteur" %}
-            <div>
-                {% if uuid %}
-                    <iframe
-                        id="acteur-detail-iframe-{{ uuid }}"
-                        src="{% url 'qfdmo:acteur-detail' uuid %}?iframe=1"
-                        width="100%"
-                        height="600px"
-                        style="border: none; overflow: hidden;">
-                    </iframe>
-                    <script src="https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/4.3.6/iframeResizer.min.js" integrity="sha512-f0wd6UIvZbsjPNebGx+uMzHmg6KXr1jWvumJDYSEDmwYJYOptZ0dTka/wBJu7Tj80tnCYMKoKicqvZiIc9GJgw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> {# pragma: allowlist secret #}
-                    <script>
-                        (function() {
-                            const iframeId = 'acteur-detail-iframe-{{ uuid }}';
-                            const iframe = document.getElementById(iframeId);
-                            if (iframe && typeof iFrameResize !== 'undefined') {
-                                iframe.onload = function() {
-                                    iFrameResize({
-                                        log: false,
-                                        checkOrigin: false,
-                                        heightCalculationMethod: 'lowestElement'
-                                    }, '#' + iframeId);
-                                };
-                            }
-                        })();
-                    </script>
-                {% else %}
-                    <p>Aucun acteur affiché</p>
-                {% endif %}
-            </div>
-        {% elif tab == "localisation" %}
-            {% if localisation %}
-                <div
-                    data-controller="suggestion-map-update"
-                    data-suggestion-map-update-update-url-value="{% url 'data:suggestion_groupe' suggestion_groupe.id %}"
-                    data-suggestion-map-update-fields-groups-value="{{ fields_groups|tojson }}"
-                    data-action="map:markerDragged->suggestion-map-update#handleMarkerDragged"
-                >
-                <div
-                    class="
-                    qf-w-1/2
-                    qf-aspect-video
-                    qf-relative"
-                    data-controller="map"
-                    data-map-initial-zoom-value="3"
-                    data-map-theme-value="osm"
-                >
+        <div>
+            {% if tab == "acteur" %}
+                <div>
+                    {% if uuid %}
+                        <iframe
+                            id="acteur-detail-iframe-{{ uuid }}"
+                            src="{% url 'qfdmo:acteur-detail' uuid %}?iframe=1"
+                            width="100%"
+                            height="600px"
+                            style="border: none; overflow: hidden;">
+                        </iframe>
+                        <script src="https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/4.3.6/iframeResizer.min.js" integrity="sha512-f0wd6UIvZbsjPNebGx+uMzHmg6KXr1jWvumJDYSEDmwYJYOptZ0dTka/wBJu7Tj80tnCYMKoKicqvZiIc9GJgw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> {# pragma: allowlist secret #}
+                        <script>
+                            (function() {
+                                const iframeId = 'acteur-detail-iframe-{{ uuid }}';
+                                const iframe = document.getElementById(iframeId);
+                                if (iframe && typeof iFrameResize !== 'undefined') {
+                                    iframe.onload = function() {
+                                        iFrameResize({
+                                            log: false,
+                                            checkOrigin: false,
+                                            heightCalculationMethod: 'lowestElement'
+                                        }, '#' + iframeId);
+                                    };
+                                }
+                            })();
+                        </script>
+                    {% else %}
+                        <p>Aucun acteur affiché</p>
+                    {% endif %}
+                </div>
+            {% elif tab == "localisation" %}
+                {% if localisation %}
                     <div
-                        data-map-target="mapContainer"
-                        class="qf-inset-0 qf-h-full qf-relative qf-z-0"
+                        data-controller="suggestion-map-update"
+                        data-suggestion-map-update-update-url-value="{% url 'data:suggestion_groupe' suggestion_groupe.id %}"
+                        data-suggestion-map-update-fields-groups-value='[["latitude", "longitude"]]'
+                        data-action="map:markerDragged->suggestion-map-update#handleMarkerDragged"
                     >
-                        {% for point in localisation.points %}
-                            {% generic_location_pinpoint_tag point.key point.latitude point.longitude point.color point.draggable point.text %}
-                        {% endfor %}
+                    <div
+                        class="
+                        qf-w-1/2
+                        qf-aspect-video
+                        qf-relative"
+                        data-controller="map"
+                        data-map-initial-zoom-value="3"
+                        data-map-theme-value="osm"
+                    >
+                        <div
+                            data-map-target="mapContainer"
+                            class="qf-inset-0 qf-h-full qf-relative qf-z-0"
+                        >
+                            {% for point in localisation.points %}
+                                {% generic_location_pinpoint_tag point.key point.latitude point.longitude point.color point.draggable point.text %}
+                            {% endfor %}
+                        </div>
                     </div>
-                </div>
-                </div>
+                    </div>
 
-            {% else %}
-                <p>Aucune localisation disponible pour cet acteur.</p>
+                {% else %}
+                    <p>Aucune localisation disponible pour cet acteur.</p>
+                {% endif %}
+            {% elif tab == "annuaire_entreprise" %}
+                <div>
+                    <p>Annuaire entreprise : Coming Soon…</p>
+                    <p>Vérification si l'etablissement et l'entreprise existe dans l'annuaire entreprise, intéraction avec l'api d'annuaire entreprise ou une IA si tel n'est pas le cas</p>
+                    <p>Affichage d'une alerte dans la case au dessus des tab si l'etablissement ou l'entreprise n'existe pas dans l'annuaire entreprise</p>
+                    <p>Option IA : Recherche si l'acteur à déménagé ou si l'entreprise a été vendue mais qu'il y a toujours un établissement qui fait lamême chose à la même adresse et proposer des corrections si nécessaire</p>
+                </div>
             {% endif %}
-        {% elif tab == "annuaire_entreprise" %}
-            <div>
-                <p>Annuaire entreprise : Coming Soon…</p>
-                <p>Vérification si l'etablissement et l'entreprise existe dans l'annuaire entreprise, intéraction avec l'api d'annuaire entreprise ou une IA si tel n'est pas le cas</p>
-                <p>Affichage d'une alerte dans la case au dessus des tab si l'etablissement ou l'entreprise n'existe pas dans l'annuaire entreprise</p>
-                <p>Option IA : Recherche si l'acteur à déménagé ou si l'entreprise a été vendue mais qu'il y a toujours un établissement qui fait lamême chose à la même adresse et proposer des corrections si nécessaire</p>
-            </div>
-        {% endif %}
-    </div>
+        </div>
+    {% endif %}
 
 {% endblock suggestion_details %}
