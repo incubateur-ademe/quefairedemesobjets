@@ -356,6 +356,40 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
                 ).first()
                 context["uuid"] = displayed_acteur.uuid if displayed_acteur else None
 
+        if tab == "annuaire_entreprise":
+            entrees: list[dict] = []
+            seen: set[tuple[str, str]] = set()
+
+            def add_entree(label: str, type_: str, value: str | None) -> None:
+                if value and value.strip() and (type_, value) not in seen:
+                    entrees.append(
+                        {"label": label, "type": type_, "value": value.strip()}
+                    )
+                    seen.add((type_, value))
+
+            for label, a in [
+                ("Acteur actuel", acteur),
+                ("Révision acteur", revision_acteur),
+                ("Parent révision acteur", parent_revision_acteur),
+            ]:
+                if a:
+                    add_entree(label, "etablissement", getattr(a, "siret", None))
+                    add_entree(label, "unite_legale", getattr(a, "siren", None))
+
+            suggestion_unitaires = list(suggestion_groupe.suggestion_unitaires.all())
+            for modele, label in [
+                ("Acteur", "Proposition (Acteur)"),
+                ("RevisionActeur", "Proposition (Révision)"),
+                ("ParentRevisionActeur", "Proposition (Parent)"),
+            ]:
+                suggestions = _suggestion_unitaires_to_suggestion_source_model(
+                    suggestion_unitaires, modele
+                )
+                add_entree(label, "etablissement", suggestions.siret)
+                add_entree(label, "unite_legale", suggestions.siren)
+
+            context["annuaire_entrees"] = json.dumps(entrees)
+
         if tab != "localisation":
             return context
 
