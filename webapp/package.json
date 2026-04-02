@@ -61,12 +61,12 @@
     "@types/jest": "^30.0.0",
     "@types/lodash": "^4.17.23",
     "@types/node": "^25.5.0",
-    "@typescript-eslint/eslint-plugin": "^8.55.0",
+    "@typescript-eslint/eslint-plugin": "^8.57.2",
     "buffer": "^6.0.3",
-    "eslint": "^9.39.2",
-    "eslint-config-love": "^149.0.0",
+    "eslint": "^10.1.0",
+    "eslint-config-love": "^151.0.0",
     "eslint-plugin-import": "^2.32.0",
-    "eslint-plugin-n": "^17.23.2",
+    "eslint-plugin-n": "^17.24.0",
     "eslint-plugin-prettier": "^5.5.5",
     "eslint-plugin-promise": "^7.2.1",
     "jest": "^30.2.0",
@@ -81,7 +81,7 @@
     "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.54.0"
+    "typescript-eslint": "^8.57.2"
   },
   "optionalDependencies": {
     "@parcel/watcher-linux-x64-glibc": "^2.5.6"
