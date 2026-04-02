@@ -214,15 +214,13 @@ class Command(BaseCommand):
             self.stdout.write("\n7. Verifying changes...")
 
             # Verify migrations
-            cursor.execute(
-                """
+            cursor.execute("""
                 SELECT app, COUNT(*) as count
                 FROM django_migrations
                 WHERE app LIKE 'sites_conformes_%'
                 GROUP BY app
                 ORDER BY app;
-            """
-            )
+            """)
 
             results = cursor.fetchall()
             if results:
@@ -231,15 +229,13 @@ class Command(BaseCommand):
                     self.stdout.write(f"  - {app}: {count} migration(s)")
 
             # Verify content types
-            cursor.execute(
-                """
+            cursor.execute("""
                 SELECT app_label, COUNT(*) as count
                 FROM django_content_type
                 WHERE app_label LIKE 'sites_conformes_%'
                 GROUP BY app_label
                 ORDER BY app_label;
-            """
-            )
+            """)
 
             ct_results = cursor.fetchall()
             if ct_results:

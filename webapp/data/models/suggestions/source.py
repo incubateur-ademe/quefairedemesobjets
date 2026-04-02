@@ -334,11 +334,9 @@ def _get_ordered_fields_groups(
     fields_groups = list(set(all_suggestion_unitaires.keys()))
     ordered_fields = SuggestionSourceModel.get_ordered_fields()
     if any(fields not in ordered_fields for fields in fields_groups):
-        raise ValueError(
-            f"""fields in fields_groups are not in ORDERED_FIELDS:
+        raise ValueError(f"""fields in fields_groups are not in ORDERED_FIELDS:
                         {fields_groups=}
-                        {ordered_fields=}"""
-        )
+                        {ordered_fields=}""")
     return [fields for fields in ordered_fields if fields in fields_groups]
 
 

@@ -106,7 +106,7 @@ class SuggestionCohorteAdmin(DjangoQLSearchMixin, NotEditableMixin, admin.ModelA
         Override the Objetcs to delete while removing a SuggestionCohorte because
         in some cases, the list is huge and it is not possible to display it.
         """
-        (deletable_objects, model_count, perms_needed, protected) = (
+        deletable_objects, model_count, perms_needed, protected = (
             super().get_deleted_objects(objs, request)
         )
         display_warning = False

@@ -21,7 +21,10 @@ class Migration(migrations.Migration):
                     ("ENRICH_ACTEURS_RGPD", "🕵 Anonymisation RGPD"),
                     ("ENRICH_ACTEURS_VILLES_TYPO", "🏙️ Acteurs villes typographiques"),
                     ("ENRICH_ACTEURS_VILLES_NEW", "🏙️ Acteurs villes nouvelles"),
-                    ("ENRICH_ACTEURS_CP_TYPO", "🏙️ Acteurs codes postaux non conformes"),
+                    (
+                        "ENRICH_ACTEURS_CP_TYPO",
+                        "🏙️ Acteurs codes postaux non conformes",
+                    ),
                     (
                         "ENRICH_REVISION_ACTEURS_CP_TYPO",
                         "🏙️ Revision acteurs codes postaux non conformes",

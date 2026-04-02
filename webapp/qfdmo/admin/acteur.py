@@ -558,7 +558,7 @@ class RevisionActeurAdmin(ImportExportMixin, BaseActeurAdmin):
                     continue
                 acteur_value = getattr(acteur, field_name)
                 if acteur_value and isinstance(form_field, PointField):
-                    (lon, lat) = acteur_value.coords
+                    lon, lat = acteur_value.coords
                     acteur_value = {
                         "type": "Point",
                         "coordinates": [lon, lat],

@@ -573,12 +573,10 @@ class ConfiguratorForm(DsfrBaseForm):
         "suffit de décocher toutes les autres actions possibles.",
     )
     epci_codes = forms.MultipleChoiceField(
-        label=mark_safe(
-            """
+        label=mark_safe("""
         <hr/>
         <h3>Paramètres de la carte</h3>
-        1. Choisir les EPCI affichés par défaut sur la carte"""
-        ),
+        1. Choisir les EPCI affichés par défaut sur la carte"""),
         help_text="Commencez à taper un nom d’EPCI et sélectionnez un EPCI parmi "
         "les propositions de la liste.",
         # TODO: voir comment évaluer cela "lazily"

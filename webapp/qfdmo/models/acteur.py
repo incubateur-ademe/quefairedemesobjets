@@ -875,7 +875,7 @@ class Acteur(BaseActeur, LatLngPropertiesMixin, DisplayedActeurLinkMixin):
                 "statut",
             ],
         )
-        (revisionacteur, created) = RevisionActeur.objects.get_or_create(
+        revisionacteur, created = RevisionActeur.objects.get_or_create(
             identifiant_unique=self.identifiant_unique, defaults=fields
         )
 
@@ -1115,7 +1115,7 @@ class RevisionActeur(BaseActeur, LatLngPropertiesMixin, DisplayedActeurLinkMixin
             }
         )
 
-        (acteur, created) = Acteur.objects.get_or_create(
+        acteur, created = Acteur.objects.get_or_create(
             identifiant_unique=self.identifiant_unique,
             defaults=default_acteur_fields,
         )
