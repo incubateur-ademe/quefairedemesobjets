@@ -136,7 +136,7 @@ dev = [
     "pytest-dotenv>=0.5.2,<0.6",
     "pytest-mock>=3.14.1,<4",
     "wagtail-factories>=4.2.1,<5",
-    "ruff>=0.12.10,<0.15",
+    "ruff>=0.12.10,<0.16",
     "djade>=1.6.0,<2",
 ]
 
