@@ -109,5 +109,35 @@ Style the autocomplete container:
 
 :root[data-formulaire] {
   --footer-height: 100px;
-  --header-height: 135px;
+  --header-height: 155px;
+}
+
+.formulaire-grid {
+  @apply qf-h-full qf-flex qf-flex-col qf-gap-0;
+  @apply qf-transition-[grid-template-columns] qf-ease-in qf-duration-200;
+
+  @media (min-width: 1024px) {
+    display: grid;
+    grid-template-rows: var(--header-height) 1fr var(--footer-height);
+    grid-template-areas:
+      "header"
+      "map"
+      "footer";
+  }
+
+  > header {
+    grid-area: header;
+  }
+
+  > main {
+    grid-area: map;
+    @media (min-width: 768px) and (max-width: 1023px) {
+      flex: 1;
+      min-height: 0;
+    }
+  }
+
+  > footer {
+    grid-area: footer;
+  }
 }
