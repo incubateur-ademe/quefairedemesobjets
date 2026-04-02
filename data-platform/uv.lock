@@ -2162,8 +2162,8 @@ wheels = [
 
 [[package]]
 name = "modelsearch"
-version = "1.1.1"
-source = { git = "https://github.com/fabienheureux/django-modelsearch?rev=0d7b25e#0d7b25e89320bc1009896f462a7c07a7f8a0d8fd" }
+version = "1.2"
+source = { git = "https://github.com/fabienheureux/django-modelsearch?rev=c825fdd64b30dbac21e2950e30a4384faa95af65#c825fdd64b30dbac21e2950e30a4384faa95af65" }
 dependencies = [
     { name = "django" },
     { name = "django-tasks" },
@@ -3655,7 +3655,7 @@ wheels = [
 
 [[package]]
 name = "wagtail"
-version = "7.3"
+version = "7.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyascii" },
@@ -3677,9 +3677,9 @@ dependencies = [
     { name = "telepath" },
     { name = "willow", extra = ["heif"] },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/59/cf/c707a97e68d3edba40d1706457cc32f3c7679aa72dc43a4470cf58bca6f8/wagtail-7.3.tar.gz", hash = "sha256:81c3449652b17341fc794d65bdd208ae9e15f21743e8a6ca6bc2ce2e7b7312ce", size = 6859380, upload-time = "2026-02-03T12:16:43.707Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/4e/f9/e28a1b87ea61c68b74990c9f5c8cb11da9a689e07c8b769acc89121f8523/wagtail-7.3.1.tar.gz", hash = "sha256:2ce131d9a4e7d55fdb5b592d320a758a189174b2cc3966b70a34a1b3dc56f449", size = 6855119, upload-time = "2026-03-03T15:54:48.523Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/79/5d/63694054535c99b04a476512810f5d254e6de440fc7d14696e93b9f43c7f/wagtail-7.3-py3-none-any.whl", hash = "sha256:519c84c47bccc2e42182a3879c6efe9f34d7233239b2899a99139ae3e17c5266", size = 9475481, upload-time = "2026-02-03T12:16:41.244Z" },
+    { url = "https://files.pythonhosted.org/packages/bb/0e/5efc903966b966df2261a66cce8cb88909e4ade86f1173a156aadbbd1a06/wagtail-7.3.1-py3-none-any.whl", hash = "sha256:eab131e15ab9edc7ed24143d44271e92af79239e105bc3e173d26c95d2b489b3", size = 9479191, upload-time = "2026-03-03T15:54:42.644Z" },
 ]
 
 [[package]]
@@ -3823,7 +3823,7 @@ requires-dist = [
     { name = "django-widget-tweaks", specifier = ">=1.5.0,<2" },
     { name = "djangoql", specifier = ">=0.18.1" },
     { name = "gunicorn", specifier = ">=23.0.0,<24" },
-    { name = "modelsearch", git = "https://github.com/fabienheureux/django-modelsearch?rev=0d7b25e" },
+    { name = "modelsearch", git = "https://github.com/fabienheureux/django-modelsearch?rev=c825fdd64b30dbac21e2950e30a4384faa95af65" },
     { name = "more-itertools", specifier = ">=10.7.0" },
     { name = "opening-hours-py", specifier = ">=1.1.3,<2" },
     { name = "orjson", specifier = ">=3.11.1,<4" },
@@ -3839,7 +3839,7 @@ requires-dist = [
     { name = "shortuuid", specifier = ">=1.0.13,<2" },
     { name = "sites-conformes", specifier = ">=2.5.3rc4" },
     { name = "unidecode", specifier = ">=1.4.0,<2" },
-    { name = "wagtail", specifier = "==7.3" },
+    { name = "wagtail", specifier = "==7.3.1" },
     { name = "wagtail-honeypot", specifier = ">=1.2.1" },
     { name = "wagtailmenus", specifier = ">=4.0.6" },
     { name = "whitenoise", specifier = ">=6.8.2,<7" },
@@ -3860,7 +3860,7 @@ dev = [
     { name = "pytest-django", specifier = ">=4.9.0,<5" },
     { name = "pytest-dotenv", specifier = ">=0.5.2,<0.6" },
     { name = "pytest-mock", specifier = ">=3.14.1,<4" },
-    { name = "ruff", specifier = ">=0.12.10,<0.15" },
+    { name = "ruff", specifier = ">=0.12.10,<0.16" },
     { name = "wagtail-factories", specifier = ">=4.2.1,<5" },
 ]
 
