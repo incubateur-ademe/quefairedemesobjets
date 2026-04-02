@@ -136,7 +136,7 @@ class AbstractSearchActeursView(
 
     # TODO : supprimer
     is_iframe = False
-    is_carte = False
+    is_carte = True
     paginate = False
 
     def get_context_data(self, **kwargs):
@@ -144,10 +144,6 @@ class AbstractSearchActeursView(
             carte=self.is_carte,
             is_carte=self.is_carte,
         )
-
-        # Only add is_formulaire flag for non-carte views (formulaire mode)
-        if not self.is_carte:
-            kwargs.update(is_formulaire=True)
 
         # Manage the selection of sous_categorie_objet and actions
         acteurs = self._build_acteurs_queryset_from_sous_categorie_objet_and_actions()
@@ -467,18 +463,22 @@ class ActeurDetailView(MapPrefixMixin, TurboFormMixin, DetailView):
             source.afficher for source in displayed_acteur.sources.all()
         )
 
+        is_carte = (
+            "carte" in self.request.GET
+            or "with_map" in self.request.GET
+            or "map_container_id" in self.request.GET
+        )
         context.update(
             latitude=search_latitude,
             longitude=search_longitude,
             direction=self.request.GET.get("direction"),
             display_labels_panel=display_labels_panel,
             display_sources_panel=display_sources_panel,
-            is_carte="carte" in self.request.GET or "with_map" in self.request.GET,
+            is_carte=is_carte,
             map_container_id=self.request.GET.get("map_container_id", "carte"),
         )
 
-        # Set is_formulaire flag when not coming from carte/list modes
-        if not ("carte" in self.request.GET or "with_map" in self.request.GET):
+        if not is_carte:
             context["is_formulaire"] = True
 
         if search_latitude and search_longitude and not displayed_acteur.is_digital:
