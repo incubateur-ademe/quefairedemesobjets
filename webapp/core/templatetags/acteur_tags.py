@@ -86,7 +86,7 @@ def acteur_label(context, acteur=None):
     if first_label.bonus:
         first_label.libelle = "Propose le Bonus Réparation"
         dsfr_label = render_to_string(
-            "ui/components/label_qualite/dsfr_label.html",
+            "ui/components/label_qualite/label_bonus.html",
             {"label": first_label},
         )
         return {"label": dsfr_label}
