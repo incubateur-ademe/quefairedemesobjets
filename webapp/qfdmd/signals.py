@@ -33,6 +33,8 @@ def index_search_tags_on_publish(sender, instance, **kwargs):
     indexing on page_published ensures all linked tags become searchable as
     soon as the page goes live.
     """
+
+    # TODO: handle unindexing removed tags
     for item in instance.search_tags_items.select_related("tag"):
         insert_or_update_object(item.tag)
 
