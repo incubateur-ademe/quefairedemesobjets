@@ -50,18 +50,15 @@ init-certs:
 # 	make createsuperuser
 # 	make seed-database
 
-.PHONY: sync
-sync:
-	uv sync --all-packages
-
 .PHONY: check-format
 check-format:
-	uv run black --check --diff .
+	$(MAKE) -C webapp check-format
+	$(MAKE) -C data-platform check-format
 
 .PHONY: format
 format:
-	uv run ruff check . --fix
-	uv run black --exclude=.venv .
+	$(MAKE) -C webapp format
+	$(MAKE) -C data-platform format
 
 # Run development servers
 .PHONY: run-airflow
@@ -150,9 +147,9 @@ webapp-unit-test:
 webapp-integration-test:
 	$(MAKE) -C webapp integration-test
 
-.PHONY: webapp-dags-test
-webapp-dags-test:
-	$(MAKE) -C webapp dags-test
+.PHONY: data-platform-dags-test
+data-platform-dags-test:
+	$(MAKE) -C data-platform dags-test
 
 .PHONY: webapp-e2e-test
 webapp-e2e-test:

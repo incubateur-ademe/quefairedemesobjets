@@ -1,3 +1,0 @@
-services: docker compose --profile airflow --profile lvao up
-web: uv run python manage.py runserver 0.0.0.0:8000
-npm: rm -rf .parcel-cache; npm run watch

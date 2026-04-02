@@ -15,9 +15,10 @@
 | `nginx-local-only/`  | Nginx config for local development                           | nginx                                                      |
 | `Makefile`           | Global commands                                              |                                                            |
 | `scripts/`           | Scripts outside webapp                                       | bash                                                       |
-| `pyproject.toml`     | Python dependencies (uv)                                     |                                                            |
 
-Note : `webapp/Makefile` handle `webapp` specific command
+**Python environments:** install dependencies separately — `cd webapp && uv sync` and `cd data-platform && uv sync` (two `.venv` folders). Run backend tests from each project: `make unit-test` / `make integration-test` / e2e in `webapp/`, `make dags-test` in `data-platform/`.
+
+Note : `webapp/Makefile` and `data-platform/Makefile` hold project-specific commands; the repo root `Makefile` delegates to them where useful.
 
 ## Using English or French
 
@@ -71,14 +72,13 @@ For each kind of task below, refer to the specific documentation
 ├── nginx-local-only/  # Configuration Nginx pour le dev local
 ├── Makefile           # Commandes globales
 ├── scripts/           # Scripts hors webapp
-└── pyproject.toml     # Dépendances Python (uv)
 ```
 
 ## 📝 Code Conventions
 
 ### Python
 
-- Linter: Ruff (configuration in `pyproject.toml`)
+- Linter: Ruff (configuration in `webapp/pyproject.toml` and `data-platform/pyproject.toml`)
 - Formatting: Black (line-length: 88)
 - Type hints: Use type hints when relevant
 - Imports: Organized according to Django conventions (stdlib, third-party, local)

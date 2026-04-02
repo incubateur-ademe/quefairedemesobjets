@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     "wagtail.sites",
     "wagtail.users",
     "wagtail.images",
+    "wagtail.admin",
     "wagtail.documents",
     # Our business apps that contain the models we need
     "core",

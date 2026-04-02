@@ -41,7 +41,7 @@ CARTE = {
     "MATOMO_ID": decouple.config("LVAO_MATOMO_ID", default=50, cast=int),
     "GOOGLE_SEARCH_CONSOLE": "google9dfbbc61adbe3888.html",
     "POSTHOG_KEY": decouple.config(
-        "LVAO_POSTHOG_KEY",
+        "CARTE_POSTHOG_KEY",
         # Staging project by default
         default="phc_L1dG5EsBjyMTTcQqFJTAQtEugtGz6C3Tdpf1g7O09si",  # pragma: allowlist secret  # noqa: E501
         cast=str,
@@ -64,14 +64,6 @@ DISTANCE_MAX = decouple.config("DISTANCE_MAX", cast=int, default=30000)
 NB_CORRECTION_DISPLAYED = decouple.config(
     "NB_CORRECTION_DISPLAYED", cast=int, default=100
 )
-
-# CMS settings
-# ------------
-CMS = {
-    "BASE_URL": decouple.config(
-        "CMS_BASE_URL", default="https://longuevieauxobjets.ademe.fr"
-    )
-}
 
 STATS = {
     "POSTHOG_BASE_URL": decouple.config(
@@ -440,12 +432,6 @@ sentry_sdk.init(
     # something more human-readable.
     # release="qfdmo@1.0.0",
 )
-
-
-# Insee
-# -----
-INSEE_KEY = decouple.config("INSEE_KEY", cast=str, default="")
-INSEE_SECRET = decouple.config("INSEE_SECRET", cast=str, default="")
 
 
 SHELL_PLUS_PRINT_SQL = True

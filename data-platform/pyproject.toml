@@ -4,28 +4,86 @@ version = "0.0.0"
 description = "Data platform - Airflow DAGs, dbt"
 requires-python = ">=3.12,<3.13"
 dependencies = [
-    "webapp",
+    "apache-airflow-providers-amazon>=9.4.0",
     "apache-airflow-providers-postgres>=6.2.2,<7",
-    "fuzzywuzzy>=0.18.0,<0.19",
-    "python-decouple~=3.8",
-    "ratelimit>=2.2.1,<3",
-    "shortuuid>=1.0.13,<2",
-    "unidecode>=1.4.0,<2",
-    "scikit-learn==1.8.0",
     "apache-airflow>=2.11.0,<3",
-    "numpy>=1.26.0,<2",
-    "pandas<2.2",
     "dbt-core>=1.10.9,<2",
     "dbt-postgres>=1.9.1,<2",
-    "apache-airflow-providers-amazon>=9.4.0",
+    "fuzzywuzzy>=0.18.0,<0.19",
+    "numpy>=1.26.0,<2",
+    "pandas<2.2",
+    "python-decouple~=3.8",
+    "ratelimit>=2.2.1,<3",
+    "scikit-learn==1.8.0",
+    "shapely>=2.1.1,<3",
+    "shortuuid>=1.0.13,<2",
+    "unidecode>=1.4.0,<2",
+    "webapp-quefairedemesobjetsetdechets",
 ]
 
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+[dependency-groups]
+dev = [
+    "black>=25.1.0,<26",
+    "factory-boy>=3.3.1,<4",
+    "pytest>=8.4.2,<10",
+    "pytest-django>=4.9.0,<5",
+    "pytest-dotenv>=0.5.2,<0.6",
+    "pytest-mock>=3.14.1,<4",
+    "ruff>=0.12.10,<0.15",
+]
+
+[tool.pytest.ini_options]
+# Full app graph (qfdmo → qfdmd, Wagtail CMS, etc.): required for migrate in django_db tests.
+# Airflow continues to use core.airflow_settings via django_setup_full() / env outside pytest.
+DJANGO_SETTINGS_MODULE = "core.test_settings"
+
+[tool.ruff]
+exclude = [
+  ".bzr",
+  ".direnv",
+  ".eggs",
+  ".git",
+  ".git-rewrite",
+  ".hg",
+  ".mypy_cache",
+  ".nox",
+  ".pants.d",
+  ".pytype",
+  ".ruff_cache",
+  ".svn",
+  ".tox",
+  ".venv",
+  "__pypackages__",
+  "_build",
+  "buck-out",
+  "build",
+  "dist",
+  "node_modules",
+  "venv",
+  "**/migrations/*.py",
+  "*.ipynb",
+]
+
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F"]
+ignore = []
+exclude = [
+  "**/migrations/*.py",
+]
+
+fixable = ["ALL"]
+unfixable = []
+
+per-file-ignores = {}
+
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
 
 [tool.uv]
 package = false
 
 [tool.uv.sources]
-webapp = { workspace = true }
+webapp-quefairedemesobjetsetdechets = { path = "../webapp", editable = true }

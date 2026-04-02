@@ -16,16 +16,23 @@ BASE_DOMAIN := quefairedemesdechets.ademe.local
 FIXTURES_OPTIONS := --indent 4 --natural-foreign --natural-primary
 HONCHO := uv run honcho
 
+.PHONY: sync
+sync:
+	uv sync
+
+.PHONY: check-format
+check-format:
+	uv run black --check --diff .
+	uv run ruff check .
+
+.PHONY: format
+format:
+	uv run ruff check . --fix
+	uv run black --exclude=.venv .
+
 .PHONY: init-playwright
 init-playwright:
 	npx playwright install --with-deps
-
-.PHONY: run-django
-run-django:
-	$(HONCHO) start -f Procfile.django.dev
-
-run-all:
-	$(HONCHO) start -f Procfile.all.dev
 
 # Local django operations
 .PHONY: runserver
@@ -128,11 +135,6 @@ unit-test:
 integration-test:
 	$(PYTEST) ./integration_tests
 
-.PHONY: dags-test
-dags-test:
-	$(PYTEST) ../data-platform/dags/tests
-
-
 .PHONY: prepare-e2e-test
 prepare-e2e-test:
 	make migrate
@@ -164,14 +166,12 @@ js-test:
 backend-test:
 	@make unit-test
 	@make integration-test
-	@make dags-test
 
 .PHONY: test
 test:
 	@make unit-test
 	@make e2e-test
 	@make integration-test
-	@make dags-test
 
 # DSFR
 .PHONY: extract-dsfr

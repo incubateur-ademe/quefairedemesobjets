@@ -22,18 +22,25 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Setup backend environment
+      - name: Setup webapp Python environment
         uses: ./.github/actions/setup-backend
         with:
-          uv-groups: "--package webapp --only-group dev"
+          working-directory: webapp
+          uv-groups: "--group dev"
+
+      - name: Setup data-platform Python environment
+        uses: ./.github/actions/setup-backend
+        with:
+          working-directory: data-platform
+          uv-groups: "--group dev"
+
       - name: Install Terragrunt and OpenTofu
         uses: gruntwork-io/terragrunt-action@53dbdc2c3d43e82bf3bae10b734a968196442bec
         with:
           tg_version: "0.83.2"
           tofu_version: "1.10.3"
-      - name: Check code formatting
+      - name: Check code formatting (Black + Ruff, webapp + data-platform)
         run: make check-format
-      - uses: astral-sh/ruff-action@4919ec5cf1f49eff0871dbcea0da843445b837e6 # v3.6.1
       - name: Run Tofu format check
         run: tofu fmt -recursive -check infrastructure
       - name: Run Terragrunt format check
@@ -74,6 +81,7 @@ jobs:
     needs: backend_linter
     uses: ./.github/workflows/_backend-test-job.yml
     with:
+      working-directory: data-platform
       make-target: dags-test
 
   frontend_tests:
@@ -88,7 +96,7 @@ jobs:
 
       - name: Run tests
         run: |
-          cp ../.env.template .env
+          cp .env.template .env
           npm run test
         working-directory: webapp
 
