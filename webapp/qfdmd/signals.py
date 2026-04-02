@@ -4,10 +4,12 @@ from core.notion import ContactFormData, create_new_row_in_notion_table
 from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from modelsearch.index import insert_or_update_object
 from pydantic import ValidationError
-from qfdmd.models import FormPageValidationSettings
+from qfdmd.models import FormPageValidationSettings, ProduitPage
 from sites_conformes.forms.models import FormPage
 from wagtail.contrib.forms.models import FormSubmission
+from wagtail.signals import page_published
 
 # Warning : this could change if Sites Faciles creates their
 # own form submission class.
@@ -19,6 +21,22 @@ from wagtail.contrib.forms.models import FormSubmission
 submission_class = FormSubmission
 
 logger = logging.getLogger(__name__)
+
+
+@receiver(page_published, sender=ProduitPage)
+def index_search_tags_on_publish(sender, instance, **kwargs):
+    """
+    Re-index SearchTags (synonymes de recherche) when a ProduitPage is published.
+
+    get_indexed_objects excludes SearchTags not linked to any page, so a tag
+    saved while the page was a draft won't be in the index yet. Triggering
+    indexing on page_published ensures all linked tags become searchable as
+    soon as the page goes live.
+    """
+
+    # TODO: handle unindexing removed tags
+    for item in instance.search_tags_items.select_related("tag"):
+        insert_or_update_object(item.tag)
 
 
 @receiver(post_save, sender=submission_class)
