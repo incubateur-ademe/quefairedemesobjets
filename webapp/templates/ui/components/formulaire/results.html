@@ -6,12 +6,6 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
 {% endcomment %}
 
 {% load carte_tags %}
-{% if request.user.is_authenticated and DEBUG %}
-    <div class="qf-bg-blue-france-sun-113-625 qf-text-white qf-text-center qf-w-screen qf-py-1v qf-text-xs ">
-        <details><summary>Afficher l'url</summary> {{ request.build_absolute_uri }}</details>
-        <a href="{{ request.build_absolute_uri }}" target="_blank">Ouvrir la carte directement</a>
-    </div>
-{% endif %}
 <div
     class="
     qf-relative

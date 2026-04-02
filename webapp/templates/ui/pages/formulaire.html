@@ -33,7 +33,7 @@ qf-h-svh qf-h-screen qf-overflow-hidden qf-bg-white
     >
 
         <input type="hidden" name="{{ MAP_CONTAINER_ID }}" value="{% main_frame_id %}">
-        <section class="qf-relative map-grid">
+        <section class="formulaire-grid">
             {# Part of this tag' style is defined in qfdmo.css because it would have been a bit unreadable as tailwind classes #}
             {% include 'ui/components/formulaire/header.html' with extra_classes="qf-bg-white" %}
             {% include "ui/components/formulaire/main.html" %}
