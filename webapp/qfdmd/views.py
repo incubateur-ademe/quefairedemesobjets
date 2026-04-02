@@ -338,7 +338,9 @@ class AutocompleteHomeSearchView(ListView):
         limit = self.NUMBER_OF_ITEMS_DISPLAYED
         if not query:
             return []
-        return SearchTerm.objects.searchable().search(Fuzzy(query))[:limit]
+        return SearchTerm.objects.searchable().search(Fuzzy(query, unaccent=True))[
+            :limit
+        ]
 
     @override
     def get_context_data(self, **kwargs):
