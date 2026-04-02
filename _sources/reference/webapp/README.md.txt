@@ -68,12 +68,15 @@ from `webapp` folder
 
 ### Tests
 
+From the **`webapp/`** directory (after `uv sync`):
+
 - `npm test`: Jest tests
-- `npm run e2e_test`: Playwright tests
-- `uv run pytest` Python tests, or:
+- `npm run e2e_test` / `make e2e-test`: Playwright (e2e) tests
+- `uv run pytest` or:
   - `make unit-test`: unit tests
   - `make integration-test`: integration tests
-  - `make dags-test`: DAG tests (data-platform)
+
+DAG / Airflow Python tests live in **`data-platform/`**: `cd data-platform && uv sync && make dags-test`.
 
 ## ⚠️ Important Points
 

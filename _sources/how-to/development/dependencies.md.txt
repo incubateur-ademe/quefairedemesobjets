@@ -2,21 +2,25 @@
 
 ## Dépendances Python
 
-On utilise uv
+On utilise **uv** avec **deux projets distincts** :
 
-Pour installer les packages en local
+- **`webapp/`** : application Django (fichiers `webapp/pyproject.toml` et `webapp/uv.lock`)
+- **`data-platform/`** : DAGs Airflow, dbt, etc. (`data-platform/pyproject.toml` et `data-platform/uv.lock`)
+
+Pour installer les paquets en local, aller dans le dossier du projet concerné :
 
 ```sh
-uv sync <package>
+cd webapp && uv sync <package>
+cd data-platform && uv sync <package>
 ```
 
-Pour ajouter une dépendance
+Pour ajouter une dépendance (toujours depuis le bon dossier) :
 
 ```sh
 uv add <package>
 ```
 
-option `--group dev` pour les dépendances de développement et `--group airflow` pour les dépendances de airflow
+Option `--group dev` pour les dépendances de développement (pytest, ruff, etc.).
 
 ## Dépendances Javascript
 

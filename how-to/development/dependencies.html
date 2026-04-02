@@ -326,16 +326,21 @@
 <h1>Gestion de package<a class="headerlink" href="#gestion-de-package" title="Lien vers cette rubrique">¶</a></h1>
 <section id="dependances-python">
 <h2>Dépendances Python<a class="headerlink" href="#dependances-python" title="Lien vers cette rubrique">¶</a></h2>
-<p>On utilise uv</p>
-<p>Pour installer les packages en local</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>sync<span class="w"> </span>&lt;package&gt;
+<p>On utilise <strong>uv</strong> avec <strong>deux projets distincts</strong> :</p>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">webapp/</span></code></strong> : application Django (fichiers <code class="docutils literal notranslate"><span class="pre">webapp/pyproject.toml</span></code> et <code class="docutils literal notranslate"><span class="pre">webapp/uv.lock</span></code>)</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">data-platform/</span></code></strong> : DAGs Airflow, dbt, etc. (<code class="docutils literal notranslate"><span class="pre">data-platform/pyproject.toml</span></code> et <code class="docutils literal notranslate"><span class="pre">data-platform/uv.lock</span></code>)</p></li>
+</ul>
+<p>Pour installer les paquets en local, aller dans le dossier du projet concerné :</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>webapp<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>uv<span class="w"> </span>sync<span class="w"> </span>&lt;package&gt;
+<span class="nb">cd</span><span class="w"> </span>data-platform<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>uv<span class="w"> </span>sync<span class="w"> </span>&lt;package&gt;
 </pre></div>
 </div>
-<p>Pour ajouter une dépendance</p>
+<p>Pour ajouter une dépendance (toujours depuis le bon dossier) :</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>add<span class="w"> </span>&lt;package&gt;
 </pre></div>
 </div>
-<p>option <code class="docutils literal notranslate"><span class="pre">--group</span> <span class="pre">dev</span></code> pour les dépendances de développement et <code class="docutils literal notranslate"><span class="pre">--group</span> <span class="pre">airflow</span></code> pour les dépendances de airflow</p>
+<p>Option <code class="docutils literal notranslate"><span class="pre">--group</span> <span class="pre">dev</span></code> pour les dépendances de développement (pytest, ruff, etc.).</p>
 </section>
 <section id="dependances-javascript">
 <h2>Dépendances Javascript<a class="headerlink" href="#dependances-javascript" title="Lien vers cette rubrique">¶</a></h2>

@@ -362,21 +362,18 @@
 </ul>
 <section id="local-linting-and-formatting">
 <h3>Local linting and formatting<a class="headerlink" href="#local-linting-and-formatting" title="Lien vers cette rubrique">¶</a></h3>
-<p>From root folder:</p>
+<p>Python uses <strong>two separate uv projects</strong> (<code class="docutils literal notranslate"><span class="pre">webapp/</span></code> and <code class="docutils literal notranslate"><span class="pre">data-platform/</span></code>). From the <strong>repository root</strong>:</p>
 <ul class="simple">
-<li><p><strong>Python</strong></p>
-<ul>
-<li><p><strong>Lint</strong>: run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">check-format</span></code> at the root of the project.</p></li>
-<li><p><strong>Format</strong>: run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">format</span></code> to apply formatting.</p></li>
+<li><p><strong>Python (Black + Ruff)</strong>: <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">check-format</span></code> runs checks in <code class="docutils literal notranslate"><span class="pre">webapp/</span></code> then <code class="docutils literal notranslate"><span class="pre">data-platform/dags/</span></code>.</p></li>
+<li><p><strong>Apply Python formatting</strong>: <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">format</span></code>.</p></li>
 </ul>
-</li>
-</ul>
-<p>From <code class="docutils literal notranslate"><span class="pre">webapp</span></code> folder:</p>
+<p>You can also run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">check-format</span></code> / <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">format</span></code> inside <code class="docutils literal notranslate"><span class="pre">webapp/</span></code> or <code class="docutils literal notranslate"><span class="pre">data-platform/</span></code> alone.</p>
+<p>From the <strong><code class="docutils literal notranslate"><span class="pre">webapp/</span></code></strong> folder (after <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">sync</span> <span class="pre">--group</span> <span class="pre">dev</span></code>):</p>
 <ul class="simple">
 <li><p><strong>TypeScript</strong></p>
 <ul>
-<li><p><strong>Lint</strong>: run <code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">run</span> <span class="pre">lint</span></code> from the project root to check the frontend code.</p></li>
-<li><p><strong>Format</strong>: run <code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">run</span> <span class="pre">format</span></code> to apply Prettier on the frontend code.</p></li>
+<li><p><strong>Lint</strong>: <code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">run</span> <span class="pre">lint</span></code></p></li>
+<li><p><strong>Format</strong>: <code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">run</span> <span class="pre">format</span></code> (Prettier)</p></li>
 </ul>
 </li>
 </ul>

@@ -325,6 +325,15 @@
           <section id="ci-cd-documentation">
 <h1>CI/CD Documentation<a class="headerlink" href="#ci-cd-documentation" title="Lien vers cette rubrique">¶</a></h1>
 <p>This documentation describes the different CI/CD workflows of the project and what happens in each use case.</p>
+<section id="python-uv-in-ci">
+<h2>Python / uv in CI<a class="headerlink" href="#python-uv-in-ci" title="Lien vers cette rubrique">¶</a></h2>
+<p>Backend jobs use <strong>two separate uv environments</strong>, matching local development:</p>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">webapp/</span></code></strong>: <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">sync</span> <span class="pre">--group</span> <span class="pre">dev</span></code> for Django unit tests, integration tests, migration checks, and E2E preparation.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">data-platform/</span></code></strong>: <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">sync</span> <span class="pre">--group</span> <span class="pre">dev</span></code> for DAG pytest (<code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">dags-test</span></code>).</p></li>
+</ul>
+<p>The reusable job <a class="reference external" href="https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/_backend-test-job.yml"><code class="docutils literal notranslate"><span class="pre">.github/workflows/_backend-test-job.yml</span></code></a> takes a <code class="docutils literal notranslate"><span class="pre">working-directory</span></code> input (<code class="docutils literal notranslate"><span class="pre">webapp</span></code> or <code class="docutils literal notranslate"><span class="pre">data-platform</span></code>). The backend linter installs both environments, then runs <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">check-format</span></code> (Black + Ruff in <code class="docutils literal notranslate"><span class="pre">webapp/</span></code> and under <code class="docutils literal notranslate"><span class="pre">data-platform/dags/</span></code>).</p>
+</section>
 <section id="creating-or-updating-a-pull-request">
 <h2>Creating or updating a Pull Request<a class="headerlink" href="#creating-or-updating-a-pull-request" title="Lien vers cette rubrique">¶</a></h2>
 <p>When a Pull Request is created or updated (events <code class="docutils literal notranslate"><span class="pre">opened</span></code> or <code class="docutils literal notranslate"><span class="pre">synchronize</span></code>), the <strong>Review</strong> workflow (<a class="reference external" href="https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/review.yml">review.yml</a>) is triggered.</p>
@@ -506,6 +515,7 @@
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">CI/CD Documentation</a><ul>
+<li><a class="reference internal" href="#python-uv-in-ci">Python / uv in CI</a></li>
 <li><a class="reference internal" href="#creating-or-updating-a-pull-request">Creating or updating a Pull Request</a><ul>
 <li><a class="reference internal" href="#review-workflow-flow">Review workflow flow</a></li>
 </ul>

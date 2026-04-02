@@ -37,14 +37,15 @@ Example: `acteur_by_id`
 
 ### Local linting and formatting
 
-From root folder:
+Python uses **two separate uv projects** (`webapp/` and `data-platform/`). From the **repository root**:
 
-- **Python**
-  - **Lint**: run `make check-format` at the root of the project.
-  - **Format**: run `make format` to apply formatting.
+- **Python (Black + Ruff)**: `make check-format` runs checks in `webapp/` then `data-platform/dags/`.
+- **Apply Python formatting**: `make format`.
 
-From `webapp` folder:
+You can also run `make check-format` / `make format` inside `webapp/` or `data-platform/` alone.
+
+From the **`webapp/`** folder (after `uv sync --group dev`):
 
 - **TypeScript**
-  - **Lint**: run `npm run lint` from the project root to check the frontend code.
-  - **Format**: run `npm run format` to apply Prettier on the frontend code.
+  - **Lint**: `npm run lint`
+  - **Format**: `npm run format` (Prettier)

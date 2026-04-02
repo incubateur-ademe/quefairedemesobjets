@@ -441,30 +441,29 @@ la plateforme data est accessible à l’adresse <a class="reference external" h
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>compose<span class="w">  </span>--profile<span class="w"> </span>lvao<span class="w"> </span>up<span class="w"> </span>-d
 </pre></div>
 </div>
-<p>Installation des dépendances python et javascript</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>env<span class="w"> </span>activate
-uv<span class="w"> </span>sync<span class="w"> </span>--all-packages
+<p>Installation des dépendances Python et JavaScript (depuis le dossier <strong><code class="docutils literal notranslate"><span class="pre">webapp/</span></code></strong>) :</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>sync
 npm<span class="w"> </span>ci
 </pre></div>
 </div>
-<p>Migration</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>migrate
+<p>Migrations Django (toujours depuis <strong><code class="docutils literal notranslate"><span class="pre">webapp/</span></code></strong>) :</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>manage.py<span class="w"> </span>migrate
 </pre></div>
 </div>
-<p>Créer la table de cache</p>
+<p>Créer la table de cache (depuis <strong><code class="docutils literal notranslate"><span class="pre">webapp/</span></code></strong>) :</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>createcachetable
 </pre></div>
 </div>
 <p>Pour peupler la base de données <code class="docutils literal notranslate"><span class="pre">webapp</span></code> le plus simple est de copier la base de données de production, cf. <a class="reference internal" href="useful_command.html#copier-la-base-de-donnees-de-prod-en-local"><span class="std std-ref">Copier la base de données de prod en local</span></a></p>
-<p>Sinon, utiliser la command de peuplement ci-dessous</p>
+<p>Sinon, utiliser la commande de peuplement ci-dessous (depuis <strong><code class="docutils literal notranslate"><span class="pre">webapp/</span></code></strong>) :</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>seed-database
 </pre></div>
 </div>
 </section>
 <section id="creer-un-superutilisatteur">
 <h3>Créer un superutilisatteur<a class="headerlink" href="#creer-un-superutilisatteur" title="Lien vers cette rubrique">¶</a></h3>
-<p>Si vous n’en avez pas déjà un</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>createsuperuser
+<p>Si vous n’en avez pas déjà un (depuis <strong><code class="docutils literal notranslate"><span class="pre">webapp/</span></code></strong>) :</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>manage.py<span class="w"> </span>createsuperuser
 </pre></div>
 </div>
 </section>
@@ -478,22 +477,22 @@ Une fois les processus démarrés, le serveur web sera accessible à l’adresse
 </section>
 <section id="tester-l-application">
 <h3>Tester l’application<a class="headerlink" href="#tester-l-application" title="Lien vers cette rubrique">¶</a></h3>
-<p>Test python avec pytest</p>
+<p>Tests Python (pytest), depuis le dossier <strong><code class="docutils literal notranslate"><span class="pre">webapp/</span></code></strong> :</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>unit-test
 make<span class="w"> </span>integration-test
 </pre></div>
 </div>
-<p>Test Js unitaire (DEPRECATED ?)</p>
+<p>Tests JS unitaires</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>npm<span class="w"> </span>run<span class="w"> </span><span class="nb">test</span>
 </pre></div>
 </div>
-<p>End to end avec Playwright</p>
+<p>End to end avec Playwright (depuis <strong><code class="docutils literal notranslate"><span class="pre">webapp/</span></code></strong>) :</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>init-playwright
 make<span class="w"> </span>e2e-test
 make<span class="w"> </span>e2e-test-ui
 </pre></div>
 </div>
-<p>Test d’accessibilité</p>
+<p>Test d’accessibilité (depuis <strong><code class="docutils literal notranslate"><span class="pre">webapp/</span></code></strong>) :</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>a11y
 </pre></div>
 </div>
@@ -526,8 +525,9 @@ make<span class="w"> </span>e2e-test-ui
 <p>accéder à l’interface d’Airflow en local <a class="reference external" href="http://localhost:8080">http://localhost:8080</a> ; identifiant/mot de passe : airflow / airflow</p>
 <section id="tester-la-plateforme-data">
 <h3>Tester la plateforme Data<a class="headerlink" href="#tester-la-plateforme-data" title="Lien vers cette rubrique">¶</a></h3>
-<p>Test python avec pytest</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>dags-test
+<p>Tests Python des DAGs (pytest), depuis le dossier <strong><code class="docutils literal notranslate"><span class="pre">data-platform/</span></code></strong> :</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>sync
+make<span class="w"> </span>dags-test
 </pre></div>
 </div>
 </section>

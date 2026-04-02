@@ -389,17 +389,18 @@
 </section>
 <section id="tests">
 <h3>Tests<a class="headerlink" href="#tests" title="Lien vers cette rubrique">¶</a></h3>
+<p>From the <strong><code class="docutils literal notranslate"><span class="pre">webapp/</span></code></strong> directory (after <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">sync</span></code>):</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">test</span></code>: Jest tests</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">run</span> <span class="pre">e2e_test</span></code>: Playwright tests</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">run</span> <span class="pre">pytest</span></code> Python tests, or:</p>
+<li><p><code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">run</span> <span class="pre">e2e_test</span></code> / <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">e2e-test</span></code>: Playwright (e2e) tests</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">run</span> <span class="pre">pytest</span></code> or:</p>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">unit-test</span></code>: unit tests</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">integration-test</span></code>: integration tests</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">dags-test</span></code>: DAG tests (data-platform)</p></li>
 </ul>
 </li>
 </ul>
+<p>DAG / Airflow Python tests live in <strong><code class="docutils literal notranslate"><span class="pre">data-platform/</span></code></strong>: <code class="docutils literal notranslate"><span class="pre">cd</span> <span class="pre">data-platform</span> <span class="pre">&amp;&amp;</span> <span class="pre">uv</span> <span class="pre">sync</span> <span class="pre">&amp;&amp;</span> <span class="pre">make</span> <span class="pre">dags-test</span></code>.</p>
 </section>
 </section>
 <section id="important-points">
