@@ -55,10 +55,14 @@ runs:
     - name: Prepare django, migrate, collect static files
       if: steps.cache-db.outputs.cache-hit != 'true'
       shell: bash
+      working-directory: webapp
       run: |
         # TODO: user make prepare-e2e-test here
-        cd webapp
         make migrate
+        # TEMPORARY, required to have unaccent search function in CI
+        # while it is not deployed on production
+        uv run python manage.py enable_unaccent
+        uv run python manage.py enable_trigram
         make rebuild-search-index
         make createsuperuser-example
 
