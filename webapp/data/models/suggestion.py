@@ -594,7 +594,9 @@ class SuggestionGroupe(TimestampedModel, SuggestionActeurRelationsMixin):
 class SuggestionUnitaire(TimestampedModel, SuggestionActeurRelationsMixin):
     class Meta:
         verbose_name = "3️⃣ ⏳ ⚠️ Suggestion Unitaire - Livraison prochainement"
-        verbose_name_plural = "3️⃣ ⏳ ⚠️ Suggestions Unitaires - Livraison prochainement"
+        verbose_name_plural = (
+            "3️⃣ ⏳ ⚠️ Suggestions Unitaires - Livraison prochainement"
+        )
         constraints = [
             CheckConstraint(
                 condition=~Q(
