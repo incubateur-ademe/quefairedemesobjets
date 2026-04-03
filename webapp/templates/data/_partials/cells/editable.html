@@ -1,4 +1,3 @@
-{% load comparison_table_tags %}
 <div class="qf-flex qf-flex-row qf-items-center qf-gap-1">
     {% for field in cell.fields %}
         {% if not field.editable %}
@@ -6,22 +5,22 @@
         {% endif %}
         <div
             contentEditable="{{ field.editable|yesno:"true,false" }}"
-            {% if field.stimulus %}{{ field.stimulus|stimulus_attrs }}{% endif %}>
+            {% if field.editable %}
+                data-controller="cell-edit"
+                data-cell-edit-field-value="{{ field.field_name }}"
+                {% if field.suggestion_modele %}data-cell-edit-suggestion-modele-value="{{ field.suggestion_modele }}"{% endif %}
+                {% if field.update_url %}data-cell-edit-update-url-value="{{ field.update_url }}"{% endif %}
+                {% if field.replace_text %}data-cell-edit-replace-text-value="{{ field.replace_text }}"{% endif %}
+                {% if field.fields_groups %}data-cell-edit-fields-groups-value="{{ field.fields_groups }}"{% endif %}
+                {% if field.identifiant_unique %}data-cell-edit-identifiant-unique-value="{{ field.identifiant_unique }}"{% endif %}
+                data-action="blur->cell-edit#save focus->cell-edit#replace"
+            {% endif %}>
             {{ field.display_html|safe }}
         </div>
         {% if not forloop.last %}<span>&nbsp;,&nbsp;</span> {% endif %}
     {% endfor %}
 </div>
-{% if cell.links %}
-    <div>
-        (
-        {% for link in cell.links %}
-            {% if not forloop.first %}, {% endif %}
-            <a href="{{ link.url }}" target="_blank" rel="noreferrer" data-turbo="false">{{ link.label }}</a>
-        {% endfor %}
-        )
-    </div>
-{% endif %}
+{% include "data/_partials/cells/_links.html" %}
 <div>
     {% for field in cell.fields %}
         {% if field.error %}

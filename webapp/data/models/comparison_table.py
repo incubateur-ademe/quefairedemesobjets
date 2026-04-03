@@ -1,21 +1,11 @@
 from abc import ABC
-from typing import Literal
+from typing import ClassVar
 
 from pydantic import BaseModel, ConfigDict
 
 
-class StimulusControllerConfig(BaseModel):
-    """Configuration for a Stimulus controller attached to an HTML element."""
-
-    model_config = ConfigDict(frozen=True)
-
-    controller: str
-    values: dict[str, str] = {}
-    actions: list[str] = []
-
-
-class CellLink(BaseModel):
-    """A hyperlink rendered inside a column header."""
+class LinkInCell(BaseModel):
+    """A hyperlink rendered inside a column header or a cell."""
 
     model_config = ConfigDict(frozen=True)
 
@@ -23,66 +13,85 @@ class CellLink(BaseModel):
     url: str
 
 
-class Cell(BaseModel):
-    """A single table cell (<td>)."""
-
-    model_config = ConfigDict(frozen=True)
-
-    links: list[CellLink] = []
-
-
-class CellField(Cell):
+class FieldInCell(BaseModel):
     """
-    One field within a cell (cells may contain multiple fields for grouped fields).
+    One field rendered inside a cell,
+    cells may contain multiple fields for grouped fields.
     """
 
     model_config = ConfigDict(frozen=True)
 
+    links: list[LinkInCell] = []
     field_name: str
     display_html: str = ""
     editable: bool = False
-    stimulus: StimulusControllerConfig | None = None
+    # Stimulus values for cell-edit controller
+    suggestion_modele: str | None = None
+    update_url: str | None = None
+    replace_text: str | None = None
+    fields_groups: str | None = None
+    identifiant_unique: str | None = None
     error: str | None = None
 
 
-class BaseCellContent(Cell, ABC):
+class BaseCellContent(BaseModel, ABC):
     model_config = ConfigDict(frozen=True)
 
+    links: list[LinkInCell] = []
     column_key: str
-    cell_type: str
+    template_name: ClassVar[str]
 
 
 class CellHtmlContent(BaseCellContent):
     """A single table cell (<td>) with html content."""
 
+    template_name: ClassVar[str] = "data/_partials/cells/html.html"
     html_content: str = ""
-    cell_type: Literal["html"] = "html"
 
 
-class CellFieldsContent(BaseCellContent):
-    """A single table cell (<td>) with CellField (one by item of group_fields)."""
+class BaseCellWithFields(BaseCellContent, ABC):
+    """Base for cells that contain a list of FieldInCell."""
 
-    model_config = ConfigDict(frozen=True)
+    fields: list[FieldInCell] = []
 
-    cell_type: Literal["display", "action", "editable"]
-    fields: list[CellField] = []
+
+class CellDisplayContent(BaseCellWithFields):
+    """A read-only cell displaying field values."""
+
+    template_name: ClassVar[str] = "data/_partials/cells/display.html"
+
+
+class CellEditableContent(BaseCellWithFields):
+    """An editable cell where each field can be modified in-place."""
+
+    template_name: ClassVar[str] = "data/_partials/cells/editable.html"
+
+
+class CellActionContent(BaseCellContent):
+    """A cell with a clickable action icon (report-update controller)."""
+
+    template_name: ClassVar[str] = "data/_partials/cells/action.html"
     enabled: bool = True
     disabled_icon: str = "🚫"
     action_icon: str = ""
-    stimulus: StimulusControllerConfig | None = None
+    # Stimulus values for report-update controller
+    stimulus_fields: str | None = None
+    stimulus_suggestion_modele: str | None = None
+    stimulus_update_url: str | None = None
+    stimulus_target_values: str | None = None
+    stimulus_fields_groups: str | None = None
 
 
 class ColumnHeader(BaseModel):
-    """Describes one column of the comparison table."""
+    """Describes one column header of the comparison table."""
 
     model_config = ConfigDict(frozen=True)
 
     key: str
     label: str = ""
-    css_classes: str = ""
-    links: list[CellLink] = []
+    links: list[LinkInCell] = []
     subtitle: str | None = None
-    header_action: StimulusControllerConfig | None = None
+    header_action: dict | None = None
 
 
 class TableRow(BaseModel):
@@ -90,7 +99,9 @@ class TableRow(BaseModel):
 
     model_config = ConfigDict(frozen=True)
 
-    cells: list[CellFieldsContent | CellHtmlContent]
+    cells: list[
+        CellHtmlContent | CellDisplayContent | CellEditableContent | CellActionContent
+    ]
 
 
 class ComparisonTable(BaseModel):

@@ -8,14 +8,22 @@
             {{ errors.error }}
         </div>
     {% endif %}
-    <div class="fr-table fr-table--bordered">
-        <table>
+    <div class="fr-table fr-table--bordered ">
+        <table class="qf-w-full qf-table-fixed qf-break-words">
             <thead>
                 <tr>
                     {% for column in comparison_table.columns %}
-                        <th class="{{ column.css_classes }}">
+                        <th class="{% if column.header_action %}qf-text-center{% endif %}">
                             {% if column.header_action %}
-                                <div {{ column.header_action|stimulus_attrs }} class="qf-cursor-pointer">
+                                <div
+                                    data-controller="report-update"
+                                    data-report-update-fields-value="{{ column.header_action.fields }}"
+                                    {% if column.header_action.suggestion_modele %}data-report-update-suggestion-modele-value="{{ column.header_action.suggestion_modele }}"{% endif %}
+                                    {% if column.header_action.update_url %}data-report-update-update-url-value="{{ column.header_action.update_url }}"{% endif %}
+                                    {% if column.header_action.target_values %}data-report-update-target-values-value="{{ column.header_action.target_values }}"{% endif %}
+                                    {% if column.header_action.fields_groups %}data-report-update-fields-groups-value="{{ column.header_action.fields_groups }}"{% endif %}
+                                    data-action="click->report-update#report"
+                                    class="qf-cursor-pointer">
                                     {{ column.label }}
                                 </div>
                             {% else %}

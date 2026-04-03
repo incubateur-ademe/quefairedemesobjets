@@ -2,13 +2,14 @@ import json
 
 from core.templatetags.admin_data_tags import display_diff_values
 from data.models.comparison_table import (
-    CellField,
-    CellFieldsContent,
+    CellActionContent,
+    CellDisplayContent,
+    CellEditableContent,
     CellHtmlContent,
-    CellLink,
     ColumnHeader,
     ComparisonTable,
-    StimulusControllerConfig,
+    FieldInCell,
+    LinkInCell,
     TableRow,
 )
 from data.models.suggestion import (
@@ -569,24 +570,6 @@ class SuggestionGroupeTypeSource(SuggestionGroupeType):
 
     # --- ComparisonTable builder helpers ---
 
-    def _build_report_stimulus(
-        self,
-        fields: str,
-        suggestion_modele: str,
-        target_values_fields: tuple[str, ...] | list[str],
-    ) -> StimulusControllerConfig:
-        return StimulusControllerConfig(
-            controller="report-update",
-            values={
-                "fields": fields,
-                "suggestion-modele": suggestion_modele,
-                "update-url": self.update_url,
-                "target-values": self._target_values_json(target_values_fields),
-                "fields-groups": self.fields_groups_json,
-            },
-            actions=["click->report-update#report"],
-        )
-
     def _get_suggestion_source_model_from_modele(
         self,
         suggestion_modele: str,
@@ -604,7 +587,7 @@ class SuggestionGroupeTypeSource(SuggestionGroupeType):
         self,
         field_group: tuple[str, ...],
         suggestion_modele: str,
-    ) -> list[CellLink]:
+    ) -> list[LinkInCell]:
         links = []
         suggestion_source_model = self._get_suggestion_source_model_from_modele(
             suggestion_modele
@@ -612,7 +595,7 @@ class SuggestionGroupeTypeSource(SuggestionGroupeType):
         if "siret" in field_group:
             if siret := getattr(suggestion_source_model, "siret", None):
                 links.append(
-                    CellLink(
+                    LinkInCell(
                         label="etablissement",
                         url=f"{AE_ETABLISSEMENT_URL}{siret}",
                     )
@@ -620,7 +603,7 @@ class SuggestionGroupeTypeSource(SuggestionGroupeType):
         if "siren" in field_group:
             if siren := getattr(suggestion_source_model, "siren", None):
                 links.append(
-                    CellLink(
+                    LinkInCell(
                         label="unité légale",
                         url=f"{AE_ENTREPRISE_URL}{siren}",
                     )
@@ -628,7 +611,7 @@ class SuggestionGroupeTypeSource(SuggestionGroupeType):
         if "url" in field_group:
             if url := getattr(suggestion_source_model, "url", None):
                 links.append(
-                    CellLink(
+                    LinkInCell(
                         label="site web",
                         url=url,
                     )
@@ -649,52 +632,43 @@ class SuggestionGroupeTypeSource(SuggestionGroupeType):
         display_fn,
         replace_text_fn,
         errors: dict | None,
-    ) -> list[CellFieldsContent]:
+    ) -> list[CellActionContent | CellEditableContent]:
         """Build the action cell + editable cell pair for a target model."""
         fields_str = "|".join(field_group)
         reportable = all(f not in not_reportable for f in field_group)
 
         links = self._get_fields_links(field_group, suggestion_modele)
 
-        action_cell = CellFieldsContent(
+        action_cell = CellActionContent(
             column_key=action_column_key,
-            cell_type="action",
             enabled=reportable,
             action_icon=action_icon,
-            stimulus=(
-                self._build_report_stimulus(fields_str, suggestion_modele, field_group)
-                if reportable
-                else None
+            stimulus_fields=fields_str if reportable else None,
+            stimulus_suggestion_modele=suggestion_modele if reportable else None,
+            stimulus_update_url=self.update_url if reportable else None,
+            stimulus_target_values=(
+                self._target_values_json(field_group) if reportable else None
             ),
+            stimulus_fields_groups=self.fields_groups_json if reportable else None,
         )
 
-        editable_cell = CellFieldsContent(
+        editable_cell = CellEditableContent(
             column_key=editable_column_key,
-            cell_type="editable",
             links=links,
             fields=[
-                CellField(
+                FieldInCell(
                     field_name=field,
                     display_html=display_fn(field),
                     editable=field not in not_editable,
-                    stimulus=(
-                        StimulusControllerConfig(
-                            controller="cell-edit",
-                            values={
-                                "field": field,
-                                "suggestion-modele": suggestion_modele,
-                                "update-url": self.update_url,
-                                "replace-text": replace_text_fn(field),
-                                # TODO: may be json.dumps(field_group) is enough
-                                "fields-groups": self.fields_groups_json,
-                            },
-                            actions=[
-                                "blur->cell-edit#save",
-                                "focus->cell-edit#replace",
-                            ],
-                        )
-                        if field not in not_editable
-                        else None
+                    suggestion_modele=(
+                        suggestion_modele if field not in not_editable else None
+                    ),
+                    update_url=self.update_url if field not in not_editable else None,
+                    replace_text=(
+                        replace_text_fn(field) if field not in not_editable else None
+                    ),
+                    fields_groups=(
+                        self.fields_groups_json if field not in not_editable else None
                     ),
                     error=(
                         str(errors.get(field, ""))
@@ -723,13 +697,12 @@ class SuggestionGroupeTypeSource(SuggestionGroupeType):
 
         # --- Columns ---
         columns = [
-            ColumnHeader(key="label", css_classes="qf-w-1/4"),
+            ColumnHeader(key="label"),
             ColumnHeader(
                 key="source",
                 label="Acteur Importé",
-                css_classes="qf-w-1/4",
                 links=(
-                    [CellLink(label="importé", url=self.acteur_change_url)]
+                    [LinkInCell(label="importé", url=self.acteur_change_url)]
                     if self.acteur_change_url
                     else []
                 ),
@@ -737,10 +710,13 @@ class SuggestionGroupeTypeSource(SuggestionGroupeType):
             ColumnHeader(
                 key="report_revision",
                 label="▶️",
-                css_classes="qf-text-center qf-text-2xl",
-                header_action=self._build_report_stimulus(
-                    "|".join(flattened), "RevisionActeur", flattened
-                ),
+                header_action={
+                    "fields": "|".join(flattened),
+                    "suggestion_modele": "RevisionActeur",
+                    "update_url": self.update_url,
+                    "target_values": self._target_values_json(flattened),
+                    "fields_groups": self.fields_groups_json,
+                },
             ),
         ]
 
@@ -748,11 +724,11 @@ class SuggestionGroupeTypeSource(SuggestionGroupeType):
         correction_links = []
         if self.revision_acteur_change_url:
             correction_links.append(
-                CellLink(label="corrigé", url=self.revision_acteur_change_url)
+                LinkInCell(label="corrigé", url=self.revision_acteur_change_url)
             )
             if not self.has_parent_revision_acteur:
                 correction_links.append(
-                    CellLink(
+                    LinkInCell(
                         label="affiché",
                         url=self.revision_acteur_displayedacteur_change_url or "",
                     )
@@ -761,7 +737,6 @@ class SuggestionGroupeTypeSource(SuggestionGroupeType):
             ColumnHeader(
                 key="correction",
                 label="Correction",
-                css_classes="qf-w-1/4",
                 links=correction_links,
             )
         )
@@ -772,23 +747,25 @@ class SuggestionGroupeTypeSource(SuggestionGroupeType):
                 ColumnHeader(
                     key="report_parent",
                     label="⏩",
-                    css_classes="qf-text-center qf-text-2xl",
-                    header_action=self._build_report_stimulus(
-                        "|".join(flattened), "ParentRevisionActeur", flattened
-                    ),
+                    header_action={
+                        "fields": "|".join(flattened),
+                        "suggestion_modele": "ParentRevisionActeur",
+                        "update_url": self.update_url,
+                        "target_values": self._target_values_json(flattened),
+                        "fields_groups": self.fields_groups_json,
+                    },
                 )
             )
             columns.append(
                 ColumnHeader(
                     key="parent",
                     label="Parent",
-                    css_classes="qf-w-1/4",
                     links=[
-                        CellLink(
+                        LinkInCell(
                             label="corrigé",
                             url=self.parent_revision_acteur_change_url or "",
                         ),
-                        CellLink(
+                        LinkInCell(
                             label="affiché",
                             url=self.parent_revision_acteur_displayedacteur_change_url
                             or "",
@@ -805,16 +782,20 @@ class SuggestionGroupeTypeSource(SuggestionGroupeType):
         # --- Rows ---
         rows = []
         for field_group in self.fields_groups:
-            cells: list[CellFieldsContent | CellHtmlContent] = []
+            cells: list[
+                CellHtmlContent
+                | CellDisplayContent
+                | CellEditableContent
+                | CellActionContent
+            ] = []
 
             # Source (display) cell
             cells.append(
-                CellFieldsContent(
+                CellDisplayContent(
                     column_key="source",
-                    cell_type="display",
                     links=self._get_fields_links(field_group, "Acteur"),
                     fields=[
-                        CellField(
+                        FieldInCell(
                             field_name=field,
                             display_html=self._source_display(field),
                         )

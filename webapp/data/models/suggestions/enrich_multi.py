@@ -3,12 +3,12 @@ import logging
 
 from core.templatetags.admin_data_tags import display_diff_values
 from data.models.comparison_table import (
-    CellField,
-    CellFieldsContent,
+    CellDisplayContent,
+    CellEditableContent,
     CellHtmlContent,
     ColumnHeader,
     ComparisonTable,
-    StimulusControllerConfig,
+    FieldInCell,
     TableRow,
 )
 from data.models.suggestion import SuggestionGroupe
@@ -40,14 +40,13 @@ class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
     def to_comparison_table(self, errors: dict | None = None) -> ComparisonTable:
         suggestions_unitaires = self.suggestion_groupe.suggestion_unitaires.all()
 
-        columns = [ColumnHeader(key="label", css_classes="qf-w-1/4")]
+        columns = [ColumnHeader(key="label")]
 
         for column_name in ["Champ(s)", "Acteur", "Correction"]:
             columns.append(
                 ColumnHeader(
                     key=column_name,
                     label=column_name,
-                    css_classes="qf-w-1/4",
                 )
             )
         rows = []
@@ -73,11 +72,10 @@ class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
                     )
                 )
                 cells.append(
-                    CellFieldsContent(
+                    CellEditableContent(
                         column_key="update",
-                        cell_type="editable",
                         fields=[
-                            CellField(
+                            FieldInCell(
                                 field_name=champ,
                                 display_html=display_diff_values(
                                     (
@@ -88,25 +86,11 @@ class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
                                     valeur,
                                 ),
                                 editable=True,
-                                stimulus=(
-                                    StimulusControllerConfig(
-                                        controller="cell-edit",
-                                        values={
-                                            "field": champ,
-                                            "suggestion-modele": (
-                                                suggestion_unitaire.suggestion_modele
-                                            ),
-                                            "identifiant-unique": identifiant_unique,
-                                            "update-url": self.update_url,  # TODO
-                                            "replace-text": valeur,
-                                            "fields-groups": json.dumps([(champ,)]),
-                                        },
-                                        actions=[
-                                            "blur->cell-edit#save",
-                                            "focus->cell-edit#replace",
-                                        ],
-                                    )
-                                ),
+                                suggestion_modele=suggestion_unitaire.suggestion_modele,
+                                identifiant_unique=identifiant_unique,
+                                update_url=self.update_url,
+                                replace_text=valeur,
+                                fields_groups=json.dumps([(champ,)]),
                                 error=(
                                     str(errors.get(champ, ""))
                                     if errors and errors.get(champ)
@@ -134,11 +118,10 @@ class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
                 row_label = f"Acteur {identifiant_unique}"
 
                 cells.append(
-                    CellFieldsContent(
+                    CellDisplayContent(
                         column_key="source",
-                        cell_type="display",
                         fields=[
-                            CellField(
+                            FieldInCell(
                                 field_name=champ,
                                 display_html=getattr(acteur, champ),
                             )
@@ -147,11 +130,10 @@ class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
                     )
                 )
                 cells.append(
-                    CellFieldsContent(
+                    CellEditableContent(
                         column_key="update",
-                        cell_type="editable",
                         fields=[
-                            CellField(
+                            FieldInCell(
                                 field_name=champ,
                                 display_html=display_diff_values(
                                     (
@@ -162,25 +144,11 @@ class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
                                     valeur,
                                 ),
                                 editable=True,
-                                stimulus=(
-                                    StimulusControllerConfig(
-                                        controller="cell-edit",
-                                        values={
-                                            "field": champ,
-                                            "suggestion-modele": (
-                                                suggestion_unitaire.suggestion_modele
-                                            ),
-                                            "update-url": self.update_url,  # TODO
-                                            "replace-text": valeur,
-                                            "fields-groups": json.dumps([(champ,)]),
-                                            "identifiant-unique": identifiant_unique,
-                                        },
-                                        actions=[
-                                            "blur->cell-edit#save",
-                                            "focus->cell-edit#replace",
-                                        ],
-                                    )
-                                ),
+                                suggestion_modele=suggestion_unitaire.suggestion_modele,
+                                update_url=self.update_url,
+                                replace_text=valeur,
+                                fields_groups=json.dumps([(champ,)]),
+                                identifiant_unique=identifiant_unique,
                                 error=(
                                     str(errors.get(champ, ""))
                                     if errors and errors.get(champ)
