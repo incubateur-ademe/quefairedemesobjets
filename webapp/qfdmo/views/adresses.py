@@ -473,7 +473,7 @@ class ActeurDetailView(MapPrefixMixin, TurboFormMixin, DetailView):
         is_carte = (
             "carte" in self.request.GET
             or "with_map" in self.request.GET
-            or self.request.GET.get(MAP_CONTAINER_ID) != FORMULAIRE_MAP_CONTAINER_ID
+            or self.request.GET.get(MAP_CONTAINER_ID, "") != FORMULAIRE_MAP_CONTAINER_ID
         )
         context.update(
             latitude=search_latitude,
