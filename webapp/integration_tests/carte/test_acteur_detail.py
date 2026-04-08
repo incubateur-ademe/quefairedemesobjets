@@ -219,11 +219,21 @@ class TestRedirects:
 @pytest.mark.django_db
 class TestIsFormulaire:
     def test_is_formulaire_without_map_params(self, client):
-        """Without map context params, acteur detail is in formulaire mode."""
+        """Without map context params, acteur detail is in carte mode."""
         acteur = DisplayedActeurFactory()
         response = client.get(f"/adresse_details/{acteur.uuid}")
-        assert response.context["is_formulaire"] is True
-        assert response.context["is_carte"] is False
+        assert response.context["is_carte"] is True
+
+    def test_is_carte_with_with_map_container_id_formulaire_is_in_formulaire_mode(
+        self, client
+    ):
+        """With with_map param, acteur detail is in carte mode."""
+        acteur = DisplayedActeurFactory()
+        response = client.get(
+            f"/adresse_details/{acteur.uuid}?map_container_id=formulaire"
+        )
+        assert response.context.get("is_formulaire") is not True
+        assert response.context["is_carte"] is True
 
     def test_is_carte_with_map_container_id(self, client):
         """With map_container_id param, acteur detail is in carte mode."""
