@@ -232,8 +232,8 @@ class TestIsFormulaire:
         response = client.get(
             f"/adresse_details/{acteur.uuid}?map_container_id=formulaire"
         )
-        assert response.context.get("is_formulaire") is not True
-        assert response.context["is_carte"] is True
+        assert response.context.get("is_formulaire") is True
+        assert response.context.get("is_carte") is not True
 
     def test_is_carte_with_map_container_id(self, client):
         """With map_container_id param, acteur detail is in carte mode."""
