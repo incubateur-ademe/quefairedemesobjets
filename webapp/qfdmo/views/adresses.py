@@ -29,6 +29,7 @@ from qfdmo.map_utils import (
 from qfdmo.models import Acteur, ActeurStatus, DisplayedActeur, RevisionActeur
 from qfdmo.models.action import get_reparer_action_id
 from qfdmo.models.geo import EPCI
+from core.constants import FORMULAIRE_MAP_CONTAINER_ID, MAP_CONTAINER_ID
 
 logger = logging.getLogger(__name__)
 
@@ -463,10 +464,16 @@ class ActeurDetailView(MapPrefixMixin, TurboFormMixin, DetailView):
             source.afficher for source in displayed_acteur.sources.all()
         )
 
+        # Some templates rely on a is_carte template.
+        # In a more recent implementation, it was decided to use
+        # a is_formulaire variable instead.
+        # The default being is_carte.
+        # TODO: remove is_carte in a future refactoring
+        # and replace by is_formulaire below
         is_carte = (
             "carte" in self.request.GET
             or "with_map" in self.request.GET
-            or "map_container_id" in self.request.GET
+            or self.request.GET.get(MAP_CONTAINER_ID) != FORMULAIRE_MAP_CONTAINER_ID
         )
         context.update(
             latitude=search_latitude,
