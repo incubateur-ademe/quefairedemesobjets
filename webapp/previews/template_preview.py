@@ -8,6 +8,18 @@ from django.contrib.gis.geos import Point
 from django.core.paginator import Paginator
 from django.template import Context, Template
 from django.template.loader import render_to_string
+
+from data.models.comparison_table import (
+    CellActionContent,
+    CellDisplayContent,
+    CellEditableContent,
+    CellHtmlContent,
+    ColumnHeader,
+    ComparisonTable,
+    FieldInCell,
+    LinkInCell,
+    TableRow,
+)
 from django.test import RequestFactory
 from django_lookbook.preview import LookbookPreview
 from django_lookbook.utils import register_form_class
@@ -1246,3 +1258,125 @@ class TestsPreview(LookbookPreview):
         return render_to_string(
             "ui/tests/t_16_infotri_configurator.html",
         )
+
+
+class DataPreview(LookbookPreview):
+    """
+    Previews for data platform admin templates (suggestion review tables, cells, etc.).
+    """
+
+    def suggestion_comparison_table(self, **kwargs):
+        """Tableau de suggestion groupe"""
+        columns = [
+            ColumnHeader(key="label", label="Champ(s)"),
+            ColumnHeader(
+                key="source",
+                label="Acteur Importé",
+            ),
+            ColumnHeader(
+                key="correction",
+                label="Correction",
+            ),
+            ColumnHeader(key="action", label=""),
+        ]
+
+        def make_url_row(identifiant, source_url, correction_url):
+            url_links = [LinkInCell(label="Vers site web", url=correction_url)]
+            return TableRow(
+                cells=[
+                    CellHtmlContent(
+                        column_key="label",
+                        html_content=f"Acteur {identifiant}<br><small>(Source - Correction)</small>",
+                    ),
+                    CellDisplayContent(
+                        column_key="source",
+                        fields=[FieldInCell(field_name="url", display_html=source_url)],
+                    ),
+                    CellEditableContent(
+                        column_key="correction",
+                        links=url_links,
+                        fields=[
+                            FieldInCell(
+                                field_name="url",
+                                display_html=correction_url,
+                                editable=True,
+                            )
+                        ],
+                    ),
+                    CellActionContent(
+                        column_key="action",
+                        enabled=True,
+                        action_icon="✅",
+                    ),
+                ]
+            )
+
+        comparison_table = ComparisonTable(
+            columns=columns,
+            rows=[
+                make_url_row(
+                    "ecomaison_2764844",
+                    "http://www.troc.com",
+                    "http://www.troc.com/fr",
+                ),
+                make_url_row(
+                    "ecomaison_2109606",
+                    "http://www.troc.com",
+                    "http://www.troc.com/fr",
+                ),
+                make_url_row(
+                    "ecomaison_2108274",
+                    "http://www.troc.com",
+                    "https://www.troc.com/fr",
+                ),
+            ],
+        )
+
+        factory = RequestFactory()
+        request = factory.get("/")
+
+        context = {
+            "comparison_table": comparison_table,
+            "request": request,
+        }
+
+        # Render only the table portion (not the full suggestion_groupe_details template
+        # which requires real django objects like suggestion_groupe, acteur, etc.)
+        template = Template("""
+            {% load comparison_table_tags %}
+            <div class="fr-table fr-table--bordered">
+                <table>
+                    <thead>
+                        <tr>
+                            {% for column in comparison_table.columns %}
+                                <th class="{{ column.css_classes }}">
+                                    <div class="qf-truncate">
+                                        {{ column.label }}
+                                        {% if column.links %}
+                                            (
+                                            {% for link in column.links %}
+                                                {% if not forloop.first %}, {% endif %}
+                                                <a href="{{ link.url }}" target="_blank" rel="noreferrer" data-turbo="false">{{ link.label }}</a>
+                                            {% endfor %}
+                                            )
+                                        {% endif %}
+                                    </div>
+                                </th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in comparison_table.rows %}
+                            <tr>
+                                {% for cell in row.cells %}
+                                    <td>
+                                        {% display_cell_as_html cell %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        """)
+        return template.render(Context(context))
