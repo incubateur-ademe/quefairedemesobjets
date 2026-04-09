@@ -1,0 +1,5 @@
+{% for field in cell.fields %}
+    {{ field.display_html|safe }}
+    {% if not forloop.last %}, {% endif %}
+{% endfor %}
+{% include "data/_partials/cells/_links.html" %}

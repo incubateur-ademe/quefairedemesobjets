@@ -67,10 +67,14 @@ def suggestion_groupe_modification(suggestion_groupe):
 def _get_cell(table, row_label, column_key):
     """Helper to find a cell by row label and column key in a ComparisonTable."""
     for row in table.rows:
-        if row.label == column_key or row.label == row_label:
-            for cell in row.cells:
-                if cell.column_key == column_key:
-                    return cell
+        if not row.cells:
+            continue
+        label_cell = row.cells[0]
+        if label_cell.column_key != "label" or label_cell.html_content != row_label:
+            continue
+        for cell in row.cells:
+            if cell.column_key == column_key:
+                return cell
     return None
 
 
@@ -98,7 +102,7 @@ class TestSerializeSuggestionGroupe:
         table = result["comparison_table"]
 
         # Verify rows match field groups
-        assert [row.label for row in table.rows] == [
+        assert [row.cells[0].html_content for row in table.rows] == [
             "identifiant_unique",
             "nom",
             "latitude, longitude",
@@ -267,6 +271,7 @@ class TestSerializeSuggestionGroupe:
         assert _get_display_htmls(table, "nom", "parent") == {
             "nom": '<span class="no-suggestion-text">Parent nom</span>',
         }
+
         assert _get_display_htmls(table, "latitude, longitude", "parent") == {
             "latitude": '<span class="no-suggestion-text">48.1111</span>',
             "longitude": '<span class="no-suggestion-text">2.1111</span>',

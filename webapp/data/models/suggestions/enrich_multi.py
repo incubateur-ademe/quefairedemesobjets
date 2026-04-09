@@ -3,16 +3,18 @@ import logging
 
 from core.templatetags.admin_data_tags import display_diff_values
 from data.models.comparison_table import (
-    CellContent,
-    CellField,
-    CellFieldsContent,
+    CellDisplayContent,
+    CellEditableContent,
+    CellHtmlContent,
     ColumnHeader,
     ComparisonTable,
-    StimulusControllerConfig,
+    FieldInCell,
+    LinkInCell,
     TableRow,
 )
-from data.models.suggestion import SuggestionGroupe
+from data.models.suggestion import SuggestionGroupe, SuggestionUnitaire
 from data.models.suggestions.abstract import SuggestionGroupeType
+from django.contrib.admin.utils import quote
 from django.urls import reverse
 from qfdmo.models.acteur import Acteur, RevisionActeur
 
@@ -37,25 +39,39 @@ class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
     ) -> "SuggestionGroupeTypeEnrichMulti":
         return cls(suggestion_groupe=suggestion_groupe)
 
+    def _get_fields_links(
+        self,
+        from_object: Acteur | RevisionActeur | None,
+        suggestion_unitaire: SuggestionUnitaire,
+    ) -> list[LinkInCell]:
+        field_group = suggestion_unitaire.champs
+        source_valeurs = [
+            getattr(from_object, field) if from_object else None
+            for field in field_group
+        ]
+        target_valeurs = suggestion_unitaire.valeurs
+
+        return super()._get_fields_links(field_group, source_valeurs, target_valeurs)
+
     def to_comparison_table(self, errors: dict | None = None) -> ComparisonTable:
         suggestions_unitaires = self.suggestion_groupe.suggestion_unitaires.all()
 
-        columns = [ColumnHeader(key="label", css_classes="qf-w-1/4")]
+        columns = [ColumnHeader(key="label")]
 
-        for column_name in ["Champ(s)", "Acteur", "Mise à jour"]:
+        for column_name in ["Champ(s)", "Acteur", "Correction"]:
             columns.append(
                 ColumnHeader(
                     key=column_name,
                     label=column_name,
-                    css_classes="qf-w-1/4",
                 )
             )
         rows = []
         for suggestion_unitaire in suggestions_unitaires:
             row_label = ""
+            identifiant_unique = ""
             cells = []
             cells.append(
-                CellContent(
+                CellHtmlContent(
                     column_key="source",
                     html_content=f"{", ".join(suggestion_unitaire.champs)}",
                 )
@@ -67,17 +83,16 @@ class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
                 parent_revision_acteur = suggestion_unitaire.parent_revision_acteur
                 row_label = f"Parent {identifiant_unique}"
                 cells.append(
-                    CellContent(
+                    CellHtmlContent(
                         column_key="source",
                         html_content="🚫",
                     )
                 )
                 cells.append(
-                    CellFieldsContent(
+                    CellEditableContent(
                         column_key="update",
-                        cell_type="editable",
                         fields=[
-                            CellField(
+                            FieldInCell(
                                 field_name=champ,
                                 display_html=display_diff_values(
                                     (
@@ -88,25 +103,11 @@ class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
                                     valeur,
                                 ),
                                 editable=True,
-                                stimulus=(
-                                    StimulusControllerConfig(
-                                        controller="cell-edit",
-                                        values={
-                                            "field": champ,
-                                            "suggestion-modele": (
-                                                suggestion_unitaire.suggestion_modele
-                                            ),
-                                            "identifiant-unique": identifiant_unique,
-                                            "update-url": self.update_url,  # TODO
-                                            "replace-text": valeur,
-                                            "fields-groups": json.dumps([(champ,)]),
-                                        },
-                                        actions=[
-                                            "blur->cell-edit#save",
-                                            "focus->cell-edit#replace",
-                                        ],
-                                    )
-                                ),
+                                suggestion_modele=suggestion_unitaire.suggestion_modele,
+                                identifiant_unique=identifiant_unique,
+                                update_url=self.update_url,
+                                replace_text=valeur,
+                                fields_groups=json.dumps([(champ,)]),
                                 error=(
                                     str(errors.get(champ, ""))
                                     if errors and errors.get(champ)
@@ -117,6 +118,10 @@ class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
                                 suggestion_unitaire.champs, suggestion_unitaire.valeurs
                             )
                         ],
+                        links=self._get_fields_links(
+                            from_object=parent_revision_acteur,
+                            suggestion_unitaire=suggestion_unitaire,
+                        ),
                     )
                 )
             else:
@@ -134,11 +139,10 @@ class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
                 row_label = f"Acteur {identifiant_unique}"
 
                 cells.append(
-                    CellFieldsContent(
+                    CellDisplayContent(
                         column_key="source",
-                        cell_type="display",
                         fields=[
-                            CellField(
+                            FieldInCell(
                                 field_name=champ,
                                 display_html=getattr(acteur, champ),
                             )
@@ -147,11 +151,10 @@ class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
                     )
                 )
                 cells.append(
-                    CellFieldsContent(
+                    CellEditableContent(
                         column_key="update",
-                        cell_type="editable",
                         fields=[
-                            CellField(
+                            FieldInCell(
                                 field_name=champ,
                                 display_html=display_diff_values(
                                     (
@@ -162,25 +165,11 @@ class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
                                     valeur,
                                 ),
                                 editable=True,
-                                stimulus=(
-                                    StimulusControllerConfig(
-                                        controller="cell-edit",
-                                        values={
-                                            "field": champ,
-                                            "suggestion-modele": (
-                                                suggestion_unitaire.suggestion_modele
-                                            ),
-                                            "update-url": self.update_url,  # TODO
-                                            "replace-text": valeur,
-                                            "fields-groups": json.dumps([(champ,)]),
-                                            "identifiant-unique": identifiant_unique,
-                                        },
-                                        actions=[
-                                            "blur->cell-edit#save",
-                                            "focus->cell-edit#replace",
-                                        ],
-                                    )
-                                ),
+                                suggestion_modele=suggestion_unitaire.suggestion_modele,
+                                update_url=self.update_url,
+                                replace_text=valeur,
+                                fields_groups=json.dumps([(champ,)]),
+                                identifiant_unique=identifiant_unique,
                                 error=(
                                     str(errors.get(champ, ""))
                                     if errors and errors.get(champ)
@@ -191,15 +180,50 @@ class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
                                 suggestion_unitaire.champs, suggestion_unitaire.valeurs
                             )
                         ],
+                        links=self._get_fields_links(
+                            from_object=revision_acteur,
+                            suggestion_unitaire=suggestion_unitaire,
+                        ),
                     )
                 )
 
-            rows.append(
-                TableRow(
-                    label=row_label,
-                    cells=cells,
+            # suggestion_unitaire.suggestion_modele == "ParentRevisionActeur"
+            links = []
+            if suggestion_unitaire.suggestion_modele == "ParentRevisionActeur":
+                links.append(
+                    LinkInCell(
+                        label="Parent",
+                        url=reverse(
+                            "qfdmo:getorcreate_revisionacteur",
+                            args=[quote(identifiant_unique)],
+                        ),
+                    )
                 )
+            else:
+                links.append(
+                    LinkInCell(
+                        label="Source",
+                        url=reverse(
+                            "admin:qfdmo_acteur_change",
+                            args=[quote(identifiant_unique)],
+                        ),
+                    )
+                )
+                links.append(
+                    LinkInCell(
+                        label="Correction",
+                        url=reverse(
+                            "qfdmo:getorcreate_revisionacteur",
+                            args=[identifiant_unique],
+                        ),
+                    )
+                )
+            label_cell = CellHtmlContent(
+                column_key="label",
+                html_content=row_label,
+                links=links,
             )
+            rows.append(TableRow(cells=[label_cell, *cells]))
 
         return ComparisonTable(columns=columns, rows=rows)
 

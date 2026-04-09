@@ -1,0 +1,19 @@
+<div class="qf-text-center qf-text-2xl">
+    {% if cell.enabled %}
+        <div
+            {% if cell.stimulus_fields %}
+                data-controller="report-update"
+                data-report-update-fields-value="{{ cell.stimulus_fields }}"
+                {% if cell.stimulus_suggestion_modele %}data-report-update-suggestion-modele-value="{{ cell.stimulus_suggestion_modele }}"{% endif %}
+                {% if cell.stimulus_update_url %}data-report-update-update-url-value="{{ cell.stimulus_update_url }}"{% endif %}
+                {% if cell.stimulus_target_values %}data-report-update-target-values-value="{{ cell.stimulus_target_values }}"{% endif %}
+                {% if cell.stimulus_fields_groups %}data-report-update-fields-groups-value="{{ cell.stimulus_fields_groups }}"{% endif %}
+                data-action="click->report-update#report"
+            {% endif %}
+            class="qf-cursor-pointer">
+            {{ cell.action_icon }}
+        </div>
+    {% else %}
+        <div>{{ cell.disabled_icon }}</div>
+    {% endif %}
+</div>

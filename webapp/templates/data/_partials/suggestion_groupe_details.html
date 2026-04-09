@@ -3,20 +3,27 @@
 {% load admin_data_tags comparison_table_tags %}
 
 {% block suggestion_details %}
-
     {% if errors and errors.error %}
         <div class="qf-text-red-500">
             {{ errors.error }}
         </div>
     {% endif %}
-    <div class="fr-table fr-table--bordered">
-        <table>
+    <div class="fr-table fr-table--bordered ">
+        <table class="qf-w-full qf-table-fixed qf-break-words">
             <thead>
                 <tr>
                     {% for column in comparison_table.columns %}
-                        <th class="{{ column.css_classes }}">
+                        <th class="{% if column.header_action %}qf-text-center{% endif %}">
                             {% if column.header_action %}
-                                <div {{ column.header_action|stimulus_attrs }} class="qf-cursor-pointer">
+                                <div
+                                    data-controller="report-update"
+                                    data-report-update-fields-value="{{ column.header_action.fields }}"
+                                    {% if column.header_action.suggestion_modele %}data-report-update-suggestion-modele-value="{{ column.header_action.suggestion_modele }}"{% endif %}
+                                    {% if column.header_action.update_url %}data-report-update-update-url-value="{{ column.header_action.update_url }}"{% endif %}
+                                    {% if column.header_action.target_values %}data-report-update-target-values-value="{{ column.header_action.target_values }}"{% endif %}
+                                    {% if column.header_action.fields_groups %}data-report-update-fields-groups-value="{{ column.header_action.fields_groups }}"{% endif %}
+                                    data-action="click->report-update#report"
+                                    class="qf-cursor-pointer">
                                     {{ column.label }}
                                 </div>
                             {% else %}
@@ -42,55 +49,10 @@
             <tbody>
                 {% for row in comparison_table.rows %}
                     <tr>
-                        <td>{{ row.label }}</td>
                         {% for cell in row.cells %}
-                            {% if cell.cell_type == "html" %}
-                                <td>
-                                    {{ cell.html_content|safe }}
-                                </td>
-                            {% elif cell.cell_type == "display" %}
-                                <td>
-                                    {% for field in cell.fields %}
-                                        {{ field.display_html|safe }}
-                                        {% if not forloop.last %}, {% endif %}
-                                    {% endfor %}
-                                </td>
-                            {% elif cell.cell_type == "action" %}
-                                <td class="qf-text-center qf-text-2xl">
-                                    {% if cell.enabled %}
-                                        <div {{ cell.stimulus|stimulus_attrs }} class="qf-cursor-pointer">
-                                            {{ cell.action_icon }}
-                                        </div>
-                                    {% else %}
-                                        <div>{{ cell.disabled_icon }}</div>
-                                    {% endif %}
-                                </td>
-                            {% elif cell.cell_type == "editable" %}
-                                <td>
-                                    <div class="qf-flex qf-flex-row qf-items-center qf-gap-1">
-                                        {% for field in cell.fields %}
-                                            {% if not field.editable %}
-                                                <div>🚫</div>
-                                            {% endif %}
-                                            <div
-                                                contentEditable="{{ field.editable|yesno:"true,false" }}"
-                                                {% if field.stimulus %}{{ field.stimulus|stimulus_attrs }}{% endif %}>
-                                                {{ field.display_html|safe }}
-                                            </div>
-                                            {% if not forloop.last %}<span>&nbsp;,&nbsp;</span> {% endif %}
-                                        {% endfor %}
-                                    </div>
-                                    <div>
-                                        {% for field in cell.fields %}
-                                            {% if field.error %}
-                                                <div class="qf-text-red-500">
-                                                    {{ field.error }}
-                                                </div>
-                                            {% endif %}
-                                        {% endfor %}
-                                    </div>
-                                </td>
-                            {% endif %}
+                            <td>
+                                {% display_cell_as_html cell %}
+                            </td>
                         {% endfor %}
                     </tr>
                 {% endfor %}
