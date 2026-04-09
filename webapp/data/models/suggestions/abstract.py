@@ -1,7 +1,7 @@
 import json
 from abc import abstractmethod
 
-from data.models.comparison_table import ComparisonTable
+from data.models.comparison_table import ComparisonTable, LinkInCell
 from data.models.suggestion import SuggestionGroupe
 from data.models.utils import prepare_acteur_data_with_location
 from django.db import models as django_models
@@ -16,6 +16,9 @@ from qfdmo.models.acteur import (
 )
 from qfdmo.models.action import Action
 from qfdmo.models.categorie_objet import SousCategorieObjet
+
+AE_ETABLISSEMENT_URL = "https://annuaire-entreprises.data.gouv.fr/etablissement/"
+AE_ENTREPRISE_URL = "https://annuaire-entreprises.data.gouv.fr/entreprise/"
 
 
 class SuggestionGroupeType(BaseModel):
@@ -131,3 +134,63 @@ class SuggestionGroupeType(BaseModel):
                     linked_objects.add(
                         linked_object_class.objects.get(code=linked_object)
                     )
+
+    def _get_fields_links(
+        self,
+        field_group: list[str],
+        source_valeurs: list[str | None],
+        target_valeurs: list[str | None],
+    ) -> list[LinkInCell]:
+        links = []
+
+        print(field_group, source_valeurs, target_valeurs)
+        for champ, source_valeur, target_valeur in zip(
+            field_group, source_valeurs, target_valeurs
+        ):
+            if champ == "siret":
+                if source_valeur:
+                    links.append(
+                        LinkInCell(
+                            label="Depuis établissement",
+                            url=f"{AE_ETABLISSEMENT_URL}{source_valeur}",
+                        )
+                    )
+                if target_valeur:
+                    links.append(
+                        LinkInCell(
+                            label="Vers établissement",
+                            url=f"{AE_ETABLISSEMENT_URL}{target_valeur}",
+                        )
+                    )
+            elif champ == "siren":
+                if source_valeur:
+                    links.append(
+                        LinkInCell(
+                            label="Depuis unité légale",
+                            url=f"{AE_ENTREPRISE_URL}{source_valeur}",
+                        )
+                    )
+                if target_valeur:
+                    links.append(
+                        LinkInCell(
+                            label="Vers unité légale",
+                            url=f"{AE_ENTREPRISE_URL}{target_valeur}",
+                        )
+                    )
+            elif champ == "url":
+                if source_valeur:
+                    links.append(
+                        LinkInCell(
+                            label="Depuis site web",
+                            url=source_valeur,
+                        )
+                    )
+                if target_valeur:
+                    links.append(
+                        LinkInCell(
+                            label="Vers site web",
+                            url=target_valeur,
+                        )
+                    )
+
+        return links

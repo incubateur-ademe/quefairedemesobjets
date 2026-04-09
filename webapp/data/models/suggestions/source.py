@@ -24,9 +24,6 @@ from more_itertools import flatten
 from pydantic import BaseModel, ConfigDict
 from qfdmo.models.acteur import Acteur, RevisionActeur
 
-AE_ETABLISSEMENT_URL = "https://annuaire-entreprises.data.gouv.fr/etablissement/"
-AE_ENTREPRISE_URL = "https://annuaire-entreprises.data.gouv.fr/entreprise/"
-
 
 class SuggestionSourceModel(BaseModel):
     """
@@ -521,8 +518,24 @@ class SuggestionGroupeTypeSource(SuggestionGroupeType):
         return json.dumps(self.fields_groups)
 
     def _get_field_value(self, model: SuggestionSourceModel, field: str) -> str | None:
-        value = getattr(model, field, None)
+        value = getattr(model, field)
         return value if value else None
+
+    def _get_fields_links(
+        self,
+        field_group: list[str],
+        source_object: SuggestionSourceModel,
+        target_object: SuggestionSourceModel,
+    ) -> list[LinkInCell]:
+
+        source_valeurs = [getattr(source_object, field) for field in field_group]
+        target_valeurs = [getattr(target_object, field) for field in field_group]
+
+        return super()._get_fields_links(
+            field_group,
+            source_valeurs,
+            target_valeurs,
+        )
 
     def _target_values_json(self, fields: tuple[str, ...] | list[str]) -> str:
         return json.dumps(
@@ -583,42 +596,6 @@ class SuggestionGroupeTypeSource(SuggestionGroupeType):
         else:
             raise ValueError(f"Invalid suggestion_modele: {suggestion_modele}")
 
-    def _get_fields_links(
-        self,
-        field_group: tuple[str, ...],
-        suggestion_modele: str,
-    ) -> list[LinkInCell]:
-        links = []
-        suggestion_source_model = self._get_suggestion_source_model_from_modele(
-            suggestion_modele
-        )
-        if "siret" in field_group:
-            if siret := getattr(suggestion_source_model, "siret", None):
-                links.append(
-                    LinkInCell(
-                        label="etablissement",
-                        url=f"{AE_ETABLISSEMENT_URL}{siret}",
-                    )
-                )
-        if "siren" in field_group:
-            if siren := getattr(suggestion_source_model, "siren", None):
-                links.append(
-                    LinkInCell(
-                        label="unité légale",
-                        url=f"{AE_ENTREPRISE_URL}{siren}",
-                    )
-                )
-        if "url" in field_group:
-            if url := getattr(suggestion_source_model, "url", None):
-                links.append(
-                    LinkInCell(
-                        label="site web",
-                        url=url,
-                    )
-                )
-
-        return links
-
     def _build_target_row_cells(
         self,
         field_group: tuple[str, ...],
@@ -637,7 +614,18 @@ class SuggestionGroupeTypeSource(SuggestionGroupeType):
         fields_str = "|".join(field_group)
         reportable = all(f not in not_reportable for f in field_group)
 
-        links = self._get_fields_links(field_group, suggestion_modele)
+        source_object = (
+            self.parent_revision_acteur_values
+            if suggestion_modele == "ParentRevisionActeur"
+            else self.revision_acteur_values
+        )
+        target_object = self._get_suggestion_source_model_from_modele(suggestion_modele)
+
+        links = self._get_fields_links(
+            list(field_group),
+            source_object,
+            target_object,
+        )
 
         action_cell = CellActionContent(
             column_key=action_column_key,
@@ -793,7 +781,6 @@ class SuggestionGroupeTypeSource(SuggestionGroupeType):
             cells.append(
                 CellDisplayContent(
                     column_key="source",
-                    links=self._get_fields_links(field_group, "Acteur"),
                     fields=[
                         FieldInCell(
                             field_name=field,
@@ -801,6 +788,9 @@ class SuggestionGroupeTypeSource(SuggestionGroupeType):
                         )
                         for field in field_group
                     ],
+                    links=self._get_fields_links(
+                        list(field_group), self.acteur_values, self.acteur_suggestions
+                    ),
                 )
             )
 

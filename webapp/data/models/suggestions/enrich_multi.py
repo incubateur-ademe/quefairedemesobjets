@@ -9,10 +9,12 @@ from data.models.comparison_table import (
     ColumnHeader,
     ComparisonTable,
     FieldInCell,
+    LinkInCell,
     TableRow,
 )
-from data.models.suggestion import SuggestionGroupe
+from data.models.suggestion import SuggestionGroupe, SuggestionUnitaire
 from data.models.suggestions.abstract import SuggestionGroupeType
+from django.contrib.admin.utils import quote
 from django.urls import reverse
 from qfdmo.models.acteur import Acteur, RevisionActeur
 
@@ -37,6 +39,20 @@ class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
     ) -> "SuggestionGroupeTypeEnrichMulti":
         return cls(suggestion_groupe=suggestion_groupe)
 
+    def _get_fields_links(
+        self,
+        from_object: Acteur | RevisionActeur | None,
+        suggestion_unitaire: SuggestionUnitaire,
+    ) -> list[LinkInCell]:
+        field_group = suggestion_unitaire.champs
+        source_valeurs = [
+            getattr(from_object, field) if from_object else None
+            for field in field_group
+        ]
+        target_valeurs = suggestion_unitaire.valeurs
+
+        return super()._get_fields_links(field_group, source_valeurs, target_valeurs)
+
     def to_comparison_table(self, errors: dict | None = None) -> ComparisonTable:
         suggestions_unitaires = self.suggestion_groupe.suggestion_unitaires.all()
 
@@ -52,6 +68,7 @@ class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
         rows = []
         for suggestion_unitaire in suggestions_unitaires:
             row_label = ""
+            identifiant_unique = ""
             cells = []
             cells.append(
                 CellHtmlContent(
@@ -101,6 +118,10 @@ class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
                                 suggestion_unitaire.champs, suggestion_unitaire.valeurs
                             )
                         ],
+                        links=self._get_fields_links(
+                            from_object=parent_revision_acteur,
+                            suggestion_unitaire=suggestion_unitaire,
+                        ),
                     )
                 )
             else:
@@ -159,10 +180,49 @@ class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
                                 suggestion_unitaire.champs, suggestion_unitaire.valeurs
                             )
                         ],
+                        links=self._get_fields_links(
+                            from_object=revision_acteur,
+                            suggestion_unitaire=suggestion_unitaire,
+                        ),
                     )
                 )
 
-            label_cell = CellHtmlContent(column_key="label", html_content=row_label)
+            # suggestion_unitaire.suggestion_modele == "ParentRevisionActeur"
+            links = []
+            if suggestion_unitaire.suggestion_modele == "ParentRevisionActeur":
+                links.append(
+                    LinkInCell(
+                        label="Parent",
+                        url=reverse(
+                            "qfdmo:getorcreate_revisionacteur",
+                            args=[quote(identifiant_unique)],
+                        ),
+                    )
+                )
+            else:
+                links.append(
+                    LinkInCell(
+                        label="Source",
+                        url=reverse(
+                            "admin:qfdmo_acteur_change",
+                            args=[quote(identifiant_unique)],
+                        ),
+                    )
+                )
+                links.append(
+                    LinkInCell(
+                        label="Correction",
+                        url=reverse(
+                            "qfdmo:getorcreate_revisionacteur",
+                            args=[identifiant_unique],
+                        ),
+                    )
+                )
+            label_cell = CellHtmlContent(
+                column_key="label",
+                html_content=row_label,
+                links=links,
+            )
             rows.append(TableRow(cells=[label_cell, *cells]))
 
         return ComparisonTable(columns=columns, rows=rows)
