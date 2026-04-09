@@ -35,7 +35,13 @@ services:
       - 5432
     ports:
       - 6543:5432
-    profiles: [lvao, airflow]
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "webapp"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    profiles: [lvao, airflow, webapp]
   lvao-warehouse-db:
     image: postgis/postgis:15-3.3-alpine
     environment:
@@ -49,7 +55,13 @@ services:
       - 5432
     ports:
       - 8765:5432
-    profiles: [airflow]
+    profiles: [airflow, webapp]
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "warehouse"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
   lvao-proxy:
     build:
       context: ./webapp
@@ -131,3 +143,20 @@ services:
       airflow-webserver:
         condition: service_healthy
     profiles: [airflow]
+
+  webapp:
+    env_file:
+      - ./webapp/.env
+    build:
+      context: ./webapp
+      dockerfile: Dockerfile
+    environment:
+      # Override local settings (localhost:6543) with docker network hostname/port
+      DATABASE_URL: postgres://webapp:webapp@lvao-webapp-db:5432/webapp # pragma: allowlist secret
+      DB_WAREHOUSE: postgres://warehouse:warehouse@lvao-warehouse-db:5432/warehouse # pragma: allowlist secret
+    depends_on:
+      lvao-webapp-db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    profiles: [webapp]
