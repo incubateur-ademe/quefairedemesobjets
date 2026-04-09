@@ -12,6 +12,7 @@ from qfdmo.forms import ActionDirectionForm, DigitalActeurForm, FormulaireForm
 from qfdmo.models.acteur import DisplayedActeur
 from qfdmo.models.action import Action, GroupeAction, get_action_instances
 from qfdmo.views.adresses import AbstractSearchActeursView
+from core.constants import FORMULAIRE_MAP_CONTAINER_ID
 
 
 class FormulaireSearchActeursView(AbstractSearchActeursView):
@@ -307,7 +308,7 @@ class FormulaireSearchActeursView(AbstractSearchActeursView):
 
         context.update(
             is_formulaire=True,
-            map_container_id="formulaire",
+            map_container_id=FORMULAIRE_MAP_CONTAINER_ID,
             action_direction_form=self.action_direction_form,
             digital_acteur_form=self.digital_acteur_form,
             selected_action_codes=self._get_action_codes(),
