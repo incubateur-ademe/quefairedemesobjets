@@ -78,7 +78,7 @@ test.describe("🏷️ Configurateur Info-tri", () => {
     test(`La catégorie "${label}" affiche un pictogramme SVG à côté du Cartouche France`, async ({
       page,
     }) => {
-      await page.goto(`/infotri/embed?categorie=${value}`, {
+      await page.goto(`/infotri/?categorie=${value}`, {
         waitUntil: "domcontentloaded",
       })
 
