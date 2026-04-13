@@ -7,7 +7,6 @@ from django.contrib.gis.geos import GEOSGeometry
 from django.core.cache import cache
 from rapidfuzz import fuzz, process
 
-
 logger = logging.getLogger(__name__)
 
 BASE_URL = "https://geo.api.gouv.fr"

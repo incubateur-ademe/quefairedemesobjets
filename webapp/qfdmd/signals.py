@@ -41,6 +41,8 @@ def index_search_tags_on_publish(sender, instance, **kwargs):
     # TODO: handle unindexing removed tags
     for item in instance.search_tags_items.select_related("tag"):
         insert_or_update_object(item.tag)
+
+
 @receiver(page_published, sender=HomePage)
 def invalidate_icons_home_cache(sender, instance, **kwargs):
     """Invalidate the homepage icons fragment cache when the page is published."""
@@ -52,6 +54,7 @@ def invalidate_footer_cache(sender, instance, **kwargs):
     """Invalidate footer fragment caches when any FlatMenu is saved."""
     cache.delete(make_template_fragment_key(FRAGMENT_CACHE_KEYS["footer_top"]))
     cache.delete(make_template_fragment_key(FRAGMENT_CACHE_KEYS["footer_links"]))
+
 
 @receiver(post_save, sender=submission_class)
 def submit_sites_conformes_form(sender, instance, created, **kwargs):
