@@ -20,18 +20,16 @@ def get_infotri_configurator_iframe_script(request):
     return static_file_content_from("embed/infotri-configurator.js")
 
 
-class InfotriConfiguratorView(FormView):
+class InfotriEmbedView(FormView):
     """
-    Main view for the Info-tri configurator.
-    Users configure their Info-tri labels here and get the embed code.
-    Handles GET requests with form data passed via query parameters.
+    Embed view that displays the actual Info-tri visual.
+    This is loaded in an iframe on third-party sites.
     """
 
     form_class = InfotriForm
-    template_name = "ui/pages/infotri.html"
+    template_name = "ui/pages/infotri_embed.html"
 
     def get_form_kwargs(self):
-        """Pass GET data to the form."""
         kwargs = super().get_form_kwargs()
         if self.request.GET:
             kwargs["data"] = self.request.GET
@@ -48,12 +46,3 @@ class InfotriConfiguratorView(FormView):
 
     def form_valid(self, form):
         return self.render_to_response(self.get_context_data(form=form))
-
-
-class InfotriEmbedView(InfotriConfiguratorView):
-    """
-    Embed view that displays the actual Info-tri visual.
-    This is loaded in an iframe on third-party sites.
-    """
-
-    template_name = "ui/pages/infotri_embed.html"

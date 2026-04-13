@@ -1,7 +1,6 @@
 from django.urls import path
 
 from infotri.views import (
-    InfotriConfiguratorView,
     InfotriEmbedView,
     get_infotri_configurator_iframe_script,
     get_infotri_iframe_script,
@@ -16,6 +15,5 @@ urlpatterns = [
         get_infotri_configurator_iframe_script,
         name="infotri_configurator_script",
     ),
-    path("", InfotriConfiguratorView.as_view(), name="configurator"),
     path("embed", InfotriEmbedView.as_view(), name="embed"),
 ]
