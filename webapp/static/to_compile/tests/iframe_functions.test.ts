@@ -2,7 +2,7 @@ import { generateBackLink } from "../embed/helpers"
 import { getIframeAttributesAndExtra } from "../js/iframe_functions"
 
 describe("generateBackLink", () => {
-  let iframeMock
+  let iframeMock: HTMLIFrameElement
 
   beforeEach(() => {
     iframeMock = document.createElement("iframe")
@@ -35,9 +35,11 @@ describe("getIframeAttributesAndExtra function tests", () => {
   let scriptTag: HTMLScriptElement
 
   // Helper function to set dataset attributes
-  const setScriptDataset = (attributes: { [key: string]: string }) => {
+  const setScriptDataset = (attributes: Record<string, string | undefined>) => {
     Object.entries(attributes).forEach(([key, value]) => {
-      scriptTag.dataset[key] = value
+      if (value !== undefined) {
+        scriptTag.dataset[key] = value
+      }
     })
   }
 
@@ -100,9 +102,19 @@ describe("getIframeAttributesAndExtra function tests", () => {
     },
   ])(
     "should generate correct iframe attributes $description",
-    ({ dataset, route, options, expectedSrc }) => {
+    ({
+      dataset,
+      route,
+      options,
+      expectedSrc,
+    }: {
+      dataset: Record<string, string | undefined>
+      route: string
+      options: Record<string, unknown>
+      expectedSrc: string
+    }) => {
       // These are tests...any seems acceptable but we might want to type this at some point.
-      setScriptDataset(dataset as any)
+      setScriptDataset(dataset)
 
       const [iframeAttributes, iframeExtraAttributes] = getIframeAttributesAndExtra(
         scriptTag,
