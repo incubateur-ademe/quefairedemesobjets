@@ -52,7 +52,7 @@ services:
     profiles: [airflow]
   lvao-proxy:
     build:
-      context: .
+      context: ./webapp
       dockerfile: nginx/Dockerfile
     ports:
       - 80:80
