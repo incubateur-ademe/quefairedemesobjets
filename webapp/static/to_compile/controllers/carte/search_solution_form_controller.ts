@@ -1,5 +1,4 @@
 import { Controller } from "@hotwired/stimulus"
-import * as Turbo from "@hotwired/turbo"
 
 class SearchFormController extends Controller<HTMLFormElement> {
   #selectedOption: string = ""
@@ -168,14 +167,17 @@ class SearchFormController extends Controller<HTMLFormElement> {
     }
   }
 
-  updateBboxInput(event) {
+  updateBboxInput(event: CustomEvent<unknown>) {
     if (this.hasBboxTarget) {
       this.bboxTarget.value = JSON.stringify(event.detail)
     }
   }
 
-  displayDigitalActeur(event) {
-    event.currentTarget.setAttribute("aria-expanded", "true")
+  displayDigitalActeur(event: Event) {
+    const target = event.currentTarget
+    if (target instanceof Element) {
+      target.setAttribute("aria-expanded", "true")
+    }
   }
 
   displayActionList() {
