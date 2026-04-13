@@ -21,6 +21,17 @@ def create_or_update_site_vitrine():
     return site
 
 
+def page_exists_at_path(old_path: str) -> bool:
+    """Return True if a Wagtail page is already served at the given URL path."""
+    current_site = Site.objects.filter(is_default_site=True).first()
+    if current_site is None:
+        return False
+    root_url_path = current_site.root_page.url_path
+    normalized = old_path.strip("/")
+    candidate_url_path = f"{root_url_path.rstrip('/')}/{normalized}/"
+    return Page.objects.filter(url_path=candidate_url_path, live=True).exists()
+
+
 class Command(BaseCommand):
     help = "Import legacy Redirects"
 
@@ -66,6 +77,14 @@ class Command(BaseCommand):
                     )
                     errors += 1
                     continue
+
+                if page_exists_at_path(old_path):
+                    self.stderr.write(
+                        self.style.WARNING(
+                            f"Warning: a live page already exists at '{old_path}',"
+                            " the redirect may be ignored by Wagtail."
+                        )
+                    )
 
                 _, was_created = Redirect.objects.update_or_create(
                     old_path=Redirect.normalise_path(old_path),
