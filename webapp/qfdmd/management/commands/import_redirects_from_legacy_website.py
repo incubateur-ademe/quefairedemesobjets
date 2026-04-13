@@ -2,23 +2,8 @@ import csv
 from pathlib import Path
 
 from django.core.management.base import BaseCommand
-from qfdmd.models import HomePage
 from wagtail.contrib.redirects.models import Redirect
 from wagtail.models import Page, Site
-
-
-def create_or_update_site_vitrine():
-    homepage = HomePage.objects.first()
-    site, _ = Site.objects.get_or_create(
-        hostname="longuevieauxobjets.ademe.fr",
-        defaults={
-            "root_page": homepage,
-            "hostname": "longuevieauxobjets.ademe.fr",
-            "port": 443,
-            "site_name": "Ancien site vitrine",
-        },
-    )
-    return site
 
 
 def page_exists_at_path(old_path: str) -> bool:
@@ -46,8 +31,6 @@ class Command(BaseCommand):
         created = 0
         skipped = 0
         errors = 0
-
-        site = create_or_update_site_vitrine()
 
         with open(csv_path, newline="", encoding="utf-8") as f:
             reader = csv.DictReader(f)
@@ -88,7 +71,6 @@ class Command(BaseCommand):
 
                 _, was_created = Redirect.objects.update_or_create(
                     old_path=Redirect.normalise_path(old_path),
-                    site=site,
                     defaults={"redirect_page": page},
                 )
                 if was_created:
