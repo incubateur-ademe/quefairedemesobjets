@@ -2,23 +2,19 @@ import csv
 from pathlib import Path
 
 from django.core.management.base import BaseCommand
-from qfdmd.models import HomePage
 from wagtail.contrib.redirects.models import Redirect
 from wagtail.models import Page, Site
 
 
-def create_or_update_site_vitrine():
-    homepage = HomePage.objects.first()
-    site, _ = Site.objects.get_or_create(
-        hostname="longuevieauxobjets.ademe.fr",
-        defaults={
-            "root_page": homepage,
-            "hostname": "longuevieauxobjets.ademe.fr",
-            "port": 443,
-            "site_name": "Ancien site vitrine",
-        },
-    )
-    return site
+def page_exists_at_path(old_path: str) -> bool:
+    """Return True if a Wagtail page is already served at the given URL path."""
+    current_site = Site.objects.filter(is_default_site=True).first()
+    if current_site is None:
+        return False
+    root_url_path = current_site.root_page.url_path
+    normalized = old_path.strip("/")
+    candidate_url_path = f"{root_url_path.rstrip('/')}/{normalized}/"
+    return Page.objects.filter(url_path=candidate_url_path, live=True).exists()
 
 
 class Command(BaseCommand):
@@ -35,8 +31,6 @@ class Command(BaseCommand):
         created = 0
         skipped = 0
         errors = 0
-
-        site = create_or_update_site_vitrine()
 
         with open(csv_path, newline="", encoding="utf-8") as f:
             reader = csv.DictReader(f)
@@ -67,9 +61,16 @@ class Command(BaseCommand):
                     errors += 1
                     continue
 
+                if page_exists_at_path(old_path):
+                    self.stderr.write(
+                        self.style.WARNING(
+                            f"Warning: a live page already exists at '{old_path}',"
+                            " the redirect may be ignored by Wagtail."
+                        )
+                    )
+
                 _, was_created = Redirect.objects.update_or_create(
                     old_path=Redirect.normalise_path(old_path),
-                    site=site,
                     defaults={"redirect_page": page},
                 )
                 if was_created:
