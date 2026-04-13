@@ -65,12 +65,11 @@ services:
         required: false
     environment:
       - BASE_DOMAIN=${BASE_DOMAIN:-quefairedemesdechets.ademe.local}
-      - LEGACY_SITE_VITRINE_DOMAIN=${LEGACY_SITE_VITRINE_DOMAIN:-}
       - PORT=80
       - NGINX_DISABLE_CACHE=${NGINX_DISABLE_CACHE:-0}
       - UPSTREAM_HOST=host.docker.internal:8000
-      - SSL_CERT_PATH=/etc/nginx/ssl/quefairedemesdechets.ademe.local.pem
-      - SSL_CERT_KEY_PATH=/etc/nginx/ssl/quefairedemesdechets.ademe.local-key.pem
+      - SSL_CERT_PATH=/etc/nginx/ssl/${BASE_DOMAIN:-quefairedemesdechets.ademe.local}.pem
+      - SSL_CERT_KEY_PATH=/etc/nginx/ssl/${BASE_DOMAIN:-quefairedemesdechets.ademe.local}-key.pem
     profiles: [lvao]
   airflow-db:
     image: postgres:15
