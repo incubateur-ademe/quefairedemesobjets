@@ -8,7 +8,8 @@ from infotri.views import (
 )
 
 urlpatterns = [
-    # These routes are embedded on external sites, do not remove or rename them.
+    # This route needs to be touched with care as it is embedded
+    # on many websites, enabling the load of Info-tri as an iframe
     path("iframe.js", get_infotri_iframe_script, name="infotri_script"),
     path(
         "configurateur.js",

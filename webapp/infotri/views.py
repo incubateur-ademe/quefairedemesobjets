@@ -21,12 +21,17 @@ def get_infotri_configurator_iframe_script(request):
 
 
 class InfotriConfiguratorView(FormView):
-    """Configurator form, loaded in an iframe by configurateur.js."""
+    """
+    Main view for the Info-tri configurator.
+    Users configure their Info-tri labels here and get the embed code.
+    Handles GET requests with form data passed via query parameters.
+    """
 
     form_class = InfotriForm
     template_name = "ui/pages/infotri.html"
 
     def get_form_kwargs(self):
+        """Pass GET data to the form."""
         kwargs = super().get_form_kwargs()
         if self.request.GET:
             kwargs["data"] = self.request.GET
@@ -45,29 +50,10 @@ class InfotriConfiguratorView(FormView):
         return self.render_to_response(self.get_context_data(form=form))
 
 
-class InfotriEmbedView(FormView):
+class InfotriEmbedView(InfotriConfiguratorView):
     """
     Embed view that displays the actual Info-tri visual.
     This is loaded in an iframe on third-party sites.
     """
 
-    form_class = InfotriForm
     template_name = "ui/pages/infotri_embed.html"
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        if self.request.GET:
-            kwargs["data"] = self.request.GET
-        return kwargs
-
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-        context["base_url"] = settings.BASE_URL
-        context["show_code"] = self.request.GET.get("show_code") == "true"
-        context["categorie_svg_templates"] = CATEGORIE_SVG_TEMPLATES
-        context["consigne_svg_templates"] = CONSIGNE_SVG_TEMPLATES
-        context["phrase_svg_templates"] = PHRASE_SVG_TEMPLATES
-        return context
-
-    def form_valid(self, form):
-        return self.render_to_response(self.get_context_data(form=form))
