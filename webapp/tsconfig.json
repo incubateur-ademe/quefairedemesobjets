@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "strictNullChecks": true,
+    "types": ["jest", "node"],
     "module": "commonjs",
     "target": "ES6",
     "esModuleInterop": true
