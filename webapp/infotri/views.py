@@ -20,6 +20,31 @@ def get_infotri_configurator_iframe_script(request):
     return static_file_content_from("embed/infotri-configurator.js")
 
 
+class InfotriConfiguratorView(FormView):
+    """Configurator form, loaded in an iframe by configurateur.js."""
+
+    form_class = InfotriForm
+    template_name = "ui/pages/infotri.html"
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        if self.request.GET:
+            kwargs["data"] = self.request.GET
+        return kwargs
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["base_url"] = settings.BASE_URL
+        context["show_code"] = self.request.GET.get("show_code") == "true"
+        context["categorie_svg_templates"] = CATEGORIE_SVG_TEMPLATES
+        context["consigne_svg_templates"] = CONSIGNE_SVG_TEMPLATES
+        context["phrase_svg_templates"] = PHRASE_SVG_TEMPLATES
+        return context
+
+    def form_valid(self, form):
+        return self.render_to_response(self.get_context_data(form=form))
+
+
 class InfotriEmbedView(FormView):
     """
     Embed view that displays the actual Info-tri visual.
