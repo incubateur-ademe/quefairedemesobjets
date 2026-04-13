@@ -15,7 +15,7 @@ parentacteur_labels AS (
         a.source_id AS source_id,
         a.identifiant_externe AS identifiant_externe
     FROM {{ ref(ephemeral_filtered_acteur) }} AS a
-    WHERE a.parent_id is not null
+    WHERE a.parent_id is not null AND a.statut = 'ACTIF'
     GROUP BY a.parent_id, a.source_id, a.identifiant_externe
 ),
 acteur_sources AS (

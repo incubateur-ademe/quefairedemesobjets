@@ -205,7 +205,7 @@ def cluster_acteurs_clusters(
             cols_ids_codes
             + cluster_fields_exact
             + cluster_fields_fuzzy
-            + ["nom", "source_codes"]
+            + ["source_codes"]
         )
     )
     df = df[cols_to_keep]
