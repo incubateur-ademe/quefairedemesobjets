@@ -11,7 +11,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
-from contextlib import suppress
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -201,10 +200,11 @@ if DEBUG:
     )
 
     if WITH_DJANGO_DEBUG_TOOLBAR:
+        from debug_toolbar.settings import CONFIG_DEFAULTS
+
         INSTALLED_APPS.append("debug_toolbar")
         MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")
         DEBUG_TOOLBAR_CONFIG = {
-            # "RESULTS_CACHE_SIZE": 1000,
             "DISABLE_PANELS": (
                 "debug_toolbar.panels.request.RequestPanel",
                 "debug_toolbar.panels.staticfiles.StaticFilesPanel",
@@ -217,18 +217,6 @@ if DEBUG:
             ),
             "TOOLBAR_STORE_CLASS": "debug_toolbar.store.DatabaseStore",
         }
-
-    if WITH_DJANGO_SILK:
-        INSTALLED_APPS.append("silk")
-        MIDDLEWARE.append("silk.middleware.SilkyMiddleware")
-
-    CORS_ALLOW_ALL_ORIGINS = DEBUG
-
-
-with suppress(ModuleNotFoundError):
-    from debug_toolbar.settings import CONFIG_DEFAULTS
-
-    if WITH_DJANGO_DEBUG_TOOLBAR:
 
         def show_toolbar_callback(request):
             path_is_not_excluded = not any(
@@ -252,6 +240,13 @@ with suppress(ModuleNotFoundError):
             + ("sentry_sdk",),
             "ROOT_TAG_EXTRA_ATTRS": "data-turbo-permanent",
         }
+
+    if WITH_DJANGO_SILK:
+        INSTALLED_APPS.append("silk")
+        MIDDLEWARE.append("silk.middleware.SilkyMiddleware")
+
+    CORS_ALLOW_ALL_ORIGINS = DEBUG
+
 
 LOGLEVEL = decouple.config(
     "LOGLEVEL", default="info" if DEBUG else "error", cast=str
