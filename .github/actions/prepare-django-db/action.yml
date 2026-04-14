@@ -57,6 +57,7 @@ runs:
       shell: bash
       working-directory: webapp
       run: |
+        uv run python manage.py createcachetable
         # TODO: user make prepare-e2e-test here
         make migrate
         # TEMPORARY, required to have unaccent search function in CI
