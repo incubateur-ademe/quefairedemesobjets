@@ -62,4 +62,10 @@ ASSISTANT = {
 
 MAP_CONTAINER_ID = "map_container_id"
 
+FRAGMENT_CACHE_KEYS = {
+    "icons_home": "icons-home",
+    "footer_top": "footer-top",
+    "footer_links": "footer-links",
+}
+
 SEARCH_TERM_ID_QUERY_PARAM = "search_term_id"

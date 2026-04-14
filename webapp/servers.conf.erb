@@ -1,19 +1,58 @@
-proxy_cache_path /tmp/nginx_assistant_cache levels=1:2 keys_zone=assistant:10m max_size=1g inactive=60m use_temp_path=off;
+sendfile on;
+tcp_nopush on;
+tcp_nodelay on;
+keepalive_timeout 65;
 
-# Define a variable to disable cache if the specific cookie is set
-map $http_cookie $no_cache {
-    default 0; # Enable caching by default
-    "~*logged_in=.*" 1; # Disable caching if 'logged_in' is set
+gzip on;
+gzip_vary on;
+gzip_proxied any;
+gzip_comp_level 6;
+gzip_types text/plain text/css text/javascript application/javascript application/json application/xml image/svg+xml;
+
+open_file_cache max=1000 inactive=20s;
+open_file_cache_valid 30s;
+open_file_cache_min_uses 2;
+open_file_cache_errors on;
+
+proxy_cache_path /tmp/nginx_assistant_cache levels=1:2 keys_zone=assistant:50m max_size=1g inactive=60m use_temp_path=off;
+
+# Disable cache when the user is logged in (session cookie present)
+map $http_cookie $cookie_no_cache {
+    default 0;
+    "~*logged_in=.*" 1;
+}
+
+# Combine cookie-based and env-based cache control
+map "$cookie_no_cache:<%= ENV["NGINX_DISABLE_CACHE"] || "0" %>" $no_cache {
+    default 0;
+    "1:0" 1;
+    "1:1" 1;
+    "0:1" 1;
 }
 
 map $host $is_valid_host {
     default                                          0;
     "<%= ENV["BASE_DOMAIN"] %>"                      1;
+<% if ENV["LEGACY_SITE_VITRINE_DOMAIN"] && ENV["LEGACY_SITE_VITRINE_DOMAIN"] != ENV["BASE_DOMAIN"] %>
     "<%= ENV["LEGACY_SITE_VITRINE_DOMAIN"] %>"       1;
+<% end %>
+}
+upstream gunicorn {
+    server <%= ENV["UPSTREAM_HOST"] || "unix:/tmp/gunicorn.sock" %>;
+    # keepalive: maintain persistent connections to gunicorn to avoid
+    # TCP handshake overhead on every request
+    keepalive 32;
 }
 
 server {
+<% if ENV["SSL_CERT_PATH"] %>
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    ssl_certificate <%= ENV["SSL_CERT_PATH"] %>;
+    ssl_certificate_key <%= ENV["SSL_CERT_KEY_PATH"] %>;
+<% else %>
     listen <%= ENV["PORT"] %>;
+<% end %>
     server_name _;
 
     # Redirect if host is not one of the allowed domains
@@ -22,44 +61,48 @@ server {
     }
 
 
+<% unless ENV["DEBUG"] == "true" || ENV["DEBUG"] == "True" || ENV["DEBUG"] == "1" %>
     location /static/ {
         expires max;
         alias /app/staticfiles/;
     }
+<% end %>
+    # Cache embeddable JS assets (iframe.js, carte.js) - these are served to
+    # third-party sites and must not vary by session
+    location ~ ^/(static/)?(iframe|carte)\.js$ {
+        # HTTP/1.1 + empty Connection header required for upstream keepalive
+        proxy_pass http://gunicorn;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
 
-    location /iframe.js {
-        proxy_pass http://unix:/tmp/gunicorn.sock;
         proxy_cache assistant;
-        add_header X-Cache-Status $upstream_cache_status;
-    }
-
-    location /static/iframe.js {
-        proxy_pass http://unix:/tmp/gunicorn.sock;
-        proxy_cache assistant;
-        add_header X-Cache-Status $upstream_cache_status;
-    }
-
-
-    location /static/carte.js {
-        proxy_pass http://unix:/tmp/gunicorn.sock;
-        proxy_cache assistant;
-        add_header X-Cache-Status $upstream_cache_status;
+        proxy_cache_valid 200 301 302 10m;
+        proxy_cache_valid 404 1m;
+        add_header X-Cache-Status $upstream_cache_status always;
     }
 
     location / {
-        proxy_pass http://unix:/tmp/gunicorn.sock;
+        # HTTP/1.1 + empty Connection header required for upstream keepalive
+        proxy_pass http://gunicorn;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
 
+        # Bypass cache for logged-in users
         proxy_cache_bypass $no_cache;
         proxy_no_cache $no_cache;
 
         proxy_cache assistant;
         proxy_set_header Host $http_host;
-        proxy_cache_key $request_method$request_uri$is_args$args;
+        # Include $http_sec_fetch_dest in cache key to serve different cached
+        # versions for standalone page loads vs iframe embeds
+        proxy_cache_key $request_method$scheme$host$request_uri$http_sec_fetch_dest;
+        proxy_cache_valid 200 301 302 10m;
+        proxy_cache_valid 404 1m;
         proxy_cache_lock on;
         proxy_cache_lock_timeout 10s;
         proxy_cache_use_stale error timeout updating;
         proxy_cache_background_update on;
-        add_header X-Cache-Status $upstream_cache_status;
+        add_header X-Cache-Status $upstream_cache_status always;
     }
 
     location ~ ^/(favicon(?:-\d+)?.(?:jpe?g|png|ico))$ {
@@ -67,3 +110,11 @@ server {
         log_not_found off;
     }
 }
+<% if ENV["SSL_CERT_PATH"] %>
+server {
+    listen 80;
+    listen [::]:80;
+    server_name _;
+    return 301 https://$host$request_uri;
+}
+<% end %>

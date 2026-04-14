@@ -22,9 +22,12 @@ check:
 init-certs:
 	@which mkcert > /dev/null || { echo "mkcert is not installed. Please install it first: brew install mkcert (macOS) or visit https://github.com/FiloSottile/mkcert"; exit 1; }
 	mkcert -install
-	mkcert $(BASE_DOMAIN)
-	mv *.pem ./nginx-local-only/certs/
-	docker compose restart lvao-proxy
+	mkdir -p ./webapp/nginx/certs
+	mkcert -cert-file ./webapp/nginx/certs/$(BASE_DOMAIN).pem -key-file ./webapp/nginx/certs/$(BASE_DOMAIN)-key.pem $(BASE_DOMAIN) $(LEGACY_SITE_VITRINE_DOMAIN)
+	@echo "Adding local DNS entries to /etc/hosts (requires sudo)..."
+	@grep -q "$(BASE_DOMAIN)" /etc/hosts || echo "127.0.0.1 $(BASE_DOMAIN)" | sudo tee -a /etc/hosts
+	@grep -q "$(LEGACY_SITE_VITRINE_DOMAIN)" /etc/hosts || echo "127.0.0.1 $(LEGACY_SITE_VITRINE_DOMAIN)" | sudo tee -a /etc/hosts
+	docker compose --profile lvao restart lvao-proxy
 
 # FIXME : Reactive it !
 # .PHONY: init-dev

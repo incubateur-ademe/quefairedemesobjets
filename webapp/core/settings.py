@@ -11,15 +11,17 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
-from contextlib import suppress
 from pathlib import Path
 from urllib.parse import urlparse
+
+import logging
 
 import decouple
 import dj_database_url
 import sentry_sdk
 from import_export.formats.base_formats import CSV, XLS, XLSX
 from sentry_sdk.integrations.django import DjangoIntegration
+from sentry_sdk.integrations.logging import LoggingIntegration
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -169,15 +171,17 @@ MIDDLEWARE = [
 
 CACHES = {
     "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-    },
-    "database": {
         "BACKEND": "django.core.cache.backends.db.DatabaseCache",
-        "LOCATION": "lvao_django_cache",
+        "LOCATION": "qf_django_cache",
     },
 }
 
 X_FRAME_OPTIONS = "ALLOWALL"
+
+WITH_DJANGO_DEBUG_TOOLBAR = decouple.config(
+    "WITH_DJANGO_DEBUG_TOOLBAR", default=False, cast=bool
+)
+WITH_DJANGO_SILK = decouple.config("WITH_DJANGO_SILK", default=False, cast=bool)
 
 if DEBUG:
     # FIXME: A CSRF error can occur locally when using HTTPS.
@@ -186,38 +190,63 @@ if DEBUG:
     # only local development and can be considered harmless, but this
     # might be nice to remove this setting someday.
     CSRF_TRUSTED_ORIGINS = [BASE_URL]
-    INSTALLED_APPS.extend(["debug_toolbar", "django_browser_reload"])
+    INSTALLED_APPS.extend(["django_browser_reload"])
     MEDIA_ROOT = "media"
     MEDIA_URL = "/media/"
     MIDDLEWARE.extend(
         [
-            "debug_toolbar.middleware.DebugToolbarMiddleware",
             "django_browser_reload.middleware.BrowserReloadMiddleware",
         ]
     )
 
+    if WITH_DJANGO_DEBUG_TOOLBAR:
+        from debug_toolbar.settings import CONFIG_DEFAULTS
+
+        INSTALLED_APPS.append("debug_toolbar")
+        MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")
+        DEBUG_TOOLBAR_CONFIG = {
+            "DISABLE_PANELS": (
+                "debug_toolbar.panels.request.RequestPanel",
+                "debug_toolbar.panels.staticfiles.StaticFilesPanel",
+                "debug_toolbar.panels.alerts.AlertsPanel",
+                "debug_toolbar.panels.cache.CachePanel",
+                "debug_toolbar.panels.signals.SignalsPanel",
+                "debug_toolbar.panels.community.CommunityPanel",
+                "debug_toolbar.panels.redirects.RedirectsPanel",
+                "debug_toolbar.panels.profiling.ProfilingPanel",
+            ),
+            "TOOLBAR_STORE_CLASS": "debug_toolbar.store.DatabaseStore",
+        }
+
+        def show_toolbar_callback(request):
+            path_is_not_excluded = not any(
+                p in request.path for p in patterns_to_exclude
+            )
+
+            if request.headers.get("User-Agent") == "playwright":
+                return False
+            if request.headers.get("Sec-Fetch-Dest") == "iframe":
+                # Hide in iframe
+                return False
+
+            return path_is_not_excluded
+
+        patterns_to_exclude = ["/lookbook"]
+        # ROOT_TAG_EXTRA_ATTRS is required so Turbo doesn't replace the toolbar
+        # between navigations, which would cause "panel data no longer available".
+        DEBUG_TOOLBAR_CONFIG = {
+            "SHOW_TOOLBAR_CALLBACK": show_toolbar_callback,
+            "HIDE_IN_STACKTRACES": CONFIG_DEFAULTS["HIDE_IN_STACKTRACES"]
+            + ("sentry_sdk",),
+            "ROOT_TAG_EXTRA_ATTRS": "data-turbo-permanent",
+        }
+
+    if WITH_DJANGO_SILK:
+        INSTALLED_APPS.append("silk")
+        MIDDLEWARE.append("silk.middleware.SilkyMiddleware")
+
     CORS_ALLOW_ALL_ORIGINS = DEBUG
 
-
-with suppress(ModuleNotFoundError):
-    from debug_toolbar.settings import CONFIG_DEFAULTS
-
-    def show_toolbar_callback(request):
-        path_is_not_excluded = not any(p in request.path for p in patterns_to_exclude)
-
-        if request.headers.get("User-Agent") == "playwright":
-            return False
-        if request.headers.get("Sec-Fetch-Dest") == "iframe":
-            # Hide in iframe
-            return False
-
-        return path_is_not_excluded
-
-    patterns_to_exclude = ["/lookbook", "/cms"]
-    DEBUG_TOOLBAR_CONFIG = {
-        "SHOW_TOOLBAR_CALLBACK": show_toolbar_callback,
-        "HIDE_IN_STACKTRACES": CONFIG_DEFAULTS["HIDE_IN_STACKTRACES"] + ("sentry_sdk",),
-    }
 
 LOGLEVEL = decouple.config(
     "LOGLEVEL", default="info" if DEBUG else "error", cast=str
@@ -417,9 +446,16 @@ WHITENOISE_KEEP_ONLY_HASHED_FILES = True
 
 # Sentry
 # ------
+SENTRY_DSN = decouple.config("SENTRY_DSN", cast=str, default="")
 sentry_sdk.init(
-    dsn=decouple.config("SENTRY_DSN", cast=str, default=""),
-    integrations=[DjangoIntegration()],
+    dsn=SENTRY_DSN,
+    integrations=[
+        DjangoIntegration(),
+        LoggingIntegration(
+            level=logging.INFO,  # INFO+ log records attached as breadcrumbs
+            event_level=logging.ERROR,  # ERROR+ log records create Sentry events
+        ),
+    ],
     environment=ENVIRONMENT,
     # If you wish to associate users to errors (assuming you are using
     # django.contrib.auth) you may enable sending PII data.
@@ -505,6 +541,10 @@ SILENCED_SYSTEM_CHECKS = ["wagtailadmin.W002"]
 HOST_PROTO = decouple.config("HOST_PROTO", default="https")
 WAGTAIL_SITE_NAME = "Que faire de mes objets et déchets"
 WAGTAILADMIN_BASE_URL = BASE_URL
+# Disable autosave
+WAGTAIL_AUTOSAVE_INTERVAL = 0
+# increase ping delay : 30s
+WAGTAIL_EDITING_SESSION_PING_INTERVAL = 30000
 MODELSEARCH_BACKENDS = {
     "default": {
         "BACKEND": "modelsearch.backends.database",

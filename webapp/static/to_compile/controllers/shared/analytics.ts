@@ -2,6 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 import { InteractionType as PosthogUIInteractionType } from "../../js/types"
 import posthog, { PostHogConfig } from "posthog-js"
 import { URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE } from "../../js/helpers"
+import { initSentry } from "../../js/sentry"
 
 const IFRAME_REFERRER_SESSION_KEY = "qf_ifr"
 
@@ -29,6 +30,8 @@ export default class extends Controller<HTMLElement> {
   declare readonly initialActionValue
   declare readonly posthogDebugValue
   declare readonly posthogKeyValue
+  declare readonly sentryDsnValue
+  declare readonly sentryEnvironmentValue
   declare readonly userAdminValue
   declare readonly userEmailValue
   declare readonly userUsernameValue
@@ -42,6 +45,8 @@ export default class extends Controller<HTMLElement> {
     initialAction: String,
     posthogDebug: Boolean,
     posthogKey: String,
+    sentryDsn: String,
+    sentryEnvironment: String,
     userAdmin: Boolean,
     userConversionScore: Object,
     userEmail: String,
@@ -74,6 +79,7 @@ export default class extends Controller<HTMLElement> {
   }
 
   initialize(): void {
+    initSentry(this.sentryDsnValue, this.sentryEnvironmentValue)
     posthog.init(this.posthogKeyValue, this.posthogConfig)
     this.#identifyAuthenticatedUser()
     this.#initialiseIframeRelatedPersonProperties()

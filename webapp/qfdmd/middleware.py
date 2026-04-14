@@ -160,22 +160,25 @@ class RequestEnhancementMiddleware:
         request.iframe = request.headers.get("Sec-Fetch-Dest") == "iframe"
 
     def _persist_iframe_in_headers(self, request, response):
-        """Persist iframe state in headers.
-        This is useful as headers are used as a cache key with nginx.
-        iFrame version of pages are cached differently."""
-
-        if request.iframe:
-            response.headers["iframe"] = "1"
-        else:
-            # Ensure the iframe header is not lingering
-            response.headers.pop("iframe", None)
+        """Add Sec-Fetch-Dest to the Vary header so nginx uses it as part of
+        the cache key, separating iframe and non-iframe versions of pages."""
+        vary_header = response.headers.get("Vary", "")
+        vary_values = [v.strip() for v in vary_header.split(",") if v.strip()]
+        if "Sec-Fetch-Dest" not in vary_values:
+            vary_values.append("Sec-Fetch-Dest")
+            response.headers["Vary"] = ", ".join(vary_values)
 
     @staticmethod
     def _cleanup_vary_header(response):
-        """Helper to parse and return the Vary header as a list."""
+        """Remove 'Cookie' from the Vary header so nginx can cache without
+        fragmenting by every cookie value."""
         vary_header = response.headers.get("Vary", "")
-        return [
+        cleaned = [
             v.strip()
             for v in vary_header.split(",")
             if v.strip() and v.strip().lower() != "cookie"
         ]
+        if cleaned:
+            response.headers["Vary"] = ", ".join(cleaned)
+        else:
+            response.headers.pop("Vary", None)
