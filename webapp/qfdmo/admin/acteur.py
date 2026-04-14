@@ -683,7 +683,25 @@ class RevisionPropositionServiceAdmin(ImportExportMixin, BasePropositionServiceA
 # endregion RevisionPropositionService
 
 
-class FinalActeurAdminMixin(admin.ModelAdmin):
+class FinalActeurAdminMixin(BaseActeurAdmin):
+    list_display = list(BaseActeurAdmin.list_display) + ["uuid"]
+    search_fields = list(BaseActeurAdmin.search_fields) + ["uuid"]
+    change_form_template = "admin/acteur/change_form.html"
+
+    base_fields = [
+        field
+        for field in BaseActeurAdmin.fields
+        if field not in ["identifiant_unique", "source"]
+    ]
+    fields = [
+        "uuid",
+        "identifiant_unique",
+        "sources",
+        *base_fields,
+        "epci",
+        "code_commune_insee",
+    ]
+
     # We need this class to display the map for the location field
     # even if it is readonly
     def get_readonly_fields(self, request, obj=None):
@@ -704,25 +722,9 @@ class DisplayedActeurResource(ActeurResource):
 
 
 class DisplayedActeurAdmin(ExportMixin, FinalActeurAdminMixin, BaseActeurAdmin):
-    list_display = list(BaseActeurAdmin.list_display) + ["uuid"]
-    search_fields = list(BaseActeurAdmin.search_fields) + ["uuid"]
-    change_form_template = "admin/acteur/change_form.html"
     gis_widget = CustomOSMWidget
     # DisplayedActeur has one or many sources, then we need to displayed the sources
     # field instead source field from BaseActeurAdmin
-    base_fields = [
-        field
-        for field in BaseActeurAdmin.fields
-        if field not in ["identifiant_unique", "source"]
-    ]
-    fields = [
-        "uuid",
-        "identifiant_unique",
-        "sources",
-        *base_fields,
-        "epci",
-        "code_commune_insee",
-    ]
 
     inlines = [
         DisplayedPropositionServiceInline,
@@ -755,14 +757,11 @@ class VueActeurAdmin(FinalActeurAdminMixin, BaseActeurAdmin):
     ]
     fields = [
         "est_parent",
-        "uuid",
-        *BaseActeurAdmin.fields,
+        *FinalActeurAdminMixin.fields,
         "parent",
         "revision_existe",
         "est_dans_carte",
         "est_dans_opendata",
-        "epci",
-        "code_commune_insee",
     ]
     autocomplete_fields = ["parent"]
 
