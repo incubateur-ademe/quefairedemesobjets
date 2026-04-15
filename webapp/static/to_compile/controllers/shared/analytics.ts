@@ -57,7 +57,9 @@ export default class extends Controller<HTMLElement> {
     api_host: "/ph",
     ui_host: "https://eu.posthog.com",
     autocapture: false,
-    capture_pageview: false,
+    capture_pageview: true,
+    capture_pageleave: true,
+    capture_performance: true,
     person_profiles: "always",
     persistence: "memory",
   }
@@ -80,7 +82,6 @@ export default class extends Controller<HTMLElement> {
   initialize(): void {
     initSentry(this.sentryDsnValue, this.sentryEnvironmentValue)
     posthog.init(this.posthogKeyValue, this.posthogConfig)
-    posthog.capture("$pageview")
     this.#identifyAuthenticatedUser()
     this.#initialiseIframeRelatedPersonProperties()
     this.#syncSessionStorageWithLocalConversionScore()
