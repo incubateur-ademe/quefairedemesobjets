@@ -3,6 +3,8 @@
     data-turbo="false"
     class="fr-link"
     tabindex="0"
+    data-action="click->analytics#captureSearchResultClick"
+    {% block tracking_attrs %}{% endblock %}
 >
     {% block nom %}
     {{ result|capfirst }}

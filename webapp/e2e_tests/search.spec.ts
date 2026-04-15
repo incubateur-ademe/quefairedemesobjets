@@ -134,7 +134,7 @@ test.describe("Recherche de produits", () => {
     expect(results).toBeHidden
   })
 
-  test("Les liens des résultats SearchTag contiennent search_term_id, position et search_term", async ({
+  test("Les résultats SearchTag portent les data attributes de tracking et non des paramètres URL", async ({
     page,
   }) => {
     await typeSearchQuery(page, "canapé d'angle")
@@ -143,30 +143,33 @@ test.describe("Recherche de produits", () => {
     const count = await results.count()
     expect(count).toBeGreaterThan(0)
 
-    // Parcourir les résultats et vérifier les liens qui contiennent search_term_id
-    // (seuls les résultats de type SearchTag ont ces paramètres)
+    // Trouver un résultat avec data-search-term-id (résultat de type SearchTag)
     let searchTagFound = false
     let nextUrl = ""
     for (let i = 0; i < count; i++) {
-      const href = await results.nth(i).getAttribute("href")
-      if (href && href.includes("search_term_id=")) {
+      const anchor = results.nth(i)
+      const searchTermId = await anchor.getAttribute("data-search-term-id")
+      if (searchTermId) {
         searchTagFound = true
-        const url = new URL(href, "http://localhost")
 
-        // search_term_id doit être un nombre
-        const searchTermId = url.searchParams.get("search_term_id")
-        expect(searchTermId).toBeTruthy()
+        // data-search-term-id doit être un nombre
         expect(Number(searchTermId)).toBeGreaterThan(0)
 
-        // position doit correspondre à la position dans la liste (1-indexed)
-        const position = url.searchParams.get("position")
-        expect(position).toBe(String(i + 1))
+        // data-search-term-name doit être présent et non vide
+        const searchTermName = await anchor.getAttribute("data-search-term-name")
+        expect(searchTermName).toBeTruthy()
 
-        // search_term doit être présent et non vide
-        const searchTerm = url.searchParams.get("search_term")
-        expect(searchTerm).toBeTruthy()
-        expect(searchTerm!.length).toBeGreaterThan(0)
-        nextUrl = href
+        // Le <li> parent doit avoir data-position et data-source
+        const li = anchor.locator("xpath=ancestor::li[1]")
+        expect(await li.getAttribute("data-position")).toBe(String(i + 1))
+        expect(await li.getAttribute("data-source")).toBe("homepage_autocomplete")
+
+        // Les paramètres ne doivent PAS être dans l'href
+        const href = await anchor.getAttribute("href")
+        expect(href).not.toContain("search_term_id=")
+        expect(href).not.toContain("search_term=")
+
+        nextUrl = href!
       }
     }
 

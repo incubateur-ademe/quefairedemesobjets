@@ -53,10 +53,9 @@ export default class extends Controller<HTMLElement> {
     userUsername: String,
   }
 
-  intersectionObserverThreshold = 0.1
-
   posthogConfig: Partial<PostHogConfig> = {
-    api_host: "https://eu.posthog.com",
+    api_host: "/ph",
+    ui_host: "https://eu.posthog.com",
     autocapture: false,
     capture_pageview: false,
     person_profiles: "always",
@@ -81,10 +80,11 @@ export default class extends Controller<HTMLElement> {
   initialize(): void {
     initSentry(this.sentryDsnValue, this.sentryEnvironmentValue)
     posthog.init(this.posthogKeyValue, this.posthogConfig)
+    posthog.capture("$pageview")
     this.#identifyAuthenticatedUser()
     this.#initialiseIframeRelatedPersonProperties()
     this.#syncSessionStorageWithLocalConversionScore()
-    this.#setupIntersectionObserver()
+    this.#setupPageViewedPersonProperty()
     this.#computeConversionScoreFromSessionStorage()
     this.#setInitialActionValue()
 
@@ -253,14 +253,39 @@ export default class extends Controller<HTMLElement> {
   }
 
   async #captureUserConversionScore() {
+    const rawCtx = sessionStorage.getItem("qf_search_ctx")
+    const searchContext = rawCtx ? JSON.parse(rawCtx) : undefined
     posthog.capture("$set", {
       $set: {
         ...this.personProperties,
         conversionScore: this.#computeConversionScoreFromActions(),
         conversionActions: this.userConversionScoreValue,
+        ...(searchContext ? { searchContext } : {}),
       },
     })
+    if (searchContext) sessionStorage.removeItem("qf_search_ctx")
     this.#updateDebugInspectorUI()
+  }
+
+  captureSearchResultClick(event: MouseEvent) {
+    const anchor = event.currentTarget as HTMLAnchorElement
+    const li = anchor.closest("li")
+    const position = li?.dataset.position ? parseInt(li.dataset.position) : undefined
+    const source = li?.dataset.source
+    const searchTermId = anchor.dataset.searchTermId
+    const searchTermName = anchor.dataset.searchTermName
+
+    const input = document.querySelector<HTMLInputElement>(
+      '[data-next-autocomplete-target="input"]',
+    )
+    const inputText = input?.value ?? ""
+
+    const context = { position, source, searchTermId, searchTermName, inputText }
+    sessionStorage.setItem("qf_search_ctx", JSON.stringify(context))
+
+    if (searchTermId) {
+      document.cookie = `qf_search_term_id=${searchTermId}; path=/; max-age=60; SameSite=Lax`
+    }
   }
 
   #computeConversionScoreFromActions() {
@@ -272,24 +297,22 @@ export default class extends Controller<HTMLElement> {
     return score
   }
 
-  #setupIntersectionObserver() {
-    const observer = new IntersectionObserver(
-      (entries, observer) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            posthog.capture("$pageview")
-            // TODO: increase userConversionScore
-            observer.unobserve(entry.target)
-          }
-        })
-      },
-      {
-        root: null,
-        threshold: this.intersectionObserverThreshold, // Trigger when at least 10% of the page is visible
-      },
-    )
+  #setupPageViewedPersonProperty() {
+    const setPageViewed = () => {
+      posthog.capture("$set", { $set: { pageViewed: true } })
+    }
 
-    observer.observe(document.body)
+    if (document.visibilityState === "visible") {
+      setPageViewed()
+    } else {
+      const handler = () => {
+        if (document.visibilityState === "visible") {
+          document.removeEventListener("visibilitychange", handler)
+          setPageViewed()
+        }
+      }
+      document.addEventListener("visibilitychange", handler)
+    }
   }
 
   #captureUIInteraction(

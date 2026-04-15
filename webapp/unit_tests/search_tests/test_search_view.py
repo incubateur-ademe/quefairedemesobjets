@@ -73,10 +73,10 @@ class TestSearchViewResultTypes:
 
 @pytest.mark.django_db
 class TestSearchViewSearchTagLinkParams:
-    """SearchTag results render with search_term_id, position, and search_term
-    query parameters in their href."""
+    """SearchTag results render with data attributes for tracking context
+    (search_term_id, position, source) instead of URL query parameters."""
 
-    def test_search_tag_link_contains_all_params(
+    def test_search_tag_link_contains_tracking_data_attributes(
         self, produit_page, search_tag_on_page
     ):
         _rebuild_index()
@@ -89,12 +89,15 @@ class TestSearchViewSearchTagLinkParams:
         assert response.status_code == 200
         content = response.content.decode()
 
-        # The link should contain search_term_id=<tag pk>
-        assert f"search_term_id={search_tag_on_page.pk}" in content
-        # The link should contain position=
-        assert "position=" in content
-        # The link should contain search_term=lave-linge
-        assert "search_term=lave-linge" in content
+        # The anchor should carry data-search-term-id and data-search-term-name
+        assert f'data-search-term-id="{search_tag_on_page.pk}"' in content
+        assert "data-search-term-name=" in content
+        # The wrapping <li> should carry data-position and data-source
+        assert 'data-position="1"' in content
+        assert 'data-source="homepage_autocomplete"' in content
+        # Params must NOT appear in the href
+        assert "search_term_id=" not in content
+        assert "search_term=" not in content
 
     def test_search_tag_result_shows_parent_page_title(
         self, produit_page, search_tag_on_page

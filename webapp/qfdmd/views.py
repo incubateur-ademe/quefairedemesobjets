@@ -1,6 +1,5 @@
 import logging
 from typing import Any
-from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 from typing import override
 
 import django_filters
@@ -19,7 +18,6 @@ from wagtail.admin.viewsets.pages import PageListingViewSet
 from modelsearch.query import Fuzzy
 from wagtail.models import Page
 
-from core.constants import SEARCH_TERM_ID_QUERY_PARAM
 from core.views import static_file_content_from
 from qfdmd.models import (
     HomePage,
@@ -389,14 +387,8 @@ class SynonymeDetailView(AssistantBaseView, DetailView):
     model = Synonyme
 
     def _build_redirect_url(self, request: HttpRequest, base_url: str) -> str:
-        """Build redirect URL, preserving search_term_id if present."""
-        search_term_id = request.GET.get(SEARCH_TERM_ID_QUERY_PARAM)
-        if not search_term_id:
-            return base_url
-        parsed = urlparse(base_url)
-        params = parse_qsl(parsed.query)
-        params.append((SEARCH_TERM_ID_QUERY_PARAM, search_term_id))
-        return urlunparse(parsed._replace(query=urlencode(params)))
+        """Build redirect URL. search_term_id is now passed via cookie, not URL."""
+        return base_url
 
     def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         synonyme = self.get_object()

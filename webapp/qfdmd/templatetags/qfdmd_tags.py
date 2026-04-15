@@ -25,7 +25,9 @@ def get_search_term_name(context):
     if not request:
         return None
 
-    search_term_id = request.GET.get("search_term_id")
+    search_term_id = request.COOKIES.get("qf_search_term_id") or request.GET.get(
+        "search_term_id"
+    )
     if not search_term_id:
         return None
 

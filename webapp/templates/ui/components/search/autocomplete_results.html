@@ -10,6 +10,8 @@
             class="qf-list-none qf-p-1w qf-inline-block qf-justify-between"
             data-next-autocomplete-target="option"
             data-action="keydown->next-autocomplete#navigate:prevent"
+            data-position="{{ forloop.counter }}"
+            data-source="homepage_autocomplete"
         >
             {% include specific.search_result_template with result=specific position=forloop.counter %}
         </li>
