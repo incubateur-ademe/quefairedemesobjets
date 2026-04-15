@@ -83,6 +83,7 @@ class NextAutocompleteInput(forms.TextInput):
             **context,
             "endpoint_url": endpoint_url,
             "event_name": event_name,
+            "field_name": name,
             "limit": self.limit,
             "display_value": self.display_value,
             "show_on_focus": self.show_on_focus,

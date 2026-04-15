@@ -266,11 +266,22 @@ export default class extends Controller<HTMLElement> {
 
   #setupAutocompleteResultClickListener() {
     this.element.addEventListener("next-autocomplete:result-click", (e: Event) => {
-      const { eventName, position, inputText, searchTermId, searchTermName } = (
-        e as CustomEvent
-      ).detail
+      const {
+        eventName,
+        fieldName,
+        position,
+        inputText,
+        searchTermId,
+        searchTermName,
+      } = (e as CustomEvent).detail
       if (!eventName) return
-      posthog.capture(eventName, { position, inputText, searchTermId, searchTermName })
+      posthog.capture(eventName, {
+        fieldName,
+        position,
+        inputText,
+        searchTermId,
+        searchTermName,
+      })
       if (searchTermId) {
         document.cookie = `qf_search_term_id=${searchTermId}; path=/; max-age=60; SameSite=Lax`
       }

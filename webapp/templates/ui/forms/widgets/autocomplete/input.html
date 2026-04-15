@@ -4,6 +4,7 @@
     data-next-autocomplete-turbo-frame-id-value="{{ turbo_frame_id }}"
     data-next-autocomplete-limit-value="{{ limit }}"
     data-next-autocomplete-event-name-value="{{ event_name }}"
+    data-next-autocomplete-field-name-value="{{ field_name }}"
     {% if show_on_focus %}data-next-autocomplete-show-on-focus-value="true"{% endif %}
     {# TODO: add optional data-action block #}
     {% for key, value in wrapper_attrs.items %}{% if key != "data-controller" %}{{ key }}="{{ value }}" {% endif %}{% endfor %}
