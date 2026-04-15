@@ -159,10 +159,10 @@ test.describe("Recherche de produits", () => {
         const searchTermName = await anchor.getAttribute("data-search-term-name")
         expect(searchTermName).toBeTruthy()
 
-        // Le <li> parent doit avoir data-position et data-source
+        // Le <li> parent doit avoir l'action resultClick du next-autocomplete controller
         const li = anchor.locator("xpath=ancestor::li[1]")
-        expect(await li.getAttribute("data-position")).toBe(String(i + 1))
-        expect(await li.getAttribute("data-source")).toBe("homepage_autocomplete")
+        const action = await li.getAttribute("data-action")
+        expect(action).toContain("click->next-autocomplete#resultClick")
 
         // Les paramètres ne doivent PAS être dans l'href
         const href = await anchor.getAttribute("href")

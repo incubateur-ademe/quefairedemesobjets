@@ -89,6 +89,7 @@ export default class extends Controller<HTMLElement> {
     this.#setInitialActionValue()
 
     posthog.debug(!!this.posthogDebugValue)
+    this.#setupAutocompleteResultClickListener()
   }
 
   userConversionScoreValueChanged(value) {
@@ -253,39 +254,27 @@ export default class extends Controller<HTMLElement> {
   }
 
   async #captureUserConversionScore() {
-    const rawCtx = sessionStorage.getItem("qf_search_ctx")
-    const searchContext = rawCtx ? JSON.parse(rawCtx) : undefined
     posthog.capture("$set", {
       $set: {
         ...this.personProperties,
         conversionScore: this.#computeConversionScoreFromActions(),
         conversionActions: this.userConversionScoreValue,
-        ...(searchContext ? { searchContext } : {}),
       },
     })
-    if (searchContext) sessionStorage.removeItem("qf_search_ctx")
     this.#updateDebugInspectorUI()
   }
 
-  captureSearchResultClick(event: MouseEvent) {
-    const anchor = event.currentTarget as HTMLAnchorElement
-    const li = anchor.closest("li")
-    const position = li?.dataset.position ? parseInt(li.dataset.position) : undefined
-    const source = li?.dataset.source
-    const searchTermId = anchor.dataset.searchTermId
-    const searchTermName = anchor.dataset.searchTermName
-
-    const input = document.querySelector<HTMLInputElement>(
-      '[data-next-autocomplete-target="input"]',
-    )
-    const inputText = input?.value ?? ""
-
-    const context = { position, source, searchTermId, searchTermName, inputText }
-    sessionStorage.setItem("qf_search_ctx", JSON.stringify(context))
-
-    if (searchTermId) {
-      document.cookie = `qf_search_term_id=${searchTermId}; path=/; max-age=60; SameSite=Lax`
-    }
+  #setupAutocompleteResultClickListener() {
+    this.element.addEventListener("next-autocomplete:result-click", (e: Event) => {
+      const { eventName, position, inputText, searchTermId, searchTermName } = (
+        e as CustomEvent
+      ).detail
+      if (!eventName) return
+      posthog.capture(eventName, { position, inputText, searchTermId, searchTermName })
+      if (searchTermId) {
+        document.cookie = `qf_search_term_id=${searchTermId}; path=/; max-age=60; SameSite=Lax`
+      }
+    })
   }
 
   #computeConversionScoreFromActions() {

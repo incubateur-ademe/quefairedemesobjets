@@ -1,6 +1,6 @@
 {% extends "./search_result.html" %}
 
 {% block href %}{{ result.url }}{% endblock %}
-{% block tracking_attrs %}data-search-term-name="{{ result.nom|urlencode }}"{% endblock %}
+{% block anchor_attrs %}data-search-term-name="{{ result.nom|urlencode }}"{% endblock %}
 
 {% block nom %}{{ result.nom|capfirst }}{% endblock %}

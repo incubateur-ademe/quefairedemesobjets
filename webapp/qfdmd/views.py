@@ -386,19 +386,13 @@ class SynonymeDetailView(AssistantBaseView, DetailView):
     template_name = "ui/pages/produit.html"
     model = Synonyme
 
-    def _build_redirect_url(self, request: HttpRequest, base_url: str) -> str:
-        """Build redirect URL. search_term_id is now passed via cookie, not URL."""
-        return base_url
-
     def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         synonyme = self.get_object()
 
         # First, check if the synonyme has a direct redirection
         try:
             synonyme_intermediate_page = synonyme.next_wagtail_page
-            redirect_url = self._build_redirect_url(
-                request, synonyme_intermediate_page.page.url
-            )
+            redirect_url = synonyme_intermediate_page.page.url
             return redirect(redirect_url)
         except Synonyme.next_wagtail_page.RelatedObjectDoesNotExist:
             pass

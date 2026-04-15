@@ -2,6 +2,6 @@
 {% load wagtailcore_tags %}
 
 {% block href %}{% pageurl result.produit_page %}{% endblock %}
-{% block tracking_attrs %}data-search-term-name="{{ result.produit_page.titre_phrase|urlencode }}"{% endblock %}
+{% block anchor_attrs %}data-search-term-name="{{ result.produit_page.titre_phrase|urlencode }}"{% endblock %}
 
 {% block nom %}{{ result.produit_page.titre_phrase|capfirst }}{% endblock %}

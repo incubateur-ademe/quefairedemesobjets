@@ -89,13 +89,13 @@ class TestSearchViewSearchTagLinkParams:
         assert response.status_code == 200
         content = response.content.decode()
 
-        # The anchor should carry data-search-term-id and data-search-term-name
+        # The anchor should carry plain data attributes for search term context
         assert f'data-search-term-id="{search_tag_on_page.pk}"' in content
         assert "data-search-term-name=" in content
-        # The wrapping <li> should carry data-position and data-source
-        assert 'data-position="1"' in content
-        assert 'data-source="homepage_autocomplete"' in content
-        # Params must NOT appear in the href
+        # The <li> should carry the resultClick action for
+        # the next-autocomplete controller
+        assert "click->next-autocomplete#resultClick" in content
+        # These must NOT appear as URL query params in the href
         assert "search_term_id=" not in content
         assert "search_term=" not in content
 
