@@ -56,7 +56,8 @@ export default class extends Controller<HTMLElement> {
   intersectionObserverThreshold = 0.1
 
   posthogConfig: Partial<PostHogConfig> = {
-    api_host: "https://eu.posthog.com",
+    api_host: "/ph",
+    ui_host: "https://eu.posthog.com",
     autocapture: false,
     capture_pageview: false,
     person_profiles: "always",
