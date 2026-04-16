@@ -12,4 +12,5 @@ python manage.py clearsessions
 python manage.py clear_cache --all
 python manage.py create_remote_db_server
 
+# FIXME : make sure it is aligned with the one used before
 gunicorn core.wsgi --bind 0.0.0.0:8000 --timeout 120 --workers 3

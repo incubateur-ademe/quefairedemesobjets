@@ -144,6 +144,7 @@ services:
         condition: service_healthy
     profiles: [airflow]
 
+
   webapp:
     env_file:
       - ./webapp/.env
@@ -154,9 +155,43 @@ services:
       # Override local settings (localhost:6543) with docker network hostname/port
       DATABASE_URL: postgres://webapp:webapp@lvao-webapp-db:5432/webapp # pragma: allowlist secret
       DB_WAREHOUSE: postgres://warehouse:warehouse@lvao-warehouse-db:5432/warehouse # pragma: allowlist secret
+      # DEBUG: "false" # FIXME : check if this allow to ass --nodev ?
+    volumes:
+      - ./webapp/templates:/app/templates
     depends_on:
       lvao-webapp-db:
         condition: service_healthy
     ports:
       - "8000:8000"
+    profiles: [webapp]
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  webapp-proxy:
+    build:
+      context: ./webapp
+      dockerfile: nginx/Dockerfile
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./webapp/nginx/certs:/etc/nginx/ssl
+      - ./webapp/staticfiles:/app/staticfiles
+    env_file:
+      - path: ./webapp/.env
+        required: false
+    environment:
+      - BASE_DOMAIN=${BASE_DOMAIN:-quefairedemesdechets.ademe.local}
+      - PORT=80
+      - NGINX_DISABLE_CACHE=${NGINX_DISABLE_CACHE:-0}
+      - UPSTREAM_HOST=webapp:8000
+      - SSL_CERT_PATH=/etc/nginx/ssl/${BASE_DOMAIN:-quefairedemesdechets.ademe.local}.pem
+      - SSL_CERT_KEY_PATH=/etc/nginx/ssl/${BASE_DOMAIN:-quefairedemesdechets.ademe.local}-key.pem
+    depends_on:
+      webapp:
+        condition: service_healthy
     profiles: [webapp]

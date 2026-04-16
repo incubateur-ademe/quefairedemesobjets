@@ -17,11 +17,12 @@ RUN npm run build
 ############################################
 # Stage 2: runtime (Python 3.12)
 ############################################
-FROM python:3.12-slim-bookworm AS webapp
+FROM python:3.12-slim-bookworm AS webapp_builder
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     UV_LINK_MODE=copy \
+    # FIXME : test if we need it
     PATH="/root/.local/bin:${PATH}"
 
 WORKDIR /app
@@ -31,6 +32,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
       ca-certificates \
       curl \
+      # FIXME : document it is because of djangomodel or remove git
       git \
       gettext \
       gdal-bin \
@@ -43,25 +45,26 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh -s -- --no-modify-path
 
 # Install python deps (cached as long as lockfiles unchanged)
 COPY pyproject.toml uv.lock ./
+#  FIXME : should we add --no-dev ?
 RUN uv sync --frozen
-# --no-dev
 
 # Ensure the venv is used for subsequent RUN/CMD
 ENV VIRTUAL_ENV="/app/.venv" \
+# FIXME : should we add /root/.local/bin ?
     PATH="/app/.venv/bin:/root/.local/bin:${PATH}"
 
 # Copy app code
+# FIXME : on peut être plus précis sur ce qu'on copie ?
+# peut-être pas besoin de static
 COPY . ./
+
+# (Internationalisation et) Customisation des messages de Wagtail
+RUN SECRET_KEY=dummy python manage.py compilemessages -l fr
 
 # Copy built frontend assets
 COPY --from=node_build /app/static/compiled ./static/compiled
 
-# Build-time Django steps
 RUN SECRET_KEY=dummy python manage.py collectstatic --noinput
-RUN SECRET_KEY=dummy python manage.py compilemessages -l fr
-
-# FIXME : Is it needed ?
-# RUN sh ./bin/post_compile
 
 EXPOSE 8000
 
