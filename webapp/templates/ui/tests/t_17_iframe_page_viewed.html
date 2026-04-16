@@ -1,0 +1,9 @@
+{% load dsfr_tags %}
+
+<div style="padding-top: 2000px;">
+  {% dsfr_callout title="Test iframe_page_viewed" text="Cette page intègre la carte en iframe pour tester l'événement PostHog iframe_page_viewed et interacted_with_iframe." icon_class="fr-icon-flask-line" %}
+
+  <p>Scrollez jusqu'à l'iframe pour déclencher l'événement <code>iframe_page_viewed</code>. Survolez ou touchez ensuite l'iframe pour déclencher <code>interacted_with_iframe</code>.</p>
+
+  <script src="{{ base_url }}/static/carte.js"></script>
+</div>
