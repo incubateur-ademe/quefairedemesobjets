@@ -57,7 +57,8 @@ export default class extends Controller<HTMLElement> {
   }
 
   posthogConfig: Partial<PostHogConfig> = {
-    api_host: "https://eu.posthog.com",
+    api_host: "/ph",
+    ui_host: "https://eu.posthog.com",
     autocapture: false,
     capture_pageview: true,
     capture_pageleave: true,
