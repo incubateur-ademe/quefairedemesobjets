@@ -6,8 +6,6 @@ import numpy as np
 import pandas as pd
 from cluster.config.constants import COL_PARENT_ID_BEFORE
 from cluster.tasks.business_logic.misc.df_sort import df_sort
-from utils.django import django_setup_full
-
 from data.models.change import (
     COL_CHANGE_MODEL_NAME,
     COL_CHANGE_ORDER,
@@ -20,6 +18,7 @@ from data.models.changes import (
     ChangeActeurUpdateParentId,
     ChangeActeurVerifyRevision,
 )
+from utils.django import django_setup_full
 
 django_setup_full()
 

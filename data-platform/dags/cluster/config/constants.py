@@ -16,7 +16,11 @@ FIELDS_PROTECTED = [
     "commentaires",
     "action_principale_id",
     "identifiant_externe",
+    "latitude",
+    "longitude",
 ]
+
+UNNORMALIZABLE_FIELDS = ["latitude", "longitude"]
 
 FIELDS_PARENT_DATA_EXCLUDED = [
     # Depending on contexte, foreign keys are sometimes
