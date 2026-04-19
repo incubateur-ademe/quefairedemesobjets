@@ -25,6 +25,7 @@ def cluster_acteurs_clusters_prepare(
     fields_protected: list[str],
     fields_transformed: list[str],
     include_source_ids: list[int],
+    distance_in_cluster: int,
 ) -> pd.DataFrame:
     """Overall clustering preparation:
     - Clustering of actors
@@ -66,6 +67,7 @@ def cluster_acteurs_clusters_prepare(
         cluster_fields_fuzzy=cluster_fields_fuzzy,
         cluster_fuzzy_threshold=cluster_fuzzy_threshold,
         cluster_intra_source_is_allowed=cluster_intra_source_is_allowed,
+        distance_in_cluster=distance_in_cluster,
     )
     log.preview_df_as_markdown("Clusters orphelins+parents", df_clusters)
     if df_clusters.empty:
@@ -132,9 +134,9 @@ def cluster_acteurs_clusters_prepare(
         cluster_fields_fuzzy=cluster_fields_fuzzy,
     )
 
-    logger.info(log.banner_string("🏁 Résultat final de cette tâche"))
-    log.preview_df_as_markdown(
-        "suggestions de clusters", df_combined, groupby="cluster_id"
-    )
+    # logger.info(log.banner_string("🏁 Résultat final de cette tâche"))
+    # log.preview_df_as_markdown(
+    #     "suggestions de clusters", df_combined, groupby="cluster_id"
+    # )
 
     return df_combined

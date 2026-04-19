@@ -1,6 +1,6 @@
 """Configuration model for the clustering DAG"""
 
-from cluster.config.constants import FIELDS_PROTECTED
+from cluster.config.constants import FIELDS_PROTECTED, UNNORMALIZABLE_FIELDS
 from pydantic import BaseModel, Field, field_validator, model_validator
 from utils.airflow_params import airflow_params_dropdown_selected_to_ids
 
@@ -73,6 +73,7 @@ class ClusterConfig(BaseModel):
     # Conversion des codes en ids
     include_source_ids: list[int]
     include_acteur_type_ids: list[int]
+    distance_in_cluster: int = 0
 
     # ---------------------------------------
     # Validation
@@ -108,6 +109,7 @@ class ClusterConfig(BaseModel):
             "normalize_fields_no_words_size3_or_less",
             "normalize_fields_order_unique_words",
             "dedup_enrich_exclude_sources",
+            "distance_in_cluster",
             "cluster_fields_fuzzy",
         ]
         for k in optionals:
@@ -118,7 +120,7 @@ class ClusterConfig(BaseModel):
         # Si aucun code source fourni alors on inclut toutes les sources
         if not values.get("include_sources"):
             values["include_sources"] = []
-            values["include_source_ids"] = values["mapping_sources"].values()
+            values["include_source_ids"] = list(values["mapping_sources"].values())
         else:
             # Sinon on résout les codes sources en ids à partir de la sélection
             values["include_source_ids"] = airflow_params_dropdown_selected_to_ids(
@@ -179,7 +181,24 @@ class ClusterConfig(BaseModel):
         # data seront normalisés, pareil pour la norma d'ordre/unicité
         if not values["normalize_fields_basic"]:
             values["normalize_fields_basic"] = values["fields_transformed"]
+        # FIXME: By default, I think it would be better to remove this default behavior
+        # but Christian asked me to keep this behavior by default
+        # "💯 Si aucun champ spécifié =  s'applique à TOUS les champs"
         if not values["normalize_fields_order_unique_words"]:
             values["normalize_fields_order_unique_words"] = values["fields_transformed"]
+
+        # remove latitude and longitude from the fields to normalize
+        for normalized_settings in [
+            "normalize_fields_basic",
+            "normalize_fields_no_words_size1",
+            "normalize_fields_no_words_size2_or_less",
+            "normalize_fields_no_words_size3_or_less",
+            "normalize_fields_order_unique_words",
+        ]:
+            values[normalized_settings] = [
+                field
+                for field in values[normalized_settings]
+                if field not in UNNORMALIZABLE_FIELDS
+            ]
 
         return values

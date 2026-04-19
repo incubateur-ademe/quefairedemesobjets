@@ -214,6 +214,18 @@ PARAMS = {
         description_md="""**🔄 INTRA-SOURCE**: si coché, les acteurs d'une même
             source peuvent être clusterisés ensemble""",
     ),
+    "distance_in_cluster": Param(
+        0,
+        type="number",
+        description_md="""Distance en mètres pour le groupage par distance
+        (0 = pas de groupage par distance).
+
+        exemple: 100
+
+        0️⃣ Si aucune valeur spécifiée = Pas de groupage par distance
+        """,
+        examples=[0, 100, 1000],
+    ),
     "cluster_fields_exact": Param(
         ["code_postal", "ville"],
         type="array",
