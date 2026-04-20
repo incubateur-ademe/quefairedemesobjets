@@ -12,20 +12,19 @@ D'où des tests python, indépendents des DAGs Airflow et la CI
 pour vérifier les compatibilités de base
 """
 
+import sqlite3
+
 import pandas as pd
-from sqlalchemy import create_engine
 
 
 def test_pandas_read_sql_table():
-    """Au 2025-01-15 ce test fonctionne en pandas 2.1.4 mais
-    échoue en 2.2.3 avec l'erreur suivante:
-    AttributeError: 'Engine' object has no attribute 'cursor'
+    """Vérifie que pandas peut lire une table via une connexion sqlite3.
 
-    TODO: lorsque ce test échoue à l'avenir à cause d'une upgrade pandas,
-    penser à:
-     - mettre à jour ce teste pour qu'il fonctionne
-     - mettre à jour les codes DAGs pour qu'ils fonctionnent également
+    Historique:
+    - pandas 2.1.4 : OK avec SQLAlchemy engine.execute() + read_sql_table(engine)
+    - pandas 2.2+ / SQLAlchemy 1.4 : incompatible (Engine.cursor supprimé côté pandas)
+    - Solution : passer une connexion sqlite3 DBAPI2, supportée par toutes versions
     """
-    engine = create_engine("sqlite:///:memory:")
-    engine.execute("CREATE TABLE my_table (id INT, name TEXT)")
-    pd.read_sql_table("my_table", engine)
+    con = sqlite3.connect(":memory:")
+    con.execute("CREATE TABLE my_table (id INT, name TEXT)")
+    pd.read_sql("SELECT * FROM my_table", con)
