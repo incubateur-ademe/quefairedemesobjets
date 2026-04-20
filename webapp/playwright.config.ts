@@ -1,11 +1,13 @@
 import { defineConfig, devices, PlaywrightTestConfig } from "@playwright/test"
 import dotenv from "dotenv"
 import path from "path"
+import { fileURLToPath } from "url"
 
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 dotenv.config({ path: path.resolve(__dirname, ".env") })
 
 const PORT = 8888
