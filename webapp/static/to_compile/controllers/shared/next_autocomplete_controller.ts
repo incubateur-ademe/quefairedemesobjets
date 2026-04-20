@@ -7,6 +7,8 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
     turboFrameId: String,
     limit: String,
     showOnFocus: { type: Boolean, default: false },
+    eventName: { type: String, default: "" },
+    fieldName: { type: String, default: "" },
   }
   declare readonly optionTargets: HTMLElement[]
   declare readonly resultsTarget: HTMLElement
@@ -14,6 +16,8 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
   declare readonly endpointUrlValue: string
   declare readonly limitValue: string
   declare readonly showOnFocusValue: boolean
+  declare readonly eventNameValue: string
+  declare readonly fieldNameValue: string
   declare readonly inputTarget: HTMLInputElement
   declare readonly hiddenInputTarget: HTMLInputElement
 
@@ -35,6 +39,28 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
 
   search(event) {
     this.#loadResults(event.target.value)
+  }
+
+  resultClick(event: MouseEvent) {
+    if (!this.eventNameValue) return
+    const li = event.currentTarget as HTMLElement
+    const position = this.optionTargets.indexOf(li) + 1
+    const inputText = this.inputTarget.value
+    const anchor = this.#getLinkFromOption(li)
+    const linkData = anchor ? { ...anchor.dataset } : {}
+
+    this.element.dispatchEvent(
+      new CustomEvent("next-autocomplete:result-click", {
+        bubbles: true,
+        detail: {
+          eventName: this.eventNameValue,
+          fieldName: this.fieldNameValue,
+          position,
+          inputText,
+          ...linkData,
+        },
+      }),
+    )
   }
 
   #loadResults(query: string) {
@@ -212,6 +238,23 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
       detail: { option: selected, value, selectedValue },
     })
     this.element.dispatchEvent(commitEvent)
+
+    // Analytics: fire result-click event if eventName is configured
+    if (this.eventNameValue) {
+      const position = this.optionTargets.indexOf(selected) + 1
+      this.element.dispatchEvent(
+        new CustomEvent("next-autocomplete:result-click", {
+          bubbles: true,
+          detail: {
+            eventName: this.eventNameValue,
+            fieldName: this.fieldNameValue,
+            position,
+            inputText: this.inputTarget.value,
+            selectedValue,
+          },
+        }),
+      )
+    }
   }
 
   #escapeAction() {

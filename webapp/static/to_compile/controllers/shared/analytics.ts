@@ -92,6 +92,7 @@ export default class extends Controller<HTMLElement> {
     this.#setInitialActionValue()
 
     posthog.debug(!!this.posthogDebugValue)
+    this.#setupAutocompleteResultClickListener()
   }
 
   userConversionScoreValueChanged(value) {
@@ -266,6 +267,29 @@ export default class extends Controller<HTMLElement> {
     this.#updateDebugInspectorUI()
   }
 
+  #setupAutocompleteResultClickListener() {
+    this.element.addEventListener("next-autocomplete:result-click", (e: Event) => {
+      const {
+        eventName,
+        fieldName,
+        position,
+        inputText,
+        searchTermId,
+        searchTermName,
+      } = (e as CustomEvent).detail
+      if (!eventName) return
+      posthog.capture(eventName, {
+        fieldName,
+        position,
+        inputText,
+        searchTermId,
+        searchTermName,
+      })
+      if (searchTermId) {
+        document.cookie = `qf_search_term_id=${searchTermId}; path=/; max-age=60; SameSite=Lax`
+      }
+    })
+  }
   capture(event: string, properties?: Record<string, unknown>) {
     posthog.capture(event, properties)
   }

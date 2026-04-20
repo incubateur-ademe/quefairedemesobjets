@@ -75,9 +75,15 @@ class NextAutocompleteInput(forms.TextInput):
                 f"urlpatterns or check for typos in the view name."
             )
 
+        # Strip optional namespace prefix: "qfdmd:autocomplete_home_search"
+        # -> "autocomplete_home_search"
+        event_name = self.search_view.split(":")[-1]
+
         return {
             **context,
             "endpoint_url": endpoint_url,
+            "event_name": event_name,
+            "field_name": name,
             "limit": self.limit,
             "display_value": self.display_value,
             "show_on_focus": self.show_on_focus,
