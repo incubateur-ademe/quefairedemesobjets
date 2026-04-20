@@ -31,12 +31,6 @@ jobs:
           registry-image=$REGISTRY_IMAGE \
           region=$SCW_DEFAULT_REGION
 
-        # See https://www.scaleway.com/en/docs/serverless-containers/api-cli/deploy-container-cli/
-    - name: Deploy container
-      run: |
-        scw container container deploy $CONTAINER_ID \
-          region=$SCW_DEFAULT_REGION
-
     - name: Check deployment status
       run: |
         EXPECTED_VALUE="ready"
