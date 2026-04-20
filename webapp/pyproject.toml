@@ -15,7 +15,7 @@ dependencies = [
     "gunicorn>=23.0.0,<26",
     "opening-hours-py>=1.2.0,<2",
     "orjson>=3.11.1,<4",
-    "pillow>=11.2.1,<13",
+    "pillow>=12.2.0,<13",
     "psycopg",
     "python-decouple~=3.8",
     "requests>=2.32.4,<3",
