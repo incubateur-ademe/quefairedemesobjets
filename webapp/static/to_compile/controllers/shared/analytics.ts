@@ -84,11 +84,10 @@ export default class extends Controller<HTMLElement> {
   initialize(): void {
     initSentry(this.sentryDsnValue, this.sentryEnvironmentValue)
     posthog.init(this.posthogKeyValue, this.posthogConfig)
-    posthog.capture("$pageview")
     this.#identifyAuthenticatedUser()
     this.#initialiseIframeRelatedPersonProperties()
     this.#syncSessionStorageWithLocalConversionScore()
-    his.#setupIframeTracking()
+    this.#setupIframeTracking()
     this.#computeConversionScoreFromSessionStorage()
     this.#setInitialActionValue()
 
@@ -268,10 +267,6 @@ export default class extends Controller<HTMLElement> {
     this.#updateDebugInspectorUI()
   }
 
-<<<<<<< HEAD
-  capture(event: string, properties?: Record<string, unknown>) {
-    posthog.capture(event, properties)
-=======
   #setupAutocompleteResultClickListener() {
     this.element.addEventListener("next-autocomplete:result-click", (e: Event) => {
       const {
@@ -294,7 +289,9 @@ export default class extends Controller<HTMLElement> {
         document.cookie = `qf_search_term_id=${searchTermId}; path=/; max-age=60; SameSite=Lax`
       }
     })
->>>>>>> 5fd92a0e (Tracking des clics sur résultats de recherche et refacto autocomplete)
+  }
+  capture(event: string, properties?: Record<string, unknown>) {
+    posthog.capture(event, properties)
   }
 
   #computeConversionScoreFromActions() {
@@ -306,7 +303,6 @@ export default class extends Controller<HTMLElement> {
     return score
   }
 
-<<<<<<< HEAD
   #setupIframeTracking() {
     if (!this.personProperties.iframe) return
     this.#setupViewportTracking()
