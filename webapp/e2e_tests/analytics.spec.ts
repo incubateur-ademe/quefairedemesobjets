@@ -1,7 +1,129 @@
-import { test, expect } from "@playwright/test"
+import { test, expect, Page, Frame } from "@playwright/test"
 import { navigateTo, TIMEOUT } from "./helpers"
 
+// Helpers shared across iframe tracking tests
+// These use Playwright's Frame API to evaluate JS directly inside the iframe,
+// which works for both same-origin and cross-origin iframes (unlike contentWindow access).
+
+async function getIframeFrame(page: Page): Promise<Frame> {
+  // Wait until a child frame appears and has navigated to its URL
+  await page.waitForFunction(() => window.frames.length > 0, {
+    timeout: TIMEOUT.DEFAULT,
+  })
+  const frames = page.frames()
+  const frame = frames.find((f) => f !== page.mainFrame())
+  if (!frame) throw new Error("iframe frame not found")
+  // Wait for the iframe page to finish loading before returning
+  await frame.waitForLoadState("domcontentloaded", { timeout: TIMEOUT.LONG })
+  return frame
+}
+
+async function waitForAnalyticsController(frame: Frame) {
+  await frame.waitForFunction(
+    () => {
+      const w = window as any
+      if (!w.stimulus) return false
+      return !!w.stimulus.getControllerForElementAndIdentifier(
+        document.body,
+        "analytics",
+      )
+    },
+    { timeout: TIMEOUT.LONG },
+  )
+}
+
+async function installCaptureSpy(frame: Frame) {
+  await frame.evaluate(() => {
+    const w = window as any
+    const ctrl = w.stimulus.getControllerForElementAndIdentifier(
+      document.body,
+      "analytics",
+    )
+    w.__capturedEvents = []
+    const original = ctrl.capture.bind(ctrl)
+    ctrl.capture = (event: string, props?: Record<string, unknown>) => {
+      w.__capturedEvents.push({ event, props })
+      original(event, props)
+    }
+  })
+}
+
+async function getCapturedEvents(frame: Frame): Promise<{ event: string }[]> {
+  return frame.evaluate(() => {
+    return (window as any).__capturedEvents as { event: string }[]
+  })
+}
+
+async function waitForEvent(frame: Frame, eventName: string) {
+  await frame.waitForFunction(
+    (name) => {
+      return (((window as any).__capturedEvents as { event: string }[]) ?? []).some(
+        (e) => e.event === name,
+      )
+    },
+    eventName,
+    { timeout: TIMEOUT.DEFAULT },
+  )
+}
+
 test.describe("📊 Analytics & Tracking", () => {
+  test.describe("Tracking visibilité et interaction iframe (t_17)", () => {
+    const TEST_PATH = "/lookbook/preview/tests/t_17_iframe_page_viewed/"
+
+    test("iframe_page_viewed fires on scroll, interacted_with_iframe fires on hover, each only once", async ({
+      page,
+    }, testInfo) => {
+      testInfo.setTimeout(90000)
+      await navigateTo(page, TEST_PATH)
+
+      const iframeEl = page.locator("iframe").first()
+      await expect(iframeEl).toBeAttached({ timeout: TIMEOUT.DEFAULT })
+
+      // Get the Frame object — works for both same-origin and cross-origin iframes
+      const frame = await getIframeFrame(page)
+
+      await waitForAnalyticsController(frame)
+      await installCaptureSpy(frame)
+
+      // No events yet — iframe is off-screen (2000px top padding)
+      const eventsBefore = await getCapturedEvents(frame)
+      expect(eventsBefore).toEqual([])
+
+      // Scroll iframe into view on the parent page
+      await iframeEl.scrollIntoViewIfNeeded()
+
+      // iframe_page_viewed should fire via IntersectionObserver → postMessage
+      await waitForEvent(frame, "iframe_page_viewed")
+      const eventsAfterScroll = await getCapturedEvents(frame)
+      expect(
+        eventsAfterScroll.filter((e) => e.event === "iframe_page_viewed"),
+      ).toHaveLength(1)
+
+      // Hover inside the iframe body → interacted_with_iframe
+      await frame.locator("main").first().hover()
+
+      await waitForEvent(frame, "interacted_with_iframe")
+      const eventsAfterHover = await getCapturedEvents(frame)
+      expect(
+        eventsAfterHover.filter((e) => e.event === "interacted_with_iframe"),
+      ).toHaveLength(1)
+
+      // Deduplication: scroll away, back, hover again — counts must stay at 1
+      await page.evaluate(() => window.scrollTo(0, 0))
+      await iframeEl.scrollIntoViewIfNeeded()
+      await frame.locator("main").first().hover()
+      await page.waitForTimeout(500)
+
+      const finalEvents = await getCapturedEvents(frame)
+      expect(finalEvents.filter((e) => e.event === "iframe_page_viewed")).toHaveLength(
+        1,
+      )
+      expect(
+        finalEvents.filter((e) => e.event === "interacted_with_iframe"),
+      ).toHaveLength(1)
+    })
+  })
+
   test.describe("Tracking du referrer dans les iframes", () => {
     const scriptTypes = [
       { name: "carte", scriptType: "carte", iframeId: "carte", iframePath: "/carte" },

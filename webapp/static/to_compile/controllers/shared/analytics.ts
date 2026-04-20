@@ -41,6 +41,9 @@ export default class extends Controller<HTMLElement> {
     iframe: false,
   }
 
+  #iframePageViewedFired = false
+  #iframeInteractedFired = false
+
   static values = {
     initialAction: String,
     posthogDebug: Boolean,
@@ -53,13 +56,12 @@ export default class extends Controller<HTMLElement> {
     userUsername: String,
   }
 
-  intersectionObserverThreshold = 0.1
-
   posthogConfig: Partial<PostHogConfig> = {
     api_host: "/ph",
     ui_host: "https://eu.posthog.com",
     autocapture: false,
-    capture_pageview: false,
+    capture_pageview: true,
+    capture_pageleave: true,
     person_profiles: "always",
     persistence: "memory",
   }
@@ -85,7 +87,7 @@ export default class extends Controller<HTMLElement> {
     this.#identifyAuthenticatedUser()
     this.#initialiseIframeRelatedPersonProperties()
     this.#syncSessionStorageWithLocalConversionScore()
-    this.#setupIntersectionObserver()
+    this.#setupIframeTracking()
     this.#computeConversionScoreFromSessionStorage()
     this.#setInitialActionValue()
 
@@ -264,6 +266,10 @@ export default class extends Controller<HTMLElement> {
     this.#updateDebugInspectorUI()
   }
 
+  capture(event: string, properties?: Record<string, unknown>) {
+    posthog.capture(event, properties)
+  }
+
   #computeConversionScoreFromActions() {
     let score = 0
     for (const value of Object.values(this.userConversionScoreValue)) {
@@ -273,24 +279,37 @@ export default class extends Controller<HTMLElement> {
     return score
   }
 
-  #setupIntersectionObserver() {
-    const observer = new IntersectionObserver(
-      (entries, observer) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            posthog.capture("$pageview")
-            // TODO: increase userConversionScore
-            observer.unobserve(entry.target)
-          }
-        })
-      },
-      {
-        root: null,
-        threshold: this.intersectionObserverThreshold, // Trigger when at least 10% of the page is visible
-      },
-    )
+  #setupIframeTracking() {
+    if (!this.personProperties.iframe) return
+    this.#setupViewportTracking()
+    this.#setupInteractionTracking()
+  }
 
-    observer.observe(document.body)
+  // Fires iframe_page_viewed once when the parent page signals that this
+  // iframe has entered the viewport (via postMessage from iframe_functions.ts).
+  #setupViewportTracking() {
+    window.addEventListener("message", (event: MessageEvent) => {
+      if (this.#iframePageViewedFired) return
+      // Only accept messages from our direct parent frame.
+      // This prevents arbitrary third-party scripts on the embedding page
+      // from spoofing the iframe_in_viewport signal.
+      if (event.source !== window.parent) return
+      if (!event.data || event.data.type !== "iframe_in_viewport") return
+      this.#iframePageViewedFired = true
+      this.capture("iframe_page_viewed")
+    })
+  }
+
+  // Fires interacted_with_iframe once on first mouse or touch interaction
+  // inside the iframe body.
+  #setupInteractionTracking() {
+    const fireOnce = () => {
+      if (this.#iframeInteractedFired) return
+      this.#iframeInteractedFired = true
+      this.capture("interacted_with_iframe")
+    }
+    document.body.addEventListener("mouseover", fireOnce, { once: true })
+    document.body.addEventListener("touchstart", fireOnce, { once: true })
   }
 
   #captureUIInteraction(
