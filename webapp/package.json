@@ -61,7 +61,7 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@types/jest": "^30.0.0",
     "@types/lodash": "^4.17.24",
-    "@types/node": "^25.5.0",
+    "@types/node": "^25.6.0",
     "@typescript-eslint/eslint-plugin": "^8.58.0",
     "buffer": "^6.0.3",
     "eslint": "^9",
