@@ -6,7 +6,7 @@ requires-python = ">=3.12,<3.13"
 dependencies = [
     "apache-airflow-providers-amazon>=9.4.0",
     "apache-airflow-providers-postgres>=6.2.2,<7",
-    "apache-airflow>=2.11.0,<3",
+    "apache-airflow>=2.11.2,<3",
     "dbt-core>=1.10.9,<2",
     "dbt-postgres>=1.9.1,<2",
     "fuzzywuzzy>=0.18.0,<0.19",
