@@ -17,7 +17,6 @@ def df_clusters_to_dict(df: pd.DataFrame) -> dict[str, list[str]]:
     return df.groupby("cluster_id")["identifiant_unique"].apply(list).to_dict()
 
 
-@pytest.mark.django_db
 class TestClusterActeursClusters:
 
     # -----------------------------------------------
@@ -268,6 +267,7 @@ class TestClusterActeursClusters:
     # -----------------------------------------------
     # Tests sur la séparation des clusters
     # -----------------------------------------------
+    @pytest.mark.django_db
     def test_cluster_instra_source(self):
         from unit_tests.qfdmo.acteur_factory import (
             ActeurTypeFactory,
