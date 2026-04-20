@@ -30,6 +30,8 @@ dev = [
     "pytest-dotenv>=0.5.2,<0.6",
     "pytest-mock>=3.14.1,<4",
     "ruff>=0.12.10,<0.16",
+    "dedupe>=3.0.3",
+    "ipython>=9.12.0,<10"
 ]
 
 [tool.pytest.ini_options]
