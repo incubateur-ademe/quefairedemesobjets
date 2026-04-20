@@ -187,12 +187,9 @@ test.describe("🗺️ Affichage des Labels dans la Fiche Acteur", () => {
     const acteurDetailLabels = iframe.locator(
       "#acteurDetailsPanel [data-testid='acteur-detail-labels']",
     )
-    await expect(acteurDetailLabels).toContainText(
-      "économie sociale et solidaire",
-      {
-        timeout: TIMEOUT.SHORT,
-      },
-    )
+    await expect(acteurDetailLabels).toContainText("économie sociale et solidaire", {
+      timeout: TIMEOUT.SHORT,
+    })
   })
 })
 

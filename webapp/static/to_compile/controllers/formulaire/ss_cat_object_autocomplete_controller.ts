@@ -1,5 +1,5 @@
 import posthog from "posthog-js"
-import AutocompleteController from "./autocomplete_controller"
+import AutocompleteController from "../carte/autocomplete_controller"
 
 export default class extends AutocompleteController {
   controllerName: string = "ss-cat-object-autocomplete"
@@ -52,15 +52,12 @@ export default class extends AutocompleteController {
   }
 
   selectOption(event: Event) {
-    const inputTargetValue = this.inputTarget.value
-
     let target = event.target as HTMLElement
     while (target && target.nodeName !== "DIV") {
       target = target.parentNode as HTMLElement
     }
     const option = JSON.parse(target.getElementsByTagName("input")[0].value)
     const labelValue = option.label
-    const subLabelValue = option.sub_label
     const identifierValue = option.identifier
 
     this.inputTarget.value = labelValue
