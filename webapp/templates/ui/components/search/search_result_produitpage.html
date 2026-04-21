@@ -3,4 +3,4 @@
 
 {% block href %}{% pageurl result.produit_page %}{% endblock %}
 
-{% block nom %}{{ result.produit_page.titre_phrase|capfirst }}{% endblock %}
+{% block nom %}{{ result.produit_page.titre_phrase|capfirst }}{{ result }}{% endblock %}

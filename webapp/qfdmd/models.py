@@ -298,10 +298,8 @@ class ProduitPageSearchTerm(SearchTerm):
 
     produit_page = models.OneToOneField(
         "qfdmd.ProduitPage",
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         related_name="produit_page_search_term",
-        blank=True,
-        null=True,
     )
     searchable_title = models.CharField()
 

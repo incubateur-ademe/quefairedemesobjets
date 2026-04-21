@@ -1,13 +1,17 @@
 import django_filters
+from django.conf import settings
 from wagtail.admin.filters import WagtailFilterSet
 from wagtail.admin.panels import FieldPanel, HelpPanel
 from wagtail.snippets.models import register_snippet
-from wagtail.snippets.views.snippets import SnippetViewSet, SnippetViewSetGroup
+from wagtail.snippets.views.snippets import (
+    IndexView,
+    SnippetViewSet,
+    SnippetViewSetGroup,
+)
 
-from qfdmd.models import SearchTag, Synonyme, TaggedSearchTag
+from qfdmd.models import ProduitPageSearchTerm, SearchTag, Synonyme, TaggedSearchTag
 from search.constants import SEARCH_TAG_HELP_TEXT
 from search.models import SearchTerm
-from django.conf import settings
 
 
 class KindFilter(django_filters.ChoiceFilter):
@@ -62,13 +66,13 @@ class SearchTermViewSet(SnippetViewSet):
     ]
 
 
-class OrphanFilter(django_filters.ChoiceFilter):
+class SearchTagStatusFilter(django_filters.ChoiceFilter):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault(
             "choices",
             [
-                ("orphan", "Orphelins uniquement"),
-                ("linked", "Rattachés uniquement"),
+                ("orphan", "Sans page (anomalie)"),
+                ("linked", "Rattachés à une page"),
             ],
         )
         kwargs.setdefault("label", "Statut")
@@ -85,7 +89,7 @@ class OrphanFilter(django_filters.ChoiceFilter):
 
 
 class SearchTagFilterSet(WagtailFilterSet):
-    status = OrphanFilter()
+    status = SearchTagStatusFilter()
 
     class Meta:
         model = SearchTag
@@ -108,13 +112,46 @@ class SearchTagViewSet(SnippetViewSet):
     ]
 
 
+class SynonymeMigrationStatusFilter(django_filters.ChoiceFilter):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault(
+            "choices",
+            [
+                ("migrated_active", "Migrés mais encore actifs (anomalie)"),
+                ("migrated_disabled", "Migrés et désactivés"),
+                ("not_migrated", "Non migrés"),
+            ],
+        )
+        kwargs.setdefault("label", "Statut migration")
+        kwargs.setdefault("empty_label", "Tous")
+        super().__init__(*args, **kwargs)
+
+    def filter(self, qs, value):
+        if value == "migrated_active":
+            return qs.filter(imported_as_search_tag__isnull=False, disabled=False)
+        if value == "migrated_disabled":
+            return qs.filter(imported_as_search_tag__isnull=False, disabled=True)
+        if value == "not_migrated":
+            return qs.filter(imported_as_search_tag__isnull=True)
+        return qs
+
+
+class SynonymeFilterSet(WagtailFilterSet):
+    migration_status = SynonymeMigrationStatusFilter()
+
+    class Meta:
+        model = Synonyme
+        fields = []
+
+
 class SynonymeViewSet(SnippetViewSet):
     model = Synonyme
     icon = "doc-full"
     menu_label = "Synonymes (ancienne version)"
     menu_name = "synonymes"
-    list_display = ["nom", "modifie_le"]
+    list_display = ["nom", "imported_as_search_tag", "disabled", "modifie_le"]
     search_backend_name = settings.MODELSEARCH_BACKENDS["default"]["BACKEND"]
+    filterset_class = SynonymeFilterSet
     panels = [
         FieldPanel("nom"),
         FieldPanel("disabled"),
@@ -122,8 +159,27 @@ class SynonymeViewSet(SnippetViewSet):
     ]
 
 
+class NonLiveProduitPageSearchTermIndexView(IndexView):
+    def get_base_queryset(self):
+        return ProduitPageSearchTerm.objects.filter(produit_page__live=False)
+
+
+class NonLiveProduitPageSearchTermViewSet(SnippetViewSet):
+    model = ProduitPageSearchTerm
+    icon = "warning"
+    menu_label = "Termes liés à des pages non publiées"
+    menu_name = "search-non-live-pages"
+    list_display = ["searchable_title", "produit_page"]
+    index_view_class = NonLiveProduitPageSearchTermIndexView
+
+
 class RechercheViewSetGroup(SnippetViewSetGroup):
-    items = (SearchTermViewSet, SearchTagViewSet, SynonymeViewSet)
+    items = (
+        SearchTermViewSet,
+        SearchTagViewSet,
+        SynonymeViewSet,
+        NonLiveProduitPageSearchTermViewSet,
+    )
     menu_icon = "search"
     menu_label = "Moteur de recherche"
     menu_name = "recherche"
