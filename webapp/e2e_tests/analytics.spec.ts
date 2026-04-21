@@ -124,6 +124,111 @@ test.describe("📊 Analytics & Tracking", () => {
     })
   })
 
+  test.describe("pageType et pageSlug dans les événements iframe (t_18)", () => {
+    const TEST_PATH = "/lookbook/preview/tests/t_18_iframe_page_properties/"
+
+    const iframeCases = [
+      { testId: "iframe-carte", expectedPageType: "carte", expectedPageSlug: "" },
+      {
+        testId: "iframe-carte-sur-mesure",
+        expectedPageType: "carte_sur_mesure",
+        expectedPageSlug: null, // slug is dynamic, just check it's non-empty
+      },
+      {
+        testId: "iframe-formulaire",
+        expectedPageType: "formulaire",
+        expectedPageSlug: "",
+      },
+      {
+        testId: "iframe-assistant",
+        expectedPageType: "assistant",
+        expectedPageSlug: "",
+      },
+    ]
+
+    for (const { testId, expectedPageType, expectedPageSlug } of iframeCases) {
+      test(`${testId} — iframe_page_viewed et interacted_with_iframe contiennent pageType="${expectedPageType}"`, async ({
+        page,
+      }, testInfo) => {
+        testInfo.setTimeout(90000)
+        await navigateTo(page, TEST_PATH)
+
+        const iframeEl = page.locator(`[data-testid="${testId}"] iframe`).first()
+        await expect(iframeEl).toBeAttached({ timeout: TIMEOUT.LONG })
+
+        // Resolve Frame from src — poll until attached (iframes load lazily via script tag)
+        const iframeSrc = await iframeEl.getAttribute("src")
+        if (!iframeSrc) throw new Error(`No src on iframe for ${testId}`)
+
+        let frame: Frame | undefined
+        await expect
+          .poll(
+            () => {
+              frame = page
+                .frames()
+                .find((f) => f.url().split("?")[0] === iframeSrc.split("?")[0])
+              return !!frame
+            },
+            { timeout: TIMEOUT.LONG },
+          )
+          .toBe(true)
+
+        const resolvedFrame = frame!
+        await resolvedFrame.waitForLoadState("domcontentloaded", {
+          timeout: TIMEOUT.LONG,
+        })
+        await waitForAnalyticsController(resolvedFrame)
+        await installCaptureSpy(resolvedFrame)
+
+        // Scroll the iframe into view so the postMessage from the parent fires
+        await iframeEl.scrollIntoViewIfNeeded()
+
+        await waitForEvent(resolvedFrame, "iframe_page_viewed")
+        const pageViewedEvents = await resolvedFrame.evaluate(() =>
+          (
+            (window as any).__capturedEvents as {
+              event: string
+              props?: Record<string, unknown>
+            }[]
+          ).filter((e) => e.event === "iframe_page_viewed"),
+        )
+        expect(pageViewedEvents).toHaveLength(1)
+        expect(pageViewedEvents[0].props?.pageType).toBe(expectedPageType)
+        if (expectedPageSlug !== null) {
+          expect(pageViewedEvents[0].props?.pageSlug).toBe(expectedPageSlug)
+        } else {
+          // carte_sur_mesure: slug is dynamic, just verify it is a non-empty string
+          expect(typeof pageViewedEvents[0].props?.pageSlug).toBe("string")
+          expect(
+            (pageViewedEvents[0].props?.pageSlug as string).length,
+          ).toBeGreaterThan(0)
+        }
+
+        // Hover inside the iframe body to trigger interacted_with_iframe
+        await resolvedFrame.locator("main").first().hover()
+        await waitForEvent(resolvedFrame, "interacted_with_iframe")
+        const interactedEvents = await resolvedFrame.evaluate(() =>
+          (
+            (window as any).__capturedEvents as {
+              event: string
+              props?: Record<string, unknown>
+            }[]
+          ).filter((e) => e.event === "interacted_with_iframe"),
+        )
+        expect(interactedEvents).toHaveLength(1)
+        expect(interactedEvents[0].props?.pageType).toBe(expectedPageType)
+        if (expectedPageSlug !== null) {
+          expect(interactedEvents[0].props?.pageSlug).toBe(expectedPageSlug)
+        } else {
+          expect(typeof interactedEvents[0].props?.pageSlug).toBe("string")
+          expect(
+            (interactedEvents[0].props?.pageSlug as string).length,
+          ).toBeGreaterThan(0)
+        }
+      })
+    }
+  })
+
   test.describe("Tracking du referrer dans les iframes", () => {
     const scriptTypes = [
       { name: "carte", scriptType: "carte", iframeId: "carte", iframePath: "/carte" },

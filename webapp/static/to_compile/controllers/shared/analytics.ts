@@ -309,6 +309,21 @@ export default class extends Controller<HTMLElement> {
     this.#setupInteractionTracking()
   }
 
+  #iframePageProperties(): { pageType: string; pageSlug: string } {
+    const pathname = window.location.pathname
+    const carteSlugMatch = pathname.match(/^\/carte\/(.+)$/)
+    if (carteSlugMatch) {
+      return { pageType: "carte_sur_mesure", pageSlug: carteSlugMatch[1] }
+    }
+    if (pathname === "/carte" || pathname === "/carte/") {
+      return { pageType: "carte", pageSlug: "" }
+    }
+    if (pathname.startsWith("/formulaire")) {
+      return { pageType: "formulaire", pageSlug: "" }
+    }
+    return { pageType: "assistant", pageSlug: pathname.replace(/^\//, "") }
+  }
+
   // Fires iframe_page_viewed once when the parent page signals that this
   // iframe has entered the viewport (via postMessage from iframe_functions.ts).
   #setupViewportTracking() {
@@ -320,7 +335,7 @@ export default class extends Controller<HTMLElement> {
       if (event.source !== window.parent) return
       if (!event.data || event.data.type !== "iframe_in_viewport") return
       this.#iframePageViewedFired = true
-      this.capture("iframe_page_viewed")
+      this.capture("iframe_page_viewed", this.#iframePageProperties())
     })
   }
 
@@ -330,7 +345,7 @@ export default class extends Controller<HTMLElement> {
     const fireOnce = () => {
       if (this.#iframeInteractedFired) return
       this.#iframeInteractedFired = true
-      this.capture("interacted_with_iframe")
+      this.capture("interacted_with_iframe", this.#iframePageProperties())
     }
     document.body.addEventListener("mouseover", fireOnce, { once: true })
     document.body.addEventListener("touchstart", fireOnce, { once: true })
