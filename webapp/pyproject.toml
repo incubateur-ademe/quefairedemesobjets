@@ -137,7 +137,7 @@ dev = [
     "pytest-mock>=3.14.1,<4",
     "wagtail-factories>=4.2.1,<5",
     "ruff>=0.12.10,<0.16",
-    "djade>=1.6.0,<2",
+    "djade>=1.9.0,<2",
     "django-silk>=5.5.0",
 ]
 
