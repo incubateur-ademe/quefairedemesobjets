@@ -1,5 +1,11 @@
 import { test, expect, Page, Frame } from "@playwright/test"
-import { navigateTo, TIMEOUT } from "./helpers"
+import {
+  navigateTo,
+  TIMEOUT,
+  searchCarteAndWaitForActeurs,
+  clickFirstClickableActeurMarker,
+  mockApiAdresse,
+} from "./helpers"
 
 // Helpers shared across iframe tracking tests
 // These use Playwright's Frame API to evaluate JS directly inside the iframe,
@@ -294,6 +300,72 @@ test.describe("📊 Analytics & Tracking", () => {
         }
       })
     }
+  })
+
+  test.describe("acteur_viewed event", () => {
+    test("acteur_viewed fires with acteurUuid, acteurType and sources when opening acteur detail", async ({
+      page,
+    }) => {
+      await mockApiAdresse(page)
+      await navigateTo(page, "/carte")
+
+      // Install capture spy on the page-level analytics controller
+      await page.waitForFunction(
+        () => {
+          const w = window as any
+          return !!w.stimulus?.getControllerForElementAndIdentifier(
+            document.body,
+            "analytics",
+          )
+        },
+        { timeout: TIMEOUT.LONG },
+      )
+      await page.evaluate(() => {
+        const w = window as any
+        const ctrl = w.stimulus.getControllerForElementAndIdentifier(
+          document.body,
+          "analytics",
+        )
+        w.__capturedEvents = []
+        const original = ctrl.capture.bind(ctrl)
+        ctrl.capture = (event: string, props?: Record<string, unknown>) => {
+          w.__capturedEvents.push({ event, props })
+          original(event, props)
+        }
+      })
+
+      await searchCarteAndWaitForActeurs(page, "Auray")
+      await clickFirstClickableActeurMarker(page)
+
+      // Wait for acteur_viewed to be captured
+      await page.waitForFunction(
+        () =>
+          (((window as any).__capturedEvents as { event: string }[]) ?? []).some(
+            (e) => e.event === "acteur_viewed",
+          ),
+        { timeout: TIMEOUT.DEFAULT },
+      )
+
+      const events = await page.evaluate(() =>
+        (
+          (window as any).__capturedEvents as {
+            event: string
+            props?: Record<string, unknown>
+          }[]
+        ).filter((e) => e.event === "acteur_viewed"),
+      )
+
+      expect(events).toHaveLength(1)
+      expect(typeof events[0].props?.acteurUuid).toBe("string")
+      expect((events[0].props?.acteurUuid as string).length).toBeGreaterThan(0)
+      expect(typeof events[0].props?.acteurType).toBe("string")
+      expect((events[0].props?.acteurType as string).length).toBeGreaterThan(0)
+      expect(Array.isArray(events[0].props?.sources)).toBe(true)
+      expect(typeof events[0].props?.searchAddress).toBe("string")
+      expect((events[0].props?.searchAddress as string).length).toBeGreaterThan(0)
+      expect(typeof events[0].props?.searchLatitude).toBe("string")
+      expect(typeof events[0].props?.searchLongitude).toBe("string")
+    })
   })
 
   test.describe("Tracking du referrer dans les iframes", () => {

@@ -100,7 +100,14 @@ export default class extends Controller<HTMLElement> {
   #setupActeurViewedListener() {
     this.element.addEventListener("acteur-details:viewed", (e: Event) => {
       const { acteurUuid, acteurType, sources } = (e as CustomEvent).detail
-      this.capture("acteur_viewed", { acteurUuid, acteurType, sources })
+      this.capture("acteur_viewed", {
+        acteurUuid,
+        acteurType,
+        sources,
+        searchAddress: sessionStorage.getItem("adresse") ?? undefined,
+        searchLatitude: sessionStorage.getItem("latitude") ?? undefined,
+        searchLongitude: sessionStorage.getItem("longitude") ?? undefined,
+      })
     })
   }
 
@@ -152,7 +159,7 @@ export default class extends Controller<HTMLElement> {
     const { pageType } = this.#iframePageProperties()
     posthog.register({
       isIframe: this.personProperties.iframe,
-      surface: pageType,
+      outil: pageType,
       ref: this.personProperties.iframeReferrer ?? null,
     })
   }
@@ -367,6 +374,9 @@ export default class extends Controller<HTMLElement> {
     }
     if (pathname.startsWith("/formulaire")) {
       return { pageType: "formulaire", pageSlug: "" }
+    }
+    if (pathname.startsWith("/infotri")) {
+      return { pageType: "infotri", pageSlug: "" }
     }
     return { pageType: "assistant", pageSlug: pathname.replace(/^\//, "") }
   }
