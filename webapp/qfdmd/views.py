@@ -1,10 +1,10 @@
 import logging
-from typing import Any
+from typing import Any, override
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
-from typing import override
 
 import django_filters
 from django.contrib import messages
+from django.db import OperationalError, connection
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.utils.decorators import method_decorator
@@ -332,15 +332,25 @@ class AutocompleteHomeSearchView(ListView):
     # seven results.
     NUMBER_OF_ITEMS_DISPLAYED = 7
 
+    SEARCH_TIMEOUT_MS = 3000
+
     @override
     def get_queryset(self):
         query = self.request.GET.get("q", "")
         limit = self.NUMBER_OF_ITEMS_DISPLAYED
         if not query:
             return []
-        return SearchTerm.objects.searchable().search(Fuzzy(query, unaccent=True))[
-            :limit
-        ]
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "SET LOCAL statement_timeout = %s", [self.SEARCH_TIMEOUT_MS]
+                )
+            return SearchTerm.objects.searchable().search(Fuzzy(query, unaccent=True))[
+                :limit
+            ]
+        except OperationalError:
+            logger.warning("Autocomplete search timed out for query: %r", query)
+            return []
 
     @override
     def get_context_data(self, **kwargs):
