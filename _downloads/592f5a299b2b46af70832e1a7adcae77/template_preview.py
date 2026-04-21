@@ -1246,10 +1246,3 @@ class TestsPreview(LookbookPreview):
         return render_to_string(
             "ui/tests/t_16_infotri_configurator.html",
         )
-
-    def t_17_iframe_page_viewed(self, **kwargs):
-        """Test that the iframe_page_viewed PostHog event fires on hover/touch inside an iframe"""
-        return render_to_string(
-            "ui/tests/t_17_iframe_page_viewed.html",
-            {"base_url": base_url},
-        )
