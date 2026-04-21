@@ -349,7 +349,8 @@ class AutocompleteHomeSearchView(ListView):
                 :limit
             ]
         except OperationalError:
-            logger.warning("Autocomplete search timed out for query: %r", query)
+            safe_query = query.replace("\r", "").replace("\n", "")
+            logger.warning("Autocomplete search timed out for query: %r", safe_query)
             return []
 
     @override
