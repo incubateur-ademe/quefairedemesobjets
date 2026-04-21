@@ -17,7 +17,12 @@
     <turbo-frame
         id="{% acteur_frame_id %}"
     >
-        <article {% if turbo %}class='qf-animate-in qf-fade-in qf-duration-400'{% endif %}>
+        <article
+            {% if turbo %}class='qf-animate-in qf-fade-in qf-duration-400'{% endif %}
+            data-acteur-uuid="{{ object.uuid }}"
+            data-acteur-type="{{ object.acteur_type.code }}"
+            data-acteur-sources="{% for s in object.sources.all %}{{ s.code }}{% if not forloop.last %},{% endif %}{% endfor %}"
+        >
             <header class="qf-mb-2w">
                 <div class="qf-flex qf-flex-col qf-gap-1w">
                     {% acteur_label %}

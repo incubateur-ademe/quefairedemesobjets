@@ -94,6 +94,14 @@ export default class extends Controller<HTMLElement> {
 
     posthog.debug(!!this.posthogDebugValue)
     this.#setupAutocompleteResultClickListener()
+    this.#setupActeurViewedListener()
+  }
+
+  #setupActeurViewedListener() {
+    this.element.addEventListener("acteur-details:viewed", (e: Event) => {
+      const { acteurUuid, acteurType, sources } = (e as CustomEvent).detail
+      this.capture("acteur_viewed", { acteurUuid, acteurType, sources })
+    })
   }
 
   userConversionScoreValueChanged(value) {
