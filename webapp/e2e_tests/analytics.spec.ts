@@ -229,6 +229,73 @@ test.describe("📊 Analytics & Tracking", () => {
     }
   })
 
+  test.describe("UTM links dans les iframes (t_18)", () => {
+    const TEST_PATH = "/lookbook/preview/tests/t_18_iframe_page_properties/"
+
+    const iframeCases = [
+      { testId: "iframe-carte", label: "carte" },
+      { testId: "iframe-formulaire", label: "formulaire" },
+      { testId: "iframe-assistant", label: "assistant" },
+    ]
+
+    for (const { testId, label } of iframeCases) {
+      test(`${label} — les liens internes ont utm_source=qfdmod`, async ({
+        page,
+      }, testInfo) => {
+        testInfo.setTimeout(90000)
+        await navigateTo(page, TEST_PATH)
+
+        const iframeEl = page.locator(`[data-testid="${testId}"] iframe`).first()
+        await expect(iframeEl).toBeAttached({ timeout: TIMEOUT.LONG })
+
+        const iframeSrc = await iframeEl.getAttribute("src")
+        if (!iframeSrc) throw new Error(`No src on iframe for ${testId}`)
+
+        let frame: Frame | undefined
+        await expect
+          .poll(
+            () => {
+              frame = page
+                .frames()
+                .find((f) => f.url().split("?")[0] === iframeSrc.split("?")[0])
+              return !!frame
+            },
+            { timeout: TIMEOUT.LONG },
+          )
+          .toBe(true)
+
+        const resolvedFrame = frame!
+        await resolvedFrame.waitForLoadState("domcontentloaded", {
+          timeout: TIMEOUT.LONG,
+        })
+
+        // Wait until at least one internal link exists in the iframe
+        await expect(resolvedFrame.locator("a[href]").first()).toBeAttached({
+          timeout: TIMEOUT.LONG,
+        })
+
+        // All same-origin links should carry utm_source=qfdmod
+        const hrefs = await resolvedFrame.evaluate(() =>
+          Array.from(document.querySelectorAll<HTMLAnchorElement>("a[href]"))
+            .map((a) => a.href)
+            .filter((href) => {
+              try {
+                return new URL(href).hostname === window.location.hostname
+              } catch {
+                return false
+              }
+            }),
+        )
+
+        expect(hrefs.length).toBeGreaterThan(0)
+        for (const href of hrefs) {
+          const url = new URL(href)
+          expect(url.searchParams.get("utm_source")).toBe("qfdmod")
+        }
+      })
+    }
+  })
+
   test.describe("Tracking du referrer dans les iframes", () => {
     const scriptTypes = [
       { name: "carte", scriptType: "carte", iframeId: "carte", iframePath: "/carte" },

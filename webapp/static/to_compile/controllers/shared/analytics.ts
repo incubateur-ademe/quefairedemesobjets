@@ -86,6 +86,7 @@ export default class extends Controller<HTMLElement> {
     posthog.init(this.posthogKeyValue, this.posthogConfig)
     this.#identifyAuthenticatedUser()
     this.#initialiseIframeRelatedPersonProperties()
+    this.#registerSuperProperties()
     this.#syncSessionStorageWithLocalConversionScore()
     this.#setupIframeTracking()
     this.#computeConversionScoreFromSessionStorage()
@@ -137,6 +138,15 @@ export default class extends Controller<HTMLElement> {
         admin: this.userAdminValue,
       })
     }
+  }
+
+  #registerSuperProperties() {
+    const { pageType } = this.#iframePageProperties()
+    posthog.register({
+      isIframe: this.personProperties.iframe,
+      surface: pageType,
+      ref: this.personProperties.iframeReferrer ?? null,
+    })
   }
 
   // The iframe URL parameter is not always set :
@@ -307,6 +317,35 @@ export default class extends Controller<HTMLElement> {
     if (!this.personProperties.iframe) return
     this.#setupViewportTracking()
     this.#setupInteractionTracking()
+    this.#setupUtmLinks()
+  }
+
+  #setupUtmLinks() {
+    const decorate = (a: HTMLAnchorElement) => {
+      try {
+        const url = new URL(a.href, window.location.href)
+        if (url.hostname !== window.location.hostname) return
+        if (url.searchParams.has("utm_source")) return
+        url.searchParams.set("utm_source", "qfdmod")
+        a.href = url.toString()
+      } catch {
+        // malformed href — skip
+      }
+    }
+
+    document.querySelectorAll<HTMLAnchorElement>("a[href]").forEach(decorate)
+
+    new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        for (const node of mutation.addedNodes) {
+          if (node instanceof HTMLAnchorElement) {
+            decorate(node)
+          } else if (node instanceof Element) {
+            node.querySelectorAll<HTMLAnchorElement>("a[href]").forEach(decorate)
+          }
+        }
+      }
+    }).observe(document.body, { childList: true, subtree: true })
   }
 
   #iframePageProperties(): { pageType: string; pageSlug: string } {
