@@ -147,7 +147,7 @@ test.describe("📊 Analytics & Tracking", () => {
       },
       {
         testId: "iframe-assistant",
-        expectedPageType: "assistant",
+        expectedPageType: "quefaire",
         expectedPageSlug: "",
       },
     ]

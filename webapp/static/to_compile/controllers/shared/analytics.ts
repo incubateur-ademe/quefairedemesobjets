@@ -63,7 +63,7 @@ export default class extends Controller<HTMLElement> {
     capture_pageview: true,
     capture_pageleave: true,
     person_profiles: "always",
-    persistence: "memory",
+    persistence: "sessionStorage",
   }
 
   // The user conversion score is computed from several actions : page views,
@@ -156,10 +156,11 @@ export default class extends Controller<HTMLElement> {
   }
 
   #registerSuperProperties() {
-    const { pageType } = this.#iframePageProperties()
+    const { pageType, pageSlug } = this.#iframePageProperties()
     posthog.register({
       isIframe: this.personProperties.iframe,
       outil: pageType,
+      pageSlug,
       ref: this.personProperties.iframeReferrer ?? null,
     })
   }
@@ -378,7 +379,7 @@ export default class extends Controller<HTMLElement> {
     if (pathname.startsWith("/infotri")) {
       return { pageType: "infotri", pageSlug: "" }
     }
-    return { pageType: "assistant", pageSlug: pathname.replace(/^\//, "") }
+    return { pageType: "quefaire", pageSlug: pathname.replace(/^\//, "") }
   }
 
   // Fires iframe_page_viewed once when the parent page signals that this
