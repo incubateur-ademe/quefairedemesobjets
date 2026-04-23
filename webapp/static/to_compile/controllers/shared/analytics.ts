@@ -63,7 +63,7 @@ export default class extends Controller<HTMLElement> {
     capture_pageview: true,
     capture_pageleave: true,
     person_profiles: "always",
-    persistence: "memory",
+    persistence: "sessionStorage",
   }
 
   // The user conversion score is computed from several actions : page views,
@@ -86,6 +86,7 @@ export default class extends Controller<HTMLElement> {
     posthog.init(this.posthogKeyValue, this.posthogConfig)
     this.#identifyAuthenticatedUser()
     this.#initialiseIframeRelatedPersonProperties()
+    this.#registerSuperProperties()
     this.#syncSessionStorageWithLocalConversionScore()
     this.#setupIframeTracking()
     this.#computeConversionScoreFromSessionStorage()
@@ -93,6 +94,21 @@ export default class extends Controller<HTMLElement> {
 
     posthog.debug(!!this.posthogDebugValue)
     this.#setupAutocompleteResultClickListener()
+    this.#setupActeurViewedListener()
+  }
+
+  #setupActeurViewedListener() {
+    this.element.addEventListener("acteur-details:viewed", (e: Event) => {
+      const { acteurUuid, acteurType, sources } = (e as CustomEvent).detail
+      this.capture("acteur_viewed", {
+        acteurUuid,
+        acteurType,
+        sources,
+        searchAddress: sessionStorage.getItem("adresse") ?? undefined,
+        searchLatitude: sessionStorage.getItem("latitude") ?? undefined,
+        searchLongitude: sessionStorage.getItem("longitude") ?? undefined,
+      })
+    })
   }
 
   userConversionScoreValueChanged(value) {
@@ -137,6 +153,16 @@ export default class extends Controller<HTMLElement> {
         admin: this.userAdminValue,
       })
     }
+  }
+
+  #registerSuperProperties() {
+    const { pageType, pageSlug } = this.#iframePageProperties()
+    posthog.register({
+      isIframe: this.personProperties.iframe,
+      outil: pageType,
+      pageSlug,
+      ref: this.personProperties.iframeReferrer ?? null,
+    })
   }
 
   // The iframe URL parameter is not always set :
@@ -307,6 +333,53 @@ export default class extends Controller<HTMLElement> {
     if (!this.personProperties.iframe) return
     this.#setupViewportTracking()
     this.#setupInteractionTracking()
+    this.#setupUtmLinks()
+  }
+
+  #setupUtmLinks() {
+    const decorate = (a: HTMLAnchorElement) => {
+      try {
+        const url = new URL(a.href, window.location.href)
+        if (url.hostname !== window.location.hostname) return
+        if (url.searchParams.has("utm_source")) return
+        url.searchParams.set("utm_source", "qfdmod")
+        a.href = url.toString()
+      } catch {
+        // malformed href — skip
+      }
+    }
+
+    document.querySelectorAll<HTMLAnchorElement>("a[href]").forEach(decorate)
+
+    new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        for (const node of mutation.addedNodes) {
+          if (node instanceof HTMLAnchorElement) {
+            decorate(node)
+          } else if (node instanceof Element) {
+            node.querySelectorAll<HTMLAnchorElement>("a[href]").forEach(decorate)
+          }
+        }
+      }
+    }).observe(document.body, { childList: true, subtree: true })
+  }
+
+  #iframePageProperties(): { pageType: string; pageSlug: string } {
+    const pathname = window.location.pathname
+    const carteSlugMatch = pathname.match(/^\/carte\/(.+)$/)
+    if (carteSlugMatch) {
+      return { pageType: "carte_sur_mesure", pageSlug: carteSlugMatch[1] }
+    }
+    if (pathname === "/carte" || pathname === "/carte/") {
+      return { pageType: "carte", pageSlug: "" }
+    }
+    if (pathname.startsWith("/formulaire")) {
+      return { pageType: "formulaire", pageSlug: "" }
+    }
+    if (pathname.startsWith("/infotri")) {
+      return { pageType: "infotri", pageSlug: "" }
+    }
+    return { pageType: "quefaire", pageSlug: pathname.replace(/^\//, "") }
   }
 
   // Fires iframe_page_viewed once when the parent page signals that this
@@ -320,7 +393,7 @@ export default class extends Controller<HTMLElement> {
       if (event.source !== window.parent) return
       if (!event.data || event.data.type !== "iframe_in_viewport") return
       this.#iframePageViewedFired = true
-      this.capture("iframe_page_viewed")
+      this.capture("iframe_page_viewed", this.#iframePageProperties())
     })
   }
 
@@ -330,7 +403,7 @@ export default class extends Controller<HTMLElement> {
     const fireOnce = () => {
       if (this.#iframeInteractedFired) return
       this.#iframeInteractedFired = true
-      this.capture("interacted_with_iframe")
+      this.capture("interacted_with_iframe", this.#iframePageProperties())
     }
     document.body.addEventListener("mouseover", fireOnce, { once: true })
     document.body.addEventListener("touchstart", fireOnce, { once: true })

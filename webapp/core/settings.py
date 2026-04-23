@@ -42,12 +42,6 @@ ASSISTANT = {
 CARTE = {
     "MATOMO_ID": decouple.config("LVAO_MATOMO_ID", default=50, cast=int),
     "GOOGLE_SEARCH_CONSOLE": "google9dfbbc61adbe3888.html",
-    "POSTHOG_KEY": decouple.config(
-        "CARTE_POSTHOG_KEY",
-        # Staging project by default
-        default="phc_L1dG5EsBjyMTTcQqFJTAQtEugtGz6C3Tdpf1g7O09si",  # pragma: allowlist secret  # noqa: E501
-        cast=str,
-    ),
     "DECLARATION_ACCESSIBILITE_PAGE_ID": decouple.config(
         "CARTE_DECLARATION_ACCESSBILITE_PAGE_ID",
         default=177,

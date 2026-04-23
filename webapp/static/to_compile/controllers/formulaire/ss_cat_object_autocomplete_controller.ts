@@ -1,4 +1,3 @@
-import posthog from "posthog-js"
 import AutocompleteController from "../carte/autocomplete_controller"
 
 export default class extends AutocompleteController {
@@ -37,13 +36,6 @@ export default class extends AutocompleteController {
         if (this.autocompleteList.childElementCount > 0) {
           this.currentFocusedOptionIndexValue = 0
         }
-
-        posthog.capture("object_input", {
-          object_requested: inputTargetValue,
-          object_list: data ? data.slice(0, this.maxOptionDisplayedValue) : undefined,
-          first_object: data ? data[0]["label"] : undefined,
-          first_subcategory: data ? data[0]["sub_label"] : undefined,
-        })
       })
       .then(() => {
         this.spinnerTarget.classList.add("qf-hidden")
