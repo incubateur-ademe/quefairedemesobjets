@@ -6,8 +6,8 @@ Adresse
 
 {% block content %}
 
-{% if request.GET.with_map %}
-<div class="max-md:qf-hidden">
+{% if is_carte and latitude and longitude %}
+<div class="{% if not request.GET.with_map %}md:qf-hidden{% endif %}">
     {% include "ui/components/mini_carte/mini_carte.html" with search_latitude=latitude search_longitude=longitude acteur=object %}
 </div>
 {% endif %}
