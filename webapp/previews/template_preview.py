@@ -537,17 +537,6 @@ class FiltresPreview(LookbookPreview):
         )
 
 
-class ModalForm(forms.Form):
-    button_only = forms.BooleanField(
-        label="Seulement le bouton",
-        help_text="Ne doit rien afficher, mais en inspectant la preview, on doit retrouver le tag <button>",
-    )
-    modal_only = forms.BooleanField(
-        label="Seulement la modal",
-        help_text="Ne doit rien afficher, mais en inspectant la preview, on doit retrouver le tag <dialog>",
-    )
-
-
 class BonusForm(forms.Form):
     bonus = forms.ChoiceField(
         label="Bonus",
@@ -582,29 +571,6 @@ class ModalsPreview(LookbookPreview):
 
         context = {"legende_form": LegendeForm(), "filtres_form": FiltresForm}
         return render_to_string("ui/components/modals/filtres.html", context)
-
-    @register_form_class(ModalForm)
-    @component_docs("ui/components/modals/infos_avec_toggle.md")
-    def infos_avec_toggle(
-        self, button_only=False, modal_only=False, button_text="Infos", **kwargs
-    ):
-        # Convert string values to boolean
-        if isinstance(button_only, str):
-            button_only = button_only.lower() == "true"
-        if isinstance(modal_only, str):
-            modal_only = modal_only.lower() == "true"
-
-        context = {
-            "button_only": button_only,
-            "modal_only": modal_only,
-            "button_text": button_text,
-            "button_extra_classes": "fr-btn--sm",
-        }
-
-        return render_to_string("ui/components/modals/infos.html", context)
-
-    def infos(self, **kwargs):
-        return render_to_string("ui/components/modals/infos.html")
 
 
 class FormulairesPreview(LookbookPreview):
