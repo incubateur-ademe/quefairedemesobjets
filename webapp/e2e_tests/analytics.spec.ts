@@ -1,4 +1,4 @@
-import { test, expect, Page, Frame } from "@playwright/test"
+import { test, expect, Page, Frame, Locator, ElementHandle } from "@playwright/test"
 import {
   navigateTo,
   TIMEOUT,
@@ -70,6 +70,25 @@ async function waitForEvent(frame: Frame, eventName: string) {
     eventName,
     { timeout: TIMEOUT.DEFAULT },
   )
+}
+
+// Resolve the Frame object from an iframe Locator via its DOM handle.
+// Using contentFrame() is redirect-safe: for iframes whose server redirects
+// (e.g. /dechet -> /, /carte/<slug> -> /carte/<slug>/), URL-based matching
+// on f.url() vs. the iframe src attribute would never match.
+async function resolveIframeFrame(iframeEl: Locator): Promise<Frame> {
+  let frame: Frame | null = null
+  await expect
+    .poll(
+      async () => {
+        const handle: ElementHandle | null = await iframeEl.elementHandle()
+        frame = (await handle?.contentFrame()) ?? null
+        return frame !== null && frame.url() !== "about:blank"
+      },
+      { timeout: TIMEOUT.LONG },
+    )
+    .toBe(true)
+  return frame!
 }
 
 test.describe("📊 Analytics & Tracking", () => {
@@ -162,24 +181,8 @@ test.describe("📊 Analytics & Tracking", () => {
         const iframeEl = page.locator(`[data-testid="${testId}"] iframe`).first()
         await expect(iframeEl).toBeAttached({ timeout: TIMEOUT.LONG })
 
-        // Resolve Frame from src — poll until attached (iframes load lazily via script tag)
-        const iframeSrc = await iframeEl.getAttribute("src")
-        if (!iframeSrc) throw new Error(`No src on iframe for ${testId}`)
-
-        let frame: Frame | undefined
-        await expect
-          .poll(
-            () => {
-              frame = page
-                .frames()
-                .find((f) => f.url().split("?")[0] === iframeSrc.split("?")[0])
-              return !!frame
-            },
-            { timeout: TIMEOUT.LONG },
-          )
-          .toBe(true)
-
-        const resolvedFrame = frame!
+        // Resolve Frame via DOM handle (redirect-safe; iframe src may differ from final URL)
+        const resolvedFrame = await resolveIframeFrame(iframeEl)
         await resolvedFrame.waitForLoadState("domcontentloaded", {
           timeout: TIMEOUT.LONG,
         })
@@ -254,23 +257,7 @@ test.describe("📊 Analytics & Tracking", () => {
         const iframeEl = page.locator(`[data-testid="${testId}"] iframe`).first()
         await expect(iframeEl).toBeAttached({ timeout: TIMEOUT.LONG })
 
-        const iframeSrc = await iframeEl.getAttribute("src")
-        if (!iframeSrc) throw new Error(`No src on iframe for ${testId}`)
-
-        let frame: Frame | undefined
-        await expect
-          .poll(
-            () => {
-              frame = page
-                .frames()
-                .find((f) => f.url().split("?")[0] === iframeSrc.split("?")[0])
-              return !!frame
-            },
-            { timeout: TIMEOUT.LONG },
-          )
-          .toBe(true)
-
-        const resolvedFrame = frame!
+        const resolvedFrame = await resolveIframeFrame(iframeEl)
         await resolvedFrame.waitForLoadState("domcontentloaded", {
           timeout: TIMEOUT.LONG,
         })
