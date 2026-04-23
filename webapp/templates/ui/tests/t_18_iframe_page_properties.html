@@ -1,0 +1,27 @@
+{% load dsfr_tags %}
+
+<div style="padding-top: 2000px;">
+  {% dsfr_callout title="Test pageType / pageSlug dans les événements iframe" text="Cette page intègre 4 iframes (carte, carte sur mesure, formulaire, assistant) pour vérifier que les événements PostHog iframe_page_viewed et interacted_with_iframe contiennent les bonnes propriétés pageType et pageSlug." icon_class="fr-icon-flask-line" %}
+
+  <p>Scrollez jusqu'à chaque iframe pour déclencher les événements.</p>
+
+  <h2>Carte (<code>/carte</code>)</h2>
+  <div data-testid="iframe-carte" style="margin-bottom: 2rem;">
+    <script src="{{ base_url }}/static/carte.js"></script>
+  </div>
+
+  <h2>Carte sur mesure (<code>/carte/{{ slug }}</code>)</h2>
+  <div data-testid="iframe-carte-sur-mesure" style="margin-bottom: 2rem;">
+    <script src="{{ base_url }}/static/carte.js" data-slug="{{ slug }}"></script>
+  </div>
+
+  <h2>Formulaire (<code>/formulaire</code>)</h2>
+  <div data-testid="iframe-formulaire" style="margin-bottom: 2rem;">
+    <script src="{{ base_url }}/static/iframe.js" data-direction="jai" data-action_list="reparer"></script>
+  </div>
+
+  <h2>Assistant (<code>/</code>)</h2>
+  <div data-testid="iframe-assistant" style="margin-bottom: 2rem;">
+    <script src="{{ base_url }}/iframe.js"></script>
+  </div>
+</div>
