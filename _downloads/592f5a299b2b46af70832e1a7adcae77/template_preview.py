@@ -1253,3 +1253,16 @@ class TestsPreview(LookbookPreview):
             "ui/tests/t_17_iframe_page_viewed.html",
             {"base_url": base_url},
         )
+
+    def t_18_iframe_page_properties(self, **kwargs):
+        """Test that iframe events include correct pageType and pageSlug for each iframe type"""
+        slug = (
+            CarteConfig.objects.exclude(test=True)
+            .values_list("slug", flat=True)
+            .first()
+            or "angers-site-vitrine"
+        )
+        return render_to_string(
+            "ui/tests/t_18_iframe_page_properties.html",
+            {"base_url": base_url, "slug": slug},
+        )
