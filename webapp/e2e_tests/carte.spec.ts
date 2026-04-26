@@ -437,6 +437,80 @@ test.describe("🗺️ Bouton 'Rechercher dans cette zone'", () => {
     // The button should be hidden again after clicking
     await expect(searchInZoneButton).toHaveClass(/qf-hidden/)
   })
+
+  test("Le home pinpoint n'est pas inclus dans le fitBounds après une recherche", async ({
+    page,
+  }) => {
+    await navigateTo(page, "/carte")
+    await mockApiAdresse(page)
+    await searchForAuray(page)
+
+    // Wait for markers to be attached
+    const acteurMarkers = page.locator(
+      '.maplibregl-marker[data-controller="pinpoint"]:not(#pinpoint-home)',
+    )
+    await expect(acteurMarkers.first()).toBeAttached({ timeout: TIMEOUT.LONG })
+    await page.waitForTimeout(2000)
+
+    // Read the map bounds and the home marker position
+    const mapInfo = await page.evaluate(() => {
+      const mapElement = document.querySelector('[data-controller*="map"]') as any
+      const map = mapElement?.actorsMap?.map
+      if (!map) return null
+      const bounds = map.getBounds()
+      const homeEl = document.getElementById("pinpoint-home") as HTMLElement | null
+      const transform = homeEl?.style.transform ?? ""
+      const markers = Array.from(
+        document.querySelectorAll(
+          '.maplibregl-marker[data-controller="pinpoint"]:not(#pinpoint-home)',
+        ),
+      ).length
+      return {
+        sw: { lat: bounds.getSouthWest().lat, lng: bounds.getSouthWest().lng },
+        ne: { lat: bounds.getNorthEast().lat, lng: bounds.getNorthEast().lng },
+        homeTransform: transform,
+        markers,
+      }
+    })
+
+    expect(mapInfo).not.toBeNull()
+    expect(mapInfo!.markers).toBeGreaterThan(0)
+
+    // Simulate the "search in zone" scenario: move the map far from the searched
+    // address, then confirm that when the map is fit again its bounds are based
+    // on the new zone only. We do this by programmatically fitting to a
+    // bbox far from Auray and checking the map center moves away from the
+    // home marker's coordinates without snapping back.
+    const afterMove = await page.evaluate(() => {
+      const mapElement = document.querySelector('[data-controller*="map"]') as any
+      const solutionMap = mapElement?.actorsMap
+      if (!solutionMap) return null
+
+      // Noirmoutier bbox (far from Auray)
+      const farBbox = {
+        southWest: { lat: 46.95, lng: -2.3 },
+        northEast: { lat: 47.05, lng: -2.15 },
+      }
+      solutionMap.fitBounds(solutionMap.points, farBbox)
+      const bounds = solutionMap.map.getBounds()
+      return {
+        sw: { lat: bounds.getSouthWest().lat, lng: bounds.getSouthWest().lng },
+        ne: { lat: bounds.getNorthEast().lat, lng: bounds.getNorthEast().lng },
+      }
+    })
+
+    expect(afterMove).not.toBeNull()
+    // When a bbox is provided, the map fits to that bbox only; the old home
+    // point at Auray (~47.66N, -2.99E) must not be inside the new bounds.
+    const aurayLat = 47.668099
+    const aurayLng = -2.990838
+    const inBounds =
+      aurayLat >= afterMove!.sw.lat &&
+      aurayLat <= afterMove!.ne.lat &&
+      aurayLng >= afterMove!.sw.lng &&
+      aurayLng <= afterMove!.ne.lng
+    expect(inBounds).toBe(false)
+  })
 })
 
 test.describe("🗺️ CarteConfig Bounding Box", () => {
