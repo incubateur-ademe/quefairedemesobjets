@@ -11,15 +11,16 @@ RUN apt-get update && \
 
 # python dependencies
 USER ${AIRFLOW_UID:-50000}:0
+
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 WORKDIR /opt/airflow/
 
-# Copy workspace structure for uv resolution
-COPY pyproject.toml uv.lock ./
-COPY webapp/pyproject.toml webapp/pyproject.toml
+# Copy data-platform uv project structure
 COPY data-platform/pyproject.toml data-platform/pyproject.toml
+COPY data-platform/uv.lock data-platform/uv.lock
 
 # Copy webapp source (needed for package install)
+COPY webapp/pyproject.toml webapp/pyproject.toml
 COPY webapp/core/ webapp/core/
 COPY webapp/data/ webapp/data/
 COPY webapp/dsfr_hacks/ webapp/dsfr_hacks/
@@ -29,11 +30,13 @@ COPY webapp/qfdmo/ webapp/qfdmo/
 COPY webapp/search/ webapp/search/
 COPY webapp/stats/ webapp/stats/
 
-RUN uv sync --frozen --all-packages --no-editable
+# Venv at /opt/airflow/.venv so shebangs match runtime (not data-platform/.venv)
+ENV UV_PROJECT_ENVIRONMENT=/opt/airflow/.venv
+RUN uv sync --project data-platform --frozen --no-editable
 
 # Runtime
 # --- --- --- ---
-FROM apache/airflow:slim-3.1.7-python3.12 AS scheduler
+FROM apache/airflow:slim-3.1.7-python3.12 AS dag-processor
 
 USER root
 
