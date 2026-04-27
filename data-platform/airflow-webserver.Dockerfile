@@ -48,7 +48,12 @@ COPY --from=python-builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
 WORKDIR /opt/airflow
 COPY ./data-platform/dags /opt/airflow/dags
+COPY ./data-platform/airflow-webserver-start.sh /opt/airflow/airflow-webserver-start.sh
+
+USER root
+RUN chmod +x /opt/airflow/airflow-webserver-start.sh
+USER ${AIRFLOW_UID:-50000}
 
 EXPOSE 8080
 
-CMD ["api-server"]
+ENTRYPOINT ["/opt/airflow/airflow-webserver-start.sh"]
