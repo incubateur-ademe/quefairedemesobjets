@@ -101,20 +101,22 @@ class ClusterConfig(BaseModel):
     # Logique multi-champs
     @model_validator(mode="before")
     def check_model(cls, values):
-        # Fields avec default []
-        optionals = [
+        # Fields with [] as default
+        optionals_lists_default_empty = [
             "normalize_fields_basic",
             "normalize_fields_no_words_size1",
             "normalize_fields_no_words_size2_or_less",
             "normalize_fields_no_words_size3_or_less",
             "normalize_fields_order_unique_words",
             "dedup_enrich_exclude_sources",
-            "distance_in_cluster",
             "cluster_fields_fuzzy",
         ]
-        for k in optionals:
-            if not values.get(k):
+        for k in optionals_lists_default_empty:
+            if values.get(k) is None:
                 values[k] = []
+
+        if values.get("distance_in_cluster") is None:
+            values["distance_in_cluster"] = 0
 
         # SOURCE CODES
         # Si aucun code source fourni alors on inclut toutes les sources
