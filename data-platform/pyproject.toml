@@ -11,7 +11,7 @@ dependencies = [
     "dbt-postgres>=1.9.1,<2",
     "fuzzywuzzy>=0.18.0,<0.19",
     "numpy>=1.26.0,<2",
-    "pandas<3",
+    "pandas<2.2",
     "python-decouple~=3.8",
     "ratelimit>=2.2.1,<3",
     "scikit-learn==1.8.0",
