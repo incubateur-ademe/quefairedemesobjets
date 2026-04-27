@@ -17,7 +17,7 @@ def modal_button(context, modal_id, button_text="", button_extra_classes=""):
 
     Usage:
         {% load modal_tags %}
-        {% modal_button modal_id="infos" button_text="Infos" %}
+        {% modal_button modal_id="filtres" button_text="Filtres" %}
     """
     # Apply namespacing to the modal_id if a namespace exists in context
     if MAP_CONTAINER_ID in context:
