@@ -1,5 +1,4 @@
 import pytest
-
 from dags.cluster.config.model import ClusterConfig
 
 

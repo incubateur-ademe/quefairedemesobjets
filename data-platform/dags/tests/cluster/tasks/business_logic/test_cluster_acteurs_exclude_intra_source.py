@@ -108,24 +108,22 @@ class TestClusterSplitClusterintraSource:
                 "nom": ["décheterie du village" for _ in range(7)],
             }
         )
-        return ("ctype", ["keys1", "keys2"], rows)
+        return (["keys1", "keys2"], rows)
 
     def test_split_cluster_intra_source(self, cluster_potential):
         cluster_potential = split_cluster_intra_source(cluster_potential)
         assert len(cluster_potential) == 2
 
-        df_cluster_1 = cluster_potential[0][2]
-        df_cluster_2 = cluster_potential[1][2]
+        print(cluster_potential)
+        df_cluster_1 = cluster_potential[0][1]
+        df_cluster_2 = cluster_potential[1][1]
 
         assert df_cluster_1["id"].tolist() == ["a3", "a2", "a4"]
         assert df_cluster_2["id"].tolist() == ["a1", "a5", "a6"]
 
-        # ctype
-        assert cluster_potential[0][0] == "ctype"
-        assert cluster_potential[1][0] == "ctype"
         # keys
-        assert cluster_potential[0][1] == ["keys1", "keys2"]
-        assert cluster_potential[1][1] == ["keys1", "keys2", "1"]
+        assert cluster_potential[0][0] == ["keys1", "keys2"]
+        assert cluster_potential[1][0] == ["keys1", "keys2", "1"]
         # rows
         assert df_cluster_1["id"].tolist() == ["a3", "a2", "a4"]
         assert df_cluster_2["id"].tolist() == ["a1", "a5", "a6"]

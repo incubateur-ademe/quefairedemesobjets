@@ -151,19 +151,12 @@ def haversine(lon1: float, lat1: float, lon2: float, lat2: float) -> float:
 
 def split_clusters_by_distance(
     df_src: pd.DataFrame, distance_threshold: int
-) -> list[pd.DataFrame]:
+) -> list[pd.Series | pd.DataFrame]:
     """Split a cluster into distance-based subclusters.
 
     Work like `cluster_cols_group_fuzzy`: take a DataFrame representing
-    *one* original cluster, and return a list of DataFrames representing
+    *one* original cluster, and return a list of Series or DataFrames representing
     subclusters.
-    *un* cluster d'origine, et on renvoie une liste de DataFrames représentant
-    des sous-clusters.
-
-    Rule: two points are connected if their haversine distance is strictly
-    inferior to `distance_threshold` (in meters). The subclusters are the
-    connected components of the graph defined this way. We only keep clusters
-    of size >= 2.
     """
 
     # We only consider clusters of size 2+
@@ -295,9 +288,11 @@ def cluster_acteurs_clusters(
             cols_ids_codes
             + cluster_fields_exact
             + cluster_fields_fuzzy
-            + ["source_codes", "latitude", "longitude"]
+            + ["source_codes"]
         )
     )
+    if distance_in_cluster > 0:
+        cols_to_keep.extend(["latitude", "longitude"])
     df = df[cols_to_keep]
 
     # Start with exact clustering with a simple groupby
