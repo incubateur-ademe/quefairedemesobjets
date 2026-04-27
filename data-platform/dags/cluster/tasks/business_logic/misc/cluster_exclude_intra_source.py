@@ -3,19 +3,19 @@ from utils import logging_utils as log
 
 
 def split_clusters_infra_source(
-    clusters_potential: list[tuple[str, list[str], pd.DataFrame]],
+    clusters_potential: list[tuple[list[str], pd.DataFrame]],
 ):
     result = []
-    for ctype, keys, rows in clusters_potential:
-        result = result + split_cluster_intra_source((ctype, keys, rows))
+    for keys, rows in clusters_potential:
+        result = result + split_cluster_intra_source((keys, rows))
     return result
 
 
 def split_cluster_intra_source(
-    cluster_potential: tuple[str, list[str], pd.DataFrame],
+    cluster_potential: tuple[list[str], pd.DataFrame],
     index_to_add: int = 0,
-) -> list[tuple[str, list[str], pd.DataFrame]]:
-    (ctype, keys, rows) = cluster_potential
+) -> list[tuple[list[str], pd.DataFrame]]:
+    keys, rows = cluster_potential
 
     # Ordonner rows pour commencer par ceux qui on le plus de source_codes
     rows["nb_sources"] = rows["source_codes"].apply(len)
@@ -42,13 +42,13 @@ def split_cluster_intra_source(
             pass
         if index_to_add:
             keys.append(str(index_to_add))
-        return [(ctype, keys, current_rows)]
+        return [(keys, current_rows)]
     else:
         copy_keys = keys.copy()
         if index_to_add:
             keys.append(str(index_to_add))
-        return [(ctype, keys, current_rows)] + split_cluster_intra_source(
-            (ctype, copy_keys, new_rows), index_to_add + 1
+        return [(keys, current_rows)] + split_cluster_intra_source(
+            (copy_keys, new_rows), index_to_add + 1
         )
 
 
