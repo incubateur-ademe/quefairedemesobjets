@@ -11,7 +11,6 @@ from data.models.change import (
     COL_CHANGE_ORDER,
     COL_CHANGE_REASON,
 )
-from sources.tasks.transform.sequence_utils import df_convert_numpy_to_jsonify
 from utils.django import django_setup_full
 
 from data.models.changes import (
@@ -199,5 +198,4 @@ def cluster_acteurs_parents_choose_new(df_clusters: pd.DataFrame) -> pd.DataFram
     df = pd.concat(dfs_marked, ignore_index=True)
     df[COL_CHANGE_ORDER] = df[COL_CHANGE_ORDER].astype(int)
 
-    df = df_convert_numpy_to_jsonify(df)
     return df_sort(df)
