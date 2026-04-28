@@ -12,7 +12,6 @@ from cluster.tasks.business_logic.cluster_acteurs_config_create import (
 from cluster.tasks.business_logic.cluster_acteurs_parents_choose_data import (
     cluster_acteurs_parents_choose_data,
 )
-from sources.tasks.transform.sequence_utils import df_convert_numpy_to_jsonify
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
@@ -62,8 +61,6 @@ def cluster_acteurs_parents_choose_data_wrapper(ti, params) -> None:
 
     logger.info(log.banner_string("🏁 Résultat final de cette tâche"))
     log.preview_df_as_markdown("clusters avec data parent", df, groupby="cluster_id")
-
-    df = df_convert_numpy_to_jsonify(df)
 
     ti.xcom_push(key=XCOMS.DF_PARENTS_CHOOSE_DATA, value=df)
 

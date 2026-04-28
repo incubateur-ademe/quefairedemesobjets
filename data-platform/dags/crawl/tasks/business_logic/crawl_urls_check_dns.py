@@ -8,7 +8,6 @@ import pandas as pd
 from crawl.config.cohorts import COHORTS
 from crawl.config.columns import COLS
 from crawl.tasks.business_logic.crawl_urls_check_syntax import url_domain_get
-from sources.tasks.transform.sequence_utils import df_convert_numpy_to_jsonify
 from utils import logging_utils as log
 from utils.dataframes import df_split_on_filter
 
@@ -36,8 +35,6 @@ def crawl_urls_check_dns(
     """Checks if the domains of the URLs are reachable,
     returns 2 sub-dataframes (working/failing)"""
     from core.models.constants import EMPTY_ACTEUR_FIELD
-
-    df = df_convert_numpy_to_jsonify(df)
 
     log.preview_df_as_markdown("🔎 Domaines à résoudre", df)
 
