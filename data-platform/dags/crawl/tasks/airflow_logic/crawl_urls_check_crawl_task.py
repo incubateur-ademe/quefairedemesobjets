@@ -3,8 +3,8 @@
 import logging
 
 from airflow import DAG
-from airflow.exceptions import AirflowSkipException
 from airflow.providers.standard.operators.python import PythonOperator
+from airflow.sdk.exceptions import AirflowSkipException
 from crawl.config.tasks import TASKS
 from crawl.config.xcoms import XCOMS, xcom_pull
 from crawl.tasks.business_logic.crawl_urls_check_crawl import crawl_urls_check_crawl
