@@ -11,7 +11,7 @@ export default new Transformer({
       // This is a IE hack we do not need to support.
       // Setting a unrealistic value of 100000000 ensures
       // this media query will never run.
-      const regex = /0\\0/g;
+      const regex = /0\\0/g
       source = source.replaceAll(regex, "1000000000")
     }
 

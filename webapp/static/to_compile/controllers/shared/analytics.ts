@@ -41,6 +41,9 @@ export default class extends Controller<HTMLElement> {
     iframe: false,
   }
 
+  #iframePageViewedFired = false
+  #iframeInteractedFired = false
+
   static values = {
     initialAction: String,
     posthogDebug: Boolean,
@@ -53,15 +56,14 @@ export default class extends Controller<HTMLElement> {
     userUsername: String,
   }
 
-  intersectionObserverThreshold = 0.1
-
   posthogConfig: Partial<PostHogConfig> = {
     api_host: "/ph",
     ui_host: "https://eu.posthog.com",
     autocapture: false,
-    capture_pageview: false,
+    capture_pageview: true,
+    capture_pageleave: true,
     person_profiles: "always",
-    persistence: "memory",
+    persistence: "sessionStorage",
   }
 
   // The user conversion score is computed from several actions : page views,
@@ -84,12 +86,29 @@ export default class extends Controller<HTMLElement> {
     posthog.init(this.posthogKeyValue, this.posthogConfig)
     this.#identifyAuthenticatedUser()
     this.#initialiseIframeRelatedPersonProperties()
+    this.#registerSuperProperties()
     this.#syncSessionStorageWithLocalConversionScore()
-    this.#setupIntersectionObserver()
+    this.#setupIframeTracking()
     this.#computeConversionScoreFromSessionStorage()
     this.#setInitialActionValue()
 
     posthog.debug(!!this.posthogDebugValue)
+    this.#setupAutocompleteResultClickListener()
+    this.#setupActeurViewedListener()
+  }
+
+  #setupActeurViewedListener() {
+    this.element.addEventListener("acteur-details:viewed", (e: Event) => {
+      const { acteurUuid, acteurType, sources } = (e as CustomEvent).detail
+      this.capture("acteur_viewed", {
+        acteurUuid,
+        acteurType,
+        sources,
+        searchAddress: sessionStorage.getItem("adresse") ?? undefined,
+        searchLatitude: sessionStorage.getItem("latitude") ?? undefined,
+        searchLongitude: sessionStorage.getItem("longitude") ?? undefined,
+      })
+    })
   }
 
   userConversionScoreValueChanged(value) {
@@ -134,6 +153,16 @@ export default class extends Controller<HTMLElement> {
         admin: this.userAdminValue,
       })
     }
+  }
+
+  #registerSuperProperties() {
+    const { pageType, pageSlug } = this.#iframePageProperties()
+    posthog.register({
+      isIframe: this.personProperties.iframe,
+      outil: pageType,
+      pageSlug,
+      ref: this.personProperties.iframeReferrer ?? null,
+    })
   }
 
   // The iframe URL parameter is not always set :
@@ -264,6 +293,33 @@ export default class extends Controller<HTMLElement> {
     this.#updateDebugInspectorUI()
   }
 
+  #setupAutocompleteResultClickListener() {
+    this.element.addEventListener("next-autocomplete:result-click", (e: Event) => {
+      const {
+        eventName,
+        fieldName,
+        position,
+        inputText,
+        searchTermId,
+        searchTermName,
+      } = (e as CustomEvent).detail
+      if (!eventName) return
+      posthog.capture(eventName, {
+        fieldName,
+        position,
+        inputText,
+        searchTermId,
+        searchTermName,
+      })
+      if (searchTermId) {
+        document.cookie = `qf_search_term_id=${searchTermId}; path=/; max-age=60; SameSite=Lax`
+      }
+    })
+  }
+  capture(event: string, properties?: Record<string, unknown>) {
+    posthog.capture(event, properties)
+  }
+
   #computeConversionScoreFromActions() {
     let score = 0
     for (const value of Object.values(this.userConversionScoreValue)) {
@@ -273,24 +329,84 @@ export default class extends Controller<HTMLElement> {
     return score
   }
 
-  #setupIntersectionObserver() {
-    const observer = new IntersectionObserver(
-      (entries, observer) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            posthog.capture("$pageview")
-            // TODO: increase userConversionScore
-            observer.unobserve(entry.target)
-          }
-        })
-      },
-      {
-        root: null,
-        threshold: this.intersectionObserverThreshold, // Trigger when at least 10% of the page is visible
-      },
-    )
+  #setupIframeTracking() {
+    if (!this.personProperties.iframe) return
+    this.#setupViewportTracking()
+    this.#setupInteractionTracking()
+    this.#setupUtmLinks()
+  }
 
-    observer.observe(document.body)
+  #setupUtmLinks() {
+    const decorate = (a: HTMLAnchorElement) => {
+      try {
+        const url = new URL(a.href, window.location.href)
+        if (url.hostname !== window.location.hostname) return
+        if (url.searchParams.has("utm_source")) return
+        url.searchParams.set("utm_source", "qfdmod")
+        a.href = url.toString()
+      } catch {
+        // malformed href — skip
+      }
+    }
+
+    document.querySelectorAll<HTMLAnchorElement>("a[href]").forEach(decorate)
+
+    new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        for (const node of mutation.addedNodes) {
+          if (node instanceof HTMLAnchorElement) {
+            decorate(node)
+          } else if (node instanceof Element) {
+            node.querySelectorAll<HTMLAnchorElement>("a[href]").forEach(decorate)
+          }
+        }
+      }
+    }).observe(document.body, { childList: true, subtree: true })
+  }
+
+  #iframePageProperties(): { pageType: string; pageSlug: string } {
+    const pathname = window.location.pathname
+    const carteSlugMatch = pathname.match(/^\/carte\/(.+)$/)
+    if (carteSlugMatch) {
+      return { pageType: "carte_sur_mesure", pageSlug: carteSlugMatch[1] }
+    }
+    if (pathname === "/carte" || pathname === "/carte/") {
+      return { pageType: "carte", pageSlug: "" }
+    }
+    if (pathname.startsWith("/formulaire")) {
+      return { pageType: "formulaire", pageSlug: "" }
+    }
+    if (pathname.startsWith("/infotri")) {
+      return { pageType: "infotri", pageSlug: "" }
+    }
+    return { pageType: "quefaire", pageSlug: pathname.replace(/^\//, "") }
+  }
+
+  // Fires iframe_page_viewed once when the parent page signals that this
+  // iframe has entered the viewport (via postMessage from iframe_functions.ts).
+  #setupViewportTracking() {
+    window.addEventListener("message", (event: MessageEvent) => {
+      if (this.#iframePageViewedFired) return
+      // Only accept messages from our direct parent frame.
+      // This prevents arbitrary third-party scripts on the embedding page
+      // from spoofing the iframe_in_viewport signal.
+      if (event.source !== window.parent) return
+      if (!event.data || event.data.type !== "iframe_in_viewport") return
+      this.#iframePageViewedFired = true
+      this.capture("iframe_page_viewed", this.#iframePageProperties())
+    })
+  }
+
+  // Fires interacted_with_iframe once on first mouse or touch interaction
+  // inside the iframe body.
+  #setupInteractionTracking() {
+    const fireOnce = () => {
+      if (this.#iframeInteractedFired) return
+      this.#iframeInteractedFired = true
+      this.capture("interacted_with_iframe", this.#iframePageProperties())
+    }
+    document.body.addEventListener("mouseover", fireOnce, { once: true })
+    document.body.addEventListener("touchstart", fireOnce, { once: true })
   }
 
   #captureUIInteraction(

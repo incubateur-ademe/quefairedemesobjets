@@ -22,13 +22,29 @@ class ActeurController extends Controller {
     PinpointController.clearActivePinpoints()
   }
 
-  #showPanelWhenTurboFrameLoad(event) {
+  #showPanelWhenTurboFrameLoad(event: CustomEvent) {
     // TODO : fetch this variable from template, using turbo_tags.acteur_frame_id
     let acteurDetailTurboFrameId = `${this.mapContainerIdValue}:acteur-detail`
 
     if (event.target.id === acteurDetailTurboFrameId) {
       this.#show()
+      this.#dispatchActeurViewed(event.target as HTMLElement)
     }
+  }
+
+  #dispatchActeurViewed(frame: HTMLElement) {
+    const article = frame.querySelector<HTMLElement>("article[data-acteur-uuid]")
+    if (!article) return
+    this.element.dispatchEvent(
+      new CustomEvent("acteur-details:viewed", {
+        bubbles: true,
+        detail: {
+          acteurUuid: article.dataset.acteurUuid,
+          acteurType: article.dataset.acteurType,
+          sources: article.dataset.acteurSources?.split(",").filter(Boolean) ?? [],
+        },
+      }),
+    )
   }
 
   connect() {

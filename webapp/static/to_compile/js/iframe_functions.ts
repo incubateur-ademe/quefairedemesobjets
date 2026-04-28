@@ -249,6 +249,20 @@ export async function buildAndInsertIframeFrom(
   // Insert iframe after script tag
   scriptTag.insertAdjacentElement("afterend", iframe)
 
+  // Notify the iframe when it enters the parent page's viewport.
+  // The analytics controller inside the iframe listens for this message
+  // to fire the iframe_page_viewed event exactly once.
+  const observer = new IntersectionObserver(
+    (entries, obs) => {
+      if (entries[0].intersectionRatio > 0) {
+        iframe.contentWindow?.postMessage({ type: "iframe_in_viewport" }, "*")
+        obs.disconnect()
+      }
+    },
+    { threshold: 0.01 },
+  )
+  observer.observe(iframe)
+
   // Generate and insert backlink
   await generateBackLink(iframe, backlinkKey, baseUrl)
 

@@ -1,5 +1,4 @@
-import posthog from "posthog-js"
-import AutocompleteController from "./autocomplete_controller"
+import AutocompleteController from "../carte/autocomplete_controller"
 
 export default class extends AutocompleteController {
   controllerName: string = "ss-cat-object-autocomplete"
@@ -37,13 +36,6 @@ export default class extends AutocompleteController {
         if (this.autocompleteList.childElementCount > 0) {
           this.currentFocusedOptionIndexValue = 0
         }
-
-        posthog.capture("object_input", {
-          object_requested: inputTargetValue,
-          object_list: data ? data.slice(0, this.maxOptionDisplayedValue) : undefined,
-          first_object: data ? data[0]["label"] : undefined,
-          first_subcategory: data ? data[0]["sub_label"] : undefined,
-        })
       })
       .then(() => {
         this.spinnerTarget.classList.add("qf-hidden")
@@ -52,15 +44,12 @@ export default class extends AutocompleteController {
   }
 
   selectOption(event: Event) {
-    const inputTargetValue = this.inputTarget.value
-
     let target = event.target as HTMLElement
     while (target && target.nodeName !== "DIV") {
       target = target.parentNode as HTMLElement
     }
     const option = JSON.parse(target.getElementsByTagName("input")[0].value)
     const labelValue = option.label
-    const subLabelValue = option.sub_label
     const identifierValue = option.identifier
 
     this.inputTarget.value = labelValue

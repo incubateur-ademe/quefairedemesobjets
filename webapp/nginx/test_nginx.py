@@ -68,20 +68,18 @@ class TestHostValidation:
         assert location.startswith("https://")
 
     @pytest.mark.skipif(not LEGACY_DOMAIN, reason="LEGACY_SITE_VITRINE_DOMAIN not set")
-    def test_legacy_domain_is_not_redirected(self):
+    def test_legacy_domain_redirects_to_base_domain(self):
         legacy_url = BASE_URL.replace(BASE_DOMAIN, LEGACY_DOMAIN)
         resp = requests.get(
-            legacy_url + "/", allow_redirects=False, timeout=5, verify=SSL_VERIFY
+            legacy_url + "/some/path",
+            allow_redirects=False,
+            timeout=5,
+            verify=SSL_VERIFY,
         )
-        assert resp.status_code != 301
-
-    @pytest.mark.skipif(not LEGACY_DOMAIN, reason="LEGACY_SITE_VITRINE_DOMAIN not set")
-    def test_legacy_domain_request_reaches_upstream(self):
-        legacy_url = BASE_URL.replace(BASE_DOMAIN, LEGACY_DOMAIN)
-        resp = requests.get(
-            legacy_url + "/", allow_redirects=False, timeout=5, verify=SSL_VERIFY
-        )
-        assert resp.status_code in (200, 404, 502, 504)
+        assert resp.status_code == 301
+        location = resp.headers.get("Location", "")
+        assert BASE_DOMAIN in location
+        assert location.startswith("https://")
 
 
 class TestCacheBypass:

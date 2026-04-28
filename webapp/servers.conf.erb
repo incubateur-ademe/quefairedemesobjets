@@ -22,9 +22,6 @@ map "$cookie_no_cache:<%= ENV["NGINX_DISABLE_CACHE"] || "0" %>" $no_cache {
 map $host $is_valid_host {
     default                                          0;
     "<%= ENV["BASE_DOMAIN"] %>"                      1;
-<% if ENV["LEGACY_SITE_VITRINE_DOMAIN"] && ENV["LEGACY_SITE_VITRINE_DOMAIN"] != ENV["BASE_DOMAIN"] %>
-    "<%= ENV["LEGACY_SITE_VITRINE_DOMAIN"] %>"       1;
-<% end %>
 }
 upstream gunicorn {
     server <%= ENV["UPSTREAM_HOST"] || "unix:/tmp/gunicorn.sock" %>;

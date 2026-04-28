@@ -1,6 +1,7 @@
 #!/bin/python
 
 """Script to read a CSV, infer its schema, and test it in a PostgreSQL database."""
+
 import csv
 import os
 import re

@@ -3,6 +3,7 @@
     data-turbo="false"
     class="fr-link"
     tabindex="0"
+    {% block anchor_attrs %}{% endblock %}
 >
     {% block nom %}
     {{ result|capfirst }}

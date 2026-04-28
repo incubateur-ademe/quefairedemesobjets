@@ -3,16 +3,19 @@
 {% block results %}
     {% for result in results %}
         {% with specific=result.specific %}
+        {# Guard against orphaned SearchTerms whose child object was deleted — see migration 0082 #}
+        {% if specific %}
         <li
             id="option-{{ forloop.counter }}"
             role="option"
             tabindex="-1"
             class="qf-list-none qf-p-1w qf-inline-block qf-justify-between"
             data-next-autocomplete-target="option"
-            data-action="keydown->next-autocomplete#navigate:prevent"
+            data-action="keydown->next-autocomplete#navigate:prevent click->next-autocomplete#resultClick"
         >
             {% include specific.search_result_template with result=specific position=forloop.counter %}
         </li>
+        {% endif %}
         {% endwith %}
     {% empty %}
         <li class="qf-list-none qf-px-2w qf-py-1w qf-text-gray-500">
