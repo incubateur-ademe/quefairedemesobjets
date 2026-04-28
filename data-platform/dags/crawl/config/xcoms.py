@@ -3,13 +3,16 @@ so we are more reliable & concise in our XCOM usage
 (so easy to typo a key or pull from wrong task and Airflow
 happily gives None without complaining)"""
 
+# TODO: should be mutualized with data-platform/dags/cluster/config/xcoms.py
+
 from dataclasses import dataclass
 from typing import Any
 
 import pandas as pd
-from airflow.exceptions import AirflowSkipException
 from airflow.models.taskinstance import TaskInstance
+from airflow.sdk.exceptions import AirflowSkipException
 from crawl.config.tasks import TASKS
+from shared.xcom.normalize import normalize_xcom_value
 from utils import logging_utils as log
 
 
@@ -58,6 +61,8 @@ def xcom_pull(ti: TaskInstance, key: str, skip_if_empty: bool = False) -> Any:
         value = ti.xcom_pull(key=key, task_ids=TASKS.CHECK_CRAWL)
     else:
         raise ValueError(f"{msg} key inconnue")
+
+    value = normalize_xcom_value(value)
 
     if skip_if_empty and (
         value is None or (isinstance(value, pd.DataFrame) and value.empty)

@@ -4,6 +4,9 @@ from datetime import datetime
 
 import pandas as pd
 from shared.tasks.database_logic.db_manager import PostgresConnectionManager
+from sources.tasks.transform.sequence_utils import df_convert_numpy_to_jsonify
+from sqlalchemy import TEXT, VARCHAR, text
+from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from utils.django import django_setup_full
 
 django_setup_full()
@@ -215,8 +218,8 @@ def insert_suggestion(
     )
     suggestion_cohorte.save()
 
-    # Insert suggestion_logs
     if not df_log_error.empty:
+        df_log_error = df_convert_numpy_to_jsonify(df_log_error)
         for index, row in df_log_error.iterrows():
             SuggestionLog(
                 suggestion_cohorte=suggestion_cohorte,
@@ -228,6 +231,7 @@ def insert_suggestion(
                 message=row["message"],
             ).save()
     if not df_log_warning.empty:
+        df_log_warning = df_convert_numpy_to_jsonify(df_log_warning)
         for index, row in df_log_warning.iterrows():
             SuggestionLog(
                 suggestion_cohorte=suggestion_cohorte,
@@ -336,10 +340,10 @@ def insert_suggestion_legacy(
     engine = PostgresConnectionManager().engine
     current_date = datetime.now()
 
-    with engine.connect() as conn:
+    with engine.begin() as conn:
         # Insert a new suggestion
         result = conn.execute(
-            """
+            text("""
             INSERT INTO data_suggestioncohorte
             (
                 identifiant_action,
@@ -350,23 +354,36 @@ def insert_suggestion_legacy(
                 cree_le,
                 modifie_le
             )
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            VALUES (
+                :identifiant_action,
+                :identifiant_execution,
+                :type_action,
+                :statut,
+                :metadata,
+                :cree_le,
+                :modifie_le
+            )
             RETURNING ID;
-        """,
-            (
-                dag_name,
-                run_name,
-                type_action,
-                SuggestionCohorteStatut.AVALIDER.value,
-                json.dumps(metadata),
-                current_date,
-                current_date,
-            ),
+        """),
+            {
+                "identifiant_action": dag_name,
+                "identifiant_execution": run_name,
+                "type_action": type_action,
+                "statut": SuggestionCohorteStatut.AVALIDER.value,
+                "metadata": json.dumps(metadata),
+                "cree_le": current_date,
+                "modifie_le": current_date,
+            },
         )
         suggestion_cohorte_id = result.fetchone()[0]
 
-    # Insert suggestion_logs
+    suggestion_log_dtype = {
+        "origine_colonnes": ARRAY(VARCHAR),
+        "origine_valeurs": ARRAY(TEXT),
+        "destination_colonnes": ARRAY(VARCHAR),
+    }
     if not df_log_error.empty:
+        df_log_error = df_convert_numpy_to_jsonify(df_log_error)
         df_log_error["suggestion_cohorte_id"] = suggestion_cohorte_id
         df_log_error["niveau_de_log"] = SuggestionLog.SuggestionLogLevel.ERROR
         df_log_error.to_sql(
@@ -376,8 +393,10 @@ def insert_suggestion_legacy(
             index=False,
             method="multi",
             chunksize=1000,
+            dtype=suggestion_log_dtype,
         )
     if not df_log_warning.empty:
+        df_log_warning = df_convert_numpy_to_jsonify(df_log_warning)
         df_log_warning["suggestion_cohorte_id"] = suggestion_cohorte_id
         df_log_warning["niveau_de_log"] = SuggestionLog.SuggestionLogLevel.WARNING
         df_log_warning.to_sql(
@@ -387,19 +406,20 @@ def insert_suggestion_legacy(
             index=False,
             method="multi",
             chunksize=1000,
+            dtype=suggestion_log_dtype,
         )
-    df_log_warning.to_sql(
-        "data_suggestionlog",
-        engine,
-        if_exists="append",
-        index=False,
-        method="multi",
-        chunksize=1000,
-    )
 
     # Insert dag_run_change
     df["suggestion_cohorte_id"] = suggestion_cohorte_id
     df["statut"] = SuggestionCohorteStatut.AVALIDER.value
+    # contexte/suggestion are stored as JSON strings upstream; JSONB bind expects
+    # dict/list, so we deserialize before writing to avoid double-encoding.
+    df["contexte"] = df["contexte"].apply(
+        lambda v: json.loads(v) if isinstance(v, str) else v
+    )
+    df["suggestion"] = df["suggestion"].apply(
+        lambda v: json.loads(v) if isinstance(v, str) else v
+    )
     # TODO: here the Suggestion model could be used instead of using pandas to insert
     # the data into the database
     df[["contexte", "suggestion", "suggestion_cohorte_id", "statut"]].to_sql(
@@ -409,4 +429,5 @@ def insert_suggestion_legacy(
         index=False,
         method="multi",
         chunksize=1000,
+        dtype={"contexte": JSONB, "suggestion": JSONB},
     )

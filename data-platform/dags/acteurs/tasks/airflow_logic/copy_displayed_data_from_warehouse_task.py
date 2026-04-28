@@ -3,7 +3,7 @@ import logging
 from acteurs.tasks.business_logic.copy_displayed_data_from_warehouse_task import (
     copy_displayed_data_from_warehouse,
 )
-from airflow.operators.python import PythonOperator
+from airflow.providers.standard.operators.python import PythonOperator
 
 logger = logging.getLogger(__name__)
 

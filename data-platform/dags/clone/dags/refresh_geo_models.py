@@ -8,9 +8,9 @@ from acteurs.tasks.airflow_logic.check_model_table_consistency_task import (
 from acteurs.tasks.airflow_logic.replace_acteur_table_task import (
     replace_acteur_table_task,
 )
-from airflow.decorators import dag
-from airflow.models.baseoperator import chain
-from airflow.operators.bash import BashOperator
+from airflow.providers.standard.operators.bash import BashOperator
+from airflow.sdk import dag
+from airflow.sdk.bases.operator import chain
 from shared.config.airflow import DEFAULT_ARGS
 from shared.config.dag_names import REFRESH_GEO_MODELS_DAG_ID
 from shared.config.dbt_commands import DBT_RUN, DBT_TEST

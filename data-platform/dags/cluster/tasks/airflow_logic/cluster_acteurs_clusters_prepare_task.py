@@ -2,13 +2,16 @@ import logging
 
 import pandas as pd
 from airflow import DAG
-from airflow.exceptions import AirflowSkipException
-from airflow.operators.python import PythonOperator
+from airflow.providers.standard.operators.python import PythonOperator
+from airflow.sdk.exceptions import AirflowSkipException
 from cluster.config.model import ClusterConfig
 from cluster.config.tasks import TASKS
 from cluster.config.xcoms import XCOMS, xcom_pull
 from cluster.tasks.business_logic.cluster_acteurs_clusters_prepare import (
     cluster_acteurs_clusters_prepare,
+)
+from cluster.tasks.business_logic.cluster_acteurs_config_create import (
+    cluster_acteurs_config_create,
 )
 from utils import logging_utils as log
 from utils.django import django_setup_full
@@ -36,10 +39,10 @@ def task_info_get():
     """
 
 
-def cluster_acteurs_clusters_prepare_wrapper(ti) -> None:
+def cluster_acteurs_clusters_prepare_wrapper(ti, params) -> None:
     logger.info(task_info_get())
 
-    config: ClusterConfig = xcom_pull(ti, XCOMS.CONFIG)
+    config: ClusterConfig = cluster_acteurs_config_create(params)
     df: pd.DataFrame = xcom_pull(ti, XCOMS.DF_NORMALIZE)
 
     if df.empty:

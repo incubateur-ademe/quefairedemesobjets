@@ -1,11 +1,14 @@
 import logging
 
 from airflow import DAG
-from airflow.exceptions import AirflowSkipException
-from airflow.operators.python import PythonOperator
+from airflow.providers.standard.operators.python import PythonOperator
+from airflow.sdk.exceptions import AirflowSkipException
 from cluster.config.model import ClusterConfig
 from cluster.config.tasks import TASKS
-from cluster.config.xcoms import XCOMS, xcom_pull
+from cluster.config.xcoms import XCOMS
+from cluster.tasks.business_logic.cluster_acteurs_config_create import (
+    cluster_acteurs_config_create,
+)
 from cluster.tasks.business_logic.cluster_acteurs_read.for_clustering import (
     cluster_acteurs_read_for_clustering,
 )
@@ -34,10 +37,10 @@ def task_info_get():
     """
 
 
-def cluster_acteurs_read_wrapper(ti) -> None:
+def cluster_acteurs_read_wrapper(ti, params) -> None:
     logger.info(task_info_get())
 
-    config: ClusterConfig = xcom_pull(ti, XCOMS.CONFIG)
+    config: ClusterConfig = cluster_acteurs_config_create(params)
     log.preview("Config reçue", config)
 
     df = cluster_acteurs_read_for_clustering(

@@ -1,6 +1,6 @@
 # Builder python
 # --- --- --- ---
-FROM apache/airflow:2.11.0 AS python-builder
+FROM apache/airflow:slim-3.1.7-python3.12 AS python-builder
 
 # system dependencies
 USER root
@@ -36,7 +36,7 @@ RUN uv sync --project data-platform --frozen --no-editable
 
 # Runtime
 # --- --- --- ---
-FROM apache/airflow:slim-2.11.0-python3.12 AS scheduler
+FROM apache/airflow:slim-3.1.7-python3.12 AS scheduler
 
 USER root
 
@@ -55,6 +55,7 @@ USER ${AIRFLOW_UID:-50000}:0
 WORKDIR /opt/airflow
 ENV VIRTUAL_ENV=/opt/airflow/.venv \
     LD_LIBRARY_PATH=/usr/lib \
+    PYTHONPATH="/opt/airflow/dags" \
     PATH="/opt/airflow/.venv/bin:$PATH"
 
 COPY --from=python-builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
