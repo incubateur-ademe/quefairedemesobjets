@@ -7,8 +7,8 @@ from dataclasses import dataclass
 from typing import Any
 
 import pandas as pd
-from airflow.exceptions import AirflowSkipException
 from airflow.models.taskinstance import TaskInstance
+from airflow.sdk.exceptions import AirflowSkipException
 from enrich.config.tasks import TASKS
 from utils import logging_utils as log
 

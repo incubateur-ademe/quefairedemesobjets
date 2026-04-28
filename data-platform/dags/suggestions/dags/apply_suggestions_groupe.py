@@ -1,4 +1,4 @@
-from airflow.decorators import dag
+from airflow.sdk import dag
 from airflow.sdk.bases.operator import chain
 from shared.config.airflow import DEFAULT_ARGS
 from shared.config.schedules import SCHEDULES

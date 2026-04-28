@@ -1,8 +1,8 @@
 import logging
 
 from airflow import DAG
-from airflow.exceptions import AirflowSkipException
 from airflow.providers.standard.operators.python import PythonOperator
+from airflow.sdk.exceptions import AirflowSkipException
 from cluster.config.model import ClusterConfig
 from cluster.config.tasks import TASKS
 from cluster.config.xcoms import XCOMS
