@@ -74,6 +74,25 @@ Enfin, vérifier les variables d'environnement en prenant exemple sur le fichier
 
 En local, il peut s'avérer complexe de développer sur la stack data, du fait du volume de données, mais aussi de l'enchaînement de tâches dans les DAGs.
 
+### Erreur "Signature verification failed" en boucle dans les logs du scheduler
+
+Si vous voyez l'erreur suivante en boucle dans les logs du scheduler :
+
+```
+[warning  ] The signature of the request was wrong [airflow.utils.serve_logs.log_server]
+jwt.exceptions.InvalidSignatureError: Signature verification failed
+```
+
+Cela signifie que la clé secrète JWT pour valider les tokens d'accès aux logs est incorrecte ou manquante.
+
+**Solution** :
+
+1. Générer une nouvelle clé secrète avec `python3 -c "import secrets; print(secrets.token_urlsafe(32))"`
+
+2. Remplacer la clé dans `data-platform/dags/.env` en localisant la ligne `AIRFLOW__API_AUTH__JWT_SECRET` et en la remplaçant avec la clé générée
+
+3. Redémarrer Airflow avec `docker-compose --profile airflow down` puis `docker-compose --profile airflow up -d`
+
 ### Visualiser les logs d'un DAG en échec
 
 Si un dag échoue, il peut être utile de visualiser ses logs.
