@@ -4,9 +4,9 @@ import logging
 from typing import Any
 
 from airflow import DAG
-from airflow.exceptions import AirflowSkipException
 from airflow.models.taskinstance import TaskInstance
 from airflow.providers.standard.operators.python import PythonOperator
+from airflow.sdk.exceptions import AirflowSkipException
 from airflow.task.trigger_rule import TriggerRule
 from enrich.config.models import EnrichActeursClosedConfig
 from enrich.tasks.business_logic.enrich_dbt_model_suggest import (

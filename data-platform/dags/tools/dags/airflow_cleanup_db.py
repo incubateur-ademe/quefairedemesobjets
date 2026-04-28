@@ -7,9 +7,8 @@ from datetime import UTC, datetime, timedelta
 from typing import List, Optional
 
 from airflow.cli.commands.db_command import all_tables
-from airflow.decorators import dag, task
 from airflow.providers.standard.operators.bash import BashOperator
-from airflow.sdk import Param
+from airflow.sdk import Param, dag, task
 from airflow.utils.db import reflect_tables
 from airflow.utils.db_cleanup import _effective_table_names
 from airflow.utils.session import NEW_SESSION, provide_session
