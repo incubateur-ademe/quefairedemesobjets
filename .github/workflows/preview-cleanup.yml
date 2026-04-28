@@ -1,0 +1,101 @@
+name: 🧹 Preview environment - daily cleanup
+
+on:
+  schedule:
+    # Every day at 03:00 UTC (~05:00 Paris)
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+    inputs:
+      ttl_hours:
+        description: "TTL in hours; previews older than this are destroyed"
+        required: false
+        default: "24"
+        type: string
+      dry_run:
+        description: "List candidates without dispatching destroys"
+        required: false
+        default: "false"
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  cleanup:
+    name: 🧹 Find and destroy stale previews
+    runs-on: ubuntu-latest
+    environment: preview
+    env:
+      SCW_ACCESS_KEY:              ${{ secrets.SCW_ACCESS_KEY }}
+      SCW_SECRET_KEY:              ${{ secrets.SCW_SECRET_KEY }}
+      SCW_DEFAULT_PROJECT_ID:      ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
+      SCW_DEFAULT_ORGANIZATION_ID: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
+      SCW_DEFAULT_REGION:          fr-par
+      TTL_HOURS:                   ${{ inputs.ttl_hours || '24' }}
+      DRY_RUN:                     ${{ inputs.dry_run || 'false' }}
+      GH_TOKEN:                    ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Setup Scaleway CLI
+        uses: scaleway/action-scw@be2696f261325a78354eda14988c80405f33e082
+
+      - name: Find stale previews and dispatch destroys
+        run: |
+          set -euo pipefail
+
+          NOW=$(date +%s)
+          CUTOFF=$((NOW - TTL_HOURS * 3600))
+          echo "Current time: $NOW (cutoff: $CUTOFF, TTL: ${TTL_HOURS}h)"
+
+          # List preview-tagged containers in the project. Scaleway returns
+          # JSON with a `tags` array per container.
+          containers=$(scw container container list \
+            tags.0=preview \
+            region=$SCW_DEFAULT_REGION \
+            -o json)
+
+          count=$(echo "$containers" | jq 'length')
+          echo "Found $count container(s) tagged 'preview'"
+
+          stale_shas=()
+          while IFS= read -r row; do
+            name=$(echo "$row" | jq -r '.name')
+            tags=$(echo "$row" | jq -r '.tags[]')
+
+            sha=$(echo "$tags" | sed -n 's/^preview-sha-//p' | head -n1)
+            created_at=$(echo "$tags" | sed -n 's/^created-at-//p' | head -n1)
+
+            if [[ -z "$sha" || -z "$created_at" ]]; then
+              echo "  - $name: missing required tags, skipping"
+              continue
+            fi
+
+            age_h=$(( (NOW - created_at) / 3600 ))
+            if (( created_at < CUTOFF )); then
+              echo "  - $name (sha=$sha): age=${age_h}h → STALE"
+              stale_shas+=("$sha")
+            else
+              echo "  - $name (sha=$sha): age=${age_h}h → keep"
+            fi
+          done < <(echo "$containers" | jq -c '.[]')
+
+          if [[ ${#stale_shas[@]} -eq 0 ]]; then
+            echo "No stale previews."
+            exit 0
+          fi
+
+          echo
+          echo "Stale previews to destroy: ${stale_shas[*]}"
+
+          if [[ "$DRY_RUN" == "true" ]]; then
+            echo "DRY_RUN=true, not dispatching."
+            exit 0
+          fi
+
+          for sha in "${stale_shas[@]}"; do
+            echo "→ Dispatching destroy for sha=$sha"
+            gh api \
+              -X POST \
+              "repos/${{ github.repository }}/dispatches" \
+              -f "event_type=preview-cleanup" \
+              -F "client_payload[sha]=$sha"
+          done

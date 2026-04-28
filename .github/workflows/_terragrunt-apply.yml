@@ -1,0 +1,82 @@
+on:
+  workflow_call:
+    inputs:
+      working_directory:
+        description: "Directory containing the terragrunt stack to apply (relative to repo root)"
+        type: string
+        required: true
+      command:
+        description: "terragrunt command (apply or destroy)"
+        type: string
+        required: false
+        default: apply
+      commit_sha:
+        description: "Commit SHA to expose as COMMIT_SHA env var (used by preview templates)"
+        type: string
+        required: true
+      environment:
+        description: "GitHub environment to load secrets from (e.g. preview, preprod)"
+        type: string
+        required: true
+
+jobs:
+  terragrunt:
+    name: 🧱 Terragrunt ${{ inputs.command }}
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    env:
+      # Scaleway provider + S3 backend creds
+      SCW_ACCESS_KEY:              ${{ secrets.SCW_ACCESS_KEY }}
+      SCW_SECRET_KEY:              ${{ secrets.SCW_SECRET_KEY }}
+      SCW_DEFAULT_PROJECT_ID:      ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
+      SCW_DEFAULT_ORGANIZATION_ID: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
+
+      # The S3 backend block in root.hcl reads access_key/secret_key from TF vars
+      TF_VAR_access_key:      ${{ secrets.SCW_ACCESS_KEY }}
+      TF_VAR_secret_key:      ${{ secrets.SCW_SECRET_KEY }}
+      TF_VAR_project_id:      ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
+      TF_VAR_organization_id: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
+
+      # AWS_*: terragrunt's S3 backend uses the AWS SDK and reads these too
+      AWS_ACCESS_KEY_ID:     ${{ secrets.SCW_ACCESS_KEY }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.SCW_SECRET_KEY }}
+      AWS_DEFAULT_REGION:    fr-par
+
+      # Inputs read by the preview templates via get_env(...)
+      COMMIT_SHA:                       ${{ inputs.commit_sha }}
+      PREVIEW_SECRET_KEY:               ${{ secrets.PREVIEW_SECRET_KEY }}
+      SAMPLE_DB_URI:                    ${{ secrets.SAMPLE_DB_URI }}
+      SCALEWAY_PREPROD_NAMESPACE_ID:    ${{ vars.SCALEWAY_PREPROD_NAMESPACE_ID }}
+
+      TG_NON_INTERACTIVE: "true"
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: "1.10.0"
+          tofu_wrapper: false
+
+      - name: Install Terragrunt
+        run: |
+          TG_VERSION="0.69.0"
+          curl -fsSL -o /usr/local/bin/terragrunt \
+            "https://github.com/gruntwork-io/terragrunt/releases/download/v${TG_VERSION}/terragrunt_linux_amd64"
+          chmod +x /usr/local/bin/terragrunt
+          terragrunt --version
+
+      - name: Install postgres client (for null_resource provisioners)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends postgresql-client
+
+      - name: Terragrunt init + ${{ inputs.command }}
+        working-directory: ${{ inputs.working_directory }}
+        run: |
+          terragrunt run-all init  --terragrunt-non-interactive
+          terragrunt run-all ${{ inputs.command }} --terragrunt-non-interactive --auto-approve
+
+permissions:
+  contents: read
