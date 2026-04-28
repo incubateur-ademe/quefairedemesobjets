@@ -42,6 +42,7 @@ USER ${AIRFLOW_UID:-50000}
 
 ENV VIRTUAL_ENV=/opt/airflow/.venv \
     PATH="/opt/airflow/.venv/bin:$PATH" \
+    PYTHONPATH="/opt/airflow/dags" \
     PORT="8080"
 
 COPY --from=python-builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
