@@ -3,7 +3,6 @@ from typing import Any
 
 import pandas as pd
 from cluster.config.constants import COL_PARENT_DATA_NEW, FIELDS_PARENT_DATA_EXCLUDED
-from sources.tasks.transform.sequence_utils import df_convert_numpy_to_jsonify
 from utils.django import django_setup_full
 
 django_setup_full()
@@ -153,7 +152,5 @@ def cluster_acteurs_parents_choose_data(
         )
 
         df_clusters.at[parent_iloc, COL_PARENT_DATA_NEW] = parent_data_new
-
-    df_clusters = df_convert_numpy_to_jsonify(df_clusters)
 
     return df_clusters
