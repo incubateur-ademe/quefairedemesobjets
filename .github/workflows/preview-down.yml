@@ -29,29 +29,15 @@ jobs:
           SHA="${{ inputs.sha || github.event.client_payload.sha || github.event.pull_request.head.sha }}"
           echo "short_sha=${SHA:0:7}" >> $GITHUB_OUTPUT
 
-  materialise-stack:
-    name: 📁 Materialise terragrunt stack
-    needs: [resolve]
-    runs-on: ubuntu-latest
-    outputs:
-      stack_dir: infrastructure/environments/preview/${{ needs.resolve.outputs.short_sha }}
-    steps:
-      - uses: actions/checkout@v6
-      - run: |
-          SRC="infrastructure/environments/preview/_template"
-          DST="infrastructure/environments/preview/${{ needs.resolve.outputs.short_sha }}"
-          cp -r "$SRC" "$DST"
-
   destroy:
     name: 🧱 Destroy preview infra
-    needs: [resolve, materialise-stack]
+    needs: [resolve]
     uses: ./.github/workflows/_terragrunt-apply.yml
     secrets: inherit # pragma: allowlist secret
     with:
-      working_directory: ${{ needs.materialise-stack.outputs.stack_dir }}
-      command:           destroy
-      commit_sha:        ${{ needs.resolve.outputs.short_sha }}
-      environment:       preview
+      command:     destroy
+      commit_sha:  ${{ needs.resolve.outputs.short_sha }}
+      environment: preview
 
 permissions:
   contents: read

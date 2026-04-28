@@ -1,17 +1,13 @@
 on:
   workflow_call:
     inputs:
-      working_directory:
-        description: "Directory containing the terragrunt stack to apply (relative to repo root)"
-        type: string
-        required: true
       command:
         description: "terragrunt command (apply or destroy)"
         type: string
         required: false
         default: apply
       commit_sha:
-        description: "Commit SHA to expose as COMMIT_SHA env var (used by preview templates)"
+        description: "Short commit SHA — exposed as COMMIT_SHA, also used to materialise infrastructure/environments/preview/<sha> from _template"
         type: string
         required: true
       environment:
@@ -72,8 +68,21 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends postgresql-client
 
+      - name: Materialise per-SHA terragrunt stack from _template
+        run: |
+          set -euo pipefail
+          SRC="infrastructure/environments/preview/_template"
+          DST="infrastructure/environments/preview/${{ inputs.commit_sha }}"
+          if [[ ! -d "$DST" ]]; then
+            cp -r "$SRC" "$DST"
+            echo "Materialised $DST from $SRC"
+          else
+            echo "$DST already exists, leaving as-is"
+          fi
+          ls -la "$DST"
+
       - name: Terragrunt init + ${{ inputs.command }}
-        working-directory: ${{ inputs.working_directory }}
+        working-directory: infrastructure/environments/preview/${{ inputs.commit_sha }}
         run: |
           terragrunt run-all init  --terragrunt-non-interactive
           terragrunt run-all ${{ inputs.command }} --terragrunt-non-interactive --auto-approve

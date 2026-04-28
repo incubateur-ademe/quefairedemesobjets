@@ -38,38 +38,15 @@ jobs:
       image_tag:   ${{ needs.resolve.outputs.short_sha }}
       environment: preview
 
-  materialise-stack:
-    # Copy the _template folder to preview/<sha>/. We commit nothing — this
-    # only needs to exist for the duration of the workflow so terragrunt has
-    # a directory to point at.
-    name: 📁 Materialise terragrunt stack
-    needs: [resolve]
-    runs-on: ubuntu-latest
-    outputs:
-      stack_dir: infrastructure/environments/preview/${{ needs.resolve.outputs.short_sha }}
-    steps:
-      - uses: actions/checkout@v6
-      - name: Copy template to preview/<sha>
-        run: |
-          SRC="infrastructure/environments/preview/_template"
-          DST="infrastructure/environments/preview/${{ needs.resolve.outputs.short_sha }}"
-          cp -r "$SRC" "$DST"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: preview-stack-${{ needs.resolve.outputs.short_sha }}
-          path: infrastructure/environments/preview/${{ needs.resolve.outputs.short_sha }}
-          retention-days: 1
-
   apply:
     name: 🧱 Apply preview infra
-    needs: [resolve, build, materialise-stack]
+    needs: [resolve, build]
     uses: ./.github/workflows/_terragrunt-apply.yml
     secrets: inherit # pragma: allowlist secret
     with:
-      working_directory: ${{ needs.materialise-stack.outputs.stack_dir }}
-      command:           apply
-      commit_sha:        ${{ needs.resolve.outputs.short_sha }}
-      environment:       preview
+      command:     apply
+      commit_sha:  ${{ needs.resolve.outputs.short_sha }}
+      environment: preview
 
   comment:
     name: 💬 Comment URL on PR
