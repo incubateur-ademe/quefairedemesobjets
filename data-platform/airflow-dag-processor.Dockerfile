@@ -69,6 +69,7 @@ USER ${AIRFLOW_UID:-50000}:0
 WORKDIR /opt/airflow
 ENV VIRTUAL_ENV=/opt/airflow/.venv \
     LD_LIBRARY_PATH=/usr/lib \
+    PYTHONPATH="/opt/airflow/dags" \
     PATH="/opt/airflow/.venv/bin:$PATH"
 
 COPY --from=python-builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
