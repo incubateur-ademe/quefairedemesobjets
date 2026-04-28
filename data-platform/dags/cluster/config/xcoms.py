@@ -1,5 +1,7 @@
 """Constants and helpers to configure XCom for Clustering DAG"""
 
+# TODO: should be mutualized with data-platform/dags/crawl/config/xcoms.py
+
 from dataclasses import dataclass
 from typing import Any
 
@@ -7,6 +9,7 @@ import pandas as pd
 from airflow.models.taskinstance import TaskInstance
 from airflow.sdk.exceptions import AirflowSkipException
 from cluster.config.tasks import TASKS
+from shared.xcom.normalize import normalize_xcom_value
 from utils import logging_utils as log
 
 
@@ -45,6 +48,8 @@ def xcom_pull(ti: TaskInstance, key: str, skip_if_empty: bool = False) -> Any:
         value = ti.xcom_pull(key=key, task_ids=TASKS.SUGGESTIONS_PREPARE)
     else:
         raise ValueError(f"{msg}: key inconnue")
+
+    value = normalize_xcom_value(value)
 
     if skip_if_empty and (
         value is None or (isinstance(value, pd.DataFrame) and value.empty)

@@ -1,26 +1,15 @@
-from airflow.models import DagRun
 from airflow.providers.standard.operators.python import PythonOperator
 from airflow.providers.standard.operators.trigger_dagrun import TriggerDagRunOperator
+from airflow.sdk import DagRunState
 from airflow.sdk.exceptions import AirflowSkipException
-from airflow.utils.session import provide_session
-from airflow.utils.state import State
 
 
-@provide_session
-def should_trigger(session=None, *, target_dag: str) -> bool:
-    if session is None:
-        return True
-    # should be triggered if no dag is queued
-    return (
-        session.query(DagRun)
-        .filter(DagRun.dag_id == target_dag, DagRun.state == State.QUEUED)
-        .count()
-        == 0
+def check_and_trigger(ti, *, target_dag: str) -> None:
+    queued_count = ti.get_dr_count(
+        dag_id=target_dag,
+        states=[DagRunState.QUEUED.value],
     )
-
-
-def check_and_trigger(ti, params, *, target_dag: str) -> None:
-    if not should_trigger(target_dag=target_dag):
+    if queued_count > 0:
         raise AirflowSkipException(
             "🔴 Un run est déjà en attente -> on ignore ce trigger"
         )
