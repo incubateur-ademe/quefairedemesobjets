@@ -1,0 +1,43 @@
+name: 🪦 Preview environment - down
+
+on:
+  pull_request:
+    types: [closed]
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: "Commit SHA whose preview env to destroy"
+        required: true
+        type: string
+  # Triggered by preview-cleanup.yml (or any other automation) with a SHA payload
+  repository_dispatch:
+    types: [preview-cleanup]
+
+concurrency:
+  group: preview-${{ inputs.sha || github.event.client_payload.sha || github.event.pull_request.head.sha }}
+  cancel-in-progress: false
+
+jobs:
+  resolve:
+    name: 📌 Resolve commit SHA
+    runs-on: ubuntu-latest
+    outputs:
+      short_sha: ${{ steps.out.outputs.short_sha }}
+    steps:
+      - id: out
+        run: |
+          SHA="${{ inputs.sha || github.event.client_payload.sha || github.event.pull_request.head.sha }}"
+          echo "short_sha=${SHA:0:7}" >> $GITHUB_OUTPUT
+
+  destroy:
+    name: 🧱 Destroy preview infra
+    needs: [resolve]
+    uses: ./.github/workflows/_terragrunt-apply.yml
+    secrets: inherit # pragma: allowlist secret
+    with:
+      command:     destroy
+      commit_sha:  ${{ needs.resolve.outputs.short_sha }}
+      environment: preview
+
+permissions:
+  contents: read
