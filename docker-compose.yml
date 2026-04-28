@@ -103,6 +103,10 @@ services:
     build:
       context: .
       dockerfile: data-platform/airflow-webserver.Dockerfile
+    deploy:
+      resources:
+        limits:
+          memory: ${AIRFLOW_WEBSERVER_MEMORY_LIMIT:-2G}
     ports:
       - "8080:8080"
     healthcheck:
@@ -125,7 +129,8 @@ services:
     deploy:
       resources:
         limits:
-          memory: ${AIRFLOW_SCHEDULER_MEMORY_LIMIT:-2G}
+          # TODO: read AIRFLOW_SCHEDULER_MEMORY_LIMIT from .env doesn't works
+          memory: ${AIRFLOW_SCHEDULER_MEMORY_LIMIT:-12G}
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8974/health"]
       interval: 30s
