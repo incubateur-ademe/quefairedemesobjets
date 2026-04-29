@@ -252,7 +252,7 @@ TAG="hotfix-vX.Y.Z"
 SCALEWAY_DOCKER_SECRET=$(scw config get secret-key)
 ```
 
-### 1. Connexion au registre Scaleway (remplacer $SCALEWAY_DOCKER_SECRET par votre token)
+### 1. Connexion au registre Scaleway
 
 ```sh
 echo $SCALEWAY_DOCKER_SECRET | docker login $SCALEWAY_REGISTRY -u nologin --password-stdin
@@ -272,11 +272,18 @@ docker build --platform=linux/amd64 -f ./data-platform/airflow-webserver.Dockerf
 docker push $SCALEWAY_REGISTRY/$SCALEWAY_NAMESPACE/airflow-webserver:$TAG
 ```
 
+### 4. Construction et push de l'image airflow-dag-processor
+
+```sh
+docker build --platform=linux/amd64 -f ./data-platform/airflow-dag-processor.Dockerfile -t $SCALEWAY_REGISTRY/$SCALEWAY_NAMESPACE/airflow-dag-processor:$TAG .
+docker push $SCALEWAY_REGISTRY/$SCALEWAY_NAMESPACE/airflow-dag-processor:$TAG
+```
+
 Les images seront disponibles aux adresses suivantes :
 
 - `rg.fr-par.scw.cloud/ns-qfdmo/airflow-scheduler:hotfix-vX.Y.Z`
 - `rg.fr-par.scw.cloud/ns-qfdmo/airflow-webserver:hotfix-vX.Y.Z`
 
-### 4. Déployer sur Scaleway
+### 5. Déployer sur Scaleway
 
 À partir de `Serverless` > `Containers` > `Settings`, éditer l'image du container à utiliser et choisir le tag précédemment créé.
