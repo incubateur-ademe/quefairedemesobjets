@@ -1,0 +1,74 @@
+name: 🌱 Preview environment - up
+
+on:
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: "Commit SHA to deploy (defaults to HEAD of the triggering ref)"
+        required: false
+        type: string
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  # Serialise applies for the same SHA so two pushes don't race on the same state.
+  group: preview-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  resolve:
+    name: 📌 Resolve commit SHA
+    runs-on: ubuntu-latest
+    outputs:
+      sha: ${{ steps.out.outputs.sha }}
+      short_sha: ${{ steps.out.outputs.short_sha }}
+    steps:
+      - id: out
+        run: |
+          SHA="${{ inputs.sha || github.event.pull_request.head.sha || github.sha }}"
+          echo "sha=$SHA"                  >> $GITHUB_OUTPUT
+          echo "short_sha=${SHA:0:7}"      >> $GITHUB_OUTPUT
+
+  build:
+    name: 🐳 Build webapp image
+    needs: [resolve]
+    uses: ./.github/workflows/_webapp-build-and-push-docker.yml
+    secrets: inherit # pragma: allowlist secret
+    with:
+      image_tag:   ${{ needs.resolve.outputs.short_sha }}
+      environment: preview
+
+  apply:
+    name: 🧱 Apply preview infra
+    needs: [resolve, build]
+    uses: ./.github/workflows/_terragrunt-apply.yml
+    secrets: inherit # pragma: allowlist secret
+    with:
+      command:     apply
+      commit_sha:  ${{ needs.resolve.outputs.short_sha }}
+      environment: preview
+
+  comment:
+    name: 💬 Comment URL on PR
+    needs: [resolve, apply]
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/github-script@v8
+        with:
+          script: |
+            const sha = "${{ needs.resolve.outputs.short_sha }}";
+            const url = `https://${sha}.quefairedemesdechets.incubateur.ademe.dev`;
+            const body = `🌱 Preview environment ready: ${url}`;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
+
+permissions:
+  contents: read
+  pull-requests: write
