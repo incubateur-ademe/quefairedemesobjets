@@ -2,6 +2,7 @@ import logging
 
 from airflow import DAG
 from airflow.providers.standard.operators.python import PythonOperator
+from sources.config.xcoms import XCOMS, xcom_pull
 from sources.tasks.airflow_logic.config_management import DAGConfig
 from sources.tasks.business_logic.db_read_acteur import db_read_acteur
 from sources.tasks.business_logic.keep_acteur_changed import keep_acteur_changed
@@ -19,7 +20,7 @@ def keep_acteur_changed_task(dag: DAG) -> PythonOperator:
 
 
 def keep_acteur_changed_wrapper(**kwargs):
-    df_normalized = kwargs["ti"].xcom_pull(task_ids="source_data_normalize")
+    df_normalized = xcom_pull(kwargs["ti"], XCOMS.SOURCE_NORMALIZED)
     dag_config = DAGConfig.from_airflow_params(kwargs["params"])
 
     df_acteur_from_db = db_read_acteur(
