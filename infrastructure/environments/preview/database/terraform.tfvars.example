@@ -1,11 +1,20 @@
-project_id            = "your-project-id"
-organization_id       = "your-organization-id"
-webapp_db_username    = "webapp"
-webapp_db_password    = "your-secure-password"  # pragma: allowlist secret
-warehouse_db_username = "warehouse"
-warehouse_db_password = "your-secure-password"  # pragma: allowlist secret
-airflow_db_username = "airflow"
-airflow_db_password = "your-secure-password"  # pragma: allowlist secret
-access_key            = "access-key"
-secret_key            = "secret-key"  # pragma: allowlist secret
+# Scaleway API credentials.
+# Prefer setting these via shell env vars (TF_VAR_access_key, TF_VAR_secret_key)
+# read from a password manager — no plaintext on disk.
+access_key = "access-key"
+secret_key = "secret-key" # pragma: allowlist secret
 
+# DB credentials — preferred source on first apply: Scaleway Secret Manager.
+# Per-env isolation comes from the Scaleway project_id, so bare names suffice.
+# Bootstrap (one-time, run with scw configured for the preview project):
+#   scw secret secret create name=DATABASE_URL
+#   scw secret version create secret-id=<id> data=<<<"$(openssl rand -hex 24)"
+# Then this file (or TF_VAR_* shell env vars) only needs to mirror the
+# password for the very first apply. After bootstrap, values live only in
+# Scaleway Secret Manager.
+webapp_db_username    = "webapp"
+webapp_db_password    = "your-secure-password" # pragma: allowlist secret
+warehouse_db_username = "warehouse"
+warehouse_db_password = "your-secure-password" # pragma: allowlist secret
+airflow_db_username   = "airflow"
+airflow_db_password   = "your-secure-password" # pragma: allowlist secret

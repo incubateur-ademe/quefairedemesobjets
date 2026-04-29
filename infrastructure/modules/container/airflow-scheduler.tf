@@ -22,41 +22,55 @@ resource "scaleway_container" "airflow_scheduler" {
     interval          = "30s"
   }
 
-  environment_variables = {
-    AIRFLOW__API__AUTH_BACKENDS                  = "airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session"
-    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION   = "true"
-    AIRFLOW__CORE__DAGS_FOLDER                   = "/opt/airflow/dags"
-    AIRFLOW__CORE__ENABLE_XCOM_PICKLING          = "true"
-    AIRFLOW__CORE__EXECUTOR                      = "LocalExecutor"
-    AIRFLOW__CORE__FERNET_KEY                    = ""
-    AIRFLOW__CORE__LOAD_EXAMPLES                 = "false"
-    AIRFLOW__DATABASE__SQL_ALCHEMY_CONNECT_ARGS  = "airflow_local_settings.keepalive_kwargs"
-    AIRFLOW__LOGGING__ENCRYPT_S3_LOGS            = "false"
-    AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER     = "s3://${var.prefix}-${var.environment}-airflow"
-    AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID         = "scalewaylogs"
-    AIRFLOW__LOGGING__REMOTE_LOGGING             = "true"
-    AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK      = "true"
-    AIRFLOW__SCHEDULER__CATCHUP_BY_DEFAULT       = "false"
-    AIRFLOW__WEBSERVER__EXPOSE_CONFIG            = "true"
-    AIRFLOW__WEBSERVER__WARN_DEPLOYMENT_EXPOSURE = "false"
-    ENVIRONMENT                                  = var.environment
-  }
-  secret_environment_variables = {
-    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN = var.AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
-    AIRFLOW_CONN_WEBAPP_DB              = var.AIRFLOW_CONN_WEBAPP_DB
-    DATABASE_URL                        = var.DATABASE_URL
-    DB_WAREHOUSE                        = var.DB_WAREHOUSE
-    DB_WEBAPP_SAMPLE                    = var.DB_WEBAPP_SAMPLE
-    POSTGRES_DB                         = var.POSTGRES_DB
-    POSTGRES_HOST                       = var.POSTGRES_HOST
-    POSTGRES_PASSWORD                   = var.POSTGRES_PASSWORD
-    POSTGRES_PORT                       = var.POSTGRES_PORT
-    POSTGRES_SCHEMA                     = var.POSTGRES_SCHEMA
-    POSTGRES_USER                       = var.POSTGRES_USER
-    SCW_ACCESS_KEY                      = var.SCW_ACCESS_KEY
-    SCW_DEFAULT_ORGANIZATION_ID         = var.SCW_DEFAULT_ORGANIZATION_ID
-    SCW_DEFAULT_PROJECT_ID              = var.SCW_DEFAULT_PROJECT_ID
-    SCW_SECRET_KEY                      = var.SCW_SECRET_KEY
-    SECRET_KEY                          = var.SECRET_KEY
-  }
+  environment_variables = merge(
+    {
+      AIRFLOW__API__AUTH_BACKENDS                  = "airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session"
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION   = "true"
+      AIRFLOW__CORE__DAGS_FOLDER                   = "/opt/airflow/dags"
+      AIRFLOW__CORE__ENABLE_XCOM_PICKLING          = "true"
+      AIRFLOW__CORE__EXECUTOR                      = "LocalExecutor"
+      AIRFLOW__CORE__FERNET_KEY                    = ""
+      AIRFLOW__CORE__LOAD_EXAMPLES                 = "false"
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONNECT_ARGS  = "airflow_local_settings.keepalive_kwargs"
+      AIRFLOW__LOGGING__ENCRYPT_S3_LOGS            = "false"
+      AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER     = "s3://${var.prefix}-${var.environment}-airflow"
+      AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID         = "scalewaylogs"
+      AIRFLOW__LOGGING__REMOTE_LOGGING             = "true"
+      AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK      = "true"
+      AIRFLOW__SCHEDULER__CATCHUP_BY_DEFAULT       = "false"
+      AIRFLOW__WEBSERVER__EXPOSE_CONFIG            = "true"
+      AIRFLOW__WEBSERVER__WARN_DEPLOYMENT_EXPOSURE = "false"
+      ENVIRONMENT                                  = var.environment
+    },
+    # Variables webapp consommées par les DAGs qui importent du code Django.
+    # On n'ajoute que celles qui sont non-vides afin de ne pas écraser les
+    # defaults Django avec des chaînes vides.
+    var.BASE_URL != "" ? { BASE_URL = var.BASE_URL } : {},
+    var.ALLOWED_HOSTS != "" ? { ALLOWED_HOSTS = var.ALLOWED_HOSTS } : {},
+    var.AWS_S3_REGION_NAME != "" ? { AWS_S3_REGION_NAME = var.AWS_S3_REGION_NAME } : {},
+    var.AWS_S3_ENDPOINT_URL != "" ? { AWS_S3_ENDPOINT_URL = var.AWS_S3_ENDPOINT_URL } : {},
+    var.AWS_STORAGE_BUCKET_NAME != "" ? { AWS_STORAGE_BUCKET_NAME = var.AWS_STORAGE_BUCKET_NAME } : {},
+  )
+  secret_environment_variables = merge(
+    {
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN = var.AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+      AIRFLOW_CONN_WEBAPP_DB              = var.AIRFLOW_CONN_WEBAPP_DB
+      DATABASE_URL                        = var.DATABASE_URL
+      DB_WAREHOUSE                        = var.DB_WAREHOUSE
+      DB_WEBAPP_SAMPLE                    = var.DB_WEBAPP_SAMPLE
+      POSTGRES_DB                         = var.POSTGRES_DB
+      POSTGRES_HOST                       = var.POSTGRES_HOST
+      POSTGRES_PASSWORD                   = var.POSTGRES_PASSWORD
+      POSTGRES_PORT                       = var.POSTGRES_PORT
+      POSTGRES_SCHEMA                     = var.POSTGRES_SCHEMA
+      POSTGRES_USER                       = var.POSTGRES_USER
+      SCW_ACCESS_KEY                      = var.SCW_ACCESS_KEY
+      SCW_DEFAULT_ORGANIZATION_ID         = var.SCW_DEFAULT_ORGANIZATION_ID
+      SCW_DEFAULT_PROJECT_ID              = var.SCW_DEFAULT_PROJECT_ID
+      SCW_SECRET_KEY                      = var.SCW_SECRET_KEY
+      SECRET_KEY                          = var.SECRET_KEY
+    },
+    # Secrets webapp lus depuis Scaleway Secret Manager si var.use_secret_manager.
+    local.webapp_secrets,
+  )
 }

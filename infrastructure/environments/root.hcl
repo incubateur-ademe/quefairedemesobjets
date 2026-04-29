@@ -12,8 +12,9 @@ terraform {
 }
 
 provider "scaleway" {
-  zone   = "fr-par-1" # Zone de Paris
-  region = "fr-par"   # Région de Paris
+  zone       = "fr-par-1" # Zone de Paris
+  region     = "fr-par"   # Région de Paris
+  project_id = var.project_id
 }
 EOF
 }
@@ -45,8 +46,7 @@ generate "common_variables" {
 }
 
 inputs = {
-  prefix          = "lvao"
-  environment     = "${basename(dirname(get_terragrunt_dir()))}"
-  project_id      = "[project_id]"
-  organization_id = "[organization_id]"
+  prefix      = "lvao"
+  environment = "${basename(dirname(get_terragrunt_dir()))}"
+  project_id  = "a279f7ac-06ce-4236-9d78-51298d8d72ed"
 }

@@ -12,8 +12,3 @@ variable "project_id" {
   description = "ID du projet Scaleway"
   type        = string
 }
-
-variable "organization_id" {
-  description = "ID de l'organisation Scaleway"
-  type        = string
-}
