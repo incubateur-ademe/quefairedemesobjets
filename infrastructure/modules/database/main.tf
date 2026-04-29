@@ -90,3 +90,74 @@ resource "scaleway_rdb_privilege" "airflow" {
   database_name = scaleway_rdb_database.airflow.name
   permission    = "all"
 }
+
+## Cross-DB foreign data wrappers (postgres_fdw) between webapp and warehouse.
+## Equivalent to the Django command `manage.py create_remote_db_server`.
+
+resource "null_resource" "create_remote_warehouse_in_webapp" {
+  count = var.create_remote_warehouse_in_webapp_script_path != null ? 1 : 0
+
+  depends_on = [
+    scaleway_rdb_database.webapp,
+    scaleway_rdb_privilege.webapp_privilege,
+    scaleway_rdb_database.warehouse_database,
+    scaleway_rdb_privilege.warehouse,
+  ]
+
+  provisioner "local-exec" {
+    # Passwords go through env vars: putting them in the URL or inline would
+    # let the shell expand `$` characters in passwords (e.g. `N$2$4efJE8c*`).
+    environment = {
+      PGPASSWORD      = var.webapp_db_password
+      REMOTE_PASSWORD = var.warehouse_db_password
+    }
+    command = <<-EOT
+      psql "postgresql://${var.webapp_db_username}@${scaleway_rdb_instance.webapp.load_balancer.0.ip}:${scaleway_rdb_instance.webapp.load_balancer.0.port}/${scaleway_rdb_database.webapp.name}?sslmode=require" \
+        -v warehouse_host='${scaleway_rdb_instance.warehouse.load_balancer.0.ip}' \
+        -v warehouse_port='${scaleway_rdb_instance.warehouse.load_balancer.0.port}' \
+        -v warehouse_dbname='${scaleway_rdb_database.warehouse_database.name}' \
+        -v warehouse_user='${var.warehouse_db_username}' \
+        -v warehouse_password="$REMOTE_PASSWORD" \
+        -f ${var.create_remote_warehouse_in_webapp_script_path}
+    EOT
+  }
+
+  triggers = {
+    webapp_database_id    = scaleway_rdb_database.webapp.id
+    warehouse_database_id = scaleway_rdb_database.warehouse_database.id
+    script_path           = var.create_remote_warehouse_in_webapp_script_path
+  }
+}
+
+resource "null_resource" "create_remote_webapp_in_warehouse" {
+  count = var.create_remote_webapp_in_warehouse_script_path != null ? 1 : 0
+
+  depends_on = [
+    scaleway_rdb_database.webapp,
+    scaleway_rdb_privilege.webapp_privilege,
+    scaleway_rdb_database.warehouse_database,
+    scaleway_rdb_privilege.warehouse,
+  ]
+
+  provisioner "local-exec" {
+    environment = {
+      PGPASSWORD      = var.warehouse_db_password
+      REMOTE_PASSWORD = var.webapp_db_password
+    }
+    command = <<-EOT
+      psql "postgresql://${var.warehouse_db_username}@${scaleway_rdb_instance.warehouse.load_balancer.0.ip}:${scaleway_rdb_instance.warehouse.load_balancer.0.port}/${scaleway_rdb_database.warehouse_database.name}?sslmode=require" \
+        -v webapp_host='${scaleway_rdb_instance.webapp.load_balancer.0.ip}' \
+        -v webapp_port='${scaleway_rdb_instance.webapp.load_balancer.0.port}' \
+        -v webapp_dbname='${scaleway_rdb_database.webapp.name}' \
+        -v webapp_user='${var.webapp_db_username}' \
+        -v webapp_password="$REMOTE_PASSWORD" \
+        -f ${var.create_remote_webapp_in_warehouse_script_path}
+    EOT
+  }
+
+  triggers = {
+    webapp_database_id    = scaleway_rdb_database.webapp.id
+    warehouse_database_id = scaleway_rdb_database.warehouse_database.id
+    script_path           = var.create_remote_webapp_in_warehouse_script_path
+  }
+}
