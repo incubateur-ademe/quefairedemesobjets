@@ -365,7 +365,11 @@ class DisplayedActeurQuerySet(models.QuerySet):
         geometries = [GEOSGeometry(geojson) for geojson in geojson]
         query = Q()
         for geometry in geometries:
-            query |= Q(location__within=geometry)
+            # `__coveredby` (geography ST_CoveredBy) lets Postgres use the
+            # GiST index on the geography-typed `location` column.
+            # `__within` casts to geometry and forces a parallel seq scan
+            # (no index match), which on a France-wide query is ~1.5 s.
+            query |= Q(location__coveredby=geometry)
 
         return self.physical().filter(query).order_by("?")
 
@@ -376,7 +380,8 @@ class DisplayedActeurQuerySet(models.QuerySet):
 
         return (
             self.physical()
-            .filter(location__within=Polygon.from_bbox(bbox))
+            # See in_geojson for why __coveredby instead of __within.
+            .filter(location__coveredby=Polygon.from_bbox(bbox))
             .order_by("?")
         )
 

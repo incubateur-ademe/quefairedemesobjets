@@ -123,6 +123,14 @@ class MapForm(GetFormMixin, CarteConfigFormMixin, forms.Form):
         ),
         required=False,
     )
+    # INSEE citycode of the commune the user picked from the address
+    # autocomplete. Carries through Turbo Frame submits so the next page render
+    # can re-fetch the polygon and draw the search-area overlay.
+    search_area_citycode = forms.CharField(
+        widget=forms.HiddenInput(),
+        required=False,
+        max_length=10,
+    )
     latitude = forms.FloatField(
         widget=forms.HiddenInput(
             attrs={

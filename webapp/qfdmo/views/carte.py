@@ -4,9 +4,10 @@ import logging
 from typing import Any, NotRequired, TypedDict, override
 
 from django.conf import settings
-from django.contrib.gis.geos import Point, Polygon
+from django.contrib.gis.geos import GEOSGeometry, Point
 from django.core.cache import cache
-from django.db.models import Q
+from django.db import connection
+from django.db.models import Exists, OuterRef, Q
 from django.forms import Form
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.utils.functional import cached_property
@@ -26,11 +27,35 @@ from qfdmo.forms import (
     ViewModeForm,
     generate_form_prefix,
 )
-from qfdmo.models import ActeurStatus, CarteConfig, DisplayedActeur
+from qfdmo.models import (
+    ActeurStatus,
+    CarteConfig,
+    DisplayedActeur,
+    DisplayedPropositionService,
+    LabelQualite,
+)
 from qfdmo.models.action import Action
 from qfdmo.views.adresses import AbstractSearchActeursView, MapPrefixMixin
 
 logger = logging.getLogger(__name__)
+
+# Cap for /carte/acteurs.geojson responses. Higher than the legacy
+# CARTE_MAX_SOLUTION_DISPLAYED (which gates the list view) because spatial
+# thinning prevents the marker density from getting overwhelming on the map.
+CARTE_GEOJSON_MAX_FEATURES = 200
+
+# Default spatial thinning grid step in degrees, used as a floor when the
+# frontend doesn't send a zoom level. Real grid is computed per-request from
+# the bbox-center latitude and the user's zoom (see _grid_step_for_zoom).
+CARTE_GEOJSON_GRID_DEG = 0.005
+
+# Target on-screen cell size in pixels. We size the thinning grid so each
+# cell maps to roughly this many CSS pixels at the user's current zoom — a
+# trade-off between marker density (smaller = more markers) and visual
+# clutter (smaller = icons overlap). 20 px at the marker icon's ~50 px width
+# allows ~2.5 markers per icon-width before overlap, which reads as "evenly
+# spread" on the user's screen.
+CARTE_GEOJSON_TARGET_CELL_PX = 20
 
 
 class ViewModeFormEntry(TypedDict):
@@ -415,6 +440,14 @@ class CarteSearchActeursView(MapPrefixMixin, AbstractSearchActeursView):
         carte_config = self._get_carte_config()
         icon_lookup = self._build_icon_lookup(carte_config) if carte_config else {}
 
+        search_area_citycode = (
+            self._get_field_value_for("map", "search_area_citycode") or ""
+        )
+        # Pre-resolve the polygon bbox at render time so the map controller
+        # can fit the camera synchronously on connect (no jolt when the
+        # polygon fetch lands later).
+        search_area_bbox = self._build_search_area_bbox(search_area_citycode)
+
         context.update(
             forms=self.ui_forms,
             map_container_id=self._get_map_container_id(),
@@ -423,9 +456,35 @@ class CarteSearchActeursView(MapPrefixMixin, AbstractSearchActeursView):
             selected_action_codes=self._get_action_codes(),
             icon_lookup=icon_lookup,
             geojson_filter_params=self._build_geojson_filter_params(),
+            search_area_citycode=search_area_citycode,
+            search_area_bbox=search_area_bbox,
         )
 
         return context
+
+    def _build_search_area_bbox(self, citycode: str) -> str:
+        """Return the polygon bbox as a JSON string in the frontend's standard
+        shape ({southWest, northEast}), pulled from the same Django cache the
+        commune-geojson proxy uses. Empty string when not available.
+        """
+        if not citycode:
+            return ""
+        from qfdmo.geo_api import retrieve_commune_geojson_from_api_or_cache
+
+        feature = retrieve_commune_geojson_from_api_or_cache(citycode)
+        if not feature or "geometry" not in feature:
+            return ""
+        try:
+            geometry = GEOSGeometry(json.dumps(feature["geometry"]))
+            xmin, ymin, xmax, ymax = geometry.extent
+        except Exception:
+            return ""
+        return json.dumps(
+            {
+                "southWest": {"lng": xmin, "lat": ymin},
+                "northEast": {"lng": xmax, "lat": ymax},
+            }
+        )
 
     def _build_geojson_filter_params(self) -> str:
         """Build the query-string fragment the frontend sends to
@@ -709,6 +768,237 @@ def _resolve_icon(
     return (_icon_name_for(code, bonus), bonus)
 
 
+def commune_geojson(request, citycode: str):
+    """Proxy + cache the commune polygon from geo.api.gouv.fr.
+
+    Frontend hits this same-origin endpoint instead of geo.api.gouv.fr
+    directly: avoids CORS, multiplexes with the rest of the page over HTTP/2,
+    and lets us cache the polygon server-side (~10 ms reads after first hit).
+    """
+    if not citycode.isdigit() or not (4 <= len(citycode) <= 5):
+        return HttpResponseBadRequest("invalid citycode")
+
+    from qfdmo.geo_api import retrieve_commune_geojson_from_api_or_cache
+
+    feature = retrieve_commune_geojson_from_api_or_cache(citycode)
+    if feature is None:
+        return JsonResponse({"error": "not found"}, status=404)
+
+    response = JsonResponse(feature)
+    # Browsers can cache the polygon for the session; the upstream rarely
+    # changes commune outlines.
+    response["Cache-Control"] = "public, max-age=86400"
+    return response
+
+
+def _grid_step_for_zoom(zoom: float, center_lat: float) -> float:
+    """Compute the spatial-thinning grid step in degrees so each cell occupies
+    ~CARTE_GEOJSON_TARGET_CELL_PX on screen at the given zoom.
+
+    Web-mercator meters-per-pixel: 156543.03 * cos(lat) / 2**zoom.
+    Convert target_meters → degrees of longitude at this latitude:
+        deg_lng = meters / (111320 * cos(lat))
+    Combining: deg_lng = TARGET_PX * 156543 * cos(lat) / 2**zoom / (111320 * cos(lat))
+                       = TARGET_PX * 1.406 / 2**zoom
+    The cos(lat) cancels because mercator's m/px and lng-deg/m both scale by
+    cos(lat). Latitude degrees stay constant (1° lat ≈ 111 km everywhere) so
+    we use the same step for both axes — visually square at the bbox center.
+    """
+    if zoom <= 0:
+        return CARTE_GEOJSON_GRID_DEG
+    return max(
+        0.0001,  # floor: never tighter than ~10 m
+        CARTE_GEOJSON_TARGET_CELL_PX * 1.406 / (2**zoom),
+    )
+
+
+def _apply_acteurs_filters(pk_qs, request):
+    """Apply the optional filter query params (sous_categories, groupe_actions,
+    bonus, ess, exclude_uuids) to a DisplayedActeur PK queryset and return:
+        (filtered_qs, sc_ids, selected_action_ids).
+
+    Shared between the bbox and KNN endpoints so the filter contract stays
+    consistent across both shapes.
+    """
+    if exclude_raw := request.GET.get("exclude_uuids", "").strip():
+        exclude_uuids = [u for u in exclude_raw.split(",") if u]
+        if exclude_uuids:
+            pk_qs = pk_qs.exclude(uuid__in=exclude_uuids)
+
+    sc_ids: list[int] = []
+    if sc_raw := request.GET.get("sous_categories", "").strip():
+        sc_ids = [int(s) for s in sc_raw.split(",") if s.isdigit()]
+        if sc_ids:
+            pk_qs = pk_qs.filter(
+                Exists(
+                    DisplayedPropositionService.objects.filter(
+                        acteur_id=OuterRef("pk"),
+                        sous_categories__id__in=sc_ids,
+                    )
+                )
+            )
+
+    selected_action_ids: list[int] = []
+    if ga_raw := request.GET.get("groupe_actions", "").strip():
+        ga_ids = [int(g) for g in ga_raw.split(",") if g.isdigit()]
+        if ga_ids:
+            selected_action_ids = list(
+                Action.objects.filter(groupe_action_id__in=ga_ids).values_list(
+                    "id", flat=True
+                )
+            )
+            pk_qs = pk_qs.filter(
+                Exists(
+                    DisplayedPropositionService.objects.filter(
+                        acteur_id=OuterRef("pk"),
+                        action_id__in=selected_action_ids,
+                    )
+                )
+            )
+
+    if request.GET.get("bonus") == "1":
+        pk_qs = pk_qs.filter(
+            Exists(
+                LabelQualite.objects.filter(
+                    displayedacteur=OuterRef("pk"), bonus=True
+                )
+            )
+        )
+    if request.GET.get("ess") == "1":
+        pk_qs = pk_qs.filter(
+            Exists(
+                LabelQualite.objects.filter(
+                    displayedacteur=OuterRef("pk"), code="ess"
+                )
+            )
+        )
+
+    return pk_qs, sc_ids, selected_action_ids
+
+
+def _serialize_acteurs(
+    pks_in_order: list,
+    sc_ids: list[int],
+    selected_action_ids: list[int],
+) -> list[dict]:
+    """Hydrate the ordered PK list into prefetched acteur instances and emit
+    GeoJSON features. Preserves the input order (required for KNN's nearest-
+    first ordering).
+    """
+    if not pks_in_order:
+        return []
+
+    instances = {
+        a.pk: a
+        for a in DisplayedActeur.objects.filter(pk__in=pks_in_order).prefetch_related(
+            "proposition_services__action__groupe_action",
+            "proposition_services__sous_categories",
+            "action_principale",
+            "labels",
+        )
+    }
+
+    sc_id_for_action = sc_ids[0] if sc_ids else None
+    action_codes = (
+        "|".join(
+            Action.objects.filter(id__in=selected_action_ids).values_list(
+                "code", flat=True
+            )
+        )
+        if selected_action_ids
+        else None
+    )
+
+    features = []
+    for pk in pks_in_order:
+        acteur = instances.get(pk)
+        if acteur is None or acteur.location is None:
+            continue
+        icon, bonus = _resolve_icon(
+            acteur, action_codes=action_codes, sous_categorie_id=sc_id_for_action
+        )
+        if not icon:
+            continue
+        features.append(
+            {
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [acteur.location.x, acteur.location.y],
+                },
+                "properties": {
+                    "uuid": str(acteur.uuid),
+                    "icon": icon,
+                    "bonus": bonus,
+                    "detail_url": acteur.get_absolute_url(),
+                },
+            }
+        )
+    return features
+
+
+def carte_acteurs_near_geojson(request):
+    """K-nearest-neighbor endpoint for "show me the N closest acteurs to this
+    point" — used when the user picks a non-municipality address (street /
+    housenumber / locality) from the autocomplete. Postgres walks the GiST
+    index in distance order via the `<->` operator; single query, no radius
+    iteration.
+
+    Query params:
+        lat, lng: required, the search center.
+        count: target number of features, default 30, capped at
+            settings.CARTE_MAX_SOLUTION_DISPLAYED.
+        sous_categories, groupe_actions, bonus, ess, exclude_uuids: same
+            filter contract as carte_acteurs_geojson.
+    """
+    try:
+        lat = float(request.GET["lat"])
+        lng = float(request.GET["lng"])
+    except (KeyError, ValueError):
+        return HttpResponseBadRequest("missing or invalid lat/lng")
+
+    count = 30
+    if (raw := request.GET.get("count", "")) and raw.isdigit():
+        count = min(int(raw), settings.CARTE_MAX_SOLUTION_DISPLAYED)
+
+    pk_qs = DisplayedActeur.objects.filter(
+        statut=ActeurStatus.ACTIF,
+    ).exclude(location__isnull=True)
+
+    pk_qs, sc_ids, selected_action_ids = _apply_acteurs_filters(pk_qs, request)
+
+    # `<->` is the GiST-indexed distance operator. Postgres walks the spatial
+    # index in nearest-first order, so this returns the K closest acteurs in
+    # one indexed pass — no full-scan, no random sort, no iteration.
+    #
+    # Django's `Distance()` function expands to `ST_Distance(...)`, which is
+    # NOT eligible for the GiST index — Postgres falls back to a parallel
+    # seq scan computing precise geography distances for every row. The
+    # `<->` operator IS GiST-indexed for geography columns, so we drop into
+    # raw SQL for the order-by.
+    pks_in_order = list(
+        pk_qs.values_list("pk", flat=True)
+        .extra(  # noqa: SLF001
+            select={"_knn_dist": "location <-> ST_SetSRID(ST_MakePoint(%s, %s), 4326)::geography"},
+            select_params=[lng, lat],
+            order_by=["_knn_dist"],
+        )[:count]
+    )
+
+    features = _serialize_acteurs(pks_in_order, sc_ids, selected_action_ids)
+
+    return JsonResponse(
+        {
+            "type": "FeatureCollection",
+            "features": features,
+            # KNN never truncates: it returns up to `count`, all that exist
+            # if the dataset has fewer.
+            "truncated": False,
+        },
+        json_dumps_params={"separators": (",", ":")},
+    )
+
+
 def carte_acteurs_geojson(request):
     """GeoJSON endpoint feeding the carte's MapLibre symbol layer.
 
@@ -733,101 +1023,81 @@ def carte_acteurs_geojson(request):
     except ValueError:
         return HttpResponseBadRequest("invalid bbox")
 
-    polygon = Polygon.from_bbox((sw_lng, sw_lat, ne_lng, ne_lat))
+    # Zoom-aware spatial thinning: cell size scales with the user's zoom so
+    # markers stay visually distributed at every zoom level (a fixed 500 m
+    # cell looks fine at city zoom but stacks all features into one pixel
+    # when looking at the whole country).
+    try:
+        zoom = float(request.GET.get("zoom", ""))
+    except ValueError:
+        zoom = 0.0
+    center_lat = (sw_lat + ne_lat) / 2.0
+    grid_step = _grid_step_for_zoom(zoom, center_lat)
 
-    qs = (
-        DisplayedActeur.objects.filter(
-            statut=ActeurStatus.ACTIF,
-            location__within=polygon,
-        )
-        .exclude(location__isnull=True)
+    # Step 1: build the *filter* queryset over PKs only. No DISTINCT, no
+    # ORDER BY, no prefetches — the goal is keep the planner's job small and
+    # let JOIN-producing filters (labels__*, proposition_services__*) live
+    # as Exists() subqueries that don't duplicate rows.
+    #
+    # Spatial predicate: raw geography `&&` (bbox-overlap operator) against
+    # an envelope cast to geography. This is what the existing
+    # `exposure_carte_acteur_location_idx` GiST index actually supports —
+    # the ORM's `location__coveredby` expands to ST_CoveredBy, which forces
+    # a parallel seq scan recomputing precise geography distances per row
+    # (~580 ms × 2 workers + 2 s of JIT compilation on a France-wide bbox).
+    # `&&` is bbox-only and lets Postgres choose between an index scan
+    # (small bbox) and a cheap parallel seq scan (wide bbox). Cuts the
+    # France-wide query from ~3 s to ~300 ms.
+    pk_qs = DisplayedActeur.objects.filter(
+        statut=ActeurStatus.ACTIF,
+    ).exclude(location__isnull=True).extra(  # noqa: SLF001
+        where=[
+            "location && ST_MakeEnvelope(%s, %s, %s, %s, 4326)::geography",
+        ],
+        params=[sw_lng, sw_lat, ne_lng, ne_lat],
     )
 
-    if exclude_raw := request.GET.get("exclude_uuids", "").strip():
-        exclude_uuids = [u for u in exclude_raw.split(",") if u]
-        if exclude_uuids:
-            qs = qs.exclude(uuid__in=exclude_uuids)
+    pk_qs, sc_ids, selected_action_ids = _apply_acteurs_filters(pk_qs, request)
 
-    if sc_raw := request.GET.get("sous_categories", "").strip():
-        sc_ids = [int(s) for s in sc_raw.split(",") if s.isdigit()]
-        if sc_ids:
-            qs = qs.filter(
-                proposition_services__sous_categories__id__in=sc_ids
-            )
-
-    selected_action_ids: list[int] = []
-    if ga_raw := request.GET.get("groupe_actions", "").strip():
-        ga_ids = [int(g) for g in ga_raw.split(",") if g.isdigit()]
-        if ga_ids:
-            selected_action_ids = list(
-                Action.objects.filter(groupe_action_id__in=ga_ids).values_list(
-                    "id", flat=True
-                )
-            )
-            qs = qs.filter(proposition_services__action_id__in=selected_action_ids)
-
-    if request.GET.get("bonus") == "1":
-        qs = qs.filter(labels__bonus=True)
-    if request.GET.get("ess") == "1":
-        qs = qs.filter(labels__code="ess")
-
-    # Random ordering so the LIMIT-cap returns a representative sample across
-    # the bbox rather than whatever Postgres has at the head of physical
-    # storage (which heavily skewed toward bibliothèques in our dataset and
-    # made wide-zoom maps look mono-icon). Mirrors the legacy
-    # `DisplayedActeurQuerySet.in_bbox` which also uses `order_by("?")`.
-    qs = qs.distinct().order_by("?").prefetch_related(
-        "proposition_services__action__groupe_action",
-        "proposition_services__sous_categories",
-        "action_principale",
-        # `is_bonus_reparation` walks `acteur.labels.all()` in pure Python; the
-        # prefetch keeps that O(1) per acteur instead of N+1.
-        "labels",
-    )
-
-    limit = settings.CARTE_MAX_SOLUTION_DISPLAYED
+    # Cap separate from CARTE_MAX_SOLUTION_DISPLAYED (which still gates the
+    # legacy list view). The JSON endpoint can return more because spatial
+    # thinning prevents the marker density from getting overwhelming.
+    limit = CARTE_GEOJSON_MAX_FEATURES
     if (raw := request.GET.get("limit", "")) and raw.isdigit():
-        limit = min(int(raw), settings.CARTE_MAX_SOLUTION_DISPLAYED)
-    # Fetch one extra row so we can tell the frontend whether the result set
-    # was truncated and a "zoom in to see more" hint should be shown.
-    overshoot = list(qs[: limit + 1])
-    truncated = len(overshoot) > limit
-    qs = overshoot[:limit]
+        limit = min(int(raw), CARTE_GEOJSON_MAX_FEATURES)
 
-    sc_id_for_action = None
-    if sc_raw and sc_ids:
-        sc_id_for_action = sc_ids[0]
-    action_codes = "|".join(
-        Action.objects.filter(id__in=selected_action_ids)
-        .values_list("code", flat=True)
-    ) if selected_action_ids else None
+    # Step 2: spatially thin the bbox down to one acteur per grid cell, then
+    # cap. ST_SnapToGrid buckets every acteur into a lat/lng cell sized so
+    # it maps to ~CARTE_GEOJSON_TARGET_CELL_PX on screen at the user's
+    # current zoom; GROUP BY collapses each bucket; array_agg(... ORDER BY
+    # random())[1] picks one acteur per cell uniformly so dense areas like
+    # central Paris show a representative sample instead of whatever
+    # Postgres has at the head of physical storage. Visually evenly
+    # distributed at every zoom; avoids icon-on-icon clutter.
+    #
+    # We wrap the ORM-built filter queryset (with Exists() filters already
+    # applied, selecting both identifiant_unique and location) as the FROM
+    # clause. Postgres flattens the subquery and runs the entire pipeline
+    # in a single pass — geometry `&&` index lookup at high zoom, parallel
+    # seq scan at low zoom — avoiding the row-by-row PK lookup that an
+    # explicit JOIN would force on a wide bbox.
+    inner_sql, inner_params = pk_qs.values_list(
+        "identifiant_unique", "location"
+    ).query.sql_with_params()
+    raw_sql = f"""
+        SELECT (array_agg(filtered.identifiant_unique ORDER BY random()))[1]
+        FROM ({inner_sql}) AS filtered
+        GROUP BY ST_SnapToGrid(filtered.location::geometry, %s)
+        LIMIT %s
+    """
+    raw_params = [*inner_params, grid_step, limit + 1]
+    with connection.cursor() as cur:
+        cur.execute(raw_sql, raw_params)
+        sampled_pks = [row[0] for row in cur.fetchall()]
+    truncated = len(sampled_pks) > limit
+    sampled_pks = sampled_pks[:limit]
 
-    features = []
-    for acteur in qs:
-        if acteur.location is None:
-            continue
-        icon, bonus = _resolve_icon(
-            acteur,
-            action_codes=action_codes,
-            sous_categorie_id=sc_id_for_action,
-        )
-        if not icon:
-            continue
-        features.append(
-            {
-                "type": "Feature",
-                "geometry": {
-                    "type": "Point",
-                    "coordinates": [acteur.location.x, acteur.location.y],
-                },
-                "properties": {
-                    "uuid": str(acteur.uuid),
-                    "icon": icon,
-                    "bonus": bonus,
-                    "detail_url": acteur.get_absolute_url(),
-                },
-            }
-        )
+    features = _serialize_acteurs(sampled_pks, sc_ids, selected_action_ids)
 
     return JsonResponse(
         {
