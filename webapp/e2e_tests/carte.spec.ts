@@ -445,31 +445,26 @@ test.describe("🗺️ Bouton 'Rechercher dans cette zone'", () => {
     await mockApiAdresse(page)
     await searchForAuray(page)
 
-    // Wait for markers to be attached
-    const acteurMarkers = page.locator(
-      '.maplibregl-marker[data-controller="pinpoint"]:not(#pinpoint-home)',
-    )
-    await expect(acteurMarkers.first()).toBeAttached({ timeout: TIMEOUT.LONG })
+    // searchForAuray already waits until at least one acteur feature is on the
+    // GeoJSON symbol layer, so we can read the map state immediately.
     await page.waitForTimeout(2000)
 
     // Read the map bounds and the home marker position
     const mapInfo = await page.evaluate(() => {
-      const mapElement = document.querySelector('[data-controller*="map"]') as any
-      const map = mapElement?.actorsMap?.map
+      const ctrl = (window as any).stimulus?.getControllerForElementAndIdentifier(
+        document.querySelector('[data-controller~="map"]'),
+        "map",
+      )
+      const map = ctrl?.actorsMap?.map
       if (!map) return null
       const bounds = map.getBounds()
       const homeEl = document.getElementById("pinpoint-home") as HTMLElement | null
       const transform = homeEl?.style.transform ?? ""
-      const markers = Array.from(
-        document.querySelectorAll(
-          '.maplibregl-marker[data-controller="pinpoint"]:not(#pinpoint-home)',
-        ),
-      ).length
       return {
         sw: { lat: bounds.getSouthWest().lat, lng: bounds.getSouthWest().lng },
         ne: { lat: bounds.getNorthEast().lat, lng: bounds.getNorthEast().lng },
         homeTransform: transform,
-        markers,
+        markers: ctrl?.actorsMap?.displayedUuids?.size ?? 0,
       }
     })
 
@@ -482,8 +477,11 @@ test.describe("🗺️ Bouton 'Rechercher dans cette zone'", () => {
     // bbox far from Auray and checking the map center moves away from the
     // home marker's coordinates without snapping back.
     const afterMove = await page.evaluate(() => {
-      const mapElement = document.querySelector('[data-controller*="map"]') as any
-      const solutionMap = mapElement?.actorsMap
+      const ctrl = (window as any).stimulus?.getControllerForElementAndIdentifier(
+        document.querySelector('[data-controller~="map"]'),
+        "map",
+      )
+      const solutionMap = ctrl?.actorsMap
       if (!solutionMap) return null
 
       // Noirmoutier bbox (far from Auray)

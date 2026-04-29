@@ -3,7 +3,7 @@ import json
 from typing import cast
 
 from django import forms
-from django.core.cache import cache
+from django.core.cache import cache, caches
 from django.db.models import TextChoices
 from django.db.utils import cached_property
 from django.http import HttpRequest, QueryDict
@@ -622,7 +622,8 @@ class AdvancedConfiguratorForm(forms.Form):
 
         # Cast needed because of the cache
         cached_action_instances = cast(
-            list[Action], cache.get_or_set("action_instances", get_action_instances)
+            list[Action],
+            caches["actions"].get_or_set("action_instances", get_action_instances),
         )
         self.fields["action_list"].choices = [
             (

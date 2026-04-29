@@ -21,7 +21,7 @@ from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point, Polygon
 from django.contrib.gis.geos.geometry import GEOSGeometry
 from django.contrib.gis.measure import D
-from django.core.cache import cache
+from django.core.cache import cache, caches
 from django.core.files.images import get_image_dimensions
 from django.core.validators import RegexValidator
 from django.db.models import (
@@ -1431,7 +1431,8 @@ class DisplayedActeur(FinalActeur, LatLngPropertiesMixin):
     ):
         # Cast needed because of the cache
         cached_action_instances = cast(
-            List[Action], cache.get_or_set("_action_instances", get_action_instances)
+            List[Action],
+            caches["actions"].get_or_set("action_instances", get_action_instances),
         )
 
         # Work with prefetched data in memory to avoid N+1 queries

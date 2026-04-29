@@ -4,10 +4,11 @@ import logging
 from typing import Any, NotRequired, TypedDict, override
 
 from django.conf import settings
-from django.contrib.gis.geos import Point
+from django.contrib.gis.geos import Point, Polygon
 from django.core.cache import cache
 from django.db.models import Q
 from django.forms import Form
+from django.http import HttpResponseBadRequest, JsonResponse
 from django.utils.functional import cached_property
 from django.views.generic import DetailView
 
@@ -25,7 +26,7 @@ from qfdmo.forms import (
     ViewModeForm,
     generate_form_prefix,
 )
-from qfdmo.models import CarteConfig
+from qfdmo.models import ActeurStatus, CarteConfig, DisplayedActeur
 from qfdmo.models.action import Action
 from qfdmo.views.adresses import AbstractSearchActeursView, MapPrefixMixin
 
@@ -421,9 +422,37 @@ class CarteSearchActeursView(MapPrefixMixin, AbstractSearchActeursView):
             carte_config=carte_config,
             selected_action_codes=self._get_action_codes(),
             icon_lookup=icon_lookup,
+            geojson_filter_params=self._build_geojson_filter_params(),
         )
 
         return context
+
+    def _build_geojson_filter_params(self) -> str:
+        """Build the query-string fragment the frontend sends to
+        carte/acteurs.geojson on each pan, so the auto-fetch honours the
+        currently-applied filters (groupe_actions, bonus, ess, sous_categories).
+        Returned as a `&`-joined string ready to append to the request URL.
+        """
+        from urllib.parse import urlencode
+
+        params: list[tuple[str, str]] = []
+
+        groupe_action_ids = self._get_ui_form("legende")["groupe_action"].value() or []
+        if groupe_action_ids:
+            params.append(("groupe_actions", ",".join(str(g) for g in groupe_action_ids)))
+
+        if self._get_bonus():
+            params.append(("bonus", "1"))
+        if self._get_ess():
+            params.append(("ess", "1"))
+
+        sous_categorie_ids = self._get_sous_categorie_ids()
+        if sous_categorie_ids:
+            params.append(
+                ("sous_categories", ",".join(str(s) for s in sous_categorie_ids))
+            )
+
+        return urlencode(params)
 
     def _build_icon_lookup(self, carte_config):
         """Build a lookup dictionary for icon configurations.
@@ -654,3 +683,160 @@ class CarteConfigView(DetailView, CarteSearchActeursView):
             )
 
         return action_ids
+
+
+# Frontend icon names mirror static/to_compile/js/acteur_icons.ts:iconNameFor.
+def _icon_name_for(groupe_action_code: str, bonus: bool) -> str:
+    return f"acteur:{groupe_action_code}:bonus" if bonus else f"acteur:{groupe_action_code}"
+
+
+def _resolve_icon(
+    acteur, action_codes: str | None, sous_categorie_id: int | None
+) -> tuple[str, bool]:
+    """Pick the icon name + bonus flag for a single acteur, mirroring
+    acteur_pinpoint_tag's logic for the carte path.
+    """
+    chosen = acteur.action_to_display(
+        action_list=action_codes,
+        sous_categorie_id=sous_categorie_id,
+        carte=True,
+    )
+    if chosen is None:
+        return ("", False)
+    groupe_action = chosen.groupe_action or chosen
+    code = getattr(groupe_action, "code", "") or ""
+    bonus = code == "reparer" and getattr(acteur, "is_bonus_reparation", False)
+    return (_icon_name_for(code, bonus), bonus)
+
+
+def carte_acteurs_geojson(request):
+    """GeoJSON endpoint feeding the carte's MapLibre symbol layer.
+
+    Returns a FeatureCollection of acteur Points filtered by bbox and any
+    optional filters. Used to incrementally append acteurs as the user pans
+    the map without re-rendering the whole results frame.
+
+    Query params:
+        bbox: "<sw_lng>,<sw_lat>,<ne_lng>,<ne_lat>"
+        exclude_uuids: comma-separated list of UUIDs already on screen
+        sous_categories: comma-separated list of ids
+        groupe_actions: comma-separated list of group_action ids
+        bonus: "1" to keep only acteurs with the bonus label
+        ess: "1" to keep only ESS-labelled acteurs
+        limit: optional, capped at settings.CARTE_MAX_SOLUTION_DISPLAYED
+    """
+    bbox_raw = request.GET.get("bbox", "").strip()
+    if not bbox_raw:
+        return HttpResponseBadRequest("missing bbox")
+    try:
+        sw_lng, sw_lat, ne_lng, ne_lat = (float(x) for x in bbox_raw.split(","))
+    except ValueError:
+        return HttpResponseBadRequest("invalid bbox")
+
+    polygon = Polygon.from_bbox((sw_lng, sw_lat, ne_lng, ne_lat))
+
+    qs = (
+        DisplayedActeur.objects.filter(
+            statut=ActeurStatus.ACTIF,
+            location__within=polygon,
+        )
+        .exclude(location__isnull=True)
+    )
+
+    if exclude_raw := request.GET.get("exclude_uuids", "").strip():
+        exclude_uuids = [u for u in exclude_raw.split(",") if u]
+        if exclude_uuids:
+            qs = qs.exclude(uuid__in=exclude_uuids)
+
+    if sc_raw := request.GET.get("sous_categories", "").strip():
+        sc_ids = [int(s) for s in sc_raw.split(",") if s.isdigit()]
+        if sc_ids:
+            qs = qs.filter(
+                proposition_services__sous_categories__id__in=sc_ids
+            )
+
+    selected_action_ids: list[int] = []
+    if ga_raw := request.GET.get("groupe_actions", "").strip():
+        ga_ids = [int(g) for g in ga_raw.split(",") if g.isdigit()]
+        if ga_ids:
+            selected_action_ids = list(
+                Action.objects.filter(groupe_action_id__in=ga_ids).values_list(
+                    "id", flat=True
+                )
+            )
+            qs = qs.filter(proposition_services__action_id__in=selected_action_ids)
+
+    if request.GET.get("bonus") == "1":
+        qs = qs.filter(labels__bonus=True)
+    if request.GET.get("ess") == "1":
+        qs = qs.filter(labels__code="ess")
+
+    # Random ordering so the LIMIT-cap returns a representative sample across
+    # the bbox rather than whatever Postgres has at the head of physical
+    # storage (which heavily skewed toward bibliothèques in our dataset and
+    # made wide-zoom maps look mono-icon). Mirrors the legacy
+    # `DisplayedActeurQuerySet.in_bbox` which also uses `order_by("?")`.
+    qs = qs.distinct().order_by("?").prefetch_related(
+        "proposition_services__action__groupe_action",
+        "proposition_services__sous_categories",
+        "action_principale",
+        # `is_bonus_reparation` walks `acteur.labels.all()` in pure Python; the
+        # prefetch keeps that O(1) per acteur instead of N+1.
+        "labels",
+    )
+
+    limit = settings.CARTE_MAX_SOLUTION_DISPLAYED
+    if (raw := request.GET.get("limit", "")) and raw.isdigit():
+        limit = min(int(raw), settings.CARTE_MAX_SOLUTION_DISPLAYED)
+    # Fetch one extra row so we can tell the frontend whether the result set
+    # was truncated and a "zoom in to see more" hint should be shown.
+    overshoot = list(qs[: limit + 1])
+    truncated = len(overshoot) > limit
+    qs = overshoot[:limit]
+
+    sc_id_for_action = None
+    if sc_raw and sc_ids:
+        sc_id_for_action = sc_ids[0]
+    action_codes = "|".join(
+        Action.objects.filter(id__in=selected_action_ids)
+        .values_list("code", flat=True)
+    ) if selected_action_ids else None
+
+    features = []
+    for acteur in qs:
+        if acteur.location is None:
+            continue
+        icon, bonus = _resolve_icon(
+            acteur,
+            action_codes=action_codes,
+            sous_categorie_id=sc_id_for_action,
+        )
+        if not icon:
+            continue
+        features.append(
+            {
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [acteur.location.x, acteur.location.y],
+                },
+                "properties": {
+                    "uuid": str(acteur.uuid),
+                    "icon": icon,
+                    "bonus": bonus,
+                    "detail_url": acteur.get_absolute_url(),
+                },
+            }
+        )
+
+    return JsonResponse(
+        {
+            "type": "FeatureCollection",
+            "features": features,
+            # Top-level flag, not strictly part of GeoJSON: signals to the
+            # frontend that more acteurs exist in this bbox than we returned,
+            # so a "zoom in to see more" pill should be shown.
+            "truncated": truncated,
+        },
+        json_dumps_params={"separators": (",", ":")},
+    )

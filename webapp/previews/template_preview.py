@@ -321,6 +321,48 @@ class ComponentsPreview(LookbookPreview):
             """)
         return template.render(Context(context))
 
+    def acteur_icons_preview(self, **kwargs):
+        """Side-by-side comparison of DOM pinpoints vs runtime-rendered MapLibre icons.
+
+        Used to validate visual fidelity of the new GeoJSON symbol layer against
+        the legacy DOM markers before migrating the carte.
+        """
+        variants = [
+            {
+                "code": "donner_echanger_rapporter",
+                "icon": "fr-icon-hand-heart",
+                "couleur": "#417dc4",
+                "filled": False,
+            },
+            {
+                "code": "emprunter_preter_louer",
+                "icon": "fr-icon-arrow-go-back-line",
+                "couleur": "#ce614a",
+                "filled": False,
+            },
+            {
+                "code": "reparer",
+                "icon": "fr-icon-tools-fill",
+                "couleur": "#009081",
+                "filled": True,
+            },
+            {
+                "code": "trier",
+                "icon": "fr-icon-recycle-line",
+                "couleur": "#A558A0",
+                "filled": False,
+            },
+            {
+                "code": "vendre_acheter",
+                "icon": "fr-icon-money-euro-circle-line",
+                "couleur": "#D1B781",
+                "filled": False,
+            },
+        ]
+        return render_to_string(
+            "ui/tests/acteur_icons_preview.html", {"variants": variants}
+        )
+
     def acteur_pinpoint_multiple(self, **kwargs):
         """
         Preview showing two pinpoints side by side to test active state toggling.

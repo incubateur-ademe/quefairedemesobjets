@@ -21,6 +21,11 @@ CACHES = {
     "database": {
         "BACKEND": "django.core.cache.backends.dummy.DummyCache",
     },
+    # Mirror the named cache from core.settings so callers using
+    # caches["actions"] don't fall over in tests.
+    "actions": {
+        "BACKEND": "django.core.cache.backends.dummy.DummyCache",
+    },
 }
 
 STORAGES["default"]["BACKEND"] = "django.core.files.storage.InMemoryStorage"

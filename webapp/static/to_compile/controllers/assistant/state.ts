@@ -14,6 +14,7 @@ export default class extends Controller<HTMLElement> {
     adresse: string | null
     latitude: string | null
     longitude: string | null
+    citycode: string | null
   }
   hasAddressAutocompleteOutletConnected = false
   hasSearchSolutionFormOutletConnected = false
@@ -38,6 +39,7 @@ export default class extends Controller<HTMLElement> {
       adresse: sessionStorage.getItem("adresse"),
       latitude: sessionStorage.getItem("latitude"),
       longitude: sessionStorage.getItem("longitude"),
+      citycode: sessionStorage.getItem("citycode"),
     }
 
     this.#setLocationValue(nextLocationValue)
@@ -71,6 +73,15 @@ export default class extends Controller<HTMLElement> {
     this.persistInSessionStorageIfChanged(value?.adresse, "adresse")
     this.persistInSessionStorageIfChanged(value?.latitude, "latitude")
     this.persistInSessionStorageIfChanged(value?.longitude, "longitude")
+    // Citycode is the odd one: an *empty* string is meaningful (the user
+    // picked a non-municipality, so the polygon outline must NOT redraw).
+    // The other persist helper short-circuits on falsy and would leave a
+    // stale citycode behind; clear explicitly when empty.
+    if (value?.citycode) {
+      this.persistInSessionStorageIfChanged(value.citycode, "citycode")
+    } else if (value && "citycode" in value) {
+      sessionStorage.removeItem("citycode")
+    }
   }
 
   updateUIFromGlobalState(outlet) {
@@ -93,9 +104,26 @@ export default class extends Controller<HTMLElement> {
       touched = true
     }
 
+    // Restore the citycode hidden input so the post-submit map render can
+    // re-fetch the commune polygon and redraw the outline. Without this,
+    // a page reload would lose the polygon even though the address itself
+    // was correctly hydrated.
+    if (value.citycode !== null && value.citycode !== undefined) {
+      this.#setHiddenFieldOnOutlet(outlet, "search_area_citycode", value.citycode)
+    }
+
     if (touched) {
       this.submit()
     }
+  }
+
+  #setHiddenFieldOnOutlet(outlet, suffix: string, value: string) {
+    const form = outlet.element.closest("form")
+    if (!form) return
+    const input = form.querySelector(
+      `input[name$="-${suffix}"], input[name="${suffix}"]`,
+    ) as HTMLInputElement | null
+    if (input) input.value = value
   }
 
   submit() {

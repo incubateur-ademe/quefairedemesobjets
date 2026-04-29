@@ -6,7 +6,7 @@ The values of 120px and 150px are determined empirically.
 They need to match the css variables used for .grid-map selector in qfdmo.css
 {% endcomment %}
 
-{% load carte_tags %}
+{% load carte_tags acteur_tags %}
 <div
     class="
     qf-relative
@@ -18,6 +18,11 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
     "
     {% if not is_digital %}
     data-controller="map"
+    data-map-acteur-frame-id-value="{% acteur_frame_id %}"
+    data-map-filter-params-value="{{ geojson_filter_params|default:'' }}"
+    data-map-use-geojson-layer-value="true"
+    data-map-search-area-citycode-value="{{ search_area_citycode|default:'' }}"
+    data-map-search-area-bbox-value="{{ search_area_bbox|default:''|escape }}"
     {% if location %}
     data-map-location-value="{{ location }}"
     {% endif %}
@@ -28,13 +33,35 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
         {% include "ui/components/carte/shared/_search_in_zone.html" %}
         {% include "ui/components/carte/buttons/ajouter_un_lieu.html" %}
     {% endif %}
+    {% comment %}
+        Subtle spinner shown while the map is fetching new acteurs after a pan.
+        Toggled by the map controller via the `qf-hidden` class.
+    {% endcomment %}
+    <div
+        data-map-target="loadingIndicator"
+        class="qf-hidden qf-absolute qf-z-20 qf-top-1w qf-right-1w
+               qf-bg-white qf-rounded-full qf-shadow qf-p-1v
+               qf-pointer-events-none"
+        role="status"
+        aria-live="polite"
+    >
+        <span class="fr-icon-refresh-line fr-icon--sm" aria-hidden="true"></span>
+        <span class="fr-sr-only">Chargement en cours</span>
+    </div>
     <div
         data-map-target="mapContainer"
         class="qf-inset-0 qf-h-full qf-relative qf-z-0"
     >
-        {% for acteur in acteurs %}
-            {% acteur_pinpoint_tag acteur=acteur direction=form.initial.direction action_list=selected_action_codes carte=carte carte_config=carte_config sous_categorie_id=forms.filtres.sous_categorie_objet_id.value counter=forloop.counter %}
-        {% endfor %}
+        {% comment %}
+            Hidden acteur pinpoints kept transitionally for selectors that
+            look them up by data-marker-key. The visible markers are now
+            rendered by the MapLibre symbol layer in solution_map.ts.
+        {% endcomment %}
+        <div class="qf-hidden">
+            {% for acteur in acteurs %}
+                {% acteur_pinpoint_tag acteur=acteur direction=form.initial.direction action_list=selected_action_codes carte=carte carte_config=carte_config sous_categorie_id=forms.filtres.sous_categorie_objet_id.value counter=forloop.counter %}
+            {% endfor %}
+        </div>
         {% include "ui/components/carte/pinpoints/home.html" %}
     </div>
 
