@@ -3,6 +3,7 @@ import logging
 from airflow import DAG
 from airflow.providers.standard.operators.python import PythonOperator
 from airflow.task.trigger_rule import TriggerRule
+from sources.config.xcoms import XCOMS, xcom_pull
 from sources.tasks.airflow_logic.config_management import DAGConfig
 from sources.tasks.business_logic.source_data_validate import source_data_validate
 from utils import logging_utils as log
@@ -21,7 +22,7 @@ def source_data_validate_task(dag: DAG) -> PythonOperator:
 
 
 def source_data_validate_wrapper(**kwargs) -> None:
-    df = kwargs["ti"].xcom_pull(task_ids="source_data_normalize")
+    df = xcom_pull(kwargs["ti"], XCOMS.SOURCE_NORMALIZED)
     dag_config = DAGConfig.from_airflow_params(kwargs["params"])
 
     log.preview("df before validation", df)

@@ -1,16 +1,11 @@
 """Constants and helpers to configure XCom for Clustering DAG"""
 
-# TODO: should be mutualized with data-platform/dags/crawl/config/xcoms.py
-
 from dataclasses import dataclass
-from typing import Any
+from functools import partial
 
-import pandas as pd
-from airflow.models.taskinstance import TaskInstance
-from airflow.sdk.exceptions import AirflowSkipException
 from cluster.config.tasks import TASKS
-from shared.xcom.normalize import normalize_xcom_value
-from utils import logging_utils as log
+from shared.xcom.pull import XComSource
+from shared.xcom.pull import xcom_pull as _xcom_pull
 
 
 @dataclass(frozen=True)
@@ -25,38 +20,34 @@ class XCOMS:
     SUGGESTIONS_FAILING: str = "suggestions_failing"
 
 
-def xcom_pull(ti: TaskInstance, key: str, skip_if_empty: bool = False) -> Any:
-    """For pulls, we create a helper to constrain keys
-    to specific task ids to guarantee consistent pulls"""
-    value: Any = None  # type: ignore
-    msg = f"XCOM from {ti.task_id=} pulling {key=}:"  # For logging
-    if key == XCOMS.CONFIG:
-        value = ti.xcom_pull(key=key, task_ids=TASKS.CONFIG_CREATE)
-    elif key == XCOMS.DF_READ:
-        value = ti.xcom_pull(key=key, task_ids=TASKS.SELECTION)
-    elif key == XCOMS.DF_NORMALIZE:
-        value = ti.xcom_pull(key=key, task_ids=TASKS.NORMALIZE)
-    elif key == XCOMS.DF_CLUSTERS_PREPARE:
-        value = ti.xcom_pull(key=key, task_ids=TASKS.CLUSTERS_PREPARE)
-    elif key == XCOMS.DF_PARENTS_CHOOSE_NEW:
-        value = ti.xcom_pull(key=key, task_ids=TASKS.PARENTS_CHOOSE_NEW)
-    elif key == XCOMS.DF_PARENTS_CHOOSE_DATA:
-        value = ti.xcom_pull(key=key, task_ids=TASKS.PARENTS_CHOOSE_DATA)
-    elif key == XCOMS.SUGGESTIONS_WORKING:
-        value = ti.xcom_pull(key=key, task_ids=TASKS.SUGGESTIONS_PREPARE)
-    elif key == XCOMS.SUGGESTIONS_FAILING:
-        value = ti.xcom_pull(key=key, task_ids=TASKS.SUGGESTIONS_PREPARE)
-    else:
-        raise ValueError(f"{msg}: key inconnue")
+XCOM_SOURCES: dict[str, XComSource] = {
+    XCOMS.CONFIG: {"task_id": TASKS.CONFIG_CREATE, "xcom_key": XCOMS.CONFIG},
+    XCOMS.DF_READ: {"task_id": TASKS.SELECTION, "xcom_key": XCOMS.DF_READ},
+    XCOMS.DF_NORMALIZE: {"task_id": TASKS.NORMALIZE, "xcom_key": XCOMS.DF_NORMALIZE},
+    XCOMS.DF_CLUSTERS_PREPARE: {
+        "task_id": TASKS.CLUSTERS_PREPARE,
+        "xcom_key": XCOMS.DF_CLUSTERS_PREPARE,
+    },
+    XCOMS.DF_PARENTS_CHOOSE_NEW: {
+        "task_id": TASKS.PARENTS_CHOOSE_NEW,
+        "xcom_key": XCOMS.DF_PARENTS_CHOOSE_NEW,
+    },
+    XCOMS.DF_PARENTS_CHOOSE_DATA: {
+        "task_id": TASKS.PARENTS_CHOOSE_DATA,
+        "xcom_key": XCOMS.DF_PARENTS_CHOOSE_DATA,
+    },
+    XCOMS.SUGGESTIONS_WORKING: {
+        "task_id": TASKS.SUGGESTIONS_PREPARE,
+        "xcom_key": XCOMS.SUGGESTIONS_WORKING,
+    },
+    XCOMS.SUGGESTIONS_FAILING: {
+        "task_id": TASKS.SUGGESTIONS_PREPARE,
+        "xcom_key": XCOMS.SUGGESTIONS_FAILING,
+    },
+}
 
-    value = normalize_xcom_value(value)
 
-    if skip_if_empty and (
-        value is None or (isinstance(value, pd.DataFrame) and value.empty)
-    ):
-        raise AirflowSkipException(f"✋ {msg} est vide, on s'arrête là")
-    log.preview(f"{msg} value = ", value)
-    return value
+xcom_pull = partial(_xcom_pull, mapping=XCOM_SOURCES)
 
 
 # We don't have an helper for xcom_push because

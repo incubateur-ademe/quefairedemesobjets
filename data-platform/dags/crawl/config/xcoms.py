@@ -3,17 +3,12 @@ so we are more reliable & concise in our XCOM usage
 (so easy to typo a key or pull from wrong task and Airflow
 happily gives None without complaining)"""
 
-# TODO: should be mutualized with data-platform/dags/cluster/config/xcoms.py
-
 from dataclasses import dataclass
-from typing import Any
+from functools import partial
 
-import pandas as pd
-from airflow.models.taskinstance import TaskInstance
-from airflow.sdk.exceptions import AirflowSkipException
 from crawl.config.tasks import TASKS
-from shared.xcom.normalize import normalize_xcom_value
-from utils import logging_utils as log
+from shared.xcom.pull import XComSource
+from shared.xcom.pull import xcom_pull as _xcom_pull
 
 
 @dataclass(frozen=True)
@@ -38,38 +33,31 @@ class XCOMS:
     SUGGEST_CRAWL_DIFF_OTHER: str = "suggestions_crawl_diff_other"
 
 
-def xcom_pull(ti: TaskInstance, key: str, skip_if_empty: bool = False) -> Any:
-    """For pulls, we create a helper to constrain keys
-    to specific task ids to guarantee consistent pulls"""
-    value = None
-    msg = f"XCOM from {ti.task_id=} pulling {key=}:"  # For logging
-    if key == XCOMS.DF_READ:
-        value = ti.xcom_pull(key=key, task_ids=TASKS.READ)
-    elif key == XCOMS.DF_SYNTAX_OK:
-        value = ti.xcom_pull(key=key, task_ids=TASKS.CHECK_SYNTAX)
-    elif key == XCOMS.DF_SYNTAX_FAIL:
-        value = ti.xcom_pull(key=key, task_ids=TASKS.CHECK_SYNTAX)
-    elif key == XCOMS.DF_DNS_OK:
-        value = ti.xcom_pull(key=key, task_ids=TASKS.CHECK_DNS)
-    elif key == XCOMS.DF_DNS_FAIL:
-        value = ti.xcom_pull(key=key, task_ids=TASKS.CHECK_DNS)
-    elif key == XCOMS.DF_CRAWL_DIFF_STANDARD:
-        value = ti.xcom_pull(key=key, task_ids=TASKS.CHECK_CRAWL)
-    elif key == XCOMS.DF_CRAWL_DIFF_OTHER:
-        value = ti.xcom_pull(key=key, task_ids=TASKS.CHECK_CRAWL)
-    elif key == XCOMS.DF_CRAWL_FAIL:
-        value = ti.xcom_pull(key=key, task_ids=TASKS.CHECK_CRAWL)
-    else:
-        raise ValueError(f"{msg} key inconnue")
+XCOM_SOURCES: dict[str, XComSource] = {
+    XCOMS.DF_READ: {"task_id": TASKS.READ, "xcom_key": XCOMS.DF_READ},
+    XCOMS.DF_SYNTAX_OK: {"task_id": TASKS.CHECK_SYNTAX, "xcom_key": XCOMS.DF_SYNTAX_OK},
+    XCOMS.DF_SYNTAX_FAIL: {
+        "task_id": TASKS.CHECK_SYNTAX,
+        "xcom_key": XCOMS.DF_SYNTAX_FAIL,
+    },
+    XCOMS.DF_DNS_OK: {"task_id": TASKS.CHECK_DNS, "xcom_key": XCOMS.DF_DNS_OK},
+    XCOMS.DF_DNS_FAIL: {"task_id": TASKS.CHECK_DNS, "xcom_key": XCOMS.DF_DNS_FAIL},
+    XCOMS.DF_CRAWL_DIFF_STANDARD: {
+        "task_id": TASKS.CHECK_CRAWL,
+        "xcom_key": XCOMS.DF_CRAWL_DIFF_STANDARD,
+    },
+    XCOMS.DF_CRAWL_DIFF_OTHER: {
+        "task_id": TASKS.CHECK_CRAWL,
+        "xcom_key": XCOMS.DF_CRAWL_DIFF_OTHER,
+    },
+    XCOMS.DF_CRAWL_FAIL: {
+        "task_id": TASKS.CHECK_CRAWL,
+        "xcom_key": XCOMS.DF_CRAWL_FAIL,
+    },
+}
 
-    value = normalize_xcom_value(value)
 
-    if skip_if_empty and (
-        value is None or (isinstance(value, pd.DataFrame) and value.empty)
-    ):
-        raise AirflowSkipException(f"✋ {msg} est vide, on s'arrête là")
-    log.preview(f"{msg} value = ", value)
-    return value
+xcom_pull = partial(_xcom_pull, mapping=XCOM_SOURCES)
 
 
 # We don't have an helper for xcom_push because

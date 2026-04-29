@@ -3,6 +3,7 @@ import logging
 
 from airflow import DAG
 from airflow.providers.standard.operators.python import PythonOperator
+from sources.config.xcoms import XCOMS, xcom_pull
 from sources.tasks.business_logic.db_data_prepare import db_data_prepare
 from utils import logging_utils as log
 from utils.db_tmp_tables import create_temporary_table
@@ -19,12 +20,8 @@ def db_data_prepare_task(dag: DAG) -> PythonOperator:
 
 
 def db_data_prepare_wrapper(**kwargs):
-    df_acteur_from_source = kwargs["ti"].xcom_pull(
-        task_ids="keep_acteur_changed", key="df_acteur_from_source"
-    )
-    df_acteur_from_db = kwargs["ti"].xcom_pull(
-        task_ids="keep_acteur_changed", key="df_acteur_from_db"
-    )
+    df_acteur_from_source = xcom_pull(kwargs["ti"], XCOMS.DF_ACTEUR_FROM_SOURCE)
+    df_acteur_from_db = xcom_pull(kwargs["ti"], XCOMS.DF_ACTEUR_FROM_DB)
 
     log.preview("df_acteur", df_acteur_from_source)
     log.preview("df_acteur_from_db", df_acteur_from_db)
