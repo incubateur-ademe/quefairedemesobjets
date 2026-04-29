@@ -1,8 +1,6 @@
 from datetime import datetime
 
 import pytest
-from django.contrib.gis.geos import Point
-
 from data.models.changes.utils import data_reconstruct
 from qfdmo.models.acteur import RevisionActeur
 from unit_tests.qfdmo.acteur_factory import (
@@ -13,7 +11,8 @@ from unit_tests.qfdmo.acteur_factory import (
 from utils.data_serialize_reconstruct import data_serialize
 
 DATETIME = datetime(2023, 10, 1, 14, 30, 4)
-POINT = Point(1, 2)
+LONGITUDE, LATITUDE = 1, 2
+LOCATION = (LONGITUDE, LATITUDE)
 
 
 @pytest.mark.django_db
@@ -30,28 +29,23 @@ class TestDataSerializeReconstruct:
             "source": s,
             "acteur_type": at,
             "action_principale": action,
-            "location": POINT,
+            "location": LOCATION,
             "cree_le": DATETIME,
         }
         return data
 
-    @pytest.fixture
-    def data_serialized(self, data_init) -> dict:
-        data = data_serialize(RevisionActeur, data_init)
-        return data
+    def test_data_reconstructed(self, data_init):
+        data_serialized = data_serialize(RevisionActeur, data_init)
+        data_reconstructed = data_reconstruct(RevisionActeur, data_serialized)
 
-    @pytest.fixture
-    def data_reconstructed(self, data_serialized) -> dict:
-        data = data_reconstruct(RevisionActeur, data_serialized)
-        return data
+        assert data_reconstructed["location"].x == LONGITUDE
+        assert data_reconstructed["location"].y == LATITUDE
+        assert isinstance(data_reconstructed["cree_le"], str)
 
-    def test_data_reconstructed(self, data_reconstructed):
-        data = data_reconstructed
-        assert data["location"].x == POINT.x
-        assert data["location"].y == POINT.y
-        assert isinstance(data["cree_le"], str)
+    def test_data_reconstructed_compatible_with_model(self, data_init):
+        data_serialized = data_serialize(RevisionActeur, data_init)
+        data_reconstructed = data_reconstruct(RevisionActeur, data_serialized)
 
-    def test_data_reconstructed_compatible_with_model(self, data_reconstructed):
         rev = RevisionActeur(**data_reconstructed)
         rev.save()
         # FIXME: setting cree_le doesn't work the 1st time due
