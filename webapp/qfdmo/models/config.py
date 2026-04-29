@@ -87,9 +87,8 @@ class CarteConfig(index.Indexed, models.Model):
     supprimer_branding = models.BooleanField(
         verbose_name="Supprimer le branding",
         default=False,
-        help_text="Supprime le logo dans l'entête de la carte ainsi que"
-        " le bouton Infos. Ce mode est utilisé essentiellement "
-        "pour la carte affichée dans l'assistant",
+        help_text="Supprime le logo dans l'entête de la carte. "
+        "Ce mode est utilisé essentiellement pour la carte affichée dans l'assistant.",
     )
     cacher_filtre_objet = models.BooleanField(
         default=False,
