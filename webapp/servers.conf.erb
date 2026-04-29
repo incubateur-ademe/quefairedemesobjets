@@ -23,8 +23,18 @@ map $host $is_valid_host {
     default                                          0;
     "<%= ENV["BASE_DOMAIN"] %>"                      1;
 }
+<%
+  # Upstream scheme defaults to http (local dev, on-host gunicorn).
+  # Set UPSTREAM_SCHEME=https when the upstream is a Scaleway Serverless Container
+  # (internal endpoints are HTTPS-only and require SNI).
+  upstream_scheme = ENV["UPSTREAM_SCHEME"] == "https" ? "https" : "http"
+  upstream_host   = ENV["UPSTREAM_HOST"] || "unix:/tmp/gunicorn.sock"
+  # When proxying over HTTPS, nginx needs the upstream hostname for SNI and Host.
+  # Strip any trailing :port to derive it.
+  upstream_sni    = upstream_host.sub(/:\d+\z/, "")
+%>
 upstream gunicorn {
-    server <%= ENV["UPSTREAM_HOST"] || "unix:/tmp/gunicorn.sock" %>;
+    server <%= upstream_host %>;
     # keepalive: maintain persistent connections to gunicorn to avoid
     # TCP handshake overhead on every request
     keepalive 32;
@@ -57,9 +67,14 @@ server {
     # third-party sites and must not vary by session
     location ~ ^/(static/)?(iframe|carte)\.js$ {
         # HTTP/1.1 + empty Connection header required for upstream keepalive
-        proxy_pass http://gunicorn;
+        proxy_pass <%= upstream_scheme %>://gunicorn;
         proxy_http_version 1.1;
         proxy_set_header Connection "";
+<% if upstream_scheme == "https" %>
+        proxy_ssl_server_name on;
+        proxy_ssl_name <%= upstream_sni %>;
+        proxy_set_header Host <%= upstream_sni %>;
+<% end %>
 
         proxy_cache assistant;
         proxy_cache_valid 200 301 302 10m;
@@ -87,16 +102,24 @@ server {
 
     location / {
         # HTTP/1.1 + empty Connection header required for upstream keepalive
-        proxy_pass http://gunicorn;
+        proxy_pass <%= upstream_scheme %>://gunicorn;
         proxy_http_version 1.1;
         proxy_set_header Connection "";
+<% if upstream_scheme == "https" %>
+        proxy_ssl_server_name on;
+        proxy_ssl_name <%= upstream_sni %>;
+<% end %>
 
         # Bypass cache for logged-in users
         proxy_cache_bypass $no_cache;
         proxy_no_cache $no_cache;
 
         proxy_cache assistant;
+<% if upstream_scheme == "https" %>
+        proxy_set_header Host <%= upstream_sni %>;
+<% else %>
         proxy_set_header Host $http_host;
+<% end %>
         # Include $http_sec_fetch_dest in cache key to serve different cached
         # versions for standalone page loads vs iframe embeds
         proxy_cache_key $request_method$scheme$host$request_uri$http_sec_fetch_dest;

@@ -286,6 +286,13 @@ db-restore-preprod-from-prod:
 	make drop-all-tables
 	make load-prod-dump
 
+# Restore prod webapp DB into preview (Scaleway → Scaleway).
+# Reads connection strings from Scaleway Secret Manager — no plaintext on disk.
+# Requires: scw CLI authenticated, pg_dump/pg_restore/psql in PATH.
+.PHONY: db-restore-preview-from-prod
+db-restore-preview-from-prod:
+	./scripts/restore_prod_to_preview.sh
+
 .PHONY: db-restore-local-from-sample
 db-restore-local-from-sample:
 	make dump-sample

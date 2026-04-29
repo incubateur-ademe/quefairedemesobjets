@@ -35,6 +35,7 @@ def cluster_acteurs_clusters_prepare(
 
     from qfdmo.models import RevisionActeur
 
+    # FIXME : we are using source here, should be use sources instead ?
     def filter_clusters_without_any_included_sources(
         df_clusters: pd.DataFrame, include_source_ids: list[int]
     ) -> pd.DataFrame:
@@ -67,7 +68,8 @@ def cluster_acteurs_clusters_prepare(
         cluster_fuzzy_threshold=cluster_fuzzy_threshold,
         cluster_intra_source_is_allowed=cluster_intra_source_is_allowed,
     )
-    log.preview_df_as_markdown("Clusters orphelins+parents", df_clusters)
+
+    # log.preview_df_as_markdown("Clusters orphelins+parents", df_clusters)
     if df_clusters.empty:
         logger.info("Pas de clusters trouvés, on arrête là")
         return df_clusters

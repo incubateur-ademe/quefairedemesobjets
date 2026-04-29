@@ -1,0 +1,81 @@
+# Builds and pushes the webapp + webapp-nginx Docker images to the Scaleway
+# container registry. Mirrors _airflow-build-and-push-docker.yml.
+name: 🐳 Docker images for Webapp
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        required: false
+        type: string
+      environment:
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      image_tag:
+        required: false
+        type: string
+      environment:
+        required: true
+        type: string
+
+env:
+  SCALEWAY_REGISTRY: rg.fr-par.scw.cloud
+  SCALEWAY_NAMESPACE: ns-qfdmo
+
+jobs:
+  build-and-push-image:
+    name: 🐳 Build and push Docker images
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: "[🟣 Scaleway] Log in to the Scaleway Container registry"
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121
+        with:
+          registry: ${{ env.SCALEWAY_REGISTRY }}
+          username: nologin
+          password: ${{ secrets.SCALEWAY_DOCKER_SECRET }}
+
+      - uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd
+
+      - name: "[🟣 Scaleway] Extract metadata for webapp image"
+        id: webapp_meta_scaleway
+        uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf
+        with:
+          images: ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/webapp
+
+      - name: "[🟣 Scaleway] Build and push Docker image (webapp)"
+        id: build-and-push-webapp
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f
+        with:
+          context: webapp
+          cache-from: type=gha,scope=webapp
+          cache-to: type=gha,scope=webapp,mode=max
+          push: true
+          tags: ${{ inputs.image_tag && format('{0}/{1}/{2}:{3}', env.SCALEWAY_REGISTRY, env.SCALEWAY_NAMESPACE, 'webapp', inputs.image_tag) || steps.webapp_meta_scaleway.outputs.tags }}
+          labels: ${{ steps.webapp_meta_scaleway.outputs.labels }}
+          file: webapp/Dockerfile
+
+      - name: "[🟣 Scaleway] Extract metadata for webapp-nginx image"
+        id: webapp_nginx_meta_scaleway
+        uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf
+        with:
+          images: ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/webapp-nginx
+
+      - name: "[🟣 Scaleway] Build and push Docker image (webapp-nginx)"
+        id: build-and-push-webapp-nginx
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f
+        with:
+          context: webapp
+          cache-from: type=gha,scope=webapp-nginx
+          cache-to: type=gha,scope=webapp-nginx,mode=max
+          push: true
+          tags: ${{ inputs.image_tag && format('{0}/{1}/{2}:{3}', env.SCALEWAY_REGISTRY, env.SCALEWAY_NAMESPACE, 'webapp-nginx', inputs.image_tag) || steps.webapp_nginx_meta_scaleway.outputs.tags }}
+          labels: ${{ steps.webapp_nginx_meta_scaleway.outputs.labels }}
+          file: webapp/nginx/Dockerfile
