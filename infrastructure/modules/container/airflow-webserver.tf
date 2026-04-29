@@ -1,5 +1,6 @@
 resource "scaleway_container" "airflow_webserver" {
   name           = "${var.prefix}-airflow-webserver"
+  http_option    = "redirected"
   tags           = [var.environment, var.prefix, "airflow", "webserver"]
   namespace_id   = scaleway_container_namespace.main.id
   registry_image = var.airflow_webserver_registry_image
@@ -17,7 +18,7 @@ resource "scaleway_container" "airflow_webserver" {
     http {
       path = "/api/v1/health"
     }
-    failure_threshold = 5
+    failure_threshold = 10
     interval          = "30s"
   }
 
