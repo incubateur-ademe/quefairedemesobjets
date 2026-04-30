@@ -1,4 +1,5 @@
 import pytest
+from dags.cluster.config.constants import FIELDS_PROTECTED
 from dags.cluster.config.model import ClusterConfig
 
 
@@ -81,33 +82,21 @@ class TestClusterConfigModel:
 
     @pytest.mark.parametrize("input", [None, []])
     def test_optional_normalize_fields_basic(self, params_working, input):
-        # On peut ne pas fournir de champs à normaliser
-        # et tous les champs présent dans les champs "fields"
-        # (sauf field_all) seront rajoutés à la liste
+        # By default, all normalizable fields are normalized
         params_working["normalize_fields_basic"] = input
         config = ClusterConfig(**params_working)
-        expected = config.fields_transformed
-        diff = set(config.normalize_fields_basic) - set(expected)
-        assert not diff, f"Différence: {diff}"
+
+        assert set(config.normalize_fields_basic) == set(config.fields_transformed)
 
     def test_fields_used_separate_meta_and_data(self, params_working):
-        # Les champs utilisés contiennent toujours les champs
-        # internes (ex: source_id, acteur_type_id)
+        # fields_transformed doesn't contain protected fields
         config = ClusterConfig(**params_working)
-        fields = [
-            "source_id",
-            "acteur_type_id",
-            "identifiant_unique",
-            "statut",
-            "nombre_enfants",
-        ]
-        for field in fields:
-            assert field in config.fields_protected
+        assert config.fields_protected == FIELDS_PROTECTED
+        for field in FIELDS_PROTECTED:
             assert field not in config.fields_transformed
 
-    def test_fields_meta_no_duplicates(self, params_working):
+    def test_fields_protected_no_duplicates(self, params_working):
         # Les champs meta ne doivent pas contenir de doublons
-        params_working["fields_protected"] = ["source_id", "source_id"]
         config = ClusterConfig(**params_working)
         assert len(config.fields_protected) == len(set(config.fields_protected))
 
@@ -120,10 +109,10 @@ class TestClusterConfigModel:
 
     @pytest.mark.parametrize("input", [None, []])
     def test_optional_normalize_fields_order_unique_words(self, params_working, input):
-        # Si aucun champ fourni => appliquer à tous les champs data
+        # Si aucun champ fourni => liste vide (pas de fallback implicite)
         params_working["normalize_fields_order_unique_words"] = input
         config = ClusterConfig(**params_working)
-        assert config.normalize_fields_order_unique_words == config.fields_transformed
+        assert config.normalize_fields_order_unique_words == []
 
     def test_default_dry_run_is_true(self, params_working):
         # On veut forcer l'init du dry_run pour limiter
@@ -201,16 +190,43 @@ class TestClusterConfigModel:
         config = ClusterConfig(**params_working)
         assert config.cluster_fuzzy_threshold == 0.5
 
-    def test_cluster_fuzzy_threshold_invalid_below_zero(self, params_working):
-        # Erreur si le seuil est < 0
+    def test_cluster_fuzzy_threshold_below_zero_is_rejected(self, params_working):
+        # Pas de validation de range dans le modèle : on garde la valeur telle quelle
         params_working["cluster_fuzzy_threshold"] = -0.1
-        with pytest.raises(ValueError):
+        with pytest.raises(
+            ValueError,
+            match=(
+                "Le seuil de similarité pour le groupage fuzzy doit être entre 0 et 1"
+            ),
+        ):
             ClusterConfig(**params_working)
 
-    def test_cluster_fuzzy_threshold_invalid_above_one(self, params_working):
-        # Erreur si le seuil est > 1
+    def test_cluster_fuzzy_threshold_above_one_is_rejected(self, params_working):
+        # Pas de validation de range dans le modèle : on garde la valeur telle quelle
         params_working["cluster_fuzzy_threshold"] = 1.1
-        with pytest.raises(ValueError):
+        with pytest.raises(
+            ValueError,
+            match=(
+                "Le seuil de similarité pour le groupage fuzzy doit être entre 0 et 1"
+            ),
+        ):
+            ClusterConfig(**params_working)
+
+    def test_cluster_fuzzy_threshold_none_defaults_to_0(self, params_working):
+        params_working["cluster_fuzzy_threshold"] = None
+        config = ClusterConfig(**params_working)
+        assert config.cluster_fuzzy_threshold == 0.0
+
+    def test_distance_in_cluster_none_defaults_to_0(self, params_working):
+        params_working["distance_in_cluster"] = None
+        config = ClusterConfig(**params_working)
+        assert config.distance_in_cluster == 0
+
+    def test_distance_in_cluster_negative_is_rejected(self, params_working):
+        params_working["distance_in_cluster"] = -1
+        with pytest.raises(
+            ValueError, match="La distance dans le cluster doit être positive ou nulle"
+        ):
             ClusterConfig(**params_working)
 
     def test_dedup_enrich_priority_source_ids_resolved(self, config_working):
@@ -276,6 +292,27 @@ class TestClusterConfigModel:
         params_working["normalize_fields_no_words_size3_or_less"] = input
         config = ClusterConfig(**params_working)
         assert config.normalize_fields_no_words_size3_or_less == []
+
+    def test_normalize_fields_do_not_include_unnormalizable_fields(
+        self, params_working
+    ):
+        normalisazed_fields = ["latitude", "longitude", "location", "nom"]
+        params_working["normalize_fields_basic"] = normalisazed_fields
+        params_working["normalize_fields_no_words_size1"] = normalisazed_fields
+        params_working["normalize_fields_no_words_size2_or_less"] = normalisazed_fields
+        params_working["normalize_fields_no_words_size3_or_less"] = normalisazed_fields
+        params_working["normalize_fields_order_unique_words"] = normalisazed_fields
+        config = ClusterConfig(**params_working)
+
+        expected = ["nom"]
+        for setting in [
+            "normalize_fields_basic",
+            "normalize_fields_no_words_size1",
+            "normalize_fields_no_words_size2_or_less",
+            "normalize_fields_no_words_size3_or_less",
+            "normalize_fields_order_unique_words",
+        ]:
+            assert getattr(config, setting) == expected
 
     @pytest.mark.parametrize("input", [None, []])
     def test_optional_cluster_fields_fuzzy(self, params_working, input):

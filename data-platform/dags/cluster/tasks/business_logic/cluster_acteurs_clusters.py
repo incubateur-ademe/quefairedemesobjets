@@ -23,6 +23,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from slugify import slugify
 from unidecode import unidecode
+from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
 
@@ -303,11 +304,11 @@ def cluster_acteurs_clusters(
 
             # Keep only clusters of size 2+
             if len(exact_rows) < 2:
-                # logger.info(f"🔴 Ignoré: cluster de taille <2: {list(exact_keys)}")
+                logger.info(f"🔴 Ignoré: cluster de taille <2: {list(exact_keys)}")
                 continue
 
             keys = list(exact_keys)
-            # log.preview_df_as_markdown("🔵 Cluster potentiel exact", exact_rows)
+            log.preview_df_as_markdown("🔵 Cluster potentiel exact", exact_rows)
             groups_after_exact_match.append((keys, exact_rows))
     else:
         groups_after_exact_match = [([], df)]
@@ -325,7 +326,7 @@ def cluster_acteurs_clusters(
             )
             cnt = len(subclusters)
             status = "🔵" if cnt else "🔴"
-            # logger.info(f"{status} Après fuzzy: #{cnt} sous-clusters")
+            logger.info(f"{status} Après fuzzy: #{cnt} sous-clusters")
             for i, fuzzy_rows in enumerate(subclusters):
                 fuzzy_keys = keys_fuzzy + [str(i + 1)]
                 groups_after_fuzzy_match.append((fuzzy_keys, fuzzy_rows))

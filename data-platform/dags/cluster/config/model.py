@@ -120,8 +120,19 @@ class ClusterConfig(BaseModel):
         if values.get("distance_in_cluster") is None:
             values["distance_in_cluster"] = 0
 
+        if values.get("distance_in_cluster") < 0:
+            raise ValueError("La distance dans le cluster doit être positive ou nulle")
+
         if values.get("cluster_fuzzy_threshold") is None:
             values["cluster_fuzzy_threshold"] = 0.0
+
+        if (
+            values["cluster_fuzzy_threshold"] < 0
+            or values["cluster_fuzzy_threshold"] > 1
+        ):
+            raise ValueError(
+                "Le seuil de similarité pour le groupage fuzzy doit être entre 0 et 1"
+            )
 
         # SOURCE CODES
         # Si aucun code source fourni alors on inclut toutes les sources
