@@ -1,7 +1,7 @@
 from typing import Any, cast
 
 from django.conf import settings
-from django.core.cache import cache
+from django.core.cache import cache, caches
 from django.db.models import QuerySet
 from django.forms import model_to_dict
 from django.http import HttpRequest, HttpResponse
@@ -88,7 +88,8 @@ class FormulaireSearchActeursView(AbstractSearchActeursView):
 
     def _set_action_displayed(self) -> list[Action]:
         cached_action_instances = cast(
-            list[Action], cache.get_or_set("action_instances", get_action_instances)
+            list[Action],
+            caches["actions"].get_or_set("action_instances", get_action_instances),
         )
         """
         Limit to actions of the direction only in Carte mode
@@ -184,7 +185,8 @@ class FormulaireSearchActeursView(AbstractSearchActeursView):
 
         # Cast needed because of the cache
         cached_action_instances = cast(
-            list[Action], cache.get_or_set("action_instances", get_action_instances)
+            list[Action],
+            caches["actions"].get_or_set("action_instances", get_action_instances),
         )
         actions = (
             [a for a in cached_action_instances if a.code in codes]
@@ -349,7 +351,7 @@ class FormulaireSearchActeursView(AbstractSearchActeursView):
         # Cast needed because of the cache
         cached_groupe_action_instances = cast(
             QuerySet[GroupeAction],
-            cache.get_or_set(
+            caches["actions"].get_or_set(
                 "groupe_action_instances", self.get_groupe_action_instances
             ),
         )

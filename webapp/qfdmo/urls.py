@@ -14,7 +14,13 @@ from qfdmo.views.adresses import (
     getorcreate_revisionacteur,
     solution_admin,
 )
-from qfdmo.views.carte import CarteConfigView, CarteSearchActeursView
+from qfdmo.views.carte import (
+    CarteConfigView,
+    CarteSearchActeursView,
+    carte_acteurs_geojson,
+    carte_acteurs_near_geojson,
+    commune_geojson,
+)
 from qfdmo.views.configurator import AdvancedConfiguratorView, ConfiguratorView
 from qfdmo.views.formulaire import FormulaireSearchActeursView
 
@@ -26,6 +32,21 @@ urlpatterns = [
     path("carte", CarteSearchActeursView.as_view(), name="carte"),
     path("carte/<slug:slug>/", CarteConfigView.as_view(), name="carte_custom"),
     path("carte.json", CarteSearchActeursView.as_view(), name="carte_json"),
+    path(
+        "carte/acteurs.geojson",
+        carte_acteurs_geojson,
+        name="carte_acteurs_geojson",
+    ),
+    path(
+        "carte/acteurs-near.geojson",
+        carte_acteurs_near_geojson,
+        name="carte_acteurs_near_geojson",
+    ),
+    path(
+        "carte/communes/<str:citycode>.geojson",
+        commune_geojson,
+        name="carte_commune_geojson",
+    ),
     path("formulaire", FormulaireSearchActeursView.as_view(), name="formulaire"),
     path(settings.CARTE.get("GOOGLE_SEARCH_CONSOLE"), google_verification),
     path(

@@ -107,24 +107,13 @@ export async function searchAddress(
 /**
  * Search for an address in the carte and wait until acteur markers are ready.
  *
- * This is the preferred way to trigger an address search in carte tests because
- * it waits for the right network signal instead of polling the loading spinner:
- *
- * 1. Types the address text into the autocomplete input
- * 2. Registers a response listener BEFORE clicking (avoids race conditions)
- * 3. Clicks the matching suggestion → triggers a Turbo Frame fetch to /carte
- * 4. Awaits the fetch response (identified by the Turbo-Frame request header)
- * 5. Waits for MapLibre to attach .maplibregl-marker to the pinpoint elements
- *
- * Live-confirmed behavior (Playwright MCP exploration):
- * - Selecting an address sends `Turbo-Frame: <map_container_id>` in the request
- * - The response HTML (~365 KB) contains the acteur pinpoints
- * - MapLibre adds .maplibregl-marker directly to each <a data-controller="pinpoint">
- *
- * @param page       - The Playwright Page (used for network interception)
- * @param searchText - Address text to type (e.g. "Auray")
- * @param context    - DOM context for locators: either the Page or an iframe FrameLocator
- * @param options    - parentSelector / parentLocator to scope the input locator
+ * Flow (post-GeoJSON-layer migration):
+ * 1. Types the address text into the autocomplete input.
+ * 2. Awaits the Turbo Frame response that re-renders the carte for the new
+ *    address (identified by the Turbo-Frame request header).
+ * 3. Awaits the GeoJSON fetch fired by the freshly-mounted MapController to
+ *    populate the symbol layer with acteurs.
+ * 4. Confirms at least one acteur feature is rendered on the layer.
  */
 export async function searchCarteAndWaitForActeurs(
   page: Page,
@@ -139,7 +128,6 @@ export async function searchCarteAndWaitForActeurs(
   const autocompleteSelector =
     ".autocomplete-items div[data-action*='address-autocomplete#selectOption']"
 
-  // Build the input locator, respecting optional parent scoping
   const inputLocator = options.parentLocator
     ? options.parentLocator.locator(inputSelector)
     : options.parentSelector
@@ -150,7 +138,6 @@ export async function searchCarteAndWaitForActeurs(
   await inputLocator.clear()
   await inputLocator.pressSequentially(searchText, { delay: 30 })
 
-  // Wait for the autocomplete suggestion containing the search text
   const autocompleteLocator = options.parentLocator
     ? options.parentLocator.locator(autocompleteSelector)
     : options.parentSelector
@@ -160,15 +147,15 @@ export async function searchCarteAndWaitForActeurs(
   const optionWithText = autocompleteLocator.filter({ hasText: searchText })
   await expect(optionWithText.first()).toBeVisible({ timeout: TIMEOUT.DEFAULT })
 
-  // Register the network listener BEFORE clicking to avoid a race condition.
-  // The click triggers a Turbo Frame fetch to /carte.
-  // We identify the right response by the presence of the Turbo-Frame request header
-  // (its value is the map_container_id, e.g. "carte" or a custom id for embedded maps).
+  // Register both response listeners BEFORE clicking. The click triggers two
+  // sequential network calls: the Turbo Frame re-render of /carte, then the
+  // GeoJSON fetch from the newly-mounted MapController.
   const carteResponsePromise = page.waitForResponse(
     (response) => {
       const turboFrame = response.request().headers()["turbo-frame"]
       return (
         response.url().includes("/carte") &&
+        !response.url().includes("/carte/acteurs.geojson") &&
         turboFrame !== undefined &&
         turboFrame !== "" &&
         response.status() === 200
@@ -176,17 +163,30 @@ export async function searchCarteAndWaitForActeurs(
     },
     { timeout: TIMEOUT.LONG },
   )
+  const geojsonResponsePromise = page.waitForResponse(
+    (response) =>
+      response.url().includes("/carte/acteurs.geojson") && response.status() === 200,
+    { timeout: TIMEOUT.LONG },
+  )
 
   await optionWithText.first().click()
   await carteResponsePromise
+  await geojsonResponsePromise
 
-  // Wait for MapLibre to attach .maplibregl-marker to the pinpoint <a> elements.
-  // This class is added by MapLibre after reading the rendered Turbo Frame HTML,
-  // and signals that the markers are positioned on the map and ready to be clicked.
-  const acteurMarkers = context.locator(
-    '.maplibregl-marker[data-controller="pinpoint"]:not(#pinpoint-home)',
-  )
-  await expect(acteurMarkers.first()).toBeAttached({ timeout: TIMEOUT.LONG })
+  // Verify at least one acteur feature has been rendered on the symbol layer.
+  await expect
+    .poll(
+      async () =>
+        await context.locator(":root").evaluate(() => {
+          const ctrl = (window as any).stimulus?.getControllerForElementAndIdentifier(
+            document.querySelector('[data-controller~="map"]'),
+            "map",
+          )
+          return ctrl?.actorsMap?.displayedUuids?.size ?? 0
+        }),
+      { timeout: TIMEOUT.LONG },
+    )
+    .toBeGreaterThan(0)
 }
 
 /**
@@ -603,61 +603,61 @@ export async function moveMap(
 }
 
 /**
- * Click on the first acteur marker that is not obstructed by other elements.
- * Cycles through markers and attempts to click each one until successful.
- * Excludes the home marker (#pinpoint-home) which often overlaps acteur markers.
- *
- * For iframe contexts, if all normal clicks fail, falls back to using
- * dispatchEvent on the actual link element inside the marker.
+ * Click on the first acteur on the MapLibre symbol layer and wait for the
+ * detail panel to open. Synthesizes a `click` event on the layer through the
+ * MapLibre API since the symbols are painted on a WebGL canvas and aren't
+ * directly clickable through Playwright's element-level click API.
  */
 export async function clickFirstClickableActeurMarker(
   context: Page | FrameLocator,
-  options: { timeout?: number } = {},
+  // Kept for backward compatibility with callers that still pass options.
+  _options: { timeout?: number } = {},
 ) {
-  const { timeout = 2500 } = options
+  // locator(":root").evaluate works for both Page and FrameLocator;
+  // FrameLocator has no .evaluate of its own.
+  await context.locator(":root").evaluate(() => {
+    const ctrl = (window as any).stimulus?.getControllerForElementAndIdentifier(
+      document.querySelector('[data-controller~="map"]'),
+      "map",
+    )
+    const map = ctrl?.actorsMap?.map
+    if (!map) throw new Error("map controller not mounted")
+    const features = map.queryRenderedFeatures(undefined, {
+      layers: ["acteurs-layer"],
+    })
+    if (features.length === 0) throw new Error("no acteur features on the layer")
+    const feature = features[0]
+    const lngLat = feature.geometry.coordinates as [number, number]
+    const point = map.project({ lng: lngLat[0], lat: lngLat[1] })
+    map.fire("click", {
+      point,
+      lngLat: map.unproject(point),
+      originalEvent: new MouseEvent("click"),
+    })
+  })
 
-  // Select markers that contain a pinpoint controller link (not the home marker)
-  const acteurMarkers = context.locator(
-    '.maplibregl-marker[data-controller="pinpoint"]:not(#pinpoint-home)',
-  )
-
-  // Wait for at least one marker to appear before attempting clicks
-  await expect(acteurMarkers.first()).toBeVisible({ timeout: TIMEOUT.LONG })
-
-  const count = await acteurMarkers.count()
-
-  // We start from the end to ensure markers are not too close to each other
-  // because this could be harder for playwright to click
-  for (let i = count; i > 0; i--) {
-    const marker = acteurMarkers.nth(i)
-    try {
-      // Try to click without force - this will fail if element is obstructed
-      await marker.click({ timeout })
-      await expect(context.locator("#acteurDetailsPanel")).toHaveAttribute(
-        "aria-hidden",
-        "false",
-        { timeout: TIMEOUT.DEFAULT },
-      )
-      return // Success - exit the function
-    } catch {
-      // This marker is obstructed, try the next one
-      continue
-    }
-  }
-
-  // If all markers failed with normal click, try using evaluate to trigger click
-  // This is a fallback for iframe contexts where overlay detection may fail
-  const firstLink = context
-    .locator('[data-controller="pinpoint"]:not(#pinpoint-home)')
-    .first()
-
-  // Use evaluate to trigger a proper click event that will go through event handlers
-  await firstLink.evaluate((el: HTMLElement) => el.click())
   await expect(context.locator("#acteurDetailsPanel")).toHaveAttribute(
     "aria-hidden",
     "false",
     { timeout: TIMEOUT.DEFAULT },
   )
+}
+
+/**
+ * Returns how many acteur features are currently rendered on the carte's
+ * MapLibre symbol layer (post-GeoJSON-layer migration). Excludes the home
+ * marker, which is rendered separately as a DOM element.
+ */
+export async function countActeurFeaturesOnLayer(
+  context: Page | FrameLocator,
+): Promise<number> {
+  return await context.locator(":root").evaluate(() => {
+    const ctrl = (window as any).stimulus?.getControllerForElementAndIdentifier(
+      document.querySelector('[data-controller~="map"]'),
+      "map",
+    )
+    return ctrl?.actorsMap?.displayedUuids?.size ?? 0
+  })
 }
 
 /**

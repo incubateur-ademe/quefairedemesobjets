@@ -1,5 +1,6 @@
 import AutocompleteController from "./autocomplete_controller"
 
+
 class AdresseAutocompleteController extends AutocompleteController {
   controllerName: string = "address-autocomplete"
 
@@ -63,9 +64,53 @@ class AdresseAutocompleteController extends AutocompleteController {
     } else if (!("geolocation" in navigator)) {
       console.error("geolocation is not available")
     } else {
-      this.dispatchLocationToGlobalState(labelValue, latitudeValue, longitudeValue)
+      // Resolve the commune polygon (when applicable) BEFORE dispatching the
+      // location change. The bbox derived from the polygon is what makes the
+      // form submit fit the area precisely; the polygon itself is pinned to
+      // the searched citycode so the next page render can re-fetch it.
+      const citycode = option.citycode as string | undefined
+      const isMunicipality = option.type === "municipality"
+      const cityCitycode = isMunicipality && citycode ? citycode : ""
+      if (cityCitycode) {
+        this.#applyCityArea(cityCitycode)
+      } else {
+        this.#clearCityArea()
+      }
+      this.dispatchLocationToGlobalState(
+        labelValue,
+        latitudeValue,
+        longitudeValue,
+        cityCitycode,
+      )
     }
     this.hideAutocompleteList()
+  }
+
+  // Persist the citycode in the form's hidden field so it survives the Turbo
+  // Frame submit. The post-swap MapController fetches the polygon from the
+  // server (which has the bbox cached) and draws the outline. We deliberately
+  // do not fetch the polygon here: it would be a wasted round-trip — the
+  // bbox is already computed server-side at template-render time and the
+  // outline only needs to be drawn once, after the Turbo swap.
+  #applyCityArea(citycode: string): void {
+    this.#setHiddenField("search_area_citycode", citycode)
+    this.dispatch("area", { detail: { citycode } })
+  }
+
+  #clearCityArea(): void {
+    this.#setHiddenField("search_area_citycode", "")
+    this.dispatch("area", { detail: { citycode: "", bbox: null, polygon: null } })
+  }
+
+  // Find a hidden input by suffix-name within the same form (the form name is
+  // prefix-namespaced, e.g. `carte_map-search_area_citycode`).
+  #setHiddenField(suffix: string, value: string): void {
+    const form = this.element.closest("form")
+    if (!form) return
+    const input = form.querySelector<HTMLInputElement>(
+      `input[name$="-${suffix}"], input[name="${suffix}"]`,
+    )
+    if (input) input.value = value
   }
 
   async getAndStorePosition(position: GeolocationPosition) {
@@ -81,10 +126,22 @@ class AdresseAutocompleteController extends AutocompleteController {
         return
       }
 
+      // Mirror selectOption's citycode gating: only persist a citycode for
+      // municipality-typed BAN results, so the polygon outline only redraws
+      // when the user actually picked a city (not a street/housenumber).
+      const props = data.features[0].properties
+      const cityCitycode =
+        props.type === "municipality" && props.citycode ? props.citycode : ""
+      if (cityCitycode) {
+        this.#applyCityArea(cityCitycode)
+      } else {
+        this.#clearCityArea()
+      }
       this.dispatchLocationToGlobalState(
-        data.features[0].properties.label,
+        props.label,
         data.features[0].geometry.coordinates[1],
         data.features[0].geometry.coordinates[0],
+        cityCitycode,
       )
 
       this.#hideInputError()
@@ -95,8 +152,13 @@ class AdresseAutocompleteController extends AutocompleteController {
     }
   }
 
-  dispatchLocationToGlobalState(adresse: string, latitude: string, longitude: string) {
-    this.dispatch("change", { detail: { adresse, latitude, longitude } })
+  dispatchLocationToGlobalState(
+    adresse: string,
+    latitude: string,
+    longitude: string,
+    citycode: string = "",
+  ) {
+    this.dispatch("change", { detail: { adresse, latitude, longitude, citycode } })
   }
 
   keydownEnter(event: KeyboardEvent): boolean {
@@ -145,6 +207,13 @@ class AdresseAutocompleteController extends AutocompleteController {
               sub_label: feature.properties.context,
               longitude: feature.geometry.coordinates[0],
               latitude: feature.geometry.coordinates[1],
+              // The BAN feature type ("municipality" | "street" | "housenumber"
+              // | "locality" | "town"). Used to decide whether to fetch a
+              // commune polygon outline.
+              type: feature.properties.type,
+              // INSEE citycode (e.g. "56007"). Present on every BAN feature
+              // and used to resolve a commune polygon.
+              citycode: feature.properties.citycode,
             }
           })
           .concat([{ label: "Autour de moi", longitude: 9999, latitude: 9999 }])

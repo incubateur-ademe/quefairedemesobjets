@@ -21,7 +21,7 @@ from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point, Polygon
 from django.contrib.gis.geos.geometry import GEOSGeometry
 from django.contrib.gis.measure import D
-from django.core.cache import cache
+from django.core.cache import cache, caches
 from django.core.files.images import get_image_dimensions
 from django.core.validators import RegexValidator
 from django.db.models import (
@@ -365,7 +365,11 @@ class DisplayedActeurQuerySet(models.QuerySet):
         geometries = [GEOSGeometry(geojson) for geojson in geojson]
         query = Q()
         for geometry in geometries:
-            query |= Q(location__within=geometry)
+            # `__coveredby` (geography ST_CoveredBy) lets Postgres use the
+            # GiST index on the geography-typed `location` column.
+            # `__within` casts to geometry and forces a parallel seq scan
+            # (no index match), which on a France-wide query is ~1.5 s.
+            query |= Q(location__coveredby=geometry)
 
         return self.physical().filter(query).order_by("?")
 
@@ -376,7 +380,8 @@ class DisplayedActeurQuerySet(models.QuerySet):
 
         return (
             self.physical()
-            .filter(location__within=Polygon.from_bbox(bbox))
+            # See in_geojson for why __coveredby instead of __within.
+            .filter(location__coveredby=Polygon.from_bbox(bbox))
             .order_by("?")
         )
 
@@ -1431,7 +1436,8 @@ class DisplayedActeur(FinalActeur, LatLngPropertiesMixin):
     ):
         # Cast needed because of the cache
         cached_action_instances = cast(
-            List[Action], cache.get_or_set("_action_instances", get_action_instances)
+            List[Action],
+            caches["actions"].get_or_set("action_instances", get_action_instances),
         )
 
         # Work with prefetched data in memory to avoid N+1 queries

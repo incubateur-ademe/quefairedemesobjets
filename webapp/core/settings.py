@@ -168,6 +168,13 @@ CACHES = {
         "BACKEND": "django.core.cache.backends.db.DatabaseCache",
         "LOCATION": "qf_django_cache",
     },
+    # Per-process in-memory cache for hot, read-only reference data (the action
+    # / groupe_action catalog). DatabaseCache adds a SQL roundtrip on every
+    # `get_or_set`, which becomes an N+1 inside per-acteur loops.
+    "actions": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "actions",
+    },
 }
 
 X_FRAME_OPTIONS = "ALLOWALL"
