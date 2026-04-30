@@ -1,7 +1,7 @@
 """Configuration model for the clustering DAG"""
 
 from cluster.config.constants import FIELDS_PROTECTED, UNNORMALIZABLE_FIELDS
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, field_validator, model_validator
 from utils.airflow_params import airflow_params_dropdown_selected_to_ids
 
 
@@ -38,7 +38,7 @@ class ClusterConfig(BaseModel):
     cluster_intra_source_is_allowed: bool
     cluster_fields_exact: list[str]
     cluster_fields_fuzzy: list[str]
-    cluster_fuzzy_threshold: float = Field(0.5, ge=0, le=1)
+    cluster_fuzzy_threshold: float
 
     # DEDUP
     dedup_enrich_fields: list[str]
@@ -110,6 +110,8 @@ class ClusterConfig(BaseModel):
             "normalize_fields_order_unique_words",
             "dedup_enrich_exclude_sources",
             "cluster_fields_fuzzy",
+            "cluster_fields_exact",
+            "include_if_all_fields_filled",
         ]
         for k in optionals_lists_default_empty:
             if values.get(k) is None:
@@ -117,6 +119,9 @@ class ClusterConfig(BaseModel):
 
         if values.get("distance_in_cluster") is None:
             values["distance_in_cluster"] = 0
+
+        if values.get("cluster_fuzzy_threshold") is None:
+            values["cluster_fuzzy_threshold"] = 0.0
 
         # SOURCE CODES
         # Si aucun code source fourni alors on inclut toutes les sources
@@ -183,11 +188,6 @@ class ClusterConfig(BaseModel):
         # data seront normalisés, pareil pour la norma d'ordre/unicité
         if not values["normalize_fields_basic"]:
             values["normalize_fields_basic"] = values["fields_transformed"]
-        # FIXME: By default, I think it would be better to remove this default behavior
-        # but Christian asked me to keep this behavior by default
-        # "💯 Si aucun champ spécifié =  s'applique à TOUS les champs"
-        if not values["normalize_fields_order_unique_words"]:
-            values["normalize_fields_order_unique_words"] = values["fields_transformed"]
 
         # remove latitude and longitude from the fields to normalize
         for normalized_settings in [

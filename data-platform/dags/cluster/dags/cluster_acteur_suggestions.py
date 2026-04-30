@@ -2,7 +2,7 @@
 
 from airflow import DAG
 from airflow.models.param import Param
-from cluster.config.constants import FIELDS_PARENT_DATA_EXCLUDED
+from cluster.config.constants import FIELDS_PARENT_DATA_EXCLUDED, UNNORMALIZABLE_FIELDS
 from cluster.config.model import ClusterConfig
 from cluster.tasks.airflow_logic.chain_tasks import chain_tasks
 from cluster.ui import params_separators as UI_PARAMS_SEPARATORS
@@ -32,7 +32,9 @@ dropdown_acteur_types = airflow_params_dropdown_from_mapping(
     mapping_acteur_type_id_by_code
 )
 
-fields_all = django_model_fields_get(VueActeur)
+fields_all = sorted(
+    list(set(django_model_fields_get(VueActeur)) - set(UNNORMALIZABLE_FIELDS))
+)
 
 # intersection of RevisionActeur and VueActeur fields
 # because VueActeur is the source and RevisionActeur is the target
@@ -122,7 +124,7 @@ PARAMS = {
     ),
     "include_if_all_fields_filled": Param(
         ["code_postal"],
-        type="array",
+        type=["null", "array"],
         examples=fields_all,
         description_md="""**➕ INCLUSION ACTEURS**: ceux dont tous ces champs
             sont **remplis** (opérateur **ET/AND**)
@@ -203,7 +205,7 @@ PARAMS = {
 
             exemple: 'rue de la montagne rue' -> 'de la montagne rue'
 
-            💯 Si aucun champ spécifié =  s'applique à TOUS les champs
+            0️⃣ Si aucun champ spécifié = s'applique à AUCUN champ
 
             {UI_PARAMS_SEPARATORS.CLUSTERING}
             """,
@@ -216,7 +218,7 @@ PARAMS = {
     ),
     "distance_in_cluster": Param(
         0,
-        type="number",
+        type=["number", "null"],
         description_md="""Distance en mètres pour le groupage par distance
         (0 = pas de groupage par distance).
 
@@ -228,7 +230,7 @@ PARAMS = {
     ),
     "cluster_fields_exact": Param(
         ["code_postal", "ville"],
-        type="array",
+        type=["null", "array"],
         examples=fields_all,
         description_md=r"""Les champs sur lesquels on fait le groupage exact.
             exemple: ["code_postal", "ville"]""",
@@ -242,7 +244,7 @@ PARAMS = {
     ),
     "cluster_fuzzy_threshold": Param(
         0.5,
-        type="number",
+        type=["number", "null"],
         description_md=f"""Seuil de similarité pour le groupage fuzzy.
             0 = pas de similarité, 1 = similarité parfaite
 

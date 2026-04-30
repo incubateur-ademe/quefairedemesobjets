@@ -20,7 +20,7 @@ FIELDS_PROTECTED = [
     "longitude",
 ]
 
-UNNORMALIZABLE_FIELDS = ["latitude", "longitude"]
+UNNORMALIZABLE_FIELDS = ["latitude", "longitude", "location"]
 
 FIELDS_PARENT_DATA_EXCLUDED = [
     # Depending on contexte, foreign keys are sometimes
