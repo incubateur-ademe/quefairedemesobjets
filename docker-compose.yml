@@ -106,7 +106,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: ${AIRFLOW_WEBSERVER_MEMORY_LIMIT:-2G}
+          memory: 2G
     ports:
       - "8080:8080"
     healthcheck:
@@ -130,7 +130,7 @@ services:
       resources:
         limits:
           # TODO: read AIRFLOW_SCHEDULER_MEMORY_LIMIT from .env doesn't works
-          memory: ${AIRFLOW_SCHEDULER_MEMORY_LIMIT:-12G}
+          memory: 12G
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8974/health"]
       interval: 30s

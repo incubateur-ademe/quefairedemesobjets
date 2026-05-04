@@ -50,6 +50,7 @@ resource "scaleway_container" "airflow_webserver" {
     _AIRFLOW_WWW_USER_PASSWORD          = var._AIRFLOW_WWW_USER_PASSWORD
     AIRFLOW__API_AUTH__JWT_SECRET       = var.AIRFLOW__API_AUTH__JWT_SECRET
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN = var.AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+    AIRFLOW_METADATA_DB_URL             = var.AIRFLOW_METADATA_DB_URL
     DATABASE_URL                        = var.DATABASE_URL
     DB_WAREHOUSE                        = var.DB_WAREHOUSE
     AIRFLOW_CONN_WEBAPP_DB              = var.AIRFLOW_CONN_WEBAPP_DB
