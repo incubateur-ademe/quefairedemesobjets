@@ -83,3 +83,23 @@ jobs:
           tags: ${{ inputs.image_tag && format('{0}/{1}/{2}:{3}', env.SCALEWAY_REGISTRY, env.SCALEWAY_NAMESPACE, 'airflow-webserver', inputs.image_tag) || steps.airflow_webserver_meta_scaleway.outputs.tags }}
           labels: ${{ steps.airflow_webserver_meta_scaleway.outputs.labels }}
           file: data-platform/airflow-webserver.Dockerfile
+
+      # https://github.com/docker/metadata-action
+      - name: "[🟣 Scaleway] Extract metadata (tags, labels) for Docker"
+        id: airflow_dag-processor_meta_scaleway
+        uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf
+        with:
+          images: ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/airflow-dag-processor
+
+      # https://github.com/docker/build-push-action
+      - name: "[🟣 Scaleway] Build and push Docker image (airflow-dag-processor)"
+        id: build-and-push-dag-processor
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f
+        with:
+          context: .
+          cache-from: type=gha,scope=dag-processor
+          cache-to: type=gha,scope=dag-processor,mode=max
+          push: true
+          tags: ${{ inputs.image_tag && format('{0}/{1}/{2}:{3}', env.SCALEWAY_REGISTRY, env.SCALEWAY_NAMESPACE, 'airflow-dag-processor', inputs.image_tag) || steps.airflow_dag-processor_meta_scaleway.outputs.tags }}
+          labels: ${{ steps.airflow_dag-processor_meta_scaleway.outputs.labels }}
+          file: data-platform/airflow-dag-processor.Dockerfile
