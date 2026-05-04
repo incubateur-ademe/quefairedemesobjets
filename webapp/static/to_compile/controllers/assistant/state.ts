@@ -1,14 +1,22 @@
 import { Controller } from "@hotwired/stimulus"
 import isEmpty from "lodash/isEmpty"
 import AdresseAutocompleteController from "../carte/address_autocomplete_controller"
+import CarteAddressAutocompleteController from "../carte/carte_address_autocomplete_controller"
 import SearchFormController from "../carte/search_solution_form_controller"
+
+type AddressOutlet = AdresseAutocompleteController | CarteAddressAutocompleteController
 
 export default class extends Controller<HTMLElement> {
   static values = {
     location: Object,
   }
-  static outlets = ["address-autocomplete", "search-solution-form"]
+  static outlets = [
+    "address-autocomplete",
+    "carte-address-autocomplete",
+    "search-solution-form",
+  ]
   declare addressAutocompleteOutlets: Array<AdresseAutocompleteController>
+  declare carteAddressAutocompleteOutlets: Array<CarteAddressAutocompleteController>
   declare searchSolutionFormOutlets: Array<SearchFormController>
   declare locationValue: {
     adresse: string | null
@@ -23,6 +31,13 @@ export default class extends Controller<HTMLElement> {
   }
 
   addressAutocompleteOutletConnected(outlet, element) {
+    if (outlet.inputTarget.value) {
+      return
+    }
+    this.updateUIFromGlobalState(outlet)
+  }
+
+  carteAddressAutocompleteOutletConnected(outlet: CarteAddressAutocompleteController) {
     if (outlet.inputTarget.value) {
       return
     }
@@ -60,7 +75,11 @@ export default class extends Controller<HTMLElement> {
     if (updatedLocationIsNotEmpty) {
       this.locationValue = nextLocationValue
 
-      for (const outlet of this.addressAutocompleteOutlets) {
+      const allOutlets: Array<AddressOutlet> = [
+        ...this.addressAutocompleteOutlets,
+        ...this.carteAddressAutocompleteOutlets,
+      ]
+      for (const outlet of allOutlets) {
         this.updateUIFromGlobalState(outlet)
       }
     }

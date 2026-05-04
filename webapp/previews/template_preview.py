@@ -1021,6 +1021,22 @@ class AccessibilitePreview(LookbookPreview):
             context,
         )
 
+    def carte_adresse_combobox_aria(self, **kwargs):
+        """Carte address combobox following the W3C APG combobox-autocomplete-list pattern.
+
+        Renders MapForm.adresse standalone so we can verify the ARIA wiring
+        (role=combobox, aria-controls, aria-expanded, aria-activedescendant,
+        aria-autocomplete, listbox role, option role) without spinning up the
+        full carte page.
+        """
+        from qfdmo.forms import MapForm
+
+        form = MapForm()
+        return render_to_string(
+            "ui/components/carte/adresse_input_form.html",
+            {"forms": {"map": form}, "is_carte": True},
+        )
+
 
 class TestsPreview(LookbookPreview):
     """
