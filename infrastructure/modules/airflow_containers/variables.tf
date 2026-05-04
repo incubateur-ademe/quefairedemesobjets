@@ -71,6 +71,10 @@ variable "AIRFLOW__DATABASE__SQL_ALCHEMY_CONN" {
   type      = string
   sensitive = true
 }
+variable "AIRFLOW_METADATA_DB_URL" {
+  type      = string
+  sensitive = true
+}
 variable "AIRFLOW_CONN_WEBAPP_DB" {
   type      = string
   sensitive = true
@@ -156,4 +160,10 @@ variable "AIRFLOW_CONN_SCALEWAYLOGS" {
 }
 variable "AIRFLOW__CORE__ALLOWED_DESERIALIZATION_CLASSES_REGEXP" {
   type = string
+}
+variable "AIRFLOW__DAG_PROCESSOR__MIN_FILE_PROCESS_INTERVAL" {
+  type = number
+}
+variable "AIRFLOW__DAG_PROCESSOR__PARSING_PROCESSES" {
+  type = number
 }

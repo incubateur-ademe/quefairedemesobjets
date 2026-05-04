@@ -61,7 +61,7 @@ ENV VIRTUAL_ENV=/opt/airflow/.venv \
 COPY --from=python-builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
 COPY ./data-platform/dbt/ /opt/airflow/dbt/
-COPY ./scripts/ /opt/airflow/scripts/
+COPY ./data-platform/scripts/ /opt/airflow/scripts/
 
 # Classique Airflow
 COPY ./data-platform/dags/ /opt/airflow/dags/

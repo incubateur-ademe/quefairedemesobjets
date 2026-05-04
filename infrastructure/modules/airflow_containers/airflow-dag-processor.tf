@@ -30,6 +30,8 @@ resource "scaleway_container" "airflow_dag_processor" {
     AIRFLOW__CORE__FERNET_KEY                             = ""
     AIRFLOW__CORE__LOAD_EXAMPLES                          = "false"
     AIRFLOW__CORE__ALLOWED_DESERIALIZATION_CLASSES_REGEXP = var.AIRFLOW__CORE__ALLOWED_DESERIALIZATION_CLASSES_REGEXP
+    AIRFLOW__DAG_PROCESSOR__MIN_FILE_PROCESS_INTERVAL     = var.AIRFLOW__DAG_PROCESSOR__MIN_FILE_PROCESS_INTERVAL
+    AIRFLOW__DAG_PROCESSOR__PARSING_PROCESSES             = var.AIRFLOW__DAG_PROCESSOR__PARSING_PROCESSES
     AIRFLOW__LOGGING__ENCRYPT_S3_LOGS                     = "false"
     AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER              = "s3://${var.prefix}-${var.environment}-airflow"
     AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID                  = "scalewaylogs"
@@ -43,6 +45,7 @@ resource "scaleway_container" "airflow_dag_processor" {
     AIRFLOW__CORE__EXECUTION_API_SERVER_URL = "https://${scaleway_container.airflow_webserver.domain_name}/execution/"
     AIRFLOW__API_AUTH__JWT_SECRET           = var.AIRFLOW__API_AUTH__JWT_SECRET
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN     = var.AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+    AIRFLOW_METADATA_DB_URL                 = var.AIRFLOW_METADATA_DB_URL
     AIRFLOW_CONN_WEBAPP_DB                  = var.AIRFLOW_CONN_WEBAPP_DB
     AIRFLOW_CONN_SCALEWAYLOGS               = var.AIRFLOW_CONN_SCALEWAYLOGS
     DATABASE_URL                            = var.DATABASE_URL

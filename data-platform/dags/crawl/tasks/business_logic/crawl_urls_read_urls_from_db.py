@@ -37,6 +37,7 @@ def crawl_urls_read_urls_from_db(limit: int | None = None) -> pd.DataFrame:
     )
     if limit is not None:
         results = results[:limit]
+    logger.info(f"Number of URLs to crawl: {len(results)}")
     df = pd.DataFrame(results)
     df = (
         df.groupby("url")
