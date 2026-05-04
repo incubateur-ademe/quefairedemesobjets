@@ -1,18 +1,18 @@
 # À propos du jeu de données « Que Faire De Mes Objets et Déchets »
 
 Ce jeu de données ouvert recense les acteurs français de l'**économie circulaire** :
-ateliers de réparation, ressourceries, recycleries, déchèteries, points de collecte,
-boutiques de seconde main, magasins de location, etc.
+ateliers de réparation, réparateurs, ressourceries, friperie, recycleries, déchèteries,
+points de collecte, boite à livre, boutiques de seconde main, magasins de location, etc.
 
 - **Producteur** : ADEME (Agence de la transition écologique)
 - **Page du dataset** : <https://data.ademe.fr/datasets/longue-vie-aux-objets-acteurs-de-leconomie-circulaire>
 - **Identifiant data-fair** : `wvw1zecq4f4gyvonve5j0hr7`
 - **Volume** : ~ 380 000 acteurs en France
-- **Mise à jour** : régulière, voir le champ `date_de_derniere_modification` de chaque ligne
+- **Mise à jour** : hebdomadaire, voir le champ `date_de_derniere_modification` de chaque ligne
 
 ## Quand utiliser ce jeu de données
 
-Quand un utilisateur cherche, **en France**, où :
+Quand un utilisateur cherche, **en France** (inclus les territoire ultra marin), où :
 
 - réparer un objet (téléphone, vélo, électroménager, vêtement…)
 - donner, échanger ou revendre un objet dont il n'a plus besoin
@@ -37,4 +37,5 @@ Voir la ressource `qfdmo://workflow`. En résumé :
 3. Identifier l'**action** souhaitée (ressource `qfdmo://actions`).
 4. **Géocoder** l'adresse via l'API BAN (ressource `qfdmo://geocoding`).
 5. Interroger l'API ADEME `/lines` (ressource `qfdmo://search-api`).
-6. Restituer les résultats avec nom, adresse, distance, horaires, lien.
+6. Identifier les sources qui ont participées au référencement de ces acteurs (resource `qfdmo://sources`)
+7. Restituer les résultats avec nom, adresse, distance, horaires, sources, lien.

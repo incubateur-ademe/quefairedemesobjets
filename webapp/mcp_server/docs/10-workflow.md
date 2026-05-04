@@ -64,7 +64,17 @@ Voir `qfdmo://search-api`. Construire l'URL avec :
 - `sort=_geo_distance`
 - `size=10`
 
-## Étape 6 — Présenter les résultats
+## Étape 6 — Identifier les sources qui ont participer au référencement des acteurs récupérés lors de l'étape 5
+
+Chaque acteur indique les libellés des sources qui ont contribuées à son référencement dans la base de données
+dans la colonne `paternité`
+
+À part pour les sources `Que faire de mes objets et déchets` et `ADEME`,
+retrouver les sources qui ont participées au référencement de l'acteur via `qfdmo://sources` :
+
+- récupérer l'`url` de chaque sources grâce à son `libelle`
+
+## Étape 7 — Présenter les résultats
 
 Restituer jusqu'à **5 résultats**, classés par proximité, avec :
 
@@ -73,8 +83,9 @@ Restituer jusqu'à **5 résultats**, classés par proximité, avec :
 - distance approximative (calculée depuis les coordonnées si non fournie)
 - horaires (`horaires_description`) si présents
 - site web (`site_web`) si présent
-
-Mentionner toujours la source : _« Source : Que Faire De Mes Objets et Déchets / ADEME »_.
+- paternité :
+  Mentionner toujours la source : _« Source : Que Faire De Mes Objets et Déchets / ADEME »_
+  ainsi que les liens vers les sources qui ont participées au référencement de l'acteur.
 
 ## Étape 7 — Si aucun résultat
 
@@ -84,4 +95,4 @@ Si la liste est vide :
 2. **Élargir l'action** (`reparer` → ajouter aussi `donner` ou `rapporter`).
 3. Sinon, expliquer à l'utilisateur qu'aucun acteur n'est référencé près de lui
    et le rediriger vers le site officiel
-   <https://longuevieauxobjets.ademe.fr>.
+   <https://quefairedemesdechets.ademe.fr>.

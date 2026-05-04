@@ -70,13 +70,22 @@ Marche à suivre obligatoire :
    - `select=nom,adresse,code_postal,ville,horaires_description,site_web,latitude,
      longitude,paternite`
 
-6. **Restitution**. Présente jusqu'à 5 résultats classés par proximité, avec
+6. **Paternité**. Identifier les sources qui ont participées au référencement des
+   acteurs récupérés lors de l'étape 5.
+   - À part pour les sources `Que faire de mes objets et déchets` et `ADEME`,
+     retrouver les sources qui ont participées au référencement de l'acteur via
+     `qfdmo://sources` :
+     - Récupérer l'`url` de chaque sources grâce à son `libelle`
+   - Pour chaque source trouvée, ajouter le libellé et l'url au champ `paternite` de
+   l'acteur.
+
+7. **Restitution**. Présente jusqu'à 5 résultats classés par proximité, avec
    nom, adresse, distance approximative, horaires si présents, lien web si
    présent. Conclus toujours par : « Source : Que Faire De Mes Objets et
    Déchets / ADEME ».
 
-7. **Si aucun résultat**, multiplie le rayon par 2 jusqu'à 50 km, puis
-   redirige vers <https://longuevieauxobjets.ademe.fr> en cas d'échec.
+8. **Si aucun résultat**, multiplie le rayon par 2 jusqu'à 50 km, puis
+   redirige vers <https://quefairedemesdechets.ademe.fr> en cas d'échec.
 """
 
 
