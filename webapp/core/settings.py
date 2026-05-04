@@ -148,6 +148,12 @@ INSTALLED_APPS = [
 
 FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 
+# RGAA 11.10 : marque les champs facultatifs avec « (Optional) » plutôt que
+# les champs obligatoires avec un astérisque, conformément à la
+# recommandation DSFR :
+# https://www.systeme-de-design.gouv.fr/version-courante/fr/modeles/blocs-fonctionnels/formulaires#champ-obligatoire
+DSFR_MARK_OPTIONAL_FIELDS = True
+
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
