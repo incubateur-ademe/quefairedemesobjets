@@ -1,7 +1,7 @@
 """Configuration model for the clustering DAG"""
 
-from cluster.config.constants import FIELDS_PROTECTED
-from pydantic import BaseModel, Field, field_validator, model_validator
+from cluster.config.constants import FIELDS_PROTECTED, UNNORMALIZABLE_FIELDS
+from pydantic import BaseModel, field_validator, model_validator
 from utils.airflow_params import airflow_params_dropdown_selected_to_ids
 
 
@@ -38,7 +38,7 @@ class ClusterConfig(BaseModel):
     cluster_intra_source_is_allowed: bool
     cluster_fields_exact: list[str]
     cluster_fields_fuzzy: list[str]
-    cluster_fuzzy_threshold: float = Field(0.5, ge=0, le=1)
+    cluster_fuzzy_threshold: float
 
     # DEDUP
     dedup_enrich_fields: list[str]
@@ -73,6 +73,7 @@ class ClusterConfig(BaseModel):
     # Conversion des codes en ids
     include_source_ids: list[int]
     include_acteur_type_ids: list[int]
+    distance_in_cluster: int = 0
 
     # ---------------------------------------
     # Validation
@@ -100,8 +101,8 @@ class ClusterConfig(BaseModel):
     # Logique multi-champs
     @model_validator(mode="before")
     def check_model(cls, values):
-        # Fields avec default []
-        optionals = [
+        # Fields with [] as default
+        optionals_lists_default_empty = [
             "normalize_fields_basic",
             "normalize_fields_no_words_size1",
             "normalize_fields_no_words_size2_or_less",
@@ -109,16 +110,35 @@ class ClusterConfig(BaseModel):
             "normalize_fields_order_unique_words",
             "dedup_enrich_exclude_sources",
             "cluster_fields_fuzzy",
+            "cluster_fields_exact",
+            "include_if_all_fields_filled",
         ]
-        for k in optionals:
-            if not values.get(k):
+        for k in optionals_lists_default_empty:
+            if values.get(k) is None:
                 values[k] = []
+
+        if values.get("distance_in_cluster") is None:
+            values["distance_in_cluster"] = 0
+
+        if values.get("distance_in_cluster") < 0:
+            raise ValueError("La distance dans le cluster doit être positive ou nulle")
+
+        if values.get("cluster_fuzzy_threshold") is None:
+            values["cluster_fuzzy_threshold"] = 0.0
+
+        if (
+            values["cluster_fuzzy_threshold"] < 0
+            or values["cluster_fuzzy_threshold"] > 1
+        ):
+            raise ValueError(
+                "Le seuil de similarité pour le groupage fuzzy doit être entre 0 et 1"
+            )
 
         # SOURCE CODES
         # Si aucun code source fourni alors on inclut toutes les sources
         if not values.get("include_sources"):
             values["include_sources"] = []
-            values["include_source_ids"] = values["mapping_sources"].values()
+            values["include_source_ids"] = list(values["mapping_sources"].values())
         else:
             # Sinon on résout les codes sources en ids à partir de la sélection
             values["include_source_ids"] = airflow_params_dropdown_selected_to_ids(
@@ -179,7 +199,19 @@ class ClusterConfig(BaseModel):
         # data seront normalisés, pareil pour la norma d'ordre/unicité
         if not values["normalize_fields_basic"]:
             values["normalize_fields_basic"] = values["fields_transformed"]
-        if not values["normalize_fields_order_unique_words"]:
-            values["normalize_fields_order_unique_words"] = values["fields_transformed"]
+
+        # remove latitude and longitude from the fields to normalize
+        for normalized_settings in [
+            "normalize_fields_basic",
+            "normalize_fields_no_words_size1",
+            "normalize_fields_no_words_size2_or_less",
+            "normalize_fields_no_words_size3_or_less",
+            "normalize_fields_order_unique_words",
+        ]:
+            values[normalized_settings] = [
+                field
+                for field in values[normalized_settings]
+                if field not in UNNORMALIZABLE_FIELDS
+            ]
 
         return values

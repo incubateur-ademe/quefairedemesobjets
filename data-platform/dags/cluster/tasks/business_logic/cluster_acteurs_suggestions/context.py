@@ -46,21 +46,26 @@ def suggestion_context_generate(
         logger.warning(msg)
         return None
 
-    # Ensuring we have 1 exact group:
-    exacts = df_cluster.groupby(cluster_fields_exact)
-    groups = list(exacts.groups.keys())
-    if len(groups) != 1:
-        msg = f"""Champs exacts {cluster_fields_exact}={groups}
-        n'est pas 1 groupe de valeur non vide"""
-        log.preview("cluster problématique", df_cluster)
-        raise ValueError(msg)
-
     cols = ["identifiant_unique"] + cluster_fields_fuzzy
     context = {}
     context["cluster_id"] = cluster_id
-    # Make sure groups[0] is always a tuple, even with a single field
-    group_val = groups[0] if isinstance(groups[0], tuple) else (groups[0],)
-    context["exact_match"] = dict(zip(cluster_fields_exact, group_val))  # type: ignore
+
+    if cluster_fields_exact:
+        # Ensuring we have 1 exact group:
+        exacts = df_cluster.groupby(cluster_fields_exact)
+        groups = list(exacts.groups.keys())
+        if len(groups) != 1:
+            msg = f"""Champs exacts {cluster_fields_exact}={groups}
+            n'est pas 1 groupe de valeur non vide"""
+            log.preview("cluster problématique", df_cluster)
+            raise ValueError(msg)
+
+        # Make sure groups[0] is always a tuple, even with a single field
+        group_val = groups[0] if isinstance(groups[0], tuple) else (groups[0],)
+        context["exact_match"] = dict(zip(cluster_fields_exact, group_val))
+    else:
+        context["exact_match"] = {}
+
     context["fuzzy_details"] = df_cluster[cols].to_dict(orient="records")
 
     return context

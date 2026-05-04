@@ -58,6 +58,7 @@ def cluster_acteurs_clusters_prepare_wrapper(ti) -> None:
         fields_protected=config.fields_protected,
         fields_transformed=config.fields_transformed,
         include_source_ids=config.include_source_ids,
+        distance_in_cluster=config.distance_in_cluster,
     )
 
     if df.empty:

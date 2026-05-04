@@ -3,7 +3,6 @@ import pytest
 from cluster.tasks.business_logic.cluster_acteurs_clusters_prepare import (
     cluster_acteurs_clusters_prepare,
 )
-
 from unit_tests.qfdmo.acteur_factory import (
     ActeurTypeFactory,
     DisplayedActeurFactory,
@@ -50,6 +49,7 @@ class TestClusterActeursClustersDisplay:
             fields_protected=["source_id"],
             fields_transformed=["ville"],
             include_source_ids=[s1.id, s2.id],
+            distance_in_cluster=0,
         )
         assert df_clusters.empty
 
@@ -91,6 +91,7 @@ class TestClusterActeursClustersDisplay:
             fields_protected=["source_id"],
             fields_transformed=["ville"],
             include_source_ids=[s1.id, s2.id],
+            distance_in_cluster=0,
         )
         assert len(df_clusters) == 2
         assert df_clusters["cluster_id"].nunique() == 1
@@ -169,6 +170,7 @@ class TestClusterActeursClustersDisplay:
             fields_protected=["source_id"],
             fields_transformed=["ville"],
             include_source_ids=[s_included.id],
+            distance_in_cluster=0,
         )
 
         assert df_clusters["cluster_id"].nunique() == 1

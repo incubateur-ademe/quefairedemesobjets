@@ -6,116 +6,131 @@ from cluster.tasks.business_logic.cluster_acteurs_clusters import (
     cluster_cols_group_fuzzy,
     score_tuples_to_clusters,
     similarity_matrix_to_tuples,
+    split_clusters_by_distance,
 )
 
 
 def df_clusters_to_dict(df: pd.DataFrame) -> dict[str, list[str]]:
-    """Utilitaire pour faciliter le test des résultats du clustering
-    en convertissant la DataFrame de clusters en dictionnaire
-    cluster_id -> liste des identifiants uniques
+    """Helper to make clustering outputs easier to test
+    by converting the clusters DataFrame into a dictionary:
+    cluster_id -> list of unique identifiers
     """
     return df.groupby("cluster_id")["identifiant_unique"].apply(list).to_dict()
 
 
 class TestClusterActeursClusters:
 
-    # -----------------------------------------------
-    # Tests de base
-    # -----------------------------------------------
-
-    @pytest.fixture(scope="session")
-    def df_basic(self):
-        return pd.DataFrame(
+    def test_can_clusterize_exact_only(self):
+        df = pd.DataFrame(
             {
-                "identifiant_unique": [
-                    "id1",
-                    "id2",
-                    "id3",
-                    "id4-a",
-                    "id4-b",
-                    "id5-a",
-                    "id5-b",
-                ],
-                "source_id": range(1, 8),
-                "source_code": ["s1", "s2", "s3", "s4", "s5", "s6", "s7"],
-                "source_codes": [
-                    ["s1"],
-                    ["s2"],
-                    ["s3"],
-                    ["s4"],
-                    ["s5"],
-                    ["s6"],
-                    ["s7"],
-                ],
-                "code_departement": ["75", "75", "75", "75", "75", "53", "53"],
-                "code_postal": [
-                    "75000",
-                    "75000",
-                    "75000",
-                    "75000",
-                    "75000",
-                    "53000",
-                    "53000",
-                ],
-                "ville": [
-                    "Paris",
-                    "Paris",
-                    "Paris",
-                    "Pâris Typo",
-                    "Pâris Typo",
-                    "Laval",
-                    "Laval",
-                ],
-                "nom": [
-                    "decheterie 1",
-                    "decheterie 2",
-                    "decheterie 3",
-                    "decheterie 4",
-                    "decheterie 5",
-                    "decheterie 6",
-                    "decheterie 7",
-                ],
+                "identifiant_unique": ["id1", "id2", "id3", "id4"],
+                "source_id": [1, 2, 3, 4],
+                "source_code": ["s1", "s2", "s3", "s4"],
+                "source_codes": [["s1"], ["s2"], ["s3"], ["s4"]],
+                "ville": ["Paris", "Paris", "Laval", "Laval"],
             }
         )
-
-    def test_cols_group_exact(self, df_basic):
-
         df_clusters = cluster_acteurs_clusters(
-            df_basic,
+            df=df,
             cluster_fields_exact=["ville"],
             cluster_fields_fuzzy=[],
             cluster_fuzzy_threshold=0.5,
             cluster_intra_source_is_allowed=True,
         )
-        assert len(df_clusters) == len(df_basic)
-        assert df_clusters["cluster_id"].nunique() == 3
-        clusters = df_clusters_to_dict(df_clusters)
-        assert clusters == {
-            "paris": ["id1", "id2", "id3"],
-            "paris-typo": ["id4-a", "id4-b"],
-            "laval": ["id5-a", "id5-b"],
-        }
+        assert df_clusters["cluster_id"].nunique() == 2
+        clusters = [
+            sorted(group["identifiant_unique"].tolist())
+            for _, group in df_clusters.groupby("cluster_id")
+        ]
+        assert sorted(clusters) == [["id1", "id2"], ["id3", "id4"]]
+
+    def test_can_clusterize_fuzzy_only(self):
+        df = pd.DataFrame(
+            {
+                "identifiant_unique": ["id0", "id1", "id2", "id3"],
+                "source_id": [1, 2, 3, 4],
+                "source_code": ["s1", "s2", "s3", "s4"],
+                "source_codes": [["s1"], ["s2"], ["s3"], ["s4"]],
+                "nom": [
+                    "auchan magasin",
+                    "auchan boutique",
+                    "carrefour depot",
+                    "carrefour entrepot",
+                ],
+            }
+        )
+        df_clusters = cluster_acteurs_clusters(
+            df=df,
+            cluster_fields_exact=[],
+            cluster_fields_fuzzy=["nom"],
+            cluster_fuzzy_threshold=0.2,
+            cluster_intra_source_is_allowed=True,
+        )
+        assert df_clusters["cluster_id"].nunique() == 2
+        clusters = [
+            sorted(group["identifiant_unique"].tolist())
+            for _, group in df_clusters.groupby("cluster_id")
+        ]
+        assert sorted(clusters) == [["id0", "id1"], ["id2", "id3"]]
+
+    def test_can_clusterize_distance_only(self):
+        df = pd.DataFrame(
+            {
+                "identifiant_unique": ["id0", "id1", "id2", "id3"],
+                "source_id": [1, 2, 3, 4],
+                "source_code": ["s1", "s2", "s3", "s4"],
+                "source_codes": [["s1"], ["s2"], ["s3"], ["s4"]],
+                "latitude": [48.8566, 48.8567, 43.2965, 43.2966],
+                "longitude": [2.3522, 2.3522, 5.3698, 5.3698],
+            }
+        )
+        df_clusters = cluster_acteurs_clusters(
+            df=df,
+            cluster_fields_exact=[],
+            cluster_fields_fuzzy=[],
+            cluster_fuzzy_threshold=0.5,
+            cluster_intra_source_is_allowed=True,
+            distance_in_cluster=100,
+        )
+        assert df_clusters["cluster_id"].nunique() == 2
+        clusters = [
+            sorted(group["identifiant_unique"].tolist())
+            for _, group in df_clusters.groupby("cluster_id")
+        ]
+        assert sorted(clusters) == [["id0", "id1"], ["id2", "id3"]]
+
+    @pytest.fixture(scope="session")
+    def df_basic(self):
+        return pd.DataFrame(
+            {
+                "identifiant_unique": ["id1", "id2", "id3", "id4"],
+                "source_id": [1, 2, 3, 4],
+                "source_code": ["s1", "s2", "s3", "s4"],
+                "source_codes": [["s1"], ["s2"], ["s3"], ["s4"]],
+                "ville": ["Paris", "Paris", "Laval", "Laval"],
+            }
+        )
 
     def test_validation_cols_group_exact(self, df_basic):
-        """On s'assure que la fonction soulève une exception
-        pour les colonnes manquantes dans le DataFrame"""
+        """Ensure the function raises when required columns are missing."""
         with pytest.raises(ValueError, match="'existe_pas' pas dans le DataFrame"):
             cluster_acteurs_clusters(df_basic, cluster_fields_exact=["existe_pas"])
 
     def test_validation_cols_group_fuzzy(self, df_basic):
-        """On s'assure que la fonction soulève une exception
-        pour les colonnes manquantes dans le DataFrame"""
+        """Ensure the function raises when required columns are missing."""
         with pytest.raises(ValueError, match="'existe_pas' pas dans le DataFrame"):
             cluster_acteurs_clusters(df_basic, cluster_fields_fuzzy=["existe_pas"])
 
     # -----------------------------------------------
-    # Tests sur la suppression des clusters de taille 1
+    # Tests for removing clusters of size 1
     # -----------------------------------------------
 
     @pytest.fixture(scope="session")
     def df_some_clusters_of_one(self):
-        """Seules la première et la dernière ligne sont à grouper
-        les autres sont des clusters de 1 et donc à supprimer"""
+        """Only the first and last rows should be grouped.
+
+        The others are singletons (clusters of size 1) and should therefore be removed.
+        """
         return pd.DataFrame(
             {
                 "identifiant_unique": [
@@ -135,8 +150,7 @@ class TestClusterActeursClusters:
         )
 
     def test_clusters_of_one_are_removed(self, df_some_clusters_of_one):
-        """On vérifie qu'on supprime les clusters de taille 1 mais
-        pas les autres de taille 2+"""
+        """Check that clusters of size 1 are removed, but not clusters of size 2+."""
         df_clusters = cluster_acteurs_clusters(
             df_some_clusters_of_one,
             cluster_fields_exact=["ville"],
@@ -151,7 +165,7 @@ class TestClusterActeursClusters:
         }
 
     # -----------------------------------------------
-    # Tests sur cluster_fields_fuzzy
+    # Tests for cluster_fields_fuzzy
     # -----------------------------------------------
     @pytest.fixture(scope="session")
     def df_cols_group_fuzzy(self):
@@ -169,7 +183,7 @@ class TestClusterActeursClusters:
                     "centre carrefour",
                     "artiste peintre",
                     "centre commercial carrefour",
-                    # ignoré car seul et on ne garde pas les clusters de taille 1
+                    # ignored because it is alone and we do not keep clusters of size 1
                     "je suis tout seul :(",
                 ],
             }
@@ -179,7 +193,7 @@ class TestClusterActeursClusters:
 
         df_clusters = cluster_acteurs_clusters(
             df_cols_group_fuzzy,
-            # code_postal est en dur dans la fonction de clustering
+            # code_postal is hardcoded in the clustering function
             cluster_fields_exact=["code_postal"],
             cluster_fields_fuzzy=["nom"],
             cluster_fuzzy_threshold=0.7,
@@ -204,8 +218,7 @@ class TestClusterActeursClusters:
         }
 
     def test_parent_not_discarded(self):
-        """On vérifie que les parents ne sont pas ignorés
-        si les enfants sont ignorés"""
+        """Check that parents are not discarded when children are discarded."""
         df_norm = pd.DataFrame(
             [
                 {
@@ -265,10 +278,10 @@ class TestClusterActeursClusters:
         ]
 
     # -----------------------------------------------
-    # Tests sur la séparation des clusters
+    # Tests for splitting clusters
     # -----------------------------------------------
     @pytest.mark.django_db
-    def test_cluster_instra_source(self):
+    def test_cluster_intra_source(self):
         from unit_tests.qfdmo.acteur_factory import (
             ActeurTypeFactory,
             DisplayedActeurFactory,
@@ -338,9 +351,9 @@ class TestClusterColsGroupFuzzy:
             "col1": [
                 # cluster 1
                 "apple orange",
-                "orphan1",  # ignoré
-                "orphan2",  # ignoré
-                "orphan3",  # ignoré
+                "orphan1",  # ignored
+                "orphan2",  # ignored
+                "orphan3",  # ignored
                 # cluster 1
                 "apple orange blue",
                 "apple orange blue",
@@ -348,9 +361,8 @@ class TestClusterColsGroupFuzzy:
                 "",
             ],
             "col2": [
-                # Une colonne en sandwich avec des valeurs identiques
-                # pour montrer que la fonction ne se base pas
-                # sur une seule colonne
+                # A "sandwich" column with identical values to show the function
+                # does not rely on a single column.
                 "fruit salad",
                 "fruit salad",
                 "fruit salad",
@@ -433,15 +445,17 @@ class TestScoreTuplesToClusters:
             (1, 2, 0.6),
             (2, 3, 0.6),
             (4, 5, 0.6),
-            (5, 6, 0.3),  # ignoré car en dessous du seuil
+            (5, 6, 0.3),  # ignored because it is below the threshold
         ]
         threshold = 0.5
         expected = [[1, 2, 3], [4, 5]]
         assert score_tuples_to_clusters(data, threshold) == expected
 
     def test_score_tuples_to_clusters_applies_sorting(self):
-        """On vérifie que les clusters sont triés par score décroissant
-        même si la data de source n'est pas triée"""
+        """Check that clusters are sorted by decreasing score.
+
+        This should hold even if the input data is not sorted.
+        """
         data = [
             (5, 6, 0.3),
             (1, 2, 0.6),
@@ -526,3 +540,60 @@ class TestClusterExcludeIntraSource:
             cluster_intra_source_is_allowed=False,
         )
         assert df_clusters["cluster_id"].nunique() == 3
+
+
+class TestSplitClustersByDistance:
+
+    def test_returns_empty_for_cluster_of_one(self):
+        df = pd.DataFrame(
+            [
+                {"identifiant_unique": "a", "latitude": 48.8566, "longitude": 2.3522},
+            ]
+        )
+        assert split_clusters_by_distance(df_src=df, distance_threshold=100) == []
+
+    def test_raises_if_missing_coordinates_columns(self):
+        df = pd.DataFrame([{"identifiant_unique": "a"}, {"identifiant_unique": "b"}])
+        with pytest.raises(ValueError, match="no latitude or longitude columns"):
+            split_clusters_by_distance(df_src=df, distance_threshold=100)
+
+    def test_drops_rows_with_missing_coordinates_and_returns_empty_if_not_enough_left(
+        self,
+    ):
+        df = pd.DataFrame(
+            [
+                {"identifiant_unique": "a", "latitude": None, "longitude": 2.3522},
+                {"identifiant_unique": "b", "latitude": 48.8566, "longitude": None},
+                {"identifiant_unique": "c", "latitude": 48.8566, "longitude": 2.3522},
+            ]
+        )
+        assert split_clusters_by_distance(df_src=df, distance_threshold=100) == []
+
+    def test_splits_into_two_components(self):
+        # (a,b) are close (~11m), (c,d) are close (~11m), but the 2 groups are far away
+        df = pd.DataFrame(
+            [
+                {"identifiant_unique": "a", "latitude": 48.8566, "longitude": 2.3522},
+                {"identifiant_unique": "b", "latitude": 48.8567, "longitude": 2.3522},
+                {"identifiant_unique": "c", "latitude": 43.2965, "longitude": 5.3698},
+                {"identifiant_unique": "d", "latitude": 43.2966, "longitude": 5.3698},
+            ]
+        )
+        subclusters = split_clusters_by_distance(df_src=df, distance_threshold=100)
+        assert len(subclusters) == 2
+
+        clusters = [sorted(sc["identifiant_unique"].tolist()) for sc in subclusters]
+        assert sorted(clusters) == [["a", "b"], ["c", "d"]]
+
+    def test_chain_connectivity_creates_one_component(self):
+        # a<->b close, b<->c close, but a<->c can be further away
+        df = pd.DataFrame(
+            [
+                {"identifiant_unique": "a", "latitude": 48.8566, "longitude": 2.3522},
+                {"identifiant_unique": "b", "latitude": 48.8567, "longitude": 2.3522},
+                {"identifiant_unique": "c", "latitude": 48.8568, "longitude": 2.3522},
+            ]
+        )
+        subclusters = split_clusters_by_distance(df_src=df, distance_threshold=15)
+        assert len(subclusters) == 1
+        assert sorted(subclusters[0]["identifiant_unique"].tolist()) == ["a", "b", "c"]
