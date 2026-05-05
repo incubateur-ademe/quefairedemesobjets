@@ -1021,6 +1021,73 @@ class AccessibilitePreview(LookbookPreview):
             context,
         )
 
+    def A11Y_2_skip_link(self, **kwargs):
+        """RGAA 12.7 — lien d'évitement (skip link) sur le layout base.html.
+
+        Le composant DSFR `dsfr_skiplinks` est désormais rendu dans
+        `webapp/templates/ui/layout/base.html` (carte, configurateur,
+        infotri). Le `<main>` du layout porte `id="content"` et
+        `role="main"`, ce qui correspond à la cible définie dans le
+        context processor global.
+        """
+        return render_to_string(
+            "ui/components/accessibilite/skip_link_demo.html",
+            {"skiplinks": [{"link": "#content", "label": "Contenu"}]},
+        )
+
+    def A11Y_1_aria_landmarks(self, **kwargs):
+        """RGAA 9.2 / 12.6 — landmarks ARIA banner / main / navigation.
+
+        Démontre les corrections : `<main>` unique avec `role="main"`,
+        `<header role="banner">` sur les en-têtes carte/formulaire,
+        `<nav aria-label>` autour du surfooter, et conversion en
+        `<section aria-label>` des `<main>` imbriqués (mode_carte,
+        mode_liste, formulaire/main, infotri).
+        """
+        return render_to_string(
+            "ui/components/accessibilite/landmarks_demo.html",
+        )
+
+    def A11Y_8_iframe_titres(self, **kwargs):
+        """RGAA 2.2 — titres d'iframes distincts par route.
+
+        Le helper `resolveIframeTitle` (iframe_functions.ts) attribue
+        désormais un titre par défaut différent selon la route :
+        carte, formulaire, infotri, assistant. Les embedders peuvent
+        surcharger via l'attribut `data-title` du `<script>`, utile
+        notamment sur la page Manteau (P09) qui embarque deux cartes.
+        """
+        return render_to_string(
+            "ui/components/accessibilite/iframe_titles_demo.html",
+        )
+
+    def A11Y_11_svg_decoratifs(self, **kwargs):
+        """RGAA 1.2 — SVG décoratifs marqués aria-hidden=true.
+
+        Les SVG logos (République Française, ADEME, QFDMOD mini), le
+        SVG ADEME inline du header et l'illustration empty state de la
+        carte mode liste portent maintenant `aria-hidden="true"
+        focusable="false"`, conformément aux recommandations RGAA 1.2
+        sur les images sans valeur informative.
+        """
+        return render_to_string(
+            "ui/components/accessibilite/svg_decoratifs_demo.html",
+        )
+
+    def A11Y_13_liens_explicites(self, **kwargs):
+        """RGAA 6.1 — intitulés de liens explicites.
+
+        Deux corrections :
+        1. Le lien des logos du header reçoit un `<span class="qf-sr-only">`
+           reprenant le `title` (« Accueil — ... »), pour fournir un
+           contenu textuel accessible aux lecteurs d'écran.
+        2. Le lien « disponible librement » de la modale d'intégration
+           voit son `title` réécrit pour reprendre l'intitulé visible.
+        """
+        return render_to_string(
+            "ui/components/accessibilite/liens_explicites_demo.html",
+        )
+
 
 class TestsPreview(LookbookPreview):
     """
