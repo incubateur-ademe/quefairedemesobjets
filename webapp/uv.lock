@@ -449,16 +449,16 @@ wheels = [
 
 [[package]]
 name = "django-import-export"
-version = "4.3.9"
+version = "4.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "diff-match-patch" },
     { name = "django" },
     { name = "tablib" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d0/4c/caaf012e437faa260e7aee97847279e80e088855d2574e08aa9282f47a6d/django_import_export-4.3.9.tar.gz", hash = "sha256:966e01c2cbd6acda710a0a0097cd99b28d4f9883abbfbbf712f34a2e8eea8809", size = 2226734, upload-time = "2025-07-21T19:17:36.519Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/22/26/279bc8e6cb2c83d1b5dcdca07e932207c3352af11c6d305d6964a2d03ccc/django_import_export-4.4.0.tar.gz", hash = "sha256:9900e99c89027594941074fb4cd63a5f2964975e239021765c0f066003fcd412", size = 2237714, upload-time = "2026-01-10T20:57:35.128Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/33/20/8502f3985b91befb3e771c258b7e2a3fa916bdb834e960da307ecc359d66/django_import_export-4.3.9-py3-none-any.whl", hash = "sha256:3d83b1c28f30935240ef9d914a1d4845c6fcaf5c7e5454889dda800eb5d374fb", size = 148545, upload-time = "2025-07-21T19:17:35.035Z" },
+    { url = "https://files.pythonhosted.org/packages/2f/e0/f4aa6d2374cc6b53b23f36bd0d5814e1db2769b25931b9908723fa295bb0/django_import_export-4.4.0-py3-none-any.whl", hash = "sha256:2d9b234c0f024d3377167f4d9c5a506e095c5bad98e06d30700e1d0752829e3d", size = 157449, upload-time = "2026-01-10T20:57:33.141Z" },
 ]
 
 [package.optional-dependencies]
@@ -1789,7 +1789,7 @@ requires-dist = [
     { name = "django-cors-headers", specifier = ">=4.6.0,<5" },
     { name = "django-dsfr", git = "https://github.com/fabienheureux/django-dsfr?rev=d26ab6f77014b04c43c4c54f694111179d1de0ef" },
     { name = "django-extensions", specifier = "~=4.1" },
-    { name = "django-import-export", extras = ["xls", "xlsx"], specifier = ">=4.3.8,<5" },
+    { name = "django-import-export", extras = ["xls", "xlsx"], specifier = ">=4.4.0,<5" },
     { name = "django-lookbook", specifier = ">=1.0.2,<2" },
     { name = "django-ninja", specifier = ">=1.6.2,<2" },
     { name = "django-storages", specifier = ">=1.14.6,<2" },
