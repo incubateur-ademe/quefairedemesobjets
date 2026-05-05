@@ -22,7 +22,7 @@ jobs:
       SCW_DEFAULT_REGION: fr-par
     steps:
     - name: Setup Scaleway CLI
-      uses: scaleway/action-scw@be2696f261325a78354eda14988c80405f33e082
+      uses: scaleway/action-scw@2e34a1eb35cf3cac627f24643a101fea269cbd83
 
     # See https://www.scaleway.com/en/docs/serverless-containers/api-cli/deploy-container-cli/
     - name: Update image
