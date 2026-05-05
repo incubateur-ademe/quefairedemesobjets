@@ -1,4 +1,4 @@
-{% load analytics_tags share_tags static %}
+{% load analytics_tags dsfr_tags share_tags static %}
 <!DOCTYPE html>
 <html
     lang="fr"
@@ -56,7 +56,10 @@
         data-action="address-autocomplete:change->state#setLocation"
         {% if STIMULUS_DEBUG %}data-stimulus-debug="true"{% endif %}
     >
-        <main id="solutions" class="qf-h-full qf-overflow-y-auto qf-overflow-x-hidden">
+        {# Skip link for accessibility - using DSFR component (RGAA 12.7) #}
+        {% dsfr_skiplinks skiplinks %}
+
+        <main id="content" class="qf-h-full qf-overflow-y-auto qf-overflow-x-hidden">
             <noscript>
                 <div class="fr-container fr-my-3w">
                     <div class="fr-alert fr-alert--error">
