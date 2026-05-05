@@ -83,6 +83,7 @@ urlpatterns = (
     + [
         path("admin/", admin.site.urls),
         path("api/", api.urls),
+        path("", include("mcp_server.urls")),
         path("robots.txt", robots_txt),
         path("embed/backlink", backlink),
         path("", include(("qfdmo.urls", "qfdmo"), namespace="qfdmo")),
