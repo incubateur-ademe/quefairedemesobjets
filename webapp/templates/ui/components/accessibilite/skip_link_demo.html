@@ -1,0 +1,20 @@
+{% load dsfr_tags %}
+<div class="fr-container fr-py-3w">
+    <h2 class="fr-h3">A11Y-2 — Skip link</h2>
+    <p class="fr-text">
+        Le composant DSFR <code>dsfr_skiplinks</code> est désormais rendu en
+        début de <code>&lt;body&gt;</code> dans le layout
+        <code>webapp/templates/ui/layout/base.html</code>. Il offre un lien
+        d'évitement vers le contenu principal de la page (RGAA 12.7).
+    </p>
+
+    {% dsfr_skiplinks skiplinks %}
+
+    <main id="content" role="main" class="fr-mt-3w">
+        <p>
+            Pour visualiser le lien, faites <kbd>Tab</kbd> depuis cette zone
+            d'aperçu. Il devient visible uniquement au focus, conformément
+            au comportement DSFR.
+        </p>
+    </main>
+</div>
