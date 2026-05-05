@@ -20,7 +20,6 @@ from data.models.changes import (
     ChangeActeurUpdateParentId,
     ChangeActeurVerifyRevision,
 )
-from utils.django import django_setup_full
 
 django_setup_full()
 

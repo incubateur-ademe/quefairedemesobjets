@@ -4,8 +4,9 @@ import logging
 
 from airflow import DAG
 from airflow.providers.standard.operators.python import PythonOperator
-from clone.config import TASKS, XCOMS, CloneConfig
-from clone.config.xcoms import xcom_push
+from clone.config.models import CloneConfig
+from clone.config.tasks import TASKS
+from clone.config.xcoms import XCOMS, xcom_push
 from clone.tasks.business_logic.clone_config_create import clone_config_create
 from utils import logging_utils as log
 
