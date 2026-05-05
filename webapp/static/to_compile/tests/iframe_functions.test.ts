@@ -54,7 +54,7 @@ describe("getIframeAttributesAndExtra function tests", () => {
       scrolling: "no",
       src: expectedSrc,
       style: "overflow: hidden; max-width: 100%; width: 100%; height: 700px;",
-      title: "Que faire de mes objets et déchets",
+      title: "Carte Longue Vie aux Objets — Où réparer ou déposer mon objet",
     })
   }
 
@@ -169,5 +169,51 @@ describe("getIframeAttributesAndExtra function tests", () => {
     expect(iframeAttributes.src).toBe(
       `${process.env.BASE_URL}/infotri?ref=aHR0cDovL2xvY2FsaG9zdC8%3D&categorie=tous&consigne=1`,
     )
+  })
+
+  describe("iframe title (RGAA 2.2)", () => {
+    test("should set the carte title by default", () => {
+      const [iframeAttributes] = getIframeAttributesAndExtra(scriptTag, "carte", {
+        height: "700px",
+      })
+      expect(iframeAttributes.title).toBe(
+        "Carte Longue Vie aux Objets — Où réparer ou déposer mon objet",
+      )
+    })
+
+    test("should set the formulaire title by default", () => {
+      const [iframeAttributes] = getIframeAttributesAndExtra(scriptTag, "formulaire")
+      expect(iframeAttributes.title).toBe(
+        "Longue Vie aux Objets — Formulaire de recherche de solutions de réemploi",
+      )
+    })
+
+    test("should set the infotri title by default", () => {
+      const [iframeAttributes] = getIframeAttributesAndExtra(scriptTag, "infotri")
+      expect(iframeAttributes.title).toBe(
+        "Info-tri — Configurateur de consignes de tri",
+      )
+    })
+
+    test("should fall back to the generic title for unknown routes", () => {
+      const [iframeAttributes] = getIframeAttributesAndExtra(scriptTag, "dechet")
+      expect(iframeAttributes.title).toBe("Que faire de mes objets et déchets")
+    })
+
+    test("should let embedders override the title via data-title", () => {
+      setScriptDataset({ title: "Carte — Où apporter mon manteau" })
+      const [iframeAttributes] = getIframeAttributesAndExtra(scriptTag, "carte")
+      expect(iframeAttributes.title).toBe("Carte — Où apporter mon manteau")
+      expect(iframeAttributes.src).not.toMatch(/title=/)
+    })
+
+    test("should resolve the route prefix when a slug is appended", () => {
+      setScriptDataset({ slug: "cyclevia" })
+      const [iframeAttributes] = getIframeAttributesAndExtra(scriptTag, "carte")
+      expect(iframeAttributes.title).toBe(
+        "Carte Longue Vie aux Objets — Où réparer ou déposer mon objet",
+      )
+      expect(iframeAttributes.src).toContain("/carte/cyclevia")
+    })
   })
 })
