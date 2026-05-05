@@ -1,9 +1,12 @@
 # Codes d'action
 
 Les actions correspondent aux **services** qu'un acteur de l'économie
-circulaire propose. Dans le jeu de données ADEME, chaque action est une
-**colonne** dont la valeur est la liste des sous-catégories d'objet
-concernées (séparateur `|`).
+circulaire propose. Ce serveur MCP les expose via le tool `list_actions`,
+optionnellement filtrable par mot-clé :
+
+```text
+list_actions(query="reparer")
+```
 
 | Code               | Libellé            | Quand l'utiliser                                                                                                                                       |
 | ------------------ | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -25,8 +28,5 @@ concernées (séparateur `|`).
 - `mettreenlocation` ne contient pas d'**espace**.
 - Plusieurs actions peuvent être pertinentes pour une même intention :
   pour « se débarrasser », essayer `rapporter` puis `donner` puis `trier`.
-- Filtre type `qs` :
-  - `qs=reparer:"velo"` → acteurs réparant les vélos
-  - `qs=donner:"vetement"` → acteurs acceptant les dons de vêtements
-  - `qs="mettreenlocation":"materiel_de_sport_hors_velo"` → acteurs proposant
-    de mettre en location du matériel de sport
+- C'est cette valeur qui est passée au paramètre `action` de `search_actors`
+  ou `find_circular_solution`.

@@ -6,6 +6,9 @@ L'objectif est de répondre à une question du type :
 - « Quelles sont les boutiques de seconde main près de chez moi ? »
 - « Où puis-je jeter un pot de peinture à moitié plein ? »
 
+Toutes les étapes ci-dessous se font **uniquement via les tools MCP**.
+N'invoque jamais directement les URLs des APIs upstream.
+
 ## Étape 1 — Obtenir la localisation (avec consentement)
 
 Demander explicitement à l'utilisateur :
@@ -20,8 +23,9 @@ peut l'utiliser sans redemander.
 
 ## Étape 2 — Identifier la sous-catégorie de l'objet
 
-Mapper l'objet décrit par l'utilisateur sur l'un des **codes de sous-catégorie**
-listés dans la ressource `qfdmo://sous-categories`.
+Appeler `list_sous_categories(query=<mot-clé>)` pour obtenir le code à utiliser.
+
+Quelques exemples :
 
 - « téléphone », « smartphone » → `smartphone_tablette_et_console`
 - « vélo » → `velo`
@@ -33,7 +37,7 @@ ou `ecran` ?), poser une question de clarification.
 
 ## Étape 3 — Identifier l'action
 
-Sélectionner une action parmi celles listées dans `qfdmo://actions` :
+Appeler `list_actions(query=<mot-clé>)` pour choisir le code d'action.
 
 | Intention exprimée                           | Code action            |
 | -------------------------------------------- | ---------------------- |
@@ -43,56 +47,56 @@ Sélectionner une action parmi celles listées dans `qfdmo://actions` :
 | « acheter d'occasion »                       | `acheter`              |
 | « revendre »                                 | `revendre`             |
 | « louer un objet pour soi »                  | `emprunter` ou `louer` |
-| « mettre en location »                       | `mettre en location`   |
+| « mettre en location »                       | `mettreenlocation`     |
 | « échanger »                                 | `echanger`             |
 | « prêter à quelqu'un »                       | `preter`               |
 
 En cas de doute (« j'ai un vieux frigo dont je veux me débarrasser »), proposer
 plusieurs actions et laisser l'utilisateur choisir.
 
-## Étape 4 — Géocoder l'adresse
+## Étape 4 — Rechercher les acteurs
 
-Voir `qfdmo://geocoding`. Appeler l'API BAN pour transformer l'adresse en
-couple `(longitude, latitude)`.
+Privilégier le tool composé `find_circular_solution` :
 
-## Étape 5 — Interroger l'API ADEME `/lines`
+```text
+find_circular_solution(
+  address="Paris",
+  action="reparer",
+  sous_categorie="smartphone_tablette_et_console",
+  radius_meters=5000  # optionnel, défaut 5000
+)
+```
 
-Voir `qfdmo://search-api`. Construire l'URL avec :
+Ce tool :
 
-- `geo_distance=<lon>:<lat>:<rayon_metres>` (typiquement 5000 à 20000 m)
-- `qs=<action>:"<sous_categorie>"` (ex. `qs=reparer:"smartphone_tablette_et_console"`)
-- `sort=_geo_distance`
-- `size=10`
+1. géocode l'adresse via la BAN ;
+2. interroge l'API ADEME data-fair ;
+3. **élargit automatiquement le rayon** (×2 jusqu'à 50 km) si zéro résultat.
 
-## Étape 6 — Identifier les sources qui ont participer au référencement des acteurs récupérés lors de l'étape 5
+Si tu as déjà des coordonnées, tu peux aussi enchaîner manuellement
+`geocode_address` puis `search_actors`.
 
-Chaque acteur indique les libellés des sources qui ont contribuées à son référencement dans la base de données
-dans la colonne `paternité`
+## Étape 5 — Enrichir la paternité
 
-À part pour les sources `Que faire de mes objets et déchets` et `ADEME`,
-retrouver les sources qui ont participées au référencement de l'acteur via `qfdmo://sources` :
+Chaque acteur expose un champ `paternite` (libellés de sources contributrices
+séparés par `|`). Pour chaque libellé **autre que** « Que faire de mes objets et
+déchets » et « ADEME », appeler `list_sources(libelle_contains=<libelle>)` pour
+récupérer son URL et l'inclure dans la restitution.
 
-- récupérer l'`url` de chaque sources grâce à son `libelle`
-
-## Étape 7 — Présenter les résultats
+## Étape 6 — Présenter les résultats
 
 Restituer jusqu'à **5 résultats**, classés par proximité, avec :
 
 - nom (`nom`)
 - adresse (`adresse`, `code_postal`, `ville`)
-- distance approximative (calculée depuis les coordonnées si non fournie)
+- distance approximative (`distance_m`, en mètres)
 - horaires (`horaires_description`) si présents
 - site web (`site_web`) si présent
-- paternité :
-  Mentionner toujours la source : _« Source : Que Faire De Mes Objets et Déchets / ADEME »_
-  ainsi que les liens vers les sources qui ont participées au référencement de l'acteur.
+- paternité : liste des libellés et liens, plus la mention finale
+  _« Source : Que Faire De Mes Objets et Déchets / ADEME »_
 
 ## Étape 7 — Si aucun résultat
 
-Si la liste est vide :
-
-1. **Élargir le rayon** (10 km → 30 km → 50 km).
-2. **Élargir l'action** (`reparer` → ajouter aussi `donner` ou `rapporter`).
-3. Sinon, expliquer à l'utilisateur qu'aucun acteur n'est référencé près de lui
-   et le rediriger vers le site officiel
-   <https://quefairedemesdechets.ademe.fr>.
+`find_circular_solution` ayant déjà élargi jusqu'à 50 km, expliquer à
+l'utilisateur qu'aucun acteur n'est référencé près de chez lui et le rediriger
+vers <https://quefairedemesdechets.ademe.fr>.

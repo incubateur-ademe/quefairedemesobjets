@@ -1,8 +1,13 @@
 # Codes de sous-catégorie d'objet
 
 Liste exhaustive des **sous-catégories** utilisées dans le jeu de données.
-Le code (colonne de gauche) est ce qu'il faut passer dans le filtre `qs`,
+Le code (colonne de gauche) est ce qu'il faut passer au paramètre
+`sous_categorie` des tools `search_actors` et `find_circular_solution` ;
 le libellé est la version humaine.
+
+Cette liste est aussi exposée dynamiquement par le tool
+`list_sous_categories(query=<mot-clé>)`, qui permet de filtrer par mot-clé
+(ex. `query="velo"`).
 
 ## Électroménager, hifi, image, son, photo
 

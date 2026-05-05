@@ -1,18 +1,23 @@
 # À propos du jeu de données « Que Faire De Mes Objets et Déchets »
 
 Ce jeu de données ouvert recense les acteurs français de l'**économie circulaire** :
-ateliers de réparation, réparateurs, ressourceries, friperie, recycleries, déchèteries,
-points de collecte, boite à livre, boutiques de seconde main, magasins de location, etc.
+ateliers de réparation, réparateurs, ressourceries, friperies, recycleries, déchèteries,
+points de collecte, boîtes à livres, boutiques de seconde main, magasins de location, etc.
 
 - **Producteur** : ADEME (Agence de la transition écologique)
 - **Page du dataset** : <https://data.ademe.fr/datasets/longue-vie-aux-objets-acteurs-de-leconomie-circulaire>
 - **Identifiant data-fair** : `wvw1zecq4f4gyvonve5j0hr7`
 - **Volume** : ~ 380 000 acteurs en France
-- **Mise à jour** : hebdomadaire, voir le champ `date_de_derniere_modification` de chaque ligne
+- **Mise à jour** : hebdomadaire, la date de dernière modification de l'acteur est
+  disponible via le champ `date_de_derniere_modification`
+
+Ce serveur MCP **expose ce jeu de données via des tools** : il n'est pas
+nécessaire d'appeler `data.ademe.fr` ou `api-adresse.data.gouv.fr` directement.
+Les tools de ce serveur font le proxy.
 
 ## Quand utiliser ce jeu de données
 
-Quand un utilisateur cherche, **en France** (inclus les territoire ultra marin), où :
+Quand un utilisateur cherche, **en France** (territoires ultramarins inclus), où :
 
 - réparer un objet (téléphone, vélo, électroménager, vêtement…)
 - donner, échanger ou revendre un objet dont il n'a plus besoin
@@ -28,14 +33,15 @@ Quand un utilisateur cherche, **en France** (inclus les territoire ultra marin),
   ces informations ne sont pas dans ce jeu de données.
 - Si la question est purement juridique ou réglementaire (ex. « la consigne est-elle obligatoire ? »).
 
-## Workflow recommandé pour répondre
+## Tools exposés
 
-Voir la ressource `qfdmo://workflow`. En résumé :
+| Tool                     | Rôle                                                                     |
+| ------------------------ | ------------------------------------------------------------------------ |
+| `geocode_address`        | Adresse → couple (longitude, latitude) (proxy BAN).                      |
+| `list_actions`           | Liste des codes d'action (reparer, donner, rapporter, …).                |
+| `list_sous_categories`   | Liste des codes de sous-catégorie d'objet (velo, vetement, …).           |
+| `list_sources`           | Liste des sources contributrices (libellé, code, URL).                   |
+| `search_actors`          | Recherche d'acteurs (proxy ADEME data-fair).                             |
+| `find_circular_solution` | Tool composé : géocode + recherche + élargissement automatique du rayon. |
 
-1. Demander la **localisation** (avec consentement explicite).
-2. Identifier la **sous-catégorie** de l'objet (ressource `qfdmo://sous-categories`).
-3. Identifier l'**action** souhaitée (ressource `qfdmo://actions`).
-4. **Géocoder** l'adresse via l'API BAN (ressource `qfdmo://geocoding`).
-5. Interroger l'API ADEME `/lines` (ressource `qfdmo://search-api`).
-6. Identifier les sources qui ont participées au référencement de ces acteurs (resource `qfdmo://sources`)
-7. Restituer les résultats avec nom, adresse, distance, horaires, sources, lien.
+Voir la ressource `qfdmo://workflow` pour la marche à suivre recommandée.

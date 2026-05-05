@@ -16,7 +16,7 @@
         "libelle": "Que Faire De Mes Objets & Déchets / Longue Vie Aux Objets",
         "code": "lvao",
         "afficher": true,
-        "url": "https://longuevieauxobjets.ademe.fr/",
+        "url": "https://quefairedemesdechets.ademe.fr/",
         "logo_file": "logos/Sans_titre_2.png",
         "licence": "OPEN_LICENSE"
     }
@@ -137,7 +137,7 @@
         "libelle": "Communauté Que Faire De Mes Objets & Déchets / Longue Vie Aux Objets",
         "code": "communautelvao",
         "afficher": true,
-        "url": "https://longuevieauxobjets.ademe.fr/",
+        "url": "https://quefairedemesdechets.ademe.fr/",
         "logo_file": "logos/Sans_titre_2.png",
         "licence": "OPEN_LICENSE"
     }
