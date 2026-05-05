@@ -101,3 +101,11 @@ When the experiment ends:
 | Flag key                            | Variant change                                                                         | Files                                                                                |
 | ----------------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
 | `produit-carte-default-view-mobile` | On mobile produit pages, the carte loads in `liste` mode by default instead of `carte` | `webapp/templates/templatetags/carte.html`, `webapp/core/templatetags/carte_tags.py` |
+
+### Opting a `ProduitPage` into `produit-carte-default-view-mobile`
+
+The experiment is opt-in per page. In the Wagtail admin, edit the `ProduitPage`,
+go to the **Configuration** tab, and tick **"A/B test mode carte/liste par
+défaut"**. Pages without this flag never serve the variant — they keep the
+existing default. Tick it on a representative subset of fiches to keep the
+experiment focused.

@@ -301,6 +301,10 @@ def carte(context: dict, carte_config: CarteConfig) -> dict:
     # Avoid circular import — ProduitPage depends on this module's blocks.
     from qfdmd.models import ProduitPage
 
+    ab_test_enabled = isinstance(page, ProduitPage) and getattr(
+        page, "ab_test_carte_default_view", False
+    )
+
     return {
         # TODO: Mutualiser avec le _get_map_container_id de views/carte.py
         "id": carte_config.slug,
@@ -308,7 +312,7 @@ def carte(context: dict, carte_config: CarteConfig) -> dict:
         "url_variant": with_query(
             base_url, VIEW_MODE_QUERY_PARAM, CarteConfig.ModesAffichage.LISTE.value
         ),
-        "ab_test_enabled": isinstance(page, ProduitPage),
+        "ab_test_enabled": ab_test_enabled,
     }
 
 

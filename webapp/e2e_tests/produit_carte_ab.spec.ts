@@ -1,9 +1,25 @@
+import { execSync } from "node:child_process"
 import { expect, Page } from "@playwright/test"
 import { test } from "./fixtures"
 import { navigateTo, TIMEOUT } from "./helpers"
 
 const FLAG_KEY = "produit-carte-default-view-mobile"
-const PRODUIT_PATH = "/categories/meubles/"
+const PRODUIT_SLUG = "meubles"
+const PRODUIT_PATH = `/categories/${PRODUIT_SLUG}/`
+
+/**
+ * Opt the sample ProduitPage into the experiment for the duration of these
+ * tests, then revert. The Django dev server started by `webServer` shares
+ * the same DB, so this is the simplest reliable way to seed data without
+ * adding a management command.
+ */
+function setAbOptIn(slug: string, enabled: boolean) {
+  const code = [
+    "from qfdmd.models import ProduitPage",
+    `ProduitPage.objects.filter(slug='${slug}').update(ab_test_carte_default_view=${enabled ? "True" : "False"})`,
+  ].join("; ")
+  execSync(`uv run python manage.py shell -c "${code}"`, { stdio: "pipe" })
+}
 
 /**
  * Stub PostHog's `/decide` and `/flags/` endpoints so that the named flag
@@ -60,6 +76,9 @@ async function getCarteFrameSrc(page: Page): Promise<string | null> {
   )
   return frame.getAttribute("src")
 }
+
+test.beforeAll(() => setAbOptIn(PRODUIT_SLUG, true))
+test.afterAll(() => setAbOptIn(PRODUIT_SLUG, false))
 
 test.describe("AB test: produit carte default view (mobile)", () => {
   test.use({ viewport: { width: 375, height: 812 } })
