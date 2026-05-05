@@ -43,9 +43,8 @@ def cluster_acteurs_parents_choose_data(
     keep_parent_data_by_default: bool = True,
 ) -> pd.DataFrame:
     from data.models.change import COL_CHANGE_MODEL_NAME
-    from qfdmo.models.acteur import VueActeur
-
     from data.models.changes import ChangeActeurCreateAsParent, ChangeActeurKeepAsParent
+    from qfdmo.models.acteur import VueActeur
 
     def parent_choose_data(
         parent: VueActeur | None,
