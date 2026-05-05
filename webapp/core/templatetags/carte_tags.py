@@ -8,10 +8,13 @@ from django.template.loader import render_to_string
 
 from core.constants import DEFAULT_MAP_CONTAINER_ID, MAP_CONTAINER_ID
 from core.templatetags.acteur_tags import acteur_url
+from core.url_utils import with_query
 from qfdmo.forms import MapForm
 from qfdmo.models import DisplayedActeur
 from qfdmo.models.action import get_actions_by_direction
 from qfdmo.models.config import CarteConfig, GroupeActionConfig
+
+VIEW_MODE_QUERY_PARAM = "view_mode-view"
 
 logger = logging.getLogger(__name__)
 
@@ -288,15 +291,24 @@ def carte(context: dict, carte_config: CarteConfig) -> dict:
     """
     # TODO: add cache
     page = context.get("page")
+    base_url = carte_config.get_absolute_url(
+        override_sous_categories=list(
+            page.sous_categorie_objet.all().values_list("id", flat=True)
+        ),
+        initial_query_string=carte_config.SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url,
+    )
+
+    # Avoid circular import — ProduitPage depends on this module's blocks.
+    from qfdmd.models import ProduitPage
+
     return {
         # TODO: Mutualiser avec le _get_map_container_id de views/carte.py
         "id": carte_config.slug,
-        "url": carte_config.get_absolute_url(
-            override_sous_categories=list(
-                page.sous_categorie_objet.all().values_list("id", flat=True)
-            ),
-            initial_query_string=carte_config.SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url,
+        "url": base_url,
+        "url_variant": with_query(
+            base_url, VIEW_MODE_QUERY_PARAM, CarteConfig.ModesAffichage.LISTE.value
         ),
+        "ab_test_enabled": isinstance(page, ProduitPage),
     }
 
 

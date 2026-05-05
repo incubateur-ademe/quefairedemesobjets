@@ -1,6 +1,7 @@
 import { Application } from "@hotwired/stimulus"
 import * as Turbo from "@hotwired/turbo"
 
+import AbTestController from "../controllers/shared/ab_test_controller"
 import CopyController from "../controllers/shared/copy_controller"
 import GenericAutocompleteController from "../controllers/shared/generic_autocomplete_controller"
 import ScrollController from "../controllers/shared/scroll_controller"
@@ -22,6 +23,7 @@ import StateController from "../controllers/assistant/state"
 
 window.stimulus = Application.start()
 
+stimulus.register("ab-test", AbTestController)
 stimulus.register("map", MapController)
 stimulus.register("ss-cat-object-autocomplete", SsCatObjectAutocompleteController)
 stimulus.register("address-autocomplete", AddressAutocompleteController)

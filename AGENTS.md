@@ -39,6 +39,7 @@ For each kind of task below, refer to the specific documentation
 | Monitoring                                 | [docs/reference/infrastructure/monitoring.md](./docs/reference/infrastructure/monitoring.md)     |
 | CI/CD                                      | [docs/reference/infrastructure/ci-cd.md](./docs/reference/infrastructure/ci-cd.md)               |
 | Javascript (Stimulus/Maplibre/Turbo)       | [docs/reference/webapp/javascript.md](./docs/reference/webapp/javascript.md)                     |
+| A/B testing (PostHog feature flags)        | [docs/reference/webapp/ab-testing.md](./docs/reference/webapp/ab-testing.md)                     |
 | Airflow                                    | [docs/reference/data-platform/airflow.md](./docs/reference/data-platform/airflow.md)             |
 | DBT                                        | [docs/reference/data-platform/dbt.md](./docs/reference/data-platform/dbt.md)                     |
 
