@@ -55,6 +55,9 @@ FIELDS_PARENT_DATA_EXCLUDED = [
     "suggestion_groupes",
     # used by source ingestion
     "suggestion_unitaires",
+    # Foreign key: can be represented as Django Model instance (VueActeur)
+    # in some contexts; never serialize the full object in parent_data_new.
+    "parent",
 ]
 
 # ---------------------------------------
