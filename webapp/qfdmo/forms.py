@@ -27,9 +27,9 @@ from qfdmo.models.action import (
 )
 from qfdmo.models.config import CarteConfig
 from qfdmo.widgets import (
+    AutoCompleteInput,
     CarteAddressAutocompleteInput,
     DSFRCheckboxSelectMultiple,
-    FormulaireSynonymeAutocompleteInput,
     GenericAutoCompleteInput,
     RangeInput,
     SegmentedControlSelect,
@@ -171,7 +171,7 @@ class FormulaireForm(forms.Form):
     latitude = forms.FloatField(
         widget=forms.HiddenInput(
             attrs={
-                "data-carte-address-autocomplete-target": "latitude",
+                "data-address-autocomplete-target": "latitude",
                 "data-search-solution-form-target": "latitudeInput",
             }
         ),
@@ -181,7 +181,7 @@ class FormulaireForm(forms.Form):
     longitude = forms.FloatField(
         widget=forms.HiddenInput(
             attrs={
-                "data-carte-address-autocomplete-target": "longitude",
+                "data-address-autocomplete-target": "longitude",
                 "data-search-solution-form-target": "longitudeInput",
             }
         ),
@@ -191,12 +191,13 @@ class FormulaireForm(forms.Form):
     sous_categorie_objet = forms.ModelChoiceField(
         queryset=SousCategorieObjet.objects.all(),
         to_field_name="libelle",
-        widget=FormulaireSynonymeAutocompleteInput(
+        widget=AutoCompleteInput(
             attrs={
                 "class": "fr-input fr-icon-search-line sm:qf-w-[596px]",
                 "autocomplete": "off",
                 "aria-label": "Indiquer un objet - obligatoire",
             },
+            data_controller="ss-cat-object-autocomplete",
         ),
         help_text="pantalon, perceuse, canapé...",
         label="Indiquer un objet ",
@@ -207,7 +208,7 @@ class FormulaireForm(forms.Form):
     sc_id = forms.IntegerField(
         widget=forms.HiddenInput(
             attrs={
-                "data-formulaire-synonyme-autocomplete-target": "scId",
+                "data-ss-cat-object-autocomplete-target": "ssCat",
                 "data-search-solution-form-target": "sousCategoryObjetID",
             }
         ),
@@ -271,13 +272,14 @@ class FormulaireForm(forms.Form):
     )
 
     adresse = forms.CharField(
-        widget=CarteAddressAutocompleteInput(
+        widget=AutoCompleteInput(
             attrs={
                 "class": "fr-input sm:qf-w-[596px]",
                 "autocomplete": "off",
                 "aria-label": "Autour de l'adresse suivante - obligatoire",
                 "data-testid": "formulaire-adresse-input",
             },
+            data_controller="address-autocomplete",
         ),
         help_text="20 av. du Grésillé 49000 Angers",
         label="Autour de l'adresse suivante ",

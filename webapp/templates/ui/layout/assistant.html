@@ -85,12 +85,13 @@ parsing, which raises VariableDoesNotExist when seo is not in context (e.g., err
         data-map-location-value="{{ location }}"
         {% endif %}
         data-state-map-outlet="[data-controller='map']"
+        data-state-address-autocomplete-outlet="[data-controller='address-autocomplete']"
         data-state-carte-address-autocomplete-outlet="[data-controller~='carte-address-autocomplete']"
         data-state-search-solution-form-outlet="[data-controller='search-solution-form']"
         {% posthog_data_attributes assistant.POSTHOG_KEY %}
         data-analytics-initial-action-value="{% block analytics_action %}{% endblock %}"
         {# Actions #}
-        data-action="carte-address-autocomplete:change->state#setLocation"
+        data-action="address-autocomplete:change->state#setLocation carte-address-autocomplete:change->state#setLocation"
     >
         {# Skip links for accessibility - using DSFR component #}
         {% dsfr_skiplinks skiplinks %}

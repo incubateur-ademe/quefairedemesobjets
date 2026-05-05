@@ -35,7 +35,7 @@ export async function searchAndSelectAutocomplete(
   } = {},
 ) {
   const {
-    autocompleteSelector = "li[role='option'][data-next-autocomplete-target='option']",
+    autocompleteSelector = ".autocomplete-items div[data-action*='address-autocomplete#selectOption']",
     optionIndex = "first",
     timeout = TIMEOUT.DEFAULT,
     parentSelector,
@@ -137,7 +137,7 @@ export async function searchCarteAndWaitForActeurs(
 ): Promise<void> {
   const inputSelector = '[data-testid="carte-adresse-input"]'
   const autocompleteSelector =
-    "li[role='option'][data-next-autocomplete-target='option']"
+    ".autocomplete-items div[data-action*='address-autocomplete#selectOption']"
 
   // Build the input locator, respecting optional parent scoping
   const inputLocator = options.parentLocator

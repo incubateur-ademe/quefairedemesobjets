@@ -18,8 +18,9 @@ qf-h-svh qf-h-screen qf-overflow-hidden qf-bg-white
         data-action="
         map:updateBbox->search-solution-form#updateBboxInput
         search-solution-form:captureInteraction->analytics#captureInteractionWithMap
-        carte-address-autocomplete:change->search-solution-form#advancedSubmit
-        formulaire-synonyme-autocomplete:optionSelected->search-solution-form#checkSsCatObjetErrorForm
+        address-autocomplete:formSubmit->search-solution-form#advancedSubmit
+        ss-cat-object-autocomplete:formSubmit->search-solution-form#advancedSubmit
+        ss-cat-object-autocomplete:optionSelected->search-solution-form#checkSsCatObjetErrorForm
         {% block form_controller_data_actions %}{% endblock %}"
         class="
         qf-group
