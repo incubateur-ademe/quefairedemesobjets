@@ -4,7 +4,7 @@ import pandas as pd
 from airflow import DAG
 from airflow.providers.standard.operators.python import PythonOperator
 from cluster.config.tasks import TASKS
-from cluster.config.xcoms import XCOMS, xcom_pull
+from cluster.config.xcoms import XCOMS, xcom_pull, xcom_push
 from cluster.tasks.business_logic.cluster_acteurs_suggestions.prepare import (
     cluster_acteurs_suggestions_prepare,
 )
@@ -42,8 +42,8 @@ def cluster_acteurs_suggestions_prepare_wrapper(ti) -> None:
         raise ValueError("Pas de clusters récupérés, on ne devrait pas être là")
 
     working, failing = cluster_acteurs_suggestions_prepare(df)
-    ti.xcom_push(key=XCOMS.SUGGESTIONS_WORKING, value=working)
-    ti.xcom_push(key=XCOMS.SUGGESTIONS_FAILING, value=failing)
+    xcom_push(ti, XCOMS.SUGGESTIONS_WORKING, working)
+    xcom_push(ti, XCOMS.SUGGESTIONS_FAILING, failing)
 
 
 def cluster_acteurs_suggestions_prepare_task(dag: DAG) -> PythonOperator:

@@ -5,7 +5,7 @@ import logging
 from airflow import DAG
 from airflow.providers.standard.operators.python import PythonOperator
 from enrich.config.tasks import TASKS
-from enrich.config.xcoms import XCOMS
+from enrich.config.xcoms import XCOMS, xcom_push
 from enrich.tasks.business_logic.db_read_acteur_cp import (
     db_read_acteur_cp,
     db_read_revision_acteur_cp,
@@ -41,8 +41,8 @@ def db_read_acteur_cp_wrapper(ti, dag, params) -> None:
         "revision acteurs avec des codes postaux non conformes", db_revision_acteur_cp
     )
 
-    ti.xcom_push(key=XCOMS.DB_READ_ACTEUR_CP, value=db_acteur_cp)
-    ti.xcom_push(key=XCOMS.DB_READ_REVISION_ACTEUR_CP, value=db_revision_acteur_cp)
+    xcom_push(ti, XCOMS.DB_READ_ACTEUR_CP, db_acteur_cp)
+    xcom_push(ti, XCOMS.DB_READ_REVISION_ACTEUR_CP, db_revision_acteur_cp)
 
 
 def db_read_acteur_cp_task(dag: DAG) -> PythonOperator:

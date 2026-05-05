@@ -6,18 +6,14 @@ pulls (no typo on `key`, no wrong `task_ids`) without duplicating the
 helper in every DAG.
 """
 
-from typing import Any, Mapping, TypedDict
+from typing import Any, Mapping
 
 import pandas as pd
 from airflow.models.taskinstance import TaskInstance
 from airflow.sdk.exceptions import AirflowSkipException
+from shared.xcom.models import XComSource
 from shared.xcom.normalize import normalize_xcom_value
 from utils import logging_utils as log
-
-
-class XComSource(TypedDict):
-    task_id: str
-    xcom_key: str
 
 
 def xcom_pull(

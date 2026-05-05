@@ -11,8 +11,8 @@ from cluster.config.metadata import (
 from pydantic import BaseModel
 from shared.tasks.database_logic.db_manager import PostgresConnectionManager
 from sources.config.airflow_params import TRANSFORMATION_MAPPING
-from sources.tasks.airflow_logic.config_management import (
-    DAGConfig,
+from sources.config.models import (
+    SourceConfig,
     NormalizationColumnDefault,
     NormalizationColumnRemove,
     NormalizationColumnRename,
@@ -63,7 +63,7 @@ def get_transformation_function(function_name, dag_config):
     return transformation_function
 
 
-def _rename_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
+def _rename_columns(df: pd.DataFrame, dag_config: SourceConfig) -> pd.DataFrame:
     columns_to_rename = [
         t
         for t in dag_config.normalization_rules
@@ -81,7 +81,7 @@ def _rename_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
     return df
 
 
-def _transform_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
+def _transform_columns(df: pd.DataFrame, dag_config: SourceConfig) -> pd.DataFrame:
     columns_to_transform = [
         t
         for t in dag_config.normalization_rules
@@ -116,7 +116,7 @@ def _transform_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
     return df
 
 
-def _transform_df(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
+def _transform_df(df: pd.DataFrame, dag_config: SourceConfig) -> pd.DataFrame:
     columns_to_transform_df = [
         t
         for t in dag_config.normalization_rules
@@ -169,7 +169,7 @@ def _transform_df(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
     return df
 
 
-def _default_value_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
+def _default_value_columns(df: pd.DataFrame, dag_config: SourceConfig) -> pd.DataFrame:
     columns_to_add_by_default = [
         t
         for t in dag_config.normalization_rules
@@ -185,7 +185,7 @@ def _default_value_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFr
     return df
 
 
-def _remove_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
+def _remove_columns(df: pd.DataFrame, dag_config: SourceConfig) -> pd.DataFrame:
     columns_to_remove = [
         t.remove
         for t in dag_config.normalization_rules
@@ -195,7 +195,7 @@ def _remove_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
 
 
 def _remove_undesired_lines(
-    df: pd.DataFrame, dag_config: DAGConfig
+    df: pd.DataFrame, dag_config: SourceConfig
 ) -> tuple[pd.DataFrame, dict]:
     metadata = {}
 
@@ -274,7 +274,7 @@ def _display_warning_about_missing_location(df: pd.DataFrame) -> None:
             log.preview("Acteurs sans localisation", df_acteur_sans_loc)
 
 
-def _manage_oca_config(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
+def _manage_oca_config(df: pd.DataFrame, dag_config: SourceConfig) -> pd.DataFrame:
     if dag_config.oca_deduplication_source:
         df = df.assign(source_code=df["source_code"].str.split("|")).explode(
             "source_code"
@@ -295,7 +295,7 @@ def _manage_oca_config(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
 
 def source_data_normalize(
     df_acteur_from_source: pd.DataFrame,
-    dag_config: DAGConfig,
+    dag_config: SourceConfig,
     dag_id: str,
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, dict]:
     """

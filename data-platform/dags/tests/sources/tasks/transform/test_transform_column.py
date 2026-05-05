@@ -558,7 +558,7 @@ class TestCleanSouscategorieCodesSinoe:
     def test_clean_sous_categorie_codes_sinoe(
         self, sscats, dechet_mapping, product_mapping, expected_output, dag_config
     ):
-        # Mock the DAGConfig
+        # Mock the SourceConfig
         dag_config.dechet_mapping = dechet_mapping
         dag_config.product_mapping = product_mapping
 

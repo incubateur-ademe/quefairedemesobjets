@@ -2,8 +2,9 @@ import logging
 
 from airflow import DAG
 from airflow.providers.standard.operators.python import PythonOperator
-from sources.config.xcoms import XCOMS, xcom_pull
-from sources.tasks.airflow_logic.config_management import DAGConfig
+from sources.config.models import SourceConfig
+from sources.config.tasks import TASKS
+from sources.config.xcoms import XCOMS, xcom_pull, xcom_push
 from sources.tasks.business_logic.db_write_type_action_suggestions import (
     db_write_type_action_suggestions,
 )
@@ -15,19 +16,17 @@ logger = logging.getLogger(__name__)
 
 def db_write_type_action_suggestions_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
-        task_id="db_write_suggestion",
+        task_id=TASKS.DB_WRITE_TYPE_ACTION_SUGGESTIONS,
         python_callable=db_write_type_action_suggestions_wrapper,
         dag=dag,
     )
 
 
-def db_write_type_action_suggestions_wrapper(**kwargs) -> None:
-    dag_name = kwargs["dag"].dag_display_name or kwargs["dag"].dag_id
-    dag_config = DAGConfig.from_airflow_params(kwargs["params"])
+def db_write_type_action_suggestions_wrapper(ti, dag, params) -> None:
+    dag_name = dag.dag_display_name or dag.dag_id
+    dag_config = SourceConfig.from_airflow_params(params)
 
-    run_id = kwargs["run_id"]
-
-    ti = kwargs["ti"]
+    run_id = ti.run_id
 
     # Récupérer les noms des tables temporaires depuis XCom
     table_name_create = xcom_pull(ti, XCOMS.TABLE_NAME_CREATE)
@@ -63,10 +62,10 @@ def db_write_type_action_suggestions_wrapper(**kwargs) -> None:
     ):
         logger.warning("!!! Aucune suggestion à traiter pour cette source !!!")
         # set the task to airflow skip status
-        ti.xcom_push(key="skip", value=True)
+        xcom_push(ti, key=XCOMS.SKIP, value=True)
         return
 
-    return db_write_type_action_suggestions(
+    db_write_type_action_suggestions(
         dag_name=dag_name,
         run_id=run_id,
         df_acteur_to_create=df_acteur_to_create,

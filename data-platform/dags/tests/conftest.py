@@ -146,9 +146,9 @@ def source_id_by_code():
 
 @pytest.fixture
 def dag_config():
-    from dags.sources.tasks.airflow_logic.config_management import DAGConfig
+    from dags.sources.config.models import SourceConfig
 
-    return DAGConfig.model_validate(
+    return SourceConfig.model_validate(
         {
             "normalization_rules": [
                 {

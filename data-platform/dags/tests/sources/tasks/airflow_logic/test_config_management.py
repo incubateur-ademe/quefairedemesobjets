@@ -1,6 +1,6 @@
 import pytest
-from sources.tasks.airflow_logic.config_management import (
-    DAGConfig,
+from sources.config.models import (
+    SourceConfig,
     NormalizationColumnDefault,
     NormalizationColumnKeep,
     NormalizationColumnRemove,
@@ -50,9 +50,9 @@ class TestGetNestedConfigParameter:
             get_nested_config_parameter(None)  # type: ignore
 
 
-class TestDAGConfig:
+class TestSourceConfig:
     def test_dag_config_success(self):
-        dag_config = DAGConfig.model_validate(
+        dag_config = SourceConfig.model_validate(
             {
                 "normalization_rules": [],
                 "endpoint": "https://example.com/api",
@@ -96,7 +96,7 @@ class TestDAGConfig:
     )
     def test_dag_config_fail(self, input_value):
         with pytest.raises(ValueError):
-            DAGConfig.model_validate(input_value)
+            SourceConfig.model_validate(input_value)
 
     @pytest.mark.parametrize(
         "normalization_rules, expected_normalization_rules",
@@ -143,7 +143,7 @@ class TestDAGConfig:
     def test_dag_config_normalization_rules_succeed(
         self, normalization_rules, expected_normalization_rules
     ):
-        dag_config = DAGConfig.model_validate(
+        dag_config = SourceConfig.model_validate(
             {
                 "normalization_rules": normalization_rules,
                 "endpoint": "https://example.com/api",
@@ -162,7 +162,7 @@ class TestDAGConfig:
     )
     def test_dag_config_normalization_rules_failed(self, normalization_rules):
         with pytest.raises(ValueError):
-            DAGConfig.model_validate(
+            SourceConfig.model_validate(
                 {
                     "normalization_rules": normalization_rules,
                     "endpoint": "https://example.com/api",
@@ -183,7 +183,7 @@ class TestDAGConfig:
             NormalizationColumnKeep(keep="keep"),
             NormalizationColumnRemove(remove="remove"),
         ]
-        dag_config = DAGConfig.model_validate(
+        dag_config = SourceConfig.model_validate(
             {
                 "normalization_rules": normalization_rules,
                 "endpoint": "https://example.com/api",
@@ -227,9 +227,11 @@ class TestDAGConfig:
             ("fichier.xlsx", False),  # No s3://
         ],
     )
-    def test_validate_endpoint(self, url: str, is_valid: bool, dag_config: DAGConfig):
+    def test_validate_endpoint(
+        self, url: str, is_valid: bool, dag_config: SourceConfig
+    ):
         if is_valid:
-            assert DAGConfig.validate_endpoint(url) == url
+            assert SourceConfig.validate_endpoint(url) == url
         else:
             with pytest.raises(ValueError):
-                DAGConfig.validate_endpoint(url)
+                SourceConfig.validate_endpoint(url)
