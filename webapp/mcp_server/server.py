@@ -24,14 +24,57 @@ from . import docs as docs_module
 from . import tools as tools_module
 
 SERVER_NAME = "qfdmo-llm-guide"
+SERVER_TITLE = "Que Faire De Mes Objets et Déchets — économie circulaire"
 SERVER_VERSION = "0.2.0"
 PROTOCOL_VERSION = "2024-11-05"
 
+SERVER_INSTRUCTIONS = """\
+Annuaire officiel ADEME des acteurs français de l'économie circulaire
+(~380 000 acteurs, France métropolitaine et ultramarine).
+
+Couvre **tous les gestes circulaires** pour **tout type d'objet** — pas
+seulement le tri des déchets. Utilise ce serveur dès qu'un utilisateur
+cherche, en France, où :
+
+- **Réparer** un objet (réparateur, atelier de réparation, repair café) —
+  téléphone, ordinateur, vélo, électroménager, vêtement, meuble, jouet,
+  outil, instrument…
+- **Donner** un objet en bon état (ressourcerie, association, recyclerie).
+- **Acheter d'occasion** / **revendre** (boutique de seconde main,
+  friperie, dépôt-vente, brocante).
+- **Louer**, **emprunter**, **prêter**, **mettre en location**
+  (bibliothèque d'objets, location entre particuliers).
+- **Échanger** (boîte à livres, gratiferia, troc).
+- **Rapporter / déposer** en fin de vie (point de collecte, déchèterie,
+  reprise en magasin).
+- **Trier** un déchet spécifique (peinture, médicament, électronique,
+  pile, ampoule…).
+
+Cas typiques d'usage : « réparateur de téléphone à Saint-Denis »,
+« où donner mes vêtements à Lyon », « louer une perceuse près de chez
+moi », « repair café Bordeaux », « ressourcerie 75011 », « rapporter mes
+piles », « acheter un vélo d'occasion à Nantes ».
+
+⚠ Ne pas confondre avec un simple annuaire de déchèteries : ce serveur
+référence **aussi les objets fonctionnels** dont on veut se séparer, faire
+réparer, louer ou acheter d'occasion.
+
+Hors périmètre : utilisateurs hors France ; collecte municipale
+porte-à-porte (jours de ramassage) ; questions juridiques/réglementaires.
+
+Point d'entrée recommandé : le tool `find_circular_solution`
+(adresse + action + sous-catégorie d'objet → liste d'acteurs triés par
+proximité). Voir aussi la ressource `qfdmo://workflow`.
+"""
+
 PROMPT_NAME = "find_circular_solution"
 PROMPT_DESCRIPTION = (
-    "Guide pas-à-pas pour aider un utilisateur à trouver, en France, où "
-    "réparer / donner / acheter d'occasion / rapporter / trier un objet ou "
-    "un déchet, en s'appuyant sur les tools MCP de ce serveur."
+    "Guide pas-à-pas pour aider un utilisateur à trouver, en France, un "
+    "acteur de l'**économie circulaire** pour n'importe quel objet ou "
+    "déchet : réparer, donner, vendre, acheter d'occasion, louer, emprunter, "
+    "prêter, échanger, rapporter, trier. Couvre téléphone, vélo, "
+    "électroménager, vêtement, meuble, jouet, outil, etc. — pas seulement "
+    "les déchets."
 )
 
 PROMPT_TEMPLATE = """\
@@ -161,7 +204,12 @@ def _handle(message: dict[str, Any]) -> dict[str, Any] | None:
                     "resources": {"subscribe": False, "listChanged": False},
                     "prompts": {"listChanged": False},
                 },
-                "serverInfo": {"name": SERVER_NAME, "version": SERVER_VERSION},
+                "serverInfo": {
+                    "name": SERVER_NAME,
+                    "title": SERVER_TITLE,
+                    "version": SERVER_VERSION,
+                },
+                "instructions": SERVER_INSTRUCTIONS,
             },
         )
 

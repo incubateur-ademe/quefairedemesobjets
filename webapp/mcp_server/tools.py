@@ -313,9 +313,12 @@ TOOLS: tuple[Tool, ...] = (
         name="list_actions",
         title="Lister les actions de l'économie circulaire",
         description=(
-            "Renvoie les codes d'action acceptés par `search_actors` "
-            "(reparer, donner, rapporter, acheter, louer, …). Optionnellement "
-            "filtrable par mot-clé."
+            "Renvoie les codes d'action acceptés par `search_actors`. "
+            "Couvre **tous les gestes circulaires**, pas seulement le tri : "
+            "`reparer` (faire réparer), `donner`, `acheter` (acheter "
+            "d'occasion), `revendre`, `louer`, `mettreenlocation`, "
+            "`emprunter`, `preter`, `echanger`, `rapporter` (déposer en fin "
+            "de vie), `trier`. Optionnellement filtrable par mot-clé."
         ),
         input_schema={
             "type": "object",
@@ -336,8 +339,12 @@ TOOLS: tuple[Tool, ...] = (
         title="Lister les sous-catégories d'objet",
         description=(
             "Renvoie les codes de sous-catégorie d'objet acceptés par "
-            "`search_actors` (velo, vetement, smartphone_tablette_et_console, "
-            "…). Optionnellement filtrable par mot-clé."
+            "`search_actors`. Couvre **tous types d'objets et de déchets** : "
+            "électronique (smartphone, ordinateur, électroménager), mobilité "
+            "(velo, trottinette), textile (vetement, chaussure), meuble, "
+            "jouet, livre, outil, instrument de musique, vaisselle, "
+            "peinture, pile, ampoule, médicament, etc. Optionnellement "
+            "filtrable par mot-clé."
         ),
         input_schema={
             "type": "object",
@@ -381,10 +388,17 @@ TOOLS: tuple[Tool, ...] = (
         name="search_actors",
         title="Rechercher des acteurs de l'économie circulaire",
         description=(
-            "Interroge l'API ADEME data-fair pour renvoyer les acteurs qui "
-            "proposent une action donnée pour une sous-catégorie d'objet, "
-            "dans un rayon autour d'un point géographique. Trie par distance "
-            "croissante."
+            "Recherche dans l'annuaire officiel ADEME (~380 000 acteurs en "
+            "France) les **réparateurs, ressourceries, recycleries, "
+            "friperies, repair cafés, boutiques de seconde main, "
+            "magasins de location, points de collecte, déchèteries, "
+            "associations** qui proposent une action donnée (réparer, "
+            "donner, acheter d'occasion, louer, emprunter, échanger, "
+            "rapporter, trier…) pour une sous-catégorie d'objet (téléphone, "
+            "vélo, vêtement, électroménager, meuble, etc.), dans un rayon "
+            "autour d'un point géographique. Trie par distance croissante. "
+            "Pour partir d'une adresse plutôt que de coordonnées, utiliser "
+            "`find_circular_solution`."
         ),
         input_schema={
             "type": "object",
@@ -436,11 +450,18 @@ TOOLS: tuple[Tool, ...] = (
         name="find_circular_solution",
         title="Trouver une solution circulaire (geocode + recherche)",
         description=(
-            "Tool composé : géocode l'adresse via la BAN puis interroge "
-            "l'API ADEME. En cas de zéro résultat, élargit automatiquement le "
-            "rayon (×2) jusqu'à 50 km. Renvoie la localisation, les tentatives "
-            "et la liste d'acteurs (jusqu'à 20). À privilégier pour répondre "
-            "à une question utilisateur en un seul appel."
+            "**Point d'entrée principal** pour répondre à toute question "
+            "du type « où **réparer / donner / vendre / acheter d'occasion / "
+            "louer / emprunter / échanger / rapporter / trier** [un objet] "
+            "près de [lieu] ? » en France. Couvre tous les objets "
+            "(téléphone, ordinateur, vélo, électroménager, vêtement, meuble, "
+            "jouet, outil, livre…) et tous les déchets — pas seulement les "
+            "déchèteries : aussi réparateurs, repair cafés, ressourceries, "
+            "recycleries, friperies, boutiques de seconde main, locations, "
+            "associations, points de collecte. Tool composé : géocode "
+            "l'adresse via la BAN, puis interroge l'annuaire ADEME ; en cas "
+            "de zéro résultat, élargit automatiquement le rayon (×2) jusqu'à "
+            "50 km. À privilégier en un seul appel."
         ),
         input_schema={
             "type": "object",
