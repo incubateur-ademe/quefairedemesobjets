@@ -50,7 +50,7 @@
     "bowser": "^2.14.1",
     "carte-facile": "^0.9.0",
     "eslint-config-prettier": "^10.1.8",
-    "maplibre-gl": "^5.23.0",
+    "maplibre-gl": "^5.24.0",
     "posthog-js": "^1.369.3",
     "stimulus-use": "^0.52.3",
     "tailwindcss": "^3.4.19"
