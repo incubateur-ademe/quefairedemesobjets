@@ -78,7 +78,7 @@
     "ts-jest": "^29.4.9",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.2",
-    "typescript-eslint": "^8.59.0"
+    "typescript-eslint": "^8.59.1"
   },
   "optionalDependencies": {
     "@parcel/watcher-linux-x64-glibc": "^2.5.6"
