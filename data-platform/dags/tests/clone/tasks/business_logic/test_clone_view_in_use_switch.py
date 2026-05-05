@@ -1,5 +1,5 @@
 import pytest
-from clone.config import DIR_SQL_CREATION
+from clone.config.models import DIR_SQL_CREATION
 
 
 class TestSqlTablesCreation:

@@ -1,6 +1,6 @@
 import pytest
 from dags.cluster.config.constants import FIELDS_PROTECTED
-from dags.cluster.config.model import ClusterConfig
+from dags.cluster.config.models import ClusterConfig
 
 
 class TestClusterConfigModel:

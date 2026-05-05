@@ -31,10 +31,12 @@ def source_config_validate(
         missing_mandatory_columns = (
             set(MANDATORY_COLUMNS_AFTER_NORMALISATION) - expected_columns
         )
-        raise ValueError(f"""
+        raise ValueError(
+            f"""
 Mandatory columns are missing in dag_config,
 Missing mandatory columns are: {missing_mandatory_columns}
-Expected columns from dag_config: {expected_columns}""")
+Expected columns from dag_config: {expected_columns}"""
+        )
 
     # Validation des sous-catégories produit qui doivent être mappées
     # et toutes correspondre à des codes valides dans notre DB

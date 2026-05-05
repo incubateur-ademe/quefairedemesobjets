@@ -343,7 +343,8 @@ def insert_suggestion_legacy(
     with engine.begin() as conn:
         # Insert a new suggestion
         result = conn.execute(
-            text("""
+            text(
+                """
             INSERT INTO data_suggestioncohorte
             (
                 identifiant_action,
@@ -364,7 +365,8 @@ def insert_suggestion_legacy(
                 :modifie_le
             )
             RETURNING ID;
-        """),
+        """
+            ),
             {
                 "identifiant_action": dag_name,
                 "identifiant_execution": run_name,

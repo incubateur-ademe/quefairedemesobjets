@@ -26,7 +26,7 @@ def airflow_init() -> None:
     os.environ["AIRFLOW__CORE__SQL_ALCHEMY_CONN"] = "sqlite:///:memory:"
     # Needed because we pass ClusterConfig via XCOM
     os.environ["AIRFLOW__CORE__ALLOWED_DESERIALIZATION_CLASSES"] = (
-        "cluster.config.model.ClusterConfig"
+        "cluster.config.models.ClusterConfig"
     )
     from airflow.utils.db import initdb
 
