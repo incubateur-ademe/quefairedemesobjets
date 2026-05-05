@@ -15,7 +15,7 @@ from typing import Any
 import requests
 
 BAN_SEARCH_URL = "https://api-adresse.data.gouv.fr/search/"
-ADEME_DATASET_ID = "wvw1zecq4f4gyvonve5j0hr7"
+ADEME_DATASET_ID = "wvw1zecq4f4gyvonve5j0hr7"  # pragma allowlist secret
 ADEME_LINES_URL = (
     "https://data.ademe.fr/data-fair/api/v1/datasets/" f"{ADEME_DATASET_ID}/lines"
 )
@@ -61,8 +61,11 @@ def search_actors(
 ) -> dict[str, Any]:
     """Query ADEME data-fair `/lines` and return its JSON body verbatim.
 
-    Filters on geo distance and on `qs=<action>:"<sous_categorie>"`. Results
-    are sorted by ascending distance from (longitude, latitude).
+    Filters on geo distance and on a full-text match of (action, sous_categorie)
+    inside the `propositions_de_services` JSON column. The dataset does not
+    expose `reparer` / `donner` / … as exact-filterable fields, and does not
+    allow sorting on `_geo_distance`, but a `geo_distance` query already
+    returns rows ordered by ascending distance.
     """
     select = select or [
         "nom",
@@ -78,8 +81,9 @@ def search_actors(
     ]
     params = {
         "geo_distance": f"{longitude}:{latitude}:{radius_meters}",
-        "qs": f'{action}:"{sous_categorie}"',
-        "sort": "_geo_distance",
+        "q": sous_categorie,
+        "q_mode": "complete",
+        "q_fields": action,
         "size": size,
         "select": ",".join(select),
     }

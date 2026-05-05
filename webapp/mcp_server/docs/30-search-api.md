@@ -19,9 +19,20 @@ chaque acteur du jeu de données comme une ligne JSON filtrable.
 | `radius_meters`  | int    | non         | Rayon de recherche (100 à 100 000 m, défaut 5000).            |
 | `size`           | int    | non         | Nombre maximum d'acteurs (1 à 20, défaut 10).                 |
 
-Ces filtres se traduisent en interne par le filtre data-fair
-`qs=<action>:"<sous_categorie>"` plus `geo_distance=<lon>:<lat>:<rayon>` et
-`sort=_geo_distance`.
+Ces filtres se traduisent en interne par une recherche plein-texte data-fair
+restreinte à la colonne JSON `propositions_de_services` :
+
+```text
+geo_distance=<lon>:<lat>:<rayon>
+q=<action> <sous_categorie>
+q_mode=complete                    # AND entre les deux termes
+q_fields=propositions_de_services  # restreint la recherche à cette colonne
+```
+
+Les colonnes par action (`reparer`, `donner`, …) n'étant pas filtrables sur
+valeur exacte côté ADEME, et le tri sur `_geo_distance` n'étant pas accepté,
+on s'appuie sur l'ordre naturel renvoyé par `geo_distance`, qui trie déjà
+par distance ascendante.
 
 ## Schéma de sortie
 
@@ -49,9 +60,9 @@ Ces filtres se traduisent en interne par le filtre data-fair
 }
 ```
 
-`distance_m` est calculée par le serveur MCP (formule de Haversine) à partir
-des coordonnées de l'acteur et du point de recherche, pour faciliter la
-restitution.
+`distance_m` reprend le `_geo_distance` calculé par ADEME quand il est
+disponible, sinon il est recalculé côté serveur MCP par la formule de
+Haversine.
 
 ## Bonnes pratiques
 

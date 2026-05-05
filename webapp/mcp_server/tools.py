@@ -158,7 +158,10 @@ def _format_actor(actor: dict[str, Any], origin: tuple[float, float]) -> dict[st
     lon = actor.get("longitude")
     lat = actor.get("latitude")
     distance_m: int | None = None
-    if isinstance(lon, (int, float)) and isinstance(lat, (int, float)):
+    upstream_distance = actor.get("_geo_distance")
+    if isinstance(upstream_distance, (int, float)):
+        distance_m = round(upstream_distance)
+    elif isinstance(lon, (int, float)) and isinstance(lat, (int, float)):
         distance_m = round(_haversine_m(origin[0], origin[1], lon, lat))
     return {
         "nom": actor.get("nom"),
