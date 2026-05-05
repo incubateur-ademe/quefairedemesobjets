@@ -1,21 +1,13 @@
 import { Controller } from "@hotwired/stimulus"
 import isEmpty from "lodash/isEmpty"
-import AdresseAutocompleteController from "../carte/address_autocomplete_controller"
 import CarteAddressAutocompleteController from "../carte/carte_address_autocomplete_controller"
 import SearchFormController from "../carte/search_solution_form_controller"
-
-type AddressOutlet = AdresseAutocompleteController | CarteAddressAutocompleteController
 
 export default class extends Controller<HTMLElement> {
   static values = {
     location: Object,
   }
-  static outlets = [
-    "address-autocomplete",
-    "carte-address-autocomplete",
-    "search-solution-form",
-  ]
-  declare addressAutocompleteOutlets: Array<AdresseAutocompleteController>
+  static outlets = ["carte-address-autocomplete", "search-solution-form"]
   declare carteAddressAutocompleteOutlets: Array<CarteAddressAutocompleteController>
   declare searchSolutionFormOutlets: Array<SearchFormController>
   declare locationValue: {
@@ -23,18 +15,11 @@ export default class extends Controller<HTMLElement> {
     latitude: string | null
     longitude: string | null
   }
-  hasAddressAutocompleteOutletConnected = false
+  hasCarteAddressAutocompleteOutletConnected = false
   hasSearchSolutionFormOutletConnected = false
 
   connect() {
     this.fetchLocationFromSessionStorageOnFirstLoad()
-  }
-
-  addressAutocompleteOutletConnected(outlet, element) {
-    if (outlet.inputTarget.value) {
-      return
-    }
-    this.updateUIFromGlobalState(outlet)
   }
 
   carteAddressAutocompleteOutletConnected(outlet: CarteAddressAutocompleteController) {
@@ -75,11 +60,7 @@ export default class extends Controller<HTMLElement> {
     if (updatedLocationIsNotEmpty) {
       this.locationValue = nextLocationValue
 
-      const allOutlets: Array<AddressOutlet> = [
-        ...this.addressAutocompleteOutlets,
-        ...this.carteAddressAutocompleteOutlets,
-      ]
-      for (const outlet of allOutlets) {
+      for (const outlet of this.carteAddressAutocompleteOutlets) {
         this.updateUIFromGlobalState(outlet)
       }
     }

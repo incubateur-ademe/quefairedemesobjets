@@ -1,16 +1,10 @@
 <div data-search-solution-form-target="sousCategoryObjetGroup" class="fr-mt-3w fr-px-1v fr-input-group {% if hidden %}qf-hidden{% endif %}">
-    <div data-controller='ss-cat-object-autocomplete'
-         data-ss-cat-object-autocomplete-max-option-displayed-value=5
-         data-ss-cat-object-autocomplete-nb-char-to-search-value=1
-
-         {% if only_reemploi %}
-             data-ss-cat-object-autocomplete-only-reemploi-value=true
-         {% endif %}
-
-         data-with-controls="{{ is_carte|yesno:'false,true' }}"
-         data-without-zone="{{ is_carte|yesno:'false,true' }}"
-         data-with-dynamic-form-panel="{{ is_carte|yesno:'false,true' }}"
-
+    <div
+        data-controller="formulaire-synonyme-autocomplete"
+        data-action="next-autocomplete:commit->formulaire-synonyme-autocomplete#commit"
+        data-with-controls="{{ is_carte|yesno:'false,true' }}"
+        data-without-zone="{{ is_carte|yesno:'false,true' }}"
+        data-with-dynamic-form-panel="{{ is_carte|yesno:'false,true' }}"
     >
         <div class="form-group">
             {{ form.sous_categorie_objet.label_tag }}

@@ -1,0 +1,35 @@
+<div
+    data-controller="next-autocomplete"
+    data-next-autocomplete-endpoint-url-value="{{ endpoint_url }}"
+    data-next-autocomplete-turbo-frame-id-value="{{ turbo_frame_id }}"
+    data-next-autocomplete-limit-value="{{ limit }}"
+    data-next-autocomplete-event-name-value="{{ event_name }}"
+    data-next-autocomplete-field-name-value="{{ field_name }}"
+    {% if show_on_focus %}data-next-autocomplete-show-on-focus-value="true"{% endif %}
+    class="qf-relative"
+>
+    <input
+        type="search"
+        {% include "django/forms/widgets/attrs.html" %}
+        {% if display_value %}name="{{ widget.name }}"{% if widget.value != None %} value="{{ widget.value }}"{% endif %}{% endif %}
+        role="combobox"
+        aria-controls="{{ turbo_frame_id }}-listbox"
+        aria-expanded="false"
+        aria-activedescendant=""
+        aria-autocomplete="both"
+        data-action="next-autocomplete#search keydown->next-autocomplete#navigate focus->next-autocomplete#focus"
+        data-next-autocomplete-target="input"
+        data-formulaire-synonyme-autocomplete-target="input"
+    >
+    <input
+        type="hidden"
+        data-next-autocomplete-target="hiddenInput"
+        name="{{ widget.name }}"{% if widget.value != None %} value="{{ widget.value }}"{% endif %}
+    >
+
+    {% include "ui/forms/widgets/autocomplete/results.html" %}
+
+    <div class="peer-aria-[busy]:qf-visible qf-invisible qf-absolute qf-z-50 qf-right-1w qf-top-auto qf-bottom-[3px]">
+    {% include "ui/components/spinner.html" with small=True %}
+    </div>
+</div>

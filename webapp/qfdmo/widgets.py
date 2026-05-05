@@ -28,6 +28,21 @@ class CarteAddressAutocompleteInput(NextAutocompleteInput):
     template_name = "ui/forms/widgets/autocomplete/carte_address_input.html"
 
 
+class FormulaireSynonymeAutocompleteInput(NextAutocompleteInput):
+    """ARIA-conformant combobox-autocomplete-list for the formulaire object field.
+
+    The visible value is the synonyme libelle (since the field has
+    `to_field_name="libelle"`) and the matching sous_categorie_objet id is
+    written to the sibling `sc_id` hidden input via the
+    `formulaire-synonyme-autocomplete` Stimulus controller.
+    """
+
+    search_view = "qfdmo:autocomplete_synonyme_formulaire"
+    limit = 5
+    display_value = True
+    template_name = "ui/forms/widgets/autocomplete/formulaire_synonyme_input.html"
+
+
 class RangeInput(widgets.NumberInput):
     template_name = "ui/forms/widgets/range_input.html"
     input_type = "range"
@@ -44,26 +59,6 @@ class GenericAutoCompleteInput(widgets.SelectMultiple):
         context = super().get_context(name, value, attrs)
         context["hidden_template_name"] = widgets.SelectMultiple.template_name
         context["extra_attrs"] = self.extra_attrs
-        return context
-
-
-class AutoCompleteInput(forms.TextInput):
-    # TODO: support an initial queryset that controls
-    # the search view.
-    template_name = "ui/forms/widgets/autocomplete.html"
-
-    def __init__(
-        self, attrs=None, data_controller="autocomplete", template_name=None, **kwargs
-    ):
-        self.data_controller = data_controller
-
-        super().__init__(attrs=attrs, **kwargs)
-        if template_name is not None:
-            self.template_name = template_name
-
-    def get_context(self, name, value, attrs):
-        context = super().get_context(name, value, attrs)
-        context["widget"]["data_controller"] = self.data_controller
         return context
 
 
