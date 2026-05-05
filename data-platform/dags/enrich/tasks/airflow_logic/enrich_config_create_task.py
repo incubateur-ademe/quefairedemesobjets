@@ -3,10 +3,9 @@
 import logging
 
 from airflow import DAG
-from airflow.operators.python import PythonOperator
-from enrich.config.models import DAG_ID_TO_CONFIG_MODEL
+from airflow.providers.standard.operators.python import PythonOperator
+from enrich.config.models import EnrichActeursClosedConfig
 from enrich.config.tasks import TASKS
-from enrich.config.xcoms import XCOMS
 
 logger = logging.getLogger(__name__)
 
@@ -28,10 +27,8 @@ def task_info_get():
 def enrich_config_create_wrapper(ti, dag, params) -> None:
     logger.info(task_info_get())
 
-    config = DAG_ID_TO_CONFIG_MODEL[dag.dag_id](**params)
+    config = EnrichActeursClosedConfig(**params)
     logger.info(f"📖 Configuration:\n{config.model_dump_json(indent=2)}")
-
-    ti.xcom_push(key=XCOMS.CONFIG, value=config)
 
 
 def enrich_config_create_task(dag: DAG) -> PythonOperator:

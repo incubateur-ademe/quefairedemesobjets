@@ -1,8 +1,10 @@
 import logging
 
 from airflow import DAG
-from airflow.operators.python import PythonOperator
-from sources.tasks.airflow_logic.config_management import DAGConfig
+from airflow.providers.standard.operators.python import PythonOperator
+from sources.config.models import SourceConfig
+from sources.config.tasks import TASKS
+from sources.config.xcoms import XCOMS, xcom_pull, xcom_push
 from sources.tasks.business_logic.db_write_type_action_suggestions import (
     db_write_type_action_suggestions,
 )
@@ -14,54 +16,36 @@ logger = logging.getLogger(__name__)
 
 def db_write_type_action_suggestions_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
-        task_id="db_write_suggestion",
+        task_id=TASKS.DB_WRITE_TYPE_ACTION_SUGGESTIONS,
         python_callable=db_write_type_action_suggestions_wrapper,
         dag=dag,
     )
 
 
-def db_write_type_action_suggestions_wrapper(**kwargs) -> None:
-    dag_name = kwargs["dag"].dag_display_name or kwargs["dag"].dag_id
-    dag_config = DAGConfig.from_airflow_params(kwargs["params"])
+def db_write_type_action_suggestions_wrapper(ti, dag, params) -> None:
+    dag_name = dag.dag_display_name or dag.dag_id
+    dag_config = SourceConfig.from_airflow_params(params)
 
-    run_id = kwargs["run_id"]
+    run_id = ti.run_id
 
     # Récupérer les noms des tables temporaires depuis XCom
-    table_name_create = kwargs["ti"].xcom_pull(
-        task_ids="db_data_prepare", key="table_name_create"
-    )
-    table_name_delete = kwargs["ti"].xcom_pull(
-        task_ids="db_data_prepare", key="table_name_delete"
-    )
-    table_name_update = kwargs["ti"].xcom_pull(
-        task_ids="db_data_prepare", key="table_name_update"
-    )
+    table_name_create = xcom_pull(ti, XCOMS.TABLE_NAME_CREATE)
+    table_name_delete = xcom_pull(ti, XCOMS.TABLE_NAME_DELETE)
+    table_name_update = xcom_pull(ti, XCOMS.TABLE_NAME_UPDATE)
 
     # Load the DataFrames from the temporary tables
     df_acteur_to_create = read_and_drop_temporary_table(table_name_create)
     df_acteur_to_delete = read_and_drop_temporary_table(table_name_delete)
     df_acteur_to_update = read_and_drop_temporary_table(table_name_update)
 
-    metadata_to_create = kwargs["ti"].xcom_pull(
-        task_ids="db_data_prepare", key="metadata_to_create"
-    )
-    metadata_to_update = kwargs["ti"].xcom_pull(
-        task_ids="db_data_prepare", key="metadata_to_update"
-    )
-    metadata_to_delete = kwargs["ti"].xcom_pull(
-        task_ids="db_data_prepare", key="metadata_to_delete"
-    )
+    metadata_to_create = xcom_pull(ti, XCOMS.METADATA_TO_CREATE)
+    metadata_to_update = xcom_pull(ti, XCOMS.METADATA_TO_UPDATE)
+    metadata_to_delete = xcom_pull(ti, XCOMS.METADATA_TO_DELETE)
 
-    metadata = kwargs["ti"].xcom_pull(task_ids="source_data_normalize", key="metadata")
-    df_log_error = kwargs["ti"].xcom_pull(
-        task_ids="source_data_normalize", key="df_log_error"
-    )
-    df_log_warning = kwargs["ti"].xcom_pull(
-        task_ids="source_data_normalize", key="df_log_warning"
-    )
-    metadata_columns_updated = kwargs["ti"].xcom_pull(
-        task_ids="keep_acteur_changed", key="metadata_columns_updated"
-    )
+    metadata = xcom_pull(ti, XCOMS.METADATA)
+    df_log_error = xcom_pull(ti, XCOMS.DF_LOG_ERROR)
+    df_log_warning = xcom_pull(ti, XCOMS.DF_LOG_WARNING)
+    metadata_columns_updated = xcom_pull(ti, XCOMS.METADATA_COLUMNS_UPDATED)
 
     log.preview("dag_name", dag_name)
     log.preview("run_id", run_id)
@@ -78,10 +62,10 @@ def db_write_type_action_suggestions_wrapper(**kwargs) -> None:
     ):
         logger.warning("!!! Aucune suggestion à traiter pour cette source !!!")
         # set the task to airflow skip status
-        kwargs["ti"].xcom_push(key="skip", value=True)
+        xcom_push(ti, key=XCOMS.SKIP, value=True)
         return
 
-    return db_write_type_action_suggestions(
+    db_write_type_action_suggestions(
         dag_name=dag_name,
         run_id=run_id,
         df_acteur_to_create=df_acteur_to_create,

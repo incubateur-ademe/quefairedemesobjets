@@ -1,4 +1,4 @@
-from airflow.operators.python import PythonOperator
+from airflow.providers.standard.operators.python import PythonOperator
 from suggestions.tasks.business_logic.db_apply_suggestion import db_apply_suggestion
 
 

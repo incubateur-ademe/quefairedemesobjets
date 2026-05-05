@@ -2,10 +2,13 @@ import logging
 
 import pandas as pd
 from airflow import DAG
-from airflow.operators.python import PythonOperator
-from cluster.config.model import ClusterConfig
+from airflow.providers.standard.operators.python import PythonOperator
+from cluster.config.models import ClusterConfig
 from cluster.config.tasks import TASKS
-from cluster.config.xcoms import XCOMS, xcom_pull
+from cluster.config.xcoms import XCOMS, xcom_pull, xcom_push
+from cluster.tasks.business_logic.cluster_acteurs_config_create import (
+    cluster_acteurs_config_create,
+)
 from cluster.tasks.business_logic.cluster_acteurs_parents_choose_data import (
     cluster_acteurs_parents_choose_data,
 )
@@ -31,11 +34,11 @@ def task_info_get():
     """
 
 
-def cluster_acteurs_parents_choose_data_wrapper(ti) -> None:
+def cluster_acteurs_parents_choose_data_wrapper(ti, params) -> None:
     logger.info(task_info_get())
 
     # use xcom to get the params from the previous task
-    config: ClusterConfig = xcom_pull(ti, XCOMS.CONFIG)
+    config: ClusterConfig = cluster_acteurs_config_create(params)
     df: pd.DataFrame = xcom_pull(ti, XCOMS.DF_PARENTS_CHOOSE_NEW)
 
     if not isinstance(df, pd.DataFrame) or df.empty:
@@ -43,8 +46,10 @@ def cluster_acteurs_parents_choose_data_wrapper(ti) -> None:
 
     log.preview("config reçue", config)
     log.preview_dict_subsets(config.__dict__, key_pattern="dedup_enrich_")
+    if "acteur_type_id" in df.columns:
+        df["acteur_type_id"] = df["acteur_type_id"].astype("Int64")
     log.preview("acteurs groupés", df)
-
+    log.preview("config.dedup_enrich_fields", config.dedup_enrich_fields)
     df = cluster_acteurs_parents_choose_data(
         df_clusters=df,
         fields_to_include=config.dedup_enrich_fields,
@@ -57,7 +62,7 @@ def cluster_acteurs_parents_choose_data_wrapper(ti) -> None:
     logger.info(log.banner_string("🏁 Résultat final de cette tâche"))
     log.preview_df_as_markdown("clusters avec data parent", df, groupby="cluster_id")
 
-    ti.xcom_push(key=XCOMS.DF_PARENTS_CHOOSE_DATA, value=df)
+    xcom_push(ti, XCOMS.DF_PARENTS_CHOOSE_DATA, df)
 
 
 def cluster_acteurs_parents_choose_data_task(dag: DAG) -> PythonOperator:

@@ -2,7 +2,7 @@ import logging
 
 import numpy as np
 import pandas as pd
-from airflow.exceptions import AirflowFailException
+from airflow.sdk.exceptions import AirflowFailException
 from cluster.tasks.business_logic.cluster_acteurs_clusters import (
     cluster_acteurs_clusters,
 )

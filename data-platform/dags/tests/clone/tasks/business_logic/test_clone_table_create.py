@@ -1,7 +1,7 @@
 from unittest.mock import patch
 
 import pytest
-from clone.config import DIR_SQL_CREATION
+from clone.config.models import DIR_SQL_CREATION
 from clone.tasks.business_logic.clone_table_create import (
     commands_download_to_disk_first,
     commands_stream_directly,

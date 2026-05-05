@@ -3,7 +3,7 @@ from unittest.mock import patch
 import pandas as pd
 import pytest
 from sources.config.airflow_params import TRANSFORMATION_MAPPING
-from sources.tasks.airflow_logic.config_management import DAGConfig
+from sources.config.models import SourceConfig
 from sources.tasks.business_logic.source_data_normalize import (
     _remove_undesired_lines,
     _transform_columns,
@@ -132,7 +132,7 @@ class TestSourceDataNormalize:
                     "nom": ["nom"],
                 }
             ),
-            dag_config=DAGConfig.model_validate(dag_config_kwargs),
+            dag_config=SourceConfig.model_validate(dag_config_kwargs),
             dag_id="dag_id",
         )
 
@@ -194,7 +194,9 @@ class TestSourceDataNormalize:
         # Initialiser log_warning comme dans source_data_normalize
         df["log_warning"] = [[] for _ in range(len(df))]
 
-        result_df = _transform_columns(df, DAGConfig.model_validate(dag_config_kwargs))
+        result_df = _transform_columns(
+            df, SourceConfig.model_validate(dag_config_kwargs)
+        )
 
         # Vérifier que la colonne de destination existe
         assert "col_destination" in result_df.columns
@@ -227,7 +229,7 @@ class TestSourceDataNormalize:
                     "col_to_remove": ["fake remove"],
                 }
             ),
-            dag_config=DAGConfig.model_validate(dag_config_kwargs),
+            dag_config=SourceConfig.model_validate(dag_config_kwargs),
             dag_id="dag_id",
         )
         assert "identifiant_unique" in df.columns
@@ -253,7 +255,7 @@ class TestSourceDataNormalize:
                         "col_make_it_raise": ["fake"],
                     }
                 ),
-                dag_config=DAGConfig.model_validate(dag_config_kwargs),
+                dag_config=SourceConfig.model_validate(dag_config_kwargs),
                 dag_id="dag_id",
             )
         assert (
@@ -285,7 +287,7 @@ class TestSourceDataNormalize:
         ],
     )
     def test_remove_explicit_null(self, null_value):
-        dag_config = DAGConfig.model_validate(
+        dag_config = SourceConfig.model_validate(
             {
                 "normalization_rules": [
                     {"keep": "identifiant_unique"},
@@ -353,7 +355,7 @@ class TestDfApplyOCA:
 
         df, _, _, _ = source_data_normalize(
             df_acteur_from_source=df_acteur,
-            dag_config=DAGConfig.model_validate(dag_config_kwargs),
+            dag_config=SourceConfig.model_validate(dag_config_kwargs),
             dag_id="dag_id",
         )
 
@@ -381,7 +383,7 @@ class TestDfApplyOCA:
 
         df, _, _, _ = source_data_normalize(
             df_acteur_from_source=df_acteur,
-            dag_config=DAGConfig.model_validate(dag_config_kwargs),
+            dag_config=SourceConfig.model_validate(dag_config_kwargs),
             dag_id="dag_id",
         )
 
@@ -406,7 +408,7 @@ class TestDfApplyOCA:
 
         df, _, _, _ = source_data_normalize(
             df_acteur_from_source=df_acteur,
-            dag_config=DAGConfig.model_validate(dag_config_kwargs),
+            dag_config=SourceConfig.model_validate(dag_config_kwargs),
             dag_id="dag_id",
         )
 
@@ -532,7 +534,7 @@ class TestRemoveUndesiredLines:
         ],
     )
     def test_remove_undesired_lines_suppressions(self, df, expected_df, dag_config):
-        # Mock the DAGConfig
+        # Mock the SourceConfig
 
         result_df, _ = _remove_undesired_lines(df, dag_config)
         pd.testing.assert_frame_equal(

@@ -1,5 +1,5 @@
 import pytest
-from sources.tasks.airflow_logic.config_management import NormalizationColumnTransform
+from sources.config.models import NormalizationColumnTransform
 from sources.tasks.business_logic.source_config_validate import source_config_validate
 
 

@@ -1,10 +1,11 @@
 import logging
 
-import pandas as pd
 from airflow import DAG
-from airflow.operators.python import PythonOperator
-from airflow.utils.trigger_rule import TriggerRule
-from sources.tasks.airflow_logic.config_management import DAGConfig
+from airflow.providers.standard.operators.python import PythonOperator
+from airflow.task.trigger_rule import TriggerRule
+from sources.config.models import SourceConfig
+from sources.config.tasks import TASKS
+from sources.config.xcoms import XCOMS, xcom_push
 from sources.tasks.business_logic.source_data_download import source_data_download
 from utils import logging_utils as log
 
@@ -13,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 def source_data_download_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
-        task_id="source_data_download",
+        task_id=TASKS.SOURCE_DATA_DOWNLOAD,
         python_callable=source_data_download_wrapper,
         dag=dag,
         trigger_rule=TriggerRule.ALL_SUCCESS,
@@ -21,8 +22,8 @@ def source_data_download_task(dag: DAG) -> PythonOperator:
     )
 
 
-def source_data_download_wrapper(**kwargs) -> pd.DataFrame:
-    dag_config = DAGConfig.from_airflow_params(kwargs["params"])
+def source_data_download_wrapper(ti, dag, params):
+    dag_config = SourceConfig.from_airflow_params(params)
     endpoint = dag_config.endpoint
     metadata_endpoint = dag_config.metadata_endpoint
     s3_connection_id = dag_config.s3_connection_id
@@ -31,8 +32,10 @@ def source_data_download_wrapper(**kwargs) -> pd.DataFrame:
     if s3_connection_id:
         log.preview("S3 connection id", s3_connection_id)
 
-    return source_data_download(
+    df = source_data_download(
         endpoint=endpoint,
         s3_connection_id=s3_connection_id,
         metadata_endpoint=metadata_endpoint,
     )
+
+    xcom_push(ti, XCOMS.SOURCE_DOWNLOADED, df)

@@ -11,8 +11,6 @@ from cluster.helpers.shorthands.change_model_name import (
 from cluster.tasks.business_logic.cluster_acteurs_suggestions.prepare import (
     cluster_acteurs_suggestions_prepare,
 )
-from shapely.geometry import Point
-
 from data.models.change import (
     COL_CHANGE_MODEL_NAME,
     COL_CHANGE_ORDER,
@@ -52,7 +50,7 @@ class TestClusterActeursSuggestionsDisplay:
                     COL_CHANGE_ORDER: 1,
                     COL_CHANGE_REASON: "because",
                     COL_CHANGE_MODEL_NAME: CHANGE_CREATE,
-                    COL_PARENT_DATA_NEW: {"acteur_type": at1, "location": Point(1, 2)},
+                    COL_PARENT_DATA_NEW: {"acteur_type": at1, "location": (1, 2)},
                 },
                 {
                     "cluster_id": "c1",
@@ -101,7 +99,7 @@ class TestClusterActeursSuggestionsDisplay:
                     COL_CHANGE_ORDER: 1,
                     COL_CHANGE_REASON: "because",
                     COL_CHANGE_MODEL_NAME: CHANGE_CREATE,
-                    COL_PARENT_DATA_NEW: {"acteur_type": at1, "location": Point(1, 2)},
+                    COL_PARENT_DATA_NEW: {"acteur_type": at1, "location": (1, 2)},
                 },
                 {
                     "cluster_id": "c4",
@@ -115,41 +113,37 @@ class TestClusterActeursSuggestionsDisplay:
             ]
         )
 
-    @pytest.fixture
-    def suggestions(self, df_clusters):
-        working, failing = cluster_acteurs_suggestions_prepare(df_clusters)
-        return working, failing
+    def test_structure_and_type(self, df_clusters):
+        working, _ = cluster_acteurs_suggestions_prepare(df_clusters)
 
-    @pytest.fixture
-    def working(self, suggestions):
-        return suggestions[0]
-
-    @pytest.fixture
-    def failing(self, suggestions):
-        return suggestions[1]
-
-    def test_structure_and_type(self, working):
         assert isinstance(working, list)
         assert isinstance(working[0], dict)
         assert list(working[0].keys()) == ["title", "cluster_id", "changes"]
 
-    def test_one_suggestion_per_cluster(self, df_clusters, working):
+    def test_one_suggestion_per_cluster(self, df_clusters):
+        working, _ = cluster_acteurs_suggestions_prepare(df_clusters)
+
         # 1 suggestion per cluster EXCEPT for failing c4
         assert len(working) == df_clusters["cluster_id"].nunique() - 1
 
-    def test_verify_clusters(self, working):
+    def test_verify_clusters(self, df_clusters):
+        working, _ = cluster_acteurs_suggestions_prepare(df_clusters)
         assert working[0]["cluster_id"] == "c1"
         assert working[1]["cluster_id"] == "c2"
         assert working[2]["cluster_id"] == "c3"
 
-    def test_model_params_location_converted(self, working):
+    def test_model_params_location_converted(self, df_clusters):
+        working, _ = cluster_acteurs_suggestions_prepare(df_clusters)
+
         c1 = working[0]
         data = c1["changes"][0]["model_params"]["data"]
         assert "location" not in data
         assert data["longitude"] == 1.0
         assert data["latitude"] == 2.0
 
-    def test_verify_model_params(self, working):
+    def test_verify_model_params(self, df_clusters):
+        working, _ = cluster_acteurs_suggestions_prepare(df_clusters)
+
         c1 = working[0]
         assert c1["changes"][0]["model_params"] == {
             "id": "new parent",
@@ -170,7 +164,9 @@ class TestClusterActeursSuggestionsDisplay:
             "data": {"parent_id": "parent to keep"},
         }
 
-    def test_failing_clusters(self, working, failing):
+    def test_failing_clusters(self, df_clusters):
+        working, failing = cluster_acteurs_suggestions_prepare(df_clusters)
+
         # The entire cluster c4 should be rejected
         assert len(failing) == 1
         assert failing[0]["cluster_id"] == "c4"

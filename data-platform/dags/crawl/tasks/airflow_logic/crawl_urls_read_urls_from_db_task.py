@@ -5,10 +5,10 @@ unnecessarily"""
 import logging
 
 from airflow import DAG
-from airflow.exceptions import AirflowSkipException
-from airflow.operators.python import PythonOperator
+from airflow.providers.standard.operators.python import PythonOperator
+from airflow.sdk.exceptions import AirflowSkipException
 from crawl.config.tasks import TASKS
-from crawl.config.xcoms import XCOMS
+from crawl.config.xcoms import XCOMS, xcom_push
 from crawl.tasks.business_logic.crawl_urls_read_urls_from_db import (
     crawl_urls_read_urls_from_db,
 )
@@ -40,7 +40,7 @@ def crawl_urls_read_urls_from_db_wrapper(ti, params) -> None:
     if df.empty:
         raise AirflowSkipException("Pas d'URLs à parcourir = on s'arrête là")
 
-    ti.xcom_push(key=XCOMS.DF_READ, value=df)
+    xcom_push(ti, XCOMS.DF_READ, df)
 
 
 def crawl_urls_read_urls_from_db_task(dag: DAG) -> PythonOperator:

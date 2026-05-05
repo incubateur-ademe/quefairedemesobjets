@@ -1,5 +1,5 @@
 import pytest
-from clone.config.model import DIR_SQL_CREATION, CloneConfig
+from clone.config.models import DIR_SQL_CREATION, CloneConfig
 
 
 class TestCloneConfig:
