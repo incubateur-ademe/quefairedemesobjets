@@ -69,3 +69,11 @@ def test_response_carries_listbox_role(client, url):
     body = response.content.decode()
     assert 'role="listbox"' in body
     assert 'id="test-listbox"' in body
+
+
+def test_response_is_publicly_cacheable(client, url):
+    """Headers must let nginx/CDN cache shared BAN responses for 1h."""
+    response = client.get(url, {"q": "", "turbo_frame_id": "test"})
+    cache_control = response.headers.get("Cache-Control", "")
+    assert "public" in cache_control
+    assert "max-age=3600" in cache_control

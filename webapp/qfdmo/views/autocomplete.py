@@ -2,6 +2,8 @@ import logging
 from typing import override
 
 import requests
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_control
 from django.views.generic import ListView
 
 logger = logging.getLogger(__name__)
@@ -17,6 +19,10 @@ GEOLOCATE_OPTION = {
 }
 
 
+@method_decorator(
+    cache_control(public=True, max_age=60 * 60, stale_while_revalidate=60 * 5),
+    name="dispatch",
+)
 class AutocompleteBanAddressView(ListView):
     """Server-rendered Turbo Frame results for the carte address combobox.
 
@@ -25,6 +31,10 @@ class AutocompleteBanAddressView(ListView):
 
     The first option is always a synthetic « Autour de moi » entry that
     triggers `navigator.geolocation.getCurrentPosition` on the client.
+
+    Responses are public-cacheable for 1 hour so nginx (and any CDN /
+    intermediate cache) can serve repeated queries without hitting BAN.
+    Address reference data is shared across users and changes slowly.
     """
 
     template_name = "ui/forms/widgets/autocomplete/address_results.html"
