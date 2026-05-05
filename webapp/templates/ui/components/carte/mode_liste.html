@@ -1,5 +1,5 @@
 {% load carte_tags dsfr_tags modal_tags %}
-<main
+<section
     class="
     qf-flex
     qf-flex-col
@@ -7,13 +7,14 @@
     qf-h-full"
     tabindex="0"
     data-testid="liste-mode-container"
+    aria-label="Liste des solutions"
 >
     {% include "ui/components/carte/shared/disclaimers/loading_solutions.html" %}
     <div class="qf-flex qf-flex-col qf-gap-1w qf-px-1w md:qf-px-3w">
-        <nav class="qf-flex qf-justify-end qf-gap-2w max-md:qf-pt-2w md:qf-py-2w">
+        <div class="qf-flex qf-justify-end qf-gap-2w max-md:qf-pt-2w md:qf-py-2w">
             {% modal_button modal_id="filtres" button_text="Filtres" button_extra_classes="fr-btn--secondary fr-btn--icon-left fr-icon-equalizer-line max-md:qf-hidden" %}
             {% include "ui/components/carte/buttons/ajouter_un_lieu_mode_liste.html" %}
-        </nav>
+        </div>
         <div class="qf-flex qf-flex-col qf-justify-center qf-items-center">
             {% if paginated_acteurs_obj %}
                 <span class="max-md:qf-pb-1w qf-mr-auto qf-text-grey-425 qf-text-sm">{{ count }} {{ MODE_LISTE.pagination_suffixe }}</span>
@@ -41,4 +42,4 @@
         </div>
         {% endif %}
     </div>
-</main>
+</section>

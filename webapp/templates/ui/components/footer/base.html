@@ -6,7 +6,9 @@
     <div class="fr-container">
     {% if request %}
         {% wagtailcache None FRAGMENT_CACHE_KEYS.footer_top %}
+            <nav role="navigation" aria-label="Pour aller plus loin">
             {% flat_menu show_menu_heading=True handle="surfooter_assistant" template="ui/components/footer/footer-top-menu.html" %}
+            </nav>
         {% endwagtailcache %}
     {% endif %}
     </div>
