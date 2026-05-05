@@ -415,6 +415,15 @@ class ProduitPage(
         help_text="Si cochée, cette page sera affichée avec le template famille "
         "(fond vert) et pourra contenir des sous-produits.",
     )
+
+    ab_test_carte_default_view = models.BooleanField(
+        "A/B test mode carte/liste par défaut",
+        default=False,
+        help_text="Activer le test A/B qui sert le mode liste par défaut sur "
+        "mobile à 50% des sessions (flag PostHog "
+        "<code>produit-carte-default-view-mobile</code>). À activer uniquement "
+        "sur les fiches sélectionnées pour l'expérience.",
+    )
     infotri = StreamField([("image", ImageBlock())], blank=True)
     body = StreamField(
         STREAMFIELD_COMMON_BLOCKS,
@@ -516,6 +525,12 @@ class ProduitPage(
                 FieldPanel("sous_categorie_objet"),
             ],
             heading="Taxonomie",
+        ),
+        MultiFieldPanel(
+            [
+                FieldPanel("ab_test_carte_default_view"),
+            ],
+            heading="Tests A/B",
         ),
     ]
 

@@ -2,6 +2,22 @@
     qf-w-full
     qf-overflow-x-hidden
 ">
+{% if ab_test_enabled %}
+    {# A/B test: keep src as the safety net (loads control if JS or PostHog fails). #}
+    {# ab_test_controller swaps in url_variant when the PostHog flag returns "variant". #}
+    <turbo-frame
+        id="{{ id }}"
+        allow="geolocation; clipboard-write"
+        class="qf-h-full qf-w-full"
+        data-testid="carte"
+        loading="lazy"
+        data-controller="ab-test"
+        data-ab-test-flag-key-value="produit-carte-default-view-mobile"
+        data-ab-test-src-variant-value="{{ url_variant }}{% if request.GET.epci %}&epci_codes={{ request.GET.epci }}{% endif %}"
+        data-ab-test-mobile-only-value="true"
+        src="{{ url }}{% if request.GET.epci %}&epci_codes={{ request.GET.epci }}{% endif %}">
+    </turbo-frame>
+{% else %}
     <turbo-frame
         id="{{ id }}"
         allow="geolocation; clipboard-write"
@@ -9,4 +25,5 @@
         data-testid="carte"
         src="{{ url }}{% if request.GET.epci %}&epci_codes={{ request.GET.epci }}{% endif %}">
     </turbo-frame>
+{% endif %}
 </div>
