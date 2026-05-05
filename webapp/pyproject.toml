@@ -35,7 +35,7 @@ dependencies = [
     "djangoql>=0.18.1",
     "pydantic[email]>=2.12.5",
     "django-admin-sortable2>=2.2.8",
-    "more-itertools>=8.0,<11",
+    "more-itertools>=11.0.2,<12",
     "wagtail-honeypot>=1.2.1",
     "sites-conformes>=2.5.3rc4,<3",
     "wagtail==7.3.1",
