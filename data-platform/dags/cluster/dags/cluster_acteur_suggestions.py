@@ -1,10 +1,9 @@
 """DAG which generates clustering suggestions for acteurs"""
 
 from airflow import DAG
-from airflow.models.param import Param
 from airflow.sdk import Param
 from cluster.config.constants import FIELDS_PARENT_DATA_EXCLUDED, UNNORMALIZABLE_FIELDS
-from cluster.config.model import ClusterConfig
+from cluster.config.models import ClusterConfig
 from cluster.tasks.airflow_logic.chain_tasks import chain_tasks
 from cluster.ui import params_separators as UI_PARAMS_SEPARATORS
 from shared.config.airflow import DEFAULT_ARGS_NO_RETRIES

@@ -3,9 +3,9 @@ import logging
 import pandas as pd
 from airflow import DAG
 from airflow.providers.standard.operators.python import PythonOperator
-from cluster.config.model import ClusterConfig
+from cluster.config.models import ClusterConfig
 from cluster.config.tasks import TASKS
-from cluster.config.xcoms import XCOMS, xcom_pull
+from cluster.config.xcoms import XCOMS, xcom_pull, xcom_push
 from cluster.tasks.business_logic.cluster_acteurs_config_create import (
     cluster_acteurs_config_create,
 )
@@ -64,7 +64,7 @@ def cluster_acteurs_normalize_wrapper(ti, params) -> None:
     df_norm = df_sort(df_norm)
     log.preview_df_as_markdown("acteurs normalisés", df_norm)
 
-    ti.xcom_push(key=XCOMS.DF_NORMALIZE, value=df_norm)
+    xcom_push(ti, XCOMS.DF_NORMALIZE, df_norm)
 
 
 def cluster_acteurs_normalize_task(dag: DAG) -> PythonOperator:

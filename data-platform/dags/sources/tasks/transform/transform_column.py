@@ -8,7 +8,7 @@ import pandas as pd
 from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 from opening_hours import OpeningHours, ParserError
-from sources.tasks.airflow_logic.config_management import DAGConfig
+from sources.config.models import SourceConfig
 from sources.tasks.transform.exceptions import (
     ActeurTypeCodeError,
     BooleanValueWarning,
@@ -265,7 +265,7 @@ def clean_code_list(codes: str | None, _) -> list[str]:
 
 
 def clean_sous_categorie_codes(
-    sscat_list: str | list[str] | None, dag_config: DAGConfig
+    sscat_list: str | list[str] | None, dag_config: SourceConfig
 ) -> list[str]:
     sous_categorie_codes = []
     if sscat_list is not None:
@@ -300,7 +300,7 @@ def clean_sous_categorie_codes(
 
 
 def clean_sous_categorie_codes_sinoe(
-    sscats: str | None, dag_config: DAGConfig
+    sscats: str | None, dag_config: SourceConfig
 ) -> list[str]:
 
     if not sscats:

@@ -3,7 +3,7 @@ from itertools import chain
 
 import pandas as pd
 from shared.tasks.database_logic import db_tasks
-from sources.tasks.airflow_logic.config_management import DAGConfig
+from sources.config.models import SourceConfig
 from sources.tasks.transform.read_mapping_from_postgres import (
     read_mapping_from_postgres,
 )
@@ -14,7 +14,7 @@ from utils import logging_utils as log
 logger = logging.getLogger(__name__)
 
 
-def source_data_validate(df: pd.DataFrame, dag_config: DAGConfig) -> None:
+def source_data_validate(df: pd.DataFrame, dag_config: SourceConfig) -> None:
     """Etape de validation des données source où on applique des règles
     métier scrictes. Par exemple, si un SIRET est malformé c'est qu'on
     pas bien fait notre travail à l'étape de normalisation"""

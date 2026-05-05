@@ -4,9 +4,9 @@ import pandas as pd
 from airflow import DAG
 from airflow.providers.standard.operators.python import PythonOperator
 from airflow.sdk.exceptions import AirflowSkipException
-from cluster.config.model import ClusterConfig
+from cluster.config.models import ClusterConfig
 from cluster.config.tasks import TASKS
-from cluster.config.xcoms import XCOMS, xcom_pull
+from cluster.config.xcoms import XCOMS, xcom_pull, xcom_push
 from cluster.tasks.business_logic.cluster_acteurs_clusters_prepare import (
     cluster_acteurs_clusters_prepare,
 )
@@ -67,7 +67,7 @@ def cluster_acteurs_clusters_prepare_wrapper(ti, params) -> None:
     if df.empty:
         raise AirflowSkipException("Pas de clusters trouvés, on s'arrête là")
 
-    ti.xcom_push(key=XCOMS.DF_CLUSTERS_PREPARE, value=df)
+    xcom_push(ti, XCOMS.DF_CLUSTERS_PREPARE, df)
 
 
 def cluster_acteurs_clusters_prepare_task(dag: DAG) -> PythonOperator:

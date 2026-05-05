@@ -10,7 +10,7 @@
 
 ### Vérification de la configuration
 
-La configuration doit suivre le format de la classe [`DAGConfig`](../../../data-platform/dags/sources/tasks/airflow_logic/config_management.py#L-DAGConfig)
+La configuration doit suivre le format de la classe [`SourceConfig`](../../../data-platform/dags/sources/tasks/airflow_logic/config_management.py#L-SourceConfig)
 
 ### Normalisation
 

@@ -2,10 +2,10 @@ import logging
 from itertools import chain
 
 from sources.config.airflow_params import TRANSFORMATION_MAPPING
-from sources.tasks.airflow_logic.config_management import (
-    DAGConfig,
+from sources.config.models import (
     NormalizationColumnTransform,
     NormalizationDFTransform,
+    SourceConfig,
 )
 from sources.tasks.transform.sequence_utils import normalize_to_list
 from sources.tasks.transform.transform_df import MANDATORY_COLUMNS_AFTER_NORMALISATION
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 def source_config_validate(
-    dag_config: DAGConfig,
+    dag_config: SourceConfig,
     codes_sc_db: set[str],
 ) -> None:
     """Etape de validation des paramètres de configuration du DAG
@@ -31,12 +31,10 @@ def source_config_validate(
         missing_mandatory_columns = (
             set(MANDATORY_COLUMNS_AFTER_NORMALISATION) - expected_columns
         )
-        raise ValueError(
-            f"""
+        raise ValueError(f"""
 Mandatory columns are missing in dag_config,
 Missing mandatory columns are: {missing_mandatory_columns}
-Expected columns from dag_config: {expected_columns}"""
-        )
+Expected columns from dag_config: {expected_columns}""")
 
     # Validation des sous-catégories produit qui doivent être mappées
     # et toutes correspondre à des codes valides dans notre DB

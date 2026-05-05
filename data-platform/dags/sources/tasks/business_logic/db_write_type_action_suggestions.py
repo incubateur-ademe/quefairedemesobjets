@@ -127,7 +127,7 @@ def db_write_type_action_suggestions(
     df_log_error: pd.DataFrame,
     df_log_warning: pd.DataFrame,
     use_legacy_suggestions: bool,
-):
+) -> None:
 
     from data.models.suggestion import SuggestionAction
 

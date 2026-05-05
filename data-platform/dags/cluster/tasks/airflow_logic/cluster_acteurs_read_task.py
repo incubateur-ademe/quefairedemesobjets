@@ -3,9 +3,9 @@ import logging
 from airflow import DAG
 from airflow.providers.standard.operators.python import PythonOperator
 from airflow.sdk.exceptions import AirflowSkipException
-from cluster.config.model import ClusterConfig
+from cluster.config.models import ClusterConfig
 from cluster.config.tasks import TASKS
-from cluster.config.xcoms import XCOMS
+from cluster.config.xcoms import XCOMS, xcom_push
 from cluster.tasks.business_logic.cluster_acteurs_config_create import (
     cluster_acteurs_config_create,
 )
@@ -66,7 +66,7 @@ def cluster_acteurs_read_wrapper(ti, params) -> None:
     logger.info(log.banner_string("🏁 Résultat final de cette tâche"))
     log.preview_df_as_markdown("acteurs sélectionnés", df)
 
-    ti.xcom_push(key=XCOMS.DF_READ, value=df)
+    xcom_push(ti, XCOMS.DF_READ, df)
 
 
 def cluster_acteurs_read_task(dag: DAG) -> PythonOperator:

@@ -5,7 +5,7 @@ import logging
 from airflow import DAG
 from airflow.providers.standard.operators.python import PythonOperator
 from crawl.config.tasks import TASKS
-from crawl.config.xcoms import XCOMS, xcom_pull
+from crawl.config.xcoms import XCOMS, xcom_pull, xcom_push
 from crawl.tasks.business_logic.crawl_urls_check_dns import crawl_urls_check_dns
 
 logger = logging.getLogger(__name__)
@@ -41,8 +41,8 @@ def crawl_urls_check_dns_wrapper(ti) -> None:
         df=xcom_pull(ti, XCOMS.DF_SYNTAX_OK, skip_if_empty=True),
     )
 
-    ti.xcom_push(key=XCOMS.DF_DNS_OK, value=df_dns_ok)
-    ti.xcom_push(key=XCOMS.DF_DNS_FAIL, value=df_dns_fail)
+    xcom_push(ti, XCOMS.DF_DNS_OK, df_dns_ok)
+    xcom_push(ti, XCOMS.DF_DNS_FAIL, df_dns_fail)
 
 
 def crawl_urls_check_dns_task(dag: DAG) -> PythonOperator:

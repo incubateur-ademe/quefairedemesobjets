@@ -2,8 +2,9 @@ import logging
 
 from airflow import DAG
 from airflow.providers.standard.operators.python import PythonOperator
-from sources.config.xcoms import XCOMS, xcom_pull
-from sources.tasks.airflow_logic.config_management import DAGConfig
+from sources.config.models import SourceConfig
+from sources.config.tasks import TASKS
+from sources.config.xcoms import XCOMS, xcom_pull, xcom_push
 from sources.tasks.business_logic.db_read_acteur import db_read_acteur
 from sources.tasks.business_logic.keep_acteur_changed import keep_acteur_changed
 from utils import logging_utils as log
@@ -13,15 +14,15 @@ logger = logging.getLogger(__name__)
 
 def keep_acteur_changed_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
-        task_id="keep_acteur_changed",
+        task_id=TASKS.KEEP_ACTEUR_CHANGED,
         python_callable=keep_acteur_changed_wrapper,
         dag=dag,
     )
 
 
-def keep_acteur_changed_wrapper(**kwargs):
-    df_normalized = xcom_pull(kwargs["ti"], XCOMS.SOURCE_NORMALIZED)
-    dag_config = DAGConfig.from_airflow_params(kwargs["params"])
+def keep_acteur_changed_wrapper(ti, dag, params):
+    df_normalized = xcom_pull(ti, XCOMS.SOURCE_NORMALIZED)
+    dag_config = SourceConfig.from_airflow_params(params)
 
     df_acteur_from_db = db_read_acteur(
         df_normalized=df_normalized,
@@ -39,8 +40,6 @@ def keep_acteur_changed_wrapper(**kwargs):
             dag_config=dag_config,
         )
     )
-    kwargs["ti"].xcom_push(key="df_acteur_from_source", value=df_acteur_from_source)
-    kwargs["ti"].xcom_push(key="df_acteur_from_db", value=df_acteur_from_db)
-    kwargs["ti"].xcom_push(
-        key="metadata_columns_updated", value=metadata_columns_updated
-    )
+    xcom_push(ti, key=XCOMS.DF_ACTEUR_FROM_SOURCE, value=df_acteur_from_source)
+    xcom_push(ti, key=XCOMS.DF_ACTEUR_FROM_DB, value=df_acteur_from_db)
+    xcom_push(ti, key=XCOMS.METADATA_COLUMNS_UPDATED, value=metadata_columns_updated)
