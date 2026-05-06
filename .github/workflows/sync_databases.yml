@@ -39,7 +39,7 @@ jobs:
       - name: Login Scalingo CLI
         run: scalingo login --api-token "${DUPLICATE_API_TOKEN}"
       - name: Use Scaleway CLI
-        uses: scaleway/action-scw@be2696f261325a78354eda14988c80405f33e082
+        uses: scaleway/action-scw@2e34a1eb35cf3cac627f24643a101fea269cbd83
         with:
           save-config: true
           export-config: true
