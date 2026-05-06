@@ -13,7 +13,7 @@ from data.views import get_context_from_suggestion_groupe
 from django.contrib import admin, messages
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-from django.db.models import QuerySet
+from django.db.models import OuterRef, Q, QuerySet, Subquery
 from django.template.loader import render_to_string
 from django.utils.html import format_html, mark_safe
 from djangoql.admin import DjangoQLSearchMixin
@@ -309,6 +309,43 @@ def apply_suggestions_to_revision(self, request, queryset):
     )
 
 
+class HasChampField(StrField):
+    """Permet de filtrer par champ de suggestion unitaire individuel"""
+
+    name = "has_champ"
+    suggest_options = False
+
+    # def get_options(self, search):
+    #     return ["public_accueilli", "lieu_prestation"]  # tes valeurs possibles
+
+    def get_lookup(self, path, operator, value):
+        if operator == "=":
+            subquery = Subquery(
+                SuggestionUnitaire.objects.filter(
+                    suggestion_groupe_id=OuterRef("pk"),
+                    champs=value,
+                ).values("suggestion_groupe_id")
+            )
+            return Q(pk__in=subquery)
+        elif operator == "~":
+            subquery = Subquery(
+                SuggestionUnitaire.objects.filter(
+                    suggestion_groupe_id=OuterRef("pk"),
+                    champs__icontains=value,
+                ).values("suggestion_groupe_id")
+            )
+            return Q(pk__in=subquery)
+        return super().get_lookup(path, operator, value)
+
+
+# class SuggestionQLSchema(DjangoQLSchema):
+#     def get_fields(self, model):
+#         fields = super().get_fields(model)
+#         if model == Suggestion:
+#             fields = list(fields) + [HasChampField]
+#         return fields
+
+
 @admin.register(SuggestionGroupe)
 class SuggestionGroupeAdmin(
     DjangoQLSearchMixin, NotEditableMixin, NotSelfDeletableMixin
@@ -335,7 +372,7 @@ class SuggestionGroupeAdmin(
                     ],
                     IntField(name="suggestion_unitaires_count"),
                     BoolField(name="has_parent"),
-                ]
+                ] + [HasChampField()]
 
             return fields
 
