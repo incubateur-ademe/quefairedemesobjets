@@ -9,6 +9,8 @@
     qf-flex qf-flex-col qf-items-start qf-gap-3w {% block header_classes %}{% endblock %}">
         {% block content %}
 
+        {% include "sites_conformes_content_manager/blocks/breadcrumbs.html" %}
+
         {% include "ui/components/produit/nouvelle_recherche.html" %}
 
         {% get_search_term_name as search_term_name %}
