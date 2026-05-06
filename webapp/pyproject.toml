@@ -39,7 +39,7 @@ dependencies = [
     "wagtail-honeypot>=1.2.1",
     "sites-conformes>=2.5.3rc4,<3",
     "wagtail==7.3.1",
-    "pre-commit>=4.5.1",
+    "pre-commit>=4.6.0",
     "modelsearch>=1.1.1",
     "wagtailmenus>=4.0.6",
 ]
@@ -128,7 +128,7 @@ dev = [
     "django-debug-toolbar>=6.3.0,<7",
     "factory-boy>=3.3.1,<4",
     "honcho>=2.0.0,<3",
-    "pre-commit>=4.3.0,<5",
+    "pre-commit>=4.6.0,<5",
     "ptpython>=3.0.30,<4",
     "beautifulsoup4>=4.13.5,<5",
     "pytest>=9.0.3,<10",
