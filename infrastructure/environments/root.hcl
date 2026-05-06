@@ -19,25 +19,7 @@ provider "scaleway" {
 EOF
 }
 
-generate "backend" {
-  path      = "backend.tf"
-  if_exists = "overwrite"
-  contents  = <<EOF
-terraform {
-  backend "s3" {
-    endpoint                    = "s3.fr-par.scw.cloud"
-    bucket                      = "lvao-terraform-state"
-    key                         = "${path_relative_to_include()}/terraform.tfstate"
-    region                      = "fr-par"
-    skip_credentials_validation = true
-    skip_region_validation      = true
-    encrypt                     = false
-    access_key                  = var.access_key
-    secret_key                  = var.secret_key
-  }
-}
-EOF
-}
+
 
 generate "common_variables" {
   path      = "common_variables.tf"
@@ -46,7 +28,5 @@ generate "common_variables" {
 }
 
 inputs = {
-  prefix      = "lvao"
-  environment = "${basename(dirname(get_terragrunt_dir()))}"
-  project_id  = "a279f7ac-06ce-4236-9d78-51298d8d72ed"
+  prefix     = "qfdmod"
 }

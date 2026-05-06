@@ -2,8 +2,12 @@ terraform {
   source = "../../../modules/container_webapp"
 }
 
-include {
+include "root" {
   path = find_in_parent_folders("root.hcl")
+}
+
+include "env" {
+  path = find_in_parent_folders("env.hcl")
 }
 
 dependency "container" {
@@ -26,8 +30,8 @@ dependency "object_storage" {
 
 inputs = {
   namespace_id   = dependency.container.outputs.namespace_id
-  registry_image = "rg.fr-par.scw.cloud/ns-qfdmo/webapp:preview"
-  image_tag      = "preview"
+  registry_image = "rg.fr-par.scw.cloud/ns-qfdmo/webapp"
+  image_tag      = "441deea"
 
   # Sizing pour preview — scale à 0 quand inactif.
   cpu_limit    = 1000
