@@ -25,11 +25,13 @@ data "scaleway_secret_version" "webapp" {
 }
 
 locals {
+  # `data` renvoyé par scaleway_secret_version est encodé en base64 ;
+  # on le décode ici pour exposer la valeur brute aux conteneurs.
   webapp_secrets = var.use_secret_manager ? {
-    AWS_ACCESS_KEY_ID        = data.scaleway_secret_version.webapp[var.secret_name_AWS_ACCESS_KEY_ID].data
-    AWS_SECRET_ACCESS_KEY    = data.scaleway_secret_version.webapp[var.secret_name_AWS_SECRET_ACCESS_KEY].data
-    SENTRY_DSN               = data.scaleway_secret_version.webapp[var.secret_name_SENTRY_DSN].data
-    NOTION_TOKEN             = data.scaleway_secret_version.webapp[var.secret_name_NOTION_TOKEN].data
-    POSTHOG_PERSONAL_API_KEY = data.scaleway_secret_version.webapp[var.secret_name_POSTHOG_PERSONAL_API_KEY].data
+    AWS_ACCESS_KEY_ID        = base64decode(data.scaleway_secret_version.webapp[var.secret_name_AWS_ACCESS_KEY_ID].data)
+    AWS_SECRET_ACCESS_KEY    = base64decode(data.scaleway_secret_version.webapp[var.secret_name_AWS_SECRET_ACCESS_KEY].data)
+    SENTRY_DSN               = base64decode(data.scaleway_secret_version.webapp[var.secret_name_SENTRY_DSN].data)
+    NOTION_TOKEN             = base64decode(data.scaleway_secret_version.webapp[var.secret_name_NOTION_TOKEN].data)
+    POSTHOG_PERSONAL_API_KEY = base64decode(data.scaleway_secret_version.webapp[var.secret_name_POSTHOG_PERSONAL_API_KEY].data)
   } : {}
 }

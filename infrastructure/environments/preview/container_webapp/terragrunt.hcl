@@ -56,7 +56,7 @@ inputs = {
 
   # Wildcard Django : autorise les sous-domaines Scaleway containers.
   # Couvre l'URL nginx ET l'URL interne webapp (health-checks).
-  allowed_hosts              = ".functions.fnc.fr-par.scw.cloud,.containers.fnc.fr-par.scw.cloud"
+  allowed_hosts              = "127.0.0.1,.functions.fnc.fr-par.scw.cloud,.containers.fnc.fr-par.scw.cloud"
   legacy_site_vitrine_domain = ""
   webapp_bucket_name         = dependency.object_storage.outputs.webapp_bucket_name
 

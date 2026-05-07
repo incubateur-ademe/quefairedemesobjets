@@ -31,14 +31,16 @@ locals {
     DB_WEBAPP_SAMPLE = var.db_webapp_sample
   }
 
+  # `data` renvoyé par scaleway_secret_version est encodé en base64 ;
+  # on le décode ici pour exposer la valeur brute aux conteneurs.
   secrets_from_manager = {
-    SECRET_KEY               = data.scaleway_secret_version.webapp[var.secret_name_SECRET_KEY].data
-    AWS_ACCESS_KEY_ID        = data.scaleway_secret_version.webapp[var.secret_name_AWS_ACCESS_KEY_ID].data
-    AWS_SECRET_ACCESS_KEY    = data.scaleway_secret_version.webapp[var.secret_name_AWS_SECRET_ACCESS_KEY].data
-    SENTRY_DSN               = data.scaleway_secret_version.webapp[var.secret_name_SENTRY_DSN].data
-    POSTHOG_PERSONAL_API_KEY = data.scaleway_secret_version.webapp[var.secret_name_POSTHOG_PERSONAL_API_KEY].data
-    NOTION_TOKEN             = data.scaleway_secret_version.webapp[var.secret_name_NOTION_TOKEN].data
-    ASSISTANT_POSTHOG_KEY    = data.scaleway_secret_version.webapp[var.secret_name_ASSISTANT_POSTHOG_KEY].data
+    SECRET_KEY               = base64decode(data.scaleway_secret_version.webapp[var.secret_name_SECRET_KEY].data)
+    AWS_ACCESS_KEY_ID        = base64decode(data.scaleway_secret_version.webapp[var.secret_name_AWS_ACCESS_KEY_ID].data)
+    AWS_SECRET_ACCESS_KEY    = base64decode(data.scaleway_secret_version.webapp[var.secret_name_AWS_SECRET_ACCESS_KEY].data)
+    SENTRY_DSN               = base64decode(data.scaleway_secret_version.webapp[var.secret_name_SENTRY_DSN].data)
+    POSTHOG_PERSONAL_API_KEY = base64decode(data.scaleway_secret_version.webapp[var.secret_name_POSTHOG_PERSONAL_API_KEY].data)
+    NOTION_TOKEN             = base64decode(data.scaleway_secret_version.webapp[var.secret_name_NOTION_TOKEN].data)
+    ASSISTANT_POSTHOG_KEY    = base64decode(data.scaleway_secret_version.webapp[var.secret_name_ASSISTANT_POSTHOG_KEY].data)
   }
 
   secrets = merge(local.secrets_from_modules, local.secrets_from_manager)

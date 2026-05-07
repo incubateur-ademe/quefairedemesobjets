@@ -10,14 +10,14 @@ resource "scaleway_container" "webapp" {
   max_scale      = var.max_scale
   timeout        = var.timeout
   deploy         = true
-  privacy        = "private"
+  privacy        = "public"
   protocol       = "http1"
 
   health_check {
     http {
       path = "/"
     }
-    failure_threshold = 5
+    failure_threshold = 10
     interval          = "30s"
   }
 

@@ -22,7 +22,6 @@ resource "scaleway_container" "nginx" {
   }
 
   environment_variables = {
-    PORT                       = "8080"
     BASE_DOMAIN                = var.base_domain
     UPSTREAM_HOST              = "${var.upstream_domain}:443"
     UPSTREAM_SCHEME            = "https"
