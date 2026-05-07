@@ -10,23 +10,32 @@ include "env" {
   path = find_in_parent_folders("env.hcl")
 }
 
+dependency "container_namespace" {
+  config_path = "../container_namespace"
+
+  mock_outputs = {
+    namespace_id = "fr-par/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+  }
+  mock_outputs_allowed_terraform_commands = ["init", "validate", "plan"]
+}
+
 dependency "database" {
   config_path = "../database"
 
   mock_outputs = {
     webapp_instance_id = "fr-par/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
   }
-  mock_outputs_allowed_terraform_commands = ["validate", "plan"]
+  mock_outputs_allowed_terraform_commands = ["init", "validate", "plan"]
 }
 
 dependency "object_storage" {
   config_path = "../object_storage"
 
   mock_outputs = {
-    airflow_bucket_name = "lvao-preview-airflow"
-    webapp_bucket_name  = "lvao-preview-webapp"
+    airflow_bucket_name = "qfdmod-preview-airflow"
+    webapp_bucket_name  = "qfdmod-preview-webapp"
   }
-  mock_outputs_allowed_terraform_commands = ["validate", "plan"]
+  mock_outputs_allowed_terraform_commands = ["init", "validate", "plan"]
 }
 
 # Secrets Airflow (DB Airflow, comptes admin, conn strings warehouse) :
@@ -38,6 +47,8 @@ dependency "object_storage" {
 # via use_secret_manager = true. Mêmes noms bruts que pour le webapp.
 
 inputs = {
+  namespace_id = dependency.container_namespace.outputs.namespace_id
+
   # Scheduler — preview est dimensionné petit
   airflow_scheduler_registry_image = "rg.fr-par.scw.cloud/ns-qfdmo/airflow-scheduler:preview"
   airflow_scheduler_cpu_limit      = 2000
@@ -86,7 +97,7 @@ inputs = {
   # Config S3 — bucket dédié aux écritures de DAGs (séparé du bucket de logs Airflow).
   AWS_S3_REGION_NAME      = "fr-par"
   AWS_S3_ENDPOINT_URL     = "https://s3.fr-par.scw.cloud"
-  AWS_STORAGE_BUCKET_NAME = dependency.object_storage.outputs.airflow_bucket_name
+  AWS_STORAGE_BUCKET_NAME = dependency.object_storage.outputs.webapp_bucket_name
 
   # Active la lecture des secrets webapp (AWS keys, Sentry, Notion, PostHog)
   # depuis Scaleway Secret Manager via leurs noms bruts.

@@ -6,7 +6,7 @@ terraform {
   backend "s3" {
     endpoint                    = "s3.fr-par.scw.cloud"
     bucket                      = "qfdmod-terraformstate-preview"
-    key                         = "terraform.tfstate"
+    key                         = "${path_relative_to_include()}/terraform.tfstate"
     region                      = "fr-par"
     skip_credentials_validation = true
     skip_region_validation      = true

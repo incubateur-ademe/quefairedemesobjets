@@ -1,5 +1,5 @@
 output "namespace_id" {
-  description = "ID du namespace de containers Scaleway (réutilisable par d'autres containers comme webapp/nginx)"
+  description = "ID du namespace de containers Scaleway (consommé par les modules container, container_webapp, container_nginx)"
   value       = scaleway_container_namespace.main.id
 }
 

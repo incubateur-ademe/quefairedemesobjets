@@ -1,7 +1,7 @@
 resource "scaleway_container" "airflow_scheduler" {
   name                = "${var.prefix}-airflow-scheduler"
   tags                = [var.environment, var.prefix, "airflow", "scheduler"]
-  namespace_id        = scaleway_container_namespace.main.id
+  namespace_id        = var.namespace_id
   registry_image      = var.airflow_scheduler_registry_image
   port                = 8974
   cpu_limit           = var.airflow_scheduler_cpu_limit

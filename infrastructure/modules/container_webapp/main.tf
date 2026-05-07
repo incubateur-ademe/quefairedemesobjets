@@ -22,14 +22,18 @@ resource "scaleway_container" "webapp" {
   }
 
   environment_variables = {
-    ENVIRONMENT             = var.environment
-    DEBUG                   = "false"
-    BASE_URL                = var.base_url
-    ALLOWED_HOSTS           = var.allowed_hosts
-    AWS_S3_REGION_NAME      = "fr-par"
-    AWS_S3_ENDPOINT_URL     = "https://s3.fr-par.scw.cloud"
-    AWS_STORAGE_BUCKET_NAME = var.webapp_bucket_name
-    CONTAINER_VERSION       = var.image_tag
+    ENVIRONMENT                     = var.environment
+    DEBUG                           = "false"
+    BASE_URL                        = var.base_url
+    ALLOWED_HOSTS                   = var.allowed_hosts
+    LEGACY_SITE_VITRINE_DOMAIN      = var.legacy_site_vitrine_domain
+    AWS_S3_REGION_NAME              = "fr-par"
+    AWS_S3_ENDPOINT_URL             = "https://s3.fr-par.scw.cloud"
+    AWS_STORAGE_BUCKET_NAME         = var.webapp_bucket_name
+    DISTANCE_MAX                    = var.distance_max
+    DJANGO_IMPORT_EXPORT_LIMIT      = var.django_import_export_limit
+    NOTION_CONTACT_FORM_DATABASE_ID = var.notion_contact_form_database_id
+    CONTAINER_VERSION               = var.image_tag
   }
 
   secret_environment_variables = local.secrets

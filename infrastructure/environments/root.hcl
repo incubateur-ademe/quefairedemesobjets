@@ -28,5 +28,5 @@ generate "common_variables" {
 }
 
 inputs = {
-  prefix     = "qfdmod"
+  prefix = "qfdmod"
 }

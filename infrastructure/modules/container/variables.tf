@@ -7,6 +7,11 @@ variable "prefix" {
   type        = string
 }
 
+variable "namespace_id" {
+  description = "ID du namespace de containers Scaleway (sortie du module container_namespace)"
+  type        = string
+}
+
 variable "airflow_scheduler_registry_image" {
   type = string
 }

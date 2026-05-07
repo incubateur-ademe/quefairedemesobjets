@@ -14,7 +14,18 @@ include "env" {
   path = find_in_parent_folders("env.hcl")
 }
 
+dependency "container_namespace" {
+  config_path = "../container_namespace"
+
+  mock_outputs = {
+    namespace_id = "fr-par/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+  }
+  mock_outputs_allowed_terraform_commands = ["validate", "plan"]
+}
+
 inputs = {
+  namespace_id = dependency.container_namespace.outputs.namespace_id
+
   # Scheduler
   airflow_scheduler_registry_image = "rg.fr-par.scw.cloud/ns-qfdmo/airflow-scheduler:v7.8.0"
   airflow_scheduler_cpu_limit      = 4000

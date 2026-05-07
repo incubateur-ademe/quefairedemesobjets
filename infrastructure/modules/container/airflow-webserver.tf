@@ -1,7 +1,7 @@
 resource "scaleway_container" "airflow_webserver" {
   name           = "${var.prefix}-airflow-webserver"
   tags           = [var.environment, var.prefix, "airflow", "webserver"]
-  namespace_id   = scaleway_container_namespace.main.id
+  namespace_id   = var.namespace_id
   registry_image = var.airflow_webserver_registry_image
   port           = 8080
   cpu_limit      = var.airflow_webserver_cpu_limit

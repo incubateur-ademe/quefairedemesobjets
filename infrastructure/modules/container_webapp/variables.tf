@@ -53,6 +53,11 @@ variable "timeout" {
   default     = 300
 }
 
+# --- Variables d'environnement Django ---
+# Sources : webapp/.env.template (canonique pour le set des variables) et
+# secret.txt (valeurs historiques Scalingo). Seules les variables présentes
+# dans .env.template sont conservées.
+
 variable "base_url" {
   description = "URL publique de l'application (utilisée par Django pour les liens absolus). Vide jusqu'au second apply ; à renseigner avec l'URL nginx une fois connue."
   type        = string
@@ -64,40 +69,69 @@ variable "allowed_hosts" {
   type        = string
 }
 
+variable "legacy_site_vitrine_domain" {
+  description = "Domaine du site vitrine LVAO (utilisé pour les redirections legacy)"
+  type        = string
+  default     = ""
+}
+
 variable "webapp_bucket_name" {
-  description = "Nom du bucket S3 pour les médias Django"
+  description = "Nom du bucket S3 pour les médias Django (déduit du module object_storage)"
   type        = string
 }
 
-# Noms des secrets dans Scaleway Secret Manager.
+variable "distance_max" {
+  description = "Distance max (mètres) pour la recherche d'acteurs sur la carte"
+  type        = string
+  default     = "30000"
+}
+
+variable "django_import_export_limit" {
+  description = "Limite d'import/export Django admin (0 = pas de limite)"
+  type        = string
+  default     = "0"
+}
+
+variable "notion_contact_form_database_id" {
+  description = "ID de la base Notion utilisée par le formulaire de contact"
+  type        = string
+  default     = "17c6523d57d78140b87f000cd3ecef4b" # pragma: allowlist secret
+}
+
+# --- DSN bases de données (déduits des modules database / database_sample) ---
+# Valeurs sensibles : injectées via secret_environment_variables.
+
+variable "database_url" {
+  description = "DSN postgres webapp (déduit du module database via dependency.database.outputs.webapp_database_url)"
+  type        = string
+  sensitive   = true
+}
+
+variable "db_warehouse" {
+  description = "DSN postgres warehouse (déduit du module database via dependency.database.outputs.warehouse_database_url)"
+  type        = string
+  sensitive   = true
+}
+
+variable "db_webapp_sample" {
+  description = "DSN postgres sample (déduit du module database_sample). Vide si le module n'est pas déployé dans cet environnement."
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+# --- Noms des secrets dans Scaleway Secret Manager ---
 # L'isolation par environnement est assurée par le project_id Scaleway (un
 # projet par env), donc les secrets ont des noms bruts identiques d'un env
 # à l'autre. Les valeurs sont lues à l'apply via data.scaleway_secret_version
 # (voir secrets.tf) et injectées dans secret_environment_variables.
-# Chaque secret doit exister dans le projet Scaleway avant le premier apply.
+# Chaque secret doit exister dans le projet Scaleway avant le premier apply
+# (voir secret-scaleway.txt à la racine du repo pour la liste).
 
 variable "secret_name_SECRET_KEY" {
   description = "Nom du secret Scaleway contenant SECRET_KEY (Django)"
   type        = string
   default     = "SECRET_KEY"
-}
-
-variable "secret_name_DATABASE_URL" {
-  description = "Nom du secret Scaleway contenant DATABASE_URL (postgres://...)"
-  type        = string
-  default     = "DATABASE_URL"
-}
-
-variable "secret_name_DB_WAREHOUSE" {
-  description = "Nom du secret Scaleway contenant DB_WAREHOUSE"
-  type        = string
-  default     = "DB_WAREHOUSE"
-}
-
-variable "secret_name_DB_WEBAPP_SAMPLE" {
-  description = "Nom du secret Scaleway contenant DB_WEBAPP_SAMPLE"
-  type        = string
-  default     = "DB_WEBAPP_SAMPLE"
 }
 
 variable "secret_name_AWS_ACCESS_KEY_ID" {
@@ -134,10 +168,4 @@ variable "secret_name_ASSISTANT_POSTHOG_KEY" {
   description = "Nom du secret Scaleway contenant ASSISTANT_POSTHOG_KEY"
   type        = string
   default     = "ASSISTANT_POSTHOG_KEY"
-}
-
-variable "secret_name_CARTE_POSTHOG_KEY" {
-  description = "Nom du secret Scaleway contenant CARTE_POSTHOG_KEY"
-  type        = string
-  default     = "CARTE_POSTHOG_KEY"
 }

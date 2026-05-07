@@ -10,8 +10,8 @@ include "env" {
   path = find_in_parent_folders("env.hcl")
 }
 
-dependency "container" {
-  config_path = "../container"
+dependency "container_namespace" {
+  config_path = "../container_namespace"
 
   mock_outputs = {
     namespace_id = "fr-par/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
@@ -29,7 +29,7 @@ dependency "container_webapp" {
 }
 
 inputs = {
-  namespace_id   = dependency.container.outputs.namespace_id
+  namespace_id   = dependency.container_namespace.outputs.namespace_id
   registry_image = "rg.fr-par.scw.cloud/ns-qfdmo/webapp-nginx:preview"
 
   cpu_limit    = 500

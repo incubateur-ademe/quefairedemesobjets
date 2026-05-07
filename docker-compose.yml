@@ -147,6 +147,7 @@ services:
 
   webapp:
     env_file:
+      # FIXME : changer le contexte pour .
       - ./webapp/.env
     build:
       context: ./webapp

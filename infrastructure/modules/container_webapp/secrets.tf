@@ -1,5 +1,7 @@
+# Secrets lus depuis Scaleway Secret Manager (un projet par env assure
+# l'isolation, les noms sont bruts).
 data "scaleway_secret" "webapp" {
-  for_each = toset(local.secret_names)
+  for_each = toset(local.secret_manager_names)
   name     = each.value
 }
 
@@ -10,31 +12,34 @@ data "scaleway_secret_version" "webapp" {
 }
 
 locals {
-  secret_names = [
+  secret_manager_names = [
     var.secret_name_SECRET_KEY,
-    var.secret_name_DATABASE_URL,
-    var.secret_name_DB_WAREHOUSE,
-    var.secret_name_DB_WEBAPP_SAMPLE,
     var.secret_name_AWS_ACCESS_KEY_ID,
     var.secret_name_AWS_SECRET_ACCESS_KEY,
     var.secret_name_SENTRY_DSN,
     var.secret_name_POSTHOG_PERSONAL_API_KEY,
     var.secret_name_NOTION_TOKEN,
     var.secret_name_ASSISTANT_POSTHOG_KEY,
-    var.secret_name_CARTE_POSTHOG_KEY,
   ]
 
-  secrets = {
+  # Secrets injectés directement (DSN bases de données déduits des autres
+  # modules — non stockés dans le Secret Manager pour éviter la duplication
+  # avec l'état Terraform du module database).
+  secrets_from_modules = {
+    DATABASE_URL     = var.database_url
+    DB_WAREHOUSE     = var.db_warehouse
+    DB_WEBAPP_SAMPLE = var.db_webapp_sample
+  }
+
+  secrets_from_manager = {
     SECRET_KEY               = data.scaleway_secret_version.webapp[var.secret_name_SECRET_KEY].data
-    DATABASE_URL             = data.scaleway_secret_version.webapp[var.secret_name_DATABASE_URL].data
-    DB_WAREHOUSE             = data.scaleway_secret_version.webapp[var.secret_name_DB_WAREHOUSE].data
-    DB_WEBAPP_SAMPLE         = data.scaleway_secret_version.webapp[var.secret_name_DB_WEBAPP_SAMPLE].data
     AWS_ACCESS_KEY_ID        = data.scaleway_secret_version.webapp[var.secret_name_AWS_ACCESS_KEY_ID].data
     AWS_SECRET_ACCESS_KEY    = data.scaleway_secret_version.webapp[var.secret_name_AWS_SECRET_ACCESS_KEY].data
     SENTRY_DSN               = data.scaleway_secret_version.webapp[var.secret_name_SENTRY_DSN].data
     POSTHOG_PERSONAL_API_KEY = data.scaleway_secret_version.webapp[var.secret_name_POSTHOG_PERSONAL_API_KEY].data
     NOTION_TOKEN             = data.scaleway_secret_version.webapp[var.secret_name_NOTION_TOKEN].data
     ASSISTANT_POSTHOG_KEY    = data.scaleway_secret_version.webapp[var.secret_name_ASSISTANT_POSTHOG_KEY].data
-    CARTE_POSTHOG_KEY        = data.scaleway_secret_version.webapp[var.secret_name_CARTE_POSTHOG_KEY].data
   }
+
+  secrets = merge(local.secrets_from_modules, local.secrets_from_manager)
 }
