@@ -2877,7 +2877,7 @@ wheels = [
 
 [[package]]
 name = "pre-commit"
-version = "4.5.1"
+version = "4.6.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cfgv" },
@@ -2886,9 +2886,9 @@ dependencies = [
     { name = "pyyaml" },
     { name = "virtualenv" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/40/f1/6d86a29246dfd2e9b6237f0b5823717f60cad94d47ddc26afa916d21f525/pre_commit-4.5.1.tar.gz", hash = "sha256:eb545fcff725875197837263e977ea257a402056661f09dae08e4b149b030a61", size = 198232, upload-time = "2025-12-16T21:14:33.552Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/8e/22/2de9408ac81acbb8a7d05d4cc064a152ccf33b3d480ebe0cd292153db239/pre_commit-4.6.0.tar.gz", hash = "sha256:718d2208cef53fdc38206e40524a6d4d9576d103eb16f0fec11c875e7716e9d9", size = 198525, upload-time = "2026-04-21T20:31:41.613Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/5d/19/fd3ef348460c80af7bb4669ea7926651d1f95c23ff2df18b9d24bab4f3fa/pre_commit-4.5.1-py2.py3-none-any.whl", hash = "sha256:3b3afd891e97337708c1674210f8eba659b52a38ea5f822ff142d10786221f77", size = 226437, upload-time = "2025-12-16T21:14:32.409Z" },
+    { url = "https://files.pythonhosted.org/packages/80/6e/4b28b62ecb6aae56769c34a8ff1d661473ec1e9519e2d5f8b2c150086b26/pre_commit-4.6.0-py2.py3-none-any.whl", hash = "sha256:e2cf246f7299edcabcf15f9b0571fdce06058527f0a06535068a86d38089f29b", size = 226472, upload-time = "2026-04-21T20:31:40.092Z" },
 ]
 
 [[package]]
@@ -3264,11 +3264,11 @@ wheels = [
 
 [[package]]
 name = "python-multipart"
-version = "0.0.26"
+version = "0.0.27"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/88/71/b145a380824a960ebd60e1014256dbb7d2253f2316ff2d73dfd8928ec2c3/python_multipart-0.0.26.tar.gz", hash = "sha256:08fadc45918cd615e26846437f50c5d6d23304da32c341f289a617127b081f17", size = 43501, upload-time = "2026-04-10T14:09:59.473Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/69/9b/f23807317a113dc36e74e75eb265a02dd1a4d9082abc3c1064acd22997c4/python_multipart-0.0.27.tar.gz", hash = "sha256:9870a6a8c5a20a5bf4f07c017bd1489006ff8836cff097b6933355ee2b49b602", size = 44043, upload-time = "2026-04-27T10:51:26.649Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9a/22/f1925cdda983ab66fc8ec6ec8014b959262747e58bdca26a4e3d1da29d56/python_multipart-0.0.26-py3-none-any.whl", hash = "sha256:c0b169f8c4484c13b0dcf2ef0ec3a4adb255c4b7d18d8e420477d2b1dd03f185", size = 28847, upload-time = "2026-04-10T14:09:58.131Z" },
+    { url = "https://files.pythonhosted.org/packages/99/78/4126abcbdbd3c559d43e0db7f7b9173fc6befe45d39a2856cc0b8ec2a5a6/python_multipart-0.0.27-py3-none-any.whl", hash = "sha256:6fccfad17a27334bd0193681b369f476eda3409f17381a2d65aa7df3f7275645", size = 29254, upload-time = "2026-04-27T10:51:24.997Z" },
 ]
 
 [[package]]
@@ -4011,7 +4011,7 @@ wheels = [
 
 [[package]]
 name = "wagtail"
-version = "7.3.1"
+version = "7.3.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyascii" },
@@ -4033,9 +4033,9 @@ dependencies = [
     { name = "telepath" },
     { name = "willow", extra = ["heif"] },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/4e/f9/e28a1b87ea61c68b74990c9f5c8cb11da9a689e07c8b769acc89121f8523/wagtail-7.3.1.tar.gz", hash = "sha256:2ce131d9a4e7d55fdb5b592d320a758a189174b2cc3966b70a34a1b3dc56f449", size = 6855119, upload-time = "2026-03-03T15:54:48.523Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/2a/5f/a440c1ddbdeee1df96d25a8b20060590d038e3a32d043e32d2372ffe0250/wagtail-7.3.2.tar.gz", hash = "sha256:d7114887402d878860b5427697e8ab47832198bc1aaf1467e2ac1f182cb13860", size = 6870905, upload-time = "2026-05-05T14:17:32.872Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/bb/0e/5efc903966b966df2261a66cce8cb88909e4ade86f1173a156aadbbd1a06/wagtail-7.3.1-py3-none-any.whl", hash = "sha256:eab131e15ab9edc7ed24143d44271e92af79239e105bc3e173d26c95d2b489b3", size = 9479191, upload-time = "2026-03-03T15:54:42.644Z" },
+    { url = "https://files.pythonhosted.org/packages/4a/f1/ac7547fd357717e673ae89cfd73d393c6870e6b138d94084f4307fe13061/wagtail-7.3.2-py3-none-any.whl", hash = "sha256:cf19b5c6df2f36781f73b311b6f690250da7da1e2f8bc6bf8dff83483980b91a", size = 9488277, upload-time = "2026-05-05T14:17:26.842Z" },
 ]
 
 [[package]]
@@ -4193,7 +4193,7 @@ requires-dist = [
     { name = "opening-hours-py", specifier = ">=1.2.0,<2" },
     { name = "orjson", specifier = ">=3.11.8,<4" },
     { name = "pillow", specifier = ">=12.2.0,<13" },
-    { name = "pre-commit", specifier = ">=4.5.1" },
+    { name = "pre-commit", specifier = ">=4.6.0" },
     { name = "psycopg" },
     { name = "pydantic", extras = ["email"], specifier = ">=2.12.5" },
     { name = "python-decouple", specifier = "~=3.8" },
@@ -4204,7 +4204,7 @@ requires-dist = [
     { name = "shortuuid", specifier = ">=1.0.13,<2" },
     { name = "sites-conformes", specifier = ">=2.5.3rc4,<3" },
     { name = "unidecode", specifier = ">=1.4.0,<2" },
-    { name = "wagtail", specifier = "==7.3.1" },
+    { name = "wagtail", specifier = "==7.3.2" },
     { name = "wagtail-honeypot", specifier = ">=1.2.1" },
     { name = "wagtailmenus", specifier = ">=4.0.6" },
     { name = "whitenoise", specifier = ">=6.8.2,<7" },
@@ -4220,7 +4220,7 @@ dev = [
     { name = "django-silk", specifier = ">=5.5.0" },
     { name = "factory-boy", specifier = ">=3.3.1,<4" },
     { name = "honcho", specifier = ">=2.0.0,<3" },
-    { name = "pre-commit", specifier = ">=4.3.0,<5" },
+    { name = "pre-commit", specifier = ">=4.6.0,<5" },
     { name = "ptpython", specifier = ">=3.0.30,<4" },
     { name = "pytest", specifier = ">=9.0.3,<10" },
     { name = "pytest-django", specifier = ">=4.9.0,<5" },
