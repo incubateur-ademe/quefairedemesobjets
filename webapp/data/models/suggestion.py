@@ -424,6 +424,15 @@ class SuggestionGroupeQuerySet(models.QuerySet):
             )
         )
 
+    def with_has_correction(self):
+        """Annotate queryset with has_correction."""
+        return self.annotate(
+            has_correction=ExpressionWrapper(
+                Q(revision_acteur_id__isnull=False),
+                output_field=BooleanField(),
+            )
+        )
+
 
 class SuggestionGroupeManager(models.Manager):
     def get_queryset(self):
@@ -434,6 +443,9 @@ class SuggestionGroupeManager(models.Manager):
 
     def with_has_parent(self):
         return self.get_queryset().with_has_parent()
+
+    def with_has_correction(self):
+        return self.get_queryset().with_has_correction()
 
 
 class _HasOptionalActeurFks(Protocol):
@@ -584,7 +596,7 @@ class SuggestionGroupe(TimestampedModel, SuggestionActeurRelationsMixin):
             and self.acteur_id != self.revision_acteur_id
         )
 
-    def suggestion_acteur_has_revision(self) -> bool:
+    def suggestion_acteur_has_correction(self) -> bool:
         return (
             self.revision_acteur_id is not None
             and self.acteur_id == self.revision_acteur_id
