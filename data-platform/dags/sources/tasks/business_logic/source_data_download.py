@@ -76,10 +76,29 @@ def fetch_data_from_endpoint(endpoint, s3_connection_id):
         return fetch_dataset_from_artisanat(endpoint)
     elif "ordre.pharmacien.fr" in endpoint:
         return fetch_dataset_from_pharmacies(endpoint)
-    # Le but de nos intégrations API est de récupérer des données.
-    # Si on ne récupére pas de données, on sait qu'on à un problème,
-    # et donc il faut échouer explicitement au plus tôt
+
+    # endpoint which return raw json data in one block (no iteration)
+    if (
+        endpoint.startswith("http")
+        and not endpoint.endswith(".zip")
+        and not endpoint.endswith(".csv")
+        and "?" not in endpoint
+    ):
+        return fetch_dataset_from_endpoint(endpoint)
+
+    # The purpose of our API integrations is to retrieve data.
+    # If we don't retrieve any data, we know we have a problem,
+    # and therefore we need to fail explicitly at the earliest possible time.
     raise NotImplementedError(f"Pas de fonction de récupération pour l'url {endpoint}")
+
+
+def fetch_dataset_from_endpoint(endpoint):
+    logger.info(f"Récupération de données pour {endpoint}")
+    response = requests.get(endpoint, timeout=60)
+    response.raise_for_status()
+    data = response.json()
+    logger.info("Nombre de lignes récupérées: " + str(len(data)))
+    return data
 
 
 def fetch_dataset_from_s3(endpoint, s3_connection_id):
