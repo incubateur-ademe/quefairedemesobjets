@@ -465,6 +465,81 @@ export const mockApiAdresse = async (page: Page) =>
   )
 
 /**
+ * Mock the server-side BAN proxy endpoint (`/qfdmo/autocomplete/address`)
+ * that powers the carte combobox. The endpoint returns a Turbo Frame fragment
+ * (not JSON) — see `webapp/qfdmo/views/autocomplete.py`.
+ *
+ * We mock at this boundary rather than the upstream `data.geopf.fr` URL
+ * because the carte's Python view proxies BAN server-side; the browser only
+ * ever talks to `/qfdmo/autocomplete/address`.
+ */
+export const mockCarteAutocompleteAddress = async (page: Page) =>
+  await page.route(/\/qfdmo\/autocomplete\/address\?/, async (route) => {
+    const url = new URL(route.request().url())
+    const turboFrameId = url.searchParams.get("turbo_frame_id") ?? ""
+    const query = (url.searchParams.get("q") ?? "").toLowerCase()
+    const body = renderCarteAutocompleteFrame(turboFrameId, query)
+    await route.fulfill({
+      status: 200,
+      contentType: "text/html; charset=utf-8",
+      body,
+    })
+  })
+
+interface CarteAutocompleteOption {
+  label: string
+  sub_label?: string
+  latitude?: number
+  longitude?: number
+  geolocate: boolean
+}
+
+function renderCarteAutocompleteFrame(turboFrameId: string, query: string): string {
+  const options: CarteAutocompleteOption[] =
+    query.length < 3
+      ? [{ label: "Autour de moi", geolocate: true }]
+      : [
+          {
+            label: "Auray",
+            sub_label: "56, Morbihan, Bretagne",
+            latitude: 47.668099,
+            longitude: -2.990838,
+            geolocate: false,
+          },
+        ]
+
+  const items = options
+    .map((option, index) => {
+      const counter = index + 1
+      const geoAttrs = option.geolocate
+        ? `data-geolocate="true"`
+        : `data-lat="${option.latitude}" data-lon="${option.longitude}"`
+      const subLabel = option.sub_label
+        ? `<small class="fr-text--sm fr-m-0 qf-italic">${option.sub_label}</small>`
+        : ""
+      return `
+        <li
+          id="option-${counter}"
+          role="option"
+          tabindex="-1"
+          data-next-autocomplete-target="option"
+          data-action="keydown->next-autocomplete#navigate:prevent click->next-autocomplete#commitSelection"
+          data-value="${option.label}"
+          data-selected-value="${option.label}"
+          ${geoAttrs}
+        >
+          <span>${option.label}</span>
+          ${subLabel}
+        </li>`
+    })
+    .join("")
+
+  return `<turbo-frame data-next-autocomplete-target="results" id="${turboFrameId}">
+    <ul id="${turboFrameId}-listbox" role="listbox">${items}</ul>
+  </turbo-frame>`
+}
+
+/**
  * Modal/Dialog helpers
  */
 /**
