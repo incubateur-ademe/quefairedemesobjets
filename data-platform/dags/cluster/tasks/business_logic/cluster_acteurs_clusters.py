@@ -19,6 +19,8 @@ import pandas as pd
 from cluster.tasks.business_logic.misc.cluster_exclude_intra_source import (
     split_clusters_infra_source,
 )
+from scipy.sparse import csr_matrix, triu
+from scipy.sparse.csgraph import connected_components
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from slugify import slugify
@@ -41,14 +43,13 @@ def cluster_id_from_strings(strings: list[str]) -> str:
     return "_".join(str(slugify(unidecode(str(x)))).lower() for x in strings)
 
 
-def values_to_similarity_matrix(values: list[str]) -> np.ndarray:
-    """Compute similarity matrix using TF-IDF vectorization
-    on a list of values."""
+def values_to_similarity_matrix_sparse(values: list[str]) -> csr_matrix:
+    """Compute a sparse similarity matrix using TF-IDF vectorization."""
     vectorizer = TfidfVectorizer(
         tokenizer=str.split, binary=False, token_pattern=None  # type: ignore
     )  # type: ignore
     tfidf_matrix = vectorizer.fit_transform(values)
-    return cosine_similarity(tfidf_matrix)
+    return cosine_similarity(tfidf_matrix, dense_output=False).tocsr()
 
 
 def score_normalize(score: np.float64, precision=5) -> int | float:
@@ -62,66 +63,71 @@ def score_normalize(score: np.float64, precision=5) -> int | float:
     return round(float(score), precision)
 
 
-def similarity_matrix_to_tuples(
-    similarity_matrix,
-    indexes: list | None = None,
-) -> list[tuple[int, int, float]]:
-    """Convertit une matrice de similarité
-    en une liste de tuples (index_a, index_b, score)
-    Optionnel: on peut passer une liste d'indexes à
-    mapper avec la matrix, par exemple pour mapper des indexes
-    à des identifiants, des indexes non contigus, etc.
-    """
-    indices = np.triu_indices_from(similarity_matrix, k=1)
-    tuples = [
-        (int(i), int(j), score_normalize(similarity_matrix[i, j]))
-        for i, j in zip(*indices)
-    ]
-    tuples.sort(key=lambda x: x[2], reverse=True)
-    if indexes:
-        tuples = [(indexes[i], indexes[j], score) for i, j, score in tuples]
-    return tuples
-
-
-def score_tuples_to_clusters(
-    tuples: list[tuple[int, int, float]], threshold
+def sparse_similarity_matrix_to_clusters(
+    similarity_matrix: csr_matrix,
+    indexes: list[int],
+    threshold: float,
 ) -> list[list[int]]:
-    """Convert tuples (index_a, index_b, score) into clusters if score >= threshold"""
+    """Convert a sparse similarity matrix into clusters above a threshold."""
+    if len(indexes) < 2:
+        return []
 
-    # We should discard empty clusters and never find ourselves here
-    if not tuples:
-        raise ValueError("Liste de tuples d'entrée vide, on ne devrait pas être ici")
+    # With TF-IDF cosine similarity, scores are always in [0, 1].
+    # threshold <= 0 therefore means a fully connected graph.
+    if threshold <= 0:
+        return [indexes]
 
-    # Sorting to work on most to least similar
-    tuples.sort(key=lambda x: x[2], reverse=True)
+    # keep half of the matrix (upper triangle)
+    similarity_upper = triu(similarity_matrix, k=1, format="csr")
+    # keep only the non-zero values
+    rows, cols = similarity_upper.nonzero()
+    # normalize the scores to be in [0, 1]
+    normalized_scores = np.where(
+        similarity_upper.data >= 1,
+        1.0,
+        np.round(similarity_upper.data.astype(float), 5),
+    )
+    # create a mask to keep only the values >= threshold as boolean
+    mask = normalized_scores >= threshold
+    if not mask.any():
+        return []
 
-    clusters = []
-    for index_a, index_b, score in tuples:
-        # Being sorted, we know we can exist if below threshold
-        if score < threshold:
-            break
+    # keep only the values >= threshold for rows and cols and scores
+    rows = rows[mask]
+    cols = cols[mask]
+    scores = normalized_scores[mask]
 
-        # On cherche si index_a ou index_b sont déjà dans un cluster
-        cluster_a = next((c for c in clusters if index_a in c), None)
-        cluster_b = next((c for c in clusters if index_b in c), None)
+    # create matrix with only the rows and cols with values >= threshold
+    adjacency = csr_matrix(
+        (np.ones(len(rows), dtype=np.int8), (rows, cols)),
+        shape=similarity_upper.shape,
+    )
+    adjacency = adjacency + adjacency.T
 
-        # a and b are in the same cluster = merge
-        if cluster_a and cluster_b:
-            if cluster_a != cluster_b:
-                # Merge the clusters if they are different
-                cluster_a.update(cluster_b)
-                clusters.remove(cluster_b)
-        # a already in a cluster, add b to it
-        elif cluster_a:
-            cluster_a.add(index_b)
-        # b already in a cluster, add a to it
-        elif cluster_b:
-            cluster_b.add(index_a)
-        else:
-            # a and b are not in any cluster, create a new one
-            clusters.append(set([index_a, index_b]))
+    # find connected components, create the clusters,
+    # if A is linked to B
+    # and if A is linked to C
+    # then A, B and C are in the same cluster
+    _, labels = connected_components(adjacency, directed=False, return_labels=True)
 
-    return [list(cluster) for cluster in clusters]
+    # convert the labels to indexes
+    clusters_by_label: dict[int, list[int]] = {}
+    for local_index, label in enumerate(labels):
+        clusters_by_label.setdefault(int(label), []).append(indexes[local_index])
+
+    component_order: list[int] = []
+    labels_seen: set[int] = set()
+    for edge_index in np.argsort(-scores, kind="stable"):
+        label = int(labels[rows[edge_index]])
+        if label not in labels_seen:
+            labels_seen.add(label)
+            component_order.append(label)
+
+    return [
+        clusters_by_label[label]
+        for label in component_order
+        if len(clusters_by_label[label]) > 1
+    ]
 
 
 def cluster_to_subclusters(
@@ -133,10 +139,8 @@ def cluster_to_subclusters(
     """Split 1 cluster into subclusters based on a column matching threshold"""
     df_cluster = df.loc[cluster]
     column_values = df_cluster[column].astype(str).values
-    similarity_matrix = values_to_similarity_matrix(column_values)  # type: ignore
-    tuples = similarity_matrix_to_tuples(similarity_matrix, indexes=cluster)
-    sub_clusters = score_tuples_to_clusters(tuples, threshold)
-    return sub_clusters
+    similarity_matrix = values_to_similarity_matrix_sparse(column_values.tolist())
+    return sparse_similarity_matrix_to_clusters(similarity_matrix, cluster, threshold)
 
 
 def haversine(lon1: float, lat1: float, lon2: float, lat2: float) -> float:
@@ -254,6 +258,71 @@ def cluster_cols_group_fuzzy(
     return result_dfs
 
 
+def _groups_with_revalidation_keys(
+    keys: list[str], subclusters: list[pd.DataFrame], step_name: str
+) -> list[tuple[list[str], pd.DataFrame]]:
+    """Keep the original keys when a split keeps a single cluster.
+
+    If the split creates several valid subclusters, append a suffix to keep
+    generated cluster ids unique.
+    """
+
+    if not subclusters:
+        return []
+    if len(subclusters) == 1:
+        return [(keys, subclusters[0])]
+    return [
+        (keys + [step_name, str(i + 1)], rows) for i, rows in enumerate(subclusters)
+    ]
+
+
+def revalidate_groups_after_intra_source_split(
+    groups: list[tuple[list[str], pd.DataFrame]],
+    cluster_fields_fuzzy: list[str],
+    cluster_fuzzy_threshold: float,
+    distance_in_cluster: int,
+) -> list[tuple[list[str], pd.DataFrame]]:
+    """Re-apply clustering constraints after intra-source splitting.
+
+    The intra-source split is source-based only and can create subsets that no
+    longer satisfy the original fuzzy or distance constraints.
+    """
+
+    if not cluster_fields_fuzzy and distance_in_cluster <= 0:
+        return groups
+
+    revalidated_groups = []
+    for keys, rows in groups:
+        groups_after_fuzzy = [(keys, rows)]
+        if cluster_fields_fuzzy:
+            subclusters_fuzzy = cluster_cols_group_fuzzy(
+                df_src=rows,
+                columns_fuzzy=cluster_fields_fuzzy,
+                threshold=cluster_fuzzy_threshold,
+            )
+            groups_after_fuzzy = _groups_with_revalidation_keys(
+                keys, subclusters_fuzzy, "fuzzy_recheck"
+            )
+
+        groups_after_distance = groups_after_fuzzy
+        if distance_in_cluster > 0:
+            groups_after_distance = []
+            for fuzzy_keys, fuzzy_rows in groups_after_fuzzy:
+                subclusters_distance = split_clusters_by_distance(
+                    df_src=fuzzy_rows,
+                    distance_threshold=distance_in_cluster,
+                )
+                groups_after_distance.extend(
+                    _groups_with_revalidation_keys(
+                        fuzzy_keys, subclusters_distance, "distance_recheck"
+                    )
+                )
+
+        revalidated_groups.extend(groups_after_distance)
+
+    return revalidated_groups
+
+
 def cluster_acteurs_clusters(
     df: pd.DataFrame,
     cluster_fields_exact: list[str] = [],
@@ -360,6 +429,12 @@ def cluster_acteurs_clusters(
     if not cluster_intra_source_is_allowed:
         groups_after_distance_match = split_clusters_infra_source(
             groups_after_distance_match
+        )
+        groups_after_distance_match = revalidate_groups_after_intra_source_split(
+            groups=groups_after_distance_match,
+            cluster_fields_fuzzy=cluster_fields_fuzzy,
+            cluster_fuzzy_threshold=cluster_fuzzy_threshold,
+            distance_in_cluster=distance_in_cluster,
         )
 
     logger.warning(
