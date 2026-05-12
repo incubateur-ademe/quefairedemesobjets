@@ -548,15 +548,15 @@ class SuggestionGroupeTypeSource(SuggestionGroupeType):
 
     def _revision_replace_text(self, field: str) -> str:
         return (
-            getattr(self.revision_acteur_suggestions, field, None)
-            or getattr(self.acteur_suggestions, field, None)
+            getattr(self.revision_acteur_suggestions, field)
+            or getattr(self.revision_acteur_values, field)
             or ""
         )
 
     def _parent_replace_text(self, field: str) -> str:
         return (
-            getattr(self.parent_revision_acteur_suggestions, field, None)
-            or getattr(self.acteur_suggestions, field, None)
+            getattr(self.parent_revision_acteur_suggestions, field)
+            or getattr(self.parent_revision_acteur_values, field)
             or ""
         )
 
