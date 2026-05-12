@@ -10,7 +10,11 @@
     {% for key, value in wrapper_attrs.items %}{% if key != "data-controller" %}{{ key }}="{{ value }}" {% endif %}{% endfor %}
     class="qf-relative"
 >
-    {# Input, copy pasted from django/forms/widgets/input.html #}
+    {# Input, copy pasted from django/forms/widgets/input.html               #}
+    {# When `display_value` is True (e.g. carte address combobox), the       #}
+    {# visible search box IS the form input: it carries the `name` and the  #}
+    {# submitted value. When False (e.g. homepage search), the visible box  #}
+    {# is decorative and the hidden sibling below carries the form value.   #}
     <input
         type="search"
         {% include "django/forms/widgets/attrs.html" %}
@@ -27,11 +31,13 @@
         data-action="next-autocomplete#search keydown->next-autocomplete#navigate focus->next-autocomplete#focus"
         data-next-autocomplete-target="input"
     >
+    {% if not display_value %}
     <input
         type="hidden"
         data-next-autocomplete-target="hiddenInput"
         name="{{ widget.name }}"{% if widget.value != None %} value="{{ widget.value }}"{% endif %}
     >
+    {% endif %}
 
     {# Results #}
     {% include "ui/forms/widgets/autocomplete/results.html" %}

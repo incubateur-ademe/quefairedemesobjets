@@ -100,7 +100,7 @@ export default class extends Controller<HTMLElement> {
     // stored globally in the page
     const value = this.locationValue
     let touched = false
-    if (value.adresse) {
+    if (value.adresse && outlet.inputTarget.value !== value.adresse) {
       outlet.inputTarget.value = value.adresse
       touched = true
     }

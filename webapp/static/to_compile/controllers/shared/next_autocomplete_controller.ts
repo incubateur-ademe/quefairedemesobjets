@@ -20,6 +20,7 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
   declare readonly fieldNameValue: string
   declare readonly inputTarget: HTMLInputElement
   declare readonly hiddenInputTarget: HTMLInputElement
+  declare readonly hasHiddenInputTarget: boolean
 
   currentIndex = -1
 
@@ -229,7 +230,11 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
     const value = selected.dataset.value?.trim() || ""
     const selectedValue = selected.dataset.selectedValue?.trim() || ""
 
-    this.hiddenInputTarget.value = value
+    // When `display_value` is True the visible input itself carries the form
+    // value and there is no hidden sibling — see input.html.
+    if (this.hasHiddenInputTarget) {
+      this.hiddenInputTarget.value = value
+    }
     this.inputTarget.value = selectedValue
     this.#hideListbox()
 
