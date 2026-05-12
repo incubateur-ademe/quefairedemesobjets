@@ -4227,7 +4227,7 @@ dev = [
     { name = "pytest-dotenv", specifier = ">=0.5.2,<0.6" },
     { name = "pytest-mock", specifier = ">=3.14.1,<4" },
     { name = "ruff", specifier = ">=0.12.10,<0.16" },
-    { name = "wagtail-factories", specifier = ">=4.2.1,<5" },
+    { name = "wagtail-factories", specifier = ">=4.4.0,<5" },
 ]
 
 [[package]]
