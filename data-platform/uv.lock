@@ -3715,7 +3715,7 @@ wheels = [
 
 [[package]]
 name = "sites-conformes"
-version = "2.5.3rc4"
+version = "3.1.0rc1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "beautifulsoup4" },
@@ -3739,9 +3739,9 @@ dependencies = [
     { name = "wagtail-modeladmin" },
     { name = "wagtailmenus" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/dd/0c/d71a3722f091f6f680711edbe958a535809ceeee870b680741d79e36ecaa/sites_conformes-2.5.3rc4.tar.gz", hash = "sha256:9d6c4d8e555c8194a162046f97f0709ab07688a68293e2cec84531e05b6c2c34", size = 7100957, upload-time = "2026-03-23T11:47:24.266Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/59/09/5a7090b3a56cb8bda042e2f2e04c2ca653e27f722b33f8b51dc34ca934fe/sites_conformes-3.1.0rc1.tar.gz", hash = "sha256:fcb133c16c6007a6e4552b4ebd904e9b6fe8ccb6fd6a3f990557fe1c34c38abc", size = 7190650, upload-time = "2026-04-30T13:29:58.363Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/31/9f/e9ad10458bf9d4d46e0c189afb2d38991797a43ad0d6e314e0aef5a14520/sites_conformes-2.5.3rc4-py3-none-any.whl", hash = "sha256:76badb12d1529ccf41ff4578bd0ede280ee202a8a4f655ced171906d2882ffc0", size = 7495068, upload-time = "2026-03-23T11:47:22.004Z" },
+    { url = "https://files.pythonhosted.org/packages/9f/db/364e93cbfcc811eff718172b69bb434fb90a6f627f08b9ff23ecc974ab75/sites_conformes-3.1.0rc1-py3-none-any.whl", hash = "sha256:880ae9d8d07b95776b2c71fdf038293701f4a89deb8f597b98ed68bc77d18e3e", size = 7607544, upload-time = "2026-04-30T13:29:55.662Z" },
 ]
 
 [[package]]
@@ -4202,7 +4202,7 @@ requires-dist = [
     { name = "requests", specifier = ">=2.33.1,<3" },
     { name = "sentry-sdk", specifier = ">=2.59.0,<3" },
     { name = "shortuuid", specifier = ">=1.0.13,<2" },
-    { name = "sites-conformes", specifier = ">=2.5.3rc4,<3" },
+    { name = "sites-conformes", specifier = ">=3.1.0rc1,<4" },
     { name = "unidecode", specifier = ">=1.4.0,<2" },
     { name = "wagtail", specifier = "==7.3.2" },
     { name = "wagtail-honeypot", specifier = ">=1.2.1" },
