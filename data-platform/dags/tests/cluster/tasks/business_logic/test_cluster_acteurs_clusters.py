@@ -1,11 +1,9 @@
-import numpy as np
 import pandas as pd
 import pytest
 from cluster.tasks.business_logic.cluster_acteurs_clusters import (
     cluster_acteurs_clusters,
     cluster_cols_group_fuzzy,
-    score_tuples_to_clusters,
-    similarity_matrix_to_tuples,
+    cluster_to_subclusters,
     split_clusters_by_distance,
 )
 
@@ -414,79 +412,6 @@ class TestClusterColsGroupFuzzy:
         assert len(clusters) == 0
 
 
-class TestSimilarityMatrixToTuples:
-
-    def test_basic(self):
-
-        matrix = np.array([[1, 0.8, 0.4], [0.8, 1, 0.9], [0.4, 0.9, 1]])
-        expected = [
-            (1, 2, 0.9),
-            (0, 1, 0.8),
-            (0, 2, 0.4),
-        ]
-        assert similarity_matrix_to_tuples(matrix) == expected
-
-    def test_index_replacements(self):
-
-        matrix = np.array([[1, 0.8, 0.4], [0.8, 1, 0.9], [0.4, 0.9, 1]])
-        expected = [
-            ("b", "c", 0.9),
-            ("a", "b", 0.8),
-            ("a", "c", 0.4),
-        ]
-        assert similarity_matrix_to_tuples(matrix, indexes=["a", "b", "c"]) == expected
-
-
-class TestScoreTuplesToClusters:
-
-    # Test cases
-    def test_score_tuples_to_clusters(self):
-        data = [
-            (1, 2, 0.6),
-            (2, 3, 0.6),
-            (4, 5, 0.6),
-            (5, 6, 0.3),  # ignored because it is below the threshold
-        ]
-        threshold = 0.5
-        expected = [[1, 2, 3], [4, 5]]
-        assert score_tuples_to_clusters(data, threshold) == expected
-
-    def test_score_tuples_to_clusters_applies_sorting(self):
-        """Check that clusters are sorted by decreasing score.
-
-        This should hold even if the input data is not sorted.
-        """
-        data = [
-            (5, 6, 0.3),
-            (1, 2, 0.6),
-            (2, 3, 0.6),
-            (4, 5, 0.6),
-        ]
-        threshold = 0.5
-        expected = [[1, 2, 3], [4, 5]]
-        assert score_tuples_to_clusters(data, threshold) == expected
-
-    def test_score_tuples_to_clusters_empty_exception(self):
-
-        data = []
-        threshold = 0.5
-        with pytest.raises(ValueError, match="Liste de tuples d'entrée vide"):
-            score_tuples_to_clusters(data, threshold)
-
-    def test_score_tuples_to_clusters_no_clusters_below_threshold(self):
-
-        data = [(1, 2, 0.3), (3, 4, 0.2)]
-        threshold = 0.5
-        assert score_tuples_to_clusters(data, threshold) == []
-
-    def test_score_tuples_to_clusters_all_in_one_cluster(self):
-
-        data = [(1, 2, 0.9), (2, 3, 0.8), (3, 4, 0.7)]
-        threshold = 0.5
-        expected = [[1, 2, 3, 4]]
-        assert score_tuples_to_clusters(data, threshold) == expected
-
-
 class TestClusterExcludeIntraSource:
 
     @pytest.fixture
@@ -540,6 +465,25 @@ class TestClusterExcludeIntraSource:
             cluster_intra_source_is_allowed=False,
         )
         assert df_clusters["cluster_id"].nunique() == 3
+
+    def test_cluster_split_clusterintra_source_revalidates_fuzzy_constraints(self):
+        df = pd.DataFrame(
+            {
+                "identifiant_unique": ["bridge", "left", "right"],
+                "source_codes": [["s1", "s2"], ["s2"], ["s1"]],
+                "nom": ["alpha beta", "alpha", "beta"],
+            }
+        )
+
+        df_clusters = cluster_acteurs_clusters(
+            df,
+            cluster_fields_exact=[],
+            cluster_fields_fuzzy=["nom"],
+            cluster_fuzzy_threshold=0.5,
+            cluster_intra_source_is_allowed=False,
+        )
+
+        assert df_clusters.empty
 
 
 class TestSplitClustersByDistance:
@@ -597,3 +541,65 @@ class TestSplitClustersByDistance:
         subclusters = split_clusters_by_distance(df_src=df, distance_threshold=15)
         assert len(subclusters) == 1
         assert sorted(subclusters[0]["identifiant_unique"].tolist()) == ["a", "b", "c"]
+
+
+class TestClusterToSubclusters:
+
+    def test_returns_only_non_singleton_subclusters(self):
+        df = pd.DataFrame(
+            {
+                "nom": [
+                    "maison du velo",
+                    "maison du velo",
+                    "repair cafe",
+                    "valeur unique",
+                ]
+            },
+            index=[10, 20, 30, 40],
+        )
+
+        subclusters = cluster_to_subclusters(
+            df=df,
+            column="nom",
+            cluster=[10, 20, 30, 40],
+            threshold=0.9,
+        )
+
+        assert subclusters == [[10, 20]]
+
+    def test_uses_only_rows_from_the_given_cluster(self):
+        df = pd.DataFrame(
+            {
+                "nom": [
+                    "alpha",
+                    "alpha",
+                    "beta",
+                    "beta",
+                ]
+            },
+            index=[100, 200, 300, 400],
+        )
+
+        subclusters = cluster_to_subclusters(
+            df=df,
+            column="nom",
+            cluster=[200, 300, 400],
+            threshold=0.9,
+        )
+
+        assert subclusters == [[300, 400]]
+
+    def test_threshold_zero_keeps_the_whole_cluster(self):
+        df = pd.DataFrame(
+            {"nom": ["alpha", "beta", "gamma"]},
+            index=[5, 7, 9],
+        )
+
+        subclusters = cluster_to_subclusters(
+            df=df,
+            column="nom",
+            cluster=[5, 7, 9],
+            threshold=0,
+        )
+
+        assert subclusters == [[5, 7, 9]]
