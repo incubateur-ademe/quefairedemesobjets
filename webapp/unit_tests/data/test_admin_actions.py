@@ -1,5 +1,6 @@
 import pytest
 from data.admin import (
+    HasSuggestionUnitaireWithChampField,
     SuggestionGroupeAdmin,
     apply_suggestions_to_parent,
     apply_suggestions_to_revision,
@@ -9,6 +10,7 @@ from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.test import RequestFactory
+from djangoql.exceptions import DjangoQLSchemaError
 from unit_tests.data.models.suggestion_factory import (
     SuggestionGroupeFactory,
     SuggestionUnitaireFactory,
@@ -461,3 +463,70 @@ class TestSuggestionGroupeAdminBooleanFilters:
 
         assert has_parent_ids == {group_with_parent.id}
         assert has_correction_ids == {group_with_correction.id}
+
+
+@pytest.mark.django_db
+class TestHasSuggestionUnitaireWithChampField:
+    def test_contains_operator_matches_partial_champ(self):
+        matching_group = SuggestionGroupeFactory()
+        non_matching_group = SuggestionGroupeFactory()
+
+        SuggestionUnitaireFactory(
+            suggestion_groupe=matching_group,
+            champs=["nom", "telephone"],
+            valeurs=["Nom", "0123456789"],
+        )
+        SuggestionUnitaireFactory(
+            suggestion_groupe=matching_group,
+            champs=["field"],
+            valeurs=["fake"],
+        )
+        SuggestionUnitaireFactory(
+            suggestion_groupe=non_matching_group,
+            champs=["adresse"],
+            valeurs=["1 rue de Paris"],
+        )
+
+        lookup = HasSuggestionUnitaireWithChampField().get_lookup([], "~", "tele")
+
+        result_ids = set(
+            SuggestionGroupe.objects.filter(lookup).values_list("id", flat=True)
+        )
+
+        assert result_ids == {matching_group.id}
+
+    def test_does_not_contain_operator_excludes_groups_with_any_matching_unitaire(
+        self,
+    ):
+        matching_group = SuggestionGroupeFactory()
+        non_matching_group = SuggestionGroupeFactory()
+
+        SuggestionUnitaireFactory(
+            suggestion_groupe=matching_group,
+            champs=["nom", "telephone"],
+            valeurs=["Nom", "0123456789"],
+        )
+        SuggestionUnitaireFactory(
+            suggestion_groupe=matching_group,
+            champs=["field"],
+            valeurs=["fake"],
+        )
+        SuggestionUnitaireFactory(
+            suggestion_groupe=non_matching_group,
+            champs=["adresse"],
+            valeurs=["1 rue de Paris"],
+        )
+
+        lookup = HasSuggestionUnitaireWithChampField().get_lookup([], "!~", "tele")
+
+        result_ids = set(
+            SuggestionGroupe.objects.filter(lookup).values_list("id", flat=True)
+        )
+
+        assert result_ids == {non_matching_group.id}
+
+    def test_only_contains_operators_are_allowed(self):
+        with pytest.raises(
+            DjangoQLSchemaError, match='only supports "~" and "!~" operators'
+        ):
+            HasSuggestionUnitaireWithChampField().get_lookup([], "=", "nom")

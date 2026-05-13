@@ -143,7 +143,6 @@ class SuggestionGroupeType(BaseModel):
     ) -> list[LinkInCell]:
         links = []
 
-        print(field_group, source_valeurs, target_valeurs)
         for champ, source_valeur, target_valeur in zip(
             field_group, source_valeurs, target_valeurs
         ):
