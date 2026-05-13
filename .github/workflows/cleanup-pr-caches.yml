@@ -1,0 +1,41 @@
+name: 🧹 Cleanup PR caches
+
+# Caches keyed to a closed PR's merge ref are never reused, but GitHub keeps
+# them for 7 days. This workflow deletes them as soon as the PR is closed,
+# freeing space in the repo's 10 GB Actions cache budget.
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete caches for this PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          PR_REF: refs/pull/${{ github.event.pull_request.number }}/merge
+        run: |
+          set -euo pipefail
+          echo "Listing caches for ref $PR_REF"
+          mapfile -t keys < <(
+            gh api --paginate "repos/$GH_REPO/actions/caches?ref=$PR_REF&per_page=100" \
+              --jq '.actions_caches[].key'
+          )
+          if [ "${#keys[@]}" -eq 0 ]; then
+            echo "No caches to delete."
+            exit 0
+          fi
+          for key in "${keys[@]}"; do
+            echo "Deleting cache: $key"
+            gh api --method DELETE \
+              "repos/$GH_REPO/actions/caches?key=$(printf %s "$key" | jq -sRr @uri)&ref=$PR_REF" \
+              || echo "  (already gone)"
+          done
+          echo "Done."
