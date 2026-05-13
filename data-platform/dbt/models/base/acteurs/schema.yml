@@ -167,6 +167,7 @@ models:
         - base
         - acteurs
         - propositionservice
+        - stats
   - name: base_propositionservice_sous_categories
     description: "Sous-catégories de propositions de services"
     columns:
@@ -193,6 +194,7 @@ models:
         - base
         - acteurs
         - propositionservice_sous_categories
+        - stats
   - name: base_revisionacteur
     description: "Correction sur les acteurs"
     columns:
@@ -354,6 +356,7 @@ models:
         - base
         - acteurs
         - revisionpropositionservice
+        - stats
   - name: base_revisionpropositionservice_sous_categories
     description: "Sous-catégories de propositions de services"
     columns:
@@ -380,6 +383,7 @@ models:
         - base
         - acteurs
         - revisionpropositionservice_sous_categories
+        - stats
   - name: base_source
     description: "Sources"
     columns:
