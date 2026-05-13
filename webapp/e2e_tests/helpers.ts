@@ -11,6 +11,14 @@ export const SEARCH_RESULTS_SELECTOR = "[data-next-autocomplete-target='option']
 export const SEARCH_RESULTS_DROPDOWN_SELECTOR =
   "[data-next-autocomplete-target='results']"
 
+// The carte address combobox uses the next-autocomplete pattern: each
+// suggestion is a <li role="option"> inside the Turbo Frame listbox.
+// The formulaire keeps the legacy AutoCompleteInput (client-side BAN) so
+// its options are still `.autocomplete-items div[data-action=...]`.
+const CARTE_OPTION_SELECTOR = '[role="option"][data-next-autocomplete-target="option"]'
+const LEGACY_OPTION_SELECTOR =
+  ".autocomplete-items div[data-action*='address-autocomplete#selectOption']"
+
 /**
  * Navigation helper
  */
@@ -35,7 +43,7 @@ export async function searchAndSelectAutocomplete(
   } = {},
 ) {
   const {
-    autocompleteSelector = ".autocomplete-items div[data-action*='address-autocomplete#selectOption']",
+    autocompleteSelector = CARTE_OPTION_SELECTOR,
     optionIndex = "first",
     timeout = TIMEOUT.DEFAULT,
     parentSelector,
@@ -98,6 +106,10 @@ export async function searchAddress(
       : '[data-testid="formulaire-adresse-input"]'
 
   await searchAndSelectAutocomplete(context, inputSelector, searchText, {
+    // The formulaire still uses the legacy client-side autocomplete; the
+    // carte combobox is the new next-autocomplete pattern (default).
+    autocompleteSelector:
+      formContext === "formulaire" ? LEGACY_OPTION_SELECTOR : CARTE_OPTION_SELECTOR,
     optionIndex: options.optionIndex ?? "first",
     parentSelector: options.parentSelector,
     parentLocator: options.parentLocator,
@@ -136,8 +148,7 @@ export async function searchCarteAndWaitForActeurs(
   } = {},
 ): Promise<void> {
   const inputSelector = '[data-testid="carte-adresse-input"]'
-  const autocompleteSelector =
-    ".autocomplete-items div[data-action*='address-autocomplete#selectOption']"
+  const autocompleteSelector = CARTE_OPTION_SELECTOR
 
   // Build the input locator, respecting optional parent scoping
   const inputLocator = options.parentLocator
@@ -233,8 +244,18 @@ export async function searchDummySousCategorieObjet(page: Page) {
 
 /**
  * API mocking helpers
+ *
+ * Two distinct flows ship suggestions to the address combobox:
+ *   - Legacy formulaire: browser → data.geopf.fr (mocked here directly)
+ *   - Carte combobox: browser → /qfdmo/autocomplete/address → BAN (server-side)
+ *
+ * `mockApiAdresse` sets up BOTH so existing carte tests that only call this
+ * helper keep working without depending on a live BAN endpoint.
  */
-export const mockApiAdresse = async (page: Page) =>
+export const mockApiAdresse = async (page: Page) => {
+  // The new carte combobox uses the server-proxied Turbo Frame endpoint.
+  await mockCarteAutocompleteAddress(page)
+  // The legacy flow (still used by the formulaire) hits data.geopf.fr directly.
   // Use glob pattern to match both with and without trailing slash, and case-insensitive query
   await page.route(
     /data\.geopf\.fr\/geocodage\/search\/?\?q=[aA]uray/i,
@@ -463,6 +484,7 @@ export const mockApiAdresse = async (page: Page) =>
       })
     },
   )
+}
 
 /**
  * Mock the server-side BAN proxy endpoint (`/qfdmo/autocomplete/address`)
