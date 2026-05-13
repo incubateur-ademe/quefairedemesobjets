@@ -27,7 +27,9 @@
         aria-controls="{{ turbo_frame_id }}-listbox"
         aria-expanded="false"
         aria-activedescendant=""
-        aria-autocomplete="both"
+        {# `list` (not `both`): we surface suggestions in the listbox below but #}
+        {# we do NOT inline-complete the typed text — APG combobox-autocomplete-list. #}
+        aria-autocomplete="list"
         data-action="next-autocomplete#search keydown->next-autocomplete#navigate focus->next-autocomplete#focus"
         data-next-autocomplete-target="input"
     >

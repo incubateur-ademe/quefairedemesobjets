@@ -42,8 +42,13 @@ class TestCarteAddressAutocompleteInputRendering:
         # keyboard navigation; it must be present even when empty.
         assert "aria-activedescendant" in self.adresse_html
 
-    def test_visible_input_advertises_inline_and_list_autocomplete(self):
-        assert 'aria-autocomplete="both"' in self.adresse_html
+    def test_visible_input_advertises_list_autocomplete(self):
+        # APG combobox-autocomplete-list: aria-autocomplete is "list"
+        # (we surface suggestions in the listbox but do NOT inline-complete
+        # the typed text — `"both"` would lie to assistive tech).
+        assert 'aria-autocomplete="list"' in self.adresse_html
+        # Explicitly assert the old value isn't there to flag regressions.
+        assert 'aria-autocomplete="both"' not in self.adresse_html
 
     def test_results_ul_has_listbox_role(self):
         assert 'role="listbox"' in self.adresse_html
