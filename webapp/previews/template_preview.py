@@ -321,6 +321,48 @@ class ComponentsPreview(LookbookPreview):
             """)
         return template.render(Context(context))
 
+    def acteur_icons_preview(self, **kwargs):
+        """Side-by-side comparison of DOM pinpoints vs runtime-rendered MapLibre icons.
+
+        Used to validate visual fidelity of the new GeoJSON symbol layer against
+        the legacy DOM markers before migrating the carte.
+        """
+        variants = [
+            {
+                "code": "donner_echanger_rapporter",
+                "icon": "fr-icon-hand-heart",
+                "couleur": "#417dc4",
+                "filled": False,
+            },
+            {
+                "code": "emprunter_preter_louer",
+                "icon": "fr-icon-arrow-go-back-line",
+                "couleur": "#ce614a",
+                "filled": False,
+            },
+            {
+                "code": "reparer",
+                "icon": "fr-icon-tools-fill",
+                "couleur": "#009081",
+                "filled": True,
+            },
+            {
+                "code": "trier",
+                "icon": "fr-icon-recycle-line",
+                "couleur": "#A558A0",
+                "filled": False,
+            },
+            {
+                "code": "vendre_acheter",
+                "icon": "fr-icon-money-euro-circle-line",
+                "couleur": "#D1B781",
+                "filled": False,
+            },
+        ]
+        return render_to_string(
+            "ui/tests/acteur_icons_preview.html", {"variants": variants}
+        )
+
     def acteur_pinpoint_multiple(self, **kwargs):
         """
         Preview showing two pinpoints side by side to test active state toggling.
@@ -971,14 +1013,72 @@ class IframePreview(LookbookPreview):
 
 
 class AccessibilitePreview(LookbookPreview):
+    """
+    Backlog RGAA — une preview par ticket auditeur.
+
+    Convention de nommage :
+    `<page_code>_<critere_rgaa>` avec les points remplacés par des underscores.
+    Quand un ticket couvre plusieurs critères inséparables (ex. 7.1 + 7.3 sur
+    le breadcrumb), on utilise un double underscore comme séparateur :
+    `P02_7_1__P02_7_3`.
+    Quand un ticket couvre plusieurs pages avec le même critère, on regroupe
+    les codes pages dans le nom : `P05_10_2__P06_10_2`.
+
+    Chaque preview est associée à un fichier markdown
+    `templates/ui/components/accessibilite/<NAME>.md` qui contient le retour
+    auditeur verbatim, le correctif recommandé, le scope (Webapp Django /
+    Sites Faciles CMS / Carte iframe / Mixte) et un lien vers le ticket Notion.
+
+    Quand la vérification implique plusieurs landmarks (header + main + footer)
+    ou un comportement difficile à isoler, la preview embarque la page dans un
+    `<iframe>` plutôt que de tout re-rendre côté Django, pour rester légère.
+    """
+
+    # ---------------------------------------------------------------------
+    # Helpers
+    # ---------------------------------------------------------------------
+
+    @staticmethod
+    def _iframe(src, title, height=600):
+        """Render a full-width iframe pointing at a live URL."""
+        return Template(
+            f"""
+            <iframe
+                src="{src}"
+                title="{title}"
+                style="width:100%;height:{height}px;border:1px solid #ddd;"
+                loading="lazy"
+            ></iframe>
+            """,
+        ).render(Context({}))
+
+    # ---------------------------------------------------------------------
+    # Existing entries
+    # ---------------------------------------------------------------------
+
     @component_docs("ui/components/accessibilite/P01_7_3.md")
     def P01_7_3(self, **kwargs):
-        return render_to_string("ui/modals/share.html")
+        return render_to_string("ui/components/modals/share.html")
 
     @component_docs("ui/components/accessibilite/P01_3_3.md")
     def P01_3_3(self, **kwargs):
-        context = {"search_form": QfSearchForm()}
-        return render_to_string("ui/components/search/view.html", context)
+        legacy = render_to_string(
+            "ui/components/search/view.html",
+            {"search_form": QfSearchForm()},
+        )
+        header_dsfr = render_to_string(
+            "ui/components/header/header.html",
+            {"request": None, "iframe": False},
+        )
+        return Template(
+            """
+            <h2 class="fr-h3">Ancien composant — ui/components/search/view.html</h2>
+            {{ legacy|safe }}
+            <hr class="fr-mt-3w fr-mb-3w">
+            <h2 class="fr-h3">Nouveau composant — recherche du header DSFR</h2>
+            {{ header_dsfr|safe }}
+            """,
+        ).render(Context({"legacy": legacy, "header_dsfr": header_dsfr}))
 
     @component_docs("ui/components/accessibilite/P01_10_2.md")
     def P01_10_2(self, **kwargs):
@@ -1019,6 +1119,401 @@ class AccessibilitePreview(LookbookPreview):
         return render_to_string(
             "sites_conformes_content_manager/blocks/breadcrumbs.html",
             context,
+        )
+
+    # ---------------------------------------------------------------------
+    # New tickets (RGAA backlog)
+    # ---------------------------------------------------------------------
+
+    @component_docs("ui/components/accessibilite/P01_1_2.md")
+    def P01_1_2(self, **kwargs):
+        """Images décoratives sans aria-hidden (header + hero homepage)."""
+        return self._iframe(
+            "https://quefairedemesdechets.ademe.fr/",
+            "Accueil — vérification des images décoratives (P01 1.2)",
+            height=700,
+        )
+
+    @component_docs("ui/components/accessibilite/P08_1_2.md")
+    def P08_1_2(self, **kwargs):
+        """Alt trop long sur l'image bonus + pictos non décoratifs."""
+        return self._iframe(
+            "https://quefairedemesdechets.ademe.fr/bonus-reparation",
+            "Bonus réparation — image et pictos (P08 1.2)",
+            height=700,
+        )
+
+    @component_docs("ui/components/accessibilite/P09_1_8.md")
+    def P09_1_8(self, **kwargs):
+        """Image-texte fast fashion sur la page produit."""
+        return self._iframe(
+            "https://quefairedemesdechets.ademe.fr/dechet/manteau/",
+            "Produit manteau — image-texte fast fashion (P09 1.8)",
+            height=800,
+        )
+
+    @component_docs("ui/components/accessibilite/P07_2_2__P08_2_2__P09_2_2.md")
+    def P07_2_2__P08_2_2__P09_2_2(self, **kwargs):
+        """Titres iframes carte / vidéo non descriptifs (multi-pages)."""
+        return Template(
+            """
+            <h2 class="fr-h3">P07 — iframe carte sur "Comment ça marche"</h2>
+            <iframe src="https://quefairedemesdechets.ademe.fr/static/carte.js" title="iframe"
+                    style="width:100%;height:200px;border:1px dashed #c00;"></iframe>
+            <p class="fr-text--sm"><em>Titre observé : "iframe" (générique). Recommandation :
+            "Carte des points de collecte près de chez moi".</em></p>
+            <hr>
+            <h2 class="fr-h3">P08 — iframe carte bonus-réparation</h2>
+            <iframe src="about:blank" title="iframe"
+                    style="width:100%;height:200px;border:1px dashed #c00;"></iframe>
+            <p class="fr-text--sm"><em>Recommandation : "Carte des artisans labellisés bonus
+            réparation".</em></p>
+            <hr>
+            <h2 class="fr-h3">P09 — iframe vidéo Consomag sur la page produit</h2>
+            <iframe src="about:blank" title="iframe"
+                    style="width:100%;height:200px;border:1px dashed #c00;"></iframe>
+            <p class="fr-text--sm"><em>Recommandation : "Vidéo Consomag — Que faire de mes
+            objets et déchets ?".</em></p>
+            """,
+        ).render(Context({}))
+
+    @component_docs("ui/components/accessibilite/P06_4_1__P06_4_3.md")
+    def P06_4_1__P06_4_3(self, **kwargs):
+        """Vidéo Consomag : transcription + sous-titres (page comment-ça-marche)."""
+        return Template(
+            """
+            <iframe
+                width="100%"
+                height="500"
+                src="https://www.youtube.com/embed/4f2Zky4xZdE"
+                title="Vidéo Consomag — Que faire de mes objets et déchets ?"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+            ></iframe>
+            <p class="fr-mt-2w">
+                Voir la transcription complète et la liste des sous-titres à corriger
+                dans le markdown associé.
+            </p>
+            """,
+        ).render(Context({}))
+
+    @component_docs("ui/components/accessibilite/P01_6_1.md")
+    def P01_6_1(self, **kwargs):
+        """Liens explicites — bloc-marque Ademe & République française dans le footer."""
+        return render_to_string(
+            "ui/components/footer/footer.html",
+            {"iframe": False},
+        )
+
+    @component_docs("ui/components/accessibilite/P07_6_1.md")
+    def P07_6_1(self, **kwargs):
+        """Liens explicites — sources de données du bonus réparation."""
+        return self._iframe(
+            "https://quefairedemesdechets.ademe.fr/bonus-reparation",
+            "Bonus réparation — sources de données (P07 6.1)",
+            height=700,
+        )
+
+    @component_docs("ui/components/accessibilite/P08_6_1.md")
+    def P08_6_1(self, **kwargs):
+        """Liens explicites — bouton "Voir sur le site" sur la fiche acteur."""
+        acteur = DisplayedActeur.objects.first()
+        if not acteur:
+            return "<p>Pas d'acteur disponible en base pour cette preview.</p>"
+        return Template(
+            """
+            <p>Bouton "Voir sur le site" tel qu'il apparaît sur la fiche acteur :</p>
+            <a class="fr-btn fr-btn--secondary" href="{{ url|default:'#' }}"
+               target="_blank" rel="noreferrer">
+                Voir sur le site
+            </a>
+            <p class="fr-text--sm fr-mt-2w">
+                Recommandation : intituler explicitement le lien, par exemple
+                "Voir la fiche de {{ nom }} sur son site officiel (nouvelle fenêtre)".
+            </p>
+            """,
+        ).render(
+            Context(
+                {
+                    "url": getattr(acteur, "url", "") or "",
+                    "nom": getattr(acteur, "nom", "") or "l'acteur",
+                },
+            ),
+        )
+
+    @component_docs("ui/components/accessibilite/P08_7_5.md")
+    def P08_7_5(self, **kwargs):
+        """Message de statut recherche objet réparable sans role="status"."""
+        return self._iframe(
+            "https://quefairedemesdechets.ademe.fr/bonus-reparation",
+            "Recherche objet réparable — message de statut (P08 7.5)",
+            height=700,
+        )
+
+    @component_docs("ui/components/accessibilite/P06_8_7.md")
+    def P06_8_7(self, **kwargs):
+        """Sélecteur de langue Impact CO2 sans attribut lang sur les options."""
+        return Template(
+            """
+            <p>Widget Impact CO2 (Ademe). Le sélecteur de langue interne ne précise
+            pas l'attribut <code>lang</code> sur ses options.</p>
+            <iframe
+                src="https://impactco2.fr/outils/comparateur"
+                title="Widget Impact CO2"
+                style="width:100%;height:500px;border:1px solid #ddd;"
+                loading="lazy"
+            ></iframe>
+            <p class="fr-text--sm fr-mt-2w">Widget tiers : nous ne pouvons que documenter
+            le défaut.</p>
+            """,
+        ).render(Context({}))
+
+    @component_docs("ui/components/accessibilite/P06_8_9__P09_8_9.md")
+    def P06_8_9__P09_8_9(self, **kwargs):
+        """<br> utilisés pour faire des paragraphes (RichText Sites Faciles)."""
+        return Template(
+            """
+            <article class="fr-mb-4w">
+                <h2 class="fr-h3">Reproduction du bloc RichText fautif</h2>
+                <div>
+                    Premier paragraphe utilisé en simple ligne.<br><br>
+                    Deuxième "paragraphe" en réalité séparé par deux &lt;br&gt;.<br><br>
+                    Troisième "paragraphe" idem.
+                </div>
+            </article>
+            <p class="fr-text--sm">
+                À corriger via contribution Sites Faciles (RichText), pas dans la webapp.
+                Le rédacteur doit utiliser de vrais &lt;p&gt; depuis l'éditeur Wagtail.
+            </p>
+            """,
+        ).render(Context({}))
+
+    @component_docs("ui/components/accessibilite/P06_9_1__P08_9_1.md")
+    def P06_9_1__P08_9_1(self, **kwargs):
+        """Niveaux de titres incohérents dans les accordéons (h3/h4/h5)."""
+        return Template(
+            """
+            <section class="fr-accordions-group">
+                <div class="fr-accordion">
+                    <h3 class="fr-accordion__title">
+                        <button class="fr-accordion__btn" aria-expanded="false"
+                                aria-controls="acc-1">Premier accordéon (h3)</button>
+                    </h3>
+                    <div class="fr-collapse" id="acc-1">Contenu</div>
+                </div>
+                <div class="fr-accordion">
+                    <h5 class="fr-accordion__title">
+                        <button class="fr-accordion__btn" aria-expanded="false"
+                                aria-controls="acc-2">Deuxième accordéon (h5 — incohérent)</button>
+                    </h5>
+                    <div class="fr-collapse" id="acc-2">Contenu</div>
+                </div>
+                <div class="fr-accordion">
+                    <h4 class="fr-accordion__title">
+                        <button class="fr-accordion__btn" aria-expanded="false"
+                                aria-controls="acc-3">Troisième accordéon (h4 — incohérent)</button>
+                    </h4>
+                    <div class="fr-collapse" id="acc-3">Contenu</div>
+                </div>
+            </section>
+            <p class="fr-text--sm fr-mt-2w">
+                Tous les titres d'accordéons d'un même groupe doivent être au même niveau,
+                cohérent avec la hiérarchie de la page (typiquement h3 si la page a un h2
+                au-dessus du groupe).
+            </p>
+            """,
+        ).render(Context({}))
+
+    @component_docs("ui/components/accessibilite/P01_9_2.md")
+    def P01_9_2(self, **kwargs):
+        """Footer sans <nav>."""
+        return render_to_string(
+            "ui/components/footer/footer.html",
+            {"iframe": False},
+        )
+
+    @component_docs("ui/components/accessibilite/P06_9_3__P07_9_3__P08_9_3__P09_9_3.md")
+    def P06_9_3__P07_9_3__P08_9_3__P09_9_3(self, **kwargs):
+        """Éléments visuellement énumérés mais non <ul><li>."""
+        return Template(
+            """
+            <article>
+                <h2 class="fr-h3">Reproduction du bloc fautif (Sites Faciles)</h2>
+                <p>Voici les étapes à suivre :</p>
+                <p>- Première étape</p>
+                <p>- Deuxième étape</p>
+                <p>- Troisième étape</p>
+            </article>
+            <hr>
+            <article>
+                <h2 class="fr-h3">Correctif attendu</h2>
+                <ul>
+                    <li>Première étape</li>
+                    <li>Deuxième étape</li>
+                    <li>Troisième étape</li>
+                </ul>
+            </article>
+            <p class="fr-text--sm">
+                À corriger dans les blocs Sites Faciles : utiliser une vraie liste
+                <code>&lt;ul&gt;&lt;li&gt;</code> dès qu'on a une énumération.
+            </p>
+            """,
+        ).render(Context({}))
+
+    @component_docs("ui/components/accessibilite/P05_10_2__P06_10_2.md")
+    def P05_10_2__P06_10_2(self, **kwargs):
+        """Sans CSS, l'icône "Nouvelle fenêtre" disparaît."""
+        return Template(
+            """
+            <p>Lien externe tel qu'utilisé dans le footer / qui-sommes-nous :</p>
+            <p>
+                <a href="https://www.ademe.fr/" target="_blank" rel="noreferrer"
+                   class="fr-link">
+                    Site de l'Ademe
+                </a>
+            </p>
+            <p class="fr-text--sm">
+                Sans CSS, l'icône "nouvelle fenêtre" disparaît, l'utilisateur ne sait
+                plus que le lien ouvre dans un nouvel onglet. Correctif : ajouter un
+                attribut <code>title="Site de l'Ademe (nouvelle fenêtre)"</code>
+                pour que l'information soit textuelle.
+            </p>
+            <hr>
+            <p>Version corrigée :</p>
+            <p>
+                <a href="https://www.ademe.fr/" target="_blank" rel="noreferrer"
+                   title="Site de l'Ademe (nouvelle fenêtre)" class="fr-link">
+                    Site de l'Ademe
+                </a>
+            </p>
+            """,
+        ).render(Context({}))
+
+    @component_docs("ui/components/accessibilite/P01_11_10__P01_11_11.md")
+    def P01_11_10__P01_11_11(self, **kwargs):
+        """Modale contact (astérisques, format mail, message d'erreur)."""
+        return self._iframe(
+            "https://quefairedemesdechets.ademe.fr/?contact=1",
+            "Modale contact (P01 11.10 + 11.11)",
+            height=700,
+        )
+
+    @component_docs("ui/components/accessibilite/P06_12_2__P09_12_2__P10_12_2.md")
+    def P06_12_2__P09_12_2__P10_12_2(self, **kwargs):
+        """Fil d'ariane absent sur certaines pages."""
+        breadcrumbs_html = render_to_string(
+            "sites_conformes_content_manager/blocks/breadcrumbs.html",
+            {
+                "self": {
+                    "get_ancestors": [
+                        {"title": "Accueil", "is_site_root": True},
+                        {"title": "Section parente", "is_root": False},
+                    ],
+                    "title": "Page courante",
+                },
+            },
+        )
+        return Template(
+            """
+            <h2 class="fr-h3">Composant breadcrumb attendu</h2>
+            {{ breadcrumbs|safe }}
+            <hr>
+            <h2 class="fr-h3">Pages où le breadcrumb est manquant</h2>
+            <ul>
+                <li>P06 — Comment ça marche</li>
+                <li>P09 — Page produit / objet (ex. /dechet/manteau/)</li>
+                <li>P10 — Guide PDF Smartphone</li>
+            </ul>
+            """,
+        ).render(Context({"breadcrumbs": breadcrumbs_html}))
+
+    @component_docs("ui/components/accessibilite/P01_12_6.md")
+    def P01_12_6(self, **kwargs):
+        """Rôles ARIA banner/main/navigation manquants."""
+        return self._iframe(
+            "https://quefairedemesdechets.ademe.fr/",
+            "Accueil — landmarks ARIA (P01 12.6)",
+            height=800,
+        )
+
+    @component_docs("ui/components/accessibilite/P01_12_7.md")
+    def P01_12_7(self, **kwargs):
+        """Lien d'évitement (regression check)."""
+        return self._iframe(
+            "https://quefairedemesdechets.ademe.fr/",
+            "Accueil — lien d'évitement (P01 12.7)",
+            height=400,
+        )
+
+    @component_docs("ui/components/accessibilite/P10_13_3.md")
+    def P10_13_3(self, **kwargs):
+        """PDF non accessible (guide Smartphone)."""
+        return Template(
+            """
+            <p>Lien vers le guide PDF Smartphone :</p>
+            <p>
+                <a href="#" class="fr-link fr-link--download"
+                   title="Guide Smartphone (PDF, à vérifier)">
+                    Télécharger le guide Smartphone (PDF)
+                </a>
+            </p>
+            <p class="fr-text--sm">
+                Marqué FAIT côté audit, mais à vérifier que tout PDF futur est testé
+                (balisage, ordre de lecture, alternatives textuelles).
+            </p>
+            """,
+        ).render(Context({}))
+
+    @component_docs("ui/components/accessibilite/P06_13_5.md")
+    def P06_13_5(self, **kwargs):
+        """Émojis non encapsulés (page comment-ça-marche)."""
+        return Template(
+            """
+            <article>
+                <h2 class="fr-h3">Reproduction du bloc fautif</h2>
+                <p>Bravo 🎉 vous venez de trier vos déchets correctement 👍</p>
+            </article>
+            <hr>
+            <article>
+                <h2 class="fr-h3">Correctif</h2>
+                <p>Bravo <span aria-hidden="true">🎉</span> vous venez de trier vos
+                déchets correctement <span aria-hidden="true">👍</span></p>
+                <p class="fr-text--sm">
+                    Si l'émoji porte une information, lui donner un texte alternatif :
+                    <code>&lt;span role="img" aria-label="fête"&gt;🎉&lt;/span&gt;</code>.
+                    Sinon, <code>aria-hidden="true"</code>.
+                </p>
+            </article>
+            """,
+        ).render(Context({}))
+
+    @component_docs("ui/components/accessibilite/P09_3_3__P03_3_3.md")
+    def P09_3_3__P03_3_3(self, **kwargs):
+        """Contrastes (Impact CO2 hachures, composants UI)."""
+        return Template(
+            """
+            <p>Widget Impact CO2 — vérification des contrastes (hachures, composants UI).</p>
+            <iframe
+                src="https://impactco2.fr/outils/comparateur"
+                title="Widget Impact CO2 — contrastes"
+                style="width:100%;height:600px;border:1px solid #ddd;"
+                loading="lazy"
+            ></iframe>
+            <p class="fr-text--sm">
+                Marqué <strong>déjà OK avec EF</strong>, plus besoin de le faire.
+                Conservé pour documentation.
+            </p>
+            """,
+        ).render(Context({}))
+
+    @component_docs("ui/components/accessibilite/P08_7_1__P08_7_3.md")
+    def P08_7_1__P08_7_3(self, **kwargs):
+        """Carte iframe — combobox autocomplete + adresse + tooltip partage non clavier."""
+        return self._iframe(
+            "/lookbook/preview/iframe/carte/",
+            "Carte iframe — combobox + clavier (P08 7.1 + 7.3)",
+            height=700,
         )
 
 

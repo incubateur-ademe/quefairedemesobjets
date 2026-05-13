@@ -786,33 +786,39 @@ class TestDisplayedActeurActionToDisplay:
 class TestActeurOrdering:
     def test_in_bbox_ordering_is_random(self):
         DisplayedActeurFactory.create_batch(20)
-        bbox_whole_planet = [-180, -90, 180, 90]
+        # Geography ST_CoveredBy rejects polygons whose edges span 180° of
+        # longitude (treated as antipodal great-circle edges). Use a wide
+        # but valid bbox covering the factory default Point(3, 3).
+        bbox_almost_whole_planet = [-30, -30, 30, 30]
         # in_bbox is explicitely called each time so that
         # the ordering of the queryset is re-computed.
         # We expect it to change at least once
-        assert DisplayedActeur.objects.all().in_bbox(bbox_whole_planet).count() > 0
-        first_acteur = DisplayedActeur.objects.all().in_bbox(bbox_whole_planet).first()
+        assert DisplayedActeur.objects.all().in_bbox(bbox_almost_whole_planet).count() > 0
+        first_acteur = DisplayedActeur.objects.all().in_bbox(bbox_almost_whole_planet).first()
         while (
             first_acteur
-            == DisplayedActeur.objects.all().in_bbox(bbox_whole_planet).first()
+            == DisplayedActeur.objects.all().in_bbox(bbox_almost_whole_planet).first()
         ):
             first_acteur = (
-                DisplayedActeur.objects.all().in_bbox(bbox_whole_planet).first()
+                DisplayedActeur.objects.all().in_bbox(bbox_almost_whole_planet).first()
             )
 
     def test_in_geojson_ordering_is_random(self):
         DisplayedActeurFactory.create_batch(20)
-        geojson_whole_planet = json.dumps(
+        # Geography ST_CoveredBy rejects edges spanning 180° of longitude
+        # (treated as antipodal great-circle edges). Use a wide but valid
+        # polygon covering France + neighbours.
+        geojson_almost_whole_planet = json.dumps(
             {
                 "type": "MultiPolygon",
                 "coordinates": [
                     [
                         [
-                            [-180, 90],
-                            [180, 90],
-                            [180, -90],
-                            [-180, -90],
-                            [-180, 90],
+                            [-30, 30],
+                            [30, 30],
+                            [30, -30],
+                            [-30, -30],
+                            [-30, 30],
                         ]
                     ]
                 ],
@@ -822,17 +828,17 @@ class TestActeurOrdering:
         # the ordering of the queryset is re-computed.
         # We expect it to change at least once
         assert (
-            DisplayedActeur.objects.all().in_geojson(geojson_whole_planet).count() > 0
+            DisplayedActeur.objects.all().in_geojson(geojson_almost_whole_planet).count() > 0
         )
         first_acteur = (
-            DisplayedActeur.objects.all().in_geojson(geojson_whole_planet).first()
+            DisplayedActeur.objects.all().in_geojson(geojson_almost_whole_planet).first()
         )
         while (
             first_acteur
-            == DisplayedActeur.objects.all().in_geojson(geojson_whole_planet).first()
+            == DisplayedActeur.objects.all().in_geojson(geojson_almost_whole_planet).first()
         ):
             first_acteur = (
-                DisplayedActeur.objects.all().in_geojson(geojson_whole_planet).first()
+                DisplayedActeur.objects.all().in_geojson(geojson_almost_whole_planet).first()
             )
 
 

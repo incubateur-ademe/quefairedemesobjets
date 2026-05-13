@@ -9,7 +9,7 @@ from django.contrib.postgres.search import TrigramWordDistance
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Exists, OuterRef, Q
 from django.db.models.functions import Length, Lower
 from django.db.models.query import QuerySet
 from django.http import Http404, JsonResponse
@@ -192,9 +192,14 @@ class AbstractSearchActeursView(
             "acteur_type_id",
         )
         if getattr(acteurs, "_has_distance_field", False):
+            # `from_center` annotates `distance`; pair DISTINCT ON with the
+            # same ORDER BY so Postgres can dedup in a single pass.
             acteurs = acteurs.distinct("distance", "identifiant_unique")
-        else:
-            acteurs = acteurs.distinct()
+        # The bbox / EPCI / no-location paths no longer need `.distinct()`:
+        # `_compile_acteurs_queryset` now expresses spanning filters as
+        # `Exists()` subqueries (instead of relation-spanning Q lookups),
+        # so no JOIN multiplies acteur rows. Removing DISTINCT eliminates
+        # a 372k-row sort spill on a France-wide bbox (saves ~1.1 s).
         acteurs = acteurs[: self._get_max_displayed_acteurs()]
 
         # Prefetch AFTER limiting to only load related data for displayed acteurs
@@ -284,6 +289,17 @@ class AbstractSearchActeursView(
     def _compile_acteurs_queryset(
         self, reparer_is_checked, selected_actions_ids, reparer_action_id
     ):
+        # Filters that span proposition_services or labels are expressed as
+        # `Exists()` subqueries instead of relation-spanning Q lookups.
+        # Relation-spanning Q() lookups (e.g. `proposition_services__action_id__in=…`)
+        # produce INNER JOINs that duplicate acteur rows once per matching
+        # child, then force a `DISTINCT` to dedupe — and on a France-wide
+        # bbox that DISTINCT triggers a 305k-row sort spill to disk plus
+        # JIT compilation (~2 s wall time, see EXPLAIN). `Exists()` keeps
+        # one row per acteur, so DISTINCT is unnecessary and Postgres can
+        # use the GiST index path directly.
+        from qfdmo.models import DisplayedPropositionService, LabelQualite
+
         filters = Q(statut=ActeurStatus.ACTIF)
         excludes = Q()
 
@@ -294,14 +310,31 @@ class AbstractSearchActeursView(
             excludes |= Q(exclusivite_de_reprisereparation=True)
 
         if self._get_ess():
-            filters &= Q(labels__code="ess")
+            filters &= Q(
+                Exists(
+                    LabelQualite.objects.filter(
+                        displayedacteur=OuterRef("pk"), code="ess"
+                    )
+                )
+            )
 
         if self._get_bonus():
-            filters &= Q(labels__bonus=True)
+            filters &= Q(
+                Exists(
+                    LabelQualite.objects.filter(
+                        displayedacteur=OuterRef("pk"), bonus=True
+                    )
+                )
+            )
 
         if sous_categorie_ids := self._get_sous_categorie_ids():
             filters &= Q(
-                proposition_services__sous_categories__id__in=sous_categorie_ids,
+                Exists(
+                    DisplayedPropositionService.objects.filter(
+                        acteur_id=OuterRef("pk"),
+                        sous_categories__id__in=sous_categorie_ids,
+                    )
+                )
             )
 
         actions_filters = Q()
@@ -310,15 +343,30 @@ class AbstractSearchActeursView(
             selected_actions_ids = [
                 a for a in selected_actions_ids if a != reparer_action_id
             ]
-
+            # "Reparer + reparacteur label" composes two Exists subqueries:
+            # the acteur must have BOTH a proposition_service for the reparer
+            # action AND a `reparacteur` label.
             actions_filters |= Q(
-                proposition_services__action_id=reparer_action_id,
-                labels__code="reparacteur",
+                Exists(
+                    DisplayedPropositionService.objects.filter(
+                        acteur_id=OuterRef("pk"), action_id=reparer_action_id,
+                    )
+                ),
+                Exists(
+                    LabelQualite.objects.filter(
+                        displayedacteur=OuterRef("pk"), code="reparacteur",
+                    )
+                ),
             )
 
         if selected_actions_ids:
             actions_filters |= Q(
-                proposition_services__action_id__in=selected_actions_ids,
+                Exists(
+                    DisplayedPropositionService.objects.filter(
+                        acteur_id=OuterRef("pk"),
+                        action_id__in=selected_actions_ids,
+                    )
+                )
             )
 
         filters &= actions_filters

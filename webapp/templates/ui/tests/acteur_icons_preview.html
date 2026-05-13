@@ -1,0 +1,104 @@
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'qfdmo.css' %}">
+<script src="{% static 'qfdmo.js' %}"></script>
+
+<style>
+    .icons-preview-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        padding: 1rem;
+    }
+
+    .icons-preview-panel {
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 1rem;
+        background: #fff;
+    }
+
+    .icons-preview-panel h3 {
+        margin: 0 0 0.75rem 0;
+        font-size: 1rem;
+    }
+
+    .dom-pinpoints-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 1.25rem;
+        flex-wrap: wrap;
+        padding: 1rem 0;
+    }
+
+    .dom-pinpoint-cell {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.75rem;
+        color: #555;
+    }
+
+    .map-preview-container {
+        height: 480px;
+        width: 100%;
+        position: relative;
+    }
+</style>
+
+<div class="icons-preview-grid">
+    <div class="icons-preview-panel">
+        <h3>Today: DOM pinpoints (rendered via <code>acteur_pinpoint_tag</code>)</h3>
+        <div class="dom-pinpoints-row">
+            {% for variant in variants %}
+                <div class="dom-pinpoint-cell">
+                    <div style="position: relative; width: 46px; height: 61px;">
+                        {% if variant.filled %}
+                            <div data-animated="" class="qf-scale-75">
+                                <div class="qf--translate-y-2/4" style="color: {{ variant.couleur }};">
+                                    {% include "ui/components/carte/pinpoints/svg/pin-background-fill.html" with mask_id=variant.code %}
+                                    <span class="qf-absolute qf-top-[10] qf-left-[10.5] qf-margin-auto {{ variant.icon }} qf-text-white"></span>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div data-animated="" class="qf-scale-75">
+                                <div class="qf--translate-y-2/4" style="color: {{ variant.couleur }};">
+                                    {% include "ui/components/carte/pinpoints/svg/pin-background.html" with mask_id=variant.code %}
+                                    <span class="qf-absolute qf-top-[10] qf-left-[10.5] qf-margin-auto {{ variant.icon }}"></span>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <span>{{ variant.code }}</span>
+                </div>
+            {% endfor %}
+
+            {# reparer + bonus #}
+            <div class="dom-pinpoint-cell">
+                <div style="position: relative; width: 46px; height: 61px;">
+                    <div data-animated="" class="qf-scale-75">
+                        <div class="qf--translate-y-2/4" style="color: #009081;">
+                            {% include "ui/components/carte/pinpoints/svg/pin-background-fill.html" with mask_id="reparer-bonus" %}
+                            <span class="qf-absolute qf-right-[-16] qf-top-[-6] qf-z-10">
+                                {% include "ui/components/carte/pinpoints/svg/bonus-icon.svg" %}
+                            </span>
+                            <span class="qf-absolute qf-top-[10] qf-left-[10.5] qf-margin-auto fr-icon-tools-fill qf-text-white"></span>
+                        </div>
+                    </div>
+                </div>
+                <span>reparer + bonus</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="icons-preview-panel">
+        <h3>New: MapLibre symbol layer (icons rendered to canvas at runtime)</h3>
+        <div data-controller="acteur-icons-preview" class="map-preview-container">
+            <div data-acteur-icons-preview-target="mapContainer" style="height: 100%; width: 100%;"></div>
+        </div>
+        <p style="font-size: 0.75rem; color: #666; margin-top: 0.5rem;">
+            Each pin should match the corresponding DOM pinpoint above. Bottom row = with-bonus variants.
+        </p>
+    </div>
+</div>

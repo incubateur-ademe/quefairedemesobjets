@@ -3,7 +3,7 @@ import json
 from typing import cast
 
 from django import forms
-from django.core.cache import cache
+from django.core.cache import cache, caches
 from django.db.models import TextChoices
 from django.db.utils import cached_property
 from django.http import HttpRequest, QueryDict
@@ -122,6 +122,14 @@ class MapForm(GetFormMixin, CarteConfigFormMixin, forms.Form):
             }
         ),
         required=False,
+    )
+    # INSEE citycode of the commune the user picked from the address
+    # autocomplete. Carries through Turbo Frame submits so the next page render
+    # can re-fetch the polygon and draw the search-area overlay.
+    search_area_citycode = forms.CharField(
+        widget=forms.HiddenInput(),
+        required=False,
+        max_length=10,
     )
     latitude = forms.FloatField(
         widget=forms.HiddenInput(
@@ -622,7 +630,8 @@ class AdvancedConfiguratorForm(forms.Form):
 
         # Cast needed because of the cache
         cached_action_instances = cast(
-            list[Action], cache.get_or_set("action_instances", get_action_instances)
+            list[Action],
+            caches["actions"].get_or_set("action_instances", get_action_instances),
         )
         self.fields["action_list"].choices = [
             (

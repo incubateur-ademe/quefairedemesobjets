@@ -73,6 +73,35 @@ def retrieve_epci_geojson_from_api_or_cache(epci):
     )
 
 
+def retrieve_commune_geojson_from_api_or_cache(citycode: str) -> dict | None:
+    """Fetch (and cache for 1 year) the commune polygon as a GeoJSON Feature.
+
+    Returns the full geo.api.gouv.fr response: a Feature with `geometry`
+    (Polygon or MultiPolygon) and `properties` (code, nom, etc.). Cached on
+    the default Django cache so subsequent lookups are server-side and fast.
+
+    Returns None when the upstream call fails or the citycode doesn't exist.
+    """
+
+    def fetch_commune_geojson():
+        try:
+            response = requests.get(
+                f"{BASE_URL}/communes/{citycode}",
+                params={"format": "geojson", "geometry": "contour"},
+                timeout=10,
+            )
+            if response.status_code != 200:
+                return None
+            return response.json()
+        except requests.RequestException:
+            logger.exception("commune polygon fetch failed for citycode=%s", citycode)
+            return None
+
+    return cache.get_or_set(
+        f"commune_geojson_{citycode}", fetch_commune_geojson, timeout=3600 * 24 * 365
+    )
+
+
 def bbox_from_list_of_geojson(geojson_list, buffer: float = 0):
     """Returns a bbox from a list of geojson
 
