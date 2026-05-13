@@ -553,6 +553,8 @@ INSTALLED_APPS.extend(
     [
         # Sites faciles
         "sites_conformes",
+        "sites_conformes.core",
+        "sites_conformes.menus",
         "sites_conformes.blog",
         "sites_conformes.content_manager",
         "sites_conformes.events",
