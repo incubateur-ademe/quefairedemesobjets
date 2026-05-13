@@ -252,6 +252,11 @@ test.describe("📊 Analytics & Tracking", () => {
         page,
       }, testInfo) => {
         testInfo.setTimeout(90000)
+        // Carte iframe has no same-origin <a href> at idle (Infos modal was
+        // removed in c8d4b728). Search to surface pinpoint /adresse_details links.
+        if (label === "carte") {
+          await mockApiAdresse(page)
+        }
         await navigateTo(page, TEST_PATH)
 
         const iframeEl = page.locator(`[data-testid="${testId}"] iframe`).first()
@@ -261,6 +266,14 @@ test.describe("📊 Analytics & Tracking", () => {
         await resolvedFrame.waitForLoadState("domcontentloaded", {
           timeout: TIMEOUT.LONG,
         })
+
+        if (label === "carte") {
+          const carteFrame = page
+            .locator(`[data-testid="${testId}"] iframe`)
+            .first()
+            .contentFrame()
+          await searchCarteAndWaitForActeurs(page, "Auray", carteFrame)
+        }
 
         // Wait until at least one internal link exists in the iframe
         await expect(resolvedFrame.locator("a[href]").first()).toBeAttached({

@@ -187,7 +187,7 @@ test.describe("🗺️ Affichage des Labels dans la Fiche Acteur", () => {
     const acteurDetailLabels = iframe.locator(
       "#acteurDetailsPanel [data-testid='acteur-detail-labels']",
     )
-    await expect(acteurDetailLabels).toContainText("économie sociale et solidaire", {
+    await expect(acteurDetailLabels).toContainText(/économie sociale et solidaire/i, {
       timeout: TIMEOUT.SHORT,
     })
   })
@@ -680,8 +680,9 @@ test.describe("🗺️ Mini Carte - Affichage des Pinpoints", () => {
     // Desktop map mode: simulate a pinpoint click (no with_map param).
     // Mini map must stay hidden because the big map remains visible
     // alongside the detail panel.
-    const hrefWithoutMap = href!.replace(/[?&]with_map=1/g, "")
-    await navigateTo(page, hrefWithoutMap)
+    const urlWithoutMap = new URL(href!, page.url())
+    urlWithoutMap.searchParams.delete("with_map")
+    await navigateTo(page, urlWithoutMap.toString())
 
     await expect(page.locator('[data-testid="acteur-detail-about-panel"]')).toBeVisible(
       {
