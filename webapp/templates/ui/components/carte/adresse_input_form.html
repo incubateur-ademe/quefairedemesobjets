@@ -16,10 +16,13 @@
         </div>
         {{ forms.map.latitude }}
         {{ forms.map.longitude }}
+        {# `role="alert"` (implicit aria-live=assertive + aria-atomic=true)   #}
+        {# so geolocation / reverse-geocode errors are announced immediately. #}
         <p
             class="fr-error-text fr-mt-1v qf-hidden"
             data-search-solution-form-target="adresseError"
             data-carte-address-autocomplete-target="displayError"
+            role="alert"
         >
             Veuillez saisir une adresse
         </p>

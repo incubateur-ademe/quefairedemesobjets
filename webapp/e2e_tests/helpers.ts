@@ -517,18 +517,46 @@ interface CarteAutocompleteOption {
 }
 
 function renderCarteAutocompleteFrame(turboFrameId: string, query: string): string {
-  const options: CarteAutocompleteOption[] =
-    query.length < 3
-      ? [{ label: "Autour de moi", geolocate: true }]
-      : [
-          {
-            label: "Auray",
-            sub_label: "56, Morbihan, Bretagne",
-            latitude: 47.668099,
-            longitude: -2.990838,
-            geolocate: false,
-          },
-        ]
+  let options: CarteAutocompleteOption[]
+  if (query.length < 3) {
+    options = [{ label: "Autour de moi", geolocate: true }]
+  } else if (query.startsWith("rue")) {
+    // Multi-option fixture for keyboard-navigation tests: three distinct
+    // suggestions so Down/Up arrows have somewhere to move.
+    options = [
+      {
+        label: "Rue de Paris 56400 Auray",
+        sub_label: "56, Morbihan",
+        latitude: 47.668099,
+        longitude: -2.990838,
+        geolocate: false,
+      },
+      {
+        label: "Rue de Rivoli 75001 Paris",
+        sub_label: "75, Paris",
+        latitude: 48.85661,
+        longitude: 2.3522,
+        geolocate: false,
+      },
+      {
+        label: "Rue de la République 69001 Lyon",
+        sub_label: "69, Rhône",
+        latitude: 45.764,
+        longitude: 4.8357,
+        geolocate: false,
+      },
+    ]
+  } else {
+    options = [
+      {
+        label: "Auray",
+        sub_label: "56, Morbihan, Bretagne",
+        latitude: 47.668099,
+        longitude: -2.990838,
+        geolocate: false,
+      },
+    ]
+  }
 
   const items = options
     .map((option, index) => {
@@ -543,9 +571,8 @@ function renderCarteAutocompleteFrame(turboFrameId: string, query: string): stri
         <li
           id="option-${counter}"
           role="option"
-          tabindex="-1"
           data-next-autocomplete-target="option"
-          data-action="keydown->next-autocomplete#navigate:prevent click->next-autocomplete#commitSelection"
+          data-action="click->next-autocomplete#commitSelection"
           data-value="${option.label}"
           data-selected-value="${option.label}"
           ${geoAttrs}

@@ -216,3 +216,186 @@ test.describe("🗺️ Carte address combobox", () => {
     }
   })
 })
+
+/**
+ * APG combobox-autocomplete-list keyboard contract:
+ *   https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-autocomplete-list/
+ *
+ * These tests pin the keyboard model against the spec — drift here breaks
+ * RGAA 7.1 / 7.3 conformance and confuses assistive-tech users.
+ *
+ * Conventions:
+ *   - DOM focus stays on the textbox at all times; the "focused" option is
+ *     conveyed only via aria-activedescendant + aria-selected.
+ *   - Down/Up on a closed listbox open it WITHOUT advancing into options.
+ *   - Arrow navigation does not wrap.
+ *   - Home/End act on the textbox (caret), not on the listbox.
+ */
+test.describe("⌨️ Carte combobox — APG keyboard contract", () => {
+  test.beforeEach(async ({ page }) => {
+    await mockCarteAutocompleteAddress(page)
+  })
+
+  // Type "rue" to land on the multi-option fixture in mockCarteAutocompleteAddress.
+  async function openListboxWithMultipleOptions(page: Page) {
+    await navigateTo(page, "/carte")
+    const input = page.locator(CARTE_INPUT)
+    await input.click()
+    await input.fill("rue")
+    await page.waitForResponse(
+      (response) =>
+        response.url().includes("/qfdmo/autocomplete/address") &&
+        response.url().includes("q=rue") &&
+        response.status() === 200,
+      { timeout: TIMEOUT.DEFAULT },
+    )
+    // Wait for at least 2 options to materialize so navigation tests have
+    // somewhere to move.
+    await expect(page.locator(CARTE_OPTION)).toHaveCount(3, {
+      timeout: TIMEOUT.DEFAULT,
+    })
+    return input
+  }
+
+  test("ArrowDown on a closed listbox opens it without focusing an option", async ({
+    page,
+  }) => {
+    await navigateTo(page, "/carte")
+    const input = page.locator(CARTE_INPUT)
+    await input.click()
+    await input.fill("rue")
+    // First wait for results to be available, then close the listbox to
+    // get a clean "closed" starting state.
+    await page.waitForResponse(
+      (response) =>
+        response.url().includes("/qfdmo/autocomplete/address") &&
+        response.status() === 200,
+    )
+    await input.press("Escape")
+    await expect(input).toHaveAttribute("aria-expanded", "false")
+
+    // Re-open via ArrowDown — must not advance into the listbox.
+    await input.press("ArrowDown")
+    await expect(input).toHaveAttribute("aria-expanded", "true")
+    // No active option yet: aria-activedescendant absent or empty.
+    const ad = await input.getAttribute("aria-activedescendant")
+    expect(ad === null || ad === "").toBe(true)
+    // No option carries aria-selected.
+    await expect(page.locator(`${CARTE_OPTION}[aria-selected="true"]`)).toHaveCount(0)
+  })
+
+  test("second ArrowDown advances to the first option, third to the second", async ({
+    page,
+  }) => {
+    const input = await openListboxWithMultipleOptions(page)
+    // Listbox is already open (it opens on input). One Down to land on first.
+    await input.press("ArrowDown")
+    await expect(input).toHaveAttribute("aria-activedescendant", "option-1")
+    await expect(page.locator(`${CARTE_OPTION}#option-1`)).toHaveAttribute(
+      "aria-selected",
+      "true",
+    )
+
+    await input.press("ArrowDown")
+    await expect(input).toHaveAttribute("aria-activedescendant", "option-2")
+    await expect(page.locator(`${CARTE_OPTION}#option-1`)).not.toHaveAttribute(
+      "aria-selected",
+      /.*/,
+    )
+    await expect(page.locator(`${CARTE_OPTION}#option-2`)).toHaveAttribute(
+      "aria-selected",
+      "true",
+    )
+  })
+
+  test("ArrowDown does not wrap past the last option", async ({ page }) => {
+    const input = await openListboxWithMultipleOptions(page)
+    // Three options total — press Down four times. Stay on the last.
+    for (let i = 0; i < 4; i += 1) {
+      await input.press("ArrowDown")
+    }
+    await expect(input).toHaveAttribute("aria-activedescendant", "option-3")
+  })
+
+  test("ArrowUp does not wrap past the first option", async ({ page }) => {
+    const input = await openListboxWithMultipleOptions(page)
+    await input.press("ArrowDown")
+    await expect(input).toHaveAttribute("aria-activedescendant", "option-1")
+    // Up from the first option must stay on the first.
+    await input.press("ArrowUp")
+    await expect(input).toHaveAttribute("aria-activedescendant", "option-1")
+  })
+
+  test("DOM focus stays on the textbox while navigating the listbox", async ({
+    page,
+  }) => {
+    const input = await openListboxWithMultipleOptions(page)
+    await input.press("ArrowDown")
+    await input.press("ArrowDown")
+    // No matter how far we navigate, the active element on the page is the
+    // textbox itself. The option is only "visually focused" via ARIA.
+    const activeId = await page.evaluate(() => document.activeElement?.id)
+    expect(activeId).toBe("id_carte_map-adresse")
+  })
+
+  test("Alt + ArrowUp closes the listbox without committing a value", async ({
+    page,
+  }) => {
+    const input = await openListboxWithMultipleOptions(page)
+    await input.press("ArrowDown") // focus option-1
+    const beforeValue = await input.inputValue()
+
+    await input.press("Alt+ArrowUp")
+
+    await expect(input).toHaveAttribute("aria-expanded", "false")
+    // No commit happened: value unchanged.
+    await expect(input).toHaveValue(beforeValue)
+  })
+
+  test("Escape on an open listbox closes it without clearing the value", async ({
+    page,
+  }) => {
+    const input = await openListboxWithMultipleOptions(page)
+    await input.press("Escape")
+    await expect(input).toHaveAttribute("aria-expanded", "false")
+    // The textbox value is preserved.
+    await expect(input).toHaveValue("rue")
+  })
+
+  test("Escape on a closed listbox clears the textbox", async ({ page }) => {
+    const input = await openListboxWithMultipleOptions(page)
+    await input.press("Escape") // first Escape closes
+    await expect(input).toHaveAttribute("aria-expanded", "false")
+    await input.press("Escape") // second Escape clears
+    await expect(input).toHaveValue("")
+  })
+
+  test("Home moves the caret to the start of the textbox (not into the listbox)", async ({
+    page,
+  }) => {
+    const input = await openListboxWithMultipleOptions(page)
+    // Move caret to the end of "rue" first.
+    await input.press("End")
+
+    await input.press("Home")
+
+    // After Home, the caret is at position 0. No option should be aria-selected
+    // and aria-activedescendant should not point at an option (still empty/absent).
+    const caretAtStart = await input.evaluate(
+      (el: HTMLInputElement) => el.selectionStart,
+    )
+    expect(caretAtStart).toBe(0)
+    await expect(page.locator(`${CARTE_OPTION}[aria-selected="true"]`)).toHaveCount(0)
+  })
+
+  test("Enter commits the active option and closes the listbox", async ({ page }) => {
+    const input = await openListboxWithMultipleOptions(page)
+    await input.press("ArrowDown")
+    await input.press("ArrowDown") // option-2 — "Rue de Rivoli 75001 Paris"
+
+    await input.press("Enter")
+
+    await expect(input).toHaveAttribute("aria-expanded", "false")
+    await expect(input).toHaveValue("Rue de Rivoli 75001 Paris")
+  })
+})
