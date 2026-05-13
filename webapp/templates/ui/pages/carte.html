@@ -19,10 +19,16 @@
         data-controller="search-solution-form"
         data-search-solution-form-target="searchForm"
         data-search-solution-form-is-iframe-value="{{ is_embedded }}"
+        {# Address picks are submitted via the state controller, NOT a direct  #}
+        {# listener here. State#setLocation runs first (it owns the body-level #}
+        {# data-action), clears any stale bbox via resetBboxInputs(), then     #}
+        {# calls submitForm via #updateUIFromGlobalState. Listening for the    #}
+        {# change event on the form too would race with state and submit with  #}
+        {# the previous bbox still set, so the server scopes acteurs to the   #}
+        {# old map view instead of the new address.                            #}
         data-action="
         map:updateBbox->search-solution-form#updateBboxInput
-        search-solution-form:captureInteraction->analytics#captureInteractionWithMap
-        carte-address-autocomplete:change->search-solution-form#submitForm"
+        search-solution-form:captureInteraction->analytics#captureInteractionWithMap"
         class="
         qf-rounded-lg qf-border qf-border-solid qf-border-grey-900
         qf-group

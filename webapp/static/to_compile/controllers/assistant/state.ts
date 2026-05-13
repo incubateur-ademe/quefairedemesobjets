@@ -68,9 +68,17 @@ export default class extends Controller<HTMLElement> {
   }
 
   setLocation(event) {
+    // The user explicitly picked a new address. Drop any stale bbox that the
+    // map controller left behind from a previous pan — otherwise the form
+    // submit below would still scope acteurs to the old map view.
     this.resetBboxInputs()
     const nextLocationValue = event.detail
     this.#setLocationValue(nextLocationValue)
+    // The carte controller already wrote the new lat/lon onto its targets
+    // before dispatching `change`, so #setLocationValue → updateUIFromGlobalState
+    // sees the DOM in sync and won't submit on its own. Submit explicitly here
+    // so the form re-fetches acteurs around the new address.
+    this.submit()
   }
 
   #setLocationValue(nextLocationValue) {

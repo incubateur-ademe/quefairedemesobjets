@@ -125,6 +125,61 @@ test.describe("🗺️ Carte address combobox", () => {
     expect(url.searchParams.get("carte_map-longitude")).toBe("-2.990838")
   })
 
+  test("picking a new address clears a stale bbox left by the map controller", async ({
+    page,
+  }) => {
+    // Regression: after the user pans the map, the search-solution-form's
+    // bounding_box hidden field carries the new map view. Picking a fresh
+    // address must clear that bbox before submitting — otherwise the server
+    // gives precedence to bbox over lat/lon and returns acteurs scoped to
+    // the previous map view (the original "Auray markers stay after picking
+    // Montbéliard" bug). state#setLocation owns the reset; the form's own
+    // listener was removed to avoid a race that submitted before bbox was
+    // cleared.
+    await navigateTo(page, "/carte")
+    await pickFirstAddress(page, "Auray")
+
+    // Simulate the map controller having written a bbox after a pan.
+    await page.evaluate(() => {
+      const bbox = document.querySelector<HTMLInputElement>(
+        '[data-search-solution-form-target="bbox"]',
+      )
+      if (!bbox) throw new Error("no bbox target")
+      const setter = Object.getOwnPropertyDescriptor(
+        HTMLInputElement.prototype,
+        "value",
+      )?.set
+      setter?.call(
+        bbox,
+        JSON.stringify({
+          southWest: { lat: 47.4, lng: 6.6 },
+          northEast: { lat: 47.6, lng: 7.0 },
+        }),
+      )
+      bbox.dispatchEvent(new Event("input", { bubbles: true }))
+    })
+
+    // Capture the GET that fires when the user picks a new address.
+    const submitRequest = page.waitForRequest(
+      (request) =>
+        request.method() === "GET" &&
+        request.url().includes("/carte?") &&
+        request.url().includes(`${ADRESSE_FIELD_NAME}=Auray`),
+      { timeout: TIMEOUT.DEFAULT },
+    )
+
+    // Re-pick (same address — also exercises the case where the visible
+    // input value already matches the new pick).
+    const input = page.locator(CARTE_INPUT)
+    await input.click()
+    await input.fill("Auray")
+    await page.locator(CARTE_OPTION).filter({ hasText: "Auray" }).first().click()
+
+    const url = new URL((await submitRequest).url())
+    expect(url.searchParams.get("carte_map-bounding_box")).toBe("")
+    expect(url.searchParams.get(ADRESSE_FIELD_NAME)).toBe("Auray")
+  })
+
   test("reloading after picking an address does not re-submit in a loop", async ({
     page,
   }) => {
