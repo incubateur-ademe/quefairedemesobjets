@@ -1,15 +1,14 @@
 import pytest
-from django.contrib.admin.sites import AdminSite
-from django.contrib.auth.models import AnonymousUser
-from django.contrib.messages.storage.fallback import FallbackStorage
-from django.test import RequestFactory
-
 from data.admin import (
     SuggestionGroupeAdmin,
     apply_suggestions_to_parent,
     apply_suggestions_to_revision,
 )
 from data.models.suggestion import SuggestionGroupe
+from django.contrib.admin.sites import AdminSite
+from django.contrib.auth.models import AnonymousUser
+from django.contrib.messages.storage.fallback import FallbackStorage
+from django.test import RequestFactory
 from unit_tests.data.models.suggestion_factory import (
     SuggestionGroupeFactory,
     SuggestionUnitaireFactory,
@@ -421,3 +420,44 @@ class TestApplySuggestionsToRevision:
             ).count()
             == 0
         )
+
+
+@pytest.mark.django_db
+class TestSuggestionGroupeAdminBooleanFilters:
+    def test_schema_exposes_has_parent_and_has_correction_fields(self, admin_instance):
+        schema = admin_instance.djangoql_schema(SuggestionGroupe)
+
+        field_names = [
+            field if isinstance(field, str) else field.name
+            for field in schema.get_fields(SuggestionGroupe)
+        ]
+
+        assert "has_parent" in field_names
+        assert "has_correction" in field_names
+
+    def test_get_queryset_annotates_has_parent_and_has_correction(
+        self, admin_instance, mock_request
+    ):
+        group_with_parent = SuggestionGroupeFactory(
+            acteur=ActeurFactory(),
+            parent_revision_acteur=RevisionActeurFactory(),
+        )
+        group_with_correction = SuggestionGroupeFactory(
+            acteur=ActeurFactory(),
+            revision_acteur=RevisionActeurFactory(),
+        )
+        SuggestionGroupeFactory(
+            acteur=ActeurFactory(),
+        )
+
+        queryset = admin_instance.get_queryset(mock_request)
+
+        has_parent_ids = set(
+            queryset.filter(has_parent=True).values_list("id", flat=True)
+        )
+        has_correction_ids = set(
+            queryset.filter(has_correction=True).values_list("id", flat=True)
+        )
+
+        assert has_parent_ids == {group_with_parent.id}
+        assert has_correction_ids == {group_with_correction.id}

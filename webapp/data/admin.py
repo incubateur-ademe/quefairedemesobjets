@@ -301,7 +301,7 @@ def apply_suggestions_to_parent(
 def apply_suggestions_to_revision(self, request, queryset):
     for suggestion_groupe in queryset:
         # Only for SuggestionGroupe with parent
-        if suggestion_groupe.suggestion_acteur_has_revision():
+        if suggestion_groupe.suggestion_acteur_has_correction():
             _update_or_copy_suggestion_unitaires(suggestion_groupe)
 
     self.message_user(
@@ -335,6 +335,7 @@ class SuggestionGroupeAdmin(
                     ],
                     IntField(name="suggestion_unitaires_count"),
                     BoolField(name="has_parent"),
+                    BoolField(name="has_correction"),
                 ]
 
             return fields
@@ -372,6 +373,7 @@ class SuggestionGroupeAdmin(
             )
             .with_suggestion_unitaire_count()
             .with_has_parent()
+            .with_has_correction()
         )
 
     def groupe_de_suggestions(self, obj):
