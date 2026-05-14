@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 import posthog from "posthog-js"
 
 const MOBILE_BREAKPOINT_QUERY = "(max-width: 767px)"
-const VARIANT_VALUE = "variant"
+const VARIANT_VALUE = "test"
 
 /**
  * Generic A/B test controller for any element exposing a `src` attribute

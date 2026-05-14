@@ -60,14 +60,14 @@ describe("AbTestController", () => {
     setMobileViewport(true)
   })
 
-  it("assigns variant src when flag returns 'variant' on mobile", async () => {
-    getFeatureFlag.mockReturnValue("variant")
+  it("assigns variant src when flag returns 'test' on mobile", async () => {
+    getFeatureFlag.mockReturnValue("test")
     const frame = setupFrame()
     startStimulus()
     await flush()
 
     expect(frame.getAttribute("src")).toBe(VARIANT_SRC)
-    expect(register).toHaveBeenCalledWith({ [`$feature/${FLAG_KEY}`]: "variant" })
+    expect(register).toHaveBeenCalledWith({ [`$feature/${FLAG_KEY}`]: "test" })
   })
 
   it("restores control src when flag returns 'control'", async () => {
@@ -88,9 +88,9 @@ describe("AbTestController", () => {
     expect(frame.getAttribute("src")).toBe(CONTROL_SRC)
   })
 
-  it("forces control on desktop viewport even when flag returns 'variant'", async () => {
+  it("forces control on desktop viewport even when flag returns 'test'", async () => {
     setMobileViewport(false)
-    getFeatureFlag.mockReturnValue("variant")
+    getFeatureFlag.mockReturnValue("test")
     const frame = setupFrame({ "data-ab-test-mobile-only-value": "true" })
     startStimulus()
     await flush()
@@ -102,7 +102,7 @@ describe("AbTestController", () => {
 
   it("honours variant on desktop when mobileOnly is false", async () => {
     setMobileViewport(false)
-    getFeatureFlag.mockReturnValue("variant")
+    getFeatureFlag.mockReturnValue("test")
     const frame = setupFrame({ "data-ab-test-mobile-only-value": "false" })
     startStimulus()
     await flush()

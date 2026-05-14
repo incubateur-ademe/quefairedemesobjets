@@ -86,7 +86,7 @@ test.describe("AB test: produit carte default view (mobile)", () => {
   test("variant flag adds view_mode-view=liste to the carte frame on mobile", async ({
     page,
   }) => {
-    await stubPosthogFlag(page, FLAG_KEY, "variant")
+    await stubPosthogFlag(page, FLAG_KEY, "test")
     await navigateTo(page, PRODUIT_PATH)
 
     const src = await getCarteFrameSrc(page)
