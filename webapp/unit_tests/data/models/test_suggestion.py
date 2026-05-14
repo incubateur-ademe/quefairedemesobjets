@@ -1,5 +1,4 @@
 import pytest
-
 from data.models.suggestion import SuggestionAction, SuggestionCohorte, SuggestionGroupe
 from unit_tests.data.models.suggestion_factory import (
     SuggestionCohorteFactory,
@@ -128,19 +127,21 @@ class TestSuggestionGroupeSuggestionActeurHasParent:
 
 @pytest.mark.django_db
 class TestSuggestionGroupeSuggestionActeurHasRevision:
-    def test_suggestion_acteur_has_revision_returns_false_when_no_revision_acteur(self):
+    def test_suggestion_acteur_has_correction_returns_false_when_no_revision_acteur(
+        self,
+    ):
         """
-        Test that suggestion_acteur_has_revision returns False
+        Test that suggestion_acteur_has_correction returns False
         when revision_acteur_id is None
         """
         acteur = ActeurFactory()
         groupe = SuggestionGroupeFactory(acteur=acteur)
 
-        assert groupe.suggestion_acteur_has_revision() is False
+        assert groupe.suggestion_acteur_has_correction() is False
 
-    def test_suggestion_acteur_has_revision_returns_true_when_same_ids(self):
+    def test_suggestion_acteur_has_correction_returns_true_when_same_ids(self):
         """
-        Test that suggestion_acteur_has_revision returns True
+        Test that suggestion_acteur_has_correction returns True
         when acteur_id == revision_acteur_id
         """
         acteur = ActeurFactory()
@@ -154,11 +155,11 @@ class TestSuggestionGroupeSuggestionActeurHasRevision:
 
         # Verify that the IDs are different
         assert groupe.acteur_id == groupe.revision_acteur_id
-        assert groupe.suggestion_acteur_has_revision() is True
+        assert groupe.suggestion_acteur_has_correction() is True
 
-    def test_suggestion_acteur_has_revision_returns_false_when_different_ids(self):
+    def test_suggestion_acteur_has_correction_returns_false_when_different_ids(self):
         """
-        Test that suggestion_acteur_has_revision returns False
+        Test that suggestion_acteur_has_correction returns False
         when acteur_id != revision_acteur_id
         """
         acteur = ActeurFactory()
@@ -170,7 +171,7 @@ class TestSuggestionGroupeSuggestionActeurHasRevision:
 
         # Verify that the IDs are different
         assert groupe.acteur_id != groupe.revision_acteur_id
-        assert groupe.suggestion_acteur_has_revision() is False
+        assert groupe.suggestion_acteur_has_correction() is False
 
 
 @pytest.mark.django_db

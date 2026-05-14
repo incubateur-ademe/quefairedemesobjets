@@ -40,7 +40,7 @@
     "semi": false
   },
   "dependencies": {
-    "@axe-core/playwright": "^4.11.2",
+    "@axe-core/playwright": "^4.11.3",
     "@gouvfr/dsfr": "^1.14",
     "@hotwired/stimulus": "^3.2.2",
     "@hotwired/turbo": "^8.0.23",
@@ -51,7 +51,7 @@
     "carte-facile": "^0.9.0",
     "eslint-config-prettier": "^10.1.8",
     "maplibre-gl": "^5.24.0",
-    "posthog-js": "^1.372.3",
+    "posthog-js": "^1.372.8",
     "stimulus-use": "^0.52.3",
     "tailwindcss": "^3.4.19"
   },
@@ -64,7 +64,7 @@
     "@types/lodash": "^4.17.24",
     "@types/node": "^25.6.0",
     "buffer": "^6.0.3",
-    "eslint": "^10.2.1",
+    "eslint": "^10.3.0",
     "eslint-plugin-prettier": "^5.5.5",
     "jest": "^30.3.0",
     "jest-environment-jsdom": "^30.3.0",
@@ -72,13 +72,13 @@
     "parcel": "^2.16.4",
     "postcss": "^8.5.12",
     "postcss-nesting": "^14.0.0",
-    "prettier": "^3.8.2",
+    "prettier": "^3.8.3",
     "svgo": "^4.0.1",
     "tailwindcss-animate": "^1.0.7",
     "ts-jest": "^29.4.9",
     "ts-node": "^10.9.2",
-    "typescript": "^6.0.2",
-    "typescript-eslint": "^8.59.1"
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.59.2"
   },
   "optionalDependencies": {
     "@parcel/watcher-linux-x64-glibc": "^2.5.6"

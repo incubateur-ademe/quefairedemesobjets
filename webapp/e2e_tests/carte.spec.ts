@@ -187,7 +187,7 @@ test.describe("🗺️ Affichage des Labels dans la Fiche Acteur", () => {
     const acteurDetailLabels = iframe.locator(
       "#acteurDetailsPanel [data-testid='acteur-detail-labels']",
     )
-    await expect(acteurDetailLabels).toContainText("économie sociale et solidaire", {
+    await expect(acteurDetailLabels).toContainText(/économie sociale et solidaire/i, {
       timeout: TIMEOUT.SHORT,
     })
   })
@@ -563,6 +563,135 @@ test.describe("🗺️ Mini Carte - Affichage des Pinpoints", () => {
     // Verify the home pinpoint is visible on the mini map
     const homePinpoint = page.locator("#pinpoint-home")
     await expect(homePinpoint).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+  })
+
+  test(
+    "La fiche acteur affiche une mini carte sur mobile (mode liste)",
+    { tag: ["@mobile", "@regression"] },
+    async ({ page }) => {
+      test.slow()
+      await navigateTo(page, "/carte")
+      await mockApiAdresse(page)
+      await searchForAuray(page)
+
+      await expect(
+        page.locator('#addressesPanel [data-controller="pinpoint"]').first(),
+      ).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+
+      await switchToListeMode(page)
+
+      const voirLaFicheButtons = page.locator('[data-testid="voir-la-fiche"]')
+      await expect(voirLaFicheButtons.first()).toBeVisible({
+        timeout: TIMEOUT.DEFAULT,
+      })
+
+      const fifthVoirLaFiche = voirLaFicheButtons.nth(4)
+      const href = await fifthVoirLaFiche.getAttribute("href")
+      expect(href).toBeTruthy()
+
+      // List mode: with_map=1 is set, mini map must be visible on mobile
+      await navigateTo(page, `${href}&with_map=1`)
+
+      await expect(
+        page.locator('[data-testid="acteur-detail-about-panel"]'),
+      ).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+
+      const miniMapContainer = page.locator('[data-map-target="mapContainer"]')
+      await expect(miniMapContainer).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+
+      const acteurPinpoint = page.locator(
+        '.maplibregl-marker[data-controller="pinpoint"]:not(#pinpoint-home)',
+      )
+      await expect(acteurPinpoint.first()).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+
+      const homePinpoint = page.locator("#pinpoint-home")
+      await expect(homePinpoint).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+    },
+  )
+
+  test(
+    "La fiche acteur affiche une mini carte sur mobile (mode carte, sans with_map)",
+    { tag: ["@mobile", "@regression"] },
+    async ({ page }) => {
+      test.slow()
+      await navigateTo(page, "/carte")
+      await mockApiAdresse(page)
+      await searchForAuray(page)
+
+      await expect(
+        page.locator('#addressesPanel [data-controller="pinpoint"]').first(),
+      ).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+
+      await switchToListeMode(page)
+
+      const voirLaFicheButtons = page.locator('[data-testid="voir-la-fiche"]')
+      await expect(voirLaFicheButtons.first()).toBeVisible({
+        timeout: TIMEOUT.DEFAULT,
+      })
+
+      const fifthVoirLaFiche = voirLaFicheButtons.nth(4)
+      const href = await fifthVoirLaFiche.getAttribute("href")
+      expect(href).toBeTruthy()
+
+      // Map mode: simulate a pinpoint click (no with_map param).
+      // Mini map must still be visible on mobile because the full-screen
+      // detail sheet hides the big map behind.
+      const hrefWithoutMap = href!.replace(/[?&]with_map=1/g, "")
+      await navigateTo(page, hrefWithoutMap)
+
+      await expect(
+        page.locator('[data-testid="acteur-detail-about-panel"]'),
+      ).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+
+      const miniMapContainer = page.locator('[data-map-target="mapContainer"]')
+      await expect(miniMapContainer).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+
+      const acteurPinpoint = page.locator(
+        '.maplibregl-marker[data-controller="pinpoint"]:not(#pinpoint-home)',
+      )
+      await expect(acteurPinpoint.first()).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+
+      const homePinpoint = page.locator("#pinpoint-home")
+      await expect(homePinpoint).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+    },
+  )
+
+  test("La fiche acteur n'affiche pas de mini carte sur desktop (mode carte, sans with_map)", async ({
+    page,
+  }) => {
+    test.slow()
+    await navigateTo(page, "/carte")
+    await mockApiAdresse(page)
+    await searchForAuray(page)
+
+    await expect(
+      page.locator('#addressesPanel [data-controller="pinpoint"]').first(),
+    ).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+
+    await switchToListeMode(page)
+
+    const voirLaFicheButtons = page.locator('[data-testid="voir-la-fiche"]')
+    await expect(voirLaFicheButtons.first()).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+
+    const fifthVoirLaFiche = voirLaFicheButtons.nth(4)
+    const href = await fifthVoirLaFiche.getAttribute("href")
+    expect(href).toBeTruthy()
+
+    // Desktop map mode: simulate a pinpoint click (no with_map param).
+    // Mini map must stay hidden because the big map remains visible
+    // alongside the detail panel.
+    const urlWithoutMap = new URL(href!, page.url())
+    urlWithoutMap.searchParams.delete("with_map")
+    await navigateTo(page, urlWithoutMap.toString())
+
+    await expect(page.locator('[data-testid="acteur-detail-about-panel"]')).toBeVisible(
+      {
+        timeout: TIMEOUT.DEFAULT,
+      },
+    )
+
+    const miniMapContainer = page.locator('[data-map-target="mapContainer"]')
+    await expect(miniMapContainer).toBeHidden()
   })
 })
 

@@ -13,6 +13,7 @@ import {
 
 test.describe("Mode liste", () => {
   test("Le mode liste affiche la distance", async ({ page }) => {
+    await mockApiAdresse(page)
     await navigateTo(page, "/carte")
 
     await searchCarteAndWaitForActeurs(page, "auray")

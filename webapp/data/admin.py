@@ -13,10 +13,11 @@ from data.views import get_context_from_suggestion_groupe
 from django.contrib import admin, messages
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-from django.db.models import QuerySet
+from django.db.models import Exists, OuterRef, Q, QuerySet
 from django.template.loader import render_to_string
 from django.utils.html import format_html, mark_safe
 from djangoql.admin import DjangoQLSearchMixin
+from djangoql.exceptions import DjangoQLSchemaError
 from djangoql.schema import BoolField, DjangoQLSchema, IntField, StrField
 
 NB_SUGGESTIONS_DISPLAYED_WHEN_DELETING = 100
@@ -301,12 +302,34 @@ def apply_suggestions_to_parent(
 def apply_suggestions_to_revision(self, request, queryset):
     for suggestion_groupe in queryset:
         # Only for SuggestionGroupe with parent
-        if suggestion_groupe.suggestion_acteur_has_revision():
+        if suggestion_groupe.suggestion_acteur_has_correction():
             _update_or_copy_suggestion_unitaires(suggestion_groupe)
 
     self.message_user(
         request, f"Les {queryset.count()} suggestions sélectionnées ont été appliquées"
     )
+
+
+class HasSuggestionUnitaireWithChampField(StrField):
+    """Permet de filtrer par champ de suggestion unitaire individuel"""
+
+    name = "has_suggestion_unitaire_with_champ"
+    suggest_options = False
+
+    def get_lookup(self, path, operator, value):
+        if operator not in {"~", "!~"}:
+            raise DjangoQLSchemaError(
+                f'Field "{self.name}" only supports "~" and "!~" operators'
+            )
+
+        has_matching_suggestion_unitaire = Exists(
+            SuggestionUnitaire.objects.filter(
+                suggestion_groupe_id=OuterRef("pk"),
+                champs__icontains=value,
+            )
+        )
+        q = Q(has_matching_suggestion_unitaire)
+        return ~q if operator == "!~" else q
 
 
 @admin.register(SuggestionGroupe)
@@ -335,7 +358,8 @@ class SuggestionGroupeAdmin(
                     ],
                     IntField(name="suggestion_unitaires_count"),
                     BoolField(name="has_parent"),
-                ]
+                    BoolField(name="has_correction"),
+                ] + [HasSuggestionUnitaireWithChampField()]
 
             return fields
 
@@ -372,6 +396,7 @@ class SuggestionGroupeAdmin(
             )
             .with_suggestion_unitaire_count()
             .with_has_parent()
+            .with_has_correction()
         )
 
     def groupe_de_suggestions(self, obj):
