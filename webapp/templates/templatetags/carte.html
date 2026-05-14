@@ -4,7 +4,7 @@
 ">
 {% if ab_test_enabled %}
     {# A/B test: keep src as the safety net (loads control if JS or PostHog fails). #}
-    {# ab_test_controller swaps in url_variant when the PostHog flag returns "variant". #}
+    {# ab_test_controller swaps in url_variant when the PostHog flag returns "test". #}
     <turbo-frame
         id="{{ id }}"
         allow="geolocation; clipboard-write"

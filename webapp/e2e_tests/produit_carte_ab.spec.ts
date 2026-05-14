@@ -106,7 +106,7 @@ test.describe("AB test: produit carte default view (desktop)", () => {
   test.use({ viewport: { width: 1280, height: 800 } })
 
   test("desktop ignores the variant (mobile-only gate)", async ({ page }) => {
-    await stubPosthogFlag(page, FLAG_KEY, "variant")
+    await stubPosthogFlag(page, FLAG_KEY, "test")
     await navigateTo(page, PRODUIT_PATH)
 
     const src = await getCarteFrameSrc(page)

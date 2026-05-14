@@ -22,7 +22,7 @@ attribute. The controller swaps the `src` based on the flag value.
                                      │
                           getFeatureFlag(key)
                                      │
-                       === "variant"?│
+                       === "test"?   │
                   ┌────yes────┐   ┌──no──┐
                   ▼           │   ▼      │
            assign variant     │   restore control
@@ -55,7 +55,7 @@ PostHog is unreachable or throws, the controller falls back to the original
 | `data-controller="ab-test"`      | yes      | —       | wires the controller                                                               |
 | `src`                            | yes      | —       | URL loaded for `control` and as a safety fallback                                  |
 | `data-ab-test-flag-key-value`    | yes      | —       | PostHog flag key                                                                   |
-| `data-ab-test-src-variant-value` | yes      | —       | URL loaded when the flag returns `"variant"`                                       |
+| `data-ab-test-src-variant-value` | yes      | —       | URL loaded when the flag returns `"test"`                                          |
 | `data-ab-test-mobile-only-value` | no       | `false` | when `true`, only honour the variant if `matchMedia("(max-width: 767px)")` matches |
 
 The controller registers `$feature/<key>: <variant>` as a posthog
@@ -65,7 +65,7 @@ automatically.
 ## Setting up a new experiment
 
 1. **Create the feature flag in PostHog.**
-   - Multivariate flag with two variants: `control` and `variant`.
+   - Multivariate flag with two variants: `control` and `test`.
    - 50/50 rollout, 100% of users.
    - No targeting filters: device gating is done client-side via `matchMedia`.
 
@@ -91,7 +91,7 @@ When the experiment ends:
 
 - If the winner is `control`: remove the data attributes and the
   `data-ab-test-src-variant-value` attribute. The element is back to normal.
-- If the winner is `variant`: replace `src` with the variant URL and remove
+- If the winner is `test`: replace `src` with the variant URL and remove
   the data attributes. The element is back to normal.
 - The `ab-test` controller stays in the bundle — it's generic and the next
   experiment will reuse it.

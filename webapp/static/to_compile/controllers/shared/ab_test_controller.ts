@@ -8,7 +8,7 @@ const VARIANT_VALUE = "test"
  * Generic A/B test controller for any element exposing a `src` attribute
  * (typically a `<turbo-frame>`).
  *
- * Resolves a PostHog feature flag and, when it returns "variant", swaps the
+ * Resolves a PostHog feature flag and, when it returns "test", swaps the
  * element's `src` for `data-ab-test-src-variant-value`. Otherwise the original
  * `src` is restored. If PostHog is unavailable or the flag cannot be resolved,
  * the original `src` is restored — the element stays equivalent to its
