@@ -132,8 +132,7 @@ test.describe("♿ RGAA Mineurs", () => {
     test("Le lien \"disponible librement\" de la modale d'intégration a un title qui reprend l'intitulé visible", async ({
       page,
     }) => {
-      await navigateTo(page, "/lookbook/inspect/modals/integration/")
-      // The preview renders the modal content directly.
+      await navigateTo(page, "/lookbook/preview/modals/integration/")
       const link = page.locator(
         'a[href="https://github.com/incubateur-ademe/quefairedemesobjets/"]',
       )
