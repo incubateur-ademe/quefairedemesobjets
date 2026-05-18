@@ -7,7 +7,6 @@ from cluster.config.metadata import (
     METADATA_ANONYMIZED_ACTEURS_IGNORED,
     METADATA_NUMBER_OF_UPDATES_BY_FIELD,
 )
-from data.models.changes.acteur_rgpd_anonymize import VALUE_ANONYMIZED
 from sources.config.models import SourceConfig
 from sources.tasks.transform.transform_df import compute_identifiant_unique
 from utils.django import django_setup_full, get_model_fields
@@ -160,7 +159,7 @@ def keep_acteur_changed(
 
     def remove_anonymized_acteur(
         df_acteur_from_db: pd.DataFrame, df_normalized: pd.DataFrame, metadata: dict
-    ) -> (pd.DataFrame, pd.DataFrame, dict):
+    ) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
         anonymized_ids = set(
             df_acteur_from_db[df_acteur_from_db["nom"] == VALUE_ANONYMIZED][
                 "identifiant_unique"
