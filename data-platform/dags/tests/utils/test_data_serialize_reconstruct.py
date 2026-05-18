@@ -1,9 +1,8 @@
 from datetime import datetime
 
 import pytest
-from django.contrib.gis.geos import Point
-
 from data.models.changes.utils import data_reconstruct
+from django.contrib.gis.geos import Point
 from qfdmo.models.acteur import RevisionActeur
 from unit_tests.qfdmo.acteur_factory import (
     ActeurTypeFactory,
@@ -32,6 +31,8 @@ class TestDataSerializeReconstruct:
             "action_principale": action,
             "location": POINT,
             "cree_le": DATETIME,
+            "exclusivite_de_reprisereparation": False,
+            "uniquement_sur_rdv": False,
         }
         return data
 
