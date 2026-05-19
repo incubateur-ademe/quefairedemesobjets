@@ -1,14 +1,25 @@
 import { Controller } from "@hotwired/stimulus"
 import isEmpty from "lodash/isEmpty"
 import AdresseAutocompleteController from "../carte/address_autocomplete_controller"
+import CarteAddressAutocompleteController from "../carte/carte_address_autocomplete_controller"
 import SearchFormController from "../carte/search_solution_form_controller"
+
+// Both address autocomplete controllers expose the same target contract for
+// the state controller's purposes: an `input` for the visible address,
+// `latitude` and `longitude` for the hidden coordinate fields.
+type AddressOutlet = AdresseAutocompleteController | CarteAddressAutocompleteController
 
 export default class extends Controller<HTMLElement> {
   static values = {
     location: Object,
   }
-  static outlets = ["address-autocomplete", "search-solution-form"]
+  static outlets = [
+    "address-autocomplete",
+    "carte-address-autocomplete",
+    "search-solution-form",
+  ]
   declare addressAutocompleteOutlets: Array<AdresseAutocompleteController>
+  declare carteAddressAutocompleteOutlets: Array<CarteAddressAutocompleteController>
   declare searchSolutionFormOutlets: Array<SearchFormController>
   declare locationValue: {
     adresse: string | null
@@ -23,6 +34,13 @@ export default class extends Controller<HTMLElement> {
   }
 
   addressAutocompleteOutletConnected(outlet, element) {
+    if (outlet.inputTarget.value) {
+      return
+    }
+    this.updateUIFromGlobalState(outlet)
+  }
+
+  carteAddressAutocompleteOutletConnected(outlet) {
     if (outlet.inputTarget.value) {
       return
     }
@@ -50,9 +68,17 @@ export default class extends Controller<HTMLElement> {
   }
 
   setLocation(event) {
+    // The user explicitly picked a new address. Drop any stale bbox that the
+    // map controller left behind from a previous pan — otherwise the form
+    // submit below would still scope acteurs to the old map view.
     this.resetBboxInputs()
     const nextLocationValue = event.detail
     this.#setLocationValue(nextLocationValue)
+    // The carte controller already wrote the new lat/lon onto its targets
+    // before dispatching `change`, so #setLocationValue → updateUIFromGlobalState
+    // sees the DOM in sync and won't submit on its own. Submit explicitly here
+    // so the form re-fetches acteurs around the new address.
+    this.submit()
   }
 
   #setLocationValue(nextLocationValue) {
@@ -60,7 +86,11 @@ export default class extends Controller<HTMLElement> {
     if (updatedLocationIsNotEmpty) {
       this.locationValue = nextLocationValue
 
-      for (const outlet of this.addressAutocompleteOutlets) {
+      const allOutlets: Array<AddressOutlet> = [
+        ...this.addressAutocompleteOutlets,
+        ...this.carteAddressAutocompleteOutlets,
+      ]
+      for (const outlet of allOutlets) {
         this.updateUIFromGlobalState(outlet)
       }
     }
@@ -78,7 +108,7 @@ export default class extends Controller<HTMLElement> {
     // stored globally in the page
     const value = this.locationValue
     let touched = false
-    if (value.adresse) {
+    if (value.adresse && outlet.inputTarget.value !== value.adresse) {
       outlet.inputTarget.value = value.adresse
       touched = true
     }

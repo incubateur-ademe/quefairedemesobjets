@@ -6,6 +6,7 @@ import GenericAutocompleteController from "../controllers/shared/generic_autocom
 import ScrollController from "../controllers/shared/scroll_controller"
 
 import AddressAutocompleteController from "../controllers/carte/address_autocomplete_controller"
+import CarteAddressAutocompleteController from "../controllers/carte/carte_address_autocomplete_controller"
 import MapController from "../controllers/carte/map_controller"
 import SearchSolutionFormController from "../controllers/carte/search_solution_form_controller"
 import SsCatObjectAutocompleteController from "../controllers/formulaire/ss_cat_object_autocomplete_controller"
@@ -25,6 +26,7 @@ window.stimulus = Application.start()
 stimulus.register("map", MapController)
 stimulus.register("ss-cat-object-autocomplete", SsCatObjectAutocompleteController)
 stimulus.register("address-autocomplete", AddressAutocompleteController)
+stimulus.register("carte-address-autocomplete", CarteAddressAutocompleteController)
 stimulus.register("search-solution-form", SearchSolutionFormController)
 stimulus.register("autocomplete", GenericAutocompleteController)
 stimulus.register("copy", CopyController)
