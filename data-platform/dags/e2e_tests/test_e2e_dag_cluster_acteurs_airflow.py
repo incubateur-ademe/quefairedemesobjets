@@ -3,12 +3,11 @@ to complete the pipeline entirely, but instead skips tasks as needed"""
 
 import pytest
 from airflow.utils.state import State
-from django.contrib.gis.geos import Point
-
 from dags.cluster.config.tasks import TASKS
 from dags.e2e_tests.e2e_utils import airflow_init, ti_get
 from dags.shared.config.start_dates import START_DATES
 from dags.tests.cluster.helpers.configs import CONF_BASE_DICT
+from django.contrib.gis.geos import Point
 from unit_tests.qfdmo.acteur_factory import (
     ActeurTypeFactory,
     DisplayedActeur,
@@ -19,7 +18,7 @@ from unit_tests.qfdmo.acteur_factory import (
 airflow_init()
 
 # Need to wait for airflow_init() to be called before importing
-from dags.cluster.config.model import ClusterConfig  # noqa: E402
+from dags.cluster.config.models import ClusterConfig  # noqa: E402
 
 
 @pytest.mark.django_db()

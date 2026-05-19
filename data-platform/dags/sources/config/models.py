@@ -48,7 +48,7 @@ class OCAConfig(BaseModel):
     deduplication_source: bool = False
 
 
-class DAGConfig(BaseModel):
+class SourceConfig(BaseModel):
     normalization_rules: list[
         Union[
             NormalizationColumnRename,
@@ -102,7 +102,7 @@ class DAGConfig(BaseModel):
     @classmethod
     def from_airflow_params(
         cls, params: dict[str, Union[str, list, dict]]
-    ) -> "DAGConfig":
+    ) -> "SourceConfig":
 
         params["normalization_rules"] = get_nested_config_parameter(
             params.get("normalization_rules", [])

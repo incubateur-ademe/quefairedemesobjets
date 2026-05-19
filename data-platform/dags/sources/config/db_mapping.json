@@ -150,22 +150,14 @@
       "abj_electrique"
     ],
     "tout egp (equipements grand public) - hors tv et optique non intégrée et jels": [
-      "gros_electromenager_refrigerant",
-      "gros_electromenager_hors_refrigerant",
-      "petit_electromenager",
       "smartphone_tablette_et_console",
       "autre_equipement_electronique",
-      "luminaire",
       "velo",
       "materiel_hifi_et_video"
     ],
     "tout egp (equipements grand public) - hors tv et optique non intégrée et jels (jouets, équipements de loisirs et de sport) - hors mobilité": [
-      "gros_electromenager_refrigerant",
-      "gros_electromenager_hors_refrigerant",
-      "petit_electromenager",
       "smartphone_tablette_et_console",
       "autre_equipement_electronique",
-      "luminaire",
       "materiel_hifi_et_video"
     ]
   },

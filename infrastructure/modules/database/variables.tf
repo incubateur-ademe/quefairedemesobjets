@@ -85,3 +85,15 @@ variable "airflow_volume_size" {
   description = "Taille du volume en GB de la base de données airflow"
   type        = number
 }
+
+variable "create_remote_warehouse_in_webapp_script_path" {
+  description = "Chemin absolu vers le script SQL qui configure le foreign server warehouse dans la base webapp. Si null, le script n'est pas exécuté."
+  type        = string
+  default     = null
+}
+
+variable "create_remote_webapp_in_warehouse_script_path" {
+  description = "Chemin absolu vers le script SQL qui configure le foreign server webapp dans la base warehouse. Si null, le script n'est pas exécuté."
+  type        = string
+  default     = null
+}
