@@ -14,6 +14,10 @@ from qfdmo.views.adresses import (
     getorcreate_revisionacteur,
     solution_admin,
 )
+from qfdmo.views.autocomplete import (
+    AutocompleteBanAddressView,
+    ReverseGeocodeBanView,
+)
 from qfdmo.views.carte import CarteConfigView, CarteSearchActeursView
 from qfdmo.views.configurator import AdvancedConfiguratorView, ConfiguratorView
 from qfdmo.views.formulaire import FormulaireSearchActeursView
@@ -65,6 +69,16 @@ urlpatterns = [
         "qfdmo/get_synonyme_list",
         get_synonyme_list,
         name="get_synonyme_list",
+    ),
+    path(
+        "qfdmo/autocomplete/address",
+        AutocompleteBanAddressView.as_view(),
+        name="autocomplete_address",
+    ),
+    path(
+        "qfdmo/autocomplete/reverse",
+        ReverseGeocodeBanView.as_view(),
+        name="reverse_geocode_address",
     ),
     path(
         "adresse/<str:identifiant_unique>",
