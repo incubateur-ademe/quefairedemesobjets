@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock
 
 import pytest
+from django.template.loader import render_to_string
 from wagtail.models import Page, Site
 
 from core.templatetags.carte_tags import carte
@@ -94,3 +95,25 @@ class TestCarteTag:
         assert result["url_variant"].count("view_mode-view=") == 1
         assert "view_mode-view=liste" in result["url_variant"]
         assert "other=1" in result["url_variant"]
+
+    def test_rendered_frame_wires_ab_controller_when_opted_in(
+        self, produit_page_ab_enabled
+    ):
+        carte_config = CarteConfigFactory(slug="carte-ab-render-on")
+        html = render_to_string(
+            "templatetags/carte.html",
+            carte({"page": produit_page_ab_enabled}, carte_config),
+        )
+        assert 'data-controller="ab-test"' in html
+        assert 'data-ab-test-flag-key-value="produit-carte-default-view-mobile"' in html
+        assert 'data-ab-test-mobile-only-value="true"' in html
+        assert "view_mode-view=liste" in html
+
+    def test_rendered_frame_omits_ab_controller_when_not_opted_in(self, produit_page):
+        carte_config = CarteConfigFactory(slug="carte-ab-render-off")
+        html = render_to_string(
+            "templatetags/carte.html",
+            carte({"page": produit_page}, carte_config),
+        )
+        assert 'data-controller="ab-test"' not in html
+        assert "view_mode-view=liste" not in html
