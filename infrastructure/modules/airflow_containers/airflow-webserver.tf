@@ -26,6 +26,7 @@ resource "scaleway_container" "airflow_webserver" {
     _AIRFLOW_WWW_USER_CREATE                              = "true"
     _PIP_ADDITIONAL_REQUIREMENTS                          = ""
     AIRFLOW__API__AUTH_BACKENDS                           = "airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session"
+    AIRFLOW__API__THEME                                   = jsonencode({ "globalCss" : { "[data-scope=\"dialog\"][data-part=\"content\"]" : { "max-width" : "95vw !important" } } })
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION            = "true"
     AIRFLOW__CORE__DAGS_FOLDER                            = "/opt/airflow/dags"
     AIRFLOW__CORE__ENABLE_XCOM_PICKLING                   = "true"
