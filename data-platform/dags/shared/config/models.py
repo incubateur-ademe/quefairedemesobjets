@@ -1,6 +1,6 @@
 import typing
 
-from airflow.models.param import Param
+from airflow.sdk import Param
 from pydantic import BaseModel
 
 PYDANTIC_TYPE_TO_AIRFLOW_TYPE = {

@@ -1,7 +1,6 @@
 import logging
 
-from clone.config import DIR_SQL_VALIDATION
-
+from clone.config.models import DIR_SQL_VALIDATION
 from utils import logging_utils as log
 from utils.django import DJANGO_WH_CONNECTION_NAME
 

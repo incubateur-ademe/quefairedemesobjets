@@ -104,3 +104,40 @@ The unique identifier is composed as follows: `<SOURCE_CODE>*<EXTERNAL_IDENTIFIE
 ### Mapping
 
 It may happen that the partner cannot ensure continuity of external identifiers. In that case, if the partner provides a mapping table of old and new identifiers, then it is possible to ensure continuity of unique identifiers by following the procedure defined [here](../../how-to/administration/update-ext-id.md).
+
+## XCom backend and object storage
+
+Airflow 3 is configured to use the `XComObjectStorageBackend` from the `common.io` provider to handle large and complex XCom payloads (pandas DataFrames, numpy arrays…).
+
+Configuration is done **only via environment variables**, not `airflow.cfg`:
+
+- **Backend activation**
+  - `AIRFLOW__CORE__XCOM_BACKEND=airflow.providers.common.io.xcom.backend.XComObjectStorageBackend`
+
+- **Object storage configuration**
+  - `AIRFLOW__COMMON_IO__XCOM_OBJECTSTORAGE_PATH=s3://<conn-id>@<bucket>/xcoms`
+    - `<conn-id>`: Airflow connection ID for the object storage (S3/GCS/…)
+    - `<bucket>`: bucket/container name
+  - `AIRFLOW__COMMON_IO__XCOM_OBJECTSTORAGE_THRESHOLD=1048576`
+    - Size threshold (in bytes). Above this size, XCom payloads are written to object storage instead of the metadata DB.
+  - `AIRFLOW__COMMON_IO__XCOM_OBJECTSTORAGE_COMPRESSION=gzip`
+    - Optional compression for large payloads.
+
+With this setup, existing DAGs can continue to push/pull pandas DataFrames and numpy-backed data structures without manual pre-serialization for XCom. For domain objects (e.g. Django models like `ActeurType`, `Source`), use dedicated serialization helpers so that XCom only sees JSON-serialisable structures (see data-platform serialization utilities).
+
+## XCom backend testing checklist
+
+When validating changes to the XCom backend configuration (for example enabling `XComObjectStorageBackend` with environment variables), run at least the following checks in a non‑production Airflow environment:
+
+- **Core clustering DAGs**
+  - Trigger a full run of clustering DAGs using `cluster` tasks (normalisation, clustering, suggestions) and confirm tasks exchanging large pandas DataFrames via XCom complete without serialization errors.
+- **Source ingestion DAGs**
+  - Run at least one `source` DAG that pushes complex data (DataFrames containing numpy types, datetimes, and domain objects mapped via helpers) through XCom, and check that downstream tasks read them correctly.
+- **Object storage offloading**
+  - Push a deliberately large XCom value (larger than `AIRFLOW__COMMON_IO__XCOM_OBJECTSTORAGE_THRESHOLD`) and confirm that:
+    - The XCom row stored in the metadata DB is only a reference.
+    - The actual payload is written to the configured object storage path.
+- **Domain objects**
+  - For any business objects (e.g. `ActeurType`, `Source`) passed through XCom using the dedicated serialization helpers, verify that:
+    - The pushed value is JSON‑serialisable.
+    - The consumer task can reconstruct or use the value as expected.

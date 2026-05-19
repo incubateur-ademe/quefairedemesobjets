@@ -11,6 +11,8 @@ from data.models.change import (
     COL_CHANGE_ORDER,
     COL_CHANGE_REASON,
 )
+from utils.django import django_setup_full
+
 from data.models.changes import (
     ChangeActeurCreateAsParent,
     ChangeActeurDeleteAsParent,
@@ -18,7 +20,6 @@ from data.models.changes import (
     ChangeActeurUpdateParentId,
     ChangeActeurVerifyRevision,
 )
-from utils.django import django_setup_full
 
 django_setup_full()
 
@@ -196,4 +197,5 @@ def cluster_acteurs_parents_choose_new(df_clusters: pd.DataFrame) -> pd.DataFram
     # On reconstruit la df principale avec les changements marqués
     df = pd.concat(dfs_marked, ignore_index=True)
     df[COL_CHANGE_ORDER] = df[COL_CHANGE_ORDER].astype(int)
+
     return df_sort(df)
