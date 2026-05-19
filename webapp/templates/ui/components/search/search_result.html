@@ -1,13 +1,15 @@
-<a
-    href="{% block href %}{{ result.url }}{% endblock %}"
-    data-turbo="false"
-    class="fr-link"
-    tabindex="0"
-    {% block anchor_attrs %}{% endblock %}
->
-    {% block nom %}
-    {{ result|capfirst }}
-    {% endblock nom %}
-</a>
+<span>
+    <a
+        href="{% block href %}{{ result.url }}{% endblock %}"
+        data-turbo="false"
+        class="fr-link"
+        tabindex="0"
+        {% block anchor_attrs %}{% endblock %}
+    >
+        {% block nom %}
+        {{ result|capfirst }}
+        {% endblock nom %}
+    </a>
+</span>
 
 {% block parent %}{% endblock parent %}
