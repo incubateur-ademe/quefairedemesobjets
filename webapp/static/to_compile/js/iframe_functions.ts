@@ -7,7 +7,18 @@ import { getBaseUrlFromEnv } from "./url_utils"
 const DEFAULT_MAX_WIDTH = "100%"
 const DEFAULT_HEIGHT = "100vh" // As recommended by iframe-resizer docs
 const IFRAME_ID = "lvao_iframe"
-const IFRAME_TITLE = "Que faire de mes objets et déchets"
+// Per-route default titles (RGAA 2.2 — each iframe must have a pertinent
+// title). Pages embedding several iframes of the same route can still
+// disambiguate per-iframe via the `data-title` attribute on the script tag.
+const IFRAME_TITLE_CARTE_FORMULAIRE =
+  "Carte des solutions - Que Faire de mes Objets et Déchets"
+const IFRAME_TITLES: Record<string, string> = {
+  carte: IFRAME_TITLE_CARTE_FORMULAIRE,
+  formulaire: IFRAME_TITLE_CARTE_FORMULAIRE,
+  infotri: "Info-tri",
+  assistant: "L'assistant au tri, à la réparation et au réemploi",
+}
+const IFRAME_TITLE_FALLBACK = IFRAME_TITLE_CARTE_FORMULAIRE
 
 // Special dataset attributes that require custom handling
 const SPECIAL_ATTRIBUTES = {
@@ -20,6 +31,7 @@ const SPECIAL_ATTRIBUTES = {
   height: "height",
   iframeAttributes: "iframe_attributes",
   boundingBox: "bounding_box",
+  title: "title",
 } as const
 
 /**
@@ -73,6 +85,19 @@ function captureFullReferrer(): string {
 }
 
 /**
+ * Resolves the iframe title in priority order:
+ * 1. Author-provided `data-title` on the script tag
+ * 2. Route-specific default
+ * 3. Generic fallback
+ */
+function resolveIframeTitle(route: string, customTitle?: string): string {
+  if (customTitle) return customTitle
+  // Route may include a sub-path like "carte/cyclevia"; only the prefix matters.
+  const baseRoute = route.split("/")[0]
+  return IFRAME_TITLES[baseRoute] || IFRAME_TITLE_FALLBACK
+}
+
+/**
  * Creates iframe HTML attributes configuration
  */
 function createIframeAttributes(
@@ -83,6 +108,7 @@ function createIframeAttributes(
   route: string,
   useAutoHeight: boolean,
   iframeId?: string,
+  customTitle?: string,
 ): Record<string, any> {
   return {
     src: `${baseUrl}/${route}?${urlParams.toString()}`,
@@ -91,7 +117,7 @@ function createIframeAttributes(
     scrolling: "no",
     allow: "geolocation; clipboard-write",
     allowFullscreen: true,
-    title: IFRAME_TITLE,
+    title: resolveIframeTitle(route, customTitle),
     style: `overflow: hidden; max-width: ${maxWidth}; width: 100%; height: ${height};`,
   }
 }
@@ -110,10 +136,12 @@ function processDatasetAttributes(
   iframeExtraAttributes: Record<string, string>
   maxWidth: string
   height: string
+  customTitle?: string
 } {
   let route = baseRoute
   let maxWidth = options.maxWidth || DEFAULT_MAX_WIDTH
   let height = options.height || DEFAULT_HEIGHT
+  let customTitle: string | undefined
   const urlParams = new URLSearchParams()
   const iframeExtraAttributes: Record<string, string> = {}
 
@@ -158,6 +186,11 @@ function processDatasetAttributes(
         height = value
         break
 
+      // Custom title — never propagated to URL params, only used as iframe attribute
+      case SPECIAL_ATTRIBUTES.title:
+        customTitle = value
+        break
+
       // Complex attribute handling
       case SPECIAL_ATTRIBUTES.epciCodes:
         if (value.includes(",")) {
@@ -184,7 +217,7 @@ function processDatasetAttributes(
     }
   }
 
-  return { route, urlParams, iframeExtraAttributes, maxWidth, height }
+  return { route, urlParams, iframeExtraAttributes, maxWidth, height, customTitle }
 }
 
 /**
@@ -284,7 +317,7 @@ export function getIframeAttributesAndExtra(
   const baseUrl = getBaseUrlFromEnv()
 
   // Process all dataset attributes
-  const { route, urlParams, iframeExtraAttributes, maxWidth, height } =
+  const { route, urlParams, iframeExtraAttributes, maxWidth, height, customTitle } =
     processDatasetAttributes(scriptTag, baseRoute, options)
 
   // Create iframe attributes
@@ -296,6 +329,7 @@ export function getIframeAttributesAndExtra(
     route,
     options.useAutoHeight || false,
     options.iframeId,
+    customTitle,
   )
 
   return [iframeAttributes, iframeExtraAttributes]

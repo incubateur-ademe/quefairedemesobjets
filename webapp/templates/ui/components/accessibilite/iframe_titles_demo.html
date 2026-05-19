@@ -1,0 +1,48 @@
+<div class="fr-container fr-py-3w">
+    <h2 class="fr-h3">A11Y-8 — Titres d'iframes distincts par route</h2>
+    <p>
+        Le helper TypeScript <code>resolveIframeTitle</code>
+        (<code>webapp/static/to_compile/js/iframe_functions.ts</code>) attribue
+        un titre par défaut selon la route, conformément à RGAA 2.2 (cadres
+        avec un titre pertinent). Les pages qui embarquent plusieurs iframes
+        d'une même route disambiguent au cas par cas via l'attribut
+        <code>data-title</code> sur le <code>&lt;script&gt;</code>.
+    </p>
+
+    <table class="fr-table">
+        <caption>Titres par défaut</caption>
+        <thead>
+            <tr><th scope="col">Route</th><th scope="col">Titre par défaut</th></tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>carte</code></td>
+                <td>Carte des solutions - Que Faire de mes Objets et Déchets</td>
+            </tr>
+            <tr>
+                <td><code>formulaire</code></td>
+                <td>Carte des solutions - Que Faire de mes Objets et Déchets</td>
+            </tr>
+            <tr>
+                <td><code>infotri</code></td>
+                <td>Info-tri</td>
+            </tr>
+            <tr>
+                <td><code>assistant</code></td>
+                <td>L'assistant au tri, à la réparation et au réemploi</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3 class="fr-h5 fr-mt-3w">Surcharge par <code>data-title</code></h3>
+    <p>
+        Les embedders peuvent passer un titre encore plus précis sur le
+        <code>&lt;script&gt;</code>, utile sur la page Manteau (P09) qui
+        embarque deux cartes :
+    </p>
+<pre class="fr-mb-0"><code>&lt;script src="/static/carte.js"
+        data-title="Carte — Où apporter mon manteau en bon état"&gt;&lt;/script&gt;
+
+&lt;script src="/static/carte.js"
+        data-title="Carte — Où apporter mon manteau en mauvais état"&gt;&lt;/script&gt;</code></pre>
+</div>

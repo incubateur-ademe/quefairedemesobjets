@@ -54,7 +54,7 @@ describe("getIframeAttributesAndExtra function tests", () => {
       scrolling: "no",
       src: expectedSrc,
       style: "overflow: hidden; max-width: 100%; width: 100%; height: 700px;",
-      title: "Que faire de mes objets et déchets",
+      title: "Carte des solutions - Que Faire de mes Objets et Déchets",
     })
   }
 
@@ -169,5 +169,40 @@ describe("getIframeAttributesAndExtra function tests", () => {
     expect(iframeAttributes.src).toBe(
       `${process.env.BASE_URL}/infotri?ref=aHR0cDovL2xvY2FsaG9zdC8%3D&categorie=tous&consigne=1`,
     )
+  })
+
+  describe("iframe title (RGAA 2.2)", () => {
+    test.each([
+      ["carte", "Carte des solutions - Que Faire de mes Objets et Déchets"],
+      ["formulaire", "Carte des solutions - Que Faire de mes Objets et Déchets"],
+      ["infotri", "Info-tri"],
+      ["assistant", "L'assistant au tri, à la réparation et au réemploi"],
+    ])("should set the default title for route %s", (route, expectedTitle) => {
+      const [iframeAttributes] = getIframeAttributesAndExtra(scriptTag, route)
+      expect(iframeAttributes.title).toBe(expectedTitle)
+    })
+
+    test("should fall back to the carte/formulaire title for unknown routes", () => {
+      const [iframeAttributes] = getIframeAttributesAndExtra(scriptTag, "dechet")
+      expect(iframeAttributes.title).toBe(
+        "Carte des solutions - Que Faire de mes Objets et Déchets",
+      )
+    })
+
+    test("should let embedders override the title via data-title", () => {
+      setScriptDataset({ title: "Carte — Où apporter mon manteau" })
+      const [iframeAttributes] = getIframeAttributesAndExtra(scriptTag, "carte")
+      expect(iframeAttributes.title).toBe("Carte — Où apporter mon manteau")
+      expect(iframeAttributes.src).not.toMatch(/title=/)
+    })
+
+    test("should resolve the route prefix when a slug is appended", () => {
+      setScriptDataset({ slug: "cyclevia" })
+      const [iframeAttributes] = getIframeAttributesAndExtra(scriptTag, "carte")
+      expect(iframeAttributes.title).toBe(
+        "Carte des solutions - Que Faire de mes Objets et Déchets",
+      )
+      expect(iframeAttributes.src).toContain("/carte/cyclevia")
+    })
   })
 })

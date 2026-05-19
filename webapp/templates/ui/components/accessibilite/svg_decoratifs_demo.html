@@ -1,0 +1,27 @@
+<div class="fr-container fr-py-3w">
+    <h2 class="fr-h3">A11Y-11 — SVG décoratifs marqués <code>aria-hidden</code></h2>
+    <p>
+        Les logos sont de simples illustrations dans une zone dont le
+        contenu textuel suffit déjà aux lecteurs d'écran (le lien parent
+        a un <code>title</code> et un <code>&lt;span class="qf-sr-only"&gt;</code>
+        cf. A11Y-13). On les marque <code>aria-hidden="true"
+        focusable="false"</code> pour qu'ils ne soient ni annoncés ni
+        atteignables au clavier (RGAA 1.2).
+    </p>
+
+    <h3 class="fr-h5 fr-mt-3w">Logos corrigés</h3>
+    <div class="fr-grid-row fr-grid-row--gutters">
+        <div class="fr-col-12 fr-col-md-4">
+            <h4 class="fr-h6">République Française</h4>
+            {% include "ui/components/logo/republique_francaise.html" %}
+        </div>
+        <div class="fr-col-12 fr-col-md-4">
+            <h4 class="fr-h6">ADEME</h4>
+            {% include "ui/components/logo/ademe.html" %}
+        </div>
+        <div class="fr-col-12 fr-col-md-4">
+            <h4 class="fr-h6">QFDMOD mini</h4>
+            {% include "ui/components/logo/site_logo_mini.html" %}
+        </div>
+    </div>
+</div>
