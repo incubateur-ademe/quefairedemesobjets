@@ -5,9 +5,9 @@ some business logic (e.g. if http -> first try https)"""
 import logging
 
 from airflow import DAG
-from airflow.operators.python import PythonOperator
+from airflow.providers.standard.operators.python import PythonOperator
 from crawl.config.tasks import TASKS
-from crawl.config.xcoms import XCOMS, xcom_pull
+from crawl.config.xcoms import XCOMS, xcom_pull, xcom_push
 from crawl.tasks.business_logic.crawl_urls_check_syntax import crawl_urls_check_syntax
 
 logger = logging.getLogger(__name__)
@@ -40,8 +40,8 @@ def crawl_urls_check_syntax_wrapper(ti) -> None:
         df=xcom_pull(ti, XCOMS.DF_READ, skip_if_empty=True),
     )
 
-    ti.xcom_push(key=XCOMS.DF_SYNTAX_OK, value=df_syntax_ok)
-    ti.xcom_push(key=XCOMS.DF_SYNTAX_FAIL, value=df_syntax_fail)
+    xcom_push(ti, XCOMS.DF_SYNTAX_OK, df_syntax_ok)
+    xcom_push(ti, XCOMS.DF_SYNTAX_FAIL, df_syntax_fail)
 
 
 def crawl_urls_check_syntax_task(dag: DAG) -> PythonOperator:

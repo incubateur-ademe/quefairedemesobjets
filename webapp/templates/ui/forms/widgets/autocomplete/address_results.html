@@ -1,0 +1,41 @@
+{% extends "ui/forms/widgets/autocomplete/results.html" %}
+{% load l10n %}
+
+{# Polite live region announcing the result count to screen readers each   #}
+{# time the Turbo Frame swaps. Visually hidden via qf-sr-only.             #}
+{# Lives outside the <ul role="listbox"> so it's not picked up as an option. #}
+{% block status %}
+    <div role="status" aria-live="polite" class="qf-sr-only">
+        {% if results %}
+            {{ results|length }} suggestion{{ results|length|pluralize }} d'adresse
+        {% else %}
+            Aucune adresse trouvée
+        {% endif %}
+    </div>
+{% endblock status %}
+
+{% block results %}
+    {% for option in results %}
+        {# No tabindex on options: per APG combobox-autocomplete-list, DOM   #}
+        {# focus never moves into the listbox. The active option is signaled #}
+        {# via aria-activedescendant on the combobox input and aria-selected #}
+        {# here. Visual state is driven by aria-[selected=true]:… utilities. #}
+        <li
+            id="option-{{ forloop.counter }}"
+            role="option"
+            class="qf-flex qf-flex-col sm:qf-flex-row sm:qf-justify-between sm:qf-items-baseline qf-gap-1v qf-list-none qf-p-1w qf-bg-white qf-border-b qf-border-solid qf-border-x-0 qf-border-t-0 qf-border-grey-625-425 aria-[selected=true]:qf-bg-blue-france-sun-113-625 aria-[selected=true]:qf-text-white hover:qf-bg-grey-1000-50-hover qf-cursor-pointer"
+            data-next-autocomplete-target="option"
+            data-action="click->next-autocomplete#commitSelection"
+            data-value="{{ option.label }}"
+            data-selected-value="{{ option.label }}"
+            {% if option.geolocate %}data-geolocate="true"{% else %}data-lat="{{ option.latitude|unlocalize }}" data-lon="{{ option.longitude|unlocalize }}"{% endif %}
+        >
+            <span>{{ option.label }}</span>
+            {% if option.sub_label %}<small class="fr-text--sm fr-m-0 qf-italic">{{ option.sub_label }}</small>{% endif %}
+        </li>
+    {% empty %}
+        <li class="qf-list-none qf-px-2w qf-py-1w qf-text-gray-500">
+            Aucune adresse trouvée
+        </li>
+    {% endfor %}
+{% endblock results %}

@@ -3,10 +3,10 @@
 import logging
 
 from airflow import DAG
-from airflow.exceptions import AirflowSkipException
-from airflow.operators.python import PythonOperator
+from airflow.providers.standard.operators.python import PythonOperator
+from airflow.sdk.exceptions import AirflowSkipException
 from crawl.config.tasks import TASKS
-from crawl.config.xcoms import XCOMS, xcom_pull
+from crawl.config.xcoms import XCOMS, xcom_pull, xcom_push
 from crawl.tasks.business_logic.crawl_urls_check_crawl import crawl_urls_check_crawl
 
 logger = logging.getLogger(__name__)
@@ -40,9 +40,9 @@ def crawl_urls_check_crawl_wrapper(ti, params) -> None:
         df=xcom_pull(ti, XCOMS.DF_DNS_OK, skip_if_empty=True),
     )
 
-    ti.xcom_push(key=XCOMS.DF_CRAWL_DIFF_STANDARD, value=df_crawl_diff_standard)
-    ti.xcom_push(key=XCOMS.DF_CRAWL_DIFF_OTHER, value=df_crawl_diff_other)
-    ti.xcom_push(key=XCOMS.DF_CRAWL_FAIL, value=df_crawl_fail)
+    xcom_push(ti, XCOMS.DF_CRAWL_DIFF_STANDARD, df_crawl_diff_standard)
+    xcom_push(ti, XCOMS.DF_CRAWL_DIFF_OTHER, df_crawl_diff_other)
+    xcom_push(ti, XCOMS.DF_CRAWL_FAIL, df_crawl_fail)
 
 
 def crawl_urls_check_crawl_task(dag: DAG) -> PythonOperator:

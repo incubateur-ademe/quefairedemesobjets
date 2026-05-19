@@ -5,4 +5,4 @@
 {% block anchor_attrs %}data-search-term-id="{{ result.pk }}" data-search-term-name="{{ result.name|urlencode }}"{% endblock %}
 
 {% block nom %}{{ result.name|capfirst }}{% endblock %}
-{% block parent %}{% if result.page and request.beta %} <span class="qf-text-grey-200-850 qf-italic">{{ result.page.titre_phrase|capfirst }}</span>{% endif %}{% endblock parent %}
+{% block parent %}{% if result.page %}<span class="qf-text-grey-200-850 qf-italic qf-ml-auto qf-text-right">{{ result.page.titre_phrase|capfirst }}</span>{% endif %}{% endblock parent %}

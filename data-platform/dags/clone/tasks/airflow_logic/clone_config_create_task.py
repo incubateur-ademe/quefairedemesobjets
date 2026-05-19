@@ -3,8 +3,10 @@
 import logging
 
 from airflow import DAG
-from airflow.operators.python import PythonOperator
-from clone.config import TASKS, XCOMS, CloneConfig
+from airflow.providers.standard.operators.python import PythonOperator
+from clone.config.models import CloneConfig
+from clone.config.tasks import TASKS
+from clone.config.xcoms import XCOMS, xcom_push
 from clone.tasks.business_logic.clone_config_create import clone_config_create
 from utils import logging_utils as log
 
@@ -31,7 +33,7 @@ def clone_config_create_wrapper(ti, params) -> None:
     logger.info(task_info_get())
     log.preview("Configuration générée", config.model_dump())
 
-    ti.xcom_push(key=XCOMS.CONFIG, value=config)
+    xcom_push(ti, XCOMS.CONFIG, config)
 
 
 def clone_config_create_task(dag: DAG) -> PythonOperator:

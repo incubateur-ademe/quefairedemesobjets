@@ -27,5 +27,7 @@ def test_pandas_read_sql_table():
      - mettre à jour les codes DAGs pour qu'ils fonctionnent également
     """
     engine = create_engine("sqlite:///:memory:")
-    engine.execute("CREATE TABLE my_table (id INT, name TEXT)")
+    pd.DataFrame({"id": [1], "name": ["foo"]}).to_sql(
+        "my_table", engine, if_exists="replace", index=False
+    )
     pd.read_sql_table("my_table", engine)

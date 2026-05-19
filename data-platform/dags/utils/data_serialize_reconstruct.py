@@ -42,11 +42,14 @@ def data_serialize(model: type[models.Model], data: dict) -> dict:
             elif isinstance(field, models.ForeignKey):
                 if isinstance(value, (str, int)):
                     result[key] = value
+                elif isinstance(value, float):
+                    result[key] = int(value)
                 else:
+                    logger.info(f"Serializing foreign key {key} with value {value}")
                     result[key] = value.pk
             elif key == "location":
-                result["longitude"] = data["location"].x
-                result["latitude"] = data["location"].y
+                result["longitude"] = data["location"][0]
+                result["latitude"] = data["location"][1]
             elif isinstance(value, datetime):
                 result[key] = value.isoformat()
             else:

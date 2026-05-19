@@ -7,7 +7,7 @@ import requests
 from fuzzywuzzy import fuzz
 from shapely import wkb
 from shapely.geometry import Point
-from sources.tasks.airflow_logic.config_management import DAGConfig
+from sources.config.models import SourceConfig
 from sources.tasks.transform.exceptions import (
     ActeurServiceCodesWarning,
     ActionCodesWarning,
@@ -291,7 +291,7 @@ def clean_acteur_service_codes(row, _):
     return row[["acteur_service_codes"]]
 
 
-def clean_action_codes(row, dag_config: DAGConfig):
+def clean_action_codes(row, dag_config: SourceConfig):
     action_codes = []
     point_dapport_de_service_reparation = cast_eo_boolean_or_string_to_boolean(
         row.get("point_dapport_de_service_reparation"), None

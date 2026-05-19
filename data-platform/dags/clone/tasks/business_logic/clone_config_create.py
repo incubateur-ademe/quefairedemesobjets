@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from clone.config.model import CloneConfig
+from clone.config.models import CloneConfig
 
 
 def clone_config_create(params: dict) -> CloneConfig:

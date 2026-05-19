@@ -1,13 +1,14 @@
 """Generate suggestions for enrichment DAGs"""
 
 import logging
+from typing import Any
 
 from airflow import DAG
-from airflow.exceptions import AirflowSkipException
 from airflow.models.taskinstance import TaskInstance
-from airflow.operators.python import PythonOperator
-from airflow.utils.trigger_rule import TriggerRule
-from enrich.config.xcoms import XCOMS, xcom_pull
+from airflow.providers.standard.operators.python import PythonOperator
+from airflow.sdk.exceptions import AirflowSkipException
+from airflow.task.trigger_rule import TriggerRule
+from enrich.config.models import EnrichActeursClosedConfig
 from enrich.tasks.business_logic.enrich_dbt_model_suggest import (
     enrich_dbt_model_suggest,
 )
@@ -34,12 +35,13 @@ def enrich_dbt_model_suggest_wrapper(
     cohort: str,
     dbt_model_name: str,
     ti: TaskInstance,
+    params: dict[str, Any],
     dag: DAG,
 ) -> None:
     logger.info(task_info_get(task_id, dbt_model_name))
 
     # Config
-    config = xcom_pull(ti, XCOMS.CONFIG)
+    config = EnrichActeursClosedConfig(**params)
     logger.info(f"📖 Configuration:\n{config.model_dump_json(indent=2)}")
 
     # Processing

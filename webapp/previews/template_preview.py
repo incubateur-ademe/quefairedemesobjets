@@ -1021,6 +1021,116 @@ class AccessibilitePreview(LookbookPreview):
             context,
         )
 
+    def fil_ariane_dans_heading_produit(self, **kwargs):
+        """
+        # Fil d'ariane dans le heading des pages produit (RGAA 12.2)
+
+        Le fil d'ariane manquait sur les pages produit Wagtail (`ProduitPage`,
+        `FamilyPage`). Il est désormais inclus en haut du `heading.html`.
+
+        Le composant utilisé est `sites_conformes_content_manager/blocks/breadcrumbs.html`,
+        avec l'override projet qui ajoute `href="#"` et `aria-current="page"` sur
+        le dernier élément (RGAA 7.1, 7.3).
+
+        Cf. carte Notion A11Y-3.
+        """
+        context = {
+            "self": {
+                "get_ancestors": [
+                    {"title": "Accueil", "is_site_root": True, "url": "/"},
+                    {
+                        "title": "Famille & Produits",
+                        "is_root": False,
+                        "url": "/categories/",
+                    },
+                ],
+                "title": "Vêtements",
+            },
+            "title": "vêtement",
+            "pronom": "mon",
+        }
+        return render_to_string(
+            "ui/components/produit/heading.html",
+            context,
+        )
+
+    def share_tooltip_acteur_sans_tabindex(self, **kwargs):
+        """
+        # Tooltip de partage de la fiche acteur sans tabindex="-1" (RGAA 7.3)
+
+        Les liens et le bouton du tooltip de partage de la fiche acteur,
+        sur la carte, ne portent plus `tabindex="-1"` : ils sont à nouveau
+        atteignables au clavier.
+
+        Pour rendre le tooltip visible dans la prévisualisation, le wrapper
+        `.fr-tooltip` est volontairement positionné statiquement.
+
+        Cf. carte Notion A11Y-9.
+        """
+        request = RequestFactory().get("/")
+        context = Context(
+            {
+                "object": "Mon acteur",
+                "map_container_id": DEFAULT_MAP_CONTAINER_ID,
+                "request": request,
+            }
+        )
+        template = Template(
+            """
+            {% load share_tags %}
+            <style>
+                .fr-tooltip { position: static !important; visibility: visible !important; opacity: 1 !important; max-width: 100%; }
+            </style>
+            {% include "ui/components/acteur/_action_share.html" %}
+            """,
+        )
+        return template.render(context)
+
+    def champs_facultatifs_marques(self, **kwargs):
+        """
+        # Champs facultatifs marqués « (Optional) » au lieu d'astérisques sur les obligatoires (RGAA 11.10)
+
+        Avec `DSFR_MARK_OPTIONAL_FIELDS=True` (cf. `webapp/core/settings.py`),
+        les formulaires Wagtail/Sites Conformes rendus via `{% dsfr_form_field %}`
+        n'ajoutent plus d'astérisque sur les champs obligatoires : ce sont les
+        champs facultatifs qui sont annotés.
+
+        Suivi de la recommandation DSFR :
+        https://www.systeme-de-design.gouv.fr/version-courante/fr/modeles/blocs-fonctionnels/formulaires#champ-obligatoire
+
+        Cf. carte Notion A11Y-6.
+        """
+
+        class _DemoForm(DsfrBaseForm):
+            nom = forms.CharField(label="Votre nom")
+            email = forms.EmailField(label="Votre email")
+            telephone = forms.CharField(label="Votre téléphone", required=False)
+            message = forms.CharField(
+                label="Votre message", widget=forms.Textarea(attrs={"rows": 4})
+            )
+
+        template = Template(
+            """
+            <form>{{ form }}</form>
+            """,
+        )
+        return template.render(Context({"form": _DemoForm()}))
+
+    def no_local_solution_role_status(self, **kwargs):
+        """
+        # Message « pas de solution localisée » avec `role="status"` (RGAA 7.5)
+
+        Le disclaimer affiché lorsqu'une recherche carte n'aboutit pas dans
+        la zone est annoncé par les technologies d'assistance grâce à
+        `role="status"` (équivalent `aria-live="polite"`).
+
+        Cf. carte Notion A11Y-10.
+        """
+        return render_to_string(
+            "ui/components/carte/shared/disclaimers/no_local_solution.html",
+            {"is_carte": False, "bounding_box": False},
+        )
+
 
 class TestsPreview(LookbookPreview):
     """

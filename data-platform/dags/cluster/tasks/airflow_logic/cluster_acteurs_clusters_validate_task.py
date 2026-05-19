@@ -1,7 +1,7 @@
 import logging
 
 from airflow import DAG
-from airflow.operators.python import PythonOperator
+from airflow.providers.standard.operators.python import PythonOperator
 from cluster.config.tasks import TASKS
 from cluster.config.xcoms import XCOMS, xcom_pull
 from cluster.tasks.business_logic.cluster_acteurs_clusters_validate import (

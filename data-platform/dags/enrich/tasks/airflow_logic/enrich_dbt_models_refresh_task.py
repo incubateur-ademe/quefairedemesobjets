@@ -3,12 +3,11 @@
 import logging
 
 from airflow import DAG
-from airflow.exceptions import AirflowSkipException
-from airflow.operators.bash import BashOperator
-from airflow.operators.python import PythonOperator
-from enrich.config.models import EnrichBaseConfig
+from airflow.providers.standard.operators.bash import BashOperator
+from airflow.providers.standard.operators.python import PythonOperator
+from airflow.sdk.exceptions import AirflowSkipException
+from enrich.config.models import EnrichActeursClosedConfig
 from enrich.config.tasks import TASKS
-from enrich.config.xcoms import XCOMS, xcom_pull
 
 logger = logging.getLogger(__name__)
 
@@ -26,11 +25,10 @@ def task_info_get(dbt_model_refresh_command: str):
     """
 
 
-def enrich_dbt_models_refresh_wrapper(ti) -> None:
+def enrich_dbt_models_refresh_wrapper(ti, params) -> None:
 
     # Config
-    config: EnrichBaseConfig = xcom_pull(ti, XCOMS.CONFIG)
-
+    config = EnrichActeursClosedConfig(**params)
     logger.info(task_info_get(config.dbt_models_refresh_command))
     logger.info(f"📖 Configuration:\n{config.model_dump_json(indent=2)}")
 

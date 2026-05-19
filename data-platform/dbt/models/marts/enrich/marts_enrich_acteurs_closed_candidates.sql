@@ -54,8 +54,8 @@ SELECT
 	acteurs.acteur_adresse,
 	acteurs.acteur_code_postal,
 	acteurs.acteur_ville,
-	CASE WHEN acteurs.acteur_location IS NULL THEN NULL ELSE ST_X(acteurs.acteur_location) END AS acteur_longitude,
-	CASE WHEN acteurs.acteur_location IS NULL THEN NULL ELSE ST_Y(acteurs.acteur_location) END AS acteur_latitude,
+	CASE WHEN acteurs.acteur_location IS NULL THEN NULL ELSE ST_X(ST_Transform(acteurs.acteur_location::geometry, 4326)) END AS acteur_longitude,
+	CASE WHEN acteurs.acteur_location IS NULL THEN NULL ELSE ST_Y(ST_Transform(acteurs.acteur_location::geometry, 4326)) END AS acteur_latitude,
 
 	-- etablissement
 	etab.unite_est_actif AS unite_est_actif,

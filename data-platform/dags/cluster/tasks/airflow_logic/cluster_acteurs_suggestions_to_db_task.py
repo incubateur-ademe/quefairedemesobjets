@@ -1,11 +1,14 @@
 import logging
 
 from airflow import DAG
-from airflow.exceptions import AirflowSkipException
-from airflow.operators.python import PythonOperator
-from cluster.config.model import ClusterConfig
+from airflow.providers.standard.operators.python import PythonOperator
+from airflow.sdk.exceptions import AirflowSkipException
+from cluster.config.models import ClusterConfig
 from cluster.config.tasks import TASKS
 from cluster.config.xcoms import XCOMS, xcom_pull
+from cluster.tasks.business_logic.cluster_acteurs_config_create import (
+    cluster_acteurs_config_create,
+)
 from cluster.tasks.business_logic.cluster_acteurs_suggestions.to_db import (
     cluster_acteurs_suggestions_to_db,
 )
@@ -31,11 +34,11 @@ def task_info_get():
     """
 
 
-def cluster_acteurs_suggestions_to_db_wrapper(ti, dag, run_id) -> None:
+def cluster_acteurs_suggestions_to_db_wrapper(ti, params, dag, run_id) -> None:
 
     logger.info(task_info_get())
 
-    config: ClusterConfig = xcom_pull(ti, XCOMS.CONFIG)
+    config: ClusterConfig = cluster_acteurs_config_create(params)
     df_clusters = xcom_pull(ti, XCOMS.DF_PARENTS_CHOOSE_DATA)
     suggestions = xcom_pull(ti, XCOMS.SUGGESTIONS_WORKING)
 

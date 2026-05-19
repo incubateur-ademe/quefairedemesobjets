@@ -3,7 +3,7 @@
 import logging
 
 from acteurs.tasks.business_logic.replace_acteur_table import replace_acteur_table
-from airflow.operators.python import PythonOperator
+from airflow.providers.standard.operators.python import PythonOperator
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
