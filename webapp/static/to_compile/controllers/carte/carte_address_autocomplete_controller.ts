@@ -1,8 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
 
-const REVERSE_GEOCODE_URL =
-  "https://data.geopf.fr/geocodage/reverse/?lon={lon}&lat={lat}"
-
 interface LocationDetail {
   adresse: string
   latitude: string
@@ -22,7 +19,10 @@ interface NextAutocompleteCommitDetail {
  * listens to.
  *
  * Also handles the synthetic « Autour de moi » option by triggering
- * `navigator.geolocation` + a reverse-geocode on data.geopf.fr.
+ * `navigator.geolocation` and calling the server-side BAN reverse-geocode
+ * proxy (see qfdmo.views.autocomplete.ReverseGeocodeBanView). The browser
+ * never talks to data.geopf.fr directly — the proxy keeps a single
+ * server-side timeout and cache policy and avoids CORS coupling.
  *
  * The combobox plumbing (search, listbox, keyboard nav, commit) belongs to the
  * inner `next-autocomplete` controller mounted by the widget itself. This
@@ -31,12 +31,16 @@ interface NextAutocompleteCommitDetail {
  */
 export default class CarteAddressAutocompleteController extends Controller<HTMLElement> {
   static targets = ["input", "latitude", "longitude", "displayError"]
+  static values = {
+    reverseGeocodeUrl: String,
+  }
 
   declare readonly inputTarget: HTMLInputElement
   declare readonly latitudeTarget: HTMLInputElement
   declare readonly longitudeTarget: HTMLInputElement
   declare readonly displayErrorTarget: HTMLElement
   declare readonly hasDisplayErrorTarget: boolean
+  declare readonly reverseGeocodeUrlValue: string
 
   commit(event: CustomEvent<NextAutocompleteCommitDetail>) {
     const option = event.detail.option
@@ -69,24 +73,28 @@ export default class CarteAddressAutocompleteController extends Controller<HTMLE
   }
 
   async #reverseGeocode(position: GeolocationPosition) {
-    const url = REVERSE_GEOCODE_URL.replace(
-      "{lon}",
-      position.coords.longitude.toString(),
-    ).replace("{lat}", position.coords.latitude.toString())
+    const url = new URL(this.reverseGeocodeUrlValue, window.location.origin)
+    url.searchParams.set("lat", position.coords.latitude.toString())
+    url.searchParams.set("lon", position.coords.longitude.toString())
     try {
-      const response = await fetch(url)
-      const data = await response.json()
-      if (!data.features?.length) {
+      const response = await fetch(url.toString())
+      if (!response.ok) {
         this.#displayInputError(
           "Votre adresse n'a pas pu être déterminée. Vous pouvez ré-essayer ou saisir votre adresse manuellement",
         )
         return
       }
-      const feature = data.features[0]
+      const data = await response.json()
+      if (!data.adresse) {
+        this.#displayInputError(
+          "Votre adresse n'a pas pu être déterminée. Vous pouvez ré-essayer ou saisir votre adresse manuellement",
+        )
+        return
+      }
       this.#setLocation({
-        adresse: feature.properties.label,
-        latitude: feature.geometry.coordinates[1].toString(),
-        longitude: feature.geometry.coordinates[0].toString(),
+        adresse: data.adresse,
+        latitude: data.latitude.toString(),
+        longitude: data.longitude.toString(),
       })
     } catch (error) {
       console.error("reverse geocoding failed:", error)

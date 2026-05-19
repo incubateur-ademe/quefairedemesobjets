@@ -3,6 +3,7 @@
     <div
         data-controller="carte-address-autocomplete"
         data-action="next-autocomplete:commit->carte-address-autocomplete#commit"
+        data-carte-address-autocomplete-reverse-geocode-url-value="{% url 'qfdmo:reverse_geocode_address' %}"
         data-testid="rechercher-adresses-submit"
     >
         <div class="form-group">

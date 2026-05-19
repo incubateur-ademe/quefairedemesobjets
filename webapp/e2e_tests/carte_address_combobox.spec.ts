@@ -398,4 +398,54 @@ test.describe("⌨️ Carte combobox — APG keyboard contract", () => {
     await expect(input).toHaveAttribute("aria-expanded", "false")
     await expect(input).toHaveValue("Rue de Rivoli 75001 Paris")
   })
+
+  test('focusing the empty address input shows "Autour de moi"', async ({ page }) => {
+    // Regression for kolok's 2026-05-18 review observation: focusing the
+    // address input on first visit must surface the synthetic "Autour de moi"
+    // geolocation option, not wait for the user to type something first.
+    await navigateTo(page, "/carte")
+    const input = page.locator(CARTE_INPUT)
+    await input.click()
+
+    await page.waitForResponse(
+      (response) =>
+        response.url().includes("/qfdmo/autocomplete/address") &&
+        response.status() === 200,
+      { timeout: TIMEOUT.DEFAULT },
+    )
+
+    await expect(input).toHaveAttribute("aria-expanded", "true")
+    await expect(page.locator(`${CARTE_OPTION}[data-geolocate="true"]`)).toBeVisible({
+      timeout: TIMEOUT.DEFAULT,
+    })
+  })
+
+  test("refocusing a committed value does not reopen the listbox", async ({ page }) => {
+    // Regression for kolok's 2026-05-18 review: after picking an address,
+    // clicking back into the input must not fire a new autocomplete request
+    // and must not re-open the listbox. The "already committed" guard in
+    // next_autocomplete_controller#focus must hold across the form submit /
+    // Turbo Frame reload that follows a pick.
+    await navigateTo(page, "/carte")
+    await pickFirstAddress(page, "Auray")
+    await expect(page.locator(CARTE_INPUT)).toHaveValue("Auray")
+
+    // Click outside to ensure the input is blurred, then count any
+    // autocomplete requests fired after we click back in.
+    const autocompleteRequests: string[] = []
+    page.on("request", (request) => {
+      if (request.url().includes("/qfdmo/autocomplete/address")) {
+        autocompleteRequests.push(request.url())
+      }
+    })
+
+    await page.locator("body").click({ position: { x: 5, y: 5 } })
+    await page.locator(CARTE_INPUT).click()
+
+    // Give focus and any potential request time to fire.
+    await page.waitForTimeout(500)
+
+    expect(autocompleteRequests).toHaveLength(0)
+    await expect(page.locator(CARTE_INPUT)).toHaveAttribute("aria-expanded", "false")
+  })
 })

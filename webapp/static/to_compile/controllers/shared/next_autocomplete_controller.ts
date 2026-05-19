@@ -23,17 +23,19 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
   declare readonly hasHiddenInputTarget: boolean
 
   currentIndex = -1
-  // Tracks the input value at the moment of the last commit (Enter or click
-  // on an option) or at connect-time when the form arrives pre-filled. We
-  // suppress reopening the listbox on refocus when the input still holds
-  // that exact value — the user just picked it; reopening would be ghosty.
-  #lastCommittedValue: string | null = null
+  // Tracks whether the current input value came from the user typing (true)
+  // or from a commit / external programmatic write / page load (false). We
+  // suppress reopening the listbox on refocus when the value was not typed
+  // by the user — the value was set for them; reopening would be ghosty.
+  //
+  // A boolean is safer than snapshotting the value because external writers
+  // (state.ts mirroring sessionStorage into the input on outlet-connect, for
+  // instance) update `inputTarget.value` directly and would not keep a
+  // value snapshot in sync.
+  #userIsTyping = false
 
   connect() {
     this.#hideListbox()
-    // Treat any value present on page load as "already committed" so the
-    // listbox does not pop open the first time the user focuses the input.
-    this.#lastCommittedValue = this.inputTarget.value || null
   }
 
   clickOutside(event) {
@@ -41,14 +43,25 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
   }
 
   focus(event) {
-    if (!this.showOnFocusValue || !this.inputTarget.value) return
-    if (this.inputTarget.value === this.#lastCommittedValue) return
+    if (!this.showOnFocusValue) return
+    // Empty input: always open so the synthetic top option (e.g. "Autour de
+    // moi" for the carte address combobox) is reachable on the very first
+    // focus. The backend returns it for sub-MIN_QUERY_LENGTH queries.
+    if (!this.inputTarget.value) {
+      this.#loadResults("")
+      return
+    }
+    // Non-empty input: only reopen when the user was mid-typing. A value that
+    // was set programmatically (commit, state restore, server render) is
+    // treated as already committed and must not re-open on refocus.
+    if (!this.#userIsTyping) return
     this.#loadResults(this.inputTarget.value)
   }
 
   search(event) {
-    // Typing invalidates any prior commit: the user is starting a new search.
-    this.#lastCommittedValue = null
+    // Typing means the user is actively searching: clear the "committed" flag
+    // so refocus after a blur reopens the listbox.
+    this.#userIsTyping = true
     this.#loadResults(event.target.value)
   }
 
@@ -222,9 +235,9 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
       this.hiddenInputTarget.value = value
     }
     this.inputTarget.value = selectedValue
-    // Remember the committed value so a subsequent refocus does not re-open
-    // the listbox with the same suggestions the user just picked.
-    this.#lastCommittedValue = selectedValue
+    // Clear the typing flag so a subsequent refocus does not re-open the
+    // listbox with the same suggestions the user just picked.
+    this.#userIsTyping = false
     this.#hideListbox()
 
     const commitEvent = new CustomEvent("next-autocomplete:commit", {

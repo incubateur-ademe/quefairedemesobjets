@@ -2,13 +2,16 @@ import logging
 from typing import override
 
 import requests
+from django.http import HttpResponseBadRequest, JsonResponse
 from django.utils.decorators import method_decorator
+from django.views import View
 from django.views.decorators.cache import cache_control
 from django.views.generic import ListView
 
 logger = logging.getLogger(__name__)
 
 BAN_API_URL = "https://data.geopf.fr/geocodage/search/"
+BAN_REVERSE_API_URL = "https://data.geopf.fr/geocodage/reverse/"
 BAN_TIMEOUT_SECONDS = 3
 
 # Synthetic option always returned at the top of the listbox to let users
@@ -92,3 +95,66 @@ class AutocompleteBanAddressView(ListView):
         context["turbo_frame_id"] = self.request.GET.get("turbo_frame_id")
         context["results"] = self.object_list
         return context
+
+
+@method_decorator(
+    cache_control(public=True, max_age=60 * 60, stale_while_revalidate=60 * 5),
+    name="dispatch",
+)
+class ReverseGeocodeBanView(View):
+    """JSON proxy in front of BAN (data.geopf.fr) reverse-geocode.
+
+    Mirrors `AutocompleteBanAddressView` so the browser never talks to BAN
+    directly: avoids CORS / availability coupling and keeps a single
+    server-side timeout + cache policy. Used by the carte address combobox
+    when the user picks the synthetic "Autour de moi" geolocation option.
+
+    Returns the matched BAN feature as JSON:
+
+        {"adresse": "...", "latitude": <float>, "longitude": <float>}
+
+    On no match or upstream failure returns 404 / 502 with an empty body so
+    the client can surface a single user-facing error message.
+    """
+
+    def get(self, request, *args, **kwargs):
+        try:
+            lat = float(request.GET["lat"])
+            lon = float(request.GET["lon"])
+        except (KeyError, TypeError, ValueError):
+            return HttpResponseBadRequest()
+
+        # Guard against absurd values; BAN rejects them anyway but failing
+        # fast avoids logging junk through the proxy.
+        if not (-90 <= lat <= 90) or not (-180 <= lon <= 180):
+            return HttpResponseBadRequest()
+
+        try:
+            response = requests.get(
+                BAN_REVERSE_API_URL,
+                params={"lat": lat, "lon": lon},
+                timeout=BAN_TIMEOUT_SECONDS,
+            )
+            response.raise_for_status()
+            payload = response.json() or {}
+            features = payload.get("features", []) or []
+        except (requests.RequestException, ValueError) as exc:
+            logger.warning(
+                "BAN reverse-geocode proxy failed for (%s, %s): %s", lat, lon, exc
+            )
+            return JsonResponse({}, status=502)
+
+        if not features:
+            return JsonResponse({}, status=404)
+
+        try:
+            feature = features[0]
+            return JsonResponse(
+                {
+                    "adresse": feature["properties"]["label"],
+                    "latitude": feature["geometry"]["coordinates"][1],
+                    "longitude": feature["geometry"]["coordinates"][0],
+                }
+            )
+        except (KeyError, IndexError, TypeError):
+            return JsonResponse({}, status=502)

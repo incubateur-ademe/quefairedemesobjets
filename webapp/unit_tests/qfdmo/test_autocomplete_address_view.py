@@ -11,6 +11,7 @@ Covers the boundary cases that aren't easy to exercise in e2e:
 Network calls to data.geopf.fr are mocked with `responses`.
 """
 
+import json
 from unittest.mock import patch
 
 import pytest
@@ -20,8 +21,10 @@ from django.urls import reverse
 
 from qfdmo.views.autocomplete import (
     BAN_API_URL,
+    BAN_REVERSE_API_URL,
     GEOLOCATE_OPTION,
     AutocompleteBanAddressView,
+    ReverseGeocodeBanView,
 )
 
 
@@ -233,3 +236,105 @@ class TestGeolocateOption:
         # `navigator.geolocation` instead of any baked-in lat/lon.
         assert GEOLOCATE_OPTION["latitude"] is None
         assert GEOLOCATE_OPTION["longitude"] is None
+
+
+def _reverse_request(**get_params):
+    factory = RequestFactory()
+    return factory.get(reverse("qfdmo:reverse_geocode_address"), data=get_params)
+
+
+@pytest.mark.django_db
+class TestReverseGeocodeBanView:
+    """JSON proxy in front of BAN reverse-geocode (Autour de moi → adresse)."""
+
+    def _ban_returns_one_match(self):
+        return {
+            "features": [
+                {
+                    "properties": {"label": "10 Rue de Paris, 56400 Auray"},
+                    "geometry": {"coordinates": [-2.990838, 47.668099]},
+                }
+            ]
+        }
+
+    def test_returns_label_and_swapped_coordinates(self):
+        with patch("qfdmo.views.autocomplete.requests.get") as ban:
+            ban.return_value.raise_for_status.return_value = None
+            ban.return_value.json.return_value = self._ban_returns_one_match()
+            response = ReverseGeocodeBanView.as_view()(
+                _reverse_request(lat="47.668099", lon="-2.990838")
+            )
+        assert response.status_code == 200
+        assert json.loads(response.content) == {
+            "adresse": "10 Rue de Paris, 56400 Auray",
+            "latitude": 47.668099,
+            "longitude": -2.990838,
+        }
+
+    def test_targets_ban_reverse_endpoint_with_parsed_floats(self):
+        with patch("qfdmo.views.autocomplete.requests.get") as ban:
+            ban.return_value.raise_for_status.return_value = None
+            ban.return_value.json.return_value = self._ban_returns_one_match()
+            ReverseGeocodeBanView.as_view()(
+                _reverse_request(lat="47.668099", lon="-2.990838")
+            )
+        assert ban.call_args.args[0] == BAN_REVERSE_API_URL
+        # Parsed as floats — protects against query-string passthrough.
+        assert ban.call_args.kwargs["params"] == {
+            "lat": 47.668099,
+            "lon": -2.990838,
+        }
+        assert ban.call_args.kwargs["timeout"] == 3
+
+    @pytest.mark.parametrize(
+        "params",
+        [
+            {},
+            {"lat": "47.6"},
+            {"lon": "2.3"},
+            {"lat": "not-a-number", "lon": "2.3"},
+            {"lat": "47.6", "lon": "abc"},
+        ],
+    )
+    def test_missing_or_malformed_params_return_400(self, params):
+        response = ReverseGeocodeBanView.as_view()(_reverse_request(**params))
+        assert response.status_code == 400
+
+    @pytest.mark.parametrize(
+        "params",
+        [
+            {"lat": "91", "lon": "2.3"},
+            {"lat": "-91", "lon": "2.3"},
+            {"lat": "47", "lon": "181"},
+            {"lat": "47", "lon": "-181"},
+        ],
+    )
+    def test_out_of_range_params_return_400(self, params):
+        response = ReverseGeocodeBanView.as_view()(_reverse_request(**params))
+        assert response.status_code == 400
+
+    def test_ban_timeout_returns_502(self):
+        with patch("qfdmo.views.autocomplete.requests.get") as ban:
+            ban.side_effect = requests.Timeout("BAN slow")
+            response = ReverseGeocodeBanView.as_view()(
+                _reverse_request(lat="47.6", lon="2.3")
+            )
+        assert response.status_code == 502
+
+    def test_empty_features_returns_404(self):
+        with patch("qfdmo.views.autocomplete.requests.get") as ban:
+            ban.return_value.raise_for_status.return_value = None
+            ban.return_value.json.return_value = {"features": []}
+            response = ReverseGeocodeBanView.as_view()(
+                _reverse_request(lat="47.6", lon="2.3")
+            )
+        assert response.status_code == 404
+
+    def test_malformed_feature_returns_502(self):
+        with patch("qfdmo.views.autocomplete.requests.get") as ban:
+            ban.return_value.raise_for_status.return_value = None
+            ban.return_value.json.return_value = {"features": [{"properties": {}}]}
+            response = ReverseGeocodeBanView.as_view()(
+                _reverse_request(lat="47.6", lon="2.3")
+            )
+        assert response.status_code == 502
