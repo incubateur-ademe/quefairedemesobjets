@@ -3,8 +3,10 @@
     <p>
         Le helper TypeScript <code>resolveIframeTitle</code>
         (<code>webapp/static/to_compile/js/iframe_functions.ts</code>) attribue
-        désormais un titre par défaut différent selon la route, conformément
-        à RGAA 2.2 (cadres avec un titre pertinent et distinct).
+        un titre par défaut selon la route, conformément à RGAA 2.2 (cadres
+        avec un titre pertinent). Les pages qui embarquent plusieurs iframes
+        d'une même route disambiguent au cas par cas via l'attribut
+        <code>data-title</code> sur le <code>&lt;script&gt;</code>.
     </p>
 
     <table class="fr-table">
@@ -15,19 +17,19 @@
         <tbody>
             <tr>
                 <td><code>carte</code></td>
-                <td>Carte Longue Vie aux Objets — Où réparer ou déposer mon objet</td>
+                <td>Carte des solutions - Que Faire de mes Objets et Déchets</td>
             </tr>
             <tr>
                 <td><code>formulaire</code></td>
-                <td>Longue Vie aux Objets — Formulaire de recherche de solutions de réemploi</td>
+                <td>Carte des solutions - Que Faire de mes Objets et Déchets</td>
             </tr>
             <tr>
                 <td><code>infotri</code></td>
-                <td>Info-tri — Configurateur de consignes de tri</td>
+                <td>Info-tri</td>
             </tr>
             <tr>
                 <td><code>assistant</code></td>
-                <td>Que faire de mes objets et déchets — Assistant de recherche</td>
+                <td>L'assistant au tri, à la réparation et au réemploi</td>
             </tr>
         </tbody>
     </table>

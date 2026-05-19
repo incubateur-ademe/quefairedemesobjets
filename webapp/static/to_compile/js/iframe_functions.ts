@@ -7,17 +7,18 @@ import { getBaseUrlFromEnv } from "./url_utils"
 const DEFAULT_MAX_WIDTH = "100%"
 const DEFAULT_HEIGHT = "100vh" // As recommended by iframe-resizer docs
 const IFRAME_ID = "lvao_iframe"
-// Distinct titles per route to satisfy RGAA 2.2 (each iframe must have a
-// unique, descriptive title). Pages embedding several iframes can override
-// per-iframe via the `data-title` attribute on the script tag.
+// Per-route default titles (RGAA 2.2 — each iframe must have a pertinent
+// title). Pages embedding several iframes of the same route can still
+// disambiguate per-iframe via the `data-title` attribute on the script tag.
+const IFRAME_TITLE_CARTE_FORMULAIRE =
+  "Carte des solutions - Que Faire de mes Objets et Déchets"
 const IFRAME_TITLES: Record<string, string> = {
-  carte: "Carte Longue Vie aux Objets — Où réparer ou déposer mon objet",
-  formulaire:
-    "Longue Vie aux Objets — Formulaire de recherche de solutions de réemploi",
-  infotri: "Info-tri — Configurateur de consignes de tri",
-  assistant: "Que faire de mes objets et déchets — Assistant de recherche",
+  carte: IFRAME_TITLE_CARTE_FORMULAIRE,
+  formulaire: IFRAME_TITLE_CARTE_FORMULAIRE,
+  infotri: "Info-tri",
+  assistant: "L'assistant au tri, à la réparation et au réemploi",
 }
-const IFRAME_TITLE_FALLBACK = "Que faire de mes objets et déchets"
+const IFRAME_TITLE_FALLBACK = IFRAME_TITLE_CARTE_FORMULAIRE
 
 // Special dataset attributes that require custom handling
 const SPECIAL_ATTRIBUTES = {

@@ -28,9 +28,9 @@ def test_landmarks_demo_lists_all_landmarks():
 
 def test_iframe_titles_demo_lists_each_route():
     html = render_to_string("ui/components/accessibilite/iframe_titles_demo.html")
-    assert "Carte Longue Vie aux Objets" in html
-    assert "Formulaire de recherche de solutions de réemploi" in html
+    assert "Carte des solutions - Que Faire de mes Objets et Déchets" in html
     assert "Info-tri" in html
+    assert "L'assistant au tri, à la réparation et au réemploi" in html
     assert "data-title" in html
 
 

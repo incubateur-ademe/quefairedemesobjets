@@ -65,38 +65,20 @@ test.describe("♿ RGAA Mineurs", () => {
   })
 
   test.describe("A11Y-8 — Titres distincts par iframe (RGAA 2.2)", () => {
-    test("Le script carte.js produit un iframe avec un titre carte explicite", async ({
-      page,
-    }) => {
-      await navigateTo(page, "/lookbook/preview/iframe/carte/")
-      const iframe = page.locator("iframe").first()
-      await expect(iframe).toHaveAttribute(
-        "title",
-        "Carte Longue Vie aux Objets — Où réparer ou déposer mon objet",
-      )
-    })
-
-    test("Le script formulaire.js produit un iframe avec un titre formulaire explicite", async ({
-      page,
-    }) => {
-      await navigateTo(page, "/lookbook/preview/iframe/formulaire/")
-      const iframe = page.locator("iframe").first()
-      await expect(iframe).toHaveAttribute(
-        "title",
-        "Longue Vie aux Objets — Formulaire de recherche de solutions de réemploi",
-      )
-    })
-
-    test("Le script infotri.js produit un iframe avec un titre infotri explicite", async ({
-      page,
-    }) => {
-      await navigateTo(page, "/lookbook/preview/iframe/infotri/")
-      const iframe = page.locator("iframe").first()
-      await expect(iframe).toHaveAttribute(
-        "title",
-        "Info-tri — Configurateur de consignes de tri",
-      )
-    })
+    const ROUTE_TITLES: Record<string, string> = {
+      carte: "Carte des solutions - Que Faire de mes Objets et Déchets",
+      formulaire: "Carte des solutions - Que Faire de mes Objets et Déchets",
+      infotri: "Info-tri",
+    }
+    for (const [route, expectedTitle] of Object.entries(ROUTE_TITLES)) {
+      test(`Le script ${route}.js produit un iframe avec son titre`, async ({
+        page,
+      }) => {
+        await navigateTo(page, `/lookbook/preview/iframe/${route}/`)
+        const iframe = page.locator("iframe").first()
+        await expect(iframe).toHaveAttribute("title", expectedTitle)
+      })
+    }
   })
 
   test.describe("A11Y-11 — SVG décoratifs (RGAA 1.2)", () => {

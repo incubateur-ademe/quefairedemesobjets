@@ -76,9 +76,7 @@ test.describe("📦 Système d'Intégration Iframe", () => {
       expect(style).toContain("width: 100%;")
       expect(style).toContain("height: 720px;")
       expect(style).toContain("max-width: 100%;")
-      expect(title).toBe(
-        "Longue Vie aux Objets — Formulaire de recherche de solutions de réemploi",
-      )
+      expect(title).toBe("Carte des solutions - Que Faire de mes Objets et Déchets")
     })
 
     test("Le formulaire est visible et a la bonne hauteur dans l'iframe", async ({
