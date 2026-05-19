@@ -1,0 +1,56 @@
+name: 🧹 Prune old Actions caches
+
+# GitHub evicts caches after 7 days of inactivity by default. This workflow
+# shortens that effective TTL by deleting any cache whose last_accessed_at is
+# older than MAX_AGE_DAYS, so the repo stays well below the 10 GB cache budget.
+#
+# Runs daily at 03:17 UTC and can be triggered manually.
+
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+    inputs:
+      max-age-days:
+        description: "Delete caches older than this many days"
+        required: false
+        default: "3"
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  prune:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prune caches older than MAX_AGE_DAYS
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          MAX_AGE_DAYS: ${{ inputs.max-age-days || '3' }}
+        run: |
+          set -euo pipefail
+          cutoff=$(date -u -d "$MAX_AGE_DAYS days ago" +%s)
+          echo "Cutoff: $(date -u -d "@$cutoff" --iso-8601=seconds) (caches older than this are deleted)"
+
+          gh api --paginate "repos/$GH_REPO/actions/caches?per_page=100" \
+            --jq '.actions_caches[] | [.id, .key, .ref, .last_accessed_at, .size_in_bytes] | @tsv' \
+            > caches.tsv
+
+          deleted=0
+          freed=0
+          while IFS=$'\t' read -r id key ref last_accessed size; do
+            ts=$(date -u -d "$last_accessed" +%s)
+            if [ "$ts" -lt "$cutoff" ]; then
+              echo "Deleting id=$id ref=$ref last=$last_accessed size=${size}B key=$key"
+              if gh api --method DELETE "repos/$GH_REPO/actions/caches/$id" >/dev/null; then
+                deleted=$((deleted + 1))
+                freed=$((freed + size))
+              else
+                echo "  (delete failed, continuing)"
+              fi
+            fi
+          done < caches.tsv
+
+          echo "Deleted $deleted cache(s), freed $((freed / 1024 / 1024)) MB."
