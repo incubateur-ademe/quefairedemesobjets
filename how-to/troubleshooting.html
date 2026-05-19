@@ -394,6 +394,21 @@ git<span class="w"> </span>rebase<span class="w"> </span>--continue
 <section id="stack-data-airflow-dbt">
 <h2>Stack data, airflow, dbt<a class="headerlink" href="#stack-data-airflow-dbt" title="Lien vers cette rubrique">¶</a></h2>
 <p>En local, il peut s’avérer complexe de développer sur la stack data, du fait du volume de données, mais aussi de l’enchaînement de tâches dans les DAGs.</p>
+<section id="erreur-signature-verification-failed-en-boucle-dans-les-logs-du-scheduler">
+<h3>Erreur « Signature verification failed » en boucle dans les logs du scheduler<a class="headerlink" href="#erreur-signature-verification-failed-en-boucle-dans-les-logs-du-scheduler" title="Lien vers cette rubrique">¶</a></h3>
+<p>Si vous voyez l’erreur suivante en boucle dans les logs du scheduler :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">warning</span>  <span class="p">]</span> <span class="n">The</span> <span class="n">signature</span> <span class="n">of</span> <span class="n">the</span> <span class="n">request</span> <span class="n">was</span> <span class="n">wrong</span> <span class="p">[</span><span class="n">airflow</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">serve_logs</span><span class="o">.</span><span class="n">log_server</span><span class="p">]</span>
+<span class="n">jwt</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">InvalidSignatureError</span><span class="p">:</span> <span class="n">Signature</span> <span class="n">verification</span> <span class="n">failed</span>
+</pre></div>
+</div>
+<p>Cela signifie que la clé secrète JWT pour valider les tokens d’accès aux logs est incorrecte ou manquante.</p>
+<p><strong>Solution</strong> :</p>
+<ol class="arabic simple">
+<li><p>Générer une nouvelle clé secrète avec <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">-c</span> <span class="pre">&quot;import</span> <span class="pre">secrets;</span> <span class="pre">print(secrets.token_urlsafe(32))&quot;</span></code></p></li>
+<li><p>Remplacer la clé dans <code class="docutils literal notranslate"><span class="pre">data-platform/dags/.env</span></code> en localisant la ligne <code class="docutils literal notranslate"><span class="pre">AIRFLOW__API_AUTH__JWT_SECRET</span></code> et en la remplaçant avec la clé générée</p></li>
+<li><p>Redémarrer Airflow avec <code class="docutils literal notranslate"><span class="pre">docker-compose</span> <span class="pre">--profile</span> <span class="pre">airflow</span> <span class="pre">down</span></code> puis <code class="docutils literal notranslate"><span class="pre">docker-compose</span> <span class="pre">--profile</span> <span class="pre">airflow</span> <span class="pre">up</span> <span class="pre">-d</span></code></p></li>
+</ol>
+</section>
 <section id="visualiser-les-logs-d-un-dag-en-echec">
 <h3>Visualiser les logs d’un DAG en échec<a class="headerlink" href="#visualiser-les-logs-d-un-dag-en-echec" title="Lien vers cette rubrique">¶</a></h3>
 <p>Si un dag échoue, il peut être utile de visualiser ses logs.
@@ -530,8 +545,8 @@ Si ce n’est pas le cas suivre <a class="reference external" href="https://gith
 </div>
 </section>
 </section>
-<section id="connexion-au-registre-scaleway-remplacer-scaleway-docker-secret-par-votre-token">
-<h3>1. Connexion au registre Scaleway (remplacer $SCALEWAY_DOCKER_SECRET par votre token)<a class="headerlink" href="#connexion-au-registre-scaleway-remplacer-scaleway-docker-secret-par-votre-token" title="Lien vers cette rubrique">¶</a></h3>
+<section id="connexion-au-registre-scaleway">
+<h3>1. Connexion au registre Scaleway<a class="headerlink" href="#connexion-au-registre-scaleway" title="Lien vers cette rubrique">¶</a></h3>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span><span class="w"> </span><span class="nv">$SCALEWAY_DOCKER_SECRET</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>docker<span class="w"> </span>login<span class="w"> </span><span class="nv">$SCALEWAY_REGISTRY</span><span class="w"> </span>-u<span class="w"> </span>nologin<span class="w"> </span>--password-stdin
 </pre></div>
 </div>
@@ -549,6 +564,13 @@ docker<span class="w"> </span>push<span class="w"> </span><span class="nv">$SCAL
 docker<span class="w"> </span>push<span class="w"> </span><span class="nv">$SCALEWAY_REGISTRY</span>/<span class="nv">$SCALEWAY_NAMESPACE</span>/airflow-webserver:<span class="nv">$TAG</span>
 </pre></div>
 </div>
+</section>
+<section id="construction-et-push-de-l-image-airflow-dag-processor">
+<h3>4. Construction et push de l’image airflow-dag-processor<a class="headerlink" href="#construction-et-push-de-l-image-airflow-dag-processor" title="Lien vers cette rubrique">¶</a></h3>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>build<span class="w"> </span>--platform<span class="o">=</span>linux/amd64<span class="w"> </span>-f<span class="w"> </span>./data-platform/airflow-dag-processor.Dockerfile<span class="w"> </span>-t<span class="w"> </span><span class="nv">$SCALEWAY_REGISTRY</span>/<span class="nv">$SCALEWAY_NAMESPACE</span>/airflow-dag-processor:<span class="nv">$TAG</span><span class="w"> </span>.
+docker<span class="w"> </span>push<span class="w"> </span><span class="nv">$SCALEWAY_REGISTRY</span>/<span class="nv">$SCALEWAY_NAMESPACE</span>/airflow-dag-processor:<span class="nv">$TAG</span>
+</pre></div>
+</div>
 <p>Les images seront disponibles aux adresses suivantes :</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">rg.fr-par.scw.cloud/ns-qfdmo/airflow-scheduler:hotfix-vX.Y.Z</span></code></p></li>
@@ -556,7 +578,7 @@ docker<span class="w"> </span>push<span class="w"> </span><span class="nv">$SCAL
 </ul>
 </section>
 <section id="deployer-sur-scaleway">
-<h3>4. Déployer sur Scaleway<a class="headerlink" href="#deployer-sur-scaleway" title="Lien vers cette rubrique">¶</a></h3>
+<h3>5. Déployer sur Scaleway<a class="headerlink" href="#deployer-sur-scaleway" title="Lien vers cette rubrique">¶</a></h3>
 <p>À partir de <code class="docutils literal notranslate"><span class="pre">Serverless</span></code> &gt; <code class="docutils literal notranslate"><span class="pre">Containers</span></code> &gt; <code class="docutils literal notranslate"><span class="pre">Settings</span></code>, éditer l’image du container à utiliser et choisir le tag précédemment créé.</p>
 </section>
 </section>
@@ -633,6 +655,7 @@ docker<span class="w"> </span>push<span class="w"> </span><span class="nv">$SCAL
 </ul>
 </li>
 <li><a class="reference internal" href="#stack-data-airflow-dbt">Stack data, airflow, dbt</a><ul>
+<li><a class="reference internal" href="#erreur-signature-verification-failed-en-boucle-dans-les-logs-du-scheduler">Erreur « Signature verification failed » en boucle dans les logs du scheduler</a></li>
 <li><a class="reference internal" href="#visualiser-les-logs-d-un-dag-en-echec">Visualiser les logs d’un DAG en échec</a></li>
 <li><a class="reference internal" href="#rejouer-une-tache-dbt-d-un-dag">Rejouer une tâche <code class="docutils literal notranslate"><span class="pre">dbt</span></code> d’un DAG</a></li>
 </ul>
@@ -646,10 +669,11 @@ docker<span class="w"> </span>push<span class="w"> </span><span class="nv">$SCAL
 <li><a class="reference internal" href="#variables-d-environnement">Variables d’environnement</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#connexion-au-registre-scaleway-remplacer-scaleway-docker-secret-par-votre-token">1. Connexion au registre Scaleway (remplacer $SCALEWAY_DOCKER_SECRET par votre token)</a></li>
+<li><a class="reference internal" href="#connexion-au-registre-scaleway">1. Connexion au registre Scaleway</a></li>
 <li><a class="reference internal" href="#construction-et-push-de-l-image-airflow-scheduler">2. Construction et push de l’image airflow-scheduler</a></li>
 <li><a class="reference internal" href="#construction-et-push-de-l-image-airflow-webserver">3. Construction et push de l’image airflow-webserver</a></li>
-<li><a class="reference internal" href="#deployer-sur-scaleway">4. Déployer sur Scaleway</a></li>
+<li><a class="reference internal" href="#construction-et-push-de-l-image-airflow-dag-processor">4. Construction et push de l’image airflow-dag-processor</a></li>
+<li><a class="reference internal" href="#deployer-sur-scaleway">5. Déployer sur Scaleway</a></li>
 </ul>
 </li>
 </ul>

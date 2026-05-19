@@ -421,6 +421,75 @@ flowchart TB
 <p>It may happen that the partner cannot ensure continuity of external identifiers. In that case, if the partner provides a mapping table of old and new identifiers, then it is possible to ensure continuity of unique identifiers by following the procedure defined <a class="reference internal" href="../../how-to/administration/update-ext-id.html"><span class="std std-doc">here</span></a>.</p>
 </section>
 </section>
+<section id="xcom-backend-and-object-storage">
+<h2>XCom backend and object storage<a class="headerlink" href="#xcom-backend-and-object-storage" title="Lien vers cette rubrique">¶</a></h2>
+<p>Airflow 3 is configured to use the <code class="docutils literal notranslate"><span class="pre">XComObjectStorageBackend</span></code> from the <code class="docutils literal notranslate"><span class="pre">common.io</span></code> provider to handle large and complex XCom payloads (pandas DataFrames, numpy arrays…).</p>
+<p>Configuration is done <strong>only via environment variables</strong>, not <code class="docutils literal notranslate"><span class="pre">airflow.cfg</span></code>:</p>
+<ul class="simple">
+<li><p><strong>Backend activation</strong></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">AIRFLOW__CORE__XCOM_BACKEND=airflow.providers.common.io.xcom.backend.XComObjectStorageBackend</span></code></p></li>
+</ul>
+</li>
+<li><p><strong>Object storage configuration</strong></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">AIRFLOW__COMMON_IO__XCOM_OBJECTSTORAGE_PATH=s3://&lt;conn-id&gt;&#64;&lt;bucket&gt;/xcoms</span></code></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;conn-id&gt;</span></code>: Airflow connection ID for the object storage (S3/GCS/…)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;bucket&gt;</span></code>: bucket/container name</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AIRFLOW__COMMON_IO__XCOM_OBJECTSTORAGE_THRESHOLD=1048576</span></code></p>
+<ul>
+<li><p>Size threshold (in bytes). Above this size, XCom payloads are written to object storage instead of the metadata DB.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AIRFLOW__COMMON_IO__XCOM_OBJECTSTORAGE_COMPRESSION=gzip</span></code></p>
+<ul>
+<li><p>Optional compression for large payloads.</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>With this setup, existing DAGs can continue to push/pull pandas DataFrames and numpy-backed data structures without manual pre-serialization for XCom. For domain objects (e.g. Django models like <code class="docutils literal notranslate"><span class="pre">ActeurType</span></code>, <code class="docutils literal notranslate"><span class="pre">Source</span></code>), use dedicated serialization helpers so that XCom only sees JSON-serialisable structures (see data-platform serialization utilities).</p>
+</section>
+<section id="xcom-backend-testing-checklist">
+<h2>XCom backend testing checklist<a class="headerlink" href="#xcom-backend-testing-checklist" title="Lien vers cette rubrique">¶</a></h2>
+<p>When validating changes to the XCom backend configuration (for example enabling <code class="docutils literal notranslate"><span class="pre">XComObjectStorageBackend</span></code> with environment variables), run at least the following checks in a non‑production Airflow environment:</p>
+<ul class="simple">
+<li><p><strong>Core clustering DAGs</strong></p>
+<ul>
+<li><p>Trigger a full run of clustering DAGs using <code class="docutils literal notranslate"><span class="pre">cluster</span></code> tasks (normalisation, clustering, suggestions) and confirm tasks exchanging large pandas DataFrames via XCom complete without serialization errors.</p></li>
+</ul>
+</li>
+<li><p><strong>Source ingestion DAGs</strong></p>
+<ul>
+<li><p>Run at least one <code class="docutils literal notranslate"><span class="pre">source</span></code> DAG that pushes complex data (DataFrames containing numpy types, datetimes, and domain objects mapped via helpers) through XCom, and check that downstream tasks read them correctly.</p></li>
+</ul>
+</li>
+<li><p><strong>Object storage offloading</strong></p>
+<ul>
+<li><p>Push a deliberately large XCom value (larger than <code class="docutils literal notranslate"><span class="pre">AIRFLOW__COMMON_IO__XCOM_OBJECTSTORAGE_THRESHOLD</span></code>) and confirm that:</p>
+<ul>
+<li><p>The XCom row stored in the metadata DB is only a reference.</p></li>
+<li><p>The actual payload is written to the configured object storage path.</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>Domain objects</strong></p>
+<ul>
+<li><p>For any business objects (e.g. <code class="docutils literal notranslate"><span class="pre">ActeurType</span></code>, <code class="docutils literal notranslate"><span class="pre">Source</span></code>) passed through XCom using the dedicated serialization helpers, verify that:</p>
+<ul>
+<li><p>The pushed value is JSON‑serialisable.</p></li>
+<li><p>The consumer task can reconstruct or use the value as expected.</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</section>
 </section>
 
         </article>
@@ -493,6 +562,8 @@ flowchart TB
 <li><a class="reference internal" href="#mapping">Mapping</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#xcom-backend-and-object-storage">XCom backend and object storage</a></li>
+<li><a class="reference internal" href="#xcom-backend-testing-checklist">XCom backend testing checklist</a></li>
 </ul>
 </li>
 </ul>
