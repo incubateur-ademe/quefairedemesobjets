@@ -22,7 +22,6 @@
                        rel="noreferrer"
                        title="{{ sharer.facebook.title }}"
                        href="{{ sharer.facebook.url }}"
-                       tabindex="-1"
                     >
                         Partager sur Facebook
                     </a>
@@ -33,7 +32,6 @@
                        rel="noreferrer"
                        title="{{ sharer.twitter.title }}"
                        href="{{ sharer.twitter.url }}"
-                       tabindex="-1"
                     >
                         Partager sur X (anciennement Twitter)
                     </a>
@@ -45,7 +43,6 @@
                        title="{{ sharer.linkedin.title }}"
                        href="{{ sharer.linkedin.url }}"
                        onclick="window.open(this.href,'Partager sur LinkedIn','toolbar=no,location=yes,status=no,menubar=no,scrollbars=yes,resizable=yes,width=550,height=550'); event.preventDefault();"
-                       tabindex="-1"
                     >
                         Partager sur LinkedIn
                     </a>
@@ -56,7 +53,6 @@
                        rel="noreferrer"
                        title="{{ sharer.email.title }}"
                        href="{{ sharer.email.url }}"
-                       tabindex="-1"
                     >
                         Partager par email
                     </a>
@@ -67,7 +63,6 @@
                     <button class="fr-btn--copy fr-btn"
                         data-action="copy#toClipboard"
                         type="button"
-                        tabindex="-1"
                     >
                         Copier dans le presse-papier
                         <span data-copy-target="toCopy">{{ object.full_url }}</span>
