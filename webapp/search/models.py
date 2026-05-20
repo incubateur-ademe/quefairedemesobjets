@@ -130,6 +130,24 @@ class SearchTerm(index.Indexed, models.Model):
 
         indexed_objects = super().get_indexed_objects()
 
+        if cls is SearchTerm:
+            # Multi-table inheritance: avoid indexing a SearchTerm row when a
+            # more specific child exists for it. Without this, the same object
+            # is indexed twice (once as SearchTerm, once as the child) and
+            # appears duplicated in search results — visible when matching via
+            # search_variants, which is declared on the base class.
+            indexed_objects = indexed_objects.exclude(
+                id__in=Synonyme.objects.values_list("searchterm_ptr_id", flat=True)
+            )
+            indexed_objects = indexed_objects.exclude(
+                id__in=SearchTag.objects.values_list("searchterm_ptr_id", flat=True)
+            )
+            indexed_objects = indexed_objects.exclude(
+                id__in=ProduitPageSearchTerm.objects.values_list(
+                    "searchterm_ptr_id", flat=True
+                )
+            )
+
         if cls is Synonyme:
             indexed_objects = indexed_objects.exclude(
                 imported_as_search_tag__isnull=False
