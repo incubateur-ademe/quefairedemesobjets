@@ -22,3 +22,14 @@ export function removeHash() {
     window.location.pathname + window.location.search,
   )
 }
+
+export function setSearchTermCookie(searchTermId: string | number): void {
+  // SameSite=None; Secure; Partitioned lets the cookie survive a navigation
+  // inside a cross-site iframe (e.g. the assistant embedded by a partner).
+  // Partitioned (CHIPS) scopes the cookie to the embedding top-level site so
+  // it cannot be used for cross-site tracking. Secure is required as soon as
+  // SameSite=None.
+  document.cookie =
+    `qf_search_term_id=${searchTermId}; path=/; max-age=60; ` +
+    `SameSite=None; Secure; Partitioned`
+}
