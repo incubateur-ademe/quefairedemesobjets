@@ -116,6 +116,33 @@ class TestSearchViewSearchTagLinkParams:
 
 
 @pytest.mark.django_db
+class TestSearchVarianteDoesNotDuplicate:
+    """Searching for a `variante de recherche` returns the parent Synonyme
+    only once, not twice (see Notion ticket 3185)."""
+
+    def test_search_by_variante_returns_single_result(self):
+        produit = Produit.objects.create(nom="Mouchoir en papier")
+        synonyme = Synonyme.objects.create(
+            nom="Mouchoir en papier",
+            produit=produit,
+            search_variants="kleenex",
+        )
+        _rebuild_index()
+
+        response = Client().get(
+            "/assistant/autocomplete-search",
+            {"q": "kleenex"},
+        )
+        assert response.status_code == 200
+
+        results = list(response.context["results"])
+        matching_ids = [r.pk for r in results if r.pk == synonyme.searchterm_ptr_id]
+        assert (
+            len(matching_ids) == 1
+        ), f"Expected synonyme to appear once, got {len(matching_ids)}: {results}"
+
+
+@pytest.mark.django_db
 class TestSearchViewProduitPageResults:
     def test_produit_page_search_term_appears_in_results(self, produit_page):
         _rebuild_index()
