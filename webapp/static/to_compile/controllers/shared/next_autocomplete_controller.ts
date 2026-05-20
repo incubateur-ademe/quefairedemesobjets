@@ -37,7 +37,7 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
 
   // Margin between the bottom of the dropdown and the bottom of the document
   // body, so the dropdown never touches the very edge of the iframe.
-  static #LISTBOX_BOTTOM_MARGIN_PX = 16
+  static #LISTBOX_BOTTOM_MARGIN_PX = 8
 
   #boundReposition = () => this.#positionListbox()
 
@@ -301,14 +301,22 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
   // Width/left come from `this.element` (the controller wrapper) rather than
   // `this.inputTarget` because the visual search box can be wider than the
   // raw <input> on the homepage variant — it includes a search icon and
-  // padding. Top still comes from the input bottom: that is where the user
-  // expects the dropdown to start.
+  // padding. Top comes from the input's parent when that parent is an inner
+  // wrapper (homepage variant: a styled box around the input + icon, sits
+  // strictly inside `this.element`). When the input is directly inside
+  // `this.element` (simple variant: no inner wrapper), measuring the parent
+  // would be circular because the parent already contains the dropdown — so
+  // we fall back to the input's own bottom.
   #positionListbox() {
     if (this.resultsTarget.hidden) return
 
-    const inputRect = this.inputTarget.getBoundingClientRect()
+    const inputParent = this.inputTarget.parentElement
+    const isInnerWrapper = inputParent !== null && inputParent !== this.element
+    const anchorRect = (
+      isInnerWrapper ? inputParent : this.inputTarget
+    ).getBoundingClientRect()
     const wrapperRect = this.element.getBoundingClientRect()
-    this.resultsTarget.style.top = `${inputRect.bottom}px`
+    this.resultsTarget.style.top = `${anchorRect.bottom}px`
     this.resultsTarget.style.left = `${wrapperRect.left}px`
     this.resultsTarget.style.width = `${wrapperRect.width}px`
     // Clear any previous max-height before measuring, otherwise a clamped
