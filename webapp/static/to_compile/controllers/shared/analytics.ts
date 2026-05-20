@@ -1,7 +1,11 @@
 import { Controller } from "@hotwired/stimulus"
 import { InteractionType as PosthogUIInteractionType } from "../../js/types"
 import posthog, { PostHogConfig } from "posthog-js"
-import { URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE } from "../../js/helpers"
+import {
+  URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE,
+  clearSearchTermCookie,
+  setSearchTermCookie,
+} from "../../js/helpers"
 import { initSentry } from "../../js/sentry"
 
 const IFRAME_REFERRER_SESSION_KEY = "qf_ifr"
@@ -333,9 +337,9 @@ export default class extends Controller<HTMLElement> {
         searchTermName,
       })
       if (searchTermId) {
-        document.cookie = `qf_search_term_id=${searchTermId}; path=/; max-age=10; SameSite=Lax`
+        setSearchTermCookie(searchTermId)
       } else {
-        document.cookie = `qf_search_term_id=; path=/; max-age=0; SameSite=Lax`
+        clearSearchTermCookie()
       }
     })
   }
