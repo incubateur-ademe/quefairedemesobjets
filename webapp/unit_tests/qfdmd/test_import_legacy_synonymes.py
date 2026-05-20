@@ -234,6 +234,97 @@ class TestImportLegacySynonymesView:
 
 
 @pytest.mark.django_db
+class TestImportSurvivesMalformedSynonymes:
+    """A single bad synonyme must not 500 the whole import. Failed entries are
+    skipped, the rest proceed, and the user gets a warning message listing them.
+    Regression: Notion ticket 3160 — 500 on vélo legacy import."""
+
+    def test_overlong_nom_is_skipped_not_500(self, produit_page):
+        produit = ProduitFactory(nom="Produit")
+        # SearchTag.name is max_length=100; a longer Synonyme.nom used to
+        # raise DataError unhandled.
+        bad = SynonymeFactory(nom="a" * 150, produit=produit)
+        good = SynonymeFactory(nom="Vélo", produit=produit)
+        LegacyIntermediateSynonymePage.objects.create(page=produit_page, synonyme=bad)
+        LegacyIntermediateSynonymePage.objects.create(page=produit_page, synonyme=good)
+
+        request = _make_request("post")
+        # Must not raise.
+        import_legacy_synonymes(request, produit_page.id)
+
+        # Long-nom synonyme imports successfully thanks to length truncation
+        # (defensive), and the good one too. Important: the import does NOT
+        # 500 the whole flow.
+        assert SearchTag.objects.filter(name="Vélo").exists()
+
+    def test_warning_message_lists_failed_synonymes(self, produit_page, monkeypatch):
+        """When a synonyme genuinely cannot be imported (IntegrityError raised
+        by the inner call), the view records a warning rather than 500.
+        We force the failure via monkeypatch to keep the test deterministic."""
+        from django.db import IntegrityError
+
+        from qfdmd import views
+
+        produit = ProduitFactory(nom="Produit")
+        bad = SynonymeFactory(nom="boom", produit=produit)
+        good = SynonymeFactory(nom="OK", produit=produit)
+        LegacyIntermediateSynonymePage.objects.create(page=produit_page, synonyme=bad)
+        LegacyIntermediateSynonymePage.objects.create(page=produit_page, synonyme=good)
+
+        original = views._import_one_synonyme
+
+        def fake_import(page, synonyme):
+            if synonyme.nom == "boom":
+                raise IntegrityError("forced")
+            return original(page, synonyme)
+
+        monkeypatch.setattr(views, "_import_one_synonyme", fake_import)
+
+        request = _make_request("post")
+        import_legacy_synonymes(request, produit_page.id)
+
+        msgs = [str(m) for m in get_messages(request)]
+        assert any("OK" not in msg and "boom" in msg for msg in msgs)
+        # The good synonyme made it through despite the bad one failing
+        assert SearchTag.objects.filter(name="OK").exists()
+        # And the bad one did not leave partial state
+        assert not SearchTag.objects.filter(name="boom").exists()
+
+    def test_per_synonyme_failure_rolls_back_only_that_iteration(
+        self, produit_page, monkeypatch
+    ):
+        """The savepoint must roll back the failed iteration without
+        rolling back synonymes imported earlier."""
+        from django.db import IntegrityError
+
+        from qfdmd import views
+
+        produit = ProduitFactory(nom="Produit")
+        first = SynonymeFactory(nom="First", produit=produit)
+        bad = SynonymeFactory(nom="boom", produit=produit)
+        third = SynonymeFactory(nom="Third", produit=produit)
+        LegacyIntermediateSynonymePage.objects.create(page=produit_page, synonyme=first)
+        LegacyIntermediateSynonymePage.objects.create(page=produit_page, synonyme=bad)
+        LegacyIntermediateSynonymePage.objects.create(page=produit_page, synonyme=third)
+
+        original = views._import_one_synonyme
+
+        def fake_import(page, synonyme):
+            if synonyme.nom == "boom":
+                raise IntegrityError("forced")
+            return original(page, synonyme)
+
+        monkeypatch.setattr(views, "_import_one_synonyme", fake_import)
+
+        request = _make_request("post")
+        import_legacy_synonymes(request, produit_page.id)
+
+        assert SearchTag.objects.filter(name="First").exists()
+        assert SearchTag.objects.filter(name="Third").exists()
+        assert not SearchTag.objects.filter(name="boom").exists()
+
+
+@pytest.mark.django_db
 class TestImportConfirmationPage:
     """GET shows a confirmation page, POST executes the import."""
 
