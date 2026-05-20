@@ -4,7 +4,13 @@ from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
 import django_filters
 from django.contrib import messages
-from django.db import OperationalError, connection
+from django.db import (
+    DataError,
+    IntegrityError,
+    OperationalError,
+    connection,
+    transaction,
+)
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.utils.decorators import method_decorator
@@ -83,37 +89,72 @@ def _collect_synonymes_for_page(page):
     )
 
 
+# taggit's TagBase imposes max_length=100 on both name and slug. Legacy
+# Synonyme records can have longer values, so we truncate to fit and keep
+# the import alive instead of bubbling a DataError up to the user.
+_SEARCH_TAG_MAX_LENGTH = 100
+
+
+def _import_one_synonyme(page, synonyme):
+    """Import a single Synonyme as a SearchTag, linked to the given page.
+
+    Wrapped in a savepoint by the caller so a per-synonyme failure rolls
+    back only this iteration. Raises any DB exception so the caller can
+    record it.
+    """
+    # Replace commas with fullwidth commas to prevent taggit from splitting
+    # the tag name on commas during admin round-trips.
+    tag_name = synonyme.nom.replace(", ", "\uff0c").replace(",", "\uff0c")
+    tag_name = tag_name[:_SEARCH_TAG_MAX_LENGTH]
+    slug = (synonyme.slug or "")[:_SEARCH_TAG_MAX_LENGTH]
+
+    search_tag = SearchTag.objects.filter(slug=slug).first()
+    if search_tag is None:
+        search_tag = SearchTag.objects.filter(name=tag_name).first()
+    if search_tag is None:
+        search_tag = SearchTag.objects.create(name=tag_name, slug=slug)
+
+    if search_tag.legacy_existing_synonyme is None:
+        search_tag.legacy_existing_synonyme = synonyme
+        search_tag.save(update_fields=["legacy_existing_synonyme"])
+
+    TaggedSearchTag.objects.get_or_create(
+        tag=search_tag,
+        content_object=page,
+    )
+
+    # Re-index now that the tag is linked to the page, since the post_save
+    # signal fired before the TaggedSearchTag existed and get_indexed_objects
+    # excluded the orphan tag.
+    insert_or_update_object(search_tag)
+
+    if synonyme.imported_as_search_tag is None:
+        synonyme.imported_as_search_tag = search_tag
+        synonyme.save(update_fields=["imported_as_search_tag"])
+
+
 def _execute_import(page, all_synonymes):
-    """Execute the import of legacy synonymes as SearchTags."""
+    """Execute the import of legacy synonymes as SearchTags.
 
+    Each synonyme is imported in its own savepoint: a failure on one
+    (collision, malformed data) rolls back only that iteration and the
+    rest of the import proceeds. Returns the list of names of synonymes
+    that could not be imported, so the caller can warn the user.
+    """
+    failed = []
     for synonyme in all_synonymes:
-        # Replace commas with fullwidth commas to prevent taggit from
-        # splitting the tag name on commas during admin round-trips.
-        tag_name = synonyme.nom.replace(", ", "\uff0c").replace(",", "\uff0c")
-
-        search_tag = SearchTag.objects.filter(slug=synonyme.slug).first()
-        if search_tag is None:
-            search_tag = SearchTag.objects.filter(name=tag_name).first()
-        if search_tag is None:
-            search_tag = SearchTag.objects.create(name=tag_name, slug=synonyme.slug)
-
-        if search_tag.legacy_existing_synonyme is None:
-            search_tag.legacy_existing_synonyme = synonyme
-            search_tag.save(update_fields=["legacy_existing_synonyme"])
-
-        TaggedSearchTag.objects.get_or_create(
-            tag=search_tag,
-            content_object=page,
-        )
-
-        # Re-index now that the tag is linked to the page, since the
-        # post_save signal fired before the TaggedSearchTag existed
-        # and get_indexed_objects excluded the orphan tag.
-        insert_or_update_object(search_tag)
-
-        if synonyme.imported_as_search_tag is None:
-            synonyme.imported_as_search_tag = search_tag
-            synonyme.save(update_fields=["imported_as_search_tag"])
+        try:
+            with transaction.atomic():
+                _import_one_synonyme(page, synonyme)
+        except (IntegrityError, DataError) as exc:
+            logger.warning(
+                "Skipped synonyme %s (id=%s) during legacy import: %s",
+                synonyme.nom,
+                synonyme.pk,
+                exc,
+            )
+            failed.append(synonyme.nom)
+    return failed
 
 
 def import_legacy_synonymes(request, id):
@@ -143,12 +184,24 @@ def import_legacy_synonymes(request, id):
 
     if request.method == "POST":
         if all_synonymes:
-            _execute_import(page, all_synonymes)
-            messages.success(
-                request,
-                f"{len(all_synonymes)} synonyme(s) de recherche importé(s) "
-                f"avec succès.",
-            )
+            failed = _execute_import(page, all_synonymes)
+            imported_count = len(all_synonymes) - len(failed)
+            if imported_count:
+                messages.success(
+                    request,
+                    f"{imported_count} synonyme(s) de recherche importé(s) "
+                    f"avec succès.",
+                )
+            if failed:
+                preview = ", ".join(failed[:5])
+                if len(failed) > 5:
+                    preview += f"… (+{len(failed) - 5})"
+                messages.warning(
+                    request,
+                    f"{len(failed)} synonyme(s) n'ont pas pu être importé(s) "
+                    f"(ils sont probablement en doublon ou mal formés) : "
+                    f"{preview}",
+                )
         else:
             messages.info(
                 request,
