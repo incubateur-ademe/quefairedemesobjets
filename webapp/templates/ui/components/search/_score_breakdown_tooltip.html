@@ -1,0 +1,37 @@
+{% comment %}
+Debug tooltip showing why a search result matched. Rendered only when the
+viewer has the wagtailadmin.can_see_beta_search permission (request.beta).
+
+Expects:
+- breakdown: ScoreBreakdown instance (from search.score_breakdown)
+- result_pk: pk of the SearchTerm this tooltip describes
+{% endcomment %}
+<button
+    class="fr-btn--tooltip fr-btn"
+    aria-describedby="tooltip-score-{{ result_pk }}"
+    type="button"
+>
+    Pourquoi ce score ?
+</button>
+<span
+    class="fr-tooltip fr-placement"
+    id="tooltip-score-{{ result_pk }}"
+    role="tooltip"
+    aria-hidden="true"
+>
+    <strong>Score effectif : {{ breakdown.ranked|floatformat:3 }}</strong>
+    <ul class="qf-m-0 qf-pl-2w">
+        <li>Title sim. : {{ breakdown.title_sim|floatformat:3 }}</li>
+        <li>Body sim. : {{ breakdown.body_sim|floatformat:3 }}</li>
+        <li>Title norm : {{ breakdown.title_norm|floatformat:3 }}</li>
+        <li>
+            Préfixe :
+            {% if breakdown.is_prefix %}
+                oui (× {{ breakdown.prefix_multiplier|floatformat:2 }})
+            {% else %}
+                non
+            {% endif %}
+        </li>
+        <li>Raw : {{ breakdown.raw|floatformat:3 }}</li>
+    </ul>
+</span>

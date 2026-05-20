@@ -1,4 +1,5 @@
 {% extends "ui/forms/widgets/autocomplete/results.html" %}
+{% load dict_tags %}
 
 {% block results %}
     {% for result in results %}
@@ -14,6 +15,13 @@
             data-action="keydown->next-autocomplete#navigate:prevent click->next-autocomplete#resultClick"
         >
             {% include specific.search_result_template with result=specific position=forloop.counter %}
+            {% if request.beta and score_breakdown %}
+                {% with breakdown=score_breakdown|get_item:result.pk %}
+                    {% if breakdown %}
+                        {% include "ui/components/search/_score_breakdown_tooltip.html" with breakdown=breakdown result_pk=result.pk %}
+                    {% endif %}
+                {% endwith %}
+            {% endif %}
         </li>
         {% endif %}
         {% endwith %}
