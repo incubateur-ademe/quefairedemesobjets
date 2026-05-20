@@ -1,4 +1,5 @@
 import { ClickOutsideController } from "stimulus-use"
+import { computeAvailableHeight } from "../../js/helpers"
 
 export default class AutocompleteController extends ClickOutsideController<HTMLElement> {
   static targets = ["option", "input", "hiddenInput", "results"]
@@ -34,8 +35,21 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
   // value snapshot in sync.
   #userIsTyping = false
 
+  // Margin between the bottom of the dropdown and the bottom of the document
+  // body, so the dropdown never touches the very edge of the iframe.
+  static #LISTBOX_BOTTOM_MARGIN_PX = 8
+
+  #boundReposition = () => this.#positionListbox()
+
   connect() {
     this.#hideListbox()
+    window.addEventListener("resize", this.#boundReposition)
+    window.addEventListener("scroll", this.#boundReposition, { passive: true })
+  }
+
+  disconnect() {
+    window.removeEventListener("resize", this.#boundReposition)
+    window.removeEventListener("scroll", this.#boundReposition)
   }
 
   clickOutside(event) {
@@ -275,6 +289,48 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
   #showListbox() {
     this.resultsTarget.hidden = false
     this.inputTarget.setAttribute("aria-expanded", "true")
+    this.#positionListbox()
+  }
+
+  // Position the (position:fixed) listbox under the autocomplete widget and
+  // clamp its height so its bottom edge stays above the bottom of the
+  // document body by LISTBOX_BOTTOM_MARGIN_PX. The body bottom matches the
+  // iframe bottom when embedded, so the dropdown never spills outside the
+  // iframe.
+  //
+  // Width/left come from `this.element` (the controller wrapper) rather than
+  // `this.inputTarget` because the visual search box can be wider than the
+  // raw <input> on the homepage variant — it includes a search icon and
+  // padding. Top comes from the input's parent when that parent is an inner
+  // wrapper (homepage variant: a styled box around the input + icon, sits
+  // strictly inside `this.element`). When the input is directly inside
+  // `this.element` (simple variant: no inner wrapper), measuring the parent
+  // would be circular because the parent already contains the dropdown — so
+  // we fall back to the input's own bottom.
+  #positionListbox() {
+    if (this.resultsTarget.hidden) return
+
+    const inputParent = this.inputTarget.parentElement
+    const isInnerWrapper = inputParent !== null && inputParent !== this.element
+    const anchorRect = (
+      isInnerWrapper ? inputParent : this.inputTarget
+    ).getBoundingClientRect()
+    const wrapperRect = this.element.getBoundingClientRect()
+    this.resultsTarget.style.top = `${anchorRect.bottom}px`
+    this.resultsTarget.style.left = `${wrapperRect.left}px`
+    this.resultsTarget.style.width = `${wrapperRect.width}px`
+    // Clear any previous max-height before measuring, otherwise a clamped
+    // value from a prior pass leaks into the new layout.
+    this.resultsTarget.style.maxHeight = ""
+
+    // Read the actual top *after* layout. Tailwind margin classes (e.g.
+    // qf-mt-1w on the homepage variant) shift the box below inputRect.bottom
+    // and we want to respect that visual gap in the clamp.
+    const frameTop = this.resultsTarget.getBoundingClientRect().top
+    const margin = AutocompleteController.#LISTBOX_BOTTOM_MARGIN_PX
+    const bodyBottom = document.documentElement.clientHeight
+    const available = computeAvailableHeight(frameTop, bodyBottom, margin)
+    this.resultsTarget.style.maxHeight = `${available}px`
   }
 
   #removeSelection() {

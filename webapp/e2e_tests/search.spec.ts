@@ -181,3 +181,42 @@ test.describe("Recherche de produits", () => {
     expect(response?.status()).toBe(200)
   })
 })
+
+test.describe("Positionnement de l'autocomplete en hauteur contrainte", () => {
+  // Regression: at narrow heights (iframe embedding scenario) the dropdown
+  // must stay inside the document body, scrolling internally instead of
+  // spilling past the bottom edge. Notion ticket 3104.
+  test("La dropdown reste dans le body et scrolle en interne", async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 220 })
+    await navigateTo(page, "/")
+
+    await typeSearchQuery(page, "velo")
+    await waitForResults(page)
+
+    const measurements = await page.evaluate((selector) => {
+      const frame = document.querySelector<HTMLElement>(selector)
+      if (!frame) return null
+      const rect = frame.getBoundingClientRect()
+      return {
+        bodyHeight: document.documentElement.clientHeight,
+        rectTop: rect.top,
+        rectBottom: rect.bottom,
+        scrollHeight: frame.scrollHeight,
+        clientHeight: frame.clientHeight,
+        overflowY: getComputedStyle(frame).overflowY,
+        hasIframeIgnore: frame.hasAttribute("data-iframe-ignore"),
+      }
+    }, SEARCH_RESULTS_DROPDOWN_SELECTOR)
+
+    expect(measurements).not.toBeNull()
+    // Dropdown bottom stays above body bottom (with our 8px margin).
+    expect(measurements!.rectBottom).toBeLessThanOrEqual(measurements!.bodyHeight)
+    // Bottom is close to body bottom — within the clamp margin, not way above.
+    expect(measurements!.bodyHeight - measurements!.rectBottom).toBeLessThanOrEqual(10)
+    // Content overflows the clamped frame, so the user can scroll inside.
+    expect(measurements!.scrollHeight).toBeGreaterThan(measurements!.clientHeight)
+    expect(measurements!.overflowY).toBe("auto")
+    // iframe-resizer must skip this element when computing iframe height.
+    expect(measurements!.hasIframeIgnore).toBe(true)
+  })
+})
