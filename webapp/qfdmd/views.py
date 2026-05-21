@@ -231,8 +231,8 @@ def import_legacy_synonymes(request, id):
                     f"{len(truncated)} synonyme(s) ont été tronqué(s) à "
                     f"{_SEARCH_TAG_MAX_LENGTH} caractères (limite des "
                     f"synonymes de recherche) : {preview}. "
-                    f"Vous pouvez renommer ces synonymes legacy pour les "
-                    f"raccourcir avant un nouvel import.",
+                    "Vous pouvez renommer le synonyme de recherche"
+                    "après l'import",
                 )
         else:
             messages.info(
