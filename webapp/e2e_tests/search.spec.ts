@@ -209,14 +209,12 @@ test.describe("Positionnement de l'autocomplete en hauteur contrainte", () => {
     }, SEARCH_RESULTS_DROPDOWN_SELECTOR)
 
     expect(measurements).not.toBeNull()
-    // Dropdown bottom stays above body bottom (with our 8px margin).
     expect(measurements!.rectBottom).toBeLessThanOrEqual(measurements!.bodyHeight)
-    // Bottom is close to body bottom — within the clamp margin, not way above.
+    // Tolerance = clamp margin, not flakiness slop.
     expect(measurements!.bodyHeight - measurements!.rectBottom).toBeLessThanOrEqual(10)
-    // Content overflows the clamped frame, so the user can scroll inside.
     expect(measurements!.scrollHeight).toBeGreaterThan(measurements!.clientHeight)
     expect(measurements!.overflowY).toBe("auto")
-    // iframe-resizer must skip this element when computing iframe height.
+    // @iframe-resizer/child skips elements with this attribute when sizing the iframe.
     expect(measurements!.hasIframeIgnore).toBe(true)
   })
 })

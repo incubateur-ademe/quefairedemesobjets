@@ -27,10 +27,8 @@ export function removeHash() {
  * Compute the available vertical space below `frameTop` inside the document
  * body, leaving `margin` pixels between the bottom edge and the body bottom.
  *
- * Used by the autocomplete controller to clamp the dropdown's max-height so
- * its bottom stays inside the iframe (the body bottom matches the iframe
- * bottom when embedded). Returns 0 if there is no room left rather than a
- * negative value, so callers can pass the result straight to a CSS length.
+ * Returns 0 if there is no room left rather than a negative value, so callers
+ * can pass the result straight to a CSS length.
  */
 export function computeAvailableHeight(
   frameTop: number,
