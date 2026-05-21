@@ -101,12 +101,20 @@ def _import_one_synonyme(page, synonyme):
     Wrapped in a savepoint by the caller so a per-synonyme failure rolls
     back only this iteration. Raises any DB exception so the caller can
     record it.
+
+    Returns True when the synonyme's name or slug had to be truncated to
+    fit SearchTag's 100-char limit (the caller surfaces those to the user
+    so they can rename the legacy record).
     """
     # Replace commas with fullwidth commas to prevent taggit from splitting
     # the tag name on commas during admin round-trips.
-    tag_name = synonyme.nom.replace(", ", "\uff0c").replace(",", "\uff0c")
-    tag_name = tag_name[:_SEARCH_TAG_MAX_LENGTH]
-    slug = (synonyme.slug or "")[:_SEARCH_TAG_MAX_LENGTH]
+    tag_name_full = synonyme.nom.replace(", ", "\uff0c").replace(",", "\uff0c")
+    slug_full = synonyme.slug or ""
+    tag_name = tag_name_full[:_SEARCH_TAG_MAX_LENGTH]
+    slug = slug_full[:_SEARCH_TAG_MAX_LENGTH]
+    truncated = len(tag_name_full) > _SEARCH_TAG_MAX_LENGTH or (
+        len(slug_full) > _SEARCH_TAG_MAX_LENGTH
+    )
 
     search_tag = SearchTag.objects.filter(slug=slug).first()
     if search_tag is None:
@@ -132,20 +140,23 @@ def _import_one_synonyme(page, synonyme):
         synonyme.imported_as_search_tag = search_tag
         synonyme.save(update_fields=["imported_as_search_tag"])
 
+    return truncated
+
 
 def _execute_import(page, all_synonymes):
     """Execute the import of legacy synonymes as SearchTags.
 
     Each synonyme is imported in its own savepoint: a failure on one
     (collision, malformed data) rolls back only that iteration and the
-    rest of the import proceeds. Returns the list of names of synonymes
-    that could not be imported, so the caller can warn the user.
+    rest of the import proceeds. Returns a (failed, truncated) tuple of
+    name lists so the caller can warn the user about each category.
     """
     failed = []
+    truncated = []
     for synonyme in all_synonymes:
         try:
             with transaction.atomic():
-                _import_one_synonyme(page, synonyme)
+                was_truncated = _import_one_synonyme(page, synonyme)
         except (IntegrityError, DataError) as exc:
             logger.warning(
                 "Skipped synonyme %s (id=%s) during legacy import: %s",
@@ -154,7 +165,16 @@ def _execute_import(page, all_synonymes):
                 exc,
             )
             failed.append(synonyme.nom)
-    return failed
+        else:
+            if was_truncated:
+                logger.info(
+                    "Truncated synonyme %s (id=%s) to %s chars during import",
+                    synonyme.nom,
+                    synonyme.pk,
+                    _SEARCH_TAG_MAX_LENGTH,
+                )
+                truncated.append(synonyme.nom)
+    return failed, truncated
 
 
 def import_legacy_synonymes(request, id):
@@ -184,7 +204,7 @@ def import_legacy_synonymes(request, id):
 
     if request.method == "POST":
         if all_synonymes:
-            failed = _execute_import(page, all_synonymes)
+            failed, truncated = _execute_import(page, all_synonymes)
             imported_count = len(all_synonymes) - len(failed)
             if imported_count:
                 messages.success(
@@ -201,6 +221,18 @@ def import_legacy_synonymes(request, id):
                     f"{len(failed)} synonyme(s) n'ont pas pu être importé(s) "
                     f"(ils sont probablement en doublon ou mal formés) : "
                     f"{preview}",
+                )
+            if truncated:
+                preview = ", ".join(truncated[:5])
+                if len(truncated) > 5:
+                    preview += f"… (+{len(truncated) - 5})"
+                messages.warning(
+                    request,
+                    f"{len(truncated)} synonyme(s) ont été tronqué(s) à "
+                    f"{_SEARCH_TAG_MAX_LENGTH} caractères (limite des "
+                    f"synonymes de recherche) : {preview}. "
+                    f"Vous pouvez renommer ces synonymes legacy pour les "
+                    f"raccourcir avant un nouvel import.",
                 )
         else:
             messages.info(

@@ -234,6 +234,55 @@ class TestImportLegacySynonymesView:
 
 
 @pytest.mark.django_db
+class TestImportTruncationWarning:
+    """When a Synonyme.nom is longer than SearchTag's 100-char limit we
+    truncate the value before insert (so the import does not 500) and
+    surface a warning to the user listing the affected synonymes so they
+    can shorten them and reimport."""
+
+    def test_overlong_nom_emits_truncation_warning(self, produit_page):
+        produit = ProduitFactory(nom="Produit")
+        SynonymeFactory(nom="x" * 150, produit=produit)
+        LegacyIntermediateProduitPage.objects.create(page=produit_page, produit=produit)
+
+        request = _make_request("post")
+        import_legacy_synonymes(request, produit_page.id)
+
+        msgs = [str(m) for m in get_messages(request)]
+        truncation_msgs = [m for m in msgs if "tronqué" in m]
+        assert len(truncation_msgs) == 1
+        assert "x" * 50 in truncation_msgs[0]
+        # And the synonyme made it in with a truncated name.
+        assert SearchTag.objects.filter(name="x" * 100).exists()
+
+    def test_no_truncation_warning_when_all_within_limit(self, produit_page):
+        produit = ProduitFactory(nom="Produit")
+        SynonymeFactory(nom="Lave-linge", produit=produit)
+        LegacyIntermediateProduitPage.objects.create(page=produit_page, produit=produit)
+
+        request = _make_request("post")
+        import_legacy_synonymes(request, produit_page.id)
+
+        msgs = [str(m) for m in get_messages(request)]
+        assert not any("tronqué" in m for m in msgs)
+
+    def test_truncation_warning_lists_multiple_synonymes(self, produit_page):
+        produit = ProduitFactory(nom="Produit")
+        SynonymeFactory(nom="a" * 150, produit=produit)
+        SynonymeFactory(nom="b" * 150, produit=produit)
+        SynonymeFactory(nom="Court", produit=produit)
+        LegacyIntermediateProduitPage.objects.create(page=produit_page, produit=produit)
+
+        request = _make_request("post")
+        import_legacy_synonymes(request, produit_page.id)
+
+        msgs = [str(m) for m in get_messages(request)]
+        truncation_msgs = [m for m in msgs if "tronqué" in m]
+        assert len(truncation_msgs) == 1
+        assert "2 synonyme(s) ont été tronqué" in truncation_msgs[0]
+
+
+@pytest.mark.django_db
 class TestImportSurvivesMalformedSynonymes:
     """A single bad synonyme must not 500 the whole import. Failed entries are
     skipped, the rest proceed, and the user gets a warning message listing them.
