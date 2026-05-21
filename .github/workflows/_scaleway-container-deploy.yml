@@ -23,6 +23,8 @@ jobs:
     steps:
     - name: Setup Scaleway CLI
       uses: scaleway/action-scw@2e34a1eb35cf3cac627f24643a101fea269cbd83
+      with:
+        version: v2.56.0
 
     # See https://www.scaleway.com/en/docs/serverless-containers/api-cli/deploy-container-cli/
     # Note: since Scaleway CLI v2.56.0 the container API migrated from v1beta1
