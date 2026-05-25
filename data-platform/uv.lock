@@ -323,7 +323,7 @@ wheels = [
 
 [[package]]
 name = "apache-airflow-providers-fab"
-version = "3.6.2"
+version = "3.6.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apache-airflow" },
@@ -343,9 +343,9 @@ dependencies = [
     { name = "werkzeug" },
     { name = "wtforms" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c8/6d/1be28dbfd422a09fa25d9a406f26d16fab88d2c9a13f48596da434bc9913/apache_airflow_providers_fab-3.6.2.tar.gz", hash = "sha256:591f02976e008eda4562bdfed66b3ea7058ec8c8b6d054fe90097d117635f73e", size = 825813, upload-time = "2026-04-26T19:25:08.874Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/94/b0/55e299c3f8ac94f682efb0787d1b14ec8edb693cd130338f93c12349b173/apache_airflow_providers_fab-3.6.3.tar.gz", hash = "sha256:6cf28dda98dbad9593d4667f987f2fa7716ed31874ee0caf06d2bca5c09e4eb4", size = 831337, upload-time = "2026-05-11T15:44:59.736Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/35/0c/8447ef9973774e15cb9a00417856789cd39c75954ba155a6c190ec794815/apache_airflow_providers_fab-3.6.2-py3-none-any.whl", hash = "sha256:1d2f2b39c3f2d59d5a75ee8f07ab47b7a1de8ecbab5fe3bb3c111313396dce04", size = 601681, upload-time = "2026-04-26T19:24:32.325Z" },
+    { url = "https://files.pythonhosted.org/packages/d8/49/19ddaf2c2acb785089db712916a58e0b1b42428471bd4a55522e201b6c78/apache_airflow_providers_fab-3.6.3-py3-none-any.whl", hash = "sha256:3df2fc996355ef2e387aad8490485ffe079f01e28162fdc92fdfda29a2fd2a56", size = 604687, upload-time = "2026-05-11T15:44:36.055Z" },
 ]
 
 [[package]]
@@ -895,7 +895,7 @@ dev = [
 requires-dist = [
     { name = "apache-airflow", specifier = ">=3.0.0,<4" },
     { name = "apache-airflow-providers-amazon", specifier = ">=9.26.0" },
-    { name = "apache-airflow-providers-fab", specifier = ">=3.3.0" },
+    { name = "apache-airflow-providers-fab", specifier = ">=3.6.3" },
     { name = "apache-airflow-providers-postgres", specifier = ">=6.2.2,<7" },
     { name = "apache-airflow-providers-standard", specifier = ">=1.11.1" },
     { name = "boto3", specifier = ">=1.42.35" },
