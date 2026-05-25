@@ -35,7 +35,7 @@ jobs:
           uv-groups: "--group dev"
 
       - name: Install Terragrunt and OpenTofu
-        uses: gruntwork-io/terragrunt-action@ad66bd184abd991249047d1f61bce1f29aaed2a6
+        uses: gruntwork-io/terragrunt-action@4ed5b7344c80315e5357f28f36159fc980bc2d5a # v3.4.0
         with:
           tg_version: "0.83.2"
           tofu_version: "1.10.3"
