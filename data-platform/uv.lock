@@ -1917,14 +1917,14 @@ wheels = [
 
 [[package]]
 name = "gunicorn"
-version = "25.3.0"
+version = "26.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "packaging" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c4/f4/e78fa054248fab913e2eab0332c6c2cb07421fca1ce56d8fe43b6aef57a4/gunicorn-25.3.0.tar.gz", hash = "sha256:f74e1b2f9f76f6cd1ca01198968bd2dd65830edc24b6e8e4d78de8320e2fe889", size = 634883, upload-time = "2026-03-27T00:00:26.092Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/6d/b7/a4a3f632f823e432ce6bc65f62961b7980c898c77f075a2f7118cb3846fe/gunicorn-26.0.0.tar.gz", hash = "sha256:ca9346f85e3a4aeeb64d491045c16b9a35647abd37ea15efe53080eb8b090baf", size = 727286, upload-time = "2026-05-05T06:38:25.529Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/43/c8/8aaf447698c4d59aa853fd318eed300b5c9e44459f242ab8ead6c9c09792/gunicorn-25.3.0-py3-none-any.whl", hash = "sha256:cacea387dab08cd6776501621c295a904fe8e3b7aae9a1a3cbb26f4e7ed54660", size = 208403, upload-time = "2026-03-27T00:00:27.386Z" },
+    { url = "https://files.pythonhosted.org/packages/e6/40/9c2384fc2be4ad25dd4a49decd5ad9ea5a3639814c11bd40ab77cb9f0a14/gunicorn-26.0.0-py3-none-any.whl", hash = "sha256:40233d26a5f0d1872916188c276e21641155111c2853f0c2cd55260aec0d24fc", size = 212009, upload-time = "2026-05-05T06:38:23.007Z" },
 ]
 
 [[package]]
@@ -2332,14 +2332,14 @@ wheels = [
 
 [[package]]
 name = "mako"
-version = "1.3.11"
+version = "1.3.12"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "markupsafe" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/59/8a/805404d0c0b9f3d7a326475ca008db57aea9c5c9f2e1e39ed0faa335571c/mako-1.3.11.tar.gz", hash = "sha256:071eb4ab4c5010443152255d77db7faa6ce5916f35226eb02dc34479b6858069", size = 399811, upload-time = "2026-04-14T20:19:51.493Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/00/62/791b31e69ae182791ec67f04850f2f062716bbd205483d63a215f3e062d3/mako-1.3.12.tar.gz", hash = "sha256:9f778e93289bd410bb35daadeb4fc66d95a746f0b75777b942088b7fd7af550a", size = 400219, upload-time = "2026-04-28T19:01:08.512Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/68/a5/19d7aaa7e433713ffe881df33705925a196afb9532efc8475d26593921a6/mako-1.3.11-py3-none-any.whl", hash = "sha256:e372c6e333cf004aa736a15f425087ec977e1fcbd2966aae7f17c8dc1da27a77", size = 78503, upload-time = "2026-04-14T20:19:53.233Z" },
+    { url = "https://files.pythonhosted.org/packages/bc/b1/a0ec7a5a9db730a08daef1fdfb8090435b82465abbf758a596f0ea88727e/mako-1.3.12-py3-none-any.whl", hash = "sha256:8f61569480282dbf557145ce441e4ba888be453c30989f879f0d652e39f53ea9", size = 78521, upload-time = "2026-04-28T19:01:10.393Z" },
 ]
 
 [[package]]
@@ -4499,7 +4499,7 @@ requires-dist = [
     { name = "django-storages", specifier = ">=1.14.6,<2" },
     { name = "django-widget-tweaks", specifier = ">=1.5.0,<2" },
     { name = "djangoql", specifier = ">=0.18.1" },
-    { name = "gunicorn", specifier = ">=23.0.0,<26" },
+    { name = "gunicorn", specifier = ">=26.0.0,<27" },
     { name = "modelsearch", specifier = ">=1.1.1" },
     { name = "more-itertools", specifier = ">=8.0,<11" },
     { name = "opening-hours-py", specifier = ">=1.2.0,<2" },
@@ -4507,7 +4507,7 @@ requires-dist = [
     { name = "pillow", specifier = ">=12.2.0,<13" },
     { name = "pre-commit", specifier = ">=4.6.0" },
     { name = "psycopg" },
-    { name = "pydantic", extras = ["email"], specifier = ">=2.13.4" },
+    { name = "pydantic", extras = ["email"], specifier = ">=2.13.3" },
     { name = "python-decouple", specifier = "~=3.8" },
     { name = "queryish", specifier = ">=0.2,<0.4" },
     { name = "rapidfuzz", specifier = ">=3.14.5,<4" },
@@ -4517,7 +4517,7 @@ requires-dist = [
     { name = "sites-conformes", specifier = "==3.1.0rc4" },
     { name = "unidecode", specifier = ">=1.4.0,<2" },
     { name = "wagtail", specifier = "==7.4" },
-    { name = "wagtail-honeypot", specifier = ">=1.2.1" },
+    { name = "wagtail-honeypot", specifier = ">=1.3.0" },
     { name = "wagtailmenus", specifier = ">=4.0.6" },
     { name = "whitenoise", specifier = ">=6.8.2,<7" },
 ]
