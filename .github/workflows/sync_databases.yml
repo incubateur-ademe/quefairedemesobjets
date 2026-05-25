@@ -43,7 +43,7 @@ jobs:
         with:
           save-config: true
           export-config: true
-          version: v2.24.0
+          version: v2.56.0
           access-key: ${{ env.SCW_ACCESS_KEY }}
           secret-key: ${{ env.SCW_SECRET_KEY }}
           default-project-id: ${{ env.SCW_DEFAULT_PROJECT_ID }}
