@@ -94,6 +94,30 @@ def _collect_synonymes_for_page(page):
 # the import alive instead of bubbling a DataError up to the user.
 _SEARCH_TAG_MAX_LENGTH = 100
 
+# How many names to show in the "first N items" preview of warning messages
+# before collapsing the tail into a "+overflow" count.
+_PREVIEW_LIMIT = 5
+
+
+def _preview_names(names: list[str]) -> str:
+    """Render a comma-joined preview of up to _PREVIEW_LIMIT names, with a
+    trailing "… (+N)" when more were skipped."""
+    head = ", ".join(names[:_PREVIEW_LIMIT])
+    if len(names) > _PREVIEW_LIMIT:
+        return f"{head}… (+{len(names) - _PREVIEW_LIMIT})"
+    return head
+
+
+class _EmptySlugError(Exception):
+    """Raised when a legacy Synonyme has an empty slug.
+
+    Synonyme.slug is an AutoSlugField populated from .nom, so an empty
+    value points at a malformed legacy record (e.g. nom containing only
+    punctuation). We refuse to import it instead of silently coalescing
+    to "" \u2014 which would otherwise collide with every other empty-slug
+    tag and mask the data problem.
+    """
+
 
 def _import_one_synonyme(page, synonyme):
     """Import a single Synonyme as a SearchTag, linked to the given page.
@@ -105,11 +129,16 @@ def _import_one_synonyme(page, synonyme):
     Returns True when the synonyme's name or slug had to be truncated to
     fit SearchTag's 100-char limit (the caller surfaces those to the user
     so they can rename the legacy record).
+
+    Raises _EmptySlugError when synonyme.slug is missing \u2014 the caller
+    surfaces those separately so the admin can fix the underlying record.
     """
     # Replace commas with fullwidth commas to prevent taggit from splitting
     # the tag name on commas during admin round-trips.
     tag_name_full = synonyme.nom.replace(", ", "\uff0c").replace(",", "\uff0c")
     slug_full = synonyme.slug or ""
+    if not slug_full:
+        raise _EmptySlugError(synonyme.nom)
     tag_name = tag_name_full[:_SEARCH_TAG_MAX_LENGTH]
     slug = slug_full[:_SEARCH_TAG_MAX_LENGTH]
     truncated = len(tag_name_full) > _SEARCH_TAG_MAX_LENGTH or (
@@ -148,15 +177,24 @@ def _execute_import(page, all_synonymes):
 
     Each synonyme is imported in its own savepoint: a failure on one
     (collision, malformed data) rolls back only that iteration and the
-    rest of the import proceeds. Returns a (failed, truncated) tuple of
-    name lists so the caller can warn the user about each category.
+    rest of the import proceeds. Returns a (failed, truncated, empty_slug)
+    tuple of name lists so the caller can warn the user about each
+    category.
     """
     failed = []
     truncated = []
+    empty_slug = []
     for synonyme in all_synonymes:
         try:
             with transaction.atomic():
                 was_truncated = _import_one_synonyme(page, synonyme)
+        except _EmptySlugError:
+            logger.warning(
+                "Skipped synonyme %s (id=%s): empty slug",
+                synonyme.nom,
+                synonyme.pk,
+            )
+            empty_slug.append(synonyme.nom)
         except (IntegrityError, DataError) as exc:
             logger.warning(
                 "Skipped synonyme %s (id=%s) during legacy import: %s",
@@ -174,7 +212,7 @@ def _execute_import(page, all_synonymes):
                     _SEARCH_TAG_MAX_LENGTH,
                 )
                 truncated.append(synonyme.nom)
-    return failed, truncated
+    return failed, truncated, empty_slug
 
 
 def import_legacy_synonymes(request, id):
@@ -204,8 +242,9 @@ def import_legacy_synonymes(request, id):
 
     if request.method == "POST":
         if all_synonymes:
-            failed, truncated = _execute_import(page, all_synonymes)
-            imported_count = len(all_synonymes) - len(failed)
+            failed, truncated, empty_slug = _execute_import(page, all_synonymes)
+            skipped_count = len(failed) + len(empty_slug)
+            imported_count = len(all_synonymes) - skipped_count
             if imported_count:
                 messages.success(
                     request,
@@ -213,25 +252,27 @@ def import_legacy_synonymes(request, id):
                     f"avec succès.",
                 )
             if failed:
-                preview = ", ".join(failed[:5])
-                if len(failed) > 5:
-                    preview += f"… (+{len(failed) - 5})"
                 messages.warning(
                     request,
                     f"{len(failed)} synonyme(s) n'ont pas pu être importé(s) "
                     f"(ils sont probablement en doublon ou mal formés) : "
-                    f"{preview}",
+                    f"{_preview_names(failed)}",
+                )
+            if empty_slug:
+                messages.warning(
+                    request,
+                    f"{len(empty_slug)} synonyme(s) ont été ignoré(s) car "
+                    f"leur slug est vide : {_preview_names(empty_slug)}. "
+                    "Vérifiez le champ « nom » du synonyme legacy puis "
+                    "relancez l'import.",
                 )
             if truncated:
-                preview = ", ".join(truncated[:5])
-                if len(truncated) > 5:
-                    preview += f"… (+{len(truncated) - 5})"
                 messages.warning(
                     request,
                     f"{len(truncated)} synonyme(s) ont été tronqué(s) à "
                     f"{_SEARCH_TAG_MAX_LENGTH} caractères (limite des "
-                    f"synonymes de recherche) : {preview}. "
-                    "Vous pouvez renommer le synonyme de recherche"
+                    f"synonymes de recherche) : {_preview_names(truncated)}. "
+                    "Vous pouvez renommer le synonyme de recherche "
                     "après l'import",
                 )
         else:

@@ -374,6 +374,66 @@ class TestImportSurvivesMalformedSynonymes:
 
 
 @pytest.mark.django_db
+class TestImportSkipsEmptySlug:
+    """Synonyme.slug is an AutoSlugField populated from .nom, so an empty
+    slug means the legacy record is malformed (e.g. nom only contained
+    punctuation). We skip those rows, warn the user, and keep importing
+    the rest — silently coercing to "" would otherwise collide with every
+    other empty-slug tag and mask the data problem."""
+
+    def _force_empty_slug(self, synonyme):
+        """AutoSlugField repopulates on save, so we have to bypass it
+        with a queryset .update() to simulate the malformed-legacy case."""
+        from qfdmd.models import Synonyme
+
+        Synonyme.objects.filter(pk=synonyme.pk).update(slug="")
+        synonyme.refresh_from_db()
+
+    def test_empty_slug_synonyme_is_skipped(self, produit_page):
+        produit = ProduitFactory(nom="Produit")
+        bad = SynonymeFactory(nom="Empty slug one", produit=produit)
+        self._force_empty_slug(bad)
+        good = SynonymeFactory(nom="Vélo", produit=produit)
+        LegacyIntermediateSynonymePage.objects.create(page=produit_page, synonyme=bad)
+        LegacyIntermediateSynonymePage.objects.create(page=produit_page, synonyme=good)
+
+        request = _make_request("post")
+        import_legacy_synonymes(request, produit_page.id)
+
+        # The good synonyme made it through; the empty-slug one did not.
+        assert SearchTag.objects.filter(name="Vélo").exists()
+        assert not SearchTag.objects.filter(name="Empty slug one").exists()
+
+    def test_empty_slug_emits_dedicated_warning(self, produit_page):
+        produit = ProduitFactory(nom="Produit")
+        bad = SynonymeFactory(nom="Empty slug one", produit=produit)
+        self._force_empty_slug(bad)
+        LegacyIntermediateSynonymePage.objects.create(page=produit_page, synonyme=bad)
+
+        request = _make_request("post")
+        import_legacy_synonymes(request, produit_page.id)
+
+        msgs = [str(m) for m in get_messages(request)]
+        empty_slug_msgs = [m for m in msgs if "slug est vide" in m]
+        assert len(empty_slug_msgs) == 1
+        assert "Empty slug one" in empty_slug_msgs[0]
+
+    def test_empty_slug_not_counted_as_failed(self, produit_page):
+        """The 'doublon ou mal formés' warning must not fire — empty-slug
+        synonymes get their own dedicated message instead."""
+        produit = ProduitFactory(nom="Produit")
+        bad = SynonymeFactory(nom="Empty", produit=produit)
+        self._force_empty_slug(bad)
+        LegacyIntermediateSynonymePage.objects.create(page=produit_page, synonyme=bad)
+
+        request = _make_request("post")
+        import_legacy_synonymes(request, produit_page.id)
+
+        msgs = [str(m) for m in get_messages(request)]
+        assert not any("doublon ou mal formés" in m for m in msgs)
+
+
+@pytest.mark.django_db
 class TestImportConfirmationPage:
     """GET shows a confirmation page, POST executes the import."""
 
