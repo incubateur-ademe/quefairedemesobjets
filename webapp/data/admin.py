@@ -246,64 +246,79 @@ class SuggestionUnitaireInline(admin.TabularInline):
     can_view = True
 
 
-def _update_or_copy_suggestion_unitaires(suggestion_groupe):
-    revision = suggestion_groupe.revision_acteur
-    suggestion_unitaires = suggestion_groupe.suggestion_unitaires.all()
-    # get all SuggestionUnitaire for the SuggestionGroupe using the Acteur model
-    suggestion_unitaires_acteur = [
-        suggestion_unitaire
-        for suggestion_unitaire in suggestion_unitaires
-        if suggestion_unitaire.suggestion_modele == "Acteur"
+def _update_or_copy_acteur_suggestions_to_target(
+    suggestion_groupe: SuggestionGroupe,
+    *,
+    target_modele: str,
+    target_fk_field: str,
+    target_fk_id: int | None,
+) -> None:
+    """For each SuggestionUnitaire « Acteur » of the group, update the existing
+    target SuggestionUnitaire (same `champs` and same target) if it exists,
+    otherwise create a new one by cloning the source suggestion.
+
+    `target_fk_field` is the name of the FK field (ex: "revision_acteur_id" or
+    "parent_revision_acteur_id") that points to the target entity.
+    """
+    suggestion_unitaires = list(suggestion_groupe.suggestion_unitaires.all())
+    acteur_sources = [
+        su for su in suggestion_unitaires if su.suggestion_modele == "Acteur"
     ]
-    # for each SuggestionUnitaire for the Acteur model,
-    # we check if there is a SuggestionUnitaire for the RevisionActeur model
-    # with the same champs and the same values
-    # Then we update or create the SuggestionUnitaire for the RevisionActeur
-    for suggestion_unitaire_acteur in suggestion_unitaires_acteur:
-        # get the SuggestionUnitaire for the RevisionActeur model
-        # with the same champs and the same values if exists
-        suggestion_unitaire_revision = next(
+
+    for acteur_source in acteur_sources:
+        target_suggestion = next(
             (
                 su
                 for su in suggestion_unitaires
-                if su.suggestion_modele == "RevisionActeur"
-                and su.revision_acteur == revision
-                and su.champs == suggestion_unitaire_acteur.champs
+                if su.suggestion_modele == target_modele
+                and getattr(su, target_fk_field) == target_fk_id
+                and su.champs == acteur_source.champs
             ),
             None,
         )
-        if suggestion_unitaire_revision:
-            # if exists, we update the SuggestionUnitaire
-            suggestion_unitaire_revision.valeurs = suggestion_unitaire_acteur.valeurs
+        if target_suggestion:
+            target_suggestion.valeurs = acteur_source.valeurs
         else:
-            # if not exists, we create the SuggestionUnitaire
-            suggestion_unitaire_revision = suggestion_unitaire_acteur
-            suggestion_unitaire_revision.id = None
-            suggestion_unitaire_revision.revision_acteur = revision
-            suggestion_unitaire_revision.suggestion_modele = "RevisionActeur"
-        suggestion_unitaire_revision.save()
+            target_suggestion = acteur_source
+            target_suggestion.id = None
+            target_suggestion.suggestion_modele = target_modele
+            setattr(target_suggestion, target_fk_field, target_fk_id)
+        target_suggestion.save()
 
 
-@admin.action(description="Appliquer les suggestions au parent")
+@admin.action(description="[SOURCE] Appliquer les suggestions au parent")
 def apply_suggestions_to_parent(
     self, request, queryset: QuerySet[SuggestionGroupe]
 ) -> None:
     for suggestion_groupe in queryset:
         # Only for SuggestionGroupe with parent
-        if suggestion_groupe.suggestion_acteur_has_parent():
-            _update_or_copy_suggestion_unitaires(suggestion_groupe)
+        if suggestion_groupe.suggestions_can_be_applied_to_parent():
+            _update_or_copy_acteur_suggestions_to_target(
+                suggestion_groupe,
+                target_modele="ParentRevisionActeur",
+                target_fk_field="parent_revision_acteur_id",
+                target_fk_id=suggestion_groupe.parent_revision_acteur_id,
+            )
 
     self.message_user(
         request, f"Les {queryset.count()} suggestions sélectionnées ont été appliquées"
     )
 
 
-@admin.action(description="Appliquer les suggestions au correction de l'acteur")
-def apply_suggestions_to_revision(self, request, queryset):
+@admin.action(
+    description="[SOURCE] Appliquer les suggestions au correction de l'acteur"
+)
+def apply_suggestions_to_correction(self, request, queryset):
     for suggestion_groupe in queryset:
-        # Only for SuggestionGroupe with parent
-        if suggestion_groupe.suggestion_acteur_has_correction():
-            _update_or_copy_suggestion_unitaires(suggestion_groupe)
+        if suggestion_groupe.suggestions_can_be_applied_to_correction():
+            _update_or_copy_acteur_suggestions_to_target(
+                suggestion_groupe,
+                target_modele="RevisionActeur",
+                target_fk_field="revision_acteur_id",
+                target_fk_id=(
+                    suggestion_groupe.revision_acteur_id or suggestion_groupe.acteur_id
+                ),
+            )
 
     self.message_user(
         request, f"Les {queryset.count()} suggestions sélectionnées ont été appliquées"
@@ -340,7 +355,7 @@ class SuggestionGroupeAdmin(
         mark_as_rejected,
         mark_as_toproceed,
         apply_suggestions_to_parent,
-        apply_suggestions_to_revision,
+        apply_suggestions_to_correction,
     ]
 
     class SuggestionGroupeQLSchema(SuggestionQLSchemaMixin):

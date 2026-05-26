@@ -590,17 +590,23 @@ class SuggestionGroupe(TimestampedModel, SuggestionActeurRelationsMixin):
         elif type_action == SuggestionAction.CRAWL_URLS:
             SuggestionGroupeTypeEnrichMulti.from_suggestion_groupe(self).apply()
 
-    def suggestion_acteur_has_parent(self) -> bool:
+    def suggestions_can_be_applied_to_parent(self) -> bool:
         return (
-            self.revision_acteur_id is not None
-            and self.acteur_id != self.revision_acteur_id
+            self.suggestion_cohorte.type_action
+            in [
+                SuggestionAction.SOURCE_AJOUT.value,
+                SuggestionAction.SOURCE_MODIFICATION.value,
+                SuggestionAction.SOURCE_SUPPRESSION.value,
+            ]
+            and self.parent_revision_acteur_id is not None
         )
 
-    def suggestion_acteur_has_correction(self) -> bool:
-        return (
-            self.revision_acteur_id is not None
-            and self.acteur_id == self.revision_acteur_id
-        )
+    def suggestions_can_be_applied_to_correction(self) -> bool:
+        return self.suggestion_cohorte.type_action in [
+            SuggestionAction.SOURCE_AJOUT.value,
+            SuggestionAction.SOURCE_MODIFICATION.value,
+            SuggestionAction.SOURCE_SUPPRESSION.value,
+        ]
 
 
 class SuggestionUnitaire(TimestampedModel, SuggestionActeurRelationsMixin):
