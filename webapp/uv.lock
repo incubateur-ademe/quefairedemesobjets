@@ -403,7 +403,7 @@ wheels = [
 [[package]]
 name = "django-dsfr"
 version = "3.4.2"
-source = { git = "https://github.com/fabienheureux/django-dsfr?rev=b5ac6f508c6b46672b898129576f34e1b74d10d5#b5ac6f508c6b46672b898129576f34e1b74d10d5" }
+source = { git = "https://github.com/fabienheureux/django-dsfr?rev=b110ff5360c4b0503374efcc10ac4b7879a7cd96#b110ff5360c4b0503374efcc10ac4b7879a7cd96" }
 dependencies = [
     { name = "django" },
     { name = "django-widget-tweaks" },
@@ -1778,7 +1778,7 @@ requires-dist = [
     { name = "django-admin-sortable2", specifier = ">=2.2.8" },
     { name = "django-colorfield", specifier = ">=0.14.0,<0.15" },
     { name = "django-cors-headers", specifier = ">=4.6.0,<5" },
-    { name = "django-dsfr", git = "https://github.com/fabienheureux/django-dsfr?rev=b5ac6f508c6b46672b898129576f34e1b74d10d5" },
+    { name = "django-dsfr", git = "https://github.com/fabienheureux/django-dsfr?rev=b110ff5360c4b0503374efcc10ac4b7879a7cd96" },
     { name = "django-extensions", specifier = "~=4.1" },
     { name = "django-import-export", extras = ["xls", "xlsx"], specifier = ">=4.4.1,<5" },
     { name = "django-lookbook", specifier = ">=1.0.2,<2" },
