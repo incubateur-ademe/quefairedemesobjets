@@ -333,7 +333,9 @@ export default class extends Controller<HTMLElement> {
         searchTermName,
       })
       if (searchTermId) {
-        document.cookie = `qf_search_term_id=${searchTermId}; path=/; max-age=60; SameSite=Lax`
+        document.cookie = `qf_search_term_id=${searchTermId}; path=/; max-age=10; SameSite=Lax`
+      } else {
+        document.cookie = `qf_search_term_id=; path=/; max-age=0; SameSite=Lax`
       }
     })
   }

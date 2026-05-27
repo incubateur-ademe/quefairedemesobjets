@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test"
+import { expect, Locator, test } from "@playwright/test"
 import {
   navigateTo,
   SEARCH_INPUT_SELECTOR,
@@ -179,6 +179,60 @@ test.describe("Recherche de produits", () => {
     expect(nextUrl).toBeTruthy()
     const response = await page.goto(nextUrl)
     expect(response?.status()).toBe(200)
+  })
+
+  test("Le synonyme de recherche n'est pas conservé pour la recherche suivante", async ({
+    page,
+  }) => {
+    // Étape 1 : rechercher via un synonyme (SearchTag) et naviguer vers la fiche
+    await typeSearchQuery(page, "canapé d'angle")
+    const results = await waitForResults(page)
+    const count = await results.count()
+    expect(count).toBeGreaterThan(0)
+
+    let searchTagAnchor: Locator | null = null
+    for (let i = 0; i < count; i++) {
+      const anchor = results.nth(i)
+      if (await anchor.getAttribute("data-search-term-id")) {
+        searchTagAnchor = anchor
+        break
+      }
+    }
+    expect(searchTagAnchor).not.toBeNull()
+    await searchTagAnchor!.click()
+
+    // La fiche d'arrivée doit afficher le bandeau « Votre recherche … »
+    // car on est arrivé via un synonyme.
+    const heading = page.getByText(/Votre recherche.*correspond aux recommandations/)
+    await expect(heading).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+
+    // Étape 2 : depuis la fiche, lancer une nouvelle recherche dont le résultat
+    // sélectionné n'est pas un SearchTag (pas de data-search-term-id).
+    await typeSearchQuery(page, "lave")
+    const nextResults = await waitForResults(page)
+    const nextCount = await nextResults.count()
+    expect(nextCount).toBeGreaterThan(0)
+
+    let nonSearchTagAnchor: Locator | null = null
+    for (let i = 0; i < nextCount; i++) {
+      const anchor = nextResults.nth(i)
+      if (!(await anchor.getAttribute("data-search-term-id"))) {
+        nonSearchTagAnchor = anchor
+        break
+      }
+    }
+    expect(nonSearchTagAnchor).not.toBeNull()
+    await nonSearchTagAnchor!.click()
+    await page.waitForLoadState("domcontentloaded")
+
+    // Le bandeau précédent ne doit pas être conservé sur la nouvelle page.
+    await expect(
+      page.getByText(/Votre recherche.*correspond aux recommandations/),
+    ).toHaveCount(0)
+
+    // Le cookie qf_search_term_id doit avoir été effacé côté navigateur.
+    const cookies = await page.context().cookies()
+    expect(cookies.find((c) => c.name === "qf_search_term_id")).toBeUndefined()
   })
 })
 
