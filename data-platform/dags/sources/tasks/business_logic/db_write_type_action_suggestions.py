@@ -7,10 +7,6 @@ from shared.tasks.database_logic.db_manager import PostgresConnectionManager
 from sources.tasks.transform.sequence_utils import df_convert_numpy_to_jsonify
 from sqlalchemy import TEXT, VARCHAR, text
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
-from utils.django import django_setup_full
-
-django_setup_full()
-
 
 logger = logging.getLogger(__name__)
 
@@ -128,7 +124,9 @@ def db_write_type_action_suggestions(
     df_log_warning: pd.DataFrame,
     use_legacy_suggestions: bool,
 ) -> None:
+    from utils.django import django_setup_full
 
+    django_setup_full()
     from data.models.suggestion import SuggestionAction
 
     (
@@ -193,6 +191,9 @@ def insert_suggestion(
     df_log_error: pd.DataFrame = pd.DataFrame(),
     df_log_warning: pd.DataFrame = pd.DataFrame(),
 ):
+    from utils.django import django_setup_full
+
+    django_setup_full()
     from data.models.suggestion import (
         SuggestionAction,
         SuggestionCohorte,
@@ -333,6 +334,9 @@ def insert_suggestion_legacy(
     df_log_error: pd.DataFrame = pd.DataFrame(),
     df_log_warning: pd.DataFrame = pd.DataFrame(),
 ):
+    from utils.django import django_setup_full
+
+    django_setup_full()
     from data.models.suggestion import SuggestionCohorteStatut, SuggestionLog
 
     if df.empty:
@@ -343,8 +347,7 @@ def insert_suggestion_legacy(
     with engine.begin() as conn:
         # Insert a new suggestion
         result = conn.execute(
-            text(
-                """
+            text("""
             INSERT INTO data_suggestioncohorte
             (
                 identifiant_action,
@@ -365,8 +368,7 @@ def insert_suggestion_legacy(
                 :modifie_le
             )
             RETURNING ID;
-        """
-            ),
+        """),
             {
                 "identifiant_action": dag_name,
                 "identifiant_execution": run_name,

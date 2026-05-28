@@ -36,6 +36,13 @@ def django_setup_full() -> None:
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.airflow_settings")
 
     import django
+    from django.apps import apps
+
+    # Let's check if Django is already set up
+    # to avoid multiple setup calls and to avoid losing time
+    if apps.ready:
+        logger.debug("Django already set up, skipping django.setup()")
+        return
 
     django.setup()
 

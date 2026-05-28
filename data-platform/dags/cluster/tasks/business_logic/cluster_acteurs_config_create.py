@@ -1,11 +1,11 @@
 from cluster.config.models import ClusterConfig
-from utils.django import django_setup_full
-
-django_setup_full()
 
 
 def cluster_acteurs_config_create(params: dict) -> ClusterConfig:
     """Create config by merging params with extra data from DB"""
+    from utils.django import django_setup_full
+
+    django_setup_full()
     from qfdmo.models import ActeurType, Source
 
     extra = {
