@@ -13,6 +13,23 @@ class SynonymeAutocompleteInput(NextAutocompleteInput):
     limit = 5
 
 
+class CarteAddressAutocompleteInput(NextAutocompleteInput):
+    """combobox-autocomplete-list for the carte address search field.
+
+    Proxies the BAN geocoding API server-side (see AutocompleteBanAddressView)
+    and renders results as a server-rendered Turbo Frame listbox.
+
+    Implements the W3C APG combobox-autocomplete-list pattern (RGAA 7.1, 7.3,
+    11.10): the visible input carries role=combobox + aria-controls, the
+    Turbo Frame's <ul> carries role=listbox, each result has role=option.
+    """
+
+    search_view = "qfdmo:autocomplete_address"
+    limit = 5
+    show_on_focus = True
+    display_value = True
+
+
 class RangeInput(widgets.NumberInput):
     template_name = "ui/forms/widgets/range_input.html"
     input_type = "range"

@@ -1,4 +1,4 @@
-<main
+<section
     class="
     qf-flex
     qf-flex-col
@@ -10,6 +10,7 @@
     qf-h-full
     "
     tabindex="0"
+    aria-label="Carte des solutions"
 >
     {% include "ui/components/carte/shared/disclaimers/loading_solutions.html" %}
     {% block form_result %}
@@ -33,4 +34,4 @@
         {% include "ui/components/carte/partials/featureflip_inputs.html" %}
         {{ form.epci_codes }}
     {% endblock form_fields %}
-</main>
+</section>

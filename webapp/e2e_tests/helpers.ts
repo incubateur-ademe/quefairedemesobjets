@@ -11,6 +11,14 @@ export const SEARCH_RESULTS_SELECTOR = "[data-next-autocomplete-target='option']
 export const SEARCH_RESULTS_DROPDOWN_SELECTOR =
   "[data-next-autocomplete-target='results']"
 
+// The carte address combobox uses the next-autocomplete pattern: each
+// suggestion is a <li role="option"> inside the Turbo Frame listbox.
+// The formulaire keeps the legacy AutoCompleteInput (client-side BAN) so
+// its options are still `.autocomplete-items div[data-action=...]`.
+const CARTE_OPTION_SELECTOR = '[role="option"][data-next-autocomplete-target="option"]'
+const LEGACY_OPTION_SELECTOR =
+  ".autocomplete-items div[data-action*='address-autocomplete#selectOption']"
+
 /**
  * Navigation helper
  */
@@ -35,7 +43,7 @@ export async function searchAndSelectAutocomplete(
   } = {},
 ) {
   const {
-    autocompleteSelector = ".autocomplete-items div[data-action*='address-autocomplete#selectOption']",
+    autocompleteSelector = CARTE_OPTION_SELECTOR,
     optionIndex = "first",
     timeout = TIMEOUT.DEFAULT,
     parentSelector,
@@ -98,6 +106,10 @@ export async function searchAddress(
       : '[data-testid="formulaire-adresse-input"]'
 
   await searchAndSelectAutocomplete(context, inputSelector, searchText, {
+    // The formulaire still uses the legacy client-side autocomplete; the
+    // carte combobox is the new next-autocomplete pattern (default).
+    autocompleteSelector:
+      formContext === "formulaire" ? LEGACY_OPTION_SELECTOR : CARTE_OPTION_SELECTOR,
     optionIndex: options.optionIndex ?? "first",
     parentSelector: options.parentSelector,
     parentLocator: options.parentLocator,
@@ -136,8 +148,7 @@ export async function searchCarteAndWaitForActeurs(
   } = {},
 ): Promise<void> {
   const inputSelector = '[data-testid="carte-adresse-input"]'
-  const autocompleteSelector =
-    ".autocomplete-items div[data-action*='address-autocomplete#selectOption']"
+  const autocompleteSelector = CARTE_OPTION_SELECTOR
 
   // Build the input locator, respecting optional parent scoping
   const inputLocator = options.parentLocator
@@ -233,8 +244,18 @@ export async function searchDummySousCategorieObjet(page: Page) {
 
 /**
  * API mocking helpers
+ *
+ * Two distinct flows ship suggestions to the address combobox:
+ *   - Legacy formulaire: browser → data.geopf.fr (mocked here directly)
+ *   - Carte combobox: browser → /qfdmo/autocomplete/address → BAN (server-side)
+ *
+ * `mockApiAdresse` sets up BOTH so existing carte tests that only call this
+ * helper keep working without depending on a live BAN endpoint.
  */
-export const mockApiAdresse = async (page: Page) =>
+export const mockApiAdresse = async (page: Page) => {
+  // The new carte combobox uses the server-proxied Turbo Frame endpoint.
+  await mockCarteAutocompleteAddress(page)
+  // The legacy flow (still used by the formulaire) hits data.geopf.fr directly.
   // Use glob pattern to match both with and without trailing slash, and case-insensitive query
   await page.route(
     /data\.geopf\.fr\/geocodage\/search\/?\?q=[aA]uray/i,
@@ -463,6 +484,109 @@ export const mockApiAdresse = async (page: Page) =>
       })
     },
   )
+}
+
+/**
+ * Mock the server-side BAN proxy endpoint (`/qfdmo/autocomplete/address`)
+ * that powers the carte combobox. The endpoint returns a Turbo Frame fragment
+ * (not JSON) — see `webapp/qfdmo/views/autocomplete.py`.
+ *
+ * We mock at this boundary rather than the upstream `data.geopf.fr` URL
+ * because the carte's Python view proxies BAN server-side; the browser only
+ * ever talks to `/qfdmo/autocomplete/address`.
+ */
+export const mockCarteAutocompleteAddress = async (page: Page) =>
+  await page.route(/\/qfdmo\/autocomplete\/address\?/, async (route) => {
+    const url = new URL(route.request().url())
+    const turboFrameId = url.searchParams.get("turbo_frame_id") ?? ""
+    const query = (url.searchParams.get("q") ?? "").toLowerCase()
+    const body = renderCarteAutocompleteFrame(turboFrameId, query)
+    await route.fulfill({
+      status: 200,
+      contentType: "text/html; charset=utf-8",
+      body,
+    })
+  })
+
+interface CarteAutocompleteOption {
+  label: string
+  sub_label?: string
+  latitude?: number
+  longitude?: number
+  geolocate: boolean
+}
+
+function renderCarteAutocompleteFrame(turboFrameId: string, query: string): string {
+  let options: CarteAutocompleteOption[]
+  if (query.length < 3) {
+    options = [{ label: "Autour de moi", geolocate: true }]
+  } else if (query.startsWith("rue")) {
+    // Multi-option fixture for keyboard-navigation tests: three distinct
+    // suggestions so Down/Up arrows have somewhere to move.
+    options = [
+      {
+        label: "Rue de Paris 56400 Auray",
+        sub_label: "56, Morbihan",
+        latitude: 47.668099,
+        longitude: -2.990838,
+        geolocate: false,
+      },
+      {
+        label: "Rue de Rivoli 75001 Paris",
+        sub_label: "75, Paris",
+        latitude: 48.85661,
+        longitude: 2.3522,
+        geolocate: false,
+      },
+      {
+        label: "Rue de la République 69001 Lyon",
+        sub_label: "69, Rhône",
+        latitude: 45.764,
+        longitude: 4.8357,
+        geolocate: false,
+      },
+    ]
+  } else {
+    options = [
+      {
+        label: "Auray",
+        sub_label: "56, Morbihan, Bretagne",
+        latitude: 47.668099,
+        longitude: -2.990838,
+        geolocate: false,
+      },
+    ]
+  }
+
+  const items = options
+    .map((option, index) => {
+      const counter = index + 1
+      const geoAttrs = option.geolocate
+        ? `data-geolocate="true"`
+        : `data-lat="${option.latitude}" data-lon="${option.longitude}"`
+      const subLabel = option.sub_label
+        ? `<small class="fr-text--sm fr-m-0 qf-italic">${option.sub_label}</small>`
+        : ""
+      return `
+        <li
+          id="option-${counter}"
+          role="option"
+          data-next-autocomplete-target="option"
+          data-action="click->next-autocomplete#commitSelection"
+          data-value="${option.label}"
+          data-selected-value="${option.label}"
+          ${geoAttrs}
+        >
+          <span>${option.label}</span>
+          ${subLabel}
+        </li>`
+    })
+    .join("")
+
+  return `<turbo-frame data-next-autocomplete-target="results" id="${turboFrameId}">
+    <ul id="${turboFrameId}-listbox" role="listbox">${items}</ul>
+  </turbo-frame>`
+}
 
 /**
  * Modal/Dialog helpers
