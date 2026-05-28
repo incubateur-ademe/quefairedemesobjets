@@ -28,6 +28,7 @@ from qfdmo.models.action import (
 from qfdmo.models.config import CarteConfig
 from qfdmo.widgets import (
     AutoCompleteInput,
+    CarteAddressAutocompleteInput,
     DSFRCheckboxSelectMultiple,
     GenericAutoCompleteInput,
     RangeInput,
@@ -101,15 +102,17 @@ class MapForm(GetFormMixin, CarteConfigFormMixin, forms.Form):
             self.fields["bounding_box"].initial = json.dumps(bounding_box_json)
 
     adresse = forms.CharField(
-        widget=AutoCompleteInput(
+        widget=CarteAddressAutocompleteInput(
             attrs={
                 "class": "fr-input",
                 "placeholder": "Rechercher autour d'une adresse",
                 "autocomplete": "off",
                 "aria-label": "Saisir une adresse - obligatoire",
                 "data-testid": "carte-adresse-input",
+                # Outer `carte-address-autocomplete` controller reads/writes
+                # the visible input on commit + on error reset.
+                "data-carte-address-autocomplete-target": "input",
             },
-            data_controller="address-autocomplete",
         ),
         label="",
         required=False,
@@ -126,7 +129,7 @@ class MapForm(GetFormMixin, CarteConfigFormMixin, forms.Form):
     latitude = forms.FloatField(
         widget=forms.HiddenInput(
             attrs={
-                "data-address-autocomplete-target": "latitude",
+                "data-carte-address-autocomplete-target": "latitude",
                 "data-search-solution-form-target": "latitudeInput",
             }
         ),
@@ -136,7 +139,7 @@ class MapForm(GetFormMixin, CarteConfigFormMixin, forms.Form):
     longitude = forms.FloatField(
         widget=forms.HiddenInput(
             attrs={
-                "data-address-autocomplete-target": "longitude",
+                "data-carte-address-autocomplete-target": "longitude",
                 "data-search-solution-form-target": "longitudeInput",
             }
         ),
