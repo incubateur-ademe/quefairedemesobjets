@@ -405,14 +405,18 @@ test.describe("⌨️ Carte combobox — APG keyboard contract", () => {
     // geolocation option, not wait for the user to type something first.
     await navigateTo(page, "/carte")
     const input = page.locator(CARTE_INPUT)
-    await input.click()
 
-    await page.waitForResponse(
+    // The focus handler fires the request synchronously after click and the
+    // Turbo Frame can resolve before we have a chance to await waitForResponse,
+    // so arm the listener BEFORE clicking to avoid losing the race.
+    const responsePromise = page.waitForResponse(
       (response) =>
         response.url().includes("/qfdmo/autocomplete/address") &&
         response.status() === 200,
       { timeout: TIMEOUT.DEFAULT },
     )
+    await input.click()
+    await responsePromise
 
     await expect(input).toHaveAttribute("aria-expanded", "true")
     await expect(page.locator(`${CARTE_OPTION}[data-geolocate="true"]`)).toBeVisible({
