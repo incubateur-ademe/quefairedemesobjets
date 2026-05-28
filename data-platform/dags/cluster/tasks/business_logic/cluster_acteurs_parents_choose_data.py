@@ -3,9 +3,6 @@ from typing import Any
 
 import pandas as pd
 from cluster.config.constants import COL_PARENT_DATA_NEW, FIELDS_PARENT_DATA_EXCLUDED
-from utils.django import django_setup_full
-
-django_setup_full()
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +39,9 @@ def cluster_acteurs_parents_choose_data(
     keep_empty: bool = False,
     keep_parent_data_by_default: bool = True,
 ) -> pd.DataFrame:
+    from utils.django import django_setup_full
+
+    django_setup_full()
     from data.models.change import COL_CHANGE_MODEL_NAME
     from data.models.changes import ChangeActeurCreateAsParent, ChangeActeurKeepAsParent
     from qfdmo.models.acteur import VueActeur

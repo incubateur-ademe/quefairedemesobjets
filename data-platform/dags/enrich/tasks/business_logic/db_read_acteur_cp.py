@@ -2,15 +2,12 @@
 
 import logging
 
-import pandas as pd
-from utils.django import django_setup_full
-
-django_setup_full()
-
 logger = logging.getLogger(__name__)
 
 
-def _get_df_acteurs_with_invalid_cp(model) -> pd.DataFrame:
+def _get_df_acteurs_with_invalid_cp(model):
+    import pandas as pd
+
     acteurs = (
         model.objects.exclude(code_postal__regex=r"^[0-9]{5}$")
         .exclude(code_postal__isnull=True)
@@ -20,13 +17,19 @@ def _get_df_acteurs_with_invalid_cp(model) -> pd.DataFrame:
     return pd.DataFrame(acteurs)
 
 
-def db_read_acteur_cp() -> pd.DataFrame:
+def db_read_acteur_cp():
+    from utils.django import django_setup_full
+
+    django_setup_full()
     from qfdmo.models.acteur import Acteur
 
     return _get_df_acteurs_with_invalid_cp(Acteur)
 
 
-def db_read_revision_acteur_cp() -> pd.DataFrame:
+def db_read_revision_acteur_cp():
+    from utils.django import django_setup_full
+
+    django_setup_full()
     from qfdmo.models.acteur import RevisionActeur
 
     return _get_df_acteurs_with_invalid_cp(RevisionActeur)

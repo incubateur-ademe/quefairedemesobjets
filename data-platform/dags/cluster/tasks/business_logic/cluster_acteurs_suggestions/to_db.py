@@ -6,9 +6,6 @@ from cluster.tasks.business_logic.cluster_acteurs_suggestions.context import (
 )
 from cluster.tasks.business_logic.misc.df_metadata_get import df_metadata_get
 from utils import logging_utils as log
-from utils.django import django_setup_full
-
-django_setup_full()
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +24,9 @@ def cluster_acteurs_suggestions_to_db(
     logger.info(f"{identifiant_action=}")
     logger.info(f"{identifiant_execution=}")
 
+    from utils.django import django_setup_full
+
+    django_setup_full()
     from data.models.suggestion import (
         Suggestion,
         SuggestionAction,

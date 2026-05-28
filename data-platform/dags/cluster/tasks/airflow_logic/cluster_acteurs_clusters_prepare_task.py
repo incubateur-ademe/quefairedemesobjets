@@ -14,10 +14,6 @@ from cluster.tasks.business_logic.cluster_acteurs_config_create import (
     cluster_acteurs_config_create,
 )
 from utils import logging_utils as log
-from utils.django import django_setup_full
-
-django_setup_full()
-
 
 logger = logging.getLogger(__name__)
 

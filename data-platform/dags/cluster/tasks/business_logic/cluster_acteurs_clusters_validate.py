@@ -1,9 +1,6 @@
 from logging import getLogger
 
 import pandas as pd
-from utils.django import django_setup_full
-
-django_setup_full()
 
 logger = getLogger(__name__)
 

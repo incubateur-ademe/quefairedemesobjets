@@ -29,9 +29,6 @@ from sources.tasks.transform.transform_column import (
 )
 from unidecode import unidecode
 from utils import logging_utils as log
-from utils.django import django_setup_full
-
-django_setup_full()
 
 logger = logging.getLogger(__name__)
 
@@ -222,6 +219,9 @@ def clean_identifiant_externe(row, _):
 
 
 def compute_identifiant_unique(identifiant_externe, source_code):
+    from utils.django import django_setup_full
+
+    django_setup_full()
     from qfdmo.models.utils import compute_identifiant_unique
 
     try:
@@ -408,6 +408,9 @@ def _sanitize_string(str_to_sanitize):
 
 
 def _clean_lieu_prestation(service_a_domicile):
+    from utils.django import django_setup_full
+
+    django_setup_full()
     from qfdmo.models.acteur import Acteur
 
     service_a_domicile = _sanitize_string(service_a_domicile)
@@ -433,6 +436,9 @@ def _clean_departement_code(departement_code):
 
 
 def _clean_perimetre_adomicile_codes(perimetre_dinterventions):
+    from utils.django import django_setup_full
+
+    django_setup_full()
     from qfdmo.models.acteur import PerimetreADomicile
 
     perimetre_prestation = []
@@ -494,6 +500,9 @@ def _clean_perimetre_adomicile_codes(perimetre_dinterventions):
 
 
 def clean_service_a_domicile(row, _):
+    from utils.django import django_setup_full
+
+    django_setup_full()
     from qfdmo.models.acteur import Acteur
 
     row["lieu_prestation"] = _clean_lieu_prestation(row["service_a_domicile"])

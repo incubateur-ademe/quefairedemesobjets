@@ -1,12 +1,8 @@
 import logging
 
-from utils.django import django_setup_full
-
 from .copy_utils import drop_tables, dump_and_restore_db
 
 logger = logging.getLogger(__name__)
-
-django_setup_full()
 
 
 EXCLUDE_TABLES = [
@@ -42,6 +38,9 @@ EXCLUDE_TABLES = [
 def copy_db_data():
     import importlib
 
+    from utils.django import django_setup_full
+
+    django_setup_full()
     from django.conf import settings
     from django.db import connections
 
