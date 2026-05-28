@@ -1021,6 +1021,183 @@ class AccessibilitePreview(LookbookPreview):
             context,
         )
 
+    def fil_ariane_dans_heading_produit(self, **kwargs):
+        """
+        # Fil d'ariane dans le heading des pages produit (RGAA 12.2)
+
+        Le fil d'ariane manquait sur les pages produit Wagtail (`ProduitPage`,
+        `FamilyPage`). Il est désormais inclus en haut du `heading.html`.
+
+        Le composant utilisé est `sites_conformes_content_manager/blocks/breadcrumbs.html`,
+        avec l'override projet qui ajoute `href="#"` et `aria-current="page"` sur
+        le dernier élément (RGAA 7.1, 7.3).
+
+        Cf. carte Notion A11Y-3.
+        """
+        context = {
+            "self": {
+                "get_ancestors": [
+                    {"title": "Accueil", "is_site_root": True, "url": "/"},
+                    {
+                        "title": "Famille & Produits",
+                        "is_root": False,
+                        "url": "/categories/",
+                    },
+                ],
+                "title": "Vêtements",
+            },
+            "title": "vêtement",
+            "pronom": "mon",
+        }
+        return render_to_string(
+            "ui/components/produit/heading.html",
+            context,
+        )
+
+    def share_tooltip_acteur_sans_tabindex(self, **kwargs):
+        """
+        # Tooltip de partage de la fiche acteur sans tabindex="-1" (RGAA 7.3)
+
+        Les liens et le bouton du tooltip de partage de la fiche acteur,
+        sur la carte, ne portent plus `tabindex="-1"` : ils sont à nouveau
+        atteignables au clavier.
+
+        Pour rendre le tooltip visible dans la prévisualisation, le wrapper
+        `.fr-tooltip` est volontairement positionné statiquement.
+
+        Cf. carte Notion A11Y-9.
+        """
+        request = RequestFactory().get("/")
+        context = Context(
+            {
+                "object": "Mon acteur",
+                "map_container_id": DEFAULT_MAP_CONTAINER_ID,
+                "request": request,
+            }
+        )
+        template = Template(
+            """
+            {% load share_tags %}
+            <style>
+                .fr-tooltip { position: static !important; visibility: visible !important; opacity: 1 !important; max-width: 100%; }
+            </style>
+            {% include "ui/components/acteur/_action_share.html" %}
+            """,
+        )
+        return template.render(context)
+
+    def champs_facultatifs_marques(self, **kwargs):
+        """
+        # Champs facultatifs marqués « (Optional) » au lieu d'astérisques sur les obligatoires (RGAA 11.10)
+
+        Avec `DSFR_MARK_OPTIONAL_FIELDS=True` (cf. `webapp/core/settings.py`),
+        les formulaires Wagtail/Sites Conformes rendus via `{% dsfr_form_field %}`
+        n'ajoutent plus d'astérisque sur les champs obligatoires : ce sont les
+        champs facultatifs qui sont annotés.
+
+        Suivi de la recommandation DSFR :
+        https://www.systeme-de-design.gouv.fr/version-courante/fr/modeles/blocs-fonctionnels/formulaires#champ-obligatoire
+
+        Cf. carte Notion A11Y-6.
+        """
+
+        class _DemoForm(DsfrBaseForm):
+            nom = forms.CharField(label="Votre nom")
+            email = forms.EmailField(label="Votre email")
+            telephone = forms.CharField(label="Votre téléphone", required=False)
+            message = forms.CharField(
+                label="Votre message", widget=forms.Textarea(attrs={"rows": 4})
+            )
+
+        template = Template(
+            """
+            <form>{{ form }}</form>
+            """,
+        )
+        return template.render(Context({"form": _DemoForm()}))
+
+    def no_local_solution_role_status(self, **kwargs):
+        """
+        # Message « pas de solution localisée » avec `role="status"` (RGAA 7.5)
+
+        Le disclaimer affiché lorsqu'une recherche carte n'aboutit pas dans
+        la zone est annoncé par les technologies d'assistance grâce à
+        `role="status"` (équivalent `aria-live="polite"`).
+
+        Cf. carte Notion A11Y-10.
+        """
+        return render_to_string(
+            "ui/components/carte/shared/disclaimers/no_local_solution.html",
+            {"is_carte": False, "bounding_box": False},
+        )
+
+    def A11Y_2_skip_link(self, **kwargs):
+        """RGAA 12.7 — lien d'évitement (skip link) sur le layout base.html.
+
+        Le composant DSFR `dsfr_skiplinks` est désormais rendu dans
+        `webapp/templates/ui/layout/base.html` (carte, configurateur,
+        infotri). Le `<main>` du layout porte `id="content"` et
+        `role="main"`, ce qui correspond à la cible définie dans le
+        context processor global.
+        """
+        return render_to_string(
+            "ui/components/accessibilite/skip_link_demo.html",
+            {"skiplinks": [{"link": "#content", "label": "Contenu"}]},
+        )
+
+    def A11Y_1_aria_landmarks(self, **kwargs):
+        """RGAA 9.2 / 12.6 — landmarks ARIA banner / main / navigation.
+
+        Démontre les corrections : `<main>` unique avec `role="main"`,
+        `<header role="banner">` sur les en-têtes carte/formulaire,
+        `<nav aria-label>` autour du surfooter, et conversion en
+        `<section aria-label>` des `<main>` imbriqués (mode_carte,
+        mode_liste, formulaire/main, infotri).
+        """
+        return render_to_string(
+            "ui/components/accessibilite/landmarks_demo.html",
+        )
+
+    def A11Y_8_iframe_titres(self, **kwargs):
+        """RGAA 2.2 — titres d'iframes distincts par route.
+
+        Le helper `resolveIframeTitle` (iframe_functions.ts) attribue
+        désormais un titre par défaut différent selon la route :
+        carte, formulaire, infotri, assistant. Les embedders peuvent
+        surcharger via l'attribut `data-title` du `<script>`, utile
+        notamment sur la page Manteau (P09) qui embarque deux cartes.
+        """
+        return render_to_string(
+            "ui/components/accessibilite/iframe_titles_demo.html",
+        )
+
+    def A11Y_11_svg_decoratifs(self, **kwargs):
+        """RGAA 1.2 — SVG décoratifs marqués aria-hidden=true.
+
+        Les SVG logos (République Française, ADEME, QFDMOD mini), le
+        SVG ADEME inline du header et l'illustration empty state de la
+        carte mode liste portent maintenant `aria-hidden="true"
+        focusable="false"`, conformément aux recommandations RGAA 1.2
+        sur les images sans valeur informative.
+        """
+        return render_to_string(
+            "ui/components/accessibilite/svg_decoratifs_demo.html",
+        )
+
+    def A11Y_13_liens_explicites(self, **kwargs):
+        """RGAA 6.1 — intitulés de liens explicites.
+
+        Deux corrections :
+        1. Le lien des logos du header reçoit un `<span class="qf-sr-only">`
+           reprenant le `title` (« Accueil — ... »), pour fournir un
+           contenu textuel accessible aux lecteurs d'écran.
+        2. Le lien « disponible librement » de la modale d'intégration
+           voit son `title` réécrit pour reprendre l'intitulé visible.
+        """
+        return render_to_string(
+            "ui/components/accessibilite/liens_explicites_demo.html",
+        )
+
 
 class TestsPreview(LookbookPreview):
     """

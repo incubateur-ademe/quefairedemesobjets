@@ -1,4 +1,4 @@
-<main
+<section
     class="
     qf-flex
     qf-relative
@@ -7,6 +7,7 @@
     qf-overflow-auto
     "
     tabindex="0"
+    aria-label="Résultats du formulaire"
 >
     {% block form_result %}
         <turbo-frame id="addressesPanel"
@@ -29,4 +30,4 @@
         {% include "ui/components/carte/partials/featureflip_inputs.html" %}
         {{ form.bounding_box }}
     {% endblock form_fields %}
-</main>
+</section>

@@ -1,0 +1,35 @@
+<div class="fr-container fr-py-3w">
+    <h2 class="fr-h3">A11Y-1 — Landmarks ARIA</h2>
+    <p>
+        Démonstration des landmarks ARIA appliqués aux différents layouts.
+        En général, on attend exactement un <code>banner</code>, un
+        <code>main</code> et un <code>contentinfo</code> par page, plus
+        un ou plusieurs <code>navigation</code> avec
+        <code>aria-label</code> distincts.
+    </p>
+
+    <header role="banner" class="fr-card fr-card--horizontal fr-p-2w fr-mb-2w">
+        <strong>&lt;header role="banner"&gt;</strong> — sur le layout
+        assistant (DSFR), sur l'en-tête carte (<code>carte/header.html</code>)
+        et sur l'en-tête formulaire (<code>formulaire/header.html</code>).
+    </header>
+
+    <main id="content" role="main" class="fr-card fr-card--horizontal fr-p-2w fr-mb-2w">
+        <strong>&lt;main id="content" role="main"&gt;</strong> — un seul
+        landmark par page. Les anciens <code>&lt;main&gt;</code> imbriqués
+        ont été convertis en <code>&lt;section aria-label&gt;</code>
+        (<code>mode_carte</code>, <code>mode_liste</code>,
+        <code>formulaire/main</code>, <code>infotri</code>).
+    </main>
+
+    <nav role="navigation" aria-label="Pour aller plus loin" class="fr-card fr-card--horizontal fr-p-2w fr-mb-2w">
+        <strong>&lt;nav aria-label="Pour aller plus loin"&gt;</strong> —
+        encapsule désormais le surfooter Sites Faciles dans
+        <code>ui/components/footer/base.html</code>.
+    </nav>
+
+    <footer role="contentinfo" class="fr-card fr-card--horizontal fr-p-2w">
+        <strong>&lt;footer role="contentinfo"&gt;</strong> — fourni nativement
+        par le composant DSFR <code>dsfr/footer.html</code>.
+    </footer>
+</div>
