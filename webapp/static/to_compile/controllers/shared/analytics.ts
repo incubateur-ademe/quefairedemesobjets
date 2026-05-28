@@ -95,6 +95,27 @@ export default class extends Controller<HTMLElement> {
     posthog.debug(!!this.posthogDebugValue)
     this.#setupAutocompleteResultClickListener()
     this.#setupActeurViewedListener()
+    this.#setupViewModeToggleListener()
+  }
+
+  // Capture when the user flips the carte/liste segmented control.
+  // Used as a counter-metric for the produit-carte-default-view-mobile experiment:
+  // identifies users who flipped away from the variant they were assigned.
+  #setupViewModeToggleListener() {
+    document.addEventListener(
+      "submit",
+      (e: Event) => {
+        const form = e.target
+        if (!(form instanceof HTMLFormElement)) return
+        const formData = new FormData(form)
+        const fromViewMode = formData.get("view_mode-view")
+        if (fromViewMode === null) return
+        posthog.capture("carte_view_mode_toggled", {
+          to: String(fromViewMode),
+        })
+      },
+      true,
+    )
   }
 
   #setupActeurViewedListener() {

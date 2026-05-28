@@ -110,17 +110,19 @@ test.describe("Recherche de produits", () => {
     await typeSearchQuery(page, "lave")
     await waitForResults(page)
 
-    // Naviguer vers le bas avec la flèche
-    await page.keyboard.press("ArrowDown")
+    // APG combobox-autocomplete-list: DOM focus stays on the textbox,
+    // the active option is conveyed via aria-activedescendant on the input
+    // and aria-selected on the option (no DOM focus moves to the link).
+    const searchInput = page.locator(SEARCH_INPUT_SELECTOR)
 
-    // Le premier résultat doit avoir le focus
-    const firstResult = page.locator(SEARCH_RESULTS_SELECTOR).first()
-    await expect(firstResult).toBeFocused()
-
-    // Naviguer encore vers le bas
     await page.keyboard.press("ArrowDown")
-    const secondResult = page.locator(SEARCH_RESULTS_SELECTOR).nth(1)
-    await expect(secondResult).toBeFocused()
+    await expect(searchInput).toHaveAttribute("aria-activedescendant", "option-1")
+    await expect(page.locator("li#option-1")).toHaveAttribute("aria-selected", "true")
+
+    await page.keyboard.press("ArrowDown")
+    await expect(searchInput).toHaveAttribute("aria-activedescendant", "option-2")
+    await expect(page.locator("li#option-2")).toHaveAttribute("aria-selected", "true")
+    await expect(page.locator("li#option-1")).not.toHaveAttribute("aria-selected", /.*/)
   })
 
   test("Échap ferme les résultats de recherche", async ({ page }) => {

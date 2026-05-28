@@ -20,8 +20,19 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
   declare readonly fieldNameValue: string
   declare readonly inputTarget: HTMLInputElement
   declare readonly hiddenInputTarget: HTMLInputElement
+  declare readonly hasHiddenInputTarget: boolean
 
   currentIndex = -1
+  // Tracks whether the current input value came from the user typing (true)
+  // or from a commit / external programmatic write / page load (false). We
+  // suppress reopening the listbox on refocus when the value was not typed
+  // by the user — the value was set for them; reopening would be ghosty.
+  //
+  // A boolean is safer than snapshotting the value because external writers
+  // (state.ts mirroring sessionStorage into the input on outlet-connect, for
+  // instance) update `inputTarget.value` directly and would not keep a
+  // value snapshot in sync.
+  #userIsTyping = false
 
   connect() {
     this.#hideListbox()
@@ -32,12 +43,25 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
   }
 
   focus(event) {
-    if (this.showOnFocusValue && this.inputTarget.value) {
-      this.#loadResults(this.inputTarget.value)
+    if (!this.showOnFocusValue) return
+    // Empty input: always open so the synthetic top option (e.g. "Autour de
+    // moi" for the carte address combobox) is reachable on the very first
+    // focus. The backend returns it for sub-MIN_QUERY_LENGTH queries.
+    if (!this.inputTarget.value) {
+      this.#loadResults("")
+      return
     }
+    // Non-empty input: only reopen when the user was mid-typing. A value that
+    // was set programmatically (commit, state restore, server render) is
+    // treated as already committed and must not re-open on refocus.
+    if (!this.#userIsTyping) return
+    this.#loadResults(this.inputTarget.value)
   }
 
   search(event) {
+    // Typing means the user is actively searching: clear the "committed" flag
+    // so refocus after a blur reopens the listbox.
+    this.#userIsTyping = true
     this.#loadResults(event.target.value)
   }
 
@@ -72,10 +96,20 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
     this.#showListbox()
   }
 
+  // Keyboard handling follows W3C APG "combobox-autocomplete-list":
+  // https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-autocomplete-list/
+  //
+  // Important invariants:
+  // - DOM focus stays on the textbox at all times while the listbox is open.
+  //   "Focused" option is conveyed only via `aria-activedescendant` and
+  //   `aria-selected` — we never call `link.focus()` or `option.focus()`.
+  // - `Home`/`End` are left to the browser so they act on the textbox caret.
+  // - Arrow navigation does NOT wrap (last → first or first → last).
+  // - First Down/Up press on a closed listbox only opens it; a second press
+  //   moves visual focus into the listbox.
   navigate(event: KeyboardEvent) {
     const key = event.key
 
-    // Allow Tab key to work normally for keyboard navigation
     if (key === "Tab") {
       this.#hideListbox()
       return
@@ -84,58 +118,43 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
     switch (key) {
       case "ArrowDown":
         event.preventDefault()
-        // Alt+Down: Open listbox without moving focus
-        if (event.altKey) {
+        // Alt+Down (and a plain Down on a closed listbox): open the listbox
+        // WITHOUT moving visual focus — APG explicitly forbids advancing.
+        if (event.altKey || this.resultsTarget.hidden) {
           this.#showListbox()
           return
         }
-        // Down Arrow: Opens the listbox if closed and moves focus to first option
-        // If already open, moves focus to next option
-        if (this.resultsTarget.hidden) {
-          this.#openListboxAndFocus(0)
-        } else {
-          this.#moveFocus(1)
-        }
+        this.#moveFocus(1)
         break
 
       case "ArrowUp":
         event.preventDefault()
-        // Up Arrow: Opens the listbox if closed and moves focus to last option
-        // If already open, moves focus to previous option
-        if (this.resultsTarget.hidden) {
-          this.#openListboxAndFocus(this.optionTargets.length - 1)
-        } else {
-          this.#moveFocus(-1)
+        if (event.altKey) {
+          // Alt + Up Arrow: close the listbox without changing the value.
+          this.#hideListbox()
+          return
         }
+        if (this.resultsTarget.hidden) {
+          // Up on a closed listbox opens it without moving visual focus.
+          this.#showListbox()
+          return
+        }
+        this.#moveFocus(-1)
         break
 
       case "Enter":
         event.preventDefault()
-        // Enter: Accepts the focused value, closes listbox
         this.commitSelection()
         break
 
       case "Escape":
         event.preventDefault()
-        // Escape: Closes the listbox if displayed, otherwise clears the combobox
         this.#escapeAction()
         break
 
-      case "Home":
-        // Home: Moves focus to first option (if listbox is open)
-        if (this.#isListboxOpenWithOptions()) {
-          event.preventDefault()
-          this.#setVisualFocus(0)
-        }
-        break
-
-      case "End":
-        // End: Moves focus to last option (if listbox is open)
-        if (this.#isListboxOpenWithOptions()) {
-          event.preventDefault()
-          this.#setVisualFocus(this.optionTargets.length - 1)
-        }
-        break
+      // Home / End intentionally not handled: APG says they move the caret
+      // in the textbox, which is the browser default. Intercepting would
+      // break users navigating long queries.
     }
   }
 
@@ -147,17 +166,6 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
     this.currentIndex = -1
   }
 
-  #isListboxOpenWithOptions(): boolean {
-    return !this.resultsTarget.hidden && this.optionTargets.length > 0
-  }
-
-  #openListboxAndFocus(index: number) {
-    this.#showListbox()
-    if (this.optionTargets.length > 0) {
-      this.#setVisualFocus(index)
-    }
-  }
-
   #getLinkFromOption(option: HTMLElement): HTMLAnchorElement | null {
     return option.querySelector("a")
   }
@@ -167,19 +175,26 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
       return
     }
 
-    // Calculate new index with wrapping
-    let newIndex = this.currentIndex + direction
+    // No wrap — APG says Down does nothing on the last option and Up does
+    // nothing on the first. From `currentIndex = -1` (no option focused yet)
+    // a Down jumps to 0 and Up jumps to the last option.
+    let newIndex: number
+    if (this.currentIndex === -1) {
+      newIndex = direction > 0 ? 0 : this.optionTargets.length - 1
+    } else {
+      newIndex = this.currentIndex + direction
+    }
 
-    // Wrap around
-    if (newIndex < 0) {
-      newIndex = this.optionTargets.length - 1
-    } else if (newIndex >= this.optionTargets.length) {
-      newIndex = 0
+    if (newIndex < 0 || newIndex >= this.optionTargets.length) {
+      return
     }
 
     this.#setVisualFocus(newIndex)
   }
 
+  // Visual focus only — DOM focus stays on the textbox. The selected option
+  // is conveyed by `aria-activedescendant` on the input and `aria-selected`
+  // on the option, per APG combobox-autocomplete-list.
   #setVisualFocus(index: number) {
     if (index < 0 || index >= this.optionTargets.length) {
       return
@@ -188,24 +203,9 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
     this.currentIndex = index
     const currentOption = this.optionTargets[this.currentIndex]
 
-    // Remove aria-selected from all options
     this.#removeSelection()
-
-    // Set aria-selected on current option
     currentOption.setAttribute("aria-selected", "true")
-
-    // If option contains a link, focus it. Otherwise keep focus on input
-    const link = this.#getLinkFromOption(currentOption)
-    if (link) {
-      link.focus()
-    } else {
-      // Keep focus on input, update aria-activedescendant
-      this.inputTarget.focus()
-    }
-
     this.inputTarget.setAttribute("aria-activedescendant", currentOption.id || "")
-
-    // Scroll into view if needed
     currentOption.scrollIntoView({ block: "nearest", behavior: "smooth" })
   }
 
@@ -229,8 +229,15 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
     const value = selected.dataset.value?.trim() || ""
     const selectedValue = selected.dataset.selectedValue?.trim() || ""
 
-    this.hiddenInputTarget.value = value
+    // When `display_value` is True the visible input itself carries the form
+    // value and there is no hidden sibling — see input.html.
+    if (this.hasHiddenInputTarget) {
+      this.hiddenInputTarget.value = value
+    }
     this.inputTarget.value = selectedValue
+    // Clear the typing flag so a subsequent refocus does not re-open the
+    // listbox with the same suggestions the user just picked.
+    this.#userIsTyping = false
     this.#hideListbox()
 
     const commitEvent = new CustomEvent("next-autocomplete:commit", {
