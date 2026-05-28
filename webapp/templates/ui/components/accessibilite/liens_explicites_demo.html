@@ -1,0 +1,42 @@
+<div class="fr-container fr-py-3w">
+    <h2 class="fr-h3">A11Y-13 — Intitulés de liens explicites</h2>
+    <p>
+        Conformément à RGAA 6.1, l'intitulé d'un lien doit être pertinent
+        et reprendre le texte visible quand un <code>title</code> est
+        utilisé.
+    </p>
+
+    <h3 class="fr-h5 fr-mt-3w">1. Lien des logos du header</h3>
+    <p>
+        Comme les 3 SVG enfants sont désormais
+        <code>aria-hidden="true"</code> (cf. A11Y-11), le lien parent
+        n'avait plus aucun contenu textuel accessible. Ajout d'un
+        <code>&lt;span class="qf-sr-only"&gt;</code> qui reprend le
+        <code>title</code>.
+    </p>
+<pre class="fr-mb-0"><code>&lt;a href="/" title="Accueil — Que faire de mes objets et déchets"&gt;
+  &lt;span class="qf-sr-only"&gt;Accueil — Que faire de mes objets et déchets&lt;/span&gt;
+  &lt;svg aria-hidden="true" .../&gt;
+  ...
+&lt;/a&gt;</code></pre>
+
+    <h3 class="fr-h5 fr-mt-3w">2. Lien « disponible librement » dans la modale d'intégration</h3>
+    <p>
+        Avant : <code>title="Lien vers le dépôt GitHub - Nouvelle fenêtre"</code>
+        (ne reprend pas l'intitulé visible).
+    </p>
+    <p>
+        Après : <code>title="disponible librement - Nouvelle fenêtre"</code>
+        (reprend le texte du lien et signale l'ouverture dans une
+        nouvelle fenêtre).
+    </p>
+    <p class="fr-mt-3w">
+        L'outil est développé de manière ouverte (open source). L'ensemble
+        du code est <a
+            href="https://github.com/incubateur-ademe/quefairedemesobjets/"
+            target="_blank"
+            rel="noreferrer"
+            title="disponible librement - Nouvelle fenêtre"
+        >disponible librement</a>.
+    </p>
+</div>
