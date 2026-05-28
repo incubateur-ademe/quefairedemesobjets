@@ -138,6 +138,11 @@ integration-test:
 .PHONY: prepare-e2e-test
 prepare-e2e-test:
 	make migrate
+	# Mirror CI: ensure unaccent / pg_trgm extensions and the f_unaccent()
+	# wrapper exist before rebuilding the search index. Without these, the
+	# autocomplete fuzzy search raises ProgrammingError at runtime.
+	$(DJANGO_ADMIN) enable_unaccent
+	$(DJANGO_ADMIN) enable_trigram
 	make rebuild-search-index
 	make createsuperuser-example
 	BASE_URL=http://localhost:8888 npm run build
