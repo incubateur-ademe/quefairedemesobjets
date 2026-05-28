@@ -210,8 +210,13 @@ test.describe("Recherche de produits", () => {
     await expect(heading).toBeVisible({ timeout: TIMEOUT.DEFAULT })
 
     // Étape 2 : depuis la fiche, lancer une nouvelle recherche dont le résultat
-    // sélectionné n'est pas un SearchTag (pas de data-search-term-id).
-    await typeSearchQuery(page, "lave")
+    // sélectionné n'est pas un SearchTag (pas de data-search-term-id). La
+    // fiche produit n'expose que la search input du header (préfixe
+    // "header-autocomplete"), pas celle de la home, d'où le sélecteur explicite.
+    const headerSearchInput = page.locator("#id_header-autocomplete-search")
+    await headerSearchInput.click()
+    await headerSearchInput.fill("")
+    await headerSearchInput.pressSequentially("lave", { delay: 50 })
     const nextResults = await waitForResults(page)
     const nextCount = await nextResults.count()
     expect(nextCount).toBeGreaterThan(0)
