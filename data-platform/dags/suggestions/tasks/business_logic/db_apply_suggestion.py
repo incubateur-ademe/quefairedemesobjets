@@ -31,7 +31,8 @@ def db_apply_suggestion(use_suggestion_groupe: bool = False):
 
         except Exception as e:
             logger.warning(
-                f"Error while applying suggestion {suggestion.id} - {type(e)}: {e}"
+                f"Error while applying suggestion {suggestion.id} - {type(e)}: {e}",
+                exc_info=True,
             )
             suggestion.statut = SuggestionStatut.ERREUR
             try:
