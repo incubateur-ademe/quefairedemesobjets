@@ -145,4 +145,4 @@ dev = [
 package = true
 
 [tool.uv.sources]
-django-dsfr = { git = "https://github.com/fabienheureux/django-dsfr", rev = "b5ac6f508c6b46672b898129576f34e1b74d10d5" } # pragma: allowlist secret
+django-dsfr = { git = "https://github.com/fabienheureux/django-dsfr", rev = "b110ff5360c4b0503374efcc10ac4b7879a7cd96" } # pragma: allowlist secret
