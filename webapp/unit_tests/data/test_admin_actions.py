@@ -2,20 +2,43 @@ import pytest
 from data.admin import (
     HasSuggestionUnitaireWithChampField,
     SuggestionGroupeAdmin,
+    apply_suggestions_to_correction,
     apply_suggestions_to_parent,
-    apply_suggestions_to_revision,
 )
-from data.models.suggestion import SuggestionGroupe
+from data.models.suggestion import (
+    SuggestionAction,
+    SuggestionGroupe,
+    SuggestionUnitaire,
+)
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.test import RequestFactory
 from djangoql.exceptions import DjangoQLSchemaError
 from unit_tests.data.models.suggestion_factory import (
+    SuggestionCohorteFactory,
     SuggestionGroupeFactory,
     SuggestionUnitaireFactory,
 )
 from unit_tests.qfdmo.acteur_factory import ActeurFactory, RevisionActeurFactory
+
+NON_SOURCE_TYPE_ACTIONS = [
+    SuggestionAction.CLUSTERING.value,
+    SuggestionAction.CRAWL_URLS.value,
+    SuggestionAction.ENRICH_ACTEURS_CLOSED.value,
+    SuggestionAction.ENRICH_ACTEURS_RGPD.value,
+    SuggestionAction.ENRICH_ACTEURS_VILLES_TYPO.value,
+    SuggestionAction.ENRICH_ACTEURS_VILLES_NEW.value,
+    SuggestionAction.ENRICH_ACTEURS_CP_TYPO.value,
+    SuggestionAction.ENRICH_REVISION_ACTEURS_CP_TYPO.value,
+    "",
+]
+
+SOURCE_TYPE_ACTIONS = [
+    SuggestionAction.SOURCE_AJOUT.value,
+    SuggestionAction.SOURCE_MODIFICATION.value,
+    SuggestionAction.SOURCE_SUPPRESSION.value,
+]
 
 
 @pytest.fixture
@@ -44,161 +67,166 @@ def mock_request(request_factory):
 
 @pytest.mark.django_db
 class TestApplySuggestionsToParent:
-    """Tests apply_suggestions_to_parent from data admin suggestion groupe"""
+    """Tests for apply_suggestions_to_parent admin action"""
 
-    def test_apply_suggestions_to_parent_creates_revision_suggestions(
-        self, admin_instance, mock_request
+    @pytest.mark.parametrize("type_action", SOURCE_TYPE_ACTIONS)
+    def test_creates_one_parent_suggestion_per_acteur_suggestion(
+        self, admin_instance, mock_request, type_action
     ):
-        """Test that the Acteur suggestions are copied to RevisionActeur"""
-        # Create an acteur and a revision_acteur parent different
+        """Each Acteur suggestion produces a ParentRevisionActeur suggestion"""
         acteur = ActeurFactory()
-        revision_acteur_parent = RevisionActeurFactory()
-
-        # Create a SuggestionGroupe with parent
+        parent = RevisionActeurFactory()
         suggestion_groupe = SuggestionGroupeFactory(
             acteur=acteur,
-            revision_acteur=revision_acteur_parent,
+            parent_revision_acteur=parent,
+            suggestion_cohorte=SuggestionCohorteFactory(type_action=type_action),
         )
-
-        # Create SuggestionUnitaire for Acteur
         SuggestionUnitaireFactory(
             suggestion_groupe=suggestion_groupe,
             suggestion_modele="Acteur",
+            acteur=acteur,
             champs=["nom"],
             valeurs=["Nouveau nom"],
         )
         SuggestionUnitaireFactory(
             suggestion_groupe=suggestion_groupe,
             suggestion_modele="Acteur",
+            acteur=acteur,
             champs=["latitude", "longitude"],
             valeurs=["48.56789", "2.56789"],
         )
 
-        # Verify that there is no SuggestionUnitaire RevisionActeur before
-        assert (
-            suggestion_groupe.suggestion_unitaires.filter(
-                suggestion_modele="RevisionActeur"
-            ).count()
-            == 0
-        )
-
-        # Call the action
-        queryset = suggestion_groupe._meta.model.objects.filter(id=suggestion_groupe.id)
+        queryset = SuggestionGroupe.objects.filter(id=suggestion_groupe.id)
         apply_suggestions_to_parent(admin_instance, mock_request, queryset)
 
-        # Verify that the SuggestionUnitaire RevisionActeur have been created
-        revision_suggestions = suggestion_groupe.suggestion_unitaires.filter(
-            suggestion_modele="RevisionActeur"
+        parent_suggestions = suggestion_groupe.suggestion_unitaires.filter(
+            suggestion_modele="ParentRevisionActeur"
         )
-        assert revision_suggestions.count() == 2
+        assert parent_suggestions.count() == 2
 
-        # Verify the suggestion for "nom"
-        su_nom_revision = revision_suggestions.filter(champs=["nom"]).first()
-        assert su_nom_revision is not None
-        assert su_nom_revision.valeurs == ["Nouveau nom"]
-        assert su_nom_revision.revision_acteur == revision_acteur_parent
-        assert su_nom_revision.suggestion_modele == "RevisionActeur"
+        su_nom = parent_suggestions.get(champs=["nom"])
+        assert su_nom.valeurs == ["Nouveau nom"]
+        assert su_nom.parent_revision_acteur == parent
 
-        # Verify the suggestion for "latitude", "longitude"
-        su_location_revision = revision_suggestions.filter(
-            champs=["latitude", "longitude"]
-        ).first()
-        assert su_location_revision is not None
-        assert su_location_revision.valeurs == ["48.56789", "2.56789"]
-        assert su_location_revision.revision_acteur == revision_acteur_parent
-        assert su_location_revision.suggestion_modele == "RevisionActeur"
+        su_location = parent_suggestions.get(champs=["latitude", "longitude"])
+        assert su_location.valeurs == ["48.56789", "2.56789"]
+        assert su_location.parent_revision_acteur == parent
 
-    def test_apply_suggestions_to_parent_updates_existing_revision_suggestions(
+    def test_updates_existing_parent_suggestion_with_matching_champs(
         self, admin_instance, mock_request
     ):
-        """Test that the existing RevisionActeur suggestions are updated"""
-        # Create an acteur and a revision_acteur parent different
+        """An existing matching ParentRevisionActeur is updated, not duplicated"""
         acteur = ActeurFactory()
-        revision_acteur_parent = RevisionActeurFactory()
-
-        # Create a SuggestionGroupe with parent
+        parent = RevisionActeurFactory()
         suggestion_groupe = SuggestionGroupeFactory(
             acteur=acteur,
-            revision_acteur=revision_acteur_parent,
+            parent_revision_acteur=parent,
+            suggestion_cohorte=SuggestionCohorteFactory(
+                type_action=SuggestionAction.SOURCE_MODIFICATION.value,
+            ),
         )
-
-        # Create a SuggestionUnitaire for Acteur
         SuggestionUnitaireFactory(
             suggestion_groupe=suggestion_groupe,
             suggestion_modele="Acteur",
             champs=["nom"],
             valeurs=["Nouveau nom"],
         )
-
-        # Create a SuggestionUnitaire RevisionActeur existing with a different value
-        su_revision_existante = SuggestionUnitaireFactory(
+        existing = SuggestionUnitaireFactory(
             suggestion_groupe=suggestion_groupe,
-            suggestion_modele="RevisionActeur",
-            revision_acteur=revision_acteur_parent,
+            suggestion_modele="ParentRevisionActeur",
+            parent_revision_acteur=parent,
             champs=["nom"],
             valeurs=["Ancienne valeur"],
         )
 
-        # Call the action
-        queryset = suggestion_groupe._meta.model.objects.filter(id=suggestion_groupe.id)
+        queryset = SuggestionGroupe.objects.filter(id=suggestion_groupe.id)
         apply_suggestions_to_parent(admin_instance, mock_request, queryset)
 
-        # Verify that the existing suggestion has been updated
-        su_revision_existante.refresh_from_db()
-        assert su_revision_existante.valeurs == ["Nouveau nom"]
-        assert su_revision_existante.revision_acteur == revision_acteur_parent
-
-        # Check that there is only one RevisionActeur suggestion
+        existing.refresh_from_db()
+        assert existing.valeurs == ["Nouveau nom"]
+        assert existing.parent_revision_acteur == parent
         assert (
             suggestion_groupe.suggestion_unitaires.filter(
-                suggestion_modele="RevisionActeur", champs=["nom"]
+                suggestion_modele="ParentRevisionActeur", champs=["nom"]
             ).count()
             == 1
         )
 
-    def test_apply_suggestions_to_parent_skips_when_no_parent(
+    def test_creates_new_suggestion_when_existing_has_different_champs(
         self, admin_instance, mock_request
     ):
-        """Test that the action does nothing when there is no parent"""
-        # Create a SuggestionGroupe without parent (revision_acteur_id is None)
-        suggestion_groupe = SuggestionGroupeFactory(
-            acteur=ActeurFactory(),
-            revision_acteur=None,
-        )
-
-        SuggestionUnitaireFactory(
-            suggestion_groupe=suggestion_groupe,
-            suggestion_modele="Acteur",
-            champs=["nom"],
-            valeurs=["Nouveau nom"],
-        )
-
-        # Call the action
-        queryset = suggestion_groupe._meta.model.objects.filter(id=suggestion_groupe.id)
-        apply_suggestions_to_parent(admin_instance, mock_request, queryset)
-
-        # Verify that no RevisionActeur suggestion has been created
-        assert (
-            suggestion_groupe.suggestion_unitaires.filter(
-                suggestion_modele="RevisionActeur"
-            ).count()
-            == 0
-        )
-
-    def test_apply_suggestions_to_parent_skips_when_acteur_equals_revision(
-        self, admin_instance, mock_request
-    ):
-        """Test that the action does nothing when acteur_id == revision_acteur_id"""
-
-        # Créer un acteur et un revision_acteur
+        """A ParentRevisionActeur with different champs is left untouched"""
         acteur = ActeurFactory()
-        revision_acteur = acteur.get_or_create_revision()
-
+        parent = RevisionActeurFactory()
         suggestion_groupe = SuggestionGroupeFactory(
             acteur=acteur,
-            revision_acteur=revision_acteur,
+            parent_revision_acteur=parent,
+            suggestion_cohorte=SuggestionCohorteFactory(
+                type_action=SuggestionAction.SOURCE_MODIFICATION.value,
+            ),
+        )
+        SuggestionUnitaireFactory(
+            suggestion_groupe=suggestion_groupe,
+            suggestion_modele="Acteur",
+            champs=["nom"],
+            valeurs=["Nouveau nom"],
+        )
+        unrelated = SuggestionUnitaireFactory(
+            suggestion_groupe=suggestion_groupe,
+            suggestion_modele="ParentRevisionActeur",
+            parent_revision_acteur=parent,
+            champs=["telephone"],
+            valeurs=["0123456789"],
         )
 
+        queryset = SuggestionGroupe.objects.filter(id=suggestion_groupe.id)
+        apply_suggestions_to_parent(admin_instance, mock_request, queryset)
+
+        unrelated.refresh_from_db()
+        assert unrelated.valeurs == ["0123456789"]
+        assert (
+            suggestion_groupe.suggestion_unitaires.filter(
+                suggestion_modele="ParentRevisionActeur"
+            ).count()
+            == 2
+        )
+
+    def test_preserves_original_acteur_suggestion(self, admin_instance, mock_request):
+        """The original Acteur suggestion is preserved in DB after the action"""
+        acteur = ActeurFactory()
+        parent = RevisionActeurFactory()
+        suggestion_groupe = SuggestionGroupeFactory(
+            acteur=acteur,
+            parent_revision_acteur=parent,
+            suggestion_cohorte=SuggestionCohorteFactory(
+                type_action=SuggestionAction.SOURCE_MODIFICATION.value,
+            ),
+        )
+        acteur_su = SuggestionUnitaireFactory(
+            suggestion_groupe=suggestion_groupe,
+            suggestion_modele="Acteur",
+            champs=["nom"],
+            valeurs=["Nouveau nom"],
+        )
+
+        queryset = SuggestionGroupe.objects.filter(id=suggestion_groupe.id)
+        apply_suggestions_to_parent(admin_instance, mock_request, queryset)
+
+        assert SuggestionUnitaire.objects.filter(
+            id=acteur_su.id, suggestion_modele="Acteur"
+        ).exists()
+
+    def test_does_nothing_when_parent_revision_acteur_is_missing(
+        self, admin_instance, mock_request
+    ):
+        """No ParentRevisionActeur suggestion is created without parent"""
+        suggestion_groupe = SuggestionGroupeFactory(
+            acteur=ActeurFactory(),
+            parent_revision_acteur=None,
+            suggestion_cohorte=SuggestionCohorteFactory(
+                type_action=SuggestionAction.SOURCE_MODIFICATION.value,
+            ),
+        )
         SuggestionUnitaireFactory(
             suggestion_groupe=suggestion_groupe,
             suggestion_modele="Acteur",
@@ -206,39 +234,85 @@ class TestApplySuggestionsToParent:
             valeurs=["Nouveau nom"],
         )
 
-        # Call the action
-        queryset = suggestion_groupe._meta.model.objects.filter(id=suggestion_groupe.id)
+        queryset = SuggestionGroupe.objects.filter(id=suggestion_groupe.id)
         apply_suggestions_to_parent(admin_instance, mock_request, queryset)
 
-        # Verify that no RevisionActeur suggestion has been created
-        assert (
-            suggestion_groupe.suggestion_unitaires.filter(
-                suggestion_modele="RevisionActeur"
-            ).count()
-            == 0
+        assert not suggestion_groupe.suggestion_unitaires.filter(
+            suggestion_modele="ParentRevisionActeur"
+        ).exists()
+
+    @pytest.mark.parametrize("type_action", NON_SOURCE_TYPE_ACTIONS)
+    def test_does_nothing_when_type_action_is_not_source(
+        self, admin_instance, mock_request, type_action
+    ):
+        """No suggestion is created when type_action is not a SOURCE_* one"""
+        acteur = ActeurFactory()
+        parent = RevisionActeurFactory()
+        suggestion_groupe = SuggestionGroupeFactory(
+            acteur=acteur,
+            parent_revision_acteur=parent,
+            suggestion_cohorte=SuggestionCohorteFactory(type_action=type_action),
+        )
+        SuggestionUnitaireFactory(
+            suggestion_groupe=suggestion_groupe,
+            suggestion_modele="Acteur",
+            champs=["nom"],
+            valeurs=["Nouveau nom"],
         )
 
-    def test_apply_suggestions_to_parent_multiple_suggestion_groupes(
+        queryset = SuggestionGroupe.objects.filter(id=suggestion_groupe.id)
+        apply_suggestions_to_parent(admin_instance, mock_request, queryset)
+
+        assert not suggestion_groupe.suggestion_unitaires.filter(
+            suggestion_modele="ParentRevisionActeur"
+        ).exists()
+
+    def test_ignores_non_acteur_suggestions_as_source(
         self, admin_instance, mock_request
     ):
-        """Test that the action works with multiple SuggestionGroupe"""
-        # Create two Acteurs and two RevisionActeur parents
-        acteur1 = ActeurFactory()
-        revision_acteur_parent1 = RevisionActeurFactory()
-        acteur2 = ActeurFactory()
-        revision_acteur_parent2 = RevisionActeurFactory()
+        """Only Acteur suggestions are used as source for copy"""
+        acteur = ActeurFactory()
+        parent = RevisionActeurFactory()
+        suggestion_groupe = SuggestionGroupeFactory(
+            acteur=acteur,
+            parent_revision_acteur=parent,
+            suggestion_cohorte=SuggestionCohorteFactory(
+                type_action=SuggestionAction.SOURCE_MODIFICATION.value,
+            ),
+        )
+        SuggestionUnitaireFactory(
+            suggestion_groupe=suggestion_groupe,
+            suggestion_modele="RevisionActeur",
+            revision_acteur=acteur.get_or_create_revision(),
+            champs=["nom"],
+            valeurs=["Valeur revision"],
+        )
 
-        # Créer deux SuggestionGroupe avec parent
+        queryset = SuggestionGroupe.objects.filter(id=suggestion_groupe.id)
+        apply_suggestions_to_parent(admin_instance, mock_request, queryset)
+
+        assert not suggestion_groupe.suggestion_unitaires.filter(
+            suggestion_modele="ParentRevisionActeur"
+        ).exists()
+
+    def test_processes_each_suggestion_groupe_in_queryset(
+        self, admin_instance, mock_request
+    ):
+        """All eligible SuggestionGroupe in the queryset are processed"""
         sg1 = SuggestionGroupeFactory(
-            acteur=acteur1,
-            revision_acteur=revision_acteur_parent1,
+            acteur=ActeurFactory(),
+            parent_revision_acteur=RevisionActeurFactory(),
+            suggestion_cohorte=SuggestionCohorteFactory(
+                type_action=SuggestionAction.SOURCE_MODIFICATION.value,
+            ),
         )
         sg2 = SuggestionGroupeFactory(
-            acteur=acteur2,
-            revision_acteur=revision_acteur_parent2,
+            acteur=ActeurFactory(),
+            parent_revision_acteur=RevisionActeurFactory(),
+            suggestion_cohorte=SuggestionCohorteFactory(
+                type_action=SuggestionAction.SOURCE_MODIFICATION.value,
+            ),
         )
-
-        # Create SuggestionUnitaire for each group
         SuggestionUnitaireFactory(
             suggestion_groupe=sg1,
             suggestion_modele="Acteur",
@@ -252,11 +326,333 @@ class TestApplySuggestionsToParent:
             valeurs=["Nom 2"],
         )
 
-        # Call the action with the two groups
         queryset = SuggestionGroupe.objects.filter(id__in=[sg1.id, sg2.id])
         apply_suggestions_to_parent(admin_instance, mock_request, queryset)
 
-        # Verify that the suggestions have been created for the two groups
+        assert (
+            sg1.suggestion_unitaires.filter(
+                suggestion_modele="ParentRevisionActeur"
+            ).count()
+            == 1
+        )
+        assert (
+            sg2.suggestion_unitaires.filter(
+                suggestion_modele="ParentRevisionActeur"
+            ).count()
+            == 1
+        )
+
+    def test_processes_only_eligible_suggestion_groupe_in_mixed_queryset(
+        self, admin_instance, mock_request
+    ):
+        """Only suggestion groupes with parent and SOURCE_* type are processed"""
+        eligible = SuggestionGroupeFactory(
+            acteur=ActeurFactory(),
+            parent_revision_acteur=RevisionActeurFactory(),
+            suggestion_cohorte=SuggestionCohorteFactory(
+                type_action=SuggestionAction.SOURCE_MODIFICATION.value,
+            ),
+        )
+        without_parent = SuggestionGroupeFactory(
+            acteur=ActeurFactory(),
+            parent_revision_acteur=None,
+            suggestion_cohorte=SuggestionCohorteFactory(
+                type_action=SuggestionAction.SOURCE_MODIFICATION.value,
+            ),
+        )
+        SuggestionUnitaireFactory(
+            suggestion_groupe=eligible,
+            suggestion_modele="Acteur",
+            champs=["nom"],
+            valeurs=["Eligible"],
+        )
+        SuggestionUnitaireFactory(
+            suggestion_groupe=without_parent,
+            suggestion_modele="Acteur",
+            champs=["nom"],
+            valeurs=["Skipped"],
+        )
+
+        queryset = SuggestionGroupe.objects.filter(
+            id__in=[eligible.id, without_parent.id]
+        )
+        apply_suggestions_to_parent(admin_instance, mock_request, queryset)
+
+        assert eligible.suggestion_unitaires.filter(
+            suggestion_modele="ParentRevisionActeur"
+        ).exists()
+        assert not without_parent.suggestion_unitaires.filter(
+            suggestion_modele="ParentRevisionActeur"
+        ).exists()
+
+
+@pytest.mark.django_db
+class TestApplySuggestionsToRevision:
+    """Tests for apply_suggestions_to_correction admin action"""
+
+    @pytest.mark.parametrize("type_action", SOURCE_TYPE_ACTIONS)
+    def test_creates_one_revision_suggestion_per_acteur_suggestion(
+        self, admin_instance, mock_request, type_action
+    ):
+        """Each Acteur suggestion produces a RevisionActeur suggestion"""
+        acteur = ActeurFactory()
+        revision_acteur = acteur.get_or_create_revision()
+        suggestion_groupe = SuggestionGroupeFactory(
+            acteur=acteur,
+            revision_acteur=revision_acteur,
+            suggestion_cohorte=SuggestionCohorteFactory(type_action=type_action),
+        )
+        SuggestionUnitaireFactory(
+            suggestion_groupe=suggestion_groupe,
+            suggestion_modele="Acteur",
+            champs=["nom"],
+            valeurs=["Nouveau nom"],
+        )
+        SuggestionUnitaireFactory(
+            suggestion_groupe=suggestion_groupe,
+            suggestion_modele="Acteur",
+            champs=["latitude", "longitude"],
+            valeurs=["48.56789", "2.56789"],
+        )
+
+        queryset = SuggestionGroupe.objects.filter(id=suggestion_groupe.id)
+        apply_suggestions_to_correction(admin_instance, mock_request, queryset)
+
+        revision_suggestions = suggestion_groupe.suggestion_unitaires.filter(
+            suggestion_modele="RevisionActeur"
+        )
+        assert revision_suggestions.count() == 2
+
+        su_nom = revision_suggestions.get(champs=["nom"])
+        assert su_nom.valeurs == ["Nouveau nom"]
+        assert su_nom.revision_acteur == revision_acteur
+
+        su_location = revision_suggestions.get(champs=["latitude", "longitude"])
+        assert su_location.valeurs == ["48.56789", "2.56789"]
+        assert su_location.revision_acteur == revision_acteur
+
+    def test_updates_existing_revision_suggestion_with_matching_champs(
+        self, admin_instance, mock_request
+    ):
+        """An existing matching RevisionActeur is updated, not duplicated"""
+        acteur = ActeurFactory()
+        revision_acteur = acteur.get_or_create_revision()
+        suggestion_groupe = SuggestionGroupeFactory(
+            acteur=acteur,
+            revision_acteur=revision_acteur,
+            suggestion_cohorte=SuggestionCohorteFactory(
+                type_action=SuggestionAction.SOURCE_MODIFICATION.value,
+            ),
+        )
+        SuggestionUnitaireFactory(
+            suggestion_groupe=suggestion_groupe,
+            suggestion_modele="Acteur",
+            champs=["nom"],
+            valeurs=["Nouveau nom"],
+        )
+        existing = SuggestionUnitaireFactory(
+            suggestion_groupe=suggestion_groupe,
+            suggestion_modele="RevisionActeur",
+            revision_acteur=revision_acteur,
+            champs=["nom"],
+            valeurs=["Ancienne valeur"],
+        )
+
+        queryset = SuggestionGroupe.objects.filter(id=suggestion_groupe.id)
+        apply_suggestions_to_correction(admin_instance, mock_request, queryset)
+
+        existing.refresh_from_db()
+        assert existing.valeurs == ["Nouveau nom"]
+        assert existing.revision_acteur == revision_acteur
+        assert (
+            suggestion_groupe.suggestion_unitaires.filter(
+                suggestion_modele="RevisionActeur", champs=["nom"]
+            ).count()
+            == 1
+        )
+
+    def test_creates_new_suggestion_when_existing_has_different_champs(
+        self, admin_instance, mock_request
+    ):
+        """A RevisionActeur with different champs is left untouched"""
+        acteur = ActeurFactory()
+        revision_acteur = acteur.get_or_create_revision()
+        suggestion_groupe = SuggestionGroupeFactory(
+            acteur=acteur,
+            revision_acteur=revision_acteur,
+            suggestion_cohorte=SuggestionCohorteFactory(
+                type_action=SuggestionAction.SOURCE_MODIFICATION.value,
+            ),
+        )
+        SuggestionUnitaireFactory(
+            suggestion_groupe=suggestion_groupe,
+            suggestion_modele="Acteur",
+            champs=["nom"],
+            valeurs=["Nouveau nom"],
+        )
+        unrelated = SuggestionUnitaireFactory(
+            suggestion_groupe=suggestion_groupe,
+            suggestion_modele="RevisionActeur",
+            revision_acteur=revision_acteur,
+            champs=["telephone"],
+            valeurs=["0123456789"],
+        )
+
+        queryset = SuggestionGroupe.objects.filter(id=suggestion_groupe.id)
+        apply_suggestions_to_correction(admin_instance, mock_request, queryset)
+
+        unrelated.refresh_from_db()
+        assert unrelated.valeurs == ["0123456789"]
+        assert (
+            suggestion_groupe.suggestion_unitaires.filter(
+                suggestion_modele="RevisionActeur"
+            ).count()
+            == 2
+        )
+
+    def test_preserves_original_acteur_suggestion(self, admin_instance, mock_request):
+        """The original Acteur suggestion is preserved in DB after the action"""
+        acteur = ActeurFactory()
+        revision_acteur = acteur.get_or_create_revision()
+        suggestion_groupe = SuggestionGroupeFactory(
+            acteur=acteur,
+            revision_acteur=revision_acteur,
+            suggestion_cohorte=SuggestionCohorteFactory(
+                type_action=SuggestionAction.SOURCE_MODIFICATION.value,
+            ),
+        )
+        acteur_su = SuggestionUnitaireFactory(
+            suggestion_groupe=suggestion_groupe,
+            suggestion_modele="Acteur",
+            champs=["nom"],
+            valeurs=["Nouveau nom"],
+        )
+
+        queryset = SuggestionGroupe.objects.filter(id=suggestion_groupe.id)
+        apply_suggestions_to_correction(admin_instance, mock_request, queryset)
+
+        assert SuggestionUnitaire.objects.filter(
+            id=acteur_su.id, suggestion_modele="Acteur"
+        ).exists()
+
+    def test_falls_back_to_acteur_id_when_no_revision_acteur(
+        self, admin_instance, mock_request
+    ):
+        """Without revision_acteur, revision_acteur_id falls back to acteur_id"""
+        acteur = ActeurFactory()
+        suggestion_groupe = SuggestionGroupeFactory(
+            acteur=acteur,
+            revision_acteur=None,
+            suggestion_cohorte=SuggestionCohorteFactory(
+                type_action=SuggestionAction.SOURCE_MODIFICATION.value,
+            ),
+        )
+        SuggestionUnitaireFactory(
+            suggestion_groupe=suggestion_groupe,
+            suggestion_modele="Acteur",
+            champs=["nom"],
+            valeurs=["Nouveau nom"],
+        )
+
+        queryset = SuggestionGroupe.objects.filter(id=suggestion_groupe.id)
+        apply_suggestions_to_correction(admin_instance, mock_request, queryset)
+
+        revision_suggestion = suggestion_groupe.suggestion_unitaires.get(
+            suggestion_modele="RevisionActeur"
+        )
+        assert revision_suggestion.revision_acteur_id == acteur.pk
+        assert revision_suggestion.valeurs == ["Nouveau nom"]
+
+    @pytest.mark.parametrize("type_action", NON_SOURCE_TYPE_ACTIONS)
+    def test_does_nothing_when_type_action_is_not_source(
+        self, admin_instance, mock_request, type_action
+    ):
+        """No suggestion is created when type_action is not a SOURCE_* one"""
+        acteur = ActeurFactory()
+        revision_acteur = acteur.get_or_create_revision()
+        suggestion_groupe = SuggestionGroupeFactory(
+            acteur=acteur,
+            revision_acteur=revision_acteur,
+            suggestion_cohorte=SuggestionCohorteFactory(type_action=type_action),
+        )
+        SuggestionUnitaireFactory(
+            suggestion_groupe=suggestion_groupe,
+            suggestion_modele="Acteur",
+            champs=["nom"],
+            valeurs=["Nouveau nom"],
+        )
+
+        queryset = SuggestionGroupe.objects.filter(id=suggestion_groupe.id)
+        apply_suggestions_to_correction(admin_instance, mock_request, queryset)
+
+        assert not suggestion_groupe.suggestion_unitaires.filter(
+            suggestion_modele="RevisionActeur"
+        ).exists()
+
+    def test_ignores_non_acteur_suggestions_as_source(
+        self, admin_instance, mock_request
+    ):
+        """Only Acteur suggestions are used as source for copy"""
+        acteur = ActeurFactory()
+        parent = RevisionActeurFactory()
+        suggestion_groupe = SuggestionGroupeFactory(
+            acteur=acteur,
+            revision_acteur=acteur.get_or_create_revision(),
+            suggestion_cohorte=SuggestionCohorteFactory(
+                type_action=SuggestionAction.SOURCE_MODIFICATION.value,
+            ),
+        )
+        SuggestionUnitaireFactory(
+            suggestion_groupe=suggestion_groupe,
+            suggestion_modele="ParentRevisionActeur",
+            parent_revision_acteur=parent,
+            champs=["nom"],
+            valeurs=["Valeur parent"],
+        )
+
+        queryset = SuggestionGroupe.objects.filter(id=suggestion_groupe.id)
+        apply_suggestions_to_correction(admin_instance, mock_request, queryset)
+
+        assert not suggestion_groupe.suggestion_unitaires.filter(
+            suggestion_modele="RevisionActeur"
+        ).exists()
+
+    def test_processes_each_suggestion_groupe_in_queryset(
+        self, admin_instance, mock_request
+    ):
+        """All eligible SuggestionGroupe in the queryset are processed"""
+        acteur1 = ActeurFactory()
+        acteur2 = ActeurFactory()
+        sg1 = SuggestionGroupeFactory(
+            acteur=acteur1,
+            revision_acteur=acteur1.get_or_create_revision(),
+            suggestion_cohorte=SuggestionCohorteFactory(
+                type_action=SuggestionAction.SOURCE_MODIFICATION.value,
+            ),
+        )
+        sg2 = SuggestionGroupeFactory(
+            acteur=acteur2,
+            revision_acteur=acteur2.get_or_create_revision(),
+            suggestion_cohorte=SuggestionCohorteFactory(
+                type_action=SuggestionAction.SOURCE_MODIFICATION.value,
+            ),
+        )
+        SuggestionUnitaireFactory(
+            suggestion_groupe=sg1,
+            suggestion_modele="Acteur",
+            champs=["nom"],
+            valeurs=["Nom 1"],
+        )
+        SuggestionUnitaireFactory(
+            suggestion_groupe=sg2,
+            suggestion_modele="Acteur",
+            champs=["nom"],
+            valeurs=["Nom 2"],
+        )
+
+        queryset = SuggestionGroupe.objects.filter(id__in=[sg1.id, sg2.id])
+        apply_suggestions_to_correction(admin_instance, mock_request, queryset)
+
         assert (
             sg1.suggestion_unitaires.filter(suggestion_modele="RevisionActeur").count()
             == 1
@@ -266,162 +662,48 @@ class TestApplySuggestionsToParent:
             == 1
         )
 
-
-@pytest.mark.django_db
-class TestApplySuggestionsToRevision:
-    """Tests action apply_suggestions_to_revision from data admin suggestion_groupe"""
-
-    def test_apply_suggestions_to_revision_creates_revision_suggestions(
+    def test_processes_only_eligible_suggestion_groupe_in_mixed_queryset(
         self, admin_instance, mock_request
     ):
-        """
-        Test that the Acteur suggestions are copied to RevisionActeur when
-        acteur_id == revision_acteur_id
-        """
-        # Create an acteur and a revision_acteur with the same identifiant_unique
-        acteur = ActeurFactory()
-        revision_acteur = acteur.get_or_create_revision()
-
-        # Create a SuggestionGroupe with revision
-        suggestion_groupe = SuggestionGroupeFactory(
-            acteur=acteur,
-            revision_acteur=revision_acteur,
+        """Only suggestion groupes with SOURCE_* type are processed"""
+        acteur_eligible = ActeurFactory()
+        acteur_skipped = ActeurFactory()
+        eligible = SuggestionGroupeFactory(
+            acteur=acteur_eligible,
+            revision_acteur=acteur_eligible.get_or_create_revision(),
+            suggestion_cohorte=SuggestionCohorteFactory(
+                type_action=SuggestionAction.SOURCE_MODIFICATION.value,
+            ),
         )
-
-        # Create a SuggestionUnitaire for Acteur
+        skipped = SuggestionGroupeFactory(
+            acteur=acteur_skipped,
+            revision_acteur=acteur_skipped.get_or_create_revision(),
+            suggestion_cohorte=SuggestionCohorteFactory(
+                type_action=SuggestionAction.CLUSTERING.value,
+            ),
+        )
         SuggestionUnitaireFactory(
-            suggestion_groupe=suggestion_groupe,
+            suggestion_groupe=eligible,
             suggestion_modele="Acteur",
             champs=["nom"],
-            valeurs=["Nouveau nom"],
+            valeurs=["Eligible"],
         )
-
-        # Verify that there is no SuggestionUnitaire RevisionActeur before
-        assert (
-            suggestion_groupe.suggestion_unitaires.filter(
-                suggestion_modele="RevisionActeur"
-            ).count()
-            == 0
-        )
-
-        # Call the action
-        queryset = suggestion_groupe._meta.model.objects.filter(id=suggestion_groupe.id)
-        apply_suggestions_to_revision(admin_instance, mock_request, queryset)
-
-        assert (
-            suggestion_groupe.suggestion_unitaires.filter(
-                suggestion_modele="RevisionActeur"
-            ).count()
-            == 1
-        )
-        su_revision = suggestion_groupe.suggestion_unitaires.filter(
-            suggestion_modele="RevisionActeur", champs=["nom"]
-        ).first()
-        assert su_revision is not None
-        assert su_revision.valeurs == ["Nouveau nom"]
-        assert su_revision.revision_acteur == revision_acteur
-
-    def test_apply_suggestions_to_revision_updates_existing_revision_suggestions(
-        self, admin_instance, mock_request
-    ):
-        """Test that the existing RevisionActeur suggestions are updated"""
-        # Create an acteur and a revision_acteur
-        acteur = ActeurFactory()
-        revision_acteur = acteur.get_or_create_revision()
-
-        suggestion_groupe = SuggestionGroupeFactory(
-            acteur=acteur,
-            revision_acteur=revision_acteur,
-        )
-
-        # Create a SuggestionUnitaire for Acteur
         SuggestionUnitaireFactory(
-            suggestion_groupe=suggestion_groupe,
+            suggestion_groupe=skipped,
             suggestion_modele="Acteur",
             champs=["nom"],
-            valeurs=["Nouveau nom"],
+            valeurs=["Skipped"],
         )
 
-        # Create a SuggestionUnitaire RevisionActeur existing
-        su_revision_existante = SuggestionUnitaireFactory(
-            suggestion_groupe=suggestion_groupe,
-            suggestion_modele="RevisionActeur",
-            revision_acteur=revision_acteur,
-            champs=["nom"],
-            valeurs=["Ancienne valeur"],
-        )
+        queryset = SuggestionGroupe.objects.filter(id__in=[eligible.id, skipped.id])
+        apply_suggestions_to_correction(admin_instance, mock_request, queryset)
 
-        # Call the action
-        queryset = suggestion_groupe._meta.model.objects.filter(id=suggestion_groupe.id)
-        apply_suggestions_to_revision(admin_instance, mock_request, queryset)
-
-        # Verify that the existing suggestion has been updated
-        su_revision_existante.refresh_from_db()
-
-        assert su_revision_existante.valeurs == ["Nouveau nom"]
-
-    def test_apply_suggestions_to_revision_skips_when_no_revision(
-        self, admin_instance, mock_request
-    ):
-        """Test that the action does nothing when there is no revision_acteur"""
-        suggestion_groupe = SuggestionGroupeFactory(
-            acteur=ActeurFactory(),
-            revision_acteur=None,
-        )
-
-        SuggestionUnitaireFactory(
-            suggestion_groupe=suggestion_groupe,
-            suggestion_modele="Acteur",
-            champs=["nom"],
-            valeurs=["Nouveau nom"],
-        )
-
-        # Call the action
-        queryset = suggestion_groupe._meta.model.objects.filter(id=suggestion_groupe.id)
-        apply_suggestions_to_revision(admin_instance, mock_request, queryset)
-
-        # Verify that no RevisionActeur suggestion has been created
-        assert (
-            suggestion_groupe.suggestion_unitaires.filter(
-                suggestion_modele="RevisionActeur"
-            ).count()
-            == 0
-        )
-
-    def test_apply_suggestions_to_revision_skips_with_parent(
-        self, admin_instance, mock_request
-    ):
-        """
-        Test that the action does nothing when revision_acteur_id is different than
-        acteur_id (parent case)
-        """
-        # Create an acteur and a revision_acteur parent different
-        acteur = ActeurFactory()
-        revision_acteur_parent = RevisionActeurFactory()
-
-        suggestion_groupe = SuggestionGroupeFactory(
-            acteur=acteur,
-            revision_acteur=revision_acteur_parent,
-        )
-
-        SuggestionUnitaireFactory(
-            suggestion_groupe=suggestion_groupe,
-            suggestion_modele="Acteur",
-            champs=["nom"],
-            valeurs=["Nouveau nom"],
-        )
-
-        # Call the action
-        queryset = suggestion_groupe._meta.model.objects.filter(id=suggestion_groupe.id)
-        apply_suggestions_to_revision(admin_instance, mock_request, queryset)
-
-        # Verify that no RevisionActeur suggestion has been created
-        assert (
-            suggestion_groupe.suggestion_unitaires.filter(
-                suggestion_modele="RevisionActeur"
-            ).count()
-            == 0
-        )
+        assert eligible.suggestion_unitaires.filter(
+            suggestion_modele="RevisionActeur"
+        ).exists()
+        assert not skipped.suggestion_unitaires.filter(
+            suggestion_modele="RevisionActeur"
+        ).exists()
 
 
 @pytest.mark.django_db

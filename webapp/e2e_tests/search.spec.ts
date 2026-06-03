@@ -202,13 +202,21 @@ test.describe("Recherche de produits", () => {
     await searchTagAnchor!.click()
 
     // La fiche d'arrivée doit afficher le bandeau « Votre recherche … »
-    // car on est arrivé via un synonyme.
-    const heading = page.getByText(/Votre recherche.*correspond aux recommandations/)
+    // car on est arrivé via un synonyme. Le terme est inséré via dsfr_tag qui
+    // rend un <p>, donc le texte est réparti sur plusieurs lignes — d'où [\s\S].
+    const heading = page.getByText(
+      /Votre recherche[\s\S]*correspond aux recommandations/,
+    )
     await expect(heading).toBeVisible({ timeout: TIMEOUT.DEFAULT })
 
     // Étape 2 : depuis la fiche, lancer une nouvelle recherche dont le résultat
-    // sélectionné n'est pas un SearchTag (pas de data-search-term-id).
-    await typeSearchQuery(page, "lave")
+    // sélectionné n'est pas un SearchTag (pas de data-search-term-id). La
+    // fiche produit n'expose que la search input du header (préfixe
+    // "header-autocomplete"), pas celle de la home, d'où le sélecteur explicite.
+    const headerSearchInput = page.locator("#id_header-autocomplete-search")
+    await headerSearchInput.click()
+    await headerSearchInput.fill("")
+    await headerSearchInput.pressSequentially("lave", { delay: 50 })
     const nextResults = await waitForResults(page)
     const nextCount = await nextResults.count()
     expect(nextCount).toBeGreaterThan(0)
@@ -227,7 +235,7 @@ test.describe("Recherche de produits", () => {
 
     // Le bandeau précédent ne doit pas être conservé sur la nouvelle page.
     await expect(
-      page.getByText(/Votre recherche.*correspond aux recommandations/),
+      page.getByText(/Votre recherche[\s\S]*correspond aux recommandations/),
     ).toHaveCount(0)
 
     // Le cookie qf_search_term_id doit avoir été effacé côté navigateur.
