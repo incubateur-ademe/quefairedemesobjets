@@ -46,14 +46,23 @@ class Command(BaseCommand):
             action=argparse.BooleanOptionalAction,
             default=False,
         )
+        parser.add_argument(
+            "--source-codes",
+            help="Source codes to copy proposition service from revision",
+            action="append",
+            default=[],
+        )
 
     def handle(self, *args, **options):
         dry_run = options["dry_run"]
         for_selected_sources = options["for_selected_sources"]
         if_empty = options["if_empty"]
+        source_codes = options["source_codes"]
+        if not source_codes:
+            source_codes = SOURCE_CODES
         if for_selected_sources:
             self.copy_proposition_service_from_revision_for_selected_sources(
-                dry_run=dry_run
+                source_codes=source_codes, dry_run=dry_run
             )
         if if_empty:
             self.copy_proposition_service_from_revision_if_empty(dry_run=dry_run)
