@@ -1,31 +1,41 @@
 # https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
 
 version: 2
+
 updates:
   - package-ecosystem: "uv"
     directory: "/webapp"
+    open-pull-requests-limit: 100
     schedule:
       interval: "weekly"
       day: "tuesday"
       time: "06:00" # UTC
     cooldown:
       default-days: 7
+    allow:
+      - dependency-type: "all"
   - package-ecosystem: "uv"
     directory: "/data-platform"
+    open-pull-requests-limit: 100
     schedule:
       interval: "weekly"
       day: "tuesday"
       time: "06:05" # UTC
     cooldown:
       default-days: 7
+    allow:
+      - dependency-type: "all"
   - package-ecosystem: "npm"
     directory: "/webapp"
+    open-pull-requests-limit: 100
     schedule:
       interval: "weekly"
       day: "tuesday"
       time: "06:15" # UTC
     cooldown:
       default-days: 7
+    allow:
+      - dependency-type: "all"
     groups:
       parcel:
         patterns:
@@ -39,17 +49,23 @@ updates:
           - "*eslint*"
   - package-ecosystem: "github-actions"
     directory: "/"
+    open-pull-requests-limit: 100
     schedule:
       interval: "weekly"
       day: "tuesday"
       time: "06:30" # UTC
     cooldown:
       default-days: 7
+    allow:
+      - dependency-type: "all"
   - package-ecosystem: "terraform"
     directory: "/infrastructure"
+    open-pull-requests-limit: 100
     schedule:
       interval: "weekly"
       day: "tuesday"
       time: "06:45" # UTC
     cooldown:
       default-days: 7
+    allow:
+      - dependency-type: "all"
