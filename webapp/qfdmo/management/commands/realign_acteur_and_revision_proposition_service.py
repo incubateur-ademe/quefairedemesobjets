@@ -31,18 +31,32 @@ class Command(BaseCommand):
             action=argparse.BooleanOptionalAction,
             default=False,
         )
+        parser.add_argument(
+            "--for-selected-sources",
+            help="Copy proposition service from revision for selected sources",
+            action=argparse.BooleanOptionalAction,
+            default=False,
+        )
+        parser.add_argument(
+            "--if-empty",
+            help=(
+                "Copy proposition service from revision if acteur has no proposition"
+                " service"
+            ),
+            action=argparse.BooleanOptionalAction,
+            default=False,
+        )
 
     def handle(self, *args, **options):
         dry_run = options["dry_run"]
-        self.stdout.write(
-            self.style.SUCCESS(
-                "Copying proposition service from revision for selected sources"
-                f"{' [DRY RUN]' if dry_run else ''}"
+        for_selected_sources = options["for_selected_sources"]
+        if_empty = options["if_empty"]
+        if for_selected_sources:
+            self.copy_proposition_service_from_revision_for_selected_sources(
+                dry_run=dry_run
             )
-        )
-        self.copy_proposition_service_from_revision_for_selected_sources(
-            dry_run=dry_run
-        )
+        if if_empty:
+            self.copy_proposition_service_from_revision_if_empty(dry_run=dry_run)
 
     def _copy_ps_from_revision_to_acteur(
         self, acteur: Acteur, revision_acteur: RevisionActeur, dry_run: bool
@@ -61,18 +75,28 @@ class Command(BaseCommand):
                     proposition_service.sous_categories.set(
                         revision_proposition_service.sous_categories.all()
                     )
-                self.stdout.write(
-                    self.style.SUCCESS(
-                        "Copied proposition service from revision for acteur "
-                        f"{acteur.identifiant_unique}"
+                else:
+                    self.stdout.write(
+                        self.style.SUCCESS(
+                            "DRY RUN: Would have copied proposition service"
+                            " from revision for acteur "
+                            f"{acteur.identifiant_unique}"
+                        )
                     )
-                )
 
     def copy_proposition_service_from_revision_for_selected_sources(
         self,
         source_codes: list[str] = SOURCE_CODES,
         dry_run: bool = False,
     ):
+        self.stdout.write(
+            self.style.SUCCESS(
+                "Copying proposition service from revision for selected sources"
+                f"{' [DRY RUN]' if dry_run else ''}"
+            )
+        )
+        count = 0
+        total = Acteur.objects.filter(source__code__in=source_codes).count()
         for acteur in Acteur.objects.filter(source__code__in=source_codes):
             try:
                 revision_acteur = RevisionActeur.objects.get(
@@ -81,12 +105,25 @@ class Command(BaseCommand):
             except RevisionActeur.DoesNotExist:
                 continue
             self._copy_ps_from_revision_to_acteur(acteur, revision_acteur, dry_run)
+            count += 1
+            if count % 100 == 0:
+                self.stdout.write(
+                    self.style.SUCCESS(f"Processed {count} / {total} acteurs")
+                )
 
     def copy_proposition_service_from_revision_if_empty(
         self,
         dry_run: bool = False,
     ):
-        # get acteur without proposition service
+        self.stdout.write(
+            self.style.SUCCESS(
+                "Copying proposition service from revision if acteur has no proposition"
+                " service"
+                f"{' [DRY RUN]' if dry_run else ''}"
+            )
+        )
+        count = 0
+        total = Acteur.objects.filter(proposition_services__isnull=True).count()
         acteurs = Acteur.objects.filter(proposition_services__isnull=True)
         for acteur in acteurs:
             try:
@@ -96,3 +133,8 @@ class Command(BaseCommand):
             except RevisionActeur.DoesNotExist:
                 continue
             self._copy_ps_from_revision_to_acteur(acteur, revision_acteur, dry_run)
+            count += 1
+            if count % 100 == 0:
+                self.stdout.write(
+                    self.style.SUCCESS(f"Processed {count} / {total} acteurs")
+                )
