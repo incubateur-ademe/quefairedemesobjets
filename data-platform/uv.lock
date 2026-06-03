@@ -899,7 +899,7 @@ requires-dist = [
     { name = "apache-airflow-providers-postgres", specifier = ">=6.2.2,<7" },
     { name = "apache-airflow-providers-standard", specifier = ">=1.13.1" },
     { name = "boto3", specifier = ">=1.42.35" },
-    { name = "dbt-core", specifier = ">=1.10.9,<2" },
+    { name = "dbt-core", specifier = ">=1.11.11,<2" },
     { name = "dbt-postgres", specifier = ">=1.9.1,<2" },
     { name = "fuzzywuzzy", specifier = ">=0.18.0,<0.19" },
     { name = "numpy", specifier = ">=1.26.0,<2" },
