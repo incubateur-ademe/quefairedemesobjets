@@ -10,6 +10,8 @@ updates:
       time: "06:00" # UTC
     cooldown:
       default-days: 7
+    allow:
+      - dependency-type: "all"
   - package-ecosystem: "uv"
     directory: "/data-platform"
     schedule:
@@ -18,6 +20,8 @@ updates:
       time: "06:05" # UTC
     cooldown:
       default-days: 7
+    allow:
+      - dependency-type: "all"
   - package-ecosystem: "npm"
     directory: "/webapp"
     schedule:
@@ -26,6 +30,8 @@ updates:
       time: "06:15" # UTC
     cooldown:
       default-days: 7
+    allow:
+      - dependency-type: "all"
     groups:
       parcel:
         patterns:
@@ -45,6 +51,8 @@ updates:
       time: "06:30" # UTC
     cooldown:
       default-days: 7
+    allow:
+      - dependency-type: "all"
   - package-ecosystem: "terraform"
     directory: "/infrastructure"
     schedule:
@@ -53,3 +61,5 @@ updates:
       time: "06:45" # UTC
     cooldown:
       default-days: 7
+    allow:
+      - dependency-type: "all"
