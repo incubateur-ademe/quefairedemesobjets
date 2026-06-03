@@ -20,7 +20,7 @@ jobs:
     name: 📝 Backend Linter
     runs-on: ubuntu-slim
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v6.0.2
 
       - name: Setup webapp Python environment
         uses: ./.github/actions/setup-backend
@@ -50,7 +50,7 @@ jobs:
     name: 📝 Frontend Linter
     runs-on: ubuntu-slim
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v6.0.2
 
       - name: Setup frontend environment
         uses: ./.github/actions/setup-frontend
@@ -89,7 +89,7 @@ jobs:
     runs-on: ubuntu-slim
     needs: frontend_linter
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v6.0.2
 
       - name: Setup frontend environment
         uses: ./.github/actions/setup-frontend

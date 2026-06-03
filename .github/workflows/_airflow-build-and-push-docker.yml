@@ -34,7 +34,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.0.2
 
       # https://github.com/docker/login-action
       - name: "[🟣 Scaleway] Log in to the Scaleway Container registry"

@@ -47,7 +47,7 @@ jobs:
           POSTGRES_PASSWORD: webapp # pragma: allowlist secret
           POSTGRES_DB: webapp
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v6.0.2
 
       - name: Install GIS packages
         uses: ./.github/actions/install-gis
