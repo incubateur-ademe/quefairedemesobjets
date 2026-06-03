@@ -1,12 +1,12 @@
 {
   "type": "module",
   "scripts": {
-    "build": "parcel build",
+    "build": "parcel build --target prod",
     "lint": "eslint . --fix",
     "format:check": "prettier --check static/to_compile",
     "format": "prettier static/to_compile --write",
     "test": "jest ./static/to_compile",
-    "watch": "parcel watch --no-hmr",
+    "watch": "parcel watch --target dev --no-hmr",
     "e2e_test": " npx playwright test --update-snapshots"
   },
   "source": [
@@ -23,7 +23,11 @@
     "static/to_compile/qfdmo.ts"
   ],
   "targets": {
-    "default": {
+    "prod": {
+      "distDir": "./static/compiled",
+      "sourceMap": false
+    },
+    "dev": {
       "distDir": "./static/compiled"
     }
   },
