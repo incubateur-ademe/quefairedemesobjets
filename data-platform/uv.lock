@@ -323,7 +323,7 @@ wheels = [
 
 [[package]]
 name = "apache-airflow-providers-fab"
-version = "3.6.3"
+version = "3.6.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apache-airflow" },
@@ -340,12 +340,13 @@ dependencies = [
     { name = "jmespath" },
     { name = "marshmallow" },
     { name = "msgpack" },
+    { name = "pyjwt" },
     { name = "werkzeug" },
     { name = "wtforms" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/94/b0/55e299c3f8ac94f682efb0787d1b14ec8edb693cd130338f93c12349b173/apache_airflow_providers_fab-3.6.3.tar.gz", hash = "sha256:6cf28dda98dbad9593d4667f987f2fa7716ed31874ee0caf06d2bca5c09e4eb4", size = 831337, upload-time = "2026-05-11T15:44:59.736Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e9/8e/8f83f27721fe562d0267d1464bce958c84879cc1f15dcc7f7c2db730da13/apache_airflow_providers_fab-3.6.4.tar.gz", hash = "sha256:9929465a448726fb38aff47344529f36c10ddc41efb0187ad223ad66cc19afb3", size = 833913, upload-time = "2026-05-23T12:32:32.595Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d8/49/19ddaf2c2acb785089db712916a58e0b1b42428471bd4a55522e201b6c78/apache_airflow_providers_fab-3.6.3-py3-none-any.whl", hash = "sha256:3df2fc996355ef2e387aad8490485ffe079f01e28162fdc92fdfda29a2fd2a56", size = 604687, upload-time = "2026-05-11T15:44:36.055Z" },
+    { url = "https://files.pythonhosted.org/packages/fb/35/16b0ed3c463eb41bf772208e6c671512cc794348007e73ee6c08b1a0c72a/apache_airflow_providers_fab-3.6.4-py3-none-any.whl", hash = "sha256:8cc956cec46e27b49d7429c0e75fb2df5ba649e4294f7e696ae8c43b703f8378", size = 606521, upload-time = "2026-05-23T12:31:30.332Z" },
 ]
 
 [[package]]
@@ -895,7 +896,7 @@ dev = [
 requires-dist = [
     { name = "apache-airflow", specifier = ">=3.0.0,<4" },
     { name = "apache-airflow-providers-amazon", specifier = ">=9.26.0" },
-    { name = "apache-airflow-providers-fab", specifier = ">=3.6.3" },
+    { name = "apache-airflow-providers-fab", specifier = ">=3.6.4" },
     { name = "apache-airflow-providers-postgres", specifier = ">=6.2.2,<7" },
     { name = "apache-airflow-providers-standard", specifier = ">=1.13.1" },
     { name = "boto3", specifier = ">=1.42.35" },
@@ -1665,7 +1666,7 @@ wheels = [
 
 [[package]]
 name = "flask-appbuilder"
-version = "5.2.0"
+version = "5.2.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apispec", extra = ["yaml"] },
@@ -1690,9 +1691,9 @@ dependencies = [
     { name = "werkzeug" },
     { name = "wtforms" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/52/ca/a617a4b39d6c1336a3dbc0b2e2ee24c2cbd3183174620de965affa355741/flask_appbuilder-5.2.0.tar.gz", hash = "sha256:dd153b4649f0cd127aeed056a409141299c6f491ecbe297960b37ace07117e72", size = 7060586, upload-time = "2026-03-02T14:42:08.376Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/97/b2/ad1784b3393cda84fd68b90689b1d6db037c13a62a9726ef639068bf8a75/flask_appbuilder-5.2.1.tar.gz", hash = "sha256:a5f6f34aa4ae0092a9eeb5051dc210869d9360429a429b0be88416c2616e1281", size = 7077970, upload-time = "2026-04-09T11:06:35.649Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/2f/33/c3c98b590f644fe80298e368401a2ad920c153210bc1ebb4cb60d6ed6478/flask_appbuilder-5.2.0-py3-none-any.whl", hash = "sha256:054b9372e2f3785c8b0012bac744a807c5740bf4dff1ed207473a696a6321ce8", size = 2216573, upload-time = "2026-03-02T14:42:05.513Z" },
+    { url = "https://files.pythonhosted.org/packages/e8/af/bdfd96170b1159ddc0e8424dfebbbac93d7270a1a749b0857fdaf384f027/flask_appbuilder-5.2.1-py3-none-any.whl", hash = "sha256:c5a134870fc0b780ac8d9de15fea8c470613ebe44feeddf01a2c18d2c066e144", size = 2217302, upload-time = "2026-04-09T11:06:32.891Z" },
 ]
 
 [[package]]
