@@ -19,10 +19,12 @@ DAYS_OF_WEEK = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 def merge_consecutive_tuples(tuples: list[tuple[Any, Any]]) -> list[tuple[Any, Any]]:
     result = []
     if tuples:
-        current_start, current_end = tuples[0]
-        for next_start, next_end in tuples[1:]:
-            if current_end == next_start:
-                current_end = next_end
+        # Sort to ensure the tuples are in chronological order
+        sorted_tuples = sorted(tuples)
+        current_start, current_end = sorted_tuples[0]
+        for next_start, next_end in sorted_tuples[1:]:
+            if next_start <= current_end:
+                current_end = max(current_end, next_end)
             else:
                 result.append((current_start, current_end))
                 current_start, current_end = next_start, next_end
