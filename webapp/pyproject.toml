@@ -41,7 +41,7 @@ dependencies = [
     "wagtail==7.4",
     "pre-commit>=4.6.0",
     "modelsearch>=1.1.1",
-    "wagtailmenus>=4.0.6",
+    "wagtailmenus>=4.0.7",
 ]
 
 [build-system]
