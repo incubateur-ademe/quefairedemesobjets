@@ -368,7 +368,7 @@ wheels = [
 
 [[package]]
 name = "apache-airflow-providers-postgres"
-version = "6.6.3"
+version = "6.7.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apache-airflow" },
@@ -377,9 +377,9 @@ dependencies = [
     { name = "asyncpg" },
     { name = "psycopg2-binary" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/fc/fa/ff9c18754b482e612a548c114c43804c4275c0175fd7a12ad8ae7599deb3/apache_airflow_providers_postgres-6.6.3.tar.gz", hash = "sha256:f9013dfd5d57723d3245779ad8d9d1b586bcf928024611ff9c22db3861121bcf", size = 62537, upload-time = "2026-04-12T14:22:33.321Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/32/80/ca228db8942ba4d8e5d158d72fa9061e8f1a726c59eccbdba8a8cbaf4de4/apache_airflow_providers_postgres-6.7.0.tar.gz", hash = "sha256:abaaa3b71abfac9b2caf5aa2afff496e0fd498bce327d4e744fc08f779c44c40", size = 63333, upload-time = "2026-05-23T12:32:50.163Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/69/7b/6b610a69c2bba38dfac1679b7b27b8f368b69230764d98bf8ddba4109eda/apache_airflow_providers_postgres-6.6.3-py3-none-any.whl", hash = "sha256:b61aaf332907fff7aad11c9d3841279a8e828c3b04397cb480621178bc3c4f12", size = 24027, upload-time = "2026-04-12T14:20:56.792Z" },
+    { url = "https://files.pythonhosted.org/packages/60/34/d6a34a11c8b9b4743b880a1d0fd0761f15cdb2af161d19a0b4808952336c/apache_airflow_providers_postgres-6.7.0-py3-none-any.whl", hash = "sha256:aec6e35d0194e65e3095cebc2d23fdba636dcb0781e27edcaf6aa3826e102ed9", size = 24390, upload-time = "2026-05-23T12:31:53.152Z" },
 ]
 
 [[package]]
@@ -897,7 +897,7 @@ requires-dist = [
     { name = "apache-airflow", specifier = ">=3.0.0,<4" },
     { name = "apache-airflow-providers-amazon", specifier = ">=9.26.0" },
     { name = "apache-airflow-providers-fab", specifier = ">=3.6.4" },
-    { name = "apache-airflow-providers-postgres", specifier = ">=6.2.2,<7" },
+    { name = "apache-airflow-providers-postgres", specifier = ">=6.7.0,<7" },
     { name = "apache-airflow-providers-standard", specifier = ">=1.13.1" },
     { name = "boto3", specifier = ">=1.43.15" },
     { name = "dbt-core", specifier = ">=1.11.11,<2" },
