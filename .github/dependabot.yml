@@ -4,23 +4,14 @@ version: 2
 
 updates:
   - package-ecosystem: "uv"
-    directory: "/webapp"
+    directories:
+      - "/webapp"
+      - "/data-platform"
     open-pull-requests-limit: 100
     schedule:
       interval: "weekly"
       day: "tuesday"
       time: "06:00" # UTC
-    cooldown:
-      default-days: 7
-    allow:
-      - dependency-type: "all"
-  - package-ecosystem: "uv"
-    directory: "/data-platform"
-    open-pull-requests-limit: 100
-    schedule:
-      interval: "weekly"
-      day: "tuesday"
-      time: "06:05" # UTC
     cooldown:
       default-days: 7
     allow:
@@ -37,10 +28,29 @@ updates:
     allow:
       - dependency-type: "all"
     groups:
+      babel:
+        patterns:
+          - "@babel/*"
       parcel:
         patterns:
           - "@parcel/*"
           - "parcel"
+      protobufjs:
+        patterns:
+          - "@protobufjs/*"
+          - "protobufjs"
+      swc:
+        patterns:
+          - "@swc/*"
+          - "swc"
+      mapbox:
+        patterns:
+          - "@mapbox/*"
+          - "mapbox*"
+      sentry:
+        patterns:
+          - "@sentry/*"
+          - "sentry*"
       jest:
         patterns:
           - "*jest*"
@@ -59,7 +69,9 @@ updates:
     allow:
       - dependency-type: "all"
   - package-ecosystem: "terraform"
-    directory: "/infrastructure"
+    directories:
+      - "/infrastructure/modules/*"
+      - "/infrastructure/environments/*/*"
     open-pull-requests-limit: 100
     schedule:
       interval: "weekly"
