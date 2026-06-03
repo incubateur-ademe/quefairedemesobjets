@@ -6,9 +6,7 @@ from modelsearch.models import IndexEntry
 
 from search.models import SearchTerm
 
-# Chunk size for the object_id IN clause. The orphan set can hold tens of
-# thousands of ids; a single unbounded IN clause risks a statement timeout
-# (see django-modelsearch issue #58).
+# Chunk the object_id IN clause to avoid a statement timeout on a large index.
 CHUNK_SIZE = 1000
 
 
@@ -19,14 +17,10 @@ def _chunked(values, size):
 
 class Command(BaseCommand):
     help = (
-        "Purge orphan base IndexEntry rows for SearchTerms that have a more "
-        "specific child (Synonyme, SearchTag, ProduitPageSearchTerm). These "
-        "rows were written before get_indexed_objects() excluded them and are "
-        "never cleaned up by rebuild_modelsearch_index, because its stale "
-        "detection only removes entries whose underlying row no longer exists. "
-        "Leaving them in place duplicates results when a term matches via a "
-        "variante de recherche. Should be run once after deploying the "
-        "get_indexed_objects() multi-table inheritance fix."
+        "Purge orphan base SearchTerm IndexEntry rows for objects that have a "
+        "more specific child. rebuild_modelsearch_index does not remove them "
+        "(django-modelsearch #58); leaving them duplicates search results when "
+        "a term matches via a variante de recherche."
     )
 
     def add_arguments(self, parser):
@@ -42,9 +36,8 @@ class Command(BaseCommand):
 
         dry_run = options["dry_run"]
 
-        # ids of SearchTerm rows that have a more specific child. Their base
-        # IndexEntry (content_type=SearchTerm) is the orphan we want to remove;
-        # the child's own IndexEntry stays.
+        # SearchTerm ids that have a more specific child; their base IndexEntry
+        # is the orphan to remove. The child's own IndexEntry stays.
         child_ids = set()
         for child_model in (Synonyme, SearchTag, ProduitPageSearchTerm):
             child_ids.update(
@@ -56,8 +49,7 @@ class Command(BaseCommand):
             return
 
         searchterm_ct = ContentType.objects.get_for_model(SearchTerm)
-        # object_id is stored as text in the index table.
-        object_ids = [str(pk) for pk in child_ids]
+        object_ids = [str(pk) for pk in child_ids]  # object_id is text in the index
 
         total = 0
         for chunk in _chunked(object_ids, CHUNK_SIZE):
