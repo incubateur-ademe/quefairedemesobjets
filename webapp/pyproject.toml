@@ -14,7 +14,7 @@ dependencies = [
     "django-storages>=1.14.6,<2",
     "gunicorn>=26.0.0,<27",
     "opening-hours-py>=1.2.0,<2",
-    "orjson>=3.11.8,<4",
+    "orjson>=3.11.9,<4",
     "pillow>=12.2.0,<13",
     "psycopg",
     "python-decouple~=3.8",
