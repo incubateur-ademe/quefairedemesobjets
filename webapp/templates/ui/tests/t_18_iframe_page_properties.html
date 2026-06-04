@@ -1,7 +1,7 @@
 {% load dsfr_tags %}
 
 <div style="padding-top: 2000px;">
-  {% dsfr_callout title="Test pageType / pageSlug dans les événements iframe" text="Cette page intègre 4 iframes (carte, carte sur mesure, formulaire, assistant) pour vérifier que les événements PostHog iframe_page_viewed et interacted_with_iframe contiennent les bonnes propriétés pageType et pageSlug." icon_class="fr-icon-flask-line" %}
+  {% dsfr_callout title="Test pageType / pageSlug dans les événements iframe" text="Cette page intègre plusieurs iframes (carte, carte sur mesure, formulaire, assistant, info-tri configurateur, info-tri widget) pour vérifier que les événements PostHog iframe_page_viewed et interacted_with_iframe contiennent les bonnes propriétés pageType et pageSlug." icon_class="fr-icon-flask-line" %}
 
   <p>Scrollez jusqu'à chaque iframe pour déclencher les événements.</p>
 
@@ -23,5 +23,15 @@
   <h2>Assistant (<code>/</code>)</h2>
   <div data-testid="iframe-assistant" style="margin-bottom: 2rem;">
     <script src="{{ base_url }}/iframe.js"></script>
+  </div>
+
+  <h2>Info-tri configurateur (<code>/infotri</code>)</h2>
+  <div data-testid="iframe-infotri-configurateur" style="margin-bottom: 2rem;">
+    <script src="{{ base_url }}/infotri/configurateur.js"></script>
+  </div>
+
+  <h2>Info-tri widget (<code>/infotri/embed</code>)</h2>
+  <div data-testid="iframe-infotri" style="margin-bottom: 2rem;">
+    <script src="{{ base_url }}/infotri/iframe.js"></script>
   </div>
 </div>

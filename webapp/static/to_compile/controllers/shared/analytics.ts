@@ -399,8 +399,11 @@ export default class extends Controller<HTMLElement> {
     if (pathname.startsWith("/formulaire")) {
       return { pageType: "formulaire", pageSlug: "" }
     }
-    if (pathname.startsWith("/infotri")) {
+    if (pathname.startsWith("/infotri/embed")) {
       return { pageType: "infotri", pageSlug: "" }
+    }
+    if (pathname.startsWith("/infotri")) {
+      return { pageType: "infotri-configurateur", pageSlug: "" }
     }
     return { pageType: "quefaire", pageSlug: pathname.replace(/^\//, "") }
   }

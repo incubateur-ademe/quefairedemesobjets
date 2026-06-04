@@ -169,6 +169,16 @@ test.describe("📊 Analytics & Tracking", () => {
         expectedPageType: "quefaire",
         expectedPageSlug: "",
       },
+      {
+        testId: "iframe-infotri-configurateur",
+        expectedPageType: "infotri-configurateur",
+        expectedPageSlug: "",
+      },
+      {
+        testId: "iframe-infotri",
+        expectedPageType: "infotri",
+        expectedPageSlug: "",
+      },
     ]
 
     for (const { testId, expectedPageType, expectedPageSlug } of iframeCases) {
