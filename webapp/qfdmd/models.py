@@ -1,5 +1,5 @@
 import logging
-from typing import override
+from typing import Any, override
 
 from django.contrib.gis.db import models
 from django.core.exceptions import ValidationError
@@ -430,6 +430,30 @@ class ProduitPage(
         verbose_name="Corps de texte",
         blank=True,
     )
+
+    @property
+    def _partitionned_body(self) -> list:
+        # inspired by https://stackoverflow.com/a/55368810
+        breakpoint = self.body.first_block_by_name("carte_sur_mesure")
+        always_visible, hidden_in_iframe = [], []
+        switch = True
+        for item in self.body:
+            out = always_visible if switch else hidden_in_iframe
+            if item.id == breakpoint.id:
+                switch = False
+
+            out.append(item)
+
+        return [always_visible, hidden_in_iframe]
+
+    @property
+    def body_always_visible(self) -> Any:
+        return self._partitionned_body[0]
+
+    @property
+    def body_to_hide_in_iframe(self):
+        return self._partitionned_body[1]
+
     commentaire = RichTextField(blank=True)
 
     content_panels = Page.content_panels + [
