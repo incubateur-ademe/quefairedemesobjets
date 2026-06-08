@@ -1,6 +1,5 @@
 {% load dsfr_tags wagtailcore_tags %}
 
-{# TODO: check spacing #}
 <div class="qf-flex qf-flex-col qf-gap-2 {{ extra_classes }}">
     {% if bon_etat and mauvais_etat %}
         <div class="fr-tabs fr-tabs--noborder-mobile">
@@ -43,17 +42,23 @@
         </div>
     {% endif %}
 
-    <div class="qf-flex qf-flex-col qf-gap-4w qf-mt-2w">
-    {% for section in produit.content_display %}
-    <div id="{{ section.id }}">
-        <h2>
-        {{ section.title }}
-        </h2>
+    {# TODO: on break ici #}
 
-        <div>
-        {{ section.content|richtext }}
+    {% if iframe %}
+        <div class="qf-flex qf-flex-col qf-gap-4w qf-mt-2w">
+        {% for section in produit.content_display %}
+        <div id="{{ section.id }}">
+            <h2>
+            {{ section.title }}
+            </h2>
+
+            <div>
+            {{ section.content|richtext }}
+            </div>
         </div>
-    </div>
-    {% endfor %}
-    </div>
+        {% endfor %}
+        </div>
+    {% else %}
+        {% include "ui/components/produit/voir_version_standalone.html" %}
+    {% endif %}
 </div>
