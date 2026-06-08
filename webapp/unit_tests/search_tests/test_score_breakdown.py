@@ -80,7 +80,7 @@ class TestAutocompleteScoreBreakdownContext:
 
         assert response.status_code == 200
         assert "score_breakdown" not in response.context
-        assert b"tooltip-score-" not in response.content
+        assert b"score-breakdown-" not in response.content
 
     @patch("qfdmd.middleware.has_explicit_perm")
     def test_breakdown_rendered_for_beta(
@@ -93,5 +93,5 @@ class TestAutocompleteScoreBreakdownContext:
         assert response.status_code == 200
         assert "score_breakdown" in response.context
         assert response.context["score_breakdown"]
-        assert b"tooltip-score-" in response.content
-        assert b"Pourquoi ce score" in response.content
+        assert b"score-breakdown-" in response.content
+        assert "Title&nbsp;sim.".encode() in response.content
