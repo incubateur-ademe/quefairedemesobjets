@@ -446,6 +446,17 @@ class ProduitPage(
 
         return [always_visible, hidden_in_iframe]
 
+    def get_context(self, request, *args, **kwargs):
+        ctx = super().get_context(request, *args, **kwargs)
+        ctx["footer_primary_button"] = {
+            "label": "Lire plus sur cette fiche",
+            "extra_classes": "fr-btn--icon-left fr-icon-external-link-line",
+            "onclick": f"window.open('{self.get_full_url(request)}'"
+            ", '_blank', 'noopener,noreferrer')",
+        }
+
+        return ctx
+
     @property
     def body_always_visible(self) -> Any:
         return self._partitionned_body[0]
