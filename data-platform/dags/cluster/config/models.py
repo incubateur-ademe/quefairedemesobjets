@@ -38,7 +38,7 @@ class ClusterConfig(BaseModel):
     cluster_intra_source_is_allowed: bool
     cluster_fields_exact: list[str]
     cluster_fields_fuzzy: list[str]
-    cluster_fuzzy_threshold: float
+    cluster_fuzzy_threshold: float | int
 
     # DEDUP
     dedup_enrich_fields: list[str]
@@ -124,15 +124,20 @@ class ClusterConfig(BaseModel):
             raise ValueError("La distance dans le cluster doit être positive ou nulle")
 
         if values.get("cluster_fuzzy_threshold") is None:
-            values["cluster_fuzzy_threshold"] = 0.0
+            values["cluster_fuzzy_threshold"] = 0
 
         if (
             values["cluster_fuzzy_threshold"] < 0
-            or values["cluster_fuzzy_threshold"] > 1
+            or values["cluster_fuzzy_threshold"] > 100
         ):
             raise ValueError(
                 "Le seuil de similarité pour le groupage fuzzy doit être entre 0 et 1"
             )
+
+        # Convert to a float between 0 and 1
+        values["cluster_fuzzy_threshold"] = (
+            float(values["cluster_fuzzy_threshold"]) / 100.0
+        )
 
         # SOURCE CODES
         # Si aucun code source fourni alors on inclut toutes les sources

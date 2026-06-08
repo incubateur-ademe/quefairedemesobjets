@@ -137,6 +137,41 @@ class TestSearchTermSpecificResolution:
 
 
 @pytest.mark.django_db
+class TestSearchTermBaseIndexExclusion:
+    """When called as SearchTerm (the root), get_indexed_objects excludes rows
+    that have a more specific child. This prevents the same object being
+    indexed twice (once as SearchTerm, once as the child) which produces
+    duplicates when matching via a variante de recherche."""
+
+    def test_excludes_synonyme_rows_at_base(self, produit):
+        synonyme = Synonyme.objects.create(nom="Lave-linge", produit=produit)
+
+        base_indexed_ids = list(
+            SearchTerm.get_indexed_objects().values_list("id", flat=True)
+        )
+
+        assert synonyme.searchterm_ptr_id not in base_indexed_ids
+
+    def test_excludes_search_tag_rows_at_base(self):
+        tag = SearchTag.objects.create(name="frigo", slug="frigo")
+
+        base_indexed_ids = list(
+            SearchTerm.get_indexed_objects().values_list("id", flat=True)
+        )
+
+        assert tag.searchterm_ptr_id not in base_indexed_ids
+
+    def test_excludes_produit_page_search_term_rows_at_base(self, produit_page):
+        search_term = produit_page.produit_page_search_term
+
+        base_indexed_ids = list(
+            SearchTerm.get_indexed_objects().values_list("id", flat=True)
+        )
+
+        assert search_term.searchterm_ptr_id not in base_indexed_ids
+
+
+@pytest.mark.django_db
 class TestProduitPageSearchTermIndexExclusion:
     """ProduitPageSearchTerms linked to non-live pages are excluded from index."""
 
