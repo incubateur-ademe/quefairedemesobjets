@@ -43,4 +43,5 @@ class TestSynonyme:
         button = response.context["footer_primary_button"]
         assert button["label"] == "Lire plus sur cette fiche"
         assert synonyme.get_absolute_url() in button["onclick"]
+        assert "utm_source=qfdmod" in button["onclick"]
         assert "_blank" in button["onclick"]
