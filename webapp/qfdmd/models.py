@@ -472,8 +472,7 @@ class ProduitPage(
 
     def get_context(self, request, *args, **kwargs):
         ctx = super().get_context(request, *args, **kwargs)
-        url = f"{self.get_full_url(request)}?utm_source=qfdmod"
-        ctx.update(footer_primary_button=lire_plus_button(url))
+        ctx.update(footer_primary_button=lire_plus_button(self.get_full_url(request)))
 
         return ctx
 
