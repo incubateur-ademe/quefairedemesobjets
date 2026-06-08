@@ -42,11 +42,7 @@
         </div>
     {% endif %}
 
-    {# TODO: on break ici #}
-
-    {% if iframe %}
-        {% include "ui/components/produit/voir_version_standalone.html" %}
-    {% else %}
+    {% if not iframe %}
         <div class="qf-flex qf-flex-col qf-gap-4w qf-mt-2w">
         {% for section in produit.content_display %}
         <div id="{{ section.id }}">
