@@ -24,6 +24,13 @@ class TestArrayToList:
         assert _array_to_list("foo") == "foo"
         assert _array_to_list(None) is None
 
+    def test_nan_becomes_none(self):
+        # Parquet turns None cells of object columns into float('nan')
+        assert _array_to_list(float("nan")) is None
+        assert _array_to_list(np.nan) is None
+        # a non-nan float stays untouched
+        assert _array_to_list(1.5) == 1.5
+
     def test_ndarray_becomes_list(self):
         result = _array_to_list(np.array(["a", "b"]))
         assert result == ["a", "b"]
@@ -95,6 +102,19 @@ class TestNormalizeXcomValue:
         df = pd.DataFrame({"a": ["x", "y"], "b": [1, 2]})
         result = normalize_xcom_value(df)
         pd.testing.assert_frame_equal(result, df)
+
+    def test_dataframe_nan_cells_become_none(self):
+        df = pd.DataFrame({"data": ['{"nom": "x"}', None]})
+        # Force the None -> nan promotion parquet does on object columns
+        buf = io.BytesIO()
+        df.to_parquet(buf)
+        buf.seek(0)
+        df_after_parquet = pd.read_parquet(buf)
+
+        result = normalize_xcom_value(df_after_parquet)
+
+        assert result.iloc[0]["data"] == '{"nom": "x"}'
+        assert result.iloc[1]["data"] is None
 
     def test_dataframe_with_top_level_ndarray_cell(self):
         df = pd.DataFrame({"codes": [np.array(["a", "b"]), np.array(["c"])]})
