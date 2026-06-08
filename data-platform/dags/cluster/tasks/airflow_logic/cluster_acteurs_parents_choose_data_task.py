@@ -6,6 +6,7 @@ from airflow.providers.standard.operators.python import PythonOperator
 from cluster.config.models import ClusterConfig
 from cluster.config.tasks import TASKS
 from cluster.config.xcoms import XCOMS, xcom_pull, xcom_push
+from cluster.tasks.airflow_logic.utils import parent_data_new_serialize
 from cluster.tasks.business_logic.cluster_acteurs_config_create import (
     cluster_acteurs_config_create,
 )
@@ -62,7 +63,8 @@ def cluster_acteurs_parents_choose_data_wrapper(ti, params) -> None:
     logger.info(log.banner_string("🏁 Résultat final de cette tâche"))
     log.preview_df_as_markdown("clusters avec data parent", df, groupby="cluster_id")
 
-    xcom_push(ti, XCOMS.DF_PARENTS_CHOOSE_DATA, df)
+    # JSON-encode the dict column so it survives Parquet-based XCom transport
+    xcom_push(ti, XCOMS.DF_PARENTS_CHOOSE_DATA, parent_data_new_serialize(df))
 
 
 def cluster_acteurs_parents_choose_data_task(dag: DAG) -> PythonOperator:
