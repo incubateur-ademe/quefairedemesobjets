@@ -18,11 +18,7 @@
         {# Always show the blocks that come before the carte #}
         {% include "sites_conformes_content_manager/blocks/blocks_stream.html" with stream=page.body_always_visible page=page %}
 
-        {% if iframe %}
-            {# in iFrame mode, we do not show blocks that come after the carte #}
-            {# but a link instead to the full page, to reduce content length #}
-            {% include "ui/components/produit/voir_version_standalone.html" %}
-        {% else %}
+        {% if not iframe %}
             {% include "sites_conformes_content_manager/blocks/blocks_stream.html" with stream=page.body_to_hide_in_iframe page=page %}
         {% endif %}
 
