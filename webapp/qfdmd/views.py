@@ -35,6 +35,7 @@ from qfdmd.models import (
     Synonyme,
     TaggedSearchTag,
 )
+from qfdmd.utils import lire_plus_button
 from search.models import SearchTerm
 
 logger = logging.getLogger(__name__)
@@ -525,12 +526,7 @@ class SynonymeDetailView(DetailView):
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
         ctx.update(
-            footer_primary_button={
-                "label": "Lire plus sur cette fiche",
-                "extra_classes": "fr-btn--icon-left fr-icon-external-link-line",
-                "onclick": f"window.open('{self.object.get_absolute_url()}'"
-                ", '_blank', 'noopener,noreferrer')",
-            }
+            footer_primary_button=lire_plus_button(self.object.get_absolute_url())
         )
 
         return ctx
