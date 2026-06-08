@@ -79,99 +79,142 @@ class TestSuggestionGroupe:
 
 
 @pytest.mark.django_db
-class TestSuggestionGroupeSuggestionActeurHasParent:
-    def test_suggestion_acteur_has_parent_returns_false_when_no_revision_acteur(self):
-        """
-        Test that suggestion_acteur_has_parent returns False
-        when revision_acteur_id is None
-        """
-        acteur = ActeurFactory()
-        groupe = SuggestionGroupeFactory(acteur=acteur)
-
-        assert groupe.suggestion_acteur_has_parent() is False
-
-    def test_suggestion_acteur_has_parent_returns_false_when_same_ids(self):
-        """
-        Test that suggestion_acteur_has_parent returns False
-        when acteur_id == revision_acteur_id
-        """
-        acteur = ActeurFactory()
-        revision_acteur = RevisionActeurFactory(
-            identifiant_unique=acteur.identifiant_unique
-        )
-        groupe = SuggestionGroupeFactory(
-            acteur=acteur,
-            revision_acteur=revision_acteur,
+class TestSuggestionGroupeSuggestionsCanBeAppliedToParent:
+    @pytest.mark.parametrize(
+        "type_action",
+        [
+            SuggestionAction.SOURCE_AJOUT.value,
+            SuggestionAction.SOURCE_MODIFICATION.value,
+            SuggestionAction.SOURCE_SUPPRESSION.value,
+        ],
+    )
+    def test_returns_true_for_source_action_with_parent_revision_acteur(
+        self, type_action
+    ):
+        parent_revision_acteur = RevisionActeurFactory()
+        suggestion_groupe = SuggestionGroupeFactory(
+            suggestion_cohorte=SuggestionCohorteFactory(type_action=type_action),
+            parent_revision_acteur=parent_revision_acteur,
         )
 
-        # Verify that the IDs are different
-        assert groupe.acteur_id == groupe.revision_acteur_id
-        assert groupe.suggestion_acteur_has_parent() is False
+        assert suggestion_groupe.suggestions_can_be_applied_to_parent() is True
 
-    def test_suggestion_acteur_has_parent_returns_true_when_different_ids(self):
-        """
-        Test that suggestion_acteur_has_parent returns True
-        when acteur_id != revision_acteur_id
-        """
-        acteur = ActeurFactory()
-        revision_acteur = RevisionActeurFactory()
-        groupe = SuggestionGroupeFactory(
-            acteur=acteur,
-            revision_acteur=revision_acteur,
+    @pytest.mark.parametrize(
+        "type_action",
+        [
+            SuggestionAction.SOURCE_AJOUT.value,
+            SuggestionAction.SOURCE_MODIFICATION.value,
+            SuggestionAction.SOURCE_SUPPRESSION.value,
+        ],
+    )
+    def test_returns_false_for_source_action_without_parent_revision_acteur(
+        self, type_action
+    ):
+        suggestion_groupe = SuggestionGroupeFactory(
+            suggestion_cohorte=SuggestionCohorteFactory(type_action=type_action),
+            parent_revision_acteur=None,
         )
 
-        # Verify that the IDs are different
-        assert groupe.acteur_id != groupe.revision_acteur_id
-        assert groupe.suggestion_acteur_has_parent() is True
+        assert suggestion_groupe.suggestions_can_be_applied_to_parent() is False
+
+    @pytest.mark.parametrize(
+        "type_action",
+        [
+            SuggestionAction.CLUSTERING.value,
+            SuggestionAction.CRAWL_URLS.value,
+            SuggestionAction.ENRICH_ACTEURS_CLOSED.value,
+            SuggestionAction.ENRICH_ACTEURS_RGPD.value,
+            "other_action",
+        ],
+    )
+    def test_returns_false_for_non_source_action_with_parent_revision_acteur(
+        self, type_action
+    ):
+        parent_revision_acteur = RevisionActeurFactory()
+        suggestion_groupe = SuggestionGroupeFactory(
+            suggestion_cohorte=SuggestionCohorteFactory(type_action=type_action),
+            parent_revision_acteur=parent_revision_acteur,
+        )
+
+        assert suggestion_groupe.suggestions_can_be_applied_to_parent() is False
+
+    @pytest.mark.parametrize(
+        "type_action",
+        [
+            SuggestionAction.CLUSTERING.value,
+            SuggestionAction.CRAWL_URLS.value,
+            SuggestionAction.ENRICH_ACTEURS_CLOSED.value,
+            SuggestionAction.ENRICH_ACTEURS_RGPD.value,
+            "other_action",
+        ],
+    )
+    def test_returns_false_for_non_source_action_without_parent_revision_acteur(
+        self, type_action
+    ):
+        suggestion_groupe = SuggestionGroupeFactory(
+            suggestion_cohorte=SuggestionCohorteFactory(type_action=type_action),
+            parent_revision_acteur=None,
+        )
+
+        assert suggestion_groupe.suggestions_can_be_applied_to_parent() is False
 
 
 @pytest.mark.django_db
-class TestSuggestionGroupeSuggestionActeurHasRevision:
-    def test_suggestion_acteur_has_correction_returns_false_when_no_revision_acteur(
-        self,
+class TestSuggestionGroupeSuggestionsCanBeAppliedToCorrection:
+    @pytest.mark.parametrize(
+        "type_action, expected_result",
+        [
+            (SuggestionAction.SOURCE_AJOUT.value, True),
+            (SuggestionAction.SOURCE_MODIFICATION.value, True),
+            (SuggestionAction.SOURCE_SUPPRESSION.value, True),
+            (SuggestionAction.CLUSTERING.value, False),
+            (SuggestionAction.CRAWL_URLS.value, False),
+            (SuggestionAction.ENRICH_ACTEURS_CLOSED.value, False),
+            (SuggestionAction.ENRICH_ACTEURS_RGPD.value, False),
+            ("other_action", False),
+        ],
+    )
+    def test_returns_expected_result_for_type_action(
+        self, type_action, expected_result
     ):
-        """
-        Test that suggestion_acteur_has_correction returns False
-        when revision_acteur_id is None
-        """
-        acteur = ActeurFactory()
-        groupe = SuggestionGroupeFactory(acteur=acteur)
+        suggestion_groupe = SuggestionGroupeFactory(
+            suggestion_cohorte=SuggestionCohorteFactory(type_action=type_action),
+        )
 
-        assert groupe.suggestion_acteur_has_correction() is False
+        assert (
+            suggestion_groupe.suggestions_can_be_applied_to_correction()
+            is expected_result
+        )
 
-    def test_suggestion_acteur_has_correction_returns_true_when_same_ids(self):
-        """
-        Test that suggestion_acteur_has_correction returns True
-        when acteur_id == revision_acteur_id
-        """
+    @pytest.mark.parametrize(
+        "type_action, expected_result",
+        [
+            (SuggestionAction.SOURCE_AJOUT.value, True),
+            (SuggestionAction.SOURCE_MODIFICATION.value, True),
+            (SuggestionAction.SOURCE_SUPPRESSION.value, True),
+            (SuggestionAction.CLUSTERING.value, False),
+            ("other_action", False),
+        ],
+    )
+    def test_result_is_independent_of_parent_revision_acteur(
+        self, type_action, expected_result
+    ):
         acteur = ActeurFactory()
         revision_acteur = RevisionActeurFactory(
             identifiant_unique=acteur.identifiant_unique
         )
-        groupe = SuggestionGroupeFactory(
+        parent_revision_acteur = RevisionActeurFactory()
+        suggestion_groupe = SuggestionGroupeFactory(
+            suggestion_cohorte=SuggestionCohorteFactory(type_action=type_action),
             acteur=acteur,
             revision_acteur=revision_acteur,
+            parent_revision_acteur=parent_revision_acteur,
         )
 
-        # Verify that the IDs are different
-        assert groupe.acteur_id == groupe.revision_acteur_id
-        assert groupe.suggestion_acteur_has_correction() is True
-
-    def test_suggestion_acteur_has_correction_returns_false_when_different_ids(self):
-        """
-        Test that suggestion_acteur_has_correction returns False
-        when acteur_id != revision_acteur_id
-        """
-        acteur = ActeurFactory()
-        revision_acteur = RevisionActeurFactory()
-        groupe = SuggestionGroupeFactory(
-            acteur=acteur,
-            revision_acteur=revision_acteur,
+        assert (
+            suggestion_groupe.suggestions_can_be_applied_to_correction()
+            is expected_result
         )
-
-        # Verify that the IDs are different
-        assert groupe.acteur_id != groupe.revision_acteur_id
-        assert groupe.suggestion_acteur_has_correction() is False
 
 
 @pytest.mark.django_db

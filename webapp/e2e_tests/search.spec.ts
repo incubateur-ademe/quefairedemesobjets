@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test"
+import { expect, Locator, test } from "@playwright/test"
 import {
   navigateTo,
   SEARCH_INPUT_SELECTOR,
@@ -110,17 +110,19 @@ test.describe("Recherche de produits", () => {
     await typeSearchQuery(page, "lave")
     await waitForResults(page)
 
-    // Naviguer vers le bas avec la flèche
-    await page.keyboard.press("ArrowDown")
+    // APG combobox-autocomplete-list: DOM focus stays on the textbox,
+    // the active option is conveyed via aria-activedescendant on the input
+    // and aria-selected on the option (no DOM focus moves to the link).
+    const searchInput = page.locator(SEARCH_INPUT_SELECTOR)
 
-    // Le premier résultat doit avoir le focus
-    const firstResult = page.locator(SEARCH_RESULTS_SELECTOR).first()
-    await expect(firstResult).toBeFocused()
-
-    // Naviguer encore vers le bas
     await page.keyboard.press("ArrowDown")
-    const secondResult = page.locator(SEARCH_RESULTS_SELECTOR).nth(1)
-    await expect(secondResult).toBeFocused()
+    await expect(searchInput).toHaveAttribute("aria-activedescendant", "option-1")
+    await expect(page.locator("li#option-1")).toHaveAttribute("aria-selected", "true")
+
+    await page.keyboard.press("ArrowDown")
+    await expect(searchInput).toHaveAttribute("aria-activedescendant", "option-2")
+    await expect(page.locator("li#option-2")).toHaveAttribute("aria-selected", "true")
+    await expect(page.locator("li#option-1")).not.toHaveAttribute("aria-selected", /.*/)
   })
 
   test("Échap ferme les résultats de recherche", async ({ page }) => {
@@ -177,5 +179,67 @@ test.describe("Recherche de produits", () => {
     expect(nextUrl).toBeTruthy()
     const response = await page.goto(nextUrl)
     expect(response?.status()).toBe(200)
+  })
+
+  test("Le synonyme de recherche n'est pas conservé pour la recherche suivante", async ({
+    page,
+  }) => {
+    // Étape 1 : rechercher via un synonyme (SearchTag) et naviguer vers la fiche
+    await typeSearchQuery(page, "canapé d'angle")
+    const results = await waitForResults(page)
+    const count = await results.count()
+    expect(count).toBeGreaterThan(0)
+
+    let searchTagAnchor: Locator | null = null
+    for (let i = 0; i < count; i++) {
+      const anchor = results.nth(i)
+      if (await anchor.getAttribute("data-search-term-id")) {
+        searchTagAnchor = anchor
+        break
+      }
+    }
+    expect(searchTagAnchor).not.toBeNull()
+    await searchTagAnchor!.click()
+
+    // La fiche d'arrivée doit afficher le bandeau « Votre recherche … »
+    // car on est arrivé via un synonyme. Le terme est inséré via dsfr_tag qui
+    // rend un <p>, donc le texte est réparti sur plusieurs lignes — d'où [\s\S].
+    const heading = page.getByText(
+      /Votre recherche[\s\S]*correspond aux recommandations/,
+    )
+    await expect(heading).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+
+    // Étape 2 : depuis la fiche, lancer une nouvelle recherche dont le résultat
+    // sélectionné n'est pas un SearchTag (pas de data-search-term-id). La
+    // fiche produit n'expose que la search input du header (préfixe
+    // "header-autocomplete"), pas celle de la home, d'où le sélecteur explicite.
+    const headerSearchInput = page.locator("#id_header-autocomplete-search")
+    await headerSearchInput.click()
+    await headerSearchInput.fill("")
+    await headerSearchInput.pressSequentially("lave", { delay: 50 })
+    const nextResults = await waitForResults(page)
+    const nextCount = await nextResults.count()
+    expect(nextCount).toBeGreaterThan(0)
+
+    let nonSearchTagAnchor: Locator | null = null
+    for (let i = 0; i < nextCount; i++) {
+      const anchor = nextResults.nth(i)
+      if (!(await anchor.getAttribute("data-search-term-id"))) {
+        nonSearchTagAnchor = anchor
+        break
+      }
+    }
+    expect(nonSearchTagAnchor).not.toBeNull()
+    await nonSearchTagAnchor!.click()
+    await page.waitForLoadState("domcontentloaded")
+
+    // Le bandeau précédent ne doit pas être conservé sur la nouvelle page.
+    await expect(
+      page.getByText(/Votre recherche[\s\S]*correspond aux recommandations/),
+    ).toHaveCount(0)
+
+    // Le cookie qf_search_term_id doit avoir été effacé côté navigateur.
+    const cookies = await page.context().cookies()
+    expect(cookies.find((c) => c.name === "qf_search_term_id")).toBeUndefined()
   })
 })

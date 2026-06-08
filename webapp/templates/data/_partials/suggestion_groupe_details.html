@@ -102,29 +102,49 @@
             {% elif tab == "localisation" %}
                 {% if localisation %}
                     <div
+                        class="qf-flex qf-gap-2 qf-flex-row"
                         data-controller="suggestion-map-update"
                         data-suggestion-map-update-update-url-value="{% url 'data:suggestion_groupe' suggestion_groupe.id %}"
                         data-suggestion-map-update-fields-groups-value='[["latitude", "longitude"]]'
                         data-action="map:markerDragged->suggestion-map-update#handleMarkerDragged"
                     >
-                    <div
-                        class="
-                        qf-w-1/2
-                        qf-aspect-video
-                        qf-relative"
-                        data-controller="map"
-                        data-map-initial-zoom-value="3"
-                        data-map-theme-value="osm"
-                    >
                         <div
-                            data-map-target="mapContainer"
-                            class="qf-inset-0 qf-h-full qf-relative qf-z-0"
+                            class="
+                            qf-w-1/2
+                            qf-aspect-video
+                            qf-relative"
+                            data-controller="map"
+                            data-map-initial-zoom-value="3"
+                            data-map-theme-value="osm"
                         >
-                            {% for point in localisation.points %}
-                                {% generic_location_pinpoint_tag point.key point.latitude point.longitude point.color point.draggable point.text %}
-                            {% endfor %}
+                            <div
+                                data-map-target="mapContainer"
+                                class="qf-inset-0 qf-h-full qf-relative qf-z-0"
+                            >
+                                {% for point in localisation.points %}
+                                    {% generic_location_pinpoint_tag point.key point.latitude point.longitude point.color point.draggable point.text %}
+                                {% endfor %}
+                            </div>
                         </div>
-                    </div>
+                        <div class="qf-w-1/2 qf-flex qf-flex-col qf-gap-2w">
+                            <h3>Légende</h3>
+                            <div class="qf-flex qf-flex-row qf-items-center qf-gap-1w qf-mt-3w">
+                                {% generic_location_pinpoint_tag "legend-origin" 0 0 "grey" %}
+                                <span class="qf-mb-3w">Acteur initial avant l'application de la correction</span>
+                            </div>
+                            <div class="qf-flex qf-flex-row qf-items-center qf-gap-1w">
+                                {% generic_location_pinpoint_tag "legend-suggestion" 0 0 "green" False "A" %}
+                                <span class="qf-mb-3w">Acteur importé après application de la modification</span>
+                            </div>
+                            <div class="qf-flex qf-flex-row qf-items-center qf-gap-1w">
+                                {% generic_location_pinpoint_tag "legend-correction" 0 0 "green" True "▶️" %}
+                                <span class="qf-mb-3w">Correction de l'acteur après application de la modification (peut-être drap and drop)</span>
+                            </div>
+                            <div class="qf-flex qf-flex-row qf-items-center qf-gap-1w">
+                                {% generic_location_pinpoint_tag "legend-parent" 0 0 "blue" True "⏩" %}
+                                <span class="qf-mb-3w">Parent de l'acteur après application de la modification (peut-être drap and drop)</span>
+                            </div>
+                        </div>
                     </div>
 
                 {% else %}

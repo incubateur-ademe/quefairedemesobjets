@@ -1,12 +1,9 @@
 {# Recherche adresse #}
 <div data-search-solution-form-target="adresseGroup">
     <div
-        data-controller="address-autocomplete"
-        data-address-autocomplete-max-option-displayed-value=5
-        data-address-autocomplete-is-ban-address-value='true'
-        data-with-controls="{{ is_carte|yesno:'false,true' }}"
-        data-without-zone="true"
-        data-with-dynamic-form-panel="{{ is_carte|yesno:'false,true' }}"
+        data-controller="carte-address-autocomplete"
+        data-action="next-autocomplete:commit->carte-address-autocomplete#commit"
+        data-carte-address-autocomplete-reverse-geocode-url-value="{% url 'qfdmo:reverse_geocode_address' %}"
         data-testid="rechercher-adresses-submit"
     >
         <div class="form-group">
@@ -20,8 +17,15 @@
         </div>
         {{ forms.map.latitude }}
         {{ forms.map.longitude }}
+        {# `role="alert"` (implicit aria-live=assertive + aria-atomic=true)   #}
+        {# so geolocation / reverse-geocode errors are announced immediately. #}
+        <p
+            class="fr-error-text fr-mt-1v qf-hidden"
+            data-search-solution-form-target="adresseError"
+            data-carte-address-autocomplete-target="displayError"
+            role="alert"
+        >
+            Veuillez saisir une adresse
+        </p>
     </div>
-    <p class="fr-error-text fr-mt-1v qf-hidden" data-search-solution-form-target="adresseError">
-        Veuillez saisir une adresse
-    </p>
 </div>

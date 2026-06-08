@@ -1,7 +1,11 @@
 import { Controller } from "@hotwired/stimulus"
 import { InteractionType as PosthogUIInteractionType } from "../../js/types"
 import posthog, { PostHogConfig } from "posthog-js"
-import { URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE } from "../../js/helpers"
+import {
+  URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE,
+  clearSearchTermCookie,
+  setSearchTermCookie,
+} from "../../js/helpers"
 import { initSentry } from "../../js/sentry"
 
 const IFRAME_REFERRER_SESSION_KEY = "qf_ifr"
@@ -95,6 +99,27 @@ export default class extends Controller<HTMLElement> {
     posthog.debug(!!this.posthogDebugValue)
     this.#setupAutocompleteResultClickListener()
     this.#setupActeurViewedListener()
+    this.#setupViewModeToggleListener()
+  }
+
+  // Capture when the user flips the carte/liste segmented control.
+  // Used as a counter-metric for the produit-carte-default-view-mobile experiment:
+  // identifies users who flipped away from the variant they were assigned.
+  #setupViewModeToggleListener() {
+    document.addEventListener(
+      "submit",
+      (e: Event) => {
+        const form = e.target
+        if (!(form instanceof HTMLFormElement)) return
+        const formData = new FormData(form)
+        const fromViewMode = formData.get("view_mode-view")
+        if (fromViewMode === null) return
+        posthog.capture("carte_view_mode_toggled", {
+          to: String(fromViewMode),
+        })
+      },
+      true,
+    )
   }
 
   #setupActeurViewedListener() {
@@ -312,7 +337,9 @@ export default class extends Controller<HTMLElement> {
         searchTermName,
       })
       if (searchTermId) {
-        document.cookie = `qf_search_term_id=${searchTermId}; path=/; max-age=60; SameSite=Lax`
+        setSearchTermCookie(searchTermId)
+      } else {
+        clearSearchTermCookie()
       }
     })
   }

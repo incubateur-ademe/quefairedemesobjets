@@ -70,6 +70,8 @@ merge-migrations:
 .PHONY: rebuild-search-index
 rebuild-search-index:
 	$(DJANGO_ADMIN) rebuild_modelsearch_index
+	# rebuild never removes orphan base entries (django-modelsearch #58)
+	$(DJANGO_ADMIN) purge_orphan_searchterm_index
 
 
 .PHONY: createcachetable
@@ -138,6 +140,11 @@ integration-test:
 .PHONY: prepare-e2e-test
 prepare-e2e-test:
 	make migrate
+	# Mirror CI: ensure unaccent / pg_trgm extensions and the f_unaccent()
+	# wrapper exist before rebuilding the search index. Without these, the
+	# autocomplete fuzzy search raises ProgrammingError at runtime.
+	$(DJANGO_ADMIN) enable_unaccent
+	$(DJANGO_ADMIN) enable_trigram
 	make rebuild-search-index
 	make createsuperuser-example
 	BASE_URL=http://localhost:8888 npm run build
