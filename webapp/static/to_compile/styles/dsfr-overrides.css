@@ -253,3 +253,10 @@ https://github.com/GouvernementFR/dsfr/blob/6a2bbfe02e396d8d77c50efee9638ab78c7b
     }
   }
 }
+
+/** breadcrumb does not plays well with our page produit design.
+we reduce its margin in order to prevent the produit page hero
+to be too tall */
+.produit-page .fr-breadcrumb {
+  margin-bottom: 0;
+}
