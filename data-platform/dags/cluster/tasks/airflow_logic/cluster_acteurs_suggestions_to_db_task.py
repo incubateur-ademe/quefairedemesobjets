@@ -12,6 +12,9 @@ from cluster.tasks.business_logic.cluster_acteurs_config_create import (
 from cluster.tasks.business_logic.cluster_acteurs_suggestions.to_db import (
     cluster_acteurs_suggestions_to_db,
 )
+from cluster.tasks.business_logic.misc.parent_data_serde import (
+    parent_data_new_deserialize,
+)
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
@@ -40,6 +43,7 @@ def cluster_acteurs_suggestions_to_db_wrapper(ti, params, dag, run_id) -> None:
 
     config: ClusterConfig = cluster_acteurs_config_create(params)
     df_clusters = xcom_pull(ti, XCOMS.DF_PARENTS_CHOOSE_DATA)
+    df_clusters = parent_data_new_deserialize(df_clusters)
     suggestions = xcom_pull(ti, XCOMS.SUGGESTIONS_WORKING)
 
     log.preview("config", config)

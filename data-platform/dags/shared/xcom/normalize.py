@@ -9,6 +9,10 @@ The conversion is recursive: parquet also rewrites lists nested inside dicts
 and these inner arrays must be restored too — otherwise ``json.dumps(..., default=str)``
 serializes them with ``str(np.ndarray)`` (``"['petits_appareils_extincteurs']"``)
 instead of as proper JSON arrays.
+
+Parquet also turns Python ``None`` cells of object columns into ``float('nan')``
+on the way back. We restore those to ``None`` so downstream code can rely on a
+single, JSON-friendly null sentinel.
 """
 
 from typing import Any
@@ -18,14 +22,16 @@ import pandas as pd
 
 
 def _array_to_list(cell: Any) -> Any:
-    """Recursively convert numpy arrays into Python lists, including arrays
-    nested inside lists/dicts."""
+    """Recursively convert numpy arrays into Python lists (including arrays
+    nested inside lists/dicts) and parquet's ``nan`` null cells back to ``None``."""
     if isinstance(cell, np.ndarray):
         return [_array_to_list(v) for v in cell.tolist()]
     if isinstance(cell, list):
         return [_array_to_list(v) for v in cell]
     if isinstance(cell, dict):
         return {k: _array_to_list(v) for k, v in cell.items()}
+    if isinstance(cell, float) and pd.isna(cell):
+        return None
     return cell
 
 
