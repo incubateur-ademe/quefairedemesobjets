@@ -86,3 +86,72 @@ test.describe("🧭 Navigation dans l'iframe avec persistance de l'UI", () => {
     await checkIframeUIIsPersisted(iframe)
   })
 })
+
+test.describe("📄 Découpe du contenu de la fiche dans l'iframe", () => {
+  // Helper: search "écran" and open the first fiche inside the iframe.
+  const openEcranFiche = async (iframe: FrameLocator) => {
+    await typeSearchQuery(iframe, "écran")
+    const results = await waitForResults(iframe)
+    await results.first().click()
+    await iframe.locator("h1").waitFor({ state: "visible", timeout: TIMEOUT.DEFAULT })
+    await expect(iframe.locator("h1")).toContainText("Écran", {
+      timeout: TIMEOUT.DEFAULT,
+    })
+  }
+
+  test("Le bouton « Lire plus sur cette fiche » pointe vers la version autonome", async ({
+    page,
+  }) => {
+    await navigateTo(page, "/lookbook/preview/tests/t_8_iframe_navigation_persistence")
+    const iframe = getIframe(page)
+    await expect(iframe.locator("body")).toBeAttached({ timeout: TIMEOUT.DEFAULT })
+
+    await openEcranFiche(iframe)
+
+    // The footer exposes a primary button opening the standalone fiche in a new tab.
+    const lirePlus = iframe.locator('button:has-text("Lire plus sur cette fiche")')
+    await expect(lirePlus).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+
+    const onclick = await lirePlus.getAttribute("onclick")
+    expect(onclick).toContain("window.open")
+    expect(onclick).toContain("_blank")
+    // It opens a fiche déchet URL, not the generic "En savoir plus sur ce site" target.
+    expect(onclick).toContain("/dechet/")
+  })
+
+  test("Le contenu détaillé est masqué dans l'iframe mais présent en version autonome", async ({
+    page,
+  }) => {
+    await navigateTo(page, "/lookbook/preview/tests/t_8_iframe_navigation_persistence")
+    const iframe = getIframe(page)
+    await expect(iframe.locator("body")).toBeAttached({ timeout: TIMEOUT.DEFAULT })
+
+    await openEcranFiche(iframe)
+
+    // Detailed content sections (produit.content_display) are suppressed in the
+    // iframe; the "Lire plus" button is the entry point to them.
+    const lirePlus = iframe.locator('button:has-text("Lire plus sur cette fiche")')
+    await expect(lirePlus).toBeVisible({ timeout: TIMEOUT.DEFAULT })
+
+    const onclick = await lirePlus.getAttribute("onclick")
+    const standaloneUrl = onclick?.match(/window\.open\('([^']+)'/)?.[1]
+    expect(standaloneUrl, "standalone URL extracted from onclick").toBeTruthy()
+
+    const detailHeadings = iframe.getByRole("heading", {
+      name: /Que va-t-il devenir|Comment consommer responsable|En savoir plus/,
+    })
+    await expect(detailHeadings).toHaveCount(0)
+
+    // Same fiche, loaded standalone (top-level, no iframe): the detail sections
+    // that were hidden above are now rendered. This is the differential that
+    // proves the split is iframe-conditional, not that the fiche simply lacks
+    // content.
+    await page.goto(standaloneUrl!)
+    await page.locator("h1").waitFor({ state: "visible", timeout: TIMEOUT.DEFAULT })
+    await expect(
+      page.getByRole("heading", {
+        name: /Que va-t-il devenir|Comment consommer responsable|En savoir plus/,
+      }),
+    ).not.toHaveCount(0)
+  })
+})

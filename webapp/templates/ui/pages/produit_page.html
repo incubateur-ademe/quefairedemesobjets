@@ -15,9 +15,11 @@
     {% endblock main_heading %}
 
     <div class="qf-flex qf-flex-col max-md:qf-order-2 md:qf-row-start-2 md:qf-col-span-2">
-        {# Always show the blocks that come before the carte #}
+        {# Always show the blocks up to and including the carte #}
         {% include "sites_conformes_content_manager/blocks/blocks_stream.html" with stream=page.body_always_visible page=page %}
 
+        {# `iframe` is set by RequestEnhancementMiddleware from the Sec-Fetch-Dest header. #}
+        {# Blocks after the carte are only rendered on the standalone page, not in the iframe. #}
         {% if not iframe %}
             {% include "sites_conformes_content_manager/blocks/blocks_stream.html" with stream=page.body_to_hide_in_iframe page=page %}
         {% endif %}
