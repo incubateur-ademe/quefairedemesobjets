@@ -1,6 +1,6 @@
 import pandas as pd
 from cluster.config.constants import COL_PARENT_DATA_NEW
-from cluster.tasks.business_logic.misc.parent_data_serde import (
+from cluster.tasks.airflow_logic.utils import (
     parent_data_new_deserialize,
     parent_data_new_serialize,
 )

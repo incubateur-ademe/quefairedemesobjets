@@ -6,14 +6,12 @@ from airflow.providers.standard.operators.python import PythonOperator
 from cluster.config.models import ClusterConfig
 from cluster.config.tasks import TASKS
 from cluster.config.xcoms import XCOMS, xcom_pull, xcom_push
+from cluster.tasks.airflow_logic.utils import parent_data_new_serialize
 from cluster.tasks.business_logic.cluster_acteurs_config_create import (
     cluster_acteurs_config_create,
 )
 from cluster.tasks.business_logic.cluster_acteurs_parents_choose_data import (
     cluster_acteurs_parents_choose_data,
-)
-from cluster.tasks.business_logic.misc.parent_data_serde import (
-    parent_data_new_serialize,
 )
 from utils import logging_utils as log
 

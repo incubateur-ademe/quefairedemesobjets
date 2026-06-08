@@ -6,14 +6,12 @@ from airflow.sdk.exceptions import AirflowSkipException
 from cluster.config.models import ClusterConfig
 from cluster.config.tasks import TASKS
 from cluster.config.xcoms import XCOMS, xcom_pull
+from cluster.tasks.airflow_logic.utils import parent_data_new_deserialize
 from cluster.tasks.business_logic.cluster_acteurs_config_create import (
     cluster_acteurs_config_create,
 )
 from cluster.tasks.business_logic.cluster_acteurs_suggestions.to_db import (
     cluster_acteurs_suggestions_to_db,
-)
-from cluster.tasks.business_logic.misc.parent_data_serde import (
-    parent_data_new_deserialize,
 )
 from utils import logging_utils as log
 

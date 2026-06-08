@@ -5,11 +5,9 @@ from airflow import DAG
 from airflow.providers.standard.operators.python import PythonOperator
 from cluster.config.tasks import TASKS
 from cluster.config.xcoms import XCOMS, xcom_pull, xcom_push
+from cluster.tasks.airflow_logic.utils import parent_data_new_deserialize
 from cluster.tasks.business_logic.cluster_acteurs_suggestions.prepare import (
     cluster_acteurs_suggestions_prepare,
-)
-from cluster.tasks.business_logic.misc.parent_data_serde import (
-    parent_data_new_deserialize,
 )
 
 logger = logging.getLogger(__name__)
