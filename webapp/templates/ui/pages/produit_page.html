@@ -4,6 +4,8 @@
 
 {% block analytics_action %}produitPageView{% endblock %}
 
+{% block body_classes %}produit-page{% endblock %}
+
 {% block main %}
 <div
     class="qf-flex qf-flex-col
@@ -15,7 +17,15 @@
     {% endblock main_heading %}
 
     <div class="qf-flex qf-flex-col max-md:qf-order-2 md:qf-row-start-2 md:qf-col-span-2">
-        {% include "sites_conformes_content_manager/blocks/blocks_stream.html" with stream=page.body page=page %}
+        {# Always show the blocks up to and including the carte #}
+        {% include "sites_conformes_content_manager/blocks/blocks_stream.html" with stream=page.body_always_visible page=page %}
+
+        {# `iframe` is set by RequestEnhancementMiddleware from the Sec-Fetch-Dest header. #}
+        {# Blocks after the carte are only rendered on the standalone page, not in the iframe. #}
+        {% if not iframe %}
+            {% include "sites_conformes_content_manager/blocks/blocks_stream.html" with stream=page.body_to_hide_in_iframe page=page %}
+        {% endif %}
+
         {% include "ui/snippets/share_and_embed.html" with extra_classes="md:qf-hidden qf-px-2w qf-mt-2w" %}
     </div>
 </div>

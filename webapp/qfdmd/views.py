@@ -35,7 +35,9 @@ from qfdmd.models import (
     Synonyme,
     TaggedSearchTag,
 )
+from qfdmd.utils import lire_plus_button
 from search.models import SearchTerm
+from search.score_breakdown import compute_breakdown
 
 logger = logging.getLogger(__name__)
 
@@ -471,9 +473,12 @@ class AutocompleteHomeSearchView(ListView):
                 cursor.execute(
                     "SET LOCAL statement_timeout = %s", [self.SEARCH_TIMEOUT_MS]
                 )
-            return SearchTerm.objects.searchable().search(Fuzzy(query, unaccent=True))[
-                :limit
-            ]
+            results = SearchTerm.objects.searchable().search(
+                Fuzzy(query, unaccent=True)
+            )
+            if getattr(self.request, "beta", False):
+                results = results.annotate_score("_search_score")
+            return results[:limit]
         except OperationalError:
             safe_query = query.replace("\r", "").replace("\n", "")
             logger.warning("Autocomplete search timed out for query: %r", safe_query)
@@ -483,21 +488,14 @@ class AutocompleteHomeSearchView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["turbo_frame_id"] = self.request.GET.get("turbo_frame_id")
-        context["results"] = self.get_queryset()
+        results = self.get_queryset()
+        context["results"] = results
+        if getattr(self.request, "beta", False) and results:
+            query = self.request.GET.get("q", "")
+            context["score_breakdown"] = compute_breakdown(
+                query, [r.pk for r in results]
+            )
         return context
-
-
-class AssistantBaseView:
-    """Base view that provides templates used on all pages.
-    It needs to be used by all views of the Assistant as it
-    handles a redirect that prevents accessing a produit
-    with a Carte domain name.
-
-    TODO: move to a middleware
-    """
-
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
 
 
 def get_homepage():
@@ -510,7 +508,7 @@ def get_homepage():
 @method_decorator(
     vary_on_headers("logged-in", "iframe", "sec-fetch-dest"), name="dispatch"
 )
-class HomeView(AssistantBaseView, TemplateView):
+class HomeView(TemplateView):
     template_name = "ui/pages/home.html"
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
@@ -521,7 +519,7 @@ class HomeView(AssistantBaseView, TemplateView):
         return context
 
 
-class SynonymeDetailView(AssistantBaseView, DetailView):
+class SynonymeDetailView(DetailView):
     template_name = "ui/pages/produit.html"
     model = Synonyme
 
@@ -534,6 +532,14 @@ class SynonymeDetailView(AssistantBaseView, DetailView):
         params = parse_qsl(parsed.query)
         params.append((SEARCH_TERM_ID_QUERY_PARAM, search_term_id))
         return urlunparse(parsed._replace(query=urlencode(params)))
+
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+        ctx.update(
+            footer_primary_button=lire_plus_button(self.object.get_absolute_url())
+        )
+
+        return ctx
 
     def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         synonyme = self.get_object()

@@ -1,5 +1,5 @@
 import logging
-from typing import override
+from typing import NamedTuple, override
 
 from django.contrib.gis.db import models
 from django.core.exceptions import ValidationError
@@ -33,11 +33,24 @@ from wagtail.snippets.models import register_snippet
 from sites_conformes.content_manager.models import ContentPage
 
 from qfdmd.blocks import STREAMFIELD_COMMON_BLOCKS
+from qfdmd.utils import lire_plus_button
 from qfdmo.models.utils import NomAsNaturalKeyModel
 from search.constants import SEARCH_TAG_HELP_TEXT
 from search.models import SearchTerm
 
 logger = logging.getLogger(__name__)
+
+
+class PartitionedBody(NamedTuple):
+    """A ProduitPage body split around the ``carte_sur_mesure`` block.
+
+    ``always_visible`` holds the blocks up to and including the carte, which are
+    shown in every context (including the iframe). ``hidden_in_iframe`` holds the
+    blocks after the carte, which are only rendered on the standalone page.
+    """
+
+    always_visible: list
+    hidden_in_iframe: list
 
 
 class GenreNombreModel(models.Model):
@@ -430,6 +443,47 @@ class ProduitPage(
         verbose_name="Corps de texte",
         blank=True,
     )
+
+    @cached_property
+    def _partitioned_body(self) -> PartitionedBody:
+        """Split the body around the ``carte_sur_mesure`` block.
+
+        Everything up to and including the carte is always visible; everything
+        after it is hidden in the iframe. When the body has no carte block, all
+        blocks are always visible and nothing is hidden.
+        """
+        # inspired by https://stackoverflow.com/a/55368810
+        carte_block = self.body.first_block_by_name("carte_sur_mesure")
+        if carte_block is None:
+            return PartitionedBody(always_visible=list(self.body), hidden_in_iframe=[])
+
+        always_visible, hidden_in_iframe = [], []
+        switch = True
+        for item in self.body:
+            out = always_visible if switch else hidden_in_iframe
+            if item.id == carte_block.id:
+                switch = False
+
+            out.append(item)
+
+        return PartitionedBody(
+            always_visible=always_visible, hidden_in_iframe=hidden_in_iframe
+        )
+
+    def get_context(self, request, *args, **kwargs):
+        ctx = super().get_context(request, *args, **kwargs)
+        ctx.update(footer_primary_button=lire_plus_button(self.get_full_url(request)))
+
+        return ctx
+
+    @property
+    def body_always_visible(self) -> list:
+        return self._partitioned_body.always_visible
+
+    @property
+    def body_to_hide_in_iframe(self) -> list:
+        return self._partitioned_body.hidden_in_iframe
+
     commentaire = RichTextField(blank=True)
 
     content_panels = Page.content_panels + [

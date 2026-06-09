@@ -1,6 +1,5 @@
 {% load dsfr_tags wagtailcore_tags %}
 
-{# TODO: check spacing #}
 <div class="qf-flex qf-flex-col qf-gap-2 {{ extra_classes }}">
     {% if bon_etat and mauvais_etat %}
         <div class="fr-tabs fr-tabs--noborder-mobile">
@@ -43,17 +42,21 @@
         </div>
     {% endif %}
 
-    <div class="qf-flex qf-flex-col qf-gap-4w qf-mt-2w">
-    {% for section in produit.content_display %}
-    <div id="{{ section.id }}">
-        <h2>
-        {{ section.title }}
-        </h2>
+    {# `iframe` is set by RequestEnhancementMiddleware from the Sec-Fetch-Dest header. #}
+    {# In the iframe we only show the carte above; the detail sections live on the standalone page. #}
+    {% if not iframe %}
+        <div class="qf-flex qf-flex-col qf-gap-4w qf-mt-2w">
+        {% for section in produit.content_display %}
+        <div id="{{ section.id }}">
+            <h2>
+            {{ section.title }}
+            </h2>
 
-        <div>
-        {{ section.content|richtext }}
+            <div>
+            {{ section.content|richtext }}
+            </div>
         </div>
-    </div>
-    {% endfor %}
-    </div>
+        {% endfor %}
+        </div>
+    {% endif %}
 </div>
