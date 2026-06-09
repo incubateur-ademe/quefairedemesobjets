@@ -1,0 +1,37 @@
+{% comment %}
+Inline debug score breakdown shown under a search result. Rendered only when
+the viewer has the wagtailadmin.can_see_beta_search permission (request.beta).
+
+Expects:
+- breakdown: ScoreBreakdown instance (from search.score_breakdown)
+- result_pk: pk of the SearchTerm this breakdown describes
+{% endcomment %}
+<dl
+    id="score-breakdown-{{ result_pk }}"
+    class="qf-m-0 qf-mt-1w qf-flex qf-flex-wrap qf-gap-x-2w qf-gap-y-1w qf-text-xs qf-text-gray-500"
+>
+    <div class="qf-flex qf-gap-1v">
+        <dt class="qf-font-bold">Score</dt>
+        <dd class="qf-m-0 qf-font-bold">{{ breakdown.ranked|floatformat:3 }}</dd>
+    </div>
+    <div class="qf-flex qf-gap-1v">
+        <dt>Title&nbsp;sim.</dt>
+        <dd class="qf-m-0">{{ breakdown.title_sim|floatformat:3 }}</dd>
+    </div>
+    <div class="qf-flex qf-gap-1v">
+        <dt>Body&nbsp;sim.</dt>
+        <dd class="qf-m-0">{{ breakdown.body_sim|floatformat:3 }}</dd>
+    </div>
+    <div class="qf-flex qf-gap-1v">
+        <dt>Title&nbsp;norm</dt>
+        <dd class="qf-m-0">{{ breakdown.title_norm|floatformat:3 }}</dd>
+    </div>
+    <div class="qf-flex qf-gap-1v">
+        <dt>Préfixe</dt>
+        <dd class="qf-m-0">{% if breakdown.is_prefix %}oui&nbsp;(×&nbsp;{{ breakdown.prefix_multiplier|floatformat:2 }}){% else %}non{% endif %}</dd>
+    </div>
+    <div class="qf-flex qf-gap-1v">
+        <dt>Raw</dt>
+        <dd class="qf-m-0">{{ breakdown.raw|floatformat:3 }}</dd>
+    </div>
+</dl>
