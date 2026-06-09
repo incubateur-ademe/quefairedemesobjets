@@ -15,14 +15,22 @@
         data-ab-test-flag-key-value="produit-carte-default-view-mobile"
         data-ab-test-src-variant-value="{{ url_variant }}{% if request.GET.epci %}&epci_codes={{ request.GET.epci }}{% endif %}"
         data-ab-test-mobile-only-value="true"
+        data-ab-test-prefix-value="{{ id }}_map"
         src="{{ url }}{% if request.GET.epci %}&epci_codes={{ request.GET.epci }}{% endif %}">
     </turbo-frame>
 {% else %}
+    {# `loading="lazy"` is required: it defers the fetch until after Stimulus has #}
+    {# connected, giving frame-location#connect a chance to inject the stored     #}
+    {# location into `src` before the (single) fetch. An eager frame would fetch  #}
+    {# during HTML parse, before any controller can pause it.                     #}
     <turbo-frame
         id="{{ id }}"
         allow="geolocation; clipboard-write"
         class="qf-h-full qf-w-full"
         data-testid="carte"
+        loading="lazy"
+        data-controller="frame-location"
+        data-frame-location-prefix-value="{{ id }}_map"
         src="{{ url }}{% if request.GET.epci %}&epci_codes={{ request.GET.epci }}{% endif %}">
     </turbo-frame>
 {% endif %}

@@ -35,10 +35,12 @@ function setupFrame(extraAttrs: Record<string, string> = {}) {
   return document.querySelector("turbo-frame") as HTMLElement
 }
 
+let app: Application | undefined
+
 function startStimulus() {
-  const application = Application.start()
-  application.register("ab-test", AbTestController)
-  return application
+  app = Application.start()
+  app.register("ab-test", AbTestController)
+  return app
 }
 
 function setMobileViewport(isMobile: boolean) {
@@ -58,6 +60,12 @@ describe("AbTestController", () => {
     getFeatureFlag.mockReset()
     register.mockReset()
     setMobileViewport(true)
+    sessionStorage.clear()
+  })
+
+  afterEach(() => {
+    app?.stop()
+    app = undefined
   })
 
   it("assigns variant src when flag returns 'test' on mobile", async () => {
@@ -130,6 +138,83 @@ describe("AbTestController", () => {
     await flush()
 
     expect(frame.getAttribute("src")).toBe(CONTROL_SRC)
+  })
+
+  describe("location injection from sessionStorage", () => {
+    const PREFIX = "foo"
+
+    function seedLocation() {
+      sessionStorage.setItem("latitude", "47.66")
+      sessionStorage.setItem("longitude", "-2.99")
+      sessionStorage.setItem("adresse", "Auray")
+    }
+
+    it("bakes stored location into the variant src (test cohort)", async () => {
+      seedLocation()
+      getFeatureFlag.mockReturnValue("test")
+      const frame = setupFrame({ "data-ab-test-prefix-value": `${PREFIX}_map` })
+      startStimulus()
+      await flush()
+
+      const url = new URL(frame.getAttribute("src")!, "https://example.test")
+      expect(url.searchParams.get("view_mode-view")).toBe("liste") // still variant
+      expect(url.searchParams.get(`${PREFIX}_map-latitude`)).toBe("47.66")
+      expect(url.searchParams.get(`${PREFIX}_map-longitude`)).toBe("-2.99")
+    })
+
+    it("bakes stored location into the control src", async () => {
+      seedLocation()
+      getFeatureFlag.mockReturnValue("control")
+      const frame = setupFrame({ "data-ab-test-prefix-value": `${PREFIX}_map` })
+      startStimulus()
+      await flush()
+
+      const url = new URL(frame.getAttribute("src")!, "https://example.test")
+      expect(url.searchParams.has("view_mode-view")).toBe(false) // control
+      expect(url.searchParams.get(`${PREFIX}_map-latitude`)).toBe("47.66")
+    })
+
+    it("bakes location into control src on desktop (mobileOnly bypass)", async () => {
+      seedLocation()
+      setMobileViewport(false)
+      getFeatureFlag.mockReturnValue("test")
+      const frame = setupFrame({
+        "data-ab-test-mobile-only-value": "true",
+        "data-ab-test-prefix-value": `${PREFIX}_map`,
+      })
+      startStimulus()
+      await flush()
+
+      const url = new URL(frame.getAttribute("src")!, "https://example.test")
+      expect(url.searchParams.has("view_mode-view")).toBe(false)
+      expect(url.searchParams.get(`${PREFIX}_map-latitude`)).toBe("47.66")
+    })
+
+    it("captures a location written during the async PostHog window", async () => {
+      // Simulate the user picking an address while PostHog is still resolving:
+      // sessionStorage is written inside the onFeatureFlags callback, BEFORE the
+      // flag callback runs. Injection reads at #assign time, so it must be seen.
+      onFeatureFlags.mockImplementation((cb: () => void) => {
+        seedLocation()
+        cb()
+      })
+      getFeatureFlag.mockReturnValue("test")
+      const frame = setupFrame({ "data-ab-test-prefix-value": `${PREFIX}_map` })
+      startStimulus()
+      await flush()
+
+      const url = new URL(frame.getAttribute("src")!, "https://example.test")
+      expect(url.searchParams.get(`${PREFIX}_map-latitude`)).toBe("47.66")
+    })
+
+    it("leaves src untouched when sessionStorage has no location", async () => {
+      getFeatureFlag.mockReturnValue("test")
+      const frame = setupFrame({ "data-ab-test-prefix-value": `${PREFIX}_map` })
+      startStimulus()
+      await flush()
+
+      expect(frame.getAttribute("src")).toBe(VARIANT_SRC)
+    })
   })
 
   it("does nothing when src attribute is missing", async () => {

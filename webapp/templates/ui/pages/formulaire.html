@@ -16,6 +16,7 @@ qf-h-svh qf-h-screen qf-overflow-hidden qf-bg-white
         data-search-solution-form-is-iframe-value="{{ is_embedded }}"
         data-turbo-frame="addressesPanel"
         data-action="
+        qf:location-changed@document->search-solution-form#applyLocationChange
         map:updateBbox->search-solution-form#updateBboxInput
         search-solution-form:captureInteraction->analytics#captureInteractionWithMap
         address-autocomplete:formSubmit->search-solution-form#advancedSubmit

@@ -20,7 +20,8 @@ import PinpointController from "../controllers/carte/pinpoint_controller"
 import SearchController from "../controllers/assistant/search"
 import BlinkController from "../controllers/assistant/blink"
 import AnalyticsController from "../controllers/shared/analytics"
-import StateController from "../controllers/assistant/state"
+import LocationController from "../controllers/shared/location_controller"
+import FrameLocationController from "../controllers/carte/frame_location_controller"
 
 window.stimulus = Application.start()
 
@@ -40,7 +41,8 @@ stimulus.register("pinpoint", PinpointController)
 stimulus.register("search", SearchController)
 stimulus.register("blink", BlinkController)
 stimulus.register("analytics", AnalyticsController)
-stimulus.register("state", StateController)
+stimulus.register("location", LocationController)
+stimulus.register("frame-location", FrameLocationController)
 stimulus.register("responsive", ResponsiveController)
 
 Turbo.session.drive = false

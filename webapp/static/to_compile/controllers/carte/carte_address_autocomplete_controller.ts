@@ -109,9 +109,10 @@ export default class CarteAddressAutocompleteController extends Controller<HTMLE
     this.latitudeTarget.value = detail.latitude
     this.longitudeTarget.value = detail.longitude
     this.#hideInputError()
-    // `carte-address-autocomplete:change` is consumed by:
-    // - body `data-action` -> `state#setLocation` (global location sync)
-    // - the carte form `data-action` -> `search-solution-form#submitForm`
+    // `carte-address-autocomplete:change` is consumed by the page-level
+    // `location` controller (body data-action -> location#persistAndBroadcast),
+    // which persists the location and re-emits a document-level
+    // `qf:location-changed` event that each carte form submits itself on.
     this.dispatch("change", { detail })
   }
 
