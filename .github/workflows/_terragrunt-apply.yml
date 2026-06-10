@@ -21,12 +21,23 @@ on:
         description: "GitHub environment to load secrets from (e.g. preview)"
         type: string
         required: true
+      ref:
+        description: "Git ref to checkout (defaults to the event's ref)"
+        type: string
+        required: false
+        default: ""
+    outputs:
+      endpoint:
+        description: "Public URL of the preview container (apply only)"
+        value: ${{ jobs.terragrunt.outputs.endpoint }}
 
 jobs:
   terragrunt:
     name: 🧱 Terragrunt ${{ inputs.command }} (pr-${{ inputs.pr_number }})
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
+    outputs:
+      endpoint: ${{ steps.endpoint.outputs.endpoint }}
     env:
       # Scaleway provider + S3 backend creds
       SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
@@ -57,6 +68,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6.0.2
+        with:
+          ref: ${{ inputs.ref }}
 
       - name: Install OpenTofu
         uses: opentofu/setup-opentofu@v1
@@ -102,6 +115,17 @@ jobs:
             tail -n 100 apply.log
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Read container public endpoint
+        id: endpoint
+        if: inputs.command == 'apply'
+        working-directory: infrastructure/environments/preview/pr-${{ inputs.pr_number }}/container
+        run: |
+          set -euo pipefail
+          ENDPOINT=$(terragrunt output -raw public_endpoint)
+          [[ "$ENDPOINT" == http* ]] || ENDPOINT="https://${ENDPOINT}"
+          echo "endpoint=$ENDPOINT" >> "$GITHUB_OUTPUT"
+          echo "Preview endpoint: $ENDPOINT"
 
 permissions:
   contents: read

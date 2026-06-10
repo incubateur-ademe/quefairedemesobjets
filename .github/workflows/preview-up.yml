@@ -1,0 +1,122 @@
+name: 🌱 Preview environment - up
+
+on:
+  pull_request:
+    types: [labeled, synchronize, reopened]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "Pull request number to deploy a preview for"
+        required: true
+        type: string
+
+concurrency:
+  # One up/down at a time per PR; don't cancel a running apply.
+  group: preview-pr-${{ inputs.pr_number || github.event.pull_request.number }}
+  cancel-in-progress: false
+
+# Gate: only PRs carrying the "preview" label get an environment.
+# - labeled: fire only when the preview label itself is added
+# - synchronize/reopened: fire only when the label is already present
+jobs:
+  resolve:
+    name: 📌 Resolve PR and commit
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.action == 'labeled' && github.event.label.name == 'preview') ||
+      (contains(fromJSON('["synchronize", "reopened"]'), github.event.action) &&
+       contains(github.event.pull_request.labels.*.name, 'preview'))
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      pr_number: ${{ steps.out.outputs.pr_number }}
+      sha: ${{ steps.out.outputs.sha }}
+      image_tag: ${{ steps.out.outputs.image_tag }}
+    steps:
+      - id: out
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            PR_NUMBER="${{ inputs.pr_number }}"
+            SHA=$(gh api "repos/${{ github.repository }}/pulls/${PR_NUMBER}" --jq .head.sha)
+          else
+            PR_NUMBER="${{ github.event.pull_request.number }}"
+            SHA="${{ github.event.pull_request.head.sha }}"
+          fi
+          echo "pr_number=$PR_NUMBER"               >> "$GITHUB_OUTPUT"
+          echo "sha=$SHA"                           >> "$GITHUB_OUTPUT"
+          echo "image_tag=pr-${PR_NUMBER}-${SHA:0:7}" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: 🐳 Build webapp image
+    needs: [resolve]
+    uses: ./.github/workflows/_webapp-build-and-push-docker.yml
+    secrets: inherit # pragma: allowlist secret
+    with:
+      image_tag: ${{ needs.resolve.outputs.image_tag }}
+      environment: preview
+      ref: ${{ needs.resolve.outputs.sha }}
+
+  apply:
+    name: 🧱 Apply preview infra
+    needs: [resolve, build]
+    uses: ./.github/workflows/_terragrunt-apply.yml
+    secrets: inherit # pragma: allowlist secret
+    with:
+      command: apply
+      pr_number: ${{ needs.resolve.outputs.pr_number }}
+      image_tag: ${{ needs.resolve.outputs.image_tag }}
+      environment: preview
+      ref: ${{ needs.resolve.outputs.sha }}
+
+  comment:
+    name: 💬 Sticky comment with the URL
+    needs: [resolve, apply]
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/github-script@v8
+        with:
+          script: |
+            const prNumber = Number("${{ needs.resolve.outputs.pr_number }}");
+            const url = "${{ needs.apply.outputs.endpoint }}";
+            const sha = "${{ needs.resolve.outputs.sha }}".slice(0, 7);
+            const marker = "<!-- preview-env -->";
+            const body = [
+              marker,
+              `🌱 Preview environment ready: ${url}`,
+              "",
+              `Deployed commit: \`${sha}\`. The environment is updated on every push`,
+              "and destroyed when the PR is closed or the `preview` label is removed.",
+            ].join("\n");
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              per_page: 100,
+            });
+            const existing = comments.find((c) => c.body?.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body,
+              });
+            }
+
+permissions:
+  contents: read
+  pull-requests: write
