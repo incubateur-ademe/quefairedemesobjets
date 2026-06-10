@@ -26,13 +26,15 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 # System deps: GDAL for GeoDjango, gettext for compilemessages,
-# libpq5 for psycopg at runtime (mirrors the Scalingo Aptfile)
+# libpq5 for psycopg at runtime (mirrors the Scalingo Aptfile),
+# git for uv to install django-dsfr from its git fork (tool.uv.sources)
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
       ca-certificates \
       curl \
       gettext \
       gdal-bin \
+      git \
       libgdal-dev \
       libpq5 \
     && rm -rf /var/lib/apt/lists/*
