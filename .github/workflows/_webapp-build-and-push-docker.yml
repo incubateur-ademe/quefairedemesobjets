@@ -1,0 +1,58 @@
+name: 🐳 Docker image for the webapp
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        required: true
+        type: string
+      environment:
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      image_tag:
+        required: true
+        type: string
+      environment:
+        required: true
+        type: string
+
+env:
+  SCALEWAY_REGISTRY: rg.fr-par.scw.cloud
+  SCALEWAY_NAMESPACE: ns-qfdmo
+
+jobs:
+  build-and-push-image:
+    name: 🐳 Build and push webapp Docker image
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6.0.2
+
+      - name: "[🟣 Scaleway] Log in to the Scaleway Container registry"
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee
+        with:
+          registry: ${{ env.SCALEWAY_REGISTRY }}
+          username: nologin
+          password: ${{ secrets.SCALEWAY_DOCKER_SECRET }}
+
+      - uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5
+
+      - name: "[🟣 Scaleway] Build and push webapp Docker image"
+        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf
+        with:
+          context: webapp
+          file: webapp/Dockerfile
+          # Scaleway Serverless Containers only run amd64
+          platforms: linux/amd64
+          cache-from: type=gha,scope=webapp
+          cache-to: type=gha,scope=webapp,mode=max
+          push: true
+          tags: ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/webapp:${{ inputs.image_tag }}
+
+permissions:
+  contents: read
