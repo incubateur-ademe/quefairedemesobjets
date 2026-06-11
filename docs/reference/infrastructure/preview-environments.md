@@ -78,24 +78,30 @@ recent tags per image).
 
 ## Bootstrap (one-time setup)
 
-1. **GitHub `preview` environment** with these secrets:
-   - `SCW_ACCESS_KEY`, `SCW_SECRET_KEY`, `SCW_DEFAULT_PROJECT_ID`,
-     `SCW_DEFAULT_ORGANIZATION_ID` — Scaleway credentials able to manage
-     RDB databases/users, object storage, IAM and containers
-   - `SCALEWAY_DOCKER_SECRET` — registry push credential (same as other
-     environments)
-   - `PREVIEW_SECRET_KEY` — any random string, shared Django
-     `SECRET_KEY` for all previews
-   - `SAMPLE_DB_URI` — postgres URI of the preprod sample database
-     (pg_dump source), reachable from GitHub runners
-2. **Apply the shared namespace stack** (locally, once):
+Everything is automated by `infrastructure/Makefile`. With the Scaleway
+credentials exported in your shell (or in the repo root `.env`):
 
-   ```bash
-   cd infrastructure/environments/preview/namespace
-   terragrunt init && terragrunt apply
-   ```
+```bash
+export SCW_ACCESS_KEY=…              # able to manage RDB databases/users,
+export SCW_SECRET_KEY=…              # object storage, IAM and containers
+export SCW_DEFAULT_PROJECT_ID=…
+export SCW_DEFAULT_ORGANIZATION_ID=…
+export SCALEWAY_DOCKER_SECRET=…      # registry push credential
+export SAMPLE_DB_URI=…               # postgres URI of the preprod sample DB
+                                     # (pg_dump source), reachable from CI
 
-3. **Create the `preview` label** on the GitHub repository.
+make -C infrastructure preview-bootstrap
+```
+
+This runs three idempotent steps, also callable individually:
+
+1. `preview-github-env` — creates the GitHub `preview` environment and
+   pushes the secrets above, plus `PREVIEW_SECRET_KEY` (the shared Django
+   `SECRET_KEY` for previews, generated with `openssl rand` unless already
+   set in your shell).
+2. `preview-namespace` — `terragrunt apply` of the shared `lvao-preview`
+   container namespace (interactive: review the plan before approving).
+3. `preview-label` — creates the `preview` label on the repository.
 
 ## Validation checklist
 
