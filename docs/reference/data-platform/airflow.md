@@ -1,5 +1,36 @@
 # Airflow
 
+> **Voir aussi** : [Sources d'ingestion](sources.md), [dbt](dbt.md), [Architecture applicative](../architecture/README.md).
+
+## Configuration runtime
+
+- **Version** : `apache/airflow:slim-3.1.7-python3.12` (3 containers Scaleway : webserver `:8080`, scheduler avec dbt, dag-processor avec nginx healthcheck).
+- **Executor** : `LocalExecutor` (single-node).
+- **Auth manager** : **FAB** (`FabAuthManager`). Backends API : `basic_auth` + `session`. **JWT** pour les échanges internes (`AIRFLOW__API_AUTH__JWT_SECRET`).
+- **Compte admin** : créé au premier démarrage du webserver via `_AIRFLOW_WWW_USER_USERNAME / _PASSWORD / _EMAIL`.
+- **Intégration Django** : les DAGs importent les modèles Django via le package éditable `webapp-quefairedemesobjetsetdechets` et `utils.django.django_setup_full()` (settings `core.airflow_settings`).
+- **Métadonnées** : base PostgreSQL `lvao-{env}-airflow`, nettoyée quotidiennement par le DAG `airflow_cleanup_db`.
+- **Logs distants** : `AIRFLOW__LOGGING__REMOTE_LOGGING=true` vers le bucket S3 `lvao-{env}-airflow`.
+
+## Vue d'ensemble des DAGs
+
+| Activité                                                     | DAG(s)                                                                                                                | Schedule                         |
+| ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| Ingestion des données des sources                            | `eo-*`, `cma`, `pharmacies`, `source_sinoe`, `source-s3`                                                              | Manuel (`None`) — tag : `source` |
+| Clonage de référentiels d'enrichissement                     | `clone_ban_*`, `clone_ae_*`, `clone_laposte_codes_postaux`, `clone_koumoul_epci`, `clone_insee_commune`, `clone_ca_*` | Hebdo dimanche 00:00–02:00       |
+| Enrichissement des acteurs                                   | `enrich_acteurs_*` (RGPD, fermés, villes, code postal)                                                                | Manuel                           |
+| Crawl & validation des URLs                                  | `crawl_urls_suggestions`                                                                                              | Manuel                           |
+| Clustering / déduplication                                   | `cluster_acteur_suggestions`                                                                                          | Manuel                           |
+| Application des suggestions validées                         | `apply_suggestions`, `apply_suggestions_groupe`                                                                       | Toutes les 5 min                 |
+| Calcul des tables d'acteurs affichés + import dans la webapp | `compute_acteurs` (dbt + FDW)                                                                                         | Quotidien `0 0 * * *`            |
+| Refresh des modèles dbt d'enrichissement                     | `enrich_dbt_models_refresh`                                                                                           | Quotidien `0 0 * * *`            |
+| Calcul des statistiques                                      | `compute_stats` (`dbt run/test tag:stats`)                                                                            | Hebdo lundi 02:00                |
+| Export opendata                                              | `export_opendata_dag` → S3 `lvao-opendata`                                                                            | Hebdo lundi 01:00                |
+| Maintenance — purge metadata Airflow                         | `airflow_cleanup_db` (`airflow db clean --skip-archive`, rétention 7 j)                                               | Quotidien `0 0 * * *`            |
+| Maintenance — purge logs DB Scaleway                         | `purge_log_db` (`scw rdb log purge`)                                                                                  | Toutes les heures à xx:03        |
+
+Les DAGs `compute_acteurs` matérialisent les tables d'acteurs via `IMPORT FOREIGN SCHEMA … LIMIT TO (…)` puis `INSERT INTO … SELECT` puis renommage atomique (swap `*_to_remove` → `DROP CASCADE`) pour minimiser le downtime. Voir [`db/db_organisation.md`](../db/db_organisation.md) pour le détail de la liaison `postgres_fdw`.
+
 ## File organization
 
 This structure is mainly used when (re)organising files for source‑ingestion DAGs.

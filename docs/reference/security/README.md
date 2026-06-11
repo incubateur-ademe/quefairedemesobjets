@@ -23,3 +23,16 @@ The following bots are configured in CI to inspect the code:
 ### Application monitoring
 
 The application is monitored by the [beta.gouv.fr Sentry instance](https://sentry.incubateur.net/organizations/betagouv/projects/que-faire-de-mes-objets/?project=115)
+
+For the full observability stack (Sentry, PostHog, Matomo, Scaleway Cockpit, Mattermost, healthcheck), see [Monitoring](../infrastructure/monitoring.md).
+
+## Topics
+
+```{toctree}
+:maxdepth: 2
+
+authentication.md
+network.md
+secrets.md
+backups.md
+```
