@@ -1,8 +1,8 @@
-# Sauvegardes & PRA
+# Sauvegardes
 
-Stratégies de sauvegarde et de reprise d'activité.
+Stratégies de sauvegarde des données applicatives, des bases et de l'état d'infrastructure.
 
-> **Voir aussi** : [Provisioning](../infrastructure/provisioning.md), [Architecture des bases](../db/db_organisation.md).
+> **Voir aussi** : [Plan de continuité d'activité (PCA)](pca.md), [Plan de reprise d'activité (PRA)](pra.md), [Provisioning](../infrastructure/provisioning.md), [Architecture des bases](../db/db_organisation.md).
 
 ## Backups automatiques
 

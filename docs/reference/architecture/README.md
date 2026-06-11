@@ -163,12 +163,17 @@ Pour le détail de chaque brique, suivre le lien correspondant.
 
 ### Sécurité
 
-| Sujet                            | Référence                                                     |
-| -------------------------------- | ------------------------------------------------------------- |
-| Authentification & autorisations | [`security/authentication.md`](../security/authentication.md) |
-| Sécurité réseau                  | [`security/network.md`](../security/network.md)               |
-| Gestion des secrets              | [`security/secrets.md`](../security/secrets.md)               |
-| Sauvegardes & PRA                | [`security/backups.md`](../security/backups.md)               |
+| Sujet                                | Référence                                                     |
+| ------------------------------------ | ------------------------------------------------------------- |
+| Inventaire des actifs à protéger     | [`security/inventory.md`](../security/inventory.md)           |
+| Prestataires & exigences de sécurité | [`security/providers.md`](../security/providers.md)           |
+| Authentification & autorisations     | [`security/authentication.md`](../security/authentication.md) |
+| Sécurité réseau                      | [`security/network.md`](../security/network.md)               |
+| Gestion des secrets                  | [`security/secrets.md`](../security/secrets.md)               |
+| Sauvegardes                          | [`security/backups.md`](../security/backups.md)               |
+| Plan de continuité d'activité (PCA)  | [`security/pca.md`](../security/pca.md)                       |
+| Plan de reprise d'activité (PRA)     | [`security/pra.md`](../security/pra.md)                       |
+| Revues régulières                    | [`security/reviews.md`](../security/reviews.md)               |
 
 ```{toctree}
 :maxdepth: 2

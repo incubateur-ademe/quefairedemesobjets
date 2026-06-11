@@ -2,7 +2,7 @@
 
 Liste des services tiers consommés par la webapp Django, des variables d'environnement associées et de leur usage.
 
-> **Voir aussi** : [Gestion des secrets](../security/secrets.md), [Monitoring](../infrastructure/monitoring.md).
+> **Voir aussi** : [Prestataires & exigences de sécurité](../security/providers.md) (SLA, certifications, conformité), [Gestion des secrets](../security/secrets.md), [Monitoring](../infrastructure/monitoring.md).
 
 | Service                   | Variables d'environnement                                                                                     | Usage                                                                                                                                               |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |

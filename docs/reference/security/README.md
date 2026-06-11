@@ -31,8 +31,13 @@ For the full observability stack (Sentry, PostHog, Matomo, Scaleway Cockpit, Mat
 ```{toctree}
 :maxdepth: 2
 
+inventory.md
+providers.md
 authentication.md
 network.md
 secrets.md
 backups.md
+pca.md
+pra.md
+reviews.md
 ```

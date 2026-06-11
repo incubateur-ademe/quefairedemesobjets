@@ -85,7 +85,7 @@ For each command, the environment must be specified.
 
 ## Composants déployés
 
-> **Voir aussi** : [Architecture applicative](../architecture/README.md), [Bases de données](../db/db_organisation.md), [Airflow](../data-platform/airflow.md), [Sauvegardes & PRA](../security/backups.md).
+> **Voir aussi** : [Architecture applicative](../architecture/README.md), [Bases de données](../db/db_organisation.md), [Airflow](../data-platform/airflow.md), [Sauvegardes](../security/backups.md), [PCA](../security/pca.md), [PRA](../security/pra.md).
 
 ### Scalingo (région `osc-fr1`)
 
