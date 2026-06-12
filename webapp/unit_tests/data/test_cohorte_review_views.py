@@ -73,7 +73,9 @@ class TestCohorteReviewAccess:
 @pytest.mark.django_db
 class TestCohorteReviewRows:
     def test_rows_contain_cells_and_fields_meta(self, client, staff_user, cohorte):
-        _groupe_with_suggestions(cohorte, "ID_1", "Acteur 1", url="https://a1.fr")
+        groupe = _groupe_with_suggestions(
+            cohorte, "ID_1", "Acteur 1", url="https://a1.fr"
+        )
         client.force_login(staff_user)
 
         response = client.get(reverse("data:cohorte_review_rows", args=[cohorte.id]))
@@ -85,6 +87,9 @@ class TestCohorteReviewRows:
 
         row = payload["rows"][0]
         assert row["acteur_id"] == "ID_1"
+        # the detail link targets the admin change page (the only standalone
+        # detail view), not the Turbo Stream endpoint
+        assert row["detail_url"] == f"/admin/data/suggestiongroupe/{groupe.id}/change/"
         assert row["statut"] == SuggestionStatut.AVALIDER
         assert row["cells"]["nom"] == {
             "current": None,
@@ -393,6 +398,40 @@ class TestCohorteReviewBulk:
             assert set(_unitaire_statuts(untouched).values()) == {
                 SuggestionStatut.AVALIDER
             }
+
+
+@pytest.mark.django_db
+class TestSeedReviewDemoCommand:
+    def test_creates_a_reviewable_cohorte(self, client, staff_user):
+        from django.core.management import call_command
+
+        for index in range(3):
+            ActeurFactory(
+                identifiant_unique=f"ID_SEED_{index}",
+                nom=f"Acteur {index}",
+                location=Point(2.1 + index / 100, 48.1),
+            )
+
+        call_command("seed_review_demo", "--groupes", "2")
+        # idempotent: rerunning replaces the previous demo cohorte
+        call_command("seed_review_demo", "--groupes", "2")
+
+        cohorte = SuggestionCohorteFactory._meta.model.objects.get(
+            identifiant_action="demo_revue_cohorte"
+        )
+        assert cohorte.suggestion_groupes.count() == 2
+
+        client.force_login(staff_user)
+        response = client.get(reverse("data:cohorte_review_rows", args=[cohorte.id]))
+        payload = response.json()
+        assert payload["meta"]["total"] == 2
+        assert all(row["cells"] for row in payload["rows"])
+
+    def test_fails_without_acteurs(self):
+        from django.core.management import CommandError, call_command
+
+        with pytest.raises(CommandError):
+            call_command("seed_review_demo")
 
 
 @pytest.mark.django_db
