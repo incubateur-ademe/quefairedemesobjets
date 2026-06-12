@@ -502,6 +502,7 @@ export default class extends Controller<HTMLElement> {
       "[data-cell-action]",
     )
     if (!button) {
+      this.maybeOpenFocusCard(event)
       return
     }
     event.preventDefault()
@@ -510,6 +511,17 @@ export default class extends Controller<HTMLElement> {
       button.dataset.field ?? "",
       button.dataset.cellAction as string,
     )
+  }
+
+  private maybeOpenFocusCard(event: Event) {
+    // In focus mode the whole card opens the suggestion groupe, except
+    // clicks on its interactive elements (actions, links)
+    const target = event.target as HTMLElement
+    const card = target.closest<HTMLElement>(".focus-card[data-detail-url]")
+    if (!card || target.closest("a, button, sl-button, input, select")) {
+      return
+    }
+    window.open(card.dataset.detailUrl, "_blank", "noopener")
   }
 
   private selectedGroupeIds(): number[] {
@@ -875,7 +887,8 @@ export default class extends Controller<HTMLElement> {
         ? `<span class="old">${esc(cell.current)}</span>`
         : ""
     return `
-      <div class="focus-card ${stateClass}">
+      <div class="focus-card ${stateClass}" data-detail-url="${esc(row.detail_url)}"
+        title="Ouvrir le groupe de suggestions (nouvel onglet)">
         <div class="who">
           <a href="${esc(row.detail_url)}" target="_blank" rel="noreferrer"
             class="acteur-nom">${esc(row.acteur_nom) || "(sans nom)"}</a>
