@@ -228,13 +228,17 @@ tbody tr.selected td {
   background: var(--sl-color-danger-600);
 }
 
+/* actions stay visible on pending cells (scan + aim without hovering,
+   keyboard reachable); decided cells reveal the undo on hover/focus */
 .cell-actions {
   display: none;
   gap: 4px;
   margin-top: 3px;
 }
 
-td:hover .cell-actions {
+.sug.pending .cell-actions,
+td:hover .cell-actions,
+td:focus-within .cell-actions {
   display: inline-flex;
 }
 
@@ -584,6 +588,42 @@ main.focus-mode .bulkbar {
 
 .focus-card[data-detail-url] {
   cursor: pointer;
+}
+
+.focus-card.active {
+  outline: 2px solid var(--sl-color-primary-600);
+  outline-offset: -1px;
+}
+
+.focus-cards:focus {
+  outline: none;
+}
+
+.kbd-help {
+  margin-top: 14px;
+  font-size: 0.75rem;
+  color: var(--sl-color-neutral-500);
+}
+
+kbd {
+  background: #fff;
+  border: 1px solid var(--sl-color-neutral-300);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  padding: 0 6px;
+  font-family: inherit;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .focus-card[data-detail-url]:hover {
