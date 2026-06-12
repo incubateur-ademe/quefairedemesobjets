@@ -56,10 +56,28 @@
                 <div class="field-toggles" data-cohorte-review-target="fieldToggles">
                     <span class="label">Champs :</span>
                 </div>
-                <span class="status" data-cohorte-review-target="status">Chargement…</span>
+                <span
+                    class="status"
+                    data-cohorte-review-target="status"
+                    aria-live="polite"
+                    aria-atomic="true"
+                >Chargement…</span>
             </div>
 
-            <div class="bulkbar" data-cohorte-review-target="bulkBar" hidden>
+            <span
+                class="sr-only"
+                aria-live="assertive"
+                aria-atomic="true"
+                data-cohorte-review-target="announcer"
+            ></span>
+
+            <div
+                class="bulkbar"
+                data-cohorte-review-target="bulkBar"
+                role="toolbar"
+                aria-label="Actions sur la sélection"
+                hidden
+            >
                 <span class="count">
                     <span data-cohorte-review-target="bulkCount">0</span> acteurs sélectionnés
                 </span>
@@ -103,7 +121,19 @@
                 ></nav>
                 <section class="focus-main">
                     <div data-cohorte-review-target="focusHeader"></div>
-                    <div class="focus-cards" data-cohorte-review-target="focusCards"></div>
+                    <div
+                        class="focus-cards"
+                        data-cohorte-review-target="focusCards"
+                        tabindex="-1"
+                        aria-label="Suggestions à réviser — ↑/↓ naviguer, A accepter, R rejeter, U annuler, Entrée ouvrir le détail"
+                    ></div>
+                    <p class="kbd-help">
+                        <kbd>↑</kbd><kbd>↓</kbd> naviguer ·
+                        <kbd>A</kbd> accepter · <kbd>R</kbd> rejeter ·
+                        <kbd>U</kbd> annuler la décision ·
+                        <kbd>⏎</kbd> ouvrir le groupe de suggestions ·
+                        <kbd>Échap</kbd> quitter
+                    </p>
                 </section>
             </div>
 

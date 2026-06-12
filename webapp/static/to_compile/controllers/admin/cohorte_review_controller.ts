@@ -127,6 +127,7 @@ export default class extends Controller<HTMLElement> {
     "focusHeader",
     "focusCards",
     "selectFiltered",
+    "announcer",
   ]
   static values = {
     rowsUrl: String,
@@ -152,6 +153,7 @@ export default class extends Controller<HTMLElement> {
   declare readonly focusCardsTarget: HTMLElement
   declare readonly selectFilteredTarget: HTMLElement
   declare readonly hasSelectFilteredTarget: boolean
+  declare readonly announcerTarget: HTMLElement
   declare readonly rowsUrlValue: string
   declare readonly bulkUrlValue: string
   declare readonly csrfValue: string
@@ -166,6 +168,10 @@ export default class extends Controller<HTMLElement> {
   private searchDebounce: number | undefined
   private focusField: string | null = null
   private selectionScope: "ids" | "filter" = "ids"
+  private activeCardIndex = 0
+  // focus to restore after the next focus-header re-render (innerHTML
+  // replacement destroys the control that triggered the action)
+  private pendingHeaderFocus: string | null = null
   // applied filter (sent to the server) vs draft being edited in the builder
   private valueFilter: ValueFilter | null = null
   private builderGroups: ValueGroup[] = [blankValueGroup()]
@@ -178,12 +184,14 @@ export default class extends Controller<HTMLElement> {
   connect() {
     this.initTable()
     this.initVirtualizer()
-    // Cell action buttons are re-rendered on every scroll (grid) or refresh
-    // (focus cards): one delegated listener survives instead of re-binding.
+    // Cell action buttons and checkboxes are re-rendered on every scroll
+    // (grid) or refresh (focus cards): delegated listeners survive instead
+    // of re-binding, and avoid racing the custom-element upgrade.
     this.element.addEventListener("click", (event) => this.onCellAction(event))
+    this.element.addEventListener("sl-change", (event) => this.onCheckboxChange(event))
     document.addEventListener("keydown", this.onKeydown)
     window.addEventListener("popstate", this.onPopstate)
-    this.focusField = new URLSearchParams(window.location.search).get("focus")
+    this.restoreStateFromUrl()
     this.applyFocusMode()
     this.fetchRows()
   }
@@ -199,17 +207,114 @@ export default class extends Controller<HTMLElement> {
   private onKeydown = (event: KeyboardEvent) => {
     if (event.key === "Escape" && this.focusField) {
       this.exitFocus()
+      return
+    }
+    // single-key shortcuts must never fire while typing in a field
+    const target = event.target as HTMLElement
+    if (
+      event.metaKey ||
+      event.ctrlKey ||
+      event.altKey ||
+      target.closest("input, select, textarea, sl-input, sl-select, [contenteditable]")
+    ) {
+      return
+    }
+    if (!this.focusField) {
+      return
+    }
+    const handled = this.handleFocusModeKey(event.key)
+    if (handled) {
+      event.preventDefault()
     }
   }
 
-  private onPopstate = () => {
-    const field = new URLSearchParams(window.location.search).get("focus")
-    if (field !== this.focusField) {
-      this.focusField = field
-      this.resetValueFilter()
-      this.applyFocusMode()
-      this.resetAndFetch()
+  /** Focus-mode review loop: ↑/↓ (or k/j) move, A accept, R reject,
+   * U undo, ⏎ opens the suggestion groupe of the active card. */
+  private handleFocusModeKey(key: string): boolean {
+    switch (key) {
+      case "ArrowDown":
+      case "j":
+        this.moveActiveCard(1)
+        return true
+      case "ArrowUp":
+      case "k":
+        this.moveActiveCard(-1)
+        return true
+      case "a":
+      case "A":
+        this.decideActiveCard("accept")
+        return true
+      case "r":
+      case "R":
+        this.decideActiveCard("reject")
+        return true
+      case "u":
+      case "U":
+        this.decideActiveCard("reset", { advance: false })
+        return true
+      case "Enter": {
+        const row = this.rows[this.activeCardIndex]
+        if (row) {
+          window.open(row.detail_url, "_blank", "noopener")
+        }
+        return true
+      }
+      default:
+        return false
     }
+  }
+
+  private moveActiveCard(delta: number) {
+    if (!this.rows.length) {
+      return
+    }
+    this.activeCardIndex = Math.max(
+      0,
+      Math.min(this.activeCardIndex + delta, this.rows.length - 1),
+    )
+    // refill the queue before the cursor reaches the end
+    if (this.rows.length - this.activeCardIndex < LOAD_MORE_THRESHOLD) {
+      this.fetchRows()
+    }
+    this.renderFocusCards()
+    this.scrollActiveCardIntoView()
+  }
+
+  private decideActiveCard(
+    action: string,
+    { advance = true }: { advance?: boolean } = {},
+  ) {
+    const field = this.focusField
+    const row = this.rows[this.activeCardIndex]
+    if (!field || !row || !row.cells[field]) {
+      return
+    }
+    this.postBulk([row.groupe_id], field, action)
+    if (advance) {
+      this.moveActiveCard(1)
+    }
+  }
+
+  private scrollActiveCardIntoView() {
+    this.focusCardsTarget
+      .querySelector(".focus-card.active")
+      ?.scrollIntoView({ block: "nearest" })
+  }
+
+  private onPopstate = () => {
+    const params = new URLSearchParams(window.location.search)
+    const field = params.get("focus")
+    const q = params.get("q") ?? ""
+    const statut = params.get("statut") ?? "AVALIDER"
+    if (field === this.focusField && q === this.q && statut === this.statutFilter) {
+      return
+    }
+    this.focusField = field
+    this.q = q
+    this.statutFilter = statut
+    this.resetValueFilter()
+    this.applyFocusMode()
+    this.resetAndFetch()
   }
 
   focusOn(event: Event) {
@@ -222,6 +327,10 @@ export default class extends Controller<HTMLElement> {
     this.syncFocusToUrl()
     this.applyFocusMode()
     this.resetAndFetch()
+    // the trigger button lives in the (now hidden) grid header: move focus
+    // into the focus layout so keyboard review can start immediately
+    this.focusCardsTarget.focus()
+    this.announce(`Mode focus sur le champ ${field}`)
   }
 
   exitFocus() {
@@ -230,6 +339,8 @@ export default class extends Controller<HTMLElement> {
     this.syncFocusToUrl()
     this.applyFocusMode()
     this.resetAndFetch()
+    this.searchTarget.focus?.()
+    this.announce("Retour à la grille")
   }
 
   // --- focus-mode query builder on the suggested value ---
@@ -238,6 +349,7 @@ export default class extends Controller<HTMLElement> {
     this.readBuilderFromDom()
     const groupIndex = Number((event.currentTarget as HTMLElement).dataset.group)
     this.builderGroups[groupIndex]?.conditions.push(blankValueCondition())
+    this.pendingHeaderFocus = `[data-action*="vbAddCondition"][data-group="${groupIndex}"]`
     this.renderFocusHeader()
   }
 
@@ -276,6 +388,7 @@ export default class extends Controller<HTMLElement> {
 
   vbApply() {
     this.readBuilderFromDom()
+    this.pendingHeaderFocus = `[data-action*="vbApply"]`
     const groups = this.builderGroups
       .map((group) => ({
         combinator: group.combinator,
@@ -342,13 +455,27 @@ export default class extends Controller<HTMLElement> {
   }
 
   private syncFocusToUrl() {
+    window.history.pushState({}, "", this.buildStateUrl())
+  }
+
+  private syncFiltersToUrl() {
+    // filters replace (no history spam); mode changes push (back works)
+    window.history.replaceState({}, "", this.buildStateUrl())
+  }
+
+  private buildStateUrl(): URL {
     const url = new URL(window.location.href)
-    if (this.focusField) {
-      url.searchParams.set("focus", this.focusField)
-    } else {
-      url.searchParams.delete("focus")
+    const setOrDelete = (key: string, value: string, defaultValue: string) => {
+      if (value && value !== defaultValue) {
+        url.searchParams.set(key, value)
+      } else {
+        url.searchParams.delete(key)
+      }
     }
-    window.history.pushState({}, "", url)
+    setOrDelete("focus", this.focusField ?? "", "")
+    setOrDelete("q", this.q, "")
+    setOrDelete("statut", this.statutFilter, "AVALIDER")
+    return url
   }
 
   private applyFocusMode() {
@@ -422,12 +549,14 @@ export default class extends Controller<HTMLElement> {
     window.clearTimeout(this.searchDebounce)
     this.searchDebounce = window.setTimeout(() => {
       this.q = this.searchTarget.value.trim()
+      this.syncFiltersToUrl()
       this.resetAndFetch()
     }, 300)
   }
 
   onStatutChange() {
     this.statutFilter = this.statutFilterTarget.value || "AVALIDER"
+    this.syncFiltersToUrl()
     this.resetAndFetch()
   }
 
@@ -436,6 +565,7 @@ export default class extends Controller<HTMLElement> {
     this.total = 0
     this.nextAfter = 0
     this.selectionScope = "ids"
+    this.activeCardIndex = 0
     this.table.resetRowSelection(true)
     this.table.setOptions((prev) => ({ ...prev, data: this.rows }))
     this.virtualizer.setOptions({ ...this.virtualizer.options, count: 0 })
@@ -513,6 +643,32 @@ export default class extends Controller<HTMLElement> {
     )
   }
 
+  private onCheckboxChange(event: Event) {
+    const target = event.target as HTMLElement & { checked: boolean }
+    if (target.hasAttribute("data-select-all")) {
+      this.table.toggleAllRowsSelected(target.checked)
+      return
+    }
+    const rowId = target.dataset.rowSelect
+    if (rowId) {
+      this.table.getRow(rowId).toggleSelected(target.checked)
+    }
+  }
+
+  private restoreStateFromUrl() {
+    const params = new URLSearchParams(window.location.search)
+    this.focusField = params.get("focus")
+    this.q = params.get("q") ?? ""
+    this.statutFilter = params.get("statut") ?? "AVALIDER"
+    // sl components upgrade asynchronously: set their values once defined
+    customElements.whenDefined("sl-input").then(() => {
+      this.searchTarget.value = this.q
+    })
+    customElements.whenDefined("sl-select").then(() => {
+      this.statutFilterTarget.value = this.statutFilter
+    })
+  }
+
   private maybeOpenFocusCard(event: Event) {
     // In focus mode the whole card opens the suggestion groupe, except
     // clicks on its interactive elements (actions, links)
@@ -534,18 +690,48 @@ export default class extends Controller<HTMLElement> {
     if (!groupeIds.length) {
       return
     }
+    // Optimistic: the cells flip immediately, the server response (or a
+    // rollback on error) reconciles afterwards. Decisions never wait.
+    const snapshot = this.applyOptimistic(groupeIds, champ || null, action)
     this.sendBulk(
       { groupe_ids: groupeIds, champ: champ || null, action },
-      { reload: false },
+      { reload: false, snapshot },
     )
   }
 
-  private async sendBulk(body: object, { reload }: { reload: boolean }) {
-    if (this.loading) {
-      return
-    }
-    this.loading = true
-    this.renderStatus()
+  private applyOptimistic(
+    groupeIds: number[],
+    champ: string | null,
+    action: string,
+  ): PivotRow[] {
+    const statut =
+      action === "accept"
+        ? STATUT_ACCEPTED
+        : action === "reject"
+          ? STATUT_REJECTED
+          : STATUT_PENDING
+    const ids = new Set(groupeIds)
+    const snapshot: PivotRow[] = []
+    this.rows = this.rows.map((row) => {
+      if (!ids.has(row.groupe_id)) {
+        return row
+      }
+      snapshot.push(row)
+      const cells: Record<string, PivotCell> = {}
+      for (const [field, cell] of Object.entries(row.cells)) {
+        cells[field] = !champ || field === champ ? { ...cell, statut } : cell
+      }
+      return { ...row, cells }
+    })
+    this.table.setOptions((prev) => ({ ...prev, data: this.rows }))
+    this.renderAll()
+    return snapshot
+  }
+
+  private async sendBulk(
+    body: object,
+    { reload, snapshot = [] }: { reload: boolean; snapshot?: PivotRow[] },
+  ) {
     try {
       const response = await fetch(this.bulkUrlValue, {
         method: "POST",
@@ -565,20 +751,39 @@ export default class extends Controller<HTMLElement> {
       if (payload.rows) {
         this.mergeRows(payload.rows as PivotRow[])
       }
+      this.announce(this.describeBulkResult(payload.applied, body))
       if (reload) {
         // Filter-scope mutations touch rows beyond the loaded window:
         // reload from the first batch instead of merging.
-        this.loading = false
         this.resetAndFetch()
         return
       }
       this.renderAll()
     } catch (error) {
+      if (snapshot.length) {
+        this.mergeRows(snapshot)
+        this.renderAll()
+      }
       this.statusTarget.textContent = `Erreur lors de l'action (${error})`
-    } finally {
-      this.loading = false
-      this.renderStatus()
+      this.announce("L'action a échoué, la suggestion n'a pas été modifiée")
     }
+  }
+
+  private describeBulkResult(applied: number, body: object): string {
+    const action = (body as { action?: string }).action
+    const verb =
+      action === "accept"
+        ? "acceptée"
+        : action === "reject"
+          ? "rejetée"
+          : "remise à valider"
+    return `${applied} suggestion${applied > 1 ? "s" : ""} ${verb}${
+      applied > 1 ? "s" : ""
+    }`
+  }
+
+  private announce(message: string) {
+    this.announcerTarget.textContent = message
   }
 
   private mergeRows(updatedRows: PivotRow[]) {
@@ -706,6 +911,13 @@ export default class extends Controller<HTMLElement> {
         </div>
       </div>
       ${this.renderValueBuilder(field)}`
+    if (this.pendingHeaderFocus) {
+      const element = this.focusHeaderTarget.querySelector(
+        this.pendingHeaderFocus,
+      ) as HTMLElement | null
+      element?.focus()
+      this.pendingHeaderFocus = null
+    }
   }
 
   private renderValueBuilder(field: string): string {
@@ -738,11 +950,13 @@ export default class extends Controller<HTMLElement> {
           this.total > 1 ? "s" : ""
         }</span>
         <sl-button size="small" variant="success"
-          data-action="click->cohorte-review#focusBulkAccept">
+          data-action="click->cohorte-review#focusBulkAccept"
+          ${this.total ? "" : "disabled"}>
           ✓ Accepter les ${this.total} filtrées
         </sl-button>
         <sl-button size="small" variant="danger" outline
-          data-action="click->cohorte-review#focusBulkReject">
+          data-action="click->cohorte-review#focusBulkReject"
+          ${this.total ? "" : "disabled"}>
           ✕ Rejeter les ${this.total} filtrées
         </sl-button>`
       : ""
@@ -870,12 +1084,20 @@ export default class extends Controller<HTMLElement> {
 
   private renderFocusCards() {
     const field = this.focusField as string
-    const cards = this.rows.map((row) => this.renderFocusCard(row, field)).join("")
+    this.activeCardIndex = Math.max(
+      0,
+      Math.min(this.activeCardIndex, this.rows.length - 1),
+    )
+    const cards = this.rows
+      .map((row, index) =>
+        this.renderFocusCard(row, field, index === this.activeCardIndex),
+      )
+      .join("")
     this.focusCardsTarget.innerHTML =
       cards || `<p class="focus-empty">Aucune suggestion pour ce champ.</p>`
   }
 
-  private renderFocusCard(row: PivotRow, field: string): string {
+  private renderFocusCard(row: PivotRow, field: string, isActive: boolean): string {
     const cell = row.cells[field]
     if (!cell) {
       return ""
@@ -887,7 +1109,8 @@ export default class extends Controller<HTMLElement> {
         ? `<span class="old">${esc(cell.current)}</span>`
         : ""
     return `
-      <div class="focus-card ${stateClass}" data-detail-url="${esc(row.detail_url)}"
+      <div class="focus-card ${stateClass} ${isActive ? "active" : ""}"
+        data-detail-url="${esc(row.detail_url)}"
         title="Ouvrir le groupe de suggestions (nouvel onglet)">
         <div class="who">
           <a href="${esc(row.detail_url)}" target="_blank" rel="noreferrer"
@@ -911,8 +1134,8 @@ export default class extends Controller<HTMLElement> {
             <button type="button" class="focus-entry"
               data-action="click->cohorte-review#focusOn"
               data-field="${esc(field.key)}"
-              title="Réviser « ${esc(field.key)} » en mode focus">
-              <sl-badge variant="warning" pill>${field.pending} 🎯</sl-badge>
+              aria-label="Réviser le champ ${esc(field.key)} en mode focus (${field.pending} suggestions à valider)">
+              <sl-badge variant="warning" pill>${field.pending} <span aria-hidden="true">🎯</span></sl-badge>
             </button>
           </th>`,
       )
@@ -926,12 +1149,6 @@ export default class extends Controller<HTMLElement> {
         <th scope="col" class="col-acteur">Acteur</th>
         ${fieldHeads}
       </tr>`
-    this.headTarget
-      .querySelector("[data-select-all]")
-      ?.addEventListener("sl-change", (event) => {
-        const checked = (event.target as HTMLInputElement).checked
-        this.table.toggleAllRowsSelected(checked)
-      })
   }
 
   private renderBody() {
@@ -950,26 +1167,51 @@ export default class extends Controller<HTMLElement> {
     const columnCount = this.visibleFields().length + 2
 
     const renderedRows = virtualItems
-      .map((virtualItem) => this.renderRow(this.rows[virtualItem.index]))
+      .map((virtualItem) =>
+        this.renderRow(this.rows[virtualItem.index], virtualItem.index),
+      )
       .join("")
 
+    // innerHTML replacement destroys the focused element: snapshot its
+    // logical identity and restore focus after the re-render
+    const focusSnapshot = this.snapshotBodyFocus()
     this.bodyTarget.innerHTML = `
       ${this.spacerRow(paddingTop, columnCount)}
       ${renderedRows}
       ${this.spacerRow(paddingBottom, columnCount)}`
-
-    this.bodyTarget.querySelectorAll("[data-row-select]").forEach((checkbox) => {
-      checkbox.addEventListener("sl-change", (event) => {
-        const target = event.target as HTMLElement & { checked: boolean }
-        const rowId = target.dataset.rowSelect as string
-        this.table.getRow(rowId).toggleSelected(target.checked)
-      })
-    })
+    this.restoreBodyFocus(focusSnapshot)
 
     const lastIndex = virtualItems[virtualItems.length - 1].index
     if (lastIndex >= this.rows.length - LOAD_MORE_THRESHOLD) {
       this.fetchRows()
     }
+  }
+
+  private snapshotBodyFocus(): string | null {
+    const active = document.activeElement as HTMLElement | null
+    if (!active || !this.bodyTarget.contains(active)) {
+      return null
+    }
+    if (active.dataset.rowSelect) {
+      return `[data-row-select="${active.dataset.rowSelect}"]`
+    }
+    if (active.dataset.cellAction) {
+      return (
+        `[data-cell-action="${active.dataset.cellAction}"]` +
+        `[data-groupe-id="${active.dataset.groupeId}"]` +
+        `[data-field="${active.dataset.field}"]`
+      )
+    }
+    const row = active.closest("[data-groupe-id]") as HTMLElement | null
+    return row ? `[data-groupe-id="${row.dataset.groupeId}"] a` : null
+  }
+
+  private restoreBodyFocus(selector: string | null) {
+    if (!selector) {
+      return
+    }
+    const element = this.bodyTarget.querySelector(selector) as HTMLElement | null
+    element?.focus()
   }
 
   private spacerRow(height: number, columnCount: number): string {
@@ -981,7 +1223,7 @@ export default class extends Controller<HTMLElement> {
     </tr>`
   }
 
-  private renderRow(row: PivotRow): string {
+  private renderRow(row: PivotRow, virtualIndex: number): string {
     const isSelected = this.tableState.rowSelection?.[String(row.groupe_id)] === true
     const cells = this.visibleFields()
       .map((field) => this.renderCell(row, field.key))
@@ -993,7 +1235,8 @@ export default class extends Controller<HTMLElement> {
       ? `<span class="row-error">${esc(row.error)}</span>`
       : ""
     return `
-      <tr class="${isSelected ? "selected" : ""}" data-groupe-id="${row.groupe_id}">
+      <tr class="${isSelected ? "selected" : ""}" data-groupe-id="${row.groupe_id}"
+        aria-rowindex="${virtualIndex + 2}">
         <td class="col-select">
           <sl-checkbox size="small" data-row-select="${row.groupe_id}"
             ${isSelected ? "checked" : ""}
@@ -1036,7 +1279,8 @@ export default class extends Controller<HTMLElement> {
     const button = (action: string, label: string, title: string) => `
       <button type="button" class="cell-action ${action}"
         data-cell-action="${action}" data-groupe-id="${groupeId}"
-        data-field="${esc(field)}" title="${title}">${label}</button>`
+        data-field="${esc(field)}" title="${title}"
+        aria-label="${title}"><span aria-hidden="true">${label}</span></button>`
     if (statut === STATUT_PENDING) {
       return `<span class="cell-actions">
         ${button("accept", "✓", `Accepter « ${esc(field)} »`)}
@@ -1071,12 +1315,15 @@ export default class extends Controller<HTMLElement> {
     this.fieldTogglesTarget
       .querySelectorAll("[data-field-toggle]")
       .forEach((button) => {
+        button.setAttribute("aria-pressed", "true")
         button.addEventListener("click", () => {
           const element = button as HTMLElement & { variant: string }
           const key = element.dataset.fieldToggle as string
           const column = this.table.getColumn(key)
           column?.toggleVisibility()
-          element.variant = column?.getIsVisible() === false ? "default" : "primary"
+          const isVisible = column?.getIsVisible() !== false
+          element.variant = isVisible ? "primary" : "default"
+          element.setAttribute("aria-pressed", String(isVisible))
         })
       })
   }
@@ -1100,5 +1347,26 @@ export default class extends Controller<HTMLElement> {
       this.selectFilteredTarget.textContent = `Sélectionner les ${this.total} acteurs filtrés`
       this.selectFilteredTarget.toggleAttribute("hidden", isFilterScope)
     }
+    this.updateSelectAllState(selectedCount)
+    this.updateRowCount()
+  }
+
+  private updateSelectAllState(selectedCount: number) {
+    const selectAll = this.headTarget.querySelector("[data-select-all]") as
+      | (HTMLElement & { checked: boolean; indeterminate: boolean })
+      | null
+    if (!selectAll) {
+      return
+    }
+    const allSelected = this.rows.length > 0 && selectedCount === this.rows.length
+    selectAll.checked = allSelected
+    selectAll.indeterminate = selectedCount > 0 && !allSelected
+  }
+
+  private updateRowCount() {
+    // virtualization renders a window: aria-rowcount exposes the real size
+    const table = this.scrollerTarget.querySelector("table")
+    table?.setAttribute("aria-rowcount", String(this.total + 1))
+    table?.setAttribute("aria-colcount", String(this.visibleFields().length + 2))
   }
 }
