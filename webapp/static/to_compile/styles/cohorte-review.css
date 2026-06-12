@@ -1,0 +1,187 @@
+/* Cohorte review screen — standalone (no DSFR, no Tailwind prefix). */
+:root {
+  --sl-color-primary-50: #eef2ff;
+  --sl-color-primary-100: #e0e7ff;
+  --sl-color-primary-200: #c7d2fe;
+  --sl-color-primary-300: #a5b4fc;
+  --sl-color-primary-400: #818cf8;
+  --sl-color-primary-500: #6366f1;
+  --sl-color-primary-600: #4f46e5;
+  --sl-color-primary-700: #4338ca;
+  --sl-color-primary-800: #3730a3;
+  --sl-color-primary-900: #312e81;
+  --sl-color-primary-950: #1e1b4b;
+  font-size: 15px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--sl-font-sans);
+  color: var(--sl-color-neutral-900);
+  background: var(--sl-color-neutral-50);
+}
+
+a {
+  color: var(--sl-color-primary-600);
+}
+
+.topbar {
+  background: #fff;
+  border-bottom: 1px solid var(--sl-color-neutral-200);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.topbar .brand {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--sl-color-primary-700);
+}
+
+.topbar .cohorte-label {
+  font-size: 0.85rem;
+  color: var(--sl-color-neutral-600);
+}
+
+.topbar .back-link {
+  margin-left: auto;
+  font-size: 0.85rem;
+}
+
+.toolbar {
+  padding: 10px 24px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.field-toggles {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.field-toggles .label {
+  font-size: 0.8rem;
+  color: var(--sl-color-neutral-500);
+}
+
+.toolbar .status {
+  margin-left: auto;
+  font-size: 0.82rem;
+  color: var(--sl-color-neutral-600);
+}
+
+.table-wrap {
+  margin: 0 24px;
+  background: #fff;
+  border: 1px solid var(--sl-color-neutral-200);
+  border-radius: 8px;
+  overflow: auto;
+  height: calc(100vh - 175px);
+}
+
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  font-size: 0.85rem;
+}
+
+thead th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--sl-color-neutral-50);
+  border-bottom: 2px solid var(--sl-color-neutral-300);
+  padding: 8px 10px;
+  text-align: left;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+tbody td {
+  border-bottom: 1px solid var(--sl-color-neutral-100);
+  padding: 7px 10px;
+  vertical-align: top;
+}
+
+tbody tr:not(.spacer):hover td {
+  background: var(--sl-color-primary-50);
+}
+
+tbody tr.selected td {
+  background: var(--sl-color-primary-100);
+}
+
+.col-select {
+  width: 36px;
+}
+
+.col-acteur {
+  min-width: 210px;
+}
+
+.acteur-nom {
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.acteur-id,
+.acteur-statut {
+  display: block;
+  color: var(--sl-color-neutral-500);
+  font-size: 0.72rem;
+}
+
+.row-error {
+  display: block;
+  color: var(--sl-color-danger-700);
+  font-size: 0.72rem;
+}
+
+.sug {
+  min-width: 170px;
+  max-width: 280px;
+}
+
+.sug .old {
+  color: var(--sl-color-neutral-500);
+  text-decoration: line-through;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sug .new {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.sug .new::before {
+  content: "→ ";
+  color: var(--sl-color-neutral-400);
+}
+
+.empty {
+  color: var(--sl-color-neutral-300);
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 24px;
+  font-size: 0.85rem;
+  color: var(--sl-color-neutral-500);
+}

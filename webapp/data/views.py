@@ -1,9 +1,12 @@
 import json
 import logging
+from collections import Counter
 
+from core.views import IsStaffMixin
 from data.forms import SuggestionGroupeStatusForm
 from data.models.suggestion import (
     SuggestionAction,
+    SuggestionCohorte,
     SuggestionGroupe,
     SuggestionStatut,
     SuggestionUnitaire,
@@ -18,10 +21,10 @@ from data.models.utils import prepare_acteur_data_with_location
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.http import HttpResponseBadRequest
+from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy
-from django.views.generic import FormView, View
+from django.views.generic import FormView, TemplateView, View
 from qfdmo.models.acteur import Acteur, ActeurStatus, DisplayedActeur, RevisionActeur
 
 logger = logging.getLogger(__name__)
@@ -493,3 +496,115 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
             context,
             content_type="text/vnd.turbo-stream.html",
         )
+
+
+REVIEW_ROWS_DEFAULT_LIMIT = 100
+REVIEW_ROWS_MAX_LIMIT = 200
+
+
+class CohorteReviewView(IsStaffMixin, TemplateView):
+    """Pivot review screen for a cohorte: rows = suggestion groupes (acteurs),
+    columns = fields. The grid itself is rendered client-side by the
+    cohorte-review Stimulus controller, fed by CohorteReviewRowsView."""
+
+    template_name = "data/cohorte_review.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["suggestion_cohorte"] = get_object_or_404(
+            SuggestionCohorte, id=self.kwargs["cohorte_id"]
+        )
+        return context
+
+
+class CohorteReviewRowsView(IsStaffMixin, View):
+    """JSON rows endpoint for the cohorte review grid.
+
+    Keyset pagination: stable ordering by id, `after` cursor, `limit` batch
+    size. Filtering (statut, champ, q) stays server-side: the client only
+    ever holds the rows it has fetched.
+    """
+
+    def get(self, request, cohorte_id):
+        cohorte = get_object_or_404(SuggestionCohorte, id=cohorte_id)
+
+        queryset = SuggestionGroupe.objects.filter(
+            suggestion_cohorte=cohorte
+        ).prefetch_related("suggestion_unitaires", "acteur", "revision_acteur")
+
+        statut = request.GET.get("statut", SuggestionStatut.AVALIDER)
+        if statut != "all":
+            queryset = queryset.filter(statut=statut)
+        if champ := request.GET.get("champ"):
+            queryset = queryset.filter(suggestion_unitaires__champs__contains=[champ])
+            queryset = queryset.distinct()
+        if q := request.GET.get("q"):
+            queryset = queryset.filter(acteur_id__icontains=q)
+
+        total = queryset.count()
+
+        try:
+            after = int(request.GET.get("after", 0))
+            limit = int(request.GET.get("limit", REVIEW_ROWS_DEFAULT_LIMIT))
+        except ValueError:
+            return HttpResponseBadRequest("after and limit must be integers")
+        limit = max(1, min(limit, REVIEW_ROWS_MAX_LIMIT))
+
+        groupes = list(queryset.filter(id__gt=after).order_by("id")[:limit])
+
+        rows = [self._build_row(groupe) for groupe in groupes]
+        next_after = groupes[-1].id if len(groupes) == limit else None
+
+        return JsonResponse(
+            {
+                "rows": rows,
+                "meta": {
+                    "total": total,
+                    "next_after": next_after,
+                    "fields": self._fields_meta(cohorte),
+                },
+            }
+        )
+
+    def _build_row(self, groupe: SuggestionGroupe) -> dict:
+        try:
+            return SuggestionGroupeTypeSource.from_suggestion_groupe(
+                groupe
+            ).to_pivot_row()
+        except ValueError as e:
+            # Non-source cohortes (or inconsistent data) still get a row so
+            # the reviewer sees them and can open the detail view.
+            logger.warning(f"Cannot build pivot row for groupe {groupe.id}: {e}")
+            return {
+                "groupe_id": groupe.id,
+                "statut": groupe.statut,
+                "statut_display": groupe.get_statut_display(),
+                "acteur_id": groupe.acteur_id or "",
+                "acteur_nom": "",
+                "has_parent": groupe.parent_revision_acteur_id is not None,
+                "detail_url": groupe.change_url,
+                "cells": {},
+                "error": "type de suggestion non supporté par la grille",
+            }
+
+    def _fields_meta(self, cohorte: SuggestionCohorte) -> list[dict]:
+        """One entry per field having at least one suggestion to validate in
+        the cohorte, ordered like the detail view, with pending counts."""
+        champs_lists = SuggestionUnitaire.objects.filter(
+            suggestion_groupe__suggestion_cohorte=cohorte,
+            suggestion_groupe__statut=SuggestionStatut.AVALIDER,
+            suggestion_modele="Acteur",
+        ).values_list("champs", flat=True)
+
+        pending: Counter = Counter()
+        for champs in champs_lists:
+            pending.update(champs)
+
+        ordered = [
+            field
+            for group in SuggestionSourceModel.get_ordered_fields()
+            for field in group
+        ]
+        keys = [field for field in ordered if field in pending]
+        keys += sorted(field for field in pending if field not in ordered)
+        return [{"key": key, "pending": pending[key]} for key in keys]
