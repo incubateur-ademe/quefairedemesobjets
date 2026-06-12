@@ -81,6 +81,8 @@ export default class extends Controller<HTMLElement> {
     "bulkBar",
     "bulkCount",
     "bulkField",
+    "search",
+    "statutFilter",
   ]
   static values = {
     rowsUrl: String,
@@ -98,6 +100,8 @@ export default class extends Controller<HTMLElement> {
   declare readonly bulkBarTarget: HTMLElement
   declare readonly bulkCountTarget: HTMLElement
   declare readonly bulkFieldTarget: HTMLElement & { value: string }
+  declare readonly searchTarget: HTMLElement & { value: string }
+  declare readonly statutFilterTarget: HTMLElement & { value: string }
   declare readonly rowsUrlValue: string
   declare readonly bulkUrlValue: string
   declare readonly csrfValue: string
@@ -107,6 +111,9 @@ export default class extends Controller<HTMLElement> {
   private total = 0
   private nextAfter: number | null = 0
   private loading = false
+  private q = ""
+  private statutFilter = "AVALIDER"
+  private searchDebounce: number | undefined
   private table!: Table<PivotRow>
   private tableState!: TableState
   private virtualizer!: Virtualizer<HTMLDivElement, HTMLTableRowElement>
@@ -136,6 +143,10 @@ export default class extends Controller<HTMLElement> {
     try {
       const url = new URL(this.rowsUrlValue, window.location.origin)
       url.searchParams.set("after", String(this.nextAfter))
+      url.searchParams.set("statut", this.statutFilter)
+      if (this.q) {
+        url.searchParams.set("q", this.q)
+      }
       const response = await fetch(url, {
         headers: { Accept: "application/json" },
         credentials: "same-origin",
@@ -172,6 +183,33 @@ export default class extends Controller<HTMLElement> {
   }
 
   loadMore() {
+    this.fetchRows()
+  }
+
+  // --- filters (server-side: changing them reloads from the first batch) ---
+
+  onSearchInput() {
+    window.clearTimeout(this.searchDebounce)
+    this.searchDebounce = window.setTimeout(() => {
+      this.q = this.searchTarget.value.trim()
+      this.resetAndFetch()
+    }, 300)
+  }
+
+  onStatutChange() {
+    this.statutFilter = this.statutFilterTarget.value || "AVALIDER"
+    this.resetAndFetch()
+  }
+
+  private resetAndFetch() {
+    this.rows = []
+    this.total = 0
+    this.nextAfter = 0
+    this.table.resetRowSelection(true)
+    this.table.setOptions((prev) => ({ ...prev, data: this.rows }))
+    this.virtualizer.setOptions({ ...this.virtualizer.options, count: 0 })
+    this.scrollerTarget.scrollTop = 0
+    this.renderAll()
     this.fetchRows()
   }
 

@@ -21,6 +21,8 @@ from data.models.utils import prepare_acteur_data_with_location
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.db.models import CharField
+from django.db.models.functions import Cast
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy
@@ -582,7 +584,11 @@ class CohorteReviewRowsView(IsStaffMixin, View):
             queryset = queryset.filter(suggestion_unitaires__champs__contains=[champ])
             queryset = queryset.distinct()
         if q := request.GET.get("q"):
-            queryset = queryset.filter(acteur_id__icontains=q)
+            # acteur is a FK with db_constraint=False: search the raw column
+            # text rather than joining on a possibly missing Acteur row
+            queryset = queryset.annotate(
+                acteur_id_text=Cast("acteur_id", CharField())
+            ).filter(acteur_id_text__icontains=q)
 
         total = queryset.count()
 
