@@ -83,6 +83,10 @@ export default class extends Controller<HTMLElement> {
     "bulkField",
     "search",
     "statutFilter",
+    "focusLayout",
+    "focusRail",
+    "focusHeader",
+    "focusCards",
   ]
   static values = {
     rowsUrl: String,
@@ -102,6 +106,10 @@ export default class extends Controller<HTMLElement> {
   declare readonly bulkFieldTarget: HTMLElement & { value: string }
   declare readonly searchTarget: HTMLElement & { value: string }
   declare readonly statutFilterTarget: HTMLElement & { value: string }
+  declare readonly focusLayoutTarget: HTMLElement
+  declare readonly focusRailTarget: HTMLElement
+  declare readonly focusHeaderTarget: HTMLElement
+  declare readonly focusCardsTarget: HTMLElement
   declare readonly rowsUrlValue: string
   declare readonly bulkUrlValue: string
   declare readonly csrfValue: string
@@ -114,6 +122,7 @@ export default class extends Controller<HTMLElement> {
   private q = ""
   private statutFilter = "AVALIDER"
   private searchDebounce: number | undefined
+  private focusField: string | null = null
   private table!: Table<PivotRow>
   private tableState!: TableState
   private virtualizer!: Virtualizer<HTMLDivElement, HTMLTableRowElement>
@@ -122,14 +131,81 @@ export default class extends Controller<HTMLElement> {
   connect() {
     this.initTable()
     this.initVirtualizer()
-    // Cell action buttons are re-rendered on every scroll: one delegated
-    // listener survives instead of re-binding per render.
-    this.bodyTarget.addEventListener("click", (event) => this.onCellAction(event))
+    // Cell action buttons are re-rendered on every scroll (grid) or refresh
+    // (focus cards): one delegated listener survives instead of re-binding.
+    this.element.addEventListener("click", (event) => this.onCellAction(event))
+    document.addEventListener("keydown", this.onKeydown)
+    window.addEventListener("popstate", this.onPopstate)
+    this.focusField = new URLSearchParams(window.location.search).get("focus")
+    this.applyFocusMode()
     this.fetchRows()
   }
 
   disconnect() {
     this.cleanupVirtualizer()
+    document.removeEventListener("keydown", this.onKeydown)
+    window.removeEventListener("popstate", this.onPopstate)
+  }
+
+  // --- focus mode (review one field across all acteurs, ?focus=<champ>) ---
+
+  private onKeydown = (event: KeyboardEvent) => {
+    if (event.key === "Escape" && this.focusField) {
+      this.exitFocus()
+    }
+  }
+
+  private onPopstate = () => {
+    const field = new URLSearchParams(window.location.search).get("focus")
+    if (field !== this.focusField) {
+      this.focusField = field
+      this.applyFocusMode()
+      this.resetAndFetch()
+    }
+  }
+
+  focusOn(event: Event) {
+    const field = (event.currentTarget as HTMLElement).dataset.field
+    if (!field || field === this.focusField) {
+      return
+    }
+    this.focusField = field
+    this.syncFocusToUrl()
+    this.applyFocusMode()
+    this.resetAndFetch()
+  }
+
+  exitFocus() {
+    this.focusField = null
+    this.syncFocusToUrl()
+    this.applyFocusMode()
+    this.resetAndFetch()
+  }
+
+  acceptAllLoaded() {
+    if (!this.focusField) {
+      return
+    }
+    const field = this.focusField
+    const pendingIds = this.rows
+      .filter((row) => row.cells[field]?.statut === STATUT_PENDING)
+      .map((row) => row.groupe_id)
+    this.postBulk(pendingIds, field, "accept")
+  }
+
+  private syncFocusToUrl() {
+    const url = new URL(window.location.href)
+    if (this.focusField) {
+      url.searchParams.set("focus", this.focusField)
+    } else {
+      url.searchParams.delete("focus")
+    }
+    window.history.pushState({}, "", url)
+  }
+
+  private applyFocusMode() {
+    this.element.classList.toggle("focus-mode", this.focusField !== null)
+    this.focusLayoutTarget.toggleAttribute("hidden", this.focusField === null)
   }
 
   // --- data loading ---
@@ -146,6 +222,9 @@ export default class extends Controller<HTMLElement> {
       url.searchParams.set("statut", this.statutFilter)
       if (this.q) {
         url.searchParams.set("q", this.q)
+      }
+      if (this.focusField) {
+        url.searchParams.set("champ", this.focusField)
       }
       const response = await fetch(url, {
         headers: { Accept: "application/json" },
@@ -356,9 +435,91 @@ export default class extends Controller<HTMLElement> {
   // --- rendering ---
 
   private renderAll() {
-    this.renderHead()
-    this.renderBody()
+    if (this.focusField) {
+      this.renderFocusRail()
+      this.renderFocusHeader()
+      this.renderFocusCards()
+    } else {
+      this.renderHead()
+      this.renderBody()
+    }
     this.renderStatus()
+  }
+
+  private renderFocusRail() {
+    const items = this.fields
+      .map((field) => {
+        const badge = field.pending
+          ? `<sl-badge variant="warning" pill>${field.pending}</sl-badge>`
+          : `<sl-badge variant="success" pill>✓</sl-badge>`
+        return `
+          <button type="button"
+            class="field-item ${field.key === this.focusField ? "active" : ""}"
+            data-action="click->cohorte-review#focusOn"
+            data-field="${esc(field.key)}">
+            ${esc(field.key)} ${badge}
+          </button>`
+      })
+      .join("")
+    this.focusRailTarget.innerHTML = `<h2>Champs</h2>${items}`
+  }
+
+  private renderFocusHeader() {
+    const field = this.focusField as string
+    const pending = this.fields.find((meta) => meta.key === field)?.pending ?? 0
+    const loadedPending = this.rows.filter(
+      (row) => row.cells[field]?.statut === STATUT_PENDING,
+    ).length
+    this.focusHeaderTarget.innerHTML = `
+      <div class="focus-header">
+        <h1>Mode focus — champ <code>${esc(field)}</code>
+          <span class="remaining">${pending} à valider</span>
+        </h1>
+        <div class="focus-actions">
+          <sl-button size="small" variant="success"
+            data-action="click->cohorte-review#acceptAllLoaded"
+            ${loadedPending ? "" : "disabled"}>
+            ✓ Accepter les ${loadedPending} chargées
+          </sl-button>
+          <sl-button size="small" variant="default"
+            data-action="click->cohorte-review#exitFocus">
+            ← Quitter le mode focus (Échap)
+          </sl-button>
+        </div>
+      </div>`
+  }
+
+  private renderFocusCards() {
+    const field = this.focusField as string
+    const cards = this.rows.map((row) => this.renderFocusCard(row, field)).join("")
+    this.focusCardsTarget.innerHTML =
+      cards || `<p class="focus-empty">Aucune suggestion pour ce champ.</p>`
+  }
+
+  private renderFocusCard(row: PivotRow, field: string): string {
+    const cell = row.cells[field]
+    if (!cell) {
+      return ""
+    }
+    const statut = cell.statut ?? STATUT_PENDING
+    const stateClass = CELL_STATE_CLASS[statut] ?? "pending"
+    const current =
+      cell.current !== null && cell.current !== cell.suggested
+        ? `<span class="old">${esc(cell.current)}</span>`
+        : ""
+    return `
+      <div class="focus-card ${stateClass}">
+        <div class="who">
+          <a href="${esc(row.detail_url)}" target="_blank" rel="noreferrer"
+            class="acteur-nom">${esc(row.acteur_nom) || "(sans nom)"}</a>
+          <span class="acteur-id">${esc(row.acteur_id)}</span>
+        </div>
+        <div class="diff">
+          ${current}
+          <span class="new">${esc(cell.suggested ?? "") || "—"}</span>
+        </div>
+        ${this.renderCellActions(row.groupe_id, field, statut)}
+      </div>`
   }
 
   private renderHead() {
@@ -367,7 +528,12 @@ export default class extends Controller<HTMLElement> {
         (field) => `
           <th scope="col">
             ${esc(field.key)}
-            <sl-badge variant="warning" pill>${field.pending}</sl-badge>
+            <button type="button" class="focus-entry"
+              data-action="click->cohorte-review#focusOn"
+              data-field="${esc(field.key)}"
+              title="Réviser « ${esc(field.key)} » en mode focus">
+              <sl-badge variant="warning" pill>${field.pending} 🎯</sl-badge>
+            </button>
           </th>`,
       )
       .join("")

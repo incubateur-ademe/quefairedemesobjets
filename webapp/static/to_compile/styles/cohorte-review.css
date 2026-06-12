@@ -293,3 +293,205 @@ td:hover .cell-actions {
   font-size: 0.85rem;
   color: var(--sl-color-neutral-500);
 }
+
+/* --- focus mode (?focus=<champ>) --- */
+
+.focus-entry {
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.focus-entry sl-badge::part(base) {
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.focus-entry:hover sl-badge::part(base) {
+  transform: scale(1.08);
+}
+
+main.focus-mode .table-wrap,
+main.focus-mode .field-toggles,
+main.focus-mode .bulkbar {
+  display: none;
+}
+
+.focus-layout {
+  display: flex;
+  gap: 0;
+  margin: 0 24px;
+  background: #fff;
+  border: 1px solid var(--sl-color-neutral-200);
+  border-radius: 8px;
+  overflow: hidden;
+  min-height: calc(100vh - 230px);
+}
+
+.focus-layout[hidden] {
+  display: none;
+}
+
+.focus-rail {
+  width: 240px;
+  flex: none;
+  border-right: 1px solid var(--sl-color-neutral-200);
+  padding: 12px 0;
+}
+
+.focus-rail h2 {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--sl-color-neutral-500);
+  margin: 0 16px 8px;
+}
+
+.field-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  font: inherit;
+  font-size: 0.88rem;
+  padding: 8px 16px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  border-left: 3px solid transparent;
+  color: inherit;
+}
+
+.field-item:hover {
+  background: var(--sl-color-neutral-50);
+}
+
+.field-item.active {
+  background: var(--sl-color-primary-50);
+  border-left-color: var(--sl-color-primary-600);
+  font-weight: 600;
+}
+
+.field-item sl-badge {
+  margin-left: auto;
+}
+
+.focus-main {
+  flex: 1;
+  min-width: 0;
+  padding: 16px 20px;
+  overflow-y: auto;
+}
+
+.focus-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.focus-header h1 {
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.focus-header code {
+  background: var(--sl-color-primary-100);
+  color: var(--sl-color-primary-700);
+  border-radius: 4px;
+  padding: 1px 8px;
+}
+
+.focus-header .remaining {
+  font-size: 0.82rem;
+  font-weight: 400;
+  color: var(--sl-color-neutral-500);
+  margin-left: 8px;
+}
+
+.focus-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+}
+
+.focus-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.focus-card {
+  border: 1px solid var(--sl-color-neutral-200);
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: grid;
+  grid-template-columns: 230px 1fr auto;
+  gap: 4px 14px;
+  align-items: center;
+}
+
+.focus-card.accepted {
+  border-left: 4px solid var(--sl-color-success-600);
+  opacity: 0.75;
+}
+
+.focus-card.rejected {
+  border-left: 4px solid var(--sl-color-danger-600);
+  opacity: 0.6;
+}
+
+.focus-card .who .acteur-id {
+  display: block;
+}
+
+.focus-card .diff {
+  font-size: 0.86rem;
+  min-width: 0;
+}
+
+.focus-card .diff .old {
+  color: var(--sl-color-neutral-500);
+  text-decoration: line-through;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.focus-card .diff .new {
+  overflow-wrap: anywhere;
+}
+
+.focus-card .diff .new::before {
+  content: "→ ";
+  color: var(--sl-color-neutral-400);
+}
+
+.focus-card.accepted .diff .new {
+  color: var(--sl-color-success-700);
+  font-weight: 500;
+}
+
+.focus-card.rejected .diff .new {
+  color: var(--sl-color-neutral-500);
+  text-decoration: line-through;
+}
+
+.focus-card .cell-actions {
+  display: inline-flex;
+}
+
+.focus-card .cell-action {
+  font-size: 0.85rem;
+  padding: 3px 10px;
+}
+
+.focus-empty {
+  color: var(--sl-color-neutral-500);
+  font-size: 0.85rem;
+}
