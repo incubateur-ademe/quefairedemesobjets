@@ -1,0 +1,163 @@
+import pytest
+from data.models.suggestion import SuggestionAction, SuggestionStatut
+from django.urls import reverse
+from unit_tests.data.models.suggestion_factory import (
+    SuggestionCohorteFactory,
+    SuggestionGroupeFactory,
+    SuggestionUnitaireFactory,
+)
+
+
+@pytest.fixture
+def staff_user(django_user_model):
+    return django_user_model.objects.create_user(
+        username="staff",
+        password="staff",  # pragma: allowlist secret
+        is_staff=True,
+    )
+
+
+@pytest.fixture
+def cohorte():
+    return SuggestionCohorteFactory(type_action=SuggestionAction.SOURCE_AJOUT)
+
+
+def _groupe_with_suggestions(cohorte, identifiant, nom, url=None, **groupe_kwargs):
+    groupe = SuggestionGroupeFactory(suggestion_cohorte=cohorte, **groupe_kwargs)
+    SuggestionUnitaireFactory(
+        suggestion_groupe=groupe,
+        suggestion_modele="Acteur",
+        champs=["identifiant_unique"],
+        valeurs=[identifiant],
+    )
+    SuggestionUnitaireFactory(
+        suggestion_groupe=groupe,
+        suggestion_modele="Acteur",
+        champs=["nom"],
+        valeurs=[nom],
+    )
+    if url is not None:
+        SuggestionUnitaireFactory(
+            suggestion_groupe=groupe,
+            suggestion_modele="Acteur",
+            champs=["url"],
+            valeurs=[url],
+        )
+    return groupe
+
+
+@pytest.mark.django_db
+class TestCohorteReviewAccess:
+    def test_anonymous_user_is_redirected(self, client, cohorte):
+        for route in ["data:cohorte_review", "data:cohorte_review_rows"]:
+            response = client.get(reverse(route, args=[cohorte.id]))
+            assert response.status_code == 302
+
+    def test_non_staff_user_cannot_access(self, client, django_user_model, cohorte):
+        user = django_user_model.objects.create_user(username="user", password="user")
+        client.force_login(user)
+        for route in ["data:cohorte_review", "data:cohorte_review_rows"]:
+            response = client.get(reverse(route, args=[cohorte.id]))
+            assert response.status_code == 403
+
+    def test_staff_user_can_access_review_page(self, client, staff_user, cohorte):
+        client.force_login(staff_user)
+        response = client.get(reverse("data:cohorte_review", args=[cohorte.id]))
+        assert response.status_code == 200
+        assert b"cohorte-review" in response.content
+
+
+@pytest.mark.django_db
+class TestCohorteReviewRows:
+    def test_rows_contain_cells_and_fields_meta(self, client, staff_user, cohorte):
+        _groupe_with_suggestions(cohorte, "ID_1", "Acteur 1", url="https://a1.fr")
+        client.force_login(staff_user)
+
+        response = client.get(reverse("data:cohorte_review_rows", args=[cohorte.id]))
+
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload["meta"]["total"] == 1
+        assert payload["meta"]["next_after"] is None
+
+        row = payload["rows"][0]
+        assert row["acteur_id"] == "ID_1"
+        assert row["statut"] == SuggestionStatut.AVALIDER
+        assert row["cells"]["nom"] == {"current": None, "suggested": "Acteur 1"}
+        assert row["cells"]["url"] == {"current": None, "suggested": "https://a1.fr"}
+
+        fields = {field["key"]: field["pending"] for field in payload["meta"]["fields"]}
+        assert fields == {"identifiant_unique": 1, "nom": 1, "url": 1}
+
+    def test_cursor_pagination(self, client, staff_user, cohorte):
+        groupes = [
+            _groupe_with_suggestions(cohorte, f"ID_{i}", f"Acteur {i}")
+            for i in range(3)
+        ]
+        client.force_login(staff_user)
+        rows_url = reverse("data:cohorte_review_rows", args=[cohorte.id])
+
+        first_page = client.get(rows_url, {"limit": 2}).json()
+        assert [row["groupe_id"] for row in first_page["rows"]] == [
+            groupes[0].id,
+            groupes[1].id,
+        ]
+        assert first_page["meta"]["total"] == 3
+        assert first_page["meta"]["next_after"] == groupes[1].id
+
+        second_page = client.get(
+            rows_url, {"limit": 2, "after": first_page["meta"]["next_after"]}
+        ).json()
+        assert [row["groupe_id"] for row in second_page["rows"]] == [groupes[2].id]
+        assert second_page["meta"]["next_after"] is None
+
+    def test_statut_filter_defaults_to_avalider(self, client, staff_user, cohorte):
+        pending = _groupe_with_suggestions(cohorte, "ID_PENDING", "Pending")
+        rejected = _groupe_with_suggestions(
+            cohorte, "ID_REJECTED", "Rejected", statut=SuggestionStatut.REJETEE
+        )
+        client.force_login(staff_user)
+        rows_url = reverse("data:cohorte_review_rows", args=[cohorte.id])
+
+        default_page = client.get(rows_url).json()
+        assert [row["groupe_id"] for row in default_page["rows"]] == [pending.id]
+
+        all_page = client.get(rows_url, {"statut": "all"}).json()
+        assert {row["groupe_id"] for row in all_page["rows"]} == {
+            pending.id,
+            rejected.id,
+        }
+
+    def test_champ_filter(self, client, staff_user, cohorte):
+        with_url = _groupe_with_suggestions(cohorte, "ID_URL", "A", url="https://a.fr")
+        _groupe_with_suggestions(cohorte, "ID_NO_URL", "B")
+        client.force_login(staff_user)
+
+        response = client.get(
+            reverse("data:cohorte_review_rows", args=[cohorte.id]), {"champ": "url"}
+        )
+
+        assert [row["groupe_id"] for row in response.json()["rows"]] == [with_url.id]
+
+    def test_invalid_cursor_returns_400(self, client, staff_user, cohorte):
+        client.force_login(staff_user)
+        response = client.get(
+            reverse("data:cohorte_review_rows", args=[cohorte.id]), {"after": "abc"}
+        )
+        assert response.status_code == 400
+
+    def test_unsupported_type_action_returns_fallback_row(self, client, staff_user):
+        crawl_cohorte = SuggestionCohorteFactory(
+            type_action=SuggestionAction.CRAWL_URLS
+        )
+        groupe = SuggestionGroupeFactory(suggestion_cohorte=crawl_cohorte)
+        client.force_login(staff_user)
+
+        response = client.get(
+            reverse("data:cohorte_review_rows", args=[crawl_cohorte.id])
+        )
+
+        row = response.json()["rows"][0]
+        assert row["groupe_id"] == groupe.id
+        assert row["cells"] == {}
+        assert "error" in row

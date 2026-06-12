@@ -1,0 +1,58 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noindex, nofollow">
+        <title>Revue des suggestions — Cohorte #{{ suggestion_cohorte.id }}</title>
+        <link rel="stylesheet" href="{% static 'cohorte-review.css' %}">
+        <script src="{% static 'cohorte-review.js' %}" defer></script>
+    </head>
+    <body>
+        <header class="topbar">
+            <span class="brand">Revue des suggestions</span>
+            <span class="cohorte-label">
+                Cohorte #{{ suggestion_cohorte.id }} —
+                {{ suggestion_cohorte.identifiant_action }} ·
+                {{ suggestion_cohorte.execution_datetime }}
+            </span>
+            <a class="back-link"
+               href="{% url 'admin:data_suggestiongroupe_changelist' %}?suggestion_cohorte__id__exact={{ suggestion_cohorte.id }}"
+               data-turbo="false">
+                ← Admin Django
+            </a>
+        </header>
+
+        <main
+            data-controller="cohorte-review"
+            data-cohorte-review-rows-url-value="{% url 'data:cohorte_review_rows' suggestion_cohorte.id %}"
+        >
+            <div class="toolbar">
+                <div class="field-toggles" data-cohorte-review-target="fieldToggles">
+                    <span class="label">Champs :</span>
+                </div>
+                <span class="status" data-cohorte-review-target="status">Chargement…</span>
+            </div>
+
+            <div class="table-wrap" data-cohorte-review-target="scroller">
+                <table>
+                    <thead data-cohorte-review-target="head"></thead>
+                    <tbody data-cohorte-review-target="body"></tbody>
+                </table>
+            </div>
+
+            <div class="pager">
+                <span data-cohorte-review-target="pagerInfo"></span>
+                <sl-button
+                    size="small"
+                    data-cohorte-review-target="loadMore"
+                    data-action="click->cohorte-review#loadMore"
+                    hidden
+                >
+                    Charger 100 de plus
+                </sl-button>
+            </div>
+        </main>
+    </body>
+</html>

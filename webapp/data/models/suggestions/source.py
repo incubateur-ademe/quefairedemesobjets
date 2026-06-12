@@ -834,6 +834,37 @@ class SuggestionGroupeTypeSource(SuggestionGroupeType):
 
         return ComparisonTable(columns=columns, rows=rows)
 
+    def to_pivot_row(self) -> dict:
+        """Serialize this group as one row of the cohorte review pivot grid:
+        rows = acteurs, columns = fields, cells = current vs suggested value.
+
+        Cells only cover the source (Acteur) suggestions: the pivot grid is a
+        triage surface, corrections and parents stay in the detail view.
+        """
+        cells = {}
+        for field in self.flattened_fields:
+            current = self._get_field_value(self.acteur_values, field)
+            suggested = self._get_field_value(self.acteur_suggestions, field)
+            if current is None and suggested is None:
+                continue
+            cells[field] = {"current": current, "suggested": suggested}
+
+        acteur_nom = (
+            (self.acteur.nom if self.acteur else None)
+            or self._get_field_value(self.acteur_suggestions, "nom")
+            or ""
+        )
+        return {
+            "groupe_id": self.suggestion_groupe.id,
+            "statut": self.suggestion_groupe.statut,
+            "statut_display": self.suggestion_groupe.get_statut_display(),
+            "acteur_id": self.identifiant_unique,
+            "acteur_nom": acteur_nom,
+            "has_parent": self.has_parent_revision_acteur,
+            "detail_url": self.update_url,
+            "cells": cells,
+        }
+
     def apply(self):
         acteur_data = self.acteur_suggestions.model_dump(exclude_none=True)
         if not acteur_data:

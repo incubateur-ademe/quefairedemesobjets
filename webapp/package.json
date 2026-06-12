@@ -13,6 +13,7 @@
     "static/to_compile/admin-categorie-widget.ts",
     "static/to_compile/admin-map-widget.ts",
     "static/to_compile/admin.ts",
+    "static/to_compile/cohorte-review.ts",
     "static/to_compile/embed/assistant.ts",
     "static/to_compile/embed/carte.ts",
     "static/to_compile/embed/formulaire.ts",
