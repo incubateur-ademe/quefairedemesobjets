@@ -1,0 +1,97 @@
+# yaml-language-server: $schema=https://promptfoo.dev/config-schema.json
+description: Audit IA — pages "Que faire de mes objets ?" (quefairedemesdechets.ademe.fr)
+
+prompts:
+  - id: file://prompts/sans-page.txt
+    label: sans-page
+  - id: file://prompts/avec-page.txt
+    label: avec-page
+
+providers:
+  - id: anthropic:messages:claude-haiku-4-5-20251001
+    config:
+      apiKey: "{{ env.ANTHROPIC_KEY }}"
+  - id: anthropic:messages:claude-sonnet-4-6
+    config:
+      apiKey: "{{ env.ANTHROPIC_KEY }}"
+  - id: mistral:mistral-large-latest
+  - id: mistral:mistral-small-latest
+  - id: google:gemini-2.5-flash
+  - id: deepseek:deepseek-chat
+
+defaultTest:
+  options:
+    provider:
+      id: anthropic:messages:claude-sonnet-4-6
+      config:
+        apiKey: "{{ env.ANTHROPIC_KEY }}"
+
+tests:
+  - description: Meubles abîmés — solutions attendues par la page
+    vars:
+      question: Que faire de mes meubles abimés ?
+      page: file://pages/meubles.txt
+    threshold: 0.7
+    assert:
+      - type: icontains
+        value: répar
+      - type: icontains
+        value: bonus réparation
+      - type: icontains-any
+        value:
+          - donner
+          - don
+          - association
+          - ressourcerie
+          - recyclerie
+      - type: icontains-any
+        value:
+          - point de collecte
+          - déchèterie
+          - déchetterie
+          - encombrants
+      - type: icontains
+        value: écomaison
+        weight: 0.5
+      - type: llm-rubric
+        value: >-
+          La réponse privilégie la seconde vie (réparation, don, revente) avant
+          la mise au rebut, mentionne le Bonus Réparation chez un réparateur
+          labellisé, et oriente vers les points de collecte, encombrants ou
+          déchèterie pour les meubles trop abîmés. Elle ne doit pas inventer
+          de dispositifs absents de la page.
+
+  - description: Emballages en verre — consignes de tri attendues par la page
+    vars:
+      question: Que faire de mes emballages en verre ?
+      page: file://pages/emballages-verre.txt
+    threshold: 0.7
+    assert:
+      - type: icontains
+        value: verre
+      - type: icontains-any
+        value:
+          - conteneur à verre
+          - bac à verre
+          - conteneur
+      - type: icontains-any
+        value:
+          - réemployable
+          - réemploi
+          - consigne
+      - type: icontains
+        value: Léko
+        weight: 0.5
+      - type: icontains-any
+        value:
+          - ordures ménagères
+          - déchèterie
+          - déchetterie
+      - type: llm-rubric
+        value: >-
+          La réponse explique que les emballages en verre se déposent dans
+          un conteneur à verre dédié, mentionne le réemploi (bouteilles
+          consignées, bocaux réutilisables) avant le recyclage, précise que
+          les couvercles vont dans le bac de tri des emballages, et indique
+          que les autres objets en verre (vaisselle, miroirs, verre cassé)
+          vont aux ordures ménagères ou en déchèterie.

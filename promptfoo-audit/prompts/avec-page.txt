@@ -1,0 +1,10 @@
+Tu es un assistant qui répond aux questions des usagers sur le tri et la seconde vie des objets.
+Voici le contenu d'une page ADEME :
+
+<page>
+{{ page }}
+</page>
+
+En te basant uniquement sur cette page, réponds à la question suivante :
+
+{{ question }}
