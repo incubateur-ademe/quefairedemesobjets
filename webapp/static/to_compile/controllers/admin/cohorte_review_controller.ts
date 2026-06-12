@@ -79,9 +79,22 @@ interface ValueCondition {
   value: string
 }
 
-interface ValueFilter {
+interface ValueGroup {
   combinator: "et" | "ou"
   conditions: ValueCondition[]
+}
+
+interface ValueFilter {
+  combinator: "et" | "ou"
+  groups: ValueGroup[]
+}
+
+function blankValueCondition(): ValueCondition {
+  return { lookup: "startswith", value: "" }
+}
+
+function blankValueGroup(): ValueGroup {
+  return { combinator: "et", conditions: [blankValueCondition()] }
 }
 
 function esc(value: string | null | undefined): string {
@@ -155,8 +168,8 @@ export default class extends Controller<HTMLElement> {
   private selectionScope: "ids" | "filter" = "ids"
   // applied filter (sent to the server) vs draft being edited in the builder
   private valueFilter: ValueFilter | null = null
-  private builderConditions: ValueCondition[] = [{ lookup: "startswith", value: "" }]
-  private builderCombinator: "et" | "ou" = "et"
+  private builderGroups: ValueGroup[] = [blankValueGroup()]
+  private builderCombinator: "et" | "ou" = "ou"
   private table!: Table<PivotRow>
   private tableState!: TableState
   private virtualizer!: Virtualizer<HTMLDivElement, HTMLTableRowElement>
@@ -221,18 +234,36 @@ export default class extends Controller<HTMLElement> {
 
   // --- focus-mode query builder on the suggested value ---
 
-  vbAdd() {
+  vbAddCondition(event: Event) {
     this.readBuilderFromDom()
-    this.builderConditions.push({ lookup: "startswith", value: "" })
+    const groupIndex = Number((event.currentTarget as HTMLElement).dataset.group)
+    this.builderGroups[groupIndex]?.conditions.push(blankValueCondition())
     this.renderFocusHeader()
   }
 
-  vbRemove(event: Event) {
+  vbRemoveCondition(event: Event) {
     this.readBuilderFromDom()
-    const index = Number((event.currentTarget as HTMLElement).dataset.index)
-    this.builderConditions.splice(index, 1)
-    if (!this.builderConditions.length) {
-      this.builderConditions = [{ lookup: "startswith", value: "" }]
+    const button = event.currentTarget as HTMLElement
+    const group = this.builderGroups[Number(button.dataset.group)]
+    group?.conditions.splice(Number(button.dataset.index), 1)
+    if (group && !group.conditions.length) {
+      group.conditions = [blankValueCondition()]
+    }
+    this.renderFocusHeader()
+  }
+
+  vbAddGroup() {
+    this.readBuilderFromDom()
+    this.builderGroups.push(blankValueGroup())
+    this.renderFocusHeader()
+  }
+
+  vbRemoveGroup(event: Event) {
+    this.readBuilderFromDom()
+    const groupIndex = Number((event.currentTarget as HTMLElement).dataset.group)
+    this.builderGroups.splice(groupIndex, 1)
+    if (!this.builderGroups.length) {
+      this.builderGroups = [blankValueGroup()]
     }
     this.renderFocusHeader()
   }
@@ -245,13 +276,18 @@ export default class extends Controller<HTMLElement> {
 
   vbApply() {
     this.readBuilderFromDom()
-    const conditions = this.builderConditions.filter(
-      (condition) =>
-        VALUE_LOOKUPS_WITHOUT_VALUE.has(condition.lookup) ||
-        condition.value.trim() !== "",
-    )
-    this.valueFilter = conditions.length
-      ? { combinator: this.builderCombinator, conditions }
+    const groups = this.builderGroups
+      .map((group) => ({
+        combinator: group.combinator,
+        conditions: group.conditions.filter(
+          (condition) =>
+            VALUE_LOOKUPS_WITHOUT_VALUE.has(condition.lookup) ||
+            condition.value.trim() !== "",
+        ),
+      }))
+      .filter((group) => group.conditions.length)
+    this.valueFilter = groups.length
+      ? { combinator: this.builderCombinator, groups }
       : null
     this.resetAndFetch()
   }
@@ -263,23 +299,34 @@ export default class extends Controller<HTMLElement> {
 
   private resetValueFilter() {
     this.valueFilter = null
-    this.builderConditions = [{ lookup: "startswith", value: "" }]
-    this.builderCombinator = "et"
+    this.builderGroups = [blankValueGroup()]
+    this.builderCombinator = "ou"
   }
 
   private readBuilderFromDom() {
-    const rows = [...this.focusHeaderTarget.querySelectorAll(".vb-row")]
-    if (rows.length) {
-      this.builderConditions = rows.map((row) => ({
-        lookup: (row.querySelector(".vb-lookup") as HTMLSelectElement).value,
-        value: (row.querySelector(".vb-value") as HTMLInputElement | null)?.value ?? "",
+    const groupElements = [...this.focusHeaderTarget.querySelectorAll(".vb-group")]
+    if (groupElements.length) {
+      this.builderGroups = groupElements.map((groupElement) => ({
+        combinator:
+          (
+            groupElement.querySelector(
+              ".vb-group-combinator",
+            ) as HTMLSelectElement | null
+          )?.value === "ou"
+            ? "ou"
+            : "et",
+        conditions: [...groupElement.querySelectorAll(".vb-row")].map((row) => ({
+          lookup: (row.querySelector(".vb-lookup") as HTMLSelectElement).value,
+          value:
+            (row.querySelector(".vb-value") as HTMLInputElement | null)?.value ?? "",
+        })),
       }))
     }
-    const combinator = this.focusHeaderTarget.querySelector(
-      ".vb-combinator",
+    const topCombinator = this.focusHeaderTarget.querySelector(
+      ".vb-top-combinator",
     ) as HTMLSelectElement | null
-    if (combinator) {
-      this.builderCombinator = combinator.value === "ou" ? "ou" : "et"
+    if (topCombinator) {
+      this.builderCombinator = topCombinator.value === "et" ? "et" : "ou"
     }
   }
 
@@ -650,40 +697,28 @@ export default class extends Controller<HTMLElement> {
   }
 
   private renderValueBuilder(field: string): string {
-    const conditionRows = this.builderConditions
-      .map((condition, index) => {
-        const options = VALUE_LOOKUPS.map(
-          ([key, label]) =>
-            `<option value="${key}" ${key === condition.lookup ? "selected" : ""}>
-              ${label}
-            </option>`,
-        ).join("")
-        const valueInput = VALUE_LOOKUPS_WITHOUT_VALUE.has(condition.lookup)
-          ? ""
-          : `<input type="text" class="vb-value" value="${esc(condition.value)}"
-              placeholder="ex : 07"
-              aria-label="Valeur de la condition ${index + 1}">`
-        return `
-          <div class="vb-row">
-            <select class="vb-lookup" aria-label="Opérateur de la condition ${index + 1}"
-              data-action="change->cohorte-review#vbLookupChanged">${options}</select>
-            ${valueInput}
-            <button type="button" class="vb-remove" title="Supprimer la condition"
-              data-action="click->cohorte-review#vbRemove" data-index="${index}">✕</button>
-          </div>`
-      })
-      .join("")
+    const groupsHtml = this.builderGroups
+      .map((group, groupIndex) => this.renderValueGroup(group, groupIndex))
+      .join(
+        `<div class="vb-between-groups" aria-hidden="true">
+          ${this.builderCombinator === "et" ? "ET" : "OU"}
+        </div>`,
+      )
 
-    const combinator =
-      this.builderConditions.length > 1
-        ? `<select class="vb-combinator" aria-label="Combinaison des conditions">
-            <option value="et" ${this.builderCombinator === "et" ? "selected" : ""}>
-              toutes les conditions (ET)
-            </option>
-            <option value="ou" ${this.builderCombinator === "ou" ? "selected" : ""}>
-              au moins une condition (OU)
-            </option>
-          </select>`
+    const topCombinator =
+      this.builderGroups.length > 1
+        ? `<label class="vb-top">groupes combinés par
+            <select class="vb-top-combinator"
+              data-action="change->cohorte-review#vbLookupChanged"
+              aria-label="Combinaison entre les groupes">
+              <option value="ou" ${this.builderCombinator === "ou" ? "selected" : ""}>
+                OU (au moins un groupe)
+              </option>
+              <option value="et" ${this.builderCombinator === "et" ? "selected" : ""}>
+                ET (tous les groupes)
+              </option>
+            </select>
+          </label>`
         : ""
 
     const filterActions = this.valueFilter
@@ -703,16 +738,86 @@ export default class extends Controller<HTMLElement> {
     return `
       <div class="value-builder">
         <span class="vb-label">Filtrer la valeur suggérée de <code>${esc(field)}</code> :</span>
-        ${conditionRows}
-        ${combinator}
-        <button type="button" class="vb-add"
-          data-action="click->cohorte-review#vbAdd">＋ condition</button>
-        <sl-button size="small" variant="primary"
-          data-action="click->cohorte-review#vbApply">Appliquer</sl-button>
-        <sl-button size="small" variant="text"
-          data-action="click->cohorte-review#vbClear">Effacer</sl-button>
-        ${filterActions}
+        ${groupsHtml}
+        <div class="vb-footer">
+          ${topCombinator}
+          <button type="button" class="vb-add"
+            data-action="click->cohorte-review#vbAddGroup">＋ groupe</button>
+          <sl-button size="small" variant="primary"
+            data-action="click->cohorte-review#vbApply">Appliquer</sl-button>
+          <sl-button size="small" variant="text"
+            data-action="click->cohorte-review#vbClear">Effacer</sl-button>
+          ${filterActions}
+        </div>
       </div>`
+  }
+
+  private renderValueGroup(group: ValueGroup, groupIndex: number): string {
+    const conditionRows = group.conditions
+      .map((condition, index) => {
+        const options = VALUE_LOOKUPS.map(
+          ([key, label]) =>
+            `<option value="${key}" ${key === condition.lookup ? "selected" : ""}>
+              ${label}
+            </option>`,
+        ).join("")
+        const valueInput = VALUE_LOOKUPS_WITHOUT_VALUE.has(condition.lookup)
+          ? ""
+          : `<input type="text" class="vb-value" value="${esc(condition.value)}"
+              placeholder="ex : 07"
+              aria-label="Valeur de la condition ${index + 1} du groupe ${groupIndex + 1}">`
+        const lineCombinator = index
+          ? `<span class="vb-line-combinator">${
+              group.combinator === "ou" ? "OU" : "ET"
+            }</span>`
+          : `<span class="vb-line-combinator" aria-hidden="true"></span>`
+        return `
+          <div class="vb-row">
+            ${lineCombinator}
+            <select class="vb-lookup"
+              aria-label="Opérateur de la condition ${index + 1} du groupe ${groupIndex + 1}"
+              data-action="change->cohorte-review#vbLookupChanged">${options}</select>
+            ${valueInput}
+            <button type="button" class="vb-remove" title="Supprimer la condition"
+              data-action="click->cohorte-review#vbRemoveCondition"
+              data-group="${groupIndex}" data-index="${index}">✕</button>
+          </div>`
+      })
+      .join("")
+
+    const groupCombinator =
+      group.conditions.length > 1
+        ? `<label>conditions combinées par
+            <select class="vb-group-combinator"
+              data-action="change->cohorte-review#vbLookupChanged"
+              aria-label="Combinaison des conditions du groupe ${groupIndex + 1}">
+              <option value="et" ${group.combinator === "et" ? "selected" : ""}>ET</option>
+              <option value="ou" ${group.combinator === "ou" ? "selected" : ""}>OU</option>
+            </select>
+          </label>`
+        : `<select class="vb-group-combinator" hidden>
+            <option value="${group.combinator}" selected></option>
+          </select>`
+
+    const removeGroup =
+      this.builderGroups.length > 1
+        ? `<button type="button" class="vb-remove" title="Supprimer le groupe"
+            data-action="click->cohorte-review#vbRemoveGroup"
+            data-group="${groupIndex}">✕ groupe</button>`
+        : ""
+
+    return `
+      <fieldset class="vb-group">
+        <legend>Groupe ${groupIndex + 1}</legend>
+        <div class="vb-group-head">
+          ${groupCombinator}
+          ${removeGroup}
+        </div>
+        ${conditionRows}
+        <button type="button" class="vb-add"
+          data-action="click->cohorte-review#vbAddCondition"
+          data-group="${groupIndex}">＋ condition</button>
+      </fieldset>`
   }
 
   focusBulkAccept() {

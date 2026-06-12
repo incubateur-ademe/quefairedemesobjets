@@ -264,6 +264,66 @@ class TestCohorteReviewValueFilter:
 
         assert [row["groupe_id"] for row in response.json()["rows"]] == [empty.id]
 
+    def test_grouped_conditions(self, client, staff_user, cohorte):
+        """(commence par 07 ET finit par 78) OU (commence par 02)"""
+        mobile_78 = _groupe_with_telephone(cohorte, "07 12 34 56 78")
+        _groupe_with_telephone(cohorte, "07 99 99 99 99")
+        landline = _groupe_with_telephone(cohorte, "02 11 22 33 44")
+        client.force_login(staff_user)
+
+        response = self._get_rows(
+            client,
+            cohorte,
+            {
+                "combinator": "ou",
+                "groups": [
+                    {
+                        "combinator": "et",
+                        "conditions": [
+                            {"lookup": "startswith", "value": "07"},
+                            {"lookup": "endswith", "value": "78"},
+                        ],
+                    },
+                    {
+                        "combinator": "et",
+                        "conditions": [{"lookup": "startswith", "value": "02"}],
+                    },
+                ],
+            },
+        )
+
+        assert {row["groupe_id"] for row in response.json()["rows"]} == {
+            mobile_78.id,
+            landline.id,
+        }
+
+    def test_grouped_conditions_et_between_groups(self, client, staff_user, cohorte):
+        """(commence par 07) ET (finit par 78 OU finit par 99)"""
+        match = _groupe_with_telephone(cohorte, "07 12 34 56 78")
+        _groupe_with_telephone(cohorte, "07 11 22 33 44")
+        _groupe_with_telephone(cohorte, "02 11 22 33 78")
+        client.force_login(staff_user)
+
+        response = self._get_rows(
+            client,
+            cohorte,
+            {
+                "combinator": "et",
+                "groups": [
+                    {"conditions": [{"lookup": "startswith", "value": "07"}]},
+                    {
+                        "combinator": "ou",
+                        "conditions": [
+                            {"lookup": "endswith", "value": "78"},
+                            {"lookup": "endswith", "value": "99"},
+                        ],
+                    },
+                ],
+            },
+        )
+
+        assert [row["groupe_id"] for row in response.json()["rows"]] == [match.id]
+
     @pytest.mark.parametrize(
         "valeur_filtre",
         [
@@ -272,6 +332,10 @@ class TestCohorteReviewValueFilter:
             {"conditions": []},
             {"combinator": "xor", "conditions": [{"lookup": "empty"}]},
             "not a dict",
+            {"groups": []},
+            {"groups": "not a list"},
+            {"groups": [{"conditions": []}]},
+            {"groups": [{"conditions": [{"lookup": "empty"}]}] * 6},
         ],
     )
     def test_invalid_payloads_return_400(
