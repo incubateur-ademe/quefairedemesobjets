@@ -328,12 +328,71 @@ class TestCohorteReviewBulk:
             {"groupe_ids": [], "action": "accept"},
             {"groupe_ids": "1,2", "action": "accept"},
             {"action": "accept"},
+            {"groupe_ids": [1], "filter": {}, "action": "accept"},
+            {"filter": "AVALIDER", "action": "accept"},
         ],
     )
     def test_invalid_payloads_return_400(self, client, staff_user, cohorte, body):
         client.force_login(staff_user)
         response = _post_bulk(client, cohorte, body)
         assert response.status_code == 400
+
+    def test_filter_scope_targets_all_matching_groupes(
+        self, client, staff_user, cohorte
+    ):
+        groupes = [
+            _groupe_with_suggestions(cohorte, f"ID_{i}", f"A{i}") for i in range(3)
+        ]
+        already_rejected = _groupe_with_suggestions(
+            cohorte, "ID_REJ", "Rej", statut=SuggestionStatut.REJETEE
+        )
+        client.force_login(staff_user)
+
+        response = _post_bulk(
+            client,
+            cohorte,
+            {"filter": {"statut": SuggestionStatut.AVALIDER}, "action": "accept"},
+        )
+
+        payload = response.json()
+        # 2 unitaires (identifiant_unique + nom) per pending groupe
+        assert payload["applied"] == 6
+        # no rows in the response: the client reloads instead
+        assert "rows" not in payload
+        for groupe in groupes:
+            groupe.refresh_from_db()
+            assert groupe.statut == SuggestionStatut.ATRAITER
+        already_rejected.refresh_from_db()
+        assert already_rejected.statut == SuggestionStatut.REJETEE
+
+    def test_filter_scope_with_champ_and_q(self, client, staff_user, cohorte):
+        matching = _groupe_with_suggestions(
+            cohorte, "ID_1", "A", url="https://a.fr", acteur_id="emmaus_auray"
+        )
+        no_url = _groupe_with_suggestions(
+            cohorte, "ID_2", "B", acteur_id="emmaus_vannes"
+        )
+        other_q = _groupe_with_suggestions(
+            cohorte, "ID_3", "C", url="https://c.fr", acteur_id="ressourcerie"
+        )
+        client.force_login(staff_user)
+
+        response = _post_bulk(
+            client,
+            cohorte,
+            {
+                "filter": {"champ": "url", "q": "emmaus"},
+                "champ": "url",
+                "action": "reject",
+            },
+        )
+
+        assert response.json()["applied"] == 1
+        assert _unitaire_statuts(matching)["url"] == SuggestionStatut.REJETEE
+        for untouched in [no_url, other_q]:
+            assert set(_unitaire_statuts(untouched).values()) == {
+                SuggestionStatut.AVALIDER
+            }
 
 
 @pytest.mark.django_db
