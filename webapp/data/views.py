@@ -21,7 +21,7 @@ from data.models.utils import prepare_acteur_data_with_location
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import CharField, Exists, OuterRef
+from django.db.models import CharField, Exists, OuterRef, Q
 from django.db.models.functions import Cast
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render
@@ -562,16 +562,88 @@ class CohorteReviewView(IsStaffMixin, TemplateView):
         return context
 
 
+# Query builder of the focus mode: lookups allowed on the suggested value.
+# Keys are the client-side identifiers, values the ORM lookup applied to the
+# first (and only) element of SuggestionUnitaire.valeurs.
+REVIEW_VALUE_LOOKUPS = {
+    "startswith": "istartswith",
+    "endswith": "iendswith",
+    "contains": "icontains",
+    "exact": "iexact",
+    "regex": "iregex",
+}
+REVIEW_VALUE_MAX_CONDITIONS = 10
+
+
+def build_value_filter_q(valeur_filtre: dict) -> Q:
+    """Translate the focus-mode query builder payload into a Q over
+    SuggestionUnitaire rows.
+
+    Expected shape: {"combinator": "et" | "ou", "conditions":
+    [{"lookup": <REVIEW_VALUE_LOOKUPS key | empty | not_empty |
+    not_contains>, "value": str}]}. Raises ValueError on anything else.
+    """
+    if not isinstance(valeur_filtre, dict):
+        raise ValueError("valeur_filtre must be an object")
+    combinator = valeur_filtre.get("combinator", "et")
+    if combinator not in {"et", "ou"}:
+        raise ValueError("combinator must be 'et' or 'ou'")
+    conditions = valeur_filtre.get("conditions")
+    if (
+        not isinstance(conditions, list)
+        or not conditions
+        or len(conditions) > REVIEW_VALUE_MAX_CONDITIONS
+    ):
+        raise ValueError(
+            "conditions must be a non-empty list of at most "
+            f"{REVIEW_VALUE_MAX_CONDITIONS} items"
+        )
+
+    empty_q = Q(valeurs__0="") | Q(valeurs=[])
+    condition_qs = []
+    for condition in conditions:
+        if not isinstance(condition, dict):
+            raise ValueError("each condition must be an object")
+        lookup = condition.get("lookup")
+        value = str(condition.get("value", ""))
+        if lookup == "empty":
+            condition_qs.append(empty_q)
+        elif lookup == "not_empty":
+            condition_qs.append(~empty_q)
+        elif lookup == "not_contains":
+            if not value:
+                raise ValueError(f"value is required for lookup '{lookup}'")
+            condition_qs.append(~Q(valeurs__0__icontains=value))
+        elif lookup in REVIEW_VALUE_LOOKUPS:
+            if not value:
+                raise ValueError(f"value is required for lookup '{lookup}'")
+            condition_qs.append(
+                Q(**{f"valeurs__0__{REVIEW_VALUE_LOOKUPS[lookup]}": value})
+            )
+        else:
+            raise ValueError(f"unknown lookup '{lookup}'")
+
+    combined = condition_qs[0]
+    for condition_q in condition_qs[1:]:
+        if combinator == "ou":
+            combined = combined | condition_q
+        else:
+            combined = combined & condition_q
+    return combined
+
+
 def filter_review_groupes(
     cohorte: SuggestionCohorte,
     *,
     statut: str,
     champ: str | None,
     q: str,
+    valeur_filtre: dict | None = None,
 ):
     """Shared filtering for the review grid: used by the rows endpoint and
     by the bulk endpoint's « all filtered rows » scope, so both always agree
-    on what « filtered » means."""
+    on what « filtered » means. Raises ValueError on an invalid
+    valeur_filtre payload."""
     queryset = SuggestionGroupe.objects.filter(suggestion_cohorte=cohorte)
     if statut != "all":
         queryset = queryset.filter(statut=statut)
@@ -585,6 +657,21 @@ def filter_review_groupes(
         queryset = queryset.annotate(
             acteur_id_text=Cast("acteur_id", CharField())
         ).filter(acteur_id_text__icontains=q)
+    if valeur_filtre is not None:
+        if not champ:
+            raise ValueError("valeur_filtre requires champ")
+        # champs=[champ] (exact single-field match) guarantees valeurs[0] is
+        # the value of that field — grouped fields (latitude/longitude) are
+        # out of scope for the value query builder
+        queryset = queryset.filter(
+            Exists(
+                SuggestionUnitaire.objects.filter(
+                    suggestion_groupe=OuterRef("pk"),
+                    suggestion_modele="Acteur",
+                    champs=[champ],
+                ).filter(build_value_filter_q(valeur_filtre))
+            )
+        )
     return queryset
 
 
@@ -599,12 +686,23 @@ class CohorteReviewRowsView(IsStaffMixin, View):
     def get(self, request, cohorte_id):
         cohorte = get_object_or_404(SuggestionCohorte, id=cohorte_id)
 
-        queryset = filter_review_groupes(
-            cohorte,
-            statut=request.GET.get("statut", SuggestionStatut.AVALIDER),
-            champ=request.GET.get("champ"),
-            q=request.GET.get("q", ""),
-        ).prefetch_related("suggestion_unitaires", "acteur", "revision_acteur")
+        valeur_filtre = None
+        if valeur_filtre_raw := request.GET.get("valeur_filtre"):
+            try:
+                valeur_filtre = json.loads(valeur_filtre_raw)
+            except json.JSONDecodeError:
+                return HttpResponseBadRequest("valeur_filtre must be valid JSON")
+
+        try:
+            queryset = filter_review_groupes(
+                cohorte,
+                statut=request.GET.get("statut", SuggestionStatut.AVALIDER),
+                champ=request.GET.get("champ"),
+                q=request.GET.get("q", ""),
+                valeur_filtre=valeur_filtre,
+            ).prefetch_related("suggestion_unitaires", "acteur", "revision_acteur")
+        except ValueError as e:
+            return HttpResponseBadRequest(str(e))
 
         total = queryset.count()
 
@@ -693,12 +791,16 @@ class CohorteReviewBulkView(IsStaffMixin, View):
         else:
             if not isinstance(filter_payload, dict):
                 return HttpResponseBadRequest("filter must be an object")
-            targeted = filter_review_groupes(
-                cohorte,
-                statut=filter_payload.get("statut") or SuggestionStatut.AVALIDER,
-                champ=filter_payload.get("champ") or None,
-                q=filter_payload.get("q") or "",
-            )
+            try:
+                targeted = filter_review_groupes(
+                    cohorte,
+                    statut=filter_payload.get("statut") or SuggestionStatut.AVALIDER,
+                    champ=filter_payload.get("champ") or None,
+                    q=filter_payload.get("q") or "",
+                    valeur_filtre=filter_payload.get("valeur_filtre"),
+                )
+            except ValueError as e:
+                return HttpResponseBadRequest(str(e))
 
         with transaction.atomic():
             targeted_ids = list(targeted.values_list("id", flat=True))

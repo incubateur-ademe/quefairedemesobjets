@@ -1,3 +1,5 @@
+import json
+
 import pytest
 from data.models.suggestion import SuggestionAction, SuggestionStatut
 from data.models.suggestions.source import SuggestionGroupeTypeSource
@@ -190,6 +192,130 @@ class TestCohorteReviewRows:
         assert row["groupe_id"] == groupe.id
         assert row["cells"] == {}
         assert "error" in row
+
+
+def _groupe_with_telephone(cohorte, telephone):
+    groupe = SuggestionGroupeFactory(suggestion_cohorte=cohorte)
+    SuggestionUnitaireFactory(
+        suggestion_groupe=groupe,
+        suggestion_modele="Acteur",
+        champs=["telephone"],
+        valeurs=[telephone],
+    )
+    return groupe
+
+
+@pytest.mark.django_db
+class TestCohorteReviewValueFilter:
+    """Focus-mode query builder: filters on the suggested value."""
+
+    def _get_rows(self, client, cohorte, valeur_filtre, champ="telephone"):
+        return client.get(
+            reverse("data:cohorte_review_rows", args=[cohorte.id]),
+            {"champ": champ, "valeur_filtre": json.dumps(valeur_filtre)},
+        )
+
+    def test_startswith_filters_on_suggested_value(self, client, staff_user, cohorte):
+        mobile = _groupe_with_telephone(cohorte, "07 12 34 56 78")
+        _groupe_with_telephone(cohorte, "02 99 11 22 33")
+        client.force_login(staff_user)
+
+        response = self._get_rows(
+            client,
+            cohorte,
+            {"conditions": [{"lookup": "startswith", "value": "07"}]},
+        )
+
+        payload = response.json()
+        assert payload["meta"]["total"] == 1
+        assert [row["groupe_id"] for row in payload["rows"]] == [mobile.id]
+
+    def test_ou_combinator(self, client, staff_user, cohorte):
+        mobile = _groupe_with_telephone(cohorte, "07 12 34 56 78")
+        other_mobile = _groupe_with_telephone(cohorte, "06 99 11 22 33")
+        _groupe_with_telephone(cohorte, "02 99 11 22 33")
+        client.force_login(staff_user)
+
+        response = self._get_rows(
+            client,
+            cohorte,
+            {
+                "combinator": "ou",
+                "conditions": [
+                    {"lookup": "startswith", "value": "07"},
+                    {"lookup": "startswith", "value": "06"},
+                ],
+            },
+        )
+
+        assert {row["groupe_id"] for row in response.json()["rows"]} == {
+            mobile.id,
+            other_mobile.id,
+        }
+
+    def test_empty_lookup(self, client, staff_user, cohorte):
+        empty = _groupe_with_telephone(cohorte, "")
+        _groupe_with_telephone(cohorte, "02 99 11 22 33")
+        client.force_login(staff_user)
+
+        response = self._get_rows(
+            client, cohorte, {"conditions": [{"lookup": "empty"}]}
+        )
+
+        assert [row["groupe_id"] for row in response.json()["rows"]] == [empty.id]
+
+    @pytest.mark.parametrize(
+        "valeur_filtre",
+        [
+            {"conditions": [{"lookup": "nope", "value": "07"}]},
+            {"conditions": [{"lookup": "startswith", "value": ""}]},
+            {"conditions": []},
+            {"combinator": "xor", "conditions": [{"lookup": "empty"}]},
+            "not a dict",
+        ],
+    )
+    def test_invalid_payloads_return_400(
+        self, client, staff_user, cohorte, valeur_filtre
+    ):
+        client.force_login(staff_user)
+        response = self._get_rows(client, cohorte, valeur_filtre)
+        assert response.status_code == 400
+
+    def test_valeur_filtre_without_champ_returns_400(self, client, staff_user, cohorte):
+        client.force_login(staff_user)
+        response = client.get(
+            reverse("data:cohorte_review_rows", args=[cohorte.id]),
+            {
+                "valeur_filtre": json.dumps(
+                    {"conditions": [{"lookup": "startswith", "value": "07"}]}
+                )
+            },
+        )
+        assert response.status_code == 400
+
+    def test_bulk_filter_scope_with_valeur_filtre(self, client, staff_user, cohorte):
+        mobile = _groupe_with_telephone(cohorte, "07 12 34 56 78")
+        landline = _groupe_with_telephone(cohorte, "02 99 11 22 33")
+        client.force_login(staff_user)
+
+        response = _post_bulk(
+            client,
+            cohorte,
+            {
+                "filter": {
+                    "champ": "telephone",
+                    "valeur_filtre": {
+                        "conditions": [{"lookup": "startswith", "value": "07"}]
+                    },
+                },
+                "champ": "telephone",
+                "action": "reject",
+            },
+        )
+
+        assert response.json()["applied"] == 1
+        assert _unitaire_statuts(mobile)["telephone"] == SuggestionStatut.REJETEE
+        assert _unitaire_statuts(landline)["telephone"] == SuggestionStatut.AVALIDER
 
 
 def _post_bulk(client, cohorte, body):

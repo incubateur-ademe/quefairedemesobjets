@@ -419,6 +419,84 @@ main.focus-mode .bulkbar {
   gap: 8px;
 }
 
+/* query builder on the suggested value */
+.value-builder {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  background: var(--sl-color-neutral-50);
+  border: 1px solid var(--sl-color-neutral-200);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  font-size: 0.82rem;
+}
+
+.value-builder .vb-label {
+  color: var(--sl-color-neutral-600);
+}
+
+.value-builder code {
+  background: var(--sl-color-primary-100);
+  color: var(--sl-color-primary-700);
+  border-radius: 4px;
+  padding: 0 6px;
+}
+
+.vb-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.vb-lookup,
+.vb-combinator,
+.vb-value {
+  font: inherit;
+  font-size: 0.82rem;
+  padding: 5px 8px;
+  border: 1px solid var(--sl-color-neutral-300);
+  border-radius: 4px;
+  background: #fff;
+}
+
+.vb-value {
+  width: 160px;
+}
+
+.vb-value:focus,
+.vb-lookup:focus,
+.vb-combinator:focus {
+  outline: 2px solid var(--sl-color-primary-600);
+  outline-offset: 1px;
+}
+
+.vb-remove,
+.vb-add {
+  font: inherit;
+  font-size: 0.78rem;
+  border: 1px solid var(--sl-color-neutral-300);
+  background: #fff;
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+.vb-remove:hover {
+  background: var(--sl-color-danger-100);
+  border-color: var(--sl-color-danger-600);
+}
+
+.vb-add:hover {
+  background: var(--sl-color-primary-50);
+}
+
+.vb-active {
+  color: var(--sl-color-primary-700);
+  font-weight: 600;
+}
+
 .focus-cards {
   display: flex;
   flex-direction: column;
