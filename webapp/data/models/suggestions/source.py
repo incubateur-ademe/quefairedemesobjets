@@ -15,6 +15,7 @@ from data.models.comparison_table import (
 from data.models.suggestion import (
     SuggestionAction,
     SuggestionGroupe,
+    SuggestionStatut,
     SuggestionUnitaire,
 )
 from data.models.suggestions.abstract import SuggestionGroupeType
@@ -841,13 +842,23 @@ class SuggestionGroupeTypeSource(SuggestionGroupeType):
         Cells only cover the source (Acteur) suggestions: the pivot grid is a
         triage surface, corrections and parents stay in the detail view.
         """
+        statut_by_field = {
+            champ: unitaire.statut
+            for unitaire in self.suggestion_groupe.suggestion_unitaires.all()
+            if unitaire.suggestion_modele == "Acteur"
+            for champ in unitaire.champs
+        }
         cells = {}
         for field in self.flattened_fields:
             current = self._get_field_value(self.acteur_values, field)
             suggested = self._get_field_value(self.acteur_suggestions, field)
             if current is None and suggested is None:
                 continue
-            cells[field] = {"current": current, "suggested": suggested}
+            cells[field] = {
+                "current": current,
+                "suggested": suggested,
+                "statut": statut_by_field.get(field, SuggestionStatut.AVALIDER),
+            }
 
         acteur_nom = (
             (self.acteur.nom if self.acteur else None)
@@ -866,7 +877,16 @@ class SuggestionGroupeTypeSource(SuggestionGroupeType):
         }
 
     def apply(self):
-        acteur_data = self.acteur_suggestions.model_dump(exclude_none=True)
+        # Rejected suggestion unitaires (per-field reject in the review grid)
+        # must not be applied: rebuild the suggestion models without them.
+        active_unitaires = [
+            unitaire
+            for unitaire in self.suggestion_groupe.suggestion_unitaires.all()
+            if unitaire.statut != SuggestionStatut.REJETEE
+        ]
+        acteur_data = _suggestion_unitaires_to_suggestion_source_model(
+            active_unitaires, "Acteur"
+        ).model_dump(exclude_none=True)
         if not acteur_data:
             raise ValueError("No acteur suggestion unitaires found")
 
@@ -875,7 +895,9 @@ class SuggestionGroupeTypeSource(SuggestionGroupeType):
         self._set_acteur_linked_objects(acteur, acteur_data)
 
         # Apply RevisionActeur suggestions
-        revision_data = self.revision_acteur_suggestions.model_dump(exclude_none=True)
+        revision_data = _suggestion_unitaires_to_suggestion_source_model(
+            active_unitaires, "RevisionActeur"
+        ).model_dump(exclude_none=True)
         if revision_data:
             identifiant_unique_revision = (
                 self.revision_acteur.identifiant_unique
@@ -888,9 +910,9 @@ class SuggestionGroupeTypeSource(SuggestionGroupeType):
             self._set_acteur_linked_objects(revision_acteur, revision_data)
 
         # Apply ParentRevisionActeur suggestions
-        parent_data = self.parent_revision_acteur_suggestions.model_dump(
-            exclude_none=True
-        )
+        parent_data = _suggestion_unitaires_to_suggestion_source_model(
+            active_unitaires, "ParentRevisionActeur"
+        ).model_dump(exclude_none=True)
         if parent_data and self.parent_revision_acteur:
             parent_acteur = self._apply_one(
                 RevisionActeur,

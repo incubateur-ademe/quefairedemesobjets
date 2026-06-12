@@ -27,12 +27,44 @@
         <main
             data-controller="cohorte-review"
             data-cohorte-review-rows-url-value="{% url 'data:cohorte_review_rows' suggestion_cohorte.id %}"
+            data-cohorte-review-bulk-url-value="{% url 'data:cohorte_review_bulk' suggestion_cohorte.id %}"
+            data-cohorte-review-csrf-value="{{ csrf_token }}"
         >
             <div class="toolbar">
                 <div class="field-toggles" data-cohorte-review-target="fieldToggles">
                     <span class="label">Champs :</span>
                 </div>
                 <span class="status" data-cohorte-review-target="status">Chargement…</span>
+            </div>
+
+            <div class="bulkbar" data-cohorte-review-target="bulkBar" hidden>
+                <span class="count">
+                    <span data-cohorte-review-target="bulkCount">0</span> acteurs sélectionnés
+                </span>
+                <sl-select
+                    size="small"
+                    value=""
+                    data-cohorte-review-target="bulkField"
+                    aria-label="Champ ciblé par l'action de masse"
+                >
+                    <sl-option value="">tous les champs</sl-option>
+                </sl-select>
+                <sl-button
+                    size="small"
+                    variant="success"
+                    data-action="click->cohorte-review#bulkAccept"
+                >✓ Accepter</sl-button>
+                <sl-button
+                    size="small"
+                    variant="danger"
+                    outline
+                    data-action="click->cohorte-review#bulkReject"
+                >✕ Rejeter</sl-button>
+                <sl-button
+                    size="small"
+                    variant="text"
+                    data-action="click->cohorte-review#clearSelection"
+                >Tout désélectionner</sl-button>
             </div>
 
             <div class="table-wrap" data-cohorte-review-target="scroller">

@@ -17,6 +17,7 @@ import {
 interface PivotCell {
   current: string | null
   suggested: string | null
+  statut?: string
 }
 
 interface PivotRow {
@@ -49,6 +50,16 @@ const ROW_HEIGHT_ESTIMATE = 52
 const OVERSCAN = 10
 const LOAD_MORE_THRESHOLD = 20
 
+const STATUT_PENDING = "AVALIDER"
+const STATUT_ACCEPTED = "ATRAITER"
+const STATUT_REJECTED = "REJETEE"
+
+const CELL_STATE_CLASS: Record<string, string> = {
+  [STATUT_PENDING]: "pending",
+  [STATUT_ACCEPTED]: "accepted",
+  [STATUT_REJECTED]: "rejected",
+}
+
 function esc(value: string | null | undefined): string {
   if (value === null || value === undefined || value === "") {
     return ""
@@ -67,9 +78,14 @@ export default class extends Controller<HTMLElement> {
     "fieldToggles",
     "pagerInfo",
     "loadMore",
+    "bulkBar",
+    "bulkCount",
+    "bulkField",
   ]
   static values = {
     rowsUrl: String,
+    bulkUrl: String,
+    csrf: String,
   }
 
   declare readonly scrollerTarget: HTMLDivElement
@@ -79,7 +95,12 @@ export default class extends Controller<HTMLElement> {
   declare readonly fieldTogglesTarget: HTMLElement
   declare readonly pagerInfoTarget: HTMLElement
   declare readonly loadMoreTarget: HTMLElement
+  declare readonly bulkBarTarget: HTMLElement
+  declare readonly bulkCountTarget: HTMLElement
+  declare readonly bulkFieldTarget: HTMLElement & { value: string }
   declare readonly rowsUrlValue: string
+  declare readonly bulkUrlValue: string
+  declare readonly csrfValue: string
 
   private rows: PivotRow[] = []
   private fields: FieldMeta[] = []
@@ -94,6 +115,9 @@ export default class extends Controller<HTMLElement> {
   connect() {
     this.initTable()
     this.initVirtualizer()
+    // Cell action buttons are re-rendered on every scroll: one delegated
+    // listener survives instead of re-binding per render.
+    this.bodyTarget.addEventListener("click", (event) => this.onCellAction(event))
     this.fetchRows()
   }
 
@@ -126,6 +150,7 @@ export default class extends Controller<HTMLElement> {
       if (!this.fields.length) {
         this.fields = payload.meta.fields
         this.renderFieldToggles()
+        this.renderBulkFieldOptions()
         this.renderHead()
       }
       this.table.setOptions((prev) => ({
@@ -148,6 +173,94 @@ export default class extends Controller<HTMLElement> {
 
   loadMore() {
     this.fetchRows()
+  }
+
+  // --- mutations (per-cell and bulk accept/reject) ---
+
+  bulkAccept() {
+    this.postBulk(this.selectedGroupeIds(), this.bulkFieldTarget.value, "accept")
+  }
+
+  bulkReject() {
+    this.postBulk(this.selectedGroupeIds(), this.bulkFieldTarget.value, "reject")
+  }
+
+  clearSelection() {
+    this.table.toggleAllRowsSelected(false)
+  }
+
+  private onCellAction(event: Event) {
+    const button = (event.target as HTMLElement).closest<HTMLElement>(
+      "[data-cell-action]",
+    )
+    if (!button) {
+      return
+    }
+    event.preventDefault()
+    this.postBulk(
+      [Number(button.dataset.groupeId)],
+      button.dataset.field ?? "",
+      button.dataset.cellAction as string,
+    )
+  }
+
+  private selectedGroupeIds(): number[] {
+    return Object.entries(this.tableState.rowSelection ?? {})
+      .filter(([, isSelected]) => isSelected)
+      .map(([groupeId]) => Number(groupeId))
+  }
+
+  private async postBulk(groupeIds: number[], champ: string, action: string) {
+    if (!groupeIds.length || this.loading) {
+      return
+    }
+    this.loading = true
+    this.renderStatus()
+    try {
+      const response = await fetch(this.bulkUrlValue, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": this.csrfValue,
+          Accept: "application/json",
+        },
+        credentials: "same-origin",
+        body: JSON.stringify({
+          groupe_ids: groupeIds,
+          champ: champ || null,
+          action,
+        }),
+      })
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`)
+      }
+      const payload = await response.json()
+      this.mergeRows(payload.rows as PivotRow[])
+      this.fields = this.mergeFieldsMeta(payload.meta.fields as FieldMeta[])
+      this.renderAll()
+    } catch (error) {
+      this.statusTarget.textContent = `Erreur lors de l'action (${error})`
+    } finally {
+      this.loading = false
+      this.renderStatus()
+    }
+  }
+
+  private mergeRows(updatedRows: PivotRow[]) {
+    const byId = new Map(updatedRows.map((row) => [row.groupe_id, row]))
+    this.rows = this.rows.map((row) => byId.get(row.groupe_id) ?? row)
+    this.table.setOptions((prev) => ({ ...prev, data: this.rows }))
+  }
+
+  private mergeFieldsMeta(updated: FieldMeta[]): FieldMeta[] {
+    // Keep the columns discovered at first load (a fully-decided field
+    // disappears from the server meta but its column must survive), only
+    // refresh the pending counts.
+    const pendingByKey = new Map(updated.map((field) => [field.key, field.pending]))
+    return this.fields.map((field) => ({
+      ...field,
+      pending: pendingByKey.get(field.key) ?? 0,
+    }))
   }
 
   // --- tanstack table (headless state: column visibility, row selection) ---
@@ -287,7 +400,7 @@ export default class extends Controller<HTMLElement> {
   private renderRow(row: PivotRow): string {
     const isSelected = this.tableState.rowSelection?.[String(row.groupe_id)] === true
     const cells = this.visibleFields()
-      .map((field) => this.renderCell(row.cells[field.key]))
+      .map((field) => this.renderCell(row, field.key))
       .join("")
     const parentBadge = row.has_parent
       ? `<sl-badge variant="primary" pill>parent</sl-badge>`
@@ -314,10 +427,13 @@ export default class extends Controller<HTMLElement> {
       </tr>`
   }
 
-  private renderCell(cell: PivotCell | undefined): string {
+  private renderCell(row: PivotRow, field: string): string {
+    const cell = row.cells[field]
     if (!cell || (cell.current === null && cell.suggested === null)) {
       return `<td><span class="empty">—</span></td>`
     }
+    const statut = cell.statut ?? STATUT_PENDING
+    const stateClass = CELL_STATE_CLASS[statut] ?? "pending"
     const current =
       cell.current !== null && cell.current !== cell.suggested
         ? `<span class="old">${esc(cell.current)}</span>`
@@ -326,7 +442,35 @@ export default class extends Controller<HTMLElement> {
       cell.suggested !== null
         ? `<span class="new">${esc(cell.suggested)}</span>`
         : `<span class="empty">—</span>`
-    return `<td class="sug">${current}${suggested}</td>`
+    return `<td class="sug ${stateClass}">
+      ${current}${suggested}
+      ${this.renderCellActions(row.groupe_id, field, statut)}
+    </td>`
+  }
+
+  private renderCellActions(groupeId: number, field: string, statut: string): string {
+    const button = (action: string, label: string, title: string) => `
+      <button type="button" class="cell-action ${action}"
+        data-cell-action="${action}" data-groupe-id="${groupeId}"
+        data-field="${esc(field)}" title="${title}">${label}</button>`
+    if (statut === STATUT_PENDING) {
+      return `<span class="cell-actions">
+        ${button("accept", "✓", `Accepter « ${esc(field)} »`)}
+        ${button("reject", "✕", `Rejeter « ${esc(field)} »`)}
+      </span>`
+    }
+    return `<span class="cell-actions">
+      ${button("reset", "↺", "Annuler la décision")}
+    </span>`
+  }
+
+  private renderBulkFieldOptions() {
+    const options = this.fields
+      .map(
+        (field) => `<sl-option value="${esc(field.key)}">${esc(field.key)}</sl-option>`,
+      )
+      .join("")
+    this.bulkFieldTarget.insertAdjacentHTML("beforeend", options)
   }
 
   private renderFieldToggles() {
@@ -354,9 +498,7 @@ export default class extends Controller<HTMLElement> {
   }
 
   private renderStatus() {
-    const selectedCount = Object.values(this.tableState.rowSelection ?? {}).filter(
-      Boolean,
-    ).length
+    const selectedCount = this.selectedGroupeIds().length
     const selection = selectedCount
       ? ` · ${selectedCount} sélectionné${selectedCount > 1 ? "s" : ""}`
       : ""
@@ -365,5 +507,7 @@ export default class extends Controller<HTMLElement> {
       : `${this.rows.length} chargés / ${this.total} acteurs${selection}`
     this.pagerInfoTarget.textContent = `${this.rows.length} acteurs chargés sur ${this.total}`
     this.loadMoreTarget.toggleAttribute("hidden", this.nextAfter === null)
+    this.bulkBarTarget.toggleAttribute("hidden", selectedCount === 0)
+    this.bulkCountTarget.textContent = String(selectedCount)
   }
 }

@@ -1,11 +1,14 @@
 import pytest
 from data.models.suggestion import SuggestionAction, SuggestionStatut
+from data.models.suggestions.source import SuggestionGroupeTypeSource
+from django.contrib.gis.geos import Point
 from django.urls import reverse
 from unit_tests.data.models.suggestion_factory import (
     SuggestionCohorteFactory,
     SuggestionGroupeFactory,
     SuggestionUnitaireFactory,
 )
+from unit_tests.qfdmo.acteur_factory import ActeurFactory
 
 
 @pytest.fixture
@@ -83,8 +86,16 @@ class TestCohorteReviewRows:
         row = payload["rows"][0]
         assert row["acteur_id"] == "ID_1"
         assert row["statut"] == SuggestionStatut.AVALIDER
-        assert row["cells"]["nom"] == {"current": None, "suggested": "Acteur 1"}
-        assert row["cells"]["url"] == {"current": None, "suggested": "https://a1.fr"}
+        assert row["cells"]["nom"] == {
+            "current": None,
+            "suggested": "Acteur 1",
+            "statut": SuggestionStatut.AVALIDER,
+        }
+        assert row["cells"]["url"] == {
+            "current": None,
+            "suggested": "https://a1.fr",
+            "statut": SuggestionStatut.AVALIDER,
+        }
 
         fields = {field["key"]: field["pending"] for field in payload["meta"]["fields"]}
         assert fields == {"identifiant_unique": 1, "nom": 1, "url": 1}
@@ -161,3 +172,187 @@ class TestCohorteReviewRows:
         assert row["groupe_id"] == groupe.id
         assert row["cells"] == {}
         assert "error" in row
+
+
+def _post_bulk(client, cohorte, body):
+    return client.post(
+        reverse("data:cohorte_review_bulk", args=[cohorte.id]),
+        data=body,
+        content_type="application/json",
+    )
+
+
+def _unitaire_statuts(groupe):
+    return {
+        champ: unitaire.statut
+        for unitaire in groupe.suggestion_unitaires.filter(suggestion_modele="Acteur")
+        for champ in unitaire.champs
+    }
+
+
+@pytest.mark.django_db
+class TestCohorteReviewBulk:
+    def test_accept_one_field_keeps_groupe_pending(self, client, staff_user, cohorte):
+        groupe = _groupe_with_suggestions(cohorte, "ID_1", "A", url="https://a.fr")
+        client.force_login(staff_user)
+
+        response = _post_bulk(
+            client,
+            cohorte,
+            {"groupe_ids": [groupe.id], "champ": "url", "action": "accept"},
+        )
+
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload["applied"] == 1
+        assert _unitaire_statuts(groupe)["url"] == SuggestionStatut.ATRAITER
+        assert _unitaire_statuts(groupe)["nom"] == SuggestionStatut.AVALIDER
+
+        groupe.refresh_from_db()
+        assert groupe.statut == SuggestionStatut.AVALIDER
+
+        row = payload["rows"][0]
+        assert row["cells"]["url"]["statut"] == SuggestionStatut.ATRAITER
+        # decided fields leave the pending meta; the client keeps the column
+        # and resets its counter to 0
+        fields = {field["key"]: field["pending"] for field in payload["meta"]["fields"]}
+        assert "url" not in fields
+        assert fields["nom"] == 1
+
+    def test_accepting_every_field_marks_groupe_atraiter(
+        self, client, staff_user, cohorte
+    ):
+        groupe = _groupe_with_suggestions(cohorte, "ID_1", "A")
+        client.force_login(staff_user)
+
+        _post_bulk(client, cohorte, {"groupe_ids": [groupe.id], "action": "accept"})
+
+        groupe.refresh_from_db()
+        assert groupe.statut == SuggestionStatut.ATRAITER
+
+    def test_rejecting_every_field_marks_groupe_rejetee(
+        self, client, staff_user, cohorte
+    ):
+        groupe = _groupe_with_suggestions(cohorte, "ID_1", "A")
+        client.force_login(staff_user)
+
+        _post_bulk(client, cohorte, {"groupe_ids": [groupe.id], "action": "reject"})
+
+        groupe.refresh_from_db()
+        assert groupe.statut == SuggestionStatut.REJETEE
+
+    def test_mixed_decisions_mark_groupe_atraiter(self, client, staff_user, cohorte):
+        groupe = _groupe_with_suggestions(cohorte, "ID_1", "A")
+        client.force_login(staff_user)
+
+        _post_bulk(
+            client,
+            cohorte,
+            {"groupe_ids": [groupe.id], "champ": "nom", "action": "reject"},
+        )
+        _post_bulk(
+            client,
+            cohorte,
+            {
+                "groupe_ids": [groupe.id],
+                "champ": "identifiant_unique",
+                "action": "accept",
+            },
+        )
+
+        groupe.refresh_from_db()
+        assert groupe.statut == SuggestionStatut.ATRAITER
+
+    def test_reset_returns_groupe_to_avalider(self, client, staff_user, cohorte):
+        groupe = _groupe_with_suggestions(cohorte, "ID_1", "A")
+        client.force_login(staff_user)
+        _post_bulk(client, cohorte, {"groupe_ids": [groupe.id], "action": "reject"})
+
+        _post_bulk(client, cohorte, {"groupe_ids": [groupe.id], "action": "reset"})
+
+        groupe.refresh_from_db()
+        assert groupe.statut == SuggestionStatut.AVALIDER
+        assert set(_unitaire_statuts(groupe).values()) == {SuggestionStatut.AVALIDER}
+
+    def test_bulk_targets_multiple_groupes(self, client, staff_user, cohorte):
+        groupes = [
+            _groupe_with_suggestions(cohorte, f"ID_{i}", f"A{i}", url="https://a.fr")
+            for i in range(2)
+        ]
+        client.force_login(staff_user)
+
+        response = _post_bulk(
+            client,
+            cohorte,
+            {
+                "groupe_ids": [groupe.id for groupe in groupes],
+                "champ": "url",
+                "action": "accept",
+            },
+        )
+
+        assert response.json()["applied"] == 2
+
+    def test_groupe_from_another_cohorte_is_ignored(self, client, staff_user, cohorte):
+        other_cohorte = SuggestionCohorteFactory(
+            type_action=SuggestionAction.SOURCE_AJOUT
+        )
+        other_groupe = _groupe_with_suggestions(other_cohorte, "ID_OTHER", "Other")
+        client.force_login(staff_user)
+
+        response = _post_bulk(
+            client, cohorte, {"groupe_ids": [other_groupe.id], "action": "reject"}
+        )
+
+        assert response.json()["applied"] == 0
+        other_groupe.refresh_from_db()
+        assert other_groupe.statut == SuggestionStatut.AVALIDER
+
+    @pytest.mark.parametrize(
+        "body",
+        [
+            {"groupe_ids": [1], "action": "nope"},
+            {"groupe_ids": [], "action": "accept"},
+            {"groupe_ids": "1,2", "action": "accept"},
+            {"action": "accept"},
+        ],
+    )
+    def test_invalid_payloads_return_400(self, client, staff_user, cohorte, body):
+        client.force_login(staff_user)
+        response = _post_bulk(client, cohorte, body)
+        assert response.status_code == 400
+
+
+@pytest.mark.django_db
+class TestApplySkipsRejectedUnitaires:
+    def test_rejected_field_is_not_applied(self):
+        cohorte = SuggestionCohorteFactory(
+            type_action=SuggestionAction.SOURCE_MODIFICATION
+        )
+        acteur = ActeurFactory(
+            identifiant_unique="ID_APPLY",
+            nom="Ancien nom",
+            url="https://ancien.fr",
+            location=Point(2.1234, 48.1234),
+        )
+        groupe = SuggestionGroupeFactory(suggestion_cohorte=cohorte, acteur=acteur)
+        SuggestionUnitaireFactory(
+            suggestion_groupe=groupe,
+            suggestion_modele="Acteur",
+            champs=["nom"],
+            valeurs=["Nouveau nom"],
+            statut=SuggestionStatut.REJETEE,
+        )
+        SuggestionUnitaireFactory(
+            suggestion_groupe=groupe,
+            suggestion_modele="Acteur",
+            champs=["url"],
+            valeurs=["https://nouveau.fr"],
+            statut=SuggestionStatut.ATRAITER,
+        )
+
+        SuggestionGroupeTypeSource.from_suggestion_groupe(groupe).apply()
+
+        acteur.refresh_from_db()
+        assert acteur.nom == "Ancien nom"
+        assert acteur.url == "https://nouveau.fr"
