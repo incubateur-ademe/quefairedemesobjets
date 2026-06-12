@@ -60,13 +60,39 @@ const CELL_STATE_CLASS: Record<string, string> = {
   [STATUT_REJECTED]: "rejected",
 }
 
+// Focus-mode query builder: lookups on the suggested value, mirroring the
+// server-side REVIEW_VALUE_LOOKUPS allowlist
+const VALUE_LOOKUPS: Array<[string, string]> = [
+  ["startswith", "commence par"],
+  ["endswith", "se termine par"],
+  ["contains", "contient"],
+  ["not_contains", "ne contient pas"],
+  ["exact", "est exactement"],
+  ["regex", "correspond à la regex"],
+  ["empty", "est vide"],
+  ["not_empty", "n'est pas vide"],
+]
+const VALUE_LOOKUPS_WITHOUT_VALUE = new Set(["empty", "not_empty"])
+
+interface ValueCondition {
+  lookup: string
+  value: string
+}
+
+interface ValueFilter {
+  combinator: "et" | "ou"
+  conditions: ValueCondition[]
+}
+
 function esc(value: string | null | undefined): string {
   if (value === null || value === undefined || value === "") {
     return ""
   }
   const div = document.createElement("div")
   div.textContent = value
-  return div.innerHTML
+  // innerHTML escapes & < > but not quotes: needed because escaped values
+  // are also interpolated into HTML attributes
+  return div.innerHTML.replace(/"/g, "&quot;").replace(/'/g, "&#39;")
 }
 
 export default class extends Controller<HTMLElement> {
@@ -127,6 +153,10 @@ export default class extends Controller<HTMLElement> {
   private searchDebounce: number | undefined
   private focusField: string | null = null
   private selectionScope: "ids" | "filter" = "ids"
+  // applied filter (sent to the server) vs draft being edited in the builder
+  private valueFilter: ValueFilter | null = null
+  private builderConditions: ValueCondition[] = [{ lookup: "startswith", value: "" }]
+  private builderCombinator: "et" | "ou" = "et"
   private table!: Table<PivotRow>
   private tableState!: TableState
   private virtualizer!: Virtualizer<HTMLDivElement, HTMLTableRowElement>
@@ -163,6 +193,7 @@ export default class extends Controller<HTMLElement> {
     const field = new URLSearchParams(window.location.search).get("focus")
     if (field !== this.focusField) {
       this.focusField = field
+      this.resetValueFilter()
       this.applyFocusMode()
       this.resetAndFetch()
     }
@@ -174,6 +205,7 @@ export default class extends Controller<HTMLElement> {
       return
     }
     this.focusField = field
+    this.resetValueFilter()
     this.syncFocusToUrl()
     this.applyFocusMode()
     this.resetAndFetch()
@@ -181,9 +213,74 @@ export default class extends Controller<HTMLElement> {
 
   exitFocus() {
     this.focusField = null
+    this.resetValueFilter()
     this.syncFocusToUrl()
     this.applyFocusMode()
     this.resetAndFetch()
+  }
+
+  // --- focus-mode query builder on the suggested value ---
+
+  vbAdd() {
+    this.readBuilderFromDom()
+    this.builderConditions.push({ lookup: "startswith", value: "" })
+    this.renderFocusHeader()
+  }
+
+  vbRemove(event: Event) {
+    this.readBuilderFromDom()
+    const index = Number((event.currentTarget as HTMLElement).dataset.index)
+    this.builderConditions.splice(index, 1)
+    if (!this.builderConditions.length) {
+      this.builderConditions = [{ lookup: "startswith", value: "" }]
+    }
+    this.renderFocusHeader()
+  }
+
+  vbLookupChanged() {
+    // value inputs are shown/hidden depending on the lookup
+    this.readBuilderFromDom()
+    this.renderFocusHeader()
+  }
+
+  vbApply() {
+    this.readBuilderFromDom()
+    const conditions = this.builderConditions.filter(
+      (condition) =>
+        VALUE_LOOKUPS_WITHOUT_VALUE.has(condition.lookup) ||
+        condition.value.trim() !== "",
+    )
+    this.valueFilter = conditions.length
+      ? { combinator: this.builderCombinator, conditions }
+      : null
+    this.resetAndFetch()
+  }
+
+  vbClear() {
+    this.resetValueFilter()
+    this.resetAndFetch()
+  }
+
+  private resetValueFilter() {
+    this.valueFilter = null
+    this.builderConditions = [{ lookup: "startswith", value: "" }]
+    this.builderCombinator = "et"
+  }
+
+  private readBuilderFromDom() {
+    const rows = [...this.focusHeaderTarget.querySelectorAll(".vb-row")]
+    if (rows.length) {
+      this.builderConditions = rows.map((row) => ({
+        lookup: (row.querySelector(".vb-lookup") as HTMLSelectElement).value,
+        value: (row.querySelector(".vb-value") as HTMLInputElement | null)?.value ?? "",
+      }))
+    }
+    const combinator = this.focusHeaderTarget.querySelector(
+      ".vb-combinator",
+    ) as HTMLSelectElement | null
+    if (combinator) {
+      this.builderCombinator = combinator.value === "ou" ? "ou" : "et"
+    }
   }
 
   acceptAllLoaded() {
@@ -229,6 +326,9 @@ export default class extends Controller<HTMLElement> {
       }
       if (this.focusField) {
         url.searchParams.set("champ", this.focusField)
+        if (this.valueFilter) {
+          url.searchParams.set("valeur_filtre", JSON.stringify(this.valueFilter))
+        }
       }
       const response = await fetch(url, {
         headers: { Accept: "application/json" },
@@ -338,6 +438,7 @@ export default class extends Controller<HTMLElement> {
             statut: this.statutFilter,
             champ: this.focusField,
             q: this.q || null,
+            valeur_filtre: this.focusField ? this.valueFilter : null,
           },
           champ: champ || null,
           action,
@@ -544,7 +645,110 @@ export default class extends Controller<HTMLElement> {
             ← Quitter le mode focus (Échap)
           </sl-button>
         </div>
+      </div>
+      ${this.renderValueBuilder(field)}`
+  }
+
+  private renderValueBuilder(field: string): string {
+    const conditionRows = this.builderConditions
+      .map((condition, index) => {
+        const options = VALUE_LOOKUPS.map(
+          ([key, label]) =>
+            `<option value="${key}" ${key === condition.lookup ? "selected" : ""}>
+              ${label}
+            </option>`,
+        ).join("")
+        const valueInput = VALUE_LOOKUPS_WITHOUT_VALUE.has(condition.lookup)
+          ? ""
+          : `<input type="text" class="vb-value" value="${esc(condition.value)}"
+              placeholder="ex : 07"
+              aria-label="Valeur de la condition ${index + 1}">`
+        return `
+          <div class="vb-row">
+            <select class="vb-lookup" aria-label="Opérateur de la condition ${index + 1}"
+              data-action="change->cohorte-review#vbLookupChanged">${options}</select>
+            ${valueInput}
+            <button type="button" class="vb-remove" title="Supprimer la condition"
+              data-action="click->cohorte-review#vbRemove" data-index="${index}">✕</button>
+          </div>`
+      })
+      .join("")
+
+    const combinator =
+      this.builderConditions.length > 1
+        ? `<select class="vb-combinator" aria-label="Combinaison des conditions">
+            <option value="et" ${this.builderCombinator === "et" ? "selected" : ""}>
+              toutes les conditions (ET)
+            </option>
+            <option value="ou" ${this.builderCombinator === "ou" ? "selected" : ""}>
+              au moins une condition (OU)
+            </option>
+          </select>`
+        : ""
+
+    const filterActions = this.valueFilter
+      ? `<span class="vb-active">filtre actif — ${this.total} correspondant${
+          this.total > 1 ? "s" : ""
+        }</span>
+        <sl-button size="small" variant="success"
+          data-action="click->cohorte-review#focusBulkAccept">
+          ✓ Accepter les ${this.total} filtrées
+        </sl-button>
+        <sl-button size="small" variant="danger" outline
+          data-action="click->cohorte-review#focusBulkReject">
+          ✕ Rejeter les ${this.total} filtrées
+        </sl-button>`
+      : ""
+
+    return `
+      <div class="value-builder">
+        <span class="vb-label">Filtrer la valeur suggérée de <code>${esc(field)}</code> :</span>
+        ${conditionRows}
+        ${combinator}
+        <button type="button" class="vb-add"
+          data-action="click->cohorte-review#vbAdd">＋ condition</button>
+        <sl-button size="small" variant="primary"
+          data-action="click->cohorte-review#vbApply">Appliquer</sl-button>
+        <sl-button size="small" variant="text"
+          data-action="click->cohorte-review#vbClear">Effacer</sl-button>
+        ${filterActions}
       </div>`
+  }
+
+  focusBulkAccept() {
+    this.focusBulkAction("accept")
+  }
+
+  focusBulkReject() {
+    this.focusBulkAction("reject")
+  }
+
+  private focusBulkAction(action: string) {
+    const field = this.focusField
+    if (!field) {
+      return
+    }
+    const verb = action === "accept" ? "Accepter" : "Rejeter"
+    const confirmed = window.confirm(
+      `${verb} « ${field} » pour les ${this.total} acteurs correspondant ` +
+        `au filtre ?\nCette action s'applique au-delà des lignes chargées.`,
+    )
+    if (!confirmed) {
+      return
+    }
+    this.sendBulk(
+      {
+        filter: {
+          statut: this.statutFilter,
+          champ: field,
+          q: this.q || null,
+          valeur_filtre: this.valueFilter,
+        },
+        champ: field,
+        action,
+      },
+      { reload: true },
+    )
   }
 
   private renderFocusCards() {
