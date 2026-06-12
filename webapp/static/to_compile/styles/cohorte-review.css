@@ -582,6 +582,15 @@ main.focus-mode .bulkbar {
   align-items: center;
 }
 
+.focus-card[data-detail-url] {
+  cursor: pointer;
+}
+
+.focus-card[data-detail-url]:hover {
+  border-color: var(--sl-color-primary-400);
+  background: var(--sl-color-primary-50);
+}
+
 .focus-card.accepted {
   border-left: 4px solid var(--sl-color-success-600);
   opacity: 0.75;
