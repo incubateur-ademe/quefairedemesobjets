@@ -87,6 +87,7 @@ export default class extends Controller<HTMLElement> {
     "focusRail",
     "focusHeader",
     "focusCards",
+    "selectFiltered",
   ]
   static values = {
     rowsUrl: String,
@@ -110,6 +111,8 @@ export default class extends Controller<HTMLElement> {
   declare readonly focusRailTarget: HTMLElement
   declare readonly focusHeaderTarget: HTMLElement
   declare readonly focusCardsTarget: HTMLElement
+  declare readonly selectFilteredTarget: HTMLElement
+  declare readonly hasSelectFilteredTarget: boolean
   declare readonly rowsUrlValue: string
   declare readonly bulkUrlValue: string
   declare readonly csrfValue: string
@@ -123,6 +126,7 @@ export default class extends Controller<HTMLElement> {
   private statutFilter = "AVALIDER"
   private searchDebounce: number | undefined
   private focusField: string | null = null
+  private selectionScope: "ids" | "filter" = "ids"
   private table!: Table<PivotRow>
   private tableState!: TableState
   private virtualizer!: Virtualizer<HTMLDivElement, HTMLTableRowElement>
@@ -284,6 +288,7 @@ export default class extends Controller<HTMLElement> {
     this.rows = []
     this.total = 0
     this.nextAfter = 0
+    this.selectionScope = "ids"
     this.table.resetRowSelection(true)
     this.table.setOptions((prev) => ({ ...prev, data: this.rows }))
     this.virtualizer.setOptions({ ...this.virtualizer.options, count: 0 })
@@ -295,15 +300,53 @@ export default class extends Controller<HTMLElement> {
   // --- mutations (per-cell and bulk accept/reject) ---
 
   bulkAccept() {
-    this.postBulk(this.selectedGroupeIds(), this.bulkFieldTarget.value, "accept")
+    this.bulkAction("accept")
   }
 
   bulkReject() {
-    this.postBulk(this.selectedGroupeIds(), this.bulkFieldTarget.value, "reject")
+    this.bulkAction("reject")
+  }
+
+  selectAllFiltered() {
+    this.selectionScope = "filter"
+    this.renderStatus()
   }
 
   clearSelection() {
+    this.selectionScope = "ids"
     this.table.toggleAllRowsSelected(false)
+  }
+
+  private bulkAction(action: string) {
+    const champ = this.bulkFieldTarget.value
+    if (this.selectionScope === "filter") {
+      // The filter scope acts beyond the loaded rows: never without an
+      // explicit confirmation carrying the real count.
+      const target = champ ? `le champ « ${champ} »` : "tous les champs"
+      const verb = action === "accept" ? "Accepter" : "Rejeter"
+      const confirmed = window.confirm(
+        `${verb} ${target} pour les ${this.total} acteurs filtrés ?\n` +
+          `Cette action s'applique à tous les acteurs correspondant aux ` +
+          `filtres, au-delà des lignes chargées.`,
+      )
+      if (!confirmed) {
+        return
+      }
+      this.sendBulk(
+        {
+          filter: {
+            statut: this.statutFilter,
+            champ: this.focusField,
+            q: this.q || null,
+          },
+          champ: champ || null,
+          action,
+        },
+        { reload: true },
+      )
+    } else {
+      this.postBulk(this.selectedGroupeIds(), champ, action)
+    }
   }
 
   private onCellAction(event: Event) {
@@ -327,8 +370,18 @@ export default class extends Controller<HTMLElement> {
       .map(([groupeId]) => Number(groupeId))
   }
 
-  private async postBulk(groupeIds: number[], champ: string, action: string) {
-    if (!groupeIds.length || this.loading) {
+  private postBulk(groupeIds: number[], champ: string, action: string) {
+    if (!groupeIds.length) {
+      return
+    }
+    this.sendBulk(
+      { groupe_ids: groupeIds, champ: champ || null, action },
+      { reload: false },
+    )
+  }
+
+  private async sendBulk(body: object, { reload }: { reload: boolean }) {
+    if (this.loading) {
       return
     }
     this.loading = true
@@ -342,18 +395,23 @@ export default class extends Controller<HTMLElement> {
           Accept: "application/json",
         },
         credentials: "same-origin",
-        body: JSON.stringify({
-          groupe_ids: groupeIds,
-          champ: champ || null,
-          action,
-        }),
+        body: JSON.stringify(body),
       })
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`)
       }
       const payload = await response.json()
-      this.mergeRows(payload.rows as PivotRow[])
       this.fields = this.mergeFieldsMeta(payload.meta.fields as FieldMeta[])
+      if (payload.rows) {
+        this.mergeRows(payload.rows as PivotRow[])
+      }
+      if (reload) {
+        // Filter-scope mutations touch rows beyond the loaded window:
+        // reload from the first batch instead of merging.
+        this.loading = false
+        this.resetAndFetch()
+        return
+      }
       this.renderAll()
     } catch (error) {
       this.statusTarget.textContent = `Erreur lors de l'action (${error})`
@@ -703,6 +761,7 @@ export default class extends Controller<HTMLElement> {
 
   private renderStatus() {
     const selectedCount = this.selectedGroupeIds().length
+    const isFilterScope = this.selectionScope === "filter"
     const selection = selectedCount
       ? ` · ${selectedCount} sélectionné${selectedCount > 1 ? "s" : ""}`
       : ""
@@ -711,7 +770,13 @@ export default class extends Controller<HTMLElement> {
       : `${this.rows.length} chargés / ${this.total} acteurs${selection}`
     this.pagerInfoTarget.textContent = `${this.rows.length} acteurs chargés sur ${this.total}`
     this.loadMoreTarget.toggleAttribute("hidden", this.nextAfter === null)
-    this.bulkBarTarget.toggleAttribute("hidden", selectedCount === 0)
-    this.bulkCountTarget.textContent = String(selectedCount)
+    this.bulkBarTarget.toggleAttribute("hidden", selectedCount === 0 && !isFilterScope)
+    this.bulkCountTarget.textContent = isFilterScope
+      ? `${this.total} (tous les acteurs filtrés)`
+      : String(selectedCount)
+    if (this.hasSelectFilteredTarget) {
+      this.selectFilteredTarget.textContent = `Sélectionner les ${this.total} acteurs filtrés`
+      this.selectFilteredTarget.toggleAttribute("hidden", isFilterScope)
+    }
   }
 }

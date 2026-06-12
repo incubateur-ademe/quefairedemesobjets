@@ -21,7 +21,7 @@ from data.models.utils import prepare_acteur_data_with_location
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import CharField
+from django.db.models import CharField, Exists, OuterRef
 from django.db.models.functions import Cast
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render
@@ -562,6 +562,32 @@ class CohorteReviewView(IsStaffMixin, TemplateView):
         return context
 
 
+def filter_review_groupes(
+    cohorte: SuggestionCohorte,
+    *,
+    statut: str,
+    champ: str | None,
+    q: str,
+):
+    """Shared filtering for the review grid: used by the rows endpoint and
+    by the bulk endpoint's « all filtered rows » scope, so both always agree
+    on what « filtered » means."""
+    queryset = SuggestionGroupe.objects.filter(suggestion_cohorte=cohorte)
+    if statut != "all":
+        queryset = queryset.filter(statut=statut)
+    if champ:
+        queryset = queryset.filter(
+            suggestion_unitaires__champs__contains=[champ]
+        ).distinct()
+    if q:
+        # acteur is a FK with db_constraint=False: search the raw column
+        # text rather than joining on a possibly missing Acteur row
+        queryset = queryset.annotate(
+            acteur_id_text=Cast("acteur_id", CharField())
+        ).filter(acteur_id_text__icontains=q)
+    return queryset
+
+
 class CohorteReviewRowsView(IsStaffMixin, View):
     """JSON rows endpoint for the cohorte review grid.
 
@@ -573,22 +599,12 @@ class CohorteReviewRowsView(IsStaffMixin, View):
     def get(self, request, cohorte_id):
         cohorte = get_object_or_404(SuggestionCohorte, id=cohorte_id)
 
-        queryset = SuggestionGroupe.objects.filter(
-            suggestion_cohorte=cohorte
+        queryset = filter_review_groupes(
+            cohorte,
+            statut=request.GET.get("statut", SuggestionStatut.AVALIDER),
+            champ=request.GET.get("champ"),
+            q=request.GET.get("q", ""),
         ).prefetch_related("suggestion_unitaires", "acteur", "revision_acteur")
-
-        statut = request.GET.get("statut", SuggestionStatut.AVALIDER)
-        if statut != "all":
-            queryset = queryset.filter(statut=statut)
-        if champ := request.GET.get("champ"):
-            queryset = queryset.filter(suggestion_unitaires__champs__contains=[champ])
-            queryset = queryset.distinct()
-        if q := request.GET.get("q"):
-            # acteur is a FK with db_constraint=False: search the raw column
-            # text rather than joining on a possibly missing Acteur row
-            queryset = queryset.annotate(
-                acteur_id_text=Cast("acteur_id", CharField())
-            ).filter(acteur_id_text__icontains=q)
 
         total = queryset.count()
 
@@ -624,13 +640,18 @@ REVIEW_BULK_ACTION_TO_STATUT = {
 
 
 class CohorteReviewBulkView(IsStaffMixin, View):
-    """Per-field accept/reject for one or many suggestion groupes.
+    """Per-field accept/reject on an explicit selection or on every
+    filtered groupe.
 
-    POST body (JSON): {groupe_ids: [int], champ: str | null, action:
-    "accept" | "reject" | "reset"}. A null champ targets every field of the
-    selected groupes. Updates the SuggestionUnitaire statuts, derives each
-    groupe statut, and returns the refreshed pivot rows so the grid can
-    update in place.
+    POST body (JSON): {champ: str | null, action: "accept" | "reject" |
+    "reset"} plus exactly one scope:
+    - groupe_ids: [int] — explicit selection; the refreshed pivot rows are
+      returned so the grid updates in place;
+    - filter: {statut, champ, q} — every groupe matching the same filters
+      as the rows endpoint (Gmail-style « select all »); no rows are
+      returned (the set may be huge), the client reloads.
+
+    A null champ targets every field of the targeted groupes.
     """
 
     def post(self, request, cohorte_id):
@@ -646,70 +667,100 @@ class CohorteReviewBulkView(IsStaffMixin, View):
             return HttpResponseBadRequest(
                 "action must be one of: accept, reject, reset"
             )
-        groupe_ids = payload.get("groupe_ids")
-        if (
-            not isinstance(groupe_ids, list)
-            or not groupe_ids
-            or not all(isinstance(groupe_id, int) for groupe_id in groupe_ids)
-        ):
-            return HttpResponseBadRequest("groupe_ids must be a list of ids")
-        if len(groupe_ids) > REVIEW_BULK_MAX_GROUPES:
-            return HttpResponseBadRequest(
-                f"groupe_ids is limited to {REVIEW_BULK_MAX_GROUPES} entries"
-            )
         champ = payload.get("champ") or None
 
-        with transaction.atomic():
+        groupe_ids = payload.get("groupe_ids")
+        filter_payload = payload.get("filter")
+        if (groupe_ids is None) == (filter_payload is None):
+            return HttpResponseBadRequest("provide exactly one of groupe_ids or filter")
+
+        if groupe_ids is not None:
+            if (
+                not isinstance(groupe_ids, list)
+                or not groupe_ids
+                or not all(isinstance(groupe_id, int) for groupe_id in groupe_ids)
+            ):
+                return HttpResponseBadRequest("groupe_ids must be a list of ids")
+            if len(groupe_ids) > REVIEW_BULK_MAX_GROUPES:
+                return HttpResponseBadRequest(
+                    f"groupe_ids is limited to {REVIEW_BULK_MAX_GROUPES} entries"
+                )
             # Scoping to the cohorte prevents acting on another cohorte's
             # groupes through forged ids.
-            groupes = list(
-                SuggestionGroupe.objects.filter(
-                    suggestion_cohorte=cohorte, id__in=groupe_ids
-                ).select_for_update()
+            targeted = SuggestionGroupe.objects.filter(
+                suggestion_cohorte=cohorte, id__in=groupe_ids
             )
+        else:
+            if not isinstance(filter_payload, dict):
+                return HttpResponseBadRequest("filter must be an object")
+            targeted = filter_review_groupes(
+                cohorte,
+                statut=filter_payload.get("statut") or SuggestionStatut.AVALIDER,
+                champ=filter_payload.get("champ") or None,
+                q=filter_payload.get("q") or "",
+            )
+
+        with transaction.atomic():
+            targeted_ids = list(targeted.values_list("id", flat=True))
             unitaires = SuggestionUnitaire.objects.filter(
-                suggestion_groupe__in=groupes,
+                suggestion_groupe_id__in=targeted_ids,
                 suggestion_modele="Acteur",
             )
             if champ:
                 unitaires = unitaires.filter(champs__contains=[champ])
             applied = unitaires.update(statut=REVIEW_BULK_ACTION_TO_STATUT[action])
 
-            for groupe in groupes:
-                self._derive_groupe_statut(groupe)
+            self._derive_groupes_statut(targeted_ids)
 
-        rows = [
-            build_pivot_row(groupe)
-            for groupe in SuggestionGroupe.objects.filter(
-                id__in=[groupe.id for groupe in groupes]
-            ).prefetch_related("suggestion_unitaires", "acteur", "revision_acteur")
-        ]
-        return JsonResponse(
-            {
-                "applied": applied,
-                "rows": rows,
-                "meta": {"fields": cohorte_fields_meta(cohorte)},
-            }
-        )
+        response: dict = {
+            "applied": applied,
+            "meta": {"fields": cohorte_fields_meta(cohorte)},
+        }
+        if groupe_ids is not None:
+            response["rows"] = [
+                build_pivot_row(groupe)
+                for groupe in SuggestionGroupe.objects.filter(
+                    id__in=targeted_ids
+                ).prefetch_related("suggestion_unitaires", "acteur", "revision_acteur")
+            ]
+        return JsonResponse(response)
 
     @staticmethod
-    def _derive_groupe_statut(groupe: SuggestionGroupe) -> None:
+    def _derive_groupes_statut(groupe_ids: list[int]) -> None:
         """A groupe stays « à valider » while any of its source suggestions
         is undecided; once all are decided it becomes « à traiter » unless
-        everything was rejected."""
-        statuts = set(
-            groupe.suggestion_unitaires.filter(suggestion_modele="Acteur")
-            .values_list("statut", flat=True)
-            .distinct()
+        everything was rejected. Set-based so « select all filtered » stays
+        fast on large cohortes."""
+
+        def acteur_unitaires():
+            return SuggestionUnitaire.objects.filter(
+                suggestion_groupe=OuterRef("pk"), suggestion_modele="Acteur"
+            )
+
+        groupes = SuggestionGroupe.objects.filter(id__in=groupe_ids).annotate(
+            has_source_suggestion=Exists(acteur_unitaires()),
+            has_pending=Exists(
+                acteur_unitaires().filter(statut=SuggestionStatut.AVALIDER)
+            ),
+            has_non_rejected_decision=Exists(
+                acteur_unitaires().exclude(
+                    statut__in=[
+                        SuggestionStatut.AVALIDER,
+                        SuggestionStatut.REJETEE,
+                    ]
+                )
+            ),
         )
-        if not statuts:
-            return
-        if SuggestionStatut.AVALIDER in statuts:
-            statut = SuggestionStatut.AVALIDER
-        elif statuts == {SuggestionStatut.REJETEE}:
-            statut = SuggestionStatut.REJETEE
-        else:
-            statut = SuggestionStatut.ATRAITER
-        if statut != groupe.statut:
-            groupe.statut = statut
-            groupe.save(update_fields=["statut"])
+        groupes.filter(has_source_suggestion=True, has_pending=True).update(
+            statut=SuggestionStatut.AVALIDER
+        )
+        groupes.filter(
+            has_source_suggestion=True,
+            has_pending=False,
+            has_non_rejected_decision=True,
+        ).update(statut=SuggestionStatut.ATRAITER)
+        groupes.filter(
+            has_source_suggestion=True,
+            has_pending=False,
+            has_non_rejected_decision=False,
+        ).update(statut=SuggestionStatut.REJETEE)
