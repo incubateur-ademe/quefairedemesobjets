@@ -519,7 +519,7 @@ def build_pivot_row(groupe: SuggestionGroupe) -> dict:
             "acteur_id": groupe.acteur_id or "",
             "acteur_nom": "",
             "has_parent": groupe.parent_revision_acteur_id is not None,
-            "detail_url": groupe.change_url,
+            "detail_url": groupe.admin_change_url,
             "cells": {},
             "error": "type de suggestion non supporté par la grille",
         }

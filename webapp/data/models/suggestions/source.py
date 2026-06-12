@@ -872,7 +872,9 @@ class SuggestionGroupeTypeSource(SuggestionGroupeType):
             "acteur_id": self.identifiant_unique,
             "acteur_nom": acteur_nom,
             "has_parent": self.has_parent_revision_acteur,
-            "detail_url": self.update_url,
+            # The admin change page is the only standalone detail view today
+            # (data:suggestion_groupe serves Turbo Stream fragments only)
+            "detail_url": self.suggestion_groupe.admin_change_url,
             "cells": cells,
         }
 

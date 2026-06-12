@@ -556,6 +556,10 @@ class SuggestionGroupe(TimestampedModel, SuggestionActeurRelationsMixin):
     def change_url(self):
         return reverse("data:suggestion_groupe", args=[quote(self.id)])
 
+    @property
+    def admin_change_url(self):
+        return reverse("admin:data_suggestiongroupe_change", args=[quote(self.id)])
+
     def get_identifiant_unique_from_suggestion_unitaires(
         self, model_name: str = "Acteur"
     ) -> str:
