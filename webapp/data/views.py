@@ -573,22 +573,27 @@ REVIEW_VALUE_LOOKUPS = {
     "regex": "iregex",
 }
 REVIEW_VALUE_MAX_CONDITIONS = 10
+REVIEW_VALUE_MAX_GROUPS = 5
 
 
-def build_value_filter_q(valeur_filtre: dict) -> Q:
-    """Translate the focus-mode query builder payload into a Q over
-    SuggestionUnitaire rows.
-
-    Expected shape: {"combinator": "et" | "ou", "conditions":
-    [{"lookup": <REVIEW_VALUE_LOOKUPS key | empty | not_empty |
-    not_contains>, "value": str}]}. Raises ValueError on anything else.
-    """
-    if not isinstance(valeur_filtre, dict):
-        raise ValueError("valeur_filtre must be an object")
-    combinator = valeur_filtre.get("combinator", "et")
+def _validated_combinator(payload: dict) -> str:
+    combinator = payload.get("combinator", "et")
     if combinator not in {"et", "ou"}:
         raise ValueError("combinator must be 'et' or 'ou'")
-    conditions = valeur_filtre.get("conditions")
+    return combinator
+
+
+def _combine_qs(condition_qs: list[Q], combinator: str) -> Q:
+    combined = condition_qs[0]
+    for condition_q in condition_qs[1:]:
+        if combinator == "ou":
+            combined = combined | condition_q
+        else:
+            combined = combined & condition_q
+    return combined
+
+
+def _build_value_conditions_q(combinator: str, conditions) -> Q:
     if (
         not isinstance(conditions, list)
         or not conditions
@@ -623,13 +628,49 @@ def build_value_filter_q(valeur_filtre: dict) -> Q:
         else:
             raise ValueError(f"unknown lookup '{lookup}'")
 
-    combined = condition_qs[0]
-    for condition_q in condition_qs[1:]:
-        if combinator == "ou":
-            combined = combined | condition_q
-        else:
-            combined = combined & condition_q
-    return combined
+    return _combine_qs(condition_qs, combinator)
+
+
+def build_value_filter_q(valeur_filtre: dict) -> Q:
+    """Translate the focus-mode query builder payload into a Q over
+    SuggestionUnitaire rows.
+
+    Two accepted shapes (lookups: REVIEW_VALUE_LOOKUPS keys plus empty,
+    not_empty, not_contains):
+    - flat: {"combinator": "et" | "ou", "conditions": [{"lookup", "value"}]}
+    - grouped: {"combinator": <between groups>, "groups":
+      [{"combinator": <within group>, "conditions": [...]}]}, allowing
+      e.g. (commence par 07 ET finit par 78) OU (commence par 06).
+
+    Raises ValueError on anything else.
+    """
+    if not isinstance(valeur_filtre, dict):
+        raise ValueError("valeur_filtre must be an object")
+    combinator = _validated_combinator(valeur_filtre)
+
+    if "groups" in valeur_filtre:
+        groups = valeur_filtre.get("groups")
+        if (
+            not isinstance(groups, list)
+            or not groups
+            or len(groups) > REVIEW_VALUE_MAX_GROUPS
+        ):
+            raise ValueError(
+                "groups must be a non-empty list of at most "
+                f"{REVIEW_VALUE_MAX_GROUPS} items"
+            )
+        group_qs = []
+        for group in groups:
+            if not isinstance(group, dict):
+                raise ValueError("each group must be an object")
+            group_qs.append(
+                _build_value_conditions_q(
+                    _validated_combinator(group), group.get("conditions")
+                )
+            )
+        return _combine_qs(group_qs, combinator)
+
+    return _build_value_conditions_q(combinator, valeur_filtre.get("conditions"))
 
 
 def filter_review_groupes(
