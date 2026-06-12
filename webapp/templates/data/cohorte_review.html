@@ -31,6 +31,28 @@
             data-cohorte-review-csrf-value="{{ csrf_token }}"
         >
             <div class="toolbar">
+                <sl-input
+                    type="search"
+                    size="small"
+                    placeholder="Rechercher un identifiant acteur…"
+                    clearable
+                    class="search"
+                    data-cohorte-review-target="search"
+                    data-action="sl-input->cohorte-review#onSearchInput sl-clear->cohorte-review#onSearchInput"
+                ></sl-input>
+                <sl-select
+                    size="small"
+                    value="AVALIDER"
+                    class="statut-filter"
+                    data-cohorte-review-target="statutFilter"
+                    data-action="sl-change->cohorte-review#onStatutChange"
+                    aria-label="Filtrer par statut"
+                >
+                    <sl-option value="AVALIDER">🟠 À valider</sl-option>
+                    <sl-option value="ATRAITER">⏳ À traiter</sl-option>
+                    <sl-option value="REJETEE">🔴 Rejetées</sl-option>
+                    <sl-option value="all">Tous les statuts</sl-option>
+                </sl-select>
                 <div class="field-toggles" data-cohorte-review-target="fieldToggles">
                     <span class="label">Champs :</span>
                 </div>

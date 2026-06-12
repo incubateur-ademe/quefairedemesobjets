@@ -75,6 +75,14 @@ a {
   color: var(--sl-color-neutral-500);
 }
 
+.toolbar .search {
+  width: 270px;
+}
+
+.toolbar .statut-filter {
+  min-width: 170px;
+}
+
 .toolbar .status {
   margin-left: auto;
   font-size: 0.82rem;

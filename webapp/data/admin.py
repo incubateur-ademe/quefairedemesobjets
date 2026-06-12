@@ -15,6 +15,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import Exists, OuterRef, Q, QuerySet
 from django.template.loader import render_to_string
+from django.urls import reverse
 from django.utils.html import format_html, mark_safe
 from djangoql.admin import DjangoQLSearchMixin
 from djangoql.exceptions import DjangoQLSchemaError
@@ -89,6 +90,7 @@ class SuggestionCohorteAdmin(DjangoQLSearchMixin, NotEditableMixin, admin.ModelA
     list_display = [
         "__str__",
         "statut",
+        "revue",
         "metadonnees",
     ]
 
@@ -101,6 +103,15 @@ class SuggestionCohorteAdmin(DjangoQLSearchMixin, NotEditableMixin, admin.ModelA
 
     def metadonnees(self, obj):
         return mark_safe(dict_to_html_table(obj.metadata or {}))
+
+    @admin.display(description="Revue")
+    def revue(self, obj):
+        if not obj.is_source_type:
+            return "-"
+        return format_html(
+            '<a href="{}">✨ Réviser en grille</a>',
+            reverse("data:cohorte_review", args=[obj.id]),
+        )
 
     def get_deleted_objects(self, objs, request):
         """

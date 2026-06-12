@@ -150,6 +150,19 @@ class TestCohorteReviewRows:
 
         assert [row["groupe_id"] for row in response.json()["rows"]] == [with_url.id]
 
+    def test_q_filter_on_acteur_id(self, client, staff_user, cohorte):
+        match = _groupe_with_suggestions(
+            cohorte, "ID_1", "A", acteur_id="emmaus_auray_001"
+        )
+        _groupe_with_suggestions(cohorte, "ID_2", "B", acteur_id="ressourcerie_lorient")
+        client.force_login(staff_user)
+
+        response = client.get(
+            reverse("data:cohorte_review_rows", args=[cohorte.id]), {"q": "auray"}
+        )
+
+        assert [row["groupe_id"] for row in response.json()["rows"]] == [match.id]
+
     def test_invalid_cursor_returns_400(self, client, staff_user, cohorte):
         client.force_login(staff_user)
         response = client.get(
