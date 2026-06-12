@@ -500,6 +500,49 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
 
 REVIEW_ROWS_DEFAULT_LIMIT = 100
 REVIEW_ROWS_MAX_LIMIT = 200
+REVIEW_BULK_MAX_GROUPES = 1000
+
+
+def build_pivot_row(groupe: SuggestionGroupe) -> dict:
+    """Pivot row for the review grid, with a fallback for groupes the grid
+    cannot represent (non-source cohortes, inconsistent data)."""
+    try:
+        return SuggestionGroupeTypeSource.from_suggestion_groupe(groupe).to_pivot_row()
+    except ValueError as e:
+        logger.warning(f"Cannot build pivot row for groupe {groupe.id}: {e}")
+        return {
+            "groupe_id": groupe.id,
+            "statut": groupe.statut,
+            "statut_display": groupe.get_statut_display(),
+            "acteur_id": groupe.acteur_id or "",
+            "acteur_nom": "",
+            "has_parent": groupe.parent_revision_acteur_id is not None,
+            "detail_url": groupe.change_url,
+            "cells": {},
+            "error": "type de suggestion non supporté par la grille",
+        }
+
+
+def cohorte_fields_meta(cohorte: SuggestionCohorte) -> list[dict]:
+    """One entry per field having at least one suggestion to validate in the
+    cohorte, ordered like the detail view, with pending counts."""
+    champs_lists = SuggestionUnitaire.objects.filter(
+        suggestion_groupe__suggestion_cohorte=cohorte,
+        suggestion_groupe__statut=SuggestionStatut.AVALIDER,
+        suggestion_modele="Acteur",
+        statut=SuggestionStatut.AVALIDER,
+    ).values_list("champs", flat=True)
+
+    pending: Counter = Counter()
+    for champs in champs_lists:
+        pending.update(champs)
+
+    ordered = [
+        field for group in SuggestionSourceModel.get_ordered_fields() for field in group
+    ]
+    keys = [field for field in ordered if field in pending]
+    keys += sorted(field for field in pending if field not in ordered)
+    return [{"key": key, "pending": pending[key]} for key in keys]
 
 
 class CohorteReviewView(IsStaffMixin, TemplateView):
@@ -552,7 +595,7 @@ class CohorteReviewRowsView(IsStaffMixin, View):
 
         groupes = list(queryset.filter(id__gt=after).order_by("id")[:limit])
 
-        rows = [self._build_row(groupe) for groupe in groupes]
+        rows = [build_pivot_row(groupe) for groupe in groupes]
         next_after = groupes[-1].id if len(groupes) == limit else None
 
         return JsonResponse(
@@ -561,50 +604,106 @@ class CohorteReviewRowsView(IsStaffMixin, View):
                 "meta": {
                     "total": total,
                     "next_after": next_after,
-                    "fields": self._fields_meta(cohorte),
+                    "fields": cohorte_fields_meta(cohorte),
                 },
             }
         )
 
-    def _build_row(self, groupe: SuggestionGroupe) -> dict:
+
+REVIEW_BULK_ACTION_TO_STATUT = {
+    "accept": SuggestionStatut.ATRAITER,
+    "reject": SuggestionStatut.REJETEE,
+    "reset": SuggestionStatut.AVALIDER,
+}
+
+
+class CohorteReviewBulkView(IsStaffMixin, View):
+    """Per-field accept/reject for one or many suggestion groupes.
+
+    POST body (JSON): {groupe_ids: [int], champ: str | null, action:
+    "accept" | "reject" | "reset"}. A null champ targets every field of the
+    selected groupes. Updates the SuggestionUnitaire statuts, derives each
+    groupe statut, and returns the refreshed pivot rows so the grid can
+    update in place.
+    """
+
+    def post(self, request, cohorte_id):
+        cohorte = get_object_or_404(SuggestionCohorte, id=cohorte_id)
+
         try:
-            return SuggestionGroupeTypeSource.from_suggestion_groupe(
-                groupe
-            ).to_pivot_row()
-        except ValueError as e:
-            # Non-source cohortes (or inconsistent data) still get a row so
-            # the reviewer sees them and can open the detail view.
-            logger.warning(f"Cannot build pivot row for groupe {groupe.id}: {e}")
-            return {
-                "groupe_id": groupe.id,
-                "statut": groupe.statut,
-                "statut_display": groupe.get_statut_display(),
-                "acteur_id": groupe.acteur_id or "",
-                "acteur_nom": "",
-                "has_parent": groupe.parent_revision_acteur_id is not None,
-                "detail_url": groupe.change_url,
-                "cells": {},
-                "error": "type de suggestion non supporté par la grille",
-            }
+            payload = json.loads(request.body or "{}")
+        except json.JSONDecodeError:
+            return HttpResponseBadRequest("invalid JSON body")
 
-    def _fields_meta(self, cohorte: SuggestionCohorte) -> list[dict]:
-        """One entry per field having at least one suggestion to validate in
-        the cohorte, ordered like the detail view, with pending counts."""
-        champs_lists = SuggestionUnitaire.objects.filter(
-            suggestion_groupe__suggestion_cohorte=cohorte,
-            suggestion_groupe__statut=SuggestionStatut.AVALIDER,
-            suggestion_modele="Acteur",
-        ).values_list("champs", flat=True)
+        action = payload.get("action")
+        if action not in REVIEW_BULK_ACTION_TO_STATUT:
+            return HttpResponseBadRequest(
+                "action must be one of: accept, reject, reset"
+            )
+        groupe_ids = payload.get("groupe_ids")
+        if (
+            not isinstance(groupe_ids, list)
+            or not groupe_ids
+            or not all(isinstance(groupe_id, int) for groupe_id in groupe_ids)
+        ):
+            return HttpResponseBadRequest("groupe_ids must be a list of ids")
+        if len(groupe_ids) > REVIEW_BULK_MAX_GROUPES:
+            return HttpResponseBadRequest(
+                f"groupe_ids is limited to {REVIEW_BULK_MAX_GROUPES} entries"
+            )
+        champ = payload.get("champ") or None
 
-        pending: Counter = Counter()
-        for champs in champs_lists:
-            pending.update(champs)
+        with transaction.atomic():
+            # Scoping to the cohorte prevents acting on another cohorte's
+            # groupes through forged ids.
+            groupes = list(
+                SuggestionGroupe.objects.filter(
+                    suggestion_cohorte=cohorte, id__in=groupe_ids
+                ).select_for_update()
+            )
+            unitaires = SuggestionUnitaire.objects.filter(
+                suggestion_groupe__in=groupes,
+                suggestion_modele="Acteur",
+            )
+            if champ:
+                unitaires = unitaires.filter(champs__contains=[champ])
+            applied = unitaires.update(statut=REVIEW_BULK_ACTION_TO_STATUT[action])
 
-        ordered = [
-            field
-            for group in SuggestionSourceModel.get_ordered_fields()
-            for field in group
+            for groupe in groupes:
+                self._derive_groupe_statut(groupe)
+
+        rows = [
+            build_pivot_row(groupe)
+            for groupe in SuggestionGroupe.objects.filter(
+                id__in=[groupe.id for groupe in groupes]
+            ).prefetch_related("suggestion_unitaires", "acteur", "revision_acteur")
         ]
-        keys = [field for field in ordered if field in pending]
-        keys += sorted(field for field in pending if field not in ordered)
-        return [{"key": key, "pending": pending[key]} for key in keys]
+        return JsonResponse(
+            {
+                "applied": applied,
+                "rows": rows,
+                "meta": {"fields": cohorte_fields_meta(cohorte)},
+            }
+        )
+
+    @staticmethod
+    def _derive_groupe_statut(groupe: SuggestionGroupe) -> None:
+        """A groupe stays « à valider » while any of its source suggestions
+        is undecided; once all are decided it becomes « à traiter » unless
+        everything was rejected."""
+        statuts = set(
+            groupe.suggestion_unitaires.filter(suggestion_modele="Acteur")
+            .values_list("statut", flat=True)
+            .distinct()
+        )
+        if not statuts:
+            return
+        if SuggestionStatut.AVALIDER in statuts:
+            statut = SuggestionStatut.AVALIDER
+        elif statuts == {SuggestionStatut.REJETEE}:
+            statut = SuggestionStatut.REJETEE
+        else:
+            statut = SuggestionStatut.ATRAITER
+        if statut != groupe.statut:
+            groupe.statut = statut
+            groupe.save(update_fields=["statut"])

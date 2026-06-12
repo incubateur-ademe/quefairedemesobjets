@@ -7,6 +7,8 @@ import "./styles/cohorte-review.css"
 import "@shoelace-style/shoelace/dist/components/badge/badge.js"
 import "@shoelace-style/shoelace/dist/components/button/button.js"
 import "@shoelace-style/shoelace/dist/components/checkbox/checkbox.js"
+import "@shoelace-style/shoelace/dist/components/option/option.js"
+import "@shoelace-style/shoelace/dist/components/select/select.js"
 
 import { Application } from "@hotwired/stimulus"
 

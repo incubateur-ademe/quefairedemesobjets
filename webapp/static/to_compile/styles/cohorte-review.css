@@ -149,9 +149,109 @@ tbody tr.selected td {
   font-size: 0.72rem;
 }
 
+.bulkbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  margin: 0 24px 10px;
+  background: var(--sl-color-primary-600);
+  color: #fff;
+  border-radius: 8px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: var(--sl-shadow-large);
+}
+
+.bulkbar[hidden] {
+  display: none;
+}
+
+.bulkbar .count {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.bulkbar sl-select {
+  min-width: 190px;
+}
+
+.bulkbar sl-button[variant="text"]::part(label) {
+  color: #fff;
+  text-decoration: underline;
+}
+
 .sug {
   min-width: 170px;
   max-width: 280px;
+  position: relative;
+}
+
+.sug.accepted .new {
+  color: var(--sl-color-success-700);
+  font-weight: 500;
+}
+
+.sug.rejected .new {
+  color: var(--sl-color-neutral-500);
+  text-decoration: line-through;
+}
+
+.sug::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 12px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.sug.pending::before {
+  background: var(--sl-color-amber-500);
+}
+
+.sug.accepted::before {
+  background: var(--sl-color-success-600);
+}
+
+.sug.rejected::before {
+  background: var(--sl-color-danger-600);
+}
+
+.cell-actions {
+  display: none;
+  gap: 4px;
+  margin-top: 3px;
+}
+
+td:hover .cell-actions {
+  display: inline-flex;
+}
+
+.cell-action {
+  font: inherit;
+  font-size: 0.72rem;
+  border: 1px solid var(--sl-color-neutral-300);
+  background: #fff;
+  border-radius: 3px;
+  padding: 1px 8px;
+  cursor: pointer;
+}
+
+.cell-action.accept:hover {
+  background: var(--sl-color-success-100);
+  border-color: var(--sl-color-success-600);
+}
+
+.cell-action.reject:hover {
+  background: var(--sl-color-danger-100);
+  border-color: var(--sl-color-danger-600);
+}
+
+.cell-action.reset:hover {
+  background: var(--sl-color-neutral-100);
 }
 
 .sug .old {
