@@ -194,6 +194,47 @@ class TestCohorteReviewRows:
         assert "error" in row
 
 
+@pytest.mark.django_db
+class TestCohorteReviewGroupe:
+    """Single-groupe endpoint feeding the focus-mode detail drawer."""
+
+    def test_returns_full_pivot_row(self, client, staff_user, cohorte):
+        groupe = _groupe_with_suggestions(cohorte, "ID_1", "A", url="https://a.fr")
+        client.force_login(staff_user)
+
+        response = client.get(
+            reverse("data:cohorte_review_groupe", args=[cohorte.id, groupe.id])
+        )
+
+        assert response.status_code == 200
+        row = response.json()["row"]
+        assert row["groupe_id"] == groupe.id
+        # every field of the acteur is present, not just one
+        assert set(row["cells"]) == {"identifiant_unique", "nom", "url"}
+
+    def test_groupe_from_another_cohorte_is_404(self, client, staff_user, cohorte):
+        other = SuggestionCohorteFactory(type_action=SuggestionAction.SOURCE_AJOUT)
+        other_groupe = _groupe_with_suggestions(other, "ID_OTHER", "Other")
+        client.force_login(staff_user)
+
+        response = client.get(
+            reverse("data:cohorte_review_groupe", args=[cohorte.id, other_groupe.id])
+        )
+
+        assert response.status_code == 404
+
+    def test_requires_staff(self, client, django_user_model, cohorte):
+        groupe = _groupe_with_suggestions(cohorte, "ID_1", "A")
+        user = django_user_model.objects.create_user(username="u", password="u")
+        client.force_login(user)
+
+        response = client.get(
+            reverse("data:cohorte_review_groupe", args=[cohorte.id, groupe.id])
+        )
+
+        assert response.status_code == 403
+
+
 def _groupe_with_telephone(cohorte, telephone):
     groupe = SuggestionGroupeFactory(suggestion_cohorte=cohorte)
     SuggestionUnitaireFactory(

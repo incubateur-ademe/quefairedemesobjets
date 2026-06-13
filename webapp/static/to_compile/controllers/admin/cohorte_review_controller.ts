@@ -136,10 +136,15 @@ export default class extends Controller<HTMLElement> {
     "announcer",
     "undoToast",
     "undoToastLabel",
+    "drawer",
+    "drawerBody",
+    "drawerAdminLink",
   ]
   static values = {
     rowsUrl: String,
     bulkUrl: String,
+    groupeUrlTemplate: String,
+    adminUrlTemplate: String,
     csrf: String,
   }
 
@@ -164,8 +169,13 @@ export default class extends Controller<HTMLElement> {
   declare readonly announcerTarget: HTMLElement
   declare readonly undoToastTarget: HTMLElement
   declare readonly undoToastLabelTarget: HTMLElement
+  declare readonly drawerTarget: HTMLElement & { show(): void; hide(): void }
+  declare readonly drawerBodyTarget: HTMLElement
+  declare readonly drawerAdminLinkTarget: HTMLElement & { href: string }
   declare readonly rowsUrlValue: string
   declare readonly bulkUrlValue: string
+  declare readonly groupeUrlTemplateValue: string
+  declare readonly adminUrlTemplateValue: string
   declare readonly csrfValue: string
 
   private rows: PivotRow[] = []
@@ -218,9 +228,16 @@ export default class extends Controller<HTMLElement> {
   // --- focus mode (review one field across all acteurs, ?focus=<champ>) ---
 
   private onKeydown = (event: KeyboardEvent) => {
-    if (event.key === "Escape" && this.focusField) {
-      this.exitFocus()
-      return
+    if (event.key === "Escape") {
+      // when the drawer is open, Escape closes it (Shoelace handles that);
+      // don't also exit focus mode in the same keystroke
+      if (this.drawerGroupeId !== null) {
+        return
+      }
+      if (this.focusField) {
+        this.exitFocus()
+        return
+      }
     }
     // single-key shortcuts must never fire while typing in a field
     const target = event.target as HTMLElement
@@ -268,7 +285,7 @@ export default class extends Controller<HTMLElement> {
       case "Enter": {
         const row = this.rows[this.activeCardIndex]
         if (row) {
-          window.open(row.detail_url, "_blank", "noopener")
+          this.openGroupeDrawer(row.groupe_id)
         }
         return true
       }
@@ -689,14 +706,120 @@ export default class extends Controller<HTMLElement> {
   }
 
   private maybeOpenFocusCard(event: Event) {
-    // In focus mode the whole card opens the suggestion groupe, except
-    // clicks on its interactive elements (actions, links)
+    // In focus mode the whole card opens the acteur's suggestion groupe in a
+    // drawer, except clicks on its interactive elements (actions, links)
     const target = event.target as HTMLElement
-    const card = target.closest<HTMLElement>(".focus-card[data-detail-url]")
+    const card = target.closest<HTMLElement>(".focus-card[data-groupe-id]")
     if (!card || target.closest("a, button, sl-button, input, select")) {
       return
     }
-    window.open(card.dataset.detailUrl, "_blank", "noopener")
+    this.openGroupeDrawer(Number(card.dataset.groupeId))
+  }
+
+  // --- suggestion-groupe drawer (act on all of an acteur's fields) ---
+
+  openGroupeFromCard(event: Event) {
+    event.preventDefault()
+    const id = (event.currentTarget as HTMLElement).dataset.groupeId
+    if (id) {
+      this.openGroupeDrawer(Number(id))
+    }
+  }
+
+  private drawerGroupeId: number | null = null
+
+  private async openGroupeDrawer(groupeId: number) {
+    this.drawerGroupeId = groupeId
+    this.drawerBodyTarget.innerHTML = `<p class="drawer-loading">Chargement…</p>`
+    this.drawerAdminLinkTarget.href = this.adminUrlTemplateValue.replace(
+      "/0/",
+      `/${groupeId}/`,
+    )
+    this.drawerTarget.show()
+    await this.refreshDrawer()
+  }
+
+  private async refreshDrawer() {
+    if (this.drawerGroupeId === null) {
+      return
+    }
+    const url = this.groupeUrlTemplateValue.replace(
+      /\/0\/$/,
+      `/${this.drawerGroupeId}/`,
+    )
+    try {
+      const response = await fetch(url, {
+        headers: { Accept: "application/json" },
+        credentials: "same-origin",
+      })
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`)
+      }
+      const payload = await response.json()
+      this.renderDrawer(payload.row as PivotRow)
+    } catch (error) {
+      this.drawerBodyTarget.innerHTML = `<p class="drawer-error">Erreur de chargement (${esc(String(error))})</p>`
+    }
+  }
+
+  private renderDrawer(row: PivotRow) {
+    this.drawerTarget.setAttribute("label", row.acteur_nom || row.acteur_id || "Acteur")
+    const fieldRows = Object.entries(row.cells)
+      .map(([field, cell]) => {
+        const statut = cell.statut ?? STATUT_PENDING
+        const stateClass = CELL_STATE_CLASS[statut] ?? "pending"
+        const current =
+          cell.current !== null && cell.current !== cell.suggested
+            ? `<span class="old">${esc(cell.current)}</span>`
+            : ""
+        return `
+          <tr class="drawer-field sug ${stateClass}">
+            <th scope="row">${esc(field)}</th>
+            <td class="drawer-diff">
+              ${current}
+              <span class="new">${esc(cell.suggested ?? "") || "—"}</span>
+            </td>
+            <td class="drawer-actions">
+              ${this.renderCellActions(row.groupe_id, field, statut)}
+            </td>
+          </tr>`
+      })
+      .join("")
+    const hasPending = Object.values(row.cells).some(
+      (cell) => (cell.statut ?? STATUT_PENDING) === STATUT_PENDING,
+    )
+    this.drawerBodyTarget.innerHTML = `
+      <p class="drawer-sub">${esc(row.acteur_id)} · ${esc(row.statut_display)}</p>
+      <table class="drawer-table">
+        <tbody>${fieldRows}</tbody>
+      </table>
+      <div class="drawer-bulk">
+        <sl-button size="small" variant="success"
+          data-action="click->cohorte-review#drawerAcceptAll"
+          ${hasPending ? "" : "disabled"}>✓ Tout accepter</sl-button>
+        <sl-button size="small" variant="danger" outline
+          data-action="click->cohorte-review#drawerRejectAll"
+          ${hasPending ? "" : "disabled"}>✕ Tout rejeter</sl-button>
+      </div>`
+  }
+
+  drawerAcceptAll() {
+    if (this.drawerGroupeId !== null) {
+      this.postBulk([this.drawerGroupeId], "", "accept")
+    }
+  }
+
+  drawerRejectAll() {
+    if (this.drawerGroupeId !== null) {
+      this.postBulk([this.drawerGroupeId], "", "reject")
+    }
+  }
+
+  onDrawerClosed(event: Event) {
+    // sl-after-hide bubbles; only react to the drawer's own event
+    if (event.target === this.drawerTarget) {
+      this.drawerGroupeId = null
+    }
   }
 
   private selectedGroupeIds(): number[] {
@@ -857,6 +980,10 @@ export default class extends Controller<HTMLElement> {
     const byId = new Map(updatedRows.map((row) => [row.groupe_id, row]))
     this.rows = this.rows.map((row) => byId.get(row.groupe_id) ?? row)
     this.table.setOptions((prev) => ({ ...prev, data: this.rows }))
+    // keep the open drawer in sync when its groupe was just mutated
+    if (this.drawerGroupeId !== null && byId.has(this.drawerGroupeId)) {
+      this.renderDrawer(byId.get(this.drawerGroupeId) as PivotRow)
+    }
   }
 
   private mergeFieldsMeta(updated: FieldMeta[]): FieldMeta[] {
@@ -1188,11 +1315,12 @@ export default class extends Controller<HTMLElement> {
         : ""
     return `
       <div class="focus-card ${stateClass} ${isActive ? "active" : ""}"
-        data-detail-url="${esc(row.detail_url)}"
-        title="Ouvrir le groupe de suggestions (nouvel onglet)">
+        data-groupe-id="${row.groupe_id}"
+        title="Voir toutes les suggestions de cet acteur">
         <div class="who">
-          <a href="${esc(row.detail_url)}" target="_blank" rel="noreferrer"
-            class="acteur-nom">${esc(row.acteur_nom) || "(sans nom)"}</a>
+          <button type="button" class="acteur-nom"
+            data-action="click->cohorte-review#openGroupeFromCard"
+            data-groupe-id="${row.groupe_id}">${esc(row.acteur_nom) || "(sans nom)"}</button>
           <span class="acteur-id">${esc(row.acteur_id)}</span>
         </div>
         <div class="diff">

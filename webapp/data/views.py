@@ -778,6 +778,22 @@ class CohorteReviewRowsView(IsStaffMixin, View):
         )
 
 
+class CohorteReviewGroupeView(IsStaffMixin, View):
+    """Single-groupe pivot row, for the focus-mode detail drawer: lets the
+    reviewer see and act on every field of one acteur without leaving the
+    queue. Scoped to the cohorte so the id can't reach another cohorte."""
+
+    def get(self, request, cohorte_id, groupe_id):
+        groupe = get_object_or_404(
+            SuggestionGroupe.objects.prefetch_related(
+                "suggestion_unitaires", "acteur", "revision_acteur"
+            ),
+            id=groupe_id,
+            suggestion_cohorte_id=cohorte_id,
+        )
+        return JsonResponse({"row": build_pivot_row(groupe)})
+
+
 REVIEW_BULK_ACTION_TO_STATUT = {
     "accept": SuggestionStatut.ATRAITER,
     "reject": SuggestionStatut.REJETEE,

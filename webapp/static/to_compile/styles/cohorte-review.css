@@ -144,6 +144,23 @@ tbody tr.selected td {
   text-decoration: none;
 }
 
+/* the focus-card name is a <button> that opens the drawer: make it read as
+   the link it replaced */
+button.acteur-nom {
+  font: inherit;
+  font-weight: 600;
+  color: var(--sl-color-primary-600);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+button.acteur-nom:hover {
+  text-decoration: underline;
+}
+
 .acteur-id,
 .acteur-statut {
   display: block;
@@ -624,6 +641,93 @@ kbd {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+/* suggestion-groupe drawer (focus mode: act on all of an acteur's fields) */
+.groupe-drawer::part(panel) {
+  width: 32rem;
+  max-width: 90vw;
+}
+
+.drawer-sub {
+  color: var(--sl-color-neutral-500);
+  font-size: 0.8rem;
+  margin: 0 0 12px;
+}
+
+.drawer-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.drawer-field th {
+  text-align: left;
+  font-weight: 600;
+  padding: 8px 10px 8px 0;
+  vertical-align: top;
+  white-space: nowrap;
+  color: var(--sl-color-neutral-700);
+}
+
+.drawer-field td {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--sl-color-neutral-100);
+  vertical-align: top;
+}
+
+.drawer-field th {
+  border-bottom: 1px solid var(--sl-color-neutral-100);
+}
+
+.drawer-diff .old {
+  color: var(--sl-color-neutral-500);
+  text-decoration: line-through;
+  display: block;
+}
+
+.drawer-diff .new {
+  overflow-wrap: anywhere;
+}
+
+.drawer-diff .new::before {
+  content: "→ ";
+  color: var(--sl-color-neutral-400);
+}
+
+.drawer-field.accepted .drawer-diff .new {
+  color: var(--sl-color-success-700);
+  font-weight: 500;
+}
+
+.drawer-field.rejected .drawer-diff .new {
+  color: var(--sl-color-neutral-500);
+  text-decoration: line-through;
+}
+
+.drawer-actions {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.drawer-field .cell-actions {
+  display: inline-flex;
+}
+
+.drawer-bulk {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.drawer-loading,
+.drawer-error {
+  color: var(--sl-color-neutral-500);
+  font-size: 0.85rem;
+}
+
+.drawer-error {
+  color: var(--sl-color-danger-700);
 }
 
 /* undo toast: appears after a bulk action with « Annuler » */

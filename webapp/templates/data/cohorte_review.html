@@ -29,6 +29,8 @@
       data-controller="cohorte-review"
       data-cohorte-review-rows-url-value="{% url 'data:cohorte_review_rows' suggestion_cohorte.id %}"
       data-cohorte-review-bulk-url-value="{% url 'data:cohorte_review_bulk' suggestion_cohorte.id %}"
+      data-cohorte-review-groupe-url-template-value="{% url 'data:cohorte_review_groupe' suggestion_cohorte.id 0 %}"
+      data-cohorte-review-admin-url-template-value="{% url 'admin:data_suggestiongroupe_change' 0 %}"
       data-cohorte-review-csrf-value="{{ csrf_token }}"
     >
       <div class="toolbar">
@@ -183,6 +185,25 @@
           ✕
         </button>
       </div>
+
+      <sl-drawer
+        label="Suggestions de l'acteur"
+        placement="end"
+        class="groupe-drawer"
+        data-cohorte-review-target="drawer"
+        data-action="sl-after-hide->cohorte-review#onDrawerClosed"
+      >
+        <div data-cohorte-review-target="drawerBody"></div>
+        <sl-button
+          slot="footer"
+          variant="text"
+          data-cohorte-review-target="drawerAdminLink"
+          href="#"
+          target="_blank"
+          rel="noreferrer"
+          >Ouvrir dans l'admin Django ↗</sl-button
+        >
+      </sl-drawer>
     </main>
   </body>
 </html>
