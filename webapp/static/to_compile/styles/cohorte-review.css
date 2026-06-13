@@ -626,6 +626,56 @@ kbd {
   border: 0;
 }
 
+/* undo toast: appears after a bulk action with « Annuler » */
+.undo-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--sl-color-neutral-900);
+  color: #fff;
+  border-radius: 8px;
+  padding: 10px 14px 10px 18px;
+  font-size: 0.85rem;
+  box-shadow: var(--sl-shadow-large);
+}
+
+.undo-toast[hidden] {
+  display: none;
+}
+
+.undo-toast-action {
+  font: inherit;
+  font-weight: 600;
+  color: var(--sl-color-primary-300);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 2px 4px;
+}
+
+.undo-toast-action:hover {
+  color: #fff;
+}
+
+.undo-toast-dismiss {
+  font: inherit;
+  color: var(--sl-color-neutral-400);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+
+.undo-toast-dismiss:hover {
+  color: #fff;
+}
+
 .focus-card[data-detail-url]:hover {
   border-color: var(--sl-color-primary-400);
   background: var(--sl-color-primary-50);

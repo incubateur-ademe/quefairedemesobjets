@@ -503,6 +503,9 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
 REVIEW_ROWS_DEFAULT_LIMIT = 100
 REVIEW_ROWS_MAX_LIMIT = 200
 REVIEW_BULK_MAX_GROUPES = 1000
+# An undo token is one entry per changed unitaire; a filter-scope action can
+# change many, so the cap is generous but bounded to keep payloads sane.
+REVIEW_UNDO_MAX_UNITAIRES = 50000
 
 
 def build_pivot_row(groupe: SuggestionGroupe) -> dict:
@@ -680,12 +683,16 @@ def filter_review_groupes(
     champ: str | None,
     q: str,
     valeur_filtre: dict | None = None,
+    exclude_ids: list[int] | None = None,
 ):
     """Shared filtering for the review grid: used by the rows endpoint and
     by the bulk endpoint's « all filtered rows » scope, so both always agree
-    on what « filtered » means. Raises ValueError on an invalid
+    on what « filtered » means. `exclude_ids` removes hand-picked groupes
+    from the set (« tout sauf ces N-là »). Raises ValueError on an invalid
     valeur_filtre payload."""
     queryset = SuggestionGroupe.objects.filter(suggestion_cohorte=cohorte)
+    if exclude_ids:
+        queryset = queryset.exclude(id__in=exclude_ids)
     if statut != "all":
         queryset = queryset.filter(statut=statut)
     if champ:
@@ -783,14 +790,20 @@ class CohorteReviewBulkView(IsStaffMixin, View):
     filtered groupe.
 
     POST body (JSON): {champ: str | null, action: "accept" | "reject" |
-    "reset"} plus exactly one scope:
+    "reset" | "undo"} plus exactly one scope:
     - groupe_ids: [int] — explicit selection; the refreshed pivot rows are
       returned so the grid updates in place;
-    - filter: {statut, champ, q} — every groupe matching the same filters
-      as the rows endpoint (Gmail-style « select all »); no rows are
-      returned (the set may be huge), the client reloads.
+    - filter: {statut, champ, q, exclude_ids} — every groupe matching the
+      same filters as the rows endpoint (Gmail-style « select all », minus
+      hand-picked exclusions); no rows are returned (the set may be huge),
+      the client reloads.
 
     A null champ targets every field of the targeted groupes.
+
+    Every accept/reject/reset response carries an `undo` token — the list of
+    {id, statut} of every changed SuggestionUnitaire *before* the action — so
+    the client can offer « Annuler ». An `undo` action takes that token (in
+    `undo`) and restores each unitaire to its captured statut.
     """
 
     def post(self, request, cohorte_id):
@@ -802,9 +815,11 @@ class CohorteReviewBulkView(IsStaffMixin, View):
             return HttpResponseBadRequest("invalid JSON body")
 
         action = payload.get("action")
+        if action == "undo":
+            return self._handle_undo(cohorte, payload)
         if action not in REVIEW_BULK_ACTION_TO_STATUT:
             return HttpResponseBadRequest(
-                "action must be one of: accept, reject, reset"
+                "action must be one of: accept, reject, reset, undo"
             )
         champ = payload.get("champ") or None
 
@@ -832,6 +847,12 @@ class CohorteReviewBulkView(IsStaffMixin, View):
         else:
             if not isinstance(filter_payload, dict):
                 return HttpResponseBadRequest("filter must be an object")
+            exclude_ids = filter_payload.get("exclude_ids")
+            if exclude_ids is not None and (
+                not isinstance(exclude_ids, list)
+                or not all(isinstance(i, int) for i in exclude_ids)
+            ):
+                return HttpResponseBadRequest("exclude_ids must be a list of ids")
             try:
                 targeted = filter_review_groupes(
                     cohorte,
@@ -839,10 +860,12 @@ class CohorteReviewBulkView(IsStaffMixin, View):
                     champ=filter_payload.get("champ") or None,
                     q=filter_payload.get("q") or "",
                     valeur_filtre=filter_payload.get("valeur_filtre"),
+                    exclude_ids=exclude_ids,
                 )
             except ValueError as e:
                 return HttpResponseBadRequest(str(e))
 
+        new_statut = REVIEW_BULK_ACTION_TO_STATUT[action]
         with transaction.atomic():
             targeted_ids = list(targeted.values_list("id", flat=True))
             unitaires = SuggestionUnitaire.objects.filter(
@@ -851,22 +874,84 @@ class CohorteReviewBulkView(IsStaffMixin, View):
             )
             if champ:
                 unitaires = unitaires.filter(champs__contains=[champ])
-            applied = unitaires.update(statut=REVIEW_BULK_ACTION_TO_STATUT[action])
-
+            # capture prior state before mutating, excluding no-op rows so the
+            # undo token only covers genuinely changed unitaires. update()
+            # returns rows *matched*, not changed, so derive `applied` from the
+            # token to report only real changes.
+            undo_token = list(
+                unitaires.exclude(statut=new_statut).values("id", "statut")
+            )
+            unitaires.exclude(statut=new_statut).update(statut=new_statut)
+            applied = len(undo_token)
             self._derive_groupes_statut(targeted_ids)
 
         response: dict = {
             "applied": applied,
+            "undo": undo_token,
             "meta": {"fields": cohorte_fields_meta(cohorte)},
         }
         if groupe_ids is not None:
-            response["rows"] = [
-                build_pivot_row(groupe)
-                for groupe in SuggestionGroupe.objects.filter(
-                    id__in=targeted_ids
-                ).prefetch_related("suggestion_unitaires", "acteur", "revision_acteur")
-            ]
+            response["rows"] = self._rows_for(targeted_ids)
         return JsonResponse(response)
+
+    def _handle_undo(self, cohorte: SuggestionCohorte, payload: dict) -> JsonResponse:
+        undo_token = payload.get("undo")
+        if not isinstance(undo_token, list) or not undo_token:
+            return HttpResponseBadRequest("undo token must be a non-empty list")
+        if len(undo_token) > REVIEW_UNDO_MAX_UNITAIRES:
+            return HttpResponseBadRequest(
+                f"undo token is limited to {REVIEW_UNDO_MAX_UNITAIRES} entries"
+            )
+
+        by_statut: dict[str, list[int]] = {}
+        for entry in undo_token:
+            if (
+                not isinstance(entry, dict)
+                or not isinstance(entry.get("id"), int)
+                or entry.get("statut") not in SuggestionStatut.values
+            ):
+                return HttpResponseBadRequest("invalid undo token entry")
+            by_statut.setdefault(entry["statut"], []).append(entry["id"])
+
+        with transaction.atomic():
+            # scope to the cohorte so a forged token can't touch other data
+            cohorte_unitaire_ids = set(
+                SuggestionUnitaire.objects.filter(
+                    suggestion_groupe__suggestion_cohorte=cohorte
+                ).values_list("id", flat=True)
+            )
+            restored = 0
+            touched_groupe_ids: set[int] = set()
+            for statut, ids in by_statut.items():
+                scoped = [i for i in ids if i in cohorte_unitaire_ids]
+                if not scoped:
+                    continue
+                restored += SuggestionUnitaire.objects.filter(id__in=scoped).update(
+                    statut=statut
+                )
+                touched_groupe_ids.update(
+                    SuggestionUnitaire.objects.filter(id__in=scoped).values_list(
+                        "suggestion_groupe_id", flat=True
+                    )
+                )
+            self._derive_groupes_statut(list(touched_groupe_ids))
+
+        return JsonResponse(
+            {
+                "applied": restored,
+                "rows": self._rows_for(list(touched_groupe_ids)),
+                "meta": {"fields": cohorte_fields_meta(cohorte)},
+            }
+        )
+
+    @staticmethod
+    def _rows_for(groupe_ids: list[int]) -> list[dict]:
+        return [
+            build_pivot_row(groupe)
+            for groupe in SuggestionGroupe.objects.filter(
+                id__in=groupe_ids
+            ).prefetch_related("suggestion_unitaires", "acteur", "revision_acteur")
+        ]
 
     @staticmethod
     def _derive_groupes_statut(groupe_ids: list[int]) -> None:

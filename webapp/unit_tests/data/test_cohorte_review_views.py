@@ -589,6 +589,120 @@ class TestCohorteReviewBulk:
                 SuggestionStatut.AVALIDER
             }
 
+    def test_filter_scope_with_exclude_ids(self, client, staff_user, cohorte):
+        keep = _groupe_with_suggestions(cohorte, "ID_KEEP", "Keep")
+        reject_a = _groupe_with_suggestions(cohorte, "ID_A", "A")
+        reject_b = _groupe_with_suggestions(cohorte, "ID_B", "B")
+        client.force_login(staff_user)
+
+        # « rejeter tous les filtrés sauf keep »
+        response = _post_bulk(
+            client,
+            cohorte,
+            {"filter": {"exclude_ids": [keep.id]}, "action": "reject"},
+        )
+
+        assert response.status_code == 200
+        keep.refresh_from_db()
+        assert keep.statut == SuggestionStatut.AVALIDER
+        for rejected in [reject_a, reject_b]:
+            rejected.refresh_from_db()
+            assert rejected.statut == SuggestionStatut.REJETEE
+
+    def test_invalid_exclude_ids_returns_400(self, client, staff_user, cohorte):
+        client.force_login(staff_user)
+        response = _post_bulk(
+            client,
+            cohorte,
+            {"filter": {"exclude_ids": ["nope"]}, "action": "reject"},
+        )
+        assert response.status_code == 400
+
+
+@pytest.mark.django_db
+class TestCohorteReviewUndo:
+    def test_undo_restores_prior_per_unitaire_statut(self, client, staff_user, cohorte):
+        groupe = _groupe_with_suggestions(cohorte, "ID_1", "A", url="https://a.fr")
+        # nom starts accepted, url starts pending — different prior statuts
+        groupe.suggestion_unitaires.filter(champs=["nom"]).update(
+            statut=SuggestionStatut.ATRAITER
+        )
+        client.force_login(staff_user)
+
+        # reject the whole groupe; capture the undo token
+        rejected = _post_bulk(
+            client, cohorte, {"groupe_ids": [groupe.id], "action": "reject"}
+        ).json()
+        undo_token = rejected["undo"]
+        assert {entry["statut"] for entry in undo_token} == {
+            SuggestionStatut.ATRAITER,
+            SuggestionStatut.AVALIDER,
+        }
+        statuts = _unitaire_statuts(groupe)
+        assert statuts["nom"] == SuggestionStatut.REJETEE
+        assert statuts["url"] == SuggestionStatut.REJETEE
+
+        # undo restores each unitaire to its individual prior statut
+        # (3 changed: identifiant_unique, nom, url)
+        undone = _post_bulk(
+            client, cohorte, {"action": "undo", "undo": undo_token}
+        ).json()
+        assert undone["applied"] == 3
+        statuts = _unitaire_statuts(groupe)
+        assert statuts["nom"] == SuggestionStatut.ATRAITER
+        assert statuts["url"] == SuggestionStatut.AVALIDER
+
+    def test_undo_token_excludes_noop_rows(self, client, staff_user, cohorte):
+        groupe = _groupe_with_suggestions(cohorte, "ID_1", "A")
+        # nom already rejected: rejecting again is a no-op for it
+        groupe.suggestion_unitaires.filter(champs=["nom"]).update(
+            statut=SuggestionStatut.REJETEE
+        )
+        client.force_login(staff_user)
+
+        rejected = _post_bulk(
+            client, cohorte, {"groupe_ids": [groupe.id], "action": "reject"}
+        ).json()
+
+        # only identifiant_unique changed (nom was already rejected)
+        assert rejected["applied"] == 1
+        assert len(rejected["undo"]) == 1
+
+    def test_undo_is_scoped_to_cohorte(self, client, staff_user, cohorte):
+        other_cohorte = SuggestionCohorteFactory(
+            type_action=SuggestionAction.SOURCE_AJOUT
+        )
+        other_groupe = _groupe_with_suggestions(other_cohorte, "ID_OTHER", "Other")
+        other_unitaire = other_groupe.suggestion_unitaires.first()
+        client.force_login(staff_user)
+
+        # a forged token referencing another cohorte's unitaire must not apply
+        response = _post_bulk(
+            client,
+            cohorte,
+            {
+                "action": "undo",
+                "undo": [{"id": other_unitaire.id, "statut": SuggestionStatut.REJETEE}],
+            },
+        )
+
+        assert response.json()["applied"] == 0
+        other_unitaire.refresh_from_db()
+        assert other_unitaire.statut == SuggestionStatut.AVALIDER
+
+    @pytest.mark.parametrize(
+        "body",
+        [
+            {"action": "undo", "undo": []},
+            {"action": "undo", "undo": "nope"},
+            {"action": "undo", "undo": [{"id": 1, "statut": "BOGUS"}]},
+            {"action": "undo", "undo": [{"id": "x", "statut": "AVALIDER"}]},
+        ],
+    )
+    def test_invalid_undo_returns_400(self, client, staff_user, cohorte, body):
+        client.force_login(staff_user)
+        assert _post_bulk(client, cohorte, body).status_code == 400
+
 
 @pytest.mark.django_db
 class TestSeedReviewDemoCommand:
