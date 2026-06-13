@@ -37,6 +37,11 @@ interface FieldMeta {
   pending: number
 }
 
+interface UndoEntry {
+  id: number
+  statut: string
+}
+
 interface RowsResponse {
   rows: PivotRow[]
   meta: {
@@ -49,6 +54,7 @@ interface RowsResponse {
 const ROW_HEIGHT_ESTIMATE = 52
 const OVERSCAN = 10
 const LOAD_MORE_THRESHOLD = 20
+const UNDO_TOAST_MS = 12000
 
 const STATUT_PENDING = "AVALIDER"
 const STATUT_ACCEPTED = "ATRAITER"
@@ -128,6 +134,8 @@ export default class extends Controller<HTMLElement> {
     "focusCards",
     "selectFiltered",
     "announcer",
+    "undoToast",
+    "undoToastLabel",
   ]
   static values = {
     rowsUrl: String,
@@ -154,6 +162,8 @@ export default class extends Controller<HTMLElement> {
   declare readonly selectFilteredTarget: HTMLElement
   declare readonly hasSelectFilteredTarget: boolean
   declare readonly announcerTarget: HTMLElement
+  declare readonly undoToastTarget: HTMLElement
+  declare readonly undoToastLabelTarget: HTMLElement
   declare readonly rowsUrlValue: string
   declare readonly bulkUrlValue: string
   declare readonly csrfValue: string
@@ -176,6 +186,9 @@ export default class extends Controller<HTMLElement> {
   private valueFilter: ValueFilter | null = null
   private builderGroups: ValueGroup[] = [blankValueGroup()]
   private builderCombinator: "et" | "ou" = "ou"
+  // undo token of the last bulk action, surfaced via the « Annuler » toast
+  private lastUndoToken: UndoEntry[] | null = null
+  private undoToastTimer: number | undefined
   private table!: Table<PivotRow>
   private tableState!: TableState
   private virtualizer!: Virtualizer<HTMLDivElement, HTMLTableRowElement>
@@ -597,12 +610,17 @@ export default class extends Controller<HTMLElement> {
   private bulkAction(action: string) {
     const champ = this.bulkFieldTarget.value
     if (this.selectionScope === "filter") {
-      // The filter scope acts beyond the loaded rows: never without an
-      // explicit confirmation carrying the real count.
+      // Filter scope acts beyond the loaded rows. Checked rows in this scope
+      // mean « tout sauf ceux-là », so they become exclusions.
+      const excludeIds = this.selectedGroupeIds()
+      const netCount = this.total - excludeIds.length
       const target = champ ? `le champ « ${champ} »` : "tous les champs"
       const verb = action === "accept" ? "Accepter" : "Rejeter"
+      const except = excludeIds.length
+        ? ` (sauf ${excludeIds.length} exclu${excludeIds.length > 1 ? "s" : ""})`
+        : ""
       const confirmed = window.confirm(
-        `${verb} ${target} pour les ${this.total} acteurs filtrés ?\n` +
+        `${verb} ${target} pour les ${netCount} acteurs filtrés${except} ?\n` +
           `Cette action s'applique à tous les acteurs correspondant aux ` +
           `filtres, au-delà des lignes chargées.`,
       )
@@ -616,6 +634,7 @@ export default class extends Controller<HTMLElement> {
             champ: this.focusField,
             q: this.q || null,
             valeur_filtre: this.focusField ? this.valueFilter : null,
+            exclude_ids: excludeIds.length ? excludeIds : undefined,
           },
           champ: champ || null,
           action,
@@ -751,7 +770,14 @@ export default class extends Controller<HTMLElement> {
       if (payload.rows) {
         this.mergeRows(payload.rows as PivotRow[])
       }
-      this.announce(this.describeBulkResult(payload.applied, body))
+      const isUndo = (body as { action?: string }).action === "undo"
+      const message = isUndo
+        ? "Action annulée"
+        : this.describeBulkResult(payload.applied, body)
+      this.announce(message)
+      if (!isUndo) {
+        this.maybeShowUndoToast(body, payload, message)
+      }
       if (reload) {
         // Filter-scope mutations touch rows beyond the loaded window:
         // reload from the first batch instead of merging.
@@ -786,6 +812,47 @@ export default class extends Controller<HTMLElement> {
     this.announcerTarget.textContent = message
   }
 
+  // --- undo toast ---
+
+  private maybeShowUndoToast(
+    body: object,
+    payload: { applied: number; undo?: UndoEntry[] },
+    message: string,
+  ) {
+    const action = (body as { action?: string }).action
+    const undo = payload.undo
+    // the per-cell ↺ already covers single decisions; only offer undo where
+    // there is no other easy way back (bulk, or any reject)
+    const isBulk = (body as { filter?: unknown }).filter !== undefined
+    const worthUndo = action === "reject" || isBulk || (payload.applied ?? 0) > 1
+    if (!action || !undo || !undo.length || !worthUndo) {
+      return
+    }
+    this.lastUndoToken = undo
+    this.undoToastLabelTarget.textContent = message
+    this.undoToastTarget.hidden = false
+    window.clearTimeout(this.undoToastTimer)
+    this.undoToastTimer = window.setTimeout(
+      () => this.dismissUndoToast(),
+      UNDO_TOAST_MS,
+    )
+  }
+
+  dismissUndoToast() {
+    window.clearTimeout(this.undoToastTimer)
+    this.undoToastTarget.hidden = true
+    this.lastUndoToken = null
+  }
+
+  undoLastBulk() {
+    if (!this.lastUndoToken) {
+      return
+    }
+    const token = this.lastUndoToken
+    this.dismissUndoToast()
+    this.sendBulk({ action: "undo", undo: token }, { reload: false })
+  }
+
   private mergeRows(updatedRows: PivotRow[]) {
     const byId = new Map(updatedRows.map((row) => [row.groupe_id, row]))
     this.rows = this.rows.map((row) => byId.get(row.groupe_id) ?? row)
@@ -806,15 +873,20 @@ export default class extends Controller<HTMLElement> {
   // --- tanstack table (headless state: column visibility, row selection) ---
 
   private initTable() {
+    // We do our own cursor pagination, so the table must not paginate the
+    // data itself. A complete initial state (incl. pagination) is required:
+    // row-selection internals read state.pagination.pageIndex.
     this.tableState = {
       columnVisibility: {},
       rowSelection: {},
+      pagination: { pageIndex: 0, pageSize: Number.MAX_SAFE_INTEGER },
     } as TableState
 
     this.table = createTable<PivotRow>({
       data: [],
       columns: [],
       state: this.tableState,
+      manualPagination: true,
       onStateChange: (updater: Updater<TableState>) => {
         this.tableState =
           updater instanceof Function ? updater(this.tableState) : updater
@@ -1211,7 +1283,16 @@ export default class extends Controller<HTMLElement> {
       return
     }
     const element = this.bodyTarget.querySelector(selector) as HTMLElement | null
-    element?.focus()
+    if (!element) {
+      return
+    }
+    // A just-rendered sl-checkbox may not have upgraded its shadow root yet:
+    // calling focus() synchronously can throw inside the component. Guard it.
+    try {
+      element.focus()
+    } catch {
+      // ignore: focus restoration is best-effort
+    }
   }
 
   private spacerRow(height: number, columnCount: number): string {
@@ -1340,9 +1421,14 @@ export default class extends Controller<HTMLElement> {
     this.pagerInfoTarget.textContent = `${this.rows.length} acteurs chargés sur ${this.total}`
     this.loadMoreTarget.toggleAttribute("hidden", this.nextAfter === null)
     this.bulkBarTarget.toggleAttribute("hidden", selectedCount === 0 && !isFilterScope)
-    this.bulkCountTarget.textContent = isFilterScope
-      ? `${this.total} (tous les acteurs filtrés)`
-      : String(selectedCount)
+    if (isFilterScope) {
+      const net = this.total - selectedCount
+      this.bulkCountTarget.textContent = selectedCount
+        ? `${net} acteurs filtrés (sauf ${selectedCount} cochés)`
+        : `${this.total} (tous les acteurs filtrés)`
+    } else {
+      this.bulkCountTarget.textContent = String(selectedCount)
+    }
     if (this.hasSelectFilteredTarget) {
       this.selectFilteredTarget.textContent = `Sélectionner les ${this.total} acteurs filtrés`
       this.selectFilteredTarget.toggleAttribute("hidden", isFilterScope)
