@@ -179,6 +179,38 @@ test.describe("🎯 Revue de cohorte — mode focus", () => {
     await expect(page.locator(".focus-card")).toHaveCount(4)
   })
 
+  test("ouvre le tiroir d'un acteur et agit sur tous ses champs", async ({ page }) => {
+    await openReview(page, "?focus=telephone")
+    await expect(page.locator(".focus-card").first()).toBeVisible({
+      timeout: TIMEOUT.DEFAULT,
+    })
+
+    // open the drawer for the active card (Enter)
+    await page.locator(".focus-cards").focus()
+    await page.keyboard.press("Enter")
+
+    const drawer = page.locator(".groupe-drawer")
+    await expect(drawer).toHaveAttribute("open", "", { timeout: TIMEOUT.SHORT })
+    // the drawer shows every field of the acteur, not just telephone
+    // (seed creates nom + telephone per groupe)
+    await expect(page.locator(".drawer-field")).toHaveCount(2)
+
+    // act on a field inside the drawer; it updates in place
+    await page
+      .locator('.drawer-field:has(th:text-is("nom")) .cell-action.accept')
+      .click()
+    await expect(page.locator('.drawer-field:has(th:text-is("nom"))')).toHaveClass(
+      /accepted/,
+      { timeout: TIMEOUT.SHORT },
+    )
+
+    // Escape closes the drawer but stays in focus mode (two-step)
+    await page.keyboard.press("Escape")
+    await expect(drawer).not.toHaveAttribute("open", "")
+    await expect(page).toHaveURL(/\?focus=telephone/)
+    await expect(page.locator(".focus-layout")).toBeVisible()
+  })
+
   test("Échap quitte le mode focus", async ({ page }) => {
     await openReview(page, "?focus=telephone")
     await expect(page.locator(".focus-layout")).toBeVisible({

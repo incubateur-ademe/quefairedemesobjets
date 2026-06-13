@@ -2,6 +2,7 @@ from django.urls import path
 
 from data.views import (
     CohorteReviewBulkView,
+    CohorteReviewGroupeView,
     CohorteReviewRowsView,
     CohorteReviewView,
     SuggestionGroupeStatusView,
@@ -35,5 +36,10 @@ urlpatterns = [
         "cohorte/<int:cohorte_id>/review/bulk/",
         CohorteReviewBulkView.as_view(),
         name="cohorte_review_bulk",
+    ),
+    path(
+        "cohorte/<int:cohorte_id>/review/groupe/<int:groupe_id>/",
+        CohorteReviewGroupeView.as_view(),
+        name="cohorte_review_groupe",
     ),
 ]
