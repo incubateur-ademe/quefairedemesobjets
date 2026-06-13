@@ -987,7 +987,13 @@ export default class extends Controller<HTMLElement> {
       const element = this.focusHeaderTarget.querySelector(
         this.pendingHeaderFocus,
       ) as HTMLElement | null
-      element?.focus()
+      // a fresh sl-button may not have upgraded its shadow root yet:
+      // focus() can throw inside the component (best-effort restoration)
+      try {
+        element?.focus()
+      } catch {
+        // ignore
+      }
       this.pendingHeaderFocus = null
     }
   }
