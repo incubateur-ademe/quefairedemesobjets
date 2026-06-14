@@ -74,7 +74,6 @@ const VALUE_LOOKUPS: Array<[string, string]> = [
   ["contains", "contient"],
   ["not_contains", "ne contient pas"],
   ["exact", "est exactement"],
-  ["regex", "correspond à la regex"],
   ["empty", "est vide"],
   ["not_empty", "n'est pas vide"],
 ]
@@ -112,6 +111,23 @@ function esc(value: string | null | undefined): string {
   // innerHTML escapes & < > but not quotes: needed because escaped values
   // are also interpolated into HTML attributes
   return div.innerHTML.replace(/"/g, "&quot;").replace(/'/g, "&#39;")
+}
+
+// esc() neutralises HTML but not a `javascript:` URI in an href. detail_url
+// is server-built today, but validate the protocol defensively.
+function safeHref(url: string | null | undefined): string {
+  if (!url) {
+    return "#"
+  }
+  try {
+    const parsed = new URL(url, window.location.origin)
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      return "#"
+    }
+    return esc(url)
+  } catch {
+    return "#"
+  }
 }
 
 export default class extends Controller<HTMLElement> {
@@ -210,8 +226,8 @@ export default class extends Controller<HTMLElement> {
     // Cell action buttons and checkboxes are re-rendered on every scroll
     // (grid) or refresh (focus cards): delegated listeners survive instead
     // of re-binding, and avoid racing the custom-element upgrade.
-    this.element.addEventListener("click", (event) => this.onCellAction(event))
-    this.element.addEventListener("sl-change", (event) => this.onCheckboxChange(event))
+    this.element.addEventListener("click", this.onCellAction)
+    this.element.addEventListener("sl-change", this.onCheckboxChange)
     document.addEventListener("keydown", this.onKeydown)
     window.addEventListener("popstate", this.onPopstate)
     this.restoreStateFromUrl()
@@ -221,8 +237,12 @@ export default class extends Controller<HTMLElement> {
 
   disconnect() {
     this.cleanupVirtualizer()
+    this.element.removeEventListener("click", this.onCellAction)
+    this.element.removeEventListener("sl-change", this.onCheckboxChange)
     document.removeEventListener("keydown", this.onKeydown)
     window.removeEventListener("popstate", this.onPopstate)
+    window.clearTimeout(this.searchDebounce)
+    window.clearTimeout(this.undoToastTimer)
   }
 
   // --- focus mode (review one field across all acteurs, ?focus=<champ>) ---
@@ -663,7 +683,8 @@ export default class extends Controller<HTMLElement> {
     }
   }
 
-  private onCellAction(event: Event) {
+  // arrow-function properties so add/removeEventListener share one identity
+  private onCellAction = (event: Event) => {
     const button = (event.target as HTMLElement).closest<HTMLElement>(
       "[data-cell-action]",
     )
@@ -679,7 +700,7 @@ export default class extends Controller<HTMLElement> {
     )
   }
 
-  private onCheckboxChange(event: Event) {
+  private onCheckboxChange = (event: Event) => {
     const target = event.target as HTMLElement & { checked: boolean }
     if (target.hasAttribute("data-select-all")) {
       this.table.toggleAllRowsSelected(target.checked)
@@ -1398,18 +1419,20 @@ export default class extends Controller<HTMLElement> {
     if (!active || !this.bodyTarget.contains(active)) {
       return null
     }
+    // CSS.escape every interpolated value: field keys could in principle
+    // contain selector-special characters
     if (active.dataset.rowSelect) {
-      return `[data-row-select="${active.dataset.rowSelect}"]`
+      return `[data-row-select="${CSS.escape(active.dataset.rowSelect)}"]`
     }
     if (active.dataset.cellAction) {
       return (
-        `[data-cell-action="${active.dataset.cellAction}"]` +
-        `[data-groupe-id="${active.dataset.groupeId}"]` +
-        `[data-field="${active.dataset.field}"]`
+        `[data-cell-action="${CSS.escape(active.dataset.cellAction)}"]` +
+        `[data-groupe-id="${CSS.escape(active.dataset.groupeId ?? "")}"]` +
+        `[data-field="${CSS.escape(active.dataset.field ?? "")}"]`
       )
     }
     const row = active.closest("[data-groupe-id]") as HTMLElement | null
-    return row ? `[data-groupe-id="${row.dataset.groupeId}"] a` : null
+    return row ? `[data-groupe-id="${CSS.escape(row.dataset.groupeId ?? "")}"] a` : null
   }
 
   private restoreBodyFocus(selector: string | null) {
@@ -1458,7 +1481,7 @@ export default class extends Controller<HTMLElement> {
             aria-label="Sélectionner ${esc(row.acteur_nom) || row.groupe_id}"></sl-checkbox>
         </td>
         <td class="col-acteur">
-          <a href="${esc(row.detail_url)}" target="_blank" rel="noreferrer"
+          <a href="${safeHref(row.detail_url)}" target="_blank" rel="noreferrer"
             class="acteur-nom">${esc(row.acteur_nom) || "(sans nom)"}</a>
           <span class="acteur-id">${esc(row.acteur_id)}</span>
           <span class="acteur-statut">${esc(row.statut_display)}</span>

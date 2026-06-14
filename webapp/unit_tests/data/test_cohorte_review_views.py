@@ -369,6 +369,8 @@ class TestCohorteReviewValueFilter:
         "valeur_filtre",
         [
             {"conditions": [{"lookup": "nope", "value": "07"}]},
+            # regex is intentionally not allowed (ReDoS via Postgres)
+            {"conditions": [{"lookup": "regex", "value": ".*"}]},
             {"conditions": [{"lookup": "startswith", "value": ""}]},
             {"conditions": []},
             {"combinator": "xor", "conditions": [{"lookup": "empty"}]},
@@ -731,12 +733,33 @@ class TestCohorteReviewUndo:
         other_unitaire.refresh_from_db()
         assert other_unitaire.statut == SuggestionStatut.AVALIDER
 
+    def test_undo_rejects_pipeline_owned_statuts(self, client, staff_user, cohorte):
+        """A forged undo token must not push a unitaire into a pipeline state
+        (ENCOURS/ERREUR/SUCCES) the review UI never produces."""
+        groupe = _groupe_with_suggestions(cohorte, "ID_1", "A")
+        unitaire = groupe.suggestion_unitaires.first()
+        client.force_login(staff_user)
+
+        response = _post_bulk(
+            client,
+            cohorte,
+            {
+                "action": "undo",
+                "undo": [{"id": unitaire.id, "statut": SuggestionStatut.SUCCES}],
+            },
+        )
+
+        assert response.status_code == 400
+        unitaire.refresh_from_db()
+        assert unitaire.statut == SuggestionStatut.AVALIDER
+
     @pytest.mark.parametrize(
         "body",
         [
             {"action": "undo", "undo": []},
             {"action": "undo", "undo": "nope"},
             {"action": "undo", "undo": [{"id": 1, "statut": "BOGUS"}]},
+            {"action": "undo", "undo": [{"id": 1, "statut": "ENCOURS"}]},
             {"action": "undo", "undo": [{"id": "x", "statut": "AVALIDER"}]},
         ],
     )
