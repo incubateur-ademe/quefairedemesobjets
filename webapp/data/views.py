@@ -933,7 +933,7 @@ class CohorteReviewBulkView(IsStaffMixin, View):
             except ReviewValidationError as e:
                 return HttpResponseBadRequest(e.user_message)
 
-            new_statut = REVIEW_BULK_ACTION_TO_STATUT[action]
+        new_statut = REVIEW_BULK_ACTION_TO_STATUT[action]
         with transaction.atomic():
             targeted_ids = list(targeted.values_list("id", flat=True))
             unitaires = SuggestionUnitaire.objects.filter(
