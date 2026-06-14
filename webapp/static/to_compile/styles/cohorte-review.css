@@ -1,0 +1,880 @@
+/* Cohorte review screen — standalone (no DSFR, no Tailwind prefix). */
+:root {
+  --sl-color-primary-50: #eef2ff;
+  --sl-color-primary-100: #e0e7ff;
+  --sl-color-primary-200: #c7d2fe;
+  --sl-color-primary-300: #a5b4fc;
+  --sl-color-primary-400: #818cf8;
+  --sl-color-primary-500: #6366f1;
+  --sl-color-primary-600: #4f46e5;
+  --sl-color-primary-700: #4338ca;
+  --sl-color-primary-800: #3730a3;
+  --sl-color-primary-900: #312e81;
+  --sl-color-primary-950: #1e1b4b;
+  font-size: 15px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--sl-font-sans);
+  color: var(--sl-color-neutral-900);
+  background: var(--sl-color-neutral-50);
+}
+
+a {
+  color: var(--sl-color-primary-600);
+}
+
+.topbar {
+  background: #fff;
+  border-bottom: 1px solid var(--sl-color-neutral-200);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.topbar .brand {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--sl-color-primary-700);
+}
+
+.topbar .cohorte-label {
+  font-size: 0.85rem;
+  color: var(--sl-color-neutral-600);
+}
+
+.topbar .back-link {
+  margin-left: auto;
+  font-size: 0.85rem;
+}
+
+.toolbar {
+  padding: 10px 24px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.field-toggles {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.field-toggles .label {
+  font-size: 0.8rem;
+  color: var(--sl-color-neutral-600);
+}
+
+.toolbar .search {
+  width: 270px;
+}
+
+.toolbar .statut-filter {
+  min-width: 170px;
+}
+
+.toolbar .status {
+  margin-left: auto;
+  font-size: 0.82rem;
+  color: var(--sl-color-neutral-600);
+}
+
+.table-wrap {
+  margin: 0 24px;
+  background: #fff;
+  border: 1px solid var(--sl-color-neutral-200);
+  border-radius: 8px;
+  overflow: auto;
+  height: calc(100vh - 175px);
+}
+
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  font-size: 0.85rem;
+}
+
+thead th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--sl-color-neutral-50);
+  border-bottom: 2px solid var(--sl-color-neutral-300);
+  padding: 8px 10px;
+  text-align: left;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+tbody td {
+  border-bottom: 1px solid var(--sl-color-neutral-100);
+  padding: 7px 10px;
+  vertical-align: top;
+}
+
+tbody tr:not(.spacer):hover td {
+  background: var(--sl-color-primary-50);
+}
+
+tbody tr.selected td {
+  background: var(--sl-color-primary-100);
+}
+
+.col-select {
+  width: 36px;
+}
+
+.col-acteur {
+  min-width: 210px;
+}
+
+.acteur-nom {
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* the focus-card name is a <button> that opens the drawer: make it read as
+   the link it replaced */
+button.acteur-nom {
+  font: inherit;
+  font-weight: 600;
+  color: var(--sl-color-primary-600);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+button.acteur-nom:hover {
+  text-decoration: underline;
+}
+
+.acteur-id,
+.acteur-statut {
+  display: block;
+  /* neutral-600 (not 500) clears 4.5:1 even on the primary-50 selected/hover
+     row background (neutral-500 measured 4.32) */
+  color: var(--sl-color-neutral-600);
+  font-size: 0.72rem;
+}
+
+.row-error {
+  display: block;
+  color: var(--sl-color-danger-700);
+  font-size: 0.72rem;
+}
+
+.bulkbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  margin: 0 24px 10px;
+  background: var(--sl-color-primary-600);
+  color: #fff;
+  border-radius: 8px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: var(--sl-shadow-large);
+}
+
+.bulkbar[hidden] {
+  display: none;
+}
+
+.bulkbar .count {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.bulkbar sl-select {
+  min-width: 190px;
+}
+
+.bulkbar sl-button[variant="text"]::part(label) {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.sug {
+  min-width: 170px;
+  max-width: 280px;
+  position: relative;
+}
+
+.sug.accepted .new {
+  color: var(--sl-color-success-700);
+  font-weight: 500;
+}
+
+.sug.rejected .new {
+  color: var(--sl-color-neutral-600);
+  text-decoration: line-through;
+}
+
+.sug::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 12px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.sug.pending::before {
+  background: var(--sl-color-amber-500);
+}
+
+.sug.accepted::before {
+  background: var(--sl-color-success-600);
+}
+
+.sug.rejected::before {
+  background: var(--sl-color-danger-600);
+}
+
+/* actions stay visible on pending cells (scan + aim without hovering,
+   keyboard reachable); decided cells reveal the undo on hover/focus */
+.cell-actions {
+  display: none;
+  gap: 4px;
+  margin-top: 3px;
+}
+
+.sug.pending .cell-actions,
+td:hover .cell-actions,
+td:focus-within .cell-actions {
+  display: inline-flex;
+}
+
+.cell-action {
+  font: inherit;
+  font-size: 0.72rem;
+  border: 1px solid var(--sl-color-neutral-300);
+  background: #fff;
+  border-radius: 3px;
+  /* WCAG 2.2 target size (2.5.8): keep the hit area at least 24px tall */
+  min-height: 24px;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+
+.cell-action.accept:hover {
+  background: var(--sl-color-success-100);
+  border-color: var(--sl-color-success-600);
+}
+
+.cell-action.reject:hover {
+  background: var(--sl-color-danger-100);
+  border-color: var(--sl-color-danger-600);
+}
+
+.cell-action.reset:hover {
+  background: var(--sl-color-neutral-100);
+}
+
+.sug .old {
+  color: var(--sl-color-neutral-600);
+  text-decoration: line-through;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sug .new {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.sug .new::before {
+  content: "→ ";
+  color: var(--sl-color-neutral-400);
+}
+
+.empty {
+  color: var(--sl-color-neutral-300);
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 24px;
+  font-size: 0.85rem;
+  color: var(--sl-color-neutral-600);
+}
+
+/* Shoelace's warning badge (white on amber-600 #d97706) is only 3.18:1.
+   Darken to amber-700 so white text clears 4.5:1 (WCAG 1.4.3). */
+sl-badge[variant="warning"]::part(base) {
+  background-color: #b45309;
+}
+
+/* --- focus mode (?focus=<champ>) --- */
+
+.focus-entry {
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.focus-entry sl-badge::part(base) {
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.focus-entry:hover sl-badge::part(base) {
+  transform: scale(1.08);
+}
+
+main.focus-mode .table-wrap,
+main.focus-mode .field-toggles,
+main.focus-mode .bulkbar {
+  display: none;
+}
+
+.focus-layout {
+  display: flex;
+  gap: 0;
+  margin: 0 24px;
+  background: #fff;
+  border: 1px solid var(--sl-color-neutral-200);
+  border-radius: 8px;
+  overflow: hidden;
+  min-height: calc(100vh - 230px);
+}
+
+.focus-layout[hidden] {
+  display: none;
+}
+
+.focus-rail {
+  width: 240px;
+  flex: none;
+  border-right: 1px solid var(--sl-color-neutral-200);
+  padding: 12px 0;
+}
+
+.focus-rail h2 {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--sl-color-neutral-600);
+  margin: 0 16px 8px;
+}
+
+.field-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  font: inherit;
+  font-size: 0.88rem;
+  padding: 8px 16px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  border-left: 3px solid transparent;
+  color: inherit;
+}
+
+.field-item:hover {
+  background: var(--sl-color-neutral-50);
+}
+
+.field-item.active {
+  background: var(--sl-color-primary-50);
+  border-left-color: var(--sl-color-primary-600);
+  font-weight: 600;
+}
+
+.field-item sl-badge {
+  margin-left: auto;
+}
+
+.focus-main {
+  flex: 1;
+  min-width: 0;
+  padding: 16px 20px;
+  overflow-y: auto;
+}
+
+.focus-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.focus-header h1 {
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.focus-header code {
+  background: var(--sl-color-primary-100);
+  color: var(--sl-color-primary-700);
+  border-radius: 4px;
+  padding: 1px 8px;
+}
+
+.focus-header .remaining {
+  font-size: 0.82rem;
+  font-weight: 400;
+  color: var(--sl-color-neutral-600);
+  margin-left: 8px;
+}
+
+.focus-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+}
+
+/* query builder on the suggested value */
+.value-builder {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  background: var(--sl-color-neutral-50);
+  border: 1px solid var(--sl-color-neutral-200);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  font-size: 0.82rem;
+}
+
+.value-builder .vb-label {
+  color: var(--sl-color-neutral-600);
+}
+
+.value-builder code {
+  background: var(--sl-color-primary-100);
+  color: var(--sl-color-primary-700);
+  border-radius: 4px;
+  padding: 0 6px;
+}
+
+.vb-group {
+  border: 1px dashed var(--sl-color-neutral-300);
+  border-radius: 8px;
+  padding: 8px 12px 10px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  background: #fff;
+}
+
+.vb-group legend {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--sl-color-neutral-600);
+  padding: 0 6px;
+}
+
+.vb-group-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--sl-color-neutral-600);
+}
+
+.vb-between-groups {
+  align-self: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--sl-color-primary-700);
+}
+
+.vb-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.vb-line-combinator {
+  width: 28px;
+  flex: none;
+  text-align: right;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--sl-color-neutral-600);
+}
+
+.vb-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.vb-top {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--sl-color-neutral-600);
+}
+
+.vb-top-combinator {
+  font: inherit;
+  font-size: 0.82rem;
+  padding: 5px 8px;
+  border: 1px solid var(--sl-color-neutral-300);
+  border-radius: 4px;
+  background: #fff;
+}
+
+.vb-lookup,
+.vb-combinator,
+.vb-value {
+  font: inherit;
+  font-size: 0.82rem;
+  padding: 5px 8px;
+  border: 1px solid var(--sl-color-neutral-300);
+  border-radius: 4px;
+  background: #fff;
+}
+
+.vb-value {
+  flex: 1;
+  max-width: 320px;
+}
+
+.vb-value:focus,
+.vb-lookup:focus,
+.vb-combinator:focus {
+  outline: 2px solid var(--sl-color-primary-600);
+  outline-offset: 1px;
+}
+
+.vb-remove,
+.vb-add {
+  font: inherit;
+  font-size: 0.78rem;
+  border: 1px solid var(--sl-color-neutral-300);
+  background: #fff;
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+.vb-remove:hover {
+  background: var(--sl-color-danger-100);
+  border-color: var(--sl-color-danger-600);
+}
+
+.vb-add:hover {
+  background: var(--sl-color-primary-50);
+}
+
+.vb-active {
+  color: var(--sl-color-primary-700);
+  font-weight: 600;
+}
+
+.focus-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.focus-card {
+  border: 1px solid var(--sl-color-neutral-200);
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: grid;
+  grid-template-columns: 230px 1fr auto;
+  gap: 4px 14px;
+  align-items: center;
+}
+
+.focus-card[data-detail-url] {
+  cursor: pointer;
+}
+
+.focus-card.active {
+  outline: 2px solid var(--sl-color-primary-600);
+  outline-offset: -1px;
+}
+
+.focus-cards:focus {
+  outline: none;
+}
+
+.kbd-help {
+  margin-top: 14px;
+  font-size: 0.75rem;
+  color: var(--sl-color-neutral-600);
+}
+
+kbd {
+  background: #fff;
+  border: 1px solid var(--sl-color-neutral-300);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  padding: 0 6px;
+  font-family: inherit;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Shoelace renders a real <label> from the `label` attribute (proper a11y,
+   unlike aria-label on the host). In the dense toolbar we hide it visually
+   but keep it for assistive tech. */
+.visually-hidden-label::part(form-control-label) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+/* suggestion-groupe drawer (focus mode: act on all of an acteur's fields) */
+.groupe-drawer::part(panel) {
+  width: 32rem;
+  max-width: 90vw;
+}
+
+.drawer-sub {
+  color: var(--sl-color-neutral-600);
+  font-size: 0.8rem;
+  margin: 0 0 12px;
+}
+
+.drawer-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.drawer-field th {
+  text-align: left;
+  font-weight: 600;
+  padding: 8px 10px 8px 0;
+  vertical-align: top;
+  white-space: nowrap;
+  color: var(--sl-color-neutral-700);
+}
+
+.drawer-field td {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--sl-color-neutral-100);
+  vertical-align: top;
+}
+
+.drawer-field th {
+  border-bottom: 1px solid var(--sl-color-neutral-100);
+}
+
+.drawer-diff .old {
+  color: var(--sl-color-neutral-600);
+  text-decoration: line-through;
+  display: block;
+}
+
+.drawer-diff .new {
+  overflow-wrap: anywhere;
+}
+
+.drawer-diff .new::before {
+  content: "→ ";
+  color: var(--sl-color-neutral-400);
+}
+
+.drawer-field.accepted .drawer-diff .new {
+  color: var(--sl-color-success-700);
+  font-weight: 500;
+}
+
+.drawer-field.rejected .drawer-diff .new {
+  color: var(--sl-color-neutral-600);
+  text-decoration: line-through;
+}
+
+.drawer-actions {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.drawer-field .cell-actions {
+  display: inline-flex;
+}
+
+.drawer-bulk {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.drawer-loading,
+.drawer-error {
+  color: var(--sl-color-neutral-600);
+  font-size: 0.85rem;
+}
+
+.drawer-error {
+  color: var(--sl-color-danger-700);
+}
+
+/* undo toast: appears after a bulk action with « Annuler » */
+.undo-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--sl-color-neutral-900);
+  color: #fff;
+  border-radius: 8px;
+  padding: 10px 14px 10px 18px;
+  font-size: 0.85rem;
+  box-shadow: var(--sl-shadow-large);
+}
+
+.undo-toast[hidden] {
+  display: none;
+}
+
+.undo-toast-action {
+  font: inherit;
+  font-weight: 600;
+  color: var(--sl-color-primary-300);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 2px 4px;
+}
+
+.undo-toast-action:hover {
+  color: #fff;
+}
+
+.undo-toast-dismiss {
+  font: inherit;
+  color: var(--sl-color-neutral-400);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+
+.undo-toast-dismiss:hover {
+  color: #fff;
+}
+
+.focus-card[data-detail-url]:hover {
+  border-color: var(--sl-color-primary-400);
+  background: var(--sl-color-primary-50);
+}
+
+.focus-card.accepted {
+  border-left: 4px solid var(--sl-color-success-600);
+  opacity: 0.75;
+}
+
+.focus-card.rejected {
+  border-left: 4px solid var(--sl-color-danger-600);
+  opacity: 0.6;
+}
+
+.focus-card .who .acteur-id {
+  display: block;
+}
+
+.focus-card .diff {
+  font-size: 0.86rem;
+  min-width: 0;
+}
+
+.focus-card .diff .old {
+  color: var(--sl-color-neutral-600);
+  text-decoration: line-through;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.focus-card .diff .new {
+  overflow-wrap: anywhere;
+}
+
+.focus-card .diff .new::before {
+  content: "→ ";
+  color: var(--sl-color-neutral-400);
+}
+
+.focus-card.accepted .diff .new {
+  color: var(--sl-color-success-700);
+  font-weight: 500;
+}
+
+.focus-card.rejected .diff .new {
+  color: var(--sl-color-neutral-600);
+  text-decoration: line-through;
+}
+
+.focus-card .cell-actions {
+  display: inline-flex;
+}
+
+.focus-card .cell-action {
+  font-size: 0.85rem;
+  padding: 3px 10px;
+}
+
+.focus-empty {
+  color: var(--sl-color-neutral-600);
+  font-size: 0.85rem;
+}
+
+/* RGAA 13.8 / WCAG 2.3.3: honour the OS reduced-motion preference for the
+   decorative transitions on this screen (badge hover, etc.) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

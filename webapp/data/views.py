@@ -1,9 +1,12 @@
 import json
 import logging
+from collections import Counter
 
+from core.views import IsStaffMixin
 from data.forms import SuggestionGroupeStatusForm
 from data.models.suggestion import (
     SuggestionAction,
+    SuggestionCohorte,
     SuggestionGroupe,
     SuggestionStatut,
     SuggestionUnitaire,
@@ -18,10 +21,12 @@ from data.models.utils import prepare_acteur_data_with_location
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.http import HttpResponseBadRequest
+from django.db.models import CharField, Exists, OuterRef, Q, QuerySet
+from django.db.models.functions import Cast
+from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy
-from django.views.generic import FormView, View
+from django.views.generic import FormView, TemplateView, View
 from qfdmo.models.acteur import Acteur, ActeurStatus, DisplayedActeur, RevisionActeur
 
 logger = logging.getLogger(__name__)
@@ -493,3 +498,559 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
             context,
             content_type="text/vnd.turbo-stream.html",
         )
+
+
+class ReviewValidationError(ValueError):
+    """A deliberate, client-safe validation error for the review endpoints.
+
+    Its message is author-written (never a stack trace or arbitrary
+    exception) so it can be returned verbatim in a 400 response without
+    leaking internal information.
+    """
+
+    @property
+    def user_message(self) -> str:
+        """Return the safe, author-written error message."""
+        return self.args[0] if self.args else ""
+
+
+REVIEW_ROWS_DEFAULT_LIMIT = 100
+REVIEW_ROWS_MAX_LIMIT = 200
+REVIEW_BULK_MAX_GROUPES = 1000
+# An undo token is one entry per changed unitaire; a filter-scope action can
+# change many, so the cap is generous but bounded to keep payloads sane.
+REVIEW_UNDO_MAX_UNITAIRES = 50000
+
+
+def build_pivot_row(groupe: SuggestionGroupe) -> dict:
+    """Pivot row for the review grid, with a fallback for groupes the grid
+    cannot represent (non-source cohortes, inconsistent data)."""
+    try:
+        return SuggestionGroupeTypeSource.from_suggestion_groupe(groupe).to_pivot_row()
+    except ValueError as e:
+        logger.warning("Cannot build pivot row for groupe %s: %s", groupe.id, e)
+        return {
+            "groupe_id": groupe.id,
+            "statut": groupe.statut,
+            "statut_display": groupe.get_statut_display(),
+            "acteur_id": groupe.acteur_id or "",
+            "acteur_nom": "",
+            "has_parent": groupe.parent_revision_acteur_id is not None,
+            "detail_url": groupe.admin_change_url,
+            "cells": {},
+            "error": "type de suggestion non supporté par la grille",
+        }
+
+
+def cohorte_fields_meta(cohorte: SuggestionCohorte) -> list[dict]:
+    """One entry per field having at least one suggestion to validate in the
+    cohorte, ordered like the detail view, with pending counts."""
+    champs_lists = SuggestionUnitaire.objects.filter(
+        suggestion_groupe__suggestion_cohorte=cohorte,
+        suggestion_groupe__statut=SuggestionStatut.AVALIDER,
+        suggestion_modele="Acteur",
+        statut=SuggestionStatut.AVALIDER,
+    ).values_list("champs", flat=True)
+
+    pending: Counter = Counter()
+    for champs in champs_lists:
+        pending.update(champs)
+
+    ordered = [
+        field for group in SuggestionSourceModel.get_ordered_fields() for field in group
+    ]
+    keys = [field for field in ordered if field in pending]
+    keys += sorted(field for field in pending if field not in ordered)
+    return [{"key": key, "pending": pending[key]} for key in keys]
+
+
+class CohorteReviewView(IsStaffMixin, TemplateView):
+    """Pivot review screen for a cohorte: rows = suggestion groupes (acteurs),
+    columns = fields. The grid itself is rendered client-side by the
+    cohorte-review Stimulus controller, fed by CohorteReviewRowsView."""
+
+    template_name = "data/cohorte_review.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["suggestion_cohorte"] = get_object_or_404(
+            SuggestionCohorte, id=self.kwargs["cohorte_id"]
+        )
+        return context
+
+
+# Query builder of the focus mode: lookups allowed on the suggested value.
+# Keys are the client-side identifiers, values the ORM lookup applied to the
+# first (and only) element of SuggestionUnitaire.valeurs.
+# No `regex`/iregex lookup on purpose: a staff-supplied pattern forwarded to
+# Postgres is a ReDoS vector (catastrophic backtracking holds a backend
+# process). These five cover the review workflow.
+REVIEW_VALUE_LOOKUPS = {
+    "startswith": "istartswith",
+    "endswith": "iendswith",
+    "contains": "icontains",
+    "exact": "iexact",
+}
+REVIEW_VALUE_MAX_CONDITIONS = 10
+REVIEW_VALUE_MAX_GROUPS = 5
+
+
+def _validated_combinator(payload: dict) -> str:
+    combinator = payload.get("combinator", "et")
+    if combinator not in {"et", "ou"}:
+        raise ReviewValidationError("combinator must be 'et' or 'ou'")
+    return combinator
+
+
+def _combine_qs(condition_qs: list[Q], combinator: str) -> Q:
+    combined = condition_qs[0]
+    for condition_q in condition_qs[1:]:
+        if combinator == "ou":
+            combined = combined | condition_q
+        else:
+            combined = combined & condition_q
+    return combined
+
+
+def _build_value_conditions_q(combinator: str, conditions: list | None) -> Q:
+    if (
+        not isinstance(conditions, list)
+        or not conditions
+        or len(conditions) > REVIEW_VALUE_MAX_CONDITIONS
+    ):
+        raise ReviewValidationError(
+            "conditions must be a non-empty list of at most "
+            f"{REVIEW_VALUE_MAX_CONDITIONS} items"
+        )
+
+    empty_q = Q(valeurs__0="") | Q(valeurs=[])
+    condition_qs = []
+    for condition in conditions:
+        if not isinstance(condition, dict):
+            raise ReviewValidationError("each condition must be an object")
+        lookup = condition.get("lookup")
+        value = str(condition.get("value", ""))
+        if lookup == "empty":
+            condition_qs.append(empty_q)
+        elif lookup == "not_empty":
+            condition_qs.append(~empty_q)
+        elif lookup == "not_contains":
+            if not value:
+                raise ReviewValidationError("value is required for this lookup")
+            condition_qs.append(~Q(valeurs__0__icontains=value))
+        elif lookup in REVIEW_VALUE_LOOKUPS:
+            if not value:
+                raise ReviewValidationError("value is required for this lookup")
+            condition_qs.append(
+                Q(**{f"valeurs__0__{REVIEW_VALUE_LOOKUPS[lookup]}": value})
+            )
+        else:
+            raise ReviewValidationError("unknown lookup")
+
+    return _combine_qs(condition_qs, combinator)
+
+
+def build_value_filter_q(valeur_filtre: dict) -> Q:
+    """Translate the focus-mode query builder payload into a Q over
+    SuggestionUnitaire rows.
+
+    Two accepted shapes (lookups: REVIEW_VALUE_LOOKUPS keys plus empty,
+    not_empty, not_contains):
+    - flat: {"combinator": "et" | "ou", "conditions": [{"lookup", "value"}]}
+    - grouped: {"combinator": <between groups>, "groups":
+      [{"combinator": <within group>, "conditions": [...]}]}, allowing
+      e.g. (commence par 07 ET finit par 78) OU (commence par 06).
+
+    Raises ValueError on anything else.
+    """
+    if not isinstance(valeur_filtre, dict):
+        raise ReviewValidationError("valeur_filtre must be an object")
+    combinator = _validated_combinator(valeur_filtre)
+
+    if "groups" in valeur_filtre:
+        groups = valeur_filtre.get("groups")
+        if (
+            not isinstance(groups, list)
+            or not groups
+            or len(groups) > REVIEW_VALUE_MAX_GROUPS
+        ):
+            raise ReviewValidationError(
+                "groups must be a non-empty list of at most "
+                f"{REVIEW_VALUE_MAX_GROUPS} items"
+            )
+        group_qs = []
+        for group in groups:
+            if not isinstance(group, dict):
+                raise ReviewValidationError("each group must be an object")
+            group_qs.append(
+                _build_value_conditions_q(
+                    _validated_combinator(group), group.get("conditions")
+                )
+            )
+        return _combine_qs(group_qs, combinator)
+
+    return _build_value_conditions_q(combinator, valeur_filtre.get("conditions"))
+
+
+# Field names the review screen may filter/act on: the SuggestionSourceModel
+# fields. Used to reject typo'd champs (which would otherwise silently no-op
+# the field filter on a write path and touch every field).
+REVIEW_VALID_CHAMPS = frozenset(SuggestionSourceModel.model_fields)
+REVIEW_VALID_STATUTS = frozenset(SuggestionStatut.values) | {"all"}
+
+
+def validate_review_champ(champ: str | None) -> None:
+    if champ and champ not in REVIEW_VALID_CHAMPS:
+        raise ReviewValidationError("unknown champ")
+
+
+def validate_review_statut(statut: str) -> None:
+    if statut not in REVIEW_VALID_STATUTS:
+        raise ReviewValidationError("unknown statut")
+
+
+def filter_review_groupes(
+    cohorte: SuggestionCohorte,
+    *,
+    statut: str,
+    champ: str | None,
+    q: str,
+    valeur_filtre: dict | None = None,
+    exclude_ids: list[int] | None = None,
+) -> "QuerySet[SuggestionGroupe]":
+    """Shared filtering for the review grid: used by the rows endpoint and
+    by the bulk endpoint's « all filtered rows » scope, so both always agree
+    on what « filtered » means. `exclude_ids` removes hand-picked groupes
+    from the set (« tout sauf ces N-là »). Raises ValueError on an invalid
+    statut, champ, or valeur_filtre payload."""
+    validate_review_statut(statut)
+    validate_review_champ(champ)
+    queryset = SuggestionGroupe.objects.filter(suggestion_cohorte=cohorte)
+    if exclude_ids:
+        queryset = queryset.exclude(id__in=exclude_ids)
+    if statut != "all":
+        queryset = queryset.filter(statut=statut)
+    if champ:
+        queryset = queryset.filter(
+            suggestion_unitaires__champs__contains=[champ]
+        ).distinct()
+    if q:
+        # acteur is a FK with db_constraint=False: search the raw column
+        # text rather than joining on a possibly missing Acteur row
+        queryset = queryset.annotate(
+            acteur_id_text=Cast("acteur_id", CharField())
+        ).filter(acteur_id_text__icontains=q)
+    if valeur_filtre is not None:
+        if not champ:
+            raise ReviewValidationError("valeur_filtre requires champ")
+        # champs=[champ] (exact single-field match) guarantees valeurs[0] is
+        # the value of that field — grouped fields (latitude/longitude) are
+        # out of scope for the value query builder
+        queryset = queryset.filter(
+            Exists(
+                SuggestionUnitaire.objects.filter(
+                    suggestion_groupe=OuterRef("pk"),
+                    suggestion_modele="Acteur",
+                    champs=[champ],
+                ).filter(build_value_filter_q(valeur_filtre))
+            )
+        )
+    return queryset
+
+
+class CohorteReviewRowsView(IsStaffMixin, View):
+    """JSON rows endpoint for the cohorte review grid.
+
+    Keyset pagination: stable ordering by id, `after` cursor, `limit` batch
+    size. Filtering (statut, champ, q) stays server-side: the client only
+    ever holds the rows it has fetched.
+    """
+
+    def get(self, request, cohorte_id):
+        cohorte = get_object_or_404(SuggestionCohorte, id=cohorte_id)
+
+        valeur_filtre = None
+        if valeur_filtre_raw := request.GET.get("valeur_filtre"):
+            try:
+                valeur_filtre = json.loads(valeur_filtre_raw)
+            except json.JSONDecodeError:
+                return HttpResponseBadRequest("valeur_filtre must be valid JSON")
+
+        try:
+            queryset = (
+                filter_review_groupes(
+                    cohorte,
+                    statut=request.GET.get("statut", SuggestionStatut.AVALIDER),
+                    champ=request.GET.get("champ"),
+                    q=request.GET.get("q", ""),
+                    valeur_filtre=valeur_filtre,
+                )
+                # from_suggestion_groupe() reads .suggestion_cohorte.type_action
+                # per row — select_related avoids an N+1 across the page
+                .select_related("suggestion_cohorte").prefetch_related(
+                    "suggestion_unitaires", "acteur", "revision_acteur"
+                )
+            )
+        except ReviewValidationError as e:
+            return HttpResponseBadRequest(e.user_message)
+
+        total = queryset.count()
+
+        try:
+            after = int(request.GET.get("after", 0))
+            limit = int(request.GET.get("limit", REVIEW_ROWS_DEFAULT_LIMIT))
+        except ValueError:
+            return HttpResponseBadRequest("after and limit must be integers")
+        limit = max(1, min(limit, REVIEW_ROWS_MAX_LIMIT))
+
+        groupes = list(queryset.filter(id__gt=after).order_by("id")[:limit])
+
+        rows = [build_pivot_row(groupe) for groupe in groupes]
+        next_after = groupes[-1].id if len(groupes) == limit else None
+
+        return JsonResponse(
+            {
+                "rows": rows,
+                "meta": {
+                    "total": total,
+                    "next_after": next_after,
+                    "fields": cohorte_fields_meta(cohorte),
+                },
+            }
+        )
+
+
+class CohorteReviewGroupeView(IsStaffMixin, View):
+    """Single-groupe pivot row, for the focus-mode detail drawer: lets the
+    reviewer see and act on every field of one acteur without leaving the
+    queue. Scoped to the cohorte so the id can't reach another cohorte."""
+
+    def get(self, request, cohorte_id, groupe_id):
+        groupe = get_object_or_404(
+            SuggestionGroupe.objects.select_related(
+                "suggestion_cohorte"
+            ).prefetch_related("suggestion_unitaires", "acteur", "revision_acteur"),
+            id=groupe_id,
+            suggestion_cohorte_id=cohorte_id,
+        )
+        return JsonResponse({"row": build_pivot_row(groupe)})
+
+
+REVIEW_BULK_ACTION_TO_STATUT = {
+    "accept": SuggestionStatut.ATRAITER,
+    "reject": SuggestionStatut.REJETEE,
+    "reset": SuggestionStatut.AVALIDER,
+}
+# The only statuts the review UI ever produces. An undo token (client-held)
+# may only restore to one of these, never to pipeline-owned states
+# (ENCOURS / ERREUR / SUCCES).
+REVIEW_RESTORABLE_STATUTS = set(REVIEW_BULK_ACTION_TO_STATUT.values())
+
+
+class CohorteReviewBulkView(IsStaffMixin, View):
+    """Per-field accept/reject on an explicit selection or on every
+    filtered groupe.
+
+    POST body (JSON): {champ: str | null, action: "accept" | "reject" |
+    "reset" | "undo"} plus exactly one scope:
+    - groupe_ids: [int] — explicit selection; the refreshed pivot rows are
+      returned so the grid updates in place;
+    - filter: {statut, champ, q, exclude_ids} — every groupe matching the
+      same filters as the rows endpoint (Gmail-style « select all », minus
+      hand-picked exclusions); no rows are returned (the set may be huge),
+      the client reloads.
+
+    A null champ targets every field of the targeted groupes.
+
+    Every accept/reject/reset response carries an `undo` token — the list of
+    {id, statut} of every changed SuggestionUnitaire *before* the action — so
+    the client can offer « Annuler ». An `undo` action takes that token (in
+    `undo`) and restores each unitaire to its captured statut.
+    """
+
+    def post(self, request, cohorte_id):
+        cohorte = get_object_or_404(SuggestionCohorte, id=cohorte_id)
+
+        try:
+            payload = json.loads(request.body or "{}")
+        except json.JSONDecodeError:
+            return HttpResponseBadRequest("invalid JSON body")
+
+        action = payload.get("action")
+        if action == "undo":
+            return self._handle_undo(cohorte, payload)
+        if action not in REVIEW_BULK_ACTION_TO_STATUT:
+            return HttpResponseBadRequest(
+                "action must be one of: accept, reject, reset, undo"
+            )
+        champ = payload.get("champ") or None
+        # a typo'd champ would silently match no field filter and act on ALL
+        # fields — reject it on the write path
+        try:
+            validate_review_champ(champ)
+        except ReviewValidationError as e:
+            return HttpResponseBadRequest(e.user_message)
+
+        groupe_ids = payload.get("groupe_ids")
+        filter_payload = payload.get("filter")
+        if (groupe_ids is None) == (filter_payload is None):
+            return HttpResponseBadRequest("provide exactly one of groupe_ids or filter")
+
+        if groupe_ids is not None:
+            if (
+                not isinstance(groupe_ids, list)
+                or not groupe_ids
+                or not all(isinstance(groupe_id, int) for groupe_id in groupe_ids)
+            ):
+                return HttpResponseBadRequest("groupe_ids must be a list of ids")
+            if len(groupe_ids) > REVIEW_BULK_MAX_GROUPES:
+                return HttpResponseBadRequest(
+                    f"groupe_ids is limited to {REVIEW_BULK_MAX_GROUPES} entries"
+                )
+            # Scoping to the cohorte prevents acting on another cohorte's
+            # groupes through forged ids.
+            targeted = SuggestionGroupe.objects.filter(
+                suggestion_cohorte=cohorte, id__in=groupe_ids
+            )
+        else:
+            if not isinstance(filter_payload, dict):
+                return HttpResponseBadRequest("filter must be an object")
+            exclude_ids = filter_payload.get("exclude_ids")
+            if exclude_ids is not None and (
+                not isinstance(exclude_ids, list)
+                or not all(isinstance(i, int) for i in exclude_ids)
+            ):
+                return HttpResponseBadRequest("exclude_ids must be a list of ids")
+            try:
+                targeted = filter_review_groupes(
+                    cohorte,
+                    statut=filter_payload.get("statut") or SuggestionStatut.AVALIDER,
+                    champ=filter_payload.get("champ") or None,
+                    q=filter_payload.get("q") or "",
+                    valeur_filtre=filter_payload.get("valeur_filtre"),
+                    exclude_ids=exclude_ids,
+                )
+            except ReviewValidationError as e:
+                return HttpResponseBadRequest(e.user_message)
+
+        new_statut = REVIEW_BULK_ACTION_TO_STATUT[action]
+        with transaction.atomic():
+            targeted_ids = list(targeted.values_list("id", flat=True))
+            unitaires = SuggestionUnitaire.objects.filter(
+                suggestion_groupe_id__in=targeted_ids,
+                suggestion_modele="Acteur",
+            )
+            if champ:
+                unitaires = unitaires.filter(champs__contains=[champ])
+            # capture prior state before mutating, excluding no-op rows so the
+            # undo token only covers genuinely changed unitaires. update()
+            # returns rows *matched*, not changed, so derive `applied` from the
+            # token to report only real changes. select_for_update locks the
+            # rows so a concurrent reviewer can't slip a write between the
+            # capture and the update.
+            to_change = unitaires.exclude(statut=new_statut).select_for_update()
+            undo_token = list(to_change.values("id", "statut"))
+            applied = unitaires.exclude(statut=new_statut).update(statut=new_statut)
+            self._derive_groupes_statut(targeted_ids)
+
+        response: dict = {
+            "applied": applied,
+            "undo": undo_token,
+            "meta": {"fields": cohorte_fields_meta(cohorte)},
+        }
+        if groupe_ids is not None:
+            response["rows"] = self._rows_for(targeted_ids)
+        return JsonResponse(response)
+
+    def _handle_undo(self, cohorte: SuggestionCohorte, payload: dict) -> JsonResponse:
+        undo_token = payload.get("undo")
+        if not isinstance(undo_token, list) or not undo_token:
+            return HttpResponseBadRequest("undo token must be a non-empty list")
+        if len(undo_token) > REVIEW_UNDO_MAX_UNITAIRES:
+            return HttpResponseBadRequest(
+                f"undo token is limited to {REVIEW_UNDO_MAX_UNITAIRES} entries"
+            )
+
+        by_statut: dict[str, list[int]] = {}
+        for entry in undo_token:
+            if (
+                not isinstance(entry, dict)
+                or not isinstance(entry.get("id"), int)
+                or entry.get("statut") not in REVIEW_RESTORABLE_STATUTS
+            ):
+                return HttpResponseBadRequest("invalid undo token entry")
+            by_statut.setdefault(entry["statut"], []).append(entry["id"])
+
+        with transaction.atomic():
+            restored = 0
+            touched_groupe_ids: set[int] = set()
+            for statut, ids in by_statut.items():
+                # scope the cohorte in the query itself (a forged id pointing
+                # at another cohorte simply matches nothing) — avoids loading
+                # the whole cohorte's unitaire ids into memory
+                scoped = SuggestionUnitaire.objects.filter(
+                    id__in=ids,
+                    suggestion_groupe__suggestion_cohorte=cohorte,
+                )
+                touched_groupe_ids.update(
+                    scoped.values_list("suggestion_groupe_id", flat=True)
+                )
+                restored += scoped.update(statut=statut)
+            self._derive_groupes_statut(list(touched_groupe_ids))
+
+        return JsonResponse(
+            {
+                "applied": restored,
+                "rows": self._rows_for(list(touched_groupe_ids)),
+                "meta": {"fields": cohorte_fields_meta(cohorte)},
+            }
+        )
+
+    @staticmethod
+    def _rows_for(groupe_ids: list[int]) -> list[dict]:
+        return [
+            build_pivot_row(groupe)
+            for groupe in SuggestionGroupe.objects.filter(id__in=groupe_ids)
+            .select_related("suggestion_cohorte")
+            .prefetch_related("suggestion_unitaires", "acteur", "revision_acteur")
+        ]
+
+    @staticmethod
+    def _derive_groupes_statut(groupe_ids: list[int]) -> None:
+        """A groupe stays « à valider » while any of its source suggestions
+        is undecided; once all are decided it becomes « à traiter » unless
+        everything was rejected. Set-based so « select all filtered » stays
+        fast on large cohortes."""
+
+        def acteur_unitaires():
+            return SuggestionUnitaire.objects.filter(
+                suggestion_groupe=OuterRef("pk"), suggestion_modele="Acteur"
+            )
+
+        groupes = SuggestionGroupe.objects.filter(id__in=groupe_ids).annotate(
+            has_source_suggestion=Exists(acteur_unitaires()),
+            has_pending=Exists(
+                acteur_unitaires().filter(statut=SuggestionStatut.AVALIDER)
+            ),
+            has_non_rejected_decision=Exists(
+                acteur_unitaires().exclude(
+                    statut__in=[
+                        SuggestionStatut.AVALIDER,
+                        SuggestionStatut.REJETEE,
+                    ]
+                )
+            ),
+        )
+        groupes.filter(has_source_suggestion=True, has_pending=True).update(
+            statut=SuggestionStatut.AVALIDER
+        )
+        groupes.filter(
+            has_source_suggestion=True,
+            has_pending=False,
+            has_non_rejected_decision=True,
+        ).update(statut=SuggestionStatut.ATRAITER)
+        groupes.filter(
+            has_source_suggestion=True,
+            has_pending=False,
+            has_non_rejected_decision=False,
+        ).update(statut=SuggestionStatut.REJETEE)

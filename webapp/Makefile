@@ -153,6 +153,16 @@ prepare-e2e-test:
 prepare-e2e-test-local:
 	make DATABASE_URL=$(SAMPLE_DATABASE_URL) prepare-e2e-test
 
+# Seed the review screen with a deterministic, self-contained cohorte so the
+# feature can be exercised by hand on the sample DB. Prints the review URL.
+.PHONY: seed-review
+seed-review:
+	$(DJANGO_ADMIN) seed_review_e2e
+
+.PHONY: seed-review-local
+seed-review-local:
+	make DATABASE_URL=$(SAMPLE_DATABASE_URL) seed-review
+
 .PHONY: e2e-test
 e2e-test:
 	npx playwright test --update-snapshots all

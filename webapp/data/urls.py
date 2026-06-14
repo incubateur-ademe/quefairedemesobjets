@@ -1,6 +1,13 @@
 from django.urls import path
 
-from data.views import SuggestionGroupeStatusView, SuggestionGroupeView
+from data.views import (
+    CohorteReviewBulkView,
+    CohorteReviewGroupeView,
+    CohorteReviewRowsView,
+    CohorteReviewView,
+    SuggestionGroupeStatusView,
+    SuggestionGroupeView,
+)
 
 app_name = "data"
 
@@ -14,5 +21,25 @@ urlpatterns = [
         "suggestion-groupe/<int:suggestion_groupe_id>/status/",
         SuggestionGroupeStatusView.as_view(),
         name="suggestion_groupe_status",
+    ),
+    path(
+        "cohorte/<int:cohorte_id>/review/",
+        CohorteReviewView.as_view(),
+        name="cohorte_review",
+    ),
+    path(
+        "cohorte/<int:cohorte_id>/review/rows/",
+        CohorteReviewRowsView.as_view(),
+        name="cohorte_review_rows",
+    ),
+    path(
+        "cohorte/<int:cohorte_id>/review/bulk/",
+        CohorteReviewBulkView.as_view(),
+        name="cohorte_review_bulk",
+    ),
+    path(
+        "cohorte/<int:cohorte_id>/review/groupe/<int:groupe_id>/",
+        CohorteReviewGroupeView.as_view(),
+        name="cohorte_review_groupe",
     ),
 ]
