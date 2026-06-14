@@ -803,6 +803,33 @@ class TestSeedReviewDemoCommand:
 
 
 @pytest.mark.django_db
+class TestSeedReviewE2eCommand:
+    def test_creates_self_contained_reviewable_cohorte(self, client, staff_user):
+        """The e2e seed builds its own acteurs (works on an empty DB) and the
+        documented statut distribution the e2e suite relies on."""
+        from django.core.management import call_command
+
+        # no acteurs pre-created on purpose: the command makes its own
+        call_command("seed_review_e2e")
+        # idempotent
+        call_command("seed_review_e2e")
+
+        cohorte = SuggestionCohorteFactory._meta.model.objects.get(
+            identifiant_action="e2e_revue_cohorte"
+        )
+        groupes = cohorte.suggestion_groupes.all()
+        assert groupes.count() == 24
+        assert groupes.filter(statut=SuggestionStatut.AVALIDER).count() == 20
+        assert groupes.filter(statut=SuggestionStatut.ATRAITER).count() == 2
+        assert groupes.filter(statut=SuggestionStatut.REJETEE).count() == 2
+
+        client.force_login(staff_user)
+        response = client.get(reverse("data:cohorte_review_rows", args=[cohorte.id]))
+        # default filter shows the 20 « à valider »
+        assert response.json()["meta"]["total"] == 20
+
+
+@pytest.mark.django_db
 class TestApplySkipsRejectedUnitaires:
     def test_rejected_field_is_not_applied(self):
         cohorte = SuggestionCohorteFactory(
