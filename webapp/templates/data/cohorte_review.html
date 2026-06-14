@@ -37,19 +37,20 @@
         <sl-input
           type="search"
           size="small"
+          label="Rechercher un identifiant acteur"
           placeholder="Rechercher un identifiant acteur…"
           clearable
-          class="search"
+          class="search visually-hidden-label"
           data-cohorte-review-target="search"
           data-action="sl-input->cohorte-review#onSearchInput sl-clear->cohorte-review#onSearchInput"
         ></sl-input>
         <sl-select
           size="small"
           value="AVALIDER"
-          class="statut-filter"
+          label="Filtrer par statut"
+          class="statut-filter visually-hidden-label"
           data-cohorte-review-target="statutFilter"
           data-action="sl-change->cohorte-review#onStatutChange"
-          aria-label="Filtrer par statut"
         >
           <sl-option value="AVALIDER">🟠 À valider</sl-option>
           <sl-option value="ATRAITER">⏳ À traiter</sl-option>
@@ -88,8 +89,9 @@
         <sl-select
           size="small"
           value=""
+          label="Champ ciblé par l'action de masse"
+          class="visually-hidden-label"
           data-cohorte-review-target="bulkField"
-          aria-label="Champ ciblé par l'action de masse"
         >
           <sl-option value="">tous les champs</sl-option>
         </sl-select>
@@ -132,6 +134,7 @@
           <div
             class="focus-cards"
             data-cohorte-review-target="focusCards"
+            role="group"
             tabindex="-1"
             aria-label="Suggestions à réviser — ↑/↓ naviguer, A accepter, R rejeter, U annuler, Entrée ouvrir le détail"
           ></div>
@@ -144,9 +147,9 @@
       </div>
 
       <div class="table-wrap" data-cohorte-review-target="scroller">
-        <table>
-          <thead data-cohorte-review-target="head"></thead>
-          <tbody data-cohorte-review-target="body"></tbody>
+        <table role="grid" aria-label="Suggestions par acteur et par champ">
+          <thead role="rowgroup" data-cohorte-review-target="head"></thead>
+          <tbody role="rowgroup" data-cohorte-review-target="body"></tbody>
         </table>
       </div>
 
@@ -166,6 +169,7 @@
         class="undo-toast"
         data-cohorte-review-target="undoToast"
         role="status"
+        aria-atomic="true"
         hidden
       >
         <span data-cohorte-review-target="undoToastLabel"></span>

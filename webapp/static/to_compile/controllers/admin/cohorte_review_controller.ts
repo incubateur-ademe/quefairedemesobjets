@@ -66,6 +66,14 @@ const CELL_STATE_CLASS: Record<string, string> = {
   [STATUT_REJECTED]: "rejected",
 }
 
+// spoken state, for the focus-card aria-label (state is otherwise conveyed
+// only by colour + strike-through)
+const STATUT_LABELS: Record<string, string> = {
+  [STATUT_PENDING]: "à valider",
+  [STATUT_ACCEPTED]: "acceptée",
+  [STATUT_REJECTED]: "rejetée",
+}
+
 // Focus-mode query builder: lookups on the suggested value, mirroring the
 // server-side REVIEW_VALUE_LOOKUPS allowlist
 const VALUE_LOOKUPS: Array<[string, string]> = [
@@ -582,7 +590,9 @@ export default class extends Controller<HTMLElement> {
       })
       this.renderAll()
     } catch (error) {
-      this.statusTarget.textContent = `Erreur de chargement (${error}) — rechargez la page`
+      // announce() uses the assertive region; statusTarget is overwritten by
+      // the renderStatus() in finally, so the error must not live only there
+      this.announce(`Erreur de chargement (${error}) — rechargez la page`)
     } finally {
       this.loading = false
       this.renderStatus()
@@ -748,8 +758,11 @@ export default class extends Controller<HTMLElement> {
   }
 
   private drawerGroupeId: number | null = null
+  private drawerOpener: HTMLElement | null = null
 
   private async openGroupeDrawer(groupeId: number) {
+    // remember who opened the drawer so focus returns there on close
+    this.drawerOpener = document.activeElement as HTMLElement | null
     this.drawerGroupeId = groupeId
     this.drawerBodyTarget.innerHTML = `<p class="drawer-loading">Chargement…</p>`
     this.drawerAdminLinkTarget.href = this.adminUrlTemplateValue.replace(
@@ -840,6 +853,13 @@ export default class extends Controller<HTMLElement> {
     // sl-after-hide bubbles; only react to the drawer's own event
     if (event.target === this.drawerTarget) {
       this.drawerGroupeId = null
+      // return focus to the opener (Shoelace otherwise drops it to <body>)
+      try {
+        this.drawerOpener?.focus()
+      } catch {
+        // ignore: best-effort focus restoration
+      }
+      this.drawerOpener = null
     }
   }
 
@@ -953,7 +973,12 @@ export default class extends Controller<HTMLElement> {
   }
 
   private announce(message: string) {
-    this.announcerTarget.textContent = message
+    // clear then set on the next frame so an identical consecutive message
+    // still re-triggers the live region (AT skips unchanged textContent)
+    this.announcerTarget.textContent = ""
+    requestAnimationFrame(() => {
+      this.announcerTarget.textContent = message
+    })
   }
 
   // --- undo toast ---
@@ -1194,6 +1219,7 @@ export default class extends Controller<HTMLElement> {
         <div class="vb-footer">
           ${topCombinator}
           <button type="button" class="vb-add"
+            aria-label="Ajouter un groupe de conditions"
             data-action="click->cohorte-review#vbAddGroup">＋ groupe</button>
           <sl-button size="small" variant="primary"
             data-action="click->cohorte-review#vbApply">Appliquer</sl-button>
@@ -1230,9 +1256,11 @@ export default class extends Controller<HTMLElement> {
               aria-label="Opérateur de la condition ${index + 1} du groupe ${groupIndex + 1}"
               data-action="change->cohorte-review#vbLookupChanged">${options}</select>
             ${valueInput}
-            <button type="button" class="vb-remove" title="Supprimer la condition"
+            <button type="button" class="vb-remove"
+              aria-label="Supprimer la condition ${index + 1} du groupe ${groupIndex + 1}"
               data-action="click->cohorte-review#vbRemoveCondition"
-              data-group="${groupIndex}" data-index="${index}">✕</button>
+              data-group="${groupIndex}" data-index="${index}">
+              <span aria-hidden="true">✕</span></button>
           </div>`
       })
       .join("")
@@ -1253,9 +1281,10 @@ export default class extends Controller<HTMLElement> {
 
     const removeGroup =
       this.builderGroups.length > 1
-        ? `<button type="button" class="vb-remove" title="Supprimer le groupe"
+        ? `<button type="button" class="vb-remove"
+            aria-label="Supprimer le groupe ${groupIndex + 1}"
             data-action="click->cohorte-review#vbRemoveGroup"
-            data-group="${groupIndex}">✕ groupe</button>`
+            data-group="${groupIndex}"><span aria-hidden="true">✕ groupe</span></button>`
         : ""
 
     return `
@@ -1267,6 +1296,7 @@ export default class extends Controller<HTMLElement> {
         </div>
         ${conditionRows}
         <button type="button" class="vb-add"
+          aria-label="Ajouter une condition au groupe ${groupIndex + 1}"
           data-action="click->cohorte-review#vbAddCondition"
           data-group="${groupIndex}">＋ condition</button>
       </fieldset>`
@@ -1321,6 +1351,16 @@ export default class extends Controller<HTMLElement> {
       .join("")
     this.focusCardsTarget.innerHTML =
       cards || `<p class="focus-empty">Aucune suggestion pour ce champ.</p>`
+    // move real focus to the active card so AT announces it on each move
+    // (skip if focus is currently inside an input/the builder, to not steal it)
+    const active = document.activeElement as HTMLElement | null
+    const inField = active?.closest("input, select, textarea, sl-input, sl-select")
+    if (!inField) {
+      const card = this.focusCardsTarget.querySelector(
+        ".focus-card.active",
+      ) as HTMLElement | null
+      card?.focus()
+    }
   }
 
   private renderFocusCard(row: PivotRow, field: string, isActive: boolean): string {
@@ -1334,8 +1374,16 @@ export default class extends Controller<HTMLElement> {
       cell.current !== null && cell.current !== cell.suggested
         ? `<span class="old">${esc(cell.current)}</span>`
         : ""
+    const statutLabel = STATUT_LABELS[statut] ?? ""
+    // roving tabindex: only the active card is in the tab order and receives
+    // real focus on navigation, so AT announces it; role=group legitimately
+    // holds the in-card action buttons (unlike role=option)
     return `
       <div class="focus-card ${stateClass} ${isActive ? "active" : ""}"
+        id="focus-card-${row.groupe_id}"
+        role="group"
+        tabindex="${isActive ? "0" : "-1"}"
+        aria-label="${esc(row.acteur_nom) || esc(row.acteur_id)} — ${esc(cell.suggested ?? "") || "vide"} — ${statutLabel}"
         data-groupe-id="${row.groupe_id}"
         title="Voir toutes les suggestions de cet acteur">
         <div class="who">
@@ -1348,15 +1396,15 @@ export default class extends Controller<HTMLElement> {
           ${current}
           <span class="new">${esc(cell.suggested ?? "") || "—"}</span>
         </div>
-        ${this.renderCellActions(row.groupe_id, field, statut)}
+        ${this.renderCellActions(row.groupe_id, field, statut, row.acteur_nom)}
       </div>`
   }
 
   private renderHead() {
     const fieldHeads = this.visibleFields()
       .map(
-        (field) => `
-          <th scope="col">
+        (field, i) => `
+          <th scope="col" role="columnheader" aria-colindex="${i + 3}">
             ${esc(field.key)}
             <button type="button" class="focus-entry"
               data-action="click->cohorte-review#focusOn"
@@ -1367,13 +1415,15 @@ export default class extends Controller<HTMLElement> {
           </th>`,
       )
       .join("")
+    // aria-rowindex="1" marks the header row so the data rows' indices (which
+    // start at 2 and skip virtualised rows) form a coherent sequence
     this.headTarget.innerHTML = `
-      <tr>
-        <th scope="col" class="col-select">
+      <tr role="row" aria-rowindex="1">
+        <th scope="col" role="columnheader" aria-colindex="1" class="col-select">
           <sl-checkbox size="small" data-select-all
-            aria-label="Sélectionner les lignes chargées"></sl-checkbox>
+            ><span class="sr-only">Sélectionner les lignes chargées</span></sl-checkbox>
         </th>
-        <th scope="col" class="col-acteur">Acteur</th>
+        <th scope="col" role="columnheader" aria-colindex="2" class="col-acteur">Acteur</th>
         ${fieldHeads}
       </tr>`
   }
@@ -1456,15 +1506,16 @@ export default class extends Controller<HTMLElement> {
     if (height <= 0) {
       return ""
     }
-    return `<tr aria-hidden="true" class="spacer">
+    return `<tr role="presentation" aria-hidden="true" class="spacer">
       <td colspan="${columnCount}" style="height:${height}px; padding:0; border:0"></td>
     </tr>`
   }
 
   private renderRow(row: PivotRow, virtualIndex: number): string {
     const isSelected = this.tableState.rowSelection?.[String(row.groupe_id)] === true
+    // colindex 1 = select, 2 = acteur, fields start at 3
     const cells = this.visibleFields()
-      .map((field) => this.renderCell(row, field.key))
+      .map((field, i) => this.renderCell(row, field.key, i + 3))
       .join("")
     const parentBadge = row.has_parent
       ? `<sl-badge variant="primary" pill>parent</sl-badge>`
@@ -1473,14 +1524,14 @@ export default class extends Controller<HTMLElement> {
       ? `<span class="row-error">${esc(row.error)}</span>`
       : ""
     return `
-      <tr class="${isSelected ? "selected" : ""}" data-groupe-id="${row.groupe_id}"
+      <tr role="row" class="${isSelected ? "selected" : ""}" data-groupe-id="${row.groupe_id}"
         aria-rowindex="${virtualIndex + 2}">
-        <td class="col-select">
+        <td role="gridcell" aria-colindex="1" class="col-select">
           <sl-checkbox size="small" data-row-select="${row.groupe_id}"
             ${isSelected ? "checked" : ""}
-            aria-label="Sélectionner ${esc(row.acteur_nom) || row.groupe_id}"></sl-checkbox>
+            ><span class="sr-only">Sélectionner ${esc(row.acteur_nom) || row.groupe_id}</span></sl-checkbox>
         </td>
-        <td class="col-acteur">
+        <td role="gridcell" aria-colindex="2" class="col-acteur">
           <a href="${safeHref(row.detail_url)}" target="_blank" rel="noreferrer"
             class="acteur-nom">${esc(row.acteur_nom) || "(sans nom)"}</a>
           <span class="acteur-id">${esc(row.acteur_id)}</span>
@@ -1492,10 +1543,10 @@ export default class extends Controller<HTMLElement> {
       </tr>`
   }
 
-  private renderCell(row: PivotRow, field: string): string {
+  private renderCell(row: PivotRow, field: string, colIndex: number): string {
     const cell = row.cells[field]
     if (!cell || (cell.current === null && cell.suggested === null)) {
-      return `<td><span class="empty">—</span></td>`
+      return `<td role="gridcell" aria-colindex="${colIndex}"><span class="empty">—</span></td>`
     }
     const statut = cell.statut ?? STATUT_PENDING
     const stateClass = CELL_STATE_CLASS[statut] ?? "pending"
@@ -1507,18 +1558,28 @@ export default class extends Controller<HTMLElement> {
       cell.suggested !== null
         ? `<span class="new">${esc(cell.suggested)}</span>`
         : `<span class="empty">—</span>`
-    return `<td class="sug ${stateClass}">
+    const stateLabel = STATUT_LABELS[statut] ?? ""
+    return `<td role="gridcell" aria-colindex="${colIndex}" class="sug ${stateClass}">
+      <span class="sr-only">${esc(field)} : ${stateLabel}.</span>
       ${current}${suggested}
       ${this.renderCellActions(row.groupe_id, field, statut)}
     </td>`
   }
 
-  private renderCellActions(groupeId: number, field: string, statut: string): string {
+  private renderCellActions(
+    groupeId: number,
+    field: string,
+    statut: string,
+    acteurNom = "",
+  ): string {
+    // in the focus-card list many cards show the same field, so disambiguate
+    // each button's accessible name with the acteur
+    const who = acteurNom ? ` pour ${esc(acteurNom)}` : ""
     const button = (action: string, label: string, title: string) => `
       <button type="button" class="cell-action ${action}"
         data-cell-action="${action}" data-groupe-id="${groupeId}"
         data-field="${esc(field)}" title="${title}"
-        aria-label="${title}"><span aria-hidden="true">${label}</span></button>`
+        aria-label="${title}${who}"><span aria-hidden="true">${label}</span></button>`
     if (statut === STATUT_PENDING) {
       return `<span class="cell-actions">
         ${button("accept", "✓", `Accepter « ${esc(field)} »`)}

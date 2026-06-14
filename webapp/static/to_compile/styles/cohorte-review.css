@@ -72,7 +72,7 @@ a {
 
 .field-toggles .label {
   font-size: 0.8rem;
-  color: var(--sl-color-neutral-500);
+  color: var(--sl-color-neutral-600);
 }
 
 .toolbar .search {
@@ -164,7 +164,9 @@ button.acteur-nom:hover {
 .acteur-id,
 .acteur-statut {
   display: block;
-  color: var(--sl-color-neutral-500);
+  /* neutral-600 (not 500) clears 4.5:1 even on the primary-50 selected/hover
+     row background (neutral-500 measured 4.32) */
+  color: var(--sl-color-neutral-600);
   font-size: 0.72rem;
 }
 
@@ -219,7 +221,7 @@ button.acteur-nom:hover {
 }
 
 .sug.rejected .new {
-  color: var(--sl-color-neutral-500);
+  color: var(--sl-color-neutral-600);
   text-decoration: line-through;
 }
 
@@ -265,7 +267,9 @@ td:focus-within .cell-actions {
   border: 1px solid var(--sl-color-neutral-300);
   background: #fff;
   border-radius: 3px;
-  padding: 1px 8px;
+  /* WCAG 2.2 target size (2.5.8): keep the hit area at least 24px tall */
+  min-height: 24px;
+  padding: 2px 8px;
   cursor: pointer;
 }
 
@@ -284,7 +288,7 @@ td:focus-within .cell-actions {
 }
 
 .sug .old {
-  color: var(--sl-color-neutral-500);
+  color: var(--sl-color-neutral-600);
   text-decoration: line-through;
   display: block;
   overflow: hidden;
@@ -312,7 +316,13 @@ td:focus-within .cell-actions {
   gap: 16px;
   padding: 12px 24px;
   font-size: 0.85rem;
-  color: var(--sl-color-neutral-500);
+  color: var(--sl-color-neutral-600);
+}
+
+/* Shoelace's warning badge (white on amber-600 #d97706) is only 3.18:1.
+   Darken to amber-700 so white text clears 4.5:1 (WCAG 1.4.3). */
+sl-badge[variant="warning"]::part(base) {
+  background-color: #b45309;
 }
 
 /* --- focus mode (?focus=<champ>) --- */
@@ -366,7 +376,7 @@ main.focus-mode .bulkbar {
   font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--sl-color-neutral-500);
+  color: var(--sl-color-neutral-600);
   margin: 0 16px 8px;
 }
 
@@ -430,7 +440,7 @@ main.focus-mode .bulkbar {
 .focus-header .remaining {
   font-size: 0.82rem;
   font-weight: 400;
-  color: var(--sl-color-neutral-500);
+  color: var(--sl-color-neutral-600);
   margin-left: 8px;
 }
 
@@ -482,7 +492,7 @@ main.focus-mode .bulkbar {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--sl-color-neutral-500);
+  color: var(--sl-color-neutral-600);
   padding: 0 6px;
 }
 
@@ -513,7 +523,7 @@ main.focus-mode .bulkbar {
   text-align: right;
   font-size: 0.72rem;
   font-weight: 700;
-  color: var(--sl-color-neutral-500);
+  color: var(--sl-color-neutral-600);
 }
 
 .vb-footer {
@@ -619,7 +629,7 @@ main.focus-mode .bulkbar {
 .kbd-help {
   margin-top: 14px;
   font-size: 0.75rem;
-  color: var(--sl-color-neutral-500);
+  color: var(--sl-color-neutral-600);
 }
 
 kbd {
@@ -643,6 +653,18 @@ kbd {
   border: 0;
 }
 
+/* Shoelace renders a real <label> from the `label` attribute (proper a11y,
+   unlike aria-label on the host). In the dense toolbar we hide it visually
+   but keep it for assistive tech. */
+.visually-hidden-label::part(form-control-label) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
 /* suggestion-groupe drawer (focus mode: act on all of an acteur's fields) */
 .groupe-drawer::part(panel) {
   width: 32rem;
@@ -650,7 +672,7 @@ kbd {
 }
 
 .drawer-sub {
-  color: var(--sl-color-neutral-500);
+  color: var(--sl-color-neutral-600);
   font-size: 0.8rem;
   margin: 0 0 12px;
 }
@@ -681,7 +703,7 @@ kbd {
 }
 
 .drawer-diff .old {
-  color: var(--sl-color-neutral-500);
+  color: var(--sl-color-neutral-600);
   text-decoration: line-through;
   display: block;
 }
@@ -701,7 +723,7 @@ kbd {
 }
 
 .drawer-field.rejected .drawer-diff .new {
-  color: var(--sl-color-neutral-500);
+  color: var(--sl-color-neutral-600);
   text-decoration: line-through;
 }
 
@@ -722,7 +744,7 @@ kbd {
 
 .drawer-loading,
 .drawer-error {
-  color: var(--sl-color-neutral-500);
+  color: var(--sl-color-neutral-600);
   font-size: 0.85rem;
 }
 
@@ -805,7 +827,7 @@ kbd {
 }
 
 .focus-card .diff .old {
-  color: var(--sl-color-neutral-500);
+  color: var(--sl-color-neutral-600);
   text-decoration: line-through;
   display: block;
   overflow: hidden;
@@ -828,7 +850,7 @@ kbd {
 }
 
 .focus-card.rejected .diff .new {
-  color: var(--sl-color-neutral-500);
+  color: var(--sl-color-neutral-600);
   text-decoration: line-through;
 }
 
@@ -842,6 +864,17 @@ kbd {
 }
 
 .focus-empty {
-  color: var(--sl-color-neutral-500);
+  color: var(--sl-color-neutral-600);
   font-size: 0.85rem;
+}
+
+/* RGAA 13.8 / WCAG 2.3.3: honour the OS reduced-motion preference for the
+   decorative transitions on this screen (badge hover, etc.) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
