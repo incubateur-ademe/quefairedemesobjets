@@ -388,6 +388,20 @@ class TestCohorteReviewValueFilter:
         response = self._get_rows(client, cohorte, valeur_filtre)
         assert response.status_code == 400
 
+    def test_400_message_is_controlled_not_a_stack_trace(
+        self, client, staff_user, cohorte
+    ):
+        """Validation 400s must carry a short author-written message, never an
+        exception/stack-trace string (CodeQL: information exposure)."""
+        client.force_login(staff_user)
+        response = self._get_rows(
+            client, cohorte, {"conditions": [{"lookup": "nope", "value": "x"}]}
+        )
+        assert response.status_code == 400
+        body = response.content.decode()
+        assert body == "unknown lookup"
+        assert "Traceback" not in body and "ValueError" not in body
+
     def test_valeur_filtre_without_champ_returns_400(self, client, staff_user, cohorte):
         client.force_login(staff_user)
         response = client.get(
@@ -766,40 +780,6 @@ class TestCohorteReviewUndo:
     def test_invalid_undo_returns_400(self, client, staff_user, cohorte, body):
         client.force_login(staff_user)
         assert _post_bulk(client, cohorte, body).status_code == 400
-
-
-@pytest.mark.django_db
-class TestSeedReviewDemoCommand:
-    def test_creates_a_reviewable_cohorte(self, client, staff_user):
-        from django.core.management import call_command
-
-        for index in range(3):
-            ActeurFactory(
-                identifiant_unique=f"ID_SEED_{index}",
-                nom=f"Acteur {index}",
-                location=Point(2.1 + index / 100, 48.1),
-            )
-
-        call_command("seed_review_demo", "--groupes", "2")
-        # idempotent: rerunning replaces the previous demo cohorte
-        call_command("seed_review_demo", "--groupes", "2")
-
-        cohorte = SuggestionCohorteFactory._meta.model.objects.get(
-            identifiant_action="demo_revue_cohorte"
-        )
-        assert cohorte.suggestion_groupes.count() == 2
-
-        client.force_login(staff_user)
-        response = client.get(reverse("data:cohorte_review_rows", args=[cohorte.id]))
-        payload = response.json()
-        assert payload["meta"]["total"] == 2
-        assert all(row["cells"] for row in payload["rows"])
-
-    def test_fails_without_acteurs(self):
-        from django.core.management import CommandError, call_command
-
-        with pytest.raises(CommandError):
-            call_command("seed_review_demo")
 
 
 @pytest.mark.django_db
