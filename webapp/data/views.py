@@ -508,6 +508,11 @@ class ReviewValidationError(ValueError):
     leaking internal information.
     """
 
+    @property
+    def user_message(self) -> str:
+        """Return the safe, author-written error message."""
+        return self.args[0] if self.args else ""
+
 
 REVIEW_ROWS_DEFAULT_LIMIT = 100
 REVIEW_ROWS_MAX_LIMIT = 200
@@ -787,7 +792,7 @@ class CohorteReviewRowsView(IsStaffMixin, View):
                 )
             )
         except ReviewValidationError as e:
-            return HttpResponseBadRequest(str(e))
+            return HttpResponseBadRequest(e.user_message)
 
         total = queryset.count()
 
@@ -884,7 +889,7 @@ class CohorteReviewBulkView(IsStaffMixin, View):
         try:
             validate_review_champ(champ)
         except ReviewValidationError as e:
-            return HttpResponseBadRequest(str(e))
+            return HttpResponseBadRequest(e.user_message)
 
         groupe_ids = payload.get("groupe_ids")
         filter_payload = payload.get("filter")
@@ -926,9 +931,9 @@ class CohorteReviewBulkView(IsStaffMixin, View):
                     exclude_ids=exclude_ids,
                 )
             except ReviewValidationError as e:
-                return HttpResponseBadRequest(str(e))
+                return HttpResponseBadRequest(e.user_message)
 
-        new_statut = REVIEW_BULK_ACTION_TO_STATUT[action]
+            new_statut = REVIEW_BULK_ACTION_TO_STATUT[action]
         with transaction.atomic():
             targeted_ids = list(targeted.values_list("id", flat=True))
             unitaires = SuggestionUnitaire.objects.filter(
