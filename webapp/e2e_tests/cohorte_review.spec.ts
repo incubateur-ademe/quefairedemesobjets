@@ -1,7 +1,10 @@
 import { execSync } from "node:child_process"
+import { AxeBuilder } from "@axe-core/playwright"
 import { expect, Page } from "@playwright/test"
 import { test } from "./fixtures"
 import { navigateTo, TIMEOUT } from "./helpers"
+
+const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]
 
 /**
  * E2E coverage for the cohorte review screen (data:cohorte_review).
@@ -109,6 +112,19 @@ test.describe("🗂️ Revue de cohorte — grille", () => {
     await expect(page.locator('thead .focus-entry[data-field="url"]')).toBeVisible()
     // default filter is « à valider »
     await expect(page.locator(".status")).toContainText(`/ ${NB_AVALIDER} acteurs`)
+  })
+
+  test("la grille respecte les critères WCAG 2.1 AA (axe)", async ({ page }) => {
+    await openReview(page)
+    await expect(page.locator("tbody tr[data-groupe-id]").first()).toBeVisible({
+      timeout: TIMEOUT.DEFAULT,
+    })
+
+    const results = await new AxeBuilder({ page })
+      .include('[data-controller="cohorte-review"]')
+      .withTags(WCAG_TAGS)
+      .analyze()
+    expect(results.violations).toEqual([])
   })
 
   test("accepter une cellule la marque acceptée (UI optimiste)", async ({ page }) => {
@@ -291,6 +307,19 @@ test.describe("🎯 Revue de cohorte — mode focus", () => {
       timeout: TIMEOUT.DEFAULT,
     })
     await expect(page.locator(".focus-card.active")).toHaveCount(1)
+  })
+
+  test("le mode focus respecte les critères WCAG 2.1 AA (axe)", async ({ page }) => {
+    await openReview(page, "?focus=telephone")
+    await expect(page.locator(".focus-card").first()).toBeVisible({
+      timeout: TIMEOUT.DEFAULT,
+    })
+
+    const results = await new AxeBuilder({ page })
+      .include('[data-controller="cohorte-review"]')
+      .withTags(WCAG_TAGS)
+      .analyze()
+    expect(results.violations).toEqual([])
   })
 
   test("revue au clavier : ↓ navigue, A accepte, R rejette, U annule", async ({
