@@ -32,3 +32,16 @@ class TestSynonyme:
             f"""<link href="http://testserver/dechet/{synonyme.slug}/" rel="canonical"/>"""
             in str(soup)
         )
+
+    def test_footer_primary_button_points_at_standalone_fiche(self, client):
+        produit = ProduitFactory(nom="Un super produit")
+        synonyme = SynonymeFactory(produit=produit, nom="Un synonyme")
+
+        response = client.get(synonyme.get_absolute_url())
+
+        assert response.status_code == 200, "No redirect occurs"
+        button = response.context["footer_primary_button"]
+        assert button["label"] == "Lire plus sur cette fiche"
+        assert synonyme.get_absolute_url() in button["onclick"]
+        assert "utm_source=qfdmod" in button["onclick"]
+        assert "_blank" in button["onclick"]
