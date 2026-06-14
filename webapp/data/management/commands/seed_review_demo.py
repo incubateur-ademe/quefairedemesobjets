@@ -7,6 +7,7 @@ from data.models.suggestion import (
     SuggestionUnitaire,
 )
 from django.core.management.base import BaseCommand, CommandError
+from django.db import transaction
 from django.utils import timezone
 from qfdmo.models.acteur import Acteur
 
@@ -37,6 +38,7 @@ class Command(BaseCommand):
             help="Nombre de groupes de suggestions à créer (défaut : 50)",
         )
 
+    @transaction.atomic
     def handle(self, *args, **options):
         nb_groupes = options["groupes"]
         acteurs = list(Acteur.objects.order_by("identifiant_unique")[:nb_groupes])

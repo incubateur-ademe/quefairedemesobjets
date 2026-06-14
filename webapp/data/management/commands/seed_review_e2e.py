@@ -14,6 +14,7 @@ from data.models.suggestion import (
 )
 from django.contrib.gis.geos import Point
 from django.core.management.base import BaseCommand
+from django.db import transaction
 from qfdmo.models.acteur import Acteur, ActeurType
 
 E2E_IDENTIFIANT_ACTION = "e2e_revue_cohorte"
@@ -33,6 +34,7 @@ def _telephone(index: int) -> str:
 class Command(BaseCommand):
     help = "Seed a deterministic review cohorte for e2e tests (idempotent)."
 
+    @transaction.atomic
     def handle(self, *args, **options):
         # tear down the previous run (cascades to groupes + unitaires)
         SuggestionCohorte.objects.filter(
