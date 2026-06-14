@@ -500,6 +500,15 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
         )
 
 
+class ReviewValidationError(ValueError):
+    """A deliberate, client-safe validation error for the review endpoints.
+
+    Its message is author-written (never a stack trace or arbitrary
+    exception) so it can be returned verbatim in a 400 response without
+    leaking internal information.
+    """
+
+
 REVIEW_ROWS_DEFAULT_LIMIT = 100
 REVIEW_ROWS_MAX_LIMIT = 200
 REVIEW_BULK_MAX_GROUPES = 1000
@@ -584,7 +593,7 @@ REVIEW_VALUE_MAX_GROUPS = 5
 def _validated_combinator(payload: dict) -> str:
     combinator = payload.get("combinator", "et")
     if combinator not in {"et", "ou"}:
-        raise ValueError("combinator must be 'et' or 'ou'")
+        raise ReviewValidationError("combinator must be 'et' or 'ou'")
     return combinator
 
 
@@ -604,7 +613,7 @@ def _build_value_conditions_q(combinator: str, conditions: list | None) -> Q:
         or not conditions
         or len(conditions) > REVIEW_VALUE_MAX_CONDITIONS
     ):
-        raise ValueError(
+        raise ReviewValidationError(
             "conditions must be a non-empty list of at most "
             f"{REVIEW_VALUE_MAX_CONDITIONS} items"
         )
@@ -613,7 +622,7 @@ def _build_value_conditions_q(combinator: str, conditions: list | None) -> Q:
     condition_qs = []
     for condition in conditions:
         if not isinstance(condition, dict):
-            raise ValueError("each condition must be an object")
+            raise ReviewValidationError("each condition must be an object")
         lookup = condition.get("lookup")
         value = str(condition.get("value", ""))
         if lookup == "empty":
@@ -622,16 +631,16 @@ def _build_value_conditions_q(combinator: str, conditions: list | None) -> Q:
             condition_qs.append(~empty_q)
         elif lookup == "not_contains":
             if not value:
-                raise ValueError(f"value is required for lookup '{lookup}'")
+                raise ReviewValidationError("value is required for this lookup")
             condition_qs.append(~Q(valeurs__0__icontains=value))
         elif lookup in REVIEW_VALUE_LOOKUPS:
             if not value:
-                raise ValueError(f"value is required for lookup '{lookup}'")
+                raise ReviewValidationError("value is required for this lookup")
             condition_qs.append(
                 Q(**{f"valeurs__0__{REVIEW_VALUE_LOOKUPS[lookup]}": value})
             )
         else:
-            raise ValueError(f"unknown lookup '{lookup}'")
+            raise ReviewValidationError("unknown lookup")
 
     return _combine_qs(condition_qs, combinator)
 
@@ -650,7 +659,7 @@ def build_value_filter_q(valeur_filtre: dict) -> Q:
     Raises ValueError on anything else.
     """
     if not isinstance(valeur_filtre, dict):
-        raise ValueError("valeur_filtre must be an object")
+        raise ReviewValidationError("valeur_filtre must be an object")
     combinator = _validated_combinator(valeur_filtre)
 
     if "groups" in valeur_filtre:
@@ -660,14 +669,14 @@ def build_value_filter_q(valeur_filtre: dict) -> Q:
             or not groups
             or len(groups) > REVIEW_VALUE_MAX_GROUPS
         ):
-            raise ValueError(
+            raise ReviewValidationError(
                 "groups must be a non-empty list of at most "
                 f"{REVIEW_VALUE_MAX_GROUPS} items"
             )
         group_qs = []
         for group in groups:
             if not isinstance(group, dict):
-                raise ValueError("each group must be an object")
+                raise ReviewValidationError("each group must be an object")
             group_qs.append(
                 _build_value_conditions_q(
                     _validated_combinator(group), group.get("conditions")
@@ -687,12 +696,12 @@ REVIEW_VALID_STATUTS = frozenset(SuggestionStatut.values) | {"all"}
 
 def validate_review_champ(champ: str | None) -> None:
     if champ and champ not in REVIEW_VALID_CHAMPS:
-        raise ValueError(f"unknown champ: {champ}")
+        raise ReviewValidationError("unknown champ")
 
 
 def validate_review_statut(statut: str) -> None:
     if statut not in REVIEW_VALID_STATUTS:
-        raise ValueError(f"unknown statut: {statut}")
+        raise ReviewValidationError("unknown statut")
 
 
 def filter_review_groupes(
@@ -728,7 +737,7 @@ def filter_review_groupes(
         ).filter(acteur_id_text__icontains=q)
     if valeur_filtre is not None:
         if not champ:
-            raise ValueError("valeur_filtre requires champ")
+            raise ReviewValidationError("valeur_filtre requires champ")
         # champs=[champ] (exact single-field match) guarantees valeurs[0] is
         # the value of that field — grouped fields (latitude/longitude) are
         # out of scope for the value query builder
@@ -777,7 +786,7 @@ class CohorteReviewRowsView(IsStaffMixin, View):
                     "suggestion_unitaires", "acteur", "revision_acteur"
                 )
             )
-        except ValueError as e:
+        except ReviewValidationError as e:
             return HttpResponseBadRequest(str(e))
 
         total = queryset.count()
@@ -874,7 +883,7 @@ class CohorteReviewBulkView(IsStaffMixin, View):
         # fields — reject it on the write path
         try:
             validate_review_champ(champ)
-        except ValueError as e:
+        except ReviewValidationError as e:
             return HttpResponseBadRequest(str(e))
 
         groupe_ids = payload.get("groupe_ids")
@@ -916,7 +925,7 @@ class CohorteReviewBulkView(IsStaffMixin, View):
                     valeur_filtre=filter_payload.get("valeur_filtre"),
                     exclude_ids=exclude_ids,
                 )
-            except ValueError as e:
+            except ReviewValidationError as e:
                 return HttpResponseBadRequest(str(e))
 
         new_statut = REVIEW_BULK_ACTION_TO_STATUT[action]

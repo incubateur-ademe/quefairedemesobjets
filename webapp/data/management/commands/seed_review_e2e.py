@@ -1,11 +1,10 @@
 """Deterministic, self-contained review cohorte for the Playwright e2e suite
 and for manual testing on the sample database.
 
-Unlike `seed_review_demo` (which builds on existing acteurs), this command
-creates its own acteurs so it works against an empty sample database, and
-uses stable identifiers so tests can target known rows and assert exact
-counts. Idempotent: the previous e2e cohorte and its acteurs are removed
-and rebuilt.
+The command creates its own acteurs so it works against an empty sample
+database, and uses stable identifiers so tests can target known rows and
+assert exact counts. Idempotent: the previous e2e cohorte and its acteurs
+are removed and rebuilt.
 
 Data scheme (NB_GROUPES = 24, indices 0..23):
 - nom suggestion on every groupe.
