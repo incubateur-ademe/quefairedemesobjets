@@ -243,10 +243,13 @@ PARAMS = {
             exemple: ["code_postal", "ville"]""",
     ),
     "cluster_fuzzy_threshold": Param(
-        0.5,
+        50,
         type=["number", "null"],
+        examples=[0, 50, 90],
+        min_value=0,
+        max_value=100,
         description_md=f"""Seuil de similarité pour le groupage fuzzy.
-            0 = pas de similarité, 1 = similarité parfaite
+            0 = pas de similarité, 100 = similarité parfaite
 
             {UI_PARAMS_SEPARATORS.DEDUP_CHOOSE_PARENT}
 

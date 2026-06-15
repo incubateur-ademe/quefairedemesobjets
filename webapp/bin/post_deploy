@@ -10,3 +10,6 @@ python manage.py enable_trigram
 python manage.py clearsessions
 python manage.py clear_cache --all
 python manage.py create_remote_db_server
+
+# Purge orphan base SearchTerm index entries (django-modelsearch #58). Idempotent.
+python manage.py purge_orphan_searchterm_index

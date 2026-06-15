@@ -8,8 +8,8 @@ dependencies = [
     "apache-airflow-providers-fab>=3.6.4",
     "apache-airflow-providers-postgres>=6.7.0,<7",
     "apache-airflow-providers-standard>=1.13.1",
-    "apache-airflow>=3.0.0,<4",
-    "boto3>=1.43.15",
+    "apache-airflow>=3.2.2,<4",
+    "boto3>=1.43.21",
     "dbt-core>=1.11.11,<2",
     "dbt-postgres>=1.9.1,<2",
     "fuzzywuzzy>=0.18.0,<0.19",
@@ -34,9 +34,9 @@ dev = [
     "pytest-django>=4.9.0,<5",
     "pytest-dotenv>=0.5.2,<0.6",
     "pytest-mock>=3.14.1,<4",
-    "ruff>=0.15.14,<0.16",
+    "ruff>=0.15.15,<0.16",
     "dedupe>=3.0.3",
-    "ipython>=9.13.0,<10"
+    "ipython>=9.14.0,<10"
 ]
 
 [tool.pytest.ini_options]
