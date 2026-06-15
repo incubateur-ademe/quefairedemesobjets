@@ -41,6 +41,10 @@ server {
 <% end %>
     server_name _;
 
+<% if ENV["ENVIRONMENT"] != "production" %>
+    add_header X-Robots-Tag "noindex, nofollow" always;
+<% end %>
+
     # Redirect if host is not one of the allowed domains
     if ($is_valid_host = 0) {
         return 301 https://<%= ENV["BASE_DOMAIN"] %>$request_uri;
