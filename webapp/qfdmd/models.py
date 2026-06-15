@@ -42,11 +42,14 @@ logger = logging.getLogger(__name__)
 
 
 class PartitionedBody(NamedTuple):
-    """A ProduitPage body split around the ``carte_sur_mesure`` block.
+    """A ProduitPage body split around the first ``carte_sur_mesure`` or
+    ``break`` block (whichever comes first in the stream).
 
-    ``always_visible`` holds the blocks up to and including the carte, which are
-    shown in every context (including the iframe). ``hidden_in_iframe`` holds the
-    blocks after the carte, which are only rendered on the standalone page.
+    ``always_visible`` holds the blocks up to the split point (excluding the
+    split block itself when it is a ``break``, or including it when it is a
+    ``carte_sur_mesure``). These are shown in every context, including the
+    iframe. ``hidden_in_iframe`` holds the blocks after the split point, which
+    are only rendered on the standalone page.
     """
 
     always_visible: list
@@ -446,23 +449,37 @@ class ProduitPage(
 
     @cached_property
     def _partitioned_body(self) -> PartitionedBody:
-        """Split the body around the ``carte_sur_mesure`` block.
+        """Split the body around the first ``carte_sur_mesure`` or ``break``
+        block.
 
-        Everything up to and including the carte is always visible; everything
-        after it is hidden in the iframe. When the body has no carte block, all
-        blocks are always visible and nothing is hidden.
+        ``carte_sur_mesure`` is content and is included in the visible
+        partition. ``break`` is a pure marker and is excluded from both
+        partitions. When neither block is present, the whole body is always
+        visible.
         """
         # inspired by https://stackoverflow.com/a/55368810
-        carte_block = self.body.first_block_by_name("carte_sur_mesure")
-        if carte_block is None:
+        split_block_names = frozenset({"carte_sur_mesure", "break"})
+
+        # Find the first block in stream order that acts as a split point.
+        breakpoint_block = None
+        for item in self.body:
+            if item.block_type in split_block_names:
+                breakpoint_block = item
+                break
+
+        if breakpoint_block is None:
             return PartitionedBody(always_visible=list(self.body), hidden_in_iframe=[])
 
+        is_break_marker = breakpoint_block.block_type == "break"
         always_visible, hidden_in_iframe = [], []
         switch = True
         for item in self.body:
             out = always_visible if switch else hidden_in_iframe
-            if item.id == carte_block.id:
+            if item.id == breakpoint_block.id:
                 switch = False
+                if is_break_marker:
+                    # The break block is a pure marker — don't render it.
+                    continue
 
             out.append(item)
 
