@@ -96,12 +96,6 @@ parsing, which raises VariableDoesNotExist when seo is not in context (e.g., err
         {# Skip links for accessibility - using DSFR component #}
         {% dsfr_skiplinks skiplinks %}
 
-        {% if request.user.is_authenticated %}
-        <div class="qf-mt-2w qf-bg-red-marianne-main-472 qf-text-white qf-text-center qf-w-full qf-py-1v qf-text-xs">
-        Vous êtes bien authentifié, vos statistiques PostHog seront ignorées pour cette session | <a href="{% url 'admin:index' %}">accéder à l'administration</a>
-        </div>
-        {% endif %}
-
         {% wagtailuserbar %}
 
         {% block header %}
