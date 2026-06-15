@@ -2,8 +2,14 @@ import { test, expect } from "@playwright/test"
 import { navigateTo } from "./helpers"
 
 /**
- * E2E tests for the RGAA Mineurs fixes shipped on the
- * `accessibilite-rgaa-mineurs` branch. Each test maps to one Notion card.
+ * ⚠️ ATTENTION : Ce fichier est consolidé dans e2e_tests/a11y.spec.ts
+ * depuis le 2026-06-15. Les tests ci-dessous sont conservés pour référence
+ * mais les nouveaux tests d'accessibilité doivent être ajoutés dans a11y.spec.ts.
+ *
+ * Voir : improve-a11y-tests branch
+ *
+ * (Anciennement : E2E tests for the RGAA Mineurs fixes shipped on the
+ * `accessibilite-rgaa-mineurs` branch. Each test maps to one Notion card.)
  */
 test.describe("♿ RGAA Mineurs", () => {
   test.describe("A11Y-2 — Skip link sur tous les layouts (RGAA 12.7)", () => {

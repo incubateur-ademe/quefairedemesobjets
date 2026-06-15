@@ -2,6 +2,14 @@ import { AxeBuilder } from "@axe-core/playwright"
 import { test, expect } from "@playwright/test"
 import { navigateTo } from "./helpers"
 
+/**
+ * ⚠️ ATTENTION : Ce fichier est consolidé dans e2e_tests/a11y.spec.ts
+ * depuis le 2026-06-15. Les tests ci-dessous sont conservés pour référence
+ * mais les nouveaux tests d'accessibilité doivent être ajoutés dans a11y.spec.ts.
+ *
+ * Voir : improve-a11y-tests branch
+ */
+
 test.describe("♿ Conformité Accessibilité WCAG", () => {
   // Shared variables
   const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]
