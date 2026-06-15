@@ -60,9 +60,6 @@ runs:
         uv run python manage.py createcachetable
         # TODO: user make prepare-e2e-test here
         make migrate
-        # Remove duplicate MainMenu records that sites_conformes may
-        # create on each deploy (post_migrate signal also handles this)
-        uv run python manage.py fix_duplicate_mainmenu
         # TEMPORARY, required to have unaccent search function in CI
         # while it is not deployed on production
         uv run python manage.py enable_unaccent
