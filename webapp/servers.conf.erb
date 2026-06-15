@@ -41,7 +41,7 @@ server {
 <% end %>
     server_name _;
 
-<% if ENV["NGINX_NOINDEX"] %>
+<% if ENV["ENVIRONMENT"] != "production" %>
     add_header X-Robots-Tag "noindex, nofollow" always;
 <% end %>
 
