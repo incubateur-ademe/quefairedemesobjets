@@ -7,5 +7,6 @@ development/README.md
 deployment/README.md
 administration/README.md
 infrastructure/README.md
+team/README.md
 troubleshooting.md
 ```

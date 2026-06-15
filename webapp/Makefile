@@ -70,6 +70,8 @@ merge-migrations:
 .PHONY: rebuild-search-index
 rebuild-search-index:
 	$(DJANGO_ADMIN) rebuild_modelsearch_index
+	# rebuild never removes orphan base entries (django-modelsearch #58)
+	$(DJANGO_ADMIN) purge_orphan_searchterm_index
 
 
 .PHONY: createcachetable

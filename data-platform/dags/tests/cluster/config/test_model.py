@@ -25,7 +25,7 @@ class TestClusterConfigModel:
             "cluster_intra_source_is_allowed": False,
             "cluster_fields_exact": ["exact1", "exact2"],
             "cluster_fields_fuzzy": ["fuzzy1", "fuzzy2"],
-            "cluster_fuzzy_threshold": 0.5,
+            "cluster_fuzzy_threshold": 50,
             "dedup_enrich_fields": ["f1_incl", "f2_incl", "f3_excl"],
             "dedup_enrich_exclude_sources": ["source1 (id=1)"],
             "dedup_enrich_priority_sources": ["source1 (id=1)"],
@@ -178,21 +178,21 @@ class TestClusterConfigModel:
 
     def test_cluster_fuzzy_threshold_valid_range(self, params_working):
         # Le seuil doit être entre 0 et 1
-        params_working["cluster_fuzzy_threshold"] = 0.0
+        params_working["cluster_fuzzy_threshold"] = 0
         config = ClusterConfig(**params_working)
         assert config.cluster_fuzzy_threshold == 0.0
 
-        params_working["cluster_fuzzy_threshold"] = 1.0
+        params_working["cluster_fuzzy_threshold"] = 100
         config = ClusterConfig(**params_working)
         assert config.cluster_fuzzy_threshold == 1.0
 
-        params_working["cluster_fuzzy_threshold"] = 0.5
+        params_working["cluster_fuzzy_threshold"] = 50
         config = ClusterConfig(**params_working)
         assert config.cluster_fuzzy_threshold == 0.5
 
     def test_cluster_fuzzy_threshold_below_zero_is_rejected(self, params_working):
         # Pas de validation de range dans le modèle : on garde la valeur telle quelle
-        params_working["cluster_fuzzy_threshold"] = -0.1
+        params_working["cluster_fuzzy_threshold"] = -10
         with pytest.raises(
             ValueError,
             match=(
@@ -203,7 +203,7 @@ class TestClusterConfigModel:
 
     def test_cluster_fuzzy_threshold_above_one_is_rejected(self, params_working):
         # Pas de validation de range dans le modèle : on garde la valeur telle quelle
-        params_working["cluster_fuzzy_threshold"] = 1.1
+        params_working["cluster_fuzzy_threshold"] = 110
         with pytest.raises(
             ValueError,
             match=(
