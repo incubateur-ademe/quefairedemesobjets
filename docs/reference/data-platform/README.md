@@ -17,6 +17,7 @@ Some use `dbt`, other use `pandas`
 :maxdepth: 2
 
 airflow.md
+sources.md
 dbt.md
 clustering-deduplication.md
 ```
