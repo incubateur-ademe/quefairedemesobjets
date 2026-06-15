@@ -3,7 +3,7 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Recherche" href="../../search.html"><link rel="next" title="dbt Documentation" href="dbt.html"><link rel="prev" title="Data Platform" href="README.html">
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Recherche" href="../../search.html"><link rel="next" title="Sources d’ingestion et référentiels d’enrichissement" href="sources.html"><link rel="prev" title="Data Platform" href="README.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
         <title>Airflow - Documentation Que faire de mes objets et déchets</title>
@@ -201,6 +201,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../how-to/development/create_webapp_sample_db.html">Création de la base de données webapp_sample pour les tests</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../how-to/development/tests_e2e.html">Tests de Régression E2E</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../how-to/development/test_iframe_referrer.html">Tester le referrer d’une iframe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/development/secure_development.html">Bonnes pratiques de développement sécurisé</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../how-to/deployment/README.html">🛹 Déploiement de la plateforme</a><input aria-label="Toggle navigation of 🛹 Déploiement de la plateforme" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -217,21 +218,25 @@
 <li class="toctree-l3"><a class="reference internal" href="../../how-to/infrastructure/monitoring.html">Monitoring sur Scaleway</a></li>
 </ul>
 </li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../how-to/team/README.html">Gestion de l’équipe</a><input aria-label="Toggle navigation of Gestion de l’équipe" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/team/onboarding-offboarding.html">Onboarding &amp; offboarding des membres de l’équipe</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../../how-to/troubleshooting.html">☎️ 3615 jaidesproblemes</a></li>
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../explanations/README.html">❓ EXPLICATIONS</a><input aria-label="Toggle navigation of ❓ EXPLICATIONS" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../explanations/data/README.html">📊 Plateforme de données</a><input aria-label="Toggle navigation of 📊 Plateforme de données" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../explanations/README.html">❓ EXPLICATIONS</a><input aria-label="Toggle navigation of ❓ EXPLICATIONS" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../explanations/data/README.html">📊 Plateforme de données</a><input aria-label="Toggle navigation of 📊 Plateforme de données" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../explanations/data/ingestion-de-source.html">Ingestion des sources</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../explanations/data/flux-dbt.html">Description des flux DBT</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../explanations/data/flux-enrich.html">Enrichissement de données</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../explanations/db/README.html">Bases de données</a><input aria-label="Toggle navigation of Bases de données" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../explanations/db/README.html">Bases de données</a><input aria-label="Toggle navigation of Bases de données" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../explanations/db/prestation-delivery.html">Lieu de prestation</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../explanations/frontend/README.html">🎨 Frontend</a><input aria-label="Toggle navigation of 🎨 Frontend" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../explanations/frontend/README.html">🎨 Frontend</a><input aria-label="Toggle navigation of 🎨 Frontend" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../explanations/frontend/routing-nginx-cache.html">🚏 Routing, nginx et cache</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../explanations/frontend/routing-nginx-cache.html#nginx">nginx</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../explanations/frontend/routing-nginx-cache.html#whitenoise">Whitenoise</a></li>
@@ -242,26 +247,32 @@
 <li class="toctree-l2"><a class="reference internal" href="../../explanations/iframe/README.html">Afficher l’application dans une Iframe</a></li>
 </ul>
 </li>
-<li class="toctree-l1 current has-children"><a class="reference internal" href="../README.html">🧐 REFERENCE</a><input aria-label="Toggle navigation of 🧐 REFERENCE" checked="" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../README.html">🧐 REFERENCE</a><input aria-label="Toggle navigation of 🧐 REFERENCE" checked="" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2 has-children"><a class="reference internal" href="../architecture/README.html">Architecture applicative</a><input aria-label="Toggle navigation of Architecture applicative" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../architecture/data-flow.html">Flux de consolidation des données</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../architecture/external-services.html">Services externes consommés par la webapp</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../coding/README.html">Code Guidelines</a></li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../infrastructure/README.html">Infrastructure, monitoring, CI/CD</a><input aria-label="Toggle navigation of Infrastructure, monitoring, CI/CD" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../infrastructure/README.html">Infrastructure, monitoring, CI/CD</a><input aria-label="Toggle navigation of Infrastructure, monitoring, CI/CD" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../infrastructure/provisioning.html">Provisioning the infrastructure</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../infrastructure/ci-cd.html">CI/CD Documentation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../infrastructure/monitoring.html">Monitoring</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../db/README.html">Postgresql Database</a><input aria-label="Toggle navigation of Postgresql Database" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../db/README.html">Postgresql Database</a><input aria-label="Toggle navigation of Postgresql Database" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../db/db_organisation.html">Database organisation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../db/architecture.html">«La Carte» database architecture</a></li>
 </ul>
 </li>
-<li class="toctree-l2 current has-children"><a class="reference internal" href="README.html">Data Platform</a><input aria-label="Toggle navigation of Data Platform" checked="" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2 current has-children"><a class="reference internal" href="README.html">Data Platform</a><input aria-label="Toggle navigation of Data Platform" checked="" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l3 current current-page"><a class="current reference internal" href="#">Airflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sources.html">Sources d’ingestion et référentiels d’enrichissement</a></li>
 <li class="toctree-l3"><a class="reference internal" href="dbt.html">dbt Documentation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="clustering-deduplication.html">Clustering &amp; Deduplication</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../webapp/README.html">Webapp</a><input aria-label="Toggle navigation of Webapp" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../webapp/README.html">Webapp</a><input aria-label="Toggle navigation of Webapp" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../webapp/templates.html">Templates</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../webapp/look-and-feel.html">Look and feel</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../webapp/javascript.html">Javascript</a></li>
@@ -269,19 +280,30 @@
 <li class="toctree-l3"><a class="reference internal" href="../webapp/internationalization.html">Internationalisation</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../opendata/README.html">Open Data</a><input aria-label="Toggle navigation of Open Data" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../opendata/README.html">Open Data</a><input aria-label="Toggle navigation of Open Data" class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../opendata/changelog.html">Changelog du jeu de données Open Data : « Acteurs de l’économie circulaire - Que faire de mes objets et déchets »</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../opendata/exposure-opendata-acteur.html">Jeu de données open data : acteurs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../opendata/politique-de-version-du-jeu-de-donnees-open-data.html">Politique de version du jeu de données Open Data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../opendata/politique-de-version-du-jeu-de-donnees-open-data-interne.html">Organisation interne de la gestion des versions du jeu de données Open Data</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../apis/README.html">API Guidelines</a><input aria-label="Toggle navigation of API Guidelines" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../apis/README.html">API Guidelines</a><input aria-label="Toggle navigation of API Guidelines" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../apis/qfdmo.html">«Que faire de mes objets et déchets» API</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../apis/stats.html">Public statistics API</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../security/README.html">Security</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../security/README.html">Security</a><input aria-label="Toggle navigation of Security" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../security/inventory.html">Inventaire des actifs à protéger</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../security/providers.html">Prestataires &amp; exigences de sécurité</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../security/authentication.html">Authentification &amp; autorisations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../security/network.html">Sécurité réseau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../security/secrets.html">Gestion des secrets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../security/backups.html">Sauvegardes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../security/pca.html">Plan de continuité d’activité (PCA)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../security/pra.html">Plan de reprise d’activité (PRA)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../security/reviews.html">Revues régulières</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -324,6 +346,85 @@
         <article role="main" id="furo-main-content">
           <section id="airflow">
 <h1>Airflow<a class="headerlink" href="#airflow" title="Lien vers cette rubrique">¶</a></h1>
+<blockquote>
+<div><p><strong>Voir aussi</strong> : <a class="reference internal" href="sources.html"><span class="std std-doc">Sources d’ingestion</span></a>, <a class="reference internal" href="dbt.html"><span class="std std-doc">dbt</span></a>, <a class="reference internal" href="../architecture/README.html"><span class="std std-doc">Architecture applicative</span></a>.</p>
+</div></blockquote>
+<section id="configuration-runtime">
+<h2>Configuration runtime<a class="headerlink" href="#configuration-runtime" title="Lien vers cette rubrique">¶</a></h2>
+<ul class="simple">
+<li><p><strong>Version</strong> : <code class="docutils literal notranslate"><span class="pre">apache/airflow:slim-3.1.7-python3.12</span></code> (3 containers Scaleway : webserver <code class="docutils literal notranslate"><span class="pre">:8080</span></code>, scheduler avec dbt, dag-processor avec nginx healthcheck).</p></li>
+<li><p><strong>Executor</strong> : <code class="docutils literal notranslate"><span class="pre">LocalExecutor</span></code> (single-node).</p></li>
+<li><p><strong>Auth manager</strong> : <strong>FAB</strong> (<code class="docutils literal notranslate"><span class="pre">FabAuthManager</span></code>). Backends API : <code class="docutils literal notranslate"><span class="pre">basic_auth</span></code> + <code class="docutils literal notranslate"><span class="pre">session</span></code>. <strong>JWT</strong> pour les échanges internes (<code class="docutils literal notranslate"><span class="pre">AIRFLOW__API_AUTH__JWT_SECRET</span></code>).</p></li>
+<li><p><strong>Compte admin</strong> : créé au premier démarrage du webserver via <code class="docutils literal notranslate"><span class="pre">_AIRFLOW_WWW_USER_USERNAME</span> <span class="pre">/</span> <span class="pre">_PASSWORD</span> <span class="pre">/</span> <span class="pre">_EMAIL</span></code>.</p></li>
+<li><p><strong>Intégration Django</strong> : les DAGs importent les modèles Django via le package éditable <code class="docutils literal notranslate"><span class="pre">webapp-quefairedemesobjetsetdechets</span></code> et <code class="docutils literal notranslate"><span class="pre">utils.django.django_setup_full()</span></code> (settings <code class="docutils literal notranslate"><span class="pre">core.airflow_settings</span></code>).</p></li>
+<li><p><strong>Métadonnées</strong> : base PostgreSQL <code class="docutils literal notranslate"><span class="pre">lvao-{env}-airflow</span></code>, nettoyée quotidiennement par le DAG <code class="docutils literal notranslate"><span class="pre">airflow_cleanup_db</span></code>.</p></li>
+<li><p><strong>Logs distants</strong> : <code class="docutils literal notranslate"><span class="pre">AIRFLOW__LOGGING__REMOTE_LOGGING=true</span></code> vers le bucket S3 <code class="docutils literal notranslate"><span class="pre">lvao-{env}-airflow</span></code>.</p></li>
+</ul>
+</section>
+<section id="vue-d-ensemble-des-dags">
+<h2>Vue d’ensemble des DAGs<a class="headerlink" href="#vue-d-ensemble-des-dags" title="Lien vers cette rubrique">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Activité</p></th>
+<th class="head"><p>DAG(s)</p></th>
+<th class="head"><p>Schedule</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Ingestion des données des sources</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">eo-*</span></code>, <code class="docutils literal notranslate"><span class="pre">cma</span></code>, <code class="docutils literal notranslate"><span class="pre">pharmacies</span></code>, <code class="docutils literal notranslate"><span class="pre">source_sinoe</span></code>, <code class="docutils literal notranslate"><span class="pre">source-s3</span></code></p></td>
+<td><p>Manuel (<code class="docutils literal notranslate"><span class="pre">None</span></code>) — tag : <code class="docutils literal notranslate"><span class="pre">source</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Clonage de référentiels d’enrichissement</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">clone_ban_*</span></code>, <code class="docutils literal notranslate"><span class="pre">clone_ae_*</span></code>, <code class="docutils literal notranslate"><span class="pre">clone_laposte_codes_postaux</span></code>, <code class="docutils literal notranslate"><span class="pre">clone_koumoul_epci</span></code>, <code class="docutils literal notranslate"><span class="pre">clone_insee_commune</span></code>, <code class="docutils literal notranslate"><span class="pre">clone_ca_*</span></code></p></td>
+<td><p>Hebdo dimanche 00:00–02:00</p></td>
+</tr>
+<tr class="row-even"><td><p>Enrichissement des acteurs</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">enrich_acteurs_*</span></code> (RGPD, fermés, villes, code postal)</p></td>
+<td><p>Manuel</p></td>
+</tr>
+<tr class="row-odd"><td><p>Crawl &amp; validation des URLs</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">crawl_urls_suggestions</span></code></p></td>
+<td><p>Manuel</p></td>
+</tr>
+<tr class="row-even"><td><p>Clustering / déduplication</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cluster_acteur_suggestions</span></code></p></td>
+<td><p>Manuel</p></td>
+</tr>
+<tr class="row-odd"><td><p>Application des suggestions validées</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">apply_suggestions</span></code>, <code class="docutils literal notranslate"><span class="pre">apply_suggestions_groupe</span></code></p></td>
+<td><p>Toutes les 5 min</p></td>
+</tr>
+<tr class="row-even"><td><p>Calcul des tables d’acteurs affichés + import dans la webapp</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">compute_acteurs</span></code> (dbt + FDW)</p></td>
+<td><p>Quotidien <code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">0</span> <span class="pre">*</span> <span class="pre">*</span> <span class="pre">*</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Refresh des modèles dbt d’enrichissement</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">enrich_dbt_models_refresh</span></code></p></td>
+<td><p>Quotidien <code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">0</span> <span class="pre">*</span> <span class="pre">*</span> <span class="pre">*</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Calcul des statistiques</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">compute_stats</span></code> (<code class="docutils literal notranslate"><span class="pre">dbt</span> <span class="pre">run/test</span> <span class="pre">tag:stats</span></code>)</p></td>
+<td><p>Hebdo lundi 02:00</p></td>
+</tr>
+<tr class="row-odd"><td><p>Export opendata</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">export_opendata_dag</span></code> → S3 <code class="docutils literal notranslate"><span class="pre">lvao-opendata</span></code></p></td>
+<td><p>Hebdo lundi 01:00</p></td>
+</tr>
+<tr class="row-even"><td><p>Maintenance — purge metadata Airflow</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">airflow_cleanup_db</span></code> (<code class="docutils literal notranslate"><span class="pre">airflow</span> <span class="pre">db</span> <span class="pre">clean</span> <span class="pre">--skip-archive</span></code>, rétention 7 j)</p></td>
+<td><p>Quotidien <code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">0</span> <span class="pre">*</span> <span class="pre">*</span> <span class="pre">*</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Maintenance — purge logs DB Scaleway</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">purge_log_db</span></code> (<code class="docutils literal notranslate"><span class="pre">scw</span> <span class="pre">rdb</span> <span class="pre">log</span> <span class="pre">purge</span></code>)</p></td>
+<td><p>Toutes les heures à xx:03</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Les DAGs <code class="docutils literal notranslate"><span class="pre">compute_acteurs</span></code> matérialisent les tables d’acteurs via <code class="docutils literal notranslate"><span class="pre">IMPORT</span> <span class="pre">FOREIGN</span> <span class="pre">SCHEMA</span> <span class="pre">…</span> <span class="pre">LIMIT</span> <span class="pre">TO</span> <span class="pre">(…)</span></code> puis <code class="docutils literal notranslate"><span class="pre">INSERT</span> <span class="pre">INTO</span> <span class="pre">…</span> <span class="pre">SELECT</span></code> puis renommage atomique (swap <code class="docutils literal notranslate"><span class="pre">*_to_remove</span></code> → <code class="docutils literal notranslate"><span class="pre">DROP</span> <span class="pre">CASCADE</span></code>) pour minimiser le downtime. Voir <a class="reference internal" href="../db/db_organisation.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">db/db_organisation.md</span></code></span></a> pour le détail de la liaison <code class="docutils literal notranslate"><span class="pre">postgres_fdw</span></code>.</p>
+</section>
 <section id="file-organization">
 <h2>File organization<a class="headerlink" href="#file-organization" title="Lien vers cette rubrique">¶</a></h2>
 <p>This structure is mainly used when (re)organising files for source‑ingestion DAGs.</p>
@@ -497,12 +598,12 @@ flowchart TB
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="dbt.html">
+          <a class="next-page" href="sources.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">dbt Documentation</div>
+                <div class="title">Sources d’ingestion et référentiels d’enrichissement</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -548,6 +649,8 @@ flowchart TB
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Airflow</a><ul>
+<li><a class="reference internal" href="#configuration-runtime">Configuration runtime</a></li>
+<li><a class="reference internal" href="#vue-d-ensemble-des-dags">Vue d’ensemble des DAGs</a></li>
 <li><a class="reference internal" href="#file-organization">File organization</a></li>
 <li><a class="reference internal" href="#follow-the-rules">Follow the rules</a></li>
 <li><a class="reference internal" href="#suggestion-system">Suggestion system</a><ul>
