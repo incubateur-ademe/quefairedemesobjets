@@ -5,6 +5,7 @@ Here is technical the documentation abouteach part of the application
 ```{toctree}
 :maxdepth: 2
 
+architecture/README.md
 coding/README.md
 infrastructure/README.md
 db/README.md
