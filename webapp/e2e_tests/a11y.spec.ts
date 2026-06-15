@@ -562,10 +562,11 @@ test.describe("♿ RGAA 13.8 — Contenu en mouvement / animation", () => {
           style.animationIterationCount === "infinite"
         ) {
           const tag = el.tagName.toLowerCase()
-          const cls = (el as HTMLElement).className || ""
+          const cls = el.getAttribute("class") || ""
           // Tolérer les spinners et indicateurs de chargement
           if (
             cls.includes("spinner") ||
+            cls.includes("spin") ||
             cls.includes("loader") ||
             cls.includes("loading")
           ) {
