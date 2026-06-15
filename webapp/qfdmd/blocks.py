@@ -24,6 +24,29 @@ class Bonus(blocks.StaticBlock):
     pass
 
 
+class BreakBlock(blocks.StaticBlock):
+    """Invisible marker to split iframe vs standalone content.
+
+    When placed in a ``ProduitPage`` body, everything after this block is
+    hidden when the page is rendered inside an iframe. The block itself
+    renders nothing — it is purely a layout boundary.
+
+    Use this on pages that do **not** have a ``carte_sur_mesure`` block.
+    The iframe cut-point logic picks whichever comes first: the carte block
+    or this break block.
+    """
+
+    class Meta:
+        icon = "horizontal-rule"
+        label = "Césure iframe"
+        group = "3. Page structure"
+        admin_text = _(
+            "Tout ce qui se trouve après ce bloc est masqué lorsque la page est "
+            "affichée dans une iframe (par ex. intégration sur un site partenaire). "
+            "Utilisez-le sur les fiches qui n'ont pas de « Carte sur mesure »."
+        )
+
+
 class CustomBlockMixin(CommonStreamBlock):
     """Mixin to add common custom blocks to any block class."""
 
@@ -66,6 +89,7 @@ STREAMFIELD_COMMON_BLOCKS = [
             template="ui/blocks/carte.html",
         ),
     ),
+    ("break", BreakBlock()),
     (
         "liens",
         blocks.ListBlock(
