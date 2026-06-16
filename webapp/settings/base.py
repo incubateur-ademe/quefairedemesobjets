@@ -380,18 +380,6 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # Database
 # --------
-# GeoDjango library paths — read from environment (local dev via nix, CI via brew)
-GDAL_LIBRARY_PATH = decouple.config(
-    "GDAL_LIBRARY_PATH",
-    default=None,
-    cast=str,
-)
-GEOS_LIBRARY_PATH = decouple.config(
-    "GEOS_LIBRARY_PATH",
-    default=None,
-    cast=str,
-)
-
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 DATABASE_URL = decouple.config(
     "DATABASE_URL",
