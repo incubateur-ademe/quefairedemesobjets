@@ -16,7 +16,7 @@ updates:
     cooldown:
       default-days: 7
     allow:
-      dependency-type: "all"
+      - dependency-type: "all"
     groups:
       python-production-minor-patch:
         dependency-type: "production"
@@ -119,7 +119,7 @@ updates:
     cooldown:
       default-days: 7
     allow:
-      dependency-type: "all"
+      - dependency-type: "all"
     groups:
       github-actions-all:
         patterns:
@@ -134,10 +134,10 @@ updates:
       interval: "weekly"
       day: "tuesday"
       time: "06:45" # UTC
-    allow:
-      dependency-type: "all"
     cooldown:
       default-days: 7
+    allow:
+      - dependency-type: "all"
     groups:
       terraform-all:
         patterns:
