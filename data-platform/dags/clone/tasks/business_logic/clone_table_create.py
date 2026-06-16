@@ -211,8 +211,8 @@ def clone_table_create(
         # Create table schema to hold the data
         sql = (
             table_schema_file_path.read_text()
-            .replace(r"{{ table_name }}", table_name)
-            .replace(r"{{ db_schema }}", "public")
+            .replace(r"{{table_name}}", table_name)
+            .replace(r"{{db_schema}}", "public")
         )
         django_schema_create_and_check(table_name, sql, dry_run=dry_run)
 

@@ -67,12 +67,12 @@ def airflow_cleanup_db():
              --clean-before-timestamp '{{ params.clean_before_timestamp }}' \
              --batch-size {{ params.batch_size }} \
              --skip-archive \
-        {% if params.dry_run - %}
+        {% if params.dry_run -%}
              --dry-run \
-        {% endif - %}
-        {% if params.tables - %}
+        {% endif -%}
+        {% if params.tables -%}
              --tables '{{ params.tables|join(',') }}' \
-        {% endif - %}
+        {% endif -%}
              --verbose \
              --yes \
         """,
@@ -85,9 +85,9 @@ def airflow_cleanup_db():
         task_id="clean_archive_tables",
         bash_command="""\
             /opt/airflow/scripts/db_cleanup.sh db drop-archived \
-        {% if params.tables - %}
+        {% if params.tables -%}
              --tables {{ params.tables|join(',') }} \
-        {% endif - %}
+        {% endif -%}
              --yes \
         """,
         do_xcom_push=False,
