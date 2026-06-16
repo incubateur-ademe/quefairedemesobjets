@@ -885,8 +885,15 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "black" },
     { name = "dedupe" },
+    { name = "factory-boy" },
     { name = "ipython" },
+    { name = "pytest" },
+    { name = "pytest-django" },
+    { name = "pytest-dotenv" },
+    { name = "pytest-mock" },
+    { name = "ruff" },
 ]
 
 [package.metadata]
@@ -915,8 +922,15 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "black", specifier = ">=25.1.0,<26" },
     { name = "dedupe", specifier = ">=3.0.3" },
+    { name = "factory-boy", specifier = ">=3.3.1,<4" },
     { name = "ipython", specifier = ">=9.14.1,<10" },
+    { name = "pytest", specifier = ">=9.0.3,<10" },
+    { name = "pytest-django", specifier = ">=4.9.0,<5" },
+    { name = "pytest-dotenv", specifier = ">=0.5.2,<0.6" },
+    { name = "pytest-mock", specifier = ">=3.14.1,<4" },
+    { name = "ruff", specifier = ">=0.15.16,<0.16" },
 ]
 
 [[package]]
@@ -1999,18 +2013,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/9a/0c/49ee588cccb688b19924c5f02add6cb9ef9760a6f56be7113a738b75d2de/highered-0.2.1.tar.gz", hash = "sha256:5fcae90599dda98560d6f5347ff88aee56a4b8e7181d009852c3dc699c336fb7", size = 2057, upload-time = "2016-06-21T19:20:35.259Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/81/00/cbd902cfd14ad1992fcdaa11a615d47b36b6136dc690e19b0afa58c7365d/highered-0.2.1-py2.py3-none-any.whl", hash = "sha256:e09dd53feba1538fb6c7c8ff9385321cbc78dcf2f8ab1dc04387064293a9fe32", size = 3266, upload-time = "2016-06-21T19:20:39.263Z" },
-]
-
-[[package]]
-name = "honcho"
-version = "2.0.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "colorama", marker = "sys_platform == 'win32'" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/65/c8/d860888358bf5c8a6e7d78d1b508b59b0e255afd5655f243b8f65166dafd/honcho-2.0.0.tar.gz", hash = "sha256:af3815c03c634bf67d50f114253ea9fef72ecff26e4fd06b29234789ac5b8b2e", size = 45618, upload-time = "2024-10-06T14:26:53.871Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/48/1c/25631fc359955569e63f5446dbb7022c320edf9846cbe892ee5113433a7e/honcho-2.0.0-py3-none-any.whl", hash = "sha256:56dcd04fc72d362a4befb9303b1a1a812cba5da283526fbc6509be122918ddf3", size = 22093, upload-time = "2024-10-06T14:26:52.181Z" },
 ]
 
 [[package]]
@@ -3631,30 +3633,88 @@ source = { virtual = "." }
 
 [package.dev-dependencies]
 dev = [
+    { name = "beautifulsoup4" },
     { name = "black" },
     { name = "djade" },
+    { name = "django-browser-reload" },
+    { name = "django-debug-toolbar" },
+    { name = "django-silk" },
     { name = "factory-boy" },
     { name = "pre-commit" },
+    { name = "ptpython" },
     { name = "pytest" },
     { name = "pytest-django" },
     { name = "pytest-dotenv" },
     { name = "pytest-mock" },
     { name = "ruff" },
+    { name = "wagtail-factories" },
+]
+django = [
+    { name = "django-browser-reload" },
+    { name = "django-debug-toolbar" },
+    { name = "django-silk" },
+]
+lint = [
+    { name = "black" },
+    { name = "ruff" },
+]
+test = [
+    { name = "beautifulsoup4" },
+    { name = "factory-boy" },
+    { name = "pytest" },
+    { name = "pytest-django" },
+    { name = "pytest-dotenv" },
+    { name = "pytest-mock" },
+    { name = "wagtail-factories" },
+]
+tooling = [
+    { name = "djade" },
+    { name = "pre-commit" },
+    { name = "ptpython" },
 ]
 
 [package.metadata]
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "beautifulsoup4", specifier = ">=4.15.0,<5" },
     { name = "black", specifier = ">=25.1.0,<26" },
-    { name = "djade", specifier = ">=1.9.0" },
+    { name = "djade", specifier = ">=1.9.0,<2" },
+    { name = "django-browser-reload", specifier = ">=1.17.0,<2" },
+    { name = "django-debug-toolbar", specifier = ">=6.3.0,<7" },
+    { name = "django-silk", specifier = ">=5.5.0" },
     { name = "factory-boy", specifier = ">=3.3.1,<4" },
     { name = "pre-commit", specifier = ">=4.6.0,<5" },
+    { name = "ptpython", specifier = ">=3.0.30,<4" },
     { name = "pytest", specifier = ">=9.0.3,<10" },
     { name = "pytest-django", specifier = ">=4.9.0,<5" },
     { name = "pytest-dotenv", specifier = ">=0.5.2,<0.6" },
     { name = "pytest-mock", specifier = ">=3.14.1,<4" },
     { name = "ruff", specifier = ">=0.15.16,<0.16" },
+    { name = "wagtail-factories", specifier = ">=4.5.0,<5" },
+]
+django = [
+    { name = "django-browser-reload", specifier = ">=1.17.0,<2" },
+    { name = "django-debug-toolbar", specifier = ">=6.3.0,<7" },
+    { name = "django-silk", specifier = ">=5.5.0" },
+]
+lint = [
+    { name = "black", specifier = ">=25.1.0,<26" },
+    { name = "ruff", specifier = ">=0.15.16,<0.16" },
+]
+test = [
+    { name = "beautifulsoup4", specifier = ">=4.15.0,<5" },
+    { name = "factory-boy", specifier = ">=3.3.1,<4" },
+    { name = "pytest", specifier = ">=9.0.3,<10" },
+    { name = "pytest-django", specifier = ">=4.9.0,<5" },
+    { name = "pytest-dotenv", specifier = ">=0.5.2,<0.6" },
+    { name = "pytest-mock", specifier = ">=3.14.1,<4" },
+    { name = "wagtail-factories", specifier = ">=4.5.0,<5" },
+]
+tooling = [
+    { name = "djade", specifier = ">=1.9.0,<2" },
+    { name = "pre-commit", specifier = ">=4.6.0,<5" },
+    { name = "ptpython", specifier = ">=3.0.30,<4" },
 ]
 
 [[package]]
@@ -4638,12 +4698,19 @@ dependencies = [
 [package.dev-dependencies]
 dev = [
     { name = "beautifulsoup4" },
+    { name = "black" },
     { name = "djade" },
     { name = "django-browser-reload" },
     { name = "django-debug-toolbar" },
     { name = "django-silk" },
-    { name = "honcho" },
+    { name = "factory-boy" },
+    { name = "pre-commit" },
     { name = "ptpython" },
+    { name = "pytest" },
+    { name = "pytest-django" },
+    { name = "pytest-dotenv" },
+    { name = "pytest-mock" },
+    { name = "ruff" },
     { name = "wagtail-factories" },
 ]
 
@@ -4690,12 +4757,19 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "beautifulsoup4", specifier = ">=4.15.0,<5" },
+    { name = "black", specifier = ">=25.1.0,<26" },
     { name = "djade", specifier = ">=1.9.0,<2" },
     { name = "django-browser-reload", specifier = ">=1.17.0,<2" },
     { name = "django-debug-toolbar", specifier = ">=6.3.0,<7" },
     { name = "django-silk", specifier = ">=5.5.0" },
-    { name = "honcho", specifier = ">=2.0.0,<3" },
+    { name = "factory-boy", specifier = ">=3.3.1,<4" },
+    { name = "pre-commit", specifier = ">=4.6.0,<5" },
     { name = "ptpython", specifier = ">=3.0.30,<4" },
+    { name = "pytest", specifier = ">=9.0.3,<10" },
+    { name = "pytest-django", specifier = ">=4.9.0,<5" },
+    { name = "pytest-dotenv", specifier = ">=0.5.2,<0.6" },
+    { name = "pytest-mock", specifier = ">=3.14.1,<4" },
+    { name = "ruff", specifier = ">=0.15.16,<0.16" },
     { name = "wagtail-factories", specifier = ">=4.5.0,<5" },
 ]
 
