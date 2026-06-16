@@ -10,11 +10,9 @@ endif
 PYTHON := uv run python
 DJANGO_ADMIN := $(PYTHON) manage.py
 PYTEST := uv run pytest
-HONCHO := uv run honcho
-DB_URL := postgres://webapp:webapp@localhost:6543/webapp# pragma: allowlist secret
+DB_URL := postgres://webapp:***@localhost:6543/webapp# pragma: allowlist secret
 BASE_DOMAIN := quefairedemesdechets.ademe.local
 FIXTURES_OPTIONS := --indent 4 --natural-foreign --natural-primary
-HONCHO := uv run honcho
 
 .PHONY: sync
 sync:

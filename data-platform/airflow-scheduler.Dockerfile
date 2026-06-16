@@ -17,7 +17,8 @@ WORKDIR /opt/airflow/
 
 # Copy data-platform uv project structure
 COPY data-platform/pyproject.toml data-platform/pyproject.toml
-COPY data-platform/uv.lock data-platform/uv.lock
+COPY pyproject.toml pyproject.toml
+COPY uv.lock uv.lock
 
 # Copy webapp source (needed for package install)
 COPY webapp/pyproject.toml webapp/pyproject.toml
