@@ -23,8 +23,8 @@ runs:
       id: cache-venv
       uses: actions/cache@v4
       with:
-        path: ${{ inputs.working-directory }}/.venv
-        key: venv-${{ inputs.working-directory }}-${{ inputs.uv-groups }}-${{ hashFiles('uv.lock') }}
+        path: .venv
+        key: venv-${{ inputs.uv-groups }}-${{ hashFiles('uv.lock') }}
 
     - name: Install Python dependencies
       if: steps.cache-venv.outputs.cache-hit != 'true'
