@@ -28,7 +28,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "black>=25.1.0,<26",
+    "black>=25.12.0,<26",
     "factory-boy>=3.3.1,<4",
     "pytest>=9.1.1,<10",
     "pytest-django>=4.9.0,<5",
@@ -93,4 +93,4 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 package = false
 
 [tool.uv.sources]
-webapp-quefairedemesobjetsetdechets = { path = "../webapp", editable = true }
+webapp-quefairedemesobjetsetdechets = { workspace = true }
