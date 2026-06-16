@@ -48,7 +48,7 @@ with DAG(
     tags=[TAGS.ENRICH, TAGS.CRAWL, TAGS.ACTEURS, TAGS.URL, TAGS.SUGGESTIONS],
     params={
         "dry_run": Param(
-            True,
+            False,
             type="boolean",
             description_md=f"""🚱 Si coché, les URLs seront parcourues
             mais les suggestions pas écrites en base.
