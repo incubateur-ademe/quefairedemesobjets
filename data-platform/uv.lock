@@ -401,15 +401,15 @@ wheels = [
 
 [[package]]
 name = "apache-airflow-providers-standard"
-version = "1.13.1"
+version = "1.14.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apache-airflow" },
     { name = "apache-airflow-providers-common-compat" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/31/b3/01355e33cb7419d79ef5132355c39e4f356281aaf85d0419599a62a57c1f/apache_airflow_providers_standard-1.13.1.tar.gz", hash = "sha256:e80161bd0271eb6dfb4c7bd1226dfe0254a76c8f488e4ede867805b5f5b1dec1", size = 210920, upload-time = "2026-05-23T12:32:56.809Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/80/fd/72202c8f5bd2f49ab1413cdcb9de12b88c1ce027c76836762d97379b7c64/apache_airflow_providers_standard-1.14.0.tar.gz", hash = "sha256:0119c8b2c54994185a6ebf4e5c706eebf998ad856cc4cc22ffe012de69f328ec", size = 214566, upload-time = "2026-06-07T09:44:33.653Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/de/37/f89e550eec089a2070bfc2516b69df2c7262bd78d594e9b341a7c256efb8/apache_airflow_providers_standard-1.13.1-py3-none-any.whl", hash = "sha256:ba0a08f151cdae844b240485cfe7964ed40395fa38a84e7633f441261b07ae20", size = 158665, upload-time = "2026-05-23T12:32:01.32Z" },
+    { url = "https://files.pythonhosted.org/packages/d8/25/3633ce05c2dc2aad6b3e5ceaf10b6dd0e5ac40e78733ea99b0108b55d235/apache_airflow_providers_standard-1.14.0-py3-none-any.whl", hash = "sha256:2fbda76b0809b12abca1dec311062b5f3c7d84453ed502413c2b37e4da4d0543", size = 160445, upload-time = "2026-06-07T09:43:25.93Z" },
 ]
 
 [[package]]
@@ -901,7 +901,7 @@ requires-dist = [
     { name = "apache-airflow-providers-amazon", specifier = ">=9.29.0" },
     { name = "apache-airflow-providers-fab", specifier = ">=3.6.4" },
     { name = "apache-airflow-providers-postgres", specifier = ">=6.7.1,<7" },
-    { name = "apache-airflow-providers-standard", specifier = ">=1.13.1" },
+    { name = "apache-airflow-providers-standard", specifier = ">=1.14.0" },
     { name = "boto3", specifier = ">=1.43.25" },
     { name = "dbt-core", specifier = ">=1.11.11,<2" },
     { name = "dbt-postgres", specifier = ">=1.9.1,<2" },
@@ -4539,7 +4539,7 @@ dev = [
     { name = "pytest-dotenv", specifier = ">=0.5.2,<0.6" },
     { name = "pytest-mock", specifier = ">=3.14.1,<4" },
     { name = "ruff", specifier = ">=0.15.16,<0.16" },
-    { name = "wagtail-factories", specifier = ">=4.2.1,<5" },
+    { name = "wagtail-factories", specifier = ">=4.5.0,<5" },
 ]
 
 [[package]]
