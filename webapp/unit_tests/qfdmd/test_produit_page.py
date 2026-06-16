@@ -153,7 +153,7 @@ class TestProduitPagePartitionedBody:
 
 @pytest.mark.django_db
 class TestProduitPageFooterButton:
-    """ProduitPage exposes a "Lire plus sur cette fiche" footer button pointing
+    """ProduitPage exposes a "Voir plus de recommandations" footer button pointing
     at its own standalone URL, used in the iframe footer."""
 
     def test_get_context_includes_footer_primary_button(self, rf):
@@ -163,7 +163,7 @@ class TestProduitPageFooterButton:
         ctx = page.get_context(request)
 
         button = ctx["footer_primary_button"]
-        assert button["label"] == "Lire plus sur cette fiche"
+        assert button["label"] == "Voir plus de recommandations"
         assert "fr-icon-external-link-line" in button["extra_classes"]
         # The standalone link is tagged so visits from the iframe footer are
         # attributable.
