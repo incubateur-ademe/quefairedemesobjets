@@ -41,7 +41,7 @@ class CloneConfig(BaseModel):
     @property
     def table_name_pattern(self) -> re.Pattern:
         """Pattern to help us remove old tables"""
-        return re.compile(f"^{PREFIX_ALL}_{self.table_kind}_\\d{{14}}$")
+        return re.compile(f"^{PREFIX_ALL}_{self.table_kind}_\\d{{ 14 }}$")
 
     @computed_field
     @property
