@@ -39,7 +39,7 @@ with DAG(
             "product_mapping": get_mapping_config(
                 mapping_key="sous_categories_qualirepar"
             ),
-            "use_legacy_suggestions": True,
+            "use_legacy_suggestions": False,
         }
     ),
 ) as dag:

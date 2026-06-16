@@ -34,7 +34,7 @@ DEFAULT_BATCH_SIZE = 1000
     ],
     params={
         "dry_run": Param(
-            default=False,
+            False,
             type="boolean",
             description="🚱 Si coché: on affiche de l'info mais pas de nettoyage",
         ),

@@ -8,7 +8,7 @@ class TestClusterConfigModel:
     def params_working(self) -> dict:
         # Paramètres pour créer une config qui fonctionne
         return {
-            "dry_run": True,
+            "dry_run": False,
             "include_sources": ["source1 (id=1)", "source3 (id=3)"],
             "apply_include_sources_to_parents": True,
             "include_acteur_types": ["atype2 (id=2)", "atype3 (id=3)"],

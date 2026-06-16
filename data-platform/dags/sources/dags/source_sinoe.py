@@ -1,16 +1,15 @@
 import json
 
 from airflow import DAG
+from airflow.sdk.definitions.param import ParamsDict
+from qfdmo.models.acteur import ActeurStatus
 from shared.config.airflow import DEFAULT_ARGS_NO_RETRIES
 from shared.config.tags import TAGS
-from airflow.sdk.definitions.param import ParamsDict
 from sources.config.airflow_params import (
     get_mapping_config,
     source_sinoe_dechet_mapping_get,
 )
 from sources.tasks.airflow_logic.operators import default_params, eo_task_chain
-
-from qfdmo.models.acteur import ActeurStatus
 
 with DAG(
     dag_id="source_sinoe",
@@ -171,7 +170,7 @@ with DAG(
             "dechet_mapping": source_sinoe_dechet_mapping_get(),
             "validate_address_with_ban": False,
             "product_mapping": get_mapping_config("sous_categories_sinoe"),
-            "use_legacy_suggestions": True,
+            "use_legacy_suggestions": False,
         }
     ),
 ) as dag:
