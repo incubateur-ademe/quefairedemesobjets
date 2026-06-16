@@ -326,7 +326,7 @@ wheels = [
 
 [[package]]
 name = "apache-airflow-providers-fab"
-version = "3.6.4"
+version = "3.6.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apache-airflow" },
@@ -347,9 +347,9 @@ dependencies = [
     { name = "werkzeug" },
     { name = "wtforms" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e9/8e/8f83f27721fe562d0267d1464bce958c84879cc1f15dcc7f7c2db730da13/apache_airflow_providers_fab-3.6.4.tar.gz", hash = "sha256:9929465a448726fb38aff47344529f36c10ddc41efb0187ad223ad66cc19afb3", size = 833913, upload-time = "2026-05-23T12:32:32.595Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/1e/d6/228dcd6e734143dc5ed7ebe0167c5ee9f91eaa8f61ab4db22aee785fbab9/apache_airflow_providers_fab-3.6.5.tar.gz", hash = "sha256:bf2a014bd9b312a9f3a3498c973fa95d2d5de40d670f51b24f97400468032775", size = 833684, upload-time = "2026-06-07T09:43:58.135Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/fb/35/16b0ed3c463eb41bf772208e6c671512cc794348007e73ee6c08b1a0c72a/apache_airflow_providers_fab-3.6.4-py3-none-any.whl", hash = "sha256:8cc956cec46e27b49d7429c0e75fb2df5ba649e4294f7e696ae8c43b703f8378", size = 606521, upload-time = "2026-05-23T12:31:30.332Z" },
+    { url = "https://files.pythonhosted.org/packages/d6/41/b65c9d4d514717ec02aff0fe49ec5e419846aec637d0533a479e558690ee/apache_airflow_providers_fab-3.6.5-py3-none-any.whl", hash = "sha256:ef1e4206887fbd1e5f9cbd6f1ab01c7d1a670b2316107759e662ef9de241689e", size = 605934, upload-time = "2026-06-07T09:42:42.014Z" },
 ]
 
 [[package]]
@@ -371,7 +371,7 @@ wheels = [
 
 [[package]]
 name = "apache-airflow-providers-postgres"
-version = "6.7.0"
+version = "6.7.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apache-airflow" },
@@ -380,9 +380,9 @@ dependencies = [
     { name = "asyncpg" },
     { name = "psycopg2-binary" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/32/80/ca228db8942ba4d8e5d158d72fa9061e8f1a726c59eccbdba8a8cbaf4de4/apache_airflow_providers_postgres-6.7.0.tar.gz", hash = "sha256:abaaa3b71abfac9b2caf5aa2afff496e0fd498bce327d4e744fc08f779c44c40", size = 63333, upload-time = "2026-05-23T12:32:50.163Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/2c/92/d9c653260571c29d4db02bf1b1629a23301c2593e91d8ea96d2b21466833/apache_airflow_providers_postgres-6.7.1.tar.gz", hash = "sha256:b80092f22a010a4a93aa5dedf4a4090f6cae6c438c1180c08b090dbb1fcb0307", size = 62948, upload-time = "2026-06-07T09:44:24.901Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/60/34/d6a34a11c8b9b4743b880a1d0fd0761f15cdb2af161d19a0b4808952336c/apache_airflow_providers_postgres-6.7.0-py3-none-any.whl", hash = "sha256:aec6e35d0194e65e3095cebc2d23fdba636dcb0781e27edcaf6aa3826e102ed9", size = 24390, upload-time = "2026-05-23T12:31:53.152Z" },
+    { url = "https://files.pythonhosted.org/packages/68/11/1c49967d8a521dec0d593f560d96dc67ecac02b63aaf61ed34750aa2dbd6/apache_airflow_providers_postgres-6.7.1-py3-none-any.whl", hash = "sha256:75c9242dfae0849f9db68f20fc1206b71f0a240f263589259f8cb8e4e287258b", size = 24320, upload-time = "2026-06-07T09:43:13.929Z" },
 ]
 
 [[package]]
@@ -401,15 +401,15 @@ wheels = [
 
 [[package]]
 name = "apache-airflow-providers-standard"
-version = "1.13.1"
+version = "1.14.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apache-airflow" },
     { name = "apache-airflow-providers-common-compat" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/31/b3/01355e33cb7419d79ef5132355c39e4f356281aaf85d0419599a62a57c1f/apache_airflow_providers_standard-1.13.1.tar.gz", hash = "sha256:e80161bd0271eb6dfb4c7bd1226dfe0254a76c8f488e4ede867805b5f5b1dec1", size = 210920, upload-time = "2026-05-23T12:32:56.809Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/80/fd/72202c8f5bd2f49ab1413cdcb9de12b88c1ce027c76836762d97379b7c64/apache_airflow_providers_standard-1.14.0.tar.gz", hash = "sha256:0119c8b2c54994185a6ebf4e5c706eebf998ad856cc4cc22ffe012de69f328ec", size = 214566, upload-time = "2026-06-07T09:44:33.653Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/de/37/f89e550eec089a2070bfc2516b69df2c7262bd78d594e9b341a7c256efb8/apache_airflow_providers_standard-1.13.1-py3-none-any.whl", hash = "sha256:ba0a08f151cdae844b240485cfe7964ed40395fa38a84e7633f441261b07ae20", size = 158665, upload-time = "2026-05-23T12:32:01.32Z" },
+    { url = "https://files.pythonhosted.org/packages/d8/25/3633ce05c2dc2aad6b3e5ceaf10b6dd0e5ac40e78733ea99b0108b55d235/apache_airflow_providers_standard-1.14.0-py3-none-any.whl", hash = "sha256:2fbda76b0809b12abca1dec311062b5f3c7d84453ed502413c2b37e4da4d0543", size = 160445, upload-time = "2026-06-07T09:43:25.93Z" },
 ]
 
 [[package]]
@@ -899,9 +899,9 @@ dev = [
 requires-dist = [
     { name = "apache-airflow", specifier = ">=3.2.2,<4" },
     { name = "apache-airflow-providers-amazon", specifier = ">=9.29.0" },
-    { name = "apache-airflow-providers-fab", specifier = ">=3.6.4" },
-    { name = "apache-airflow-providers-postgres", specifier = ">=6.7.0,<7" },
-    { name = "apache-airflow-providers-standard", specifier = ">=1.13.1" },
+    { name = "apache-airflow-providers-fab", specifier = ">=3.6.5" },
+    { name = "apache-airflow-providers-postgres", specifier = ">=6.7.1,<7" },
+    { name = "apache-airflow-providers-standard", specifier = ">=1.14.0" },
     { name = "boto3", specifier = ">=1.43.25" },
     { name = "dbt-core", specifier = ">=1.11.11,<2" },
     { name = "dbt-postgres", specifier = ">=1.9.1,<2" },
@@ -4527,19 +4527,19 @@ dev = [
     { name = "beautifulsoup4", specifier = ">=4.15.0,<5" },
     { name = "black", specifier = ">=26.5.1,<27" },
     { name = "djade", specifier = ">=1.9.0,<2" },
-    { name = "django-browser-reload", specifier = ">=1.17.0,<2" },
+    { name = "django-browser-reload", specifier = ">=1.21.0,<2" },
     { name = "django-debug-toolbar", specifier = ">=6.3.0,<7" },
     { name = "django-silk", specifier = ">=5.5.0" },
     { name = "factory-boy", specifier = ">=3.3.1,<4" },
     { name = "honcho", specifier = ">=2.0.0,<3" },
     { name = "pre-commit", specifier = ">=4.6.0,<5" },
-    { name = "ptpython", specifier = ">=3.0.30,<4" },
+    { name = "ptpython", specifier = ">=3.0.32,<4" },
     { name = "pytest", specifier = ">=9.0.3,<10" },
     { name = "pytest-django", specifier = ">=4.9.0,<5" },
     { name = "pytest-dotenv", specifier = ">=0.5.2,<0.6" },
     { name = "pytest-mock", specifier = ">=3.14.1,<4" },
     { name = "ruff", specifier = ">=0.15.16,<0.16" },
-    { name = "wagtail-factories", specifier = ">=4.2.1,<5" },
+    { name = "wagtail-factories", specifier = ">=4.5.0,<5" },
 ]
 
 [[package]]

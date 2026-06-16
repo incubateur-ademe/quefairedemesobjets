@@ -52,7 +52,7 @@ with DAG(
             On y associera alors le geste `donner`.
             """,
             ),
-            "use_legacy_suggestions": True,
+            "use_legacy_suggestions": False,
         }
     ),
 ) as dag:

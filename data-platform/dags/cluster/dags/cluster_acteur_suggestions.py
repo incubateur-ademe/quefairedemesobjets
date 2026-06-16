@@ -59,7 +59,7 @@ exclus_string = "  \n".join([", ".join(chunck) for chunck in fields_enrich_exclu
 DAG_ID = "cluster_acteur_suggestions"
 PARAMS = {
     "dry_run": Param(
-        True,
+        False,
         type="boolean",
         description_md=f"""
             🚱 Si coché, aucune tâche d'écriture ne sera effectuée.

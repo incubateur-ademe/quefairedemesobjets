@@ -5,9 +5,9 @@ description = "Data platform - Airflow DAGs, dbt"
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "apache-airflow-providers-amazon>=9.29.0",
-    "apache-airflow-providers-fab>=3.6.4",
-    "apache-airflow-providers-postgres>=6.7.0,<7",
-    "apache-airflow-providers-standard>=1.13.1",
+    "apache-airflow-providers-fab>=3.6.5",
+    "apache-airflow-providers-postgres>=6.7.1,<7",
+    "apache-airflow-providers-standard>=1.14.0",
     "apache-airflow>=3.2.2,<4",
     "boto3>=1.43.25",
     "dbt-core>=1.11.11,<2",
