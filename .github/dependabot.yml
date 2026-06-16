@@ -1,4 +1,5 @@
 # https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+# https://docs.github.com/en/code-security/tutorials/secure-your-dependencies/optimizing-pr-creation-version-updates
 
 version: 2
 
@@ -14,8 +15,21 @@ updates:
       time: "06:00" # UTC
     cooldown:
       default-days: 7
-    allow:
-      - dependency-type: "all"
+    groups:
+      python-production-minor-patch:
+        dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
+      python-development-minor-patch:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+      python-major:
+        update-types:
+          - "major"
+
   - package-ecosystem: "npm"
     directory: "/webapp"
     open-pull-requests-limit: 100
@@ -25,9 +39,8 @@ updates:
       time: "06:15" # UTC
     cooldown:
       default-days: 7
-    allow:
-      - dependency-type: "all"
     groups:
+      # Named groups (specific packages get their own PRs)
       babel:
         patterns:
           - "@babel/*"
@@ -35,6 +48,7 @@ updates:
         patterns:
           - "@parcel/*"
           - "parcel"
+          - "parcel*"
       protobufjs:
         patterns:
           - "@protobufjs/*"
@@ -54,9 +68,51 @@ updates:
       jest:
         patterns:
           - "*jest*"
+          - "@types/jest"
       eslint:
         patterns:
           - "*eslint*"
+      hotwired:
+        patterns:
+          - "@hotwired/*"
+      iframe-resizer:
+        patterns:
+          - "@iframe-resizer/*"
+      maplibre:
+        patterns:
+          - "maplibre-gl"
+          - "@maplibre/*"
+      postcss:
+        patterns:
+          - "postcss*"
+      playwright:
+        patterns:
+          - "*playwright*"
+      gouvfr:
+        patterns:
+          - "@gouvfr/*"
+      testing:
+        patterns:
+          - "@testing-library/*"
+      typescript-toolchain:
+        patterns:
+          - "typescript*"
+          - "ts-jest"
+          - "ts-node"
+
+      # Catch-all: remaining deps grouped by semver
+      npm-minor-patch:
+        update-types:
+          - "minor"
+          - "patch"
+        patterns:
+          - "*"
+      npm-major:
+        update-types:
+          - "major"
+        patterns:
+          - "*"
+
   - package-ecosystem: "github-actions"
     directory: "/"
     open-pull-requests-limit: 100
@@ -66,8 +122,11 @@ updates:
       time: "06:30" # UTC
     cooldown:
       default-days: 7
-    allow:
-      - dependency-type: "all"
+    groups:
+      github-actions-all:
+        patterns:
+          - "*"
+
   - package-ecosystem: "terraform"
     directories:
       - "/infrastructure/modules/*"
@@ -79,5 +138,7 @@ updates:
       time: "06:45" # UTC
     cooldown:
       default-days: 7
-    allow:
-      - dependency-type: "all"
+    groups:
+      terraform-all:
+        patterns:
+          - "*"
