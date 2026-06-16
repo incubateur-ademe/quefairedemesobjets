@@ -69,6 +69,9 @@ server {
         proxy_cache_valid 200 301 302 10m;
         proxy_cache_valid 404 1m;
         add_header X-Cache-Status $upstream_cache_status always;
+<% if ENV["ENVIRONMENT"] != "production" %>
+        add_header X-Robots-Tag "noindex, nofollow" always;
+<% end %>
     }
 
     # PostHog proxy - keeps analytics traffic on our domain, bypasses ad-blockers
@@ -111,6 +114,9 @@ server {
         proxy_cache_use_stale error timeout updating;
         proxy_cache_background_update on;
         add_header X-Cache-Status $upstream_cache_status always;
+<% if ENV["ENVIRONMENT"] != "production" %>
+        add_header X-Robots-Tag "noindex, nofollow" always;
+<% end %>
     }
 
     location ~ ^/(favicon(?:-\d+)?.(?:jpe?g|png|ico))$ {
