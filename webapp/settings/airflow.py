@@ -1,4 +1,7 @@
 # ruff: noqa: F405
+# F405 is suppressed because this file relies on star imports from base.py.
+# All names (INSTALLED_APPS, MIDDLEWARE, LOGGING_CONFIG, etc.) are defined
+# in settings.base and intentionally overridden here.
 from settings.base import *  # noqa: F403
 
 # Inactive the logging when Django is use in Airflow because it's not compatible
