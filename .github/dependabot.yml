@@ -15,6 +15,8 @@ updates:
       time: "06:00" # UTC
     cooldown:
       default-days: 7
+    allow:
+      dependency-type: "all"
     groups:
       python-production-minor-patch:
         dependency-type: "production"
@@ -26,9 +28,6 @@ updates:
         update-types:
           - "minor"
           - "patch"
-      python-major:
-        update-types:
-          - "major"
 
   - package-ecosystem: "npm"
     directory: "/webapp"
@@ -39,6 +38,8 @@ updates:
       time: "06:15" # UTC
     cooldown:
       default-days: 7
+    allow:
+      dependency-type: "all"
     groups:
       # Named groups (specific packages get their own PRs)
       babel:
@@ -107,11 +108,6 @@ updates:
           - "patch"
         patterns:
           - "*"
-      npm-major:
-        update-types:
-          - "major"
-        patterns:
-          - "*"
 
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -122,6 +118,8 @@ updates:
       time: "06:30" # UTC
     cooldown:
       default-days: 7
+    allow:
+      dependency-type: "all"
     groups:
       github-actions-all:
         patterns:
@@ -136,6 +134,8 @@ updates:
       interval: "weekly"
       day: "tuesday"
       time: "06:45" # UTC
+    allow:
+      dependency-type: "all"
     cooldown:
       default-days: 7
     groups:
