@@ -2,7 +2,7 @@ UTM_SOURCE = "qfdmod"
 
 
 def lire_plus_button(url: str) -> dict[str, str]:
-    """Build the "Lire plus sur cette fiche" footer button shown in the iframe.
+    """Build the "Voir plus de recommandations" footer button shown in the iframe.
 
     The button opens the standalone version of the fiche in a new tab. It is
     used both by ProduitPage (Wagtail) and SynonymeDetailView (legacy fiche),
@@ -13,7 +13,7 @@ def lire_plus_button(url: str) -> dict[str, str]:
     """
     tagged_url = f"{url}?utm_source={UTM_SOURCE}"
     return {
-        "label": "Lire plus sur cette fiche",
+        "label": "Voir plus de recommandations",
         "extra_classes": "fr-btn--icon-left fr-icon-external-link-line",
         "onclick": f"window.open('{tagged_url}', '_blank', 'noopener,noreferrer')",
     }

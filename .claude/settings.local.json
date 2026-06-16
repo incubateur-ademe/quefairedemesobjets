@@ -1,0 +1,10 @@
+{
+  "enabledMcpjsonServers": [
+    "playwright"
+  ],
+  "permissions": {
+    "allow": [
+      "Bash(git *)"
+    ]
+  }
+}
