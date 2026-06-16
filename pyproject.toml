@@ -10,6 +10,7 @@ members = ["webapp", "data-platform"]
 [dependency-groups]
 dev = [
     "black>=25.1.0,<26",
+    "djade>=1.9.0",
     "factory-boy>=3.3.1,<4",
     "pre-commit>=4.6.0,<5",
     "pytest>=9.0.3,<10",
