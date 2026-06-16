@@ -12,7 +12,7 @@ def clone_view_in_use_switch(
     """Switching the in-use view to point to the new table"""
     sql = (
         view_schema_file_path.read_text()
-        .replace(r"{{view_name}}", view_name)
-        .replace(r"{{table_name}}", table_name)
+        .replace(r"{{ view_name }}", view_name)
+        .replace(r"{{ table_name }}", table_name)
     )
     django_schema_create_and_check(schema_name=table_name, sql=sql, dry_run=dry_run)

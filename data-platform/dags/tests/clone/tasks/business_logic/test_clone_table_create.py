@@ -15,7 +15,7 @@ class TestSqlTablesCreation:
     def test_sql_content(self, path):
         # Making sure the key statements are present in the SQL
         sql = path.read_text()
-        sql = sql.replace(r"{{table_name}}", "my_table")
+        sql = sql.replace(r"{{ table_name }}", "my_table")
         # We DON'T drop tables during creation as they are versioned
         assert "DROP TABLE" not in sql
         assert "CREATE TABLE my_table" in sql

@@ -50,14 +50,12 @@ def copy_tables_between_servers(cursor, prefix_dbt, prefix_django, tables):
             )
 
             # Get column names in correct order
-            cursor.execute(
-                f"""
+            cursor.execute(f"""
                 SELECT column_name
                 FROM information_schema.columns
                 WHERE table_name = '{prefix_django}{table}'
                 ORDER BY ordinal_position
-            """
-            )
+            """)
             columns = [col[0] for col in cursor.fetchall()]
             columns_str = ", ".join(columns)
 
