@@ -22,13 +22,15 @@ from dags.cluster.config.models import ClusterConfig  # noqa: E402
 
 
 @pytest.mark.django_db()
-@pytest.mark.skip(reason="""
+@pytest.mark.skip(
+    reason="""
     Disabled on 2025-04-07 because:
     - this was a POC, it was not actually testing the clustering DAG
     - During refactoring for PR1501, I ran into some issues I couldn't
         troubleshoot regarding task ids (_display still present vs. _prepare),
         wasn't obvious, and needed to move on
-    """)
+    """
+)
 class TestClusterDedupSkipped:
 
     @pytest.fixture
