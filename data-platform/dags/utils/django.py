@@ -37,7 +37,7 @@ def django_setup_full() -> None:
     Full init of our Django environment.
     Safe to call from multiple modules at import time: Django is initialized only once.
     """
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.airflow_settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings.airflow")
 
     import django
 
