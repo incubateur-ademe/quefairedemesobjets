@@ -36,9 +36,11 @@ def airflow_params_dropdown_selected_to_ids(
         return []
     invalid = [x for x in dropdown_selected if ID_PREFIX not in x]
     if invalid:
-        raise ValueError(f"""Valeurs invalides sans ID_PREFIX {ID_PREFIX}: {invalid}.
+        raise ValueError(
+            f"""Valeurs invalides sans ID_PREFIX {ID_PREFIX}: {invalid}.
                          Utiliser airflow_params_dropdown_from_mapping
-                         pour générer les dropdowns.""")
+                         pour générer les dropdowns."""
+        )
     codes = [re.sub(r" \(id=\d+\)$", "", v) for v in dropdown_selected]
     # Si des codes n'ont pas bien étés extraits où ne sont pas dans le mapping
     missing = [x for x in codes if x not in mapping_ids_by_codes]
