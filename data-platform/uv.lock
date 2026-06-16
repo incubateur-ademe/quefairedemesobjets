@@ -4527,7 +4527,7 @@ dev = [
     { name = "beautifulsoup4", specifier = ">=4.15.0,<5" },
     { name = "black", specifier = ">=26.5.1,<27" },
     { name = "djade", specifier = ">=1.9.0,<2" },
-    { name = "django-browser-reload", specifier = ">=1.17.0,<2" },
+    { name = "django-browser-reload", specifier = ">=1.21.0,<2" },
     { name = "django-debug-toolbar", specifier = ">=6.3.0,<7" },
     { name = "django-silk", specifier = ">=5.5.0" },
     { name = "factory-boy", specifier = ">=3.3.1,<4" },
