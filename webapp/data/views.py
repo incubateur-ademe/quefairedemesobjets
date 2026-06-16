@@ -2,11 +2,12 @@ import json
 import logging
 from collections import Counter
 
-from core.views import IsStaffMixin
+from core.views import IsStaffMixin, IsSuperuserMixin
 from data.forms import SuggestionGroupeStatusForm
 from data.models.suggestion import (
     SuggestionAction,
     SuggestionCohorte,
+    SuggestionCohorteStatut,
     SuggestionGroupe,
     SuggestionStatut,
     SuggestionUnitaire,
@@ -20,8 +21,9 @@ from data.models.suggestions.source import (
 from data.models.utils import prepare_acteur_data_with_location
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import CharField, Exists, OuterRef, Q, QuerySet
+from django.db.models import CharField, Count, Exists, OuterRef, Q, QuerySet
 from django.db.models.functions import Cast
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render
@@ -1054,3 +1056,141 @@ class CohorteReviewBulkView(IsStaffMixin, View):
             has_pending=False,
             has_non_rejected_decision=False,
         ).update(statut=SuggestionStatut.REJETEE)
+
+
+COHORT_ADMIN_PAGE_SIZE = 100
+
+
+class CohortAdminListView(IsSuperuserMixin, TemplateView):
+    template_name = "data/cohorte_admin_list.html"
+
+    SORT_FIELDS = {
+        "id": "id",
+        "action": "identifiant_action",
+        "execution": "identifiant_execution",
+        "statut": "statut",
+        "progression": "pending_groupes",
+        "date": "cree_le",
+    }
+    DEFAULT_SORT = "date"
+    DEFAULT_DIR = "desc"
+
+    NUMERIC_OPERATORS = {
+        "eq": "exact",
+        "ne": "exact",
+        "lt": "lt",
+        "lte": "lte",
+        "gt": "gt",
+        "gte": "gte",
+    }
+
+    def _resolve_sort(self):
+        sort = self.request.GET.get("sort", "")
+        direction = self.request.GET.get("dir", "")
+        if sort not in self.SORT_FIELDS:
+            sort = self.DEFAULT_SORT
+        if direction not in ("asc", "desc"):
+            direction = "asc" if sort != self.DEFAULT_SORT else self.DEFAULT_DIR
+        return sort, direction
+
+    def _resolve_filters(self):
+        get = self.request.GET
+        filters = {
+            "identifiant_action": get.get("identifiant_action", "").strip(),
+            "type_action": get.get("type_action", "").strip(),
+            "statut": get.get("statut", "").strip(),
+            "reste_op": get.get("reste_op", "").strip(),
+            "reste_val": get.get("reste_val", "").strip(),
+        }
+        if filters["type_action"] not in SuggestionAction.values:
+            filters["type_action"] = ""
+        if filters["statut"] not in SuggestionCohorteStatut.values:
+            filters["statut"] = ""
+        return filters
+
+    def _apply_filters(self, queryset, filters):
+        if filters["identifiant_action"]:
+            queryset = queryset.filter(
+                identifiant_action__icontains=filters["identifiant_action"]
+            )
+        if filters["type_action"]:
+            queryset = queryset.filter(type_action=filters["type_action"])
+        if filters["statut"]:
+            queryset = queryset.filter(statut=filters["statut"])
+
+        lookup = self.NUMERIC_OPERATORS.get(filters["reste_op"])
+        if lookup is not None and filters["reste_val"].isdigit():
+            value = int(filters["reste_val"])
+            condition = Q(**{f"pending_groupes__{lookup}": value})
+            if filters["reste_op"] == "ne":
+                condition = ~condition
+            queryset = queryset.filter(condition)
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        sort, direction = self._resolve_sort()
+        filters = self._resolve_filters()
+
+        queryset = SuggestionCohorte.objects.annotate(
+            total_groupes=Count("suggestion_groupes"),
+            validated_groupes=Count(
+                "suggestion_groupes",
+                filter=~Q(suggestion_groupes__statut=SuggestionStatut.AVALIDER),
+            ),
+            pending_groupes=Count(
+                "suggestion_groupes",
+                filter=Q(suggestion_groupes__statut=SuggestionStatut.AVALIDER),
+            ),
+        ).filter(total_groupes__gt=0)
+        queryset = self._apply_filters(queryset, filters)
+
+        order_field = self.SORT_FIELDS[sort]
+        if direction == "desc":
+            order_field = f"-{order_field}"
+        queryset = queryset.order_by(order_field, "-id")
+
+        paginator = Paginator(queryset, COHORT_ADMIN_PAGE_SIZE)
+        try:
+            requested_page = int(self.request.GET.get("page", 1))
+        except (TypeError, ValueError):
+            requested_page = 1
+        requested_page = max(1, min(requested_page, paginator.num_pages))
+        page_obj = paginator.page(requested_page)
+
+        arrow = "▲" if direction == "asc" else "▼"
+        columns = [
+            {"key": "id", "label": "ID"},
+            {"key": "action", "label": "Action"},
+            {"key": "execution", "label": "Execution"},
+            {"key": "statut", "label": "Statut"},
+            {"key": "progression", "label": "Progression"},
+            {"key": "date", "label": "Date"},
+        ]
+        for column in columns:
+            is_active = column["key"] == sort
+            default_dir = "desc" if column["key"] == self.DEFAULT_SORT else "asc"
+            if is_active:
+                next_dir = "desc" if direction == "asc" else "asc"
+                aria = "ascending" if direction == "asc" else "descending"
+            else:
+                next_dir = default_dir
+                aria = "none"
+            column["is_active"] = is_active
+            column["next_dir"] = next_dir
+            column["aria_sort"] = aria
+
+        context.update(
+            {
+                "cohortes": page_obj.object_list,
+                "page_obj": page_obj,
+                "paginator": paginator,
+                "filters": filters,
+                "type_action_choices": SuggestionAction.choices,
+                "statut_choices": SuggestionCohorteStatut.choices,
+                "columns": columns,
+                "sort": {"field": sort, "dir": direction, "arrow": arrow},
+            }
+        )
+        return context

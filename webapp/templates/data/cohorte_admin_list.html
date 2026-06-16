@@ -1,0 +1,162 @@
+{% load static %}
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Administration des cohortes</title>
+    <link rel="stylesheet" href="{% static 'cohort-admin.css' %}" />
+  </head>
+  <body>
+    <header class="topbar">
+      <span class="brand">Administration des cohortes</span>
+      <a class="back-link" href="{% url 'admin:index' %}">
+        &larr; Admin Django
+      </a>
+    </header>
+
+    <main>
+      <form class="filter-bar" method="get" role="search" aria-label="Filtres des cohortes">
+        <input type="hidden" name="sort" value="{{ sort.field }}" />
+        <input type="hidden" name="dir" value="{{ sort.dir }}" />
+
+        <div class="filter-field">
+          <label for="f-action">Action</label>
+          <input
+            type="text"
+            id="f-action"
+            name="identifiant_action"
+            value="{{ filters.identifiant_action }}"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="filter-field">
+          <label for="f-type">Type d'action</label>
+          <select id="f-type" name="type_action">
+            <option value="">Tous les types</option>
+            {% for value, label in type_action_choices %}
+              <option value="{{ value }}" {% if filters.type_action == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="filter-field">
+          <label for="f-statut">Statut</label>
+          <select id="f-statut" name="statut">
+            <option value="">Tous les statuts</option>
+            {% for value, label in statut_choices %}
+              <option value="{{ value }}" {% if filters.statut == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="filter-field filter-field--numeric" role="group" aria-labelledby="f-reste-label">
+          <span class="filter-label" id="f-reste-label">Groupes restant à valider</span>
+          <div class="numeric-control">
+            <label class="sr-only" for="f-reste-op">Opérateur de comparaison</label>
+            <select id="f-reste-op" name="reste_op" class="numeric-op">
+              <option value="">Opérateur</option>
+              <option value="eq" {% if filters.reste_op == "eq" %}selected{% endif %}>égal à</option>
+              <option value="ne" {% if filters.reste_op == "ne" %}selected{% endif %}>différent de</option>
+              <option value="lt" {% if filters.reste_op == "lt" %}selected{% endif %}>inférieur à</option>
+              <option value="lte" {% if filters.reste_op == "lte" %}selected{% endif %}>inférieur ou égal à</option>
+              <option value="gt" {% if filters.reste_op == "gt" %}selected{% endif %}>supérieur à</option>
+              <option value="gte" {% if filters.reste_op == "gte" %}selected{% endif %}>supérieur ou égal à</option>
+            </select>
+            <label class="sr-only" for="f-reste-val">Nombre de groupes restant à valider</label>
+            <input
+              type="number"
+              id="f-reste-val"
+              name="reste_val"
+              min="0"
+              inputmode="numeric"
+              value="{{ filters.reste_val }}"
+              placeholder="Nombre"
+              class="numeric-val"
+            />
+          </div>
+        </div>
+
+        <div class="filter-actions">
+          <button type="submit" class="btn btn--primary">Filtrer</button>
+          <a class="btn-reset" href="{% url 'data:cohorte_admin_list' %}">Réinitialiser</a>
+        </div>
+      </form>
+
+      <table class="cohort-table">
+        <thead>
+          <tr>
+            {% for column in columns %}
+            <th aria-sort="{{ column.aria_sort }}">
+              <a class="th-sort {% if column.is_active %}is-active{% endif %}"
+                 href="{% querystring sort=column.key dir=column.next_dir page=1 %}">
+                {{ column.label }}
+                {% if column.is_active %}<span class="sort-arrow" aria-hidden="true">{{ sort.arrow }}</span>{% endif %}
+              </a>
+            </th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for cohorte in cohortes %}
+          <tr class="clickable-row" data-href="{% url 'data:cohorte_review' cohorte.id %}">
+            <td>
+              <a class="row-link" href="{% url 'data:cohorte_review' cohorte.id %}">{{ cohorte.id }}</a>
+            </td>
+            <td>{{ cohorte.identifiant_action }}</td>
+            <td>{{ cohorte.execution_datetime }}</td>
+            <td>{{ cohorte.get_statut_display }}</td>
+            <td>
+              {% if cohorte.total_groupes == 0 %}
+                <span class="indicator indicator--grey">0 / 0</span>
+              {% elif cohorte.validated_groupes == cohorte.total_groupes %}
+                <span class="indicator indicator--green">{{ cohorte.validated_groupes }} / {{ cohorte.total_groupes }}</span>
+              {% elif cohorte.validated_groupes == 0 %}
+                <span class="indicator indicator--red">{{ cohorte.validated_groupes }} / {{ cohorte.total_groupes }}</span>
+              {% else %}
+                <span class="indicator indicator--orange">{{ cohorte.validated_groupes }} / {{ cohorte.total_groupes }}</span>
+              {% endif %}
+            </td>
+            <td>{{ cohorte.cree_le|date:"d/m/Y H:i" }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6">Aucune cohorte ne correspond à ces critères.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <nav class="pager" aria-label="Pagination des cohortes">
+        {% if page_obj.has_previous %}
+          <a class="pager-link" href="{% querystring page=page_obj.previous_page_number %}" rel="prev">&lsaquo; Précédent</a>
+        {% else %}
+          <span class="pager-link is-disabled" aria-disabled="true">&lsaquo; Précédent</span>
+        {% endif %}
+
+        <span class="pager-status" aria-live="polite">
+          Page {{ page_obj.number }} sur {{ paginator.num_pages }} · {{ paginator.count }} cohortes
+        </span>
+
+        {% if page_obj.has_next %}
+          <a class="pager-link" href="{% querystring page=page_obj.next_page_number %}" rel="next">Suivant &rsaquo;</a>
+        {% else %}
+          <span class="pager-link is-disabled" aria-disabled="true">Suivant &rsaquo;</span>
+        {% endif %}
+      </nav>
+    </main>
+
+    <script>
+      document.querySelectorAll(".clickable-row").forEach(function (row) {
+        row.addEventListener("click", function (event) {
+          if (event.target.closest("a")) {
+            return;
+          }
+          window.location.href = row.dataset.href;
+        });
+      });
+    </script>
+  </body>
+</html>

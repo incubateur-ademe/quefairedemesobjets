@@ -74,6 +74,13 @@ class IsStaffMixin(LoginRequiredMixin):
         return super().dispatch(request, *args, **kwargs)
 
 
+class IsSuperuserMixin(LoginRequiredMixin):
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_superuser:
+            return self.handle_no_permission()
+        return super().dispatch(request, *args, **kwargs)
+
+
 class AutocompleteSynonyme(ListView):
     template_name = "ui/forms/widgets/autocomplete/synonyme.html"
     model = Synonyme

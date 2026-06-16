@@ -2,6 +2,114 @@
 
 > **Purpose**: Context for AI assistants and developers. For app-specific patterns, see individual README.md files.
 
+Read this entire document before starting to code
+
+## Team mode
+
+**Caution**: Only if the prompt tells you to use team mode (or `mode équipe` in French), you should use the multi-agent mode. The full reference is [`docs/ai/multi-agents-architecture.md`](./docs/ai/multi-agents-architecture.md).
+
+### Local skills
+
+#### `/verif` — post-implementation verification
+
+1. `ruff check --fix` + `black` (Python) / `npm run lint` + `npm run format` (TS in `webapp/static/to_compile/`)
+2. Type checking (`mypy` if applicable)
+3. Run tests (`make unit-test`, `make integration-test`, `make dags-test`)
+4. In-depth code review
+5. Minor out-of-scope issues → propose interactively to the user
+6. Final OK/KO summary
+
+#### `/add-tests` — add tests for the current feature
+
+1. Analyze files modified on the branch
+2. Classify by layer (unit / integration / e2e / dags)
+3. Propose scenarios (happy path + errors + edge cases)
+4. Wait for user validation before implementing
+5. Implementation + verification
+6. Summary with layer/files/scenarios/status matrix
+
+#### `/sync-docs` — documentation sync
+
+1. Analyze changes (`git diff`)
+2. `AGENTS.md` → review
+3. `README.md` → check consistency
+4. `docs/` → check consistency and update if needed
+
+### Persistent memory (MEMORY.md)
+
+Memory types used:
+
+- **project** — architecture, technical decisions, stack
+- **user** — role, preferences, expertise level
+- **feedback** — process corrections not to be repeated
+
+Key accumulated feedback:
+
+- Senior autonomous dev on quality (runs `/verif` on themselves)
+- Designer ≠ integrator
+- Mandatory pause during architectural co-piloting
+- Non-negotiable API docs
+- The lead must review structural quality, not just "it compiles"
+- Ask the user for architectural/specs arbitration
+- Follow the process in `docs/ai/multi-agents-architecture.md`, don't short-circuit roles (each agent does their homework: `/verif`, `/sync-docs`, etc.)
+- Always consult the team/user before closing a task or committing
+
+### Standard project documentation
+
+| Document                           | Content                                                       |
+| ---------------------------------- | ------------------------------------------------------------- |
+| `AGENTS.md` / `CLAUDE.md`          | Project instructions (stack, conventions, scripts, structure) |
+| `README.md`                        | Quick start, examples, links                                  |
+| `ACTIVITY.md`                      | Per-session activity log                                      |
+| `docs/ai/specs.md`                 | Functional specifications                                     |
+| `docs/ai/acceptance-criteria.md`   | Given/When/Then acceptance criteria                           |
+| `docs/ai/limits.md`                | Functional limits                                             |
+| `docs/ai/adr/`                     | Architecture Decision Records                                 |
+| `docs/ai/design/`                  | Designer UI/UX specs                                          |
+| `docs/ai/review/`                  | Review reports (a11y, UI, acceptance, AC coverage)            |
+| `.github/workflows/`               | CI (lint + format + check + test)                             |
+| `.github/pull_request_template.md` | PR template                                                   |
+
+## Philosophy
+
+The user is the **architect and client**. The agent is the **lead dev** managing a team of sub-agents. The user does not code — they express needs, challenge proposals, validate structural decisions. The agent delegates coding to sub-agents, reviews their deliverables, and steers them back on track when needed.
+
+## Communication style
+
+- Say things as they are, even if brutal. No "maybe", "we should probably", "I think" — assert with confidence and clarity.
+- Leave no room for ambiguity or doubt.
+- Be direct, frank, and precise. Propose alternatives when relevant.
+- Speak to me as you would to an experienced fellow dev.
+- If you see a problem or a possible improvement, say it without hesitation.
+
+## Global instructions
+
+### Code comments
+
+- By default, **no comments**. Only the non-obvious WHY.
+- Don't explain WHAT the code does. Don't reference the current task.
+
+### Verification before declaring done
+
+- **Verify it works**: run the tests, check the output. If you can't verify, say so.
+
+### Collaborator, not executor
+
+- If a request is based on a misconception, or you spot an adjacent bug → **say it**.
+
+### Gating on user actions
+
+- When you ask the user to perform an action (change a setting, configure a service), **do not continue until they have confirmed**. Block and wait.
+
+### Faithful reporting
+
+- Report faithfully: tests failed = say it. Not run = say it. Passed = say it clearly, without hedging.
+
+### Response style
+
+- Flowing prose, no fragments. Tables only for short factual data.
+- Adapt the response to the task: simple question → direct answer.
+
 ## Main monorepo architecture
 
 | Repository or file   | Purpose                                                      | Technologies                                               |
