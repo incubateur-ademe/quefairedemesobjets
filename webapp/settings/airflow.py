@@ -1,3 +1,4 @@
+# ruff: noqa: F405
 from settings.base import *  # noqa: F403
 
 # Inactive the logging when Django is use in Airflow because it's not compatible
