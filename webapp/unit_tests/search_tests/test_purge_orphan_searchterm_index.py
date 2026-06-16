@@ -29,8 +29,12 @@ class TestPurgeOrphanSearchtermIndex:
         synonyme_ct = ContentType.objects.get_for_model(Synonyme)
 
         # Simulate the pre-fix state: the same object indexed twice.
+        # The child entry is auto-created by modelsearch's post_save signal.
         orphan = _make_index_entry(searchterm_ct, synonyme.searchterm_ptr_id)
-        child = _make_index_entry(synonyme_ct, synonyme.searchterm_ptr_id)
+        child = IndexEntry.objects.get(
+            content_type=synonyme_ct,
+            object_id=str(synonyme.searchterm_ptr_id),
+        )
 
         call_command("purge_orphan_searchterm_index")
 
@@ -40,7 +44,11 @@ class TestPurgeOrphanSearchtermIndex:
     def test_keeps_bare_searchterm_entry(self):
         bare = SearchTerm.objects.create()
         searchterm_ct = ContentType.objects.get_for_model(SearchTerm)
-        entry = _make_index_entry(searchterm_ct, bare.pk)
+        # The entry is auto-created by modelsearch's post_save signal.
+        entry = IndexEntry.objects.get(
+            content_type=searchterm_ct,
+            object_id=str(bare.pk),
+        )
 
         call_command("purge_orphan_searchterm_index")
 
