@@ -2,11 +2,11 @@
 import os
 
 # Tests (webapp + data-platform) must not require django-debug-toolbar /
-# django-browser-reload. If DEBUG=True comes from the environment, core.settings.base
+# django-browser-reload. If DEBUG=True comes from the environment, settings.base
 # would register those apps before this module loads; force DEBUG off first.
 os.environ["DEBUG"] = "false"
 
-from core.settings.base import *
+from settings.base import *
 
 # Add test hosts to ALLOWED_HOSTS for integration tests
 ALLOWED_HOSTS = ALLOWED_HOSTS + [

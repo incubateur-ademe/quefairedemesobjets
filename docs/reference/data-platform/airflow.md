@@ -8,7 +8,7 @@
 - **Executor** : `LocalExecutor` (single-node).
 - **Auth manager** : **FAB** (`FabAuthManager`). Backends API : `basic_auth` + `session`. **JWT** pour les échanges internes (`AIRFLOW__API_AUTH__JWT_SECRET`).
 - **Compte admin** : créé au premier démarrage du webserver via `_AIRFLOW_WWW_USER_USERNAME / _PASSWORD / _EMAIL`.
-- **Intégration Django** : les DAGs importent les modèles Django via le package éditable `webapp-quefairedemesobjetsetdechets` et `utils.django.django_setup_full()` (settings `core.settings.airflow`).
+- **Intégration Django** : les DAGs importent les modèles Django via le package éditable `webapp-quefairedemesobjetsetdechets` et `utils.django.django_setup_full()` (settings `settings.airflow`).
 - **Métadonnées** : base PostgreSQL `lvao-{env}-airflow`, nettoyée quotidiennement par le DAG `airflow_cleanup_db`.
 - **Logs distants** : `AIRFLOW__LOGGING__REMOTE_LOGGING=true` vers le bucket S3 `lvao-{env}-airflow`.
 

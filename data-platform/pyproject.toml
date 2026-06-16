@@ -41,7 +41,7 @@ dev = [
 
 [tool.pytest.ini_options]
 # Full app graph (qfdmo → qfdmd, Wagtail CMS, etc.): required for migrate in django_db tests.
-# Airflow continues to use core.settings.airflow via django_setup_full() / env outside pytest.
+# Airflow continues to use settings.airflow via django_setup_full() / env outside pytest.
 DJANGO_SETTINGS_MODULE = "core.test_settings"
 
 [tool.ruff]
