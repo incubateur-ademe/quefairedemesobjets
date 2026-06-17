@@ -3,11 +3,11 @@ output "bucket_name" {
 }
 
 output "bucket_region" {
-  value = scaleway_object_bucket.media.region
+  value = "fr-par"
 }
 
 output "endpoint_url" {
-  value = "https://s3.${scaleway_object_bucket.media.region}.scw.cloud"
+  value = "https://s3.fr-par.scw.cloud"
 }
 
 output "access_key" {

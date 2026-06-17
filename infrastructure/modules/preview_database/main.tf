@@ -4,7 +4,15 @@ data "scaleway_rdb_instance" "host" {
 
 resource "random_password" "preview" {
   length  = 32
-  special = false
+  special = true
+  # Scaleway RDB requires at least one special char, digit, lowercase and
+  # uppercase letter. Restricted to chars that don't need URL-encoding in
+  # the postgres:// DSN built below (no @, :, /, ?, #, %).
+  override_special = "-_.~!*"
+  min_special      = 1
+  min_numeric      = 1
+  min_lower        = 1
+  min_upper        = 1
 }
 
 resource "scaleway_rdb_database" "preview" {
