@@ -9,17 +9,32 @@ from data.models.suggestion import (
     SuggestionStatut,
     SuggestionUnitaire,
 )
+from data.services import (
+    HasSuggestionUnitaireWithChampField,
+    SuggestionGroupeQLSchema,
+    SuggestionQLSchemaMixin,
+)
+from data.services import (
+    apply_suggestions_to_correction as apply_suggestions_to_correction_service,
+)
+from data.services import (
+    apply_suggestions_to_parent as apply_suggestions_to_parent_service,
+)
 from data.views import get_context_from_suggestion_groupe
 from django.contrib import admin, messages
-from django.contrib.postgres.fields import ArrayField
-from django.db import models
-from django.db.models import Exists, OuterRef, Q, QuerySet
+from django.db.models import QuerySet
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.html import format_html, mark_safe
 from djangoql.admin import DjangoQLSearchMixin
-from djangoql.exceptions import DjangoQLSchemaError
-from djangoql.schema import BoolField, DjangoQLSchema, IntField, StrField
+
+__all__ = [
+    "HasSuggestionUnitaireWithChampField",
+    "SuggestionGroupeQLSchema",
+    "SuggestionQLSchemaMixin",
+    "apply_suggestions_to_correction",
+    "apply_suggestions_to_parent",
+]
 
 NB_SUGGESTIONS_DISPLAYED_WHEN_DELETING = 100
 
@@ -56,28 +71,6 @@ class SuggestionLogInline(admin.TabularInline):
     can_add = False
     can_change = False
     can_view = True
-
-
-class SuggestionQLSchemaMixin(DjangoQLSchema):
-    """Force JSON fields to be string fields for text search"""
-
-    def get_fields(self, model):
-        """Override to force JSON fields as string fields for text search."""
-        fields = super().get_fields(model)
-        result = []
-        for field in fields:
-            # Get field name (field can be a string or a Field object)
-            field_name = field if isinstance(field, str) else field.name
-
-            # Check if the field is a JSONField in the model
-            model_field = model._meta.get_field(field_name)
-            if model_field and (
-                isinstance(model_field, models.JSONField)
-                or isinstance(model_field, ArrayField)
-            ):
-                field = StrField(name=field_name)
-            result.append(field)
-        return result
 
 
 class SuggestionCohorteAdmin(DjangoQLSearchMixin, NotEditableMixin, admin.ModelAdmin):
@@ -257,59 +250,12 @@ class SuggestionUnitaireInline(admin.TabularInline):
     can_view = True
 
 
-def _update_or_copy_acteur_suggestions_to_target(
-    suggestion_groupe: SuggestionGroupe,
-    *,
-    target_modele: str,
-    target_fk_field: str,
-    target_fk_id: int | None,
-) -> None:
-    """For each SuggestionUnitaire « Acteur » of the group, update the existing
-    target SuggestionUnitaire (same `champs` and same target) if it exists,
-    otherwise create a new one by cloning the source suggestion.
-
-    `target_fk_field` is the name of the FK field (ex: "revision_acteur_id" or
-    "parent_revision_acteur_id") that points to the target entity.
-    """
-    suggestion_unitaires = list(suggestion_groupe.suggestion_unitaires.all())
-    acteur_sources = [
-        su for su in suggestion_unitaires if su.suggestion_modele == "Acteur"
-    ]
-
-    for acteur_source in acteur_sources:
-        target_suggestion = next(
-            (
-                su
-                for su in suggestion_unitaires
-                if su.suggestion_modele == target_modele
-                and getattr(su, target_fk_field) == target_fk_id
-                and su.champs == acteur_source.champs
-            ),
-            None,
-        )
-        if target_suggestion:
-            target_suggestion.valeurs = acteur_source.valeurs
-        else:
-            target_suggestion = acteur_source
-            target_suggestion.id = None
-            target_suggestion.suggestion_modele = target_modele
-            setattr(target_suggestion, target_fk_field, target_fk_id)
-        target_suggestion.save()
-
-
 @admin.action(description="[SOURCE] Appliquer les suggestions au parent")
 def apply_suggestions_to_parent(
     self, request, queryset: QuerySet[SuggestionGroupe]
 ) -> None:
     for suggestion_groupe in queryset:
-        # Only for SuggestionGroupe with parent
-        if suggestion_groupe.suggestions_can_be_applied_to_parent():
-            _update_or_copy_acteur_suggestions_to_target(
-                suggestion_groupe,
-                target_modele="ParentRevisionActeur",
-                target_fk_field="parent_revision_acteur_id",
-                target_fk_id=suggestion_groupe.parent_revision_acteur_id,
-            )
+        apply_suggestions_to_parent_service(suggestion_groupe)
 
     self.message_user(
         request, f"Les {queryset.count()} suggestions sélectionnées ont été appliquées"
@@ -321,41 +267,11 @@ def apply_suggestions_to_parent(
 )
 def apply_suggestions_to_correction(self, request, queryset):
     for suggestion_groupe in queryset:
-        if suggestion_groupe.suggestions_can_be_applied_to_correction():
-            _update_or_copy_acteur_suggestions_to_target(
-                suggestion_groupe,
-                target_modele="RevisionActeur",
-                target_fk_field="revision_acteur_id",
-                target_fk_id=(
-                    suggestion_groupe.revision_acteur_id or suggestion_groupe.acteur_id
-                ),
-            )
+        apply_suggestions_to_correction_service(suggestion_groupe)
 
     self.message_user(
         request, f"Les {queryset.count()} suggestions sélectionnées ont été appliquées"
     )
-
-
-class HasSuggestionUnitaireWithChampField(StrField):
-    """Permet de filtrer par champ de suggestion unitaire individuel"""
-
-    name = "has_suggestion_unitaire_with_champ"
-    suggest_options = False
-
-    def get_lookup(self, path, operator, value):
-        if operator not in {"~", "!~"}:
-            raise DjangoQLSchemaError(
-                f'Field "{self.name}" only supports "~" and "!~" operators'
-            )
-
-        has_matching_suggestion_unitaire = Exists(
-            SuggestionUnitaire.objects.filter(
-                suggestion_groupe_id=OuterRef("pk"),
-                champs__icontains=value,
-            )
-        )
-        q = Q(has_matching_suggestion_unitaire)
-        return ~q if operator == "!~" else q
 
 
 @admin.register(SuggestionGroupe)
@@ -368,26 +284,6 @@ class SuggestionGroupeAdmin(
         apply_suggestions_to_parent,
         apply_suggestions_to_correction,
     ]
-
-    class SuggestionGroupeQLSchema(SuggestionQLSchemaMixin):
-        def get_fields(self, model):
-            """Override to expose relations and custom fields."""
-            fields = super().get_fields(model)
-
-            # Works with with_suggestion_unitaire_count set in get_queryset
-            if model == SuggestionGroupe:
-                return [
-                    *[
-                        field
-                        for field in fields
-                        if field not in ["suggestion_unitaires_count"]
-                    ],
-                    IntField(name="suggestion_unitaires_count"),
-                    BoolField(name="has_parent"),
-                    BoolField(name="has_correction"),
-                ] + [HasSuggestionUnitaireWithChampField()]
-
-            return fields
 
     djangoql_completion_enabled_by_default = True
     djangoql_schema = SuggestionGroupeQLSchema

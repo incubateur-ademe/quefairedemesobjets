@@ -1,0 +1,43 @@
+{% comment %}
+« Vue par acteurs » fragment: a paginated list of SuggestionGroupe cards.
+Loaded over AJAX and injected by the frontend controller.
+
+Contract (anchors the frontend relies on):
+- root: <div data-cohorte-review-acteurs
+            data-cohorte-id data-total data-page data-num-pages
+            data-has-next data-has-previous>
+- one card per groupe:
+    <article class="cohorte-review-acteur-card"
+             data-groupe-id data-groupe-statut>
+      - <div data-card-checkbox-slot></div>   (frontend injects the checkbox)
+      - <div data-card-map-slot></div>        (frontend injects the « Carte » button)
+      - the existing suggestion_groupe_details.html partial
+{% endcomment %}
+<div
+    data-cohorte-review-acteurs
+    data-cohorte-id="{{ cohorte.id }}"
+    data-total="{{ total }}"
+    data-page="{{ page_obj.number }}"
+    data-num-pages="{{ paginator.num_pages }}"
+    data-has-next="{{ page_obj.has_next|yesno:'true,false' }}"
+    data-has-previous="{{ page_obj.has_previous|yesno:'true,false' }}">
+
+    {% for card in cards %}
+        <article
+            class="cohorte-review-acteur-card"
+            data-groupe-id="{{ card.groupe.id }}"
+            data-groupe-statut="{{ card.groupe.statut }}">
+            <header class="cohorte-review-acteur-card__header">
+                <div data-card-checkbox-slot></div>
+                <span class="cohorte-review-acteur-card__id">#{{ card.groupe.id }}</span>
+                <span class="cohorte-review-acteur-card__statut">{{ card.groupe.get_statut_display }}</span>
+                <div data-card-map-slot></div>
+            </header>
+            <div class="cohorte-review-acteur-card__body">
+                {{ card.details_html|safe }}
+            </div>
+        </article>
+    {% empty %}
+        <p data-cohorte-review-acteurs-empty>Aucun acteur ne correspond à ces critères.</p>
+    {% endfor %}
+</div>

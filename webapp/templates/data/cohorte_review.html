@@ -16,13 +16,22 @@
         Cohorte #{{ suggestion_cohorte.id }} — {{ suggestion_cohorte.identifiant_action
         }} · {{ suggestion_cohorte.execution_datetime }}
       </span>
-      <a
-        class="back-link"
-        href="{% url 'admin:data_suggestiongroupe_changelist' %}?suggestion_cohorte__id__exact={{ suggestion_cohorte.id }}"
-        data-turbo="false"
-      >
-        ← Admin Django
-      </a>
+      <nav class="back-links" aria-label="Navigation">
+        <a
+          class="back-link back-link--primary"
+          href="{% url 'data:cohorte_admin_list' %}"
+          data-turbo="false"
+        >
+          ← Cohortes
+        </a>
+        <a
+          class="back-link back-link--secondary"
+          href="{% url 'admin:data_suggestiongroupe_changelist' %}?suggestion_cohorte__id__exact={{ suggestion_cohorte.id }}"
+          data-turbo="false"
+        >
+          Admin Django ↗
+        </a>
+      </nav>
     </header>
 
     <main
@@ -31,44 +40,11 @@
       data-cohorte-review-bulk-url-value="{% url 'data:cohorte_review_bulk' suggestion_cohorte.id %}"
       data-cohorte-review-groupe-url-template-value="{% url 'data:cohorte_review_groupe' suggestion_cohorte.id 0 %}"
       data-cohorte-review-admin-url-template-value="{% url 'admin:data_suggestiongroupe_change' 0 %}"
+      data-cohorte-review-acteurs-url-value="{% url 'data:cohorte_review_acteurs' suggestion_cohorte.id %}"
+      data-cohorte-review-acteurs-bulk-url-value="{% url 'data:cohorte_review_acteurs_bulk' suggestion_cohorte.id %}"
+      data-cohorte-review-groupe-stream-url-template-value="{% url 'data:suggestion_groupe' 0 %}"
       data-cohorte-review-csrf-value="{{ csrf_token }}"
     >
-      <div class="toolbar">
-        <sl-input
-          type="search"
-          size="small"
-          label="Rechercher un identifiant acteur"
-          placeholder="Rechercher un identifiant acteur…"
-          clearable
-          class="search visually-hidden-label"
-          data-cohorte-review-target="search"
-          data-action="sl-input->cohorte-review#onSearchInput sl-clear->cohorte-review#onSearchInput"
-        ></sl-input>
-        <sl-select
-          size="small"
-          value="AVALIDER"
-          label="Filtrer par statut"
-          class="statut-filter visually-hidden-label"
-          data-cohorte-review-target="statutFilter"
-          data-action="sl-change->cohorte-review#onStatutChange"
-        >
-          <sl-option value="AVALIDER">🟠 À valider</sl-option>
-          <sl-option value="ATRAITER">⏳ À traiter</sl-option>
-          <sl-option value="REJETEE">🔴 Rejetées</sl-option>
-          <sl-option value="all">Tous les statuts</sl-option>
-        </sl-select>
-        <div class="field-toggles" data-cohorte-review-target="fieldToggles">
-          <span class="label">Champs :</span>
-        </div>
-        <span
-          class="status"
-          data-cohorte-review-target="status"
-          aria-live="polite"
-          aria-atomic="true"
-          >Chargement…</span
-        >
-      </div>
-
       <span
         class="sr-only"
         aria-live="assertive"
@@ -76,94 +52,346 @@
         data-cohorte-review-target="announcer"
       ></span>
 
-      <div
-        class="bulkbar"
-        data-cohorte-review-target="bulkBar"
-        role="toolbar"
-        aria-label="Actions sur la sélection"
-        hidden
+      <div class="view-switch-bar">
+        <sl-radio-group
+          label="Vue"
+          value="acteurs"
+          class="view-switch visually-hidden-label"
+          data-cohorte-review-target="viewSwitch"
+          data-action="sl-change->cohorte-review#onViewChange"
+        >
+          <sl-radio-button value="acteurs">Vue par acteurs</sl-radio-button>
+          <sl-radio-button value="champs">Vue par champ</sl-radio-button>
+        </sl-radio-group>
+      </div>
+
+      {# ============================= VUE PAR ACTEURS ============================= #}
+      <section
+        class="acteurs-view"
+        data-cohorte-review-target="acteursView"
+        aria-label="Vue par acteurs"
       >
-        <span class="count">
-          <span data-cohorte-review-target="bulkCount">0</span> acteurs sélectionnés
-        </span>
-        <sl-select
-          size="small"
-          value=""
-          label="Champ ciblé par l'action de masse"
-          class="visually-hidden-label"
-          data-cohorte-review-target="bulkField"
+        <h1
+          class="acteurs-heading"
+          tabindex="-1"
+          data-cohorte-review-target="acteursHeading"
         >
-          <sl-option value="">tous les champs</sl-option>
-        </sl-select>
-        <sl-button
-          size="small"
-          variant="success"
-          data-action="click->cohorte-review#bulkAccept"
-          >✓ Accepter</sl-button
-        >
-        <sl-button
-          size="small"
-          variant="danger"
-          outline
-          data-action="click->cohorte-review#bulkReject"
-          >✕ Rejeter</sl-button
-        >
-        <sl-button
-          size="small"
-          variant="text"
-          data-cohorte-review-target="selectFiltered"
-          data-action="click->cohorte-review#selectAllFiltered"
-          >Sélectionner tous les acteurs filtrés</sl-button
-        >
-        <sl-button
-          size="small"
-          variant="text"
-          data-action="click->cohorte-review#clearSelection"
-          >Tout désélectionner</sl-button
-        >
-      </div>
+          Vue par acteurs
+        </h1>
 
-      <div class="focus-layout" data-cohorte-review-target="focusLayout" hidden>
-        <nav
-          class="focus-rail"
-          data-cohorte-review-target="focusRail"
-          aria-label="Changer de champ sans quitter le mode focus"
-        ></nav>
-        <section class="focus-main">
-          <div data-cohorte-review-target="focusHeader"></div>
-          <div
-            class="focus-cards"
-            data-cohorte-review-target="focusCards"
-            role="group"
-            tabindex="-1"
-            aria-label="Suggestions à réviser — ↑/↓ naviguer, A accepter, R rejeter, U annuler, Entrée ouvrir le détail"
-          ></div>
-          <p class="kbd-help">
-            <kbd>↑</kbd><kbd>↓</kbd> naviguer · <kbd>A</kbd> accepter ·
-            <kbd>R</kbd> rejeter · <kbd>U</kbd> annuler la décision ·
-            <kbd>⏎</kbd> ouvrir le groupe de suggestions · <kbd>Échap</kbd> quitter
-          </p>
-        </section>
-      </div>
+        <details class="qb" open>
+          <summary class="qb__summary">Recherche</summary>
+          <div class="qb__body">
+            <fieldset class="qb__combinator" data-cohorte-review-target="qbBlocks">
+              <legend class="qb__legend">Combiner les filtres avec</legend>
+              <div role="radiogroup" aria-label="Combinaison des filtres">
+                <label>
+                  <input
+                    type="radio"
+                    name="qb-combinator"
+                    value="and"
+                    checked
+                    data-cohorte-review-target="qbCombinatorAnd"
+                    data-action="change->cohorte-review#qbCombinatorChanged"
+                  />
+                  ET (tous)
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="qb-combinator"
+                    value="or"
+                    data-cohorte-review-target="qbCombinatorOr"
+                    data-action="change->cohorte-review#qbCombinatorChanged"
+                  />
+                  OU (au moins un)
+                </label>
+              </div>
 
-      <div class="table-wrap" data-cohorte-review-target="scroller">
-        <table role="grid" aria-label="Suggestions par acteur et par champ">
-          <thead role="rowgroup" data-cohorte-review-target="head"></thead>
-          <tbody role="rowgroup" data-cohorte-review-target="body"></tbody>
-        </table>
-      </div>
+              <div class="qb__rows" data-cohorte-review-target="qbRows"></div>
 
-      <div class="pager">
-        <span data-cohorte-review-target="pagerInfo"></span>
-        <sl-button
-          size="small"
-          data-cohorte-review-target="loadMore"
-          data-action="click->cohorte-review#loadMore"
+              <div class="qb__actions">
+                <sl-button
+                  size="small"
+                  data-qb-add
+                  data-action="click->cohorte-review#qbAddRow"
+                  >+ Ajouter un filtre</sl-button
+                >
+                <sl-button
+                  size="small"
+                  variant="text"
+                  data-action="click->cohorte-review#qbReset"
+                  >Réinitialiser</sl-button
+                >
+                <sl-button
+                  size="small"
+                  variant="primary"
+                  data-action="click->cohorte-review#qbApply"
+                  >Filtrer</sl-button
+                >
+              </div>
+            </fieldset>
+
+            <sl-textarea
+              size="small"
+              class="qb__raw"
+              label="DjangoQL brut"
+              placeholder="ex : has_parent = True and statut = &quot;AVALIDER&quot;"
+              data-cohorte-review-target="qbRaw"
+              hidden
+            ></sl-textarea>
+
+            <div class="qb__preview-row">
+              <button
+                type="button"
+                class="qb__raw-toggle"
+                data-qb-raw-toggle
+                aria-expanded="false"
+                data-action="click->cohorte-review#qbToggleRaw"
+              >
+                DjangoQL brut
+              </button>
+              <code
+                class="qb__preview"
+                aria-live="polite"
+                data-cohorte-review-target="qbPreview"
+                >(aucun filtre)</code
+              >
+            </div>
+          </div>
+        </details>
+
+        <div class="acteurs-toolbar">
+          <sl-select
+            size="small"
+            value="AVALIDER"
+            label="Filtrer par statut"
+            class="statut-filter visually-hidden-label"
+            data-cohorte-review-target="acteursStatut"
+            data-action="sl-change->cohorte-review#onActeursStatutChange"
+          >
+            <sl-option value="AVALIDER">🟠 À valider</sl-option>
+            <sl-option value="ATRAITER">⏳ À traiter</sl-option>
+            <sl-option value="REJETEE">🔴 Rejetées</sl-option>
+            <sl-option value="all">Tous les statuts</sl-option>
+          </sl-select>
+          <span
+            class="acteurs-count"
+            aria-live="polite"
+            aria-atomic="true"
+            data-cohorte-review-target="acteursCount"
+            >Chargement…</span
+          >
+          <sl-button
+            size="small"
+            variant="text"
+            data-action="click->cohorte-review#refreshActeurs"
+            >↻ Rafraîchir</sl-button
+          >
+          <label class="acteurs-select-all">
+            <sl-checkbox
+              size="small"
+              data-cohorte-review-target="acteursSelectAllPage"
+              data-action="sl-change->cohorte-review#toggleSelectPage"
+              >Tout cocher (page)</sl-checkbox
+            >
+          </label>
+        </div>
+
+        <div
+          class="acteurs-bulkbar"
+          role="toolbar"
+          aria-label="Actions sur la sélection"
+          data-cohorte-review-target="acteursBulkBar"
           hidden
         >
-          Charger 100 de plus
-        </sl-button>
-      </div>
+          <span class="acteurs-bulkbar__count" data-cohorte-review-target="acteursBulkCount"
+            >0 acteur sélectionné</span
+          >
+          <sl-button
+            size="small"
+            variant="success"
+            data-action="click->cohorte-review#acteursAccept"
+            >✓ Valider (À traiter)</sl-button
+          >
+          <sl-button
+            size="small"
+            variant="danger"
+            outline
+            data-action="click->cohorte-review#acteursReject"
+            >✕ Rejeter</sl-button
+          >
+          <sl-button
+            size="small"
+            variant="primary"
+            outline
+            data-action="click->cohorte-review#acteursApplyCorrection"
+            >→ Appliquer à la correction</sl-button
+          >
+          <sl-button
+            size="small"
+            variant="primary"
+            outline
+            data-action="click->cohorte-review#acteursApplyParent"
+            >⏩ Appliquer au parent</sl-button
+          >
+          <sl-button
+            size="small"
+            variant="text"
+            data-action="click->cohorte-review#clearActeursSelection"
+            >Tout désélectionner</sl-button
+          >
+        </div>
+
+        <p
+          class="acteurs-page-banner"
+          role="status"
+          data-cohorte-review-target="acteursPageBanner"
+          hidden
+        ></p>
+
+        <div class="acteurs-list" data-cohorte-review-target="acteursList"></div>
+
+        <nav
+          class="acteurs-pager"
+          aria-label="Pagination"
+          data-cohorte-review-target="acteursPager"
+        ></nav>
+      </section>
+
+      {# ============================== VUE PAR CHAMP ============================== #}
+      <section
+        class="champs-view"
+        data-cohorte-review-target="champsView"
+        aria-label="Vue par champ"
+        hidden
+      >
+        <h1 class="sr-only" data-view-heading tabindex="-1">Vue par champ</h1>
+        <div class="toolbar">
+          <sl-input
+            type="search"
+            size="small"
+            label="Rechercher un identifiant acteur"
+            placeholder="Rechercher un identifiant acteur…"
+            clearable
+            class="search visually-hidden-label"
+            data-cohorte-review-target="search"
+            data-action="sl-input->cohorte-review#onSearchInput sl-clear->cohorte-review#onSearchInput"
+          ></sl-input>
+          <sl-select
+            size="small"
+            value="AVALIDER"
+            label="Filtrer par statut"
+            class="statut-filter visually-hidden-label"
+            data-cohorte-review-target="statutFilter"
+            data-action="sl-change->cohorte-review#onStatutChange"
+          >
+            <sl-option value="AVALIDER">🟠 À valider</sl-option>
+            <sl-option value="ATRAITER">⏳ À traiter</sl-option>
+            <sl-option value="REJETEE">🔴 Rejetées</sl-option>
+            <sl-option value="all">Tous les statuts</sl-option>
+          </sl-select>
+          <div class="field-toggles" data-cohorte-review-target="fieldToggles">
+            <span class="label">Champs :</span>
+          </div>
+          <span
+            class="status"
+            data-cohorte-review-target="status"
+            aria-live="polite"
+            aria-atomic="true"
+            >Chargement…</span
+          >
+        </div>
+
+        <div
+          class="bulkbar"
+          data-cohorte-review-target="bulkBar"
+          role="toolbar"
+          aria-label="Actions sur la sélection"
+          hidden
+        >
+          <span class="count">
+            <span data-cohorte-review-target="bulkCount">0</span> acteurs sélectionnés
+          </span>
+          <sl-select
+            size="small"
+            value=""
+            label="Champ ciblé par l'action de masse"
+            class="visually-hidden-label"
+            data-cohorte-review-target="bulkField"
+          >
+            <sl-option value="">tous les champs</sl-option>
+          </sl-select>
+          <sl-button
+            size="small"
+            variant="success"
+            data-action="click->cohorte-review#bulkAccept"
+            >✓ Accepter</sl-button
+          >
+          <sl-button
+            size="small"
+            variant="danger"
+            outline
+            data-action="click->cohorte-review#bulkReject"
+            >✕ Rejeter</sl-button
+          >
+          <sl-button
+            size="small"
+            variant="text"
+            data-cohorte-review-target="selectFiltered"
+            data-action="click->cohorte-review#selectAllFiltered"
+            >Sélectionner tous les acteurs filtrés</sl-button
+          >
+          <sl-button
+            size="small"
+            variant="text"
+            data-action="click->cohorte-review#clearSelection"
+            >Tout désélectionner</sl-button
+          >
+        </div>
+
+        <div class="focus-layout" data-cohorte-review-target="focusLayout" hidden>
+          <nav
+            class="focus-rail"
+            data-cohorte-review-target="focusRail"
+            aria-label="Changer de champ sans quitter le mode focus"
+          ></nav>
+          <section class="focus-main">
+            <div data-cohorte-review-target="focusHeader"></div>
+            <div
+              class="focus-cards"
+              data-cohorte-review-target="focusCards"
+              role="group"
+              tabindex="-1"
+              aria-label="Suggestions à réviser — ↑/↓ naviguer, A accepter, R rejeter, U annuler, Entrée ouvrir le détail"
+            ></div>
+            <p class="kbd-help">
+              <kbd>↑</kbd><kbd>↓</kbd> naviguer · <kbd>A</kbd> accepter ·
+              <kbd>R</kbd> rejeter · <kbd>U</kbd> annuler la décision ·
+              <kbd>⏎</kbd> ouvrir le groupe de suggestions · <kbd>Échap</kbd> quitter
+            </p>
+          </section>
+        </div>
+
+        <div class="table-wrap" data-cohorte-review-target="scroller">
+          <table role="grid" aria-label="Suggestions par acteur et par champ">
+            <thead role="rowgroup" data-cohorte-review-target="head"></thead>
+            <tbody role="rowgroup" data-cohorte-review-target="body"></tbody>
+          </table>
+        </div>
+
+        <div class="pager">
+          <span data-cohorte-review-target="pagerInfo"></span>
+          <sl-button
+            size="small"
+            data-cohorte-review-target="loadMore"
+            data-action="click->cohorte-review#loadMore"
+            hidden
+          >
+            Charger 100 de plus
+          </sl-button>
+        </div>
+      </section>
 
       <div
         class="undo-toast"
@@ -208,6 +436,25 @@
           >Ouvrir dans l'admin Django ↗</sl-button
         >
       </sl-drawer>
+
+      <sl-dialog
+        label="Localisation"
+        class="map-dialog"
+        data-cohorte-review-target="mapDialog"
+        data-action="sl-after-show->cohorte-review#onMapDialogShown sl-after-hide->cohorte-review#onMapDialogHidden"
+      >
+        <div class="map-dialog__body" data-cohorte-review-target="mapDialogBody"></div>
+        <div slot="footer" class="map-dialog__footer">
+          <span class="map-dialog__hint"
+            >Les déplacements sont enregistrés automatiquement.</span
+          >
+          <sl-button
+            variant="primary"
+            data-action="click->cohorte-review#closeMapDialog"
+            >Fermer</sl-button
+          >
+        </div>
+      </sl-dialog>
     </main>
   </body>
 </html>

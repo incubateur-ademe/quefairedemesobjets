@@ -4,6 +4,11 @@ from collections import Counter
 
 from core.views import IsStaffMixin, IsSuperuserMixin
 from data.forms import SuggestionGroupeStatusForm
+from data.services import (
+    SuggestionGroupeQLSchema,
+    apply_suggestions_to_correction,
+    apply_suggestions_to_parent,
+)
 from data.models.suggestion import (
     SuggestionAction,
     SuggestionCohorte,
@@ -27,8 +32,11 @@ from django.db.models import CharField, Count, Exists, OuterRef, Q, QuerySet
 from django.db.models.functions import Cast
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render
+from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.views.generic import FormView, TemplateView, View
+from djangoql.exceptions import DjangoQLError
+from djangoql.queryset import apply_search
 from qfdmo.models.acteur import Acteur, ActeurStatus, DisplayedActeur, RevisionActeur
 
 logger = logging.getLogger(__name__)
@@ -1194,3 +1202,196 @@ class CohortAdminListView(IsSuperuserMixin, TemplateView):
             }
         )
         return context
+
+
+REVIEW_ACTEURS_PAGE_SIZE = 100
+
+
+def _acteurs_review_queryset(cohorte: SuggestionCohorte):
+    """Base queryset for the « vue par acteurs »: carries the annotations the
+    SuggestionGroupeQLSchema custom fields rely on and prefetches what the
+    card partial reads, to avoid an N+1 across the page."""
+    return (
+        SuggestionGroupe.objects.filter(suggestion_cohorte=cohorte)
+        .with_suggestion_unitaire_count()
+        .with_has_parent()
+        .with_has_correction()
+        .select_related("suggestion_cohorte")
+        .prefetch_related("suggestion_unitaires", "acteur", "revision_acteur")
+    )
+
+
+def _apply_acteurs_review_filters(queryset, *, statut: str, djangoql: str):
+    """Apply the statut filter and the optional DjangoQL search. Raises
+    ReviewValidationError (client-safe message) on an invalid statut or an
+    unparsable/invalid DjangoQL query."""
+    validate_review_statut(statut)
+    if statut != "all":
+        queryset = queryset.filter(statut=statut)
+    if djangoql:
+        try:
+            queryset = apply_search(queryset, djangoql, SuggestionGroupeQLSchema)
+        except DjangoQLError:
+            # DjangoQLError messages can echo back the raw query/internal
+            # detail; surface a controlled message instead.
+            raise ReviewValidationError("requête DjangoQL invalide")
+    return queryset
+
+
+class CohorteReviewActeursView(IsStaffMixin, View):
+    """« Vue par acteurs » of the cohorte review screen: a paginated list
+    (100/page) of SuggestionGroupe cards, reproducing the SuggestionGroupeAdmin
+    DjangoQL search and statut filter. Renders an HTML fragment (not a full
+    page) the frontend loads over AJAX and injects."""
+
+    template_name = "data/_partials/cohorte_review_acteurs_list.html"
+
+    def get(self, request, cohorte_id):
+        cohorte = get_object_or_404(SuggestionCohorte, id=cohorte_id)
+
+        statut = request.GET.get("statut", "all")
+        djangoql = request.GET.get("djangoql", "").strip()
+
+        try:
+            queryset = _apply_acteurs_review_filters(
+                _acteurs_review_queryset(cohorte),
+                statut=statut,
+                djangoql=djangoql,
+            )
+        except ReviewValidationError as e:
+            return HttpResponseBadRequest(e.user_message)
+
+        paginator = Paginator(queryset.order_by("id"), REVIEW_ACTEURS_PAGE_SIZE)
+        try:
+            requested_page = int(request.GET.get("page", 1))
+        except (TypeError, ValueError):
+            requested_page = 1
+        requested_page = max(1, min(requested_page, paginator.num_pages))
+        page_obj = paginator.page(requested_page)
+
+        cards = [
+            {
+                "groupe": groupe,
+                "details_html": render_to_string(
+                    "data/_partials/suggestion_groupe_details.html",
+                    # embed_mode: the « vue par acteurs » shows the localisation
+                    # in a modal, not inline, so the partial drops its tabs.
+                    {**get_context_from_suggestion_groupe(groupe), "embed_mode": True},
+                ),
+            }
+            for groupe in page_obj.object_list
+        ]
+
+        return render(
+            request,
+            self.template_name,
+            {
+                "cohorte": cohorte,
+                "cards": cards,
+                "page_obj": page_obj,
+                "paginator": paginator,
+                "total": paginator.count,
+            },
+        )
+
+
+REVIEW_ACTEURS_BULK_ACTIONS = {
+    "accept",
+    "reject",
+    "apply_to_correction",
+    "apply_to_parent",
+}
+REVIEW_ACTEURS_BULK_STATUT = {
+    "accept": SuggestionStatut.ATRAITER,
+    "reject": SuggestionStatut.REJETEE,
+}
+
+
+class CohorteReviewActeursBulkView(IsStaffMixin, View):
+    """Groupe-level mass actions for the « vue par acteurs », mirroring the
+    SuggestionGroupeAdmin actions (accept/reject the groupe, apply suggestions
+    to correction/parent).
+
+    POST body (JSON): {"action": str} plus exactly one scope:
+    - "groupe_ids": [int] — explicit selection (capped at
+      REVIEW_BULK_MAX_GROUPES);
+    - "filter": {"djangoql": str, "statut": str} — every groupe matching the
+      same filters as the list endpoint (« select all filtered »).
+
+    Strictly scoped to the cohorte: a forged id pointing elsewhere matches
+    nothing. Returns {"applied": <n>}.
+
+    Distinct from CohorteReviewBulkView, which acts per-field at the
+    SuggestionUnitaire level with an undo token."""
+
+    def post(self, request, cohorte_id):
+        cohorte = get_object_or_404(SuggestionCohorte, id=cohorte_id)
+
+        try:
+            payload = json.loads(request.body or "{}")
+        except json.JSONDecodeError:
+            return HttpResponseBadRequest("invalid JSON body")
+
+        action = payload.get("action")
+        if action not in REVIEW_ACTEURS_BULK_ACTIONS:
+            return HttpResponseBadRequest(
+                "action must be one of: accept, reject, apply_to_correction, "
+                "apply_to_parent"
+            )
+
+        groupe_ids = payload.get("groupe_ids")
+        filter_payload = payload.get("filter")
+        if (groupe_ids is None) == (filter_payload is None):
+            return HttpResponseBadRequest("provide exactly one of groupe_ids or filter")
+
+        if groupe_ids is not None:
+            if (
+                not isinstance(groupe_ids, list)
+                or not groupe_ids
+                or not all(isinstance(groupe_id, int) for groupe_id in groupe_ids)
+            ):
+                return HttpResponseBadRequest("groupe_ids must be a list of ids")
+            if len(groupe_ids) > REVIEW_BULK_MAX_GROUPES:
+                return HttpResponseBadRequest(
+                    f"groupe_ids is limited to {REVIEW_BULK_MAX_GROUPES} entries"
+                )
+            targeted = SuggestionGroupe.objects.filter(
+                suggestion_cohorte=cohorte, id__in=groupe_ids
+            )
+        else:
+            if not isinstance(filter_payload, dict):
+                return HttpResponseBadRequest("filter must be an object")
+            try:
+                targeted = _apply_acteurs_review_filters(
+                    _acteurs_review_queryset(cohorte),
+                    statut=filter_payload.get("statut") or "all",
+                    djangoql=(filter_payload.get("djangoql") or "").strip(),
+                )
+            except ReviewValidationError as e:
+                return HttpResponseBadRequest(e.user_message)
+
+        with transaction.atomic():
+            applied = self._apply_action(action, targeted)
+
+        return JsonResponse({"applied": applied})
+
+    @staticmethod
+    def _apply_action(action: str, targeted: "QuerySet[SuggestionGroupe]") -> int:
+        if action in REVIEW_ACTEURS_BULK_STATUT:
+            # values_list on a possibly-annotated/filtered queryset, then a
+            # set-based update keyed on those ids
+            targeted_ids = list(targeted.values_list("id", flat=True))
+            return SuggestionGroupe.objects.filter(id__in=targeted_ids).update(
+                statut=REVIEW_ACTEURS_BULK_STATUT[action]
+            )
+
+        apply = (
+            apply_suggestions_to_correction
+            if action == "apply_to_correction"
+            else apply_suggestions_to_parent
+        )
+        applied = 0
+        for groupe in targeted.prefetch_related("suggestion_unitaires"):
+            if apply(groupe):
+                applied += 1
+        return applied

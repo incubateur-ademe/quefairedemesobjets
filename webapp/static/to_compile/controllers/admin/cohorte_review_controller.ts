@@ -13,6 +13,15 @@ import {
   observeElementOffset,
   observeElementRect,
 } from "@tanstack/virtual-core"
+import {
+  QL_FIELDS,
+  QlCombinator,
+  QlRow,
+  blankRow,
+  buildDjangoQL,
+  fieldByName,
+  operatorsForField,
+} from "./djangoql_builder"
 
 interface PivotCell {
   current: string | null
@@ -163,6 +172,27 @@ export default class extends Controller<HTMLElement> {
     "drawer",
     "drawerBody",
     "drawerAdminLink",
+    // --- vue par acteurs ---
+    "viewSwitch",
+    "champsView",
+    "acteursView",
+    "acteursHeading",
+    "acteursList",
+    "acteursStatut",
+    "acteursCount",
+    "acteursPager",
+    "acteursBulkBar",
+    "acteursBulkCount",
+    "acteursSelectAllPage",
+    "acteursPageBanner",
+    "qbRows",
+    "qbCombinatorAnd",
+    "qbCombinatorOr",
+    "qbPreview",
+    "qbRaw",
+    "qbBlocks",
+    "mapDialog",
+    "mapDialogBody",
   ]
   static values = {
     rowsUrl: String,
@@ -170,6 +200,10 @@ export default class extends Controller<HTMLElement> {
     groupeUrlTemplate: String,
     adminUrlTemplate: String,
     csrf: String,
+    // --- vue par acteurs ---
+    acteursUrl: String,
+    acteursBulkUrl: String,
+    groupeStreamUrlTemplate: String,
   }
 
   declare readonly scrollerTarget: HTMLDivElement
@@ -202,6 +236,55 @@ export default class extends Controller<HTMLElement> {
   declare readonly adminUrlTemplateValue: string
   declare readonly csrfValue: string
 
+  // --- vue par acteurs targets ---
+  declare readonly viewSwitchTarget: HTMLElement & { value: string }
+  declare readonly hasViewSwitchTarget: boolean
+  declare readonly champsViewTarget: HTMLElement
+  declare readonly acteursViewTarget: HTMLElement
+  declare readonly acteursHeadingTarget: HTMLElement
+  declare readonly acteursListTarget: HTMLElement
+  declare readonly acteursStatutTarget: HTMLElement & { value: string }
+  declare readonly acteursCountTarget: HTMLElement
+  declare readonly acteursPagerTarget: HTMLElement
+  declare readonly acteursBulkBarTarget: HTMLElement
+  declare readonly acteursBulkCountTarget: HTMLElement
+  declare readonly acteursSelectAllPageTarget: HTMLElement & {
+    checked: boolean
+    indeterminate: boolean
+  }
+  declare readonly acteursPageBannerTarget: HTMLElement
+  declare readonly qbRowsTarget: HTMLElement
+  declare readonly qbCombinatorAndTarget: HTMLInputElement
+  declare readonly qbCombinatorOrTarget: HTMLInputElement
+  declare readonly qbPreviewTarget: HTMLElement
+  declare readonly qbRawTarget: HTMLElement & { value: string; disabled: boolean }
+  declare readonly qbBlocksTarget: HTMLElement
+  declare readonly mapDialogTarget: HTMLElement & { show(): void; hide(): void }
+  declare readonly mapDialogBodyTarget: HTMLElement
+  declare readonly hasActeursViewTarget: boolean
+  declare readonly acteursUrlValue: string
+  declare readonly acteursBulkUrlValue: string
+  declare readonly groupeStreamUrlTemplateValue: string
+
+  // --- vue par acteurs state ---
+  private currentView: "acteurs" | "champs" = "acteurs"
+  private acteursPage = 1
+  private acteursNumPages = 1
+  private acteursTotal = 0
+  private acteursHasNext = false
+  private acteursHasPrevious = false
+  private acteursLoading = false
+  private acteursStatut = "AVALIDER"
+  // ids selected across pages, persisted while paginating
+  private acteursSelection = new Set<number>()
+  // « select all filtered » scope: bulk acts on the filter, not on ids
+  private acteursFilterScope = false
+  private qbRowsState: QlRow[] = [blankRow()]
+  private qbCombinator: QlCombinator = "and"
+  private qbRawMode = false
+  private appliedDjangoQL = ""
+  private mapDialogGroupeId: number | null = null
+
   private rows: PivotRow[] = []
   private fields: FieldMeta[] = []
   private total = 0
@@ -228,9 +311,11 @@ export default class extends Controller<HTMLElement> {
   private virtualizer!: Virtualizer<HTMLDivElement, HTMLTableRowElement>
   private cleanupVirtualizer: () => void = () => {}
 
+  // the pivot grid is lazy: only initialised/fetched the first time the
+  // « vue par champ » is shown, so the default acteurs view starts cheaply
+  private champsInitialized = false
+
   connect() {
-    this.initTable()
-    this.initVirtualizer()
     // Cell action buttons and checkboxes are re-rendered on every scroll
     // (grid) or refresh (focus cards): delegated listeners survive instead
     // of re-binding, and avoid racing the custom-element upgrade.
@@ -238,13 +323,41 @@ export default class extends Controller<HTMLElement> {
     this.element.addEventListener("sl-change", this.onCheckboxChange)
     document.addEventListener("keydown", this.onKeydown)
     window.addEventListener("popstate", this.onPopstate)
+    if (this.hasActeursViewTarget) {
+      this.restoreViewFromUrl()
+      this.renderQbRows()
+      if (this.qbRawMode) {
+        this.qbRawTarget.value = this.appliedDjangoQL
+      }
+      this.renderQbMode()
+      this.renderQbPreview()
+      this.applyViewVisibility()
+      if (this.currentView === "acteurs") {
+        this.fetchActeurs()
+      } else {
+        this.initChampsView()
+      }
+    } else {
+      this.initChampsView()
+    }
+  }
+
+  private initChampsView() {
+    if (this.champsInitialized) {
+      return
+    }
+    this.champsInitialized = true
+    this.initTable()
+    this.initVirtualizer()
     this.restoreStateFromUrl()
     this.applyFocusMode()
     this.fetchRows()
   }
 
   disconnect() {
-    this.cleanupVirtualizer()
+    if (this.champsInitialized) {
+      this.cleanupVirtualizer()
+    }
     this.element.removeEventListener("click", this.onCellAction)
     this.element.removeEventListener("sl-change", this.onCheckboxChange)
     document.removeEventListener("keydown", this.onKeydown)
@@ -360,6 +473,9 @@ export default class extends Controller<HTMLElement> {
   }
 
   private onPopstate = () => {
+    if (!this.champsInitialized) {
+      return
+    }
     const params = new URLSearchParams(window.location.search)
     const field = params.get("focus")
     const q = params.get("q") ?? ""
@@ -1672,5 +1788,700 @@ export default class extends Controller<HTMLElement> {
     const table = this.scrollerTarget.querySelector("table")
     table?.setAttribute("aria-rowcount", String(this.total + 1))
     table?.setAttribute("aria-colcount", String(this.visibleFields().length + 2))
+  }
+
+  // =====================================================================
+  // « VUE PAR ACTEURS » — paginated list of SuggestionGroupe cards, with a
+  // DjangoQL block builder, persistent cross-page selection, groupe-level
+  // bulk actions and a lazy MapLibre dialog. Self-contained: shares only the
+  // announcer/csrf with the pivot grid above.
+  // =====================================================================
+
+  // --- view switch (sl-radio-group : acteurs | champs) ---
+
+  onViewChange(event: Event) {
+    const value = (event.target as HTMLElement & { value: string }).value
+    this.setView(value === "champs" ? "champs" : "acteurs", { focus: true })
+  }
+
+  private setView(view: "acteurs" | "champs", { focus = false } = {}) {
+    if (view === this.currentView) {
+      return
+    }
+    this.currentView = view
+    this.syncViewToUrl()
+    this.applyViewVisibility()
+    if (view === "champs") {
+      this.initChampsView()
+    } else if (!this.acteursList.childElementCount) {
+      this.fetchActeurs()
+    }
+    if (focus) {
+      const heading =
+        view === "acteurs" ? this.acteursHeadingTarget : this.firstChampsHeading()
+      heading?.focus()
+      this.announce(
+        view === "acteurs" ? "Vue par acteurs affichée" : "Vue par champ affichée",
+      )
+    }
+  }
+
+  private firstChampsHeading(): HTMLElement | null {
+    return this.champsViewTarget.querySelector<HTMLElement>("[data-view-heading]")
+  }
+
+  private applyViewVisibility() {
+    this.acteursViewTarget.toggleAttribute("hidden", this.currentView !== "acteurs")
+    this.champsViewTarget.toggleAttribute("hidden", this.currentView !== "champs")
+  }
+
+  private restoreViewFromUrl() {
+    const params = new URLSearchParams(window.location.search)
+    this.currentView = params.get("vue") === "champs" ? "champs" : "acteurs"
+    const statut = params.get("statut")
+    if (statut) {
+      this.acteursStatut = statut
+    }
+    const djangoql = params.get("djangoql")
+    if (djangoql) {
+      this.appliedDjangoQL = djangoql
+      this.qbRawMode = true
+    }
+    customElements.whenDefined("sl-radio-group").then(() => {
+      if (this.hasViewSwitchTarget) {
+        this.viewSwitchTarget.value = this.currentView
+      }
+    })
+    customElements.whenDefined("sl-select").then(() => {
+      this.acteursStatutTarget.value = this.acteursStatut
+    })
+  }
+
+  private syncViewToUrl() {
+    const url = new URL(window.location.href)
+    if (this.currentView === "champs") {
+      url.searchParams.set("vue", "champs")
+    } else {
+      url.searchParams.delete("vue")
+    }
+    if (this.appliedDjangoQL) {
+      url.searchParams.set("djangoql", this.appliedDjangoQL)
+    } else {
+      url.searchParams.delete("djangoql")
+    }
+    if (this.acteursStatut && this.acteursStatut !== "AVALIDER") {
+      url.searchParams.set("statut", this.acteursStatut)
+    }
+    window.history.replaceState({}, "", url)
+  }
+
+  private get acteursList(): HTMLElement {
+    return this.acteursListTarget
+  }
+
+  // --- data loading & pagination ---
+
+  async fetchActeurs() {
+    if (this.acteursLoading) {
+      return
+    }
+    this.acteursLoading = true
+    this.acteursCountTarget.textContent = "Chargement…"
+    try {
+      const url = new URL(this.acteursUrlValue, window.location.origin)
+      url.searchParams.set("page", String(this.acteursPage))
+      url.searchParams.set("statut", this.acteursStatut)
+      if (this.appliedDjangoQL) {
+        url.searchParams.set("djangoql", this.appliedDjangoQL)
+      }
+      const response = await fetch(url, {
+        headers: { Accept: "text/html" },
+        credentials: "same-origin",
+      })
+      if (!response.ok) {
+        const message = await response.text()
+        throw new Error(message || `HTTP ${response.status}`)
+      }
+      const html = await response.text()
+      this.injectActeursFragment(html)
+    } catch (error) {
+      this.acteursListTarget.innerHTML = `<p class="acteurs-error">Erreur de chargement : ${esc(
+        String(error instanceof Error ? error.message : error),
+      )}</p>`
+      this.announce("Échec du chargement de la liste des acteurs")
+    } finally {
+      this.acteursLoading = false
+    }
+  }
+
+  private injectActeursFragment(html: string) {
+    const template = document.createElement("template")
+    template.innerHTML = html.trim()
+    const root = template.content.querySelector(
+      "[data-cohorte-review-acteurs]",
+    ) as HTMLElement | null
+    if (!root) {
+      this.acteursListTarget.innerHTML = html
+      return
+    }
+    this.acteursTotal = Number(root.dataset.total ?? "0")
+    this.acteursPage = Number(root.dataset.page ?? "1")
+    this.acteursNumPages = Number(root.dataset.numPages ?? "1")
+    this.acteursHasNext = root.dataset.hasNext === "true"
+    this.acteursHasPrevious = root.dataset.hasPrevious === "true"
+
+    this.acteursListTarget.replaceChildren(...Array.from(template.content.childNodes))
+    this.decorateActeurCards()
+    this.renderActeursCount()
+    this.renderActeursPager()
+    this.renderActeursBulkBar()
+    // « select all filtered » scope is per filter+page set: any reload drops it
+    this.acteursFilterScope = false
+    this.acteursListTarget.scrollIntoView({ block: "start", behavior: "auto" })
+    this.acteursHeadingTarget.focus()
+    this.announce(`Page ${this.acteursPage} sur ${this.acteursNumPages}`)
+  }
+
+  /** Inject the checkbox + « Carte » button into each card's server-built
+   * slots, and restore the persistent selection state. */
+  private decorateActeurCards() {
+    this.acteursListTarget
+      .querySelectorAll<HTMLElement>(".cohorte-review-acteur-card")
+      .forEach((card) => {
+        const groupeId = Number(card.dataset.groupeId)
+        const statut = card.dataset.groupeStatut ?? ""
+        card.classList.toggle("is-accepted", statut === STATUT_ACCEPTED)
+        card.classList.toggle("is-rejected", statut === STATUT_REJECTED)
+        const nom =
+          card.querySelector(".cohorte-review-acteur-card__id")?.textContent?.trim() ??
+          `#${groupeId}`
+        const checkboxSlot = card.querySelector<HTMLElement>(
+          "[data-card-checkbox-slot]",
+        )
+        if (checkboxSlot && !checkboxSlot.childElementCount) {
+          const checked = this.acteursSelection.has(groupeId)
+          checkboxSlot.innerHTML = `
+            <sl-checkbox size="small"
+              data-card-select
+              data-groupe-id="${groupeId}"
+              ${checked ? "checked" : ""}
+              data-action="sl-change->cohorte-review#onCardSelect"
+              aria-label="Sélectionner l'acteur ${esc(nom)}"></sl-checkbox>`
+        }
+        const mapSlot = card.querySelector<HTMLElement>("[data-card-map-slot]")
+        if (mapSlot && !mapSlot.childElementCount) {
+          mapSlot.innerHTML = `
+            <sl-button size="small" variant="text"
+              data-groupe-id="${groupeId}"
+              data-action="click->cohorte-review#openMapDialog">
+              <span aria-hidden="true">🗺</span> Carte
+            </sl-button>`
+        }
+        card.classList.toggle("is-selected", this.acteursSelection.has(groupeId))
+      })
+  }
+
+  goToActeursPage(event: Event) {
+    const page = Number((event.currentTarget as HTMLElement).dataset.page)
+    if (!page || page === this.acteursPage || page < 1 || page > this.acteursNumPages) {
+      return
+    }
+    this.acteursPage = page
+    this.fetchActeurs()
+  }
+
+  acteursPrevPage() {
+    if (this.acteursHasPrevious) {
+      this.acteursPage -= 1
+      this.fetchActeurs()
+    }
+  }
+
+  acteursNextPage() {
+    if (this.acteursHasNext) {
+      this.acteursPage += 1
+      this.fetchActeurs()
+    }
+  }
+
+  refreshActeurs() {
+    this.fetchActeurs()
+  }
+
+  onActeursStatutChange() {
+    this.acteursStatut = this.acteursStatutTarget.value || "all"
+    this.acteursPage = 1
+    this.syncViewToUrl()
+    this.fetchActeurs()
+  }
+
+  private renderActeursCount() {
+    const start = this.acteursTotal === 0 ? 0 : (this.acteursPage - 1) * 100 + 1
+    const end = Math.min(this.acteursPage * 100, this.acteursTotal)
+    this.acteursCountTarget.textContent = this.acteursTotal
+      ? `${start}–${end} / ${this.acteursTotal}`
+      : "Aucun acteur"
+  }
+
+  private renderActeursPager() {
+    if (this.acteursNumPages <= 1) {
+      this.acteursPagerTarget.innerHTML = ""
+      return
+    }
+    const pageButton = (page: number): string => {
+      const current = page === this.acteursPage
+      return `<sl-button size="small" pill
+        variant="${current ? "primary" : "default"}"
+        ${current ? 'aria-current="page"' : ""}
+        data-page="${page}"
+        data-action="click->cohorte-review#goToActeursPage">${page}</sl-button>`
+    }
+    const ellipsis = `<span class="acteurs-pager__gap" aria-hidden="true">…</span>`
+    const pages = this.pagerWindow()
+    let inner = ""
+    let last = 0
+    for (const page of pages) {
+      if (last && page - last > 1) {
+        inner += ellipsis
+      }
+      inner += pageButton(page)
+      last = page
+    }
+    this.acteursPagerTarget.innerHTML = `
+      <sl-button size="small" ${this.acteursHasPrevious ? "" : "disabled"}
+        data-action="click->cohorte-review#acteursPrevPage">‹ Précédent</sl-button>
+      ${inner}
+      <sl-button size="small" ${this.acteursHasNext ? "" : "disabled"}
+        data-action="click->cohorte-review#acteursNextPage">Suivant ›</sl-button>`
+  }
+
+  /** Windowed pager: 1 … n-1 [n] n+1 … last (no full list). */
+  private pagerWindow(): number[] {
+    const total = this.acteursNumPages
+    const current = this.acteursPage
+    const pages = new Set<number>([1, total, current])
+    if (current - 1 >= 1) {
+      pages.add(current - 1)
+    }
+    if (current + 1 <= total) {
+      pages.add(current + 1)
+    }
+    return [...pages].sort((a, b) => a - b)
+  }
+
+  // --- persistent selection ---
+
+  onCardSelect(event: Event) {
+    const checkbox = event.target as HTMLElement & { checked: boolean }
+    const groupeId = Number(checkbox.dataset.groupeId)
+    if (!groupeId) {
+      return
+    }
+    if (checkbox.checked) {
+      this.acteursSelection.add(groupeId)
+    } else {
+      this.acteursSelection.delete(groupeId)
+      this.acteursFilterScope = false
+    }
+    const card = checkbox.closest<HTMLElement>(".cohorte-review-acteur-card")
+    card?.classList.toggle("is-selected", checkbox.checked)
+    this.renderActeursBulkBar()
+  }
+
+  toggleSelectPage(event: Event) {
+    const checked = (event.target as HTMLElement & { checked: boolean }).checked
+    this.pageGroupeIds().forEach((groupeId) => {
+      if (checked) {
+        this.acteursSelection.add(groupeId)
+      } else {
+        this.acteursSelection.delete(groupeId)
+      }
+    })
+    if (!checked) {
+      this.acteursFilterScope = false
+    }
+    this.acteursListTarget
+      .querySelectorAll<HTMLElement & { checked: boolean }>("[data-card-select]")
+      .forEach((box) => {
+        box.checked = checked
+        box
+          .closest(".cohorte-review-acteur-card")
+          ?.classList.toggle("is-selected", checked)
+      })
+    this.renderActeursBulkBar()
+  }
+
+  clearActeursSelection() {
+    this.acteursSelection.clear()
+    this.acteursFilterScope = false
+    this.acteursListTarget
+      .querySelectorAll<HTMLElement & { checked: boolean }>("[data-card-select]")
+      .forEach((box) => {
+        box.checked = false
+        box.closest(".cohorte-review-acteur-card")?.classList.remove("is-selected")
+      })
+    this.renderActeursBulkBar()
+  }
+
+  selectAllFilteredActeurs() {
+    this.acteursFilterScope = true
+    this.renderActeursBulkBar()
+    this.announce(`Les ${this.acteursTotal} acteurs filtrés sont sélectionnés`)
+  }
+
+  private pageGroupeIds(): number[] {
+    return [
+      ...this.acteursListTarget.querySelectorAll<HTMLElement>("[data-card-select]"),
+    ].map((box) => Number(box.dataset.groupeId))
+  }
+
+  private renderActeursBulkBar() {
+    const count = this.acteursFilterScope
+      ? this.acteursTotal
+      : this.acteursSelection.size
+    this.acteursBulkBarTarget.toggleAttribute("hidden", count === 0)
+    this.acteursBulkCountTarget.textContent = this.acteursFilterScope
+      ? `${this.acteursTotal} acteurs filtrés`
+      : `${count} acteur${count > 1 ? "s" : ""} sélectionné${count > 1 ? "s" : ""}`
+
+    const pageIds = this.pageGroupeIds()
+    const pageSelected = pageIds.filter((id) => this.acteursSelection.has(id)).length
+    const allPageSelected = pageIds.length > 0 && pageSelected === pageIds.length
+    if (this.hasActeursSelectAllPageTarget) {
+      this.acteursSelectAllPageTarget.checked = allPageSelected
+      this.acteursSelectAllPageTarget.indeterminate =
+        pageSelected > 0 && !allPageSelected
+    }
+    // Gmail-style banner: whole page checked but more results exist
+    const showBanner =
+      allPageSelected && !this.acteursFilterScope && this.acteursTotal > pageIds.length
+    this.acteursPageBannerTarget.toggleAttribute("hidden", !showBanner)
+    if (showBanner) {
+      this.acteursPageBannerTarget.innerHTML = `
+        Les ${pageIds.length} de cette page sont sélectionnés.
+        <sl-button size="small" variant="text"
+          data-action="click->cohorte-review#selectAllFilteredActeurs">
+          Sélectionner les ${this.acteursTotal} filtrés</sl-button>`
+    }
+  }
+
+  declare readonly hasActeursSelectAllPageTarget: boolean
+
+  // --- bulk actions (accept / reject / apply to correction / parent) ---
+
+  acteursAccept() {
+    this.runActeursBulk("accept")
+  }
+
+  acteursReject() {
+    this.confirmThen("Rejeter", () => this.runActeursBulk("reject"))
+  }
+
+  acteursApplyCorrection() {
+    this.runActeursBulk("apply_to_correction")
+  }
+
+  acteursApplyParent() {
+    this.confirmThen("Appliquer au parent", () =>
+      this.runActeursBulk("apply_to_parent"),
+    )
+  }
+
+  private confirmThen(label: string, run: () => void) {
+    const count = this.acteursFilterScope
+      ? this.acteursTotal
+      : this.acteursSelection.size
+    if (
+      window.confirm(`${label} pour ${count} acteur(s) ? Cette action est définitive.`)
+    ) {
+      run()
+    }
+  }
+
+  private async runActeursBulk(action: string) {
+    const body: Record<string, unknown> = { action }
+    if (this.acteursFilterScope) {
+      body.filter = { djangoql: this.appliedDjangoQL, statut: this.acteursStatut }
+    } else {
+      const ids = [...this.acteursSelection]
+      if (!ids.length) {
+        return
+      }
+      body.groupe_ids = ids
+    }
+    try {
+      const response = await fetch(this.acteursBulkUrlValue, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": this.csrfValue,
+          Accept: "application/json",
+        },
+        credentials: "same-origin",
+        body: JSON.stringify(body),
+      })
+      if (!response.ok) {
+        const message = await response.text()
+        throw new Error(message || `HTTP ${response.status}`)
+      }
+      const payload = await response.json()
+      this.announce(
+        `${payload.applied} action${payload.applied > 1 ? "s" : ""} appliquée${
+          payload.applied > 1 ? "s" : ""
+        }`,
+      )
+      this.acteursSelection.clear()
+      this.acteursFilterScope = false
+      this.fetchActeurs()
+    } catch (error) {
+      this.announce(
+        `Échec de l'action : ${error instanceof Error ? error.message : String(error)}`,
+      )
+    }
+  }
+
+  // --- DjangoQL block builder ---
+
+  qbToggleRaw() {
+    this.qbRawMode = !this.qbRawMode
+    if (this.qbRawMode) {
+      this.qbRawTarget.value = this.appliedDjangoQL || this.computeDjangoQL()
+    }
+    this.renderQbMode()
+  }
+
+  private renderQbMode() {
+    this.qbRawTarget.toggleAttribute("hidden", !this.qbRawMode)
+    this.qbBlocksTarget.toggleAttribute("hidden", this.qbRawMode)
+    const toggle = this.element.querySelector<HTMLElement>("[data-qb-raw-toggle]")
+    toggle?.setAttribute("aria-expanded", String(this.qbRawMode))
+  }
+
+  qbAddRow() {
+    this.readQbFromDom()
+    this.qbRowsState.push(blankRow())
+    this.renderQbRows()
+    this.renderQbPreview()
+    const selects = this.qbRowsTarget.querySelectorAll<HTMLElement>(".qb-field")
+    selects[selects.length - 1]?.focus()
+  }
+
+  qbRemoveRow(event: Event) {
+    this.readQbFromDom()
+    const index = Number((event.currentTarget as HTMLElement).dataset.index)
+    this.qbRowsState.splice(index, 1)
+    if (!this.qbRowsState.length) {
+      this.qbRowsState = [blankRow()]
+    }
+    this.renderQbRows()
+    this.renderQbPreview()
+    const rows = this.qbRowsTarget.querySelectorAll<HTMLElement>(".qb-remove")
+    const fallback = this.element.querySelector<HTMLElement>("[data-qb-add]")
+    ;(rows[Math.max(0, index - 1)] ?? fallback)?.focus()
+  }
+
+  qbFieldChanged(event: Event) {
+    // operator list depends on the field type → re-render the row
+    this.readQbFromDom()
+    const index = Number((event.currentTarget as HTMLElement).dataset.index)
+    const field = (event.currentTarget as HTMLSelectElement).value
+    const row = this.qbRowsState[index]
+    if (row) {
+      row.field = field
+      const operators = operatorsForField(field)
+      if (!operators.some((operator) => operator.value === row.operator)) {
+        row.operator = operators[0]?.value ?? "="
+      }
+    }
+    this.renderQbRows()
+    this.renderQbPreview()
+  }
+
+  qbCombinatorChanged() {
+    this.qbCombinator = this.qbCombinatorAndTarget.checked ? "and" : "or"
+    this.renderQbPreview()
+  }
+
+  qbInputChanged() {
+    this.readQbFromDom()
+    this.renderQbPreview()
+  }
+
+  qbApply() {
+    if (this.qbRawMode) {
+      this.appliedDjangoQL = this.qbRawTarget.value.trim()
+    } else {
+      this.readQbFromDom()
+      this.appliedDjangoQL = this.computeDjangoQL()
+    }
+    this.acteursPage = 1
+    this.acteursSelection.clear()
+    this.acteursFilterScope = false
+    this.syncViewToUrl()
+    this.fetchActeurs()
+  }
+
+  qbReset() {
+    this.qbRowsState = [blankRow()]
+    this.qbCombinator = "and"
+    this.qbRawMode = false
+    this.appliedDjangoQL = ""
+    this.qbRawTarget.value = ""
+    this.renderQbRows()
+    this.renderQbMode()
+    this.renderQbPreview()
+    this.acteursPage = 1
+    this.syncViewToUrl()
+    this.fetchActeurs()
+  }
+
+  private computeDjangoQL(): string {
+    return buildDjangoQL(this.qbRowsState, this.qbCombinator)
+  }
+
+  private readQbFromDom() {
+    const rows = [...this.qbRowsTarget.querySelectorAll<HTMLElement>(".qb-row")]
+    if (!rows.length) {
+      return
+    }
+    this.qbRowsState = rows.map((row) => ({
+      field: (row.querySelector(".qb-field") as HTMLSelectElement).value,
+      operator: (row.querySelector(".qb-operator") as HTMLSelectElement).value,
+      value:
+        (row.querySelector(".qb-value") as (HTMLElement & { value: string }) | null)
+          ?.value ?? "",
+    }))
+    this.qbCombinator = this.qbCombinatorAndTarget.checked ? "and" : "or"
+  }
+
+  private renderQbRows() {
+    this.qbRowsTarget.innerHTML = this.qbRowsState
+      .map((row, index) => this.renderQbRow(row, index))
+      .join("")
+    this.qbCombinatorAndTarget.checked = this.qbCombinator === "and"
+    this.qbCombinatorOrTarget.checked = this.qbCombinator === "or"
+  }
+
+  private renderQbRow(row: QlRow, index: number): string {
+    const fieldOptions = QL_FIELDS.map(
+      (field) =>
+        `<option value="${esc(field.name)}" ${
+          field.name === row.field ? "selected" : ""
+        }>${esc(field.label)}</option>`,
+    ).join("")
+    const operators = operatorsForField(row.field)
+    const operatorOptions = operators
+      .map(
+        (operator) =>
+          `<option value="${esc(operator.value)}" ${
+            operator.value === row.operator ? "selected" : ""
+          }>${esc(operator.label)}</option>`,
+      )
+      .join("")
+    const meta = fieldByName(row.field)
+    const valueInput =
+      meta?.type === "bool"
+        ? `<select class="qb-value"
+            aria-label="Valeur du filtre ${index + 1}"
+            data-action="change->cohorte-review#qbInputChanged">
+            <option value="true" ${row.value === "true" ? "selected" : ""}>Oui</option>
+            <option value="false" ${row.value !== "true" ? "selected" : ""}>Non</option>
+          </select>`
+        : `<sl-input size="small" class="qb-value"
+            value="${esc(row.value)}"
+            aria-label="Valeur du filtre ${index + 1}"
+            data-action="sl-input->cohorte-review#qbInputChanged"></sl-input>`
+    return `
+      <div class="qb-row">
+        <select class="qb-field"
+          aria-label="Champ du filtre ${index + 1}"
+          data-index="${index}"
+          data-action="change->cohorte-review#qbFieldChanged">${fieldOptions}</select>
+        <select class="qb-operator"
+          aria-label="Opérateur du filtre ${index + 1}"
+          data-action="change->cohorte-review#qbInputChanged">${operatorOptions}</select>
+        ${valueInput}
+        <button type="button" class="qb-remove"
+          aria-label="Supprimer ce filtre"
+          data-index="${index}"
+          data-action="click->cohorte-review#qbRemoveRow"><span aria-hidden="true">✕</span></button>
+      </div>`
+  }
+
+  private renderQbPreview() {
+    const query = this.qbRawMode
+      ? this.qbRawTarget.value.trim()
+      : this.computeDjangoQL()
+    this.qbPreviewTarget.textContent = query || "(aucun filtre)"
+  }
+
+  // --- map dialog (MapLibre mounts only on sl-after-show) ---
+
+  openMapDialog(event: Event) {
+    const groupeId = Number((event.currentTarget as HTMLElement).dataset.groupeId)
+    if (!groupeId) {
+      return
+    }
+    this.mapDialogGroupeId = groupeId
+    this.mapDialogBodyTarget.innerHTML = `<p class="map-dialog__loading">Chargement de la carte…</p>`
+    this.mapDialogTarget.setAttribute("label", `Localisation — acteur #${groupeId}`)
+    this.mapDialogTarget.show()
+  }
+
+  async onMapDialogShown(event: Event) {
+    if (event.target !== this.mapDialogTarget || this.mapDialogGroupeId === null) {
+      return
+    }
+    const url = this.groupeStreamUrlTemplateValue.replace(
+      /\/0\/$/,
+      `/${this.mapDialogGroupeId}/`,
+    )
+    try {
+      const response = await fetch(`${url}?tab=localisation`, {
+        headers: { Accept: "text/vnd.turbo-stream.html" },
+        credentials: "same-origin",
+      })
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`)
+      }
+      const stream = await response.text()
+      this.mountLocalisationFromStream(stream)
+    } catch (error) {
+      this.mapDialogBodyTarget.innerHTML = `<p class="map-dialog__error">Erreur de chargement : ${esc(
+        String(error instanceof Error ? error.message : error),
+      )}</p>`
+    }
+  }
+
+  /** The localisation endpoint answers a <turbo-stream> wrapping the whole
+   * details partial; extract just the localisation block (the map + legend)
+   * so the existing `map` / `suggestion-map-update` controllers boot inside
+   * the now-visible dialog. */
+  private mountLocalisationFromStream(stream: string) {
+    const template = document.createElement("template")
+    template.innerHTML = stream.trim()
+    const inner =
+      template.content.querySelector("template")?.content ?? template.content
+    const block = inner.querySelector(
+      "[data-controller~='suggestion-map-update']",
+    ) as HTMLElement | null
+    if (block) {
+      this.mapDialogBodyTarget.replaceChildren(block)
+    } else {
+      this.mapDialogBodyTarget.innerHTML = `<p class="map-dialog__error">Aucune localisation disponible pour cet acteur.</p>`
+    }
+  }
+
+  closeMapDialog() {
+    this.mapDialogTarget.hide()
+  }
+
+  onMapDialogHidden(event: Event) {
+    if (event.target !== this.mapDialogTarget) {
+      return
+    }
+    // tear MapLibre down so the next open re-mounts cleanly in a sized container
+    this.mapDialogBodyTarget.innerHTML = ""
+    this.mapDialogGroupeId = null
   }
 }

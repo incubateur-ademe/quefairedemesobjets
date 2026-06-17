@@ -60,7 +60,7 @@
         </table>
     </div>
 
-    {% if suggestion_groupe_type.display_tab %}
+    {% if suggestion_groupe_type.display_tab and not embed_mode %}
         <ul class="tabs">
             <li {% if tab == "acteur" %}class="active"{% endif %}><a href="{{ suggestion_groupe.change_url }}?tab=acteur">Acteur affiché</a></li>
             <li {% if tab == "localisation" %}class="active"{% endif %}><a href="{{ suggestion_groupe.change_url }}?tab=localisation">Localisation</a></li>

@@ -1,5 +1,7 @@
 from data.views import (
     CohortAdminListView,
+    CohorteReviewActeursBulkView,
+    CohorteReviewActeursView,
     CohorteReviewBulkView,
     CohorteReviewGroupeView,
     CohorteReviewRowsView,
@@ -46,5 +48,15 @@ urlpatterns = [
         "cohorte/<int:cohorte_id>/review/groupe/<int:groupe_id>/",
         CohorteReviewGroupeView.as_view(),
         name="cohorte_review_groupe",
+    ),
+    path(
+        "cohorte/<int:cohorte_id>/review/acteurs/",
+        CohorteReviewActeursView.as_view(),
+        name="cohorte_review_acteurs",
+    ),
+    path(
+        "cohorte/<int:cohorte_id>/review/acteurs/bulk/",
+        CohorteReviewActeursBulkView.as_view(),
+        name="cohorte_review_acteurs_bulk",
     ),
 ]
