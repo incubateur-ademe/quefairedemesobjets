@@ -5,20 +5,23 @@
 from settings.base import *  # noqa: F403
 
 import decouple
+import os
 
 # ---------------------------------------------------------------------------
 # GeoDjango library paths
 # ---------------------------------------------------------------------------
-GDAL_LIBRARY_PATH = decouple.config(
-    "GDAL_LIBRARY_PATH",
-    default=None,
-    cast=str,
-)
-GEOS_LIBRARY_PATH = decouple.config(
-    "GEOS_LIBRARY_PATH",
-    default=None,
-    cast=str,
-)
+if "GDAL_LIBRARY_PATH" in os.environ:
+    GDAL_LIBRARY_PATH = decouple.config(
+        "GDAL_LIBRARY_PATH",
+        default=None,
+        cast=str,
+    )
+
+if "GEOS_LIBRARY_PATH" in os.environ:
+    GEOS_LIBRARY_PATH = decouple.config(
+        "GEOS_LIBRARY_PATH",
+        cast=str,
+    )
 
 # ---------------------------------------------------------------------------
 # Debug & developer conveniences
