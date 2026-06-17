@@ -45,7 +45,10 @@ resource "null_resource" "create_extensions" {
   depends_on = [scaleway_rdb_privilege.preview]
 
   provisioner "local-exec" {
-    command = "psql \"${local.preview_db_url}\" -f ${var.create_extensions_script_path}"
+    environment = {
+      PGPASSWORD = random_password.preview.result
+    }
+    command = "psql \"postgresql://${var.preview_db_username}@${local.host}:${local.port}/${var.preview_db_name}?sslmode=require\" -f ${var.create_extensions_script_path}"
   }
 
   triggers = {
@@ -55,23 +58,32 @@ resource "null_resource" "create_extensions" {
   }
 }
 
-# Seed the preview DB by piping pg_dump (from the sample) into pg_restore
-# (into the preview). Mirrors the .github/actions/prepare-django-db pattern.
+# Seed the preview DB from the sample on every deploy (image_tag changes each push).
+# Drops and recreates the DB first for a guaranteed clean slate.
 resource "null_resource" "seed_from_sample" {
   depends_on = [null_resource.create_extensions]
 
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
-    command     = <<-EOT
+    # Passwords via env vars: avoids shell expansion of special chars in inline URLs
+    environment = {
+      PGPASSWORD     = var.admin_password
+      PREVIEW_DB_URL = local.preview_db_url
+      SAMPLE_DB_URI  = var.sample_db_uri
+    }
+    command = <<-EOT
       set -euo pipefail
-      pg_dump -Fc "${var.sample_db_uri}" \
-        | pg_restore -d "${local.preview_db_url}" \
-            --clean --if-exists --no-owner --no-privileges \
+      ADMIN_URL="postgresql://${var.admin_username}@${local.host}:${local.port}/postgres?sslmode=require"
+      psql "$ADMIN_URL" -c "DROP DATABASE IF EXISTS ${var.preview_db_name} WITH (FORCE);"
+      psql "$ADMIN_URL" -c "CREATE DATABASE ${var.preview_db_name} OWNER ${var.preview_db_username};"
+      pg_dump -Fc "$SAMPLE_DB_URI" \
+        | pg_restore -d "$PREVIEW_DB_URL" \
+            --no-owner --no-privileges \
             --exit-on-error
     EOT
   }
 
   triggers = {
-    database_id = scaleway_rdb_database.preview.id
+    image_tag = var.image_tag
   }
 }

@@ -23,3 +23,19 @@ variable "create_extensions_script_path" {
   description = "Chemin absolu vers create_extensions.sql"
   type        = string
 }
+
+variable "image_tag" {
+  description = "Image tag du déploiement (pr-<n>-<sha>) — change à chaque push pour forcer un re-seed"
+  type        = string
+}
+
+variable "admin_username" {
+  description = "Utilisateur admin de l'instance RDB (superuser Scaleway) pour drop/create database"
+  type        = string
+}
+
+variable "admin_password" {
+  description = "Mot de passe de l'admin RDB"
+  type        = string
+  sensitive   = true
+}

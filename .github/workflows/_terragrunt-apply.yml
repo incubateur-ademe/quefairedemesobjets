@@ -90,11 +90,21 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends postgresql-client
 
+      - name: Validate command input
+        run: |
+          CMD="${{ inputs.command }}"
+          [[ "$CMD" == "apply" || "$CMD" == "destroy" ]] \
+            || { echo "Invalid command: $CMD (must be 'apply' or 'destroy')"; exit 1; }
+
       - name: Materialise per-PR terragrunt stack from _template
         run: |
           set -euo pipefail
           SRC="infrastructure/environments/preview/_template"
           DST="infrastructure/environments/preview/pr-${{ inputs.pr_number }}"
+          if [[ "${{ inputs.command }}" == "destroy" && ! -d "$DST" ]]; then
+            echo "No preview directory at $DST, nothing to destroy."
+            exit 0
+          fi
           if [[ ! -d "$DST" ]]; then
             cp -r "$SRC" "$DST"
             echo "Materialised $DST from $SRC"
@@ -106,10 +116,11 @@ jobs:
       - name: Terragrunt init + ${{ inputs.command }}
         working-directory: infrastructure/environments/preview/pr-${{ inputs.pr_number }}
         run: |
+          CMD="${{ inputs.command }}"
           terragrunt run-all init --terragrunt-non-interactive 2>&1 | tee init.log
-          terragrunt run-all ${{ inputs.command }} --terragrunt-non-interactive --auto-approve 2>&1 | tee apply.log
+          terragrunt run-all "$CMD" --terragrunt-non-interactive --auto-approve 2>&1 | tee apply.log
           {
-            echo "## Terragrunt ${{ inputs.command }} (pr-${{ inputs.pr_number }})"
+            echo "## Terragrunt $CMD (pr-${{ inputs.pr_number }})"
             echo
             echo '```'
             tail -n 100 apply.log

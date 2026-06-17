@@ -123,3 +123,14 @@ On a test PR:
 - Production deployment is unchanged (Scalingo); the Docker image is
   used by previews only for now.
 - Served on the Scaleway-generated domain; no custom URLs.
+
+## TODO
+
+- **Separate Scaleway project for previews**: currently all preview resources
+  (containers, databases, buckets, IAM keys) are created in the same Scaleway
+  project as preprod. A dedicated preview project would provide billing
+  isolation, quota isolation, and tighten the IAM scope (the per-PR bucket IAM
+  policy currently has `ObjectStorageFullAccess` on the whole project, which
+  includes preprod buckets). To implement: create a `preview` Scaleway project,
+  add `SCW_PREVIEW_PROJECT_ID` as a GitHub secret in the `preview` environment,
+  and update `_terragrunt-apply.yml` to pass it as `TF_VAR_project_id`.
