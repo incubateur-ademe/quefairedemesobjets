@@ -54,9 +54,9 @@ resource "null_resource" "create_extensions" {
 
   provisioner "local-exec" {
     environment = {
-      PGPASSWORD = random_password.preview.result
+      PGPASSWORD = var.admin_password
     }
-    command = "psql \"postgresql://${var.preview_db_username}@${local.host}:${local.port}/${var.preview_db_name}?sslmode=require\" -f ${var.create_extensions_script_path}"
+    command = "psql \"postgresql://${var.admin_username}@${local.host}:${local.port}/${var.preview_db_name}?sslmode=require\" -f ${var.create_extensions_script_path}"
   }
 
   triggers = {

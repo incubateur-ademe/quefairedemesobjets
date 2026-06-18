@@ -45,7 +45,9 @@ Per-PR resources (state: lvao-terraform-state/preview/pr-<n>/…):
 │                   RDB instance, PostGIS extensions, seeded from
 │                   the sample DB
 ├── object_storage  throwaway media bucket, force_destroy,
-│                   1-day object expiry, bucket-scoped IAM key
+│                   1-day object expiry; container reuses the
+│                   project-wide SCW key (no bucket-scoped IAM key,
+│                   see Limitations)
 └── container       serverless container in the shared
                     lvao-preview namespace, min_scale=0,
                     tagged preview / preview-pr-<n> /
@@ -123,14 +125,25 @@ On a test PR:
 - Production deployment is unchanged (Scalingo); the Docker image is
   used by previews only for now.
 - Served on the Scaleway-generated domain; no custom URLs.
+- No bucket-scoped IAM key for the media bucket: the CI Terraform credentials
+  (`SCW_ACCESS_KEY`/`SCW_SECRET_KEY`) lack IAM write permission, so the
+  container reuses those project-wide credentials for S3 access instead of a
+  bucket-scoped key. Any preview container can therefore reach every bucket
+  in the project, not just its own. Revisit once IAM write access is granted
+  (see TODO below) — re-add `scaleway_iam_application` /
+  `scaleway_iam_policy` / `scaleway_iam_api_key` in `preview_object_storage`,
+  scoped to the bucket.
 
 ## TODO
 
 - **Separate Scaleway project for previews**: currently all preview resources
-  (containers, databases, buckets, IAM keys) are created in the same Scaleway
+  (containers, databases, buckets) are created in the same Scaleway
   project as preprod. A dedicated preview project would provide billing
-  isolation, quota isolation, and tighten the IAM scope (the per-PR bucket IAM
-  policy currently has `ObjectStorageFullAccess` on the whole project, which
-  includes preprod buckets). To implement: create a `preview` Scaleway project,
-  add `SCW_PREVIEW_PROJECT_ID` as a GitHub secret in the `preview` environment,
-  and update `_terragrunt-apply.yml` to pass it as `TF_VAR_project_id`.
+  isolation and quota isolation. To implement: create a `preview` Scaleway
+  project, add `SCW_PREVIEW_PROJECT_ID` as a GitHub secret in the `preview`
+  environment, and update `_terragrunt-apply.yml` to pass it as
+  `TF_VAR_project_id`.
+- **Grant IAM write permission to the CI Scaleway key**: needed to restore
+  bucket-scoped IAM credentials per preview (see Limitations above). Without
+  it, the IAM isolation between previews and prod/preprod buckets is weaker
+  than intended.

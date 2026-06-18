@@ -38,8 +38,6 @@ dependency "preview_object_storage" {
   mock_outputs = {
     bucket_name  = "lvao-preview-mock-media"
     endpoint_url = "https://s3.fr-par.scw.cloud"
-    access_key   = "SCWMOCK"
-    secret_key   = "MOCKSECRET" # pragma: allowlist secret
   }
   mock_outputs_allowed_terraform_commands = ["validate", "plan"]
 }
@@ -64,8 +62,10 @@ inputs = {
   DATABASE_URL = dependency.preview_database.outputs.database_url
   SECRET_KEY   = get_env("PREVIEW_SECRET_KEY")
 
-  AWS_ACCESS_KEY_ID       = dependency.preview_object_storage.outputs.access_key
-  AWS_SECRET_ACCESS_KEY   = dependency.preview_object_storage.outputs.secret_key
+  # ponytail: reuses the project-wide Scaleway key (no IAM write access to
+  # mint a bucket-scoped one). Revisit if IAM permissions are granted.
+  AWS_ACCESS_KEY_ID       = get_env("SCW_ACCESS_KEY")
+  AWS_SECRET_ACCESS_KEY   = get_env("SCW_SECRET_KEY")
   AWS_STORAGE_BUCKET_NAME = dependency.preview_object_storage.outputs.bucket_name
   AWS_S3_ENDPOINT_URL     = dependency.preview_object_storage.outputs.endpoint_url
 }

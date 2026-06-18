@@ -26,24 +26,7 @@ resource "scaleway_object_bucket_acl" "media" {
   acl    = "private"
 }
 
-# Bucket-scoped IAM application: gives the container an access key that
-# can only touch this bucket, nothing else in the project.
-resource "scaleway_iam_application" "bucket_access" {
-  name        = "${var.prefix}-${var.environment}-media"
-  description = "Bucket-scoped credentials for preview ${var.environment}"
-}
-
-resource "scaleway_iam_policy" "bucket_access" {
-  name           = "${var.prefix}-${var.environment}-media"
-  application_id = scaleway_iam_application.bucket_access.id
-
-  rule {
-    project_ids          = [var.project_id]
-    permission_set_names = ["ObjectStorageFullAccess"]
-  }
-}
-
-resource "scaleway_iam_api_key" "bucket_access" {
-  application_id = scaleway_iam_application.bucket_access.id
-  description    = "Used by the preview ${var.environment} webapp container"
-}
+# ponytail: no dedicated IAM application here — the CI/Terraform key lacks
+# IAM write permission. The container reuses the project-wide SCW
+# access/secret key instead. Less isolated than a bucket-scoped key;
+# revisit if IAM write perms are granted later.
