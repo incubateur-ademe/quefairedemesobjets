@@ -15,9 +15,20 @@ resource "random_password" "preview" {
   min_upper        = 1
 }
 
+# Carries the image_tag so the database resource below can be forced to
+# replace (drop+recreate via the Scaleway API, which has owner permission
+# unlike a raw psql DROP/CREATE) on every push.
+resource "terraform_data" "image_tag_trigger" {
+  input = var.image_tag
+}
+
 resource "scaleway_rdb_database" "preview" {
   instance_id = var.webapp_instance_id
   name        = var.preview_db_name
+
+  lifecycle {
+    replace_triggered_by = [terraform_data.image_tag_trigger]
+  }
 }
 
 resource "scaleway_rdb_user" "preview" {
@@ -66,24 +77,20 @@ resource "null_resource" "create_extensions" {
   }
 }
 
-# Seed the preview DB from the sample on every deploy (image_tag changes each push).
-# Drops and recreates the DB first for a guaranteed clean slate.
+# Seed the preview DB from the sample on every deploy. scaleway_rdb_database
+# above is replaced (dropped+recreated) on every image_tag change, so this
+# always restores into a fresh, empty database.
 resource "null_resource" "seed_from_sample" {
   depends_on = [null_resource.create_extensions]
 
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
-    # Passwords via env vars: avoids shell expansion of special chars in inline URLs
     environment = {
-      PGPASSWORD     = var.admin_password
       PREVIEW_DB_URL = local.preview_db_url
       SAMPLE_DB_URI  = var.sample_db_uri
     }
     command = <<-EOT
       set -euo pipefail
-      ADMIN_URL="postgresql://${var.admin_username}@${local.host}:${local.port}/postgres?sslmode=require"
-      psql "$ADMIN_URL" -c "DROP DATABASE IF EXISTS ${var.preview_db_name} WITH (FORCE);"
-      psql "$ADMIN_URL" -c "CREATE DATABASE ${var.preview_db_name} OWNER ${var.preview_db_username};"
       pg_dump -Fc "$SAMPLE_DB_URI" \
         | pg_restore -d "$PREVIEW_DB_URL" \
             --no-owner --no-privileges \
@@ -92,6 +99,6 @@ resource "null_resource" "seed_from_sample" {
   }
 
   triggers = {
-    image_tag = var.image_tag
+    database_id = scaleway_rdb_database.preview.id
   }
 }
