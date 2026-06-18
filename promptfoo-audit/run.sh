@@ -15,7 +15,7 @@ if [ -f .env ]; then
   set +a
 fi
 
-for key in ANTHROPIC_KEY MISTRAL_API_KEY GOOGLE_API_KEY DEEPSEEK_API_KEY; do
+for key in ANTHROPIC_KEY MISTRAL_API_KEY GOOGLE_API_KEY DEEPSEEK_API_KEY OPENAI_API_KEY; do
   if [ -z "${!key:-}" ]; then
     echo "⚠️  $key manquante : créez un fichier .env ou exportez-la" >&2
   fi
