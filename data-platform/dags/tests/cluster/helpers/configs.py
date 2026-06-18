@@ -7,7 +7,7 @@ We represent the confs in dict format because:
 """
 
 CONF_BASE_DICT = {
-    "dry_run": True,
+    "dry_run": False,
     "include_sources": ["ecopae (id=252)", "cyclevia (id=90)"],
     "apply_include_sources_to_parents": False,
     "include_acteur_types": ["decheterie (id=7)"],
