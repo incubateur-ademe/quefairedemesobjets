@@ -33,7 +33,7 @@ from wagtail.snippets.models import register_snippet
 from sites_conformes.content_manager.models import ContentPage
 
 from qfdmd.blocks import STREAMFIELD_COMMON_BLOCKS
-from qfdmd.utils import lire_plus_button
+from qfdmd.utils import see_more_button
 from qfdmo.models.utils import NomAsNaturalKeyModel
 from search.constants import SEARCH_TAG_HELP_TEXT
 from search.models import SearchTerm
@@ -489,7 +489,7 @@ class ProduitPage(
 
     def get_context(self, request, *args, **kwargs):
         ctx = super().get_context(request, *args, **kwargs)
-        ctx.update(footer_primary_button=lire_plus_button(self.get_full_url(request)))
+        ctx.update(footer_primary_button=see_more_button(self.get_full_url(request)))
 
         return ctx
 

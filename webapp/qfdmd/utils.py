@@ -1,7 +1,7 @@
 UTM_SOURCE = "qfdmod"
 
 
-def lire_plus_button(url: str) -> dict[str, str]:
+def see_more_button(url: str) -> dict[str, str]:
     """Build the "Voir plus de recommandations" footer button shown in the iframe.
 
     The button opens the standalone version of the fiche in a new tab. It is
