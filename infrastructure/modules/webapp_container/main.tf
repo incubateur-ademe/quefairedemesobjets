@@ -28,9 +28,9 @@ resource "scaleway_container" "webapp" {
     http {
       path = "/healthz/"
     }
-    failure_threshold = 3
+    failure_threshold = 5
     interval          = "30s"
-    duration          = "10s"
+    timeout           = "10s"
   }
 
   # Give the container up to 5 minutes to finish entrypoint
@@ -41,7 +41,7 @@ resource "scaleway_container" "webapp" {
     }
     failure_threshold = 10
     interval          = "30s"
-    duration          = "10s"
+    timeout           = "10s"
   }
 
   environment_variables = merge(
