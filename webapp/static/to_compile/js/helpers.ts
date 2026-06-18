@@ -23,6 +23,21 @@ export function removeHash() {
   )
 }
 
+/**
+ * Compute the available vertical space below `frameTop` inside the document
+ * body, leaving `margin` pixels between the bottom edge and the body bottom.
+ *
+ * Returns 0 if there is no room left rather than a negative value, so callers
+ * can pass the result straight to a CSS length.
+ */
+export function computeAvailableHeight(
+  frameTop: number,
+  bodyHeight: number,
+  margin: number,
+): number {
+  return Math.max(0, bodyHeight - frameTop - margin)
+}
+
 // SameSite=None; Secure; Partitioned lets the cookie survive a navigation
 // inside a cross-site iframe (e.g. the assistant embedded by a partner).
 // Partitioned (CHIPS) scopes the cookie to the embedding top-level site so
