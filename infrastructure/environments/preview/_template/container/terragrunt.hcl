@@ -57,7 +57,8 @@ inputs = {
 
   # The container is served on its Scaleway-generated domain, unknown before
   # apply: trust the whole generated-domain suffix (Django wildcard syntax).
-  ALLOWED_HOSTS = ".functions.fnc.fr-par.scw.cloud"
+  # 127.0.0.1 and localhost are needed for Scaleway's internal health probes.
+  ALLOWED_HOSTS = "127.0.0.1,localhost,.functions.fnc.fr-par.scw.cloud"
 
   DATABASE_URL = dependency.preview_database.outputs.database_url
   SECRET_KEY   = get_env("PREVIEW_SECRET_KEY")
