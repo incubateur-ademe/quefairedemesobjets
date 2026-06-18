@@ -613,3 +613,7 @@ LOOKBOOK = {
     "preview_base": ["previews"],
     "show_previews": decouple.config("SHOE_PREVIEWS", default=True, cast=bool),
 }
+
+GDAL_LIBRARY_PATH = "/Users/fabienlefrapper/.nix-profile/lib/libgdal.dylib"
+
+GEOS_LIBRARY_PATH = "/Users/fabienlefrapper/.nix-profile/lib/libgeos_c.dylib"
