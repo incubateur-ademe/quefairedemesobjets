@@ -32,3 +32,4 @@ exec gunicorn core.wsgi \
   --workers "${GUNICORN_WORKERS:-2}" \
   --max-requests 1000 \
   --max-requests-jitter 100
+
