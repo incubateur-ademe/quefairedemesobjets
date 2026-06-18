@@ -418,6 +418,7 @@ class CarteSearchActeursView(MapPrefixMixin, AbstractSearchActeursView):
             forms=self.ui_forms,
             map_container_id=self._get_map_container_id(),
             mode_liste=self.paginate,
+            in_modal="in_modal" in self.request.GET,
             carte_config=carte_config,
             selected_action_codes=self._get_action_codes(),
             icon_lookup=icon_lookup,
