@@ -87,15 +87,36 @@ resource "null_resource" "seed_from_sample" {
         psql "$PREVIEW_DB_URL" -c "DROP TABLE IF EXISTS \"$table\" CASCADE;"
       done
       psql "$PREVIEW_DB_URL" -f "$EXTENSIONS_SCRIPT"
-      # --clean emits DROP/ALTER statements for objects it assumes exist;
-      # against the freshly emptied database above, several of those are
-      # no-ops that still report a non-zero exit. Matches the tolerance
-      # already used by scripts/restore_sample_locally.sh (|| true) and
-      # restore_prod_to_preprod.sh (no --exit-on-error at all).
-      pg_dump -Fc --no-acl --no-owner --no-privileges "$SAMPLE_DB_URI" \
-        | pg_restore -d "$PREVIEW_DB_URL" \
-            --schema=public --clean --no-acl --no-owner --no-privileges \
-        || true
+
+      # Dump the sample database to a temp file — must succeed.
+      # If the sample DB is unreachable or auth fails, we fail loudly
+      # instead of silently proceeding with an empty database.
+      DUMP_FILE="$(mktemp)"
+      pg_dump -Fc --no-acl --no-owner --no-privileges "$SAMPLE_DB_URI" > "$DUMP_FILE"
+
+      # --clean emits DROP/ALTER for objects it assumes exist; against
+      # the freshly emptied database those pre-drops fail with exit 1.
+      # That's benign — but anything above 1 is a real restore error.
+      set +e
+      pg_restore -d "$PREVIEW_DB_URL" \
+          --schema=public --clean --no-acl --no-owner --no-privileges \
+          "$DUMP_FILE" 2>&1
+      RESTORE_RC=$?
+      set -e
+      if [ "$RESTORE_RC" -gt 1 ]; then
+        echo "pg_restore failed with exit code $RESTORE_RC" >&2
+        exit "$RESTORE_RC"
+      fi
+      rm -f "$DUMP_FILE"
+
+      # Verify that data was actually restored.
+      TABLE_COUNT="$(psql "$PREVIEW_DB_URL" -t -c \
+        "SELECT count(*) FROM pg_tables WHERE schemaname='public'")"
+      if [ "${TABLE_COUNT:-0}" -eq 0 ]; then
+        echo "ERROR: seed produced an empty database" >&2
+        exit 1
+      fi
+      echo "Seed complete: $TABLE_COUNT tables restored"
     EOT
   }
 
