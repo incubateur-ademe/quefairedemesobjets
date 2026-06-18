@@ -30,7 +30,7 @@ WITH acteurs_with_siret AS (
 		ville AS acteur_ville,
 		location AS acteur_location
 
-	FROM {{ source('enrich', 'qfdmo_vueacteur') }} AS acteurs
+	FROM {{ ref('base_vueacteur') }} AS acteurs
 	WHERE siret IS NOT NULL AND siret != '' AND LENGTH(siret) = 14
 	AND statut = 'ACTIF'
 	AND (est_dans_carte IS TRUE OR est_dans_opendata IS TRUE)
