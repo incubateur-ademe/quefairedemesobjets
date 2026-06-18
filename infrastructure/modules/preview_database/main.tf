@@ -67,11 +67,18 @@ resource "null_resource" "seed_from_sample" {
       scw rdb database delete instance-id="$INSTANCE_ID" name="$DB_NAME" 2>/dev/null || true
       scw rdb database create instance-id="$INSTANCE_ID" name="$DB_NAME"
 
-      # `user create` on an already-existing name updates it in place
-      # (notably resyncs the password to the current Terraform-managed
-      # one) rather than erroring, so this is an upsert on every run.
-      scw rdb user create instance-id="$INSTANCE_ID" name="$DB_USERNAME" \
-        password="$DB_PASSWORD" generate-password=false is-admin=false
+      # `user create` on an already-existing name doesn't error, but
+      # also silently does NOT update the password (confirmed: its
+      # output omits the password and the new one doesn't authenticate).
+      # `user update` is the one that actually resyncs it.
+      if scw rdb user list instance-id="$INSTANCE_ID" -o json \
+           | grep -q "\"name\":\"$DB_USERNAME\""; then
+        scw rdb user update instance-id="$INSTANCE_ID" name="$DB_USERNAME" \
+          password="$DB_PASSWORD"
+      else
+        scw rdb user create instance-id="$INSTANCE_ID" name="$DB_USERNAME" \
+          password="$DB_PASSWORD" generate-password=false is-admin=false
+      fi
 
       scw rdb privilege set instance-id="$INSTANCE_ID" \
         database-name="$DB_NAME" user-name="$DB_USERNAME" permission=all
