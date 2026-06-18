@@ -87,10 +87,15 @@ resource "null_resource" "seed_from_sample" {
         psql "$PREVIEW_DB_URL" -c "DROP TABLE IF EXISTS \"$table\" CASCADE;"
       done
       psql "$PREVIEW_DB_URL" -f "$EXTENSIONS_SCRIPT"
+      # --clean emits DROP/ALTER statements for objects it assumes exist;
+      # against the freshly emptied database above, several of those are
+      # no-ops that still report a non-zero exit. Matches the tolerance
+      # already used by scripts/restore_sample_locally.sh (|| true) and
+      # restore_prod_to_preprod.sh (no --exit-on-error at all).
       pg_dump -Fc --no-acl --no-owner --no-privileges "$SAMPLE_DB_URI" \
         | pg_restore -d "$PREVIEW_DB_URL" \
             --schema=public --clean --no-acl --no-owner --no-privileges \
-            --exit-on-error
+        || true
     EOT
   }
 
