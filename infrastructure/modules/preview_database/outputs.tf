@@ -1,9 +1,9 @@
 output "database_name" {
-  value = scaleway_rdb_database.preview.name
+  value = var.preview_db_name
 }
 
 output "database_username" {
-  value = scaleway_rdb_user.preview.name
+  value = var.preview_db_username
 }
 
 output "database_url" {
