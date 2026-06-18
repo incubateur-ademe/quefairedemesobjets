@@ -9,3 +9,8 @@ default:
       password: "{{ env_var('POSTGRES_PASSWORD', 'warehouse') }}"
       dbname: "{{ env_var('POSTGRES_DB', 'warehouse') }}"
       schema: "{{ env_var('POSTGRES_SCHEMA', 'public') }}"
+      # Keepalive TCP : during a long query (ex. int_acteur ~120s),
+      # the socket remains silent and a NAT/load-balancer Scaleway cuts the
+      # inactive connection after ~100s -> "SSL connection has been closed
+      # unexpectedly". Keepalive probes maintain the tunnel open.
+      keepalives_idle: 30
