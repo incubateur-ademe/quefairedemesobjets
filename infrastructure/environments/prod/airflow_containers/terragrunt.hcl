@@ -33,8 +33,8 @@ dependency "database_sample" {
 
   mock_outputs_allowed_terraform_commands = ["init", "validate", "plan"]
   mock_outputs = {
-    webapp_db_sample_username = "mock_webapp_sample"
-    webapp_db_sample_password = "mock_password" # pragma: allowlist secret
+    webapp_db_sample_username      = "mock_webapp_sample"
+    webapp_db_sample_password      = "mock_password" # pragma: allowlist secret
     webapp_db_sample_database_name = "webapp_sample"
   }
 }
