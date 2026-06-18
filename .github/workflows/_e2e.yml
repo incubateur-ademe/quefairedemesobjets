@@ -96,10 +96,6 @@ jobs:
           database-url: ${{ env.DATABASE_URL }}
           dump-path: database-dump.pgdump
 
-      - name: Fix duplicate MainMenu records
-        working-directory: webapp
-        run: uv run python manage.py fix_duplicate_mainmenu
-
       - name: TEMPORARY - prepare search index
         if: inputs.ref == github.ref
         working-directory: webapp
