@@ -101,17 +101,19 @@ Le projet est soumis à l'obligation légale d'accessibilité numérique (RGAA, 
 
 À chaque revue : appliquer la procédure décrite dans [`authentication.md`](authentication.md) §Procédure de revue des comptes Django Admin et airflow (inventaire des utilisateurs, recoupement avec la matrice d'onboarding/offboarding, ajustement des droits) puis consigner ci-dessous.
 
-| Date | Auteur | Environnement | Comptes revus | Observations |
-| ---- | ------ | ------------- | ------------- | ------------ |
-| —    | —      | prod          | —             | —            |
+| Date       | Auteur         | Environnement | Comptes revus | Observations |
+| ---------- | -------------- | ------------- | ------------- | ------------ |
+| 18/06/2026 | Nicolas Oudard | prod          | tous          | —            |
+| —          | —              | prod          | —             | —            |
 
 ### Comptes Airflow
 
 À chaque revue : appliquer la procédure décrite dans [`authentication.md`](authentication.md) §Procédure de revue des comptes Django Admin et Airflow (inventaire des utilisateurs, recoupement avec la matrice d'onboarding/offboarding, ajustement des droits) puis consigner ci-dessous.
 
-| Date | Auteur | Environnement | Comptes revus | Observations |
-| ---- | ------ | ------------- | ------------- | ------------ |
-| —    | —      | prod          | —             | —            |
+| Date       | Auteur         | Environnement | Comptes revus | Observations |
+| ---------- | -------------- | ------------- | ------------- | ------------ |
+| 18/06/2026 | Nicolas Oudard | prod          | tous          | —            |
+| —          | —              | prod          | —             | —            |
 
 ## Ajouter une nouvelle revue récurrente
 
