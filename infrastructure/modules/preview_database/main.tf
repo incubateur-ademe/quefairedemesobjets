@@ -19,6 +19,11 @@ locals {
   host = data.scaleway_rdb_instance.host.load_balancer.0.ip
   port = data.scaleway_rdb_instance.host.load_balancer.0.port
 
+  # var.webapp_instance_id is the Terraform-style composite ID
+  # ("fr-par/<uuid>"); the scw CLI's instance-id argument wants the bare
+  # UUID only.
+  instance_uuid = element(split("/", var.webapp_instance_id), length(split("/", var.webapp_instance_id)) - 1)
+
   preview_db_url = format(
     "postgresql://%s:%s@%s:%s/%s?sslmode=require", # pragma: allowlist secret
     var.preview_db_username,
@@ -48,7 +53,7 @@ resource "null_resource" "seed_from_sample" {
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     environment = {
-      INSTANCE_ID       = var.webapp_instance_id
+      INSTANCE_ID       = local.instance_uuid
       DB_NAME           = var.preview_db_name
       DB_USERNAME       = var.preview_db_username
       DB_PASSWORD       = random_password.preview.result
