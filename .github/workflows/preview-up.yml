@@ -73,24 +73,49 @@ jobs:
       ref: ${{ needs.resolve.outputs.sha }}
 
   comment:
-    name: 💬 Sticky comment with the URL
+    name: 💬 Sticky comment + deployment
     needs: [resolve, apply]
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
+      deployments: write
     steps:
       - uses: actions/github-script@v8
         with:
           script: |
             const prNumber = Number("${{ needs.resolve.outputs.pr_number }}");
             const url = "${{ needs.apply.outputs.endpoint }}";
-            const sha = "${{ needs.resolve.outputs.sha }}".slice(0, 7);
+            const sha = "${{ needs.resolve.outputs.sha }}";
+            const shortSha = sha.slice(0, 7);
+            const env = `preview-pr-${prNumber}`;
             const marker = "<!-- preview-env -->";
+
+            // --- Create GitHub Deployment (visible in Deployments tab) ---
+            const { data: deployment } = await github.rest.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: sha,
+              environment: env,
+              auto_merge: false,
+              required_contexts: [],
+              description: `Preview environment for PR #${prNumber} (${shortSha})`,
+            });
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: deployment.id,
+              state: "success",
+              environment_url: url,
+              log_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              description: `Deployed ${shortSha} — ${url}`,
+            });
+
+            // --- Sticky PR comment ---
             const body = [
               marker,
               `🌱 Preview environment ready: ${url}`,
               "",
-              `Deployed commit: \`${sha}\`. The environment is updated on every push`,
+              `Deployed commit: \`${shortSha}\`. The environment is updated on every push`,
               "and destroyed when the PR is closed or the `preview` label is removed.",
             ].join("\n");
 

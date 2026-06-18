@@ -63,5 +63,34 @@ jobs:
             "s3://lvao-terraform-state/preview/pr-${{ needs.resolve.outputs.pr_number }}/" \
             --recursive
 
+  mark-inactive:
+    name: 🏷️ Mark deployment as inactive
+    needs: [resolve, cleanup-state]
+    runs-on: ubuntu-latest
+    permissions:
+      deployments: write
+    steps:
+      - uses: actions/github-script@v8
+        with:
+          script: |
+            const prNumber = Number("${{ needs.resolve.outputs.pr_number }}");
+            const env = `preview-pr-${prNumber}`;
+
+            const { data: deployments } = await github.rest.repos.listDeployments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              environment: env,
+              per_page: 10,
+            });
+
+            for (const d of deployments) {
+              await github.rest.repos.createDeploymentStatus({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                deployment_id: d.id,
+                state: "inactive",
+              });
+            }
+
 permissions:
   contents: read
