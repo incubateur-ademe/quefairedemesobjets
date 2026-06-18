@@ -3,20 +3,31 @@ import { Controller } from "@hotwired/stimulus"
 /**
  * Responsive Controller
  *
- * Moves element content to a hidden wrapper at the end of body when media query matches,
- * and restores content to original position when media query no longer matches.
+ * Moves element content based on media query matching.
  *
- * Usage:
- * <div data-controller="responsive" data-responsive-media-query-value="(max-width: 768px)">
- *   Content to be moved
+ * Without a `target`: content is moved to a hidden wrapper at the end of
+ * <body> when the query does NOT match (legacy behaviour — hides content
+ * on larger screens).
+ *
+ * With a `target` selector: content is moved TO the target element when
+ * the query MATCHES, and restored to its original position when the query
+ * no longer matches. Useful for moving content out of a modal on desktop.
+ *
+ * Usage with target:
+ * <div data-controller="responsive"
+ *      data-responsive-media-query-value="(min-width: 768px)"
+ *      data-responsive-target-value="#desktop-container">
+ *   Content (starts here on mobile, moves to #desktop-container on desktop)
  * </div>
  */
 export default class extends Controller {
   static values = {
     mediaQuery: String,
+    target: { type: String, default: "" },
   }
 
   declare mediaQueryValue: string
+  declare targetValue: string
 
   #mediaQueryList: MediaQueryList | null = null
   #boundHandleMediaChange: (() => void) | null = null
@@ -47,39 +58,91 @@ export default class extends Controller {
   #handleMediaChange() {
     if (!this.#mediaQueryList) return
 
-    if (this.#mediaQueryList.matches) {
-      this.#restoreToOriginalPosition()
+    if (this.targetValue) {
+      // Target mode: move to target on match, restore on !match
+      if (this.#mediaQueryList.matches) {
+        this.#moveToTarget()
+      } else {
+        this.#restoreFromTarget()
+      }
     } else {
-      this.#moveToBodyEnd()
+      // Legacy mode: restore on match, hide on !match
+      if (this.#mediaQueryList.matches) {
+        this.#restoreFromLegacyWrapper()
+      } else {
+        this.#moveToLegacyWrapper()
+      }
     }
   }
 
-  #moveToBodyEnd() {
-    if (document.getElementById(this.#wrapperId)) {
-      return
-    }
+  // ── Target mode ──────────────────────────────────────────────
 
-    const wrapper = document.createElement("div")
-    wrapper.id = this.#wrapperId
-    wrapper.setAttribute("hidden", "")
+  #moveToTarget() {
+    const targetEl = this.#resolveTarget()
+    if (!targetEl || this.element.children.length === 0) return
+
+    // Don't move if content is already in the target
+    if (targetEl.contains(this.element.firstChild)) return
+
+    while (this.element.firstChild) {
+      targetEl.appendChild(this.element.firstChild)
+    }
+  }
+
+  #restoreFromTarget() {
+    const targetEl = this.#resolveTarget()
+    if (!targetEl || targetEl.children.length === 0) return
+
+    // Don't move if content is already back in the original element
+    if (this.element.contains(targetEl.firstChild)) return
+
+    while (targetEl.firstChild) {
+      this.element.appendChild(targetEl.firstChild)
+    }
+  }
+
+  #resolveTarget(): HTMLElement | null {
+    return document.querySelector(this.targetValue)
+  }
+
+  // ── Legacy mode (body-end hidden wrapper) ────────────────────
+
+  #moveToLegacyWrapper() {
+    const wrapper = this.#getOrCreateLegacyWrapper()
+    if (this.element.children.length === 0) return
+    if (wrapper.contains(this.element.firstChild)) return
 
     while (this.element.firstChild) {
       wrapper.appendChild(this.element.firstChild)
     }
-
-    document.body.appendChild(wrapper)
   }
 
-  #restoreToOriginalPosition() {
-    const wrapper = document.getElementById(this.#wrapperId)
-    if (!wrapper) {
-      return
-    }
+  #restoreFromLegacyWrapper() {
+    const wrapper = this.#getOrCreateLegacyWrapper()
+    if (wrapper.children.length === 0) return
+    if (this.element.contains(wrapper.firstChild)) return
 
     while (wrapper.firstChild) {
       this.element.appendChild(wrapper.firstChild)
     }
+  }
 
-    wrapper.remove()
+  #restoreToOriginalPosition() {
+    if (this.targetValue) {
+      this.#restoreFromTarget()
+    } else {
+      this.#restoreFromLegacyWrapper()
+    }
+  }
+
+  #getOrCreateLegacyWrapper(): HTMLElement {
+    let wrapper = document.getElementById(this.#wrapperId)
+    if (!wrapper) {
+      wrapper = document.createElement("div")
+      wrapper.id = this.#wrapperId
+      wrapper.setAttribute("hidden", "")
+      document.body.appendChild(wrapper)
+    }
+    return wrapper
   }
 }

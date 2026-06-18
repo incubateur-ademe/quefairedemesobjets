@@ -1,0 +1,68 @@
+{% load acteur_tags wagtailcore_tags %}
+
+{% if value.open_in_modal and value.card %}
+<div class="fr-mb-2w">
+  {% with modal_id="fr-modal-carte-"|add:value.carte_config.slug %}
+  {% with desktop_id="carte-desktop-"|add:value.carte_config.slug %}
+
+    {% comment %}
+      Desktop container — map moves here on desktop (≥768px) via responsive controller.
+      Hidden on mobile.
+    {% endcomment %}
+    <div id="{{ desktop_id }}" class="max-md:qf-hidden"></div>
+
+    {% comment %}
+      DSFR card teaser — visible only on mobile.
+      Acts as trigger for the DSFR modal containing the map.
+    {% endcomment %}
+    <button
+      class="qf-hidden max-md:qf-block qf-appearance-none qf-bg-transparent qf-border-0 qf-p-0 qf-w-full qf-text-left"
+      data-fr-opened="false"
+      aria-controls="{{ modal_id }}"
+      type="button"
+    >
+      {% include_block value.card %}
+    </button>
+
+    {% comment %}
+      DSFR modal — large, anchored to top, close button reads "Retour aux consignes".
+      On mobile, the map lives here. On desktop, the responsive controller moves it
+      to the desktop container above.
+    {% endcomment %}
+    <dialog
+      id="{{ modal_id }}"
+      class="fr-modal fr-modal--top"
+    >
+      <div class="fr-container fr-container--fluid fr-container-md">
+        <div class="fr-grid-row fr-grid-row--center">
+          <div class="fr-col-12 fr-col-md-10 fr-col-lg-8">
+            <div class="fr-modal__body">
+              <div class="fr-modal__header">
+                <button
+                  type="button"
+                  class="fr-btn--close fr-btn"
+                  title="Retour aux consignes"
+                  aria-controls="{{ modal_id }}"
+                >Retour aux consignes</button>
+              </div>
+              <div class="fr-modal__content">
+                <div
+                  data-controller="responsive"
+                  data-responsive-media-query-value="(min-width: 768px)"
+                  data-responsive-target-value="#{{ desktop_id }}"
+                >
+                  {% carte value.carte_config %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </dialog>
+
+  {% endwith %}
+  {% endwith %}
+</div>
+{% else %}
+  {% carte value.carte_config %}
+{% endif %}
