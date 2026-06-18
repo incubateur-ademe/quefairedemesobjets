@@ -58,14 +58,17 @@ locals {
   )
 }
 
-# Seed the preview DB from the sample, then backfill extensions, on every
-# deploy. scaleway_rdb_database above is replaced (dropped+recreated) on
-# every image_tag change, so this always runs against a fresh, empty
-# database. Single resource (rather than two depends_on-chained ones) to
-# avoid a destroy-order cycle across replacements: the restore must run
-# before create_extensions (it wipes/recreates the public schema via
-# --clean, which would also wipe extensions and text search configs
-# created beforehand).
+# Seed the preview DB from the sample on every deploy. scaleway_rdb_database
+# above is replaced (dropped+recreated) on every image_tag change, so this
+# always runs against a fresh, empty database.
+#
+# Mirrors the project's existing restore pattern (see
+# scripts/restore_sample_locally.sh, restore_prod_locally.sh,
+# restore_prod_to_preprod.sh): drop tables individually rather than the
+# whole schema, create extensions BEFORE restoring (pg_restore doesn't
+# recreate them), and pass --no-acl on both dump and restore so the dump
+# carries no ACL/REVOKE statements that could revoke the preview user's
+# own CONNECT privilege on its database.
 resource "null_resource" "seed_from_sample" {
   depends_on = [scaleway_rdb_privilege.preview]
 
@@ -74,16 +77,17 @@ resource "null_resource" "seed_from_sample" {
     environment = {
       PREVIEW_DB_URL = local.preview_db_url
       SAMPLE_DB_URI  = var.sample_db_uri
-      PGPASSWORD     = var.admin_password
     }
     command = <<-EOT
       set -euo pipefail
-      pg_dump -Fc "$SAMPLE_DB_URI" \
+      for table in $(psql "$PREVIEW_DB_URL" -t -c "SELECT tablename FROM pg_tables WHERE schemaname='public'"); do
+        psql "$PREVIEW_DB_URL" -c "DROP TABLE IF EXISTS \"$table\" CASCADE;"
+      done
+      psql "$PREVIEW_DB_URL" -f ${var.create_extensions_script_path}
+      pg_dump -Fc --no-acl --no-owner --no-privileges "$SAMPLE_DB_URI" \
         | pg_restore -d "$PREVIEW_DB_URL" \
-            --clean --if-exists --no-owner --no-privileges \
+            --schema=public --clean --no-acl --no-owner --no-privileges \
             --exit-on-error
-      psql "postgresql://${var.admin_username}@${local.host}:${local.port}/${var.preview_db_name}?sslmode=require" \
-        -f ${var.create_extensions_script_path}
     EOT
   }
 
