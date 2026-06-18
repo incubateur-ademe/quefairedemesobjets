@@ -58,11 +58,14 @@ locals {
   )
 }
 
-# Seed the preview DB from the sample on every deploy. scaleway_rdb_database
-# above is replaced (dropped+recreated) on every image_tag change, so this
-# always restores into a fresh, empty database. Runs BEFORE create_extensions
-# below: the restore wipes/recreates the public schema, which would also wipe
-# any extensions or text search configs created beforehand.
+# Seed the preview DB from the sample, then backfill extensions, on every
+# deploy. scaleway_rdb_database above is replaced (dropped+recreated) on
+# every image_tag change, so this always runs against a fresh, empty
+# database. Single resource (rather than two depends_on-chained ones) to
+# avoid a destroy-order cycle across replacements: the restore must run
+# before create_extensions (it wipes/recreates the public schema via
+# --clean, which would also wipe extensions and text search configs
+# created beforehand).
 resource "null_resource" "seed_from_sample" {
   depends_on = [scaleway_rdb_privilege.preview]
 
@@ -71,6 +74,7 @@ resource "null_resource" "seed_from_sample" {
     environment = {
       PREVIEW_DB_URL = local.preview_db_url
       SAMPLE_DB_URI  = var.sample_db_uri
+      PGPASSWORD     = var.admin_password
     }
     command = <<-EOT
       set -euo pipefail
@@ -78,25 +82,9 @@ resource "null_resource" "seed_from_sample" {
         | pg_restore -d "$PREVIEW_DB_URL" \
             --clean --if-exists --no-owner --no-privileges \
             --exit-on-error
+      psql "postgresql://${var.admin_username}@${local.host}:${local.port}/${var.preview_db_name}?sslmode=require" \
+        -f ${var.create_extensions_script_path}
     EOT
-  }
-
-  triggers = {
-    database_id = scaleway_rdb_database.preview.id
-  }
-}
-
-# Enable the same extensions as on the sample DB so Django migrations don't fail
-# on CREATE EXTENSION statements. Runs AFTER the restore above re-creates the
-# schema, so anything the restore dropped (or never had) is put back.
-resource "null_resource" "create_extensions" {
-  depends_on = [null_resource.seed_from_sample]
-
-  provisioner "local-exec" {
-    environment = {
-      PGPASSWORD = var.admin_password
-    }
-    command = "psql \"postgresql://${var.admin_username}@${local.host}:${local.port}/${var.preview_db_name}?sslmode=require\" -f ${var.create_extensions_script_path}"
   }
 
   triggers = {
