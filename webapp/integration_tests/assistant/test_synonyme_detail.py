@@ -41,7 +41,7 @@ class TestSynonyme:
 
         assert response.status_code == 200, "No redirect occurs"
         button = response.context["footer_primary_button"]
-        assert button["label"] == "Lire plus sur cette fiche"
+        assert button["label"] == "Voir plus de recommandations"
         assert synonyme.get_absolute_url() in button["onclick"]
         assert "utm_source=qfdmod" in button["onclick"]
         assert "_blank" in button["onclick"]

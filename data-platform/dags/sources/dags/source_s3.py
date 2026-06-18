@@ -165,7 +165,7 @@ with DAG(
             ),
             "validate_address_with_ban": False,
             "product_mapping": get_souscategorie_mapping_from_db(),
-            "use_legacy_suggestions": True,
+            "use_legacy_suggestions": False,
         }
     ),
 ) as dag:

@@ -2,12 +2,11 @@ import json
 
 from airflow import DAG
 from airflow.sdk.definitions.param import ParamsDict
+from qfdmo.models.acteur import ActeurPublicAccueilli, ActeurStatus
 from shared.config.airflow import DEFAULT_ARGS
 from shared.config.tags import TAGS
 from sources.config.airflow_params import get_mapping_config
 from sources.tasks.airflow_logic.operators import default_params, eo_task_chain
-
-from qfdmo.models.acteur import ActeurPublicAccueilli, ActeurStatus
 
 with DAG(
     dag_id="cma",
@@ -176,7 +175,7 @@ with DAG(
             "endpoint": ("https://apiopendata.artisanat.fr/reparacteur"),
             "validate_address_with_ban": False,
             "product_mapping": get_mapping_config(mapping_key="sous_categories_cma"),
-            "use_legacy_suggestions": True,
+            "use_legacy_suggestions": False,
         }
     ),
 ) as dag:
