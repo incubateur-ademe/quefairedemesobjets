@@ -1,4 +1,4 @@
-# Per-PR webapp container, deployed in the shared lvao-preview namespace.
+# Per-PR webapp container, deployed in the shared qfdmod-preview namespace.
 # Materialised to environments/preview/pr-<n>/ by the _terragrunt-apply.yml
 # workflow; `environment` (pr-<n>) and the state key derive from the
 # materialised path.

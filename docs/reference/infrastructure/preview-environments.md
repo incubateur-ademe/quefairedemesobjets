@@ -16,14 +16,14 @@ OpenTofu/Terragrunt from CI.
 
 ## Decisions
 
-| Topic               | Decision                               | Rationale                                                                                                                                                               |
-| ------------------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Env keying          | **PR number** (`pr-<n>`)               | Stable URL across pushes, one env per PR, destroyed on close.                                                                                                           |
-| Trigger             | **Label-gated** (`preview` label)      | Each up run builds a Docker image and seeds a DB: real cost, several minutes. Labeling opts a PR in.                                                                    |
-| Hostname            | **Scaleway generated domain**          | No DNS to manage. The hostname is unknown before apply, so the container runs with `ALLOWED_HOSTS` relaxed to `.functions.fnc.fr-par.scw.cloud`.                        |
-| Container namespace | **Dedicated `lvao-preview` namespace** | Isolation from preprod; the cleanup cron can list it exhaustively.                                                                                                      |
-| DB seeding          | **`pg_dump` sample DB → `pg_restore`** | Realistic data on the carte from the preprod sample database.                                                                                                           |
-| Cleanup TTL         | **7 days** (nightly cron)              | With PR keying + destroy-on-close the cron is only a safety net for missed destroys. A shorter TTL would kill envs of still-open PRs and dead URLs in their PR comment. |
+| Topic               | Decision                                 | Rationale                                                                                                                                                               |
+| ------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Env keying          | **PR number** (`pr-<n>`)                 | Stable URL across pushes, one env per PR, destroyed on close.                                                                                                           |
+| Trigger             | **Label-gated** (`preview` label)        | Each up run builds a Docker image and seeds a DB: real cost, several minutes. Labeling opts a PR in.                                                                    |
+| Hostname            | **Scaleway generated domain**            | No DNS to manage. The hostname is unknown before apply, so the container runs with `ALLOWED_HOSTS` relaxed to `.functions.fnc.fr-par.scw.cloud`.                        |
+| Container namespace | **Dedicated `qfdmod-preview` namespace** | Isolation from preprod; the cleanup cron can list it exhaustively.                                                                                                      |
+| DB seeding          | **`pg_dump` sample DB → `pg_restore`**   | Realistic data on the carte from the preprod sample database.                                                                                                           |
+| Cleanup TTL         | **7 days** (nightly cron)                | With PR keying + destroy-on-close the cron is only a safety net for missed destroys. A shorter TTL would kill envs of still-open PRs and dead URLs in their PR comment. |
 
 ## Architecture
 
@@ -49,12 +49,12 @@ Per-PR resources (state: lvao-terraform-state/preview/pr-<n>/…):
 │                   project-wide SCW key (no bucket-scoped IAM key,
 │                   see Limitations)
 └── container       serverless container in the shared
-                    lvao-preview namespace, min_scale=0,
+                    qfdmod-preview namespace, min_scale=0,
                     tagged preview / preview-pr-<n> /
                     created-at-<unix>
 
 Shared (one-time):
-└── lvao-preview container namespace
+└── qfdmod-preview container namespace
     (infrastructure/environments/preview/namespace)
 ```
 
@@ -101,7 +101,7 @@ This runs three idempotent steps, also callable individually:
    pushes the secrets above, plus `PREVIEW_SECRET_KEY` (the shared Django
    `SECRET_KEY` for previews, generated with `openssl rand` unless already
    set in your shell).
-2. `preview-namespace` — `terragrunt apply` of the shared `lvao-preview`
+2. `preview-namespace` — `terragrunt apply` of the shared `qfdmod-preview`
    container namespace (interactive: review the plan before approving).
 3. `preview-label` — creates the `preview` label on the repository.
 
