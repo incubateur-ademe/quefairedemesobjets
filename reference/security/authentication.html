@@ -172,7 +172,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
@@ -339,7 +339,7 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
@@ -348,7 +348,7 @@
 <h1>Authentification &amp; autorisations<a class="headerlink" href="#authentification-autorisations" title="Lien vers cette rubrique">¶</a></h1>
 <p>Mécanismes d’authentification et de gestion des autorisations sur les différentes surfaces de la plateforme.</p>
 <blockquote>
-<div><p><strong>Voir aussi</strong> : <a class="reference internal" href="../architecture/README.html"><span class="std std-doc">Architecture applicative</span></a>, <a class="reference internal" href="network.html"><span class="std std-doc">Sécurité réseau</span></a>, <a class="reference internal" href="secrets.html"><span class="std std-doc">Gestion des secrets</span></a>.</p>
+<div><p><strong>Voir aussi</strong> : <a class="reference internal" href="../architecture/README.html"><span class="std std-doc">Architecture applicative</span></a>, <a class="reference internal" href="network.html"><span class="std std-doc">Sécurité réseau</span></a>, <a class="reference internal" href="secrets.html"><span class="std std-doc">Gestion des secrets</span></a>, <a class="reference internal" href="reviews.html"><span class="std std-doc">Revues régulières</span></a>.</p>
 </div></blockquote>
 <div class="table-wrapper colwidths-auto docutils container">
 <table class="docutils align-default">
@@ -394,6 +394,25 @@
 </tbody>
 </table>
 </div>
+<section id="procedure-de-revue-des-comptes-django-admin-et-airflow">
+<h2>Procédure de revue des comptes Django Admin et Airflow<a class="headerlink" href="#procedure-de-revue-des-comptes-django-admin-et-airflow" title="Lien vers cette rubrique">¶</a></h2>
+<p>Réalisée chaque semestre (cf. <a class="reference internal" href="reviews.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">reviews.md</span></code></span></a> §Calendrier des revues) sur l’environnement <strong>prod</strong> (et <strong>preprod</strong> si des comptes y sont maintenus hors déploiement automatisé).</p>
+<p>Les comptes Django Admin, Wagtail CMS et back-office <code class="docutils literal notranslate"><span class="pre">/data/</span></code> partagent le même modèle <code class="docutils literal notranslate"><span class="pre">User</span></code> de <code class="docutils literal notranslate"><span class="pre">django.contrib.auth</span></code> : une revue couvre les trois surfaces.</p>
+<ol class="arabic simple">
+<li><p><strong>Inventaire</strong> : lister les utilisateurs</p></li>
+</ol>
+<ul class="simple">
+<li><p>via Django Admin → <em>Authentication and Authorization</em> → <em>Users</em> (<code class="docutils literal notranslate"><span class="pre">/admin/auth/user/</span></code>)</p></li>
+<li><p>via Airflow → <em>Sécurité</em> → <em>Utilisateurs</em></p></li>
+</ul>
+<ol class="arabic simple" start="2">
+<li><p><strong>Recoupement équipe</strong> : comparer la liste avec les membres actifs de l’équipe et la <a class="reference internal" href="../../how-to/team/onboarding-offboarding.html"><span class="std std-doc">matrice d’accès</span></a> (rôles DEV → superuser, PO → droits limités, etc.).</p></li>
+<li><p><strong>Comptes obsolètes</strong> : désactiver (<code class="docutils literal notranslate"><span class="pre">is_active</span> <span class="pre">=</span> <span class="pre">False</span></code>) tout compte dont le titulaire a quitté l’équipe — ne pas supprimer pour conserver l’historique d’audit (cf. <a class="reference internal" href="../../how-to/team/onboarding-offboarding.html"><span class="std std-doc">offboarding</span></a>).</p></li>
+<li><p><strong>Privilèges</strong> : vérifier que <code class="docutils literal notranslate"><span class="pre">is_superuser</span></code> est réservé aux DEV ; retirer les droits superflus (groupes, permissions explicites) des comptes non superuser.</p></li>
+<li><p><strong>Comptes techniques</strong> : S’assurer que tous les comptes sont reliés à un utilisateur réel (pas de compte technique ou de test).</p></li>
+<li><p>Consigner la revue dans <a class="reference internal" href="reviews.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">reviews.md</span></code></span></a> §Comptes Django Admin.</p></li>
+</ol>
+</section>
 </section>
 
         </article>
@@ -439,8 +458,27 @@
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Authentification &amp; autorisations</a><ul>
+<li><a class="reference internal" href="#procedure-de-revue-des-comptes-django-admin-et-airflow">Procédure de revue des comptes Django Admin et Airflow</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>

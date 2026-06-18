@@ -359,6 +359,7 @@
 <li><p>Les <strong>tests de restauration</strong> (PITR, dumps, S3) : pour s’assurer que les sauvegardes sont réellement exploitables.</p></li>
 <li><p>L”<strong>accessibilité numérique (RGAA)</strong> : pour respecter l’obligation légale de conformité au Référentiel Général d’Amélioration de l’Accessibilité (audit, déclaration, schéma pluriannuel).</p></li>
 <li><p>Les <strong>exigences de sécurité des prestataires</strong> : pour vérifier le maintien des SLA, certifications (ISO 27001, HDS, SecNumCloud…) et DPA RGPD des fournisseurs critiques.</p></li>
+<li><p>Les <strong>comptes Django Admin</strong> (<code class="docutils literal notranslate"><span class="pre">/admin/</span></code>) et les <strong>comptes Aiflow</strong> : pour s’assurer que seuls les membres actifs de l’équipe disposent des droits attendus (staff, superuser, groupes/permissions).</p></li>
 </ul>
 <p>Ce document centralise :</p>
 <ol class="arabic simple">
@@ -453,6 +454,18 @@
 <td><p><a class="reference internal" href="providers.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">providers.md</span></code></span></a> §Procédure de revue annuelle</p></td>
 <td><p>—</p></td>
 <td><p>2027-06-11</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Comptes Django Admin</strong> (<code class="docutils literal notranslate"><span class="pre">/admin/</span></code>)</p></td>
+<td><p>Semestrielle</p></td>
+<td><p><a class="reference internal" href="authentication.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">authentication.md</span></code></span></a> §Procédure de revue des comptes Django Admin et Airflow</p></td>
+<td><p>—</p></td>
+<td><p>2026-12-11</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Comptes Airflow</strong></p></td>
+<td><p>Semestrielle</p></td>
+<td><p><a class="reference internal" href="authentication.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">authentication.md</span></code></span></a> §Procédure de revue des comptes Django Admin et Airflow</p></td>
+<td><p>—</p></td>
+<td><p>2026-12-11</p></td>
 </tr>
 </tbody>
 </table>
@@ -602,6 +615,66 @@
 </table>
 </div>
 </section>
+<section id="comptes-django-admin">
+<h3>Comptes Django Admin<a class="headerlink" href="#comptes-django-admin" title="Lien vers cette rubrique">¶</a></h3>
+<p>À chaque revue : appliquer la procédure décrite dans <a class="reference internal" href="authentication.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">authentication.md</span></code></span></a> §Procédure de revue des comptes Django Admin et airflow (inventaire des utilisateurs, recoupement avec la matrice d’onboarding/offboarding, ajustement des droits) puis consigner ci-dessous.</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Date</p></th>
+<th class="head"><p>Auteur</p></th>
+<th class="head"><p>Environnement</p></th>
+<th class="head"><p>Comptes revus</p></th>
+<th class="head"><p>Observations</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>18/06/2026</p></td>
+<td><p>Nicolas Oudard</p></td>
+<td><p>prod</p></td>
+<td><p>tous</p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-odd"><td><p>—</p></td>
+<td><p>—</p></td>
+<td><p>prod</p></td>
+<td><p>—</p></td>
+<td><p>—</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="comptes-airflow">
+<h3>Comptes Airflow<a class="headerlink" href="#comptes-airflow" title="Lien vers cette rubrique">¶</a></h3>
+<p>À chaque revue : appliquer la procédure décrite dans <a class="reference internal" href="authentication.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">authentication.md</span></code></span></a> §Procédure de revue des comptes Django Admin et Airflow (inventaire des utilisateurs, recoupement avec la matrice d’onboarding/offboarding, ajustement des droits) puis consigner ci-dessous.</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Date</p></th>
+<th class="head"><p>Auteur</p></th>
+<th class="head"><p>Environnement</p></th>
+<th class="head"><p>Comptes revus</p></th>
+<th class="head"><p>Observations</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>18/06/2026</p></td>
+<td><p>Nicolas Oudard</p></td>
+<td><p>prod</p></td>
+<td><p>tous</p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-odd"><td><p>—</p></td>
+<td><p>—</p></td>
+<td><p>prod</p></td>
+<td><p>—</p></td>
+<td><p>—</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
 </section>
 <section id="ajouter-une-nouvelle-revue-recurrente">
 <h2>Ajouter une nouvelle revue récurrente<a class="headerlink" href="#ajouter-une-nouvelle-revue-recurrente" title="Lien vers cette rubrique">¶</a></h2>
@@ -671,6 +744,8 @@
 <li><a class="reference internal" href="#tests-de-restauration">Tests de restauration</a></li>
 <li><a class="reference internal" href="#accessibilite-numerique-rgaa">Accessibilité numérique (RGAA)</a></li>
 <li><a class="reference internal" href="#exigences-de-securite-des-prestataires">Exigences de sécurité des prestataires</a></li>
+<li><a class="reference internal" href="#comptes-django-admin">Comptes Django Admin</a></li>
+<li><a class="reference internal" href="#comptes-airflow">Comptes Airflow</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#ajouter-une-nouvelle-revue-recurrente">Ajouter une nouvelle revue récurrente</a></li>

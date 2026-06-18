@@ -2,7 +2,7 @@
 
 Procédure d'**ouverture** (onboarding) et de **clôture** (offboarding) des accès des membres de l'équipe, en fonction de leur rôle.
 
-> **Voir aussi** : [Prestataires](../../reference/security/providers.md), [Inventaire des actifs](../../reference/security/inventory.md), [Gestion des secrets](../../reference/security/secrets.md), [Authentification](../../reference/security/authentication.md).
+> **Voir aussi** : [Prestataires](../../reference/security/providers.md), [Inventaire des actifs](../../reference/security/inventory.md), [Gestion des secrets](../../reference/security/secrets.md), [Authentification](../../reference/security/authentication.md), [Revues régulières](../../reference/security/reviews.md) §Comptes Django Admin.
 
 > ⚠️ **Document à compléter** : la matrice ci-dessous est une proposition initiale, à ajuster selon les pratiques réelles de l'équipe.
 
