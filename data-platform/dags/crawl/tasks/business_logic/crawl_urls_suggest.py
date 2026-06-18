@@ -13,8 +13,6 @@ from utils.django import django_setup_full
 
 logger = logging.getLogger(__name__)
 
-django_setup_full()
-
 
 def suggestions_metadata(
     df: pd.DataFrame,
@@ -38,6 +36,7 @@ def suggestions_prepare(
     """Generate suggestions for URL updates:
     - df_crawl_ok_diff = successful AND different = propose
     - df_crawl_fail = failed = propose None"""
+    django_setup_full()
     from data.models.change import SuggestionChange
     from data.models.changes import ChangeActeurUpdateRevision
 
@@ -96,6 +95,7 @@ def crawl_urls_suggestions_to_db(
     identifiant_execution: str,
 ) -> None:
     """Writing suggestions to DB"""
+    django_setup_full()
 
     logger.info(f"{identifiant_action=}")
     logger.info(f"{identifiant_execution=}")
@@ -134,6 +134,7 @@ def crawl_urls_suggestion_groupes_to_db(
     identifiant_execution: str,
 ) -> int:
     """Writing suggestion_groupes to DB"""
+    django_setup_full()
     from data.models.suggestion import (
         SuggestionAction,
         SuggestionCohorte,

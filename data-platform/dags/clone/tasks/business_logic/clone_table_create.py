@@ -10,8 +10,6 @@ from utils import logging_utils as log
 from utils.cmd import cmd_run
 from utils.django import django_schema_create_and_check, django_setup_full
 
-django_setup_full()
-
 logger = logging.getLogger(__name__)
 
 
@@ -20,6 +18,7 @@ def command_psql_copy_from_csv(
     delimiter: str,
 ) -> str:
     """Command to load CSV into DB, factored out for reuse"""
+    django_setup_full()
     from django.conf import settings
 
     db_dsn = settings.DB_WAREHOUSE
@@ -38,6 +37,7 @@ def command_ogr2ogr_import_geojson(
 
     For more information about ogr2ogr, see: https://gdal.gloobe.org/ogr/ogr2ogr.html
     """
+    django_setup_full()
     from django.conf import settings
 
     warehouse_db_settings = settings.DATABASES["warehouse"]
@@ -70,6 +70,7 @@ def command_ogr2ogr_import_geojson_from_stdin(
     geometry_column_name: str = "contours_administratifs",
 ) -> str:
     """Command to load GeoJSON into DB using ogr2ogr from stdin"""
+    django_setup_full()
     from django.conf import settings
 
     warehouse_db_settings = settings.DATABASES["warehouse"]
@@ -201,6 +202,7 @@ def clone_table_create(
     convert_downloaded_file_to_utf8: bool,
     dry_run: bool,
 ) -> None:
+    django_setup_full()
     from django.db import connections
 
     """Create a table in the DB from a CSV file downloaded via URL"""

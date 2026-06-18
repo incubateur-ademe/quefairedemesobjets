@@ -36,8 +36,7 @@ from sources.tasks.transform.transform_df import (
     get_latlng_from_geopoint,
     merge_sous_categories_columns,
 )
-
-from qfdmo.models.acteur import ActeurStatus
+from utils.django import django_setup_full
 
 PATH_NOMENCLARURE_DECHET = (
     "https://data.ademe.fr/data-fair/api/v1/datasets/sinoe-r-nomenclature-dechets/lines"
@@ -176,7 +175,7 @@ EO_NORMALIZATION_RULES = [
     # 3. Ajout des colonnes avec une valeur par défaut
     {
         "column": "statut",
-        "value": ActeurStatus.ACTIF.value,
+        "value": "ACTIF",
     },
     # 4. Transformation du dataframe
     {
@@ -290,6 +289,8 @@ def get_mapping_config(mapping_key: str = "sous_categories"):
 
 
 def get_souscategorie_mapping_from_db():
+
+    django_setup_full()
     from qfdmo.models.categorie_objet import SousCategorieObjet
 
     return {

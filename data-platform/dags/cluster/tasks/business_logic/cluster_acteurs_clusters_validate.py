@@ -3,8 +3,6 @@ from logging import getLogger
 import pandas as pd
 from utils.django import django_setup_full
 
-django_setup_full()
-
 logger = getLogger(__name__)
 
 
@@ -17,6 +15,7 @@ def raise_if_df_not_empty(df: pd.DataFrame, error) -> None:
 
 def cluster_acteurs_clusters_validate(df_clusters: pd.DataFrame) -> None:
     """Validate prepared clusters"""
+    django_setup_full()
 
     df = df_clusters
 

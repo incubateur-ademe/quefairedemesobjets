@@ -6,23 +6,20 @@ from .copy_utils import dump_and_restore_db
 
 logger = logging.getLogger(__name__)
 
-django_setup_full()
-
 
 def _get_all_tables(cursor):
-    cursor.execute(
-        """
+    cursor.execute("""
             SELECT tablename
             FROM pg_tables
             WHERE schemaname = 'public'
             ORDER BY tablename;
-        """
-    )
+        """)
     tables = [row[0] for row in cursor.fetchall()]
     return tables
 
 
 def copy_db_schema():
+    django_setup_full()
     from django.conf import settings
     from django.db import connections
 

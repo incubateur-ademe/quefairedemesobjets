@@ -6,8 +6,6 @@ from .copy_utils import drop_tables, dump_and_restore_db
 
 logger = logging.getLogger(__name__)
 
-django_setup_full()
-
 
 EXCLUDE_TABLES = [
     "qfdmo_acteur_acteur_services",
@@ -41,6 +39,8 @@ EXCLUDE_TABLES = [
 
 def copy_db_data():
     import importlib
+
+    django_setup_full()
 
     from django.conf import settings
     from django.db import connections

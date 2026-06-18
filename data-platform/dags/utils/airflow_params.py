@@ -10,8 +10,6 @@ import re
 
 from utils.django import django_setup_full
 
-django_setup_full()
-
 ID_PREFIX = "id="
 
 
@@ -36,11 +34,9 @@ def airflow_params_dropdown_selected_to_ids(
         return []
     invalid = [x for x in dropdown_selected if ID_PREFIX not in x]
     if invalid:
-        raise ValueError(
-            f"""Valeurs invalides sans ID_PREFIX {ID_PREFIX}: {invalid}.
+        raise ValueError(f"""Valeurs invalides sans ID_PREFIX {ID_PREFIX}: {invalid}.
                          Utiliser airflow_params_dropdown_from_mapping
-                         pour générer les dropdowns."""
-        )
+                         pour générer les dropdowns.""")
     codes = [re.sub(r" \(id=\d+\)$", "", v) for v in dropdown_selected]
     # Si des codes n'ont pas bien étés extraits où ne sont pas dans le mapping
     missing = [x for x in codes if x not in mapping_ids_by_codes]
@@ -53,6 +49,7 @@ def airflow_params_dropdown_codes_to_ids(model_name: str) -> dict[str, str]:
     """Returns a mapping of {code (id=id)} -> id so it can be used in Airflow Params UI:
     - keys = used in Param.examples = what user sees/selects
     - whole dict = used in Param.values_display = converts selections back to ids"""
+    django_setup_full()
     from qfdmo.models import ActeurType, Source
 
     models = {

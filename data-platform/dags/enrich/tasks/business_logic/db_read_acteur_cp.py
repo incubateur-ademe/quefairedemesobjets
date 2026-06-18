@@ -5,8 +5,6 @@ import logging
 import pandas as pd
 from utils.django import django_setup_full
 
-django_setup_full()
-
 logger = logging.getLogger(__name__)
 
 
@@ -21,12 +19,14 @@ def _get_df_acteurs_with_invalid_cp(model) -> pd.DataFrame:
 
 
 def db_read_acteur_cp() -> pd.DataFrame:
+    django_setup_full()
     from qfdmo.models.acteur import Acteur
 
     return _get_df_acteurs_with_invalid_cp(Acteur)
 
 
 def db_read_revision_acteur_cp() -> pd.DataFrame:
+    django_setup_full()
     from qfdmo.models.acteur import RevisionActeur
 
     return _get_df_acteurs_with_invalid_cp(RevisionActeur)

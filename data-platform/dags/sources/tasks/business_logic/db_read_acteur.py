@@ -5,14 +5,13 @@ from sources.config.models import SourceConfig
 from utils import logging_utils as log
 from utils.django import django_setup_full, get_model_fields
 
-django_setup_full()
-
-
 logger = logging.getLogger(__name__)
 
 
 # TODO: To be factorized with PYDANTIC classes
 def db_read_acteur(df_normalized: pd.DataFrame, dag_config: SourceConfig):
+    django_setup_full()
+
     from qfdmo.models import Acteur
 
     if "source_code" not in df_normalized.columns:

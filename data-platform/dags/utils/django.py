@@ -1,5 +1,6 @@
 """Utilities to work with Django from Airflow"""
 
+import functools
 import logging
 import os
 from typing import Any
@@ -30,9 +31,12 @@ def django_settings_to_dict() -> dict:
     }
 
 
+@functools.lru_cache(maxsize=1)
 def django_setup_full() -> None:
-    """Full init of our Django environment"""
-
+    """
+    Full init of our Django environment.
+    Safe to call from multiple modules at import time: Django is initialized only once.
+    """
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.airflow_settings")
 
     import django

@@ -11,8 +11,6 @@ from utils.django import (
     django_setup_full,
 )
 
-django_setup_full()
-
 logger = logging.getLogger(__name__)
 
 
@@ -180,6 +178,7 @@ def _cluster_acteurs_read_base(
     Returns:
         tuple[pd.DataFrame, str]: DataFrame of actors and SQL query used
     """
+    django_setup_full()
     from qfdmo.models import ActeurType, Source, VueActeur
     from qfdmo.models.acteur import ActeurStatus
 
