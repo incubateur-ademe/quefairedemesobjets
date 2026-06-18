@@ -13,6 +13,7 @@ Plusieurs éléments du périmètre sécurité & conformité doivent être **rev
 - Les **tests de restauration** (PITR, dumps, S3) : pour s'assurer que les sauvegardes sont réellement exploitables.
 - L'**accessibilité numérique (RGAA)** : pour respecter l'obligation légale de conformité au Référentiel Général d'Amélioration de l'Accessibilité (audit, déclaration, schéma pluriannuel).
 - Les **exigences de sécurité des prestataires** : pour vérifier le maintien des SLA, certifications (ISO 27001, HDS, SecNumCloud…) et DPA RGPD des fournisseurs critiques.
+- Les **comptes Django Admin** (`/admin/`) et les **comptes Aiflow** : pour s'assurer que seuls les membres actifs de l'équipe disposent des droits attendus (staff, superuser, groupes/permissions).
 
 Ce document centralise :
 
@@ -37,6 +38,8 @@ Ce document centralise :
 | **Schéma pluriannuel d'accessibilité + plan d'action annuel** | Annuelle                   | Document publié sur le site.                                                                                                                                                                                                     | —              | À planifier        |
 | **Scan automatisé d'accessibilité (axe-core)**                | À chaque PR + à la demande | `make a11y` (Playwright + axe-core, tags `wcag2a/aa`, `wcag21a/aa`) — voir [`webapp/e2e_tests/accessibility.spec.ts`](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/webapp/e2e_tests/accessibility.spec.ts). | —              | Continu            |
 | **Exigences de sécurité des prestataires**                    | Annuelle                   | [`providers.md`](providers.md) §Procédure de revue annuelle                                                                                                                                                                      | —              | 2027-06-11         |
+| **Comptes Django Admin** (`/admin/`)                          | Semestrielle               | [`authentication.md`](authentication.md) §Procédure de revue des comptes Django Admin et Airflow                                                                                                                                 | —              | 2026-12-11         |
+| **Comptes Airflow**                                           | Semestrielle               | [`authentication.md`](authentication.md) §Procédure de revue des comptes Django Admin et Airflow                                                                                                                                 | —              | 2026-12-11         |
 
 ## Journaux
 
@@ -93,6 +96,24 @@ Le projet est soumis à l'obligation légale d'accessibilité numérique (RGAA, 
 | Date | Auteur | Prestataires revus                                                                                            | Observations |
 | ---- | ------ | ------------------------------------------------------------------------------------------------------------- | ------------ |
 | —    | —      | Hébergeurs critiques (Scaleway, Scalingo) + services applicatifs (GitHub, PostHog, Notion, Tally, Cloudflare) | —            |
+
+### Comptes Django Admin
+
+À chaque revue : appliquer la procédure décrite dans [`authentication.md`](authentication.md) §Procédure de revue des comptes Django Admin et airflow (inventaire des utilisateurs, recoupement avec la matrice d'onboarding/offboarding, ajustement des droits) puis consigner ci-dessous.
+
+| Date       | Auteur         | Environnement | Comptes revus | Observations |
+| ---------- | -------------- | ------------- | ------------- | ------------ |
+| 18/06/2026 | Nicolas Oudard | prod          | tous          | —            |
+| —          | —              | prod          | —             | —            |
+
+### Comptes Airflow
+
+À chaque revue : appliquer la procédure décrite dans [`authentication.md`](authentication.md) §Procédure de revue des comptes Django Admin et Airflow (inventaire des utilisateurs, recoupement avec la matrice d'onboarding/offboarding, ajustement des droits) puis consigner ci-dessous.
+
+| Date       | Auteur         | Environnement | Comptes revus | Observations |
+| ---------- | -------------- | ------------- | ------------- | ------------ |
+| 18/06/2026 | Nicolas Oudard | prod          | tous          | —            |
+| —          | —              | prod          | —             | —            |
 
 ## Ajouter une nouvelle revue récurrente
 
