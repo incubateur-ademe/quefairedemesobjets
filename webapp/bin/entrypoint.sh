@@ -21,8 +21,10 @@ else
   echo "DB_WAREHOUSE not set, skipping create_remote_db_server"
 fi
 
-# Purge orphan base SearchTerm index entries (django-modelsearch #58). Idempotent.
-python manage.py purge_orphan_searchterm_index
+# Purge orphan base SearchTerm index entries (django-modelsearch #58).
+# May fail if the sample DB dump has a different migration state than the
+# current code — tolerated because it's non-critical for previews.
+python manage.py purge_orphan_searchterm_index || true
 
 exec gunicorn core.wsgi \
   --bind "0.0.0.0:${PORT:-8000}" \
