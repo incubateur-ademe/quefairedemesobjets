@@ -39,7 +39,7 @@ data-action="keydown.esc@window->acteur-details#hide:stop"
       data-acteur-details-target="content"
   >
       {# Close button #}
-      <span
+      <button
           class="
           qf-cursor-pointer
           fr-icon fr-icon-close-line
@@ -47,11 +47,13 @@ data-action="keydown.esc@window->acteur-details#hide:stop"
           qf-absolute qf-left-auto qf-right-0 qf-top-0
           qf-z-10
           qf-bg-white qf-p-1v qf-pr-0 qf-rounded-full
-          qf-text-blue-france-sun-113-625"
+          qf-text-blue-france-sun-113-625
+          qf-border-0"
           data-action="click->acteur-details#hide"
           data-testid="acteur-details-close"
+          aria-label="Fermer"
       >
-      </span>
+      </button>
       <turbo-frame
           id="{% acteur_frame_id %}"
       ></turbo-frame>
