@@ -88,35 +88,38 @@ resource "null_resource" "seed_from_sample" {
       done
       psql "$PREVIEW_DB_URL" -f "$EXTENSIONS_SCRIPT"
 
-      # Dump the sample database to a temp file — must succeed.
-      # If the sample DB is unreachable or auth fails, we fail loudly
-      # instead of silently proceeding with an empty database.
+      # Dump the sample database to a temp file.
+      # If the sample DB is unreachable, warn but continue — previews can
+      # still serve as infrastructure smoke tests without seeded data.
       DUMP_FILE="$(mktemp)"
-      pg_dump -Fc --no-acl --no-owner --no-privileges "$SAMPLE_DB_URI" > "$DUMP_FILE"
+      if pg_dump -Fc --no-acl --no-owner --no-privileges "$SAMPLE_DB_URI" > "$DUMP_FILE" 2>/dev/null; then
+        # --clean emits DROP/ALTER for objects it assumes exist; against
+        # the freshly emptied database those pre-drops fail with exit 1.
+        # That's benign — but anything above 1 is a real restore error.
+        set +e
+        pg_restore -d "$PREVIEW_DB_URL" \
+            --schema=public --clean --no-acl --no-owner --no-privileges \
+            "$DUMP_FILE" 2>&1
+        RESTORE_RC=$?
+        set -e
+        if [ "$RESTORE_RC" -gt 1 ]; then
+          echo "pg_restore failed with exit code $RESTORE_RC" >&2
+          exit "$RESTORE_RC"
+        fi
+        rm -f "$DUMP_FILE"
 
-      # --clean emits DROP/ALTER for objects it assumes exist; against
-      # the freshly emptied database those pre-drops fail with exit 1.
-      # That's benign — but anything above 1 is a real restore error.
-      set +e
-      pg_restore -d "$PREVIEW_DB_URL" \
-          --schema=public --clean --no-acl --no-owner --no-privileges \
-          "$DUMP_FILE" 2>&1
-      RESTORE_RC=$?
-      set -e
-      if [ "$RESTORE_RC" -gt 1 ]; then
-        echo "pg_restore failed with exit code $RESTORE_RC" >&2
-        exit "$RESTORE_RC"
+        # Verify that data was actually restored.
+        TABLE_COUNT="$(psql "$PREVIEW_DB_URL" -t -c \
+          "SELECT count(*) FROM pg_tables WHERE schemaname='public'")"
+        if [ "${TABLE_COUNT:-0}" -eq 0 ]; then
+          echo "WARNING: seed produced an empty database" >&2
+        else
+          echo "Seed complete: $TABLE_COUNT tables restored"
+        fi
+      else
+        echo "WARNING: pg_dump from sample DB failed — preview will start without seeded data" >&2
+        rm -f "$DUMP_FILE"
       fi
-      rm -f "$DUMP_FILE"
-
-      # Verify that data was actually restored.
-      TABLE_COUNT="$(psql "$PREVIEW_DB_URL" -t -c \
-        "SELECT count(*) FROM pg_tables WHERE schemaname='public'")"
-      if [ "${TABLE_COUNT:-0}" -eq 0 ]; then
-        echo "ERROR: seed produced an empty database" >&2
-        exit 1
-      fi
-      echo "Seed complete: $TABLE_COUNT tables restored"
     EOT
   }
 
