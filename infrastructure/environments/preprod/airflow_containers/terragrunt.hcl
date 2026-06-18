@@ -67,7 +67,6 @@ inputs = {
   AIRFLOW_CONN_WEBAPP_DB              = "postgres://${dependency.database.outputs.webapp_db_username}:${dependency.database.outputs.webapp_db_password}@${dependency.database.outputs.webapp_endpoint_ip}:${dependency.database.outputs.webapp_endpoint_port}/${dependency.database.outputs.webapp_database_name}?sslmode=require"
   DATABASE_URL                        = "postgres://${dependency.database.outputs.webapp_db_username}:${dependency.database.outputs.webapp_db_password}@${dependency.database.outputs.webapp_endpoint_ip}:${dependency.database.outputs.webapp_endpoint_port}/${dependency.database.outputs.webapp_database_name}?sslmode=require"
   DB_WAREHOUSE                        = "postgres://${dependency.database.outputs.warehouse_db_username}:${dependency.database.outputs.warehouse_db_password}@${dependency.database.outputs.warehouse_endpoint_ip}:${dependency.database.outputs.warehouse_endpoint_port}/${dependency.database.outputs.warehouse_database_name}?sslmode=require"
-  DB_WEBAPP_SAMPLE                    = "[DB_WEBAPP_SAMPLE]"
   ENVIRONMENT                         = "[ENVIRONMENT]"
   POSTGRES_DB                         = "[POSTGRES_DB]"
   POSTGRES_HOST                       = dependency.database.outputs.warehouse_endpoint_ip

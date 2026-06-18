@@ -1,4 +1,4 @@
-from acteurs.tasks.airflow_logic.check_not_prod_env import check_isnt_prod_env_task
+from acteurs.tasks.airflow_logic.check_is_prod_env import check_is_prod_env_task
 from acteurs.tasks.airflow_logic.copy_db_data_task import copy_db_data_task
 from acteurs.tasks.airflow_logic.copy_db_schema_task import copy_db_schema_task
 from acteurs.tasks.airflow_logic.copy_displayed_data_from_warehouse_task import (
@@ -26,7 +26,7 @@ from shared.config.tags import TAGS
 )
 def compute_sample_acteur():
 
-    check_prod_env = check_isnt_prod_env_task()
+    check_prod_env = check_is_prod_env_task()
 
     dbt_run_base_acteurs = BashOperator(
         task_id="dbt_run_base_acteurs",
