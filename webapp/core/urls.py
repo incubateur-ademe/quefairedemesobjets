@@ -83,7 +83,7 @@ urlpatterns = (
     + [
         path("admin/", admin.site.urls),
         path("api/", api.urls),
-        path("healthz", healthz),
+        path("healthz/", healthz),
         path("robots.txt", robots_txt),
         path("embed/backlink", backlink),
         path("", include(("qfdmo.urls", "qfdmo"), namespace="qfdmo")),

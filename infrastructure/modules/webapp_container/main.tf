@@ -26,7 +26,7 @@ resource "scaleway_container" "webapp" {
 
   liveness_probe {
     http {
-      path = "/healthz"
+      path = "/healthz/"
     }
     failure_threshold = 3
     interval          = "30s"
@@ -37,7 +37,7 @@ resource "scaleway_container" "webapp" {
   # (migrations, collectstatic, etc.) before liveness kicks in.
   startup_probe {
     http {
-      path = "/healthz"
+      path = "/healthz/"
     }
     failure_threshold = 10
     interval          = "30s"
