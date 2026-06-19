@@ -10,8 +10,6 @@ import re
 
 from utils.django import django_setup_full
 
-django_setup_full()
-
 ID_PREFIX = "id="
 
 
@@ -53,6 +51,7 @@ def airflow_params_dropdown_codes_to_ids(model_name: str) -> dict[str, str]:
     """Returns a mapping of {code (id=id)} -> id so it can be used in Airflow Params UI:
     - keys = used in Param.examples = what user sees/selects
     - whole dict = used in Param.values_display = converts selections back to ids"""
+    django_setup_full()
     from qfdmo.models import ActeurType, Source
 
     models = {

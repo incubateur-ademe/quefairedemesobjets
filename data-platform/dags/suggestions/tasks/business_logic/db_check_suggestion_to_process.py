@@ -1,8 +1,5 @@
 from utils.django import django_setup_full
 
-django_setup_full()
-
-
 # Here we get only the suggestion with AVALIDER status
 # ENCOURS status is for suggestion that are being processed, it can remain sommes
 # suggestions with this status after process it if Airflow cluster shutdown suddenly
@@ -10,6 +7,7 @@ django_setup_full()
 
 
 def get_suggestions_toprocess(use_suggestion_groupe: bool = False):
+    django_setup_full()
     from data.models.suggestion import Suggestion, SuggestionGroupe, SuggestionStatut
 
     cls = Suggestion

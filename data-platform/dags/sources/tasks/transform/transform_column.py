@@ -25,6 +25,7 @@ from sources.tasks.transform.exceptions import (
 from sources.tasks.transform.formatter import format_libelle_to_code
 from sources.tasks.transform.opening_hours import interprete_opening_hours
 from sources.tasks.transform.sequence_utils import convert_numpy_to_jsonify
+from utils.django import django_setup_full
 
 logger = logging.getLogger(__name__)
 
@@ -157,6 +158,8 @@ def clean_acteur_type_code(value, _):
 
 
 def clean_public_accueilli(value, _):
+    django_setup_full()
+
     from qfdmo.models.acteur import ActeurPublicAccueilli
 
     if not value:

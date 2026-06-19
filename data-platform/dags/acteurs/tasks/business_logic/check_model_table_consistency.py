@@ -1,7 +1,5 @@
 from utils.django import django_setup_full
 
-django_setup_full()
-
 
 def check_model_table_consistency(
     *,
@@ -9,10 +7,10 @@ def check_model_table_consistency(
     model_name: str,
     table_name: str,
 ) -> bool:
-
-    from django.apps import apps
+    django_setup_full()
 
     from core.models.tools import compare_model_vs_table
+    from django.apps import apps
 
     model_class = apps.get_model(django_app, model_name)
     return compare_model_vs_table(model_class, table_name)

@@ -16,9 +16,6 @@ from cluster.tasks.business_logic.cluster_acteurs_config_create import (
 from utils import logging_utils as log
 from utils.django import django_setup_full
 
-django_setup_full()
-
-
 logger = logging.getLogger(__name__)
 
 
@@ -40,6 +37,7 @@ def task_info_get():
 
 
 def cluster_acteurs_clusters_prepare_wrapper(ti, params) -> None:
+    django_setup_full()
     logger.info(task_info_get())
 
     config: ClusterConfig = cluster_acteurs_config_create(params)

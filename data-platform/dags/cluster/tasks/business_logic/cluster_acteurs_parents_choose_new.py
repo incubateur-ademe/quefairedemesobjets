@@ -6,22 +6,7 @@ import numpy as np
 import pandas as pd
 from cluster.config.constants import COL_PARENT_ID_BEFORE
 from cluster.tasks.business_logic.misc.df_sort import df_sort
-from data.models.change import (
-    COL_CHANGE_MODEL_NAME,
-    COL_CHANGE_ORDER,
-    COL_CHANGE_REASON,
-)
 from utils.django import django_setup_full
-
-from data.models.changes import (
-    ChangeActeurCreateAsParent,
-    ChangeActeurDeleteAsParent,
-    ChangeActeurKeepAsParent,
-    ChangeActeurUpdateParentId,
-    ChangeActeurVerifyRevision,
-)
-
-django_setup_full()
 
 logger = getLogger(__name__)
 
@@ -63,6 +48,19 @@ def cluster_acteurs_one_cluster_parent_changes_mark(
     - if children not pointing to parent -> point to new parent
     - if orphan -> point to new parent
     """
+    django_setup_full()
+
+    from data.models.change import (
+        COL_CHANGE_MODEL_NAME,
+        COL_CHANGE_ORDER,
+        COL_CHANGE_REASON,
+    )
+    from data.models.changes import (
+        ChangeActeurDeleteAsParent,
+        ChangeActeurUpdateParentId,
+        ChangeActeurVerifyRevision,
+    )
+
     df = df_one_cluster.copy()
 
     parent_index = df[df["identifiant_unique"] == parent_id].index[0]
@@ -105,6 +103,9 @@ def cluster_acteurs_one_cluster_parent_changes_mark(
 
 def cluster_acteurs_one_cluster_parent_choose(df: pd.DataFrame) -> tuple[str, str, str]:
     """Generate the decision on the parent selection for 1 cluster"""
+    django_setup_full()
+
+    from data.models.changes import ChangeActeurCreateAsParent, ChangeActeurKeepAsParent
     from qfdmo.models.acteur import ActeurStatus
 
     try:
@@ -152,8 +153,10 @@ def cluster_acteurs_one_cluster_parent_choose(df: pd.DataFrame) -> tuple[str, st
 def cluster_acteurs_parents_choose_new(df_clusters: pd.DataFrame) -> pd.DataFrame:
     """Select and assign the new parents to a dataframe
     comprenant 1 ou plusieurs clusters.'"""
+    django_setup_full()
 
     from data.models.change import COL_CHANGE_ORDER
+    from data.models.changes import ChangeActeurCreateAsParent
 
     dfs_marked = []
 

@@ -1,5 +1,6 @@
 """Utilities to work with Django from Airflow"""
 
+import functools
 import logging
 import os
 from typing import Any
@@ -30,9 +31,12 @@ def django_settings_to_dict() -> dict:
     }
 
 
+@functools.lru_cache(maxsize=1)
 def django_setup_full() -> None:
-    """Full init of our Django environment"""
-
+    """
+    Full init of our Django environment.
+    Safe to call from multiple modules at import time: Django is initialized only once.
+    """
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.airflow_settings")
 
     import django
@@ -42,6 +46,7 @@ def django_setup_full() -> None:
 
 def django_conn_to_sqlalchemy_engine(using="default"):
     """Return a SQLAlchemy engine from a Django connection"""
+    django_setup_full()
     from django.db import connections
     from sqlalchemy import create_engine
 
@@ -163,6 +168,7 @@ def django_model_queryset_to_df(query: Any, fields: list[str]) -> pd.DataFrame:
 
 def django_schema_create_and_check(schema_name: str, sql: str, dry_run=True) -> None:
     """Create a table in the DB from a schema"""
+    django_setup_full()
     from django.db import connections
 
     # Creation
