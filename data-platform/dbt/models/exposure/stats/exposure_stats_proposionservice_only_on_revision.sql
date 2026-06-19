@@ -13,8 +13,8 @@ more_props_agg AS (
         a.code AS action_code,
         jsonb_agg(sco.code ORDER BY sco.code) AS sous_categories
     FROM {{ ref('marts_acteur_vs_revision_propositon_services') }} AS m
-    INNER JOIN {{ source('qfdmo', 'qfdmo_action') }} AS a ON m.action_id = a.id
-    INNER JOIN {{ source('qfdmo', 'qfdmo_souscategorieobjet') }} AS sco ON m.souscategorieobjet_id = sco.id
+    INNER JOIN {{ ref('base_action') }} AS a ON m.action_id = a.id
+    INNER JOIN {{ ref('base_souscategorieobjet') }} AS sco ON m.souscategorieobjet_id = sco.id
     WHERE m.source = 'revision'
     GROUP BY m.identifiant_unique, a.code
 ),
@@ -35,8 +35,8 @@ revision_props_agg AS (
     FROM {{ ref('int_revisionpropositonservices_with_acteur') }} AS rps
     INNER JOIN {{ ref('int_revisionpropositonservice_sous_categories_with_acteur') }} AS rpsc
         ON rps.id = rpsc.revisionpropositionservice_id
-    INNER JOIN {{ source('qfdmo', 'qfdmo_action') }} AS a ON rps.action_id = a.id
-    INNER JOIN {{ source('qfdmo', 'qfdmo_souscategorieobjet') }} AS sco
+    INNER JOIN {{ ref('base_action') }} AS a ON rps.action_id = a.id
+    INNER JOIN {{ ref('base_souscategorieobjet') }} AS sco
         ON rpsc.souscategorieobjet_id = sco.id
     WHERE rps.acteur_id IN (SELECT identifiant_unique FROM revisions)
     GROUP BY rps.acteur_id, a.code

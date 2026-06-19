@@ -7,7 +7,7 @@ WITH deduplicated_opened_sources AS (
   FROM {{ ref('marts_opendata_acteur') }}  AS da
   LEFT JOIN {{ ref('marts_opendata_acteur_sources') }} AS das
     ON da.identifiant_unique = das.acteur_id
-  LEFT JOIN {{ source('qfdmo', 'qfdmo_source') }} AS source
+  LEFT JOIN {{ ref('base_source') }} AS source
     ON das.source_id = source.id
   GROUP BY da.uuid
 ),
@@ -20,14 +20,14 @@ proposition_services AS (
         'sous_categories', (
           SELECT jsonb_agg(sco.code)
           FROM {{ ref('marts_opendata_propositionservice_sous_categories') }}  AS pssc
-          JOIN {{ source('qfdmo', 'qfdmo_souscategorieobjet') }} AS sco ON pssc.souscategorieobjet_id = sco.id
+          JOIN {{ ref('base_souscategorieobjet') }} AS sco ON pssc.souscategorieobjet_id = sco.id
           WHERE pssc.propositionservice_id = ps.id
         )
       )
     ) as services
   FROM {{ ref('marts_opendata_acteur') }} AS da
   JOIN {{ ref('marts_opendata_propositionservice') }}  AS ps ON ps.acteur_id = da.identifiant_unique
-  JOIN {{ source('qfdmo', 'qfdmo_action') }} AS a ON ps.action_id = a.id
+  JOIN {{ ref('base_action') }} AS a ON ps.action_id = a.id
   GROUP BY da.uuid
 ),
 acteur_labels AS (
@@ -37,7 +37,7 @@ acteur_labels AS (
   FROM {{ ref('marts_opendata_acteur') }}  AS da
   LEFT JOIN {{ ref('marts_opendata_acteur_labels') }} AS dal
     ON da.identifiant_unique = dal.acteur_id
-  LEFT JOIN {{ source('qfdmo', 'qfdmo_labelqualite') }} AS lq ON dal.labelqualite_id = lq.id
+  LEFT JOIN {{ ref('base_labelqualite') }} AS lq ON dal.labelqualite_id = lq.id
   GROUP BY da.uuid
 ),
 acteur_services AS (
@@ -47,7 +47,7 @@ acteur_services AS (
   FROM {{ ref('marts_opendata_acteur') }}  AS da
   LEFT JOIN {{ ref('marts_opendata_acteur_acteur_services') }} AS daas
     ON da.identifiant_unique = daas.acteur_id
-  LEFT JOIN {{ source('qfdmo', 'qfdmo_acteurservice') }} AS as2 ON daas.acteurservice_id = as2.id
+  LEFT JOIN {{ ref('base_acteurservice') }} AS as2 ON daas.acteurservice_id = as2.id
   GROUP BY da.uuid
 ),
 perimetreadomicile AS (
@@ -84,7 +84,7 @@ SELECT
     WHEN EXISTS (
       SELECT 1
       FROM {{ ref('marts_opendata_acteur_sources') }} das2
-      JOIN {{ source('qfdmo', 'qfdmo_source') }} s ON das2.source_id = s.id
+      JOIN {{ ref('base_source') }} s ON das2.source_id = s.id
       WHERE das2.acteur_id = da.identifiant_unique
       AND s.code = 'carteco'
     ) THEN NULL
@@ -125,7 +125,7 @@ SELECT
   {{ sscat_from_action('ps.services', 'rapporter') }} as "rapporter",
   to_char(da.modifie_le, 'YYYY-MM-DD') as "date_de_derniere_modification"
 FROM {{ ref('marts_opendata_acteur') }}  AS da
-LEFT JOIN {{ source('qfdmo', 'qfdmo_acteurtype') }} AS at ON da.acteur_type_id = at.id
+LEFT JOIN {{ ref('base_acteur_type') }} AS at ON da.acteur_type_id = at.id
 -- INNER JOIN : Only open lisense
 INNER JOIN deduplicated_opened_sources AS ds ON da.uuid = ds.uuid
 LEFT JOIN proposition_services AS ps ON da.uuid = ps.uuid

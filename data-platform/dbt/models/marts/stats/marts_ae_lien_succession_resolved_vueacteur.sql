@@ -9,7 +9,7 @@ SELECT
     transfert_siege,
     continuite_economique
 FROM {{ ref('int_ae_lien_succession_resolved') }}
-INNER JOIN {{ source('stats_qfdmo', 'qfdmo_vueacteur') }} AS vueacteur
+INNER JOIN {{ ref('base_vueacteur') }} AS vueacteur
 ON vueacteur.siret = siret_predecesseur
 AND (vueacteur.est_dans_carte IS TRUE OR vueacteur.est_dans_opendata IS TRUE)
 WHERE etat_administratif_successeur = 'A'
