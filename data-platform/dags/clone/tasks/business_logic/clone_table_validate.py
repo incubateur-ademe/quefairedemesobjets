@@ -2,13 +2,14 @@ import logging
 
 from clone.config.models import DIR_SQL_VALIDATION
 from utils import logging_utils as log
-from utils.django import DJANGO_WH_CONNECTION_NAME
+from utils.django import DJANGO_WH_CONNECTION_NAME, django_setup_full
 
 logger = logging.getLogger(__name__)
 
 
 def clone_table_validate(table_kind: str, table_name: str, dry_run: bool) -> None:
     """Validate a table in the DB"""
+    django_setup_full()
     from django.db import connections
 
     # Gathering SQL validation files
