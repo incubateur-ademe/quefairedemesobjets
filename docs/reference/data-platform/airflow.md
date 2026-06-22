@@ -62,7 +62,7 @@ Run them from **`data-platform/`** (requires `uv sync`):
 make dags-test
 ```
 
-Pytest uses `core.test_settings` (see `data-platform/pyproject.toml`).
+Pytest uses `settings.test` (see `data-platform/pyproject.toml`).
 
 ## Follow the rules
 
