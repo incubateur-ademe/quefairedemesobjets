@@ -27,6 +27,7 @@ env:
   BASE_URL: http://localhost:8000
   DATABASE_URL: "postgres://webapp:webapp@localhost:5432/webapp" # pragma: allowlist secret
   SECRET_KEY: coucou # pragma: allowlist secret
+  DJANGO_SETTINGS_MODULE: settings.test
   CI: true
 
 jobs:
