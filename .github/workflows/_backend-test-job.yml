@@ -65,7 +65,7 @@ jobs:
       - name: Check for missing migrations
         if: inputs.check-migrations && inputs.working-directory == 'webapp'
         working-directory: webapp
-        run: uv run python manage.py makemigrations --check --no-input --settings=core.test_settings
+        run: uv run python manage.py makemigrations --check --no-input --settings=settings.test
 
 permissions:
   contents: read
