@@ -5,16 +5,14 @@ test.describe("Navigation dans le header", () => {
   test("Test link on logo", async ({ page }) => {
     await navigateTo(page, "/")
 
-    // Click on the second link in the navbar
-    await page.locator("#fr-navigation .fr-nav__item:nth-of-type(2) a").click()
-    await page.locator("#fr-navigation .fr-nav__item:nth-of-type(2) a").click()
-    await expect(
-      page.locator("#fr-navigation .fr-nav__item:nth-of-type(2) a"),
-    ).toHaveAttribute("aria-current", "true")
-    const previousUrl = page.url()
+    // Navigate to a sub-page by clicking a page link in the main content
+    // The homepage has links like "Petit électroménager", "Déchets alimentaires", etc.
+    await page.locator("a[href^='/produit/'], a[href^='/dechet/']").first().click()
+    await page.waitForURL(/\/produit\/|\/dechet\//)
+    const subPageUrl = page.url()
 
-    // Click on logo parent
+    // Click on logo parent → should go back to home
     await page.locator(".fr-header__operator").click()
-    expect(page.url()).not.toBe(previousUrl)
+    expect(page.url()).not.toBe(subPageUrl)
   })
 })
