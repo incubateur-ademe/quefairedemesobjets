@@ -14,6 +14,15 @@ class ActeurController extends Controller {
     if (this.element.ariaHidden !== "false") {
       this.element.ariaHidden = "false"
     }
+    // Move keyboard focus into the panel when it opens
+    const closeButton = this.element.querySelector<HTMLElement>(
+      "[data-testid='acteur-details-close']",
+    )
+    if (closeButton) {
+      closeButton.focus()
+    } else {
+      this.element.focus()
+    }
   }
 
   hide() {
