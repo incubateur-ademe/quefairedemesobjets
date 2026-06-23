@@ -1,7 +1,8 @@
 -- Creates the wagtail_french text search configuration used by the Postgres
--- search backend. Shared between qfdmd migration 0045 (runs via Django on the
--- test/fresh DB) and create_extensions.sql (runs via psql on local restores),
--- so the two never drift.
+-- search backend. Run as a dedicated step right after create_extensions.sql by
+-- every caller (qfdmd migration 0045 via Django, create_webapp_sample_db.py via
+-- psycopg, and the Makefile load-*-dump / create-extensions targets via psql),
+-- so there is exactly one definition.
 --
 -- Postgres has no CREATE ... IF NOT EXISTS for text search configurations, so
 -- the creation is guarded manually and is therefore safe to run repeatedly.

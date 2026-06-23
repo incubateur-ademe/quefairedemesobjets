@@ -48,7 +48,12 @@ class Command(BaseCommand):
         file_path = repo_root / "scripts" / "sql" / "create_webapp_sample_db.sql"
         execute_sql_script(conn, file_path)
 
-        # Create extensions
+        # Create extensions, then the wagtail_french text search config
+        # (kept in its own script so the migration runs the exact same SQL).
         conn = connections["webapp_sample"]
-        file_path = repo_root / "scripts" / "sql" / "create_extensions.sql"
-        execute_sql_script(conn, file_path)
+        execute_sql_script(
+            conn, repo_root / "scripts" / "sql" / "create_extensions.sql"
+        )
+        execute_sql_script(
+            conn, repo_root / "scripts" / "sql" / "create_wagtail_french_config.sql"
+        )
