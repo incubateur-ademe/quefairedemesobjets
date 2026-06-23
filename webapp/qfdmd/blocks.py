@@ -45,6 +45,8 @@ class BreakBlock(blocks.StaticBlock):
             "affichée dans une iframe (par ex. intégration sur un site partenaire). "
             "Utilisez-le sur les fiches qui n'ont pas de « Carte sur mesure »."
         )
+
+
 class CarteBlock(blocks.StructBlock):
     """StructBlock wrapping a CarteConfig snippet with a mobile display toggle."""
 
