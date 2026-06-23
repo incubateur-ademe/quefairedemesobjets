@@ -239,59 +239,49 @@ dump-sample:
 	pg_dump --format=custom --no-acl --no-owner --no-privileges "$(REMOTE_SAMPLE_DATABASE_URL)" --file="$(SAMPLE_DUMP_FILE)"
 
 
+# Restore targets — all run psql/pg_restore inside Docker for version compatibility.
+# The script handles extension creation before restore.
+.DB_restore_scheme=--schema=public --clean --no-acl --no-owner --no-privileges
 .SILENT:
-.PHONY: load-prod-dump
-load-prod-dump:
-	@DUMP_FILE=$$(find tmpbackup-prod -type f -name "*.custom" -print -quit); \
-	psql -d '$(DB_URL)' -f scripts/sql/create_extensions.sql && \
-	pg_restore -d '$(DB_URL)' --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
+load-dump-to-loc:
+	sh scripts/db_restore.sh $(ENV) $(TMPDIR)
 
-.SILENT:
-.PHONY: load-preprod-dump
-load-preprod-dump:
-	@DUMP_FILE=$$(find tmpbackup-preprod -type f -name "*.custom" -print -quit); \
-	psql -d '$(DB_URL)' -f scripts/sql/create_extensions.sql && \
-	pg_restore -d '$(DB_URL)' --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
+.PHONY: drop-public
+drop-schema-public:
+	psql -d '$(DB_URL)' -c "DROP SCHEMA IF EXISTS public CASCADE;"
+.PHONY: create-public
+create-schema-public:
+	psql -d '$(DB_URL)' -c "CREATE SCHEMA IF NOT EXISTS public;"
 
-.SILENT:
-.PHONY: load-sample-dump
-load-sample-dump:
-	@DUMP_FILE=$(SAMPLE_DUMP_FILE); \
-	[ -f "$$DUMP_FILE" ] || DUMP_FILE=$$(find tmpbackup-sample -type f -name "*.custom" -print -quit); \
-	[ -n "$$DUMP_FILE" ] || { echo "No sample dump found"; exit 1; }; \
-	psql -d '$(SAMPLE_DB_URL)' -f scripts/sql/create_extensions.sql && \
-	pg_restore -d '$(SAMPLE_DB_URL)' --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
+.PHONY: db-restore-local-from
+db-restore-local-from:
+	@ENV=$(env) $(MAKE) dump-$(env)
+	@$(MAKE) drop-schema-public
+	@$(MAKE) create-schema-public
+	@ENV=$(env) TMPDIR=tmpbackup-$(env) $(MAKE) load-dump-to-loc
+	@$(MAKE) webapp-migrate
+ifeq ($(env),prod)
+	@$(MAKE) webapp-create-remote-db-server
+endif
 
 .PHONY: db-restore-local-from-prod
 db-restore-local-from-prod:
-	make dump-prod
-	make drop-schema-public
-	make create-schema-public
-	make load-prod-dump
-	make webapp-migrate
-	make webapp-create-remote-db-server
+	$(MAKE) db-restore-local-from env=prod
 
 .PHONY: db-restore-local-from-preprod
 db-restore-local-from-preprod:
-	make dump-preprod
-	make drop-schema-public
-	make create-schema-public
-	make load-preprod-dump
-	make webapp-migrate
-	make webapp-create-remote-db-server
+	$(MAKE) db-restore-local-from env=preprod
+	@echo "⚠️  Preprod restore done — no remote DB server created."
 
 .PHONY: db-restore-preprod-from-prod
 db-restore-preprod-from-prod:
-	make dump-prod-quiet
-	make drop-all-tables
-	make load-prod-dump
+	sh scripts/infrastructure/backup-db.sh --quiet
+	sh scripts/db_restore.sh prod tmpbackup-prod
 
 .PHONY: db-restore-local-from-sample
 db-restore-local-from-sample:
-	make dump-sample
-	make drop-schema-public-sample
-	make create-schema-public-sample
-	make load-sample-dump
+	$(MAKE) dump-sample
+	sh scripts/db_restore.sh sample tmpbackup-sample
 
 .PHONY: db-restore-local-for-tests
 db-restore-local-for-tests:
