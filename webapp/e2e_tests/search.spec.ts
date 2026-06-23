@@ -249,15 +249,34 @@ test.describe("Positionnement de l'autocomplete en hauteur contrainte", () => {
   // must stay inside the document body, scrolling internally instead of
   // spilling past the bottom edge. Notion ticket 3104.
   test("La dropdown reste dans le body et scrolle en interne", async ({ page }) => {
-    const pageHeight = 300
-    await page.setViewportSize({ width: 320, height: pageHeight })
+    await page.setViewportSize({ width: 320, height: 220 })
     await navigateTo(page, "/")
 
     await typeSearchQuery(page, "velo")
     await waitForResults(page)
 
-    const turboFrame = page.locator(SEARCH_RESULTS_DROPDOWN_SELECTOR)
-    const box = await turboFrame.boundingBox()
-    expect(box?.y! + box?.height!).toBeLessThanOrEqual(pageHeight)
+    const measurements = await page.evaluate((selector) => {
+      const frame = document.querySelector<HTMLElement>(selector)
+      if (!frame) return null
+      const rect = frame.getBoundingClientRect()
+      return {
+        bodyHeight: document.documentElement.clientHeight,
+        rectTop: rect.top,
+        rectBottom: rect.bottom,
+        scrollHeight: frame.scrollHeight,
+        clientHeight: frame.clientHeight,
+        overflowY: getComputedStyle(frame).overflowY,
+        hasIframeIgnore: frame.hasAttribute("data-iframe-ignore"),
+      }
+    }, SEARCH_RESULTS_DROPDOWN_SELECTOR)
+
+    expect(measurements).not.toBeNull()
+    expect(measurements!.rectBottom).toBeLessThanOrEqual(measurements!.bodyHeight)
+    // Tolerance = clamp margin, not flakiness slop.
+    expect(measurements!.bodyHeight - measurements!.rectBottom).toBeLessThanOrEqual(10)
+    expect(measurements!.scrollHeight).toBeGreaterThan(measurements!.clientHeight)
+    expect(measurements!.overflowY).toBe("auto")
+    // @iframe-resizer/child skips elements with this attribute when sizing the iframe.
+    expect(measurements!.hasIframeIgnore).toBe(true)
   })
 })
