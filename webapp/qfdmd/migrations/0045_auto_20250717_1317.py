@@ -5,10 +5,11 @@ from pathlib import Path
 from django.conf import settings
 from django.db import migrations
 
-# Shared with scripts/sql/create_extensions.sql (run via psql on local
-# restores) so the wagtail_french text search config is defined in exactly
-# one place. This migration is the source of truth for the test DB and any
-# fresh DB, which are built from migrations only.
+# Read from a shared .sql file rather than inlined here, so the migration and
+# create_webapp_sample_db.py run identical SQL. create_extensions.sql keeps an
+# inline copy (it is executed via psycopg, which cannot \ir-include files);
+# both are guarded so order does not matter. This migration is the source of
+# truth for the test DB and any fresh DB, built from migrations only.
 _WAGTAIL_FRENCH_SQL = (
     Path(settings.BASE_DIR).parent
     / "scripts"
