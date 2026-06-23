@@ -884,12 +884,23 @@ export async function typeSearchQuery(
       new URL(response.url()).searchParams.get("q") === query,
     { timeout: TIMEOUT.DEFAULT },
   )
+  // After the network response lands, wait for Turbo to finish processing
+  // the frame swap so `waitForResults` doesn't observe a still-busy frame
+  // with `Chargement...` (aria-busy) and no options in the DOM yet.
+  const frameReadyPromise = page?.waitForFunction(
+    () =>
+      !document
+        .querySelector('[data-next-autocomplete-target="results"]')
+        ?.hasAttribute("busy"),
+    { timeout: TIMEOUT.DEFAULT },
+  )
   const searchInput = locator.locator(SEARCH_INPUT_SELECTOR)
   await searchInput.scrollIntoViewIfNeeded()
   await searchInput.click()
   await searchInput.fill("")
   await searchInput.pressSequentially(query, { delay: 100 })
   await responsePromise
+  await frameReadyPromise
 }
 
 export async function waitForResults(locator: Locator | Page | FrameLocator) {
