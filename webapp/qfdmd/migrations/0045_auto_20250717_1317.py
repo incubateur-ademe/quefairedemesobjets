@@ -9,17 +9,12 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        # No-op: this used to CREATE TEXT SEARCH CONFIGURATION wagtail_french,
+        # but that now happens in scripts/sql/create_extensions.sql, which
+        # runs before migrate. Keeping the migration (rather than deleting
+        # it) preserves the dependency chain and applied-migration history.
         migrations.RunSQL(
-            sql="""
-            CREATE EXTENSION IF NOT EXISTS unaccent;
-
-            CREATE TEXT SEARCH CONFIGURATION wagtail_french (COPY = french);
-            ALTER TEXT SEARCH CONFIGURATION wagtail_french
-              ALTER MAPPING FOR hword, hword_part, word
-              WITH unaccent, french_stem;
-            """,
-            reverse_sql="""
-            DROP TEXT SEARCH CONFIGURATION IF EXISTS wagtail_french;
-            """,
+            sql=migrations.RunSQL.noop,
+            reverse_sql=migrations.RunSQL.noop,
         ),
     ]
