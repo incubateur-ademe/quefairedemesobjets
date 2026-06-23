@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test"
-import { navigateTo } from "./helpers"
+import { navigateTo, TIMEOUT } from "./helpers"
 
 test.describe("Navigation dans le header", () => {
   test("Test link on logo", async ({ page }) => {
@@ -7,8 +7,10 @@ test.describe("Navigation dans le header", () => {
 
     // Navigate to a sub-page by clicking a page link in the main content
     // The homepage has links like "Petit électroménager", "Déchets alimentaires", etc.
-    await page.locator("a[href^='/produit/'], a[href^='/dechet/']").first().click()
-    await page.waitForURL(/\/produit\/|\/dechet\//)
+    const pageLink = page.locator("a[href^='/produit/'], a[href^='/dechet/']").first()
+    await pageLink.waitFor({ state: "visible", timeout: TIMEOUT.DEFAULT })
+    await pageLink.click()
+    await page.waitForURL(/\/produit\/|\/dechet\//, { timeout: TIMEOUT.DEFAULT })
     const subPageUrl = page.url()
 
     // Click on logo parent → should go back to home
