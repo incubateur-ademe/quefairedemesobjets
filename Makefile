@@ -1,7 +1,7 @@
 # Aliases
 PYTHON := uv run python
 DB_URL := postgres://webapp:webapp@localhost:6543/webapp# pragma: allowlist secret
-SAMPLE_DB_URL ?= $(if $(SAMPLE_DATABASE_URL),$(SAMPLE_DATABASE_URL),$(DB_URL))
+SAMPLE_DB_URL ?= $(if $(DB_WEBAPP_SAMPLE),$(DB_WEBAPP_SAMPLE),$(DB_URL))
 SAMPLE_DUMP_FILE ?= tmpbackup-sample/sample.custom
 BASE_DOMAIN := quefairedemesdechets.ademe.local
 
@@ -204,6 +204,10 @@ drop-schema-public-sample:
 create-schema-public:
 	psql -d '$(DB_URL)' -c "CREATE SCHEMA IF NOT EXISTS public;"
 
+.PHONY: create-db-sample
+create-db-sample:
+	$(MAKE) -C webapp create-db-sample
+
 .SILENT:
 .PHONY: create-schema-public-sample
 create-schema-public-sample:
@@ -288,6 +292,7 @@ db-restore-preprod-from-prod:
 
 .PHONY: db-restore-local-from-sample
 db-restore-local-from-sample:
+	$(MAKE) create-db-sample
 	make dump-sample
 	make drop-schema-public-sample
 	make create-schema-public-sample

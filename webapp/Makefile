@@ -41,7 +41,7 @@ runserver:
 
 .PHONY: runserver-e2e
 runserver-e2e:
-	make DATABASE_URL=$(SAMPLE_DATABASE_URL) runserver
+	make DATABASE_URL=$(DB_WEBAPP_SAMPLE) runserver
 
 .PHONY: migrate
 migrate:
@@ -103,6 +103,10 @@ seed-database:
 createsuperuser-example:
 	$(DJANGO_ADMIN) createsuperuser_example
 
+.PHONY: create-db-sample
+create-db-sample:
+	$(DJANGO_ADMIN) create_webapp_sample_db
+
 .PHONY: generate-fixtures-acteurs
 generate-fixtures-acteurs:
 	$(DJANGO_ADMIN) dumpdata_acteurs
@@ -140,6 +144,7 @@ integration-test:
 .PHONY: prepare-e2e-test
 prepare-e2e-test:
 	make migrate
+	make createcachetable
 	# Mirror CI: ensure unaccent / pg_trgm extensions and the f_unaccent()
 	# wrapper exist before rebuilding the search index. Without these, the
 	# autocomplete fuzzy search raises ProgrammingError at runtime.
@@ -151,7 +156,9 @@ prepare-e2e-test:
 
 .PHONY: prepare-e2e-test-local
 prepare-e2e-test-local:
-	make DATABASE_URL=$(SAMPLE_DATABASE_URL) prepare-e2e-test
+	make create-db-sample
+	make -C .. DB_WEBAPP_SAMPLE=$(DB_WEBAPP_SAMPLE) load-sample-dump
+	make DATABASE_URL=$(DB_WEBAPP_SAMPLE) prepare-e2e-test
 
 .PHONY: e2e-test
 e2e-test:
