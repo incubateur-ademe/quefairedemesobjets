@@ -124,6 +124,7 @@ resource "null_resource" "seed_from_sample" {
   }
 
   triggers = {
-    image_tag = var.image_tag
+    image_tag      = var.image_tag
+    sample_db_hash = md5(var.sample_db_uri)
   }
 }
