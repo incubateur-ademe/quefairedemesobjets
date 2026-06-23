@@ -11,17 +11,6 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS postgres_fdw;
 CREATE EXTENSION IF NOT EXISTS unaccent;
 
--- Postgres has no CREATE ... IF NOT EXISTS for text search configurations,
--- so guard manually (this script can run more than once, e.g. after restores).
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_ts_config WHERE cfgname = 'wagtail_french'
-  ) THEN
-    CREATE TEXT SEARCH CONFIGURATION wagtail_french (COPY = french);
-    ALTER TEXT SEARCH CONFIGURATION wagtail_french
-      ALTER MAPPING FOR hword, hword_part, word
-      WITH unaccent, french_stem;
-  END IF;
-END
-$$;
+-- Shared with qfdmd migration 0045 so the two never drift. \ir resolves the
+-- path relative to this file's location (psql include-relative).
+\ir create_wagtail_french_config.sql
