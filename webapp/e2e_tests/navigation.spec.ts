@@ -5,12 +5,12 @@ test.describe("Navigation dans le header", () => {
   test("Test link on logo", async ({ page }) => {
     await navigateTo(page, "/")
 
-    // Navigate to a sub-page by clicking a page link in the main content
-    // The homepage has links like "Petit électroménager", "Déchets alimentaires", etc.
-    const pageLink = page.locator("a[href^='/produit/'], a[href^='/dechet/']").first()
+    // Navigate to a sub-page by clicking a category link in the main content.
+    // The homepage's category cards link to /categories/<slug>/.
+    const pageLink = page.locator("a[href^='/categories/']").first()
     await pageLink.waitFor({ state: "visible", timeout: TIMEOUT.DEFAULT })
     await pageLink.click()
-    await page.waitForURL(/\/produit\/|\/dechet\//, { timeout: TIMEOUT.DEFAULT })
+    await page.waitForURL(/\/categories\//, { timeout: TIMEOUT.DEFAULT })
     const subPageUrl = page.url()
 
     // Click on logo parent → should go back to home
