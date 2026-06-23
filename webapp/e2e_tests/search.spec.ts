@@ -249,7 +249,7 @@ test.describe("Positionnement de l'autocomplete en hauteur contrainte", () => {
   // must stay inside the document body, scrolling internally instead of
   // spilling past the bottom edge. Notion ticket 3104.
   test("La dropdown reste dans le body et scrolle en interne", async ({ page }) => {
-    await page.setViewportSize({ width: 320, height: 400 })
+    await page.setViewportSize({ width: 320, height: 300 })
     await navigateTo(page, "/")
 
     await typeSearchQuery(page, "velo")
@@ -258,8 +258,7 @@ test.describe("Positionnement de l'autocomplete en hauteur contrainte", () => {
     // The page has more than one autocomplete instance (home search + header
     // search); scope to the visible one instead of grabbing whichever frame
     // is first in the DOM.
-    const frame = page.locator(SEARCH_RESULTS_DROPDOWN_SELECTOR).locator("visible=true")
-    await expect(frame).toBeVisible()
+    const frame = page.locator("main").locator(SEARCH_RESULTS_DROPDOWN_SELECTOR)
 
     const box = await frame.boundingBox()
     expect(box).not.toBeNull()

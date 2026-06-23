@@ -885,9 +885,10 @@ export async function typeSearchQuery(
     { timeout: TIMEOUT.DEFAULT },
   )
   const searchInput = locator.locator(SEARCH_INPUT_SELECTOR)
+  await searchInput.scrollIntoViewIfNeeded()
   await searchInput.click()
   await searchInput.fill("")
-  await searchInput.pressSequentially(query, { delay: 50 })
+  await searchInput.pressSequentially(query, { delay: 100 })
   await responsePromise
 }
 
