@@ -111,7 +111,7 @@ resource "null_resource" "seed_from_sample" {
         # Verify that data was actually restored.
         TABLE_COUNT="$(psql "$PREVIEW_DB_URL" -t -c \
           "SELECT count(*) FROM pg_tables WHERE schemaname='public'")"
-        if [ "${TABLE_COUNT:-0}" -eq 0 ]; then
+        if [ "$${TABLE_COUNT:-0}" -eq 0 ]; then
           echo "WARNING: seed produced an empty database" >&2
         else
           echo "Seed complete: $TABLE_COUNT tables restored"
