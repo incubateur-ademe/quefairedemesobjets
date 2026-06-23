@@ -195,19 +195,9 @@ drop-schema-public:
 	psql -d '$(DB_URL)' -c "DROP SCHEMA IF EXISTS public CASCADE;"
 
 .SILENT:
-.PHONY: drop-schema-public-sample
-drop-schema-public-sample:
-	psql -d '$(SAMPLE_DB_URL)' -c "DROP SCHEMA IF EXISTS public CASCADE;"
-
-.SILENT:
 .PHONY: create-schema-public
 create-schema-public:
 	psql -d '$(DB_URL)' -c "CREATE SCHEMA IF NOT EXISTS public;"
-
-.SILENT:
-.PHONY: create-schema-public-sample
-create-schema-public-sample:
-	psql -d '$(SAMPLE_DB_URL)' -c "CREATE SCHEMA IF NOT EXISTS public;"
 
 
 .SILENT:
@@ -241,17 +231,11 @@ dump-sample:
 
 # Restore targets — all run psql/pg_restore inside Docker for version compatibility.
 # The script handles extension creation before restore.
-.DB_restore_scheme=--schema=public --clean --no-acl --no-owner --no-privileges
+# drop-schema-public / create-schema-public are defined once above.
 .SILENT:
+.PHONY: load-dump-to-loc
 load-dump-to-loc:
-	sh scripts/db_restore.sh $(ENV) $(TMPDIR)
-
-.PHONY: drop-public
-drop-schema-public:
-	psql -d '$(DB_URL)' -c "DROP SCHEMA IF EXISTS public CASCADE;"
-.PHONY: create-public
-create-schema-public:
-	psql -d '$(DB_URL)' -c "CREATE SCHEMA IF NOT EXISTS public;"
+	./scripts/db_restore.sh $(ENV) $(TMPDIR)
 
 .PHONY: db-restore-local-from
 db-restore-local-from:
@@ -276,12 +260,12 @@ db-restore-local-from-preprod:
 .PHONY: db-restore-preprod-from-prod
 db-restore-preprod-from-prod:
 	sh scripts/infrastructure/backup-db.sh --quiet
-	sh scripts/db_restore.sh prod tmpbackup-prod
+	./scripts/db_restore.sh prod tmpbackup-prod
 
 .PHONY: db-restore-local-from-sample
 db-restore-local-from-sample:
 	$(MAKE) dump-sample
-	sh scripts/db_restore.sh sample tmpbackup-sample
+	./scripts/db_restore.sh sample tmpbackup-sample
 
 .PHONY: db-restore-local-for-tests
 db-restore-local-for-tests:
