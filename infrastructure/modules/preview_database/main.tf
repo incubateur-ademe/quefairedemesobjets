@@ -118,7 +118,7 @@ resource "null_resource" "seed_from_sample" {
         # Verify that data was actually restored — show row counts.
         echo "Table row counts:"
         psql "$PREVIEW_DB_URL" -t -c "
-          SELECT tablename, n_live_tup
+          SELECT relname, n_live_tup
           FROM pg_stat_user_tables
           WHERE schemaname = 'public'
             AND n_live_tup > 0
