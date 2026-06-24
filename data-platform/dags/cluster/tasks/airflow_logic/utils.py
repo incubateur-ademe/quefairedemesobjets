@@ -13,6 +13,7 @@ import json
 
 import pandas as pd
 from cluster.config.constants import COL_PARENT_DATA_NEW
+from utils.data_serialize_reconstruct import parent_data_dict_to_json_ready
 
 
 def parent_data_new_serialize(df: pd.DataFrame) -> pd.DataFrame:
@@ -21,7 +22,11 @@ def parent_data_new_serialize(df: pd.DataFrame) -> pd.DataFrame:
         return df
     df = df.copy()
     df[COL_PARENT_DATA_NEW] = df[COL_PARENT_DATA_NEW].map(
-        lambda v: None if v is None else json.dumps(v, default=str)
+        lambda v: (
+            None
+            if v is None
+            else json.dumps(parent_data_dict_to_json_ready(v), default=str)
+        )
     )
     return df
 
