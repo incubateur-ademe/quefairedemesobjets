@@ -23,6 +23,16 @@ CACHES = {
     },
 }
 
+# Run background tasks synchronously in tests so assertions see their effects.
+# ENQUEUE_ON_COMMIT=False is required: pytest wraps each test in a transaction
+# that never commits, so on-commit enqueueing would never fire.
+TASKS = {
+    "default": {
+        "BACKEND": "django_tasks.backends.immediate.ImmediateBackend",
+        "ENQUEUE_ON_COMMIT": False,
+    }
+}
+
 STORAGES["default"]["BACKEND"] = "django.core.files.storage.InMemoryStorage"
 STORAGES["staticfiles"] = {
     "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
