@@ -99,7 +99,7 @@ resource "null_resource" "seed_from_sample" {
         # That's benign — but anything above 1 is a real restore error.
         set +e
         pg_restore -d "$PREVIEW_DB_URL" \
-            --schema=public --clean --no-acl --no-owner --no-privileges \
+            --schema=public --no-acl --no-owner --no-privileges \
             "$DUMP_FILE" > "$RESTORE_LOG" 2>&1
         RESTORE_RC=$?
         set -e
@@ -162,6 +162,6 @@ resource "null_resource" "seed_from_sample" {
   triggers = {
     image_tag      = var.clear_db ? var.image_tag : "reuse"
     sample_db_hash = md5(var.sample_db_uri)
-    seed_version   = "2"  # bump to force re-seed (e.g. when changing restore logic)
+    seed_version   = "3"  # bump to force re-seed (e.g. when changing restore logic)
   }
 }
