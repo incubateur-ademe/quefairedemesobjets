@@ -58,7 +58,6 @@ resource "null_resource" "seed_from_sample" {
       DB_USERNAME       = var.preview_db_username
       DB_PASSWORD       = random_password.preview.result
       PREVIEW_DB_URL    = local.preview_db_url
-      SAMPLE_DB_URI     = var.sample_db_uri
       EXTENSIONS_SCRIPT = var.create_extensions_script_path
       IMAGE_TAG         = var.image_tag
     }
