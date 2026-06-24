@@ -21,6 +21,19 @@
     @apply qf-text-blue-france-975-75 qf-font-bold;
     @apply hover:!qf-bg-green-menthe-sun-373-moon-652-hover qf-transition-colors;
   }
+
+  /* Apply modal height only when carte-wrapper is inside a DSFR modal */
+  .fr-modal__content .carte-wrapper {
+    /*
+    3.5rem : margin bottom on modal content,
+    65px: height of modal header
+    */
+    @apply qf-h-[calc(var(--modal-max-height)-65px)];
+  }
+}
+
+.cmsfr-block-carte .fr-modal__content {
+  @apply !qf-mb-1v;
 }
 
 [type="search"]::-webkit-search-cancel-button,
