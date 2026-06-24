@@ -91,8 +91,12 @@ resource "null_resource" "seed_from_sample" {
       psql "$PREVIEW_DB_URL" -f "$WAGTAIL_FRENCH_CONFIG_SCRIPT"
 
       # Dump the sample database to a temp file.
-      # If the sample DB is unreachable, warn but continue — previews can
-      # still serve as infrastructure smoke tests without seeded data.
+      # If the sample DB is unreachable or SAMPLE_DB_URI is not set, warn
+      # but continue — previews can still serve as infrastructure smoke
+      # tests without seeded data.
+      if [[ -z "$${SAMPLE_DB_URI:-}" ]]; then
+        echo "WARNING: SAMPLE_DB_URI is not set — preview will start without seeded data" >&2
+      else
       DUMP_FILE="$(mktemp)"
       RESTORE_LOG="$(mktemp)"
       if pg_dump -Fc --no-acl --no-owner --no-privileges "$SAMPLE_DB_URI" > "$DUMP_FILE" 2>/dev/null; then
@@ -138,6 +142,7 @@ resource "null_resource" "seed_from_sample" {
         echo "WARNING: pg_dump from sample DB failed — preview will start without seeded data" >&2
         rm -f "$DUMP_FILE"
       fi
+      fi  # SAMPLE_DB_URI check
 
       # Run Django management commands against the freshly seeded database.
       # Uses the Docker image that was just built; only runs when the seed
