@@ -131,8 +131,21 @@ jobs:
         run: |
           set -euo pipefail
           CMD="${{ inputs.command }}"
-          terragrunt run-all init --terragrunt-non-interactive --terragrunt-log-level debug 2>&1 | tee init.log
-          terragrunt run-all "$CMD" --terragrunt-non-interactive --auto-approve --terragrunt-log-level debug 2>&1 | tee apply.log
+          terragrunt run-all init --terragrunt-non-interactive 2>&1 | tee init.log
+
+          # Apply in dependency order — run-all dependency resolution can fail
+          # on first deploy when downstream modules need outputs from modules
+          # that haven't been applied yet.
+          # For destroy, reverse the order.
+          if [[ "$CMD" == "destroy" ]]; then
+            DIRS=(container object_storage database)
+          else
+            DIRS=(database object_storage container)
+          fi
+          for dir in "${DIRS[@]}"; do
+            echo "=== terragrunt $CMD $dir ==="
+            (cd "$dir" && terragrunt "$CMD" --terragrunt-non-interactive --auto-approve 2>&1) | tee -a apply.log
+          done
           {
             echo "## Terragrunt $CMD (pr-${{ inputs.pr_number }})"
             echo
