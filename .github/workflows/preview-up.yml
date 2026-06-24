@@ -11,9 +11,10 @@ on:
         type: string
 
 concurrency:
-  # One up/down at a time per PR; don't cancel a running apply.
+  # One deploy per PR at a time; cancel the previous run when a new push
+  # arrives — no point finishing a stale build.
   group: preview-pr-${{ inputs.pr_number || github.event.pull_request.number }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 # Gate: only PRs carrying the "preview" label get an environment.
 # - labeled: fire only when the preview label itself is added
