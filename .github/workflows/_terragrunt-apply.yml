@@ -99,6 +99,10 @@ jobs:
       - name: Setup Scaleway CLI (used by preview_database to manage the DB)
         uses: scaleway/action-scw@be2696f261325a78354eda14988c80405f33e082
 
+      - name: Login to Scaleway Container Registry
+        if: inputs.command == 'apply'
+        run: echo "${{ secrets.SCW_SECRET_KEY }}" | docker login rg.fr-par.scw.cloud -u nologin --password-stdin
+
       - name: Validate command input
         run: |
           CMD="${{ inputs.command }}"

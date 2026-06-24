@@ -60,6 +60,7 @@ resource "null_resource" "seed_from_sample" {
       PREVIEW_DB_URL    = local.preview_db_url
       SAMPLE_DB_URI     = var.sample_db_uri
       EXTENSIONS_SCRIPT = var.create_extensions_script_path
+      IMAGE_TAG         = var.image_tag
     }
     command = <<-EOT
       set -euo pipefail
@@ -120,6 +121,26 @@ resource "null_resource" "seed_from_sample" {
         echo "WARNING: pg_dump from sample DB failed — preview will start without seeded data" >&2
         rm -f "$DUMP_FILE"
       fi
+
+      # Run Django management commands against the freshly seeded database.
+      # Uses the Docker image that was just built; only runs when the seed
+      # runs (clear_db=true or SAMPLE_DB_URI changed).
+      echo "Running Django management commands..."
+      IMAGE="rg.fr-par.scw.cloud/ns-qfdmo/webapp:${IMAGE_TAG}"
+      docker pull "$IMAGE"
+      docker run --rm \
+        -e DATABASE_URL="$PREVIEW_DB_URL" \
+        -e SECRET_KEY=dummy \
+        "$IMAGE" \
+        sh -c "
+          set -e
+          python manage.py createcachetable
+          python manage.py migrate
+          python manage.py enable_unaccent
+          python manage.py enable_trigram
+          python manage.py purge_orphan_searchterm_index || true
+          echo 'Management commands complete.'
+        "
     EOT
   }
 
