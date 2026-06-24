@@ -1,3 +1,2 @@
 web: bash bin/start
-worker: python manage.py db_worker
 postdeploy: bash bin/post_deploy
