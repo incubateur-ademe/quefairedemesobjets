@@ -23,7 +23,7 @@ from unit_tests.qfdmo.acteur_factory import (
     RevisionActeurFactory,
 )
 
-ACTEUR_TYPE_ID = 123456
+ACTEUR_TYPE_CODE = "at1"
 
 
 @pytest.mark.django_db
@@ -39,7 +39,7 @@ class TestClusterActeursSuggestionsDisplay:
         RevisionActeurFactory(identifiant_unique="revision to keep")
         ActeurFactory(identifiant_unique="update parent id")
         RevisionActeurFactory(identifiant_unique="update parent id")
-        at1 = ActeurTypeFactory(code="at1", id=ACTEUR_TYPE_ID)
+        at1 = ActeurTypeFactory(code=ACTEUR_TYPE_CODE, libelle="déchèterie")
 
         return pd.DataFrame(
             [
@@ -147,14 +147,18 @@ class TestClusterActeursSuggestionsDisplay:
         c1 = working[0]
         assert c1["changes"][0]["model_params"] == {
             "id": "new parent",
-            "data": {"acteur_type": ACTEUR_TYPE_ID, "longitude": 1.0, "latitude": 2.0},
+            "data": {
+                "acteur_type": ACTEUR_TYPE_CODE,
+                "longitude": 1.0,
+                "latitude": 2.0,
+            },
         }
         assert c1["changes"][1]["model_params"] == {"id": "parent to delete"}
 
         c2 = working[1]
         assert c2["changes"][0]["model_params"] == {
             "id": "parent to keep",
-            "data": {"acteur_type": ACTEUR_TYPE_ID},
+            "data": {"acteur_type": ACTEUR_TYPE_CODE},
         }
 
         c3 = working[2]
