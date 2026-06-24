@@ -4,6 +4,7 @@ import logging
 
 from django.contrib.gis.geos import Point
 from django.db import models
+from qfdmo.models.utils import django_model_from_wire
 
 logger = logging.getLogger(__name__)
 
@@ -61,10 +62,7 @@ def data_reconstruct(model: type[models.Model], data_src: dict) -> dict:
                     pass
 
             # Retrieving the related instance if it's not already an instance
-            if not isinstance(value, field.related_model):  # type: ignore
-                value = field.related_model.objects.get(pk=value)  # type: ignore
-
-            result[key] = value
+            result[key] = django_model_from_wire(field.related_model, value)  # type: ignore
 
         else:
             result[key] = value
