@@ -8,7 +8,7 @@ def _update_or_copy_acteur_suggestions_to_target(
     *,
     target_modele: str,
     target_fk_field: str,
-    target_fk_id: int | None,
+    target_fk_id: str | None,
 ) -> None:
     """For each SuggestionUnitaire « Acteur » of the group, update the existing
     target SuggestionUnitaire (same `champs` and same target) if it exists,
@@ -64,10 +64,18 @@ def apply_suggestions_to_parent_task(suggestion_groupe_ids: list[int]) -> None:
 def apply_suggestions_to_correction_task(suggestion_groupe_ids: list[int]) -> None:
     """Apply suggestions to the acteur correction for each given SuggestionGroupe."""
     for sg in SuggestionGroupe.objects.filter(id__in=suggestion_groupe_ids):
-        if sg.suggestions_can_be_applied_to_correction():
-            _update_or_copy_acteur_suggestions_to_target(
-                sg,
-                target_modele="RevisionActeur",
-                target_fk_field="revision_acteur_id",
-                target_fk_id=(sg.revision_acteur_id or sg.acteur_id),
-            )
+        if not sg.suggestions_can_be_applied_to_correction():
+            continue
+        target_fk_id = (
+            sg.revision_acteur_id
+            or sg.acteur_id
+            or sg.get_identifiant_unique_from_suggestion_unitaires()
+        )
+        if not target_fk_id:
+            continue
+        _update_or_copy_acteur_suggestions_to_target(
+            sg,
+            target_modele="RevisionActeur",
+            target_fk_field="revision_acteur_id",
+            target_fk_id=target_fk_id,
+        )

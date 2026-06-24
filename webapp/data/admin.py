@@ -250,17 +250,27 @@ class SuggestionUnitaireInline(admin.TabularInline):
     can_view = True
 
 
+SUGGESTION_TASK_ASYNC_THRESHOLD = 1000
+
+
 @admin.action(description="[SOURCE] Appliquer les suggestions au parent")
 def apply_suggestions_to_parent(
     self, request, queryset: QuerySet[SuggestionGroupe]
 ) -> None:
     ids = list(queryset.values_list("id", flat=True))
-    apply_suggestions_to_parent_task.enqueue(ids)
-    self.message_user(
-        request,
-        f"Les {len(ids)} suggestions sélectionnées sont en cours d'application "
-        "en arrière-plan.",
-    )
+    if len(ids) < SUGGESTION_TASK_ASYNC_THRESHOLD:
+        apply_suggestions_to_parent_task.call(ids)
+        self.message_user(
+            request,
+            f"Les {len(ids)} suggestions sélectionnées ont été appliquées au parent.",
+        )
+    else:
+        apply_suggestions_to_parent_task.enqueue(ids)
+        self.message_user(
+            request,
+            f"Les {len(ids)} suggestions sélectionnées sont en cours d'application "
+            "en arrière-plan.",
+        )
 
 
 @admin.action(
@@ -268,12 +278,20 @@ def apply_suggestions_to_parent(
 )
 def apply_suggestions_to_correction(self, request, queryset):
     ids = list(queryset.values_list("id", flat=True))
-    apply_suggestions_to_correction_task.enqueue(ids)
-    self.message_user(
-        request,
-        f"Les {len(ids)} suggestions sélectionnées sont en cours d'application "
-        "en arrière-plan.",
-    )
+    if len(ids) < SUGGESTION_TASK_ASYNC_THRESHOLD:
+        apply_suggestions_to_correction_task.call(ids)
+        self.message_user(
+            request,
+            f"Les {len(ids)} suggestions sélectionnées ont été appliquées "
+            "à la correction de l'acteur.",
+        )
+    else:
+        apply_suggestions_to_correction_task.enqueue(ids)
+        self.message_user(
+            request,
+            f"Les {len(ids)} suggestions sélectionnées sont en cours d'application "
+            "en arrière-plan.",
+        )
 
 
 class HasSuggestionUnitaireWithChampField(StrField):
