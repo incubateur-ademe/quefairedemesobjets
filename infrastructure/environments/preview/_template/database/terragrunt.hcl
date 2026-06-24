@@ -22,6 +22,7 @@ dependency "preprod_database" {
 locals {
   pr_number = get_env("PR_NUMBER")
   image_tag = get_env("IMAGE_TAG")
+  clear_db  = get_env("CLEAR_DB", "false") == "true"
 }
 
 inputs = {
@@ -33,6 +34,7 @@ inputs = {
 
   sample_db_uri = get_env("SAMPLE_DB_URI")
   image_tag     = local.image_tag
+  clear_db      = local.clear_db
 
   create_extensions_script_path = abspath("${get_terragrunt_dir()}/../../../../../scripts/sql/create_extensions.sql")
 }

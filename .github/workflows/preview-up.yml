@@ -34,6 +34,7 @@ jobs:
       pr_number: ${{ steps.out.outputs.pr_number }}
       sha: ${{ steps.out.outputs.sha }}
       image_tag: ${{ steps.out.outputs.image_tag }}
+      clear_db: ${{ steps.out.outputs.clear_db }}
     steps:
       - id: out
         env:
@@ -43,13 +44,24 @@ jobs:
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             PR_NUMBER="${{ inputs.pr_number }}"
             SHA=$(gh api "repos/${{ github.repository }}/pulls/${PR_NUMBER}" --jq .head.sha)
+            LABELS=$(gh api "repos/${{ github.repository }}/pulls/${PR_NUMBER}" --jq '.labels[].name')
           else
             PR_NUMBER="${{ github.event.pull_request.number }}"
             SHA="${{ github.event.pull_request.head.sha }}"
+            LABELS="${{ toJSON(github.event.pull_request.labels.*.name) }}"
           fi
-          echo "pr_number=$PR_NUMBER"               >> "$GITHUB_OUTPUT"
-          echo "sha=$SHA"                           >> "$GITHUB_OUTPUT"
-          echo "image_tag=pr-${PR_NUMBER}-${SHA:0:7}" >> "$GITHUB_OUTPUT"
+
+          # Check for the preview:clear-db label
+          if echo "$LABELS" | grep -q 'preview:clear-db'; then
+            CLEAR_DB="true"
+          else
+            CLEAR_DB="false"
+          fi
+
+          echo "pr_number=$PR_NUMBER"                    >> "$GITHUB_OUTPUT"
+          echo "sha=$SHA"                                >> "$GITHUB_OUTPUT"
+          echo "image_tag=pr-${PR_NUMBER}-${SHA:0:7}"    >> "$GITHUB_OUTPUT"
+          echo "clear_db=$CLEAR_DB"                      >> "$GITHUB_OUTPUT"
 
   build:
     name: 🐳 Build webapp image
@@ -72,6 +84,7 @@ jobs:
       image_tag: ${{ needs.resolve.outputs.image_tag }}
       environment: preview
       ref: ${{ needs.resolve.outputs.sha }}
+      clear_db: ${{ needs.resolve.outputs.clear_db }}
 
   sync-media:
     name: 🖼️ Sync media from production

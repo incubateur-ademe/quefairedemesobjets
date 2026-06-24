@@ -28,3 +28,9 @@ variable "image_tag" {
   description = "Image tag du déploiement (pr-<n>-<sha>) — change à chaque push pour forcer un re-seed"
   type        = string
 }
+
+variable "clear_db" {
+  description = "When true, re-seed the database on every apply (controlled by the preview:clear-db PR label)"
+  type        = bool
+  default     = false
+}

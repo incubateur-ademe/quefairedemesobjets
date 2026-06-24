@@ -26,6 +26,11 @@ on:
         type: string
         required: false
         default: ""
+      clear_db:
+        description: "Whether to clear and re-seed the database (e.g. when preview:clear-db label is present)"
+        type: string
+        required: false
+        default: "false"
     outputs:
       endpoint:
         description: "Public URL of the preview container (apply only)"
@@ -63,6 +68,7 @@ jobs:
       IMAGE_TAG: ${{ inputs.image_tag }}
       PREVIEW_SECRET_KEY: ${{ secrets.PREVIEW_SECRET_KEY }}
       SAMPLE_DB_URI: ${{ secrets.SAMPLE_DB_URI }}
+      CLEAR_DB: ${{ inputs.clear_db }}
 
       TG_NON_INTERACTIVE: "true"
 
