@@ -17,6 +17,72 @@ jobs:
       image_tag: ${{ inputs.tag_name }}
       environment: ${{ inputs.environment }}
 
+  # Check that no DAG runs are active before redeploying the scheduler.
+  # A redeploy while a DAG is running would cause that run to abort midway,
+  # potentially leaving data in an inconsistent state.
+  check_no_active_dag_runs:
+    name: 🛑 Check no active DAG runs
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: ${{ inputs.environment }}
+    env:
+      AIRFLOW_BASE_URL: ${{ secrets.AIRFLOW_BASE_URL }}
+      AIRFLOW_USERNAME: ${{ secrets.AIRFLOW_USERNAME }}
+      AIRFLOW_PASSWORD: ${{ secrets.AIRFLOW_PASSWORD }}
+    steps:
+      - name: Check required secrets
+        run: |
+          if [ -z "$AIRFLOW_BASE_URL" ]; then
+            echo "::error::Missing secret AIRFLOW_BASE_URL (e.g. https://airflow.example.com)"
+            exit 1
+          fi
+          if [ -z "$AIRFLOW_USERNAME" ]; then
+            echo "::error::Missing secret AIRFLOW_USERNAME"
+            exit 1
+          fi
+          if [ -z "$AIRFLOW_PASSWORD" ]; then
+            echo "::error::Missing secret AIRFLOW_PASSWORD"
+            exit 1
+          fi
+
+      - name: Wait for active DAG runs to finish
+        run: |
+          ACTIVE_STATES='["running","queued","scheduled","deferred","restarting","up_for_retry","up_for_reschedule"]'
+
+          for attempt in $(seq 1 30); do
+            echo "--- Attempt $attempt/30 ---"
+
+            HTTP_RESPONSE=$(curl -s -w "\n%{http_code}" \
+              -u "$AIRFLOW_USERNAME:$AIRFLOW_PASSWORD" \
+              "$AIRFLOW_BASE_URL/api/v1/dags/~/dagRuns?state=running&state=queued&state=scheduled&state=deferred&state=restarting&state=up_for_retry&state=up_for_reschedule&limit=1")
+
+            HTTP_CODE=$(echo "$HTTP_RESPONSE" | tail -1)
+            BODY=$(echo "$HTTP_RESPONSE" | sed '$d')
+
+            if [ "$HTTP_CODE" != "200" ]; then
+              echo "::warning::Airflow API returned HTTP $HTTP_CODE — can't check DAG runs, proceeding"
+              echo "Response: $BODY"
+              exit 0
+            fi
+
+            TOTAL_ENTRIES=$(echo "$BODY" | jq -r '.total_entries // 0')
+
+            if [ "$TOTAL_ENTRIES" -eq 0 ]; then
+              echo "✅ No active DAG runs. Proceeding with deployment."
+              exit 0
+            fi
+
+            echo "⏳ $TOTAL_ENTRIES DAG run(s) still active. Waiting 30s..."
+            sleep 30
+          done
+
+          echo "::error::Timed out waiting for DAG runs to finish after 15 minutes."
+          echo "Active runs:"
+          curl -s -u "$AIRFLOW_USERNAME:$AIRFLOW_PASSWORD" \
+            "$AIRFLOW_BASE_URL/api/v1/dags/~/dagRuns?state=running&state=queued&state=scheduled&limit=50" \
+            | jq -r '(.dag_runs // [])[] | "\(.dag_id) — \(.state) — started \(.start_date)"'
+          exit 1
+
   # Job which retrieves the container IDs from the environment
   # Approbation is done once here
   get_container_ids:
@@ -34,6 +100,7 @@ jobs:
           echo "scheduler_id=${{ vars.SCALEWAY_AIRFLOW_SCHEDULER_CONTAINER_ID }}" >> $GITHUB_OUTPUT
           echo "webserver_id=${{ vars.SCALEWAY_AIRFLOW_WEBSERVER_CONTAINER_ID }}" >> $GITHUB_OUTPUT
           echo "dag_processor_id=${{ vars.SCALEWAY_AIRFLOW_DAG_PROCESSOR_CONTAINER_ID }}" >> $GITHUB_OUTPUT
+    needs: [airflow_docker, check_no_active_dag_runs]
 
   deploy_scaleway_scheduler:
     name: 🟣⏳ Scaleway Airflow scheduler
@@ -66,4 +133,3 @@ jobs:
 # code scanning alerts
 permissions:
   contents: read
-
