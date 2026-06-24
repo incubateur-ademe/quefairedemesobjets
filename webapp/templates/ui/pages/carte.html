@@ -30,14 +30,11 @@
         map:updateBbox->search-solution-form#updateBboxInput
         search-solution-form:captureInteraction->analytics#captureInteractionWithMap"
         class="
+        carte-wrapper
         qf-rounded-lg qf-border qf-border-solid qf-border-grey-900
         qf-group
         {% if not mode_liste %}
-          {% if in_modal %}
-            qf-h-[calc(var(--modal-max-height)-65px)]
-          {% else %}
-            qf-h-[660px]
-          {% endif %}
+          qf-h-[660px]
           qf-min-h-full qf-overflow-hidden
         {% else %}qf-h-full{% endif %}"
         qf-m-0
