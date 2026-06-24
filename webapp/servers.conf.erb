@@ -105,9 +105,7 @@ server {
 
         proxy_set_header Host $http_host;
         add_header X-Cache-Status $upstream_cache_status always;
-<% if ENV["ENVIRONMENT"] != "production" %>
         add_header X-Robots-Tag "noindex, nofollow" always;
-<% end %>
     }
 
     location / {
