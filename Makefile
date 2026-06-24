@@ -244,14 +244,14 @@ dump-sample:
 load-prod-dump:
 	@DUMP_FILE=$$(find tmpbackup-prod -type f -name "*.custom" -print -quit); \
 	psql -d '$(DB_URL)' -f scripts/sql/create_extensions.sql && \
-	pg_restore -d '$(DB_URL)' --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
+	pg_restore -d '$(DB_URL)' --schema=public --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
 
 .SILENT:
 .PHONY: load-preprod-dump
 load-preprod-dump:
 	@DUMP_FILE=$$(find tmpbackup-preprod -type f -name "*.custom" -print -quit); \
 	psql -d '$(DB_URL)' -f scripts/sql/create_extensions.sql && \
-	pg_restore -d '$(DB_URL)' --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
+	pg_restore -d '$(DB_URL)' --schema=public --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
 
 .SILENT:
 .PHONY: load-sample-dump
@@ -260,7 +260,7 @@ load-sample-dump:
 	[ -f "$$DUMP_FILE" ] || DUMP_FILE=$$(find tmpbackup-sample -type f -name "*.custom" -print -quit); \
 	[ -n "$$DUMP_FILE" ] || { echo "No sample dump found"; exit 1; }; \
 	psql -d '$(SAMPLE_DB_URL)' -f scripts/sql/create_extensions.sql && \
-	pg_restore -d '$(SAMPLE_DB_URL)' --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
+	pg_restore -d '$(SAMPLE_DB_URL)' --schema=public --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
 
 .PHONY: db-restore-local-from-prod
 db-restore-local-from-prod:
