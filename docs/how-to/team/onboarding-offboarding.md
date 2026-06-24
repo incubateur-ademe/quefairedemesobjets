@@ -25,35 +25,30 @@ Légende :
 - **Read** : lecture seule.
 - **—** : pas d'accès par défaut (à ouvrir à la demande si besoin justifié).
 
-| Accès / Service                                                                                       | DA                    | DEV                    | PO                     | COACH     | BIZ                    |
-| ----------------------------------------------------------------------------------------------------- | --------------------- | ---------------------- | ---------------------- | --------- | ---------------------- |
-| **GitHub** — org `incubateur-ademe`, repo `quefairedemesobjets`                                       | Read                  | Write/Maintain         | Read                   | —         | —                      |
-| **GitHub** — Environments `preprod` / `prod` (secrets CI)                                             | —                     | Admin                  | —                      | —         | —                      |
-| **GitHub** — Discussions / Issues                                                                     | Read                  | Write                  | Write                  | Read      | Write                  |
-| **Scalingo** — applications webapp (`preprod`, `prod`)                                                | —                     | Collaborator           | —                      | —         | —                      |
-| **Scaleway** — projet `longuevieauxobjets` (IAM)                                                      | Read (Warehouse)      | Admin                  | —                      | —         | —                      |
-| **DB Webapp** `lvao-{env}-webapp` (PostgreSQL)                                                        | —                     | Admin                  | —                      | —         | —                      |
-| **DB Warehouse** `lvao-{env}-warehouse` (PostgreSQL)                                                  | Read                  | Admin                  | —                      | —         | —                      |
-| **DB Airflow** `lvao-{env}-airflow` (PostgreSQL)                                                      | —                     | Admin                  | —                      | —         | —                      |
-| **Django Admin** (`/admin/`)                                                                          | —                     | Superuser              | Write (limité)         | —         | —                      |
-| **Wagtail CMS** (`/cms/`)                                                                             | —                     | Superuser              | Editor                 | —         | Editor (selon contenu) |
-| **Back-office données** (`/data/`)                                                                    | Read                  | Write                  | Read                   | —         | —                      |
-| **Airflow UI** (`webserver`)                                                                          | Read (Viewer)         | Admin                  | —                      | —         | —                      |
-| **Scaleway Container Registry** `ns-qfdmo`                                                            | —                     | Push/Pull              | —                      | —         | —                      |
-| **Scaleway Object Storage** (`qfdmo-interface`, `lvao-opendata`…)                                     | Read (opendata)       | Admin                  | —                      | —         | Read (opendata)        |
-| **OpenTofu / Terragrunt** (`terraform.tfvars`, bucket `lvao-terraform-state`)                         | —                     | Admin                  | —                      | —         | —                      |
-| **Sentry** (beta.gouv — projet `que-faire-de-mes-objets`)                                             | Read                  | Admin                  | Read                   | —         | —                      |
-| **PostHog EU**                                                                                        | Read                  | Admin                  | Read                   | —         | Read                   |
-| **Matomo** (`stats.beta.gouv.fr`)                                                                     | Read                  | Read                   | Read                   | Read      | Read                   |
-| **Scaleway Cockpit (Grafana)**                                                                        | Read                  | Admin                  | —                      | —         | —                      |
-| **Mattermost** — canal `lvao-tour-de-controle` (alertes deploy)                                       | Membre                | Membre                 | Membre                 | —         | —                      |
-| **Mattermost** — canal équipe / produit                                                               | Membre                | Membre                 | Membre                 | Membre    | Membre                 |
-| **Notion** — workspace équipe (specs, formulaire contact)                                             | Membre                | Membre                 | Admin                  | Membre    | Membre                 |
-| **Tally.so** — formulaires hébergés                                                                   | —                     | Admin                  | Editor                 | —         | Editor                 |
-| **Coffre de secrets** (variables sensibles, voir [`secrets.md`](../../reference/security/secrets.md)) | —                     | Accès complet          | —                      | —         | —                      |
-| **Documentation** (GitHub Pages — publié via CI `publish-docs`)                                       | Read (édition via PR) | Write (édition via PR) | Write (édition via PR) | Read      | Read                   |
-| **Dashlord ADEME** ([dashlord.incubateur.ademe.fr](https://dashlord.incubateur.ademe.fr/))            | Read                  | Read                   | Read                   | Read      | Read                   |
-| **Outils internes ADEME** (intranet, accès bureaux, badges)                                           | À définir             | À définir              | À définir              | À définir | À définir              |
+| Accès / Service                                                                                       | DA                     | DEV                    | PO                     | COACH  | BIZ    |
+| ----------------------------------------------------------------------------------------------------- | ---------------------- | ---------------------- | ---------------------- | ------ | ------ |
+| **GitHub** — org `incubateur-ademe`, repo `quefairedemesobjets`                                       | Read                   | Write/Maintain         | Read                   | —      | —      |
+| **GitHub** — Environments `preprod` / `prod` (secrets CI)                                             | —                      | Admin                  | —                      | —      | —      |
+| **GitHub** — Discussions / Issues                                                                     | Write                  | Write                  | Write                  | Write  | Write  |
+| **Scalingo** — applications webapp (`preprod`, `prod`)                                                | —                      | Collaborator           | —                      | —      | —      |
+| **Scaleway** — projet `longuevieauxobjets` (IAM)                                                      | Read (Warehouse)       | Admin                  | —                      | —      | —      |
+| **Django Admin** (`/admin/`)                                                                          | Superuser              | Superuser              | —                      | —      | —      |
+| **Wagtail CMS** (`/cms/`)                                                                             | —                      | Superuser              | Editor                 | —      | Editor |
+| **Airflow UI** (`webserver`)                                                                          | Admin                  | Admin                  | —                      | —      | —      |
+| **Scaleway Container Registry** `ns-qfdmo`                                                            | —                      | Push/Pull              | —                      | —      | —      |
+| **Scaleway Object Storage** (`qfdmo-interface`, `lvao-opendata`…)                                     | Read (opendata)        | Admin                  | —                      | —      | —      |
+| **OpenTofu / Terragrunt** (`terraform.tfvars`, bucket `lvao-terraform-state`)                         | —                      | Admin                  | —                      | —      | —      |
+| **Sentry** (beta.gouv — projet `que-faire-de-mes-objets`)                                             | Read                   | Admin                  | Read                   | —      | —      |
+| **PostHog EU**                                                                                        | Read                   | Admin                  | Read                   | —      | Read   |
+| **Matomo** (`stats.beta.gouv.fr`)                                                                     | Read                   | Read                   | Read                   | Read   | Read   |
+| **Scaleway Cockpit (Grafana)**                                                                        | Read                   | Admin                  | —                      | —      | —      |
+| **Mattermost** — canal `lvao-tour-de-controle` (alertes deploy)                                       | Membre                 | Membre                 | Membre                 | —      | —      |
+| **Mattermost** — canal équipe / produit                                                               | Membre                 | Membre                 | Membre                 | Membre | Membre |
+| **Notion** — workspace équipe (specs, formulaire contact)                                             | Membre                 | Membre                 | Admin                  | Membre | Membre |
+| **Tally.so** — formulaires hébergés                                                                   | —                      | Admin                  | Editor                 | —      | Editor |
+| **Coffre de secrets** (variables sensibles, voir [`secrets.md`](../../reference/security/secrets.md)) | —                      | Accès complet          | —                      | —      | —      |
+| **Documentation** (GitHub Pages — publié via CI `publish-docs`)                                       | Write (édition via PR) | Write (édition via PR) | Write (édition via PR) | Read   | Read   |
+| **Dashlord ADEME** ([dashlord.incubateur.ademe.fr](https://dashlord.incubateur.ademe.fr/))            | Read                   | Read                   | Read                   | Read   | Read   |
 
 ## Procédure d'onboarding
 
