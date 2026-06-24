@@ -49,10 +49,10 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["core", "data", "dsfr_hacks", "infotri", "qfdmd", "qfdmo", "search", "stats"]
+packages = ["core", "data", "dsfr_hacks", "infotri", "qfdmd", "qfdmo", "search", "settings", "stats"]
 
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "core.test_settings"
+DJANGO_SETTINGS_MODULE = "settings.test"
 env_files = [".env.template"]
 addopts = "--reuse-db --ignore=scripts"
 filterwarnings = [
