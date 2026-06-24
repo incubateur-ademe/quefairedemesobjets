@@ -126,7 +126,7 @@ resource "null_resource" "seed_from_sample" {
       # Uses the Docker image that was just built; only runs when the seed
       # runs (clear_db=true or SAMPLE_DB_URI changed).
       echo "Running Django management commands..."
-      IMAGE="rg.fr-par.scw.cloud/ns-qfdmo/webapp:${IMAGE_TAG}"
+      IMAGE="rg.fr-par.scw.cloud/ns-qfdmo/webapp:$${IMAGE_TAG}"
       docker pull "$IMAGE"
       docker run --rm \
         -e DATABASE_URL="$PREVIEW_DB_URL" \
