@@ -72,6 +72,32 @@ jobs:
       environment: preview
       ref: ${{ needs.resolve.outputs.sha }}
 
+  sync-media:
+    name: 🖼️ Sync media from production
+    needs: [resolve, apply]
+    runs-on: ubuntu-latest
+    environment: preview
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.SCW_ACCESS_KEY }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.SCW_SECRET_KEY }}
+      AWS_DEFAULT_REGION: fr-par
+    steps:
+      - name: Sync prod bucket → preview bucket
+        run: |
+          set -euo pipefail
+          PROD_BUCKET="qfdmo-interface"
+          PREVIEW_BUCKET="lvao-pr-${{ needs.resolve.outputs.pr_number }}-media"
+          ENDPOINT="https://s3.fr-par.scw.cloud"
+
+          echo "Syncing s3://${PROD_BUCKET} → s3://${PREVIEW_BUCKET}"
+          aws s3 sync "s3://${PROD_BUCKET}" "s3://${PREVIEW_BUCKET}" \
+            --endpoint-url "${ENDPOINT}" \
+            --no-progress \
+            --delete \
+            --size-only 2>&1 | tail -20
+
+          echo "Media sync complete."
+
   comment:
     name: 💬 Sticky comment + deployment
     needs: [resolve, apply]
