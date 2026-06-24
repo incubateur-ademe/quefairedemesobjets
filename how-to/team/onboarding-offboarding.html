@@ -424,10 +424,10 @@
 <td><p>—</p></td>
 </tr>
 <tr class="row-even"><td><p><strong>GitHub</strong> — Discussions / Issues</p></td>
-<td><p>Read</p></td>
 <td><p>Write</p></td>
 <td><p>Write</p></td>
-<td><p>Read</p></td>
+<td><p>Write</p></td>
+<td><p>Write</p></td>
 <td><p>Write</p></td>
 </tr>
 <tr class="row-odd"><td><p><strong>Scalingo</strong> — applications webapp (<code class="docutils literal notranslate"><span class="pre">preprod</span></code>, <code class="docutils literal notranslate"><span class="pre">prod</span></code>)</p></td>
@@ -444,50 +444,22 @@
 <td><p>—</p></td>
 <td><p>—</p></td>
 </tr>
-<tr class="row-odd"><td><p><strong>DB Webapp</strong> <code class="docutils literal notranslate"><span class="pre">lvao-{env}-webapp</span></code> (PostgreSQL)</p></td>
-<td><p>—</p></td>
-<td><p>Admin</p></td>
-<td><p>—</p></td>
-<td><p>—</p></td>
-<td><p>—</p></td>
-</tr>
-<tr class="row-even"><td><p><strong>DB Warehouse</strong> <code class="docutils literal notranslate"><span class="pre">lvao-{env}-warehouse</span></code> (PostgreSQL)</p></td>
-<td><p>Read</p></td>
-<td><p>Admin</p></td>
-<td><p>—</p></td>
-<td><p>—</p></td>
-<td><p>—</p></td>
-</tr>
-<tr class="row-odd"><td><p><strong>DB Airflow</strong> <code class="docutils literal notranslate"><span class="pre">lvao-{env}-airflow</span></code> (PostgreSQL)</p></td>
-<td><p>—</p></td>
-<td><p>Admin</p></td>
-<td><p>—</p></td>
-<td><p>—</p></td>
-<td><p>—</p></td>
-</tr>
-<tr class="row-even"><td><p><strong>Django Admin</strong> (<code class="docutils literal notranslate"><span class="pre">/admin/</span></code>)</p></td>
-<td><p>—</p></td>
+<tr class="row-odd"><td><p><strong>Django Admin</strong> (<code class="docutils literal notranslate"><span class="pre">/admin/</span></code>)</p></td>
 <td><p>Superuser</p></td>
-<td><p>Write (limité)</p></td>
+<td><p>Superuser</p></td>
+<td><p>—</p></td>
 <td><p>—</p></td>
 <td><p>—</p></td>
 </tr>
-<tr class="row-odd"><td><p><strong>Wagtail CMS</strong> (<code class="docutils literal notranslate"><span class="pre">/cms/</span></code>)</p></td>
+<tr class="row-even"><td><p><strong>Wagtail CMS</strong> (<code class="docutils literal notranslate"><span class="pre">/cms/</span></code>)</p></td>
 <td><p>—</p></td>
 <td><p>Superuser</p></td>
 <td><p>Editor</p></td>
 <td><p>—</p></td>
-<td><p>Editor (selon contenu)</p></td>
-</tr>
-<tr class="row-even"><td><p><strong>Back-office données</strong> (<code class="docutils literal notranslate"><span class="pre">/data/</span></code>)</p></td>
-<td><p>Read</p></td>
-<td><p>Write</p></td>
-<td><p>Read</p></td>
-<td><p>—</p></td>
-<td><p>—</p></td>
+<td><p>Editor</p></td>
 </tr>
 <tr class="row-odd"><td><p><strong>Airflow UI</strong> (<code class="docutils literal notranslate"><span class="pre">webserver</span></code>)</p></td>
-<td><p>Read (Viewer)</p></td>
+<td><p>Admin</p></td>
 <td><p>Admin</p></td>
 <td><p>—</p></td>
 <td><p>—</p></td>
@@ -505,7 +477,7 @@
 <td><p>Admin</p></td>
 <td><p>—</p></td>
 <td><p>—</p></td>
-<td><p>Read (opendata)</p></td>
+<td><p>—</p></td>
 </tr>
 <tr class="row-even"><td><p><strong>OpenTofu / Terragrunt</strong> (<code class="docutils literal notranslate"><span class="pre">terraform.tfvars</span></code>, bucket <code class="docutils literal notranslate"><span class="pre">lvao-terraform-state</span></code>)</p></td>
 <td><p>—</p></td>
@@ -578,7 +550,7 @@
 <td><p>—</p></td>
 </tr>
 <tr class="row-even"><td><p><strong>Documentation</strong> (GitHub Pages — publié via CI <code class="docutils literal notranslate"><span class="pre">publish-docs</span></code>)</p></td>
-<td><p>Read (édition via PR)</p></td>
+<td><p>Write (édition via PR)</p></td>
 <td><p>Write (édition via PR)</p></td>
 <td><p>Write (édition via PR)</p></td>
 <td><p>Read</p></td>
@@ -590,13 +562,6 @@
 <td><p>Read</p></td>
 <td><p>Read</p></td>
 <td><p>Read</p></td>
-</tr>
-<tr class="row-even"><td><p><strong>Outils internes ADEME</strong> (intranet, accès bureaux, badges)</p></td>
-<td><p>À définir</p></td>
-<td><p>À définir</p></td>
-<td><p>À définir</p></td>
-<td><p>À définir</p></td>
-<td><p>À définir</p></td>
 </tr>
 </tbody>
 </table>
