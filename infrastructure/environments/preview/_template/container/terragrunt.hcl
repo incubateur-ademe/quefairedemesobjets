@@ -71,4 +71,7 @@ inputs = {
   AWS_SECRET_ACCESS_KEY   = get_env("SCW_SECRET_KEY")
   AWS_STORAGE_BUCKET_NAME = dependency.preview_object_storage.outputs.bucket_name
   AWS_S3_ENDPOINT_URL     = dependency.preview_object_storage.outputs.endpoint_url
+
+  # Keep the container warm for 1h after the last request to avoid cold starts.
+  timeout = 3600
 }
