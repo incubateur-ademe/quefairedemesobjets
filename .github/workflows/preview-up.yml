@@ -113,15 +113,17 @@ jobs:
             const url = "${{ needs.apply.outputs.endpoint }}";
             const sha = "${{ needs.resolve.outputs.sha }}";
             const shortSha = sha.slice(0, 7);
-            const env = `preview-pr-${prNumber}`;
             const marker = "<!-- preview-env -->";
 
             // --- Create GitHub Deployment (visible in Deployments tab) ---
+            // All previews share a single "preview" environment, tagged with
+            // `task` so we can find the right one to mark inactive on destroy.
             const { data: deployment } = await github.rest.repos.createDeployment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               ref: sha,
-              environment: env,
+              environment: "preview",
+              task: `pr-${prNumber}`,
               auto_merge: false,
               required_contexts: [],
               description: `Preview environment for PR #${prNumber} (${shortSha})`,

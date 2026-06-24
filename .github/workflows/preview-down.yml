@@ -74,12 +74,12 @@ jobs:
         with:
           script: |
             const prNumber = Number("${{ needs.resolve.outputs.pr_number }}");
-            const env = `preview-pr-${prNumber}`;
 
             const { data: deployments } = await github.rest.repos.listDeployments({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              environment: env,
+              environment: "preview",
+              task: `pr-${prNumber}`,
               per_page: 10,
             });
 
