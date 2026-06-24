@@ -137,7 +137,7 @@ resource "null_resource" "seed_from_sample" {
           python manage.py createcachetable
           python manage.py migrate
           python manage.py enable_unaccent
-          python manage.py enable_trigram
+          python manage.py enable_trigram || true
           python manage.py purge_orphan_searchterm_index || true
           echo 'Management commands complete.'
         "

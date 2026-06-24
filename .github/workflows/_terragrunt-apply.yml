@@ -129,6 +129,7 @@ jobs:
       - name: Terragrunt init + ${{ inputs.command }}
         working-directory: infrastructure/environments/preview/pr-${{ inputs.pr_number }}
         run: |
+          set -euo pipefail
           CMD="${{ inputs.command }}"
           terragrunt run-all init --terragrunt-non-interactive 2>&1 | tee init.log
           terragrunt run-all "$CMD" --terragrunt-non-interactive --auto-approve 2>&1 | tee apply.log
