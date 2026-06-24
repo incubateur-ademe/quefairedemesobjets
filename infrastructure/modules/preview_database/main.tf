@@ -92,6 +92,7 @@ resource "null_resource" "seed_from_sample" {
       # If the sample DB is unreachable, warn but continue — previews can
       # still serve as infrastructure smoke tests without seeded data.
       DUMP_FILE="$(mktemp)"
+      RESTORE_LOG="$(mktemp)"
       if pg_dump -Fc --no-acl --no-owner --no-privileges "$SAMPLE_DB_URI" > "$DUMP_FILE" 2>/dev/null; then
         # --clean emits DROP/ALTER for objects it assumes exist; against
         # the freshly emptied database those pre-drops fail with exit 1.
@@ -99,16 +100,31 @@ resource "null_resource" "seed_from_sample" {
         set +e
         pg_restore -d "$PREVIEW_DB_URL" \
             --schema=public --clean --no-acl --no-owner --no-privileges \
-            "$DUMP_FILE" 2>&1
+            "$DUMP_FILE" > "$RESTORE_LOG" 2>&1
         RESTORE_RC=$?
         set -e
+
+        # Show restore errors (first 30 lines)
+        if grep -i 'error' "$RESTORE_LOG" | head -30; then
+          echo "--- pg_restore errors above (may be benign DROP/ALTER on fresh DB) ---"
+        fi
+
         if [ "$RESTORE_RC" -gt 1 ]; then
           echo "pg_restore failed with exit code $RESTORE_RC" >&2
           exit "$RESTORE_RC"
         fi
-        rm -f "$DUMP_FILE"
+        rm -f "$DUMP_FILE" "$RESTORE_LOG"
 
-        # Verify that data was actually restored.
+        # Verify that data was actually restored — show row counts.
+        echo "Table row counts:"
+        psql "$PREVIEW_DB_URL" -t -c "
+          SELECT tablename, n_live_tup
+          FROM pg_stat_user_tables
+          WHERE schemaname = 'public'
+            AND n_live_tup > 0
+          ORDER BY n_live_tup DESC
+          LIMIT 30;
+        "
         TABLE_COUNT="$(psql "$PREVIEW_DB_URL" -t -c \
           "SELECT count(*) FROM pg_tables WHERE schemaname='public'")"
         if [ "$${TABLE_COUNT:-0}" -eq 0 ]; then
@@ -146,5 +162,6 @@ resource "null_resource" "seed_from_sample" {
   triggers = {
     image_tag      = var.clear_db ? var.image_tag : "reuse"
     sample_db_hash = md5(var.sample_db_uri)
+    seed_version   = "2"  # bump to force re-seed (e.g. when changing restore logic)
   }
 }
