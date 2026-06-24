@@ -13,10 +13,14 @@ import { Controller } from "@hotwired/stimulus"
  * the query MATCHES, and restored to its original position when the query
  * no longer matches. Useful for moving content out of a modal on desktop.
  *
+ * With `closeModal`: when content is moved to the target, the closest
+ * ancestor `<dialog class="fr-modal">` is closed via the DSFR modal API.
+ *
  * Usage with target:
  * <div data-controller="responsive"
  *      data-responsive-media-query-value="(min-width: 768px)"
- *      data-responsive-target-value="#desktop-container">
+ *      data-responsive-target-value="#desktop-container"
+ *      data-responsive-close-modal-value="true">
  *   Content (starts here on mobile, moves to #desktop-container on desktop)
  * </div>
  */
@@ -24,10 +28,12 @@ export default class extends Controller {
   static values = {
     mediaQuery: String,
     target: { type: String, default: "" },
+    closeModal: { type: Boolean, default: false },
   }
 
   declare mediaQueryValue: string
   declare targetValue: string
+  declare closeModalValue: boolean
 
   #mediaQueryList: MediaQueryList | null = null
   #boundHandleMediaChange: (() => void) | null = null
@@ -87,6 +93,10 @@ export default class extends Controller {
     while (this.element.firstChild) {
       targetEl.appendChild(this.element.firstChild)
     }
+
+    if (this.closeModalValue) {
+      this.#closeParentModal()
+    }
   }
 
   #restoreFromTarget() {
@@ -103,6 +113,21 @@ export default class extends Controller {
 
   #resolveTarget(): HTMLElement | null {
     return document.querySelector(this.targetValue)
+  }
+
+  #closeParentModal() {
+    const dialog = this.element.closest<HTMLDialogElement>("dialog.fr-modal")
+    if (!dialog) return
+
+    // Use DSFR API if available; otherwise native dialog.close()
+    const dsfr = (window as Record<string, unknown>).dsfr as
+      | ((el: Element) => { modal: { conceal: () => void } })
+      | undefined
+    if (dsfr) {
+      dsfr(dialog).modal.conceal()
+    } else {
+      dialog.close()
+    }
   }
 
   // ── Legacy mode (body-end hidden wrapper) ────────────────────
