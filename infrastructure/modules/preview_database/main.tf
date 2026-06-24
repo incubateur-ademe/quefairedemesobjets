@@ -61,6 +61,7 @@ resource "null_resource" "seed_from_sample" {
       EXTENSIONS_SCRIPT            = var.create_extensions_script_path
       WAGTAIL_FRENCH_CONFIG_SCRIPT = var.create_wagtail_french_config_script_path
       IMAGE_TAG                    = var.image_tag
+      SAMPLE_DB_URI                = var.sample_db_uri
     }
     command = <<-EOT
       set -euo pipefail
