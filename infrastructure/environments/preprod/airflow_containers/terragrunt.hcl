@@ -28,8 +28,19 @@ dependency "database" {
   }
 }
 
+dependency "database_sample" {
+  config_path = "../database_sample"
+
+  mock_outputs_allowed_terraform_commands = ["init", "validate", "plan"]
+  mock_outputs = {
+    webapp_db_sample_username      = "mock_webapp_sample"
+    webapp_db_sample_password      = "mock_password" # pragma: allowlist secret
+    webapp_db_sample_database_name = "webapp_sample"
+  }
+}
+
 dependencies {
-  paths = ["../database", "../object_storage"]
+  paths = ["../database", "../database_sample", "../object_storage"]
 }
 
 include {
@@ -67,6 +78,7 @@ inputs = {
   AIRFLOW_CONN_WEBAPP_DB              = "postgres://${dependency.database.outputs.webapp_db_username}:${dependency.database.outputs.webapp_db_password}@${dependency.database.outputs.webapp_endpoint_ip}:${dependency.database.outputs.webapp_endpoint_port}/${dependency.database.outputs.webapp_database_name}?sslmode=require"
   DATABASE_URL                        = "postgres://${dependency.database.outputs.webapp_db_username}:${dependency.database.outputs.webapp_db_password}@${dependency.database.outputs.webapp_endpoint_ip}:${dependency.database.outputs.webapp_endpoint_port}/${dependency.database.outputs.webapp_database_name}?sslmode=require"
   DB_WAREHOUSE                        = "postgres://${dependency.database.outputs.warehouse_db_username}:${dependency.database.outputs.warehouse_db_password}@${dependency.database.outputs.warehouse_endpoint_ip}:${dependency.database.outputs.warehouse_endpoint_port}/${dependency.database.outputs.warehouse_database_name}?sslmode=require"
+  DB_WEBAPP_SAMPLE                    = "postgres://${dependency.database_sample.outputs.webapp_db_sample_username}:${dependency.database_sample.outputs.webapp_db_sample_password}@${dependency.database.outputs.webapp_endpoint_ip}:${dependency.database.outputs.webapp_endpoint_port}/${dependency.database_sample.outputs.webapp_db_sample_database_name}?sslmode=require"
   ENVIRONMENT                         = "[ENVIRONMENT]"
   POSTGRES_DB                         = "[POSTGRES_DB]"
   POSTGRES_HOST                       = dependency.database.outputs.warehouse_endpoint_ip
