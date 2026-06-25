@@ -42,19 +42,33 @@ class Command(BaseCommand):
             action=argparse.BooleanOptionalAction,
             default=True,
         )
+        parser.add_argument(
+            "--suggestion-cohorte-id",
+            type=int,
+            help="Restrict the fix to suggestions from this cohort id",
+        )
 
     def handle(self, *args, **options):
         dry_run = options["dry_run"]
         requeue = options["requeue"]
+        suggestion_cohorte_id = options["suggestion_cohorte_id"]
 
         suggestions = Suggestion.objects.filter(
             statut=SuggestionStatut.ERREUR,
             metadata__error__icontains=RECURSION_ERROR_MESSAGE,
         )
+        if suggestion_cohorte_id is not None:
+            suggestions = suggestions.filter(
+                suggestion_cohorte_id=suggestion_cohorte_id
+            )
 
         total = suggestions.count()
+        cohort_msg = (
+            f" (cohorte {suggestion_cohorte_id})" if suggestion_cohorte_id else ""
+        )
         self.stdout.write(
-            f"{total} suggestion(s) en erreur avec '{RECURSION_ERROR_MESSAGE}'"
+            f"{total} suggestion(s) en erreur avec "
+            f"'{RECURSION_ERROR_MESSAGE}'{cohort_msg}"
         )
 
         fixed_count = 0
@@ -127,9 +141,8 @@ class Command(BaseCommand):
             data = model_params.get("data")
             if not isinstance(data, dict):
                 continue
-            change_id = model_params.get("id")
             for key in ILLEGAL_PARENT_KEYS:
-                if key in data and data[key] == change_id:
+                if key in data:
                     del data[key]
                     removed += 1
         return removed
