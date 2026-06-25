@@ -9,7 +9,7 @@ from sources.tasks.business_logic.db_write_type_action_suggestions import (
     db_write_type_action_suggestions,
 )
 from utils import logging_utils as log
-from utils.db_tmp_tables import read_and_drop_temporary_table
+from utils.db_tmp_tables import drop_temporary_table, read_temporary_table
 
 logger = logging.getLogger(__name__)
 
@@ -34,9 +34,9 @@ def db_write_type_action_suggestions_wrapper(ti, dag, params) -> None:
     table_name_update = xcom_pull(ti, XCOMS.TABLE_NAME_UPDATE)
 
     # Load the DataFrames from the temporary tables
-    df_acteur_to_create = read_and_drop_temporary_table(table_name_create)
-    df_acteur_to_delete = read_and_drop_temporary_table(table_name_delete)
-    df_acteur_to_update = read_and_drop_temporary_table(table_name_update)
+    df_acteur_to_create = read_temporary_table(table_name_create)
+    df_acteur_to_delete = read_temporary_table(table_name_delete)
+    df_acteur_to_update = read_temporary_table(table_name_update)
 
     metadata_to_create = xcom_pull(ti, XCOMS.METADATA_TO_CREATE)
     metadata_to_update = xcom_pull(ti, XCOMS.METADATA_TO_UPDATE)
@@ -61,24 +61,30 @@ def db_write_type_action_suggestions_wrapper(ti, dag, params) -> None:
         and df_acteur_to_update.empty
     ):
         logger.warning("!!! Aucune suggestion à traiter pour cette source !!!")
+
         # set the task to airflow skip status
         xcom_push(ti, key=XCOMS.SKIP, value=True)
-        return
+    else:
 
-    db_write_type_action_suggestions(
-        dag_name=dag_name,
-        run_id=run_id,
-        df_acteur_to_create=df_acteur_to_create,
-        df_acteur_to_delete=df_acteur_to_delete,
-        df_acteur_to_update=df_acteur_to_update,
-        metadata_to_create={**metadata, **metadata_to_create},
-        metadata_to_update={
-            **metadata,
-            **metadata_to_update,
-            **metadata_columns_updated,
-        },
-        metadata_to_delete={**metadata, **metadata_to_delete},
-        df_log_error=df_log_error,
-        df_log_warning=df_log_warning,
-        use_legacy_suggestions=dag_config.use_legacy_suggestions,
-    )
+        db_write_type_action_suggestions(
+            dag_name=dag_name,
+            run_id=run_id,
+            df_acteur_to_create=df_acteur_to_create,
+            df_acteur_to_delete=df_acteur_to_delete,
+            df_acteur_to_update=df_acteur_to_update,
+            metadata_to_create={**metadata, **metadata_to_create},
+            metadata_to_update={
+                **metadata,
+                **metadata_to_update,
+                **metadata_columns_updated,
+            },
+            metadata_to_delete={**metadata, **metadata_to_delete},
+            df_log_error=df_log_error,
+            df_log_warning=df_log_warning,
+            use_legacy_suggestions=dag_config.use_legacy_suggestions,
+        )
+
+    # Load the DataFrames from the temporary tables
+    drop_temporary_table(table_name_create)
+    drop_temporary_table(table_name_delete)
+    drop_temporary_table(table_name_update)
