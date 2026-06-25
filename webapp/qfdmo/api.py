@@ -107,7 +107,9 @@ class ActeurSchema(ModelSchema):
     def resolve_distance(obj):
         if not obj.distance:
             return
-        return obj.distance.m
+        # SQL-annotated distances are `Distance` objects (meters via `.m`),
+        # while the carte's Python-side sorting sets a raw float.
+        return getattr(obj.distance, "m", obj.distance)
 
     class Meta:
         model = DisplayedActeur
