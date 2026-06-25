@@ -136,10 +136,15 @@ await iframe.locator('[data-testid="element"]').click();
 
 ## Exécuter les tests
 
+Pour le setup local (base de données d'échantillon, etc.), voir
+[README.md](../../reference/webapp/README.md#running-e2e-tests-locally).
+
 ### Tous les tests
 
 ```bash
-npm run test:e2e
+npm run e2e_test
+# ou, avec préparation de la base d'échantillon :
+make prepare-e2e-test-local && make e2e-test
 ```
 
 ### Un fichier spécifique

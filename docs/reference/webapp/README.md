@@ -78,6 +78,37 @@ From the **`webapp/`** directory (after `uv sync`):
 
 DAG / Airflow Python tests live in **`data-platform/`**: `cd data-platform && uv sync && make dags-test`.
 
+#### Running E2E tests locally
+
+E2E tests run against a dedicated `webapp_sample` database (kept separate from your
+dev `webapp` database) on the same Postgres container, so you don't have to mutate
+the dev data you're working with. The connection is configured by `DB_WEBAPP_SAMPLE`
+in `.env` (see `.env.template`); the dev `DATABASE_URL` is left untouched.
+
+```bash
+# 1. start the local Postgres container (from repo root)
+docker compose --profile lvao up -d
+
+# 2. from webapp/: create the sample DB (if missing), migrate, seed search index, build JS
+make prepare-e2e-test-local
+
+# 3. run the tests
+make e2e-test
+```
+
+`prepare-e2e-test-local` is idempotent for DB creation — it calls
+`manage.py create_webapp_sample_db`, which creates the `webapp_sample` database,
+role, and extensions only if they don't already exist, so steps 2-3 are the normal
+loop for iterating on tests.
+
+To start fresh, drop the sample DB and rerun step 2:
+
+```bash
+psql "$DATABASE_URL" -c "DROP DATABASE webapp_sample;"
+```
+
+See [tests_e2e.md](../../how-to/development/tests_e2e.md) for how to write new E2E tests.
+
 ## ⚠️ Important Points
 
 - Django Migrations: Always create migrations for model changes
