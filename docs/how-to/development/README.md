@@ -13,4 +13,5 @@ create_webapp_sample_db.md
 tests_e2e.md
 test_iframe_referrer.md
 secure_development.md
+promptfoo-audit.md
 ```

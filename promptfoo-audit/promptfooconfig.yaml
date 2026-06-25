@@ -1,0 +1,154 @@
+# yaml-language-server: $schema=https://promptfoo.dev/config-schema.json
+description: Audit IA — pages "Que faire de mes objets ?" (quefairedemesdechets.ademe.fr)
+
+prompts:
+  - id: file://prompts/sans-page.txt
+    label: sans-page
+  - id: file://prompts/avec-page.txt
+    label: avec-page
+
+providers:
+  - id: anthropic:messages:claude-haiku-4-5-20251001
+    config:
+      apiKey: "{{ env.ANTHROPIC_KEY }}"
+  - id: anthropic:messages:claude-sonnet-4-6
+    config:
+      apiKey: "{{ env.ANTHROPIC_KEY }}"
+  - id: mistral:mistral-large-latest
+  - id: mistral:mistral-small-latest
+  - id: google:gemini-2.5-flash
+  - id: deepseek:deepseek-chat
+  - id: openai:gpt-4o
+  - id: openai:gpt-4o-mini
+  - id: openai:o3-mini
+
+# Variables utilisées dans les prompts
+#   question : question posée par l'usager (ex. "Que faire de mes meubles abîmés ?")
+#   page     : contenu textuel de la page ADEME correspondante (fichier .txt)
+
+defaultTest:
+  options:
+    provider:
+      id: anthropic:messages:claude-sonnet-4-6
+      config:
+        apiKey: "{{ env.ANTHROPIC_KEY }}"
+  # Métadonnées par défaut appliquées à chaque test
+  metadata:
+    source: quefairedemesdechets.ademe.fr
+    eval-type: page-coverage
+
+tests:
+  - description: Meubles abîmés — solutions attendues par la page
+    metadata:
+      category: meubles
+      dispositif-clé: bonus-réparation
+    vars:
+      question: Que faire de mes meubles abimés ?
+      page: file://pages/meubles.txt
+    threshold: 0.7
+    assert:
+      - type: icontains
+        value: répar
+      - type: icontains
+        value: bonus réparation
+      - type: icontains-any
+        value:
+          - donner
+          - don
+          - association
+          - ressourcerie
+          - recyclerie
+      - type: icontains-any
+        value:
+          - point de collecte
+          - déchèterie
+          - déchetterie
+          - encombrants
+      - type: llm-rubric
+        value: >-
+          La réponse privilégie la seconde vie (réparation, don, revente) avant
+          la mise au rebut, mentionne le Bonus Réparation chez un réparateur
+          labellisé, et oriente vers les points de collecte, encombrants ou
+          déchèterie pour les meubles trop abîmés. Elle ne doit pas inventer
+          de dispositifs absents de la page.
+
+  - description: Bonus Réparation — informations générales sur le dispositif
+    metadata:
+      category: bonus-reparation
+      page-spécifique: oui
+    vars:
+      question: Qu'est-ce que le Bonus Réparation et comment en bénéficier ?
+      page: file://pages/bonus-reparation.txt
+    threshold: 0.7
+    assert:
+      - type: icontains
+        value: aide financière
+      - type: icontains
+        value: réduction
+      - type: icontains-any
+        value:
+          - 10 €
+          - 10€
+          - 65 €
+          - 65€
+      - type: icontains-any
+        value:
+          - réparateur labellisé
+          - QualiRépar
+          - QualiRepar
+          - labellisé
+      - type: icontains-any
+        value:
+          - hors garantie
+          - sous garantie
+          - garantie légale
+          - garantie commerciale
+      - type: icontains
+        value: éco-organisme
+        weight: 0.5
+      - type: llm-rubric
+        value: >-
+          La réponse explique qu'il s'agit d'une aide financière directe appliquée en caisse par un réparateur labellisé.
+          Elle mentionne les conditions (objet hors garantie, acheté en France,
+          usage normal) et la démarche simple (pas de dossier à remplir).
+          Elle ne renvoie pas vers jerepare.fr ni vers les sites des
+          éco-organismes comme des alternatives — elle s'en tient au contenu
+          de la page ADEME qui présente le dispositif.
+
+  - description: Emballages en verre — consignes de tri attendues par la page
+    metadata:
+      category: emballages
+      matière: verre
+    vars:
+      question: Que faire de mes emballages en verre ?
+      page: file://pages/emballages-verre.txt
+    threshold: 0.7
+    assert:
+      - type: icontains
+        value: verre
+      - type: icontains-any
+        value:
+          - conteneur à verre
+          - bac à verre
+          - conteneur
+      - type: icontains-any
+        value:
+          - réemployable
+          - réemploi
+          - consigne
+      - type: icontains
+        value: Léko
+        weight: 0.5
+      - type: icontains-any
+        value:
+          - ordures ménagères
+          - déchèterie
+          - déchetterie
+      - type: llm-rubric
+        value: >-
+          La réponse explique que les emballages en verre se déposent dans
+          un conteneur à verre dédié, mentionne le réemploi (bouteilles
+          consignées, bocaux réutilisables) avant le recyclage, précise que
+          les couvercles vont dans le bac de tri des emballages, et indique
+          que les autres objets en verre (vaisselle, miroirs, verre cassé)
+          vont aux ordures ménagères ou en déchèterie.
