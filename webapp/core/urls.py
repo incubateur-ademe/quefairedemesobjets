@@ -32,7 +32,7 @@ from wagtail.documents import urls as wagtaildocs_urls
 from qfdmd.models import Synonyme
 
 from .api import api
-from .views import AutocompleteSynonyme, backlink, robots_txt
+from .views import AutocompleteSynonyme, backlink, healthz, robots_txt
 
 info_dict = {
     "queryset": Synonyme.objects.filter().order_by("nom"),
@@ -83,6 +83,7 @@ urlpatterns = (
     + [
         path("admin/", admin.site.urls),
         path("api/", api.urls),
+        path("healthz/", healthz),
         path("robots.txt", robots_txt),
         path("embed/backlink", backlink),
         path("", include(("qfdmo.urls", "qfdmo"), namespace="qfdmo")),

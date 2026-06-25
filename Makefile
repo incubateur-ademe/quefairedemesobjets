@@ -1,7 +1,7 @@
 # Aliases
 PYTHON := uv run python
 DB_URL := postgres://webapp:webapp@localhost:6543/webapp# pragma: allowlist secret
-SAMPLE_DB_URL ?= $(if $(SAMPLE_DATABASE_URL),$(SAMPLE_DATABASE_URL),$(DB_URL))
+SAMPLE_DB_URL ?= $(if $(DB_WEBAPP_SAMPLE),$(DB_WEBAPP_SAMPLE),$(DB_URL))
 SAMPLE_DUMP_FILE ?= tmpbackup-sample/sample.custom
 BASE_DOMAIN := quefairedemesdechets.ademe.local
 
@@ -204,6 +204,10 @@ drop-schema-public-sample:
 create-schema-public:
 	psql -d '$(DB_URL)' -c "CREATE SCHEMA IF NOT EXISTS public;"
 
+.PHONY: create-db-sample
+create-db-sample:
+	$(MAKE) -C webapp create-db-sample
+
 .SILENT:
 .PHONY: create-schema-public-sample
 create-schema-public-sample:
@@ -215,6 +219,7 @@ create-schema-public-sample:
 create-extensions:
 	@echo "Creating required extensions"
 	psql -d '$(DB_URL)' -f scripts/sql/create_extensions.sql
+	psql -d '$(DB_URL)' -f scripts/sql/create_wagtail_french_config.sql
 
 .PHONY: psql
 psql:
@@ -244,14 +249,16 @@ dump-sample:
 load-prod-dump:
 	@DUMP_FILE=$$(find tmpbackup-prod -type f -name "*.custom" -print -quit); \
 	psql -d '$(DB_URL)' -f scripts/sql/create_extensions.sql && \
-	pg_restore -d '$(DB_URL)' --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
+	psql -d '$(DB_URL)' -f scripts/sql/create_wagtail_french_config.sql && \
+	pg_restore -d '$(DB_URL)' --schema=public --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
 
 .SILENT:
 .PHONY: load-preprod-dump
 load-preprod-dump:
 	@DUMP_FILE=$$(find tmpbackup-preprod -type f -name "*.custom" -print -quit); \
 	psql -d '$(DB_URL)' -f scripts/sql/create_extensions.sql && \
-	pg_restore -d '$(DB_URL)' --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
+	psql -d '$(DB_URL)' -f scripts/sql/create_wagtail_french_config.sql && \
+	pg_restore -d '$(DB_URL)' --schema=public --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
 
 .SILENT:
 .PHONY: load-sample-dump
@@ -260,7 +267,8 @@ load-sample-dump:
 	[ -f "$$DUMP_FILE" ] || DUMP_FILE=$$(find tmpbackup-sample -type f -name "*.custom" -print -quit); \
 	[ -n "$$DUMP_FILE" ] || { echo "No sample dump found"; exit 1; }; \
 	psql -d '$(SAMPLE_DB_URL)' -f scripts/sql/create_extensions.sql && \
-	pg_restore -d '$(SAMPLE_DB_URL)' --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
+	psql -d '$(SAMPLE_DB_URL)' -f scripts/sql/create_wagtail_french_config.sql && \
+	pg_restore -d '$(SAMPLE_DB_URL)' --schema=public --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
 
 .PHONY: db-restore-local-from-prod
 db-restore-local-from-prod:
@@ -288,6 +296,7 @@ db-restore-preprod-from-prod:
 
 .PHONY: db-restore-local-from-sample
 db-restore-local-from-sample:
+	$(MAKE) create-db-sample
 	make dump-sample
 	make drop-schema-public-sample
 	make create-schema-public-sample

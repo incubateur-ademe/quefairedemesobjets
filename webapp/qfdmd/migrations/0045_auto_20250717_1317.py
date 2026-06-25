@@ -13,13 +13,19 @@ class Migration(migrations.Migration):
             sql="""
             CREATE EXTENSION IF NOT EXISTS unaccent;
 
-            CREATE TEXT SEARCH CONFIGURATION wagtail_french (COPY = french);
-            ALTER TEXT SEARCH CONFIGURATION wagtail_french
-              ALTER MAPPING FOR hword, hword_part, word
-              WITH unaccent, french_stem;
+            DO $$
+            BEGIN
+              IF NOT EXISTS (
+                SELECT 1 FROM pg_ts_config WHERE cfgname = 'wagtail_french'
+              ) THEN
+                CREATE TEXT SEARCH CONFIGURATION wagtail_french (COPY = french);
+                ALTER TEXT SEARCH CONFIGURATION wagtail_french
+                  ALTER MAPPING FOR hword, hword_part, word
+                  WITH unaccent, french_stem;
+              END IF;
+            END
+            $$;
             """,
-            reverse_sql="""
-            DROP TEXT SEARCH CONFIGURATION IF EXISTS wagtail_french;
-            """,
+            reverse_sql="DROP TEXT SEARCH CONFIGURATION IF EXISTS wagtail_french;",
         ),
     ]
