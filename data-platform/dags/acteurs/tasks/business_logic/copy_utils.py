@@ -1,6 +1,5 @@
 import logging
 import subprocess
-import tempfile
 from typing import Optional
 
 import psycopg2
@@ -48,38 +47,53 @@ def dump_and_restore_db(
             dump_cmd.append("--table")
             dump_cmd.append(f"public.{table}")
 
-    # Create the dump
-    with tempfile.NamedTemporaryFile(suffix=".dump") as tmp_dump_file:
-        dump_file = tmp_dump_file.name
+    logger.info("📦 Démarrage du dump/restore en pipeline...")
 
-        with open(dump_file, "wb") as f:
-            subprocess.run(
-                dump_cmd,
-                stdout=f,
-                stderr=subprocess.PIPE,
-                check=True,
-            )
+    # Pipe pg_dump directly into pg_restore — no intermediate file on disk.
+    # For a 3GB database this avoids ~6GB of sequential disk I/O per call.
+    dump_proc = subprocess.Popen(
+        dump_cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
 
-        logger.info("✅ Dump créé")
+    restore_cmd = [
+        "pg_restore",
+        "-d",
+        dest_dsn,
+        "--schema=public",
+        "--no-owner",
+        "--no-acl",
+        "--no-privileges",
+        "--clean",
+        "--if-exists",
+        "--disable-triggers",
+    ]
 
-        # Restore the dump
-        restore_cmd = [
-            "pg_restore",
-            "-d",
-            dest_dsn,
-            "--schema=public",
-            "--no-owner",
-            "--no-acl",
-            "--no-privileges",
-            "--clean",
-            "--if-exists",
-            "--disable-triggers",
-            dump_file,
-        ]
+    restore_proc = subprocess.Popen(
+        restore_cmd,
+        stdin=dump_proc.stdout,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
 
-        result = subprocess.run(restore_cmd, capture_output=True)
-        if result.returncode != 0:
-            logger.warning(
-                f"⚠️  pg_restore exited with code {result.returncode}:\n"
-                f"{result.stderr.decode()}"
-            )
+    # Close the pipe in the parent so the pipeline doesn't deadlock
+    dump_proc.stdout.close()
+
+    dump_stderr = dump_proc.stderr.read()
+    restore_stdout, restore_stderr = restore_proc.communicate()
+
+    dump_retcode = dump_proc.wait()
+
+    if dump_retcode != 0:
+        logger.warning(
+            f"⚠️  pg_dump exited with code {dump_retcode}:\n"
+            f"{dump_stderr.decode(errors='replace')}"
+        )
+    if restore_proc.returncode != 0:
+        logger.warning(
+            f"⚠️  pg_restore exited with code {restore_proc.returncode}:\n"
+            f"{restore_stderr.decode(errors='replace')}"
+        )
+
+    logger.info("✅ Pipeline dump/restore terminé")
