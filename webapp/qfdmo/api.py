@@ -19,6 +19,7 @@ from qfdmo.models import (
     Source,
     SousCategorieObjet,
 )
+from qfdmo.models.acteur import DisplayedPropositionService
 
 router = Router()
 
@@ -77,16 +78,26 @@ class SousCategorieObjetSchema(ModelSchema):
         fields = ["id", "code", "libelle"]
 
 
-class ActeurSchema(ModelSchema):
+class PropositionServiceSchema(ModelSchema):
+    action: ActionSchema = Field(..., description="L'action proposée")
+    sous_categories: List[SousCategorieObjetSchema] = Field(
+        ...,
+        alias="sous_categories.all",
+        description="Les sous-catégories d'objet concernées par cette action",
+    )
+
+    class Meta:
+        model = DisplayedPropositionService
+        fields = ["id"]
+
+
+class BaseActeurSchema(ModelSchema):
     latitude: float
     longitude: float
     services: List[ActeurServiceSchema] = Field(
         ...,
         alias="acteur_services.all",
         description="Les services proposés pour un acteur",
-    )
-    actions: List[ActionSchema] = Field(
-        ..., alias="acteur_actions", description="Les actions proposés pour un acteur"
     )
     type: ActeurTypeSchema = Field(
         ..., alias="acteur_type", description="Le type d'acteur"
@@ -114,6 +125,23 @@ class ActeurSchema(ModelSchema):
     class Meta:
         model = DisplayedActeur
         fields = ["nom_commercial", "identifiant_unique", "siret"]
+
+
+class ActeurSchema(BaseActeurSchema):
+    actions: List[ActionSchema] = Field(
+        ..., alias="acteur_actions", description="Les actions proposés pour un acteur"
+    )
+
+
+class CarteActeurSchema(BaseActeurSchema):
+    propositions_services: List[PropositionServiceSchema] = Field(
+        ...,
+        alias="proposition_services.all",
+        description=(
+            "Les propositions de service de l'acteur : pour chaque action, "
+            "les sous-catégories d'objet concernées"
+        ),
+    )
 
 
 class ActeurFilterSchema(FilterSchema):
