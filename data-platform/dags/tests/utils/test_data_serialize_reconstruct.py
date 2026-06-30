@@ -8,7 +8,7 @@ from unit_tests.qfdmo.acteur_factory import (
     ActionFactory,
     SourceFactory,
 )
-from utils.data_serialize_reconstruct import data_serialize
+from utils.data_serialize_reconstruct import data_serialize, location_to_coords
 
 DATETIME = datetime(2023, 10, 1, 14, 30, 4)
 LONGITUDE, LATITUDE = 1, 2
@@ -98,3 +98,29 @@ class TestDataSerializeReconstruct:
         rec = data_reconstruct(RevisionActeur, ser)
         # The reconstruction should be in {field} format
         assert rec["source"].id == data_init["source"].id
+
+    def test_acteur_type_serialized_as_code_not_libelle(self, data_init):
+        acteur_type = data_init["acteur_type"]
+        acteur_type.libelle = "déchèterie"
+        acteur_type.save()
+        data = {"acteur_type": acteur_type}
+        serialized = data_serialize(RevisionActeur, data)
+        assert serialized["acteur_type"] == acteur_type.code
+        assert serialized["acteur_type"] != acteur_type.libelle
+
+        reconstructed = data_reconstruct(RevisionActeur, serialized)
+        assert reconstructed["acteur_type"] == acteur_type
+
+    def test_location_wkt_string_serialized(self):
+        wkt = "SRID=4326;POINT (3.447635 46.1413235)"
+        data = {"nom": "EPUR CENTRE", "location": wkt}
+        serialized = data_serialize(RevisionActeur, data)
+        assert serialized["longitude"] == pytest.approx(3.447635)
+        assert serialized["latitude"] == pytest.approx(46.1413235)
+        assert "location" not in serialized
+
+    def test_location_to_coords_wkt_string(self):
+        wkt = "SRID=4326;POINT (3.447635 46.1413235)"
+        longitude, latitude = location_to_coords(wkt)
+        assert longitude == pytest.approx(3.447635)
+        assert latitude == pytest.approx(46.1413235)

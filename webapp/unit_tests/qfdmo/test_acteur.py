@@ -556,6 +556,27 @@ class TestRevisionActeurRemoveParentWithoutChildren:
 
 
 @pytest.mark.django_db
+class TestRevisionActeurSelfParent:
+    def test_cant_be_its_own_parent(self):
+        revision_acteur = RevisionActeurFactory()
+        revision_acteur.parent_id = revision_acteur.identifiant_unique
+        with pytest.raises(ValidationError):
+            revision_acteur.save()
+
+    def test_load_self_referential_parent_does_not_recurse(self):
+        """A self-referential parent already in DB must not crash on load:
+        __init__ keeps only the parent id and does not chase the parent FK."""
+        revision_acteur = RevisionActeurFactory()
+        # Bypass validation to simulate corrupted data already in DB
+        RevisionActeur.objects.filter(pk=revision_acteur.pk).update(
+            parent_id=revision_acteur.identifiant_unique
+        )
+        # Would raise RecursionError before the lazy __init__ fix
+        reloaded = RevisionActeur.objects.get(pk=revision_acteur.pk)
+        assert reloaded._original_parent_id == revision_acteur.identifiant_unique
+
+
+@pytest.mark.django_db
 class TestActeurService:
     def test_acteur_services_basic(self, displayed_acteur):
         displayed_acteur.acteur_services.add(
