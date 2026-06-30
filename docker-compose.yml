@@ -22,34 +22,6 @@ x-airflow-common: &airflow-common
       condition: service_healthy
 
 services:
-  lvao-webapp-db:
-    image: postgis/postgis:15-3.3-alpine
-    environment:
-      - POSTGRES_USER=webapp
-      - POSTGRES_PASSWORD=webapp # pragma: allowlist secret
-      - POSTGRES_DB=webapp
-      - POSTGRES_MULTIPLE_EXTENSIONS=postgis
-    volumes:
-      - ./webapp_dbdata:/var/lib/postgresql/data:delegated
-    expose:
-      - 5432
-    ports:
-      - 6544:5432
-    profiles: [lvao, airflow]
-  lvao-warehouse-db:
-    image: postgis/postgis:15-3.3-alpine
-    environment:
-      - POSTGRES_USER=warehouse
-      - POSTGRES_PASSWORD=warehouse # pragma: allowlist secret
-      - POSTGRES_DB=warehouse
-      - POSTGRES_MULTIPLE_EXTENSIONS=postgis
-    volumes:
-      - ./warehouse_dbdata:/var/lib/postgresql/data:delegated
-    expose:
-      - 5432
-    ports:
-      - 8765:5432
-    profiles: [airflow]
   lvao-proxy:
     build:
       context: ./webapp

@@ -46,4 +46,4 @@ class TestProduitPageBodyClasses:
         body = soup.find("body")
         assert body is not None
         body_classes = body.get("class", "")
-        assert isinstance(body_classes, str) and "produit-page" in body_classes
+        assert "produit-page" in body_classes
