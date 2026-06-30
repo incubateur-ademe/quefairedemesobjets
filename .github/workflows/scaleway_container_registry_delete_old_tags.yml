@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-slim
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6.0.3
+        uses: actions/checkout@v7.0.0
       - name: Setup python
         uses: actions/setup-python@v6
         with:
