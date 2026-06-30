@@ -4,7 +4,6 @@ from typing import NamedTuple, override
 from django.contrib.gis.db import models
 from django.core.exceptions import ValidationError
 from django.db.models.functions import Now
-from django.shortcuts import redirect
 from django.template.loader import render_to_string
 from django.urls.base import reverse
 from django.utils.functional import cached_property
@@ -30,6 +29,8 @@ from wagtail.images.blocks import ImageBlock
 from wagtail.models import Page, ParentalKey
 from wagtail.snippets.models import register_snippet
 
+# Update when migrating to v4
+from sites_conformes.content_manager.abstract import SitesFacilesBasePage
 from sites_conformes.content_manager.models import ContentPage
 
 from qfdmd.blocks import STREAMFIELD_COMMON_BLOCKS
@@ -152,7 +153,7 @@ class TitleFields(models.Model):
         abstract = True
 
 
-class ProduitIndexPage(CompiledFieldMixin, Page):
+class LegacyProduitIndexPage(CompiledFieldMixin, Page):
     template = "ui/pages/produit_index_page.html"
     subpage_types = ["qfdmd.produitpage"]
     body = StreamField(
@@ -163,9 +164,18 @@ class ProduitIndexPage(CompiledFieldMixin, Page):
 
     content_panels = Page.content_panels + [FieldPanel("body")]
 
-    @override
-    def serve(self, request, *args, **kwargs):
-        return redirect(reverse("qfdmd:home"), permanent=False)
+    class Meta:
+        verbose_name = "Index des familles & produits (legacy)"
+
+
+class ProduitIndexPage(SitesFacilesBasePage):
+    template = "sites_conformes_content_manager/content_page.html"
+    subpage_types = ["qfdmd.produitpage"]
+    body = StreamField(
+        STREAMFIELD_COMMON_BLOCKS,
+        verbose_name="Corps de texte",
+        blank=True,
+    )
 
     class Meta:
         verbose_name = "Index des familles & produits"
