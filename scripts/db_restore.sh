@@ -22,15 +22,10 @@ fi
 
 # Determine which Docker service and database URL to use
 case "$DB_LABEL" in
-    prod|preprod)
+    prod|preprod|sample)
         DOCKER_SERVICE="lvao-webapp-db"
         DB_USER="webapp"
         DB_NAME="webapp"
-        ;;
-    sample)
-        DOCKER_SERVICE="lvao-warehouse-db"
-        DB_USER="warehouse"
-        DB_NAME="warehouse"
         ;;
     *)
         echo "Unknown db_label: $DB_LABEL (use: prod, preprod, sample)" >&2
@@ -54,7 +49,7 @@ docker compose exec -T "$DOCKER_SERVICE" psql -U "$DB_USER" -d "$DB_NAME" -f /de
 
 # 2. Restore the dump inside the container (same psql/pg_restore version as the DB)
 echo "  Restoring dump…"
-docker compose exec -T "$DOCKER_SERVICE" pg_restore -d "$DB_NAME" -U "$DB_USER" \
+docker compose exec -T "$DOCKER_SERVICE" pg_restore -v -d "$DB_NAME" -U "$DB_USER" \
     --schema=public --clean --no-acl --no-owner --no-privileges < "$DUMP_FILE"
 
 echo "✅ Restore complete: $DB_LABEL"
