@@ -56,7 +56,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.3
+        uses: actions/checkout@v7.0.0
         with:
           ref: ${{ inputs.ref }}
       # The regression test files and GitHub actions may not exist on the
@@ -64,7 +64,7 @@ jobs:
       # and overlay them onto the working tree so both baseline and compare jobs
       # use the same test definitions and action definitions.
       - name: Checkout regression test files from PR branch
-        uses: actions/checkout@v6.0.3
+        uses: actions/checkout@v7.0.0
         with:
           ref: ${{ github.ref }}
           sparse-checkout: |
@@ -152,7 +152,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v6.0.3
+    - uses: actions/checkout@v7.0.0
     - uses: actions/setup-node@v6.4.0
     - name: Install dependencies
       run: npm ci
