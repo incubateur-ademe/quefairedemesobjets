@@ -6,6 +6,7 @@ from qfdmd.views import (
     AutocompleteHomeSearchView,
     HomeView,
     SynonymeDetailView,
+    export_synonymes_csv,
     get_assistant_script,
 )
 
@@ -27,6 +28,7 @@ urlpatterns = [
     # Gatsby website. If changed, a redirect need to be created to keep the
     # legacy behaviour.
     path("dechet/<slug:slug>/", SynonymeDetailView.as_view(), name="synonyme-detail"),
+    path("synonymes-export.csv", export_synonymes_csv, name="synonymes-export"),
     path("iframe.js", get_assistant_script, name="script"),
     path("", HomeView.as_view(), name="home"),
 ]

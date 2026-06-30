@@ -1,8 +1,12 @@
+import csv
 import logging
 from typing import Any, override
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
 import django_filters
+from django.contrib.admin.views.decorators import staff_member_required
+from django.http import StreamingHttpResponse
+from django.urls import reverse
 from django.contrib import messages
 from django.db import (
     DataError,
@@ -568,3 +572,95 @@ class SynonymeDetailView(DetailView):
             pass
 
         return super().get(request, *args, **kwargs)
+
+
+# Champs où une valeur propre signifie que le contenu est défini au niveau du
+# synonyme (sinon il est hérité du produit, cf. Synonyme.bon_etat/mauvais_etat).
+SYNONYME_CONTENT_FIELDS = [
+    "qu_est_ce_que_j_en_fais_bon_etat",
+    "qu_est_ce_que_j_en_fais_mauvais_etat",
+    "comment_les_eviter",
+    "que_va_t_il_devenir",
+]
+
+
+def resolve_synonyme_url(synonyme: Synonyme) -> tuple[str, str]:
+    """Resolve the path a synonyme currently serves, mirroring
+    SynonymeDetailView.get. Returns (kind, path)."""
+    try:
+        return "redirect_synonyme", synonyme.next_wagtail_page.page.url
+    except Synonyme.next_wagtail_page.RelatedObjectDoesNotExist:
+        pass
+    try:
+        page = synonyme.produit.next_wagtail_page.page
+        excluded = (
+            hasattr(synonyme, "should_not_redirect_to")
+            and synonyme.should_not_redirect_to.page == page
+        )
+        if not excluded:
+            return "redirect_produit", page.url
+    except Produit.next_wagtail_page.RelatedObjectDoesNotExist:
+        pass
+    return "synonyme_detail", reverse("qfdmd:synonyme-detail", args=[synonyme.slug])
+
+
+@staff_member_required
+def export_synonymes_csv(request: HttpRequest) -> StreamingHttpResponse:
+    """Stream a CSV of every synonyme with its resolved URL and whether its
+    content is defined at the synonyme level."""
+    header = [
+        "id",
+        "nom",
+        "slug",
+        "produit",
+        "url_kind",
+        "url",
+        "content_defined_at_synonyme_level",
+        "filled_content_fields",
+        "imported_as_search_tag",
+    ]
+    qs = Synonyme.objects.select_related(
+        "produit",
+        "next_wagtail_page__page",
+        "should_not_redirect_to__page",
+        "produit__next_wagtail_page__page",
+        "imported_as_search_tag",
+    ).order_by("nom")
+
+    def rows():
+        writer = csv.writer(Echo())
+        yield writer.writerow(header)
+        for syn in qs.iterator():
+            kind, url = resolve_synonyme_url(syn)
+            filled = [
+                f for f in SYNONYME_CONTENT_FIELDS if (getattr(syn, f) or "").strip()
+            ]
+            yield writer.writerow(
+                [
+                    syn.pk,
+                    syn.nom,
+                    syn.slug,
+                    syn.produit.nom if syn.produit_id else "",
+                    kind,
+                    url,
+                    "yes" if filled else "no",
+                    "|".join(filled),
+                    (
+                        syn.imported_as_search_tag.name
+                        if syn.imported_as_search_tag_id
+                        else ""
+                    ),
+                ]
+            )
+
+    response = StreamingHttpResponse(rows(), content_type="text/csv")
+    response["Content-Disposition"] = 'attachment; filename="synonymes_export.csv"'
+    return response
+
+
+class Echo:
+    """A file-like object that returns what it is asked to write, for streaming
+    CSV (Django docs pattern)."""
+
+    def write(self, value):
+        return value
