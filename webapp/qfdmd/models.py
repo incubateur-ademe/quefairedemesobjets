@@ -153,6 +153,9 @@ class TitleFields(models.Model):
         abstract = True
 
 
+# TODO: delete later. Kept only so migrate_legacy_produit_index_page can move
+# the existing page onto the new ProduitIndexPage. Remove this model, its
+# template and the management command once the migration has run in all envs.
 class LegacyProduitIndexPage(CompiledFieldMixin, Page):
     template = "ui/pages/produit_index_page.html"
     subpage_types = ["qfdmd.produitpage"]
