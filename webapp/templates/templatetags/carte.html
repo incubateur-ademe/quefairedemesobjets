@@ -17,11 +17,18 @@
         src="{{ url }}{% if request.GET.epci %}&epci_codes={{ request.GET.epci }}{% endif %}">
     </turbo-frame>
 {% else %}
+    {# Lazy + frame-location so the stored location is folded into `src` before  #}
+    {# the (single) fetch — same as the AB branch, minus the variant swap. The   #}
+    {# `loading="lazy"` is REQUIRED: it defers the fetch until after Stimulus     #}
+    {# connects, giving frame-location a pause-point an eager frame wouldn't have.#}
     <turbo-frame
         id="{{ id }}"
         allow="geolocation; clipboard-write"
         class="qf-h-full qf-w-full"
         data-testid="carte"
+        loading="lazy"
+        data-controller="frame-location"
+        data-frame-location-prefix-value="{{ id }}_map"
         src="{{ url }}{% if request.GET.epci %}&epci_codes={{ request.GET.epci }}{% endif %}">
     </turbo-frame>
 {% endif %}

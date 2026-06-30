@@ -15,8 +15,8 @@ interface NextAutocompleteCommitDetail {
 /**
  * Carte-specific listener that turns a `next-autocomplete:commit` event into
  * lat/lon population on the surrounding form and dispatches the
- * `carte-address-autocomplete:change` event that the global state controller
- * listens to.
+ * `carte-address-autocomplete:change` event that the page-level `location`
+ * controller listens to.
  *
  * Also handles the synthetic « Autour de moi » option by triggering
  * `navigator.geolocation` and calling the server-side BAN reverse-geocode
@@ -110,8 +110,9 @@ export default class CarteAddressAutocompleteController extends Controller<HTMLE
     this.longitudeTarget.value = detail.longitude
     this.#hideInputError()
     // `carte-address-autocomplete:change` is consumed by:
-    // - body `data-action` -> `state#setLocation` (global location sync)
-    // - the carte form `data-action` -> `search-solution-form#submitForm`
+    // - body `data-action` -> `location#persistAndBroadcast` (persists to
+    //   sessionStorage + emits `qf:location-changed` on document)
+    // - each carte form -> `search-solution-form#applyLocationChange`
     this.dispatch("change", { detail })
   }
 
