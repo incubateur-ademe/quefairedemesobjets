@@ -19,15 +19,15 @@
         data-controller="search-solution-form"
         data-search-solution-form-target="searchForm"
         data-search-solution-form-is-iframe-value="{{ is_embedded }}"
-        {# Address picks are submitted via the state controller, NOT a direct  #}
-        {# listener here. State#setLocation runs first (it owns the body-level #}
-        {# data-action), clears any stale bbox via resetBboxInputs(), then     #}
-        {# calls submitForm via #updateUIFromGlobalState. Listening for the    #}
-        {# change event on the form too would race with state and submit with  #}
-        {# the previous bbox still set, so the server scopes acteurs to the   #}
-        {# old map view instead of the new address.                            #}
+        {# Address picks reach this form via the document-level                 #}
+        {# `qf:location-changed` event broadcast by the page `location`         #}
+        {# controller. applyLocationChange writes the new lat/lon, clears any   #}
+        {# stale bbox, then submits — once per pick. The document event reaches #}
+        {# every carte on the page (works with N cartes) and, unlike the old    #}
+        {# Stimulus outlet, never fires on a Turbo re-render (pinpoint click).  #}
         data-action="
         map:updateBbox->search-solution-form#updateBboxInput
+        qf:location-changed@document->search-solution-form#applyLocationChange
         search-solution-form:captureInteraction->analytics#captureInteractionWithMap"
         class="
         qf-rounded-lg qf-border qf-border-solid qf-border-grey-900
