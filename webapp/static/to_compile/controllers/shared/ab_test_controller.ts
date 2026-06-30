@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import posthog from "posthog-js"
+import { injectLocationIntoSrc, readStoredLocation } from "../../js/location_store"
 
 const VARIANT_VALUE = "test"
 

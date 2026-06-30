@@ -102,6 +102,62 @@ describe("AbTestController", () => {
     expect(frame.getAttribute("src")).toBe(CONTROL_SRC)
   })
 
+  describe("location injection from sessionStorage", () => {
+    // The template passes `data-ab-test-prefix-value="{{ id }}_map"`, so the
+    // controller's prefixValue already includes the `_map` suffix; the store
+    // appends `-latitude`/`-longitude`/`-adresse` to it.
+    const PREFIX = "foo_map"
+
+    function seedLocation() {
+      sessionStorage.setItem("latitude", "47.66")
+      sessionStorage.setItem("longitude", "-2.99")
+      sessionStorage.setItem("adresse", "Auray")
+    }
+
+    it("bakes stored location into the variant src (test cohort)", async () => {
+      seedLocation()
+      getFeatureFlag.mockReturnValue("test")
+      const frame = setupFrame({ "data-ab-test-prefix-value": PREFIX })
+      startStimulus()
+      await flush()
+
+      const url = new URL(frame.getAttribute("src")!, "https://example.test")
+      expect(url.searchParams.get("view_mode-view")).toBe("liste") // still variant
+      expect(url.searchParams.get(`${PREFIX}-latitude`)).toBe("47.66")
+      expect(url.searchParams.get(`${PREFIX}-longitude`)).toBe("-2.99")
+      expect(url.searchParams.get(`${PREFIX}-adresse`)).toBe("Auray")
+    })
+
+    it("bakes stored location into the control src", async () => {
+      seedLocation()
+      getFeatureFlag.mockReturnValue("control")
+      const frame = setupFrame({ "data-ab-test-prefix-value": PREFIX })
+      startStimulus()
+      await flush()
+
+      const url = new URL(frame.getAttribute("src")!, "https://example.test")
+      expect(url.searchParams.get("view_mode-view")).toBeNull() // control, no variant
+      expect(url.searchParams.get(`${PREFIX}-latitude`)).toBe("47.66")
+      expect(url.searchParams.get(`${PREFIX}-longitude`)).toBe("-2.99")
+    })
+
+    it("captures a location written during the async PostHog window", async () => {
+      // PostHog resolves asynchronously; a pick made before it resolves must
+      // still land in the src because #assign reads storage at assign time.
+      onFeatureFlags.mockImplementation((cb: () => void) => {
+        seedLocation()
+        cb()
+      })
+      getFeatureFlag.mockReturnValue("control")
+      const frame = setupFrame({ "data-ab-test-prefix-value": PREFIX })
+      startStimulus()
+      await flush()
+
+      const url = new URL(frame.getAttribute("src")!, "https://example.test")
+      expect(url.searchParams.get(`${PREFIX}-latitude`)).toBe("47.66")
+    })
+  })
+
   it("does nothing when src attribute is missing", async () => {
     document.body.innerHTML = `<turbo-frame
       id="carte"
