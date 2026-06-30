@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import posthog from "posthog-js"
+import { injectLocationIntoSrc, readStoredLocation } from "../../js/location_store"
 
 const VARIANT_VALUE = "test"
 
@@ -32,7 +33,7 @@ export default class extends Controller<HTMLElement> {
 
   declare readonly flagKeyValue: string
   declare readonly srcVariantValue: string
-
+  
   #controlSrc: string | null = null
   #alreadyRanOnce: boolean = false
 

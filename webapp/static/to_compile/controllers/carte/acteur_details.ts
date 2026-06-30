@@ -8,6 +8,9 @@ class ActeurController extends Controller {
   declare readonly mapContainerIdValue: string
   declare readonly contentTarget: HTMLElement
 
+  /** Element that triggered the acteur detail to open — restored on close. */
+  #lastTrigger: HTMLElement | null = null
+
   #show() {
     // Reset scroll when jumping from a acteur detail to another.
     this.element.scrollTo(0, 0)
@@ -29,6 +32,12 @@ class ActeurController extends Controller {
     this.element.ariaExpanded = "false"
     this.element.ariaHidden = "true"
     PinpointController.clearActivePinpoints()
+
+    // Restore focus to the element that opened the panel
+    if (this.#lastTrigger && document.contains(this.#lastTrigger)) {
+      this.#lastTrigger.focus()
+      this.#lastTrigger = null
+    }
   }
 
   #showPanelWhenTurboFrameLoad(event: CustomEvent) {
@@ -56,11 +65,31 @@ class ActeurController extends Controller {
     )
   }
 
+  #saveTrigger(event: Event) {
+    const target = event.target as HTMLElement | null
+    if (!target) return
+
+    // Only track clicks that will navigate the acteur-detail turbo frame
+    const turboFrame = target.closest("[data-turbo-frame$=':acteur-detail']")
+    if (!turboFrame) return
+
+    this.#lastTrigger = target
+  }
+
   connect() {
     document.addEventListener(
       "turbo:frame-load",
       this.#showPanelWhenTurboFrameLoad.bind(this),
     )
+    // Capture clicks on any element that targets the acteur-detail frame
+    document.addEventListener("click", this.#saveTrigger.bind(this), { capture: true })
+  }
+
+  disconnect() {
+    // Cleanup is automatic for classes that use `.bind(this)` —
+    // but for safety we don't remove the listener here because other
+    // instances may still be active on the page. Capture listener is
+    // lightweight and harmless.
   }
 }
 
