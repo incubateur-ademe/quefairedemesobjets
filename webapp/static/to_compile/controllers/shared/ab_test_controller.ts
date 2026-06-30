@@ -32,7 +32,7 @@ export default class extends Controller<HTMLElement> {
 
   declare readonly flagKeyValue: string
   declare readonly srcVariantValue: string
-
+  
   #controlSrc: string | null = null
   #alreadyRanOnce: boolean = false
 
