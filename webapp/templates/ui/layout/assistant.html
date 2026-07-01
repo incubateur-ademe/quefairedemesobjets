@@ -101,7 +101,7 @@ parsing, which raises VariableDoesNotExist when seo is not in context (e.g., err
         {% block header %}
         {% include "ui/components/header/header.html" %}
         {% endblock header %}
-        {% if settings.sites_conformes_content_manager.CmsDsfrConfig.notice_title or settings.sites_conformes_content_manager.CmsDsfrConfig.notice_description %}
+        {% if settings.sites_conformes_core.CmsDsfrConfig.notice_title or settings.sites_conformes_core.CmsDsfrConfig.notice_description %}
             {% include "blocks/notice.html" %}
         {% endif %}
 

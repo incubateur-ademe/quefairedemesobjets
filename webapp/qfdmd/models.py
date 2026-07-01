@@ -30,7 +30,7 @@ from wagtail.images.blocks import ImageBlock
 from wagtail.models import Page, ParentalKey
 from wagtail.snippets.models import register_snippet
 
-from sites_conformes.content_manager.models import ContentPage
+from sites_conformes.core.models import ContentPage
 
 from qfdmd.blocks import STREAMFIELD_COMMON_BLOCKS
 from qfdmd.utils import see_more_button

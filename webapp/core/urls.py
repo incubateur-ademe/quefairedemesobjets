@@ -23,7 +23,7 @@ from django.contrib.sitemaps import views as sitemaps_views
 from django.contrib.sitemaps.views import sitemap
 from django.urls import include, path
 from django.views.generic import TemplateView
-from sites_conformes.content_manager.urls import urlpatterns as sites_conformes_urls
+from sites_conformes.core.urls import urlpatterns as sites_conformes_urls
 from wagtail.admin import urls as wagtailadmin_urls
 from wagtail.contrib.sitemaps.sitemap_generator import Sitemap
 from wagtail.contrib.sitemaps.views import index
