@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { hasCompleteLocation, readStoredLocation } from "../../js/location_store"
 
 class SearchFormController extends Controller<HTMLFormElement> {
   #selectedOption: string = ""
@@ -96,6 +97,40 @@ class SearchFormController extends Controller<HTMLFormElement> {
 
   connect() {
     this.displayActionList()
+    this.#hydrateOnConnect()
+  }
+
+  // Eager carte cold-loaded with the location only in sessionStorage (client
+  // source): the server rendered a locationless carte, so submit once to fetch
+  // results. Guarded so we never re-submit when the server already rendered with
+  // location (inputs already populated) — that's the double-fetch we avoid.
+  // Carte-only: the multi-step formulaire must not auto-submit on load.
+  #hydrateOnConnect() {
+    if (!this.hasCarteTarget) return
+
+    const location = readStoredLocation()
+    if (!hasCompleteLocation(location)) return
+
+    // Server-source render already filled the inputs -> nothing to do.
+    if (this.latitudeInputTarget.value && this.longitudeInputTarget.value) return
+
+    this.latitudeInputTarget.value = location.latitude!
+    this.longitudeInputTarget.value = location.longitude!
+    this.#writeAddressInput(location.adresse)
+    this.resetBboxInput()
+    this.submitForm()
+  }
+
+  // The visible adresse input is owned by the carte-address-autocomplete widget,
+  // not a search-solution-form target, so reach it by its namespaced name
+  // (`{prefix}_map-adresse`). Writing it keeps the submitted querystring and the
+  // UI in sync with the restored location.
+  #writeAddressInput(adresse: string | null) {
+    if (!adresse) return
+    const input = this.element.querySelector<HTMLInputElement>(
+      'input[name$="_map-adresse"]',
+    )
+    if (input) input.value = adresse
   }
 
   activeReparerFilters(activate: boolean = true) {
@@ -364,6 +399,24 @@ class SearchFormController extends Controller<HTMLFormElement> {
 
   submitForm() {
     this.element.requestSubmit()
+  }
+
+  // Reacts to the page-level `qf:location-changed` event: copy the new
+  // coordinates into this form's hidden inputs, drop any stale bbox from a
+  // previous map pan, then submit so the server re-fetches around the address.
+  // Each carte form handles its own event (document-level), so this works with N
+  // cartes and — unlike the former outlet callback — never fires on a Turbo
+  // re-render such as a pinpoint click.
+  applyLocationChange(
+    event: CustomEvent<{ adresse: string; latitude: string; longitude: string }>,
+  ) {
+    const detail = event.detail
+    if (!detail) return
+    if (detail.latitude) this.latitudeInputTarget.value = detail.latitude
+    if (detail.longitude) this.longitudeInputTarget.value = detail.longitude
+    this.#writeAddressInput(detail.adresse)
+    this.resetBboxInput()
+    this.submitForm()
   }
 
   advancedSubmit(event?: Event) {
