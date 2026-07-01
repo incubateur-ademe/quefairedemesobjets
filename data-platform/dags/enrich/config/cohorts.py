@@ -22,3 +22,5 @@ class COHORTS:
     REVISION_ACTEUR_CP_TYPO = (
         "🌆 Changement de code postal pour les revisions: 🟢 respect du formalisme"
     )
+    SIRET_FROM_SIREN = "🏢 SIRET proposé depuis le SIREN connu"
+    SIREN_FROM_SIRET = "🏢 SIREN proposé depuis le SIRET connu"

@@ -1,0 +1,45 @@
+version: 2
+
+models:
+  - name: int_acteur_with_siren_without_siret
+    description: "Acteurs avec un SIREN correctement formaté (9 chiffres) mais sans SIRET"
+    columns:
+      - name: identifiant_unique
+        description: "L'identifiant unique de l'acteur"
+      - name: siren
+        description: "Le numéro SIREN de l'acteur"
+      - name: siret
+        description: "Le numéro SIRET de l'acteur"
+      - name: code_postal
+        description: "Le code postal de l'acteur"
+      - name: ville
+        description: "La ville de l'acteur"
+    config:
+      materialized: table
+      indexes:
+        - columns: ['siren']
+      tags:
+        - intermediate
+        - enrich
+        - siren_siret
+  - name: int_acteur_with_siret_without_siren
+    description: "Acteurs avec un SIRET correctement formaté (14 chiffres) mais sans SIREN"
+    columns:
+      - name: identifiant_unique
+        description: "L'identifiant unique de l'acteur"
+      - name: siret
+        description: "Le numéro SIRET de l'acteur"
+      - name: siren
+        description: "Le numéro SIREN de l'acteur"
+      - name: code_postal
+        description: "Le code postal de l'acteur"
+      - name: ville
+        description: "La ville de l'acteur"
+    config:
+      materialized: table
+      indexes:
+        - columns: ['siret']
+      tags:
+        - intermediate
+        - enrich
+        - siren_siret
