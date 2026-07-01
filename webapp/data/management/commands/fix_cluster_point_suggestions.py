@@ -42,19 +42,32 @@ class Command(BaseCommand):
             action=argparse.BooleanOptionalAction,
             default=True,
         )
+        parser.add_argument(
+            "--suggestion-cohorte-id",
+            type=int,
+            help="Restrict the fix to suggestions from this cohort id",
+        )
 
     def handle(self, *args, **options):
         dry_run = options["dry_run"]
         requeue = options["requeue"]
+        suggestion_cohorte_id = options["suggestion_cohorte_id"]
 
         suggestions = Suggestion.objects.filter(
             statut=SuggestionStatut.ERREUR,
             metadata__error__icontains=POINT_ERROR_MESSAGE,
         )
+        if suggestion_cohorte_id is not None:
+            suggestions = suggestions.filter(
+                suggestion_cohorte_id=suggestion_cohorte_id
+            )
 
         total = suggestions.count()
+        cohort_msg = (
+            f" (cohorte {suggestion_cohorte_id})" if suggestion_cohorte_id else ""
+        )
         self.stdout.write(
-            f"{total} suggestion(s) en erreur avec '{POINT_ERROR_MESSAGE}'"
+            f"{total} suggestion(s) en erreur avec '{POINT_ERROR_MESSAGE}'{cohort_msg}"
         )
 
         fixed_count = 0
