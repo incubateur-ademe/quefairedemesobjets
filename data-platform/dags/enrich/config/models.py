@@ -135,9 +135,28 @@ class EnrichActeursVillesConfig(EnrichBaseConfig):
     pass
 
 
+class EnrichActeursSiretSirenConfig(BaseModel):
+    dry_run: bool = Field(
+        default=False,
+        description="🚱 Si coché, aucune tâche d'écriture ne sera effectuée",
+    )
+
+    dbt_models_refresh: bool = Field(
+        default=True,
+        description="""🔄 Si coché, les modèles DBT seront rafraîchis.
+        🔴 Désactiver uniquement pour des tests.""",
+    )
+
+    dbt_models_refresh_command: str = Field(
+        default="dbt run --select +tag:siren_siret",
+        description="🔄 Commande DBT à exécuter pour rafraîchir les modèles",
+    )
+
+
 DAG_ID_TO_CONFIG_MODEL = {
     "enrich_acteurs_closed": EnrichActeursClosedConfig,
     "enrich_acteurs_rgpd": EnrichActeursRGPDConfig,
     "enrich_dbt_models_refresh": EnrichDbtModelsRefreshConfig,
     "enrich_acteurs_villes": EnrichActeursVillesConfig,
+    "enrich_siret_siren": EnrichActeursSiretSirenConfig,
 }
