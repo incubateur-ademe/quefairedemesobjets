@@ -10,6 +10,13 @@ SUGGEST_PREFIX = "suggest"
 @dataclass(frozen=True)
 class COLS:
 
+    # Identifiant & raw SIRET/SIREN columns (as exposed by the marts)
+    IDENTIFIANT_UNIQUE: str = "identifiant_unique"
+    SIREN: str = "siren"
+    SIRET: str = "siret"
+    CODE_POSTAL: str = "code_postal"
+    EST_PARENT: str = "est_parent"
+
     # Acteurs
     ACTEUR_ID: str = "acteur_id"
     ACTEUR_ID_EXTERNE: str = "acteur_id_externe"

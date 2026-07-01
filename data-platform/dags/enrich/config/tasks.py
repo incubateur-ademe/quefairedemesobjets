@@ -39,6 +39,14 @@ class TASKS:
     ENRICH_VILLES_TYPO: str = "enrich_acteurs_villes_typo"
     ENRICH_VILLES_NEW: str = "enrich_acteurs_villes_new"
 
+    # SIRET / SIREN
+    ENRICH_SIRET_FROM_SIREN_SUGGESTIONS: str = (
+        "enrich_acteurs_siret_from_siren_suggestions"
+    )
+    ENRICH_SIREN_FROM_SIRET_SUGGESTIONS: str = (
+        "enrich_acteurs_siren_from_siret_suggestions"
+    )
+
     # Code postal
     DB_READ_ACTEUR_CP: str = "db_read_acteur_cp"
     NORMALIZE_ACTEUR_CP: str = "normalize_acteur_cp_task"

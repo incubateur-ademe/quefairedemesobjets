@@ -65,6 +65,14 @@ class SuggestionAction(models.TextChoices):
         "ENRICH_REVISION_ACTEURS_CP_TYPO",
         "🏙️ Revision acteurs codes postaux non conformes",
     )
+    ENRICH_ACTEURS_SIRET = (
+        "ENRICH_ACTEURS_SIRET",
+        "🏢 Acteurs SIRET proposé depuis le SIREN connu",
+    )
+    ENRICH_ACTEURS_SIREN = (
+        "ENRICH_ACTEURS_SIREN",
+        "🏢 Acteurs SIREN proposé depuis le SIRET connu",
+    )
     CLUSTERING = "CLUSTERING", "regroupement/déduplication des acteurs"
     SOURCE_AJOUT = (
         "SOURCE_AJOUT",
@@ -587,7 +595,11 @@ class SuggestionGroupe(TimestampedModel, SuggestionActeurRelationsMixin):
             SuggestionAction.SOURCE_SUPPRESSION,
         ]:
             SuggestionGroupeTypeSource.from_suggestion_groupe(self).apply()
-        elif type_action == SuggestionAction.CRAWL_URLS:
+        elif type_action in [
+            SuggestionAction.CRAWL_URLS,
+            SuggestionAction.ENRICH_ACTEURS_SIRET,
+            SuggestionAction.ENRICH_ACTEURS_SIREN,
+        ]:
             SuggestionGroupeTypeEnrichMulti.from_suggestion_groupe(self).apply()
 
     def suggestions_can_be_applied_to_parent(self) -> bool:
