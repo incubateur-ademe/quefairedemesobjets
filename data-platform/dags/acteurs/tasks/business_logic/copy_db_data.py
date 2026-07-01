@@ -75,7 +75,7 @@ def copy_db_data():
 
     # Get app labels from main Django settings (not Airflow settings)
     # Import the main settings module to get the full INSTALLED_APPS list
-    main_settings = importlib.import_module("core.settings")
+    main_settings = importlib.import_module("settings.base")
 
     # Extract app labels from INSTALLED_APPS
     table_prefixes = set()
