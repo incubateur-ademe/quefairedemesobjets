@@ -2,25 +2,40 @@
 
 ## Dépendances Python
 
-On utilise **uv** avec **deux projets distincts** :
+On utilise **uv** avec un **workspace unique** à la racine du repo (un seul `uv.lock`).
 
-- **`webapp/`** : application Django (fichiers `webapp/pyproject.toml` et `webapp/uv.lock`)
-- **`data-platform/`** : DAGs Airflow, dbt, etc. (`data-platform/pyproject.toml` et `data-platform/uv.lock`)
+Dépendances de production : chaque membre (`webapp/`, `data-platform/`) déclare les siennes dans son propre `pyproject.toml`.
 
-Pour installer les paquets en local, aller dans le dossier du projet concerné :
+Dépendances de développement : toutes centralisées dans le `pyproject.toml` racine, réparties en groupes sémantiques :
+
+| Groupe       | Contenu                                                    | Usage                   |
+| ------------ | ---------------------------------------------------------- | ----------------------- |
+| `lint`       | black, ruff                                                | CI linter, pre-commit   |
+| `test`       | pytest*, factory-boy                                       | CI tests                |
+| `dev`        | lint + test + djade + pre-commit                           | CI + dev de base        |
+| `webapp-dev` | django-browser-reload, debug-toolbar, silk, ptpython, etc. | Développement webapp    |
+| `notebook`   | dedupe, ipython                                            | Notebooks data-platform |
+
+Pour installer en local (depuis la racine du repo) :
 
 ```sh
-cd webapp && uv sync <package>
-cd data-platform && uv sync <package>
+uv sync --all-groups   # tout installer
+uv sync --group dev    # minimum pour les tests
 ```
 
-Pour ajouter une dépendance (toujours depuis le bon dossier) :
+Pour ajouter une dépendance :
 
 ```sh
-uv add <package>
+uv add --package webapp-quefairedemesobjetsetdechets <package>
+uv add --package data-platform <package>
 ```
 
-Option `--group dev` pour les dépendances de développement (pytest, ruff, etc.).
+Pour ajouter une dépendance de développement (au workspace root) :
+
+```sh
+uv add --group lint <package>
+uv add --group dev <package>
+```
 
 ## Dépendances Javascript
 

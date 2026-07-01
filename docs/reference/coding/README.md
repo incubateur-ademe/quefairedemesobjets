@@ -44,7 +44,7 @@ Python uses **two separate uv projects** (`webapp/` and `data-platform/`). From 
 
 You can also run `make check-format` / `make format` inside `webapp/` or `data-platform/` alone.
 
-From the **`webapp/`** folder (after `uv sync --group dev`):
+From the repo root (after `uv sync --group dev --group webapp-dev`):
 
 - **TypeScript**
   - **Lint**: `npm run lint`

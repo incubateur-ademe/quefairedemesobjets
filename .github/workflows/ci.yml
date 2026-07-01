@@ -22,17 +22,10 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.0
 
-      - name: Setup webapp Python environment
+      - name: Setup backend Python environment
         uses: ./.github/actions/setup-backend
         with:
-          working-directory: webapp
-          uv-groups: "--group dev"
-
-      - name: Setup data-platform Python environment
-        uses: ./.github/actions/setup-backend
-        with:
-          working-directory: data-platform
-          uv-groups: "--group dev"
+          uv-groups: "--group lint"
 
       - name: Install Terragrunt and OpenTofu
         uses: gruntwork-io/terragrunt-action@4ed5b7344c80315e5357f28f36159fc980bc2d5a # v3.4.0

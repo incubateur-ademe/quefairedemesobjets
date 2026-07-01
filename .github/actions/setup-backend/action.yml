@@ -5,7 +5,7 @@ inputs:
   working-directory:
     description: "Directory that contains pyproject.toml and uv.lock (e.g. webapp, data-platform)"
     required: false
-    default: "webapp"
+    default: "."
   uv-groups:
     description: 'Arguments passed to uv sync (e.g. "--group dev")'
     required: false
@@ -23,8 +23,8 @@ runs:
       id: cache-venv
       uses: actions/cache@v4
       with:
-        path: ${{ inputs.working-directory }}/.venv
-        key: venv-${{ inputs.working-directory }}-${{ inputs.uv-groups }}-${{ hashFiles(format('{0}/uv.lock', inputs.working-directory)) }}
+        path: .venv
+        key: venv-${{ inputs.uv-groups }}-${{ hashFiles('uv.lock') }}
 
     - name: Install Python dependencies
       if: steps.cache-venv.outputs.cache-hit != 'true'

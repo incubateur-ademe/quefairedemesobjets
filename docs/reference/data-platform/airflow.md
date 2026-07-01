@@ -56,7 +56,7 @@ This structure is mainly used when (re)organising files for source‑ingestion D
 
 Tests follow the same structure as `data-platform/dags`, under `data-platform/dags/tests`.
 
-Run them from **`data-platform/`** (requires `uv sync`):
+Run them from the repo root (requires `uv sync --group dev --group notebook`):
 
 ```sh
 make dags-test
