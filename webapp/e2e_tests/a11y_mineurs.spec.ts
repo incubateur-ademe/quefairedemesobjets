@@ -57,10 +57,17 @@ test.describe("♿ RGAA Mineurs", () => {
       expect(count).toBeGreaterThanOrEqual(0)
     })
 
-    test('Le <header> de la carte porte role="banner"', async ({ page }) => {
+    test("Le <header> de la carte a un aria-label accessible (pas de role='banner' à l'intérieur de <main>)", async ({
+      page,
+    }) => {
       await navigateTo(page, "/carte")
-      const banner = page.locator('header[role="banner"]')
-      await expect(banner.first()).toBeAttached()
+      const carteHeader = page.locator(
+        'main header[aria-label="Recherche sur la carte"]',
+      )
+      await expect(carteHeader.first()).toBeAttached()
+      // No role="banner" inside <main>
+      const bannerInsideMain = page.locator('main [role="banner"]')
+      await expect(bannerInsideMain).toHaveCount(0)
     })
   })
 

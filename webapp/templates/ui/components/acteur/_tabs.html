@@ -14,6 +14,8 @@
     </ul>
 
     {% include "ui/components/acteur/tabs/about_panel.html" %}
-    {% include "ui/components/acteur/tabs/labels_panel.html" %}
+    {% if object.labels_without_enseigne_display %}
+        {% include "ui/components/acteur/tabs/labels_panel.html" %}
+    {% endif %}
     {% include "ui/components/acteur/tabs/sources_panel.html" %}
 </div>

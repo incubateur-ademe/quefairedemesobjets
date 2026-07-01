@@ -1,0 +1,26 @@
+{% load i18n widget_tweaks dsfr_tags %}
+<fieldset class="fr-fieldset{% if field.errors %} fr-fieldset--error{% endif %}"
+          id="radio-{{ field.auto_id }}"
+          aria-labelledby="{{ field.auto_id }}-legend{% if field.errors %} {{ field.auto_id }}-desc-error{% endif %}">
+  <legend class="fr-fieldset__legend fr-fieldset__legend--regular"
+          id="{{ field.auto_id }}-legend">
+    {# djlint:off #}
+    {{ field.label }}{% if not DSFR_MARK_OPTIONAL_FIELDS and field.field.required %}<span class="fr-required-marker" aria-hidden="true">&nbsp;*</span>{% elif DSFR_MARK_OPTIONAL_FIELDS and not field.field.required %}&nbsp;(facultatif){% endif %}
+    {% if field.help_text %}
+      <span class="fr-hint-text" id="{{ field.auto_id }}_helptext">{{ field.help_text|safe }}</span>
+    {% endif %}
+    {# djlint:on #}
+  </legend>
+  {% with field=field|dsfr_input_class_attr %}
+    {% for subwidget in field.subwidgets %}
+      <div class="fr-fieldset__element{% if field.field.widget.inline %} fr-fieldset__element--inline{% endif %}">
+        {{ subwidget }}
+      </div>
+    {% endfor %}
+  {% endwith %}
+  {% if field.errors %}
+    <div class="fr-messages-group" id="{{ field.auto_id }}-desc-error">
+      {{ field.errors }}
+    </div>
+  {% endif %}
+</fieldset>

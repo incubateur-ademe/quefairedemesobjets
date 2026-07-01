@@ -1,6 +1,12 @@
 import { AxeBuilder } from "@axe-core/playwright"
 import { test, expect } from "@playwright/test"
-import { navigateTo } from "./helpers"
+import {
+  clickFirstClickableActeurMarker,
+  mockApiAdresse,
+  navigateTo,
+  searchCarteAndWaitForActeurs,
+  switchToListeMode,
+} from "./helpers"
 
 test.describe("♿ Conformité Accessibilité WCAG", () => {
   // Shared variables
@@ -61,6 +67,34 @@ test.describe("♿ Conformité Accessibilité WCAG", () => {
         .analyze()
 
       expect(accessibilityScanResults.violations).toEqual([])
+    })
+  })
+
+  test.describe("Conformité WCAG 2.1 AA après interactions", () => {
+    test("La carte avec résultats et acteur detail ouvert respecte WCAG 2.1 AA", async ({
+      page,
+    }) => {
+      await navigateTo(page, "/carte")
+      await mockApiAdresse(page)
+      await searchCarteAndWaitForActeurs(page, "Auray")
+      await clickFirstClickableActeurMarker(page)
+      const panel = page.getByTestId("acteur-detail-about-panel")
+      await expect(panel).toBeVisible()
+
+      const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze()
+      expect(results.violations).toEqual([])
+    })
+
+    test("La carte en mode liste avec résultats respecte WCAG 2.1 AA", async ({
+      page,
+    }) => {
+      await navigateTo(page, "/carte")
+      await mockApiAdresse(page)
+      await searchCarteAndWaitForActeurs(page, "Auray")
+      await switchToListeMode(page)
+
+      const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze()
+      expect(results.violations).toEqual([])
     })
   })
 })

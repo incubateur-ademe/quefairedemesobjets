@@ -1,7 +1,7 @@
 <div id="{{ map_container_id }}:{% block id %}{% endblock %}"
     class="fr-tabs__panel"
     role="tabpanel"
-    aria-labelledby="{{ map_container_id }}:{% block aria_labelledby %}{% endblock %}"
+    aria-labelledby="{{ map_container_id }}:tab-{% block aria_labelledby %}{% endblock %}"
     tabindex="{% block tabindex %}0{% endblock %}"
 >
     {% block content %}
