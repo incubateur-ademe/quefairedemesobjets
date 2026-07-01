@@ -17,6 +17,7 @@ qf-h-svh qf-h-screen qf-overflow-hidden qf-bg-white
         data-turbo-frame="addressesPanel"
         data-action="
         map:updateBbox->search-solution-form#updateBboxInput
+        qf:location-changed@document->search-solution-form#applyLocationChange
         search-solution-form:captureInteraction->analytics#captureInteractionWithMap
         address-autocomplete:formSubmit->search-solution-form#advancedSubmit
         ss-cat-object-autocomplete:formSubmit->search-solution-form#advancedSubmit

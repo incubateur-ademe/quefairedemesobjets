@@ -50,12 +50,12 @@
     "@hotwired/turbo": "^8.0.23",
     "@iframe-resizer/child": "^5.5.9",
     "@iframe-resizer/parent": "^5.5.9",
-    "@sentry/browser": "^10.58.0",
+    "@sentry/browser": "^10.59.0",
     "bowser": "^2.14.1",
     "carte-facile": "^0.9.0",
     "eslint-config-prettier": "^10.1.8",
     "maplibre-gl": "^5.24.0",
-    "posthog-js": "^1.386.8",
+    "posthog-js": "^1.392.0",
     "stimulus-use": "^0.52.3",
     "tailwindcss": "^3.4.19"
   },
@@ -66,7 +66,7 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@types/jest": "^30.0.0",
     "@types/lodash": "^4.17.24",
-    "@types/node": "^25.9.3",
+    "@types/node": "^26.0.0",
     "buffer": "^6.0.3",
     "eslint": "^10.5.0",
     "eslint-plugin-prettier": "^5.5.6",
@@ -82,7 +82,7 @@
     "ts-jest": "^29.4.11",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.61.1"
+    "typescript-eslint": "^8.62.0"
   },
   "optionalDependencies": {
     "@parcel/watcher-linux-x64-glibc": "^2.5.6"

@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import posthog from "posthog-js"
+import { injectLocationIntoSrc, readStoredLocation } from "../../js/location_store"
 
 const MOBILE_BREAKPOINT_QUERY = "(max-width: 767px)"
 const VARIANT_VALUE = "test"
@@ -31,11 +32,13 @@ export default class extends Controller<HTMLElement> {
     flagKey: String,
     srcVariant: String,
     mobileOnly: { type: Boolean, default: false },
+    prefix: { type: String, default: "" },
   }
 
   declare readonly flagKeyValue: string
   declare readonly srcVariantValue: string
   declare readonly mobileOnlyValue: boolean
+  declare readonly prefixValue: string
 
   #controlSrc: string | null = null
 
@@ -86,7 +89,14 @@ export default class extends Controller<HTMLElement> {
   }
 
   #assign(src: string) {
-    this.element.setAttribute("src", src)
+    // `#assign` is the single place this controller commits `src`, so injecting
+    // the stored location here covers every branch (mobileOnly bypass,
+    // test/control, error fallbacks) and reads the location at the moment the
+    // frame is unpaused — capturing a pick made during the async PostHog window.
+    this.element.setAttribute(
+      "src",
+      injectLocationIntoSrc(src, this.prefixValue, readStoredLocation()),
+    )
   }
 
   #isMobileViewport(): boolean {
