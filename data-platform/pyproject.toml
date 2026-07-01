@@ -4,14 +4,14 @@ version = "0.0.0"
 description = "Data platform - Airflow DAGs, dbt"
 requires-python = ">=3.12,<3.13"
 dependencies = [
-    "apache-airflow-providers-amazon>=9.29.0",
-    "apache-airflow-providers-fab>=3.6.5",
-    "apache-airflow-providers-postgres>=6.7.1,<7",
-    "apache-airflow-providers-standard>=1.14.0",
+    "apache-airflow-providers-amazon>=9.31.0",
+    "apache-airflow-providers-fab>=3.7.0",
+    "apache-airflow-providers-postgres>=6.8.0,<7",
+    "apache-airflow-providers-standard>=1.15.0",
     "apache-airflow>=3.2.2,<4",
-    "boto3>=1.43.25",
+    "boto3>=1.43.36",
     "dbt-core>=1.11.11,<2",
-    "dbt-postgres>=1.9.1,<2",
+    "dbt-postgres>=1.10.1,<2",
     "fuzzywuzzy>=0.18.0,<0.19",
     "numpy>=1.26.0,<2",
     "pandas<2.2",
@@ -29,8 +29,8 @@ dependencies = [
 [dependency-groups]
 dev = [
     "black>=25.1.0,<26",
-    "ruff>=0.15.16,<0.16",
-    "pytest>=9.0.3,<10",
+    "ruff>=0.15.18,<0.16",
+    "pytest>=9.1.1,<10",
     "pytest-django>=4.9.0,<5",
     "pytest-dotenv>=0.5.2,<0.6",
     "pytest-mock>=3.14.1,<4",

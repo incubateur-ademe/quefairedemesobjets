@@ -2,13 +2,13 @@
 
 {% if infotri %}
     <div class="qf-flex qf-flex-col qf-gap-1w">
-        <ul class="qf-list-none qf-flex md:qf-flex-row qf-flex-col qf-gap-2w qf-m-0">
+        <div class="qf-flex md:qf-flex-row qf-flex-col qf-gap-2w">
             {% for infotri_image in infotri %}
-                <li class="qf-h-[80px]">
+                <div class="qf-h-[80px]">
                 {% image infotri_image.value original preserve-svg height="80" width="auto" class="qf-object-left qf-max-w-full" %}
-                </li>
+                </div>
             {% endfor %}
-        </ul>
+        </div>
 
         <p class="qf-m-0 qf-ml-auto">
             <a href="{{ ASSISTANT.infotri.lien }}" class="fr-link" rel="noopener external" target="_blank" title="Lien vers les infotris - Nouvelle fenêtre" data-testid="infotri-link">{{ ASSISTANT.infotri.texte_du_lien }}</a>

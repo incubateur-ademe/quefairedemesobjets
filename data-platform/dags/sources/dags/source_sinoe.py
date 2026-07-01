@@ -2,7 +2,6 @@ import json
 
 from airflow import DAG
 from airflow.sdk.definitions.param import ParamsDict
-from qfdmo.models.acteur import ActeurStatus
 from shared.config.airflow import DEFAULT_ARGS_NO_RETRIES
 from shared.config.tags import TAGS
 from sources.config.airflow_params import (
@@ -10,6 +9,10 @@ from sources.config.airflow_params import (
     source_sinoe_dechet_mapping_get,
 )
 from sources.tasks.airflow_logic.operators import default_params, eo_task_chain
+from utils.django import django_setup_full
+
+django_setup_full()
+from qfdmo.models.acteur import ActeurStatus  # noqa: E402
 
 with DAG(
     dag_id="source_sinoe",

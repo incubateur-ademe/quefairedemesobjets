@@ -1,0 +1,6 @@
+project_id            = "your-project-id"
+organization_id       = "your-organization-id"
+webapp_db_sample_username = "webapp_sample"
+webapp_db_sample_password = "your-secure-password"  # pragma: allowlist secret
+access_key            = "access-key"
+secret_key            = "secret-key"  # pragma: allowlist secret

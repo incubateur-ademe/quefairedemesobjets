@@ -4,14 +4,13 @@ from utils.django import django_setup_full
 
 logger = logging.getLogger(__name__)
 
-django_setup_full()
-
 
 def replace_acteur_table(
     prefix_django: str,
     prefix_dbt: str,
     tables: list[str],
 ) -> None:
+    django_setup_full()
     from django.db import DEFAULT_DB_ALIAS, connections
 
     with connections[DEFAULT_DB_ALIAS].cursor() as cursor:
@@ -20,6 +19,7 @@ def replace_acteur_table(
 
 
 def copy_tables_between_servers(cursor, prefix_dbt, prefix_django, tables):
+    django_setup_full()
     from django.conf import settings
 
     cursor.execute("BEGIN")

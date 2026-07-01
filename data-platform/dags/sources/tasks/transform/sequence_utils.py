@@ -38,6 +38,10 @@ def df_convert_numpy_to_jsonify(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def convert_numpy_to_jsonify(obj) -> list | dict | str | int | float | bool | None:
+    from utils.django import django_setup_full
+
+    django_setup_full()
+
     from django.contrib.gis.geos import Point
     from qfdmo.models.acteur import ActeurType, Source, VueActeur
 

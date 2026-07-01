@@ -8,11 +8,10 @@ from sources.config.airflow_params import get_mapping_config
 from sources.tasks.airflow_logic.operators import default_params, eo_task_chain
 from utils.django import django_setup_full
 
-django_setup_full()
-
 
 def default_normalization_rules() -> list[dict]:
     # Import here to avoid import it before django is setup (get_mapping_config import)
+    django_setup_full()
     from qfdmo.models.acteur import ActeurPublicAccueilli, ActeurStatus
 
     return [

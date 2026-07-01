@@ -22,6 +22,22 @@ class CodeAsNaturalKeyModel(models.Model):
         return getattr(self, "code")
 
 
+def django_model_to_wire(value: models.Model):
+    """Serialize a Django model instance for JSON / XCom transport."""
+    if isinstance(value, CodeAsNaturalKeyModel):
+        return value.code
+    return value.pk
+
+
+def django_model_from_wire(model_class: type[models.Model], value):
+    """Reconstruct a Django model instance from a wire-transport value."""
+    if isinstance(value, model_class):
+        return value
+    if issubclass(model_class, CodeAsNaturalKeyModel) and isinstance(value, str):
+        return model_class.objects.get(code=value)
+    return model_class.objects.get(pk=value)
+
+
 class NomAsNaturalKeyManager(models.Manager):
     def get_by_natural_key(self, nom: str) -> models.Model:
         return self.get(nom=nom)

@@ -6,10 +6,9 @@ from .copy_utils import drop_tables, dump_and_restore_db
 
 logger = logging.getLogger(__name__)
 
-django_setup_full()
-
 
 EXCLUDE_TABLES = [
+    # qfdmo acteurs — these are overwritten from warehouse later
     "qfdmo_acteur_acteur_services",
     "qfdmo_acteur_labels",
     "qfdmo_acteur",
@@ -36,11 +35,30 @@ EXCLUDE_TABLES = [
     "qfdmo_vueperimetreadomicile",
     "qfdmo_vuepropositionservice_sous_categories",
     "qfdmo_vuepropositionservice",
+    # data suggestions — user-submitted acteur suggestions with full JSON blobs,
+    # not needed in the sample database (~3.2GB total on prod)
+    "data_suggestion",
+    "data_suggestionunitaire",
+    "data_suggestiongroupe",
+    "data_suggestionlog",
+    "data_suggestioncohorte",
+    # analysis / migration helper tables — not needed in sample
+    "fix_sources_cma_nonreparacteur_revisionacteur",
+    "pharmacies_revisionacteur",
+    "fix_pharma",
+    "fix_code_postal_odp",
+    "refashion_actors",
+    "test_write_speed",
+    # caches — rebuilt naturally
+    "qf_django_cache",
+    "lvao_django_cache",
 ]
 
 
 def copy_db_data():
     import importlib
+
+    django_setup_full()
 
     from django.conf import settings
     from django.db import connections

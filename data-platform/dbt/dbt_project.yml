@@ -35,3 +35,4 @@ clean-targets:
 
 models:
   +unlogged: true
+  +materialized: table

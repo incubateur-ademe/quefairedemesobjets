@@ -47,7 +47,8 @@ services:
     profiles: [lvao]
 
   lvao-webapp-db:
-    image: postgis/postgis:15-3.3-alpine
+    platform: linux/amd64
+    image: postgis/postgis:16-3.5-alpine
     environment:
       - POSTGRES_USER=webapp
       - POSTGRES_PASSWORD=webapp # pragma: allowlist secret

@@ -1,0 +1,40 @@
+# This file is maintained automatically by "tofu init".
+# Manual edits may be lost in future updates.
+
+provider "registry.opentofu.org/hashicorp/null" {
+  version = "3.2.4"
+  hashes = [
+    "h1:i+WKhUHL2REY5EGmiHjfUljJB8UKZ9QdhdM5uTeUhC4=",
+    "zh:1769783386610bed8bb1e861a119fe25058be41895e3996d9216dd6bb8a7aee3",
+    "zh:32c62a9387ad0b861b5262b41c5e9ed6e940eda729c2a0e58100e6629af27ddb",
+    "zh:339bf8c2f9733fce068eb6d5612701144c752425cebeafab36563a16be460fb2",
+    "zh:36731f23343aee12a7e078067a98644c0126714c4fe9ac930eecb0f2361788c4",
+    "zh:3d106c7e32a929e2843f732625a582e562ff09120021e510a51a6f5d01175b8d",
+    "zh:74bcb3567708171ad83b234b92c9d63ab441ef882b770b0210c2b14fdbe3b1b6",
+    "zh:90b55bdbffa35df9204282251059e62c178b0ac7035958b93a647839643c0072",
+    "zh:ae24c0e5adc692b8f94cb23a000f91a316070fdc19418578dcf2134ff57cf447",
+    "zh:b5c10d4ad860c4c21273203d1de6d2f0286845edf1c64319fa2362df526b5f58",
+    "zh:e05bbd88e82e1d6234988c85db62fd66f11502645838fff594a2ec25352ecd80",
+  ]
+}
+
+provider "registry.opentofu.org/scaleway/scaleway" {
+  version     = "2.73.0"
+  constraints = ">= 2.73.0"
+  hashes = [
+    "h1:OjdLX6A8rVgH6h8NE6KhnwGn2NflQaG7b4r9LKZKZjs=",
+    "zh:1997c81d5dda1ac7b027404140c7473f6bc5d1c39b228a6f07da536f65935d41",
+    "zh:3af28a4ae59eb013254143f2c49d60f8b479fbd6b61316d13ba191d6b22888f4",
+    "zh:41f8dbb0614d4a5d15cc4d9ecc32abc1122345ebfe3b1e18962b1d5564f85e71",
+    "zh:55e82fe1f39625d2d137737559a9d329e0a51dc706b07efccae2f08d1ac8e2be",
+    "zh:66a77832d889dee56de02dc3bcc8da95af0c9ec81425e6a99ba5d9091a0e4896",
+    "zh:75fdb3dc9936d5525cb6e48a1b59330b92b1cc773bf9376c1d796a6a6c4ad967",
+    "zh:831fdd0f940dedbfa4deba6a8d5b14a2c68033240386c53f1e3210d2c456db42",
+    "zh:973e13fa01c3bbb0739f0764747ec612d1d7ee9a850633ad9fcf759967a77f2a",
+    "zh:993db06f5652d80096249240ca313da20d8fd0b1f09c35f6356144dd3e728f7c",
+    "zh:abb7c58eba72b0d7dc1e81f751c91166faaf30cdda2eef42c0ec3e0e4950556d",
+    "zh:addd802e26562b665ca4b885ad520a503c6961a1a8b2ba665d646c8506d1451e",
+    "zh:bcc2aa51f086243871758b07c907e510c6e56f93ade3e1c0f4e59482a5358f7f",
+    "zh:f8a2603c8cff34f1a8aef4103fee58d066d9294b68e5f5fc9806f6629f0de507",
+  ]
+}

@@ -38,6 +38,7 @@ def cluster_acteurs_suggestions_prepare_wrapper(ti) -> None:
     logger.info(task_info_get())
 
     df: pd.DataFrame = xcom_pull(ti, XCOMS.DF_PARENTS_CHOOSE_DATA)
+
     df = parent_data_new_deserialize(df)
 
     if df.empty:

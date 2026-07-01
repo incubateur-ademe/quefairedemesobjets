@@ -12,13 +12,12 @@ from utils.django import django_setup_full
 
 logger = logging.getLogger(__name__)
 
-django_setup_full()
-
 MAIN_OPENDATA_FILENAME = "acteurs.csv"
 
 
 def export_opendata_csv_to_s3(export_opendata_config: ExportOpendataConfig):
 
+    django_setup_full()
     from django.conf import settings
 
     with tempfile.TemporaryDirectory(dir=TMP_FOLDER) as temp_dir:

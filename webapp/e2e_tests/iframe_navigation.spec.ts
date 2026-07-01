@@ -99,7 +99,7 @@ test.describe("📄 Découpe du contenu de la fiche dans l'iframe", () => {
     })
   }
 
-  test("Le bouton « Lire plus sur cette fiche » pointe vers la version autonome", async ({
+  test("Le bouton « Voir plus de recommandations » pointe vers la version autonome", async ({
     page,
   }) => {
     await navigateTo(page, "/lookbook/preview/tests/t_8_iframe_navigation_persistence")
@@ -109,7 +109,7 @@ test.describe("📄 Découpe du contenu de la fiche dans l'iframe", () => {
     await openEcranFiche(iframe)
 
     // The footer exposes a primary button opening the standalone fiche in a new tab.
-    const lirePlus = iframe.locator('button:has-text("Lire plus sur cette fiche")')
+    const lirePlus = iframe.locator('button:has-text("Voir plus de recommandations")')
     await expect(lirePlus).toBeVisible({ timeout: TIMEOUT.DEFAULT })
 
     const onclick = await lirePlus.getAttribute("onclick")
@@ -130,7 +130,7 @@ test.describe("📄 Découpe du contenu de la fiche dans l'iframe", () => {
 
     // Detailed content sections (produit.content_display) are suppressed in the
     // iframe; the "Lire plus" button is the entry point to them.
-    const lirePlus = iframe.locator('button:has-text("Lire plus sur cette fiche")')
+    const lirePlus = iframe.locator('button:has-text("Voir plus de recommandations")')
     await expect(lirePlus).toBeVisible({ timeout: TIMEOUT.DEFAULT })
 
     const onclick = await lirePlus.getAttribute("onclick")

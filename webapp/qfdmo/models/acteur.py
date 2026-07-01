@@ -1010,9 +1010,17 @@ class RevisionActeur(BaseActeur, LatLngPropertiesMixin, DisplayedActeurLinkMixin
         pointent vers l'identifiant_unique de cet acteur"""
         return parents_cache_get()["nombre_enfants"].get(self.identifiant_unique, 0)
 
+    def clean(self):
+        super().clean()
+        # An acteur can't be its own parent
+        if self.parent_id and self.parent_id == self.identifiant_unique:
+            raise ValidationError(
+                {"parent": "Un acteur ne peut pas être son propre parent."}
+            )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._original_parent = self.parent
+        self._original_parent_id = self.parent_id
 
     def save(self, *args, **kwargs):
         # OPTIMIZE: if we need to validate the main action in the service propositions
@@ -1048,9 +1056,12 @@ class RevisionActeur(BaseActeur, LatLngPropertiesMixin, DisplayedActeurLinkMixin
                     valeur=perimetre_adomicile.valeur,
                 )
 
-        if self.parent != self._original_parent and self._original_parent:
-            if not self._original_parent.is_parent:
-                self._original_parent.delete()
+        if self.parent_id != self._original_parent_id and self._original_parent_id:
+            original_parent = RevisionActeur.objects.filter(
+                pk=self._original_parent_id
+            ).first()
+            if original_parent and not original_parent.is_parent:
+                original_parent.delete()
 
         # Dès qu'on fait des changements de révisions, quels qu'ils soient,
         # on force le recalcul du nombre d'enfants

@@ -68,7 +68,7 @@ class TestCopyDbData:
         # Assert that only valid tables are included
         tables_passed = call_args.kwargs["tables"]
         assert "qfdmo_sometable" in tables_passed
-        assert "data_suggestion" in tables_passed
+        assert "data_suggestion" not in tables_passed  # excluded as suggestion table
         assert "core_setting" in tables_passed
 
         # Assert that excluded tables are not present

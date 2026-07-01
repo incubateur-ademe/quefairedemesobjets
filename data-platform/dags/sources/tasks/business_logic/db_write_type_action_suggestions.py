@@ -9,9 +9,6 @@ from sqlalchemy import TEXT, VARCHAR, text
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from utils.django import django_setup_full
 
-django_setup_full()
-
-
 logger = logging.getLogger(__name__)
 
 
@@ -128,6 +125,7 @@ def db_write_type_action_suggestions(
     df_log_warning: pd.DataFrame,
     use_legacy_suggestions: bool,
 ) -> None:
+    django_setup_full()
 
     from data.models.suggestion import SuggestionAction
 
@@ -193,6 +191,7 @@ def insert_suggestion(
     df_log_error: pd.DataFrame = pd.DataFrame(),
     df_log_warning: pd.DataFrame = pd.DataFrame(),
 ):
+    django_setup_full()
     from data.models.suggestion import (
         SuggestionAction,
         SuggestionCohorte,
@@ -333,6 +332,8 @@ def insert_suggestion_legacy(
     df_log_error: pd.DataFrame = pd.DataFrame(),
     df_log_warning: pd.DataFrame = pd.DataFrame(),
 ):
+    django_setup_full()
+
     from data.models.suggestion import SuggestionCohorteStatut, SuggestionLog
 
     if df.empty:

@@ -7,14 +7,13 @@ from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
 from utils.django import django_setup_full
 
-# Load Django environement to test Django and saving airflow logs to s3 storage are
-# compatible
-django_setup_full()
-
 logger = logging.getLogger(__name__)
 
 
 def test_django_and_logs():
+    # Load Django environement to test Django and saving airflow logs to s3 storage
+    # are compatible
+    django_setup_full()
     logger.info("Test Django and Logs")
 
 

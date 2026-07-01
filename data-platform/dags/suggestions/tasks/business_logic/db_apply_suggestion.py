@@ -4,6 +4,7 @@ from django.db import transaction
 from suggestions.tasks.business_logic.db_check_suggestion_to_process import (
     get_suggestions_toprocess,
 )
+from utils.django import django_setup_full
 
 logger = logging.getLogger(__name__)
 
@@ -14,6 +15,7 @@ def suggestion_apply_atomic(suggestion):
 
 
 def db_apply_suggestion(use_suggestion_groupe: bool = False):
+    django_setup_full()
     from data.models.suggestion import SuggestionStatut
 
     suggestions = get_suggestions_toprocess(use_suggestion_groupe=use_suggestion_groupe)
