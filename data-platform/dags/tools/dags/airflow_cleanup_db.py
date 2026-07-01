@@ -11,7 +11,7 @@ from shared.config.schedules import SCHEDULES
 from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
 
-DAYS_TO_KEEP = 7
+DAYS_TO_KEEP = 15
 DEFAULT_BATCH_SIZE = 1000
 
 
