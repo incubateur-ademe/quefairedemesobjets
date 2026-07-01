@@ -1,4 +1,5 @@
-<a
+<button
+    type="button"
     class="
     qf-flex qf-flex-col qf-items-center
     qf-bg-none qf-no-external-link-icon
@@ -7,12 +8,10 @@
     md:qf-hidden
     {% endif %}
     "
-    href="{% block href %}{{ url }}{% if utm_source %}?utm_source={{ utm_source }}{% endif %}{% endblock %}"
+    {% block href_attr %}data-href="{{ url }}{% if utm_source %}?utm_source={{ utm_source }}{% endif %}"{% endblock %}
     {% if title %}title="{{ title }}"{% endif %}
-    target="_blank"
-    rel="noreferrer"
-    {% block data_action %}data-action="click -> analytics#captureInteractionWithSolutionDetails"{% endblock %}
->
+    {% block data_action %}data-action="click -> analytics#captureInteractionWithSolutionDetails click->acteur-details#navigateExternal{% endblock %}
+">
     <span class="
         fr-btn fr-btn--sm
         qf-rounded-full
@@ -20,4 +19,4 @@
         {% if extra_classes %}{{ extra_classes }}{% endif %}">
     </span>
     <span class="fr-text--xs fr-mb-0 qf-whitespace-nowrap">{{ text }}</span>
-</a>
+</button>
