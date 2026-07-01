@@ -5,7 +5,7 @@ inputs:
   working-directory:
     description: "Directory that contains pyproject.toml and uv.lock (e.g. webapp, data-platform)"
     required: false
-    default: "webapp"
+    default: "."
   uv-groups:
     description: 'Arguments passed to uv sync (e.g. "--group dev")'
     required: false

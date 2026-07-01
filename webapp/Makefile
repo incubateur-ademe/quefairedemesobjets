@@ -16,7 +16,7 @@ FIXTURES_OPTIONS := --indent 4 --natural-foreign --natural-primary
 
 .PHONY: sync
 sync:
-	uv sync
+	uv sync --group dev --group webapp-dev
 
 .PHONY: check-format
 check-format:
