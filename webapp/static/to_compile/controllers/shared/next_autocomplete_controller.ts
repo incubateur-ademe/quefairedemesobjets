@@ -30,9 +30,9 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
   // by the user — the value was set for them; reopening would be ghosty.
   //
   // A boolean is safer than snapshotting the value because external writers
-  // (state.ts mirroring sessionStorage into the input on outlet-connect, for
-  // instance) update `inputTarget.value` directly and would not keep a
-  // value snapshot in sync.
+  // (search-solution-form#applyLocationChange writing a picked location into
+  // the input, for instance) update `inputTarget.value` directly and would
+  // not keep a value snapshot in sync.
   #userIsTyping = false
 
   static #LISTBOX_BOTTOM_MARGIN_PX = 8
