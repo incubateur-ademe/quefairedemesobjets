@@ -2,7 +2,7 @@
 
 import django.core.validators
 import re
-import sites_conformes.content_manager.validators
+import sites_conformes.core.validators
 import wagtail.fields
 from django.db import migrations
 
@@ -259,7 +259,7 @@ class Migration(migrations.Migration):
                             "label": "Extra query parameters",
                             "required": False,
                             "validators": [
-                                sites_conformes.content_manager.validators.validate_query_string
+                                sites_conformes.core.validators.validate_query_string
                             ],
                         },
                     ),
@@ -2845,7 +2845,7 @@ class Migration(migrations.Migration):
                             "label": "Extra query parameters",
                             "required": False,
                             "validators": [
-                                sites_conformes.content_manager.validators.validate_query_string
+                                sites_conformes.core.validators.validate_query_string
                             ],
                         },
                     ),

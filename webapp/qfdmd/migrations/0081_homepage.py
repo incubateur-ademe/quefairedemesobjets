@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("qfdmd", "0080_remove_synonyme_disabled"),
         (
-            "sites_conformes_content_manager",
+            "sites_conformes_core",
             "0072_catalogindexpage_filter_selection_and_more",
         ),
     ]
@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
                         parent_link=True,
                         primary_key=True,
                         serialize=False,
-                        to="sites_conformes_content_manager.contentpage",
+                        to="sites_conformes_core.contentpage",
                     ),
                 ),
                 (
@@ -55,6 +55,6 @@ class Migration(migrations.Migration):
             options={
                 "verbose_name": "Page d'accueil",
             },
-            bases=("sites_conformes_content_manager.contentpage",),
+            bases=("sites_conformes_core.contentpage",),
         ),
     ]

@@ -319,8 +319,8 @@ TEMPLATES = [
                 # Sites faciles
                 "wagtail.contrib.settings.context_processors.settings",
                 "wagtailmenus.context_processors.wagtailmenus",
-                "sites_conformes.content_manager.context_processors.skiplinks",
-                "sites_conformes.content_manager.context_processors.mega_menus",
+                "sites_conformes.core.context_processors.skiplinks",
+                "sites_conformes.core.context_processors.mega_menus",
             ],
         },
     },
@@ -562,7 +562,8 @@ INSTALLED_APPS.extend(
         "sites_conformes.core",
         "sites_conformes.menus",
         "sites_conformes.blog",
-        "sites_conformes.content_manager",
+        # In earlier PRs, content_manager was split into core.
+        # Ref: https://github.com/numerique-gouv/sites-conformes/pull/537
         "sites_conformes.events",
         "wagtail.contrib.settings",
         "sites_conformes.forms",

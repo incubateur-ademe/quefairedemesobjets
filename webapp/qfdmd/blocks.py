@@ -1,11 +1,11 @@
 import logging
 
 from django.utils.translation import gettext_lazy as _
-from sites_conformes.content_manager import blocks as sites_conformes_blocks
-from sites_conformes.content_manager.blocks import (
+from sites_conformes.core import blocks as sites_conformes_blocks
+from sites_conformes.core.blocks import (
     STREAMFIELD_COMMON_BLOCKS as sites_conformes_BLOCKS,
 )
-from sites_conformes.content_manager.blocks import (
+from sites_conformes.core.blocks.layout import (
     CommonStreamBlock,
 )
 from wagtail import blocks
