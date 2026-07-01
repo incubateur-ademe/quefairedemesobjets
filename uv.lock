@@ -3607,6 +3607,7 @@ source = { virtual = "." }
 
 [package.dev-dependencies]
 dev = [
+    { name = "beautifulsoup4" },
     { name = "black" },
     { name = "djade" },
     { name = "factory-boy" },
@@ -3616,6 +3617,7 @@ dev = [
     { name = "pytest-dotenv" },
     { name = "pytest-mock" },
     { name = "ruff" },
+    { name = "wagtail-factories" },
 ]
 lint = [
     { name = "black" },
@@ -3626,26 +3628,26 @@ notebook = [
     { name = "ipython" },
 ]
 test = [
+    { name = "beautifulsoup4" },
     { name = "factory-boy" },
     { name = "pytest" },
     { name = "pytest-django" },
     { name = "pytest-dotenv" },
     { name = "pytest-mock" },
+    { name = "wagtail-factories" },
 ]
 webapp-dev = [
-    { name = "beautifulsoup4" },
     { name = "django-browser-reload" },
     { name = "django-debug-toolbar" },
     { name = "django-silk" },
-    { name = "honcho" },
     { name = "ptpython" },
-    { name = "wagtail-factories" },
 ]
 
 [package.metadata]
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "beautifulsoup4", specifier = ">=4.15.0,<5" },
     { name = "black", specifier = ">=25.1.0,<26" },
     { name = "djade", specifier = ">=1.9.0,<2" },
     { name = "factory-boy", specifier = ">=3.3.1,<4" },
@@ -3655,6 +3657,7 @@ dev = [
     { name = "pytest-dotenv", specifier = ">=0.5.2,<0.6" },
     { name = "pytest-mock", specifier = ">=3.14.1,<4" },
     { name = "ruff", specifier = ">=0.15.18,<0.16" },
+    { name = "wagtail-factories", specifier = ">=4.5.0,<5" },
 ]
 lint = [
     { name = "black", specifier = ">=25.1.0,<26" },
@@ -3665,20 +3668,19 @@ notebook = [
     { name = "ipython", specifier = ">=9.14.1,<10" },
 ]
 test = [
+    { name = "beautifulsoup4", specifier = ">=4.15.0,<5" },
     { name = "factory-boy", specifier = ">=3.3.1,<4" },
     { name = "pytest", specifier = ">=9.1.1,<10" },
     { name = "pytest-django", specifier = ">=4.9.0,<5" },
     { name = "pytest-dotenv", specifier = ">=0.5.2,<0.6" },
     { name = "pytest-mock", specifier = ">=3.14.1,<4" },
+    { name = "wagtail-factories", specifier = ">=4.5.0,<5" },
 ]
 webapp-dev = [
-    { name = "beautifulsoup4", specifier = ">=4.15.0,<5" },
     { name = "django-browser-reload", specifier = ">=1.21.0,<2" },
     { name = "django-debug-toolbar", specifier = ">=7.0.0,<8" },
     { name = "django-silk", specifier = ">=5.5.0" },
-    { name = "honcho", specifier = ">=2.0.0,<3" },
     { name = "ptpython", specifier = ">=3.0.32,<4" },
-    { name = "wagtail-factories", specifier = ">=4.5.0,<5" },
 ]
 
 [[package]]
