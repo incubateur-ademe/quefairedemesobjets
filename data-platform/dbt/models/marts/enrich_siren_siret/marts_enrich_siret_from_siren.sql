@@ -3,11 +3,12 @@ WITH acteurs AS (
     FROM {{ ref('int_acteur_with_siren_without_siret') }}
 ),
 active_etablissements AS (
-    SELECT siren, siret, code_postal
+    SELECT ae.siren, ae.siret, ae.code_postal
     FROM {{ ref('base_ae_etablissement') }} AS ae
     INNER JOIN {{ ref('int_acteur_with_siren_without_siret') }} AS av
         ON ae.siren = av.siren
     WHERE ae.etat_administratif = 'A'
+    GROUP BY ae.siren, ae.siret, ae.code_postal
 ),
 -- Un seul SIRET actif pour le SIREN, quel que soit le code postal
 siren_unique_siret AS (
@@ -26,7 +27,7 @@ code_postal_unique_siret AS (
     INNER JOIN active_etablissements AS ae
         ON ae.siren = av.siren
         AND ae.code_postal = av.code_postal
-    GROUP BY av.identifiant_unique
+    GROUP BY av.identifiant_unique, av.siren
     HAVING COUNT(DISTINCT ae.siret) = 1
 )
 SELECT

@@ -380,18 +380,19 @@ class TestSerializeSuggestionGroupeEnrichMulti:
     def test_enrich_siret_from_siren_shows_siren_in_first_column(self):
         siren = "123456789"
         acteur = ActeurFactory(identifiant_unique="ACTEUR_2", siret="", siren=siren)
+        siret_propose = "12345678901234"
         suggestion_groupe = SuggestionGroupeFactory(
             suggestion_cohorte=SuggestionCohorteFactory(
                 type_action=SuggestionAction.ENRICH_ACTEURS_SIRET,
             ),
-            contexte={"siren": siren, "# acteurs": 1},
+            contexte={"siret": siret_propose, "# acteurs": 1},
         )
         SuggestionUnitaireFactory(
             suggestion_groupe=suggestion_groupe,
             suggestion_modele="RevisionActeur",
             revision_acteur_id=acteur.identifiant_unique,
             champs=["siret"],
-            valeurs=["12345678901234"],
+            valeurs=[siret_propose],
         )
 
         result = get_context_from_suggestion_groupe_type_enrich_multi(suggestion_groupe)

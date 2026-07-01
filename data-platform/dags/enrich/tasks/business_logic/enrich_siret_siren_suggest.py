@@ -1,8 +1,9 @@
 """Generate SuggestionGroupe/SuggestionUnitaire for SIRET/SIREN enrichment.
 
 Unlike the legacy suggestions (1 Suggestion per acteur), we group acteurs into
-1 SuggestionGroupe per SIREN (resp. per SIRET) and 1 SuggestionUnitaire per
-acteur, the same way crawl_urls does with `use_legacy_suggestions=False`.
+1 SuggestionGroupe per proposed SIRET (resp. per acteur SIRET) and 1
+SuggestionUnitaire per acteur, the same way crawl_urls does with
+`use_legacy_suggestions=False`.
 """
 
 import logging
@@ -32,11 +33,10 @@ def enrich_siret_siren_to_suggestion_groupes(
     cohort: str,
     suggest_action: str,
     suggest_field: str,
-    group_by_field: str,
     identifiant_action: str,
     dry_run: bool = True,
 ) -> bool:
-    """Write 1 SuggestionGroupe per `group_by_field` value and 1
+    """Write 1 SuggestionGroupe per `suggest_field` value and 1
     SuggestionUnitaire per acteur, suggesting `suggest_field`."""
     django_setup_full()
     from data.models.suggestion import (
@@ -58,10 +58,10 @@ def enrich_siret_siren_to_suggestion_groupes(
         logger.info("Aucun acteur visible correspondant, rien à suggérer")
         return False
 
-    nb_groupes = df[group_by_field].nunique()
+    nb_groupes = df[suggest_field].nunique()
     nb_acteurs = len(df)
     metadata = {
-        f"{cohort}: # {group_by_field}": nb_groupes,
+        f"{cohort}: # {suggest_field}": nb_groupes,
         f"{cohort}: # Acteurs": nb_acteurs,
     }
     logger.info(log.banner_string(f"🏁 Cohorte {cohort}"))
@@ -88,12 +88,12 @@ def enrich_siret_siren_to_suggestion_groupes(
 
     from qfdmo.models import RevisionActeur
 
-    for group_value, group_df in df.groupby(group_by_field):
+    for group_value, group_df in df.groupby(suggest_field):
         suggestion_groupe = SuggestionGroupe.objects.create(
             suggestion_cohorte=cohorte,
             statut=SuggestionStatut.AVALIDER,
             contexte={
-                group_by_field: group_value,
+                suggest_field: group_value,
                 "# acteurs": len(group_df),
             },
         )
@@ -131,7 +131,6 @@ def enrich_siret_siren_suggest(
     cohort: str,
     suggest_action: str,
     suggest_field: str,
-    group_by_field: str,
     identifiant_action: str,
     dry_run: bool = True,
 ) -> bool:
@@ -147,7 +146,6 @@ def enrich_siret_siren_suggest(
         cohort=cohort,
         suggest_action=suggest_action,
         suggest_field=suggest_field,
-        group_by_field=group_by_field,
         identifiant_action=identifiant_action,
         dry_run=dry_run,
     )

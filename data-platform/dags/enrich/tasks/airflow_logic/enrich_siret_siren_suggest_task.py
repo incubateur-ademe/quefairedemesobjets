@@ -22,7 +22,6 @@ def enrich_siret_siren_suggest_wrapper(
     dbt_model_name: str,
     suggest_action: str,
     suggest_field: str,
-    group_by_field: str,
     ti: TaskInstance,
     params: dict[str, Any],
     dag: DAG,
@@ -37,7 +36,6 @@ def enrich_siret_siren_suggest_wrapper(
         cohort=cohort,
         suggest_action=suggest_action,
         suggest_field=suggest_field,
-        group_by_field=group_by_field,
         identifiant_action=dag.dag_id,
         dry_run=config.dry_run,
     )
@@ -52,7 +50,6 @@ def enrich_siret_siren_suggest_task(
     dbt_model_name: str,
     suggest_action: str,
     suggest_field: str,
-    group_by_field: str,
 ) -> PythonOperator:
     return PythonOperator(
         task_id=task_id,
@@ -63,7 +60,6 @@ def enrich_siret_siren_suggest_task(
             dbt_model_name,
             suggest_action,
             suggest_field,
-            group_by_field,
         ],
         dag=dag,
         doc_md=f"**Suggestions groupées** pour la cohorte: **{cohort}**",

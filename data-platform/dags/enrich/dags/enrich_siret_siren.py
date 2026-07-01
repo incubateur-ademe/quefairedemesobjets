@@ -3,7 +3,8 @@ DAG to suggest SIRET/SIREN enrichments for QFDMO acteurs:
 - 1 cohorte to suggest a new SIRET for acteurs that have a known SIREN
 - 1 cohorte to suggest a new SIREN for acteurs that have a known SIRET
 
-Suggestions are grouped (1 SuggestionGroupe per SIREN, resp. per SIRET) using
+Suggestions are grouped (1 SuggestionGroupe per proposed SIRET, resp. per SIRET
+acteur) using
 the non-legacy SuggestionGroupe/SuggestionUnitaire machinery, the same way
 crawl_urls does with `use_legacy_suggestions=False`.
 """
@@ -51,7 +52,7 @@ with DAG(
     dbt_refresh = enrich_dbt_models_refresh_task(dag)
 
     # Cohorte 1: acteurs with a known SIREN -> suggest a new SIRET
-    # 1 SuggestionGroupe per SIREN
+    # 1 SuggestionGroupe per proposed SIRET
     suggest_siret_from_siren = enrich_siret_siren_suggest_task(
         dag,
         task_id=TASKS.ENRICH_SIRET_FROM_SIREN_SUGGESTIONS,
@@ -59,7 +60,6 @@ with DAG(
         dbt_model_name=DBT.MARTS_ENRICH_SIRET_FROM_SIREN,
         suggest_action="ENRICH_ACTEURS_SIRET",
         suggest_field="siret",
-        group_by_field="siren",
     )
 
     # Cohorte 2: acteurs with a known SIRET -> suggest a new SIREN
@@ -71,7 +71,6 @@ with DAG(
         dbt_model_name=DBT.MARTS_ENRICH_SIREN_FROM_SIRET,
         suggest_action="ENRICH_ACTEURS_SIREN",
         suggest_field="siren",
-        group_by_field="siret",
     )
 
     # Graph
