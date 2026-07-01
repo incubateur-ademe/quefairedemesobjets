@@ -8,13 +8,13 @@ Dépendances de production : chaque membre (`webapp/`, `data-platform/`) déclar
 
 Dépendances de développement : toutes centralisées dans le `pyproject.toml` racine, réparties en groupes sémantiques :
 
-| Groupe       | Contenu                                                            | Usage                   |
-| ------------ | ------------------------------------------------------------------ | ----------------------- |
-| `lint`       | black, ruff                                                        | CI linter, pre-commit   |
-| `test`       | pytest*, factory-boy                                               | CI tests                |
-| `dev`        | lint + test + djade + pre-commit                                   | CI + dev de base        |
-| `webapp-dev` | django-browser-reload, debug-toolbar, silk, honcho, ptpython, etc. | Développement webapp    |
-| `notebook`   | dedupe, ipython                                                    | Notebooks data-platform |
+| Groupe       | Contenu                                                    | Usage                   |
+| ------------ | ---------------------------------------------------------- | ----------------------- |
+| `lint`       | black, ruff                                                | CI linter, pre-commit   |
+| `test`       | pytest*, factory-boy                                       | CI tests                |
+| `dev`        | lint + test + djade + pre-commit                           | CI + dev de base        |
+| `webapp-dev` | django-browser-reload, debug-toolbar, silk, ptpython, etc. | Développement webapp    |
+| `notebook`   | dedupe, ipython                                            | Notebooks data-platform |
 
 Pour installer en local (depuis la racine du repo) :
 

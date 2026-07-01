@@ -21,6 +21,8 @@ test = [
     "pytest-dotenv>=0.5.2,<0.6",
     "pytest-mock>=3.14.1,<4",
     "factory-boy>=3.3.1,<4",
+    "wagtail-factories>=4.5.0,<5",
+    "beautifulsoup4>=4.15.0,<5",
 ]
 dev = [
     {include-group = "lint"},
@@ -29,13 +31,10 @@ dev = [
     "pre-commit>=4.6.0,<5",
 ]
 webapp-dev = [
-    "beautifulsoup4>=4.15.0,<5",
     "django-browser-reload>=1.21.0,<2",
     "django-debug-toolbar>=7.0.0,<8",
     "django-silk>=5.5.0",
-    "honcho>=2.0.0,<3",
     "ptpython>=3.0.32,<4",
-    "wagtail-factories>=4.5.0,<5",
 ]
 notebook = [
     "dedupe>=3.0.3",
