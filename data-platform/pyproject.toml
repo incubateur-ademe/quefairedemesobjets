@@ -26,19 +26,6 @@ dependencies = [
     "webapp-quefairedemesobjetsetdechets",
 ]
 
-[dependency-groups]
-dev = [
-    "black>=25.1.0,<26",
-    "ruff>=0.15.18,<0.16",
-    "pytest>=9.1.1,<10",
-    "pytest-django>=4.9.0,<5",
-    "pytest-dotenv>=0.5.2,<0.6",
-    "pytest-mock>=3.14.1,<4",
-    "factory-boy>=3.3.1,<4",
-    "dedupe>=3.0.3",
-    "ipython>=9.14.1,<10",
-]
-
 [tool.pytest.ini_options]
 # Full app graph (qfdmo → qfdmd, Wagtail CMS, etc.): required for migrate in django_db tests.
 # Airflow continues to use core.airflow_settings via django_setup_full() / env outside pytest.
