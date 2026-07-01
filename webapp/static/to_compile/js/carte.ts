@@ -15,12 +15,13 @@ import ActeurDetailsController from "../controllers/carte/acteur_details"
 import NextAutocompleteController from "../controllers/shared/next_autocomplete_controller"
 import ResponsiveController from "../controllers/carte/responsive_controller"
 import PinpointController from "../controllers/carte/pinpoint_controller"
+import FrameLocationController from "../controllers/carte/frame_location_controller"
 
 // QFDMD
 import SearchController from "../controllers/assistant/search"
 import BlinkController from "../controllers/assistant/blink"
 import AnalyticsController from "../controllers/shared/analytics"
-import StateController from "../controllers/assistant/state"
+import LocationController from "../controllers/shared/location_controller"
 
 window.stimulus = Application.start()
 
@@ -36,11 +37,12 @@ stimulus.register("scroll", ScrollController)
 stimulus.register("acteur-details", ActeurDetailsController)
 stimulus.register("next-autocomplete", NextAutocompleteController)
 stimulus.register("pinpoint", PinpointController)
+stimulus.register("frame-location", FrameLocationController)
 
 stimulus.register("search", SearchController)
 stimulus.register("blink", BlinkController)
 stimulus.register("analytics", AnalyticsController)
-stimulus.register("state", StateController)
+stimulus.register("location", LocationController)
 stimulus.register("responsive", ResponsiveController)
 
 Turbo.session.drive = false

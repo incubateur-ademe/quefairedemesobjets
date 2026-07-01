@@ -27,9 +27,13 @@ export const config: PlaywrightTestConfig = {
     reuseExistingServer: !process.env.CI,
     env: {
       ...(process.env as Record<string, string>),
-      DATABASE_URL: (process.env.SAMPLE_DATABASE_URL ?? process.env.DATABASE_URL)!,
+      DATABASE_URL: (process.env.DB_WEBAPP_SAMPLE ?? process.env.DATABASE_URL)!,
       SECRET_KEY: process.env.SECRET_KEY!,
       BASE_URL: "http://localhost:8888",
+      // The debug toolbar is a fixed-position overlay that interferes with
+      // layout-sensitive tests (e.g. the autocomplete dropdown clamp at narrow
+      // heights). Keep it off for the e2e server regardless of local .env.
+      WITH_DJANGO_DEBUG_TOOLBAR: "False",
     },
     cwd: path.resolve(__dirname),
   },
