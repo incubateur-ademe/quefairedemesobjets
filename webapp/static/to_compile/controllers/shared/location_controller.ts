@@ -1,9 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
-import {
-  persistLocation,
-  readStoredLocation,
-  StoredLocation,
-} from "../../js/location_store"
+import { persistLocation } from "../../js/location_store"
 
 export const LOCATION_CHANGED_EVENT = "qf:location-changed"
 
@@ -36,11 +32,5 @@ export default class LocationController extends Controller<HTMLElement> {
 
     persistLocation(detail)
     document.dispatchEvent(new CustomEvent(LOCATION_CHANGED_EVENT, { detail }))
-  }
-
-  // Thin re-export so callers that hold the controller can read the location;
-  // most readers import readStoredLocation from the module directly.
-  getLocation(): StoredLocation {
-    return readStoredLocation()
   }
 }
