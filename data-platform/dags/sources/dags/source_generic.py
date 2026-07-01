@@ -43,6 +43,31 @@ def default_normalization_rules() -> list[dict]:
             "transformation": "clean_sous_categorie_codes",
             "destination": "sous_categorie_codes",
         },
+        {
+            "origin": "email",
+            "transformation": "clean_email",
+            "destination": "email",
+        },
+        {
+            "origin": "nom",
+            "transformation": "strip_string",
+            "destination": "nom",
+        },
+        {
+            "origin": "adresse",
+            "transformation": "strip_string",
+            "destination": "adresse",
+        },
+        {
+            "origin": "description",
+            "transformation": "strip_string",
+            "destination": "description",
+        },
+        {
+            "origin": "ville",
+            "transformation": "strip_string",
+            "destination": "ville",
+        },
         # 3. Ajout des colonnes avec une valeur par défaut
         {
             "column": "statut",
@@ -117,11 +142,6 @@ def default_normalization_rules() -> list[dict]:
         {"remove": "categorie"},
         {"remove": "website"},
         # 6. Colonnes à garder (rien à faire, utilisé pour le controle)
-        {"keep": "nom"},
-        {"keep": "adresse"},
-        {"keep": "description"},
-        {"keep": "email"},
-        {"keep": "ville"},
     ]
 
 
