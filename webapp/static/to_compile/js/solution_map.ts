@@ -78,6 +78,8 @@ export class SolutionMap {
     }
     // Add zoom controls
     this.#addZoomControl()
+    // Override English titles on Maplibre controls with French
+    this.#localiseControls()
 
     if (
       this.#location.latitude !== undefined &&
@@ -186,15 +188,40 @@ export class SolutionMap {
   }
 
   #addZoomControl() {
-    this.map.addControl(
-      new maplibregl.NavigationControl({
-        visualizePitch: false,
-        visualizeRoll: false,
-        showZoom: true,
-        showCompass: false,
-      }),
-      "top-left",
+    const nav = new maplibregl.NavigationControl({
+      visualizePitch: false,
+      visualizeRoll: false,
+      showZoom: true,
+      showCompass: false,
+    })
+    this.map.addControl(nav, "top-left")
+    // Maplibre defaults to English title attributes — override with French
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const zoomIn = (nav as any)._zoomInButton as HTMLElement
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const zoomOut = (nav as any)._zoomOutButton as HTMLElement
+    if (zoomIn) zoomIn.setAttribute("title", "Zoom avant")
+    if (zoomOut) zoomOut.setAttribute("title", "Zoom arrière")
+  }
+
+  #localiseControls() {
+    // The _controls array is a Maplibre internal API — typed as `any` by necessity
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const attribution = (this.map as any)._controls?.find(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (c: any) => c instanceof maplibregl.AttributionControl,
     )
+    if (attribution) {
+      const btn = attribution._compactButton as HTMLButtonElement
+      const link = attribution._editLink as HTMLAnchorElement
+      if (btn) {
+        btn.setAttribute("title", "Afficher les attributions")
+      }
+      if (link) {
+        link.setAttribute("title", "Améliorer la carte — Nouvelle fenêtre")
+        link.setAttribute("aria-label", "Améliorer la carte — Nouvelle fenêtre")
+      }
+    }
   }
 
   #dispatchMapChangedEvent(): void {

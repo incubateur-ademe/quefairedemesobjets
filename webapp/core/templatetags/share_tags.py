@@ -41,20 +41,22 @@ def get_sharer_content(request, object, social_network=None):
     template = {
         "url": url,
         "facebook": {
-            "title": f"partager {object} sur Facebook - nouvelle fenêtre",
+            "title": f"Partager sur Facebook {object} - nouvelle fenêtre",
             "url": f"https://www.facebook.com/sharer.php?u={quoted_url}",
         },
         "twitter": {
-            "title": f"partager {object} sur X - nouvelle fenêtre",
+            "title": (
+                f"Partager sur X (anciennement Twitter) {object}" f" - nouvelle fenêtre"
+            ),
             "url": f"https://twitter.com/intent/tweet?url={quoted_url}"
             f"&text={share_intro}&via=Longue+vie+aux+objets&hashtags=longuevieauxobjets,ademe",
         },
         "linkedin": {
-            "title": f"partager {object} sur LinkedIn - nouvelle fenêtre",
+            "title": f"Partager sur LinkedIn {object} - nouvelle fenêtre",
             "url": f"https://www.linkedin.com/shareArticle?url={quoted_url}&title={share_intro}",
         },
         "email": {
-            "title": f"partager {object} par email - nouvelle fenêtre",
+            "title": f"Partager par email {object} - nouvelle fenêtre",
             "url": f"mailto:?subject={quote(share_intro)}&body={quote(share_body)}",
         },
     }
