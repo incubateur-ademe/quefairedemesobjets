@@ -1,7 +1,7 @@
 # Aliases
 PYTHON := uv run python
 DB_URL := postgres://webapp:webapp@localhost:6543/webapp# pragma: allowlist secret
-SAMPLE_DB_URL ?= $(if $(SAMPLE_DATABASE_URL),$(SAMPLE_DATABASE_URL),$(DB_URL))
+SAMPLE_DB_URL ?= $(if $(DB_WEBAPP_SAMPLE),$(DB_WEBAPP_SAMPLE),$(DB_URL))
 SAMPLE_DUMP_FILE ?= tmpbackup-sample/sample.custom
 BASE_DOMAIN := quefairedemesdechets.ademe.local
 
@@ -199,12 +199,12 @@ drop-schema-public:
 create-schema-public:
 	psql -d '$(DB_URL)' -c "CREATE SCHEMA IF NOT EXISTS public;"
 
-
 .SILENT:
 .PHONY: create-db-extensions
 create-extensions:
 	@echo "Creating required extensions"
 	psql -d '$(DB_URL)' -f scripts/sql/create_extensions.sql
+	psql -d '$(DB_URL)' -f scripts/sql/create_wagtail_french_config.sql
 
 .PHONY: psql
 psql:
@@ -233,6 +233,32 @@ dump-sample:
 # The script handles extension creation before restore.
 # drop-schema-public / create-schema-public are defined once above.
 .SILENT:
+.SILENT:
+.PHONY: load-prod-dump
+load-prod-dump:
+	@DUMP_FILE=$$(find tmpbackup-prod -type f -name "*.custom" -print -quit); \
+	psql -d '$(DB_URL)' -f scripts/sql/create_extensions.sql && \
+	psql -d '$(DB_URL)' -f scripts/sql/create_wagtail_french_config.sql && \
+	pg_restore -d '$(DB_URL)' --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
+
+.SILENT:
+.PHONY: load-preprod-dump
+load-preprod-dump:
+	@DUMP_FILE=$$(find tmpbackup-preprod -type f -name "*.custom" -print -quit); \
+	psql -d '$(DB_URL)' -f scripts/sql/create_extensions.sql && \
+	psql -d '$(DB_URL)' -f scripts/sql/create_wagtail_french_config.sql && \
+	pg_restore -d '$(DB_URL)' --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
+
+.SILENT:
+.PHONY: load-sample-dump
+load-sample-dump:
+	@DUMP_FILE=$(SAMPLE_DUMP_FILE); \
+	[ -f "$$DUMP_FILE" ] || DUMP_FILE=$$(find tmpbackup-sample -type f -name "*.custom" -print -quit); \
+	[ -n "$$DUMP_FILE" ] || { echo "No sample dump found"; exit 1; }; \
+	psql -d '$(SAMPLE_DB_URL)' -f scripts/sql/create_extensions.sql && \
+	psql -d '$(SAMPLE_DB_URL)' -f scripts/sql/create_wagtail_french_config.sql && \
+	pg_restore -d '$(SAMPLE_DB_URL)' --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
+
 .PHONY: load-dump-to-loc
 load-dump-to-loc:
 	./scripts/db_restore.sh $(ENV) $(TMPDIR)
