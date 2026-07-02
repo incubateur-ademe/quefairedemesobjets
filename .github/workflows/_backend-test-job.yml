@@ -27,6 +27,7 @@ env:
   BASE_URL: http://localhost:8000
   DATABASE_URL: "postgres://webapp:webapp@localhost:5432/webapp" # pragma: allowlist secret
   SECRET_KEY: coucou # pragma: allowlist secret
+  DJANGO_SETTINGS_MODULE: settings.test
   CI: true
 
 jobs:
@@ -64,7 +65,7 @@ jobs:
       - name: Check for missing migrations
         if: inputs.check-migrations && inputs.working-directory == 'webapp'
         working-directory: webapp
-        run: uv run python manage.py makemigrations --check --no-input --settings=core.test_settings
+        run: uv run python manage.py makemigrations --check --no-input --settings=${{ env.DJANGO_SETTINGS_MODULE }}
 
 permissions:
   contents: read

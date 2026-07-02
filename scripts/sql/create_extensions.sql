@@ -11,8 +11,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS postgres_fdw;
 CREATE EXTENSION IF NOT EXISTS unaccent;
 
-DROP TEXT SEARCH CONFIGURATION IF EXISTS wagtail_french;
-CREATE TEXT SEARCH CONFIGURATION wagtail_french (COPY = french);
-ALTER TEXT SEARCH CONFIGURATION wagtail_french
-  ALTER MAPPING FOR hword, hword_part, word
-  WITH unaccent, french_stem;
+-- Note: the wagtail_french text search configuration is created by the
+-- dedicated webapp/qfdmd/migrations/sql/create_wagtail_french_config.sql,
+-- run right after
+-- this file by every caller.
