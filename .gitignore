@@ -28,8 +28,6 @@ __screenshots__
 
 # Notebooks
 .ipynb_checkpoints
-data-platform/notebooks/deduplication/datasets/Clusterisation comme Data-inclusion - par département - deduplication_clusters_26_p_90.csv
-data-platform/notebooks/deduplication/datasets/Clusterisation comme Data-inclusion - par département - deduplication_clusters_26_p_95.csv
-data-platform/notebooks/deduplication/datasets/Clusterisation comme Data-inclusion - par département - deduplication_clusters_44_P_90.csv
-data-platform/notebooks/deduplication/datasets/Clusterisation comme Data-inclusion - par département - deduplication_clusters_56_p_90.csv
-data-platform/notebooks/deduplication/datasets/Clusterisation comme Data-inclusion - par département - deduplication_clusters_56_p_95.csv
+
+#datasets
+data-platform/notebooks/deduplication/datasets/*
