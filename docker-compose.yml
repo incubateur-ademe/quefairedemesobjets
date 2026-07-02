@@ -55,7 +55,7 @@ services:
       - POSTGRES_DB=webapp
       - POSTGRES_MULTIPLE_EXTENSIONS=postgis
     volumes:
-      - ./webapp_dbdata:/var/lib/postgresql/data:delegated
+      - webapp_dbdata:/var/lib/postgresql/data:delegated
     expose:
       - 5432
     ports:
@@ -70,7 +70,7 @@ services:
       - POSTGRES_DB=warehouse
       - POSTGRES_MULTIPLE_EXTENSIONS=postgis
     volumes:
-      - ./warehouse_dbdata:/var/lib/postgresql/data:delegated
+      - warehouse_dbdata:/var/lib/postgresql/data:delegated
     expose:
       - 5432
     ports:
@@ -156,7 +156,11 @@ services:
     ports:
       - "8082:80"
     healthcheck:
-      test: ["CMD-SHELL", 'airflow jobs check --job-type DagProcessorJob --hostname "$${HOSTNAME}"']
+      test:
+        [
+          "CMD-SHELL",
+          'airflow jobs check --job-type DagProcessorJob --hostname "$${HOSTNAME}"',
+        ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -167,3 +171,7 @@ services:
       airflow-webserver:
         condition: service_healthy
     profiles: [airflow]
+
+volumes:
+  webapp_dbdata:
+  warehouse_dbdata:
