@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = "==3.12.*"
 dependencies = [
+    "connectorx>=0.4.5",
     "dedupe>=3.0.3",
     "jupyterlab>=4.6.0",
     "jupyterlab-execute-time>=3.3.0",
