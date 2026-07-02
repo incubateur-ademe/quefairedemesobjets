@@ -423,6 +423,32 @@
 </li>
 </ul>
 <p>DAG / Airflow Python tests live in <strong><code class="docutils literal notranslate"><span class="pre">data-platform/</span></code></strong>: <code class="docutils literal notranslate"><span class="pre">cd</span> <span class="pre">data-platform</span> <span class="pre">&amp;&amp;</span> <span class="pre">uv</span> <span class="pre">sync</span> <span class="pre">&amp;&amp;</span> <span class="pre">make</span> <span class="pre">dags-test</span></code>.</p>
+<section id="running-e2e-tests-locally">
+<h4>Running E2E tests locally<a class="headerlink" href="#running-e2e-tests-locally" title="Lien vers cette rubrique">¶</a></h4>
+<p>E2E tests run against a dedicated <code class="docutils literal notranslate"><span class="pre">webapp_sample</span></code> database (kept separate from your
+dev <code class="docutils literal notranslate"><span class="pre">webapp</span></code> database) on the same Postgres container, so you don’t have to mutate
+the dev data you’re working with. The connection is configured by <code class="docutils literal notranslate"><span class="pre">DB_WEBAPP_SAMPLE</span></code>
+in <code class="docutils literal notranslate"><span class="pre">.env</span></code> (see <code class="docutils literal notranslate"><span class="pre">.env.template</span></code>); the dev <code class="docutils literal notranslate"><span class="pre">DATABASE_URL</span></code> is left untouched.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># 1. start the local Postgres container (from repo root)</span>
+docker<span class="w"> </span>compose<span class="w"> </span>--profile<span class="w"> </span>lvao<span class="w"> </span>up<span class="w"> </span>-d
+
+<span class="c1"># 2. from webapp/: create the sample DB (if missing), migrate, seed search index, build JS</span>
+make<span class="w"> </span>prepare-e2e-test-local
+
+<span class="c1"># 3. run the tests</span>
+make<span class="w"> </span>e2e-test
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">prepare-e2e-test-local</span></code> is idempotent for DB creation — it calls
+<code class="docutils literal notranslate"><span class="pre">manage.py</span> <span class="pre">create_webapp_sample_db</span></code>, which creates the <code class="docutils literal notranslate"><span class="pre">webapp_sample</span></code> database,
+role, and extensions only if they don’t already exist, so steps 2-3 are the normal
+loop for iterating on tests.</p>
+<p>To start fresh, drop the sample DB and rerun step 2:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>psql<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$DATABASE_URL</span><span class="s2">&quot;</span><span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;DROP DATABASE webapp_sample;&quot;</span>
+</pre></div>
+</div>
+<p>See <a class="reference internal" href="../../how-to/development/tests_e2e.html"><span class="std std-doc">tests_e2e.md</span></a> for how to write new E2E tests.</p>
+</section>
 </section>
 </section>
 <section id="important-points">
@@ -531,7 +557,10 @@
 </li>
 <li><a class="reference internal" href="#useful-tools-and-commands">🔧 Useful Tools and Commands</a><ul>
 <li><a class="reference internal" href="#development">Development</a></li>
-<li><a class="reference internal" href="#tests">Tests</a></li>
+<li><a class="reference internal" href="#tests">Tests</a><ul>
+<li><a class="reference internal" href="#running-e2e-tests-locally">Running E2E tests locally</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li><a class="reference internal" href="#important-points">⚠️ Important Points</a></li>

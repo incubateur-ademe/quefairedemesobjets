@@ -476,9 +476,13 @@ icon_class=&quot;fr-icon-alert-line&quot; %}
 </section>
 <section id="executer-les-tests">
 <h2>Exécuter les tests<a class="headerlink" href="#executer-les-tests" title="Lien vers cette rubrique">¶</a></h2>
+<p>Pour le setup local (base de données d’échantillon, etc.), voir
+<a class="reference internal" href="../../reference/webapp/README.html#running-e2e-tests-locally"><span class="std std-ref">README.md</span></a>.</p>
 <section id="tous-les-tests">
 <h3>Tous les tests<a class="headerlink" href="#tous-les-tests" title="Lien vers cette rubrique">¶</a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>npm<span class="w"> </span>run<span class="w"> </span>test:e2e
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>npm<span class="w"> </span>run<span class="w"> </span>e2e_test
+<span class="c1"># ou, avec préparation de la base d&#39;échantillon :</span>
+make<span class="w"> </span>prepare-e2e-test-local<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>make<span class="w"> </span>e2e-test
 </pre></div>
 </div>
 </section>
