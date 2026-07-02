@@ -65,7 +65,7 @@ jobs:
       - name: Check for missing migrations
         if: inputs.check-migrations && inputs.working-directory == 'webapp'
         working-directory: webapp
-        run: uv run python manage.py makemigrations --check --no-input --settings=settings.test
+        run: uv run python manage.py makemigrations --check --no-input --settings=${{ env.DJANGO_SETTINGS_MODULE }}
 
 permissions:
   contents: read
