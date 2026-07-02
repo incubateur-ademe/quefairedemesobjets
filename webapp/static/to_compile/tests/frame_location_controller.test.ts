@@ -9,6 +9,7 @@ function setupFrame(src: string | null) {
   const srcAttr = src === null ? "" : `src="${src}"`
   document.body.innerHTML = `<turbo-frame
     id="tous-les-gestes"
+    loading="lazy"
     data-controller="frame-location"
     data-frame-location-prefix-value="${PREFIX}"
     ${srcAttr}></turbo-frame>`
@@ -38,7 +39,7 @@ describe("FrameLocationController", () => {
     app = undefined
   })
 
-  it("injects the stored location into src on connect", async () => {
+  it("injects the stored location into src and strips loading=lazy on connect", async () => {
     sessionStorage.setItem("latitude", "47.66")
     sessionStorage.setItem("longitude", "-2.99")
     sessionStorage.setItem("adresse", "Auray")
@@ -52,6 +53,7 @@ describe("FrameLocationController", () => {
     expect(url.searchParams.get(`${PREFIX}-latitude`)).toBe("47.66")
     expect(url.searchParams.get(`${PREFIX}-longitude`)).toBe("-2.99")
     expect(url.searchParams.get(`${PREFIX}-adresse`)).toBe("Auray")
+    expect(frame.hasAttribute("loading")).toBe(false)
   })
 
   it("leaves src unchanged when no location is stored", async () => {

@@ -26,6 +26,7 @@ function setupFrame(extraAttrs: Record<string, string> = {}) {
     "data-ab-test-flag-key-value": FLAG_KEY,
     "data-ab-test-src-variant-value": VARIANT_SRC,
     src: CONTROL_SRC,
+    loading: "lazy",
     ...extraAttrs,
   }
   const attrString = Object.entries(attrs)
@@ -63,23 +64,25 @@ describe("AbTestController", () => {
     sessionStorage.clear()
   })
 
-  it("assigns variant src when flag returns 'test' on mobile", async () => {
+  it("assigns variant src and strips loading=lazy when flag returns 'test' on mobile", async () => {
     getFeatureFlag.mockReturnValue("test")
     const frame = setupFrame()
     startStimulus()
     await flush()
 
     expect(frame.getAttribute("src")).toBe(VARIANT_SRC)
+    expect(frame.hasAttribute("loading")).toBe(false)
     expect(register).toHaveBeenCalledWith({ [`$feature/${FLAG_KEY}`]: "test" })
   })
 
-  it("restores control src when flag returns 'control'", async () => {
+  it("restores control src and strips loading=lazy when flag returns 'control'", async () => {
     getFeatureFlag.mockReturnValue("control")
     const frame = setupFrame()
     startStimulus()
     await flush()
 
     expect(frame.getAttribute("src")).toBe(CONTROL_SRC)
+    expect(frame.hasAttribute("loading")).toBe(false)
   })
 
   it("restores control src when flag is missing/undefined", async () => {

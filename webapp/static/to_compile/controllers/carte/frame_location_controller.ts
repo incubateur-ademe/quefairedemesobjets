@@ -10,10 +10,12 @@ import { injectLocationIntoSrc, readStoredLocation } from "../../js/location_sto
  * on connect it removes `src` to pause Turbo, folds the stored location into the
  * URL, then restores `src` so the frame fetches once, located.
  *
- * IMPORTANT: the frame MUST be `loading="lazy"`. An eager frame fires its fetch
- * in `connectedCallback` during HTML parse — before Stimulus connects — so the
- * pause would come too late. `lazy` defers the fetch to viewport intersection,
- * which happens after this controller has connected.
+ * The frame MUST start as `loading="lazy"` so Turbo doesn't fire its fetch in
+ * `connectedCallback` during HTML parse (before Stimulus connects). Once this
+ * controller has injected the location, it strips `loading="lazy"` so the frame
+ * loads eagerly on the final `src` — the IntersectionObserver may have already
+ * fired by now, and a lazy frame that re-enters the viewport after a `src`
+ * change won't re-trigger loading on its own.
  *
  * The AB-test frame achieves the same result by composing `injectLocationIntoSrc`
  * into its own `#assign`; this controller is for the non-AB frame, which has no
@@ -27,11 +29,15 @@ export default class FrameLocationController extends Controller<HTMLElement> {
     const src = this.element.getAttribute("src")
     if (!src) return // Misconfigured — leave the frame as-is.
 
-    // Pause the frame, inject location, then let it fetch once.
+    // Pause the frame, inject location.
     this.element.removeAttribute("src")
-    this.element.setAttribute(
-      "src",
-      injectLocationIntoSrc(src, this.prefixValue, readStoredLocation()),
-    )
+    const finalSrc = injectLocationIntoSrc(src, this.prefixValue, readStoredLocation())
+    this.element.setAttribute("src", finalSrc)
+
+    // Strip `loading="lazy"` so Turbo loads the frame eagerly. By this
+    // point the IntersectionObserver may have already fired (the element
+    // was in the viewport at parse time), and a lazy frame won't reload
+    // on its own when `src` changes post-intersection.
+    this.element.removeAttribute("loading")
   }
 }

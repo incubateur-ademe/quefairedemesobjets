@@ -97,6 +97,11 @@ export default class extends Controller<HTMLElement> {
       "src",
       injectLocationIntoSrc(src, this.prefixValue, readStoredLocation()),
     )
+    // Strip `loading="lazy"` so Turbo loads the frame eagerly. By the time
+    // `#assign` runs the IntersectionObserver may have already fired (the
+    // frame was in the viewport at parse time), and a lazy frame won't
+    // re-trigger loading when `src` is set post-intersection.
+    this.element.removeAttribute("loading")
   }
 
   #isMobileViewport(): boolean {
