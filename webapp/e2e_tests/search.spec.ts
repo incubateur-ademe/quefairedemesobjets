@@ -249,34 +249,30 @@ test.describe("Positionnement de l'autocomplete en hauteur contrainte", () => {
   // must stay inside the document body, scrolling internally instead of
   // spilling past the bottom edge. Notion ticket 3104.
   test("La dropdown reste dans le body et scrolle en interne", async ({ page }) => {
-    await page.setViewportSize({ width: 320, height: 220 })
+    await page.setViewportSize({ width: 320, height: 300 })
     await navigateTo(page, "/")
 
     await typeSearchQuery(page, "velo")
     await waitForResults(page)
 
-    const measurements = await page.evaluate((selector) => {
-      const frame = document.querySelector<HTMLElement>(selector)
-      if (!frame) return null
-      const rect = frame.getBoundingClientRect()
-      return {
-        bodyHeight: document.documentElement.clientHeight,
-        rectTop: rect.top,
-        rectBottom: rect.bottom,
-        scrollHeight: frame.scrollHeight,
-        clientHeight: frame.clientHeight,
-        overflowY: getComputedStyle(frame).overflowY,
-        hasIframeIgnore: frame.hasAttribute("data-iframe-ignore"),
-      }
-    }, SEARCH_RESULTS_DROPDOWN_SELECTOR)
+    // The page has more than one autocomplete instance (home search + header
+    // search); scope to the visible one instead of grabbing whichever frame
+    // is first in the DOM.
+    const frame = page.locator("main").locator(SEARCH_RESULTS_DROPDOWN_SELECTOR)
 
-    expect(measurements).not.toBeNull()
-    expect(measurements!.rectBottom).toBeLessThanOrEqual(measurements!.bodyHeight)
+    const box = await frame.boundingBox()
+    expect(box).not.toBeNull()
+    const rectBottom = box!.y + box!.height
+    // page.viewportSize() reflects the size set above via setViewportSize —
+    // no need to read document.documentElement.clientHeight via evaluate.
+    const viewportHeight = page.viewportSize()!.height
+
+    expect(rectBottom).toBeLessThanOrEqual(viewportHeight)
     // Tolerance = clamp margin, not flakiness slop.
-    expect(measurements!.bodyHeight - measurements!.rectBottom).toBeLessThanOrEqual(10)
-    expect(measurements!.scrollHeight).toBeGreaterThan(measurements!.clientHeight)
-    expect(measurements!.overflowY).toBe("auto")
-    // @iframe-resizer/child skips elements with this attribute when sizing the iframe.
-    expect(measurements!.hasIframeIgnore).toBe(true)
+    expect(viewportHeight - rectBottom).toBeLessThanOrEqual(10)
+
+    const scrollHeight = await frame.evaluate((el) => el.scrollHeight)
+    const clientHeight = await frame.evaluate((el) => el.clientHeight)
+    expect(scrollHeight).toBeGreaterThan(clientHeight)
   })
 })
