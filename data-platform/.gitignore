@@ -1,5 +1,3 @@
 # airflow
 .env
-airflow_settings.yaml
 logs
-airflow-pgdata/

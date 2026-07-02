@@ -28,6 +28,7 @@ COPY webapp/infotri/ webapp/infotri/
 COPY webapp/qfdmd/ webapp/qfdmd/
 COPY webapp/qfdmo/ webapp/qfdmo/
 COPY webapp/search/ webapp/search/
+COPY webapp/settings/ webapp/settings/
 COPY webapp/stats/ webapp/stats/
 
 # Venv at /opt/airflow/.venv so shebangs match runtime (not data-platform/.venv)
