@@ -866,6 +866,18 @@ wheels = [
 ]
 
 [[package]]
+name = "connectorx"
+version = "0.4.5"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/74/c3/77aebad14179cf1a8cfdc5e84ea1bac4efb82de270ca6fc7ff914f8ec601/connectorx-0.4.5-cp312-cp312-macosx_10_7_x86_64.whl", hash = "sha256:25efda2317f40e6536582c3dd4f57a8a31c7e5969d708a674272c05591e6f5a2", size = 37900333, upload-time = "2026-01-18T01:31:27.545Z" },
+    { url = "https://files.pythonhosted.org/packages/23/5c/e1e82bcb235fa52280696b01a975535800c0b8c3c12af7c5ddbb42a39010/connectorx-0.4.5-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:27539e03408705f318572b163c419572a114fdc9baf4d1e6cd746bb87f573cf2", size = 35971550, upload-time = "2026-01-18T01:31:43.775Z" },
+    { url = "https://files.pythonhosted.org/packages/14/be/fa9c3a14b6c10c899d0fb93f8ea549285db271c9899900f7eb21c3cdeb9a/connectorx-0.4.5-cp312-cp312-manylinux_2_28_aarch64.whl", hash = "sha256:c68cc9c6bff737d3c9fb8735b27ecc8474238ef640abb701ee0ab213c6c95f8c", size = 43720741, upload-time = "2026-01-18T01:30:52.897Z" },
+    { url = "https://files.pythonhosted.org/packages/3e/4c/54cbfabd1866f3f8657e348f3a496fbde0a138d66a9f2f024b28b4db1c2e/connectorx-0.4.5-cp312-cp312-manylinux_2_28_x86_64.whl", hash = "sha256:3863bc71677d6314b60cb1e1489a650114d37d8d9f58f2df038cae4a82d2ffc5", size = 43751056, upload-time = "2026-01-18T01:31:10.534Z" },
+    { url = "https://files.pythonhosted.org/packages/e0/03/350aafe6bc38a3851744bfab7c4d61bd16500ff6b20dfcb98054b7adb56d/connectorx-0.4.5-cp312-none-win_amd64.whl", hash = "sha256:0737254429e22e5012e1fe6a849112da38abb9b56743b3b8c8a1f902e5270e75", size = 34642277, upload-time = "2026-01-18T01:59:38.121Z" },
+]
+
+[[package]]
 name = "cron-descriptor"
 version = "2.0.8"
 source = { registry = "https://pypi.org/simple" }
@@ -947,10 +959,13 @@ dependencies = [
     { name = "apache-airflow-providers-fab" },
     { name = "apache-airflow-providers-postgres" },
     { name = "apache-airflow-providers-standard" },
+    { name = "black" },
     { name = "boto3" },
     { name = "dbt-core" },
     { name = "dbt-postgres" },
     { name = "fuzzywuzzy" },
+    { name = "jupyterlab-code-formatter" },
+    { name = "jupyterlab-lsp" },
     { name = "numpy" },
     { name = "pandas" },
     { name = "pyarrow" },
@@ -988,6 +1003,8 @@ requires-dist = [
     { name = "dbt-core", specifier = ">=1.11.11,<2" },
     { name = "dbt-postgres", specifier = ">=1.10.2,<2" },
     { name = "fuzzywuzzy", specifier = ">=0.18.0,<0.19" },
+    { name = "jupyterlab-code-formatter", specifier = ">=3.0.3" },
+    { name = "jupyterlab-lsp", specifier = ">=5.3.0" },
     { name = "numpy", specifier = ">=1.26.0,<2" },
     { name = "pandas", specifier = "<2.2" },
     { name = "pyarrow", specifier = ">=23.0.1" },
@@ -1223,6 +1240,7 @@ name = "deduplication"
 version = "0.1.0"
 source = { virtual = "notebooks/deduplication" }
 dependencies = [
+    { name = "connectorx" },
     { name = "dedupe" },
     { name = "jupyterlab" },
     { name = "jupyterlab-execute-time" },
@@ -1234,6 +1252,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "connectorx", specifier = ">=0.4.5" },
     { name = "dedupe", specifier = ">=3.0.3" },
     { name = "jupyterlab", specifier = ">=4.6.0" },
     { name = "jupyterlab-execute-time", specifier = ">=3.3.0" },
@@ -2529,6 +2548,19 @@ wheels = [
 ]
 
 [[package]]
+name = "jupyterlab-code-formatter"
+version = "3.0.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "jupyter-server" },
+    { name = "packaging" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e7/05/a4115d428c07e70c8fef8790f234afb8ec5d31537f6ef643748b85c89759/jupyterlab_code_formatter-3.0.3.tar.gz", hash = "sha256:179e3c85cf6c0fc3c321c84bae446f3a2ad517e26606989c9485ce72e6c781c5", size = 3324163, upload-time = "2026-02-11T14:57:52.291Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/59/a1/8de7afd92c475f7ed5487a8070fb69c869039ec0aef46ef11543b86bbef4/jupyterlab_code_formatter-3.0.3-py3-none-any.whl", hash = "sha256:e10de34012c8acd935a7781980e629e3cb7635967d83e03ca662c844b23a91d8", size = 33043, upload-time = "2026-02-11T14:57:50.751Z" },
+]
+
+[[package]]
 name = "jupyterlab-execute-time"
 version = "3.3.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2538,6 +2570,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/4a/19/0458b8602b61c802c4c9ab0ee84776b7f1ea7bb5efb602692a1b91badc89/jupyterlab_execute_time-3.3.0.tar.gz", hash = "sha256:900fd1aebbfd3d943d3625eef973eed555bb2745d49840402783959c8a1dfc3a", size = 191870, upload-time = "2025-12-23T15:51:50.925Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/ad/2d/96861673abb8e9336b74568bd920d9e3e61c911e2fba4bcfa7d10e8dd919/jupyterlab_execute_time-3.3.0-py3-none-any.whl", hash = "sha256:ed246db4d25c2fdbf2825206203d9d12251ebb38d46eb17ce0e11d271b2738f7", size = 45630, upload-time = "2025-12-23T15:51:49.537Z" },
+]
+
+[[package]]
+name = "jupyterlab-lsp"
+version = "5.3.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "jupyter-lsp" },
+    { name = "jupyterlab" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/87/72/38878b13f73fdbff3b776d274ef1b070e1a8afc824049b67ef5666b6b5f0/jupyterlab_lsp-5.3.0.tar.gz", hash = "sha256:bdf014febc0ec297ff69087e957549d724eb0c29df3f24d4f4c40758a71afc3f", size = 761351, upload-time = "2026-04-02T08:10:05.004Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/95/7a/cc44f9b548f126372ed48ca0f9691f7802204e1dbdea14ab091f411900fb/jupyterlab_lsp-5.3.0-py3-none-any.whl", hash = "sha256:89f519c8de8ca0835551f40ddf69bf6a769411b0b1e75f5752fbe38d45e75f23", size = 1571008, upload-time = "2026-04-02T08:10:00.033Z" },
 ]
 
 [[package]]

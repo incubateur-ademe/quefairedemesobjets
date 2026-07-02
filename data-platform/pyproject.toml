@@ -13,6 +13,8 @@ dependencies = [
     "dbt-core>=1.11.11,<2",
     "dbt-postgres>=1.10.2,<2",
     "fuzzywuzzy>=0.18.0,<0.19",
+    "jupyterlab-code-formatter>=3.0.3",
+    "jupyterlab-lsp>=5.3.0",
     "numpy>=1.26.0,<2",
     "pandas<2.2",
     "pyarrow>=23.0.1",
@@ -36,7 +38,7 @@ dev = [
     "pytest-mock>=3.14.1,<4",
     "ruff>=0.15.20,<0.16",
     "dedupe>=3.0.3",
-    "ipython>=9.15.0,<10"
+    "ipython>=9.15.0,<10",
 ]
 
 [tool.pytest.ini_options]
@@ -46,29 +48,29 @@ DJANGO_SETTINGS_MODULE = "settings.test"
 
 [tool.ruff]
 exclude = [
-  ".bzr",
-  ".direnv",
-  ".eggs",
-  ".git",
-  ".git-rewrite",
-  ".hg",
-  ".mypy_cache",
-  ".nox",
-  ".pants.d",
-  ".pytype",
-  ".ruff_cache",
-  ".svn",
-  ".tox",
-  ".venv",
-  "__pypackages__",
-  "_build",
-  "buck-out",
-  "build",
-  "dist",
-  "node_modules",
-  "venv",
-  "**/migrations/*.py",
-  "*.ipynb",
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    "**/migrations/*.py",
+    "*.ipynb",
 ]
 
 line-length = 88
@@ -77,9 +79,7 @@ target-version = "py312"
 [tool.ruff.lint]
 select = ["E", "F"]
 ignore = []
-exclude = [
-  "**/migrations/*.py",
-]
+exclude = ["**/migrations/*.py"]
 
 fixable = ["ALL"]
 unfixable = []
@@ -96,6 +96,4 @@ package = false
 webapp-quefairedemesobjetsetdechets = { path = "../webapp", editable = true }
 
 [tool.uv.workspace]
-members = [
-    "notebooks/deduplication",
-]
+members = ["notebooks/deduplication"]
