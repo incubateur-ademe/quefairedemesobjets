@@ -94,3 +94,8 @@ package = false
 
 [tool.uv.sources]
 webapp-quefairedemesobjetsetdechets = { path = "../webapp", editable = true }
+
+[tool.uv.workspace]
+members = [
+    "notebooks/deduplication",
+]

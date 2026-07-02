@@ -25,3 +25,6 @@ __screenshots__
 
 # Translations
 *.mo
+
+# Notebooks
+.ipynb_checkpoints
