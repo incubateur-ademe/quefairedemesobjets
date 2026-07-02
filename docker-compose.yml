@@ -84,7 +84,7 @@ services:
       POSTGRES_PASSWORD: airflow # pragma: allowlist secret
       POSTGRES_DB: airflow
     volumes:
-      - ./airflow_dbdata:/var/lib/postgresql/data
+      - airflow_dbdata:/var/lib/postgresql/data
     ports:
       - 7654:5432
     healthcheck:
@@ -175,3 +175,4 @@ services:
 volumes:
   webapp_dbdata:
   warehouse_dbdata:
+  airflow_dbdata:
