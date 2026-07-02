@@ -356,7 +356,7 @@
 <li><p><strong>Executor</strong> : <code class="docutils literal notranslate"><span class="pre">LocalExecutor</span></code> (single-node).</p></li>
 <li><p><strong>Auth manager</strong> : <strong>FAB</strong> (<code class="docutils literal notranslate"><span class="pre">FabAuthManager</span></code>). Backends API : <code class="docutils literal notranslate"><span class="pre">basic_auth</span></code> + <code class="docutils literal notranslate"><span class="pre">session</span></code>. <strong>JWT</strong> pour les échanges internes (<code class="docutils literal notranslate"><span class="pre">AIRFLOW__API_AUTH__JWT_SECRET</span></code>).</p></li>
 <li><p><strong>Compte admin</strong> : créé au premier démarrage du webserver via <code class="docutils literal notranslate"><span class="pre">_AIRFLOW_WWW_USER_USERNAME</span> <span class="pre">/</span> <span class="pre">_PASSWORD</span> <span class="pre">/</span> <span class="pre">_EMAIL</span></code>.</p></li>
-<li><p><strong>Intégration Django</strong> : les DAGs importent les modèles Django via le package éditable <code class="docutils literal notranslate"><span class="pre">webapp-quefairedemesobjetsetdechets</span></code> et <code class="docutils literal notranslate"><span class="pre">utils.django.django_setup_full()</span></code> (settings <code class="docutils literal notranslate"><span class="pre">core.airflow_settings</span></code>).</p></li>
+<li><p><strong>Intégration Django</strong> : les DAGs importent les modèles Django via le package éditable <code class="docutils literal notranslate"><span class="pre">webapp-quefairedemesobjetsetdechets</span></code> et <code class="docutils literal notranslate"><span class="pre">utils.django.django_setup_full()</span></code> (settings <code class="docutils literal notranslate"><span class="pre">settings.airflow</span></code>).</p></li>
 <li><p><strong>Métadonnées</strong> : base PostgreSQL <code class="docutils literal notranslate"><span class="pre">lvao-{env}-airflow</span></code>, nettoyée quotidiennement par le DAG <code class="docutils literal notranslate"><span class="pre">airflow_cleanup_db</span></code>.</p></li>
 <li><p><strong>Logs distants</strong> : <code class="docutils literal notranslate"><span class="pre">AIRFLOW__LOGGING__REMOTE_LOGGING=true</span></code> vers le bucket S3 <code class="docutils literal notranslate"><span class="pre">lvao-{env}-airflow</span></code>.</p></li>
 </ul>
@@ -451,7 +451,7 @@
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>dags-test
 </pre></div>
 </div>
-<p>Pytest uses <code class="docutils literal notranslate"><span class="pre">core.test_settings</span></code> (see <code class="docutils literal notranslate"><span class="pre">data-platform/pyproject.toml</span></code>).</p>
+<p>Pytest uses <code class="docutils literal notranslate"><span class="pre">settings.test</span></code> (see <code class="docutils literal notranslate"><span class="pre">data-platform/pyproject.toml</span></code>).</p>
 </section>
 <section id="follow-the-rules">
 <h2>Follow the rules<a class="headerlink" href="#follow-the-rules" title="Lien vers cette rubrique">¶</a></h2>
