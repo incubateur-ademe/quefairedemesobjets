@@ -60,6 +60,25 @@ resource "scaleway_rdb_privilege" "warehouse" {
   permission    = "all"
 }
 
+## Read-only users on warehouse
+
+resource "scaleway_rdb_user" "warehouse_readonly" {
+  for_each = var.warehouse_readonly_users
+
+  instance_id = scaleway_rdb_instance.warehouse.id
+  name        = each.key
+  password    = each.value
+}
+
+resource "scaleway_rdb_privilege" "warehouse_readonly" {
+  for_each = var.warehouse_readonly_users
+
+  instance_id   = scaleway_rdb_instance.warehouse.id
+  user_name     = each.key
+  database_name = scaleway_rdb_database.warehouse_database.name
+  permission    = "readonly"
+}
+
 ## Airflow
 
 resource "scaleway_rdb_instance" "airflow" {
