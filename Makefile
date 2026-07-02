@@ -199,8 +199,6 @@ drop-schema-public:
 create-schema-public:
 	psql -d '$(DB_URL)' -c "CREATE SCHEMA IF NOT EXISTS public;"
 
-
-
 .SILENT:
 .PHONY: create-db-extensions
 create-extensions:
@@ -235,6 +233,32 @@ dump-sample:
 # The script handles extension creation before restore.
 # drop-schema-public / create-schema-public are defined once above.
 .SILENT:
+.SILENT:
+.PHONY: load-prod-dump
+load-prod-dump:
+	@DUMP_FILE=$$(find tmpbackup-prod -type f -name "*.custom" -print -quit); \
+	psql -d '$(DB_URL)' -f scripts/sql/create_extensions.sql && \
+	psql -d '$(DB_URL)' -f scripts/sql/create_wagtail_french_config.sql && \
+	pg_restore -d '$(DB_URL)' --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
+
+.SILENT:
+.PHONY: load-preprod-dump
+load-preprod-dump:
+	@DUMP_FILE=$$(find tmpbackup-preprod -type f -name "*.custom" -print -quit); \
+	psql -d '$(DB_URL)' -f scripts/sql/create_extensions.sql && \
+	psql -d '$(DB_URL)' -f scripts/sql/create_wagtail_french_config.sql && \
+	pg_restore -d '$(DB_URL)' --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
+
+.SILENT:
+.PHONY: load-sample-dump
+load-sample-dump:
+	@DUMP_FILE=$(SAMPLE_DUMP_FILE); \
+	[ -f "$$DUMP_FILE" ] || DUMP_FILE=$$(find tmpbackup-sample -type f -name "*.custom" -print -quit); \
+	[ -n "$$DUMP_FILE" ] || { echo "No sample dump found"; exit 1; }; \
+	psql -d '$(SAMPLE_DB_URL)' -f scripts/sql/create_extensions.sql && \
+	psql -d '$(SAMPLE_DB_URL)' -f scripts/sql/create_wagtail_french_config.sql && \
+	pg_restore -d '$(SAMPLE_DB_URL)' --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
+
 .PHONY: load-dump-to-loc
 load-dump-to-loc:
 	./scripts/db_restore.sh $(ENV) $(TMPDIR)
