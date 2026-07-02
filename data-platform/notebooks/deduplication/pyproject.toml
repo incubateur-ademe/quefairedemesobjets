@@ -1,0 +1,15 @@
+[project]
+name = "deduplication"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = "==3.12.*"
+dependencies = [
+    "dedupe>=3.0.3",
+    "jupyterlab>=4.6.0",
+    "jupyterlab-execute-time>=3.3.0",
+    "pandas>=2.1.4",
+    "polars>=1.42.0",
+    "psycopg[binary]>=3.3.4",
+    "scikit-learn>=1.9.0",
+]
