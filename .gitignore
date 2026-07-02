@@ -28,3 +28,5 @@ __screenshots__
 
 node_modules
 .parcel-cache
+# Notebooks
+.ipynb_checkpoints
