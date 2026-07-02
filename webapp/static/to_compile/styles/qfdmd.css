@@ -39,6 +39,15 @@
   .fr-modal__body {
     --modal-max-height: 100vh !important;
   }
+  /* The DSFR fr-modal--top::after pseudo-element is a bottom spacer
+     (flex: 1 0 2rem) that pushes modal content up.  In the carte
+     block the carte-wrapper already fills the modal body via
+     --modal-max-height, so the spacer creates a visible dark gap
+     through the semi-transparent overlay.  Removing it lets the
+     carte-wrapper reach the viewport bottom. */
+  .fr-modal--top::after {
+    content: none;
+  }
 }
 
 [type="search"]::-webkit-search-cancel-button,
