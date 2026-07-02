@@ -1,0 +1,8 @@
+{# TODO: delete later. Only used by LegacyProduitIndexPage during the migration #}
+{# to the new ContentPage-based ProduitIndexPage. Remove once migrated. #}
+{% extends "ui/layout/assistant.html" %}
+
+{% block main %}
+    <h1>{{ page.title }}</h1>
+    {% include "sites_conformes_content_manager/blocks/blocks_stream.html" with stream=page.body page=page %}
+{% endblock main %}
