@@ -867,14 +867,40 @@ export async function searchOnProduitPage(page: Page, searchedAddress: string) {
   }
 }
 
+// Each keystroke triggers its own Turbo Frame load (no debounce, no request
+// cancellation client-side — see next_autocomplete_controller.ts), so typing
+// a multi-character query fires one overlapping request per character. When
+// `page` is given, arms a wait for the response to the *final* query before
+// typing, so waitForResults below can't observe a stale, not-yet-replaced
+// result set from an earlier keystroke.
 export async function typeSearchQuery(
   locator: Locator | Page | FrameLocator,
   query: string,
+  page?: Page,
 ) {
+  const responsePromise = page?.waitForResponse(
+    (response) =>
+      response.url().includes("/autocomplete-search") &&
+      new URL(response.url()).searchParams.get("q") === query,
+    { timeout: TIMEOUT.DEFAULT },
+  )
+  // After the network response lands, wait for Turbo to finish processing
+  // the frame swap so `waitForResults` doesn't observe a still-busy frame
+  // with `Chargement...` (aria-busy) and no options in the DOM yet.
+  const frameReadyPromise = page?.waitForFunction(
+    () =>
+      !document
+        .querySelector('[data-next-autocomplete-target="results"]')
+        ?.hasAttribute("busy"),
+    { timeout: TIMEOUT.DEFAULT },
+  )
   const searchInput = locator.locator(SEARCH_INPUT_SELECTOR)
+  await searchInput.scrollIntoViewIfNeeded()
   await searchInput.click()
   await searchInput.fill("")
-  await searchInput.pressSequentially(query, { delay: 50 })
+  await searchInput.pressSequentially(query, { delay: 100 })
+  await responsePromise
+  await frameReadyPromise
 }
 
 export async function waitForResults(locator: Locator | Page | FrameLocator) {

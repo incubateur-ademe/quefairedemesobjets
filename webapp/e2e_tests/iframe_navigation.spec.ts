@@ -1,4 +1,4 @@
-import { test, expect, FrameLocator } from "@playwright/test"
+import { test, expect, FrameLocator, Page } from "@playwright/test"
 import {
   navigateTo,
   getIframe,
@@ -51,7 +51,7 @@ test.describe("🧭 Navigation dans l'iframe avec persistance de l'UI", () => {
 
     // Navigate to a product page by using the search functionality
     // The carousel links are hidden, so we use the search input instead
-    await typeSearchQuery(iframe, "écran")
+    await typeSearchQuery(iframe, "écran", page)
     const results = await waitForResults(iframe)
     results.first().click()
 
@@ -73,7 +73,7 @@ test.describe("🧭 Navigation dans l'iframe avec persistance de l'UI", () => {
     const iframe = getIframe(page)
     await expect(iframe.locator("body")).toBeAttached({ timeout: TIMEOUT.DEFAULT })
 
-    await typeSearchQuery(iframe, "écran")
+    await typeSearchQuery(iframe, "écran", page)
     const results = await waitForResults(iframe)
     results.first().click()
 
@@ -89,8 +89,8 @@ test.describe("🧭 Navigation dans l'iframe avec persistance de l'UI", () => {
 
 test.describe("📄 Découpe du contenu de la fiche dans l'iframe", () => {
   // Helper: search "écran" and open the first fiche inside the iframe.
-  const openEcranFiche = async (iframe: FrameLocator) => {
-    await typeSearchQuery(iframe, "écran")
+  const openEcranFiche = async (iframe: FrameLocator, page: Page) => {
+    await typeSearchQuery(iframe, "écran", page)
     const results = await waitForResults(iframe)
     await results.first().click()
     await iframe.locator("h1").waitFor({ state: "visible", timeout: TIMEOUT.DEFAULT })
@@ -106,7 +106,7 @@ test.describe("📄 Découpe du contenu de la fiche dans l'iframe", () => {
     const iframe = getIframe(page)
     await expect(iframe.locator("body")).toBeAttached({ timeout: TIMEOUT.DEFAULT })
 
-    await openEcranFiche(iframe)
+    await openEcranFiche(iframe, page)
 
     // The footer exposes a primary button opening the standalone fiche in a new tab.
     const lirePlus = iframe.locator('button:has-text("Voir plus de recommandations")')
@@ -126,7 +126,7 @@ test.describe("📄 Découpe du contenu de la fiche dans l'iframe", () => {
     const iframe = getIframe(page)
     await expect(iframe.locator("body")).toBeAttached({ timeout: TIMEOUT.DEFAULT })
 
-    await openEcranFiche(iframe)
+    await openEcranFiche(iframe, page)
 
     // Detailed content sections (produit.content_display) are suppressed in the
     // iframe; the "Lire plus" button is the entry point to them.
