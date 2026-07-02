@@ -11,10 +11,6 @@ from settings.base import *  # noqa: F403
 # If absent, Django falls back to its own discovery — no crash on stock macOS.
 # ---------------------------------------------------------------------------
 import decouple
-import os
 
-if os.environ.get("GEOS_LIBRARY_PATH"):
-    GEOS_LIBRARY_PATH = decouple.config("GEOS_LIBRARY_PATH", cast=str)
-
-if os.environ.get("GDAL_LIBRARY_PATH"):
-    GDAL_LIBRARY_PATH = decouple.config("GDAL_LIBRARY_PATH", cast=str)
+GEOS_LIBRARY_PATH = decouple.config("GEOS_LIBRARY_PATH", default="", cast=str) or None
+GDAL_LIBRARY_PATH = decouple.config("GDAL_LIBRARY_PATH", default="", cast=str) or None
