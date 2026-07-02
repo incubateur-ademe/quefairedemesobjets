@@ -32,8 +32,13 @@
   }
 }
 
-.cmsfr-block-carte .fr-modal__content {
-  @apply !qf-mb-1v;
+.cmsfr-block-carte {
+  .fr-modal__content {
+    @apply !qf-mb-1v;
+  }
+  .fr-modal__body {
+    --modal-max-height: 100vh !important;
+  }
 }
 
 [type="search"]::-webkit-search-cancel-button,
