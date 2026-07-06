@@ -55,5 +55,10 @@ class Command(BaseCommand):
             conn, repo_root / "scripts" / "sql" / "create_extensions.sql"
         )
         execute_sql_script(
-            conn, repo_root / "scripts" / "sql" / "create_wagtail_french_config.sql"
+            conn,
+            Path(settings.BASE_DIR)
+            / "qfdmd"
+            / "migrations"
+            / "sql"
+            / "create_wagtail_french_config.sql",
         )
