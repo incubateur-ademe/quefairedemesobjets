@@ -52,6 +52,9 @@ WORKDIR /opt/airflow
 COPY ./data-platform/dags /opt/airflow/dags
 COPY ./data-platform/airflow-webserver-start.sh /opt/airflow/airflow-webserver-start.sh
 
+# Copy data-platform docs
+COPY ./docs/reference/data-platform/ /opt/airflow/docs/reference/data-platform/
+
 USER root
 RUN chmod +x /opt/airflow/airflow-webserver-start.sh
 USER ${AIRFLOW_UID:-50000}

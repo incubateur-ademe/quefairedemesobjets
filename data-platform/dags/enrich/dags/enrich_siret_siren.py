@@ -24,6 +24,7 @@ from shared.config.airflow import DEFAULT_ARGS_NO_RETRIES
 from shared.config.models import config_to_airflow_params
 from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
+from utils.docs import load_dag_doc_md
 
 with DAG(
     dag_id="enrich_siret_siren",
@@ -33,55 +34,7 @@ with DAG(
         "Un DAG pour proposer un SIRET (depuis un SIREN connu) "
         "ou un SIREN (depuis un SIRET connu) pour les acteurs"
     ),
-    doc_md="""
-## 🏢 Enrichir - Acteurs SIRET & SIREN
-
-Ce DAG complète les identifiants SIRET/SIREN manquants des acteurs visibles,
-en s'appuyant sur l'Annuaire Entreprises (AE). Il rafraîchit d'abord les
-modèles DBT (`dbt run --select +tag:siren_siret`), puis génère des suggestions
-groupées pour deux cohortes indépendantes.
-
-Les suggestions utilisent le mécanisme `SuggestionGroupe` / `SuggestionUnitaire`
-(non legacy) : un groupe par valeur proposée, une suggestion unitaire par acteur.
-
----
-
-### Cohorte 1 — 🏢 SIRET proposé depuis le SIREN connu
-
-**Modèle DBT :** `marts_enrich_siret_from_siren`
-
-**Population d'entrée** (`int_acteur_with_siren_without_siret`) :
-acteurs visibles (`base_vueacteur_visible`) avec un SIREN valide
-(9 chiffres numériques) et un SIRET vide.
-
-**Règles de proposition** (croisement avec les établissements AE actifs,
-`base_ae_etablissement`, `etat_administratif = 'A'`) :
-
-1. **SIREN → SIRET unique** : si le SIREN ne possède qu'un seul établissement
-   actif dans l'AE (tous codes postaux confondus), ce SIRET est proposé.
-2. **Sinon, SIREN + code postal → SIRET unique** : si un seul établissement
-   actif correspond au couple SIREN + code postal de l'acteur, ce SIRET est
-   proposé.
-
-Un acteur n'est retenu que si l'une de ces deux règles aboutit à une
-proposition non nulle. Les suggestions sont regroupées par SIRET proposé
-(1 `SuggestionGroupe` par SIRET).
-
----
-
-### Cohorte 2 — 🏢 SIREN proposé depuis le SIRET connu
-
-**Modèle DBT :** `marts_enrich_siren_from_siret`
-
-**Population d'entrée** (`int_acteur_with_siret_without_siren`) :
-acteurs visibles avec un SIRET valide (14 chiffres numériques) et un SIREN
-vide.
-
-**Règle de proposition** : jointure du SIRET de l'acteur avec
-`base_ae_etablissement` ; le SIREN de l'établissement AE actif
-(`etat_administratif = 'A'`) est proposé. Les suggestions sont regroupées
-par SIREN proposé (1 `SuggestionGroupe` par SIREN).
-""",
+    doc_md=load_dag_doc_md("enrich-siret-siren.md"),
     tags=[
         TAGS.ENRICH,
         TAGS.SIREN,
@@ -95,7 +48,7 @@ par SIREN proposé (1 `SuggestionGroupe` par SIREN).
         EnrichActeursSiretSirenConfig(
             dbt_models_refresh=True,
             dbt_models_refresh_command="dbt run --select +tag:siren_siret",
-        )
+        ),
     ),
 ) as dag:
     dbt_refresh = enrich_dbt_models_refresh_task(dag)
