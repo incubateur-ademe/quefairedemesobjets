@@ -30,6 +30,7 @@ node_modules
 .parcel-cache
 # Notebooks
 .ipynb_checkpoints
+.virtual_documents
 
 # ML
 data-platform/notebooks/deduplication/datasets/*
