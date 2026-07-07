@@ -93,6 +93,12 @@ Cohorts and suggestions have a processing status that represents their lifecycle
 - SuggestionCohorte represents cohorts, i.e. a set of suggestions of the same nature.
 - Suggestion represents modification proposals.
 
+### Applying suggestions from Django Admin
+
+Some back-office actions on `SuggestionGroupe` (apply to parent, apply to acteur correction) can process thousands of rows. When **≥ 1 000** groups are selected, they run asynchronously via **django-tasks** (`webapp/data/tasks.py`) and a dedicated Scalingo **`worker`** process (`manage.py db_worker`). Below that threshold, execution is synchronous in the web process.
+
+See [`webapp/django.md`](../webapp/django.md) for local setup and architecture details.
+
 ### Suggestion lifecycle
 
 ```mermaid
