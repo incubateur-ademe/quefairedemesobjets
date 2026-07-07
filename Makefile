@@ -213,15 +213,15 @@ psql:
 
 .PHONY: dump-prod
 dump-prod:
-	sh scripts/infrastructure/backup-db.sh --env prod
+	bash scripts/infrastructure/backup-db.sh --env prod
 
 .PHONY: dump-preprod
 dump-preprod:
-	sh scripts/infrastructure/backup-db.sh --quiet --env preprod
+	bash scripts/infrastructure/backup-db.sh --quiet --env preprod
 
 .PHONY: dump-prod-quiet
 dump-prod-quiet:
-	sh scripts/infrastructure/backup-db.sh --quiet
+	bash scripts/infrastructure/backup-db.sh --quiet
 
 .PHONY: dump-sample
 dump-sample:
@@ -240,7 +240,7 @@ load-prod-dump:
 	@DUMP_FILE=$$(find tmpbackup-prod -type f -name "*.custom" -print -quit); \
 	psql -d '$(DB_URL)' -f scripts/sql/create_extensions.sql && \
 	psql -d '$(DB_URL)' -f $(WAGTAIL_FRENCH_SQL) && \
-	pg_restore -d '$(DB_URL)' --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
+	pg_restore -d '$(DB_URL)' --schema=public --clean --if-exists --no-acl --no-owner --no-privileges "$$DUMP_FILE"
 
 .SILENT:
 .PHONY: load-preprod-dump
@@ -286,8 +286,9 @@ db-restore-local-from-preprod:
 
 .PHONY: db-restore-preprod-from-prod
 db-restore-preprod-from-prod:
-	sh scripts/infrastructure/backup-db.sh --quiet
-	./scripts/db_restore.sh prod tmpbackup-prod
+	$(MAKE) dump-prod-quiet
+	$(MAKE) drop-all-tables
+	$(MAKE) load-prod-dump
 
 .PHONY: db-restore-local-from-sample
 db-restore-local-from-sample:
