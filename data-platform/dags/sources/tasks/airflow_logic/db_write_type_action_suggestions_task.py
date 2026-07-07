@@ -9,7 +9,7 @@ from sources.tasks.business_logic.db_write_type_action_suggestions import (
     db_write_type_action_suggestions,
 )
 from utils import logging_utils as log
-from utils.db_tmp_tables import drop_temporary_table, read_temporary_table
+from utils.db_tmp_tables import read_temporary_table
 
 logger = logging.getLogger(__name__)
 
@@ -64,27 +64,22 @@ def db_write_type_action_suggestions_wrapper(ti, dag, params) -> None:
 
         # set the task to airflow skip status
         xcom_push(ti, key=XCOMS.SKIP, value=True)
-    else:
+        return
 
-        db_write_type_action_suggestions(
-            dag_name=dag_name,
-            run_id=run_id,
-            df_acteur_to_create=df_acteur_to_create,
-            df_acteur_to_delete=df_acteur_to_delete,
-            df_acteur_to_update=df_acteur_to_update,
-            metadata_to_create={**metadata, **metadata_to_create},
-            metadata_to_update={
-                **metadata,
-                **metadata_to_update,
-                **metadata_columns_updated,
-            },
-            metadata_to_delete={**metadata, **metadata_to_delete},
-            df_log_error=df_log_error,
-            df_log_warning=df_log_warning,
-            use_legacy_suggestions=dag_config.use_legacy_suggestions,
-        )
-
-    # Load the DataFrames from the temporary tables
-    drop_temporary_table(table_name_create)
-    drop_temporary_table(table_name_delete)
-    drop_temporary_table(table_name_update)
+    db_write_type_action_suggestions(
+        dag_name=dag_name,
+        run_id=run_id,
+        df_acteur_to_create=df_acteur_to_create,
+        df_acteur_to_delete=df_acteur_to_delete,
+        df_acteur_to_update=df_acteur_to_update,
+        metadata_to_create={**metadata, **metadata_to_create},
+        metadata_to_update={
+            **metadata,
+            **metadata_to_update,
+            **metadata_columns_updated,
+        },
+        metadata_to_delete={**metadata, **metadata_to_delete},
+        df_log_error=df_log_error,
+        df_log_warning=df_log_warning,
+        use_legacy_suggestions=dag_config.use_legacy_suggestions,
+    )
