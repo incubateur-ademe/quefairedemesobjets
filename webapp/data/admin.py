@@ -9,6 +9,10 @@ from data.models.suggestion import (
     SuggestionStatut,
     SuggestionUnitaire,
 )
+from data.tasks import (
+    apply_suggestions_to_correction_task,
+    apply_suggestions_to_parent_task,
+)
 from data.views import get_context_from_suggestion_groupe
 from django.contrib import admin, messages
 from django.contrib.postgres.fields import ArrayField
@@ -246,83 +250,48 @@ class SuggestionUnitaireInline(admin.TabularInline):
     can_view = True
 
 
-def _update_or_copy_acteur_suggestions_to_target(
-    suggestion_groupe: SuggestionGroupe,
-    *,
-    target_modele: str,
-    target_fk_field: str,
-    target_fk_id: int | None,
-) -> None:
-    """For each SuggestionUnitaire « Acteur » of the group, update the existing
-    target SuggestionUnitaire (same `champs` and same target) if it exists,
-    otherwise create a new one by cloning the source suggestion.
-
-    `target_fk_field` is the name of the FK field (ex: "revision_acteur_id" or
-    "parent_revision_acteur_id") that points to the target entity.
-    """
-    suggestion_unitaires = list(suggestion_groupe.suggestion_unitaires.all())
-    acteur_sources = [
-        su for su in suggestion_unitaires if su.suggestion_modele == "Acteur"
-    ]
-
-    for acteur_source in acteur_sources:
-        target_suggestion = next(
-            (
-                su
-                for su in suggestion_unitaires
-                if su.suggestion_modele == target_modele
-                and getattr(su, target_fk_field) == target_fk_id
-                and su.champs == acteur_source.champs
-            ),
-            None,
-        )
-        if target_suggestion:
-            target_suggestion.valeurs = acteur_source.valeurs
-        else:
-            target_suggestion = acteur_source
-            target_suggestion.id = None
-            target_suggestion.suggestion_modele = target_modele
-            setattr(target_suggestion, target_fk_field, target_fk_id)
-        target_suggestion.save()
+SUGGESTION_TASK_ASYNC_THRESHOLD = 1000
 
 
 @admin.action(description="[SOURCE] Appliquer les suggestions au parent")
 def apply_suggestions_to_parent(
     self, request, queryset: QuerySet[SuggestionGroupe]
 ) -> None:
-    for suggestion_groupe in queryset:
-        # Only for SuggestionGroupe with parent
-        if suggestion_groupe.suggestions_can_be_applied_to_parent():
-            _update_or_copy_acteur_suggestions_to_target(
-                suggestion_groupe,
-                target_modele="ParentRevisionActeur",
-                target_fk_field="parent_revision_acteur_id",
-                target_fk_id=suggestion_groupe.parent_revision_acteur_id,
-            )
-
-    self.message_user(
-        request, f"Les {queryset.count()} suggestions sélectionnées ont été appliquées"
-    )
+    ids = list(queryset.values_list("id", flat=True))
+    if len(ids) < SUGGESTION_TASK_ASYNC_THRESHOLD:
+        apply_suggestions_to_parent_task.call(ids)
+        self.message_user(
+            request,
+            f"Les {len(ids)} suggestions sélectionnées ont été appliquées au parent.",
+        )
+    else:
+        apply_suggestions_to_parent_task.enqueue(ids)
+        self.message_user(
+            request,
+            f"Les {len(ids)} suggestions sélectionnées sont en cours d'application "
+            "en arrière-plan.",
+        )
 
 
 @admin.action(
     description="[SOURCE] Appliquer les suggestions au correction de l'acteur"
 )
 def apply_suggestions_to_correction(self, request, queryset):
-    for suggestion_groupe in queryset:
-        if suggestion_groupe.suggestions_can_be_applied_to_correction():
-            _update_or_copy_acteur_suggestions_to_target(
-                suggestion_groupe,
-                target_modele="RevisionActeur",
-                target_fk_field="revision_acteur_id",
-                target_fk_id=(
-                    suggestion_groupe.revision_acteur_id or suggestion_groupe.acteur_id
-                ),
-            )
-
-    self.message_user(
-        request, f"Les {queryset.count()} suggestions sélectionnées ont été appliquées"
-    )
+    ids = list(queryset.values_list("id", flat=True))
+    if len(ids) < SUGGESTION_TASK_ASYNC_THRESHOLD:
+        apply_suggestions_to_correction_task.call(ids)
+        self.message_user(
+            request,
+            f"Les {len(ids)} suggestions sélectionnées ont été appliquées "
+            "à la correction de l'acteur.",
+        )
+    else:
+        apply_suggestions_to_correction_task.enqueue(ids)
+        self.message_user(
+            request,
+            f"Les {len(ids)} suggestions sélectionnées sont en cours d'application "
+            "en arrière-plan.",
+        )
 
 
 class HasSuggestionUnitaireWithChampField(StrField):

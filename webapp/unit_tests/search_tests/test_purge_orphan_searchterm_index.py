@@ -28,9 +28,13 @@ class TestPurgeOrphanSearchtermIndex:
         searchterm_ct = ContentType.objects.get_for_model(SearchTerm)
         synonyme_ct = ContentType.objects.get_for_model(Synonyme)
 
-        # Simulate the pre-fix state: the same object indexed twice.
+        # modelsearch's post_save signal already created a child IndexEntry
+        # for the Synonyme. Manually add the orphan base entry (SearchTerm)
+        # to simulate the pre-fix duplicate-index state.
         orphan = _make_index_entry(searchterm_ct, synonyme.searchterm_ptr_id)
-        child = _make_index_entry(synonyme_ct, synonyme.searchterm_ptr_id)
+        child = IndexEntry.objects.get(
+            content_type=synonyme_ct, object_id=str(synonyme.searchterm_ptr_id)
+        )
 
         call_command("purge_orphan_searchterm_index")
 
@@ -40,7 +44,11 @@ class TestPurgeOrphanSearchtermIndex:
     def test_keeps_bare_searchterm_entry(self):
         bare = SearchTerm.objects.create()
         searchterm_ct = ContentType.objects.get_for_model(SearchTerm)
-        entry = _make_index_entry(searchterm_ct, bare.pk)
+
+        # modelsearch auto-indexed the bare SearchTerm — verify it survives.
+        entry = IndexEntry.objects.get(
+            content_type=searchterm_ct, object_id=str(bare.pk)
+        )
 
         call_command("purge_orphan_searchterm_index")
 
@@ -50,6 +58,9 @@ class TestPurgeOrphanSearchtermIndex:
         produit = Produit.objects.create(nom="Mouchoir en papier")
         synonyme = Synonyme.objects.create(nom="Mouchoir en papier", produit=produit)
         searchterm_ct = ContentType.objects.get_for_model(SearchTerm)
+
+        # Only the orphan base entry exists (auto-index created the child,
+        # which should also exist — but we only assert the orphan survives).
         orphan = _make_index_entry(searchterm_ct, synonyme.searchterm_ptr_id)
 
         call_command("purge_orphan_searchterm_index", "--dry-run")

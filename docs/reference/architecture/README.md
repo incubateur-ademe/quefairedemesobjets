@@ -22,6 +22,7 @@ flowchart LR
     subgraph Scalingo["☁️ Scalingo (region osc-fr1)"]
         nginx_scalingo["nginx (cache + proxy /ph/)"]
         webapp["🌐 Webapp Django\n(gunicorn, WhiteNoise)"]
+        django_worker["⚙️ Worker django-tasks\n(db_worker)"]
     end
 
     subgraph Scaleway["☁️ Scaleway (region fr-par, projet longuevieauxobjets)"]
@@ -76,6 +77,8 @@ flowchart LR
     nginx_scalingo -->|"/ph/*"| posthog
 
     webapp --> db_webapp
+    webapp -->|"enqueue tâches"| django_worker
+    django_worker --> db_webapp
     webapp --> s3_medias
     webapp -->|"erreurs"| sentry
     webapp -->|"HogQL stats"| posthog
@@ -114,6 +117,7 @@ Pour le détail de chaque brique, suivre le lien correspondant.
 | Composant                                                    | Hébergeur                                  | Détail / référence                                                                                                               |
 | ------------------------------------------------------------ | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
 | **Webapp Django** (Gunicorn + WhiteNoise + nginx local)      | Scalingo (`osc-fr1`)                       | [`infrastructure/provisioning.md`](../infrastructure/provisioning.md), [`webapp/README.md`](../webapp/README.md)                 |
+| **Worker django-tasks** (`manage.py db_worker`)              | Scalingo (`osc-fr1`, container `worker`)   | [`webapp/django.md`](../webapp/django.md)                                                                                        |
 | **Airflow** : webserver, scheduler (avec dbt), DAG processor | Scaleway Container as a Service (`fr-par`) | [`infrastructure/provisioning.md`](../infrastructure/provisioning.md), [`data-platform/airflow.md`](../data-platform/airflow.md) |
 | **Container Registry** privé `ns-qfdmo`                      | Scaleway                                   | [`infrastructure/provisioning.md`](../infrastructure/provisioning.md)                                                            |
 
@@ -141,6 +145,7 @@ Pour le détail de chaque brique, suivre le lien correspondant.
 | Composant                                                                                       | Référence                                               |
 | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
 | **Django** + apps métier (`qfdmo`, `qfdmd`, `search`, `data`, `infotri`, `stats`, `dsfr_hacks`) | [`webapp/django.md`](../webapp/django.md)               |
+| **Tâches asynchrones** django-tasks (actions admin lourdes, file en base)                       | [`webapp/django.md`](../webapp/django.md)               |
 | **API Django-Ninja** (`/api/qfdmo/*`, `/api/stats`)                                             | [`apis/README.md`](../apis/README.md)                   |
 | **CMS Wagtail** (surcouche `sites-conformes`)                                                   | [`webapp/README.md`](../webapp/README.md)               |
 | **Front** Stimulus + Turbo + Parcel + TypeScript                                                | [`webapp/javascript.md`](../webapp/javascript.md)       |

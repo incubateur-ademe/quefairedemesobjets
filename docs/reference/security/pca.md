@@ -17,13 +17,14 @@ Mesures préventives et dispositifs permettant de **maintenir le service en fonc
 
 ### Webapp Django (Scalingo `osc-fr1`)
 
-| Mécanisme                                               | Détail                                                                                                                   |
-| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| **Gunicorn multi-workers**                              | Plusieurs workers servent les requêtes en parallèle derrière nginx local (`bin/start`).                                  |
-| **nginx Scalingo (cache)**                              | Couche de cache devant Gunicorn (`servers.conf.erb`) absorbe les pics de trafic anonymes. Bypass via cookie `logged_in`. |
-| **WhiteNoise + `CompressedManifestStaticFilesStorage`** | Statiques servis directement par l'app, indépendants d'un CDN tiers.                                                     |
-| **Cache applicatif en base**                            | `DatabaseCache` (table `qf_django_cache`) — pas de dépendance Redis à maintenir.                                         |
-| **Scalabilité horizontale Scalingo**                    | Possibilité d'augmenter le nombre de containers `web` à la demande depuis l'interface Scalingo.                          |
+| Mécanisme                                               | Détail                                                                                                                               |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| **Gunicorn multi-workers**                              | Plusieurs workers servent les requêtes en parallèle derrière nginx local (`bin/start`).                                              |
+| **Worker django-tasks**                                 | Container Scalingo `worker` (`manage.py db_worker`) traite les actions admin lourdes enqueueées en base. Indépendant du trafic HTTP. |
+| **nginx Scalingo (cache)**                              | Couche de cache devant Gunicorn (`servers.conf.erb`) absorbe les pics de trafic anonymes. Bypass via cookie `logged_in`.             |
+| **WhiteNoise + `CompressedManifestStaticFilesStorage`** | Statiques servis directement par l'app, indépendants d'un CDN tiers.                                                                 |
+| **Cache applicatif en base**                            | `DatabaseCache` (table `qf_django_cache`) — pas de dépendance Redis à maintenir.                                                     |
+| **Scalabilité horizontale Scalingo**                    | Possibilité d'augmenter le nombre de containers `web` à la demande depuis l'interface Scalingo.                                      |
 
 ### Bases de données (Scaleway RDB PostgreSQL 16)
 

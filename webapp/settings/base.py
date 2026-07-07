@@ -176,6 +176,8 @@ INSTALLED_APPS = [
     "corsheaders",
     "django_lookbook",
     "djangoql",
+    "django_tasks",
+    "django_tasks.backends.database",
 ]
 
 
@@ -207,6 +209,14 @@ CACHES = {
         "BACKEND": "django.core.cache.backends.db.DatabaseCache",
         "LOCATION": "qf_django_cache",
     },
+}
+
+# Background tasks (django-tasks). In DEBUG, run inline so no worker is needed
+# locally; in prod, enqueue to the DB and let `manage.py db_worker` process them.
+TASKS = {
+    "default": {
+        "BACKEND": ("django_tasks.backends.database.DatabaseBackend"),
+    }
 }
 
 X_FRAME_OPTIONS = "ALLOWALL"
