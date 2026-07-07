@@ -1,6 +1,8 @@
 import logging
+import re
 import tempfile
 import zipfile
+from datetime import datetime
 from pathlib import Path
 
 import numpy as np
@@ -8,18 +10,25 @@ import pandas as pd
 import requests
 from shared.config.airflow import TMP_FOLDER
 from utils import logging_utils as log
+from utils.db_tmp_tables import infer_postgresql_array_dtypes
+from utils.django import django_setup_full
 
 logger = logging.getLogger(__name__)
 
 
 def source_data_download(
     endpoint: str,
+    dag_id: str,
     s3_connection_id: str | None = None,
     metadata_endpoint: str | None = None,
 ) -> pd.DataFrame:
     """Téléchargement de la données source sans lui apporter de modification"""
+    django_setup_full()
+    from django.db import connections
+    from utils.django import DJANGO_WH_CONNECTION_NAME, django_conn_to_sqlalchemy_engine
 
     def _align_columns_with_schema(df: pd.DataFrame, schema: dict) -> pd.DataFrame:
+
         # Récupérer toutes les colonnes attendues du schéma
         expected_columns = [
             field["key"] for field in schema if not field.get("x-calculated", False)
@@ -50,10 +59,6 @@ def source_data_download(
     data = fetch_data_from_endpoint(endpoint, s3_connection_id)
     logger.info("Téléchargement données de l'API : ✅ succès.")
     df = pd.DataFrame(data).replace({pd.NA: None, np.nan: None})
-    # create dataframe with only string, boolean or list dtype columns
-    for column in df.columns:
-        if df[column].dtype not in [str, bool, list]:
-            df[column] = df[column].astype(str)
     if df.empty:
         raise ValueError("Aucune donnée reçue de l'API")
     log.preview("df retournée par la tâche", df)
@@ -63,6 +68,49 @@ def source_data_download(
         metadata.raise_for_status()
         schema = metadata.json()
         df = _align_columns_with_schema(df, schema)
+
+    # Enregistrer le dataframe en DB nommée "<SOURCE_NAME>_<DATE_TIME>"
+    # puis faire pointer une vue vers cette table nommée "<SOURCE_NAME>_in_use"
+    # et enfin ne garder que les 2 dernières occurences de table timestampée
+    # et supprimer les autres tables timestampées
+    logger.info(
+        "Enregistrement du dataframe en DB nommée"
+        f" {dag_id}_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+    )
+    logger.info(f"Faire pointer une vue vers cette table nommée {dag_id}_in_use")
+    connection = connections[DJANGO_WH_CONNECTION_NAME]
+    engine = django_conn_to_sqlalchemy_engine(using=DJANGO_WH_CONNECTION_NAME)
+    table_name = f"{dag_id}_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+    view_name = f"{dag_id}_in_use"
+
+    df.to_sql(
+        table_name,
+        engine,
+        if_exists="replace",
+        index=False,
+        method="multi",
+        chunksize=1000,
+        dtype=infer_postgresql_array_dtypes(df),
+    )
+
+    quoted_table_name = f'"{table_name}"'
+    quoted_view_name = f'"{view_name}"'
+    table_name_pattern = re.compile(f"^{re.escape(dag_id)}_\\d{{ 14 }}$")
+
+    with connection.cursor() as cursor:
+        cursor.execute(f"DROP VIEW IF EXISTS {quoted_view_name} CASCADE")
+        cursor.execute(
+            f"CREATE VIEW {quoted_view_name} AS SELECT * FROM {quoted_table_name}"
+        )
+        # ne garder que les 2 dernières occurences de table timestampée
+        # et supprimer les autres tables timestampées
+        tbls_all = connection.introspection.table_names()
+        tbls_matched = sorted(
+            (x for x in tbls_all if table_name_pattern.match(x)),
+            reverse=True,
+        )
+        for old_table in tbls_matched[2:]:
+            cursor.execute(f'DROP TABLE IF EXISTS "{old_table}"')
 
     return df
 

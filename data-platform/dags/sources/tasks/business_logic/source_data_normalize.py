@@ -12,12 +12,12 @@ from pydantic import BaseModel
 from shared.tasks.database_logic.db_manager import PostgresConnectionManager
 from sources.config.airflow_params import TRANSFORMATION_MAPPING
 from sources.config.models import (
-    SourceConfig,
     NormalizationColumnDefault,
     NormalizationColumnRemove,
     NormalizationColumnRename,
     NormalizationColumnTransform,
     NormalizationDFTransform,
+    SourceConfig,
 )
 from sources.tasks.transform.exceptions import (
     ImportSourceException,
@@ -27,6 +27,8 @@ from sources.tasks.transform.transform_df import compute_location, merge_duplica
 from sqlalchemy import text
 from tenacity import retry, stop_after_attempt, wait_fixed
 from utils import logging_utils as log
+from utils.db_tmp_tables import column_contains_lists
+from utils.django import django_setup_full
 
 logger = logging.getLogger(__name__)
 
@@ -294,7 +296,6 @@ def _manage_oca_config(df: pd.DataFrame, dag_config: SourceConfig) -> pd.DataFra
 
 
 def source_data_normalize(
-    df_acteur_from_source: pd.DataFrame,
     dag_config: SourceConfig,
     dag_id: str,
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, dict]:
@@ -306,7 +307,27 @@ def source_data_normalize(
     - Ajout des colonnes avec valeurs par défaut
     """
 
-    df = df_acteur_from_source
+    django_setup_full()
+    from utils.django import DJANGO_WH_CONNECTION_NAME, django_conn_to_sqlalchemy_engine
+
+    # Récupérer le dataframe de la vue
+    view_name = f"{dag_id}_in_use"
+
+    engine = django_conn_to_sqlalchemy_engine(using=DJANGO_WH_CONNECTION_NAME)
+    df = pd.read_sql_table(view_name, engine).replace({pd.NA: None})
+    log.preview("df avant normalisation", df)
+
+    # Colonnes ARRAY PostgreSQL relues en dtype object avec des list Python :
+    # ne pas les convertir en str.
+    for column in df.columns:
+        if column_contains_lists(df[column]):
+            continue
+        if df[column].dtype == bool:
+            continue
+        if df[column].dtype != str:
+            df[column] = df[column].astype(str)
+
+    log.preview("df avant normalisation", df)
 
     if dag_id == "pharmacies":
         # Patch pour les pharmacies car l'apostrophe n'est pas bien géré dans la

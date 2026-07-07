@@ -5,7 +5,7 @@ from airflow.providers.standard.operators.python import PythonOperator
 from airflow.task.trigger_rule import TriggerRule
 from sources.config.models import SourceConfig
 from sources.config.tasks import TASKS
-from sources.config.xcoms import XCOMS, xcom_pull, xcom_push
+from sources.config.xcoms import XCOMS, xcom_push
 from sources.tasks.business_logic.source_data_normalize import source_data_normalize
 from utils import logging_utils as log
 
@@ -23,17 +23,13 @@ def source_data_normalize_task(dag: DAG) -> PythonOperator:
 
 
 def source_data_normalize_wrapper(ti, dag, params) -> None:
-    df = xcom_pull(ti, XCOMS.SOURCE_DOWNLOADED)
-
     dag_config = SourceConfig.from_airflow_params(params)
     dag_id = dag.dag_id
 
-    log.preview("df avant normalisation", df)
     log.preview("paramètres du DAG", dag_config)
     log.preview("ID du DAG", dag_id)
 
     df, df_log_error, df_log_warning, metadata = source_data_normalize(
-        df_acteur_from_source=df,
         dag_config=dag_config,
         dag_id=dag_id,
     )
