@@ -31,5 +31,6 @@ node_modules
 # Notebooks
 .ipynb_checkpoints
 
-#datasets
+# ML
 data-platform/notebooks/deduplication/datasets/*
+data-platform/notebooks/deduplication/model.bin
