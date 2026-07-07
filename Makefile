@@ -3,6 +3,7 @@ PYTHON := uv run python
 DB_URL := postgres://webapp:webapp@localhost:6543/webapp# pragma: allowlist secret
 SAMPLE_DB_URL ?= $(if $(DB_WEBAPP_SAMPLE),$(DB_WEBAPP_SAMPLE),$(DB_URL))
 SAMPLE_DUMP_FILE ?= tmpbackup-sample/sample.custom
+WAGTAIL_FRENCH_SQL := webapp/qfdmd/migrations/sql/create_wagtail_french_config.sql
 BASE_DOMAIN := quefairedemesdechets.ademe.local
 
 # Loading environment variables
@@ -204,7 +205,7 @@ create-schema-public:
 create-extensions:
 	@echo "Creating required extensions"
 	psql -d '$(DB_URL)' -f scripts/sql/create_extensions.sql
-	psql -d '$(DB_URL)' -f scripts/sql/create_wagtail_french_config.sql
+	psql -d '$(DB_URL)' -f $(WAGTAIL_FRENCH_SQL)
 
 .PHONY: psql
 psql:
@@ -212,15 +213,15 @@ psql:
 
 .PHONY: dump-prod
 dump-prod:
-	sh scripts/infrastructure/backup-db.sh --env prod
+	bash scripts/infrastructure/backup-db.sh --env prod
 
 .PHONY: dump-preprod
 dump-preprod:
-	sh scripts/infrastructure/backup-db.sh --quiet --env preprod
+	bash scripts/infrastructure/backup-db.sh --quiet --env preprod
 
 .PHONY: dump-prod-quiet
 dump-prod-quiet:
-	sh scripts/infrastructure/backup-db.sh --quiet
+	bash scripts/infrastructure/backup-db.sh --quiet
 
 .PHONY: dump-sample
 dump-sample:
@@ -238,15 +239,15 @@ dump-sample:
 load-prod-dump:
 	@DUMP_FILE=$$(find tmpbackup-prod -type f -name "*.custom" -print -quit); \
 	psql -d '$(DB_URL)' -f scripts/sql/create_extensions.sql && \
-	psql -d '$(DB_URL)' -f scripts/sql/create_wagtail_french_config.sql && \
-	pg_restore -d '$(DB_URL)' --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
+	psql -d '$(DB_URL)' -f $(WAGTAIL_FRENCH_SQL) && \
+	pg_restore -d '$(DB_URL)' --schema=public --clean --if-exists --no-acl --no-owner --no-privileges "$$DUMP_FILE"
 
 .SILENT:
 .PHONY: load-preprod-dump
 load-preprod-dump:
 	@DUMP_FILE=$$(find tmpbackup-preprod -type f -name "*.custom" -print -quit); \
 	psql -d '$(DB_URL)' -f scripts/sql/create_extensions.sql && \
-	psql -d '$(DB_URL)' -f scripts/sql/create_wagtail_french_config.sql && \
+	psql -d '$(DB_URL)' -f $(WAGTAIL_FRENCH_SQL) && \
 	pg_restore -d '$(DB_URL)' --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
 
 .SILENT:
@@ -256,7 +257,7 @@ load-sample-dump:
 	[ -f "$$DUMP_FILE" ] || DUMP_FILE=$$(find tmpbackup-sample -type f -name "*.custom" -print -quit); \
 	[ -n "$$DUMP_FILE" ] || { echo "No sample dump found"; exit 1; }; \
 	psql -d '$(SAMPLE_DB_URL)' -f scripts/sql/create_extensions.sql && \
-	psql -d '$(SAMPLE_DB_URL)' -f scripts/sql/create_wagtail_french_config.sql && \
+	psql -d '$(SAMPLE_DB_URL)' -f $(WAGTAIL_FRENCH_SQL) && \
 	pg_restore -d '$(SAMPLE_DB_URL)' --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
 
 .PHONY: load-dump-to-loc
@@ -285,8 +286,9 @@ db-restore-local-from-preprod:
 
 .PHONY: db-restore-preprod-from-prod
 db-restore-preprod-from-prod:
-	sh scripts/infrastructure/backup-db.sh --quiet
-	./scripts/db_restore.sh prod tmpbackup-prod
+	$(MAKE) dump-prod-quiet
+	$(MAKE) drop-all-tables
+	$(MAKE) load-prod-dump
 
 .PHONY: db-restore-local-from-sample
 db-restore-local-from-sample:

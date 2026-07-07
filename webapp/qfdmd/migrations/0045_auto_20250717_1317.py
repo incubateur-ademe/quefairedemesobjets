@@ -2,7 +2,6 @@
 
 from pathlib import Path
 
-from django.conf import settings
 from django.db import migrations
 
 # Read from a shared .sql file so the migration, create_webapp_sample_db.py and
@@ -10,11 +9,10 @@ from django.db import migrations
 # step right after create_extensions.sql by every caller). The SQL is guarded,
 # so order does not matter. This migration is the source of truth for the test
 # DB and any fresh DB, which are built from migrations only.
+# The file lives next to this migration (inside webapp/) so it is present on
+# deployments that only ship the webapp directory, such as Scalingo.
 _WAGTAIL_FRENCH_SQL = (
-    Path(settings.BASE_DIR).parent
-    / "scripts"
-    / "sql"
-    / "create_wagtail_french_config.sql"
+    Path(__file__).parent / "sql" / "create_wagtail_french_config.sql"
 ).read_text()
 
 
