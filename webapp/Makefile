@@ -197,3 +197,33 @@ extract-dsfr:
 	$(PYTHON) ./dsfr_hacks/extract_dsfr_colors.py
 	$(PYTHON) ./dsfr_hacks/extract_used_colors.py
 	$(PYTHON) ./dsfr_hacks/extract_used_icons.py
+
+# ProduitPage recovery — recover pages deleted by mistake, from a DB backup.
+# 1. Drop a .custom dump (e.g. a Scalingo backup) into ../tmpbackup-recover/
+# 2. make db-restore-recover
+# 3. make export-produit-pages slugs="mon-produit" [output=recovered.json]
+# 4. make recreate-produit-pages [fixture=recovered.json] [args=--dry-run]
+#    (or run recreate_produit_pages on prod via a Scalingo one-off container)
+RECOVER_DB_URL := postgres://webapp:webapp@localhost:6543/recover# pragma: allowlist secret
+RECOVER_DUMP_DIR := ../tmpbackup-recover
+
+.PHONY: db-restore-recover
+db-restore-recover:
+	@mkdir -p $(RECOVER_DUMP_DIR); \
+	DUMP_FILE=$$(find $(RECOVER_DUMP_DIR) -type f -name "*.custom" -print -quit); \
+	[ -n "$$DUMP_FILE" ] || { echo "No .custom dump found in $(RECOVER_DUMP_DIR)/"; exit 1; }; \
+	echo "Restoring $$DUMP_FILE into 'recover' database..."; \
+	psql -d '$(DB_URL)' -c "DROP DATABASE IF EXISTS recover;" && \
+	psql -d '$(DB_URL)' -c "CREATE DATABASE recover;" && \
+	psql -d '$(RECOVER_DB_URL)' -f ../scripts/sql/create_extensions.sql && \
+	psql -d '$(RECOVER_DB_URL)' -f qfdmd/migrations/sql/create_wagtail_french_config.sql && \
+	pg_restore -d '$(RECOVER_DB_URL)' --schema=public --no-acl --no-owner --no-privileges --verbose --jobs=4 "$$DUMP_FILE" || true
+
+.PHONY: export-produit-pages
+export-produit-pages:
+	@[ -n "$(slugs)" ] || { echo "Usage: make export-produit-pages slugs='slug1 slug2' [output=recovered.json]"; exit 1; }
+	DATABASE_URL='$(RECOVER_DB_URL)' $(DJANGO_ADMIN) export_produit_pages $(slugs) --output $(or $(output),recovered.json)
+
+.PHONY: recreate-produit-pages
+recreate-produit-pages:
+	$(DJANGO_ADMIN) recreate_produit_pages $(or $(fixture),recovered.json) $(args)
