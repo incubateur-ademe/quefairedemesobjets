@@ -28,6 +28,7 @@ __screenshots__
 
 # Notebooks
 .ipynb_checkpoints
+.virtual_documents
 
 # ML
 data-platform/notebooks/deduplication/datasets/*

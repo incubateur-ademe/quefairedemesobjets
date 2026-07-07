@@ -1273,6 +1273,7 @@ dependencies = [
     { name = "psycopg2" },
     { name = "pyarrow" },
     { name = "python-lsp-server", extra = ["all"] },
+    { name = "ruff" },
     { name = "scikit-learn" },
     { name = "sqlalchemy" },
 ]
@@ -1292,6 +1293,7 @@ requires-dist = [
     { name = "psycopg2", specifier = ">=2.9.12" },
     { name = "pyarrow", specifier = ">=24.0.0" },
     { name = "python-lsp-server", extras = ["all"], specifier = ">=1.14.0" },
+    { name = "ruff", specifier = ">=0.15.18" },
     { name = "scikit-learn", specifier = ">=1.9.0" },
     { name = "sqlalchemy", specifier = ">=2.0.49" },
 ]
