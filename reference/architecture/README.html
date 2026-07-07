@@ -368,6 +368,7 @@
     subgraph Scalingo[&quot;☁️ Scalingo (region osc-fr1)&quot;]
         nginx_scalingo[&quot;nginx (cache + proxy /ph/)&quot;]
         webapp[&quot;🌐 Webapp Django\n(gunicorn, WhiteNoise)&quot;]
+        django_worker[&quot;⚙️ Worker django-tasks\n(db_worker)&quot;]
     end
 
     subgraph Scaleway[&quot;☁️ Scaleway (region fr-par, projet longuevieauxobjets)&quot;]
@@ -422,6 +423,8 @@
     nginx_scalingo --&gt;|&quot;/ph/*&quot;| posthog
 
     webapp --&gt; db_webapp
+    webapp --&gt;|&quot;enqueue tâches&quot;| django_worker
+    django_worker --&gt; db_webapp
     webapp --&gt; s3_medias
     webapp --&gt;|&quot;erreurs&quot;| sentry
     webapp --&gt;|&quot;HogQL stats&quot;| posthog
@@ -468,11 +471,15 @@
 <td><p>Scalingo (<code class="docutils literal notranslate"><span class="pre">osc-fr1</span></code>)</p></td>
 <td><p><a class="reference internal" href="../infrastructure/provisioning.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">infrastructure/provisioning.md</span></code></span></a>, <a class="reference internal" href="../webapp/README.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">webapp/README.md</span></code></span></a></p></td>
 </tr>
-<tr class="row-odd"><td><p><strong>Airflow</strong> : webserver, scheduler (avec dbt), DAG processor</p></td>
+<tr class="row-odd"><td><p><strong>Worker django-tasks</strong> (<code class="docutils literal notranslate"><span class="pre">manage.py</span> <span class="pre">db_worker</span></code>)</p></td>
+<td><p>Scalingo (<code class="docutils literal notranslate"><span class="pre">osc-fr1</span></code>, container <code class="docutils literal notranslate"><span class="pre">worker</span></code>)</p></td>
+<td><p><a class="reference internal" href="../webapp/django.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">webapp/django.md</span></code></span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Airflow</strong> : webserver, scheduler (avec dbt), DAG processor</p></td>
 <td><p>Scaleway Container as a Service (<code class="docutils literal notranslate"><span class="pre">fr-par</span></code>)</p></td>
 <td><p><a class="reference internal" href="../infrastructure/provisioning.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">infrastructure/provisioning.md</span></code></span></a>, <a class="reference internal" href="../data-platform/airflow.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">data-platform/airflow.md</span></code></span></a></p></td>
 </tr>
-<tr class="row-even"><td><p><strong>Container Registry</strong> privé <code class="docutils literal notranslate"><span class="pre">ns-qfdmo</span></code></p></td>
+<tr class="row-odd"><td><p><strong>Container Registry</strong> privé <code class="docutils literal notranslate"><span class="pre">ns-qfdmo</span></code></p></td>
 <td><p>Scaleway</p></td>
 <td><p><a class="reference internal" href="../infrastructure/provisioning.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">infrastructure/provisioning.md</span></code></span></a></p></td>
 </tr>
@@ -554,19 +561,22 @@
 <tr class="row-even"><td><p><strong>Django</strong> + apps métier (<code class="docutils literal notranslate"><span class="pre">qfdmo</span></code>, <code class="docutils literal notranslate"><span class="pre">qfdmd</span></code>, <code class="docutils literal notranslate"><span class="pre">search</span></code>, <code class="docutils literal notranslate"><span class="pre">data</span></code>, <code class="docutils literal notranslate"><span class="pre">infotri</span></code>, <code class="docutils literal notranslate"><span class="pre">stats</span></code>, <code class="docutils literal notranslate"><span class="pre">dsfr_hacks</span></code>)</p></td>
 <td><p><a class="reference internal" href="../webapp/django.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">webapp/django.md</span></code></span></a></p></td>
 </tr>
-<tr class="row-odd"><td><p><strong>API Django-Ninja</strong> (<code class="docutils literal notranslate"><span class="pre">/api/qfdmo/*</span></code>, <code class="docutils literal notranslate"><span class="pre">/api/stats</span></code>)</p></td>
+<tr class="row-odd"><td><p><strong>Tâches asynchrones</strong> django-tasks (actions admin lourdes, file en base)</p></td>
+<td><p><a class="reference internal" href="../webapp/django.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">webapp/django.md</span></code></span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><strong>API Django-Ninja</strong> (<code class="docutils literal notranslate"><span class="pre">/api/qfdmo/*</span></code>, <code class="docutils literal notranslate"><span class="pre">/api/stats</span></code>)</p></td>
 <td><p><a class="reference internal" href="../apis/README.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">apis/README.md</span></code></span></a></p></td>
 </tr>
-<tr class="row-even"><td><p><strong>CMS Wagtail</strong> (surcouche <code class="docutils literal notranslate"><span class="pre">sites-conformes</span></code>)</p></td>
+<tr class="row-odd"><td><p><strong>CMS Wagtail</strong> (surcouche <code class="docutils literal notranslate"><span class="pre">sites-conformes</span></code>)</p></td>
 <td><p><a class="reference internal" href="../webapp/README.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">webapp/README.md</span></code></span></a></p></td>
 </tr>
-<tr class="row-odd"><td><p><strong>Front</strong> Stimulus + Turbo + Parcel + TypeScript</p></td>
+<tr class="row-even"><td><p><strong>Front</strong> Stimulus + Turbo + Parcel + TypeScript</p></td>
 <td><p><a class="reference internal" href="../webapp/javascript.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">webapp/javascript.md</span></code></span></a></p></td>
 </tr>
-<tr class="row-even"><td><p><strong>Design system</strong> DSFR + Tailwind (prefix <code class="docutils literal notranslate"><span class="pre">qf-</span></code>)</p></td>
+<tr class="row-odd"><td><p><strong>Design system</strong> DSFR + Tailwind (prefix <code class="docutils literal notranslate"><span class="pre">qf-</span></code>)</p></td>
 <td><p><a class="reference internal" href="../webapp/look-and-feel.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">webapp/look-and-feel.md</span></code></span></a></p></td>
 </tr>
-<tr class="row-odd"><td><p><strong>Templates</strong> Django</p></td>
+<tr class="row-even"><td><p><strong>Templates</strong> Django</p></td>
 <td><p><a class="reference internal" href="../webapp/templates.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">webapp/templates.md</span></code></span></a></p></td>
 </tr>
 </tbody>

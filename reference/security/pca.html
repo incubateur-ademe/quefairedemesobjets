@@ -396,16 +396,19 @@
 <tr class="row-even"><td><p><strong>Gunicorn multi-workers</strong></p></td>
 <td><p>Plusieurs workers servent les requêtes en parallèle derrière nginx local (<code class="docutils literal notranslate"><span class="pre">bin/start</span></code>).</p></td>
 </tr>
-<tr class="row-odd"><td><p><strong>nginx Scalingo (cache)</strong></p></td>
+<tr class="row-odd"><td><p><strong>Worker django-tasks</strong></p></td>
+<td><p>Container Scalingo <code class="docutils literal notranslate"><span class="pre">worker</span></code> (<code class="docutils literal notranslate"><span class="pre">manage.py</span> <span class="pre">db_worker</span></code>) traite les actions admin lourdes enqueueées en base. Indépendant du trafic HTTP.</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>nginx Scalingo (cache)</strong></p></td>
 <td><p>Couche de cache devant Gunicorn (<code class="docutils literal notranslate"><span class="pre">servers.conf.erb</span></code>) absorbe les pics de trafic anonymes. Bypass via cookie <code class="docutils literal notranslate"><span class="pre">logged_in</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><strong>WhiteNoise + <code class="docutils literal notranslate"><span class="pre">CompressedManifestStaticFilesStorage</span></code></strong></p></td>
+<tr class="row-odd"><td><p><strong>WhiteNoise + <code class="docutils literal notranslate"><span class="pre">CompressedManifestStaticFilesStorage</span></code></strong></p></td>
 <td><p>Statiques servis directement par l’app, indépendants d’un CDN tiers.</p></td>
 </tr>
-<tr class="row-odd"><td><p><strong>Cache applicatif en base</strong></p></td>
+<tr class="row-even"><td><p><strong>Cache applicatif en base</strong></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">DatabaseCache</span></code> (table <code class="docutils literal notranslate"><span class="pre">qf_django_cache</span></code>) — pas de dépendance Redis à maintenir.</p></td>
 </tr>
-<tr class="row-even"><td><p><strong>Scalabilité horizontale Scalingo</strong></p></td>
+<tr class="row-odd"><td><p><strong>Scalabilité horizontale Scalingo</strong></p></td>
 <td><p>Possibilité d’augmenter le nombre de containers <code class="docutils literal notranslate"><span class="pre">web</span></code> à la demande depuis l’interface Scalingo.</p></td>
 </tr>
 </tbody>

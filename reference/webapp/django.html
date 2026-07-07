@@ -368,6 +368,91 @@
 </ul>
 </section>
 </section>
+<section id="taches-asynchrones-django-tasks">
+<h2>Tâches asynchrones (django-tasks)<a class="headerlink" href="#taches-asynchrones-django-tasks" title="Lien vers cette rubrique">¶</a></h2>
+<p>Certaines actions du back-office Django Admin — notamment l’application en masse de suggestions sur les <code class="docutils literal notranslate"><span class="pre">SuggestionGroupe</span></code> — peuvent traiter des milliers d’enregistrements. Pour éviter les timeouts HTTP, ces actions passent par <strong><a class="reference external" href="https://github.com/RealOrangeOne/django-tasks">django-tasks</a></strong> avec un backend PostgreSQL (<code class="docutils literal notranslate"><span class="pre">django_tasks.backends.database.DatabaseBackend</span></code>).</p>
+<section id="architecture">
+<h3>Architecture<a class="headerlink" href="#architecture" title="Lien vers cette rubrique">¶</a></h3>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Composant</p></th>
+<th class="head"><p>Rôle</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Tâches</strong> (<code class="docutils literal notranslate"><span class="pre">webapp/data/tasks.py</span></code>)</p></td>
+<td><p>Fonctions décorées avec <code class="docutils literal notranslate"><span class="pre">&#64;task()</span></code> ; exécutées hors requête HTTP.</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>File d’attente</strong></p></td>
+<td><p>Tables Django créées par <code class="docutils literal notranslate"><span class="pre">django_tasks.backends.database</span></code> dans la DB webapp (<code class="docutils literal notranslate"><span class="pre">DATABASE_URL</span></code>).</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Worker</strong></p></td>
+<td><p>Processus dédié <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">manage.py</span> <span class="pre">db_worker</span></code> qui consomme la file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Processus web</strong></p></td>
+<td><p>Gunicorn / <code class="docutils literal notranslate"><span class="pre">runserver</span></code> — enqueue les tâches ou les exécute de façon synchrone selon le volume.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="seuil-synchrone-asynchrone">
+<h3>Seuil synchrone / asynchrone<a class="headerlink" href="#seuil-synchrone-asynchrone" title="Lien vers cette rubrique">¶</a></h3>
+<p>Les actions admin <code class="docutils literal notranslate"><span class="pre">[SOURCE]</span> <span class="pre">Appliquer</span> <span class="pre">les</span> <span class="pre">suggestions</span> <span class="pre">au</span> <span class="pre">parent</span></code> et <code class="docutils literal notranslate"><span class="pre">[SOURCE]</span> <span class="pre">Appliquer</span> <span class="pre">les</span> <span class="pre">suggestions</span> <span class="pre">à</span> <span class="pre">la</span> <span class="pre">correction</span> <span class="pre">de</span> <span class="pre">l'acteur</span></code> (<code class="docutils literal notranslate"><span class="pre">webapp/data/admin.py</span></code>) choisissent le mode d’exécution selon le nombre de <code class="docutils literal notranslate"><span class="pre">SuggestionGroupe</span></code> sélectionnés :</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Sélection</p></th>
+<th class="head"><p>Comportement</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>&lt; 1 000</strong></p></td>
+<td><p>Exécution <strong>synchrone</strong> via <code class="docutils literal notranslate"><span class="pre">task.call(ids)</span></code> dans le processus web. L’utilisateur voit le résultat immédiatement.</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>≥ 1 000</strong></p></td>
+<td><p>Exécution <strong>asynchrone</strong> via <code class="docutils literal notranslate"><span class="pre">task.enqueue(ids)</span></code>. L’utilisateur est informé que le traitement est lancé en arrière-plan ; le worker prend le relais.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Le seuil est défini par la constante <code class="docutils literal notranslate"><span class="pre">SUGGESTION_TASK_ASYNC_THRESHOLD</span></code> dans <code class="docutils literal notranslate"><span class="pre">webapp/data/admin.py</span></code>.</p>
+</section>
+<section id="developpement-local">
+<h3>Développement local<a class="headerlink" href="#developpement-local" title="Lien vers cette rubrique">¶</a></h3>
+<p>Depuis <code class="docutils literal notranslate"><span class="pre">webapp/</span></code> :</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>runserver
+</pre></div>
+</div>
+<p>La cible <code class="docutils literal notranslate"><span class="pre">runserver</span></code> du Makefile lance <strong><code class="docutils literal notranslate"><span class="pre">db_worker</span></code> en arrière-plan</strong> puis <code class="docutils literal notranslate"><span class="pre">runserver</span></code>. Sans worker, les actions asynchrones (≥ 1 000 entrées) resteraient en file d’attente.</p>
+<p>Pour lancer le worker seul (par exemple après un <code class="docutils literal notranslate"><span class="pre">runserver</span></code> démarré autrement) :</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>manage.py<span class="w"> </span>db_worker
+</pre></div>
+</div>
+<p>Les tests utilisent le backend <code class="docutils literal notranslate"><span class="pre">ImmediateBackend</span></code> (<code class="docutils literal notranslate"><span class="pre">webapp/settings/test.py</span></code>) : les tâches s’exécutent inline, sans worker.</p>
+</section>
+<section id="production-scalingo">
+<h3>Production (Scalingo)<a class="headerlink" href="#production-scalingo" title="Lien vers cette rubrique">¶</a></h3>
+<p>Le <code class="docutils literal notranslate"><span class="pre">Procfile</span></code> déclare deux types de processus :</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>web: bash bin/start
+worker: python manage.py db_worker
+postdeploy: bash bin/post_deploy
+</pre></div>
+</div>
+<p>Scalingo démarre un container <strong><code class="docutils literal notranslate"><span class="pre">worker</span></code></strong> distinct du container <strong><code class="docutils literal notranslate"><span class="pre">web</span></code></strong>. Les deux partagent la même <code class="docutils literal notranslate"><span class="pre">DATABASE_URL</span></code> : le web enqueue, le worker consomme.</p>
+<p>Voir aussi <a class="reference internal" href="../infrastructure/provisioning.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">infrastructure/provisioning.md</span></code></span></a> pour le détail du déploiement.</p>
+</section>
+<section id="ajouter-une-nouvelle-tache">
+<h3>Ajouter une nouvelle tâche<a class="headerlink" href="#ajouter-une-nouvelle-tache" title="Lien vers cette rubrique">¶</a></h3>
+<ol class="arabic simple">
+<li><p>Déclarer la fonction dans le module <code class="docutils literal notranslate"><span class="pre">tasks.py</span></code> de l’app concernée avec <code class="docutils literal notranslate"><span class="pre">&#64;task()</span></code>.</p></li>
+<li><p>Passer des <strong>identifiants sérialisables</strong> (listes d’IDs, pas de queryset) : la tâche peut s’exécuter dans un autre processus et doit re-fetcher les objets.</p></li>
+<li><p>Depuis une vue ou une action admin, appeler <code class="docutils literal notranslate"><span class="pre">.call(...)</span></code> pour une exécution synchrone ou <code class="docutils literal notranslate"><span class="pre">.enqueue(...)</span></code> pour la mettre en file.</p></li>
+<li><p>Tester avec <code class="docutils literal notranslate"><span class="pre">ImmediateBackend</span></code> ; vérifier localement avec <code class="docutils literal notranslate"><span class="pre">db_worker</span></code> si la tâche est destinée à être enqueueée.</p></li>
+</ol>
+</section>
+</section>
 </section>
 
         </article>
@@ -428,6 +513,14 @@
 <li><a class="reference internal" href="#">Django</a><ul>
 <li><a class="reference internal" href="#applications">Applications</a><ul>
 <li><a class="reference internal" href="#django-tips">Django Tips</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#taches-asynchrones-django-tasks">Tâches asynchrones (django-tasks)</a><ul>
+<li><a class="reference internal" href="#architecture">Architecture</a></li>
+<li><a class="reference internal" href="#seuil-synchrone-asynchrone">Seuil synchrone / asynchrone</a></li>
+<li><a class="reference internal" href="#developpement-local">Développement local</a></li>
+<li><a class="reference internal" href="#production-scalingo">Production (Scalingo)</a></li>
+<li><a class="reference internal" href="#ajouter-une-nouvelle-tache">Ajouter une nouvelle tâche</a></li>
 </ul>
 </li>
 </ul>

@@ -515,11 +515,12 @@ npm<span class="w"> </span>ci
 </section>
 <section id="lancement">
 <h3>Lancement<a class="headerlink" href="#lancement" title="Lien vers cette rubrique">¶</a></h3>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>run-django
+<p>Depuis <strong><code class="docutils literal notranslate"><span class="pre">webapp/</span></code></strong> :</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>runserver
 </pre></div>
 </div>
-<p>Honcho démarrera les containers Docker s’ils ne sont pas déjà démarrés.
-Une fois les processus démarrés, le serveur web sera accessible à l’adresse <a class="reference external" href="https://quefairedemesobjets.ademe.local/">quefairedemesobjets.ademe.local</a>, écoutant sur le port 8000.</p>
+<p><code class="docutils literal notranslate"><span class="pre">runserver</span></code> démarre le serveur Django <strong>et</strong> le worker <code class="docutils literal notranslate"><span class="pre">db_worker</span></code> en arrière-plan. Ce worker est nécessaire pour traiter les actions admin lourdes (≥ 1 000 <code class="docutils literal notranslate"><span class="pre">SuggestionGroupe</span></code> sélectionnés) qui passent par django-tasks. Voir <a class="reference internal" href="../../reference/webapp/django.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">reference/webapp/django.md</span></code></span></a>.</p>
+<p>Une fois le serveur démarré, l’application est accessible à l’adresse <a class="reference external" href="https://quefairedemesobjets.ademe.local/">quefairedemesobjets.ademe.local</a>, écoutant sur le port 8000 (derrière nginx local si le profile <code class="docutils literal notranslate"><span class="pre">lvao</span></code> Docker est actif).</p>
 </section>
 <section id="tester-l-application">
 <h3>Tester l’application<a class="headerlink" href="#tester-l-application" title="Lien vers cette rubrique">¶</a></h3>

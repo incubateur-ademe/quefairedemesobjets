@@ -481,6 +481,11 @@
 <li><p>Suggestion represents modification proposals.</p></li>
 </ul>
 </section>
+<section id="applying-suggestions-from-django-admin">
+<h3>Applying suggestions from Django Admin<a class="headerlink" href="#applying-suggestions-from-django-admin" title="Lien vers cette rubrique">¶</a></h3>
+<p>Some back-office actions on <code class="docutils literal notranslate"><span class="pre">SuggestionGroupe</span></code> (apply to parent, apply to acteur correction) can process thousands of rows. When <strong>≥ 1 000</strong> groups are selected, they run asynchronously via <strong>django-tasks</strong> (<code class="docutils literal notranslate"><span class="pre">webapp/data/tasks.py</span></code>) and a dedicated Scalingo <strong><code class="docutils literal notranslate"><span class="pre">worker</span></code></strong> process (<code class="docutils literal notranslate"><span class="pre">manage.py</span> <span class="pre">db_worker</span></code>). Below that threshold, execution is synchronous in the web process.</p>
+<p>See <a class="reference internal" href="../webapp/django.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">webapp/django.md</span></code></span></a> for local setup and architecture details.</p>
+</section>
 <section id="suggestion-lifecycle">
 <h3>Suggestion lifecycle<a class="headerlink" href="#suggestion-lifecycle" title="Lien vers cette rubrique">¶</a></h3>
 <pre  class="mermaid">
@@ -655,6 +660,7 @@ flowchart TB
 <li><a class="reference internal" href="#follow-the-rules">Follow the rules</a></li>
 <li><a class="reference internal" href="#suggestion-system">Suggestion system</a><ul>
 <li><a class="reference internal" href="#representation-in-django">Representation in Django</a></li>
+<li><a class="reference internal" href="#applying-suggestions-from-django-admin">Applying suggestions from Django Admin</a></li>
 <li><a class="reference internal" href="#suggestion-lifecycle">Suggestion lifecycle</a></li>
 </ul>
 </li>

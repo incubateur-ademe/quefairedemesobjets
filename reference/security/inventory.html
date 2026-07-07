@@ -384,19 +384,25 @@
 <td><p>Outils internes (auth <code class="docutils literal notranslate"><span class="pre">django.contrib.auth</span></code>)</p></td>
 <td><p><a class="reference internal" href="authentication.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">authentication.md</span></code></span></a></p></td>
 </tr>
-<tr class="row-even"><td><p><strong>API REST Django-Ninja</strong> (<code class="docutils literal notranslate"><span class="pre">/api/qfdmo/*</span></code>, <code class="docutils literal notranslate"><span class="pre">/api/stats</span></code>)</p></td>
+<tr class="row-even"><td><p><strong>Worker django-tasks</strong> (<code class="docutils literal notranslate"><span class="pre">db_worker</span></code>)</p></td>
+<td><p>Applicatif</p></td>
+<td><p>Scalingo (container <code class="docutils literal notranslate"><span class="pre">worker</span></code>)</p></td>
+<td><p>Traitement asynchrone des actions admin lourdes (file en DB)</p></td>
+<td><p><a class="reference internal" href="../webapp/django.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">webapp/django.md</span></code></span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>API REST Django-Ninja</strong> (<code class="docutils literal notranslate"><span class="pre">/api/qfdmo/*</span></code>, <code class="docutils literal notranslate"><span class="pre">/api/stats</span></code>)</p></td>
 <td><p>Applicatif</p></td>
 <td><p>Scalingo</p></td>
 <td><p>Endpoint public en lecture</p></td>
 <td><p><a class="reference internal" href="../apis/README.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">apis/README.md</span></code></span></a></p></td>
 </tr>
-<tr class="row-odd"><td><p><strong>DB Webapp</strong> <code class="docutils literal notranslate"><span class="pre">lvao-prod-webapp</span></code></p></td>
+<tr class="row-even"><td><p><strong>DB Webapp</strong> <code class="docutils literal notranslate"><span class="pre">lvao-prod-webapp</span></code></p></td>
 <td><p>Base de données</p></td>
 <td><p>Scaleway RDB PostgreSQL 16 HA</p></td>
 <td><p>Données métier, cache, médias Wagtail, PostGIS</p></td>
 <td><p><a class="reference internal" href="../db/db_organisation.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">db/db_organisation.md</span></code></span></a></p></td>
 </tr>
-<tr class="row-even"><td><p><strong>Bucket <code class="docutils literal notranslate"><span class="pre">qfdmo-interface</span></code></strong></p></td>
+<tr class="row-odd"><td><p><strong>Bucket <code class="docutils literal notranslate"><span class="pre">qfdmo-interface</span></code></strong></p></td>
 <td><p>Stockage</p></td>
 <td><p>Scaleway S3 (<code class="docutils literal notranslate"><span class="pre">fr-par</span></code>)</p></td>
 <td><p>Médias uploadés via Django Admin</p></td>

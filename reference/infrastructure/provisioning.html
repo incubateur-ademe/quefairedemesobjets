@@ -448,18 +448,21 @@
 <td><p><code class="docutils literal notranslate"><span class="pre">apt</span></code>, <code class="docutils literal notranslate"><span class="pre">node</span></code>, <code class="docutils literal notranslate"><span class="pre">python</span></code>, <code class="docutils literal notranslate"><span class="pre">nginx</span></code> (ordre défini dans <code class="docutils literal notranslate"><span class="pre">webapp/.buildpacks</span></code>).</p></td>
 </tr>
 <tr class="row-even"><td><p><strong>Procfile</strong></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">web:</span> <span class="pre">bash</span> <span class="pre">bin/start</span></code> — lance Gunicorn + nginx local.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">web:</span> <span class="pre">bash</span> <span class="pre">bin/start</span></code> — lance Gunicorn + nginx local ; <code class="docutils literal notranslate"><span class="pre">worker:</span> <span class="pre">python</span> <span class="pre">manage.py</span> <span class="pre">db_worker</span></code> — consomme la file de tâches django-tasks (actions admin lourdes).</p></td>
 </tr>
-<tr class="row-odd"><td><p><strong>nginx Scalingo</strong></p></td>
+<tr class="row-odd"><td><p><strong>Worker django-tasks</strong></p></td>
+<td><p>Container Scalingo <code class="docutils literal notranslate"><span class="pre">worker</span></code> (Procfile). Traite les tâches enqueueées en base PostgreSQL (même <code class="docutils literal notranslate"><span class="pre">DATABASE_URL</span></code> que le web). Voir <a class="reference internal" href="../webapp/django.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">webapp/django.md</span></code></span></a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>nginx Scalingo</strong></p></td>
 <td><p>Couche de cache devant Gunicorn (<code class="docutils literal notranslate"><span class="pre">servers.conf.erb</span></code>), proxy <code class="docutils literal notranslate"><span class="pre">/ph/*</span></code> vers PostHog (analytics first-party), bypass cache via cookie <code class="docutils literal notranslate"><span class="pre">logged_in</span></code> (posé par <code class="docutils literal notranslate"><span class="pre">RequestEnhancementMiddleware</span></code>), <code class="docutils literal notranslate"><span class="pre">Vary:</span> <span class="pre">Sec-Fetch-Dest</span></code> (distingue iframe vs navigation directe).</p></td>
 </tr>
-<tr class="row-even"><td><p><strong>Base de données</strong></p></td>
+<tr class="row-odd"><td><p><strong>Base de données</strong></p></td>
 <td><p>La webapp cible la DB Scaleway <code class="docutils literal notranslate"><span class="pre">lvao-{env}-webapp</span></code> via <code class="docutils literal notranslate"><span class="pre">DATABASE_URL</span></code> (pas d’add-on PostgreSQL Scalingo).</p></td>
 </tr>
-<tr class="row-odd"><td><p><strong>Cache applicatif</strong></p></td>
+<tr class="row-even"><td><p><strong>Cache applicatif</strong></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">django.core.cache.backends.db.DatabaseCache</span></code> (table <code class="docutils literal notranslate"><span class="pre">qf_django_cache</span></code>). <strong>Pas de Redis</strong> : tous les caches sont stockés en base.</p></td>
 </tr>
-<tr class="row-even"><td><p><strong>Médias</strong></p></td>
+<tr class="row-odd"><td><p><strong>Médias</strong></p></td>
 <td><p>Délégués à Scaleway Object Storage (<code class="docutils literal notranslate"><span class="pre">django-storages</span></code> + <code class="docutils literal notranslate"><span class="pre">boto3</span></code>).</p></td>
 </tr>
 </tbody>

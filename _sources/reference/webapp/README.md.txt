@@ -61,6 +61,7 @@ from `webapp` folder
 
 ### Development
 
+- `make runserver`: Django dev server **and** django-tasks worker (`db_worker`) for background admin actions
 - `npm run watch`: Watch mode for Parcel (automatic compilation)
 - `npm run build`: Production build
 - `npm run lint`: TypeScript/JavaScript linter
