@@ -93,9 +93,15 @@ def convert_json_columns_to_dict_list(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def read_and_drop_temporary_table(table_name: str) -> pd.DataFrame:
+    df = read_temporary_table(table_name)
+    drop_temporary_table(table_name)
+
+    return df
+
+
+def read_temporary_table(table_name: str) -> pd.DataFrame:
     """
     Read a temporary table from the database and convert JSON columns back to dict/list.
-    Drop the temporary table from the database.
     """
     engine = django_conn_to_sqlalchemy_engine(using=DJANGO_WH_CONNECTION_NAME)
 
@@ -107,8 +113,15 @@ def read_and_drop_temporary_table(table_name: str) -> pd.DataFrame:
 
     logger.info(f"Table temporaire lue: {table_name} avec {len(df)} lignes")
 
+    return df
+
+
+def drop_temporary_table(table_name: str):
+    """
+    Drop the temporary table from the database.
+    """
+    engine = django_conn_to_sqlalchemy_engine(using=DJANGO_WH_CONNECTION_NAME)
+
     with engine.begin() as conn:  # type: ignore
         conn.execute(text(f"DROP TABLE IF EXISTS {table_name}"))
     logger.info(f"Table temporaire supprimée: {table_name}")
-
-    return df
