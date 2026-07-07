@@ -64,6 +64,6 @@ runs:
         make createsuperuser-example
 
     - name: Dump PostgreSQL database
-      if: steps.cache-db.outputs.cache-hit != 'true'
+      # if: steps.cache-db.outputs.cache-hit != 'true'
       shell: bash
       run: pg_dump -Fc -f ${{ inputs.local-dump-path }}
