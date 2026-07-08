@@ -28,6 +28,8 @@ INSTALLED_APPS = [
     "core",
     "qfdmo",
     "data",
+    "django_tasks",
+    "django_tasks.backends.database",
 ]
 
 # Minimal middleware for Airflow (no web requests to handle)

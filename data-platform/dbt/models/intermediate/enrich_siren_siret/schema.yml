@@ -8,6 +8,11 @@ models:
         description: "L'identifiant unique de l'acteur"
       - name: siren
         description: "Le numéro SIREN de l'acteur"
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_value_lengths_to_equal:
+              arguments:
+                value: 9
       - name: siret
         description: "Le numéro SIRET de l'acteur"
       - name: code_postal
@@ -29,6 +34,11 @@ models:
         description: "L'identifiant unique de l'acteur"
       - name: siret
         description: "Le numéro SIRET de l'acteur"
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_value_lengths_to_equal:
+              arguments:
+                value: 14
       - name: siren
         description: "Le numéro SIREN de l'acteur"
       - name: code_postal

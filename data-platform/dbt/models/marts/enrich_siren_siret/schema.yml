@@ -9,10 +9,22 @@ models:
     columns:
       - name: identifiant_unique
         description: "L'identifiant unique de l'acteur"
+        data_tests:
+          - not_null
       - name: siren
         description: "SIREN de l'acteur"
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_value_lengths_to_equal:
+              arguments:
+                value: 9
       - name: siret
         description: "SIRET proposé (établissement actif unique dans AE)"
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_value_lengths_to_equal:
+              arguments:
+                value: 14
       - name: code_postal
         description: "Code postal utilisé pour la correspondance"
     config:
@@ -28,10 +40,22 @@ models:
     columns:
       - name: identifiant_unique
         description: "L'identifiant unique de l'acteur"
+        data_tests:
+          - not_null
       - name: siren
         description: "SIREN de l'acteur"
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_value_lengths_to_equal:
+              arguments:
+                value: 9
       - name: siret
         description: "SIRET proposé (établissement actif unique dans AE)"
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_value_lengths_to_equal:
+              arguments:
+                value: 14
       - name: code_postal
         description: "Code postal utilisé pour la correspondance"
     config:
