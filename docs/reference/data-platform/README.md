@@ -20,4 +20,5 @@ airflow.md
 sources.md
 dbt.md
 clustering-deduplication.md
+enrich-siret-siren.md
 ```

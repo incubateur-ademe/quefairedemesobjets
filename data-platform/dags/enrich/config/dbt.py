@@ -24,3 +24,7 @@ class DBT:
     )
     MARTS_ENRICH_VILLES_TYPO: str = "marts_enrich_acteurs_villes_suggest_typo"
     MARTS_ENRICH_VILLES_NEW: str = "marts_enrich_acteurs_villes_suggest_new"
+
+    # SIRET / SIREN
+    MARTS_ENRICH_SIRET_FROM_SIREN: str = "marts_enrich_siret_from_siren"
+    MARTS_ENRICH_SIREN_FROM_SIRET: str = "marts_enrich_siren_from_siret"

@@ -41,6 +41,8 @@ def get_context_from_suggestion_groupe(
         return get_context_from_suggestion_groupe_type_source(suggestion_groupe)
     elif type_action in [
         SuggestionAction.CRAWL_URLS,
+        SuggestionAction.ENRICH_ACTEURS_SIRET,
+        SuggestionAction.ENRICH_ACTEURS_SIREN,
     ]:
         return get_context_from_suggestion_groupe_type_enrich_multi(suggestion_groupe)
 
@@ -420,6 +422,8 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
     def _build_full_context(self, request, suggestion_groupe):
         if suggestion_groupe.suggestion_cohorte.type_action in [
             SuggestionAction.CRAWL_URLS,
+            SuggestionAction.ENRICH_ACTEURS_SIRET,
+            SuggestionAction.ENRICH_ACTEURS_SIREN,
         ]:
             return get_context_from_suggestion_groupe_type_enrich_multi(
                 suggestion_groupe

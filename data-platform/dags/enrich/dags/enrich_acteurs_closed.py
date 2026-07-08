@@ -14,8 +14,9 @@ from enrich.tasks.airflow_logic.enrich_config_create_task import (
 from enrich.tasks.airflow_logic.enrich_dbt_model_suggest_task import (
     enrich_dbt_model_suggest_task,
 )
-from enrich.tasks.airflow_logic.enrich_dbt_models_refresh_task import (
+from enrich.tasks.airflow_logic.enrich_dbt_models_task import (
     enrich_dbt_models_refresh_task,
+    enrich_dbt_models_test_task,
 )
 from shared.config.airflow import DEFAULT_ARGS_NO_RETRIES
 from shared.config.models import config_to_airflow_params
@@ -46,6 +47,9 @@ with DAG(
             dbt_models_refresh_command=(
                 "dbt build --select tag:marts,tag:enrich,tag:closed"
             ),
+            dbt_models_test_command=(
+                "dbt test --select tag:marts,tag:enrich,tag:closed"
+            ),
             filter_equals__acteur_statut="ACTIF",
         )
     ),
@@ -53,6 +57,7 @@ with DAG(
     # Instantiation
     config = enrich_config_create_task(dag)
     dbt_refresh = enrich_dbt_models_refresh_task(dag)
+    dbt_test = enrich_dbt_models_test_task(dag)
     suggest_not_replaced_unite = enrich_dbt_model_suggest_task(
         dag,
         task_id=TASKS.ENRICH_CLOSED_SUGGESTIONS_NOT_REPLACED_UNITE,
@@ -80,7 +85,8 @@ with DAG(
 
     # Graph
     config >> dbt_refresh  # type: ignore
-    dbt_refresh >> suggest_not_replaced_unite  # type: ignore
-    dbt_refresh >> suggest_not_replaced_etablissement  # type: ignore
-    dbt_refresh >> suggest_other_siren  # type: ignore
-    dbt_refresh >> suggest_same_siren  # type: ignore
+    dbt_refresh >> dbt_test  # type: ignore
+    dbt_test >> suggest_not_replaced_unite  # type: ignore
+    dbt_test >> suggest_not_replaced_etablissement  # type: ignore
+    dbt_test >> suggest_other_siren  # type: ignore
+    dbt_test >> suggest_same_siren  # type: ignore

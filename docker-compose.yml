@@ -7,6 +7,7 @@ x-airflow-common: &airflow-common
   volumes:
     - ./data-platform/config:/opt/airflow/config
     - ./data-platform/dags:/opt/airflow/dags
+    - ./docs/reference/data-platform:/opt/airflow/docs/reference/data-platform
     - ./data-platform/dbt:/opt/airflow/dbt
     - ./data-platform/logs:/opt/airflow/logs
     - ./data-platform/plugins:/opt/airflow/plugins

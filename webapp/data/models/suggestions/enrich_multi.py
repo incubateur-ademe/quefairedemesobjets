@@ -12,13 +12,53 @@ from data.models.comparison_table import (
     LinkInCell,
     TableRow,
 )
-from data.models.suggestion import SuggestionGroupe, SuggestionUnitaire
-from data.models.suggestions.abstract import SuggestionGroupeType
+from data.models.suggestion import (
+    SuggestionAction,
+    SuggestionGroupe,
+    SuggestionUnitaire,
+)
+from data.models.suggestions.abstract import (
+    AE_ENTREPRISE_URL,
+    AE_ETABLISSEMENT_URL,
+    SuggestionGroupeType,
+)
 from django.contrib.admin.utils import quote
 from django.urls import reverse
 from qfdmo.models.acteur import Acteur, RevisionActeur
 
 logger = logging.getLogger(__name__)
+
+
+def _format_siret_label(siret: str) -> str:
+    if not siret:
+        return ""
+    return (
+        f'<a href="{AE_ETABLISSEMENT_URL}{siret}" target="_blank" '
+        f'rel="noreferrer">{siret}</a>'
+    )
+
+
+def _format_siren_label(siren: str) -> str:
+    if not siren:
+        return ""
+    return (
+        f'<a href="{AE_ENTREPRISE_URL}{siren}" target="_blank" '
+        f'rel="noreferrer">{siren}</a>'
+    )
+
+
+def _append_siret_to_row_label(row_label: str, siret: str) -> str:
+    formatted_siret = _format_siret_label(siret)
+    if not formatted_siret:
+        return row_label
+    return f"{row_label}<br/>SIRET&nbsp;: {formatted_siret}"
+
+
+def _append_siren_to_row_label(row_label: str, siren: str) -> str:
+    formatted_siren = _format_siren_label(siren)
+    if not formatted_siren:
+        return row_label
+    return f"{row_label}<br/>SIREN&nbsp;: {formatted_siren}"
 
 
 class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
@@ -53,9 +93,49 @@ class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
 
         return super()._get_fields_links(field_group, source_valeurs, target_valeurs)
 
+    def _get_acteur_field_for_row_label(
+        self,
+        field_name: str,
+        acteur: Acteur | None,
+        revision_acteur: RevisionActeur | None,
+        parent_revision_acteur: RevisionActeur | None,
+    ) -> str:
+        if parent_revision_acteur:
+            return getattr(parent_revision_acteur, field_name)
+        if revision_acteur and acteur:
+            return getattr(revision_acteur, field_name) or getattr(acteur, field_name)
+        if acteur:
+            return getattr(acteur, field_name)
+        raise ValueError(f"No value found for {field_name}")
+
+    def _append_cohort_identifier_to_row_label(
+        self,
+        row_label: str,
+        *,
+        acteur: Acteur | None,
+        revision_acteur: RevisionActeur | None,
+        parent_revision_acteur: RevisionActeur | None,
+    ) -> str:
+        type_action = self.suggestion_groupe.suggestion_cohorte.type_action
+        acteur_kwargs = {
+            "acteur": acteur,
+            "revision_acteur": revision_acteur,
+            "parent_revision_acteur": parent_revision_acteur,
+        }
+        if type_action == SuggestionAction.ENRICH_ACTEURS_SIREN:
+            return _append_siret_to_row_label(
+                row_label,
+                self._get_acteur_field_for_row_label("siret", **acteur_kwargs),
+            )
+        if type_action == SuggestionAction.ENRICH_ACTEURS_SIRET:
+            return _append_siren_to_row_label(
+                row_label,
+                self._get_acteur_field_for_row_label("siren", **acteur_kwargs),
+            )
+        return row_label
+
     def to_comparison_table(self, errors: dict | None = None) -> ComparisonTable:
         suggestions_unitaires = self.suggestion_groupe.suggestion_unitaires.all()
-
         columns = [ColumnHeader(key="label")]
 
         for column_name in ["Champ(s)", "Acteur", "Correction"]:
@@ -82,6 +162,12 @@ class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
                 )
                 parent_revision_acteur = suggestion_unitaire.parent_revision_acteur
                 row_label = f"Parent {identifiant_unique}"
+                row_label = self._append_cohort_identifier_to_row_label(
+                    row_label,
+                    acteur=None,
+                    revision_acteur=None,
+                    parent_revision_acteur=parent_revision_acteur,
+                )
                 cells.append(
                     CellHtmlContent(
                         column_key="source",
@@ -137,6 +223,12 @@ class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
                     identifiant_unique=identifiant_unique
                 )
                 row_label = f"Acteur {identifiant_unique}"
+                row_label = self._append_cohort_identifier_to_row_label(
+                    row_label,
+                    acteur=acteur,
+                    revision_acteur=revision_acteur,
+                    parent_revision_acteur=None,
+                )
 
                 cells.append(
                     CellDisplayContent(

@@ -12,6 +12,7 @@ from airflow.sdk import Param
 from airflow.sdk.definitions.param import ParamsDict
 from clone.tasks.airflow_logic.chain_tasks import chain_tasks
 from shared.config.airflow import DEFAULT_ARGS_NO_RETRIES
+from shared.config.schedules import SCHEDULES
 from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
 
@@ -19,7 +20,7 @@ with DAG(
     dag_id="clone_ae_lien_succession",
     dag_display_name="Cloner - AE - Lien de Succession",
     default_args=DEFAULT_ARGS_NO_RETRIES,
-    schedule=None,
+    schedule=SCHEDULES.EVERY_FIRST_DAY_OF_MONTH_AT_02_00,
     start_date=START_DATES.DEFAULT,
     description=(
         "Clone la table 'lien de succession' de l'Annuaire Entreprises (AE)"
