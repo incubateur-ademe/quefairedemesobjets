@@ -8,6 +8,7 @@ from airflow import DAG
 from airflow.sdk import Param
 from clone.tasks.airflow_logic.chain_tasks import chain_tasks
 from shared.config.airflow import DEFAULT_ARGS_NO_RETRIES
+from shared.config.schedules import SCHEDULES
 from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
 
@@ -15,7 +16,7 @@ with DAG(
     dag_id="clone_ban_adresses",
     dag_display_name="Cloner - BAN - Adresses",
     default_args=DEFAULT_ARGS_NO_RETRIES,
-    schedule=None,
+    schedule=SCHEDULES.EVERY_FIRST_DAY_OF_MONTH_AT_04_00,
     start_date=START_DATES.DEFAULT,
     description=(
         "Clone la table 'adresses' de la Base Adresse Nationale (BAN) dans notre DB"

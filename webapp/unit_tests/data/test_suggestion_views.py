@@ -1,6 +1,7 @@
 import pytest
 from data.models.suggestion import SuggestionAction
 from data.views import (
+    get_context_from_suggestion_groupe_type_enrich_multi,
     get_context_from_suggestion_groupe_type_source,
     update_suggestion_groupe,
 )
@@ -343,6 +344,68 @@ class TestSerializeSuggestionGroupe:
             get_context_from_suggestion_groupe_type_source(suggestion_groupe)
 
         assert "acteur is required" in str(exc_info.value)
+
+
+@pytest.mark.django_db
+class TestSerializeSuggestionGroupeEnrichMulti:
+    def test_enrich_siren_from_siret_shows_siret_in_first_column(self):
+        siret = "12345678901234"
+        acteur = ActeurFactory(identifiant_unique="ACTEUR_1", siret=siret, siren="")
+        suggestion_groupe = SuggestionGroupeFactory(
+            suggestion_cohorte=SuggestionCohorteFactory(
+                type_action=SuggestionAction.ENRICH_ACTEURS_SIREN,
+            ),
+            contexte={"siret": siret, "# acteurs": 1},
+        )
+        SuggestionUnitaireFactory(
+            suggestion_groupe=suggestion_groupe,
+            suggestion_modele="RevisionActeur",
+            revision_acteur_id=acteur.identifiant_unique,
+            champs=["siren"],
+            valeurs=["123456789"],
+        )
+
+        result = get_context_from_suggestion_groupe_type_enrich_multi(suggestion_groupe)
+        table = result["comparison_table"]
+
+        assert len(table.rows) == 1
+        label_cell = table.rows[0].cells[0]
+        assert "Acteur ACTEUR_1" in label_cell.html_content
+        assert "SIRET&nbsp;:" in label_cell.html_content
+        assert "12345678901234" in label_cell.html_content
+        assert "annuaire-entreprises.data.gouv.fr/etablissement/" in (
+            label_cell.html_content
+        )
+
+    def test_enrich_siret_from_siren_shows_siren_in_first_column(self):
+        siren = "123456789"
+        acteur = ActeurFactory(identifiant_unique="ACTEUR_2", siret="", siren=siren)
+        siret_propose = "12345678901234"
+        suggestion_groupe = SuggestionGroupeFactory(
+            suggestion_cohorte=SuggestionCohorteFactory(
+                type_action=SuggestionAction.ENRICH_ACTEURS_SIRET,
+            ),
+            contexte={"siret": siret_propose, "# acteurs": 1},
+        )
+        SuggestionUnitaireFactory(
+            suggestion_groupe=suggestion_groupe,
+            suggestion_modele="RevisionActeur",
+            revision_acteur_id=acteur.identifiant_unique,
+            champs=["siret"],
+            valeurs=[siret_propose],
+        )
+
+        result = get_context_from_suggestion_groupe_type_enrich_multi(suggestion_groupe)
+        table = result["comparison_table"]
+
+        assert len(table.rows) == 1
+        label_cell = table.rows[0].cells[0]
+        assert "Acteur ACTEUR_2" in label_cell.html_content
+        assert "SIREN&nbsp;:" in label_cell.html_content
+        assert "123456789" in label_cell.html_content
+        assert "annuaire-entreprises.data.gouv.fr/entreprise/" in (
+            label_cell.html_content
+        )
 
 
 @pytest.mark.django_db

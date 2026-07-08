@@ -69,6 +69,9 @@ COPY ./data-platform/dags/ /opt/airflow/dags/
 COPY ./data-platform/config/ /opt/airflow/config/
 COPY ./data-platform/plugins/ /opt/airflow/plugins/
 
+# Copy data-platform docs
+COPY ./docs/reference/data-platform/ /opt/airflow/docs/reference/data-platform/
+
 RUN mkdir -p /opt/airflow/tmp
 RUN chown -R ${AIRFLOW_UID:-50000}:0 /opt/airflow/tmp
 
