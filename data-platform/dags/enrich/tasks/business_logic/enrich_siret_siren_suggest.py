@@ -86,42 +86,44 @@ def enrich_siret_siren_to_suggestion_groupes(
     )
     cohorte.save()
 
+    from django.db import transaction
     from qfdmo.models import RevisionActeur
 
     for group_value, group_df in df.groupby(suggest_field):
-        suggestion_groupe = SuggestionGroupe.objects.create(
-            suggestion_cohorte=cohorte,
-            statut=SuggestionStatut.AVALIDER,
-            contexte={
-                suggest_field: group_value,
-                "# acteurs": len(group_df),
-            },
-        )
-        for _, row in group_df.iterrows():
-            identifiant_unique = row[COLS.IDENTIFIANT_UNIQUE]
-            est_parent = est_parent_map.get(identifiant_unique, False)
-            parent_revision = None
-            suggestion_modele = "RevisionActeur"
-            if est_parent:
-                parent_revision = RevisionActeur.objects.get(
-                    identifiant_unique=identifiant_unique
-                )
-                suggestion_modele = "ParentRevisionActeur"
-
-            SuggestionUnitaire.objects.create(
-                suggestion_groupe=suggestion_groupe,
+        with transaction.atomic():
+            suggestion_groupe = SuggestionGroupe.objects.create(
+                suggestion_cohorte=cohorte,
                 statut=SuggestionStatut.AVALIDER,
-                revision_acteur_id=(
-                    identifiant_unique
-                    if suggestion_modele == "RevisionActeur"
-                    else None
-                ),
-                parent_revision_acteur=parent_revision,
-                suggestion_modele=suggestion_modele,
-                raison=cohort,
-                champs=[suggest_field],
-                valeurs=[str(row[suggest_field])],
+                contexte={
+                    suggest_field: group_value,
+                    "# acteurs": len(group_df),
+                },
             )
+            for _, row in group_df.iterrows():
+                identifiant_unique = row[COLS.IDENTIFIANT_UNIQUE]
+                est_parent = est_parent_map.get(identifiant_unique, False)
+                parent_revision = None
+                suggestion_modele = "RevisionActeur"
+                if est_parent:
+                    parent_revision = RevisionActeur.objects.get(
+                        identifiant_unique=identifiant_unique
+                    )
+                    suggestion_modele = "ParentRevisionActeur"
+
+                SuggestionUnitaire.objects.create(
+                    suggestion_groupe=suggestion_groupe,
+                    statut=SuggestionStatut.AVALIDER,
+                    revision_acteur_id=(
+                        identifiant_unique
+                        if suggestion_modele == "RevisionActeur"
+                        else None
+                    ),
+                    parent_revision_acteur=parent_revision,
+                    suggestion_modele=suggestion_modele,
+                    raison=cohort,
+                    champs=[suggest_field],
+                    valeurs=[str(row[suggest_field])],
+                )
 
     return True
 

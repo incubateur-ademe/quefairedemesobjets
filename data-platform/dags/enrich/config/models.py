@@ -48,12 +48,16 @@ class EnrichBaseConfig(BaseModel):
     )
     dbt_models_refresh: bool = Field(
         default=True,
-        description="""🔄 Si coché, les modèles DBT seront rafraîchis.
+        description="""🔄 Si coché, les modèles DBT seront rafraîchis et testés.
         🔴 Désactiver uniquement pour des tests.""",
     )
     dbt_models_refresh_command: str = Field(
         default="",
         description="🔄 Commande DBT à exécuter pour rafraîchir les modèles",
+    )
+    dbt_models_test_command: str = Field(
+        default="",
+        description="🧪 Commande DBT à exécuter pour tester les modèles",
     )
     filter_contains__acteur_commentaires: Optional[str] = Field(
         default=None,
@@ -111,6 +115,10 @@ class EnrichActeursClosedConfig(EnrichBaseConfig):
         default="dbt build --select tag:marts,tag:enrich,tag:closed",
         description="🔄 Commande DBT à exécuter pour rafraîchir les modèles",
     )
+    dbt_models_test_command: str = Field(
+        default="dbt test --select tag:marts,tag:enrich,tag:closed",
+        description="🧪 Commande DBT à exécuter pour tester les modèles",
+    )
     filter_contains__etab_naf: Optional[str] = Field(
         default=None,
         description="🔍 Filtre sur **NAF AE Etablissement**",
@@ -121,6 +129,10 @@ class EnrichActeursRGPDConfig(EnrichBaseConfig):
     dbt_models_refresh_command: str = Field(
         default="dbt build --select tag:marts,tag:enrich,tag:rgpd",
         description="🔄 Commande DBT à exécuter pour rafraîchir les modèles",
+    )
+    dbt_models_test_command: str = Field(
+        default="dbt test --select tag:marts,tag:enrich,tag:rgpd",
+        description="🧪 Commande DBT à exécuter pour tester les modèles",
     )
 
 
@@ -143,13 +155,18 @@ class EnrichActeursSiretSirenConfig(BaseModel):
 
     dbt_models_refresh: bool = Field(
         default=True,
-        description="""🔄 Si coché, les modèles DBT seront rafraîchis.
+        description="""🔄 Si coché, les modèles DBT seront rafraîchis et testés.
         🔴 Désactiver uniquement pour des tests.""",
     )
 
     dbt_models_refresh_command: str = Field(
         default="dbt run --select +tag:siren_siret",
         description="🔄 Commande DBT à exécuter pour rafraîchir les modèles",
+    )
+
+    dbt_models_test_command: str = Field(
+        default="dbt test --select +tag:siren_siret",
+        description="🧪 Commande DBT à exécuter pour tester les modèles",
     )
 
 

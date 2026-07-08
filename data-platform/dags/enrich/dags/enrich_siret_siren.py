@@ -14,8 +14,9 @@ from enrich.config.cohorts import COHORTS
 from enrich.config.dbt import DBT
 from enrich.config.models import EnrichActeursSiretSirenConfig
 from enrich.config.tasks import TASKS
-from enrich.tasks.airflow_logic.enrich_dbt_models_refresh_task import (
+from enrich.tasks.airflow_logic.enrich_dbt_models_task import (
     enrich_dbt_models_refresh_task,
+    enrich_dbt_models_test_task,
 )
 from enrich.tasks.airflow_logic.enrich_siret_siren_suggest_task import (
     enrich_siret_siren_suggest_task,
@@ -48,10 +49,12 @@ with DAG(
         EnrichActeursSiretSirenConfig(
             dbt_models_refresh=True,
             dbt_models_refresh_command="dbt run --select +tag:siren_siret",
+            dbt_models_test_command="dbt test --select +tag:siren_siret",
         ),
     ),
 ) as dag:
     dbt_refresh = enrich_dbt_models_refresh_task(dag)
+    dbt_test = enrich_dbt_models_test_task(dag)
 
     # Cohorte 1: acteurs with a known SIREN -> suggest a new SIRET
     # 1 SuggestionGroupe per proposed SIRET
@@ -76,5 +79,6 @@ with DAG(
     )
 
     # Graph
-    dbt_refresh >> suggest_siret_from_siren  # type: ignore
-    dbt_refresh >> suggest_siren_from_siret  # type: ignore
+    dbt_refresh >> dbt_test  # type: ignore
+    dbt_test >> suggest_siret_from_siren  # type: ignore
+    dbt_test >> suggest_siren_from_siret  # type: ignore

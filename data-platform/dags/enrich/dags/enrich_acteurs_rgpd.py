@@ -11,8 +11,9 @@ from enrich.tasks.airflow_logic.enrich_config_create_task import (
 from enrich.tasks.airflow_logic.enrich_dbt_model_suggest_task import (
     enrich_dbt_model_suggest_task,
 )
-from enrich.tasks.airflow_logic.enrich_dbt_models_refresh_task import (
+from enrich.tasks.airflow_logic.enrich_dbt_models_task import (
     enrich_dbt_models_refresh_task,
+    enrich_dbt_models_test_task,
 )
 from shared.config.airflow import DEFAULT_ARGS_NO_RETRIES
 from shared.config.models import config_to_airflow_params
@@ -37,10 +38,11 @@ with DAG(
     # Instantiation
     config = enrich_config_create_task(dag)
     dbt_refresh = enrich_dbt_models_refresh_task(dag)
+    dbt_test = enrich_dbt_models_test_task(dag)
     suggest_rgpd = enrich_dbt_model_suggest_task(
         dag,
         task_id=TASKS.ENRICH_RGPD_SUGGESTIONS,
         cohort=COHORTS.RGPD,
         dbt_model_name=DBT.MARTS_ENRICH_RGPD_SUGGESTIONS,
     )
-    config >> dbt_refresh >> suggest_rgpd  # type: ignore
+    config >> dbt_refresh >> dbt_test >> suggest_rgpd  # type: ignore

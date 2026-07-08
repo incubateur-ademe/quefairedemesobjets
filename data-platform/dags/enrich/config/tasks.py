@@ -33,6 +33,7 @@ class TASKS:
         "enrich_acteurs_closed_suggestions_not_replaced_etablissement"
     )
     ENRICH_DBT_MODELS_REFRESH: str = "enrich_dbt_models_refresh"
+    ENRICH_DBT_MODELS_TEST: str = "enrich_dbt_models_test"
     READ_AE_RGPD: str = "enrich_ae_rgpd_read"
 
     # Villes
