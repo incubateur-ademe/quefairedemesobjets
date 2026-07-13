@@ -11,6 +11,20 @@ from utils.django import DJANGO_WH_CONNECTION_NAME, django_conn_to_sqlalchemy_en
 logger = logging.getLogger(__name__)
 
 
+def column_contains_lists(series: pd.Series) -> bool:
+    """Return True if the first non-null cell value is a Python list."""
+    sample = next((v for v in series if v is not None), None)
+    return isinstance(sample, list)
+
+
+def infer_postgresql_array_dtypes(df: pd.DataFrame) -> dict:
+    """Map columns whose cells are lists to PostgreSQL ARRAY(VARCHAR) for to_sql."""
+    from sqlalchemy import VARCHAR
+    from sqlalchemy.dialects.postgresql import ARRAY
+
+    return {col: ARRAY(VARCHAR) for col in df.columns if column_contains_lists(df[col])}
+
+
 def convert_dict_list_columns_to_json(df: pd.DataFrame) -> pd.DataFrame:
     """Convert columns ending with '_codes' containing dict/list to JSON strings."""
     df_copy = df.copy()
