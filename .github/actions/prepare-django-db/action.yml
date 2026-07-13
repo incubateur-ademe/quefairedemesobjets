@@ -60,10 +60,6 @@ runs:
         uv run python manage.py createcachetable
         # TODO: user make prepare-e2e-test here
         make migrate
-        # TEMPORARY, required to have unaccent search function in CI
-        # while it is not deployed on production
-        uv run python manage.py enable_unaccent
-        uv run python manage.py enable_trigram
         make rebuild-search-index
         make createsuperuser-example
 
