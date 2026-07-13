@@ -35,11 +35,33 @@ from sites_conformes.content_manager.models import ContentPage
 
 from qfdmd.blocks import STREAMFIELD_COMMON_BLOCKS
 from qfdmd.utils import see_more_button
-from qfdmo.models.utils import NomAsNaturalKeyModel
+from qfdmo.models.utils import NomAsNaturalKeyManager, NomAsNaturalKeyModel
 from search.constants import SEARCH_TAG_HELP_TEXT
 from search.models import SearchTerm
 
 logger = logging.getLogger(__name__)
+
+# Slug of the ProduitIndexPage hosting the pages automatically migrated from
+# legacy Produit records. Mirrors the historic /dechet/<slug>/ URLs so
+# migrated pages keep their public URL, served by Wagtail.
+LEGACY_PRODUIT_INDEX_SLUG = "dechet"
+
+# Fields copied verbatim from the legacy Produit model onto ProduitPage
+# (prefixed with legacy_) by the migrate_produits_legacy command.
+PRODUIT_LEGACY_COPIED_FIELDS = (
+    "nom",
+    "code",
+    "qu_est_ce_que_j_en_fais",
+    "qu_est_ce_que_j_en_fais_bon_etat",
+    "qu_est_ce_que_j_en_fais_mauvais_etat",
+    "comment_les_eviter",
+    "que_va_t_il_devenir",
+    "nom_eco_organisme",
+    "filieres_rep",
+    "slug",
+    "infotri",
+    "modifie_le",
+)
 
 
 class PartitionedBody(NamedTuple):
@@ -55,6 +77,69 @@ class PartitionedBody(NamedTuple):
 
     always_visible: list
     hidden_in_iframe: list
+
+
+def _build_consignes_avec_etat(bon_etat: str, mauvais_etat: str) -> dict:
+    """Build a streamfield value for the consignes avec état.
+
+    Returns a ``{"type": "item_grid", "value": ...}`` dict with two
+    vertical cards: "Bon état" (Donner ou revendre) then "Mauvais état"
+    (Déposer), each with a badge and the corresponding content.
+    """
+    return {
+        "type": "item_grid",
+        "value": {
+            "column_width": "6",
+            "items": [
+                {
+                    "type": "card",
+                    "value": {
+                        "title": "Donner ou revendre",
+                        "heading_tag": "h3",
+                        "description": bon_etat,
+                        "top_detail_badges_tags": [
+                            {
+                                "type": "badges",
+                                "value": [
+                                    {
+                                        "type": "badge",
+                                        "value": {
+                                            "text": "Bon état",
+                                            "color": "cumulus",
+                                            "hide_icon": False,
+                                        },
+                                    }
+                                ],
+                            }
+                        ],
+                    },
+                },
+                {
+                    "type": "card",
+                    "value": {
+                        "title": "Déposer",
+                        "heading_tag": "h3",
+                        "description": mauvais_etat,
+                        "top_detail_badges_tags": [
+                            {
+                                "type": "badges",
+                                "value": [
+                                    {
+                                        "type": "badge",
+                                        "value": {
+                                            "text": "Mauvais état",
+                                            "color": "glycine",
+                                            "hide_icon": False,
+                                        },
+                                    }
+                                ],
+                            }
+                        ],
+                    },
+                },
+            ],
+        },
+    }
 
 
 class GenreNombreModel(models.Model):
@@ -370,6 +455,24 @@ def find_duplicate_search_tag_names(tag_names, page_id=None):
     return duplicates
 
 
+class LegacyProduitObjectList(ObjectList):
+    """Tab only shown on pages automatically migrated from a legacy Produit."""
+
+    class BoundPanel(ObjectList.BoundPanel):
+        def is_shown(self):
+            return (
+                bool(
+                    self.instance
+                    and getattr(
+                        self.instance,
+                        "automatically_migrated_from_legacy_produit",
+                        False,
+                    )
+                )
+                and super().is_shown()
+            )
+
+
 class ProduitPageForm(WagtailAdminPageForm):
     def clean(self):
         cleaned_data = super().clean()
@@ -491,7 +594,7 @@ class ProduitPage(
             if item.id == breakpoint_block.id:
                 switch = False
                 if is_break_marker:
-                    # The break block is a pure marker — don't render it.
+                    # The break block is a pure marker, don't render it.
                     continue
 
             out.append(item)
@@ -515,6 +618,58 @@ class ProduitPage(
         return self._partitioned_body.hidden_in_iframe
 
     commentaire = RichTextField(blank=True)
+
+    # Legacy Produit data, filled by the migrate_produits_legacy command.
+    # Raw copy (read-only in the admin) of the qfdmd.Produit fields, kept
+    # as a reference while editors rework the content.
+    automatically_migrated_from_legacy_produit = models.BooleanField(
+        "Produit legacy migré automatiquement",
+        default=False,
+        help_text="Si cochée, cette page a été créée automatiquement à partir "
+        "d'une fiche produit Django (ancien système) par la commande "
+        "migrate_produits_legacy.",
+    )
+    legacy_nom = models.CharField("Libellé (legacy)", blank=True)
+    legacy_code = models.CharField("Code (legacy)", blank=True)
+    legacy_qu_est_ce_que_j_en_fais = models.TextField(
+        "Qu'est-ce que j'en fais ? - ANCIEN CHAMP (legacy)",
+        blank=True,
+    )
+    legacy_qu_est_ce_que_j_en_fais_bon_etat = models.TextField(
+        "Qu'est-ce que j'en fais ? - Bon état (legacy)",
+        blank=True,
+    )
+    legacy_qu_est_ce_que_j_en_fais_mauvais_etat = models.TextField(
+        "Qu'est-ce que j'en fais ? - Mauvais état (legacy)",
+        blank=True,
+    )
+    legacy_comment_les_eviter = models.TextField(
+        "Comment consommer responsable ? (legacy)",
+        blank=True,
+    )
+    legacy_que_va_t_il_devenir = models.TextField(
+        "Que va-t-il devenir ? (legacy)",
+        blank=True,
+    )
+    legacy_nom_eco_organisme = models.CharField(
+        "Nom de l'éco-organisme (legacy)",
+        blank=True,
+    )
+    legacy_filieres_rep = models.CharField(
+        "Filière(s) REP concernée(s) (legacy)",
+        blank=True,
+    )
+    legacy_slug = models.CharField("Slug (legacy)", blank=True)
+    legacy_infotri = StreamField(
+        [("image", ImageBlock())],
+        verbose_name="Infotri (legacy)",
+        blank=True,
+    )
+    legacy_modifie_le = models.DateTimeField(
+        "Dernière modification du produit legacy",
+        null=True,
+        blank=True,
+    )
 
     content_panels = Page.content_panels + [
         FieldPanel("infotri"),
@@ -628,16 +783,175 @@ class ProduitPage(
         ),
     ]
 
+    legacy_produit_panels = [
+        MultiFieldPanel(
+            [
+                HelpPanel(
+                    "<strong>Produit legacy migré automatiquement</strong><br/>"
+                    "Cette page a été créée automatiquement à partir d'une "
+                    "fiche produit Django (ancien système). Les champs "
+                    "ci-dessous sont une copie en lecture seule des données "
+                    "legacy, à utiliser comme référence pour la reprise "
+                    "éditoriale du contenu."
+                ),
+                FieldPanel("automatically_migrated_from_legacy_produit"),
+                *[
+                    FieldPanel(f"legacy_{field}", read_only=True)
+                    for field in PRODUIT_LEGACY_COPIED_FIELDS
+                ],
+            ],
+            heading="Champs du produit legacy",
+        ),
+    ]
+
     edit_handler = TabbedInterface(
         [
             ObjectList(content_panels, heading="Contenu"),
             ObjectList(config_panels, heading="Configuration"),
             ObjectList(search_panels, heading="Recherche"),
             ObjectList(migration_panels, heading="Migration"),
+            LegacyProduitObjectList(legacy_produit_panels, heading="Produit legacy"),
             ObjectList(Page.promote_panels, heading="Promotion (SEO)"),
             ObjectList(Page.settings_panels, heading="Paramètres"),
         ],
     )
+
+    @property
+    def related_legacy_produit_display(self) -> str:
+        """Return the name of the legacy Produit this page was migrated from.
+
+        Used in Wagtail admin list_display to show cross-link information.
+        """
+        return self.legacy_imported_produits.values_list("nom", flat=True).first() or ""
+
+    related_legacy_produit_display.fget.short_description = "Produit legacy"
+
+    @property
+    def linked_legacy_produit(self) -> "Produit | None":
+        """Return the legacy Produit this page was migrated from, if any."""
+        return self.legacy_imported_produits.first()
+
+    @cached_property
+    def _main_synonyme(self):
+        """Return the main synonyme (matching nom with its produit) for
+        the linked legacy produit."""
+        produit = self.linked_legacy_produit
+        if produit is None:
+            return None
+        return produit.synonymes.filter(nom=produit.nom).first()
+
+    def sync_from_legacy_produit(self) -> list[str]:
+        """Rebuild ``body`` and ``infotri`` from the linked legacy Produit.
+
+        Content is resolved from the main synonyme (whose ``nom`` matches
+        the product's ``nom``) so that ``bon_etat`` / ``mauvais_etat``
+        properties follow the same fallback chain as the legacy rendering
+        (synonyme fields → produit fields → parsed HTML).
+
+        Builds the body according to the migration spec:
+        - Avec état: item_grid with two vertical cards (Bon / Mauvais état)
+        - Sans état: simple paragraph
+        - Below break: devenir, consommer responsable, en savoir plus, date
+
+        Returns a list of messages describing what was synchronised.
+        """
+        from datetime import date
+
+        from qfdmo.models import CarteConfig
+
+        msgs = []
+        produit = self.linked_legacy_produit
+        if produit is None:
+            return ["Aucun produit legacy lié."]
+
+        synonyme = self._main_synonyme
+
+        bon_etat = synonyme.bon_etat if synonyme else produit.bon_etat
+        mauvais_etat = synonyme.mauvais_etat if synonyme else produit.mauvais_etat
+        body = []
+
+        if bon_etat and mauvais_etat:
+            body.append(_build_consignes_avec_etat(bon_etat, mauvais_etat))
+            msgs.append("Consignes avec état (grille 2 cartes verticales).")
+        elif produit.qu_est_ce_que_j_en_fais:
+            body.append({"type": "paragraph", "value": produit.qu_est_ce_que_j_en_fais})
+            msgs.append("Consignes sans état (texte riche).")
+        else:
+            msgs.append("Aucune consigne trouvée.")
+
+        sous_categories = (
+            produit.sous_categories.filter(afficher_carte=True)
+            if hasattr(produit, "sous_categories")
+            else None
+        )
+        if sous_categories and sous_categories.exists():
+            carte = CarteConfig.objects.filter(slug="tous-les-gestes").first()
+            if carte:
+                body.append({"type": "paragraph", "value": "<h2>Où l'apporter ?</h2>"})
+                body.append({"type": "carte_sur_mesure", "value": carte.pk})
+                msgs.append("Carte sur mesure ajoutée (tous-les-gestes).")
+
+        body.append({"type": "break", "value": ""})
+
+        source = synonyme if synonyme else produit
+        after_break = 0
+        for title, field in [
+            ("Que va-t-il devenir ?", source.que_va_t_il_devenir),
+            (
+                "Comment consommer responsable ?",
+                source.comment_les_eviter,
+            ),
+        ]:
+            if field:
+                body.append(
+                    {
+                        "type": "paragraph",
+                        "value": f"<h2>{title}</h2>{field}",
+                    }
+                )
+                after_break += 1
+        if after_break:
+            msgs.append(f"{after_break} section(s) après la césure iframe.")
+
+        liens_qs = produit.liens.select_related().order_by("produitlien__poids")
+        if liens_qs.exists():
+            body.append({"type": "paragraph", "value": "<h2>En savoir plus</h2>"})
+            body.append({"type": "liens", "value": [lien.pk for lien in liens_qs]})
+            msgs.append(f"{liens_qs.count()} lien(s) « en savoir plus » ajouté(s).")
+
+        body.append(
+            {
+                "type": "separator",
+                "value": {"top_margin": 3, "bottom_margin": 3},
+            }
+        )
+        body.append(
+            {
+                "type": "paragraph",
+                "value": f"<p>Dernière mise à jour : "
+                f"{date.today().strftime('%d/%m/%Y')}</p>",
+            }
+        )
+        msgs.append("Date de mise à jour ajoutée.")
+
+        self.body = body
+
+        if produit.infotri and produit.infotri.raw_data:
+            self.infotri = produit.infotri.raw_data
+            msgs.append("Images infotri copiées.")
+
+        if synonyme and synonyme.meta_description:
+            self.seo_title = f"Que faire de mon {produit.nom}"
+            self.search_description = synonyme.meta_description
+            msgs.append("Metadonnées SEO copiées depuis le synonyme principal.")
+
+        self.save()
+
+        from wagtail.log_actions import log
+
+        log(instance=produit, action="qfdmd.sync_produit", data={"page_id": self.pk})
+
+        return msgs
 
     search_fields = Page.search_fields + [
         index.SearchField("title", boost=10),
@@ -817,8 +1131,47 @@ class AbstractBaseProduit(NomAsNaturalKeyModel):
         ordering = ("id",)
 
 
+class ProduitQuerySet(models.QuerySet):
+    def to_migrate(self):
+        """Produits legacy pas encore migrés vers une ProduitPage.
+
+        Exclut à la fois les produits migrés automatiquement
+        (legacy_imported_as_produit_page) et ceux redirigés manuellement vers
+        une page Wagtail (next_wagtail_page).
+        """
+        return self.filter(
+            legacy_imported_as_produit_page__isnull=True,
+            next_wagtail_page__isnull=True,
+        )
+
+    def with_synonymes_to_migrate(self):
+        """Produits having at least one synonyme not migrated yet.
+
+        A synonyme still needs migration when it has not been imported as
+        a SearchTag, neither manually (imported_as_search_tag) nor
+        automatically (legacy_imported_as_search_tag).
+        """
+        return self.filter(
+            synonymes__imported_as_search_tag__isnull=True,
+            synonymes__legacy_imported_as_search_tag__isnull=True,
+        ).distinct()
+
+
 @register_snippet
 class Produit(index.Indexed, AbstractBaseProduit):
+    objects = NomAsNaturalKeyManager.from_queryset(ProduitQuerySet)()
+
+    legacy_imported_as_produit_page = models.ForeignKey(
+        "qfdmd.ProduitPage",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="legacy_imported_produits",
+        verbose_name="Migré automatiquement vers la page",
+        help_text="Si renseigné, ce produit a été migré automatiquement vers "
+        "cette ProduitPage par la commande migrate_produits_legacy.",
+    )
+
     @cached_property
     def bon_etat(self) -> str:
         if self.qu_est_ce_que_j_en_fais_bon_etat:
@@ -867,6 +1220,18 @@ class Produit(index.Indexed, AbstractBaseProduit):
 
     def __str__(self):
         return f"{self.pk} - {self.nom}"
+
+    def synonymes_to_migrate(self) -> models.QuerySet:
+        """Synonymes de ce produit pas encore importés comme SearchTag."""
+        return self.synonymes.filter(
+            imported_as_search_tag__isnull=True,
+            legacy_imported_as_search_tag__isnull=True,
+        )
+
+    def nb_synonymes_to_migrate(self) -> int:
+        return self.synonymes_to_migrate().count()
+
+    nb_synonymes_to_migrate.short_description = "Synonymes à migrer"
 
     search_fields = [
         index.AutocompleteField("nom"),
@@ -1002,6 +1367,18 @@ class Synonyme(SearchTerm, AbstractBaseProduit):
         verbose_name="Importé comme SearchTag",
         help_text="Si renseigné, ce synonyme a été importé comme SearchTag "
         "et ne devrait plus apparaître dans les résultats de recherche.",
+    )
+    legacy_imported_as_search_tag = models.ForeignKey(
+        "qfdmd.SearchTag",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="legacy_imported_synonymes",
+        verbose_name="Importé automatiquement comme SearchTag",
+        help_text="Si renseigné, ce synonyme a été importé comme SearchTag "
+        "par la migration automatique (migrate_produits_legacy) et ne devrait "
+        "plus apparaître dans les résultats de recherche. Les synonymes "
+        "migrés manuellement utilisent imported_as_search_tag.",
     )
     picto = models.FileField(
         upload_to="pictos",
