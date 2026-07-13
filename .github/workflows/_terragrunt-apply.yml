@@ -85,7 +85,7 @@ jobs:
 
       - name: Install Terragrunt
         run: |
-          TG_VERSION="0.69.0"
+          TG_VERSION="1.1.0"
           curl -fsSL -o /usr/local/bin/terragrunt \
             "https://github.com/gruntwork-io/terragrunt/releases/download/v${TG_VERSION}/terragrunt_linux_amd64"
           chmod +x /usr/local/bin/terragrunt
@@ -126,29 +126,19 @@ jobs:
           fi
           ls -la "$DST"
 
-      - name: Terragrunt init + ${{ inputs.command }}
+      - name: Terragrunt ${{ inputs.command }}
         working-directory: infrastructure/environments/preview/pr-${{ inputs.pr_number }}
         run: |
           set -euo pipefail
           CMD="${{ inputs.command }}"
 
-          # Apply/destroy in dependency order. Using run-all can deadlock on
-          # first deploy because downstream modules try to resolve dependency
-          # outputs before upstream modules have been applied.
-          # For apply:  database → object_storage → container
-          # For destroy: container → object_storage → database
-          if [[ "$CMD" == "destroy" ]]; then
-            DIRS=(container object_storage database)
-          else
-            DIRS=(database object_storage container)
-          fi
-
-          for dir in "${DIRS[@]}"; do
-            echo "=== terragrunt init $dir ==="
-            (cd "$dir" && terragrunt init --terragrunt-non-interactive 2>&1) | tee -a init.log
-            echo "=== terragrunt $CMD $dir ==="
-            (cd "$dir" && terragrunt "$CMD" --terragrunt-non-interactive --auto-approve 2>&1) | tee -a apply.log
-          done
+          # run --all walks the unit DAG: apply in dependency order
+          # (database → object_storage → container), destroy in reverse.
+          # Init is implicit (auto-init) and -auto-approve is added
+          # automatically in --all mode; TG_NON_INTERACTIVE is set job-wide.
+          # --queue-exclude-external keeps the shared ../../namespace unit
+          # out of the queue: it must never be destroyed by a PR teardown.
+          terragrunt run --all --queue-exclude-external -- "$CMD" 2>&1 | tee apply.log
           {
             echo "## Terragrunt $CMD (pr-${{ inputs.pr_number }})"
             echo
