@@ -1,0 +1,35 @@
+{% extends "wagtailadmin/generic/base.html" %}
+{% load wagtailadmin_tags i18n %}
+
+{% block titletag %}Annuler la migration du produit legacy{% endblock %}
+
+{% block content %}
+<div class="nice-padding">
+    <h2>Annuler la migration de "{{ produit.nom }}"</h2>
+
+    {% if produit.legacy_imported_as_produit_page %}
+    <p>
+        La ProduitPage <strong>{{ produit.legacy_imported_as_produit_page.title }}</strong>
+        (id={{ produit.legacy_imported_as_produit_page.pk }}) sera
+        <strong>supprimee</strong>.
+    </p>
+    {% endif %}
+
+    <p>
+        Les etiquettes de recherche importees avec elle seront egalement
+        supprimees (sauf si elles sont utilisees par d'autres pages).
+    </p>
+
+    <p>
+        Le produit redeviendra eligible a la migration.
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="actions">
+            <a href="{% url 'wagtailsnippets_qfdmd_produit:edit' produit.pk %}" class="button button-secondary">Annuler</a>
+            <button type="submit" class="button no">Annuler la migration</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
