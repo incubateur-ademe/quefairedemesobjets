@@ -130,9 +130,9 @@ def migrate_produit(
 
     sync_msgs = page.sync_from_legacy_produit()
 
-    log(
-        instance=produit,
-        action="qfdmd.migrate_produit",
+    _safe_log(
+        produit,
+        "qfdmd.migrate_produit",
         data={"page_id": page.pk, "page_title": page.title},
     )
 
@@ -200,8 +200,11 @@ def revert_produit_migration(produit: Produit) -> None:
         if _is_orphan_search_tag(tag):
             tag.delete()
 
-    log(
-        instance=produit,
-        action="qfdmd.revert_migration",
-        data={"page_title": page_title},
-    )
+    _safe_log(produit, "qfdmd.revert_migration", data={"page_title": page_title})
+
+
+def _safe_log(instance, action, **kwargs):
+    try:
+        log(instance=instance, action=action, **kwargs)
+    except Exception:
+        pass
