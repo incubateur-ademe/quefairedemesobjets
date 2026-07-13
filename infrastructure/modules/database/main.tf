@@ -10,7 +10,7 @@ resource "scaleway_rdb_instance" "webapp" {
   password                  = var.webapp_db_password
   tags                      = ["${var.environment}", "postgresql", "qfdmo"]
   backup_schedule_frequency = 24
-  backup_schedule_retention = 7
+  backup_schedule_retention = 30
   backup_same_region        = false
   volume_size_in_gb         = var.webapp_volume_size
   volume_type               = "sbs_15k"

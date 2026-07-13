@@ -19,3 +19,18 @@ class SCHEDULES:
     EVERY_FIRST_DAY_OF_MONTH_AT_00_00: str = (
         "0 0 1 * *"  # every first day of the month at 00:00
     )
+    EVERY_FIRST_DAY_OF_MONTH_AT_01_00: str = (
+        "0 1 1 * *"  # every first day of the month at 01:00
+    )
+    EVERY_FIRST_DAY_OF_MONTH_AT_02_00: str = (
+        "0 2 1 * *"  # every first day of the month at 02:00
+    )
+    EVERY_FIRST_DAY_OF_MONTH_AT_03_00: str = (
+        "0 3 1 * *"  # every first day of the month at 03:00
+    )
+    EVERY_FIRST_DAY_OF_MONTH_AT_04_00: str = (
+        "0 4 1 * *"  # every first day of the month at 04:00
+    )
+    EVERY_FIRST_DAY_OF_MONTH_AT_05_00: str = (
+        "0 5 1 * *"  # every first day of the month at 05:00
+    )

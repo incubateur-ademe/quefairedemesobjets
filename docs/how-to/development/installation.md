@@ -180,12 +180,15 @@ uv run python manage.py createsuperuser
 
 ### Lancement
 
+Depuis **`webapp/`** :
+
 ```sh
-make run-django
+make runserver
 ```
 
-Honcho démarrera les containers Docker s'ils ne sont pas déjà démarrés.
-Une fois les processus démarrés, le serveur web sera accessible à l'adresse [quefairedemesobjets.ademe.local](https://quefairedemesobjets.ademe.local/), écoutant sur le port 8000.
+`runserver` démarre le serveur Django **et** le worker `db_worker` en arrière-plan. Ce worker est nécessaire pour traiter les actions admin lourdes (≥ 1 000 `SuggestionGroupe` sélectionnés) qui passent par django-tasks. Voir [`reference/webapp/django.md`](../../reference/webapp/django.md).
+
+Une fois le serveur démarré, l'application est accessible à l'adresse [quefairedemesobjets.ademe.local](https://quefairedemesobjets.ademe.local/), écoutant sur le port 8000 (derrière nginx local si le profile `lvao` Docker est actif).
 
 ### Tester l'application
 

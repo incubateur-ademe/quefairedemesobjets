@@ -563,6 +563,44 @@ class TestApplySuggestionsToRevision:
         assert revision_suggestion.revision_acteur_id == acteur.pk
         assert revision_suggestion.valeurs == ["Nouveau nom"]
 
+    def test_falls_back_to_identifiant_unique_from_suggestion_unitaires(
+        self, admin_instance, mock_request
+    ):
+        """For SOURCE_AJOUT, revision_acteur_id falls back to identifiant_unique"""
+        identifiant_unique = "citeo_6172886001"
+        suggestion_groupe = SuggestionGroupeFactory(
+            acteur=None,
+            revision_acteur=None,
+            suggestion_cohorte=SuggestionCohorteFactory(
+                type_action=SuggestionAction.SOURCE_AJOUT.value,
+            ),
+        )
+        SuggestionUnitaireFactory(
+            suggestion_groupe=suggestion_groupe,
+            suggestion_modele="Acteur",
+            champs=["identifiant_unique"],
+            valeurs=[identifiant_unique],
+        )
+        SuggestionUnitaireFactory(
+            suggestion_groupe=suggestion_groupe,
+            suggestion_modele="Acteur",
+            champs=["nom"],
+            valeurs=["Nouveau nom"],
+        )
+
+        queryset = SuggestionGroupe.objects.filter(id=suggestion_groupe.id)
+        apply_suggestions_to_correction(admin_instance, mock_request, queryset)
+
+        revision_suggestions = suggestion_groupe.suggestion_unitaires.filter(
+            suggestion_modele="RevisionActeur"
+        )
+        assert revision_suggestions.count() == 2
+        for revision_suggestion in revision_suggestions:
+            assert revision_suggestion.revision_acteur_id == identifiant_unique
+
+        su_nom = revision_suggestions.get(champs=["nom"])
+        assert su_nom.valeurs == ["Nouveau nom"]
+
     @pytest.mark.parametrize("type_action", NON_SOURCE_TYPE_ACTIONS)
     def test_does_nothing_when_type_action_is_not_source(
         self, admin_instance, mock_request, type_action

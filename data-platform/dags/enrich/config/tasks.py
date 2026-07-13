@@ -33,11 +33,20 @@ class TASKS:
         "enrich_acteurs_closed_suggestions_not_replaced_etablissement"
     )
     ENRICH_DBT_MODELS_REFRESH: str = "enrich_dbt_models_refresh"
+    ENRICH_DBT_MODELS_TEST: str = "enrich_dbt_models_test"
     READ_AE_RGPD: str = "enrich_ae_rgpd_read"
 
     # Villes
     ENRICH_VILLES_TYPO: str = "enrich_acteurs_villes_typo"
     ENRICH_VILLES_NEW: str = "enrich_acteurs_villes_new"
+
+    # SIRET / SIREN
+    ENRICH_SIRET_FROM_SIREN_SUGGESTIONS: str = (
+        "enrich_acteurs_siret_from_siren_suggestions"
+    )
+    ENRICH_SIREN_FROM_SIRET_SUGGESTIONS: str = (
+        "enrich_acteurs_siren_from_siret_suggestions"
+    )
 
     # Code postal
     DB_READ_ACTEUR_CP: str = "db_read_acteur_cp"

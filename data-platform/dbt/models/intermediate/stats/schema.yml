@@ -171,6 +171,12 @@ models:
         description: "L'identifiant unique de l'acteur"
       - name: siret
         description: "Le numéro SIRET de l'acteur"
+      - name: siren
+        description: "Le numéro SIREN de l'acteur"
+      - name: code_postal
+        description: "Le code postal de l'acteur"
+      - name: ville
+        description: "La ville de l'acteur"
     config:
       materialized: table
       indexes:
@@ -187,6 +193,12 @@ models:
         description: "L'identifiant unique de l'acteur"
       - name: siren
         description: "Le numéro SIREN de l'acteur"
+      - name: siret
+        description: "Le numéro SIRET de l'acteur"
+      - name: code_postal
+        description: "Le code postal de l'acteur"
+      - name: ville
+        description: "La ville de l'acteur"
     config:
       materialized: table
       indexes:

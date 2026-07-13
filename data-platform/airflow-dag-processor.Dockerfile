@@ -85,6 +85,9 @@ COPY ./data-platform/plugins/ /opt/airflow/plugins/
 
 COPY ./data-platform/airflow-dag-processor-start.sh /opt/airflow/airflow-dag-processor-start.sh
 
+# Copy data-platform docs
+COPY ./docs/reference/data-platform/ /opt/airflow/docs/reference/data-platform/
+
 RUN mkdir -p /opt/airflow/tmp
 RUN chown -R ${AIRFLOW_UID:-50000}:0 /opt/airflow/tmp
 

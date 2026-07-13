@@ -36,8 +36,12 @@ init-playwright:
 
 # Local django operations
 .PHONY: runserver
+# Run the django-tasks worker alongside runserver so background tasks (enqueued
+# admin actions) are processed locally. The worker runs in the background (&) and
+# `trap 'kill %1' EXIT` kills it when runserver stops, so we don't orphan it.
+# Must stay on one line: each Make recipe line is its own shell.
 runserver:
-	$(DJANGO_ADMIN) runserver
+	$(DJANGO_ADMIN) db_worker & trap 'kill %1' EXIT; $(DJANGO_ADMIN) runserver
 
 .PHONY: runserver-e2e
 runserver-e2e:
