@@ -30,7 +30,6 @@ TODO(settings-split): evolutions planned after the rename settles
     - CSRF_TRUSTED_ORIGINS, django-browser-reload, debug-toolbar, silk
       (under `if DEBUG`)
     - hide_staticfiles filter in LOGGING
-    - GDAL_LIBRARY_PATH / GEOS_LIBRARY_PATH (NixOS custom paths)
 
   ▸ production.py
     - SECURE_PROXY_SSL_HEADER / USE_X_FORWARDED_HOST / USE_X_FORWARDED_PORT
@@ -55,6 +54,15 @@ import sentry_sdk
 from import_export.formats.base_formats import CSV, XLS, XLSX
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
+
+# -- GeoDjango library paths (only when env vars are explicitly set, e.g. NixOS) --
+_geos_path = decouple.config("GEOS_LIBRARY_PATH", default="")
+if _geos_path:
+    GEOS_LIBRARY_PATH = _geos_path
+
+_gdal_path = decouple.config("GDAL_LIBRARY_PATH", default="")
+if _gdal_path:
+    GDAL_LIBRARY_PATH = _gdal_path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent

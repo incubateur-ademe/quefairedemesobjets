@@ -322,10 +322,10 @@ class TestImportSurvivesMalformedSynonymes:
 
         original = views._import_one_synonyme
 
-        def fake_import(page, synonyme):
+        def fake_import(page, synonyme, tracking_field="imported_as_search_tag"):
             if synonyme.nom == "boom":
                 raise IntegrityError("forced")
-            return original(page, synonyme)
+            return original(page, synonyme, tracking_field=tracking_field)
 
         monkeypatch.setattr(views, "_import_one_synonyme", fake_import)
 
@@ -358,10 +358,10 @@ class TestImportSurvivesMalformedSynonymes:
 
         original = views._import_one_synonyme
 
-        def fake_import(page, synonyme):
+        def fake_import(page, synonyme, tracking_field="imported_as_search_tag"):
             if synonyme.nom == "boom":
                 raise IntegrityError("forced")
-            return original(page, synonyme)
+            return original(page, synonyme, tracking_field=tracking_field)
 
         monkeypatch.setattr(views, "_import_one_synonyme", fake_import)
 
