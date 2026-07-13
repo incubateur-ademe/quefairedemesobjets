@@ -1,6 +1,7 @@
 """DAG to anonymize QFDMO acteurs for RGPD"""
 
 from airflow import DAG
+from airflow.sdk.bases.operator import chain
 from enrich.config.cohorts import COHORTS
 from enrich.config.dbt import DBT
 from enrich.config.models import EnrichActeursRGPDConfig
@@ -45,4 +46,4 @@ with DAG(
         cohort=COHORTS.RGPD,
         dbt_model_name=DBT.MARTS_ENRICH_RGPD_SUGGESTIONS,
     )
-    config >> dbt_refresh >> dbt_test >> suggest_rgpd  # type: ignore
+    chain(config, dbt_refresh, dbt_test, suggest_rgpd)
