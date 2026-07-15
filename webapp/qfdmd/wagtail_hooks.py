@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.models import Permission
 from django.db import transaction
 from django.urls import path, reverse
+from django.utils.html import escape
 from django.utils.safestring import mark_safe
 from wagtail import hooks
 from wagtail.admin.action_menu import ActionMenuItem
@@ -33,7 +34,9 @@ def register_permissions():
 
 
 class MigratePageMenuItem(ActionMenuItem):
-    # TODOWAGTAIL: remove if not needed in a few weeks (2025/8/25)
+    # This menu item is permanently hidden (is_shown() returns False)
+    # but kept around in case the migration from produit / synonyme
+    # is needed again in the future.
     name = "migrate-legacy"
     label = "Migrer depuis les produits/synonymes"
     icon_name = "download"
@@ -174,6 +177,8 @@ class BaseProduitMigrationBulkAction(SnippetBulkAction):
                     result = cls.apply(instance, produit)
             except MigrationError as exc:
                 instance.errors.append(f"{produit.nom} : {exc}")
+            except Exception as exc:
+                instance.errors.append(f"{produit.nom} : erreur inattendue ({exc})")
             else:
                 succeeded += 1
                 instance.results.append(result)
@@ -182,7 +187,7 @@ class BaseProduitMigrationBulkAction(SnippetBulkAction):
     def get_success_message(self, num_parent_objects, num_child_objects):
         parts = [
             f'<a href="{reverse("wagtailadmin_pages:edit", args=[r[0]])}">'
-            f"{r[1]}</a>"
+            f"{escape(r[1])}</a>"
             for r in self.results
             if r is not None
         ]
@@ -190,7 +195,8 @@ class BaseProduitMigrationBulkAction(SnippetBulkAction):
         if parts:
             message += "<ul><li>" + "</li><li>".join(parts) + "</li></ul>"
         if self.errors:
-            message += f" Ignoré(s) : {' ; '.join(self.errors)}"
+            escaped_errors = " ; ".join(escape(e) for e in self.errors)
+            message += f" Ignoré(s) : {escaped_errors}"
         return mark_safe(message)
 
 

@@ -1,6 +1,7 @@
 from types import SimpleNamespace
 
 import pytest
+from django.urls import reverse
 from wagtail.models import Page
 
 from qfdmd.legacy_migration import (
@@ -131,3 +132,32 @@ def test_bulk_action_revert_annule_la_migration(index_dechet):
     assert reverted == 1
     assert instance.errors == []
     assert produit.legacy_imported_as_produit_page is None
+
+
+def test_vue_migrate_affiche_une_confirmation_sur_get(admin_client, index_dechet):
+    produit = ProduitFactory(nom="Baignoire")
+    SynonymeFactory(produit=produit, nom="Sabot de bain")
+
+    response = admin_client.get(reverse("migrate_single_produit", args=[produit.pk]))
+
+    assert response.status_code == 200
+    assert "admin/qfdmd/confirm_migrate_produit.html" in [
+        t.name for t in response.templates
+    ]
+    content = response.content.decode()
+    assert "Baignoire" in content
+    assert "1" in str(response.context["nb_synonymes"])
+
+
+def test_vue_revert_affiche_une_confirmation_sur_get(admin_client, index_dechet):
+    produit = ProduitFactory(nom="Armoire")
+    migrate_produit(produit, index_page=index_dechet)
+    produit.refresh_from_db()
+
+    response = admin_client.get(reverse("revert_single_produit", args=[produit.pk]))
+
+    assert response.status_code == 200
+    assert "admin/qfdmd/confirm_revert_produit.html" in [
+        t.name for t in response.templates
+    ]
+    assert "Armoire" in response.content.decode()
