@@ -90,15 +90,15 @@ resource "null_resource" "seed_from_sample" {
       psql "$PREVIEW_DB_URL" -f "$EXTENSIONS_SCRIPT"
 
       # Dump the sample database to a temp file.
-      # If the sample DB is unreachable or SAMPLE_DB_URI is not set, warn
-      # but continue — previews can still serve as infrastructure smoke
-      # tests without seeded data.
+      # An unseeded preview looks healthy but is useless — fail loudly
+      # instead of shipping an empty database.
       if [[ -z "$${SAMPLE_DB_URI:-}" ]]; then
-        echo "WARNING: SAMPLE_DB_URI is not set — preview will start without seeded data" >&2
-      else
+        echo "ERROR: SAMPLE_DB_URI is not set — refusing to ship an unseeded preview" >&2
+        exit 1
+      fi
       DUMP_FILE="$(mktemp)"
       RESTORE_LOG="$(mktemp)"
-      if pg_dump -Fc --no-acl --no-owner --no-privileges "$SAMPLE_DB_URI" > "$DUMP_FILE" 2>/dev/null; then
+      if pg_dump -Fc --no-acl --no-owner --no-privileges "$SAMPLE_DB_URI" > "$DUMP_FILE"; then
         # --clean emits DROP/ALTER for objects it assumes exist; against
         # the freshly emptied database those pre-drops fail with exit 1.
         # That's benign — but anything above 1 is a real restore error.
@@ -133,15 +133,23 @@ resource "null_resource" "seed_from_sample" {
         TABLE_COUNT="$(psql "$PREVIEW_DB_URL" -t -c \
           "SELECT count(*) FROM pg_tables WHERE schemaname='public'")"
         if [ "$${TABLE_COUNT:-0}" -eq 0 ]; then
-          echo "WARNING: seed produced an empty database" >&2
-        else
-          echo "Seed complete: $TABLE_COUNT tables restored"
+          echo "ERROR: seed produced an empty database" >&2
+          exit 1
         fi
+        # Tables can exist while rows were skipped (RESTORE_RC=1) —
+        # require actual data, not just schema.
+        ROW_COUNT="$(psql "$PREVIEW_DB_URL" -t -c \
+          "SELECT coalesce(sum(n_live_tup), 0) FROM pg_stat_user_tables WHERE schemaname='public'")"
+        if [ "$${ROW_COUNT:-0}" -eq 0 ]; then
+          echo "ERROR: seed restored $TABLE_COUNT tables but zero rows" >&2
+          exit 1
+        fi
+        echo "Seed complete: $TABLE_COUNT tables, $ROW_COUNT rows restored"
       else
-        echo "WARNING: pg_dump from sample DB failed — preview will start without seeded data" >&2
+        echo "ERROR: pg_dump from sample DB failed — refusing to ship an unseeded preview" >&2
         rm -f "$DUMP_FILE"
+        exit 1
       fi
-      fi  # SAMPLE_DB_URI check
 
       # Run Django management commands against the freshly seeded database.
       # Uses the Docker image that was just built; only runs when the seed
@@ -168,6 +176,6 @@ resource "null_resource" "seed_from_sample" {
   triggers = {
     image_tag      = var.clear_db ? var.image_tag : "reuse"
     sample_db_hash = md5(var.sample_db_uri)
-    seed_version   = "3" # bump to force re-seed (e.g. when changing restore logic)
+    seed_version   = "4" # bump to force re-seed (e.g. when changing restore logic)
   }
 }
