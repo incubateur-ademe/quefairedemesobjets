@@ -912,7 +912,7 @@ class ProduitPage(
         if after_break:
             msgs.append(f"{after_break} section(s) après la césure iframe.")
 
-        liens_qs = produit.liens.select_related().order_by("produitlien__poids")
+        liens_qs = produit.liens.order_by("produitlien__poids")
         if liens_qs.exists():
             body.append({"type": "paragraph", "value": "<h2>En savoir plus</h2>"})
             body.append({"type": "liens", "value": [lien.pk for lien in liens_qs]})
