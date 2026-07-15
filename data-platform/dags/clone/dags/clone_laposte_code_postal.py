@@ -7,6 +7,7 @@ cf. https://www.data.gouv.fr/datasets/base-officielle-des-codes-postaux/
 from airflow import DAG
 from airflow.sdk import Param
 from clone.tasks.airflow_logic.chain_tasks import chain_tasks
+from clone.tasks.airflow_logic.clone_dbt_task import clone_dbt_params
 from shared.config.airflow import DEFAULT_ARGS_NO_RETRIES
 from shared.config.schedules import SCHEDULES
 from shared.config.start_dates import START_DATES
@@ -65,6 +66,7 @@ with DAG(
             type="boolean",
             description_md="🔤 Convertir le fichier téléchargé de ISO-8859-1 en UTF-8",
         ),
+        **clone_dbt_params(dbt_select="+tag:geo"),
     },
 ) as dag:
     chain_tasks(dag)

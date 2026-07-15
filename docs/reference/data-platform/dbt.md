@@ -473,6 +473,7 @@ exposure_stats_acteur_stacked_history.sql  (incremental: daily snapshot with cou
 - **Use base layer** - Clean data once in base, reuse everywhere
 - **Test aggressively** - `not_null`, `unique`, `data_tests` on key columns
 - **Document everything** - Column descriptions in `schema.yml`
+- **Sort schema.yml models alphabetically** - List entries under `models:` in alphabetical order by name
 - **Use incremental** - For history/snapshot tables (exposure layer)
 - **Use tags** - Tag models by subject (`stats`, `acteurs`) and layer (`base`, `marts`)
 - **Use `env_var` for sampling** - `DBT_SAMPLING=true` for faster dev cycles

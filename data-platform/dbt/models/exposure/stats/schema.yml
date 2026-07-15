@@ -236,7 +236,7 @@ models:
         - stats
         - acteurs
         - siret
-        - successeur
+        - lien_succession
   - name: exposure_stats_acteur_stacked_history
     description: "Historique du nombre d'acteurs empilés. Une ligne est ajoutée à chaque exécution de dbt."
     columns:

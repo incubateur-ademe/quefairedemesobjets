@@ -1,58 +1,6 @@
 version: 2
 
 models:
-  - name: int_ae_unite_legale
-    description: "Unités légales de l'Annuaire Entreprises (AE)"
-    columns:
-      - name: siren
-        description: "Numéro SIREN"
-        data_type: varchar(9)
-        data_tests:
-          - not_null
-          - unique
-      - name: est_actif
-        description: "OUI si A = Active"
-        data_type: boolean
-        data_tests:
-          - not_null
-      - name: naf
-        description: "Code NAF Rev2"
-        # Test failing on 2025-03-17 due to missing data in source table
-        # data_tests:
-        #   - not_null
-      - name: nom_commercial
-        description: "Dénomination"
-        # Test failing on 2025-03-17 due to missing data in source table
-        # data_tests:
-        #   - not_null
-      - name: dirigeant_prenom1
-        description: "Prénom 1 du dirigeant"
-      - name: dirigeant_prenom2
-        description: "Prénom 2 du dirigeant"
-      - name: dirigeant_prenom3
-        description: "Prénom 3 du dirigeant"
-      - name: dirigeant_prenom4
-        description: "Prénom 4 du dirigeant"
-      - name: dirigeant_prenom_usuel
-        description: "Prénom usuel du dirigeant"
-      - name: dirigeant_pseudonyme
-        description: "Pseudonyme du dirigeant"
-      - name: dirigeant_nom
-        description: "Nom du dirigeant"
-      - name: dirigeant_nom_usage
-        description: "Nom d'usage du dirigeant"
-    config:
-      materialized: table
-      tags:
-        - intermediate
-        - ae
-        - annuaire_entreprises
-        - unite_legale
-      indexes:
-        - columns: ['siren']
-          unique: true
-        - columns: ['est_actif']
-        - columns: ['a_dirigeant_noms_ou_prenoms_non_null']
   - name: int_ae_etablissement
     description: "Établissements de l'Annuaire Entreprises (AE)"
     columns:
@@ -156,6 +104,58 @@ models:
           type: btree
         - columns: ['etat_administratif_successeur']
           type: btree
+  - name: int_ae_unite_legale
+    description: "Unités légales de l'Annuaire Entreprises (AE)"
+    columns:
+      - name: siren
+        description: "Numéro SIREN"
+        data_type: varchar(9)
+        data_tests:
+          - not_null
+          - unique
+      - name: est_actif
+        description: "OUI si A = Active"
+        data_type: boolean
+        data_tests:
+          - not_null
+      - name: naf
+        description: "Code NAF Rev2"
+        # Test failing on 2025-03-17 due to missing data in source table
+        # data_tests:
+        #   - not_null
+      - name: nom_commercial
+        description: "Dénomination"
+        # Test failing on 2025-03-17 due to missing data in source table
+        # data_tests:
+        #   - not_null
+      - name: dirigeant_prenom1
+        description: "Prénom 1 du dirigeant"
+      - name: dirigeant_prenom2
+        description: "Prénom 2 du dirigeant"
+      - name: dirigeant_prenom3
+        description: "Prénom 3 du dirigeant"
+      - name: dirigeant_prenom4
+        description: "Prénom 4 du dirigeant"
+      - name: dirigeant_prenom_usuel
+        description: "Prénom usuel du dirigeant"
+      - name: dirigeant_pseudonyme
+        description: "Pseudonyme du dirigeant"
+      - name: dirigeant_nom
+        description: "Nom du dirigeant"
+      - name: dirigeant_nom_usage
+        description: "Nom d'usage du dirigeant"
+    config:
+      materialized: table
+      tags:
+        - intermediate
+        - ae
+        - annuaire_entreprises
+        - unite_legale
+      indexes:
+        - columns: ['siren']
+          unique: true
+        - columns: ['est_actif']
+        - columns: ['a_dirigeant_noms_ou_prenoms_non_null']
 
 unit_tests:
   - name: test_transitive_succession_resolution
