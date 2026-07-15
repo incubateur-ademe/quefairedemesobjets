@@ -20,8 +20,13 @@ map "$cookie_no_cache:<%= ENV["NGINX_DISABLE_CACHE"] || "0" %>" $no_cache {
 }
 
 map $host $is_valid_host {
+<% if ENV["NGINX_ALLOW_ALL_HOSTS"] == "1" %>
+    # Preview environments: accept any host (domain unknown at build time)
+    default 1;
+<% else %>
     default                                          0;
     "<%= ENV["BASE_DOMAIN"] %>"                      1;
+<% end %>
 }
 upstream gunicorn {
     server <%= ENV["UPSTREAM_HOST"] || "unix:/tmp/gunicorn.sock" %>;

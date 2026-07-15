@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
 
     db_port = (
         5432
-        if settings.ENVIRONMENT == "development"
+        if settings.DATABASES["default"]["HOST"] == "localhost"
         else settings.DATABASES["default"]["PORT"]
     )
 

@@ -12,4 +12,5 @@ This documentation covers:
 provisioning.md
 ci-cd.md
 monitoring.md
+preview-environments.md
 ```
