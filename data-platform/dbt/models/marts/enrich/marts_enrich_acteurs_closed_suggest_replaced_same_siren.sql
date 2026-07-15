@@ -1,10 +1,3 @@
-{{
-  config(
-    materialized = 'table',
-    tags=['marts', 'enrich', 'closed', 'ae', 'annuaire_entreprises', 'etablissement'],
-  )
-}}
-
 SELECT
   '🚪 Acteurs Fermés: 🟢 remplacés par SIRET du même SIREN' AS suggest_cohort,
   *

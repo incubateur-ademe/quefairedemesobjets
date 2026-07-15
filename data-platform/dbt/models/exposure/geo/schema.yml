@@ -23,6 +23,7 @@ models:
     config:
       tags:
         - exposure
+        - normalisation
         - geo
         - epci
       contract:

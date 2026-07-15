@@ -51,7 +51,7 @@ with DAG(
             type="string",
             description_md="🔤 Délimiteur utilisé dans le fichier",
         ),
-        **clone_dbt_params(dbt_select="+tag:geo"),
+        **clone_dbt_params(dbt_select="+tag:geo,+tag:normalisation"),
     },
 ) as dag:
     chain_tasks(dag)

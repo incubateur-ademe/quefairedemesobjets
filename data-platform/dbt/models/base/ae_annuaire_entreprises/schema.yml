@@ -42,7 +42,7 @@ models:
         - stats
         - annuaire_entreprises
         - etablissement
-        - lien_succession
+        - normalisation
       indexes:
         - columns: ['siret']
           unique: true

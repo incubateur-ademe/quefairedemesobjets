@@ -43,6 +43,7 @@ models:
         - ae
         - annuaire_entreprises
         - etablissement
+        - normalisation
       indexes:
         - columns: ['siret']
           unique: true
@@ -150,6 +151,7 @@ models:
         - intermediate
         - ae
         - annuaire_entreprises
+        - normalisation
         - unite_legale
       indexes:
         - columns: ['siren']

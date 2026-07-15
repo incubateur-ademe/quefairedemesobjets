@@ -1,10 +1,3 @@
-{{
-  config(
-    materialized = 'table',
-    tags=['marts', 'enrich', 'villes', 'cities', 'ban'],
-  )
-}}
-
 SELECT
   acteurs.identifiant_unique AS acteur_id,
   acteurs.acteur_type_id AS acteur_type_id,

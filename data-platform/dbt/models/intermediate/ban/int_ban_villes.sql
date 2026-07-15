@@ -1,28 +1,11 @@
-/*
-post_hook = partial indexes on high-cardinality columns only for NOT NULL
-so we can still speed up the JOINS/FILTERS
-*/
-{{
-  config(
-    materialized = 'table',
-    tags=['intermediate', 'ban', 'villes'],
-    indexes=[
-      {'columns': ['ville_ancienne']},
-      {'columns': ['ville']},
-      {'columns': ['code_postal']},
-      {'columns': ['code_departement']},
-    ],
-    post_hook=[
-      "CREATE INDEX ON {{ this }}(ville_ancienne) WHERE ville_ancienne IS NOT NULL",
-    ]
-  )
-}}
-
-
 SELECT
-    ville_ancienne,
-    ville,
+    CASE
+      WHEN nom_ancienne_commune = nom_commune THEN NULL
+      ELSE nom_ancienne_commune
+    END AS ville_ancienne,
+    nom_commune AS ville,
     code_postal,
-    code_departement
+    LEFT(code_postal, 2) AS code_departement
 FROM {{ ref('base_ban_adresses') }}
+WHERE code_postal IS NOT NULL AND code_postal != ''
 GROUP BY 1,2,3,4
