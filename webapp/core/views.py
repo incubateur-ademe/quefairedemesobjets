@@ -6,6 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.lookups import Unaccent
 from django.contrib.postgres.search import TrigramWordDistance
 from django.contrib.staticfiles import finders
+from django.db import connection
 from django.db.models.functions import Length, Lower
 from django.http import HttpResponse
 from django.template.loader import render_to_string
@@ -43,6 +44,17 @@ def backlink(request):
     response = HttpResponse(richtext(text_content), content_type="text/plain")
     response["Access-Control-Allow-Origin"] = "*"
     return response
+
+
+def healthz(request):
+    """Health check probe for container platforms (e.g. Scaleway).
+
+    Touches the default database so the container is only considered
+    healthy once it can actually serve requests.
+    """
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT 1")
+    return HttpResponse("ok", content_type="text/plain")
 
 
 @cache_control(max_age=31536000)

@@ -24,7 +24,7 @@ echo "Creating extensions..."
 psql -d "${SAMPLE_DATABASE_URL}" -f scripts/sql/create_extensions.sql
 
 echo "Restoring dump to local sample database..."
-pg_restore -d "${SAMPLE_DATABASE_URL}" --schema=public --clean --no-acl --no-owner --no-privileges "${DUMP_FILE}" || true
+pg_restore -d "${SAMPLE_DATABASE_URL}" --schema=public --no-acl --no-owner --no-privileges "${DUMP_FILE}" || true
 
 echo "Removing dump file..."
 rm -f "${DUMP_FILE}"
