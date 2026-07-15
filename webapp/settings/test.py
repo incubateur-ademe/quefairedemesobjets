@@ -8,11 +8,6 @@ os.environ["DEBUG"] = "false"
 
 from settings.base import *
 
-import decouple
-
-GEOS_LIBRARY_PATH = decouple.config("GEOS_LIBRARY_PATH", default="", cast=str) or None
-GDAL_LIBRARY_PATH = decouple.config("GDAL_LIBRARY_PATH", default="", cast=str) or None
-
 # Add test hosts to ALLOWED_HOSTS for integration tests
 ALLOWED_HOSTS = ALLOWED_HOSTS + [
     "lvao.ademe.fr",
