@@ -77,6 +77,12 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
 
+      - name: Validate command input
+        run: |
+          CMD="${{ inputs.command }}"
+          [[ "$CMD" == "apply" || "$CMD" == "destroy" ]] \
+            || { echo "Invalid command: $CMD (must be 'apply' or 'destroy')"; exit 1; }
+
       - name: Install OpenTofu
         uses: opentofu/setup-opentofu@v1
         with:
@@ -102,12 +108,6 @@ jobs:
       - name: Login to Scaleway Container Registry
         if: inputs.command == 'apply'
         run: echo "${{ secrets.SCW_SECRET_KEY }}" | docker login rg.fr-par.scw.cloud -u nologin --password-stdin
-
-      - name: Validate command input
-        run: |
-          CMD="${{ inputs.command }}"
-          [[ "$CMD" == "apply" || "$CMD" == "destroy" ]] \
-            || { echo "Invalid command: $CMD (must be 'apply' or 'destroy')"; exit 1; }
 
       - name: Materialise per-PR terragrunt stack from _template
         run: |
