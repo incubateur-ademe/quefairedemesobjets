@@ -84,12 +84,12 @@ def create_schema_webapp_public_in_warehouse_db():
     # this is not planned at the moment.
     db_port = (
         5432
-        if settings.ENVIRONMENT == "development"
+        if settings.DATABASES["default"]["HOST"] == "localhost"
         else settings.DATABASES["default"]["PORT"]
     )
     db_host = (
         "lvao-webapp-db"
-        if settings.ENVIRONMENT == "development"
+        if settings.DATABASES["default"]["HOST"] == "localhost"
         else settings.DATABASES["default"]["HOST"]
     )
 
@@ -108,12 +108,12 @@ def create_schema_webapp_public_in_warehouse_db():
 def create_schema_warehouse_public_in_webapp_db():
     db_port = (
         5432
-        if settings.ENVIRONMENT == "development"
+        if settings.DATABASES["warehouse"]["HOST"] == "localhost"
         else settings.DATABASES["warehouse"]["PORT"]
     )
     db_host = (
         "lvao-warehouse-db"
-        if settings.ENVIRONMENT == "development"
+        if settings.DATABASES["warehouse"]["HOST"] == "localhost"
         else settings.DATABASES["warehouse"]["HOST"]
     )
 
