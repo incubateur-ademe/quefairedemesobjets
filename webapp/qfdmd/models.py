@@ -893,13 +893,12 @@ class ProduitPage(
 
         body.append({"type": "break", "value": ""})
 
-        source = synonyme if synonyme else produit
         after_break = 0
         for title, field in [
-            ("Que va-t-il devenir ?", source.que_va_t_il_devenir),
+            ("Que va-t-il devenir ?", produit.que_va_t_il_devenir),
             (
                 "Comment consommer responsable ?",
-                source.comment_les_eviter,
+                produit.comment_les_eviter,
             ),
         ]:
             if field:
@@ -913,7 +912,7 @@ class ProduitPage(
         if after_break:
             msgs.append(f"{after_break} section(s) après la césure iframe.")
 
-        liens_qs = produit.liens.select_related().order_by("produitlien__poids")
+        liens_qs = produit.liens.order_by("produitlien__poids")
         if liens_qs.exists():
             body.append({"type": "paragraph", "value": "<h2>En savoir plus</h2>"})
             body.append({"type": "liens", "value": [lien.pk for lien in liens_qs]})
@@ -946,10 +945,13 @@ class ProduitPage(
             msgs.append("Metadonnées SEO copiées depuis le synonyme principal.")
 
         self.save()
+        # Wagtail's editor and live rendering read the latest revision, so a
+        # plain save() leaves the synced content invisible.
+        self.save_revision().publish()
 
-        from wagtail.log_actions import log
+        from qfdmd.legacy_migration import _safe_log
 
-        log(instance=produit, action="qfdmd.sync_produit", data={"page_id": self.pk})
+        _safe_log(produit, "qfdmd.sync_produit", data={"page_id": self.pk})
 
         return msgs
 

@@ -667,19 +667,19 @@ class SynonymeDetailView(DetailView):
 def migrate_single_produit(request: HttpRequest, id: str) -> HttpResponse:
     """Migrate a single legacy Produit to a ProduitPage from the admin.
 
-    GET returns to the Produit admin with an error (migration requires POST).
-    POST executes the migration and redirects back with a success/error
-    message.
+    GET shows a confirmation page. POST executes the migration and
+    redirects back with a success/error message.
     """
     produit = get_object_or_404(Produit, pk=id)
 
     if request.method != "POST":
-        messages.warning(request, "La migration nécessite une confirmation POST.")
-        return redirect(
-            reverse(
-                "wagtailsnippets_qfdmd_produit:edit",
-                args=[quote(id)],
-            )
+        return render(
+            request,
+            "admin/qfdmd/confirm_migrate_produit.html",
+            {
+                "produit": produit,
+                "nb_synonymes": produit.nb_synonymes_to_migrate(),
+            },
         )
 
     try:
@@ -688,6 +688,14 @@ def migrate_single_produit(request: HttpRequest, id: str) -> HttpResponse:
             report = migrate_produit(produit, index_page=index_page)
     except MigrationError as exc:
         messages.error(request, str(exc))
+        return redirect(
+            reverse(
+                "wagtailsnippets_qfdmd_produit:edit",
+                args=[quote(id)],
+            )
+        )
+    except Exception as exc:
+        messages.error(request, f"Erreur inattendue : {exc}")
         return redirect(
             reverse(
                 "wagtailsnippets_qfdmd_produit:edit",
@@ -714,21 +722,16 @@ def migrate_single_produit(request: HttpRequest, id: str) -> HttpResponse:
 def revert_single_produit(request: HttpRequest, id: str) -> HttpResponse:
     """Revert the automatic migration of a single legacy Produit.
 
-    GET returns to the Produit admin with an error (revert requires POST).
-    POST deletes the migrated ProduitPage and cleans up, then redirects
-    back with a success/error message.
+    GET shows a confirmation page. POST deletes the migrated ProduitPage
+    and cleans up, then redirects back with a success/error message.
     """
     produit = get_object_or_404(Produit, pk=id)
 
     if request.method != "POST":
-        messages.warning(
-            request, "L'annulation de la migration nécessite une confirmation POST."
-        )
-        return redirect(
-            reverse(
-                "wagtailsnippets_qfdmd_produit:edit",
-                args=[quote(id)],
-            )
+        return render(
+            request,
+            "admin/qfdmd/confirm_revert_produit.html",
+            {"produit": produit},
         )
 
     try:
@@ -736,6 +739,14 @@ def revert_single_produit(request: HttpRequest, id: str) -> HttpResponse:
             revert_produit_migration(produit)
     except MigrationError as exc:
         messages.error(request, str(exc))
+        return redirect(
+            reverse(
+                "wagtailsnippets_qfdmd_produit:edit",
+                args=[quote(id)],
+            )
+        )
+    except Exception as exc:
+        messages.error(request, f"Erreur inattendue : {exc}")
         return redirect(
             reverse(
                 "wagtailsnippets_qfdmd_produit:edit",
@@ -775,7 +786,11 @@ def sync_page_from_produit(request: HttpRequest, id: str) -> HttpResponse:
         return redirect("wagtailadmin_pages:edit", id)
 
     if request.method == "POST":
-        msgs = page.sync_from_legacy_produit()
+        try:
+            msgs = page.sync_from_legacy_produit()
+        except Exception as exc:
+            messages.error(request, f"Erreur lors de la synchronisation : {exc}")
+            return redirect("wagtailadmin_pages:edit", id)
         if msgs:
             messages.success(
                 request,
