@@ -945,6 +945,9 @@ class ProduitPage(
             msgs.append("Metadonnées SEO copiées depuis le synonyme principal.")
 
         self.save()
+        # Wagtail's editor and live rendering read the latest revision, so a
+        # plain save() leaves the synced content invisible.
+        self.save_revision().publish()
 
         from qfdmd.legacy_migration import _safe_log
 
