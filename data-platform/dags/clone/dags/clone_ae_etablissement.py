@@ -18,7 +18,7 @@ with DAG(
     dag_id="clone_ae_etablissement",
     dag_display_name="Cloner - AE - Etablissement",
     default_args=DEFAULT_ARGS_NO_RETRIES,
-    schedule=SCHEDULES.EVERY_FIRST_DAY_OF_MONTH_AT_01_00,
+    schedule=SCHEDULES.EVERY_FIRST_DAY_OF_MONTH_AT_02_00,
     start_date=START_DATES.DEFAULT,
     description=(
         "Clone la table 'etablissement' de l'Annuaire Entreprises (AE) dans notre DB"
