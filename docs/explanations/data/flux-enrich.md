@@ -20,7 +20,6 @@ Plusieurs étapes :
    - Cloner - BAN - Lieux-dits
 1. Préparation de la donnée (Airflow + DBT) :
    - DBT - Rafraîchir les acteurs affichés
-   - 🔄 Enrichir - Rafraîchir les modèles DBT
 1. Création des suggestions (Airflow + DBT) :
    - 🚪 Enrichir - Acteurs Fermés
 

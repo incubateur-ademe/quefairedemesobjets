@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: exposure_stats_acteur_siret_successeur
+  - name: exposure_ae_acteur_siret_successeur
     description: "Acteurs visibles avec un SIRET successeur"
     columns:
       - name: identifiant_unique

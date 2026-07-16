@@ -11,7 +11,6 @@ cf. https://explore.data.gouv.fr/fr/datasets/58c984b088ee386cdb1261f3/#/resource
 from airflow import DAG
 from airflow.sdk import Param
 from clone.tasks.airflow_logic.chain_tasks import chain_tasks
-from clone.tasks.airflow_logic.clone_dbt_task import clone_dbt_params
 from shared.config.airflow import DEFAULT_ARGS_NO_RETRIES
 from shared.config.schedules import SCHEDULES
 from shared.config.start_dates import START_DATES
@@ -51,7 +50,6 @@ with DAG(
             type="string",
             description_md="🔤 Délimiteur utilisé dans le fichier",
         ),
-        **clone_dbt_params(dbt_select="+tag:geo,+tag:normalisation"),
     },
 ) as dag:
     chain_tasks(dag)

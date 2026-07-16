@@ -19,7 +19,7 @@ from shared.config.tags import TAGS
 
 with DAG(
     dag_id="clone_ae_lien_succession",
-    dag_display_name="Cloner - AE - Lien de Succession",
+    dag_display_name="Cloner - AE - 3 - Lien de Succession",
     default_args=DEFAULT_ARGS_NO_RETRIES,
     schedule=SCHEDULES.EVERY_FIRST_DAY_OF_MONTH_AT_03_00,
     start_date=START_DATES.DEFAULT,
@@ -75,7 +75,7 @@ with DAG(
                 type="string",
                 description_md="🔤 Délimiteur utilisé dans le fichier",
             ),
-            **clone_dbt_params(dbt_select="+tag:lien_succession"),
+            **clone_dbt_params(dbt_select="tag:lien_succession,tag:normalisation"),
         }
     ),
 ) as dag:

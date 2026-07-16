@@ -16,7 +16,7 @@ from shared.config.tags import TAGS
 
 with DAG(
     dag_id="clone_ae_etablissement",
-    dag_display_name="Cloner - AE - Etablissement",
+    dag_display_name="Cloner - AE - 2 - Etablissement",
     default_args=DEFAULT_ARGS,
     schedule=SCHEDULES.EVERY_FIRST_DAY_OF_MONTH_AT_02_00,
     start_date=START_DATES.DEFAULT,
@@ -72,7 +72,7 @@ with DAG(
                 description_md="🔤 Délimiteur utilisé dans le fichier",
             ),
             # The DAG execute the models with the tags etablissement and normalisation
-            **clone_dbt_params(dbt_select="+tag:etablissement,+tag:normalisation"),
+            **clone_dbt_params(dbt_select="tag:etablissement,tag:normalisation"),
         }
     ),
 ) as dag:

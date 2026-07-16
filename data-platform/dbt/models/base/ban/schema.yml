@@ -1,13 +1,14 @@
 version: 2
 models:
   # No tests for base BAN models as they take forever
-  # to run and we will have the same on int_
+  # to run and we will have the same on int_/marts_
   - name: base_ban_adresses
     description: ''
     config:
       materialized: view
       tags:
         - base
+        - normalisation
         - ban
         - adresses
   - name: base_ban_lieux_dits

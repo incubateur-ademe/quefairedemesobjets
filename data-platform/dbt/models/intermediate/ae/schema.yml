@@ -98,6 +98,7 @@ models:
         - ae
         - annuaire_entreprises
         - lien_succession
+        - normalisation
       indexes:
         - columns: ['siret_predecesseur']
           type: btree

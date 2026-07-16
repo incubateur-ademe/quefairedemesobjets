@@ -6,17 +6,20 @@ models:
     columns:
       - name: id
         description: "The primary key for this table"
+        data_type: integer
         data_tests:
           - not_null
-      - name: code_epci
-        description: "The code of the EPCI"
+      - name: code
+        description: "Le code de l'EPCI"
+        data_type: varchar(10)
         data_tests:
           - not_null
           - dbt_expectations.expect_column_value_lengths_to_equal:
               arguments:
                 value: 9
-      - name: nom_epci
-        description: "The name of the EPCI"
+      - name: nom
+        description: "Le nom de l'EPCI"
+        data_type: varchar(255)
         data_tests:
           - not_null
     config:
@@ -26,3 +29,5 @@ models:
         - geo
         - epci
       materialized: table
+      contract:
+        enforced: true

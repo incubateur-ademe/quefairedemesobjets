@@ -1,6 +1,5 @@
 version: 2
 models:
-
   - name: base_ae_etablissement
     description: Établissements de l'Annuaire Entreprises (AE)
     columns:
@@ -35,14 +34,13 @@ models:
         description: Nom de la ville
         data_type: string
     config:
-      materialized: table
+      materialized: view
       tags:
         - base
         - ae
-        - stats
         - annuaire_entreprises
-        - etablissement
         - normalisation
+        - etablissement
       indexes:
         - columns: ['siret']
           unique: true
@@ -79,12 +77,12 @@ models:
         description: Date du dernier traitement
         data_type: date
     config:
-      materialized: table
+      materialized: view
       tags:
         - base
         - ae
-        - stats
         - annuaire_entreprises
+        - normalisation
         - lien_succession
       indexes:
         - columns: ['siret_predecesseur']
@@ -135,11 +133,12 @@ models:
         description: Nom d'usage du dirigeant
         data_type: string
     config:
-      materialized: table
+      materialized: view
       tags:
         - base
         - ae
         - annuaire_entreprises
+        - normalisation
         - unite_legale
       indexes:
         - columns: ['siren']
