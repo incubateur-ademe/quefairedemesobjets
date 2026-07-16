@@ -1,4 +1,5 @@
 from airflow import DAG
+from airflow.sdk.bases.operator import chain
 from enrich.tasks.airflow_logic.db_read_acteur_cp_task import db_read_acteur_cp_task
 from enrich.tasks.airflow_logic.db_write_cp_suggestions_task import (
     db_write_cp_suggestions_task,
@@ -23,4 +24,4 @@ with DAG(
     db_read_acteur_cp = db_read_acteur_cp_task(dag)
     acteur_cp_normalize = normalize_acteur_cp_task(dag)
     db_write_cp_suggestions = db_write_cp_suggestions_task(dag)
-    db_read_acteur_cp >> acteur_cp_normalize >> db_write_cp_suggestions  # type: ignore
+    chain(db_read_acteur_cp, acteur_cp_normalize, db_write_cp_suggestions)

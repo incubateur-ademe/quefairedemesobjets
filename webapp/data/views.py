@@ -43,6 +43,7 @@ def get_context_from_suggestion_groupe(
         SuggestionAction.CRAWL_URLS,
         SuggestionAction.ENRICH_ACTEURS_SIRET,
         SuggestionAction.ENRICH_ACTEURS_SIREN,
+        SuggestionAction.ENRICH_ACTEURS_LIEN_SUCCESSION,
     ]:
         return get_context_from_suggestion_groupe_type_enrich_multi(suggestion_groupe)
 
@@ -424,6 +425,7 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
             SuggestionAction.CRAWL_URLS,
             SuggestionAction.ENRICH_ACTEURS_SIRET,
             SuggestionAction.ENRICH_ACTEURS_SIREN,
+            SuggestionAction.ENRICH_ACTEURS_LIEN_SUCCESSION,
         ]:
             return get_context_from_suggestion_groupe_type_enrich_multi(
                 suggestion_groupe

@@ -73,6 +73,10 @@ class SuggestionAction(models.TextChoices):
         "ENRICH_ACTEURS_SIREN",
         "🏢 Acteurs SIREN proposé depuis le SIRET connu",
     )
+    ENRICH_ACTEURS_LIEN_SUCCESSION = (
+        "ENRICH_ACTEURS_LIEN_SUCCESSION",
+        "🏢 Acteurs SIREN/SIRET proposés depuis un lien de succession AE",
+    )
     CLUSTERING = "CLUSTERING", "regroupement/déduplication des acteurs"
     SOURCE_AJOUT = (
         "SOURCE_AJOUT",
@@ -599,6 +603,7 @@ class SuggestionGroupe(TimestampedModel, SuggestionActeurRelationsMixin):
             SuggestionAction.CRAWL_URLS,
             SuggestionAction.ENRICH_ACTEURS_SIRET,
             SuggestionAction.ENRICH_ACTEURS_SIREN,
+            SuggestionAction.ENRICH_ACTEURS_LIEN_SUCCESSION,
         ]:
             SuggestionGroupeTypeEnrichMulti.from_suggestion_groupe(self).apply()
 
