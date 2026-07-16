@@ -24,6 +24,7 @@ from qfdmo.constants import MAP_FORM_PREFIX
 from qfdmo.forms import MapForm, generate_form_prefix
 from qfdmo.geo_api import retrieve_epci_geojson_from_api_or_cache
 from qfdmo.map_utils import (
+    center_from_frontend_bbox,
     sanitize_frontend_bbox,
 )
 from qfdmo.models import Acteur, ActeurStatus, DisplayedActeur, RevisionActeur
@@ -228,6 +229,11 @@ class AbstractSearchActeursView(
             acteurs_in_bbox = acteurs.in_bbox(bbox)
 
             if acteurs_in_bbox.exists():
+                center = center_from_frontend_bbox(custom_bbox)
+                if center[0] and center[1]:
+                    self.location = json.dumps(
+                        {"longitude": center[0], "latitude": center[1]}
+                    )
                 return custom_bbox, acteurs_in_bbox
 
         # At the beginning, there is no bounding box.
