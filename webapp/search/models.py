@@ -22,6 +22,10 @@ class SearchTermQuerySet(SearchableQuerySetMixin, QuerySet):
                 synonyme__isnull=False,
                 synonyme__imported_as_search_tag__isnull=False,
             )
+            | Q(
+                synonyme__isnull=False,
+                synonyme__legacy_imported_as_search_tag__isnull=False,
+            )
             | Q(searchtag__isnull=False, searchtag__tagged_produit_page__isnull=True)
             | Q(
                 produitpagesearchterm__isnull=False,
@@ -134,7 +138,7 @@ class SearchTerm(index.Indexed, models.Model):
             # Multi-table inheritance: avoid indexing a SearchTerm row when a
             # more specific child exists for it. Without this, the same object
             # is indexed twice (once as SearchTerm, once as the child) and
-            # appears duplicated in search results — visible when matching via
+            # appears duplicated in search results, visible when matching via
             # search_variants, which is declared on the base class.
             indexed_objects = indexed_objects.exclude(
                 id__in=Synonyme.objects.values_list("searchterm_ptr_id", flat=True)
@@ -151,7 +155,7 @@ class SearchTerm(index.Indexed, models.Model):
         if cls is Synonyme:
             indexed_objects = indexed_objects.exclude(
                 imported_as_search_tag__isnull=False
-            )
+            ).exclude(legacy_imported_as_search_tag__isnull=False)
 
         if cls is SearchTag:
             indexed_objects = indexed_objects.exclude(tagged_produit_page__isnull=True)
