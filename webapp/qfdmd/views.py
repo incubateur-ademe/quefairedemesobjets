@@ -519,6 +519,7 @@ class HomeView(TemplateView):
         return context
 
 
+@method_decorator(cache_control(max_age=60 * 5), name="dispatch")
 class SynonymeDetailView(DetailView):
     template_name = "ui/pages/produit.html"
     model = Synonyme
