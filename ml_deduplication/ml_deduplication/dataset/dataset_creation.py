@@ -3,9 +3,13 @@ The dataset is created using different methods like manual annotation and random
 """
 
 import os
+from datetime import datetime
 from pathlib import Path
 
 import polars as pl
+import psycopg
+
+from ml_deduplication.dataset.utils import get_sql_files_folder_path
 
 RANDOM_SEED = 42
 
@@ -13,8 +17,29 @@ RANDOM_SEED = 42
 def create_entity_pairs_from_ml_manual_labeling(
     ml_manual_labeling_datasets_folder_path: Path,
 ) -> pl.DataFrame:
-    """Create acteurs pairs from manual labeling of the old ML experience.
+    """
     See original spreadsheet : https://docs.google.com/spreadsheets/d/1HltmT0Rhq-NXHaRJpDeqNEXXHO87iZMKTl7144iZaJ4/edit?gid=154092679#gid=154092679
+
+    Create actors pairs from manual labeling of the old ML experience.
+
+    Reads CSV files matching 'Clusterisation *.csv' from the given folder,
+    processes them to extract pairs of actors, and assigns labels based on
+    the 'Good ?' column. It also computes a hash for the cluster ID to
+    preserve cluster information for positive pairs.
+
+    Parameters
+    ----------
+    ml_manual_labeling_datasets_folder_path : Path
+        Path to the folder containing the CSV files for manual labeling.
+
+    Returns
+    -------
+    pl.DataFrame
+        A Polars DataFrame containing pairs of actors with columns:
+        - identifiant_unique_i: The first actor's unique identifier.
+        - identifiant_unique_j: The second actor's unique identifier.
+        - label: Boolean indicating if the pair is a match.
+        - cluster_id: The hash of the cluster ID for positive pairs, null otherwise.
     """
     csv_files_to_load = ml_manual_labeling_datasets_folder_path.glob(
         "Clusterisation *.csv"
@@ -109,8 +134,34 @@ def create_entity_pairs_from_manual_labeling(
     true_positives_suggestions_dataset_path: Path,
     database_connection_uri: str,
 ) -> pl.DataFrame:
+    """Create actors pairs from manual labeling suggestions.
+
+    Reads false positives, true negatives, and true positives from CSV files,
+    writes them to a temporary database table, queries for pairs using a SQL
+    script, and assigns appropriate labels and cluster IDs.
+
+    Parameters
+    ----------
+    false_positives_suggestions_dataset_path : Path
+        Path to the CSV file containing false positive suggestions.
+    true_negatives_suggestions_dataset_path : Path
+        Path to the CSV file containing true negative suggestions.
+    true_positives_suggestions_dataset_path : Path
+        Path to the CSV file containing true positive suggestions.
+    database_connection_uri : str
+        URI for the database connection.
+
+    Returns
+    -------
+    pl.DataFrame
+        A Polars DataFrame containing pairs of actors with columns:
+        - identifiant_unique_i: The first actor's unique identifier.
+        - identifiant_unique_j: The second actor's unique identifier.
+        - label: Boolean indicating if the pair is a match.
+        - cluster_id: The hash of the cluster ID for positive pairs, null otherwise.
+    """
     pairs_sql_query = (
-        (Path(__file__).parent / "sql" / "pairs_query.sql")
+        (get_sql_files_folder_path() / "pairs_query.sql")
         .read_text()
         .format("luis._suggestions_tmp")
     )
@@ -153,6 +204,11 @@ def create_entity_pairs_from_manual_labeling(
 
         dfs.append(df_suggestions_pairs)
 
+    with psycopg.connect(database_connection_uri) as conn:
+        with conn.cursor() as cur:
+            cur.execute("DROP TABLE luis._suggestions_tmp")
+            conn.commit()
+
     df_pairs = pl.concat(dfs)
 
     return df_pairs
@@ -161,7 +217,26 @@ def create_entity_pairs_from_manual_labeling(
 def create_entity_pairs_from_database_parent_changes(
     database_connection_uri: str,
 ) -> pl.DataFrame:
-    sql_query_folder = Path(__file__).parent / "sql"
+    """Create actors pairs from database parent changes.
+
+    Retrieves pairs of actors from the database that have undergone parent
+    changes, marking them as negative pairs (label=False).
+
+    Parameters
+    ----------
+    database_connection_uri : str
+        URI for the database connection.
+
+    Returns
+    -------
+    pl.DataFrame
+        A Polars DataFrame containing negative pairs of actors with columns:
+        - identifiant_unique_i: The first actor's unique identifier.
+        - identifiant_unique_j: The second actor's unique identifier.
+        - label: Always False, indicating a negative pair.
+        - cluster_id: Always null, as these are negative pairs.
+    """
+    sql_query_folder = get_sql_files_folder_path()
 
     df_pairs = (
         pl.read_database_uri(
@@ -183,7 +258,27 @@ def create_entity_pairs_from_database_parent_changes(
 def create_entity_pairs_from_database_random_sampling(
     database_connection_uri: str,
 ) -> pl.DataFrame:
-    sql_query_folder = Path(__file__).parent / "sql"
+    """Create actors pairs from database random sampling.
+
+    Retrieves both negative and positive pairs of actors from the database
+    using random sampling methods.
+
+    Parameters
+    ----------
+    database_connection_uri : str
+        URI for the database connection.
+
+    Returns
+    -------
+    pl.DataFrame
+        A Polars DataFrame containing both positive and negative pairs of actors
+        with columns:
+        - identifiant_unique_i: The first actor's unique identifier.
+        - identifiant_unique_j: The second actor's unique identifier.
+        - label: Boolean indicating if the pair is a match.
+        - cluster_id: The hash of the cluster ID for positive pairs, null otherwise.
+    """
+    sql_query_folder = get_sql_files_folder_path()
     configs = [
         {
             "query": (
@@ -226,6 +321,35 @@ def balance_dataset(
     df_pairs_database_random_sampling: pl.DataFrame,
     num_examples_for_each_label: int = 1000,
 ) -> pl.DataFrame:
+    """Balance the dataset by combining pairs from different sources.
+
+    Combines pairs from manual labeling and database sources, then samples
+    from the random sampling dataset to achieve the desired number of examples
+    for each label (positive and negative).
+
+    Parameters
+    ----------
+    df_pairs_ml_manual_labeling : pl.DataFrame
+        Pairs derived from the old ML manual labeling.
+    df_pairs_manual_labeling : pl.DataFrame
+        Pairs derived from the new manual labeling.
+    df_pairs_database_via_parent_change : pl.DataFrame
+        Negative pairs derived from database parent changes.
+    df_pairs_database_random_sampling : pl.DataFrame
+        Pairs derived from database random sampling.
+    num_examples_for_each_label : int, optional
+        Target number of examples for each label (positive and negative).
+        Default is 1000.
+
+    Returns
+    -------
+    pl.DataFrame
+        A balanced Polars DataFrame containing pairs of actors with columns:
+        - identifiant_unique_i: The first actor's unique identifier.
+        - identifiant_unique_j: The second actor's unique identifier.
+        - label: Boolean indicating if the pair is a match.
+        - cluster_id: The hash of the cluster ID for positive pairs, null otherwise.
+    """
     df_pairs = pl.concat(
         [
             df_pairs_ml_manual_labeling,
@@ -235,11 +359,22 @@ def balance_dataset(
         how="diagonal",
     )
 
+    mean_actors_by_cluster = (
+        df_pairs_database_random_sampling.filter(pl.col("label"))
+        .group_by("cluster_id")
+        .len()
+        .mean()["len"]
+        .item()
+    )
+
     df_pairs = pl.concat(
         [
             df_pairs,
             df_pairs_database_random_sampling.filter(pl.col("label").not_()).sample(
-                n=(1000 - len(df_pairs.filter(pl.col("label").not_()))),
+                n=(
+                    num_examples_for_each_label
+                    - len(df_pairs.filter(pl.col("label").not_()))
+                ),
                 seed=42,
             ),
             df_pairs_database_random_sampling.filter(pl.col("label")).filter(
@@ -248,8 +383,12 @@ def balance_dataset(
                         pl.col("cluster_id").unique()
                     )
                     .sample(
-                        n=int(
-                            (1000 - len(df_pairs.filter(pl.col("label")))) / 2.1
+                        n=round(
+                            (
+                                num_examples_for_each_label
+                                - len(df_pairs.filter(pl.col("label")))
+                            )
+                            / mean_actors_by_cluster
                         ),  # En moyenne 2.1 paires par cluster
                         seed=42,
                     )
@@ -267,6 +406,29 @@ def balance_dataset(
 def create_full_dataset(
     datasets_path: Path, database_connection_uri: str
 ) -> pl.DataFrame:
+    """Create the full balanced dataset for training.
+
+    Orchestrates the creation of the dataset by calling functions to extract
+    pairs from various sources (manual labeling, database changes, random sampling)
+    and then balances the dataset.
+
+    Parameters
+    ----------
+    datasets_path : Path
+        Path to the directory containing the dataset CSV files.
+    database_connection_uri : str
+        URI for the database connection.
+
+    Returns
+    -------
+    pl.DataFrame
+        A balanced Polars DataFrame containing the final dataset of actor pairs
+        with columns:
+        - identifiant_unique_i: The first actor's unique identifier.
+        - identifiant_unique_j: The second actor's unique identifier.
+        - label: Boolean indicating if the pair is a match.
+        - cluster_id: The hash of the cluster ID for positive pairs, null otherwise.
+    """
     df_pairs_ml_manual_labeling = create_entity_pairs_from_ml_manual_labeling(
         datasets_path
     )
@@ -299,3 +461,6 @@ if __name__ == "__main__":
     datasets_path = Path(os.environ["ML_DATASETS_PATH"])
     database_connection_uri = os.environ["DATABASE_CONNECTION_URI"]
     df_pairs = create_full_dataset(datasets_path, database_connection_uri)
+    df_pairs.write_parquet(
+        datasets_path / f"ml_dataset_{datetime.now():%Y%m%d}.parquet"
+    )
