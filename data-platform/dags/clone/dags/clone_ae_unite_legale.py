@@ -29,6 +29,7 @@ with DAG(
         TAGS.ANNAIRE_ENTREPRISE,
         TAGS.UNITE_LEGALE,
         TAGS.SIREN,
+        TAGS.SIRET,
     ],
     params=ParamsDict(
         {

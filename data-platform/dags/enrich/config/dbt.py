@@ -28,3 +28,4 @@ class DBT:
     # SIRET / SIREN
     MARTS_ENRICH_SIRET_FROM_SIREN: str = "marts_enrich_siret_from_siren"
     MARTS_ENRICH_SIREN_FROM_SIRET: str = "marts_enrich_siren_from_siret"
+    EXPOSURE_AE_ACTEUR_SIRET_SUCCESSEUR: str = "exposure_ae_acteur_siret_successeur"

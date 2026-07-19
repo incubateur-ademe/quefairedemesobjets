@@ -28,6 +28,7 @@ with DAG(
         TAGS.CLONE,
         TAGS.ANNAIRE_ENTREPRISE,
         TAGS.ETABLISSEMENT,
+        TAGS.SIREN,
         TAGS.SIRET,
     ],
     params=ParamsDict(

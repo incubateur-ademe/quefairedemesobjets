@@ -22,6 +22,7 @@ from shared.config.airflow import DEFAULT_ARGS_NO_RETRIES
 from shared.config.models import config_to_airflow_params
 from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
+from utils.docs import load_dag_doc_md
 
 with DAG(
     dag_id="enrich_acteurs_closed",
@@ -31,6 +32,7 @@ with DAG(
         "Un DAG pour détécter et remplacer les acteurs fermés"
         "dans l'Annuaire Entreprises (AE)"
     ),
+    doc_md=load_dag_doc_md("enrich-acteurs-closed.md"),
     tags=[
         TAGS.ENRICH,
         TAGS.ANNAIRE_ENTREPRISE,

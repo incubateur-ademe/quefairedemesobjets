@@ -147,6 +147,29 @@ class EnrichActeursVillesConfig(EnrichBaseConfig):
     pass
 
 
+class EnrichActeursLienSuccessionConfig(BaseModel):
+    dry_run: bool = Field(
+        default=False,
+        description="🚱 Si coché, aucune tâche d'écriture ne sera effectuée",
+    )
+
+    dbt_models_refresh: bool = Field(
+        default=True,
+        description="""🔄 Si coché, les modèles DBT seront rafraîchis et testés.
+        🔴 Désactiver uniquement pour des tests.""",
+    )
+
+    dbt_models_refresh_command: str = Field(
+        default="dbt run --select +tag:lien_succession --exclude tag:normalisation",
+        description="🔄 Commande DBT à exécuter pour rafraîchir les modèles",
+    )
+
+    dbt_models_test_command: str = Field(
+        default="dbt test --select +tag:lien_succession --exclude tag:normalisation",
+        description="🧪 Commande DBT à exécuter pour tester les modèles",
+    )
+
+
 class EnrichActeursSiretSirenConfig(BaseModel):
     dry_run: bool = Field(
         default=False,
@@ -176,4 +199,5 @@ DAG_ID_TO_CONFIG_MODEL = {
     "enrich_dbt_models_refresh": EnrichDbtModelsRefreshConfig,
     "enrich_acteurs_villes": EnrichActeursVillesConfig,
     "enrich_siret_siren": EnrichActeursSiretSirenConfig,
+    "enrich_siret_siren_lien_succession": EnrichActeursLienSuccessionConfig,
 }
