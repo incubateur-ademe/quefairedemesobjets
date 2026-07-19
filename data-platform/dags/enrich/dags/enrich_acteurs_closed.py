@@ -4,6 +4,7 @@ contains people from Annuaire Entreprise (AE)
 """
 
 from airflow import DAG
+from airflow.sdk.bases.operator import chain
 from enrich.config.cohorts import COHORTS
 from enrich.config.dbt import DBT
 from enrich.config.models import EnrichActeursClosedConfig
@@ -88,9 +89,14 @@ with DAG(
     )
 
     # Graph
-    config >> dbt_refresh  # type: ignore
-    dbt_refresh >> dbt_test  # type: ignore
-    dbt_test >> suggest_not_replaced_unite  # type: ignore
-    dbt_test >> suggest_not_replaced_etablissement  # type: ignore
-    dbt_test >> suggest_other_siren  # type: ignore
-    dbt_test >> suggest_same_siren  # type: ignore
+    chain(
+        config,
+        dbt_refresh,
+        dbt_test,
+        [
+            suggest_not_replaced_unite,
+            suggest_not_replaced_etablissement,
+            suggest_other_siren,
+            suggest_same_siren,
+        ],
+    )

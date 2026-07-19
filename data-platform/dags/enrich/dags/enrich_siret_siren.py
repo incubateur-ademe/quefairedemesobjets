@@ -10,6 +10,7 @@ crawl_urls does with `use_legacy_suggestions=False`.
 """
 
 from airflow import DAG
+from airflow.sdk.bases.operator import chain
 from enrich.config.cohorts import COHORTS
 from enrich.config.dbt import DBT
 from enrich.config.models import EnrichActeursSiretSirenConfig
@@ -82,7 +83,8 @@ with DAG(
         suggest_field="siren",
     )
 
-    # Graph
-    dbt_refresh >> dbt_test  # type: ignore
-    dbt_test >> suggest_siret_from_siren  # type: ignore
-    dbt_test >> suggest_siren_from_siret  # type: ignore
+    chain(
+        dbt_refresh,
+        dbt_test,
+        [suggest_siret_from_siren, suggest_siren_from_siret],
+    )
