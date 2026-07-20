@@ -148,5 +148,6 @@ def stringify_params_list(
     params["dedupe_variables_config"] = [
         str(e) for e in params["dedupe_variables_config"]
     ]
+    params.pop("features_names")
 
     return params
