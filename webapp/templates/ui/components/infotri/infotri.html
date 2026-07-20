@@ -8,7 +8,7 @@
         </div>
     {% else %}
         {# Info-tri Preview Display #}
-        <div class="qf-flex qf-flex-col qf-items-center">
+        <div class="qf-flex qf-flex-col qf-items-center qf-w-full [&_svg]:qf-max-w-full [&_svg]:qf-h-auto">
             {% if form.avec_phrase.value %}
                 {% with phrase_svg_templates|get_item:form.consigne.value as phrase_template %}
                     {% if phrase_template %}
@@ -21,13 +21,13 @@
 
             <div class="qf-pt-3v qf-flex qf-gap-1w">
                 {# Triman symbol - Always shown #}
-                <div>
+                <div class="qf-min-w-0">
                     {% include "ui/components/infotri/svg/triman.html" %}
                 </div>
 
                 {# Category box with French flag and icons #}
                 {% if form.categorie.value %}
-                    <div class="qf-relative qf-flex qf-items-center qf-gap-1v qf-rounded-lg qf-px-1w qf-pt-1v qf-ring-2 qf-ring-black">
+                    <div class="qf-min-w-0 qf-relative qf-flex qf-items-center qf-gap-1v qf-rounded-lg qf-px-1w qf-pt-1v qf-ring-2 qf-ring-black">
                         {# French flag cartouche #}
                         {% include "ui/components/infotri/svg/cartouche-fr.html" %}
 
