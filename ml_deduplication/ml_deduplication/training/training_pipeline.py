@@ -1,19 +1,20 @@
-from datetime import datetime
 import io
 import json
 import logging
+import time
+from datetime import datetime
 from pathlib import Path
 
 import dedupe
 import polars as pl
 
+from ml_deduplication.evaluation.metrics.cluster import generate_full_cluster_report
 from ml_deduplication.evaluation.metrics.pairwise import pairwise_metrics_from_clusters
-from ml_deduplication.training.features import (
-    DEDUPE_VARIABLE_CONFIG,
-    FEATURES_NAMES_FROM_DATASET,
-)
 from ml_deduplication.training.model import BusinessRulesDedupe
-from ml_deduplication.training.model_selection import select_best_threshold
+from ml_deduplication.training.model_selection import (
+    generate_parameter_grid,
+    select_best_threshold,
+)
 from ml_deduplication.training.utils import (
     build_entities_dict,
     create_acteur_to_cluster_dict,
@@ -21,6 +22,7 @@ from ml_deduplication.training.utils import (
     partition_to_dict,
     partition_to_results_dict,
     split_train_dev,
+    stringify_params_list,
 )
 
 logging.basicConfig(
@@ -33,7 +35,10 @@ LOGS_FOLDER = Path(__file__).parent.parent.parent / "logs"
 
 
 def train_deduper(
-    df_train: pl.DataFrame, entities_dict: dict, dedupe_variables_definition: list
+    df_train: pl.DataFrame,
+    entities_dict: dict,
+    dedupe_variables_definition: list,
+    index_predicates: bool = True,
 ) -> BusinessRulesDedupe:
     """
     Entraîne un objet dedupe.Dedupe à partir des paires labellisées de
@@ -71,16 +76,61 @@ def train_deduper(
         sample_size=max(10000, len(train_ids)),
     )
 
-    deduper.train()
+    deduper.train(index_predicates=index_predicates)
     deduper.cleanup_training()
 
     return deduper
 
 
-# def run_training_with_hyperparameter_tuning():
+def run_training_with_hyperparameter_tuning(
+    df_features: pl.DataFrame,
+) -> tuple[BusinessRulesDedupe | None, dict | None]:
+    param_grid = generate_parameter_grid()
+
+    training_results = {"training_results": [], "best_results": {}}
+
+    best_f1 = 0
+    best_metrics = None
+    best_params = {}
+    best_model = None
+
+    start_time = time.time()
+    for params in param_grid:
+        logger.info("Training with params : %s", params)
+        model, results = run_pipeline(df_features, params)
+        logger.info("----" * 15)
+        training_results["training_results"].append(
+            {"params": stringify_params_list(params), "metrics": results}
+        )
+        if (training_f1 := results["test_results"]["pairwise"]["f1"]) > best_f1:
+            best_f1 = training_f1
+            best_metrics = results
+            best_params = params
+            best_model = model
+
+    end_time = time.time()
+    total_time = end_time - start_time
+    logger.debug("Finished tuning in %ss", total_time)
+    training_results["total_time_seconds"] = total_time
+    training_results["best_results"] = {
+        "metrics": best_metrics,
+        "params": stringify_params_list(best_params),
+    }
+    logger.info(
+        "Best metrics are %s w",
+        best_metrics,
+    )
+    logger.info(
+        "Best params are %s w",
+        best_params,
+    )
+
+    return best_model, training_results
 
 
-def run_pipeline(df_features: pl.DataFrame):
+def run_pipeline(
+    df_features: pl.DataFrame, training_hyperparameters: dict
+) -> tuple[BusinessRulesDedupe, dict]:
 
     results = {}
 
@@ -91,19 +141,24 @@ def run_pipeline(df_features: pl.DataFrame):
     acteur_to_cluster_id_dict = create_acteur_to_cluster_dict(cluster_to_acteur_dict)
 
     # select features
-    features_names = FEATURES_NAMES_FROM_DATASET
+    features_names = training_hyperparameters["features_names"]
     # Create entities dict
-    entities_dict = build_entities_dict(df_features, feature_names=features_names)
+    entities_dict = build_entities_dict(df_features, features_names=features_names)
 
     # split train into train/dev
     df_train, df_dev = split_train_dev(df_features.filter(pl.col("split") == "train"))
 
     # config variables
-    dedupe_variable_config = DEDUPE_VARIABLE_CONFIG
+    dedupe_variables_config = training_hyperparameters["dedupe_variables_config"]
 
     # train dedupe
     logger.info("Starting dedupe training")
-    deduper = train_deduper(df_train, entities_dict, dedupe_variable_config)
+    deduper = train_deduper(
+        df_train,
+        entities_dict,
+        dedupe_variables_config,
+        training_hyperparameters["index_predicates"],
+    )
     logger.info("Finished dedupe training")
 
     # select threshold on dev
@@ -137,7 +192,7 @@ def run_pipeline(df_features: pl.DataFrame):
     deduper = train_deduper(
         df_features.filter(pl.col("split") == "train"),
         entities_dict,
-        dedupe_variable_config,
+        dedupe_variables_config,
     )
     logger.info("Finished dedupe training on full training set")
 
@@ -157,19 +212,28 @@ def run_pipeline(df_features: pl.DataFrame):
         data=entities_dict_test, threshold=best_threshold
     )  # type: ignore
     id_to_cluster_test_pred = partition_to_dict(partition_test)
-    metrics = pairwise_metrics_from_clusters(
+    pairwise_metrics = pairwise_metrics_from_clusters(
         id_to_cluster_id_dict_test, id_to_cluster_test_pred
     )
-    logger.info("Test metrics: %s", metrics)
-    results["test_results"] = metrics
+    logger.info("Test pairwise metrics: %s", pairwise_metrics)
     results["pred_clusters"] = partition_to_results_dict(partition_test)
 
-    with (LOGS_FOLDER / f"training_results_{datetime.now():%Y_%m_%d_%H%M}.json").open(
-        "w"
-    ) as f:
-        json.dump(results, f)
+    clusterwise_metrics = generate_full_cluster_report(
+        id_to_cluster_id_dict_test, id_to_cluster_test_pred
+    )
+
+    results["test_results"] = {
+        "pairwise": pairwise_metrics,
+        "clusterwise": clusterwise_metrics,
+    }
+
+    return deduper, results
 
 
 if __name__ == "__main__":
     df_features = pl.read_parquet("datasets/features_dataset_20260718.parquet")
-    run_pipeline(df_features)
+    deduper, results = run_training_with_hyperparameter_tuning(df_features)
+    with (LOGS_FOLDER / f"training_results_{datetime.now():%Y_%m_%d_%H%M}.json").open(
+        "w"
+    ) as f:
+        json.dump(results, f)

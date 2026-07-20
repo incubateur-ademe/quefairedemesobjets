@@ -43,7 +43,7 @@ def create_acteur_to_cluster_dict(
 
 
 def build_entities_dict(
-    df_features: pl.DataFrame, feature_names: list[str]
+    df_features: pl.DataFrame, features_names: list[str]
 ) -> dict[str, dict[str, Any]]:
     """
     Construit un dictionnaire {id_entité: {feature: valeur, ...}} unique
@@ -58,11 +58,12 @@ def build_entities_dict(
             eid = row[id_col]
             if eid not in entities:
                 entity = {}
-                for feature_name in feature_names:
+                for feature_name in features_names:
                     value = row[f"{feature_name}{suffix}"]
                     if isinstance(value, int) or isinstance(value, float):
                         value = str(value)
                     entity[feature_name] = value
+
                 entity["location"] = (
                     row[f"latitude{suffix}"],
                     row[f"longitude{suffix}"],
@@ -138,3 +139,14 @@ def split_train_dev(
     )
 
     return df_train_sub, df_dev
+
+
+def stringify_params_list(
+    params: dict,
+) -> dict:
+    params = params.copy()
+    params["dedupe_variables_config"] = [
+        str(e) for e in params["dedupe_variables_config"]
+    ]
+
+    return params

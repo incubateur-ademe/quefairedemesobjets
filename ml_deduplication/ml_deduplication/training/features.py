@@ -43,19 +43,56 @@ FEATURES_NAMES_FROM_DATASET = [
     "action_rapporter",
 ]
 
-DEDUPE_VARIABLE_CONFIG = variables = [
+DEDUPE_VARIABLES_CONFIG_MANDATORY = [
     dedupe.variables.String(name="nom", field="nom"),
-    dedupe.variables.Text("description", has_missing=True),
     dedupe.variables.Categorical(
         "acteur_type_id",
         categories=["1", "2", "3", "4", "5", "7", "8", "9", "10", "11", "12"],
     ),
     dedupe.variables.String(name="adresse", field="adresse", has_missing=True),
+    dedupe.variables.Exact(name="code_postal", field="code_postal", has_missing=True),
+    dedupe.variables.String(name="ville", field="ville", has_missing=True),
+    dedupe.variables.LatLong("location"),
+    dedupe.variables.Categorical(
+        "action_reparer", categories=["True", "False"], has_missing=True
+    ),
+    dedupe.variables.Categorical(
+        "action_acheter", categories=["True", "False"], has_missing=True
+    ),
+    dedupe.variables.Categorical(
+        "action_revendre", categories=["True", "False"], has_missing=True
+    ),
+    dedupe.variables.Categorical(
+        "action_donner", categories=["True", "False"], has_missing=True
+    ),
+    dedupe.variables.Categorical(
+        "action_louer", categories=["True", "False"], has_missing=True
+    ),
+    dedupe.variables.Categorical(
+        "action_mettreenlocation", categories=["True", "False"], has_missing=True
+    ),
+    dedupe.variables.Categorical(
+        "action_emprunter", categories=["True", "False"], has_missing=True
+    ),
+    dedupe.variables.Categorical(
+        "action_preter", categories=["True", "False"], has_missing=True
+    ),
+    dedupe.variables.Categorical(
+        "action_echanger", categories=["True", "False"], has_missing=True
+    ),
+    dedupe.variables.Categorical(
+        "action_trier", categories=["True", "False"], has_missing=True
+    ),
+    dedupe.variables.Categorical(
+        "action_rapporter", categories=["True", "False"], has_missing=True
+    ),
+]
+
+DEDUPE_VARIABLES_CONFIG_FULL = DEDUPE_VARIABLES_CONFIG_MANDATORY + [
+    dedupe.variables.Text("description", has_missing=True),
     dedupe.variables.String(
         name="adresse_complement", field="adresse_complement", has_missing=True
     ),
-    dedupe.variables.Exact(name="code_postal", field="code_postal", has_missing=True),
-    dedupe.variables.String(name="ville", field="ville", has_missing=True),
     dedupe.variables.Exact("url", has_missing=True),
     dedupe.variables.Exact("email", has_missing=True),
     dedupe.variables.Exact("telephone", has_missing=True),
@@ -108,42 +145,8 @@ DEDUPE_VARIABLE_CONFIG = variables = [
         categories=["A_DOMICILE", "SUR_PLACE", "SUR_PLACE_OU_A_DOMICILE"],
         has_missing=True,
     ),
-    dedupe.variables.LatLong("location"),
     dedupe.variables.Exact("code_commune_insee", has_missing=True),
     dedupe.variables.Exact("epci_id", has_missing=True),
-    dedupe.variables.Categorical(
-        "action_reparer", categories=["True", "False"], has_missing=True
-    ),
-    dedupe.variables.Categorical(
-        "action_acheter", categories=["True", "False"], has_missing=True
-    ),
-    dedupe.variables.Categorical(
-        "action_revendre", categories=["True", "False"], has_missing=True
-    ),
-    dedupe.variables.Categorical(
-        "action_donner", categories=["True", "False"], has_missing=True
-    ),
-    dedupe.variables.Categorical(
-        "action_louer", categories=["True", "False"], has_missing=True
-    ),
-    dedupe.variables.Categorical(
-        "action_mettreenlocation", categories=["True", "False"], has_missing=True
-    ),
-    dedupe.variables.Categorical(
-        "action_emprunter", categories=["True", "False"], has_missing=True
-    ),
-    dedupe.variables.Categorical(
-        "action_preter", categories=["True", "False"], has_missing=True
-    ),
-    dedupe.variables.Categorical(
-        "action_echanger", categories=["True", "False"], has_missing=True
-    ),
-    dedupe.variables.Categorical(
-        "action_trier", categories=["True", "False"], has_missing=True
-    ),
-    dedupe.variables.Categorical(
-        "action_rapporter", categories=["True", "False"], has_missing=True
-    ),
     dedupe.variables.Interaction(
         "nom",
         "nom_commercial",
@@ -157,4 +160,38 @@ DEDUPE_VARIABLE_CONFIG = variables = [
     ),
     dedupe.variables.Interaction("horaires_osm", "horaires_description"),
     dedupe.variables.Interaction("reprise", "exclusivite_de_reprisereparation"),
+]
+
+DEDUPE_VARIABLES_CONFIG_RESTRICTED = DEDUPE_VARIABLES_CONFIG_MANDATORY + [
+    dedupe.variables.String(
+        name="nom_commercial", field="nom_commercial", has_missing=True
+    ),
+    dedupe.variables.Exact("siren", has_missing=True),
+    dedupe.variables.Exact("siret", has_missing=True),
+    dedupe.variables.Categorical(
+        "public_accueilli",
+        categories=[
+            "Aucun",
+            "Particuliers",
+            "Particuliers et professionnels",
+            "Professionnels",
+        ],
+        has_missing=True,
+    ),
+    dedupe.variables.Categorical(
+        "action_principale_id",
+        categories=["7", "8", "5", "6", "1", "9", "3", "2", "12", "11", "4"],
+        has_missing=True,
+    ),
+    dedupe.variables.Exact("code_commune_insee", has_missing=True),
+    dedupe.variables.Exact("epci_id", has_missing=True),
+    dedupe.variables.Interaction(
+        "nom",
+        "nom_commercial",
+    ),
+    dedupe.variables.Interaction(
+        "adresse",
+        "code_postal",
+        "ville",
+    ),
 ]
