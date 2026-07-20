@@ -19,14 +19,18 @@
     "python.analysis.typeCheckingMode": "basic",
     "[django-html]": {
         "editor.formatOnSave": false,
-        "tailwindCSS.experimental.classRegex": ["class=['\"]([^'\"]*)"]
+        "tailwindCSS.experimental.classRegex": [
+            "class=['\"]([^'\"]*)"
+        ]
     },
     "[css]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
     "[html]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode",
-        "tailwindCSS.experimental.classRegex": ["class=['\"]([^'\"]*)"]
+        "tailwindCSS.experimental.classRegex": [
+            "class=['\"]([^'\"]*)"
+        ]
     },
     "[json]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
@@ -39,7 +43,6 @@
         }
     },
     "[python]": {
-        "editor.defaultFormatter": "ms-python.black-formatter",
         "editor.formatOnSave": true,
         "editor.codeActionsOnSave": {
             "source.fixAll.ruff": "explicit",
@@ -63,5 +66,11 @@
         "editor.codeActionsOnSave": {
             "source.fixAll.eslint": "explicit"
         }
+    },
+    "editor.formatOnSave": true,
+    "files.autoSave": "onFocusChange",
+    "notebook.formatOnSave.enabled": true,
+    "files.exclude": {
+        "**/.git": false
     }
 }
