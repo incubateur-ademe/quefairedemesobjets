@@ -1,9 +1,17 @@
 import dedupe
 import numpy as np
 
+from sklearn.model_selection import ParameterGrid
+
 from ml_deduplication.training.utils import partition_to_dict
 from ml_deduplication.evaluation.metrics import fbeta
 from ml_deduplication.evaluation.metrics.pairwise import pairwise_metrics_from_clusters
+from ml_deduplication.training.features import (
+    DEDUPE_VARIABLES_CONFIG_MANDATORY,
+    DEDUPE_VARIABLES_CONFIG_RESTRICTED,
+    DEDUPE_VARIABLES_CONFIG_FULL,
+    FEATURES_NAMES_FROM_DATASET,
+)
 
 
 def select_best_threshold(
@@ -62,3 +70,17 @@ def select_best_threshold(
     return max(
         results, key=lambda x: fbeta(x[1]["precision"], x[1]["recall"], beta=0.5)
     )
+
+
+def generate_parameter_grid() -> ParameterGrid:
+    param_grid = {
+        "index_predicates": [True, False],
+        "dedupe_variables_config": [
+            DEDUPE_VARIABLES_CONFIG_MANDATORY,
+            DEDUPE_VARIABLES_CONFIG_RESTRICTED,
+            DEDUPE_VARIABLES_CONFIG_FULL,
+        ],
+        "features_names": [FEATURES_NAMES_FROM_DATASET],
+    }
+
+    return ParameterGrid(param_grid)
