@@ -89,7 +89,7 @@ def run_training_with_hyperparameter_tuning(
 
     training_results = {"training_results": [], "best_results": {}}
 
-    best_f1 = 0
+    best_precision = 0
     best_metrics = None
     best_params = {}
     best_model = None
@@ -100,10 +100,15 @@ def run_training_with_hyperparameter_tuning(
         model, results = run_pipeline(df_features, params)
         logger.info("----" * 15)
         training_results["training_results"].append(
-            {"params": stringify_params_list(params), "metrics": results}
+            {
+                "params": stringify_params_list(params),
+                "metrics": {k: v for k, v in results.items() if k != "pred_clusters"},
+            }
         )
-        if (training_f1 := results["test_results"]["pairwise"]["f1"]) > best_f1:
-            best_f1 = training_f1
+        if (
+            training_precision := results["test_results"]["pairwise"]["precision"]
+        ) > best_precision:
+            best_precision = training_precision
             best_metrics = results
             best_params = params
             best_model = model
@@ -117,11 +122,11 @@ def run_training_with_hyperparameter_tuning(
         "params": stringify_params_list(best_params),
     }
     logger.info(
-        "Best metrics are %s w",
+        "Best metrics are %s",
         best_metrics,
     )
     logger.info(
-        "Best params are %s w",
+        "Best params are %s",
         best_params,
     )
 
