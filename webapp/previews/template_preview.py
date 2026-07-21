@@ -1409,3 +1409,10 @@ class TestsPreview(LookbookPreview):
             "ui/tests/t_18_iframe_page_properties.html",
             {"base_url": base_url, "slug": slug},
         )
+
+    def t_19_infotri_responsive(self, **kwargs):
+        """Test that the Info-tri widget scales without overflow in a narrow embed"""
+        return render_to_string(
+            "ui/tests/t_19_infotri_responsive.html",
+            {"base_url": base_url},
+        )
