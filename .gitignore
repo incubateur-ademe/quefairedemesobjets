@@ -25,3 +25,11 @@ __screenshots__
 
 # Translations
 *.mo
+
+# Notebooks
+.ipynb_checkpoints
+.virtual_documents
+
+# ML
+data-platform/notebooks/deduplication/datasets/*
+data-platform/notebooks/deduplication/model.bin
