@@ -1,10 +1,12 @@
+import io
 import logging
 from collections import defaultdict
 from itertools import combinations
-from typing import Any, Hashable, Iterable, Mapping, Sequence, TextIO
+from typing import Any, Hashable, Iterable, Mapping, Self, Sequence, TextIO
 
 import dedupe
 import dedupe.labeler as labeler
+import polars as pl
 from dedupe.api import _cleanup_scores, flatten_training
 
 logger = logging.getLogger(__name__)
@@ -59,6 +61,51 @@ class BusinessRulesDedupe(dedupe.Dedupe):
         )
         self.active_learner.mark(examples, y)
 
+    def fit(
+        self,
+        df_train: pl.DataFrame,
+        entities_dict: dict,
+        index_predicates: bool = True,
+    ) -> Self:
+        """
+        Entraîne un objet dedupe.Dedupe à partir des paires labellisées de
+        `df_train_sub`, sans passer par l'apprentissage actif interactif.
+
+        entities contient tous les acteurs dans un dictionnaire format dedupe.
+        """
+
+        train_ids = set(df_train["identifiant_unique_i"].to_list()) | set(
+            df_train["identifiant_unique_j"].to_list()
+        )
+        train_entities = {i: entities_dict[i] for i in train_ids}
+
+        # Construct labeled_pairs before training
+        labeled_pairs = {"match": [], "distinct": []}
+        for row in df_train.iter_rows(named=True):
+            pair = (
+                entities_dict[row["identifiant_unique_i"]],
+                entities_dict[row["identifiant_unique_j"]],
+            )
+            labeled_pairs["match" if row["label"] else "distinct"].append(pair)
+
+        # Serialize labeled_pairs to a training file in memory
+        training_file = io.StringIO()
+        dedupe.write_training(labeled_pairs, training_file)
+        training_file.seek(0)
+
+        # use the serialized training file to avoid using mark_pairs
+        # that can cause bugs depending of sample size
+        self.prepare_training(
+            train_entities,
+            training_file=training_file,
+            sample_size=max(10000, len(train_ids)),
+        )
+
+        self.train(index_predicates=index_predicates)
+        self.cleanup_training()
+
+        return self
+
     def score(self, pairs, data=None):
         # Let the parent score all pairs normally
         scored = super().score(pairs)
@@ -99,8 +146,8 @@ class BusinessRulesDedupe(dedupe.Dedupe):
 
         # Blocking and pair generation are typically the first memory
         # bottlenecks, so we'll use sqlite3 to avoid doing them in memory
-        import tempfile
         import sqlite3
+        import tempfile
 
         with tempfile.TemporaryDirectory() as temp_dir:
             if self.in_memory:
