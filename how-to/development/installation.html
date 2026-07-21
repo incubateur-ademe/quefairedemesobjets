@@ -489,9 +489,9 @@ la plateforme data est accessible à l’adresse <a class="reference external" h
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>compose<span class="w">  </span>--profile<span class="w"> </span>lvao<span class="w"> </span>up<span class="w"> </span>-d
 </pre></div>
 </div>
-<p>Installation des dépendances Python et JavaScript (depuis le dossier <strong><code class="docutils literal notranslate"><span class="pre">webapp/</span></code></strong>) :</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>sync
-npm<span class="w"> </span>ci
+<p>Installation des dépendances Python et JavaScript (depuis la racine du repo) :</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>sync<span class="w"> </span>--all-groups
+<span class="nb">cd</span><span class="w"> </span>webapp<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>npm<span class="w"> </span>ci
 </pre></div>
 </div>
 <p>Migrations Django (toujours depuis <strong><code class="docutils literal notranslate"><span class="pre">webapp/</span></code></strong>) :</p>
@@ -574,9 +574,9 @@ make<span class="w"> </span>e2e-test-ui
 <p>accéder à l’interface d’Airflow en local <a class="reference external" href="http://localhost:8080">http://localhost:8080</a> ; identifiant/mot de passe : airflow / airflow</p>
 <section id="tester-la-plateforme-data">
 <h3>Tester la plateforme Data<a class="headerlink" href="#tester-la-plateforme-data" title="Lien vers cette rubrique">¶</a></h3>
-<p>Tests Python des DAGs (pytest), depuis le dossier <strong><code class="docutils literal notranslate"><span class="pre">data-platform/</span></code></strong> :</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>sync
-make<span class="w"> </span>dags-test
+<p>Tests Python des DAGs (pytest), depuis la racine du repo :</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>sync<span class="w"> </span>--group<span class="w"> </span>dev<span class="w"> </span>--group<span class="w"> </span>notebook
+<span class="nb">cd</span><span class="w"> </span>data-platform<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>make<span class="w"> </span>dags-test
 </pre></div>
 </div>
 </section>

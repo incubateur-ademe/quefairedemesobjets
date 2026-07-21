@@ -414,7 +414,7 @@
 </section>
 <section id="tests">
 <h3>Tests<a class="headerlink" href="#tests" title="Lien vers cette rubrique">¶</a></h3>
-<p>From the <strong><code class="docutils literal notranslate"><span class="pre">webapp/</span></code></strong> directory (after <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">sync</span></code>):</p>
+<p>From the repo root (after <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">sync</span> <span class="pre">--all-groups</span></code>):</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">test</span></code>: Jest tests</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">run</span> <span class="pre">e2e_test</span></code> / <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">e2e-test</span></code>: Playwright (e2e) tests</p></li>
@@ -425,7 +425,7 @@
 </ul>
 </li>
 </ul>
-<p>DAG / Airflow Python tests live in <strong><code class="docutils literal notranslate"><span class="pre">data-platform/</span></code></strong>: <code class="docutils literal notranslate"><span class="pre">cd</span> <span class="pre">data-platform</span> <span class="pre">&amp;&amp;</span> <span class="pre">uv</span> <span class="pre">sync</span> <span class="pre">&amp;&amp;</span> <span class="pre">make</span> <span class="pre">dags-test</span></code>.</p>
+<p>DAG / Airflow Python tests live in <strong><code class="docutils literal notranslate"><span class="pre">data-platform/</span></code></strong>: run <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">sync</span> <span class="pre">--group</span> <span class="pre">dev</span> <span class="pre">--group</span> <span class="pre">notebook</span></code> from root, then <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">dags-test</span></code>.</p>
 <section id="running-e2e-tests-locally">
 <h4>Running E2E tests locally<a class="headerlink" href="#running-e2e-tests-locally" title="Lien vers cette rubrique">¶</a></h4>
 <p>E2E tests run against a dedicated <code class="docutils literal notranslate"><span class="pre">webapp_sample</span></code> database (kept separate from your

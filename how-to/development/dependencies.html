@@ -350,21 +350,56 @@
 <h1>Gestion de package<a class="headerlink" href="#gestion-de-package" title="Lien vers cette rubrique">¶</a></h1>
 <section id="dependances-python">
 <h2>Dépendances Python<a class="headerlink" href="#dependances-python" title="Lien vers cette rubrique">¶</a></h2>
-<p>On utilise <strong>uv</strong> avec <strong>deux projets distincts</strong> :</p>
-<ul class="simple">
-<li><p><strong><code class="docutils literal notranslate"><span class="pre">webapp/</span></code></strong> : application Django (fichiers <code class="docutils literal notranslate"><span class="pre">webapp/pyproject.toml</span></code> et <code class="docutils literal notranslate"><span class="pre">webapp/uv.lock</span></code>)</p></li>
-<li><p><strong><code class="docutils literal notranslate"><span class="pre">data-platform/</span></code></strong> : DAGs Airflow, dbt, etc. (<code class="docutils literal notranslate"><span class="pre">data-platform/pyproject.toml</span></code> et <code class="docutils literal notranslate"><span class="pre">data-platform/uv.lock</span></code>)</p></li>
-</ul>
-<p>Pour installer les paquets en local, aller dans le dossier du projet concerné :</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>webapp<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>uv<span class="w"> </span>sync<span class="w"> </span>&lt;package&gt;
-<span class="nb">cd</span><span class="w"> </span>data-platform<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>uv<span class="w"> </span>sync<span class="w"> </span>&lt;package&gt;
+<p>On utilise <strong>uv</strong> avec un <strong>workspace unique</strong> à la racine du repo (un seul <code class="docutils literal notranslate"><span class="pre">uv.lock</span></code>).</p>
+<p>Dépendances de production : chaque membre (<code class="docutils literal notranslate"><span class="pre">webapp/</span></code>, <code class="docutils literal notranslate"><span class="pre">data-platform/</span></code>) déclare les siennes dans son propre <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>.</p>
+<p>Dépendances de développement : toutes centralisées dans le <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> racine, réparties en groupes sémantiques :</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Groupe</p></th>
+<th class="head"><p>Contenu</p></th>
+<th class="head"><p>Usage</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">lint</span></code></p></td>
+<td><p>black, ruff</p></td>
+<td><p>CI linter, pre-commit</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">test</span></code></p></td>
+<td><p>pytest*, factory-boy</p></td>
+<td><p>CI tests</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dev</span></code></p></td>
+<td><p>lint + test + djade + pre-commit</p></td>
+<td><p>CI + dev de base</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">webapp-dev</span></code></p></td>
+<td><p>django-browser-reload, debug-toolbar, silk, ptpython, etc.</p></td>
+<td><p>Développement webapp</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">notebook</span></code></p></td>
+<td><p>dedupe, ipython</p></td>
+<td><p>Notebooks data-platform</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Pour installer en local (depuis la racine du repo) :</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>sync<span class="w"> </span>--all-groups<span class="w">   </span><span class="c1"># tout installer</span>
+uv<span class="w"> </span>sync<span class="w"> </span>--group<span class="w"> </span>dev<span class="w">    </span><span class="c1"># minimum pour les tests</span>
 </pre></div>
 </div>
-<p>Pour ajouter une dépendance (toujours depuis le bon dossier) :</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>add<span class="w"> </span>&lt;package&gt;
+<p>Pour ajouter une dépendance :</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>add<span class="w"> </span>--package<span class="w"> </span>webapp-quefairedemesobjetsetdechets<span class="w"> </span>&lt;package&gt;
+uv<span class="w"> </span>add<span class="w"> </span>--package<span class="w"> </span>data-platform<span class="w"> </span>&lt;package&gt;
 </pre></div>
 </div>
-<p>Option <code class="docutils literal notranslate"><span class="pre">--group</span> <span class="pre">dev</span></code> pour les dépendances de développement (pytest, ruff, etc.).</p>
+<p>Pour ajouter une dépendance de développement (au workspace root) :</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>add<span class="w"> </span>--group<span class="w"> </span>lint<span class="w"> </span>&lt;package&gt;
+uv<span class="w"> </span>add<span class="w"> </span>--group<span class="w"> </span>dev<span class="w"> </span>&lt;package&gt;
+</pre></div>
+</div>
 </section>
 <section id="dependances-javascript">
 <h2>Dépendances Javascript<a class="headerlink" href="#dependances-javascript" title="Lien vers cette rubrique">¶</a></h2>
