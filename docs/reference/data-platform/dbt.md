@@ -2,6 +2,8 @@
 
 Production-ready patterns for dbt (data build tool) including model organization, testing strategies, documentation, and incremental processing.
 
+> **See also**: [Interactive dbt model documentation](../../dbt/index.html) (model catalog, columns, tests, and lineage).
+
 ## Model Layers
 
 ```
@@ -416,6 +418,7 @@ Run these commands from `data-platform/dbt/`:
 ```bash
 make generate-docs    # Generate dbt documentation (HTML)
 make serve-docs       # Serve documentation locally on port 8085
+make copy-docs        # Copy generated documentation to docs/dbt
 make clean-docs       # Remove generated documentation (target/)
 ```
 

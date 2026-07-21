@@ -8,6 +8,7 @@ repos:
       - id: check-yaml
       - id: check-added-large-files
         args: ["--maxkb=600"]
+        exclude: ^docs/dbt/
   - repo: https://github.com/Yelp/detect-secrets
     rev: v1.5.0
     hooks:
