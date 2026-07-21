@@ -97,7 +97,7 @@ def run_training_with_hyperparameter_tuning(
     start_time = time.time()
     for params in param_grid:
         logger.info("Training with params : %s", params)
-        model, results = run_pipeline(df_features, params)
+        model, results = run_training_pipeline(df_features, params)
         logger.info("----" * 15)
         training_results["training_results"].append(
             {
@@ -133,7 +133,7 @@ def run_training_with_hyperparameter_tuning(
     return best_model, training_results
 
 
-def run_pipeline(
+def run_training_pipeline(
     df_features: pl.DataFrame, training_hyperparameters: dict
 ) -> tuple[BusinessRulesDedupe, dict]:
 
@@ -158,10 +158,10 @@ def run_pipeline(
 
     # train dedupe
     logger.info("Starting dedupe training")
-    deduper = train_deduper(
+    deduper = BusinessRulesDedupe(variable_definition=dedupe_variables_config)
+    deduper.fit(
         df_train,
         entities_dict,
-        dedupe_variables_config,
         training_hyperparameters["index_predicates"],
     )
     logger.info("Finished dedupe training")
