@@ -349,9 +349,6 @@
           <section id="dbt-documentation">
 <h1>dbt Documentation<a class="headerlink" href="#dbt-documentation" title="Lien vers cette rubrique">¶</a></h1>
 <p>Production-ready patterns for dbt (data build tool) including model organization, testing strategies, documentation, and incremental processing.</p>
-<blockquote>
-<div><p><strong>See also</strong>: <a class="reference download internal" download="" href="../../_downloads/f7d990db7be3f6c40758602a8c077d03/index.html"><span class="xref download myst">Interactive dbt model documentation</span></a> (model catalog, columns, tests, and lineage).</p>
-</div></blockquote>
 <section id="model-layers">
 <h2>Model Layers<a class="headerlink" href="#model-layers" title="Lien vers cette rubrique">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>source/           Source definitions (YAML only, declares external tables)
@@ -766,7 +763,6 @@ exposure/         Final tables exposed to consumers (API, dashboards, Open Data)
 <p>Run these commands from <code class="docutils literal notranslate"><span class="pre">data-platform/dbt/</span></code>:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>generate-docs<span class="w">    </span><span class="c1"># Generate dbt documentation (HTML)</span>
 make<span class="w"> </span>serve-docs<span class="w">       </span><span class="c1"># Serve documentation locally on port 8085</span>
-make<span class="w"> </span>copy-docs<span class="w">        </span><span class="c1"># Copy generated documentation to docs/dbt</span>
 make<span class="w"> </span>clean-docs<span class="w">       </span><span class="c1"># Remove generated documentation (target/)</span>
 </pre></div>
 </div>
