@@ -79,3 +79,22 @@ package = false
 
 [tool.uv.sources]
 webapp-quefairedemesobjetsetdechets = { workspace = true }
+
+[tool.sqlfluff.core]
+templater = "dbt"
+dialect = "postgres"
+
+[tool.sqlfluff.templater.jinja]
+apply_dbt_builtins = true
+
+[tool.sqlfluff.templater.jinja.macros]
+# Macros provided as builtins for dbt projects
+dbt_is_incremental = "{% macro is_incremental() %}True{% endmacro %}"
+dbt_ref = "{% macro ref(model_ref) %}{{model_ref}}{% endmacro %}"
+dbt_source = "{% macro source(source_name, table) %}{{source_name}}_{{table}}{% endmacro %}"
+dbt_config = "{% macro config() %}{% for k in kwargs %}{% endfor %}{% endmacro %}"
+dbt_var = "{% macro var(variable, default='') %}item{% endmacro %}"
+
+[tool.sqlfluff.templater.dbt]
+profiles_dir = "./dbt"
+project_dir = "./dbt"
