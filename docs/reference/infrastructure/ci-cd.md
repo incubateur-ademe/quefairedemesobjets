@@ -4,12 +4,13 @@ This documentation describes the different CI/CD workflows of the project and wh
 
 ## Python / uv in CI
 
-Backend jobs use **two separate uv environments**, matching local development:
+Backend jobs use a **single workspace virtual environment** at the repo root, synced with semantic dependency groups:
 
-- **`webapp/`**: `uv sync --group dev` for Django unit tests, integration tests, migration checks, and E2E preparation.
-- **`data-platform/`**: `uv sync --group dev` for DAG pytest (`make dags-test`).
+- **`--group lint`**: Black + Ruff for CI linter.
+- **`--group dev`**: lint + test (pytest, factory-boy) + djade + pre-commit for CI tests / checks.
+- **`--group dev --group webapp-dev`**: Full local dev (adds Django runserver tooling, debug toolbar, etc.).
 
-The reusable job [`.github/workflows/_backend-test-job.yml`](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/_backend-test-job.yml) takes a `working-directory` input (`webapp` or `data-platform`). The backend linter installs both environments, then runs `make check-format` (Black + Ruff in `webapp/` and under `data-platform/dags/`).
+`uv sync` always runs from the repo root (the workspace root). The reusable job [`.github/workflows/_backend-test-job.yml`](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/_backend-test-job.yml) syncs `--group dev` from root, then runs `make -C <webapp|data-platform> <target>`.
 
 ## Creating or updating a Pull Request
 

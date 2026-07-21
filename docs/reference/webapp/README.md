@@ -69,7 +69,7 @@ from `webapp` folder
 
 ### Tests
 
-From the **`webapp/`** directory (after `uv sync`):
+From the repo root (after `uv sync --all-groups`):
 
 - `npm test`: Jest tests
 - `npm run e2e_test` / `make e2e-test`: Playwright (e2e) tests
@@ -77,7 +77,7 @@ From the **`webapp/`** directory (after `uv sync`):
   - `make unit-test`: unit tests
   - `make integration-test`: integration tests
 
-DAG / Airflow Python tests live in **`data-platform/`**: `cd data-platform && uv sync && make dags-test`.
+DAG / Airflow Python tests live in **`data-platform/`**: run `uv sync --group dev --group notebook` from root, then `make dags-test`.
 
 #### Running E2E tests locally
 
