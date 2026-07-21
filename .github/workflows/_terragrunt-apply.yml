@@ -73,7 +73,7 @@ jobs:
       TG_NON_INTERACTIVE: "true"
 
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@v7.0.0
         with:
           ref: ${{ inputs.ref }}
 
@@ -103,7 +103,7 @@ jobs:
           sudo apt-get install -y --no-install-recommends postgresql-client
 
       - name: Setup Scaleway CLI (used by preview_database to manage the DB)
-        uses: scaleway/action-scw@be2696f261325a78354eda14988c80405f33e082
+        uses: scaleway/action-scw@2e34a1eb35cf3cac627f24643a101fea269cbd83
 
       - name: Login to Scaleway Container Registry
         if: inputs.command == 'apply'
