@@ -24,3 +24,4 @@ class COHORTS:
     )
     SIRET_FROM_SIREN = "🏢 SIRET proposé depuis le SIREN connu"
     SIREN_FROM_SIRET = "🏢 SIREN proposé depuis le SIRET connu"
+    LIEN_SUCCESSION = "🏢 SIREN/SIRET proposés depuis un lien de succession AE"

@@ -661,3 +661,7 @@ LOOKBOOK = {
     "preview_base": ["previews"],
     "show_previews": decouple.config("SHOE_PREVIEWS", default=True, cast=bool),
 }
+
+
+GEOS_LIBRARY_PATH = decouple.config("GEOS_LIBRARY_PATH", default="", cast=str) or None
+GDAL_LIBRARY_PATH = decouple.config("GDAL_LIBRARY_PATH", default="", cast=str) or None

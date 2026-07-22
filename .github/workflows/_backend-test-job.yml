@@ -56,7 +56,6 @@ jobs:
       - name: Setup backend environment
         uses: ./.github/actions/setup-backend
         with:
-          working-directory: ${{ inputs.working-directory }}
           uv-groups: "--group dev"
 
       - name: Run tests

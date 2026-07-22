@@ -1,10 +1,3 @@
-{{
-  config(
-    materialized = 'table',
-    tags=['marts', 'enrich', 'closed', 'ae', 'annuaire_entreprises', 'etablissement'],
-  )
-}}
-
 WITH potential_replacements AS (
 	SELECT
 

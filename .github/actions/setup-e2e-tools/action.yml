@@ -27,8 +27,7 @@ runs:
     - name: Setup backend environment
       uses: ./.github/actions/setup-backend
       with:
-        working-directory: webapp
-        uv-groups: "--only-group dev"
+        uv-groups: "--group dev --group webapp-dev"
 
     - name: Install GIS packages
       uses: ./.github/actions/install-gis

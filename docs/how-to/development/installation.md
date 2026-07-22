@@ -143,11 +143,11 @@ Pour lancer uniquement les services utiliser par la webapp
 docker compose  --profile lvao up -d
 ```
 
-Installation des dépendances Python et JavaScript (depuis le dossier **`webapp/`**) :
+Installation des dépendances Python et JavaScript (depuis la racine du repo) :
 
 ```sh
-uv sync
-npm ci
+uv sync --all-groups
+cd webapp && npm ci
 ```
 
 Migrations Django (toujours depuis **`webapp/`**) :
@@ -252,9 +252,9 @@ accéder à l'interface d'Airflow en local [http://localhost:8080](http://localh
 
 ### Tester la plateforme Data
 
-Tests Python des DAGs (pytest), depuis le dossier **`data-platform/`** :
+Tests Python des DAGs (pytest), depuis la racine du repo :
 
 ```sh
-uv sync
-make dags-test
+uv sync --group dev --group notebook
+cd data-platform && make dags-test
 ```

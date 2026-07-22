@@ -39,6 +39,15 @@ models:
       - name: replacement_priority
         description: "Priorité du remplacement (1 = meilleur match)"
         data_type: integer
+    config:
+      materialized: table
+      tags:
+        - marts
+        - enrich
+        - closed
+        - ae
+        - annuaire_entreprises
+        - etablissement
 
   - name: marts_enrich_acteurs_closed_candidates
     description: Etablissements fermés de l'Annuaire Entreprises (AE) qui pourraient être remplacés
@@ -75,4 +84,114 @@ models:
         description: Nom de l'acteur normalisé pour faciliter les comparaisons
       - name: acteur_commentaires
         description: Commentaires de l'acteur pour debug
+    config:
+      materialized: table
+      tags:
+        - marts
+        - enrich
+        - closed
+        - ae
+        - annuaire_entreprises
+        - etablissement
+
+  - name: marts_enrich_acteurs_closed_suggest_not_replaced_etablissement
+    description: Acteurs fermés non remplacés (établissement fermé)
+    config:
+      materialized: table
+      tags:
+        - marts
+        - enrich
+        - closed
+        - ae
+        - annuaire_entreprises
+        - etablissement
+
+  - name: marts_enrich_acteurs_closed_suggest_not_replaced_unite
+    description: Acteurs fermés non remplacés (unité fermée)
+    config:
+      materialized: table
+      tags:
+        - marts
+        - enrich
+        - closed
+        - ae
+        - annuaire_entreprises
+        - etablissement
+
+  - name: marts_enrich_acteurs_closed_suggest_replaced_other_siren
+    description: Acteurs fermés remplacés par un SIRET d'un autre SIREN
+    config:
+      materialized: table
+      tags:
+        - marts
+        - enrich
+        - closed
+        - ae
+        - annuaire_entreprises
+        - etablissement
+
+  - name: marts_enrich_acteurs_closed_suggest_replaced_same_siren
+    description: Acteurs fermés remplacés par un SIRET du même SIREN
+    config:
+      materialized: table
+      tags:
+        - marts
+        - enrich
+        - closed
+        - ae
+        - annuaire_entreprises
+        - etablissement
+
+  - name: marts_enrich_acteurs_rgpd_suggest
+    description: Suggestions RGPD basées sur les noms des dirigeants AE
+    config:
+      materialized: view
+      tags:
+        - marts
+        - enrich
+        - ae
+        - annuaire_entreprises
+        - unite_legale
+        - rgpd
+
+  - name: marts_enrich_acteurs_villes_candidates
+    description: Candidats pour suggestions de correction de ville
+    config:
+      materialized: table
+      tags:
+        - marts
+        - enrich
+        - villes
+        - cities
+        - ban
+
+  - name: marts_enrich_acteurs_villes_suggest_new
+    description: Suggestions de changement de ville (ancienne -> nouvelle)
+    config:
+      materialized: view
+      alias: marts_enrich_acteurs_villes_suggest_new
+      tags:
+        - marts
+        - enrich
+        - villes
+        - cities
+        - ban
+        - acteurs
+        - nouvelle
+        - new
+
+  - name: marts_enrich_acteurs_villes_suggest_typo
+    description: Suggestions de correction d'orthographe de ville
+    config:
+      materialized: view
+      alias: marts_enrich_acteurs_villes_suggest_typo
+      tags:
+        - marts
+        - enrich
+        - villes
+        - cities
+        - ban
+        - acteurs
+        - typo
+        - ortographe
 

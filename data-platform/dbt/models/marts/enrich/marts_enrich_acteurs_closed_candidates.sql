@@ -5,12 +5,6 @@ Notes:
  - 📦 Materialized as table but refreshed by DAG enrich_acteurs_closed
 	as many models/tests depending on each other = would take too long
 */
-{{
-  config(
-    materialized = 'table',
-    tags=['marts', 'enrich', 'closed', 'ae', 'annuaire_entreprises', 'etablissement'],
-  )
-}}
 -- Starting from our acteurs we can match via SIRET
 WITH acteurs_with_siret AS (
 	SELECT
