@@ -783,6 +783,41 @@ class LegacyIntermediateSynonymePage(models.Model):
 
     panels = [FieldPanel("synonyme")]
 
+    def clean(self):
+        super().clean()
+
+        if self.synonyme:
+            existing = (
+                LegacyIntermediateSynonymePage.objects.filter(synonyme=self.synonyme)
+                .exclude(pk=self.pk)
+                .first()
+            )
+            if existing and existing.page_id != self.page_id:
+                raise ValidationError(
+                    f"Conflit : le synonyme « {self.synonyme.nom} » "
+                    "a déjà une redirection directe vers la page "
+                    f"« {existing.page.title} ». "
+                    "Vous ne pouvez pas créer une redirection directe "
+                    "vers cette page."
+                )
+
+            existing_exclusion = (
+                LegacyIntermediateProduitPageSynonymeExclusion.objects.filter(
+                    synonyme=self.synonyme
+                )
+                .exclude(page=self.page)
+                .first()
+            )
+            if existing_exclusion:
+                raise ValidationError(
+                    f"Conflit : le synonyme « {self.synonyme.nom} » "
+                    "est marqué comme exclu de la redirection vers la "
+                    f"page « {existing_exclusion.page.title} ». "
+                    "Vous ne pouvez pas créer une redirection directe "
+                    "tant que cette exclusion existe. "
+                    "Veuillez d'abord supprimer l'exclusion."
+                )
+
     class Meta:
         verbose_name = "Fiche synonyme"
         verbose_name_plural = "Fiches synonyme"
