@@ -33,6 +33,8 @@ from wagtail.snippets.models import register_snippet
 from sites_conformes.content_manager.abstract import SitesFacilesBasePage
 from sites_conformes.content_manager.models import ContentPage
 
+from . import forms as qfdmd_forms
+
 from qfdmd.blocks import STREAMFIELD_COMMON_BLOCKS
 from qfdmd.utils import see_more_button
 from qfdmo.models.utils import NomAsNaturalKeyModel
@@ -1064,6 +1066,32 @@ class Synonyme(SearchTerm, AbstractBaseProduit):
     ]
 
     search_result_template = "ui/components/search/search_result_synonyme.html"
+
+
+@register_setting
+class SearchSettings(BaseGenericSetting):
+    search_placeholder = models.CharField(
+        "Placeholder du champ de recherche (page d'accueil)",
+        max_length=255,
+        default=qfdmd_forms.DEFAULT_HOME_SEARCH_PLACEHOLDER,
+        help_text="Texte affiché dans le champ de recherche de la page "
+        "d'accueil avant que l'utilisateur ne commence à taper.",
+    )
+    header_search_placeholder = models.CharField(
+        "Placeholder du champ de recherche (header)",
+        max_length=255,
+        default=qfdmd_forms.DEFAULT_HEADER_SEARCH_PLACEHOLDER,
+        help_text="Texte affiché dans le champ de recherche du header "
+        "avant que l'utilisateur ne commence à taper.",
+    )
+
+    panels = [
+        FieldPanel("search_placeholder"),
+        FieldPanel("header_search_placeholder"),
+    ]
+
+    class Meta:
+        verbose_name = "Paramètres de recherche"
 
 
 @register_setting

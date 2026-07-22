@@ -1,7 +1,12 @@
 from django.conf import settings
+from django.core.cache import cache
 from django.urls import reverse
 
-from qfdmd.forms import QfSearchForm
+from qfdmd.forms import (
+    DEFAULT_HEADER_SEARCH_PLACEHOLDER,
+    DEFAULT_HOME_SEARCH_PLACEHOLDER,
+    QfSearchForm,
+)
 
 from . import constants
 
@@ -24,12 +29,39 @@ def content(request):
     return vars(constants)
 
 
+def _get_search_placeholders():
+    cache_key = "search_settings_placeholders"
+    value = cache.get(cache_key)
+    if value is not None:
+        return value
+
+    try:
+        from qfdmd.models import SearchSettings
+
+        settings_obj = SearchSettings.load()
+        placeholders = (
+            settings_obj.search_placeholder or DEFAULT_HOME_SEARCH_PLACEHOLDER,
+            settings_obj.header_search_placeholder or DEFAULT_HEADER_SEARCH_PLACEHOLDER,
+        )
+    except Exception:
+        placeholders = (
+            DEFAULT_HOME_SEARCH_PLACEHOLDER,
+            DEFAULT_HEADER_SEARCH_PLACEHOLDER,
+        )
+
+    cache.set(cache_key, placeholders, timeout=3600)
+    return placeholders
+
+
 def global_context(request) -> dict:
+    (
+        home_placeholder,
+        header_placeholder,
+    ) = _get_search_placeholders()
     header_search_form = QfSearchForm(prefix="header-autocomplete")
-    header_search_form.fields["search"].widget.attrs[
-        "placeholder"
-    ] = "Rechercher un objet ou un déchet"
+    header_search_form.fields["search"].widget.attrs["placeholder"] = header_placeholder
     homepage_search_form = QfSearchForm(prefix="home")
+    homepage_search_form.fields["search"].widget.attrs["placeholder"] = home_placeholder
     skiplinks = [
         {"link": "#content", "label": "Contenu"},
     ]
