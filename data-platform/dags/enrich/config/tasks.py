@@ -47,6 +47,9 @@ class TASKS:
     ENRICH_SIREN_FROM_SIRET_SUGGESTIONS: str = (
         "enrich_acteurs_siren_from_siret_suggestions"
     )
+    ENRICH_LIEN_SUCCESSION_SUGGESTIONS: str = (
+        "enrich_acteurs_lien_succession_suggestions"
+    )
 
     # Code postal
     DB_READ_ACTEUR_CP: str = "db_read_acteur_cp"
