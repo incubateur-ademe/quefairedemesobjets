@@ -72,4 +72,14 @@ test.describe("♿ RGAA", () => {
       await expect(page).toHaveTitle(/carte interactive/i)
     })
   })
+  test.describe("[Site Que faire] 6.1 — Lien info-tri explicite", () => {
+    test("Le title du lien info-tri reprend son intitulé visible", async ({ page }) => {
+      await navigateTo(page, "/lookbook/preview/pages/produit/")
+      const link = page.getByTestId("infotri-link")
+      await expect(link).toBeVisible()
+      const text = (await link.textContent())?.trim()
+      const title = await link.getAttribute("title")
+      expect(title).toBe(`${text} - Nouvelle fenêtre`)
+    })
+  })
 })
