@@ -106,7 +106,6 @@ class TestCarteTag:
         )
         assert 'data-controller="ab-test"' in html
         assert 'data-ab-test-flag-key-value="produit-carte-default-view-mobile"' in html
-        assert 'data-ab-test-mobile-only-value="true"' in html
         assert "view_mode-view=liste" in html
 
     def test_rendered_frame_omits_ab_controller_when_not_opted_in(self, produit_page):
