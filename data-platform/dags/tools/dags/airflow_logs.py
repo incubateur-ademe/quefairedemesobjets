@@ -24,12 +24,10 @@ with DAG(
     default_args=DEFAULT_ARGS_NO_RETRIES,
     schedule=None,
     start_date=START_DATES.DEFAULT,
-    description=(
-        """
+    description=("""
 Lancer le DAG et vérifier que les logs sont disponibles sur s3
 La mention `Found logs in s3` doit apparaitre dans les logs de la tâche
-"""
-    ),
+"""),
 ) as dag:
     PythonOperator(
         task_id="test_django_and_logs",
