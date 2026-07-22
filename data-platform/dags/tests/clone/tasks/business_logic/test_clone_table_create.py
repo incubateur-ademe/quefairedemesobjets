@@ -60,6 +60,7 @@ class TestCommands:
                 file_unpacked="StockUniteLegale_utf8.csv",
                 delimiter=",",
                 convert_downloaded_file_to_utf8=False,
+                fix_corrupted_utf8_sed_substitutions=[],
                 table_name="my_table",
                 dry_run=True,
             )
@@ -83,6 +84,7 @@ class TestCommands:
                 file_unpacked="adresses-france.csv",
                 delimiter=";",
                 convert_downloaded_file_to_utf8=False,
+                fix_corrupted_utf8_sed_substitutions=[],
                 table_name="my_table",
                 dry_run=True,
             )
@@ -91,3 +93,31 @@ class TestCommands:
             assert "zcat" in mock_cmd_run.call_args_list[1][0][0]
             assert "wc" in mock_cmd_run.call_args_list[2][0][0]
             assert "psql" in mock_cmd_run.call_args_list[3][0][0]
+
+    def test_download_gz_with_fix_corrupted_utf8(self):
+        substitutions = [
+            r"s/entr\xef\xbf\xbd\xa9e/entrée/",
+            r"s/foo/bar/g",
+        ]
+        with (
+            patch(
+                "clone.tasks.business_logic.clone_table_create.cmd_run"
+            ) as mock_cmd_run,
+            patch(
+                "clone.tasks.business_logic.clone_table_create.fix_corrupted_utf8_file"
+            ) as mock_fix,
+            patch("clone.tasks.business_logic.clone_table_create.TMP_FOLDER", "/tmp"),
+        ):
+            commands_download_to_disk_first(
+                data_endpoint=AnyUrl(url="https://example.com/adresses-france.csv.gz"),
+                file_downloaded="adresses-france.csv.gz",
+                file_unpacked="adresses-france.csv",
+                delimiter=";",
+                convert_downloaded_file_to_utf8=False,
+                fix_corrupted_utf8_sed_substitutions=substitutions,
+                table_name="my_table",
+                dry_run=True,
+            )
+            assert len(mock_cmd_run.call_args_list) == 4
+            mock_fix.assert_called_once()
+            assert mock_fix.call_args.kwargs["sed_substitutions"] == substitutions

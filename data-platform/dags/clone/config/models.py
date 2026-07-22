@@ -4,7 +4,8 @@ import re
 from pathlib import Path
 from typing import Literal
 
-from pydantic import AnyUrl, BaseModel, computed_field
+from clone.tasks.business_logic.fix_corrupted_utf8 import validate_sed_substitutions
+from pydantic import AnyUrl, BaseModel, computed_field, model_validator
 
 DIR_CURRENT = Path(__file__).resolve()
 DIR_SQL_CREATION = DIR_CURRENT.parent / "sql" / "creation"
@@ -12,6 +13,16 @@ DIR_SQL_VALIDATION = DIR_CURRENT.parent / "sql" / "validation"
 
 PREFIX_ALL = "clone"
 SUFFIX_VIEW_IN_USE = "in_use"
+
+FIX_CORRUPTED_UTF8_SED_SUBSTITUTION_DESCRIPTION = """
+🔧 Liste d'expressions sed limitées au format 's/motif/remplacement/'
+(remplacement littéral de bytes sur tout le fichier, pas une commande shell).
+Ajouter '/g' pour remplacer toutes les occurrences. Seules les séquences '\\xHH'
+sont autorisées comme échappements.
+
+**Exemples :**
+- s/\\xef\\xbf\\xbd\\xa9/é/ : remplace le caractère Unicode 'U+FFFD' par 'é'
+"""
 
 
 class CloneConfig(BaseModel):
@@ -26,6 +37,18 @@ class CloneConfig(BaseModel):
     delimiter: str = ","
     run_timestamp: str
     convert_downloaded_file_to_utf8: bool = False
+    fix_corrupted_utf8_sed_substitutions: list[str] = []
+
+    @model_validator(mode="after")
+    def validate_fix_corrupted_utf8(self) -> "CloneConfig":
+        substitutions = [
+            item.strip()
+            for item in self.fix_corrupted_utf8_sed_substitutions
+            if item.strip()
+        ]
+        if substitutions:
+            validate_sed_substitutions(substitutions)
+        return self
 
     @computed_field
     @property
