@@ -1198,6 +1198,31 @@ class AccessibilitePreview(LookbookPreview):
             "ui/components/accessibilite/liens_explicites_demo.html",
         )
 
+    def A11Y_15_mode_liste_table_caption_et_entetes(self, **kwargs):
+        """RGAA 5.4 / 5.6 — titre et en-têtes du tableau mode liste.
+
+        Le tableau des résultats en mode liste avait une balise
+        `<caption>` vide et un en-tête de colonne vide pour la colonne
+        « Voir la fiche ». Le tag `acteurs_table` (carte_tags.py)
+        fournit désormais un `caption` pertinent et un intitulé
+        « Fiche » pour cette colonne.
+        """
+        acteurs = DisplayedActeur.objects.all()[:2]
+        request = RequestFactory().get("/")
+        context = Context(
+            {
+                "acteurs": acteurs,
+                "map_container_id": DEFAULT_MAP_CONTAINER_ID,
+                "forms": {"legende": LegendeForm(), "filtres_form": None},
+                "request": request,
+            }
+        )
+        template = Template("""
+            {% load carte_tags %}
+            {% acteurs_table acteurs %}
+            """)
+        return template.render(context)
+
 
 class TestsPreview(LookbookPreview):
     """
