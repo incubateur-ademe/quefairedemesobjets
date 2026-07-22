@@ -416,6 +416,10 @@
 <section id="dbt-normalization-clone-first-enrich-second">
 <h2>dbt normalization: « clone first, enrich second »<a class="headerlink" href="#dbt-normalization-clone-first-enrich-second" title="Lien vers cette rubrique">¶</a></h2>
 <p><strong>Principle</strong>: dbt preparation of a reference dataset is triggered <strong>when that dataset changes</strong>, i.e. at the end of the relevant clone DAG. Enrichment DAGs only need to refresh their own <code class="docutils literal notranslate"><span class="pre">marts</span></code> models (<code class="docutils literal notranslate"><span class="pre">tag:…</span></code> selector without <code class="docutils literal notranslate"><span class="pre">+</span></code>), assuming <code class="docutils literal notranslate"><span class="pre">base</span></code> and <code class="docutils literal notranslate"><span class="pre">intermediate</span></code> layers are already up to date.</p>
+<section id="best-practice-tag-models-with-normalisation">
+<h3>Best practice: tag models with <code class="docutils literal notranslate"><span class="pre">normalisation</span></code><a class="headerlink" href="#best-practice-tag-models-with-normalisation" title="Lien vers cette rubrique">¶</a></h3>
+<p>Systematically add the <code class="docutils literal notranslate"><span class="pre">normalisation</span></code> tag to every dbt model that must be recalculated after a clone. Clone DAGs select these models with a combined selector: <code class="docutils literal notranslate"><span class="pre">tag:&lt;domain&gt;,tag:normalisation</span></code> (for example <code class="docutils literal notranslate"><span class="pre">tag:geo,tag:normalisation</span></code> or <code class="docutils literal notranslate"><span class="pre">tag:ban,tag:normalisation</span></code>).</p>
+</section>
 <section id="reference-data-normalized-at-clone-time">
 <h3>Reference data normalized at clone time<a class="headerlink" href="#reference-data-normalized-at-clone-time" title="Lien vers cette rubrique">¶</a></h3>
 <div class="table-wrapper colwidths-auto docutils container">
@@ -633,6 +637,7 @@
 </ul>
 </li>
 <li><a class="reference internal" href="#dbt-normalization-clone-first-enrich-second">dbt normalization: « clone first, enrich second »</a><ul>
+<li><a class="reference internal" href="#best-practice-tag-models-with-normalisation">Best practice: tag models with <code class="docutils literal notranslate"><span class="pre">normalisation</span></code></a></li>
 <li><a class="reference internal" href="#reference-data-normalized-at-clone-time">Reference data normalized at clone time</a></li>
 <li><a class="reference internal" href="#clones-without-immediate-normalization">Clones without immediate normalization</a></li>
 <li><a class="reference internal" href="#impact-on-enrichment-dags">Impact on enrichment DAGs</a></li>

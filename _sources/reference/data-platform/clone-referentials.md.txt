@@ -56,6 +56,10 @@ For some clones, a dbt step runs immediately after the switch. It turns raw data
 
 **Principle**: dbt preparation of a reference dataset is triggered **when that dataset changes**, i.e. at the end of the relevant clone DAG. Enrichment DAGs only need to refresh their own `marts` models (`tag:…` selector without `+`), assuming `base` and `intermediate` layers are already up to date.
 
+### Best practice: tag models with `normalisation`
+
+Systematically add the `normalisation` tag to every dbt model that must be recalculated after a clone. Clone DAGs select these models with a combined selector: `tag:<domain>,tag:normalisation` (for example `tag:geo,tag:normalisation` or `tag:ban,tag:normalisation`).
+
 ### Reference data normalized at clone time
 
 | Clone DAG                     | dbt models prepared (base + intermediate layers)              |

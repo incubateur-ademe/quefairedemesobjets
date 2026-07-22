@@ -48,8 +48,12 @@ with DAG(
     params=config_to_airflow_params(
         EnrichActeursSiretSirenConfig(
             dbt_models_refresh=True,
-            dbt_models_refresh_command="dbt run --select +tag:siren_siret",
-            dbt_models_test_command="dbt test --select +tag:siren_siret",
+            dbt_models_refresh_command=(
+                "dbt run --select +tag:siren_siret --exclude tag:normalisation"
+            ),
+            dbt_models_test_command=(
+                "dbt test --select +tag:siren_siret --exclude tag:normalisation"
+            ),
         ),
     ),
 ) as dag:
