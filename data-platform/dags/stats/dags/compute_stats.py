@@ -25,11 +25,11 @@ def compute_stats():
 
     dbt_run_stats = BashOperator(
         task_id="dbt_run_stats",
-        bash_command=(f"{DBT_RUN} tag:stats"),
+        bash_command=(f"{DBT_RUN} +tag:stats --exclude tag:normalisation"),
     )
     dbt_test_stats = BashOperator(
         task_id="dbt_test_stats",
-        bash_command=(f"{DBT_TEST} tag:stats"),
+        bash_command=(f"{DBT_TEST} +tag:stats --exclude tag:normalisation"),
     )
 
     chain(

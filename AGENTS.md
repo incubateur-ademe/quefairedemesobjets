@@ -16,7 +16,7 @@
 | `Makefile`           | Global commands                                              |                                                            |
 | `scripts/`           | Scripts outside webapp                                       | bash                                                       |
 
-**Python environments:** install dependencies separately — `cd webapp && uv sync` and `cd data-platform && uv sync` (two `.venv` folders). Run backend tests from each project: `make unit-test` / `make integration-test` / e2e in `webapp/`, `make dags-test` in `data-platform/`.
+**Python environments:** uv workspace — `uv sync` at repo root installs all members. `cd webapp && uv sync` or `cd data-platform && uv sync` also work for targeting specific members. Single `uv.lock` at repo root. Run backend tests from each project: `make unit-test` / `make integration-test` / e2e in `webapp/`, `make dags-test` in `data-platform/`.
 
 Note : `webapp/Makefile` and `data-platform/Makefile` hold project-specific commands; the repo root `Makefile` delegates to them where useful.
 

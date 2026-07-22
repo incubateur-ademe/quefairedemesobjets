@@ -56,13 +56,13 @@ init-certs:
 
 .PHONY: check-format
 check-format:
-	$(MAKE) -C webapp check-format
-	$(MAKE) -C data-platform check-format
+	uv run black --check --diff webapp/ data-platform/dags/
+	uv run ruff check webapp/ data-platform/dags/
 
 .PHONY: format
 format:
-	$(MAKE) -C webapp format
-	$(MAKE) -C data-platform format
+	uv run ruff check webapp/ data-platform/dags/ --fix
+	uv run black webapp/ data-platform/dags/
 
 # Run development servers
 .PHONY: run-airflow

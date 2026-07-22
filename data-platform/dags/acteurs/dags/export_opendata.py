@@ -5,6 +5,7 @@ from acteurs.tasks.airflow_logic.remove_old_s3_opendata_csv_task import (
     remove_old_s3_opendata_csv_task,
 )
 from airflow import DAG
+from airflow.sdk.bases.operator import chain
 from decouple import config
 from shared.config.airflow import DEFAULT_ARGS
 from shared.config.schedules import SCHEDULES
@@ -34,4 +35,7 @@ with DAG(
     max_active_runs=1,
 ) as dag:
 
-    export_opendata_csv_to_s3_task(dag=dag) >> remove_old_s3_opendata_csv_task(dag=dag)
+    chain(
+        export_opendata_csv_to_s3_task(dag=dag),
+        remove_old_s3_opendata_csv_task(dag=dag),
+    )

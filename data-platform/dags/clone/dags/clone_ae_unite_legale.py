@@ -8,6 +8,7 @@ from airflow import DAG
 from airflow.sdk import Param
 from airflow.sdk.definitions.param import ParamsDict
 from clone.tasks.airflow_logic.chain_tasks import chain_tasks
+from clone.tasks.airflow_logic.clone_dbt_task import clone_dbt_params
 from shared.config.airflow import DEFAULT_ARGS_NO_RETRIES
 from shared.config.schedules import SCHEDULES
 from shared.config.start_dates import START_DATES
@@ -15,9 +16,9 @@ from shared.config.tags import TAGS
 
 with DAG(
     dag_id="clone_ae_unite_legale",
-    dag_display_name="Cloner - AE - Unite Legale",
+    dag_display_name="Cloner - AE - 1 - Unite Legale",
     default_args=DEFAULT_ARGS_NO_RETRIES,
-    schedule=SCHEDULES.EVERY_FIRST_DAY_OF_MONTH_AT_03_00,
+    schedule=SCHEDULES.EVERY_FIRST_DAY_OF_MONTH_AT_01_00,
     start_date=START_DATES.DEFAULT,
     description=(
         "Clone la table 'unite_legale' de l'Annuaire Entreprises (AE) dans notre DB"
@@ -28,6 +29,7 @@ with DAG(
         TAGS.ANNAIRE_ENTREPRISE,
         TAGS.UNITE_LEGALE,
         TAGS.SIREN,
+        TAGS.SIRET,
     ],
     params=ParamsDict(
         {
@@ -70,6 +72,7 @@ with DAG(
                 type="string",
                 description_md="🔤 Délimiteur utilisé dans le fichier",
             ),
+            **clone_dbt_params(dbt_select="tag:unite_legale,tag:normalisation"),
         }
     ),
 ) as dag:

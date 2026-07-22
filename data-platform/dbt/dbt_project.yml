@@ -34,5 +34,20 @@ clean-targets:
   - "dbt_packages"
 
 models:
+  # by default the tables are unlogged because the warehouse is optimized for performance
+  # and can be rebuild from scratch
   +unlogged: true
   +materialized: table
+  qfdmo:
+    intermediate:
+      ae:
+        +unlogged: false
+      ban:
+        +unlogged: false
+      geo:
+        +unlogged: false
+    exposure:
+      stats:
+        # for stats tables, we want to keep the historical data even if PG crashs
+        +unlogged: false
+        on_schema_change: "append_new_columns"

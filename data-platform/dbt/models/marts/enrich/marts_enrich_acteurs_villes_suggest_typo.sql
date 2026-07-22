@@ -1,11 +1,3 @@
-{{
-  config(
-    materialized = 'view',
-    alias = 'marts_enrich_acteurs_villes_suggest_typo',
-    tags=['marts', 'enrich', 'villes', 'cities', 'ban','acteurs','typo','ortographe'],
-  )
-}}
-
 SELECT
   '🌆 Changement de ville: 🟢 variation d''ortographe' AS suggest_cohort,
   *
