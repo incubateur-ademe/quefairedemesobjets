@@ -1139,6 +1139,11 @@ class AccessibilitePreview(LookbookPreview):
         infotri). Le `<main>` du layout porte `id="content"` et
         `role="main"`, ce qui correspond à la cible définie dans le
         context processor global.
+
+        `tabindex="-1"` a été ajouté sur `<main id="content">` (et sur
+        `<nav id="fr-navigation">` dans `header_menu.html`) : un bug
+        connu de Firefox empêche le focus de se déplacer via un lien
+        d'ancrage si la cible n'est pas programmatiquement focusable.
         """
         return render_to_string(
             "ui/components/accessibilite/skip_link_demo.html",
