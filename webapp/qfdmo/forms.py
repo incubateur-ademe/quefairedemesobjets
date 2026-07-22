@@ -453,7 +453,7 @@ class FiltresForm(GetFormMixin, CarteConfigFormMixin, DsfrBaseForm):
         to_field_name="code",
         widget=forms.CheckboxSelectMultiple,
         required=False,
-        label="",
+        label="Labels et certifications",
     )
 
     pas_exclusivite_reparation = forms.BooleanField(
@@ -826,7 +826,7 @@ class ViewModeForm(AutoSubmitMixin, GetFormMixin, CarteConfigFormMixin, DsfrBase
         }
 
     view = forms.ChoiceField(
-        label="",
+        label="Mode d'affichage",
         choices=ViewModeSegmentedControlChoices.choices,
         required=False,
         initial=CarteConfig.ModesAffichage.CARTE,
