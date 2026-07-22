@@ -11,7 +11,7 @@
         class="
         {# Z-index here helps prevent autocomplete overlapping on the accordion on the homepage #}
         qf-relative qf-z-10
-        qf-rounded-3xl qf-overflow-hidden
+        qf-rounded-3xl
         group-data-[home]:qf-rounded-[2rem]
         max-md:qf-rounded-[2rem]
         qf-border-solid qf-border-[3px] qf-border-green-menthe-sun-373-moon-652-hover qf-bg-white
@@ -23,8 +23,8 @@
             action="{% url 'qfdmd:search' %}"
             class="qf-pl-4w {# should match the svg icon width #}
             qf-flex qf-flex-row-reverse qf-relative
-            md:group-data-[home]:qf-h-7w
-            qf-h-5w
+            md:group-data-[home]:qf-min-h-7w
+            qf-min-h-5w
             qf-content-center
             "
         >
