@@ -275,7 +275,8 @@ def acteurs_table(context, acteurs):
     As it must be rendered with a dict, we cannot easily render complex rows."""
     return {
         "table": {
-            "header": ["Nom du lieu", "Actions", "Distance", ""],
+            "caption": "Liste des lieux et solutions correspondant à votre recherche",
+            "header": ["Nom du lieu", "Actions", "Distance", "Fiche"],
             "content": [render_acteur_table_row(acteur, context) for acteur in acteurs],
             "extra_classes": "fr-table--mode-liste fr-table--multiline qf-w-full",
         }
