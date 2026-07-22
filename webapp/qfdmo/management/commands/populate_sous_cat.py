@@ -137,15 +137,11 @@ def assign_new_sous_cat(self, mappings=MAPPINGS) -> None:
     # sur proposition de service, si pas revision de proposition de service alors on
     #  crée une révision et on corrige les revision de proposition de service
     for mapping in mappings:
-        self.stdout.write(
-            self.style.SUCCESS(
-                f"""
+        self.stdout.write(self.style.SUCCESS(f"""
 Assigning new sous categories: {mapping['new_sous_categories']}
 To existing sous categorie: {mapping['existing_sous_categorie']}
 With actions: {mapping['actions']}
-"""
-            )
-        )
+"""))
         existing_sous_categorie = mapping["existing_sous_categorie"]
 
         acteur_ids_in_mapping_without_revision = (
