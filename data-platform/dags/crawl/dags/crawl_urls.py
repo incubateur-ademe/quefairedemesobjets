@@ -1,5 +1,6 @@
 from airflow import DAG
 from airflow.sdk import Param
+from airflow.sdk.bases.operator import chain
 from crawl.tasks.airflow_logic.crawl_urls_check_crawl_task import (
     crawl_urls_check_crawl_task,
 )
@@ -90,8 +91,8 @@ with DAG(
     suggest_diff_other = crawl_urls_suggest_crawl_diff_other_task(dag)
 
     # Always reading and checking syntax
-    read >> check_syntax >> suggest_syntax  # type: ignore
+    chain(read, check_syntax, suggest_syntax)
     # DNS depends on syntax
-    check_syntax >> check_dns >> suggest_dns  # type: ignore
+    chain(check_syntax, check_dns, suggest_dns)
     # Crawl depends on DNS
-    check_dns >> check_crawl >> [suggest_diff_standard, suggest_diff_other]  # type: ignore
+    chain(check_dns, check_crawl, [suggest_diff_standard, suggest_diff_other])

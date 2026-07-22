@@ -1,6 +1,7 @@
 """DAG to suggestion city corrections based on BAN data"""
 
 from airflow import DAG
+from airflow.sdk.bases.operator import chain
 from enrich.config.cohorts import COHORTS
 from enrich.config.dbt import DBT
 from enrich.config.models import EnrichActeursVillesConfig
@@ -57,7 +58,4 @@ with DAG(
         cohort=COHORTS.VILLES_NEW,
         dbt_model_name=DBT.MARTS_ENRICH_VILLES_NEW,
     )
-    config >> dbt_refresh  # type: ignore
-    dbt_refresh >> dbt_test  # type: ignore
-    dbt_test >> suggest_typo  # type: ignore
-    dbt_test >> suggest_new  # type: ignore
+    chain(config, dbt_refresh, dbt_test, [suggest_typo, suggest_new])
