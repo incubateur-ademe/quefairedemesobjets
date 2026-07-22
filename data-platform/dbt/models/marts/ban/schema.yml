@@ -1,0 +1,32 @@
+version: 2
+
+models:
+  - name: marts_ban_adresses
+    description: ''
+    config:
+      materialized: table
+      tags:
+        - marts
+        - ban
+        - adresses
+      indexes:
+        - columns: ['code_postal']
+        - columns: ['code_departement']
+      post_hook:
+        - "CREATE INDEX ON {{ this }}(ville_ancienne) WHERE ville_ancienne IS NOT NULL"
+        - "CREATE INDEX ON {{ this }}(adresse_numero) WHERE adresse_numero IS NOT NULL"
+  - name: marts_ban_villes
+    description: ''
+    config:
+      materialized: table
+      tags:
+        - marts
+        - ban
+        - villes
+      indexes:
+        - columns: ['ville_ancienne']
+        - columns: ['ville']
+        - columns: ['code_postal']
+        - columns: ['code_departement']
+      post_hook:
+        - "CREATE INDEX ON {{ this }}(ville_ancienne) WHERE ville_ancienne IS NOT NULL"

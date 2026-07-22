@@ -200,7 +200,7 @@ models:
         materialized: incremental
         unique_key: date_snapshot
         incremental_strategy: delete+insert
-        on_schema_change: sync_all_columns
+        on_schema_change: append_new_columns
         tags:
           - exposure
           - stats
@@ -208,35 +208,6 @@ models:
           - siren
           - siret
 
-  - name: exposure_stats_acteur_siret_successeur
-    description: "Acteurs visibles avec un SIRET successeur"
-    columns:
-      - name: identifiant_unique
-        description: "L'identifiant unique de l'acteur"
-      - name: siren_actuel
-        description: "Le SIRET de l'acteur actuel"
-      - name: siret_actuel
-        description: "Le SIRET de l'acteur actuel"
-      - name: siren_successeur
-        description: "Le SIREN de l'acteur successeur"
-      - name: siret_successeur
-        description: "Le SIRET de l'acteur successeur"
-      - name: etat_administratif_successeur
-        description: "L'état administratif de l'acteur successeur"
-      - name: date_lien_succession
-        description: "La date du lien de succession"
-      - name: transfert_siege
-        description: "Le transfert de siège"
-      - name: continuite_economique
-        description: "La continuité économique"
-    config:
-      materialized: table
-      tags:
-        - exposure
-        - stats
-        - acteurs
-        - siret
-        - successeur
   - name: exposure_stats_acteur_stacked_history
     description: "Historique du nombre d'acteurs empilés. Une ligne est ajoutée à chaque exécution de dbt."
     columns:

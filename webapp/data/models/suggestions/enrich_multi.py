@@ -132,6 +132,15 @@ class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
                 row_label,
                 self._get_acteur_field_for_row_label("siren", **acteur_kwargs),
             )
+        if type_action == SuggestionAction.ENRICH_ACTEURS_LIEN_SUCCESSION:
+            row_label = _append_siren_to_row_label(
+                row_label,
+                self._get_acteur_field_for_row_label("siren", **acteur_kwargs),
+            )
+            return _append_siret_to_row_label(
+                row_label,
+                self._get_acteur_field_for_row_label("siret", **acteur_kwargs),
+            )
         return row_label
 
     def to_comparison_table(self, errors: dict | None = None) -> ComparisonTable:

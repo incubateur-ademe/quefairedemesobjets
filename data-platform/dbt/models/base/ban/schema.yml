@@ -1,36 +1,24 @@
 version: 2
 models:
   # No tests for base BAN models as they take forever
-  # to run and we will have the same on int_
+  # to run and we will have the same on int_/marts_
   - name: base_ban_adresses
     description: ''
-    columns:
-      - name: adresse
-        description: adresse
-        data_type: string
-      - name: adresse_numero
-        description: adresse_numero
-        data_type: string
-      - name: ville
-        description: ville
-        data_type: string
-      - name: ville_ancienne
-        description: ville_ancienne
-        data_type: string
-      - name: code_postal
-        description: code_postal
-        data_type: string
-      - name: code_departement
-        description: code_departement
-        data_type: string
-      - name: latitude
-        description: latitude
-        data_type: string
-      - name: longitude
-        description: longitude
-        data_type: string
+    config:
+      materialized: view
+      tags:
+        - base
+        - normalisation
+        - ban
+        - adresses
   - name: base_ban_lieux_dits
     description: ''
+    config:
+      materialized: view
+      tags:
+        - base
+        - ban
+        - lieux_dits
     columns:
       - description: Identifiant
         data_type: string

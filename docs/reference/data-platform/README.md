@@ -18,7 +18,10 @@ Some use `dbt`, other use `pandas`
 
 airflow.md
 sources.md
+clone-referentials.md
 dbt.md
 clustering-deduplication.md
 enrich-siret-siren.md
+enrich-acteurs-closed.md
+enrich-siret-siren-lien-succession.md
 ```

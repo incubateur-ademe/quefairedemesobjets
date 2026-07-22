@@ -1,45 +1,47 @@
-# Sources d'ingestion et référentiels d'enrichissement
+# Ingestion sources and enrichment reference data
 
-Inventaire des sources de données ingérées par la plateforme et des référentiels externes clonés pour l'enrichissement.
+Inventory of data sources ingested by the platform and external reference datasets cloned for enrichment.
 
-> **Voir aussi** : [Flux de consolidation](../architecture/data-flow.md), [Airflow](airflow.md), [dbt](dbt.md).
+> **See also**: [Consolidation flow](../architecture/data-flow.md), [Airflow](airflow.md), [dbt](dbt.md).
 
-## Sources d'acteurs
+## Actor sources
 
-Toutes les sources ci-dessous sont exposées comme des **DAGs Airflow individuels** (déclenchement manuel, schedule `None`) sous `data-platform/dags/sources/dags/`.
+All sources below are exposed as **individual Airflow DAGs** (manual trigger, schedule `None`) under `data-platform/dags/sources/dags/`.
 
-| Catégorie     | DAG Airflow    | Source / endpoint                                         | Filière                                            |
-| ------------- | -------------- | --------------------------------------------------------- | -------------------------------------------------- |
-| Eco-organisme | `eo-aliapur`   | ALIAPUR (`data.pointsapport.ademe.fr`)                    | PNEU                                               |
-| Eco-organisme | `eo-batribox`  | BATRIBOX (`data.ademe.fr`)                                | Piles & accus                                      |
-| Eco-organisme | `eo-citeo`     | CITEO                                                     | Emballages & papiers                               |
-| Eco-organisme | `eo-corepile`  | COREPILE                                                  | Piles & accus                                      |
-| Eco-organisme | `eo-cyclevia`  | CYCLEVIA                                                  | Lubrifiants                                        |
-| Eco-organisme | `eo-ecodds`    | ECODDS                                                    | Articles de bricolage & jardin, Produits chimiques |
-| Eco-organisme | `eo-ecologic`  | ECOLOGIC                                                  | ABJ, ASL, EEE                                      |
-| Eco-organisme | `eo-ecomaison` | ECOMAISON                                                 | ABJ, Éléments d'ameublement, Jouets, PMCB          |
-| Eco-organisme | `eo-ecopae`    | ECOPAE                                                    | Produits chimiques                                 |
-| Eco-organisme | `eo-ecosystem` | ECOSYSTEM                                                 | EEE                                                |
-| Eco-organisme | `eo-pyreo`     | PYREO                                                     | Produits chimiques                                 |
-| Eco-organisme | `eo-refashion` | REFASHION                                                 | Textiles, linges, chaussures                       |
-| Eco-organisme | `eo-soren`     | SOREN                                                     | EEE                                                |
-| Eco-organisme | `eo-valdelia`  | VALDELIA                                                  | PMCB                                               |
-| Eco-organisme | `eo-ocab`      | OCAB                                                      | OCA / PMCB                                         |
-| Eco-organisme | `eo-ocad3e`    | OCAD3E (label QualiRépar)                                 | EEE                                                |
-| API           | `cma`          | CMA Réparacteurs (`apiopendata.artisanat.fr/reparacteur`) | Label `reparacteur`                                |
-| API           | `pharmacies`   | Ordre National des Pharmaciens (`ordre.pharmacien.fr`)    | Médicaments                                        |
-| ADEME         | `source_sinoe` | ADEME SINOE (`data.ademe.fr`)                             | Déchèteries                                        |
-| Custom        | `source-s3`    | Bucket S3 `lvao-data-source`                              | Fichiers Excel ad-hoc                              |
+| Category      | Airflow DAG    | Source / endpoint                                         | Stream                        |
+| ------------- | -------------- | --------------------------------------------------------- | ----------------------------- |
+| Eco-organisme | `eo-aliapur`   | ALIAPUR (`data.pointsapport.ademe.fr`)                    | Tyres                         |
+| Eco-organisme | `eo-batribox`  | BATRIBOX (`data.ademe.fr`)                                | Batteries                     |
+| Eco-organisme | `eo-citeo`     | CITEO                                                     | Packaging & paper             |
+| Eco-organisme | `eo-corepile`  | COREPILE                                                  | Batteries                     |
+| Eco-organisme | `eo-cyclevia`  | CYCLEVIA                                                  | Lubricants                    |
+| Eco-organisme | `eo-ecodds`    | ECODDS                                                    | DIY & garden items, chemicals |
+| Eco-organisme | `eo-ecologic`  | ECOLOGIC                                                  | ABJ, ASL, EEE                 |
+| Eco-organisme | `eo-ecomaison` | ECOMAISON                                                 | ABJ, furniture, toys, PMCB    |
+| Eco-organisme | `eo-ecopae`    | ECOPAE                                                    | Chemicals                     |
+| Eco-organisme | `eo-ecosystem` | ECOSYSTEM                                                 | EEE                           |
+| Eco-organisme | `eo-pyreo`     | PYREO                                                     | Chemicals                     |
+| Eco-organisme | `eo-refashion` | REFASHION                                                 | Textiles, linens, shoes       |
+| Eco-organisme | `eo-soren`     | SOREN                                                     | EEE                           |
+| Eco-organisme | `eo-valdelia`  | VALDELIA                                                  | PMCB                          |
+| Eco-organisme | `eo-ocab`      | OCAB                                                      | OCA / PMCB                    |
+| Eco-organisme | `eo-ocad3e`    | OCAD3E (QualiRépar label)                                 | EEE                           |
+| API           | `cma`          | CMA Réparacteurs (`apiopendata.artisanat.fr/reparacteur`) | `reparacteur` label           |
+| API           | `pharmacies`   | Ordre National des Pharmaciens (`ordre.pharmacien.fr`)    | Medicines                     |
+| ADEME         | `source_sinoe` | ADEME SINOE (`data.ademe.fr`)                             | Recycling centres             |
+| Custom        | `source-s3`    | S3 bucket `lvao-data-source`                              | Ad-hoc Excel files            |
 
-## Référentiels d'enrichissement clonés
+## Cloned enrichment reference data
 
-Données externes clonées en base via les DAGs `clone_*` puis exploitées en croisement par dbt.
+External data cloned into the database via `clone_*` DAGs, then cross-referenced by dbt.
 
-| Référentiel               | Source                                          | Usage                                                                          |
-| ------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------ |
-| BAN                       | `adresse.data.gouv.fr`                          | Géocodage acteurs (`adresses-france.csv.gz`, `lieux-dits-beta-france.csv.gz`)  |
-| Annuaire Entreprises (AE) | `object.files.data.gouv.fr`, `www.data.gouv.fr` | Validation SIREN/SIRET, détection établissements fermés                        |
-| La Poste                  | `datanova.laposte.fr`                           | Codes postaux (`laposte-hexasmal`)                                             |
-| Koumoul                   | `opendata.koumoul.com`                          | EPCI                                                                           |
-| INSEE                     | `www.insee.fr`                                  | Communes (`v_commune_2025.csv`)                                                |
-| Contours administratifs   | `etalab-datasets.geo.data.gouv.fr`              | GeoJSON commune / département / région / EPCI / communes associées & déléguées |
+> Business workflow of clone DAGs and dbt normalization logic: [Clone — Enrichment reference data](clone-referentiels.md).
+
+| Reference data            | Source                                          | Usage                                                                                              |
+| ------------------------- | ----------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| BAN                       | `adresse.data.gouv.fr`                          | Actor geocoding (`adresses-france.csv.gz`, `lieux-dits-beta-france.csv.gz`)                        |
+| Annuaire Entreprises (AE) | `object.files.data.gouv.fr`, `www.data.gouv.fr` | SIREN/SIRET validation, closed establishment detection                                             |
+| La Poste                  | `datanova.laposte.fr`                           | Postal codes (`laposte-hexasmal`)                                                                  |
+| Koumoul                   | `opendata.koumoul.com`                          | EPCI                                                                                               |
+| INSEE                     | `www.insee.fr`                                  | Municipalities (`v_commune_2025.csv`)                                                              |
+| Contours administratifs   | `etalab-datasets.geo.data.gouv.fr`              | GeoJSON for municipalities / departments / regions / EPCIs / associated & delegated municipalities |

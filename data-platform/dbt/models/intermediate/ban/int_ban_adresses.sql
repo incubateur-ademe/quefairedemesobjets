@@ -1,22 +1,21 @@
-/*
-post_hook = partial indexes on high-cardinality columns only for NOT NULL
-so we can still speed up the JOINS/FILTERS
-*/
-{{
-  config(
-    materialized = 'table',
-    tags=['intermediate', 'ban', 'adresses'],
-    indexes=[
-      {'columns': ['code_postal']},
-      {'columns': ['code_departement']},
-    ],
-    post_hook=[
-      "CREATE INDEX ON {{ this }}(ville_ancienne) WHERE ville_ancienne IS NOT NULL",
-      "CREATE INDEX ON {{ this }}(adresse_numero) WHERE adresse_numero IS NOT NULL",
-    ]
-  )
-}}
-
-
-SELECT *
+-- Large source: only reading what's needed
+SELECT
+    /* Creating complete adresse to do lookups
+    and compare vs. ours rep = ex: "bis" */
+    {{ target.schema }}.udf_columns_concat_unique_non_empty(numero,rep,nom_voie) AS adresse,
+    /* Also keeping separate column for numero
+    as it's a common suggestion filter */
+    numero AS adresse_numero,
+    nom_commune AS ville,
+    /* We only keep ville_ancienne if it's different from current ville */
+    CASE
+      WHEN nom_ancienne_commune = nom_commune THEN NULL
+      ELSE nom_ancienne_commune
+    END AS ville_ancienne,
+    code_postal,
+    LEFT(code_postal, 2) AS code_departement,
+    lat as latitude,
+    lon as longitude
 FROM {{ ref('base_ban_adresses') }}
+WHERE code_postal IS NOT NULL AND code_postal != ''
+ORDER BY code_postal ASC

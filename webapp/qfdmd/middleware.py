@@ -3,7 +3,7 @@ from urllib.parse import urlparse, urlunparse
 
 from django.conf import settings
 from django.shortcuts import redirect
-from django.urls import resolve
+from django.urls import Resolver404, resolve
 from wagtail.admin.viewsets.base import reverse
 
 from core.utils import has_explicit_perm
@@ -74,7 +74,13 @@ class RequestEnhancementMiddleware:
         return None
 
     def _handle_special_query_params(self, request) -> str | None:
-        if resolve(request.path).view_name != "qfdmd:home":
+        try:
+            if resolve(request.path).view_name != "qfdmd:home":
+                return
+        except Resolver404:
+            # Paths that don't match any urlpattern (e.g. Wagtail's preview
+            # dummy request path for pages with accented slugs, see
+            # PreviewableMixin._get_dummy_headers) can't be the home view.
             return
 
         if self.CARTE_PARAM in request.GET:

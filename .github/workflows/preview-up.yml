@@ -120,7 +120,7 @@ jobs:
       pull-requests: write
       deployments: write
     steps:
-      - uses: actions/github-script@v8
+      - uses: actions/github-script@v9
         with:
           script: |
             const prNumber = Number("${{ needs.resolve.outputs.pr_number }}");

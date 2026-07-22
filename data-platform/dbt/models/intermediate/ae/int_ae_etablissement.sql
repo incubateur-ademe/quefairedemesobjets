@@ -13,7 +13,7 @@ SELECT
     -- Names
     CASE
       WHEN etab.denomination_usuelle IS NOT NULL THEN etab.denomination_usuelle
-      WHEN etab.denomination_usuelle IS NULL AND unite.denomination IS NOT NULL THEN unite.denomination
+      WHEN etab.denomination_usuelle IS NULL AND unite.nom_commercial IS NOT NULL THEN unite.nom_commercial
       ELSE {{ value_unavailable() }}
     END AS nom,
 
@@ -28,10 +28,7 @@ SELECT
       WHEN 'A' THEN TRUE
       ELSE FALSE
     END AS est_actif,
-    CASE unite.etat_administratif
-      WHEN 'A' THEN TRUE
-      ELSE FALSE
-    END AS unite_est_actif,
+    unite.est_actif AS unite_est_actif,
 
     -- Addresse
     {{ target.schema }}.udf_columns_concat_unique_non_empty(
@@ -55,7 +52,7 @@ FROM {{ ref('base_ae_etablissement') }} AS etab
 /* Joining with unite_legale to bring some essential
 data from parent unite into each etablissement (saves
 us from making expensive JOINS in downstream models) */
-JOIN {{ ref('base_ae_unite_legale') }} AS unite
+JOIN {{ ref('int_ae_unite_legale') }} AS unite
 ON unite.siren = etab.siren
 /* Here we keep unavailable names as int_ models aren't
 responsible for business logic. Keeping allows investigating

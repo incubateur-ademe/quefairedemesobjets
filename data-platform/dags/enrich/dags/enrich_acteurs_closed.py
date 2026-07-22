@@ -4,6 +4,7 @@ contains people from Annuaire Entreprise (AE)
 """
 
 from airflow import DAG
+from airflow.sdk.bases.operator import chain
 from enrich.config.cohorts import COHORTS
 from enrich.config.dbt import DBT
 from enrich.config.models import EnrichActeursClosedConfig
@@ -22,6 +23,7 @@ from shared.config.airflow import DEFAULT_ARGS_NO_RETRIES
 from shared.config.models import config_to_airflow_params
 from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
+from utils.docs import load_dag_doc_md
 
 with DAG(
     dag_id="enrich_acteurs_closed",
@@ -31,6 +33,7 @@ with DAG(
         "Un DAG pour détécter et remplacer les acteurs fermés"
         "dans l'Annuaire Entreprises (AE)"
     ),
+    doc_md=load_dag_doc_md("enrich-acteurs-closed.md"),
     tags=[
         TAGS.ENRICH,
         TAGS.ANNAIRE_ENTREPRISE,
@@ -44,11 +47,13 @@ with DAG(
     params=config_to_airflow_params(
         EnrichActeursClosedConfig(
             dbt_models_refresh=True,
+            # here we don't want `+`` before `tag`in select because the data were
+            # prepared when it was cloned
             dbt_models_refresh_command=(
-                "dbt build --select tag:marts,tag:enrich,tag:closed"
+                "dbt run --select +tag:closed --exclude tag:normalisation"
             ),
             dbt_models_test_command=(
-                "dbt test --select tag:marts,tag:enrich,tag:closed"
+                "dbt test --select +tag:closed --exclude tag:normalisation"
             ),
             filter_equals__acteur_statut="ACTIF",
         )
@@ -84,9 +89,14 @@ with DAG(
     )
 
     # Graph
-    config >> dbt_refresh  # type: ignore
-    dbt_refresh >> dbt_test  # type: ignore
-    dbt_test >> suggest_not_replaced_unite  # type: ignore
-    dbt_test >> suggest_not_replaced_etablissement  # type: ignore
-    dbt_test >> suggest_other_siren  # type: ignore
-    dbt_test >> suggest_same_siren  # type: ignore
+    chain(
+        config,
+        dbt_refresh,
+        dbt_test,
+        [
+            suggest_not_replaced_unite,
+            suggest_not_replaced_etablissement,
+            suggest_other_siren,
+            suggest_same_siren,
+        ],
+    )

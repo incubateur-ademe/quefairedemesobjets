@@ -1,0 +1,12 @@
+version: 2
+models:
+  - name: base_koumoul_epci
+    description: Communes de France (Koumoul) — données géographiques incluant EPCI
+    config:
+      materialized: view
+      tags:
+        - base
+        - normalisation
+        - geo
+        - koumoul
+        - epci

@@ -10,7 +10,5 @@ from settings.base import *  # noqa: F403
 # Only set when the env var is explicitly provided (e.g. NixOS custom paths).
 # If absent, Django falls back to its own discovery — no crash on stock macOS.
 # ---------------------------------------------------------------------------
-import decouple
 
-GEOS_LIBRARY_PATH = decouple.config("GEOS_LIBRARY_PATH", default="", cast=str) or None
-GDAL_LIBRARY_PATH = decouple.config("GDAL_LIBRARY_PATH", default="", cast=str) or None
+# @TODO move dev settings here
