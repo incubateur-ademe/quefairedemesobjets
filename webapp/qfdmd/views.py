@@ -519,6 +519,10 @@ class HomeView(TemplateView):
         return context
 
 
+@method_decorator(cache_control(max_age=60 * 5), name="dispatch")
+@method_decorator(
+    vary_on_headers("logged-in", "iframe", "sec-fetch-dest"), name="dispatch"
+)
 class SynonymeDetailView(DetailView):
     template_name = "ui/pages/produit.html"
     model = Synonyme
