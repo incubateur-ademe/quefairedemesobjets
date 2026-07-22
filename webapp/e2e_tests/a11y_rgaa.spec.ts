@@ -97,4 +97,13 @@ test.describe("♿ RGAA", () => {
     // Lookbook du tooltip de partage n'ayant pas de request.resolver_match
     // pour générer le sharer réel.
   })
+  test.describe("[Carte] 8.9 — Balise sémantique pour la date de mise à jour", () => {
+    test("La date de mise à jour de la fiche acteur est dans une balise <p>", async ({
+      page,
+    }) => {
+      await navigateTo(page, "/lookbook/preview/pages/acteur/")
+      const updatedDate = page.locator("p", { hasText: "Mis à jour le" })
+      await expect(updatedDate).toBeVisible()
+    })
+  })
 })
