@@ -15,7 +15,10 @@
             class="qf-items-center qf-hidden nolegend:qf-flex qf-flex-row"
             id="logo"
         >
-            {% include 'ui/layout/_partials/header_logos.html' %}
+            <a href="/" title="Accueil — {{ SITE_CONFIG.site_title }}">
+                <span class="qf-sr-only">Accueil — {{ SITE_CONFIG.site_title }}</span>
+                {% include "ui/components/header/combined_logos.html" %}
+            </a>
         </div>
         {% endif %}
 
