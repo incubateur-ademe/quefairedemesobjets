@@ -127,4 +127,14 @@ test.describe("♿ RGAA", () => {
       await expect(infotriImg.first()).toHaveAttribute("alt", "")
     })
   })
+  test.describe("[Carte] 1.2 — Logo décoratif dans les onglets Labels/Sources", () => {
+    test("Le logo précédant un label/source a un alt vide", async ({ page }) => {
+      await navigateTo(page, "/lookbook/preview/pages/acteur/")
+      const logoImg = page.locator('img[src*="/media/logos/"], img[src*="/logos/"]')
+      const count = await logoImg.count()
+      if (count > 0) {
+        await expect(logoImg.first()).toHaveAttribute("alt", "")
+      }
+    })
+  })
 })
