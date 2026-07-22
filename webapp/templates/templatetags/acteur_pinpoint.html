@@ -9,6 +9,7 @@
     data-turbo-frame="{% acteur_frame_id %}"
     data-controller="pinpoint"
     data-action="analytics#captureInteractionWithMap pinpoint#setActive"
+    aria-label="{{ libelle }}"
 >
 {% else %}
 <div
@@ -22,7 +23,7 @@
 {% endif %}
     <div data-animated="" class="qf-scale-75">
         {% if marker_icon_file %}
-            <img class="qf--translate-y-2/4" height="61" width="46" src="{{ marker_icon_file }}">
+            <img class="qf--translate-y-2/4" height="61" width="46" src="{{ marker_icon_file }}" alt="">
         {% else %}
             <div class="qf--translate-y-2/4" style="color: {{ marker_couleur }};">
                 {% if marker_fill_background %}

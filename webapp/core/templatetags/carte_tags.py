@@ -144,6 +144,7 @@ def acteur_pinpoint_tag(
         "latitude": acteur.latitude,
         "longitude": acteur.longitude,
         "href": acteur_url(context, acteur, with_map=False),
+        "libelle": str(acteur),
         "request": context.get("request"),
         MAP_CONTAINER_ID: context.get(MAP_CONTAINER_ID),
         "mask_id": mask_id,
@@ -275,7 +276,8 @@ def acteurs_table(context, acteurs):
     As it must be rendered with a dict, we cannot easily render complex rows."""
     return {
         "table": {
-            "header": ["Nom du lieu", "Actions", "Distance", ""],
+            "caption": "Liste des lieux de réemploi et de réparation",
+            "header": ["Nom du lieu", "Actions", "Distance", "Fiche"],
             "content": [render_acteur_table_row(acteur, context) for acteur in acteurs],
             "extra_classes": "fr-table--mode-liste fr-table--multiline qf-w-full",
         }

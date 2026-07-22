@@ -828,7 +828,7 @@ class ViewModeForm(AutoSubmitMixin, GetFormMixin, CarteConfigFormMixin, DsfrBase
         }
 
     view = forms.ChoiceField(
-        label="",
+        label="Mode d'affichage",
         choices=ViewModeSegmentedControlChoices.choices,
         required=False,
         initial=CarteConfig.ModesAffichage.CARTE,
