@@ -120,4 +120,11 @@ test.describe("♿ RGAA", () => {
       await expect(alt).toBeAttached()
     })
   })
+  test.describe("[Site Que faire] 1.2 — Image info-tri décorative ignorée", () => {
+    test("L'image info-tri a un alt vide", async ({ page }) => {
+      await navigateTo(page, "/lookbook/preview/pages/produit/")
+      const infotriImg = page.locator(".qf-h-\\[80px\\] img")
+      await expect(infotriImg.first()).toHaveAttribute("alt", "")
+    })
+  })
 })
