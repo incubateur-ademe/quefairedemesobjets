@@ -7,6 +7,7 @@ cf. https://opendata.koumoul.com/datasets/communes-de-france/full
 from airflow import DAG
 from airflow.sdk import Param
 from clone.tasks.airflow_logic.chain_tasks import chain_tasks
+from clone.tasks.airflow_logic.clone_dbt_task import clone_dbt_params
 from shared.config.airflow import DEFAULT_ARGS_NO_RETRIES
 from shared.config.schedules import SCHEDULES
 from shared.config.start_dates import START_DATES
@@ -49,6 +50,7 @@ with DAG(
             type="string",
             description_md="🔤 Délimiteur utilisé dans le fichier",
         ),
+        **clone_dbt_params(dbt_select="+tag:geo"),
     },
 ) as dag:
     chain_tasks(dag)

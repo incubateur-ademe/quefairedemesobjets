@@ -131,6 +131,13 @@ with DAG(
         "qfdmo_vue", "exposure_exhaustive_"
     )
 
+    check_model_table_epci_task = check_model_table_consistency_task(
+        "qfdmo", "EPCI", "exposure_epci"
+    )
+    replace_epci_table_task = replace_acteur_table_task(
+        "qfdmo_", "exposure_", tables=["epci"]
+    )
+
     # Définir la séquence principale
     (
         dbt_run_base_acteurs
@@ -151,6 +158,11 @@ with DAG(
         >> dbt_test_exposure_acteurs_exhaustive
     )
     # Définir la séquence de vérification en parallèle
+    (
+        dbt_test_exposure_acteurs_carte
+        >> check_model_table_epci_task
+        >> replace_epci_table_task
+    )
     (
         dbt_test_exposure_acteurs_carte
         >> check_model_table_displayedacteur_task

@@ -44,12 +44,10 @@ with DAG(
     params=config_to_airflow_params(
         EnrichActeursClosedConfig(
             dbt_models_refresh=True,
-            dbt_models_refresh_command=(
-                "dbt build --select tag:marts,tag:enrich,tag:closed"
-            ),
-            dbt_models_test_command=(
-                "dbt test --select tag:marts,tag:enrich,tag:closed"
-            ),
+            # here we don't want `+`` before `tag`in select because the data were
+            # prepared when it was cloned
+            dbt_models_refresh_command=("dbt build --select tag:closed"),
+            dbt_models_test_command=("dbt test --select tag:closed"),
             filter_equals__acteur_statut="ACTIF",
         )
     ),

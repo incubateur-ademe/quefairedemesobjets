@@ -1,6 +1,11 @@
 from airflow import DAG
 from airflow.sdk.bases.operator import chain
 from clone.tasks.airflow_logic.clone_config_create_task import clone_config_create_task
+from clone.tasks.airflow_logic.clone_dbt_task import (
+    PARAM_DBT_RUN_COMMAND,
+    clone_dbt_run_task,
+    clone_dbt_test_task,
+)
 from clone.tasks.airflow_logic.clone_old_tables_remove_task import (
     clone_old_tables_remove_task,
 )
@@ -11,19 +16,27 @@ from clone.tasks.airflow_logic.clone_table_validate_task import (
 from clone.tasks.airflow_logic.clone_view_in_use_switch_task import (
     clone_view_in_use_switch_task,
 )
-from shared.config.dag_names import REFRESH_GEO_MODELS_DAG_ID
-from shared.tasks.airflow_logic.trigger_dag_task import trigger_dag_task
 
 
 def chain_tasks(dag: DAG) -> None:
-    chain(
+    """Build the shared clone chain.
+
+    When the DAG exposes the DBT command params (added via ``clone_dbt_params``),
+    a DBT normalization run followed by its tests is inserted after the in-use
+    view switch. DAGs without those params keep their chain unchanged.
+    """
+    tasks = [
         clone_config_create_task(dag),
         clone_table_create_task(dag),
         clone_table_validate_task(dag),
         clone_view_in_use_switch_task(dag),
         clone_old_tables_remove_task(dag),
-        trigger_dag_task(
-            task_id="launch_refresh_geo_models",
-            target_dag=REFRESH_GEO_MODELS_DAG_ID,
-        ),
-    )
+    ]
+
+    if PARAM_DBT_RUN_COMMAND in dag.params:
+        tasks += [
+            clone_dbt_run_task(dag),
+            clone_dbt_test_task(dag),
+        ]
+
+    chain(*tasks)
