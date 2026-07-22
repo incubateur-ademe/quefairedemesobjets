@@ -77,7 +77,7 @@
     "postcss": "^8.5.16",
     "postcss-nesting": "^14.0.0",
     "prettier": "^3.9.4",
-    "svgo": "^4.0.1",
+    "svgo": "^4.0.2",
     "tailwindcss-animate": "^1.0.7",
     "ts-jest": "^29.4.11",
     "ts-node": "^10.9.2",
