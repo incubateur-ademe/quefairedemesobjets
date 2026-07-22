@@ -2,13 +2,6 @@
 Acteurs which SIREN & SIRET are closed in AE's etablissement
 AND for which we couldn't find replacements
 */
-{{
-  config(
-    materialized = 'table',
-    tags=['marts', 'enrich', 'closed', 'ae', 'annuaire_entreprises', 'etablissement'],
-  )
-}}
-
 SELECT
   '🚪 Acteurs Fermés: 🔴 non remplacés - unité fermée' AS suggest_cohort,
   *

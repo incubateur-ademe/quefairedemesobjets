@@ -132,10 +132,10 @@ with DAG(
     )
 
     check_model_table_epci_task = check_model_table_consistency_task(
-        "qfdmo", "EPCI", "exposure_epci"
+        "qfdmo", "EPCI", "int_epci"
     )
     replace_epci_table_task = replace_acteur_table_task(
-        "qfdmo_", "exposure_", tables=["epci"]
+        "qfdmo_", "int_", tables=["epci"]
     )
 
     # Définir la séquence principale

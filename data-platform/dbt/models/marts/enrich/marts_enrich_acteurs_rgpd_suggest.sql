@@ -5,13 +5,6 @@ around found inside our acteurs names.
 Notes:
  - 🧹 Pre-matching/filtering at SQL level to reduce data size (13M rows)
 */
-{{
-  config(
-    materialized = 'view',
-    tags=['marts', 'enrich', 'ae', 'annuaire_entreprises', 'unite_legale', 'rgpd'],
-  )
-}}
-
 WITH acteurs_with_siren AS (
 	SELECT
 		identifiant_unique,

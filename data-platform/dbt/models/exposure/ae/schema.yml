@@ -1,0 +1,32 @@
+version: 2
+
+models:
+  - name: exposure_ae_acteur_siret_successeur
+    description: "Acteurs visibles avec un SIRET successeur"
+    columns:
+      - name: identifiant_unique
+        description: "L'identifiant unique de l'acteur"
+      - name: siren_actuel
+        description: "Le SIRET de l'acteur actuel"
+      - name: siret_actuel
+        description: "Le SIRET de l'acteur actuel"
+      - name: siren_successeur
+        description: "Le SIREN de l'acteur successeur"
+      - name: siret_successeur
+        description: "Le SIRET de l'acteur successeur"
+      - name: etat_administratif_successeur
+        description: "L'état administratif de l'acteur successeur"
+      - name: date_lien_succession
+        description: "La date du lien de succession"
+      - name: transfert_siege
+        description: "Le transfert de siège"
+      - name: continuite_economique
+        description: "La continuité économique"
+    config:
+      materialized: table
+      tags:
+        - exposure
+        - ae
+        - acteurs
+        - siret
+        - lien_succession

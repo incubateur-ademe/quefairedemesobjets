@@ -127,11 +127,11 @@ class EnrichActeursClosedConfig(EnrichBaseConfig):
 
 class EnrichActeursRGPDConfig(EnrichBaseConfig):
     dbt_models_refresh_command: str = Field(
-        default="dbt build --select tag:marts,tag:enrich,tag:rgpd",
+        default="dbt run --select +tag:rgpd --exclude tag:normalisation",
         description="🔄 Commande DBT à exécuter pour rafraîchir les modèles",
     )
     dbt_models_test_command: str = Field(
-        default="dbt test --select tag:marts,tag:enrich,tag:rgpd",
+        default="dbt test --select +tag:rgpd --exclude tag:normalisation",
         description="🧪 Commande DBT à exécuter pour tester les modèles",
     )
 

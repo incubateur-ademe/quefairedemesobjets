@@ -46,8 +46,12 @@ with DAG(
             dbt_models_refresh=True,
             # here we don't want `+`` before `tag`in select because the data were
             # prepared when it was cloned
-            dbt_models_refresh_command=("dbt build --select tag:closed"),
-            dbt_models_test_command=("dbt test --select tag:closed"),
+            dbt_models_refresh_command=(
+                "dbt run --select +tag:closed --exclude tag:normalisation"
+            ),
+            dbt_models_test_command=(
+                "dbt test --select +tag:closed --exclude tag:normalisation"
+            ),
             filter_equals__acteur_statut="ACTIF",
         )
     ),

@@ -43,6 +43,7 @@ models:
         - ae
         - annuaire_entreprises
         - etablissement
+        - normalisation
       indexes:
         - columns: ['siret']
           unique: true
@@ -97,6 +98,7 @@ models:
         - ae
         - annuaire_entreprises
         - lien_succession
+        - normalisation
       indexes:
         - columns: ['siret_predecesseur']
           type: btree
@@ -150,6 +152,7 @@ models:
         - intermediate
         - ae
         - annuaire_entreprises
+        - normalisation
         - unite_legale
       indexes:
         - columns: ['siren']

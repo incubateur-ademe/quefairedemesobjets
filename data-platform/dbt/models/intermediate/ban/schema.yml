@@ -1,0 +1,18 @@
+version: 2
+
+models:
+  - name: int_ban_adresses
+    description: ''
+    config:
+      materialized: table
+      tags:
+        - intermediate
+        - normalisation
+        - ban
+        - adresses
+      indexes:
+        - columns: ['code_postal']
+        - columns: ['code_departement']
+      post_hook:
+        - "CREATE INDEX ON {{ this }}(ville_ancienne) WHERE ville_ancienne IS NOT NULL"
+        - "CREATE INDEX ON {{ this }}(adresse_numero) WHERE adresse_numero IS NOT NULL"

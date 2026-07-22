@@ -147,9 +147,7 @@ data-platform/dbt/
         │   ├── exposure_stats_acteur_no_siren_actif.sql
         │   ├── exposure_stats_distance_nb_acteur_by_action.sql
         │   └── ...
-        └── geo/
-            ├── schema.yml
-            └── exposure_epci.sql
+        └── ...
 ```
 
 ## Patterns
