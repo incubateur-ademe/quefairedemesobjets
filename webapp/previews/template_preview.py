@@ -1198,6 +1198,23 @@ class AccessibilitePreview(LookbookPreview):
             "ui/components/accessibilite/liens_explicites_demo.html",
         )
 
+    def A11Y_14_acteur_section_heading_level(self, **kwargs):
+        """RGAA 9.1 — niveau de titre cohérent dans la fiche acteur.
+
+        Le titre de la fiche acteur (`object.libelle`) est rendu en
+        `<h3>` en contexte Turbo (panneau de détail). Les titres de
+        section (« Adresse », « Services disponibles », etc.) étaient
+        eux aussi en `<h3>`, cassant la hiérarchie de titres. Ils
+        passent en `<h4>`.
+        """
+        acteur = DisplayedActeur.objects.first()
+        context = {"object": acteur}
+        return render_to_string(
+            "ui/components/acteur/tabs/sections/adresse.html", context
+        ) + render_to_string(
+            "ui/components/acteur/tabs/sections/services_disponibles.html", context
+        )
+
 
 class TestsPreview(LookbookPreview):
     """
