@@ -3,7 +3,7 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Recherche" href="../../search.html"><link rel="next" title="Sources d’ingestion et référentiels d’enrichissement" href="sources.html"><link rel="prev" title="Data Platform" href="README.html">
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Recherche" href="../../search.html"><link rel="next" title="Ingestion sources and enrichment reference data" href="sources.html"><link rel="prev" title="Data Platform" href="README.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
         <title>Airflow - Documentation Que faire de mes objets et déchets</title>
@@ -268,7 +268,8 @@
 </li>
 <li class="toctree-l2 current has-children"><a class="reference internal" href="README.html">Data Platform</a><input aria-label="Toggle navigation of Data Platform" checked="" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l3 current current-page"><a class="current reference internal" href="#">Airflow</a></li>
-<li class="toctree-l3"><a class="reference internal" href="sources.html">Sources d’ingestion et référentiels d’enrichissement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sources.html">Ingestion sources and enrichment reference data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="clone-referentials.html">Clone — Enrichment reference data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="dbt.html">dbt Documentation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="clustering-deduplication.html">Clustering &amp; Deduplication</a></li>
 <li class="toctree-l3"><a class="reference internal" href="enrich-siret-siren.html">Enrich — Acteurs SIRET &amp; SIREN (<code class="docutils literal notranslate"><span class="pre">enrich_siret_siren</span></code>)</a></li>
@@ -380,7 +381,7 @@
 </tr>
 <tr class="row-odd"><td><p>Clonage de référentiels d’enrichissement</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">clone_ban_*</span></code>, <code class="docutils literal notranslate"><span class="pre">clone_ae_*</span></code>, <code class="docutils literal notranslate"><span class="pre">clone_laposte_codes_postaux</span></code>, <code class="docutils literal notranslate"><span class="pre">clone_koumoul_epci</span></code>, <code class="docutils literal notranslate"><span class="pre">clone_insee_commune</span></code>, <code class="docutils literal notranslate"><span class="pre">clone_ca_*</span></code></p></td>
-<td><p>Hebdo dimanche 00:00–02:00</p></td>
+<td><p>Hebdo / mensuel — voir <a class="reference internal" href="#clone-referentiels.md"><span class="xref myst">Clone</span></a></p></td>
 </tr>
 <tr class="row-even"><td><p>Enrichissement des acteurs</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">enrich_acteurs_*</span></code> (RGPD, fermés, villes, code postal)</p></td>
@@ -610,7 +611,7 @@ flowchart TB
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Sources d’ingestion et référentiels d’enrichissement</div>
+                <div class="title">Ingestion sources and enrichment reference data</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>

@@ -3,7 +3,7 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Recherche" href="../../search.html"><link rel="next" title="Clustering &amp; Deduplication" href="clustering-deduplication.html"><link rel="prev" title="Sources d’ingestion et référentiels d’enrichissement" href="sources.html">
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Recherche" href="../../search.html"><link rel="next" title="Clustering &amp; Deduplication" href="clustering-deduplication.html"><link rel="prev" title="Clone — Enrichment reference data" href="clone-referentials.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
         <title>dbt Documentation - Documentation Que faire de mes objets et déchets</title>
@@ -268,7 +268,8 @@
 </li>
 <li class="toctree-l2 current has-children"><a class="reference internal" href="README.html">Data Platform</a><input aria-label="Toggle navigation of Data Platform" checked="" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="airflow.html">Airflow</a></li>
-<li class="toctree-l3"><a class="reference internal" href="sources.html">Sources d’ingestion et référentiels d’enrichissement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sources.html">Ingestion sources and enrichment reference data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="clone-referentials.html">Clone — Enrichment reference data</a></li>
 <li class="toctree-l3 current current-page"><a class="current reference internal" href="#">dbt Documentation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="clustering-deduplication.html">Clustering &amp; Deduplication</a></li>
 <li class="toctree-l3"><a class="reference internal" href="enrich-siret-siren.html">Enrich — Acteurs SIRET &amp; SIREN (<code class="docutils literal notranslate"><span class="pre">enrich_siret_siren</span></code>)</a></li>
@@ -821,6 +822,7 @@ exposure_stats_acteur_stacked_history.sql  (incremental: daily snapshot with cou
 <li><p><strong>Use base layer</strong> - Clean data once in base, reuse everywhere</p></li>
 <li><p><strong>Test aggressively</strong> - <code class="docutils literal notranslate"><span class="pre">not_null</span></code>, <code class="docutils literal notranslate"><span class="pre">unique</span></code>, <code class="docutils literal notranslate"><span class="pre">data_tests</span></code> on key columns</p></li>
 <li><p><strong>Document everything</strong> - Column descriptions in <code class="docutils literal notranslate"><span class="pre">schema.yml</span></code></p></li>
+<li><p><strong>Sort schema.yml models alphabetically</strong> - List entries under <code class="docutils literal notranslate"><span class="pre">models:</span></code> in alphabetical order by name</p></li>
 <li><p><strong>Use incremental</strong> - For history/snapshot tables (exposure layer)</p></li>
 <li><p><strong>Use tags</strong> - Tag models by subject (<code class="docutils literal notranslate"><span class="pre">stats</span></code>, <code class="docutils literal notranslate"><span class="pre">acteurs</span></code>) and layer (<code class="docutils literal notranslate"><span class="pre">base</span></code>, <code class="docutils literal notranslate"><span class="pre">marts</span></code>)</p></li>
 <li><p><strong>Use <code class="docutils literal notranslate"><span class="pre">env_var</span></code> for sampling</strong> - <code class="docutils literal notranslate"><span class="pre">DBT_SAMPLING=true</span></code> for faster dev cycles</p></li>
@@ -853,14 +855,14 @@ exposure_stats_acteur_stacked_history.sql  (incremental: daily snapshot with cou
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="sources.html">
+          <a class="prev-page" href="clone-referentials.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Sources d’ingestion et référentiels d’enrichissement</div>
+                <div class="title">Clone — Enrichment reference data</div>
                 
               </div>
             </a>

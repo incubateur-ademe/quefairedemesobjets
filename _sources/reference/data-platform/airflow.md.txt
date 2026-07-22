@@ -14,20 +14,20 @@
 
 ## Vue d'ensemble des DAGs
 
-| Activité                                                     | DAG(s)                                                                                                                | Schedule                         |
-| ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
-| Ingestion des données des sources                            | `eo-*`, `cma`, `pharmacies`, `source_sinoe`, `source-s3`                                                              | Manuel (`None`) — tag : `source` |
-| Clonage de référentiels d'enrichissement                     | `clone_ban_*`, `clone_ae_*`, `clone_laposte_codes_postaux`, `clone_koumoul_epci`, `clone_insee_commune`, `clone_ca_*` | Hebdo dimanche 00:00–02:00       |
-| Enrichissement des acteurs                                   | `enrich_acteurs_*` (RGPD, fermés, villes, code postal)                                                                | Manuel                           |
-| Crawl & validation des URLs                                  | `crawl_urls_suggestions`                                                                                              | Manuel                           |
-| Clustering / déduplication                                   | `cluster_acteur_suggestions`                                                                                          | Manuel                           |
-| Application des suggestions validées                         | `apply_suggestions`, `apply_suggestions_groupe`                                                                       | Toutes les 5 min                 |
-| Calcul des tables d'acteurs affichés + import dans la webapp | `compute_acteurs` (dbt + FDW)                                                                                         | Quotidien `0 0 * * *`            |
-| Refresh des modèles dbt d'enrichissement                     | `enrich_dbt_models_refresh`                                                                                           | Quotidien `0 0 * * *`            |
-| Calcul des statistiques                                      | `compute_stats` (`dbt run/test tag:stats`)                                                                            | Hebdo lundi 02:00                |
-| Export opendata                                              | `export_opendata_dag` → S3 `lvao-opendata`                                                                            | Hebdo lundi 01:00                |
-| Maintenance — purge metadata Airflow                         | `airflow_cleanup_db` (`airflow db clean --skip-archive`, rétention 7 j)                                               | Quotidien `0 0 * * *`            |
-| Maintenance — purge logs DB Scaleway                         | `purge_log_db` (`scw rdb log purge`)                                                                                  | Toutes les heures à xx:03        |
+| Activité                                                     | DAG(s)                                                                                                                | Schedule                                              |
+| ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Ingestion des données des sources                            | `eo-*`, `cma`, `pharmacies`, `source_sinoe`, `source-s3`                                                              | Manuel (`None`) — tag : `source`                      |
+| Clonage de référentiels d'enrichissement                     | `clone_ban_*`, `clone_ae_*`, `clone_laposte_codes_postaux`, `clone_koumoul_epci`, `clone_insee_commune`, `clone_ca_*` | Hebdo / mensuel — voir [Clone](clone-referentiels.md) |
+| Enrichissement des acteurs                                   | `enrich_acteurs_*` (RGPD, fermés, villes, code postal)                                                                | Manuel                                                |
+| Crawl & validation des URLs                                  | `crawl_urls_suggestions`                                                                                              | Manuel                                                |
+| Clustering / déduplication                                   | `cluster_acteur_suggestions`                                                                                          | Manuel                                                |
+| Application des suggestions validées                         | `apply_suggestions`, `apply_suggestions_groupe`                                                                       | Toutes les 5 min                                      |
+| Calcul des tables d'acteurs affichés + import dans la webapp | `compute_acteurs` (dbt + FDW)                                                                                         | Quotidien `0 0 * * *`                                 |
+| Refresh des modèles dbt d'enrichissement                     | `enrich_dbt_models_refresh`                                                                                           | Quotidien `0 0 * * *`                                 |
+| Calcul des statistiques                                      | `compute_stats` (`dbt run/test tag:stats`)                                                                            | Hebdo lundi 02:00                                     |
+| Export opendata                                              | `export_opendata_dag` → S3 `lvao-opendata`                                                                            | Hebdo lundi 01:00                                     |
+| Maintenance — purge metadata Airflow                         | `airflow_cleanup_db` (`airflow db clean --skip-archive`, rétention 7 j)                                               | Quotidien `0 0 * * *`                                 |
+| Maintenance — purge logs DB Scaleway                         | `purge_log_db` (`scw rdb log purge`)                                                                                  | Toutes les heures à xx:03                             |
 
 Les DAGs `compute_acteurs` matérialisent les tables d'acteurs via `IMPORT FOREIGN SCHEMA … LIMIT TO (…)` puis `INSERT INTO … SELECT` puis renommage atomique (swap `*_to_remove` → `DROP CASCADE`) pour minimiser le downtime. Voir [`db/db_organisation.md`](../db/db_organisation.md) pour le détail de la liaison `postgres_fdw`.
 
