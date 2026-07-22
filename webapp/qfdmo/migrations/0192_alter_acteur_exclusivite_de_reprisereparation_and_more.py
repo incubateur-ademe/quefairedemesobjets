@@ -6,28 +6,98 @@ BOOLEAN_FIELDS = ("exclusivite_de_reprisereparation", "uniquement_sur_rdv")
 TABLES = ("qfdmo_acteur", "qfdmo_displayedacteur", "qfdmo_vueacteur")
 
 
-def _alter_boolean_columns_sql(*, reverse: bool = False) -> str:
-    statements: list[str] = []
-    for table in TABLES:
-        for column in BOOLEAN_FIELDS:
-            if reverse:
-                statements.extend(
-                    [
-                        f'ALTER TABLE "{table}" ALTER COLUMN "{column}" DROP DEFAULT;',
-                        f'ALTER TABLE "{table}" ALTER COLUMN "{column}" DROP NOT NULL;',
-                    ]
-                )
-            else:
-                statements.extend(
-                    [
-                        f'ALTER TABLE "{table}" ALTER COLUMN "{column}" SET DEFAULT false;',
-                        f'ALTER TABLE "{table}" ALTER COLUMN "{column}" SET NOT NULL;',
-                    ]
-                )
-    return "\n".join(statements)
+def _constraint_name(table: str, column: str) -> str:
+    # Doit rester sous les 63 caractères imposés par PostgreSQL
+    return f"{table}_{column}_nn"
+
+
+def _not_null_operations(table: str, column: str) -> list[migrations.RunSQL]:
+    """Passe une colonne en NOT NULL sans scan bloquant.
+
+    Un ALTER COLUMN ... SET NOT NULL classique scanne toute la table en tenant
+    un verrou ACCESS EXCLUSIVE : sur les tables acteurs c'est long et ça bloque
+    lectures comme écritures. Depuis PostgreSQL 12, si une contrainte CHECK
+    (col IS NOT NULL) validée existe, le SET NOT NULL la réutilise et devient
+    instantané. Et VALIDATE CONSTRAINT ne prend qu'un verrou SHARE UPDATE
+    EXCLUSIVE, qui laisse passer le trafic applicatif pendant le scan.
+
+    Chaque étape est un RunSQL distinct : la migration tourne hors transaction
+    (atomic = False), donc chaque instruction obtient et relâche son verrou
+    individuellement. Les regrouper dans un seul RunSQL les enfermerait dans
+    une transaction implicite et le verrou de l'ADD CONSTRAINT serait tenu
+    pendant toute la validation — exactement ce qu'on cherche à éviter.
+
+    Les étapes sont idempotentes pour que la migration soit rejouable en cas
+    d'échec en cours de route.
+    """
+    constraint = _constraint_name(table, column)
+    return [
+        migrations.RunSQL(
+            sql=f'ALTER TABLE "{table}" ALTER COLUMN "{column}" SET DEFAULT false;',
+            reverse_sql=(
+                f'ALTER TABLE "{table}" ALTER COLUMN "{column}" DROP DEFAULT;'
+            ),
+        ),
+        # Sans ce backfill la validation échouerait sur les lignes historiques
+        migrations.RunSQL(
+            sql=(
+                f'UPDATE "{table}" SET "{column}" = false ' f'WHERE "{column}" IS NULL;'
+            ),
+            reverse_sql=migrations.RunSQL.noop,
+        ),
+        migrations.RunSQL(
+            sql=f"""
+                DO $$
+                BEGIN
+                    IF NOT EXISTS (
+                        SELECT 1 FROM pg_constraint
+                        WHERE conrelid = '{table}'::regclass
+                          AND conname = '{constraint}'
+                    ) THEN
+                        ALTER TABLE "{table}"
+                            ADD CONSTRAINT "{constraint}"
+                            CHECK ("{column}" IS NOT NULL) NOT VALID;
+                    END IF;
+                END $$;
+            """,
+            reverse_sql=(
+                f'ALTER TABLE "{table}" DROP CONSTRAINT IF EXISTS "{constraint}";'
+            ),
+        ),
+        migrations.RunSQL(
+            sql=f"""
+                DO $$
+                BEGIN
+                    IF NOT EXISTS (
+                        SELECT 1 FROM pg_constraint
+                        WHERE conrelid = '{table}'::regclass
+                          AND conname = '{constraint}'
+                          AND convalidated
+                    ) THEN
+                        ALTER TABLE "{table}" VALIDATE CONSTRAINT "{constraint}";
+                    END IF;
+                END $$;
+            """,
+            reverse_sql=migrations.RunSQL.noop,
+        ),
+        # Instantané : PostgreSQL s'appuie sur la contrainte validée ci-dessus
+        migrations.RunSQL(
+            sql=f'ALTER TABLE "{table}" ALTER COLUMN "{column}" SET NOT NULL;',
+            reverse_sql=(
+                f'ALTER TABLE "{table}" ALTER COLUMN "{column}" DROP NOT NULL;'
+            ),
+        ),
+        # La contrainte a joué son rôle, le NOT NULL prend le relais
+        migrations.RunSQL(
+            sql=f'ALTER TABLE "{table}" DROP CONSTRAINT IF EXISTS "{constraint}";',
+            reverse_sql=migrations.RunSQL.noop,
+        ),
+    ]
 
 
 class Migration(migrations.Migration):
+
+    atomic = False
 
     dependencies = [
         ("qfdmo", "0191_rebuild_remote_server_fix_port"),
@@ -36,10 +106,10 @@ class Migration(migrations.Migration):
     operations = [
         migrations.SeparateDatabaseAndState(
             database_operations=[
-                migrations.RunSQL(
-                    sql=_alter_boolean_columns_sql(),
-                    reverse_sql=_alter_boolean_columns_sql(reverse=True),
-                ),
+                operation
+                for table in TABLES
+                for column in BOOLEAN_FIELDS
+                for operation in _not_null_operations(table, column)
             ],
             state_operations=[
                 migrations.AlterField(
