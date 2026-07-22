@@ -1056,16 +1056,22 @@ class AccessibilitePreview(LookbookPreview):
 
     def share_tooltip_acteur_sans_tabindex(self, **kwargs):
         """
-        # Tooltip de partage de la fiche acteur sans tabindex="-1" (RGAA 7.3)
+        # Tooltip de partage de la fiche acteur sans tabindex="-1" (RGAA 7.3, 7.2, 12.8, 12.11)
 
         Les liens et le bouton du tooltip de partage de la fiche acteur,
         sur la carte, ne portent plus `tabindex="-1"` : ils sont à nouveau
         atteignables au clavier.
 
+        Le tooltip ne porte plus non plus `tabindex="1"` (un tabindex
+        positif perturbe l'ordre de tabulation naturel), ni
+        `role="toolbar"` sur `.fr-share` (non pertinent, ce n'est pas une
+        barre d'outils avec navigation flèches), ni `aria-describedby` sur
+        le bouton (le tooltip n'est pas une description du bouton).
+
         Pour rendre le tooltip visible dans la prévisualisation, le wrapper
         `.fr-tooltip` est volontairement positionné statiquement.
 
-        Cf. carte Notion A11Y-9.
+        Cf. carte Notion A11Y-9, A11Y-3333 (item 5), A11Y-3343, A11Y-3344.
         """
         request = RequestFactory().get("/")
         context = Context(
