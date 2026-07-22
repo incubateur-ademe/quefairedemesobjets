@@ -20,6 +20,24 @@ test.describe("♿ RGAA", () => {
       await expect(page.locator("h3", { hasText: "Adresse" })).toHaveCount(0)
     })
   })
+  test.describe("[Carte] 7.2 / 12.8 / 12.11 — Tooltip de partage nettoyé", () => {
+    test('Le tooltip de partage n\'a pas de tabindex positif, ni role="toolbar", ni aria-describedby', async ({
+      page,
+    }) => {
+      await navigateTo(
+        page,
+        "/lookbook/preview/accessibilite/share_tooltip_acteur_sans_tabindex/",
+      )
+      const shareButton = page.locator('button:has(span:text("partager"))')
+      await expect(shareButton).not.toHaveAttribute("aria-describedby", /.+/)
+
+      const tooltip = page.locator(".fr-tooltip")
+      await expect(tooltip).not.toHaveAttribute("tabindex", "1")
+
+      const shareToolbar = page.locator(".fr-share")
+      await expect(shareToolbar).not.toHaveAttribute("role", "toolbar")
+    })
+  })
   test.describe("[Carte] 5.4 / 5.6 — Titre et en-têtes du tableau mode liste", () => {
     test("Le tableau a une légende (<caption>) non vide", async ({ page }) => {
       await navigateTo(
