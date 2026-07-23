@@ -4,6 +4,7 @@ import logging
 import tempfile
 from pathlib import Path
 
+from clone.tasks.business_logic.fix_corrupted_utf8 import fix_corrupted_utf8_file
 from pydantic import AnyUrl
 from shared.config.airflow import TMP_FOLDER
 from utils import logging_utils as log
@@ -139,6 +140,7 @@ def commands_download_to_disk_first(
     delimiter: str,
     table_name: str,
     convert_downloaded_file_to_utf8: bool,
+    fix_corrupted_utf8_sed_substitutions: list[str],
     dry_run: bool,
 ):
     """Commands to create table while first dowloading to disk"""
@@ -175,6 +177,18 @@ def commands_download_to_disk_first(
             )
             file_unpacked = file_converted
 
+        if fix_corrupted_utf8_sed_substitutions:
+            file_path = Path(folder) / file_unpacked
+            logger.info(
+                "Correction UTF-8 dans %s avec %r",
+                file_path,
+                fix_corrupted_utf8_sed_substitutions,
+            )
+            fix_corrupted_utf8_file(
+                file_path=file_path,
+                sed_substitutions=fix_corrupted_utf8_sed_substitutions,
+            )
+
         # Load into DB
         if file_unpacked.endswith(".csv"):
             cmd_psql = command_psql_copy_from_csv(
@@ -200,6 +214,7 @@ def clone_table_create(
     table_name: str,
     table_schema_file_path: Path,
     convert_downloaded_file_to_utf8: bool,
+    fix_corrupted_utf8_sed_substitutions: list[str],
     dry_run: bool,
 ) -> None:
     django_setup_full()
@@ -232,6 +247,7 @@ def clone_table_create(
                 delimiter=delimiter,
                 table_name=table_name,
                 convert_downloaded_file_to_utf8=convert_downloaded_file_to_utf8,
+                fix_corrupted_utf8_sed_substitutions=fix_corrupted_utf8_sed_substitutions,
                 dry_run=dry_run,
             )
         elif clone_method == "stream_directly":
