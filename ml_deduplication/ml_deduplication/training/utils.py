@@ -151,3 +151,43 @@ def stringify_params_list(
     params.pop("features_names")
 
     return params
+
+
+def generate_pred_pairs_df(dedupe_partitions):
+    entities = []
+    for cluster_idx, (ids, scores) in enumerate(dedupe_partitions):
+        if len(ids) < 2:
+            continue
+        for eid, score in zip(ids, scores):
+            entities.append(
+                {
+                    "identifiant_unique": eid,
+                    "score": float(score),
+                    "cluster_label": cluster_idx,
+                }
+            )
+
+    df_entities = pl.DataFrame(
+        entities,
+        schema={
+            "identifiant_unique": pl.String,
+            "score": pl.Float64,
+            "cluster_label": pl.Int64,
+        },
+    )
+
+    df_pairs = (
+        df_entities.join(df_entities, on="cluster_label", suffix="_j")
+        .filter(pl.col("identifiant_unique") != pl.col("identifiant_unique_j"))
+        .with_columns(
+            pl.min_horizontal(["identifiant_unique", "identifiant_unique_j"]).alias(
+                "identifiant_unique_i"
+            ),
+            pl.max_horizontal(["identifiant_unique", "identifiant_unique_j"]).alias(
+                "identifiant_unique_j"
+            ),
+        )
+        .unique(["identifiant_unique_i", "identifiant_unique_j"])
+    )
+
+    return df_pairs

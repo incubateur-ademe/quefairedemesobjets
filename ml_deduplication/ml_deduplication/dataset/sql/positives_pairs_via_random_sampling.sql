@@ -19,7 +19,17 @@ inner join pool p2 on
 	and p.identifiant_unique != p2.identifiant_unique
 where
   coalesce(p.source_id, -1) != coalesce(p2.source_id, -2) -- les deux acteurs n'ont pas la même source
-  AND coalesce(p.acteur_type_id, -1) = coalesce(p2.acteur_type_id, -2) -- les deux acteurs sont du même type
+  AND (
+	coalesce(p.acteur_type_id, -1) = coalesce(p2.acteur_type_id, -2)
+	OR (
+		coalesce(p.acteur_type_id, -1) = 4
+		and coalesce(p2.acteur_type_id, -1) = 3
+	)
+	OR (
+		coalesce(p.acteur_type_id, -1) = 3
+		and coalesce(p2.acteur_type_id, -1) = 4
+	)
+	) -- les deux acteurs sont du même type ou Commerce et Artisans
   AND p.acteur_type_id!=10 AND p2.acteur_type_id!=10 -- Exclusion des PAV publics
 )
 select

@@ -1,12 +1,13 @@
-import io
+import argparse
 import json
 import logging
 import time
 from datetime import datetime
 from pathlib import Path
 
-import dedupe
 import polars as pl
+from tqdm import tqdm
+from tqdm.contrib.logging import tqdm_logging_redirect
 
 from ml_deduplication.evaluation.metrics.cluster import generate_full_cluster_report
 from ml_deduplication.evaluation.metrics.pairwise import pairwise_metrics_from_clusters
@@ -14,6 +15,7 @@ from ml_deduplication.training.model import BusinessRulesDedupe
 from ml_deduplication.training.model_selection import (
     generate_parameter_grid,
     select_best_threshold,
+    get_default_hyperparameters,
 )
 from ml_deduplication.training.utils import (
     build_entities_dict,
@@ -23,6 +25,7 @@ from ml_deduplication.training.utils import (
     partition_to_results_dict,
     split_train_dev,
     stringify_params_list,
+    generate_pred_pairs_df,
 )
 
 logging.basicConfig(
@@ -34,57 +37,9 @@ logger = logging.getLogger(__name__)
 LOGS_FOLDER = Path(__file__).parent.parent.parent / "logs"
 
 
-def train_deduper(
-    df_train: pl.DataFrame,
-    entities_dict: dict,
-    dedupe_variables_definition: list,
-    index_predicates: bool = True,
-) -> BusinessRulesDedupe:
-    """
-    Entraîne un objet dedupe.Dedupe à partir des paires labellisées de
-    `df_train_sub`, sans passer par l'apprentissage actif interactif.
-
-    entities contient tous les acteurs dans un dictionnaire format dedupe.
-    """
-
-    deduper = BusinessRulesDedupe(dedupe_variables_definition)
-
-    train_ids = set(df_train["identifiant_unique_i"].to_list()) | set(
-        df_train["identifiant_unique_j"].to_list()
-    )
-    train_entities = {i: entities_dict[i] for i in train_ids}
-
-    # Construct labeled_pairs before training
-    labeled_pairs = {"match": [], "distinct": []}
-    for row in df_train.iter_rows(named=True):
-        pair = (
-            entities_dict[row["identifiant_unique_i"]],
-            entities_dict[row["identifiant_unique_j"]],
-        )
-        labeled_pairs["match" if row["label"] else "distinct"].append(pair)
-
-    # Serialize labeled_pairs to a training file in memory
-    training_file = io.StringIO()
-    dedupe.write_training(labeled_pairs, training_file)
-    training_file.seek(0)
-
-    # use the serialized training file to avoid using mark_pairs
-    # that can cause bugs depending of sample size
-    deduper.prepare_training(
-        train_entities,
-        training_file=training_file,
-        sample_size=max(10000, len(train_ids)),
-    )
-
-    deduper.train(index_predicates=index_predicates)
-    deduper.cleanup_training()
-
-    return deduper
-
-
 def run_training_with_hyperparameter_tuning(
     df_features: pl.DataFrame,
-) -> tuple[BusinessRulesDedupe | None, dict | None]:
+) -> tuple[BusinessRulesDedupe | None, dict | None, pl.DataFrame | None]:
     param_grid = generate_parameter_grid()
 
     training_results = {"training_results": [], "best_results": {}}
@@ -93,25 +48,41 @@ def run_training_with_hyperparameter_tuning(
     best_metrics = None
     best_params = {}
     best_model = None
-
+    best_df_pairs_test_pred = None
     start_time = time.time()
-    for params in param_grid:
-        logger.info("Training with params : %s", params)
-        model, results = run_training_pipeline(df_features, params)
-        logger.info("----" * 15)
-        training_results["training_results"].append(
-            {
-                "params": stringify_params_list(params),
-                "metrics": {k: v for k, v in results.items() if k != "pred_clusters"},
-            }
-        )
-        if (
-            training_precision := results["test_results"]["pairwise"]["precision"]
-        ) > best_precision:
-            best_precision = training_precision
-            best_metrics = results
-            best_params = params
-            best_model = model
+
+    with tqdm_logging_redirect():
+        with tqdm(
+            param_grid, "Training model with hyperparameter tuning", colour="green"
+        ) as t:
+            for params in t:
+                logger.info("Training with params : %s", params)
+                model, results, df_pairs_test_pred = run_training_pipeline(
+                    df_features, params
+                )
+                logger.info("----" * 15)
+                training_results["training_results"].append(
+                    {
+                        "params": stringify_params_list(params),
+                        "metrics": {
+                            k: v for k, v in results.items() if k != "pred_clusters"
+                        },
+                    }
+                )
+                if (
+                    training_precision := results["test_results"]["pairwise"][
+                        "precision"
+                    ]
+                ) > best_precision:
+                    best_precision = training_precision
+                    best_metrics = results
+                    best_params = params
+                    best_model = model
+                    best_df_pairs_test_pred = df_pairs_test_pred
+                    t.set_description(
+                        "Training model with hyperparameter tuning. Current best precision %s"
+                        % best_precision
+                    )
 
     end_time = time.time()
     total_time = end_time - start_time
@@ -130,12 +101,12 @@ def run_training_with_hyperparameter_tuning(
         best_params,
     )
 
-    return best_model, training_results
+    return best_model, training_results, best_df_pairs_test_pred
 
 
 def run_training_pipeline(
     df_features: pl.DataFrame, training_hyperparameters: dict
-) -> tuple[BusinessRulesDedupe, dict]:
+) -> tuple[BusinessRulesDedupe, dict, pl.DataFrame]:
 
     results = {}
 
@@ -151,18 +122,22 @@ def run_training_pipeline(
     entities_dict = build_entities_dict(df_features, features_names=features_names)
 
     # split train into train/dev
-    df_train, df_dev = split_train_dev(df_features.filter(pl.col("split") == "train"))
+    df_train_sub, df_dev = split_train_dev(
+        df_features.filter(pl.col("split") == "train")
+    )
 
     # config variables
     dedupe_variables_config = training_hyperparameters["dedupe_variables_config"]
 
     # train dedupe
     logger.info("Starting dedupe training")
-    deduper = BusinessRulesDedupe(variable_definition=dedupe_variables_config)
+    deduper = BusinessRulesDedupe(
+        variable_definition=dedupe_variables_config,
+        index_predicates=training_hyperparameters["index_predicates"],
+    )
     deduper.fit(
-        df_train,
+        df_train_sub,
         entities_dict,
-        training_hyperparameters["index_predicates"],
     )
     logger.info("Finished dedupe training")
 
@@ -194,10 +169,13 @@ def run_training_pipeline(
 
     # train on full dataset (train+dev)
     logger.info("Starting dedupe training on full training set")
-    deduper = train_deduper(
+    deduper = BusinessRulesDedupe(
+        variable_definition=dedupe_variables_config,
+        index_predicates=training_hyperparameters["index_predicates"],
+    )
+    deduper.fit(
         df_features.filter(pl.col("split") == "train"),
         entities_dict,
-        dedupe_variables_config,
     )
     logger.info("Finished dedupe training on full training set")
 
@@ -213,15 +191,17 @@ def run_training_pipeline(
     id_to_cluster_id_dict_test = {
         k: v for k, v in acteur_to_cluster_id_dict.items() if k in entities_ids_test
     }
-    partition_test = deduper.partition(
+    partition_test_pred = deduper.partition(
         data=entities_dict_test, threshold=best_threshold
     )  # type: ignore
-    id_to_cluster_test_pred = partition_to_dict(partition_test)
+    id_to_cluster_test_pred = partition_to_dict(partition_test_pred)
+    df_pairs_pred = generate_pred_pairs_df(partition_test_pred)
+
     pairwise_metrics = pairwise_metrics_from_clusters(
         id_to_cluster_id_dict_test, id_to_cluster_test_pred
     )
     logger.info("Test pairwise metrics: %s", pairwise_metrics)
-    results["pred_clusters"] = partition_to_results_dict(partition_test)
+    results["pred_clusters"] = partition_to_results_dict(partition_test_pred)
 
     clusterwise_metrics = generate_full_cluster_report(
         id_to_cluster_id_dict_test, id_to_cluster_test_pred
@@ -232,13 +212,77 @@ def run_training_pipeline(
         "clusterwise": clusterwise_metrics,
     }
 
-    return deduper, results
+    return deduper, results, df_pairs_pred
+
+
+def parse_args() -> argparse.Namespace:
+    """Parse command-line arguments for the training pipeline."""
+    parser = argparse.ArgumentParser(
+        description="Run the ML deduplication training pipeline.",
+    )
+
+    parser.add_argument(
+        "dataset_path",
+        type=Path,
+        help="Path to the features dataset parquet file.",
+    )
+    parser.add_argument(
+        "--log-dir",
+        type=Path,
+        default=LOGS_FOLDER,
+        help=f"Directory to save training results (default: {LOGS_FOLDER}).",
+    )
+    parser.add_argument(
+        "--mode",
+        choices=["simple", "tuning"],
+        default="simple",
+        help="Training mode: 'simple' for a single run, 'tuning' for hyperparameter tuning (default: simple).",
+    )
+
+    return parser.parse_args()
 
 
 if __name__ == "__main__":
-    df_features = pl.read_parquet("datasets/features_dataset_20260718.parquet")
-    deduper, results = run_training_with_hyperparameter_tuning(df_features)
-    with (LOGS_FOLDER / f"training_results_{datetime.now():%Y_%m_%d_%H%M}.json").open(
-        "w"
-    ) as f:
+    args = parse_args()
+
+    # Validate dataset exists
+    if not args.dataset_path.exists():
+        logger.error("Dataset not found: %s", args.dataset_path)
+        raise SystemExit(1)
+
+    # Ensure log directory exists
+    args.log_dir.mkdir(parents=True, exist_ok=True)
+
+    logger.info("Loading features dataset at path %s", args.dataset_path)
+    df_features = pl.read_parquet(args.dataset_path)
+
+    timestamp = datetime.now().strftime("%Y_%m_%d_%H%M")
+
+    if args.mode == "tuning":
+        logger.info("Running hyperparameter tuning training")
+        deduper, results, df_pairs_test_pred = run_training_with_hyperparameter_tuning(
+            df_features
+        )
+    else:
+        logger.info("Running simple training with default parameters")
+        default_params = get_default_hyperparameters()
+        deduper, results, df_pairs_test_pred = run_training_pipeline(
+            df_features, default_params
+        )
+
+    output_file = args.log_dir / f"training_results_{args.mode}_{timestamp}.json"
+    logger.info("Writing logs file at path %s", output_file)
+    with output_file.open("w") as f:
         json.dump(results, f)
+
+    if df_pairs_test_pred is not None:
+        output_df_pairs_test_pred = (
+            args.log_dir / f"training_{args.mode}_{timestamp}_test_pred_pairs.parquet"
+        )
+        logger.info(
+            "Writing df pairs test pred parquet file at path %s",
+            output_df_pairs_test_pred,
+        )
+        df_pairs_test_pred.write_parquet(output_df_pairs_test_pred)
+
+    logger.info("Results saved to %s", output_file)

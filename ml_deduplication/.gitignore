@@ -1,3 +1,4 @@
-# Training artifacts
+# Training and evaluation artifacts
 datasets/*
 logs/*
+outputs/*

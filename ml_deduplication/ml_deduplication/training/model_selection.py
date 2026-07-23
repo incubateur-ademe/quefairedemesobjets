@@ -84,3 +84,13 @@ def generate_parameter_grid() -> ParameterGrid:
     }
 
     return ParameterGrid(param_grid)
+
+
+def get_default_hyperparameters() -> dict:
+    params = {
+        "index_predicates": True,
+        "dedupe_variables_config": DEDUPE_VARIABLES_CONFIG_RESTRICTED,
+        "features_names": FEATURES_NAMES_FROM_DATASET,
+    }
+
+    return params
