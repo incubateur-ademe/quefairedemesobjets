@@ -54,7 +54,6 @@ FROM
   and not a.est_parent and not b.est_parent -- On exclue les parent_ids des paires
   AND coalesce(a.parent_id, 'N/A') != coalesce(b.parent_id, 'N/A2') -- les deux acteurs n'ont pas le même parent
   AND coalesce(a.source_id, -1) != coalesce(b.source_id, -2) -- les deux acteurs n'ont pas la même source
-  AND coalesce(a.acteur_type_id, -1) != coalesce(b.acteur_type_id, -2) -- les deux acteurs ne sont pas du même type
   AND a.acteur_type_id!=10 AND b.acteur_type_id!=10 -- Exclusion des PAV publics
   AND (
     ST_DistanceSpheroid (a."location"::geometry, b."location"::geometry) >= 10000

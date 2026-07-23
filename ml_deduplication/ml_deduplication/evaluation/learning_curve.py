@@ -1,7 +1,22 @@
+import argparse
+from datetime import datetime
 import logging
+import json
+from pathlib import Path
+
 
 import numpy as np
 import polars as pl
+import plotly.graph_objects as go
+
+from tqdm import tqdm
+from tqdm.contrib.logging import tqdm_logging_redirect
+
+from ml_deduplication.training.training_pipeline import run_training_pipeline
+from ml_deduplication.training.features import (
+    DEDUPE_VARIABLES_CONFIG_FULL,
+    FEATURES_NAMES_FROM_DATASET,
+)
 
 RANDOM_SEED = 42
 
@@ -64,6 +79,9 @@ def generate_df_features_subset(
     df_features: pl.DataFrame, train_fraction: float
 ) -> pl.DataFrame:
 
+    if train_fraction == 1.0:
+        return df_features
+
     df_test = df_features.filter(pl.col("split") == "test")
     df_train = df_features.filter(pl.col("split") == "train")
 
@@ -110,14 +128,149 @@ def generate_df_features_subset(
     return df_final
 
 
+def generate_plotly_graph(trainings_results: list[dict]) -> go.Figure:
+
+    training_sizes = []
+    training_pairwise_precision_list = []
+    training_pairwise_recall_list = []
+    training_b3_precision_list = []
+    training_b3_recall_list = []
+    for res in trainings_results:
+        train_size = res["train_size"]
+        pairwise_metrics = res["metrics"]["pairwise"]
+        cluster_metrics = res["metrics"]["clusterwise"]
+
+        training_sizes.append(train_size)
+        training_pairwise_precision_list.append(pairwise_metrics["precision"])
+        training_pairwise_recall_list.append(pairwise_metrics["recall"])
+        training_b3_precision_list.append(cluster_metrics["bcubed"]["precision"])
+        training_b3_recall_list.append(cluster_metrics["bcubed"]["recall"])
+
+    configs = [
+        {
+            "name": "Pairwise precision",
+            "x": training_sizes,
+            "y": training_pairwise_precision_list,
+        },
+        {
+            "name": "Pairwise recall",
+            "x": training_sizes,
+            "y": training_pairwise_recall_list,
+        },
+        {
+            "name": "Bcubed precision",
+            "x": training_sizes,
+            "y": training_b3_precision_list,
+        },
+        {"name": "Bcubed recall", "x": training_sizes, "y": training_b3_recall_list},
+    ]
+
+    lines = []
+
+    for config in configs:
+        line = go.Scatter(
+            x=config["x"],
+            y=config["y"],
+            texttemplate="%{y:.3f}",
+            textposition="top center",
+            name=config["name"],
+            mode="lines+markers+text",
+        )
+        lines.append(line)
+
+    fig = go.Figure(lines)
+    fig.update_yaxes(range=[0, 1.1], showgrid=True)
+    fig.update_xaxes(title="Nombre d'observations dans le jeu d’entraînement")
+    fig.update_layout(
+        template="simple_white",
+        title=f"Courbe d'apprentissage du {datetime.now():%d/%m/%Y}",
+        height=720,
+        width=1280,
+    )
+
+    return fig
+
+
 def generate_learning_curve(
     df_features: pl.DataFrame,
     training_hyperparams: dict,
-    train_sizes=[0.1, 0.33, 0.55, 0.78, 1.0],
-) -> dict:
-    pass
+    train_fractions=[0.1, 0.25, 0.33, 0.50, 0.66, 0.75, 1.0],
+) -> tuple[list[dict], go.Figure]:
+
+    results = []
+
+    with tqdm_logging_redirect():
+        with tqdm(total=len(train_fractions)) as t:
+            for train_fraction in train_fractions:
+                logger.debug(
+                    "------ Running training with %s%% of the dataset ------",
+                    train_fraction * 100,
+                )
+                t.set_description(
+                    "Training with %s%% of the dataset." % (train_fraction * 100)
+                )
+
+                df_features_sub = generate_df_features_subset(
+                    df_features, train_fraction
+                )
+                _model, training_results, _ = run_training_pipeline(
+                    df_features_sub, training_hyperparams
+                )
+
+                results.append(
+                    {
+                        "train_size": train_fraction
+                        * len(df_features.filter(pl.col("split") == "train")),
+                        "metrics": training_results["test_results"],
+                    }
+                )
+                t.update()
+
+    fig = generate_plotly_graph(results)
+    return results, fig
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Generate a learning curve for the ML deduplication pipeline."
+    )
+    parser.add_argument(
+        "dataset_path",
+        type=Path,
+        help="Path to the features dataset (.parquet file).",
+    )
+    parser.add_argument(
+        "output_path",
+        type=Path,
+        help="Directory path to save the results JSON and HTML plot.",
+    )
+    parser.add_argument(
+        "--fractions",
+        type=float,
+        nargs="+",
+        default=[0.1, 0.25, 0.33, 0.50, 0.66, 0.75, 1.0],
+        help="List of training fractions to evaluate (default: 0.1 0.25 0.33 0.50 0.66 0.75 1.0).",
+    )
+    return parser.parse_args()
 
 
 if __name__ == "__main__":
-    df_features = pl.read_parquet("datasets/features_dataset_20260718.parquet")
-    generate_df_features_subset(df_features, 0.1)
+    logger.setLevel(logging.DEBUG)
+
+    args = parse_args()
+
+    df_features = pl.read_parquet(args.dataset_path)
+    training_hyperparams = {
+        "index_predicates": False,
+        "dedupe_variables_config": DEDUPE_VARIABLES_CONFIG_FULL,
+        "features_names": FEATURES_NAMES_FROM_DATASET,
+    }
+    results, fig = generate_learning_curve(
+        df_features, training_hyperparams, args.fractions
+    )
+
+    timestamp = datetime.now().strftime("%Y%m%dT%H%M")
+
+    with open(args.output_path / f"learning_curve_results_{timestamp}.json", "w") as f:
+        json.dump(results, f)
+    fig.write_html(args.output_path / f"learning_curve_{timestamp}.html")

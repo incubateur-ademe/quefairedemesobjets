@@ -155,8 +155,6 @@ DEDUPE_VARIABLES_CONFIG_FULL = DEDUPE_VARIABLES_CONFIG_MANDATORY + [
     dedupe.variables.Interaction(
         "adresse",
         "adresse_complement",
-        "code_postal",
-        "ville",
     ),
     dedupe.variables.Interaction("horaires_osm", "horaires_description"),
     dedupe.variables.Interaction("reprise", "exclusivite_de_reprisereparation"),
@@ -183,6 +181,9 @@ DEDUPE_VARIABLES_CONFIG_RESTRICTED = DEDUPE_VARIABLES_CONFIG_MANDATORY + [
         categories=["7", "8", "5", "6", "1", "9", "3", "2", "12", "11", "4"],
         has_missing=True,
     ),
+    dedupe.variables.String(
+        name="adresse_complement", field="adresse_complement", has_missing=True
+    ),
     dedupe.variables.Exact("code_commune_insee", has_missing=True),
     dedupe.variables.Exact("epci_id", has_missing=True),
     dedupe.variables.Interaction(
@@ -191,7 +192,6 @@ DEDUPE_VARIABLES_CONFIG_RESTRICTED = DEDUPE_VARIABLES_CONFIG_MANDATORY + [
     ),
     dedupe.variables.Interaction(
         "adresse",
-        "code_postal",
-        "ville",
+        "adresse_complement",
     ),
 ]

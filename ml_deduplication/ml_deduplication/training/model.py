@@ -20,6 +20,7 @@ class BusinessRulesDedupe(dedupe.Dedupe):
         *args,
         unique_fields=("source_id",),
         distinct_fields=("acteur_type_id",),
+        index_predicates: bool = True,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
@@ -29,6 +30,7 @@ class BusinessRulesDedupe(dedupe.Dedupe):
 
         self._unique_fields = unique_fields
         self._distinct_fields = distinct_fields
+        self._index_predicates = index_predicates
 
     def prepare_training(
         self,
@@ -65,7 +67,6 @@ class BusinessRulesDedupe(dedupe.Dedupe):
         self,
         df_train: pl.DataFrame,
         entities_dict: dict,
-        index_predicates: bool = True,
     ) -> Self:
         """
         Entraîne un objet dedupe.Dedupe à partir des paires labellisées de
@@ -101,7 +102,7 @@ class BusinessRulesDedupe(dedupe.Dedupe):
             sample_size=max(10000, len(train_ids)),
         )
 
-        self.train(index_predicates=index_predicates)
+        self.train(index_predicates=self._index_predicates)
         self.cleanup_training()
 
         return self
@@ -231,12 +232,20 @@ class BusinessRulesDedupe(dedupe.Dedupe):
             and (entity_a[field] == entity_b[field])
             for field in self._unique_fields
         )
-        distinct_conflicts = any(
-            entity_a[field] is not None
-            and entity_b[field] is not None
-            and (entity_a[field] != entity_b[field])
-            for field in self._distinct_fields
-        )
+
+        distinct_conflicts_list = []
+        for field in self._distinct_fields:
+            if (entity_a[field] is None) or (entity_b[field] is None):
+                distinct_conflicts_list.append(False)
+                continue
+            if field == "acteur_type_id":
+                if ((int(entity_a[field]) == 3) and (int(entity_b[field]) == 4)) or (
+                    (int(entity_a[field]) == 4) and (int(entity_b[field]) == 3)
+                ):
+                    distinct_conflicts_list.append(False)
+                    continue
+            distinct_conflicts_list.append(entity_a[field] != entity_b[field])
+        distinct_conflicts = any(distinct_conflicts_list)
 
         return unique_conflicts or distinct_conflicts
 
