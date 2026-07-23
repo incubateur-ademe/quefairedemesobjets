@@ -45,6 +45,7 @@ def clone_table_create_wrapper(ti) -> None:
         table_name=config.table_name,
         table_schema_file_path=config.table_schema_file_path,
         convert_downloaded_file_to_utf8=config.convert_downloaded_file_to_utf8,
+        fix_corrupted_utf8_sed_substitutions=config.fix_corrupted_utf8_sed_substitutions,
         dry_run=config.dry_run,
     )
 
