@@ -303,6 +303,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "connectorx" },
     { name = "dedupe" },
+    { name = "plotly" },
     { name = "polars" },
     { name = "psycopg", extra = ["binary"] },
     { name = "psycopg2" },
@@ -322,6 +323,7 @@ dev = [
 requires-dist = [
     { name = "connectorx", specifier = ">=0.4.5" },
     { name = "dedupe", specifier = ">=3.0.3" },
+    { name = "plotly", specifier = ">=6.9.0" },
     { name = "polars", specifier = ">=1.42.0" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.3.4" },
     { name = "psycopg2", specifier = ">=2.9.12" },
@@ -384,6 +386,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/94/a8/f98e50356cf167df656c526c2dfeec2d7dde182f2a3da4b458a5938e2776/numpy-2.5.1-cp314-cp314t-win32.whl", hash = "sha256:6eab239876581b2b3c5a242281b6007bbdbcd1c7085d7709bb57c5929b11e6bf", size = 6263298, upload-time = "2026-07-04T17:07:53.445Z" },
     { url = "https://files.pythonhosted.org/packages/72/ac/96ae880cdecad0b3275d9359fcec72667b49a4863c9f12942e43679dda02/numpy-2.5.1-cp314-cp314t-win_amd64.whl", hash = "sha256:83ce9c80d5b521b0d77ddcbe5447c218d247929b6cc056ca5351342accfff0af", size = 12748623, upload-time = "2026-07-04T17:07:55.384Z" },
     { url = "https://files.pythonhosted.org/packages/a1/5a/4d2b1601df3602dba7a14f3348ba9bfe94a18adb428e693df6154c293831/numpy-2.5.1-cp314-cp314t-win_arm64.whl", hash = "sha256:5a6db61f9aaa57e369905c67d852045d3c4f7126405b29d09b19dec118e9c9cb", size = 10697674, upload-time = "2026-07-04T17:07:58.506Z" },
+]
+
+[[package]]
+name = "packaging"
+version = "26.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/d7/f1/e7a6dd94a8d4a5626c03e4e99c87f241ba9e350cd9e6d75123f992427270/packaging-26.2.tar.gz", hash = "sha256:ff452ff5a3e828ce110190feff1178bb1f2ea2281fa2075aadb987c2fb221661", size = 228134, upload-time = "2026-04-24T20:15:23.917Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/df/b2/87e62e8c3e2f4b32e5fe99e0b86d576da1312593b39f47d8ceef365e95ed/packaging-26.2-py3-none-any.whl", hash = "sha256:5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e", size = 100195, upload-time = "2026-04-24T20:15:22.081Z" },
 ]
 
 [[package]]
@@ -455,6 +466,19 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/54/bc/d56f4f79e5ae06b18d378a65c241a7e2ef01d6e3fbaa304411e5b9635680/persistent-6.7-cp314-cp314-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:756bd3f7769a2b5a99c1462620aa4945ce5281b2b42f765f19d17c8666af4e05", size = 245366, upload-time = "2026-05-26T06:58:50.346Z" },
     { url = "https://files.pythonhosted.org/packages/08/0e/e8b2b1d40c2cefed61ab942b187dfb700e2e759fb65dc2785eeaaa5e9d92/persistent-6.7-cp314-cp314-win_amd64.whl", hash = "sha256:2c3f9bd6f5d60af6caf7be8f4064cb33a6f4c56baf464b41888bea342afa0916", size = 132084, upload-time = "2026-05-26T06:58:51.688Z" },
     { url = "https://files.pythonhosted.org/packages/cf/60/d6f12fe7f4aeda2cc67112dc7c6c0cbf06c122a668936396e0788e17f149/persistent-6.7-cp314-cp314-win_arm64.whl", hash = "sha256:ef3f6f034f8bab6e1fd353022e7db18d47be0c16a46a713392d31d7c6cede00c", size = 127253, upload-time = "2026-05-26T06:58:53.512Z" },
+]
+
+[[package]]
+name = "plotly"
+version = "6.9.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "narwhals" },
+    { name = "packaging" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/96/07/795c79dbce40c39bece88e69d049babbd23ffa95b5d117f248db8ea03abb/plotly-6.9.0.tar.gz", hash = "sha256:967ad33e8c704fed051800d11d985eb206a9c795c14206b30a6f463ed9c67d0d", size = 6919903, upload-time = "2026-07-09T14:55:59.982Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/24/18/d8544811ab076f876c4892b3714f5b0dad335e1dc33aef826df431b8325d/plotly-6.9.0-py3-none-any.whl", hash = "sha256:36bebe2f1bb13884774fe61689c329071446f6ce4a8927fb1f0d6fb24f581236", size = 9909646, upload-time = "2026-07-09T14:55:55.421Z" },
 ]
 
 [[package]]

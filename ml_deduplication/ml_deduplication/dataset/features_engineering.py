@@ -1,5 +1,6 @@
 """Module that allows to create features from dataset ids, also does train/test split."""
 
+import argparse
 import logging
 import os
 from datetime import datetime
@@ -85,7 +86,7 @@ def add_train_test_split(
 
 
 def create_features_dataset(
-    ml_dataset_filepath: Path, database_connection_uri: str
+    ml_dataset_filepath: Path, database_connection_uri: str, test_size: float = 0.2
 ) -> pl.DataFrame:
 
     df_ml_dataset = pl.read_parquet(ml_dataset_filepath)
@@ -111,7 +112,7 @@ def create_features_dataset(
 
     df_features_preprocessed = preprocess_features_dataset(df_features)
 
-    df_features_preprocessed = add_train_test_split(df_features_preprocessed)
+    df_features_preprocessed = add_train_test_split(df_features_preprocessed, test_size)
 
     with psycopg.connect(database_connection_uri) as conn:
         with conn.cursor() as cur:
@@ -121,11 +122,72 @@ def create_features_dataset(
     return df_features_preprocessed
 
 
-if __name__ == "__main__":
-    logger.setLevel(logging.DEBUG)
-    ml_dataset_path = Path(os.environ["ML_DATASET_FILEPATH"])
-    database_connection_uri = os.environ["DATABASE_CONNECTION_URI"]
-    df_pairs = create_features_dataset(ml_dataset_path, database_connection_uri)
-    df_pairs.write_parquet(
-        ml_dataset_path.parent / f"features_dataset_{datetime.now():%Y%m%d}.parquet"
+def parse_args() -> argparse.Namespace:
+    """Parse command-line arguments for features engineering."""
+    parser = argparse.ArgumentParser(
+        description="Create features from actor pairs dataset and perform train/test split."
     )
+    parser.add_argument(
+        "--ml-dataset-filepath",
+        type=Path,
+        default=Path(os.environ.get("ML_DATASET_FILEPATH", "")),
+        help="Path to the input ML dataset parquet file. "
+        "Defaults to ML_DATASET_FILEPATH environment variable.",
+    )
+    parser.add_argument(
+        "--database-uri",
+        type=str,
+        default=os.environ.get("DATABASE_CONNECTION_URI", ""),
+        help="URI for the database connection. "
+        "Defaults to DATABASE_CONNECTION_URI environment variable.",
+    )
+    parser.add_argument(
+        "--dataset-output-path",
+        type=Path,
+        default=None,
+        help="Path where the output features parquet file will be saved. "
+        "Defaults to <ml-dataset-filepath parent>/features_dataset_<date>.parquet.",
+    )
+    parser.add_argument(
+        "--test-size",
+        type=float,
+        default=0.2,
+        help="Proportion of the dataset to include in the test split. Default is 0.2.",
+    )
+    parser.add_argument(
+        "--log-level",
+        type=str,
+        default="INFO",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        help="Logging level. Default is INFO.",
+    )
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    args = parse_args()
+    logger.setLevel(getattr(logging, args.log_level))
+
+    if not args.ml_dataset_filepath:
+        raise ValueError(
+            "No ML dataset filepath provided. Use --ml-dataset-filepath or set ML_DATASET_FILEPATH env var."
+        )
+    if not args.database_uri:
+        raise ValueError(
+            "No database URI provided. Use --database-uri or set DATABASE_CONNECTION_URI env var."
+        )
+
+    df_features = create_features_dataset(
+        args.ml_dataset_filepath,
+        args.database_uri,
+        test_size=args.test_size,
+    )
+
+    output_path = (
+        args.dataset_output_path
+        if args.dataset_output_path
+        else args.ml_dataset_filepath.parent
+        / f"features_dataset_{datetime.now():%Y%m%d}.parquet"
+    )
+    df_features.write_parquet(output_path)
+    logger.info("Features dataset written to %s", output_path)

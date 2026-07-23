@@ -2,6 +2,7 @@
 The dataset is created using different methods like manual annotation and random sampling.
 """
 
+import argparse
 import os
 from datetime import datetime
 from pathlib import Path
@@ -404,7 +405,9 @@ def balance_dataset(
 
 
 def create_full_dataset(
-    datasets_path: Path, database_connection_uri: str
+    datasets_path: Path,
+    database_connection_uri: str,
+    num_examples_per_class: int = 1000,
 ) -> pl.DataFrame:
     """Create the full balanced dataset for training.
 
@@ -452,15 +455,70 @@ def create_full_dataset(
         df_pairs_manual_labeling,
         df_pairs_database_via_parent_change,
         df_pairs_database_random_sampling,
+        num_examples_per_class,
     )
 
     return df_pairs_balanced
 
 
-if __name__ == "__main__":
-    datasets_path = Path(os.environ["ML_DATASETS_PATH"])
-    database_connection_uri = os.environ["DATABASE_CONNECTION_URI"]
-    df_pairs = create_full_dataset(datasets_path, database_connection_uri)
-    df_pairs.write_parquet(
-        datasets_path / f"ml_dataset_{datetime.now():%Y%m%d}.parquet"
+def parse_args() -> argparse.Namespace:
+    """Parse command-line arguments for dataset creation."""
+    parser = argparse.ArgumentParser(
+        description="Create a balanced dataset of actor pairs for ML training."
     )
+    parser.add_argument(
+        "--datasets-path",
+        type=Path,
+        default=Path(os.environ.get("ML_DATASETS_PATH", "")),
+        help="Path to the directory containing the dataset CSV files. "
+        "Defaults to ML_DATASETS_PATH environment variable.",
+    )
+    parser.add_argument(
+        "--database-uri",
+        type=str,
+        default=os.environ.get("DATABASE_CONNECTION_URI", ""),
+        help="URI for the database connection. "
+        "Defaults to DATABASE_CONNECTION_URI environment variable.",
+    )
+    parser.add_argument(
+        "--dataset-output-path",
+        type=Path,
+        default=None,
+        help="Path where the output parquet file will be saved. "
+        "Defaults to <datasets-path>/ml_dataset_<date>.parquet.",
+    )
+    parser.add_argument(
+        "--num-examples-per-class",
+        type=int,
+        default=1000,
+        help="Target number of examples for each label (positive and negative). "
+        "Default is 1000.",
+    )
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    args = parse_args()
+
+    if not args.datasets_path:
+        raise ValueError(
+            "No datasets path provided. Use --datasets-path or set ML_DATASETS_PATH env var."
+        )
+    if not args.database_uri:
+        raise ValueError(
+            "No database URI provided. Use --database-uri or set DATABASE_CONNECTION_URI env var."
+        )
+
+    df_pairs = create_full_dataset(
+        args.datasets_path,
+        args.database_uri,
+        args.num_examples_per_class,
+    )
+
+    output_path = (
+        args.dataset_output_path
+        if args.dataset_output_path
+        else args.datasets_path / f"ml_dataset_{datetime.now():%Y%m%d}.parquet"
+    )
+    df_pairs.write_parquet(output_path)
+    print(f"Dataset written to {output_path}")
