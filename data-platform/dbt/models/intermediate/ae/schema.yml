@@ -10,6 +10,11 @@ models:
         data_tests:
           - not_null
           - unique
+      - name: siren
+        description: "Numéro SIREN"
+        data_type: varchar(9)
+        data_tests:
+          - not_null
       - name: activite_principale
         description: "Code NAF Rev2"
       - name: nom
