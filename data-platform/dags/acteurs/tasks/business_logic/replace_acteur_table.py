@@ -49,13 +49,19 @@ def copy_tables_between_servers(cursor, prefix_dbt, prefix_django, tables):
                 f"INCLUDING INDEXES)"
             )
 
-            # Get column names in correct order
-            cursor.execute(f"""
+            # Get column names in correct order (public schema only: avoid
+            # duplicates from FDW mirrors like webapp_public.qfdmo_vueacteur)
+            django_table = f"{prefix_django}{table}"
+            cursor.execute(
+                """
                 SELECT column_name
                 FROM information_schema.columns
-                WHERE table_name = '{prefix_django}{table}'
+                WHERE table_schema = 'public'
+                  AND table_name = %s
                 ORDER BY ordinal_position
-            """)
+                """,
+                [django_table],
+            )
             columns = [col[0] for col in cursor.fetchall()]
             columns_str = ", ".join(columns)
 
