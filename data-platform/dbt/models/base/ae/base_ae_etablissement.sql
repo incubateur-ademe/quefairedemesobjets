@@ -9,30 +9,29 @@ Notes:
 SELECT
 
 -- Codes
-{{ target.schema }}.udf_ae_string_cleanup(siret) AS siret,
-{{ target.schema }}.udf_ae_string_cleanup(siren) AS siren,
-{{ target.schema }}.udf_ae_string_cleanup(activite_principale) AS activite_principale,
+siret,
+siren,
+activite_principale,
 
 -- Names
-{{ target.schema }}.udf_ae_string_cleanup(denomination_usuelle) AS denomination_usuelle,
+denomination_usuelle,
 
 -- Status
-{{ target.schema }}.udf_ae_string_cleanup(etat_administratif) AS etat_administratif,
+etat_administratif,
 
 -- Address
-{{ target.schema }}.udf_ae_string_cleanup(numero_voie) AS numero_voie,
-{{ target.schema }}.udf_ae_string_cleanup(complement_adresse) AS complement_adresse,
-{{ target.schema }}.udf_ae_string_cleanup(type_voie) AS type_voie,
-{{ target.schema }}.udf_ae_string_cleanup(libelle_voie) AS libelle_voie,
-{{ target.schema }}.udf_ae_string_cleanup(code_postal) AS code_postal,
-{{ target.schema }}.udf_ae_string_cleanup(libelle_commune) AS libelle_commune
+numero_voie,
+complement_adresse,
+type_voie,
+libelle_voie,
+code_postal,
+libelle_commune
 
 FROM {{ source('ae', 'clone_ae_etablissement_in_use') }}
 -- Filtering out foreign establishments as our focus is France
 -- On 2025-03-17 this allows excluding ~316K rows
-WHERE code_pays_etranger IS NULL
 -- Ignore closed establishments before 2006 (20 years ago)
-AND NOT (date_debut < '2006-01-01' AND etat_administratif = 'F')
+WHERE NOT (date_debut < '2006-01-01' AND etat_administratif = 'F')
 
 {% if env_var('DBT_SAMPLING', 'false') == 'true' %}
 /* We can't do random sampling else we risk having
