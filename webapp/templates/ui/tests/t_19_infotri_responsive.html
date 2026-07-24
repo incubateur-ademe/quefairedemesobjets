@@ -1,0 +1,15 @@
+{% load dsfr_tags %}
+
+{% dsfr_callout title="Test responsive Info-tri — embed en conteneur étroit" text="L'iframe ci-dessous teste que l'Info-tri s'affiche sans débordement horizontal dans un conteneur étroit (200px de large)." icon_class="fr-icon-alert-line" %}
+
+<div data-testid="narrow-container" style="width: 200px">
+    <script src="{{ base_url }}/infotri/iframe.js" data-config="categorie=chaussures&consigne=3&avec_phrase=false"></script>
+</div>
+
+<hr class="fr-mt-4w fr-mb-2w">
+
+<h3 class="fr-mb-1w">Avec phrase</h3>
+
+<div data-testid="narrow-container-with-phrase" style="width: 200px">
+    <script src="{{ base_url }}/infotri/iframe.js" data-config="categorie=chaussures&consigne=3&avec_phrase=true"></script>
+</div>
