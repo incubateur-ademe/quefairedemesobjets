@@ -143,7 +143,7 @@ def commands_download_to_disk_first(
     fix_corrupted_utf8_sed_substitutions: list[str],
     dry_run: bool,
 ):
-    """Commands to create table while first dowloading to disk"""
+    """Commands to create table while first downloading to disk"""
 
     file_unpacked = file_unpacked or file_downloaded
 
