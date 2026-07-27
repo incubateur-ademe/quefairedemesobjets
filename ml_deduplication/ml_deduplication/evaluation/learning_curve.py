@@ -1,22 +1,20 @@
 import argparse
-from datetime import datetime
-import logging
 import json
+import logging
+from datetime import datetime, timezone
 from pathlib import Path
 
-
 import numpy as np
-import polars as pl
 import plotly.graph_objects as go
-
+import polars as pl
 from tqdm import tqdm
 from tqdm.contrib.logging import tqdm_logging_redirect
 
-from ml_deduplication.training.training_pipeline import run_training_pipeline
 from ml_deduplication.training.features import (
     DEDUPE_VARIABLES_CONFIG_FULL,
     FEATURES_NAMES_FROM_DATASET,
 )
+from ml_deduplication.training.training_pipeline import run_training_pipeline
 
 RANDOM_SEED = 42
 
@@ -122,7 +120,7 @@ def generate_df_features_subset(
     logger.debug("Number of true cluster kept in train : %s", num_cluster_kept_in_train)
     logger.debug(
         "Num labels in train : %s",
-        df_final.filter((pl.col("split") == "train")).group_by("label").len(),
+        df_final.filter(pl.col("split") == "train").group_by("label").len(),
     )
 
     return df_final
@@ -143,8 +141,12 @@ def generate_plotly_graph(trainings_results: list[dict]) -> go.Figure:
         training_sizes.append(train_size)
         training_pairwise_precision_list.append(pairwise_metrics["precision"])
         training_pairwise_recall_list.append(pairwise_metrics["recall"])
-        training_b3_precision_list.append(cluster_metrics["bcubed"]["precision"])
-        training_b3_recall_list.append(cluster_metrics["bcubed"]["recall"])
+        training_b3_precision_list.append(
+            cluster_metrics["bcubed_without_singletons"]["precision"]
+        )
+        training_b3_recall_list.append(
+            cluster_metrics["bcubed_without_singletons"]["recall"]
+        )
 
     configs = [
         {
@@ -183,7 +185,7 @@ def generate_plotly_graph(trainings_results: list[dict]) -> go.Figure:
     fig.update_xaxes(title="Nombre d'observations dans le jeu d’entraînement")
     fig.update_layout(
         template="simple_white",
-        title=f"Courbe d'apprentissage du {datetime.now():%d/%m/%Y}",
+        title=f"Courbe d'apprentissage du {datetime.now(tz=timezone.utc):%d/%m/%Y}",
         height=720,
         width=1280,
     )
@@ -194,37 +196,37 @@ def generate_plotly_graph(trainings_results: list[dict]) -> go.Figure:
 def generate_learning_curve(
     df_features: pl.DataFrame,
     training_hyperparams: dict,
-    train_fractions=[0.1, 0.25, 0.33, 0.50, 0.66, 0.75, 1.0],
+    train_fractions: list[float] | None = None,
 ) -> tuple[list[dict], go.Figure]:
+
+    if train_fractions is None:
+        train_fractions = [0.1, 0.25, 0.33, 0.50, 0.66, 0.75, 1.0]
 
     results = []
 
-    with tqdm_logging_redirect():
-        with tqdm(total=len(train_fractions)) as t:
-            for train_fraction in train_fractions:
-                logger.debug(
-                    "------ Running training with %s%% of the dataset ------",
-                    train_fraction * 100,
-                )
-                t.set_description(
-                    "Training with %s%% of the dataset." % (train_fraction * 100)
-                )
+    with tqdm_logging_redirect(), tqdm(total=len(train_fractions)) as t:
+        for train_fraction in train_fractions:
+            logger.debug(
+                "------ Running training with %s%% of the dataset ------",
+                train_fraction * 100,
+            )
+            t.set_description(
+                "Training with %s%% of the dataset." % (train_fraction * 100)
+            )
 
-                df_features_sub = generate_df_features_subset(
-                    df_features, train_fraction
-                )
-                _model, training_results, _ = run_training_pipeline(
-                    df_features_sub, training_hyperparams
-                )
+            df_features_sub = generate_df_features_subset(df_features, train_fraction)
+            _model, training_results, _ = run_training_pipeline(
+                df_features_sub, training_hyperparams
+            )
 
-                results.append(
-                    {
-                        "train_size": train_fraction
-                        * len(df_features.filter(pl.col("split") == "train")),
-                        "metrics": training_results["test_results"],
-                    }
-                )
-                t.update()
+            results.append(
+                {
+                    "train_size": train_fraction
+                    * len(df_features.filter(pl.col("split") == "train")),
+                    "metrics": training_results["test_results"],
+                }
+            )
+            t.update()
 
     fig = generate_plotly_graph(results)
     return results, fig
@@ -269,7 +271,7 @@ if __name__ == "__main__":
         df_features, training_hyperparams, args.fractions
     )
 
-    timestamp = datetime.now().strftime("%Y%m%dT%H%M")
+    timestamp = datetime.now(tz=timezone.utc).strftime("%Y%m%dT%H%M")
 
     with open(args.output_path / f"learning_curve_results_{timestamp}.json", "w") as f:
         json.dump(results, f)

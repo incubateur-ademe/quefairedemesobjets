@@ -17,7 +17,7 @@ exactement le même ensemble d'ids.
 
 import logging
 from collections import defaultdict
-from typing import Hashable
+from collections.abc import Hashable
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +69,9 @@ def exact_match_cluster_metrics(true_clusters: dict, pred_clusters: dict) -> dic
     }
 
 
-def bcubed_metrics(true_clusters: dict, pred_clusters: dict) -> dict:
+def bcubed_metrics(
+    true_clusters: dict, pred_clusters: dict, exclude_true_singletons: bool = False
+) -> dict:
     """
     Précision / rappel B-cubed (Bagga & Baldwin, 1998) : calculés PAR ENTITÉ
     puis moyennés, ce qui pondère naturellement par la taille des clusters.
@@ -79,11 +81,11 @@ def bcubed_metrics(true_clusters: dict, pred_clusters: dict) -> dict:
         recall(e)    = |cluster_pred(e) ∩ cluster_vrai(e)| / |cluster_vrai(e)|
     puis on moyenne sur toutes les entités.
 
-    -> C'est la métrique de référence en résolution d'entités dans la
-    littérature académique, un bon compromis entre le pairwise (généreux
-    sur les gros clusters) et l'exact match (trop sévère). C'est souvent
-    la métrique à privilégier si vous devez n'en garder qu'une en plus du
-    pairwise F1 que vous avez déjà.
+    exclude_true_singletons: si True, ignore les entités qui appartiennent à un
+        vrai cluster de taille 1. Ces entités contribuent toujours 1.0 à la
+        précision et au rappel (1/1), ce qui peut gonfler artificiellement les
+        scores quand le dataset contient beaucoup de non-doublons. À activer
+        pour évaluer la capacité réelle du modèle à trouver des doublons.
     """
     _check_same_ids(true_clusters, pred_clusters)
 
@@ -94,16 +96,27 @@ def bcubed_metrics(true_clusters: dict, pred_clusters: dict) -> dict:
     recalls = []
     for id_ in true_clusters:
         true_group = true_groups[true_clusters[id_]]
+        if exclude_true_singletons and len(true_group) == 1:
+            continue
         pred_group = pred_groups[pred_clusters[id_]]
         intersection = len(true_group & pred_group)
         precisions.append(intersection / len(pred_group))
         recalls.append(intersection / len(true_group))
 
-    precision = sum(precisions) / len(precisions)
-    recall = sum(recalls) / len(recalls)
+    n_evaluated = len(precisions)
+    if n_evaluated == 0:
+        return {"precision": 0.0, "recall": 0.0, "f1": 0.0, "n_evaluated": 0}
+
+    precision = sum(precisions) / n_evaluated
+    recall = sum(recalls) / n_evaluated
     f1 = 2 * precision * recall / (precision + recall) if (precision + recall) else 0.0
 
-    return {"precision": precision, "recall": recall, "f1": f1}
+    return {
+        "precision": precision,
+        "recall": recall,
+        "f1": f1,
+        "n_evaluated": n_evaluated,
+    }
 
 
 def cluster_purity_report(
@@ -238,6 +251,11 @@ def generate_full_cluster_report(
         ),
         "bcubed": bcubed_metrics(
             id_to_cluster_id_true_dict, id_to_cluster_id_pred_dict
+        ),
+        "bcubed_without_singletons": bcubed_metrics(
+            id_to_cluster_id_true_dict,
+            id_to_cluster_id_pred_dict,
+            exclude_true_singletons=True,
         ),
         "purity": cluster_purity_report(
             id_to_cluster_id_true_dict, id_to_cluster_id_pred_dict

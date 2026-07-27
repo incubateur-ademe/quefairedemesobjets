@@ -4,7 +4,7 @@ The dataset is created using different methods like manual annotation and random
 
 import argparse
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import polars as pl
@@ -205,10 +205,9 @@ def create_entity_pairs_from_manual_labeling(
 
         dfs.append(df_suggestions_pairs)
 
-    with psycopg.connect(database_connection_uri) as conn:
-        with conn.cursor() as cur:
-            cur.execute("DROP TABLE luis._suggestions_tmp")
-            conn.commit()
+    with psycopg.connect(database_connection_uri) as conn, conn.cursor() as cur:
+        cur.execute("DROP TABLE luis._suggestions_tmp")
+        conn.commit()
 
     df_pairs = pl.concat(dfs)
 
@@ -316,9 +315,9 @@ def create_entity_pairs_from_database_random_sampling(
 
 
 def balance_dataset(
-    df_pairs_ml_manual_labeling: pl.DataFrame,
-    df_pairs_manual_labeling: pl.DataFrame,
-    df_pairs_database_via_parent_change: pl.DataFrame,
+    df_pairs_ml_manual_labeling: pl.DataFrame | None,
+    df_pairs_manual_labeling: pl.DataFrame | None,
+    df_pairs_database_via_parent_change: pl.DataFrame | None,
     df_pairs_database_random_sampling: pl.DataFrame,
     num_examples_for_each_label: int = 1000,
 ) -> pl.DataFrame:
@@ -353,9 +352,13 @@ def balance_dataset(
     """
     df_pairs = pl.concat(
         [
-            df_pairs_ml_manual_labeling,
-            df_pairs_database_via_parent_change,
-            df_pairs_manual_labeling,
+            e
+            for e in [
+                df_pairs_ml_manual_labeling,
+                df_pairs_database_via_parent_change,
+                df_pairs_manual_labeling,
+            ]
+            if e is not None
         ],
         how="diagonal",
     )
@@ -443,9 +446,6 @@ def create_full_dataset(
         database_connection_uri,
     )
 
-    df_pairs_database_via_parent_change = (
-        create_entity_pairs_from_database_parent_changes(database_connection_uri)
-    )
     df_pairs_database_random_sampling = (
         create_entity_pairs_from_database_random_sampling(database_connection_uri)
     )
@@ -453,7 +453,7 @@ def create_full_dataset(
     df_pairs_balanced = balance_dataset(
         df_pairs_ml_manual_labeling,
         df_pairs_manual_labeling,
-        df_pairs_database_via_parent_change,
+        None,
         df_pairs_database_random_sampling,
         num_examples_per_class,
     )
@@ -518,7 +518,8 @@ if __name__ == "__main__":
     output_path = (
         args.dataset_output_path
         if args.dataset_output_path
-        else args.datasets_path / f"ml_dataset_{datetime.now():%Y%m%d}.parquet"
+        else args.datasets_path
+        / f"ml_dataset_{datetime.now(tz=timezone.utc):%Y%m%d}.parquet"
     )
     df_pairs.write_parquet(output_path)
     print(f"Dataset written to {output_path}")
