@@ -60,7 +60,7 @@ def build_entities_dict(
                 entity = {}
                 for feature_name in features_names:
                     value = row[f"{feature_name}{suffix}"]
-                    if isinstance(value, int) or isinstance(value, float):
+                    if isinstance(value, (int, float)):
                         value = str(value)
                     entity[feature_name] = value
 
@@ -186,8 +186,17 @@ def generate_pred_pairs_df(dedupe_partitions):
             pl.max_horizontal(["identifiant_unique", "identifiant_unique_j"]).alias(
                 "identifiant_unique_j"
             ),
+            pl.coalesce("score", "score_j").alias("score"),
         )
         .unique(["identifiant_unique_i", "identifiant_unique_j"])
+        .select(
+            [
+                "identifiant_unique_i",
+                "identifiant_unique_j",
+                "score",
+                "cluster_label",
+            ]
+        )
     )
 
     return df_pairs

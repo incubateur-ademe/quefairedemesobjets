@@ -1,24 +1,25 @@
+from typing import Any
+
 import dedupe
 import numpy as np
-
 from sklearn.model_selection import ParameterGrid
 
-from ml_deduplication.training.utils import partition_to_dict
 from ml_deduplication.evaluation.metrics import fbeta
 from ml_deduplication.evaluation.metrics.pairwise import pairwise_metrics_from_clusters
 from ml_deduplication.training.features import (
+    DEDUPE_VARIABLES_CONFIG_FULL,
     DEDUPE_VARIABLES_CONFIG_MANDATORY,
     DEDUPE_VARIABLES_CONFIG_RESTRICTED,
-    DEDUPE_VARIABLES_CONFIG_FULL,
     FEATURES_NAMES_FROM_DATASET,
 )
+from ml_deduplication.training.utils import partition_to_dict
 
 
 def select_best_threshold(
     deduper: dedupe.Dedupe,
     entities_dev: dict,
     id_to_cluster_id_dev: dict,
-    thresholds=np.arange(0.10, 1.00, 0.05),
+    thresholds: np.ndarray[tuple[int], Any] | None = None,
     min_recall: float = 0.3,
 ) -> tuple[float, dict]:
     """
@@ -37,6 +38,9 @@ def select_best_threshold(
     un très gros volume, on pourrait factoriser le blocking/scoring et ne
     faire varier que l'étape de clustering.
     """
+    if thresholds is None:
+        thresholds = np.arange(0.10, 1.00, 0.05)
+
     eval_ids = set(id_to_cluster_id_dev.keys())
 
     results = []
@@ -89,7 +93,7 @@ def generate_parameter_grid() -> ParameterGrid:
 def get_default_hyperparameters() -> dict:
     params = {
         "index_predicates": True,
-        "dedupe_variables_config": DEDUPE_VARIABLES_CONFIG_RESTRICTED,
+        "dedupe_variables_config": DEDUPE_VARIABLES_CONFIG_FULL,
         "features_names": FEATURES_NAMES_FROM_DATASET,
     }
 
