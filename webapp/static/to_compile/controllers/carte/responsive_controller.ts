@@ -121,8 +121,7 @@ export default class extends Controller {
 
     // Use DSFR API if available; otherwise native dialog.close()
     const dsfr = (window as Record<string, unknown>).dsfr as
-      | ((el: Element) => { modal: { conceal: () => void } })
-      | undefined
+      ((el: Element) => { modal: { conceal: () => void } }) | undefined
     if (dsfr) {
       dsfr(dialog).modal.conceal()
     } else {
