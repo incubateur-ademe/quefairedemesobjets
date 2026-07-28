@@ -185,6 +185,11 @@ def create_entity_pairs_from_manual_labeling(
     ]
     for config in configs:
         df_suggestions = pl.read_csv(config["suggestions_dataset_filepath"])
+
+        if "true_candidate_filter" not in df_suggestions.columns:
+            df_suggestions = df_suggestions.with_columns(
+                pl.lit(None).alias("true_candidate_filter")
+            )
         df_suggestions.write_database(
             "luis._suggestions_tmp",
             connection=database_connection_uri,
@@ -352,7 +357,7 @@ def balance_dataset(
     """
     df_pairs = pl.concat(
         [
-            e
+            e.with_columns(pl.lit("manual").alias("example_type"))
             for e in [
                 df_pairs_ml_manual_labeling,
                 df_pairs_database_via_parent_change,
@@ -374,14 +379,8 @@ def balance_dataset(
     df_pairs = pl.concat(
         [
             df_pairs,
-            df_pairs_database_random_sampling.filter(pl.col("label").not_()).sample(
-                n=(
-                    num_examples_for_each_label
-                    - len(df_pairs.filter(pl.col("label").not_()))
-                ),
-                seed=42,
-            ),
-            df_pairs_database_random_sampling.filter(pl.col("label")).filter(
+            df_pairs_database_random_sampling.filter(pl.col("label"))
+            .filter(
                 pl.col("cluster_id").is_in(
                     df_pairs_database_random_sampling.select(
                         pl.col("cluster_id").unique()
@@ -399,9 +398,71 @@ def balance_dataset(
                     .get_column("cluster_id")
                     .to_list()
                 )
-            ),
+            )
+            .with_columns(pl.lit("auto").alias("example_type")),
         ],
         how="diagonal",
+    )
+
+    positive_ids = set(
+        df_pairs.filter(pl.col("label"))
+        .select(
+            pl.concat_list(
+                ["identifiant_unique_i", "identifiant_unique_j"]
+            ).list.explode()
+        )
+        .unique()
+        .get_column("identifiant_unique_i")
+        .to_list()
+    )
+
+    # Hard negatives: at least one ID appears in positive pairs
+    hard_negatives = df_pairs_database_random_sampling.filter(
+        pl.col("label").not_()
+        & (
+            pl.col("identifiant_unique_i").is_in(positive_ids)
+            | pl.col("identifiant_unique_j").is_in(positive_ids)
+        )
+    )
+
+    # Fallback to easy negatives if hard negatives pool is too small
+    negatives_needed = num_examples_for_each_label - len(
+        df_pairs.filter(pl.col("label").not_())
+    )
+
+    hard_negatives_sampled = hard_negatives.sample(
+        n=min(negatives_needed, len(hard_negatives)), seed=42
+    ).with_columns(pl.lit("auto").alias("example_type"))
+    negatives_dfs = [hard_negatives_sampled]
+    if len(hard_negatives) < negatives_needed:
+        # Pairs already in dataset (to avoid contradictions)
+        existing_pairs = (
+            hard_negatives_sampled.select(
+                pl.concat_arr(["identifiant_unique_i", "identifiant_unique_j"])
+            )
+            .get_column("identifiant_unique_i")
+            .to_list()
+        )
+        easy_negatives = (
+            df_pairs_database_random_sampling.filter(
+                pl.col("label").not_()
+                & (
+                    pl.concat_list(["identifiant_unique_i", "identifiant_unique_j"])
+                    .is_in(existing_pairs)
+                    .not_()
+                )
+            )
+            .sample(n=negatives_needed - len(hard_negatives_sampled), seed=42)
+            .with_columns(pl.lit("auto").alias("example_type"))
+        )
+        negatives_dfs.append(easy_negatives)
+
+    df_pairs = pl.concat([df_pairs, *negatives_dfs], how="diagonal")
+
+    # Remove any contradictory duplicates (same pair, different labels)
+    df_pairs = df_pairs.unique(
+        subset=["identifiant_unique_i", "identifiant_unique_j"],
+        keep="first",  # Keeps the manually labeled version if it exists
     )
 
     return df_pairs

@@ -3,7 +3,7 @@
 import argparse
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import polars as pl
@@ -57,8 +57,12 @@ def add_train_test_split(
         ).alias("cluster_id_split")
     )
 
+    df_cluster_ids = df_features_preprocessed.select(
+        "cluster_id_split", "example_type"
+    ).unique("cluster_id_split")
     train_cluster_ids, test_cluster_ids = train_test_split(
-        df_features_preprocessed.select("cluster_id_split").unique("cluster_id_split"),
+        df_cluster_ids.select("cluster_id_split"),
+        stratify=df_cluster_ids.select("example_type"),
         test_size=test_size,
         random_state=RANDOM_SEED,
     )
@@ -108,16 +112,19 @@ def create_features_dataset(
     df_features = pl.read_database_uri(
         sql_features_generation, uri=database_connection_uri
     )
-    logger.debug("Successfully loaded features.")
+    logger.debug(
+        "Successfully loaded features. Shape og the features df: %s", df_features.shape
+    )
 
+    logger.debug("Preprocessing features.")
     df_features_preprocessed = preprocess_features_dataset(df_features)
 
+    logger.debug("Train/test split.")
     df_features_preprocessed = add_train_test_split(df_features_preprocessed, test_size)
 
-    with psycopg.connect(database_connection_uri) as conn:
-        with conn.cursor() as cur:
-            cur.execute("DROP TABLE luis._ml_dataset_tmp")
-            conn.commit()
+    with psycopg.connect(database_connection_uri) as conn, conn.cursor() as cur:
+        cur.execute("DROP TABLE luis._ml_dataset_tmp")
+        conn.commit()
 
     return df_features_preprocessed
 
@@ -183,11 +190,14 @@ if __name__ == "__main__":
         test_size=args.test_size,
     )
 
+    logger.info("Generated features dataset with distribution:")
+    logger.info(df_features.group_by(["split", "label"]).len())
+
     output_path = (
         args.dataset_output_path
         if args.dataset_output_path
         else args.ml_dataset_filepath.parent
-        / f"features_dataset_{datetime.now():%Y%m%d}.parquet"
+        / f"features_dataset_{datetime.now(timezone.utc):%Y%m%d}.parquet"
     )
     df_features.write_parquet(output_path)
     logger.info("Features dataset written to %s", output_path)

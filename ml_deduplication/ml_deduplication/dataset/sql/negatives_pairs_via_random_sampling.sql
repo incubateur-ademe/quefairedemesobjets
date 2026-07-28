@@ -23,7 +23,7 @@ WITH
     FROM
       sampled
     WHERE
-      rn <= 100000 -- Permet la création d'environ 50k paires
+      rn <= 300000 -- Permet la création d'environ 50k paires
   ),
   randomized_pairs AS (
     SELECT

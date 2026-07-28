@@ -14,6 +14,7 @@ inner join data_suggestion ds on
 suggestions_explosees as (
 select
 	s.suggestion_id,
+	string_to_array(true_candidate_filter,',') as true_candidate_filter,
 	id_parent,
 	s_lid.id_acteur
 from
@@ -24,6 +25,7 @@ from
 paires_dupliquees as (
 select
 	s1.suggestion_id,
+	coalesce(s1.true_candidate_filter,s2.true_candidate_filter) as true_candidate_filter,
 	least(s1.id_acteur , s2.id_acteur ) as identifiant_unique_i,
 	greatest(s1.id_acteur , s2.id_acteur) as identifiant_unique_j,
 	coalesce(s1.id_parent,s2.id_parent) as cluster_id,
@@ -46,6 +48,11 @@ from
 where
 	rn = 1
 	and identifiant_unique_i <> identifiant_unique_j
+	-- On filtre les vrais duplicats parmi les clusters partiellement faux
+	and (pd.true_candidate_filter is null or not (
+		identifiant_unique_i= ANY(true_candidate_filter)
+		and identifiant_unique_j= ANY(true_candidate_filter)
+	))
 ),
 -- Ajout des potentiels autres enfants liés au parent suggéré par le clustering (pour créer encore plus de paires négatives)
 paires_enfants as (
