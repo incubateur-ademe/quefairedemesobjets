@@ -74,7 +74,7 @@
     "jest-environment-jsdom": "^30.4.1",
     "lodash": "^4.18.1",
     "parcel": "^2.16.4",
-    "postcss": "^8.5.19",
+    "postcss": "^8.5.20",
     "postcss-nesting": "^14.0.0",
     "prettier": "^3.9.6",
     "svgo": "^4.0.2",
@@ -85,6 +85,6 @@
     "typescript-eslint": "^8.62.1"
   },
   "optionalDependencies": {
-    "@parcel/watcher-linux-x64-glibc": "^2.5.6"
+    "@parcel/watcher-linux-x64-glibc": "^2.6.0"
   }
 }
