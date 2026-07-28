@@ -2,7 +2,7 @@ import argparse
 import json
 import logging
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import polars as pl
@@ -11,21 +11,23 @@ from tqdm.contrib.logging import tqdm_logging_redirect
 
 from ml_deduplication.evaluation.metrics.cluster import generate_full_cluster_report
 from ml_deduplication.evaluation.metrics.pairwise import pairwise_metrics_from_clusters
-from ml_deduplication.training.model import BusinessRulesDedupe
+from ml_deduplication.training.model import (
+    BusinessRulesDedupe,
+)
 from ml_deduplication.training.model_selection import (
     generate_parameter_grid,
-    select_best_threshold,
     get_default_hyperparameters,
+    select_best_threshold,
 )
 from ml_deduplication.training.utils import (
     build_entities_dict,
     create_acteur_to_cluster_dict,
     create_cluster_to_acteurs_dict,
+    generate_pred_pairs_df,
     partition_to_dict,
     partition_to_results_dict,
     split_train_dev,
     stringify_params_list,
-    generate_pred_pairs_df,
 )
 
 logging.basicConfig(
@@ -51,38 +53,37 @@ def run_training_with_hyperparameter_tuning(
     best_df_pairs_test_pred = None
     start_time = time.time()
 
-    with tqdm_logging_redirect():
-        with tqdm(
+    with (
+        tqdm_logging_redirect(),
+        tqdm(
             param_grid, "Training model with hyperparameter tuning", colour="green"
-        ) as t:
-            for params in t:
-                logger.info("Training with params : %s", params)
-                model, results, df_pairs_test_pred = run_training_pipeline(
-                    df_features, params
+        ) as t,
+    ):
+        for params in t:
+            logger.info("Training with params : %s", params)
+            model, results, df_pairs_test_pred = run_training_pipeline(
+                df_features, params
+            )
+            logger.info("----" * 15)
+            training_results["training_results"].append(
+                {
+                    "params": stringify_params_list(params),
+                    "metrics": {
+                        k: v for k, v in results.items() if k != "pred_clusters"
+                    },
+                }
+            )
+            if (
+                training_precision := results["test_results"]["pairwise"]["precision"]
+            ) > best_precision:
+                best_precision = training_precision
+                best_metrics = results
+                best_params = params
+                best_model = model
+                best_df_pairs_test_pred = df_pairs_test_pred
+                t.set_description(
+                    f"Training model with hyperparameter tuning. Current best precision {best_precision}"
                 )
-                logger.info("----" * 15)
-                training_results["training_results"].append(
-                    {
-                        "params": stringify_params_list(params),
-                        "metrics": {
-                            k: v for k, v in results.items() if k != "pred_clusters"
-                        },
-                    }
-                )
-                if (
-                    training_precision := results["test_results"]["pairwise"][
-                        "precision"
-                    ]
-                ) > best_precision:
-                    best_precision = training_precision
-                    best_metrics = results
-                    best_params = params
-                    best_model = model
-                    best_df_pairs_test_pred = df_pairs_test_pred
-                    t.set_description(
-                        "Training model with hyperparameter tuning. Current best precision %s"
-                        % best_precision
-                    )
 
     end_time = time.time()
     total_time = end_time - start_time
@@ -256,7 +257,7 @@ if __name__ == "__main__":
     logger.info("Loading features dataset at path %s", args.dataset_path)
     df_features = pl.read_parquet(args.dataset_path)
 
-    timestamp = datetime.now().strftime("%Y_%m_%d_%H%M")
+    timestamp = datetime.now(timezone.utc).strftime("%Y_%m_%d_%H%M")
 
     if args.mode == "tuning":
         logger.info("Running hyperparameter tuning training")
@@ -269,6 +270,12 @@ if __name__ == "__main__":
         deduper, results, df_pairs_test_pred = run_training_pipeline(
             df_features, default_params
         )
+
+    # Save model
+    if deduper is not None:
+        model_save_dir = args.log_dir / f"model_{args.mode}_{timestamp}.json"
+        logger.info("Writing model at %s", model_save_dir)
+        deduper.save(model_save_dir)
 
     output_file = args.log_dir / f"training_results_{args.mode}_{timestamp}.json"
     logger.info("Writing logs file at path %s", output_file)
