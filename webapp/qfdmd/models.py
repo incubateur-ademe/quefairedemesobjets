@@ -1126,6 +1126,32 @@ class FormPageValidationSettings(BaseGenericSetting):
         verbose_name = "Paramètres des pages de formulaire"
 
 
+@register_snippet
+class ConversionImmediatePage(models.Model):
+    """A page listed here converts the visitor (as in "visiteur orienté",
+    our north star metric) as soon as they view it, instead of requiring a
+    Produit page view or a map interaction (the usual conversion triggers)."""
+
+    page = models.OneToOneField(
+        "wagtailcore.Page",
+        on_delete=models.CASCADE,
+        related_name="+",
+    )
+
+    panels = [PageChooserPanel("page")]
+
+    def __str__(self):
+        return self.page.title
+
+    class Meta:
+        verbose_name = "Page convertissant dès la visite"
+        verbose_name_plural = "Pages convertissant dès la visite"
+
+    @classmethod
+    def converts_immediately(cls, page) -> bool:
+        return cls.objects.filter(page_id=page.pk).exists()
+
+
 @register_setting
 class EmbedSettings(BaseGenericSetting):
     backlink_assistant = RichTextField(

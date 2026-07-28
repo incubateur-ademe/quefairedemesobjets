@@ -1,5 +1,9 @@
 {% extends "ui/layout/assistant.html" %}
 
+{% load qfdmd_tags %}
+
+{% block analytics_action %}{% if page|converts_immediately %}produitPageView{% endif %}{% endblock %}
+
 {% block main %}
 {% block content %}{% endblock %}
 {% endblock main %}
