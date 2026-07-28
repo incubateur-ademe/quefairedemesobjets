@@ -3,39 +3,46 @@ with pool as
 select
 	qv.identifiant_unique,
 	qv.parent_id,
-    qv.acteur_type_id,
-    qv.source_id
+	qv.acteur_type_id,
+	qv.source_id
 from
-	qfdmo_vueacteur qv),
+	qfdmo_vueacteur qv
+WHERE
+	qv.statut <> 'SUPPRIME'
+	  	),
 paires_dupliquees as (
 select
 	least(p.identifiant_unique, p2.identifiant_unique) as identifiant_unique_i,
 	greatest(p.identifiant_unique, p2.identifiant_unique) as identifiant_unique_j,
-    p.parent_id
+	p.parent_id
 from
 	pool p
 inner join pool p2 on
 	p.parent_id = p2.parent_id
 	and p.identifiant_unique != p2.identifiant_unique
 where
-  coalesce(p.source_id, -1) != coalesce(p2.source_id, -2) -- les deux acteurs n'ont pas la même source
-  AND (
+	-- les deux acteurs n'ont pas la même source
+	coalesce(p.source_id, -1) != coalesce(p2.source_id, -2)
+	-- les deux acteurs sont du même type ou Commerce et Artisans
+		AND (
 	coalesce(p.acteur_type_id, -1) = coalesce(p2.acteur_type_id, -2)
-	OR (
+			OR (
 		coalesce(p.acteur_type_id, -1) = 4
-		and coalesce(p2.acteur_type_id, -1) = 3
+				and coalesce(p2.acteur_type_id, -1) = 3
 	)
-	OR (
+				OR (
 		coalesce(p.acteur_type_id, -1) = 3
-		and coalesce(p2.acteur_type_id, -1) = 4
+					and coalesce(p2.acteur_type_id, -1) = 4
 	)
-	) -- les deux acteurs sont du même type ou Commerce et Artisans
-  AND p.acteur_type_id!=10 AND p2.acteur_type_id!=10 -- Exclusion des PAV publics
+	)
+	-- Exclusion des PAV publics
+	AND p.acteur_type_id != 10
+	AND p2.acteur_type_id != 10
 )
 select
 	identifiant_unique_i,
 	identifiant_unique_j,
-    parent_id as cluster_id
+	parent_id as cluster_id
 from
 	(
 	select

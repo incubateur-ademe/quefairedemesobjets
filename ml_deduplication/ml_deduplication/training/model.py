@@ -1,111 +1,32 @@
+import base64
 import io
+import json
 import logging
 from collections import defaultdict
+from collections.abc import Hashable, Iterable, Mapping, Sequence
 from itertools import combinations
-from typing import Any, Hashable, Iterable, Mapping, Self, Sequence, TextIO
+from pathlib import Path
+from typing import Any, Self, TextIO
 
 import dedupe
-import dedupe.labeler as labeler
 import polars as pl
+from dedupe import labeler
 from dedupe.api import _cleanup_scores, flatten_training
 
 logger = logging.getLogger(__name__)
-
 RANDOM_SEED = 42
 
 
-class BusinessRulesDedupe(dedupe.Dedupe):
-    def __init__(
-        self,
-        *args,
-        unique_fields=("source_id",),
-        distinct_fields=("acteur_type_id",),
-        index_predicates: bool = True,
-        **kwargs,
-    ):
-        super().__init__(*args, **kwargs)
+class BusinessRulesMixin:
+    """
+    Mixin providing business rules logic for Dedupe models.
+    Expects the host class to have `_unique_fields`, `_distinct_fields`,
+    and `_index_predicates` attributes.
+    """
 
-        # The models can fail to converge with the default 100 iterations
-        self.classifier.estimator.set_params(max_iter=1000, random_state=RANDOM_SEED)
-
-        self._unique_fields = unique_fields
-        self._distinct_fields = distinct_fields
-        self._index_predicates = index_predicates
-
-    def prepare_training(
-        self,
-        data: Mapping[int, Mapping[str, Any]] | Mapping[str, Mapping[str, Any]],
-        training_file: TextIO | None = None,
-        sample_size: int = 1500,
-        blocked_proportion: float = 0.9,
-    ) -> None:
-        self._checkData(data)
-
-        # Reset active learner
-        self.active_learner = None
-
-        if training_file:
-            self._read_training(training_file)
-
-        # We need the active learner to know about all our
-        # existing training data, so add them to data dictionary
-        examples, y = flatten_training(self.training_pairs)
-
-        self.active_learner = labeler.DedupeDisagreementLearner(
-            self.data_model.predicates,
-            self.data_model.distances,
-            data,
-            index_include=examples,
-        )
-
-        self.active_learner.matcher._classifier.set_params(
-            max_iter=1000, random_state=RANDOM_SEED
-        )
-        self.active_learner.mark(examples, y)
-
-    def fit(
-        self,
-        df_train: pl.DataFrame,
-        entities_dict: dict,
-    ) -> Self:
-        """
-        Entraîne un objet dedupe.Dedupe à partir des paires labellisées de
-        `df_train_sub`, sans passer par l'apprentissage actif interactif.
-
-        entities contient tous les acteurs dans un dictionnaire format dedupe.
-        """
-
-        train_ids = set(df_train["identifiant_unique_i"].to_list()) | set(
-            df_train["identifiant_unique_j"].to_list()
-        )
-        train_entities = {i: entities_dict[i] for i in train_ids}
-
-        # Construct labeled_pairs before training
-        labeled_pairs = {"match": [], "distinct": []}
-        for row in df_train.iter_rows(named=True):
-            pair = (
-                entities_dict[row["identifiant_unique_i"]],
-                entities_dict[row["identifiant_unique_j"]],
-            )
-            labeled_pairs["match" if row["label"] else "distinct"].append(pair)
-
-        # Serialize labeled_pairs to a training file in memory
-        training_file = io.StringIO()
-        dedupe.write_training(labeled_pairs, training_file)
-        training_file.seek(0)
-
-        # use the serialized training file to avoid using mark_pairs
-        # that can cause bugs depending of sample size
-        self.prepare_training(
-            train_entities,
-            training_file=training_file,
-            sample_size=max(10000, len(train_ids)),
-        )
-
-        self.train(index_predicates=self._index_predicates)
-        self.cleanup_training()
-
-        return self
+    _unique_fields: tuple[str, ...]
+    _distinct_fields: tuple[str, ...]
+    _index_predicates: bool
 
     def score(self, pairs, data=None):
         # Let the parent score all pairs normally
@@ -115,7 +36,7 @@ class BusinessRulesDedupe(dedupe.Dedupe):
         if data is None:
             return scored
 
-        num_conflincting_pairs = 0
+        num_conflicting_pairs = 0
         # Zero out scores for conflicting pairs
         for i, pair in enumerate(scored["pairs"]):
             id_a, id_b = pair
@@ -123,14 +44,13 @@ class BusinessRulesDedupe(dedupe.Dedupe):
             entity_b = data.get(id_b, {})
             if self._has_conflict(entity_a, entity_b):
                 scored["score"][i] = 0.0
-                num_conflincting_pairs += 1
+                num_conflicting_pairs += 1
 
         logger.debug(
-            "Scored %s pair and processed %s conflict(s).",
-            len(scored),
-            num_conflincting_pairs,
+            "Scored %s pairs and processed %s conflict(s).",
+            len(scored["pairs"]),
+            num_conflicting_pairs,
         )
-
         return scored
 
     def pairs(self, data):
@@ -151,12 +71,12 @@ class BusinessRulesDedupe(dedupe.Dedupe):
         import tempfile
 
         with tempfile.TemporaryDirectory() as temp_dir:
-            if self.in_memory:
+            # StaticDedupe might not have in_memory attribute, so we use getattr
+            if getattr(self, "in_memory", False):
                 con = sqlite3.connect(":memory:")
             else:
                 con = sqlite3.connect(temp_dir + "/blocks.db")
 
-            # Set journal mode to WAL.
             con.execute("pragma journal_mode=off")
             con.execute(
                 f"CREATE TABLE blocking_map (block_key text, record_id {id_type})"
@@ -165,9 +85,7 @@ class BusinessRulesDedupe(dedupe.Dedupe):
                 "INSERT INTO blocking_map values (?, ?)",
                 self.fingerprinter(data.items()),
             )
-
             self.fingerprinter.reset_indices()
-
             con.execute("""CREATE UNIQUE INDEX record_id_block_key_idx
                            ON blocking_map (record_id, block_key)""")
             con.execute("""CREATE INDEX block_key_idx
@@ -182,7 +100,6 @@ class BusinessRulesDedupe(dedupe.Dedupe):
             # Count statistics for logging
             total_pairs = 0
             filtered_pairs = 0
-
             for a_record_id, b_record_id in pairs:
                 total_pairs += 1
                 entity_a = data[a_record_id]
@@ -192,7 +109,6 @@ class BusinessRulesDedupe(dedupe.Dedupe):
                 if self._has_conflict(entity_a, entity_b):
                     filtered_pairs += 1
                     continue
-
                 yield (
                     (a_record_id, data[a_record_id]),
                     (b_record_id, data[b_record_id]),
@@ -214,6 +130,7 @@ class BusinessRulesDedupe(dedupe.Dedupe):
         clusters = super().cluster(pair_scores, threshold)
         clusters = super()._add_singletons(data.keys(), clusters)
         clusters_eval = list(clusters)
+
         # Apply business rules at cluster level
         clusters_clean = self.apply_business_rules(clusters_eval, data)
 
@@ -221,9 +138,7 @@ class BusinessRulesDedupe(dedupe.Dedupe):
         return clusters_clean
 
     def _has_conflict(
-        self,
-        entity_a: dict[str, object],
-        entity_b: dict[str, object],
+        self, entity_a: dict[str, object], entity_b: dict[str, object]
     ) -> bool:
         """Return True if two entities conflict on any field."""
         unique_conflicts = any(
@@ -238,12 +153,13 @@ class BusinessRulesDedupe(dedupe.Dedupe):
             if (entity_a[field] is None) or (entity_b[field] is None):
                 distinct_conflicts_list.append(False)
                 continue
-            if field == "acteur_type_id":
-                if ((int(entity_a[field]) == 3) and (int(entity_b[field]) == 4)) or (
-                    (int(entity_a[field]) == 4) and (int(entity_b[field]) == 3)
-                ):
-                    distinct_conflicts_list.append(False)
-                    continue
+            if (
+                (field == "acteur_type_id")
+                and ((int(entity_a[field]) == 3) and (int(entity_b[field]) == 4))
+                or ((int(entity_a[field]) == 4) and (int(entity_b[field]) == 3))
+            ):
+                distinct_conflicts_list.append(False)
+                continue
             distinct_conflicts_list.append(entity_a[field] != entity_b[field])
         distinct_conflicts = any(distinct_conflicts_list)
 
@@ -297,13 +213,10 @@ class BusinessRulesDedupe(dedupe.Dedupe):
             )
             remaining.remove(worst)
             removed.append(worst)
-
         return remaining, removed
 
     def apply_business_rules(
-        self,
-        clusters: Iterable,
-        data: dict[Hashable, dict[str, object]],
+        self, clusters: Iterable, data: dict[Hashable, dict[str, object]]
     ) -> list:
         """
         Applique les règles métiers à la sortie de `dedupe.partition()`.
@@ -320,7 +233,7 @@ class BusinessRulesDedupe(dedupe.Dedupe):
         """
         result: list[tuple[tuple[Hashable, ...], tuple[float, ...]]] = []
 
-        logger.debug("Applying business rules to %s clusters", len(clusters))
+        logger.debug("Applying business rules to clusters")
         for acteur_ids, scores in clusters:
             if len(acteur_ids) == 1:
                 # Singleton case
@@ -331,12 +244,7 @@ class BusinessRulesDedupe(dedupe.Dedupe):
             score_by_id = dict(zip(acteur_ids, scores))
 
             # le cluster nettoyé (peut être réduit à une seule entité)
-            result.append(
-                (
-                    tuple(kept_ids),
-                    tuple(score_by_id[i] for i in kept_ids),
-                )
-            )
+            result.append((tuple(kept_ids), tuple(score_by_id[i] for i in kept_ids)))
 
             # chaque entité retirée redevient un singleton
             for removed_id in removed_ids:
@@ -346,3 +254,141 @@ class BusinessRulesDedupe(dedupe.Dedupe):
             "New clusters count after business rules applied : %s", len(result)
         )
         return result
+
+
+class BusinessRulesDedupe(BusinessRulesMixin, dedupe.Dedupe):
+    def __init__(
+        self,
+        *args,
+        unique_fields: tuple[str, ...] = ("source_id",),
+        distinct_fields: tuple[str, ...] = ("acteur_type_id",),
+        index_predicates: bool = True,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+
+        # The models can fail to converge with the default 100 iterations
+        self.classifier.estimator.set_params(max_iter=1000, random_state=RANDOM_SEED)
+
+        self._unique_fields = unique_fields
+        self._distinct_fields = distinct_fields
+        self._index_predicates = index_predicates
+
+    def prepare_training(
+        self,
+        data: Mapping[int, Mapping[str, Any]] | Mapping[str, Mapping[str, Any]],
+        training_file: TextIO | None = None,
+        sample_size: int = 1500,
+        blocked_proportion: float = 0.9,
+    ) -> None:
+        self._checkData(data)
+
+        self.active_learner = None
+        if training_file:
+            self._read_training(training_file)
+
+        # We need the active learner to know about all our
+        # existing training data, so add them to data dictionary
+        examples, y = flatten_training(self.training_pairs)
+        self.active_learner = labeler.DedupeDisagreementLearner(
+            self.data_model.predicates,
+            self.data_model.distances,
+            data,
+            index_include=examples,
+        )
+
+        self.active_learner.matcher._classifier.set_params(
+            max_iter=1000, random_state=RANDOM_SEED
+        )
+        self.active_learner.mark(examples, y)
+
+    def fit(self, df_train: pl.DataFrame, entities_dict: dict) -> Self:
+        """
+        Entraîne un objet dedupe.Dedupe à partir des paires labellisées de
+        `df_train_sub`, sans passer par l'apprentissage actif interactif.
+
+        entities contient tous les acteurs dans un dictionnaire format dedupe.
+        """
+
+        train_ids = set(df_train["identifiant_unique_i"].to_list()) | set(
+            df_train["identifiant_unique_j"].to_list()
+        )
+        train_entities = {i: entities_dict[i] for i in train_ids}
+
+        # Construct labeled_pairs before training
+        labeled_pairs = {"match": [], "distinct": []}
+        for row in df_train.iter_rows(named=True):
+            pair = (
+                entities_dict[row["identifiant_unique_i"]],
+                entities_dict[row["identifiant_unique_j"]],
+            )
+            labeled_pairs["match" if row["label"] else "distinct"].append(pair)
+
+        # Serialize labeled_pairs to a training file in memory
+        training_file = io.StringIO()
+        dedupe.write_training(labeled_pairs, training_file)
+        training_file.seek(0)
+
+        # use the serialized training file to avoid using mark_pairs
+        # that can cause bugs depending of sample size
+        self.prepare_training(
+            train_entities,
+            training_file=training_file,
+            sample_size=max(10000, len(train_ids)),
+        )
+
+        self.train(index_predicates=self._index_predicates)
+        self.cleanup_training()
+
+        return self
+
+    def save(self, path: str | Path | TextIO) -> None:
+        settings_buffer = io.BytesIO()
+        self.write_settings(settings_buffer)
+        core_settings_bytes = settings_buffer.getvalue()
+        core_settings_b64 = base64.b64encode(core_settings_bytes).decode("utf-8")
+        full_settings = {
+            "core": core_settings_b64,
+            "business_rules": {
+                "unique_fields": self._unique_fields,
+                "distinct_fields": self._distinct_fields,
+                "index_predicates": self._index_predicates,
+            },
+        }
+        if isinstance(path, (str, Path)):
+            with Path(path).open("w", encoding="utf-8") as f:
+                json.dump(full_settings, f, indent=2)
+        else:
+            json.dump(full_settings, path, indent=2)
+        logger.info("Model saved to %s", path)
+
+
+class BusinessRulesStaticDedupe(BusinessRulesMixin, dedupe.StaticDedupe):
+    def __init__(
+        self, settings_file: str | Path | TextIO, num_cores: int | None = None
+    ):
+        """
+        Load a model saved with BusinessRulesDedupe.save().
+        """
+        # 1. Load the JSON wrapper
+        if hasattr(settings_file, "read"):
+            full_settings = json.load(settings_file)
+        else:
+            with Path(settings_file).open("r", encoding="utf-8") as f:
+                full_settings = json.load(f)
+
+        # 2. Decode the core dedupe settings
+        core_settings_b64 = full_settings["core"]
+        core_settings_bytes = base64.b64decode(core_settings_b64)
+        settings_buffer = io.BytesIO(core_settings_bytes)
+
+        # 3. Initialize the parent StaticDedupe with the binary stream
+        super().__init__(settings_buffer, num_cores=num_cores)
+
+        # 4. Restore the business rules configuration
+        business_rules = full_settings.get("business_rules", {})
+        self._unique_fields = tuple(business_rules.get("unique_fields", ("source_id",)))
+        self._distinct_fields = tuple(
+            business_rules.get("distinct_fields", ("acteur_type_id",))
+        )
+        self._index_predicates = business_rules.get("index_predicates", True)
