@@ -63,7 +63,7 @@
     "@parcel/optimizer-svgo": "^2.16.4",
     "@parcel/transformer-inline-string": "^2.16.4",
     "@playwright/test": "^1.61.1",
-    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/jest-dom": "^7.0.0",
     "@types/jest": "^30.0.0",
     "@types/lodash": "^4.17.24",
     "@types/node": "^26.1.1",
