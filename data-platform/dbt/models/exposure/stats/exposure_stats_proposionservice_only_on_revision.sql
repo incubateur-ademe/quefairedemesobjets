@@ -10,11 +10,13 @@ WITH revisions AS (
 more_props_agg AS (
     SELECT
         m.identifiant_unique,
-        a.code AS action_code,
+        a.code                                AS action_code,
         jsonb_agg(sco.code ORDER BY sco.code) AS sous_categories
     FROM {{ ref('marts_acteur_vs_revision_propositon_services') }} AS m
     INNER JOIN {{ ref('base_action') }} AS a ON m.action_id = a.id
-    INNER JOIN {{ ref('base_souscategorieobjet') }} AS sco ON m.souscategorieobjet_id = sco.id
+    INNER JOIN
+        {{ ref('base_souscategorieobjet') }} AS sco
+        ON m.souscategorieobjet_id = sco.id
     WHERE m.source = 'revision'
     GROUP BY m.identifiant_unique, a.code
 ),
@@ -22,18 +24,21 @@ more_props_agg AS (
 more_propositionservices AS (
     SELECT
         identifiant_unique,
-        jsonb_object_agg(action_code, sous_categories) AS more_propositionservices
+        jsonb_object_agg(action_code, sous_categories)
+            AS more_propositionservices
     FROM more_props_agg
     GROUP BY identifiant_unique
 ),
 
 revision_props_agg AS (
     SELECT
-        rps.acteur_id AS identifiant_unique,
-        a.code AS action_code,
+        rps.acteur_id                                  AS identifiant_unique,
+        a.code                                         AS action_code,
         jsonb_agg(DISTINCT sco.code ORDER BY sco.code) AS sous_categories
     FROM {{ ref('int_revisionpropositonservices_with_acteur') }} AS rps
-    INNER JOIN {{ ref('int_revisionpropositonservice_sous_categories_with_acteur') }} AS rpsc
+    INNER JOIN
+        {{ ref('int_revisionpropositonservice_sous_categories_with_acteur') }}
+            AS rpsc
         ON rps.id = rpsc.revisionpropositionservice_id
     INNER JOIN {{ ref('base_action') }} AS a ON rps.action_id = a.id
     INNER JOIN {{ ref('base_souscategorieobjet') }} AS sco
@@ -56,7 +61,13 @@ SELECT
     mp.more_propositionservices,
     ps.propositionservices
 FROM revisions AS ao
-INNER JOIN {{ ref('int_acteur_with_revision') }} AS a ON ao.identifiant_unique = a.identifiant_unique
-INNER JOIN more_propositionservices AS mp ON ao.identifiant_unique = mp.identifiant_unique
-INNER JOIN revisionpropositionservices AS ps ON ao.identifiant_unique = ps.identifiant_unique
+INNER JOIN
+    {{ ref('int_acteur_with_revision') }} AS a
+    ON ao.identifiant_unique = a.identifiant_unique
+INNER JOIN
+    more_propositionservices AS mp
+    ON ao.identifiant_unique = mp.identifiant_unique
+INNER JOIN
+    revisionpropositionservices AS ps
+    ON ao.identifiant_unique = ps.identifiant_unique
 ORDER BY a.nom, a.identifiant_unique

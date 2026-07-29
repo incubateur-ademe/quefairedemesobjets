@@ -1,7 +1,7 @@
 SELECT
     identifiant_unique,
-    siren as siren_actuel,
-    acteur_siret as siret_actuel,
+    siren        AS siren_actuel,
+    acteur_siret AS siret_actuel,
     siren_successeur,
     siret_successeur,
     transfert_siege,

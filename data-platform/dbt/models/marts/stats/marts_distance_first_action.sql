@@ -6,10 +6,12 @@ WITH position_action AS (
     SELECT
         rp.longitude,
         rp.latitude,
-        ST_SetSRID(ST_MakePoint(rp.longitude, rp.latitude), 4326)::geography AS geog,
-        a.id AS action_id
-    FROM {{ ref('base_random_position') }} rp
-    CROSS JOIN {{ ref('base_action') }} a
+        a.id
+            AS action_id,
+        ST_SETSRID(ST_MAKEPOINT(rp.longitude, rp.latitude), 4326)::geography
+            AS geog
+    FROM {{ ref('base_random_position') }} AS rp
+    CROSS JOIN {{ ref('base_action') }} AS a
 ),
 
 distance_to_acteurs AS (
@@ -19,16 +21,17 @@ distance_to_acteurs AS (
         pa.longitude,
         pa.latitude,
         pa.action_id,
-        va.identifiant_unique AS acteur_id,
-        va.latitude AS acteur_latitude,
-        va.longitude AS acteur_longitude,
-        ST_Distance(pa.geog, va.location::geography) AS distance_m
-    FROM position_action pa
-    INNER JOIN {{ ref('base_vuepropositionservice_visible') }} vps
+        va.identifiant_unique                        AS acteur_id,
+        va.latitude                                  AS acteur_latitude,
+        va.longitude                                 AS acteur_longitude,
+        ST_DISTANCE(pa.geog, va.location::geography) AS distance_m
+    FROM position_action AS pa
+    INNER JOIN {{ ref('base_vuepropositionservice_visible') }} AS vps
         ON pa.action_id = vps.action_id
-    INNER JOIN {{ ref('base_vueacteur_visible') }} va
+    INNER JOIN {{ ref('base_vueacteur_visible') }} AS va
         ON vps.acteur_id = va.identifiant_unique
-    WHERE ST_DWithin(pa.geog, va.location::geography, 100000)  -- 30 km en mètres
+    -- 30 km en mètres
+    WHERE ST_DWITHIN(pa.geog, va.location::geography, 100000)
 ),
 
 ranked AS (

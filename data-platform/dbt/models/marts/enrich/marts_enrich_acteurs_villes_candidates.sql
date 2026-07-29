@@ -1,15 +1,15 @@
 SELECT
-  acteurs.identifiant_unique AS acteur_id,
-  acteurs.acteur_type_id AS acteur_type_id,
-  acteurs.source_id AS acteur_source_id,
-  acteurs.adresse AS acteur_adresse,
-  acteurs.ville AS acteur_ville,
-  acteurs.code_postal AS acteur_code_postal,
-  acteurs.statut AS acteur_statut,
-  ban.ville_ancienne AS ban_ville_ancienne,
-  ban.ville AS ban_ville,
-  ban.code_postal AS ban_code_postal,
-  ban.ville AS suggest_ville
+    acteurs.identifiant_unique AS acteur_id,
+    acteurs.acteur_type_id,
+    acteurs.source_id          AS acteur_source_id,
+    acteurs.adresse            AS acteur_adresse,
+    acteurs.ville              AS acteur_ville,
+    acteurs.code_postal        AS acteur_code_postal,
+    acteurs.statut             AS acteur_statut,
+    ban.ville_ancienne         AS ban_ville_ancienne,
+    ban.ville                  AS ban_ville,
+    ban.code_postal            AS ban_code_postal,
+    ban.ville                  AS suggest_ville
 FROM {{ ref('base_vueacteur') }} AS acteurs
 JOIN {{ ref('marts_ban_villes') }} AS ban ON ban.code_postal = acteurs.code_postal
 WHERE acteurs.statut = 'ACTIF'

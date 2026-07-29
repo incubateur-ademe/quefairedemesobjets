@@ -1,2 +1,5 @@
 SELECT * FROM {{ ref('base_displayedacteur_acteur_services') }}
-WHERE displayedacteur_id IN (SELECT identifiant_unique FROM {{ ref('marts_sample_displayedacteur') }})
+WHERE
+    displayedacteur_id IN (
+        SELECT identifiant_unique FROM {{ ref('marts_sample_displayedacteur') }}
+    )

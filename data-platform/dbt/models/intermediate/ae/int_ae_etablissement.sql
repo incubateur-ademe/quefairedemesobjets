@@ -51,21 +51,21 @@ SELECT
 
     -- Addresse
     {{ target.schema }}.udf_columns_concat_unique_non_empty(
-      etab.numero_voie,
-      etab.type_voie,
-      etab.libelle_voie
-    ) AS adresse,
-    etab.numero_voie AS adresse_numero,
-    etab.complement_adresse AS adresse_complement,
-    etab.code_postal,
-    etab.libelle_commune AS ville,
-    {{ target.schema }}.udf_normalize_string_for_match(
-      {{ target.schema }}.udf_columns_concat_unique_non_empty(
         etab.numero_voie,
         etab.type_voie,
         etab.libelle_voie
-      )
-    ) AS adresse_normalize_string_for_match
+    )                        AS adresse,
+    etab.numero_voie         AS adresse_numero,
+    etab.complement_adresse  AS adresse_complement,
+    etab.code_postal,
+    etab.libelle_commune     AS ville,
+    {{ target.schema }}.udf_normalize_string_for_match(
+        {{ target.schema }}.udf_columns_concat_unique_non_empty(
+            etab.numero_voie,
+            etab.type_voie,
+            etab.libelle_voie
+        )
+    )                        AS adresse_normalize_string_for_match
 
 FROM cleaned AS etab
 /* Joining with unite_legale to bring some essential

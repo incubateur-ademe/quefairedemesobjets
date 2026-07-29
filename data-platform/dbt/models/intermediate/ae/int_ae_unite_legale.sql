@@ -37,15 +37,12 @@ SELECT
        using different flags
      - create more efficient data type and index
     */
-    CASE etat_administratif
-      WHEN 'A' THEN TRUE
-      ELSE FALSE
-    END AS est_actif,
+    denomination        AS nom_commercial,
 
     -- In QFDMO, "nom" refers to the business name
     -- we use "nom_commercial" to avoid collision
     -- with the original "nom" referring to directors
-    denomination AS nom_commercial,
+    nom                 AS dirigeant_nom,
 
     /*
     Director's first names and last names for the sake
@@ -53,24 +50,27 @@ SELECT
      - normalize to increase chances of matching
      - keep each column separate for a potential substring match
     */
-    nom AS dirigeant_nom,
-    nom_usage AS dirigeant_nom_usage,
-    pseudonyme AS dirigeant_pseudonyme,
-    prenom1 AS dirigeant_prenom1,
-    prenom2 AS dirigeant_prenom2,
-    prenom3 AS dirigeant_prenom3,
-    prenom4 AS dirigeant_prenom4,
-    prenom_usuel AS dirigeant_prenom_usuel,
+    nom_usage           AS dirigeant_nom_usage,
+    pseudonyme          AS dirigeant_pseudonyme,
+    prenom1             AS dirigeant_prenom1,
+    prenom2             AS dirigeant_prenom2,
+    prenom3             AS dirigeant_prenom3,
+    prenom4             AS dirigeant_prenom4,
+    prenom_usuel        AS dirigeant_prenom_usuel,
+    CASE etat_administratif
+        WHEN 'A' THEN TRUE
+        ELSE FALSE
+    END                 AS est_actif,
     -- TRUE if ANY names NOT NULL for more efficient pre-filtering
     COALESCE(
-      nom,
-      nom_usage,
-      pseudonyme,
-      prenom1,
-      prenom2,
-      prenom3,
-      prenom4,
-      prenom_usuel
-    ) IS NOT NULL AS a_dirigeant_noms_ou_prenoms_non_null
+        nom,
+        nom_usage,
+        pseudonyme,
+        prenom1,
+        prenom2,
+        prenom3,
+        prenom4,
+        prenom_usuel
+    ) IS NOT NULL       AS a_dirigeant_noms_ou_prenoms_non_null
 
 FROM cleaned
