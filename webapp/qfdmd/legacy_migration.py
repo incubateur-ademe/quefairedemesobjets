@@ -107,7 +107,15 @@ def migrate_produit(
     if index_page is None:
         index_page, _ = get_or_create_legacy_index_page()
 
-    base_slug = slugify(produit.slug or produit.nom)
+    main_synonyme = produit.synonymes.filter(nom=produit.nom).first()
+    # Produit.slug is a single legacy field that can only hold one historic
+    # URL, even though each synonyme had its own — it isn't reliably the
+    # produit's own slug (e.g. it can be an unrelated synonyme's slug). The
+    # main synonyme (same nom as the produit) carries the slug that actually
+    # matches the produit and should be preferred for SEO continuity.
+    base_slug = slugify(
+        (main_synonyme.slug if main_synonyme else "") or produit.slug or produit.nom
+    )
     if not base_slug:
         raise MigrationError("slug et nom vides, page impossible à créer.")
 

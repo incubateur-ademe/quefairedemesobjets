@@ -100,6 +100,35 @@ def test_migrate_refuse_un_produit_deja_migre(index_dechet):
         migrate_produit(produit, index_page=index_dechet)
 
 
+def test_migrate_utilise_le_slug_du_synonyme_principal(index_dechet):
+    """Produit.slug is a single legacy field that can only hold one
+    historic URL, even though each synonyme had its own — it can hold an
+    unrelated synonyme's slug instead of the produit's own. The main
+    synonyme (same nom as the produit) carries the slug that actually
+    matches the produit and must be preferred for SEO continuity.
+    """
+    produit = ProduitFactory(nom="Matériaux du bâtiment en pierre", slug="Ardoises")
+    SynonymeFactory(produit=produit, nom="Ardoises")
+    main_synonyme = SynonymeFactory(
+        produit=produit, nom="Matériaux du bâtiment en pierre"
+    )
+
+    report = migrate_produit(produit, index_page=index_dechet)
+
+    assert report.page.slug == main_synonyme.slug
+    assert report.page.slug == "materiaux-du-batiment-en-pierre"
+
+
+def test_migrate_utilise_produit_slug_si_pas_de_synonyme_principal(index_dechet):
+    """Falls back to Produit.slug (then nom) when no synonyme matches the
+    produit's own nom."""
+    produit = ProduitFactory(nom="Canapé", slug="canape-convertible")
+
+    report = migrate_produit(produit, index_page=index_dechet)
+
+    assert report.page.slug == "canape-convertible"
+
+
 def test_bulk_action_migrate_ignore_les_produits_non_eligibles(index_dechet):
     eligible = ProduitFactory(nom="Matelas")
     deja_migre = ProduitFactory(nom="Sommier")
