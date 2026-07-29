@@ -109,6 +109,47 @@ def _repair_html(html: str) -> str:
     return str(BeautifulSoup(html, "html.parser"))
 
 
+_BLOCK_TAGS = {
+    "p",
+    "div",
+    "ul",
+    "ol",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "table",
+    "blockquote",
+}
+
+
+def _ensure_wrapped_in_paragraph(html: str) -> str:
+    """Wrap bare top-level text/inline HTML in a <p> tag.
+
+    Legacy fields are plain text with <br> line breaks, not RichText, so
+    they have no enclosing <p>. The DSFR card template's
+    ``richtext_p_add_class`` filter only adds its layout class to existing
+    <p> tags (``soup.find_all("p")``): with no <p> at all, the card's
+    description renders as unwrapped text, breaking the CSS layout that
+    positions title/description/badge (visible live, since live rendering
+    outputs the stored HTML as-is — unlike the editor preview, whose
+    Draftail/contentstate round-trip always wraps top-level text in <p>).
+    Content that already starts with a block element is left untouched.
+    """
+    soup = BeautifulSoup(html, "html.parser")
+    if any(getattr(child, "name", None) in _BLOCK_TAGS for child in soup.contents):
+        return str(soup)
+
+    wrapped = BeautifulSoup("", "html.parser")
+    p_tag = wrapped.new_tag("p")
+    for child in list(soup.contents):
+        p_tag.append(child)
+    wrapped.append(p_tag)
+    return str(wrapped)
+
+
 def _build_consignes_avec_etat(bon_etat: str, mauvais_etat: str) -> dict:
     """Build a streamfield value for the consignes avec état.
 
@@ -126,7 +167,9 @@ def _build_consignes_avec_etat(bon_etat: str, mauvais_etat: str) -> dict:
                     "value": {
                         "title": "Donner ou revendre",
                         "heading_tag": "h3",
-                        "description": _repair_html(bon_etat),
+                        "description": _ensure_wrapped_in_paragraph(
+                            _repair_html(bon_etat)
+                        ),
                         "top_detail_badges_tags": [
                             {
                                 "type": "badges",
@@ -149,7 +192,9 @@ def _build_consignes_avec_etat(bon_etat: str, mauvais_etat: str) -> dict:
                     "value": {
                         "title": "Déposer",
                         "heading_tag": "h3",
-                        "description": _repair_html(mauvais_etat),
+                        "description": _ensure_wrapped_in_paragraph(
+                            _repair_html(mauvais_etat)
+                        ),
                         "top_detail_badges_tags": [
                             {
                                 "type": "badges",

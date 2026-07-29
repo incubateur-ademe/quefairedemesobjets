@@ -1,6 +1,6 @@
 import pytest
 
-from qfdmd.models import _repair_html, _split_off_embeds
+from qfdmd.models import _ensure_wrapped_in_paragraph, _repair_html, _split_off_embeds
 from unit_tests.qfdmd.qfdmod_factory import (
     ProduitFactory,
     ProduitPageFactory,
@@ -310,3 +310,70 @@ class TestSyncFromLegacyProduitMalformedHtml:
         from wagtail.admin.rich_text.editors.draftail import DraftailRichTextArea
 
         DraftailRichTextArea().format_value(description)
+
+
+class TestEnsureWrappedInParagraph:
+    """_ensure_wrapped_in_paragraph guarantees a card's "description" value
+    has a top-level <p> for the DSFR card template's richtext_p_add_class
+    filter (which only adds its layout class to existing <p> tags via
+    ``soup.find_all("p")``) to attach its CSS class to. Legacy fields are
+    plain text with <br> line breaks, not RichText, so they have no <p> of
+    their own: with none to target, the description rendered as unwrapped
+    text on the live page, breaking the CSS layout that positions the
+    title/description/badge (the admin's preview iframe didn't show this,
+    since Draftail's contentstate round-trip always wraps top-level text
+    in <p>, unlike live rendering which outputs the stored HTML as-is)."""
+
+    def test_wraps_bare_text_in_paragraph(self):
+        html = "Proposez-le à un proche.<br><br>Vous pouvez aussi le revendre."
+
+        wrapped = _ensure_wrapped_in_paragraph(html)
+
+        assert wrapped == f"<p>{html}</p>".replace("<br>", "<br/>")
+
+    def test_leaves_already_wrapped_paragraph_untouched(self):
+        html = "<p>Déjà encapsulé.</p>"
+
+        wrapped = _ensure_wrapped_in_paragraph(html)
+
+        assert wrapped == html
+
+    def test_leaves_heading_plus_text_untouched(self):
+        """A leading block element (e.g. <h2>) is left as-is: wrapping the
+        whole thing in one <p> would nest a block element inside it."""
+        html = "<h2>Titre</h2>Texte après le titre."
+
+        wrapped = _ensure_wrapped_in_paragraph(html)
+
+        assert wrapped == html
+
+
+@pytest.mark.django_db
+class TestSyncFromLegacyProduitDescriptionWrapping:
+    """sync_from_legacy_produit must wrap bare bon_etat/mauvais_etat text in
+    a <p> so the DSFR card layout (title/description/badge) renders in the
+    right order on the live page, not just in the admin preview."""
+
+    def test_card_descriptions_are_wrapped_in_paragraph(self):
+        produit = ProduitFactory(nom="Articles en cuir")
+        SynonymeFactory(
+            nom=produit.nom,
+            produit=produit,
+            qu_est_ce_que_j_en_fais_bon_etat=(
+                "Proposez-le à un proche.<br><br>Ou revendez-le."
+            ),
+            qu_est_ce_que_j_en_fais_mauvais_etat="Jetez-le à la poubelle.",
+        )
+        page = ProduitPageFactory()
+        produit.legacy_imported_as_produit_page = page
+        produit.save(update_fields=["legacy_imported_as_produit_page"])
+
+        page.sync_from_legacy_produit()
+
+        grid = next(b for b in page.body if b.block_type == "item_grid").value
+        bon_etat_desc = str(grid["items"][0].value["description"])
+        mauvais_etat_desc = str(grid["items"][1].value["description"])
+        assert bon_etat_desc.startswith("<p>")
+        assert bon_etat_desc.endswith("</p>")
+        assert mauvais_etat_desc.startswith("<p>")
+        assert mauvais_etat_desc.endswith("</p>")
