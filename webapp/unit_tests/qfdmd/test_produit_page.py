@@ -7,6 +7,7 @@ from unit_tests.qfdmd.qfdmod_factory import (
     SynonymeFactory,
 )
 from unit_tests.qfdmo.carte_config_factory import CarteConfigFactory
+from unit_tests.qfdmo.sscatobj_factory import SousCategorieObjetFactory
 
 
 @pytest.mark.django_db
@@ -377,3 +378,33 @@ class TestSyncFromLegacyProduitDescriptionWrapping:
         assert bon_etat_desc.endswith("</p>")
         assert mauvais_etat_desc.startswith("<p>")
         assert mauvais_etat_desc.endswith("</p>")
+
+
+@pytest.mark.django_db
+class TestSyncFromLegacyProduitSousCategorieObjet:
+    """sync_from_legacy_produit copies the legacy Produit's sous-catégories
+    objet onto the ProduitPage's own sous_categorie_objet field, which
+    otherwise stays empty on migrated pages (nothing else populates it)."""
+
+    def test_copies_sous_categories_from_produit(self):
+        sc1 = SousCategorieObjetFactory()
+        sc2 = SousCategorieObjetFactory()
+        produit = ProduitFactory(nom="Matériaux du bâtiment en pierre")
+        produit.sous_categories.set([sc1, sc2])
+        page = ProduitPageFactory()
+        produit.legacy_imported_as_produit_page = page
+        produit.save(update_fields=["legacy_imported_as_produit_page"])
+
+        page.sync_from_legacy_produit()
+
+        assert set(page.sous_categorie_objet.all()) == {sc1, sc2}
+
+    def test_no_sous_categorie_does_not_raise(self):
+        produit = ProduitFactory(nom="Sans sous-catégorie")
+        page = ProduitPageFactory()
+        produit.legacy_imported_as_produit_page = page
+        produit.save(update_fields=["legacy_imported_as_produit_page"])
+
+        page.sync_from_legacy_produit()
+
+        assert list(page.sous_categorie_objet.all()) == []

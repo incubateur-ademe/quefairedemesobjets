@@ -1035,6 +1035,14 @@ class ProduitPage(
             msgs.append("Metadonnées SEO copiées depuis le synonyme principal.")
 
         self.save()
+
+        produit_sous_categories = list(produit.sous_categories.all())
+        if produit_sous_categories:
+            self.sous_categorie_objet.set(produit_sous_categories)
+            msgs.append(
+                f"{len(produit_sous_categories)} sous-catégorie(s) objet copiée(s)."
+            )
+
         # Wagtail's editor and live rendering read the latest revision, so a
         # plain save() leaves the synced content invisible.
         self.save_revision().publish()
