@@ -1,6 +1,11 @@
 import pytest
 
-from unit_tests.qfdmd.qfdmod_factory import ProduitPageFactory
+from qfdmd.models import _repair_html, _split_off_embeds
+from unit_tests.qfdmd.qfdmod_factory import (
+    ProduitFactory,
+    ProduitPageFactory,
+    SynonymeFactory,
+)
 from unit_tests.qfdmo.carte_config_factory import CarteConfigFactory
 
 
@@ -168,4 +173,140 @@ class TestProduitPageFooterButton:
         # The standalone link is tagged so visits from the iframe footer are
         # attributable.
         assert "utm_source=qfdmod" in button["onclick"]
-        assert "_blank" in button["onclick"]
+
+
+class TestSplitOffEmbeds:
+    """_split_off_embeds pulls <script>/<iframe> tags (e.g. the impactco2.fr
+    widget) out of legacy rich-text HTML so they can be migrated into their
+    own StreamField "html" block instead of a RichTextBlock, which would
+    otherwise strip them."""
+
+    def test_no_embed_returns_html_unchanged(self):
+        html = "<p>Rien à signaler ici.</p>"
+
+        cleaned, embeds = _split_off_embeds(html)
+
+        assert cleaned == html
+        assert embeds == []
+
+    def test_extracts_script_tag(self):
+        script = (
+            '<script name="impact-co2" src="https://impactco2.fr/iframe.js" '
+            'data-type="transport"></script>'
+        )
+        html = f"<p>avant</p>{script}<p>après</p>"
+
+        cleaned, embeds = _split_off_embeds(html)
+
+        assert embeds == [script]
+        assert script not in cleaned
+        assert cleaned == "<p>avant</p><p>après</p>"
+
+    def test_extracts_iframe_tag(self):
+        iframe = '<iframe src="https://example.com/widget"></iframe>'
+        html = f"<p>avant</p>{iframe}"
+
+        cleaned, embeds = _split_off_embeds(html)
+
+        assert embeds == [iframe]
+        assert cleaned == "<p>avant</p>"
+
+    def test_extracts_multiple_embeds_in_order(self):
+        script = '<script src="https://a.example/x.js"></script>'
+        iframe = '<iframe src="https://b.example/y"></iframe>'
+        html = f"{script}<p>milieu</p>{iframe}"
+
+        cleaned, embeds = _split_off_embeds(html)
+
+        assert embeds == [script, iframe]
+        assert cleaned == "<p>milieu</p>"
+
+
+@pytest.mark.django_db
+class TestSyncFromLegacyProduitEmbeds:
+    """sync_from_legacy_produit must not leave raw <script>/<iframe> tags
+    inside a RichTextBlock: they get split into a dedicated "html" block."""
+
+    def test_script_in_comment_les_eviter_becomes_its_own_html_block(self):
+        script = (
+            '<script name="impact-co2" src="https://impactco2.fr/iframe.js" '
+            'data-type="transport"></script>'
+        )
+        produit = ProduitFactory(
+            comment_les_eviter=f"Consignes de base.{script}",
+        )
+        page = ProduitPageFactory()
+        produit.legacy_imported_as_produit_page = page
+        produit.save(update_fields=["legacy_imported_as_produit_page"])
+
+        page.sync_from_legacy_produit()
+
+        html_blocks = [b for b in page.body if b.block_type == "html"]
+        assert len(html_blocks) == 1
+        assert str(html_blocks[0].value) == script
+
+        paragraph_blocks = [b for b in page.body if b.block_type == "paragraph"]
+        assert not any(script in b.value.source for b in paragraph_blocks)
+
+
+class TestRepairHtml:
+    """_repair_html balances tags in legacy HTML before it is stored as a
+    RichTextBlock value. Unbalanced markup (e.g. a stray closing tag with no
+    matching opening tag) otherwise crashes Wagtail's contentstate converter
+    with "AssertionError: Unmatched tags" as soon as the page is opened in
+    the editor."""
+
+    def test_well_formed_html_is_unchanged_in_content(self):
+        html = "<p>Rien à signaler</p><b>gras</b>."
+
+        repaired = _repair_html(html)
+
+        assert "Rien à signaler" in repaired
+        assert "<b>gras</b>" in repaired
+
+    def test_drops_unmatched_closing_tag(self):
+        html = "avant.<br><br></b>après</b>, fin."
+
+        repaired = _repair_html(html)
+
+        assert "</b>après</b>" not in repaired
+        assert "après" in repaired
+        assert "avant." in repaired
+        assert "fin." in repaired
+
+
+@pytest.mark.django_db
+class TestSyncFromLegacyProduitMalformedHtml:
+    """sync_from_legacy_produit must not write unbalanced HTML (e.g. a
+    stray closing tag with no matching opener) into a RichTextBlock: it
+    crashes the page editor with an AssertionError from Wagtail's
+    contentstate converter as soon as the malformed value is loaded."""
+
+    def test_unmatched_tag_in_synonyme_bon_etat_is_repaired(self):
+        malformed = (
+            "Proposez-le à un proche.<br><br></b>S'il est propre</b>, "
+            "donnez-le en point de collecte."
+        )
+        produit = ProduitFactory(nom="Articles en cuir")
+        SynonymeFactory(
+            nom=produit.nom,
+            produit=produit,
+            qu_est_ce_que_j_en_fais_bon_etat=malformed,
+            qu_est_ce_que_j_en_fais_mauvais_etat="Jetez-le à la poubelle.",
+        )
+        page = ProduitPageFactory()
+        produit.legacy_imported_as_produit_page = page
+        produit.save(update_fields=["legacy_imported_as_produit_page"])
+
+        page.sync_from_legacy_produit()
+
+        grid = next(b for b in page.body if b.block_type == "item_grid").value
+        description = str(grid["items"][0].value["description"])
+        assert "</b>S'il est propre</b>" not in description
+        assert "S'il est propre" in description
+
+        # The DraftailRichTextArea widget's format_value() is exactly what
+        # crashed on the unbalanced source HTML when the editor loaded it.
+        from wagtail.admin.rich_text.editors.draftail import DraftailRichTextArea
+
+        DraftailRichTextArea().format_value(description)

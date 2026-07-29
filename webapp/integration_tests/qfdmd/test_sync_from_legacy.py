@@ -3,7 +3,7 @@ from django.core.management import call_command
 from wagtail.models import Page, Site
 
 from qfdmd.legacy_migration import migrate_produit
-from qfdmd.models import HomePage, Produit
+from qfdmd.models import HomePage, Produit, _repair_html
 
 pytestmark = pytest.mark.django_db
 
@@ -60,14 +60,14 @@ class TestSyncFromLegacyProduit:
         badge1 = badges1[0].value[0].value
         assert badge1["text"] == "Bon état"
         assert badge1["color"] == "cumulus"
-        assert synonyme.bon_etat in card1["description"].source
+        assert _repair_html(synonyme.bon_etat) in card1["description"].source
 
         card2 = grid["items"][1].value
         assert card2["title"] == "Déposer"
         badge2 = card2["top_detail_badges_tags"][0].value[0].value
         assert badge2["text"] == "Mauvais état"
         assert badge2["color"] == "glycine"
-        assert synonyme.mauvais_etat in card2["description"].source
+        assert _repair_html(synonyme.mauvais_etat) in card2["description"].source
 
         break_blocks = [b for b in blocks if b.block_type == "break"]
         assert len(break_blocks) == 1
@@ -99,8 +99,8 @@ class TestSyncFromLegacyProduit:
         card2 = grid["items"][1].value
         assert card1["title"] == "Donner ou revendre"
         assert card2["title"] == "Déposer"
-        assert produit.bon_etat in card1["description"].source
-        assert produit.mauvais_etat in card2["description"].source
+        assert _repair_html(produit.bon_etat) in card1["description"].source
+        assert _repair_html(produit.mauvais_etat) in card2["description"].source
         assert page.search_description
         assert page.seo_title
 

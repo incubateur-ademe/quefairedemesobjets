@@ -1,6 +1,8 @@
 import logging
+import re
 from typing import NamedTuple, override
 
+from bs4 import BeautifulSoup
 from django.contrib.gis.db import models
 from django.core.exceptions import ValidationError
 from django.db.models.functions import Now
@@ -79,6 +81,34 @@ class PartitionedBody(NamedTuple):
     hidden_in_iframe: list
 
 
+# Legacy rich-text fields sometimes embed a raw <script> or <iframe> (e.g.
+# the impactco2.fr widget). RichTextBlock strips those on save, so they must
+# be split out into their own "html" StreamField block (sites_conformes'
+# RawHTMLBlock) instead.
+_EMBED_TAG_RE = re.compile(
+    r"<(script|iframe)\b[^>]*>.*?</\1>", flags=re.IGNORECASE | re.DOTALL
+)
+
+
+def _split_off_embeds(html: str) -> tuple[str, list[str]]:
+    """Return ``(html_without_embeds, [extracted_embed_html, ...])``."""
+    embeds = [match.group(0) for match in _EMBED_TAG_RE.finditer(html)]
+    cleaned = _EMBED_TAG_RE.sub("", html)
+    return cleaned, embeds
+
+
+def _repair_html(html: str) -> str:
+    """Balance tags in legacy HTML before it becomes a RichTextBlock value.
+
+    Some legacy fields contain unbalanced markup (e.g. a stray ``</b>``
+    with no matching opening tag), which crashes Wagtail's contentstate
+    converter (``AssertionError: Unmatched tags``) as soon as the page is
+    opened in the editor. BeautifulSoup re-serializes the HTML, dropping
+    unmatched tags instead of erroring.
+    """
+    return str(BeautifulSoup(html, "html.parser"))
+
+
 def _build_consignes_avec_etat(bon_etat: str, mauvais_etat: str) -> dict:
     """Build a streamfield value for the consignes avec état.
 
@@ -96,7 +126,7 @@ def _build_consignes_avec_etat(bon_etat: str, mauvais_etat: str) -> dict:
                     "value": {
                         "title": "Donner ou revendre",
                         "heading_tag": "h3",
-                        "description": bon_etat,
+                        "description": _repair_html(bon_etat),
                         "top_detail_badges_tags": [
                             {
                                 "type": "badges",
@@ -119,7 +149,7 @@ def _build_consignes_avec_etat(bon_etat: str, mauvais_etat: str) -> dict:
                     "value": {
                         "title": "Déposer",
                         "heading_tag": "h3",
-                        "description": mauvais_etat,
+                        "description": _repair_html(mauvais_etat),
                         "top_detail_badges_tags": [
                             {
                                 "type": "badges",
@@ -874,7 +904,12 @@ class ProduitPage(
             body.append(_build_consignes_avec_etat(bon_etat, mauvais_etat))
             msgs.append("Consignes avec état (grille 2 cartes verticales).")
         elif produit.qu_est_ce_que_j_en_fais:
-            body.append({"type": "paragraph", "value": produit.qu_est_ce_que_j_en_fais})
+            body.append(
+                {
+                    "type": "paragraph",
+                    "value": _repair_html(produit.qu_est_ce_que_j_en_fais),
+                }
+            )
             msgs.append("Consignes sans état (texte riche).")
         else:
             msgs.append("Aucune consigne trouvée.")
@@ -894,6 +929,7 @@ class ProduitPage(
         body.append({"type": "break", "value": ""})
 
         after_break = 0
+        embed_count = 0
         for title, field in [
             ("Que va-t-il devenir ?", produit.que_va_t_il_devenir),
             (
@@ -902,15 +938,24 @@ class ProduitPage(
             ),
         ]:
             if field:
+                cleaned_field, embeds = _split_off_embeds(field)
+                cleaned_field = _repair_html(cleaned_field)
                 body.append(
                     {
                         "type": "paragraph",
-                        "value": f"<h2>{title}</h2>{field}",
+                        "value": f"<h2>{title}</h2>{cleaned_field}",
                     }
                 )
+                for embed in embeds:
+                    body.append({"type": "html", "value": embed})
+                embed_count += len(embeds)
                 after_break += 1
         if after_break:
             msgs.append(f"{after_break} section(s) après la césure iframe.")
+        if embed_count:
+            msgs.append(
+                f"{embed_count} bloc(s) HTML (script/iframe) extrait(s) en bloc dédié."
+            )
 
         liens_qs = produit.liens.order_by("produitlien__poids")
         if liens_qs.exists():
