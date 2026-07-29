@@ -1,4 +1,5 @@
 PYTEST := uv run pytest
+SQLFLUFF := uv run sqlfluff
 
 .PHONY: dags-test
 dags-test:
@@ -8,8 +9,10 @@ dags-test:
 check-format:
 	uv run black --check --diff dags
 	uv run ruff check dags
+	$(SQLFLUFF) lint dbt/models dbt/macros
 
 .PHONY: format
 format:
 	uv run ruff check dags --fix
 	uv run black dags
+	$(SQLFLUFF) fix dbt/models dbt/macros
