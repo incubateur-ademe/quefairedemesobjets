@@ -447,6 +447,10 @@ class AMigrerViewSet(PageListingViewSet):
 
 class LegacyProduitsToMigrateIndexView(ModelIndexView):
     page_title = "Produits à migrer"
+    # Produit is index.Indexed (for its ProduitPage autocomplete search) but
+    # its search_fields/queryset filters aren't set up for the Wagtail search
+    # backend. Force the plain Django `icontains` fallback instead.
+    search_backend_name = None
 
     def get_base_queryset(self):
         return Produit.objects.to_migrate().order_by("id")
