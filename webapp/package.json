@@ -50,12 +50,12 @@
     "@hotwired/turbo": "^8.0.23",
     "@iframe-resizer/child": "^5.5.9",
     "@iframe-resizer/parent": "^5.5.9",
-    "@sentry/browser": "^10.65.0",
+    "@sentry/browser": "^10.67.0",
     "bowser": "^2.14.1",
     "carte-facile": "^0.9.0",
     "eslint-config-prettier": "^10.1.8",
     "maplibre-gl": "^5.24.0",
-    "posthog-js": "^1.400.1",
+    "posthog-js": "^1.405.2",
     "stimulus-use": "^0.53.0",
     "tailwindcss": "^3.4.19"
   },
@@ -63,7 +63,7 @@
     "@parcel/optimizer-svgo": "^2.16.4",
     "@parcel/transformer-inline-string": "^2.16.4",
     "@playwright/test": "^1.61.1",
-    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/jest-dom": "^7.0.0",
     "@types/jest": "^30.0.0",
     "@types/lodash": "^4.17.24",
     "@types/node": "^26.1.1",
@@ -74,9 +74,9 @@
     "jest-environment-jsdom": "^30.4.1",
     "lodash": "^4.18.1",
     "parcel": "^2.16.4",
-    "postcss": "^8.5.19",
+    "postcss": "^8.5.20",
     "postcss-nesting": "^14.0.0",
-    "prettier": "^3.9.5",
+    "prettier": "^3.9.6",
     "svgo": "^4.0.2",
     "tailwindcss-animate": "^1.0.7",
     "ts-jest": "^29.4.11",
@@ -85,6 +85,6 @@
     "typescript-eslint": "^8.62.1"
   },
   "optionalDependencies": {
-    "@parcel/watcher-linux-x64-glibc": "^2.5.6"
+    "@parcel/watcher-linux-x64-glibc": "^2.6.0"
   }
 }
