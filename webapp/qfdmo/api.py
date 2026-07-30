@@ -5,7 +5,7 @@ from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import D
 from django.shortcuts import get_object_or_404
-from ninja import Field, FilterSchema, ModelSchema, Query, Router
+from ninja import Field, FilterSchema, ModelSchema, Query, Router, Schema
 from ninja.pagination import paginate
 from qfdmo.admin.acteur import GenericExporterMixin
 from qfdmo.geo_api import search_epci_code
@@ -16,8 +16,10 @@ from qfdmo.models import (
     Action,
     DisplayedActeur,
     GroupeAction,
+    RevisionActeur,
     Source,
     SousCategorieObjet,
+    VueActeur,
 )
 
 router = Router()
@@ -249,3 +251,71 @@ def acteur(request, identifiant_unique: str):
 @router.get("/autocomplete/configurateur")
 def autocomplete_epcis(request, query: str):
     return search_epci_code(query)
+
+
+def _model_field_names(model_class, include_properties=True) -> list[str]:
+    """Field names of a Django model, mirroring the behaviour of
+    the data-platform's `django_model_fields_get` so Airflow DAGs
+    can build their UI params from the API instead of the ORM.
+
+    Always excluded: internals (pk) & ManyToMany
+    """
+    from django.db import models
+    from django.utils.functional import cached_property
+
+    excluded = ["pk"]
+
+    fields = [
+        x.name
+        for x in model_class._meta.get_fields()
+        # ManyToMany case causing massive performance issues (e.g. on "sources")
+        if not isinstance(x, models.ManyToManyField)
+    ]
+
+    attributes = []
+    if include_properties:
+        for attr_name in dir(model_class):
+            attr = getattr(model_class, attr_name, None)
+            if isinstance(attr, (property, cached_property)):
+                attributes.append(attr_name)
+
+    return [x for x in fields + attributes if x not in excluded]
+
+
+class ModelFieldsSchema(Schema):
+    with_properties: List[str]
+    db_only: List[str]
+
+
+class ActeursMetadataSchema(Schema):
+    sources: dict[str, int]
+    acteur_types: dict[str, int]
+    model_fields: dict[str, ModelFieldsSchema]
+
+
+@router.get(
+    "/metadata/acteurs",
+    response=ActeursMetadataSchema,
+    summary="Métadonnées des modèles acteurs (usage interne data-platform)",
+)
+def acteurs_metadata(request):
+    """
+    Expose les référentiels (sources, types d'acteur) et les champs des
+    modèles acteurs. Utilisé par la data-platform (Airflow) pour construire
+    les paramètres des DAGs (ex: cluster_acteur_suggestions) sans dépendre
+    d'un accès direct à la base de données de la webapp au parsing des DAGs.
+    """  # noqa
+    return {
+        "sources": {s.code: s.id for s in Source.objects.all()},
+        "acteur_types": {t.code: t.id for t in ActeurType.objects.all()},
+        "model_fields": {
+            "vue_acteur": {
+                "with_properties": _model_field_names(VueActeur),
+                "db_only": _model_field_names(VueActeur, include_properties=False),
+            },
+            "revision_acteur": {
+                "with_properties": _model_field_names(RevisionActeur),
+                "db_only": _model_field_names(RevisionActeur, include_properties=False),
+            },
+        },
+    }
