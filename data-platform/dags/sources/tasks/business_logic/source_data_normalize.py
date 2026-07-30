@@ -12,12 +12,12 @@ from pydantic import BaseModel
 from shared.tasks.database_logic.db_manager import PostgresConnectionManager
 from sources.config.airflow_params import TRANSFORMATION_MAPPING
 from sources.config.models import (
-    SourceConfig,
     NormalizationColumnDefault,
     NormalizationColumnRemove,
     NormalizationColumnRename,
     NormalizationColumnTransform,
     NormalizationDFTransform,
+    SourceConfig,
 )
 from sources.tasks.transform.exceptions import (
     ImportSourceException,
@@ -238,13 +238,25 @@ def _remove_undesired_lines(
         )
     # Remove acteurs which propose only service à domicile
     if "service_a_domicile" in df.columns:
+        nb_before = len(df)
         df = df[df["service_a_domicile"].str.lower() != "oui exclusivement"]
         df = df[df["service_a_domicile"].str.lower() != "service à domicile uniquement"]
+        if nb_filtered := nb_before - len(df):
+            logger.warning(
+                "Acteurs filtrés car service à domicile uniquement: "
+                f"{nb_filtered} / {nb_before}"
+            )
 
     # Remove acteurs which have no sous_categorie_codes
     if "sous_categorie_codes" in df.columns:
+        nb_before = len(df)
         df = df[df["sous_categorie_codes"].notnull()]
         df = df[df["sous_categorie_codes"].apply(len) > 0]
+        if nb_filtered := nb_before - len(df):
+            logger.warning(
+                "Acteurs filtrés car sans sous_categorie: "
+                f"{nb_filtered} / {nb_before}"
+            )
 
     # Find duplicates for logging
     dups = df[df["identifiant_unique"].duplicated(keep=False)]

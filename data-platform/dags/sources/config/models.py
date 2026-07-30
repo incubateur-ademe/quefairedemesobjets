@@ -71,6 +71,8 @@ class SourceConfig(BaseModel):
     oca: OCAConfig | None = None
     returnable_objects: bool = False
     use_legacy_suggestions: bool = False
+    # Lignes ignorées après téléchargement si l'un de ces champs est null
+    ignore_rows_with_null_or_empty_fields: list[str] = []
 
     @field_validator("endpoint")
     def validate_endpoint(cls, endpoint):

@@ -12,10 +12,42 @@ from utils import logging_utils as log
 logger = logging.getLogger(__name__)
 
 
+def drop_rows_with_null_or_empty_fields(
+    data: list | pd.DataFrame, fields: list[str] | None = None
+) -> list | pd.DataFrame:
+    """Supprime les lignes dont au moins un des champs listés est null."""
+    if not fields:
+        return data
+
+    if isinstance(data, list) and data and isinstance(data[0], dict):
+        before = len(data)
+
+        def _has_null_or_empty_field(row: dict) -> bool:
+            return any(
+                row.get(field) is None or row.get(field) == "" for field in fields
+            )
+
+        null_or_empty_rows = [row for row in data if _has_null_or_empty_field(row)]
+        filtered = [row for row in data if not _has_null_or_empty_field(row)]
+        removed = before - len(filtered)
+        if removed:
+            logger.info(
+                "Lignes avec champ(s) null (%s) supprimées : %s / %s",
+                fields,
+                removed,
+                before,
+            )
+            log.preview("lignes avec champ(s) null supprimées", null_or_empty_rows)
+        return filtered
+
+    return data
+
+
 def source_data_download(
     endpoint: str,
     s3_connection_id: str | None = None,
     metadata_endpoint: str | None = None,
+    ignore_rows_with_null_or_empty_fields: list[str] | None = None,
 ) -> pd.DataFrame:
     """Téléchargement de la données source sans lui apporter de modification"""
 
@@ -49,6 +81,13 @@ def source_data_download(
     # tant que possible
     data = fetch_data_from_endpoint(endpoint, s3_connection_id)
     logger.info("Téléchargement données de l'API : ✅ succès.")
+    logger.info(
+        "Suppression des lignes avec champ(s) null ou vide : %s",
+        ignore_rows_with_null_or_empty_fields,
+    )
+    data = drop_rows_with_null_or_empty_fields(
+        data, ignore_rows_with_null_or_empty_fields
+    )
     df = pd.DataFrame(data).replace({pd.NA: None, np.nan: None})
     # create dataframe with only string, boolean or list dtype columns
     for column in df.columns:
