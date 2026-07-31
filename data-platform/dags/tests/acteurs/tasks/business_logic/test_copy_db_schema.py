@@ -38,14 +38,12 @@ class TestCopyDbSchema:
 
         # Assertions
         # Verify that _get_all_tables query was executed
-        mock_cursor.execute.assert_any_call(
-            """
+        mock_cursor.execute.assert_any_call("""
             SELECT tablename
             FROM pg_tables
             WHERE schemaname = 'public'
             ORDER BY tablename;
-        """
-        )
+        """)
         mock_cursor.fetchall.assert_called_once()
 
         # Verify that DROP TABLE was called for each table

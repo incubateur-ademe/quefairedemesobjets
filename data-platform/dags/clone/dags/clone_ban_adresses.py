@@ -6,6 +6,7 @@ running into DB table name length limits.
 
 from airflow import DAG
 from airflow.sdk import Param
+from clone.config.models import FIX_CORRUPTED_UTF8_SED_SUBSTITUTION_DESCRIPTION
 from clone.tasks.airflow_logic.chain_tasks import chain_tasks
 from clone.tasks.airflow_logic.clone_dbt_task import clone_dbt_params
 from shared.config.airflow import DEFAULT_ARGS_NO_RETRIES
@@ -62,6 +63,11 @@ with DAG(
             ";",
             type="string",
             description_md="🔤 Délimiteur utilisé dans le fichier",
+        ),
+        "fix_corrupted_utf8_sed_substitutions": Param(
+            [],
+            type="array",
+            description_md=FIX_CORRUPTED_UTF8_SED_SUBSTITUTION_DESCRIPTION,
         ),
         **clone_dbt_params(dbt_select="tag:ban,tag:normalisation"),
     },

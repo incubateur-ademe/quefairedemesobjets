@@ -12,8 +12,8 @@ package = false
 
 [dependency-groups]
 lint = [
-    "black>=25.1.0,<26",
-    "ruff>=0.15.18,<0.16",
+    "black>=26.5.1,<27",
+    "ruff>=0.15.22,<0.16",
 ]
 test = [
     "pytest>=9.1.1,<10",
@@ -28,7 +28,7 @@ dev = [
     {include-group = "lint"},
     {include-group = "test"},
     "djade>=1.9.0,<2",
-    "pre-commit>=4.6.0,<5",
+    "pre-commit>=4.6.1,<5",
 ]
 webapp-dev = [
     "django-browser-reload>=1.21.0,<2",
@@ -38,5 +38,5 @@ webapp-dev = [
 ]
 notebook = [
     "dedupe>=3.0.3",
-    "ipython>=9.14.1,<10",
+    "ipython>=9.15.0,<10",
 ]
