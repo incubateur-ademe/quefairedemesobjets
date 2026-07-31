@@ -55,7 +55,7 @@
     "carte-facile": "^0.9.0",
     "eslint-config-prettier": "^10.1.8",
     "maplibre-gl": "^5.24.0",
-    "posthog-js": "^1.405.2",
+    "posthog-js": "^1.407.0",
     "stimulus-use": "^0.53.0",
     "tailwindcss": "^3.4.19"
   },
@@ -74,7 +74,7 @@
     "jest-environment-jsdom": "^30.4.1",
     "lodash": "^4.18.1",
     "parcel": "^2.16.4",
-    "postcss": "^8.5.20",
+    "postcss": "^8.5.22",
     "postcss-nesting": "^14.0.0",
     "prettier": "^3.9.6",
     "svgo": "^4.0.2",

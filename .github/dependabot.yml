@@ -5,9 +5,7 @@ version: 2
 
 updates:
   - package-ecosystem: "uv"
-    directories:
-      - "/webapp"
-      - "/data-platform"
+    directory: "/"
     open-pull-requests-limit: 100
     schedule:
       interval: "weekly"
