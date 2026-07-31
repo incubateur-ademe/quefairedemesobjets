@@ -378,6 +378,11 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 
+# GDAL/GEOS (postgis backend needs these; only required when the native libs
+# aren't on the default search path, e.g. Nix on macOS). No-op if unset.
+GDAL_LIBRARY_PATH = decouple.config("GDAL_LIBRARY_PATH", default=None)
+GEOS_LIBRARY_PATH = decouple.config("GEOS_LIBRARY_PATH", default=None)
+
 # Database
 # --------
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases

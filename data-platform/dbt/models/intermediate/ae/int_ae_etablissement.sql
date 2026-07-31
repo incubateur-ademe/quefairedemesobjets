@@ -1,13 +1,32 @@
 /*
 Notes:
+ - 🧹 Converting '[ND]' (non-diffusible) to NULL to make
+      our data lighter and easier to work with
  - 🖊️ Renaming columns to follow our naming convention
  - 🧱 We force tu use indexes `Merge Join` instead of `Hash Join`
       to improve performance because siren has a high cardinality
 */
 
+WITH cleaned AS (
+    SELECT
+        {{ target.schema }}.udf_ae_string_cleanup(siret) AS siret,
+        {{ target.schema }}.udf_ae_string_cleanup(siren) AS siren,
+        {{ target.schema }}.udf_ae_string_cleanup(activite_principale) AS activite_principale,
+        {{ target.schema }}.udf_ae_string_cleanup(denomination_usuelle) AS denomination_usuelle,
+        {{ target.schema }}.udf_ae_string_cleanup(etat_administratif) AS etat_administratif,
+        {{ target.schema }}.udf_ae_string_cleanup(numero_voie) AS numero_voie,
+        {{ target.schema }}.udf_ae_string_cleanup(complement_adresse) AS complement_adresse,
+        {{ target.schema }}.udf_ae_string_cleanup(type_voie) AS type_voie,
+        {{ target.schema }}.udf_ae_string_cleanup(libelle_voie) AS libelle_voie,
+        {{ target.schema }}.udf_ae_string_cleanup(code_postal) AS code_postal,
+        {{ target.schema }}.udf_ae_string_cleanup(libelle_commune) AS libelle_commune
+    FROM {{ ref('base_ae_etablissement') }}
+)
+
 SELECT
     -- Codes
     etab.siret,
+    etab.siren,
     etab.activite_principale AS naf, -- Making NAF explicit being a well-known code
 
     -- Names
@@ -48,7 +67,7 @@ SELECT
       )
     ) AS adresse_normalize_string_for_match
 
-FROM {{ ref('base_ae_etablissement') }} AS etab
+FROM cleaned AS etab
 /* Joining with unite_legale to bring some essential
 data from parent unite into each etablissement (saves
 us from making expensive JOINS in downstream models) */
