@@ -144,10 +144,17 @@ def migrate_produit(
         data={"page_id": page.pk, "page_title": page.title},
     )
 
-    synonymes = produit.synonymes.filter(
-        imported_as_search_tag__isnull=True,
-        legacy_imported_as_search_tag__isnull=True,
-    ).order_by("id")
+    # The main synonyme (same nom as the produit) was used to build the
+    # page itself: it must not also appear as one of the page's own
+    # search synonymes.
+    synonymes = (
+        produit.synonymes.filter(
+            imported_as_search_tag__isnull=True,
+            legacy_imported_as_search_tag__isnull=True,
+        )
+        .exclude(nom=produit.nom)
+        .order_by("id")
+    )
     failed, truncated, empty_slug = _execute_import(
         page, synonymes, tracking_field="legacy_imported_as_search_tag"
     )

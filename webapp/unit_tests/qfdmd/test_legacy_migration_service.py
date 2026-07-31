@@ -92,6 +92,28 @@ def test_revert_refuse_une_page_non_migree_automatiquement(index_dechet):
         revert_produit_migration(produit)
 
 
+def test_migrate_n_importe_pas_le_synonyme_principal_comme_tag(index_dechet):
+    """The main synonyme (same nom as the produit) was used to build the
+    page itself: it must not also appear as one of the page's own search
+    synonymes."""
+    produit = ProduitFactory(nom="Acétone")
+    main_synonyme = SynonymeFactory(produit=produit, nom="Acétone")
+    autre_synonyme = SynonymeFactory(produit=produit, nom="Dissolvant")
+
+    report = migrate_produit(produit, index_page=index_dechet)
+
+    main_synonyme.refresh_from_db()
+    autre_synonyme.refresh_from_db()
+    assert main_synonyme.legacy_imported_as_search_tag is None
+    assert autre_synonyme.legacy_imported_as_search_tag is not None
+
+    tag_names = [
+        item.tag.name for item in report.page.search_tags_items.select_related("tag")
+    ]
+    assert "Acétone" not in tag_names
+    assert "Dissolvant" in tag_names
+
+
 def test_migrate_refuse_un_produit_deja_migre(index_dechet):
     produit = ProduitFactory(nom="Fauteuil")
     migrate_produit(produit, index_page=index_dechet)

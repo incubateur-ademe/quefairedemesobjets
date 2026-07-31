@@ -109,11 +109,17 @@ def test_migration_importe_uniquement_les_synonymes_non_migres(
     call_command("migrate_produits_legacy", ids=[AMIANTE_PK])
 
     deja_migre.refresh_from_db()
-    a_migrer = produit.synonymes.exclude(pk=deja_migre.pk)
-    assert a_migrer.count() == 4
+    # Le synonyme principal (même nom que le produit) a servi à créer la
+    # fiche : il ne doit pas être importé comme synonyme de recherche.
+    a_migrer = produit.synonymes.exclude(pk=deja_migre.pk).exclude(nom=produit.nom)
+    assert a_migrer.count() == 3
     for synonyme in a_migrer:
         assert synonyme.legacy_imported_as_search_tag is not None
         assert synonyme.legacy_imported_as_search_tag.name == synonyme.nom
+
+    synonyme_principal = produit.synonymes.get(nom=produit.nom)
+    assert synonyme_principal.legacy_imported_as_search_tag is None
+
     # Les synonymes déjà migrés ne doivent pas être retouchés.
     assert deja_migre.legacy_imported_as_search_tag is None
     assert deja_migre.imported_as_search_tag.name == "Fibro-ciment"
