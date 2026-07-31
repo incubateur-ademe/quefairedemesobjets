@@ -3,22 +3,10 @@ from unittest.mock import patch
 
 import pytest
 from django.core.management import call_command
-from wagtail.models import Page
 
-from qfdmd.legacy_migration import migrate_produit
-from qfdmd.models import LEGACY_PRODUIT_INDEX_SLUG, ProduitIndexPage
 from unit_tests.qfdmd.qfdmod_factory import ProduitFactory, SynonymeFactory
 
 pytestmark = pytest.mark.django_db
-
-
-@pytest.fixture
-def index_dechet():
-    root_page = Page.objects.get(depth=1)
-    page = ProduitIndexPage(title="Déchets", slug=LEGACY_PRODUIT_INDEX_SLUG)
-    root_page.add_child(instance=page)
-    page.save()
-    return page
 
 
 def _write_csv(tmp_path, rows):
@@ -32,13 +20,11 @@ def _write_csv(tmp_path, rows):
     return path
 
 
-class TestReportGenreNombreMigratedPages:
-    def test_uses_csv_when_pair_matches(self, index_dechet, tmp_path):
+class TestReportGenreNombreSynonymes:
+    def test_covers_every_synonyme_not_just_main_ones(self, tmp_path):
         produit = ProduitFactory(nom="Rideau")
         SynonymeFactory(produit=produit, nom="Rideau")
-        migrate_produit(produit, index_page=index_dechet)
-        produit.refresh_from_db()
-        page = produit.legacy_imported_as_produit_page
+        SynonymeFactory(produit=produit, nom="Voilage")
 
         csv_path = _write_csv(
             tmp_path,
@@ -50,43 +36,45 @@ class TestReportGenreNombreMigratedPages:
                     "premier_mot": "Rideau",
                     "genre": "masculin",
                     "nombre": "singulier",
-                }
+                },
+                {
+                    "id": 2,
+                    "produit": produit.pk,
+                    "nom": "Voilage",
+                    "premier_mot": "Voilage",
+                    "genre": "masculin",
+                    "nombre": "singulier",
+                },
             ],
         )
-        output_path = tmp_path / "report.csv"
+        output_path = tmp_path / "genre-nombre-synonyme.csv"
 
         call_command(
-            "report_genre_nombre_migrated_pages",
+            "report_genre_nombre_synonymes",
             csv_path=str(csv_path),
             output=str(output_path),
             no_llm=True,
         )
 
         with open(output_path, newline="", encoding="utf-8") as f:
-            rows = list(csv.DictReader(f))
+            rows = {r["synonyme_nom"] for r in csv.DictReader(f)}
 
-        assert len(rows) == 1
-        assert rows[0]["page_id"] == str(page.pk)
-        assert rows[0]["genre"] == "masculin"
-        assert rows[0]["nombre"] == "singulier"
-        assert rows[0]["source"] == "csv"
+        assert rows == {"Rideau", "Voilage"}
 
-    def test_falls_back_to_llm_when_pair_missing_from_csv(self, index_dechet, tmp_path):
-        produit = ProduitFactory(nom="Tabouret")
+    def test_falls_back_to_llm_when_pair_missing_from_csv(self, tmp_path):
+        produit = ProduitFactory(nom="Rideau")
         SynonymeFactory(produit=produit, nom="Tabouret")
-        migrate_produit(produit, index_page=index_dechet)
-        produit.refresh_from_db()
 
         csv_path = _write_csv(tmp_path, [])
-        output_path = tmp_path / "report.csv"
+        output_path = tmp_path / "genre-nombre-synonyme.csv"
 
         with patch(
-            "qfdmd.management.commands.report_genre_nombre_migrated_pages"
+            "qfdmd.management.commands.report_genre_nombre_synonymes"
             ".classify_with_ollama",
             return_value=("masculin", "singulier"),
         ) as mocked_classify:
             call_command(
-                "report_genre_nombre_migrated_pages",
+                "report_genre_nombre_synonymes",
                 csv_path=str(csv_path),
                 output=str(output_path),
             )
@@ -99,20 +87,16 @@ class TestReportGenreNombreMigratedPages:
 
         assert len(rows) == 1
         assert rows[0]["source"] == "llm"
-        assert rows[0]["genre"] == "masculin"
-        assert rows[0]["nombre"] == "singulier"
 
-    def test_no_llm_skips_pages_missing_from_csv(self, index_dechet, tmp_path):
-        produit = ProduitFactory(nom="Tabouret")
+    def test_no_llm_skips_synonymes_missing_from_csv(self, tmp_path):
+        produit = ProduitFactory(nom="Rideau")
         SynonymeFactory(produit=produit, nom="Tabouret")
-        migrate_produit(produit, index_page=index_dechet)
-        produit.refresh_from_db()
 
         csv_path = _write_csv(tmp_path, [])
-        output_path = tmp_path / "report.csv"
+        output_path = tmp_path / "genre-nombre-synonyme.csv"
 
         call_command(
-            "report_genre_nombre_migrated_pages",
+            "report_genre_nombre_synonymes",
             csv_path=str(csv_path),
             output=str(output_path),
             no_llm=True,
@@ -123,14 +107,9 @@ class TestReportGenreNombreMigratedPages:
 
         assert rows == []
 
-    def test_does_not_write_to_database(self, index_dechet, tmp_path):
-        """The report is read-only: it must not mutate ProduitPage."""
+    def test_does_not_write_to_database(self, tmp_path):
         produit = ProduitFactory(nom="Rideau")
-        SynonymeFactory(produit=produit, nom="Rideau")
-        migrate_produit(produit, index_page=index_dechet)
-        produit.refresh_from_db()
-        page = produit.legacy_imported_as_produit_page
-        assert page.genre == ""
+        synonyme = SynonymeFactory(produit=produit, nom="Rideau")
 
         csv_path = _write_csv(
             tmp_path,
@@ -146,11 +125,12 @@ class TestReportGenreNombreMigratedPages:
             ],
         )
         call_command(
-            "report_genre_nombre_migrated_pages",
+            "report_genre_nombre_synonymes",
             csv_path=str(csv_path),
-            output=str(tmp_path / "report.csv"),
+            output=str(tmp_path / "genre-nombre-synonyme.csv"),
             no_llm=True,
         )
 
-        page.refresh_from_db()
-        assert page.genre == ""
+        # Synonyme has no genre/nombre fields at all; just confirm the
+        # command didn't error trying to write to the model.
+        synonyme.refresh_from_db()

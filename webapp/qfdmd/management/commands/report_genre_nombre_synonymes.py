@@ -7,16 +7,15 @@ from qfdmd.genre_nombre_classification import (
     load_csv_lookup,
     write_report,
 )
-from qfdmd.models import ProduitPage
+from qfdmd.models import Synonyme
 
 
 class Command(BaseCommand):
     help = (
-        "Reports genre/nombre for the main synonyme of every migrated "
-        "ProduitPage: looked up from genre-nombre.csv, falling back to a "
-        "local Ollama instance (OLLAMA_BASE_URL) when the pair "
-        "(produit_id, nom) isn't in the CSV. Writes a report CSV, no "
-        "database writes."
+        "Reports genre/nombre for every Synonyme (not just main synonymes): "
+        "looked up from genre-nombre.csv, falling back to a local Ollama "
+        "instance (OLLAMA_BASE_URL) when the pair (produit_id, nom) isn't in "
+        "the CSV. Writes a report CSV, no database writes."
     )
 
     def add_arguments(self, parser):
@@ -27,14 +26,14 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             "--output",
-            default="genre_nombre_report.csv",
+            default="genre-nombre-synonyme.csv",
             help="Path to write the report CSV to.",
         )
         parser.add_argument(
             "--no-llm",
             action="store_true",
-            help="Skip the Ollama fallback; leave genre/nombre blank when "
-            "missing from the CSV.",
+            help="Skip the Ollama fallback; leave out synonymes missing "
+            "from the CSV.",
         )
 
     def handle(self, *args, **options):
@@ -48,33 +47,25 @@ class Command(BaseCommand):
             )
 
         rows = []
-        pages = ProduitPage.objects.filter(
-            automatically_migrated_from_legacy_produit=True
-        ).select_related()
+        failures = 0
+        synonymes = Synonyme.objects.select_related("produit").order_by("id")
+        total = synonymes.count()
 
-        for page in pages:
-            produit = page.linked_legacy_produit
-            if produit is None:
-                continue
-            main_synonyme = produit.synonymes.filter(nom=produit.nom).first()
-            if main_synonyme is None:
-                continue
-
-            key = (produit.pk, main_synonyme.nom)
+        for index, synonyme in enumerate(synonymes, start=1):
+            key = (synonyme.produit_id, synonyme.nom)
             source = "csv"
             genre_nombre = csv_lookup.get(key)
 
             if genre_nombre is None and not options["no_llm"]:
                 try:
-                    genre_nombre = classify_with_ollama(
-                        ollama_base_url, main_synonyme.nom
-                    )
+                    genre_nombre = classify_with_ollama(ollama_base_url, synonyme.nom)
                     source = "llm"
                 except Exception as exc:  # noqa: BLE001
+                    failures += 1
                     self.stdout.write(
                         self.style.ERROR(
                             f"Échec de classification pour "
-                            f"« {main_synonyme.nom} » : {exc}"
+                            f"« {synonyme.nom} » : {exc}"
                         )
                     )
                     continue
@@ -85,22 +76,25 @@ class Command(BaseCommand):
             genre, nombre = genre_nombre
             rows.append(
                 {
-                    "page_id": page.pk,
-                    "produit_id": produit.pk,
-                    "synonyme_nom": main_synonyme.nom,
+                    "produit_id": synonyme.produit_id,
+                    "synonyme_nom": synonyme.nom,
                     "genre": genre,
                     "nombre": nombre,
                     "source": source,
                 }
             )
 
-        write_report(options["output"], rows, extra_fieldnames=["page_id"])
+            if index % 50 == 0 or index == total:
+                self.stdout.write(f"{index}/{total} synonymes traités.")
+
+        write_report(options["output"], rows)
 
         from_csv = sum(1 for r in rows if r["source"] == "csv")
         from_llm = sum(1 for r in rows if r["source"] == "llm")
         self.stdout.write(
             self.style.SUCCESS(
-                f"{len(rows)} page(s) écrite(s) dans {options['output']} "
-                f"({from_csv} depuis le CSV, {from_llm} classifiée(s) par le LLM)."
+                f"{len(rows)} synonyme(s) écrit(s) dans {options['output']} "
+                f"({from_csv} depuis le CSV, {from_llm} classifiée(s) par le "
+                f"LLM, {failures} échec(s))."
             )
         )
