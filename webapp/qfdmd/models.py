@@ -1029,10 +1029,12 @@ class ProduitPage(
             self.infotri = produit.infotri.raw_data
             msgs.append("Images infotri copiées.")
 
+        self.seo_title = f"Que faire de mon {produit.nom}"
+        msgs.append("Balise title initialisée.")
+
         if synonyme and synonyme.meta_description:
-            self.seo_title = f"Que faire de mon {produit.nom}"
             self.search_description = synonyme.meta_description
-            msgs.append("Metadonnées SEO copiées depuis le synonyme principal.")
+            msgs.append("Meta description copiée depuis le synonyme principal.")
 
         self.save()
 

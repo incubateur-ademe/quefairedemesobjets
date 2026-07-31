@@ -125,3 +125,7 @@ class TestSyncFromLegacyProduit:
         )
         assert "Que va-t-il devenir" in after_texts
         assert "Dernière mise à jour" in after_texts
+
+        # seo_title must be set even without a meta_description on the main
+        # synonyme (regression: it used to be gated on meta_description).
+        assert page.seo_title == f"Que faire de mon {produit.nom}"
