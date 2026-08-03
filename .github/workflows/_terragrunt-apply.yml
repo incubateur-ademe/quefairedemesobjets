@@ -27,7 +27,7 @@ on:
         required: false
         default: ""
       clear_db:
-        description: "Whether to clear and re-seed the database (e.g. when preview:clear-db label is present)"
+        description: "Whether to clear and re-seed the database (e.g. when preview:cleardb label is present)"
         type: string
         required: false
         default: "false"

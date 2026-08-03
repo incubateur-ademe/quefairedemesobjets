@@ -34,6 +34,29 @@ locals {
   )
 }
 
+# Detects whether the preview database currently exists on the RDB
+# instance. Terraform's own state can't see this: if the DB was deleted
+# out-of-band (manually, or by some other process), state still says the
+# null_resource below already applied, so trigger diffing alone would keep
+# skipping it forever. Folding live existence into the triggers forces a
+# reseed whenever the DB is actually missing, regardless of clear_db.
+data "external" "db_exists" {
+  program = ["bash", "-c", <<-EOT
+    if scw rdb database list instance-id="$INSTANCE_ID" -o json 2>/dev/null \
+         | grep -q "\"name\":\"$DB_NAME\""; then
+      echo '{"exists":"true"}'
+    else
+      echo '{"exists":"false"}'
+    fi
+  EOT
+  ]
+
+  query = {
+    INSTANCE_ID = local.instance_uuid
+    DB_NAME     = var.preview_db_name
+  }
+}
+
 # Database, user and privilege are managed via the `scw` CLI instead of the
 # scaleway_rdb_database/user/privilege Terraform resources: the provider hit
 # a "Missing Resource Identity After Read" bug on scaleway_rdb_privilege once
@@ -176,6 +199,7 @@ resource "null_resource" "seed_from_sample" {
   triggers = {
     image_tag      = var.clear_db ? var.image_tag : "reuse"
     sample_db_hash = md5(var.sample_db_uri)
-    seed_version   = "4" # bump to force re-seed (e.g. when changing restore logic)
+    seed_version   = "5" # bump to force re-seed (e.g. when changing restore logic)
+    db_exists      = data.external.db_exists.result.exists
   }
 }
