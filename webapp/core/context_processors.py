@@ -30,14 +30,13 @@ def content(request):
 
 
 def _get_search_placeholders():
-    cache_key = "search_settings_placeholders"
-    value = cache.get(cache_key)
+    from qfdmd.models import SEARCH_SETTINGS_CACHE_KEY, SearchSettings
+
+    value = cache.get(SEARCH_SETTINGS_CACHE_KEY)
     if value is not None:
         return value
 
     try:
-        from qfdmd.models import SearchSettings
-
         settings_obj = SearchSettings.load()
         placeholders = (
             settings_obj.search_placeholder or DEFAULT_HOME_SEARCH_PLACEHOLDER,
@@ -49,7 +48,7 @@ def _get_search_placeholders():
             DEFAULT_HEADER_SEARCH_PLACEHOLDER,
         )
 
-    cache.set(cache_key, placeholders, timeout=3600)
+    cache.set(SEARCH_SETTINGS_CACHE_KEY, placeholders, timeout=3600)
     return placeholders
 
 

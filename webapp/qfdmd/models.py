@@ -2,8 +2,11 @@ import logging
 from typing import NamedTuple, override
 
 from django.contrib.gis.db import models
+from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db.models.functions import Now
+from django.db.models.signals import post_delete, post_save
+from django.dispatch import receiver
 from django.template.loader import render_to_string
 from django.urls.base import reverse
 from django.utils.functional import cached_property
@@ -1092,6 +1095,15 @@ class SearchSettings(BaseGenericSetting):
 
     class Meta:
         verbose_name = "Paramètres de recherche"
+
+
+SEARCH_SETTINGS_CACHE_KEY = "search_settings_placeholders"
+
+
+@receiver(post_save, sender=SearchSettings)
+@receiver(post_delete, sender=SearchSettings)
+def clear_search_settings_cache(**kwargs):
+    cache.delete(SEARCH_SETTINGS_CACHE_KEY)
 
 
 @register_setting
