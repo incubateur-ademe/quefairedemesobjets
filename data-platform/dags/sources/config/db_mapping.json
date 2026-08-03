@@ -288,8 +288,9 @@
     "[syderep] pots/barquettes pet clair (en extension)": "emballage_plastique",
     "[syderep] pots/barquettes ps (en extension)": "bouteilles_plastique",
     "[syderep] rigides multi-couches ou complexes (en extension)": "emballage_plastique",
-    "articles de bricolage et de jardin (abj)": "outil_de_bricolage_et_jardinage",
-    "articles de bricolage et de jardin (outils du peintre)": "abj_outillage_du_peintre_usage",
+    "articles de bricolage et de jardin (abj) catégorie 3° et 4°": "outil_de_bricolage_et_jardinage",
+    "articles de bricolage et de jardin catégorie 1° (outils du peintre)": "abj_outillage_du_peintre_usage",
+    "articles de bricolage et de jardin thermiques catégorie 2°": "outil_de_bricolage_et_jardinage",
     "articles de sports et de loisirs (asl)": [
       "materiel_de_sport_hors_velo",
       "velo"
@@ -297,7 +298,6 @@
     "automobiles hors d'usage": "vehicule",
     "autres batteries (y compris moyens de transport légers)": "batteries_de_mtl",
     "batteries automobiles": "batterie_de_voitures_pour_demarrage",
-    "biodéchets": "biodechets",
     "bouteilles de gaz/extincteurs": "petits_appareils_extincteurs",
     "cartons": "emballage_carton",
     "catalyseurs chimiques usés": "dechets_de_produits_chimiques",
@@ -306,6 +306,7 @@
     "corps gras": "huile_alimentaire",
     "déchets acides": "dechets_de_produits_chimiques_acides",
     "déchets acides, alcalins ou salins": "dechets_de_produits_chimiques_acides",
+    "déchets alimentaires et végétaux en mélange (biodéchets)": "biodechets",
     "déchets amiantés": "dechets_dangereux_de_pmcb_produits_et_materiaux_de_construction_du_batiment",
     "déchets chimiques en mélange": "dechets_de_produits_chimiques",
     "déchets chimiques mélangés pour traitement": "dechets_de_produits_chimiques",
@@ -322,6 +323,7 @@
     "déchets de piles et accumulateurs": "batteries_et_piles_portables",
     "déchets de plâtre": "platre_pmcb_produits_et_materiaux_de_construction_du_batiment",
     "déchets de préparation chimiques": "dechets_de_produits_chimiques",
+    "déchets de produits agro-chimiques": "dechets_phytosanitaires_menagers_produits_chimiques",
     "déchets de produits alimentaires": "biodechets",
     "déchets de vêtements en textiles": [
       "vetement",
@@ -338,6 +340,16 @@
     "ecorces": "dechets_verts",
     "ecrans, dont appareils à tubes cathodiques": "ecran",
     "elément d'ameublement": "meuble",
+    "eléments d’ameublement (ea)–jouets–articles de bricolage et de jardin":[
+      "accessoire_et_meuble_de_jardin",
+      "outil_de_bricolage_et_jardinage",
+      "sieges_elements_d_ameublement",
+      "rembourres_d_assise_ou_de_couchage_elements_d_ameublement",
+      "meuble",
+      "literie_elements_d_ameublement",
+      "decorations_textiles_elements_d_ameublement",
+      "jouet"
+    ],
     "emballages en matières plastiques": "emballage_plastique",
     "emballages en verre": "emballage_verre",
     "emballages et papiers graphiques": [
@@ -380,13 +392,13 @@
     "gros électroménager hors d'usage": "gros_electromenager_hors_refrigerant",
     "huiles de vidange": "huiles_lubrifiantes",
     "huiles usées": "huiles_lubrifiantes",
-    "huisseries multi-matériaux": "huisseries_produits_et_materiaux_de_construction_du_batiment",
     "jouets": "jouet",
     "jouets et asl en mélange": [
       "jouet",
       "materiel_de_sport_hors_velo",
       "velo"
     ],
+    "menuiseries vitrées": "huisseries_produits_et_materiaux_de_construction_du_batiment",
     "palettes usagées": "palette",
     "papiers cartons en mélange à trier": [
       "papiers_graphiques",
@@ -406,9 +418,10 @@
     "solvants usés": "produits_chimiques_solvants",
     "solvants usés halogénés": "produits_chimiques_solvants",
     "solvants usés non halogénés": "produits_chimiques_solvants",
+    "standard bureautique":	"papiers_graphiques",
     "toner d'impression": "cartouches",
     "tubes cathodiques": "ecran",
-    "tubes fluorescents": "ampoule",
+    "tubes fluorescents et ampoules": "ampoule",
     "véhicules hors d'usage": "vehicule"
   }
 }
