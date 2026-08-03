@@ -197,6 +197,64 @@ class TestLegacyIntermediateProduitPageSynonymeExclusion:
 
 
 @pytest.mark.django_db
+class TestLegacyIntermediateSynonymePage:
+    """Test LegacyIntermediateSynonymePage validation via clean().
+
+    These tests simulate the modelcluster formset validation that happens
+    when editing a ProduitPage in the Wagtail admin. During formset
+    processing, child instances are created WITHOUT a parent page set
+    (the ParentalKey is assigned after the parent is saved).
+    """
+
+    def test_add_direct_redirection_without_conflict(self, produit_page_a, db):
+        produit = ProduitFactory(nom="Produit Test")
+        synonyme = SynonymeFactory(nom="Synonyme Test", produit=produit)
+
+        intermediate = LegacyIntermediateSynonymePage(synonyme=synonyme)
+        intermediate.page = produit_page_a
+        intermediate.clean()
+        intermediate.save()
+
+    def test_add_direct_redirection_already_redirected_elsewhere(
+        self, produit_page_a, produit_page_b, db
+    ):
+        produit = ProduitFactory(nom="Produit Test")
+        synonyme = SynonymeFactory(nom="Synonyme Test", produit=produit)
+
+        LegacyIntermediateSynonymePage.objects.create(
+            page=produit_page_b,
+            synonyme=synonyme,
+        )
+
+        intermediate = LegacyIntermediateSynonymePage(synonyme=synonyme)
+
+        with pytest.raises(ValidationError) as exc_info:
+            intermediate.clean()
+
+        assert "Conflit" in str(exc_info.value)
+        assert produit_page_b.title in str(exc_info.value)
+
+    def test_add_direct_redirection_when_excluded_elsewhere(
+        self, produit_page_a, produit_page_b, db
+    ):
+        produit = ProduitFactory(nom="Produit Test")
+        synonyme = SynonymeFactory(nom="Synonyme Test", produit=produit)
+
+        LegacyIntermediateProduitPageSynonymeExclusion.objects.create(
+            page=produit_page_b,
+            synonyme=synonyme,
+        )
+
+        intermediate = LegacyIntermediateSynonymePage(synonyme=synonyme)
+
+        with pytest.raises(ValidationError) as exc_info:
+            intermediate.clean()
+
+        assert "Conflit" in str(exc_info.value)
+        assert produit_page_b.title in str(exc_info.value)
+
+
+@pytest.mark.django_db
 class TestSynonymeDetailViewRedirection:
     """Test SynonymeDetailView redirection priority."""
 
