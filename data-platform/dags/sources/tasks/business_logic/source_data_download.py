@@ -70,7 +70,11 @@ def source_data_download(
 def fetch_data_from_endpoint(endpoint, s3_connection_id):
     if endpoint.startswith("s3://"):
         return fetch_dataset_from_s3(endpoint, s3_connection_id)
-    elif "pointsapport.ademe.fr" in endpoint or "data.ademe.fr" in endpoint:
+    elif (
+        "pointsapport.ademe.fr" in endpoint
+        or "data.ademe.fr" in endpoint
+        or "sinoe-dechets.ademe.fr" in endpoint
+    ):
         return fetch_dataset_from_point_apport(endpoint)
     elif "apiopendata.artisanat.fr" in endpoint:
         return fetch_dataset_from_artisanat(endpoint)

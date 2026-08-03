@@ -30,49 +30,36 @@ with DAG(
     ],
     **default_params,
     params=ParamsDict(
+        # TODO : à exploiter
+        # code_type_service	"04B" -> déduire le public accueilli
+        # annee
+        # date_fermeture_service
         {
             "endpoint": (
-                "https://data.ademe.fr/data-fair/api/v1/datasets/"
-                "sinoe-(r)-annuaire-des-decheteries-dma/lines?size=10000&q_mode=simple&ANNEE_eq=2025"
+                "https://data.sinoe-dechets.ademe.fr/data-fair/api/v1/datasets/"
+                "liste-des-services-de-decheteries-donnees-publiques/lines"
+                "?size=10000&q_mode=simple"
+            ),
+            "metadata_endpoint": (
+                "https://data.sinoe-dechets.ademe.fr/data-fair/api/v1/datasets/"
+                "liste-des-services-de-decheteries-donnees-publiques/schema"
             ),
             "normalization_rules": json.dumps(
                 [
                     # 1. Renommage des colonnes
                     {
-                        "origin": "C_SERVICE",
+                        "origin": "code_service",
                         "destination": "identifiant_externe",
                     },
                     {
-                        "origin": "N_SERVICE",
+                        "origin": "libelle_service",
                         "destination": "nom",
-                    },
-                    {
-                        "origin": "AD1_SITE",
-                        "destination": "adresse",
-                    },
-                    {
-                        "origin": "AD2_SITE",
-                        "destination": "adresse_complement",
-                    },
-                    {
-                        "origin": "L_VILLE_SITE",
-                        "destination": "ville",
                     },
                     # 2. Transformation des colonnes
                     {
-                        "origin": "CP_SITE",
-                        "transformation": "clean_code_postal",
-                        "destination": "code_postal",
-                    },
-                    {
-                        "origin": "LST_TYPE_DECHET",
+                        "origin": "code_type_dechet_admis",
                         "transformation": "clean_sous_categorie_codes_sinoe",
                         "destination": "sous_categorie_codes",
-                    },
-                    {
-                        "origin": "ORIGINE_DECHET_ACC",
-                        "transformation": "clean_public_accueilli",
-                        "destination": "public_accueilli",
                     },
                     # 3. Ajout des colonnes avec une valeur par défaut
                     {
@@ -101,19 +88,9 @@ with DAG(
                     },
                     # 4. Transformation du dataframe
                     {
-                        "origin": ["_geopoint"],
-                        "transformation": "get_latlng_from_geopoint",
-                        "destination": ["latitude", "longitude"],
-                    },
-                    {
                         "origin": ["latitude", "longitude"],
                         "transformation": "compute_location",
                         "destination": ["location", "latitude", "longitude"],
-                    },
-                    {
-                        "origin": ["TEL_SERVICE", "code_postal"],
-                        "transformation": "clean_telephone",
-                        "destination": ["telephone"],
                     },
                     {
                         "origin": ["identifiant_externe", "nom"],
@@ -139,35 +116,23 @@ with DAG(
                     {"remove": "_id"},
                     {"remove": "_rand"},
                     {"remove": "_score"},
-                    {"remove": "AD1_ACTEUR"},
-                    {"remove": "AD2_ACTEUR"},
-                    {"remove": "C_ACTEUR"},
-                    {"remove": "C_COMM"},
-                    {"remove": "C_DEPT"},
-                    {"remove": "C_REGION"},
-                    {"remove": "C_TYP_ACTEUR"},
-                    {"remove": "CP_ACTEUR"},
-                    {"remove": "D_MODIF"},
-                    {"remove": "D_OUV"},
-                    {"remove": "FAX_ACTEUR"},
-                    {"remove": "FAX_SERVICE"},
-                    {"remove": "GPS_LAT"},
-                    {"remove": "GPS_LONG"},
-                    {"remove": "GPS_PRECISION"},
-                    {"remove": "GPS_QUALITY"},
-                    {"remove": "GPS_X"},
-                    {"remove": "GPS_Y"},
-                    {"remove": "L_REGION"},
-                    {"remove": "L_TYP_ACTEUR"},
-                    {"remove": "L_VILLE_ACTEUR"},
-                    {"remove": "LOV_MO_GEST"},
-                    {"remove": "N_ACTEUR"},
-                    {"remove": "N_DEPT"},
-                    {"remove": "TEL_ACTEUR"},
-                    {"remove": "TEL_SERVICE"},
-                    # 6. Colonnes à garder (rien à faire, utilisé pour le controle)
-                    {"keep": "_geopoint"},  # FIXME : trnsformation explicite à faire ?
-                    {"keep": "ANNEE"},
+                    {"remove": "annee"},
+                    {"remove": "code_acteur_exploitant"},
+                    {"remove": "code_acteur_moa"},
+                    {"remove": "code_departement"},
+                    {"remove": "code_mode_gestion"},
+                    {"remove": "code_region"},
+                    {"remove": "code_service"},
+                    {"remove": "code_valideur"},
+                    {"remove": "date_ouverture_service"},
+                    {"remove": "libelle_acteur_exploitant"},
+                    {"remove": "libelle_acteur_moa"},
+                    {"remove": "libelle_departement"},
+                    {"remove": "libelle_mode_gestion"},
+                    {"remove": "libelle_region"},
+                    {"remove": "libelle_type_service"},
+                    {"remove": "origine"},
+                    {"remove": "qualite_coordonnees"},
                 ]
             ),
             "dechet_mapping": source_sinoe_dechet_mapping_get(),

@@ -13,18 +13,12 @@ from sources.tasks.business_logic.source_data_normalize import (
 )
 from sources.tasks.transform.exceptions import ImportSourceValueWarning
 
-"""
-TODO:
-Pour la fonction df_nomalize_sinoe
-
-"""
-
 
 @pytest.fixture
 def df_sinoe():
     return pd.DataFrame(
         {
-            "identifiant_externe": ["DECHET_1"],
+            "identifiant_unique": ["sinoe_DECHET_1"],
             "ANNEE": [2024],
             "_geopoint": ["48.4812237361283,3.120109493179493"],
             "produitsdechets_acceptes": ["07.6"],
@@ -33,60 +27,39 @@ def df_sinoe():
     )
 
 
-@pytest.fixture
-def product_mapping():
-    return {
-        "Solvants usés": "Produits chimiques - Solvants",
-        "Papiers cartons mêlés triés": [
-            "papiers_graphiques",
-            "emballage_carton",
-        ],
-        "Déchets textiles": ["vêtement", "linge de maison"],
-    }
-
-
-@pytest.fixture
-def dechet_mapping():
-    return {
-        "01.1": "Solvants usés",
-        "07.25": "Papiers cartons mêlés triés",
-        "07.6": "Déchets textiles",
-        "01.22": "Déchets alcalins",
-        "NP": "Non précisé",
-    }
-
-
 class TestSourceDataNormalizeSinoe:
     """
     Test de la fonction df_normalize_sinoe
     """
 
-    def test_annee_unique(self, product_mapping, dechet_mapping, acteurtype_id_by_code):
+    def test_keep_latest_annee_per_identifiant_unique(self):
         df = pd.DataFrame(
             {
-                "identifiant_externe": ["DECHET_1", "DECHET_2"],
-                "ANNEE": [2024, 2025],
-                "_geopoint": [
-                    "48.4812237361283,3.120109493179493",
-                    "48.4812237361283,3.120109493179493",
+                "identifiant_unique": [
+                    "sinoe_DECHET_1",
+                    "sinoe_DECHET_1",
+                    "sinoe_DECHET_2",
+                    "sinoe_DECHET_2",
                 ],
-                "produitsdechets_acceptes": ["07.6", "07.6"],
-                "public_accueilli": ["DMA", "DMA"],
+                "ANNEE": [2023, 2025, 2024, 2025],
+                "nom": ["ancien_1", "recent_1", "ancien_2", "recent_2"],
             },
         )
 
-        with pytest.raises(ValueError):
-            df = df_normalize_sinoe(
-                df=df,
-            )
+        result = df_normalize_sinoe(df=df)
 
-    def test_drop_annee_column(
-        self, df_sinoe, product_mapping, dechet_mapping, acteurtype_id_by_code
-    ):
-        df = df_normalize_sinoe(
-            df=df_sinoe,
-        )
+        assert len(result) == 2
+        assert set(result["identifiant_unique"]) == {
+            "sinoe_DECHET_1",
+            "sinoe_DECHET_2",
+        }
+        assert set(result["nom"]) == {"recent_1", "recent_2"}
+        assert "ANNEE" not in result.columns
+
+    def test_drop_annee_column(self, df_sinoe):
+        df = df_normalize_sinoe(df=df_sinoe)
         assert "ANNEE" not in df.columns
+        assert len(df) == 1
 
 
 NORMALIZATION_RULES = [

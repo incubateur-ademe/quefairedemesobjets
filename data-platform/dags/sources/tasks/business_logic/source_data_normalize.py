@@ -429,13 +429,16 @@ def df_normalize_pharmacie(df: pd.DataFrame) -> pd.DataFrame:
 def df_normalize_sinoe(
     df: pd.DataFrame,
 ) -> pd.DataFrame:
-    # DOUBLONS: extra sécurité: même si on ne devrait pas obtenir
-    # de doublon grâce à l'API (q_mode=simple&ANNEE_eq=2025)
-    # on vérifie qu'on a qu'une année
-    log.preview("ANNEE uniques", df["ANNEE"].unique().tolist())
-    if df["ANNEE"].nunique() != 1:
-        raise ValueError("Plusieurs ANNEE, changer requête API pour n'en avoir qu'une")
-    df = df.drop(columns=["ANNEE"])
+    # Pour chaque entité, garder la version de l'année la plus récente
+    log.preview("ANNEE uniques", sorted(df["ANNEE"].unique().tolist()))
+    nb_before = len(df)
+    df = df.loc[df.groupby("identifiant_unique", sort=False)["ANNEE"].idxmax()]
+    if nb_filtered := nb_before - len(df):
+        logger.info(
+            "Versions SINOE filtrées (années antérieures): "
+            f"{nb_filtered} / {nb_before}"
+        )
+    df = df.drop(columns=["ANNEE"]).reset_index(drop=True)
 
     return df
 
