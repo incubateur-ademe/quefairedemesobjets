@@ -10,18 +10,28 @@ Notes:
 
 WITH cleaned AS (
     SELECT
-        {{ target.schema }}.udf_ae_string_cleanup(siren) AS siren,
-        {{ target.schema }}.udf_ae_string_cleanup(activite_principale) AS activite_principale,
-        {{ target.schema }}.udf_ae_string_cleanup(etat_administratif) AS etat_administratif,
-        {{ target.schema }}.udf_ae_string_cleanup(denomination) AS denomination,
-        {{ target.schema }}.udf_ae_string_cleanup(prenom1) AS prenom1,
-        {{ target.schema }}.udf_ae_string_cleanup(prenom2) AS prenom2,
-        {{ target.schema }}.udf_ae_string_cleanup(prenom3) AS prenom3,
-        {{ target.schema }}.udf_ae_string_cleanup(prenom4) AS prenom4,
-        {{ target.schema }}.udf_ae_string_cleanup(prenom_usuel) AS prenom_usuel,
-        {{ target.schema }}.udf_ae_string_cleanup(pseudonyme) AS pseudonyme,
-        {{ target.schema }}.udf_ae_string_cleanup(nom) AS nom,
-        {{ target.schema }}.udf_ae_string_cleanup(nom_usage) AS nom_usage
+        {{ target.schema }}.udf_ae_string_cleanup(siren)               AS siren,
+        {{ target.schema }}.udf_ae_string_cleanup(activite_principale)
+            AS activite_principale,
+        {{ target.schema }}.udf_ae_string_cleanup(etat_administratif)
+            AS etat_administratif,
+        {{ target.schema }}.udf_ae_string_cleanup(denomination)
+            AS denomination,
+        {{ target.schema }}.udf_ae_string_cleanup(prenom1)
+            AS prenom1,
+        {{ target.schema }}.udf_ae_string_cleanup(prenom2)
+            AS prenom2,
+        {{ target.schema }}.udf_ae_string_cleanup(prenom3)
+            AS prenom3,
+        {{ target.schema }}.udf_ae_string_cleanup(prenom4)
+            AS prenom4,
+        {{ target.schema }}.udf_ae_string_cleanup(prenom_usuel)
+            AS prenom_usuel,
+        {{ target.schema }}.udf_ae_string_cleanup(pseudonyme)
+            AS pseudonyme,
+        {{ target.schema }}.udf_ae_string_cleanup(nom)                 AS nom,
+        {{ target.schema }}.udf_ae_string_cleanup(nom_usage)
+            AS nom_usage
     FROM {{ ref('base_ae_unite_legale') }}
 )
 

@@ -7,7 +7,10 @@ WITH acteurs AS (
 ),
 
 active_etablissements AS (
-    SELECT ae.siren, ae.siret, ae.code_postal
+    SELECT
+        ae.siren,
+        ae.siret,
+        ae.code_postal
     FROM {{ ref('int_ae_etablissement') }} AS ae
     INNER JOIN {{ ref('int_acteur_with_siren_without_siret') }} AS av
         ON ae.siren = av.siren
