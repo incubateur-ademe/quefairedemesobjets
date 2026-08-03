@@ -1,0 +1,42 @@
+{% extends 'wagtailadmin/bulk_actions/confirmation/base.html' %}
+{% load i18n wagtailadmin_tags %}
+
+{% block titletag %}Annuler la migration des produits{% endblock %}
+
+{% block header %}
+    {% include "wagtailadmin/shared/header.html" with title="Annuler la migration" subtitle="Produits legacy" icon=header_icon only %}
+{% endblock header %}
+
+{% block items_with_access %}
+    {% if items %}
+        <p>
+            La migration automatique des produits suivants sera annulée :
+            la ProduitPage créée sera <strong>supprimée</strong>, ainsi que
+            les étiquettes de recherche importées avec elle (si rien
+            d'autre ne les utilise). Les produits redeviendront éligibles à
+            la migration.
+        </p>
+        <ul>
+            {% for produit in items %}
+                <li>
+                    <a href="{{ produit.edit_url }}" target="_blank" rel="noreferrer">{{ produit.item }}</a>
+                    {% if not produit.item.migration_eligible %}
+                        — <strong>sera ignoré</strong> (pas de migration automatique à annuler)
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock items_with_access %}
+
+{% block items_with_no_access %}
+    {% include 'wagtailsnippets/bulk_actions/list_items_with_no_access.html' with items=items_with_no_access no_access_msg="Vous n'avez pas la permission de modifier ces produits" %}
+{% endblock items_with_no_access %}
+
+{% block form_section %}
+    {% if items %}
+        {% include 'wagtailadmin/bulk_actions/confirmation/form.html' with action_button_text="Oui, annuler la migration" no_action_button_text="Non, revenir en arrière" action_button_class="serious" %}
+    {% else %}
+        {% include 'wagtailadmin/bulk_actions/confirmation/go_back.html' %}
+    {% endif %}
+{% endblock form_section %}
