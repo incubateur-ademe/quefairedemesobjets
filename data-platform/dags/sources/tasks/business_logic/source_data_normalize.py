@@ -5,8 +5,8 @@ import pandas as pd
 import requests
 from cluster.config.metadata import (
     METADATA_DUPLICATES_FILTERED,
+    METADATA_NO_LOCATION_FILTERED,
     METADATA_NO_SOUS_CATEGORIE_FILTERED,
-    METADATA_SERVICE_DOMICILE_FILTERED,
 )
 from pydantic import BaseModel
 from shared.tasks.database_logic.db_manager import PostgresConnectionManager
@@ -127,20 +127,20 @@ def _transform_df(df: pd.DataFrame, dag_config: SourceConfig) -> pd.DataFrame:
         normalisation_function = get_transformation_function(function_name, dag_config)
         logger.warning(f"Transformation {function_name}")
 
-        # Initialiser les colonnes de destination si elles n'existent pas
+        # Initialize destination columns if they do not exist
         for dest_col in column_to_transform_df.destination:
             if dest_col not in df.columns:
                 df[dest_col] = ""
 
         for index, row in df.iterrows():
-            # Récupérer les valeurs d'origine (peut être une ou plusieurs colonnes)
+            # Get origin values (may be one or several columns)
             origin_values = row[column_to_transform_df.origin]
             try:
-                # La fonction de normalisation doit retourner un dict ou une liste
-                # correspondant aux colonnes de destination
+                # The normalization function must return a dict or a list
+                # matching the destination columns
                 result = normalisation_function(origin_values)
 
-                # Assigner les résultats aux colonnes de destination
+                # Assign results to destination columns
                 if isinstance(result, pd.Series):
                     for i, dest_col in enumerate(column_to_transform_df.destination):
                         if i < len(result):
@@ -162,7 +162,7 @@ def _transform_df(df: pd.DataFrame, dag_config: SourceConfig) -> pd.DataFrame:
                         message=str(e),
                     )
                 )
-                # Définir des valeurs par défaut pour toutes les colonnes de destination
+                # Set default values for all destination columns
                 for dest_col in column_to_transform_df.destination:
                     df.at[index, dest_col] = [] if dest_col.endswith("_codes") else ""
 
@@ -194,33 +194,15 @@ def _remove_columns(df: pd.DataFrame, dag_config: SourceConfig) -> pd.DataFrame:
     return df.drop(columns=columns_to_remove)
 
 
-def _remove_undesired_lines(
-    df: pd.DataFrame, dag_config: SourceConfig
-) -> tuple[pd.DataFrame, dict]:
-    metadata = {}
+def _remove_undesired_lines(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
+    """Filter rows according to their content.
 
-    # Compute metadata
-    if "service_a_domicile" in df.columns:
-        metadata[METADATA_SERVICE_DOMICILE_FILTERED] = str(
-            (
-                df["service_a_domicile"]
-                .str.lower()
-                .str.contains("service à domicile uniquement")
-                .sum()
-            )
-            + (
-                df["service_a_domicile"]
-                .str.lower()
-                .str.contains("oui exclusivement")
-                .sum()
-            )
-        )
-
-    if "sous_categorie_codes" in df.columns:
-        if nb_empty_sous_categorie := len(
-            df[df["sous_categorie_codes"].apply(len) == 0]
-        ) + len(df[df["sous_categorie_codes"].isnull()]):
-            metadata[METADATA_NO_SOUS_CATEGORIE_FILTERED] = str(nb_empty_sous_categorie)
+    Ignored rows (with error logged if rows are filtered) :
+    - duplicates on identifiant_unique (after merge if needed)
+    - actors without subcategories
+    - actors without digital location
+    """
+    metadata: dict = {}
 
     if all(
         column in df.columns
@@ -236,54 +218,53 @@ def _remove_undesired_lines(
             merge_as_list_columns=["label_codes", "acteur_service_codes"],
             merge_as_proposition_service_columns=["proposition_service_codes"],
         )
-    # Remove acteurs which propose only service à domicile
-    if "service_a_domicile" in df.columns:
-        nb_before = len(df)
-        df = df[df["service_a_domicile"].str.lower() != "oui exclusivement"]
-        df = df[df["service_a_domicile"].str.lower() != "service à domicile uniquement"]
-        if nb_filtered := nb_before - len(df):
-            logger.warning(
-                "Acteurs filtrés car service à domicile uniquement: "
-                f"{nb_filtered} / {nb_before}"
-            )
 
-    # Remove acteurs which have no sous_categorie_codes
+    # Ignore actors without subcategories
     if "sous_categorie_codes" in df.columns:
         nb_before = len(df)
-        df = df[df["sous_categorie_codes"].notnull()]
-        df = df[df["sous_categorie_codes"].apply(len) > 0]
+        has_sous_categorie = df["sous_categorie_codes"].notnull() & df[
+            "sous_categorie_codes"
+        ].apply(lambda x: len(x) > 0 if x is not None else False)
+        df_ignored = df[~has_sous_categorie]
+        df = df[has_sous_categorie]
         if nb_filtered := nb_before - len(df):
-            logger.warning(
-                "Acteurs filtrés car sans sous_categorie: "
+            metadata[METADATA_NO_SOUS_CATEGORIE_FILTERED] = str(nb_filtered)
+            logger.error(
+                "Acteurs ignorés car sans sous_categorie: "
                 f"{nb_filtered} / {nb_before}"
             )
+            log.preview("Acteurs ignorés (sans sous_categorie)", df_ignored)
 
-    # Find duplicates for logging
-    dups = df[df["identifiant_unique"].duplicated(keep=False)]
-    if not dups.empty:
-        logger.warning(
-            f"==== DOUBLONS SUR LES IDENTIFIANTS UNIQUES {len(dups) / 2} ====="
+    # Ignore duplicates on identifiant_unique
+    if "identifiant_unique" in df.columns:
+        nb_before = len(df)
+        dups = df[df["identifiant_unique"].duplicated(keep=False)]
+        if not dups.empty:
+            nb_duplicate_groups = int(df["identifiant_unique"].duplicated().sum())
+            metadata[METADATA_DUPLICATES_FILTERED] = str(nb_duplicate_groups)
+            logger.error(
+                "Acteurs ignorés car doublons sur identifiant_unique: "
+                f"{nb_duplicate_groups} / {nb_before}"
+            )
+            log.preview("Doublons sur identifiant_unique", dups)
+            df = df.drop_duplicates(subset=["identifiant_unique"], keep="first")
+
+    # Ignore not digital actors without location (e.g. physical actors)
+    if "location" in df.columns and "acteur_type_code" in df.columns:
+        nb_before = len(df)
+        missing_location = (df["location"].isnull()) & (
+            df["acteur_type_code"] != "acteur_digital"
         )
-        log.preview("Doublons sur identifiant_unique", dups)
-        metadata[METADATA_DUPLICATES_FILTERED] = str(len(dups) / 2)
+        df_ignored = df[missing_location]
+        df = df[~missing_location]
+        if nb_filtered := nb_before - len(df):
+            metadata[METADATA_NO_LOCATION_FILTERED] = str(nb_filtered)
+            logger.error(
+                "Acteurs ignorés car sans localisation: " f"{nb_filtered} / {nb_before}"
+            )
+            log.preview("Acteurs ignorés (sans localisation)", df_ignored)
 
     return df, metadata
-
-
-def _display_warning_about_missing_location(df: pd.DataFrame) -> None:
-    # TODO: A voir ce qu'on doit faire de ces acteurs non digitaux mais sans
-    # localisation (proposition : les afficher en erreur directement ?)
-    if "location" in df.columns and "acteur_type_code" in df.columns:
-        df_acteur_sans_loc = df[
-            (df["location"].isnull()) & (df["acteur_type_code"] != "acteur_digital")
-        ]
-        if not df_acteur_sans_loc.empty:
-            nb_acteurs = len(df)
-            logger.warning(
-                f"Nombre d'acteurs sans localisation: {len(df_acteur_sans_loc)} / "
-                f"{nb_acteurs}"
-            )
-            log.preview("Acteurs sans localisation", df_acteur_sans_loc)
 
 
 def _manage_oca_config(df: pd.DataFrame, dag_config: SourceConfig) -> pd.DataFrame:
@@ -295,7 +276,7 @@ def _manage_oca_config(df: pd.DataFrame, dag_config: SourceConfig) -> pd.DataFra
         df["source_code"] = df["source_code"].apply(
             lambda x: oca_prefix + "_" + x.strip().lower()
         )
-    # Recalcul de l'identifiant unique
+    # Recompute identifiant_unique
     normalisation_function = get_transformation_function(
         "clean_identifiant_unique", dag_config
     )
@@ -311,18 +292,18 @@ def source_data_normalize(
     dag_id: str,
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, dict]:
     """
-    Normalisation des données source. Passée cette étape:
-    - toutes les sources doivent avoir une nomenclature et formatage alignés
-    - les sources peuvent préservées des spécificités (ex: présence/absence de SIRET)
-        mais toujours en cohérence avec les règles de nommage et formatage
-    - Ajout des colonnes avec valeurs par défaut
+    Normalization of source data. Passed this step:
+    - all sources must have a nomenclature and formatting aligned
+    - sources may preserve specificities (ex: presence/absence of SIRET)
+        but always consistent with the naming and formatting rules
+    - Add columns with default values
     """
 
     df = df_acteur_from_source
 
     if dag_id == "pharmacies":
-        # Patch pour les pharmacies car l'apostrophe n'est pas bien géré dans la
-        # configuration de airflow
+        # Patch for pharmacies because the apostrophe is not well managed in the
+        # airflow configuration
         df.rename(
             columns={"Numéro d'établissement": "identifiant_externe"},
             inplace=True,
@@ -389,11 +370,7 @@ def source_data_normalize(
     df = df.drop(columns=["log_error"])
     df = df.drop(columns=["log_warning"])
 
-    # Merge and delete undesired lines
-    df, metadata = _remove_undesired_lines(df, dag_config)
-    log.preview("df after removing undesired lines", df)
-
-    # deduplication_on_source_code
+    # deduplication_on_source_code / config OCA
     if dag_config.is_oca:
         df = _manage_oca_config(df, dag_config)
 
@@ -407,15 +384,16 @@ def source_data_normalize(
             Colonnes manquantes: {expected_columns - set(df.columns)}"""
         )
 
-    # Etapes de normalisation spécifiques aux sources
+    # Source-specific normalization steps
     if dag_id == "pharmacies":
         df = df_normalize_pharmacie(df)
 
     if dag_id == "source_sinoe":
         df = df_normalize_sinoe(df)
 
-    # Log si des localisations sont manquantes parmis les acteurs non digitaux
-    _display_warning_about_missing_location(df)
+    # Filter by content (home, duplicates, subcategory, location)
+    df, metadata = _remove_undesired_lines(df)
+    log.preview("df after filtering rows by content", df)
 
     log.preview("df après normalisation", df)
     if df.empty:
@@ -424,10 +402,10 @@ def source_data_normalize(
 
 
 def df_normalize_pharmacie(df: pd.DataFrame) -> pd.DataFrame:
-    # FIXME : à déplacer dans une fonction df ?
-    # controle des adresses et localisation des pharmacies
+    # FIXME: move this into a df function?
+    # Validate pharmacy addresses and locations
     df = df.apply(enrich_from_ban_api, axis=1)
-    # On supprime les pharmacies sans localisation
+    # Remove pharmacies without a location
     nb_pharmacies_sans_loc = len(df[(df["latitude"] == 0) | (df["longitude"] == 0)])
     nb_pharmacies = len(df)
     logger.warning(
@@ -441,9 +419,9 @@ def df_normalize_pharmacie(df: pd.DataFrame) -> pd.DataFrame:
 def df_normalize_sinoe(
     df: pd.DataFrame,
 ) -> pd.DataFrame:
-    # DOUBLONS: extra sécurité: même si on ne devrait pas obtenir
-    # de doublon grâce à l'API (q_mode=simple&ANNEE_eq=2025)
-    # on vérifie qu'on a qu'une année
+    # DUPLICATES: extra safety — even though the API should not return
+    # duplicates (q_mode=simple&ANNEE_eq=2025),
+    # we still check that there is only one year
     log.preview("ANNEE uniques", df["ANNEE"].unique().tolist())
     if df["ANNEE"].nunique() != 1:
         raise ValueError("Plusieurs ANNEE, changer requête API pour n'en avoir qu'une")

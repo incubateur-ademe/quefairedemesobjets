@@ -31,11 +31,9 @@ def drop_rows_with_null_or_empty_fields(
         filtered = [row for row in data if not _has_null_or_empty_field(row)]
         removed = before - len(filtered)
         if removed:
-            logger.info(
-                "Lignes avec champ(s) null (%s) supprimées : %s / %s",
-                fields,
-                removed,
-                before,
+            logger.error(
+                f"Lignes avec champ(s) null ({fields}) supprimées : "
+                f"{removed} / {before}"
             )
             log.preview("lignes avec champ(s) null supprimées", null_or_empty_rows)
         return filtered
