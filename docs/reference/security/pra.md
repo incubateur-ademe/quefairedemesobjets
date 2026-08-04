@@ -77,7 +77,7 @@ Le détail des stratégies est dans [`backups.md`](backups.md). Synthèse :
 
 **Procédure** (basculement d'urgence)
 
-1. Provisionner une plateforme alternative compatible buildpacks (ou un container Docker classique) — l'application est packagée par les buildpacks `apt`, `node`, `python`, `nginx` listés dans `webapp/.buildpacks`.
+1. Provisionner une plateforme alternative compatible buildpacks (ou un container Docker classique) — l'application est packagée par les buildpacks `apt`, `node`, `python`, `nginx` listés dans `.buildpacks` à la racine du monorepo.
 2. Déployer la dernière image de `main` (build à partir du repo GitHub).
 3. Configurer les variables d'environnement (cf. [`secrets.md`](secrets.md)) — récupération depuis le coffre interne.
 4. Pointer le DNS de la production vers la nouvelle plateforme (TTL court à anticiper en temps normal).

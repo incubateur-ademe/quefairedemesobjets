@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "scripts": {
+    "scalingo-prebuild": "npm --prefix webapp ci",
+    "build": "npm --prefix webapp run build"
+  },
+  "cacheDirectories": [
+    "webapp/node_modules"
+  ]
+}

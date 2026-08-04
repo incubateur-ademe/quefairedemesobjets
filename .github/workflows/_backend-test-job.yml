@@ -56,7 +56,8 @@ jobs:
       - name: Setup backend environment
         uses: ./.github/actions/setup-backend
         with:
-          uv-groups: "--group dev"
+          # --all-packages: root depends only on webapp for Scalingo; data-platform tests need the other member too
+          uv-groups: "--all-packages --group dev"
 
       - name: Run tests
         run: make -C ${{ inputs.working-directory }} ${{ inputs.make-target }}
