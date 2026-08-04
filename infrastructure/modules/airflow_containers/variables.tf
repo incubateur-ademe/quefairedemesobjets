@@ -167,3 +167,7 @@ variable "AIRFLOW__DAG_PROCESSOR__MIN_FILE_PROCESS_INTERVAL" {
 variable "AIRFLOW__DAG_PROCESSOR__PARSING_PROCESSES" {
   type = number
 }
+variable "WEBAPP_URL" {
+  description = "Webapp base URL for API calls from DAGs (parse time and runtime)"
+  type        = string
+}
