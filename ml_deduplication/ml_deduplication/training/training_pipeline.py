@@ -11,7 +11,7 @@ from tqdm.contrib.logging import tqdm_logging_redirect
 
 from ml_deduplication.evaluation.metrics.cluster import generate_full_cluster_report
 from ml_deduplication.evaluation.metrics.pairwise import pairwise_metrics_from_clusters
-from ml_deduplication.training.model import (
+from ml_deduplication.ml_deduplication.modeling.model import (
     BusinessRulesDedupe,
 )
 from ml_deduplication.training.model_selection import (
