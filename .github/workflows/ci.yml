@@ -16,8 +16,22 @@ env:
   CI: true
 
 jobs:
-  backend_linter:
-    name: 📝 Backend Linter
+  backend-webapp-linter:
+    name: 📝 Backend Webapp Linter
+    runs-on: ubuntu-slim
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Setup backend Python environment
+        uses: ./.github/actions/setup-backend
+        with:
+          uv-groups: "--group lint"
+
+      - name: Check code formatting (Black + Ruff)
+        run: make -C webapp check-format
+
+  data-platform-linter:
+    name: 📝 Data Platform Linter
     runs-on: ubuntu-latest
     env:
       POSTGRES_HOST: localhost
@@ -64,14 +78,20 @@ jobs:
         working-directory: data-platform/dbt
         run: uv run dbt debug
 
+      - name: Check code formatting (Black + Ruff + SqlFluff)
+        run: make -C data-platform check-format
+
+  infrastructure-linter:
+    name: 📝 Infrastructure Linter
+    runs-on: ubuntu-slim
+    steps:
+      - uses: actions/checkout@v7.0.1
+
       - name: Install Terragrunt and OpenTofu
         uses: gruntwork-io/terragrunt-action@8c1d96b76d445fd2e41475a3f0b63dcd1d9cc077 # v3.4.1
         with:
           tg_version: "0.83.2"
           tofu_version: "1.10.3"
-
-      - name: Check code formatting (Black + Ruff + SqlFluff, webapp + data-platform)
-        run: make check-format
 
       - name: Run Tofu format check
         run: tofu fmt -recursive -check infrastructure
@@ -96,7 +116,7 @@ jobs:
 
   backend_unit_tests:
     name: ✅ Backend Unit Tests
-    needs: backend_linter
+    needs: backend-webapp-linter
     uses: ./.github/workflows/_backend-test-job.yml
     with:
       make-target: unit-test
@@ -104,14 +124,14 @@ jobs:
 
   backend_integration_tests:
     name: ✅ Backend Integration Tests
-    needs: backend_linter
+    needs: backend-webapp-linter
     uses: ./.github/workflows/_backend-test-job.yml
     with:
       make-target: integration-test
 
   backend_data_tests:
     name: ✅ Backend Data Tests
-    needs: backend_linter
+    needs: data-platform-linter
     uses: ./.github/workflows/_backend-test-job.yml
     with:
       working-directory: data-platform
