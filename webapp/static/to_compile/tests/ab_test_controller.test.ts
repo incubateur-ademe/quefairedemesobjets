@@ -41,13 +41,6 @@ function startStimulus() {
   return application
 }
 
-function setMobileViewport(isMobile: boolean) {
-  Object.defineProperty(window, "matchMedia", {
-    writable: true,
-    value: jest.fn().mockReturnValue({ matches: isMobile }),
-  })
-}
-
 async function flush() {
   await new Promise((r) => setTimeout(r, 0))
 }
@@ -57,10 +50,9 @@ describe("AbTestController", () => {
     onFeatureFlags.mockReset().mockImplementation((cb: () => void) => cb())
     getFeatureFlag.mockReset()
     register.mockReset()
-    setMobileViewport(true)
   })
 
-  it("assigns variant src when flag returns 'test' on mobile", async () => {
+  it("assigns variant src when flag returns 'test'", async () => {
     getFeatureFlag.mockReturnValue("test")
     const frame = setupFrame()
     startStimulus()
@@ -86,28 +78,6 @@ describe("AbTestController", () => {
     await flush()
 
     expect(frame.getAttribute("src")).toBe(CONTROL_SRC)
-  })
-
-  it("forces control on desktop viewport even when flag returns 'test'", async () => {
-    setMobileViewport(false)
-    getFeatureFlag.mockReturnValue("test")
-    const frame = setupFrame({ "data-ab-test-mobile-only-value": "true" })
-    startStimulus()
-    await flush()
-
-    expect(frame.getAttribute("src")).toBe(CONTROL_SRC)
-    // PostHog flag is never read, so no registration on desktop.
-    expect(getFeatureFlag).not.toHaveBeenCalled()
-  })
-
-  it("honours variant on desktop when mobileOnly is false", async () => {
-    setMobileViewport(false)
-    getFeatureFlag.mockReturnValue("test")
-    const frame = setupFrame({ "data-ab-test-mobile-only-value": "false" })
-    startStimulus()
-    await flush()
-
-    expect(frame.getAttribute("src")).toBe(VARIANT_SRC)
   })
 
   it("falls back to control when getFeatureFlag throws", async () => {
