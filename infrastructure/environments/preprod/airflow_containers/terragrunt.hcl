@@ -100,4 +100,6 @@ inputs = {
 
   AIRFLOW__DAG_PROCESSOR__MIN_FILE_PROCESS_INTERVAL = 300
   AIRFLOW__DAG_PROCESSOR__PARSING_PROCESSES         = 1
+
+  WEBAPP_URL = "https://quefairedemesdechets.incubateur.ademe.dev"
 }

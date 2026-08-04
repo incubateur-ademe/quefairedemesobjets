@@ -5,7 +5,7 @@ from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import D
 from django.shortcuts import get_object_or_404
-from ninja import Field, FilterSchema, ModelSchema, Query, Router
+from ninja import Field, FilterSchema, ModelSchema, Query, Router, Schema
 from ninja.pagination import paginate
 from qfdmo.admin.acteur import GenericExporterMixin
 from qfdmo.geo_api import search_epci_code
@@ -16,8 +16,10 @@ from qfdmo.models import (
     Action,
     DisplayedActeur,
     GroupeAction,
+    RevisionActeur,
     Source,
     SousCategorieObjet,
+    VueActeur,
 )
 
 router = Router()
@@ -127,8 +129,8 @@ class ActeurFilterSchema(FilterSchema):
 @router.get("/sources", response=List[SourceSchema], summary="Liste des sources")
 def sources(request):
     """
-    Liste l'ensemble des <i>sources</i> possibles pour un acteur.
-    """  # noqa
+    List the possible <i>sources</i> for an actor.
+    """
     qs = Source.objects.filter(afficher=True)
     return qs
 
@@ -140,8 +142,8 @@ def sources(request):
 )
 def sous_categories(request):
     """
-    Liste l'ensemble des <i>sous-catégories d'objet</i> possibles pour un acteur.
-    """  # noqa
+    List the possible <i>sub-categories of objects</i> for an actor.
+    """
     qs = SousCategorieObjet.objects.filter(afficher=True)
     return qs
 
@@ -151,8 +153,8 @@ def sous_categories(request):
 )
 def actions(request):
     """
-    Liste l'ensemble des <i>actions</i> possibles sur un objet / déchet.
-    """  # noqa
+    List the possible <i>actions</i> on an object / waste.
+    """
     qs = Action.objects.all()
     return qs
 
@@ -164,8 +166,8 @@ def actions(request):
 )
 def groupe_actions(request):
     """
-    Liste l'ensemble des <i>actions</i> possibles sur un objet / déchet.
-    """  # noqa
+    List the possible <i>actions</i> on an object / waste.
+    """
     qs = GroupeAction.objects.all()
     return qs
 
@@ -180,14 +182,16 @@ def acteurs(
     rayon: int = 2,
 ):
     """
-    Les acteurs correspondant à un point sur la carte Que faire de mes objets et déchets
+    The actors corresponding to a point on the "Que faire de mes objets et déchets" map.
 
-    Pour retrouver les acteurs à proximité :
-    - Indiquer une latitude / longitude (exemple : latitude=48.86 et longitude=2.3)
-    - Indiquer un rayon (optionnel) en km : les résultats en dehors de ce rayon ne seront pas retournés
+    To find actors near a point:
+    - provide a latitude / longitude (example: latitude=48.86 and longitude=2.3)
+    - provide a radius (optional) in km: results outside this radius will not be
+      returned
 
-    Si la latitude ou longitude sont manquantes, alors tous les résultats seront retournés triés par nom.
-    """  # noqa
+    If the latitude or longitude are missing, then all results will be returned sorted
+    by name.
+    """
     qs = DisplayedActeur.objects.filter(
         statut=ActeurStatus.ACTIF,
     ).order_by("nom")
@@ -216,8 +220,8 @@ def acteurs(
 )
 def acteurs_types(request):
     """
-    Liste l'ensemble des <i>types</i> d'acteurs possibles.
-    """  # noqa
+    List the possible <i>types</i> of actors.
+    """
     qs = ActeurType.objects.all()
     return qs
 
@@ -230,7 +234,7 @@ def acteurs_types(request):
 def services(request):
     """
     Liste l'ensemble des <i>services</i> qui peuvent être proposés par un acteur.
-    """  # noqa
+    """
     qs = ActeurService.objects.all()
     return qs
 
@@ -249,3 +253,59 @@ def acteur(request, identifiant_unique: str):
 @router.get("/autocomplete/configurateur")
 def autocomplete_epcis(request, query: str):
     return search_epci_code(query)
+
+
+def _model_field_names(model_class, include_properties=True) -> list[str]:
+    """Field names of a Django model, mirroring the behaviour of
+    the data-platform's `django_model_fields_get` so Airflow DAGs
+    can build their UI params from the API instead of the ORM.
+
+    Always excluded: internals (pk) & ManyToMany
+    """
+    from django.db import models
+    from django.utils.functional import cached_property
+
+    excluded = ["pk"]
+
+    fields = [
+        x.name
+        for x in model_class._meta.get_fields()
+        # ManyToMany case causing massive performance issues (e.g. on "sources")
+        if not isinstance(x, models.ManyToManyField)
+    ]
+
+    attributes = []
+    if include_properties:
+        for attr_name in dir(model_class):
+            attr = getattr(model_class, attr_name, None)
+            if isinstance(attr, (property, cached_property)):
+                attributes.append(attr_name)
+
+    return [x for x in fields + attributes if x not in excluded]
+
+
+class ModelFieldsSchema(Schema):
+    with_properties: List[str]
+    db_only: List[str]
+
+
+@router.get(
+    "/acteurs/columns",
+    response=dict[str, ModelFieldsSchema],
+    summary="Champs des modèles acteurs",
+)
+def acteurs_columns(request):
+    """
+    Actor models columns.
+    Used by the data-platform (Airflow) to build the DAGs parameters.
+    """
+    return {
+        "vue_acteur": {
+            "with_properties": _model_field_names(VueActeur),
+            "db_only": _model_field_names(VueActeur, include_properties=False),
+        },
+        "revision_acteur": {
+            "with_properties": _model_field_names(RevisionActeur),
+            "db_only": _model_field_names(RevisionActeur, include_properties=False),
+        },
+    }

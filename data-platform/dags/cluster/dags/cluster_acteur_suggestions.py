@@ -10,10 +10,11 @@ from shared.config.airflow import DEFAULT_ARGS_NO_RETRIES
 from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
 from utils.airflow_params import airflow_params_dropdown_from_mapping
-from utils.django import django_model_fields_get, django_setup_full
-
-django_setup_full()
-from qfdmo.models import ActeurType, RevisionActeur, Source, VueActeur  # noqa: E402
+from utils.webapp import (
+    get_acteur_columns_from_webapp,
+    get_acteur_types_from_webapp,
+    get_sources_from_webapp,
+)
 
 # -------------------------------------------
 # Manage dropdowns in Airflow
@@ -21,27 +22,36 @@ from qfdmo.models import ActeurType, RevisionActeur, Source, VueActeur  # noqa: 
 # Beware of performance impact, see min_file_process_interval
 # https://airflow.apache.org/docs/apache-airflow/stable/configurations-ref.html#config-scheduler-min-file-process-interval
 # https://airflow.apache.org/docs/apache-airflow/stable/best-practices.html#top-level-python-code
-# But OK for now given low amount of requested data
+# Data is fetched via the webapp API instead of django.setup() + ORM
+# which caused DagBag import timeouts
 
-# Get data from DB
-mapping_source_id_by_code = {obj.code: obj.id for obj in Source.objects.all()}
-mapping_acteur_type_id_by_code = {obj.code: obj.id for obj in ActeurType.objects.all()}
+mapping_source_id_by_code = {
+    source["code"]: source["id"] for source in get_sources_from_webapp()
+}
+mapping_acteur_type_id_by_code = {
+    acteur_type["code"]: acteur_type["id"]
+    for acteur_type in get_acteur_types_from_webapp()
+}
 # Create dropdowns
 dropdown_sources = airflow_params_dropdown_from_mapping(mapping_source_id_by_code)
 dropdown_acteur_types = airflow_params_dropdown_from_mapping(
     mapping_acteur_type_id_by_code
 )
 
+acteur_columns = get_acteur_columns_from_webapp()
+fields_vue_acteur = acteur_columns["vue_acteur"]
+fields_revision_acteur = acteur_columns["revision_acteur"]
+
 fields_all = sorted(
-    list(set(django_model_fields_get(VueActeur)) - set(UNNORMALIZABLE_FIELDS))
+    list(set(fields_vue_acteur["with_properties"]) - set(UNNORMALIZABLE_FIELDS))
 )
 
 # intersection of RevisionActeur and VueActeur fields
 # because VueActeur is the source and RevisionActeur is the target
 fields_enrich = sorted(
     list(
-        set(django_model_fields_get(VueActeur, include_properties=False))
-        & set(django_model_fields_get(RevisionActeur, include_properties=False))
+        set(fields_vue_acteur["db_only"])
+        & set(fields_revision_acteur["db_only"])
         # Exclude some fields based on business rules (ex: source)
         - set(FIELDS_PARENT_DATA_EXCLUDED)
     )
@@ -110,8 +120,12 @@ PARAMS = {
         description_md="""**➕ INCLUSION ACTEURS**: ceux dont le champ 'nom'
             correspond à cette expression régulière ([voir recettes](https://www.notion.so/accelerateur-transition-ecologique-ademe/Expressions-r-guli-res-regex-1766523d57d780939a37edd60f367b75))
 
-            🧹 Note: la normalisation basique est appliquée à la volée sur ce
+            🧹 Note:
+            - la normalisation basique est appliquée à la volée sur ce
             champ avant l'application de la regex pour simplifier les expressions
+            - la regex n'est pas sensible à la casse mais est sensible aux caractères
+            accentués, par exemple, pour chercher école avec ou sans accent, il faut
+            utiliser la regex `école` ou `école|ecole` ou `[ée]cole`
 
             0️⃣ Si aucune valeur spécifiée =  cette option n'a PAS d'effet""",
     ),
