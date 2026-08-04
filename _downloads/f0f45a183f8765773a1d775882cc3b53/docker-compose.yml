@@ -64,6 +64,7 @@ services:
     profiles: [lvao, airflow]
 
   lvao-warehouse-db:
+    platform: linux/amd64
     image: postgis/postgis:15-3.3-alpine
     environment:
       - POSTGRES_USER=warehouse
