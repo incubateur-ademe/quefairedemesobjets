@@ -21,6 +21,8 @@ from ml_deduplication.training.utils import (
     partition_to_dict,
     partition_to_results_dict,
 )
+from tqdm import tqdm
+from tqdm.contrib.logging import tqdm_logging_redirect
 
 logger = logging.getLogger(__name__)
 if not logger.handlers:
@@ -209,17 +211,35 @@ def main():
 
     df_acteurs_preprocessed = preprocess_features_dataset(df_acteurs)
 
-    # Step 3: Build entities dict
-    entities_dict = build_entities_dict(
-        df_acteurs_preprocessed, FEATURES_NAMES_FROM_DATASET + ["parent_id"]
-    )
-    logger.info("Built entities dict with %d entities", len(entities_dict))
+    total_code_postal = df_acteurs_preprocessed.select(
+        pl.col("code_postal").n_unique()
+    ).item()
+    complete_partition = []
 
-    # Step 4: Run inference/clustering
-    partition = run_inference(deduper, entities_dict, args.model_threshold)
+    with tqdm_logging_redirect():
+        for code_postal, sub_df in tqdm(
+            df_acteurs_preprocessed.group_by(
+                pl.col("code_postal").str.slice(0, 2),
+            ),
+            total=total_code_postal,
+            colour="BLUE",
+        ):
+            logger.info("Starting partition for code postal: %s", code_postal)
+            if len(sub_df) < 2:
+                logger.info("Skipping %s as there is no enough entities.")
+                continue
 
+            # Step 3: Build entities dict
+            entities_dict = build_entities_dict(
+                sub_df, FEATURES_NAMES_FROM_DATASET + ["parent_id"]
+            )
+            logger.info("Built entities dict with %d entities", len(entities_dict))
+
+            # Step 4: Run inference/clustering
+            partition = run_inference(deduper, entities_dict, args.model_threshold)
+            complete_partition.extend(partition)
     # Step 5: Convert to results format
-    results = partition_to_dict(partition)
+    results = partition_to_dict(complete_partition)
 
     # Count cluster sizes
     cluster_sizes = {}
