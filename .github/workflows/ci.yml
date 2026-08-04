@@ -27,15 +27,23 @@ jobs:
         with:
           uv-groups: "--group lint"
 
+      - name: Install DBT dependencies
+        run: |
+          cd data-platform/dbt
+          uv run dbt deps
+
       - name: Install Terragrunt and OpenTofu
         uses: gruntwork-io/terragrunt-action@8c1d96b76d445fd2e41475a3f0b63dcd1d9cc077 # v3.4.1
         with:
           tg_version: "0.83.2"
           tofu_version: "1.10.3"
+
       - name: Check code formatting (Black + Ruff, webapp + data-platform)
         run: make check-format
+
       - name: Run Tofu format check
         run: tofu fmt -recursive -check infrastructure
+
       - name: Run Terragrunt format check
         run: terragrunt hcl fmt -check infrastructure
 
