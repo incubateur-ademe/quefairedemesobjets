@@ -18,7 +18,28 @@ env:
 jobs:
   backend_linter:
     name: 📝 Backend Linter
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-latest
+    env:
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: warehouse
+      POSTGRES_PASSWORD: warehouse # pragma: allowlist secret
+      POSTGRES_DB: warehouse
+      POSTGRES_SCHEMA: public
+    services:
+      postgres:
+        image: postgis/postgis:15-3.3-alpine
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 1s
+          --health-timeout 1s
+          --health-retries 50
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: warehouse
+          POSTGRES_PASSWORD: warehouse # pragma: allowlist secret
+          POSTGRES_DB: warehouse
     steps:
       - uses: actions/checkout@v7.0.1
 
@@ -27,10 +48,21 @@ jobs:
         with:
           uv-groups: "--group lint"
 
+      - name: Cache DBT packages
+        id: cache-dbt-packages
+        uses: actions/cache@v6
+        with:
+          path: data-platform/dbt/dbt_packages
+          key: dbt-packages-${{ hashFiles('data-platform/dbt/packages.yml', 'data-platform/dbt/package-lock.yml') }}
+
       - name: Install DBT dependencies
-        run: |
-          cd data-platform/dbt
-          uv run dbt deps
+        if: steps.cache-dbt-packages.outputs.cache-hit != 'true'
+        working-directory: data-platform/dbt
+        run: uv run dbt deps
+
+      - name: Check dbt database connection
+        working-directory: data-platform/dbt
+        run: uv run dbt debug
 
       - name: Install Terragrunt and OpenTofu
         uses: gruntwork-io/terragrunt-action@8c1d96b76d445fd2e41475a3f0b63dcd1d9cc077 # v3.4.1
@@ -38,7 +70,7 @@ jobs:
           tg_version: "0.83.2"
           tofu_version: "1.10.3"
 
-      - name: Check code formatting (Black + Ruff, webapp + data-platform)
+      - name: Check code formatting (Black + Ruff + SqlFluff, webapp + data-platform)
         run: make check-format
 
       - name: Run Tofu format check

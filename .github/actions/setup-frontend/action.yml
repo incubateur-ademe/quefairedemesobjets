@@ -25,7 +25,7 @@ runs:
 
     - name: Cache node_modules
       id: cache-node-modules
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: ${{ inputs.working-directory }}/node_modules
         key: node-modules-${{ runner.os }}-${{ hashFiles(format('{0}/package-lock.json', inputs.working-directory)) }}
@@ -38,7 +38,7 @@ runs:
 
     # - name: Cache Parcel build cache
     #   if: inputs.build == 'true'
-    #   uses: actions/cache@v4
+    #   uses: actions/cache@v6
     #   with:
     #     path: .parcel-cache
     #     key: parcel-${{ runner.os }}-${{ hashFiles('static/to_compile/**') }}
