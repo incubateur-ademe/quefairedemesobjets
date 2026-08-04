@@ -14,6 +14,8 @@ package = false
 lint = [
     "black>=26.5.1,<27",
     "ruff>=0.16.0,<0.17",
+    "sqlfluff-templater-dbt>=4.2.2",
+    "sqlfluff[rs]>=4.2.2",
 ]
 test = [
     "pytest>=9.1.1,<10",
@@ -25,8 +27,8 @@ test = [
     "beautifulsoup4>=4.15.0,<5",
 ]
 dev = [
-    {include-group = "lint"},
-    {include-group = "test"},
+    { include-group = "lint" },
+    { include-group = "test" },
     "djade>=1.9.0,<2",
     "pre-commit>=4.6.1,<5",
 ]
@@ -36,7 +38,4 @@ webapp-dev = [
     "django-silk>=5.5.0",
     "ptpython>=3.0.32,<4",
 ]
-notebook = [
-    "dedupe>=3.0.3",
-    "ipython>=9.15.0,<10",
-]
+notebook = ["dedupe>=3.0.3", "ipython>=9.15.0,<10"]

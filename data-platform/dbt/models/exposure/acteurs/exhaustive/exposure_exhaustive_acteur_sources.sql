@@ -1,6 +1,15 @@
-SELECT
-    ROW_NUMBER() OVER (ORDER BY acteur_id, source_id) AS id,
-    acteur_id AS vueacteur_id,
+with data_ as (
+    select
+        acteur_id                                         as vueacteur_id,
+        source_id,
+        ROW_NUMBER() over (order by acteur_id, source_id) as id
+    from {{ ref('marts_exhaustive_acteur_sources') }}
+    group by acteur_id, source_id
+)
+
+select
+    id,
+    vueacteur_id,
     source_id
-FROM {{ ref('marts_exhaustive_acteur_sources') }}
-GROUP BY acteur_id, source_id
+from
+    data_

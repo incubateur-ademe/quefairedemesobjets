@@ -16,8 +16,8 @@ env:
   CI: true
 
 jobs:
-  backend_linter:
-    name: 📝 Backend Linter
+  backend-webapp-linter:
+    name: 📝 Backend Webapp Linter
     runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v7.0.1
@@ -27,15 +27,75 @@ jobs:
         with:
           uv-groups: "--group lint"
 
+      - name: Check code formatting (Black + Ruff)
+        run: make -C webapp check-format
+
+  data-platform-linter:
+    name: 📝 Data Platform Linter
+    runs-on: ubuntu-latest
+    env:
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: warehouse
+      POSTGRES_PASSWORD: warehouse # pragma: allowlist secret
+      POSTGRES_DB: warehouse
+      POSTGRES_SCHEMA: public
+    services:
+      postgres:
+        image: postgis/postgis:15-3.3-alpine
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 1s
+          --health-timeout 1s
+          --health-retries 50
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: warehouse
+          POSTGRES_PASSWORD: warehouse # pragma: allowlist secret
+          POSTGRES_DB: warehouse
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Setup backend Python environment
+        uses: ./.github/actions/setup-backend
+        with:
+          uv-groups: "--group lint"
+
+      - name: Cache DBT packages
+        id: cache-dbt-packages
+        uses: actions/cache@v6
+        with:
+          path: data-platform/dbt/dbt_packages
+          key: dbt-packages-${{ hashFiles('data-platform/dbt/packages.yml', 'data-platform/dbt/package-lock.yml') }}
+
+      - name: Install DBT dependencies
+        if: steps.cache-dbt-packages.outputs.cache-hit != 'true'
+        working-directory: data-platform/dbt
+        run: uv run dbt deps
+
+      - name: Check dbt database connection
+        working-directory: data-platform/dbt
+        run: uv run dbt debug
+
+      - name: Check code formatting (Black + Ruff + SqlFluff)
+        run: make -C data-platform check-format
+
+  infrastructure-linter:
+    name: 📝 Infrastructure Linter
+    runs-on: ubuntu-slim
+    steps:
+      - uses: actions/checkout@v7.0.1
+
       - name: Install Terragrunt and OpenTofu
         uses: gruntwork-io/terragrunt-action@8c1d96b76d445fd2e41475a3f0b63dcd1d9cc077 # v3.4.1
         with:
           tg_version: "0.83.2"
           tofu_version: "1.10.3"
-      - name: Check code formatting (Black + Ruff, webapp + data-platform)
-        run: make check-format
+
       - name: Run Tofu format check
         run: tofu fmt -recursive -check infrastructure
+
       - name: Run Terragrunt format check
         run: terragrunt hcl fmt -check infrastructure
 
@@ -56,7 +116,7 @@ jobs:
 
   backend_unit_tests:
     name: ✅ Backend Unit Tests
-    needs: backend_linter
+    needs: backend-webapp-linter
     uses: ./.github/workflows/_backend-test-job.yml
     with:
       make-target: unit-test
@@ -64,14 +124,14 @@ jobs:
 
   backend_integration_tests:
     name: ✅ Backend Integration Tests
-    needs: backend_linter
+    needs: backend-webapp-linter
     uses: ./.github/workflows/_backend-test-job.yml
     with:
       make-target: integration-test
 
   backend_data_tests:
     name: ✅ Backend Data Tests
-    needs: backend_linter
+    needs: data-platform-linter
     uses: ./.github/workflows/_backend-test-job.yml
     with:
       working-directory: data-platform

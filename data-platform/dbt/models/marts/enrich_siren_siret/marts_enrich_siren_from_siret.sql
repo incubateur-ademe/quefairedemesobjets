@@ -5,5 +5,5 @@ SELECT
     ae.code_postal
 FROM {{ ref('int_acteur_with_siret_without_siren') }} AS av
 INNER JOIN {{ ref('int_ae_etablissement') }} AS ae
-    ON ae.siret = av.siret
+    ON av.siret = ae.siret
 WHERE ae.etat_administratif = 'A'

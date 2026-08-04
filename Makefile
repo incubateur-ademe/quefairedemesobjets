@@ -1,10 +1,10 @@
 # Aliases
-PYTHON := uv run python
+BASE_DOMAIN := quefairedemesdechets.ademe.local
 DB_URL := postgres://webapp:webapp@localhost:6543/webapp# pragma: allowlist secret
+PYTHON := uv run python
 SAMPLE_DB_URL ?= $(if $(DB_WEBAPP_SAMPLE),$(DB_WEBAPP_SAMPLE),$(DB_URL))
 SAMPLE_DUMP_FILE ?= tmpbackup-sample/sample.custom
 WAGTAIL_FRENCH_SQL := webapp/qfdmd/migrations/sql/create_wagtail_french_config.sql
-BASE_DOMAIN := quefairedemesdechets.ademe.local
 
 # Loading environment variables
 ifneq (,$(wildcard ./.env))
@@ -56,13 +56,13 @@ init-certs:
 
 .PHONY: check-format
 check-format:
-	uv run black --check --diff webapp/ data-platform/dags/
-	uv run ruff check webapp/ data-platform/dags/
+	make -C data-platform check-format
+	make -C webapp check-format
 
 .PHONY: format
 format:
-	uv run ruff check webapp/ data-platform/dags/ --fix
-	uv run black webapp/ data-platform/dags/
+	make -C data-platform format
+	make -C webapp format
 
 # Run development servers
 .PHONY: run-airflow
