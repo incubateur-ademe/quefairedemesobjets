@@ -12,7 +12,10 @@ import dedupe
 import duckdb
 import polars as pl
 from dedupe import labeler
+from dedupe._typing import Clusters, Scores
 from dedupe.api import _cleanup_scores, flatten_training
+
+from ml_deduplication.ml_deduplication.modeling.clustering import cluster
 
 logger = logging.getLogger(__name__)
 RANDOM_SEED = 42
@@ -30,13 +33,15 @@ class BusinessRulesMixin:
     _index_predicates: bool
 
     def score(self, pairs, data=None):
+        logger.debug("Starting scoring pairs")
         # Let the parent score all pairs normally
         scored = super().score(pairs)
-
+        logger.debug("Finished scoring with original dedupe algorithm")
         # If no data dict provided, we can't check conflicts
         if data is None:
             return scored
 
+        logger.debug("Starting filtering out conflicting pairs")
         num_conflicting_pairs = 0
         # Zero out scores for conflicting pairs
         for i, pair in enumerate(scored["pairs"]):
@@ -127,7 +132,7 @@ class BusinessRulesMixin:
     def partition(self, data, threshold=0.5):
         pairs = self.pairs(data)
         pair_scores = self.score(pairs, data)
-        clusters = super().cluster(pair_scores, threshold)
+        clusters = self.cluster(pair_scores, threshold)
         clusters = super()._add_singletons(data.keys(), clusters)
         clusters_eval = list(clusters)
 
@@ -136,6 +141,74 @@ class BusinessRulesMixin:
 
         _cleanup_scores(pair_scores)
         return clusters_clean
+
+    def cluster(self, scores: Scores, threshold: float = 0.5) -> Clusters:
+        r"""
+        Optimized in-memory version.
+
+        From the similarity scores of pairs of records, decide which groups
+        of records are all referring to the same entity.
+
+        Yields tuples containing a sequence of record ids and corresponding
+        sequence of confidence score as a float between 0 and 1. The
+        record_ids within each set should refer to the same entity and the
+        confidence score is a measure of our confidence a particular entity
+        belongs in the cluster.
+
+        Each confidence scores is a measure of how similar the record is
+        to the other records in the cluster. Let :math:`\phi(i,j)` be the pair-wise
+        similarity between records :math:`i` and :math:`j`. Let :math:`N` be the number of records in the cluster.
+
+        .. math::
+
+           \text{confidence score}_i = 1 - \sqrt {\frac{\sum_{j}^N (1 - \phi(i,j))^2}{N -1}}
+
+        This measure is similar to the average squared distance
+        between the focal record and the other records in the
+        cluster. These scores can be `combined to give a total score
+        for the cluster
+        <https://en.wikipedia.org/wiki/Variance#Discrete_random_variable>`_.
+
+        .. math::
+
+           \text{cluster score} = 1 - \sqrt { \frac{\sum_i^N(1 - \mathrm{score}_i)^2 \cdot (N - 1) } { 2 N^2}}
+
+        Args:
+            scores: a numpy `structured array <https://docs.scipy.org/doc/numpy/user/basics.rec.html>`_ with a dtype of `[('pairs', id_type, 2),
+                    ('score', 'f4')]` where dtype is either a str
+                    or int, and score is a number between 0 and
+                    1. The 'pairs' column contains pairs of ids of
+                    the records compared and the 'score' column
+                    should contains the similarity score for that
+                    pair of records.
+
+                    For each pair, the smaller id should be first.
+
+            threshold: Number between 0 and 1. We will only consider
+                       put together records into clusters if the
+                       `cophenetic similarity
+                       <https://en.wikipedia.org/wiki/Cophenetic>`_ of
+                       the cluster is greater than the threshold.
+
+                       Lowering the number will increase recall,
+                       raising it will increase precision
+
+        Examples:
+            >>> pairs = matcher.pairs(data)
+            >>> scores = matcher.scores(pairs)
+            >>> clusters = matcher.cluster(scores)
+            >>> list(clusters)
+            [
+                ((1, 2, 3), (0.790, 0.860, 0.790)),
+                ((4, 5), (0.720, 0.720)),
+                ((10, 11), (0.899, 0.899)),
+            ]
+
+        """
+
+        logger.debug("matching done, begin clustering")
+
+        yield from cluster(scores, threshold)
 
     def _has_conflict(
         self, entity_a: dict[str, object], entity_b: dict[str, object]
