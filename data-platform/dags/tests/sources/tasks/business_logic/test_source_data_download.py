@@ -24,9 +24,9 @@ class TestDropRowsWithNullFields:
             {"id": 4, "nom": "d"},
         ]
 
-    def test_warns_on_missing_dataframe_columns(self, caplog):
+    def test_warns_on_dataframe(self, caplog):
         df = pd.DataFrame([{"id": 1}])
         with caplog.at_level("WARNING"):
-            filtered = drop_rows_with_null_or_empty_fields(df, ["missing"])
+            filtered = drop_rows_with_null_or_empty_fields(df, ["id"])
         assert len(filtered) == 1
-        assert "absents des données" in caplog.text
+        assert "is not applied on a DataFrame" in caplog.text

@@ -19,6 +19,12 @@ def drop_rows_with_null_or_empty_fields(
     if not fields:
         return data
 
+    if isinstance(data, pd.DataFrame):
+        logger.warning(
+            "drop_rows_with_null_or_empty_fields is not applied on a DataFrame"
+        )
+        return data
+
     if isinstance(data, list) and data and isinstance(data[0], dict):
         before = len(data)
 
