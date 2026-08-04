@@ -3,12 +3,18 @@ name = "quefairedemesobjets"
 version = "0.1.0"
 description = "Que faire de mes objets et déchets — monorepo workspace"
 requires-python = ">=3.12,<3.13"
+dependencies = [
+    "webapp-quefairedemesobjetsetdechets",
+]
 
 [tool.uv.workspace]
 members = ["webapp", "data-platform"]
 
 [tool.uv]
 package = false
+
+[tool.uv.sources]
+webapp-quefairedemesobjetsetdechets = { workspace = true }
 
 [dependency-groups]
 lint = [
