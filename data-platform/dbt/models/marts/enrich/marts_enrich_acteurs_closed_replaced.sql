@@ -5,24 +5,24 @@ WITH potential_replacements AS (
         candidates.*,
 
         -- Suggestions
-        acteur_type_id            AS suggest_acteur_type_id,
-        acteur_longitude          AS suggest_longitude,
-        acteur_latitude           AS suggest_latitude,
-        suggests.siret            AS suggest_siret,
-        suggests.nom              AS suggest_nom,
-        suggests.naf              AS suggest_naf,
-        suggests.ville            AS suggest_ville,
-        suggests.code_postal      AS suggest_code_postal,
-        suggests.adresse          AS suggest_adresse,
-        LEFT(suggests.siret, 9)   AS suggest_siren,
+        candidates.acteur_type_id   AS suggest_acteur_type_id,
+        candidates.acteur_longitude AS suggest_longitude,
+        candidates.acteur_latitude  AS suggest_latitude,
+        suggests.siret              AS suggest_siret,
+        suggests.nom                AS suggest_nom,
+        suggests.naf                AS suggest_naf,
+        suggests.ville              AS suggest_ville,
+        suggests.code_postal        AS suggest_code_postal,
+        suggests.adresse            AS suggest_adresse,
+        LEFT(suggests.siret, 9)     AS suggest_siren,
         LEFT(candidates.acteur_siret, 9)
-        = LEFT(suggests.siret, 9) AS suggest_siret_is_from_same_siren,
+        = LEFT(suggests.siret, 9)   AS suggest_siret_is_from_same_siren,
 
         -- Matching
         {{ target.schema }}.udf_columns_words_in_common_count(
             candidates.acteur_nom_normalise,
             {{ target.schema }}.udf_normalize_string_for_match(suggests.nom)
-        )                         AS noms_nombre_mots_commun,
+        )                           AS noms_nombre_mots_commun,
         ROW_NUMBER() OVER (
             PARTITION BY candidates.acteur_siret
             ORDER BY
@@ -41,7 +41,7 @@ WITH potential_replacements AS (
                         suggests.nom
                     )
                 ) DESC
-        )                         AS replacement_priority
+        )                           AS replacement_priority
     /*
     JOINS: candidates are our acteurs, suggests are etablissements
     with a matching naf, code_postal, adresse and adresse_numero

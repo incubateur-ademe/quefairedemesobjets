@@ -15,7 +15,8 @@ filtered_parent_acteur AS (
     FROM {{ ref('int_acteur') }} AS tva
     WHERE
         tva.identifiant_unique IN (
-            SELECT parent_id FROM filtered_children_acteur
+            SELECT fca.parent_id
+            FROM filtered_children_acteur AS fca
         )
 )
 

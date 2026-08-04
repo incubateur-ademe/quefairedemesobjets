@@ -1,5 +1,7 @@
--- Acteurs dont des propositions de service sont présentes côté acteur mais pas côté révision
--- Colonnes : identifiant_unique, nom, more_propositionservice (JSON), propositionservices (JSON)
+-- Acteurs dont des propositions de service sont présentes côté acteur
+-- mais pas côté révision
+-- Colonnes : identifiant_unique, nom, more_propositionservice (JSON),
+-- propositionservices (JSON)
 
 WITH acteurs AS (
     SELECT DISTINCT identifiant_unique
@@ -42,7 +44,10 @@ acteur_props_agg AS (
     INNER JOIN {{ ref('base_action') }} AS a ON ps.action_id = a.id
     INNER JOIN {{ ref('base_souscategorieobjet') }} AS sco
         ON psc.souscategorieobjet_id = sco.id
-    WHERE ps.acteur_id IN (SELECT identifiant_unique FROM acteurs)
+    WHERE
+        ps.acteur_id IN (
+            SELECT acteurs_list.identifiant_unique FROM acteurs AS acteurs_list
+        )
     GROUP BY ps.acteur_id, a.code
 ),
 

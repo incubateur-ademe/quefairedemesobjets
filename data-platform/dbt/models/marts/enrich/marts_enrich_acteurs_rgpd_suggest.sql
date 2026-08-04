@@ -56,28 +56,40 @@ unite_matching_acteurs_on_siren AS (
         reduce data size and we will perform a more precise
         post-match in Python
         */
-        {{ target.schema }}.udf_normalize_string_for_match(dirigeant_nom)
+        {{ target.schema }}.udf_normalize_string_for_match(unite.dirigeant_nom)
             AS unite_dirigeant_nom_normalise,
-        {{ target.schema }}.udf_normalize_string_for_match(dirigeant_nom_usage)
+        {{ target.schema }}.udf_normalize_string_for_match(
+            unite.dirigeant_nom_usage
+        )
             AS unite_dirigeant_nom_usage_normalise,
-        {{ target.schema }}.udf_normalize_string_for_match(dirigeant_pseudonyme)
+        {{ target.schema }}.udf_normalize_string_for_match(
+            unite.dirigeant_pseudonyme
+        )
             AS unite_dirigeant_pseudonyme_normalise,
-        {{ target.schema }}.udf_normalize_string_for_match(dirigeant_prenom1)
+        {{ target.schema }}.udf_normalize_string_for_match(
+            unite.dirigeant_prenom1
+        )
             AS unite_dirigeant_prenom1_normalise,
-        {{ target.schema }}.udf_normalize_string_for_match(dirigeant_prenom2)
+        {{ target.schema }}.udf_normalize_string_for_match(
+            unite.dirigeant_prenom2
+        )
             AS unite_dirigeant_prenom2_normalise,
-        {{ target.schema }}.udf_normalize_string_for_match(dirigeant_prenom3)
+        {{ target.schema }}.udf_normalize_string_for_match(
+            unite.dirigeant_prenom3
+        )
             AS unite_dirigeant_prenom3_normalise,
-        {{ target.schema }}.udf_normalize_string_for_match(dirigeant_prenom4)
+        {{ target.schema }}.udf_normalize_string_for_match(
+            unite.dirigeant_prenom4
+        )
             AS unite_dirigeant_prenom4_normalise,
         {{ target.schema }}.udf_columns_concat_unique_non_empty(
-            dirigeant_nom,
-            dirigeant_nom_usage,
-            dirigeant_pseudonyme,
-            dirigeant_prenom1,
-            dirigeant_prenom2,
-            dirigeant_prenom3,
-            dirigeant_prenom4
+            unite.dirigeant_nom,
+            unite.dirigeant_nom_usage,
+            unite.dirigeant_pseudonyme,
+            unite.dirigeant_prenom1,
+            unite.dirigeant_prenom2,
+            unite.dirigeant_prenom3,
+            unite.dirigeant_prenom4
         )
             AS unite_dirigeants_noms_prenoms
     FROM {{ ref('int_ae_unite_legale') }} AS unite
@@ -85,7 +97,7 @@ unite_matching_acteurs_on_siren AS (
     WHERE
         unite.est_actif IS FALSE -- we only anonymize inactive acteurs
         -- unite with any directors names available
-        AND a_dirigeant_noms_ou_prenoms_non_null
+        AND unite.a_dirigeant_noms_ou_prenoms_non_null
         AND acteurs.siren IS NOT NULL
 ),
 

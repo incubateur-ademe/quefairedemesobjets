@@ -1,5 +1,7 @@
--- Acteurs dont des propositions de service sont présentes côté révision mais pas côté acteur
--- Colonnes : identifiant_unique, nom, more_propositionservice (JSON), propositionservices (JSON)
+-- Acteurs dont des propositions de service sont présentes côté révision
+-- mais pas côté acteur
+-- Colonnes : identifiant_unique, nom, more_propositionservice (JSON),
+-- propositionservices (JSON)
 
 WITH revisions AS (
     SELECT DISTINCT identifiant_unique
@@ -43,7 +45,11 @@ revision_props_agg AS (
     INNER JOIN {{ ref('base_action') }} AS a ON rps.action_id = a.id
     INNER JOIN {{ ref('base_souscategorieobjet') }} AS sco
         ON rpsc.souscategorieobjet_id = sco.id
-    WHERE rps.acteur_id IN (SELECT identifiant_unique FROM revisions)
+    WHERE
+        rps.acteur_id IN (
+            SELECT revisions_list.identifiant_unique
+            FROM revisions AS revisions_list
+        )
     GROUP BY rps.acteur_id, a.code
 ),
 

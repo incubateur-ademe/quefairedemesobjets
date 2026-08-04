@@ -1,5 +1,5 @@
 WITH enfants AS (
-    SELECT DISTINCT
+    SELECT
         (parent_id)                   AS parent_id,
         jsonb_agg(identifiant_unique) AS enfants
     FROM {{ ref('base_revisionacteur') }}

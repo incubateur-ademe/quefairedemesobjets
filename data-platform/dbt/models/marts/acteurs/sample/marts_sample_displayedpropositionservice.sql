@@ -1,5 +1,7 @@
-SELECT * FROM {{ ref('base_displayedpropositionservice') }}
+SELECT displayed.*
+FROM {{ ref('base_displayedpropositionservice') }} AS displayed
 WHERE
-    acteur_id IN (
-        SELECT identifiant_unique FROM {{ ref('marts_sample_displayedacteur') }}
+    displayed.acteur_id IN (
+        SELECT sample.identifiant_unique
+        FROM {{ ref('marts_sample_displayedacteur') }} AS sample
     )

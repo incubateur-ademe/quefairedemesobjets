@@ -1,4 +1,4 @@
-SELECT *
+SELECT propositionservice.*
 FROM {{ ref('base_vuepropositionservice') }} AS propositionservice
 INNER JOIN
     {{ ref('base_vueacteur_visible') }} AS acteur

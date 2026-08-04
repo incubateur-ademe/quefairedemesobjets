@@ -1,11 +1,13 @@
--- Identifiants uniques pour lesquels les propositions de services diffèrent entre acteur et révision.
--- Compare les paires (action_id, souscategorieobjet_id) côté acteur et côté révision.
+-- Identifiants uniques pour lesquels les propositions de services diffèrent
+-- entre acteur et révision.
+-- Compare les paires (action_id, souscategorieobjet_id) côté acteur et côté
+-- révision.
 
 WITH acteur_props AS (
     SELECT
         ps.acteur_id AS identifiant_unique,
         ps.action_id,
-        souscategorieobjet_id
+        psc.souscategorieobjet_id
     FROM {{ ref('int_propositonservices_with_revision') }} AS ps
     INNER JOIN
         {{ ref('int_propositionservice_sous_categories_with_revision') }} AS psc
@@ -16,7 +18,7 @@ revision_props AS (
     SELECT
         rps.acteur_id AS identifiant_unique,
         rps.action_id,
-        souscategorieobjet_id
+        rpsc.souscategorieobjet_id
     FROM {{ ref('int_revisionpropositonservices_with_acteur') }} AS rps
     INNER JOIN
         {{ ref('int_revisionpropositonservice_sous_categories_with_acteur') }}

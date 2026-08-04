@@ -43,11 +43,15 @@ succession_chain AS (
         bl.siren_successeur,
         bl.siret_successeur,
         bl.etat_administratif_successeur,
-        LEAST(sc.date_lien_succession, bl.date_lien_succession),
-        sc.transfert_siege AND bl.transfert_siege,
-        sc.continuite_economique AND bl.continuite_economique,
-        sc.visited || bl.siret_predecesseur,
-        sc.profondeur + 1
+        LEAST(sc.date_lien_succession, bl.date_lien_succession)
+            AS date_lien_succession,
+        sc.transfert_siege
+        AND bl.transfert_siege
+            AS transfert_siege,
+        sc.continuite_economique AND bl.continuite_economique
+            AS continuite_economique,
+        sc.visited || bl.siret_predecesseur                     AS visited,
+        sc.profondeur + 1                                       AS profondeur
     FROM succession_chain AS sc
     INNER JOIN base_links AS bl
         ON sc.siret_successeur = bl.siret_predecesseur
@@ -65,7 +69,8 @@ SELECT
     MAX(sc.date_lien_succession)      AS date_lien_succession,
     -- if one of the path has transfert_siege = true, then the result is true
     BOOL_OR(sc.transfert_siege)       AS transfert_siege,
-    -- if one of the path has continuite_economique = true, then the result is true
+    -- if one of the path has continuite_economique = true,
+    -- then the result is true
     BOOL_OR(sc.continuite_economique) AS continuite_economique,
     -- keep the shortest path
     MIN(sc.profondeur)                AS profondeur

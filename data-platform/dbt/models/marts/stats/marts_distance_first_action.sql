@@ -15,8 +15,10 @@ WITH position_action AS (
 ),
 
 distance_to_acteurs AS (
-    -- Calculer la distance entre chaque position et chaque acteur qui propose l'action
-    -- Filtre: uniquement les acteurs à moins de 30 km (ST_DWithin utilise les index spatiaux)
+    -- Calculer la distance entre chaque position et chaque acteur
+    -- qui propose l'action
+    -- Filtre: uniquement les acteurs à moins de 30 km
+    -- (ST_DWithin utilise les index spatiaux)
     SELECT
         pa.longitude,
         pa.latitude,
