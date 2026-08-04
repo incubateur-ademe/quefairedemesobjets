@@ -12,7 +12,6 @@ from sklearn.model_selection import train_test_split
 
 from ml_deduplication.dataset.utils import get_sql_files_folder_path
 
-logging.basicConfig()
 logger = logging.getLogger(__name__)
 
 RANDOM_SEED = 42
@@ -172,6 +171,7 @@ def parse_args() -> argparse.Namespace:
 
 
 if __name__ == "__main__":
+    logging.basicConfig()
     args = parse_args()
     logger.setLevel(getattr(logging, args.log_level))
 
