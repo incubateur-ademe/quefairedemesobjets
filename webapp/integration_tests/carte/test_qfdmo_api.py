@@ -235,31 +235,17 @@ def test_get_sous_categories(client):
 
 
 @pytest.mark.django_db
-def test_get_metadata_acteurs(client):
-    """Test the /metadata/acteurs endpoint used by the data-platform"""
-    # Unlike /sources, all sources are returned (even hidden ones)
-    # because DAGs must be able to work on all of them
-    displayed_source = SourceFactory(afficher=True)
-    hidden_source = SourceFactory(afficher=False)
-
-    response = client.get(f"{BASE_URL}/metadata/acteurs")
+def test_get_acteurs_columns(client):
+    """Test the /acteurs/columns endpoint used by the data-platform"""
+    response = client.get(f"{BASE_URL}/acteurs/columns")
     assert response.status_code == 200
     data = response.json()
 
-    assert data["sources"][displayed_source.code] == displayed_source.id
-    assert data["sources"][hidden_source.code] == hidden_source.id
-    # acteur_types loaded via fixtures
-    assert data["acteur_types"]
-    assert all(isinstance(x, int) for x in data["acteur_types"].values())
-
-    model_fields = data["model_fields"]
     for model in ["vue_acteur", "revision_acteur"]:
-        assert "nom" in model_fields[model]["db_only"]
-        assert "nom" in model_fields[model]["with_properties"]
+        assert "nom" in data[model]["db_only"]
+        assert "nom" in data[model]["with_properties"]
         # db_only is a subset of with_properties
-        assert set(model_fields[model]["db_only"]) <= set(
-            model_fields[model]["with_properties"]
-        )
+        assert set(data[model]["db_only"]) <= set(data[model]["with_properties"])
     # properties (ex: latitude on RevisionActeur) are only in with_properties
-    assert "latitude" in model_fields["revision_acteur"]["with_properties"]
-    assert "latitude" not in model_fields["revision_acteur"]["db_only"]
+    assert "latitude" in data["revision_acteur"]["with_properties"]
+    assert "latitude" not in data["revision_acteur"]["db_only"]

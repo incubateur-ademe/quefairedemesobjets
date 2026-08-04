@@ -7,33 +7,18 @@ https://airflow.apache.org/docs/apache-airflow/stable/best-practices.html#top-le
 """
 
 import functools
-import os
 
 import requests
+from decouple import config
 
-WEBAPP_URL_DEFAULT = "http://host.docker.internal:8000"
 TIMEOUT_SECONDS = 10
 
-
-def webapp_url() -> str:
-    """Base URL of the webapp, configurable via the WEBAPP_URL env var"""
-    return os.environ.get("WEBAPP_URL", WEBAPP_URL_DEFAULT).rstrip("/")
+WEBAPP_URL = config("WEBAPP_URL", default="http://host.docker.internal:8000")
 
 
-@functools.lru_cache(maxsize=1)
-def acteurs_metadata() -> dict:
-    """Referentials (sources, acteur types) and acteurs model fields
-    from the webapp API, see /api/qfdmo/metadata/acteurs:
-    {
-        "sources": {code: id, ...},
-        "acteur_types": {code: id, ...},
-        "model_fields": {
-            "vue_acteur": {"with_properties": [...], "db_only": [...]},
-            "revision_acteur": {"with_properties": [...], "db_only": [...]},
-        },
-    }
-    """
-    url = f"{webapp_url()}/api/qfdmo/metadata/acteurs"
+def _get_json(path: str):
+    """GET JSON from the webapp API, or raise a clear error if unreachable"""
+    url = f"{WEBAPP_URL}{path}"
     try:
         response = requests.get(url, timeout=TIMEOUT_SECONDS)
         response.raise_for_status()
@@ -44,3 +29,26 @@ def acteurs_metadata() -> dict:
             " the WEBAPP_URL env var points to it"
         ) from e
     return response.json()
+
+
+@functools.lru_cache(maxsize=1)
+def get_sources_from_webapp() -> list[dict]:
+    """Get the list of sources from the webapp API"""
+    return _get_json("/api/qfdmo/sources")
+
+
+@functools.lru_cache(maxsize=1)
+def get_acteur_types_from_webapp() -> list[dict]:
+    """Get the list of acteur types from the webapp API"""
+    return _get_json("/api/qfdmo/acteurs/types")
+
+
+@functools.lru_cache(maxsize=1)
+def get_acteur_columns_from_webapp() -> dict:
+    """Get the list of acteur columns from the webapp API:
+    {
+        "vue_acteur": {"with_properties": [...], "db_only": [...]},
+        "revision_acteur": {"with_properties": [...], "db_only": [...]},
+    }
+    """
+    return _get_json("/api/qfdmo/acteurs/columns")

@@ -129,8 +129,8 @@ class ActeurFilterSchema(FilterSchema):
 @router.get("/sources", response=List[SourceSchema], summary="Liste des sources")
 def sources(request):
     """
-    Liste l'ensemble des <i>sources</i> possibles pour un acteur.
-    """  # noqa
+    List the possible <i>sources</i> for an actor.
+    """
     qs = Source.objects.filter(afficher=True)
     return qs
 
@@ -142,8 +142,8 @@ def sources(request):
 )
 def sous_categories(request):
     """
-    Liste l'ensemble des <i>sous-catégories d'objet</i> possibles pour un acteur.
-    """  # noqa
+    List the possible <i>sub-categories of objects</i> for an actor.
+    """
     qs = SousCategorieObjet.objects.filter(afficher=True)
     return qs
 
@@ -153,8 +153,8 @@ def sous_categories(request):
 )
 def actions(request):
     """
-    Liste l'ensemble des <i>actions</i> possibles sur un objet / déchet.
-    """  # noqa
+    List the possible <i>actions</i> on an object / waste.
+    """
     qs = Action.objects.all()
     return qs
 
@@ -166,8 +166,8 @@ def actions(request):
 )
 def groupe_actions(request):
     """
-    Liste l'ensemble des <i>actions</i> possibles sur un objet / déchet.
-    """  # noqa
+    List the possible <i>actions</i> on an object / waste.
+    """
     qs = GroupeAction.objects.all()
     return qs
 
@@ -182,14 +182,16 @@ def acteurs(
     rayon: int = 2,
 ):
     """
-    Les acteurs correspondant à un point sur la carte Que faire de mes objets et déchets
+    The actors corresponding to a point on the "Que faire de mes objets et déchets" map.
 
-    Pour retrouver les acteurs à proximité :
-    - Indiquer une latitude / longitude (exemple : latitude=48.86 et longitude=2.3)
-    - Indiquer un rayon (optionnel) en km : les résultats en dehors de ce rayon ne seront pas retournés
+    To find actors near a point:
+    - provide a latitude / longitude (example: latitude=48.86 and longitude=2.3)
+    - provide a radius (optional) in km: results outside this radius will not be
+      returned
 
-    Si la latitude ou longitude sont manquantes, alors tous les résultats seront retournés triés par nom.
-    """  # noqa
+    If the latitude or longitude are missing, then all results will be returned sorted
+    by name.
+    """
     qs = DisplayedActeur.objects.filter(
         statut=ActeurStatus.ACTIF,
     ).order_by("nom")
@@ -218,8 +220,8 @@ def acteurs(
 )
 def acteurs_types(request):
     """
-    Liste l'ensemble des <i>types</i> d'acteurs possibles.
-    """  # noqa
+    List the possible <i>types</i> of actors.
+    """
     qs = ActeurType.objects.all()
     return qs
 
@@ -232,7 +234,7 @@ def acteurs_types(request):
 def services(request):
     """
     Liste l'ensemble des <i>services</i> qui peuvent être proposés par un acteur.
-    """  # noqa
+    """
     qs = ActeurService.objects.all()
     return qs
 
@@ -287,35 +289,23 @@ class ModelFieldsSchema(Schema):
     db_only: List[str]
 
 
-class ActeursMetadataSchema(Schema):
-    sources: dict[str, int]
-    acteur_types: dict[str, int]
-    model_fields: dict[str, ModelFieldsSchema]
-
-
 @router.get(
-    "/metadata/acteurs",
-    response=ActeursMetadataSchema,
-    summary="Métadonnées des modèles acteurs (usage interne data-platform)",
+    "/acteurs/columns",
+    response=dict[str, ModelFieldsSchema],
+    summary="Champs des modèles acteurs",
 )
-def acteurs_metadata(request):
+def acteurs_columns(request):
     """
-    Expose les référentiels (sources, types d'acteur) et les champs des
-    modèles acteurs. Utilisé par la data-platform (Airflow) pour construire
-    les paramètres des DAGs (ex: cluster_acteur_suggestions) sans dépendre
-    d'un accès direct à la base de données de la webapp au parsing des DAGs.
-    """  # noqa
+    Actor models columns.
+    Used by the data-platform (Airflow) to build the DAGs parameters.
+    """
     return {
-        "sources": {s.code: s.id for s in Source.objects.all()},
-        "acteur_types": {t.code: t.id for t in ActeurType.objects.all()},
-        "model_fields": {
-            "vue_acteur": {
-                "with_properties": _model_field_names(VueActeur),
-                "db_only": _model_field_names(VueActeur, include_properties=False),
-            },
-            "revision_acteur": {
-                "with_properties": _model_field_names(RevisionActeur),
-                "db_only": _model_field_names(RevisionActeur, include_properties=False),
-            },
+        "vue_acteur": {
+            "with_properties": _model_field_names(VueActeur),
+            "db_only": _model_field_names(VueActeur, include_properties=False),
+        },
+        "revision_acteur": {
+            "with_properties": _model_field_names(RevisionActeur),
+            "db_only": _model_field_names(RevisionActeur, include_properties=False),
         },
     }

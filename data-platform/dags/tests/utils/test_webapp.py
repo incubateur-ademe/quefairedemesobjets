@@ -2,55 +2,78 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 import requests
-from utils.webapp import WEBAPP_URL_DEFAULT, acteurs_metadata, webapp_url
+from utils.webapp import (
+    get_acteur_columns_from_webapp,
+    get_acteur_types_from_webapp,
+    get_sources_from_webapp,
+)
 
-METADATA = {
-    "sources": {"source1": 1},
-    "acteur_types": {"type1": 10},
-    "model_fields": {
-        "vue_acteur": {"with_properties": ["nom", "latitude"], "db_only": ["nom"]},
-        "revision_acteur": {"with_properties": ["nom"], "db_only": ["nom"]},
-    },
+SOURCES = [{"id": 1, "code": "source1", "libelle": "Source 1"}]
+ACTEUR_TYPES = [{"id": 10, "code": "type1", "libelle": "Type 1"}]
+ACTEUR_COLUMNS = {
+    "vue_acteur": {"with_properties": ["nom", "latitude"], "db_only": ["nom"]},
+    "revision_acteur": {"with_properties": ["nom"], "db_only": ["nom"]},
 }
 
 
-class TestWebappUrl:
-    def test_default(self, monkeypatch):
-        monkeypatch.delenv("WEBAPP_URL", raising=False)
-        assert webapp_url() == WEBAPP_URL_DEFAULT
+@pytest.fixture(autouse=True)
+def clear_cache():
+    get_sources_from_webapp.cache_clear()
+    get_acteur_types_from_webapp.cache_clear()
+    get_acteur_columns_from_webapp.cache_clear()
+    yield
+    get_sources_from_webapp.cache_clear()
+    get_acteur_types_from_webapp.cache_clear()
+    get_acteur_columns_from_webapp.cache_clear()
 
-    def test_from_env_and_strips_trailing_slash(self, monkeypatch):
-        monkeypatch.setenv("WEBAPP_URL", "https://webapp.example.org/")
-        assert webapp_url() == "https://webapp.example.org"
 
-
-class TestActeursMetadata:
-    @pytest.fixture(autouse=True)
-    def clear_cache(self):
-        acteurs_metadata.cache_clear()
-        yield
-        acteurs_metadata.cache_clear()
+class TestGetSourcesFromWebapp:
 
     def test_calls_webapp_api(self, monkeypatch):
-        monkeypatch.setenv("WEBAPP_URL", "https://webapp.example.org")
+        monkeypatch.setattr("utils.webapp.WEBAPP_URL", "https://webapp.example.org")
         response = MagicMock()
-        response.json.return_value = METADATA
+        response.json.return_value = SOURCES
         with patch("utils.webapp.requests.get", return_value=response) as mock_get:
-            assert acteurs_metadata() == METADATA
+            assert get_sources_from_webapp() == SOURCES
         args, kwargs = mock_get.call_args
-        assert args[0] == "https://webapp.example.org/api/qfdmo/metadata/acteurs"
+        assert args[0] == "https://webapp.example.org/api/qfdmo/sources"
         assert kwargs["timeout"]
 
     def test_result_is_cached(self, monkeypatch):
-        monkeypatch.setenv("WEBAPP_URL", "https://webapp.example.org")
+        monkeypatch.setattr("utils.webapp.WEBAPP_URL", "https://webapp.example.org")
         response = MagicMock()
-        response.json.return_value = METADATA
+        response.json.return_value = SOURCES
         with patch("utils.webapp.requests.get", return_value=response) as mock_get:
-            acteurs_metadata()
-            acteurs_metadata()
+            get_sources_from_webapp()
+            get_sources_from_webapp()
         assert mock_get.call_count == 1
 
     def test_explicit_error_when_unreachable(self):
         with patch("utils.webapp.requests.get", side_effect=requests.ConnectionError()):
             with pytest.raises(RuntimeError, match="Webapp API unreachable"):
-                acteurs_metadata()
+                get_sources_from_webapp()
+
+
+class TestGetActeurTypesFromWebapp:
+    def test_calls_webapp_api(self, monkeypatch):
+        monkeypatch.setattr("utils.webapp.WEBAPP_URL", "https://webapp.example.org")
+        response = MagicMock()
+        response.json.return_value = ACTEUR_TYPES
+        with patch("utils.webapp.requests.get", return_value=response) as mock_get:
+            assert get_acteur_types_from_webapp() == ACTEUR_TYPES
+        args, kwargs = mock_get.call_args
+        assert args[0] == "https://webapp.example.org/api/qfdmo/acteurs/types"
+        assert kwargs["timeout"]
+
+
+class TestGetActeurColumnsFromWebapp:
+
+    def test_calls_webapp_api(self, monkeypatch):
+        monkeypatch.setattr("utils.webapp.WEBAPP_URL", "https://webapp.example.org")
+        response = MagicMock()
+        response.json.return_value = ACTEUR_COLUMNS
+        with patch("utils.webapp.requests.get", return_value=response) as mock_get:
+            assert get_acteur_columns_from_webapp() == ACTEUR_COLUMNS
+        args, kwargs = mock_get.call_args
+        assert args[0] == "https://webapp.example.org/api/qfdmo/acteurs/columns"
+        assert kwargs["timeout"]

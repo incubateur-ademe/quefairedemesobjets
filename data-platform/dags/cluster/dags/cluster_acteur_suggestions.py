@@ -10,7 +10,11 @@ from shared.config.airflow import DEFAULT_ARGS_NO_RETRIES
 from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
 from utils.airflow_params import airflow_params_dropdown_from_mapping
-from utils.webapp import acteurs_metadata
+from utils.webapp import (
+    get_acteur_columns_from_webapp,
+    get_acteur_types_from_webapp,
+    get_sources_from_webapp,
+)
 
 # -------------------------------------------
 # Manage dropdowns in Airflow
@@ -18,20 +22,25 @@ from utils.webapp import acteurs_metadata
 # Beware of performance impact, see min_file_process_interval
 # https://airflow.apache.org/docs/apache-airflow/stable/configurations-ref.html#config-scheduler-min-file-process-interval
 # https://airflow.apache.org/docs/apache-airflow/stable/best-practices.html#top-level-python-code
-# Data is fetched via the webapp API (single HTTP call) instead of
-# django.setup() + ORM which caused DagBag import timeouts
+# Data is fetched via the webapp API instead of django.setup() + ORM
+# which caused DagBag import timeouts
 
-metadata = acteurs_metadata()
-mapping_source_id_by_code = metadata["sources"]
-mapping_acteur_type_id_by_code = metadata["acteur_types"]
+mapping_source_id_by_code = {
+    source["code"]: source["id"] for source in get_sources_from_webapp()
+}
+mapping_acteur_type_id_by_code = {
+    acteur_type["code"]: acteur_type["id"]
+    for acteur_type in get_acteur_types_from_webapp()
+}
 # Create dropdowns
 dropdown_sources = airflow_params_dropdown_from_mapping(mapping_source_id_by_code)
 dropdown_acteur_types = airflow_params_dropdown_from_mapping(
     mapping_acteur_type_id_by_code
 )
 
-fields_vue_acteur = metadata["model_fields"]["vue_acteur"]
-fields_revision_acteur = metadata["model_fields"]["revision_acteur"]
+acteur_columns = get_acteur_columns_from_webapp()
+fields_vue_acteur = acteur_columns["vue_acteur"]
+fields_revision_acteur = acteur_columns["revision_acteur"]
 
 fields_all = sorted(
     list(set(fields_vue_acteur["with_properties"]) - set(UNNORMALIZABLE_FIELDS))
