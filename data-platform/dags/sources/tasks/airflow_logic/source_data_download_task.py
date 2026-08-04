@@ -27,15 +27,23 @@ def source_data_download_wrapper(ti, dag, params):
     endpoint = dag_config.endpoint
     metadata_endpoint = dag_config.metadata_endpoint
     s3_connection_id = dag_config.s3_connection_id
+    ignore_rows_with_null_or_empty_fields = (
+        dag_config.ignore_rows_with_null_or_empty_fields
+    )
 
     log.preview("API end point", endpoint)
     if s3_connection_id:
         log.preview("S3 connection id", s3_connection_id)
+    if ignore_rows_with_null_or_empty_fields:
+        log.preview(
+            "ignore_rows_with_null_fields", ignore_rows_with_null_or_empty_fields
+        )
 
     df = source_data_download(
         endpoint=endpoint,
         s3_connection_id=s3_connection_id,
         metadata_endpoint=metadata_endpoint,
+        ignore_rows_with_null_or_empty_fields=ignore_rows_with_null_or_empty_fields,
     )
 
     xcom_push(ti, XCOMS.SOURCE_DOWNLOADED, df)
