@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Self, TextIO
 
 import dedupe
+import duckdb
 import polars as pl
 from dedupe import labeler
 from dedupe.api import _cleanup_scores, flatten_training
@@ -60,69 +61,68 @@ class BusinessRulesMixin:
         This prevents:
         1. Wasting compute on scoring pairs that will be rejected
         2. Transitive clustering through bridge records
+
+        Uses DuckDB + polars Arrow integration for zero-copy in-memory blocking
+        instead of sqlite3 with disk-backed tables and index creation overhead.
         """
         self.fingerprinter.index_all(data)
 
-        id_type = dedupe.core.sqlite_id_type(data)
+        # Collect fingerprints as (block_key, record_id) tuples — same format as before
+        fingerprint_data = list(self.fingerprinter(data.items()))
+        self.fingerprinter.reset_indices()
 
-        # Blocking and pair generation are typically the first memory
-        # bottlenecks, so we'll use sqlite3 to avoid doing them in memory
-        import sqlite3
-        import tempfile
+        if not fingerprint_data:
+            return
 
-        with tempfile.TemporaryDirectory() as temp_dir:
-            # StaticDedupe might not have in_memory attribute, so we use getattr
-            if getattr(self, "in_memory", False):
-                con = sqlite3.connect(":memory:")
-            else:
-                con = sqlite3.connect(temp_dir + "/blocks.db")
+        # Build polars DataFrame then export to Arrow for zero-copy DuckDB access.
+        # No explicit schema — duckdb auto-infers types from the Arrow table,
+        # supporting both string and integer record IDs as dedupe does.
+        fp_df = pl.DataFrame(
+            {
+                "block_key": [b[0] for b in fingerprint_data],
+                "record_id": [b[1] for b in fingerprint_data],
+            },
+        )
 
-            con.execute("pragma journal_mode=off")
-            con.execute(
-                f"CREATE TABLE blocking_map (block_key text, record_id {id_type})"
+        con = duckdb.connect(":memory:")
+
+        # Register as Arrow table — zero-copy from polars via pyarrow
+        arrow_table = fp_df.to_arrow()
+        con.register("blocking_map", arrow_table)
+
+        # Self-join on block_key; DuckDB's columnar engine handles statistics automatically
+        pairs_df = con.execute("""
+            SELECT DISTINCT a.record_id AS a_record_id, b.record_id AS b_record_id
+            FROM blocking_map a
+            INNER JOIN blocking_map b USING (block_key)
+            WHERE a.record_id < b.record_id
+        """).pl()
+
+        # Count statistics for logging — now iterating a polars DataFrame instead of SQLite cursor
+        total_pairs = len(pairs_df)
+        filtered_pairs = 0
+
+        for row in pairs_df.iter_rows(named=True):
+            entity_a = data[row["a_record_id"]]
+            entity_b = data[row["b_record_id"]]
+
+            # Filter out conflicting pairs BEFORE yielding them
+            if self._has_conflict(entity_a, entity_b):
+                filtered_pairs += 1
+                continue
+            yield (
+                (row["a_record_id"], entity_a),
+                (row["b_record_id"], entity_b),
             )
-            con.executemany(
-                "INSERT INTO blocking_map values (?, ?)",
-                self.fingerprinter(data.items()),
-            )
-            self.fingerprinter.reset_indices()
-            con.execute("""CREATE UNIQUE INDEX record_id_block_key_idx
-                           ON blocking_map (record_id, block_key)""")
-            con.execute("""CREATE INDEX block_key_idx
-                           ON blocking_map (block_key)""")
-            con.execute("""ANALYZE""")
-            pairs = con.execute("""SELECT DISTINCT a.record_id, b.record_id
-                                   FROM blocking_map a
-                                   INNER JOIN blocking_map b
-                                   USING (block_key)
-                                   WHERE a.record_id < b.record_id""")
 
-            # Count statistics for logging
-            total_pairs = 0
-            filtered_pairs = 0
-            for a_record_id, b_record_id in pairs:
-                total_pairs += 1
-                entity_a = data[a_record_id]
-                entity_b = data[b_record_id]
+        con.close()
 
-                # Filter out conflicting pairs BEFORE yielding them
-                if self._has_conflict(entity_a, entity_b):
-                    filtered_pairs += 1
-                    continue
-                yield (
-                    (a_record_id, data[a_record_id]),
-                    (b_record_id, data[b_record_id]),
-                )
-
-            pairs.close()
-            con.close()
-
-            logger.info(
-                "Blocking generated %d pairs, filtered out %d conflicting pairs (%.1f%%)",
-                total_pairs,
-                filtered_pairs,
-                (filtered_pairs / total_pairs * 100) if total_pairs > 0 else 0,
-            )
+        logger.info(
+            "Blocking generated %d pairs, filtered out %d conflicting pairs (%.1f%%)",
+            total_pairs,
+            filtered_pairs,
+            (filtered_pairs / total_pairs * 100) if total_pairs > 0 else 0,
+        )
 
     def partition(self, data, threshold=0.5):
         pairs = self.pairs(data)
