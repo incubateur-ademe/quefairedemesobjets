@@ -62,7 +62,7 @@
   "devDependencies": {
     "@parcel/optimizer-svgo": "^2.16.4",
     "@parcel/transformer-inline-string": "^2.16.4",
-    "@playwright/test": "^1.61.1",
+    "@playwright/test": "^1.62.0",
     "@testing-library/jest-dom": "^7.0.0",
     "@types/jest": "^30.0.0",
     "@types/lodash": "^4.17.24",
