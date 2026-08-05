@@ -69,6 +69,7 @@ class BusinessRulesMixin:
         Uses DuckDB + polars Arrow integration for zero-copy in-memory blocking
         instead of sqlite3 with disk-backed tables and index creation overhead.
         """
+        logger.debug("Starting generating pairs")
         self.fingerprinter.index_all(data)
 
         # Collect fingerprints as (block_key, record_id) tuples — same format as before
@@ -90,10 +91,13 @@ class BusinessRulesMixin:
 
         con = duckdb.connect(":memory:")
 
+        logger.debug("Populating duckdb table...")
         # Register as Arrow table — zero-copy from polars via pyarrow
         arrow_table = fp_df.to_arrow()
         con.register("blocking_map", arrow_table)
+        logger.debug("Finished populating duckdb table.")
 
+        logger.debug("Running pairs query")
         # Self-join on block_key; DuckDB's columnar engine handles statistics automatically
         pairs_df = con.execute("""
             SELECT DISTINCT a.record_id AS a_record_id, b.record_id AS b_record_id
@@ -102,6 +106,7 @@ class BusinessRulesMixin:
             WHERE a.record_id < b.record_id
         """).pl()
 
+        logger.debug("Num pairs before business rules clustering %s", len(pairs_df))
         # Count statistics for logging — now iterating a polars DataFrame instead of SQLite cursor
         total_pairs = len(pairs_df)
         filtered_pairs = 0
@@ -305,7 +310,7 @@ class BusinessRulesMixin:
         """
         result: list[tuple[tuple[Hashable, ...], tuple[float, ...]]] = []
 
-        logger.debug("Applying business rules to clusters")
+        logger.debug("Applying business rules to %s clusters", len(clusters))
         for acteur_ids, scores in clusters:
             if len(acteur_ids) == 1:
                 # Singleton case

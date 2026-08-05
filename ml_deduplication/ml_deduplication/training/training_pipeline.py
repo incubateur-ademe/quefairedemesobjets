@@ -11,7 +11,7 @@ from tqdm.contrib.logging import tqdm_logging_redirect
 
 from ml_deduplication.evaluation.metrics.cluster import generate_full_cluster_report
 from ml_deduplication.evaluation.metrics.pairwise import pairwise_metrics_from_clusters
-from ml_deduplication.ml_deduplication.modeling.model import (
+from ml_deduplication.modeling.model import (
     BusinessRulesDedupe,
 )
 from ml_deduplication.training.model_selection import (
@@ -31,7 +31,7 @@ from ml_deduplication.training.utils import (
 )
 
 logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s | %(filename)s | %(message)s"
+    level=logging.DEBUG, format="%(asctime)s | %(filename)s | %(message)s", force=True
 )
 logger = logging.getLogger(__name__)
 
