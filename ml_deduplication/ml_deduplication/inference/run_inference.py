@@ -24,12 +24,11 @@ from ml_deduplication.training.utils import (
 from tqdm import tqdm
 from tqdm.contrib.logging import tqdm_logging_redirect
 
+logging.basicConfig(
+    format="%(asctime)s | %(name)s | %(message)s", level=logging.DEBUG, force=True
+)
 logger = logging.getLogger(__name__)
-if not logger.handlers:
-    handler = logging.StreamHandler()
-    handler.setFormatter(logging.Formatter("%(asctime)s | %(name)s | %(message)s"))
-    logger.addHandler(handler)
-    logger.setLevel(logging.DEBUG)
+
 
 SCRIPT_DIR = Path(__file__).parent.parent.parent
 DEFAULT_MODEL_PATH = SCRIPT_DIR / "logs" / "model_tuning_2026_07_28_1214.json"
@@ -39,7 +38,7 @@ DEFAULT_OUTPUT_DIR = SCRIPT_DIR / "outputs"
 def load_model(model_path: Path) -> BusinessRulesStaticDedupe:
     """Load a saved model from a JSON file."""
     logger.info("Loading model from %s", model_path)
-    deduper = BusinessRulesStaticDedupe(settings_file=model_path)
+    deduper = BusinessRulesStaticDedupe(settings_file=model_path, num_cores=1)
     deduper._unique_fields = tuple(list(deduper._unique_fields) + ["parent_id"])
     logger.info("Model loaded successfully")
     return deduper
@@ -224,9 +223,9 @@ def main():
             total=total_code_postal,
             colour="BLUE",
         ):
-            logger.info("Starting partition for code postal: %s", code_postal)
+            logger.info("Starting partition for code postal: %s", code_postal[0])
             if len(sub_df) < 2:
-                logger.info("Skipping %s as there is no enough entities.")
+                logger.warning("Skipping %s as there is no enough entities.")
                 continue
 
             # Step 3: Build entities dict
@@ -254,8 +253,8 @@ def main():
         len(multi_clusters),
     )
 
-    result_df = generate_pred_pairs_df(partition)
-    result_dict = partition_to_results_dict(partition)
+    result_df = generate_pred_pairs_df(complete_partition)
+    result_dict = partition_to_results_dict(complete_partition)
 
     # Step 7: Save outputs
     result_df.write_parquet(args.output_dir / f"inference_clusters_{run_id}.parquet")
