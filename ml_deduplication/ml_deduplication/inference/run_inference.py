@@ -243,8 +243,8 @@ def main():
 
     # Count cluster sizes
     cluster_sizes = {}
-    for r in results:
-        cid = r["cluster_id"]
+    for cluster_id in results.values():
+        cid = cluster_id
         cluster_sizes[cid] = cluster_sizes.get(cid, 0) + 1
     multi_clusters = {k: v for k, v in cluster_sizes.items() if v > 1}
     logger.info(
