@@ -11,7 +11,7 @@ from tqdm import tqdm
 from tqdm.contrib.logging import tqdm_logging_redirect
 
 from ml_deduplication.training.features import (
-    DEDUPE_VARIABLES_CONFIG_FULL,
+    DEDUPE_VARIABLES_CONFIG_MANDATORY,
     FEATURES_NAMES_FROM_DATASET,
 )
 from ml_deduplication.training.training_pipeline import run_training_pipeline
@@ -263,8 +263,8 @@ if __name__ == "__main__":
 
     df_features = pl.read_parquet(args.dataset_path)
     training_hyperparams = {
-        "index_predicates": False,
-        "dedupe_variables_config": DEDUPE_VARIABLES_CONFIG_FULL,
+        "index_predicates": True,
+        "dedupe_variables_config": DEDUPE_VARIABLES_CONFIG_MANDATORY,
         "features_names": FEATURES_NAMES_FROM_DATASET,
     }
     results, fig = generate_learning_curve(
