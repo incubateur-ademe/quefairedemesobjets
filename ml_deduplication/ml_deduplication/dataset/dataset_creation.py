@@ -129,6 +129,119 @@ def create_entity_pairs_from_ml_manual_labeling(
     return df_pairs_concat
 
 
+def create_entity_pairs_from_ml_inference_manual_labeling(
+    ml_inference_manual_labeling_datasets_folder_path: Path,
+) -> pl.DataFrame:
+    """
+    See original spreadsheet : https://docs.google.com/spreadsheets/d/1vAG5OViTbVKMZFmdiYZioA2Sn9lN9r6yEeOmdY4ks24/edit?hl=fr&gid=647125517#gid=647125517
+
+    Create actors pairs from manual labeling of the old ML experience.
+
+    Reads CSV files matching 'Clusterisation *.csv' from the given folder,
+    processes them to extract pairs of actors, and assigns labels based on
+    the 'Good ?' column. It also computes a hash for the cluster ID to
+    preserve cluster information for positive pairs.
+
+    Parameters
+    ----------
+    ml_manual_labeling_datasets_folder_path : Path
+        Path to the folder containing the CSV files for manual labeling.
+
+    Returns
+    -------
+    pl.DataFrame
+        A Polars DataFrame containing pairs of actors with columns:
+        - identifiant_unique_i: The first actor's unique identifier.
+        - identifiant_unique_j: The second actor's unique identifier.
+        - label: Boolean indicating if the pair is a match.
+        - cluster_id: The hash of the cluster ID for positive pairs, null otherwise.
+    """
+    csv_files_to_load = ml_inference_manual_labeling_datasets_folder_path.glob(
+        "inference_annotation_*.csv"
+    )
+
+    dfs_to_concat = []
+
+    for filepath in csv_files_to_load:
+        df = pl.read_csv(
+            filepath, schema_overrides={"cluster_label": pl.String}
+        ).select(["identifiant_unique", "cluster_label", "Review"])
+        df = df.filter(pl.col("Review").is_not_null())
+        df_cluster_ids = (
+            df.group_by("cluster_label")
+            .agg(pl.concat_list("identifiant_unique").alias("ids"))
+            .with_columns(
+                pl.col("ids")
+                .list.unique()
+                .sort()
+                .hash(RANDOM_SEED)
+                .alias("cluster_id")
+                .cast(pl.String)
+            )
+        )
+
+        df_pairs = (
+            (
+                df.join(df, on="cluster_label", suffix="_j")
+                .filter(pl.col("identifiant_unique") != pl.col("identifiant_unique_j"))
+                .with_columns(
+                    pl.min_horizontal(
+                        ["identifiant_unique", "identifiant_unique_j"]
+                    ).alias("identifiant_unique_i"),
+                    pl.max_horizontal(
+                        ["identifiant_unique", "identifiant_unique_j"]
+                    ).alias("identifiant_unique_j"),
+                )
+                .unique(["identifiant_unique_i", "identifiant_unique_j"])
+                .with_columns(
+                    pl.when((pl.col("Review") == "OK") & (pl.col("Review_j") == "OK"))
+                    .then(True)
+                    .when(
+                        (pl.col("Review") == "Pas ok")
+                        & (pl.col("Review_j") == "Pas ok")
+                    )
+                    .then(False)
+                    .when(
+                        ((pl.col("Review") == "OK") & (pl.col("Review_j") == "Pas ok"))
+                        | (
+                            (pl.col("Review") == "Pas ok")
+                            & (pl.col("Review_j") == "OK")
+                        )
+                    )
+                    .then(False)
+                    .when(
+                        (
+                            (pl.col("Review") == "Partiellement ok")
+                            & (pl.col("Review_j") == "Pas ok")
+                        )
+                        | (
+                            (pl.col("Review") == "Pas ok")
+                            & (pl.col("Review_j") == "Partiellement ok")
+                        )
+                    )
+                    .then(False)
+                    .when(
+                        (pl.col("Review") == "Partiellement ok")
+                        & (pl.col("Review_j") == "Partiellement ok")
+                    )
+                    .then(True)
+                    .otherwise(None)
+                    .alias("label"),
+                )
+            )
+            .join(df_cluster_ids, on="cluster_label")
+            .select(
+                ["identifiant_unique_i", "identifiant_unique_j", "cluster_id", "label"]
+            )
+            .with_columns(pl.when(pl.col("label")).then("cluster_id").otherwise(None))
+        )
+
+        dfs_to_concat.append(df_pairs)
+
+    final_df = pl.concat(dfs_to_concat)
+    return final_df.unique(["identifiant_unique_i", "identifiant_unique_j"])
+
+
 def create_entity_pairs_from_manual_labeling(
     false_positives_suggestions_dataset_path: Path,
     true_negatives_suggestions_dataset_path: Path,
@@ -322,7 +435,7 @@ def create_entity_pairs_from_database_random_sampling(
 def balance_dataset(
     df_pairs_ml_manual_labeling: pl.DataFrame | None,
     df_pairs_manual_labeling: pl.DataFrame | None,
-    df_pairs_database_via_parent_change: pl.DataFrame | None,
+    df_pairs_ml_inference_manual_labeling: pl.DataFrame | None,
     df_pairs_database_random_sampling: pl.DataFrame,
     num_examples_for_each_label: int = 1000,
 ) -> pl.DataFrame:
@@ -338,8 +451,8 @@ def balance_dataset(
         Pairs derived from the old ML manual labeling.
     df_pairs_manual_labeling : pl.DataFrame
         Pairs derived from the new manual labeling.
-    df_pairs_database_via_parent_change : pl.DataFrame
-        Negative pairs derived from database parent changes.
+    df_pairs_ml_inference_manual_labeling : pl.DataFrame
+        Pairs from ML inference manual labeling.
     df_pairs_database_random_sampling : pl.DataFrame
         Pairs derived from database random sampling.
     num_examples_for_each_label : int, optional
@@ -360,7 +473,7 @@ def balance_dataset(
             e.with_columns(pl.lit("manual").alias("example_type"))
             for e in [
                 df_pairs_ml_manual_labeling,
-                df_pairs_database_via_parent_change,
+                df_pairs_ml_inference_manual_labeling,
                 df_pairs_manual_labeling,
             ]
             if e is not None
@@ -507,6 +620,10 @@ def create_full_dataset(
         database_connection_uri,
     )
 
+    df_pairs_ml_inference_manual_labeling = (
+        create_entity_pairs_from_ml_inference_manual_labeling(datasets_path)
+    )
+
     df_pairs_database_random_sampling = (
         create_entity_pairs_from_database_random_sampling(database_connection_uri)
     )
@@ -514,7 +631,7 @@ def create_full_dataset(
     df_pairs_balanced = balance_dataset(
         df_pairs_ml_manual_labeling,
         df_pairs_manual_labeling,
-        None,
+        df_pairs_ml_inference_manual_labeling,
         df_pairs_database_random_sampling,
         num_examples_per_class,
     )

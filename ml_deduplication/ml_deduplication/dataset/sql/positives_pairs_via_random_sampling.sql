@@ -8,7 +8,7 @@ select
 from
 	qfdmo_vueacteur qv
 WHERE
-	qv.statut <> 'SUPPRIME'
+	qv.statut = 'ACTIF'
 	  	),
 paires_dupliquees as (
 select
