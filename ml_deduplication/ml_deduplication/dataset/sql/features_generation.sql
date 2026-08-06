@@ -18,7 +18,7 @@ from
 inner join qfdmo_vueacteur qv3 on
 	qv.est_parent
 	and qv.identifiant_unique = qv3.parent_id
-	and qv3.statut <> 'SUPPRIME'
+	and qv3.statut = 'ACTIF'
 inner join qfdmo_vuepropositionservice qv2 on
 	qv3.identifiant_unique = qv2.acteur_id
 group by

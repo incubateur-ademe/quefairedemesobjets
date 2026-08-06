@@ -15,7 +15,7 @@ WITH
     FROM
       qfdmo_vueacteur qv
     WHERE
-      qv.statut <> 'SUPPRIME'
+      qv.statut = 'ACTIF'
   ),
   sampled_filtered AS (
     SELECT
