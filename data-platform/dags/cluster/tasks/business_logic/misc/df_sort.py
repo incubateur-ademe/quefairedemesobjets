@@ -1,6 +1,5 @@
 import pandas as pd
 from cluster.config.constants import COL_PARENT_DATA_NEW
-from utils.django import django_setup_full
 
 
 def df_sort(
@@ -11,6 +10,8 @@ def df_sort(
     """Utility to help us sort dataframes in a consistent way
     throught clustering pipeline despite them having potentially
     different columns"""
+
+    from utils.django import django_setup_full
 
     django_setup_full()
     from data.models.change import (

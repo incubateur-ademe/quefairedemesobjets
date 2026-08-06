@@ -10,7 +10,6 @@ import pandas as pd
 from enrich.config.columns import COLS
 from enrich.tasks.business_logic.enrich_dbt_model_read import enrich_dbt_model_read
 from utils import logging_utils as log
-from utils.django import django_setup_full
 
 logger = logging.getLogger(__name__)
 
@@ -57,6 +56,8 @@ def enrich_lien_succession_to_suggestion_groupes(
 ) -> bool:
     """Write 1 SuggestionGroupe per acteur and 1 SuggestionUnitaire per changed
     field (SIREN and/or SIRET)."""
+    from utils.django import django_setup_full
+
     django_setup_full()
     from data.models.suggestion import (
         SuggestionAction,

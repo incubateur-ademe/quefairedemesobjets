@@ -5,7 +5,6 @@ import pandas as pd
 from enrich.config.cohorts import COHORTS
 from enrich.config.columns import COLS
 from utils import logging_utils as log
-from utils.django import django_setup_full
 
 logger = logging.getLogger(__name__)
 
@@ -221,6 +220,8 @@ def enrich_dbt_model_to_suggestions(
     identifiant_action: str,
     dry_run: bool = True,
 ) -> bool:
+    from utils.django import django_setup_full
+
     django_setup_full()
 
     from data.models.suggestion import (

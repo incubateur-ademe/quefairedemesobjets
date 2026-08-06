@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 from sources.tasks.transform.sequence_utils import is_empty_sequence
 from utils import logging_utils as log
-from utils.django import django_setup_full
 
 logger = logging.getLogger(__name__)
 
@@ -14,6 +13,8 @@ def db_data_prepare(
     df_acteur: pd.DataFrame,
     df_acteur_from_db: pd.DataFrame,
 ):
+    from utils.django import django_setup_full
+
     django_setup_full()
     from qfdmo.models.acteur import ActeurStatus
 

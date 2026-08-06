@@ -127,9 +127,7 @@ class TestEnrichLienSuccessionSuggest:
             ]
         )
 
-        mocker.patch(
-            "enrich.tasks.business_logic.enrich_lien_succession_suggest.django_setup_full"
-        )
+        mocker.patch("utils.django.django_setup_full")
         mocker.patch(
             "enrich.tasks.business_logic.enrich_lien_succession_suggest._est_parent_par_acteur",
             return_value={"acteur-a": False},
