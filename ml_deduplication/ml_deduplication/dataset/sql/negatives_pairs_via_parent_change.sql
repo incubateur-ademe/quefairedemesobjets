@@ -48,7 +48,7 @@ from
 inner join suggestions_avec_parent_existant se on qv.identifiant_unique = se.id_acteur and qv.parent_id!=se.id_parent
 where
 	not qv.est_parent
-	and qv.statut <> 'SUPPRIME'
+	and qv.statut = 'ACTIF'
 	and qv.modifie_le <= now() - interval '1 day'
 )
 select
