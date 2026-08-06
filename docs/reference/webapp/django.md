@@ -62,11 +62,11 @@ Les tests utilisent le backend `ImmediateBackend` (`webapp/settings/test.py`) : 
 
 ### Production (Scalingo)
 
-Le `Procfile` déclare deux types de processus :
+Le `Procfile` (racine du monorepo) déclare deux types de processus :
 
 ```text
 web: bash bin/start
-worker: python manage.py db_worker
+worker: bash -c 'cd webapp && python manage.py db_worker'
 postdeploy: bash bin/post_deploy
 ```
 

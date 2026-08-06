@@ -1,0 +1,16 @@
+# Keep the Scalingo webapp slug lean (repo is a monorepo).
+data-platform
+docs
+infrastructure
+.github
+.cursor
+.tmp
+**/__pycache__
+**/.pytest_cache
+**/.ruff_cache
+**/.venv
+webapp/e2e_tests
+webapp/unit_tests
+webapp/integration_tests
+webapp/media
+webapp/.parcel-cache
