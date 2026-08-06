@@ -1,7 +1,5 @@
 import logging
 
-from utils.django import django_setup_full
-
 from .copy_utils import dump_and_restore_db
 
 logger = logging.getLogger(__name__)
@@ -23,6 +21,8 @@ EXPOSURE_TABLE_MAPPINGS = {
 
 
 def _drop_exposure_tables_from_webapp_sample():
+    from utils.django import django_setup_full
+
     django_setup_full()
     from django.db import connections
 
@@ -46,6 +46,8 @@ def copy_displayed_data_from_warehouse():
     4. Copy the content of the exposure_sample_* tables to the qfdmo_* tables
     5. Delete the exposure_sample_* tables from webapp_sample
     """
+    from utils.django import django_setup_full
+
     django_setup_full()
     from django.conf import settings
     from django.db import connections

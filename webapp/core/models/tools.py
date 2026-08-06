@@ -1,12 +1,12 @@
 import logging
 
 from django.db import connections
-from utils.django import DJANGO_WH_CONNECTION_NAME
 
 logger = logging.getLogger(__name__)
 
 
 def compare_model_vs_table(cls, table_name: str) -> bool:
+    from utils.django import DJANGO_WH_CONNECTION_NAME
 
     def are_fields_matched(db_type, model_type):
         logger.info(f"Comparing {db_type} with {model_type}")

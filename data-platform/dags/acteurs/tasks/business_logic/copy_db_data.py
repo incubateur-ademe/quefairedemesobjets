@@ -1,7 +1,5 @@
 import logging
 
-from utils.django import django_setup_full
-
 from .copy_utils import drop_tables, dump_and_restore_db
 
 logger = logging.getLogger(__name__)
@@ -57,6 +55,8 @@ EXCLUDE_TABLES = [
 
 def copy_db_data():
     import importlib
+
+    from utils.django import django_setup_full
 
     django_setup_full()
 

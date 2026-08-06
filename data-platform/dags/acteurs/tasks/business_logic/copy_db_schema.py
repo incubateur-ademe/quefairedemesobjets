@@ -1,7 +1,5 @@
 import logging
 
-from utils.django import django_setup_full
-
 from .copy_utils import dump_and_restore_db
 
 logger = logging.getLogger(__name__)
@@ -19,6 +17,8 @@ def _get_all_tables(cursor):
 
 
 def copy_db_schema():
+    from utils.django import django_setup_full
+
     django_setup_full()
     from django.conf import settings
     from django.db import connections
