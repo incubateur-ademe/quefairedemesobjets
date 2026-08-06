@@ -5,6 +5,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
+import numpy as np
 import polars as pl
 from tqdm import tqdm
 from tqdm.contrib.logging import tqdm_logging_redirect
@@ -124,7 +125,7 @@ def run_training_pipeline(
 
     # split train into train/dev
     df_train_sub, df_dev = split_train_dev(
-        df_features.filter(pl.col("split") == "train")
+        df_features.filter(pl.col("split") == "train"),
     )
 
     # config variables
@@ -158,6 +159,9 @@ def run_training_pipeline(
         entities_dev=entities_dict_dev,
         id_to_cluster_id_dev=id_to_cluster_id_dict_dev,
         min_recall=0.25,
+        thresholds=np.concatenate(
+            [np.arange(0.10, 0.91, 0.05), np.arange(0.91, 0.96, 0.01)]
+        ),
     )
     logger.info(
         "Best threshold found: %s, best metrics: %s", best_threshold, best_metrics

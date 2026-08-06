@@ -120,9 +120,13 @@ def split_train_dev(
     The column cluster_id_split is used in order to ensure there is no cluster data
     leaking between train and dev sets
     """
+    df_cluster_ids = df_train_features.select(
+        "cluster_id_split", "example_type"
+    ).unique("cluster_id_split")
     train_cluster_ids, dev_cluster_ids = train_test_split(
-        df_train_features.select("cluster_id_split").unique("cluster_id_split"),
+        df_cluster_ids.select("cluster_id_split"),
         test_size=dev_ratio,
+        stratify=df_cluster_ids.select("example_type"),
         random_state=seed,
     )
 
