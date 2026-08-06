@@ -12,7 +12,6 @@ import pandas as pd
 from enrich.config.columns import COLS
 from enrich.tasks.business_logic.enrich_dbt_model_read import enrich_dbt_model_read
 from utils import logging_utils as log
-from utils.django import django_setup_full
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +37,8 @@ def enrich_siret_siren_to_suggestion_groupes(
 ) -> bool:
     """Write 1 SuggestionGroupe per `suggest_field` value and 1
     SuggestionUnitaire per acteur, suggesting `suggest_field`."""
+    from utils.django import django_setup_full
+
     django_setup_full()
     from data.models.suggestion import (
         SuggestionAction,

@@ -1,7 +1,5 @@
 from pathlib import Path
 
-from utils.django import django_schema_create_and_check
-
 
 def clone_view_in_use_switch(
     view_schema_file_path: Path,
@@ -10,6 +8,8 @@ def clone_view_in_use_switch(
     dry_run: bool,
 ) -> None:
     """Switching the in-use view to point to the new table"""
+    from utils.django import django_schema_create_and_check
+
     sql = (
         view_schema_file_path.read_text()
         .replace(r"{{view_name}}", view_name)
