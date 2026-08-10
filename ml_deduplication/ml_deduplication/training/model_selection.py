@@ -1,6 +1,6 @@
-from typing import Any
+import logging
+from typing import Any, Literal
 
-import dedupe
 import numpy as np
 from sklearn.model_selection import ParameterGrid
 
@@ -14,9 +14,11 @@ from ml_deduplication.training.features import (
 )
 from ml_deduplication.training.utils import partition_to_dict
 
+logger = logging.getLogger(__name__)
+
 
 def select_best_threshold(
-    deduper: dedupe.Dedupe,
+    deduper: Any,
     entities_dev: dict,
     id_to_cluster_id_dev: dict,
     thresholds: np.ndarray[tuple[int], Any] | None = None,
@@ -47,7 +49,7 @@ def select_best_threshold(
     for t in thresholds:
         # On demande à dedupe de clusteriser et on obtient une
         # liste de liste d'ids regroupés
-        partition_pred = deduper.partition(entities_dev, float(t))
+        partition_pred = deduper.partition(entities_dev, float(t), output_scores=False)
 
         # On crée un dict entity_id -> cluster_id + singleton
         id_to_cluster_pred = partition_to_dict(partition_pred)
@@ -59,16 +61,16 @@ def select_best_threshold(
             id_to_cluster_id_dev, id_to_cluster_pred
         )
         results.append((float(t), metrics))
-        print(
+        logger.info(
             f"  seuil={t:.2f}  precision={metrics['precision']:.3f}  "
-            f"recall={metrics['recall']:.3f}  f1={metrics['f1']:.3f}"
+            f"recall={metrics['recall']:.3f}  f1={metrics['f1']:.3f} fbeta={metrics['fbeta']:.3f}"
         )
-        print("-----")
+        logger.info("-----")
 
     # 1) parmi les seuils respectant le rappel minimal, on prend le plus précis
     eligibles = [(t, m) for t, m in results if m["recall"] >= min_recall]
     if eligibles:
-        return max(eligibles, key=lambda x: x[1]["precision"])
+        return max(eligibles, key=lambda x: x[1]["fbeta"])
 
     # 2) sinon, repli sur le F-bêta (favorise quand même la précision)
     return max(
@@ -76,25 +78,83 @@ def select_best_threshold(
     )
 
 
-def generate_parameter_grid() -> ParameterGrid:
-    param_grid = {
-        "index_predicates": [True, False],
-        "dedupe_variables_config": [
-            DEDUPE_VARIABLES_CONFIG_MANDATORY,
-            DEDUPE_VARIABLES_CONFIG_RESTRICTED,
-            DEDUPE_VARIABLES_CONFIG_FULL,
-        ],
-        "features_names": [FEATURES_NAMES_FROM_DATASET],
-    }
+def generate_parameter_grid(
+    model_type: Literal["dedupe", "xgboost"] = "dedupe",
+) -> ParameterGrid:
+    if model_type == "dedupe":
+        param_grid = {
+            "model_type": ["dedupe"],
+            "index_predicates": [True, False],
+            "dedupe_variables_config": [
+                "mandatory",
+                "restricted",
+                "full",
+            ],
+            "features_names": [FEATURES_NAMES_FROM_DATASET],
+        }
+    elif model_type == "xgboost":
+        param_grid = {
+            "model_type": ["xgboost"],
+            "max_depth": [2, 3, 4],
+            "min_child_weight": [
+                5,
+                10,
+            ],
+            "gamma": [
+                0,
+                0.5,
+            ],
+            "reg_lambda": [
+                5,
+                10,
+            ],
+            "reg_alpha": [
+                0,
+            ],
+            "learning_rate": [
+                0.03,
+                0.05,
+            ],
+            "index_predicates": [True],
+            "dedupe_variables_config": [
+                "restricted",
+                "full",
+            ],
+            "features_names": [FEATURES_NAMES_FROM_DATASET],
+        }
+    else:
+        raise ValueError("model_type not found")
 
     return ParameterGrid(param_grid)
 
 
-def get_default_hyperparameters() -> dict:
+def get_default_hyperparameters(model_type: Literal["dedupe", "xgboost"]) -> dict:
     params = {
-        "index_predicates": False,
-        "dedupe_variables_config": DEDUPE_VARIABLES_CONFIG_RESTRICTED,
+        "model_type": model_type,
+        "index_predicates": True,
+        "dedupe_variables_config": "restricted",
         "features_names": FEATURES_NAMES_FROM_DATASET,
     }
+    if model_type == "xgboost":
+        params = {
+            **params,
+            "gamma": 0,
+            "learning_rate": 0.03,
+            "max_depth": 2,
+            "min_child_weight": 5,
+            "reg_alpha": 0,
+            "reg_lambda": 10,
+        }
 
     return params
+
+
+def get_dedupe_variables_config(name):
+
+    configs = {
+        "mandatory": DEDUPE_VARIABLES_CONFIG_MANDATORY,
+        "full": DEDUPE_VARIABLES_CONFIG_FULL,
+        "restricted": DEDUPE_VARIABLES_CONFIG_RESTRICTED,
+    }
+
+    return configs[name]

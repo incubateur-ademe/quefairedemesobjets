@@ -133,17 +133,32 @@ class BusinessRulesMixin:
             (filtered_pairs / total_pairs * 100) if total_pairs > 0 else 0,
         )
 
-    def partition(self, data, threshold=0.5):
+    @staticmethod
+    def _add_singletons(all_ids, clusters):
+        singletons = set(all_ids)
+
+        for record_ids, score in clusters:
+            singletons.difference_update(record_ids)
+            yield (record_ids, score)
+
+        for singleton in singletons:
+            yield (singleton,), (1.0,)
+
+    def partition(self, data, threshold=0.5, output_scores: bool = False):
         pairs = self.pairs(data)
         pair_scores = self.score(pairs, data)
         clusters = self.cluster(pair_scores, threshold)
-        clusters = super()._add_singletons(data.keys(), clusters)
+        clusters = self._add_singletons(data.keys(), clusters)
         clusters_eval = list(clusters)
 
         # Apply business rules at cluster level
         clusters_clean = self.apply_business_rules(clusters_eval, data)
 
         _cleanup_scores(pair_scores)
+
+        if output_scores:
+            return clusters_clean, pair_scores
+
         return clusters_clean
 
     def cluster(self, scores: Scores, threshold: float = 0.5) -> Clusters:

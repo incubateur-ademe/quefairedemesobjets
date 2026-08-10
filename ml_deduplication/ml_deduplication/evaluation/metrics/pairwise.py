@@ -1,6 +1,11 @@
 from collections import Counter
 from math import comb
 
+import numpy as np
+from sklearn.metrics import average_precision_score, roc_auc_score
+
+from ml_deduplication.evaluation.metrics import fbeta
+
 
 def pairwise_metrics_from_clusters(true_clusters: dict, pred_clusters: dict) -> dict:
     """
@@ -48,11 +53,28 @@ def pairwise_metrics_from_clusters(true_clusters: dict, pred_clusters: dict) -> 
     precision = tp / (tp + fp) if (tp + fp) else 0.0
     recall = tp / (tp + fn) if (tp + fn) else 0.0
     f1 = 2 * precision * recall / (precision + recall) if (precision + recall) else 0.0
+    fbeta_score = fbeta(precision, recall, beta=0.5)
     return {
         "precision": precision,
         "recall": recall,
         "f1": f1,
+        "fbeta": fbeta_score,
         "tp": tp,
         "fp": fp,
         "fn": fn,
+    }
+
+
+def pairwise_metrics_from_scores(scores: np.ndarray, y: np.ndarray) -> dict:
+
+    roc_auc = roc_auc_score(y, scores)
+    pr_auc = average_precision_score(y, scores)
+    pos_mean_score = scores[y == 1].mean().item()
+    neg_mean_score = scores[y == 0].mean().item()
+
+    return {
+        "roc_auc": roc_auc,
+        "pr_auc": pr_auc,
+        "pos_mean_score": pos_mean_score,
+        "neg_mean_score": neg_mean_score,
     }
