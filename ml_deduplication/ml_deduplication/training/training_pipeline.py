@@ -4,19 +4,26 @@ import logging
 import time
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any, Literal
 
 import numpy as np
 import polars as pl
+from joblib import Parallel, delayed
 from tqdm import tqdm
 from tqdm.contrib.logging import tqdm_logging_redirect
 
 from ml_deduplication.evaluation.metrics.cluster import generate_full_cluster_report
-from ml_deduplication.evaluation.metrics.pairwise import pairwise_metrics_from_clusters
+from ml_deduplication.evaluation.metrics.pairwise import (
+    pairwise_metrics_from_clusters,
+    pairwise_metrics_from_scores,
+)
 from ml_deduplication.modeling.model import (
     BusinessRulesDedupe,
 )
+from ml_deduplication.modeling.xgb_model import BusinessRulesXGBoost
 from ml_deduplication.training.model_selection import (
     generate_parameter_grid,
+    get_dedupe_variables_config,
     get_default_hyperparameters,
     select_best_threshold,
 )
@@ -42,8 +49,9 @@ LOGS_FOLDER = Path(__file__).parent.parent.parent / "logs"
 
 def run_training_with_hyperparameter_tuning(
     df_features: pl.DataFrame,
-) -> tuple[BusinessRulesDedupe | None, dict | None, pl.DataFrame | None]:
-    param_grid = generate_parameter_grid()
+    model_type: Literal["dedupe", "xgboost"] = "dedupe",
+) -> tuple[Any | None, dict | None, pl.DataFrame | None]:
+    param_grid = generate_parameter_grid(model_type)
 
     training_results = {"training_results": [], "best_results": {}}
 
@@ -106,9 +114,104 @@ def run_training_with_hyperparameter_tuning(
     return best_model, training_results, best_df_pairs_test_pred
 
 
+def run_training_with_hyperparameter_tuning_parallel(
+    df_features: pl.DataFrame,
+    model_type: Literal["dedupe", "xgboost"],
+    n_jobs: int = 8,
+) -> tuple[Any | None, dict | None, pl.DataFrame | None]:
+
+    param_grid = generate_parameter_grid(model_type)
+
+    training_results = {
+        "training_results": [],
+        "best_results": {},
+    }
+
+    start_time = time.time()
+
+    with (
+        tqdm_logging_redirect(),
+        tqdm(
+            total=len(param_grid),
+            desc="Training models",
+            colour="green",
+        ) as progress,
+    ):
+        results = []
+
+        for result in Parallel(
+            n_jobs=n_jobs,
+            backend="loky",
+            return_as="generator",
+        )(
+            delayed(run_training_pipeline)(
+                df_features,
+                params,
+            )
+            for params in param_grid
+        ):
+            progress.update(1)
+            results.append(result)
+
+    best_precision = 0
+    best_model = None
+    best_metrics = None
+    best_params = None
+    best_df_pairs_test_pred = None
+
+    for params, (model, metrics, df_pairs_test_pred) in zip(
+        param_grid,
+        results,
+    ):
+        training_results["training_results"].append(
+            {
+                "params": stringify_params_list(params),
+                "metrics": {k: v for k, v in metrics.items() if k != "pred_clusters"},
+            }
+        )
+
+        precision = metrics["test_results"]["pairwise"]["precision"]
+
+        if precision > best_precision:
+            best_precision = precision
+            best_model = model
+            best_metrics = metrics
+            best_params = params
+            best_df_pairs_test_pred = df_pairs_test_pred
+
+    total_time = time.time() - start_time
+
+    training_results["total_time_seconds"] = total_time
+    training_results["best_results"] = {
+        "metrics": best_metrics,
+        "params": stringify_params_list(best_params),
+    }
+
+    logger.info(
+        "Finished tuning in %.2fs",
+        total_time,
+    )
+
+    logger.info(
+        "Best metrics: %s",
+        best_metrics,
+    )
+
+    logger.info(
+        "Best params: %s",
+        best_params,
+    )
+
+    return (
+        best_model,
+        training_results,
+        best_df_pairs_test_pred,
+    )
+
+
 def run_training_pipeline(
     df_features: pl.DataFrame, training_hyperparameters: dict
-) -> tuple[BusinessRulesDedupe, dict, pl.DataFrame]:
+) -> tuple[Any, dict, pl.DataFrame]:
 
     results = {}
 
@@ -129,19 +232,28 @@ def run_training_pipeline(
     )
 
     # config variables
-    dedupe_variables_config = training_hyperparameters["dedupe_variables_config"]
-
-    # train dedupe
-    logger.info("Starting dedupe training")
-    deduper = BusinessRulesDedupe(
-        variable_definition=dedupe_variables_config,
-        index_predicates=training_hyperparameters["index_predicates"],
+    dedupe_variables_config = get_dedupe_variables_config(
+        training_hyperparameters["dedupe_variables_config"]
     )
+
+    model_type = training_hyperparameters.get("model_type", "dedupe")
+    if model_type == "xgboost":
+        logger.info("Starting XGB training")
+        deduper = BusinessRulesXGBoost(
+            variable_config=dedupe_variables_config,
+            index_predicates=training_hyperparameters["index_predicates"],
+        )
+    else:
+        logger.info("Starting dedupe training")
+        deduper = BusinessRulesDedupe(
+            variable_definition=dedupe_variables_config,
+            index_predicates=training_hyperparameters["index_predicates"],
+        )
     deduper.fit(
         df_train_sub,
         entities_dict,
     )
-    logger.info("Finished dedupe training")
+    logger.info("Finished training")
 
     # select threshold on dev
     logger.info("Starting best threshold selection....")
@@ -173,11 +285,18 @@ def run_training_pipeline(
     }
 
     # train on full dataset (train+dev)
-    logger.info("Starting dedupe training on full training set")
-    deduper = BusinessRulesDedupe(
-        variable_definition=dedupe_variables_config,
-        index_predicates=training_hyperparameters["index_predicates"],
-    )
+    if model_type == "xgboost":
+        logger.info("Starting XGB training on full training set")
+        deduper = BusinessRulesXGBoost(
+            variable_config=dedupe_variables_config,
+            index_predicates=training_hyperparameters["index_predicates"],
+        )
+    else:
+        logger.info("Starting dedupe training on full training set")
+        deduper = BusinessRulesDedupe(
+            variable_definition=dedupe_variables_config,
+            index_predicates=training_hyperparameters["index_predicates"],
+        )
     deduper.fit(
         df_features.filter(pl.col("split") == "train"),
         entities_dict,
@@ -196,9 +315,27 @@ def run_training_pipeline(
     id_to_cluster_id_dict_test = {
         k: v for k, v in acteur_to_cluster_id_dict.items() if k in entities_ids_test
     }
-    partition_test_pred = deduper.partition(
-        data=entities_dict_test, threshold=best_threshold
-    )  # type: ignore
+    partition_test_pred, scores = deduper.partition(
+        data=entities_dict_test, threshold=best_threshold, output_scores=True
+    )
+
+    # Pairwise score metrics
+    df_test_scores = pl.DataFrame(scores).select(
+        pl.col("pairs").arr.get(0).alias("identifiant_unique_i"),
+        pl.col("pairs").arr.get(1).alias("identifiant_unique_j"),
+        "score",
+    )
+    df_test_scores = df_test_scores.join(
+        df_test.select(["identifiant_unique_i", "identifiant_unique_j", "label"]),
+        on=["identifiant_unique_i", "identifiant_unique_j"],
+    )
+    scores_test = df_test_scores.get_column("score").to_numpy()
+    y_test = df_test_scores.get_column("label").to_numpy().astype(int)
+
+    test_score_metrics = pairwise_metrics_from_scores(scores_test, y_test)
+    logger.info("Test pairwise score metrics: %s", test_score_metrics)
+
+    # type: ignore
     id_to_cluster_test_pred = partition_to_dict(partition_test_pred)
     df_pairs_pred = generate_pred_pairs_df(partition_test_pred)
 
@@ -213,7 +350,7 @@ def run_training_pipeline(
     )
 
     results["test_results"] = {
-        "pairwise": pairwise_metrics,
+        "pairwise": {**pairwise_metrics, **test_score_metrics},
         "clusterwise": clusterwise_metrics,
     }
 
@@ -243,6 +380,12 @@ def parse_args() -> argparse.Namespace:
         default="simple",
         help="Training mode: 'simple' for a single run, 'tuning' for hyperparameter tuning (default: simple).",
     )
+    parser.add_argument(
+        "--model-type",
+        choices=["dedupe", "xgboost"],
+        default=None,
+        help="Type of model to use",
+    )
 
     return parser.parse_args()
 
@@ -266,11 +409,12 @@ if __name__ == "__main__":
     if args.mode == "tuning":
         logger.info("Running hyperparameter tuning training")
         deduper, results, df_pairs_test_pred = run_training_with_hyperparameter_tuning(
-            df_features
+            df_features,
+            args.model_type,
         )
     else:
         logger.info("Running simple training with default parameters")
-        default_params = get_default_hyperparameters()
+        default_params = get_default_hyperparameters(args.model_type)
         deduper, results, df_pairs_test_pred = run_training_pipeline(
             df_features, default_params
         )

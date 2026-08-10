@@ -9,13 +9,17 @@ import logging
 import os
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import polars as pl
 import psycopg
 from ml_deduplication.dataset.features_engineering import preprocess_features_dataset
 from ml_deduplication.modeling.model import BusinessRulesStaticDedupe
-from ml_deduplication.training.features import FEATURES_NAMES_FROM_DATASET
+from ml_deduplication.modeling.xgb_model import BusinessRulesStaticXGBoost
+from ml_deduplication.training.features import (
+    DEDUPE_VARIABLES_CONFIG_RESTRICTED,
+    FEATURES_NAMES_FROM_DATASET,
+)
 from ml_deduplication.training.utils import (
     generate_pred_pairs_df,
     partition_to_dict,
@@ -35,10 +39,20 @@ DEFAULT_MODEL_PATH = SCRIPT_DIR / "logs" / "model_tuning_2026_07_28_1214.json"
 DEFAULT_OUTPUT_DIR = SCRIPT_DIR / "outputs"
 
 
-def load_model(model_path: Path) -> BusinessRulesStaticDedupe:
+def load_model(
+    model_path: Path, model_type: Literal["dedupe", "xgboost"]
+) -> BusinessRulesStaticDedupe | BusinessRulesStaticXGBoost:
     """Load a saved model from a JSON file."""
     logger.info("Loading model from %s", model_path)
-    deduper = BusinessRulesStaticDedupe(settings_file=model_path, num_cores=1)
+
+    if model_type == "dedupe":
+        deduper = BusinessRulesStaticDedupe(settings_file=model_path, num_cores=1)
+    elif model_type == "xgboost":
+        deduper = BusinessRulesStaticXGBoost(
+            settings_file=model_path,
+            variable_config=DEDUPE_VARIABLES_CONFIG_RESTRICTED,
+            num_cores=1,
+        )
     deduper._unique_fields = tuple(list(deduper._unique_fields) + ["parent_id"])
     logger.info("Model loaded successfully")
     return deduper
@@ -150,6 +164,12 @@ def parse_args() -> argparse.Namespace:
         help=f"Path to the saved model JSON file (default: {DEFAULT_MODEL_PATH})",
     )
     parser.add_argument(
+        "--model-type",
+        type=str,
+        choices=["dedupe", "xgboost"],
+        help="Type of the model to load",
+    )
+    parser.add_argument(
         "--model-threshold",
         type=float,
         help="Threshold to use for inference. Default to 0.85",
@@ -200,7 +220,7 @@ def main():
     )
 
     # Step 1: Load the saved model
-    deduper = load_model(args.model_path)
+    deduper = load_model(args.model_path, args.model_type)
 
     # Step 2: Query acteurs from database
     df_acteurs = query_acteurs(args.database_uri)
