@@ -17,6 +17,7 @@ dependencies = [
     "scikit-learn>=1.9.0",
     "sqlalchemy>=2.0.49",
     "tqdm>=4.69.0",
+    "tqdm-joblib>=0.0.5",
 ]
 
 [dependency-groups]

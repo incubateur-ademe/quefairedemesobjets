@@ -505,8 +505,10 @@ dependencies = [
     { name = "psycopg", extra = ["binary"] },
     { name = "psycopg2" },
     { name = "pyarrow" },
+    { name = "scikit-learn" },
     { name = "sqlalchemy" },
     { name = "tqdm" },
+    { name = "tqdm-joblib" },
     { name = "xgboost" },
 ]
 
@@ -528,8 +530,10 @@ requires-dist = [
     { name = "psycopg", extras = ["binary"], specifier = ">=3.3.4" },
     { name = "psycopg2", specifier = ">=2.9.12" },
     { name = "pyarrow", specifier = ">=24.0.0" },
+    { name = "scikit-learn", specifier = ">=1.9.0" },
     { name = "sqlalchemy", specifier = ">=2.0.49" },
     { name = "tqdm", specifier = ">=4.69.0" },
+    { name = "tqdm-joblib", specifier = ">=0.0.5" },
     { name = "xgboost", specifier = ">=2.1.0" },
 ]
 
@@ -1223,6 +1227,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/8c/69/40407dfc835517f058b603dbf37a6df094d8582b015a51eddc988febbcb7/tqdm-4.69.0.tar.gz", hash = "sha256:700c5e85dcd5f009dd6222588a29180a193a748247a5d855b4d67db93d79a53b", size = 792569, upload-time = "2026-07-17T18:09:06.2Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/fe/21/99a0cdaf54eb35e77623c41b5a2c9472ee4404bba687052791fe2aba6773/tqdm-4.69.0-py3-none-any.whl", hash = "sha256:9979978912be667a6ef21fd5d8abf54e324e63d82f7f43c360792ebc2bc4e622", size = 676680, upload-time = "2026-07-17T18:09:04.172Z" },
+]
+
+[[package]]
+name = "tqdm-joblib"
+version = "0.0.5"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "tqdm" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/90/f7/a9c22b0238269a6f77a40fdb701c5c9720def77816d7fd697516eb88f47a/tqdm_joblib-0.0.5.tar.gz", hash = "sha256:34dd63c92e1b88b5118661a41eaf91001cac2687bfe217a4b6a9ab1bbf0f1c64", size = 1482, upload-time = "2025-08-17T20:04:09.722Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/48/6a/e9a02c0c8c990f07f05619a9033c32bee29ebbcab78bc5cf560a9b912b53/tqdm_joblib-0.0.5-py3-none-any.whl", hash = "sha256:5948fccca627970cc8340dd56ac49d29222ed110b9ee39fd310b76a1483b471f", size = 1918, upload-time = "2025-08-17T20:04:08.217Z" },
 ]
 
 [[package]]
