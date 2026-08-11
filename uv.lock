@@ -595,30 +595,30 @@ wheels = [
 
 [[package]]
 name = "boto3"
-version = "1.43.36"
+version = "1.43.63"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "botocore" },
     { name = "jmespath" },
     { name = "s3transfer" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ff/9f/897287e955db0f50b12fd69ef45956e4fd2c7ddb48c736872f7ea2314443/boto3-1.43.36.tar.gz", hash = "sha256:587d7ee92a12e440ad12b0e7f11f3358f0c4d65b19f64726efc94aaf194aff28", size = 112690, upload-time = "2026-06-23T02:47:14.561Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/4a/b7/3fdd53534170ef7d99d1707071e57ea0aeb0dec84ed0206d31e8c78f54d7/boto3-1.43.63.tar.gz", hash = "sha256:647c0f0b59710ce12a49323382bb5ece1b4e02199c736d19d555330dca7e947f", size = 112658, upload-time = "2026-08-03T19:55:05.178Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9f/f1/274303f52483ecf199eae6f8d9b6f5951670397ee4d72c06cfd4eb644612/boto3-1.43.36-py3-none-any.whl", hash = "sha256:42942dde254673abcbc9e6e60017c88341a4f49d99d24e1f2e290fb38138c26f", size = 140031, upload-time = "2026-06-23T02:47:13.178Z" },
+    { url = "https://files.pythonhosted.org/packages/a6/57/a91420a14ef26fe52fc0706b5af21c00b2e4ff1c57b0c4272370c9b80399/boto3-1.43.63-py3-none-any.whl", hash = "sha256:859a8d1c50505a5cefb8629790dd34602ddb85bfd7ea5d34a362ab1793513636", size = 140024, upload-time = "2026-08-03T19:55:03.4Z" },
 ]
 
 [[package]]
 name = "botocore"
-version = "1.43.37"
+version = "1.43.68"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "jmespath" },
     { name = "python-dateutil" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c4/a8/3409b5df7e6a562be82e409ba5a976e7ac3df8d5567552c23d44b367a40b/botocore-1.43.37.tar.gz", hash = "sha256:46a7982815579cfe8c7851036b1f51237e35e7937456341df55bc5c36a316145", size = 15646119, upload-time = "2026-06-29T20:29:25.452Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e1/dc/ff7e35ecb25e2584e22ce8d5a13c5f991687597fd77d7cc388f2e4768cf3/botocore-1.43.68.tar.gz", hash = "sha256:a6c7ac88724c96f2ad5a7657f87d545d8218a74a1b219ba4397e3d37481941cd", size = 15894825, upload-time = "2026-08-10T19:22:02.501Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/bf/64/49313b38d675f4004fb736d2a4293b72504eac5380fc21b6e4a8660824ad/botocore-1.43.37-py3-none-any.whl", hash = "sha256:8b7e8408aa7eca7dca9ae9824fb7677daf64d40ed675366ed7b9248470d08757", size = 15333748, upload-time = "2026-06-29T20:29:20.459Z" },
+    { url = "https://files.pythonhosted.org/packages/32/48/18dc095a908da94e2389d8e4127f4438b185dfd2dd9190fe6f946b9f41ac/botocore-1.43.68-py3-none-any.whl", hash = "sha256:9985c6eb9b7896f88bd89c07d543accd6985ea772af9d796087012ad40f78420", size = 15579433, upload-time = "2026-08-10T19:21:58.157Z" },
 ]
 
 [[package]]
@@ -905,7 +905,7 @@ requires-dist = [
     { name = "apache-airflow-providers-fab", specifier = ">=3.7.0" },
     { name = "apache-airflow-providers-postgres", specifier = ">=6.8.0,<7" },
     { name = "apache-airflow-providers-standard", specifier = ">=1.15.0" },
-    { name = "boto3", specifier = ">=1.43.36" },
+    { name = "boto3", specifier = ">=1.43.63" },
     { name = "dbt-core", specifier = ">=1.11.11,<2" },
     { name = "dbt-postgres", specifier = ">=1.10.2,<2" },
     { name = "fuzzywuzzy", specifier = ">=0.18.0,<0.19" },
@@ -1471,16 +1471,16 @@ wheels = [
 
 [[package]]
 name = "django-tasks"
-version = "0.11.0"
+version = "0.12.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
     { name = "django-stubs-ext" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/6a/17/c7478fcae7c277a0f648f6e6334d318ad28f48372c3e0f84d1fdc79ec7f3/django_tasks-0.11.0.tar.gz", hash = "sha256:923bf4ac444daee5d879393daf09c7cdf4575c8b0e12726c9d9fceafdea5187f", size = 32971, upload-time = "2026-01-09T17:38:45.824Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/1d/6e/34d4e77bb7951e5a5acbd846f43240f062c68bb04d9c246cb446a55d4cbc/django_tasks-0.12.0.tar.gz", hash = "sha256:58be66c1e487da32a3ce7320bd1949d0d1dc381b9004819f92591eb37fb2c1b8", size = 15445, upload-time = "2026-02-06T16:15:33.593Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/64/c4/1cb34c94078ee02fcf14eb9198d1816f3cd24fe0086d2ce8ecf8aab25628/django_tasks-0.11.0-py3-none-any.whl", hash = "sha256:28f00fcda4e2cc8fe09ca685fbe54d52602ab42077543f9164890781c7e58599", size = 45015, upload-time = "2026-01-09T17:38:44.704Z" },
+    { url = "https://files.pythonhosted.org/packages/07/e7/40c45768e84efd77e3ae6ffdcd2b5540011036cbb00c6df6ef2a2ad69551/django_tasks-0.12.0-py3-none-any.whl", hash = "sha256:ffcc1d7bdfad3bc5ef9c2d498596c6546484c9ec6b182fb9709c691eb66a8709", size = 15758, upload-time = "2026-02-06T16:15:32.168Z" },
 ]
 
 [[package]]
@@ -4852,7 +4852,7 @@ requires-dist = [
     { name = "django-lookbook", specifier = ">=1.0.2,<2" },
     { name = "django-ninja", specifier = ">=1.6.2,<2" },
     { name = "django-storages", specifier = ">=1.14.6,<2" },
-    { name = "django-tasks", specifier = ">=0.9.0,<0.12.0" },
+    { name = "django-tasks", specifier = ">=0.12.0,<0.13.0" },
     { name = "django-widget-tweaks", specifier = ">=1.5.0,<2" },
     { name = "djangoql", specifier = ">=0.18.1" },
     { name = "gunicorn", specifier = ">=26.0.0,<27" },
