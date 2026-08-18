@@ -30,6 +30,8 @@ __screenshots__
 .ipynb_checkpoints
 .virtual_documents
 
+
 # ML
 data-platform/notebooks/deduplication/datasets/*
 data-platform/notebooks/deduplication/model.bin
+ml_deduplication/ml_deduplication/notebooks/.tmp/*

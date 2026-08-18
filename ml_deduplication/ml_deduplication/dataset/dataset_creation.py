@@ -156,87 +156,232 @@ def create_entity_pairs_from_ml_inference_manual_labeling(
         - label: Boolean indicating if the pair is a match.
         - cluster_id: The hash of the cluster ID for positive pairs, null otherwise.
     """
-    csv_files_to_load = ml_inference_manual_labeling_datasets_folder_path.glob(
-        "inference_annotation_*.csv"
-    )
+    csv_files_to_load_list = [
+        {
+            "filename": "inference_annotation_20260805.csv",
+            "cluster_colname": "cluster_label",
+        },
+        {
+            "filename": "inference_annotation_sample_50_20260805.csv",
+            "cluster_colname": "cluster_label",
+        },
+        {
+            "filename": "inference_annotation_sample_100_20260817.csv",
+            "cluster_colname": "cluster_id",
+        },
+    ]
 
     dfs_to_concat = []
 
-    for filepath in csv_files_to_load:
-        df = pl.read_csv(
-            filepath, schema_overrides={"cluster_label": pl.String}
-        ).select(["identifiant_unique", "cluster_label", "Review"])
-        df = df.filter(pl.col("Review").is_not_null())
-        df_cluster_ids = (
-            df.group_by("cluster_label")
-            .agg(pl.concat_list("identifiant_unique").alias("ids"))
-            .with_columns(
-                pl.col("ids")
-                .list.unique()
-                .sort()
-                .hash(RANDOM_SEED)
-                .alias("cluster_id")
-                .cast(pl.String)
-            )
+    for config in csv_files_to_load_list:
+        cluster_colname = config["cluster_colname"]
+        filepath = (
+            ml_inference_manual_labeling_datasets_folder_path / config["filename"]
         )
+        df = pl.read_csv(filepath, schema_overrides={cluster_colname: pl.String})
 
-        df_pairs = (
-            (
-                df.join(df, on="cluster_label", suffix="_j")
-                .filter(pl.col("identifiant_unique") != pl.col("identifiant_unique_j"))
+        if cluster_colname == "cluster_label":  # Old manual annotation style
+            df = df.select(["identifiant_unique", "cluster_label", "Review"])
+            df = df.filter(pl.col("Review").is_not_null())
+            df_cluster_ids = (
+                df.group_by("cluster_label")
+                .agg(pl.concat_list("identifiant_unique").alias("ids"))
                 .with_columns(
-                    pl.min_horizontal(
-                        ["identifiant_unique", "identifiant_unique_j"]
-                    ).alias("identifiant_unique_i"),
-                    pl.max_horizontal(
-                        ["identifiant_unique", "identifiant_unique_j"]
-                    ).alias("identifiant_unique_j"),
+                    pl.col("ids")
+                    .list.unique()
+                    .sort()
+                    .hash(RANDOM_SEED)
+                    .alias("cluster_id")
+                    .cast(pl.String)
                 )
-                .unique(["identifiant_unique_i", "identifiant_unique_j"])
-                .with_columns(
-                    pl.when((pl.col("Review") == "OK") & (pl.col("Review_j") == "OK"))
-                    .then(True)
-                    .when(
-                        (pl.col("Review") == "Pas ok")
-                        & (pl.col("Review_j") == "Pas ok")
+            )
+
+            df_pairs = (
+                (
+                    df.join(df, on="cluster_label", suffix="_j")
+                    .filter(
+                        pl.col("identifiant_unique") != pl.col("identifiant_unique_j")
                     )
-                    .then(False)
-                    .when(
-                        ((pl.col("Review") == "OK") & (pl.col("Review_j") == "Pas ok"))
-                        | (
-                            (pl.col("Review") == "Pas ok")
-                            & (pl.col("Review_j") == "OK")
+                    .with_columns(
+                        pl.min_horizontal(
+                            ["identifiant_unique", "identifiant_unique_j"]
+                        ).alias("identifiant_unique_i"),
+                        pl.max_horizontal(
+                            ["identifiant_unique", "identifiant_unique_j"]
+                        ).alias("identifiant_unique_j"),
+                    )
+                    .unique(["identifiant_unique_i", "identifiant_unique_j"])
+                    .with_columns(
+                        pl.when(
+                            (pl.col("Review") == "OK") & (pl.col("Review_j") == "OK")
                         )
-                    )
-                    .then(False)
-                    .when(
-                        (
-                            (pl.col("Review") == "Partiellement ok")
+                        .then(True)
+                        .when(
+                            (pl.col("Review") == "Pas ok")
                             & (pl.col("Review_j") == "Pas ok")
                         )
-                        | (
-                            (pl.col("Review") == "Pas ok")
+                        .then(False)
+                        .when(
+                            (
+                                (pl.col("Review") == "OK")
+                                & (pl.col("Review_j") == "Pas ok")
+                            )
+                            | (
+                                (pl.col("Review") == "Pas ok")
+                                & (pl.col("Review_j") == "OK")
+                            )
+                        )
+                        .then(False)
+                        .when(
+                            (
+                                (pl.col("Review") == "Partiellement ok")
+                                & (pl.col("Review_j") == "Pas ok")
+                            )
+                            | (
+                                (pl.col("Review") == "Pas ok")
+                                & (pl.col("Review_j") == "Partiellement ok")
+                            )
+                        )
+                        .then(False)
+                        .when(
+                            (pl.col("Review") == "Partiellement ok")
                             & (pl.col("Review_j") == "Partiellement ok")
                         )
+                        .then(True)
+                        .otherwise(None)
+                        .alias("label"),
                     )
-                    .then(False)
-                    .when(
-                        (pl.col("Review") == "Partiellement ok")
-                        & (pl.col("Review_j") == "Partiellement ok")
-                    )
-                    .then(True)
-                    .otherwise(None)
-                    .alias("label"),
+                )
+                .join(df_cluster_ids, on="cluster_label")
+                .select(
+                    [
+                        "identifiant_unique_i",
+                        "identifiant_unique_j",
+                        "cluster_id",
+                        "label",
+                    ]
+                )
+                .with_columns(
+                    pl.when(pl.col("label")).then("cluster_id").otherwise(None)
                 )
             )
-            .join(df_cluster_ids, on="cluster_label")
-            .select(
-                ["identifiant_unique_i", "identifiant_unique_j", "cluster_id", "label"]
-            )
-            .with_columns(pl.when(pl.col("label")).then("cluster_id").otherwise(None))
-        )
 
-        dfs_to_concat.append(df_pairs)
+            dfs_to_concat.append(df_pairs)
+
+        elif cluster_colname == "cluster_id":  # New annotation style
+            df = df.select(
+                ["identifiant_unique", cluster_colname, "review", "cluster_id_manual"]
+            )
+            df = df.filter(pl.col("review").is_not_null())
+
+            df_pairs = (
+                (
+                    df.join(df, on=cluster_colname, suffix="_j")
+                    .filter(
+                        pl.col("identifiant_unique") != pl.col("identifiant_unique_j")
+                    )
+                    .with_columns(
+                        pl.min_horizontal(
+                            ["identifiant_unique", "identifiant_unique_j"]
+                        ).alias("identifiant_unique_i"),
+                        pl.max_horizontal(
+                            ["identifiant_unique", "identifiant_unique_j"]
+                        ).alias("identifiant_unique_j"),
+                    )
+                    .unique(["identifiant_unique_i", "identifiant_unique_j"])
+                    .with_columns(
+                        pl.when(
+                            (pl.col("review") == "OK") & (pl.col("review_j") == "OK")
+                        )
+                        .then(True)
+                        .when(
+                            (pl.col("review") == "Pas ok")
+                            & (pl.col("review_j") == "Pas ok")
+                        )
+                        .then(False)
+                        .when(
+                            (
+                                (pl.col("review") == "OK")
+                                & (pl.col("review_j") == "Pas ok")
+                            )
+                            | (
+                                (pl.col("review") == "Pas ok")
+                                & (pl.col("review_j") == "OK")
+                            )
+                        )
+                        .then(False)
+                        .when(
+                            (
+                                (pl.col("review") == "Partiellement ok")
+                                & (pl.col("review_j") == "Pas ok")
+                            )
+                            | (
+                                (pl.col("review") == "Pas ok")
+                                & (pl.col("review_j") == "Partiellement ok")
+                            )
+                        )
+                        .then(False)
+                        .when(
+                            (
+                                (pl.col("review") == "Partiellement ok")
+                                & (pl.col("review_j") == "Partiellement ok")
+                            )
+                            & (
+                                (
+                                    pl.col("cluster_id_manual")
+                                    == pl.col("cluster_id_manual_j")
+                                )
+                                | (
+                                    pl.col("cluster_id_manual").is_null()
+                                    & pl.col("cluster_id_manual_j").is_null()
+                                )
+                            )
+                        )
+                        .then(True)
+                        .when(
+                            (
+                                (pl.col("review") == "Partiellement ok")
+                                & (pl.col("review_j") == "Partiellement ok")
+                            )
+                            & (
+                                pl.col("cluster_id_manual")
+                                != pl.col("cluster_id_manual_j")
+                            )
+                        )
+                        .then(False)
+                        .otherwise(None)
+                        .alias("label"),
+                    )
+                    .with_columns(
+                        pl.when(
+                            (
+                                (pl.col("review") == "Partiellement ok")
+                                & (pl.col("review_j") == "Partiellement ok")
+                            )
+                            & (
+                                pl.col("cluster_id_manual")
+                                == pl.col("cluster_id_manual_j")
+                            )
+                        )
+                        .then("cluster_id_manual")
+                        .otherwise("cluster_id")
+                        .alias("cluster_id")
+                    )
+                )
+                .select(
+                    [
+                        "identifiant_unique_i",
+                        "identifiant_unique_j",
+                        "cluster_id",
+                        "label",
+                    ]
+                )
+                .with_columns(
+                    pl.when(pl.col("label")).then("cluster_id").otherwise(None)
+                )
+            )
+
+            dfs_to_concat.append(df_pairs)
 
     final_df = pl.concat(dfs_to_concat)
     return final_df.unique(["identifiant_unique_i", "identifiant_unique_j"])
@@ -492,7 +637,19 @@ def balance_dataset(
     df_pairs = pl.concat(
         [
             df_pairs,
-            df_pairs_database_random_sampling.filter(pl.col("label"))
+            df_pairs_database_random_sampling.filter(
+                pl.col("label")
+                & (
+                    pl.col("identifiant_unique_i")
+                    .is_in(df_pairs.get_column("identifiant_unique_i"))
+                    .not_()
+                )
+                & (
+                    pl.col("identifiant_unique_j")
+                    .is_in(df_pairs.get_column("identifiant_unique_j"))
+                    .not_()
+                )
+            )
             .filter(
                 pl.col("cluster_id").is_in(
                     df_pairs_database_random_sampling.select(

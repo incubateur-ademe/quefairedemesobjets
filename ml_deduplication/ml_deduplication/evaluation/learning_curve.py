@@ -14,7 +14,7 @@ from ml_deduplication.training.features import (
     DEDUPE_VARIABLES_CONFIG_MANDATORY,
     FEATURES_NAMES_FROM_DATASET,
 )
-from ml_deduplication.training.training_pipeline import run_training_pipeline
+from ml_deduplication.training.training_pipeline_dedupe import run_training_pipeline
 
 RANDOM_SEED = 42
 

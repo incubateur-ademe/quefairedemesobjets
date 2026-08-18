@@ -79,7 +79,7 @@ def select_best_threshold(
 
 
 def generate_parameter_grid(
-    model_type: Literal["dedupe", "xgboost"] = "dedupe",
+    model_type: Literal["dedupe", "xgboost", "splink"] = "dedupe",
 ) -> ParameterGrid:
     if model_type == "dedupe":
         param_grid = {
@@ -91,6 +91,16 @@ def generate_parameter_grid(
                 "full",
             ],
             "features_names": [FEATURES_NAMES_FROM_DATASET],
+        }
+    elif model_type == "splink":
+        param_grid = {
+            "model_type": ["splink"],
+            "dedupe_variables_config": [
+                "splink_mandatory",
+                "splink_restricted",
+                "splink_full",
+            ],
+            "threshold": [0.5, 0.7],
         }
     elif model_type == "xgboost":
         param_grid = {
@@ -128,13 +138,14 @@ def generate_parameter_grid(
     return ParameterGrid(param_grid)
 
 
-def get_default_hyperparameters(model_type: Literal["dedupe", "xgboost"]) -> dict:
+def get_default_hyperparameters(model_type: Literal["dedupe", "xgboost", "splink"]) -> dict:  # type: ignore[reportUnknownParameterType]
     params = {
         "model_type": model_type,
-        "index_predicates": True,
+        "index_predicates": True if model_type != "splink" else None,  # type: ignore[reportUnknownMemberType]
         "dedupe_variables_config": "restricted",
         "features_names": FEATURES_NAMES_FROM_DATASET,
     }
+
     if model_type == "xgboost":
         params = {
             **params,
