@@ -49,7 +49,7 @@ LOGS_FOLDER = Path(__file__).parent.parent.parent / "logs"
 
 def run_training_with_hyperparameter_tuning(
     df_features: pl.DataFrame,
-    model_type: Literal["dedupe", "xgboost"] = "dedupe",
+    model_type: Literal["dedupe", "xgboost", "splink"] = "dedupe",
 ) -> tuple[Any | None, dict | None, pl.DataFrame | None]:
     param_grid = generate_parameter_grid(model_type)
 
@@ -116,7 +116,7 @@ def run_training_with_hyperparameter_tuning(
 
 def run_training_with_hyperparameter_tuning_parallel(
     df_features: pl.DataFrame,
-    model_type: Literal["dedupe", "xgboost"],
+    model_type: Literal["dedupe", "xgboost", "splink"],
     n_jobs: int = 8,
 ) -> tuple[Any | None, dict | None, pl.DataFrame | None]:
 
@@ -215,7 +215,9 @@ def run_training_pipeline(
 
     results = {}
 
-    # Create cluster to ids dict
+    model_type = training_hyperparameters.get("model_type", "dedupe")  # type: ignore[reportUnknownMemberType]
+
+    # Create cluster to ids dict (for ground truth evaluation).
     cluster_to_acteur_dict = create_cluster_to_acteurs_dict(df_features)
 
     # Create id to cluster dict
@@ -382,9 +384,9 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--model-type",
-        choices=["dedupe", "xgboost"],
+        choices=["dedupe", "xgboost", "splink"],
         default=None,
-        help="Type of model to use",
+        help="Type of model to use (default: None = dedupe)",
     )
 
     return parser.parse_args()
