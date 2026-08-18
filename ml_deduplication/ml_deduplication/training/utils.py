@@ -111,6 +111,22 @@ def partition_to_results_dict(dedupe_partitions) -> dict:
     return id_to_cluster
 
 
+def splink_cluster_df_to_dict(
+    splink_cluster_df: pl.DataFrame,
+) -> dict:
+    """
+    Convertit la sortie du clustering Splink en dict {id: cluster_id}.
+    les cluster_id sont générés automatiquement.
+    Les entités que dedupe n'a rattachées à aucun cluster (cas limite selon
+    versions) sont explicitement placées dans un cluster singleton.
+    """
+    id_to_cluster = {}
+    for row in splink_cluster_df.to_dicts():
+        id_to_cluster[row["entity_id"]] = f"c_{row['cluster_id']}"
+
+    return id_to_cluster
+
+
 def split_train_dev(
     df_train_features: pl.DataFrame,
     dev_ratio: float = 0.2,
