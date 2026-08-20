@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Literal
 
 import polars as pl
+from altair import Chart
 from sentence_transformers import SentenceTransformer
 from tqdm import tqdm
 from tqdm.contrib.logging import tqdm_logging_redirect
@@ -25,7 +26,6 @@ from ml_deduplication.training.model_selection import (
 from ml_deduplication.training.splink_config import SPLINK_SETTINGS
 from ml_deduplication.training.utils import (
     create_acteur_to_cluster_dict,
-    create_cluster_to_acteurs_dict,
     splink_cluster_df_to_dict,
     stringify_params_list,
 )
@@ -106,47 +106,13 @@ def run_training_with_hyperparameter_tuning(
     return best_model, training_results, best_df_pairs_test_pred
 
 
-def run_training_pipeline(df_features: pl.DataFrame) -> tuple[Any, dict, pl.DataFrame]:
-
-    results = {}
-    splink_config = SPLINK_SETTINGS
-    embedding_model = SentenceTransformer("Lajavaness/sentence-camembert-large")
-    model = BusinessRulesSplink(
-        splink_settings=splink_config, embedding_model=embedding_model
-    )
-
-    logger.info("Starting training on train set")
-    df_train = df_features.filter(pl.col("split") == "train")
-    linker, best_dev_data = model.train(df_train, min_precision=0.9)
-
-    best_weight_shreshold = best_dev_data["truth_threshold"]
-    logger.info("Best weight threshold found :%s.", best_weight_shreshold)
-    logger.info("Best dev metrics: %s", best_dev_data)
-
-    results["model_selection"] = {
-        "best_threshold": best_weight_shreshold,
-        "best_metrics": best_dev_data,
+def generate_test_reports(
+    df_test: pl.DataFrame, df_clusters_test: pl.DataFrame
+) -> dict:
+    cluster_to_acteur_dict_test = {
+        e["cluster_id_split"]: e["entity_id"]
+        for e in df_test.group_by("cluster_id_split").agg("entity_id").to_dicts()
     }
-
-    model.validation_chart.save(
-        f"validation_data_training_{datetime.now(timezone.utc):%Y%m%dT%H:%M}.html"
-    )
-    # evaluate on test with best threshold
-    logger.info("Starting predicting on test set")
-    df_test = df_features.filter(pl.col("split") == "test")
-
-    model_test = BusinessRulesSplink(
-        linker.misc.save_model_to_json(),
-        embedding_model,
-        df_features=df_test,
-        db_api=create_ducbdb_backend(Path("/Volumes/PRO-G40")),
-    )
-
-    df_predictions_test, df_clusters_test = model_test.predict(
-        threshold=best_weight_shreshold
-    )
-
-    cluster_to_acteur_dict_test = create_cluster_to_acteurs_dict(df_test)
     acteur_to_cluster_id_dict_test = create_acteur_to_cluster_dict(
         cluster_to_acteur_dict_test
     )
@@ -161,12 +127,72 @@ def run_training_pipeline(df_features: pl.DataFrame) -> tuple[Any, dict, pl.Data
         acteur_to_cluster_id_dict_test, id_to_cluster_test_pred
     )
 
-    results["test_results"] = {
+    return {
         "pairwise": {**test_score_metrics},
         "clusterwise": clusterwise_metrics,
     }
 
-    return model, results, df_predictions_test
+
+def run_training_pipeline(
+    df_features: pl.DataFrame,
+) -> tuple[
+    BusinessRulesSplink,
+    dict,
+    pl.DataFrame,
+    pl.DataFrame,
+    list[dict] | None,
+    Chart | None,
+]:
+
+    df_features = df_features.rename({"identifiant_unique": "entity_id"})
+    results = {}
+    splink_config = SPLINK_SETTINGS
+    embedding_model = SentenceTransformer("Lajavaness/sentence-camembert-large")
+    model = BusinessRulesSplink(
+        splink_settings=splink_config, embedding_model=embedding_model
+    )
+
+    logger.info("Starting training on train set")
+    df_train = df_features.filter(pl.col("split") == "train")
+    linker, best_dev_data = model.train(df_train, min_precision=0.99)
+
+    best_weight_threshold = best_dev_data["truth_threshold"]
+    logger.info("Best weight threshold found :%s.", best_weight_threshold)
+    logger.info("Best dev metrics: %s", best_dev_data)
+
+    results["model_selection"] = {
+        "best_threshold": best_weight_threshold,
+        "best_metrics": best_dev_data,
+    }
+
+    # evaluate on test with best threshold
+    logger.info("Starting predicting on test set")
+    df_test = df_features.filter(pl.col("split") == "test")
+
+    model_test = BusinessRulesSplink(
+        linker.misc.save_model_to_json(),
+        embedding_model,
+        df_features=df_test,
+        db_api=create_ducbdb_backend(Path("/Volumes/PRO-G40")),
+    )
+
+    df_predictions_test, df_clusters_test = model_test.predict(
+        threshold=best_weight_threshold, build_waterfall_chart=True
+    )
+
+    performance_reports = generate_test_reports(df_test, df_clusters_test)
+    logger.info("Test pairwise score metrics: %s", performance_reports["pairwise"])
+
+    results["test_results"] = performance_reports
+
+    return (
+        model,
+        results,
+        df_predictions_test,
+        df_clusters_test,
+        model_test.waterfall_chart_data,
+        model_test.waterfall_chart,
+    )
 
 
 def parse_args() -> argparse.Namespace:
@@ -204,13 +230,13 @@ if __name__ == "__main__":
         logger.error("Dataset not found: %s", args.dataset_path)
         raise SystemExit(1)
 
+    timestamp = datetime.now(timezone.utc).strftime("%Y_%m_%d_%H%M")
     # Ensure log directory exists
-    args.log_dir.mkdir(parents=True, exist_ok=True)
+    log_dir: Path = args.log_dir / f"training_{args.mode}_{timestamp}"
+    log_dir.mkdir(parents=True, exist_ok=True)
 
     logger.info("Loading features dataset at path %s", args.dataset_path)
     df_features = pl.read_parquet(args.dataset_path)
-
-    timestamp = datetime.now(timezone.utc).strftime("%Y_%m_%d_%H%M")
 
     if args.mode == "tuning":
         logger.info("Running hyperparameter tuning training")
@@ -220,27 +246,75 @@ if __name__ == "__main__":
         )
     else:
         logger.info("Running simple training with default parameters")
-        model, results, df_pred_test = run_training_pipeline(df_features)
+        (
+            model,
+            results,
+            df_pred_test,
+            df_clusters_test,
+            test_waterfall_chart_data,
+            test_waterfall_chart,
+        ) = run_training_pipeline(df_features)
 
     # Save model
     if model is not None:
-        model_save_dir = args.log_dir / f"model_{args.mode}_{timestamp}.json"
+        model_save_dir = log_dir / f"model_{args.mode}_{timestamp}.json"
         logger.info("Writing model at %s", model_save_dir)
-        model.save(model_save_dir.absolute())
+        model.save(str(model_save_dir.absolute()))
 
-    output_file = args.log_dir / f"training_results_{args.mode}_{timestamp}.json"
+        logger.info("Writing model artifacts")
+        charts_config = [
+            {
+                "chart_name": "match_weight_chart",
+                "chart": model.linker.visualisations.match_weights_chart(),
+            },
+            {
+                "chart_name": "m_u_parameters_chart",
+                "chart": model.linker.visualisations.m_u_parameters_chart(),
+            },
+            {
+                "chart_name": "unlinkables_chart",
+                "chart": model.linker.evaluation.unlinkables_chart(),
+            },
+            {
+                "chart_name": "validation_results_chart",
+                "chart": model.validation_chart,
+            },
+            {
+                "chart_name": "test_predictions_waterfall_chart",
+                "chart": test_waterfall_chart,
+            },
+        ]
+        for chart in charts_config:
+            chart["chart"].save((log_dir / f"{chart['chart_name']}.html").absolute())
+
+        json.dump(
+            test_waterfall_chart_data,
+            (log_dir / "test_predictions_waterfall_chart_data.json").open("w+"),
+        )
+
+    output_file = log_dir / f"training_results_{args.mode}_{timestamp}.json"
     logger.info("Writing logs file at path %s", output_file)
     with output_file.open("w") as f:
         json.dump(results, f)
 
     if df_pred_test is not None:
-        output_df_pairs_test_pred = (
-            args.log_dir / f"training_{args.mode}_{timestamp}_test_pred_pairs.parquet"
+        output_df_preds_test_pred = (
+            log_dir / f"training_{args.mode}_{timestamp}_test_pred_predictions.parquet"
         )
         logger.info(
-            "Writing df pairs test pred parquet file at path %s",
-            output_df_pairs_test_pred,
+            "Writing df predictions test pred parquet file at path %s",
+            output_df_preds_test_pred,
         )
-        df_pred_test.write_parquet(output_df_pairs_test_pred)
+        df_pred_test.write_parquet(output_df_preds_test_pred)
+
+    if df_clusters_test is not None:
+        output_df_clusters_test_pred = (
+            log_dir / f"training_{args.mode}_{timestamp}_test_pred_clusters.parquet"
+        )
+        logger.info(
+            "Writing df clusters test pred parquet file at path %s",
+            output_df_clusters_test_pred,
+        )
+        df_clusters_test.write_parquet(output_df_clusters_test_pred)
 
     logger.info("Results saved to %s", output_file)
