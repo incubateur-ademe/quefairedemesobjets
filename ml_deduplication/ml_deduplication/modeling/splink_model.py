@@ -122,14 +122,13 @@ class BusinessRulesSplink:
         self.linker = None
 
         if (db_api is not None) and (df_features is not None):
-            df_splink, _ = features_to_entities_df(df_features)
-            df_splink = df_splink.rename(
+            df_features = df_features.rename(
                 {"cluster_id": "cluster_id_true"}, strict=False
             )
-            df_splink_preprocessed = self.preprocess_features(df_splink)
+            df_features_preprocessed = self.preprocess_features(df_features)
 
             self.linker = Linker(
-                df_splink_preprocessed,  # type: ignore
+                df_features_preprocessed,  # type: ignore
                 splink_settings,
                 db_api=db_api,
             )
@@ -137,7 +136,9 @@ class BusinessRulesSplink:
         self._unique_fields = unique_fields
         self._distinct_fields = distinct_fields
 
-        self.validation_chart: None | Chart
+        self.validation_chart: None | Chart = None
+        self.waterfall_chart_data: None | list[dict] = None
+        self.waterfall_chart: None | Chart = None
 
     def preprocess_features(self, df_features: pl.DataFrame) -> pl.DataFrame:
         df_features_preprocessed = df_features.clone()
@@ -227,16 +228,14 @@ class BusinessRulesSplink:
 
     def train(
         self,
-        df_pairs_train: pl.DataFrame,
+        df_features_train: pl.DataFrame,
         min_precision: float = 0.95,
     ):  # type: ignore[reportUnknownParameterType]
         """Train the Splink model from labeled pair data."""
 
         # Split train/dev for threshold selection
-        df_pairs_train_sub, df_pairs_dev = split_train_dev(df_pairs_train)
+        df_train_sub, df_dev = split_train_dev(df_features_train)
 
-        # Turning train df_pairs  into long format
-        df_train_sub, _ = features_to_entities_df(df_pairs_train_sub)
         df_train_sub = df_train_sub.rename({"cluster_id": "cluster_id_true"})
 
         # preprocessing df_train
@@ -255,7 +254,6 @@ class BusinessRulesSplink:
 
         # Dev evaluation
         ## dev preprocessing
-        df_dev, _ = features_to_entities_df(df_pairs_dev)
         df_dev = df_dev.rename({"cluster_id": "cluster_id_true"})
         df_dev_preprocessed = self.preprocess_features(df_dev)
 
@@ -280,10 +278,9 @@ class BusinessRulesSplink:
 
         # Re-train on all data
         # Turning train df_pairs  into long format
-        df_train, _ = features_to_entities_df(df_pairs_train)
-        df_train = df_train.rename({"cluster_id": "cluster_id_true"})
-        # preprocessing df_train
+        df_train = df_features_train.rename({"cluster_id": "cluster_id_true"})
 
+        # preprocessing df_train
         df_train_preprocessed = self.preprocess_features(df_train)
 
         # Create training linker
@@ -298,7 +295,9 @@ class BusinessRulesSplink:
 
         return self.linker, best_thresold_data
 
-    def predict(self, threshold=0.5) -> tuple[pl.DataFrame, pl.DataFrame]:  # type: ignore[reportUnknownParameterType]
+    def predict(
+        self, threshold=0.5, build_waterfall_chart: bool = False
+    ) -> tuple[pl.DataFrame, pl.DataFrame]:  # type: ignore[reportUnknownParameterType]
         """Run clustering and apply business rule filtering."""
         if self.linker is None:  # type: ignore[reportUnknownMemberType]
             raise RuntimeError(
@@ -313,9 +312,24 @@ class BusinessRulesSplink:
             df_predictions, threshold_match_weight=threshold
         )
 
-        return pl.DataFrame(df_predictions.as_pandas_dataframe()), pl.DataFrame(
-            clusters.as_pandas_dataframe()
+        result = (
+            pl.DataFrame(df_predictions.as_pandas_dataframe()),
+            pl.DataFrame(clusters.as_pandas_dataframe()),
         )
+        if build_waterfall_chart:
+            logger.info(
+                "Building waterfall chart for predictions dataframe above threshold"
+            )
+            self.waterfall_chart_data = [
+                e
+                for e in df_predictions.as_record_dict()
+                if e["match_weight"] >= threshold
+            ]
+            self.waterfall_chart = self.linker.visualisations.waterfall_chart(
+                self.waterfall_chart_data, remove_sensitive_data=True
+            )  # type: ignore
+
+        return result
 
     def save(self, path: str):
         self.linker.misc.save_model_to_json(path)
@@ -334,5 +348,5 @@ def select_best_threshold(
         if evaluation_dict["f0_5"] > best_f_0_5:
             best_f_0_5_index = i
 
-    print("Precision aimed not reached, defaulting to best f0_5")
+    logger.info("Precision aimed not reached, defaulting to best f0_5")
     return evaluation_data[best_f_0_5_index]

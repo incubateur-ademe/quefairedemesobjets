@@ -124,5 +124,7 @@ SPLINK_SETTINGS = SettingsCreator(
     additional_columns_to_retain=[
         "cluster_id_true",
         "split",
+        "adresse_clean",
+        "nom_clean",
     ],
 )
