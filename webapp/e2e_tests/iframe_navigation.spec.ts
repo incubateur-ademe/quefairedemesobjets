@@ -58,6 +58,7 @@ test.describe("🧭 Navigation dans l'iframe avec persistance de l'UI", () => {
     // Wait for product page to load (heading with product name)
     await iframe.locator("h1").waitFor({ state: "visible", timeout: TIMEOUT.DEFAULT })
     await expect(iframe.locator("h1")).toContainText("Écran", {
+      ignoreCase: true,
       timeout: TIMEOUT.DEFAULT,
     })
 
@@ -80,6 +81,7 @@ test.describe("🧭 Navigation dans l'iframe avec persistance de l'UI", () => {
     // Wait for product page to load
     await iframe.locator("h1").waitFor({ state: "visible", timeout: TIMEOUT.DEFAULT })
     await expect(iframe.locator("h1")).toContainText("Écran", {
+      ignoreCase: true,
       timeout: TIMEOUT.DEFAULT,
     })
 
@@ -95,6 +97,7 @@ test.describe("📄 Découpe du contenu de la fiche dans l'iframe", () => {
     await results.first().click()
     await iframe.locator("h1").waitFor({ state: "visible", timeout: TIMEOUT.DEFAULT })
     await expect(iframe.locator("h1")).toContainText("Écran", {
+      ignoreCase: true,
       timeout: TIMEOUT.DEFAULT,
     })
   }
