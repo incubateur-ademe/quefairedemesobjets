@@ -1,7 +1,11 @@
 """Splink-based deduplication model with business rules support."""
 
 import logging
+from collections import defaultdict
+from collections.abc import Hashable, Sequence
+from itertools import combinations
 from pathlib import Path
+from statistics import mean
 
 import duckdb
 import polars as pl
@@ -306,30 +310,155 @@ class BusinessRulesSplink:
 
         logger.info("[SPLINK] Generating predictions at threshold %.3f", threshold)
         # Generate pairwise predictions with Splink.
-        df_predictions = self.linker.inference.predict()
+        predictions = self.linker.inference.predict()
 
         clusters = self.linker.clustering.cluster_pairwise_predictions_at_threshold(
-            df_predictions, threshold_match_weight=threshold
+            predictions, threshold_match_weight=threshold
         )
 
-        result = (
-            pl.DataFrame(df_predictions.as_pandas_dataframe()),
-            pl.DataFrame(clusters.as_pandas_dataframe()),
-        )
+        df_predictions = pl.DataFrame(predictions.as_pandas_dataframe())
+        df_clusters = pl.DataFrame(clusters.as_pandas_dataframe())
+
+        # Apply business rules
+        df_clusters_cleaned = self.apply_business_rules(df_clusters, df_predictions)
+
         if build_waterfall_chart:
             logger.info(
                 "Building waterfall chart for predictions dataframe above threshold"
             )
             self.waterfall_chart_data = [
                 e
-                for e in df_predictions.as_record_dict()
+                for e in predictions.as_record_dict()
                 if e["match_weight"] >= threshold
             ]
             self.waterfall_chart = self.linker.visualisations.waterfall_chart(
                 self.waterfall_chart_data, remove_sensitive_data=True
             )  # type: ignore
 
-        return result
+        return df_predictions, df_clusters_cleaned
+
+    def _has_conflict(
+        self, entity_a: dict[str, object], entity_b: dict[str, object]
+    ) -> bool:
+        """Return True if two entities conflict on any field."""
+        unique_conflicts = any(
+            entity_a[field] is not None
+            and entity_b[field] is not None
+            and (entity_a[field] == entity_b[field])
+            for field in self._unique_fields
+        )
+
+        distinct_conflicts_list = []
+        for field in self._distinct_fields:
+            if (entity_a[field] is None) or (entity_b[field] is None):
+                distinct_conflicts_list.append(False)
+                continue
+            if (
+                (field == "acteur_type_id")
+                and ((int(entity_a[field]) == 3) and (int(entity_b[field]) == 4))
+                or ((int(entity_a[field]) == 4) and (int(entity_b[field]) == 3))
+            ):
+                distinct_conflicts_list.append(False)
+                continue
+            distinct_conflicts_list.append(entity_a[field] != entity_b[field])
+        distinct_conflicts = any(distinct_conflicts_list)
+
+        return unique_conflicts or distinct_conflicts
+
+    def _conflicts_in_cluster(
+        self,
+        cluster_ids: Sequence[Hashable],
+        attributes: dict[str, dict[str, object]],
+    ) -> dict[str, set]:
+        """
+        Pour chaque entité du cluster, retourne l'ensemble des autres entités
+        avec lesquelles elle est en conflit selon les business rules.
+        """
+        conflicts = defaultdict(set)
+        for id_a, id_b in combinations(cluster_ids, 2):
+            attrs_a, attrs_b = attributes[id_a], attributes[id_b]
+            if self._has_conflict(attrs_a, attrs_b):
+                conflicts[id_a].add(id_b)
+                conflicts[id_b].add(id_a)
+        return conflicts
+
+    def _resolve_cluster(
+        self,
+        entities_dicts: dict[str, dict],
+    ) -> tuple[list[str], list[str]]:
+        """
+        Retire des entités d'un seul cluster jusqu'à ce qu'il respecte les
+        règles métier. Retourne (ids_conservés, ids_retirés), ces derniers
+        dans l'ordre où ils ont été retirés.
+        """
+        remaining = list(entities_dicts.keys())
+        removed: list[str] = []
+
+        while True:
+            conflicts = self._conflicts_in_cluster(remaining, entities_dicts)
+            if not conflicts:
+                break
+            # on retire l'entité la plus conflictuelle ; en cas d'égalité,
+            # celle dont le score de confiance moyen est le plus faible
+            worst = max(
+                conflicts,
+                key=lambda entity_id: (
+                    len(conflicts[entity_id]),
+                    -entities_dicts[entity_id]["mean_score"],
+                ),
+            )
+            remaining.remove(worst)
+            removed.append(worst)
+        return remaining, removed
+
+    def apply_business_rules(
+        self, df_clusters: pl.DataFrame, df_predictions: pl.DataFrame
+    ) -> pl.DataFrame:
+        """
+        Applique les règles métiers à la sortie de l'algorithme de clusterisation.
+        """
+
+        logger.debug(
+            "Applying business rules to %s clusters",
+            df_clusters.select(pl.col("cluster_id").n_unique()).item(),
+        )
+        clusters_dict = defaultdict(dict)
+        for cluster_id, df in df_clusters.filter(
+            pl.col("entity_id").count().over("cluster_id") > 1
+        ).group_by("cluster_id"):
+            for row in df.iter_rows(named=True):
+                entity_id = row["entity_id"]
+                siblings_entities_ids = df.filter(pl.col("entity_id") != entity_id)[
+                    "entity_id"
+                ].to_list()
+
+                scores = df_predictions.filter(
+                    (pl.col("entity_id_l") == entity_id)
+                    & (pl.col("entity_id_r").is_in(siblings_entities_ids))
+                    | (pl.col("entity_id_r") == entity_id)
+                    & (pl.col("entity_id_l").is_in(siblings_entities_ids))
+                )["match_weight"].to_list()
+
+                entity_dict = {**row, "mean_score": mean(scores)}
+                clusters_dict[cluster_id][entity_id] = entity_dict
+
+        entity_ids_to_remove = []
+        for cluster_id, entities in clusters_dict.items():
+            _, removed_ids = self._resolve_cluster(entities)
+            entity_ids_to_remove.extend(removed_ids)
+
+        df_clusters = df_clusters.with_columns(
+            pl.when(pl.col("entity_id").is_in(entity_ids_to_remove))
+            .then(pl.concat_str(pl.lit("c_singleton_business_rules_"), "entity_id"))
+            .otherwise("cluster_id")
+            .alias("cluster_id")
+        )
+
+        logger.debug(
+            "New clusters count after business rules applied : %s",
+            df_clusters.select(pl.col("cluster_id").n_unique()).item(),
+        )
+        return df_clusters
 
     def save(self, path: str):
         self.linker.misc.save_model_to_json(path)
