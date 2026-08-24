@@ -88,14 +88,14 @@ class TestSearchSettingsCacheInvalidation:
         cache.set(SEARCH_SETTINGS_CACHE_KEY, ("stale home", "stale header"))
 
         SearchSettings.objects.create(
-            search_placeholder="new home", header_search_placeholder="new header"
+            home_search_placeholder="new home", header_search_placeholder="new header"
         )
 
         assert cache.get(SEARCH_SETTINGS_CACHE_KEY) is None
 
     def test_deleting_clears_cache(self):
         settings_obj = SearchSettings.objects.create(
-            search_placeholder="home", header_search_placeholder="header"
+            home_search_placeholder="home", header_search_placeholder="header"
         )
         cache.set(SEARCH_SETTINGS_CACHE_KEY, ("home", "header"))
 
