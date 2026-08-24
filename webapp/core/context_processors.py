@@ -38,7 +38,7 @@ def _get_search_placeholders():
     try:
         settings_obj = SearchSettings.load()
         placeholders = (
-            settings_obj.search_placeholder or DEFAULT_HOME_SEARCH_PLACEHOLDER,
+            settings_obj.home_search_placeholder or DEFAULT_HOME_SEARCH_PLACEHOLDER,
             settings_obj.header_search_placeholder or DEFAULT_HEADER_SEARCH_PLACEHOLDER,
         )
     except Exception:
