@@ -119,7 +119,7 @@ test.describe("📄 Découpe du contenu de la fiche dans l'iframe", () => {
     expect(onclick).toContain("window.open")
     expect(onclick).toContain("_blank")
     // It opens a fiche déchet URL, not the generic "En savoir plus sur cet outil" target.
-    expect(onclick).toContain("/dechet/")
+    expect(onclick).toContain("/categories/")
   })
 
   test("Le contenu détaillé est masqué dans l'iframe mais présent en version autonome", async ({
