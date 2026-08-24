@@ -1,1 +1,2 @@
-SELECT * FROM {{ ref('marts_sample_displayedpropositionservice_sous_categories') }}
+SELECT *
+FROM {{ ref('marts_sample_displayedpropositionservice_sous_categories') }}

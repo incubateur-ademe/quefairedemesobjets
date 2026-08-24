@@ -79,3 +79,35 @@ package = false
 
 [tool.uv.sources]
 webapp-quefairedemesobjetsetdechets = { workspace = true }
+
+[tool.sqlfluff.core]
+templater = "dbt"
+dialect = "postgres"
+
+[tool.sqlfluff.templater.jinja]
+apply_dbt_builtins = true
+
+[tool.sqlfluff.layout.type.alias_expression]
+# We want non-default spacing _before_ the alias expressions.
+spacing_before = "align"
+# We want to align them within the next outer select clause.
+# This means for example that alias expressions within the FROM
+# or JOIN clause would _not_ be aligned with them.
+align_within = "select_clause"
+# The point at which to stop searching outward for siblings, which
+# in this example would likely be the boundary of a CTE. Stopping
+# when we hit brackets is usually a good rule of thumb for this
+# configuration.
+align_scope = "bracketed"
+
+[tool.sqlfluff.templater.jinja.macros]
+# Macros provided as builtins for dbt projects
+dbt_is_incremental = "{% macro is_incremental() %}True{% endmacro %}"
+dbt_ref = "{% macro ref(model_ref) %}{{model_ref}}{% endmacro %}"
+dbt_source = "{% macro source(source_name, table) %}{{source_name}}_{{table}}{% endmacro %}"
+dbt_config = "{% macro config() %}{% for k in kwargs %}{% endfor %}{% endmacro %}"
+dbt_var = "{% macro var(variable, default='') %}item{% endmacro %}"
+
+[tool.sqlfluff.templater.dbt]
+profiles_dir = "./dbt"
+project_dir = "./dbt"

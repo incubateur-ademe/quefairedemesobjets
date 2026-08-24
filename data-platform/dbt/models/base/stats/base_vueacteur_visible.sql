@@ -1,4 +1,3 @@
-
 SELECT *
 FROM {{ source('stats_qfdmo', 'qfdmo_vueacteur') }}
 WHERE est_dans_carte IS TRUE OR est_dans_opendata IS TRUE

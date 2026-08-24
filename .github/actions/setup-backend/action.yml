@@ -21,7 +21,7 @@ runs:
 
     - name: Cache virtual environment
       id: cache-venv
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: .venv
         key: venv-${{ inputs.uv-groups }}-${{ hashFiles('uv.lock') }}

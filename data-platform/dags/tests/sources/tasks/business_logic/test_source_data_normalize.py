@@ -481,33 +481,6 @@ class TestRemoveUndesiredLines:
     @pytest.mark.parametrize(
         "df, expected_df",
         [
-            # Cas suppression service à domicile
-            (
-                pd.DataFrame(
-                    {
-                        "identifiant_unique": ["id1", "id2", "id3"],
-                        "service_a_domicile": [
-                            "non",
-                            "oui exclusivement",
-                            "service à domicile uniquement",
-                        ],
-                        "public_accueilli": [
-                            "Particuliers",
-                            "Particuliers",
-                            "Particuliers",
-                        ],
-                        "sous_categorie_codes": [["code1"], ["code2"], ["code3"]],
-                    }
-                ),
-                pd.DataFrame(
-                    {
-                        "identifiant_unique": ["id1"],
-                        "service_a_domicile": ["non"],
-                        "public_accueilli": ["Particuliers"],
-                        "sous_categorie_codes": [["code1"]],
-                    }
-                ),
-            ),
             # Cas avec suppression des lignes sans produits acceptés
             (
                 pd.DataFrame(
@@ -531,17 +504,52 @@ class TestRemoveUndesiredLines:
                     }
                 ),
             ),
+            # Cas suppression acteurs non digitaux sans localisation
+            (
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": ["id1", "id2", "id3"],
+                        "acteur_type_code": [
+                            "artisan",
+                            "acteur_digital",
+                            "artisan",
+                        ],
+                        "location": ["POINT(1 1)", None, None],
+                        "sous_categorie_codes": [["code1"], ["code2"], ["code3"]],
+                    }
+                ),
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": ["id1", "id2"],
+                        "acteur_type_code": ["artisan", "acteur_digital"],
+                        "location": ["POINT(1 1)", None],
+                        "sous_categorie_codes": [["code1"], ["code2"]],
+                    }
+                ),
+            ),
         ],
     )
-    def test_remove_undesired_lines_suppressions(self, df, expected_df, dag_config):
-        # Mock the SourceConfig
-
-        result_df, _ = _remove_undesired_lines(df, dag_config)
+    def test_filter_rows_by_content_suppressions(self, df, expected_df):
+        result_df, _ = _remove_undesired_lines(df)
         pd.testing.assert_frame_equal(
             result_df.reset_index(drop=True), expected_df.reset_index(drop=True)
         )
 
-    def test_merge_duplicated(self, dag_config):
+    def test_filter_rows_by_content_drops_remaining_duplicates(self):
+        df = pd.DataFrame(
+            {
+                "identifiant_unique": ["id1", "id1", "id2"],
+                "sous_categorie_codes": [["a"], ["b"], ["c"]],
+            }
+        )
+        result_df, metadata = _remove_undesired_lines(df)
+        assert list(result_df["identifiant_unique"]) == ["id1", "id2"]
+        assert (
+            metadata["Nombre d'acteurs filtrés car doublons sur identifiant_unique"]
+            == "1"
+        )
+
+    def test_merge_duplicated(self):
         result, _ = _remove_undesired_lines(
             pd.DataFrame(
                 {
@@ -574,7 +582,6 @@ class TestRemoveUndesiredLines:
                     ],
                 }
             ),
-            dag_config,
         )
         result = result.sort_values("identifiant_unique")
         result = result.reset_index(drop=True)
