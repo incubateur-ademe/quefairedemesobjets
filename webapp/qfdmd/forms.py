@@ -8,6 +8,11 @@ from core.widgets import QfSearchAutocompleteInput
 logger = logging.getLogger(__name__)
 
 
+DEFAULT_HOME_SEARCH_PLACEHOLDER = "exemple : canapé, téléphone, CD-ROM..."
+DEFAULT_HEADER_SEARCH_PLACEHOLDER = "Rechercher un objet ou un déchet"
+DEFAULT_SEARCH_PLACEHOLDER = DEFAULT_HOME_SEARCH_PLACEHOLDER
+
+
 class QfSearchForm(forms.Form):
     """QFDMOD-styled search form used on the homepage.
 
@@ -20,7 +25,7 @@ class QfSearchForm(forms.Form):
         label="",
         widget=QfSearchAutocompleteInput(
             attrs={
-                "placeholder": "exemple : canapé, téléphone, CD-ROM...",
+                "placeholder": DEFAULT_SEARCH_PLACEHOLDER,
                 "autocomplete": "off",
             },
         ),
