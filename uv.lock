@@ -1485,6 +1485,21 @@ wheels = [
 ]
 
 [[package]]
+name = "django-tasks-db"
+version = "0.12.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+    { name = "django-stubs-ext" },
+    { name = "django-tasks" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f4/25/bc21ad4a610634f0a66f4faea4522eed26b55dbd50c4ac853128d24091d3/django_tasks_db-0.12.0.tar.gz", hash = "sha256:314d486b8c1786705b4afaf03dadaf0b1b104163acce9c5d9c9bb2aef205c501", size = 26724, upload-time = "2026-02-06T16:54:33.021Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/09/1c/e14198615e22df28b333540f2e506d6ddef7aff16d510818e94ebc01440c/django_tasks_db-0.12.0-py3-none-any.whl", hash = "sha256:69e3a1edcbf1efeeb1268da465e8ea5296ddd80834719769acc719b82da2d62e", size = 28832, upload-time = "2026-02-06T16:54:31.564Z" },
+]
+
+[[package]]
 name = "django-treebeard"
 version = "5.2.2"
 source = { registry = "https://pypi.org/simple" }
@@ -4812,6 +4827,7 @@ dependencies = [
     { name = "django-ninja" },
     { name = "django-storages" },
     { name = "django-tasks" },
+    { name = "django-tasks-db" },
     { name = "django-widget-tweaks" },
     { name = "djangoql" },
     { name = "gunicorn" },
@@ -4854,6 +4870,7 @@ requires-dist = [
     { name = "django-ninja", specifier = ">=1.6.2,<2" },
     { name = "django-storages", specifier = ">=1.14.6,<2" },
     { name = "django-tasks", specifier = ">=0.9.0,<0.13.0" },
+    { name = "django-tasks-db", specifier = ">=0.12.0" },
     { name = "django-widget-tweaks", specifier = ">=1.5.0,<2" },
     { name = "djangoql", specifier = ">=0.18.1" },
     { name = "gunicorn", specifier = ">=26.0.0,<27" },
