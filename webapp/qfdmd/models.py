@@ -1073,7 +1073,7 @@ class Synonyme(SearchTerm, AbstractBaseProduit):
 
 @register_setting
 class SearchSettings(BaseGenericSetting):
-    search_placeholder = models.CharField(
+    home_search_placeholder = models.CharField(
         "Placeholder du champ de recherche (page d'accueil)",
         max_length=255,
         default=qfdmd_forms.DEFAULT_HOME_SEARCH_PLACEHOLDER,
@@ -1089,7 +1089,7 @@ class SearchSettings(BaseGenericSetting):
     )
 
     panels = [
-        FieldPanel("search_placeholder"),
+        FieldPanel("home_search_placeholder"),
         FieldPanel("header_search_placeholder"),
     ]
 

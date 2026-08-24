@@ -7,6 +7,7 @@ from qfdmd.forms import (
     DEFAULT_HOME_SEARCH_PLACEHOLDER,
     QfSearchForm,
 )
+from qfdmd.models import SEARCH_SETTINGS_CACHE_KEY, SearchSettings
 
 from . import constants
 
@@ -30,8 +31,6 @@ def content(request):
 
 
 def _get_search_placeholders():
-    from qfdmd.models import SEARCH_SETTINGS_CACHE_KEY, SearchSettings
-
     value = cache.get(SEARCH_SETTINGS_CACHE_KEY)
     if value is not None:
         return value
