@@ -132,7 +132,7 @@ def create_entity_df_from_ml_inference_manual_labeling(
             df_cluster_ids = (
                 df.filter(pl.col("Review") != "Pas ok")
                 .group_by("cluster_label")
-                .agg(pl.concat_list("identifiant_unique").alias("ids"))
+                .agg(pl.col("identifiant_unique").alias("ids"))
                 .with_columns(
                     pl.col("ids")
                     .list.unique()

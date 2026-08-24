@@ -121,7 +121,6 @@ def generate_test_reports(
     test_score_metrics = pairwise_metrics_from_clusters(
         acteur_to_cluster_id_dict_test, id_to_cluster_test_pred
     )
-    logger.info("Test pairwise score metrics: %s", test_score_metrics)
 
     clusterwise_metrics = generate_full_cluster_report(
         acteur_to_cluster_id_dict_test, id_to_cluster_test_pred
@@ -182,6 +181,7 @@ def run_training_pipeline(
 
     performance_reports = generate_test_reports(df_test, df_clusters_test)
     logger.info("Test pairwise score metrics: %s", performance_reports["pairwise"])
+    logger.info("Test clusterwise metrics: %s", performance_reports["clusterwise"])
 
     results["test_results"] = performance_reports
 

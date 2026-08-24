@@ -28,7 +28,7 @@ BUSINESS_RULES_FRAGMENT = """AND
             OR (l.acteur_type_id = 4 AND r.acteur_type_id = 3)
             OR (l.acteur_type_id = 3 AND r.acteur_type_id = 4)
         )
-        AND (l.source_id!=r.source_id)
+        AND (coalesce(l.source_id,-1)!=coalesce(r.source_id,-2))
     )"""
 
 BLOCKING_CODE_POSTAL_2DIGITS = (
