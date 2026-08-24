@@ -10,10 +10,10 @@ endif
 BASE_DOMAIN := quefairedemesdechets.ademe.local
 BLACK := uv run black
 DB_URL := postgres://webapp:***@localhost:6543/webapp# pragma: allowlist secret
-DJANGO_ADMIN := $(PYTHON) manage.py
 FIXTURES_OPTIONS := --indent 4 --natural-foreign --natural-primary
 PYTEST := uv run pytest
 PYTHON := uv run python
+DJANGO_ADMIN := $(PYTHON) manage.py
 RUFF := uv run ruff
 
 .PHONY: sync
