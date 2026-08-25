@@ -9,14 +9,14 @@ dependencies = [
   "dj-database-url>=3.0.1,<4",
   "django>=6.0.6",
   "django-extensions~=4.1",
-  "django-tasks>=0.9.0,<0.12.0",
+  "django-tasks>=0.9.0,<0.13.0",
   "django-import-export[xls, xlsx]>=4.4.1,<5",
   "django-ninja>=1.6.2,<2",
   "django-storages>=1.14.6,<2",
   "gunicorn>=26.0.0,<27",
   "opening-hours-py>=2.0.2,<3",
   "orjson>=3.11.9,<4",
-   "pillow>=12.3.0,<13",
+  "pillow>=12.3.0,<13",
   "psycopg",
   "python-decouple~=3.8",
   "requests>=2.34.2,<3",
@@ -43,6 +43,7 @@ dependencies = [
   "pre-commit>=4.6.1",
   "modelsearch>=1.1.1",
   "wagtailmenus>=4.0.7",
+  "django-tasks-db>=0.12.0",
 ]
 
 [build-system]

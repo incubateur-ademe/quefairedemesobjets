@@ -177,7 +177,7 @@ INSTALLED_APPS = [
     "django_lookbook",
     "djangoql",
     "django_tasks",
-    "django_tasks.backends.database",
+    "django_tasks_db",
 ]
 
 
@@ -215,7 +215,7 @@ CACHES = {
 # locally; in prod, enqueue to the DB and let `manage.py db_worker` process them.
 TASKS = {
     "default": {
-        "BACKEND": ("django_tasks.backends.database.DatabaseBackend"),
+        "BACKEND": "django_tasks_db.DatabaseBackend",
     }
 }
 
