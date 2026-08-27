@@ -3,14 +3,11 @@
 ############################################
 FROM node:24-slim AS node_build
 
-WORKDIR /app
+WORKDIR /build
 
 # Install JS deps first for better caching
-COPY package.json package-lock.json ./
+COPY webapp/ .
 RUN npm ci
-
-# Parcel build inputs
-COPY . ./
 RUN npm run build
 
 
@@ -22,7 +19,7 @@ RUN npm run build
 FROM ruby:alpine AS nginx_config
 
 WORKDIR /build
-COPY servers.conf.erb .
+COPY webapp/servers.conf.erb .
 
 # PORT=8000: Scaleway container port (TLS terminated by Scaleway).
 # NGINX_ALLOW_ALL_HOSTS=1: preview domain unknown at build time.
@@ -47,7 +44,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     UV_LINK_MODE=copy
 
-WORKDIR /app
+WORKDIR /opt/app
 
 # System deps: GDAL for GeoDjango, gettext for compilemessages,
 # libpq5 for psycopg at runtime (mirrors the Scalingo Aptfile),
@@ -68,30 +65,37 @@ RUN apt-get update \
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh -s -- --no-modify-path
 
 # Install python deps (cached as long as lockfiles unchanged)
-COPY pyproject.toml uv.lock ./
-RUN /root/.local/bin/uv sync --frozen --no-dev
+COPY pyproject.toml uv.lock .
+COPY webapp/pyproject.toml webapp/pyproject.toml
+RUN /root/.local/bin/uv sync --project webapp --frozen --no-dev
 
 # Use the venv for subsequent RUN/CMD
-ENV VIRTUAL_ENV="/app/.venv" \
-    PATH="/app/.venv/bin:${PATH}"
+ENV VIRTUAL_ENV="/opt/app/.venv" \
+    PATH="/opt/app/.venv/bin:${PATH}"
 
 # Copy app code
-COPY . ./
+WORKDIR /opt/app/webapp
+COPY webapp/ ./
 
 # Internationalisation and customisation of Wagtail messages.
 # SECRET_KEY is the only env var without a default in settings; any value
 # works for build-time management commands.
-RUN SECRET_KEY=dummy python manage.py compilemessages -l fr
+# RUN DJANGO_SETTINGS_MODULE=settings.base SECRET_KEY=dummy python manage.py compilemessages -l fr
 
 # Copy built frontend assets, then collect them
-COPY --from=node_build /app/static/compiled ./static/compiled
-RUN SECRET_KEY=dummy python manage.py collectstatic --noinput
+COPY --from=node_build /build/static/compiled/ static/compiled/
+
+RUN DJANGO_SETTINGS_MODULE=settings.base SECRET_KEY=dummy python manage.py collectstatic --noinput
+
+# Required while we share scalingo and scaleway config.
+RUN mkdir -p /app/staticfiles
+RUN cp -r /opt/app/webapp/staticfiles/* /app/staticfiles/
 
 # Nginx: use the same nginx.conf + rendered servers.conf as Scalingo.
 # The rendered servers.conf is compiled in stage 2 with preview vars.
 RUN rm -f /etc/nginx/sites-enabled/default \
     && rm -f /etc/nginx/conf.d/default.conf 2>/dev/null
-COPY nginx/nginx.conf /etc/nginx/nginx.conf
+RUN mv nginx/nginx.conf /etc/nginx/nginx.conf
 COPY --from=nginx_config /build/servers.conf /etc/nginx/servers.conf
 
 EXPOSE 8000
