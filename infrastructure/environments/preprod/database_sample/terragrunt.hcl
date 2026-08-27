@@ -17,11 +17,11 @@ dependency "database" {
 }
 
 inputs = {
-  webapp_instance_id = dependency.database.outputs.webapp_instance_id
+  instance_id = dependency.database.outputs.webapp_instance_id
 
-  webapp_db_sample_name     = "webapp_sample"
-  webapp_db_sample_username = "[webapp_db_sample_username]"
-  webapp_db_sample_password = "[webapp_db_sample_password]"
+  db_name     = "webapp_sample"
+  db_username = "[webapp_db_sample_username]"
+  db_password = "[webapp_db_sample_password]"
 
   # Path to the create_extensions.sql script
   # From infrastructure/environments/preprod/database_sample/, we go up 4 levels to the root
