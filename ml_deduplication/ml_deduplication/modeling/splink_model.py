@@ -62,6 +62,7 @@ class BusinessRulesSplink:
         embedding_model: SentenceTransformer,
         db_api: DuckDBAPI | None = None,
         df_features: pl.DataFrame | None = None,
+        df_embeddings: pl.DataFrame | None = None,
         unique_fields=("source_id",),
         distinct_fields=("acteur_type_id",),
     ):
@@ -75,7 +76,9 @@ class BusinessRulesSplink:
             df_features = df_features.rename(
                 {"cluster_id": "cluster_id_true"}, strict=False
             )
-            df_features_preprocessed = self.preprocess_features(df_features)
+            df_features_preprocessed = self.preprocess_features(
+                df_features, df_embeddings
+            )
 
             self.linker = Linker(
                 df_features_preprocessed,  # type: ignore
@@ -90,7 +93,9 @@ class BusinessRulesSplink:
         self.waterfall_chart_data: None | list[dict] = None
         self.waterfall_chart: None | Chart = None
 
-    def preprocess_features(self, df_features: pl.DataFrame) -> pl.DataFrame:
+    def preprocess_features(
+        self, df_features: pl.DataFrame, df_embeddings: pl.DataFrame | None
+    ) -> pl.DataFrame:
         df_features_preprocessed = df_features.clone()
 
         df_features_preprocessed = df_features_preprocessed.with_columns(
@@ -138,12 +143,19 @@ class BusinessRulesSplink:
 
         addresses_texts = df_features_preprocessed.get_column("adresse_clean").to_list()
 
-        addresses_tensors = self.embedding_model.encode(addresses_texts)
+        if df_embeddings is None:
+            addresses_tensors = self.embedding_model.encode(addresses_texts)
 
-        df_vectors = pl.DataFrame({"adresse_clean_vector": addresses_tensors})
-        df_features_preprocessed = pl.concat(
-            [df_features_preprocessed, df_vectors], how="horizontal"
-        ).with_columns(
+            df_vectors = pl.DataFrame({"adresse_clean_vector": addresses_tensors})
+            df_features_preprocessed = pl.concat(
+                [df_features_preprocessed, df_vectors], how="horizontal"
+            )
+        else:
+            df_features_preprocessed = df_features_preprocessed.join(
+                df_embeddings, on="entity_id", validate="1:1", how="left"
+            )
+
+        df_features_preprocessed = df_features_preprocessed.with_columns(
             pl.when(
                 pl.col("adresse").is_null() & pl.col("adresse_complement").is_null()
             )
