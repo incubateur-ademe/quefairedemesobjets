@@ -97,3 +97,10 @@ variable "create_remote_webapp_in_warehouse_script_path" {
   type        = string
   default     = null
 }
+
+variable "warehouse_readonly_users" {
+  description = "Utilisateurs en lecture seule sur warehouse (clé = nom d'utilisateur, valeur = mot de passe)"
+  type        = map(string)
+  sensitive   = true
+  default     = {}
+}

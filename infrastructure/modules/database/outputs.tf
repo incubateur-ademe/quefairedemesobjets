@@ -82,6 +82,17 @@ output "warehouse_db_password" {
   sensitive   = true
 }
 
+output "warehouse_readonly_users" {
+  description = "Noms des utilisateurs en lecture seule sur warehouse"
+  value       = keys(var.warehouse_readonly_users)
+}
+
+output "warehouse_readonly_user_passwords" {
+  description = "Mots de passe des utilisateurs en lecture seule sur warehouse"
+  value       = var.warehouse_readonly_users
+  sensitive   = true
+}
+
 ## Airflow
 
 output "airflow_instance_id" {

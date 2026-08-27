@@ -28,6 +28,14 @@ inputs = {
   airflow_db_password = "[airflow_db_password]"
   airflow_volume_size = 10
 
+  # Read-only users on warehouse
+  warehouse_readonly_users = {
+    metabase = "[metabase_db_password]"
+    luis     = "[luis_db_password]"
+    fabien   = "[fabien_db_password]"
+    nicolas  = "[nicolas_db_password]"
+  }
+
   # Cross-DB postgres_fdw setup between webapp and warehouse.
   # From infrastructure/environments/airflowv3/database/, go up 4 levels to repo root.
   # create_remote_warehouse_in_webapp_script_path = abspath("${get_terragrunt_dir()}/../../../../scripts/sql/create_remote_warehouse_in_webapp.sql")
