@@ -26,7 +26,7 @@ resource "scaleway_object_bucket_acl" "media" {
   acl    = "private"
 }
 
-# ponytail: no dedicated IAM application here — the CI/Terraform key lacks
+# no dedicated IAM application here — the CI/Terraform key lacks
 # IAM write permission. The container reuses the project-wide SCW
 # access/secret key instead. Less isolated than a bucket-scoped key;
 # revisit if IAM write perms are granted later.
