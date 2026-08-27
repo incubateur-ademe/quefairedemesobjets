@@ -286,46 +286,22 @@ def balance_entities_dataset(
         database_connection_uri, df_entities_manual_labeling
     ).with_columns(pl.lit("auto").alias("example_type"))
 
-    cluster_ids_in_manual_dataset = (
-        df_entities_manual_labeling.filter(pl.col("cluster_id").is_not_null())
-        .select(pl.col("cluster_id").unique())["cluster_id"]
+    # Add clusters sibling from manual singletons that in fact are in a cluster
+    singletons_with_clusters_in_db = (
+        df_entities_cluster.filter(pl.col("was_singleton"))
+        .get_column("identifiant_unique")
         .to_list()
     )
-    entity_ids_in_manual_dataset = df_entities_manual_labeling.select(
-        pl.col("identifiant_unique").unique()
-    )["identifiant_unique"].to_list()
-
-    # Add clusters sibling if not already in dataset
     df_final = pl.concat(
         [
-            df_entities_manual_labeling,
-            df_entities_cluster.filter(
-                pl.col("cluster_id").is_in(cluster_ids_in_manual_dataset)
-                & pl.col("identifiant_unique")
-                .is_in(entity_ids_in_manual_dataset)
-                .not_()
-                & pl.col("was_singleton").not_()
-            ).select("identifiant_unique", "cluster_id", "example_type"),
-        ]
-    )
-    # Add clusters sibling from manual singletons that in fact are in a cluster
-    df_final = pl.concat(
-        [
-            df_final.filter(
+            df_entities_manual_labeling.filter(
                 pl.col("identifiant_unique")
-                .is_in(
-                    df_entities_cluster.filter(pl.col("was_singleton"))[
-                        "identifiant_unique"
-                    ]
-                )
+                .is_in(singletons_with_clusters_in_db)
                 .not_()
             ),
-            df_entities_cluster.filter(
-                pl.col("was_singleton")
-                & pl.col("identifiant_unique")
-                .is_in(entity_ids_in_manual_dataset)
-                .not_()
-            ).select("identifiant_unique", "cluster_id", "example_type"),
+            df_entities_cluster.filter(pl.col("was_singleton")).select(
+                "identifiant_unique", "cluster_id", "example_type"
+            ),
         ]
     )
 
@@ -404,6 +380,16 @@ def balance_entities_dataset(
             how="diagonal",
         )
 
+    # Some entities are in clusters with only one entities due for example to deletions of siblings
+    # We set their cluster_id to null
+
+    df_final = df_final.with_columns(
+        pl.when(pl.col("identifiant_unique").count().over("cluster_id") == 1)
+        .then(None)
+        .otherwise("cluster_id")
+        .alias("cluster_id")
+    )
+
     return df_final
 
 
@@ -422,7 +408,7 @@ def get_clusters_from_database_random_sampling(
     df_entities_cluster = pl.read_database_uri(
         query=(sql_query_folder / "cluster_entities.sql")
         .read_text()
-        .format(tmp_table_name, tmp_table_name),
+        .format(tmp_table_name, tmp_table_name, tmp_table_name),
         uri=database_connection_uri,
     )
 

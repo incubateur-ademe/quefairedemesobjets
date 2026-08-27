@@ -214,6 +214,7 @@ if __name__ == "__main__":
     else:
         raise ValueError(f"{dataset_type} not a valid choice")
 
+    logger.info("Dataset generated with len: %s", len(df_dataset))
     output_path = (
         args.dataset_output_path
         if args.dataset_output_path
@@ -221,4 +222,4 @@ if __name__ == "__main__":
         / f"ml_dataset_{datetime.now(tz=timezone.utc):%Y%m%d}_{dataset_type}.parquet"
     )
     df_dataset.write_parquet(output_path)
-    print(f"Dataset written to {output_path}")
+    logger.info(f"Dataset written to {output_path}")
