@@ -14,13 +14,6 @@ from splink import SettingsCreator
 logger = logging.getLogger(__name__)
 
 
-# --------------------------------------------------------------------------- #
-#  Blocking rules                                                             #
-# --------------------------------------------------------------------------- #
-# Uses LEFT(code_postal, 2) to handle errors in postal codes.             #
-# High-precision blocks prefer exact name match; broader blocks accept fuzzy   #
-# matches but sacrifice some recall for precision (user's stated objective).   #
-# --------------------------------------------------------------------------- #
 BUSINESS_RULES_FRAGMENT = """AND
     (
         (

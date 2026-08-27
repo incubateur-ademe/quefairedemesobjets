@@ -1,3 +1,4 @@
+drop table if exists luis._entities_with_location_tmp;
 create table luis._entities_with_location_tmp as (
 select
     et.*,
@@ -8,10 +9,11 @@ left join qfdmo_vueacteur qv on
     et.identifiant_unique = qv.identifiant_unique
 );
 
-create index _entities_with_location_tmp_location_idx on
+create index IF NOT EXISTS _entities_with_location_tmp_location_idx on
                 luis._entities_with_location_tmp
             using gist (location);
 
+drop table if exists luis._selected_acteurs_tmp;
 create table luis._selected_acteurs_tmp as (
 with entities_query as (
 select
@@ -43,6 +45,6 @@ where
 select * from selected_acteurs order by random()
 );
 
-create index _selected_acteurs_tmp_location_idx on
+create index IF NOT EXISTS _selected_acteurs_tmp_location_idx on
 luis._selected_acteurs_tmp
     using gist (location);

@@ -20,6 +20,8 @@ dependencies = [
     "splink>=4,<5",
     "tqdm-joblib>=0.0.5",
     "sentence-transformers>=5.7.0",
+    "spatial-polars>=0.3.0",
+    "polars-distance>=0.5.3",
 ]
 
 [dependency-groups]

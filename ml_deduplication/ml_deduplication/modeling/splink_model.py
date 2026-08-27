@@ -25,69 +25,15 @@ def create_ducbdb_backend(tmp_dir: Path | None = None) -> DuckDBAPI:
     if tmp_dir is not None:
         con.sql(f"SET temp_directory = '{tmp_dir.absolute()}' ")
 
+    con.sql("""
+    SET threads = 7;
+    SET memory_limit = '24GB';
+    SET preserve_insertion_order = false;
+    SET max_temp_directory_size = '550GB';
+    """)
+
     db_api = DuckDBAPI(connection=con)
     return db_api
-
-
-def features_to_entities_df(
-    df_features: pl.DataFrame,
-) -> tuple[pl.DataFrame, list[str]]:
-    """Pivot pair-level features into one-row-per-entity format.
-
-    Parameters
-    ----------
-    df_features : pl.DataFrame
-        Features dataframe with _i / _j suffixed columns for each entity in a pair.
-
-    Returns
-    -------
-    entities_df : pl.DataFrame
-        One row per unique entity_id, with feature values from whichever side they appeared on.
-    all_feature_cols : list[str]
-        List of feature column names (without suffixes).
-    """
-    # Identify _i and _j columns by stripping the trailing '_i' or '_j'.
-    i_columns = {c[:-2] for c in df_features.columns if c.endswith("_i")}
-    j_columns = {c[:-2] for c in df_features.columns if c.endswith("_j")}
-
-    shared_cols = (i_columns & j_columns) - {"identifiant_unique"}
-    feature_names = sorted(shared_cols)
-
-    logger.debug(
-        "Entities will have %d features: %s", len(feature_names), feature_names[:10]
-    )
-
-    i_df = df_features.select(
-        pl.col("identifiant_unique_i").alias("entity_id"),
-        pl.col("cluster_id"),
-        pl.col("split"),
-        pl.col("cluster_id_split"),
-        *[pl.col(f"{f}_i").alias(f) for f in feature_names],
-    )
-
-    j_df = df_features.select(
-        pl.col("identifiant_unique_j").alias("entity_id"),
-        pl.col("cluster_id"),
-        pl.col("split"),
-        pl.col("cluster_id_split"),
-        *[pl.col(f"{f}_j").alias(f) for f in feature_names],
-    )
-
-    # Union and keep first occurrence (entities may appear on both sides of different pairs).
-    entities_df = (
-        pl.concat([i_df, j_df])
-        .group_by("entity_id")
-        .agg(
-            *[pl.first(f) for f in feature_names],
-            pl.first("cluster_id"),
-            pl.first("split"),
-            pl.first("cluster_id_split"),
-        )
-    )
-
-    logger.debug("Created entities DataFrame with shape %s", entities_df.shape)
-
-    return entities_df, feature_names
 
 
 def strip_ville_from_name(data: dict) -> str:
@@ -133,7 +79,7 @@ class BusinessRulesSplink:
 
             self.linker = Linker(
                 df_features_preprocessed,  # type: ignore
-                splink_settings,
+                self.splink_settings,
                 db_api=db_api,
             )
 

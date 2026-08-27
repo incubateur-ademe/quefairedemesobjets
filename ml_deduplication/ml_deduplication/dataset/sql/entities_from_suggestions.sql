@@ -46,10 +46,4 @@ select
 	identifiant_unique,
 	parent_id,
 	cluster_id
-from suggestions_filtrees
-union all
-select
-	identifiant_unique,
-	parent_id,
-	cluster_id
 from enfants

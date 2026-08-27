@@ -1,6 +1,6 @@
-with other_entities_with_cluster as (
+with clusters_ids_to_select as (
+-- select clusters that have at least one entity in this context
 select
-	qv.identifiant_unique,
 	qv.parent_id as cluster_id
 from
 	qfdmo_vueacteur qv
@@ -13,23 +13,55 @@ where
 		identifiant_unique
 	from
 		{}
-		where cluster_id is not null)
+	where
+		cluster_id is not null)
+	and not qv.est_parent
+group by
+	1
+having
+	count(*)>1
+),
+other_entities_with_cluster as (
+select
+	qv.identifiant_unique,
+	qv.parent_id as cluster_id
+from
+	qfdmo_vueacteur qv
+inner join clusters_ids_to_select cl on
+	qv.parent_id = cl.cluster_id
+where
+	qv.acteur_type_id != 10
+	and qv.statut = 'ACTIF'
+	and qv.parent_id is not null
+	and qv.identifiant_unique not in (
+	select
+		identifiant_unique
+	from
+		{}
+	where
+		cluster_id is not null)
 	and not qv.est_parent
 ),
-singletons_entities_clusters as ( -- Rattrapage des annotations manuelles négatives qui ont leur propre clusters
+singletons_entities_clusters as (
+-- Rattrapage des annotations manuelles négatives qui ont leur propre clusters
 select
 	qv2.identifiant_unique,
 	max(qv2.parent_id) as cluster_id,
 	true as was_singleton,
 	max(et.identifiant_unique) as initial_entity_id
-from {} et
-inner join qfdmo_vueacteur qv on et.identifiant_unique = qv.identifiant_unique
-inner join qfdmo_vueacteur qv2 on qv.parent_id = qv2.parent_id
-where et.cluster_id is null
-and qv2.acteur_type_id != 10
-and qv2.statut = 'ACTIF'
-and not qv2.est_parent
-group by 1
+from
+	{} et
+inner join qfdmo_vueacteur qv on
+	et.identifiant_unique = qv.identifiant_unique
+inner join qfdmo_vueacteur qv2 on
+	qv.parent_id = qv2.parent_id
+where
+	et.cluster_id is null
+	and qv2.acteur_type_id != 10
+	and qv2.statut = 'ACTIF'
+	and not qv2.est_parent
+group by
+	1
 )
 select
 	identifiant_unique,
@@ -46,3 +78,5 @@ select
 	initial_entity_id
 from
 	singletons_entities_clusters
+order by
+	initial_entity_id
