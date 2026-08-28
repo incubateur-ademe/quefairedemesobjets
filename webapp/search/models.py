@@ -189,6 +189,29 @@ class SearchTerm(index.Indexed, models.Model):
     kind.fget.short_description = "Type"
 
     @property
+    def sous_categories(self) -> list:
+        """Sous-catégories d'objet associées à ce terme de recherche.
+
+        Selon le type de terme, elles proviennent du produit lié (Synonyme)
+        ou de la page produit liée (SearchTag, ProduitPageSearchTerm).
+        """
+        from qfdmd.models import ProduitPageSearchTerm, SearchTag, Synonyme
+
+        instance = self.get_indexed_instance()
+
+        if isinstance(instance, Synonyme):
+            if instance.produit_id:
+                return list(instance.produit.sous_categories.all())
+            return []
+        if isinstance(instance, ProduitPageSearchTerm):
+            return list(instance.produit_page.sous_categorie_objet.all())
+        if isinstance(instance, SearchTag):
+            if page := instance.page:
+                return list(page.sous_categorie_objet.all())
+            return []
+        return []
+
+    @property
     def redirect_destination(self) -> str | None:
         instance = self.get_indexed_instance()
         from qfdmd.models import ProduitPageSearchTerm, SearchTag, Synonyme
