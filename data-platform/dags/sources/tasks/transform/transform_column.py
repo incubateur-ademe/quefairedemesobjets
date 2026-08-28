@@ -34,9 +34,7 @@ url_validator = URLValidator(schemes=["http", "https"])
 CLOSED_THIS_DAY = "Fermé"
 
 
-def cast_eo_boolean_or_string_to_boolean(
-    value: str | bool | NoneType, _
-) -> bool | None:
+def cast_eo_boolean_or_string_to_boolean(value: str | bool | NoneType, _) -> bool:
     if isinstance(value, (bool, np.bool_)):
         return bool(value)
     if isinstance(value, str):
@@ -45,7 +43,7 @@ def cast_eo_boolean_or_string_to_boolean(
         if value.lower().strip() in ["non", "no", "false"]:
             return False
     if value is None or (isinstance(value, str) and value.strip() == ""):
-        return None
+        return False
     raise BooleanValueWarning(
         f"la valeur `{value}` n'a pas pu être interprété comme un booléen"
         ", Valeurs possibles: oui, yes, true, non, no, false"
