@@ -2,7 +2,6 @@
   "private": true,
   "name": "Que Faire de mes Objets & Déchets",
   "scripts": {
-    "scalingo-prebuild": "npm --prefix webapp ci",
     "build": "npm --prefix webapp run build"
   },
   "cacheDirectories": [
