@@ -39,6 +39,7 @@ resource "scaleway_container" "airflow_scheduler" {
     AIRFLOW__WEBSERVER__EXPOSE_CONFIG                     = "true"
     AIRFLOW__WEBSERVER__WARN_DEPLOYMENT_EXPOSURE          = "false"
     ENVIRONMENT                                           = var.environment
+    WEBAPP_URL                                            = var.WEBAPP_URL
   }
   secret_environment_variables = {
     AIRFLOW__CORE__EXECUTION_API_SERVER_URL = "https://${scaleway_container.airflow_webserver.domain_name}/execution/"

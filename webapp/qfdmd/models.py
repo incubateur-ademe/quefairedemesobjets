@@ -2,8 +2,11 @@ import logging
 from typing import NamedTuple, override
 
 from django.contrib.gis.db import models
+from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db.models.functions import Now
+from django.db.models.signals import post_delete, post_save
+from django.dispatch import receiver
 from django.template.loader import render_to_string
 from django.urls.base import reverse
 from django.utils.functional import cached_property
@@ -32,6 +35,8 @@ from wagtail.snippets.models import register_snippet
 # Update when migrating to v4
 from sites_conformes.content_manager.abstract import SitesFacilesBasePage
 from sites_conformes.content_manager.models import ContentPage
+
+from . import forms as qfdmd_forms
 
 from qfdmd.blocks import STREAMFIELD_COMMON_BLOCKS
 from qfdmd.utils import see_more_button
@@ -1064,6 +1069,41 @@ class Synonyme(SearchTerm, AbstractBaseProduit):
     ]
 
     search_result_template = "ui/components/search/search_result_synonyme.html"
+
+
+@register_setting
+class SearchSettings(BaseGenericSetting):
+    home_search_placeholder = models.CharField(
+        "Placeholder du champ de recherche (page d'accueil)",
+        max_length=255,
+        default=qfdmd_forms.DEFAULT_HOME_SEARCH_PLACEHOLDER,
+        help_text="Texte affiché dans le champ de recherche de la page "
+        "d'accueil avant que l'utilisateur ne commence à taper.",
+    )
+    header_search_placeholder = models.CharField(
+        "Placeholder du champ de recherche (header)",
+        max_length=255,
+        default=qfdmd_forms.DEFAULT_HEADER_SEARCH_PLACEHOLDER,
+        help_text="Texte affiché dans le champ de recherche du header "
+        "avant que l'utilisateur ne commence à taper.",
+    )
+
+    panels = [
+        FieldPanel("home_search_placeholder"),
+        FieldPanel("header_search_placeholder"),
+    ]
+
+    class Meta:
+        verbose_name = "Paramètres de recherche"
+
+
+SEARCH_SETTINGS_CACHE_KEY = "search_settings_placeholders"
+
+
+@receiver(post_save, sender=SearchSettings)
+@receiver(post_delete, sender=SearchSettings)
+def clear_search_settings_cache(**kwargs):
+    cache.delete(SEARCH_SETTINGS_CACHE_KEY)
 
 
 @register_setting

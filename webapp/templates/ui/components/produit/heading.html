@@ -1,9 +1,9 @@
 {% load dsfr_tags qfdmd_tags %}
 {% block wrapper %}
-<header class="qf-text-green-menthe-main-548 {% block wrapper_classes %}qf-pt-3w md:qf-pt-4w{% endblock %}">
+<header class="{% block wrapper_classes %}qf-pt-3w md:qf-pt-4w{% endblock %}">
     <div class="
-        qf-flex fr-container
-        ">
+        qf-flex fr-container qf-text-green-menthe-main-548"
+    >
     <div class="
     max-md:qf-order-1
     qf-flex qf-flex-col qf-items-start qf-gap-3w {% block header_classes %}{% endblock %}">
@@ -39,6 +39,6 @@
         {% endif %}
         {% endblock content %}
     </div>
-    {% include "ui/snippets/share_and_embed_produit.html" with extra_classes="max-md:qf-hidden qf-ml-auto qf-mr-0 max-md:qf-order-last md:qf-min-w-[17rem] md:qf-row-start-1 md:qf-col-start-2" %}
+    {% include "ui/snippets/share_and_embed.html" with extra_classes="max-md:qf-hidden qf-ml-auto qf-mr-0 max-md:qf-order-last md:qf-min-w-[17rem] md:qf-row-start-1 md:qf-col-start-2" %}
 </header>
 {% endblock wrapper %}

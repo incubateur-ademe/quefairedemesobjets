@@ -1,9 +1,17 @@
 import pytest
 from unittest.mock import call, patch
+from django.core.cache import cache
 from wagtail.models import Page, Site
 from wagtail.signals import page_published
 
-from qfdmd.models import ProduitIndexPage, ProduitPage, SearchTag, TaggedSearchTag
+from qfdmd.models import (
+    SEARCH_SETTINGS_CACHE_KEY,
+    ProduitIndexPage,
+    ProduitPage,
+    SearchSettings,
+    SearchTag,
+    TaggedSearchTag,
+)
 
 
 @pytest.fixture
@@ -72,3 +80,25 @@ class TestIndexSearchTagsOnPublish:
             page_published.send(sender=ProduitPage, instance=produit_page)
 
         mock_insert.assert_called_once_with(tag_mine)
+
+
+@pytest.mark.django_db
+class TestSearchSettingsCacheInvalidation:
+    def test_saving_clears_cache(self):
+        cache.set(SEARCH_SETTINGS_CACHE_KEY, ("stale home", "stale header"))
+
+        SearchSettings.objects.create(
+            home_search_placeholder="new home", header_search_placeholder="new header"
+        )
+
+        assert cache.get(SEARCH_SETTINGS_CACHE_KEY) is None
+
+    def test_deleting_clears_cache(self):
+        settings_obj = SearchSettings.objects.create(
+            home_search_placeholder="home", header_search_placeholder="header"
+        )
+        cache.set(SEARCH_SETTINGS_CACHE_KEY, ("home", "header"))
+
+        settings_obj.delete()
+
+        assert cache.get(SEARCH_SETTINGS_CACHE_KEY) is None

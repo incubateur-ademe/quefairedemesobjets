@@ -1,12 +1,12 @@
 import pytest
 from sources.config.models import (
-    SourceConfig,
     NormalizationColumnDefault,
     NormalizationColumnKeep,
     NormalizationColumnRemove,
     NormalizationColumnRename,
     NormalizationColumnTransform,
     NormalizationDFTransform,
+    SourceConfig,
     get_nested_config_parameter,
 )
 
@@ -67,6 +67,7 @@ class TestSourceConfig:
         assert dag_config.product_mapping == {}
         assert dag_config.source_code is None
         assert dag_config.validate_address_with_ban is False
+        assert dag_config.ignore_rows_with_null_or_empty_fields == []
 
     @pytest.mark.parametrize(
         "input_value",

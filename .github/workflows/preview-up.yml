@@ -51,8 +51,8 @@ jobs:
             LABELS="${{ toJSON(github.event.pull_request.labels.*.name) }}"
           fi
 
-          # Check for the preview:clear-db label
-          if echo "$LABELS" | grep -q 'preview:clear-db'; then
+          # Check for the preview:cleardb label
+          if echo "$LABELS" | grep -q 'preview:cleardb'; then
             CLEAR_DB="true"
           else
             CLEAR_DB="false"

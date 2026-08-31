@@ -232,3 +232,20 @@ def test_get_sous_categories(client):
         assert "code" in data[0]
         assert "id" in data[0]
         assert "libelle" in data[0]
+
+
+@pytest.mark.django_db
+def test_get_acteurs_columns(client):
+    """Test the /acteurs/columns endpoint used by the data-platform"""
+    response = client.get(f"{BASE_URL}/acteurs/columns")
+    assert response.status_code == 200
+    data = response.json()
+
+    for model in ["vue_acteur", "revision_acteur"]:
+        assert "nom" in data[model]["db_only"]
+        assert "nom" in data[model]["with_properties"]
+        # db_only is a subset of with_properties
+        assert set(data[model]["db_only"]) <= set(data[model]["with_properties"])
+    # properties (ex: latitude on RevisionActeur) are only in with_properties
+    assert "latitude" in data["revision_acteur"]["with_properties"]
+    assert "latitude" not in data["revision_acteur"]["db_only"]

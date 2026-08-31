@@ -9,23 +9,23 @@ Notes:
 SELECT
 
 -- Codes
-siret,
-siren,
-activite_principale,
+    siret,
+    siren,
+    activite_principale,
 
--- Names
-denomination_usuelle,
+    -- Names
+    denomination_usuelle,
 
--- Status
-etat_administratif,
+    -- Status
+    etat_administratif,
 
--- Address
-numero_voie,
-complement_adresse,
-type_voie,
-libelle_voie,
-code_postal,
-libelle_commune
+    -- Address
+    numero_voie,
+    complement_adresse,
+    type_voie,
+    libelle_voie,
+    code_postal,
+    libelle_commune
 
 FROM {{ source('ae', 'clone_ae_etablissement_in_use') }}
 -- Filtering out foreign establishments as our focus is France

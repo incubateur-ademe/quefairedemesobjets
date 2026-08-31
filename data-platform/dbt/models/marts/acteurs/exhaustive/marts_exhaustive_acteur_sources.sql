@@ -1,1 +1,1 @@
-{{ acteur_sources('marts_exhaustive_acteur', 'marts_exhaustive_acteur')}}
+{{ acteur_sources('marts_exhaustive_acteur', 'marts_exhaustive_acteur') }}

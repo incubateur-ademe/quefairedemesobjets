@@ -177,7 +177,7 @@ INSTALLED_APPS = [
     "django_lookbook",
     "djangoql",
     "django_tasks",
-    "django_tasks.backends.database",
+    "django_tasks_db",
 ]
 
 
@@ -215,7 +215,7 @@ CACHES = {
 # locally; in prod, enqueue to the DB and let `manage.py db_worker` process them.
 TASKS = {
     "default": {
-        "BACKEND": ("django_tasks.backends.database.DatabaseBackend"),
+        "BACKEND": "django_tasks_db.DatabaseBackend",
     }
 }
 
@@ -377,6 +377,11 @@ WSGI_APPLICATION = "core.wsgi.application"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
+
+# GDAL/GEOS (postgis backend needs these; only required when the native libs
+# aren't on the default search path, e.g. Nix on macOS). No-op if unset.
+GDAL_LIBRARY_PATH = decouple.config("GDAL_LIBRARY_PATH", default=None)
+GEOS_LIBRARY_PATH = decouple.config("GEOS_LIBRARY_PATH", default=None)
 
 # Database
 # --------

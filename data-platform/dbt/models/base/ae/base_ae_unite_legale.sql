@@ -8,24 +8,24 @@ Notes:
 SELECT
 
 -- Codes
-siren,
-activite_principale,
+    siren,
+    activite_principale,
 
--- Status
-etat_administratif,
+    -- Status
+    etat_administratif,
 
--- Business names
-denomination,
+    -- Business names
+    denomination,
 
--- Director's names
-prenom1,
-prenom2,
-prenom3,
-prenom4,
-prenom_usuel,
-pseudonyme,
-nom,
-nom_usage
+    -- Director's names
+    prenom1,
+    prenom2,
+    prenom3,
+    prenom4,
+    prenom_usuel,
+    pseudonyme,
+    nom,
+    nom_usage
 
 FROM {{ source('ae', 'clone_ae_unite_legale_in_use') }}
 /* We can't do random sampling else we risk having
