@@ -147,7 +147,7 @@ Installation des dépendances Python et JavaScript (depuis la racine du repo) :
 
 ```sh
 uv sync --all-groups
-cd webapp && npm ci
+npm ci
 ```
 
 Migrations Django (toujours depuis **`webapp/`**) :

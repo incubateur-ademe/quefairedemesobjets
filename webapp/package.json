@@ -43,7 +43,6 @@
     "parcel": "^2.16.4",
     "postcss": "^8.5.26",
     "postcss-nesting": "^14.0.1",
-    "prettier": "^3.9.6",
     "svgo": "^4.0.2",
     "tailwindcss-animate": "^1.0.7",
     "ts-jest": "^29.4.11",

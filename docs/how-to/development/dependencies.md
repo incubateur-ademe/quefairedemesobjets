@@ -48,11 +48,18 @@ Le frontend est construit via le `package.json` racine (`npm --prefix webapp`). 
 
 ## Dépendances Javascript
 
-Utiliser npm **depuis `webapp/`** :
+On utilise **npm en mode workspace** : le `package.json` racine déclare `webapp/` comme workspace, avec un seul `package-lock.json` à la racine du repo.
+
+Installer les dépendances (depuis la racine du repo) :
 
 ```sh
-cd webapp
-npm install <package> --before="$(date -v -7d +%Y-%m-%d)" # testé sur MacOS et Debian
+npm ci
+```
+
+Pour ajouter une dépendance (depuis la racine du repo) :
+
+```sh
+npm install <package> --workspace webapp --before="$(date -v -7d +%Y-%m-%d)" # testé sur MacOS et Debian
 ```
 
 option `--dev` pour les dépendances de développement

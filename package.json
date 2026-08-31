@@ -9,5 +9,8 @@
   ],
   "workspaces": [
     "webapp"
-  ]
+  ],
+  "devDependencies": {
+    "prettier": "^3.9.6"
+  }
 }
