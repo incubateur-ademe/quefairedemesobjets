@@ -25,3 +25,5 @@ __screenshots__
 
 # Translations
 *.mo
+
+node_modules
