@@ -43,7 +43,6 @@ FROM apache/airflow:slim-3.1.7-python3.12 AS dag-processor
 USER root
 
 # unzip for Airflow DAG
-RUN echo "deb http://deb.debian.org/debian stable main" > /etc/apt/sources.list
 RUN apt-get update
 RUN apt-get install -y unzip curl
 
