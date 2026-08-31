@@ -42,7 +42,7 @@ uv add --group dev <package>
 
 Le déploiement se fait **depuis la racine du monorepo** (pas de `PROJECT_DIR`). Le buildpack Python voit le `uv.lock` racine et exécute `uv sync --locked --no-default-groups`, ce qui installe le membre webapp via la dépendance déclarée dans le `pyproject.toml` racine.
 
-Le frontend est construit via le `package.json` racine (`npm --prefix webapp`). `data-platform/`, `docs/` et `infrastructure/` sont exclus du slug via [`.slugignore`](../../../.slugignore).
+Le frontend est construit via le `package.json` racine (`npm --prefix webapp`). `data-platform/`, `docs/` et `infrastructure/` sont exclus du build final via [`.slugignore`](../../../.slugignore).
 
 **Ops** : la variable d’environnement Scalingo `PROJECT_DIR` ne doit **pas** être définie sur les apps webapp (preprod/prod).
 
