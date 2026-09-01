@@ -59,7 +59,7 @@ server {
 <% unless ENV["DEBUG"] == "true" || ENV["DEBUG"] == "True" || ENV["DEBUG"] == "1" %>
     location /static/ {
         expires max;
-        alias /app/staticfiles/;
+        alias /app/webapp/staticfiles/;
     }
 <% end %>
     # Cache embeddable JS assets (iframe.js, carte.js) - these are served to

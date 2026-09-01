@@ -1,4 +1,5 @@
 {
+  "name": "webapp",
   "type": "module",
   "scripts": {
     "build": "parcel build --target prod",
@@ -8,6 +9,49 @@
     "test": "jest ./static/to_compile",
     "watch": "parcel watch --target dev --no-hmr",
     "e2e_test": " npx playwright test --update-snapshots"
+  },
+  "dependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@gouvfr/dsfr": "1.14",
+    "@hotwired/stimulus": "^3.2.2",
+    "@hotwired/turbo": "^8.0.23",
+    "@iframe-resizer/child": "^5.5.9",
+    "@iframe-resizer/parent": "^5.5.9",
+    "@sentry/browser": "^10.70.0",
+    "bowser": "^2.14.1",
+    "carte-facile": "^0.9.0",
+    "eslint-config-prettier": "^10.1.8",
+    "maplibre-gl": "^5.24.0",
+    "posthog-js": "^1.417.4",
+    "stimulus-use": "^0.53.0",
+    "tailwindcss": "^3.4.19"
+  },
+  "devDependencies": {
+    "@parcel/optimizer-svgo": "^2.16.4",
+    "@parcel/transformer-inline-string": "^2.16.4",
+    "@playwright/test": "^1.62.1",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@types/jest": "^30.0.0",
+    "@types/lodash": "^4.17.25",
+    "@types/node": "^26.2.0",
+    "buffer": "^6.0.3",
+    "eslint": "^10.8.1",
+    "eslint-plugin-prettier": "^5.5.6",
+    "jest": "^30.4.2",
+    "jest-environment-jsdom": "^30.4.1",
+    "lodash": "^4.18.1",
+    "parcel": "^2.16.4",
+    "postcss": "^8.5.26",
+    "postcss-nesting": "^14.0.1",
+    "svgo": "^4.0.2",
+    "tailwindcss-animate": "^1.0.7",
+    "ts-jest": "^29.4.11",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.62.1"
+  },
+  "optionalDependencies": {
+    "@parcel/watcher-linux-x64-glibc": "^2.6.0"
   },
   "source": [
     "static/to_compile/admin-categorie-widget.ts",
@@ -42,49 +86,5 @@
     "trailingComma": "all",
     "printWidth": 88,
     "semi": false
-  },
-  "dependencies": {
-    "@axe-core/playwright": "^4.13.0",
-    "@gouvfr/dsfr": "^1.14",
-    "@hotwired/stimulus": "^3.2.2",
-    "@hotwired/turbo": "^8.0.23",
-    "@iframe-resizer/child": "^5.5.9",
-    "@iframe-resizer/parent": "^5.5.9",
-    "@sentry/browser": "^10.70.0",
-    "bowser": "^2.14.1",
-    "carte-facile": "^0.9.0",
-    "eslint-config-prettier": "^10.1.8",
-    "maplibre-gl": "^5.24.0",
-    "posthog-js": "^1.417.4",
-    "stimulus-use": "^0.53.0",
-    "tailwindcss": "^3.4.19"
-  },
-  "devDependencies": {
-    "@parcel/optimizer-svgo": "^2.16.4",
-    "@parcel/transformer-inline-string": "^2.16.4",
-    "@playwright/test": "^1.62.1",
-    "@testing-library/jest-dom": "^7.0.1",
-    "@types/jest": "^30.0.0",
-    "@types/lodash": "^4.17.25",
-    "@types/node": "^26.2.0",
-    "buffer": "^6.0.3",
-    "eslint": "^10.8.1",
-    "eslint-plugin-prettier": "^5.5.6",
-    "jest": "^30.4.2",
-    "jest-environment-jsdom": "^30.4.1",
-    "lodash": "^4.18.1",
-    "parcel": "^2.16.4",
-    "postcss": "^8.5.26",
-    "postcss-nesting": "^14.0.1",
-    "prettier": "^3.9.6",
-    "svgo": "^4.0.2",
-    "tailwindcss-animate": "^1.0.7",
-    "ts-jest": "^29.4.11",
-    "ts-node": "^10.9.2",
-    "typescript": "^6.0.3",
-    "typescript-eslint": "^8.62.1"
-  },
-  "optionalDependencies": {
-    "@parcel/watcher-linux-x64-glibc": "^2.6.0"
   }
 }

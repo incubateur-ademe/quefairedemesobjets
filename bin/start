@@ -1,0 +1,10 @@
+#!/bin/bash
+set -euo pipefail
+
+gunicorn core.wsgi \
+  --bind unix:/tmp/gunicorn.sock \
+  --timeout 120 \
+  --workers "${GUNICORN_WORKERS:-2}" \
+  --max-requests 1000 \
+  --chdir /app/webapp \
+  --max-requests-jitter 100 & /app/bin/run

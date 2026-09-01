@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "name": "Que Faire de mes Objets & Déchets",
+  "scripts": {
+    "build": "npm --prefix webapp run build"
+  },
+  "workspaces": [
+    "webapp"
+  ],
+  "devDependencies": {
+    "prettier": "^3.9.6"
+  }
+}

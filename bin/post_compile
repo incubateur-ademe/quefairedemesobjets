@@ -1,0 +1,20 @@
+#!/bin/sh
+set -eu
+
+# .apt is created by the Apt buildpack at the app root (monorepo root).
+APP_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+APT_PREFIX="${APP_ROOT}/.apt"
+
+echo "APT_PREFIX: ${APT_PREFIX}"
+echo "PYTHONPATH: ${PYTHONPATH:-}"
+echo "LD_LIBRARY_PATH: ${LD_LIBRARY_PATH:-}"
+echo "PROJ_LIB: ${PROJ_LIB:-}"
+echo "list_aptprefix: $(ls -la "${APT_PREFIX}" 2>/dev/null || true)"
+
+export PYTHONPATH="${APT_PREFIX}/usr/lib/python3/dist-packages:${PYTHONPATH:-}"
+# libblas.so.3 is in blas/ subdir when installed via dpkg -x (postinst not run)
+export LD_LIBRARY_PATH="${APT_PREFIX}/usr/lib/x86_64-linux-gnu/blas:${APT_PREFIX}/usr/lib/x86_64-linux-gnu/lapack:${APT_PREFIX}/usr/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH:-}"
+export PROJ_LIB="${APT_PREFIX}/usr/share/proj"
+
+python webapp/manage.py compilemessages -l fr
+python webapp/manage.py collectstatic --noinput

@@ -1,4 +1,7 @@
-#!/bin/env bash
+#!/bin/bash
+set -euo pipefail
+
+cd /app/webapp
 
 python manage.py createcachetable
 python manage.py migrate
