@@ -75,18 +75,17 @@ ENV VIRTUAL_ENV="/opt/app/.venv" \
     PATH="/opt/app/.venv/bin:${PATH}"
 
 # Copy app code
-WORKDIR /opt/app/webapp
-COPY webapp/ ./
+COPY webapp/ /opt/app/webapp
 
 # Internationalisation and customisation of Wagtail messages.
-# SECRET_KEY is the only env var without a default in settings; any value
-# works for build-time management commands.
-# RUN DJANGO_SETTINGS_MODULE=settings.base SECRET_KEY=dummy python manage.py compilemessages -l fr
+# This must be ran from git repo root for some obscure reason.
+# Running it from webapp subdirectory causes issues
+RUN SECRET_KEY=dummy python /opt/app/webapp/manage.py compilemessages -l fr
 
+WORKDIR /opt/app/webapp
 # Copy built frontend assets, then collect them
 COPY --from=node_build /build/webapp/static/compiled/ static/compiled/
-
-RUN DJANGO_SETTINGS_MODULE=settings.base SECRET_KEY=dummy python manage.py collectstatic --noinput
+RUN SECRET_KEY=dummy python manage.py collectstatic --noinput
 
 # Required while we share scalingo and scaleway config.
 RUN mkdir -p /app/staticfiles
