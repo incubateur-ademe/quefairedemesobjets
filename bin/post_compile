@@ -3,7 +3,6 @@ set -eu
 
 # .apt is created by the Apt buildpack at the app root (monorepo root).
 APP_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-WEBAPP_DIR="${APP_ROOT}/webapp"
 APT_PREFIX="${APP_ROOT}/.apt"
 
 echo "APT_PREFIX: ${APT_PREFIX}"
@@ -18,5 +17,4 @@ export LD_LIBRARY_PATH="${APT_PREFIX}/usr/lib/x86_64-linux-gnu/blas:${APT_PREFIX
 export PROJ_LIB="${APT_PREFIX}/usr/share/proj"
 
 python webapp/manage.py compilemessages -l fr
-cd "${WEBAPP_DIR}"
-python manage.py collectstatic --noinput
+python webapp/manage.py collectstatic --noinput
