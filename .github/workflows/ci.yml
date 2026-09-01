@@ -107,8 +107,6 @@ jobs:
 
       - name: Setup frontend environment
         uses: ./.github/actions/setup-frontend
-        with:
-          working-directory: webapp
 
       - name: Check code formatting
         run: npm run format:check
