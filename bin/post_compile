@@ -17,6 +17,6 @@ export PYTHONPATH="${APT_PREFIX}/usr/lib/python3/dist-packages:${PYTHONPATH:-}"
 export LD_LIBRARY_PATH="${APT_PREFIX}/usr/lib/x86_64-linux-gnu/blas:${APT_PREFIX}/usr/lib/x86_64-linux-gnu/lapack:${APT_PREFIX}/usr/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH:-}"
 export PROJ_LIB="${APT_PREFIX}/usr/share/proj"
 
+python webapp/manage.py compilemessages -l fr
 cd "${WEBAPP_DIR}"
 python manage.py collectstatic --noinput
-python manage.py compilemessages -l fr
