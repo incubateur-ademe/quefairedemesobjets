@@ -6,9 +6,10 @@ FROM node:24-slim AS node_build
 WORKDIR /build
 
 # Install JS deps first for better caching
-COPY webapp/ .
-RUN npm ci
-RUN npm run build
+COPY webapp/ ./webapp/
+COPY package-lock.json package.json .
+RUN npm -w webapp ci
+RUN npm -w webapp run build
 
 
 ############################################
@@ -83,7 +84,7 @@ COPY webapp/ ./
 # RUN DJANGO_SETTINGS_MODULE=settings.base SECRET_KEY=dummy python manage.py compilemessages -l fr
 
 # Copy built frontend assets, then collect them
-COPY --from=node_build /build/static/compiled/ static/compiled/
+COPY --from=node_build /build/webapp/static/compiled/ static/compiled/
 
 RUN DJANGO_SETTINGS_MODULE=settings.base SECRET_KEY=dummy python manage.py collectstatic --noinput
 
