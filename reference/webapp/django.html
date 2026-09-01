@@ -439,9 +439,9 @@
 </section>
 <section id="production-scalingo">
 <h3>Production (Scalingo)<a class="headerlink" href="#production-scalingo" title="Lien vers cette rubrique">¶</a></h3>
-<p>Le <code class="docutils literal notranslate"><span class="pre">Procfile</span></code> déclare deux types de processus :</p>
+<p>Le <code class="docutils literal notranslate"><span class="pre">Procfile</span></code> (racine du monorepo) déclare deux types de processus :</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>web: bash bin/start
-worker: python manage.py db_worker
+worker: bash -c &#39;cd webapp &amp;&amp; python manage.py db_worker&#39;
 postdeploy: bash bin/post_deploy
 </pre></div>
 </div>

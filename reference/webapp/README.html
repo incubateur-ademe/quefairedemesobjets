@@ -390,7 +390,7 @@
 </ul>
 <p>Main entry points: <code class="docutils literal notranslate"><span class="pre">qfdmo.ts</span></code>, <code class="docutils literal notranslate"><span class="pre">qfdmd.ts</span></code>, <code class="docutils literal notranslate"><span class="pre">admin.ts</span></code>, and the embed bundles (<code class="docutils literal notranslate"><span class="pre">embed/assistant.ts</span></code>, <code class="docutils literal notranslate"><span class="pre">embed/carte.ts</span></code>, <code class="docutils literal notranslate"><span class="pre">embed/formulaire.ts</span></code>, <code class="docutils literal notranslate"><span class="pre">embed/infotri.ts</span></code>, etc.).</p>
 <p>The frontend stack uses <strong>Stimulus</strong> for controllers and <strong>Turbo</strong> for navigation. Scripts are loaded in layouts (e.g. <code class="docutils literal notranslate"><span class="pre">base.html</span></code>) via <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">static</span> <span class="pre">'qfdmo.js'</span> <span class="pre">%}</span></code> tags.</p>
-<p>for more details about js/parcel configuration, read the <a class="reference download internal" download="" href="../../_downloads/4340ad243ec8d978d0d45b263ac9521d/package.json"><span class="xref download myst">package.json</span></a> file.</p>
+<p>for more details about js/parcel configuration, read the <a class="reference download internal" download="" href="../../_downloads/4340ad243ec8d978d0d45b263ac9521d/package.json"><span class="xref download myst">webapp <code class="docutils literal notranslate"><span class="pre">package.json</span></code></span></a> file. The frontend uses an <strong>npm workspace</strong>: <code class="docutils literal notranslate"><span class="pre">webapp/</span></code> is declared in the <a class="reference download internal" download="" href="../../_downloads/107ae6f6a70591a8435722bf4be2e286/package.json"><span class="xref download myst">root <code class="docutils literal notranslate"><span class="pre">package.json</span></code></span></a> and there is a single <code class="docutils literal notranslate"><span class="pre">package-lock.json</span></code> at the repo root.</p>
 <section id="postcss">
 <h4>PostCSS<a class="headerlink" href="#postcss" title="Lien vers cette rubrique">¶</a></h4>
 <p>Parcel includes PostCSS, which is extended in this project to support Tailwind and <a class="reference external" href="https://www.w3.org/TR/css-nesting-1/"><em>CSS nesting</em></a>.</p>
@@ -404,24 +404,24 @@
 </section>
 <section id="useful-tools-and-commands">
 <h2>🔧 Useful Tools and Commands<a class="headerlink" href="#useful-tools-and-commands" title="Lien vers cette rubrique">¶</a></h2>
-<p>from <code class="docutils literal notranslate"><span class="pre">webapp</span></code> folder</p>
+<p>npm is an <strong>npm workspace</strong> rooted at the repo root (<code class="docutils literal notranslate"><span class="pre">webapp/</span></code> is the only workspace). Install dependencies once with <code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">ci</span></code> from the repo root, then run scripts either from <code class="docutils literal notranslate"><span class="pre">webapp/</span></code> or with <code class="docutils literal notranslate"><span class="pre">--workspace</span> <span class="pre">webapp</span></code>.</p>
 <section id="development">
 <h3>Development<a class="headerlink" href="#development" title="Lien vers cette rubrique">¶</a></h3>
+<p>From <code class="docutils literal notranslate"><span class="pre">webapp/</span></code>:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">runserver</span></code>: Django dev server <strong>and</strong> django-tasks worker (<code class="docutils literal notranslate"><span class="pre">db_worker</span></code>) for background admin actions</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">run</span> <span class="pre">watch</span></code>: Watch mode for Parcel (automatic compilation)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">run</span> <span class="pre">build</span></code>: Production build</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">run</span> <span class="pre">build</span></code>: Production build (also available from root via <code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">run</span> <span class="pre">build</span></code>)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">run</span> <span class="pre">lint</span></code>: TypeScript/JavaScript linter</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">run</span> <span class="pre">format</span></code>: Format code with Prettier</p></li>
 </ul>
 </section>
 <section id="tests">
 <h3>Tests<a class="headerlink" href="#tests" title="Lien vers cette rubrique">¶</a></h3>
-<p>From the repo root (after <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">sync</span> <span class="pre">--all-groups</span></code>):</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">test</span></code>: Jest tests</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">run</span> <span class="pre">e2e_test</span></code> / <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">e2e-test</span></code>: Playwright (e2e) tests</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">run</span> <span class="pre">pytest</span></code> or:</p>
+<li><p><code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">test</span> <span class="pre">--workspace</span> <span class="pre">webapp</span></code>: Jest tests (from the repo root)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">run</span> <span class="pre">e2e_test</span> <span class="pre">--workspace</span> <span class="pre">webapp</span></code> / <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">e2e-test</span></code>: Playwright (e2e) tests</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">run</span> <span class="pre">pytest</span></code> or, from <code class="docutils literal notranslate"><span class="pre">webapp/</span></code>:</p>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">unit-test</span></code>: unit tests</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">integration-test</span></code>: integration tests</p></li>

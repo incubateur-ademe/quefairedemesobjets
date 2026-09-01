@@ -354,7 +354,7 @@
 <section id="dependances-python">
 <h2>Dépendances Python<a class="headerlink" href="#dependances-python" title="Lien vers cette rubrique">¶</a></h2>
 <p>On utilise <strong>uv</strong> avec un <strong>workspace unique</strong> à la racine du repo (un seul <code class="docutils literal notranslate"><span class="pre">uv.lock</span></code>).</p>
-<p>Dépendances de production : chaque membre (<code class="docutils literal notranslate"><span class="pre">webapp/</span></code>, <code class="docutils literal notranslate"><span class="pre">data-platform/</span></code>) déclare les siennes dans son propre <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>.</p>
+<p>Dépendances de production : chaque membre (<code class="docutils literal notranslate"><span class="pre">webapp/</span></code>, <code class="docutils literal notranslate"><span class="pre">data-platform/</span></code>) déclare les siennes dans son propre <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>. Le projet racine dépend du membre webapp pour que le buildpack Scalingo (<code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">sync</span> <span class="pre">--locked</span> <span class="pre">--no-default-groups</span></code>) installe uniquement la webapp.</p>
 <p>Dépendances de développement : toutes centralisées dans le <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> racine, réparties en groupes sémantiques :</p>
 <div class="table-wrapper colwidths-auto docutils container">
 <table class="docutils align-default">
@@ -389,8 +389,9 @@
 </table>
 </div>
 <p>Pour installer en local (depuis la racine du repo) :</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>sync<span class="w"> </span>--all-groups<span class="w">   </span><span class="c1"># tout installer</span>
-uv<span class="w"> </span>sync<span class="w"> </span>--group<span class="w"> </span>dev<span class="w">    </span><span class="c1"># minimum pour les tests</span>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>sync<span class="w"> </span>--all-packages<span class="w"> </span>--all-groups<span class="w">   </span><span class="c1"># tout installer (webapp + data-platform + groupes)</span>
+uv<span class="w"> </span>sync<span class="w"> </span>--group<span class="w"> </span>dev<span class="w">                   </span><span class="c1"># webapp + groupe dev (défaut Scalingo-compatible)</span>
+uv<span class="w"> </span>sync<span class="w"> </span>--all-packages<span class="w"> </span>--group<span class="w"> </span>dev<span class="w">    </span><span class="c1"># webapp + data-platform + groupe dev (tests CI)</span>
 </pre></div>
 </div>
 <p>Pour ajouter une dépendance :</p>
@@ -403,11 +404,22 @@ uv<span class="w"> </span>add<span class="w"> </span>--package<span class="w"> <
 uv<span class="w"> </span>add<span class="w"> </span>--group<span class="w"> </span>dev<span class="w"> </span>&lt;package&gt;
 </pre></div>
 </div>
+<section id="deploiement-scalingo-webapp">
+<h3>Déploiement Scalingo (webapp)<a class="headerlink" href="#deploiement-scalingo-webapp" title="Lien vers cette rubrique">¶</a></h3>
+<p>Le déploiement se fait <strong>depuis la racine du monorepo</strong> (pas de <code class="docutils literal notranslate"><span class="pre">PROJECT_DIR</span></code>). Le buildpack Python voit le <code class="docutils literal notranslate"><span class="pre">uv.lock</span></code> racine et exécute <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">sync</span> <span class="pre">--locked</span> <span class="pre">--no-default-groups</span></code>, ce qui installe le membre webapp via la dépendance déclarée dans le <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> racine.</p>
+<p>Le frontend est construit via le <code class="docutils literal notranslate"><span class="pre">package.json</span></code> racine (<code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">--prefix</span> <span class="pre">webapp</span></code>). <code class="docutils literal notranslate"><span class="pre">data-platform/</span></code>, <code class="docutils literal notranslate"><span class="pre">docs/</span></code> et <code class="docutils literal notranslate"><span class="pre">infrastructure/</span></code> sont exclus du build final via <a class="reference download internal" download="" href="../../_downloads/af4cdeaa20604a40e4332050288474d3/.slugignore"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">.slugignore</span></code></span></a>.</p>
+<p><strong>Ops</strong> : la variable d’environnement Scalingo <code class="docutils literal notranslate"><span class="pre">PROJECT_DIR</span></code> ne doit <strong>pas</strong> être définie sur les apps webapp (preprod/prod).</p>
+</section>
 </section>
 <section id="dependances-javascript">
 <h2>Dépendances Javascript<a class="headerlink" href="#dependances-javascript" title="Lien vers cette rubrique">¶</a></h2>
-<p>Utiliser npm</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>npm<span class="w"> </span>install<span class="w"> </span>&lt;package&gt;<span class="w"> </span>--before<span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span>date<span class="w"> </span>-v<span class="w"> </span>-7d<span class="w"> </span>+%Y-%m-%d<span class="k">)</span><span class="s2">&quot;</span><span class="w"> </span><span class="c1"># testé sur MacOS et Debian</span>
+<p>On utilise <strong>npm en mode workspace</strong> : le <code class="docutils literal notranslate"><span class="pre">package.json</span></code> racine déclare <code class="docutils literal notranslate"><span class="pre">webapp/</span></code> comme workspace, avec un seul <code class="docutils literal notranslate"><span class="pre">package-lock.json</span></code> à la racine du repo.</p>
+<p>Installer les dépendances (depuis la racine du repo) :</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>npm<span class="w"> </span>ci
+</pre></div>
+</div>
+<p>Pour ajouter une dépendance (depuis la racine du repo) :</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>npm<span class="w"> </span>install<span class="w"> </span>&lt;package&gt;<span class="w"> </span>--workspace<span class="w"> </span>webapp<span class="w"> </span>--before<span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span>date<span class="w"> </span>-v<span class="w"> </span>-7d<span class="w"> </span>+%Y-%m-%d<span class="k">)</span><span class="s2">&quot;</span><span class="w"> </span><span class="c1"># testé sur MacOS et Debian</span>
 </pre></div>
 </div>
 <p>option <code class="docutils literal notranslate"><span class="pre">--dev</span></code> pour les dépendances de développement
@@ -471,7 +483,10 @@ Note : on recommande un cooldown de 7 jours pour les nouvelles dépendances afin
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Gestion de package</a><ul>
-<li><a class="reference internal" href="#dependances-python">Dépendances Python</a></li>
+<li><a class="reference internal" href="#dependances-python">Dépendances Python</a><ul>
+<li><a class="reference internal" href="#deploiement-scalingo-webapp">Déploiement Scalingo (webapp)</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#dependances-javascript">Dépendances Javascript</a></li>
 </ul>
 </li>

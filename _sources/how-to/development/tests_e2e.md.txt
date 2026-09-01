@@ -142,7 +142,7 @@ Pour le setup local (base de données d'échantillon, etc.), voir
 ### Tous les tests
 
 ```bash
-npm run e2e_test
+npm run e2e_test --workspace webapp
 # ou, avec préparation de la base d'échantillon :
 make prepare-e2e-test-local && make e2e-test
 ```

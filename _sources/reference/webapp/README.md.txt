@@ -43,7 +43,7 @@ Main entry points: `qfdmo.ts`, `qfdmd.ts`, `admin.ts`, and the embed bundles (`e
 
 The frontend stack uses **Stimulus** for controllers and **Turbo** for navigation. Scripts are loaded in layouts (e.g. `base.html`) via `{% static 'qfdmo.js' %}` tags.
 
-for more details about js/parcel configuration, read the [package.json](../../../webapp/package.json) file.
+for more details about js/parcel configuration, read the [webapp `package.json`](../../../webapp/package.json) file. The frontend uses an **npm workspace**: `webapp/` is declared in the [root `package.json`](../../../package.json) and there is a single `package-lock.json` at the repo root.
 
 #### PostCSS
 
@@ -57,23 +57,23 @@ More details in [look-and-feel.md](./look-and-feel.md)
 
 ## 🔧 Useful Tools and Commands
 
-from `webapp` folder
+npm is an **npm workspace** rooted at the repo root (`webapp/` is the only workspace). Install dependencies once with `npm ci` from the repo root, then run scripts either from `webapp/` or with `--workspace webapp`.
 
 ### Development
 
+From `webapp/`:
+
 - `make runserver`: Django dev server **and** django-tasks worker (`db_worker`) for background admin actions
 - `npm run watch`: Watch mode for Parcel (automatic compilation)
-- `npm run build`: Production build
+- `npm run build`: Production build (also available from root via `npm run build`)
 - `npm run lint`: TypeScript/JavaScript linter
 - `npm run format`: Format code with Prettier
 
 ### Tests
 
-From the repo root (after `uv sync --all-groups`):
-
-- `npm test`: Jest tests
-- `npm run e2e_test` / `make e2e-test`: Playwright (e2e) tests
-- `uv run pytest` or:
+- `npm test --workspace webapp`: Jest tests (from the repo root)
+- `npm run e2e_test --workspace webapp` / `make e2e-test`: Playwright (e2e) tests
+- `uv run pytest` or, from `webapp/`:
   - `make unit-test`: unit tests
   - `make integration-test`: integration tests
 

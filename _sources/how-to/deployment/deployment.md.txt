@@ -20,6 +20,15 @@ L'intégralité des commandes possibles n'est pas documentée ici, elle l'est da
 
 L'ensemble des commandes documentées ci-après peut être lancée soit depuis un environnement local, soit depuis un shell en production ou pré-production.
 
+## Push manuel vers Scalingo
+
+Le déploiement part de la **racine du monorepo** (voir [Gestion de package](../development/dependencies.md#déploiement-scalingo-webapp)). Vérifier que `PROJECT_DIR` n’est pas défini sur l’app Scalingo, puis :
+
+```sh
+git remote add prod-interface git@ssh.osc-fr1.scalingo.com:quefairedemesobjets.git  # si besoin
+git push -f prod-interface HEAD:master
+```
+
 ## Rollback: Revenir à une version précédente de l'application déployée
 
 Dans le cas d'une catastrophe en production, il est parfois nécessaire de revenir à la version précédente.
