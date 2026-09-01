@@ -19,7 +19,7 @@ RUN npm run build
 FROM ruby:alpine AS nginx_config
 
 WORKDIR /build
-COPY webapp/servers.conf.erb .
+COPY servers.conf.erb .
 
 # PORT=8000: Scaleway container port (TLS terminated by Scaleway).
 # NGINX_ALLOW_ALL_HOSTS=1: preview domain unknown at build time.
