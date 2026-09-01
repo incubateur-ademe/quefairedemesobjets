@@ -4,9 +4,6 @@
   "scripts": {
     "build": "npm --prefix webapp run build"
   },
-  "cacheDirectories": [
-    "webapp/node_modules"
-  ],
   "workspaces": [
     "webapp"
   ],
