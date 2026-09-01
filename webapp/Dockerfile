@@ -45,7 +45,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     UV_LINK_MODE=copy
 
-WORKDIR /opt/app
+WORKDIR /app
 
 # System deps: GDAL for GeoDjango, gettext for compilemessages,
 # libpq5 for psycopg at runtime (mirrors the Scalingo Aptfile),
@@ -71,25 +71,21 @@ COPY webapp/pyproject.toml webapp/pyproject.toml
 RUN /root/.local/bin/uv sync --project webapp --frozen --no-dev
 
 # Use the venv for subsequent RUN/CMD
-ENV VIRTUAL_ENV="/opt/app/.venv" \
-    PATH="/opt/app/.venv/bin:${PATH}"
+ENV VIRTUAL_ENV="/app/.venv" \
+    PATH="/app/.venv/bin:${PATH}"
 
 # Copy app code
-COPY webapp/ /opt/app/webapp
+COPY webapp/ /app/webapp
 
 # Internationalisation and customisation of Wagtail messages.
 # This must be ran from git repo root for some obscure reason.
 # Running it from webapp subdirectory causes issues
-RUN SECRET_KEY=dummy python /opt/app/webapp/manage.py compilemessages -l fr
+RUN SECRET_KEY=dummy python /app/webapp/manage.py compilemessages -l fr
 
-WORKDIR /opt/app/webapp
+WORKDIR /app/webapp
 # Copy built frontend assets, then collect them
 COPY --from=node_build /build/webapp/static/compiled/ static/compiled/
 RUN SECRET_KEY=dummy python manage.py collectstatic --noinput
-
-# Required while we share scalingo and scaleway config.
-RUN mkdir -p /app/staticfiles
-RUN cp -r /opt/app/webapp/staticfiles/* /app/staticfiles/
 
 # Nginx: use the same nginx.conf + rendered servers.conf as Scalingo.
 # The rendered servers.conf is compiled in stage 2 with preview vars.
