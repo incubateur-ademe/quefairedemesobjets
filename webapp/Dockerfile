@@ -45,7 +45,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     UV_LINK_MODE=copy
 
-WORKDIR /opt/app
+WORKDIR /app
 
 # System deps: GDAL for GeoDjango, gettext for compilemessages,
 # libpq5 for psycopg at runtime (mirrors the Scalingo Aptfile),
@@ -71,8 +71,8 @@ COPY webapp/pyproject.toml webapp/pyproject.toml
 RUN /root/.local/bin/uv sync --project webapp --frozen --no-dev
 
 # Use the venv for subsequent RUN/CMD
-ENV VIRTUAL_ENV="/opt/app/.venv" \
-    PATH="/opt/app/.venv/bin:${PATH}"
+ENV VIRTUAL_ENV="/app/.venv" \
+    PATH="/app/.venv/bin:${PATH}"
 
 # Copy app code
 COPY webapp/ /app/webapp
