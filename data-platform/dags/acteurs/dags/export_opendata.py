@@ -30,7 +30,7 @@ with DAG(
         "bucket_name": "lvao-opendata",
         "remote_dir": "acteurs" if ENVIRONMENT == "prod" else f"acteurs-{ENVIRONMENT}",
         "s3_connection_id": "s3data",
-        "opendata_table": "exposure_opendata_acteur",
+        "opendata_table": "exposure_opendata_acteur_published",
     },
     max_active_runs=1,
 ) as dag:

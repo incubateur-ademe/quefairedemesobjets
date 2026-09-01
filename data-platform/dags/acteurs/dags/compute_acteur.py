@@ -72,13 +72,24 @@ with DAG(
     )
     dbt_run_exposure_acteurs_opendata = BashOperator(
         task_id="dbt_run_exposure_acteurs_opendata",
-        bash_command=(f"{DBT_RUN} exposure.acteurs.opendata"),
+        bash_command=(f"{DBT_RUN} exposure.acteurs.opendata.exposure_opendata_acteur"),
     )
     dbt_test_exposure_acteurs_opendata = BashOperator(
         task_id="dbt_test_exposure_acteurs_opendata",
-        bash_command=(f"{DBT_TEST} exposure.acteurs.opendata"),
+        bash_command=(f"{DBT_TEST} exposure.acteurs.opendata.exposure_opendata_acteur"),
     )
-
+    dbt_run_exposure_acteurs_opendata_published = BashOperator(
+        task_id="dbt_run_exposure_acteurs_opendata_published",
+        bash_command=(
+            f"{DBT_RUN} exposure.acteurs.opendata.exposure_opendata_acteur_published"
+        ),
+    )
+    dbt_test_exposure_acteurs_opendata_published = BashOperator(
+        task_id="dbt_test_exposure_acteurs_opendata_published",
+        bash_command=(
+            f"{DBT_TEST} exposure.acteurs.opendata.exposure_opendata_acteur_published"
+        ),
+    )
     dbt_run_marts_acteurs_exhaustive = BashOperator(
         task_id="dbt_run_marts_acteurs_exhaustive",
         bash_command=(f"{DBT_RUN} marts.acteurs.exhaustive"),
@@ -149,14 +160,16 @@ with DAG(
         dbt_test_marts_acteurs_carte,
         dbt_run_exposure_acteurs_carte,
         dbt_test_exposure_acteurs_carte,
-        dbt_run_marts_acteurs_opendata,
-        dbt_test_marts_acteurs_opendata,
-        dbt_run_exposure_acteurs_opendata,
-        dbt_test_exposure_acteurs_opendata,
         dbt_run_marts_acteurs_exhaustive,
         dbt_test_marts_acteurs_exhaustive,
         dbt_run_exposure_acteurs_exhaustive,
         dbt_test_exposure_acteurs_exhaustive,
+        dbt_run_marts_acteurs_opendata,
+        dbt_test_marts_acteurs_opendata,
+        dbt_run_exposure_acteurs_opendata,
+        dbt_test_exposure_acteurs_opendata,
+        dbt_run_exposure_acteurs_opendata_published,
+        dbt_test_exposure_acteurs_opendata_published,
     )
     # Définir la séquence de vérification en parallèle
     # EPCI
