@@ -6,9 +6,10 @@ FROM node:24-slim AS node_build
 WORKDIR /build
 
 # Install JS deps first for better caching
-COPY webapp/ .
-RUN npm ci
-RUN npm run build
+COPY webapp/ ./webapp/
+COPY package-lock.json package.json .
+RUN npm -w webapp ci
+RUN npm -w webapp run build
 
 
 ############################################
@@ -19,7 +20,7 @@ RUN npm run build
 FROM ruby:alpine AS nginx_config
 
 WORKDIR /build
-COPY webapp/servers.conf.erb .
+COPY servers.conf.erb .
 
 # PORT=8000: Scaleway container port (TLS terminated by Scaleway).
 # NGINX_ALLOW_ALL_HOSTS=1: preview domain unknown at build time.
@@ -44,7 +45,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     UV_LINK_MODE=copy
 
-WORKDIR /opt/app
+WORKDIR /app
 
 # System deps: GDAL for GeoDjango, gettext for compilemessages,
 # libpq5 for psycopg at runtime (mirrors the Scalingo Aptfile),
@@ -70,26 +71,21 @@ COPY webapp/pyproject.toml webapp/pyproject.toml
 RUN /root/.local/bin/uv sync --project webapp --frozen --no-dev
 
 # Use the venv for subsequent RUN/CMD
-ENV VIRTUAL_ENV="/opt/app/.venv" \
-    PATH="/opt/app/.venv/bin:${PATH}"
+ENV VIRTUAL_ENV="/app/.venv" \
+    PATH="/app/.venv/bin:${PATH}"
 
 # Copy app code
-WORKDIR /opt/app/webapp
-COPY webapp/ ./
+COPY webapp/ /app/webapp
 
 # Internationalisation and customisation of Wagtail messages.
-# SECRET_KEY is the only env var without a default in settings; any value
-# works for build-time management commands.
-# RUN DJANGO_SETTINGS_MODULE=settings.base SECRET_KEY=dummy python manage.py compilemessages -l fr
+# This must be ran from git repo root for some obscure reason.
+# Running it from webapp subdirectory causes issues
+RUN SECRET_KEY=dummy python /app/webapp/manage.py compilemessages -l fr
 
+WORKDIR /app/webapp
 # Copy built frontend assets, then collect them
-COPY --from=node_build /build/static/compiled/ static/compiled/
-
-RUN DJANGO_SETTINGS_MODULE=settings.base SECRET_KEY=dummy python manage.py collectstatic --noinput
-
-# Required while we share scalingo and scaleway config.
-RUN mkdir -p /app/staticfiles
-RUN cp -r /opt/app/webapp/staticfiles/* /app/staticfiles/
+COPY --from=node_build /build/webapp/static/compiled/ static/compiled/
+RUN SECRET_KEY=dummy python manage.py collectstatic --noinput
 
 # Nginx: use the same nginx.conf + rendered servers.conf as Scalingo.
 # The rendered servers.conf is compiled in stage 2 with preview vars.
