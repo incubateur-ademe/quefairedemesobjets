@@ -1,14 +1,17 @@
 {% load acteur_tags turbo_tags %}
 {% if href %}
 <a
-    class="qf-w-[34px] qf-h-[45px] !qf-bg-none"
+    class="qf-w-[34px] qf-h-[45px] !qf-bg-none focus:qf-ring-2"
     data-latitude="{{ latitude }}"
     data-longitude="{{ longitude }}"
     data-map-target="acteur"
     href="{{ href }}"
     data-turbo-frame="{% acteur_frame_id %}"
     data-controller="pinpoint"
-    data-action="analytics#captureInteractionWithMap pinpoint#setActive"
+    data-action="
+    analytics#captureInteractionWithMap pinpoint#setActive
+    acteur-details:hidden@window->pinpoint#focus
+    "
 >
 {% else %}
 <div

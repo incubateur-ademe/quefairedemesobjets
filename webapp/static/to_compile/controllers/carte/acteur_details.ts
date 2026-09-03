@@ -7,9 +7,7 @@ class ActeurController extends Controller {
 
   declare readonly mapContainerIdValue: string
   declare readonly contentTarget: HTMLElement
-
-  /** Element that triggered the acteur detail to open — restored on close. */
-  #lastTrigger: HTMLElement | null = null
+  declare acteurUuid?: string
 
   #show() {
     // Reset scroll when jumping from a acteur detail to another.
@@ -29,15 +27,12 @@ class ActeurController extends Controller {
   }
 
   hide() {
+    // Restore focus to the element that opened the panel
+    this.dispatch("hidden", { detail: { acteurUuid: this.acteurUuid } })
+    console.log("event dispatched")
     this.element.ariaExpanded = "false"
     this.element.ariaHidden = "true"
     PinpointController.clearActivePinpoints()
-
-    // Restore focus to the element that opened the panel
-    if (this.#lastTrigger && document.contains(this.#lastTrigger)) {
-      this.#lastTrigger.focus()
-      this.#lastTrigger = null
-    }
   }
 
   #showPanelWhenTurboFrameLoad(event: CustomEvent) {
@@ -53,6 +48,7 @@ class ActeurController extends Controller {
   #dispatchActeurViewed(frame: HTMLElement) {
     const article = frame.querySelector<HTMLElement>("article[data-acteur-uuid]")
     if (!article) return
+    this.acteurUuid = article.dataset.acteurUuid
     this.element.dispatchEvent(
       new CustomEvent("acteur-details:viewed", {
         bubbles: true,
@@ -72,8 +68,6 @@ class ActeurController extends Controller {
     // Only track clicks that will navigate the acteur-detail turbo frame
     const turboFrame = target.closest("[data-turbo-frame$=':acteur-detail']")
     if (!turboFrame) return
-
-    this.#lastTrigger = target
   }
 
   connect() {
