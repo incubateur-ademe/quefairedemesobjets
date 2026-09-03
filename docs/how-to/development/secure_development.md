@@ -61,7 +61,7 @@ Les contrôles `pre-commit` sont la première barrière de qualité ; ils ne doi
 - **CSRF** activé sur toutes les vues mutables (POST/PUT/DELETE). Ne désactiver `csrf_exempt` que sur les endpoints publics en lecture documentés (cf. [API REST](../../reference/apis/README.md)).
 - **Contrôle d'accès** sur les vues administratives : `LoginRequiredMixin`, `PermissionRequiredMixin`, ou `core.utils.has_explicit_perm` (cf. [Authentification](../../reference/security/authentication.md)).
 - **`DEBUG = False` obligatoire** hors local ; ne jamais activer `DEBUG = True` en preprod/prod.
-- Respecter `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`, `SECURE_REFERRER_POLICY`, `SECURE_PROXY_SSL_HEADER` déjà définis dans `core/settings.py`.
+- Respecter `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`, `SECURE_REFERRER_POLICY`, `SECURE_PROXY_SSL_HEADER` déjà définis dans `webapp/settings/base.py`.
 - Tout nouveau header de sécurité (CSP, HSTS, etc.) ajouté ou modifié doit être documenté dans [Sécurité réseau](../../reference/security/network.md).
 
 ### 6. Sécuriser le code TypeScript / frontend
