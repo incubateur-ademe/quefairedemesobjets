@@ -44,10 +44,10 @@ Ce script effectue automatiquement :
 | `REMOTE_SAMPLE_DATABASE_URL` | URL de connexion à la base distante à copier (ex : preprod) |
 | `SAMPLE_DATABASE_URL`        | URL de connexion à la base locale cible                     |
 
-Ces deux variables doivent être définies dans le fichier `.env` (voir `.env.template`).
+Ces deux variables doivent être définies dans `webapp/.env` (voir `webapp/.env.template`).
 
 `REMOTE_SAMPLE_DATABASE_URL` doit pointer vers une base accessible depuis votre machine.
 
 ## Configuration
 
-La base de données `webapp_sample` est configurée dans `webapp/core/settings.py` en utilisant la variable d'environnement `DB_WEBAPP_SAMPLE`
+La base de données `webapp_sample` est configurée dans `webapp/settings/base.py` en utilisant la variable d'environnement `DB_WEBAPP_SAMPLE`

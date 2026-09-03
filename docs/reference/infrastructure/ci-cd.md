@@ -10,7 +10,7 @@ Backend jobs use a **single workspace virtual environment** at the repo root, sy
 - **`--group dev`**: lint + test (pytest, factory-boy) + djade + pre-commit for CI tests / checks.
 - **`--group dev --group webapp-dev`**: Full local dev (adds Django runserver tooling, debug toolbar, etc.).
 
-`uv sync` always runs from the repo root (the workspace root). The reusable job [`.github/workflows/_backend-test-job.yml`](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/_backend-test-job.yml) syncs `--group dev` from root, then runs `make -C <webapp|data-platform> <target>`.
+`uv sync` always runs from the repo root (the workspace root). The reusable job [`.github/workflows/_backend-test-job.yml`](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/_backend-test-job.yml) syncs `--all-packages --group dev` from root, then runs `make -C <webapp|data-platform> <target>`.
 
 ## Creating or updating a Pull Request
 
