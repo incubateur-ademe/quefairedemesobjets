@@ -64,4 +64,12 @@ test.describe("♿ RGAA", () => {
       }
     })
   })
+  test.describe("[Carte] 8.6 — Titre de page pertinent", () => {
+    test("La page carte a un titre mentionnant « carte interactive »", async ({
+      page,
+    }) => {
+      await navigateTo(page, "/carte")
+      await expect(page).toHaveTitle(/carte interactive/i)
+    })
+  })
 })
