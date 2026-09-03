@@ -5,16 +5,15 @@
 >
     <button
         class="fr-btn fr-btn--sm fr-btn--secondary-light fr-icon-share-line qf-rounded-full"
-        aria-describedby="{{ map_container_id }}:shareTooltip"
         type="button"
         data-action="click -> analytics#captureInteractionWithSolutionDetails"
     >
         <span class="qf-sr-only">partager</span>
     </button>
 
-    <div class="fr-tooltip fr-placement" id="{{ map_container_id }}:shareTooltip" role="tooltip" tabindex="1">
+    <div class="fr-tooltip fr-placement" id="{{ map_container_id }}:shareTooltip" role="tooltip">
         {% configure_acteur_sharer %}
-        <div class="fr-share" role="toolbar">
+        <div class="fr-share">
             <ul class="fr-btns-group">
                 <li>
                     <a class="fr-btn--facebook fr-btn"

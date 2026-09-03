@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test"
-import { navigateTo } from "./helpers"
+import { navigateTo, switchToListeMode } from "./helpers"
 
 /**
  * E2E tests for the RGAA audit fixes (contre-audit accessibilité, carte).
@@ -18,6 +18,24 @@ test.describe("♿ RGAA", () => {
       await expect(headings.filter({ hasText: "Adresse" })).toBeAttached()
       await expect(headings.filter({ hasText: "Services disponibles" })).toBeAttached()
       await expect(page.locator("h3", { hasText: "Adresse" })).toHaveCount(0)
+    })
+  })
+  test.describe("[Carte] 7.2 / 12.8 / 12.11 — Tooltip de partage nettoyé", () => {
+    test('Le tooltip de partage n\'a pas de tabindex positif, ni role="toolbar", ni aria-describedby', async ({
+      page,
+    }) => {
+      await navigateTo(
+        page,
+        "/lookbook/preview/accessibilite/share_tooltip_acteur_sans_tabindex/",
+      )
+      const shareButton = page.locator('button:has(span:text("partager"))')
+      await expect(shareButton).not.toHaveAttribute("aria-describedby", /.+/)
+
+      const tooltip = page.locator(".fr-tooltip")
+      await expect(tooltip).not.toHaveAttribute("tabindex", "1")
+
+      const shareToolbar = page.locator(".fr-share")
+      await expect(shareToolbar).not.toHaveAttribute("role", "toolbar")
     })
   })
   test.describe("[Carte] 5.4 / 5.6 — Titre et en-têtes du tableau mode liste", () => {
@@ -80,6 +98,121 @@ test.describe("♿ RGAA", () => {
       const text = (await link.textContent())?.trim()
       const title = await link.getAttribute("title")
       expect(title).toBe(`${text} - Nouvelle fenêtre`)
+    })
+  })
+  test.describe("[Carte] 6.1 — Liens explicites (ajouter un lieu)", () => {
+    test('Le bouton "ajouter un lieu" a un aria-label cohérent avec son texte visible', async ({
+      page,
+    }) => {
+      await navigateTo(page, "/lookbook/preview/carte/ajouter_un_lieu/")
+      const link = page.locator("a").first()
+      const text = (await link.textContent())?.trim()
+      const ariaLabel = await link.getAttribute("aria-label")
+      expect(ariaLabel).toBe(`${text} - Nouvelle fenêtre`)
+    })
+    // Le title des liens de partage (Facebook, X, LinkedIn, email) est
+    // couvert par integration_tests/core/test_sharer.py, la preview
+    // Lookbook du tooltip de partage n'ayant pas de request.resolver_match
+    // pour générer le sharer réel.
+  })
+  test.describe("[Carte] 8.9 — Balise sémantique pour la date de mise à jour", () => {
+    test("La date de mise à jour de la fiche acteur est dans une balise <p>", async ({
+      page,
+    }) => {
+      await navigateTo(page, "/lookbook/preview/pages/acteur/")
+      const updatedDate = page.locator("p", { hasText: "Mis à jour le" })
+      await expect(updatedDate).toBeVisible()
+    })
+  })
+  test.describe("[Carte] 10.8 — Alternative textuelle pour l'illustration mode liste vide", () => {
+    test("Le mode liste sans résultat a une alternative textuelle pour les technologies d'assistance", async ({
+      page,
+    }) => {
+      // Bounding box en pleine mer : garantit l'absence de résultat.
+      await navigateTo(
+        page,
+        '/carte?bounding_box={"southWest":{"lat":0,"lng":0},"northEast":{"lat":1,"lng":1}}',
+      )
+      await switchToListeMode(page)
+      const alt = page.getByText("Aucun résultat trouvé pour votre recherche.")
+      await expect(alt).toBeAttached()
+    })
+  })
+  test.describe("[Site Que faire] 1.2 — Image info-tri décorative ignorée", () => {
+    test("L'image info-tri a un alt vide", async ({ page }) => {
+      await navigateTo(page, "/lookbook/preview/pages/produit/")
+      const infotriImg = page.locator(".qf-h-\\[80px\\] img")
+      await expect(infotriImg.first()).toHaveAttribute("alt", "")
+    })
+  })
+  test.describe("[Carte] 1.2 — Logo décoratif dans les onglets Labels/Sources", () => {
+    test("Le logo précédant un label/source a un alt vide", async ({ page }) => {
+      await navigateTo(page, "/lookbook/preview/pages/acteur/")
+      const logoImg = page.locator('img[src*="/media/logos/"], img[src*="/logos/"]')
+      const count = await logoImg.count()
+      if (count > 0) {
+        await expect(logoImg.first()).toHaveAttribute("alt", "")
+      }
+    })
+  })
+  test.describe("[Site Que faire] 6.1 — Lien logo header explicite sur la carte", () => {
+    test('Le lien logo du header carte expose un libellé "Accueil — ..."', async ({
+      page,
+    }) => {
+      await navigateTo(page, "/carte")
+      const logoLink = page.locator("#logo a[href='/']").first()
+      await expect(logoLink).toHaveAccessibleName(/Accueil — /)
+    })
+  })
+  test.describe("[Carte] 11.6 — Légende du toggle Carte/Liste", () => {
+    test("Le fieldset du toggle Carte/Liste a une légende « Mode d'affichage »", async ({
+      page,
+    }) => {
+      await navigateTo(page, "/lookbook/preview/formulaires/mode_carte_liste/")
+      const legend = page.locator(".fr-segmented__legend")
+      await expect(legend).toHaveText(/Mode d'affichage/)
+    })
+  })
+
+  test.describe("[Carte] 11.7 — Légende pertinente dans la modale filtres", () => {
+    test('La légende du groupe de labels/certifications n\'est pas juste "Optional"', async ({
+      page,
+    }) => {
+      await navigateTo(page, "/lookbook/preview/modals/filtres/")
+      const legend = page.locator("#id_label_qualite-legend")
+      await expect(legend).toContainText("Labels et certifications")
+    })
+  })
+  test.describe("[Site Que faire] 10.12 — Espacement du texte du champ de recherche", () => {
+    test("le champ de recherche n'est pas rogné avec un espacement de texte élargi (WCAG 1.4.12)", async ({
+      page,
+    }) => {
+      await navigateTo(page, "/")
+      await page.addStyleTag({
+        content: `
+          * {
+            line-height: 1.5 !important;
+            letter-spacing: 0.12em !important;
+            word-spacing: 0.16em !important;
+          }
+          p {
+            margin-bottom: 2em !important;
+          }
+        `,
+      })
+      const searchWrapper = page.locator(
+        '[data-controller="search"]:has(' + SEARCH_INPUT_SELECTOR + ")",
+      )
+      const box = await searchWrapper.boundingBox()
+      const input = page.locator(SEARCH_INPUT_SELECTOR)
+      const inputBox = await input.boundingBox()
+      expect(box).not.toBeNull()
+      expect(inputBox).not.toBeNull()
+      // The input row must not be clipped by its ancestor: the input's
+      // bottom edge should stay within the wrapper's bounds.
+      if (box && inputBox) {
+        expect(inputBox.y + inputBox.height).toBeLessThanOrEqual(box.y + box.height + 1)
+      }
     })
   })
 })
