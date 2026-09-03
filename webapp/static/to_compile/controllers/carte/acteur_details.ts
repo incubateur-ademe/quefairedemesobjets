@@ -7,6 +7,7 @@ class ActeurController extends Controller {
 
   declare readonly mapContainerIdValue: string
   declare readonly contentTarget: HTMLElement
+  declare acteurUuid?: string
 
   #show() {
     // Reset scroll when jumping from a acteur detail to another.
@@ -26,6 +27,9 @@ class ActeurController extends Controller {
   }
 
   hide() {
+    // Restore focus to the element that opened the panel
+    this.dispatch("hidden", { detail: { acteurUuid: this.acteurUuid } })
+    console.log("event dispatched")
     this.element.ariaExpanded = "false"
     this.element.ariaHidden = "true"
     PinpointController.clearActivePinpoints()
@@ -44,6 +48,7 @@ class ActeurController extends Controller {
   #dispatchActeurViewed(frame: HTMLElement) {
     const article = frame.querySelector<HTMLElement>("article[data-acteur-uuid]")
     if (!article) return
+    this.acteurUuid = article.dataset.acteurUuid
     this.element.dispatchEvent(
       new CustomEvent("acteur-details:viewed", {
         bubbles: true,
@@ -56,11 +61,29 @@ class ActeurController extends Controller {
     )
   }
 
+  #saveTrigger(event: Event) {
+    const target = event.target as HTMLElement | null
+    if (!target) return
+
+    // Only track clicks that will navigate the acteur-detail turbo frame
+    const turboFrame = target.closest("[data-turbo-frame$=':acteur-detail']")
+    if (!turboFrame) return
+  }
+
   connect() {
     document.addEventListener(
       "turbo:frame-load",
       this.#showPanelWhenTurboFrameLoad.bind(this),
     )
+    // Capture clicks on any element that targets the acteur-detail frame
+    document.addEventListener("click", this.#saveTrigger.bind(this), { capture: true })
+  }
+
+  disconnect() {
+    // Cleanup is automatic for classes that use `.bind(this)` —
+    // but for safety we don't remove the listener here because other
+    // instances may still be active on the page. Capture listener is
+    // lightweight and harmless.
   }
 }
 

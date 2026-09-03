@@ -11,9 +11,19 @@ class PinpointController extends Controller<HTMLElement> {
       })
   }
 
-  setActive(event: Event) {
+  setActive(event?: Event) {
     PinpointController.clearActivePinpoints()
     this.element.classList.add(PinpointController.ACTIVE_PINPOINT_CLASSNAME)
+  }
+
+  focus(e: CustomEvent) {
+    // Per accessibility requirements, we need to focus on the last
+    // opened pinpoint when we close an acteur details.
+    const { acteurUuid } = e.detail
+    const href = this.element.getAttribute("href")
+    if (href?.includes(acteurUuid)) {
+      this.element.focus()
+    }
   }
 }
 
