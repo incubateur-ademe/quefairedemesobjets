@@ -9,19 +9,16 @@ from typing import Any, Literal
 import numpy as np
 import polars as pl
 from joblib import Parallel, delayed
-from tqdm import tqdm
-from tqdm.contrib.logging import tqdm_logging_redirect
-
 from ml_deduplication.evaluation.metrics.cluster import generate_full_cluster_report
 from ml_deduplication.evaluation.metrics.pairwise import (
     pairwise_metrics_from_clusters,
     pairwise_metrics_from_scores,
 )
-from ml_deduplication.modeling.model import (
+from ml_deduplication.modeling.dedupe.model import (
     BusinessRulesDedupe,
 )
-from ml_deduplication.modeling.xgb_model import BusinessRulesXGBoost
-from ml_deduplication.training.model_selection import (
+from ml_deduplication.modeling.dedupe.xgb_model import BusinessRulesXGBoost
+from ml_deduplication.training.dedupe.model_selection import (
     generate_parameter_grid,
     get_dedupe_variables_config,
     get_default_hyperparameters,
@@ -37,6 +34,8 @@ from ml_deduplication.training.utils import (
     split_train_dev,
     stringify_params_list,
 )
+from tqdm import tqdm
+from tqdm.contrib.logging import tqdm_logging_redirect
 
 logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s | %(filename)s | %(message)s", force=True

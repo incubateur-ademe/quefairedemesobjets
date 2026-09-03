@@ -2,6 +2,7 @@ import logging
 from collections import defaultdict
 from typing import Any
 
+import numpy as np
 import polars as pl
 from sklearn.model_selection import train_test_split
 
@@ -111,7 +112,7 @@ def partition_to_results_dict(dedupe_partitions) -> dict:
     return id_to_cluster
 
 
-def splink_cluster_df_to_dict(
+def transform_cluster_df_to_dict(
     splink_cluster_df: pl.DataFrame,
 ) -> dict:
     """
@@ -220,3 +221,43 @@ def generate_pred_pairs_df(dedupe_partitions):
     )
 
     return df_pairs
+
+
+def assign_kfolds(
+    df_entities: pl.DataFrame,
+    n_splits: int = 5,
+    cluster_col: str = "cluster_id_split",
+    seed: int = 42,
+) -> pl.DataFrame:
+    """
+    Assign each ground-truth cluster to a fold.
+
+    This prevents leakage: all entities belonging to the same
+    cluster_id_split stay in the same fold.
+    """
+    if cluster_col not in df_entities.columns:
+        raise ValueError(f"Column '{cluster_col}' not found in dataframe.")
+
+    unique_clusters = (
+        df_entities.select(pl.col(cluster_col).unique()).to_series().to_numpy()
+    )
+
+    if len(unique_clusters) < n_splits:
+        raise ValueError(
+            f"Cannot create {n_splits} folds: only "
+            f"{len(unique_clusters)} unique values in '{cluster_col}'."
+        )
+
+    rng = np.random.default_rng(seed)
+    rng.shuffle(unique_clusters)
+
+    folds = np.arange(len(unique_clusters)) % n_splits
+
+    df_folds = pl.DataFrame(
+        {
+            cluster_col: unique_clusters,
+            "fold": folds,
+        }
+    )
+
+    return df_entities.join(df_folds, on=cluster_col, how="left")

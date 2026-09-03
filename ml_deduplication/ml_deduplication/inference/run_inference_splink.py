@@ -12,11 +12,17 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import polars as pl
-from ml_deduplication.modeling.splink_model import (
+from ml_deduplication.modeling.splink.splink_model import (
     BusinessRulesSplink,
     create_ducbdb_backend,
 )
+from ml_deduplication.training.splink.splink_config import (
+    BLOCKING_PARENT_ID,
+    BUSINESS_RULES_FRAGMENT,
+)
 from sentence_transformers import SentenceTransformer
+from tqdm import tqdm
+from tqdm.contrib.logging import logging_redirect_tqdm
 
 logging.basicConfig(
     format="%(asctime)s | %(name)s | %(message)s", level=logging.DEBUG, force=True
@@ -73,6 +79,11 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Run identifier for DB tracking (auto-generated if not provided)",
     )
+    parser.add_argument(
+        "--split-by-departement",
+        action="store_true",
+        help="Run identifier for DB tracking (auto-generated if not provided)",
+    )
     return parser.parse_args()
 
 
@@ -91,8 +102,11 @@ def main():
         )
         raise SystemExit(1)
 
+    split_by_departement = args.split_by_departement
+
+    output_dir: Path = args.output_dir
     # Ensure output directory exists
-    args.output_dir.mkdir(parents=True, exist_ok=True)
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     # Generate run ID
     run_id = (
@@ -112,21 +126,69 @@ def main():
     # Step 2: Load the saved model
     model_path: Path = args.model_path
     embedding_model = SentenceTransformer("Lajavaness/sentence-camembert-large")
-    model = BusinessRulesSplink(
-        json.load(model_path.open()),
-        embedding_model,
-        df_features=df_acteurs,
-        db_api=create_ducbdb_backend(Path("/Volumes/PRO-G40")),
-        unique_fields=(
-            "source_id",
-            "parent_id",
-        ),  # Should not have two parent ids in the same cluster
-    )
 
-    # Step 3 : predict
-    df_predictions, df_clusters = model.predict(
-        threshold=args.model_threshold, build_waterfall_chart=False
-    )
+    model_config = json.load(model_path.open())
+    blocking_business_rule_parent_id = BLOCKING_PARENT_ID + BUSINESS_RULES_FRAGMENT
+    model_config["blocking_rules_to_generate_predictions"] = [
+        *model_config["blocking_rules_to_generate_predictions"],
+        blocking_business_rule_parent_id,
+    ]
+
+    if split_by_departement:
+        dfs_predictions = []
+        dfs_clusters = []
+        tmp_parquet_dir = output_dir / "_tmp_parquet_outputs"
+        tmp_parquet_dir.mkdir(exist_ok=True)
+        with logging_redirect_tqdm():
+            for departement, df in tqdm(
+                df_acteurs.group_by(pl.col("code_postal").str.slice(0, 2))
+            ):
+                departement_code: str = departement[0]
+                if len(df) < 2:
+                    logger.info(
+                        "Not enough acteurs in departement %s to clusterize",
+                        departement_code,
+                    )
+                    continue
+                logger.info("Starting prediction for departement %s", departement_code)
+                model = BusinessRulesSplink(
+                    model_config,
+                    embedding_model,
+                    df_features=df,
+                    db_api=create_ducbdb_backend(Path("/Volumes/PRO-G40")),
+                    unique_fields=(
+                        "source_id",
+                        "parent_id",
+                    ),  # Should not have two parent ids in the same cluster
+                )
+
+                # Step 3 : predict
+                df_predictions_tmp, df_clusters_temp = model.predict(
+                    threshold=args.model_threshold,
+                    build_waterfall_chart=False,
+                )
+                if len(df_predictions_tmp) > 0:
+                    dfs_predictions.append(df_predictions_tmp)
+                if len(df_clusters_temp) > 0:
+                    dfs_clusters.append(df_clusters_temp)
+        df_predictions = pl.concat(dfs_predictions, how="vertical")
+        df_clusters = pl.concat(dfs_clusters, how="vertical")
+    else:
+        model = BusinessRulesSplink(
+            model_config,
+            embedding_model,
+            df_features=df_acteurs,
+            db_api=create_ducbdb_backend(),
+            unique_fields=(
+                "source_id",
+                "parent_id",
+            ),  # Should not have two parent ids in the same cluster
+        )
+
+        # Step 3 : predict
+        df_predictions, df_clusters = model.predict(
+            threshold=args.model_threshold, build_waterfall_chart=False
+        )
 
     df_clusters_multi = df_clusters.filter(
         pl.col("cluster_id").count().over("cluster_id") > 1
@@ -139,13 +201,11 @@ def main():
     )
 
     # Step 7: Save outputs
-    df_clusters.write_parquet(args.output_dir / f"inference_clusters_{run_id}.parquet")
-    df_predictions.write_parquet(
-        args.output_dir / f"inference_predictions_{run_id}.parquet"
-    )
+    df_clusters.write_parquet(output_dir / f"inference_clusters_{run_id}.parquet")
+    df_predictions.write_parquet(output_dir / f"inference_predictions_{run_id}.parquet")
 
     logger.info("Inference complete!")
-    logger.info("Parquet output: %s", args.output_dir)
+    logger.info("Parquet output: %s", output_dir)
     logger.info("Database run_id: %s", run_id)
 
 

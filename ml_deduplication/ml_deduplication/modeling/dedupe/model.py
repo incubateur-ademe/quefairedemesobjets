@@ -14,7 +14,7 @@ import polars as pl
 from dedupe import labeler
 from dedupe._typing import Clusters, Scores
 from dedupe.api import _cleanup_scores, flatten_training
-from ml_deduplication.modeling.clustering import cluster
+from ml_deduplication.modeling.dedupe.clustering import cluster
 
 logger = logging.getLogger(__name__)
 RANDOM_SEED = 42
