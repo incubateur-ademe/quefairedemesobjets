@@ -1,7 +1,7 @@
-from collections import defaultdict
-from itertools import combinations
-from typing import Hashable, Iterable, Sequence
 import logging
+from collections import defaultdict
+from collections.abc import Hashable, Iterable, Sequence
+from itertools import combinations
 
 logger = logging.getLogger(__name__)
 

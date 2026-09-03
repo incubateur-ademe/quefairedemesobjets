@@ -41,7 +41,9 @@ ST_DISTANCE_SPHEROID(
 )
 """
 
-BLOCKING_SIREN = "l.siren IS NOT NULL AND l.siren = r.siren"
+BLOCKING_SIREN = "l.siren IS NOT NULL AND (l.siren = r.siren)"
+
+BLOCKING_PARENT_ID = "(l.parent_id != r.parent_id)"
 
 
 # --------------------------------------------------------------------------- #

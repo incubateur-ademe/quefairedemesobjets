@@ -5,22 +5,22 @@ builds features, runs clustering, and outputs results.
 """
 
 import argparse
-import json
 import logging
 import os
 from datetime import datetime, timezone
 from pathlib import Path
+from pickle import load
 
+from sentence_transformers import SentenceTransformer  # isort: skip
 import polars as pl
-from ml_deduplication.modeling.splink.splink_model import (
-    BusinessRulesSplink,
-    create_ducbdb_backend,
+from ml_deduplication.modeling.xgboost.model import (
+    DEFAULT_SHOULD_BE_DIFFERENT_FIELDS,
+    DEFAULT_SHOULD_BE_EQUAL_FIELDS,
+    XGBoostBusinessRulesModel,
 )
-from ml_deduplication.training.splink.splink_config import (
-    BLOCKING_PARENT_ID,
-    BUSINESS_RULES_FRAGMENT,
-)
-from sentence_transformers import SentenceTransformer
+from ml_deduplication.modeling.xgboost.preprocessing import preprocess_entities_df
+from ml_deduplication.training.xgboost.training import apply_calibrator
+from sklearn.linear_model import LogisticRegression
 from tqdm import tqdm
 from tqdm.contrib.logging import logging_redirect_tqdm
 
@@ -84,6 +84,12 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Run identifier for DB tracking (auto-generated if not provided)",
     )
+    parser.add_argument(
+        "--embeddings-filepath",
+        type=Path,
+        help="Precomputed embeddings file",
+    )
+
     return parser.parse_args()
 
 
@@ -120,25 +126,25 @@ def main():
         logger.warning("No acteurs found with type 4 or 3. Exiting.")
         raise SystemExit(0)
 
-    df_acteurs = df_acteurs.rename({"identifiant_unique": "entity_id"}).with_columns(
-        pl.lit(None).alias("cluster_id_true"), pl.lit(None).alias("split")
-    )
     # Step 2: Load the saved model
     model_path: Path = args.model_path
+
+    df_embeddings = None
+    if args.embeddings_filepath is not None:
+        df_embeddings = pl.read_parquet(args.embeddings_filepath)
     embedding_model = SentenceTransformer("Lajavaness/sentence-camembert-large")
 
-    model_config = json.load(model_path.open())
-    blocking_business_rule_parent_id = BLOCKING_PARENT_ID + BUSINESS_RULES_FRAGMENT
-    model_config["blocking_rules_to_generate_predictions"] = [
-        *model_config["blocking_rules_to_generate_predictions"],
-        blocking_business_rule_parent_id,
-    ]
+    model = XGBoostBusinessRulesModel.load(
+        xgb_model_path=model_path / "model.json",
+        threshold=args.model_threshold,
+        n_jobs=-1,
+    )
+    with (model_path / "calibrator.pkl").open("rb") as f:
+        calibrator: LogisticRegression = load(f)
 
     if split_by_departement:
         dfs_predictions = []
         dfs_clusters = []
-        tmp_parquet_dir = output_dir / "_tmp_parquet_outputs"
-        tmp_parquet_dir.mkdir(exist_ok=True)
         with logging_redirect_tqdm():
             for departement, df in tqdm(
                 df_acteurs.group_by(pl.col("code_postal").str.slice(0, 2))
@@ -151,43 +157,70 @@ def main():
                     )
                     continue
                 logger.info("Starting prediction for departement %s", departement_code)
-                model = BusinessRulesSplink(
-                    model_config,
-                    embedding_model,
-                    df_features=df,
-                    db_api=create_ducbdb_backend(Path("/Volumes/PRO-G40")),
-                    unique_fields=(
-                        "source_id",
+
+                X_temp = preprocess_entities_df(
+                    df,
+                    embedding_model=embedding_model,
+                    additional_columns_to_keep=[
+                        *DEFAULT_SHOULD_BE_DIFFERENT_FIELDS,
+                        *DEFAULT_SHOULD_BE_EQUAL_FIELDS,
                         "parent_id",
-                    ),  # Should not have two parent ids in the same cluster
+                    ],
+                    include_label=False,
+                    additional_business_rules_exprs=[
+                        pl.col("parent_id_l") != pl.col("parent_id_r")
+                    ],
+                )
+                if len(X_temp) == 0:
+                    continue
+                # Step 3 : predict
+                df_predictions_tmp = model.predict(X_temp)
+                df_calibrated_predictions_tmp = apply_calibrator(
+                    calibrator, df_predictions_tmp
                 )
 
-                # Step 3 : predict
-                df_predictions_tmp, df_clusters_temp = model.predict(
+                _, df_clusters_tmp = model.cluster(
+                    df_calibrated_predictions_tmp.with_columns(
+                        pl.col("score_true_calibrated").alias("score_true")
+                    ),
+                    df_entities=df,
                     threshold=args.model_threshold,
-                    build_waterfall_chart=False,
                 )
                 if len(df_predictions_tmp) > 0:
                     dfs_predictions.append(df_predictions_tmp)
-                if len(df_clusters_temp) > 0:
-                    dfs_clusters.append(df_clusters_temp)
+                if len(df_clusters_tmp) > 0:
+                    dfs_clusters.append(
+                        df_clusters_tmp.with_columns(
+                            pl.format(f"dep_{departement_code}_{{  }}", "cluster_id")
+                        )
+                    )
         df_predictions = pl.concat(dfs_predictions, how="vertical")
         df_clusters = pl.concat(dfs_clusters, how="vertical")
     else:
-        model = BusinessRulesSplink(
-            model_config,
-            embedding_model,
-            df_features=df_acteurs,
-            db_api=create_ducbdb_backend(),
-            unique_fields=(
-                "source_id",
+        X = preprocess_entities_df(
+            df_acteurs,
+            embedding_model=embedding_model,
+            additional_columns_to_keep=[
+                *DEFAULT_SHOULD_BE_DIFFERENT_FIELDS,
+                *DEFAULT_SHOULD_BE_EQUAL_FIELDS,
                 "parent_id",
-            ),  # Should not have two parent ids in the same cluster
+            ],
+            include_label=False,
+            additional_business_rules_exprs=[
+                pl.col("parent_id_l") != pl.col("parent_id_r")
+            ],
+            df_embeddings=df_embeddings,
         )
-
         # Step 3 : predict
-        df_predictions, df_clusters = model.predict(
-            threshold=args.model_threshold, build_waterfall_chart=False
+        df_predictions = model.predict(X)
+        df_calibrated_predictions = apply_calibrator(calibrator, df_predictions)
+
+        df_clusters = model.cluster(
+            df_calibrated_predictions.with_columns(
+                pl.col("score_true_calibrated").alias("score_true")
+            ),
+            df_entities=df,
+            threshold=args.model_threshold,
         )
 
     df_clusters_multi = df_clusters.filter(

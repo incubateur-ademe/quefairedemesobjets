@@ -8,27 +8,26 @@ from typing import Any, Literal
 
 import polars as pl
 from altair import Chart
-from sentence_transformers import SentenceTransformer
-from tqdm import tqdm
-from tqdm.contrib.logging import tqdm_logging_redirect
-
 from ml_deduplication.evaluation.metrics.cluster import generate_full_cluster_report
 from ml_deduplication.evaluation.metrics.pairwise import (
     pairwise_metrics_from_clusters,
 )
-from ml_deduplication.modeling.splink_model import (
+from ml_deduplication.modeling.splink.splink_model import (
     BusinessRulesSplink,
     create_ducbdb_backend,
 )
-from ml_deduplication.training.model_selection import (
+from ml_deduplication.training.dedupe.model_selection import (
     generate_parameter_grid,
 )
-from ml_deduplication.training.splink_config import SPLINK_SETTINGS
+from ml_deduplication.training.splink.splink_config import SPLINK_SETTINGS
 from ml_deduplication.training.utils import (
     create_acteur_to_cluster_dict,
-    splink_cluster_df_to_dict,
     stringify_params_list,
+    transform_cluster_df_to_dict,
 )
+from sentence_transformers import SentenceTransformer
+from tqdm import tqdm
+from tqdm.contrib.logging import tqdm_logging_redirect
 
 logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s | %(filename)s | %(message)s", force=True
@@ -116,7 +115,7 @@ def generate_test_reports(
     acteur_to_cluster_id_dict_test = create_acteur_to_cluster_dict(
         cluster_to_acteur_dict_test
     )
-    id_to_cluster_test_pred = splink_cluster_df_to_dict(df_clusters_test)
+    id_to_cluster_test_pred = transform_cluster_df_to_dict(df_clusters_test)
 
     test_score_metrics = pairwise_metrics_from_clusters(
         acteur_to_cluster_id_dict_test, id_to_cluster_test_pred

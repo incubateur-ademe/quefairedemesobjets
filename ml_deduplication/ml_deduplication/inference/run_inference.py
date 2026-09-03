@@ -13,10 +13,10 @@ from typing import Any, Literal
 
 import polars as pl
 import psycopg
-from ml_deduplication.dataset.features_engineering import preprocess_features_dataset
-from ml_deduplication.modeling.model import BusinessRulesStaticDedupe
-from ml_deduplication.modeling.xgb_model import BusinessRulesStaticXGBoost
-from ml_deduplication.training.features import (
+from ml_deduplication.dataset.features_creation import preprocess_features_dataset
+from ml_deduplication.modeling.dedupe.model import BusinessRulesStaticDedupe
+from ml_deduplication.modeling.dedupe.xgb_model import BusinessRulesStaticXGBoost
+from ml_deduplication.training.dedupe.features import (
     DEDUPE_VARIABLES_CONFIG_RESTRICTED,
     FEATURES_NAMES_FROM_DATASET,
 )
