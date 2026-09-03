@@ -81,6 +81,11 @@ variable "AWS_STORAGE_BUCKET_NAME" {
   default = ""
 }
 
+variable "BASE_URL" {
+  type = string
+  default = ""
+}
+
 variable "AWS_S3_REGION_NAME" {
   type    = string
   default = "fr-par"
