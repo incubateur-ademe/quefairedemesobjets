@@ -20,4 +20,26 @@ test.describe("♿ RGAA", () => {
       await expect(page.locator("h3", { hasText: "Adresse" })).toHaveCount(0)
     })
   })
+  test.describe("[Carte] 5.4 / 5.6 — Titre et en-têtes du tableau mode liste", () => {
+    test("Le tableau a une légende (<caption>) non vide", async ({ page }) => {
+      await navigateTo(
+        page,
+        "/lookbook/preview/accessibilite/A11Y_15_mode_liste_table_caption_et_entetes/",
+      )
+      const caption = page.locator("table caption")
+      await expect(caption).toBeAttached()
+      await expect(caption).not.toHaveText("")
+    })
+
+    test("La colonne « Voir la fiche » a un en-tête non vide", async ({ page }) => {
+      await navigateTo(
+        page,
+        "/lookbook/preview/accessibilite/A11Y_15_mode_liste_table_caption_et_entetes/",
+      )
+      const headers = page.locator("table thead th")
+      await expect(headers).toHaveCount(4)
+      const lastHeader = headers.last()
+      await expect(lastHeader).not.toHaveText("")
+    })
+  })
 })
