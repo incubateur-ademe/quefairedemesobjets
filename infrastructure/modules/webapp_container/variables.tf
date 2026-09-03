@@ -82,7 +82,7 @@ variable "AWS_STORAGE_BUCKET_NAME" {
 }
 
 variable "BASE_URL" {
-  type = string
+  type    = string
   default = ""
 }
 
