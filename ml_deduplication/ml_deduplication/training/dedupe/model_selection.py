@@ -2,17 +2,16 @@ import logging
 from typing import Any, Literal
 
 import numpy as np
-from sklearn.model_selection import ParameterGrid
-
 from ml_deduplication.evaluation.metrics import fbeta
 from ml_deduplication.evaluation.metrics.pairwise import pairwise_metrics_from_clusters
-from ml_deduplication.training.features import (
+from ml_deduplication.training.dedupe.features import (
     DEDUPE_VARIABLES_CONFIG_FULL,
     DEDUPE_VARIABLES_CONFIG_MANDATORY,
     DEDUPE_VARIABLES_CONFIG_RESTRICTED,
     FEATURES_NAMES_FROM_DATASET,
 )
 from ml_deduplication.training.utils import partition_to_dict
+from sklearn.model_selection import ParameterGrid
 
 logger = logging.getLogger(__name__)
 
@@ -138,7 +137,9 @@ def generate_parameter_grid(
     return ParameterGrid(param_grid)
 
 
-def get_default_hyperparameters(model_type: Literal["dedupe", "xgboost", "splink"]) -> dict:  # type: ignore[reportUnknownParameterType]
+def get_default_hyperparameters(
+    model_type: Literal["dedupe", "xgboost", "splink"],
+) -> dict:  # type: ignore[reportUnknownParameterType]
     params = {
         "model_type": model_type,
         "index_predicates": True if model_type != "splink" else None,  # type: ignore[reportUnknownMemberType]

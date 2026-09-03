@@ -22,6 +22,7 @@ dependencies = [
     "sentence-transformers>=5.7.0",
     "spatial-polars>=0.3.0",
     "polars-distance>=0.5.3",
+    "optuna>=4.9.0",
 ]
 
 [dependency-groups]

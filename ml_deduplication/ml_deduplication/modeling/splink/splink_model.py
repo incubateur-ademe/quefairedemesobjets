@@ -10,6 +10,7 @@ from statistics import mean
 import duckdb
 import polars as pl
 from altair import Chart
+from ml_deduplication.modeling.splink.schemas import SCHEMA_CLUSTERS, SCHEMA_PREDS
 from ml_deduplication.training.utils import split_train_dev
 from sentence_transformers import SentenceTransformer
 from splink import DuckDBAPI, Linker, SettingsCreator
@@ -24,13 +25,6 @@ def create_ducbdb_backend(tmp_dir: Path | None = None) -> DuckDBAPI:
 
     if tmp_dir is not None:
         con.sql(f"SET temp_directory = '{tmp_dir.absolute()}' ")
-
-    con.sql("""
-    SET threads = 7;
-    SET memory_limit = '24GB';
-    SET preserve_insertion_order = false;
-    SET max_temp_directory_size = '550GB';
-    """)
 
     db_api = DuckDBAPI(connection=con)
     return db_api
@@ -94,7 +88,7 @@ class BusinessRulesSplink:
         self.waterfall_chart: None | Chart = None
 
     def preprocess_features(
-        self, df_features: pl.DataFrame, df_embeddings: pl.DataFrame | None
+        self, df_features: pl.DataFrame, df_embeddings: pl.DataFrame | None = None
     ) -> pl.DataFrame:
         df_features_preprocessed = df_features.clone()
 
@@ -160,7 +154,7 @@ class BusinessRulesSplink:
                 pl.col("adresse").is_null() & pl.col("adresse_complement").is_null()
             )
             .then(None)
-            .otherwise(pl.col("adresse_clean_vector").cast(pl.Array(pl.Float64, 1024)))
+            .otherwise(pl.col("adresse_clean_vector").cast(pl.Array(pl.Float32, 1024)))
             .alias("adresse_clean_vector")
         )
 
@@ -258,8 +252,13 @@ class BusinessRulesSplink:
         return self.linker, best_thresold_data
 
     def predict(
-        self, threshold=0.5, build_waterfall_chart: bool = False
-    ) -> tuple[pl.DataFrame, pl.DataFrame]:  # type: ignore[reportUnknownParameterType]
+        self,
+        threshold=0.5,
+        build_waterfall_chart: bool = False,
+        materialize_outputs_as_parquet: bool = False,
+        outputs_parquet_folder: Path | None = None,
+        outputs_suffix: str | None = None,
+    ) -> tuple[pl.DataFrame, pl.DataFrame] | None:  # type: ignore[reportUnknownParameterType]
         """Run clustering and apply business rule filtering."""
         if self.linker is None:  # type: ignore[reportUnknownMemberType]
             raise RuntimeError(
@@ -268,17 +267,36 @@ class BusinessRulesSplink:
 
         logger.info("[SPLINK] Generating predictions at threshold %.3f", threshold)
         # Generate pairwise predictions with Splink.
-        predictions = self.linker.inference.predict()
+        predictions = self.linker.inference.predict(threshold_match_weight=threshold)
 
         clusters = self.linker.clustering.cluster_pairwise_predictions_at_threshold(
             predictions, threshold_match_weight=threshold
         )
 
-        df_predictions = pl.DataFrame(predictions.as_pandas_dataframe())
-        df_clusters = pl.DataFrame(clusters.as_pandas_dataframe())
+        if materialize_outputs_as_parquet:
+            if outputs_parquet_folder is None:
+                raise ValueError("outputs_parquet_folder must be provided.")
+            predictions.to_parquet(
+                str(outputs_parquet_folder / f"predictions_{outputs_suffix}.parquet"),
+                overwrite=True,
+            )
+            clusters.to_parquet(
+                str(outputs_parquet_folder / f"clusters_{outputs_suffix}.parquet"),
+                overwrite=True,
+            )
+            return
+
+        df_predictions = pl.DataFrame(
+            predictions.as_record_dict(),
+            schema_overrides=SCHEMA_PREDS,
+        )
+        df_clusters = pl.DataFrame(
+            clusters.as_record_dict(),
+            schema_overrides=SCHEMA_CLUSTERS,
+        )
 
         # Apply business rules
-        df_clusters_cleaned = self.apply_business_rules(df_clusters, df_predictions)
+        df_clusters_cleaned = df_clusters
 
         if build_waterfall_chart:
             logger.info(
@@ -381,7 +399,7 @@ class BusinessRulesSplink:
             df_clusters.select(pl.col("cluster_id").n_unique()).item(),
         )
         clusters_dict = defaultdict(dict)
-        for cluster_id, df in df_clusters.filter(
+        for (_, cluster_id), df in df_clusters.filter(
             pl.col("entity_id").count().over("cluster_id") > 1
         ).group_by("cluster_id"):
             for row in df.iter_rows(named=True):
@@ -391,10 +409,14 @@ class BusinessRulesSplink:
                 ].to_list()
 
                 scores = df_predictions.filter(
-                    (pl.col("entity_id_l") == entity_id)
-                    & (pl.col("entity_id_r").is_in(siblings_entities_ids))
-                    | (pl.col("entity_id_r") == entity_id)
-                    & (pl.col("entity_id_l").is_in(siblings_entities_ids))
+                    (
+                        (pl.col("entity_id_l") == entity_id)
+                        & (pl.col("entity_id_r").is_in(siblings_entities_ids))
+                    )
+                    | (
+                        (pl.col("entity_id_r") == entity_id)
+                        & (pl.col("entity_id_l").is_in(siblings_entities_ids))
+                    )
                 )["match_weight"].to_list()
 
                 entity_dict = {**row, "mean_score": mean(scores)}

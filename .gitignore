@@ -35,3 +35,4 @@ __screenshots__
 data-platform/notebooks/deduplication/datasets/*
 data-platform/notebooks/deduplication/model.bin
 ml_deduplication/ml_deduplication/notebooks/.tmp/*
+ml_deduplication/cache_artifacts/*
