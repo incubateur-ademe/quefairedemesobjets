@@ -29,6 +29,28 @@ variable "webapp_db_password" {
   sensitive   = true
 }
 
+variable "webapp_db_admin_username" {
+  description = "Nom d'utilisateur administrateur de la base de données webapp"
+  type        = string
+}
+
+variable "webapp_db_admin_password" {
+  description = "Mot de passe administrateur de la base de données webapp"
+  type        = string
+  sensitive   = true
+}
+
+variable "webapp_db_metabase_username" {
+  description = "Nom d'utilisateur Metabase de la base de données webapp"
+  type        = string
+}
+
+variable "webapp_db_metabase_password" {
+  description = "Mot de passe Metabase de la base de données webapp"
+  type        = string
+  sensitive   = true
+}
+
 variable "webapp_volume_size" {
   description = "Taille du volume en GB de la base de données webapp"
   type        = number
@@ -55,6 +77,28 @@ variable "warehouse_db_password" {
   sensitive   = true
 }
 
+variable "warehouse_db_admin_username" {
+  description = "Nom d'utilisateur administrateur de la base de données warehouse"
+  type        = string
+}
+
+variable "warehouse_db_admin_password" {
+  description = "Mot de passe administrateur de la base de données warehouse"
+  type        = string
+  sensitive   = true
+}
+
+variable "warehouse_db_metabase_username" {
+  description = "Nom d'utilisateur Metabase de la base de données warehouse"
+  type        = string
+}
+
+variable "warehouse_db_metabase_password" {
+  description = "Mot de passe Metabase de la base de données warehouse"
+  type        = string
+  sensitive   = true
+}
+
 variable "warehouse_volume_size" {
   description = "Taille du volume en GB de la base de données warehouse"
   type        = number
@@ -77,6 +121,17 @@ variable "airflow_db_username" {
 
 variable "airflow_db_password" {
   description = "Mot de passe de la base de données airflow"
+  type        = string
+  sensitive   = true
+}
+
+variable "airflow_db_admin_username" {
+  description = "Nom d'utilisateur administrateur de la base de données airflow"
+  type        = string
+}
+
+variable "airflow_db_admin_password" {
+  description = "Mot de passe administrateur de la base de données airflow"
   type        = string
   sensitive   = true
 }
