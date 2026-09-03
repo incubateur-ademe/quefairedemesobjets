@@ -61,7 +61,7 @@ inputs = {
   # The actual probe uses a dynamic internal IP (e.g. 100.96.x.x:8000) which
   # varies per deployment — "*" allows any host for ephemeral previews.
   ALLOWED_HOSTS = "*"
-  BASE_URL = format("https://qfdmodpreview6b0061c2-lvao-pr-%s-webapp.functions.fnc.fr-par.scw.cloud", local.pr_number)
+  BASE_URL      = format("https://qfdmodpreview6b0061c2-lvao-pr-%s-webapp.functions.fnc.fr-par.scw.cloud", local.pr_number)
 
   DATABASE_URL = dependency.preview_database.outputs.database_url
   SECRET_KEY   = get_env("PREVIEW_SECRET_KEY")
