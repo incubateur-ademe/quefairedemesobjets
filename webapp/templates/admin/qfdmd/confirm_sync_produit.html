@@ -1,0 +1,28 @@
+{% extends "wagtailadmin/generic/base.html" %}
+{% load wagtailadmin_tags i18n %}
+
+{% block titletag %}Synchroniser depuis le produit legacy{% endblock %}
+
+{% block content %}
+<div class="nice-padding">
+    <h2>Synchroniser "{{ page.title }}" depuis le produit legacy</h2>
+
+    <p>
+        Le corps de la page (<code>body</code>) et les images d'infotri
+        seront reconstruits a partir des donnees du produit legacy
+        <strong>{{ produit.nom }}</strong> (id={{ produit.pk }}).
+    </p>
+
+    <p>
+        Les champs <code>legacy_</code> (lecture seule) ne sont pas modifies.
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="actions">
+            <a href="{% url 'wagtailadmin_pages:edit' page.id %}" class="button button-secondary">Annuler</a>
+            <button type="submit" class="button">Synchroniser</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
