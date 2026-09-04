@@ -58,7 +58,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7.0.1
         with:
-          ref: ${{ inputs.ref }}
+          ref: ${{ github.sha }}
       # The regression test files and GitHub actions may not exist on the
       # checked-out ref (e.g. main). We sparse-checkout them from the PR branch
       # and overlay them onto the working tree so both baseline and compare jobs
