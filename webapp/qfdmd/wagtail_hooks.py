@@ -1,4 +1,6 @@
 from django.contrib import messages
+from wagtail.admin.views.bulk_action import BulkAction
+
 from django.contrib.auth.models import Permission
 from django.db import transaction
 from django.urls import path, reverse
@@ -250,6 +252,31 @@ class RevertProduitsMigrationBulkAction(BaseProduitMigrationBulkAction):
         return None
 
 
+@hooks.register("register_bulk_action")
+class RevertProduitPagesMigrationBulkAction(BulkAction):
+    display_name = "Annuler la migration"
+    aria_label = "Annuler la migration automatique des pages produits sélectionnées"
+    action_type = "revert_produit_page_migration"
+    template_name = "qfdmd/bulk_actions/confirm_bulk_revert.html"
+    action_priority = 20
+    classes = {"serious"}
+    success_message_template = "Migration annulée pour %(count)d produit(s)."
+    models = [ProduitPage]
+
+    @classmethod
+    def execute_action(cls, objects, self):
+        num_parent_objects = 0
+        num_child_objects = 0
+
+        for produit_page in objects:
+            num_parent_objects += 1
+            for produit in produit_page.legacy_imported_produits.all():
+                revert_produit_migration(produit)
+                num_child_objects += 1
+
+        return num_parent_objects, num_child_objects
+
+
 # Snippet action menu items for the Produit edit view
 
 
@@ -379,6 +406,7 @@ class RevertPageMigrationMenuItem(ActionMenuItem):
         return reverse("revert_single_produit", args=[produits[0]])
 
     def is_shown(self, context):
+        return True
         page = context.get("page")
         if not page:
             return False
