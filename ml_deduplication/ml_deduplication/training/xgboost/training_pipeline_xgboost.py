@@ -239,15 +239,15 @@ if __name__ == "__main__":
 
     hyperparameters = {
         "n_estimators": 1000,
-        "max_depth": 3,
+        "max_depth": 4,
         "learning_rate": 0.1,
-        "subsample": 0.8,
-        "colsample_bytree": 0.8,
+        "subsample": 0.9,
+        "colsample_bytree": 0.7,
         "min_child_weight": 5,
-        "gamma": 1.0,
-        "reg_alpha": 0.0,
-        "reg_lambda": 5.0,
-        "scale_pos_weight": 0.9,
+        "gamma": 0.3,
+        "reg_alpha": 1.0,
+        "reg_lambda": 0.1,
+        "scale_pos_weight": 1.1,
     }
     n_splits = args.n_splits
     if args.mode == "tuning":

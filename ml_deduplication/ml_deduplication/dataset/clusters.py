@@ -3,6 +3,7 @@ import math
 from pathlib import Path
 
 import polars as pl
+import polars_distance as pld
 import psycopg
 
 from ml_deduplication.dataset import RANDOM_SEED
@@ -272,8 +273,10 @@ def balance_entities_dataset(
     df_entities_ml_inference_manual_labeling: pl.DataFrame,
     database_connection_uri: str,
     num_examples_for_each_label: int = 1000,
+    nearby_distance_meters: float = 50,
+    nearby_clusters_ratio: float = 0.5,
+    name_similarity_threshold: float = 0.9,
 ) -> pl.DataFrame:
-
     df_entities_manual_labeling = pl.concat(
         [
             df_entities_ml_manual_labeling,
@@ -347,35 +350,113 @@ def balance_entities_dataset(
             ]
         )
 
-    num_entities_without_clusters = len(df_final.filter(pl.col("cluster_id").is_null()))
-    required_singleton_entities = (
-        num_examples_for_each_label - num_entities_without_clusters
+    # =====================================================================
+    # Entités de clusters DIFFERENTS mais géographiquement proches (centres
+    # commerciaux). Elles ont toutes un parent_id (cluster connu) : on est
+    # certain qu'elles sont distinctes -> aucun risque de faux négatif.
+    # Au moment du block_df (cross-join), deux entités de clusters voisins
+    # formeront une paire avec cluster_id_l != cluster_id_r -> labellisée
+    # négative. C'est la source fiable de "hard negatives" proches.
+    #
+    # Le nombre d'entités ajoutées est borné : il représente environ
+    # nearby_clusters_ratio (50 % par défaut) du budget restant pour atteindre
+    # num_examples_for_each_label, le reste étant complété par les singletons.
+    # =====================================================================
+    num_entities_to_add = num_examples_for_each_label - len(
+        df_final.filter(pl.col("cluster_id").is_null())
     )
-    if required_singleton_entities > 0:
+    nearby_budget = math.floor(nearby_clusters_ratio * num_entities_to_add)
+    singleton_budget = num_entities_to_add - nearby_budget
+
+    df_nearby_clusters = get_nearby_clusters_from_database_random_sampling(
+        database_connection_uri, nearby_distance_meters
+    ).filter(
+        pl.col("identifiant_unique")
+        .is_in(df_final.get_column("identifiant_unique"))
+        .not_()
+    )
+    if nearby_budget > 0 and not df_nearby_clusters.is_empty():
+        # On ajoute des CLUSTERS ENTIERS (et non des entités isolées) : sinon,
+        # un cluster partiellement ajouté se retrouverait avec une seule entité
+        # dans le dataset final et son cluster_id serait remis à null par la règle
+        # finale, ce qui casserait la garantie "clusters distincts connus" et
+        # produirait des entités sans cluster_id malgré un parent_id en base.
+        # On ne garde que les clusters ayant au moins 2 entités (vrais clusters,
+        # non remis à null) et on sélectionne des clusters au hasard jusqu'à
+        # approcher le budget.
+        cluster_sizes = df_nearby_clusters.group_by("cluster_id").agg(
+            pl.len().alias("n_entities")
+        )
+        cluster_sizes = cluster_sizes.filter(pl.col("n_entities") >= 2)
+        shuffled_cluster_ids = cluster_sizes.select(
+            pl.col("cluster_id").shuffle(RANDOM_SEED)
+        )["cluster_id"].to_list()
+
+        selected_cluster_ids = []
+        budget_left = nearby_budget
+        for cluster_id in shuffled_cluster_ids:
+            selected_cluster_ids.append(cluster_id)
+            budget_left -= cluster_sizes.filter(pl.col("cluster_id") == cluster_id)[
+                "n_entities"
+            ][0]
+            if budget_left <= 0:
+                break
+
+        df_nearby_clusters_sampled = df_nearby_clusters.filter(
+            pl.col("cluster_id").is_in(selected_cluster_ids)
+        ).with_columns(pl.lit("auto_nearby").alias("example_type"))
+        df_final = pl.concat([df_final, df_nearby_clusters_sampled], how="diagonal")
+        logger.info(
+            "Added %s nearby-cluster entities across %s clusters "
+            "(shopping malls hard negatives)",
+            len(df_nearby_clusters_sampled),
+            len(selected_cluster_ids),
+        )
+
+    if singleton_budget > 0:
         logger.info(
             "Will add %s required singleton entities to reach num_examples_for_each_label",
-            required_singleton_entities,
+            singleton_budget,
         )
         df_singletons = get_singleton_entities_from_database_random_sampling(
             database_connection_uri, df_final
-        ).with_columns(pl.lit("auto").alias("example_type"))
+        ).with_columns(pl.lit("auto_singleton").alias("example_type"))
+
+        # =================================================================
+        # Filtre anti-faux-négatif : un singleton proche d'une entité déjà
+        # présente dans le dataset avec un nom quasi identique est très
+        # probablement un doublon non détecté. On ne doit PAS l'ajouter comme
+        # négatif, sinon on injecte du bruit. On garde uniquement les
+        # singletons proches dont le nom diffère nettement, plus les
+        # singletons isolés (> seuil de proximité).
+        # =================================================================
+        df_singletons = filter_singletons_not_duplicates(
+            df_singletons, name_similarity_threshold
+        )
 
         df_hard_singletons = df_singletons.filter(
             pl.col("is_100m_close_to_clustered_entity")
         )
         hard_singletons_to_take = min(
-            math.floor(0.25 * required_singleton_entities), len(df_hard_singletons)
+            math.floor(0.25 * singleton_budget), len(df_hard_singletons)
         )
         df_hard_singletons_sampled = df_hard_singletons.sample(
             n=hard_singletons_to_take
+        )
+        df_isolated_singletons = df_singletons.filter(
+            pl.col("is_100m_close_to_clustered_entity").not_()
+        )
+        isolated_to_take = min(
+            singleton_budget - hard_singletons_to_take, len(df_isolated_singletons)
+        )
+        df_isolated_singletons_sampled = df_isolated_singletons.sample(
+            n=isolated_to_take
         )
         df_final = pl.concat(
             [
                 df_final,
                 df_hard_singletons_sampled,
-                df_singletons.filter(
-                    pl.col("is_100m_close_to_clustered_entity").not_()
-                ).sample(required_singleton_entities - hard_singletons_to_take),
+                df_isolated_singletons_sampled,
             ],
             how="diagonal",
         )
@@ -391,6 +472,69 @@ def balance_entities_dataset(
     )
 
     return df_final
+
+
+def filter_singletons_not_duplicates(
+    df_singletons: pl.DataFrame,
+    name_similarity_threshold: float = 0.9,
+) -> pl.DataFrame:
+    """Remove singletons that are likely duplicate records of entities already
+    present in the dataset (false negatives).
+
+    A singleton close to an existing dataset entity (is_100m_close_to_clustered_entity)
+    whose name is very similar to one of the nearby entities is very likely a
+    non-detected duplicate. We exclude it from the negative pool to avoid adding
+    noise, keeping only the singletons whose name differs clearly plus the
+    isolated ones.
+
+    Parameters
+    ----------
+    df_singletons : pl.DataFrame
+        Singleton entities as returned by singleton_entities.sql, with the extra
+        columns `nom` and `close_entities_noms`.
+    name_similarity_threshold : float, optional
+        Jaro-Winkler similarity above which two names are considered identical.
+        Default is 0.9.
+
+    Returns
+    -------
+    pl.DataFrame
+        The singletons filtered of likely duplicates.
+    """
+    if df_singletons.is_empty() or "close_entities_noms" not in df_singletons.columns:
+        return df_singletons
+
+    df_singletons = df_singletons.with_columns(
+        pl.col("close_entities_noms").fill_null(pl.lit([])).alias("close_entities_noms")
+    )
+
+    df_proximity = (
+        df_singletons.select("identifiant_unique", "nom", "close_entities_noms")
+        .explode("close_entities_noms")
+        .filter(pl.col("close_entities_noms").is_not_null())
+        .with_columns(
+            pld.col("nom")
+            .dist_str.jaro_winkler("close_entities_noms")
+            .alias("name_sim")
+        )
+        .group_by("identifiant_unique")
+        .agg(pl.col("name_sim").max().alias("max_name_sim"))
+    )
+
+    df_singletons = df_singletons.join(
+        df_proximity, on="identifiant_unique", how="left"
+    ).with_columns(pl.col("max_name_sim").fill_null(0.0).alias("max_name_sim"))
+
+    # Un singleton proche d'une entité existante dont le nom est trop similaire
+    # est exclu (probable doublon -> faux négatif).
+    df_singletons = df_singletons.filter(
+        ~(
+            pl.col("is_100m_close_to_clustered_entity")
+            & (pl.col("max_name_sim") >= name_similarity_threshold)
+        )
+    ).drop(["nom", "close_entities_noms", "max_name_sim"])
+
+    return df_singletons
 
 
 def get_clusters_from_database_random_sampling(
@@ -417,6 +561,67 @@ def get_clusters_from_database_random_sampling(
         conn.commit()
 
     return df_entities_cluster
+
+
+def get_nearby_clusters_from_database_random_sampling(
+    database_connection_uri: str,
+    nearby_distance_meters: float = 50,
+    sample_size: int = 5000,
+) -> pl.DataFrame:
+    """Retrieve entities from distinct clusters (parent_id) that are geographically
+    close (<= nearby_distance_meters). This is the typical case of shopping malls
+    where several distinct shops are located at the same place.
+
+    These entities all have a parent_id (known cluster), so we are certain they
+    are distinct entities -> no risk of adding noise / false negatives.
+
+    The candidates are materialized in a temporary table with a GiST index on
+    "location" (guaranteeing the spatial index is used, unlike querying the view
+    directly), and the spatial self-join is bounded: only a random sample of
+    `sample_size` acteurs drives the neighborhood lookup, each of them only
+    searching its close neighbors via the GiST index. This keeps the query fast
+    even on a large table instead of doing a full cross spatial join.
+
+    Parameters
+    ----------
+    database_connection_uri : str
+        URI for the database connection.
+    nearby_distance_meters : float, optional
+        Maximum distance (meters) below which two entities of distinct clusters
+        are considered nearby. Default is 50.
+    sample_size : int, optional
+        Number of randomly sampled acteurs that drive the nearby lookup.
+        Default is 5000.
+
+    Returns
+    -------
+    pl.DataFrame
+        DataFrame with columns:
+        - identifiant_unique: The entity's unique identifier.
+        - cluster_id: The entity's parent_id cast to String.
+    """
+    sql_query_folder = get_sql_files_folder_path()
+
+    with psycopg.connect(database_connection_uri) as conn, conn.cursor() as cur:
+        cur.execute(
+            (sql_query_folder / "create_nearby_clusters_tmp_tables.sql").read_text()
+        )
+        conn.commit()
+
+    df_entities_nearby_clusters = pl.read_database_uri(
+        query=(sql_query_folder / "nearby_clusters.sql")
+        .read_text()
+        .format(nearby_distance_meters=nearby_distance_meters, sample_size=sample_size),
+        uri=database_connection_uri,
+    ).with_columns(pl.col("cluster_id").cast(pl.String))
+
+    with psycopg.connect(database_connection_uri) as conn, conn.cursor() as cur:
+        cur.execute(
+            (sql_query_folder / "drop_nearby_clusters_tmp_tables.sql").read_text()
+        )
+        conn.commit()
+
+    return df_entities_nearby_clusters
 
 
 def get_singleton_entities_from_database_random_sampling(
