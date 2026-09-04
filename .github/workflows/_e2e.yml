@@ -80,7 +80,7 @@ jobs:
           rm -rf __regression_tests__
 
       - name: Setup E2E tools
-        uses: ./.github/actions/setup-e2e-tools
+        uses: ${{ github.repository }}/.github/actions/setup-e2e-tools@main
         with:
           build-frontend: "true"
           base-url: ${{ inputs.base-url || 'http://localhost:8888' }}
