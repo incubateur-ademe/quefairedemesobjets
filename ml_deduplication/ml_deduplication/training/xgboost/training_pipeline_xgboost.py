@@ -157,6 +157,7 @@ def run_training_pipeline(
     )
 
     test_performance_reports = {
+        "best_threshold": best_threshold,
         **test_performance_reports,
         "pairwise_classification_report": test_classification_report_pairwise,
         "selected_cluster_threshold": final_model.best_threshold,
@@ -238,13 +239,13 @@ if __name__ == "__main__":
 
     hyperparameters = {
         "n_estimators": 1000,
-        "max_depth": 5,
-        "learning_rate": 0.02,
-        "subsample": 0.7,
-        "colsample_bytree": 0.9,
+        "max_depth": 3,
+        "learning_rate": 0.1,
+        "subsample": 0.8,
+        "colsample_bytree": 0.8,
         "min_child_weight": 5,
-        "gamma": 0.5,
-        "reg_alpha": 1.0,
+        "gamma": 1.0,
+        "reg_alpha": 0.0,
         "reg_lambda": 5.0,
         "scale_pos_weight": 0.9,
     }

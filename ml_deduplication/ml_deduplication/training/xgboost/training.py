@@ -363,8 +363,10 @@ def train_xgboost_with_kfold_validation(
     )
 
     target_precision = 0.97
-
-    candidates = df_threshold_metrics.filter(pl.col("precision") >= target_precision)
+    min_recall = 0.75
+    candidates = df_threshold_metrics.filter(
+        (pl.col("precision") >= target_precision) & (pl.col("recall") >= min_recall)
+    )
     if candidates.is_empty():
         logger.warning("No threshold reaches target precision=%s", target_precision)
         candidates = df_threshold_metrics
@@ -422,7 +424,10 @@ def train_xgboost_with_kfold_validation(
     )
 
     best_threshold = (
-        df_clusterwise_threshold_selection_agg.with_columns(
+        df_clusterwise_threshold_selection_agg.filter(
+            pl.col("mean_bcubed_recall") >= min_recall
+        )
+        .with_columns(
             (
                 pl.col("mean_bcubed_precision") - 0.5 * pl.col("std_bcubed_precision")
             ).alias("score")

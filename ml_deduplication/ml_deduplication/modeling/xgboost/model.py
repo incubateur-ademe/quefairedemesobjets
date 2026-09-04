@@ -2,10 +2,8 @@ import logging
 from pathlib import Path
 from typing import Self
 
-import numpy as np
 import polars as pl
-from scipy.sparse import coo_matrix
-from scipy.sparse.csgraph import connected_components
+from ml_deduplication.modeling.xgboost.clustering import ConstrainedUnionFind
 from xgboost import XGBClassifier
 from xgboost.callback import EarlyStopping
 
@@ -24,6 +22,7 @@ FEATURES_COLUMNS_NAMES = (
     "code_commune_insee_match",
     "code_postal_match",
     "departement_match",
+    "geo_distance",
 )
 
 
@@ -37,8 +36,8 @@ class XGBoostBusinessRulesModel:
     ):
         self.xgb_hyperparameters = xgb_hyperparameters
 
-        self._unique_fields = should_be_different_fields
-        self._distinct_fields = should_be_equal_fields
+        self._should_be_different_fields = should_be_different_fields
+        self._should_be_equal_fields = should_be_equal_fields
         self._feature_columns = FEATURES_COLUMNS_NAMES
 
         self._classifier = XGBClassifier(
@@ -125,10 +124,10 @@ class XGBoostBusinessRulesModel:
                     pl.col(f"{f}_l").is_not_null()
                     & pl.col(f"{f}_r").is_not_null()
                     & (pl.col(f"{f}_l") == pl.col(f"{f}_r"))
-                    for f in self._unique_fields
+                    for f in self._should_be_different_fields
                 ]
             )
-            if self._unique_fields
+            if self._should_be_different_fields
             else pl.lit(False)
         )
 
@@ -152,9 +151,9 @@ class XGBoostBusinessRulesModel:
 
         distinct_conflict = (
             pl.any_horizontal(
-                [distinct_field_conflict(f) for f in self._distinct_fields]
+                [distinct_field_conflict(f) for f in self._should_be_equal_fields]
             )
-            if self._distinct_fields
+            if self._should_be_equal_fields
             else pl.lit(False)
         )
 
@@ -167,23 +166,7 @@ class XGBoostBusinessRulesModel:
         threshold: float | None = None,
         max_null_pct: float | None = None,
     ) -> tuple[pl.DataFrame, pl.DataFrame]:
-        """
-        Build entity clusters (connected components) from scored candidate pairs.
-
-        Expects df_pairs_scores to have: identifiant_unique_l, identifiant_unique_r, score_true,
-        the model's feature columns, and {field}_a / {field}_b for every field
-        in self._unique_fields / self._distinct_fields (see predict()).
-
-        threshold: score_true cutoff for an edge. Defaults to self.best_threshold.
-        max_null_pct: if set, pairs with a higher fraction of null features than
-            this are also excluded from edge formation (in addition to being
-            flagged via pct_null_features for a downstream QA pass).
-
-        Returns:
-          - df_pairs_scores with two extra columns: pct_null_features, is_edge
-          - df_entity_clusters: one row per entity_id with its cluster_id
-        """
-        logger.info("Starting clustering entities")
+        logger.info("Starting constrained clustering entities")
         threshold = threshold if threshold is not None else self.best_threshold
         if threshold is None:
             raise ValueError(
@@ -192,6 +175,7 @@ class XGBoostBusinessRulesModel:
 
         n_features = len(self._feature_columns)
         df_pairs_scores_lazy = df_pairs_scores.lazy()
+
         df_pairs_scores_lazy = df_pairs_scores_lazy.with_columns(
             (
                 pl.sum_horizontal(
@@ -208,76 +192,100 @@ class XGBoostBusinessRulesModel:
         df_pairs_scores_lazy = df_pairs_scores_lazy.with_columns(
             is_edge.alias("is_edge")
         )
+        df_pairs_final = df_pairs_scores_lazy.collect(engine="streaming")
 
-        # Node index, vectorized (no python-level dict/loop, scales to millions of rows)
-        df_nodes = (
-            pl.concat(
-                [
-                    df_pairs_scores_lazy.select(
-                        pl.col("identifiant_unique_l").alias("entity_id")
-                    ),
-                    df_pairs_scores_lazy.select(
-                        pl.col("identifiant_unique_r").alias("entity_id")
-                    ),
-                ]
-            )
-            .unique(subset="entity_id")
-            .with_row_index("node_idx")
-            .collect(engine="streaming")
+        df_edges = df_pairs_final.filter(pl.col("is_edge"))
+
+        if df_edges.is_empty():
+            logger.warning("No edges passed the threshold and business rules.")
+            return df_pairs_final, self._get_singletons(df_entities)
+
+        # =====================================================================
+        # Union-Find Contraint Dynamique
+        # =====================================================================
+        logger.info("Building entity attribute map for dynamic constraint checking...")
+
+        # On extrait dynamiquement tous les champs à surveiller (avec suffixe _l et _r)
+        fields_to_track = list(
+            set(self._should_be_different_fields + self._should_be_equal_fields)
         )
-        n_nodes = df_nodes.height
 
-        df_edges_idx = (
-            df_pairs_scores_lazy.filter(pl.col("is_edge"))
-            .select("identifiant_unique_l", "identifiant_unique_r")
-            .join(
-                df_nodes.lazy().rename(
-                    {
-                        "entity_id": "identifiant_unique_l",
-                        "node_idx": "node_idx_a",
-                    }
-                ),
-                on="identifiant_unique_l",
-            )
-            .join(
-                df_nodes.lazy().rename(
-                    {
-                        "entity_id": "identifiant_unique_r",
-                        "node_idx": "node_idx_b",
-                    }
-                ),
-                on="identifiant_unique_r",
-            )
-        ).collect(engine="streaming")
+        exprs_l = [pl.col("identifiant_unique_l").alias("entity_id")] + [
+            pl.col(f"{f}_l").alias(f) for f in fields_to_track
+        ]
 
-        row = df_edges_idx.get_column("node_idx_a").to_numpy()
-        col = df_edges_idx.get_column("node_idx_b").to_numpy()
-        data = np.ones(len(row), dtype=np.int8)
+        exprs_r = [pl.col("identifiant_unique_r").alias("entity_id")] + [
+            pl.col(f"{f}_r").alias(f) for f in fields_to_track
+        ]
 
-        adjacency = coo_matrix((data, (row, col)), shape=(n_nodes, n_nodes))
-        logger.debug("Starting connected components...")
-        _, labels = connected_components(adjacency, directed=False)
-        logger.debug("Finished connected components.")
+        df_nodes_attrs = pl.concat(
+            [
+                df_edges.select(exprs_l),
+                df_edges.select(exprs_r),
+            ]
+        ).unique(subset="entity_id")
 
-        df_entity_clusters = df_nodes.with_columns(
-            pl.Series("cluster_id", labels)
-        ).select("entity_id", "cluster_id")
+        # Conversion en dictionnaire pour lookup O(1)
+        entity_attributes = {
+            row["entity_id"]: {f: row[f] for f in fields_to_track}
+            for row in df_nodes_attrs.iter_rows(named=True)
+        }
 
-        # Adds entities that have been filtered out by the blocking step
+        logger.info(
+            "Running Constrained Union-Find with rules: diff=%s, eq=%s",
+            self._should_be_different_fields,
+            self._should_be_equal_fields,
+        )
+
+        uf = ConstrainedUnionFind(
+            entity_attributes=entity_attributes,
+            should_be_different_fields=self._should_be_different_fields,
+            should_be_equal_fields=self._should_be_equal_fields,
+        )
+
+        # Trier les arêtes par score décroissant pour privilégier les liens les plus forts
+        edges_sorted = df_edges.sort("score_true", descending=True)
+        col_l = edges_sorted["identifiant_unique_l"].to_list()
+        col_r = edges_sorted["identifiant_unique_r"].to_list()
+
+        for i in range(len(col_l)):
+            uf.union(col_l[i], col_r[i])
+
+        logger.info(
+            "Constrained clustering finished. %s unions discarded to respect business rules",
+            uf.refused_unions_count,
+        )
+        clusters_mapping = uf.get_clusters()
+
+        df_entity_clusters = pl.DataFrame(
+            {
+                "entity_id": list(clusters_mapping.keys()),
+                "cluster_id": list(clusters_mapping.values()),
+            }
+        )
+
+        # Formater les IDs de cluster pour qu'ils soient uniques et lisibles
+        unique_clusters = df_entity_clusters["cluster_id"].unique().to_list()
+        cluster_id_map = {
+            old_id: f"c_{new_id}" for new_id, old_id in enumerate(unique_clusters)
+        }
+
+        df_entity_clusters = df_entity_clusters.with_columns(
+            pl.col("cluster_id").replace_strict(cluster_id_map).alias("cluster_id")
+        )
+
+        # Ajout des entités isolées (singletons)
         if df_entities is not None:
             df_entity_clusters = pl.concat(
                 [
-                    df_entity_clusters.with_columns(
-                        "entity_id",
-                        pl.format("c_pred_{}", "cluster_id").alias("cluster_id"),
-                    ),
+                    df_entity_clusters,
                     df_entities.filter(
                         pl.col("identifiant_unique")
-                        .is_in(df_entity_clusters.get_column("entity_id").to_list())
+                        .is_in(df_entity_clusters["entity_id"])
                         .not_()
                     )
                     .with_columns(
-                        pl.format("c_singleton_pred_{}", "identifiant_unique").alias(
+                        pl.format("c_singleton_{}", "identifiant_unique").alias(
                             "cluster_id"
                         )
                     )
@@ -285,12 +293,19 @@ class XGBoostBusinessRulesModel:
                         pl.col("identifiant_unique").alias("entity_id"), "cluster_id"
                     ),
                 ],
-                how="vertical",
+                how="vertical_relaxed",
             )
 
-        return (
-            df_pairs_scores_lazy.collect(engine="streaming"),
-            df_entity_clusters,
+        return df_pairs_final, df_entity_clusters
+
+    def _get_singletons(self, df_entities: pl.DataFrame) -> pl.DataFrame:
+        if df_entities is None:
+            return pl.DataFrame(
+                schema={"entity_id": pl.String, "cluster_id": pl.String}
+            )
+        return df_entities.select(
+            pl.col("identifiant_unique").alias("entity_id"),
+            pl.format("c_singleton_{}", "identifiant_unique").alias("cluster_id"),
         )
 
     def save(self, path: Path):

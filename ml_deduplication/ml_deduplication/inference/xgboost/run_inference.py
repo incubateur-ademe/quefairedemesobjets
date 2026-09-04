@@ -139,6 +139,12 @@ def main():
         threshold=args.model_threshold,
         n_jobs=-1,
     )
+    model._should_be_different_fields = tuple(
+        [
+            *model._should_be_different_fields,
+            "parent_id",
+        ]
+    )
     with (model_path / "calibrator.pkl").open("rb") as f:
         calibrator: LogisticRegression = load(f)
 
@@ -171,7 +177,7 @@ def main():
                         pl.col("parent_id_l") != pl.col("parent_id_r")
                     ],
                 )
-                if len(X_temp) == 0:
+                if (X_temp is None) or (len(X_temp) == 0):
                     continue
                 # Step 3 : predict
                 df_predictions_tmp = model.predict(X_temp)
@@ -191,7 +197,9 @@ def main():
                 if len(df_clusters_tmp) > 0:
                     dfs_clusters.append(
                         df_clusters_tmp.with_columns(
-                            pl.format(f"dep_{departement_code}_{{  }}", "cluster_id")
+                            pl.format(
+                                f"dep_{departement_code}_{{  }}", "cluster_id"
+                            ).alias("cluster_id")
                         )
                     )
         df_predictions = pl.concat(dfs_predictions, how="vertical")
@@ -215,11 +223,11 @@ def main():
         df_predictions = model.predict(X)
         df_calibrated_predictions = apply_calibrator(calibrator, df_predictions)
 
-        df_clusters = model.cluster(
+        _, df_clusters = model.cluster(
             df_calibrated_predictions.with_columns(
                 pl.col("score_true_calibrated").alias("score_true")
             ),
-            df_entities=df,
+            df_entities=df_acteurs,
             threshold=args.model_threshold,
         )
 
