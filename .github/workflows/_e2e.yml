@@ -55,6 +55,14 @@ jobs:
           POSTGRES_DB: webapp
 
     steps:
+      - name: Validate requested ref
+        shell: bash
+        run: |
+          if [[ ! "${{ inputs.ref }}" =~ ^[0-9a-fA-F]{40}$ ]]; then
+            echo "Invalid inputs.ref: must be a full 40-character commit SHA."
+            exit 1
+          fi
+
       - name: Checkout
         uses: actions/checkout@v7.0.1
         with:
