@@ -4,6 +4,9 @@ version = "0.1.0"
 description = "Que faire de mes objets et déchets — monorepo workspace"
 requires-python = ">=3.12,<3.13"
 dependencies = [
+    # explicitely added here in order to force dependency version
+    # as version <0.6.0 introduced a CVE
+    "sqlparse>=0.6.0",
     "webapp-quefairedemesobjetsetdechets",
 ]
 
