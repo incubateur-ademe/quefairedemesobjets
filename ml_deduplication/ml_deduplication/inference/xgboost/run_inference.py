@@ -174,7 +174,8 @@ def main():
                     ],
                     include_label=False,
                     additional_business_rules_exprs=[
-                        pl.col("parent_id_l") != pl.col("parent_id_r")
+                        pl.col("parent_id_l").fill_null(-1)
+                        != pl.col("parent_id_r").fill_null(-2)
                     ],
                 )
                 if (X_temp is None) or (len(X_temp) == 0):
@@ -198,7 +199,8 @@ def main():
                     dfs_clusters.append(
                         df_clusters_tmp.with_columns(
                             pl.format(
-                                f"dep_{departement_code}_{{  }}", "cluster_id"
+                                f"dep_{departement_code}_{{}}",
+                                "cluster_id",
                             ).alias("cluster_id")
                         )
                     )
@@ -243,7 +245,9 @@ def main():
 
     # Step 7: Save outputs
     df_clusters.write_parquet(output_dir / f"inference_clusters_{run_id}.parquet")
-    df_predictions.write_parquet(output_dir / f"inference_predictions_{run_id}.parquet")
+    df_calibrated_predictions.write_parquet(
+        output_dir / f"inference_predictions_{run_id}.parquet"
+    )
 
     logger.info("Inference complete!")
     logger.info("Parquet output: %s", output_dir)

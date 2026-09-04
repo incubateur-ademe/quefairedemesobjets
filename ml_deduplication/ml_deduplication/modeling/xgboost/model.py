@@ -23,6 +23,8 @@ FEATURES_COLUMNS_NAMES = (
     "code_postal_match",
     "departement_match",
     "geo_distance",
+    "acteur_type_id_l",
+    "acteur_type_id_r",
 )
 
 

@@ -91,6 +91,9 @@ def create_full_entities_dataset(
     datasets_path: Path,
     database_connection_uri: str,
     num_examples_per_class: int = 1000,
+    nearby_distance_meters: float = 50,
+    nearby_clusters_ratio: float = 0.5,
+    name_similarity_threshold: float = 0.9,
 ) -> pl.DataFrame:
     """Create the full balanced dataset for training.
 
@@ -104,6 +107,17 @@ def create_full_entities_dataset(
         Path to the directory containing the dataset CSV files.
     database_connection_uri : str
         URI for the database connection.
+    num_examples_per_class : int, optional
+        Target number of examples for each label. Default is 1000.
+    nearby_distance_meters : float, optional
+        Maximum distance (meters) between two entities of distinct clusters to be
+        considered nearby (shopping mall hard negatives). Default is 50.
+    nearby_clusters_ratio : float, optional
+        Share of the entities still to add that should come from nearby clusters
+        (the rest being singletons). Default is 0.5.
+    name_similarity_threshold : float, optional
+        Jaro-Winkler similarity above which a nearby singleton is considered a
+        likely duplicate and excluded from negatives. Default is 0.9.
 
     Returns
     -------
@@ -136,6 +150,9 @@ def create_full_entities_dataset(
         df_entities_ml_inference_manual_labeling,
         database_connection_uri,
         num_examples_per_class,
+        nearby_distance_meters,
+        nearby_clusters_ratio,
+        name_similarity_threshold,
     )
 
     return df_entities_balanced
@@ -182,6 +199,27 @@ def parse_args() -> argparse.Namespace:
         help="Target number of examples for each label (positive and negative). "
         "Default is 1000.",
     )
+    parser.add_argument(
+        "--nearby-distance-meters",
+        type=float,
+        default=50,
+        help="Maximum distance (meters) between two entities of distinct clusters "
+        "to be considered nearby (shopping mall hard negatives). Default is 50.",
+    )
+    parser.add_argument(
+        "--nearby-clusters-ratio",
+        type=float,
+        default=0.5,
+        help="Share of the entities still to add that should come from nearby "
+        "clusters (the rest being singletons). Default is 0.5.",
+    )
+    parser.add_argument(
+        "--name-similarity-threshold",
+        type=float,
+        default=0.9,
+        help="Jaro-Winkler similarity above which a nearby singleton is considered "
+        "a likely duplicate and excluded from negatives. Default is 0.9.",
+    )
     return parser.parse_args()
 
 
@@ -210,6 +248,9 @@ if __name__ == "__main__":
             args.datasets_path,
             args.database_uri,
             args.num_examples_per_class,
+            args.nearby_distance_meters,
+            args.nearby_clusters_ratio,
+            args.name_similarity_threshold,
         )
     else:
         raise ValueError(f"{dataset_type} not a valid choice")
