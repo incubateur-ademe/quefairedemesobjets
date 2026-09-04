@@ -1,0 +1,1946 @@
+id,produit,nom,premier_mot,genre,nombre
+1,420,Cartouche de gaz vide (non rechargeable),Cartouche,féminin,singulier
+2,426,Huisserie,Huisserie,féminin,singulier
+3,426,Menuiserie vitrée,Menuiserie,féminin,singulier
+4,426,Fenêtre,Fenêtre,féminin,singulier
+5,415,masque à usage unique,masque,masculin,singulier
+6,356,Vaisselle jetable,Vaisselle,féminin,singulier
+7,32,Barbecue,Barbecue,masculin,singulier
+8,33,Barbecue jetable,Barbecue,masculin,singulier
+9,103,Clé USB,Clé,féminin,singulier
+10,89,Cartouche d'encre d'imprimante,Cartouche,féminin,singulier
+11,89,"Cartouche d'impression (à jet d'encre, laser)",Cartouche,féminin,singulier
+12,265,Rice-cooker,Rice-cooker,masculin,singulier
+1501,18,Appareil photo numérique,Appareil,masculin,singulier
+13,265,Bouilloire,Bouilloire,féminin,singulier
+14,265,Grille-pain,Grille-pain,masculin,singulier
+15,265,Toaster,Toaster,masculin,singulier
+16,265,Ventilateur,Ventilateur,masculin,singulier
+17,265,Mini-aspirateur,Mini-aspirateur,masculin,singulier
+18,265,Robot,Robot,masculin,singulier
+19,265,Mixeur,Mixeur,masculin,singulier
+20,265,Blender,Blender,masculin,singulier
+21,265,Cafetière,Cafetière,féminin,singulier
+22,265,Machine à café,Machine,féminin,singulier
+23,265,Couteau électrique,Couteau,féminin,singulier
+24,265,Hachoir,Hachoir,masculin,singulier
+25,265,Fer à repasser,Fer,masculin,singulier
+26,265,Centrale vapeur,Centrale,féminin,singulier
+27,265,Friteuse,Friteuse,féminin,singulier
+28,265,Grill,Grill,masculin,singulier
+29,265,Nettoyeur haute pression,Nettoyeur,masculin,singulier
+30,265,Karcher,Karcher,masculin,singulier
+31,265,Batteur,Batteur,masculin,singulier
+32,265,Appareil à raclette,Appareil,masculin,singulier
+33,265,Petit électroménager,Petit,masculin,singulier
+34,178,Remblai,Remblai,masculin,singulier
+35,178,Tout venant,Tout,masculin,singulier
+36,178,Gravats,Gravats,masculin,pluriel
+37,451,Lunette de WC en céramique,Lunette,féminin,singulier
+38,451,Abattant de WC en porcelaine,Abattant,masculin,singulier
+39,451,Lunette de WC en porcelaine,Lunette,féminin,singulier
+40,451,Abattant de WC en céramique,Abattant,masculin,singulier
+41,209,Lunette de WC en plastique,Lunette,féminin,singulier
+42,209,Abattant de WC en plastique,Abattant,masculin,singulier
+43,450,Lunette de WC en bois,Lunette,féminin,singulier
+44,450,Abattant de WC en bois,Abattant,masculin,singulier
+45,364,Pull,Pull,masculin,singulier
+46,364,T-shirt,T-shirt,masculin,singulier
+47,364,Pantalon,Pantalon,masculin,singulier
+48,364,Short,Short,masculin,singulier
+49,364,Bermuda,Bermuda,masculin,singulier
+50,364,Pantacourt,Pantacourt,masculin,singulier
+51,364,Maillot de bain,Maillot,masculin,singulier
+52,364,Chaussettes,Chaussettes,féminin,pluriel
+53,364,Bonnet,Bonnet,masculin,singulier
+54,364,Gant,Gant,masculin,pluriel
+55,364,Echarpe,Echarpe,féminin,singulier
+56,364,Chemise,Chemise,féminin,singulier
+57,364,Polo,Polo,masculin,singulier
+58,364,Veste,Veste,féminin,singulier
+59,364,Costume,Costume,masculin,singulier
+60,364,Gilet,Gilet,masculin,singulier
+61,364,Sweat,Sweat,masculin,singulier
+62,364,Caleçon,Caleçon,masculin,singulier
+63,364,Slip,Slip,masculin,singulier
+64,364,Boxer,Boxer,masculin,singulier
+65,364,Caban,Caban,masculin,singulier
+66,364,Duffle-coat,Duffle-coat,masculin,singulier
+67,364,Trench,Trench,masculin,singulier
+68,364,Legging,Legging,masculin,singulier
+69,364,Jupe,Jupe,féminin,singulier
+70,364,Robe,Robe,féminin,singulier
+71,364,Collant,Collant,masculin,pluriel
+72,364,Mouffle,Mouffle,féminin,singulier
+73,364,Mitaine,Mitaine,féminin,pluriel
+74,364,Foulard,Foulard,masculin,singulier
+75,364,Sous-vêtement,Sous-vêtement,masculin,singulier
+76,364,Lingerie,Lingerie,féminin,singulier
+77,364,Culotte,Culotte,féminin,pluriel
+78,364,Manteau,Manteau,masculin,singulier
+79,364,Soutien-gorge,Soutien-gorge,masculin,singulier
+80,364,Anorak,Anorak,masculin,singulier
+81,364,Doudoune,Doudoune,féminin,singulier
+82,364,Vêtement (propre et sec),Vêtement,masculin,pluriel
+83,408,Couette,Couette,féminin,singulier
+84,408,Traversin,Traversin,masculin,singulier
+85,408,Coussin,Coussin,masculin,singulier
+86,408,Sac de couchage,Sac,masculin,singulier
+87,408,Panier pour animaux,Panier,masculin,singulier
+88,408,Edredon,Edredon,masculin,singulier
+89,408,Surmatelas,Surmatelas,masculin,singulier
+90,408,Polochon,Polochon,masculin,singulier
+91,408,"Housse rembourrée (chaise, canapé)",Housse,féminin,singulier
+92,408,Tapis d'éveil,Tapis,masculin,singulier
+93,408,Turbulette,Turbulette,féminin,singulier
+94,408,Tour de lit rembourré,Tour,masculin,singulier
+95,408,Coussin d'allaitement,Coussin,masculin,singulier
+96,408,Oreiller ergonomique,Oreiller,masculin,singulier
+97,408,Coussin d'assise ou de dossier,Coussin,masculin,singulier
+98,408,Coussin pour animaux,Coussin,masculin,singulier
+99,408,Oreiller,Oreiller,masculin,singulier
+100,408,Duvet,Duvet,masculin,singulier
+101,408,Produit d'ameublement rembourré,Produit,masculin,singulier
+102,285,Vaseline,Vaseline,féminin,singulier
+103,284,Allume-barbecue,Allume-barbecue,masculin,singulier
+104,284,Pâte à bois,Pâte,masculin,singulier
+105,284,Produits à base d'hydrocarbures,Produits,masculin,pluriel
+106,8,Allume-feux,Allume-feux,masculin,pluriel
+107,8,Allume-feu,Allume-feu,masculin,singulier
+108,258,Paraffine,Paraffine,féminin,singulier
+109,290,PVC (Polychlorure de vinyle),PVC,masculin,singulier
+110,246,Panneau d'aggloméré (bois/résine),Panneau,masculin,singulier
+111,109,Corde usée,Corde,féminin,singulier
+112,179,Grillage,Grillage,masculin,singulier
+113,16,Cadenas,Cadenas,masculin,pluriel
+114,16,Loquet,Loquet,masculin,singulier
+115,16,Antivol,Antivol,masculin,singulier
+116,50,"Bois imprégné, souillé ou dangereux",Bois,masculin,singulier
+117,100,Puff,Puff,féminin,singulier
+118,100,Cigarette électronique,Cigarette,féminin,singulier
+119,349,Jouet électrique,Jouet,masculin,singulier
+120,349,Jouet télécommandé,Jouet,masculin,singulier
+121,349,Train électrique (jouet),Train,masculin,singulier
+123,145,Caméscope,Caméscope,masculin,singulier
+126,145,Radio-réveil,Radio-réveil,masculin,singulier
+127,145,Répondeur,Répondeur,masculin,singulier
+128,145,Lampe torche,Lampe,féminin,singulier
+129,145,Barbecue électrique,Barbecue,masculin,singulier
+130,145,Machine à coudre,Machine,féminin,singulier
+131,145,Magnétoscope,Magnétoscope,masculin,singulier
+132,145,Radio,Radio,masculin,singulier
+133,145,Réveil matin,Réveil,masculin,singulier
+134,145,Machine à pain,Machine,féminin,singulier
+135,145,Télécommande,Télécommande,féminin,singulier
+138,145,Onduleur électrique,Onduleur,masculin,singulier
+141,145,Brosse à cheveux électrique,Brosse,féminin,singulier
+142,145,Brosse à dents électrique,Brosse,féminin,singulier
+143,145,Équipement Électrique et Électronique (EEE),Équipement,masculin,singulier
+1500,18,Appareil photo,Appareil,masculin,singulier
+122,145,Rasoir électrique,Rasoir,masculin,singulier
+124,145,Chaîne hi-fi,Chaîne,féminin,singulier
+125,145,Enceinte,Enceinte,féminin,singulier
+136,145,Épilateur électrique,Épilateur,masculin,singulier
+137,145,Lisseur électrique,Lisseur,masculin,singulier
+139,145,Tondeuse à cheveux électrique,Tondeuse,féminin,singulier
+140,145,Tondeuse à barbe électrique,Tondeuse,féminin,singulier
+144,147,Bidon de combustible chauffage,Bidon,masculin,singulier
+145,147,Essence et autres carburants et combustibles,Essence,masculin,singulier
+146,449,Cartouche pour siphon à chantilly,Cartouche,féminin,singulier
+147,449,Bouteille de protoxyde d'azote,Bouteille,féminin,singulier
+148,449,Cartouche de gaz hilarant,Cartouche,féminin,singulier
+149,449,Bouteille de gaz hilarant,Bouteille,féminin,singulier
+150,449,Cartouche de protoxyde d'azote,Cartouche,masculin,singulier
+151,407,Pot de yaourt en grès,Pot,masculin,singulier
+152,243,Perceuse,Perceuse,féminin,singulier
+153,243,Visseuse,Visseuse,féminin,singulier
+154,243,Ponceuse,Ponceuse,féminin,singulier
+155,243,Taille-haie électrique,Taille-haie,masculin,singulier
+156,243,Tronçonneuse électrique,Tronçonneuse,féminin,singulier
+157,243,Scie circulaire,Scie,féminin,singulier
+158,243,Disqueuse,Disqueuse,féminin,singulier
+159,243,Scie sauteuse,Scie,féminin,singulier
+160,243,"Outil électrique (bricolage, jardinage)",Outil,masculin,singulier
+161,321,Siège voiture,Siège,masculin,singulier
+162,321,Siège auto,Siège,masculin,singulier
+163,403,Ecran à tube cathodique,Ecran,masculin,singulier
+164,119,Cuvette de WC,Cuvette,féminin,singulier
+165,448,Pinceau de peinture (bricolage),Pinceau,masculin,singulier
+166,448,Rouleau de peinture (bricolage),Rouleau,masculin,singulier
+167,448,Manchon de rouleau de peinture (bricolage),Manchon,masculin,singulier
+168,448,Couteau de peinture ou d'enduit (bricolage),Couteau,masculin,singulier
+169,448,Couteau à enduire (bricolage),Couteau,masculin,singulier
+170,448,Bac plat à peinture (bricolage),Bac,masculin,singulier
+171,448,Recharge en plastique de bac plat à peinture (bricolage),Recharge,féminin,singulier
+172,448,Bac et camion à peinture (bricolage),Bac,masculin,singulier
+173,448,Grille pour égouttage de bac ou camion à peinture (bricolage),Grille,féminin,singulier
+174,448,Outillage du peintre (bricolage),Outillage,masculin,singulier
+175,183,Halogène,Halogène,masculin,singulier
+176,352,Néon,Néon,masculin,singulier
+177,352,Tube fluorescent,Tube,masculin,singulier
+178,13,ampoule à incandescence,ampoule,féminin,singulier
+179,13,lampe à incandescence,lampe,féminin,singulier
+180,13,ampoules à filaments,ampoules,féminin,pluriel
+181,13,lampes à filaments,lampes,féminin,pluriel
+182,13,Ampoule classique (à incandescence),Ampoule,féminin,singulier
+183,410,lampes,lampes,féminin,pluriel
+184,410,Ampoule,Ampoule,féminin,singulier
+185,201,Lampe à LED,Lampe,féminin,singulier
+186,201,LED,LED,féminin,singulier
+187,229,Montre électronique,Montre,féminin,singulier
+188,229,Montre connectée,Montre,féminin,singulier
+189,230,Montre mécanique,Montre,féminin,singulier
+190,15,Produits d'entretien,Produits,masculin,pluriel
+191,15,Anti-rouille,Anti-rouille,masculin,singulier
+192,259,"Peinture à l'eau (gouache, aquarelle, acrylique, vinyle...)",Peinture,féminin,singulier
+193,262,Peinture anti-fouling,Peinture,féminin,singulier
+194,262,Pot de peinture synthétique,Pot,masculin,singulier
+195,262,"Peinture synthétique (acrylique, glycéro...)",Peinture,féminin,singulier
+196,164,Agrafeuse,Agrafeuse,féminin,singulier
+197,164,Scotch,Scotch,masculin,singulier
+198,164,Règle,Règle,féminin,singulier
+199,164,Compas,Compas,masculin,singulier
+200,164,Etiquettes,Etiquettes,féminin,pluriel
+201,164,Gommettes,Gommettes,féminin,pluriel
+202,164,Trombone,Trombone,masculin,singulier
+203,164,Gomme,Gomme,féminin,singulier
+204,164,Trousse,Trousse,féminin,singulier
+205,164,Cartable,Cartable,masculin,singulier
+206,164,Effaceur,Effaceur,masculin,singulier
+207,164,Tipp-ex,Tipp-ex,masculin,singulier
+208,164,Blanco,Blanco,masculin,singulier
+209,164,"Correcteur (stylo, ruban)",Correcteur,masculin,singulier
+210,164,Ruban adhésif,Ruban,masculin,singulier
+211,164,Efface-encre,Efface-encre,masculin,singulier
+212,164,Transparent,Transparent,masculin,singulier
+213,164,Equerre (fourniture scolaire),Equerre,féminin,singulier
+214,164,Pinceau (fourniture scolaire ou artistique),Pinceau,masculin,singulier
+215,164,Fourniture scolaire ou de bureau,Fourniture,féminin,singulier
+216,244,Tournevis,Tournevis,masculin,singulier
+217,244,Pince (outil de bricolage),Pince,féminin,singulier
+218,244,Cutter,Cutter,masculin,singulier
+219,244,Masse (outil de bricolage),Masse,féminin,singulier
+220,244,Maillet,Maillet,masculin,singulier
+221,244,Lime (outil de bricolage),Lime,féminin,singulier
+222,244,Râpe (outil de bricolage),Râpe,féminin,singulier
+223,244,Tenaille,Tenaille,féminin,singulier
+224,244,Clé (outil de bricolage),Clé,féminin,singulier
+225,244,Douille (outil de bricolage),Douille,féminin,singulier
+226,244,"Scie non électrique (à bois, à bûche, à métaux, arboricole, de jardin...)",Scie,féminin,singulier
+227,244,Abrasifs (en feuille ou en rouleaux),Abrasifs,masculin,pluriel
+228,244,Armoire de jardin,Armoire,féminin,singulier
+229,244,Abri à bûches,Abri,masculin,singulier
+230,244,Abri de jardin,Abri,masculin,singulier
+231,244,Abri non maçonné,Abri,masculin,singulier
+232,244,Abri pour poubelle,Abri,masculin,singulier
+233,244,Abri pour robot tondeuse,Abri,masculin,singulier
+234,244,Accessoires de culture,Accessoires,masculin,pluriel
+235,244,Accessoires de manutention,Accessoires,masculin,pluriel
+236,244,Agrafeuse (de bricolage),Agrafeuse,féminin,singulier
+237,244,Agrafes de grillage,Agraphes,masculin,pluriel
+238,244,Anneau de levage,Anneau,masculin,singulier
+239,244,Appentis,Appentis,masculin,singulier
+240,244,Arche,Arche,féminin,singulier
+241,244,Arrache-liteaux,Arrache-liteaux,masculin,singulier
+242,244,Arrosage goutte à goutte,Arrosage,masculin,singulier
+243,244,Arroseur,Arroseur,masculin,singulier
+244,244,Arrosoir,Arrosoir,masculin,singulier
+245,244,Auge,Auge,féminin,singulier
+246,244,Bac à fleur,Bac,masculin,singulier
+247,244,Bâche,Bâche,féminin,singulier
+248,244,Bâche de bricolage,Bâche,féminin,singulier
+249,244,Bâche de protection,Bâche,masculin,pluriel
+250,244,Balai à gazon,Balai,masculin,singulier
+251,244,Balconnière,Balconnière,féminin,singulier
+252,244,Bande de ponçage,Bande,masculin,pluriel
+253,244,"Barbecue (feu de bois, à gaz, fumoir)",Barbecue,masculin,singulier
+254,244,Barre à creuser,Barre,féminin,singulier
+255,244,Barre à mine,Barre,féminin,singulier
+256,244,Bassin,Bassin,masculin,singulier
+257,244,Bêche,Bêche,féminin,singulier
+258,244,Bédane,Bédane,féminin,singulier
+259,244,Bisaigue,Bisaigue,féminin,singulier
+260,244,Boite et scie à onglet,Boite,féminin,singulier
+261,244,Bordure,Bordure,féminin,singulier
+262,244,Bouchon anti-bruit,bouchon,masculin,singulier
+263,244,Broche à gazon,Broche,féminin,singulier
+264,244,Brosse de nettoyage,Brosse,féminin,singulier
+265,244,Brouette,Brouette,féminin,singulier
+266,244,Bucheronnage,Bucheronnage,masculin,singulier
+267,244,Burin,Burin,masculin,singulier
+268,244,Buse,Buse,féminin,singulier
+269,244,Cache poubelle,Cache,masculin,singulier
+270,244,Cale de ponçage,Cale,féminin,singulier
+271,244,Carport non maçonné,Carport,masculin,singulier
+272,244,Carré potager,Carré,masculin,singulier
+273,244,Cartouche pour masque,Cartouche,féminin,singulier
+274,244,Casque (bricolage),Casque,masculin,singulier
+275,244,Casque de soudeur,Casque,masculin,singulier
+276,244,Casque de chantier,Casque,masculin,singulier
+277,244,Chalet non maçonné,Chalet,masculin,singulier
+278,244,Chariot de manutention,chariot,masculin,singulier
+279,244,Chaussures de protection (bricolage),Chaussures,féminin,pluriel
+280,244,Chevillette,Chevillette,féminin,singulier
+281,244,Cisaille,Cisaille,féminin,singulier
+282,244,Ciseaux (bricolage),Ciseaux,masculin,pluriel
+283,244,Ciseaux à bois,Ciseaux,masculin,singulier
+284,244,Ciseaux à brique,Ciseaux,masculin,singulier
+285,244,Citerne,Citerne,féminin,singulier
+286,244,Cliquet,Cliquet,masculin,singulier
+287,244,Cognée,Cognée,féminin,singulier
+288,244,Coin éclateur,Coin,masculin,singulier
+289,244,Combinaison de protection (bricolage),Combinaison,masculin,singulier
+290,244,Composteur,Composteur,masculin,singulier
+291,244,Contenant pour plante ou fleur,Contenant,masculin,singulier
+292,244,Coupe-branche,Coupe-branche,masculin,singulier
+293,244,Coupe-carreaux manuel,Coupe-carreaux,masculin,singulier
+294,244,Coupe-tube,Coupe-tube,masculin,singulier
+295,244,Coupe-bordure,Coupe-bordure,masculin,singulier
+296,244,Couteau à asphalte,Couteau,masculin,singulier
+297,244,Couverture à bulle,Couverture,féminin,singulier
+298,244,Couverture de sécurité de piscine,Couverture,féminin,singulier
+299,244,Crochet de levage,Crochet,masculin,singulier
+300,244,Cueille-fruit,Cueille-fruit,masculin,singulier
+301,244,Dévidoir,Dévidoir,masculin,singulier
+302,244,Enrouleur,enrouleur,masculin,singulier
+303,244,Pulvérisateur,Pulvérisateur,masculin,singulier
+304,244,Echafaudage structures tubulaires,Echafaudage,masculin,singulier
+305,244,Echafaudage mobile,Echafaudage,masculin,singulier
+306,244,Echelle coulissante,Echelle,féminin,singulier
+307,244,Echelle de piscine amovible,Echelle,féminin,singulier
+308,244,Echelle,Echelle,féminin,singulier
+309,244,Echelle transformable,Echelle,féminin,singulier
+310,244,Embout de vissage,Embout,masculin,singulier
+311,244,Emporte-pièces de jardin,Emporte-pièces,masculin,pluriel
+312,244,Enclume,Enclume,féminin,singulier
+313,244,Enrouleur de bâche,Enrouleur,masculin,singulier
+314,244,Enrouleur de tuyau d'arrosage,Enrouleur,masculin,singulier
+315,244,Eponge abrasive,Eponge,masculin,pluriel
+316,244,Epuisette,Epuisette,féminin,singulier
+317,244,Epuisette de fond,Epuisette,féminin,singulier
+318,244,Visière de protection de bricolage,Visière,féminin,singulier
+319,244,Genouillère (bricolage),Genouillère,féminin,singulier
+320,244,Jambière,Jambière,féminin,singulier
+321,244,Equipement d'entretien du jardin,Equipement,masculin,singulier
+322,244,Escabeau,Escadeau,masculin,singulier
+323,244,Etai,Etai,masculin,singulier
+324,244,Etancheur,Etancheur,masculin,singulier
+325,244,Etau,Etau,masculin,singulier
+326,244,Extracteur,Extracteur,masculin,singulier
+327,244,Faucheuse - débroussailleuse,Faucheuse,féminin,singulier
+328,244,Faux,Faux,féminin,singulier
+329,244,Faucille,Faucille,féminin,singulier
+330,244,Fendeur de bûche,Fendeur,masculin,singulier
+331,244,Fil à plomb,Fil,masculin,pluriel
+332,244,Filet de protection des cultures,Filet,masculin,singulier
+333,244,Filet de jardinage,Filet,masculin,singulier
+334,244,Film agricole,Film,masculin,pluriel
+335,244,Film de serre,Film,masculin,pluriel
+336,244,Housse de serre,Housse,masculin,singulier
+337,244,Film géotextile,Film,masculin,pluriel
+338,244,Four à bois de jardin,Four,masculin,singulier
+339,244,Fourche,Fourche,féminin,singulier
+340,244,Fût,Fût,masculin,singulier
+341,244,Gants de jardinage,Gants,masculin,pluriel
+342,244,Gants de protection pour le bricolage,Gants,masculin,pluriel
+343,244,Garage non maçonné,Garage,masculin,singulier
+344,244,Gazon artificiel ménager,Gazon,masculin,pluriel
+345,244,Gloriette non maçonnée,Gloriette,féminin,singulier
+346,244,Goutteur,Goutteur,masculin,singulier
+347,244,Grattoir,Grattoir,masculin,singulier
+348,244,Grattoir à béton,Grattoir,masculin,singulier
+349,244,Griffe de jardinier,Griffe,féminin,singulier
+350,244,Griffe à cintrer,Griffe,féminin,singulier
+351,244,Griffe de zingueur,Griffe,féminin,singulier
+352,244,Griffe,Griffe,féminin,singulier
+353,244,Hâche,Hâche,féminin,singulier
+354,244,Hâchette,Hâchette,féminin,singulier
+355,244,Housse de barbecue,Housse,féminin,singulier
+356,244,Housse de parasol,Housse,féminin,singulier
+357,244,Jardinière,Jardinière,féminin,singulier
+358,244,Kiosque non maçonné,Kiosque,masculin,singulier
+359,244,Lame de scie,Lame,féminin,singulier
+360,244,Lame de sécateur,Lame,féminin,singulier
+361,244,Levier de force,Levier,masculin,singulier
+362,244,Lime de précision,Lime,féminin,singulier
+363,244,Lissarde à béton,Lissarde,féminin,singulier
+364,244,Lisseur de joints,Lisseur,masculin,singulier
+365,244,Lunettes de protection (bricolage),Lunettes,féminin,pluriel
+366,244,Maillet de pavage,Maillet,masculin,singulier
+367,244,Manche (outil),Manche,masculin,singulier
+368,244,Marche-pied,Marche-pied,masculin,singulier
+369,244,Marteau,Marteau,masculin,singulier
+370,244,Marteau burineur,Marteau,masculin,singulier
+371,244,Marteau de pavage,Marteau,masculin,singulier
+372,244,Masque de protection (bricolage),Masque,masculin,singulier
+373,244,Massette,Massette,féminin,singulier
+374,244,Merlin de bûcheron,Merlin,masculin,singulier
+375,244,Outil de mesure (non électrique),Mesure,masculin,singulier
+376,244,Mesure longue,Mesure,féminin,singulier
+377,244,Mètre ruban,Mètre,masculin,singulier
+378,244,Métrologie,Métrologie,féminin,singulier
+379,244,Mire,Mire,féminin,singulier
+380,244,Nichoir,Nichoir,masculin,singulier
+381,244,Niveau à bulles,Niveau,masculin,singulier
+382,244,Nivelle pour mire,Nivelle,féminin,singulier
+383,244,Outillage d'alimentation en eau potable (aep),Outillage,masculin,singulier
+384,244,Outillage de fontainerie,Outillage,masculin,singulier
+385,244,Outillage de serrage et découpage,Outillage,masculin,singulier
+386,244,Outillage d'électricien,Outillage,masculin,singulier
+387,244,Outillage de couvreur,Outillage,masculin,singulier
+388,244,Outillage de maçon,Outillage,masculin,singulier
+389,244,Outillage lourd de carreleur,Outillage,masculin,singulier
+390,244,Outillage pour le travail du bois,Outillage,masculin,singulier
+391,244,Outillage pour tuyauterie,Outillage,masculin,singulier
+392,244,Outillage spécifique du plâtrier-plaquiste,Outillage,masculin,singulier
+393,244,Outil de mesure et de traçage,Outil,masculin,singulier
+394,244,Outils de terrassement,Outils,masculin,pluriel
+395,244,Outils du plombier,Outils,masculin,pluriel
+396,244,Outils et accessoires de carreleur,Outils,masculin,pluriel
+397,244,Outil pneumatique,Outil,masculin,singulier
+398,244,Outils pour travaux d'étanchéité,Outils,masculin,pluriel
+399,244,Ouvre-caisse,Ouvre-caisse,masculin,singulier
+400,244,Panier de plantation,Panier,masculin,singulier
+401,244,Parasol,Parasol,masculin,singulier
+402,244,Parasol chauffant (à gaz),Parasol,masculin,singulier
+403,244,Pelle,Pelle,féminin,singulier
+404,244,Pelle à neige,Pelle,féminin,singulier
+405,244,Pergola non-maçonnée,Pergola,féminin,singulier
+406,244,Petit outil de jardin,Petit,masculin,singulier
+407,244,Pied de biche,Pied,masculin,singulier
+408,244,Pied de parasol,Pied,masculin,singulier
+409,244,Dalle de parasol,Dalle,féminin,singulier
+410,244,Pioche,Pioche,féminin,singulier
+411,244,Pioche à bec,Pioche,féminin,singulier
+412,244,Pioche de terrassement,Pioche,féminin,singulier
+413,244,Pistolet à cartouche (bricolage),Pistolet,masculin,singulier
+414,244,Pistolet à colle,Pistolet,masculin,singulier
+415,244,Pistolet à poche,Pistolet,masculin,singulier
+416,244,Pistolet d'arrosage,Pistolet,masculin,singulier
+417,244,Plancha (à gaz),Plancha,féminin,singulier
+418,244,Pluviomètre,Pluviomètre,masculin,singulier
+419,244,Pointe à tracer,Pointe,féminin,singulier
+420,244,Pointeau,Pointeau,masculin,singulier
+421,244,Pointerolle,Pointerolle,féminin,singulier
+422,244,Pointes clous à tête plate,Pointes,féminin,pluriel
+423,244,Pompe,Pompe,féminin,singulier
+424,244,Potager urbain,Potager,masculin,singulier
+425,244,Poterie,Poterie,féminin,singulier
+426,244,Pot de fleur,Pot,masculin,singulier
+427,244,Poulailler,Poulailler,masculin,singulier
+428,244,Presse de bricolage,Presse,féminin,singulier
+429,244,Protection auditive (bricolage),Protection,féminin,pluriel
+430,244,Protection des voies respiratoires (masque de bricolage),Protection,féminin,singulier
+431,244,Protection des yeux (bricolage),Protection,féminin,pluriel
+432,244,Rabot,Rabot,masculin,singulier
+433,244,Racleur,Racleur,masculin,singulier
+434,244,Rampe de chargement,Rampe,féminin,singulier
+435,244,Rateau,Rateau,masculin,singulier
+436,244,Récupérateur d'eau,Récupérateur,masculin,singulier
+437,244,Règle à niveau,Règle,féminin,singulier
+438,244,Règle aluminium (bricolage),Régle,féminin,singulier
+439,244,Réservoir externe,Réservoir,masculin,singulier
+440,244,Riflard,Riflard,masculin,singulier
+441,244,Ruche,Ruche,féminin,singulier
+442,244,Hôtel à insecte,Hôtel,masculin,singulier
+443,244,Sac à déchets de jardin,Sac,masculin,singulier
+444,244,Seau,Seau,masculin,singulier
+445,244,Sécateur,Sécateur,masculin,singulier
+446,244,Serfouette,Serfouette,féminin,singulier
+447,244,Serre de jardin,Serre,féminin,singulier
+448,244,Serre-joint,Serre-joint,masculin,singulier
+449,244,Soucoupe de jardinière,Soucoupe,féminin,singulier
+450,244,Souflette,Souflette,féminin,singulier
+451,244,Table de culture,Table,féminin,singulier
+452,244,Table élévatrice,Table,féminin,singulier
+453,244,Taillanderie,Taillanderie,féminin,singulier
+454,244,Taille-haie (manuel),Taille-haie,masculin,singulier
+455,244,Taloche,Taloche,féminin,singulier
+456,244,Tamis,Tamis,masculin,singulier
+457,244,Thermomètre non électrique,Thermomètre,masculin,singulier
+458,244,Toile de paillage,Toile,masculin,pluriel
+459,244,Tonnelle,Tonnelle,féminin,singulier
+460,244,Transplantoir,Transplantoir,masculin,singulier
+461,244,Treillis,Treillis,masculin,singulier
+462,244,Tréteau de sciage,Tréteau,masculin,singulier
+463,244,Truelle,Truelle,féminin,singulier
+464,244,Trusquin,Trusquin,masculin,singulier
+465,244,Tuteur,Tuteur,masculin,singulier
+466,244,Tuyau,Tuyau,masculin,singulier
+467,244,Tuyau d'arrosage,Tuyau,masculin,singulier
+468,244,Vase de jardin,Vase,masculin,singulier
+469,244,Pot de fleurs,pot,masculin,singulier
+470,244,Equerre de bricolage,Equerre,féminin,singulier
+471,244,"Outil manuel (bricolage, jardinage)",Outil,masculin,singulier
+472,187,Huile de vidange,Huile,féminin,singulier
+473,436,Cintre en plastique ou en métal,Cintre,masculin,singulier
+474,227,Miroir (glace),Miroir,masculin,singulier
+475,231,Moquette,Moquette,féminin,singulier
+476,63,Bouchons en plastique,Bouchons,masculin,singulier
+477,66,Bouteille d'eau (en plastique),Bouteille,féminin,singulier
+478,66,Bouteille en plastique (et bouchon),Bouteille,féminin,singulier
+479,442,Niche,Niche,féminin,singulier
+480,61,Bottes de pluie,Bottes,féminin,singulier
+481,61,Bottes de pêche,Bottes,féminin,singulier
+482,61,Bottes en caoutchouc,Bottes,féminin,singulier
+483,357,VHU,VHU,masculin,singulier
+484,357,Voiture,Voiture,féminin,singulier
+485,357,Véhicule (automobile),Véhicule,masculin,singulier
+486,357,Automobile,Automobile,féminin,singulier
+487,357,Camionette,Camionette,féminin,singulier
+488,357,Van aménagé,Van,masculin,singulier
+489,357,Fourgon,Fourgon,masculin,singulier
+490,357,Fourgonnette,Fourgonnette,féminin,singulier
+491,357,Véhicule hors d'usage,Véhicule,féminin,singulier
+492,271,plaques de plâtre,plaques,féminin,pluriel
+493,271,cloisons alvéolaires à base de plaques de plâtre,cloisons,féminin,pluriel
+494,271,carreaux de plâtre,carreaux,masculin,pluriel
+495,271,dalles de plâtre pour plafonds suspendus,dalles,féminin,pluriel
+496,271,Plâtre,Plâtre,masculin,singulier
+497,92,Blu-ray,Blu-ray,masculin,singulier
+498,92,CD-ROM,CD-ROM,masculin,singulier
+499,92,Disque (album),Disque,masculin,singulier
+500,92,CD,CD,masculin,singulier
+501,92,DVD,DVD,masculin,singulier
+502,92,CDRom,CDRom,masculin,singulier
+503,92,"CD/DVD, cassette (avec ou sans boîtier)","CD/DVD,",masculin,pluriel
+504,49,Parquet (bois),Parquet,masculin,singulier
+505,49,Porte en bois (matériau du bâtiment),Porte,féminin,singulier
+506,49,Lambris (en bois),Lambris,masculin,singulier
+507,49,Bois de construction et de démolition,Bois,masculin,singulier
+508,150,évier,évier,masculin,singulier
+509,150,evier,evier,masculin,singulier
+510,150,Évier (en inox ou en aluminium),Évier,masculin,singulier
+511,217,Brique,Brique,féminin,singulier
+512,217,Tuile,Tuile,féminin,singulier
+513,217,Baignoire en céramique,Baignoire,féminin,singulier
+514,217,Receveur de douche en céramique,Receveur,masculin,singulier
+515,217,Lavabo en céramique,Lavabo,masculin,singulier
+516,217,Évier en céramique,Évier,masculin,singulier
+517,217,Matériaux de construction,Matériaux,masculin,pluriel
+518,125,Déchets inertes mélangés,Déchets,masculin,pluriel
+519,125,Enrobé bitumineux,Enrobé,masculin,pluriel
+520,125,Isolant minéral,Isolant,masculin,singulier
+521,125,Carrelage,Carrelage,masculin,singulier
+522,125,Verre plat blanc,Verre,masculin,singulier
+523,125,Verres plats spéciaux,Verres,masculin,pluriel
+524,125,Déchets inertes,Déchets,masculin,pluriel
+525,266,Pierres,Pierres,féminin,pluriel
+526,242,Carcasse,Carcasse,féminin,singulier
+527,242,Os de viande,Os,féminin,pluriel
+528,242,Os,Os,masculin,pluriel
+529,3,Dissolvant,Dissolvant,masculin,singulier
+530,3,Acétone,Acétone,masculin,singulier
+531,285,Herbicide,Herbicide,masculin,singulier
+532,14,Anti-moisissures,Anti-moisissures,masculin,pluriel
+533,14,Pesticides,Pesticides,masculin,pluriel
+534,14,Anti-mousse,Anti-mousse,masculin,singulier
+535,194,Jeu de société,Jeu,masculin,singulier
+536,194,Jeu (non électrique),Jeu,masculin,singulier
+537,194,Figurine,Figurine,féminin,singulier
+538,194,Jeu de construction,Jeu,masculin,singulier
+539,194,Poupon,Poupon,masculin,singulier
+540,194,Poupée,Poupée,féminin,singulier
+541,194,Accessoires pour poupon ou poupée,Accessoires,masculin,pluriel
+542,194,Poupée mannequin,Poupée,féminin,singulier
+543,194,Maison de poupée,Maison,féminin,singulier
+544,194,Mobilier de poupée,Mobilier,féminin,singulier
+545,194,Vêtements de poupon ou poupée,Vêtements,masculin,pluriel
+546,194,Peluche,Peluche,féminin,singulier
+547,194,Marionnette,Marionnette,féminin,singulier
+549,194,Décor de marionnettes,Décor,masculin,singulier
+550,194,Jouet premier âge,Jouet,masculin,singulier
+551,194,Jeu d'imitation,Jeu,masculin,singulier
+552,194,Jouet à promener,Jouet,masculin,singulier
+553,194,Jouet à pousser,Jouet,masculin,singulier
+554,194,Jouet de bain,Jouet,masculin,singulier
+555,194,Jouet éducatif,Jouet,masculin,singulier
+556,194,Mobile,Mobile,masculin,singulier
+557,194,Véhicule miniature,Véhicule,masculin,singulier
+558,194,Voiture non motorisé,Voiture,féminin,singulier
+559,194,Camion non motorisé,Camion,masculin,singulier
+560,194,Avion non motorisé,Avion,masculin,singulier
+561,194,Bateau non motorisé,Bateau,masculin,singulier
+562,194,Véhicule à friction,Véhicule,masculin,singulier
+563,194,Pâte à modeler,Pâte,féminin,singulier
+564,194,Ballon de baudruche,Ballon,masculin,singulier
+565,194,Carte à collectionner,Carte,féminin,singulier
+566,194,Vignette à collectionner,Vignette,masculin,singulier
+567,194,Costume d'enfant (- de 14 ans),Costume,masculin,singulier
+568,194,Décor pour figurines,Décor,masculin,singulier
+569,194,Instrument de musique jouet,Instrument,masculin,singulier
+570,194,Farces et attrapes,Farces,féminin,pluriel
+571,194,Jeu de magie,Jeu,masculin,singulier
+572,194,Jeu scientifique,Jeu,masculin,singulier
+573,194,Jeu de chimiste,Jeu,masculin,singulier
+574,194,Porteur (jouet),Porteur,masculin,singulier
+575,194,tricycle enfant (jouet),tricycle,masculin,singulier
+576,194,Skateboard d'enfant (jouet),Skateboard,masculin,singulier
+577,194,Trottinette enfant (jouet),Trottinette,féminin,singulier
+578,194,Bicyclette enfant (jouet),Bicyclette,féminin,singulier
+579,194,Ensemble cosmétique pour enfant (jouet),Ensemble,masculin,singulier
+580,194,Babyfoot pour enfant (jouet),Babyfoot,masculin,singulier
+581,194,Arme factice (jouet),Arme,féminin,singulier
+582,194,Echasse,Echasse,féminin,singulier
+583,194,Ballon sauteur,Ballon,masculin,singulier
+584,194,Pelle à neige (luge),Pelle,féminin,singulier
+585,194,Pataugette,Pataugette,féminin,singulier
+586,194,Pistolet à eau,Pistolet,masculin,singulier
+587,194,Maison de jardin pour enfant,Maison,féminin,singulier
+588,194,Trampoline (jouet),Trampoline,masculin,singulier
+589,194,Toboggan,Toboggan,masculin,singulier
+590,194,Portique,Portique,masculin,singulier
+591,194,Casse-tête,Casse-tête,masculin,singulier
+592,194,Jeu de cartes,Jeu,masculin,singulier
+593,194,Jeu de dés,Jeu,masculin,singulier
+594,194,Jeu de plateau,Jeu,masculin,singulier
+595,194,Jeu de stratégie,Jeu,masculin,singulier
+596,194,Jeu de voyage,Jeu,masculin,singulier
+597,194,Puzzle,Puzzle,masculin,singulier
+598,194,Maquette,Maquette,féminin,singulier
+599,194,Jeu (non électronique),Jeu,masculin,singulier
+600,194,Jeu de plage,Jeu,masculin,singulier
+601,194,"Jeu de sable (seau, pelle, râteau...)",Jeu,masculin,singulier
+602,194,Draisienne,Draisienne,féminin,singulier
+603,194,Loisirs créatifs pour enfants (jouet),Loisirs,masculin,pluriel
+604,194,"Articles de sport d'extérieur pour enfant (jouet : raquette, boule de pétanque en plastique...)",Articles,masculin,pluriel
+605,194,Luge d'enfant (jouet),Luge,féminin,singulier
+606,194,Jeu d'eau,Jeu,masculin,singulier
+607,194,Jouet (non électronique),Jouet,masculin,singulier
+608,218,Polystyrène expansé (PSE) - Matériau d'isolation,Polystyrène,masculin,singulier
+609,218,"Matériau d'isolation plastique (XPS, polyuréthane, polyisocianurate, Mousse phénolique, résolique, perlite fibrée...",Matériau,masculin,singulier
+610,218,Matériaux d'isolation Plastique,Matériaux,masculin,pluriel
+611,444,Membrane bitumineuse,Membrane,féminin,singulier
+612,447,Croisillons de carrelage,Croisillons,masculin,pluriel
+613,447,Croisillons pour pose de carrelage,Croisillons,masculin,pluriel
+614,210,Lunettes,Lunettes,féminin,pluriel
+615,27,Baignoire,Baignoire,féminin,singulier
+616,26,Baignoire (en fonte),Baignoire,féminin,singulier
+617,445,Poussette,Poussette,féminin,singulier
+618,373,"Bouée, planche, matériel d'aide à la flottaison","Bouée,",féminin,singulier
+619,373,Brassard de flottaison,Brassard,masculin,singulier
+620,373,"Casque de protection (ski, vélo, football américain, hockey, roller skate, skate board, bombe d'équitation, alpinisme, escalade, varappe, canyoning, patinage artistique, hockey sur glace, curling…)",Casque,masculin,singulier
+621,373,Ceinture et gilet de sauvetage textile,Ceinture,féminin,singulier
+622,373,Chambre à air de vélo,Chambre,féminin,singulier
+623,373,Coquille de protection,Coquille,féminin,singulier
+624,373,"Corde, cordelette, harnais et longe de canicrosse","Corde,",féminin,singulier
+625,373,Coudière,Coudière,féminin,singulier
+626,373,Crashpad,Crashpad,masculin,singulier
+627,373,Epaulière,Epaulière,féminin,singulier
+628,373,"Gants (gardien de foot, vélo, voile, golf, escrime, boxe…)",Gants,masculin,pluriel
+629,373,Genouillère,Genouillère,féminin,singulier
+630,373,"Harnais, mousqueton, dégaine, assurage, poulie, bloqueur, coinceur (Matériel d'alpinisme, escalade, varappe, canyoning, camping)","Harnais,",masculin,singulier
+631,373,"Lunettes de sports de montagne (parapente, parachute, deltaplane…)",Lunettes,féminin,pluriel
+632,373,"Matériel de voile (harnais de rappel, trapèze, accastillage, poulie, manille, mousqueton, drisse, cordage…) < 2,5 m,",Matériel,masculin,singulier
+633,373,Piolet,Piolet,masculin,singulier
+634,373,Pneu de vélo,Pneu,masculin,singulier
+635,373,Protège-tibia,Protège-tibia,masculin,singulier
+636,373,"Tuba, masque de plongée","Tuba,",masculin,singulier
+637,373,Protège-poignet,Protège-poignet,masculin,singulier
+638,373,Coque de protection de handball,Coque,féminin,singulier
+639,373,"Corde, cordelette et longe d'escalade","Corde,",féminin,singulier
+640,373,Crampons de chaussures de montagne,Crampons,masculin,pluriel
+641,373,Dorsale,Dorsale,féminin,singulier
+642,373,"Equipement de ski de randonnée (pelle, sonde)",Equipement,masculin,singulier
+643,373,"Matériel d'escalade (harnais, mousqueton, dégaine, assurage, poulie, bloqueur, coinceur)",Matériel,masculin,singulier
+644,373,Matériel d'alpinisme,Matériel,masculin,singulier
+645,373,Matériel de Varappe,Matériel,masculin,singulier
+646,373,Matériel de canyoning,Matériel,masculin,singulier
+647,373,Masque d'escrime,Masque,masculin,singulier
+648,373,"Matériel de protection du cavalier (bombe, gilet...)",Matériel,masculin,singulier
+649,373,Suspente de parapente et parachute,Suspente,masculin,singulier
+650,373,Casque de vélo,Casque,masculin,singulier
+651,373,Casque de trotinette,Casque,masculin,singulier
+652,373,Matériel de protection individuelle (sport),Matériel,masculin,singulier
+653,45,Pot de yaourt en verre,Pot,masculin,singulier
+654,45,Récipient en verre,Récipient,masculin,singulier
+655,45,Bocal ou pot en verre (alimentaire),Bocal,masculin,singulier
+656,446,Emballage multimatière (ex : carton et plastique),Emballage,masculin,singulier
+657,336,Terre,Terre,féminin,singulier
+658,44,Bijou fantaisie (accessoires de mode),Bijou,masculin,singulier
+659,136,écran,écran,masculin,singulier
+660,136,Écran informatique,Écran,masculin,singulier
+661,402,Ecran plat,Ecran,masculin,singulier
+662,430,Douille de cartouche de fusil,Douille,féminin,singulier
+663,430,"Cartouche, douille usagée, balle (tir sportif)","Cartouche,",féminin,singulier
+664,430,Douille de cartouche de chasse,Douille,féminin,singulier
+665,374,Fleuret,Fleuret,masculin,singulier
+666,374,Dague,Dague,féminin,singulier
+667,374,Couteau (chasse),Couteau,masculin,singulier
+668,374,Epée d'entrainement sportif,Epée,féminin,singulier
+669,374,Arme d'entraînement,Arme,masculin,singulier
+670,443,Capteur de glucose en continu,Capteur,masculin,singulier
+671,443,Dispositifs médicaux avec électronique - Déchets d'Activités de Soins à Risques Infectieux (DASRI) perforants (avec électronique),Dispositifs,masculin,pluriel
+672,314,Seringue sans aiguille (contaminée),Seringue,féminin,singulier
+673,313,Seringue avec aiguille solidaire,Seringue,féminin,singulier
+674,313,Seringue pré-remplie,Seringue,féminin,singulier
+675,313,Seringue avec aiguille,Seringue,féminin,singulier
+676,199,Lancette,Lancette,féminin,singulier
+677,196,Micro-perfuseur,Micro-perfuseur,masculin,singulier
+678,196,Kit de perfusion,Kit,masculin,singulier
+679,123,Dispositifs médicaux sans électronique - Déchets d'Activités de Soins à Risques Infectieux (DASRI) perforants,Dispositifs,masculin,pluriel
+680,91,Cathéter tout en un,Cathéter,masculin,singulier
+681,91,Cathéter,Cathéter,masculin,singulier
+682,5,Aiguille à stylo,Aiguille,féminin,singulier
+683,5,Aiguille de transfert,Aiguille,féminin,singulier
+684,5,Aiguille seule (médicale),Aiguille,féminin,singulier
+685,5,Aiguille usagée (médicale),Aiguille,féminin,singulier
+686,327,Stylo avec aiguille (médical),Stylo,masculin,singulier
+687,319,Adaptateur de flacon,Adaptateur,masculin,singulier
+688,319,Micro-perfuseur (DASRI),Micro-perfuseur,masculin,singulier
+689,319,Autopiqueur (DASRI),Autopiqueur,masculin,singulier
+690,319,Applicateur médical (DASRI),Applicateur,masculin,singulier
+691,319,Set de transfert,Set,masculin,singulier
+692,347,Débroussailleuse thermique,Débroussailleuse,féminin,singulier
+693,347,Coupe bordure thermique,Coupe,masculin,singulier
+694,347,"Aspirateur souffleur thermique, aspirateur souffleur broyeur thermique",Aspirateur,masculin,singulier
+695,347,Souffleur thermique,Souffleur,masculin,singulier
+696,347,Broyeur thermique  à végétaux,Broyeur,masculin,singulier
+697,347,"Pulvérisateur thermique,  Atomiseur thermique à dos",Pulvérisateur,masculin,singulier
+698,347,Taille-haie thermique,Taille-haie,masculin,singulier
+699,347,Tronçonneuse thermique,Tronçonneuse,féminin,singulier
+700,347,Motobineuse thermique,Motobineuse,féminin,singulier
+701,347,Motoculteur thermique,Motoculteur,masculin,singulier
+702,347,Microbineuse thermique,Microbineuse,féminin,singulier
+703,347,Tarière thermique,Tarière,masculin,singulier
+704,347,Scarificateur thermique,Scarificateur,masculin,singulier
+705,347,Démousseur thermique,Démousseur,masculin,singulier
+706,347,Aérateur démousseur thermique,Aérateur,masculin,singulier
+707,347,Pompe à eau thermique,Pompe,féminin,singulier
+708,347,Outil multifonctions thermique combisystème ou multisystème,Outil,masculin,singulier
+709,347,Nettoyeur à haute pression thermique,Nettoyeur,masculin,singulier
+710,347,Fraise à neige thermique,Fraise,féminin,singulier
+711,347,Scie à bûches thermique,Scie,féminin,singulier
+712,347,Fendeur de bûches thermique,Fendeur,masculin,singulier
+713,347,Tondeuse à gazon thermique,Tondeuse,féminin,singulier
+714,12,Lampe à économie d'énergie,Lampe,féminin,singulier
+715,12,Lampe fluocompacte,Lampe,féminin,singulier
+716,12,Lampe basse consommation,Lampe,masculin,singulier
+717,12,Ampoule basse consommation,Ampoule,masculin,singulier
+718,240,PC fixe,PC,masculin,singulier
+719,240,Ordinateur fixe,Ordinateur,masculin,singulier
+720,345,Tondeuse à gazon électrique,Tondeuse,féminin,singulier
+721,342,Thermomètre digital,Thermomètre,masculin,singulier
+722,367,Voiture de course électrique (jouet),Voiture,féminin,singulier
+723,198,Lustre,Lustre,masculin,singulier
+724,198,Lampe (ou luminaire) sans ampoule,Lampe,féminin,singulier
+725,200,Lecteur DVD,Lecteur,masculin,singulier
+726,152,Fast-food,Fast-food,masculin,singulier
+727,132,Eau de Javel (bouteille),Eau,féminin,singulier
+728,93,Cendres de bois,Cendres,féminin,pluriel
+729,90,Casque,Casque,masculin,singulier
+730,83,Capsules de café ou de thé,Capsules,féminin,singulier
+731,82,Caoutchouc (hors pneus),Caoutchouc,masculin,singulier
+732,158,Filtre à café,Filtre,masculin,singulier
+733,158,Café (marc),Café,masculin,singulier
+734,75,Cadavre d'animal,Cadavre,masculin,singulier
+735,74,Brosse à cheveux,Brosse,féminin,singulier
+736,74,Brosse à dents,Brosse,féminin,singulier
+737,73,Briquet,Briquet,masculin,singulier
+738,71,Branches,Branches,féminin,pluriel
+739,71,Branchages,Branchages,masculin,pluriel
+740,67,Bouteille de plongée,Bouteille,féminin,singulier
+741,65,Bougies de moteur,Bougies,féminin,singulier
+742,64,Chandelle,Chandelle,féminin,singulier
+743,64,Cierge,Cierge,masculin,singulier
+744,64,Bougie,Bougie,féminin,singulier
+745,64,Bougie en cire,Bougie,féminin,singulier
+746,62,Bouchons en liège,Bouchons,masculin,singulier
+747,51,Bois lamellé-collé (BLC),Bois,masculin,singulier
+748,48,Bois de chauffage,Bois,masculin,singulier
+749,46,Surf,Surf,masculin,singulier
+750,46,Bodyboard,Bodyboard,masculin,singulier
+751,43,Bidon d'huile,Bidon,masculin,singulier
+752,43,Bidon d'huile de moteur (ou de lubrifiant) vide,Bidon,masculin,singulier
+753,42,Biberon,Biberon,masculin,singulier
+754,42,Biberon en plastique,Biberon,masculin,singulier
+755,38,Bassine,Bassine,féminin,singulier
+756,38,Bassine en plastique,Bassine,féminin,singulier
+757,32,Barbecue à gaz,Barbecue,masculin,singulier
+758,32,Barbecue à combustible,Barbecue,masculin,singulier
+759,31,Essuie-glace,Essuie-glace,masculin,singulier
+760,31,Equipement automobile,Equipement,masculin,singulier
+761,31,Balai d'essuie-glace,Balai,masculin,singulier
+762,30,Balai-brosse,Balai-brosse,masculin,singulier
+763,30,Balayette,Balayette,féminin,singulier
+764,30,Plumeau,Plumeau,masculin,singulier
+765,30,Balai en bois,Balai,masculin,singulier
+766,30,Balai en plastique,Balai,masculin,singulier
+767,30,Balai,Balai,masculin,singulier
+768,28,Révélateur photographique,Révélateur,masculin,singulier
+769,28,Fixateur photographique,Fixateur,masculin,singulier
+770,28,"Bain photographique (révélateur, fixateur...)",Bain,masculin,singulier
+771,27,Baignoire (en résine ou acrylique),Baignoire,féminin,singulier
+772,20,Fusil,Fusil,masculin,singulier
+773,20,Pistolet,Pistolet,masculin,singulier
+774,20,Revolver,Revolver,masculin,singulier
+775,20,Carabine,Carabine,féminin,singulier
+776,20,Arme à feu,Arme,féminin,singulier
+777,11,désinfectant,désinfectant,masculin,singulier
+778,11,nettoyant,nettoyant,masculin,singulier
+779,11,produit d'entretien,produit,masculin,singulier
+780,11,Ammoniaque,Ammoniaque,féminin,singulier
+781,10,matériau fibreux,matériau,masculin,pluriel
+782,10,Amiante,Amiante,féminin,singulier
+783,9,Amendements,Amendements,masculin,pluriel
+784,6,Alcool ménager,Alcool,masculin,singulier
+785,6,Alcool à brûler,Alcool,masculin,singulier
+786,4,Acide,Acide,masculin,singulier
+787,2,Jante,Jante,féminin,singulier
+788,2,Rétroviseur,Rétroviseur,masculin,singulier
+789,2,Phare,Phare,masculin,singulier
+790,2,Kit de sécurité,Kit,masculin,singulier
+791,2,Attelage,Attelage,masculin,singulier
+792,2,Chaîne de neige,Chaîne,féminin,singulier
+793,2,Barre de remorquage,Barre,féminin,singulier
+794,2,Accessoires automobiles (et deux-roues) non électroniques,Accessoires,masculin,pluriel
+795,1,Détecteur radar,Détecteur,masculin,singulier
+796,1,Radar de stationnement,Radar,masculin,singulier
+797,1,Allume-cigare,Allume-cigare,masculin,singulier
+798,1,Accessoire automobile (et deux-roues) électronique,Accessoire,masculin,singulier
+799,188,Imperméabilisant,Imperméabilisant,masculin,singulier
+800,186,Huile de friture,Huile,féminin,singulier
+801,176,Gourde,Gourde,féminin,singulier
+802,172,Coffre de toit,Coffre,masculin,singulier
+803,172,Galeries de voiture,Galeries,féminin,singulier
+804,171,Bidon en métal,Bidon,masculin,singulier
+805,171,Fût en métal,Fût,masculin,singulier
+806,170,Bidon en plastique,Bidon,masculin,singulier
+807,170,Bidon de pétrole,Bidon,masculin,singulier
+808,170,Baril de pétrole,Baril,masculin,singulier
+809,170,Fût (ou conteneur) en plastique,Fût,masculin,singulier
+810,169,Fumier,Fumier,masculin,singulier
+811,168,Coquillages,Coquillages,masculin,pluriel
+812,168,Crustacés,Crustacés,masculin,pluriel
+813,168,Langoustines,Langoustines,féminin,pluriel
+814,168,Crevettes,Crevettes,féminin,pluriel
+815,168,Huîtres,Huîtres,féminin,pluriel
+816,168,Bigorneaux,Bigorneaux,masculin,pluriel
+817,168,Moules,Moules,féminin,pluriel
+818,168,Crabes,Crabes,masculin,pluriel
+819,168,Fruits de mer,Fruits,masculin,pluriel
+820,167,Pomme abîmée,Pomme,féminin,singulier
+821,167,Poire abîmée,Poire,féminin,singulier
+822,167,Abricot abîmé,Abricot,masculin,singulier
+823,167,Banane abîmée,Banane,féminin,singulier
+824,167,Cerises abîmées,Cerises,féminin,pluriel
+825,167,Raisins abîmés,Raisins,masculin,pluriel
+826,167,Fraises abîmées,Fraises,féminin,pluriel
+827,167,Tomates abîmées,Tomates,féminin,pluriel
+828,167,Melon abîmé,Melon,masculin,singulier
+829,124,Fruits abîmés,Fruits,masculin,pluriel
+830,162,Fongicides,Fongicides,masculin,pluriel
+831,160,Flash-ball,Flash-ball,masculin,singulier
+832,156,Fil de fer barbelé,Fil,masculin,singulier
+833,155,Fibro-ciment,Fibro-ciment,masculin,singulier
+834,154,Stabilo,Stabilo,masculin,singulier
+835,154,Surligneur,Surligneur,masculin,singulier
+836,154,Feutre (marqueur),Feutre,masculin,singulier
+837,149,Évier (céramique),Évier,masculin,singulier
+838,148,Papier absorbant,Papier,masculin,singulier
+839,148,Sopalin,Sopalin,masculin,singulier
+840,148,Essuie-tout (papier),Essuie-tout,masculin,singulier
+841,146,Essence de térébenthine,Essence,féminin,singulier
+842,144,épluchure,épluchure,féminin,singulier
+843,7,Épluchures,Épluchures,féminin,pluriel
+844,142,Enjoliveurs,Enjoliveurs,masculin,pluriel
+845,141,Engrais organiques,Engrais,masculin,pluriel
+846,140,Engrais minéral,Engrais,masculin,singulier
+847,139,Enduit,Enduit,masculin,singulier
+848,138,Emballage vide de produit phytosanitaire,Emballage,masculin,singulier
+849,137,Emballage souillé par un produit dangereux,Emballage,masculin,singulier
+850,135,Eau souillée,Eau,féminin,singulier
+851,134,Eau oxygénée,Eau,féminin,singulier
+852,133,Eau de Javel (pastilles),Eau,masculin,singulier
+853,131,Eau de Javel (berlingot),Eau,masculin,singulier
+854,130,Diapositives,Diapositives,féminin,pluriel
+855,126,ORUM,ORUM,masculin,singulier
+856,126,Objet au radium à usage médical,Objet,masculin,singulier
+857,126,Fontaine au radium,Fontaine,féminin,singulier
+858,126,Minéraux radioactifs,Minéraux,masculin,pluriel
+859,126,Déchets radioactifs,Déchets,masculin,pluriel
+860,121,Décapant pour cheminée,Décapant,masculin,singulier
+861,121,Décapant pour four,Décapant,masculin,singulier
+862,121,Décapant,Décapant,masculin,singulier
+863,120,Déboucheur de canalisations,Déboucheur,masculin,singulier
+864,116,Crottes de chien,Crottes,féminin,singulier
+865,115,"Crayon en bois (à papier, de couleur)",Crayon,masculin,singulier
+866,114,Couverts en métal,Couverts,masculin,singulier
+867,111,Couches pour bébé,Couches,féminin,pluriel
+868,111,Couches hygiéniques,Couches,féminin,pluriel
+869,111,Couche-culotte (lange),Couche-culotte,féminin,singulier
+870,401,Coton-tige,Coton-tige,masculin,singulier
+871,401,Coton hydrophile,Coton,masculin,singulier
+872,401,Coton démaquillant,Coton,masculin,singulier
+873,107,Coquilles de fruits de mer,Coquilles,féminin,pluriel
+874,108,Coquilles d'oeufs,Coquilles,féminin,pluriel
+875,106,Contreplaqué,Contreplaqué,masculin,singulier
+876,105,Tube de colle scolaire,Tube,masculin,singulier
+877,105,Colle blanche (stick ou pot),Colle,féminin,singulier
+878,104,"Colle (à bois, super-glu, époxy, néoprène)",Colle,féminin,singulier
+879,102,Classeur,Classeur,masculin,singulier
+880,101,Ciseaux,Ciseaux,masculin,pluriel
+881,99,Désinfectant de piscine,Désinfectant,masculin,singulier
+882,99,Chlore,Chlore,masculin,singulier
+883,98,Chiffon (ou absorbant) souillé par des produits dangereux,Chiffon,masculin,singulier
+884,97,Bubble-gum,Bubble-gum,masculin,singulier
+885,97,Chewing-gum,Chewing-gum,masculin,singulier
+886,285,Mousse de polyuréthane,Mousse,féminin,singulier
+887,285,Sous-couche,Sous-couche,féminin,singulier
+888,285,Polish,Polish,masculin,singulier
+889,285,Filtres à huile,Filtres,masculin,singulier
+890,285,Filtre à gasoil,Filtre,masculin,singulier
+891,285,Antigel,Antigel,masculin,singulier
+892,285,Liquide de dégivrage,Liquide,masculin,singulier
+893,285,Liquides de refroidissement,Liquides,masculin,pluriel
+894,285,Biocides,Biocides,masculin,pluriel
+895,285,Mousse expansive,Mousse,féminin,singulier
+896,285,Anti-goudron,Anti-goudron,masculin,singulier
+897,285,Produit pour ramoner les cheminées,Produit,masculin,singulier
+898,285,Appât,Appât,masculin,singulier
+899,285,Produit chimique,Produit,masculin,singulier
+900,281,Préservatif,Préservatif,masculin,singulier
+901,278,Pot catalytique,Pot,masculin,singulier
+902,273,Plombage,Plombage,masculin,singulier
+903,272,Plomb,Plomb,masculin,singulier
+904,267,Pigment,Pigment,masculin,singulier
+905,264,Pesticide,Pesticide,masculin,singulier
+906,263,Négatifs (photos),Négatifs,masculin,pluriel
+907,263,Pellicule (photographique ou de film),Pellicule,féminin,singulier
+908,261,Peinture naturelle,Peinture,féminin,singulier
+909,260,Peinture à l'huile (glycéro...),Peinture,féminin,singulier
+910,257,Photos,Photos,féminin,pluriel
+911,257,Photographies,Photographies,féminin,pluriel
+912,257,Papiers photographiques (argentique et imprimante),Papiers,masculin,pluriel
+913,256,Tapisserie,Tapisserie,féminin,singulier
+914,256,Papier peint,Papier,masculin,singulier
+915,251,Papier carbone (ou thermique),Papier,masculin,singulier
+916,250,Papier calque,Papier,masculin,singulier
+917,239,Nettoyant cheminée,Nettoyant,féminin,singulier
+918,238,Mousse isolante,Mousse,féminin,singulier
+919,235,Raticide,Raticide,masculin,singulier
+920,235,Mort aux rats,Mort,féminin,singulier
+921,234,Morceaux de verre,Morceaux,masculin,pluriel
+922,232,Morceaux de bois,Morceaux,masculin,pluriel
+923,224,Mercure,Mercure,masculin,singulier
+924,221,Mauvaises herbes,Mauvaises,féminin,pluriel
+925,216,"Matelas (en mousse, à ressorts...)",Matelas,masculin,singulier
+926,215,Mastic,Mastic,masculin,singulier
+927,207,Litière d'animal domestique,Litière,féminin,singulier
+928,204,Lingette nettoyante,Lingette,féminin,singulier
+929,202,Poireaux,Poireaux,masculin,pluriel
+930,202,Fenouils,Fenouils,masculin,pluriel
+931,202,Carottes,Carottes,féminin,pluriel
+932,202,Navets,Navets,masculin,pluriel
+933,202,Pommes de terre,Pommes,féminin,singulier
+934,202,Aubergines,Aubergines,féminin,pluriel
+935,202,Courgettes,Courgettes,féminin,pluriel
+936,124,Légumes abîmés,Légumes,masculin,pluriel
+937,413,Lasure,Lasure,féminin,singulier
+938,190,Insecticide,Insecticide,masculin,singulier
+939,368,white spirit,white,masculin,singulier
+941,362,Verre à boire,Verre,féminin,singulier
+942,361,Verre (ayant contenu une bougie),Verre,masculin,singulier
+943,360,"Vernis, laque","Vernis,",masculin,singulier
+944,353,Tuiles (et terre cuite),Tuiles,féminin,pluriel
+945,351,Trottinette,Trottinette,féminin,singulier
+946,399,Triman,Triman,masculin,singulier
+947,348,Top-case,Top-case,masculin,singulier
+948,346,Tondeuse à gazon mécanique,Tondeuse,féminin,singulier
+949,341,Thermomètre à mercure,Thermomètre,masculin,singulier
+950,340,Thermomètre à alcool,Thermomètre,masculin,singulier
+951,338,Test de grossesse,Test,masculin,singulier
+952,337,Terreau,Terreau,masculin,singulier
+953,332,Tampon hygiénique,Tampon,masculin,singulier
+954,331,Taille-crayon,Taille-crayon,masculin,singulier
+955,330,Tableau en ardoise,Tableau,masculin,singulier
+956,328,Stylo-plume,Stylo-plume,masculin,singulier
+957,326,Stylo bille,Stylo,masculin,singulier
+958,326,Stylo à bille,Stylo,masculin,singulier
+959,325,Soude,Soude,féminin,singulier
+960,324,Diluant,Diluant,masculin,singulier
+961,324,Solvant,Solvant,masculin,singulier
+962,318,Serviette hygiénique,Serviette,féminin,singulier
+963,316,Serviette en papier,Serviette,féminin,singulier
+964,309,Thé en sachet,Thé,masculin,singulier
+965,309,Sachet de thé,Sachet,masculin,singulier
+966,307,Poubelle,Poubelle,féminin,singulier
+967,307,Sac poubelle,Sac,masculin,singulier
+968,304,Sac isotherme,Sac,masculin,singulier
+969,302,Sable de chantier,Sable,masculin,singulier
+970,302,Sable,Sable,masculin,singulier
+971,301,Rouge à lèvres,Rouge,masculin,singulier
+972,297,Résine,Résine,féminin,singulier
+973,297,Résines,Résines,féminin,pluriel
+974,296,Répulsif,Répulsif,masculin,singulier
+975,294,Rasoir jetable,Rasoir,féminin,singulier
+976,293,Radiographie,Radiographie,féminin,singulier
+977,286,Produit phytopharmaceutique non utilisé,Produit,masculin,pluriel
+978,286,Produits phytopharmaceutiques non utilisés,Produits,masculin,pluriel
+979,282,Produits de traitement des matériaux (dont bois),Produits,masculin,pluriel
+980,287,Feux d'artifice,Feux,masculin,pluriel
+981,287,Détaupeurs,Détaupeurs,masculin,pluriel
+982,287,Fusées paragrêles,Fusées,féminin,pluriel
+983,287,Produits pyrotechniques,Produits,masculin,pluriel
+984,177,Avertisseur de radars,Avertisseur,masculin,singulier
+985,177,Assistant de conduite,Assistant,féminin,singulier
+986,177,GPS,GPS,masculin,singulier
+987,181,Guirlande électrique,Guirlande,féminin,singulier
+988,184,Enceintes,Enceintes,féminin,pluriel
+989,184,Baffles,Baffles,masculin,pluriel
+990,184,Haut-parleurs,Haut-parleurs,masculin,pluriel
+991,189,Imprimante,Imprimante,féminin,singulier
+992,29,Walkman,Walkman,masculin,singulier
+993,29,MP3,MP3,masculin,singulier
+994,29,Baladeur,Baladeur,masculin,singulier
+995,414,Calculatrice,Calculatrice,féminin,singulier
+996,94,Chargeur,Chargeur,masculin,singulier
+997,84,Clé RFID,Clé,masculin,singulier
+998,84,Carte RFID,Carte,masculin,singulier
+999,95,Chauffe-eau,Chauffe-eau,masculin,singulier
+1000,219,Prise,Prise,féminin,singulier
+1001,219,Rallonge,Rallonge,féminin,singulier
+1002,219,Multiprise,Multiprise,féminin,singulier
+1003,219,Cordon,Cordon,masculin,singulier
+1004,219,Câble,Câble,masculin,singulier
+1005,219,"Matériel électrique passif (prise, adaptateur, câbles, cordons)",Matériel,masculin,singulier
+1006,365,Vieil appareil électrique ou électronique,Vieil,masculin,singulier
+1007,350,Transformateur électrique,Transformateur,masculin,singulier
+1008,333,Téléphone fixe,Téléphone,masculin,singulier
+1009,118,Cuisinière électrique,Cuisinière,féminin,singulier
+1010,163,Four électrique,Four,masculin,singulier
+1011,173,Gazinière,Gazinière,féminin,singulier
+1012,291,Chauffage électrique,Chauffage,masculin,singulier
+1013,291,Radiateur électrique,Radiateur,masculin,singulier
+1014,299,Robot-aspirateur,Robot-aspirateur,masculin,singulier
+1015,226,Four micro-ondes,Four,masculin,singulier
+1016,226,Micro-ondes,Micro-ondes,masculin,singulier
+1017,292,Radiateur en fonte,Radiateur,féminin,singulier
+1018,85,"Carte à puce (bancaire, de téléphone, d'identité)",Carte,féminin,singulier
+1019,40,Batterie automobile,Batterie,féminin,singulier
+1020,236,Mousse à raser en bombe aérosol,Mousse,féminin,singulier
+1021,404,Vernis à ongles,Vernis,masculin,singulier
+1022,288,Dépliant,Dépliant,masculin,singulier
+1023,288,Réclame,Réclame,féminin,singulier
+1024,288,Publicité,Publicité,masculin,singulier
+1025,288,Publicités,Publicités,féminin,pluriel
+1026,288,Prospectus,Prospectus,masculin,singulier
+1027,249,Papier cadeau,Papier,masculin,singulier
+1028,252,Papier de bureau,Papier,masculin,singulier
+1029,255,Papier kraft,Papier,masculin,singulier
+1030,253,Papier graphique,Papier,masculin,singulier
+1031,54,Carton à pizza,Carton,masculin,singulier
+1032,54,Boîte à pizza,Boîte,féminin,singulier
+1033,53,Boîte à oeufs en plastique,Boîte,féminin,singulier
+1034,57,Boîte de médicament en carton (vide),Boîte,féminin,singulier
+1035,68,Bouteille en métal (sirop),Bouteille,féminin,singulier
+1036,405,Opercule en alu / métal,Opercule,masculin,singulier
+1037,113,Couvercle en métal,Couvercle,masculin,singulier
+1038,174,Verre en carton,Verre,masculin,singulier
+1039,174,Gobelet en carton,Gobelet,masculin,singulier
+1040,34,Baril de lessive (en carton),Baril,masculin,singulier
+1041,409,Carton,Carton,masculin,singulier
+1042,87,"Carton d'emballage de grande taille (électroménager, meuble...)",Carton,masculin,singulier
+1043,36,Barquette en aluminium,Barquette,masculin,singulier
+1044,248,Papier aluminium,Papier,masculin,singulier
+1045,143,Enveloppe,Enveloppe,féminin,singulier
+1046,78,Calepin,Calepin,masculin,singulier
+1047,78,Bloc-notes,Bloc-notes,masculin,singulier
+1048,78,Carnet,Carnet,masculin,singulier
+1049,78,Cahier à spirale,Cahier,masculin,singulier
+1050,78,Calendrier,Calendrier,masculin,singulier
+1051,78,Cahier,Cahier,masculin,singulier
+1052,277,Polystyrène expansé (calage),Polystyrène,masculin,singulier
+1053,213,Maquillage (emballage et produit),Maquillage,masculin,singulier
+1054,306,Sac plastique jetable classique (non biodégradable),Sac,masculin,singulier
+1055,157,Film plastique,Film,masculin,singulier
+1056,406,Opercule en plastique,Opercule,féminin,singulier
+1057,161,Fleurs fanées,Fleurs,féminin,pluriel
+1058,270,Plante,Plante,féminin,singulier
+1059,182,Guirlande non électrique,Guirlande,féminin,singulier
+1060,166,Fourrure synthétique,Fourrure,féminin,singulier
+1061,165,Fourrure naturelle,Fourrure,féminin,singulier
+1062,303,Sac en coton (tissu),Sac,masculin,singulier
+1063,363,Vêtement souillé,Vêtement,masculin,singulier
+1064,192,Jean,Jean,masculin,singulier
+1065,398,Chapeau,Chapeau,masculin,singulier
+1066,398,Béret,Béret,masculin,singulier
+1067,398,Casquette,Casquette,féminin,singulier
+1068,398,Toque,Toque,féminin,singulier
+1069,398,Couvre-chef,Couvre-chef,masculin,singulier
+1070,424,Carpette,Carpette,féminin,singulier
+1071,424,Paillassonextérieur,Paillassonextérieur,masculin,singulier
+1072,424,Paillasson intérieur,Paillasson,masculin,singulier
+1073,424,Thibaude,Thibaude,féminin,singulier
+1074,424,Tapis,Tapis,masculin,singulier
+1075,370,Balançoire,Balançoire,féminin,singulier
+1076,370,Balle de golf,Balle,féminin,singulier
+1077,370,"Balle de sport de raquette (badminton, squash, ping-pong)",Balle,féminin,singulier
+1078,370,Balle de baseball,Balle,féminin,singulier
+1079,370,Batte de baseball,Batte,féminin,singulier
+1080,370,Boule de billard,Boule,féminin,singulier
+1081,370,Boule de pétanque,Boule,féminin,singulier
+1082,370,Canne à pêche,Canne,féminin,singulier
+1083,370,"Cible (chasse, tir sportif, ball-trap, tir à l'arc, fléchettes)",Cible,féminin,singulier
+1084,370,"Combinaison (triathlon, nage eau libre, plongée, surf)",Combinaison,féminin,singulier
+1085,370,Combinaison de ski,Combinaison,féminin,singulier
+1086,370,Crosse de hockey,Crosse,féminin,singulier
+1087,370,"Embarcation < 2,5m",Embarcation,féminin,singulier
+1088,370,"Fixation (ski, snowboard)",Fixation,féminin,singulier
+1089,370,Fixation murale sac de frappe,Fixation,féminin,singulier
+1090,370,Flèche,Flèche,féminin,singulier
+1091,370,Fléchette,Fléchette,féminin,singulier
+1092,370,Housse du Surf,Housse,féminin,singulier
+1093,370,Laisse de promenade de canicrosse,Laisse,féminin,singulier
+1094,370,Luge,Luge,féminin,singulier
+1095,370,Pagaie,Pagaie,féminin,singulier
+1096,370,Palme,Palme,féminin,singulier
+1097,370,Pièce détachée skate-board,Pièce,féminin,singulier
+1098,370,Planche de bodyboard,Planche,féminin,singulier
+1099,370,Planche de kite-surf,Planche,féminin,singulier
+1100,370,Planche de surf (en mousse ou rigide),Planche,féminin,singulier
+1101,370,Planche de windsurf,Planche,féminin,singulier
+1102,370,"Pompe (vélo, sports nautiques)",Pompe,féminin,singulier
+1103,370,Rame,Rame,féminin,singulier
+1104,370,Pelle d'aviron,Pelle,féminin,singulier
+1105,370,"Raquette (tennis, badminton, squash, ping-pong...)",Raquette,féminin,singulier
+1106,370,Tenue de cycliste,Tenue,féminin,singulier
+1107,370,Table de billard,Table,féminin,singulier
+1108,370,Table de ping-pong,Table,féminin,singulier
+1109,370,Tente,Tente,féminin,singulier
+1110,370,Trottinette non électrique,Trottinette,féminin,singulier
+1111,370,Veste d'escrime,Veste,féminin,singulier
+1112,370,Voile de windsurf,Voile,féminin,singulier
+1113,370,Housse de sac,Housse,féminin,singulier
+1114,370,Corde pour canicross,Corde,féminin,singulier
+1115,370,Glacière rigide,Glacière,féminin,singulier
+1116,370,Housse de skis,Housse,féminin,singulier
+1117,370,Housse de chaussures de ski,Housse,féminin,singulier
+1118,370,Housse de snowboard,Housse,féminin,singulier
+1119,370,Housse de surf,Housse,féminin,singulier
+1120,370,Machine de musculation développé-couché,Machine,féminin,singulier
+1121,370,Fourche de vélo,Fourche,féminin,singulier
+1122,370,Potence de vélo,Potence,féminin,singulier
+1123,370,Poignée de vélo,Poignée,féminin,singulier
+1124,370,Jante de vélo,Jante,féminin,singulier
+1125,370,Pédale de vélo,Pédale,féminin,singulier
+1126,370,Chaîne de vélo,Chaîne,féminin,singulier
+1127,370,"Planche de sport nautique (surf, kitesurf, windsurf, bodyboard)",Planche,féminin,singulier
+1128,370,"Pompe (vélo, sports nautiques...)",Pompe,féminin,singulier
+1129,370,"Pièce détachée de vélo (moyeu, jeu de direction, plateau, dérailleur, poignée, chaîne, cadre, guidon, fourche...)",Pièce,féminin,pluriel
+1130,370,"Balle de sport (gymnastique, yoga, pilates, musculation, capoeira, cheerleading, cirque)",Balle,féminin,singulier
+1131,371,Balle de tennis,Balle,féminin,singulier
+1132,416,Mouchoir en papier,Mouchoir,masculin,singulier
+1133,418,Gants médicaux (gants jetables en plastique),Gants,masculin,pluriel
+1134,417,Lingette désinfectante,Lingette,féminin,singulier
+1135,70,Bonbonne de gaz (pour cuisson),Bonbonne,féminin,singulier
+1136,70,Bouteille de gaz (pour cuisson),Bouteille,féminin,singulier
+1137,52,Boîte à fromage en carton,Boîte,féminin,singulier
+1138,52,Pot de yaourt en carton,Pot,masculin,singulier
+1139,52,Barquette en carton,Barquette,féminin,singulier
+1140,52,Boîte à oeufs en carton,Boîte,féminin,singulier
+1141,276,Poche plastique jetable (non biodégradable),Poche,féminin,singulier
+1142,276,Pochette plastique d'emballage,Pochette,féminin,singulier
+1143,423,Bande d'accrochage de rideau,Bande,féminin,singulier
+1144,423,Bande d'ancrage de rideau,Bande,féminin,singulier
+1145,423,Bouton de tringle à rideau,Bouton,masculin,singulier
+1146,423,Décoration textile à suspendre,Décoration,féminin,singulier
+1147,423,Doublure occultante thermique,Doublure,féminin,singulier
+1148,423,Fausse peau de mouton,Fausse,féminin,singulier
+1149,423,Guirlande décoration en tissu,Guirlande,féminin,singulier
+1150,423,Macramé,Macramé,masculin,singulier
+1151,423,Peau de bête,Peau,féminin,singulier
+1152,423,Rideau obscurcissant,Rideau,masculin,singulier
+1153,423,Rideau occultant,Rideau,masculin,singulier
+1154,423,Rideau phonique,Rideau,féminin,singulier
+1155,423,Rideau tamisant,Rideau,masculin,singulier
+1156,423,Rideau thermique,Rideau,féminin,singulier
+1157,423,Rideau,Rideau,masculin,singulier
+1158,423,Rideau moustiquaire,Rideau,masculin,singulier
+1159,423,Set d'angle,Set,masculin,singulier
+1160,423,Store alvéolaire,Store,masculin,singulier
+1161,423,Store bateau,Store,masculin,singulier
+1162,423,Store californien,Store,masculin,singulier
+1163,423,Store enrouleur,Store,masculin,singulier
+1164,423,Store japonais,Store,masculin,singulier
+1165,423,Store occultant,Store,masculin,singulier
+1166,423,Store plissé,Store,masculin,singulier
+1167,423,Store pour fenêtre de toit,Store,masculin,singulier
+1168,423,Store vénitien,Store,masculin,singulier
+1169,423,Structure de penderie,Structure,féminin,singulier
+1170,423,"Support de fixation (rideau, penderie)",Support,masculin,singulier
+1171,423,Tissage mural macramé,Tissage,masculin,singulier
+1172,423,Tissu mural,Tissu,masculin,singulier
+1173,423,Toile tendue,Toile,féminin,singulier
+1174,203,Tour de lit,Tour,masculin,singulier
+1175,423,Tringle à vêtement,Tringle,féminin,singulier
+1176,423,Tringle à rideau,Tringle,féminin,singulier
+1177,423,Voilage tamisant,Voilage,masculin,singulier
+1178,423,Voilage transparent,Voilage,masculin,singulier
+1179,423,Voile d'ombrage,Voile,féminin,singulier
+1180,423,Rideaux et leurs accessoires,Rideaux,masculin,pluriel
+1181,159,Flacon de sirop de médicament en verre (vide),Flacon,masculin,singulier
+1182,159,Flacon de cosmétique (en verre),Flacon,masculin,singulier
+1183,159,Flacon spray en verre,Flacon,masculin,singulier
+1184,159,Flacon pompe en verre,Flacon,masculin,singulier
+1185,159,Flacon de parfum (en verre),Flacon,masculin,singulier
+1186,308,filet de fruits et légumes,filet,masculin,singulier
+1187,308,Sachet alimentaire (en plastique),Sachet,masculin,singulier
+1188,55,Allumettes,Allumettes,féminin,pluriel
+1189,55,Boîte d'allumettes,Boîte,féminin,pluriel
+1190,427,Détecteur d'incendie,Détecteur,masculin,singulier
+1191,427,Détecteur de fumées,Détecteur,masculin,singulier
+1192,322,Alarme,Alarme,féminin,singulier
+1193,322,Sirène (alarme),Sirène,féminin,singulier
+1194,428,Parapluie,Parapluie,masculin,singulier
+1195,429,Cartouche filtrante d'eau,Cartouche,féminin,singulier
+1196,429,Filtre de carafe d'eau,Filtre,masculin,singulier
+1197,429,Cartouche Brita,Cartouche,féminin,singulier
+1198,429,Filtre Brita,Filtre,masculin,singulier
+1199,429,Cartouche de filtration d'eau,Cartouche,féminin,singulier
+1200,429,Filtre à eau usagé,Filtre,masculin,singulier
+1201,247,Papier (ou carton) souillé,Papier,masculin,singulier
+1202,175,Verre en plastique jetable,Verre,masculin,singulier
+1203,175,Gobelet en plastique jetable,Gobelet,masculin,singulier
+1204,122,Compresse,Compresse,féminin,singulier
+1205,122,Pansement,Pansement,masculin,singulier
+1206,122,Coton (soin médical),Coton,masculin,singulier
+1207,122,Poche de perfusion vide,Poche,féminin,singulier
+1208,122,Poche de nutrition,Poche,féminin,singulier
+1209,122,Blouse,Blouse,féminin,singulier
+1210,122,Surchaussures,Surchaussures,féminin,pluriel
+1211,122,Poche urinaire,Poche,féminin,singulier
+1212,122,Déchets d'Activités de Soins (DAS) non-dangereux,Déchets,masculin,pluriel
+1213,396,Boîte à fromage en bois,Boîte,féminin,singulier
+1214,320,Shampoing (flacon en plastique),Shampoing,masculin,singulier
+1215,205,Liquide vaisselle,Liquide,masculin,singulier
+1216,35,Baril de lessive (en plastique),Baril,masculin,singulier
+1217,283,Nettoyant pour vitres,Nettoyant,masculin,singulier
+1218,283,Nettoyant pour sols,Nettoyant,masculin,singulier
+1219,283,Désodorisant,Désodorisant,masculin,singulier
+1220,283,Produit d'entretien ménager non-dangereux,Produit,masculin,singulier
+1221,37,Barquette,Barquette,féminin,singulier
+1222,37,Barquette en plastique (dont polystyrène),Barquette,féminin,singulier
+1223,58,"Boîte en métal (thé, café, biscuits...)",Boîte,féminin,singulier
+1224,431,Contenant réemployable,Contenant,masculin,singulier
+1225,431,Flacon réemployable,Flacon,masculin,singulier
+1226,431,Bocal réemployable,Bocal,masculin,singulier
+1227,431,Emballage consigné,Emballage,masculin,singulier
+1228,431,Bocal consigné,Bocal,masculin,singulier
+1229,431,Flacon consigné,Flacon,masculin,singulier
+1230,431,sac réutilisable,sac,masculin,singulier
+1231,431,Emballage réemployable,Emballage,masculin,singulier
+1232,254,Papier gras non plastifié,Papier,masculin,singulier
+1233,56,Conserve,Conserve,féminin,singulier
+1234,56,Boîte de conserve (vide),Boîte,féminin,singulier
+1235,117,Cubitainer en métal,Cubitainer,masculin,singulier
+1236,117,Cubitainer de vin,Cubitainer,masculin,singulier
+1237,117,Cubitainer en carton,Cubitainer,masculin,singulier
+1238,117,Cubitainer en plastique,Cubitainer,masculin,singulier
+1239,117,Cubitainer,Cubitainer,masculin,singulier
+1240,72,Brique de lait,Brique,féminin,singulier
+1241,72,Brique de jus,Brique,féminin,singulier
+1242,72,Brique de soupe,Brique,féminin,singulier
+1243,72,"Brique alimentaire (jus, lait...)",Brique,féminin,singulier
+1244,59,Boîte à fromage en plastique,Boîte,masculin,singulier
+1245,59,Tupperware,Tupperware,masculin,singulier
+1246,59,Pochette alimentaire (en plastique),Pochette,féminin,singulier
+1247,59,"Boîte en plastique (alimentaire, emballage...)",Boîte,féminin,singulier
+1248,397,Flacon en plastique,Flacon,masculin,singulier
+1249,355,Tasse,Tasse,féminin,singulier
+1250,355,Mug,Mug,masculin,singulier
+1251,355,Assiette,Assiette,féminin,singulier
+1252,355,Bol,Bol,masculin,singulier
+1253,355,Vaisselle,Vaisselle,féminin,singulier
+1254,432,Bouteille consignée,Bouteille,féminin,singulier
+1255,432,Barquette réemployable,Barquette,féminin,singulier
+1256,432,Barquette consignée,Barquette,féminin,singulier
+1257,432,Bouteille réemployable,Bouteille,féminin,singulier
+1258,110,"Fard (à paupières, à joues)",Fard,masculin,singulier
+1259,110,Mascara,Mascara,masculin,singulier
+1260,110,Fond de teint,Fond,masculin,singulier
+1261,110,Poudre,Poudre,féminin,singulier
+1262,110,Blush,Blush,masculin,singulier
+1263,110,Anti-cernes,Anti-cernes,masculin,singulier
+1264,110,crème hydratante,crème,féminin,singulier
+1265,110,lait solaire,lait,masculin,singulier
+1266,110,Lait pour le corps,Lait,masculin,singulier
+1267,110,Crème solaire,Crème,féminin,singulier
+1268,110,Eyeliner liquide,Eyeliner,masculin,singulier
+1269,110,Crème à raser,Crème,masculin,singulier
+1270,110,Cosmétique (produit et emballage),Cosmétique,masculin,singulier
+1271,433,Boîte de cirage,Boîte,féminin,singulier
+1272,433,Tube de cirage,Tube,masculin,singulier
+1273,433,Flacon de cirage,Flacon,masculin,singulier
+1274,433,Emballage de cirage,Emballage,masculin,singulier
+1275,280,Pot de yaourt en plastique,Pot,masculin,singulier
+1276,280,"Pot en plastique (yaourt, crème fraîche)",Pot,masculin,singulier
+1277,359,Vélo à assistance électrique (VAE),Vélo,masculin,singulier
+1278,359,Vélo électrique,Vélo,masculin,singulier
+1279,435,Gyroroue,Gyroroue,féminin,singulier
+1280,435,Planche hoverboard,Planche,féminin,singulier
+1281,435,"Planche à roulette électrique (skateboard, longboard...)",Planche,masculin,singulier
+1282,435,Trottinette électrique,Trottinette,féminin,singulier
+1283,421,Scooter de mer,Scooter,masculin,singulier
+1284,421,Bateau à moteur,Bateau,masculin,singulier
+1285,421,Voilier,Voilier,masculin,singulier
+1286,421,Catamaran,Catamaran,masculin,singulier
+1287,421,Vedette,Vedette,féminin,singulier
+1288,421,Bateau de pêche promenade,Bateau,masculin,singulier
+1289,421,Dériveur,Dériveur,masculin,singulier
+1290,421,Bateau pneumatique,Bateau,masculin,singulier
+1291,421,Bateau semi-rigide,Bateau,masculin,singulier
+1292,421,jetski,jetski,masculin,singulier
+1293,421,Bateau de plaisance et de sport,Bateau,masculin,singulier
+1294,233,clé de porte,clé,féminin,singulier
+1295,233,clé (de serrure),clé,féminin,singulier
+1296,233,Morceaux de métal,Morceaux,masculin,pluriel
+1297,311,Sciure,Sciure,féminin,singulier
+1298,311,Sciure de bois,Sciure,féminin,singulier
+1299,354,Plat en pyrex,Plat,masculin,singulier
+1300,354,Ustensile de cuisine,Ustensile,masculin,singulier
+1301,434,Casserole,Casserole,féminin,singulier
+1302,434,Poêle,Poêle,féminin,singulier
+1303,434,Fourchette,Fourchette,féminin,singulier
+1304,434,Cuillère,Cuillère,féminin,singulier
+1305,434,Couteau de cuisine,Couteau,masculin,singulier
+1306,434,Timbale en métal,Timbale,féminin,singulier
+1307,434,Ouvre-bouteille,Ouvre-bouteille,féminin,singulier
+1308,434,Ouvre-boîte,Ouvre-boîte,masculin,singulier
+1309,434,Marmite en fonte,Marmite,féminin,singulier
+1310,434,Canif,Canif,masculin,singulier
+1311,434,Vaisselle en métal,Vaisselle,féminin,singulier
+1312,437,Cintre en bois,Cintre,masculin,pluriel
+1313,310,Sapin,Sapin,masculin,singulier
+1314,310,Sapin de Noël naturel,Sapin,masculin,singulier
+1315,127,Tonte de pelouse,Tonte,féminin,singulier
+1316,127,Tailles de haies,Tailles,masculin,pluriel
+1317,127,Tailles d'arbustes,Tailles,masculin,pluriel
+1318,127,Résidus d'élagage,Résidus,féminin,pluriel
+1319,127,Résidus de débroussaillement,Résidus,masculin,pluriel
+1320,127,Feuillages,Feuillages,masculin,pluriel
+1322,153,Feuilles mortes,Feuilles,féminin,pluriel
+1323,127,Déchets verts,Déchets,masculin,pluriel
+1324,185,Herbe (ou gazon),Herbe,féminin,singulier
+1325,438,sac d'aspirateur plein,sac,masculin,singulier
+1326,438,sac d'aspirateur plein de poussière,sac,masculin,singulier
+1327,438,Poussière,Poussière,féminin,singulier
+1328,81,capsule de bouteille de bière,capsule,féminin,singulier
+1329,81,Canette,Canette,féminin,singulier
+1330,245,Palette en bois,Palette,féminin,singulier
+1331,457,Plaquette de médicaments (vide),Plaquette,féminin,singulier
+1332,457,Blister de médicament (vide),Blister,masculin,singulier
+1333,241,PC portable,PC,masculin,singulier
+1334,241,Ordinateur portable,Ordinateur,masculin,singulier
+1335,24,Equipement d'entretien,Equipement,masculin,singulier
+1336,24,Aspirateur,Aspirateur,masculin,singulier
+1337,211,Lave-linge,Lave-linge,masculin,singulier
+1338,211,Machine à laver,Machine,féminin,singulier
+1339,335,Télévision,Télévision,féminin,singulier
+1340,335,TV,TV,féminin,singulier
+1341,335,Téléviseur,Téléviseur,masculin,singulier
+2045,124,Épluchures,Epluchures,féminin,pluriel
+1343,124,Biodéchets,Biodéchets,masculin,pluriel
+1344,124,Déchets organiques,Déchets,masculin,pluriel
+1345,124,Aliments pourris,Aliments,masculin,pluriel
+1346,124,Déchets alimentaires,Déchets,masculin,pluriel
+1347,124,Déchets de préparation et restes de repas,Déchets,masculin,pluriel
+1348,298,Restes,Restes,masculin,pluriel
+1349,298,Restes de repas,Restes,masculin,pluriel
+1350,366,Vitre,Vitre,féminin,singulier
+1351,7,Laitages,Laitages,masculin,pluriel
+1352,7,Croutes de fromage,Croutes,féminin,pluriel
+1353,7,Fanes de légumes,Fanes,masculin,pluriel
+1354,7,Poisson (restes),Poisson,masculin,singulier
+1355,7,Fruits et légumes abîmés,Fruits,masculin,pluriel
+1356,7,Marcs de café,Marcs,masculin,singulier
+1357,7,Sachets et feuilles de thés,Sachets,masculin,pluriel
+1358,7,Aliments compostables,Aliments,masculin,pluriel
+1359,77,cagette en bois,cagette,féminin,pluriel
+1360,77,"Cageot, caissette en bois","Cageot,",masculin,pluriel
+1361,439,Climatiseur,Climatiseur,masculin,singulier
+1362,343,Ticket de métro,Ticket,masculin,singulier
+1363,343,Ticket de caisse,Ticket,masculin,singulier
+1364,343,Ticket (transport en commun),Ticket,masculin,singulier
+1365,212,Revue,Revue,féminin,singulier
+1366,212,Catalogue,Catalogue,masculin,singulier
+1367,212,Annuaire,Annuaire,masculin,singulier
+1368,212,Magazine,Magazine,masculin,singulier
+1369,195,Journal,Journal,masculin,singulier
+1370,86,Etuis en carton,Etuis,masculin,singulier
+1371,86,Calage en carton,Calage,masculin,singulier
+1372,86,Cale en carton,Cale,féminin,singulier
+1373,86,Paquet de cigarettes vide,Paquet,masculin,singulier
+1374,86,Carton de petite taille,Carton,féminin,singulier
+1375,223,Mégot de cigarette,Mégot,masculin,singulier
+1376,440,Laine de roche,Laine,féminin,singulier
+1377,315,Seringue sans aiguille (non-contaminée),Seringue,masculin,singulier
+1378,180,Lave-vaisselle,Lave-vaisselle,masculin,singulier
+1379,180,Sèche-linge,Sèche-linge,masculin,singulier
+1380,180,Hotte,Hotte,féminin,singulier
+1381,180,Plaque de cuisson,Plaque,féminin,singulier
+1382,180,Gros électroménager,Gros,masculin,singulier
+1383,295,Frigidaire,Frigidaire,masculin,singulier
+1384,295,Frigo,Frigo,masculin,singulier
+1385,295,Cave à vin,Cave,féminin,singulier
+1386,295,Congélateur,Congélateur,masculin,singulier
+1387,295,Freezer,Freezer,masculin,singulier
+1388,295,Réfrigérateur,Réfrigérateur,masculin,singulier
+1389,129,Moto-cycle,Moto-cycle,féminin,singulier
+1390,129,Solex,Solex,masculin,singulier
+1391,129,"Deux-roues (moto, scooter, mobylette)",Deux-roues,masculin,singulier
+1392,425,Protège-cahier,Protège-cahier,masculin,singulier
+1393,425,Porte-vue,Porte-vue,masculin,singulier
+1394,425,Objet en plastique,Objet,masculin,singulier
+1395,220,Fax,Fax,masculin,singulier
+1396,220,Scanner,Scanner,masculin,singulier
+1397,220,Joystick,Joystick,masculin,singulier
+1398,220,Trackpad,Trackpad,masculin,singulier
+1399,220,Disque dur externe,Disque,masculin,singulier
+1400,220,Console de jeu,Console,féminin,singulier
+1401,220,Station d'accueil (informatique),Station,féminin,singulier
+1402,220,Dock,Dock,masculin,singulier
+1403,220,Clavier (informatique),Clavier,masculin,singulier
+1404,220,Souris (informatique),Souris,féminin,singulier
+1405,220,Tour (informatique),Tour,féminin,singulier
+1406,220,Unité centrale,Unité,féminin,singulier
+1407,220,Tablette numérique,Tablette,féminin,singulier
+1408,220,Box internet,Box,féminin,singulier
+1409,220,onduleur,onduleur,masculin,singulier
+1410,220,Alimentation sans interruption,Alimentation,féminin,singulier
+1411,220,Tablette (informatique),Tablette,féminin,singulier
+1412,220,Matériel informatique,Matériel,masculin,singulier
+1413,206,Cadre à lattes,Cadre,masculin,singulier
+1414,206,Lit pour animaux domestique,Lit,masculin,singulier
+1415,206,Matelas,Matelas,masculin,singulier
+1416,206,Matelas anti-escarres,Matelas,masculin,singulier
+1417,206,Matelas de bébé,Matelas,masculin,singulier
+1418,206,Matelas de jardin,Matelas,masculin,singulier
+1419,206,Matelas gonflable (pour couchage),Matelas,masculin,singulier
+1420,206,Parc à bébé avec fonction lit,Parc,masculin,singulier
+1421,206,Sommier à lattes,Sommier,masculin,singulier
+1422,206,Sommier,Sommier,masculin,singulier
+1423,206,Sommier fagot,Sommier,masculin,singulier
+1424,206,Sommier futon,Sommier,masculin,singulier
+1425,206,Sommier motorisé,Sommier,masculin,singulier
+1426,206,Sommier de relaxation (électronique ou mécanique),Sommier,masculin,singulier
+1427,206,Sommier tapissier,Sommier,masculin,singulier
+1428,206,Sur-matelas,Sur-matelas,masculin,singulier
+1429,206,"Sur-matelas type litier comportant une âme en mousse, latex ou ressort",Sur-matelas,masculin,singulier
+1430,206,Literie,Literie,féminin,singulier
+1431,96,Bottes,Bottes,féminin,pluriel
+1432,96,Bottines,Bottines,féminin,pluriel
+1433,96,Baskets,Baskets,féminin,pluriel
+1434,96,Tennis,Tennis,féminin,pluriel
+1435,96,Chaussons,Chaussons,masculin,pluriel
+1436,96,Pantoufles,Pantoufles,féminin,pluriel
+1437,96,Savattes,Savattes,féminin,pluriel
+1438,96,Souliers,Souliers,masculin,pluriel
+1950,96,Après-ski,Après-ski,masculin,pluriel
+1440,96,Babouches,Babouches,féminin,pluriel
+1441,96,Ballerines,Ballerines,féminin,pluriel
+1442,96,Boots,Boots,féminin,pluriel
+1443,96,Escarpins,Escarpins,masculin,pluriel
+1444,96,Mocassins,Mocassins,masculin,pluriel
+1445,96,Nu-pieds,Nu-pieds,masculin,pluriel
+1446,96,Tongs,Tongs,féminin,pluriel
+1447,96,Sabots,Sabots,masculin,pluriel
+1448,96,Sandales,Sandales,féminin,pluriel
+1449,96,Snow-boot,Snow-boot,féminin,pluriel
+1450,96,Chaussures,Chaussures,féminin,pluriel
+1451,275,Pneu de voiture / moto / scooter,Pneu,masculin,singulier
+1452,203,Tablier,Tablier,masculin,singulier
+1453,203,Draps,Draps,masculin,pluriel
+1454,203,Serviette de bain,Serviette,féminin,singulier
+1455,203,Taie d'oreiller,Taie,féminin,singulier
+1456,203,Parure de lit,Parure,féminin,singulier
+1457,203,Gigoteuse,Gigoteuse,féminin,singulier
+1458,203,Alèse,Alèse,féminin,singulier
+1459,203,Protège-matelas,Protège-matelas,masculin,singulier
+1460,203,Drap de plage,Drap,masculin,singulier
+1461,203,Peignoir,Peignoir,masculin,singulier
+1462,203,Tapis de bain,Tapis,masculin,singulier
+1463,203,Nappe,Nappe,féminin,singulier
+1464,203,Sous-nappe,Sous-nappe,masculin,singulier
+1465,203,Chemin de table,Chemin,masculin,singulier
+1466,203,Sets de table,Set,masculin,pluriel
+1467,203,Torchon,Torchon,masculin,singulier
+1468,203,Panneau japonais,Panneau,masculin,singulier
+1469,203,Mouchoir en tissu,Mouchoir,masculin,singulier
+1470,203,Housse,Housse,féminin,singulier
+1471,203,Linge de maison,Linge,masculin,singulier
+1472,317,Serviette en tissu,Serviette,féminin,singulier
+1473,419,Feu à main,Feu,masculin,singulier
+1474,419,Fusée parachute,Fusée,féminin,singulier
+1475,419,fusée de détresse,fusée,féminin,singulier
+1476,419,Fumigène,Fumigène,masculin,singulier
+1477,41,Béton,Béton,masculin,singulier
+1478,197,Laine de verre,Laine,féminin,singulier
+1479,222,Sirop de médicament,Sirop,masculin,singulier
+1480,222,Gélules de médicament,Gélules,féminin,pluriel
+1481,222,Comprimés de médicament,Comprimés,masculin,singulier
+1482,222,Médocs,Médocs,masculin,pluriel
+1483,222,Suppositoire,Suppositoire,masculin,singulier
+1484,222,Pommade de médicament,Pommade,féminin,singulier
+1485,222,Crème de médicament,Crème,féminin,singulier
+1486,222,Collyre,Collyre,masculin,singulier
+1487,222,Pillule de médicament,Pillule,féminin,singulier
+1488,222,Cachet de médicament,Cachet,masculin,singulier
+1489,222,Spray de médicament,Spray,masculin,singulier
+1490,222,Gouttes de médicament,Gouttes,féminin,pluriel
+1491,222,Patch de médicament,Patch,masculin,singulier
+1492,222,Médicaments,Médicaments,masculin,pluriel
+1493,339,Textiles,Textiles,masculin,pluriel
+1494,312,Lisseur,Lisseur,masculin,singulier
+1495,312,Fer à friser,Fer,masculin,singulier
+1496,312,Fer à lisser,Fer,masculin,singulier
+1497,312,Sèche-cheveux,Sèche-cheveux,masculin,singulier
+1498,25,Autoradio,Autoradio,masculin,singulier
+1499,17,Appareil photo jetable,Appareil,masculin,singulier
+1502,372,Chaussures à crampons,Chaussures,féminin,pluriel
+1503,372,Chaussures de cyclisme,Chaussures,féminin,pluriel
+1504,372,Chaussures de ski,Chaussures,féminin,pluriel
+1505,372,Chaussures de surf,Chaussures,féminin,pluriel
+1506,372,"Filets et poteaux  (tennis, badminton, squash, ping-pong, volley)",Filets,masculin,pluriel
+1507,372,Guètres de sport,Guètres,féminin,pluriel
+1508,372,"Patins à glace, de hockey sur glace, de curling",Patins,masculin,pluriel
+1509,372,"Poids, haltères","Poids,",masculin,pluriel
+1510,372,Raquettes de ski,Raquettes,féminin,pluriel
+1511,372,Skis,Skis,masculin,pluriel
+1512,372,Skis nautiques,Skis,masculin,pluriel
+1513,372,Tees,Tees,masculin,pluriel
+1514,372,Chaussons de danse,chaussons,masculin,pluriel
+1515,372,Chaussons de gymnastique,Chaussons,masculin,pluriel
+1516,372,Pointes d'athlétisme,Pointes,féminin,pluriel
+1517,372,Lunettes de piscine,Lunettes,féminin,pluriel
+1518,372,Palmes,palmes,féminin,pluriel
+1519,372,Plaquettes (natation),plaquettes,féminin,pluriel
+1520,372,Boots de snowboard,Boots,féminin,pluriel
+1521,372,Pattes d'ours (boxe),Pattes,féminin,pluriel
+1522,372,Chaussons d'escalade,Chaussons,masculin,pluriel
+1523,300,Patins,Patins,masculin,pluriel
+1524,300,Rollers,Rollers,masculin,pluriel
+1525,323,Planche à roulettes,Planche,féminin,singulier
+1526,323,Skate,Skate,masculin,singulier
+1527,323,Skate-board,Skate-board,masculin,singulier
+1528,329,Planche à repasser,Planche,féminin,singulier
+1529,369,Accessoire de canoë kayak non électrique,Accessoire,masculin,pluriel
+1530,369,"Accessoire de trottinette (roue, poignée, autre composant plastique)",Accessoire,masculin,pluriel
+1531,369,"Accessoire de vélo (antivol, bagagerie, panier, sonnette, pompe, gourde, bidon et porte-bidon)",Accessoire,masculin,pluriel
+1532,369,Appareil de fitness non électrique,Appareil,masculin,singulier
+1533,369,Article pour la pêche à la ligne,Article,masculin,pluriel
+1534,369,Aviron,Aviron,masculin,singulier
+1535,369,"Accessoire de sport (baseball, basketball, football, handball, football américain, hockey, rugby, volley, handball, Athlétisme, gymnastique, yoga, pilate, danse, fitness, musculation, capoeira, cheerleading, cirque, fléchettes)",Accessoire,masculin,pluriel
+1536,369,ballon,ballon,masculin,singulier
+1537,369,Bâton de ski,Bâton,masculin,singulier
+1538,369,BMX,BMX,masculin,singulier
+1539,369,But de football,But,masculin,singulier
+1540,369,Mini-but,Mini-but,masculin,singulier
+1541,369,Cerf-volant,Cerf-volant,masculin,singulier
+1542,369,Chariot de golf,Chariot,masculin,singulier
+1543,369,club de golf,club,masculin,singulier
+1544,369,Composant de vélo,Composant,masculin,singulier
+1545,369,Deltaplane,Deltaplane,masculin,singulier
+1546,369,Equipement de musculation non électrique,Equipement,masculin,singulier
+1547,369,Equipement de piscine,Equipement,masculin,singulier
+1548,369,hameçon,hameçon,masculin,singulier
+1549,369,kimono,kimono,masculin,singulier
+1550,369,Mât de windsurf,Mât,masculin,singulier
+1551,369,"Matériel d'athlétisme (haie, starting-block, bâton, témoin, javelot, poids, disque, marteau, matériel pour saut en longueur et hauteur…)",Matériel,masculin,singulier
+1552,369,"Matériel de voile (Dérive, gouvernail < 2,5 m)",Matériel,masculin,singulier
+1553,369,"Matériel d'entraînement sportif (mini-haie, marquage au sol, plot, cône de sport…)",Matériel,masculin,singulier
+1554,369,pantalon d'escrime,pantalon,masculin,singulier
+1555,369,Parachute,Parachute,masculin,singulier
+1556,369,Parapente,Parapente,masculin,singulier
+1557,369,Porte-bébé pour vélo,Porte-bébé,masculin,singulier
+1558,369,"Poteau, mini poteau de foot","Poteau,",masculin,singulier
+1559,369,Raft,Raft,masculin,singulier
+1560,369,Sac de frappe,Sac,masculin,singulier
+1561,369,Sac de golf,Sac,masculin,singulier
+1562,369,Sac de randonnée avec ceinture ventrale,Sac,masculin,singulier
+1563,369,Short rembourré,Short,masculin,singulier
+1564,369,Snowboard,Snowboard,masculin,singulier
+1565,369,Stand-up paddle (gonflable ou rigide),Stand-up,masculin,singulier
+1566,369,Tapis de sol,Tapis,masculin,singulier
+1567,369,Vélo adulte hors vélo à assistance électrique,Vélo,masculin,singulier
+1568,369,Vélo enfant,Vélo,masculin,singulier
+1569,369,Volant,Volant,masculin,singulier
+1570,369,Wakeboard,Wakeboard,masculin,singulier
+1571,369,Wishbone de windsurf,Wishbone,masculin,singulier
+1572,369,Accessoire aquafitness,Accessoire,masculin,singulier
+1573,369,pince-nez (piscine),pince-nez,masculin,singulier
+1574,369,Article de natation,Article,masculin,singulier
+1575,369,Bonnet de bain,Bonnet,masculin,singulier
+1576,369,Babyfoot,Babyfoot,masculin,singulier
+1577,369,Boomerang,Boomerang,masculin,singulier
+1578,369,Frisbee,Frisbee,masculin,singulier
+1579,369,Vortex,Vortex,masculin,singulier
+1580,369,Bouclier (Pad) de boxe,Bouclier,masculin,singulier
+1581,369,Ceinture de judo,Ceinture,féminin,singulier
+1582,369,Cercle de basket,Cercle,masculin,singulier
+1583,369,"Equipement de ski de randonnée (pelle, sonde...)",Equipement,masculin,singulier
+1584,369,Elliptique,Elliptique,masculin,singulier
+1585,369,Elastiband,Elastiband,masculin,singulier
+1586,369,Fitness tube,Fitness,masculin,singulier
+1587,369,"Filet (football, volley-ball, badminton, tennis, tennis de table...)",Filet,masculin,singulier
+1588,369,"Etui de raquette (tennis, badminton, squash, tennis de table...)",Etui,masculin,singulier
+1589,369,Filet de mini-tennis (filet + pieds),Filet,masculin,singulier
+1590,369,"Foil (windsurf, kitesurf...)",Foil,masculin,singulier
+1591,369,Jeu de palets,Jeu,masculin,singulier
+1592,369,Jeu de quilles,Jeu,masculin,singulier
+1593,369,Masque de ski ou de snowboard,Masque,masculin,singulier
+1594,369,Matériel d'aquagym,Matériel,masculin,singulier
+1595,369,"Matériel de cirque (diabolo, assiettes chinoises, balles et anneaux de jonglages...)",Matériel,masculin,singulier
+1596,369,Moulinet de canne à pêche,Moulinet,masculin,singulier
+1597,369,"Matériel en néoprène (chaussons, gants, cagoules, mitaines, surchausses...)",Matériel,masculin,singulier
+1598,369,Palet de hockey,Palet,masculin,singulier
+1599,369,Panneau de basket,Panneau,masculin,singulier
+1600,369,Panier de basket,Panier,masculin,singulier
+1601,369,Cadre de vélo,Cadre,masculin,singulier
+1602,369,Guidon de vélo,Guidon,masculin,singulier
+1603,369,Rayon de vélo,Rayon,masculin,singulier
+1604,369,Punch paddle (boxe),Punch,masculin,singulier
+1605,369,Rack de musculation,Rack,masculin,singulier
+1606,369,Rameur,Rameur,masculin,singulier
+1607,369,"Shorty, veste, combinaison en néoprène enfant","Shorty,",féminin,singulier
+1608,369,Slackline,Slackline,féminin,singulier
+1609,369,Speedball,Speedball,masculin,singulier
+1610,369,Step de gymnastique,Step,masculin,singulier
+1611,369,Trampoline,Trampoline,masculin,singulier
+1612,369,"Poteau, mini poteau de rugby","Poteau,",masculin,singulier
+1613,369,Mini poteau gonflable de rugby,Mini,masculin,singulier
+1614,369,"Equipement d'équitation (hors équipement de protection individuelle, chaussants et vêtements)",Equipement,masculin,singulier
+1615,369,Travel bag (bagagerie sportive),Travel,masculin,singulier
+1616,369,Arc (sport de tir de précision),Arc,masculin,singulier
+1617,369,Article de sport,Article,masculin,singulier
+1618,21,Poignard,Poignard,masculin,singulier
+1619,21,Dague de chasse,Dague,féminin,singulier
+1620,21,Couteau de plongée,Couteau,masculin,singulier
+1621,21,Bombe lacrymogène,Bombe,féminin,singulier
+1622,21,Coups de poings américains,Coups,masculin,pluriel
+1623,21,Etoile de jet,Etoile,féminin,singulier
+1624,21,Epée (arme blanche),Epée,féminin,singulier
+1625,21,Arc (arme),Arc,masculin,singulier
+1626,21,Lame d'arme blanche,Lame,féminin,singulier
+1627,21,Arme blanche,Arme,féminin,singulier
+1628,400,Volière,Volière,féminin,singulier
+1629,400,Cage pour animaux,Cage,féminin,singulier
+1630,19,Ardoises,Ardoises,féminin,pluriel
+1631,422,PV,PV,masculin,singulier
+1632,422,Centrale photovoltaïque,Centrale,féminin,singulier
+1633,422,Panneaux solaires,Panneaux,masculin,pluriel
+1634,422,Panneaux photovoltaïques,Panneaux,masculin,pluriel
+1635,47,Bois contaminé (termites),Bois,masculin,singulier
+1636,358,Cycle,Cycle,masculin,singulier
+1637,358,Bicyclette,Bicyclette,féminin,singulier
+1638,358,Bécane (biclou),Bécane,féminin,singulier
+1639,358,Tandem,Tandem,masculin,singulier
+1640,358,Vélo musculaire,Vélo,masculin,singulier
+1641,358,Vélo - hors vélo électrique,Vélo,masculin,singulier
+1642,193,jeu de PS2,jeu,masculin,singulier
+1643,193,jeu de PS4,jeu,masculin,singulier
+1644,193,"Jeu vidéo (cassette ou cartouche DS, PS3, Xbox...)",Jeu,masculin,singulier
+1645,191,Instrument de musique électronique,Instrument,masculin,singulier
+1646,191,Guitare électrique,Guitare,féminin,singulier
+1647,191,Synthétiseur,Synthétiseur,masculin,singulier
+1648,191,Piano électrique,Piano,masculin,singulier
+1649,191,Instrument de musique électrique,Instrument,masculin,singulier
+1650,441,violon,violon,masculin,singulier
+1651,441,flûte,flûte,féminin,singulier
+1652,441,guitare acoustique,guitare,féminin,singulier
+1653,441,piano,piano,masculin,singulier
+1654,441,saxophone,saxophone,masculin,singulier
+1655,441,instrument à cuivre,instrument,masculin,singulier
+1656,441,instrument à vent,instrument,masculin,singulier
+1657,441,Instrument de musique,Instrument,masculin,singulier
+1658,208,Bande-dessinée (album),Bande-dessinée,féminin,singulier
+1659,208,Livre,Livre,masculin,singulier
+1660,269,Pile rechargeable,Pile,féminin,singulier
+1661,268,Pile jetable,Pile,féminin,singulier
+1662,39,Accumulateur,Accumulateur,masculin,singulier
+1663,39,Batterie (hors batterie de voiture),Batterie,féminin,singulier
+1664,305,Poche plastique jetable biodégradable,Poche,féminin,singulier
+1665,305,Sac plastique jetable compostable,Sac,masculin,singulier
+1666,305,Sac plastique jetable biodégradable,Sac,masculin,singulier
+1667,225,Etagère,Etagère,féminin,singulier
+1668,225,Bibliothèque,Bibliothèque,féminin,singulier
+1669,225,Cadre de lit,Cadre,masculin,singulier
+1670,225,Placard,Placard,masculin,singulier
+1671,225,Buffet,Buffet,masculin,singulier
+1672,225,Table de chevet,Table,féminin,singulier
+1673,225,Chaise,Chaise,féminin,singulier
+1674,225,Table,Table,féminin,singulier
+1675,225,Éléments de cuisine,Eléments,masculin,pluriel
+1676,225,Lit,Lit,masculin,singulier
+1677,225,Commode,Commode,féminin,singulier
+1678,225,Table à langer,Table,féminin,singulier
+1679,225,Table de jardin,Table,féminin,singulier
+1680,225,Chaise de jardin,Chaise,féminin,singulier
+1681,225,Banc,Banc,masculin,singulier
+1682,225,Ilot central,Ilot,masculin,singulier
+1683,225,Vaisselier,Vaisselier,masculin,singulier
+1684,225,Garde-manger,Garde-manger,masculin,singulier
+1685,225,Coffre,Coffre,masculin,singulier
+1686,225,Penderie,Penderie,féminin,singulier
+1687,225,Fauteuil,Fauteuil,masculin,singulier
+1688,225,Armoire,Armoire,féminin,singulier
+1689,225,Guéridon,Guéridon,masculin,singulier
+1690,225,Argentier,Argentier,masculin,singulier
+1691,225,Bibus,Bibus,masculin,singulier
+1692,225,Chiffonnier,Chiffonnier,masculin,singulier
+1693,225,Confiturier,Confiturier,masculin,singulier
+1694,225,Console,Console,féminin,singulier
+1695,225,Canapé,Canapé,masculin,singulier
+1696,225,Caisson de meuble,Caisson,masculin,singulier
+1697,225,Rallonge et extension de table,rallonge,féminin,singulier
+1698,225,Console murale,Console,féminin,singulier
+1699,225,Façade de porte,Façade,féminin,singulier
+1700,225,Façade de tiroir,Façade,féminin,singulier
+1701,225,Lingère,Lingère,féminin,singulier
+1702,225,Meuble de bar,Meuble,masculin,singulier
+1703,225,Meuble range CD,Meuble,masculin,singulier
+1704,225,Meuble d'aquarium,Meuble,masculin,singulier
+1705,225,Meuble de téléphone,Meuble,masculin,singulier
+1706,225,Meuble TV,Meuble,masculin,singulier
+1707,225,Ottomane,Ottomane,féminin,singulier
+1708,225,Paravent,Paravent,masculin,singulier
+1709,225,Piétement de table,Piétement,masculin,singulier
+1710,225,Plateau de table,Plateau,masculin,singulier
+1711,225,Réhausse TV,Réhausse,masculin,singulier
+1712,225,Repose-pied,Repose-pied,masculin,singulier
+1713,225,Table gigogne,Table,féminin,singulier
+1714,225,Tiroir,Tiroir,masculin,singulier
+1715,225,Amortisseur mécanique pour meuble,Amortisseur,masculin,singulier
+1716,225,Boite de rangement,Boite,féminin,singulier
+1717,225,Range bouteille,Range,masculin,singulier
+1718,225,Support mural d'accrochage,Support,masculin,singulier
+1719,225,Compas pour meuble,Compas,masculin,singulier
+1720,225,Cube de rangement,Cube,masculin,singulier
+1721,225,"Etagère (caisson, murale, de bureau, à épices, à vin, à chapeaux…)",Etagère,féminin,singulier
+1722,225,Filet de rangement,Filet,masculin,singulier
+1723,225,Fileur,Fileur,masculin,singulier
+1724,225,Kit coulissant,Kit,masculin,singulier
+1725,225,Meuble de hotte,Meuble,masculin,singulier
+1726,225,Pieds de meuble,Pieds,masculin,pluriel
+1727,225,Porte-manteaux sur pied,Porte-manteaux,masculin,singulier
+1728,225,Porte battante de meuble,Porte,féminin,singulier
+1729,225,Raccord de meubles modulaires,Raccord,masculin,singulier
+1730,225,Rangement coulissant pour caisson,Rangement,masculin,singulier
+1731,225,Rayonnage,Rayonnage,masculin,singulier
+1732,225,Structure de rangement,Structure,masculin,singulier
+1733,225,Tiroir motorisé,Tiroir,masculin,singulier
+1734,225,Tourillon,Tourillon,masculin,singulier
+1735,225,Arbre à chat,Arbre,masculin,singulier
+1736,225,Quincaillerie de meuble,Quincaillerie,féminin,singulier
+1737,225,Tréteau,Tréteau,masculin,singulier
+1738,225,Tasseau,Tasseau,masculin,singulier
+1739,225,Bande de chant,Bande,féminin,singulier
+1740,225,Bouton de meuble,Bouton,masculin,singulier
+1741,225,Poignée de meuble,Poignée,féminin,singulier
+1742,225,Housse de dosseret,Housse,féminin,singulier
+1743,225,Loquetaux,Loquetaux,masculin,pluriel
+1744,225,Mobilier animalier,Mobilier,masculin,singulier
+1745,225,Panier à linge,Panier,masculin,singulier
+1746,225,Panneau de meuble,Panneau,masculin,singulier
+1747,225,Table à repasser,Table,féminin,singulier
+1748,225,Housse de table à repasser,Housse,féminin,singulier
+1749,225,Servante d'atelier,Servante,féminin,singulier
+1750,225,"Accessoire pour meuble (taquet, équerre, patte, charnière, vis spécifiquement dédiées)",Accessoire,masculin,pluriel
+1751,225,Armoire-lit,Armoire-lit,féminin,singulier
+1752,225,Bac de rangement,Bac,masculin,singulier
+1753,225,Bac de rangement à roulettes,Bac,masculin,singulier
+1754,225,Coiffeuse,Coiffeuse,féminin,singulier
+1755,225,Couchette enfant,Couchette,féminin,singulier
+1756,225,Dosseret,Dosseret,masculin,singulier
+1757,225,Dressing,Dressing,masculin,singulier
+1758,225,Lit d'appoint,Lit,masculin,singulier
+1759,225,Lit de camp,Lit,masculin,singulier
+1760,225,Lit évolutif,Lit,masculin,singulier
+1761,225,Lit pliant,Lit,masculin,singulier
+1762,225,Lit pont,Lit,masculin,singulier
+1763,225,Lit relevable,Lit,masculin,singulier
+1764,225,Lit rétractable,Lit,masculin,singulier
+1765,225,Malle,Malle,féminin,singulier
+1766,225,Portant,Portant,masculin,singulier
+1767,225,Semainier (meuble),Semainier,masculin,singulier
+1768,225,Tiroir de lit,Tiroir,masculin,singulier
+1769,225,Table de massage,Table,féminin,singulier
+1770,225,Pupitre,Pupitre,masculin,singulier
+1771,225,Valet,Valet,masculin,singulier
+1772,225,Bloc tiroir,Bloc,masculin,singulier
+1773,225,Structure de lit,Structure,féminin,singulier
+1774,225,Tringle à penderie,Tringle,féminin,singulier
+1775,225,Hamac à peluches,Hamac,masculin,singulier
+1776,225,Cloisonette de séparation,Cloisonette,féminin,singulier
+1777,225,Table basse,Table,féminin,singulier
+1778,225,Patère,Patère,féminin,singulier
+1779,225,Tête de lit,Tête,féminin,singulier
+1780,225,Lit superposé,Lit,masculin,singulier
+1781,225,Tapis à chat ou chien,Tapis,masculin,singulier
+1782,225,Vitrine,Vitrine,féminin,singulier
+1783,225,Bureau,Bureau,masculin,singulier
+1784,225,Bandeau de four,Bandeau,masculin,singulier
+1785,225,Caisson (meuble),Caisson,masculin,singulier
+1786,225,Casier à bouteille,Casier,masculin,singulier
+1787,225,Casserolier,Casserolier,masculin,singulier
+1788,225,Corniche,Corniche,féminin,singulier
+1789,225,Crédence,Crédence,féminin,singulier
+1790,225,Crémaillère,Crémaillère,féminin,singulier
+1791,225,Desserte,Desserte,féminin,singulier
+1792,225,Escabeau solidaire d'un meuble,Escabeau,masculin,singulier
+1793,225,Etabli,Etabli,masculin,singulier
+1794,225,Casier à vin,Casier,masculin,singulier
+1795,225,"Façade de placard (coulissante, pliante ou pivotante)",Façade,féminin,singulier
+1796,225,Façade de lave-vasselle,Façade,féminin,singulier
+1797,225,Hûche à pain,Hûche,féminin,singulier
+1798,225,Poubelle (indépendante ou intégrée),Poubelle,féminin,singulier
+1799,225,Joue de finition,Joue,féminin,singulier
+1800,225,Mange-débout,Mange-débout,masculin,singulier
+1801,225,Meuble de cuisine (haut et bas),Meuble,masculin,singulier
+1802,225,Meuble d'évier,Meuble,masculin,singulier
+1803,225,Meuble de tri,Meuble,masculin,singulier
+1804,225,Meuble colonne,Meuble,masculin,singulier
+1805,225,Meuble de micro-ondes,Meuble,masculin,singulier
+1806,225,Meuble range-bouteilles,Meuble,masculin,singulier
+1807,225,Plan de travail,Plan,masculin,singulier
+1808,225,Plinthe de meuble,Plinthe,féminin,singulier
+1809,225,Egouttoir,Egouttoir,masculin,singulier
+1810,225,Range-couvert,Range-couvert,masculin,singulier
+1811,225,Armoire de toilette,Armoire,féminin,singulier
+1812,225,Crédence adhésive,Crédence,féminin,singulier
+1813,225,"Revêtement de meuble (portes de placard, plan de travail...)",revêtement,masculin,singulier
+1814,225,Socle de caisson,Socle,masculin,singulier
+1815,225,Table de préparation,Table,féminin,singulier
+1816,225,Table encastrable,Table,féminin,singulier
+1817,225,Caisson à tiroirs (y compris à roulettes),Caisson,masculin,singulier
+1818,225,Colonne de rangement,Colonne,féminin,singulier
+1819,225,Meuble sous vasque,Meuble,masculin,singulier
+1820,225,Rangement sous lavabo,Rangement,masculin,singulier
+1821,225,Siège de bain,Siège,masculin,singulier
+1822,225,Plan à langer,Plan,masculin,singulier
+1823,225,Tablette murale,Tablette,féminin,singulier
+1824,225,Range-outils,Range-outils,masculin,singulier
+1825,225,Support de barbecue,Support,masculin,singulier
+1826,225,Bout de canapé,Bout,masculin,singulier
+1827,225,Caisson de rangement pour bureau (y compris à roulettes),Caisson,masculin,singulier
+1828,225,Chariot d'imprimante,Chariot,masculin,singulier
+1829,225,Chevalet d'écriture,Chevalet,masculin,singulier
+1830,225,Meuble classeur,Meuble,masculin,singulier
+1831,225,Meuble de séparation,Meuble,masculin,singulier
+1832,225,"Piétement de meuble (bureau, siège, table...)",Piétement,masculin,pluriel
+1833,225,Cloisonette de séparation amovible de jardin (visuelle ou phonique),Cloisonnette,féminin,singulier
+1834,225,Support brosse WC,Support,masculin,singulier
+1835,225,Porte-savon,Porte-savon,masculin,singulier
+1836,225,"Accessoire de pose ou d'accrochage (dévidoir, dérouleur, distributeur, support...)",Accessoire,masculin,singulier
+1837,225,Support de plancha,Support,masculin,singulier
+1838,225,"Table (à manger, d'extérieur, de jardin, de camping, de pique-nique)",Table,féminin,singulier
+1839,225,Meuble à langer,Meuble,masculin,singulier
+1840,225,Meuble de rangement,Meuble,masculin,singulier
+1841,225,Porte-revue sur pied,Porte-revue,masculin,singulier
+1842,225,Plateau de bureau,Plateau,masculin,singulier
+1843,225,Retour et angle de bureau,Retour,masculin,singulier
+1844,225,Secrétaire,Secrétaire,masculin,singulier
+1845,225,Support pour ordinateur,Support,masculin,singulier
+1846,225,Sur-meuble de bureau,Sur-meuble,masculin,singulier
+1847,225,Tableau d'écriture,Tableau,masculin,singulier
+1848,225,Tablette coulissante pour clavier,Tablette,féminin,singulier
+1849,225,Table pour ordinateur portable,Table,féminin,singulier
+1850,225,Voile de fond de bureau,Voile,masculin,singulier
+1851,225,Table de camping pique-nique pliante portable avec 4 sieges,Table,féminin,singulier
+1852,225,Table et ses 4 sièges solidaires pliables dans une valisette,Table,féminin,singulier
+1853,225,Serre-bûches,Serre-bûches,masculin,singulier
+1854,225,Range-bûches,Range-bûches,masculin,singulier
+1855,225,Table de rempotage,Table,féminin,singulier
+1856,225,Support de jardinière,Support,masculin,singulier
+1857,225,Housse de protection de meuble,Housse,féminin,singulier
+1858,225,"Assise médicale (non électrique, non motorisée)",Assise,masculin,singulier
+1859,225,Transat,Transat,masculin,singulier
+1860,225,Bain de soleil,bain,masculin,singulier
+1861,225,Chaise longue,chaise,féminin,singulier
+1862,225,Banc-coffre,Banc-coffre,masculin,singulier
+1863,225,Canapé de jardin,Canapé,masculin,singulier
+1864,225,Canapé-lit,Canapé-lit,masculin,singulier
+1865,225,Chaise de massage,Chaise,féminin,singulier
+1866,225,Chaise avec tablette,Chaise,féminin,singulier
+1867,225,Chaise d'enfant,chaise,féminin,singulier
+1868,225,Chaise haute,Chaise,féminin,singulier
+1869,225,Chaise évolutive d'enfant,Chaise,féminin,singulier
+1870,225,Chaise longue de jardin (fixe ou pliante),Chaise,féminin,singulier
+1871,225,Chaise pliante,chaise,féminin,singulier
+1872,225,Chauffeuse,Chauffeuse,féminin,singulier
+1873,225,Divan ou canapé pour animal domestique,Divan,féminin,singulier
+1874,225,Fauteuil bébé,Fauteuil,masculin,singulier
+1875,225,Mini fauteuil club,Mini,masculin,singulier
+1876,225,Fauteuil de jardin,Fauteuil,masculin,singulier
+1877,225,Fauteuil de relaxation,Fauteuil,masculin,singulier
+1878,225,Fauteuil gonflable,Fauteuil,masculin,singulier
+1879,225,Galette de siège,Galette,féminin,singulier
+1880,225,Hamac de jardin,Hamac,masculin,singulier
+1881,225,Méridienne,Méridienne,féminin,singulier
+1882,225,Méridienne de jardin,Méridienne,féminin,singulier
+1883,225,Meuble hamac,Meuble,masculin,singulier
+1884,225,"Partie de siège (accoudoir, assise, roulettes, dossier...)",Partie,masculin,pluriel
+1885,225,Pouf,Pouf,masculin,singulier
+1886,225,Pouf poire,Pouf,masculin,singulier
+1887,225,Pouf micro-billes,Pouf,masculin,singulier
+1888,225,Siège articulé,Siège,masculin,singulier
+1889,225,Siège d'extérieur,Siège,masculin,singulier
+1890,225,Siège de camping,Siège,masculin,singulier
+1891,225,Siège,Siège,masculin,singulier
+1892,225,Siège pour animal domestique,Siège,masculin,singulier
+1893,225,Siège transformable en lit,Siège,masculin,singulier
+1894,225,Support pour hamac de jardin,Support,masculin,singulier
+1895,225,Tabouret,Tabouret,masculin,singulier
+1896,225,Transat pour bébé,Transat,masculin,singulier
+1897,225,Tabouret d'enfant,Tabouret,masculin,singulier
+1898,225,Transat de bain pour bébé,Transat,masculin,singulier
+1899,225,Agenouilloire,Agenouilloire,masculin,singulier
+1900,225,Tissu d'ameublement,Tissu,masculin,singulier
+1901,225,Bac à BD,Bac,masculin,singulier
+1902,225,Bac à livres,Bac,masculin,singulier
+1903,225,Bahut,Bahut,masculin,singulier
+1904,225,Balancelle de jardin,Balancelle,féminin,singulier
+1905,225,Casier de rangement,Casier,masculin,singulier
+1906,225,Chariot,Chariot,masculin,singulier
+1907,225,Vestiaire,Vestiaire,masculin,singulier
+1908,225,Bloc de classement à tiroirs,Bloc,masculin,singulier
+1909,225,Barrière de lit,Barrière,féminin,singulier
+1910,225,Bras-perroquet,Bras-perroquet,masculin,singulier
+1911,225,Revêtement de plan de travail,Revêtement,masculin,singulier
+1912,225,Meuble range DVD,Meuble,masculin,singulier
+1913,225,Tablette (mobilier),Tablette,féminin,singulier
+1914,225,Meuble,Meuble,masculin,singulier
+1915,334,Smartphone,Smartphone,masculin,singulier
+1916,334,Téléphone mobile,Téléphone,masculin,singulier
+1917,411,Bouteille d'huile,Bouteille,féminin,singulier
+1918,128,Tube de crème,Tube,masculin,singulier
+1919,128,Tube de dentifrice (vide),Tube,masculin,singulier
+1920,128,Dentifrice (tube),Dentifrice,masculin,singulier
+1921,60,déodorant en spray,déodorant,masculin,singulier
+1922,60,brumisateur aérosol,brumisateur,masculin,singulier
+1923,60,laque pour les cheveux,laque,féminin,singulier
+1924,60,Bombe aérosol (vide),Bombe,féminin,singulier
+1925,23,Ceinture en cuir,Ceinture,féminin,singulier
+1926,23,Gants en cuir,Gants,masculin,pluriel
+1927,23,Portefeuille en cuir,Portefeuille,masculin,singulier
+1928,23,Sacoche en cuir,Sacoche,féminin,singulier
+1929,23,Sac à main en cuir,Sac,masculin,singulier
+1930,23,Maroquinerie,Maroquinerie,féminin,singulier
+1931,23,Blouson en cuir,Blouson,masculin,singulier
+1932,23,Pantalon en cuir,Pantalon,masculin,singulier
+1933,23,Bracelet en cuir,Bracelet,masculin,singulier
+1934,23,Articles en cuir (hors chaussures),Articles,masculin,pluriel
+1935,69,Bouteille d'eau (en verre),Bouteille,féminin,singulier
+1936,69,Bouteille de sirop de médicament en verre (vide),Bouteille,féminin,singulier
+1937,69,"Bouteille en verre (bière, cidre, eau, lait, jus, vin...)",Bouteille,féminin,singulier
+1938,151,Petit extincteur à poudre ou à mousse (moins de 2 kg ou 2 L),Petit,masculin,singulier
+1939,452,béquilles,béquilles,féminin,pluriel
+1940,452,brancard,brancard,masculin,singulier
+1941,452,lit médicalisé,lit,masculin,singulier
+1942,452,déambulateur,déambulateur,masculin,singulier
+1943,452,attelle,attelle,féminin,singulier
+1944,452,Fauteuil roulant,Fauteuil,masculin,singulier
+1945,62,Bouchon en liège,Bouchon,masculin,singulier
+2057,471,Robot de cuisine,Robot,masculin,singulier
+2056,471,Robot pâtissier,Robot,masculin,singulier
+2035,369,Sac à dos,Sac,masculin,singulier

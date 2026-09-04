@@ -1,7 +1,9 @@
 import logging
+from pathlib import Path
 import re
 from typing import NamedTuple, override
 
+import csv
 from bs4 import BeautifulSoup
 from django.contrib.gis.db import models
 from django.core.cache import cache
@@ -37,6 +39,7 @@ from wagtail.snippets.models import register_snippet
 # Update when migrating to v4
 from sites_conformes.content_manager.abstract import SitesFacilesBasePage
 from sites_conformes.content_manager.models import ContentPage
+from django.conf import settings
 
 from . import forms as qfdmd_forms
 
@@ -936,7 +939,7 @@ class ProduitPage(
         Returns a list of messages describing what was synchronised.
         """
         from datetime import date
-
+        from qfdmd.legacy_migration import log_without_raising
         from qfdmo.models import CarteConfig
 
         msgs = []
@@ -1050,13 +1053,34 @@ class ProduitPage(
                 f"{len(produit_sous_categories)} sous-catégorie(s) objet copiée(s)."
             )
 
+        if not self.genre or not self.nombre:
+
+            GENRE_NOMBRE_CSV = Path(settings.BASE_DIR / "qfdmd" / "genre_nombre.csv")
+            with open(GENRE_NOMBRE_CSV, newline="", encoding="utf-8") as f:
+                for row in csv.DictReader(f):
+                    if not row["nom"] == self.title:
+                        continue
+                    else:
+                        mapping = {
+                            "genre": {
+                                "masculin": GenreNombreModel.Genre.MASCULIN,
+                                "féminin": GenreNombreModel.Genre.FEMININ,
+                            },
+                            "nombre": {
+                                "singulier": GenreNombreModel.Nombre.SINGULIER,
+                                "pluriel": GenreNombreModel.Nombre.PLURIEL,
+                            },
+                        }
+                        self.genre = mapping["genre"][row["genre"]]
+                        self.nombre = mapping["nombre"][row["nombre"]]
+                        msgs.append("Les genre et nombre ont été trouvés et définis")
+                        break
+
         # Wagtail's editor and live rendering read the latest revision, so a
         # plain save() leaves the synced content invisible.
         self.save_revision().publish()
 
-        from qfdmd.legacy_migration import _safe_log
-
-        _safe_log(produit, "qfdmd.sync_produit", data={"page_id": self.pk})
+        log_without_raising(produit, "qfdmd.sync_produit", data={"page_id": self.pk})
 
         return msgs
 
