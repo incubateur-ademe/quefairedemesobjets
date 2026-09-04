@@ -100,6 +100,24 @@ def preprocess_features(
         .alias("adresse_clean_vector")
     )
 
+    optimized_schema = {
+        "cluster_id": pl.Categorical,
+        "cluster_id_split": pl.Categorical,
+        "example_type": pl.Categorical,
+        "naf_principal": pl.Categorical,
+        "public_accueilli": pl.Categorical,
+        "reprise": pl.Categorical,
+        "latitude": pl.Float32,
+        "longitude": pl.Float32,
+        "code_commune_insee": pl.Categorical,
+        "split": pl.Categorical,
+    }
+    df_features_preprocessed = df_features_preprocessed.with_columns(
+        pl.col(k).cast(v)
+        for k, v in optimized_schema.items()
+        if k in df_features_preprocessed.columns
+    )
+
     return df_features_preprocessed
 
 
@@ -110,13 +128,24 @@ def preprocess_entities_df(
     additional_columns_to_keep: None | list[str] = None,
     additional_business_rules_exprs: list[pl.Expr] | None = None,
     df_embeddings: pl.DataFrame | None = None,
-) -> pl.DataFrame | tuple[pl.DataFrame, pl.DataFrame]:
+) -> pl.DataFrame | tuple[pl.DataFrame, pl.DataFrame] | None:
     logger.info("Starting data preprocessing...")
     df_features_preprocessed = preprocess_features(
         df_entities, embedding_model, df_embeddings
     )
 
-    df_pairs = block_df(df_features_preprocessed, additional_business_rules_exprs)
+    additional_columns_to_keep = additional_columns_to_keep or []
+    if include_label:
+        additional_columns_to_keep.extend(["cluster_id", "cluster_id_split"])
+
+    additional_columns_to_keep = list(set(additional_columns_to_keep))
+    df_pairs = block_df(
+        df_features_preprocessed,
+        additional_business_rules_exprs,
+        additional_columns_to_keep,
+    )
+    if len(df_pairs) == 0:
+        return None
     df_pairs_features = generate_features(
         df_pairs, include_label, additional_columns_to_keep
     )
