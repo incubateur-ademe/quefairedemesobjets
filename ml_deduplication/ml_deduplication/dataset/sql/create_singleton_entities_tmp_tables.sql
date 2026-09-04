@@ -2,7 +2,8 @@ drop table if exists luis._entities_with_location_tmp;
 create table luis._entities_with_location_tmp as (
 select
     et.*,
-    qv."location"
+    qv."location",
+    lower(qv.nom) as nom
 from
     {} et
 left join qfdmo_vueacteur qv on
@@ -28,7 +29,8 @@ selected_acteurs as
 (
 select
 	identifiant_unique,
-	qv."location"
+	qv."location",
+	lower(qv.nom) as nom
 from
 	qfdmo_vueacteur qv
 where

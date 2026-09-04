@@ -220,6 +220,7 @@ def block_df(
         "telephone",
         "code_commune_insee",
         "code_postal",
+        "acteur_type_id",
     ]
     if additional_columns_to_keep is not None:
         column_needed_to_generate_features.extend(additional_columns_to_keep)
@@ -227,25 +228,30 @@ def block_df(
             set(column_needed_to_generate_features)
         )
 
+    df_features = df_features.sort("identifiant_unique")
     df_features_lazy = df_features.lazy().select(column_needed_to_generate_features)
 
     # Jointure pour récupérer les features de l'entité de gauche
     df_enriched_l = (
-        valid_pairs_minimal.lazy()
-        .sort("identifiant_unique_l")
-        .select("identifiant_unique_l", "identifiant_unique_r", "geo_distance")
-        .join(
-            df_features_lazy.rename(lambda x: f"{x}_l").sort("identifiant_unique_l"),
-            left_on="identifiant_unique_l",
-            right_on="identifiant_unique_l",
-            how="left",
+        (
+            valid_pairs_minimal.sort("identifiant_unique_l")
+            .lazy()
+            .select("identifiant_unique_l", "identifiant_unique_r", "geo_distance")
+            .join(
+                df_features_lazy.rename(lambda x: f"{x}_l"),
+                left_on="identifiant_unique_l",
+                right_on="identifiant_unique_l",
+                how="left",
+            )
         )
+        .collect(engine="streaming")
+        .sort("identifiant_unique_r")
     )
 
     df_features_r_lazy = df_features.lazy().rename(lambda x: f"{x}_r")
 
-    df_pairs_final = df_enriched_l.sort("identifiant_unique_r").join(
-        df_features_r_lazy.sort("identifiant_unique_r"),
+    df_pairs_final = df_enriched_l.lazy().join(
+        df_features_r_lazy,
         left_on="identifiant_unique_r",
         right_on="identifiant_unique_r",
         how="left",

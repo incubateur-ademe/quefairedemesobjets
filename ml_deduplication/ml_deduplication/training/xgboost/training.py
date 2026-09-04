@@ -83,15 +83,15 @@ def tune_xgboost_hyperparameters(
     rng = np.random.default_rng(random_seed)
 
     search_space = {
-        "max_depth": [3, 4, 5, 6, 7, 8],
-        "learning_rate": [0.02, 0.03, 0.05, 0.07, 0.1, 0.15],
-        "min_child_weight": [1, 2, 3, 5, 8, 10],
-        "subsample": [0.7, 0.8, 0.9, 1.0],
-        "colsample_bytree": [0.7, 0.8, 0.9, 1.0],
-        "gamma": [0.0, 0.1, 0.3, 0.5, 1.0],
-        "reg_alpha": [0.0, 0.001, 0.01, 0.1, 1.0],
+        "max_depth": [2, 3, 4, 5, 6, 7, 8, 9, 10],
+        "learning_rate": [0.02, 0.03, 0.05, 0.07, 0.1, 0.15, 0.3],
+        "min_child_weight": [1, 2, 3, 5, 8, 10, 15],
+        "subsample": [0.6, 0.7, 0.8, 0.9, 1.0],
+        "colsample_bytree": [0.3, 0.5, 0.7, 0.8, 0.9, 1.0],
+        "gamma": [0.0, 0.1, 0.3, 0.5, 0.8, 1.0],
+        "reg_alpha": [0.0, 0.001, 0.01, 0.1, 0.5, 1.0],
         "reg_lambda": [0.1, 0.5, 1.0, 2.0, 5.0, 10.0],
-        "scale_pos_weight": [0.8, 0.9, 1.0, 1.1, 1.2],
+        "scale_pos_weight": [0.8, 0.9, 1.0, 1.1, 1.2, 2, 3],
     }
 
     folds = prepare_folds(
@@ -363,7 +363,7 @@ def train_xgboost_with_kfold_validation(
     )
 
     target_precision = 0.97
-    min_recall = 0.75
+    min_recall = 0.80
     candidates = df_threshold_metrics.filter(
         (pl.col("precision") >= target_precision) & (pl.col("recall") >= min_recall)
     )
@@ -423,19 +423,37 @@ def train_xgboost_with_kfold_validation(
         )
     )
 
-    best_threshold = (
+    df_clusterwise_threshold_selection_agg_filtered = (
         df_clusterwise_threshold_selection_agg.filter(
             pl.col("mean_bcubed_recall") >= min_recall
         )
-        .with_columns(
-            (
-                pl.col("mean_bcubed_precision") - 0.5 * pl.col("std_bcubed_precision")
-            ).alias("score")
-        )
-        .sort(["score", "mean_bcubed_recall"], descending=[True, True])
-        .head(1)["threshold"]
-        .item()
     )
+
+    if len(df_clusterwise_threshold_selection_agg_filtered) == 0:
+        logger.warning(
+            "No threshold meet recall criteria, fallback to best threshold without recall filtering"
+        )
+        best_threshold = (
+            df_clusterwise_threshold_selection_agg.with_columns(
+                (
+                    pl.col("mean_bcubed_precision")
+                    - 0.5 * pl.col("std_bcubed_precision")
+                ).alias("score")
+            )
+            .sort(["score", "mean_bcubed_recall"], descending=[True, True])
+            .head(1)["threshold"]
+        )
+    else:
+        best_threshold = (
+            df_clusterwise_threshold_selection_agg_filtered.with_columns(
+                (
+                    pl.col("mean_bcubed_precision")
+                    - 0.5 * pl.col("std_bcubed_precision")
+                ).alias("score")
+            )
+            .sort(["score", "mean_bcubed_recall"], descending=[True, True])
+            .head(1)["threshold"]
+        )
 
     logger.info("Selected cluster threshold: %.4f", best_threshold)
     logger.info(

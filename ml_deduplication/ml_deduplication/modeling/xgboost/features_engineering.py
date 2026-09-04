@@ -43,6 +43,8 @@ def generate_features(
         "code_postal_match",
         "departement_match",
         "geo_distance",  # Computed at blocking step
+        "acteur_type_id_l",
+        "acteur_type_id_r",
     ]
     if include_label:
         df_pairs_features = df_pairs_features.with_columns(
@@ -59,10 +61,23 @@ def generate_features(
                 .alias("cluster_id"),
             ]
         )
+
     if additional_columns_to_keep is not None:
         for colname in additional_columns_to_keep:
-            columns_to_select.append(f"{colname}_l")
-            columns_to_select.append(f"{colname}_r")
+            for suffix in ["_l", "_r"]:
+                colname_suffix = f"{colname}{suffix}"
+                already_in_list = False
+                for col in columns_to_select:
+                    if isinstance(col, pl.Expr):
+                        if col.meta.output_name() == colname_suffix:
+                            already_in_list = True
+                            break
+                    else:
+                        if colname_suffix == col:
+                            already_in_list = True
+                            break
+                if not already_in_list:
+                    columns_to_select.append(colname_suffix)
 
     df_pairs_features = df_pairs_features.select(columns_to_select)
     return df_pairs_features
