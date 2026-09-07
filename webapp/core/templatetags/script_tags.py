@@ -47,6 +47,14 @@ def assistant_iframe_script(context: dict) -> str:
     return ""
 
 
+@register.simple_tag(takes_context=True)
+def page_formatted_for_script(context: dict) -> str:
+    if page := context.get("page", ""):
+        return f"Page “{page}”"
+
+    return ""
+
+
 @register.simple_tag()
 def infotri_script_url() -> str:
     return f"{settings.BASE_URL}{reverse('infotri:infotri_script')}"

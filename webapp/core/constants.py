@@ -31,6 +31,12 @@ ACTEUR = {
 }
 
 ASSISTANT = {
+    "embed": {
+        "titre": "Intégrer cette page à votre site ou application",
+        "intro": "Il vous suffit de copier/coller ce code dans votre site Internet. "
+        "En cas de difficultés, de questions, ou pour tout autre échange, "
+        "vous pouvez contacter notre équipe.",
+    },
     "partage": {
         # Introduction utilisé lors du partage d'un acteur ou d'un produit / déchet
         "titre": "Découvrez le site de l'ADEME “Que faire de mes objets & déchets”",
