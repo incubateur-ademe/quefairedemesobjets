@@ -2,6 +2,11 @@ name: "Sync prod > preprod"
 
 on:
   workflow_dispatch:
+    inputs:
+      use_latest_backup:
+        description: "Réutiliser le dernier backup prod au lieu d'en créer un"
+        type: boolean
+        default: false
   schedule:
   - cron: "0 0 * * SUN"
 
@@ -49,17 +54,13 @@ jobs:
           default-project-id: ${{ env.SCW_DEFAULT_PROJECT_ID }}
           default-organization-id: ${{ env.SCW_DEFAULT_ORGANIZATION_ID }}
       - name: Restore DB from prod to preprod
+        env:
+          USE_LATEST_BACKUP: ${{ inputs.use_latest_backup }}
         run: |
           DB_URL=${PREPROD_DB_WEBAPP_DSN} make -e db-restore-preprod-from-prod
-      - name: Execute migrations in one-off container
+      - name: Run post-restore Django commands
         run: |
-          scalingo --app ${PREPROD_APP} run cd webapp && python manage.py migrate
-      - name: Truncate the suggestions table
-        run: |
-          scalingo --app ${PREPROD_APP} run cd webapp && python manage.py reinitialize_suggestions
-      - name: Create remote db server between webapp and warehouse
-        run: |
-          scalingo --app ${PREPROD_APP} run cd webapp && python manage.py create_remote_db_server
+          scalingo --app ${PREPROD_APP} run "cd webapp && python manage.py migrate && python manage.py reinitialize_suggestions && python manage.py create_remote_db_server"
 
   sync_prod_to_preprod_s3:
     name: Copy Prod s3 bucket to Copy Preprod s3 bucket
