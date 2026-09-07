@@ -101,17 +101,11 @@ def block_df(
             cols_needed.append(root_names[0].removesuffix("_l"))
 
     # On sélectionne et on optimise les types IMMÉDIATEMENT
-    df_minimal = (
-        df_features.select(cols_needed)
-        .with_columns(
-            [
-                pl.col("latitude").cast(pl.Float32),
-                pl.col("longitude").cast(pl.Float32),
-                # Si vos IDs sont numériques, décommentez la ligne suivante pour gagner encore plus de mémoire :
-                # pl.col("identifiant_unique").cast(pl.Int32),
-            ]
-        )
-        .lazy()
+    df_minimal = df_features.select(cols_needed).with_columns(
+        [
+            pl.col("latitude").cast(pl.Float32),
+            pl.col("longitude").cast(pl.Float32),
+        ]
     )
 
     # Préparation des versions _l et _r du dataset minimal
@@ -123,9 +117,18 @@ def block_df(
     # =====================================================================
 
     # 1. SIREN
-    candidates_siren = df_l.join(
-        df_r, left_on="siren_l", right_on="siren_r", how="inner", coalesce=False
-    ).filter(pl.col("identifiant_unique_l") < pl.col("identifiant_unique_r"))
+    candidates_siren = (
+        df_l.sort("siren_l")
+        .lazy()
+        .join(
+            df_r.sort("siren_r").lazy(),
+            left_on="siren_l",
+            right_on="siren_r",
+            how="inner",
+            coalesce=False,
+        )
+        .filter(pl.col("identifiant_unique_l") < pl.col("identifiant_unique_r"))
+    )
 
     # 2. Code Postal
     df_cp_l = df_l.with_columns(
@@ -135,8 +138,13 @@ def block_df(
         pl.col("code_postal_r").str.slice(0, 2).alias("cp_prefix_r")
     )
     candidates_cp = (
-        df_cp_l.join(
-            df_cp_r, left_on="cp_prefix_l", right_on="cp_prefix_r", how="inner"
+        df_cp_l.sort("cp_prefix_l")
+        .lazy()
+        .join(
+            df_cp_r.sort("cp_prefix_r").lazy(),
+            left_on="cp_prefix_l",
+            right_on="cp_prefix_r",
+            how="inner",
         )
         .filter(pl.col("identifiant_unique_l") < pl.col("identifiant_unique_r"))
         .drop("cp_prefix_l")
@@ -156,8 +164,13 @@ def block_df(
         ]
     )
     candidates_geo = (
-        df_geo_l.join(
-            df_geo_r,
+        df_geo_l.sort(["lat_grid_l", "lon_grid_l"])
+        .lazy()
+        .set_sorted(["lat_grid_l", "lon_grid_l"])
+        .join(
+            df_geo_r.sort(["lat_grid_r", "lon_grid_r"])
+            .lazy()
+            .set_sorted(["lat_grid_r", "lon_grid_r"]),
             left_on=["lat_grid_l", "lon_grid_l"],
             right_on=["lat_grid_r", "lon_grid_r"],
             how="inner",
@@ -193,7 +206,7 @@ def block_df(
     )
 
     # =====================================================================
-    # ÉTAPE 3 : Collecte intermédiaire et Jointure finale (Le secret anti-OOM)
+    # ÉTAPE 3 : Collecte intermédiaire et Jointure finale
     # =====================================================================
     logger.info("Collecting minimal valid pairs to free memory...")
     # On matérialise SEULEMENT les paires valides avec le schéma minimal.

@@ -1,18 +1,26 @@
+import math
+
 import numpy as np
 import polars as pl
 import polars_distance as pld
+from tqdm import tqdm
 
 
 def _adresse_clean_distance(
     df_pairs: pl.DataFrame,
     df_embeddings: pl.DataFrame | None,
+    chunk_size: int = 5_000,
 ) -> pl.Expr:
     """Cosine similarity of address embeddings computed on a compact matrix.
 
     The 1024-dim vectors are never broadcast through the (potentially huge)
     pairs frame. Instead we build an (N x 1024) Float32 matrix from the entity
     embeddings, gather left/right rows by entity id, and compute the cosine on
-    compact Float32 columns (a few hundred MB at most).
+    compact Float32 columns. Rows are processed in chunks so that only a few
+    hundred MB are allocated at a time, regardless of the pair count.
+
+    The id -> row lookup is vectorized (sorted ids + binary search) to avoid a
+    Python-level loop over every pair.
     """
     if df_embeddings is None or df_embeddings.is_empty():
         return pl.lit(None, dtype=pl.Float32).alias("adresse_clean_distance")
@@ -25,6 +33,7 @@ def _adresse_clean_distance(
     if embeddings.is_empty():
         return pl.lit(None, dtype=pl.Float32).alias("adresse_clean_distance")
 
+    embeddings = embeddings.sort("identifiant_unique")
     vectors = np.asarray(
         embeddings.get_column("adresse_clean_vector").to_list(), dtype=np.float32
     )  # (N, 1024)
@@ -32,33 +41,37 @@ def _adresse_clean_distance(
     norms[norms == 0] = 1.0
     unit_vectors = vectors / norms
 
-    id_to_pos = {
-        eid: pos for pos, eid in enumerate(embeddings.get_column("identifiant_unique"))
-    }
-
-    def gather(id_col: str) -> np.ndarray:
-        positions = np.asarray(
-            [id_to_pos.get(eid, -1) for eid in df_pairs.get_column(id_col)],
-            dtype=np.int64,
-        )
-        gathered = np.zeros((df_pairs.height, unit_vectors.shape[1]), dtype=np.float32)
-        present = positions >= 0
-        if present.any():
-            gathered[present] = unit_vectors[positions[present]]
-        return gathered
-
-    left = gather("identifiant_unique_l")
-    right = gather("identifiant_unique_r")
-
-    # Cosine of unit vectors = dot product. polars_distance's dist_arr.cosine
-    # returns a distance (1 - cosine), so we mirror that exactly.
-    distance = 1.0 - np.einsum("ij,ij->i", left, right).astype(np.float32)
     known_ids = embeddings.get_column("identifiant_unique")
-    valid = (
-        df_pairs.get_column("identifiant_unique_l").is_in(known_ids).to_numpy()
-        & df_pairs.get_column("identifiant_unique_r").is_in(known_ids).to_numpy()
-    )
-    distance[~valid] = np.nan
+    known_ids_np = known_ids.to_numpy()
+
+    def gather_positions(id_col: str) -> np.ndarray:
+        ids = df_pairs.get_column(id_col).to_numpy()
+        positions = np.searchsorted(known_ids_np, ids)
+        positions = np.clip(positions, 0, len(known_ids_np) - 1)
+        found = known_ids_np[positions] == ids
+        positions = np.where(found, positions, -1)
+        return positions.astype(np.int64)
+
+    positions_l = gather_positions("identifiant_unique_l")
+    positions_r = gather_positions("identifiant_unique_r")
+    valid = (positions_l >= 0) & (positions_r >= 0)
+
+    distance = np.full(df_pairs.height, np.nan, dtype=np.float32)
+    for start in tqdm(
+        range(0, df_pairs.height, chunk_size),
+        desc="Computing adresse cosine distance in batch",
+        total=math.ceil(df_pairs.height / chunk_size),
+    ):
+        end = min(start + chunk_size, df_pairs.height)
+        idx = np.arange(start, end)
+        batch_l = np.where(valid[idx], positions_l[idx], 0)
+        batch_r = np.where(valid[idx], positions_r[idx], 0)
+        left = unit_vectors[batch_l]
+        right = unit_vectors[batch_r]
+        # Cosine of unit vectors = dot product. polars_distance's dist_arr.cosine
+        # returns a distance (1 - cosine), so we mirror that exactly.
+        cos = 1.0 - np.einsum("ij,ij->i", left, right)
+        distance[idx] = np.where(valid[idx], cos, np.nan)
 
     return pl.Series("adresse_clean_distance", distance).alias("adresse_clean_distance")
 
