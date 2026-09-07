@@ -29,21 +29,6 @@ resource "scaleway_rdb_privilege" "webapp_privilege" {
   permission    = "all"
 }
 
-## Webapp Admin User
-
-resource "scaleway_rdb_user" "webapp_admin_user" {
-  instance_id = scaleway_rdb_instance.webapp.id
-  name        = var.webapp_db_admin_username
-  password    = var.webapp_db_admin_password
-  is_admin    = true
-}
-
-resource "scaleway_rdb_privilege" "webapp_admin_privilege" {
-  instance_id   = scaleway_rdb_instance.webapp.id
-  user_name     = scaleway_rdb_user.webapp_admin_user.name
-  database_name = scaleway_rdb_database.webapp.name
-  permission    = "all"
-}
 
 ## Webapp Metabase User
 
@@ -85,24 +70,9 @@ resource "scaleway_rdb_database" "warehouse_database" {
   name        = var.warehouse_db_name
 }
 
-resource "scaleway_rdb_privilege" "warehouse" {
+resource "scaleway_rdb_privilege" "warehouse_privilege" {
   instance_id   = scaleway_rdb_instance.warehouse.id
   user_name     = var.warehouse_db_username
-  database_name = scaleway_rdb_database.warehouse_database.name
-  permission    = "all"
-}
-
-## Warehouse Admin User
-resource "scaleway_rdb_user" "warehouse_admin_user" {
-  instance_id = scaleway_rdb_instance.warehouse.id
-  name        = var.warehouse_db_admin_username
-  password    = var.warehouse_db_admin_password
-  is_admin    = true
-}
-
-resource "scaleway_rdb_privilege" "warehouse_admin_privilege" {
-  instance_id   = scaleway_rdb_instance.warehouse.id
-  user_name     = scaleway_rdb_user.warehouse_admin_user.name
   database_name = scaleway_rdb_database.warehouse_database.name
   permission    = "all"
 }
@@ -146,28 +116,13 @@ resource "scaleway_rdb_database" "airflow" {
   name        = var.airflow_db_name
 }
 
-resource "scaleway_rdb_privilege" "airflow" {
+resource "scaleway_rdb_privilege" "airflow_privilege" {
   instance_id   = scaleway_rdb_instance.airflow.id
   user_name     = var.airflow_db_username
   database_name = scaleway_rdb_database.airflow.name
   permission    = "all"
 }
 
-## Airflow Admin User
-
-resource "scaleway_rdb_user" "airflow_admin_user" {
-  instance_id = scaleway_rdb_instance.airflow.id
-  name        = var.airflow_db_admin_username
-  password    = var.airflow_db_admin_password
-  is_admin    = true
-}
-
-resource "scaleway_rdb_privilege" "airflow_admin_privilege" {
-  instance_id   = scaleway_rdb_instance.airflow.id
-  user_name     = scaleway_rdb_user.airflow_admin_user.name
-  database_name = scaleway_rdb_database.airflow.name
-  permission    = "all"
-}
 
 ## Cross-DB foreign data wrappers (postgres_fdw) between webapp and warehouse.
 ## Equivalent to the Django command `manage.py create_remote_db_server`.
@@ -191,25 +146,25 @@ resource "null_resource" "create_remote_warehouse_in_webapp" {
 
   depends_on = [
     scaleway_rdb_database.webapp,
-    scaleway_rdb_privilege.webapp_admin_privilege,
+    scaleway_rdb_privilege.webapp_privilege,
     scaleway_rdb_database.warehouse_database,
-    scaleway_rdb_privilege.warehouse_admin_privilege,
+    scaleway_rdb_privilege.warehouse_privilege,
   ]
 
   provisioner "local-exec" {
     # Passwords go through env vars: putting them in the URL or inline would
     # let the shell expand `$` characters in passwords (e.g. `N$2$4efJE8c*`).
     environment = {
-      PGPASSWORD      = var.webapp_db_admin_password
-      REMOTE_PASSWORD = var.warehouse_db_admin_password
+      PGPASSWORD      = var.webapp_db_password
+      REMOTE_PASSWORD = var.warehouse_db_password
     }
     command = <<-EOT
       psql -v ON_ERROR_STOP=1 \
-        "postgresql://${var.webapp_db_admin_username}@${scaleway_rdb_instance.webapp.load_balancer.0.ip}:${scaleway_rdb_instance.webapp.load_balancer.0.port}/${scaleway_rdb_database.webapp.name}?sslmode=require" \
+        "postgresql://${var.webapp_db_username}@${scaleway_rdb_instance.webapp.load_balancer.0.ip}:${scaleway_rdb_instance.webapp.load_balancer.0.port}/${scaleway_rdb_database.webapp.name}?sslmode=require" \
         -v warehouse_host='${scaleway_rdb_instance.warehouse.load_balancer.0.ip}' \
         -v warehouse_port='${scaleway_rdb_instance.warehouse.load_balancer.0.port}' \
         -v warehouse_dbname='${scaleway_rdb_database.warehouse_database.name}' \
-        -v warehouse_user='${var.warehouse_db_admin_username}' \
+        -v warehouse_user='${var.warehouse_db_username}' \
         -v warehouse_password="$REMOTE_PASSWORD" \
         -f ${var.create_remote_warehouse_in_webapp_script_path}
     EOT
@@ -219,10 +174,10 @@ resource "null_resource" "create_remote_warehouse_in_webapp" {
     webapp_database_id    = scaleway_rdb_database.webapp.id
     warehouse_database_id = scaleway_rdb_database.warehouse_database.id
     script_sha256         = local.create_remote_warehouse_in_webapp_script_sha256
-    local_user            = var.webapp_db_admin_username
-    local_user_password   = var.webapp_db_admin_password
-    remote_user           = var.warehouse_db_admin_username
-    remote_user_password  = var.warehouse_db_admin_password
+    local_user            = var.webapp_db_username
+    local_user_password   = var.webapp_db_password
+    remote_user           = var.warehouse_db_username
+    remote_user_password  = var.warehouse_db_password
   }
 }
 
@@ -231,25 +186,23 @@ resource "null_resource" "create_remote_webapp_in_warehouse" {
 
   depends_on = [
     scaleway_rdb_database.webapp,
-    scaleway_rdb_user.webapp_admin_user,
-    scaleway_rdb_privilege.webapp_admin_privilege,
+    scaleway_rdb_privilege.webapp_privilege,
     scaleway_rdb_database.warehouse_database,
-    scaleway_rdb_user.warehouse_admin_user,
-    scaleway_rdb_privilege.warehouse_admin_privilege,
+    scaleway_rdb_privilege.warehouse_privilege,
   ]
 
   provisioner "local-exec" {
     environment = {
-      PGPASSWORD      = var.warehouse_db_admin_password
-      REMOTE_PASSWORD = var.webapp_db_admin_password
+      PGPASSWORD      = var.warehouse_db_password
+      REMOTE_PASSWORD = var.webapp_db_password
     }
     command = <<-EOT
       psql -v ON_ERROR_STOP=1 \
-        "postgresql://${var.warehouse_db_admin_username}@${scaleway_rdb_instance.warehouse.load_balancer.0.ip}:${scaleway_rdb_instance.warehouse.load_balancer.0.port}/${scaleway_rdb_database.warehouse_database.name}?sslmode=require" \
+        "postgresql://${var.warehouse_db_username}@${scaleway_rdb_instance.warehouse.load_balancer.0.ip}:${scaleway_rdb_instance.warehouse.load_balancer.0.port}/${scaleway_rdb_database.warehouse_database.name}?sslmode=require" \
         -v webapp_host='${scaleway_rdb_instance.webapp.load_balancer.0.ip}' \
         -v webapp_port='${scaleway_rdb_instance.webapp.load_balancer.0.port}' \
         -v webapp_dbname='${scaleway_rdb_database.webapp.name}' \
-        -v webapp_user='${var.webapp_db_admin_username}' \
+        -v webapp_user='${var.webapp_db_username}' \
         -v webapp_password="$REMOTE_PASSWORD" \
         -f ${var.create_remote_webapp_in_warehouse_script_path}
     EOT
@@ -259,9 +212,9 @@ resource "null_resource" "create_remote_webapp_in_warehouse" {
     webapp_database_id    = scaleway_rdb_database.webapp.id
     warehouse_database_id = scaleway_rdb_database.warehouse_database.id
     script_sha256         = local.create_remote_webapp_in_warehouse_script_sha256
-    local_user            = var.warehouse_db_admin_username
-    local_user_password   = var.warehouse_db_admin_password
-    remote_user           = var.webapp_db_admin_username
-    remote_user_password  = var.webapp_db_admin_password
+    local_user            = var.warehouse_db_username
+    local_user_password   = var.warehouse_db_password
+    remote_user           = var.webapp_db_username
+    remote_user_password  = var.webapp_db_password
   }
 }

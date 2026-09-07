@@ -12,8 +12,6 @@ inputs = {
   webapp_db_name     = "webapp"
   webapp_db_username = "[webapp_db_username]"
   webapp_db_password = "[webapp_db_password]"
-  webapp_db_admin_username = "[webapp_db_admin_username]"
-  webapp_db_admin_password = "[webapp_db_admin_password]"
   webapp_db_metabase_username = "[webapp_db_metabase_username]"
   webapp_db_metabase_password = "[webapp_db_metabase_password]"
   webapp_volume_size = 20
@@ -23,8 +21,6 @@ inputs = {
   warehouse_db_name     = "warehouse"
   warehouse_db_username = "[warehouse_db_username]"
   warehouse_db_password = "[warehouse_db_password]"
-  warehouse_db_admin_username = "[warehouse_db_admin_username]"
-  warehouse_db_admin_password = "[warehouse_db_admin_password]"
   warehouse_db_metabase_username = "[warehouse_db_metabase_username]"
   warehouse_db_metabase_password = "[warehouse_db_metabase_password]"
   warehouse_volume_size = 100
@@ -34,8 +30,6 @@ inputs = {
   airflow_db_name     = "airflow"
   airflow_db_username = "[airflow_db_username]"
   airflow_db_password = "[airflow_db_password]"
-  airflow_db_admin_username = "[airflow_db_admin_username]"
-  airflow_db_admin_password = "[airflow_db_admin_password]"
   airflow_volume_size = 10
 
   # Cross-DB postgres_fdw setup between webapp and warehouse.

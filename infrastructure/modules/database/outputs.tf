@@ -38,17 +38,6 @@ output "webapp_db_password" {
   sensitive   = true
 }
 
-output "webapp_db_admin_username" {
-  description = "Nom d'utilisateur administrateur de la base de données webapp"
-  value       = var.webapp_db_admin_username
-}
-
-output "webapp_db_admin_password" {
-  description = "Mot de passe administrateur de la base de données webapp"
-  value       = var.webapp_db_admin_password
-  sensitive   = true
-}
-
 output "webapp_db_metabase_username" {
   description = "Nom d'utilisateur Metabase de la base de données webapp"
   value       = var.webapp_db_metabase_username
@@ -100,16 +89,6 @@ output "warehouse_db_password" {
   sensitive   = true
 }
 
-output "warehouse_db_admin_username" {
-  description = "Nom d'utilisateur administrateur de la base de données warehouse"
-  value       = var.warehouse_db_admin_username
-}
-
-output "warehouse_db_admin_password" {
-  description = "Mot de passe administrateur de la base de données warehouse"
-  value       = var.warehouse_db_admin_password
-  sensitive   = true
-}
 
 output "warehouse_db_metabase_username" {
   description = "Nom d'utilisateur Metabase de la base de données warehouse"
@@ -159,16 +138,5 @@ output "airflow_db_username" {
 output "airflow_db_password" {
   description = "Mot de passe de la base de données airflow"
   value       = var.airflow_db_password
-  sensitive   = true
-}
-
-output "airflow_db_admin_username" {
-  description = "Nom d'utilisateur administrateur de la base de données airflow"
-  value       = var.airflow_db_admin_username
-}
-
-output "airflow_db_admin_password" {
-  description = "Mot de passe administrateur de la base de données airflow"
-  value       = var.airflow_db_admin_password
   sensitive   = true
 }
