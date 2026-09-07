@@ -219,9 +219,11 @@ dump-prod:
 dump-preprod:
 	bash scripts/infrastructure/backup-db.sh --quiet --env preprod
 
+# USE_LATEST_BACKUP=true réutilise le dernier backup Scaleway prêt
+# au lieu d'en créer un nouveau (évite la création + polling).
 .PHONY: dump-prod-quiet
 dump-prod-quiet:
-	bash scripts/infrastructure/backup-db.sh --quiet
+	bash scripts/infrastructure/backup-db.sh --quiet $(if $(filter true,$(USE_LATEST_BACKUP)),--latest)
 
 .PHONY: dump-sample
 dump-sample:
@@ -240,7 +242,7 @@ load-prod-dump:
 	@DUMP_FILE=$$(find tmpbackup-prod -type f -name "*.custom" -print -quit); \
 	psql -d '$(DB_URL)' -f scripts/sql/create_extensions.sql && \
 	psql -d '$(DB_URL)' -f $(WAGTAIL_FRENCH_SQL) && \
-	pg_restore -d '$(DB_URL)' --schema=public --clean --if-exists --no-acl --no-owner --no-privileges "$$DUMP_FILE"
+	pg_restore -d '$(DB_URL)' --schema=public --clean --if-exists --no-acl --no-owner --no-privileges --jobs=4 "$$DUMP_FILE"
 
 .SILENT:
 .PHONY: load-preprod-dump
@@ -286,7 +288,7 @@ db-restore-local-from-preprod:
 
 .PHONY: db-restore-preprod-from-prod
 db-restore-preprod-from-prod:
-	$(MAKE) dump-prod-quiet
+	$(MAKE) dump-prod-quiet USE_LATEST_BACKUP=$(USE_LATEST_BACKUP)
 	$(MAKE) drop-all-tables
 	$(MAKE) load-prod-dump
 
