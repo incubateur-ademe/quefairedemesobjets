@@ -139,13 +139,16 @@ def preprocess_entities_df(
         additional_columns_to_keep.extend(["cluster_id", "cluster_id_split"])
 
     additional_columns_to_keep = list(set(additional_columns_to_keep))
+    logger.info("Starting blocking...")
     df_pairs = block_df(
         df_features_preprocessed,
         additional_business_rules_exprs,
         additional_columns_to_keep,
     )
+    logger.info("Finished blocking.")
     if len(df_pairs) == 0:
         return None
+    logger.info("Starting generating features...")
     df_pairs_features = generate_features(
         df_pairs,
         include_label,
@@ -154,7 +157,7 @@ def preprocess_entities_df(
             "identifiant_unique", "adresse_clean_vector"
         ),
     )
-
+    logger.info("Finished generating features.")
     X = df_pairs_features
 
     if include_label:
