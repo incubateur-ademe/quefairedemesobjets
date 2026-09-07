@@ -6,3 +6,7 @@ output "public_endpoint" {
   description = "Endpoint public auto-généré par Scaleway pour le container"
   value       = scaleway_container.webapp.public_endpoint
 }
+
+output "worker_container_id" {
+  value = scaleway_container.worker.id
+}
