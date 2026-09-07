@@ -3,8 +3,10 @@ set -euo pipefail
 
 gunicorn core.wsgi \
   --bind unix:/tmp/gunicorn.sock \
+  --worker-class gthread \
   --timeout 120 \
   --workers "${GUNICORN_WORKERS:-2}" \
+  --threads "${GUNICORN_THREADS:-8}" \
   --max-requests 1000 \
   --chdir /app/webapp \
   --max-requests-jitter 100 & /app/bin/run
