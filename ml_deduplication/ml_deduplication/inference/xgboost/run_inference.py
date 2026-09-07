@@ -194,7 +194,7 @@ def main():
                     threshold=args.model_threshold,
                 )
                 if len(df_predictions_tmp) > 0:
-                    dfs_predictions.append(df_predictions_tmp)
+                    dfs_predictions.append(df_calibrated_predictions_tmp)
                 if len(df_clusters_tmp) > 0:
                     dfs_clusters.append(
                         df_clusters_tmp.with_columns(
