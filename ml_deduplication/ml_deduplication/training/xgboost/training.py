@@ -428,7 +428,6 @@ def train_xgboost_with_kfold_validation(
             pl.col("mean_bcubed_recall") >= min_recall
         )
     )
-
     if len(df_clusterwise_threshold_selection_agg_filtered) == 0:
         logger.warning(
             "No threshold meet recall criteria, fallback to best threshold without recall filtering"
@@ -442,6 +441,7 @@ def train_xgboost_with_kfold_validation(
             )
             .sort(["score", "mean_bcubed_recall"], descending=[True, True])
             .head(1)["threshold"]
+            .item()
         )
     else:
         best_threshold = (
@@ -453,6 +453,7 @@ def train_xgboost_with_kfold_validation(
             )
             .sort(["score", "mean_bcubed_recall"], descending=[True, True])
             .head(1)["threshold"]
+            .item()
         )
 
     logger.info("Selected cluster threshold: %.4f", best_threshold)
