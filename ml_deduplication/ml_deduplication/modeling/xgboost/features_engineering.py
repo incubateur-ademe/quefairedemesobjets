@@ -1,19 +1,78 @@
+import numpy as np
 import polars as pl
 import polars_distance as pld
+
+
+def _adresse_clean_distance(
+    df_pairs: pl.DataFrame,
+    df_embeddings: pl.DataFrame | None,
+) -> pl.Expr:
+    """Cosine similarity of address embeddings computed on a compact matrix.
+
+    The 1024-dim vectors are never broadcast through the (potentially huge)
+    pairs frame. Instead we build an (N x 1024) Float32 matrix from the entity
+    embeddings, gather left/right rows by entity id, and compute the cosine on
+    compact Float32 columns (a few hundred MB at most).
+    """
+    if df_embeddings is None or df_embeddings.is_empty():
+        return pl.lit(None, dtype=pl.Float32).alias("adresse_clean_distance")
+
+    embeddings = (
+        df_embeddings.select("identifiant_unique", "adresse_clean_vector")
+        .filter(pl.col("adresse_clean_vector").is_not_null())
+        .unique(subset="identifiant_unique")
+    )
+    if embeddings.is_empty():
+        return pl.lit(None, dtype=pl.Float32).alias("adresse_clean_distance")
+
+    vectors = np.asarray(
+        embeddings.get_column("adresse_clean_vector").to_list(), dtype=np.float32
+    )  # (N, 1024)
+    norms = np.linalg.norm(vectors, axis=1, keepdims=True)
+    norms[norms == 0] = 1.0
+    unit_vectors = vectors / norms
+
+    id_to_pos = {
+        eid: pos for pos, eid in enumerate(embeddings.get_column("identifiant_unique"))
+    }
+
+    def gather(id_col: str) -> np.ndarray:
+        positions = np.asarray(
+            [id_to_pos.get(eid, -1) for eid in df_pairs.get_column(id_col)],
+            dtype=np.int64,
+        )
+        gathered = np.zeros((df_pairs.height, unit_vectors.shape[1]), dtype=np.float32)
+        present = positions >= 0
+        if present.any():
+            gathered[present] = unit_vectors[positions[present]]
+        return gathered
+
+    left = gather("identifiant_unique_l")
+    right = gather("identifiant_unique_r")
+
+    # Cosine of unit vectors = dot product. polars_distance's dist_arr.cosine
+    # returns a distance (1 - cosine), so we mirror that exactly.
+    distance = 1.0 - np.einsum("ij,ij->i", left, right).astype(np.float32)
+    known_ids = embeddings.get_column("identifiant_unique")
+    valid = (
+        df_pairs.get_column("identifiant_unique_l").is_in(known_ids).to_numpy()
+        & df_pairs.get_column("identifiant_unique_r").is_in(known_ids).to_numpy()
+    )
+    distance[~valid] = np.nan
+
+    return pl.Series("adresse_clean_distance", distance).alias("adresse_clean_distance")
 
 
 def generate_features(
     df_pairs: pl.DataFrame,
     include_label: bool = True,
     additional_columns_to_keep: None | list[str] = None,
+    df_embeddings: pl.DataFrame | None = None,
 ) -> pl.DataFrame:
     df_pairs_features = df_pairs.with_columns(
         pld.col("nom_clean_l")
         .dist_str.jaro_winkler("nom_clean_r")
         .alias("nom_clean_dist"),
-        pld.col("adresse_clean_vector_l")
-        .dist_arr.cosine("adresse_clean_vector_r")
-        .alias("adresse_clean_distance"),
         pld.col("ville_clean_l")
         .dist_str.jaro_winkler("ville_clean_r")
         .alias("ville_clean_dist"),
@@ -28,6 +87,9 @@ def generate_features(
             pl.col("code_postal_l").str.slice(0, 2)
             == pl.col("code_postal_r").str.slice(0, 2)
         ).alias("departement_match"),
+    )
+    df_pairs_features = df_pairs_features.with_columns(
+        _adresse_clean_distance(df_pairs_features, df_embeddings)
     )
 
     columns_to_select: list[str | pl.Expr] = [

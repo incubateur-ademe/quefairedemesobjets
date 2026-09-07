@@ -171,7 +171,7 @@ def run_training_pipeline(
         "pairs_preds_test": df_pairs_preds_test,
         "pred_clusters_test": df_pred_clusters_test,
         "threshold_results": df_threshold_cv_results,
-        "hyperparameters": xgb_hyperparameters,
+        "hyperparameters": final_hyperparameters,
     }
 
     return outputs
@@ -239,16 +239,17 @@ if __name__ == "__main__":
 
     hyperparameters = {
         "n_estimators": 1000,
-        "max_depth": 4,
-        "learning_rate": 0.1,
-        "subsample": 0.9,
-        "colsample_bytree": 0.7,
-        "min_child_weight": 5,
-        "gamma": 0.3,
-        "reg_alpha": 1.0,
+        "max_depth": 2,
+        "learning_rate": 0.3,
+        "subsample": 0.7,
+        "colsample_bytree": 0.9,
+        "min_child_weight": 8,
+        "gamma": 1.0,
+        "reg_alpha": 0.0,
         "reg_lambda": 0.1,
-        "scale_pos_weight": 1.1,
+        "scale_pos_weight": 1.2,
     }
+
     n_splits = args.n_splits
     if args.mode == "tuning":
         logger.info("Running hyperparameter tuning training")

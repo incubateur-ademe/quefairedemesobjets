@@ -147,7 +147,12 @@ def preprocess_entities_df(
     if len(df_pairs) == 0:
         return None
     df_pairs_features = generate_features(
-        df_pairs, include_label, additional_columns_to_keep
+        df_pairs,
+        include_label,
+        additional_columns_to_keep,
+        df_embeddings=df_features_preprocessed.select(
+            "identifiant_unique", "adresse_clean_vector"
+        ),
     )
 
     X = df_pairs_features

@@ -130,6 +130,12 @@ def tune_xgboost_hyperparameters(
                 candidate_thresholds=candidate_thresholds,
             )
 
+            if cv_results["best_threshold"] is None:
+                logger.warning(
+                    "Experience %s does not met criteria for threshold, skipping it..."
+                )
+                continue
+
             df_threshold_results = cv_results["clusterwise_threshold_selection_results"]
 
             summary = df_threshold_results.group_by("threshold").agg(
@@ -250,7 +256,7 @@ def train_xgboost_with_kfold_validation(
         )
 
     if candidate_thresholds is None:
-        candidate_thresholds = np.arange(0.50, 1.00, 0.001)
+        candidate_thresholds = np.arange(0.75, 1.00, 0.001)
 
     candidate_thresholds = sorted(
         {float(np.clip(t, 0.001, 0.999)) for t in candidate_thresholds}
@@ -363,13 +369,36 @@ def train_xgboost_with_kfold_validation(
     )
 
     target_precision = 0.97
-    min_recall = 0.80
+    min_recall = 0.75
     candidates = df_threshold_metrics.filter(
         (pl.col("precision") >= target_precision) & (pl.col("recall") >= min_recall)
     )
     if candidates.is_empty():
-        logger.warning("No threshold reaches target precision=%s", target_precision)
-        candidates = df_threshold_metrics
+        logger.warning(
+            "No threshold reaches target precision=%s and recall %s",
+            target_precision,
+            min_recall,
+        )
+
+        for new_min_recall in np.arange(0.75, 0.5, -0.01):
+            candidates = df_threshold_metrics.filter(
+                (pl.col("precision") >= target_precision)
+                & (pl.col("recall") >= new_min_recall)
+            )
+            if not candidates.is_empty():
+                logger.info("New target recall=%s", new_min_recall)
+                min_recall = new_min_recall
+                break
+
+        if candidates.is_empty():
+            logger.warning("Training has not reached the targets, aborting...")
+            return {
+                "best_threshold": None,
+                "best_iterations": best_iterations,
+                "oof_predictions_stats": df_predictions_stats,
+                "clusterwise_threshold_selection_results": None,
+                "calibrator": calibrator,
+            }
 
     candidate_thresholds = candidates.get_column("threshold").to_numpy()
 
@@ -432,17 +461,13 @@ def train_xgboost_with_kfold_validation(
         logger.warning(
             "No threshold meet recall criteria, fallback to best threshold without recall filtering"
         )
-        best_threshold = (
-            df_clusterwise_threshold_selection_agg.with_columns(
-                (
-                    pl.col("mean_bcubed_precision")
-                    - 0.5 * pl.col("std_bcubed_precision")
-                ).alias("score")
-            )
-            .sort(["score", "mean_bcubed_recall"], descending=[True, True])
-            .head(1)["threshold"]
-            .item()
-        )
+        return {
+            "best_threshold": None,
+            "best_iterations": best_iterations,
+            "oof_predictions_stats": df_predictions_stats,
+            "clusterwise_threshold_selection_results": df_clusterwise_threshold_selection,
+            "calibrator": calibrator,
+        }
     else:
         best_threshold = (
             df_clusterwise_threshold_selection_agg_filtered.with_columns(
