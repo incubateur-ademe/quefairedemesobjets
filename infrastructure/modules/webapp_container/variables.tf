@@ -9,8 +9,9 @@ variable "environment" {
 }
 
 variable "namespace_id" {
-  description = "ID du namespace Scaleway Container où déployer le webapp"
+  description = "ID d'un namespace existant (preview le partage entre PRs). Si null, le module crée son propre namespace."
   type        = string
+  default     = null
 }
 
 variable "registry_image" {
@@ -108,4 +109,46 @@ variable "extra_secret_environment_variables" {
   type        = map(string)
   sensitive   = true
   default     = {}
+}
+
+## Worker (django-tasks)
+
+variable "worker_cpu_limit" {
+  type    = number
+  default = 1000
+}
+
+variable "worker_memory_limit" {
+  type    = number
+  default = 2048
+}
+
+variable "worker_min_scale" {
+  description = "Keep at least 1: the worker polls the queue, it is not request-driven"
+  type        = number
+  default     = 1
+}
+
+variable "worker_max_scale" {
+  type    = number
+  default = 1
+}
+
+## Gunicorn
+
+variable "GUNICORN_WORKERS" {
+  type    = number
+  default = 2
+}
+
+variable "GUNICORN_THREADS" {
+  description = "Concurrency is workers x threads. Each thread holds a Postgres connection for CONN_MAX_AGE, so raising this consumes the max_connections budget shared with Airflow."
+  type        = number
+  default     = 8
+}
+
+variable "CONN_MAX_AGE" {
+  description = "Persistent DB connections, in seconds. Defaults to 0 in settings/base.py, so it must be set explicitly here or the migration silently loses connection pooling."
+  type        = number
+  default     = 600
 }

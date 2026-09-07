@@ -62,6 +62,12 @@ inputs = {
   # varies per deployment — "*" allows any host for ephemeral previews.
   ALLOWED_HOSTS = "*"
 
+  # servers.conf.erb is rendered at container start: the preview domain is
+  # unknown here, so nginx must accept any host (was a build arg before).
+  extra_environment_variables = {
+    NGINX_ALLOW_ALL_HOSTS = "1"
+  }
+
   DATABASE_URL = dependency.preview_database.outputs.database_url
   SECRET_KEY   = get_env("PREVIEW_SECRET_KEY")
 

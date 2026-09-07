@@ -19,13 +19,16 @@ map "$cookie_no_cache:<%= ENV["NGINX_DISABLE_CACHE"] || "0" %>" $no_cache {
     "0:1" 1;
 }
 
-map $host $is_valid_host {
+# Keyed on host AND path so the container platform's liveness probe, which
+# arrives with an internal IP as Host, is not redirected away from /healthz/.
+map "$host:$uri" $is_valid_host {
 <% if ENV["NGINX_ALLOW_ALL_HOSTS"] == "1" %>
-    # Preview environments: accept any host (domain unknown at build time)
+    # Preview environments: accept any host (domain unknown before deploy)
     default 1;
 <% else %>
     default                                          0;
-    "<%= ENV["BASE_DOMAIN"] %>"                      1;
+    "~^<%= Regexp.escape(ENV["BASE_DOMAIN"].to_s) %>:"    1;
+    "~:/healthz/$"                                   1;
 <% end %>
 }
 upstream gunicorn {
@@ -95,6 +98,16 @@ server {
         # Strip Origin/Referer so PostHog doesn't reject requests from local/unknown domains
         proxy_set_header Origin "";
         proxy_set_header Referer "";
+    }
+
+    # Liveness probe. Host is forced to a value Django always allows, since
+    # the probe's own Host header is an internal IP that changes per deploy.
+    location = /healthz/ {
+        proxy_pass http://gunicorn;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_set_header Host localhost;
+        access_log off;
     }
 
     location /admin {

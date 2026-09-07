@@ -13,31 +13,7 @@ RUN npm -w webapp run build
 
 
 ############################################
-# Stage 2: render nginx ERB config (Ruby)
-############################################
-# Compiles servers.conf.erb — the same template Scalingo uses — with
-# preview-appropriate values baked in at build time.
-FROM ruby:alpine AS nginx_config
-
-WORKDIR /build
-COPY servers.conf.erb .
-
-# PORT=8000: Scaleway container port (TLS terminated by Scaleway).
-# NGINX_ALLOW_ALL_HOSTS=1: preview domain unknown at build time.
-# UPSTREAM_HOST=127.0.0.1:8001: gunicorn on localhost, not a unix socket.
-# NGINX_DISABLE_CACHE=0: keep caching for production fidelity.
-RUN NGINX_ALLOW_ALL_HOSTS=1 \
-    NGINX_DISABLE_CACHE=0 \
-    PORT=8000 \
-    ENVIRONMENT=preview \
-    UPSTREAM_HOST=127.0.0.1:8001 \
-    BASE_DOMAIN="" \
-    ruby -e "require 'erb'; puts ERB.new(File.read('servers.conf.erb')).result(binding)" \
-    > servers.conf
-
-
-############################################
-# Stage 3: runtime (Python 3.12)
+# Stage 2: runtime (Python 3.12)
 ############################################
 FROM python:3.12-slim-bookworm
 
@@ -49,7 +25,10 @@ WORKDIR /app
 
 # System deps: GDAL for GeoDjango, gettext for compilemessages,
 # libpq5 for psycopg at runtime (mirrors the Scalingo Aptfile),
-# git for uv to install django-dsfr from its git fork (tool.uv.sources)
+# git for uv to install django-dsfr from its git fork (tool.uv.sources),
+# ruby (stdlib erb only) to render servers.conf.erb at container start, so
+# one image serves every environment and ENVIRONMENT / BASE_DOMAIN come
+# from the container env rather than being baked in at build time.
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
       ca-certificates \
@@ -60,6 +39,7 @@ RUN apt-get update \
       libgdal-dev \
       libpq5 \
       nginx \
+      ruby \
     && rm -rf /var/lib/apt/lists/*
 
 # Install uv (official installer)
@@ -87,12 +67,12 @@ WORKDIR /app/webapp
 COPY --from=node_build /build/webapp/static/compiled/ static/compiled/
 RUN SECRET_KEY=dummy python manage.py collectstatic --noinput
 
-# Nginx: use the same nginx.conf + rendered servers.conf as Scalingo.
-# The rendered servers.conf is compiled in stage 2 with preview vars.
+# Nginx: same nginx.conf and servers.conf.erb as Scalingo and the local
+# lvao-proxy image. servers.conf is rendered by bin/entrypoint.sh at start.
 RUN rm -f /etc/nginx/sites-enabled/default \
     && rm -f /etc/nginx/conf.d/default.conf 2>/dev/null
 RUN mv nginx/nginx.conf /etc/nginx/nginx.conf
-COPY --from=nginx_config /build/servers.conf /etc/nginx/servers.conf
+COPY servers.conf.erb /etc/nginx/servers.conf.erb
 
 EXPOSE 8000
 

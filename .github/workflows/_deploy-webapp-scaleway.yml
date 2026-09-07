@@ -1,0 +1,159 @@
+# Deploys the webapp + worker containers to Scaleway.
+#
+# Order matters: build the image, run its migrations against the
+# environment's database, and only then `terragrunt apply`, which is what
+# rolls the new image out (Scaleway redeploys when registry_image changes).
+# If the migrations fail, apply never runs and the live version is untouched.
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: "GitHub environment holding the secrets (preprod or prod)"
+        type: string
+        required: true
+      image_tag:
+        type: string
+        required: true
+      ref:
+        description: "Git ref to checkout (defaults to the event's ref)"
+        type: string
+        required: false
+        default: ""
+
+# The S3 state backend on Scaleway has no locking: two applies on the same
+# environment must never overlap. Queue rather than cancel, so a deploy in
+# flight always finishes.
+concurrency:
+  group: deploy-webapp-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: 🐳 Build webapp image
+    uses: ./.github/workflows/_webapp-build-and-push-docker.yml
+    secrets: inherit # pragma: allowlist secret
+    with:
+      image_tag: ${{ inputs.image_tag }}
+      environment: ${{ inputs.environment }}
+      ref: ${{ inputs.ref }}
+
+  deploy:
+    name: 🚀 Migrate, apply, verify
+    needs: [build]
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.environment }}
+      url: ${{ steps.endpoint.outputs.endpoint }}
+    env:
+      SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
+      SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
+      SCW_DEFAULT_PROJECT_ID: ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
+      SCW_DEFAULT_ORGANIZATION_ID: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
+      SCW_DEFAULT_REGION: fr-par
+
+      TF_VAR_access_key: ${{ secrets.SCW_ACCESS_KEY }}
+      TF_VAR_secret_key: ${{ secrets.SCW_SECRET_KEY }}
+      TF_VAR_project_id: ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
+      TF_VAR_organization_id: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
+
+      # Read by <env>/webapp_container/terragrunt.hcl through get_env.
+      # Only true secrets travel this way; config is committed in the HCL.
+      IMAGE_TAG: ${{ inputs.image_tag }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+      NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+      POSTHOG_PERSONAL_API_KEY: ${{ secrets.POSTHOG_PERSONAL_API_KEY }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      IMAGE: rg.fr-par.scw.cloud/ns-qfdmo/webapp:${{ inputs.image_tag }}
+      STACK: infrastructure/environments/${{ inputs.environment }}/webapp_container
+      TG_NON_INTERACTIVE: "true"
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Install OpenTofu
+        uses: opentofu/setup-opentofu@a1320f892987e89d278cc92dc5adc984fb93aca4 # v2.0.2
+        with:
+          tofu_version: "1.10.0"
+          tofu_wrapper: false
+
+      - name: Install Terragrunt
+        run: |
+          TG_VERSION="1.1.0"
+          curl -fsSL -o /usr/local/bin/terragrunt \
+            "https://github.com/gruntwork-io/terragrunt/releases/download/v${TG_VERSION}/terragrunt_linux_amd64"
+          chmod +x /usr/local/bin/terragrunt
+          terragrunt --version
+
+      - name: Setup Scaleway CLI
+        uses: scaleway/action-scw@2e34a1eb35cf3cac627f24643a101fea269cbd83
+        with:
+          version: v2.56.0
+
+      # One source of truth for the DB connection: the same database stack
+      # outputs the webapp container's DATABASE_URL is derived from.
+      - name: Resolve DATABASE_URL from the database stack
+        working-directory: infrastructure/environments/${{ inputs.environment }}/database
+        run: |
+          set -euo pipefail
+          OUT=$(terragrunt output -json)
+          PW=$(jq -r .webapp_db_password.value <<<"$OUT")
+          echo "::add-mask::$PW"
+          URL="postgresql://$(jq -r .webapp_db_username.value <<<"$OUT"):${PW}@$(jq -r .webapp_endpoint_ip.value <<<"$OUT"):$(jq -r .webapp_endpoint_port.value <<<"$OUT")/$(jq -r .webapp_database_name.value <<<"$OUT")?sslmode=require"
+          echo "::add-mask::$URL"
+          echo "DATABASE_URL=$URL" >> "$GITHUB_ENV"
+
+      - name: Run migrations in the freshly built image
+        run: |
+          set -euo pipefail
+          echo "$SCW_SECRET_KEY" | docker login rg.fr-par.scw.cloud -u nologin --password-stdin
+          # Against the image being deployed, so the migrations are exactly
+          # the ones the new code expects.
+          docker run --rm -e DATABASE_URL -e SECRET_KEY "$IMAGE" \
+            sh -c "python manage.py migrate --noinput && python manage.py createcachetable"
+
+      - name: Terragrunt apply (rolls the image out)
+        working-directory: ${{ env.STACK }}
+        run: terragrunt apply -auto-approve
+
+      - name: Read container ids and endpoint
+        id: endpoint
+        working-directory: ${{ env.STACK }}
+        run: |
+          set -euo pipefail
+          OUT=$(terragrunt output -json)
+          ENDPOINT=$(jq -r .public_endpoint.value <<<"$OUT")
+          [[ "$ENDPOINT" == http* ]] || ENDPOINT="https://${ENDPOINT}"
+          echo "endpoint=$ENDPOINT" >> "$GITHUB_OUTPUT"
+          echo "WEBAPP_ID=$(jq -r .container_id.value <<<"$OUT")" >> "$GITHUB_ENV"
+          echo "WORKER_ID=$(jq -r .worker_container_id.value <<<"$OUT")" >> "$GITHUB_ENV"
+
+      - name: Wait for containers to be ready
+        run: |
+          set -euo pipefail
+          for ID in "$WEBAPP_ID" "$WORKER_ID"; do
+            # Ids come out of terraform as region/uuid; the CLI wants the uuid.
+            ID="${ID##*/}"
+            echo "Waiting for $ID"
+            for _ in $(seq 1 120); do
+              STATUS=$(scw container container get "$ID" region=fr-par -o json | jq -r .status)
+              echo "  status: $STATUS"
+              [[ "$STATUS" == "ready" ]] && break
+              [[ "$STATUS" == "error" ]] && { echo "🚨 $ID failed"; exit 1; }
+              sleep 5
+            done
+            [[ "$STATUS" == "ready" ]] || { echo "🚨 timed out waiting for $ID"; exit 1; }
+          done
+
+      # The container's own endpoint, not the public domain: before the DNS
+      # cutover the domain still points at Scalingo and would prove nothing.
+      # /healthz/ is exempt from the nginx host redirect and touches the DB.
+      - name: Health check
+        run: curl --fail --silent --show-error --retry 5 --retry-delay 10 --retry-all-errors \
+               "${{ steps.endpoint.outputs.endpoint }}/healthz/"
+
+permissions:
+  contents: read

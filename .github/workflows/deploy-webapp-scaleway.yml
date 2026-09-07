@@ -1,0 +1,36 @@
+# Manual trigger for the Scaleway webapp deploy, until cd.yml / deploy.yml
+# are switched over from Scalingo. Builds the checked-out ref, migrates,
+# applies the <environment>/webapp_container stack and verifies it.
+name: 🟣 Deploy webapp to Scaleway
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        type: choice
+        options: [preprod, prod]
+        required: true
+  # TEMPORARY, remove before merging: deploy preprod on every push to the
+  # migration branch so the stack can be iterated on from CI.
+  push:
+    branches: [scaleway-webapp-migration]
+
+# Mirrors the group in the reusable workflow, so a manual run and a future
+# cd.yml run on the same environment queue rather than overlap.
+concurrency:
+  group: deploy-webapp-${{ inputs.environment || 'preprod' }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: 🟣 ${{ inputs.environment || 'preprod' }}
+    uses: ./.github/workflows/_deploy-webapp-scaleway.yml
+    secrets: inherit # pragma: allowlist secret
+    with:
+      environment: ${{ inputs.environment || 'preprod' }}
+      image_tag: ${{ inputs.environment || 'preprod' }}-${{ github.sha }}
+      ref: ${{ github.sha }}
+
+permissions:
+  contents: read
