@@ -66,6 +66,7 @@ def block_df(
     df_features: pl.DataFrame,
     additional_business_rules_exprs: list[pl.Expr] | None = None,
     additional_columns_to_keep: list[str] | None = None,
+    chunk_size: int | None = None,
 ) -> pl.DataFrame:
     # =====================================================================
     # ÉTAPE 0 : Définition du schéma minimal et optimisation des types
@@ -213,7 +214,6 @@ def block_df(
     column_needed_to_generate_features = [
         "identifiant_unique",
         "nom_clean",
-        "adresse_clean_vector",
         "ville_clean",
         "siren",
         "siret",
@@ -231,11 +231,29 @@ def block_df(
     df_features = df_features.sort("identifiant_unique")
     df_features_lazy = df_features.lazy().select(column_needed_to_generate_features)
 
-    # Jointure pour récupérer les features de l'entité de gauche
-    df_enriched_l = (
-        (
-            valid_pairs_minimal.sort("identifiant_unique_l")
-            .lazy()
+    # On n'emporte QUE les features scalaires dans la jointure à 132M lignes.
+    # La colonne adresse_clean_vector (1024 x Float32) est volontairement
+    # exclue ici : elle est recombinée de façon compacte dans generate_features.
+    df_features_r_lazy = df_features_lazy.rename(lambda x: f"{x}_r")
+
+    pair_ids_sorted = valid_pairs_minimal.sort(
+        ["identifiant_unique_l", "identifiant_unique_r"]
+    )
+
+    if chunk_size is None:
+        chunks = [pair_ids_sorted]
+    else:
+        chunks = [
+            pair_ids_sorted.slice(offset=start, length=chunk_size)
+            for start in range(0, pair_ids_sorted.height, chunk_size)
+        ]
+
+    logger.info("Starting blocking and enrichment.")
+    enriched_chunks = []
+    for chunk in chunks:
+        # Jointure pour récupérer les features de l'entité de gauche
+        df_enriched_l = (
+            chunk.lazy()
             .select("identifiant_unique_l", "identifiant_unique_r", "geo_distance")
             .join(
                 df_features_lazy.rename(lambda x: f"{x}_l"),
@@ -243,20 +261,17 @@ def block_df(
                 right_on="identifiant_unique_l",
                 how="left",
             )
+            .collect(engine="streaming")
         )
-        .collect(engine="streaming")
-        .sort("identifiant_unique_r")
-    )
 
-    df_features_r_lazy = df_features.lazy().rename(lambda x: f"{x}_r")
+        df_pairs_final = df_enriched_l.lazy().join(
+            df_features_r_lazy,
+            left_on="identifiant_unique_r",
+            right_on="identifiant_unique_r",
+            how="left",
+        )
+        enriched_chunks.append(df_pairs_final.collect(engine="streaming"))
 
-    df_pairs_final = df_enriched_l.lazy().join(
-        df_features_r_lazy,
-        left_on="identifiant_unique_r",
-        right_on="identifiant_unique_r",
-        how="left",
-    )
-    logger.info("Starting blocking and enrichment.")
-    df_pairs_final_materilized = df_pairs_final.collect(engine="streaming")
+    df_pairs_final_materilized = pl.concat(enriched_chunks, how="vertical")
     logger.info("Finished blocking and enrichment.")
     return df_pairs_final_materilized
