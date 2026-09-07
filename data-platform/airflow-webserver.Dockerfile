@@ -1,6 +1,6 @@
 # Builder python
 # --- --- --- ---
-FROM apache/airflow:slim-3.1.7-python3.12 AS python-builder
+FROM apache/airflow:slim-3.3.1-python3.12 AS python-builder
 
 # system dependencies
 USER root
@@ -38,7 +38,7 @@ RUN uv sync --project data-platform --frozen --no-editable
 
 # Runtime
 # --- --- --- ---
-FROM apache/airflow:slim-3.1.7-python3.12 AS webserver
+FROM apache/airflow:slim-3.3.1-python3.12 AS webserver
 
 USER ${AIRFLOW_UID:-50000}
 
