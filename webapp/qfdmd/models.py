@@ -1130,7 +1130,12 @@ class FormPageValidationSettings(BaseGenericSetting):
 class ConversionImmediatePage(models.Model):
     """A page listed here converts the visitor (as in "visiteur orienté",
     our north star metric) as soon as they view it, instead of requiring a
-    Produit page view or a map interaction (the usual conversion triggers)."""
+    Produit page view or a map interaction (the usual conversion triggers).
+
+    This is done using an extra django model because at the moment
+    Sites Conformes does not allow us to add fields to existing page
+    models.
+    """
 
     page = models.OneToOneField(
         "wagtailcore.Page",
