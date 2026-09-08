@@ -14,11 +14,11 @@ def test_check_pageviews_passes_at_threshold():
     check_pageviews(10, 10)
 
 
-def test_mattermost_payload_targets_tour_de_controle():
+def test_mattermost_payload_links_to_logs():
     context = {
         "exception": AirflowException("boom"),
         "task_instance": SimpleNamespace(log_url="http://airflow/log"),
     }
     payload = mattermost_payload(context)
-    assert payload["channel"] == "qfdmod-tour-de-controle"
+    assert "channel" not in payload  # canal défini par le webhook côté Mattermost
     assert payload["text"] == "boom [Voir les logs](http://airflow/log)"

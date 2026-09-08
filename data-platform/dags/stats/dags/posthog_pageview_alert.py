@@ -19,7 +19,6 @@ from utils.django import django_setup_full
 logger = logging.getLogger(__name__)
 
 PAGEVIEW_THRESHOLD = 10
-MATTERMOST_CHANNEL = "qfdmod-tour-de-controle"
 MATTERMOST_USERNAME = "Bipboop le robot de seconde main"
 MATTERMOST_ICON = (
     "https://cdn3.iconfinder.com/data/icons/system-basic-vol-4-1/20/"
@@ -52,6 +51,9 @@ def posthog_pageview_count() -> int:
 
 
 def check_pageviews(count: int, threshold: int) -> None:
+    logger.info(
+        "PostHog : %s $pageview sur la dernière minute (seuil %s)", count, threshold
+    )
     if count < threshold:
         raise AirflowException(
             f"⚠️ PostHog : seulement {count} $pageview sur la dernière minute "
@@ -63,9 +65,8 @@ def mattermost_payload(context: dict) -> dict:
     ti = context["task_instance"]
     return {
         "text": f"{context.get('exception')} [Voir les logs]({ti.log_url})",
-        "channel": MATTERMOST_CHANNEL,
         "username": MATTERMOST_USERNAME,
-        "icon": MATTERMOST_ICON,
+        "icon_url": MATTERMOST_ICON,
     }
 
 
@@ -74,7 +75,9 @@ def notify_mattermost(context: dict) -> None:
     if not webhook_url:
         logger.warning("MATTERMOST_WEBHOOK_URL absent : pas de notification")
         return
-    requests.post(webhook_url, json=mattermost_payload(context), timeout=10)
+    response = requests.post(webhook_url, json=mattermost_payload(context), timeout=10)
+    logger.info("Mattermost : HTTP %s %s", response.status_code, response.text[:200])
+    response.raise_for_status()
 
 
 @dag(
