@@ -8,22 +8,22 @@ include {
 
 inputs = {
   # Web app
-  webapp_node_type   = "DB-PLAY2-NANO"
-  webapp_db_name     = "webapp"
-  webapp_db_username = "[webapp_db_username]"
-  webapp_db_password = "[webapp_db_password]"
+  webapp_node_type            = "DB-PLAY2-NANO"
+  webapp_db_name              = "webapp"
+  webapp_db_username          = "[webapp_db_username]"
+  webapp_db_password          = "[webapp_db_password]"
   webapp_db_metabase_username = "[webapp_db_metabase_username]"
   webapp_db_metabase_password = "[webapp_db_metabase_password]"
-  webapp_volume_size = 20
+  webapp_volume_size          = 20
 
   # Warehouse
-  warehouse_node_type   = "DB-PLAY2-NANO"
-  warehouse_db_name     = "warehouse"
-  warehouse_db_username = "[warehouse_db_username]"
-  warehouse_db_password = "[warehouse_db_password]"
+  warehouse_node_type            = "DB-PLAY2-NANO"
+  warehouse_db_name              = "warehouse"
+  warehouse_db_username          = "[warehouse_db_username]"
+  warehouse_db_password          = "[warehouse_db_password]"
   warehouse_db_metabase_username = "[warehouse_db_metabase_username]"
   warehouse_db_metabase_password = "[warehouse_db_metabase_password]"
-  warehouse_volume_size = 100
+  warehouse_volume_size          = 100
 
   # Airflow
   airflow_node_type   = "DB-PLAY2-NANO"
