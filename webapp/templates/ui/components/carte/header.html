@@ -3,11 +3,11 @@
     role="banner"
     class="
     qf-bg-white qf-border-b qf-border-solid qf-border-t-0 qf-border-x-0 qf-border-grey-900
-    max-nolegend:qf-p-1w
+    max-nolegend:qf-py-1w
     {% if not mode_liste %}qf-shadow-lg{% endif %}"
 >
     <div
-        class="qf-flex qf-flex-col nolegend:qf-flex-row nolegend:qf-items-center"
+        class="qf-flex qf-gap-2w qf-flex-col nolegend:qf-flex-row nolegend:qf-items-center"
     >
 
         {% if not carte_config or not carte_config.supprimer_branding %}
@@ -20,14 +20,14 @@
         {% endif %}
 
         {# Recherche adresse #}
-        <div class="fr-my-1w qf-flex-grow qf-flex qf-flex-col
-            {% if carte_config and carte_config.supprimer_branding %}md:qf-p-2w{% endif %}"
+        <div class="qf-flex-grow qf-flex qf-flex-col
+            {% if carte_config and carte_config.supprimer_branding %}md:qf-py-0{% endif %}"
         >
             {% include "ui/components/carte/adresse_input_form.html" %}
         </div>
 
         {# Navigation entre carte / liste #}
-        <div class="nolegend:qf-px-2w max-nolegend:qf-flex qf-justify-between qf-items-end" id="view-mode-nav" data-testid="view-mode-nav">
+        <div class="max-nolegend:qf-flex qf-justify-between qf-items-end" id="view-mode-nav" data-testid="view-mode-nav">
             {{ forms.view_mode }}
             <div class="nolegend:qf-hidden">
             {% modal_button modal_id="filtres" button_text="Filtres" button_extra_classes="fr-btn--secondary fr-btn--icon-left fr-icon-equalizer-line fr-btn--sm" %}
