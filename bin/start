@@ -5,9 +5,9 @@ gunicorn core.wsgi \
   --bind unix:/tmp/gunicorn.sock \
   --worker-class gthread \
   --preload \
-  --timeout 120 \
+  --timeout "${GUNICORN_TIMEOUT:-120}" \
   --workers "${GUNICORN_WORKERS:-2}" \
-  --threads "${GUNICORN_THREADS:-8}" \
-  --max-requests 1000 \
+  --threads "${GUNICORN_THREADS:-4}" \
+  --max-requests "${GUNICORN_MAX_REQUESTS:-10000}" \
   --chdir /app/webapp \
-  --max-requests-jitter "${GUNICORN_MAX_REQUESTS_JITTER:-500}" & /app/bin/run
+  --max-requests-jitter "${GUNICORN_MAX_REQUESTS_JITTER:-2500}" & /app/bin/run
