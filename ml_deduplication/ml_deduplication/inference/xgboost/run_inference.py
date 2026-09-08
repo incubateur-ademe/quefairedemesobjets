@@ -173,9 +173,8 @@ def main():
                         "parent_id",
                     ],
                     include_label=False,
-                    additional_business_rules_exprs=[
-                        pl.col("parent_id_l").fill_null(-1)
-                        != pl.col("parent_id_r").fill_null(-2)
+                    additional_business_rules_sql_exprs=[
+                        "coalesce(l.parent_id,-1) <> coalesce(r.parent_id,-2)"
                     ],
                 )
                 if (X_temp is None) or (len(X_temp) == 0):
@@ -216,9 +215,8 @@ def main():
                 "parent_id",
             ],
             include_label=False,
-            additional_business_rules_exprs=[
-                pl.col("parent_id_l").fill_null(-1)
-                != pl.col("parent_id_r").fill_null(-2)
+            additional_business_rules_sql_exprs=[
+                "coalesce(l.parent_id,'-1') <> coalesce(r.parent_id,'-2')"
             ],
             df_embeddings=df_embeddings,
         )
