@@ -49,10 +49,22 @@ def assistant_iframe_script(context: dict) -> str:
 
 @register.simple_tag(takes_context=True)
 def page_formatted_for_script(context: dict) -> str:
-    if page := context.get("page", ""):
-        return f"Page “{page}”"
+    page = context.get("page", "")
+    if page and isinstance(page, ProduitPage):
+        return f"Page “{page.title}”"
 
     return ""
+
+
+@register.simple_tag(takes_context=True)
+def embed_modal_title(context: dict) -> str:
+    from core.constants import ASSISTANT
+
+    page = context.get("page", "")
+    if page and isinstance(page, ProduitPage):
+        return ASSISTANT["embed"]["titre_pages_produit"]
+
+    return ASSISTANT["embed"]["titre_pages"]
 
 
 @register.simple_tag()

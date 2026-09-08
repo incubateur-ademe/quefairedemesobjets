@@ -8,17 +8,19 @@
 {% endblock button_text %}
 
 {% block modal_title %}
-{{ ASSISTANT.embed.titre }}
+{% embed_modal_title %}
 {% endblock modal_title %}
 
 {% block modal_content %}
+
+{% assistant_iframe_script as script %}
+{% page_formatted_for_script as before_script %}
+
 <div class="qf-flex qf-flex-col qf-gap-1w">
     <p>
         {{ ASSISTANT.embed.intro }}
     </p>
 
-    {% assistant_iframe_script as script %}
-    {% page_formatted_for_script as before_script %}
     {% include "ui/components/code/code.html" with before_script=before_script script=script %}
 
     <p><strong>Vous souhaitez réutiliser le code de notre outil ?</strong>
