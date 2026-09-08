@@ -67,6 +67,8 @@ jobs:
       PR_NUMBER: ${{ inputs.pr_number }}
       IMAGE_TAG: ${{ inputs.image_tag }}
       PREVIEW_SECRET_KEY: ${{ secrets.PREVIEW_SECRET_KEY }}
+      NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+      NOTION_CONTACT_FORM_DATABASE_ID: ${{ secrets.NOTION_CONTACT_FORM_DATABASE_ID }}
       SAMPLE_DB_URI: ${{ secrets.SAMPLE_DB_URI }}
       CLEAR_DB: ${{ inputs.clear_db }}
 
