@@ -4,6 +4,7 @@ set -euo pipefail
 gunicorn core.wsgi \
   --bind unix:/tmp/gunicorn.sock \
   --worker-class gthread \
+  --preload \
   --timeout 120 \
   --workers "${GUNICORN_WORKERS:-2}" \
   --threads "${GUNICORN_THREADS:-8}" \
