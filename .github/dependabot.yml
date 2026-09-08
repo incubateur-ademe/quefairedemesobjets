@@ -28,7 +28,8 @@ updates:
           - "patch"
 
   - package-ecosystem: "npm"
-    directory: "/webapp"
+    # Root of the npm workspace: package-lock.json lives here, not in /webapp
+    directory: "/"
     open-pull-requests-limit: 100
     schedule:
       interval: "weekly"
@@ -38,6 +39,11 @@ updates:
       default-days: 7
     allow:
       - dependency-type: "all"
+    ignore:
+      # TypeScript 7 (native compiler) has no JS compiler API: ts-jest and
+      # typescript-eslint require typescript <7. Drop once they support it.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
     groups:
       # Named groups (specific packages get their own PRs)
       babel:
