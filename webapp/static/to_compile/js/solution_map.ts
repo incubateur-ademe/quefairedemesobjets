@@ -1,11 +1,13 @@
 import { addOverlay, mapStyles, Overlay } from "carte-facile"
 import "carte-facile/dist/carte-facile.css"
-import maplibregl, {
+import {
   FitBoundsOptions,
   LngLat,
   LngLatBoundsLike,
   Map,
   Marker,
+  NavigationControl,
+  Popup,
 } from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
 import MapController from "../controllers/carte/map_controller"
@@ -83,13 +85,11 @@ export class SolutionMap {
       this.#location.latitude !== undefined &&
       this.#location.longitude !== undefined
     ) {
-      new maplibregl.Marker({
+      new Marker({
         element: this.#initialiseHomeMarker(),
       })
         .setLngLat([this.#location.longitude, this.#location.latitude])
-        .setPopup(
-          new maplibregl.Popup().setHTML("<p><strong>Vous êtes ici !</strong></p>"),
-        )
+        .setPopup(new Popup().setHTML("<p><strong>Vous êtes ici !</strong></p>"))
         .addTo(this.map)
 
       // Store home point for inclusion in fitBounds
@@ -121,7 +121,7 @@ export class SolutionMap {
         let latitudeFloat = parseFloat(latitude.replace(",", "."))
         actor.classList.remove("qf-invisible")
 
-        const marker: Marker = new maplibregl.Marker({
+        const marker: Marker = new Marker({
           element: actor,
           draggable: draggable,
         }).setLngLat([longitudeFloat, latitudeFloat])
@@ -187,7 +187,7 @@ export class SolutionMap {
 
   #addZoomControl() {
     this.map.addControl(
-      new maplibregl.NavigationControl({
+      new NavigationControl({
         visualizePitch: false,
         visualizeRoll: false,
         showZoom: true,
