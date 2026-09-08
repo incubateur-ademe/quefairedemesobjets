@@ -9,14 +9,12 @@ resource "scaleway_object_bucket" "media" {
   # (lifecycle would reap them eventually, but we don't want to wait).
   force_destroy = true
 
-  # Object-level lifecycle: every object older than N days is auto-deleted.
-  # Acts as a safety net even if the per-PR destroy never runs.
+  # No object expiration: the scaleway provider always sends
+  # ExpiredObjectDeleteMarker alongside Days, which Scaleway now rejects
+  # (MalformedXML). force_destroy + preview-down/cleanup reap the bucket.
   lifecycle_rule {
-    id      = "expire-objects"
-    enabled = true
-    expiration {
-      days = var.object_expiration_days
-    }
+    id                                     = "abort-multipart"
+    enabled                                = true
     abort_incomplete_multipart_upload_days = 1
   }
 }
