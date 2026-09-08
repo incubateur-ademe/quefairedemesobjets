@@ -462,9 +462,12 @@ class AutocompleteHomeSearchView(ListView):
 
     SEARCH_TIMEOUT_MS = 3000
 
+    def _get_search_query(self) -> str:
+        return self.request.GET.get("q", "")
+
     @override
     def get_queryset(self):
-        query = self.request.GET.get("q", "")
+        query = self._get_search_query()
         limit = self.NUMBER_OF_ITEMS_DISPLAYED
         if not query:
             return []
