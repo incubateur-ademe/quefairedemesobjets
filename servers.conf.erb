@@ -19,6 +19,14 @@ map "$cookie_no_cache:<%= ENV["NGINX_DISABLE_CACHE"] || "0" %>" $no_cache {
     "0:1" 1;
 }
 
+# iframe.js appends ref=<base64 parent URL> to every embed URL. It is only read
+# client-side (analytics controller), never by Django, so drop it from the cache
+# key: otherwise every embedding page is a cache miss.
+map $args $cache_args {
+    default $args;
+    "~^(.*&)?ref=[^&]*(&.*)?$" $1$2;
+}
+
 map $host $is_valid_host {
 <% if ENV["NGINX_ALLOW_ALL_HOSTS"] == "1" %>
     # Preview environments: accept any host (domain unknown at build time)
@@ -131,7 +139,7 @@ server {
         proxy_set_header Host $http_host;
         # Include $http_sec_fetch_dest in cache key to serve different cached
         # versions for standalone page loads vs iframe embeds
-        proxy_cache_key $request_method$scheme$host$request_uri$http_sec_fetch_dest;
+        proxy_cache_key $request_method$scheme$host$uri?$cache_args$http_sec_fetch_dest;
         proxy_cache_valid 200 301 302 10m;
         proxy_cache_valid 404 1m;
         proxy_cache_lock on;
