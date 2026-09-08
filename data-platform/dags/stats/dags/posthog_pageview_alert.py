@@ -14,7 +14,6 @@ from shared.config.airflow import DEFAULT_ARGS_NO_RETRIES
 from shared.config.schedules import SCHEDULES
 from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
-from utils.django import django_setup_full
 
 logger = logging.getLogger(__name__)
 
