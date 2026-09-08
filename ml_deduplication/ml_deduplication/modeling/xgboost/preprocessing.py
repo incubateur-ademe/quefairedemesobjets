@@ -126,7 +126,7 @@ def preprocess_entities_df(
     embedding_model: SentenceTransformer,
     include_label: bool = True,
     additional_columns_to_keep: None | list[str] = None,
-    additional_business_rules_exprs: list[pl.Expr] | None = None,
+    additional_business_rules_sql_exprs: list[str] | None = None,
     df_embeddings: pl.DataFrame | None = None,
 ) -> pl.DataFrame | tuple[pl.DataFrame, pl.DataFrame] | None:
     logger.info("Starting data preprocessing...")
@@ -142,7 +142,7 @@ def preprocess_entities_df(
     logger.info("Starting blocking...")
     df_pairs = block_df(
         df_features_preprocessed,
-        additional_business_rules_exprs,
+        additional_business_rules_sql_exprs,
         additional_columns_to_keep,
     )
     logger.info("Finished blocking.")
