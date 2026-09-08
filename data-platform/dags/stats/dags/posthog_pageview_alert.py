@@ -35,6 +35,8 @@ WHERE event = '$pageview'
 
 
 def posthog_pageview_count() -> int:
+    from utils.django import django_setup_full
+
     django_setup_full()
     from django.conf import settings
 
