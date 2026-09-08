@@ -59,6 +59,16 @@ variable "SECRET_KEY" {
   sensitive = true
 }
 
+variable "NOTION_TOKEN" {
+  type      = string
+  sensitive = true
+}
+
+variable "NOTION_CONTACT_FORM_DATABASE_ID" {
+  type      = string
+  sensitive = true
+}
+
 variable "ALLOWED_HOSTS" {
   type    = string
   default = ""
