@@ -1,5 +1,6 @@
 {% load acteur_tags wagtailcore_tags %}
 
+<div class="[&_[data-controller=search-solution-form]]:qf-border-0">
 {% if value.open_in_modal and value.card %}
 <div class="fr-mb-2w">
   {% with modal_id="fr-modal-carte-"|add:value.carte_config.slug %}
@@ -37,7 +38,7 @@
         <div class="fr-grid-row fr-grid-row--center">
           <div class="fr-col-12 fr-col-md-10 fr-col-lg-8">
             <div class="fr-modal__body">
-              <div class="fr-modal__header">
+              <div class="fr-modal__header qf-pb-0">
                 <button
                   type="button"
                   class="qf-ml-auto fr-btn fr-btn--icon-left fr-icon-arrow-go-back-line fr-btn--tertiary"
@@ -45,7 +46,7 @@
                   aria-controls="{{ modal_id }}"
                 >Retour aux consignes</button>
               </div>
-              <div class="fr-modal__content">
+              <div class="fr-modal__content qf-px-0">
                 <div
                   data-controller="responsive"
                   data-responsive-media-query-value="(min-width: 768px)"
@@ -67,3 +68,4 @@
 {% else %}
   {% carte value.carte_config %}
 {% endif %}
+<div>
