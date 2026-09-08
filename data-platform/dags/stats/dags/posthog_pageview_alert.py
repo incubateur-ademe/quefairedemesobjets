@@ -1,7 +1,8 @@
 """Alerte si PostHog reçoit moins de 10 $pageview par minute.
 
-La tâche échoue quand le seuil n'est pas atteint, et envoie un
-message mattermost.
+Vérifié toutes les 10 minutes de 9h à 18h, toutes les heures la nuit.
+La tâche échoue quand le seuil n'est pas atteint, et envoie un message
+mattermost.
 """
 
 import logging
@@ -10,8 +11,8 @@ import os
 import requests
 from airflow.exceptions import AirflowException
 from airflow.sdk import dag, task
+from airflow.timetables.trigger import MultipleCronTriggerTimetable
 from shared.config.airflow import DEFAULT_ARGS_NO_RETRIES
-from shared.config.schedules import SCHEDULES
 from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
 
@@ -85,7 +86,11 @@ def notify_mattermost(context: dict) -> None:
     dag_id="posthog_pageview_alert",
     dag_display_name="Stats - PostHog - Alerte si trop peu de pages vues",
     default_args=DEFAULT_ARGS_NO_RETRIES,
-    schedule=SCHEDULES.EVERY_MINUTE,
+    schedule=MultipleCronTriggerTimetable(
+        "*/10 9-17 * * *",  # every 10 min, 09:00-17:50
+        "0 18-23,0-8 * * *",  # hourly, 18:00-08:00
+        timezone="Europe/Paris",
+    ),
     start_date=START_DATES.DEFAULT,
     catchup=False,
     is_paused_upon_creation=False,
