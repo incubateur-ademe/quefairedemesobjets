@@ -392,8 +392,13 @@ DATABASE_URL = decouple.config(
     cast=str,
 )
 
+CONN_MAX_AGE = decouple.config("CONN_MAX_AGE", cast=int, default=0)
+CONN_HEALTH_CHECKS = True
+
 DEFAULT_DATABASE_SETTINGS = {
-    **dj_database_url.parse(DATABASE_URL),
+    **dj_database_url.parse(
+        DATABASE_URL, conn_max_age=CONN_MAX_AGE, conn_health_checks=CONN_HEALTH_CHECKS
+    ),
     "ENGINE": "django.contrib.gis.db.backends.postgis",
 }
 
@@ -415,7 +420,11 @@ DB_WAREHOUSE = decouple.config(
 )
 
 WAREHOUSE_DATABASE_SETTINGS = {
-    **dj_database_url.parse(DB_WAREHOUSE),
+    **dj_database_url.parse(
+        DB_WAREHOUSE,
+        conn_max_age=CONN_MAX_AGE,
+        conn_health_checks=CONN_HEALTH_CHECKS,
+    ),
     "ENGINE": "django.contrib.gis.db.backends.postgis",
 }
 
@@ -429,9 +438,6 @@ REMOTE_WEBAPP_SERVERNAME = "webapp_server"
 REMOTE_WEBAPP_SCHEMANAME = "webapp_public"
 REMOTE_WAREHOUSE_SERVERNAME = "warehouse_server"
 REMOTE_WAREHOUSE_SCHEMANAME = "warehouse_public"
-
-CONN_HEALTH_CHECKS = True
-CONN_MAX_AGE = decouple.config("CONN_MAX_AGE", cast=int, default=0)
 
 
 # Password validation

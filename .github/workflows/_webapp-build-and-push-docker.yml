@@ -52,7 +52,7 @@ jobs:
       - name: "[🟣 Scaleway] Build and push webapp Docker image"
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a
         with:
-          context: webapp
+          context: .
           file: webapp/Dockerfile
           # Scaleway Serverless Containers only run amd64
           platforms: linux/amd64

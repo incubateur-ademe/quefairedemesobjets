@@ -3,15 +3,13 @@
 ############################################
 FROM node:24-slim AS node_build
 
-WORKDIR /app
+WORKDIR /build
 
 # Install JS deps first for better caching
-COPY package.json package-lock.json ./
-RUN npm ci
-
-# Parcel build inputs
-COPY . ./
-RUN npm run build
+COPY webapp/ ./webapp/
+COPY package-lock.json package.json .
+RUN npm -w webapp ci
+RUN npm -w webapp run build
 
 
 ############################################
@@ -68,30 +66,32 @@ RUN apt-get update \
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh -s -- --no-modify-path
 
 # Install python deps (cached as long as lockfiles unchanged)
-COPY pyproject.toml uv.lock ./
-RUN /root/.local/bin/uv sync --frozen --no-dev
+COPY pyproject.toml uv.lock .
+COPY webapp/pyproject.toml webapp/pyproject.toml
+RUN /root/.local/bin/uv sync --project webapp --frozen --no-dev
 
 # Use the venv for subsequent RUN/CMD
 ENV VIRTUAL_ENV="/app/.venv" \
     PATH="/app/.venv/bin:${PATH}"
 
 # Copy app code
-COPY . ./
+COPY webapp/ /app/webapp
 
 # Internationalisation and customisation of Wagtail messages.
-# SECRET_KEY is the only env var without a default in settings; any value
-# works for build-time management commands.
-RUN SECRET_KEY=dummy python manage.py compilemessages -l fr
+# This must be ran from git repo root for some obscure reason.
+# Running it from webapp subdirectory causes issues
+RUN SECRET_KEY=dummy python /app/webapp/manage.py compilemessages -l fr
 
+WORKDIR /app/webapp
 # Copy built frontend assets, then collect them
-COPY --from=node_build /app/static/compiled ./static/compiled
+COPY --from=node_build /build/webapp/static/compiled/ static/compiled/
 RUN SECRET_KEY=dummy python manage.py collectstatic --noinput
 
 # Nginx: use the same nginx.conf + rendered servers.conf as Scalingo.
 # The rendered servers.conf is compiled in stage 2 with preview vars.
 RUN rm -f /etc/nginx/sites-enabled/default \
     && rm -f /etc/nginx/conf.d/default.conf 2>/dev/null
-COPY nginx/nginx.conf /etc/nginx/nginx.conf
+RUN mv nginx/nginx.conf /etc/nginx/nginx.conf
 COPY --from=nginx_config /build/servers.conf /etc/nginx/servers.conf
 
 EXPOSE 8000
