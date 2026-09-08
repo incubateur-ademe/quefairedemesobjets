@@ -9,6 +9,3 @@ include {
   path = find_in_parent_folders("root.hcl")
 }
 
-inputs = {
-  object_expiration_days = 1
-}
