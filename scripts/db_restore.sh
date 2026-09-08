@@ -1,10 +1,11 @@
 #!/bin/bash
-# Usage: sh scripts/db_restore.sh <db_label> [dump_dir]
+# Usage: sh scripts/db_restore.sh <db_label> [dump_dir] [jobs]
 #
 # Restore a PostgreSQL custom-format dump into a Docker database container.
 #
 #   db_label   - one of: prod, preprod, sample
 #   dump_dir   - directory containing .custom dump files (default: tmpbackup-<db_label>)
+#   jobs       - pg_restore --jobs value (default: 1)
 #
 # Runs psql and pg_restore inside the matching Docker PostgreSQL container
 # to avoid version mismatches between host and remote pg_dump versions.
@@ -13,6 +14,7 @@ set -euo pipefail
 
 DB_LABEL="${1:-}"
 DUMP_DIR="${2:-tmpbackup-${DB_LABEL}}"
+JOBS="${3:-1}"
 
 if [ -z "$DB_LABEL" ]; then
     echo "Usage: sh scripts/db_restore.sh <db_label> [dump_dir]" >&2
@@ -47,9 +49,17 @@ echo "Restoring $DUMP_FILE into docker:$DOCKER_SERVICE ($DB_NAME)…"
 echo "  Creating extensions…"
 docker compose exec -T "$DOCKER_SERVICE" psql -U "$DB_USER" -d "$DB_NAME" -f /dev/stdin < scripts/sql/create_extensions.sql
 
-# 2. Restore the dump inside the container (same psql/pg_restore version as the DB)
+# 2. Copy file into container
+echo "  Copying file into container..."
+docker compose cp  "$DUMP_FILE" "$DOCKER_SERVICE":'/home/"$DUMP_FILE"'
+
+# 3. Restore the dump inside the container (same psql/pg_restore version as the DB)
 echo "  Restoring dump…"
 docker compose exec -T "$DOCKER_SERVICE" pg_restore -v -d "$DB_NAME" -U "$DB_USER" \
-    --schema=public --clean --no-acl --no-owner --no-privileges < "$DUMP_FILE"
+    --schema=public --clean --no-acl --no-owner --no-privileges --jobs "$JOBS" '/home/"$DUMP_FILE"'
+
+# 4. Deleting backup file inside container
+echo "  Deleting dumpfile inside container…"
+docker compose exec -T "$DOCKER_SERVICE" rm -r '/home/"$DUMP_FILE"'
 
 echo "✅ Restore complete: $DB_LABEL"

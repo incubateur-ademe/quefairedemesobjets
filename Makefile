@@ -4,6 +4,7 @@ DB_URL := postgres://webapp:webapp@localhost:6543/webapp# pragma: allowlist secr
 PYTHON := uv run python
 SAMPLE_DB_URL ?= $(if $(DB_WEBAPP_SAMPLE),$(DB_WEBAPP_SAMPLE),$(DB_URL))
 SAMPLE_DUMP_FILE ?= tmpbackup-sample/sample.custom
+PG_RESTORE_JOBS ?= 1
 WAGTAIL_FRENCH_SQL := webapp/qfdmd/migrations/sql/create_wagtail_french_config.sql
 
 # Loading environment variables
@@ -264,14 +265,14 @@ load-sample-dump:
 
 .PHONY: load-dump-to-loc
 load-dump-to-loc:
-	./scripts/db_restore.sh $(ENV) $(TMPDIR)
+	./scripts/db_restore.sh $(ENV) $(TMPDIR) $(PG_RESTORE_JOBS)
 
 .PHONY: db-restore-local-from
 db-restore-local-from:
 	@ENV=$(env) $(MAKE) dump-$(env)
 	@$(MAKE) drop-schema-public
 	@$(MAKE) create-schema-public
-	@ENV=$(env) TMPDIR=tmpbackup-$(env) $(MAKE) load-dump-to-loc
+	@ENV=$(env) TMPDIR=tmpbackup-$(env) PG_RESTORE_JOBS=$(PG_RESTORE_JOBS) $(MAKE) load-dump-to-loc
 	@$(MAKE) webapp-migrate
 ifeq ($(env),prod)
 	@$(MAKE) webapp-create-remote-db-server
@@ -279,7 +280,7 @@ endif
 
 .PHONY: db-restore-local-from-prod
 db-restore-local-from-prod:
-	$(MAKE) db-restore-local-from env=prod
+	$(MAKE) db-restore-local-from env=prod PG_RESTORE_JOBS=$(PG_RESTORE_JOBS)
 
 .PHONY: db-restore-local-from-preprod
 db-restore-local-from-preprod:
