@@ -5,6 +5,7 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class SCHEDULES:
+    EVERY_MINUTE: str = "* * * * *"  # every minute
     EVERY_5_MINUTES: str = "*/5 * * * *"  # every 5 minutes
     EVERY_HOUR_AT_MIN_3: str = "3 * * * *"  # 3 minutes après chaque heure
     EVERY_DAY_AT_00_00: str = "0 0 * * *"  # every day at 00:00

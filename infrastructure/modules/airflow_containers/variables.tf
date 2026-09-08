@@ -171,3 +171,13 @@ variable "WEBAPP_URL" {
   description = "Webapp base URL for API calls from DAGs (parse time and runtime)"
   type        = string
 }
+variable "MATTERMOST_WEBHOOK_URL" {
+  description = "Webhook Mattermost du canal lvao-tour-de-controle (alertes DAG)"
+  type        = string
+  sensitive   = true
+}
+variable "POSTHOG_PERSONAL_API_KEY" {
+  description = "Clé API personnelle PostHog (requêtes HogQL depuis les DAGs)"
+  type        = string
+  sensitive   = true
+}
