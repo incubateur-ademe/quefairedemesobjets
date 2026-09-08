@@ -74,6 +74,7 @@ def submit_sites_conformes_form(sender, instance, created, **kwargs):
             "email": form_data.get(fields_names[1]),
             "subject": form_data.get(fields_names[2]),
             "message": form_data.get(fields_names[3]),
+            "location": form_data.get(fields_names[4]),
         }
         try:
             validated_data = ContactFormData(**data_dict)
