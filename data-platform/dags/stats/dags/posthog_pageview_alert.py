@@ -19,7 +19,7 @@ from utils.django import django_setup_full
 logger = logging.getLogger(__name__)
 
 PAGEVIEW_THRESHOLD = 10
-MATTERMOST_CHANNEL = "lvao-tour-de-controle"
+MATTERMOST_CHANNEL = "qfdmod-tour-de-controle"
 MATTERMOST_USERNAME = "Bipboop le robot de seconde main"
 MATTERMOST_ICON = (
     "https://cdn3.iconfinder.com/data/icons/system-basic-vol-4-1/20/"

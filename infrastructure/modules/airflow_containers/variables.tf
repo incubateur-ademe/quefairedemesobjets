@@ -172,7 +172,7 @@ variable "WEBAPP_URL" {
   type        = string
 }
 variable "MATTERMOST_WEBHOOK_URL" {
-  description = "Webhook Mattermost du canal lvao-tour-de-controle (alertes DAG)"
+  description = "Webhook Mattermost du canal qfdmod-tour-de-controle (alertes DAG)"
   type        = string
   sensitive   = true
 }

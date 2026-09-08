@@ -20,5 +20,5 @@ def test_mattermost_payload_targets_tour_de_controle():
         "task_instance": SimpleNamespace(log_url="http://airflow/log"),
     }
     payload = mattermost_payload(context)
-    assert payload["channel"] == "lvao-tour-de-controle"
+    assert payload["channel"] == "qfdmod-tour-de-controle"
     assert payload["text"] == "boom [Voir les logs](http://airflow/log)"
