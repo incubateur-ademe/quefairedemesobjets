@@ -59,14 +59,14 @@ class TestSyncFromLegacyProduit:
         assert badges1[0].block_type == "badges"
         badge1 = badges1[0].value[0].value
         assert badge1["text"] == "Bon état"
-        assert badge1["color"] == "cumulus"
+        assert badge1["color"] == "blue-cumulus"
         assert _repair_html(synonyme.bon_etat) in card1["description"].source
 
         card2 = grid["items"][1].value
         assert card2["title"] == "Déposer"
         badge2 = card2["top_detail_badges_tags"][0].value[0].value
         assert badge2["text"] == "Mauvais état"
-        assert badge2["color"] == "glycine"
+        assert badge2["color"] == "purple-glycine"
         assert _repair_html(synonyme.mauvais_etat) in card2["description"].source
 
         break_blocks = [b for b in blocks if b.block_type == "break"]
