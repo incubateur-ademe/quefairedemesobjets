@@ -36,6 +36,7 @@ from wagtail.models import Page
 from core.constants import SEARCH_TERM_ID_QUERY_PARAM
 from core.views import static_file_content_from
 from qfdmd.legacy_migration import (
+    finalize_produit_migration,
     MigrationError,
     get_or_create_legacy_index_page,
     migrate_produit,
@@ -814,6 +815,47 @@ def sync_page_from_produit(request: HttpRequest, id: str) -> HttpResponse:
     return render(
         request,
         "admin/qfdmd/confirm_sync_produit.html",
+        {"page": page, "produit": page.linked_legacy_produit},
+    )
+
+
+def finalize_page_migration(request: HttpRequest, id: str) -> HttpResponse:
+    """Finalize the automatic migration of a ProduitPage from the admin.
+
+    GET shows a confirmation page. POST moves the page under /categories,
+    converts the automatic legacy links to manual ones, unlocks the page
+    and redirects back to the editor.
+    """
+    page = get_object_or_404(Page, pk=id).specific
+    if not isinstance(page, ProduitPage) or not (
+        page.automatically_migrated_from_legacy_produit
+    ):
+        messages.error(
+            request,
+            "Cette action n'est disponible que pour les pages Produit "
+            "migrées automatiquement.",
+        )
+        return redirect("wagtailadmin_pages:edit", id)
+
+    if request.method == "POST":
+        try:
+            with transaction.atomic():
+                categories = finalize_produit_migration(page)
+        except MigrationError as exc:
+            messages.error(request, str(exc))
+        except Exception as exc:
+            messages.error(request, f"Erreur inattendue : {exc}")
+        else:
+            messages.success(
+                request,
+                f"Migration finalisée : la page a été déplacée sous "
+                f"« {categories.title} » et déverrouillée.",
+            )
+        return redirect("wagtailadmin_pages:edit", id)
+
+    return render(
+        request,
+        "admin/qfdmd/confirm_finalize_migration.html",
         {"page": page, "produit": page.linked_legacy_produit},
     )
 

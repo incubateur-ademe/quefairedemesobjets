@@ -19,6 +19,7 @@ from qfdmd.legacy_migration import (
 )
 from qfdmd.models import Produit, ProduitPage
 from qfdmd.views import (
+    finalize_page_migration,
     import_legacy_synonymes,
     legacy_migrate,
     migrate_single_produit,
@@ -113,6 +114,11 @@ def register_legacy_migrate_url():
             "legacy/sync-produit/<str:id>/",
             sync_page_from_produit,
             name="sync_page_from_produit",
+        ),
+        path(
+            "legacy/finalize-migration/<str:id>/",
+            finalize_page_migration,
+            name="finalize_page_migration",
         ),
     ]
 
@@ -422,6 +428,29 @@ def register_sync_from_legacy_menu_item():
     return SyncFromLegacyMenuItem(order=52)
 
 
+class FinalizeMigrationMenuItem(ActionMenuItem):
+    name = "finalize-migration"
+    label = "Finaliser la migration (déplacer dans /categories)"
+    icon_name = "check"
+
+    def get_url(self, context):
+        return reverse("finalize_page_migration", args=[context["page"].id])
+
+    def is_shown(self, context):
+        page = context.get("page")
+        if not page:
+            return False
+        return (
+            page.specific_class is ProduitPage
+            and page.specific.automatically_migrated_from_legacy_produit
+        )
+
+
+@hooks.register("register_page_action_menu_item")
+def register_finalize_migration_menu_item():
+    return FinalizeMigrationMenuItem(order=49)
+
+
 @hooks.register("register_log_actions")
 def register_migration_log_actions(actions):
     @actions.register_action("qfdmd.migrate_produit")
@@ -433,6 +462,11 @@ def register_migration_log_actions(actions):
     class RevertMigrationAction(LogFormatter):
         label = "Annulation migration"
         message = "Migration automatique annulée"
+
+    @actions.register_action("qfdmd.finalize_migration")
+    class FinalizeMigrationAction(LogFormatter):
+        label = "Finalisation migration"
+        message = "Migration finalisée : page déplacée dans /categories"
 
     @actions.register_action("qfdmd.sync_produit")
     class SyncProduitAction(LogFormatter):
