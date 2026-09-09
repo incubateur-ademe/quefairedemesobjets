@@ -33,7 +33,6 @@
 }
 
 .cmsfr-block-carte {
-  @apply max-md:qf-px-0;
   .fr-modal__content {
     @apply !qf-mb-1v;
   }
