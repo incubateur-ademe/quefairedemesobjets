@@ -6,10 +6,12 @@ from wagtail.models import Page
 
 from qfdmd.legacy_migration import (
     MigrationError,
+    finalize_produit_migration,
     migrate_produit,
     revert_produit_migration,
 )
 from qfdmd.models import (
+    CATEGORIES_INDEX_SLUG,
     LEGACY_PRODUIT_INDEX_SLUG,
     Produit,
     ProduitIndexPage,
@@ -227,3 +229,101 @@ def test_produit_sans_synonyme_a_migrer_n_est_pas_a_migrer():
 
     SynonymeFactory(nom="Bouteille de parfum", produit=produit)
     assert Produit.objects.to_migrate().filter(pk=produit.pk).exists()
+
+
+@pytest.fixture
+def index_categories():
+    root_page = Page.objects.get(depth=1)
+    page = ProduitIndexPage(title="Catégories", slug=CATEGORIES_INDEX_SLUG)
+    root_page.add_child(instance=page)
+    page.save()
+    return page
+
+
+def test_migrate_verrouille_la_page(index_dechet):
+    produit = ProduitFactory(nom="Baignoire")
+
+    report = migrate_produit(produit, index_page=index_dechet)
+
+    assert report.page.locked is True
+    assert report.page.locked_by is None
+
+
+def test_finalize_deplace_la_page_et_convertit_les_liens(
+    index_dechet, index_categories
+):
+    produit = ProduitFactory(nom="Baignoire")
+    synonyme = SynonymeFactory(produit=produit, nom="Sabot de bain")
+    page = migrate_produit(produit, index_page=index_dechet).page
+    synonyme.refresh_from_db()
+    tag = synonyme.legacy_imported_as_search_tag
+
+    finalize_produit_migration(page)
+
+    page.refresh_from_db()
+    produit.refresh_from_db()
+    synonyme.refresh_from_db()
+    assert page.get_parent().pk == index_categories.pk
+    assert page.url_path.endswith(f"/{CATEGORIES_INDEX_SLUG}/baignoire/")
+    assert page.live is True
+    assert page.locked is False
+    assert page.automatically_migrated_from_legacy_produit is False
+    # Automatic links replaced by the manual ones.
+    assert produit.legacy_imported_as_produit_page is None
+    assert produit.next_wagtail_page.page.pk == page.pk
+    assert synonyme.legacy_imported_as_search_tag is None
+    assert synonyme.imported_as_search_tag == tag
+    # No longer "migré", and the produit stays out of "à migrer".
+    assert not ProduitPage.objects.filter(
+        pk=page.pk, automatically_migrated_from_legacy_produit=True
+    ).exists()
+    assert not Produit.objects.to_migrate().filter(pk=produit.pk).exists()
+
+
+def test_finalize_suffixe_le_slug_en_cas_de_conflit(index_dechet, index_categories):
+    existing = ProduitPage(title="Baignoire", slug="baignoire")
+    index_categories.add_child(instance=existing)
+    produit = ProduitFactory(nom="Baignoire")
+    page = migrate_produit(produit, index_page=index_dechet).page
+
+    finalize_produit_migration(page)
+
+    page.refresh_from_db()
+    assert page.slug == "baignoire-2"
+
+
+def test_finalize_refuse_une_page_non_migree_automatiquement(index_categories):
+    page = ProduitPage(title="Manuelle", slug="manuelle")
+    index_categories.add_child(instance=page)
+
+    with pytest.raises(MigrationError):
+        finalize_produit_migration(page)
+
+
+def test_vue_finalize_affiche_une_confirmation_sur_get(
+    admin_client, index_dechet, index_categories
+):
+    produit = ProduitFactory(nom="Armoire")
+    page = migrate_produit(produit, index_page=index_dechet).page
+
+    response = admin_client.get(reverse("finalize_page_migration", args=[page.pk]))
+
+    assert response.status_code == 200
+    assert "admin/qfdmd/confirm_finalize_migration.html" in [
+        t.name for t in response.templates
+    ]
+    assert "Armoire" in response.content.decode()
+
+
+def test_vue_finalize_deplace_la_page_sur_post(
+    admin_client, index_dechet, index_categories
+):
+    produit = ProduitFactory(nom="Armoire")
+    page = migrate_produit(produit, index_page=index_dechet).page
+
+    response = admin_client.post(reverse("finalize_page_migration", args=[page.pk]))
+
+    page.refresh_from_db()
+    assert response.status_code == 302
+    assert page.get_parent().pk == index_categories.pk
+    assert page.locked is False
