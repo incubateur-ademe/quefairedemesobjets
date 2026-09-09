@@ -191,6 +191,7 @@ resource "null_resource" "seed_from_sample" {
           python manage.py enable_unaccent
           python manage.py enable_trigram || true
           python manage.py purge_orphan_searchterm_index || true
+          python manage.py mark_infotri_decorative || true
           echo 'Management commands complete.'
         "
     EOT
