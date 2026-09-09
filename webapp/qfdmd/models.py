@@ -158,6 +158,15 @@ def _ensure_wrapped_in_paragraph(html: str) -> str:
     return str(wrapped)
 
 
+def _decapitalize(nom: str) -> str:
+    """Lowercase the first letter, except when the first word holds another
+    capital (acronym or CamelCase brand): "Bougie" → "bougie", "DVD" → "DVD"."""
+    first_word = nom.split(" ", 1)[0]
+    if any(c.isupper() for c in first_word[1:]):
+        return nom
+    return nom[:1].lower() + nom[1:]
+
+
 def _build_consignes_avec_etat(bon_etat: str, mauvais_etat: str) -> dict:
     """Build a streamfield value for the consignes avec état.
 
@@ -967,17 +976,24 @@ class ProduitPage(
         else:
             msgs.append("Aucune consigne trouvée.")
 
-        sous_categories = (
-            produit.sous_categories.filter(afficher_carte=True)
-            if hasattr(produit, "sous_categories")
-            else None
+        all_sous_categories = produit.sous_categories.all()
+        # Waste ("à usage unique") when no sous-catégorie allows reuse.
+        self.usage_unique = (
+            all_sous_categories.exists()
+            and not all_sous_categories.filter(reemploi_possible=True).exists()
         )
-        if sous_categories and sous_categories.exists():
-            carte = CarteConfig.objects.filter(slug="tous-les-gestes").first()
+        if self.usage_unique:
+            msgs.append("Produit à usage unique (aucune sous-catégorie réemployable).")
+
+        carte_slug = (
+            "ass-deposer-uniquement" if self.usage_unique else "tous-les-gestes"
+        )
+        if all_sous_categories.filter(afficher_carte=True).exists():
+            carte = CarteConfig.objects.filter(slug=carte_slug).first()
             if carte:
                 body.append({"type": "paragraph", "value": "<h2>Où l'apporter ?</h2>"})
                 body.append({"type": "carte_sur_mesure", "value": carte.pk})
-                msgs.append("Carte sur mesure ajoutée (tous-les-gestes).")
+                msgs.append(f"Carte sur mesure ajoutée ({carte_slug}).")
 
         body.append({"type": "break", "value": ""})
 
@@ -1040,6 +1056,11 @@ class ProduitPage(
         self.seo_title = f"Que faire de mon {produit.nom}"
         msgs.append("Balise title initialisée.")
 
+        # Used mid-sentence ("Que faire de mon xxx"): drop the leading capital,
+        # unless the first word looks like an acronym (DVD, PC portable…).
+        self.titre_phrase = _decapitalize(produit.nom)
+        msgs.append("Titre utilisé dans les phrases initialisé.")
+
         if synonyme and synonyme.meta_description:
             self.search_description = synonyme.meta_description
             msgs.append("Meta description copiée depuis le synonyme principal.")
@@ -1054,7 +1075,6 @@ class ProduitPage(
             )
 
         if not self.genre or not self.nombre:
-
             GENRE_NOMBRE_CSV = Path(settings.BASE_DIR / "qfdmd" / "genre_nombre.csv")
             with open(GENRE_NOMBRE_CSV, newline="", encoding="utf-8") as f:
                 for row in csv.DictReader(f):
