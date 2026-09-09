@@ -27,3 +27,4 @@ __screenshots__
 *.mo
 
 node_modules
+.parcel-cache
