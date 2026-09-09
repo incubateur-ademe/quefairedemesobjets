@@ -36,9 +36,10 @@ WHERE event = '$pageview'
 
 def posthog_pageview_count() -> int:
     from utils.django import django_setup_full
-    from django.conf import settings
 
     django_setup_full()
+
+    from django.conf import settings
 
     stats = settings.STATS
     base_url = stats["POSTHOG_BASE_URL"].rstrip("/")
