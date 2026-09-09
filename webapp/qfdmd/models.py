@@ -55,6 +55,8 @@ logger = logging.getLogger(__name__)
 # legacy Produit records. Mirrors the historic /dechet/<slug>/ URLs so
 # migrated pages keep their public URL, served by Wagtail.
 LEGACY_PRODUIT_INDEX_SLUG = "dechet"
+# Index page hosting the hand-made produit pages; finalized migrations move there.
+CATEGORIES_INDEX_SLUG = "categories"
 
 # Fields copied verbatim from the legacy Produit model onto ProduitPage
 # (prefixed with legacy_) by the migrate_produits_legacy command.

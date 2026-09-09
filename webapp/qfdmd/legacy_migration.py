@@ -7,13 +7,16 @@ per-object admin views allowing to migrate / revert a single produit.
 
 from dataclasses import dataclass, field
 
+from django.utils import timezone
 from django.utils.text import slugify
 from wagtail.log_actions import log
 
 from qfdmd.models import (
+    CATEGORIES_INDEX_SLUG,
     LEGACY_PRODUIT_INDEX_SLUG,
     PRODUIT_LEGACY_COPIED_FIELDS,
     HomePage,
+    LegacyIntermediateProduitPage,
     Produit,
     ProduitIndexPage,
     ProduitPage,
@@ -123,6 +126,10 @@ def migrate_produit(
         title=produit.nom,
         slug=unique_slug(index_page, base_slug),
         automatically_migrated_from_legacy_produit=True,
+        # Locked for everyone (no locked_by) until the migration is
+        # finalized, so nobody edits a page still driven by legacy data.
+        locked=True,
+        locked_at=timezone.now(),
     )
     for field_name in PRODUIT_LEGACY_COPIED_FIELDS:
         value = getattr(produit, field_name)
@@ -218,6 +225,67 @@ def revert_produit_migration(produit: Produit) -> None:
     log_without_raising(
         produit, "qfdmd.revert_migration", data={"page_title": page_title}
     )
+
+
+def finalize_produit_migration(page: ProduitPage) -> ProduitIndexPage:
+    """Turn an automatically migrated page into a regular, hand-managed one.
+
+    Moves the page under the /categories index, replaces the automatic
+    links (``Produit.legacy_imported_as_produit_page``,
+    ``Synonyme.legacy_imported_as_search_tag``) with the manual ones used
+    by hand-migrated pages (``next_wagtail_page``,
+    ``Synonyme.imported_as_search_tag``), clears the "migré
+    automatiquement" flag and unlocks the page.
+
+    Should be called inside a transaction; raises MigrationError when the
+    page was not migrated automatically or the target index is missing.
+    Returns the index page the page was moved under.
+    """
+    if not page.automatically_migrated_from_legacy_produit:
+        raise MigrationError("Cette page n'a pas été migrée automatiquement.")
+    categories = ProduitIndexPage.objects.filter(slug=CATEGORIES_INDEX_SLUG).first()
+    if categories is None:
+        raise MigrationError(
+            f"Page index « {CATEGORIES_INDEX_SLUG} » introuvable, "
+            "déplacement impossible."
+        )
+
+    produit = page.linked_legacy_produit
+    if produit is not None:
+        for synonyme in produit.synonymes.filter(
+            legacy_imported_as_search_tag__isnull=False
+        ):
+            synonyme.imported_as_search_tag = synonyme.legacy_imported_as_search_tag
+            synonyme.legacy_imported_as_search_tag = None
+            synonyme.save(
+                update_fields=[
+                    "imported_as_search_tag",
+                    "legacy_imported_as_search_tag",
+                ]
+            )
+        produit.legacy_imported_as_produit_page = None
+        produit.save(update_fields=["legacy_imported_as_produit_page"])
+        LegacyIntermediateProduitPage.objects.get_or_create(
+            produit=produit, defaults={"page": page}
+        )
+
+    page.automatically_migrated_from_legacy_produit = False
+    page.locked = False
+    page.locked_by = None
+    page.locked_at = None
+    if page.get_parent().pk != categories.pk:
+        page.slug = unique_slug(categories, page.slug)
+    page.save()
+    if page.get_parent().pk != categories.pk:
+        page.move(categories, pos="last-child")
+        page.refresh_from_db()
+
+    log_without_raising(
+        page,
+        "qfdmd.finalize_migration",
+        data={"produit_id": produit.pk if produit else None},
+    )
+    return categories
 
 
 def log_without_raising(instance, action, **kwargs):
