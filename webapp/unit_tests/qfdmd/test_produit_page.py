@@ -1,6 +1,11 @@
 import pytest
 
-from qfdmd.models import _ensure_wrapped_in_paragraph, _repair_html, _split_off_embeds
+from qfdmd.models import (
+    _decapitalize,
+    _ensure_wrapped_in_paragraph,
+    _repair_html,
+    _split_off_embeds,
+)
 from unit_tests.qfdmd.qfdmod_factory import (
     ProduitFactory,
     ProduitPageFactory,
@@ -408,3 +413,85 @@ class TestSyncFromLegacyProduitSousCategorieObjet:
         page.sync_from_legacy_produit()
 
         assert list(page.sous_categorie_objet.all()) == []
+
+
+@pytest.mark.django_db
+class TestSyncFromLegacyProduitUsageUnique:
+    """A legacy Produit is a waste ("à usage unique") when none of its
+    sous-catégories allows reuse: the page gets the flag and the
+    "Déposer uniquement" map instead of "tous les gestes"."""
+
+    def _page_for(self, *sous_categories):
+        produit = ProduitFactory(nom="Bougie en cire")
+        produit.sous_categories.set(sous_categories)
+        page = ProduitPageFactory()
+        produit.legacy_imported_as_produit_page = page
+        produit.save(update_fields=["legacy_imported_as_produit_page"])
+        return page
+
+    def _carte_slugs(self, page):
+        return [
+            block.value.slug
+            for block in page.body
+            if block.block_type == "carte_sur_mesure"
+        ]
+
+    def test_waste_gets_usage_unique_and_deposer_uniquement_carte(self):
+        CarteConfigFactory(slug="tous-les-gestes", nom="Tous les gestes")
+        CarteConfigFactory(slug="ass-deposer-uniquement", nom="Déposer uniquement")
+        page = self._page_for(
+            SousCategorieObjetFactory(reemploi_possible=False, afficher_carte=True)
+        )
+
+        page.sync_from_legacy_produit()
+
+        assert page.usage_unique is True
+        assert self._carte_slugs(page) == ["ass-deposer-uniquement"]
+
+    def test_reusable_keeps_tous_les_gestes_carte(self):
+        CarteConfigFactory(slug="tous-les-gestes", nom="Tous les gestes")
+        CarteConfigFactory(slug="ass-deposer-uniquement", nom="Déposer uniquement")
+        page = self._page_for(
+            SousCategorieObjetFactory(reemploi_possible=False, afficher_carte=True),
+            SousCategorieObjetFactory(reemploi_possible=True),
+        )
+
+        page.sync_from_legacy_produit()
+
+        assert page.usage_unique is False
+        assert self._carte_slugs(page) == ["tous-les-gestes"]
+
+    def test_no_sous_categorie_is_not_usage_unique(self):
+        page = self._page_for()
+
+        page.sync_from_legacy_produit()
+
+        assert page.usage_unique is False
+
+
+@pytest.mark.django_db
+class TestSyncFromLegacyProduitTitrePhrase:
+    def test_titre_phrase_drops_leading_capital(self):
+        produit = ProduitFactory(nom="Bougie en cire")
+        page = ProduitPageFactory()
+        produit.legacy_imported_as_produit_page = page
+        produit.save(update_fields=["legacy_imported_as_produit_page"])
+
+        page.sync_from_legacy_produit()
+
+        assert page.titre_phrase == "bougie en cire"
+
+
+@pytest.mark.parametrize(
+    "nom, expected",
+    [
+        ("Bougie en cire", "bougie en cire"),
+        ("DVD", "DVD"),
+        ("PC portable", "PC portable"),
+        ("CD/DVD, cassette", "CD/DVD, cassette"),
+        ("CDRom", "CDRom"),
+        ("", ""),
+    ],
+)
+def test_decapitalize(nom, expected):
+    assert _decapitalize(nom) == expected
