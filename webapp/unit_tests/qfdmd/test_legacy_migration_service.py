@@ -212,3 +212,18 @@ def test_vue_revert_affiche_une_confirmation_sur_get(admin_client, index_dechet)
         t.name for t in response.templates
     ]
     assert "Armoire" in response.content.decode()
+
+
+@pytest.mark.django_db
+def test_produit_sans_synonyme_a_migrer_n_est_pas_a_migrer():
+    """Produit 159 case: every synonyme already redirected to a new page,
+    nothing left to migrate, so it must not show up as "à migrer"."""
+    from unit_tests.qfdmd.qfdmod_factory import ProduitFactory, SynonymeFactory
+
+    produit = ProduitFactory(nom="Flacon de parfum (en verre)")
+    tag = SearchTag.objects.create(name="Flacon de parfum", slug="flacon-de-parfum")
+    SynonymeFactory(nom="Flacon de parfum", produit=produit, imported_as_search_tag=tag)
+    assert not Produit.objects.to_migrate().filter(pk=produit.pk).exists()
+
+    SynonymeFactory(nom="Bouteille de parfum", produit=produit)
+    assert Produit.objects.to_migrate().filter(pk=produit.pk).exists()
