@@ -114,7 +114,58 @@ def _repair_html(html: str) -> str:
     opened in the editor. BeautifulSoup re-serializes the HTML, dropping
     unmatched tags instead of erroring.
     """
-    return str(BeautifulSoup(html, "html.parser"))
+    soup = BeautifulSoup(html, "html.parser")
+    _internalize_links(soup)
+    return str(soup)
+
+
+# ponytail: legacy content only ever links to these two hosts, hardcoded.
+OWN_HOSTS = {"quefairedemesobjets.ademe.fr", "quefairedemesdechets.ademe.fr"}
+
+
+def _internalize_links(soup: BeautifulSoup) -> None:
+    """Turn absolute links to our own site into internal ones, in place.
+
+    A link whose path matches a live Wagtail page becomes a Wagtail page
+    link (``<a linktype="page" id="…">``), editable as such in the CMS.
+    Otherwise the link becomes relative so it stays on the current host
+    (preview, prod…). Either way the ``target="_blank"`` set on legacy
+    links is dropped: internal links open in the same tab.
+    """
+    from urllib.parse import urlparse
+
+    from wagtail.models import Page, Site
+
+    own_links = [
+        (link, parsed)
+        for link in soup.find_all("a", href=True)
+        if (parsed := urlparse(link["href"])).hostname in OWN_HOSTS
+    ]
+    if not own_links:
+        return
+
+    site = Site.objects.filter(is_default_site=True).select_related("root_page").first()
+    root_url_path = site.root_page.url_path if site else None
+
+    for link, parsed in own_links:
+        path = parsed.path or "/"
+        if not path.endswith("/"):
+            path += "/"
+        link.attrs.pop("target", None)
+        link.attrs.pop("rel", None)
+        page = (
+            Page.objects.live()
+            .filter(url_path=root_url_path + path.lstrip("/"))
+            .first()
+            if root_url_path
+            else None
+        )
+        if page:
+            del link["href"]
+            link["linktype"] = "page"
+            link["id"] = str(page.pk)
+        else:
+            link["href"] = path + (f"?{parsed.query}" if parsed.query else "")
 
 
 _BLOCK_TAGS = {
@@ -1322,13 +1373,14 @@ class ProduitQuerySet(models.QuerySet):
         """Produits legacy pas encore migrés vers une ProduitPage.
 
         Exclut à la fois les produits migrés automatiquement
-        (legacy_imported_as_produit_page) et ceux redirigés manuellement vers
-        une page Wagtail (next_wagtail_page).
+        (legacy_imported_as_produit_page), ceux redirigés manuellement vers
+        une page Wagtail (next_wagtail_page) et ceux dont tous les synonymes
+        sont déjà migrés : il ne reste rien à migrer.
         """
         return self.filter(
             legacy_imported_as_produit_page__isnull=True,
             next_wagtail_page__isnull=True,
-        )
+        ).with_synonymes_to_migrate()
 
     def with_synonymes_to_migrate(self):
         """Produits having at least one synonyme not migrated yet.

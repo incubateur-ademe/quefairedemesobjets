@@ -518,3 +518,33 @@ def test_infotri_image_block_is_decorative_by_default():
     block = ProduitPage._meta.get_field("infotri").stream_block.child_blocks["image"]
 
     assert block.child_blocks["decorative"].get_default() is True
+
+
+@pytest.mark.django_db
+class TestRepairHtmlInternalizesLinks:
+    def test_link_to_live_page_becomes_wagtail_page_link(self):
+        from wagtail.models import Page, Site
+
+        root = Site.objects.get(is_default_site=True).root_page
+        bonus = Page(title="Bonus réparation", slug="bonus-reparation")
+        root.add_child(instance=bonus)
+
+        html = _repair_html(
+            '<p><a href="https://quefairedemesobjets.ademe.fr/bonus-reparation/" '
+            'target="_blank">bonus</a></p>'
+        )
+
+        assert html == f'<p><a id="{bonus.pk}" linktype="page">bonus</a></p>'
+
+    def test_link_to_unknown_own_path_becomes_relative(self):
+        html = _repair_html(
+            '<p><a href="https://quefairedemesdechets.ademe.fr/dechet/pile" '
+            'target="_blank" rel="noopener">piles</a></p>'
+        )
+
+        assert html == '<p><a href="/dechet/pile/">piles</a></p>'
+
+    def test_external_link_is_untouched(self):
+        html = '<p><a href="https://www.economie.gouv.fr/x" target="_blank">x</a></p>'
+
+        assert _repair_html(html) == html
