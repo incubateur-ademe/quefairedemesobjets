@@ -195,7 +195,7 @@ def _build_consignes_avec_etat(bon_etat: str, mauvais_etat: str) -> dict:
                                         "type": "badge",
                                         "value": {
                                             "text": "Bon état",
-                                            "color": "cumulus",
+                                            "color": "blue-cumulus",
                                             "hide_icon": False,
                                         },
                                     }
@@ -220,7 +220,7 @@ def _build_consignes_avec_etat(bon_etat: str, mauvais_etat: str) -> dict:
                                         "type": "badge",
                                         "value": {
                                             "text": "Mauvais état",
-                                            "color": "glycine",
+                                            "color": "purple-glycine",
                                             "hide_icon": False,
                                         },
                                     }
