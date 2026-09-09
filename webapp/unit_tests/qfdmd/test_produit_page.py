@@ -495,3 +495,18 @@ class TestSyncFromLegacyProduitTitrePhrase:
 )
 def test_decapitalize(nom, expected):
     assert _decapitalize(nom) == expected
+
+
+def test_consignes_avec_etat_badges_use_valid_dsfr_colors():
+    from qfdmd.models import _build_consignes_avec_etat
+
+    grid = _build_consignes_avec_etat("<p>bon</p>", "<p>mauvais</p>")
+
+    badges = [
+        item["value"]["top_detail_badges_tags"][0]["value"][0]["value"]
+        for item in grid["value"]["items"]
+    ]
+    assert [(b["text"], b["color"]) for b in badges] == [
+        ("Bon état", "blue-cumulus"),
+        ("Mauvais état", "purple-glycine"),
+    ]
