@@ -15,66 +15,49 @@ concurrency:
   cancel-in-progress: false
 
 # Gate:
-# - closed: only if the PR carried the preview label (otherwise there is
-#   nothing to destroy; the terragrunt destroy would be a costly no-op)
+# - closed: only if the PR carried the preview label (otherwise nothing to destroy)
 # - unlabeled: only when the preview label itself is removed
-# - workflow_dispatch: always (manual destroy, used by preview-cleanup.yml)
+# - workflow_dispatch: always (manual destroy)
+# Resources are looked up by naming convention and deleted with the Scaleway
+# CLI (scripts/infrastructure/preview_destroy.sh), no terraform state needed.
+# preview-cleanup.yml runs the same script daily for anything missed here.
 jobs:
-  resolve:
-    name: 📌 Resolve PR number
+  destroy:
+    name: 🧱 Destroy preview resources
     if: >-
       github.event_name == 'workflow_dispatch' ||
       (github.event.action == 'unlabeled' && github.event.label.name == 'preview') ||
       (github.event.action == 'closed' &&
        contains(github.event.pull_request.labels.*.name, 'preview'))
     runs-on: ubuntu-latest
-    outputs:
-      pr_number: ${{ steps.out.outputs.pr_number }}
-    steps:
-      - id: out
-        run: |
-          PR_NUMBER="${{ inputs.pr_number || github.event.pull_request.number }}"
-          echo "pr_number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
-
-  destroy:
-    name: 🧱 Destroy preview infra
-    needs: [resolve]
-    uses: ./.github/workflows/_terragrunt-apply.yml
-    secrets: inherit # pragma: allowlist secret
-    with:
-      command: destroy
-      pr_number: ${{ needs.resolve.outputs.pr_number }}
-      environment: preview
-
-  cleanup-state:
-    name: 🧹 Delete terraform state objects
-    needs: [resolve, destroy]
-    runs-on: ubuntu-latest
     environment: preview
+    permissions:
+      contents: read
+      deployments: write
     env:
+      PR_NUMBER: ${{ inputs.pr_number || github.event.pull_request.number }}
+      SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
+      SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
+      SCW_DEFAULT_PROJECT_ID: ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
+      SCW_DEFAULT_ORGANIZATION_ID: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
+      SCW_DEFAULT_REGION: fr-par
       AWS_ACCESS_KEY_ID: ${{ secrets.SCW_ACCESS_KEY }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.SCW_SECRET_KEY }}
       AWS_DEFAULT_REGION: fr-par
     steps:
-      - name: Remove state files for pr-${{ needs.resolve.outputs.pr_number }}
-        run: |
-          set -euo pipefail
-          aws --endpoint-url=https://s3.fr-par.scw.cloud s3 rm \
-            "s3://lvao-terraform-state/preview/pr-${{ needs.resolve.outputs.pr_number }}/" \
-            --recursive
+      - uses: actions/checkout@v7.0.1
 
-  mark-inactive:
-    name: 🏷️ Mark deployment as inactive
-    needs: [resolve, cleanup-state]
-    runs-on: ubuntu-latest
-    permissions:
-      deployments: write
-    steps:
-      - uses: actions/github-script@v9
+      - name: Setup Scaleway CLI
+        uses: scaleway/action-scw@2e34a1eb35cf3cac627f24643a101fea269cbd83
+
+      - name: Destroy pr-${{ inputs.pr_number || github.event.pull_request.number }}
+        run: scripts/infrastructure/preview_destroy.sh "$PR_NUMBER"
+
+      - name: Mark deployment as inactive
+        uses: actions/github-script@v9
         with:
           script: |
-            const prNumber = Number("${{ needs.resolve.outputs.pr_number }}");
-
+            const prNumber = Number(process.env.PR_NUMBER);
             const { data: deployments } = await github.rest.repos.listDeployments({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -82,7 +65,6 @@ jobs:
               task: `pr-${prNumber}`,
               per_page: 10,
             });
-
             for (const d of deployments) {
               await github.rest.repos.createDeploymentStatus({
                 owner: context.repo.owner,
