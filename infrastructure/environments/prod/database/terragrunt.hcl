@@ -21,11 +21,13 @@ inputs = {
   warehouse_db_password = "[warehouse_db_password]"
   warehouse_volume_size = 100
 
-  # Airflow
-  airflow_node_type   = "DB-PLAY2-NANO"
+  # Airflow (database on warehouse instance)
   airflow_db_name     = "airflow"
   airflow_db_username = "[airflow_db_username]"
   airflow_db_password = "[airflow_db_password]"
+
+  # DEPRECATED
+  airflow_node_type   = "DB-PLAY2-NANO"
   airflow_volume_size = 20
 
   # Cross-DB postgres_fdw setup between webapp and warehouse.
