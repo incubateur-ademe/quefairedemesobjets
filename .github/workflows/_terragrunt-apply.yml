@@ -1,22 +1,16 @@
-name: 🧱 Terragrunt apply/destroy
+name: 🧱 Terragrunt apply
 
 on:
   workflow_call:
     inputs:
-      command:
-        description: "terragrunt command (apply or destroy)"
-        type: string
-        required: false
-        default: apply
       pr_number:
         description: "Pull request number — materialises infrastructure/environments/preview/pr-<n> from _template, exposed as PR_NUMBER"
         type: string
         required: true
       image_tag:
-        description: "Webapp image tag to deploy (e.g. pr-123-abc1234). Not needed for destroy."
+        description: "Webapp image tag to deploy (e.g. pr-123-abc1234)"
         type: string
-        required: false
-        default: "unused"
+        required: true
       environment:
         description: "GitHub environment to load secrets from (e.g. preview)"
         type: string
@@ -33,12 +27,12 @@ on:
         default: "false"
     outputs:
       endpoint:
-        description: "Public URL of the preview container (apply only)"
+        description: "Public URL of the preview container"
         value: ${{ jobs.terragrunt.outputs.endpoint }}
 
 jobs:
   terragrunt:
-    name: 🧱 Terragrunt ${{ inputs.command }} (pr-${{ inputs.pr_number }})
+    name: 🧱 Terragrunt apply (pr-${{ inputs.pr_number }})
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     outputs:
@@ -79,12 +73,6 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
 
-      - name: Validate command input
-        run: |
-          CMD="${{ inputs.command }}"
-          [[ "$CMD" == "apply" || "$CMD" == "destroy" ]] \
-            || { echo "Invalid command: $CMD (must be 'apply' or 'destroy')"; exit 1; }
-
       - name: Install OpenTofu
         uses: opentofu/setup-opentofu@a1320f892987e89d278cc92dc5adc984fb93aca4 # v2.0.2
         with:
@@ -108,7 +96,6 @@ jobs:
         uses: scaleway/action-scw@2e34a1eb35cf3cac627f24643a101fea269cbd83
 
       - name: Login to Scaleway Container Registry
-        if: inputs.command == 'apply'
         run: echo "${{ secrets.SCW_SECRET_KEY }}" | docker login rg.fr-par.scw.cloud -u nologin --password-stdin
 
       - name: Materialise per-PR terragrunt stack from _template
@@ -116,33 +103,23 @@ jobs:
           set -euo pipefail
           SRC="infrastructure/environments/preview/_template"
           DST="infrastructure/environments/preview/pr-${{ inputs.pr_number }}"
-          if [[ "${{ inputs.command }}" == "destroy" && ! -d "$DST" ]]; then
-            echo "No preview directory at $DST, nothing to destroy."
-            exit 0
-          fi
-          if [[ ! -d "$DST" ]]; then
-            cp -r "$SRC" "$DST"
-            echo "Materialised $DST from $SRC"
-          else
-            echo "$DST already exists, leaving as-is"
-          fi
+          cp -r "$SRC" "$DST"
           ls -la "$DST"
 
-      - name: Terragrunt ${{ inputs.command }}
+      - name: Terragrunt apply
         working-directory: infrastructure/environments/preview/pr-${{ inputs.pr_number }}
         run: |
           set -euo pipefail
-          CMD="${{ inputs.command }}"
 
           # run --all walks the unit DAG: apply in dependency order
-          # (database → object_storage → container), destroy in reverse.
-          # Init is implicit (auto-init) and -auto-approve is added
-          # automatically in --all mode; TG_NON_INTERACTIVE is set job-wide.
-          # --queue-exclude-external keeps the shared ../../namespace unit
-          # out of the queue: it must never be destroyed by a PR teardown.
-          terragrunt run --all --queue-exclude-external -- "$CMD" 2>&1 | tee apply.log
+          # (database → object_storage → container). Init is implicit
+          # (auto-init) and -auto-approve is added automatically in --all
+          # mode; TG_NON_INTERACTIVE is set job-wide. --queue-exclude-external
+          # keeps the shared ../../namespace unit out of the queue.
+          # Teardown is not done with terragrunt: see preview-down.yml.
+          terragrunt run --all --queue-exclude-external -- apply 2>&1 | tee apply.log
           {
-            echo "## Terragrunt $CMD (pr-${{ inputs.pr_number }})"
+            echo "## Terragrunt apply (pr-${{ inputs.pr_number }})"
             echo
             echo '```'
             tail -n 100 apply.log
@@ -151,7 +128,6 @@ jobs:
 
       - name: Read container public endpoint
         id: endpoint
-        if: inputs.command == 'apply'
         working-directory: infrastructure/environments/preview/pr-${{ inputs.pr_number }}/container
         run: |
           set -euo pipefail
