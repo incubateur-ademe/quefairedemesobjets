@@ -6,7 +6,6 @@ import logging
 import pandas as pd
 from sources.tasks.transform.sequence_utils import convert_numpy_to_jsonify
 from sqlalchemy import text
-from utils.django import DJANGO_WH_CONNECTION_NAME, django_conn_to_sqlalchemy_engine
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +46,8 @@ def create_temporary_table(
         table_name: Name of the temporary table to create
         engine: SQLAlchemy engine for database connection
     """
+
+    from utils.django import DJANGO_WH_CONNECTION_NAME, django_conn_to_sqlalchemy_engine
 
     # Create a SQLAlchemy engine from the Django connection
     engine = django_conn_to_sqlalchemy_engine(using=DJANGO_WH_CONNECTION_NAME)
@@ -103,6 +104,8 @@ def read_temporary_table(table_name: str) -> pd.DataFrame:
     """
     Read a temporary table from the database and convert JSON columns back to dict/list.
     """
+    from utils.django import DJANGO_WH_CONNECTION_NAME, django_conn_to_sqlalchemy_engine
+
     engine = django_conn_to_sqlalchemy_engine(using=DJANGO_WH_CONNECTION_NAME)
 
     df = (
@@ -120,6 +123,8 @@ def drop_temporary_table(table_name: str):
     """
     Drop the temporary table from the database.
     """
+    from utils.django import DJANGO_WH_CONNECTION_NAME, django_conn_to_sqlalchemy_engine
+
     engine = django_conn_to_sqlalchemy_engine(using=DJANGO_WH_CONNECTION_NAME)
 
     with engine.begin() as conn:  # type: ignore
