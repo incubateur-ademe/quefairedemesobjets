@@ -49,7 +49,7 @@ services:
 
   lvao-webapp-db:
     platform: ${POSTGIS_IMAGE_PLATFORM:-linux/amd64}
-    image: imresamu/postgis:16-3.5-alpine
+    image: imresamu/postgis:16-3.5-alpine # We use imresamu image because official Postgis image does not ship ARM builds
     environment:
       - POSTGRES_USER=webapp
       - POSTGRES_PASSWORD=webapp # pragma: allowlist secret
@@ -64,7 +64,7 @@ services:
 
   lvao-warehouse-db:
     platform: ${POSTGIS_IMAGE_PLATFORM:-linux/amd64}
-    image: imresamu/postgis:15-3.3-alpine
+    image: imresamu/postgis:15-3.3-alpine # We use imresamu image because official Postgis image does not ship ARM builds
     environment:
       - POSTGRES_USER=warehouse
       - POSTGRES_PASSWORD=warehouse # pragma: allowlist secret
