@@ -31,7 +31,7 @@ class BreakBlock(blocks.StaticBlock):
     hidden when the page is rendered inside an iframe. The block itself
     renders nothing — it is purely a layout boundary.
 
-    Use this on pages that do **not** have a ``carte_sur_mesure`` block.
+    Use this on pages that do **not** have a ``carte`` block.
     The iframe cut-point logic picks whichever comes first: the carte block
     or this break block.
     """
@@ -43,18 +43,43 @@ class BreakBlock(blocks.StaticBlock):
         admin_text = _(
             "Tout ce qui se trouve après ce bloc est masqué lorsque la page est "
             "affichée dans une iframe (par ex. intégration sur un site partenaire). "
-            "Utilisez-le sur les fiches qui n'ont pas de « Carte sur mesure »."
+            "Utilisez-le sur les fiches qui n'ont pas de « Carte »."
         )
+
+
+class CarteBlock(blocks.StructBlock):
+    """StructBlock wrapping a CarteConfig snippet with a mobile display toggle."""
+
+    carte_config = SnippetChooserBlock(
+        "qfdmo.CarteConfig",
+        label="Configuration de carte",
+    )
+    card = sites_conformes_blocks.VerticalCardBlock(
+        label="Carte DSFR",
+        help_text=(
+            "Carte affichée en teaser sur mobile lorsque le mode modale est activé."
+            " Ne pas définir de lien — le clic ouvre la modale."
+        ),
+        required=False,
+    )
+    open_in_modal = blocks.BooleanBlock(
+        required=False,
+        label="Afficher dans une modale",
+        help_text=(
+            "Sur mobile, la carte sera masquée derrière une carte DSFR cliquable"
+        ),
+    )
+
+    class Meta:
+        template = "ui/blocks/carte_block.html"
+        label = "Carte"
+        icon = "map"
 
 
 class CustomBlockMixin(CommonStreamBlock):
     """Mixin to add common custom blocks to any block class."""
 
-    carte_sur_mesure = SnippetChooserBlock(
-        "qfdmo.CarteConfig",
-        label="Carte sur mesure",
-        template="ui/blocks/carte.html",
-    )
+    carte = CarteBlock(label="Carte")
     liens = blocks.ListBlock(
         SnippetChooserBlock("qfdmd.Lien", label="Lien"),
         label="Liste de liens",
@@ -81,15 +106,8 @@ class TabsBlock(sites_conformes_blocks.TabsBlock):
 
 STREAMFIELD_COMMON_BLOCKS = [
     *sites_conformes_BLOCKS,
-    (
-        "carte_sur_mesure",
-        SnippetChooserBlock(
-            "qfdmo.CarteConfig",
-            label="Carte sur mesure",
-            template="ui/blocks/carte.html",
-        ),
-    ),
     ("break", BreakBlock()),
+    ("carte", CarteBlock(label="Carte")),
     (
         "liens",
         blocks.ListBlock(

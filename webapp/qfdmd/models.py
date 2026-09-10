@@ -48,12 +48,12 @@ logger = logging.getLogger(__name__)
 
 
 class PartitionedBody(NamedTuple):
-    """A ProduitPage body split around the first ``carte_sur_mesure`` or
+    """A ProduitPage body split around the first ``carte`` or
     ``break`` block (whichever comes first in the stream).
 
     ``always_visible`` holds the blocks up to the split point (excluding the
     split block itself when it is a ``break``, or including it when it is a
-    ``carte_sur_mesure``). These are shown in every context, including the
+    ``carte``). These are shown in every context, including the
     iframe. ``hidden_in_iframe`` holds the blocks after the split point, which
     are only rendered on the standalone page.
     """
@@ -467,16 +467,16 @@ class ProduitPage(
 
     @cached_property
     def _partitioned_body(self) -> PartitionedBody:
-        """Split the body around the first ``carte_sur_mesure`` or ``break``
+        """Split the body around the first ``carte`` or ``break``
         block.
 
-        ``carte_sur_mesure`` is content and is included in the visible
+        ``carte`` is content and is included in the visible
         partition. ``break`` is a pure marker and is excluded from both
         partitions. When neither block is present, the whole body is always
         visible.
         """
         # inspired by https://stackoverflow.com/a/55368810
-        split_block_names = frozenset({"carte_sur_mesure", "break"})
+        split_block_names = frozenset({"carte", "break"})
 
         # Find the first block in stream order that acts as a split point.
         breakpoint_block = None
