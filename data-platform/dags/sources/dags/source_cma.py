@@ -7,10 +7,6 @@ from shared.config.airflow import DEFAULT_ARGS
 from shared.config.tags import TAGS
 from sources.config.airflow_params import get_mapping_config
 from sources.tasks.airflow_logic.operators import default_params, eo_task_chain
-from utils.django import django_setup_full
-
-django_setup_full()
-from qfdmo.models.acteur import ActeurPublicAccueilli, ActeurStatus  # noqa: E402
 
 NORMALIZATION_RULES = [
     # 1. Renommage des colonnes
@@ -75,9 +71,11 @@ NORMALIZATION_RULES = [
         "destination": "ville",
     },
     # 3. Ajout des colonnes avec une valeur par défaut
+    # Hardcoded values (ActeurStatus.ACTIF):
+    # not ideal, but avoids initializing Django at DAG module load time.
     {
         "column": "statut",
-        "value": ActeurStatus.ACTIF,
+        "value": "ACTIF",
     },
     {
         "column": "label_codes",
@@ -95,9 +93,11 @@ NORMALIZATION_RULES = [
         "column": "action_codes",
         "value": ["reparer"],
     },
+    # Hardcoded values (ActeurPublicAccueilli.PARTICULIERS):
+    # not ideal, but avoids initializing Django at DAG module load time.
     {
         "column": "public_accueilli",
-        "value": ActeurPublicAccueilli.PARTICULIERS,
+        "value": "Particuliers",
     },
     {
         "column": "source_code",

@@ -98,7 +98,7 @@ Le détail des stratégies est dans [`backups.md`](backups.md). Synthèse :
 
 ### Scénario 6 — Compromission de secrets
 
-Procédure de rotation détaillée dans [`secrets.md`](secrets.md). À effectuer dans l'ordre :
+Procédure de rotation détaillée dans [`secrets.md`](secrets.md). Pour les mots de passe PostgreSQL, suivre [Rotating database passwords](../../how-to/infrastructure/rotate_db_passwords.md). À effectuer dans l'ordre :
 
 1. Révoquer le secret compromis chez l'émetteur (Scaleway, Scalingo, GitHub, PostHog, Notion, Mattermost…).
 2. Générer un nouveau secret.

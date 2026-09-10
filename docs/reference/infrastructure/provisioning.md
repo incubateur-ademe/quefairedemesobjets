@@ -130,6 +130,8 @@ Namespace privé `ns-qfdmo` — héberge les images Docker des 3 containers Airf
 
 Connexions clientes en `sslmode=require`. Voir [`db/db_organisation.md`](../db/db_organisation.md) pour la liaison `postgres_fdw` et [`security/backups.md`](../security/backups.md) pour la stratégie de sauvegarde.
 
+Pour faire tourner les mots de passe (`webapp_db_password`, `warehouse_db_password`, `airflow_db_password`), suivre [Rotating database passwords](../../how-to/infrastructure/rotate_db_passwords.md).
+
 #### Object Storage (S3 `fr-par`)
 
 | Bucket                 | Connexion Airflow | Usage                                                                                                                                                            |
