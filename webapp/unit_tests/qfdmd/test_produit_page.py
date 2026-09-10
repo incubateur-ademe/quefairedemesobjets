@@ -6,7 +6,7 @@ from unit_tests.qfdmo.carte_config_factory import CarteConfigFactory
 
 @pytest.mark.django_db
 class TestProduitPagePartitionedBody:
-    """ProduitPage.body is split around the first ``carte_sur_mesure`` or
+    """ProduitPage.body is split around the first ``carte`` or
     ``break`` block so that the iframe only shows what comes before the split.
     """
 
@@ -15,7 +15,7 @@ class TestProduitPagePartitionedBody:
         page = ProduitPageFactory(
             body=[
                 ("paragraph", "<p>avant</p>"),
-                ("carte_sur_mesure", carte),
+                ("carte", {"carte_config": carte}),
                 ("paragraph", "<p>apres</p>"),
             ]
         )
@@ -26,7 +26,7 @@ class TestProduitPagePartitionedBody:
         # Everything up to and including the carte stays visible.
         assert [block.block_type for block in always_visible] == [
             "paragraph",
-            "carte_sur_mesure",
+            "carte",
         ]
         # Only the blocks strictly after the carte are hidden in the iframe.
         assert [block.block_type for block in hidden_in_iframe] == ["paragraph"]
@@ -36,7 +36,7 @@ class TestProduitPagePartitionedBody:
         carte = CarteConfigFactory()
         page = ProduitPageFactory(
             body=[
-                ("carte_sur_mesure", carte),
+                ("carte", {"carte_config": carte}),
                 ("paragraph", "<p>apres</p>"),
             ]
         )
@@ -80,7 +80,7 @@ class TestProduitPagePartitionedBody:
         page = ProduitPageFactory(
             body=[
                 ("paragraph", "<p>avant</p>"),
-                ("carte_sur_mesure", carte),
+                ("carte", {"carte_config": carte}),
                 ("break", None),
                 ("paragraph", "<p>inter</p>"),
             ]
@@ -91,7 +91,7 @@ class TestProduitPagePartitionedBody:
 
         assert [block.block_type for block in always_visible] == [
             "paragraph",
-            "carte_sur_mesure",
+            "carte",
         ]
         # The break block is also hidden because it's after the carte split
         assert [block.block_type for block in hidden_in_iframe] == [
@@ -108,7 +108,7 @@ class TestProduitPagePartitionedBody:
                 ("paragraph", "<p>avant</p>"),
                 ("break", None),
                 ("paragraph", "<p>inter</p>"),
-                ("carte_sur_mesure", carte),
+                ("carte", {"carte_config": carte}),
             ]
         )
 
@@ -122,7 +122,7 @@ class TestProduitPagePartitionedBody:
         # After the break, even the carte is hidden in the iframe
         assert [block.block_type for block in hidden_in_iframe] == [
             "paragraph",
-            "carte_sur_mesure",
+            "carte",
         ]
 
     def test_body_without_split_block_does_not_raise(self):

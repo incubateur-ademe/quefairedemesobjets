@@ -118,7 +118,7 @@ test.describe("📋 Fiche Acteur - mode liste", () => {
 
       // Search for Auray in the carte embedded in the produit page
       const someWagtailCarteBlock = iframe
-        .locator(".cmsfr-block-carte_sur_mesure turbo-frame[data-testid=carte]")
+        .locator(".cmsfr-block-carte turbo-frame[data-testid=carte]")
         .first()
       await expect(someWagtailCarteBlock).toBeAttached({ timeout: 1000 })
       await searchCarteAndWaitForActeurs(page, "auray", iframe, {

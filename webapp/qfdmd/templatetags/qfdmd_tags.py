@@ -55,6 +55,15 @@ def canonical_url(context: dict) -> dict:
 
 
 @register.filter
+def converts_immediately(page) -> bool:
+    from qfdmd.models import ConversionImmediatePage
+
+    if not page:
+        return False
+    return ConversionImmediatePage.converts_immediately(page)
+
+
+@register.filter
 def as_page(page_id):
     if not page_id:
         return ""
