@@ -392,7 +392,7 @@
         subgraph Databases[&quot;🗄️ Bases PostgreSQL 16 (RDB HA)&quot;]
             db_webapp[(&quot;DB Webapp\nlvao-{env}-webapp&quot;)]
             db_warehouse[(&quot;DB Warehouse\nlvao-{env}-warehouse&quot;)]
-            db_airflow[(&quot;DB Airflow\nlvao-{env}-airflow&quot;)]
+            db_airflow[(&quot;DB Airflow\nsur lvao-{env}-warehouse&quot;)]
             db_warehouse &lt;--&gt;|&quot;postgres_fdw&quot;| db_webapp
         end
 
@@ -512,7 +512,7 @@
 <td><p>Scaleway RDB</p></td>
 <td><p><a class="reference internal" href="../db/db_organisation.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">db/db_organisation.md</span></code></span></a>, <a class="reference internal" href="../data-platform/dbt.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">data-platform/dbt.md</span></code></span></a></p></td>
 </tr>
-<tr class="row-even"><td><p><strong>DB Airflow</strong> <code class="docutils literal notranslate"><span class="pre">lvao-{env}-airflow</span></code> (métadonnées)</p></td>
+<tr class="row-even"><td><p><strong>DB Airflow</strong> <code class="docutils literal notranslate"><span class="pre">airflow</span></code> sur <code class="docutils literal notranslate"><span class="pre">lvao-{env}-warehouse</span></code> (métadonnées)</p></td>
 <td><p>Scaleway RDB</p></td>
 <td><p><a class="reference internal" href="../data-platform/airflow.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">data-platform/airflow.md</span></code></span></a></p></td>
 </tr>

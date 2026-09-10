@@ -383,16 +383,8 @@
 <li><p>lvao-airflow-scheduler : scheduler d’airflow, orchestre et execute les dags car l’option <code class="docutils literal notranslate"><span class="pre">LocalExecutor</span></code> est active</p></li>
 <li><p>lvao-airflow-webserver : interface d’airflow</p></li>
 </ul>
-<p>Chaque environnement utilise sa propre base de données :</p>
-<ul class="simple">
-<li><p>lvao-preprod-airflow</p></li>
-<li><p>lvao-prod-airflow</p></li>
-</ul>
-<p>et chaque environnement utilise son espace de stockage s3 :</p>
-<ul class="simple">
-<li><p>lvao-preprod-airflow</p></li>
-<li><p>lvao-prod-airflow</p></li>
-</ul>
+<p>Chaque environnement utilise sa propre base de données <code class="docutils literal notranslate"><span class="pre">airflow</span></code> sur l’instance warehouse : lvao-{env}-warehouse</p>
+<p>et chaque environnement utilise son espace de stockage s3 : lvao-{env}-airflow</p>
 </section>
 <section id="deploiement-et-configuration">
 <h2>Déploiement et configuration<a class="headerlink" href="#deploiement-et-configuration" title="Lien vers cette rubrique">¶</a></h2>

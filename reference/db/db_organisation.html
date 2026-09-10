@@ -354,10 +354,10 @@
 <h1>Database organisation<a class="headerlink" href="#database-organisation" title="Lien vers cette rubrique">¶</a></h1>
 <section id="using-two-databases-instance">
 <h2>Using two databases instance<a class="headerlink" href="#using-two-databases-instance" title="Lien vers cette rubrique">¶</a></h2>
-<p>The application uses two PostgreSQL databases:</p>
+<p>The application uses two PostgreSQL instances:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">webapp</span></code>: stores and serves the data used to administer and display objects for the “La Carte” and “L’Assistant” applications</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">warehouse</span></code>: used for all data processing, calculations, and consolidation work</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">warehouse</span></code>: used for all data processing, calculations, and consolidation work. It also hosts the Airflow metadata database and, when enabled, the Metabase application database.</p></li>
 </ul>
 <p>The goal is to separate the databases so that data processing does not impact the performance of the web application.
 We also need much more storage capacity for data processing, and higher responsiveness for the web application.</p>

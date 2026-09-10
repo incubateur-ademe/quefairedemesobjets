@@ -18,17 +18,17 @@ Cette qualification est **revue annuellement** ([`reviews.md`](reviews.md)) pour
 
 ### Scaleway
 
-| Aspect              | Détail                                                                                                                                                                                  |
-| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Périmètre**       | Bases RDB PostgreSQL HA (`lvao-{env}-webapp`, `-warehouse`, `-airflow`), Serverless Containers Airflow, Container Registry `ns-qfdmo`, Object Storage (5 buckets), tfstate OpenTofu.    |
-| **Région utilisée** | `fr-par` (Paris) — non SecNumCloud à ce jour.                                                                                                                                           |
-| **Criticité**       | **Élevée** — porte les données métier et la plateforme data.                                                                                                                            |
-| **SLA contractuel** | Voir [SLA officiel par produit](https://www.scaleway.com/en/sla/) (RDB HA, Object Storage 99,99 % de disponibilité, Serverless Containers).                                             |
-| **Certifications**  | **ISO/IEC 27001:2022**, **HDS** (Hébergeur de Données de Santé, depuis juillet 2024). **SecNumCloud 3.2** : qualification en cours (J0 obtenu en janvier 2025) — non acquise à ce jour. |
-| **RGPD / DPA**      | DPA disponible. Hébergement et opérateur français (Iliad). Pas d'exposition CLOUD Act pour les régions EU.                                                                              |
-| **Trust Center**    | [security.scaleway.com](https://security.scaleway.com/) (audits, rapports, politiques).                                                                                                 |
-| **Page sécurité**   | [scaleway.com/en/security-and-resilience](https://www.scaleway.com/en/security-and-resilience/)                                                                                         |
-| **Status page**     | [status.scaleway.com](https://status.scaleway.com/)                                                                                                                                     |
+| Aspect              | Détail                                                                                                                                                                                                                          |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Périmètre**       | Bases RDB PostgreSQL HA (`lvao-{env}-webapp`, `-warehouse` ; Airflow et Metabase y sont des bases supplémentaires), Serverless Containers Airflow, Container Registry `ns-qfdmo`, Object Storage (5 buckets), tfstate OpenTofu. |
+| **Région utilisée** | `fr-par` (Paris) — non SecNumCloud à ce jour.                                                                                                                                                                                   |
+| **Criticité**       | **Élevée** — porte les données métier et la plateforme data.                                                                                                                                                                    |
+| **SLA contractuel** | Voir [SLA officiel par produit](https://www.scaleway.com/en/sla/) (RDB HA, Object Storage 99,99 % de disponibilité, Serverless Containers).                                                                                     |
+| **Certifications**  | **ISO/IEC 27001:2022**, **HDS** (Hébergeur de Données de Santé, depuis juillet 2024). **SecNumCloud 3.2** : qualification en cours (J0 obtenu en janvier 2025) — non acquise à ce jour.                                         |
+| **RGPD / DPA**      | DPA disponible. Hébergement et opérateur français (Iliad). Pas d'exposition CLOUD Act pour les régions EU.                                                                                                                      |
+| **Trust Center**    | [security.scaleway.com](https://security.scaleway.com/) (audits, rapports, politiques).                                                                                                                                         |
+| **Page sécurité**   | [scaleway.com/en/security-and-resilience](https://www.scaleway.com/en/security-and-resilience/)                                                                                                                                 |
+| **Status page**     | [status.scaleway.com](https://status.scaleway.com/)                                                                                                                                                                             |
 
 ### Scalingo
 

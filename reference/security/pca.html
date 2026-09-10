@@ -432,7 +432,7 @@
 </thead>
 <tbody>
 <tr class="row-even"><td><p><strong>Offre RDB HA</strong></p></td>
-<td><p>Bases <code class="docutils literal notranslate"><span class="pre">lvao-{env}-webapp</span></code>, <code class="docutils literal notranslate"><span class="pre">lvao-{env}-warehouse</span></code>, <code class="docutils literal notranslate"><span class="pre">lvao-{env}-airflow</span></code> provisionnées en mode <strong>Haute Disponibilité</strong> (réplication synchrone + failover automatique géré par Scaleway).</p></td>
+<td><p>Instances <code class="docutils literal notranslate"><span class="pre">lvao-{env}-webapp</span></code> et <code class="docutils literal notranslate"><span class="pre">lvao-{env}-warehouse</span></code> provisionnées en mode <strong>Haute Disponibilité</strong> (réplication synchrone + failover automatique géré par Scaleway). Les bases Airflow et Metabase sont hébergées sur l’instance warehouse.</p></td>
 </tr>
 <tr class="row-odd"><td><p><strong>Point-in-time recovery</strong></p></td>
 <td><p>Rétention PITR 24 h (granularité seconde) sur chaque base.</p></td>
