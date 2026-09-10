@@ -1,8 +1,11 @@
-name: 🧹 Preview environment - daily cleanup
+name: 🧹 Preview environment - daily garbage collection
 
-# Safety net only: previews are normally destroyed when their PR is closed
-# or unlabeled (preview-down.yml). This cron reaps environments whose
-# destroy never ran (workflow failure, force-deleted branch, …).
+# Safety net for preview-down.yml: every day, list every preview resource
+# still in Scaleway (containers, databases, buckets), map it to its PR, and
+# destroy it when the PR no longer wants a preview:
+#   - PR closed or merged for more than GRACE_HOURS (default 24h)
+#   - PR open but without the `preview` label
+# Open PRs carrying the `preview` label are always kept.
 
 on:
   schedule:
@@ -10,24 +13,24 @@ on:
     - cron: "0 3 * * *"
   workflow_dispatch:
     inputs:
-      ttl_hours:
-        description: "TTL in hours; previews older than this are destroyed"
+      grace_hours:
+        description: "Destroy previews of PRs closed for more than this many hours"
         required: false
-        default: "168"
+        default: "24"
         type: string
       dry_run:
-        description: "List candidates without dispatching destroys"
+        description: "List candidates without destroying anything"
         required: false
         default: "false"
         type: string
 
 permissions:
   contents: read
-  actions: write
+  pull-requests: read
 
 jobs:
-  cleanup:
-    name: 🧹 Find and destroy stale previews
+  gc:
+    name: 🧹 Destroy previews of closed or unlabeled PRs
     runs-on: ubuntu-latest
     environment: preview
     env:
@@ -36,70 +39,63 @@ jobs:
       SCW_DEFAULT_PROJECT_ID: ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
       SCW_DEFAULT_ORGANIZATION_ID: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
       SCW_DEFAULT_REGION: fr-par
-      # 168h = 7 days
-      TTL_HOURS: ${{ inputs.ttl_hours || '168' }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.SCW_ACCESS_KEY }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.SCW_SECRET_KEY }}
+      AWS_DEFAULT_REGION: fr-par
+      GH_TOKEN: ${{ github.token }}
+      GRACE_HOURS: ${{ inputs.grace_hours || '24' }}
       DRY_RUN: ${{ inputs.dry_run || 'false' }}
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
+      - uses: actions/checkout@v7.0.1
+
       - name: Setup Scaleway CLI
         uses: scaleway/action-scw@2e34a1eb35cf3cac627f24643a101fea269cbd83
 
-      - name: Find stale previews and dispatch destroys
+      - name: Find previews to destroy
+        id: find
         run: |
           set -euo pipefail
+          NAMESPACE_ID=$(scw container namespace list name=qfdmod-preview -o json | jq -r '.[0].id')
+          INSTANCE_ID=$(scw rdb instance list name=lvao-preprod-webapp -o json | jq -r '.[0].id')
 
-          NOW=$(date +%s)
-          CUTOFF=$((NOW - TTL_HOURS * 3600))
-          echo "Current time: $NOW (cutoff: $CUTOFF, TTL: ${TTL_HOURS}h)"
+          # PR numbers of every preview resource still around, deduplicated.
+          prs=$( {
+            scw container container list namespace-id="$NAMESPACE_ID" -o json | jq -r '.[].name' | sed -n 's/^lvao-pr-\([0-9]*\)-webapp$/\1/p'
+            scw rdb database list instance-id="$INSTANCE_ID" skip-size-retrieval=true -o json | jq -r '.[].name' | sed -n 's/^preview_pr_\([0-9]*\)$/\1/p'
+            scw object bucket list -o json | jq -r '.[].Name' | sed -n 's/^lvao-pr-\([0-9]*\)-media$/\1/p'
+          } | sort -un )
 
-          # List preview-tagged containers in the project. Scaleway returns
-          # JSON with a `tags` array per container.
-          containers=$(scw container container list \
-            tags.0=preview \
-            region=$SCW_DEFAULT_REGION \
-            -o json)
-
-          count=$(echo "$containers" | jq 'length')
-          echo "Found $count container(s) tagged 'preview'"
-
-          stale_prs=()
-          while IFS= read -r row; do
-            name=$(echo "$row" | jq -r '.name')
-            tags=$(echo "$row" | jq -r '.tags[]')
-
-            pr=$(echo "$tags" | sed -n 's/^preview-pr-//p' | head -n1)
-            created_at=$(echo "$tags" | sed -n 's/^created-at-//p' | head -n1)
-
-            if [[ -z "$pr" || -z "$created_at" ]]; then
-              echo "  - $name: missing required tags, skipping"
+          cutoff=$(( $(date +%s) - GRACE_HOURS * 3600 ))
+          to_destroy=()
+          for pr in $prs; do
+            if ! info=$(gh pr view "$pr" --repo "$GITHUB_REPOSITORY" --json state,closedAt,labels 2>/dev/null); then
+              echo "  - pr-$pr: not a pull request, skipping"
               continue
             fi
+            state=$(jq -r .state <<< "$info")
+            labeled=$(jq -r '[.labels[].name] | index("preview") != null' <<< "$info")
+            closed_at=$(jq -r '.closedAt // empty' <<< "$info")
 
-            age_h=$(( (NOW - created_at) / 3600 ))
-            if (( created_at < CUTOFF )); then
-              echo "  - $name (pr=$pr): age=${age_h}h → STALE"
-              stale_prs+=("$pr")
+            if [[ "$state" == "OPEN" && "$labeled" == "true" ]]; then
+              echo "  - pr-$pr: open and labeled → keep"
+            elif [[ "$state" == "OPEN" ]]; then
+              echo "  - pr-$pr: open without preview label → DESTROY"
+              to_destroy+=("$pr")
+            elif (( $(date -d "$closed_at" +%s) < cutoff )); then
+              echo "  - pr-$pr: $state at $closed_at → DESTROY"
+              to_destroy+=("$pr")
             else
-              echo "  - $name (pr=$pr): age=${age_h}h → keep"
+              echo "  - pr-$pr: $state at $closed_at, within grace period → keep"
             fi
-          done < <(echo "$containers" | jq -c '.[]')
-
-          if [[ ${#stale_prs[@]} -eq 0 ]]; then
-            echo "No stale previews."
-            exit 0
-          fi
-
-          echo
-          echo "Stale previews to destroy: ${stale_prs[*]}"
-
-          if [[ "$DRY_RUN" == "true" ]]; then
-            echo "DRY_RUN=true, not dispatching."
-            exit 0
-          fi
-
-          for pr in "${stale_prs[@]}"; do
-            echo "→ Dispatching preview-down for pr=$pr"
-            gh workflow run preview-down.yml \
-              --repo "${{ github.repository }}" \
-              -f "pr_number=$pr"
           done
+
+          echo "to_destroy=${to_destroy[*]:-}" >> "$GITHUB_OUTPUT"
+
+      - name: Destroy
+        if: steps.find.outputs.to_destroy != ''
+        run: |
+          set -euo pipefail
+          flag=""
+          [[ "$DRY_RUN" == "true" ]] && flag="--dry-run"
+          # shellcheck disable=SC2086
+          scripts/infrastructure/preview_destroy.sh $flag ${{ steps.find.outputs.to_destroy }}
