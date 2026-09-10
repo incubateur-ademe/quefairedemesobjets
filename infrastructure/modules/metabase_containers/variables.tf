@@ -62,3 +62,9 @@ variable "MB_SITE_NAME" {
   type        = string
   default     = "Que Faire de Mes Objets"
 }
+
+variable "MB_LOAD_SAMPLE_CONTENT" {
+  description = "Chargement du contenu d'exemple de Metabase"
+  type        = string
+  default     = "false"
+}

@@ -33,11 +33,12 @@ resource "scaleway_container" "metabase" {
   }
 
   environment_variables = {
-    ENVIRONMENT       = var.environment
-    MB_DB_TYPE        = "postgres"
-    MB_JETTY_PORT     = "3000"
-    MB_SITE_NAME      = var.MB_SITE_NAME
-    JAVA_TOOL_OPTIONS = "-XX:MaxRAMPercentage=75.0"
+    ENVIRONMENT            = var.environment
+    MB_DB_TYPE             = "postgres"
+    MB_JETTY_PORT          = "3000"
+    MB_SITE_NAME           = var.MB_SITE_NAME
+    MB_LOAD_SAMPLE_CONTENT = var.MB_LOAD_SAMPLE_CONTENT
+    JAVA_TOOL_OPTIONS      = "-XX:MaxRAMPercentage=75.0"
   }
 
   secret_environment_variables = {
