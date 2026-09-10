@@ -1,0 +1,13 @@
+project_id      = "your-project-id"
+organization_id = "your-organization-id"
+access_key      = "access-key"
+secret_key      = "secret-key" # pragma: allowlist secret
+
+# MB_DB_CONNECTION_URI est fourni par la dépendance Terragrunt
+# sur le module ../database (cf. terragrunt.hcl).
+
+# Tag Docker de l'image metabase/metabase (ex. v0.63.17.x).
+tag_docker = "v0.63.17.x"
+
+# Clé de chiffrement Metabase : au moins 16 caractères, de préférence en base64.
+MB_ENCRYPTION_SECRET_KEY = "" # pragma: allowlist secret
