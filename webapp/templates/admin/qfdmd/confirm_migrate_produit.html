@@ -1,0 +1,36 @@
+{% extends "wagtailadmin/generic/base.html" %}
+{% load wagtailadmin_tags i18n %}
+
+{% block titletag %}Migrer le produit legacy{% endblock %}
+
+{% block content %}
+<div class="nice-padding">
+    <h2>Migrer "{{ produit.nom }}" vers une ProduitPage</h2>
+
+    <p>
+        Une ProduitPage sera creee sous l'index <code>/dechet</code> avec les
+        actions suivantes :
+    </p>
+    <ul>
+        <li>Copie des champs du produit legacy (prefixes <code>legacy_</code>)</li>
+        {% if nb_synonymes > 0 %}
+        <li>Import de <strong>{{ nb_synonymes }}</strong> synonyme(s) restant(s) comme etiquettes de recherche</li>
+        {% endif %}
+        <li>Publication immediate de la page</li>
+    </ul>
+
+    <p>
+        Cette action n'est <strong>pas reversible directement</strong> depuis
+        la page (utiliser &laquo;&nbsp;Annuler la migration&nbsp;&raquo; depuis
+        la fiche produit pour revenir en arriere).
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="actions">
+            <a href="{% url 'wagtailsnippets_qfdmd_produit:edit' produit.pk %}" class="button button-secondary">Annuler</a>
+            <button type="submit" class="button">Migrer</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

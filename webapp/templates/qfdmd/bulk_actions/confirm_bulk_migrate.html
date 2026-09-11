@@ -1,0 +1,41 @@
+{% extends 'wagtailadmin/bulk_actions/confirmation/base.html' %}
+{% load i18n wagtailadmin_tags %}
+
+{% block titletag %}Migrer les produits vers des ProduitPage{% endblock %}
+
+{% block header %}
+    {% include "wagtailadmin/shared/header.html" with title="Migrer" subtitle="Produits legacy vers ProduitPage" icon=header_icon only %}
+{% endblock header %}
+
+{% block items_with_access %}
+    {% if items %}
+        <p>
+            Les produits suivants seront migrés vers des ProduitPage sous
+            l'index <code>/dechet</code> : champs copiés (préfixés
+            <code>legacy_</code>), synonymes restants importés comme
+            étiquettes de recherche, page publiée.
+        </p>
+        <ul>
+            {% for produit in items %}
+                <li>
+                    <a href="{{ produit.edit_url }}" target="_blank" rel="noreferrer">{{ produit.item }}</a>
+                    {% if not produit.item.migration_eligible %}
+                        — <strong>sera ignoré</strong> (déjà migré ou redirigé manuellement)
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock items_with_access %}
+
+{% block items_with_no_access %}
+    {% include 'wagtailsnippets/bulk_actions/list_items_with_no_access.html' with items=items_with_no_access no_access_msg="Vous n'avez pas la permission de migrer ces produits" %}
+{% endblock items_with_no_access %}
+
+{% block form_section %}
+    {% if items %}
+        {% include 'wagtailadmin/bulk_actions/confirmation/form.html' with action_button_text="Oui, migrer" no_action_button_text="Non, annuler" %}
+    {% else %}
+        {% include 'wagtailadmin/bulk_actions/confirmation/go_back.html' %}
+    {% endif %}
+{% endblock form_section %}

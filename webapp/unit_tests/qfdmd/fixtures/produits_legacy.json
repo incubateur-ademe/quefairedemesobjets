@@ -1,0 +1,872 @@
+[
+  {
+    "model": "search.searchterm",
+    "pk": 99,
+    "fields": {
+      "search_variants": "",
+      "disabled": false
+    }
+  },
+  {
+    "model": "search.searchterm",
+    "pk": 101,
+    "fields": {
+      "search_variants": "",
+      "disabled": false
+    }
+  },
+  {
+    "model": "search.searchterm",
+    "pk": 162,
+    "fields": {
+      "search_variants": "",
+      "disabled": false
+    }
+  },
+  {
+    "model": "search.searchterm",
+    "pk": 163,
+    "fields": {
+      "search_variants": "",
+      "disabled": false
+    }
+  },
+  {
+    "model": "search.searchterm",
+    "pk": 164,
+    "fields": {
+      "search_variants": "",
+      "disabled": false
+    }
+  },
+  {
+    "model": "search.searchterm",
+    "pk": 165,
+    "fields": {
+      "search_variants": "",
+      "disabled": false
+    }
+  },
+  {
+    "model": "search.searchterm",
+    "pk": 166,
+    "fields": {
+      "search_variants": "",
+      "disabled": false
+    }
+  },
+  {
+    "model": "search.searchterm",
+    "pk": 490,
+    "fields": {
+      "search_variants": "",
+      "disabled": false
+    }
+  },
+  {
+    "model": "search.searchterm",
+    "pk": 491,
+    "fields": {
+      "search_variants": "",
+      "disabled": false
+    }
+  },
+  {
+    "model": "search.searchterm",
+    "pk": 672,
+    "fields": {
+      "search_variants": "",
+      "disabled": false
+    }
+  },
+  {
+    "model": "search.searchterm",
+    "pk": 673,
+    "fields": {
+      "search_variants": "",
+      "disabled": false
+    }
+  },
+  {
+    "model": "search.searchterm",
+    "pk": 674,
+    "fields": {
+      "search_variants": "",
+      "disabled": false
+    }
+  },
+  {
+    "model": "search.searchterm",
+    "pk": 675,
+    "fields": {
+      "search_variants": "",
+      "disabled": false
+    }
+  },
+  {
+    "model": "search.searchterm",
+    "pk": 737,
+    "fields": {
+      "search_variants": "",
+      "disabled": false
+    }
+  },
+  {
+    "model": "search.searchterm",
+    "pk": 738,
+    "fields": {
+      "search_variants": "",
+      "disabled": false
+    }
+  },
+  {
+    "model": "search.searchterm",
+    "pk": 740,
+    "fields": {
+      "search_variants": "",
+      "disabled": false
+    }
+  },
+  {
+    "model": "search.searchterm",
+    "pk": 741,
+    "fields": {
+      "search_variants": "",
+      "disabled": false
+    }
+  },
+  {
+    "model": "search.searchterm",
+    "pk": 789,
+    "fields": {
+      "search_variants": "",
+      "disabled": false
+    }
+  },
+  {
+    "model": "search.searchterm",
+    "pk": 1938,
+    "fields": {
+      "search_variants": "",
+      "disabled": false
+    }
+  },
+  {
+    "model": "search.searchterm",
+    "pk": 1939,
+    "fields": {
+      "search_variants": "",
+      "disabled": false
+    }
+  },
+  {
+    "model": "search.searchterm",
+    "pk": 1940,
+    "fields": {
+      "search_variants": "",
+      "disabled": false
+    }
+  },
+  {
+    "model": "search.searchterm",
+    "pk": 1943,
+    "fields": {
+      "search_variants": "",
+      "disabled": false
+    }
+  },
+  {
+    "model": "search.searchterm",
+    "pk": 1983,
+    "fields": {
+      "search_variants": "",
+      "disabled": false
+    }
+  },
+  {
+    "model": "search.searchterm",
+    "pk": 1984,
+    "fields": {
+      "search_variants": "",
+      "disabled": false
+    }
+  },
+  {
+    "model": "search.searchterm",
+    "pk": 2148,
+    "fields": {
+      "search_variants": "",
+      "disabled": false
+    }
+  },
+  {
+    "model": "search.searchterm",
+    "pk": 2149,
+    "fields": {
+      "search_variants": "",
+      "disabled": false
+    }
+  },
+  {
+    "model": "qfdmd.produit",
+    "pk": 3,
+    "fields": {
+      "modifie_le": "2025-04-17T13:09:44.413Z",
+      "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+      "qu_est_ce_que_j_en_fais_bon_etat": "",
+      "comment_les_eviter": "Achetez ce produit seulement si vous en avez vraiment l'usage et vérifiez qu'il n'existe pas un produit équivalent moins nocif. N'achetez que la quantité nécessaire. Lisez bien la notice d'utilisation et ne dépassez pas la dose préconisée. Enfin, veillez à bien utiliser le produit jusqu'au bout.",
+      "que_va_t_il_devenir": "Une fois convenablement conditionné, le produit est envoyé vers un incinérateur de déchets dangereux avec le plus souvent récupération de chaleur pour produire de l'énergie (chauffage, électricité).",
+      "legacy_imported_as_produit_page": null,
+      "nom": "Acétone",
+      "synonymes_existants": "Dissolvant",
+      "code": "ADEME_DDS",
+      "bdd": "sinoe",
+      "qu_est_ce_que_j_en_fais": "Que le flacon soit vide ou non, apportez-le dans une déchèterie acceptant les déchets ménagers spéciaux et dangereux.",
+      "nom_eco_organisme": "EcoDDS",
+      "filieres_rep": "Produits chimiques",
+      "slug": "Acétone",
+      "infotri": "[{\"id\": \"7d37c0e9-90b6-458d-bfdb-f7f73fede3bf\", \"type\": \"image\", \"value\": {\"image\": 388, \"alt_text\": null, \"decorative\": false}}]"
+    }
+  },
+  {
+    "model": "qfdmd.produit",
+    "pk": 6,
+    "fields": {
+      "modifie_le": "2025-04-17T13:09:19.391Z",
+      "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+      "qu_est_ce_que_j_en_fais_bon_etat": "",
+      "comment_les_eviter": "Achetez ce produit seulement si vous en avez vraiment l'usage et vérifiez qu'il n'existe pas un produit équivalent moins nocif. N'achetez que la quantité nécessaire. Lisez bien la notice d'utilisation et utilisez le produit sans dépasser la dose préconisée. Enfin, veillez à bien l'utiliser jusqu'au bout.",
+      "que_va_t_il_devenir": "Une fois convenablement conditionné, le produit est envoyé vers un incinérateur de déchets dangereux avec le plus souvent récupération de chaleur pour produire de l'énergie (chauffage, électricité).",
+      "legacy_imported_as_produit_page": null,
+      "nom": "Alcool à brûler",
+      "synonymes_existants": "Alcool ménager",
+      "code": "ADEME_DDS",
+      "bdd": "sinoe",
+      "qu_est_ce_que_j_en_fais": "Que la bouteille soit vide ou non, apportez-la dans une déchèterie acceptant les déchets ménagers spéciaux et dangereux.",
+      "nom_eco_organisme": "",
+      "filieres_rep": "",
+      "slug": "Alcool à brûler",
+      "infotri": "[{\"id\": \"219e4767-e4fa-4775-a500-7c605e49814a\", \"type\": \"image\", \"value\": {\"image\": 203, \"alt_text\": null, \"decorative\": false}}]"
+    }
+  },
+  {
+    "model": "qfdmd.produit",
+    "pk": 10,
+    "fields": {
+      "modifie_le": "2025-04-28T12:44:00.891Z",
+      "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+      "qu_est_ce_que_j_en_fais_bon_etat": "",
+      "comment_les_eviter": "L'utilisation d'amiante est interdite en France depuis le 1er janvier 1997. Toutefois, un nombre important de produits anciens sont encore en place. Les interventions sur ces produits, leur dépose, leur transport et leur traitement peuvent être source d'exposition aux fibres d'amiante.",
+      "que_va_t_il_devenir": "Ces déchets, ensachés et étiquetés \"amiante\" seront éliminés dans une installation de stockage de déchets ou de vitrification autorisée à recevoir ce type de déchets :<br/><br/>- les déchets d'amiante friable ou lié sont envoyés en installation de stockage de déchets dangereux ou dans une unité de vitrification,<br/><br/>- les déchets d'amiante lié à des matériaux inertes (amiante-ciment, ardoises ou tuiles fibre-ciment) sont entreposés en installations de stockage de déchets non-dangereux.",
+      "legacy_imported_as_produit_page": null,
+      "nom": "Amiante",
+      "synonymes_existants": "matériau fibreux",
+      "code": "ADEME_AMIANTE",
+      "bdd": "sinoe",
+      "qu_est_ce_que_j_en_fais": "Faites enlever l'amiante par l'entrepreneur qui réalise vos travaux de rénovation. Il doit disposer d'une certification QUALIBAT 1552. Il retirera et évacuera vos éléments en amiante en toute sécurité vers des installations dédiées (en contrepartie d'une rémunération fixée lors du devis initial). Le retrait par vous-même est fortement déconseillé. Toutefois, si vous réalisez des travaux vous-même et que la quantité de déchets à éliminer est limitée, vous pouvez contacter votre déchèterie.",
+      "nom_eco_organisme": "",
+      "filieres_rep": "",
+      "slug": "Amiante",
+      "infotri": "[{\"id\": \"a7c62063-90d2-42e2-bec1-5b8e08820c9f\", \"type\": \"image\", \"value\": {\"image\": 417, \"alt_text\": null, \"decorative\": false}}]"
+    }
+  },
+  {
+    "model": "qfdmd.produit",
+    "pk": 12,
+    "fields": {
+      "modifie_le": "2025-04-17T13:09:11.097Z",
+      "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+      "qu_est_ce_que_j_en_fais_bon_etat": "",
+      "comment_les_eviter": "",
+      "que_va_t_il_devenir": "Ecosystem se charge de la collecte et du recyclage pour en assurer une élimination respectueuse de l'environnement. Les ampoules fluocompactes se recyclent à plus de 86 % de leur poids. Le mercure et les poudres fluorescentes contenus dans votre ampoule ou votre tube \"néon\" sont soigneusement retirés et éliminés selon des normes environnementales strictes et exigeantes. Les matières qui les composent (verre, métaux, plastique…) sont triées pour être en grande partie réutilisées dans la fabrication de nouveaux produits.",
+      "legacy_imported_as_produit_page": null,
+      "nom": "Ampoule basse consommation",
+      "synonymes_existants": "Lampe à économie d'énergie / Lampe fluocompacte / Lampe basse consommation",
+      "code": "LAMPES",
+      "bdd": "ocad3e",
+      "qu_est_ce_que_j_en_fais": "Déposez-la dans un bac de collecte. Les points de collecte sont installés chez les distributeurs (il existe des bacs de collecte dans toutes les grandes surfaces) ou dans les déchèteries. Le symbole de la \"poubelle barrée\" marqué sur une lampe signifie qu'elle fait l'objet d'un recyclage et qu'il ne faut donc pas la jeter dans la poubelle classique.",
+      "nom_eco_organisme": "",
+      "filieres_rep": "",
+      "slug": "Ampoule basse consommation",
+      "infotri": "[{\"id\": \"fe0c5ae2-75f8-4bd6-9fb1-7300456f0052\", \"type\": \"image\", \"value\": {\"image\": 124, \"alt_text\": null, \"decorative\": false}}]"
+    }
+  },
+  {
+    "model": "qfdmd.produit",
+    "pk": 13,
+    "fields": {
+      "modifie_le": "2025-01-28T20:18:02.740Z",
+      "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+      "qu_est_ce_que_j_en_fais_bon_etat": "",
+      "comment_les_eviter": "Les lampes à incandescence sont très gourmandes en énergie. Elles ne peuvent plus être mises sur le marché par les fabricants, seuls les stocks existants sont actuellement commercialisés.<br/><br/>Des lampes plus économes et plus performantes sont disponibles : les lampes fluocompactes et les lampes à LED. Utilisez-les pour mieux maîtriser votre consommation électrique et améliorer l'efficacité énergétique de vos logements.",
+      "que_va_t_il_devenir": "L'ampoule jetée suit l'une des filières d'élimination des ordures ménagères : elle est incinérée (avec le plus souvent récupération de chaleur pour produire de l'énergie) ou enfouie en installation de stockage de déchets.",
+      "legacy_imported_as_produit_page": null,
+      "nom": "Ampoule classique (à incandescence)",
+      "synonymes_existants": "ampoule à incandescence / lampe à incandescence / ampoules à filaments / lampes à filaments",
+      "code": "LAMPES",
+      "bdd": "ademe",
+      "qu_est_ce_que_j_en_fais": "Jetez-la dans la poubelle des ordures ménagères. Les ampoules à filaments ne sont pas recyclées, ne contiennent pas de mercure et sont à jeter dans la poubelle classique.",
+      "nom_eco_organisme": "Ecosystem",
+      "filieres_rep": "Equipements électriques et électroniques",
+      "slug": "Ampoule classique (à incandescence)",
+      "infotri": "[]"
+    }
+  },
+  {
+    "model": "qfdmd.produit",
+    "pk": 16,
+    "fields": {
+      "modifie_le": "2025-04-17T13:09:49.301Z",
+      "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+      "qu_est_ce_que_j_en_fais_bon_etat": "",
+      "comment_les_eviter": "",
+      "que_va_t_il_devenir": "Remis à une structure de réemploi, repris par un revendeur de pièces automobiles ou revendu, votre antivol poursuit une seconde vie en tant que pièce d'occasion.<br/><br/>Déposé en déchèterie dans la benne destinée aux métaux il est orienté vers une filière de recyclage appropriée pour recycler le métal.",
+      "legacy_imported_as_produit_page": null,
+      "nom": "Antivol",
+      "synonymes_existants": "Cadenas / Loquet",
+      "code": "ADEME_PRODUIT",
+      "bdd": "sinoe",
+      "qu_est_ce_que_j_en_fais": "S'il est encore en bon état, remettez-le à une structure de réemploi ou revendez-le. Sinon apportez-le en déchèterie.",
+      "nom_eco_organisme": "Ecologic",
+      "filieres_rep": "Sport et loisirs",
+      "slug": "Antivol",
+      "infotri": "[{\"id\": \"f6ddb765-54d0-4961-9e87-b1568d612ab1\", \"type\": \"image\", \"value\": {\"image\": 424, \"alt_text\": null, \"decorative\": false}}]"
+    }
+  },
+  {
+    "model": "qfdmd.produit",
+    "pk": 470,
+    "fields": {
+      "modifie_le": "2025-05-21T14:10:35.537Z",
+      "qu_est_ce_que_j_en_fais_mauvais_etat": "Si elle est en panne, privilégiez la réparation.<br /><br />Si elle est hors-service :<br /><br />- dans le cadre de l'achat d'un produit neuf, rapportez l'ancien matériel à votre revendeur ou remettez-le au livreur.<br /><br />- déposez-la dans un bac de collecte dans un magasin qui propose ce service.<br /><br />Sinon, apportez-la en déchèterie.",
+      "qu_est_ce_que_j_en_fais_bon_etat": "Donnez-la à une structure de réemploi ou un proche, ou bien revendez-la.<br /><br />\r\nSinon, déposez-la dans un bac de collecte dans un magasin qui propose ce service, ou apportez-la en déchèterie.",
+      "comment_les_eviter": "Prolongez la vie de votre appareil en l’entretenant régulièrement.  Assurez-vous dès l'achat qu'il bénéficie d'une bonne garantie réparation.  Privilégiez un appareil démontable, donc plus facile à réparer, pour faire face à une éventuelle panne après expiration de la garantie. \r\n<br /><br />\r\nPrivilégiez la location plutôt que l'achat en propre.",
+      "que_va_t_il_devenir": "Remis à une structure de réemploi, revendu ou réparé, votre appareil poursuit une seconde vie en tant que matériel d'occasion. <br /><br />Déposé en magasin, en déchèterie ou remis à un livreur, le matériel suit la filière des Équipements Électriques et Électroniques (EEE). Il est acheminé jusqu'à un centre de traitement où il est démantelé, dépollué si nécessaire, et ses différents composants sont triés (métaux, plastiques, cartes électroniques). Les matériaux sont ensuite recyclés quand c’est possible (réutilisation dans de nouveaux produits). Ceux qui ne sont pas recyclables sont incinérés (avec le plus souvent récupération de chaleur pour produire de l'énergie) ou enfouis dans des installations de stockage de déchets (déchets ultimes ou substances polluantes ou réglementées).",
+      "legacy_imported_as_produit_page": null,
+      "nom": "Antenne parabolique",
+      "synonymes_existants": "Décodeur TNT / Décodeur TV / Antenne TV / Antenne satellite / Antenne parabolique",
+      "code": "DEEE",
+      "bdd": "ocad3e",
+      "qu_est_ce_que_j_en_fais": "",
+      "nom_eco_organisme": "Ecologic / Ecosystem",
+      "filieres_rep": "Equipements électriques et électroniques",
+      "slug": "antenne-parabolique",
+      "infotri": "[]"
+    }
+  },
+  {
+    "model": "qfdmd.produit",
+    "pk": 491,
+    "fields": {
+      "modifie_le": "2025-05-26T20:30:06.703Z",
+      "qu_est_ce_que_j_en_fais_mauvais_etat": "Jetez votre aimant dans la poubelle des ordures ménagères. <br/>\r\nSi vous en avez une grande quantité, apportez-les en déchèterie, dans la benne dédiée aux déchets métalliques.",
+      "qu_est_ce_que_j_en_fais_bon_etat": "Proposez votre aimant à un proche ou à une structure de réemploi.",
+      "comment_les_eviter": "",
+      "que_va_t_il_devenir": "Déposé en déchèterie, le métal est repris par un récupérateur, puis broyé, fondu et recyclé dans des installations sidérurgiques. Jeté à la poubelle, il pourra être récupéré dans les résidus solides d'incinération des ordures ménagères. A défaut, il sera enfoui en installation de stockage de déchets non-dangereux.",
+      "legacy_imported_as_produit_page": null,
+      "nom": "Aimant",
+      "synonymes_existants": "",
+      "code": "",
+      "bdd": "",
+      "qu_est_ce_que_j_en_fais": "",
+      "nom_eco_organisme": "",
+      "filieres_rep": "",
+      "slug": "",
+      "infotri": "[]"
+    }
+  },
+  {
+    "model": "qfdmd.synonyme",
+    "pk": 99,
+    "fields": {
+      "modifie_le": "2025-01-28T20:18:02.550Z",
+      "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+      "qu_est_ce_que_j_en_fais_bon_etat": "",
+      "comment_les_eviter": "",
+      "que_va_t_il_devenir": "",
+      "slug": "cadenas",
+      "nom": "Cadenas",
+      "produit": 16,
+      "imported_as_search_tag": null,
+      "legacy_imported_as_search_tag": null,
+      "picto": "",
+      "pin_on_homepage": false,
+      "meta_description": ""
+    }
+  },
+  {
+    "model": "qfdmd.synonyme",
+    "pk": 101,
+    "fields": {
+      "modifie_le": "2025-01-28T20:18:02.558Z",
+      "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+      "qu_est_ce_que_j_en_fais_bon_etat": "",
+      "comment_les_eviter": "",
+      "que_va_t_il_devenir": "",
+      "slug": "antivol",
+      "nom": "Antivol",
+      "produit": 16,
+      "imported_as_search_tag": null,
+      "legacy_imported_as_search_tag": null,
+      "picto": "",
+      "pin_on_homepage": false,
+      "meta_description": ""
+    }
+  },
+  {
+    "model": "qfdmd.synonyme",
+    "pk": 162,
+    "fields": {
+      "modifie_le": "2025-01-28T20:18:02.745Z",
+      "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+      "qu_est_ce_que_j_en_fais_bon_etat": "",
+      "comment_les_eviter": "",
+      "que_va_t_il_devenir": "",
+      "slug": "ampoule-a-incandescence",
+      "nom": "ampoule à incandescence",
+      "produit": 13,
+      "imported_as_search_tag": null,
+      "legacy_imported_as_search_tag": null,
+      "picto": "",
+      "pin_on_homepage": false,
+      "meta_description": ""
+    }
+  },
+  {
+    "model": "qfdmd.synonyme",
+    "pk": 163,
+    "fields": {
+      "modifie_le": "2025-01-28T20:18:02.752Z",
+      "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+      "qu_est_ce_que_j_en_fais_bon_etat": "",
+      "comment_les_eviter": "",
+      "que_va_t_il_devenir": "",
+      "slug": "lampe-a-incandescence",
+      "nom": "lampe à incandescence",
+      "produit": 13,
+      "imported_as_search_tag": null,
+      "legacy_imported_as_search_tag": null,
+      "picto": "",
+      "pin_on_homepage": false,
+      "meta_description": ""
+    }
+  },
+  {
+    "model": "qfdmd.synonyme",
+    "pk": 164,
+    "fields": {
+      "modifie_le": "2025-01-28T20:18:02.756Z",
+      "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+      "qu_est_ce_que_j_en_fais_bon_etat": "",
+      "comment_les_eviter": "",
+      "que_va_t_il_devenir": "",
+      "slug": "ampoules-a-filaments",
+      "nom": "ampoules à filaments",
+      "produit": 13,
+      "imported_as_search_tag": null,
+      "legacy_imported_as_search_tag": null,
+      "picto": "",
+      "pin_on_homepage": false,
+      "meta_description": ""
+    }
+  },
+  {
+    "model": "qfdmd.synonyme",
+    "pk": 165,
+    "fields": {
+      "modifie_le": "2025-01-28T20:18:02.760Z",
+      "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+      "qu_est_ce_que_j_en_fais_bon_etat": "",
+      "comment_les_eviter": "",
+      "que_va_t_il_devenir": "",
+      "slug": "lampes-a-filaments",
+      "nom": "lampes à filaments",
+      "produit": 13,
+      "imported_as_search_tag": null,
+      "legacy_imported_as_search_tag": null,
+      "picto": "",
+      "pin_on_homepage": false,
+      "meta_description": ""
+    }
+  },
+  {
+    "model": "qfdmd.synonyme",
+    "pk": 166,
+    "fields": {
+      "modifie_le": "2025-01-28T20:18:02.764Z",
+      "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+      "qu_est_ce_que_j_en_fais_bon_etat": "",
+      "comment_les_eviter": "",
+      "que_va_t_il_devenir": "",
+      "slug": "ampoule-classique-a-incandescence",
+      "nom": "Ampoule classique (à incandescence)",
+      "produit": 13,
+      "imported_as_search_tag": null,
+      "legacy_imported_as_search_tag": null,
+      "picto": "",
+      "pin_on_homepage": false,
+      "meta_description": ""
+    }
+  },
+  {
+    "model": "qfdmd.synonyme",
+    "pk": 490,
+    "fields": {
+      "modifie_le": "2025-01-28T20:18:03.130Z",
+      "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+      "qu_est_ce_que_j_en_fais_bon_etat": "",
+      "comment_les_eviter": "",
+      "que_va_t_il_devenir": "",
+      "slug": "dissolvant",
+      "nom": "Dissolvant",
+      "produit": 3,
+      "imported_as_search_tag": null,
+      "legacy_imported_as_search_tag": null,
+      "picto": "",
+      "pin_on_homepage": false,
+      "meta_description": ""
+    }
+  },
+  {
+    "model": "qfdmd.synonyme",
+    "pk": 491,
+    "fields": {
+      "modifie_le": "2025-01-28T20:18:03.135Z",
+      "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+      "qu_est_ce_que_j_en_fais_bon_etat": "",
+      "comment_les_eviter": "",
+      "que_va_t_il_devenir": "",
+      "slug": "acetone",
+      "nom": "Acétone",
+      "produit": 3,
+      "imported_as_search_tag": null,
+      "legacy_imported_as_search_tag": null,
+      "picto": "",
+      "pin_on_homepage": false,
+      "meta_description": ""
+    }
+  },
+  {
+    "model": "qfdmd.synonyme",
+    "pk": 672,
+    "fields": {
+      "modifie_le": "2025-01-28T20:18:03.692Z",
+      "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+      "qu_est_ce_que_j_en_fais_bon_etat": "",
+      "comment_les_eviter": "",
+      "que_va_t_il_devenir": "",
+      "slug": "lampe-a-economie-denergie",
+      "nom": "Lampe à économie d'énergie",
+      "produit": 12,
+      "imported_as_search_tag": null,
+      "legacy_imported_as_search_tag": null,
+      "picto": "",
+      "pin_on_homepage": false,
+      "meta_description": ""
+    }
+  },
+  {
+    "model": "qfdmd.synonyme",
+    "pk": 673,
+    "fields": {
+      "modifie_le": "2025-01-28T20:18:03.696Z",
+      "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+      "qu_est_ce_que_j_en_fais_bon_etat": "",
+      "comment_les_eviter": "",
+      "que_va_t_il_devenir": "",
+      "slug": "lampe-fluocompacte",
+      "nom": "Lampe fluocompacte",
+      "produit": 12,
+      "imported_as_search_tag": null,
+      "legacy_imported_as_search_tag": null,
+      "picto": "",
+      "pin_on_homepage": false,
+      "meta_description": ""
+    }
+  },
+  {
+    "model": "qfdmd.synonyme",
+    "pk": 674,
+    "fields": {
+      "modifie_le": "2025-01-28T20:18:03.699Z",
+      "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+      "qu_est_ce_que_j_en_fais_bon_etat": "",
+      "comment_les_eviter": "",
+      "que_va_t_il_devenir": "",
+      "slug": "lampe-basse-consommation",
+      "nom": "Lampe basse consommation",
+      "produit": 12,
+      "imported_as_search_tag": null,
+      "legacy_imported_as_search_tag": null,
+      "picto": "",
+      "pin_on_homepage": false,
+      "meta_description": ""
+    }
+  },
+  {
+    "model": "qfdmd.synonyme",
+    "pk": 675,
+    "fields": {
+      "modifie_le": "2025-01-28T20:18:03.703Z",
+      "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+      "qu_est_ce_que_j_en_fais_bon_etat": "",
+      "comment_les_eviter": "",
+      "que_va_t_il_devenir": "",
+      "slug": "ampoule-basse-consommation",
+      "nom": "Ampoule basse consommation",
+      "produit": 12,
+      "imported_as_search_tag": null,
+      "legacy_imported_as_search_tag": null,
+      "picto": "",
+      "pin_on_homepage": false,
+      "meta_description": ""
+    }
+  },
+  {
+    "model": "qfdmd.synonyme",
+    "pk": 737,
+    "fields": {
+      "modifie_le": "2025-05-04T18:47:51.138Z",
+      "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+      "qu_est_ce_que_j_en_fais_bon_etat": "",
+      "comment_les_eviter": "",
+      "que_va_t_il_devenir": "",
+      "slug": "materiau-fibreux",
+      "nom": "Matériau fibreux",
+      "produit": 10,
+      "imported_as_search_tag": null,
+      "legacy_imported_as_search_tag": null,
+      "picto": "",
+      "pin_on_homepage": false,
+      "meta_description": "Découvrez les consignes de tri pour vos déchets du bâtiment et où donner ou jeter vos matériaux"
+    }
+  },
+  {
+    "model": "qfdmd.synonyme",
+    "pk": 738,
+    "fields": {
+      "modifie_le": "2025-01-28T20:18:04.120Z",
+      "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+      "qu_est_ce_que_j_en_fais_bon_etat": "",
+      "comment_les_eviter": "",
+      "que_va_t_il_devenir": "",
+      "slug": "amiante",
+      "nom": "Amiante",
+      "produit": 10,
+      "imported_as_search_tag": null,
+      "legacy_imported_as_search_tag": null,
+      "picto": "",
+      "pin_on_homepage": false,
+      "meta_description": ""
+    }
+  },
+  {
+    "model": "qfdmd.synonyme",
+    "pk": 740,
+    "fields": {
+      "modifie_le": "2025-01-28T20:18:04.139Z",
+      "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+      "qu_est_ce_que_j_en_fais_bon_etat": "",
+      "comment_les_eviter": "",
+      "que_va_t_il_devenir": "",
+      "slug": "alcool-menager",
+      "nom": "Alcool ménager",
+      "produit": 6,
+      "imported_as_search_tag": null,
+      "legacy_imported_as_search_tag": null,
+      "picto": "",
+      "pin_on_homepage": false,
+      "meta_description": ""
+    }
+  },
+  {
+    "model": "qfdmd.synonyme",
+    "pk": 741,
+    "fields": {
+      "modifie_le": "2025-01-28T20:18:04.144Z",
+      "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+      "qu_est_ce_que_j_en_fais_bon_etat": "",
+      "comment_les_eviter": "",
+      "que_va_t_il_devenir": "",
+      "slug": "alcool-a-bruler",
+      "nom": "Alcool à brûler",
+      "produit": 6,
+      "imported_as_search_tag": null,
+      "legacy_imported_as_search_tag": null,
+      "picto": "",
+      "pin_on_homepage": false,
+      "meta_description": ""
+    }
+  },
+  {
+    "model": "qfdmd.synonyme",
+    "pk": 789,
+    "fields": {
+      "modifie_le": "2025-05-04T18:47:51.144Z",
+      "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+      "qu_est_ce_que_j_en_fais_bon_etat": "",
+      "comment_les_eviter": "",
+      "que_va_t_il_devenir": "",
+      "slug": "fibro-ciment",
+      "nom": "Fibro-ciment",
+      "produit": 10,
+      "imported_as_search_tag": null,
+      "legacy_imported_as_search_tag": null,
+      "picto": "",
+      "pin_on_homepage": false,
+      "meta_description": "Découvrez les consignes de tri pour vos déchets du bâtiment et où donner ou jeter vos matériaux"
+    }
+  },
+  {
+    "model": "qfdmd.synonyme",
+    "pk": 1938,
+    "fields": {
+      "modifie_le": "2025-03-04T18:29:32.038Z",
+      "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+      "qu_est_ce_que_j_en_fais_bon_etat": "",
+      "comment_les_eviter": "",
+      "que_va_t_il_devenir": "",
+      "slug": "parabole-tv",
+      "nom": "Parabole (TV)",
+      "produit": 470,
+      "imported_as_search_tag": null,
+      "legacy_imported_as_search_tag": null,
+      "picto": "",
+      "pin_on_homepage": false,
+      "meta_description": ""
+    }
+  },
+  {
+    "model": "qfdmd.synonyme",
+    "pk": 1939,
+    "fields": {
+      "modifie_le": "2025-03-04T18:29:43.535Z",
+      "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+      "qu_est_ce_que_j_en_fais_bon_etat": "",
+      "comment_les_eviter": "",
+      "que_va_t_il_devenir": "",
+      "slug": "antenne-satellite",
+      "nom": "Antenne satellite",
+      "produit": 470,
+      "imported_as_search_tag": null,
+      "legacy_imported_as_search_tag": null,
+      "picto": "",
+      "pin_on_homepage": false,
+      "meta_description": ""
+    }
+  },
+  {
+    "model": "qfdmd.synonyme",
+    "pk": 1940,
+    "fields": {
+      "modifie_le": "2025-03-04T18:29:39.315Z",
+      "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+      "qu_est_ce_que_j_en_fais_bon_etat": "",
+      "comment_les_eviter": "",
+      "que_va_t_il_devenir": "",
+      "slug": "antenne-tv",
+      "nom": "Antenne TV",
+      "produit": 470,
+      "imported_as_search_tag": null,
+      "legacy_imported_as_search_tag": null,
+      "picto": "",
+      "pin_on_homepage": false,
+      "meta_description": ""
+    }
+  },
+  {
+    "model": "qfdmd.synonyme",
+    "pk": 1943,
+    "fields": {
+      "modifie_le": "2025-03-04T18:30:31.070Z",
+      "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+      "qu_est_ce_que_j_en_fais_bon_etat": "",
+      "comment_les_eviter": "",
+      "que_va_t_il_devenir": "",
+      "slug": "antenne-parabolique",
+      "nom": "Antenne parabolique",
+      "produit": 470,
+      "imported_as_search_tag": null,
+      "legacy_imported_as_search_tag": null,
+      "picto": "",
+      "pin_on_homepage": false,
+      "meta_description": ""
+    }
+  },
+  {
+    "model": "qfdmd.synonyme",
+    "pk": 1983,
+    "fields": {
+      "modifie_le": "2025-05-04T18:47:51.131Z",
+      "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+      "qu_est_ce_que_j_en_fais_bon_etat": "",
+      "comment_les_eviter": "",
+      "que_va_t_il_devenir": "",
+      "slug": "joint-amiante",
+      "nom": "Joint amianté",
+      "produit": 10,
+      "imported_as_search_tag": null,
+      "legacy_imported_as_search_tag": null,
+      "picto": "",
+      "pin_on_homepage": false,
+      "meta_description": "Découvrez les consignes de tri pour vos déchets du bâtiment et où donner ou jeter vos matériaux"
+    }
+  },
+  {
+    "model": "qfdmd.synonyme",
+    "pk": 1984,
+    "fields": {
+      "modifie_le": "2025-05-04T18:47:51.125Z",
+      "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+      "qu_est_ce_que_j_en_fais_bon_etat": "",
+      "comment_les_eviter": "",
+      "que_va_t_il_devenir": "",
+      "slug": "colle-amiantee",
+      "nom": "Colle amiantée",
+      "produit": 10,
+      "imported_as_search_tag": null,
+      "legacy_imported_as_search_tag": null,
+      "picto": "",
+      "pin_on_homepage": false,
+      "meta_description": "Découvrez les consignes de tri pour vos déchets du bâtiment et où donner ou jeter vos matériaux"
+    }
+  },
+  {
+    "model": "qfdmd.synonyme",
+    "pk": 2148,
+    "fields": {
+      "modifie_le": "2025-05-26T09:16:28.775Z",
+      "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+      "qu_est_ce_que_j_en_fais_bon_etat": "",
+      "comment_les_eviter": "",
+      "que_va_t_il_devenir": "",
+      "slug": "aimant",
+      "nom": "Aimant",
+      "produit": 491,
+      "imported_as_search_tag": null,
+      "legacy_imported_as_search_tag": null,
+      "picto": "",
+      "pin_on_homepage": false,
+      "meta_description": ""
+    }
+  },
+  {
+    "model": "qfdmd.synonyme",
+    "pk": 2149,
+    "fields": {
+      "modifie_le": "2025-05-26T09:16:28.798Z",
+      "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+      "qu_est_ce_que_j_en_fais_bon_etat": "",
+      "comment_les_eviter": "",
+      "que_va_t_il_devenir": "",
+      "slug": "magnet",
+      "nom": "Magnet",
+      "produit": 491,
+      "imported_as_search_tag": null,
+      "legacy_imported_as_search_tag": null,
+      "picto": "",
+      "pin_on_homepage": false,
+      "meta_description": ""
+    }
+  }
+]
