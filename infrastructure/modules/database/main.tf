@@ -175,7 +175,9 @@ resource "scaleway_rdb_privilege" "metabase_privilege_on_warehouse" {
 
 ## Cross-DB foreign data wrappers (postgres_fdw) between webapp and warehouse.
 ## Equivalent to the Django command `manage.py create_remote_db_server`.
-## Provisioners are not in state: only a `triggers` change recreates the resource.
+## Provisioners run only on create. Do not put sensitive passwords in
+## `triggers`: that marks the whole map sensitive and OpenTofu often plans an
+## in-place update (no local-exec). Hash + nonsensitive() forces replacement.
 
 locals {
   create_remote_warehouse_in_webapp_script_sha256 = (
@@ -188,6 +190,8 @@ locals {
     ? filesha256(var.create_remote_webapp_in_warehouse_script_path)
     : null
   )
+  webapp_db_password_sha256    = nonsensitive(sha256(var.webapp_db_password))
+  warehouse_db_password_sha256 = nonsensitive(sha256(var.warehouse_db_password))
 }
 
 resource "null_resource" "create_remote_warehouse_in_webapp" {
@@ -220,13 +224,13 @@ resource "null_resource" "create_remote_warehouse_in_webapp" {
   }
 
   triggers = {
-    webapp_database_id    = scaleway_rdb_database.webapp.id
-    warehouse_database_id = scaleway_rdb_database.warehouse_database.id
-    script_sha256         = local.create_remote_warehouse_in_webapp_script_sha256
-    local_user            = var.webapp_db_username
-    local_user_password   = var.webapp_db_password
-    remote_user           = var.warehouse_db_username
-    remote_user_password  = var.warehouse_db_password
+    webapp_database_id          = scaleway_rdb_database.webapp.id
+    warehouse_database_id       = scaleway_rdb_database.warehouse_database.id
+    script_sha256               = local.create_remote_warehouse_in_webapp_script_sha256
+    local_user                  = var.webapp_db_username
+    local_user_password_sha256  = local.webapp_db_password_sha256
+    remote_user                 = var.warehouse_db_username
+    remote_user_password_sha256 = local.warehouse_db_password_sha256
   }
 }
 
@@ -258,12 +262,12 @@ resource "null_resource" "create_remote_webapp_in_warehouse" {
   }
 
   triggers = {
-    webapp_database_id    = scaleway_rdb_database.webapp.id
-    warehouse_database_id = scaleway_rdb_database.warehouse_database.id
-    script_sha256         = local.create_remote_webapp_in_warehouse_script_sha256
-    local_user            = var.warehouse_db_username
-    local_user_password   = var.warehouse_db_password
-    remote_user           = var.webapp_db_username
-    remote_user_password  = var.webapp_db_password
+    webapp_database_id          = scaleway_rdb_database.webapp.id
+    warehouse_database_id       = scaleway_rdb_database.warehouse_database.id
+    script_sha256               = local.create_remote_webapp_in_warehouse_script_sha256
+    local_user                  = var.warehouse_db_username
+    local_user_password_sha256  = local.warehouse_db_password_sha256
+    remote_user                 = var.webapp_db_username
+    remote_user_password_sha256 = local.webapp_db_password_sha256
   }
 }
