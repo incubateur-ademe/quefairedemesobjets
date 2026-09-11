@@ -47,6 +47,26 @@ def assistant_iframe_script(context: dict) -> str:
     return ""
 
 
+@register.simple_tag(takes_context=True)
+def page_formatted_for_script(context: dict) -> str:
+    page = context.get("page", "")
+    if page and isinstance(page, ProduitPage):
+        return f"Page “{page.title}”"
+
+    return ""
+
+
+@register.simple_tag(takes_context=True)
+def embed_modal_title(context: dict) -> str:
+    from core.constants import ASSISTANT
+
+    page = context.get("page", "")
+    if page and isinstance(page, ProduitPage):
+        return ASSISTANT["embed"]["titre_pages_produit"]
+
+    return ASSISTANT["embed"]["titre_pages"]
+
+
 @register.simple_tag()
 def infotri_script_url() -> str:
     return f"{settings.BASE_URL}{reverse('infotri:infotri_script')}"

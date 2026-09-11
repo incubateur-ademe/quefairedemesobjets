@@ -2,18 +2,23 @@
     data-controller="copy"
     data-copy-copied-value="Copié"
     class="qf-flex
+    qf-gap-4w
     qf-p-2w qf-bg-grey-975"
 >
-    <pre
-        data-copy-target="toCopy"
-        class="
-        qf-m-0 qf-pr-1w
-        qf-leading-[1.5]
-        fr-text--md
-        qf-text-blue-france-sun-113
-        qf-whitespace-break-spaces
-        qf-break-all"
-    >{{ script }}</pre>
+    <div class="qf-flex qf-flex-col qf-gap-1w">
+        {% if before_script %}<p class="qf-m-0 qf-font-medium">{{ before_script}}</p>{% endif %}
+        <pre
+            data-copy-target="toCopy"
+            class="
+            !qf-m-0
+            qf-leading-[1.5]
+            fr-text--md
+            qf-text-blue-france-sun-113
+            qf-whitespace-break-spaces
+            qf-break-all"
+        >{{ script }}</pre>
+    </div>
+
     <button
         class="fr-btn qf-my-auto qf-ml-auto"
         title="Copier"
