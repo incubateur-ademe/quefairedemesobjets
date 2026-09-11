@@ -37,18 +37,11 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
 
   static #LISTBOX_BOTTOM_MARGIN_PX = 8
 
-  #boundReposition = () => this.#positionListbox()
-
   connect() {
     this.#hideListbox()
-    // window.addEventListener("resize", this.#boundReposition)
-    // window.addEventListener("scroll", this.#boundReposition, { passive: true })
   }
 
-  disconnect() {
-    // window.removeEventListener("resize", this.#boundReposition)
-    // window.removeEventListener("scroll", this.#boundReposition)
-  }
+  disconnect() {}
 
   clickOutside(event) {
     this.#hideListbox()
