@@ -599,12 +599,29 @@ WAGTAILADMIN_BASE_URL = BASE_URL
 WAGTAIL_AUTOSAVE_INTERVAL = 0
 # increase ping delay : 30s
 WAGTAIL_EDITING_SESSION_PING_INTERVAL = 30000
+# Autocomplete display thresholds, see search/ranking.py.
+# Raw similarity decides *whether* a result is shown, score decides *where*.
+SEARCH_DISPLAY_THRESHOLDS = {
+    # Below this raw similarity, a result is never shown.
+    "RAW_SIMILARITY_MINIMUM": decouple.config(
+        "SEARCH_RAW_SIMILARITY_MINIMUM", default=0.5, cast=float
+    ),
+    # At or above this raw similarity, a result is always shown.
+    "RAW_SIMILARITY_SUFFICIENT": decouple.config(
+        "SEARCH_RAW_SIMILARITY_SUFFICIENT", default=0.75, cast=float
+    ),
+    # Between the two, the result needs at least this score to be shown.
+    "SCORE_MINIMUM": decouple.config("SEARCH_SCORE_MINIMUM", default=1.2, cast=float),
+}
 MODELSEARCH_BACKENDS = {
     "default": {
         "BACKEND": "modelsearch.backends.database",
         "SEARCH_CONFIG": "wagtail_french",
         "FUZZY_ALGORITHM": "trigram",
-        "FUZZY_SIMILARITY_THRESHOLD": 0.2,
+        # The backend applies the coarse cut in SQL, ranking.py the rest.
+        "FUZZY_SIMILARITY_THRESHOLD": SEARCH_DISPLAY_THRESHOLDS[
+            "RAW_SIMILARITY_MINIMUM"
+        ],
         "FUZZY_PREFIX_BOOST": 0.5,
     }
 }

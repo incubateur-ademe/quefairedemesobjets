@@ -37,6 +37,7 @@ from qfdmd.models import (
 )
 from qfdmd.utils import see_more_button
 from search.models import SearchTerm
+from search.ranking import DisplayThresholds, ranked_by_similarity
 from search.score_breakdown import compute_breakdown
 
 logger = logging.getLogger(__name__)
@@ -460,12 +461,15 @@ class AutocompleteHomeSearchView(ListView):
     # seven results.
     NUMBER_OF_ITEMS_DISPLAYED = 7
 
+    # The backend orders candidates by score, ranking.py re-orders them by raw
+    # similarity.
+    CANDIDATE_POOL_SIZE = 50
+
     SEARCH_TIMEOUT_MS = 3000
 
     @override
     def get_queryset(self):
         query = self.request.GET.get("q", "")
-        limit = self.NUMBER_OF_ITEMS_DISPLAYED
         if not query:
             return []
         try:
@@ -473,28 +477,33 @@ class AutocompleteHomeSearchView(ListView):
                 cursor.execute(
                     "SET LOCAL statement_timeout = %s", [self.SEARCH_TIMEOUT_MS]
                 )
-            results = SearchTerm.objects.searchable().search(
-                Fuzzy(query, unaccent=True)
+            candidates = list(
+                SearchTerm.objects.searchable().search(Fuzzy(query, unaccent=True))[
+                    : self.CANDIDATE_POOL_SIZE
+                ]
             )
-            if getattr(self.request, "beta", False):
-                results = results.annotate_score("_search_score")
-            return results[:limit]
         except OperationalError:
             safe_query = query.replace("\r", "").replace("\n", "")
             logger.warning("Autocomplete search timed out for query: %r", safe_query)
             return []
+        return ranked_by_similarity(
+            candidates,
+            DisplayThresholds.from_settings(),
+            limit=self.NUMBER_OF_ITEMS_DISPLAYED,
+        )
 
     @override
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["turbo_frame_id"] = self.request.GET.get("turbo_frame_id")
-        results = self.get_queryset()
+        results = context["object_list"]
         context["results"] = results
         if getattr(self.request, "beta", False) and results:
             query = self.request.GET.get("q", "")
             context["score_breakdown"] = compute_breakdown(
                 query, [r.pk for r in results]
             )
+            context["display_thresholds"] = DisplayThresholds.from_settings()
         return context
 
 
