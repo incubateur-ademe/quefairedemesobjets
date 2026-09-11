@@ -66,11 +66,11 @@ data-platform/dbt/
     │   │   ├── schema.yml
     │   │   ├── base_acteur.sql
     │   │   ├── base_acteur_acteur_services.sql
+    │   │   ├── base_action.sql
     │   │   ├── base_propositionservice.sql
     │   │   └── base_source.sql
     │   ├── stats/
     │   │   ├── schema.yml
-    │   │   ├── base_action.sql
     │   │   ├── base_vueacteur_visible.sql
     │   │   ├── base_vuepropositionservice.sql
     │   │   ├── base_vuepropositionservice_visible.sql
@@ -168,7 +168,6 @@ sources:
     tables:
       - name: qfdmo_vueacteur
       - name: qfdmo_vuepropositionservice
-      - name: qfdmo_action
   - name: stats_clone
     schema: public
     tables:
@@ -192,9 +191,8 @@ TABLESAMPLE SYSTEM (10)
 ```
 
 ```sql
--- models/base/stats/base_action.sql
-SELECT *
-FROM {{ source('stats_qfdmo', 'qfdmo_action') }}
+-- models/base/acteurs/base_action.sql
+select * from {{ source('qfdmo', 'qfdmo_action') }}
 ```
 
 Base models that combine two base models with a simple join are also acceptable:
