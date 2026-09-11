@@ -2,7 +2,7 @@
 
 Operational procedure to rotate the PostgreSQL passwords of an environment (`preprod` or `prod`).
 
-The three managed RDB instances (`lvao-{env}-webapp`, `lvao-{env}-warehouse`, `lvao-{env}-airflow`) store their admin passwords in OpenTofu variables. Changing them requires a coordinated update of **every consumer**: Terragrunt, Scalingo, GitHub, and the password vault.
+The two managed RDB instances (`lvao-{env}-webapp`, `lvao-{env}-warehouse`) store their passwords in OpenTofu variables. Airflow (and optionally Metabase) are extra databases on the warehouse instance. Changing passwords requires a coordinated update of **every consumer**: Terragrunt, Scalingo, GitHub, and the password vault.
 
 > **See also**: [Provisioning](../../reference/infrastructure/provisioning.md), [Secrets](../../reference/security/secrets.md), [Database organisation](../../reference/db/db_organisation.md), [PRA — secret compromise](../../reference/security/pra.md).
 
@@ -37,11 +37,11 @@ infrastructure/environments/<ENV>/database/terraform.tfvars
 
 Replace these three values with newly generated strong passwords:
 
-| Variable                | Instance               | Admin user  |
+| Variable                | Instance               | User        |
 | ----------------------- | ---------------------- | ----------- |
 | `webapp_db_password`    | `lvao-{env}-webapp`    | `webapp`    |
 | `warehouse_db_password` | `lvao-{env}-warehouse` | `warehouse` |
-| `airflow_db_password`   | `lvao-{env}-airflow`   | `airflow`   |
+| `airflow_db_password`   | `lvao-{env}-warehouse` | `airflow`   |
 
 This protocol does **not** rotate the read-only Metabase users (`webapp_db_metabase_password`, `warehouse_db_metabase_password`). Rotate those separately if needed, then update the Metabase connection settings.
 

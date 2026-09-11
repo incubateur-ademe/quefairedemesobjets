@@ -123,6 +123,55 @@ resource "scaleway_rdb_privilege" "airflow_privilege" {
   permission    = "all"
 }
 
+## Airflow DB on warehouse instance
+
+resource "scaleway_rdb_database" "airflow_db_on_warehouse" {
+  instance_id = scaleway_rdb_instance.warehouse.id
+  name        = var.airflow_db_name
+}
+
+resource "scaleway_rdb_user" "airflow_user_on_warehouse" {
+  instance_id = scaleway_rdb_instance.warehouse.id
+  name        = var.airflow_db_username
+  password    = var.airflow_db_password
+  is_admin    = false
+}
+
+resource "scaleway_rdb_privilege" "airflow_privilege_on_warehouse" {
+  instance_id   = scaleway_rdb_instance.warehouse.id
+  user_name     = scaleway_rdb_user.airflow_user_on_warehouse.name
+  database_name = scaleway_rdb_database.airflow_db_on_warehouse.name
+  permission    = "all"
+}
+
+## Metabase (application database on warehouse instance)
+
+locals {
+  metabase_enabled = var.metabase_db_username != null
+}
+
+resource "scaleway_rdb_database" "metabase_on_warehouse" {
+  count       = local.metabase_enabled ? 1 : 0
+  instance_id = scaleway_rdb_instance.warehouse.id
+  name        = var.metabase_db_name
+}
+
+resource "scaleway_rdb_user" "metabase_user_on_warehouse" {
+  count       = local.metabase_enabled ? 1 : 0
+  instance_id = scaleway_rdb_instance.warehouse.id
+  name        = var.metabase_db_username
+  password    = var.metabase_db_password
+  is_admin    = false
+}
+
+resource "scaleway_rdb_privilege" "metabase_privilege_on_warehouse" {
+  count         = local.metabase_enabled ? 1 : 0
+  instance_id   = scaleway_rdb_instance.warehouse.id
+  user_name     = scaleway_rdb_user.metabase_user_on_warehouse[0].name
+  database_name = scaleway_rdb_database.metabase_on_warehouse[0].name
+  permission    = "all"
+}
+
 
 ## Cross-DB foreign data wrappers (postgres_fdw) between webapp and warehouse.
 ## Equivalent to the Django command `manage.py create_remote_db_server`.

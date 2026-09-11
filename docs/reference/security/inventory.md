@@ -26,15 +26,15 @@ La documentation du périmètre fonctionnel détaillé reste portée par [`archi
 
 ## Priorité 2 — Plateforme data (Airflow)
 
-| Actif                                             | Type            | Hébergeur                                  | Sensibilité                                 | Référence                                                 |
-| ------------------------------------------------- | --------------- | ------------------------------------------ | ------------------------------------------- | --------------------------------------------------------- |
-| **Airflow Webserver / Scheduler / DAG Processor** | Applicatif      | Scaleway Container as a Service (`fr-par`) | Orchestration des pipelines internes        | [`data-platform/airflow.md`](../data-platform/airflow.md) |
-| **DB Warehouse** `lvao-prod-warehouse`            | Base de données | Scaleway RDB                               | Couches dbt (reconstructible par `dbt run`) | [`data-platform/dbt.md`](../data-platform/dbt.md)         |
-| **DB Airflow** `lvao-prod-airflow`                | Base de données | Scaleway RDB                               | Métadonnées Airflow (perte tolérable)       | [`data-platform/airflow.md`](../data-platform/airflow.md) |
-| **Bucket `lvao-opendata`**                        | Stockage        | Scaleway S3                                | Exports CSV publics + snapshots horodatés   | [`backups.md`](backups.md)                                |
-| **Bucket `lvao-data-source`**                     | Stockage        | Scaleway S3                                | Fichiers source (Excel, ingestions)         | [`provisioning.md`](../infrastructure/provisioning.md)    |
-| **Bucket `lvao-prod-airflow`**                    | Stockage        | Scaleway S3                                | Logs distants Airflow                       | [`data-platform/airflow.md`](../data-platform/airflow.md) |
-| **Container Registry** `ns-qfdmo`                 | Stockage        | Scaleway                                   | Images Docker Airflow (privé)               | [`provisioning.md`](../infrastructure/provisioning.md)    |
+| Actif                                              | Type            | Hébergeur                                  | Sensibilité                                 | Référence                                                 |
+| -------------------------------------------------- | --------------- | ------------------------------------------ | ------------------------------------------- | --------------------------------------------------------- |
+| **Airflow Webserver / Scheduler / DAG Processor**  | Applicatif      | Scaleway Container as a Service (`fr-par`) | Orchestration des pipelines internes        | [`data-platform/airflow.md`](../data-platform/airflow.md) |
+| **DB Warehouse** `lvao-prod-warehouse`             | Base de données | Scaleway RDB                               | Couches dbt (reconstructible par `dbt run`) | [`data-platform/dbt.md`](../data-platform/dbt.md)         |
+| **DB Airflow** `airflow` sur `lvao-prod-warehouse` | Base de données | Scaleway RDB                               | Métadonnées Airflow (perte tolérable)       | [`data-platform/airflow.md`](../data-platform/airflow.md) |
+| **Bucket `lvao-opendata`**                         | Stockage        | Scaleway S3                                | Exports CSV publics + snapshots horodatés   | [`backups.md`](backups.md)                                |
+| **Bucket `lvao-data-source`**                      | Stockage        | Scaleway S3                                | Fichiers source (Excel, ingestions)         | [`provisioning.md`](../infrastructure/provisioning.md)    |
+| **Bucket `lvao-prod-airflow`**                     | Stockage        | Scaleway S3                                | Logs distants Airflow                       | [`data-platform/airflow.md`](../data-platform/airflow.md) |
+| **Container Registry** `ns-qfdmo`                  | Stockage        | Scaleway                                   | Images Docker Airflow (privé)               | [`provisioning.md`](../infrastructure/provisioning.md)    |
 
 ## Actifs transverses
 

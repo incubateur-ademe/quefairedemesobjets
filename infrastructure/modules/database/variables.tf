@@ -82,13 +82,20 @@ variable "warehouse_volume_size" {
   type        = number
 }
 
+# DEPRECATED
+variable "airflow_volume_size" {
+  description = "Taille du volume en GB de la base de données airflow"
+  type        = number
+}
+
+# DEPRECATED
 variable "airflow_node_type" {
   description = "Type de nœud de la base de données airflow"
   type        = string
 }
 
 variable "airflow_db_name" {
-  description = "Nom de la base de données airflow"
+  description = "Nom de la base de données airflow (hébergée sur l'instance warehouse)"
   type        = string
 }
 
@@ -103,9 +110,23 @@ variable "airflow_db_password" {
   sensitive   = true
 }
 
-variable "airflow_volume_size" {
-  description = "Taille du volume en GB de la base de données airflow"
-  type        = number
+variable "metabase_db_name" {
+  description = "Nom de la base de données applicative Metabase (hébergée sur l'instance warehouse)"
+  type        = string
+  default     = "metabase"
+}
+
+variable "metabase_db_username" {
+  description = "Nom d'utilisateur de la base de données Metabase. Si null, la base n'est pas créée."
+  type        = string
+  default     = null
+}
+
+variable "metabase_db_password" {
+  description = "Mot de passe de la base de données Metabase"
+  type        = string
+  sensitive   = true
+  default     = null
 }
 
 variable "create_remote_warehouse_in_webapp_script_path" {
