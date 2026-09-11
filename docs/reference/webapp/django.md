@@ -80,3 +80,31 @@ Voir aussi [`infrastructure/provisioning.md`](../infrastructure/provisioning.md)
 2. Passer des **identifiants sérialisables** (listes d'IDs, pas de queryset) : la tâche peut s'exécuter dans un autre processus et doit re-fetcher les objets.
 3. Depuis une vue ou une action admin, appeler `.call(...)` pour une exécution synchrone ou `.enqueue(...)` pour la mettre en file.
 4. Tester avec `ImmediateBackend` ; vérifier localement avec `db_worker` si la tâche est destinée à être enqueueée.
+
+## Recherche (autocomplete)
+
+La recherche objet présent en header et en la page d'accueil s'appuie sur
+la recherche Fuzzy (par trigrammes) de django-modelsearch, embarquée avec Wagtail.
+Chaque résultat porte deux valeurs :
+
+- **Raw** : similarité brute, sans bonus. Décide _si_ le résultat s'affiche.
+- **Score** : similarité pondérée (normalisation par longueur du titre, bonus
+  de préfixe). Décide _à quelle position_.
+
+Les règles appliquées dans `webapp/search/ranking.py` :
+
+- affichage si `raw ≥ SEARCH_RAW_SIMILARITY_SUFFICIENT`, ou si
+  `SEARCH_RAW_SIMILARITY_MINIMUM ≤ raw` et `score ≥ SEARCH_SCORE_MINIMUM` ;
+- tri par raw décroissant, puis par score décroissant.
+
+Ces trois seuils sont des variables d'environnement (modifiables dans
+Scalingo, un redémarrage suffit, aucune réindexation n'est nécessaire) :
+
+| Variable                           | Défaut |
+| ---------------------------------- | ------ |
+| `SEARCH_RAW_SIMILARITY_MINIMUM`    | 0.5    |
+| `SEARCH_RAW_SIMILARITY_SUFFICIENT` | 0.75   |
+| `SEARCH_SCORE_MINIMUM`             | 1.2    |
+
+Les utilisateurs disposant de la permission `can_see_beta_search` voient le
+détail du score et les seuils sous chaque résultat.
