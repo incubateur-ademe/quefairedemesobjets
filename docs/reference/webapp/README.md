@@ -13,9 +13,9 @@ It combined technologies :
 
 ### Django and apps
 
-The backend is a **Django** project whose central configuration lives in `core/` (settings, URLs, templatetags, context processors). Business logic is split across several **Django applications**:
+The backend is a **Django** project whose settings live in `settings/` (`base`, `dev`, `test`, `airflow`). Shared URLs, WSGI, templatetags and context processors live in `core/`. Business logic is split across several **Django applications**:
 
-- **core** — Configuration, URLs, shared templatetags and context processors
+- **core** — URLs, WSGI, shared templatetags and context processors
 - **qfdmo** — Core business (models, views, forms of the main tool)
 - **qfdmd** — CMS and content (pages, middleware, multi‑site integration)
 - **infotri** — Infotri module (configurator, dedicated forms)
@@ -77,7 +77,7 @@ From `webapp/`:
   - `make unit-test`: unit tests
   - `make integration-test`: integration tests
 
-DAG / Airflow Python tests live in **`data-platform/`**: run `uv sync --group dev --group notebook` from root, then `make dags-test`.
+DAG / Airflow Python tests live in **`data-platform/`**: from the repo root, run `uv sync --all-packages --group dev`, then `make -C data-platform dags-test` (or `make data-platform-dags-test`).
 
 #### Running E2E tests locally
 

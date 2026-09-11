@@ -27,10 +27,9 @@ L'architecture du dépôt est organisée comme suit :
 ├── docs/              # Documentation technique
 ├── infrastructure/    # Gestion et déploiement de l'infrastructure
 ├── docker-compose.yml # Exécution en local
-├── nginx-local-only/  # Configuration Nginx pour le dev local
 ├── Makefile           # Commandes globales
 ├── scripts/           # Scripts hors webapp
-└── pyproject.toml     # Dépendances Python (uv)
+└── pyproject.toml     # Workspace Python (uv)
 ```
 
 ## Documentation technique

@@ -33,8 +33,7 @@ Webapp:
 - Typescript
 - Parcel
 - DSFR
-- Honcho
-- Whitnoise
+- Whitenoise
 - Tailwind
 - nginx
 
@@ -71,22 +70,16 @@ Le `docker-compose.yml` à la racine expose deux profiles indépendants :
 
 | Profile   | Services                                                                                                                                                       |
 | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `lvao`    | `lvao-webapp-db` (PostGIS, port 6543), `lvao-warehouse-db` (8765), nginx local SSL (`nginx-local-only/` + mkcert, domaine `quefairedemesdechets.ademe.local`). |
-| `airflow` | `airflow-db` (7654), `airflow-webserver` (8080), `airflow-scheduler` (12 G RAM), `airflow-dag-processor` (8082).                                               |
+| `lvao`    | `lvao-webapp-db` (PostGIS, port 6543), nginx local SSL (`webapp/nginx/` + mkcert, domaine `quefairedemesdechets.ademe.local`).                                 |
+| `airflow` | `lvao-webapp-db`, `lvao-warehouse-db` (8765), `airflow-db` (7654), `airflow-webserver` (8080), `airflow-scheduler` (12 G RAM), `airflow-dag-processor` (8082). |
 
 > Pas de **Redis** ni de **mailcatcher** en local : le cache Django est stocké en base (`django.core.cache.backends.db.DatabaseCache`, table `qf_django_cache`).
 
 ## Installation rapide
 
-la commande `init-dev` installe tout l'environnement Webapp et plateforme data
+Enchaîner les commandes suivantes depuis la **racine du repo** (détail dans les sections ci-dessous).
 
-```sh
-make init-dev
-```
-
-### Lancement de la webapp et de la plateforme data
-
-Modifier le fichier `/etc/hosts`, ajouter les lignes
+Modifier `/etc/hosts` :
 
 ```
 127.0.0.1       lvao.ademe.local
@@ -94,20 +87,31 @@ Modifier le fichier `/etc/hosts`, ajouter les lignes
 127.0.0.1       quefairedemesobjets.ademe.local
 ```
 
-Copier la base de données de prod
-
 ```sh
-make db-restore-local-from-prod
+cp webapp/.env.template webapp/.env
+cp data-platform/dags/.env.template data-platform/dags/.env
+uv sync --all-packages --all-groups
+npm ci
+make init-certs
+docker compose --profile lvao up -d
+make run-airflow
+make db-restore-local-from-prod   # optionnel, accès Scaleway requis
 ```
 
-Lancer l'application
+Puis, dans un terminal depuis **`webapp/`** :
 
 ```sh
-make run-all
+make runserver
 ```
 
-la webapp est accessible à l'adresse [quefairedemesobjets.ademe.local](https://quefairedemesobjets.ademe.local/)
-la plateforme data est accessible à l'adresse [http://localhost:8080](http://localhost:8080)
+Dans un autre terminal, toujours depuis **`webapp/`** :
+
+```sh
+npm run watch
+```
+
+La webapp est accessible à [quefairedemesobjets.ademe.local](https://quefairedemesobjets.ademe.local/) (derrière nginx local si le profil `lvao` est actif).
+La plateforme data est accessible à [http://localhost:8080](http://localhost:8080) (identifiant / mot de passe : airflow / airflow).
 
 ## Installation de la Webapp uniquement
 
@@ -123,17 +127,19 @@ Modifier le fichier `/etc/hosts`, ajouter les lignes
 
 ### Installation & Exécution
 
-Configuration des variables d'environnement: ajouter (ou mettre à jour si existant)
+Configuration des variables d'environnement (ajouter ou mettre à jour) :
 
 ```sh
-cp .env.template .env
+cp webapp/.env.template webapp/.env
 ```
 
-Modifier les variables dans le fichier .env si nécessaire
+Modifier les variables dans `webapp/.env` si nécessaire.
 
-Générer les certificats utilisé par nginx
+Générer les certificats utilisés par nginx (depuis la racine du repo) :
 
+```sh
 make init-certs
+```
 
 Les bases de données `Postgres + Postgis` sont executées et mises à disposition par le gestionnaire de conteneur Docker
 
@@ -146,7 +152,7 @@ docker compose  --profile lvao up -d
 Installation des dépendances Python et JavaScript (depuis la racine du repo) :
 
 ```sh
-uv sync --all-groups
+uv sync --group dev --group webapp-dev
 npm ci
 ```
 
@@ -255,6 +261,6 @@ accéder à l'interface d'Airflow en local [http://localhost:8080](http://localh
 Tests Python des DAGs (pytest), depuis la racine du repo :
 
 ```sh
-uv sync --group dev --group notebook
-cd data-platform && make dags-test
+uv sync --all-packages --group dev
+make -C data-platform dags-test
 ```

@@ -8,4 +8,4 @@ Mesures de sécurité au niveau réseau et flux applicatifs.
 - **Registry privé** (`ns-qfdmo`) avec pull authentifié par les Serverless Containers.
 - **CORS** géré par `django-cors-headers` côté webapp (origins configurés par environnement).
 - **Embeds iframe** : détection par header `Sec-Fetch-Dest: iframe`, header `Vary: Sec-Fetch-Dest` pour différencier les caches. Backlinks contrôlés via `EmbedSettings` (Wagtail).
-- **TLS** : terminé par Scalingo (Let's Encrypt) côté webapp, par Scaleway côté Airflow. En local, mkcert + nginx (`nginx-local-only/`).
+- **TLS** : terminé par Scalingo (Let's Encrypt) côté webapp, par Scaleway côté Airflow. En local, mkcert + nginx (`webapp/nginx/`).

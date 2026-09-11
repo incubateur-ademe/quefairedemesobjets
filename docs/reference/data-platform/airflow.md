@@ -4,7 +4,7 @@
 
 ## Configuration runtime
 
-- **Version** : `apache/airflow:slim-3.1.7-python3.12` (3 containers Scaleway : webserver `:8080`, scheduler avec dbt, dag-processor avec nginx healthcheck).
+- **Version** : `apache/airflow:slim-3.3.1-python3.12` (3 containers Scaleway : webserver `:8080`, scheduler avec dbt, dag-processor avec nginx healthcheck).
 - **Executor** : `LocalExecutor` (single-node).
 - **Auth manager** : **FAB** (`FabAuthManager`). Backends API : `basic_auth` + `session`. **JWT** pour les échanges internes (`AIRFLOW__API_AUTH__JWT_SECRET`).
 - **Compte admin** : créé au premier démarrage du webserver via `_AIRFLOW_WWW_USER_USERNAME / _PASSWORD / _EMAIL`.
@@ -56,11 +56,13 @@ This structure is mainly used when (re)organising files for source‑ingestion D
 
 Tests follow the same structure as `data-platform/dags`, under `data-platform/dags/tests`.
 
-Run them from the repo root (requires `uv sync --group dev --group notebook`):
+Run them from `data-platform/` (requires `uv sync --all-packages --group dev` from the repo root):
 
 ```sh
 make dags-test
 ```
+
+From the repo root, the equivalent is `make data-platform-dags-test`.
 
 Pytest uses `settings.test` (see `data-platform/pyproject.toml`).
 

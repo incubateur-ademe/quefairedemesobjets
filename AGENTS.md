@@ -1,96 +1,139 @@
 # AGENT Guidelines - Monorepo Guide
 
-> **Purpose**: Context for AI assistants and developers. For app-specific patterns, see individual README.md files.
+> **Purpose**: Context for AI assistants and developers. For app-specific patterns, see individual README.md files and `docs/`.
 
 ## Main monorepo architecture
 
-| Repository or file   | Purpose                                                      | Technologies                                               |
-| -------------------- | ------------------------------------------------------------ | ---------------------------------------------------------- |
-| `.github/`           | CI/CD                                                        | Github action                                              |
-| `webapp/`            | Django + Stimulus app “What to do with my objects and waste” | Django, Typescript, Stimulus, pytest, playwright, tailwind |
-| `data-platform/`     | Data platform (Airflow, dbt, notebooks…)                     | Airflow, dbt, python, pytest                               |
-| `docs/`              | Technical documentation                                      | sphinx, markdown                                           |
-| `infrastructure/`    | Infrastructure deployment and management                     | opentofu, terragrunt, Scaleway                             |
-| `docker-compose.yml` | Local execution                                              | docker, docker compose                                     |
-| `nginx-local-only/`  | Nginx config for local development                           | nginx                                                      |
-| `Makefile`           | Global commands                                              |                                                            |
-| `scripts/`           | Scripts outside webapp                                       | bash                                                       |
+| Path                         | Purpose                                                    | Technologies                                                                |
+| ---------------------------- | ---------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `.github/`                   | CI/CD                                                      | GitHub Actions                                                              |
+| `webapp/`                    | Django + Stimulus app “Que faire de mes objets et déchets” | Django, Wagtail, TypeScript, Stimulus, Parcel, Tailwind, pytest, Playwright |
+| `data-platform/`             | Data platform (Airflow, dbt, notebooks)                    | Airflow, dbt, Python, pytest                                                |
+| `docs/`                      | Technical documentation                                    | Sphinx, Markdown                                                            |
+| `infrastructure/`            | Infrastructure deployment and management                   | OpenTofu, Terragrunt, Scaleway                                              |
+| `docker-compose.yml`         | Local databases, nginx proxy, Airflow                      | Docker Compose (`lvao` / `airflow` profiles)                                |
+| `webapp/nginx/`              | Local nginx (TLS via mkcert)                               | nginx                                                                       |
+| `Makefile`                   | Root command aliases (delegates to subprojects)            | Make                                                                        |
+| `scripts/`                   | Scripts outside the webapp (DB restore, backups)           | bash, SQL                                                                   |
+| `pyproject.toml` / `uv.lock` | uv workspace (Python 3.12)                                 | uv                                                                          |
 
-**Python environments:** uv workspace — `uv sync` at repo root installs all members. `cd webapp && uv sync` or `cd data-platform && uv sync` also work for targeting specific members. Single `uv.lock` at repo root. Run backend tests from each project: `make unit-test` / `make integration-test` / e2e in `webapp/`, `make dags-test` in `data-platform/`.
+**Python:** uv workspace at the repo root (`members = ["webapp", "data-platform"]`), single `uv.lock`. The root project depends only on the webapp member (Scalingo build). `uv sync` alone does **not** install data-platform.
 
-Note : `webapp/Makefile` and `data-platform/Makefile` hold project-specific commands; the repo root `Makefile` delegates to them where useful.
+```sh
+# Full local install (webapp + data-platform + all dependency groups)
+uv sync --all-packages --all-groups
+npm ci
+```
+
+Webapp-only: `uv sync --group dev --group webapp-dev`. Data-platform tests (as in CI): `uv sync --all-packages --group dev`. Targeting a member with `cd webapp && uv sync` / `cd data-platform && uv sync` also works, but still needs the relevant `--group` flags for pytest/ruff.
+
+**JavaScript:** npm workspace (`webapp/` is the only workspace). Install once from the repo root with `npm ci`. Node 20.
+
+Project-specific Make targets live in `webapp/Makefile` and `data-platform/Makefile`. The root `Makefile` exposes prefixed aliases (`webapp-unit-test`, `data-platform-dags-test`, …). Unprefixed targets (`unit-test`, `dags-test`) only exist inside those directories.
+
+## Common commands
+
+| Task                                             | Directory               | Command                               |
+| ------------------------------------------------ | ----------------------- | ------------------------------------- |
+| Django + `db_worker`                             | `webapp/`               | `make runserver`                      |
+| Parcel watch                                     | `webapp/`               | `npm run watch`                       |
+| Webapp DBs + local nginx                         | repo root               | `docker compose --profile lvao up -d` |
+| Airflow stack                                    | repo root               | `make run-airflow`                    |
+| Format (Black + Ruff; SqlFluff in data-platform) | repo root or subproject | `make format` / `make check-format`   |
+| Webapp unit tests                                | `webapp/`               | `make unit-test`                      |
+| Webapp integration tests                         | `webapp/`               | `make integration-test`               |
+| Webapp JS tests (Jest)                           | `webapp/`               | `make js-test`                        |
+| Webapp e2e (Playwright)                          | `webapp/`               | `make e2e-test`                       |
+| DAG tests                                        | `data-platform/`        | `make dags-test`                      |
+| TypeScript lint / Prettier                       | `webapp/`               | `npm run lint` / `npm run format`     |
+
+Equivalent from repo root: `make webapp-unit-test`, `make webapp-integration-test`, `make webapp-e2e-test`, `make webapp-js-test`, `make data-platform-dags-test`.
+
+Django management commands: `uv run python manage.py …` from `webapp/` (or `make migrate`, `make shell`, … in that Makefile).
 
 ## Using English or French
 
-Use English by default, for more guidelines : [docs/reference/coding/README.md](./docs/reference/coding/README.md)
+Use English in code and technical markdown. Details: [docs/reference/coding/README.md](./docs/reference/coding/README.md).
 
 ## Quick Lookup
 
-For each kind of task below, refer to the specific documentation
+| Topic                                    | Go to…                                                                                           |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Local install                            | [docs/how-to/development/installation.md](./docs/how-to/development/installation.md)             |
+| Python / npm dependencies                | [docs/how-to/development/dependencies.md](./docs/how-to/development/dependencies.md)             |
+| API features                             | [docs/reference/apis/README.md](./docs/reference/apis/README.md)                                 |
+| Webapp (Django / JS)                     | [docs/reference/webapp/README.md](./docs/reference/webapp/README.md)                             |
+| Django apps and async tasks              | [docs/reference/webapp/django.md](./docs/reference/webapp/django.md)                             |
+| Templating                               | [docs/reference/webapp/templates.md](./docs/reference/webapp/templates.md)                       |
+| Look and feel (DSFR / Tailwind)          | [docs/reference/webapp/look-and-feel.md](./docs/reference/webapp/look-and-feel.md)               |
+| Javascript (Stimulus / Maplibre / Turbo) | [docs/reference/webapp/javascript.md](./docs/reference/webapp/javascript.md)                     |
+| A/B testing (PostHog)                    | [docs/reference/webapp/ab-testing.md](./docs/reference/webapp/ab-testing.md)                     |
+| Internationalization                     | [docs/reference/webapp/internationalization.md](./docs/reference/webapp/internationalization.md) |
+| Architecture                             | [docs/reference/architecture/README.md](./docs/reference/architecture/README.md)                 |
+| Database                                 | [docs/reference/db/README.md](./docs/reference/db/README.md)                                     |
+| Infrastructure                           | [docs/reference/infrastructure/provisioning.md](./docs/reference/infrastructure/provisioning.md) |
+| Monitoring                               | [docs/reference/infrastructure/monitoring.md](./docs/reference/infrastructure/monitoring.md)     |
+| CI/CD                                    | [docs/reference/infrastructure/ci-cd.md](./docs/reference/infrastructure/ci-cd.md)               |
+| Security                                 | [docs/reference/security/README.md](./docs/reference/security/README.md)                         |
+| Airflow                                  | [docs/reference/data-platform/airflow.md](./docs/reference/data-platform/airflow.md)             |
+| DBT                                      | [docs/reference/data-platform/dbt.md](./docs/reference/data-platform/dbt.md)                     |
+| Open data                                | [docs/reference/opendata/README.md](./docs/reference/opendata/README.md)                         |
 
-| Is concerned                               | Go to...                                                                                         |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------ |
-| API features                               | [docs/reference/apis/README.md](./docs/reference/apis/README.md)                                 |
-| Webapp features (Django app/Javascript)    | [docs/reference/webapp/README.md](./docs/reference/webapp/README.md)                             |
-| in Webapp, more specifically Django        | [docs/reference/webapp/django.md](./docs/reference/webapp/django.md)                             |
-| in Webapp, more specifically Templating    | [docs/reference/webapp/templates.md](./docs/reference/webapp/templates.md)                       |
-| in Webapp, more specifically Look and feel | [docs/reference/webapp/look-and-feel.md](./docs/reference/webapp/look-and-feel.md)               |
-| Infrastructure                             | [docs/reference/infrastructure/provisioning.md](./docs/reference/infrastructure/provisioning.md) |
-| Monitoring                                 | [docs/reference/infrastructure/monitoring.md](./docs/reference/infrastructure/monitoring.md)     |
-| CI/CD                                      | [docs/reference/infrastructure/ci-cd.md](./docs/reference/infrastructure/ci-cd.md)               |
-| Javascript (Stimulus/Maplibre/Turbo)       | [docs/reference/webapp/javascript.md](./docs/reference/webapp/javascript.md)                     |
-| A/B testing (PostHog feature flags)        | [docs/reference/webapp/ab-testing.md](./docs/reference/webapp/ab-testing.md)                     |
-| Airflow                                    | [docs/reference/data-platform/airflow.md](./docs/reference/data-platform/airflow.md)             |
-| DBT                                        | [docs/reference/data-platform/dbt.md](./docs/reference/data-platform/dbt.md)                     |
-
-## General Coding guidelines
-
-- Nommage (et [Swift API Guidelines](https://www.swift.org/documentation/api-design-guidelines/))
-- La base de code python suit les conventions décrites par [PEP8](https://peps.python.org/pep-0008/). Garanti en CI par `ruff`
-- La base de code Typescript suit les conventions décrites par [TypeScript style guide](https://ts.dev/style/). Garanti en CI par `eslint` / `prettier`
-
-### Project Structure
+## Project structure
 
 ```txt
 /
-├── .github/           # CI/CD workflows
-├── webapp/            # Application Django + Stimulus « Que faire de mes objets et déchets »
-│   ├── core/          # Django configuration (settings, urls, wsgi)
-│   ├── qfdmo/         # Main Django app (business models)
-│   ├── qfdmd/         # Django app for CMS
-│   ├── static/        # Compiled static assets
-│   │   └── to_compile/ # TypeScript/JavaScript sources to compile
-│   ├── templates/     # Django templates (HTML)
-│   ├── unit_tests/    # Unit tests with pytest
-│   ├── integration_tests/ # Integration tests with pytest
-│   └── e2e_tests/     # End-to-end tests with Playwright
-├── data-platform/     # Plateforme data (Airflow, dbt, notebooks…)
-│   ├── dags/          # Airflow DAGs (clone, enrich, crawl, etc.)
-│   └── dbt/           # dbt models for data transformation
-├── docs/              # Documentation technique
-├── infrastructure/    # Gestion et déploiement de l'infrastructure
-├── docker-compose.yml # Exécution en local
-├── nginx-local-only/  # Configuration Nginx pour le dev local
-├── Makefile           # Commandes globales
-├── scripts/           # Scripts hors webapp
+├── .github/                 # CI/CD workflows
+├── webapp/                  # Django + Stimulus « Que faire de mes objets et déchets »
+│   ├── settings/            # Django settings (base, dev, test, airflow)
+│   ├── core/                # URLs, WSGI, shared utilities / templatetags
+│   ├── qfdmo/               # Map and acteurs
+│   ├── qfdmd/               # Wagtail CMS and tri advice
+│   ├── search/              # Search
+│   ├── data/                # Backoffice data / suggestions
+│   ├── infotri/             # Infotri widget
+│   ├── stats/               # Stats API
+│   ├── nginx/               # Local nginx + mkcert certs
+│   ├── static/
+│   │   ├── to_compile/      # TypeScript / CSS sources (Parcel)
+│   │   ├── to_collect/      # Extra static assets
+│   │   └── compiled/        # Parcel output
+│   ├── templates/           # Django templates
+│   ├── unit_tests/
+│   ├── integration_tests/
+│   └── e2e_tests/           # Playwright
+├── data-platform/
+│   ├── dags/                # Airflow DAGs (tests in dags/tests/)
+│   ├── dbt/                 # dbt models
+│   ├── notebooks/
+│   ├── config/              # Airflow config
+│   └── plugins/
+├── docs/                    # Sphinx technical documentation
+├── infrastructure/          # OpenTofu / Terragrunt
+├── docker-compose.yml
+├── Makefile                 # Root aliases
+├── pyproject.toml           # uv workspace root
+├── uv.lock
+└── scripts/                 # DB restore, backups, SQL
 ```
 
-## 📝 Code Conventions
+## Code conventions
 
 ### Python
 
-- Linter: Ruff (configuration in `webapp/pyproject.toml` and `data-platform/pyproject.toml`)
-- Formatting: Black (line-length: 88)
-- Type hints: Use type hints when relevant
-- Imports: Organized according to Django conventions (stdlib, third-party, local)
-- Tests: pytest with pytest-django
+- **Lint:** Ruff (`webapp/pyproject.toml` and `data-platform/pyproject.toml`)
+- **Format:** Black, line-length 88
+- Type hints when relevant
+- Tests: pytest; webapp uses pytest-django (`settings.test`)
+- Language rules: [docs/reference/coding/README.md](./docs/reference/coding/README.md)
 
-## 🔍 Codebase Search
+### TypeScript
 
-- Use `codebase_search` to understand flows
-- Use `grep` to find exact occurrences
+- Conventions: [TypeScript style guide](https://ts.dev/style/)
+- Enforced in CI by eslint / prettier (`webapp/`)
 
-## 📚 Documentation
+## Documentation
 
 - Technical documentation is in `docs/` and published on GitHub Pages
-- Specific READMEs are in each important subfolder
+- Start from [docs/how-to/development/installation.md](./docs/how-to/development/installation.md) for local setup
+- Specific READMEs live in important subfolders
