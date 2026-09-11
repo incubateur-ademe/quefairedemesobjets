@@ -21,10 +21,22 @@ Stratégies de sauvegarde des données applicatives, des bases et de l'état d'i
 
 Voir [CI/CD — Database synchronization](../infrastructure/ci-cd.md#database-synchronization) pour le détail du workflow.
 
+## Export GitHub Actions
+
+Le workflow [`backup-databases.yml`](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/backup-databases.yml) génère (ou réutilise) un backup Scaleway RDB des bases `webapp`, `warehouse`, `metabase` et `airflow`, télécharge les dumps `.custom` et les publie en artefacts GitHub (rétention 7 jours).
+
+Déclenchement : **Actions → Backup databases → Run workflow** (choix de l’environnement `prod` / `preprod`).
+
 ## Backups manuels
 
-Pour générer un dump à la demande :
+Pour générer un dump à la demande (webapp par défaut) :
 
 ```sh
 scripts/infrastructure/backup-db.sh
+```
+
+Pour les quatre bases :
+
+```sh
+scripts/infrastructure/backup-db.sh --quiet --env prod --database all
 ```
