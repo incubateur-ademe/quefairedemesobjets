@@ -134,6 +134,27 @@ models:
         - base
         - acteurs
         - acteur_labels
+  - name: base_action
+    description: "Actions"
+    columns:
+      - name: id
+        description: "clef primaire"
+        data_tests:
+          - not_null
+          - unique
+      - name: libelle
+        description: "Nom de l'action (ex: Réparer, Donner)"
+      - name: code
+        description: "Code de l'action (ex: reparer, donner)"
+        data_tests:
+          - not_null
+          - unique
+    config:
+      tags:
+        - base
+        - acteurs
+        - action
+        - stats
   - name: base_propositionservice
     description: "Propositions de services"
     columns:
