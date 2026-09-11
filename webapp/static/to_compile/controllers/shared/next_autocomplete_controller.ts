@@ -41,8 +41,6 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
     this.#hideListbox()
   }
 
-  disconnect() {}
-
   clickOutside(event) {
     this.#hideListbox()
   }
