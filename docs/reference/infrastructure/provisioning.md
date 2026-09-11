@@ -122,11 +122,12 @@ Namespace privé `ns-qfdmo` — héberge les images Docker des 3 containers Airf
 
 #### Bases de données (RDB PostgreSQL 16 HA)
 
-| Base de données | Nom Scaleway           | Usage                                                                                                                                                         |
-| --------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| DB Webapp       | `lvao-{env}-webapp`    | Données applicatives (acteurs, propositions de service, configurations carte, utilisateurs Wagtail/Django, cache, médias Wagtail). Extension PostGIS activée. |
-| DB Warehouse    | `lvao-{env}-warehouse` | Tables analytiques produites par **dbt**. Schéma `webapp_public` consommé en source via `postgres_fdw`.                                                       |
-| DB Airflow      | `lvao-{env}-airflow`   | Métadonnées Airflow (état des DAGs, XComs, logs courts). Nettoyée quotidiennement par le DAG `airflow_cleanup_db`.                                            |
+| Base de données | Nom Scaleway                                       | Usage                                                                                                                                                         |
+| --------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| DB Webapp       | Instance `lvao-{env}-webapp` / base `webapp`       | Données applicatives (acteurs, propositions de service, configurations carte, utilisateurs Wagtail/Django, cache, médias Wagtail). Extension PostGIS activée. |
+| DB Warehouse    | Instance `lvao-{env}-warehouse` / base `warehouse` | Tables analytiques produites par **dbt**. Schéma `webapp_public` consommé en source via `postgres_fdw`.                                                       |
+| DB Airflow      | Instance `lvao-{env}-warehouse` / base `airflow`   | Métadonnées Airflow (état des DAGs, XComs, logs courts). Nettoyée quotidiennement par le DAG `airflow_cleanup_db`.                                            |
+| DB Metabase     | Instance `lvao-{env}-warehouse` / base `metabase`  | Base applicative Metabase (optionnelle, provisionnée si `metabase_db_username` est défini).                                                                   |
 
 Connexions clientes en `sslmode=require`. Voir [`db/db_organisation.md`](../db/db_organisation.md) pour la liaison `postgres_fdw` et [`security/backups.md`](../security/backups.md) pour la stratégie de sauvegarde.
 

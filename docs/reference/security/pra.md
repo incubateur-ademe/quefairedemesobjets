@@ -8,15 +8,15 @@ Procédures de **restauration du service après un sinistre majeur** : perte d'u
 
 > Objectifs internes — non contractualisés avec un tiers à ce jour.
 
-| Périmètre                                | RPO cible (perte de données max.)                | RTO cible (durée d'interruption max.) |
-| ---------------------------------------- | ------------------------------------------------ | ------------------------------------- |
-| **DB Webapp** (`lvao-prod-webapp`)       | ≤ 1 h (couvert par PITR 24 h)                    | ≤ 4 h                                 |
-| **DB Warehouse** (`lvao-prod-warehouse`) | ≤ 24 h (reconstructible par `dbt run`)           | ≤ 8 h                                 |
-| **DB Airflow** (`lvao-prod-airflow`)     | ≤ 24 h (métadonnées — perte tolérable)           | ≤ 8 h                                 |
-| **Bucket `qfdmo-interface`**             | Versioning S3 (récupération fichier par fichier) | ≤ 2 h                                 |
-| **Bucket `lvao-opendata`**               | Dernier snapshot horodaté                        | ≤ 2 h                                 |
-| **Webapp Scalingo**                      | Aucune perte (re-deploy depuis `main`)           | ≤ 1 h                                 |
-| **Airflow Scaleway**                     | Aucune perte (re-build & push image)             | ≤ 2 h                                 |
+| Périmètre                                            | RPO cible (perte de données max.)                | RTO cible (durée d'interruption max.) |
+| ---------------------------------------------------- | ------------------------------------------------ | ------------------------------------- |
+| **DB Webapp** (`lvao-prod-webapp`)                   | ≤ 1 h (couvert par PITR 24 h)                    | ≤ 4 h                                 |
+| **DB Warehouse** (`lvao-prod-warehouse`)             | ≤ 24 h (reconstructible par `dbt run`)           | ≤ 8 h                                 |
+| **DB Airflow** (`airflow` sur `lvao-prod-warehouse`) | ≤ 24 h (métadonnées — perte tolérable)           | ≤ 8 h                                 |
+| **Bucket `qfdmo-interface`**                         | Versioning S3 (récupération fichier par fichier) | ≤ 2 h                                 |
+| **Bucket `lvao-opendata`**                           | Dernier snapshot horodaté                        | ≤ 2 h                                 |
+| **Webapp Scalingo**                                  | Aucune perte (re-deploy depuis `main`)           | ≤ 1 h                                 |
+| **Airflow Scaleway**                                 | Aucune perte (re-build & push image)             | ≤ 2 h                                 |
 
 ## Inventaire des sauvegardes mobilisables
 
