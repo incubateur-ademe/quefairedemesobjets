@@ -504,9 +504,17 @@ avec son `.md`, tokens en place.
 
 Périmètre MVP strict. Les deux autocompletes héritent des vues existantes :
 
+> 🚫 **Le sous-classement décrit ci-dessous a été écarté à la mesure** : le
+> rendu du gabarit coûtait ~25 ms contre 15 ms pour la requête, soit un p95 de
+> 69 ms pour un budget de 50 ms. L'assistant sert désormais du JSON depuis
+> `RechercheObjetView` — voir
+> [ADR 0007](adr/0007-endpoint-json-pour-la-recherche.md).
+>
+> L'autocomplete d'adresse, lui, suit bien le patron ci-dessous.
+
 ```python
 # views/autocomplete.py
-class AutocompleteObjetView(AutocompleteHomeSearchView):
+class AutocompleteObjetView(AutocompleteHomeSearchView):  # ← écarté, cf. ADR 0007
     """Recherche d'objet — hérite du Fuzzy(unaccent=True) existant,
     seul le gabarit de résultats change."""
 

@@ -23,15 +23,15 @@ clé** : l'URL _est_ la clé ([05-données et cache](05-donnees-et-cache.md)).
 
 ## Les routes
 
-| Route                          | Nom Django                       | Paramètres de chemin | Query string                             |
-| ------------------------------ | -------------------------------- | -------------------- | ---------------------------------------- |
-| `/assistant/`                  | `assistant:home`                 | —                    | —                                        |
-| `/assistant/objet/<slug>/`     | `assistant:produit`              | `slug`               | `adresse`, `lat`, `lon`                  |
-| `/assistant/solutions/`        | `assistant:solutions`            | —                    | `geste`, `lat`, `lon`, `adresse`, `bbox` |
-| `/assistant/lieu/<uuid>/`      | `assistant:lieu`                 | `uuid`               | —                                        |
-| `/assistant/lieux.geojson`     | `assistant:lieux-geojson`        | —                    | `geste`, `objet`, `lat`, `lon`, `bbox`   |
-| `/assistant/recherche/objet`   | `assistant:autocomplete-objet`   | —                    | `q`                                      |
-| `/assistant/recherche/adresse` | `assistant:autocomplete-adresse` | —                    | `q`                                      |
+| Route                          | Nom Django                       | Paramètres de chemin | Query string                                                             |
+| ------------------------------ | -------------------------------- | -------------------- | ------------------------------------------------------------------------ |
+| `/assistant/`                  | `assistant:home`                 | —                    | —                                                                        |
+| `/assistant/objet/<slug>/`     | `assistant:produit`              | `slug`               | `adresse`, `lat`, `lon`                                                  |
+| `/assistant/solutions/`        | `assistant:solutions`            | —                    | `geste`, `lat`, `lon`, `adresse`, `bbox`                                 |
+| `/assistant/lieu/<uuid>/`      | `assistant:lieu`                 | `uuid`               | —                                                                        |
+| `/assistant/lieux.geojson`     | `assistant:lieux-geojson`        | —                    | `geste`, `objet`, `lat`, `lon`, `bbox`                                   |
+| `/assistant/recherche/objet`   | `assistant:recherche-objet`      | —                    | `q` (JSON, voir [ADR 0007](adr/0007-endpoint-json-pour-la-recherche.md)) |
+| `/assistant/recherche/adresse` | `assistant:autocomplete-adresse` | —                    | `q`                                                                      |
 
 ## Les paramètres
 

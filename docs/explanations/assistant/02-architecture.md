@@ -110,7 +110,7 @@ urlpatterns = [
     path("solutions/", views.SolutionsView.as_view(), name="solutions"),
     path("lieu/<uuid:uuid>/", views.LieuView.as_view(), name="lieu"),
     path("lieux.geojson", views.LieuxGeoJSONView.as_view(), name="lieux-geojson"),
-    path("recherche/objet", views.AutocompleteObjetView.as_view(), name="autocomplete-objet"),
+    path("recherche/objet", views.RechercheObjetView.as_view(), name="recherche-objet"),
     path("recherche/adresse", views.AutocompleteAdresseView.as_view(), name="autocomplete-adresse"),
 ]
 ```

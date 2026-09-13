@@ -9,6 +9,7 @@
 0004-tri-knn-sans-borne-de-distance.md
 0005-bboverlaps-pour-la-zone-visible.md
 0006-strategie-adaptative-geste-objet.md
+0007-endpoint-json-pour-la-recherche.md
 ```
 
 Format inspiré des [ADR d'aides-agri](https://github.com/betagouv/aides-agri/tree/main/documentation/adr).
@@ -25,6 +26,7 @@ appuyé sur une mesure — et dont deux contredisent le plan initial.
 | [0004](0004-tri-knn-sans-borne-de-distance.md)   | Trier par l'opérateur KNN, sans borne de distance     | **Accepté** |
 | [0005](0005-bboverlaps-pour-la-zone-visible.md)  | Filtrer la zone visible par `bboverlaps`              | **Accepté** |
 | [0006](0006-strategie-adaptative-geste-objet.md) | Deux stratégies selon la rareté du couple geste/objet | **Accepté** |
+| [0007](0007-endpoint-json-pour-la-recherche.md)  | Servir la recherche d'objet en JSON, pas en HTML      | **Accepté** |
 
 « Proposé » : décidé sur dossier, pas encore éprouvé par du code.
 « Accepté » : mis en œuvre, mesuré, couvert par un test de non-régression.
