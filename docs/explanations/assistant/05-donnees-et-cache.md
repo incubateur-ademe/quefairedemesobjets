@@ -316,36 +316,31 @@ En zone dense, **les 20 lieux tiennent dans 2 km** : chercher à 20 km charge
 4 000 candidats pour en garder 20. En zone rurale au contraire, 20 km est
 nécessaire — et peu coûteux, car il y a peu de candidats.
 
-### Stratégie retenue : rayon croissant
+### ~~Stratégie envisagée : rayon croissant~~ — écartée à la mesure
 
-```python
-# Paliers : on s'arrête dès qu'on a NOMBRE_MAX_LIEUX résultats.
-# En ville le premier palier suffit (~20 ms) ; en zone rurale on
-# descend jusqu'à 20 km, qui reste rapide faute de candidats.
-PALIERS_RAYON_M = (2_000, 5_000, 20_000)
+> 🚫 **Cette section décrit une piste abandonnée.** Elle est conservée parce
+> que le raisonnement paraît solide et qu'un relecteur risque de le refaire.
+>
+> L'idée était d'essayer des paliers (2 km → 5 km → 20 km) et de s'arrêter dès
+> 20 résultats. Confrontée à la base réelle, elle échoue : **un palier de 5 km
+> coûte déjà 154 ms**, au-dessus du budget de 50 ms, et les paliers sont
+> indispensables en zone rurale. Chaque palier infructueux ajoute en plus une
+> requête.
+>
+> La cause est plus profonde que le rayon : `ST_DWithin` **empêche** PostgreSQL
+> de parcourir l'index GiST dans l'ordre des distances. Supprimer toute borne
+> et trier par l'opérateur KNN `<->` ramène Paris à 2 ms.
+>
+> → Voir [ADR 0004](adr/0004-tri-knn-sans-borne-de-distance.md) pour la
+> décision retenue et ses limites.
 
-
-def autour_de(self, longitude: float, latitude: float):
-    """Recherche initiale : les plus proches d'un point.
-
-    Essaie des rayons croissants pour éviter de charger des milliers de
-    candidats en zone dense. Mesuré : 450 ms à 20 km contre 21 ms à 2 km
-    à Paris, pour le même résultat final.
-    """
-    for rayon in PALIERS_RAYON_M:
-        lieux = self.physical().from_center(longitude, latitude, rayon)
-        if lieux.count() >= NOMBRE_MAX_LIEUX:
-            return lieux
-    return lieux          # dernier palier : tout ce qu'on a trouvé
-```
-
-> ⚠️ Le `count()` ajoute une requête par palier. À mesurer : si le `count()`
-> coûte autant que la requête complète, préférer un `[:NOMBRE_MAX_LIEUX]`
-> matérialisé et tester `len()`. **À trancher en PR 6, chiffres à l'appui.**
-
-Le plafond de 20 km reste celui de la spec #3356 (« la recherche se fait sur un
-rayon de 20 km maximum ») : les paliers sont une optimisation interne, ils ne
-changent pas le résultat visible.
+> ⚠️ **Point à trancher avec le produit** : la spec #3356 mentionne « un rayon
+> de 20 km maximum ». L'implémentation retenue n'impose aucune borne — elle
+> renvoie les 20 lieux les plus proches, fussent-ils au-delà. En pratique la
+> carte se cadre sur les résultats, donc l'usager voit toujours des lieux
+> pertinents ; mais un lieu à 80 km peut apparaître dans une zone très peu
+> dotée. À confirmer : vaut-il mieux afficher un lieu lointain ou ne rien
+> afficher ?
 
 ### En exploration (bbox), le problème ne se pose pas
 

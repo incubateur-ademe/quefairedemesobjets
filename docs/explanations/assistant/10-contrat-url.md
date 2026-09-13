@@ -29,21 +29,28 @@ clé** : l'URL _est_ la clé ([05-données et cache](05-donnees-et-cache.md)).
 | `/assistant/objet/<slug>/`     | `assistant:produit`              | `slug`               | `adresse`, `lat`, `lon`                  |
 | `/assistant/solutions/`        | `assistant:solutions`            | —                    | `geste`, `lat`, `lon`, `adresse`, `bbox` |
 | `/assistant/lieu/<uuid>/`      | `assistant:lieu`                 | `uuid`               | —                                        |
-| `/assistant/lieux.geojson`     | `assistant:lieux-geojson`        | —                    | `geste`, `lat`, `lon`, `bbox`            |
+| `/assistant/lieux.geojson`     | `assistant:lieux-geojson`        | —                    | `geste`, `objet`, `lat`, `lon`, `bbox`   |
 | `/assistant/recherche/objet`   | `assistant:autocomplete-objet`   | —                    | `q`                                      |
 | `/assistant/recherche/adresse` | `assistant:autocomplete-adresse` | —                    | `q`                                      |
 
 ## Les paramètres
 
-| Paramètre     | Type   | Obligatoire             | Valeurs                                                                                     | Origine                                                 |
-| ------------- | ------ | ----------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| `slug`        | chemin | ✅                      | slug Wagtail                                                                                | `ProduitPage.slug`                                      |
-| `uuid`        | chemin | ✅                      | uuid court                                                                                  | `DisplayedActeur.uuid`                                  |
-| `geste`       | query  | ✅ (solutions, geojson) | `reparer`, `donner_echanger_rapporter`, `emprunter_preter_louer`, `vendre_acheter`, `trier` | **`GroupeAction.code`** — voir [02](02-architecture.md) |
-| `lat` / `lon` | query  | ✅ si pas de `bbox`     | décimal WGS84                                                                               | choix dans l'autocomplete BAN                           |
-| `adresse`     | query  | ⚪️ affichage            | texte libre                                                                                 | libellé BAN, **réaffiché seulement**                    |
-| `bbox`        | query  | ⚪️ exploration          | JSON Leaflet                                                                                | déplacement de la carte                                 |
-| `q`           | query  | ✅ (autocomplete)       | texte libre                                                                                 | saisie usager                                           |
+| Paramètre     | Type   | Obligatoire             | Valeurs                                                                                     | Origine                                                      |
+| ------------- | ------ | ----------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `slug`        | chemin | ✅                      | slug Wagtail                                                                                | `ProduitPage.slug`                                           |
+| `uuid`        | chemin | ✅                      | uuid court                                                                                  | `DisplayedActeur.uuid`                                       |
+| `geste`       | query  | ✅ (solutions, geojson) | `reparer`, `donner_echanger_rapporter`, `emprunter_preter_louer`, `vendre_acheter`, `trier` | **`GroupeAction.code`** — voir [02](02-architecture.md)      |
+| `lat` / `lon` | query  | ✅ si pas de `bbox`     | décimal WGS84                                                                               | choix dans l'autocomplete BAN                                |
+| `adresse`     | query  | ⚪️ affichage            | texte libre                                                                                 | libellé BAN, **réaffiché seulement**                         |
+| `objet`       | query  | ⚪️ recommandé           | slug de `ProduitPage`                                                                       | restreint aux sous-catégories de la fiche ; `404` si inconnu |
+| `bbox`        | query  | ⚪️ exploration          | JSON Leaflet                                                                                | déplacement de la carte                                      |
+| `q`           | query  | ✅ (autocomplete)       | texte libre                                                                                 | saisie usager                                                |
+
+> ⚠️ **`objet` est facultatif mais quasi toujours souhaitable.** Sans lui,
+> `?geste=reparer` renvoie des réparateurs de n'importe quoi. Avec lui, le
+> geste et l'objet sont cherchés sur la _même_ proposition : un réparateur de
+> vélos doublé d'un donneur de meubles n'est pas un réparateur de meubles.
+> Voir [ADR 0006](adr/0006-strategie-adaptative-geste-objet.md).
 
 > ⚠️ **`geste` prend un code de `GroupeAction`, pas d'`Action`.** Un `?geste=deposer`
 > ne correspond à rien : le code attendu est `trier`.
@@ -57,7 +64,7 @@ flowchart TD
     R["Requête lieux"] --> B{"bbox présente<br/>et lisible ?"}
     B -->|oui| EXPLO["🗺️ Mode exploration<br/>zone = bbox visible<br/>tri par distance au centre"]
     B -->|non| LL{"lat + lon<br/>présents ?"}
-    LL -->|oui| INIT["📍 Mode recherche initiale<br/>rayon croissant 2→5→20 km"]
+    LL -->|oui| INIT["📍 Mode recherche initiale<br/>tri KNN, sans borne de distance"]
     LL -->|non| ERR["❌ HTTP 400<br/>paramètres invalides"]
 
     style EXPLO fill:#fef7e0,stroke:#ea8600
@@ -68,7 +75,7 @@ flowchart TD
 | Situation                                          | Comportement                                                     |
 | -------------------------------------------------- | ---------------------------------------------------------------- |
 | `bbox` seule                                       | exploration, tri depuis le centre de la bbox                     |
-| `lat`+`lon` seuls                                  | recherche initiale, rayon croissant                              |
+| `lat`+`lon` seuls                                  | recherche initiale, tri par proximité                            |
 | `bbox` **et** `lat`+`lon`                          | **`bbox` gagne** — l'usager a bougé la carte depuis sa recherche |
 | ni l'un ni l'autre                                 | `400`                                                            |
 | `bbox` illisible (`sanitize_frontend_bbox` → `[]`) | `400`, **pas** de repli silencieux sur `lat`/`lon`               |

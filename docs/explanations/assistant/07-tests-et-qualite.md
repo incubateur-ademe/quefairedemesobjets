@@ -342,13 +342,13 @@ mmdc -i diagramme.mmd -o /tmp/out.svg
 
 Cibles, mesurées avec `django-silk` (déjà en dépendance) et Lighthouse :
 
-| Métrique                      | Cible    | Pourquoi                                                                                                        |
-| ----------------------------- | -------- | --------------------------------------------------------------------------------------------------------------- |
-| Réponse fiche objet           | < 200 ms | c'est l'écran le plus visité                                                                                    |
-| Réponse GeoJSON (zone rurale) | < 50 ms  | mesuré : 10-27 ms                                                                                               |
-| Réponse GeoJSON (zone dense)  | < 150 ms | **mesuré à 450 ms sans optimisation** — voir [05-données](05-donnees-et-cache.md), stratégie du rayon croissant |
-| JS transféré (gzip)           | < 150 kb | iframe chez des réutilisateurs                                                                                  |
-| CSS transféré (gzip)          | < 30 kb  | idem                                                                                                            |
-| LCP                           | < 2.5 s  | Core Web Vitals                                                                                                 |
+| Métrique                      | Cible    | Pourquoi                                                                                                                 |
+| ----------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Réponse fiche objet           | < 200 ms | c'est l'écran le plus visité                                                                                             |
+| Réponse GeoJSON (zone rurale) | < 50 ms  | mesuré : 10-27 ms                                                                                                        |
+| Réponse GeoJSON (zone dense)  | < 50 ms  | **mesuré à 25 ms p95** au pire des 25 combinaisons zone × geste ([ADR 0004](adr/0004-tri-knn-sans-borne-de-distance.md)) |
+| JS transféré (gzip)           | < 150 kb | iframe chez des réutilisateurs                                                                                           |
+| CSS transféré (gzip)          | < 30 kb  | idem                                                                                                                     |
+| LCP                           | < 2.5 s  | Core Web Vitals                                                                                                          |
 
 **Mesurer avant d'optimiser** : PR 9 commence par un profil, pas par du cache.
