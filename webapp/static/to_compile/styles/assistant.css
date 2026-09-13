@@ -1,6 +1,15 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Le défilement doux était la seule utilité Tailwind de l'assistant. L'écrire
+   ici évite d'embarquer 2 282 classes utilitaires pour une ligne (ADR 0009 Q2),
+   et permet de la neutraliser sous `prefers-reduced-motion`. */
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
 
 /* Jetons relevés sur le Figma « 🪑 Composants spécifiques à Que faire »,
    nœud 368:1591 (Carte/Punaises de carte). Ce ne sont pas des couleurs

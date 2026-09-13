@@ -44,6 +44,10 @@ de `--qfa-pinpoint-couleur`, donc du geste choisi par l'usager (#3295).
 
 ## Deux écarts constatés, non tranchés
 
+Ces deux points sont suivis comme questions ouvertes :
+[Q4](0009-questions-a-trancher.md) pour la couleur, [Q5](0009-questions-a-trancher.md)
+pour le vocabulaire des états.
+
 **1. `vendre_acheter` diverge.** Quatre des cinq couleurs correspondent déjà à
 `GroupeAction.couleur` en base, ce qui confirme que le Figma est la source de
 ces valeurs. La cinquième non :
@@ -56,8 +60,9 @@ ces valeurs. La cinquième non :
 | `vendre_acheter`            | `#D1B781` | `#BB8568` |
 | `trier`                     | `#A558A0` | `#A558A0` |
 
-La carte utilise la valeur du Figma. **À trancher avec le design** : soit la
-base est en retard, soit le Figma l'est.
+La carte utilise la valeur du Figma. Le jeton s'appelle
+`brown-caramel-sun-425-hover` : un jeton d'état de survol, ce qui rend l'erreur
+de relevé plausible côté maquette. **À trancher avec le design → [Q4](0009-questions-a-trancher.md).**
 
 **2. La spec et le Figma se contredisent sur un libellé.** #3295 décrit
 « Prêter/Louer = orange » ; le Figma utilise `pink-tuile` (#CE614A), un
@@ -71,7 +76,8 @@ embarquée via le DSFR ; Public Sans ne l'est pas.
 
 Comme [ADR 0001](0001-pas-de-dsfr.md) écarte le DSFR de l'assistant, ajouter
 une police revient à embarquer un webfont de plus. La décision n'est pas prise
-ici : l'assistant n'impose aucune `font-family` pour l'instant.
+ici : l'assistant n'impose aucune `font-family` pour l'instant — ce qui est un
+trou, pas un choix. **→ [Q7](0009-questions-a-trancher.md).**
 
 ## Conséquences
 
@@ -79,6 +85,10 @@ ici : l'assistant n'impose aucune `font-family` pour l'instant.
 - Un changement de couleur de geste se fait en un endroit.
 - **Les assets sont copiés, pas liés** : une évolution du Figma ne se propage
   pas toute seule. C'est le prix d'un rendu qui ne dépend pas du réseau.
-- Les jetons de dimension (`--radius-sm: 4`, `--spacing-3v: 12`) ne sont pas
-  encore repris : `--qfa-rayon` vaut toujours 8px, à aligner quand les
-  composants élémentaires seront construits.
+- Les jetons de dimension sont désormais repris : l'échelle d'espacement
+  (`--qfa-espace-1v` à `-4v`, un pas de 4 px) et les deux rayons du Figma
+  (`--qfa-rayon-sm: 4px`, `--qfa-rayon-md: 8px`) remplacent le `--qfa-rayon`
+  approximé, conservé comme alias du rayon moyen.
+- Les libellés courts des gestes n'ont pas de place en base
+  (`GroupeAction.libelle` est une phrase, pas un infinitif) : voir
+  **[Q6](0009-questions-a-trancher.md)**.
