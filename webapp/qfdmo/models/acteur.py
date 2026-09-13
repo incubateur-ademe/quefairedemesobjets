@@ -19,6 +19,7 @@ from django.contrib.admin.utils import quote
 from django.contrib.gis.db import models
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point, Polygon
+from qfdmo.geo_expressions import NearestTo
 from django.contrib.gis.geos.geometry import GEOSGeometry
 from django.contrib.gis.measure import D
 from django.core.cache import cache
@@ -304,6 +305,9 @@ class LabelQualite(CodeAsNaturalKeyModel):
         return self.libelle
 
 
+NOMBRE_MAX_LIEUX = 20
+
+
 class DisplayedActeurQuerySet(models.QuerySet):
     def with_reparer(self):
         proposition_service_reparer = DisplayedPropositionService.objects.filter(
@@ -395,6 +399,58 @@ class DisplayedActeurQuerySet(models.QuerySet):
             .annotate(distance=Distance("location", reference_point))
             .order_by("distance")
         )
+
+    def proposing(self, groupe_action_code: str):
+        """Acteurs proposant ce geste.
+
+        Un « geste » au sens usager est un GroupeAction (5 en base), pas une
+        Action (11) : choisir « donner » doit inclure les acteurs qui ne
+        déclarent que `echanger` ou `rapporter`.
+
+        Le filtre passe par EXISTS plutôt que par une jointure pour éviter la
+        duplication de lignes — 9 363 acteurs ont plusieurs propositions dans
+        un même groupe, ce qui ferait rendre moins de 20 lieux distincts.
+        """
+        propositions = DisplayedPropositionService.objects.filter(
+            acteur=OuterRef("pk"),
+            action__groupe_action__code=groupe_action_code,
+        )
+        return self.filter(Exists(propositions))
+
+    def nearest_to(self, longitude, latitude):
+        """Acteurs physiques triés du plus proche au plus lointain.
+
+        Aucune borne de distance : `ST_DWithin` empêcherait le parcours
+        ordonné de l'index GiST et coûterait deux ordres de grandeur de plus.
+        Le plafond de résultats suffit à borner le travail.
+        """
+        reference_point = Point(float(longitude), float(latitude), srid=4326)
+        return self.physical().order_by(NearestTo("location", reference_point))
+
+    def within(self, bbox):
+        """Acteurs de la zone visible, du plus proche de son centre au plus loin.
+
+        Le filtre passe par `bboverlaps` (opérateur `&&`) et non `within` :
+        sur une colonne geography, `within` ignore l'index GiST et coûte
+        2 s contre 1 ms pour le même résultat, les lieux étant des points.
+        """
+        zone = Polygon.from_bbox(bbox)
+        zone.srid = 4326
+        centre = Point((bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2, srid=4326)
+        return (
+            self.physical()
+            .filter(location__bboverlaps=zone)
+            .order_by(NearestTo("location", centre))
+        )
+
+    def for_the_map(self, limit: int = NOMBRE_MAX_LIEUX):
+        return self.with_bonus()[:limit]
+
+    def as_geojson(self) -> dict:
+        return {
+            "type": "FeatureCollection",
+            "features": [acteur.as_geojson_feature() for acteur in self],
+        }
 
 
 class LatLngPropertiesMixin(models.Model):
@@ -837,7 +893,6 @@ def clean_parent(parent):
 
 
 class DisplayedActeurLinkMixin:
-
     identifiant_unique: str
 
     @property
@@ -1264,7 +1319,6 @@ class FinalActeur(BaseActeur):
 
 
 class VueActeurManager(FinalActeurManager, models.Manager):
-
     def get_visible_acteurs(self):
         return self.get_queryset().filter(
             Q(est_dans_carte=True) | Q(est_dans_opendata=True),
@@ -1352,6 +1406,27 @@ class DisplayedActeur(FinalActeur, LatLngPropertiesMixin):
 
     def natural_key(self):
         return (self.uuid,)
+
+    def as_geojson_feature(self) -> dict:
+        """Représentation GeoJSON du lieu pour la carte.
+
+        La couleur du pinpoint n'est pas exposée ici : elle suit le geste
+        choisi par l'usager, que le client connaît déjà, et non une propriété
+        du lieu. `action_principale` est d'ailleurs vide pour 99,7 % des
+        acteurs.
+        """
+        return {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [self.location.x, self.location.y],
+            },
+            "properties": {
+                "uuid": self.uuid,
+                "nom": self.nom_commercial or self.nom,
+                "bonus": getattr(self, "bonus", False),
+            },
+        }
 
     class Meta:
         verbose_name = "ACTEUR de l'EC - AFFICHÉ"

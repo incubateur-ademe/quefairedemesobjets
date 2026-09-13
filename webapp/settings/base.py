@@ -170,6 +170,7 @@ INSTALLED_APPS = [
     "search",
     "qfdmd",
     "qfdmo",
+    "assistant",
     "infotri",
     "data",
     "adminsortable2",
