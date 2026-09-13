@@ -1,8 +1,26 @@
+/* Public Sans, la police du Figma (ADR 0009 Q7), auto-hébergée via
+   `@fontsource-variable` : aucun appel à Google Fonts au chargement, donc pas
+   de requête tierce ni de dépendance réseau externe.
+
+   `wght.css` déclare trois sous-ensembles (latin, latin-ext, vietnamien), mais
+   chacun porte sa `unicode-range` : le navigateur ne télécharge que celui dont
+   la page a besoin, donc le vietnamien ne part jamais sur le réseau pour une
+   interface française.
+
+   Fonte variable : un seul fichier couvre les graisses 400 à 700 utilisées par
+   les composants, au lieu de quatre fichiers statiques. Les italiques ne sont
+   pas importées, faute d'usage. */
+@import "npm:@fontsource-variable/public-sans/wght.css";
+
 /* Le défilement doux était la seule utilité Tailwind de l'assistant. L'écrire
    ici évite d'embarquer 2 282 classes utilitaires pour une ligne (ADR 0009 Q2),
    et permet de la neutraliser sous `prefers-reduced-motion`. */
 html {
   scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Public Sans Variable", "Public Sans", system-ui, sans-serif;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -22,8 +22,9 @@ remplacée par un lien.
 | Q6 — libellés courts des gestes           | ouverte, dépend de Q5                |
 | Q7 — typographie de l'assistant           | ouverte, arbitrage design            |
 
-Q2 est conservée en place plutôt que retirée : sa réponse tient en quelques
-lignes et la mesure qui l'a tranchée vaut d'être gardée sous les yeux.
+Q2 et Q7 sont conservées en place plutôt que retirées : leurs réponses tiennent
+en quelques lignes, et les mesures qui les ont tranchées valent d'être gardées
+sous les yeux.
 
 ## Q1 — Marqueurs DOM ou couche MapLibre pour les points ?
 
@@ -246,31 +247,57 @@ dev — ce qui est probable vu Q5. Sinon l'option 1 suffit, à condition de
 
 **Dépend de Q5** : inutile de migrer avant que le vocabulaire soit arrêté.
 
-## Q7 — Quelle typographie pour l'assistant ?
+## ~~Q7 — Quelle typographie pour l'assistant ?~~ — tranchée
 
-**Contexte** : le Figma utilise **Public Sans** sur les composants de
-l'assistant (relevé sur `24417:448`, `24382:53`, `24414:395` — taille, graisse
-et interlignage sont tous exprimés dans cette famille). La page des pinpoints,
-plus ancienne, est en **Marianne**.
+**Réponse : Public Sans, auto-hébergée.** Le Figma fait foi ; la police est
+embarquée dans le dépôt, sans appel à Google Fonts.
 
-**Constaté** :
+**Mise en œuvre** : `@fontsource-variable/public-sans` (OFL-1.1), importé dans
+`assistant.css` via le schéma `npm:` déjà utilisé par `dsfr.css`. Parcel copie
+les `.woff2` à côté du CSS ; aucune URL externe ne subsiste dans le bundle
+compilé, vérifié au grep et au trafic réseau.
 
-- Marianne est déjà embarquée par le DSFR, donc disponible sans rien ajouter ;
-- Public Sans n'est **pas** dans le dépôt ;
-- [ADR 0001](0001-pas-de-dsfr.md) écarte le DSFR de l'assistant — s'appuyer sur
-  ses polices reviendrait à en garder une dépendance discrète.
+**Ce que ça coûte** : le CSS passe de 2 650 à 3 055 o gzip (+405 o), et **un
+seul** fichier de police part sur le réseau — `public-sans-latin-wght-normal`
+(mesuré au chargement d'une preview). Trois raisons :
 
-**État actuel** : l'assistant ne déclare **aucune** `font-family`. Il hérite
-donc de la police par défaut du navigateur, ce qui n'est un choix ni dans un
-sens ni dans l'autre — c'est un trou, pas une décision.
+- **fonte variable** : un fichier couvre les graisses 400 à 700 utilisées par
+  les composants, au lieu de quatre fichiers statiques ;
+- **`unicode-range`** : les sous-ensembles latin-ext et vietnamien sont
+  déclarés mais jamais téléchargés par une page française ;
+- **italiques non importées**, faute d'usage dans les maquettes.
 
-**Ce qui est en jeu** : Marianne est la police de l'État et porte une identité
-institutionnelle ; Public Sans est neutre. Le choix est autant éditorial que
-technique. Embarquer une famille supplémentaire coûte par ailleurs des octets
-sur un budget qui vient d'être ramené à 2,6 kb gzip (Q2).
+`font-display: swap` vient du paquet : le texte s'affiche immédiatement dans la
+police de repli, puis bascule. Pas d'écran vide pendant le chargement.
 
-**À trancher avec le design** : le Figma fait-il foi (Public Sans, à embarquer),
-ou l'assistant reste-t-il sur Marianne, déjà présente ?
+**Pourquoi pas Marianne** : elle est disponible, mais seulement _via_ le DSFR,
+que [ADR 0001](0001-pas-de-dsfr.md) écarte. S'appuyer dessus aurait maintenu
+une dépendance discrète au paquet qu'on cherche à ne pas charger.
+
+**Conséquence** : la page des pinpoints du Figma est en Marianne, l'assistant
+en Public Sans. L'écart est dans la maquette, pas dans le code.
+
+## Note — deux copies de MapLibre dans l'arbre npm
+
+Consigné ici parce que ce n'est pas une question ouverte mais un correctif, et
+qu'il touche la carte.
+
+`webapp/package.json` déclarait `maplibre-gl: ^6.6.0`, alors que `carte-facile`
+exige `^5.0.0`. npm installait donc **deux** copies : 5.24.0 pour carte-facile,
+6.8.0 pour l'application. Les types divergeaient (`FontFacesSpecification`
+n'est pas compatible entre les deux majeures) et `mapStyles.desaturated`
+produisait un objet refusé par le constructeur typé en 6.x.
+
+Le symptôme avait été traité une première fois en supprimant
+`webapp/node_modules` — ce qui masquait la cause : le moindre `npm install` le
+faisait revenir. La déclaration est désormais alignée sur `^5.24.0`, et
+`npm ls maplibre-gl` ne montre plus qu'une seule version, dédupliquée.
+
+> ⚠️ `webapp/tsconfig.json` n'a ni `include` ni `skipLibCheck`, et son
+> `types: ["jest", "node"]` exclut `geojson`. `tsc` parcourt donc tout
+> `node_modules` et signale des erreurs dans les `.d.ts` de dépendances
+> (`@maplibre/geojson-vt`). Antérieur à ce travail, sans effet sur le build
+> Parcel qui, lui, passe. À traiter séparément.
 
 ## Voir aussi
 
