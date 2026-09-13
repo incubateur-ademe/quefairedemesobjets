@@ -116,7 +116,7 @@ parsing, which raises VariableDoesNotExist when seo is not in context (e.g., err
         {% endblock footer %}
 
         {% dsfr_js %}
-        <script type="module" src="{% static 'qfdmd.js' %}"></script>
+        <script type="module" src="{% static 'quefaire.js' %}"></script>
         {% if "posthog" in request.GET %}
             <div class="qf-bg-green-bourgeon-main-640 qf-text-white qf-text-center qf-w-screen qf-py-1v qf-text-xs">
             Identifiant PostHog : {{ assistant.POSTHOG_KEY }} | Score de conversion : <span id="posthog-banner-conversion-score"></span>

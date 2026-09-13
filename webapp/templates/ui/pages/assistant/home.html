@@ -1,6 +1,25 @@
 {% extends base_template %}
 
+{% block title %}Que faire de mes objets et déchets ?{% endblock %}
+
 {% block main %}
-    <h1>Que faire de vos objets et déchets ?</h1>
-    {% include "ui/components/assistant/recherche_objet.html" %}
+    <div class="qfa-accueil">
+        <h1 class="qfa-accueil__titre">Que faire de vos objets et déchets ?</h1>
+
+        {% comment %}
+        GET et non POST : la recherche ne modifie rien, et l'URL résultante est
+        partageable et rechargeable. Les deux champs sont obligatoires (#3295).
+        {% endcomment %}
+        <form class="qfa-accueil__formulaire" action="{% url 'assistant:recherche' %}" method="get">
+            {% include "ui/components/assistant/recherche_objet.html" %}
+            {% include "ui/components/assistant/recherche_adresse.html" %}
+
+            <button type="submit" class="qfa-bouton qfa-bouton--primaire">
+                Lancer la recherche
+                <span class="qfa-bouton__fleche" aria-hidden="true"></span>
+            </button>
+        </form>
+
+        {% include "ui/components/assistant/footer.html" %}
+    </div>
 {% endblock main %}

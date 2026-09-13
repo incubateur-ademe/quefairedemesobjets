@@ -1,31 +1,44 @@
-<div class="qfa-recherche"
+{% comment %}
+Champ « objet » de l'en-tête.
+
+`slug` est caché : c'est lui qui identifie la fiche, alors que le champ visible
+porte le libellé choisi par l'usager.
+{% endcomment %}
+{% url 'assistant:recherche-objet' as url_recherche %}
+<div class="qfa-combobox"
      id="{{ id|default:'recherche-objet' }}"
-     data-controller="assistant-recherche-objet"
-     data-assistant-recherche-objet-url-value="{% url 'assistant:recherche-objet' %}">
-    <label class="qfa-recherche__label" for="{{ id|default:'recherche-objet' }}-champ">
+     data-controller="assistant-combobox"
+     data-assistant-combobox-url-value="{{ url_recherche }}">
+    <label class="qfa-combobox__label" for="{{ id|default:'recherche-objet' }}-champ">
         {{ label|default:"Quel objet souhaitez-vous recycler, donner, revendre ou réparer ?" }}
     </label>
 
     <input type="text"
            id="{{ id|default:'recherche-objet' }}-champ"
-           class="qfa-recherche__champ"
-           data-assistant-recherche-objet-target="champ"
-           data-action="input->assistant-recherche-objet#chercher
-                        keydown->assistant-recherche-objet#naviguer"
+           name="objet"
+           class="qfa-combobox__champ"
+           value="{{ objet|default:'' }}"
+           data-assistant-combobox-target="champ"
+           data-action="input->assistant-combobox#chercher
+                        keydown->assistant-combobox#naviguer"
            role="combobox"
            aria-expanded="false"
            aria-controls="{{ id|default:'recherche-objet' }}-liste"
            aria-autocomplete="list"
            autocomplete="off"
+           required
            placeholder="{{ placeholder|default:'Chaise, téléphone, emballage…' }}">
 
-    <ul class="qfa-recherche__liste"
+    <input type="hidden" name="slug" value="{{ slug|default:'' }}"
+           data-assistant-combobox-target="valeur" data-cle="slug">
+
+    <ul class="qfa-combobox__liste"
         id="{{ id|default:'recherche-objet' }}-liste"
         role="listbox"
-        data-assistant-recherche-objet-target="liste"
-        data-action="click->assistant-recherche-objet#choisirDepuisClic"
+        data-assistant-combobox-target="liste"
+        data-action="click->assistant-combobox#choisirDepuisClic"
         hidden></ul>
 
     <p class="qfa-sr-only" role="status" aria-live="polite"
-       data-assistant-recherche-objet-target="statut"></p>
+       data-assistant-combobox-target="statut"></p>
 </div>

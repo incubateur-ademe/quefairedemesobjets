@@ -257,17 +257,17 @@ body {
   opacity: 0.75;
 }
 
-.qfa-recherche {
+.qfa-combobox {
   position: relative;
 }
 
-.qfa-recherche__label {
+.qfa-combobox__label {
   display: block;
   margin-bottom: 0.35rem;
   font-weight: 500;
 }
 
-.qfa-recherche__champ {
+.qfa-combobox__champ {
   width: 100%;
   padding: 0.6rem 0.8rem;
   border: 1px solid #929292;
@@ -275,12 +275,12 @@ body {
   font-size: 1rem;
 }
 
-.qfa-recherche__champ:focus-visible {
+.qfa-combobox__champ:focus-visible {
   outline: 2px solid #0a76f6;
   outline-offset: 2px;
 }
 
-.qfa-recherche__liste {
+.qfa-combobox__liste {
   position: absolute;
   z-index: 20;
   width: 100%;
@@ -293,13 +293,13 @@ body {
   box-shadow: 0 4px 12px rgb(0 0 0 / 0.12);
 }
 
-.qfa-recherche__option {
+.qfa-combobox__option {
   padding: 0.55rem 0.8rem;
   cursor: pointer;
 }
 
-.qfa-recherche__option[aria-selected="true"],
-.qfa-recherche__option:hover {
+.qfa-combobox__option[aria-selected="true"],
+.qfa-combobox__option:hover {
   background: #f0f0f0;
 }
 
@@ -682,4 +682,33 @@ body {
   .qfa-accordeon__chevron {
     transition: none;
   }
+}
+
+/* Détail d'une suggestion : le contexte BAN (« 75004 Paris, Paris, Île-de-France »),
+   secondaire par rapport au libellé. */
+.qfa-combobox__detail {
+  color: var(--qfa-texte-courant);
+  font-size: 0.85em;
+}
+
+.qfa-accueil {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qfa-espace-4v);
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: var(--qfa-espace-4v);
+}
+
+.qfa-accueil__titre {
+  margin: 0;
+  color: var(--qfa-texte-titre);
+  font-size: 1.75rem;
+  line-height: 1.3;
+}
+
+.qfa-accueil__formulaire {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qfa-espace-3v);
 }

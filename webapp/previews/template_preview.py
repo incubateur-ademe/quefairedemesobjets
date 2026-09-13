@@ -1484,6 +1484,10 @@ class AssistantPreview(LookbookPreview):
     def recherche_objet(self, **kwargs):
         return render_to_string("ui/components/assistant/recherche_objet.html", {})
 
+    @component_docs("ui/components/assistant/recherche_adresse.md")
+    def recherche_adresse(self, **kwargs):
+        return render_to_string("ui/components/assistant/recherche_adresse.html", {})
+
     @component_docs("ui/components/assistant/etiquette_geste.md")
     def etiquette_geste(self, **kwargs):
         """Les gestes dans une seule preview : comparaison directe au Figma."""

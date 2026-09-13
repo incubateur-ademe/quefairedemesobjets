@@ -3,28 +3,46 @@ import { useClickOutside, useDebounce } from "stimulus-use"
 
 const DELAI_FRAPPE_MS = 150
 
-type Resultat = { libelle: string; slug: string }
+/**
+ * Une suggestion. `libelle` est seul obligatoire : les champs restants
+ * dépendent de l'endpoint (un slug pour un objet, des coordonnées pour une
+ * adresse) et voyagent tels quels dans l'événement `choisi`.
+ */
+type Suggestion = {
+  libelle: string
+  detail?: string
+  [cle: string]: unknown
+}
 
 /**
- * Combobox de recherche d'objet (W3C APG combobox-autocomplete-list).
+ * Combobox de saisie assistée (W3C APG combobox-autocomplete-list).
+ *
+ * Sert les deux champs de l'en-tête, objet et adresse : seuls l'URL interrogée
+ * et la forme des suggestions changent, pas le comportement clavier ni l'ARIA.
  *
  * La liste ne s'ouvre qu'à partir de la saisie, jamais au focus : le MVP
  * (#3295) écarte explicitement la liste ouverte d'emblée.
  */
 export default class extends Controller<HTMLElement> {
-  static targets = ["champ", "liste", "statut"]
-  static values = { url: String }
+  static targets = ["champ", "liste", "statut", "valeur"]
+  static values = {
+    url: String,
+    longueurMinimale: { type: Number, default: 2 },
+  }
 
   declare readonly champTarget: HTMLInputElement
   declare readonly listeTarget: HTMLElement
   declare readonly statutTarget: HTMLElement
   declare readonly hasStatutTarget: boolean
+  /** Champs cachés renseignés au choix, pour que le formulaire les soumette. */
+  declare readonly valeurTargets: HTMLInputElement[]
   declare urlValue: string
+  declare longueurMinimaleValue: number
 
   static debounces = [{ name: "chercher", wait: DELAI_FRAPPE_MS }]
 
   private requeteEnCours: AbortController | null = null
-  private resultats: Resultat[] = []
+  private suggestions: Suggestion[] = []
   private actif = -1
 
   connect() {
@@ -42,7 +60,11 @@ export default class extends Controller<HTMLElement> {
 
   async chercher() {
     const saisie = this.champTarget.value.trim()
-    if (saisie.length < 2) return this.#fermer()
+    // Toute frappe invalide le choix précédent : sans cela, corriger le texte
+    // sans re-choisir soumettrait les coordonnées de l'adresse d'avant.
+    this.#oublierValeurs()
+
+    if (saisie.length < this.longueurMinimaleValue) return this.#fermer()
 
     this.requeteEnCours?.abort()
     this.requeteEnCours = new AbortController()
@@ -53,7 +75,7 @@ export default class extends Controller<HTMLElement> {
       })
       if (!reponse.ok) throw new Error(`réponse ${reponse.status}`)
       const { resultats } = await reponse.json()
-      this.resultats = resultats
+      this.suggestions = resultats
       this.#afficher()
     } catch (erreur) {
       if ((erreur as Error).name === "AbortError") return
@@ -62,7 +84,7 @@ export default class extends Controller<HTMLElement> {
   }
 
   naviguer(event: KeyboardEvent) {
-    if (!this.resultats.length) return
+    if (!this.suggestions.length) return
 
     const touches: Record<string, () => void> = {
       ArrowDown: () => this.#activer(this.actif + 1),
@@ -83,27 +105,51 @@ export default class extends Controller<HTMLElement> {
   }
 
   #activer(index: number) {
-    const total = this.resultats.length
+    const total = this.suggestions.length
     this.actif = ((index % total) + total) % total
     this.#afficher()
   }
 
   #choisir(index: number) {
-    const resultat = this.resultats[index]
-    if (!resultat) return
-    this.champTarget.value = resultat.libelle
-    this.dispatch("choisi", { detail: resultat })
+    const suggestion = this.suggestions[index]
+    if (!suggestion) return
+
+    this.champTarget.value = suggestion.libelle
+    this.#renseignerValeurs(suggestion)
+    this.dispatch("choisi", { detail: suggestion })
     this.#fermer()
   }
 
+  /**
+   * Recopie la suggestion dans les champs cachés, par `data-cle`.
+   *
+   * C'est ainsi que la longitude, la latitude et le caractère précis d'une
+   * adresse arrivent au serveur : l'usager ne les saisit pas, mais la carte en
+   * a besoin.
+   */
+  #renseignerValeurs(suggestion: Suggestion) {
+    for (const champ of this.valeurTargets) {
+      const valeur = suggestion[champ.dataset.cle ?? ""]
+      champ.value = valeur === undefined || valeur === null ? "" : String(valeur)
+    }
+  }
+
+  #oublierValeurs() {
+    for (const champ of this.valeurTargets) champ.value = ""
+  }
+
   #afficher() {
-    this.listeTarget.innerHTML = this.resultats
-      .map(
-        (resultat, index) =>
+    this.listeTarget.innerHTML = this.suggestions
+      .map((suggestion, index) => {
+        const detail = suggestion.detail
+          ? ` <span class="qfa-combobox__detail">${echapper(suggestion.detail)}</span>`
+          : ""
+        return (
           `<li role="option" data-index="${index}" id="${this.#idOption(index)}"` +
           ` aria-selected="${index === this.actif}"` +
-          ` class="qfa-recherche__option">${resultat.libelle}</li>`,
-      )
+          ` class="qfa-combobox__option">${echapper(suggestion.libelle)}${detail}</li>`
+        )
+      })
       .join("")
 
     this.listeTarget.hidden = false
@@ -113,8 +159,8 @@ export default class extends Controller<HTMLElement> {
       this.actif >= 0 ? this.#idOption(this.actif) : "",
     )
     this.#annoncer(
-      this.resultats.length
-        ? `${this.resultats.length} suggestion${this.resultats.length > 1 ? "s" : ""}`
+      this.suggestions.length
+        ? `${this.suggestions.length} suggestion${this.suggestions.length > 1 ? "s" : ""}`
         : "Aucune suggestion",
     )
   }
@@ -122,17 +168,24 @@ export default class extends Controller<HTMLElement> {
   #fermer() {
     this.listeTarget.hidden = true
     this.listeTarget.innerHTML = ""
-    this.resultats = []
+    this.suggestions = []
     this.actif = -1
     this.champTarget.setAttribute("aria-expanded", "false")
     this.champTarget.removeAttribute("aria-activedescendant")
   }
 
   #idOption(index: number): string {
-    return `${this.element.id || "recherche"}-option-${index}`
+    return `${this.element.id || "combobox"}-option-${index}`
   }
 
   #annoncer(message: string) {
     if (this.hasStatutTarget) this.statutTarget.textContent = message
   }
+}
+
+/** Les libellés viennent d'une API tierce : ils ne sont pas du HTML de confiance. */
+function echapper(texte: string): string {
+  const noeud = document.createElement("span")
+  noeud.textContent = texte
+  return noeud.innerHTML
 }

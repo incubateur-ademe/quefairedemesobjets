@@ -1,0 +1,52 @@
+{% comment %}
+Champ « adresse » de l'en-tête.
+
+Les champs cachés portent ce que l'usager ne saisit pas : les coordonnées, et
+le fait que la saisie désigne une adresse précise plutôt qu'une commune — ce
+qui décide de l'affichage de la punaise rouge (#3356).
+
+Trois caractères minimum : la BAN ne répond pas en deçà.
+{% endcomment %}
+{% url 'assistant:recherche-adresse' as url_recherche %}
+<div class="qfa-combobox"
+     id="{{ id|default:'recherche-adresse' }}"
+     data-controller="assistant-combobox"
+     data-assistant-combobox-url-value="{{ url_recherche }}"
+     data-assistant-combobox-longueur-minimale-value="3">
+    <label class="qfa-combobox__label" for="{{ id|default:'recherche-adresse' }}-champ">
+        {{ label|default:"Où êtes-vous ?" }}
+    </label>
+
+    <input type="text"
+           id="{{ id|default:'recherche-adresse' }}-champ"
+           name="adresse"
+           class="qfa-combobox__champ"
+           value="{{ adresse|default:'' }}"
+           data-assistant-combobox-target="champ"
+           data-action="input->assistant-combobox#chercher
+                        keydown->assistant-combobox#naviguer"
+           role="combobox"
+           aria-expanded="false"
+           aria-controls="{{ id|default:'recherche-adresse' }}-liste"
+           aria-autocomplete="list"
+           autocomplete="off"
+           required
+           placeholder="{{ placeholder|default:'Adresse ou commune' }}">
+
+    <input type="hidden" name="longitude" value="{{ longitude|default:'' }}"
+           data-assistant-combobox-target="valeur" data-cle="longitude">
+    <input type="hidden" name="latitude" value="{{ latitude|default:'' }}"
+           data-assistant-combobox-target="valeur" data-cle="latitude">
+    <input type="hidden" name="precise" value="{{ precise|default:'' }}"
+           data-assistant-combobox-target="valeur" data-cle="precise">
+
+    <ul class="qfa-combobox__liste"
+        id="{{ id|default:'recherche-adresse' }}-liste"
+        role="listbox"
+        data-assistant-combobox-target="liste"
+        data-action="click->assistant-combobox#choisirDepuisClic"
+        hidden></ul>
+
+    <p class="qfa-sr-only" role="status" aria-live="polite"
+       data-assistant-combobox-target="statut"></p>
+</div>

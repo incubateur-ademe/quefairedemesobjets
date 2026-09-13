@@ -1,5 +1,6 @@
 from time import perf_counter
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import OperationalError, connection
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
@@ -89,13 +90,34 @@ class RechercheObjetView(View):
 
         `SearchTerm` est une base : seules ses sous-classes savent produire un
         titre. Sans passer par la sous-classe, tous les libellés sortent vides.
+
+        Une suggestion sans fiche n'est pas rendue : elle mènerait à une
+        impasse. C'est le cas d'un synonyme rattaché à un produit du modèle
+        historique plutôt qu'à une `ProduitPage`.
         """
         if specifique is None:
             return None
 
         libelle = specifique.get_title()
-        if not libelle:
+        page = _fiche_de(specifique)
+        if not libelle or page is None:
             return None
 
-        page = getattr(specifique, "page", None)
-        return {"libelle": libelle, "slug": page.slug if page else ""}
+        return {"libelle": libelle, "slug": page.slug}
+
+
+# Chaque sous-classe nomme différemment sa relation vers la fiche : il n'existe
+# pas d'accesseur commun à interroger.
+RELATIONS_VERS_LA_FICHE = ("produit_page", "page")
+
+
+def _fiche_de(terme):
+    """La `ProduitPage` d'un terme, ou None s'il n'en cible aucune."""
+    for relation in RELATIONS_VERS_LA_FICHE:
+        try:
+            page = getattr(terme, relation, None)
+        except ObjectDoesNotExist:
+            continue
+        if page is not None and getattr(page, "slug", None):
+            return page
+    return None
