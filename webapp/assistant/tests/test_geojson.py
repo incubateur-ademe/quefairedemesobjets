@@ -11,7 +11,9 @@ from unit_tests.qfdmo.acteur_factory import (
     DisplayedActeurFactory,
     DisplayedPropositionServiceFactory,
 )
+from unit_tests.qfdmd.qfdmod_factory import ProduitPageFactory
 from unit_tests.qfdmo.action_factory import ActionFactory, GroupeActionFactory
+from unit_tests.qfdmo.sscatobj_factory import SousCategorieObjetFactory
 
 PARIS = {"lat": "48.8534", "lon": "2.3488"}
 PARIS_POINT = Point(2.3488, 48.8534, srid=4326)
@@ -19,6 +21,14 @@ PARIS_POINT = Point(2.3488, 48.8534, srid=4326)
 
 def get_lieux(client, **params):
     return client.get(reverse("assistant:lieux-geojson"), {**PARIS, **params})
+
+
+def fiche_for(sous_categories):
+    """ParentalManyToManyField : la relation n'existe qu'après sauvegarde."""
+    page = ProduitPageFactory(parent=None)
+    page.sous_categorie_objet.set(sous_categories)
+    page.save()
+    return page
 
 
 def place_offering(groupe_code, *, at=PARIS_POINT, action_code=None, acteur_type=None):
@@ -114,6 +124,47 @@ class TestReponse:
         payload = json.loads(get_lieux(client, geste="reparer").content)
         assert payload["features"] == []
 
+    def test_narrows_places_to_the_object_of_the_fiche(self, client):
+        """Un réparateur de vélos n'est pas un réparateur de meubles."""
+        groupe = GroupeActionFactory(code="reparer")
+        action = ActionFactory(code="reparer", groupe_action=groupe)
+        velo, meuble = SousCategorieObjetFactory(), SousCategorieObjetFactory()
+
+        for sous_categorie in (velo, meuble):
+            acteur = DisplayedActeurFactory(location=PARIS_POINT)
+            proposition = DisplayedPropositionServiceFactory(
+                acteur=acteur, action=action
+            )
+            proposition.sous_categories.add(sous_categorie)
+
+        page = fiche_for([meuble])
+        payload = json.loads(
+            get_lieux(client, geste="reparer", objet=page.slug).content
+        )
+        assert len(payload["features"]) == 1
+
+    def test_ignores_a_place_offering_the_object_under_another_geste(self, client):
+        """Le geste et l'objet doivent tenir sur la même proposition."""
+        donner = GroupeActionFactory(code="donner_echanger_rapporter")
+        GroupeActionFactory(code="reparer")
+        meuble = SousCategorieObjetFactory()
+
+        acteur = DisplayedActeurFactory(location=PARIS_POINT)
+        proposition = DisplayedPropositionServiceFactory(
+            acteur=acteur,
+            action=ActionFactory(code="donner", groupe_action=donner),
+        )
+        proposition.sous_categories.add(meuble)
+
+        page = fiche_for([meuble])
+        payload = json.loads(
+            get_lieux(client, geste="reparer", objet=page.slug).content
+        )
+        assert payload["features"] == []
+
+    def test_returns_404_on_unknown_object(self, client):
+        assert get_lieux(client, geste="reparer", objet="inconnu").status_code == 404
+
     def test_is_cacheable(self, client):
         place_offering("reparer")
         response = get_lieux(client, geste="reparer")
@@ -138,6 +189,19 @@ class TestRequetes:
         )
         assert "&&" in sql
         assert "ST_Within" not in sql
+
+    def test_lists_candidates_when_the_geste_object_pair_is_rare(self):
+        """Sans liste, une combinaison rare fait parcourir 388 000 acteurs."""
+        groupe = GroupeActionFactory(code="reparer")
+        action = ActionFactory(code="reparer", groupe_action=groupe)
+        meuble = SousCategorieObjetFactory()
+        acteur = DisplayedActeurFactory(location=PARIS_POINT)
+        proposition = DisplayedPropositionServiceFactory(acteur=acteur, action=action)
+        proposition.sous_categories.add(meuble)
+
+        sql = str(DisplayedActeur.objects.all().proposing("reparer", [meuble.id]).query)
+        assert "identifiant_unique" in sql
+        assert "EXISTS" not in sql.upper()
 
     def test_nearest_to_does_not_bound_the_search(self):
         """Une borne de distance empêcherait le parcours ordonné de l'index."""

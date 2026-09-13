@@ -1,14 +1,27 @@
-from django.http import HttpResponseBadRequest, JsonResponse
+from django.http import Http404, HttpResponseBadRequest, JsonResponse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.cache import cache_control
 
+from qfdmd.models import ProduitPage
 from qfdmo.map_utils import sanitize_frontend_bbox
 from qfdmo.models.acteur import NOMBRE_MAX_LIEUX, DisplayedActeur
 
 
 class InvalidPosition(ValueError):
     pass
+
+
+def sous_categorie_ids_for(slug: str) -> list[int]:
+    """Sous-catégories de la fiche, pour restreindre les lieux à cet objet.
+
+    Une fiche sans sous-catégorie renvoie une liste vide : les lieux ne sont
+    alors pas restreints, plutôt que de n'en afficher aucun.
+    """
+    page = ProduitPage.objects.live().filter(slug=slug).first()
+    if page is None:
+        raise Http404(f"objet inconnu : {slug}")
+    return list(page.sous_categorie_objet.values_list("id", flat=True))
 
 
 def position_from(query) -> dict:
@@ -49,7 +62,11 @@ class LieuxGeoJSONView(View):
         except InvalidPosition as erreur:
             return HttpResponseBadRequest(f"position invalide : {erreur}")
 
-        lieux = DisplayedActeur.objects.all().proposing(geste)
+        sous_categorie_ids = (
+            sous_categorie_ids_for(objet) if (objet := request.GET.get("objet")) else []
+        )
+
+        lieux = DisplayedActeur.objects.all().proposing(geste, sous_categorie_ids)
         if position["bbox"]:
             lieux = lieux.within(position["bbox"])
         else:
