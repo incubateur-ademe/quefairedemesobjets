@@ -1,3 +1,5 @@
+from time import perf_counter
+
 from django.http import Http404, HttpResponseBadRequest, JsonResponse
 from django.utils.decorators import method_decorator
 from django.views import View
@@ -72,4 +74,12 @@ class LieuxGeoJSONView(View):
         else:
             lieux = lieux.nearest_to(position["longitude"], position["latitude"])
 
-        return JsonResponse(lieux.for_the_map(NOMBRE_MAX_LIEUX).as_geojson())
+        debut = perf_counter()
+        payload = lieux.for_the_map(NOMBRE_MAX_LIEUX).as_geojson()
+        duree_ms = (perf_counter() - debut) * 1000
+
+        reponse = JsonResponse(payload)
+        # Lu par le navigateur (onglet Réseau, PerformanceObserver) et par
+        # l'overlay de debug de la carte.
+        reponse.headers["Server-Timing"] = f'acteurs;dur={duree_ms:.1f};desc="lieux"'
+        return reponse

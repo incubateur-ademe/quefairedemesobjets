@@ -10,6 +10,14 @@ import {
 import { elementPinpoint, type CouleursPinpoint } from "../../js/assistant/pinpoint"
 import type { Map as CarteMapLibre, Marker } from "maplibre-gl"
 
+type Mesure = { serveur: number; total: number; lieux: number }
+
+/** Lit `acteurs;dur=12.3` dans l'en-tête Server-Timing. */
+function dureeServeur(entete: string | null): number {
+  const correspondance = entete?.match(/acteurs;dur=([\d.]+)/)
+  return correspondance ? Number(correspondance[1]) : 0
+}
+
 const DELAI_STABILISATION_MS = 1000
 const ZOOM_MINIMUM = 9
 
@@ -22,8 +30,10 @@ export default class extends Controller<HTMLElement> {
     longitude: Number,
     latitude: Number,
   }
+  static outlets = ["assistant-chrono"]
   static debounces = [{ name: "rafraichir", wait: DELAI_STABILISATION_MS }]
 
+  declare readonly assistantChronoOutlets: { mesurer(mesure: Mesure): void }[]
   declare readonly conteneurTarget: HTMLElement
   declare readonly messageTarget: HTMLElement
   declare readonly hasMessageTarget: boolean
@@ -55,8 +65,19 @@ export default class extends Controller<HTMLElement> {
       attributionControl: { compact: true },
     })
     this.carte.addControl(new NavigationControl({ showCompass: false }), "top-left")
+    await this.carte.once("load")
+
+    // MapLibre mesure son conteneur à la construction, avant que la feuille de
+    // styles ne soit forcément appliquée. Sans ce resize, la zone visible
+    // calculée est celle d'un conteneur trop haut et les lieux ramenés tombent
+    // hors de l'écran.
+    this.carte.resize()
+
+    // L'écoute de `moveend` n'est branchée qu'après le resize : celui-ci émet
+    // un `moveend`, qui déclencherait un second chargement identique au
+    // premier, une seconde plus tard.
     this.carte.on("moveend", () => this.rafraichir())
-    this.carte.on("load", () => this.rafraichir())
+    await this.#charger()
   }
 
   disconnect() {
@@ -71,7 +92,12 @@ export default class extends Controller<HTMLElement> {
     this.carte?.resize()
   }
 
-  async rafraichir() {
+  /** Débouncée : appelée à chaque `moveend`, n'agit qu'une fois la carte stable. */
+  rafraichir() {
+    void this.#charger()
+  }
+
+  async #charger() {
     if (!this.carte) return
 
     if (this.carte.getZoom() < ZOOM_MINIMUM) {
@@ -85,6 +111,7 @@ export default class extends Controller<HTMLElement> {
     this.requeteEnCours?.abort()
     this.requeteEnCours = new AbortController()
 
+    const debut = performance.now()
     try {
       const reponse = await fetch(this.#urlDesLieux(), {
         signal: this.requeteEnCours.signal,
@@ -92,6 +119,12 @@ export default class extends Controller<HTMLElement> {
       if (!reponse.ok) throw new Error(`réponse ${reponse.status}`)
 
       const nouveaux = lieuxDepuisGeoJSON(await reponse.json())
+      const mesure = {
+        serveur: dureeServeur(reponse.headers.get("Server-Timing")),
+        total: performance.now() - debut,
+        lieux: nouveaux.length,
+      }
+      this.assistantChronoOutlets.forEach((chrono) => chrono.mesurer(mesure))
       this.lieux = fusionner(this.lieux, nouveaux, this.#zoneVisible())
       this.#dessiner()
       this.#annoncer(
