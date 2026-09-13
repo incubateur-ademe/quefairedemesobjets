@@ -455,7 +455,11 @@ le layout.
 contient pas MapLibre** :
 
 ```bash
-grep -c maplibre static/compiled/assistant.js    # doit afficher 0
+# La bibliothèque ne doit pas être dans le bundle initial. Chercher
+# « maplibre » ne suffit pas : le nom du chunk chargé dynamiquement y
+# apparaît légitimement. On cherche donc un symbole interne.
+grep -c "maplibregl\|MercatorCoordinate" static/compiled/assistant.js   # 0
+gzip -c static/compiled/assistant.js | wc -c                            # < 150 kb
 ```
 
 Voir [08-démarrage](08-demarrage.md) pour la check-list complète.

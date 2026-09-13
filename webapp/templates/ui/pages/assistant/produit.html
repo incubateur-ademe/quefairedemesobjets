@@ -1,0 +1,9 @@
+{% extends base_template %}
+
+{% block title %}{{ produit.title }}{% endblock %}
+
+{% block main %}
+    <turbo-frame id="assistant-fiche">
+        <h1>{{ produit.title }}</h1>
+    </turbo-frame>
+{% endblock main %}

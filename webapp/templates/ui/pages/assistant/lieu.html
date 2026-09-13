@@ -1,0 +1,9 @@
+{% extends base_template %}
+
+{% block title %}{{ lieu.nom_commercial|default:lieu.nom }}{% endblock %}
+
+{% block main %}
+    <turbo-frame id="assistant-lieu">
+        <h1>{{ lieu.nom_commercial|default:lieu.nom }}</h1>
+    </turbo-frame>
+{% endblock main %}

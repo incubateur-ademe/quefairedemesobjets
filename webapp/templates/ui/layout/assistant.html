@@ -1,0 +1,27 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr" class="qf-scroll-smooth">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    {% comment %}
+    Pas de bloc SEO : l'assistant est embarqué en iframe et n'a pas vocation à
+    être indexé (#3434). On s'en tient à ce qui sert l'accessibilité.
+    {% endcomment %}
+    <meta name="robots" content="noindex, nofollow">
+    <title>{% block title %}Assistant au tri, au réemploi et à la réparation{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'assistant.css' %}">
+    <script type="module" src="{% static 'assistant.js' %}"></script>
+  </head>
+  <body>
+    <a class="qfa-skiplink" href="#contenu">Aller au contenu</a>
+
+    {% block header %}{% endblock %}
+
+    <main id="contenu">
+      {% block main %}{% endblock %}
+    </main>
+
+    {% block footer %}{% endblock %}
+  </body>
+</html>
