@@ -128,6 +128,16 @@ server {
         proxy_pass http://gunicorn;
         proxy_http_version 1.1;
         proxy_set_header Connection "";
+
+        # Sans ces en-têtes, build_absolute_uri() reconstruit des URLs en
+        # http:// derrière le TLS terminé par nginx. Un navigateur bloque
+        # alors les sous-ressources en contenu mixte — l'iframe du lookbook,
+        # par exemple.
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Real-IP $remote_addr;
+
         proxy_read_timeout 30s;
         proxy_connect_timeout 15s;
 
