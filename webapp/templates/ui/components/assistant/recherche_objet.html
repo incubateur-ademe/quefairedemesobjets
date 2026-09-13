@@ -1,0 +1,31 @@
+<div class="qfa-recherche"
+     id="{{ id|default:'recherche-objet' }}"
+     data-controller="assistant-recherche-objet"
+     data-assistant-recherche-objet-url-value="{% url 'assistant:recherche-objet' %}">
+    <label class="qfa-recherche__label" for="{{ id|default:'recherche-objet' }}-champ">
+        {{ label|default:"Quel objet souhaitez-vous recycler, donner, revendre ou réparer ?" }}
+    </label>
+
+    <input type="text"
+           id="{{ id|default:'recherche-objet' }}-champ"
+           class="qfa-recherche__champ"
+           data-assistant-recherche-objet-target="champ"
+           data-action="input->assistant-recherche-objet#chercher
+                        keydown->assistant-recherche-objet#naviguer"
+           role="combobox"
+           aria-expanded="false"
+           aria-controls="{{ id|default:'recherche-objet' }}-liste"
+           aria-autocomplete="list"
+           autocomplete="off"
+           placeholder="{{ placeholder|default:'Chaise, téléphone, emballage…' }}">
+
+    <ul class="qfa-recherche__liste"
+        id="{{ id|default:'recherche-objet' }}-liste"
+        role="listbox"
+        data-assistant-recherche-objet-target="liste"
+        data-action="click->assistant-recherche-objet#choisirDepuisClic"
+        hidden></ul>
+
+    <p class="qfa-sr-only" role="status" aria-live="polite"
+       data-assistant-recherche-objet-target="statut"></p>
+</div>
