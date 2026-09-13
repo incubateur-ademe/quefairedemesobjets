@@ -1,2 +1,8 @@
-{% block content %}
-{% endblock content %}
+{% comment %}
+Gabarit des réponses destinées à un Turbo Frame : Turbo n'extrait que le frame
+correspondant, le reste du document serait jeté.
+
+Le bloc porte le même nom que dans `assistant.html` — sans quoi les pages, qui
+définissent `main`, rendraient une réponse vide.
+{% endcomment %}
+{% block main %}{% endblock main %}

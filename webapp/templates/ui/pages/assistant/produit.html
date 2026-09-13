@@ -3,7 +3,25 @@
 {% block title %}{{ produit.title }}{% endblock %}
 
 {% block main %}
-    <turbo-frame id="assistant-fiche">
-        <h1>{{ produit.title }}</h1>
-    </turbo-frame>
+    <div class="qfa-fiche">
+        {% comment %}
+        L'en-tête est *dans* le frame, pas au-dessus : Turbo Drive est désactivé
+        pour l'assistant (il vit en iframe), et un formulaire hors frame
+        retomberait alors sur une navigation classique, rechargeant toute la
+        page. Dedans, il pilote le frame comme attendu.
+
+        Conséquence assumée : l'en-tête est re-rendu à chaque changement
+        d'objet. Il est petit, et cela garantit que le rappel affiché
+        correspond toujours à la fiche.
+        {% endcomment %}
+        <turbo-frame id="assistant-fiche">
+            {% include "ui/components/assistant/entete_parcours.html" %}
+
+            <h1 class="qfa-fiche__titre">{{ produit.title }}</h1>
+
+            {% include "ui/components/assistant/bloc_gestes.html" with blocs=consignes %}
+        </turbo-frame>
+
+        {% include "ui/components/assistant/footer.html" %}
+    </div>
 {% endblock main %}

@@ -6,6 +6,7 @@ from django.urls import reverse
 from django.views import View
 from django.views.generic import DetailView, TemplateView
 
+from assistant.consignes import consignes_pour
 from assistant.parcours import Parcours
 from qfdmd.models import ProduitPage
 from qfdmo.models.acteur import DisplayedActeur
@@ -51,6 +52,15 @@ class ProduitView(TurboFrameMixin, DetailView):
 
     def get_queryset(self):
         return ProduitPage.objects.live()
+
+    def get_context_data(self, **kwargs):
+        parcours = Parcours.depuis(self.request.GET)
+        return super().get_context_data(
+            parcours=parcours,
+            parametres=urlencode(parcours.en_parametres()),
+            consignes=consignes_pour(self.object, parcours),
+            **kwargs,
+        )
 
 
 class SolutionsView(TurboFrameMixin, TemplateView):

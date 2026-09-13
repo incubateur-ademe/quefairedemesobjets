@@ -457,8 +457,20 @@ body {
 .qfa-icone-geste[data-geste="reparer"] {
   background-image: url("../images/assistant/gestes/geste-reparer.svg");
 }
+/* « Donner » est le seul geste dont le Figma exporte le glyphe à part : le
+   fichier principal ne contient que le cercle. Sans ce second calque, l'icône
+   s'affiche vide. */
 .qfa-icone-geste[data-geste="donner_echanger_rapporter"] {
+  position: relative;
   background-image: url("../images/assistant/gestes/geste-donner.svg");
+}
+
+.qfa-icone-geste[data-geste="donner_echanger_rapporter"]::after {
+  content: "";
+  position: absolute;
+  inset: 16.67%;
+  background: url("../images/assistant/gestes/geste-donner-main.svg") center / contain
+    no-repeat;
 }
 .qfa-icone-geste[data-geste="emprunter_preter_louer"] {
   background-image: url("../images/assistant/gestes/geste-preter.svg");
@@ -711,4 +723,30 @@ body {
   display: flex;
   flex-direction: column;
   gap: var(--qfa-espace-3v);
+}
+
+.qfa-fiche {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qfa-espace-4v);
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: var(--qfa-espace-4v);
+}
+
+.qfa-fiche__titre {
+  margin: 0;
+  color: var(--qfa-texte-titre);
+  font-size: 1.5rem;
+  line-height: 1.3;
+}
+
+/* Rappel de la recherche, en tête de fiche et d'écran solutions. */
+.qfa-entete {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qfa-espace-2v);
+  padding: var(--qfa-espace-3v);
+  border-radius: var(--qfa-rayon-md);
+  background: var(--qfa-geste-reparation-fond);
 }
