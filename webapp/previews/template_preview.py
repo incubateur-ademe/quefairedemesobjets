@@ -1490,9 +1490,9 @@ class AssistantPreview(LookbookPreview):
         return _cote_a_cote(
             render_to_string(
                 "ui/components/assistant/etiquette_geste.html",
-                {"geste": code, "libelle": libelle},
+                {"geste": groupe.code, "libelle": groupe.libelle_court},
             )
-            for code, libelle in LIBELLES_COURTS.items()
+            for groupe in GroupeAction.objects.order_by("order")
         )
 
     @component_docs("ui/components/assistant/badge.md")
@@ -1510,9 +1510,9 @@ class AssistantPreview(LookbookPreview):
         return _cote_a_cote(
             render_to_string(
                 "ui/components/assistant/icone_geste.html",
-                {"geste": code, "titre": libelle},
+                {"geste": groupe.code, "titre": groupe.libelle_court},
             )
-            for code, libelle in LIBELLES_COURTS.items()
+            for groupe in GroupeAction.objects.order_by("order")
         )
 
     @component_docs("ui/components/assistant/alerte.md")
@@ -1560,17 +1560,6 @@ class AssistantPreview(LookbookPreview):
     def footer(self, **kwargs):
         return render_to_string("ui/components/assistant/footer.html", {})
 
-
-# `GroupeAction.libelle` rend une phrase à la première personne (« Je répare ») ;
-# le Figma étiquette les gestes à l'infinitif. Deux libellés différents pour deux
-# usages différents, d'où cette table plutôt qu'un détournement du modèle.
-LIBELLES_COURTS = {
-    "reparer": "Réparer",
-    "donner_echanger_rapporter": "Donner",
-    "emprunter_preter_louer": "Prêter",
-    "vendre_acheter": "Vendre",
-    "trier": "Déposer",
-}
 
 CONDITIONS = [
     ("reparable", "Réparable"),

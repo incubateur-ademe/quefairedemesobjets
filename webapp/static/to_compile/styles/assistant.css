@@ -39,7 +39,10 @@ body {
 :root {
   --qfa-geste-reparation: #009081; /* green-menthe-main-548 */
   --qfa-geste-don: #417dc4; /* blue-cumulus-main-526 */
-  --qfa-geste-vente: #bb8568; /* brown-caramel-sun-425-hover */
+  /* Valeur de `GroupeAction.couleur`, pas celle du Figma (#BB8568) : le Figma
+     y utilise un jeton `-hover`, vraisemblablement pris par erreur sur un état
+     de survol. La base fait foi (ADR 0009 Q4). */
+  --qfa-geste-vente: #d1b781;
   --qfa-geste-loc: #ce614a; /* pink-tuile-main-556 */
   --qfa-geste-tri: #a558a0; /* purple-glycine-main-494 */
 

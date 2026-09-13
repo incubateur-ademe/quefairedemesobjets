@@ -18,5 +18,6 @@
 Chaque condition associe un fond **et** une couleur de texte : les deux vont
 ensemble, le contraste en dépend.
 
-> ⚠️ Le Figma écrit « Mauvais état » là où la spec #3295 dit « Hors d'usage ».
-> Le libellé étant passé en paramètre, le choix revient à l'appelant.
+Le libellé retenu est **« Mauvais état »**, celui du Figma, là où la spec #3295
+écrivait « Hors d'usage » (tranché en ADR 0009, Q5). Le libellé reste un
+paramètre : la condition `mauvais_etat` ne bouge pas si la formulation évolue.

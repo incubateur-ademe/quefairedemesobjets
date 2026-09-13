@@ -134,11 +134,11 @@ class LieuxGeoJSONView(View):
     """Traduit les paramètres de requête en appel manager. Aucune logique ici."""
 
     def get(self, request, *args, **kwargs):
-        try:
-            params = self._params(request.GET)
-        except (KeyError, ValueError, TypeError):
-            return HttpResponseBadRequest("paramètres invalides")
+        form = LieuxForm(request.GET)
+        if not form.is_valid():
+            return JsonResponse({"erreurs": form.errors}, status=400)
 
+        params = form.cleaned_data
         lieux = DisplayedActeur.objects.all().pour_le_geste(params["geste"])
         lieux = (
             lieux.dans_la_zone(params["bbox"])
@@ -227,44 +227,109 @@ def test_deduplicates_acteur_with_several_propositions(acteur_factory):
     assert len(uuids) == len(set(uuids))
 ```
 
-### Validation aux frontières
+### Validation aux frontières : un formulaire Django
 
-`lat`, `lon` et `bbox` viennent du client : ce sont des **entrées non fiables**.
+`geste`, `objet`, `lat`, `lon` et `bbox` viennent du client : ce sont des
+**entrées non fiables**. Elles sont validées par un formulaire Django lié sur
+`request.GET`, **pas** par du parsing manuel.
 
-> ⚠️ **Piège vérifié dans le code existant** : `sanitize_frontend_bbox()`
-> (`qfdmo/map_utils.py`) **ne lève pas d'exception** sur une entrée invalide —
-> elle logge et retourne `[]`. Un `try/except ValueError` autour d'elle ne se
-> déclencherait donc jamais, et le `[]` filerait jusqu'à `Polygon.from_bbox()`.
-> Elle attend par ailleurs un JSON de forme Leaflet
-> (`{"southWest": {...}, "northEast": {...}}`), pas une liste de 4 nombres.
+C'est la pratique déjà en place dans le projet (`MapForm`, `FiltresForm`,
+`ActionDirectionForm`… dans `qfdmo/forms.py`) et elle apporte ici trois choses
+qu'un `_params()` maison n'apporte pas :
+
+1. **La valeur est validée, pas seulement la forme.** Un parsing manuel
+   vérifie que `geste` est présent et non vide ; un `ChoiceField` vérifie qu'il
+   fait partie des 5 codes de `GroupeAction`. Sans cela, `?geste=nimportequoi`
+   passe la validation et renvoie zéro lieu — un `400` déguisé en carte vide.
+2. **Une seule définition pour deux vues.** `/assistant/solutions/` et
+   `/assistant/lieux.geojson` lisent les mêmes paramètres
+   ([10-contrat d'URL](10-contrat-url.md)). Le formulaire est l'objet qui se
+   partage ; deux `_params()` divergeraient.
+3. **Le contrat se teste sans HTTP.** Les règles de priorité deviennent des
+   tests de `clean()`, sans client ni base.
 
 ```python
-def _params(self, get):
-    """Valide les paramètres client.
+# assistant/forms.py
+class LieuxForm(GetFormMixin, forms.Form):
+    """Paramètres de recherche de lieux, communs au frame et au GeoJSON."""
 
-    Lève KeyError/ValueError si invalides. Le retour [] de
-    sanitize_frontend_bbox (entrée illisible) est traité explicitement :
-    cette fonction logge et retourne [] au lieu de lever.
-    """
-    if not (geste := get.get("geste")):
-        raise KeyError("geste")
+    geste = forms.ChoiceField()          # choices posées dans __init__ (voir plus bas)
+    objet = forms.SlugField(required=False)
+    lat = forms.FloatField(min_value=-90, max_value=90, required=False)
+    lon = forms.FloatField(min_value=-180, max_value=180, required=False)
+    bbox = BboxField(required=False)
 
-    if brut := get.get("bbox"):
-        bbox = sanitize_frontend_bbox(brut)
-        if not bbox:                       # [] = bbox illisible
-            raise ValueError("bbox illisible")
-        return {"geste": geste, "bbox": bbox, "lat": None, "lon": None}
-
-    # float() lève ValueError sur une saisie non numérique, TypeError sur None
-    return {
-        "geste": geste,
-        "bbox": None,
-        "lat": float(get["lat"]),
-        "lon": float(get["lon"]),
-    }
+    def clean(self):
+        cleaned = super().clean()
+        if cleaned.get("bbox"):
+            return cleaned               # la bbox gagne : lat/lon sont ignorés
+        if cleaned.get("lat") is None or cleaned.get("lon") is None:
+            raise ValidationError("fournir bbox, ou lat et lon")
+        return cleaned
 ```
 
-Jamais de chaîne brute passée à `from_center()`.
+`GetFormMixin` (`qfdmo/mixins/get_form_mixin.py`) ne lie le formulaire que si
+au moins un champ correspondant porte une valeur non vide. Une requête sans
+aucun paramètre produit donc un formulaire **non lié**, donc `is_valid()` faux,
+donc `400` — le comportement voulu, obtenu sans code.
+
+#### `BboxField` : le seul vrai travail
+
+`sanitize_frontend_bbox()` (`qfdmo/map_utils.py`) ne peut pas être appelée
+telle quelle. Trois comportements relevés **en l'exécutant**, dont deux ne sont
+documentés nulle part :
+
+| Entrée                          | `sanitize_frontend_bbox` renvoie | Problème                               |
+| ------------------------------- | -------------------------------- | -------------------------------------- |
+| `pasdujson`, `{}`               | `[]` (logge, ne lève pas)        | un `try/except` autour d'elle est mort |
+| `null`, `5`, `[]`               | **lève `TypeError`**             | non rattrapé → **500**, pas `400`      |
+| `{"southWest":{"lng":"a",…},…}` | `["a","b","c","d"]`              | des **chaînes** filent jusqu'à PostGIS |
+
+Elle attend par ailleurs un JSON de forme Leaflet
+(`{"southWest": {...}, "northEast": {...}}`), pas une liste de 4 nombres.
+
+Un champ dédié referme les trois cas au même endroit :
+
+```python
+class BboxField(forms.Field):
+    """Bbox Leaflet → [xmin, ymin, xmax, ymax] de floats.
+
+    Encapsule les trois défauts de sanitize_frontend_bbox : le [] silencieux,
+    le TypeError sur JSON non-objet, et les coordonnées non numériques.
+    """
+
+    def to_python(self, value):
+        if value in self.empty_values:
+            return None
+        try:
+            bbox = sanitize_frontend_bbox(value)
+        except TypeError:                       # "null", "5", "[]"
+            raise ValidationError("bbox illisible")
+        if not bbox:                            # [] = entrée illisible, loggée
+            raise ValidationError("bbox illisible")
+        try:
+            return [float(c) for c in bbox]     # "a" → ValueError
+        except (TypeError, ValueError):
+            raise ValidationError("coordonnées de bbox non numériques")
+```
+
+> 💡 `FloatField` rejette déjà `nan`, `inf` et `1e400` (vérifié) : inutile de
+> s'en prémunir à la main. Les bornes `min_value`/`max_value` sur `lat`/`lon`
+> restent utiles, elles.
+
+#### Les choix de `geste` viennent de la base
+
+`GroupeAction.code` est la source de vérité ([02-architecture](02-architecture.md)).
+Les choix sont donc posés à l'instanciation, jamais en dur — et jamais au
+chargement du module, sinon une migration casserait l'import :
+
+```python
+def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+    self.fields["geste"].choices = GroupeAction.objects.values_list("code", "libelle")
+```
+
+Jamais de chaîne brute passée à `from_center()` ou `Polygon.from_bbox()`.
 
 ## Performance : mesures et stratégie du rayon
 

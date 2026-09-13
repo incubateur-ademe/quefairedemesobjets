@@ -22,9 +22,13 @@ remplacée par un lien.
 | Q6 — libellés courts des gestes           | ouverte, dépend de Q5                |
 | Q7 — typographie de l'assistant           | ouverte, arbitrage design            |
 
-Q2 et Q7 sont conservées en place plutôt que retirées : leurs réponses tiennent
-en quelques lignes, et les mesures qui les ont tranchées valent d'être gardées
-sous les yeux.
+Les questions tranchées sont conservées en place plutôt que retirées : leurs
+réponses tiennent en quelques lignes, et ce qui les a tranchées — une mesure
+pour Q2 et Q7, un arbitrage d'équipe pour Q4 à Q6 — vaut d'être gardé sous les
+yeux.
+
+Restent ouvertes : **Q1** (marqueurs DOM ou couche MapLibre) et **Q3** (borner
+la distance en zone peu dotée), toutes deux issues du plan initial.
 
 ## Q1 — Marqueurs DOM ou couche MapLibre pour les points ?
 
@@ -164,88 +168,49 @@ lointain, ou afficher un message d'absence ? Tant que cette question n'est pas
 répondue, construire une densité serait bâtir la mécanique d'une décision non
 prise.
 
-## Q4 — Quelle couleur fait foi pour `vendre_acheter` ?
+## ~~Q4 — Quelle couleur fait foi pour `vendre_acheter` ?~~ — tranchée
 
-**Contexte** : les couleurs de geste ont été relevées sur le Figma (nœud
-`368:1591`) pendant l'implémentation des pinpoints. Quatre des cinq
-correspondent **exactement** à `GroupeAction.couleur` en base, ce qui indique
-que le Figma est bien la source de ces valeurs. La cinquième diverge.
+**Réponse : la base fait foi.** `--qfa-geste-vente` vaut `#D1B781`, la valeur
+de `GroupeAction.couleur`, et non le `#BB8568` relevé sur le Figma.
 
-| Code                        | En base   | Figma     |            |
-| --------------------------- | --------- | --------- | ---------- |
-| `reparer`                   | `#009081` | `#009081` | ✅         |
-| `donner_echanger_rapporter` | `#417dc4` | `#417DC4` | ✅         |
-| `emprunter_preter_louer`    | `#ce614a` | `#CE614A` | ✅         |
-| `vendre_acheter`            | `#D1B781` | `#BB8568` | ⚠️ diverge |
-| `trier`                     | `#A558A0` | `#A558A0` | ✅         |
+L'indice qui allait dans ce sens : le jeton Figma était
+`brown-caramel-sun-425-hover`, un jeton d'**état de survol** — vraisemblablement
+pris par erreur sur un composant survolé dans la maquette.
 
-Le jeton Figma est `brown-caramel-sun-425-hover` — un jeton **`-hover`**, ce
-qui peut signaler soit un choix délibéré, soit une teinte prise par erreur sur
-un état de survol dans la maquette.
+Les cinq couleurs de geste viennent donc toutes de la base, ce qui aligne
+l'assistant sur la carte historique : une seule source, une seule correction à
+faire le jour où une couleur change.
 
-**État actuel** : la carte et les composants utilisent la valeur du Figma
-(`#BB8568`). Les deux valeurs sont des bruns proches ; l'écart se voit sur un
-aplat, pas sur une icône de 20 px.
+> ⚠️ `gestes/geste-vendre.svg` avait la couleur **dans le fichier** (c'est une
+> `background-image`, pas un masque) : son `fill` a été corrigé lui aussi. Les
+> deux SVG de pinpoint gardent l'ancien `fill`, sans conséquence — servant de
+> masques, seule leur forme est utilisée.
 
-**Ce qui dépend de la réponse** : la base sert aussi la carte historique. Si
-c'est le Figma qui a raison, corriger `GroupeAction.couleur` aligne les deux
-surfaces d'un coup ; si c'est la base, il faut corriger l'assistant **et** la
-maquette, sinon l'écart reviendra au prochain relevé.
+## ~~Q5 — « Mauvais état » ou « Hors d'usage » ?~~ — tranchée
 
-**À trancher avec le design.** Ce n'est pas une décision technique : les deux
-valeurs fonctionnent.
+**Réponse : « Mauvais état »**, le libellé du Figma.
 
-## Q5 — « Mauvais état » ou « Hors d'usage » ?
+La condition reste `mauvais_etat` côté code : le libellé est un paramètre du
+gabarit, une reformulation ultérieure ne touchera pas au composant ni au CSS.
 
-**Contexte** : le composant badge affiche l'état d'un objet. La spec #3295
-liste `Réparable`, `En bon état`, `Hors d'usage`. Le Figma (nœud `24381:25`)
-nomme la troisième variante **« Mauvais état »**.
+## ~~Q6 — Où vivent les libellés courts des gestes ?~~ — tranchée
 
-**État actuel** : le libellé est un paramètre du gabarit, la condition
-(`mauvais_etat`) reste stable. Les deux formulations sont donc possibles sans
-retoucher le composant, et la preview lookbook affiche celle du Figma.
+**Réponse : un champ sur le modèle** (option 2). `GroupeAction.libelle_court`
+porte le nom à l'infinitif affiché sur les étiquettes.
 
-**Pourquoi ce n'est pas qu'un détail** : les deux ne disent pas la même chose à
-l'usager. « Hors d'usage » est un constat sur l'objet ; « mauvais état »
-suggère un jugement, et laisse penser qu'une réparation reste envisageable —
-alors que c'est précisément la branche où l'on oriente vers le dépôt.
+Migration `qfdmo/0192_groupe_action_libelle_court`, avec sa migration de données
+qui renseigne les cinq groupes existants et sait se défaire (`RunPython` avec
+son inverse).
 
-**Penchant actuel** : suivre la spec (« Hors d'usage »), parce qu'elle décrit
-l'intention produit, alors que le Figma fige une formulation.
+| Champ           | Contenu                | Usage                    |
+| --------------- | ---------------------- | ------------------------ |
+| `libelle`       | « Je répare » (dérivé) | appel à l'action, phrase |
+| `libelle_court` | « Réparer » (saisi)    | étiquette, badge, icône  |
 
-**À trancher avec le produit et le design**, en même temps que Q6 : c'est le
-même sujet de vocabulaire.
-
-## Q6 — Où vivent les libellés courts des gestes ?
-
-**Contexte** : le Figma étiquette les gestes à l'infinitif (« Réparer »,
-« Donner », « Prêter », « Vendre », « Déposer »). `GroupeAction` n'a pas de
-champ pour cela : sa propriété `libelle` rend une phrase à la première
-personne — « Je répare », « Je dépose en point de collecte ».
-
-Ce sont deux libellés pour deux usages, pas une redondance : la phrase sert un
-appel à l'action, l'infinitif sert une étiquette.
-
-**État actuel** : une table `LIBELLES_COURTS` dans `previews/template_preview.py`
-fait la correspondance code → infinitif. C'est **volontairement un pis-aller** :
-la table est dans les previews, donc invisible pour le reste de l'application.
-
-**Options** :
-
-| #   | Option                                     | Coût        | Conséquence                                         |
-| --- | ------------------------------------------ | ----------- | --------------------------------------------------- |
-| 1   | Garder la table Python                     | nul         | le libellé ne se change pas sans déploiement        |
-| 2   | Ajouter `libelle_court` sur `GroupeAction` | migration S | éditable en admin, cohérent avec `libelle` existant |
-| 3   | Le déduire de `libelle`                    | nul         | fragile : « Je dépose en point de collecte » → ?    |
-
-L'option 3 ne tient pas : aucune règle ne transforme « Je dépose en point de
-collecte » en « Déposer ».
-
-**Penchant actuel** : option 2 si le produit veut pouvoir ajuster ces mots sans
-dev — ce qui est probable vu Q5. Sinon l'option 1 suffit, à condition de
-**sortir la table des previews** pour la mettre près du modèle.
-
-**Dépend de Q5** : inutile de migrer avant que le vocabulaire soit arrêté.
+Les deux coexistent volontairement : ce sont deux registres, pas une
+redondance. La table Python qui servait de pis-aller dans
+`previews/template_preview.py` a été supprimée — le libellé est désormais
+éditable en admin, sans déploiement.
 
 ## ~~Q7 — Quelle typographie pour l'assistant ?~~ — tranchée
 

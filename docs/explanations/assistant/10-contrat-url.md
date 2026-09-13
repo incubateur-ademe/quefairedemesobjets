@@ -153,43 +153,80 @@ src="{% url 'assistant:solutions' %}?geste={{ geste }}&adresse={{ adresse }}"
 
 ## Validation côté serveur
 
-**Une seule implémentation**, dans `assistant/views/geojson.py` : la méthode
-`_params()` détaillée dans [05-données et cache](05-donnees-et-cache.md),
+**Un formulaire Django, pas du parsing manuel.** `LieuxForm`
+(`assistant/forms.py`), détaillé dans [05-données et cache](05-donnees-et-cache.md),
 section « Validation aux frontières ».
 
-Elle applique exactement les règles de priorité ci-dessus :
+Il est lié sur `request.GET` et porte **tout** le contrat ci-dessus : les types,
+les valeurs admises, et les règles de priorité dans son `clean()`.
 
-| Entrée                     | Sortie                                       |
-| -------------------------- | -------------------------------------------- |
-| `bbox` lisible             | `{"bbox": [...], "lat": None, "lon": None}`  |
-| `lat`+`lon` numériques     | `{"bbox": None, "lat": float, "lon": float}` |
-| `bbox` illisible           | `ValueError` → `400`                         |
-| `lat`/`lon` non numériques | `ValueError` → `400`                         |
-| `lat`/`lon` absents        | `KeyError` → `400`                           |
-| `geste` absent             | `KeyError` → `400`                           |
+| Entrée                                    | Résultat                                                   |
+| ----------------------------------------- | ---------------------------------------------------------- |
+| `bbox` lisible                            | `{"bbox": [4 floats], "lat": …, "lon": …}` — la bbox prime |
+| `lat`+`lon` numériques et bornés          | `{"bbox": None, "lat": float, "lon": float}`               |
+| `bbox` illisible                          | `ValidationError` → `400`                                  |
+| `bbox` non numérique                      | `ValidationError` → `400`                                  |
+| `lat`/`lon` non numériques ou hors bornes | `ValidationError` → `400`                                  |
+| `lat`/`lon` absents, sans `bbox`          | `ValidationError` → `400`                                  |
+| `geste` absent                            | `required` → `400`                                         |
+| **`geste` inconnu**                       | `ChoiceField` → `400`                                      |
 
-> 🔁 **Ne pas dupliquer cette fonction.** Si une autre vue a besoin de lire la
-> position, elle importe celle-ci. Deux implémentations divergeraient au
-> premier changement de règle.
+> La dernière ligne est ce qu'un parsing manuel laisse passer : vérifier que
+> `geste` est « présent et non vide » n'empêche pas `?geste=nimportequoi`
+> d'aboutir à une carte vide sans erreur. Les choix viennent de
+> `GroupeAction.code`, en base.
+
+> 🔁 **Ne pas dupliquer ce formulaire.** `/assistant/solutions/` et
+> `/assistant/lieux.geojson` lisent les mêmes paramètres : ils partagent
+> `LieuxForm`. Deux définitions divergeraient au premier changement de règle.
 
 ## Tests du contrat
 
+Les règles de priorité vivent dans `clean()` : elles se testent **sur le
+formulaire**, sans client HTTP ni base.
+
 ```python
-def test_bbox_takes_precedence_over_latlon(client):
+def test_bbox_takes_precedence_over_latlon():
     """L'usager a bougé la carte : la bbox décrit ce qu'il regarde."""
-    ...
+    form = LieuxForm({"geste": "reparer", "bbox": BBOX_PARIS, "lat": "45", "lon": "5"})
+    assert form.is_valid()
+    assert form.cleaned_data["bbox"] == [2.22, 48.81, 2.47, 48.90]
 
 
-def test_returns_400_when_no_position_given(client):
+def test_returns_400_when_no_position_given():
     """Ni bbox ni lat/lon : on ne devine pas une zone."""
-    ...
+    assert not LieuxForm({"geste": "reparer"}).is_valid()
 
 
-def test_unreadable_bbox_does_not_fall_back_to_latlon(client):
+def test_unreadable_bbox_does_not_fall_back_to_latlon():
     """Un repli silencieux masquerait un bug client."""
-    ...
+    form = LieuxForm({"geste": "reparer", "bbox": "pasdujson", "lat": "45", "lon": "5"})
+    assert not form.is_valid()          # et surtout : pas de repli sur 45/5
 
 
+@pytest.mark.parametrize("brut", ["pasdujson", "{}", "null", "5", "[]"])
+def test_rejects_every_unreadable_bbox_shape(brut):
+    """`null`, `5` et `[]` font lever un TypeError à sanitize_frontend_bbox :
+    sans BboxField ils produiraient un 500, pas un 400."""
+    assert not LieuxForm({"geste": "reparer", "bbox": brut}).is_valid()
+
+
+def test_rejects_non_numeric_bbox_coordinates():
+    """sanitize_frontend_bbox laisse passer les chaînes : elles n'atteignent
+    jamais PostGIS."""
+    bbox = '{"southWest":{"lng":"a","lat":"b"},"northEast":{"lng":"c","lat":"d"}}'
+    assert not LieuxForm({"geste": "reparer", "bbox": bbox}).is_valid()
+
+
+def test_rejects_unknown_geste(db):
+    """Un parsing manuel laisserait passer : carte vide au lieu d'un 400."""
+    assert not LieuxForm({"geste": "nimportequoi", "lat": "48.8", "lon": "2.3"}).is_valid()
+```
+
+Un seul test garde le client HTTP, parce qu'il porte sur la vue et non sur le
+formulaire :
+
+```python
 def test_adresse_is_never_used_for_geocoding(client):
     """`adresse` est décorative : seuls lat/lon et bbox localisent."""
     ...

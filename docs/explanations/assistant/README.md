@@ -74,14 +74,14 @@ sont ceux où une implémentation « de bon sens » serait fausse.
 
 ### 🗄️ Données et modèles
 
-| Piège                                                 | Réalité vérifiée                                                                                              | Détail                       |
-| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ---------------------------- |
-| « Les gestes sont des `Action` »                      | Ce sont des **`GroupeAction`** (5 en base). Un geste `deposer` n'existe pas : c'est `trier`.                  | [02](02-architecture.md)     |
-| « Les couleurs de pinpoint sont des tokens CSS »      | Elles sont **déjà en base** dans `GroupeAction.couleur`, et correspondent exactement aux 5 couleurs du Figma. | [02](02-architecture.md)     |
-| « `DisplayedActeur.objects.physical()` »              | `AttributeError` : le manager ne proxifie pas le QuerySet. Il faut `.objects.all().physical()`.               | [05](05-donnees-et-cache.md) |
-| « `[:20]` renvoie 20 lieux »                          | Le JOIN sur les propositions duplique : **9 363 acteurs** ont >1 proposition dans un même groupe.             | [05](05-donnees-et-cache.md) |
-| « `in_bbox()` trie par distance »                     | Elle finit par `.order_by("?")` (aléatoire), à écraser explicitement.                                         | [05](05-donnees-et-cache.md) |
-| « `sanitize_frontend_bbox` lève sur entrée invalide » | Elle **logge et retourne `[]`**. Un `try/except` autour ne se déclenche jamais.                               | [05](05-donnees-et-cache.md) |
+| Piège                                                 | Réalité vérifiée                                                                                                                                                                                    | Détail                       |
+| ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| « Les gestes sont des `Action` »                      | Ce sont des **`GroupeAction`** (5 en base). Un geste `deposer` n'existe pas : c'est `trier`.                                                                                                        | [02](02-architecture.md)     |
+| « Les couleurs de pinpoint sont des tokens CSS »      | Elles sont **déjà en base** dans `GroupeAction.couleur`, et correspondent exactement aux 5 couleurs du Figma.                                                                                       | [02](02-architecture.md)     |
+| « `DisplayedActeur.objects.physical()` »              | `AttributeError` : le manager ne proxifie pas le QuerySet. Il faut `.objects.all().physical()`.                                                                                                     | [05](05-donnees-et-cache.md) |
+| « `[:20]` renvoie 20 lieux »                          | Le JOIN sur les propositions duplique : **9 363 acteurs** ont >1 proposition dans un même groupe.                                                                                                   | [05](05-donnees-et-cache.md) |
+| « `in_bbox()` trie par distance »                     | Elle finit par `.order_by("?")` (aléatoire), à écraser explicitement.                                                                                                                               | [05](05-donnees-et-cache.md) |
+| « `sanitize_frontend_bbox` lève sur entrée invalide » | Selon l'entrée : elle **logge et retourne `[]`** (`{}`), **lève `TypeError`** (`null`, `5`, `[]`) ou **laisse passer des chaînes** jusqu'à PostGIS. Les trois cas sont encapsulés dans `BboxField`. | [05](05-donnees-et-cache.md) |
 
 ### ⚡ Performance
 

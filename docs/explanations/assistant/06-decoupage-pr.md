@@ -27,6 +27,15 @@ dès que PR 1 est mergée. C'est utile car PR 7 en dépend et c'est la plus gros
 
 ### Deux points de séquencement à connaître
 
+> ⚠️ **Mise à jour (2026-09-13) : PR 0 est reportée.** Le renommage attend la
+> validation de l'équipe, car il touche la data-platform. Les PR 1, 2-3, 6 et 7
+> ont donc été construites sur `qfdmd`/`qfdmo`.
+>
+> Conséquence assumée : le verrou n'a pas joué, et PR 0 devra balayer ces PR en
+> plus du reste. Le travail reste mécanique (`git mv` + `sed`, tables gelées par
+> [ADR 0002](adr/0002-geler-noms-tables.md)), mais il n'est plus gratuit. Plus
+> on avance, plus la surface grandit : à rouvrir dès que l'équipe tranche.
+
 **1. PR 0 est un verrou, pas une étape.** Tant qu'elle n'est pas mergée, toute
 autre PR importera `qfdmd`/`qfdmo` et devra être retouchée. Elle est aussi la
 seule à toucher des données de production. → la faire seule, vite, et la merger
@@ -559,7 +568,13 @@ sans recharger la page.
 
 ## PR 6 — Manager GeoJSON (#3432)
 
-Voir [05-données et cache](05-donnees-et-cache.md) pour le QuerySet et la vue.
+Voir [05-données et cache](05-donnees-et-cache.md) pour le QuerySet, le
+formulaire de validation et la vue.
+
+Livre **trois** objets, pas deux : le QuerySet, la vue, et `LieuxForm`
+(`assistant/forms.py`) qui porte tout le contrat d'URL. Le formulaire est
+partagé avec `/assistant/solutions/` (PR 5) : c'est lui qui empêche les deux
+vues de diverger.
 
 **Tests — un par règle de #3356** :
 
@@ -568,12 +583,23 @@ def test_caps_results_at_twenty_places(): ...
 def test_orders_by_distance_from_bbox_center(): ...
 def test_filters_on_selected_geste(): ...
 def test_excludes_digital_acteurs(): ...          # « uniquement lieux physiques »
-def test_returns_400_on_unreadable_bbox(): ...
-def test_returns_400_on_non_numeric_coordinates(): ...
+```
+
+**Tests du formulaire** — sans client HTTP, voir
+[10-contrat d'URL](10-contrat-url.md) :
+
+```python
+def test_bbox_takes_precedence_over_latlon(): ...
+def test_returns_400_when_no_position_given(): ...
+def test_unreadable_bbox_does_not_fall_back_to_latlon(): ...
+def test_rejects_every_unreadable_bbox_shape(): ...   # null, 5, [] → 400, pas 500
+def test_rejects_non_numeric_bbox_coordinates(): ...
+def test_rejects_unknown_geste(): ...                 # ?geste=nimportequoi
 ```
 
 **Definition of done** : endpoint testé, contrat GeoJSON documenté dans
-`assistant/README.md`.
+`assistant/README.md`, validation portée par un formulaire et non par du
+parsing manuel.
 
 ---
 
