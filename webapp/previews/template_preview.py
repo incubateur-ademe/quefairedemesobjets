@@ -9,6 +9,8 @@ from django.core.paginator import Paginator
 from django.template import Context, Template
 from django.template.loader import render_to_string
 from django.test import RequestFactory
+from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from django_lookbook.preview import LookbookPreview
 from django_lookbook.utils import register_form_class
 from dsfr.forms import DsfrBaseForm
@@ -1481,6 +1483,140 @@ class AssistantPreview(LookbookPreview):
     @component_docs("ui/components/assistant/recherche_objet.md")
     def recherche_objet(self, **kwargs):
         return render_to_string("ui/components/assistant/recherche_objet.html", {})
+
+    @component_docs("ui/components/assistant/etiquette_geste.md")
+    def etiquette_geste(self, **kwargs):
+        """Les gestes dans une seule preview : comparaison directe au Figma."""
+        return _cote_a_cote(
+            render_to_string(
+                "ui/components/assistant/etiquette_geste.html",
+                {"geste": code, "libelle": libelle},
+            )
+            for code, libelle in LIBELLES_COURTS.items()
+        )
+
+    @component_docs("ui/components/assistant/badge.md")
+    def badge(self, **kwargs):
+        return _cote_a_cote(
+            render_to_string(
+                "ui/components/assistant/badge.html",
+                {"condition": condition, "libelle": libelle},
+            )
+            for condition, libelle in CONDITIONS
+        )
+
+    @component_docs("ui/components/assistant/icone_geste.md")
+    def icone_geste(self, **kwargs):
+        return _cote_a_cote(
+            render_to_string(
+                "ui/components/assistant/icone_geste.html",
+                {"geste": code, "titre": libelle},
+            )
+            for code, libelle in LIBELLES_COURTS.items()
+        )
+
+    @component_docs("ui/components/assistant/alerte.md")
+    def alerte(
+        self, message="Cet objet ne se jette pas avec les ordures ménagères.", **kwargs
+    ):
+        return render_to_string(
+            "ui/components/assistant/alerte.html", {"message": message}
+        )
+
+    @component_docs("ui/components/assistant/bloc_geste.md")
+    def bloc_geste(self, **kwargs):
+        return render_to_string(
+            "ui/components/assistant/bloc_geste.html", _BLOC_REPARER
+        )
+
+    @component_docs("ui/components/assistant/bloc_gestes.md")
+    def bloc_gestes(self, **kwargs):
+        """Les blocs dans l'ordre imposé par #3295 : réparable, bon état, usagé."""
+        return render_to_string(
+            "ui/components/assistant/bloc_gestes.html",
+            {"blocs": [_BLOC_REPARER, _BLOC_DONNER, _BLOC_TRIER]},
+        )
+
+    @component_docs("ui/components/assistant/bouton_changer_geste.md")
+    def bouton_changer_geste(self, libelle="Réparer", **kwargs):
+        return render_to_string(
+            "ui/components/assistant/bouton_changer_geste.html",
+            {"libelle": libelle, "gestes": ["reparer"], "url": "#"},
+        )
+
+    @component_docs("ui/components/assistant/accordeon.md")
+    def accordeon(self, ouvert=False, **kwargs):
+        return render_to_string(
+            "ui/components/assistant/accordeon.html",
+            {
+                "intitule": "Horaires d'ouverture",
+                "apercu": "Ouvert du lundi au samedi",
+                "contenu": "Lundi au vendredi : 9h-18h. Samedi : 9h-12h.",
+                "ouvert": ouvert,
+            },
+        )
+
+    @component_docs("ui/components/assistant/footer.md")
+    def footer(self, **kwargs):
+        return render_to_string("ui/components/assistant/footer.html", {})
+
+
+# `GroupeAction.libelle` rend une phrase à la première personne (« Je répare ») ;
+# le Figma étiquette les gestes à l'infinitif. Deux libellés différents pour deux
+# usages différents, d'où cette table plutôt qu'un détournement du modèle.
+LIBELLES_COURTS = {
+    "reparer": "Réparer",
+    "donner_echanger_rapporter": "Donner",
+    "emprunter_preter_louer": "Prêter",
+    "vendre_acheter": "Vendre",
+    "trier": "Déposer",
+}
+
+CONDITIONS = [
+    ("reparable", "Réparable"),
+    ("bon_etat", "Bon état"),
+    ("mauvais_etat", "Mauvais état"),
+    ("bonus", "Bonus Réparation"),
+]
+
+_BLOC_REPARER = {
+    "geste": "reparer",
+    "libelle": "Réparer",
+    "consigne": (
+        "Vous pensez que votre téléphone mobile peut être réparé ? Pensez au "
+        "Bonus Réparation ! Grâce à la réparation, vous prolongez la durée de "
+        "vie de votre téléphone, tout en économisant de l'argent."
+    ),
+    "badges": [
+        {"condition": "reparable", "libelle": "Réparable"},
+        {"condition": "bonus", "libelle": "Bonus Réparation"},
+    ],
+    "url": "#",
+}
+
+_BLOC_DONNER = {
+    "geste": "donner_echanger_rapporter",
+    "libelle": "Donner ou revendre",
+    "consigne": "Votre objet fonctionne encore ? Donnez-lui une seconde vie.",
+    "badges": [{"condition": "bon_etat", "libelle": "Bon état"}],
+    "url": "#",
+}
+
+_BLOC_TRIER = {
+    "geste": "trier",
+    "libelle": "Déposer",
+    "consigne": "Hors d'usage, votre objet se dépose en point de collecte.",
+    "badges": [{"condition": "mauvais_etat", "libelle": "Mauvais état"}],
+    "url": "#",
+}
+
+
+def _cote_a_cote(rendus):
+    """Aligne plusieurs variantes pour les comparer d'un coup d'œil."""
+    return format_html(
+        '<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">{}</div>',
+        mark_safe("".join(rendus)),
+    )
 
 
 PARIS = (2.3488, 48.8534)

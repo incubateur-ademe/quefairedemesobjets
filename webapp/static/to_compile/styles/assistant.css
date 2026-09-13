@@ -19,7 +19,41 @@
   --qfa-bonus-couleur: var(--qfa-geste-reparation);
   --qfa-bonus-pastille: #efcb3a; /* yellow-tournesol-850 */
   --qfa-adresse-usager: #c9191e;
-  --qfa-rayon: 8px;
+
+  /* Fonds pastel des étiquettes de geste. */
+  --qfa-geste-reparation-fond: #dffdf7; /* green-menthe-975 */
+  --qfa-geste-don-fond: #dae6fd; /* blue-cumulus-925 */
+  --qfa-geste-vente-fond: #f3e2d9; /* brown-caramel-925 */
+  --qfa-geste-loc-fond: #fddfd8; /* orange-terre-battue-925 */
+  --qfa-geste-tri-fond: #fee7fc; /* purple-glycine-950 */
+
+  /* Badges d'état : chaque fond va avec son texte, pour le contraste. */
+  --qfa-etat-reparable-fond: #dffdf7;
+  --qfa-etat-reparable-texte: #37635f;
+  --qfa-etat-bon-fond: #e1fee8;
+  --qfa-etat-bon-texte: #18753c;
+  --qfa-etat-mauvais-fond: #fee7fc;
+  --qfa-etat-mauvais-texte: #6e445a;
+  --qfa-etat-bonus-fond: #fef7da;
+  --qfa-etat-bonus-texte: #66673d;
+
+  --qfa-texte-titre: #161616;
+  --qfa-texte-courant: #3a3a3a;
+  --qfa-accent: #37635f; /* green-menthe-sun-373 : boutons, intitulés */
+  --qfa-bordure: #dddddd;
+  --qfa-fond-contraste: #eeeeee;
+  --qfa-fond-survol: #f6f6f6;
+
+  /* Échelle d'espacement du Figma : un pas vaut 4px. */
+  --qfa-espace-1v: 4px;
+  --qfa-espace-2v: 8px;
+  --qfa-espace-3v: 12px;
+  --qfa-espace-4v: 16px;
+
+  --qfa-rayon-sm: 4px;
+  --qfa-rayon-md: 8px;
+  --qfa-rayon-pilule: 999px;
+  --qfa-rayon: var(--qfa-rayon-md);
 }
 
 .qfa-carte {
@@ -246,4 +280,376 @@
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------------------
+   Composants élémentaires (#3433)
+   --------------------------------------------------------------------------- */
+
+.qfa-etiquette {
+  display: inline-flex;
+  gap: var(--qfa-espace-1v);
+  align-items: center;
+  padding: 3px var(--qfa-espace-3v) 3px var(--qfa-espace-1v);
+  border-radius: var(--qfa-rayon-pilule);
+  color: var(--qfa-texte-titre);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.qfa-etiquette__icone {
+  width: 20px;
+  height: 20px;
+  /* Le masque prend la couleur du geste, pas `currentColor` : le texte de
+     l'étiquette est gris foncé, l'icône ne l'est pas. */
+  background: var(--qfa-etiquette-icone-couleur);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.qfa-etiquette[data-geste="reparer"] {
+  background: var(--qfa-geste-reparation-fond);
+  --qfa-etiquette-icone-couleur: var(--qfa-geste-reparation);
+}
+.qfa-etiquette[data-geste="reparer"] .qfa-etiquette__icone {
+  -webkit-mask-image: url("../images/assistant/gestes/etiquette-reparer.svg");
+  mask-image: url("../images/assistant/gestes/etiquette-reparer.svg");
+}
+.qfa-etiquette[data-geste="donner_echanger_rapporter"] {
+  background: var(--qfa-geste-don-fond);
+  --qfa-etiquette-icone-couleur: var(--qfa-geste-don);
+}
+.qfa-etiquette[data-geste="donner_echanger_rapporter"] .qfa-etiquette__icone {
+  -webkit-mask-image: url("../images/assistant/gestes/etiquette-donner.svg");
+  mask-image: url("../images/assistant/gestes/etiquette-donner.svg");
+}
+.qfa-etiquette[data-geste="vendre_acheter"] {
+  background: var(--qfa-geste-vente-fond);
+  --qfa-etiquette-icone-couleur: var(--qfa-geste-vente);
+}
+.qfa-etiquette[data-geste="vendre_acheter"] .qfa-etiquette__icone {
+  -webkit-mask-image: url("../images/assistant/gestes/etiquette-vendre.svg");
+  mask-image: url("../images/assistant/gestes/etiquette-vendre.svg");
+}
+.qfa-etiquette[data-geste="emprunter_preter_louer"] {
+  background: var(--qfa-geste-loc-fond);
+  --qfa-etiquette-icone-couleur: var(--qfa-geste-loc);
+}
+.qfa-etiquette[data-geste="emprunter_preter_louer"] .qfa-etiquette__icone {
+  -webkit-mask-image: url("../images/assistant/gestes/etiquette-preter.svg");
+  mask-image: url("../images/assistant/gestes/etiquette-preter.svg");
+}
+.qfa-etiquette[data-geste="trier"] {
+  background: var(--qfa-geste-tri-fond);
+  --qfa-etiquette-icone-couleur: var(--qfa-geste-tri);
+}
+.qfa-etiquette[data-geste="trier"] .qfa-etiquette__icone {
+  -webkit-mask-image: url("../images/assistant/gestes/etiquette-deposer.svg");
+  mask-image: url("../images/assistant/gestes/etiquette-deposer.svg");
+}
+
+.qfa-badge {
+  display: inline-flex;
+  gap: var(--qfa-espace-1v);
+  align-items: center;
+  padding: var(--qfa-espace-1v) 10px;
+  border-radius: var(--qfa-rayon-pilule);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.qfa-badge[data-condition="reparable"] {
+  background: var(--qfa-etat-reparable-fond);
+  color: var(--qfa-etat-reparable-texte);
+}
+.qfa-badge[data-condition="bon_etat"] {
+  background: var(--qfa-etat-bon-fond);
+  color: var(--qfa-etat-bon-texte);
+}
+.qfa-badge[data-condition="mauvais_etat"] {
+  background: var(--qfa-etat-mauvais-fond);
+  color: var(--qfa-etat-mauvais-texte);
+}
+.qfa-badge[data-condition="bonus"] {
+  background: var(--qfa-etat-bonus-fond);
+  color: var(--qfa-etat-bonus-texte);
+}
+
+.qfa-badge__icone {
+  width: 14px;
+  height: 14px;
+  background-image: url("../images/assistant/ui/badge-bonus.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.qfa-alerte {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin: 0;
+  padding: var(--qfa-espace-2v) var(--qfa-espace-3v);
+  border: 1px solid var(--qfa-texte-courant);
+  border-radius: var(--qfa-rayon-sm);
+  background: var(--qfa-fond-survol);
+  color: var(--qfa-texte-courant);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.qfa-alerte__icone {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  background: currentColor;
+  -webkit-mask: url("../images/assistant/ui/alerte-info.svg") center / contain no-repeat;
+  mask: url("../images/assistant/ui/alerte-info.svg") center / contain no-repeat;
+}
+
+.qfa-icone-geste {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.qfa-icone-geste[data-geste="reparer"] {
+  background-image: url("../images/assistant/gestes/geste-reparer.svg");
+}
+.qfa-icone-geste[data-geste="donner_echanger_rapporter"] {
+  background-image: url("../images/assistant/gestes/geste-donner.svg");
+}
+.qfa-icone-geste[data-geste="emprunter_preter_louer"] {
+  background-image: url("../images/assistant/gestes/geste-preter.svg");
+}
+.qfa-icone-geste[data-geste="vendre_acheter"] {
+  background-image: url("../images/assistant/gestes/geste-vendre.svg");
+}
+.qfa-icone-geste[data-geste="trier"] {
+  background-image: url("../images/assistant/gestes/geste-deposer.svg");
+}
+
+/* ---------------------------------------------------------------------------
+   Composants complexes (#3433)
+   --------------------------------------------------------------------------- */
+
+.qfa-bouton {
+  display: inline-flex;
+  gap: var(--qfa-espace-2v);
+  align-items: center;
+  justify-content: center;
+  padding: var(--qfa-espace-2v) var(--qfa-espace-4v);
+  border-radius: var(--qfa-rayon-md);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-decoration: none;
+}
+
+.qfa-bouton--primaire {
+  background: var(--qfa-accent);
+  color: #fff;
+}
+
+.qfa-bouton--tertiaire {
+  background: none;
+  color: var(--qfa-accent);
+}
+
+.qfa-bouton:focus-visible,
+.qfa-changer-geste:focus-visible,
+.qfa-accordeon__entete:focus-visible {
+  outline: 2px solid #0a76f6;
+  outline-offset: 2px;
+}
+
+.qfa-bouton__fleche,
+.qfa-bouton__externe {
+  width: 16px;
+  height: 16px;
+  background: currentColor;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.qfa-bouton__fleche {
+  -webkit-mask-image: url("../images/assistant/ui/fleche-droite.svg");
+  mask-image: url("../images/assistant/ui/fleche-droite.svg");
+}
+
+.qfa-bouton__externe {
+  -webkit-mask-image: url("../images/assistant/ui/lien-externe.svg");
+  mask-image: url("../images/assistant/ui/lien-externe.svg");
+}
+
+.qfa-bloc-geste {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qfa-espace-2v);
+  align-items: flex-start;
+}
+
+.qfa-bloc-geste__badges {
+  display: flex;
+  gap: var(--qfa-espace-1v);
+  flex-wrap: wrap;
+  margin: 0;
+}
+
+.qfa-bloc-geste__titre {
+  display: flex;
+  gap: var(--qfa-espace-2v);
+  align-items: center;
+  margin: 0;
+  color: var(--qfa-texte-titre);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.qfa-bloc-geste__consigne {
+  color: var(--qfa-texte-titre);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.qfa-bloc-geste .qfa-bouton {
+  width: 100%;
+  max-width: 300px;
+}
+
+.qfa-bloc-gestes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qfa-espace-4v);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.qfa-changer-geste {
+  display: inline-flex;
+  gap: var(--qfa-espace-2v);
+  align-items: center;
+  padding: var(--qfa-espace-2v) var(--qfa-espace-3v);
+  border-radius: var(--qfa-rayon-md);
+  background: var(--qfa-accent);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-decoration: none;
+}
+
+.qfa-changer-geste__retour {
+  width: 16px;
+  height: 16px;
+  background: currentColor;
+  /* La flèche « droite » du Figma, retournée : une seule icône embarquée. */
+  transform: rotate(180deg);
+  -webkit-mask: url("../images/assistant/ui/fleche-droite.svg") center / contain
+    no-repeat;
+  mask: url("../images/assistant/ui/fleche-droite.svg") center / contain no-repeat;
+}
+
+.qfa-changer-geste__icones {
+  display: inline-flex;
+  gap: var(--qfa-espace-1v);
+  align-items: center;
+}
+
+.qfa-accordeon {
+  border-top: 1px solid var(--qfa-bordure);
+  border-bottom: 1px solid var(--qfa-bordure);
+}
+
+.qfa-accordeon__entete {
+  display: flex;
+  gap: var(--qfa-espace-4v);
+  align-items: center;
+  padding: var(--qfa-espace-3v) var(--qfa-espace-4v);
+  background: var(--qfa-geste-reparation-fond);
+  cursor: pointer;
+  list-style: none;
+}
+
+/* Safari affiche un triangle par défaut, que le chevron remplace. */
+.qfa-accordeon__entete::-webkit-details-marker {
+  display: none;
+}
+
+.qfa-accordeon__textes {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--qfa-espace-1v);
+}
+
+.qfa-accordeon__intitule {
+  color: var(--qfa-accent);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.qfa-accordeon__apercu {
+  color: var(--qfa-texte-courant);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* L'asset du Figma pointe vers le haut, c'est-à-dire l'état ouvert. Fermé, le
+   chevron doit inviter à déplier : c'est donc l'état fermé qui pivote. */
+.qfa-accordeon__chevron {
+  flex: none;
+  transform: rotate(180deg);
+  width: 16px;
+  height: 16px;
+  background: var(--qfa-accent);
+  transition: transform 150ms ease-out;
+  -webkit-mask: url("../images/assistant/ui/accordeon-chevron.svg") center / contain
+    no-repeat;
+  mask: url("../images/assistant/ui/accordeon-chevron.svg") center / contain no-repeat;
+}
+
+.qfa-accordeon[open] .qfa-accordeon__chevron {
+  transform: rotate(0deg);
+}
+
+.qfa-accordeon__contenu {
+  padding: var(--qfa-espace-2v) var(--qfa-espace-4v);
+}
+
+.qfa-footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qfa-espace-3v);
+  align-items: center;
+}
+
+.qfa-footer__marques {
+  display: flex;
+  gap: 21px;
+  align-items: center;
+  margin: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qfa-accordeon__chevron {
+    transition: none;
+  }
 }

@@ -1,0 +1,10 @@
+{% comment %}
+Alerte informative (Figma 24420:507).
+
+`role="status"` plutôt que `role="alert"` : le contenu est informatif et ne
+doit pas interrompre un lecteur d'écran en cours de lecture.
+{% endcomment %}
+<p class="qfa-alerte" role="status">
+    <span class="qfa-alerte__icone" aria-hidden="true"></span>
+    <span>{{ message }}</span>
+</p>

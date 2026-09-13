@@ -1,0 +1,12 @@
+{% comment %}
+Badge d'état ou Bonus Réparation (Figma 24381:25).
+
+`condition` vaut reparable, bon_etat, mauvais_etat ou bonus. Le Bonus porte une
+icône ; les autres sont purement textuels.
+{% endcomment %}
+<span class="qfa-badge" data-condition="{{ condition }}">
+    {% if condition == "bonus" %}
+        <span class="qfa-badge__icone" aria-hidden="true"></span>
+    {% endif %}
+    {{ libelle }}
+</span>

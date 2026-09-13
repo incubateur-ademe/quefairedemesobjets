@@ -1,0 +1,30 @@
+{% comment %}
+Bloc geste (Figma 24414:395) : badges, titre, consigne, appel à l'action.
+
+C'est l'unité de la fiche objet. L'ordre des blocs (réparable → bon état →
+hors d'usage) est décidé par la vue, pas ici.
+
+`consigne` est du HTML issu du CMS : il est marqué sûr en amont, dans le
+modèle, jamais échappé à la volée dans le gabarit.
+{% endcomment %}
+<article class="qfa-bloc-geste" data-geste="{{ geste }}">
+    {% if badges %}
+        <p class="qfa-bloc-geste__badges">
+            {% for badge in badges %}
+                {% include "ui/components/assistant/badge.html" with condition=badge.condition libelle=badge.libelle %}
+            {% endfor %}
+        </p>
+    {% endif %}
+
+    <h3 class="qfa-bloc-geste__titre">
+        {% include "ui/components/assistant/icone_geste.html" with geste=geste %}
+        {{ libelle }}
+    </h3>
+
+    <div class="qfa-bloc-geste__consigne">{{ consigne }}</div>
+
+    <a class="qfa-bouton qfa-bouton--primaire" href="{{ url }}">
+        {{ appel_action|default:"Je découvre les solutions" }}
+        <span class="qfa-bouton__fleche" aria-hidden="true"></span>
+    </a>
+</article>

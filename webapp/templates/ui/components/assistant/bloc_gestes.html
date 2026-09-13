@@ -1,0 +1,15 @@
+{% comment %}
+Liste des blocs geste d'une fiche objet.
+
+Une liste plutôt qu'une suite d'`article` : le nombre de gestes est une
+information utile au lecteur d'écran, et l'ordre porte du sens (#3295).
+{% endcomment %}
+<ul class="qfa-bloc-gestes">
+    {% for bloc in blocs %}
+        <li>
+            {% include "ui/components/assistant/bloc_geste.html" with geste=bloc.geste libelle=bloc.libelle consigne=bloc.consigne badges=bloc.badges url=bloc.url %}
+        </li>
+    {% empty %}
+        {% include "ui/components/assistant/alerte.html" with message="Aucune consigne n'est disponible pour cet objet." %}
+    {% endfor %}
+</ul>
