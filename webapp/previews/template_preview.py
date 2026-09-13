@@ -20,7 +20,7 @@ from core.widgets import (
 )
 from infotri.forms import InfotriForm
 from qfdmd.forms import QfSearchForm
-from qfdmd.models import Synonyme
+from qfdmd.models import ProduitPage, Synonyme
 from qfdmd.views import get_homepage
 from qfdmo.forms import (
     LegendeForm,
@@ -32,7 +32,7 @@ from qfdmo.models.acteur import (
     DisplayedPropositionService,
     LabelQualite,
 )
-from qfdmo.models.action import Action
+from qfdmo.models.action import Action, GroupeAction
 from qfdmo.models.config import CarteConfig
 from search.models import SearchTerm
 from qfdmo.widgets import SynonymeAutocompleteInput
@@ -1416,3 +1416,52 @@ class TestsPreview(LookbookPreview):
             "ui/tests/t_19_infotri_responsive.html",
             {"base_url": base_url},
         )
+
+
+class GesteForm(DsfrBaseForm):
+    geste = forms.ChoiceField(
+        label="Geste",
+        choices=[
+            ("reparer", "Réparer"),
+            ("donner_echanger_rapporter", "Donner, échanger, rapporter"),
+            ("emprunter_preter_louer", "Emprunter, prêter, louer"),
+            ("vendre_acheter", "Vendre, acheter"),
+            ("trier", "Trier"),
+        ],
+    )
+    objet = forms.CharField(
+        label="Slug d'une fiche produit (facultatif)", required=False
+    )
+
+
+class AssistantPreview(LookbookPreview):
+    """Composants de l'assistant V2."""
+
+    @register_form_class(GesteForm)
+    @component_docs("ui/components/assistant/carte.md")
+    def carte(self, geste="reparer", objet="", **kwargs):
+        groupe = GroupeAction.objects.filter(code=geste).first()
+        lieux = (
+            DisplayedActeur.objects.all()
+            .proposing(geste, _sous_categorie_ids(objet))
+            .nearest_to(2.3488, 48.8534)
+            .for_the_map()
+        )
+        return render_to_string(
+            "ui/components/assistant/carte.html",
+            {
+                "geste": geste,
+                "objet": objet,
+                "longitude": 2.3488,
+                "latitude": 48.8534,
+                "couleur_geste": groupe.couleur if groupe else "#009081",
+                "lieux": lieux,
+            },
+        )
+
+
+def _sous_categorie_ids(slug):
+    if not slug:
+        return []
+    page = ProduitPage.objects.live().filter(slug=slug).first()
+    return list(page.sous_categorie_objet.values_list("id", flat=True)) if page else []
