@@ -500,6 +500,14 @@ class DisplayedActeurQuerySet(models.QuerySet):
     def for_the_map(self, limit: int = NOMBRE_MAX_LIEUX):
         return self.with_bonus()[:limit]
 
+    def pour_le_detail(self):
+        """Un lieu et tout ce que sa fiche affiche, sans requête en cascade.
+
+        Le `prefetch_related` vit ici plutôt que dans la vue : c'est une
+        propriété de la donnée à charger, pas de la page qui l'affiche.
+        """
+        return self.select_related("acteur_type").prefetch_related("labels", "sources")
+
     def as_geojson(self) -> dict:
         return {
             "type": "FeatureCollection",

@@ -3,7 +3,78 @@
 {% block title %}{{ lieu.nom_commercial|default:lieu.nom }}{% endblock %}
 
 {% block main %}
-    <turbo-frame id="assistant-lieu">
-        <h1>{{ lieu.nom_commercial|default:lieu.nom }}</h1>
-    </turbo-frame>
+    <article class="qfa-lieu">
+        <turbo-frame id="assistant-lieu">
+            <header class="qfa-lieu__identite">
+                <h1 class="qfa-lieu__nom">{{ lieu.nom_commercial|default:lieu.nom }}</h1>
+                {% if lieu.acteur_type %}
+                    <p class="qfa-lieu__type">{{ lieu.acteur_type.libelle }}</p>
+                {% endif %}
+
+                {% comment %}
+                Un seul label, le Bonus Réparation : la spec #3295 écarte ESS et
+                Répar'Acteurs du MVP, que la V1 affichait pourtant.
+                {% endcomment %}
+                {% if bonus_reparation %}
+                    {% include "ui/components/assistant/badge.html" with condition="bonus" libelle="Bonus Réparation" %}
+                {% endif %}
+            </header>
+
+            <p class="qfa-lieu__adresse">
+                {{ lieu.adresse }}{% if lieu.adresse_complement %}, {{ lieu.adresse_complement }}{% endif %}<br>
+                {{ lieu.code_postal }} {{ lieu.ville }}
+            </p>
+
+            {% comment %}
+            Téléphone et site en texte brut, pas en lien : le MVP les affiche
+            sans action associée (#3295).
+            {% endcomment %}
+            {% if lieu.telephone or lieu.url %}
+                <dl class="qfa-lieu__contact">
+                    {% if lieu.telephone %}
+                        <dt>Téléphone</dt><dd>{{ lieu.telephone }}</dd>
+                    {% endif %}
+                    {% if lieu.url %}
+                        <dt>Site web</dt><dd>{{ lieu.url }}</dd>
+                    {% endif %}
+                </dl>
+            {% endif %}
+
+            {% if infos_pratiques %}
+                <section class="qfa-lieu__pratique" aria-labelledby="infos-pratiques">
+                    <h2 id="infos-pratiques" class="qfa-lieu__soustitre">Informations pratiques</h2>
+                    <ul>
+                        {% for info in infos_pratiques %}<li>{{ info }}</li>{% endfor %}
+                    </ul>
+                </section>
+            {% endif %}
+
+            {% if lieu.horaires_description or lieu.horaires_osm %}
+                {% include "ui/components/assistant/accordeon.html" with intitule="Horaires d'ouverture" contenu=lieu.horaires_description|default:lieu.horaires_osm %}
+            {% endif %}
+
+            {% comment %}
+            Paternité et fraîcheur de la donnée : l'usager doit pouvoir juger
+            de ce qu'il lit, et savoir d'où ça vient (#3295). L'accordéon est
+            écrit ici plutôt qu'inclus, son contenu étant structuré.
+            {% endcomment %}
+            <details class="qfa-accordeon">
+                <summary class="qfa-accordeon__entete">
+                    <span class="qfa-accordeon__textes">
+                        <span class="qfa-accordeon__intitule">En savoir plus</span>
+                    </span>
+                    <span class="qfa-accordeon__chevron" aria-hidden="true"></span>
+                </summary>
+                <div class="qfa-accordeon__contenu">
+                    {% if lieu.sources.all %}
+                        <p>
+                            Source{{ lieu.sources.all|pluralize }} :
+                            {% for source in lieu.sources.all %}{{ source.libelle }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                        </p>
+                    {% endif %}
+                    <p>Dernière mise à jour : {{ lieu.modifie_le|date:"j F Y" }}</p>
+                </div>
+            </details>
+        </turbo-frame>
+    </article>
 {% endblock main %}

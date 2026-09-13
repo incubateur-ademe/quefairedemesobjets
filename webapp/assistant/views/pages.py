@@ -7,6 +7,7 @@ from django.views import View
 from django.views.generic import DetailView, TemplateView
 
 from assistant.consignes import consignes_pour
+from assistant.lieu import infos_pratiques_de, propose_le_bonus
 from assistant.parcours import Parcours
 from qfdmd.models import ProduitPage
 from qfdmo.models.acteur import DisplayedActeur
@@ -73,3 +74,16 @@ class LieuView(TurboFrameMixin, DetailView):
     slug_field = "uuid"
     slug_url_kwarg = "uuid"
     context_object_name = "lieu"
+
+    def get_queryset(self):
+        return DisplayedActeur.objects.all().pour_le_detail()
+
+    def get_context_data(self, **kwargs):
+        parcours = Parcours.depuis(self.request.GET)
+        return super().get_context_data(
+            parcours=parcours,
+            parametres=urlencode(parcours.en_parametres()),
+            infos_pratiques=infos_pratiques_de(self.object),
+            bonus_reparation=propose_le_bonus(self.object),
+            **kwargs,
+        )

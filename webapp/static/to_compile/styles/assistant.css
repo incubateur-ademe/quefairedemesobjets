@@ -750,3 +750,60 @@ body {
   border-radius: var(--qfa-rayon-md);
   background: var(--qfa-geste-reparation-fond);
 }
+
+.qfa-lieu {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qfa-espace-4v);
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: var(--qfa-espace-4v);
+}
+
+.qfa-lieu__identite {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qfa-espace-2v);
+  align-items: flex-start;
+}
+
+.qfa-lieu__nom {
+  margin: 0;
+  color: var(--qfa-texte-titre);
+  font-size: 1.5rem;
+  line-height: 1.3;
+}
+
+.qfa-lieu__type {
+  margin: 0;
+  color: var(--qfa-texte-courant);
+  font-size: 0.875rem;
+}
+
+.qfa-lieu__adresse,
+.qfa-lieu__contact,
+.qfa-lieu__pratique {
+  margin: 0;
+  color: var(--qfa-texte-courant);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.qfa-lieu__soustitre {
+  margin: 0 0 var(--qfa-espace-1v);
+  color: var(--qfa-texte-titre);
+  font-size: 1rem;
+}
+
+.qfa-lieu__contact dt {
+  font-weight: 600;
+}
+
+.qfa-lieu__contact dd {
+  margin: 0 0 var(--qfa-espace-1v);
+}
+
+.qfa-lieu__pratique ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}

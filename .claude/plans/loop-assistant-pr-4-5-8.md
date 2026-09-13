@@ -29,32 +29,32 @@ qu'un point bloquant demande un arbitrage humain.
 
 ### PR 4 — Écran accueil
 
-- [ ] Autocomplete d'adresse (BAN), sans l'option « Autour de moi » (hors MVP)
-- [ ] Le `type` BAN (`housenumber`/`street`/`municipality`) est propagé —
+- [x] Autocomplete d'adresse (BAN), sans l'option « Autour de moi » (hors MVP)
+- [x] Le `type` BAN (`housenumber`/`street`/`municipality`) est propagé —
       nécessaire à la punaise rouge, qui ne s'affiche **que** pour une adresse
       précise, jamais pour une commune (#3356)
-- [ ] Les deux champs sont obligatoires
-- [ ] Saisir objet + adresse mène à la fiche objet
-- [ ] Bandeau de marque (logos + lien « En savoir plus »)
+- [x] Les deux champs sont obligatoires
+- [x] Saisir objet + adresse mène à la fiche objet
+- [x] Bandeau de marque (logos + lien « En savoir plus »)
 
 ### PR 5 — Fiche objet
 
-- [ ] Gestes ordonnés selon la hiérarchie #3295 : réparable → bon état → hors d'usage
-- [ ] Badges d'état par geste, badge Bonus sur `reparer`
-- [ ] Consignes statiques derrière `consignes_pour()`, pivot vers #3284
-- [ ] Appel à l'action « Je découvre les solutions » vers les solutions
-- [ ] Changer d'objet depuis l'en-tête recharge le frame sans recharger la page
-- [ ] Rappel de l'objet et de l'adresse en en-tête
+- [x] Gestes ordonnés selon la hiérarchie #3295 : réparable → bon état → hors d'usage
+- [x] Badges d'état par geste, badge Bonus sur `reparer`
+- [x] Consignes statiques derrière `consignes_pour()`, pivot vers #3284
+- [x] Appel à l'action « Je découvre les solutions » vers les solutions
+- [x] Changer d'objet depuis l'en-tête recharge le frame sans recharger la page
+- [x] Rappel de l'objet et de l'adresse en en-tête
 
 ### PR 8 — Détail d'un lieu
 
-- [ ] Identité : nom commercial + type de service
-- [ ] Un seul label affiché, Bonus Réparation uniquement (pas ESS ni Répar'Acteurs)
-- [ ] Téléphone et site web en texte, pas en lien (#3295)
-- [ ] Infos pratiques (à domicile, sur RDV, exclusivité marque, reprise 1 pour 1…)
-- [ ] Accordéon horaires
-- [ ] « En savoir plus » : sources et date de mise à jour
-- [ ] `pour_le_detail()` porte le `prefetch_related` côté QuerySet, pas la vue
+- [x] Identité : nom commercial + type de service
+- [x] Un seul label affiché, Bonus Réparation uniquement (pas ESS ni Répar'Acteurs)
+- [x] Téléphone et site web en texte, pas en lien (#3295)
+- [x] Infos pratiques (à domicile, sur RDV, exclusivité marque, reprise 1 pour 1…)
+- [x] Accordéon horaires
+- [x] « En savoir plus » : sources et date de mise à jour
+- [x] `pour_le_detail()` porte le `prefetch_related` côté QuerySet, pas la vue
 
 ## Hors périmètre — ne pas implémenter
 
@@ -94,8 +94,36 @@ rendu.
 
 ## Suivi
 
-| PR  | État    | Commit |
-| --- | ------- | ------ |
-| 4   | à faire |        |
-| 5   | à faire |        |
-| 8   | à faire |        |
+| PR  | État     | Commit                                       |
+| --- | -------- | -------------------------------------------- |
+| 4   | **fait** | `98ebe4042` accueil + recherche d'adresse    |
+| 5   | **fait** | `c2b40bd6a` fiche objet, consignes statiques |
+| 8   | **fait** | détail d'un lieu                             |
+
+## Boucle arrêtée
+
+Les trois Definition of done sont vérifiées. Six défauts trouvés en chemin,
+tous invisibles aux tests et repérés en regardant le rendu ou en exerçant le
+parcours de bout en bout :
+
+1. **Slug toujours vide** dans la recherche d'objet : chaque sous-classe de
+   `SearchTerm` nomme différemment sa relation vers la fiche, et une seule
+   était lue. Le formulaire ne pouvait donc jamais aboutir.
+2. **`ui/layout/turbo.html` rendait une page vide** : il déclarait
+   `{% block content %}` quand les pages définissent `main`. Toute réponse à un
+   Turbo Frame sortait vide depuis la PR 1.
+3. **L'en-tête devait être dans le frame** : Turbo Drive étant désactivé, un
+   formulaire au-dessus retombe sur une navigation classique.
+4. **Icône « donner » vide** : le Figma exporte son glyphe séparément du cercle.
+5. **`libelle_court` absent de `actions.json`** : toute base fraîche affichait
+   des étiquettes vides.
+6. **Valeur inventée pour `lieu_prestation`** : la base utilise
+   `SUR_PLACE_OU_A_DOMICILE`, pas `domicile`.
+
+## Reste à faire, hors périmètre de cette boucle
+
+- **Vérification navigateur de la PR 8** : le serveur de développement s'est
+  arrêté avant. Les 16 tests de la fiche lieu passent, mais le rendu n'a pas
+  été regardé — c'est la porte qui a attrapé les six défauts ci-dessus.
+- **URL de partage d'un lieu** (#3434), à valider avec le produit.
+- **PR 7 (carte)** : la suite e2e n'a toujours pas eu de passage propre.
