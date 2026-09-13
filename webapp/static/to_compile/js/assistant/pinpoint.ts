@@ -14,17 +14,26 @@ export type CouleursPinpoint = {
  * s'il a choisi « revendre » (#3295). Seul le Bonus Réparation fait exception
  * et prend le pas sur la couleur du geste.
  */
-export function elementPinpoint(lieu: Lieu, couleurs: CouleursPinpoint): HTMLElement {
+export function elementPinpoint(
+  lieu: Lieu,
+  couleurs: CouleursPinpoint,
+  geste: string,
+): HTMLElement {
   const element = document.createElement("button")
   element.type = "button"
   element.className = "qfa-pinpoint"
   element.dataset.uuid = lieu.uuid
+  element.dataset.geste = geste
   element.setAttribute("aria-label", lieu.nom)
   element.style.setProperty(
     "--qfa-pinpoint-couleur",
     lieu.bonus ? couleurs.bonus : couleurs.geste,
   )
   if (lieu.bonus) element.dataset.bonus = "true"
+
+  const icone = document.createElement("span")
+  icone.className = "qfa-pinpoint__icone"
+  element.append(icone)
   return element
 }
 

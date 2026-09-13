@@ -2,8 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Jetons relevés sur le Figma « 🪑 Composants spécifiques à Que faire »,
+   nœud 368:1591 (Carte/Punaises de carte). Ce ne sont pas des couleurs
+   arbitraires : ce sont des jetons d'illustration du DSFR, nommés ici par le
+   geste qu'ils portent plutôt que par leur teinte.
+
+   La spec #3295 décrit « Prêter/Louer = orange » ; le Figma utilise en réalité
+   pink-tuile (#CE614A), un terracotta. La maquette fait foi. */
 :root {
-  --qfa-bonus-couleur: #009081;
+  --qfa-geste-reparation: #009081; /* green-menthe-main-548 */
+  --qfa-geste-don: #417dc4; /* blue-cumulus-main-526 */
+  --qfa-geste-vente: #bb8568; /* brown-caramel-sun-425-hover */
+  --qfa-geste-loc: #ce614a; /* pink-tuile-main-556 */
+  --qfa-geste-tri: #a558a0; /* purple-glycine-main-494 */
+
+  --qfa-bonus-couleur: var(--qfa-geste-reparation);
+  --qfa-bonus-pastille: #efcb3a; /* yellow-tournesol-850 */
   --qfa-adresse-usager: #c9191e;
   --qfa-rayon: 8px;
 }
@@ -43,8 +57,8 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 34px;
-  height: 45px;
+  width: 35px;
+  height: 47px;
   padding: 0;
   border: 0;
   cursor: pointer;
@@ -52,15 +66,83 @@
   color: var(--qfa-pinpoint-couleur);
 }
 
-.qfa-pinpoint::before {
+/* Le pin du Figma (nœud 368:1591) empile trois calques : un corps blanc, un
+   cerne de la couleur du geste, et l'icône du geste. La pointe descend jusqu'à
+   y=47 — c'est elle, et non le centre, qui désigne le lieu (#3356).
+
+   Les SVG exportés servent de masques plutôt que d'images : la forme reste
+   exactement celle de la maquette, et la couleur continue de venir de
+   `--qfa-pinpoint-couleur`, donc du geste choisi par l'usager. */
+.qfa-pinpoint::before,
+.qfa-pinpoint::after {
   content: "";
-  display: block;
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  inset: 0;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+/* Corps blanc : la goutte est la même pour les cinq gestes.
+   Les `url()` sont écrits directement dans `mask` plutôt que via une variable :
+   Parcel refuse une URL relative dans une custom property, car elle se résout
+   là où le `var()` est utilisé, pas là où il est défini. */
+.qfa-pinpoint::before {
+  -webkit-mask-image: url("../images/assistant/pinpoints/geste-loc.svg");
+  mask-image: url("../images/assistant/pinpoints/geste-loc.svg");
+  background: #fff;
+}
+
+/* Cerne de la goutte, à la couleur du geste. Identique pour les cinq gestes :
+   c'est l'icône, posée par-dessus, qui les distingue. */
+.qfa-pinpoint::after {
+  -webkit-mask-image: url("../images/assistant/pinpoints/geste-loc-fond.svg");
+  mask-image: url("../images/assistant/pinpoints/geste-loc-fond.svg");
   background: currentColor;
-  clip-path: path(
-    "M17 0C7.6 0 0 7.6 0 17c0 12 17 28 17 28s17-16 17-28C34 7.6 26.4 0 17 0z"
-  );
+}
+
+/* L'icône du geste, ~20×20 dans la maquette, centrée dans la tête de la goutte
+   (et non dans le pin entier, dont la pointe occupe le tiers bas). */
+.qfa-pinpoint__icone {
+  position: absolute;
+  top: 7.78px;
+  left: 7.77px;
+  width: 19.47px;
+  height: 19.5px;
+  background: currentColor;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+.qfa-pinpoint[data-geste="reparer"] .qfa-pinpoint__icone {
+  -webkit-mask-image: url("../images/assistant/pinpoints/icone-reparation.svg");
+  mask-image: url("../images/assistant/pinpoints/icone-reparation.svg");
+  top: 5.48px;
+  left: 6.99px;
+  width: 21.92px;
+  height: 21.96px;
+}
+.qfa-pinpoint[data-geste="vendre_acheter"] .qfa-pinpoint__icone {
+  -webkit-mask-image: url("../images/assistant/pinpoints/icone-vente.svg");
+  mask-image: url("../images/assistant/pinpoints/icone-vente.svg");
+}
+.qfa-pinpoint[data-geste="emprunter_preter_louer"] .qfa-pinpoint__icone {
+  -webkit-mask-image: url("../images/assistant/pinpoints/icone-loc.svg");
+  mask-image: url("../images/assistant/pinpoints/icone-loc.svg");
+}
+.qfa-pinpoint[data-geste="trier"] .qfa-pinpoint__icone {
+  -webkit-mask-image: url("../images/assistant/pinpoints/icone-tri.svg");
+  mask-image: url("../images/assistant/pinpoints/icone-tri.svg");
+}
+
+/* « Donner » est exporté d'un seul tenant dans le Figma, icône comprise : pas
+   de calque séparé à superposer. */
+.qfa-pinpoint[data-geste="donner_echanger_rapporter"]::after {
+  -webkit-mask-image: url("../images/assistant/pinpoints/geste-don.svg");
+  mask-image: url("../images/assistant/pinpoints/geste-don.svg");
 }
 
 .qfa-pinpoint:focus-visible {

@@ -176,7 +176,7 @@ export default class extends Controller<HTMLElement> {
     for (const lieu of this.lieux) {
       if (this.marqueurs.has(lieu.uuid)) continue
 
-      const element = elementPinpoint(lieu, this.#couleurs())
+      const element = elementPinpoint(lieu, this.#couleurs(), this.gesteValue)
       element.addEventListener("click", () =>
         this.dispatch("lieuChoisi", { detail: { lieu } }),
       )
