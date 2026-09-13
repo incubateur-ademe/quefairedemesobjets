@@ -15,6 +15,18 @@
 /* Le défilement doux était la seule utilité Tailwind de l'assistant. L'écrire
    ici évite d'embarquer 2 282 classes utilitaires pour une ligne (ADR 0009 Q2),
    et permet de la neutraliser sous `prefers-reduced-motion`. */
+/* `border-box` partout : les tailles du Figma (un bouton de 300 px, un champ
+   de 360) désignent la boîte visible, bordure et remplissage compris. En
+   `content-box`, un bouton de 300 px plafonné en affiche 332.
+
+   Tailwind fournissait ce réglage via son preflight ; le retirer (ADR 0009 Q2)
+   l'a emporté avec lui. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -263,16 +275,26 @@ body {
 
 .qfa-combobox__label {
   display: block;
-  margin-bottom: 0.35rem;
+  margin-bottom: var(--qfa-espace-1v);
+  color: var(--qfa-texte-titre);
+  font-size: 14px;
   font-weight: 500;
+  line-height: 1.5;
 }
 
+/* Valeurs relevées sur le Figma (nœud 24371:24, « Barre de recherche ») :
+   bordure de 2 px à la couleur d'accent, rayon court, remplissage de 12 px.
+   La hauteur de 48 px en découle, elle n'est pas imposée. */
 .qfa-combobox__champ {
   width: 100%;
-  padding: 0.6rem 0.8rem;
-  border: 1px solid #929292;
-  border-radius: var(--qfa-rayon);
-  font-size: 1rem;
+  padding: var(--qfa-espace-3v);
+  border: 2px solid var(--qfa-accent);
+  border-radius: var(--qfa-rayon-sm);
+  color: var(--qfa-texte-titre);
+  font-family: inherit;
+  font-size: 16px;
+  /* 48 px de haut dans la maquette = 2×12 (remplissage) + 2×2 (bordure) + 20. */
+  line-height: 20px;
 }
 
 .qfa-combobox__champ:focus-visible {
@@ -284,23 +306,27 @@ body {
   position: absolute;
   z-index: 20;
   width: 100%;
-  margin: 0.25rem 0 0;
+  margin: var(--qfa-espace-1v) 0 0;
   padding: 0;
   list-style: none;
   background: #fff;
-  border: 1px solid #929292;
-  border-radius: var(--qfa-rayon);
+  border: 1px solid var(--qfa-bordure);
+  border-radius: var(--qfa-rayon-sm);
   box-shadow: 0 4px 12px rgb(0 0 0 / 0.12);
 }
 
+/* Suggestion : 45 px de haut dans le Figma (nœud 24395:189). */
 .qfa-combobox__option {
-  padding: 0.55rem 0.8rem;
+  /* 45 px de haut dans la maquette = 2×12 (remplissage) + 21 (ligne). */
+  padding: var(--qfa-espace-3v);
   cursor: pointer;
+  font-size: 14px;
+  line-height: 21px;
 }
 
 .qfa-combobox__option[aria-selected="true"],
 .qfa-combobox__option:hover {
-  background: #f0f0f0;
+  background: var(--qfa-fond-survol);
 }
 
 .qfa-sr-only {
@@ -806,4 +832,20 @@ body {
 .qfa-lieu__pratique ul {
   margin: 0;
   padding-left: 1.25rem;
+}
+
+/* `turbo-frame` est un élément inconnu du navigateur, donc `display: inline`
+   par défaut. Quand il enveloppe le contenu d'un écran, il devient l'unique
+   enfant du conteneur flex : l'espacement s'applique alors à lui seul, et le
+   contenu qu'il porte se retrouve collé. En faire un conteneur flex à son tour
+   rétablit le rythme vertical. */
+turbo-frame {
+  display: block;
+}
+
+.qfa-fiche > turbo-frame,
+.qfa-lieu > turbo-frame {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qfa-espace-4v);
 }
