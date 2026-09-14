@@ -440,11 +440,11 @@ exposure/         Final tables exposed to consumers (API, dashboards, Open Data)
     │   │   ├── schema.yml
     │   │   ├── base_acteur.sql
     │   │   ├── base_acteur_acteur_services.sql
+    │   │   ├── base_action.sql
     │   │   ├── base_propositionservice.sql
     │   │   └── base_source.sql
     │   ├── stats/
     │   │   ├── schema.yml
-    │   │   ├── base_action.sql
     │   │   ├── base_vueacteur_visible.sql
     │   │   ├── base_vuepropositionservice.sql
     │   │   ├── base_vuepropositionservice_visible.sql
@@ -540,7 +540,6 @@ exposure/         Final tables exposed to consumers (API, dashboards, Open Data)
 <span class="w">    </span><span class="nt">tables</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">qfdmo_vueacteur</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">qfdmo_vuepropositionservice</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">qfdmo_action</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">stats_clone</span>
 <span class="w">    </span><span class="nt">schema</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">public</span>
 <span class="w">    </span><span class="nt">tables</span><span class="p">:</span>
@@ -562,9 +561,8 @@ exposure/         Final tables exposed to consumers (API, dashboards, Open Data)
 <span class="err">{</span><span class="o">%</span><span class="w"> </span><span class="n">endif</span><span class="w"> </span><span class="o">%</span><span class="err">}</span>
 </pre></div>
 </div>
-<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="c1">-- models/base/stats/base_action.sql</span>
-<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
-<span class="k">FROM</span><span class="w"> </span><span class="err">{{</span><span class="w"> </span><span class="k">source</span><span class="p">(</span><span class="s1">&#39;stats_qfdmo&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;qfdmo_action&#39;</span><span class="p">)</span><span class="w"> </span><span class="err">}}</span>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="c1">-- models/base/acteurs/base_action.sql</span>
+<span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="err">{{</span><span class="w"> </span><span class="k">source</span><span class="p">(</span><span class="s1">&#39;qfdmo&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;qfdmo_action&#39;</span><span class="p">)</span><span class="w"> </span><span class="err">}}</span>
 </pre></div>
 </div>
 <p>Base models that combine two base models with a simple join are also acceptable:</p>
