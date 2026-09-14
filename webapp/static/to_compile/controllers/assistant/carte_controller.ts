@@ -76,7 +76,6 @@ export default class extends Controller<HTMLElement> {
       attributionControl: { compact: true },
     })
     this.carte.addControl(new NavigationControl({ showCompass: false }), "top-left")
-    await this.carte.once("load")
 
     // MapLibre mesure son conteneur à la construction, avant que la feuille de
     // styles ne soit forcément appliquée. Sans ce resize, la zone visible
@@ -84,12 +83,26 @@ export default class extends Controller<HTMLElement> {
     // hors de l'écran.
     this.carte.resize()
 
-    // L'écoute de `moveend` n'est branchée qu'après le resize : celui-ci émet
-    // un `moveend`, qui déclencherait un second chargement identique au
-    // premier, une seconde plus tard.
-    this.carte.on("moveend", () => this.rafraichir())
+    // Les lieux sont demandés tout de suite, sans attendre `load`.
+    //
+    // `load` n'est émis qu'une fois le style *et* les premières tuiles prêtes,
+    // soit près de deux secondes ici. Or la requête n'a besoin que des bornes
+    // de la vue, connues dès la construction : l'attente était gratuite. Les
+    // deux chargements avancent désormais de front, et les punaises
+    // apparaissent avec le fond de carte au lieu de le suivre.
+    const lieux = this.#charger()
+
+    // La punaise de l'adresse ne dépend d'aucune donnée de carte : la poser
+    // avant `load` évite de la faire attendre les tuiles.
     this.#poserAdresse()
-    await this.#charger()
+
+    await this.carte.once("load")
+
+    // L'écoute de `moveend` n'est branchée qu'après `load` : le resize et la
+    // mise en place du style en émettent, qui déclencheraient un second
+    // chargement identique au premier.
+    this.carte.on("moveend", () => this.rafraichir())
+    await lieux
   }
 
   /**

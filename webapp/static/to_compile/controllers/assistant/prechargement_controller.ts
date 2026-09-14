@@ -14,6 +14,7 @@ import { Controller } from "@hotwired/stimulus"
  */
 export default class extends Controller<HTMLAnchorElement> {
   private demande: HTMLLinkElement | null = null
+  private modulesDemandes = false
 
   precharger() {
     if (this.demande || !this.element.href) return
@@ -25,6 +26,30 @@ export default class extends Controller<HTMLAnchorElement> {
     this.demande.rel = "prefetch"
     this.demande.href = this.element.href
     document.head.append(this.demande)
+
+    void this.#prechargerLaCarte()
+  }
+
+  /**
+   * Met MapLibre en cache avant que l'écran carte ne le demande.
+   *
+   * Le document seul ne suffit pas : c'est le moteur de carte, près d'un
+   * mégaoctet, qui coûte le plus à l'arrivée. L'importer ici le place dans le
+   * cache du navigateur ; l'import de l'écran suivant le retrouve sans réseau.
+   *
+   * L'import est volontairement sans effet de bord : on ne construit aucune
+   * carte, on ne fait que payer le téléchargement en avance.
+   */
+  async #prechargerLaCarte() {
+    if (this.modulesDemandes) return
+    this.modulesDemandes = true
+
+    try {
+      await Promise.all([import("maplibre-gl"), import("carte-facile")])
+    } catch {
+      // Un préchargement qui échoue ne doit rien casser : l'écran carte
+      // refera l'import lui-même, et signalera l'erreur s'il y a lieu.
+    }
   }
 
   disconnect() {
