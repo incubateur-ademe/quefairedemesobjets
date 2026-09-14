@@ -53,12 +53,60 @@ class TestEcranSolutions:
         assert 'longitude-value=""' not in contenu
 
     def test_le_geste_est_rappele_dans_le_bouton_de_retour(self, client, reparer):
+        from unit_tests.qfdmd.qfdmod_factory import ProduitPageFactory
+
+        fiche = ProduitPageFactory(parent=None)
         contenu = client.get(
-            reverse("assistant:solutions"), {"geste": "reparer", "slug": "meubles"}
+            reverse("assistant:solutions"), {"geste": "reparer", "fiche": fiche.slug}
         ).content.decode()
 
         assert "Réparer" in contenu
-        assert reverse("assistant:produit", args=["meubles"]) in contenu
+        assert reverse("assistant:produit", args=[fiche.slug]) in contenu
+
+    def test_le_retour_retrouve_la_fiche_depuis_le_libelle(self, client, reparer):
+        """Une URL partagée ne porte souvent que le libellé.
+
+        Renvoyer alors vers l'accueil ferait refaire à l'usager la recherche
+        qu'il vient de faire.
+        """
+        from unit_tests.qfdmd.qfdmod_factory import ProduitPageFactory
+        from qfdmd.models import ProduitPageSearchTerm
+
+        fiche = ProduitPageFactory(parent=None)
+        terme = ProduitPageSearchTerm.objects.get(produit_page=fiche)
+        terme.searchable_title = "Bidule test"
+        terme.save()
+
+        contenu = client.get(
+            reverse("assistant:solutions"),
+            {"geste": "reparer", "objet": "Bidule test"},
+        ).content.decode()
+
+        assert reverse("assistant:produit", args=[fiche.slug]) in contenu
+
+    def test_la_fiche_explicite_prime_sur_le_libelle(self, client, reparer):
+        from unit_tests.qfdmd.qfdmod_factory import ProduitPageFactory
+
+        fiche = ProduitPageFactory(parent=None)
+
+        contenu = client.get(
+            reverse("assistant:solutions"),
+            {"geste": "reparer", "fiche": fiche.slug, "objet": "peu importe"},
+        ).content.decode()
+
+        assert reverse("assistant:produit", args=[fiche.slug]) in contenu
+
+    def test_l_ancien_parametre_slug_reste_accepte(self, client, reparer):
+        """Des liens portant `slug=` ont pu être partagés avant le renommage."""
+        from unit_tests.qfdmd.qfdmod_factory import ProduitPageFactory
+
+        fiche = ProduitPageFactory(parent=None)
+
+        contenu = client.get(
+            reverse("assistant:solutions"), {"geste": "reparer", "slug": fiche.slug}
+        ).content.decode()
+
+        assert reverse("assistant:produit", args=[fiche.slug]) in contenu
 
     def test_sans_objet_le_retour_mene_a_l_accueil(self, client, reparer):
         """Mieux vaut l'accueil qu'un lien mort vers une fiche inconnue."""
@@ -70,9 +118,12 @@ class TestEcranSolutions:
 
     def test_le_lien_des_punaises_emporte_le_parcours(self, client, reparer):
         """Sans lui, « Revenir aux solutions » perdrait geste et adresse."""
+        from unit_tests.qfdmd.qfdmod_factory import ProduitPageFactory
+
+        fiche = ProduitPageFactory(parent=None)
         contenu = client.get(
             reverse("assistant:solutions"),
-            {"geste": "reparer", "slug": "meubles", "adresse": "Auray"},
+            {"geste": "reparer", "fiche": fiche.slug, "adresse": "Auray"},
         ).content.decode()
 
         assert "url-lieu-value" in contenu

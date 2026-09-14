@@ -7,6 +7,7 @@ from django.views.generic import DetailView, TemplateView
 
 from assistant.consignes import consignes_pour
 from assistant.forms import RechercheForm
+from assistant.objets import fiche_du_libelle
 from assistant.lieu import gestes_de, infos_pratiques_de, propose_le_bonus
 from assistant.parcours import Parcours
 from qfdmd.models import ProduitPage
@@ -92,8 +93,8 @@ class SolutionsView(TurboFrameMixin, TemplateView):
     def get_context_data(self, **kwargs):
         parcours = Parcours.depuis(self.request.GET)
         geste = (self.request.GET.get("geste") or "").strip()
-        slug = (self.request.GET.get("slug") or "").strip()
         groupe = GroupeAction.objects.filter(code=geste).first()
+        slug = self._slug_demande(parcours)
 
         longitude, latitude = _position_de(parcours)
         return super().get_context_data(
@@ -104,11 +105,11 @@ class SolutionsView(TurboFrameMixin, TemplateView):
             slug=slug,
             libelle_geste=(groupe.libelle_court or groupe.libelle) if groupe else "",
             couleur_geste=groupe.couleur if groupe else "",
-            url_fiche=self._url_fiche(parcours),
+            url_fiche=self._url_fiche(parcours, slug),
             # Le lien d'une punaise emporte le parcours : sans lui, « Revenir
             # aux solutions » perdrait le geste et l'adresse.
             parametres_lieu=urlencode(
-                {**parcours.en_parametres(), "geste": geste, "slug": slug}
+                {**parcours.en_parametres(), "geste": geste, "fiche": slug}
             ),
             longitude=longitude,
             latitude=latitude,
@@ -117,14 +118,32 @@ class SolutionsView(TurboFrameMixin, TemplateView):
             **kwargs,
         )
 
-    def _url_fiche(self, parcours: Parcours) -> str:
-        """Retour vers la fiche de l'objet, ou l'accueil si on ne sait plus lequel."""
-        slug = (self.request.GET.get("slug") or "").strip()
+    def _url_fiche(self, parcours: Parcours, slug: str) -> str:
+        """Retour vers la fiche de l'objet, ou l'accueil à défaut.
+
+        L'accueil n'est qu'un dernier recours : une URL partagée ne porte
+        souvent que le libellé, et renvoyer l'usager au formulaire lui ferait
+        refaire une recherche qu'il vient de faire.
+        """
         parametres = urlencode(parcours.en_parametres())
         if not slug:
             return f"{reverse('assistant:home')}?{parametres}"
         destination = reverse("assistant:produit", kwargs={"slug": slug})
         return f"{destination}?{parametres}"
+
+    def _slug_demande(self, parcours: Parcours) -> str:
+        """La fiche visée, explicite ou déduite du libellé.
+
+        Le champ s'appelle `fiche` depuis que le formulaire le résout en
+        `ProduitPage` ; `slug` reste accepté pour ne pas casser les liens déjà
+        partagés.
+        """
+        for cle in ("fiche", "slug"):
+            if valeur := (self.request.GET.get(cle) or "").strip():
+                return valeur
+
+        fiche = fiche_du_libelle(parcours.objet) if parcours.objet else None
+        return fiche.slug if fiche else ""
 
 
 # Centre par défaut : la France entière, quand l'adresse n'a pas été géocodée.
