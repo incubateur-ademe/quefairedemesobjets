@@ -507,6 +507,14 @@ class ComponentsPreview(LookbookPreview):
         return render_to_string("ui/components/footer/footer.html", context)
 
     @register_form_class(IframeForm)
+    def surfooter(self, iframe=False, **kwargs):
+        if isinstance(iframe, str):
+            iframe = iframe.lower() == "true"
+
+        context = {"iframe": iframe}
+        return render_to_string("ui/components/surfooter/surfooter.html", context)
+
+    @register_form_class(IframeForm)
     @component_docs("ui/components/header/header.md")
     def header(self, iframe=False, **kwargs):
         # Convert string values to boolean
