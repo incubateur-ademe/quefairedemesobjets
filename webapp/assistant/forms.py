@@ -2,13 +2,14 @@
 
 Le couple objet + adresse est saisi en autocomplétion : le champ visible porte
 un libellé, les champs cachés portent ce que le serveur exploite réellement —
-le slug de la fiche, les coordonnées. Valider les deux ensemble est le travail
-d'un formulaire, pas d'une suite de `if` dans la vue.
+la fiche visée, les coordonnées. Valider les deux ensemble est le travail d'un
+formulaire, pas d'une suite de `if` dans la vue.
 """
 
 from django import forms
 
-from assistant.views.recherche import slug_du_libelle
+from assistant.objets import fiche_du_libelle
+from qfdmd.models import ProduitPage
 
 MESSAGE_OBJET_INCONNU = (
     "Nous ne connaissons pas cet objet. Choisissez une suggestion dans la liste."
@@ -19,13 +20,24 @@ MESSAGE_ADRESSE_MANQUANTE = "Indiquez une adresse ou une commune."
 class RechercheForm(forms.Form):
     """Ce que l'accueil envoie pour ouvrir une fiche.
 
-    `slug` est facultatif au sens du formulaire mais requis au sens métier : il
+    `fiche` est un `ModelChoiceField` : le formulaire rend donc une
+    `ProduitPage`, pas une chaîne que chaque appelant devrait re-résoudre, et
+    l'existence de la fiche est vérifiée par le champ lui-même.
+
+    Il est déclaré non requis au sens de Django mais l'est au sens métier : il
     peut être déduit du libellé quand l'usager arrive par une URL partagée,
     sans être passé par l'autocomplétion. C'est `clean()` qui tranche.
     """
 
     objet = forms.CharField(required=False, max_length=200)
-    slug = forms.CharField(required=False, max_length=200)
+    fiche = forms.ModelChoiceField(
+        # `to_field_name` fait porter au formulaire le slug plutôt que la clé
+        # primaire : l'URL reste lisible et partageable.
+        queryset=ProduitPage.objects.live(),
+        to_field_name="slug",
+        required=False,
+        error_messages={"invalid_choice": MESSAGE_OBJET_INCONNU},
+    )
     adresse = forms.CharField(required=False, max_length=200)
     longitude = forms.FloatField(required=False)
     latitude = forms.FloatField(required=False)
@@ -39,11 +51,12 @@ class RechercheForm(forms.Form):
 
     def clean(self):
         donnees = super().clean()
-        donnees["slug"] = self._slug_de(donnees)
+        if donnees.get("fiche") is None:
+            donnees["fiche"] = self._fiche_depuis_le_libelle(donnees)
         return donnees
 
-    def _slug_de(self, donnees: dict) -> str:
-        """Le slug choisi, ou celui que le libellé permet de retrouver.
+    def _fiche_depuis_le_libelle(self, donnees: dict) -> ProduitPage:
+        """La fiche que le libellé désigne, quand l'autocomplétion n'a rien posé.
 
         Une URL partagée ne porte que le libellé : « ?objet=Téléphone mobile »
         doit ouvrir la fiche, pas renvoyer l'usager vers un formulaire qui
@@ -54,14 +67,8 @@ class RechercheForm(forms.Form):
         on le résout par le même chemin que l'autocomplétion, sinon les deux
         divergeraient.
         """
-        if slug := (donnees.get("slug") or "").strip():
-            return slug
-
         libelle = (donnees.get("objet") or "").strip()
-        if not libelle:
+        fiche = fiche_du_libelle(libelle) if libelle else None
+        if fiche is None:
             raise forms.ValidationError({"objet": MESSAGE_OBJET_INCONNU})
-
-        slug = slug_du_libelle(libelle)
-        if not slug:
-            raise forms.ValidationError({"objet": MESSAGE_OBJET_INCONNU})
-        return slug
+        return fiche

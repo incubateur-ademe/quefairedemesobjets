@@ -33,7 +33,11 @@ porte le libellé choisi par l'usager.
                placeholder="{{ placeholder|default:'ex : un objet ou un déchet' }}">
     </span>
 
-    <input type="hidden" name="slug" value="{{ slug|default:'' }}"
+    {% comment %}
+    Le champ porte le nom attendu par `RechercheForm` ; `data-cle` reste
+    `slug`, la clé que l'endpoint JSON renvoie pour chaque suggestion.
+    {% endcomment %}
+    <input type="hidden" name="fiche" value="{{ fiche|default:'' }}"
            data-assistant-combobox-target="valeur" data-cle="slug">
 
     {% if erreur %}

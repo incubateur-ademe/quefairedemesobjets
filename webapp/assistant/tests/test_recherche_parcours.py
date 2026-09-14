@@ -54,24 +54,32 @@ class TestParcours:
         assert arrivee == depart
 
 
+@pytest.fixture
+def fiche():
+    """Une fiche publiée : `ModelChoiceField` vérifie qu'elle existe vraiment."""
+    from unit_tests.qfdmd.qfdmod_factory import ProduitPageFactory
+
+    return ProduitPageFactory(parent=None)
+
+
 class TestRechercheView:
-    def test_saisie_complete_mene_a_la_fiche(self, client):
+    def test_saisie_complete_mene_a_la_fiche(self, client, fiche):
         reponse = client.get(
             reverse("assistant:recherche"),
-            {"slug": "emballages", "objet": "Emballages", "adresse": "Auray"},
+            {"fiche": fiche.slug, "objet": fiche.title, "adresse": "Auray"},
         )
 
         assert reponse.status_code == 302
         assert reponse.url.startswith(
-            reverse("assistant:produit", kwargs={"slug": "emballages"})
+            reverse("assistant:produit", kwargs={"slug": fiche.slug})
         )
 
-    def test_le_parcours_suit_jusqu_a_la_fiche(self, client):
+    def test_le_parcours_suit_jusqu_a_la_fiche(self, client, fiche):
         reponse = client.get(
             reverse("assistant:recherche"),
             {
-                "slug": "emballages",
-                "objet": "Emballages",
+                "fiche": fiche.slug,
+                "objet": fiche.title,
                 "adresse": "Auray",
                 "longitude": "-2.98",
                 "latitude": "47.66",
@@ -85,7 +93,7 @@ class TestRechercheView:
         "parametres",
         [
             {"objet": "zzz inconnu", "adresse": "Auray"},  # objet non résolu
-            {"slug": "emballages", "objet": "Emballages"},  # pas d'adresse
+            {"objet": "Emballages"},  # pas d'adresse
         ],
     )
     def test_saisie_incomplete_reaffiche_l_accueil(self, client, parametres):
@@ -138,15 +146,15 @@ class TestFormulaireDeRecherche:
             reverse("assistant:produit", kwargs={"slug": fiche.slug})
         )
 
-    def test_le_slug_explicite_prime_sur_le_libelle(self, client):
+    def test_la_fiche_explicite_prime_sur_le_libelle(self, client, fiche):
         """L'autocomplétion a déjà tranché : ne pas refaire la résolution."""
         reponse = client.get(
             reverse("assistant:recherche"),
-            {"objet": "peu importe", "slug": "emballages", "adresse": "Auray"},
+            {"objet": "peu importe", "fiche": fiche.slug, "adresse": "Auray"},
         )
 
         assert reponse.url.startswith(
-            reverse("assistant:produit", kwargs={"slug": "emballages"})
+            reverse("assistant:produit", kwargs={"slug": fiche.slug})
         )
 
     def test_un_objet_inconnu_affiche_une_erreur(self, client):
@@ -162,8 +170,8 @@ class TestFormulaireDeRecherche:
         assert "qfa-combobox__erreur" in contenu
         assert 'aria-invalid="true"' in contenu
 
-    def test_une_adresse_manquante_affiche_une_erreur(self, client):
-        reponse = client.get(reverse("assistant:recherche"), {"slug": "emballages"})
+    def test_une_adresse_manquante_affiche_une_erreur(self, client, fiche):
+        reponse = client.get(reverse("assistant:recherche"), {"fiche": fiche.slug})
 
         assert reponse.status_code == 200
         assert "qfa-combobox__erreur" in reponse.content.decode()

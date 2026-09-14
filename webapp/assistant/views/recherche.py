@@ -1,6 +1,5 @@
 from time import perf_counter
 
-from django.core.exceptions import ObjectDoesNotExist
 from django.db import OperationalError, connection
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
@@ -8,6 +7,7 @@ from django.views import View
 from django.views.decorators.cache import cache_control
 from modelsearch.query import Fuzzy
 
+from assistant.objets import fiche_de
 from search.models import SearchTerm
 
 NOMBRE_DE_RESULTATS = 7
@@ -99,49 +99,8 @@ class RechercheObjetView(View):
             return None
 
         libelle = specifique.get_title()
-        page = _fiche_de(specifique)
+        page = fiche_de(specifique)
         if not libelle or page is None:
             return None
 
         return {"libelle": libelle, "slug": page.slug}
-
-
-# Chaque sous-classe nomme différemment sa relation vers la fiche : il n'existe
-# pas d'accesseur commun à interroger.
-RELATIONS_VERS_LA_FICHE = ("produit_page", "page")
-
-
-def slug_du_libelle(libelle: str) -> str:
-    """Fiche correspondant à un libellé exact, pour une URL partagée.
-
-    L'autocomplétion renvoie le slug avec chaque suggestion ; ce chemin sert
-    quand l'usager arrive par un lien qui ne porte que le texte. La recherche
-    est exacte, pas floue : deviner sur une saisie approximative ouvrirait la
-    mauvaise fiche sans que l'usager comprenne pourquoi.
-    """
-    from qfdmd.models import ProduitPageSearchTerm, SearchTag, Synonyme
-
-    # Chaque sous-classe range son libellé dans un champ différent : trois
-    # requêtes indexées valent mieux que parcourir les 2 271 termes en Python,
-    # ce qui coûtait 263 ms.
-    for modele, champ in (
-        (ProduitPageSearchTerm, "searchable_title"),
-        (SearchTag, "name"),
-        (Synonyme, "nom"),
-    ):
-        for terme in modele.objects.filter(**{f"{champ}__iexact": libelle})[:5]:
-            if page := _fiche_de(terme):
-                return page.slug
-    return ""
-
-
-def _fiche_de(terme):
-    """La `ProduitPage` d'un terme, ou None s'il n'en cible aucune."""
-    for relation in RELATIONS_VERS_LA_FICHE:
-        try:
-            page = getattr(terme, relation, None)
-        except ObjectDoesNotExist:
-            continue
-        if page is not None and getattr(page, "slug", None):
-            return page
-    return None

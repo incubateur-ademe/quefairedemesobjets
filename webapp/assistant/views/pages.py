@@ -29,6 +29,7 @@ class HomeView(TurboFrameMixin, TemplateView):
         return super().get_context_data(
             parcours=Parcours.depuis(self.request.GET),
             erreurs=getattr(self, "formulaire", None) and self.formulaire.errors,
+            fiche_slug=(self.request.GET.get("fiche") or "").strip(),
             **kwargs,
         )
 
@@ -51,10 +52,11 @@ class RechercheView(View):
             # formulaire rempli qui refuse d'avancer, sans savoir pourquoi.
             return HomeView.as_view()(request, formulaire=formulaire)
 
+        # Le formulaire rend la fiche elle-même : `get_absolute_url` n'existe
+        # pas sur ce modèle, mais la route en dérive directement de son slug.
+        fiche = formulaire.cleaned_data["fiche"]
         parcours = Parcours.depuis(request.GET)
-        destination = reverse(
-            "assistant:produit", kwargs={"slug": formulaire.cleaned_data["slug"]}
-        )
+        destination = reverse("assistant:produit", kwargs={"slug": fiche.slug})
         return redirect(f"{destination}?{urlencode(parcours.en_parametres())}")
 
 
@@ -72,6 +74,7 @@ class ProduitView(TurboFrameMixin, DetailView):
             parcours=parcours,
             parametres=urlencode(parcours.en_parametres()),
             consignes=consignes_pour(self.object, parcours),
+            fiche_slug=self.object.slug,
             **kwargs,
         )
 

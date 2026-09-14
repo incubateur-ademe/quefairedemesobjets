@@ -21,7 +21,7 @@
             <form action="" method="get" data-controller="assistant-soumission"
                   data-action="assistant-combobox:choisi->assistant-soumission#soumettre">
                 <input type="hidden" name="objet" value="{{ parcours.objet }}">
-                <input type="hidden" name="slug" value="{{ slug }}">
+                <input type="hidden" name="fiche" value="{{ slug }}">
                 <input type="hidden" name="geste" value="{{ geste }}">
                 {% include "ui/components/assistant/recherche_adresse.html" with adresse=parcours.adresse longitude=parcours.longitude latitude=parcours.latitude precise=parcours.precise %}
             </form>

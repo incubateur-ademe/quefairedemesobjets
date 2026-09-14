@@ -5,7 +5,7 @@ Commun à l'accueil et à la fiche : sur la fiche il sert de rappel et permet de
 relancer une recherche, d'où le bouton masqué quand `bouton` est faux.
 {% endcomment %}
 <div class="qfa-panneau">
-    {% include "ui/components/assistant/recherche_objet.html" with objet=parcours.objet erreur=erreurs.objet.0 %}
+    {% include "ui/components/assistant/recherche_objet.html" with objet=parcours.objet fiche=fiche_slug erreur=erreurs.objet.0 %}
     {% include "ui/components/assistant/recherche_adresse.html" with adresse=parcours.adresse longitude=parcours.longitude latitude=parcours.latitude precise=parcours.precise erreur=erreurs.adresse.0 %}
 
     {% if bouton %}
