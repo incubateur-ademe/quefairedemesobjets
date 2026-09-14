@@ -109,8 +109,9 @@ class TestFicheObjet:
             reverse("assistant:produit", args=[fiche.slug])
         ).content.decode()
 
-        assert '<turbo-frame id="assistant-fiche">' in contenu
-        assert 'data-turbo-frame="assistant-fiche"' in contenu
+        assert 'id="assistant-fiche"' in contenu
+        # Pas de bouton sur cette maquette : choisir une suggestion soumet.
+        assert "assistant-soumission#soumettre" in contenu
 
 
 class TestReponseDeFrame:
@@ -130,8 +131,8 @@ class TestReponseDeFrame:
         )
 
         contenu = reponse.content.decode()
-        assert '<turbo-frame id="assistant-fiche">' in contenu
-        assert fiche.title in contenu
+        assert 'id="assistant-fiche"' in contenu
+        assert "qfa-bloc-geste" in contenu
 
     def test_la_reponse_de_frame_omet_le_layout(self, client):
         """Sinon Turbo transfère un document entier pour n'en garder qu'un bout."""

@@ -1,0 +1,17 @@
+{% comment %}
+Panneau de saisie vert d'eau (maquette 30139:14317).
+
+Commun à l'accueil et à la fiche : sur la fiche il sert de rappel et permet de
+relancer une recherche, d'où le bouton masqué quand `bouton` est faux.
+{% endcomment %}
+<div class="qfa-panneau">
+    {% include "ui/components/assistant/recherche_objet.html" with objet=parcours.objet slug=parcours.slug %}
+    {% include "ui/components/assistant/recherche_adresse.html" with adresse=parcours.adresse longitude=parcours.longitude latitude=parcours.latitude precise=parcours.precise %}
+
+    {% if bouton %}
+        <button type="submit" class="qfa-bouton qfa-bouton--primaire qfa-bouton--pleine-largeur">
+            <span class="qfa-bouton__loupe" aria-hidden="true"></span>
+            Lancer la recherche
+        </button>
+    {% endif %}
+</div>

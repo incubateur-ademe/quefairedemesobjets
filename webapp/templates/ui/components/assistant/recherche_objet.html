@@ -1,5 +1,5 @@
 {% comment %}
-Champ « objet » de l'en-tête.
+Champ « objet » (maquette 30139:14309).
 
 `slug` est caché : c'est lui qui identifie la fiche, alors que le champ visible
 porte le libellé choisi par l'usager.
@@ -10,24 +10,27 @@ porte le libellé choisi par l'usager.
      data-controller="assistant-combobox"
      data-assistant-combobox-url-value="{{ url_recherche }}">
     <label class="qfa-combobox__label" for="{{ id|default:'recherche-objet' }}-champ">
-        {{ label|default:"Quel objet souhaitez-vous recycler, donner, revendre ou réparer ?" }}
+        {{ label|default:"Quel objet ou déchet souhaitez-vous recycler, donner, revendre ou réparer ?" }}
     </label>
 
-    <input type="text"
-           id="{{ id|default:'recherche-objet' }}-champ"
-           name="objet"
-           class="qfa-combobox__champ"
-           value="{{ objet|default:'' }}"
-           data-assistant-combobox-target="champ"
-           data-action="input->assistant-combobox#chercher
-                        keydown->assistant-combobox#naviguer"
-           role="combobox"
-           aria-expanded="false"
-           aria-controls="{{ id|default:'recherche-objet' }}-liste"
-           aria-autocomplete="list"
-           autocomplete="off"
-           required
-           placeholder="{{ placeholder|default:'Chaise, téléphone, emballage…' }}">
+    <span class="qfa-combobox__cadre">
+        <span class="qfa-combobox__loupe" aria-hidden="true"></span>
+        <input type="text"
+               id="{{ id|default:'recherche-objet' }}-champ"
+               name="objet"
+               class="qfa-combobox__champ"
+               value="{{ objet|default:'' }}"
+               data-assistant-combobox-target="champ"
+               data-action="input->assistant-combobox#chercher
+                            keydown->assistant-combobox#naviguer"
+               role="combobox"
+               aria-expanded="false"
+               aria-controls="{{ id|default:'recherche-objet' }}-liste"
+               aria-autocomplete="list"
+               autocomplete="off"
+               required
+               placeholder="{{ placeholder|default:'ex : un objet ou un déchet' }}">
+    </span>
 
     <input type="hidden" name="slug" value="{{ slug|default:'' }}"
            data-assistant-combobox-target="valeur" data-cle="slug">

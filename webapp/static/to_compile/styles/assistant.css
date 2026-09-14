@@ -31,7 +31,11 @@ html {
   scroll-behavior: smooth;
 }
 
+/* La marge par défaut du navigateur (8 px) rentrait le bandeau de saisie, qui
+   va bord à bord dans la maquette. Tailwind la remettait à zéro via son
+   preflight ; le retirer (ADR 0009 Q2) l'a laissée revenir. */
 body {
+  margin: 0;
   font-family: "Public Sans Variable", "Public Sans", system-ui, sans-serif;
 }
 
@@ -273,33 +277,74 @@ body {
   position: relative;
 }
 
+/* Question posée au-dessus du champ (30139:14308) : c'est elle qui tient lieu
+   de titre sur l'écran d'accueil, d'où le gras. */
 .qfa-combobox__label {
   display: block;
-  margin-bottom: var(--qfa-espace-1v);
-  color: var(--qfa-texte-titre);
+  margin-bottom: var(--qfa-espace-2v);
+  color: #000;
   font-size: 14px;
-  font-weight: 500;
-  line-height: 1.5;
+  font-weight: 600;
+  line-height: normal;
+}
+
+/* Le cadre porte la bordure et la loupe ; le champ lui-même est nu, sinon la
+   bordure du navigateur doublerait celle de la maquette. */
+.qfa-combobox__cadre {
+  display: flex;
+  gap: var(--qfa-espace-2v);
+  align-items: center;
+  padding: var(--qfa-espace-3v);
+  border: 2px solid var(--qfa-accent);
+  border-radius: var(--qfa-rayon-sm);
+  background: #fff;
+}
+
+.qfa-combobox__cadre:focus-within {
+  outline: 2px solid #0a76f6;
+  outline-offset: 2px;
+}
+
+/* 24 px, la taille déclarée du symbole « Icônes » dans la maquette.
+
+   À noter : le cadre du Figma annonce 48 px de haut, mais 12+12 de remplissage
+   plus 2+2 de bordure plus cette icône de 24 en font 52. La maquette se
+   contredit ; l'icône, valeur explicite du composant, l'emporte sur la hauteur
+   du cadre, qui n'est qu'un résultat de mise en page. */
+.qfa-combobox__loupe {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  background: var(--qfa-texte-titre);
+  -webkit-mask: url("../images/assistant/ui/recherche-loupe.svg") center / contain
+    no-repeat;
+  mask: url("../images/assistant/ui/recherche-loupe.svg") center / contain no-repeat;
 }
 
 /* Valeurs relevées sur le Figma (nœud 24371:24, « Barre de recherche ») :
    bordure de 2 px à la couleur d'accent, rayon court, remplissage de 12 px.
    La hauteur de 48 px en découle, elle n'est pas imposée. */
 .qfa-combobox__champ {
-  width: 100%;
-  padding: var(--qfa-espace-3v);
-  border: 2px solid var(--qfa-accent);
-  border-radius: var(--qfa-rayon-sm);
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
   color: var(--qfa-texte-titre);
   font-family: inherit;
   font-size: 16px;
-  /* 48 px de haut dans la maquette = 2×12 (remplissage) + 2×2 (bordure) + 20. */
+  /* 48 px de haut = 2×12 (remplissage) + 2×2 (bordure) + 20 de ligne. */
   line-height: 20px;
+  /* Ellipsis si la saisie dépasse, comme annoté sur la maquette. */
+  text-overflow: ellipsis;
 }
 
+.qfa-combobox__champ::placeholder {
+  color: #666;
+}
+
+/* Le cadre porte déjà l'anneau de focus. */
 .qfa-combobox__champ:focus-visible {
-  outline: 2px solid #0a76f6;
-  outline-offset: 2px;
+  outline: none;
 }
 
 .qfa-combobox__liste {
@@ -512,17 +557,23 @@ body {
    Composants complexes (#3433)
    --------------------------------------------------------------------------- */
 
+/* 36 px de haut dans la maquette = 2×8 (remplissage) + 19,6 (ligne). Un
+   `<button>` hérite d'une bordure et d'une police du navigateur : les deux
+   sont neutralisées, sinon il dépasse de 4 px son équivalent en lien. */
 .qfa-bouton {
   display: inline-flex;
   gap: var(--qfa-espace-2v);
   align-items: center;
   justify-content: center;
   padding: var(--qfa-espace-2v) var(--qfa-espace-4v);
+  border: 0;
   border-radius: var(--qfa-rayon-md);
+  font-family: inherit;
   font-size: 14px;
   font-weight: 600;
   line-height: 1.4;
   text-decoration: none;
+  cursor: pointer;
 }
 
 .qfa-bouton--primaire {
@@ -601,13 +652,24 @@ body {
   max-width: 300px;
 }
 
+/* Les gestes s'alignent sur la même colonne que les champs : 296 px à 320,
+   600 px au-delà (maquettes 30141:8702 et 30174:11412), gouttières de 12 px
+   comprises. Un `width` fixe déborderait sous 320. */
 .qfa-bloc-gestes {
   display: flex;
   flex-direction: column;
-  gap: var(--qfa-espace-4v);
+  gap: var(--qfa-espace-3v);
+  width: 100%;
+  max-width: calc(296px + 2 * var(--qfa-espace-3v));
   margin: 0;
-  padding: 0;
+  padding: 0 var(--qfa-espace-3v);
   list-style: none;
+}
+
+@media (min-width: 800px) {
+  .qfa-bloc-gestes {
+    max-width: calc(600px + 2 * var(--qfa-espace-3v));
+  }
 }
 
 .qfa-changer-geste {
@@ -729,26 +791,38 @@ body {
   font-size: 0.85em;
 }
 
-.qfa-accueil {
+/* Gabarit d'écran, relevé sur les maquettes 30136:8533 (320 px) et
+   30174:11316 (800 px). Le contenu est bordé à 800 px : au-delà, la maquette
+   ne centre pas une colonne large, elle garde la même. */
+.qfa-ecran {
   display: flex;
   flex-direction: column;
   gap: var(--qfa-espace-4v);
-  max-width: 40rem;
+  align-items: center;
+  width: 100%;
+  max-width: 800px;
   margin: 0 auto;
-  padding: var(--qfa-espace-4v);
+  padding-bottom: var(--qfa-espace-4v);
 }
 
-.qfa-accueil__titre {
-  margin: 0;
-  color: var(--qfa-texte-titre);
-  font-size: 1.75rem;
-  line-height: 1.3;
-}
-
-.qfa-accueil__formulaire {
+/* Panneau de saisie vert d'eau (30139:14317). Il occupe toute la largeur et
+   déborde volontairement des gouttières : c'est un bandeau, pas une carte. */
+.qfa-panneau {
   display: flex;
   flex-direction: column;
   gap: var(--qfa-espace-3v);
+  width: 100%;
+  padding: var(--qfa-espace-4v) var(--qfa-espace-3v);
+  background: var(--qfa-geste-reparation-fond);
+}
+
+/* Le contenu du panneau s'aligne sur 600 px dès que la place le permet, comme
+   dans la maquette large (30174:11318), où les champs ne s'étirent pas. */
+@media (min-width: 800px) {
+  .qfa-panneau > * {
+    width: 600px;
+    margin: 0 auto;
+  }
 }
 
 .qfa-fiche {
@@ -848,4 +922,18 @@ turbo-frame {
   display: flex;
   flex-direction: column;
   gap: var(--qfa-espace-4v);
+}
+
+/* Le bouton de recherche porte une loupe avant son libellé (30139:14339). */
+.qfa-bouton--pleine-largeur {
+  width: 100%;
+}
+
+.qfa-bouton__loupe {
+  width: 16px;
+  height: 16px;
+  background: currentColor;
+  -webkit-mask: url("../images/assistant/ui/bouton-recherche.svg") center / contain
+    no-repeat;
+  mask: url("../images/assistant/ui/bouton-recherche.svg") center / contain no-repeat;
 }
