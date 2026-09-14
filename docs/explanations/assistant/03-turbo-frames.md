@@ -1,5 +1,19 @@
 # 3. Architecture Turbo Frames
 
+> ⚠️ **Mise à jour (2026-09-14) : `#assistant-solutions` n'existe pas.** Les
+> maquettes d'écran, arrivées après l'écriture de ce document, font de la carte
+> un **écran voisin** de la fiche (nœud 30141:8703) et non un frame qu'elle
+> contiendrait : la carte a son propre bandeau « Revenir aux solutions » et son
+> propre pied de page. L'imbriquer en empilerait deux.
+>
+> Le `loading="lazy"` prévu ici est donc remplacé par un préchargement à
+> l'intention — `<link rel="prefetch">` posé au survol du bouton « Je découvre
+> les solutions ». Même objectif, mécanisme adapté à une navigation de page :
+> **53 ms** gagnées sur le clic, mesuré sur le document solutions.
+>
+> Les frames `#assistant-fiche` et `#assistant-lieu` décrits plus bas restent
+> valables.
+
 ## Les quatre frames
 
 ```mermaid

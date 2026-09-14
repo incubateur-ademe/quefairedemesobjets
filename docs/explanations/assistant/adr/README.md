@@ -12,6 +12,7 @@
 0007-endpoint-json-pour-la-recherche.md
 0008-jetons-de-design.md
 0009-questions-a-trancher.md
+0010-pas-de-comptage-par-geste.md
 ```
 
 Format inspiré des [ADR d'aides-agri](https://github.com/betagouv/aides-agri/tree/main/documentation/adr).
@@ -31,6 +32,7 @@ appuyé sur une mesure — et dont deux contredisent le plan initial.
 | [0007](0007-endpoint-json-pour-la-recherche.md)  | Servir la recherche d'objet en JSON, pas en HTML      | **Accepté**  |
 | [0008](0008-jetons-de-design.md)                 | Relever les jetons dans le Figma, pas les approximer  | **Accepté**  |
 | [0009](0009-questions-a-trancher.md)             | Questions ouvertes, en attente d'arbitrage            | _En attente_ |
+| [0010](0010-pas-de-comptage-par-geste.md)        | Ne pas compter les solutions par geste                | **Accepté**  |
 
 « Proposé » : décidé sur dossier, pas encore éprouvé par du code.
 « Accepté » : mis en œuvre, mesuré, couvert par un test de non-régression.

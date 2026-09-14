@@ -23,7 +23,16 @@ modèle, jamais échappé à la volée dans le gabarit.
 
     <div class="qfa-bloc-geste__consigne">{{ consigne }}</div>
 
-    <a class="qfa-bouton qfa-bouton--primaire" href="{{ url }}">
+    {% comment %}
+    Préchargé au survol : l'écran solutions construit une carte, autant que le
+    document soit déjà là quand le clic arrive (#3431, « que ça semble
+    instantané »).
+    {% endcomment %}
+    <a class="qfa-bouton qfa-bouton--primaire"
+       href="{{ url }}"
+       data-controller="assistant-prechargement"
+       data-action="mouseenter->assistant-prechargement#precharger
+                    touchstart->assistant-prechargement#precharger">
         {{ appel_action|default:"Je découvre les solutions" }}
         <span class="qfa-bouton__fleche" aria-hidden="true"></span>
     </a>
