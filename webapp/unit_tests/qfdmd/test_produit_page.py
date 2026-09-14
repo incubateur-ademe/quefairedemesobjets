@@ -431,9 +431,9 @@ class TestSyncFromLegacyProduitUsageUnique:
 
     def _carte_slugs(self, page):
         return [
-            block.value.slug
+            block.value["carte_config"].slug
             for block in page.body
-            if block.block_type == "carte_sur_mesure"
+            if block.block_type == "carte"
         ]
 
     def test_waste_gets_usage_unique_and_deposer_uniquement_carte(self):
