@@ -13,12 +13,13 @@ import polars as pl
 from dedupe.blocking import Fingerprinter
 from dedupe.datamodel import DataModel
 from dedupe.labeler import DedupeDisagreementLearner
-from ml_deduplication.modeling.dedupe.model import BusinessRulesMixin
 from sklearn.base import clone
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import GroupKFold
 from xgboost import XGBClassifier
+
+from ml_deduplication.modeling.dedupe.model import BusinessRulesMixin
 
 logger = logging.getLogger(__name__)
 RANDOM_SEED = 42

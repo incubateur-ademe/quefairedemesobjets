@@ -3,9 +3,10 @@ from pathlib import Path
 from typing import Self
 
 import polars as pl
-from ml_deduplication.modeling.xgboost.clustering import ConstrainedUnionFind
 from xgboost import XGBClassifier
 from xgboost.callback import EarlyStopping
+
+from ml_deduplication.modeling.xgboost.clustering import ConstrainedUnionFind
 
 logger = logging.getLogger(__name__)
 

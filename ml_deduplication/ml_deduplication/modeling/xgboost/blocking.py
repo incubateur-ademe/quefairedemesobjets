@@ -62,6 +62,7 @@ def block_df(
             pl.col("longitude").cast(pl.Float32),
         ]
     )
+    con.register("df_minimal", df_minimal)
     con.sql("CREATE TABLE features AS SELECT * FROM df_minimal")
 
     # =====================================================================
@@ -171,7 +172,7 @@ def block_df(
             ) as geo_distance
         FROM pairs p
         left join features f on p.identifiant_unique_l=f.identifiant_unique
-        left join features f2 on p.identifiant_unique_l=f2.identifiant_unique
+        left join features f2 on p.identifiant_unique_r=f2.identifiant_unique
         """).pl()
     con.close()
     if valid_pairs_minimal.is_empty():

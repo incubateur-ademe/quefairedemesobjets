@@ -2,13 +2,16 @@ import argparse
 import json
 import logging
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
 
 import numpy as np
 import polars as pl
 from joblib import Parallel, delayed
+from tqdm import tqdm
+from tqdm.contrib.logging import tqdm_logging_redirect
+
 from ml_deduplication.evaluation.metrics.cluster import generate_full_cluster_report
 from ml_deduplication.evaluation.metrics.pairwise import (
     pairwise_metrics_from_clusters,
@@ -34,8 +37,6 @@ from ml_deduplication.training.utils import (
     split_train_dev,
     stringify_params_list,
 )
-from tqdm import tqdm
-from tqdm.contrib.logging import tqdm_logging_redirect
 
 logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s | %(filename)s | %(message)s", force=True
@@ -405,7 +406,7 @@ if __name__ == "__main__":
     logger.info("Loading features dataset at path %s", args.dataset_path)
     df_features = pl.read_parquet(args.dataset_path)
 
-    timestamp = datetime.now(timezone.utc).strftime("%Y_%m_%d_%H%M")
+    timestamp = datetime.now(UTC).strftime("%Y_%m_%d_%H%M")
 
     if args.mode == "tuning":
         logger.info("Running hyperparameter tuning training")
