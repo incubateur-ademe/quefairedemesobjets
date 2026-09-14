@@ -70,6 +70,35 @@ make init-certs
 
 Enfin, vérifier les variables d'environnement en prenant exemple sur le fichier `.env.template`
 
+## Bases de données / postgres_fdw
+
+### Erreur `could not connect to server "webapp_server"` ou `"warehouse_server"`
+
+Si une requête, un DAG dbt ou une commande Django échoue avec :
+
+```
+could not connect to server "webapp_server"
+```
+
+ou
+
+```
+could not connect to server "warehouse_server"
+```
+
+les liens `postgres_fdw` entre les deux bases de l’environnement sont absents ou obsolètes (restauration, rotation de mot de passe, recréation d’instance, hook de déploiement non exécuté…).
+
+`webapp` et `warehouse` se lisent mutuellement via ces serveurs étrangers : `webapp_server` expose le schéma `webapp_public` dans warehouse, `warehouse_server` expose `warehouse_public` dans webapp.
+
+Recréer les serveurs FDW, les user mappings et l’import des schémas sur **l’environnement concerné** :
+
+```sh
+python manage.py create_remote_db_server
+```
+
+En local : `make create-remote-db-server`.
+Sur Scalingo : `scalingo --app <app> run "cd webapp && python manage.py create_remote_db_server"`.
+
 ## Stack data, airflow, dbt
 
 En local, il peut s'avérer complexe de développer sur la stack data, du fait du volume de données, mais aussi de l'enchaînement de tâches dans les DAGs.
@@ -101,7 +130,7 @@ Pour ce faire,
 1. cliquer sur la tâche échouée (`failed`)
 2. cliquer dans l'onglet `Logs`
 3. cliquer sur `see more`
-   ![./_medias/troubleshooting-1.png]()
+   ![./_medias/troubleshooting-1.png](<>)
 
 Cela va amener à une vue détaillée des logs du DAG échuoée
 
