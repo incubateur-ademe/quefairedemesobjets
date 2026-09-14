@@ -1045,7 +1045,7 @@ class ProduitPage(
             carte = CarteConfig.objects.filter(slug=carte_slug).first()
             if carte:
                 body.append({"type": "paragraph", "value": "<h2>Où l'apporter ?</h2>"})
-                body.append({"type": "carte_sur_mesure", "value": carte.pk})
+                body.append({"type": "carte", "value": {"carte_config": carte.pk}})
                 msgs.append(f"Carte sur mesure ajoutée ({carte_slug}).")
 
         body.append({"type": "break", "value": ""})
