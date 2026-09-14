@@ -419,6 +419,28 @@ git<span class="w"> </span>rebase<span class="w"> </span>--continue
 </section>
 </section>
 </section>
+<section id="bases-de-donnees-postgres-fdw">
+<h2>Bases de données / postgres_fdw<a class="headerlink" href="#bases-de-donnees-postgres-fdw" title="Lien vers cette rubrique">¶</a></h2>
+<section id="erreur-could-not-connect-to-server-webapp-server-ou-warehouse-server">
+<h3>Erreur <code class="docutils literal notranslate"><span class="pre">could</span> <span class="pre">not</span> <span class="pre">connect</span> <span class="pre">to</span> <span class="pre">server</span> <span class="pre">&quot;webapp_server&quot;</span></code> ou <code class="docutils literal notranslate"><span class="pre">&quot;warehouse_server&quot;</span></code><a class="headerlink" href="#erreur-could-not-connect-to-server-webapp-server-ou-warehouse-server" title="Lien vers cette rubrique">¶</a></h3>
+<p>Si une requête, un DAG dbt ou une commande Django échoue avec :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">could</span> <span class="ow">not</span> <span class="n">connect</span> <span class="n">to</span> <span class="n">server</span> <span class="s2">&quot;webapp_server&quot;</span>
+</pre></div>
+</div>
+<p>ou</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">could</span> <span class="ow">not</span> <span class="n">connect</span> <span class="n">to</span> <span class="n">server</span> <span class="s2">&quot;warehouse_server&quot;</span>
+</pre></div>
+</div>
+<p>les liens <code class="docutils literal notranslate"><span class="pre">postgres_fdw</span></code> entre les deux bases de l’environnement sont absents ou obsolètes (restauration, rotation de mot de passe, recréation d’instance, hook de déploiement non exécuté…).</p>
+<p><code class="docutils literal notranslate"><span class="pre">webapp</span></code> et <code class="docutils literal notranslate"><span class="pre">warehouse</span></code> se lisent mutuellement via ces serveurs étrangers : <code class="docutils literal notranslate"><span class="pre">webapp_server</span></code> expose le schéma <code class="docutils literal notranslate"><span class="pre">webapp_public</span></code> dans warehouse, <code class="docutils literal notranslate"><span class="pre">warehouse_server</span></code> expose <code class="docutils literal notranslate"><span class="pre">warehouse_public</span></code> dans webapp.</p>
+<p>Recréer les serveurs FDW, les user mappings et l’import des schémas sur <strong>l’environnement concerné</strong> :</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>create_remote_db_server
+</pre></div>
+</div>
+<p>En local : <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">create-remote-db-server</span></code>.
+Sur Scalingo : <code class="docutils literal notranslate"><span class="pre">scalingo</span> <span class="pre">--app</span> <span class="pre">&lt;app&gt;</span> <span class="pre">run</span> <span class="pre">&quot;cd</span> <span class="pre">webapp</span> <span class="pre">&amp;&amp;</span> <span class="pre">python</span> <span class="pre">manage.py</span> <span class="pre">create_remote_db_server&quot;</span></code>.</p>
+</section>
+</section>
 <section id="stack-data-airflow-dbt">
 <h2>Stack data, airflow, dbt<a class="headerlink" href="#stack-data-airflow-dbt" title="Lien vers cette rubrique">¶</a></h2>
 <p>En local, il peut s’avérer complexe de développer sur la stack data, du fait du volume de données, mais aussi de l’enchaînement de tâches dans les DAGs.</p>
@@ -680,6 +702,10 @@ docker<span class="w"> </span>push<span class="w"> </span><span class="nv">$SCAL
 <li><a class="reference internal" href="#env">.env</a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li><a class="reference internal" href="#bases-de-donnees-postgres-fdw">Bases de données / postgres_fdw</a><ul>
+<li><a class="reference internal" href="#erreur-could-not-connect-to-server-webapp-server-ou-warehouse-server">Erreur <code class="docutils literal notranslate"><span class="pre">could</span> <span class="pre">not</span> <span class="pre">connect</span> <span class="pre">to</span> <span class="pre">server</span> <span class="pre">&quot;webapp_server&quot;</span></code> ou <code class="docutils literal notranslate"><span class="pre">&quot;warehouse_server&quot;</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#stack-data-airflow-dbt">Stack data, airflow, dbt</a><ul>
