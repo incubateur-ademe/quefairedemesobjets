@@ -28,8 +28,15 @@ modèle, jamais échappé à la volée dans le gabarit.
     document soit déjà là quand le clic arrive (#3431, « que ça semble
     instantané »).
     {% endcomment %}
+    {% comment %}
+    `_top` est indispensable : ce lien vit dans le frame `assistant-fiche`, donc
+    Turbo y chercherait par défaut un frame de même nom dans la réponse. L'écran
+    solutions est une page entière, qui n'en contient aucun — sans cela, Turbo
+    affiche « Content missing ».
+    {% endcomment %}
     <a class="qfa-bouton qfa-bouton--primaire"
        href="{{ url }}"
+       data-turbo-frame="_top"
        data-controller="assistant-prechargement"
        data-action="mouseenter->assistant-prechargement#precharger
                     touchstart->assistant-prechargement#precharger">

@@ -144,3 +144,29 @@ class TestReponseDeFrame:
         ).content.decode()
 
         assert "<!DOCTYPE html>" not in contenu.upper()
+
+
+class TestLiensSortantDuFrame:
+    """Un lien enfermé dans un frame doit dire quand il en sort.
+
+    Le CTA vit dans `assistant-fiche` : sans `_top`, Turbo cherche un frame de
+    ce nom dans l'écran solutions, qui est une page entière et n'en contient
+    aucun. Le résultat est un « Content missing » à la place de la carte.
+    """
+
+    def test_le_cta_des_gestes_sort_du_frame(self, client):
+        fiche = ProduitPageFactory(parent=None)
+
+        contenu = client.get(
+            reverse("assistant:produit", args=[fiche.slug])
+        ).content.decode()
+
+        assert 'data-turbo-frame="_top"' in contenu
+
+    def test_l_ecran_solutions_n_a_pas_le_frame_de_la_fiche(self, client):
+        """C'est ce qui rend `_top` nécessaire : le vérifier fige le lien."""
+        contenu = client.get(
+            reverse("assistant:solutions"), {"geste": "reparer"}
+        ).content.decode()
+
+        assert 'id="assistant-fiche"' not in contenu
