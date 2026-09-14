@@ -1,12 +1,12 @@
 from urllib.parse import urlencode
 
-from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.views import View
 from django.views.generic import DetailView, TemplateView
 
 from assistant.consignes import consignes_pour
+from assistant.forms import RechercheForm
 from assistant.lieu import gestes_de, infos_pratiques_de, propose_le_bonus
 from assistant.parcours import Parcours
 from qfdmd.models import ProduitPage
@@ -19,9 +19,17 @@ from .mixins import TurboFrameMixin
 class HomeView(TurboFrameMixin, TemplateView):
     template_name = "ui/pages/assistant/home.html"
 
+    def get(self, request, *args, formulaire=None, **kwargs):
+        """`formulaire` est passé par `RechercheView` quand la saisie est
+        refusée : l'accueil se réaffiche alors avec ses messages."""
+        self.formulaire = formulaire
+        return super().get(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         return super().get_context_data(
-            parcours=Parcours.depuis(self.request.GET), **kwargs
+            parcours=Parcours.depuis(self.request.GET),
+            erreurs=getattr(self, "formulaire", None) and self.formulaire.errors,
+            **kwargs,
         )
 
 
@@ -35,16 +43,19 @@ class RechercheView(View):
     plutôt que d'afficher une erreur sur un formulaire vidé.
     """
 
-    def get(self, request, *args, **kwargs) -> HttpResponseRedirect:
+    def get(self, request, *args, **kwargs):
+        formulaire = RechercheForm(request.GET)
+        if not formulaire.is_valid():
+            # Réafficher l'accueil avec ses erreurs, plutôt qu'y rediriger : une
+            # redirection perdrait les messages et l'usager verrait un
+            # formulaire rempli qui refuse d'avancer, sans savoir pourquoi.
+            return HomeView.as_view()(request, formulaire=formulaire)
+
         parcours = Parcours.depuis(request.GET)
-        slug = (request.GET.get("slug") or "").strip()
-
-        parametres = urlencode(parcours.en_parametres())
-        if not slug or not parcours.adresse:
-            return redirect(f"{reverse('assistant:home')}?{parametres}")
-
-        destination = reverse("assistant:produit", kwargs={"slug": slug})
-        return redirect(f"{destination}?{parametres}")
+        destination = reverse(
+            "assistant:produit", kwargs={"slug": formulaire.cleaned_data["slug"]}
+        )
+        return redirect(f"{destination}?{urlencode(parcours.en_parametres())}")
 
 
 class ProduitView(TurboFrameMixin, DetailView):

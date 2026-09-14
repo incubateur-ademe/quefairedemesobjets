@@ -13,7 +13,7 @@ porte le libellé choisi par l'usager.
         {{ label|default:"Quel objet ou déchet souhaitez-vous recycler, donner, revendre ou réparer ?" }}
     </label>
 
-    <span class="qfa-combobox__cadre">
+    <span class="qfa-combobox__cadre" data-erreur="{{ erreur|yesno:'true,false' }}">
         <span class="qfa-combobox__loupe" aria-hidden="true"></span>
         <input type="text"
                id="{{ id|default:'recherche-objet' }}-champ"
@@ -28,12 +28,19 @@ porte le libellé choisi par l'usager.
                aria-controls="{{ id|default:'recherche-objet' }}-liste"
                aria-autocomplete="list"
                autocomplete="off"
+               {% if erreur %}aria-describedby="{{ id|default:'recherche-objet' }}-erreur" aria-invalid="true"{% endif %}
                required
                placeholder="{{ placeholder|default:'ex : un objet ou un déchet' }}">
     </span>
 
     <input type="hidden" name="slug" value="{{ slug|default:'' }}"
            data-assistant-combobox-target="valeur" data-cle="slug">
+
+    {% if erreur %}
+        <p class="qfa-combobox__erreur" id="{{ id|default:'recherche-objet' }}-erreur">
+            {{ erreur }}
+        </p>
+    {% endif %}
 
     <ul class="qfa-combobox__liste"
         id="{{ id|default:'recherche-objet' }}-liste"

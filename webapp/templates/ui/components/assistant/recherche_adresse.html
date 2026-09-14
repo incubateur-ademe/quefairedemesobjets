@@ -17,7 +17,7 @@ Trois caractères minimum : la BAN ne répond pas en deçà.
         {{ label|default:"Où souhaitez-vous trouver des solutions ?" }}
     </label>
 
-    <span class="qfa-combobox__cadre">
+    <span class="qfa-combobox__cadre" data-erreur="{{ erreur|yesno:'true,false' }}">
         <span class="qfa-combobox__loupe" aria-hidden="true"></span>
         <input type="text"
                id="{{ id|default:'recherche-adresse' }}-champ"
@@ -32,6 +32,7 @@ Trois caractères minimum : la BAN ne répond pas en deçà.
                aria-controls="{{ id|default:'recherche-adresse' }}-liste"
                aria-autocomplete="list"
                autocomplete="off"
+               {% if erreur %}aria-describedby="{{ id|default:'recherche-adresse' }}-erreur" aria-invalid="true"{% endif %}
                required
                placeholder="{{ placeholder|default:'ex : une adresse ou commune' }}">
     </span>
@@ -42,6 +43,12 @@ Trois caractères minimum : la BAN ne répond pas en deçà.
            data-assistant-combobox-target="valeur" data-cle="latitude">
     <input type="hidden" name="precise" value="{{ precise|default:'' }}"
            data-assistant-combobox-target="valeur" data-cle="precise">
+
+    {% if erreur %}
+        <p class="qfa-combobox__erreur" id="{{ id|default:'recherche-adresse' }}-erreur">
+            {{ erreur }}
+        </p>
+    {% endif %}
 
     <ul class="qfa-combobox__liste"
         id="{{ id|default:'recherche-adresse' }}-liste"

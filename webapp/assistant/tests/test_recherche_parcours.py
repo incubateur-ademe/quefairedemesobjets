@@ -2,6 +2,7 @@ import pytest
 from django.urls import reverse
 
 from assistant.parcours import Parcours
+from qfdmd.models import ProduitPageSearchTerm
 
 pytestmark = pytest.mark.django_db
 
@@ -83,23 +84,17 @@ class TestRechercheView:
     @pytest.mark.parametrize(
         "parametres",
         [
-            {"objet": "Emballages", "adresse": "Auray"},  # pas de slug : rien choisi
+            {"objet": "zzz inconnu", "adresse": "Auray"},  # objet non résolu
             {"slug": "emballages", "objet": "Emballages"},  # pas d'adresse
         ],
     )
-    def test_saisie_incomplete_revient_a_l_accueil(self, client, parametres):
-        """Les deux champs sont obligatoires (#3295)."""
+    def test_saisie_incomplete_reaffiche_l_accueil(self, client, parametres):
+        """Les deux champs sont obligatoires (#3295). L'accueil est réaffiché
+        avec ses messages plutôt que redirigé : une redirection les perdrait."""
         reponse = client.get(reverse("assistant:recherche"), parametres)
 
-        assert reponse.status_code == 302
-        assert reponse.url.startswith(reverse("assistant:home"))
-
-    def test_la_saisie_deja_faite_n_est_pas_perdue(self, client):
-        reponse = client.get(
-            reverse("assistant:recherche"), {"objet": "Emballages", "adresse": ""}
-        )
-
-        assert "objet=Emballages" in reponse.url
+        assert reponse.status_code == 200
+        assert "qfa-combobox__erreur" in reponse.content.decode()
 
 
 class TestAccueil:
@@ -114,3 +109,70 @@ class TestAccueil:
 
         for nom in ("longitude", "latitude", "precise"):
             assert f'name="{nom}"' in contenu
+
+
+class TestFormulaireDeRecherche:
+    """Une URL partagée ne porte que le libellé, jamais le slug."""
+
+    def test_une_url_partagee_ouvre_la_fiche(self, client):
+        """« ?objet=<libellé> » doit mener à la fiche, pas à un formulaire figé.
+
+        Le libellé est un terme de recherche, pas un titre de fiche :
+        « Téléphone mobile » mène à « Téléphones, tablettes ou consoles ».
+        """
+        from unit_tests.qfdmd.qfdmod_factory import ProduitPageFactory
+
+        fiche = ProduitPageFactory(parent=None)
+        # La fabrique crée déjà le terme de recherche de la fiche (relation
+        # un-à-un) : on le renomme plutôt que d'en ajouter un second.
+        terme = ProduitPageSearchTerm.objects.get(produit_page=fiche)
+        terme.searchable_title = "Bidule test"
+        terme.save()
+
+        reponse = client.get(
+            reverse("assistant:recherche"), {"objet": "Bidule test", "adresse": "Auray"}
+        )
+
+        assert reponse.status_code == 302
+        assert reponse.url.startswith(
+            reverse("assistant:produit", kwargs={"slug": fiche.slug})
+        )
+
+    def test_le_slug_explicite_prime_sur_le_libelle(self, client):
+        """L'autocomplétion a déjà tranché : ne pas refaire la résolution."""
+        reponse = client.get(
+            reverse("assistant:recherche"),
+            {"objet": "peu importe", "slug": "emballages", "adresse": "Auray"},
+        )
+
+        assert reponse.url.startswith(
+            reverse("assistant:produit", kwargs={"slug": "emballages"})
+        )
+
+    def test_un_objet_inconnu_affiche_une_erreur(self, client):
+        """Rediriger en silence laissait l'usager devant un formulaire rempli
+        qui refusait d'avancer, sans dire pourquoi."""
+        reponse = client.get(
+            reverse("assistant:recherche"),
+            {"objet": "zzz inexistant", "adresse": "Auray"},
+        )
+
+        assert reponse.status_code == 200
+        contenu = reponse.content.decode()
+        assert "qfa-combobox__erreur" in contenu
+        assert 'aria-invalid="true"' in contenu
+
+    def test_une_adresse_manquante_affiche_une_erreur(self, client):
+        reponse = client.get(reverse("assistant:recherche"), {"slug": "emballages"})
+
+        assert reponse.status_code == 200
+        assert "qfa-combobox__erreur" in reponse.content.decode()
+
+    def test_la_saisie_est_conservee_quand_elle_est_refusee(self, client):
+        contenu = client.get(
+            reverse("assistant:recherche"),
+            {"objet": "zzz inexistant", "adresse": "Auray"},
+        ).content.decode()
+
+        assert 'value="zzz inexistant"' in contenu
+        assert 'value="Auray"' in contenu

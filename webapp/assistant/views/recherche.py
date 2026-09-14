@@ -111,6 +111,30 @@ class RechercheObjetView(View):
 RELATIONS_VERS_LA_FICHE = ("produit_page", "page")
 
 
+def slug_du_libelle(libelle: str) -> str:
+    """Fiche correspondant à un libellé exact, pour une URL partagée.
+
+    L'autocomplétion renvoie le slug avec chaque suggestion ; ce chemin sert
+    quand l'usager arrive par un lien qui ne porte que le texte. La recherche
+    est exacte, pas floue : deviner sur une saisie approximative ouvrirait la
+    mauvaise fiche sans que l'usager comprenne pourquoi.
+    """
+    from qfdmd.models import ProduitPageSearchTerm, SearchTag, Synonyme
+
+    # Chaque sous-classe range son libellé dans un champ différent : trois
+    # requêtes indexées valent mieux que parcourir les 2 271 termes en Python,
+    # ce qui coûtait 263 ms.
+    for modele, champ in (
+        (ProduitPageSearchTerm, "searchable_title"),
+        (SearchTag, "name"),
+        (Synonyme, "nom"),
+    ):
+        for terme in modele.objects.filter(**{f"{champ}__iexact": libelle})[:5]:
+            if page := _fiche_de(terme):
+                return page.slug
+    return ""
+
+
 def _fiche_de(terme):
     """La `ProduitPage` d'un terme, ou None s'il n'en cible aucune."""
     for relation in RELATIONS_VERS_LA_FICHE:

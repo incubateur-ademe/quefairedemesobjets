@@ -981,3 +981,16 @@ turbo-frame {
   inset: 9px;
   background: url("../images/assistant/ui/adresse-pin.svg") center / contain no-repeat;
 }
+
+/* État d'erreur d'un champ (maquette 30144:16020). Le cadre passe au rouge et
+   le message s'affiche dessous, relié au champ par `aria-describedby`. */
+.qfa-combobox__cadre[data-erreur="true"] {
+  border-color: var(--qfa-adresse-usager);
+}
+
+.qfa-combobox__erreur {
+  margin: var(--qfa-espace-1v) 0 0;
+  color: var(--qfa-adresse-usager);
+  font-size: 12px;
+  line-height: 1.5;
+}
