@@ -7,22 +7,24 @@ builds features, runs clustering, and outputs results.
 import argparse
 import logging
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from pickle import load
 
 from sentence_transformers import SentenceTransformer  # isort: skip
 import polars as pl
+from sklearn.linear_model import LogisticRegression
+from tqdm import tqdm
+from tqdm.contrib.logging import logging_redirect_tqdm
+
 from ml_deduplication.modeling.xgboost.model import (
     DEFAULT_SHOULD_BE_DIFFERENT_FIELDS,
     DEFAULT_SHOULD_BE_EQUAL_FIELDS,
     XGBoostBusinessRulesModel,
 )
 from ml_deduplication.modeling.xgboost.preprocessing import preprocess_entities_df
+from ml_deduplication.modeling.xgboost.schema import OPTIMIZED_SCHEMA
 from ml_deduplication.training.xgboost.training import apply_calibrator
-from sklearn.linear_model import LogisticRegression
-from tqdm import tqdm
-from tqdm.contrib.logging import logging_redirect_tqdm
 
 logging.basicConfig(
     format="%(asctime)s | %(name)s | %(message)s", level=logging.DEBUG, force=True
@@ -33,17 +35,6 @@ logger = logging.getLogger(__name__)
 SCRIPT_DIR = Path(__file__).parent.parent.parent
 DEFAULT_MODEL_PATH = SCRIPT_DIR / "logs" / "model_tuning_2026_07_28_1214.json"
 DEFAULT_OUTPUT_DIR = SCRIPT_DIR / "outputs"
-
-
-def query_acteurs(database_uri: str) -> pl.DataFrame:
-    """Query all acteurs with acteur_type_id IN (4, 3) from qfdmo_vueacteur."""
-    sql = """
-SELECT * FROM luis.acteurs_inference
-    """
-    logger.info("Querying acteurs from qfdmo_vueacteur (type 4 or 3)")
-    df = pl.read_database_uri(sql, uri=database_uri)
-    logger.info("Found %d acteurs", len(df))
-    return df
 
 
 def parse_args() -> argparse.Namespace:
@@ -89,6 +80,11 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         help="Precomputed embeddings file",
     )
+    parser.add_argument(
+        "acteurs_filepath",
+        type=Path,
+        help="Path to the file containing acteur data to infer",
+    )
 
     return parser.parse_args()
 
@@ -117,13 +113,28 @@ def main():
     # Generate run ID
     run_id = (
         args.run_id
-        or f"inference_{datetime.strftime(datetime.now(timezone.utc), '%Y%m%dT%H%M%S')}"
+        or f"inference_{datetime.strftime(datetime.now(UTC), '%Y%m%dT%H%M%S')}"
     )
 
-    # Step 1: Query acteurs from database
-    df_acteurs = query_acteurs(args.database_uri)
+    # Step 1: Load acteurs file
+    acteurs_filepath: Path = args.acteurs_filepath
+    if not acteurs_filepath.exists():
+        raise ValueError(f"{acteurs_filepath} does not exists")
+
+    match acteurs_filepath.suffix:
+        case ".csv":
+            df_acteurs = pl.read_csv(
+                acteurs_filepath, schema_overrides=OPTIMIZED_SCHEMA, infer_schema=False
+            )
+        case ".parquet":
+            df_acteurs = pl.read_parquet(acteurs_filepath)
+        case _:
+            raise ValueError(
+                "acteurs_filepath has to be either a CSV or a parquer file."
+            )
+
     if len(df_acteurs) == 0:
-        logger.warning("No acteurs found with type 4 or 3. Exiting.")
+        logger.warning("No acteurs found Exiting.")
         raise SystemExit(0)
 
     # Step 2: Load the saved model
@@ -198,7 +209,7 @@ def main():
                     dfs_clusters.append(
                         df_clusters_tmp.with_columns(
                             pl.format(
-                                f"dep_{departement_code}_{{}}",
+                                "dep_{}_{}".format(departement_code, "{}"),
                                 "cluster_id",
                             ).alias("cluster_id")
                         )
@@ -237,7 +248,7 @@ def main():
     )
     # Count cluster sizes
     logger.info(
-        "Results: %d entities in %d multi-entity clusters",
+        "Results: %d entities, %d entities belong to multi-entity clusters",
         df_clusters.select(pl.col("entity_id").n_unique()).item(),
         len(df_clusters_multi),
     )
@@ -250,7 +261,7 @@ def main():
 
     logger.info("Inference complete!")
     logger.info("Parquet output: %s", output_dir)
-    logger.info("Database run_id: %s", run_id)
+    logger.info("run_id: %s", run_id)
 
 
 if __name__ == "__main__":
